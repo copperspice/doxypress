@@ -23,137 +23,141 @@
 #include <translator.h>
 #include <translator_en.h>
 
-#if !defined(ENGLISH_ONLY)
-#include "translator_adapter.h"
+#if ! defined(ENGLISH_ONLY)
+#include "translate/translator_adapter.h"
+
 #ifdef LANG_NL
-#include "translator_nl.h"
+#include "translate/translator_nl.h"
 #endif
 #ifdef LANG_AM
-#include "translator_am.h"
+#include "translate/translator_am.h"
 #endif
 #ifdef LANG_SV
-#include "translator_sv.h"
+#include "translate/translator_sv.h"
 #endif
 #ifdef LANG_CZ
-#include "translator_cz.h"
+#include "translate/translator_cz.h"
 #endif
 #ifdef LANG_FR
-#include "translator_fr.h"
+#include "translate/translator_fr.h"
 #endif
 #ifdef LANG_ID
-#include "translator_id.h"
+#include "translate/translator_id.h"
 #endif
 #ifdef LANG_IT
-#include "translator_it.h"
+#include "translate/translator_it.h"
 #endif
 #ifdef LANG_DE
-#include "translator_de.h"
+#include "translate/translator_de.h"
 #endif
 #ifdef LANG_JP
-#include "translator_jp.h"
+#include "translate/translator_jp.h"
 #endif
 #ifdef LANG_JE
-#include "translator_je.h"
+#include "translate/translator_je.h"
 #endif
 #ifdef LANG_ES
-#include "translator_es.h"
+#include "translate/translator_es.h"
 #endif
 #ifdef LANG_EO
-#include "translator_eo.h"
+#include "translate/translator_eo.h"
 #endif
 #ifdef LANG_FI
-#include "translator_fi.h"
+#include "translate/translator_fi.h"
 #endif
 #ifdef LANG_RU
-#include "translator_ru.h"
+#include "translate/translator_ru.h"
 #endif
 #ifdef LANG_HR
-#include "translator_hr.h"
+#include "translate/translator_hr.h"
 #endif
 #ifdef LANG_PL
-#include "translator_pl.h"
+#include "translate/translator_pl.h"
 #endif
 #ifdef LANG_PT
-#include "translator_pt.h"
+#include "translate/translator_pt.h"
 #endif
 #ifdef LANG_HU
-#include "translator_hu.h"
+#include "translate/translator_hu.h"
 #endif
 #ifdef LANG_KE
-#include "translator_ke.h"
+#include "translate/translator_ke.h"
 #endif
 #ifdef LANG_KR
-#include "translator_kr.h"
+#include "translate/translator_kr.h"
 #endif
 #ifdef LANG_RO
-#include "translator_ro.h"
+#include "translate/translator_ro.h"
 #endif
 #ifdef LANG_SI
-#include "translator_si.h"
+#include "translate/translator_si.h"
 #endif
 #ifdef LANG_CN
-#include "translator_cn.h"
+#include "translate/translator_cn.h"
 #endif
 #ifdef LANG_TW
-#include "translator_tw.h"
+#include "translate/translator_tw.h"
 #endif
 #ifdef LANG_NO
-#include "translator_no.h"
+#include "translate/translator_no.h"
 #endif
 #ifdef LANG_BR
-#include "translator_br.h"
+#include "translate/translator_br.h"
 #endif
 #ifdef LANG_DK
-#include "translator_dk.h"
+#include "translate/translator_dk.h"
 #endif
 #ifdef LANG_SK
-#include "translator_sk.h"
+#include "translate/translator_sk.h"
 #endif
 #ifdef LANG_UA
-#include "translator_ua.h"
+#include "translate/translator_ua.h"
 #endif
 #ifdef LANG_GR
-#include "translator_gr.h"
+#include "translate/translator_gr.h"
 #endif
 #ifdef LANG_SR
-#include "translator_sr.h"
+#include "translate/translator_sr.h"
 #endif
 #ifdef LANG_CA
-#include "translator_ca.h"
+#include "translate/translator_ca.h"
 #endif
+
 //#ifdef LANG_JS
 //#include "translator_js.h"
 //#endif
+
 #ifdef LANG_LT
-#include "translator_lt.h"
+#include "translate/translator_lt.h"
 #endif
 #ifdef LANG_LV
-#include "translator_lv.h"
+#include "translate/translator_lv.h"
 #endif
 #ifdef LANG_ZA
-#include "translator_za.h"
+#include "translate/translator_za.h"
 #endif
 #ifdef LANG_AR
-#include "translator_ar.h"
+#include "translate/translator_ar.h"
 #endif
 #ifdef LANG_FA
-#include "translator_fa.h"
+#include "translate/translator_fa.h"
 #endif
 #ifdef LANG_MK
-#include "translator_mk.h"
+#include "translate/translator_mk.h"
 #endif
 #ifdef LANG_SC
-#include "translator_sc.h"
+#include "translate/translator_sc.h"
 #endif
 #ifdef LANG_VI
-#include "translator_vi.h"
+#include "translate/translator_vi.h"
 #endif
 #ifdef LANG_TR
-#include "translator_tr.h"
+#include "translate/translator_tr.h"
 #endif
-#endif // !ENGLISH_ONLY
 
-#define L_EQUAL(a) !qstricmp(langName,a)
+#endif 
+
+#define L_EQUAL(a) ! qstricmp(langName,a)
 
 Translator *theTranslator = 0;
 
@@ -314,7 +318,8 @@ bool setTranslator(const char *langName)
    }
 #endif
 #ifdef LANG_SC
-   else if (L_EQUAL("serbian-cyrillic") || L_EQUAL("serbiancyr")) { /* serbiancyr for consistency with older versions */
+   else if (L_EQUAL("serbian-cyrillic") || L_EQUAL("serbiancyr")) {
+      /* serbiancyr for consistency with older versions */
       theTranslator = new TranslatorSerbianCyrillic;
    }
 #endif
@@ -369,13 +374,15 @@ bool setTranslator(const char *langName)
    }
 #endif
 #endif // ENGLISH_ONLY
-   else { // use the default language (i.e. english)
+
+   else {
       theTranslator = new TranslatorEnglish;
       return false;
    }
 
    QByteArray msg = theTranslator->updateNeededMessage();
-   if (!msg.isEmpty()) {
+
+   if (! msg.isEmpty()) {
       warn_uncond(msg);
    }
    return true;

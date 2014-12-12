@@ -243,7 +243,7 @@ void RTFGenerator::beginRTFDocument()
    t << "{\\widctlpar\\adjustright \\fs20\\cgrid \\snext0 Normal;}\n";
 
    // sort styles ascending by \s-number via an intermediate QArray
-   QArray<const StyleData *> array(128);
+   QVector<const StyleData *> array(128);
    array.fill(0);
 
    QHashIterator<QString, StyleData> iter(rtf_Style);
@@ -642,8 +642,7 @@ void RTFGenerator::endIndexSection(IndexSections is)
          t << "\\par " << rtf_Style_Reset << endl;
          if (fortranOpt) {
             t << "{\\tc \\v " << theTranslator->trCompoundIndexFortran() << "}" << endl;
-         } else if (vhdlOpt) {
-            t << "{\\tc \\v " << VhdlDocGen::trDesignUnitIndex() << "}" << endl;
+         
          } else {
             t << "{\\tc \\v " << theTranslator->trCompoundIndex() << "}" << endl;
          }
@@ -2455,7 +2454,7 @@ bool RTFGenerator::preProcessFileInplace(const char *path, const char *name)
       err("Output dir %s does not exist!\n", path);
       return false;
    }
-   QByteArray oldDir = QDir::currentPath().utf8();
+   QByteArray oldDir = QDir::currentPath().toUtf8();
 
    // go to the html output directory (i.e. path)
    QDir::setCurrent(d.absolutePath());

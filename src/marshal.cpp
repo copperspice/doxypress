@@ -269,7 +269,7 @@ void marshalMemberList(StorageIntf *s, MemberList *ml)
       marshalUInt(s, NULL_LIST); // null pointer representation
    } else {
       marshalUInt(s, ml->count());
-      MemberListIterator mli(*ml);
+      QListIterator<MemberDef> mli(*ml);
       MemberDef *md;
       uint count = 0;
       for (mli.toFirst(); (md = mli.current()); ++mli) {

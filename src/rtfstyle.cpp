@@ -509,7 +509,7 @@ void loadStylesheet(const char *name, QHash<QString, StyleData> &dict)
 
    while (!t.eof()) {
       QByteArray s(4096); // string buffer of max line length
-      s = t.readLine().trimmed().utf8();
+      s = t.readLine().trimmed().toUtf8();
       if (s.isEmpty() || s.at(0) == '#') {
          continue;   // skip blanks & comments
       }
@@ -553,7 +553,7 @@ void loadExtensions(const char *name)
 
    while (!t.eof()) {
       QByteArray s(4096); // string buffer of max line length
-      s = t.readLine().trimmed().utf8();
+      s = t.readLine().trimmed().toUtf8();
       if (s.length() == 0 || s.at(0) == '#') {
          continue;   // skip blanks & comments
       }

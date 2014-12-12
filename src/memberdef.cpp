@@ -46,8 +46,6 @@
 #include <filedef.h>
 #include <config.h>
 
-//-----------------------------------------------------------------------------
-
 int MemberDef::s_indentLevel = 0;
 
 //-----------------------------------------------------------------------------
@@ -122,9 +120,10 @@ static QByteArray addTemplateNames(const QByteArray &s, const QByteArray &n, con
 
 static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray & /*scopeName*/, MemberDef *md)
 {
-   ArgumentList *defArgList = (md->isDocsForDefinition()) ?
-                              md->argumentList() : md->declArgumentList();
+   ArgumentList *defArgList = (md->isDocsForDefinition()) ? md->argumentList() : md->declArgumentList();
+
    //printf("writeDefArgumentList `%s' isDocsForDefinition()=%d\n",md->name().data(),md->isDocsForDefinition());
+
    if (defArgList == 0 || md->isProperty()) {
       return false; // member has no function like argument list
    }
@@ -134,6 +133,7 @@ static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray 
       if (defArgList->count() == 0) {
          return false;
       }
+
       ArgumentListIterator ali(*defArgList);
       Argument *a;
       ol.endMemberDocName();
@@ -141,6 +141,7 @@ static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray 
       ol.startParameterType(true, 0);
       ol.endParameterType();
       ol.startParameterName(false);
+
       for (; (a = ali.current()); ++ali) {
          if (a->defval.isEmpty()) {
             ol.docify(a->name + " ");
@@ -201,6 +202,7 @@ static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray 
          cName.resize(0);
       }
    }
+
    //printf("~~~ %s cName=%s\n",md->name().data(),cName.data());
 
    bool first = true;
@@ -465,38 +467,40 @@ class MemberDefImpl
  public:
    MemberDefImpl();
    ~MemberDefImpl();
+
    void init(Definition *def, const char *t, const char *a, const char *e,
              Protection p, Specifier v, bool s, Relationship r,
-             MemberType mt, const ArgumentList *tal,
-             const ArgumentList *al
-            );
+             MemberType mt, const ArgumentList *tal, const ArgumentList *al );
 
-   ClassDef     *classDef;   // member of or related to
-   FileDef      *fileDef;    // member of file definition
-   NamespaceDef *nspace;     // the namespace this member is in.
+   ClassDef     *classDef;      // member of or related to
+   FileDef      *fileDef;       // member of file definition
+   NamespaceDef *nspace;        // the namespace this member is in.
 
-   MemberDef  *enumScope;    // the enclosing scope, if this is an enum field
-   bool        livesInsideEnum;
-   MemberDef  *annEnumType;  // the anonymous enum that is the type of this member
-   MemberList *enumFields;   // enumeration fields
+   MemberDef    *enumScope;     // the enclosing scope, if this is an enum field
+   bool          livesInsideEnum;
+   MemberDef    *annEnumType;   // the anonymous enum that is the type of this member
+   MemberList   *enumFields;    // enumeration fields
 
-   MemberDef  *redefines;    // the members that this member redefines
-   MemberList *redefinedBy;  // the list of members that redefine this one
+   MemberDef    *redefines;     // the members that this member redefines
+   MemberList   *redefinedBy;   // the list of members that redefine this one
 
-   MemberDef  *memDef;       // member definition for this declaration
-   MemberDef  *memDec;       // member declaration for this definition
-   ClassDef   *relatedAlso;  // points to class marked by relatedAlso
+   MemberDef    *memDef;        // member definition for this declaration
+   MemberDef    *memDec;        // member declaration for this definition
+   ClassDef     *relatedAlso;   // points to class marked by relatedAlso
 
-   ExampleSDict *exampleSDict; // a dictionary of all examples for quick access
+   ExampleSDict *exampleSDict;  // a dictionary of all examples for quick access
 
-   QByteArray type;            // return actual type
-   QByteArray accessorType;    // return type that tell how to get to this member
-   ClassDef *accessorClass;  // class that this member accesses (for anonymous types)
-   QByteArray args;            // function arguments/variable array specifiers
-   QByteArray def;             // member definition in code (fully qualified name)
-   QByteArray anc;             // HTML anchor name
-   Specifier virt;           // normal/virtual/pure virtual
-   Protection prot;          // protection type [Public/Protected/Private]
+   QByteArray type;             // return actual type
+   QByteArray accessorType;     // return type that tell how to get to this member
+   ClassDef *accessorClass;     // class that this member accesses (for anonymous types)
+
+   QByteArray args;             // function arguments/variable array specifiers
+   QByteArray def;              // member definition in code (fully qualified name)
+   QByteArray anc;              // HTML anchor name
+
+   Specifier virt;              // normal/virtual/pure virtual
+   Protection prot;             // protection type [Public/Protected/Private]
+
    QByteArray decl;            // member declaration in class
 
    QByteArray bitfields;       // struct member bitfields
@@ -506,28 +510,28 @@ class MemberDefImpl
    QByteArray initializer;     // initializer
    QByteArray extraTypeChars;  // extra type info found after the argument list
    QByteArray enumBaseType;    // base type of the enum (C++11)
-   int initLines;            // number of lines in the initializer
+   int initLines;              // number of lines in the initializer
 
    uint64_t  memSpec;          // The specifiers present for this member
-   MemberType mtype;         // returns the kind of member
-   int maxInitLines;         // when the initializer will be displayed
-   int userInitLines;        // result of explicit \hideinitializer or \showinitializer
+   MemberType mtype;           // returns the kind of member
+   int maxInitLines;           // when the initializer will be displayed
+   int userInitLines;          // result of explicit \hideinitializer or \showinitializer
    MemberDef  *annMemb;
 
-   ArgumentList *defArgList;    // argument list of this member definition
-   ArgumentList *declArgList;   // argument list of this member declaration
+   ArgumentList *defArgList;      // argument list of this member definition
+   ArgumentList *declArgList;     // argument list of this member declaration
 
-   ArgumentList *tArgList;      // template argument list of function template
+   ArgumentList *tArgList;        // template argument list of function template
    ArgumentList *typeConstraints; // type constraints for template parameters
    MemberDef *templateMaster;
-   QList<ArgumentList> *defTmpArgLists; // lists of template argument lists
-   // (for template functions in nested template classes)
+
+   // lists of template argument lists for template functions in nested template classes
+   QList<ArgumentList> *defTmpArgLists; 
 
    ClassDef *cachedAnonymousType; // if the member has an anonymous compound
 
    // as its type then this is computed by
-   // getClassDefOfAnonymousType() and
-   // cached here.
+   // getClassDefOfAnonymousType() and cached here
 
    StringMap<QSharedPointer<MemberList>> *classSectionSDict; // not accessible
 
@@ -538,7 +542,7 @@ class MemberDefImpl
    Grouping::GroupPri_t grouppri;  // priority of this definition
 
    QByteArray groupFileName;       // file where this grouping was defined
-   int groupStartLine;            // line  "      "      "     "     "
+   int groupStartLine;             // line  "      "      "     "     "
    MemberDef *groupMember;
 
    bool isTypedefValCached;
@@ -712,8 +716,7 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
 
 
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+
 
 /*! Creates a new member definition.
  *
@@ -737,15 +740,14 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
  *            the string past as argument \a a.
  */
 
-MemberDef::MemberDef(const char *df, int dl, int dc,
-                     const char *t, const char *na, const char *a, const char *e,
-                     Protection p, Specifier v, bool s, Relationship r, MemberType mt,
-                     const ArgumentList *tal, const ArgumentList *al
-                    ) : Definition(df, dl, dc, removeRedundantWhiteSpace(na)), visited(false)
-{
-   //printf("MemberDef::MemberDef(%s)\n",na);
+MemberDef::MemberDef(const char *df, int dl, int dc, const char *t, const char *na, const char *a, const char *e,
+                     Protection p, Specifier v, bool s, Relationship r, MemberType mt, const ArgumentList *tal, 
+                     const ArgumentList *al) 
+   : Definition(df, dl, dc, removeRedundantWhiteSpace(na)), visited(false) {
+   
    m_impl = new MemberDefImpl;
    m_impl->init(this, t, a, e, p, v, s, r, mt, tal, al);
+
    m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
    m_isDestructorCached  = 0;
@@ -753,35 +755,42 @@ MemberDef::MemberDef(const char *df, int dl, int dc,
 
 MemberDef::MemberDef(const MemberDef &md) : Definition(md), visited(false)
 {
-   m_impl = new MemberDefImpl;
+   m_impl = new MemberDefImpl(md.m_impl);
+
    m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
    m_isDestructorCached  = 0;
+
+#warning Missing code to complete the deep Copy. . . 
+
 }
 
-MemberDef *MemberDef::deepCopy() const
+MemberDef &MemberDef::operator=(const MemberDef &)
 {
-   //MemberDef *result = new MemberDef(getDefFileName(),getDefLine(),name());
+
+} 
+
+MemberDef *MemberDef::deepCopy() const
+{   
+   // copy the object
    MemberDef *result = new MemberDef(*this);
-
-   // first copy everything by reference
-   *result->m_impl = *m_impl;
-
+  
    // clear pointers owned by object
-   result->m_impl->redefinedBy = 0;
-   result->m_impl->exampleSDict = 0;
-   result->m_impl->enumFields = 0;
-   result->m_impl->defArgList = 0;
-   result->m_impl->tArgList = 0;
-   result->m_impl->typeConstraints = 0;
-   result->m_impl->defTmpArgLists = 0;
+   result->m_impl->redefinedBy       = 0;
+   result->m_impl->exampleSDict      = 0;
+   result->m_impl->enumFields        = 0;
+   result->m_impl->defArgList        = 0;
+   result->m_impl->tArgList          = 0;
+   result->m_impl->typeConstraints   = 0;
+   result->m_impl->defTmpArgLists    = 0;
    result->m_impl->classSectionSDict = 0;
-   result->m_impl->declArgList = 0;
+   result->m_impl->declArgList       = 0;
 
    // replace pointers owned by the object by deep copies
    if (m_impl->redefinedBy) {
-      MemberListIterator mli(*m_impl->redefinedBy);
+      QListIterator<MemberDef> mli(*m_impl->redefinedBy);
       MemberDef *md;
+
       for (mli.toFirst(); (md = mli.current()); ++mli) {
          result->insertReimplementedBy(md);
       }
@@ -790,13 +799,14 @@ MemberDef *MemberDef::deepCopy() const
    if (m_impl->exampleSDict) {
       ExampleSDict::Iterator it(*m_impl->exampleSDict);
       Example *e;
+
       for (it.toFirst(); (e = it.current()); ++it) {
          result->addExample(e->anchor, e->name, e->file);
       }
    }
 
    if (m_impl->enumFields) {
-      MemberListIterator mli(*m_impl->enumFields);
+      QListIterator<MemberDef> mli(*m_impl->enumFields);
       MemberDef *md;
       for (mli.toFirst(); (md = mli.current()); ++mli) {
          result->insertEnumField(md);
@@ -831,6 +841,7 @@ MemberDef *MemberDef::deepCopy() const
    if (m_impl->declArgList) {
       result->m_impl->declArgList = m_impl->declArgList->deepCopy();
    }
+
    return result;
 }
 
@@ -848,7 +859,7 @@ void MemberDef::moveTo(Definition *scope)
       m_impl->nspace = (NamespaceDef *)scope;
    }
 
-   m_isLinkableCached = 0;
+   m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
 }
 
@@ -870,10 +881,12 @@ void MemberDef::insertReimplementedBy(MemberDef *md)
    if (m_impl->templateMaster) {
       m_impl->templateMaster->insertReimplementedBy(md);
    }
+
    if (m_impl->redefinedBy == 0) {
       m_impl->redefinedBy = new MemberList(MemberListType_redefinedBy);
    }
-   if (m_impl->redefinedBy->findRef(md) == -1) {
+
+   if (m_impl->redefinedBy->lastIndexOf(md) == -1) {
       m_impl->redefinedBy->inSort(md);
    }
 }
@@ -891,10 +904,13 @@ MemberList *MemberDef::reimplementedBy() const
 bool MemberDef::isReimplementedBy(ClassDef *cd) const
 {
    if (cd && m_impl->redefinedBy) {
-      MemberListIterator mi(*m_impl->redefinedBy);
+      QListIterator<MemberDef> mi(*m_impl->redefinedBy);
+
       MemberDef *md;
+
       for (mi.toFirst(); (md = mi.current()); ++mi) {
          ClassDef *mcd = md->getClassDef();
+
          if (mcd) {
             if (cd == mcd || cd->isBaseClass(mcd, true)) {
                return true;
@@ -910,23 +926,24 @@ void MemberDef::insertEnumField(MemberDef *md)
    if (m_impl->enumFields == 0) {
       m_impl->enumFields = new MemberList(MemberListType_enumFields);
    }
+
    m_impl->enumFields->append(md);
 }
 
-bool MemberDef::addExample(const char *anchor, const char *nameStr,
-                           const char *file)
+bool MemberDef::addExample(const char *anchor, const char *nameStr, const char *file)
 {
-   //printf("%s::addExample(%s,%s,%s)\n",name().data(),anchor,nameStr,file);
    if (m_impl->exampleSDict == 0) {
       m_impl->exampleSDict = new ExampleSDict;
    }
+
    if (m_impl->exampleSDict->find(nameStr) == 0) {
-      //printf("Add reference to example %s to member %s\n",nameStr,name.data());
+
       Example *e = new Example;
       e->anchor = anchor;
       e->name = nameStr;
       e->file = file;
       m_impl->exampleSDict->inSort(nameStr, e);
+
       return true;
    }
    return false;
@@ -945,11 +962,13 @@ QByteArray MemberDef::getOutputFileBase() const
 {
    static bool separateMemberPages = Config_getBool("SEPARATE_MEMBER_PAGES");
    static bool inlineSimpleClasses = Config_getBool("INLINE_SIMPLE_STRUCTS");
+
    QByteArray baseName;
 
    //printf("Member: %s: templateMaster=%p group=%p classDef=%p nspace=%p fileDef=%p\n",
    //    name().data(),m_impl->templateMaster,m_impl->group,m_impl->classDef,
    //    m_impl->nspace,m_impl->fileDef);
+
    if (!m_impl->explicitOutputFileBase.isEmpty()) {
       return m_impl->explicitOutputFileBase;
    } else if (m_impl->templateMaster) {
@@ -986,9 +1005,11 @@ QByteArray MemberDef::getOutputFileBase() const
 QByteArray MemberDef::getReference() const
 {
    QByteArray ref = Definition::getReference();
+
    if (!ref.isEmpty()) {
       return ref;
    }
+
    if (m_impl->templateMaster) {
       return m_impl->templateMaster->getReference();
    } else if (m_impl->group) {
@@ -1129,24 +1150,26 @@ bool MemberDef::isLinkable() const
    }
 }
 
-
 void MemberDef::setDefinitionTemplateParameterLists(QList<ArgumentList> *lists)
 {
    if (lists) {
       if (m_impl->defTmpArgLists) {
          delete m_impl->defTmpArgLists;
       }
+
       m_impl->defTmpArgLists = copyArgumentLists(lists);
    }
 }
 
-void MemberDef::writeLink(OutputList &ol, ClassDef *, NamespaceDef *,
-                          FileDef *fd, GroupDef *gd, bool onlyText)
+void MemberDef::writeLink(OutputList &ol, ClassDef *, NamespaceDef *, FileDef *fd, GroupDef *gd, bool onlyText)
 {
    SrcLangExt lang = getLanguage();
-   static bool hideScopeNames     = Config_getBool("HIDE_SCOPE_NAMES");
+
+   static bool hideScopeNames = Config_getBool("HIDE_SCOPE_NAMES");
+
    QByteArray sep = getLanguageSpecificSeparator(lang, true);
    QByteArray n = name();
+
    if (!hideScopeNames) {
       if (m_impl->enumScope && m_impl->livesInsideEnum) {
          n.prepend(m_impl->enumScope->displayName() + sep);
@@ -1165,7 +1188,8 @@ void MemberDef::writeLink(OutputList &ol, ClassDef *, NamespaceDef *,
          ol.docify("- ");
       }
    }
-   if (!onlyText && isLinkable()) { // write link
+
+   if (! onlyText && isLinkable()) { // write link
       if (m_impl->mtype == MemberType_EnumValue && getGroupDef() == 0 &&      // enum value is not grouped
             getEnumScope() && getEnumScope()->getGroupDef()) { // but its container is
          GroupDef *enumValGroup = getEnumScope()->getGroupDef();
@@ -1175,6 +1199,7 @@ void MemberDef::writeLink(OutputList &ol, ClassDef *, NamespaceDef *,
       } else {
          ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), n);
       }
+
    } else { // write only text
       ol.startBold();
       ol.docify(n);
@@ -1192,21 +1217,26 @@ ClassDef *MemberDef::getClassDefOfAnonymousType()
    }
 
    QByteArray cname;
+
    if (getClassDef() != 0) {
       cname = getClassDef()->name().copy();
    } else if (getNamespaceDef() != 0) {
       cname = getNamespaceDef()->name().copy();
    }
+
    QByteArray ltype(m_impl->type);
    // strip `static' keyword from ltype
    //if (ltype.left(7)=="static ") ltype=ltype.right(ltype.length()-7);
    // strip `friend' keyword from ltype
+
    ltype.stripPrefix("friend ");
    static QRegExp r("@[0-9]+");
    int l, i = r.match(ltype, 0, &l);
+
    //printf("ltype=`%s' i=%d\n",ltype.data(),i);
    // search for the last anonymous scope in the member type
    ClassDef *annoClassDef = 0;
+
    if (i != -1) { // found anonymous scope in type
       int il = i - 1, ir = i + l;
       // extract anonymous scope
@@ -1257,48 +1287,33 @@ bool MemberDef::isBriefSectionVisible() const
    //    argsString());
 
    MemberGroupInfo *info = Doxygen::memGrpInfoDict[m_impl->grpId];
+
    //printf("name=%s m_impl->grpId=%d info=%p\n",name().data(),m_impl->grpId,info);
    //QByteArray *pMemGrp = Doxygen::memberDocDict[grpId];
-   bool hasDocs = hasDocumentation() ||
+
+   bool hasDocs = hasDocumentation() || 
                   // part of a documented member group
                   (m_impl->grpId != -1 && info && !(info->doc.isEmpty() && info->header.isEmpty()));
 
    // only include static members with file/namespace scope if
    // explicitly enabled in the config file
-   bool visibleIfStatic = !(getClassDef() == 0 &&
-                            isStatic() &&
-                            !extractStatic
-                           );
+   bool visibleIfStatic = !(getClassDef() == 0 && isStatic() && !extractStatic );
 
    // only include members is the are documented or
    // HIDE_UNDOC_MEMBERS is NO in the config file
-   bool visibleIfDocumented = (!hideUndocMembers ||
-                               hasDocs ||
-                               isDocumentedFriendClass()
-                              );
+   bool visibleIfDocumented = (!hideUndocMembers || hasDocs || isDocumentedFriendClass() );
 
    // hide members with no detailed description and brief descriptions
    // explicitly disabled.
-   bool visibleIfEnabled = !(hideUndocMembers &&
-                             documentation().isEmpty() &&
-                             !briefMemberDesc &&
-                             !repeatBrief
-                            );
+   bool visibleIfEnabled = !(hideUndocMembers && documentation().isEmpty() && !briefMemberDesc && !repeatBrief );
 
    // Hide friend (class|struct|union) declarations if HIDE_FRIEND_COMPOUNDS is true
-   bool visibleIfFriendCompound = !(hideFriendCompounds &&
-                                    isFriend() &&
-                                    (m_impl->type == "friend class" ||
-                                     m_impl->type == "friend struct" ||
-                                     m_impl->type == "friend union"
-                                    )
-                                   );
+   bool visibleIfFriendCompound = !(hideFriendCompounds && isFriend() && (m_impl->type == "friend class" ||
+                                     m_impl->type == "friend struct" || m_impl->type == "friend union" ) );
 
    // only include members that are non-private unless EXTRACT_PRIVATE is
    // set to YES or the member is part of a group
-   bool visibleIfPrivate = (protectionLevelVisible(protection()) ||
-                            m_impl->mtype == MemberType_Friend
-                           );
+   bool visibleIfPrivate = (protectionLevelVisible(protection()) || m_impl->mtype == MemberType_Friend );
 
    // hide member if it overrides a member in a superclass and has no
    // documentation of its own
@@ -1311,13 +1326,8 @@ bool MemberDef::isBriefSectionVisible() const
 
    // hide default constructors or destructors (no args) without
    // documentation
-   bool visibleIfNotDefaultCDTor = !(cOrDTor &&
-                                     m_impl->defArgList &&
-                                     (m_impl->defArgList->isEmpty() ||
-                                      m_impl->defArgList->getFirst()->type == "void"
-                                     ) &&
-                                     !hasDocs
-                                    );
+   bool visibleIfNotDefaultCDTor = !(cOrDTor && m_impl->defArgList && (m_impl->defArgList->isEmpty() ||
+                                      m_impl->defArgList->getFirst()->type == "void" ) && ! hasDocs );
 
 
    //printf("visibleIfStatic=%d visibleIfDocumented=%d visibleIfEnabled=%d "
@@ -1327,12 +1337,12 @@ bool MemberDef::isBriefSectionVisible() const
    //       visibleIfEnabled,visibleIfPrivate,visibleIfNotDefaultCDTor,
    //       visibleIfFriendCompound,!m_impl->annScope);
 
-   bool visible = visibleIfStatic     && visibleIfDocumented      &&
-                  visibleIfEnabled    && visibleIfPrivate         &&
-                  /*visibleIfDocVirtual &&*/ visibleIfNotDefaultCDTor &&
-                  visibleIfFriendCompound &&
-                  !m_impl->annScope && !isHidden();
+   bool visible = visibleIfStatic && visibleIfDocumented && visibleIfEnabled && visibleIfPrivate && 
+                  /*visibleIfDocVirtual &&*/ visibleIfNotDefaultCDTor && visibleIfFriendCompound &&
+                  ! m_impl->annScope && !isHidden();
+
    //printf("MemberDef::isBriefSectionVisible() %d\n",visible);
+
    return visible;
 }
 
@@ -1358,8 +1368,7 @@ QByteArray MemberDef::getDeclType() const
    return ltype;
 }
 
-void MemberDef::writeDeclaration(OutputList &ol,
-                                 ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
+void MemberDef::writeDeclaration(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
                                  bool inGroup, ClassDef *inheritedFrom, const char *inheritId)
 {
    //printf("%s MemberDef::writeDeclaration() inGroup=%d\n",qualifiedName().data(),inGroup);
@@ -1864,199 +1873,196 @@ void MemberDef::getLabels(QStringList &sl, Definition *container) const
    static bool inlineInfo = Config_getBool("INLINE_INFO");
 
    Specifier lvirt = virtualness();
-   if ((!isObjCMethod() || isOptional() || isRequired()) &&
-         (protection() != Public || lvirt != Normal ||
-          isFriend() || isRelated() ||
-          (isInline() && inlineInfo) ||
-          isSignal() || isSlot() ||
-          isStatic() ||
+   if ((!isObjCMethod() || isOptional() || isRequired()) && (protection() != Public || lvirt != Normal ||
+          isFriend() || isRelated() || (isInline() && inlineInfo) || isSignal() || isSlot() || isStatic() ||
           (m_impl->classDef && m_impl->classDef != container && container->definitionType() == TypeClass) ||
-          (m_impl->memSpec & ~Entry::Inline) != 0
-         )
+          (m_impl->memSpec & ~Entry::Inline) != 0 )
       ) {
+
       // write the member specifier list
       //ol.writeLatexSpacing();
       //ol.startTypewriter();
       //ol.docify(" [");
-      SrcLangExt lang = getLanguage();
-      bool optVhdl = lang == SrcLangExt_VHDL;
+
+      SrcLangExt lang = getLanguage();      
       bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
-      if (optVhdl) {
-         sl.append(VhdlDocGen::trTypeString(getMemberSpecifiers()));
+      
+      if (isFriend()) {
+         sl.append("friend");
+
+      } else if (isRelated()) {
+         sl.append("related");
+
       } else {
-         if (isFriend()) {
-            sl.append("friend");
-         } else if (isRelated()) {
-            sl.append("related");
-         } else {
-            if      (Config_getBool("INLINE_INFO") && isInline()) {
-               sl.append("inline");
+         if      (Config_getBool("INLINE_INFO") && isInline()) {
+            sl.append("inline");
+         }
+         if      (isExplicit()) {
+            sl.append("explicit");
+         }
+         if      (isMutable()) {
+            sl.append("mutable");
+         }
+         if      (isStatic()) {
+            sl.append("static");
+         }
+         if      (isGettable()) {
+            sl.append("get");
+         }
+         if      (isProtectedGettable()) {
+            sl.append("protected get");
+         }
+         if      (isSettable()) {
+            sl.append("set");
+         }
+         if      (isProtectedSettable()) {
+            sl.append("protected set");
+         }
+         if (extractPrivate) {
+            if    (isPrivateGettable()) {
+               sl.append("private get");
             }
-            if      (isExplicit()) {
-               sl.append("explicit");
-            }
-            if      (isMutable()) {
-               sl.append("mutable");
-            }
-            if      (isStatic()) {
-               sl.append("static");
-            }
-            if      (isGettable()) {
-               sl.append("get");
-            }
-            if      (isProtectedGettable()) {
-               sl.append("protected get");
-            }
-            if      (isSettable()) {
-               sl.append("set");
-            }
-            if      (isProtectedSettable()) {
-               sl.append("protected set");
-            }
-            if (extractPrivate) {
-               if    (isPrivateGettable()) {
-                  sl.append("private get");
-               }
-               if    (isPrivateSettable()) {
-                  sl.append("private set");
-               }
-            }
-            if      (isAddable()) {
-               sl.append("add");
-            }
-            if      (!isUNOProperty() && isRemovable()) {
-               sl.append("remove");
-            }
-            if      (isRaisable()) {
-               sl.append("raise");
-            }
-            if      (isReadable()) {
-               sl.append("read");
-            }
-            if      (isWritable()) {
-               sl.append("write");
-            }
-            if      (isFinal()) {
-               sl.append("final");
-            }
-            if      (isAbstract()) {
-               sl.append("abstract");
-            }
-            if      (isOverride()) {
-               sl.append("override");
-            }
-            if      (isInitonly()) {
-               sl.append("initonly");
-            }
-            if      (isSealed()) {
-               sl.append("sealed");
-            }
-            if      (isNew()) {
-               sl.append("new");
-            }
-            if      (isOptional()) {
-               sl.append("optional");
-            }
-            if      (isRequired()) {
-               sl.append("required");
-            }
-
-            if      (isNonAtomic()) {
-               sl.append("nonatomic");
-            } else if (isObjCProperty()) {
-               sl.append("atomic");
-            }
-
-            // mutual exclusive Objective 2.0 property attributes
-            if      (isAssign()) {
-               sl.append("assign");
-            } else if (isCopy()) {
-               sl.append("copy");
-            } else if (isRetain()) {
-               sl.append("retain");
-            } else if (isWeak()) {
-               sl.append("weak");
-            } else if (isStrong()) {
-               sl.append("strong");
-            } else if (isUnretained()) {
-               sl.append("unsafe_unretained");
-            }
-
-            if (!isObjCMethod()) {
-               if      (protection() == Protected) {
-                  sl.append("protected");
-               } else if (protection() == Private) {
-                  sl.append("private");
-               } else if (protection() == Package) {
-                  sl.append("package");
-               }
-
-               if      (lvirt == Virtual) {
-                  sl.append("virtual");
-               } else if (lvirt == Pure) {
-                  sl.append("pure virtual");
-               }
-               if      (isSignal()) {
-                  sl.append("signal");
-               }
-               if      (isSlot()) {
-                  sl.append("slot");
-               }
-               if      (isDefault()) {
-                  sl.append("default");
-               }
-               if      (isDelete()) {
-                  sl.append("delete");
-               }
-               if      (isNoExcept()) {
-                  sl.append("noexcept");
-               }
-               if      (isAttribute()) {
-                  sl.append("attribute");
-               }
-               if      (isUNOProperty()) {
-                  sl.append("property");
-               }
-               if      (isReadonly()) {
-                  sl.append("readonly");
-               }
-               if      (isBound()) {
-                  sl.append("bound");
-               }
-               if      (isUNOProperty() && isRemovable()) {
-                  sl.append("removable");
-               }
-               if      (isConstrained()) {
-                  sl.append("constrained");
-               }
-               if      (isTransient()) {
-                  sl.append("transient");
-               }
-               if      (isMaybeVoid()) {
-                  sl.append("maybevoid");
-               }
-               if      (isMaybeDefault()) {
-                  sl.append("maybedefault");
-               }
-               if      (isMaybeAmbiguous()) {
-                  sl.append("maybeambiguous");
-               }
-               if      (isPublished()) {
-                  sl.append("published");   // enum
-               }
-            }
-            if (isObjCProperty() && isImplementation()) {
-               sl.append("implementation");
+            if    (isPrivateSettable()) {
+               sl.append("private set");
             }
          }
-         if (m_impl->classDef &&
-               container->definitionType() == TypeClass &&
-               m_impl->classDef != container &&
-               !isRelated()
-            ) {
-            sl.append("inherited");
+         if      (isAddable()) {
+            sl.append("add");
+         }
+         if      (!isUNOProperty() && isRemovable()) {
+            sl.append("remove");
+         }
+         if      (isRaisable()) {
+            sl.append("raise");
+         }
+         if      (isReadable()) {
+            sl.append("read");
+         }
+         if      (isWritable()) {
+            sl.append("write");
+         }
+         if      (isFinal()) {
+            sl.append("final");
+         }
+         if      (isAbstract()) {
+            sl.append("abstract");
+         }
+         if      (isOverride()) {
+            sl.append("override");
+         }
+         if      (isInitonly()) {
+            sl.append("initonly");
+         }
+         if      (isSealed()) {
+            sl.append("sealed");
+         }
+         if      (isNew()) {
+            sl.append("new");
+         }
+         if      (isOptional()) {
+            sl.append("optional");
+         }
+         if      (isRequired()) {
+            sl.append("required");
+         }
+
+         if      (isNonAtomic()) {
+            sl.append("nonatomic");
+         } else if (isObjCProperty()) {
+            sl.append("atomic");
+         }
+
+         // mutual exclusive Objective 2.0 property attributes
+         if      (isAssign()) {
+            sl.append("assign");
+         } else if (isCopy()) {
+            sl.append("copy");
+         } else if (isRetain()) {
+            sl.append("retain");
+         } else if (isWeak()) {
+            sl.append("weak");
+         } else if (isStrong()) {
+            sl.append("strong");
+         } else if (isUnretained()) {
+            sl.append("unsafe_unretained");
+         }
+
+         if (!isObjCMethod()) {
+            if      (protection() == Protected) {
+               sl.append("protected");
+            } else if (protection() == Private) {
+               sl.append("private");
+            } else if (protection() == Package) {
+               sl.append("package");
+            }
+
+            if      (lvirt == Virtual) {
+               sl.append("virtual");
+            } else if (lvirt == Pure) {
+               sl.append("pure virtual");
+            }
+            if      (isSignal()) {
+               sl.append("signal");
+            }
+            if      (isSlot()) {
+               sl.append("slot");
+            }
+            if      (isDefault()) {
+               sl.append("default");
+            }
+            if      (isDelete()) {
+               sl.append("delete");
+            }
+            if      (isNoExcept()) {
+               sl.append("noexcept");
+            }
+            if      (isAttribute()) {
+               sl.append("attribute");
+            }
+            if      (isUNOProperty()) {
+               sl.append("property");
+            }
+            if      (isReadonly()) {
+               sl.append("readonly");
+            }
+            if      (isBound()) {
+               sl.append("bound");
+            }
+            if      (isUNOProperty() && isRemovable()) {
+               sl.append("removable");
+            }
+            if      (isConstrained()) {
+               sl.append("constrained");
+            }
+            if      (isTransient()) {
+               sl.append("transient");
+            }
+            if      (isMaybeVoid()) {
+               sl.append("maybevoid");
+            }
+            if      (isMaybeDefault()) {
+               sl.append("maybedefault");
+            }
+            if      (isMaybeAmbiguous()) {
+               sl.append("maybeambiguous");
+            }
+            if      (isPublished()) {
+               sl.append("published");   // enum
+            }
+         }
+         if (isObjCProperty() && isImplementation()) {
+            sl.append("implementation");
          }
       }
+
+      if (m_impl->classDef &&
+            container->definitionType() == TypeClass &&
+            m_impl->classDef != container &&
+            !isRelated()
+         ) {
+         sl.append("inherited");
+      }
+   
    } else if (isObjCMethod() && isImplementation()) {
       sl.append("implementation");
    }
@@ -2155,7 +2161,7 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
 {
    MemberList *bml = reimplementedBy();
    if (bml) {
-      MemberListIterator mli(*bml);
+      QListIterator<MemberDef> mli(*bml);
       MemberDef *bmd = 0;
       uint count = 0;
       ClassDef *bcd = 0;
@@ -2291,7 +2297,7 @@ void MemberDef::_writeEnumValues(OutputList &ol, Definition *container,
       MemberList *fmdl = enumFieldList();
       //printf("** %s: enum values=%d\n",name().data(),fmdl!=0 ? fmdl->count() : 0);
       if (fmdl) {
-         MemberListIterator it(*fmdl);
+         QListIterator<MemberDef> it(*fmdl);
          MemberDef *fmd;
          for (; (fmd = it.current()); ++it) {
             //printf("Enum %p: isLinkable()=%d\n",fmd,fmd->isLinkable());
@@ -2711,19 +2717,10 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol,
             ldef.prepend("- ");
          }
       }
-
-      if (optVhdl) {
-         hasParameterList = VhdlDocGen::writeVHDLTypeDocumentation(this, container, ol);
-      } else {
-         linkifyText(TextGeneratorOLImpl(ol),
-                     container,
-                     getBodyDef(),
-                     this,
-                     substitute(ldef, "::", sep)
-                    );
-         hasParameterList = writeDefArgumentList(ol, cd, scopeName, this);
-      }
-
+     
+      linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), this, substitute(ldef, "::", sep));
+      hasParameterList = writeDefArgumentList(ol, cd, scopeName, this);
+     
       if (hasOneLineInitializer()) { // add initializer
          if (!isDefine()) {
             //ol.docify(" = ");
@@ -2836,23 +2833,16 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol,
    }
 
    /* write detailed description */
-   if (!detailed.isEmpty() ||
-         !inbodyDocumentation().isEmpty()) {
-      // write vhdl inline code with or without option INLINE_SOURCE
-      if (optVhdl && VhdlDocGen::isMisc(this)) {
-         VhdlDocGen::writeSource(this, ol, cname);
-         return;
-      } else {
-         ol.generateDoc(docFile(), docLine(), getOuterScope() ? getOuterScope() : container, this, detailed + "\n", true, false);
-      }
+   if (!detailed.isEmpty() || ! inbodyDocumentation().isEmpty()) {           
+      ol.generateDoc(docFile(), docLine(), getOuterScope() ? getOuterScope() : container, this, detailed + "\n", true, false);
+      
 
       if (!inbodyDocumentation().isEmpty()) {
-         ol.generateDoc(inbodyFile(), inbodyLine(),
-                        getOuterScope() ? getOuterScope() : container, this,
-                        inbodyDocumentation() + "\n", true, false);
+         ol.generateDoc(inbodyFile(), inbodyLine(), getOuterScope() ? getOuterScope() : container, this, inbodyDocumentation() + "\n", true, false);
       }
-   } else if (!brief.isEmpty() && (Config_getBool("REPEAT_BRIEF") ||
-                                   !Config_getBool("BRIEF_MEMBER_DESC"))) {
+
+   } else if (!brief.isEmpty() && (Config_getBool("REPEAT_BRIEF") || ! Config_getBool("BRIEF_MEMBER_DESC"))) {
+
       if (!inbodyDocumentation().isEmpty()) {
          ol.generateDoc(inbodyFile(), inbodyLine(), getOuterScope() ? getOuterScope() : container, this, inbodyDocumentation() + "\n", true, false);
       }
@@ -3272,15 +3262,17 @@ void MemberDef::setAnchor()
    // convert to md5 hash
    uchar md5_sig[16];
    QByteArray sigStr(33);
+
    MD5Buffer((const unsigned char *)memAnchor.data(), memAnchor.length(), md5_sig);
+
    //printf("memAnchor=%s\n",memAnchor.data());
    MD5SigToString(md5_sig, sigStr.data(), 33);
+
    m_impl->anc = "a" + sigStr;
 }
 
-void MemberDef::setGroupDef(GroupDef *gd, Grouping::GroupPri_t pri,
-                            const QByteArray &fileName, int startLine,
-                            bool hasDocs, MemberDef *member)
+void MemberDef::setGroupDef(GroupDef *gd, Grouping::GroupPri_t pri, const QByteArray &fileName, 
+                            int startLine, bool hasDocs, MemberDef *member)
 {
    //printf("%s MemberDef::setGroupDef(%s)\n",name().data(),gd->name().data());
    m_impl->group = gd;
@@ -3343,42 +3335,29 @@ MemberDef *MemberDef::createTemplateInstanceMember(
       methodName = substituteTemplateArgumentsInString(methodName, formalArgs, actualArgs);
    }
 
-   MemberDef *imd = new MemberDef(
-      getDefFileName(), getDefLine(), getDefColumn(),
-      substituteTemplateArgumentsInString(m_impl->type, formalArgs, actualArgs),
-      methodName,
+   MemberDef *imd = new MemberDef( getDefFileName(), getDefLine(), getDefColumn(),
+      substituteTemplateArgumentsInString(m_impl->type, formalArgs, actualArgs),methodName, 
       substituteTemplateArgumentsInString(m_impl->args, formalArgs, actualArgs),
-      m_impl->exception, m_impl->prot,
-      m_impl->virt, m_impl->stat, m_impl->related, m_impl->mtype, 0, 0
-   );
+      m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->related, m_impl->mtype, 0, 0);
+
    imd->setArgumentList(actualArgList);
    imd->setDefinition(substituteTemplateArgumentsInString(m_impl->def, formalArgs, actualArgs));
    imd->setBodyDef(getBodyDef());
    imd->setBodySegment(getStartBodyLine(), getEndBodyLine());
-   //imd->setBodyMember(this);
-
-   // TODO: init other member variables (if needed).
-   // TODO: reimplemented info
+   
    return imd;
 }
 
 bool MemberDef::hasOneLineInitializer() const
-{
-   //printf("%s: init=%s, initLines=%d maxInitLines=%d userInitLines=%d\n",
-   //    name().data(),m_impl->initializer.data(),m_impl->initLines,
-   //    m_impl->maxInitLines,m_impl->userInitLines);
+{  
    return !m_impl->initializer.isEmpty() && m_impl->initLines == 0 && // one line initializer
           ((m_impl->maxInitLines > 0 && m_impl->userInitLines == -1) || m_impl->userInitLines > 0); // enabled by default or explicitly
 }
 
 bool MemberDef::hasMultiLineInitializer() const
-{
-   //printf("initLines=%d userInitLines=%d maxInitLines=%d\n",
-   //    initLines,userInitLines,maxInitLines);
-   return m_impl->initLines > 0 &&
-          ((m_impl->initLines < m_impl->maxInitLines && m_impl->userInitLines == -1) // implicitly enabled
-           || m_impl->initLines < m_impl->userInitLines // explicitly enabled
-          );
+{  
+   return m_impl->initLines > 0 &&  ((m_impl->initLines < m_impl->maxInitLines && m_impl->userInitLines == -1)  
+           || m_impl->initLines < m_impl->userInitLines );
 }
 
 void MemberDef::setInitializer(const char *initializer)
@@ -3386,25 +3365,29 @@ void MemberDef::setInitializer(const char *initializer)
    m_impl->initializer = initializer;
    int l = m_impl->initializer.length();
    int p = l - 1;
+
    while (p >= 0 && isspace((uchar)m_impl->initializer.at(p))) {
       p--;
    }
+
    m_impl->initializer = m_impl->initializer.left(p + 1);
-   m_impl->initLines = m_impl->initializer.contains('\n');
-   //printf("%s::setInitializer(%s)\n",name().data(),m_impl->initializer.data());
+   m_impl->initLines = m_impl->initializer.contains('\n');   
 }
 
 void MemberDef::addListReference(Definition *)
 {
    static bool optimizeOutputForC = Config_getBool("OPTIMIZE_OUTPUT_FOR_C");
+
    //static bool hideScopeNames     = Config_getBool("HIDE_SCOPE_NAMES");
    //static bool optimizeOutputJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
    //static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+
    SrcLangExt lang = getLanguage();
    visited = true;
    if (!isLinkableInProject()) {
       return;
    }
+
    QByteArray memLabel;
    if (optimizeOutputForC) {
       memLabel = theTranslator->trGlobal(true, true);
@@ -3572,7 +3555,7 @@ void MemberDef::writeTagFile(FTextStream &tagFile)
    if (isStrong()) {
       MemberList *fmdl = m_impl->enumFields;
       if (fmdl) {
-         MemberListIterator mli(*fmdl);
+         QListIterator<MemberDef> mli(*fmdl);
          MemberDef *fmd;
          for (mli.toFirst(); (fmd = mli.current()); ++mli) {
             if (!fmd->isReference()) {
@@ -3670,7 +3653,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl,
    MemberList *fmdl = m_impl->enumFields;
    uint numVisibleEnumValues = 0;
    if (fmdl) {
-      MemberListIterator mli(*fmdl);
+      QListIterator<MemberDef> mli(*fmdl);
       MemberDef *fmd;
       for (mli.toFirst(); (fmd = mli.current()); ++mli) {
          if (fmd->isBriefSectionVisible()) {
@@ -3710,7 +3693,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl,
    if (numVisibleEnumValues > 0 && enumValuesPerLine > 0) {
       typeDecl.docify("{ ");
       if (fmdl) {
-         MemberListIterator mli(*fmdl);
+         QListIterator<MemberDef> mli(*fmdl);
          MemberDef *fmd = mli.current();
          bool fmdVisible = fmd ? fmd->isBriefSectionVisible() : true;
          while (fmd) {
@@ -4967,10 +4950,10 @@ const ArgumentList *MemberDef::typeConstraints() const
 bool MemberDef::isFriendToHide() const
 {
    static bool hideFriendCompounds = Config_getBool("HIDE_FRIEND_COMPOUNDS");
-   bool isFriendToHide = hideFriendCompounds &&
-                         (m_impl->type == "friend class"  ||
-                          m_impl->type == "friend struct" ||
-                          m_impl->type == "friend union");
+
+   bool isFriendToHide = hideFriendCompounds && (m_impl->type == "friend class"  ||
+                          m_impl->type == "friend struct" || m_impl->type == "friend union");
+
    return isFriendToHide;
 }
 

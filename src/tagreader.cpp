@@ -414,10 +414,10 @@ class TagFileParser : public QXmlDefaultHandler
 
    void startMember( const QXmlAttributes &attrib) {
       m_curMember = new TagMemberInfo;
-      m_curMember->kind = attrib.value("kind").utf8();
-      QByteArray protStr   = attrib.value("protection").utf8();
-      QByteArray virtStr   = attrib.value("virtualness").utf8();
-      QByteArray staticStr = attrib.value("static").utf8();
+      m_curMember->kind = attrib.value("kind").toUtf8();
+      QByteArray protStr   = attrib.value("protection").toUtf8();
+      QByteArray virtStr   = attrib.value("virtualness").toUtf8();
+      QByteArray staticStr = attrib.value("static").toUtf8();
       if (protStr == "protected") {
          m_curMember->prot = Protected;
       } else if (protStr == "private") {
@@ -464,9 +464,9 @@ class TagFileParser : public QXmlDefaultHandler
       if (m_state == InMember) {
          m_curString = "";
          m_curEnumValue = new TagEnumValueInfo;
-         m_curEnumValue->file = attrib.value("file").utf8();
-         m_curEnumValue->anchor = attrib.value("anchor").utf8();
-         m_curEnumValue->clangid = attrib.value("clangid").utf8();
+         m_curEnumValue->file = attrib.value("file").toUtf8();
+         m_curEnumValue->anchor = attrib.value("anchor").toUtf8();
+         m_curEnumValue->clangid = attrib.value("clangid").toUtf8();
          m_stateStack.push(new State(m_state));
          m_state = InEnumValue;
       } else {
@@ -597,8 +597,8 @@ class TagFileParser : public QXmlDefaultHandler
    }
 
    void startDocAnchor(const QXmlAttributes &attrib ) {
-      m_fileName = attrib.value("file").utf8();
-      m_title = attrib.value("title").utf8();
+      m_fileName = attrib.value("file").toUtf8();
+      m_title = attrib.value("title").toUtf8();
       m_curString = "";
    }
 
@@ -678,10 +678,10 @@ class TagFileParser : public QXmlDefaultHandler
    void startIncludes(const QXmlAttributes &attrib ) {
       if (m_state == InFile && m_curFile) {
          m_curIncludes = new TagIncludeInfo;
-         m_curIncludes->id = attrib.value("id").utf8();
-         m_curIncludes->name = attrib.value("name").utf8();
-         m_curIncludes->isLocal = attrib.value("local").utf8() == "yes" ? true : false;
-         m_curIncludes->isImported = attrib.value("imported").utf8() == "yes" ? true : false;
+         m_curIncludes->id = attrib.value("id").toUtf8();
+         m_curIncludes->name = attrib.value("name").toUtf8();
+         m_curIncludes->isLocal = attrib.value("local").toUtf8() == "yes" ? true : false;
+         m_curIncludes->isImported = attrib.value("imported").toUtf8() == "yes" ? true : false;
          m_curFile->includes.append(m_curIncludes);
       } else {
          warn("Unexpected tag `includes' found\n");
@@ -887,7 +887,7 @@ class TagFileParser : public QXmlDefaultHandler
    bool startElement( const QString &, const QString &,
                       const QString &name, const QXmlAttributes &attrib ) {
       //printf("startElement `%s'\n",name.data());
-      StartElementHandler *handler = m_startElementHandlers[name.utf8()];
+      StartElementHandler *handler = m_startElementHandlers[name.toUtf8()];
       if (handler) {
          (*handler)(attrib);
       } else {
@@ -898,7 +898,7 @@ class TagFileParser : public QXmlDefaultHandler
 
    bool endElement( const QString &, const QString &, const QString &name ) {
       //printf("endElement `%s'\n",name.data());
-      EndElementHandler *handler = m_endElementHandlers[name.utf8()];
+      EndElementHandler *handler = m_endElementHandlers[name.toUtf8()];
       if (handler) {
          (*handler)();
       } else {
@@ -908,7 +908,7 @@ class TagFileParser : public QXmlDefaultHandler
    }
 
    bool characters ( const QString &ch ) {
-      m_curString += ch.utf8();
+      m_curString += ch.toUtf8();
       return true;
    }
 

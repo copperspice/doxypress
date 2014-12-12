@@ -18,20 +18,52 @@
 #ifndef FTEXTSTREAM_H
 #define FTEXTSTREAM_H
 
-#include <QIodevice>
-#include <QString>
-#include <QByteArray>
-
-#include <stdio.h>
+#include <QTextStream>
 
 /** @brief Simplified and optimized version of QTextStream */
-class FTextStream
+class FTextStream : public QTextStream
+{
+   public:   
+
+      FTextStream()
+      {} 
+    
+      FTextStream(QIODevice *device) : QTextStream(device) 
+      {
+      }
+
+   	FTextStream(FILE *fileHandle, QIODevice::OpenMode openMode = QIODevice::ReadWrite) 
+         : QTextStream(fileHandle, openMode)
+      {
+      }
+
+   	FTextStream(QString *string, QIODevice::OpenMode openMode = QIODevice::ReadWrite)
+         : QTextStream(string, openMode)
+      {
+      }
+
+   	FTextStream(QByteArray *array, QIODevice::OpenMode openMode = QIODevice::ReadWrite)
+         : QTextStream(array, openMode)
+      {
+      }
+
+   	FTextStream(const QByteArray &array, QIODevice::OpenMode openMode = QIODevice::ReadOnly)
+         : QTextStream(array, openMode)
+      {
+      }
+
+};
+
+
+/*
+
 {
  public:
    FTextStream();
    FTextStream( QIODevice *);
    FTextStream( QByteArray *);
    FTextStream( FILE *);
+
    virtual ~FTextStream();
 
    QIODevice	*device() const;
@@ -101,5 +133,7 @@ inline FTextStream &endl( FTextStream &s)
 {
    return s << '\n';
 }
+
+*/
 
 #endif // FTEXTSTREAM_H

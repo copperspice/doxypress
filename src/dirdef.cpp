@@ -576,8 +576,8 @@ int FilePairDict::compareValues(const FilePair *left, const FilePair *right) con
 
 //----------------------------------------------------------------------
 
-UsedDir::UsedDir(DirDef *dir, bool inherited) :
-   m_dir(dir), m_filePairs(7), m_inherited(inherited)
+UsedDir::UsedDir(DirDef *dir, bool inherited)
+   : m_dir(dir), m_inherited(inherited)
 { 
 }
 
@@ -585,11 +585,9 @@ UsedDir::~UsedDir()
 {
 }
 
-
 void UsedDir::addFileDep(FileDef *srcFd, FileDef *dstFd)
 {
-   m_filePairs.inSort(srcFd->getOutputFileBase() + dstFd->getOutputFileBase(),
-                      new FilePair(srcFd, dstFd));
+   m_filePairs.insert(srcFd->getOutputFileBase() + dstFd->getOutputFileBase(), new FilePair(srcFd, dstFd));
 }
 
 FilePair *UsedDir::findFilePair(const char *name)

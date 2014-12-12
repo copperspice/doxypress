@@ -19,6 +19,7 @@
 #include <QRegExp>
 
 #include <stdio.h>
+
 #include <classdef.h>
 #include <classlist.h>
 #include <entry.h>
@@ -53,6 +54,7 @@ class ClassDefImpl
  public:
    ClassDefImpl();
    ~ClassDefImpl();
+
    void init(const char *defFileName, const char *name, const QByteArray &ctStr, const char *fName);
 
    /*! file name that forms the base for the output file containing the
@@ -69,11 +71,11 @@ class ClassDefImpl
    /*! List of base class (or super-classes) from which this class derives
     *  directly.
     */
-   BaseClassList *m_parents;
+   SortedList<BaseClassDef *> *m_parents;
 
    /*! List of sub-classes that directly derive from this class
     */
-   BaseClassList *inheritedBy;
+   SortedList<BaseClassDef *> *inheritedBy;
 
    /*! Namespace this class is part of
     *  (this is the inner most namespace in case of nested namespaces)
@@ -175,14 +177,13 @@ class ClassDefImpl
    /** Does this class overloaded the -> operator? */
    MemberDef *arrowOperator;
 
-   ClassList *taggedInnerClasses;
+   SortedList<ClassDef *> *taggedInnerClasses;
    ClassDef *tagLessRef;
 
    /** Does this class represent a Java style enum? */
    bool isJavaEnum;
 
    bool isGeneric;
-
    bool isAnonymous;
 
    uint64_t spec;
@@ -326,7 +327,7 @@ QByteArray ClassDef::displayName(bool includeScope) const
 void ClassDef::insertBaseClass(ClassDef *cd, const char *n, Protection p, Specifier s, const char *t)
 {   
    if (m_impl->m_parents == 0) {
-      m_impl->m_parents = new BaseClassList;
+      m_impl->m_parents = new SortedList<BaseClassDef *>;
    }
 
    m_impl->m_parents->append(new BaseClassDef(cd, n, p, s, t));
@@ -344,10 +345,12 @@ void ClassDef::insertSubClass(ClassDef *cd, Protection p, Specifier s, const cha
    }
 
    if (m_impl->inheritedBy == 0) {
-      m_impl->inheritedBy = new BaseClassList;     
+      m_impl->inheritedBy = new SortedList<BaseClassDef *>;     
    }
 
-   m_impl->inheritedBy->inSort(new BaseClassDef(cd, 0, p, s, t));
+   SortedList<BaseClassDef *> *temp = m_impl->inheritedBy;
+   temp->inSort(new BaseClassDef(cd, 0, p, s, t));
+
    m_impl->isSimple = false;
 }
 
@@ -591,16 +594,11 @@ void ClassDef::internalInsertMember(MemberDef *md, Protection prot, bool addToAl
    }
 
    //::addClassMemberNameToIndex(md);
-   if (addToAllList &&
-         !(Config_getBool("HIDE_FRIEND_COMPOUNDS") &&
-           md->isFriend() &&
-           (QByteArray(md->typeString()) == "friend class" ||
-            QByteArray(md->typeString()) == "friend struct" ||
-            QByteArray(md->typeString()) == "friend union"))) {
-
-      //printf("=======> adding member %s to class %s\n",md->name().data(),name().data());
-      MemberInfo *mi = new MemberInfo((MemberDef *)md, prot, md->virtualness(), false);
-      MemberNameInfo *mni = 0;
+   if (addToAllList && ! (Config_getBool("HIDE_FRIEND_COMPOUNDS") && md->isFriend() &&  (QByteArray(md->typeString()) == "friend class" || 
+            QByteArray(md->typeString()) == "friend struct" || QByteArray(md->typeString()) == "friend union"))) {
+      
+      QSharedPointer<MemberInfo> mi = new MemberInfo((MemberDef *)md, prot, md->virtualness(), false);
+      QSharedPointer<MemberNameInfo> mni;
 
       if (m_impl->allMemberNameInfoSDict == 0) {
          m_impl->allMemberNameInfoSDict = new MemberNameInfoSDict();        
@@ -612,6 +610,7 @@ void ClassDef::internalInsertMember(MemberDef *md, Protection prot, bool addToAl
       } else {
          mni = new MemberNameInfo(md->name());
          mni->append(mi);
+
          m_impl->allMemberNameInfoSDict->append(mni->memberName(), mni);
       }
    }
@@ -1041,7 +1040,9 @@ int ClassDef::countInheritanceNodes()
    int count = 0;
    BaseClassDef *ibcd;
    if (m_impl->inheritedBy) {
-      BaseClassListIterator it(*m_impl->inheritedBy);
+
+      QListIterator<BaseClassDef *> it(*m_impl->inheritedBy);
+
       for (; (ibcd = it.current()); ++it) {
          ClassDef *icd = ibcd->classDef;
          if ( icd->isVisibleInHierarchy()) {
@@ -1050,7 +1051,8 @@ int ClassDef::countInheritanceNodes()
       }
    }
    if (m_impl->m_parents) {
-      BaseClassListIterator it(*m_impl->m_parents);
+      QListIterator<BaseClassDef *> it(*m_impl->m_parents);
+
       for (; (ibcd = it.current()); ++it) {
          ClassDef *icd = ibcd->classDef;
          if ( icd->isVisibleInHierarchy()) {
@@ -1429,7 +1431,7 @@ void ClassDef::writeTagFile(FTextStream &tagFile)
    }
 
    if (m_impl->m_parents) {
-      BaseClassListIterator it(*m_impl->m_parents);
+      QListIterator<BaseClassDef *> it(*m_impl->m_parents);
       BaseClassDef *ibcd;
 
       for (it.toFirst(); (ibcd = it.current()); ++it) {
@@ -2335,12 +2337,15 @@ bool ClassDef::addExample(const char *anchor, const char *nameStr,
       m_impl->exampleSDict = new ExampleSDict;      
    }
 
-   if (!m_impl->exampleSDict->find(nameStr)) {
+   if (! m_impl->exampleSDict->find(nameStr)) {
       Example *e = new Example;
+
       e->anchor = anchor;
-      e->name = nameStr;
-      e->file = file;
-      m_impl->exampleSDict->inSort(nameStr, e);
+      e->name   = nameStr;
+      e->file   = file;
+
+      m_impl->exampleSDict->insert(nameStr, e);
+
       return true;
    }
    return false;
@@ -2402,7 +2407,7 @@ bool ClassDef::hasNonReferenceSuperClass()
    }
 
    if (m_impl->inheritedBy) {
-      BaseClassListIterator bcli(*m_impl->inheritedBy);
+      QListIterator<BaseClassDef *> bcli(*m_impl->inheritedBy);
 
       for ( ; bcli.current() && !found ; ++bcli ) { // for each super class
          ClassDef *bcd = bcli.current()->classDef;
@@ -2549,9 +2554,12 @@ bool ClassDef::isBaseClass(ClassDef *bcd, bool followInstances, int level)
    if (baseClasses()) {
       // Beware: trying to optimise the iterator away using ->first() & ->next()
       // causes bug 625531
-      BaseClassListIterator bcli(*baseClasses());
+
+      QListIterator<BaseClassDef *> bcli(*baseClasses());
+
       for ( ; bcli.current() && !found ; ++bcli) {
          ClassDef *ccd = bcli.current()->classDef;
+
          if (!followInstances && ccd->templateMaster()) {
             ccd = ccd->templateMaster();
          }
@@ -2576,7 +2584,7 @@ bool ClassDef::isSubClass(ClassDef *cd, int level)
       return false;
    }
    if (subClasses()) {
-      BaseClassListIterator bcli(*subClasses());
+      QListIterator<BaseClassDef *> bcli(*subClasses());
 
       for ( ; bcli.current() && !found ; ++bcli) {
          ClassDef *ccd = bcli.current()->classDef;
@@ -2622,7 +2630,7 @@ void ClassDef::mergeMembers()
 
    if (baseClasses()) {
       //printf("  => has base classes!\n");
-      BaseClassListIterator bcli(*baseClasses());
+      QListIterator<BaseClassDef *> bcli(*baseClasses());
       BaseClassDef *bcd;
 
       for ( ; (bcd = bcli.current()) ; ++bcli ) {
@@ -2859,15 +2867,17 @@ void ClassDef::mergeCategory(ClassDef *category)
 
       // copy base classes/protocols from extension
       if (category->baseClasses()) {
-         BaseClassListIterator bcli(*category->baseClasses());
+         QListIterator<BaseClassDef *> bcli(*category->baseClasses());
          BaseClassDef *bcd;
+
          for ( ; (bcd = bcli.current()) ; ++bcli ) {
             insertBaseClass(bcd->classDef, bcd->usedName, bcd->prot, bcd->virt, bcd->templSpecifiers);
             // correct bcd->classDef so that they do no longer derive from
             // category, but from this class!
             if (bcd->classDef->subClasses()) {
-               BaseClassListIterator scli(*bcd->classDef->subClasses());
+               QListIterator<BaseClassDef *> scli(*bcd->classDef->subClasses());
                BaseClassDef *scd;
+
                for ( ; (scd = scli.current()) ; ++scli ) {
                   if (scd->classDef == category) {
                      scd->classDef = this;
@@ -3201,9 +3211,10 @@ void ClassDef::addInnerCompound(Definition *d)
       // nested in classes.
    {
       if (m_impl->innerClasses == 0) {
-         m_impl->innerClasses = new ClassSDict(17);
+         m_impl->innerClasses = new ClassSDict();
       }
-      m_impl->innerClasses->inSort(d->localName(), (ClassDef *)d);
+
+      m_impl->innerClasses->insert(d->localName(), (ClassDef *)d);
    }
 }
 
@@ -3218,46 +3229,6 @@ Definition *ClassDef::findInnerCompound(const char *name)
    }
    return result;
 }
-
-//void ClassDef::initTemplateMapping()
-//{
-//  m_impl->templateMapping->clear();
-//  ArgumentList *al = templateArguments();
-//  if (al)
-//  {
-//    ArgumentListIterator ali(*al);
-//    Argument *arg;
-//    for (ali.toFirst();(arg=ali.current());++ali)
-//    {
-//      setTemplateArgumentMapping(arg->name,arg->defval);
-//    }
-//  }
-//}
-//void ClassDef::setTemplateArgumentMapping(const char *formal,const char *actual)
-//{
-//  //printf("ClassDef::setTemplateArgumentMapping(%s,%s)\n",formal,actual);
-//  if (m_impl->templateMapping && formal)
-//  {
-//    if (m_impl->templateMapping->find(formal))
-//    {
-//      m_impl->templateMapping->remove(formal);
-//    }
-//    m_impl->templateMapping->insert(formal,new QByteArray(actual));
-//  }
-//}
-//
-//QByteArray ClassDef::getTemplateArgumentMapping(const char *formal) const
-//{
-//  if (m_impl->templateMapping && formal)
-//  {
-//    QByteArray *s = m_impl->templateMapping->find(formal);
-//    if (s)
-//    {
-//      return *s;
-//    }
-//  }
-//  return "";
-//}
 
 ClassDef *ClassDef::insertTemplateInstance(const QByteArray &fileName,
       int startLine, int startColumn, const QByteArray &templSpec, bool &freshInstance)
@@ -3771,9 +3742,11 @@ void ClassDef::writeInheritedMemberDeclarations(OutputList &ol,
    //printf("%s: writeInheritedMemberDec: lt=%d process=%d invert=%d always=%d\n",
    //    name().data(),lt,process,invert,showAlways);
    if ((process ^ invert) || showAlways) {
+
       if (m_impl->m_parents) {
-         BaseClassListIterator it(*m_impl->m_parents);
+         QListIterator<BaseClassDef *> it(*m_impl->m_parents);
          BaseClassDef *ibcd;
+
          for (it.toFirst(); (ibcd = it.current()); ++it) {
             ClassDef *icd = ibcd->classDef;
             if (icd->isLinkable()) {
@@ -3805,42 +3778,31 @@ void ClassDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const 
 {
    //printf("%s: ClassDef::writeMemberDeclarations lt=%d lt2=%d\n",name().data(),lt,lt2);
 
-   MemberList *ml = getMemberList(lt);
+   MemberList *ml  = getMemberList(lt);
    MemberList *ml2 = getMemberList((MemberListType)lt2);
+      
+   QByteArray tt = title, st = subTitle;
 
-   if (getLanguage() == SrcLangExt_VHDL) { // use specific declarations function
-      static ClassDef *cdef;
-
-      if (cdef != this) {
-         // only one inline link
-         VhdlDocGen::writeInlineClassLink(this, ol);
-         cdef = this;
-      }
-      if (ml) {
-         VhdlDocGen::writeVhdlDeclarations(ml, ol, 0, this, 0, 0);
-      }
-   } else {
-      //printf("%s::writeMemberDeclarations(%s) ml=%p ml2=%p\n",name().data(),title.data(),ml,ml2);
-      QByteArray tt = title, st = subTitle;
-      if (ml) {
-         //printf("  writeDeclaration type=%d count=%d\n",lt,ml->numDecMembers());
-         ml->writeDeclarations(ol, this, 0, 0, 0, tt, st, false, showInline, inheritedFrom, lt);
-         tt.resize(0);
-         st.resize(0);
-      }
-      if (ml2) {
-         //printf("  writeDeclaration type=%d count=%d\n",lt2,ml2->numDecMembers());
-         ml2->writeDeclarations(ol, this, 0, 0, 0, tt, st, false, showInline, inheritedFrom, lt);
-      }
-      static bool inlineInheritedMembers = Config_getBool("INLINE_INHERITED_MEMB");
-      if (!inlineInheritedMembers) { // show inherited members as separate lists
-         QPtrDict<void> visited(17);
-         writeInheritedMemberDeclarations(ol, lt, lt2, title,
-                                          inheritedFrom ? inheritedFrom : this,
-                                          invert, showAlways,
-                                          visitedClasses == 0 ? &visited : visitedClasses);
-      }
+   if (ml) {
+      //printf("  writeDeclaration type=%d count=%d\n",lt,ml->numDecMembers());
+      ml->writeDeclarations(ol, this, 0, 0, 0, tt, st, false, showInline, inheritedFrom, lt);
+      tt.resize(0);
+      st.resize(0);
    }
+
+   if (ml2) {
+      //printf("  writeDeclaration type=%d count=%d\n",lt2,ml2->numDecMembers());
+      ml2->writeDeclarations(ol, this, 0, 0, 0, tt, st, false, showInline, inheritedFrom, lt);
+   }
+
+   static bool inlineInheritedMembers = Config_getBool("INLINE_INHERITED_MEMB");
+
+   if (!inlineInheritedMembers) { // show inherited members as separate lists
+      QHash<void *, void *> visited;
+      writeInheritedMemberDeclarations(ol, lt, lt2, title, inheritedFrom ? inheritedFrom : this,
+                                       invert, showAlways, visitedClasses == 0 ? &visited : visitedClasses);
+   }
+ 
 }
 
 void ClassDef::addGroupedInheritedMembers(OutputList &ol, MemberListType lt,
@@ -3903,12 +3865,12 @@ ClassDef::CompoundType ClassDef::compoundType() const
    return m_impl->compType;
 }
 
-BaseClassList *ClassDef::baseClasses() const
+SortedList<BaseClassDef *> *ClassDef::baseClasses() const
 {
    return m_impl->m_parents;
 }
 
-BaseClassList *ClassDef::subClasses() const
+SortedList<BaseClassDef *> *ClassDef::subClasses() const
 {
    return m_impl->inheritedBy;
 }
@@ -4154,7 +4116,7 @@ bool ClassDef::isEmbeddedInOuterScope() const
    return b1 || b2;  // either reason will do
 }
 
-const ClassList *ClassDef::taggedInnerClasses() const
+const SortedList<ClassDef *> *ClassDef::taggedInnerClasses() const
 {
    return m_impl->taggedInnerClasses;
 }
@@ -4162,7 +4124,7 @@ const ClassList *ClassDef::taggedInnerClasses() const
 void ClassDef::addTaggedInnerClass(ClassDef *cd)
 {
    if (m_impl->taggedInnerClasses == 0) {
-      m_impl->taggedInnerClasses = new ClassList;
+      m_impl->taggedInnerClasses = new SortedList<ClassDef *>;
    }
    m_impl->taggedInnerClasses->append(cd);
 }

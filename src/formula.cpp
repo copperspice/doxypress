@@ -53,12 +53,13 @@ void FormulaList::generateBitmaps(const char *path)
 {
    int x1, y1, x2, y2;
    QDir d(path);
+
    // store the original directory
    if (!d.exists()) {
       err("Output dir %s does not exist!\n", path);
       exit(1);
    }
-   QByteArray oldDir = QDir::currentPath().utf8();
+   QByteArray oldDir = QDir::currentPath().toUtf8();
 
    // go to the html output directory (i.e. path)
    QDir::setCurrent(d.absolutePath());
@@ -67,93 +68,115 @@ void FormulaList::generateBitmaps(const char *path)
    // generate a latex file containing one formula per page.
    QByteArray texName = "_formulas.tex";
    QList<int> pagesToGenerate;
-  
-   FormulaListIterator fli(*this);
-   Formula *formula;
+     
    QFile f(texName);
    bool formulaError = false;
 
    if (f.open(QIODevice::WriteOnly)) {
       FTextStream t(&f);
+
       if (Config_getBool("LATEX_BATCHMODE")) {
          t << "\\batchmode" << endl;
       }
+
       t << "\\documentclass{article}" << endl;
       t << "\\usepackage{epsfig}" << endl; // for those who want to include images
-      const char *s = Config_getList("EXTRA_PACKAGES").first();
-      while (s) {
-         t << "\\usepackage{" << s << "}\n";
-         s = Config_getList("EXTRA_PACKAGES").next();
+
+      QStringList s = Config_getList("EXTRA_PACKAGES");
+
+      for (auto item : s) {
+         t << "\\usepackage{" << item << "}\n";        
       }
+
       t << "\\pagestyle{empty}" << endl;
       t << "\\begin{document}" << endl;
+
       int page = 0;
-      for (fli.toFirst(); (formula = fli.current()); ++fli) {
-         QByteArray resultName;
-         resultName.sprintf("form_%d.png", formula->getId());
+     
+      for (auto formula : *this) {
+         QString resultName;
+         resultName = QString("form_%1.png").arg(formula.getId());
+
          // only formulas for which no image exists are generated
          QFileInfo fi(resultName);
-         if (!fi.exists()) {
+
+         if (! fi.exists()) {
             // we force a pagebreak after each formula
-            t << formula->getFormulaText() << endl << "\\pagebreak\n\n";
-            pagesToGenerate.append(new int(page));
+            t << formula.getFormulaText() << endl << "\\pagebreak\n\n";
+            pagesToGenerate.append(page);
          }
-         Doxygen::indexList->addImageFile(resultName);
+
+         Doxygen::indexList->addImageFile(strdup(qPrintable(resultName)));
          page++;
       }
+
       t << "\\end{document}" << endl;
       f.close();
    }
-   if (pagesToGenerate.count() > 0) { // there are new formulas
+
+   if (pagesToGenerate.count() > 0) {
+      // there are new formulas
       //printf("Running latex...\n");
       //system("latex _formulas.tex </dev/null >/dev/null");
+
       QByteArray latexCmd = Config_getString("LATEX_CMD_NAME");
+
       if (latexCmd.isEmpty()) {
          latexCmd = "latex";
       }
       portable_sysTimerStart();
+
       if (portable_system(latexCmd, "_formulas.tex") != 0) {
          err("Problems running latex. Check your installation or look "
              "for typos in _formulas.tex and check _formulas.log!\n");
          formulaError = true;
          //return;
       }
+
       portable_sysTimerStop();
-      //printf("Running dvips...\n");
-      QListIterator<int> pli(pagesToGenerate);
-      int *pagePtr;
+             
       int pageIndex = 1;
-      for (; (pagePtr = pli.current()); ++pli, ++pageIndex) {
-         int pageNum = *pagePtr;
+    
+      for (auto pageNum : pagesToGenerate) {         
          msg("Generating image form_%d.png for formula\n", pageNum);
-         char dviArgs[4096];
-         QByteArray formBase;
-         formBase.sprintf("_form%d", pageNum);
+         
+         QString formBase;
+         formBase = QString("_form%1").arg(pageNum);
+
          // run dvips to convert the page with number pageIndex to an
          // encapsulated postscript.
-         sprintf(dviArgs, "-q -D 600 -E -n 1 -p %d -o %s.eps _formulas.dvi",
-                 pageIndex, formBase.data());
+
+         char dviArgs[4096];   
+         sprintf(dviArgs, "-q -D 600 -E -n 1 -p %d -o %s.eps _formulas.dvi",pageIndex, formBase.data());
+
          portable_sysTimerStart();
+
          if (portable_system("dvips", dviArgs) != 0) {
             err("Problems running dvips. Check your installation!\n");
             portable_sysTimerStop();
             return;
          }
          portable_sysTimerStop();
+
          // now we read the generated postscript file to extract the bounding box
          QFileInfo fi(formBase + ".eps");
+ 
          if (fi.exists()) {
-            QByteArray eps = fileToString(formBase + ".eps");
-            int i = eps.find("%%BoundingBox:");
+            QByteArray eps = fileToString(qPrintable(formBase + ".eps"));
+            int i = eps.indexOf("%%BoundingBox:");
+
             if (i != -1) {
                sscanf(eps.data() + i, "%%%%BoundingBox:%d %d %d %d", &x1, &y1, &x2, &y2);
+
             } else {
-               err("Couldn't extract bounding box!\n");
+               err("Could not extract bounding box!\n");
             }
          }
+
          // next we generate a postscript file which contains the eps
          // and displays it in the right colors and the right bounding box
-         f.setName(formBase + ".ps");
+         f.setFileName(formBase + ".ps");
+
          if (f.open(QIODevice::WriteOnly)) {
             FTextStream t(&f);
             t << "1 1 1 setrgbcolor" << endl;  // anti-alias to white background
@@ -173,12 +196,15 @@ void FormulaList::generateBitmaps(const char *path)
          // and the sizes are a multiple of four.
          double scaleFactor = 16.0 / 3.0;
          int zoomFactor = Config_getInt("FORMULA_FONTSIZE");
+
          if (zoomFactor < 8 || zoomFactor > 50) {
             zoomFactor = 10;
          }
+
          scaleFactor *= zoomFactor / 10.0;
          int gx = (((int)((x2 - x1) * scaleFactor)) + 3) & ~1;
          int gy = (((int)((y2 - y1) * scaleFactor)) + 3) & ~1;
+
          // Then we run ghostscript to convert the postscript to a pixmap
          // The pixmap is a truecolor image, where only black and white are
          // used.
@@ -189,39 +215,61 @@ void FormulaList::generateBitmaps(const char *path)
                  gx, gy, (int)(scaleFactor * 72), (int)(scaleFactor * 72),
                  formBase.data(), formBase.data()
                 );
+
          portable_sysTimerStart();
+
          if (portable_system(portable_ghostScriptCommand(), gsArgs) != 0) {
             err("Problem running ghostscript %s %s. Check your installation!\n", portable_ghostScriptCommand(), gsArgs);
             portable_sysTimerStop();
+
             return;
          }
+
          portable_sysTimerStop();
-         f.setName(formBase + ".pnm");
+         f.setFileName(formBase + ".pnm");
+
          uint imageX = 0, imageY = 0;
+         
          // we read the generated image again, to obtain the pixel data.
          if (f.open(QIODevice::ReadOnly)) {
             QTextStream t(&f);
             QByteArray s;
-            if (!t.eof()) {
-               s = t.readLine().utf8();
+
+            if (! t.atEnd()) {
+               s = t.readLine().toUtf8();
             }
+
             if (s.length() < 2 || s.left(2) != "P6") {
-               err("ghostscript produced an illegal image format!");
+               err("GhostScript produced an illegal image format.");
+
             } else {
                // assume the size is after the first line that does not start with
                // # excluding the first line of the file.
-               while (!t.eof() && (s = t.readLine().utf8()) && !s.isEmpty() && s.at(0) == '#') { }
+             
+               while (! t.atEnd()) {            
+                  s = t.readLine().toUtf8();
+                  
+                  if (s.isEmpty()) {
+                     break;
+                  }   
+
+                  if (s.at(0) != '#') {
+                     break;
+                  }
+               }
+
                sscanf(s, "%d %d", &imageX, &imageY);
             }
+
             if (imageX > 0 && imageY > 0) {
                //printf("Converting image...\n");
                char *data = new char[imageX * imageY * 3]; // rgb 8:8:8 format
                uint i, x, y, ix, iy;
-               f.readBlock(data, imageX * imageY * 3);
-               Image srcImage(imageX, imageY),
-                     filteredImage(imageX, imageY),
-                     dstImage(imageX / 4, imageY / 4);
+               f.read(data, imageX * imageY * 3);
+
+               Image srcImage(imageX, imageY), filteredImage(imageX, imageY), dstImage(imageX / 4, imageY / 4);
                uchar *ps = srcImage.getData();
+
                // convert image to black (1) and white (0) index.
                for (i = 0; i < imageX * imageY; i++) {
                   *ps++ = (data[i * 3] == 0 ? 1 : 0);
@@ -267,44 +315,59 @@ void FormulaList::generateBitmaps(const char *path)
                      dstImage.setPixel(x, y, qMin(15, (c * 15) / (16 * 10)));
                   }
                }
+
                // save the result as a bitmap
-               QByteArray resultName;
-               resultName.sprintf("form_%d.png", pageNum);
+               QString resultName;
+               resultName = QString("form_%1.png").arg(pageNum);
+
                // the option parameter 1 is used here as a temporary hack
                // to select the right color palette!
-               dstImage.save(resultName, 1);
+
+               dstImage.save(strdup(qPrintable(resultName)), 1);
                delete[] data;
             }
+
             f.close();
          }
+
          // remove intermediate image files
          thisDir.remove(formBase + ".eps");
          thisDir.remove(formBase + ".pnm");
          thisDir.remove(formBase + ".ps");
+
+         ++pageIndex;
       }
+
       // remove intermediate files produced by latex
       thisDir.remove("_formulas.dvi");
-      if (!formulaError) {
+
+      if (! formulaError) {
          thisDir.remove("_formulas.log");   // keep file in case of errors
       }
       thisDir.remove("_formulas.aux");
    }
+
    // remove the latex file itself
-   if (!formulaError) {
+   if (! formulaError) {
       thisDir.remove("_formulas.tex");
    }
+
    // write/update the formula repository so we know what text the
    // generated images represent (we use this next time to avoid regeneration
    // of the images, and to avoid forcing the user to delete all images in order
    // to let a browser refresh the images).
-   f.setName("formula.repository");
+
+   f.setFileName("formula.repository");
+
    if (f.open(QIODevice::WriteOnly)) {
       FTextStream t(&f);
-      for (fli.toFirst(); (formula = fli.current()); ++fli) {
-         t << "\\form#" << formula->getId() << ":" << formula->getFormulaText() << endl;
+
+      for (auto formula : *this) {      
+         t << "\\form#" << formula.getId() << ":" << formula.getFormulaText() << endl;
       }
       f.close();
    }
+
    // reset the directory to the original location.
    QDir::setCurrent(oldDir);
 }

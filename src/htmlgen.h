@@ -78,7 +78,8 @@ class HtmlGenerator : public OutputGenerator
 
    void enable() {
       if (genStack.top()) {
-         active = *genStack.top();
+         active = genStack.top();
+
       } else {
          active = true;
       }

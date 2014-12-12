@@ -20,17 +20,17 @@
 
 #include <QList>
 #include <QHash>
-#include <qwaitcondition.h>
-#include <qmutex.h>
-#include <qqueue.h>
-#include <qthread.h>
+#include <QWaitCondition>
+#include <Qmutex>
+#include <QQueue>
+#include <QThread>
 
 #include <stringmap.h>
+#include <sortedlist.h>
 
 class ClassDef;
 class FileDef;
 class FTextStream;
-class DotNodeList;
 class ClassSDict;
 class MemberDef;
 class Definition;
@@ -46,8 +46,10 @@ enum EmbeddedOutputFormat { EOF_Html, EOF_LaTeX, EOF_Rtf, EOF_DocBook };
 struct EdgeInfo {
    enum Colors { Blue = 0, Green = 1, Red = 2, Purple = 3, Grey = 4, Orange = 5 };
    enum Styles { Solid = 0, Dashed = 1 };
+
    EdgeInfo() : m_color(0), m_style(0), m_labColor(0) {}
    ~EdgeInfo() {}
+
    int m_color;
    int m_style;
    QByteArray m_label;
@@ -66,16 +68,11 @@ class DotNode
            bool rootNode = false, ClassDef *cd = 0);
    ~DotNode();
 
-   void addChild(DotNode *n,
-                 int edgeColor = EdgeInfo::Purple,
-                 int edgeStyle = EdgeInfo::Solid,
-                 const char *edgeLab = 0,
-                 const char *edgeURL = 0,
-                 int edgeLabCol = -1
-                );
+   void addChild(DotNode *n, int edgeColor = EdgeInfo::Purple, int edgeStyle = EdgeInfo::Solid,
+                 const char *edgeLab = 0, const char *edgeURL = 0, int edgeLabCol = -1 );
 
    void addParent(DotNode *n);
-   void deleteNode(DotNodeList &deletedList, StringMap<QSharedPointer<DotNode>> *skipNodes = 0);
+   void deleteNode(SortedList<DotNode *> &deletedList, StringMap<QSharedPointer<DotNode>> *skipNodes = 0);
    void removeChild(DotNode *n);
    void removeParent(DotNode *n);
    int findParent( DotNode *n );
@@ -149,8 +146,7 @@ class DotNode
 
    friend class DotGfxHierarchyTable;
    friend class DotClassGraph;
-   friend class DotInclDepGraph;
-   friend class DotNodeList;
+   friend class DotInclDepGraph;   
    friend class DotCallGraph;
    friend class DotGroupCollaboration;
 
@@ -189,7 +185,7 @@ class DotGfxHierarchyTable
    QHash<QString, DotNode *> *m_usedNodes;
 
    static int    m_curNodeNumber;
-   DotNodeList  *m_rootSubgraphs;
+   SortedList<DotNode *>  *m_rootSubgraphs;
 };
 
 /** Representation of a class inheritance or dependency graph */

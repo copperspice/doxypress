@@ -418,12 +418,13 @@ void DiagramRow::insertClass(DiagramItem *parent, ClassDef *cd, bool doBases, Pr
 
    di->move(count()*gridWidth, level * gridHeight);
    append(di);
-   BaseClassList *bcl = doBases ? cd->baseClasses() : cd->subClasses();
+
+   SortedList<BaseClassDef *> *bcl = doBases ? cd->baseClasses() : cd->subClasses();
    int count = 0;
 
    if (bcl) {
       /* there are base/sub classes */
-      BaseClassListIterator it(*bcl);
+      QListIterator<BaseClassDef *> it(*bcl);
       BaseClassDef *bcd;
 
       for (; (bcd = it.current()); ++it) {
@@ -443,7 +444,7 @@ void DiagramRow::insertClass(DiagramItem *parent, ClassDef *cd, bool doBases, Pr
       }
 
       /* insert base classes in the next row */
-      BaseClassListIterator it(*bcl);
+      QListIterator<BaseClassDef *> it(*bcl);
       BaseClassDef *bcd;
 
       for (; (bcd = it.current()); ++it) {
@@ -1064,8 +1065,10 @@ void ClassDiagram::writeFigure(FTextStream &output, const char *path,
 
    QByteArray epsBaseName = (QByteArray)path + "/" + fileName;
    QByteArray epsName = epsBaseName + ".eps";
+
    QFile f1;
-   f1.setName(epsName.data());
+   f1.setFileName(epsName.data());
+
    if (!f1.open(QIODevice::WriteOnly)) {
       err("Could not open file %s for writing\n", f1.name().data());
       exit(1);

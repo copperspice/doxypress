@@ -52,10 +52,7 @@ inline void writeDEFString(FTextStream &t, const char *s)
    t << '\'';
 }
 
-void generateDEFForMember(MemberDef *md,
-                          FTextStream &t,
-                          Definition *def,
-                          const char *Prefix)
+void generateDEFForMember(MemberDef *md, FTextStream &t, Definition *def, const char *Prefix)
 {
    QByteArray memPrefix;
 
@@ -184,7 +181,8 @@ void generateDEFForMember(MemberDef *md,
 
    t << memPrefix << "name = '" << md->name() << "';" << endl;
 
-   if (isFunc) { //function
+   if (isFunc) { 
+      //function
       ArgumentList *declAl = new ArgumentList;
       ArgumentList *defAl  = md->argumentList();
 
@@ -198,42 +196,42 @@ void generateDEFForMember(MemberDef *md,
      
          for (auto a : *declAl)  {
  
-            Argument *defArg = *defAli;
+            Argument &defArg = *defAli;
 
             t << memPrefix << "param = {" << endl;
 
             if (! a.attrib.isEmpty()) {
                t << fcnPrefix << "attributes = ";
-               writeDEFString(t, a->attrib);
+               writeDEFString(t, a.attrib);
                t << ';' << endl;
             }
 
-            if (!a.type.isEmpty()) {
+            if (! a.type.isEmpty()) {
                t << fcnPrefix << "type = <<_EnD_oF_dEf_TeXt_" << endl
                  << a.type << endl << "_EnD_oF_dEf_TeXt_;" << endl;
             }
 
-            if (!a.name.isEmpty()) {
+            if (! a.name.isEmpty()) {
                t << fcnPrefix << "declname = ";
-               writeDEFString(t, a->name);
+               writeDEFString(t, a.name);
                t << ';' << endl;
             }
 
-            if (defArg && !defArg->name.isEmpty() && defArg->name != a->name) {
+            if (defArg && ! defArg.name.isEmpty() && defArg.name != a.name) {
                t << fcnPrefix << "defname = ";
-               writeDEFString(t, defArg->name);
+               writeDEFString(t, defArg.name);
                t << ';' << endl;
             }
 
             if (!a->array.isEmpty()) {
                t << fcnPrefix << "array = ";
-               writeDEFString(t, a->array);
+               writeDEFString(t, a.array);
                t << ';' << endl;
             }
 
-            if (!a->defval.isEmpty()) {
+            if (! a.defval.isEmpty()) {
                t << fcnPrefix << "defval = <<_EnD_oF_dEf_TeXt_" << endl
-                 << a->defval << endl << "_EnD_oF_dEf_TeXt_;" << endl;
+                 << a.defval << endl << "_EnD_oF_dEf_TeXt_;" << endl;
             }
 
             if (defArg) {
@@ -266,7 +264,7 @@ void generateDEFForMember(MemberDef *md,
    if (md->memberType() == MemberType_Enumeration) { // enum
       MemberList *enumList = md->enumFieldList();
       if (enumList != 0) {
-         MemberListIterator emli(*enumList);
+         QListIterator<MemberDef> emli(*enumList);
          MemberDef *emd;
          for (emli.toFirst(); (emd = emli.current()); ++emli) {
             t << memPrefix << "enum = { enum-name = " << emd->name() << ';';
@@ -361,7 +359,7 @@ void generateDEFClassSection(ClassDef *cd,
       t << "  cp-section = {" << endl;
       t << "    sec-kind = '" << kind << "';" << endl;
 
-      MemberListIterator mli(*ml);
+      QListIterator<MemberDef> mli(*ml);
       MemberDef *md;
       for (mli.toFirst(); (md = mli.current()); ++mli) {
          generateDEFForMember(md, t, cd, "sec");
@@ -401,7 +399,7 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
    t << "  cp-name   = '" << cd->name() << "';" << endl;
 
    if (cd->baseClasses()) {
-      BaseClassListIterator bcli(*cd->baseClasses());
+      QListIterator<BaseClassDef *> bcli(*cd->baseClasses());
       BaseClassDef *bcd;
       for (bcli.toFirst(); (bcd = bcli.current()); ++bcli) {
          t << "  cp-ref     = {" << endl << "    ref-type = base;" << endl;
@@ -437,8 +435,9 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
    }
 
    if (cd->subClasses()) {
-      BaseClassListIterator bcli(*cd->subClasses());
+      QListIterator<BaseClassDef *> bcli(*cd->subClasses());
       BaseClassDef *bcd;
+
       for (bcli.toFirst(); (bcd = bcli.current()); ++bcli) {
          t << "  cp-ref     = {" << endl << "    ref-type = derived;" << endl;
          t << "    ref-id   = '"
@@ -538,7 +537,7 @@ void generateDEFSection(Definition *d,
 {
    if (ml && ml->count() > 0) {
       t << "    " << kind << " = {" << endl;
-      MemberListIterator mli(*ml);
+      QListIterator<MemberDef> mli(*ml);
       MemberDef *md;
       for (mli.toFirst(); (md = mli.current()); ++mli) {
          generateDEFForMember(md, t, d, kind);
@@ -611,7 +610,7 @@ void generateDEF()
 {
    QByteArray outputDirectory = Config_getString("OUTPUT_DIRECTORY");
    if (outputDirectory.isEmpty()) {
-      outputDirectory = QDir::currentPath().utf8();
+      outputDirectory = QDir::currentPath().toUtf8();
    } else {
       QDir dir(outputDirectory);
       if (!dir.exists()) {
@@ -655,12 +654,12 @@ void generateDEF()
    if (Doxygen::classSDict->count() + Doxygen::inputNameList->count() > 0) {
       ClassSDict::Iterator cli(*Doxygen::classSDict);
       ClassDef *cd;
+
       for (cli.toFirst(); (cd = cli.current()); ++cli) {
          generateDEFForClass(cd, t);
       }
-      FileNameListIterator fnli(*Doxygen::inputNameList);
-      FileName *fn;
-      for (; (fn = fnli.current()); ++fnli) {
+     
+      for (auto fn : *Doxygen::inputNameList ) {
          FileNameIterator fni(*fn);
          FileDef *fd;
          for (; (fd = fni.current()); ++fni) {

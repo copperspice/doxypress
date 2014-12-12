@@ -18,30 +18,22 @@
 #include <QHash>
 
 #include <tooltip.h>
+
+#include <config.h>
 #include <definition.h>
+#include <doxygen.h>
+#include <filedef.h>
 #include <outputgen.h>
 #include <util.h>
-#include <filedef.h>
-#include <doxygen.h>
-#include <config.h>
-
-class TooltipManager::Private
-{
- public:
-   Private() : tooltipInfo() {}
-   QHash<QString, Definition> tooltipInfo;
-};
 
 TooltipManager *TooltipManager::s_theInstance = 0;
 
 TooltipManager::TooltipManager()
-{
-   p = new Private;
+{   
 }
 
 TooltipManager::~TooltipManager()
-{
-   delete p;
+{ 
 }
 
 TooltipManager *TooltipManager::instance()
@@ -49,12 +41,13 @@ TooltipManager *TooltipManager::instance()
    if (!s_theInstance) {
       s_theInstance = new TooltipManager;
    }
+
    return s_theInstance;
 }
 
 void TooltipManager::clearTooltips()
 {
-   p->tooltipInfo.clear();
+   m_tooltipInfo.clear();
 }
 
 static QByteArray escapeId(const char *s)
@@ -74,7 +67,7 @@ static QByteArray escapeId(const char *s)
 void TooltipManager::addTooltip(Definition *d)
 {
    static bool sourceTooltips = Config_getBool("SOURCE_TOOLTIPS");
-   if (!sourceTooltips) {
+   if (! sourceTooltips) {
       return;
    }
 
@@ -88,52 +81,50 @@ void TooltipManager::addTooltip(Definition *d)
    id += escapeId(Doxygen::htmlFileExtension);
 
    QByteArray anc = d->anchor();
-   if (!anc.isEmpty()) {
+   if (! anc.isEmpty()) {
       id += "_" + anc;
    }
 
-   if (p->tooltipInfo.find(id) == 0) {
-      p->tooltipInfo.insert(id, d);
+   if (! m_tooltipInfo.contains(id)) {
+      m_tooltipInfo.insert(id, d);
    }
 }
 
 void TooltipManager::writeTooltips(CodeOutputInterface &ol)
 {
-   QHashIterator<QString, Definition> di(p->tooltipInfo);
-   Definition *d;
+   QHash<QString, Definition *>::iterator iter = m_tooltipInfo.begin();
 
-   for (di.toFirst(); (d = di.current()); ++di) {
+   for (auto item : m_tooltipInfo) {
       DocLinkInfo docInfo;
-      docInfo.name   = d->qualifiedName();
-      docInfo.ref    = d->getReference();
-      docInfo.url    = d->getOutputFileBase();
-      docInfo.anchor = d->anchor();
+
+      docInfo.name   = item->qualifiedName();
+      docInfo.ref    = item->getReference();
+      docInfo.url    = item->getOutputFileBase();
+      docInfo.anchor = item->anchor();
+
       SourceLinkInfo defInfo;
 
-      if (d->getBodyDef() && d->getStartBodyLine() != -1) {
-         defInfo.file    = d->getBodyDef()->name();
-         defInfo.line    = d->getStartBodyLine();
-         defInfo.url     = d->getSourceFileBase();
-         defInfo.anchor  = d->getSourceAnchor();
+      if (item->getBodyDef() && item->getStartBodyLine() != -1) {
+         defInfo.file    = item->getBodyDef()->name();
+         defInfo.line    = item->getStartBodyLine();
+         defInfo.url     = item->getSourceFileBase();
+         defInfo.anchor  = item->getSourceAnchor();
       }
 
-      SourceLinkInfo declInfo; // TODO: fill in...
+      SourceLinkInfo declInfo; 
       QByteArray decl;
 
-      if (d->definitionType() == Definition::TypeMember) {
-         MemberDef *md = (MemberDef *)d;
+      if (item->definitionType() == Definition::TypeMember) {
+         MemberDef *md = (MemberDef *)item;
          decl = md->declaration();
-         if (!decl.isEmpty() && decl.at(0) == '@') { // hide enum values
+
+         if (! decl.isEmpty() && decl.at(0) == '@') {
+            // hide enum values
             decl.resize(0);
          }
       }
-      ol.writeTooltip(di.currentKey(),                 // id
-                      docInfo,                         // symName
-                      decl,                            // decl
-                      d->briefDescriptionAsTooltip(),  // desc
-                      defInfo,
-                      declInfo
-                     );
+
+      ol.writeTooltip(qPrintable(iter.key()), docInfo, decl, item->briefDescriptionAsTooltip(), defInfo, declInfo);
+      iter++;
    }
 }
-

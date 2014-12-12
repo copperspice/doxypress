@@ -323,11 +323,12 @@ HtmlEntityMapper *HtmlEntityMapper::s_instance = 0;
 
 HtmlEntityMapper::HtmlEntityMapper()
 {
-   m_name2sym = new QHash<QString, int>(1009);
-   m_name2sym->setAutoDelete(true);
+   m_name2sym = new QHash<QString, int>;
+   
    for (int i = 0; i < g_numHtmlEntities; i++) {
-      m_name2sym->insert(g_htmlEntities[i].item, new int(g_htmlEntities[i].symb));
+      m_name2sym->insert(g_htmlEntities[i].item, g_htmlEntities[i].symb);
    }
+
    validate();
 }
 
@@ -462,8 +463,15 @@ const DocSymbol::PerlSymb *HtmlEntityMapper::perl(DocSymbol::SymType symb) const
  */
 DocSymbol::SymType HtmlEntityMapper::name2sym(const QByteArray &symName) const
 {
-   int *pSymb = m_name2sym->find(symName);
-   return pSymb ? ((DocSymbol::SymType) * pSymb) : DocSymbol::Sym_Unknown;
+   auto item = m_name2sym->find(symName);
+  
+   if (item == m_name2sym->end()) {
+      return DocSymbol::Sym_Unknown;
+
+   } else {   
+      return ((DocSymbol::SymType) item.value());
+
+   }   
 }
 
 void HtmlEntityMapper::writeXMLSchema(FTextStream &t)

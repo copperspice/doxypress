@@ -26,24 +26,6 @@
 
 class Definition;
 
-/** A list of ClassDef objects. */
-class ClassList : public QList<ClassDef>
-{
- public:
-   ClassList();
-   ~ClassList();
-
- private:
-   int compareValues(const ClassDef *item1, const ClassDef *item2) const;
-};
-
-/** An iterator for ClassDef objects in a ClassList. */
-class ClassListIterator : public QListIterator<ClassDef>
-{
- public:
-   ClassListIterator(const ClassList &list);
-};
-
 /** An unsorted dictionary of ClassDef objects. */
 class ClassDict : public QHash<QString, ClassDef>
 {

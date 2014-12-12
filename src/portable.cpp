@@ -17,21 +17,25 @@
 
 #include <qglobal.h>
 #include <QDateTime>
+#include <QDir>
 
 #include <stdlib.h>
 #include <ctype.h>
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && ! defined(__CYGWIN__)
 #undef UNICODE
 #define _WIN32_DCOM
 #include <windows.h>
+
 #else
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
+
 extern char **environ;
+
 #endif
 
 #include <portable.h>
@@ -45,17 +49,18 @@ static QTime   g_time;
 
 int portable_system(const char *command, const char *args, bool commandHasConsole)
 {
-
    if (command == 0) {
       return 1;
    }
 
    QByteArray fullCmd = command;
    fullCmd = fullCmd.trimmed();
-   if (fullCmd.at(0) != '"' && fullCmd.find(' ') != -1) {
+
+   if (fullCmd.at(0) != '"' && fullCmd.indexOf(' ') != -1) {
       // add quotes around command as it contains spaces and is not quoted already
       fullCmd = "\"" + fullCmd + "\"";
    }
+
    fullCmd += " ";
    fullCmd += args;
 
@@ -64,34 +69,13 @@ int portable_system(const char *command, const char *args, bool commandHasConsol
 #endif
 
 #if ! defined(_WIN32) || defined(__CYGWIN__)
+
    (void)commandHasConsole;
-   /*! taken from the system() manpage on my Linux box */
-   int pid, status = 0;
-
-#ifdef _OS_SOLARIS // for Solaris we use vfork since it is more memory efficient
-
-   // on Solaris fork() duplicates the memory usage
-   // so we use vfork instead
-
-   // spawn shell
-   if ((pid = vfork()) < 0) {
-      status = -1;
-   } else if (pid == 0) {
-      execl("/bin/sh", "sh", "-c", fullCmd.data(), (char *)0);
-      _exit(127);
-   } else {
-      while (waitpid(pid, &status, 0 ) < 0) {
-         if (errno != EINTR) {
-            status = -1;
-            break;
-         }
-      }
-   }
-   return status;
-
-#else  // Other Unices just use fork
-
+   
+   int pid;
+   int status = 0;
    pid = fork();
+
    if (pid == -1) {
       perror("fork error");
       return -1;
@@ -105,6 +89,7 @@ int portable_system(const char *command, const char *args, bool commandHasConsol
       execve("/bin/sh", (char *const *)argv, environ);
       exit(127);
    }
+
    for (;;) {
       if (waitpid(pid, &status, 0) == -1) {
          if (errno != EINTR) {
@@ -118,11 +103,14 @@ int portable_system(const char *command, const char *args, bool commandHasConsol
          }
       }
    }
-#endif // !_OS_SOLARIS
 
-#else // Win32 specific
+
+#else 
+   // Win32 specific
+
    if (commandHasConsole) {
       return system(fullCmd);
+
    } else {
       // Because ShellExecuteEx can delegate execution to Shell extensions
       // (data sources, context menu handlers, verb implementations) that
@@ -147,8 +135,8 @@ int portable_system(const char *command, const char *args, bool commandHasConsol
                                                        */
          NULL,                       /* window handle */
          NULL,                       /* action to perform: open */
-         (LPCWSTR)commandw.ucs2(),   /* file to execute */
-         (LPCWSTR)argsw.ucs2(),      /* argument list */
+         (LPCWSTR)commandw.utf16(),  /* file to execute */
+         (LPCWSTR)argsw.utf16(),     /* argument list */
          NULL,                       /* use current working dir */
          SW_HIDE,                    /* minimize on start-up */
          0,                          /* application instance handle */
@@ -162,13 +150,16 @@ int portable_system(const char *command, const char *args, bool commandHasConsol
 
       if (!ShellExecuteExW(&sInfo)) {
          return -1;
+
       } else if (sInfo.hProcess) {  /* executable was launched, wait for it to finish */
          WaitForSingleObject(sInfo.hProcess, INFINITE);
+
          /* get process exit code */
          DWORD exitCode;
-         if (!GetExitCodeProcess(sInfo.hProcess, &exitCode)) {
+         if (! GetExitCodeProcess(sInfo.hProcess, &exitCode)) {
             exitCode = -1;
          }
+
          CloseHandle(sInfo.hProcess);
          return exitCode;
       }
@@ -180,11 +171,13 @@ int portable_system(const char *command, const char *args, bool commandHasConsol
 uint portable_pid()
 {
    uint pid;
+
 #if !defined(_WIN32) || defined(__CYGWIN__)
    pid = (uint)getpid();
 #else
    pid = (uint)GetCurrentProcessId();
 #endif
+
    return pid;
 }
 
@@ -195,13 +188,17 @@ void portable_setenv(const char *name, const char *value)
    if (value == 0) {
       value = "";
    }
-#if defined(_WIN32) && !defined(__CYGWIN__)
+
+#if defined(_WIN32) && ! defined(__CYGWIN__)
    SetEnvironmentVariable(name, value);
+
 #else
-   register char **ep = 0;
-   register size_t size;
+
+   char **ep = 0;
+   size_t size;
+
    const size_t namelen = qstrlen(name);
-   const size_t vallen = qstrlen(value) + 1;
+   const size_t vallen  = qstrlen(value) + 1;
 
    size = 0;
    if (environ != 0) {
@@ -217,11 +214,14 @@ void portable_setenv(const char *name, const char *value)
 
    if (environ == 0 || *ep == 0) { /* add new string */
       char **new_environ;
+
       if (environ == last_environ && environ != 0) {
          // We allocated this space; we can extend it.
          new_environ = (char **) realloc (last_environ, (size + 2) * sizeof (char *));
+
       } else {
          new_environ = (char **) malloc ((size + 2) * sizeof (char *));
+
       }
 
       if (new_environ == 0) { // no more memory
@@ -240,11 +240,14 @@ void portable_setenv(const char *name, const char *value)
 
       memcpy(new_environ[size], name, namelen);
       new_environ[size][namelen] = '=';
+
       memcpy(&new_environ[size][namelen + 1], value, vallen);
       new_environ[size + 1] = 0;
       last_environ = environ = new_environ;
+
    } else { /* replace existing string */
       size_t len = qstrlen (*ep);
+
       if (len + 1 < namelen + 1 + vallen) {
          /* The existing string is too short; malloc a new one.  */
          char *newString = (char *)malloc(namelen + 1 + vallen);
@@ -253,8 +256,10 @@ void portable_setenv(const char *name, const char *value)
          }
          *ep = newString;
       }
+
       memcpy(*ep, name, namelen);
       (*ep)[namelen] = '=';
+
       memcpy(&(*ep)[namelen + 1], value, vallen);
    }
 
@@ -263,8 +268,10 @@ void portable_setenv(const char *name, const char *value)
 
 void portable_unsetenv(const char *variable)
 {
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
    SetEnvironmentVariable(variable, 0);
+
 #else
    /* Some systems don't have unsetenv(), so we do it ourselves */
    size_t len;
@@ -299,6 +306,7 @@ const char *portable_getenv(const char *variable)
 
 portable_off_t portable_fseek(FILE *f, portable_off_t offset, int whence)
 {
+
 #if defined(__MINGW32__)
    return fseeko64(f, offset, whence);
 #elif defined(_WIN32) && !defined(__CYGWIN__)
@@ -306,38 +314,43 @@ portable_off_t portable_fseek(FILE *f, portable_off_t offset, int whence)
 #else
    return fseeko(f, offset, whence);
 #endif
+
 }
 
 portable_off_t portable_ftell(FILE *f)
 {
+
 #if defined(__MINGW32__)
    return ftello64(f);
+
 #elif defined(_WIN32) && !defined(__CYGWIN__)
    return _ftelli64(f);
+
 #else
    return ftello(f);
+
 #endif
+
 }
 
 FILE *portable_fopen(const char *fileName, const char *mode)
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && ! defined(__CYGWIN__)
    QString fn(fileName);
    QString m(mode);
-   return _wfopen((wchar_t *)fn.ucs2(), (wchar_t *)m.ucs2());
+   return _wfopen((wchar_t *)fn.utf16(), (wchar_t *)m.utf16());
+
 #else
    return fopen(fileName, mode);
+
 #endif
 }
 
 char portable_pathSeparator()
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-   return '\\';
-#else
-   return '/';
-#endif
+   return QDir::separator().toLatin1();   
 }
+
 
 char portable_pathListSeparator()
 {
@@ -350,6 +363,9 @@ char portable_pathListSeparator()
 
 const char *portable_ghostScriptCommand()
 {
+
+// CS BROOM 
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
    return "gswin32c.exe";
 #else
@@ -359,7 +375,7 @@ const char *portable_ghostScriptCommand()
 
 const char *portable_commandExtension()
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && ! defined(__CYGWIN__)
    return ".exe";
 #else
    return "";
@@ -368,7 +384,7 @@ const char *portable_commandExtension()
 
 bool portable_fileSystemIsCaseSensitive()
 {
-#if defined(_WIN32) || defined(macintosh) || defined(__MACOSX__) || defined(__APPLE__)
+#if defined(_WIN32) || defined(__MACOSX__) || defined(__APPLE__)
    return false;
 #else
    return true;
@@ -411,21 +427,7 @@ void portable_sleep(int ms)
 
 bool portable_isAbsolutePath(const char *fileName)
 {
-# ifdef _WIN32
-   if (isalpha (fileName [0]) && fileName[1] == ':') {
-      fileName += 2;
-   }
-# endif
-   char const fst = fileName [0];
-   if (fst == '/')  {
-      return true;
-   }
-# ifdef _WIN32
-   if (fst == '\\') {
-      return true;
-   }
-# endif
-   return false;
+   return QDir::isAbsolutePath(fileName);
 }
 
 

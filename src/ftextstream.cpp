@@ -15,11 +15,11 @@
  *
 *************************************************************************/
 
+/*
+
 #include <QFile>
 
 #include <ftextstream.h>
-
-//----------------------------------------------------------------------------
 
 class QGStringBuffer : public QIODevice
 {
@@ -71,19 +71,11 @@ QGStringBuffer::~QGStringBuffer()
 bool QGStringBuffer::open( int m )
 {
    if (! m_str ) {
-
-#if defined(CHECK_STATE)
-      qWarning( "QGStringBuffer::open: No string" );
-#endif
       return false;
    }
 
    if ( isOpen() ) {
       // buffer already open
-
-#if defined(CHECK_STATE)
-      qWarning( "QGStringBuffer::open: Buffer already open" );
-#endif
       return false;
    }
 
@@ -297,6 +289,6 @@ FTextStream &FTextStream::operator<<( double d )
 }
 
 
-
+*/
 
 

@@ -118,7 +118,7 @@ ClassSDict      *Doxygen::hiddenClasses = 0;
 NamespaceSDict  *Doxygen::namespaceSDict = 0;
 MemberNameSDict *Doxygen::memberNameSDict = 0;
 MemberNameSDict *Doxygen::functionNameSDict = 0;
-FileNameList    *Doxygen::inputNameList = 0;       // all input files
+SortedList<FileName *>    *Doxygen::inputNameList = 0;       // all input files
 FileNameDict    *Doxygen::inputNameDict = 0;
 GroupSDict      *Doxygen::groupSDict = 0;
 FormulaList     *Doxygen::formulaList = 0;         // all formulas
@@ -1473,33 +1473,33 @@ static ClassDef *createTagLessInstance(ClassDef *rootCd, ClassDef *templ, const 
    }
 
    FileDef *fd = templ->getFileDef();
+
    if (fd) {
       cd->setFileDef(fd);
       fd->insertClass(cd);
    }
+
    GroupList *groups = rootCd->partOfGroups();
+
    if ( groups != 0 ) {
-      GroupListIterator gli(*groups);
-      GroupDef *gd;
-      for (gli.toFirst(); (gd = gli.current()); ++gli) {
-         cd->makePartOfGroup(gd);
-         gd->addClass(cd);
+      for (auto item : *groups) {
+         cd->makePartOfGroup(item);
+         item->addClass(cd);
       }
    }
    //printf("** adding class %s based on %s\n",fullName.data(),templ->name().data());
    Doxygen::classSDict->append(fullName, cd);
 
    MemberList *ml = templ->getMemberList(MemberListType_pubAttribs);
-   if (ml) {
-      MemberListIterator li(*ml);
-      MemberDef *md;
-      for (li.toFirst(); (md = li.current()); ++li) {
+
+   if (ml) {     
+
+      for (auto md : *ml) {
          //printf("    Member %s type=%s\n",md->name().data(),md->typeString());
          MemberDef *imd = new MemberDef(md->getDefFileName(), md->getDefLine(), md->getDefColumn(),
                                         md->typeString(), md->name(), md->argsString(), md->excpString(),
-                                        md->protection(), md->virtualness(), md->isStatic(), Member,
-                                        md->memberType(),
-                                        0, 0);
+                                        md->protection(), md->virtualness(), md->isStatic(), Member, md->memberType(), 0, 0);
+
          imd->setMemberClass(cd);
          imd->setDocumentation(md->documentation(), md->docFile(), md->docLine());
          imd->setBriefDescription(md->briefDescription(), md->briefFile(), md->briefLine());
@@ -1513,6 +1513,7 @@ static ClassDef *createTagLessInstance(ClassDef *rootCd, ClassDef *templ, const 
          cd->insertMember(imd);
       }
    }
+
    return cd;
 }
 
@@ -1536,7 +1537,7 @@ static void processTagLessClasses(ClassDef *rootCd,
       MemberList *ml = cd->getMemberList(MemberListType_pubAttribs);
 
       if (ml) {
-         MemberListIterator li(*ml);
+         QListIterator<MemberDef> li(*ml);
          MemberDef *md;
 
          for (li.toFirst(); (md = li.current()); ++li) {
@@ -1577,7 +1578,7 @@ static void processTagLessClasses(ClassDef *rootCd,
                      // generated tagged struct of which there can be multiple instances!
                      MemberList *pml = tagParentCd->getMemberList(MemberListType_pubAttribs);
                      if (pml) {
-                        MemberListIterator pli(*pml);
+                        QListIterator<MemberDef> pli(*pml);
                         MemberDef *pmd;
                         for (pli.toFirst(); (pmd = pli.current()); ++pli) {
                            if (pmd->name() == md->name()) {
@@ -6888,7 +6889,7 @@ static void findDEV(const MemberNameSDict &mnsd)
             MemberList *fmdl = md->enumFieldList();
             int documentedEnumValues = 0;
             if (fmdl) { // enum has values
-               MemberListIterator fmni(*fmdl);
+               QListIterator<MemberDef> fmni(*fmdl);
                MemberDef *fmd;
                // for each enum value
                for (fmni.toFirst(); (fmd = fmni.current()); ++fmni) {
@@ -8249,19 +8250,27 @@ static bool openOutputFile(const char *outFile, QFile &f)
 {
    bool fileOpened = false;
    bool writeToStdout = (outFile[0] == '-' && outFile[1] == '\0');
+
    if (writeToStdout) { // write to stdout
       fileOpened = f.open(QIODevice::WriteOnly, stdout);
+
    } else { // write to file
       QFileInfo fi(outFile);
+
       if (fi.exists()) { // create a backup
+
          QDir dir = fi.dir();
          QFileInfo backup(fi.fileName() + ".bak");
+
          if (backup.exists()) { // remove existing backup
             dir.remove(backup.fileName());
          }
+
          dir.rename(fi.fileName(), fi.fileName() + ".bak");
       }
-      f.setName(outFile);
+
+      f.setFileName(outFile);
+
       fileOpened = f.open(QIODevice::WriteOnly | IO_Translate);
    }
    return fileOpened;
@@ -8323,7 +8332,7 @@ static void readTagFile(Entry *root, const char *tl)
       fileName = tagLine.left(eqPos).trimmed();
       destName = tagLine.right(tagLine.length() - eqPos - 1).trimmed();
       QFileInfo fi(fileName);
-      Doxygen::tagDestinationDict.insert(fi.absFilePath().utf8(), new QByteArray(destName));
+      Doxygen::tagDestinationDict.insert(fi.absFilePath().toUtf8(), new QByteArray(destName));
       //printf("insert tagDestination %s->%s\n",fi.fileName().data(),destName.data());
    } else {
       fileName = tagLine;
@@ -8342,7 +8351,7 @@ static void readTagFile(Entry *root, const char *tl)
       msg("Reading tag file `%s'...\n", fileName.data());
    }
 
-   parseTagFile(root, fi.absFilePath().utf8());
+   parseTagFile(root, fi.absFilePath().toUtf8());
 }
 
 //----------------------------------------------------------------------------
@@ -8403,7 +8412,7 @@ static void copyExtraFiles(const QByteArray &filesOption, const QByteArray &outp
             err("Extra file '%s' specified in " + filesOption + " does not exist!\n", fileName.data());
          } else {
             QByteArray destFileName = Config_getString(outputOption) + "/" + fi.fileName().data();
-            Doxygen::indexList->addImageFile(fi.fileName().utf8());
+            Doxygen::indexList->addImageFile(fi.fileName().toUtf8());
             copyFile(fileName, destFileName);
          }
       }
@@ -8629,21 +8638,11 @@ static QHash<QString, void> g_pathsVisited(1009);
 // The directory is read iff the recusiveFlag is set.
 // The contents of all files is append to the input string
 
-int readDir(QFileInfo *fi,
-            FileNameList *fnList,
-            FileNameDict *fnDict,
-            StringDict  *exclDict,
-            QStringList *patList,
-            QStringList *exclPatList,
-            QList<QByteArray> *resultList,
-            StringDict *resultDict,
-            bool errorIfNotExist,
-            bool recursive,
-            QHash<QString, void> *killDict,
-            QHash<QString, void> *paths
-           )
+int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict  *exclDict,
+            QStringList *patList, QStringList *exclPatList, QList<QByteArray> *resultList, StringDict *resultDict,
+            bool errorIfNotExist, bool recursive, QHash<QString, void> *killDict, QHash<QString, void> *paths)
 {
-   QByteArray dirName = fi->absFilePath().utf8();
+   QByteArray dirName = fi->absFilePath().toUtf8();
    if (paths && paths->find(dirName) == 0) {
       paths->insert(dirName, (void *)0x8);
    }
@@ -8669,7 +8668,7 @@ int readDir(QFileInfo *fi,
       QFileInfo *cfi;
 
       while ((cfi = it.current())) {
-         if (exclDict == 0 || exclDict->find(cfi->absFilePath().utf8()) == 0) {
+         if (exclDict == 0 || exclDict->find(cfi->absFilePath().toUtf8()) == 0) {
             // file should not be excluded
             //printf("killDict->find(%s)\n",cfi->absFilePath().data());
             if (!cfi->exists() || !cfi->isReadable()) {
@@ -8680,18 +8679,18 @@ int readDir(QFileInfo *fi,
                        (!Config_getBool("EXCLUDE_SYMLINKS") || !cfi->isSymLink()) &&
                        (patList == 0 || patternMatch(*cfi, patList)) &&
                        !patternMatch(*cfi, exclPatList) &&
-                       (killDict == 0 || killDict->find(cfi->absFilePath().utf8()) == 0)
+                       (killDict == 0 || killDict->find(cfi->absFilePath().toUtf8()) == 0)
                       ) {
                totalSize += cfi->size() + cfi->absFilePath().length() + 4;
-               QByteArray name = cfi->fileName().utf8();
+               QByteArray name = cfi->fileName().toUtf8();
                //printf("New file %s\n",name.data());
                if (fnDict) {
-                  FileDef  *fd = new FileDef(cfi->dirPath().utf8() + "/", name);
+                  FileDef  *fd = new FileDef(cfi->dirPath().toUtf8() + "/", name);
                   FileName *fn = 0;
                   if (!name.isEmpty() && (fn = (*fnDict)[name])) {
                      fn->append(fd);
                   } else {
-                     fn = new FileName(cfi->absFilePath().utf8(), name);
+                     fn = new FileName(cfi->absFilePath().toUtf8(), name);
                      fn->append(fd);
                      if (fnList) {
                         fnList->inSort(fn);
@@ -8701,16 +8700,16 @@ int readDir(QFileInfo *fi,
                }
                QByteArray *rs = 0;
                if (resultList || resultDict) {
-                  rs = new QByteArray(cfi->absFilePath().utf8());
+                  rs = new QByteArray(cfi->absFilePath().toUtf8());
                }
                if (resultList) {
                   resultList->append(rs);
                }
                if (resultDict) {
-                  resultDict->insert(cfi->absFilePath().utf8(), rs);
+                  resultDict->insert(cfi->absFilePath().toUtf8(), rs);
                }
                if (killDict) {
-                  killDict->insert(cfi->absFilePath().utf8(), (void *)0x8);
+                  killDict->insert(cfi->absFilePath().toUtf8(), (void *)0x8);
                }
             } else if (recursive &&
                        (!Config_getBool("EXCLUDE_SYMLINKS") || !cfi->isSymLink()) &&
@@ -8735,7 +8734,7 @@ int readDir(QFileInfo *fi,
 // input string. The names of the files are appended to the `fiList' list.
 
 int readFileOrDirectory(const char *s,
-                        FileNameList *fnList,
+                        SortedList<FileName *> *fnList,
                         FileNameDict *fnDict,
                         StringDict *exclDict,
                         QStringList *patList,
@@ -8763,15 +8762,15 @@ int readFileOrDirectory(const char *s,
    //printf("readFileOrDirectory(%s)\n",s);
    int totalSize = 0;
    {
-      if (exclDict == 0 || exclDict->find(fi.absFilePath().utf8()) == 0) {
+      if (exclDict == 0 || exclDict->find(fi.absFilePath().toUtf8()) == 0) {
          if (!fi.exists() || !fi.isReadable()) {
             if (errorIfNotExist) {
                warn_uncond("source %s is not a readable file or directory... skipping.\n", s);
             }
          } else if (!Config_getBool("EXCLUDE_SYMLINKS") || !fi.isSymLink()) {
             if (fi.isFile()) {
-               QByteArray dirPath = fi.dirPath(true).utf8();
-               QByteArray filePath = fi.absFilePath().utf8();
+               QByteArray dirPath = fi.dirPath(true).toUtf8();
+               QByteArray filePath = fi.absFilePath().toUtf8();
                if (paths && paths->find(dirPath)) {
                   paths->insert(dirPath, (void *)0x8);
                }
@@ -8779,7 +8778,7 @@ int readFileOrDirectory(const char *s,
                if (killDict == 0 || killDict->find(filePath) == 0) {
                   totalSize += fi.size() + fi.absFilePath().length() + 4; //readFile(&fi,fiList,input);
                   //fiList->inSort(new FileInfo(fi));
-                  QByteArray name = fi.fileName().utf8();
+                  QByteArray name = fi.fileName().toUtf8();
                   //printf("New file %s\n",name.data());
                   if (fnDict) {
                      FileDef  *fd = new FileDef(dirPath + "/", name);
@@ -8807,7 +8806,7 @@ int readFileOrDirectory(const char *s,
                   }
 
                   if (killDict) {
-                     killDict->insert(fi.absFilePath().utf8(), (void *)0x8);
+                     killDict->insert(fi.absFilePath().toUtf8(), (void *)0x8);
                   }
                }
             } else if (fi.isDir()) { // readable dir
@@ -8831,7 +8830,7 @@ void readFormulaRepository()
       QTextStream t(&f);
       QByteArray line;
       while (!t.eof()) {
-         line = t.readLine().utf8();
+         line = t.readLine().toUtf8();
          int se = line.find(':'); // find name and text separator.
          if (se == -1) {
             warn_uncond("formula.repository is corrupted!\n");
@@ -9074,7 +9073,7 @@ void initDoxygen()
 #endif
 
    Doxygen::symbolMap         = new QHash<QString, DefinitionIntf>();
-   Doxygen::inputNameList     = new FileNameList;  
+   Doxygen::inputNameList     = new SortedList<FileName *>;  
 
    Doxygen::memberNameSDict   = new MemberNameSDict();
    Doxygen::functionNameSDict = new MemberNameSDict();
@@ -9510,7 +9509,7 @@ void adjustConfiguration()
 
    while (s) {
       QFileInfo fi(s);
-      addSearchDir(fi.absFilePath().utf8());
+      addSearchDir(fi.absFilePath().toUtf8());
       s = includePath.next();
    }
 
@@ -9858,7 +9857,7 @@ void parseInput()
     **************************************************************************/
    QByteArray &outputDirectory = Config_getString("OUTPUT_DIRECTORY");
    if (outputDirectory.isEmpty()) {
-      outputDirectory = QDir::currentPath().utf8();
+      outputDirectory = QDir::currentPath().toUtf8();
    } else {
       QDir dir(outputDirectory);
       if (!dir.exists()) {
@@ -10196,9 +10195,7 @@ void parseInput()
    g_s.begin("Computing class relations...\n");
    computeTemplateClassRelations();
    flushUnresolvedRelations();
-   if (Config_getBool("OPTIMIZE_OUTPUT_VHDL")) {
-      VhdlDocGen::computeVhdlComponentRelations();
-   }
+  
    computeClassRelations();
    g_classEntries.clear();
    g_s.end();
@@ -10285,8 +10282,13 @@ void parseInput()
 
    // compute the shortest possible names of all files
    // without losing the uniqueness of the file names.
+
    g_s.begin("Generating disk names...\n");
-   Doxygen::inputNameList->generateDiskNames();
+
+   for (auto item : Doxygen::inputNameList) {
+      item.generateDiskNames();
+   }
+
    g_s.end();
 
    g_s.begin("Adding source references...\n");

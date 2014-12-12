@@ -126,8 +126,7 @@ class DirDef : public Definition
    void setLevel();
    static DirDef *createNewDir(const char *path);
    static bool matchPath(const QByteArray &path, QStringList &l);
-   void addUsesDependency(DirDef *usedDir, FileDef *srcFd,
-                          FileDef *dstFd, bool inherited);
+   void addUsesDependency(DirDef *usedDir, FileDef *srcFd,FileDef *dstFd, bool inherited);
    void computeDependencies();
 
    DirList m_subdirs;
@@ -138,6 +137,7 @@ class DirDef : public Definition
    int m_dirCount;
    int m_level;
    DirDef *m_parent;
+
    QHash<QString, UsedDir> *m_usedDirs;
 };
 

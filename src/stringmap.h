@@ -53,6 +53,16 @@ class StringMap
    virtual ~StringMap() {            
    }
 
+   using iterator = typename QMap<QString, T>::iterator;
+   
+   iterator begin() {     
+      return m_dict.begin();      
+   }  
+
+   iterator end() {     
+      return m_dict.end();  
+   }  
+
    /*! Appends an element to the dictionary. The element is owned by the
     *  dictionary.
     *  \param key The unique key to use to quicky find the item later on.
@@ -222,17 +232,23 @@ class LongMap
  private:  
    QMap<long, T> m_dict;
    
- public:
-   /*! Create an ordered dictionary.   
-    *  \param caseSensitive indicated whether the keys should be sorted
-    *         in a case sensitive way.
-    */
+ public:  
    LongMap() {
    }
 
    /*! Destroys the dictionary */
    virtual ~LongMap() {            
    }
+
+   using iterator = typename QMap<long, T>::iterator;
+   
+   iterator begin() {     
+      return m_dict.begin();      
+   }  
+
+   iterator end() {     
+      return m_dict.end();  
+   }  
 
    /*! Appends an element to the dictionary. The element is owned by the
     *  dictionary.

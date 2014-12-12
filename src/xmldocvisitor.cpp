@@ -272,7 +272,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
       case DocInclude::IncWithLines: {
          m_t << "<programlisting>";
          QFileInfo cfi( inc->file() );
-         FileDef fd( cfi.dirPath().utf8(), cfi.fileName().utf8() );
+         FileDef fd( cfi.dirPath().toUtf8(), cfi.fileName().toUtf8() );
          Doxygen::parserManager->getParser(inc->extension())
          ->parseCode(m_ci, inc->context(),
                      inc->text(),

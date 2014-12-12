@@ -25,14 +25,6 @@
 #include <arguments.h>
 #include <groupdef.h>
 
-ClassList::ClassList() : QList<ClassDef>()
-{
-}
-
-ClassList::~ClassList()
-{
-}
-
 static int compItems(const ClassDef *c1, const ClassDef *c2)
 {
    static bool b = Config_getBool("SORT_BY_SCOPE_NAME");
@@ -43,25 +35,17 @@ static int compItems(const ClassDef *c1, const ClassDef *c2)
    }
 }
 
-int ClassList::compareValues(const ClassDef *item1, const ClassDef *item2) const
-{
-   return compItems(item1, item2);
-}
-
 int ClassSDict::compareValues(const ClassDef *item1, const ClassDef *item2) const
 {
    return compItems(item1, item2);
 }
 
-ClassListIterator::ClassListIterator(const ClassList &cllist) :
-   QListIterator<ClassDef>(cllist)
-{
-}
 
 bool ClassSDict::declVisible(const ClassDef::CompoundType *filter) const
 {
    static bool hideUndocClasses = Config_getBool("HIDE_UNDOC_CLASSES");
    static bool extractLocalClasses = Config_getBool("EXTRACT_LOCAL_CLASSES");
+
    if (count() > 0) {
       ClassSDict::Iterator sdi(*this);
       ClassDef *cd = 0;

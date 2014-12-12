@@ -39,6 +39,7 @@ class FileName : public FileList
 
  private:
    int compareValues(const FileDef *item1, const FileDef *item2) const;
+
    QByteArray name;
    QByteArray fName;
 };
@@ -49,28 +50,6 @@ class FileNameIterator : public QListIterator<FileDef *>
  public:
    FileNameIterator(const FileName &list);
 };
-
-
-/** Class representing a list of FileName objects. */
-class FileNameList : public QList<FileName>
-{
- public:
-   FileNameList();
-   ~FileNameList();
-
-   void generateDiskNames();
-
- private:
-   int compareValues(const FileName *item1, const FileName *item2) const;
-};
-
-/** Iterator for FileName objects in a FileNameList. */
-class FileNameListIterator : public QListIterator<FileName>
-{
- public:
-   FileNameListIterator( const FileNameList &list );
-};
-
 
 /** Unsorted dictionary of FileName objects. */
 class FileNameDict : public StringMap<QSharedPointer<FileName>>

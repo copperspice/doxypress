@@ -1175,7 +1175,7 @@ void writeJavascriptSearchIndex()
                SearchIndexList *sl;
 
                for (it.toFirst(); (sl = it.current()); ++it) { // for each letter
-                  t << QString( QChar( sl->letter() ) ).utf8();
+                  t << QString( QChar( sl->letter() ) ).toUtf8();
                }
                t << "\"";
                first = false;

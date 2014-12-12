@@ -2226,7 +2226,7 @@ QByteArray processMarkdown(const QByteArray &fileName, const int lineNr, Entry *
 
 QByteArray markdownFileNameToId(const QByteArray &fileName)
 {
-   QByteArray baseFn  = stripFromPath(QFileInfo(fileName).absFilePath().utf8());
+   QByteArray baseFn  = stripFromPath(QFileInfo(fileName).absFilePath().toUtf8());
    int i = baseFn.lastIndexOf('.');
    if (i != -1) {
       baseFn = baseFn.left(i);
@@ -2249,8 +2249,8 @@ void MarkdownFileParser::parseInput(const char *fileName,
    QByteArray docs = fileBuf;
    QByteArray id;
    QByteArray title = extractPageTitle(docs, id).trimmed();
-   QByteArray titleFn = QFileInfo(fileName).baseName().utf8();
-   QByteArray fn      = QFileInfo(fileName).fileName().utf8();
+   QByteArray titleFn = QFileInfo(fileName).baseName().toUtf8();
+   QByteArray fn      = QFileInfo(fileName).fileName().toUtf8();
    static QByteArray mdfileAsMainPage = Config_getString("USE_MDFILE_AS_MAINPAGE");
    if (id.isEmpty()) {
       id = markdownFileNameToId(fileName);

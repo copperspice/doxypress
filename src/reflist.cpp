@@ -80,7 +80,7 @@ RefItem *RefList::getRefItem(int itemId)
 }
 
 /*! Returns the first item in the dictionary or 0 if
- *  non is available.
+ *  none is available.
  *  Items are not sorted.
  */
 RefItem *RefList::getFirstRefItem()
@@ -88,7 +88,8 @@ RefItem *RefList::getFirstRefItem()
    RefItem *retval = 0;
 
    if (m_dictIterator)  {
-      retval = m_dictIterator->toFront();
+      m_dictIterator->toFront();
+      retval = m_dictIterator->value();
    }  
 
    return retval;
@@ -102,8 +103,8 @@ RefItem *RefList::getNextRefItem()
 {  
    RefItem *retval = 0;
 
-   if (m_dictIterator)  {
-      retval = m_dictIterator->operator++();
+   if (m_dictIterator && m_dictIterator->hasNext())  {     
+      retval = m_dictIterator->next();
    }  
 
    return retval;

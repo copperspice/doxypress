@@ -537,13 +537,13 @@ class DBusXMLHandler : public QXmlDefaultHandler
       const int type_idx(indexOf(attributes, "type"));
       const int named_type_idx(indexOf(attributes, "named-type"));
 
-      QByteArray type;
+      QString type;
 
       if (named_type_idx >= 0) {
-         type = attributes.value(named_type_idx).toUtf8();
+         type = attributes.value(named_type_idx);
 
          if (type.left(2) != "::") {
-            type = getCurrentScope(attributes.value(named_type_idx).toUtf8());
+            type = getCurrentScope(attributes.value(named_type_idx));
          } else {
             type = type.mid(2);
          }
@@ -595,7 +595,7 @@ class DBusXMLHandler : public QXmlDefaultHandler
       QByteArray scoped_name(getCurrentScope());
 
       if (m_namedTypeMap.contains(scoped_name)) {
-         DOC_ERROR(QString("Named type \"%1\" is already defined.").arg(scoped_name));
+         DOC_ERROR(QString("Named type \"%1\" is already defined.").arg(QString(scoped_name)));
          return;
       }
 
@@ -604,6 +604,7 @@ class DBusXMLHandler : public QXmlDefaultHandler
 
    QByteArray getCurrentScope(const QByteArray &type = QByteArray()) {
       QByteArray scoped_name;
+
       if (!m_scopeStack.isEmpty()) {
          scoped_name = m_scopeStack.getLast()->scope->name;
          scoped_name.append("::");
@@ -618,9 +619,9 @@ class DBusXMLHandler : public QXmlDefaultHandler
       return scoped_name;
    }
 
-   int indexOf(const QXmlAttributes &attributes, const QString &name,
-               const QString &type = "CDATA", const bool mandatory = true) {
+   int indexOf(const QXmlAttributes &attributes, const QString &name, const QString &type = "CDATA", const bool mandatory = true) {
       const int idx(attributes.index(name));
+
       if (idx < 0 || idx > attributes.length()) {
          return -1;
       }

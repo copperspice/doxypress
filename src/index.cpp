@@ -46,6 +46,7 @@
 #include <classlist.h>
 #include <namespacedef.h>
 #include <filename.h>
+#include <sortedlist.h>
 
 #define MAX_ITEMS_BEFORE_MULTIPAGE_INDEX 200
 #define MAX_ITEMS_BEFORE_QUICK_INDEX 30
@@ -324,7 +325,7 @@ void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part,
             LayoutDocEntryMemberDef *lmd = (LayoutDocEntryMemberDef *)lde;
             MemberList *ml = def->getMemberList(lmd->type);
             if (ml) {
-               MemberListIterator mi(*ml);
+               QListIterator<MemberDef> mi(*ml);
                MemberDef *md;
                for (mi.toFirst(); (md = mi.current()); ++mi) {
                   MemberList *enumList = md->enumFieldList();
@@ -348,7 +349,7 @@ void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part,
                      if (!isAnonymous) {
                         Doxygen::indexList->incContentsDepth();
                      }
-                     MemberListIterator emli(*enumList);
+                     QListIterator<MemberDef> emli(*enumList);
                      MemberDef *emd;
                      for (emli.toFirst(); (emd = emli.current()); ++emli) {
                         if (!hideUndocMembers || emd->hasDocumentation()) {
@@ -395,25 +396,21 @@ void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part,
 //----------------------------------------------------------------------------
 /*! Generates HTML Help tree of classes */
 
-static void writeClassTree(OutputList &ol, const BaseClassList *bcl, bool hideSuper, int level, FTVHelp *ftv, bool addToIndex)
+static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl, bool hideSuper, int level, FTVHelp *ftv, bool addToIndex)
 {
    if (bcl == 0) {
       return;
    }
-   BaseClassListIterator bcli(*bcl);
+  
    bool started = false;
-   for ( ; bcli.current() ; ++bcli) {
-      ClassDef *cd = bcli.current()->classDef;
-      if (cd->getLanguage() == SrcLangExt_VHDL && (VhdlDocGen::VhdlClasses)cd->protection() != VhdlDocGen::ENTITYCLASS) {
-         continue;
-      }
+   
+   for (auto item : *bcl) {
 
+      ClassDef *cd = item->classDef;
+      
       bool b;
-      if (cd->getLanguage() == SrcLangExt_VHDL) {
-         b = hasVisibleRoot(cd->subClasses());
-      } else {
-         b = hasVisibleRoot(cd->baseClasses());
-      }
+      b = hasVisibleRoot(cd->baseClasses());
+      
 
       if (cd->isVisibleInHierarchy() && b) { // hasVisibleRoot(cd->baseClasses()))
          if (!started) {
@@ -426,10 +423,11 @@ static void writeClassTree(OutputList &ol, const BaseClassList *bcl, bool hideSu
             }
             started = true;
          }
+
          ol.startIndexListItem();
-         //printf("Passed...\n");
+        
          bool hasChildren = !cd->visited && !hideSuper && classHasVisibleChildren(cd);
-         //printf("tree4: Has children %s: %d\n",cd->name().data(),hasChildren);
+        
          if (cd->isLinkable()) {
             //printf("Writing class %s\n",cd->displayName().data());
             ol.startIndexItem(cd->getReference(), cd->getOutputFileBase());
@@ -443,39 +441,39 @@ static void writeClassTree(OutputList &ol, const BaseClassList *bcl, bool hideSu
             if (addToIndex) {
                Doxygen::indexList->addContentsItem(hasChildren, cd->displayName(), cd->getReference(), cd->getOutputFileBase(), cd->anchor());
             }
-            if (ftv) {
-               if (cd->getLanguage() == SrcLangExt_VHDL) {
-                  ftv->addContentsItem(hasChildren, bcli.current()->usedName, cd->getReference(), cd->getOutputFileBase(), cd->anchor(), false, false, cd);
-               } else {
-                  ftv->addContentsItem(hasChildren, cd->displayName(), cd->getReference(), cd->getOutputFileBase(), cd->anchor(), false, false, cd);
-               }
+
+            if (ftv) {              
+               ftv->addContentsItem(hasChildren, cd->displayName(), cd->getReference(), cd->getOutputFileBase(), cd->anchor(), false, false, cd);               
             }
+
          } else {
             ol.startIndexItem(0, 0);
             ol.parseText(cd->name());
             ol.endIndexItem(0, 0);
+
             if (addToIndex) {
                Doxygen::indexList->addContentsItem(hasChildren, cd->displayName(), 0, 0, 0);
             }
+
             if (ftv) {
                ftv->addContentsItem(hasChildren, cd->displayName(), 0, 0, 0, false, false, cd);
             }
          }
+
          if (hasChildren) {
             //printf("Class %s at %p visited=%d\n",cd->name().data(),cd,cd->visited);
             bool wasVisited = cd->visited;
             cd->visited = true;
-            if (cd->getLanguage() == SrcLangExt_VHDL) {
-               writeClassTree(ol, cd->baseClasses(), wasVisited, level + 1, ftv, addToIndex);
-            } else {
-               writeClassTree(ol, cd->subClasses(), wasVisited, level + 1, ftv, addToIndex);
-            }
+           
+            writeClassTree(ol, cd->subClasses(), wasVisited, level + 1, ftv, addToIndex);            
          }
+
          ol.endIndexListItem();
       }
    }
    if (started) {
       endIndexHierarchy(ol, level);
+
       if (addToIndex) {
          Doxygen::indexList->decContentsDepth();
       }
@@ -720,15 +718,10 @@ static void writeClassTreeForList(OutputList &ol, ClassSDict *cl, bool &started,
       //              hasVisibleRoot(cd->baseClasses()),
       //              cd->isVisibleInHierarchy()
       //      );
-      bool b;
-      if (cd->getLanguage() == SrcLangExt_VHDL) {
-         if ((VhdlDocGen::VhdlClasses)cd->protection() != VhdlDocGen::ENTITYCLASS) {
-            continue;
-         }
-         b = !hasVisibleRoot(cd->subClasses());
-      } else {
-         b = !hasVisibleRoot(cd->baseClasses());
-      }
+
+      bool b;      
+      b = ! hasVisibleRoot(cd->baseClasses());
+      
 
       if (b) { //filter on root classes
          if (cd->isVisibleInHierarchy()) { // should it be visible
@@ -1087,14 +1080,14 @@ static void writeFileIndex(OutputList &ol)
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Html);
 
-   OutputNameDict outputNameDict(1009);
-   OutputNameList outputNameList;
-   outputNameList.setAutoDelete(true);
+   OutputNameDict outputNameDict();
+   SortedList<FileList *> outputNameList;
 
    if (Config_getBool("FULL_PATH_NAMES")) {
       // re-sort input files in (dir,file) output order instead of (file,dir) input order
       FileNameListIterator fnli(*Doxygen::inputNameList);
       FileName *fn;
+
       for (fnli.toFirst(); (fn = fnli.current()); ++fnli) {
          FileNameIterator fni(*fn);
          FileDef *fd;
@@ -1193,19 +1186,9 @@ void writeClassTree(ClassSDict *clDict, FTVHelp *ftv, bool addToIndex, bool glob
    if (clDict) {
       ClassSDict::Iterator cli(*clDict);
       ClassDef *cd;
-      for (; (cd = cli.current()); ++cli) {
-         if (cd->getLanguage() == SrcLangExt_VHDL) {
-            if ((VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::PACKAGECLASS ||
-                  (VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::PACKBODYCLASS
-               ) { // no architecture
-               continue;
-            }
-            if ((VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::ARCHITECTURECLASS) {
-               QByteArray n = cd->name();
-               cd->setClassName(n.data());
-            }
-         }
 
+      for (; (cd = cli.current()); ++cli) {
+        
          if (!globalOnly ||
                cd->getOuterScope() == 0 ||
                cd->getOuterScope() == Doxygen::globalScope
@@ -1433,13 +1416,7 @@ static void writeAnnotatedClassList(OutputList &ol)
    ClassDef *cd;
 
    for (cli.toFirst(); (cd = cli.current()); ++cli) {
-      if (cd->getLanguage() == SrcLangExt_VHDL &&
-            ((VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::PACKAGECLASS ||
-             (VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::PACKBODYCLASS)
-         ) { // no architecture
-         continue;
-      }
-
+     
       ol.pushGeneratorState();
       if (cd->isEmbeddedInOuterScope()) {
          ol.disable(OutputGenerator::Latex);
@@ -1448,11 +1425,7 @@ static void writeAnnotatedClassList(OutputList &ol)
       if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
          QByteArray type = cd->compoundTypeString();
          ol.startIndexKey();
-         if (cd->getLanguage() == SrcLangExt_VHDL) {
-            QByteArray prot = VhdlDocGen::getProtectionName((VhdlDocGen::VhdlClasses)cd->protection());
-            ol.docify(prot.data());
-            ol.writeString(" ");
-         }
+        
          ol.writeObjectLink(0, cd->getOutputFileBase(), cd->anchor(), cd->displayName());
          ol.endIndexKey();
          bool hasBrief = !cd->briefDescription().isEmpty();
@@ -1515,7 +1488,7 @@ static QByteArray letterToLabel(uint startLetter)
 //----------------------------------------------------------------------------
 
 /** Special class list where sorting takes IGNORE_PREFIX into account. */
-class PrefixIgnoreClassList : public ClassList
+class PrefixIgnoreClassList : public SortedList<ClassDef *>
 {
  public:
    typedef ClassDef ElementType;
@@ -1523,6 +1496,7 @@ class PrefixIgnoreClassList : public ClassList
    uint letter() const {
       return m_letter;
    }
+
  private:
    virtual int compareValue(const ClassDef *c1, const ClassDef *c2) const {
       QByteArray n1 = c1->className();
@@ -1619,12 +1593,9 @@ static void writeAlphabeticalClassList(OutputList &ol)
    ClassDef *cd;
    uint startLetter = 0;
    int headerItems = 0;
-   for (; (cd = cli.current()); ++cli) {
-      if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
-         if (cd->getLanguage() == SrcLangExt_VHDL && !((VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::ENTITYCLASS )) { // no architecture
-            continue;
-         }
 
+   for (; (cd = cli.current()); ++cli) {
+      if (cd->isLinkableInProject() && cd->templateMaster() == 0) {        
          int index = getPrefixIndex(cd->className());
          //printf("name=%s index=%d %d\n",cd->className().data(),index,cd->protection());
          startLetter = getUtf8CodeToUpper(cd->className(), index);
@@ -1645,7 +1616,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
 
       headerItems++;
       QByteArray li = letterToLabel(*pLetter);
-      QByteArray ls = QString(QChar(*pLetter)).utf8();
+      QByteArray ls = QString(QChar(*pLetter)).toUtf8();
       alphaLinks += (QByteArray)"<a class=\"qindex\" href=\"#letter_" +
                     li + "\">" +
                     ls + "</a>";
@@ -1673,23 +1644,18 @@ static void writeAlphabeticalClassList(OutputList &ol)
    // item less.
    //int icount=0;
    startLetter = 0;
-   for (cli.toFirst(); (cd = cli.current()); ++cli) {
-      if (cd->getLanguage() == SrcLangExt_VHDL && !((VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::ENTITYCLASS )) { // no architecture
-         continue;
-      }
 
+   for (cli.toFirst(); (cd = cli.current()); ++cli) {
+      
       if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
          int index = getPrefixIndex(cd->className());
          startLetter = getUtf8Code(cd->className(), index);
+         
          // Do some sorting again, since the classes are sorted by name with
          // prefix, which should be ignored really.
-         if (cd->getLanguage() == SrcLangExt_VHDL) {
-            if ((VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::ENTITYCLASS ) { // no architecture
-               classesByLetter.append(startLetter, cd);
-            }
-         } else {
-            classesByLetter.append(startLetter, cd);
-         }
+        
+         classesByLetter.append(startLetter, cd);
+         
       }
    }
 
@@ -1721,12 +1687,15 @@ static void writeAlphabeticalClassList(OutputList &ol)
       row++;
       tableRows->append(new AlphaIndexTableCell(row, col, 0, (ClassDef *)0x8));
       row++;
-      ClassListIterator cit(*cl);
+
+      QListIterator<ClassDef *> cit(*cl);
       cit.toFirst();
+
       ClassDef *cd = cit.current();
       ++cit;
       tableRows->append(new AlphaIndexTableCell(row, col, 0, cd));
       row++;
+
       NEXT_ROW();
 
       for (; (cd = cit.current()); ++cit) {
@@ -1770,7 +1739,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
                      ol.writeString("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">"
                                     "<tr>"
                                     "<td><div class=\"ah\">&#160;&#160;");
-                     ol.writeString(QString(QChar(cell->letter())).utf8());
+                     ol.writeString(QString(QChar(cell->letter())).toUtf8());
                      ol.writeString(         "&#160;&#160;</div>"
                                              "</td>"
                                              "</tr>"
@@ -2032,7 +2001,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
                   ol.endItemList();
                }
                QByteArray cs = letterToLabel(ml->letter());
-               QByteArray cl = QString(QChar(ml->letter())).utf8();
+               QByteArray cl = QString(QChar(ml->letter())).toUtf8();
                QByteArray anchor = (QByteArray)"index_" + cs;
                QByteArray title = (QByteArray)"- " + cl + " -";
                ol.startSection(anchor, title, SectionInfo::Subsection);
@@ -2250,7 +2219,7 @@ static void writeQuickMemberIndex(OutputList &ol,
    for (it.toFirst(); (ml = it.current()); ++it) {
       uint i = ml->letter();
       QByteArray is = letterToLabel(i);
-      QByteArray ci = QString(QChar(i)).utf8();
+      QByteArray ci = QString(QChar(i)).toUtf8();
       QByteArray anchor;
       QByteArray extension = Doxygen::htmlFileExtension;
       if (!multiPage) {
@@ -2280,12 +2249,11 @@ struct CmhlInfo {
 static const CmhlInfo *getCmhlInfo(int hl)
 {
    static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
-   static bool vhdlOpt    = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
+   
    static CmhlInfo cmhlInfo[] = {
       CmhlInfo("functions",     theTranslator->trAll()),
       CmhlInfo("functions_func",
-      fortranOpt ? theTranslator->trSubprograms() :
-      vhdlOpt    ? VhdlDocGen::trFunctionAndProc() :
+      fortranOpt ? theTranslator->trSubprograms() :      
       theTranslator->trFunctions()),
       CmhlInfo("functions_vars", theTranslator->trVariables()),
       CmhlInfo("functions_type", theTranslator->trTypedefs()),
@@ -2342,7 +2310,7 @@ static void writeClassMemberIndexFiltered(OutputList &ol, ClassMemberHighlight h
          if (!first) {
             fileName += "_" + letterToLabel(page);
          }
-         QByteArray cs = QString(QChar(page)).utf8();
+         QByteArray cs = QString(QChar(page)).toUtf8();
          if (addToIndex) {
             Doxygen::indexList->addContentsItem(false, cs, 0, fileName, 0, false, true);
          }
@@ -2448,12 +2416,11 @@ struct FmhlInfo {
 static const FmhlInfo *getFmhlInfo(int hl)
 {
    static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
-   static bool vhdlOpt    = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
+  
    static FmhlInfo fmhlInfo[] = {
       FmhlInfo("globals",     theTranslator->trAll()),
       FmhlInfo("globals_func",
-      fortranOpt ? theTranslator->trSubprograms()  :
-      vhdlOpt    ? VhdlDocGen::trFunctionAndProc() :
+      fortranOpt ? theTranslator->trSubprograms()  :      
       theTranslator->trFunctions()),
       FmhlInfo("globals_vars", theTranslator->trVariables()),
       FmhlInfo("globals_type", theTranslator->trTypedefs()),
@@ -2504,7 +2471,7 @@ static void writeFileMemberIndexFiltered(OutputList &ol, FileMemberHighlight hl)
          if (!first) {
             fileName += "_" + letterToLabel(page);
          }
-         QByteArray cs = QString(QChar(page)).utf8();
+         QByteArray cs = QString(QChar(page)).toUtf8();
          if (addToIndex) {
             Doxygen::indexList->addContentsItem(false, cs, 0, fileName, 0, false, true);
          }
@@ -2603,12 +2570,11 @@ struct NmhlInfo {
 static const NmhlInfo *getNmhlInfo(int hl)
 {
    static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
-   static bool vhdlOpt    = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
+   
    static NmhlInfo nmhlInfo[] = {
       NmhlInfo("namespacemembers",     theTranslator->trAll()),
       NmhlInfo("namespacemembers_func",
-      fortranOpt ? theTranslator->trSubprograms()  :
-      vhdlOpt    ? VhdlDocGen::trFunctionAndProc() :
+      fortranOpt ? theTranslator->trSubprograms()  :     
       theTranslator->trFunctions()),
       NmhlInfo("namespacemembers_vars", theTranslator->trVariables()),
       NmhlInfo("namespacemembers_type", theTranslator->trTypedefs()),
@@ -2662,7 +2628,7 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol,
          if (!first) {
             fileName += "_" + letterToLabel(page);
          }
-         QByteArray cs = QString(QChar(page)).utf8();
+         QByteArray cs = QString(QChar(page)).toUtf8();
          if (addToIndex) {
             Doxygen::indexList->addContentsItem(false, cs, 0, fileName, 0, false, true);
          }
@@ -3106,7 +3072,7 @@ static void writeGroupTreeNode(OutputList &ol, GroupDef *gd, int level, FTVHelp 
             LayoutDocEntryMemberDef *lmd = (LayoutDocEntryMemberDef *)lde;
             MemberList *ml = gd->getMemberList(lmd->type);
             if (ml) {
-               MemberListIterator mi(*ml);
+               QListIterator<MemberDef> mi(*ml);
                MemberDef *md;
                for (mi.toFirst(); (md = mi.current()); ++mi) {
                   MemberList *enumList = md->enumFieldList();
@@ -3118,7 +3084,7 @@ static void writeGroupTreeNode(OutputList &ol, GroupDef *gd, int level, FTVHelp 
                   }
                   if (isDir) {
                      Doxygen::indexList->incContentsDepth();
-                     MemberListIterator emli(*enumList);
+                     QListIterator<MemberDef> emli(*enumList);
                      MemberDef *emd;
                      for (emli.toFirst(); (emd = emli.current()); ++emli) {
                         if (emd->isVisible()) {
@@ -3641,21 +3607,23 @@ static void writeIndex(OutputList &ol)
       //  ol.parseText(/*projPrefix+*/ theTranslator->trPageIndex());
       //  ol.endIndexSection(isPageIndex);
       //}
+
       if (documentedGroups > 0) {
          ol.startIndexSection(isModuleIndex);
          ol.parseText(/*projPrefix+*/ theTranslator->trModuleIndex());
          ol.endIndexSection(isModuleIndex);
       }
+
       if (documentedNamespaces > 0) {
          ol.startIndexSection(isNamespaceIndex);
          ol.parseText(/*projPrefix+*/(fortranOpt ? theTranslator->trModulesIndex() : theTranslator->trNamespaceIndex()));
          ol.endIndexSection(isNamespaceIndex);
       }
+
       if (hierarchyClasses > 0) {
          ol.startIndexSection(isClassHierarchyIndex);
          ol.parseText(/*projPrefix+*/
-            (fortranOpt ? theTranslator->trCompoundIndexFortran() :
-             vhdlOpt    ? VhdlDocGen::trDesignUnitIndex()         :
+            (fortranOpt ? theTranslator->trCompoundIndexFortran() :             
              theTranslator->trHierarchicalIndex()
             ));
          ol.endIndexSection(isClassHierarchyIndex);
@@ -3663,8 +3631,7 @@ static void writeIndex(OutputList &ol)
       if (annotatedClassesPrinted > 0) {
          ol.startIndexSection(isCompoundIndex);
          ol.parseText(/*projPrefix+*/
-            (fortranOpt ? theTranslator->trCompoundIndexFortran() :
-             vhdlOpt ? VhdlDocGen::trDesignUnitIndex()         :
+            (fortranOpt ? theTranslator->trCompoundIndexFortran() :             
              theTranslator->trCompoundIndex()
             ));
          ol.endIndexSection(isCompoundIndex);
@@ -3721,7 +3688,7 @@ static void writeIndex(OutputList &ol)
    ol.popGeneratorState();
 }
 
-static QArray<bool> indexWritten;
+static QVector<bool> indexWritten;
 
 static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntry> &entries)
 {

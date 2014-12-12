@@ -2137,7 +2137,7 @@ void setAnchors(MemberList *ml)
    if (ml == 0) {
       return;
    }
-   MemberListIterator mli(*ml);
+   QListIterator<MemberDef> mli(*ml);
    MemberDef *md;
    for (; (md = mli.current()); ++mli) {
       if (!md->isReference()) {
@@ -2583,7 +2583,7 @@ static QByteArray trimScope(const QByteArray &name, const QByteArray &s)
 }
 #endif
 
-void trimBaseClassScope(BaseClassList *bcl, QByteArray &s, int level = 0)
+void trimBaseClassScope(SortedList<BaseClassDef *> *bcl, QByteArray &s, int level = 0)
 {
    //printf("trimBaseClassScope level=%d `%s'\n",level,s.data());
    BaseClassListIterator bcli(*bcl);
@@ -3578,7 +3578,7 @@ static void findMembersWithSpecificName(MemberName *mn,
 {
    //printf("  Function with global scope name `%s' args=`%s'\n",
    //       mn->memberName(),args);
-   MemberListIterator mli(*mn);
+   QListIterator<MemberDef> mli(*mn);
    MemberDef *md;
    for (mli.toFirst(); (md = mli.current()); ++mli) {
       FileDef  *fd = md->getFileDef();
@@ -3713,7 +3713,7 @@ bool getDefs(const QByteArray &scName,
                fcd->isLinkable()
             ) {
             //printf("  Found fcd=%p\n",fcd);
-            MemberListIterator mmli(*mn);
+            QListIterator<MemberDef> mmli(*mn);
             MemberDef *mmd;
             int mdist = maxInheritanceDepth;
             ArgumentList *argList = 0;
@@ -3787,7 +3787,7 @@ bool getDefs(const QByteArray &scName,
             //printf("Found scoped enum!\n");
             MemberList *tml = tmd->enumFieldList();
             if (tml) {
-               MemberListIterator tmi(*tml);
+               QListIterator<MemberDef> tmi(*tml);
                MemberDef *emd;
                for (; (emd = tmi.current()); ++tmi) {
                   if (emd->localName() == mName) {
@@ -3815,7 +3815,7 @@ bool getDefs(const QByteArray &scName,
    }
    if (mn && scopeName.isEmpty() && mScope.isEmpty()) { // Maybe a related function?
       //printf("Global symbol\n");
-      MemberListIterator mmli(*mn);
+      QListIterator<MemberDef> mmli(*mn);
       MemberDef *mmd, *fuzzy_mmd = 0;
       ArgumentList *argList = 0;
       bool hasEmptyArgs = args && qstrcmp(args, "()") == 0;
@@ -3887,7 +3887,7 @@ bool getDefs(const QByteArray &scName,
             //printf("Symbol inside existing namespace `%s' count=%d\n",
             //    namespaceName.data(),mn->count());
             bool found = false;
-            MemberListIterator mmli(*mn);
+            QListIterator<MemberDef> mmli(*mn);
             MemberDef *mmd;
             for (mmli.toFirst(); ((mmd = mmli.current()) && !found); ++mmli) {
                //printf("mmd->getNamespaceDef()=%p fnd=%p\n",
@@ -3960,7 +3960,7 @@ bool getDefs(const QByteArray &scName,
          } else {
             //printf("not a namespace\n");
             bool found = false;
-            MemberListIterator mmli(*mn);
+            QListIterator<MemberDef> mmli(*mn);
             MemberDef *mmd;
             for (mmli.toFirst(); ((mmd = mmli.current()) && !found); ++mmli) {
                MemberDef *tmd = mmd->getEnumScope();
@@ -4004,11 +4004,14 @@ bool getDefs(const QByteArray &scName,
             // search again without strict static checking
             findMembersWithSpecificName(mn, args, false, currentFile, checkCV, forceTagFile, members);
          }
+
          //printf("found %d members\n",members.count());
+
          if (members.count() != 1 && args && !qstrcmp(args, "()")) {
             // no exact match found, but if args="()" an arbitrary
             // member will do
-            MemberListIterator mni(*mn);
+
+            QListIterator<MemberDef> mni(*mn);
             for (mni.toLast(); (md = mni.current()); --mni) {
                //printf("Found member `%s'\n",md->name().data());
                //printf("member is linkable md->name()=`%s'\n",md->name().data());
@@ -4473,7 +4476,7 @@ bool resolveLink(/* in */ const char *scName,
       *resContext = nd;
       return true;
 
-   } else if ((dir = Doxygen::directories->find(QFileInfo(linkRef).absFilePath().utf8() + "/")) && dir->isLinkable()) { 
+   } else if ((dir = Doxygen::directories->find(QFileInfo(linkRef).absFilePath().toUtf8() + "/")) && dir->isLinkable()) { 
       // TODO: make this location independent like filedefs
 
       *resContext = dir;
@@ -4617,7 +4620,7 @@ FileDef *findFileDef(const FileNameDict *fnDict, const char *n, bool &ambig)
       cachedResult = new FindFileCacheElem(0, false);
    }
 
-   QByteArray name = QDir::cleanDirPath(n).utf8();
+   QByteArray name = QDir::cleanDirPath(n).toUtf8();
    QByteArray path;
    int slashPos;
    FileName *fn;
@@ -4796,7 +4799,7 @@ int getPrefixIndex(const QByteArray &name)
 
 //----------------------------------------------------------------------------
 
-static void initBaseClassHierarchy(BaseClassList *bcl)
+static void initBaseClassHierarchy(SortedList<BaseClassDef *> *bcl)
 {
    if (bcl == 0) {
       return;
@@ -4814,7 +4817,7 @@ static void initBaseClassHierarchy(BaseClassList *bcl)
 
 bool classHasVisibleChildren(ClassDef *cd)
 {
-   BaseClassList *bcl;
+   SortedList<BaseClassDef *> *bcl;
 
    if (cd->getLanguage() == SrcLangExt_VHDL) { // reverse baseClass/subClass relation
       if (cd->baseClasses() == 0) {
@@ -4852,7 +4855,7 @@ void initClassHierarchy(ClassSDict *cl)
 
 //----------------------------------------------------------------------------
 
-bool hasVisibleRoot(BaseClassList *bcl)
+bool hasVisibleRoot(SortedList<BaseClassDef *> *bcl)
 {
    if (bcl) {
       BaseClassListIterator bcli(*bcl);
@@ -5526,14 +5529,14 @@ void addMembersToMemberGroup(MemberList *ml,
    if (ml == 0) {
       return;
    }
-   MemberListIterator mli(*ml);
+   QListIterator<MemberDef> mli(*ml);
    MemberDef *md;
    uint index;
    for (index = 0; (md = mli.current());) {
       if (md->isEnumerate()) { // insert enum value of this enum into groups
          MemberList *fmdl = md->enumFieldList();
          if (fmdl != 0) {
-            MemberListIterator fmli(*fmdl);
+            QListIterator<MemberDef> fmli(*fmdl);
             MemberDef *fmd;
             for (fmli.toFirst(); (fmd = fmli.current()); ++fmli) {
                int groupId = fmd->getMemberGroupId();

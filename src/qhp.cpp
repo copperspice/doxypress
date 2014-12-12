@@ -103,10 +103,10 @@ void Qhp::initialize()
       const char *tagAttributes[] = { "name", filterName, 0 };
       m_doc.open("customFilter", tagAttributes);
 
-      QStringList customFilterAttributes = QStringList::split(QChar(' '), Config_getString("QHP_CUST_FILTER_ATTRS"));
+      QStringList customFilterAttributes = QString(Config_getString("QHP_CUST_FILTER_ATTRS")).split(QChar(' '));
 
       for (int i = 0; i < (int)customFilterAttributes.count(); i++) {
-         m_doc.openCloseContent("filterAttribute", customFilterAttributes[i].utf8());
+         m_doc.openCloseContent("filterAttribute", customFilterAttributes[i].toUtf8());
       }
 
       m_doc.close("customFilter");
@@ -123,7 +123,7 @@ void Qhp::initialize()
    }
 
    for (int i = 0; i < (int)sectionFilterAttributes.count(); i++) {
-      m_doc.openCloseContent("filterAttribute", sectionFilterAttributes[i].utf8());
+      m_doc.openCloseContent("filterAttribute", sectionFilterAttributes[i].toUtf8());
    }
 
    m_toc.open("toc");

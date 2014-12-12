@@ -106,7 +106,7 @@ void EclipseHelp::finalize()
    m_tocstream << "</toc>" << endl;
 
    // -- close the content file
-   m_tocstream.unsetDevice();
+   m_tocstream.setDevice(0);
    m_tocfile->close();
    delete m_tocfile;
    m_tocfile = 0;

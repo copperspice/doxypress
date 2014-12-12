@@ -50,6 +50,8 @@ class MemberDef : public Definition
              Relationship related, MemberType t, const ArgumentList *tal,
              const ArgumentList *al);
 
+   MemberDef(const MemberDef &);  
+
    ~MemberDef();
 
    DefType definitionType() const {
@@ -192,8 +194,9 @@ class MemberDef : public Definition
    // output info
    bool isLinkableInProject() const;
    bool isLinkable() const;
-   bool hasDocumentation() const;  // overrides hasDocumentation in definition.h
-   //bool hasUserDocumentation() const; // overrides hasUserDocumentation
+
+   bool hasDocumentation() const override;
+  
    bool isBriefSectionVisible() const;
    bool isDetailedSectionVisible(bool inGroup, bool inFile) const;
    bool isDetailedSectionLinkable() const;
@@ -203,11 +206,7 @@ class MemberDef : public Definition
    MemberDef *reimplements() const;
    MemberList *reimplementedBy() const;
    bool isReimplementedBy(ClassDef *cd) const;
-
-   //int inbodyLine() const;
-   //QByteArray inbodyFile() const;
-   //const QByteArray &inbodyDocumentation() const;
-
+ 
    ClassDef *relatedAlso() const;
 
    bool hasDocumentedEnumValues() const;
@@ -288,9 +287,10 @@ class MemberDef : public Definition
    void setMaxInitLines(int lines);
    void setMemberClass(ClassDef *cd);
    void setSectionList(Definition *d, MemberList *sl);
+
    void setGroupDef(GroupDef *gd, Grouping::GroupPri_t pri,
-                    const QByteArray &fileName, int startLine, bool hasDocs,
-                    MemberDef *member = 0);
+                    const QByteArray &fileName, int startLine, bool hasDocs, MemberDef *member = 0);
+
    void setExplicitExternal(bool b);
    void setReadAccessor(const char *r);
    void setWriteAccessor(const char *w);
@@ -380,14 +380,11 @@ class MemberDef : public Definition
    //-----------------------------------------------------------------------------------
 
    // output generation
-   void writeDeclaration(OutputList &ol,
-                         ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
+   void writeDeclaration(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
                          bool inGroup, ClassDef *inheritFrom = 0, const char *inheritId = 0);
 
-   void writeDocumentation(MemberList *ml, OutputList &ol,
-                           const char *scopeName, Definition *container,
-                           bool inGroup, bool showEnumValues = false, bool
-                           showInline = false);
+   void writeDocumentation(MemberList *ml, OutputList &ol, const char *scopeName, Definition *container,
+                           bool inGroup, bool showEnumValues = false, bool showInline = false);
 
    void writeMemberDocSimple(OutputList &ol, Definition *container);
    void writeEnumDeclaration(OutputList &typeDecl, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd);
@@ -428,14 +425,14 @@ class MemberDef : public Definition
    void _addToSearchIndex();
 
    static int s_indentLevel;
-  
-   // disable copying of member defs
-   MemberDef(const MemberDef &);
-   MemberDef &operator=(const MemberDef &);
-
+    
    void writeLink(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd, bool onlyText = false);
 
-   MemberDefImpl *m_impl;
+   // unsure if this is needed
+   MemberDef &operator=(const MemberDef &);
+
+   QScopedPointer<MemberDefImpl> m_impl;
+
    uchar m_isLinkableCached;    // 0 = not cached, 1=false, 2=true
    uchar m_isConstructorCached; // 0 = not cached, 1=false, 2=true
    uchar m_isDestructorCached;  // 0 = not cached, 1=false, 2=true

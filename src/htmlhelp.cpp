@@ -68,10 +68,12 @@ class HtmlHelpIndex
  public:
    HtmlHelpIndex(HtmlHelp *help);
    ~HtmlHelpIndex();
+
    void addItem(const char *first, const char *second,
                 const char *url, const char *anchor,
                 bool hasLink, bool reversed);
    void writeFields(FTextStream &t);
+
  private:
    IndexFieldSDict *dict;
    HtmlHelp *m_help;
@@ -80,8 +82,7 @@ class HtmlHelpIndex
 /*! Constructs a new HtmlHelp index */
 HtmlHelpIndex::HtmlHelpIndex(HtmlHelp *help) : m_help(help)
 {
-   dict = new IndexFieldSDict;
-   dict->setAutoDelete(true);
+   dict = new IndexFieldSDict;   
 }
 
 /*! Destroys the HtmlHelp index */
@@ -108,15 +109,20 @@ void HtmlHelpIndex::addItem(const char *level1, const char *level2,
                             bool reversed)
 {
    QByteArray key = level1;
+
    if (level2) {
       key += (QByteArray)"?" + level2;
    }
-   if (key.find(QRegExp("@[0-9]+")) != -1) { // skip anonymous stuff
+
+   if (key.indexOf(QRegExp("@[0-9]+")) != -1) { // skip anonymous stuff
       return;
    }
-   if (dict->find(key) == 0) { // new key
+
+   if (dict->find(key) == 0) { 
+      // new key
       //printf(">>>>>>>>> HtmlHelpIndex::addItem(%s,%s,%s,%s)\n",
       //      level1,level2,url,anchor);
+
       IndexField *f = new IndexField;
       f->name     = key;
       f->url      = url;
@@ -165,18 +171,25 @@ static QByteArray field2URL(const IndexField *f, bool checkReversed)
 void HtmlHelpIndex::writeFields(FTextStream &t)
 {
    dict->sort();
+
    IndexFieldSDict::Iterator ifli(*dict);
    IndexField *f;
+
    QByteArray lastLevel1;
    bool level2Started = false;
+
    for (; (f = ifli.current()); ++ifli) {
       QByteArray level1, level2;
       int i;
-      if ((i = f->name.find('?')) != -1) {
+
+      if ((i = f->name.indexOf('?')) != -1) {
+
          level1 = f->name.left(i);
          level2 = f->name.right(f->name.length() - i - 1);
+
       } else {
          level1  = f->name;
+
       }
 
       if (level1 != lastLevel1) {
@@ -527,7 +540,7 @@ void HtmlHelp::finalize()
    cts << "</UL>\n";
    cts << "</BODY>\n";
    cts << "</HTML>\n";
-   cts.unsetDevice();
+   cts.setDevice(0);
    cf->close();
    delete cf;
 
@@ -537,7 +550,7 @@ void HtmlHelp::finalize()
    kts << "</UL>\n";
    kts << "</BODY>\n";
    kts << "</HTML>\n";
-   kts.unsetDevice();
+   kts.setDevice(0);
    kf->close();
    delete kf;
 

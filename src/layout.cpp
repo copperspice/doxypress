@@ -51,7 +51,7 @@
 
 static bool elemIsVisible(const QXmlAttributes &attrib, bool defVal = true)
 {
-   QByteArray visible = attrib.value("visible").utf8();
+   QByteArray visible = attrib.value("visible").toUtf8();
 
    if (visible.isEmpty()) {
       return defVal;
@@ -807,7 +807,7 @@ class LayoutParser : public QXmlDefaultHandler
    void startSectionEntry(LayoutDocEntry::Kind k, const QXmlAttributes &attrib,
                           const QByteArray &title) {
       bool isVisible = elemIsVisible(attrib);
-      QByteArray userTitle = attrib.value("title").utf8();
+      QByteArray userTitle = attrib.value("title").toUtf8();
       //printf("startSectionEntry: title='%s' userTitle='%s'\n",
       //    title.data(),userTitle.data());
       if (userTitle.isEmpty()) {
@@ -824,8 +824,8 @@ class LayoutParser : public QXmlDefaultHandler
                              const QByteArray &title, const QByteArray &subscript) {
       //QByteArray visible = convertToQByteArray(attrib.value("visible"));
       //bool isVisible = visible.isEmpty() || (visible!="no" && visible!="0");
-      QByteArray userTitle     = attrib.value("title").utf8();
-      QByteArray userSubscript = attrib.value("subtitle").utf8();
+      QByteArray userTitle     = attrib.value("title").toUtf8();
+      QByteArray userSubscript = attrib.value("subtitle").toUtf8();
       if (userTitle.isEmpty()) {
          userTitle     = title;
       }
@@ -841,7 +841,7 @@ class LayoutParser : public QXmlDefaultHandler
 
    void startMemberDefEntry(const QXmlAttributes &attrib, MemberListType type,
                             const QByteArray &title, const QByteArray &) {
-      QByteArray userTitle = attrib.value("title").utf8();
+      QByteArray userTitle = attrib.value("title").toUtf8();
       if (userTitle.isEmpty()) {
          userTitle = title;
       }
@@ -1064,7 +1064,7 @@ class LayoutParser : public QXmlDefaultHandler
          return;
       }
       QByteArray baseFile = mapping[i].baseFile;
-      QByteArray title = attrib.value("title").utf8();
+      QByteArray title = attrib.value("title").toUtf8();
       bool isVisible = elemIsVisible(attrib);
       if (title.isEmpty()) { // use default title
          title = mapping[i].mainName; // use title for main row
@@ -1073,11 +1073,11 @@ class LayoutParser : public QXmlDefaultHandler
             // this is mainly done to get compatible naming with older versions.
          }
       }
-      QByteArray intro = attrib.value("intro").utf8();
+      QByteArray intro = attrib.value("intro").toUtf8();
       if (intro.isEmpty()) { // use default intro text
          intro = mapping[i].intro;
       }
-      QByteArray url = attrib.value("url").utf8();
+      QByteArray url = attrib.value("url").toUtf8();
       if (mapping[i].kind == LayoutNavEntry::User && !url.isEmpty()) {
          baseFile = url;
       } else if (kind == LayoutNavEntry::UserGroup) {
@@ -1196,7 +1196,7 @@ class LayoutParser : public QXmlDefaultHandler
    bool startElement( const QString &, const QString &,
                       const QString &name, const QXmlAttributes &attrib ) {
       //printf("startElement [%s]::[%s]\n",m_scope.data(),name.data());
-      StartElementHandler *handler = m_sHandler[m_scope + name.utf8()];
+      StartElementHandler *handler = m_sHandler[m_scope + name.toUtf8()];
       if (handler) {
          (*handler)(attrib);
       } else {
@@ -1208,11 +1208,11 @@ class LayoutParser : public QXmlDefaultHandler
    bool endElement( const QString &, const QString &, const QString &name ) {
       //printf("endElement [%s]::[%s]\n",m_scope.data(),name.data());
       EndElementHandler *handler;
-      if (!m_scope.isEmpty() && m_scope.right(name.length() + 1) == name.utf8() + "/") {
+      if (!m_scope.isEmpty() && m_scope.right(name.length() + 1) == name.toUtf8() + "/") {
          // element ends current scope
          handler = m_eHandler[m_scope.left(m_scope.length() - 1)];
       } else { // continue with current scope
-         handler = m_eHandler[m_scope + name.utf8()];
+         handler = m_eHandler[m_scope + name.toUtf8()];
       }
       if (handler) {
          (*handler)();

@@ -23,15 +23,14 @@
 
 #include <index.h>
 #include <definition.h>
-#include <stringmap.h>
 #include <memberlist.h>
+#include <stringmap.h>
 
 class MemberList;
 class FileDef;
 class FileList;
 class ClassSDict;
 class ClassDef;
-class ClassList;
 class MemberDef;
 class OutputList;
 class NamespaceDef;
@@ -322,22 +321,6 @@ class FileList : public QList<FileDef *>
    }
 
    QByteArray m_pathName;
-};
-
-// **
-class OutputNameList : public QList<FileList>
-{
- public:
-   OutputNameList() : QList<FileList>() 
-   {}
-
-   ~OutputNameList() 
-   {}
-
- private:
-   int compareValues(const FileList *fl1, const FileList *fl2) const {
-      return qstricmp(fl1->path(), fl2->path());
-   }
 };
 
 class OutputNameDict : public QHash<QString, FileList>

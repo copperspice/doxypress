@@ -410,7 +410,7 @@ void RTFDocVisitor::visit(DocInclude *inc)
          m_t << "\\par" << endl;
          m_t << rtf_Style_Reset << getStyle("CodeExample");
          QFileInfo cfi( inc->file() );
-         FileDef fd( cfi.dirPath().utf8(), cfi.fileName().utf8() );
+         FileDef fd( cfi.dirPath().toUtf8(), cfi.fileName().toUtf8() );
          Doxygen::parserManager->getParser(inc->extension())
          ->parseCode(m_ci, inc->context(),
                      inc->text(),

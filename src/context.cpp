@@ -529,9 +529,7 @@ class TranslateContext::Private : public PropertyMapper
       return theTranslator->trMainPage();
    }
    TemplateVariant classes() const {
-      return theTranslator->trClasses();
-      // TODO: VHDL: trVhdlType(VhdlDocGen::ENTITY,false)
-      // TODO: Fortran: trDataTypes()
+      return theTranslator->trClasses();     
    }
    TemplateVariant classList() const {
       return theTranslator->trCompoundList();
@@ -729,11 +727,14 @@ class TranslateContext::Private : public PropertyMapper
    }
    TemplateVariant functions() const {
       static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
-      static bool vhdlOpt    = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
-      return fortranOpt ? theTranslator->trSubprograms() :
-             vhdlOpt    ? VhdlDocGen::trFunctionAndProc() :
-             theTranslator->trFunctions();
+      
+      if (fortranOpt) {
+         return theTranslator->trSubprograms(); 
+      } else {             
+         return theTranslator->trFunctions();
+      }
    }
+
    TemplateVariant variables() const {
       return theTranslator->trVariables();
    }
@@ -1718,7 +1719,7 @@ class ClassContext::Private : public DefinitionContext<ClassContext::Private>
    void addMembers(ClassDef *cd, MemberListType lt) const {
       MemberList *ml = cd->getMemberList(lt);
       if (ml) {
-         MemberListIterator li(*ml);
+         QListIterator<MemberDef> li(*ml);
          const MemberDef *md;
          for (li.toFirst(); (md = li.current()); ++li) {
             if (md->isBriefSectionVisible()) {
@@ -2034,10 +2035,9 @@ class NamespaceContext::Private : public DefinitionContext<NamespaceContext::Pri
       QByteArray title = theTranslator->trFunctions();
       SrcLangExt lang = m_namespaceDef->getLanguage();
       if (lang == SrcLangExt_Fortran) {
-         title = theTranslator->trSubprograms();
-      } else if (lang == SrcLangExt_VHDL) {
-         title = VhdlDocGen::trFunctionAndProc();
+         title = theTranslator->trSubprograms();      
       }
+
       return getMemberList(m_cache.functions, MemberListType_decFuncMembers, title);
    }
 
@@ -3386,7 +3386,7 @@ class MemberContext::Private : public DefinitionContext<MemberContext::Private>
          MemberList *ml = m_memberDef->reimplementedBy();
          m_cache.implementedBy.reset(TemplateList::alloc());
          if (ml) {
-            MemberListIterator mli(*ml);
+            QListIterator<MemberDef> mli(*ml);
             MemberDef *md = 0;
             for (mli.toFirst(); (md = mli.current()); ++mli) {
                ClassDef *cd = md->getClassDef();
@@ -3404,7 +3404,7 @@ class MemberContext::Private : public DefinitionContext<MemberContext::Private>
          m_cache.reimplementedBy.reset(TemplateList::alloc());
          MemberList *ml = m_memberDef->reimplementedBy();
          if (ml) {
-            MemberListIterator mli(*ml);
+            QListIterator<MemberDef> mli(*ml);
             MemberDef *md = 0;
             for (mli.toFirst(); (md = mli.current()); ++mli) {
                ClassDef *cd = md->getClassDef();
@@ -4058,13 +4058,7 @@ class ClassListContext::Private : public GenericNodeListContext
       ClassDef *cd;
 
       for (cli.toFirst() ; (cd = cli.current()) ; ++cli ) {
-         if (cd->getLanguage() == SrcLangExt_VHDL &&
-               ((VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::PACKAGECLASS ||
-                (VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::PACKBODYCLASS) ) {
-            // no architecture
-            continue;
-         }
-
+        
          if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
             append(ClassContext::alloc(cd));
          }
@@ -4120,13 +4114,9 @@ class ClassIndexContext::Private : public PropertyMapper
          if (Doxygen::classSDict) {
             ClassSDict::Iterator cli(*Doxygen::classSDict);
             ClassDef *cd;
+
             for (cli.toFirst() ; (cd = cli.current()) ; ++cli ) {
-               if (cd->getLanguage() == SrcLangExt_VHDL &&
-                     ((VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::PACKAGECLASS ||
-                      (VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::PACKBODYCLASS)
-                  ) { // no architecture
-                  continue;
-               }
+               
                if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
                   classList->append(ClassContext::alloc(cd));
                }
@@ -4148,13 +4138,13 @@ class ClassIndexContext::Private : public PropertyMapper
    TemplateVariant subhighlight() const {
       return "classindex";
    }
+
    TemplateVariant title() const {
       static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
-      static bool vhdlOpt    = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
+      
       if (fortranOpt) {
          return theTranslator->trDataTypes();
-      } else if (vhdlOpt) {
-         return VhdlDocGen::trDesignUnits();
+ 
       } else {
          return theTranslator->trCompoundIndex();
       }
@@ -4198,20 +4188,18 @@ class ClassInheritanceNodeContext::Private : public PropertyMapper
       //%% Class class: class info
       addProperty("class", this, &Private::getClass);
    }
-   void addChildren(const BaseClassList *bcl, bool hideSuper) {
+
+   void addChildren(const SortedList<BaseClassDef *> *bcl, bool hideSuper) {
       if (bcl == 0) {
          return;
       }
-      BaseClassListIterator bcli(*bcl);
+
+      QListIterator<BaseClassDef *> bcli(*bcl);
       BaseClassDef *bcd;
 
       for (bcli.toFirst() ; (bcd = bcli.current()) ; ++bcli) {
          ClassDef *cd = bcd->classDef;
-
-         if (cd->getLanguage() == SrcLangExt_VHDL && (VhdlDocGen::VhdlClasses)cd->protection() != VhdlDocGen::ENTITYCLASS) {
-            continue;
-         }
-
+        
          bool b;
          if (cd->getLanguage() == SrcLangExt_VHDL) {
             b = hasVisibleRoot(cd->subClasses());
@@ -4273,7 +4261,7 @@ TemplateVariant ClassInheritanceNodeContext::get(const char *n) const
    return p->get(n);
 }
 
-void ClassInheritanceNodeContext::addChildren(const BaseClassList *bcl, bool hideSuper)
+void ClassInheritanceNodeContext::addChildren(const SortedList<BaseClassDef *> *bcl, bool hideSuper)
 {
    p->addChildren(bcl, hideSuper);
 }
@@ -4287,21 +4275,17 @@ class ClassInheritanceContext::Private : public GenericNodeListContext
    void addClasses(const ClassSDict &classSDict) {
       ClassSDict::Iterator cli(classSDict);
       ClassDef *cd;
+
       for (cli.toFirst(); (cd = cli.current()); ++cli) {
          bool b;
-         if (cd->getLanguage() == SrcLangExt_VHDL) {
-            if ((VhdlDocGen::VhdlClasses)cd->protection() != VhdlDocGen::ENTITYCLASS) {
-               continue;
-            }
-            b = !hasVisibleRoot(cd->subClasses());
-         } else {
-            b = !hasVisibleRoot(cd->baseClasses());
-         }
+         b = !hasVisibleRoot(cd->baseClasses());
+         
          if (b) {
             if (cd->isVisibleInHierarchy()) { // should it be visible
                // new root level class
                ClassInheritanceNodeContext *tnc = ClassInheritanceNodeContext::alloc(cd);
                append(tnc);
+
                bool hasChildren = !cd->visited && classHasVisibleChildren(cd);
                if (cd->getLanguage() == SrcLangExt_VHDL && hasChildren) {
                   tnc->addChildren(cd->baseClasses(), cd->visited);
@@ -4363,25 +4347,26 @@ class ClassHierarchyContext::Private : public PropertyMapper
       }
       return m_cache.classTree.get();
    }
+
    TemplateVariant fileName() const {
       return "hierarchy";
    }
+
    TemplateVariant relPath() const {
       return "";
    }
+
    TemplateVariant highlight() const {
       return "classes";
    }
+
    TemplateVariant subhighlight() const {
       return "classhierarchy";
    }
-   TemplateVariant title() const {
-      static bool vhdlOpt    = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
-      if (vhdlOpt) {
-         return VhdlDocGen::trDesignUnitHierarchy();
-      } else {
-         return theTranslator->trClassHierarchy();
-      }
+
+   TemplateVariant title() const {      
+      return theTranslator->trClassHierarchy();
+      
    }
    Private() {
       //%% ClassInheritance tree
@@ -4673,13 +4658,7 @@ class NestingContext::Private : public GenericNodeListContext
       ClassSDict::Iterator cli(clDict);
       ClassDef *cd;
       for (; (cd = cli.current()); ++cli) {
-         if (cd->getLanguage() == SrcLangExt_VHDL) {
-            if ((VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::PACKAGECLASS ||
-                  (VhdlDocGen::VhdlClasses)cd->protection() == VhdlDocGen::PACKBODYCLASS
-               ) { // no architecture
-               continue;
-            }
-         }
+        
          if (!rootOnly ||
                cd->getOuterScope() == 0 ||
                cd->getOuterScope() == Doxygen::globalScope
@@ -4712,12 +4691,12 @@ class NestingContext::Private : public GenericNodeListContext
          m_index++;
       }
    }
-   void addFiles(const FileNameList &fnList) {
-      FileNameListIterator fnli(fnList);
-      FileName *fn;
-      for (fnli.toFirst(); (fn = fnli.current()); ++fnli) {
+   void addFiles(const SortedList<FileName *> &fnList) {
+      
+      for (auto fn : fnList) {
          FileNameIterator fni(*fn);
          FileDef *fd;
+
          for (; (fd = fni.current()); ++fni) {
             if (fd->getDirDef() == 0) { // top level file
                append(NestingNodeContext::alloc(m_parent, fd, m_index, m_level, false));
@@ -4822,7 +4801,7 @@ void NestingContext::addDirs(const DirList &dirs)
    p->addDirs(dirs);
 }
 
-void NestingContext::addFiles(const FileNameList &files)
+void NestingContext::addFiles(const SortedList<FileName *> &files)
 {
    p->addFiles(files);
 }
@@ -4951,11 +4930,9 @@ class ClassTreeContext::Private : public PropertyMapper
    }
    TemplateVariant title() const {
       static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
-      static bool vhdlOpt    = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
+      
       if (fortranOpt) {
-         return theTranslator->trCompoundListFortran();
-      } else if (vhdlOpt) {
-         return VhdlDocGen::trDesignUnitList();
+         return theTranslator->trCompoundListFortran();     
       } else {
          return theTranslator->trClasses();
       }
@@ -5144,17 +5121,18 @@ TemplateVariant NamespaceTreeContext::get(const char *name) const
 class FileListContext::Private : public GenericNodeListContext
 {
  public:
-   void addFiles(const FileNameList &fnList) {
+   void addFiles(const SortedList<FileName *> &fnList) {
       // TODO: if FULL_PATH_NAMES is enabled, the ordering should be dir+file
-      FileNameListIterator fnli(fnList);
-      FileName *fn;
-      for (fnli.toFirst(); (fn = fnli.current()); ++fnli) {
+ 
+      for (auto fn : fnList ) {
          FileNameIterator fni(*fn);
          FileDef *fd;
+
          for (fni.toFirst(); (fd = fni.current()); ++fni) {
             bool doc = fd->isLinkableInProject();
             bool src = fd->generateSourceFile();
             bool nameOk = !fd->isDocumentationFile();
+
             if (nameOk && (doc || src) && !fd->isReference()) {
                append(FileContext::alloc(fd));
             }
@@ -6161,12 +6139,13 @@ class InheritanceListContext::Private : public GenericNodeListContext
    }
 };
 
-InheritanceListContext::InheritanceListContext(const BaseClassList *list, bool baseClasses) : RefCountedContext("InheritanceListContext")
+InheritanceListContext::InheritanceListContext(const SortedList<BaseClassDef *> *list, bool baseClasses) : RefCountedContext("InheritanceListContext")
 {
    p = new Private;
    if (list) {
-      BaseClassListIterator li(*list);
+      QListIterator<BaseClassDef *> li(*list);
       BaseClassDef *bcd;
+
       for (li.toFirst(); (bcd = li.current()); ++li) {
          ClassDef *cd = bcd->classDef;
          QByteArray name;
@@ -6224,7 +6203,7 @@ MemberListContext::MemberListContext(const MemberList *list) : RefCountedContext
    p = new Private;
    if (list) {
       bool details = list->listType()&MemberListType_detailedLists;
-      MemberListIterator mli(*list);
+      QListIterator<MemberDef> mli(*list);
       MemberDef *md;
       for (mli.toFirst(); (md = mli.current()); ++mli) {
          if ((md->isBriefSectionVisible() && !details) ||
@@ -6499,7 +6478,7 @@ TemplateVariant MemberGroupInfoContext::get(const char *name) const
 
 //------------------------------------------------------------------------
 
-//%% list MemberGroupList[MemberGroupInfo] : list of member groups
+//%% list QList<MemberGroup>[MemberGroupInfo] : list of member groups
 class MemberGroupListContext::Private : public GenericNodeListContext
 {
  public:
@@ -6514,11 +6493,11 @@ MemberGroupListContext::MemberGroupListContext() : RefCountedContext("MemberGrou
 }
 
 MemberGroupListContext::MemberGroupListContext(Definition *def, const QByteArray &relPath,
-      const MemberGroupList *list) : RefCountedContext("MemberGroupListContext")
+      const QList<MemberGroup> *list) : RefCountedContext("MemberGroupListContext")
 {
    p = new Private;
    if (list) {
-      MemberGroupListIterator mgli(*list);
+      QListIterator<MemberGroup> mgli(*list);
       MemberGroup *mg;
       for (; (mg = mgli.current()); ++mgli) {
          p->addMemberGroup(def, relPath, mg);
@@ -6729,7 +6708,7 @@ class InheritedMemberInfoListContext::Private : public GenericNodeListContext
  public:
    void addMemberList(ClassDef *inheritedFrom, MemberList *ml, MemberList *combinedList) {
       if (ml) {
-         MemberListIterator li(*ml);
+         QListIterator<MemberDef> li(*ml);
          MemberDef *md;
          for (li.toFirst(); (md = li.current()); ++li) {
             if (md->isBriefSectionVisible() && !md->isReimplementedBy(inheritedFrom)) {
@@ -6742,7 +6721,7 @@ class InheritedMemberInfoListContext::Private : public GenericNodeListContext
       if (ml) {
          addMemberList(inheritedFrom, ml, combinedList);
          if (ml->getMemberGroupList()) {
-            MemberGroupListIterator mgli(*ml->getMemberGroupList());
+            QListIterator<MemberGroup> mgli(*ml->getMemberGroupList());
             MemberGroup *mg;
             for (mgli.toFirst(); (mg = mgli.current()); ++mgli) {
                addMemberList(inheritedFrom, mg->members(), combinedList);
@@ -6757,7 +6736,7 @@ class InheritedMemberInfoListContext::Private : public GenericNodeListContext
          MemberGroup *mg;
          for (; (mg = mgli.current()); ++mgli) {
             if (mg->members() && (!mg->allMembersInSameSection() || !cd->subGrouping())) { // group is in its own section
-               MemberListIterator li(*mg->members());
+               QListIterator<MemberDef> li(*mg->members());
                MemberDef *md;
                for (li.toFirst(); (md = li.current()); ++li) {
                   if (lt == md->getSectionList(mg->parent())->listType() &&
@@ -6797,7 +6776,7 @@ class InheritedMemberInfoListContext::Private : public GenericNodeListContext
    void findInheritedMembers(ClassDef *inheritedFrom, ClassDef *cd, MemberListType lt, int lt2, const QByteArray &title, 
                              bool additionalList, QHash<void *, void *> *visitedClasses) {
       if (cd->baseClasses()) {
-         BaseClassListIterator it(*cd->baseClasses());
+         QListIterator<BaseClassDef *> it(*cd->baseClasses());
          BaseClassDef *ibcd;
 
          for (it.toFirst(); (ibcd = it.current()); ++it) {

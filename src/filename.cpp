@@ -15,9 +15,10 @@
  *
 *************************************************************************/
 
+#include <config.h>
 #include <filename.h>
 #include <util.h>
-#include <config.h>
+
 
 FileName::FileName(const char *fn, const char *n) : FileList()
 {   
@@ -116,47 +117,9 @@ int FileName::compareValues(const FileDef *f1, const FileDef *f2) const
    return qstricmp(f1->fileName(), f2->fileName());
 }
 
-// ** 
 FileNameIterator::FileNameIterator(const FileName &fname) : QListIterator<FileDef *>(fname)
 {
 }
-
-// **
-FileNameList::FileNameList() : QList<FileName>()
-{
-}
-
-FileNameList::~FileNameList()
-{
-}
-
-void FileNameList::generateDiskNames()
-{ 
-   for (auto item : *this) {
-      item.generateDiskNames();
-   }
-}
-
-int FileNameList::compareValues(const FileName *f1, const FileName *f2) const
-{
-   int retval;
-
-   if (Config_getBool("FULL_PATH_NAMES")) {
-      retval = qstricmp(f1->fullName(), f2->fullName());
-
-   } else {
-      retval = qstricmp(f1->fileName(), f2->fileName());
-
-   }
-
-   return retval;
-}
-
-// **
-FileNameListIterator::FileNameListIterator(const FileNameList &fnlist) : QListIterator<FileName>(fnlist)
-{
-}
-
 
 // ** 
 static Qt::CaseSensitivity getCaseSenseNames()

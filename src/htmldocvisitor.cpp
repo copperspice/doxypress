@@ -520,7 +520,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          forceEndParagraph(inc);
          m_t << PREFRAG_START;
          QFileInfo cfi( inc->file() );
-         FileDef fd( cfi.dirPath().utf8(), cfi.fileName().utf8() );
+         FileDef fd( cfi.dirPath().toUtf8(), cfi.fileName().toUtf8() );
          Doxygen::parserManager->getParser(inc->extension())
          ->parseCode(m_ci,
                      inc->context(),
@@ -1930,6 +1930,7 @@ void HtmlDocVisitor::visitPre(DocVhdlFlow *vf)
    if (m_hide) {
       return;
    }
+
    if (VhdlDocGen::getFlowMember()) { // use VHDL flow chart creator
       forceEndParagraph(vf);
       QByteArray fname = FlowChart::convertNameToFileName();

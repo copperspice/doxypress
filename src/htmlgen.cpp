@@ -232,7 +232,7 @@ static QByteArray substituteHtmlKeywords(const QByteArray &s,
    } else {
       QFileInfo cssfi(cssFile);
       if (cssfi.exists()) {
-         cssFile = cssfi.fileName().utf8();
+         cssFile = cssfi.fileName().toUtf8();
       } else {
          cssFile = "doxygen.css";
       }
@@ -957,11 +957,11 @@ void HtmlGenerator::writeStyleInfo(int part)
             // convert style sheet to string
             QByteArray fileStr = fileToString(cssname);
             // write the string into the output dir
-            startPlainFile(cssfi.fileName().utf8());
+            startPlainFile(cssfi.fileName().toUtf8());
             t << fileStr;
             endPlainFile();
          }
-         Doxygen::indexList->addStyleSheetFile(cssfi.fileName().utf8());
+         Doxygen::indexList->addStyleSheetFile(cssfi.fileName().toUtf8());
       }
       static QStringList extraCssFile = Config_getList("HTML_EXTRA_STYLESHEET");
       for (uint i = 0; i < extraCssFile.count(); ++i) {
@@ -969,7 +969,7 @@ void HtmlGenerator::writeStyleInfo(int part)
          if (!fileName.isEmpty()) {
             QFileInfo fi(fileName);
             if (fi.exists()) {
-               Doxygen::indexList->addStyleSheetFile(fi.fileName().utf8());
+               Doxygen::indexList->addStyleSheetFile(fi.fileName().toUtf8());
             }
          }
       }

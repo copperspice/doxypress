@@ -812,7 +812,7 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
 
    MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
    if (allMemberList) {
-      MemberListIterator mli(*allMemberList);
+      QListIterator<MemberDef> mli(*allMemberList);
       MemberDef *md;
       for (mli.toFirst(); (md = mli.current()); ++mli) {
          if (md->getFileDef() == this && md->getNamespaceDef() == 0 && md->isLinkable() && !md->isEnumValue()) {
@@ -1539,11 +1539,11 @@ void generateFileTree()
 {
    Directory *root = new Directory(0, "root");
    root->setLast(true);
-   FileNameListIterator fnli(*Doxygen::inputNameList);
-   FileName *fn;
-   for (fnli.toFirst(); (fn = fnli.current()); ++fnli) {
+  
+   for (auto fn : *Doxygen::inputNameList ) {
       FileNameIterator fni(*fn);
       FileDef *fd;
+
       for (; (fd = fni.current()); ++fni) {
          mergeFileDef(root, fd);
       }
@@ -1715,16 +1715,11 @@ MemberList *FileDef::getMemberList(MemberListType lt) const
 }
 
 void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title)
-{
-   static bool optVhdl = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
+{ 
    MemberList *ml = getMemberList(lt);
-   if (ml) {
-      if (optVhdl) { // use specific declarations function
 
-         VhdlDocGen::writeVhdlDeclarations(ml, ol, 0, 0, this, 0);
-      } else {
-         ml->writeDeclarations(ol, 0, 0, this, 0, title, 0);
-      }
+   if (ml) {     
+      ml->writeDeclarations(ol, 0, 0, this, 0, title, 0);      
    }
 }
 
@@ -1739,22 +1734,21 @@ void FileDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const 
 bool FileDef::isLinkableInProject() const
 {
    static bool showFiles = Config_getBool("SHOW_FILES");
-   return hasDocumentation() && !isReference() && showFiles;
+   return hasDocumentation() && ! isReference() && showFiles;
 }
 
-static void getAllIncludeFilesRecursively(
-   QHash<QString, void> *filesVisited, const FileDef *fd, QStringList &incFiles)
+static void getAllIncludeFilesRecursively(QHash<QString, void> *filesVisited, const FileDef *fd, QStringList &incFiles)
 {
    if (fd->includeFileList()) {
-      QListIterator<IncludeInfo> iii(*fd->includeFileList());
-      IncludeInfo *ii;
-      for (iii.toFirst(); (ii = iii.current()); ++iii) {
-         if (ii->fileDef && !ii->fileDef->isReference() &&
-               !filesVisited->find(ii->fileDef->absFilePath())) {
-            //printf("FileDef::addIncludeDependency(%s)\n",ii->fileDef->absFilePath().data());
-            incFiles.append(ii->fileDef->absFilePath());
-            filesVisited->insert(ii->fileDef->absFilePath(), (void *)0x8);
-            getAllIncludeFilesRecursively(filesVisited, ii->fileDef, incFiles);
+
+      for (auto item : *fd->includeFileList() ) {   
+
+         if (item->fileDef && ! item->fileDef->isReference() && ! filesVisited->find(item->fileDef->absFilePath())) {
+
+            incFiles.append(item->fileDef->absFilePath());
+            filesVisited->insert(item->fileDef->absFilePath(), (void *)0x8);
+
+            getAllIncludeFilesRecursively(filesVisited, item->fileDef, incFiles);
          }
       }
    }
@@ -1762,7 +1756,7 @@ static void getAllIncludeFilesRecursively(
 
 void FileDef::getAllIncludeFilesRecursively(QStringList &incFiles) const
 {
-   QHash<QString, void> includes(257);
+   QHash<QString, void *> includes;
    ::getAllIncludeFilesRecursively(&includes, this, incFiles);
 }
 

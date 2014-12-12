@@ -900,7 +900,7 @@ static void generateSqlite3Section(sqlite3 *db,
    if (ml == 0) {
       return;
    }
-   MemberListIterator mli(*ml);
+   QListIterator<MemberDef> mli(*ml);
    MemberDef *md;
    int count = 0;
    for (mli.toFirst(); (md = mli.current()); ++mli) {
@@ -1243,12 +1243,11 @@ void generateSqlite3()
       generateSqlite3ForNamespace(db, nd);
    }
 
-   // + files
-   FileNameListIterator fnli(*Doxygen::inputNameList);
-   FileName *fn;
-   for (; (fn = fnli.current()); ++fnli) {
+   // + files 
+   for (auto fn : *Doxygen::inputNameList ) {
       FileNameIterator fni(*fn);
       FileDef *fd;
+
       for (; (fd = fni.current()); ++fni) {
          msg("Generating Sqlite3 output for file %s\n", fd->name().data());
          generateSqlite3ForFile(db, fd);

@@ -2640,7 +2640,9 @@ void DocVhdlFlow::parse()
    DBG(("DocVhdlFlow::parse() start\n"));
 
    doctokenizerYYsetStateTitle();
+
    int tok;
+
    while ((tok = doctokenizerYYlex())) {
       if (!defaultHandleToken(this, tok, m_children)) {
          switch (tok) {
@@ -2666,7 +2668,9 @@ void DocVhdlFlow::parse()
 
    DBG(("DocVhdlFlow::parse() end\n"));
    DocNode *n = g_nodeStack.pop();
+
    assert(n == this);
+
    VhdlDocGen::createFlowChart(g_memberDef);
 }
 

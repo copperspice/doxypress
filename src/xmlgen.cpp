@@ -938,7 +938,7 @@ static void generateXMLForMember(MemberDef *md, FTextStream &ti, FTextStream &t,
    }
    MemberList *rbml = md->reimplementedBy();
    if (rbml) {
-      MemberListIterator mli(*rbml);
+      QListIterator<MemberDef> mli(*rbml);
       for (mli.toFirst(); (rmd = mli.current()); ++mli) {
          t << "        <reimplementedby refid=\""
            << memberOutputFileBase(rmd) << "_1" << rmd->anchor() << "\">"
@@ -1028,7 +1028,7 @@ static void generateXMLForMember(MemberDef *md, FTextStream &ti, FTextStream &t,
    if (md->memberType() == MemberType_Enumeration) { // enum
       MemberList *enumFields = md->enumFieldList();
       if (enumFields) {
-         MemberListIterator emli(*enumFields);
+         QListIterator<MemberDef> emli(*enumFields);
          MemberDef *emd;
          for (emli.toFirst(); (emd = emli.current()); ++emli) {
             ti << "    <member refid=\"" << memberOutputFileBase(emd)
@@ -1123,7 +1123,7 @@ static void generateXMLSection(Definition *d, FTextStream &ti, FTextStream &t,
    if (ml == 0) {
       return;
    }
-   MemberListIterator mli(*ml);
+   QListIterator<MemberDef> mli(*ml);
    MemberDef *md;
    int count = 0;
    for (mli.toFirst(); (md = mli.current()); ++mli) {
@@ -1984,7 +1984,7 @@ void generateXML()
    f.close();
 
    fileName = outputDirectory + "/index.xml";
-   f.setName(fileName);
+   f.setFileName(fileName);
 
    if (!f.open(QIODevice::WriteOnly)) {
       err("Cannot open file %s for writing!\n", fileName.data());

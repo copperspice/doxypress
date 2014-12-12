@@ -29,19 +29,19 @@ class ManGenerator : public OutputGenerator
    ManGenerator();
    ~ManGenerator();
 
-   //OutputGenerator *copy()  { return new ManGenerator; }
-   //OutputGenerator *clone() { return new ManGenerator(*this); }
-   //void append(const OutputGenerator *o);
    void enable() {
-      if (genStack->top()) {
-         active = *genStack->top();
+      if (genStack.top()) {
+         active = genStack.top();
+
       } else {
          active = true;
       }
    }
+
    void disable() {
       active = false;
    }
+
    void enableIf(OutputType o)  {
       if (o == Man) {
          enable();
@@ -91,33 +91,37 @@ class ManGenerator : public OutputGenerator
    void startIndexListItem() {}
    void endIndexListItem() {}
    void startIndexList() {}
+
    void endIndexList()   {
       newParagraph();
    }
+
    void startIndexKey() {}
    void endIndexKey()   {}
    void startIndexValue(bool) {}
    void endIndexValue(const char *, bool)   {}
    void startItemList()  {}
+
    void endItemList()    {
       newParagraph();
    }
+
    void startIndexItem(const char *ref, const char *file);
    void endIndexItem(const char *ref, const char *file);
    void docify(const char *text);
    void codify(const char *text);
-   void writeObjectLink(const char *ref, const char *file,
-                        const char *anchor, const char *name);
-   void writeCodeLink(const char *ref, const char *file,
-                      const char *anchor, const char *name,
-                      const char *tooltip);
-   void writeTooltip(const char *, const DocLinkInfo &, const char *,
-                     const char *, const SourceLinkInfo &, const SourceLinkInfo &
-                    ) {}
+
+   void writeObjectLink(const char *ref, const char *file, const char *anchor, const char *name);
+   void writeCodeLink(const char *ref, const char *file, const char *anchor, const char *name, const char *tooltip);
+
+   void writeTooltip(const char *, const DocLinkInfo &, const char *, const char *, const SourceLinkInfo &, const SourceLinkInfo &)
+   {}
+
    void startTextLink(const char *, const char *) {}
    void endTextLink() {}
    void startHtmlLink(const char *url);
    void endHtmlLink();
+
    void startTypewriter() {
       t << "\\fC";
       firstCol = false;
@@ -137,7 +141,8 @@ class ManGenerator : public OutputGenerator
    void insertMemberAlign(bool) {}
    void startMemberSubtitle() {}
    void endMemberSubtitle() {}
-   //void writeListItem();
+  
+ //void writeListItem();
    void startItemListItem();
    void endItemListItem();
    void startMemberDocList() {}
@@ -192,21 +197,25 @@ class ManGenerator : public OutputGenerator
    void endDescription()   {}
    void startDescItem();
    void endDescItem();
+
    void lineBreak(const char *) {
       t << "\n.br" << endl;
    }
+
    void writeChar(char c);
    void startMemberDoc(const char *, const char *, const char *, const char *, bool);
    void endMemberDoc(bool);
    void startDoxyAnchor(const char *, const char *, const char *, const char *, const char *);
    void endDoxyAnchor(const char *, const char *) {}
    void writeLatexSpacing() {}
-   void writeStartAnnoItem(const char *type, const char *file,
-                           const char *path, const char *name);
+
+   void writeStartAnnoItem(const char *type, const char *file, const char *path, const char *name);
+
    void writeEndAnnoItem(const char *) {
       t << endl;
       firstCol = true;
    }
+
    void startSubsection();
    void endSubsection();
    void startSubsubsection();
@@ -215,24 +224,31 @@ class ManGenerator : public OutputGenerator
    void endCenter()          {}
    void startSmall()         {}
    void endSmall()           {}
+
    void startMemberDescription(const char *, const char *) {
       t << "\n.RI \"\\fI";
       firstCol = false;
    }
+
    void endMemberDescription()   {
       t << "\\fP\"";
       firstCol = false;
    }
+
    void startMemberDeclaration() {}
    void endMemberDeclaration(const char *, const char *) {}
-   void writeInheritedSectionTitle(const char *, const char *, const char *,
-                                   const char *, const char *, const char *) {}
+   void writeInheritedSectionTitle(const char *, const char *, const char *, const char *, const char *, const char *)
+   {}
+
    void startDescList(SectionTypes);
-   void endDescList()        {}
+   void endDescList() 
+   {}
+
    void startSimpleSect(SectionTypes, const char *, const char *, const char *);
    void endSimpleSect();
    void startParamList(ParamListTypes, const char *title);
    void endParamList();
+
    //void writeDescItem();
    void startDescForItem();
    void endDescForItem();
@@ -255,6 +271,7 @@ class ManGenerator : public OutputGenerator
    void writeSummaryLink(const char *, const char *, const char *, bool) {}
    void startContents() {}
    void endContents() {}
+
    void writeNonBreakableSpace(int n) {
       int i;
       for (i = 0; i < n; i++) {

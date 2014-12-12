@@ -30,6 +30,7 @@
 #include <dirdef.h>
 #include <memberlist.h>
 #include <section.h>
+#include <sortedlist.h>
 
 class RefList;
 class PageSList;
@@ -50,7 +51,6 @@ class ClassSDict;
 class GenericsSDict;
 class MemberNameSDict;
 class FileNameDict;
-class FileNameList;
 class NamespaceSDict;
 class NamespaceDef;
 class DefinitionIntf;
@@ -111,7 +111,7 @@ class Doxygen
    static FileNameDict                     *includeNameDict;
    static FileNameDict                     *exampleNameDict;   
    static FileNameDict                     *inputNameDict;
-   static FileNameList                     *inputNameList;
+   static SortedList<FileName *>           *inputNameList;
    static FileNameDict                     *imageNameDict;
    static FileNameDict                     *dotFileNameDict;
    static FileNameDict                     *mscFileNameDict;
@@ -183,12 +183,12 @@ void readAliases();
 void readFormulaRepository();
 void cleanUpDoxygen();
 
-int readFileOrDirectory(const char *s, FileNameList *fnList, FileNameDict *fnDict, StringDict *exclDict,
+int readFileOrDirectory(const char *s, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict *exclDict,
                         QList<QByteArray>  *patList, QList<QByteArray>  *exclPatList, QList<QByteArray>  *resultList,
                         StringDict *resultDict, bool recursive, bool errorIfNotExist = true, QHash<QString,
                         void *> *killDict = 0, QHash<QString, void *> *paths = 0 );
 
-int readDir(QFileInfo *fi, FileNameList *fnList, FileNameDict *fnDict, StringDict  *exclDict,
+int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict  *exclDict,
             QList<QByteArray>  *patList, QList<QByteArray>  *exclPatList, QList<QByteArray>  *resultList,
             StringDict *resultDict, bool errorIfNotExist, bool recursive, QHash<QString, void *> *killDict );
 

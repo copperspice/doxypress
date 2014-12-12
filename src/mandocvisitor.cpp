@@ -265,6 +265,7 @@ void ManDocVisitor::visit(DocInclude *inc)
       return;
    }
    SrcLangExt langExt = getLanguageFromFileName(inc->extension());
+
    switch (inc->type()) {
       case DocInclude::IncWithLines: {
          if (!m_firstCol) {
@@ -272,21 +273,22 @@ void ManDocVisitor::visit(DocInclude *inc)
          }
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
+
          QFileInfo cfi( inc->file() );
-         FileDef fd( cfi.dirPath().utf8(), cfi.fileName().utf8() );
-         Doxygen::parserManager->getParser(inc->extension())
-         ->parseCode(m_ci, inc->context(),
-                     inc->text(),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile(), &fd);
+         FileDef fd( cfi.dir().path().toUtf8(), cfi.fileName().toUtf8() );
+
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(), 
+                                           langExt, inc->isExample(), inc->exampleFile(), &fd);
+
          if (!m_firstCol) {
             m_t << endl;
          }
+
          m_t << ".fi" << endl;
          m_t << ".PP" << endl;
          m_firstCol = true;
       }
+
       break;
       case DocInclude::Include:
          if (!m_firstCol) {
@@ -294,12 +296,9 @@ void ManDocVisitor::visit(DocInclude *inc)
          }
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
-         Doxygen::parserManager->getParser(inc->extension())
-         ->parseCode(m_ci, inc->context(),
-                     inc->text(),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile());
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),inc->text(),langExt,
+                     inc->isExample(), inc->exampleFile());
+
          if (!m_firstCol) {
             m_t << endl;
          }
@@ -307,12 +306,16 @@ void ManDocVisitor::visit(DocInclude *inc)
          m_t << ".PP" << endl;
          m_firstCol = true;
          break;
+
       case DocInclude::DontInclude:
          break;
+
       case DocInclude::HtmlInclude:
          break;
+
       case DocInclude::LatexInclude:
          break;
+
       case DocInclude::VerbInclude:
          if (!m_firstCol) {
             m_t << endl;
@@ -320,30 +323,29 @@ void ManDocVisitor::visit(DocInclude *inc)
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
          m_t << inc->text();
+
          if (!m_firstCol) {
             m_t << endl;
          }
+
          m_t << ".fi" << endl;
          m_t << ".PP" << endl;
          m_firstCol = true;
          break;
+
       case DocInclude::Snippet:
          if (!m_firstCol) {
             m_t << endl;
          }
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
-         Doxygen::parserManager->getParser(inc->extension())
-         ->parseCode(m_ci,
-                     inc->context(),
-                     extractBlock(inc->text(), inc->blockId()),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile()
-                    );
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
+                     langExt, inc->isExample(), inc->exampleFile() );
+
          if (!m_firstCol) {
             m_t << endl;
          }
+
          m_t << ".fi" << endl;
          m_t << ".PP" << endl;
          m_firstCol = true;
@@ -356,17 +358,20 @@ void ManDocVisitor::visit(DocIncOperator *op)
    SrcLangExt langExt = getLanguageFromFileName(m_langExt);
    //printf("DocIncOperator: type=%d first=%d, last=%d text=`%s'\n",
    //    op->type(),op->isFirst(),op->isLast(),op->text().data());
+
    if (op->isFirst()) {
       if (!m_hide) {
          if (!m_firstCol) {
             m_t << endl;
          }
+
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
       }
       pushEnabled();
       m_hide = true;
    }
+
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (!m_hide) {
@@ -1066,24 +1071,28 @@ void ManDocVisitor::visitPre(DocParamList *pl)
    if (m_hide) {
       return;
    }
+
    m_t << "\\fI";
-   //QStringListIterator li(pl->parameters());
-   //const char *s;
-   QListIterator<DocNode> li(pl->parameters());
-   DocNode *param;
+   
    bool first = true;
-   for (li.toFirst(); (param = li.current()); ++li) {
+
+   for (auto param : pl->parameters()) {   
       if (!first) {
          m_t << ",";
+
       } else {
          first = false;
       }
+
       if (param->kind() == DocNode::Kind_Word) {
          visit((DocWord *)param);
+
       } else if (param->kind() == DocNode::Kind_LinkedWord) {
          visit((DocLinkedWord *)param);
+
       }
    }
+
    m_t << "\\fP ";
 }
 
@@ -1092,10 +1101,12 @@ void ManDocVisitor::visitPost(DocParamList *pl)
    if (m_hide) {
       return;
    }
+
    if (!pl->isLast()) {
       if (!m_firstCol) {
          m_t << endl;
       }
+
       m_t << ".br" << endl;
    }
 }
@@ -1105,13 +1116,16 @@ void ManDocVisitor::visitPre(DocXRefItem *x)
    if (m_hide) {
       return;
    }
+
    if (x->title().isEmpty()) {
       return;
    }
+
    if (!m_firstCol) {
       m_t << endl;
       m_t << ".PP" << endl;
    }
+
    m_t << "\\fB";
    filter(x->title());
    m_t << "\\fP" << endl;
@@ -1123,9 +1137,11 @@ void ManDocVisitor::visitPost(DocXRefItem *x)
    if (m_hide) {
       return;
    }
+
    if (x->title().isEmpty()) {
       return;
    }
+
    if (!m_firstCol) {
       m_t << endl;
    }
@@ -1147,6 +1163,7 @@ void ManDocVisitor::visitPost(DocInternalRef *)
    if (m_hide) {
       return;
    }
+
    m_t << "\\fP";
 }
 
@@ -1171,6 +1188,7 @@ void ManDocVisitor::visitPre(DocHtmlBlockQuote *)
    if (m_hide) {
       return;
    }
+
    if (!m_firstCol) {
       m_t << endl;
       m_t << ".PP" << endl;
@@ -1183,9 +1201,11 @@ void ManDocVisitor::visitPost(DocHtmlBlockQuote *)
    if (m_hide) {
       return;
    }
+
    if (!m_firstCol) {
       m_t << endl;
    }
+
    m_t << ".RE" << endl;
    m_t << ".PP" << endl;
    m_firstCol = true;
@@ -1206,7 +1226,6 @@ void ManDocVisitor::visitPre(DocParBlock *)
 void ManDocVisitor::visitPost(DocParBlock *)
 {
 }
-
 
 void ManDocVisitor::filter(const char *str)
 {
@@ -1233,14 +1252,12 @@ void ManDocVisitor::filter(const char *str)
 
 void ManDocVisitor::pushEnabled()
 {
-   m_enabled.push(new bool(m_hide));
+   m_enabled.push(m_hide);
 }
 
 void ManDocVisitor::popEnabled()
 {
-   bool *v = m_enabled.pop();
-   assert(v != 0);
-   m_hide = *v;
-   delete v;
+   bool v = m_enabled.pop();
+   m_hide = v;  
 }
 

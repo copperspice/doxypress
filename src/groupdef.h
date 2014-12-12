@@ -47,24 +47,32 @@ class GroupDef : public Definition
  public:
    GroupDef(const char *fileName, int line, const char *name, const char *title, const char *refFileName = 0);
    ~GroupDef();
+
    DefType definitionType() const {
       return TypeGroup;
    }
+
    QByteArray getOutputFileBase() const;
+
    QByteArray anchor() const {
       return QByteArray();
    }
+
    QByteArray displayName(bool = true) const {
       return hasGroupTitle() ? title : Definition::name();
    }
+
    const char *groupTitle() const {
       return title;
    }
+
    void setGroupTitle( const char *newtitle );
+
    bool hasGroupTitle( ) const {
       return titleSet;
    }
-   void addFile(const FileDef *def);
+
+   void addFile(FileDef *def);
    bool addClass(const ClassDef *def);
    bool addNamespace(const NamespaceDef *def);
    void addGroup(const GroupDef *def);
@@ -218,7 +226,9 @@ class GroupList : public QList<GroupDef>
 class GroupListIterator : public QListIterator<GroupDef>
 {
  public:
-   GroupListIterator(const GroupList &l) : QListIterator<GroupDef>(l) {}
+   GroupListIterator(const GroupList &l) : QListIterator<GroupDef>(l) 
+   {}
+
    virtual ~GroupListIterator() {}
 };
 

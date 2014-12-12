@@ -29,30 +29,34 @@
 #include <stringmap.h>
 #include <docparser.h>
 
-class ClassDef;
-class FileDef;
-class MemberList;
-class NamespaceDef;
-class FileNameDict;
 class ArgumentList;
+class BaseClassDef;
+class BufStr;
+class ClassDef;
+class ClassSDict;
+class Definition;
+class ExampleSDict;
+class FileDef;
+class FileNameDict;
+class FTextStream;
+class GroupDef;
+class MemberList;
+class MemberDef;
+class MemberGroupSDict;
+class MemberNameInfoSDict;
+class NamespaceDef;
+class NamespaceSDict;
 class OutputList;
 class OutputDocInterface;
-class MemberDef;
-class ExampleSDict;
-class ClassSDict;
-class BaseClassList;
-class GroupDef;
-class NamespaceSDict;
-class ClassList;
-class MemberGroupSDict;
-struct TagInfo;
-class MemberNameInfoSDict;
-struct ListItemInfo;
 class PageDef;
+
+struct ListItemInfo;
 struct SectionInfo;
-class Definition;
-class BufStr;
-class FTextStream;
+struct TagInfo;
+
+template <class T>
+class SortedList;
+
 
 /*! \file
  *  \brief A bunch of utility functions.
@@ -84,7 +88,7 @@ class TextGeneratorOLImpl : public TextGeneratorIntf
 /** @brief maps a unicode character code to a list of T::ElementType's
  */
 template<class T>
-class LetterToIndexMap : public LongMap<QSharedPointer<T> >
+class LetterToIndexMap : public LongMap<QSharedPointer<T>>
 {
  public:
    LetterToIndexMap() 
@@ -92,11 +96,11 @@ class LetterToIndexMap : public LongMap<QSharedPointer<T> >
    }
 
    void append(uint letter, typename T::ElementType *elem) {
-      T *l = LongMap<QSharedPointer<T>>::find((int)letter);
+      T *l = this->find(letter);
 
       if (l == 0) {
          l = new T(letter);
-         LongMap<QSharedPointer<T>>::inSort((int)letter, l);
+         this->insert(letter, l);
       }
 
       l->append(elem);
@@ -246,7 +250,8 @@ QByteArray replaceAnonymousScopes(const QByteArray &s, const char *replacement =
 
 void initClassHierarchy(ClassSDict *cl);
 
-bool hasVisibleRoot(BaseClassList *bcl);
+bool hasVisibleRoot(SortedList<BaseClassDef *> *bcl);
+
 bool classHasVisibleChildren(ClassDef *cd);
 bool namespaceHasVisibleChild(NamespaceDef *nd, bool includeClasses);
 bool classVisibleInIndex(ClassDef *cd);

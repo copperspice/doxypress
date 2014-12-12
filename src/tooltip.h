@@ -30,8 +30,7 @@ class TooltipManager
    void writeTooltips(CodeOutputInterface &ol);
 
  private:
-   class Private;
-   Private *p;
+   QHash<QString, Definition *> m_tooltipInfo;
 
    TooltipManager();
    ~TooltipManager();

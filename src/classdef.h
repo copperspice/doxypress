@@ -27,12 +27,10 @@
 class MemberDef;
 class MemberList;
 class MemberDict;
-class ClassList;
 class ClassSDict;
 class OutputList;
 class FileDef;
 class FileList;
-class BaseClassList;
 class NamespaceDef;
 class MemberDef;
 class ExampleSDict;
@@ -47,6 +45,10 @@ class ArgumentList;
 class FTextStream;
 
 struct IncludeInfo;
+struct BaseClassDef;
+
+template <class T>
+class SortedList;
 
 /** A class representing of a compound symbol.
  *
@@ -144,11 +146,11 @@ class ClassDef : public Definition
    /** Returns the list of base classes from which this class directly
     *  inherits.
     */
-   BaseClassList *baseClasses() const;
+   SortedList<BaseClassDef *> *baseClasses() const;
 
    /** Returns the list of sub classes that directly derive from this class
     */
-   BaseClassList *subClasses() const;
+   SortedList<BaseClassDef *> *subClasses() const;
 
    /** Returns a dictionary of all members. This includes any inherited
     *  members. Members are sorted alphabetically.
@@ -306,7 +308,7 @@ class ClassDef : public Definition
 
    bool isSimple() const;
 
-   const ClassList *taggedInnerClasses() const;
+   const SortedList<ClassDef *>   *taggedInnerClasses() const;
    ClassDef *tagLessReference() const;
 
    MemberDef *isSmartPointer() const;
@@ -450,13 +452,10 @@ class ClassDef : public Definition
                                 ClassDef *inheritedFrom, bool invert, bool showAlways,
                                 QHash<void *, void *> *visitedClasses);
 
-   void getTitleForMemberListType(MemberListType type,
-                                  QByteArray &title, QByteArray &subtitle);
+   void getTitleForMemberListType(MemberListType type, QByteArray &title, QByteArray &subtitle);
    QByteArray includeStatement() const;
 
-
    ClassDefImpl *m_impl;
-
 };
 
 /** Class that contains information about a usage relation.
@@ -542,39 +541,6 @@ struct BaseClassDef {
 
    /** Template arguments used for the base class */
    QByteArray templSpecifiers;
-};
-
-/** List of base classes.
- *
- *  The classes are alphabetically sorted on name if inSort() is used.
- */
-class BaseClassList : public QList<BaseClassDef *>
-{
- public:
-   ~BaseClassList() {}
-
-   int compareValues(const BaseClassDef *item1, const BaseClassDef *item2) const {
-      const ClassDef *c1 = item1->classDef;
-      const ClassDef *c2 = item2->classDef;
-
-      if (c1 == 0 || c2 == 0) {
-         return false;
-      } else {
-         return qstricmp(c1->name(), c2->name());
-      }
-   }
-};
-
-/** Iterator for a list of base classes.
- */
-class BaseClassListIterator : public QListIterator<BaseClassDef *>
-{
- public:
-   BaseClassListIterator(const BaseClassList &bcl) 
-      : QListIterator<BaseClassDef *>(bcl) 
-   {
-   }
-
 };
 
 #endif

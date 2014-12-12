@@ -27,7 +27,6 @@
 
 class MemberList;
 class ClassDef;
-class ClassList;
 class OutputList;
 class ClassSDict;
 class MemberDef;

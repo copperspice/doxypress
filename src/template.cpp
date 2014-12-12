@@ -1134,7 +1134,7 @@ class FilterAlphaIndex
       }
    };
    static QByteArray keyToLetter(uint startLetter) {
-      return QString(QChar(startLetter)).utf8();
+      return QString(QChar(startLetter)).toUtf8();
    }
    static QByteArray keyToLabel(uint startLetter) {
       char s[11]; // 0x12345678 + '\0'

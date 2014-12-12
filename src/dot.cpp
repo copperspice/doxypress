@@ -45,6 +45,7 @@
 #include <namespacedef.h>
 #include <memberdef.h>
 #include <membergroup.h>
+#include <sortedlist.h>
 
 #define MAP_CMD "cmapx"
 
@@ -364,13 +365,14 @@ static bool convertMapFile(FTextStream &t, const char *mapName,
    return true;
 }
 
-static QArray<int> s_newNumber;
+static QVector<int> s_newNumber;
 static int s_max_newNumber = 0;
 
 inline int reNumberNode(int number, bool doReNumbering)
 {
    if (!doReNumbering) {
       return number;
+
    } else {
       int s = s_newNumber.size();
       if (number >= s) {
@@ -686,20 +688,6 @@ static bool checkDeliverables(const QByteArray &file1, const QByteArray &file2 =
    }
    return file1Ok && file2Ok;
 }
-
-//--------------------------------------------------------------------
-
-/** Class representing a list of DotNode objects. */
-class DotNodeList : public QList<DotNode>
-{
- public:
-   DotNodeList() : QList<DotNode>() {}
-   ~DotNodeList() {}
- private:
-   int compareValues(const DotNode *n1, const DotNode *n2) const {
-      return qstricmp(n1->m_label, n2->m_label);
-   }
-};
 
 //--------------------------------------------------------------------
 
@@ -1282,7 +1270,7 @@ bool DotManager::run()
 static void deleteNodes(DotNode *node, StringMap<QSharedPointer<DotNode>> *skipNodes = 0)
 {
    //printf("deleteNodes skipNodes=%p\n",skipNodes);
-   static DotNodeList deletedNodes;
+   static SortedList<DotNode *> deletedNodes;
    
    node->deleteNode(deletedNodes, skipNodes); // collect nodes to be deleted.
    deletedNodes.clear(); // actually remove the nodes.
@@ -1360,7 +1348,7 @@ void DotNode::removeParent(DotNode *n)
    }
 }
 
-void DotNode::deleteNode(DotNodeList &deletedList, StringMap<QSharedPointer<DotNode>> *skipNodes)
+void DotNode::deleteNode(SortedList<DotNode *> &deletedList, StringMap<QSharedPointer<DotNode>> *skipNodes)
 {
    if (m_deleted) {
       return;   // avoid recursive loops in case the graph has cycles
@@ -1506,7 +1494,7 @@ static void writeBoxMemberList(FTextStream &t,
 {
    (void)isStatic;
    if (ml) {
-      MemberListIterator mlia(*ml);
+      QListIterator<MemberDef> mlia(*ml);
       MemberDef *mma;
       int totalCount = 0;
       for (mlia.toFirst(); (mma = mlia.current()); ++mlia) {
@@ -1537,9 +1525,9 @@ static void writeBoxMemberList(FTextStream &t,
          }
       }
       // write member groups within the memberlist
-      MemberGroupList *mgl = ml->getMemberGroupList();
+      QList<MemberGroup> *mgl = ml->getMemberGroupList();
       if (mgl) {
-         MemberGroupListIterator mgli(*mgl);
+         QListIterator<MemberGroup> mgli(*mgl);
          MemberGroup *mg;
          for (mgli.toFirst(); (mg = mgli.current()); ++mgli) {
             if (mg->members()) {
@@ -2113,9 +2101,9 @@ void DotGfxHierarchyTable::writeGraph(FTextStream &out,
       QByteArray imgName = baseName + "." + imgExt;
       QByteArray mapName = baseName + ".map";
 
-      QByteArray absImgName  = QByteArray(d.absPath().data()) + "/" + imgName;
-      QByteArray absMapName  = QByteArray(d.absPath().data()) + "/" + mapName;
-      QByteArray absBaseName = QByteArray(d.absPath().data()) + "/" + baseName;
+      QByteArray absImgName  = QByteArray(d.absolutePath().data()) + "/" + imgName;
+      QByteArray absMapName  = QByteArray(d.absolutePath().data()) + "/" + mapName;
+      QByteArray absBaseName = QByteArray(d.absolutePath().data()) + "/" + baseName;
 
       QListIterator<DotNode> dnli2(*m_rootNodes);
       DotNode *node;
@@ -2162,7 +2150,7 @@ void DotGfxHierarchyTable::writeGraph(FTextStream &out,
          f.close();
          resetReNumbering();
 
-         DotRunner *dotRun = new DotRunner(dotName, d.absPath().data(), true, absImgName);
+         DotRunner *dotRun = new DotRunner(dotName, d.absolutePath().data(), true, absImgName);
          dotRun->addJob(imgExt, absImgName);
          dotRun->addJob(MAP_CMD, absMapName);
          DotManager::instance()->addRun(dotRun);
@@ -2209,7 +2197,7 @@ void DotGfxHierarchyTable::addHierarchy(DotNode *n, ClassDef *cd, bool hideSuper
    // printf("addHierarchy `%s' baseClasses=%d\n",cd->name().data(),cd->baseClasses()->count());
 
    if (cd->subClasses()) {
-      BaseClassListIterator bcli(*cd->subClasses());
+      QListIterator<BaseClassDef *> bcli(*cd->subClasses());
       BaseClassDef *bcd;
 
       for ( ; (bcd = bcli.current()) ; ++bcli ) {
@@ -2286,13 +2274,10 @@ void DotGfxHierarchyTable::addClassList(ClassSDict *cl)
 {
    ClassSDict::Iterator cli(*cl);
    ClassDef *cd;
+
    for (cli.toLast(); (cd = cli.current()); --cli) {
       //printf("Trying %s subClasses=%d\n",cd->name().data(),cd->subClasses()->count());
-      if (cd->getLanguage() == SrcLangExt_VHDL &&
-            (VhdlDocGen::VhdlClasses)cd->protection() != VhdlDocGen::ENTITYCLASS
-         ) {
-         continue;
-      }
+     
       if (!hasVisibleRoot(cd->baseClasses()) &&
             cd->isVisibleInHierarchy()
          ) { // root node in the forest
@@ -2328,7 +2313,7 @@ DotGfxHierarchyTable::DotGfxHierarchyTable()
    m_rootNodes = new QList<DotNode>;
    m_usedNodes = new QHash<QString, DotNode>; 
  
-   m_rootSubgraphs = new DotNodeList;
+   m_rootSubgraphs = new SortedList<DotNode *>;
 
    // build a graph with each class as a node and the inheritance relations
    // as edges
@@ -2340,27 +2325,43 @@ DotGfxHierarchyTable::DotGfxHierarchyTable()
    // m_usedNodes now contains all nodes in the graph
 
    // color the graph into a set of independent subgraphs
-   bool done = false;
+   bool done    = false;
    int curColor = 0;
+
    QListIterator<DotNode> dnli(*m_rootNodes);
 
-   while (!done) { // there are still nodes to color
+   while (! done) { 
+      // there are still nodes to color
       DotNode *n;
-      done = true; // we are done unless there are still uncolored nodes
-      for (dnli.toLast(); (n = dnli.current()); --dnli) {
-         if (n->m_subgraphId == -1) { // not yet colored
-            //printf("Starting at node %s (%p): %d\n",n->m_label.data(),n,curColor);
-            done = false; // still uncolored nodes
+
+      // we are done unless there are still uncolored nodes
+      done = true; 
+     
+      dnli.toBack();
+
+      while (dnli.hasPrevious() ) {
+         n = dnli.previous();
+
+         if (n->m_subgraphId == -1) { 
+            // still uncolored nodes
+            done = false; 
+
             n->m_subgraphId = curColor;
+
             n->markAsVisible();
             n->colorConnectedNodes(curColor);
             curColor++;
-            const DotNode *dn = n->findDocNode();
+
+            DotNode *dn = n->findDocNode();
+
             if (dn != 0) {
                m_rootSubgraphs->inSort(dn);
+
             } else {
                m_rootSubgraphs->inSort(n);
+
             }
+
          }
       }
    }
@@ -2495,18 +2496,21 @@ void DotClassGraph::determineTruncatedNodes(QList<DotNode> &queue, bool includeP
    }
 }
 
-bool DotClassGraph::determineVisibleNodes(DotNode *rootNode,
-      int maxNodes, bool includeParents)
+bool DotClassGraph::determineVisibleNodes(DotNode *rootNode, int maxNodes, bool includeParents)
 {
    QList<DotNode> childQueue;
    QList<DotNode> parentQueue;
-   QArray<int> childTreeWidth;
-   QArray<int> parentTreeWidth;
+
+   QVector<int> childTreeWidth;
+   QVector<int> parentTreeWidth;
+
    childQueue.append(rootNode);
    if (includeParents) {
       parentQueue.append(rootNode);
    }
+
    bool firstNode = true; // flag to force reprocessing rootNode in the parent loop
+
    // despite being marked visible in the child loop
    while ((childQueue.count() > 0 || parentQueue.count() > 0) && maxNodes > 0) {
       static int maxDistance = Config_getInt("MAX_DOT_GRAPH_DEPTH");
@@ -2596,9 +2600,10 @@ void DotClassGraph::buildGraph(ClassDef *cd, DotNode *n, bool base, int distance
    // ---- Add inheritance relations
 
    if (m_graphType == DotNode::Inheritance || m_graphType == DotNode::Collaboration) {
-      BaseClassList *bcl = base ? cd->baseClasses() : cd->subClasses();
+      SortedList<BaseClassDef *> *bcl = base ? cd->baseClasses() : cd->subClasses();
+
       if (bcl) {
-         BaseClassListIterator bcli(*bcl);
+         QListIterator<BaseClassDef *> bcli(*bcl);
          BaseClassDef *bcd;
          for ( ; (bcd = bcli.current()) ; ++bcli ) {
             //printf("-------- inheritance relation %s->%s templ=`%s'\n",
@@ -2884,7 +2889,7 @@ QByteArray DotClassGraph::writeGraph(FTextStream &out, GraphOutputFormat graphFo
 
    // derive target file names from baseName
    QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
-   QByteArray absBaseName = d.absPath().utf8() + "/" + baseName;
+   QByteArray absBaseName = d.absolutePath().toUtf8() + "/" + baseName;
    QByteArray absDotName  = absBaseName + ".dot";
    QByteArray absMapName  = absBaseName + ".map";
    QByteArray absPdfName  = absBaseName + ".pdf";
@@ -2933,7 +2938,7 @@ QByteArray DotClassGraph::writeGraph(FTextStream &out, GraphOutputFormat graphFo
          // run dot to create a bitmap image
          QByteArray dotArgs(maxCmdLine);
 
-         DotRunner *dotRun = new DotRunner(absDotName, d.absPath().data(), true, absImgName);
+         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().data(), true, absImgName);
          dotRun->addJob(imgExt, absImgName);
 
          if (generateImageMap) {
@@ -2943,7 +2948,7 @@ QByteArray DotClassGraph::writeGraph(FTextStream &out, GraphOutputFormat graphFo
          DotManager::instance()->addRun(dotRun);
 
       } else if (graphFormat == GOF_EPS) { // run dot to create a .eps image
-         DotRunner *dotRun = new DotRunner(absDotName, d.absPath().data(), false);
+         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().data(), false);
          if (usePDFLatex) {
             dotRun->addJob("pdf", absPdfName);
          } else {
@@ -3241,7 +3246,7 @@ QByteArray DotInclDepGraph::writeGraph(FTextStream &out,
    }
 
    QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
-   QByteArray absBaseName = d.absPath().utf8() + "/" + baseName;
+   QByteArray absBaseName = d.absolutePath().toUtf8() + "/" + baseName;
    QByteArray absDotName  = absBaseName + ".dot";
    QByteArray absMapName  = absBaseName + ".map";
    QByteArray absPdfName  = absBaseName + ".pdf";
@@ -3266,14 +3271,14 @@ QByteArray DotInclDepGraph::writeGraph(FTextStream &out,
       if (graphFormat == GOF_BITMAP) {
          // run dot to create a bitmap image
          QByteArray dotArgs(maxCmdLine);
-         DotRunner *dotRun = new DotRunner(absDotName, d.absPath().data(), true, absImgName);
+         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().data(), true, absImgName);
          dotRun->addJob(imgExt, absImgName);
          if (generateImageMap) {
             dotRun->addJob(MAP_CMD, absMapName);
          }
          DotManager::instance()->addRun(dotRun);
       } else if (graphFormat == GOF_EPS) {
-         DotRunner *dotRun = new DotRunner(absDotName, d.absPath().data(), false);
+         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().data(), false);
          if (usePDFLatex) {
             dotRun->addJob("pdf", absPdfName);
          } else {
@@ -3518,7 +3523,7 @@ QByteArray DotCallGraph::writeGraph(FTextStream &out, GraphOutputFormat graphFor
    QByteArray mapName  = baseName;
 
    QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
-   QByteArray absBaseName = d.absPath().utf8() + "/" + baseName;
+   QByteArray absBaseName = d.absolutePath().toUtf8() + "/" + baseName;
    QByteArray absDotName  = absBaseName + ".dot";
    QByteArray absMapName  = absBaseName + ".map";
    QByteArray absPdfName  = absBaseName + ".pdf";
@@ -3543,7 +3548,7 @@ QByteArray DotCallGraph::writeGraph(FTextStream &out, GraphOutputFormat graphFor
       if (graphFormat == GOF_BITMAP) {
          // run dot to create a bitmap image
          QByteArray dotArgs(maxCmdLine);
-         DotRunner *dotRun = new DotRunner(absDotName, d.absPath().data(), true, absImgName);
+         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().data(), true, absImgName);
          dotRun->addJob(imgExt, absImgName);
          if (generateImageMap) {
             dotRun->addJob(MAP_CMD, absMapName);
@@ -3552,7 +3557,7 @@ QByteArray DotCallGraph::writeGraph(FTextStream &out, GraphOutputFormat graphFor
 
       } else if (graphFormat == GOF_EPS) {
          // run dot to create a .eps image
-         DotRunner *dotRun = new DotRunner(absDotName, d.absPath().data(), false);
+         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().data(), false);
          if (usePDFLatex) {
             dotRun->addJob("pdf", absPdfName);
          } else {
@@ -3658,7 +3663,7 @@ QByteArray DotDirDeps::writeGraph(FTextStream &out,
    QByteArray mapName = escapeCharsInString(baseName, false);
 
    QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
-   QByteArray absBaseName = d.absPath().utf8() + "/" + baseName;
+   QByteArray absBaseName = d.absolutePath().toUtf8() + "/" + baseName;
    QByteArray absDotName  = absBaseName + ".dot";
    QByteArray absMapName  = absBaseName + ".map";
    QByteArray absPdfName  = absBaseName + ".pdf";
@@ -3726,14 +3731,14 @@ QByteArray DotDirDeps::writeGraph(FTextStream &out,
       if (graphFormat == GOF_BITMAP) {
          // run dot to create a bitmap image
          QByteArray dotArgs(maxCmdLine);
-         DotRunner *dotRun = new DotRunner(absDotName, d.absPath().data(), true, absImgName);
+         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().data(), true, absImgName);
          dotRun->addJob(imgExt, absImgName);
          if (generateImageMap) {
             dotRun->addJob(MAP_CMD, absMapName);
          }
          DotManager::instance()->addRun(dotRun);
       } else if (graphFormat == GOF_EPS) {
-         DotRunner *dotRun = new DotRunner(absDotName, d.absPath().data(), false);
+         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().data(), false);
          if (usePDFLatex) {
             dotRun->addJob("pdf", absPdfName);
          } else {
@@ -3876,7 +3881,7 @@ void generateGraphLegend(const char *path)
 
       // run dot to generate the a bitmap image from the graph
 
-      DotRunner *dotRun = new DotRunner(absDotName, d.absPath().data(), true, absImgName);
+      DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().data(), true, absImgName);
       dotRun->addJob(imgExt, absImgName);
       DotManager::instance()->addRun(dotRun);
 
@@ -3905,10 +3910,10 @@ void writeDotGraphFromFile(const char *inFile, const char *outDir,
 
    QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
    QByteArray imgName = (QByteArray)outFile + "." + imgExt;
-   QByteArray absImgName = d.absPath().utf8() + "/" + imgName;
-   QByteArray absOutFile = d.absPath().utf8() + "/" + outFile;
+   QByteArray absImgName = d.absolutePath().toUtf8() + "/" + imgName;
+   QByteArray absOutFile = d.absolutePath().toUtf8() + "/" + outFile;
 
-   DotRunner dotRun(inFile, d.absPath().data(), false, absImgName);
+   DotRunner dotRun(inFile, d.absolutePath().data(), false, absImgName);
    if (format == GOF_BITMAP) {
       dotRun.addJob(imgExt, absImgName);
    } else { // format==GOF_EPS
@@ -3957,9 +3962,9 @@ void writeDotImageMapFromFile(FTextStream &t,
    QByteArray mapName = baseName + ".map";
    QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
    QByteArray imgName = baseName + "." + imgExt;
-   QByteArray absOutFile = d.absPath().utf8() + "/" + mapName;
+   QByteArray absOutFile = d.absolutePath().toUtf8() + "/" + mapName;
 
-   DotRunner dotRun(inFile, d.absPath().data(), false);
+   DotRunner dotRun(inFile, d.absolutePath().data(), false);
    dotRun.addJob(MAP_CMD, absOutFile);
    dotRun.preventCleanUp();
    if (!dotRun.run()) {
@@ -4117,7 +4122,7 @@ void DotGroupCollaboration::addMemberList( MemberList *ml )
    if ( !( ml && ml->count()) ) {
       return;
    }
-   MemberListIterator defli(*ml);
+   QListIterator<MemberDef> defli(*ml);
    MemberDef *def;
    for (; (def = defli.current()); ++defli) {
       QByteArray tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxygen::htmlFileExtension
@@ -4229,7 +4234,7 @@ QByteArray DotGroupCollaboration::writeGraph( FTextStream &t,
    QByteArray baseName    = m_diskName;
    QByteArray imgName     = baseName + "." + imgExt;
    QByteArray mapName     = baseName + ".map";
-   QByteArray absPath     = d.absPath().data();
+   QByteArray absPath     = d.absolutePath().data();
    QByteArray absBaseName = absPath + "/" + baseName;
    QByteArray absDotName  = absBaseName + ".dot";
    QByteArray absImgName  = absBaseName + "." + imgExt;
@@ -4287,7 +4292,7 @@ QByteArray DotGroupCollaboration::writeGraph( FTextStream &t,
       if (graphFormat == GOF_BITMAP) { // run dot to create a bitmap image
          QByteArray dotArgs(maxCmdLine);
 
-         DotRunner *dotRun = new DotRunner(absDotName, d.absPath().data(), false);
+         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().data(), false);
          dotRun->addJob(imgExt, absImgName);
          if (writeImageMap) {
             dotRun->addJob(MAP_CMD, absMapName);
@@ -4295,7 +4300,7 @@ QByteArray DotGroupCollaboration::writeGraph( FTextStream &t,
          DotManager::instance()->addRun(dotRun);
 
       } else if (graphFormat == GOF_EPS) {
-         DotRunner *dotRun = new DotRunner(absDotName, d.absPath().data(), false);
+         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().data(), false);
          if (usePDFLatex) {
             dotRun->addJob("pdf", absPdfName);
          } else {

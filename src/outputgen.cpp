@@ -55,7 +55,7 @@ void OutputGenerator::startPlainFile(const char *name)
 
 void OutputGenerator::endPlainFile()
 {
-   t.unsetDevice();
+   t.setDevice(0);
    delete file;
 
    file = 0;

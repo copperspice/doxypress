@@ -24,19 +24,17 @@
 
 #include <types.h>
 #include <template.h>
+#include <sortedlist.h>
 
 class Definition;
 class ClassDef;
 class ClassSDict;
-class BaseClassList;
 class PageDef;
 class GroupDef;
 class NamespaceDef;
-class BaseClassList;
 class NamespaceSDict;
 class FileDef;
 class FileList;
-class FileNameList;
 class DirSDict;
 class DirList;
 class DirDef;
@@ -54,7 +52,7 @@ class MemberNameInfoSDict;
 struct MemberInfo;
 class MemberGroup;
 class MemberGroupSDict;
-class MemberGroupList;
+class QList<MemberGroup>;
 
 //----------------------------------------------------
 
@@ -467,9 +465,11 @@ class ClassListContext : public RefCountedContext, public TemplateListIntf
    virtual int  count() const;
    virtual TemplateVariant at(int index) const;
    virtual TemplateListIntf::ConstIterator *createIterator() const;
+
    virtual int addRef()  {
       return RefCountedContext::addRef();
    }
+
    virtual int release() {
       return RefCountedContext::release();
    }
@@ -477,6 +477,7 @@ class ClassListContext : public RefCountedContext, public TemplateListIntf
  private:
    ClassListContext();
    ~ClassListContext();
+
    class Private;
    Private *p;
 };
@@ -524,7 +525,7 @@ class ClassInheritanceNodeContext : public RefCountedContext, public TemplateStr
       return RefCountedContext::release();
    }
 
-   void addChildren(const BaseClassList *bcl, bool hideSuper);
+   void addChildren(const SortedList<BaseClassDef *> *bcl, bool hideSuper);
 
  private:
    ClassInheritanceNodeContext(ClassDef *);
@@ -638,8 +639,10 @@ class NestingContext : public RefCountedContext, public TemplateListIntf
    void addClasses(const ClassSDict &clDict, bool rootOnly);
    void addDirs(const DirSDict &);
    void addDirs(const DirList &);
-   void addFiles(const FileNameList &);
-   void addFiles(const FileList &);
+
+   void addFiles(const SortedList<FileName *> &);
+   void addFiles(const SortedList<FileName *> &);
+
    void addPages(const PageSDict &pages, bool rootOnly);
    void addModules(const GroupSDict &modules);
    void addModules(const GroupList &modules);
@@ -1097,7 +1100,7 @@ class InheritanceNodeContext : public RefCountedContext, public TemplateStructIn
 class InheritanceListContext : public RefCountedContext, public TemplateListIntf
 {
  public:
-   static InheritanceListContext *alloc(const BaseClassList *list, bool baseClasses) {
+   static InheritanceListContext *alloc(const SortedList<BaseClassDef *> *list, bool baseClasses) {
       return new InheritanceListContext(list, baseClasses);
    }
 
@@ -1113,7 +1116,7 @@ class InheritanceListContext : public RefCountedContext, public TemplateListIntf
    }
 
  private:
-   InheritanceListContext(const BaseClassList *list, bool baseClasses);
+   InheritanceListContext(const SortedList<BaseClassDef *> *list, bool baseClasses);
    ~InheritanceListContext();
    class Private;
    Private *p;
@@ -1187,7 +1190,7 @@ class MemberGroupListContext : public RefCountedContext, public TemplateListIntf
    static MemberGroupListContext *alloc() {
       return new MemberGroupListContext;
    }
-   static MemberGroupListContext *alloc(Definition *def, const QByteArray &relPath, const MemberGroupList *list) {
+   static MemberGroupListContext *alloc(Definition *def, const QByteArray &relPath, const QList<MemberGroup> *list) {
       return new MemberGroupListContext(def, relPath, list);
    }
    static MemberGroupListContext *alloc(Definition *def, const QByteArray &relPath, const MemberGroupSDict *dict, bool subGrouping) {
@@ -1207,7 +1210,7 @@ class MemberGroupListContext : public RefCountedContext, public TemplateListIntf
 
  private:
    MemberGroupListContext();
-   MemberGroupListContext(Definition *def, const QByteArray &relPath, const MemberGroupList *list);
+   MemberGroupListContext(Definition *def, const QByteArray &relPath, const QList<MemberGroup> *list);
    MemberGroupListContext(Definition *def, const QByteArray &relPath, const MemberGroupSDict *mgDict, bool subGrouping);
    ~MemberGroupListContext();
    class Private;

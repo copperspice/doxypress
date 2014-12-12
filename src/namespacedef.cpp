@@ -679,7 +679,7 @@ void NamespaceDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) c
 
    MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
    if (allMemberList) {
-      MemberListIterator mli(*allMemberList);
+      QListIterator<MemberDef> mli(*allMemberList);
       MemberDef *md;
       for (mli.toFirst(); (md = mli.current()); ++mli) {
          if (md->getNamespaceDef() == this && md->isLinkable() && !md->isEnumValue()) {

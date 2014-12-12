@@ -297,30 +297,23 @@ static void writeTemplateArgumentList(ArgumentList *al, FTextStream &t, Definiti
    if (al) {
       t << indentStr << "<templateparamlist>" << endl;
 
-/*
-      broom
-      ArgumentListIterator ali(*al);
-      Argument *a;
-      for (ali.toFirst(); (a = ali.current()); ++ali) {
-*/
-
-      for (auto a : *al) {
+      for (auto item : *al) {
          t << indentStr << "  <param>" << endl;
 
-         if (!a->type.isEmpty()) {
+         if (! item.type.isEmpty()) {
             t << indentStr <<  "    <type>";
-            linkifyText(TextGeneratorDocbookImpl(t), scope, fileScope, 0, a->type);
+            linkifyText(TextGeneratorDocbookImpl(t), scope, fileScope, 0, item.type);
             t << "</type>" << endl;
          }
 
-         if (!a->name.isEmpty()) {
-            t << indentStr <<  "    <declname>" << a->name << "</declname>" << endl;
-            t << indentStr <<  "    <defname>" << a->name << "</defname>" << endl;
+         if (! item.name.isEmpty()) {
+            t << indentStr <<  "    <declname>" << item.name << "</declname>" << endl;
+            t << indentStr <<  "    <defname>" << item.name << "</defname>" << endl;
          }
 
-         if (!a->defval.isEmpty()) {
+         if (! item.defval.isEmpty()) {
             t << indentStr << "    <defval>";
-            linkifyText(TextGeneratorDocbookImpl(t), scope, fileScope, 0, a->defval);
+            linkifyText(TextGeneratorDocbookImpl(t), scope, fileScope, 0, item.defval);
             t << "</defval>" << endl;
          }
 
@@ -514,21 +507,16 @@ static void generateDocbookForMember(MemberDef *md, FTextStream &t, Definition *
             t << " {" << endl;
             int cnt = 0;
 
-/*          broom - for
-            MemberListIterator emli(*enumFields);
-            MemberDef *emd;
-            for (emli.toFirst(); (emd = emli.current()); ++emli) {
-*/
             for (auto item: *enumFields) {
                if (cnt != 0) {
                   t << "," << endl;
                }
 
-               t << "<link linkend=\"" << memberOutputFileBase(emd) << "_1" << item->anchor() << "\">";
-               writeDocbookString(t, item->name());
+               t << "<link linkend=\"" << memberOutputFileBase(item) << "_1" << item.anchor() << "\">";
+               writeDocbookString(t, item.name());
 
                t << "</link>";
-               if (! item->initializer().isEmpty()) {
+               if (! item.initializer().isEmpty()) {
                   writeDocbookString(t, item->initializer());
                }
 
@@ -663,7 +651,7 @@ static void generateDocbookForMember(MemberDef *md, FTextStream &t, Definition *
          writeDocbookDocBlock(t, md->docFile(), md->docLine(), md->getOuterScope(), md, md->documentation());
          t << endl;
          if (enumFields != 0) {
-            MemberListIterator emli(*enumFields);
+            QListIterator<MemberDef> emli(*enumFields);
             MemberDef *emd;
             t << "               <formalpara>" << endl;
             t << "                    <title>Enumerator:</title>" << endl;
@@ -789,7 +777,7 @@ static void generateDocbookSection(Definition *d, FTextStream &t, MemberList *ml
    if (ml == 0) {
       return;
    }
-   MemberListIterator mli(*ml);
+   QListIterator<MemberDef> mli(*ml);
    MemberDef *md;
    int count = 0;
    int doc_count = 0;
@@ -1662,7 +1650,7 @@ void generateDocbook()
 
    QByteArray outputDirectory = Config_getString("DOCBOOK_OUTPUT");
    if (outputDirectory.isEmpty()) {
-      outputDirectory = QDir::currentPath().utf8();
+      outputDirectory = QDir::currentPath().toUtf8();
    } else {
       QDir dir(outputDirectory);
       if (!dir.exists()) {
@@ -1693,13 +1681,15 @@ void generateDocbook()
 
    QByteArray fileName = outputDirectory + "/index.xml";
    QByteArray dbk_projectName = Config_getString("PROJECT_NAME");
-   QFile f(fileName);
 
-   f.setName(fileName);
+   QFile f(fileName);
+   f.setFileName(fileName);
+
    if (!f.open(QIODevice::WriteOnly)) {
       err("Cannot open file %s for writing!\n", fileName.data());
       return;
    }
+
    FTextStream t(&f);
    //t.setEncoding(FTextStream::UnicodeUTF8);
 

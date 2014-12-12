@@ -21,28 +21,31 @@
 #include <QList>
 
 #include <cassert>
+
 #include <memberdef.h>
 #include <stringmap.h>
+#include <sortedlist.h>
 #include <types.h>
 
 class GroupDef;
 class MemberGroup;
-class MemberGroupList;
 class StorageIntf;
 
 /** A list of MemberDef objects. */
-class MemberList : public QList<MemberDef>
+class MemberList : public SortedList<MemberDef *>
 {
  public:
    MemberList();
    MemberList(MemberListType lt);
+
    ~MemberList();
+
    MemberListType listType() const {
       return m_listType;
    }
+
    static QByteArray listTypeAsString(MemberListType type);
-   bool insert(uint index, const MemberDef *md);
-   void inSort(const MemberDef *md);
+   bool insert(uint index, const MemberDef *md); 
    void append(const MemberDef *md);
 
    int varCount() const       {
@@ -129,7 +132,8 @@ class MemberList : public QList<MemberDef>
    void addListReferences(Definition *def);
    void findSectionsInDocumentation();
    void setNeedsSorting(bool b);
-   MemberGroupList *getMemberGroupList() const {
+
+   QList<MemberGroup> *getMemberGroupList() const {
       return memberGroupList;
    }
 
@@ -137,7 +141,6 @@ class MemberList : public QList<MemberDef>
    void unmarshal(StorageIntf *s);
 
  private:
-   int compareValues(const MemberDef *item1, const MemberDef *item2) const;
    int m_varCnt;
    int m_funcCnt;
    int m_enumCnt;
@@ -148,19 +151,14 @@ class MemberList : public QList<MemberDef>
    int m_friendCnt;
    int m_numDecMembers; // number of members in the brief part of the memberlist
    int m_numDocMembers; // number of members in the detailed part of the memberlist
-   MemberGroupList *memberGroupList;
+
+   QList<MemberGroup> *memberGroupList;
+
    bool m_inGroup; // is this list part of a group definition
    bool m_inFile;  // is this list part of a file definition
    MemberListType m_listType;
-   bool m_needsSorting;
-};
 
-/** An iterator for MemberDef objects in a MemberList. */
-class MemberListIterator : public QListIterator<MemberDef>
-{
- public:
-   MemberListIterator(const QList<MemberDef> &list);
-   virtual ~MemberListIterator() {}
+   bool m_needsSorting;
 };
 
 /** An unsorted dictionary of MemberDef objects. */

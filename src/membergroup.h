@@ -121,19 +121,6 @@ class MemberGroup
    QList<ListItemInfo> *m_xrefListItems;
 };
 
-/** A list of MemberGroup objects. */
-class MemberGroupList : public QList<MemberGroup>
-{
-};
-
-/** An iterator for MemberGroup objects in a MemberGroupList. */
-class MemberGroupListIterator : public QListIterator<MemberGroup>
-{
- public:
-   MemberGroupListIterator(const MemberGroupList &l) :
-      QListIterator<MemberGroup>(l) {}
-};
-
 /** A sorted dictionary of MemberGroup objects. */
 class MemberGroupSDict : public LongMap<QSharedPointer<MemberGroup>>
 {

@@ -595,13 +595,17 @@ static void generateJSNavTree(const QList<FTVNode> &nodeList)
             elemCount++;
             if (li.current() && elemCount >= maxElemCount) { // switch to new sub-index
                tsidx << "};" << endl;
+
                elemCount = 0;
                fsidx.close();
                subIndex++;
-               fsidx.setName(htmlOutput + "/navtreeindex" + QByteArray().setNum(subIndex) + ".js");
+
+               fsidx.setFileName(htmlOutput + "/navtreeindex" + QByteArray().setNum(subIndex) + ".js");
+
                if (!fsidx.open(QIODevice::WriteOnly)) {
                   break;
                }
+
                tsidx.setDevice(&fsidx);
                tsidx << "var NAVTREEINDEX" << subIndex << " =" << endl;
                tsidx << "{" << endl;

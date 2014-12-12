@@ -1646,7 +1646,7 @@ static QByteArray pathDoxyExec;
 void setPerlModDoxyfile(const QByteArray &qs)
 {
    pathDoxyfile = qs;
-   pathDoxyExec = QDir::currentPath().utf8();
+   pathDoxyExec = QDir::currentPath().toUtf8();
 }
 
 class PerlModGenerator
@@ -1850,7 +1850,7 @@ void PerlModGenerator::generatePerlModForMember(MemberDef *md, Definition *)
       MemberList *enumFields = md->enumFieldList();
       if (enumFields) {
          m_output.openList("values");
-         MemberListIterator emli(*enumFields);
+         QListIterator<MemberDef> emli(*enumFields);
          MemberDef *emd;
          for (emli.toFirst(); (emd = emli.current()); ++emli) {
             m_output.openHash()
@@ -1878,7 +1878,7 @@ void PerlModGenerator::generatePerlModForMember(MemberDef *md, Definition *)
 
    MemberList *rbml = md->reimplementedBy();
    if (rbml) {
-      MemberListIterator mli(*rbml);
+      QListIterator<MemberDef> mli(*rbml);
       m_output.openList("reimplemented_by");
       for (mli.toFirst(); (rmd = mli.current()); ++mli)
          m_output.openHash()
@@ -1904,7 +1904,7 @@ void PerlModGenerator::generatePerlModSection(Definition *d,
    }
 
    m_output.openList("members");
-   MemberListIterator mli(*ml);
+   QListIterator<MemberDef> mli(*ml);
    MemberDef *md;
    for (mli.toFirst(); (md = mli.current()); ++mli) {
       generatePerlModForMember(md, d);
@@ -2416,11 +2416,13 @@ bool PerlModGenerator::generatePerlModOutput()
 
 bool PerlModGenerator::createOutputFile(QFile &f, const char *s)
 {
-   f.setName(s);
-   if (!f.open(QIODevice::WriteOnly)) {
+   f.setFileName(s);
+
+   if (! f.open(QIODevice::WriteOnly)) {
       err("Cannot open file %s for writing!\n", s);
       return false;
    }
+
    return true;
 }
 
@@ -2428,7 +2430,7 @@ bool PerlModGenerator::createOutputDir(QDir &perlModDir)
 {
    QByteArray outputDirectory = Config_getString("OUTPUT_DIRECTORY");
    if (outputDirectory.isEmpty()) {
-      outputDirectory = QDir::currentPath().utf8();
+      outputDirectory = QDir::currentPath().toUtf8();
    } else {
       QDir dir(outputDirectory);
       if (!dir.exists()) {

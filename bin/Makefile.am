@@ -129,6 +129,7 @@ Doxygen_SOURCES = \
    src/rtfdocvisitor.cpp \
    src/rtfgen.cpp \
    src/rtfstyle.cpp \
+   src/sortedlist.cpp \
    src/searchindex.cpp \
    src/sqlite3gen.cpp \
    src/store.cpp \

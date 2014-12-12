@@ -117,7 +117,7 @@ void MemberGroup::writeDocumentationPage(OutputList &ol, const char *scopeName, 
 void MemberGroup::addGroupedInheritedMembers(OutputList &ol, ClassDef *cd, MemberListType lt, ClassDef *inheritedFrom, const QByteArray &inheritId)
 {
    //printf("** addGroupedInheritedMembers()\n");
-   MemberListIterator li(*memberList);
+   QListIterator<MemberDef> li(*memberList);
    MemberDef *md;
 
    for (li.toFirst(); (md = li.current()); ++li) {
@@ -134,7 +134,7 @@ int MemberGroup::countGroupedInheritedMembers(MemberListType lt)
 {
    //printf("** countGroupedInheritedMembers()\n");
    int count = 0;
-   MemberListIterator li(*memberList);
+   QListIterator<MemberDef> li(*memberList);
    MemberDef *md;
    for (li.toFirst(); (md = li.current()); ++li) {
       //printf("matching %d == %d\n",lt,md->getSectionList(m_parent)->listType());
@@ -185,7 +185,7 @@ int MemberGroup::countInheritableMembers(ClassDef *inheritedFrom) const
 void MemberGroup::distributeMemberGroupDocumentation()
 {
    //printf("MemberGroup::distributeMemberGroupDocumentation() %s\n",grpHeader.data());
-   MemberListIterator li(*memberList);
+   QListIterator<MemberDef> li(*memberList);
    MemberDef *md;
    for (li.toFirst(); (md = li.current()); ++li) {
       //printf("checking md=%s\n",md->name().data());
