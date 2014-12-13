@@ -19,9 +19,12 @@
 
 #include <classdef.h>
 #include <config.h>
+#include <dirdef.h>
 #include <dot.h>
 #include <filedef.h>
 #include <filename.h>
+#include <groupdef.h>
+
 
 // BaseClassList --> SortedList<BaseClassDef *>
 // BaseClassListIterator --> QListIterator<BaseClassDef *>
@@ -57,6 +60,14 @@ int compareValues(const ClassDef *item1, const ClassDef *item2)
 }
 
 
+// DirList ->  SortedList<DirDef *>
+
+int compareValues(const DirDef *item1, const DirDef *item2)
+{
+    return qstricmp(item1->shortName(), item2->shortName());
+}
+
+
 // DotNodeList --> SortedList<DotNode *>
 
 int compareValues(const DotNode *item1, const DotNode *item2) 
@@ -65,11 +76,11 @@ int compareValues(const DotNode *item1, const DotNode *item2)
 }
 
 
-// OutputNameList -->  SortedList<FileList *>
+// FileList 
 
-int compareValues(const FileList *item1, const FileList *item2) 
+int compareValues(const FileDef *md1, const FileDef *md2) 
 {
-   return qstricmp(item1->path(), item2->path());
+      return qstricmp(md1->name(), md2->name());
 }
 
 
@@ -78,7 +89,7 @@ int compareValues(const FileList *item1, const FileList *item2)
 
 int compareValues(const FileName *item1, const FileName *item2)
 {
-  int retval;
+   int retval;
 
    if (Config_getBool("FULL_PATH_NAMES")) {
       retval = qstricmp(item1->fullName(), item2->fullName());
@@ -89,6 +100,15 @@ int compareValues(const FileName *item1, const FileName *item2)
    }
 
    return retval;
+}
+
+
+//   GroupList --> SortedList<GroupDef *>
+//   GroupListIterator --> QListIterator<GroupDef *>
+
+int compareValues(const GroupDef *item1, const GroupDef *item2) 
+{
+   return qstrcmp(item1->groupTitle(), item2->groupTitle());
 }
 
 
@@ -117,9 +137,10 @@ int compareValues(const MemberDef *c1, const MemberDef *c2)
 }
 
 
+// OutputNameList -->  SortedList<FileList *>
 
-
-//   ../src/groupdef.cpp:220:16: error: 'class DirList' has no member named 'inSort'
-
-//   ../src/groupdef.cpp:142:17: error: 'class FileList' has no member named 'inSort'
+int compareValues(const FileList *item1, const FileList *item2) 
+{
+   return qstricmp(item1->path(), item2->path());
+}
 

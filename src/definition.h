@@ -22,15 +22,15 @@
 #include <QHash>
 
 #include <types.h>
+#include <sortedlist.h>
 
+class DefinitionImpl;
 class FileDef;
-class OutputList;
+class FTextStream;
+class GroupDef;
 class MemberSDict;
 class MemberDef;
-class GroupDef;
-class GroupList;
-class DefinitionImpl;
-class FTextStream;
+class OutputList;
 
 struct ListItemInfo;
 struct SectionInfo;
@@ -252,7 +252,7 @@ class Definition : public DefinitionIntf
    /** Returns the programming language this definition was written in. */
    SrcLangExt getLanguage() const;
 
-   GroupList *partOfGroups() const;
+   SortedList<GroupDef *> *partOfGroups() const;
 
    QList<ListItemInfo> *xrefListItems() const;
 

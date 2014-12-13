@@ -15,26 +15,27 @@
  *
 *************************************************************************/
 
-#include <membergroup.h>
-#include <memberlist.h>
-#include <outputlist.h>
-#include <util.h>
+#include <QCryptographicHash>
+
 #include <classdef.h>
-#include <namespacedef.h>
-#include <filedef.h>
-#include <language.h>
-#include <groupdef.h>
 #include <doxygen.h>
 #include <docparser.h>
-#include <marshal.h>
 #include <entry.h>
+#include <filedef.h>
+#include <groupdef.h>
+#include <language.h>
+#include <marshal.h>
+#include <membergroup.h>
+#include <memberlist.h>
+#include <namespacedef.h>
+#include <outputlist.h>
+#include <util.h>
 
 MemberGroup::MemberGroup()
 {
 }
 
-MemberGroup::MemberGroup(Definition *parent,
-                         int id, const char *hdr, const char *d, const char *docFile)
+MemberGroup::MemberGroup(Definition *parent, int id, const char *hdr, const char *d, const char *docFile)
 {
    //printf("New member group id=%d header=%s desc=%s\n",id,hdr,d);
    memberList      = new MemberList(MemberListType_memberGroup);
@@ -59,7 +60,7 @@ MemberGroup::~MemberGroup()
 
 void MemberGroup::insertMember(MemberDef *md)
 {  
-   MemberDef *firstMd = memberList->getFirst();
+   MemberDef *firstMd = memberList->first();
 
    if (inSameSection && memberList->count() > 0 && firstMd->getSectionList(m_parent) != md->getSectionList(m_parent)) {
       inSameSection = false;
@@ -73,10 +74,11 @@ void MemberGroup::insertMember(MemberDef *md)
 
    // copy the group of the first member in the memberGroup
    GroupDef *gd;
+
    if (firstMd && (gd = firstMd->getGroupDef())) {
-      md->setGroupDef(gd, firstMd->getGroupPri(),
-                      firstMd->getGroupFileName(), firstMd->getGroupStartLine(),
-                      firstMd->getGroupHasDocs());
+      md->setGroupDef(gd, firstMd->getGroupPri(), firstMd->getGroupFileName(), 
+                      firstMd->getGroupStartLine(), firstMd->getGroupHasDocs());
+
       gd->insertMember(md);
    }
 }
@@ -87,12 +89,13 @@ void MemberGroup::setAnchors()
 }
 
 void MemberGroup::writeDeclarations(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd, bool showInline)
-{
-   //printf("MemberGroup::writeDeclarations() %s\n",grpHeader.data());
+{  
    QByteArray ldoc = doc;
+
    if (!ldoc.isEmpty()) {
       ldoc.prepend("<a name=\"" + anchor() + "\" id=\"" + anchor() + "\"></a>");
    }
+
    memberList->writeDeclarations(ol, cd, nd, fd, gd, grpHeader, ldoc, false, showInline);
 }
 
@@ -114,14 +117,12 @@ void MemberGroup::writeDocumentationPage(OutputList &ol, const char *scopeName, 
    memberList->writeDocumentationPage(ol, scopeName, container);
 }
 
-void MemberGroup::addGroupedInheritedMembers(OutputList &ol, ClassDef *cd, MemberListType lt, ClassDef *inheritedFrom, const QByteArray &inheritId)
-{
-   //printf("** addGroupedInheritedMembers()\n");
-   QListIterator<MemberDef> li(*memberList);
-   MemberDef *md;
-
-   for (li.toFirst(); (md = li.current()); ++li) {
+void MemberGroup::addGroupedInheritedMembers(OutputList &ol, ClassDef *cd, MemberListType lt,    
+                                             ClassDef *inheritedFrom, const QByteArray &inheritId)
+{  
+   for (auto md : *memberList) {   
       //printf("matching %d == %d\n",lt,md->getSectionList(m_parent)->listType());
+
       if (lt == md->getSectionList(m_parent)->listType()) {
          MemberList ml(lt);
          ml.append(md);
@@ -133,11 +134,11 @@ void MemberGroup::addGroupedInheritedMembers(OutputList &ol, ClassDef *cd, Membe
 int MemberGroup::countGroupedInheritedMembers(MemberListType lt)
 {
    //printf("** countGroupedInheritedMembers()\n");
-   int count = 0;
-   QListIterator<MemberDef> li(*memberList);
-   MemberDef *md;
-   for (li.toFirst(); (md = li.current()); ++li) {
+   int count = 0;  
+
+   for (auto md : *memberList) {  
       //printf("matching %d == %d\n",lt,md->getSectionList(m_parent)->listType());
+
       if (lt == md->getSectionList(m_parent)->listType()) {
          count++;
       }
@@ -151,16 +152,15 @@ int MemberGroup::countGroupedInheritedMembers(MemberListType lt)
  */
 void MemberGroup::addToDeclarationSection()
 {
-   if (inDeclSection) {
-      //printf("Adding group %p to list %p (type=%d)\n",this,
-      //                              inDeclSection,inDeclSection->listType());
+   if (inDeclSection) {    
       inDeclSection->addMemberGroup(this);
    }
 }
 
 int MemberGroup::countDecMembers(GroupDef *gd)
 {
-   if (m_numDecMembers == -1) { /* number of member not cached */
+   if (m_numDecMembers == -1) { 
+      /* number of member not cached */
       memberList->countDecMembers(gd);
       m_numDecMembers = memberList->numDecMembers();
    }
@@ -181,38 +181,28 @@ int MemberGroup::countInheritableMembers(ClassDef *inheritedFrom) const
    return memberList->countInheritableMembers(inheritedFrom);
 }
 
-
 void MemberGroup::distributeMemberGroupDocumentation()
 {
-   //printf("MemberGroup::distributeMemberGroupDocumentation() %s\n",grpHeader.data());
-   QListIterator<MemberDef> li(*memberList);
-   MemberDef *md;
-   for (li.toFirst(); (md = li.current()); ++li) {
-      //printf("checking md=%s\n",md->name().data());
+   for (auto item : *memberList) {        
       // find the first member of the group with documentation
-      if (!md->documentation().isEmpty()       ||
-            !md->briefDescription().isEmpty()    ||
-            !md->inbodyDocumentation().isEmpty()
-         ) {
-         //printf("found it!\n");
+
+      if (! item->documentation().isEmpty() || ! item->briefDescription().isEmpty() || ! item->inbodyDocumentation().isEmpty() ) {         
+
+         // distribute docs of item to other members of the list            
+         for (auto omd : *memberList) {  
+
+            if (item != omd && omd->documentation().isEmpty() && omd->briefDescription().isEmpty() && omd->inbodyDocumentation().isEmpty() ) {
+               //printf("Copying documentation to member %s\n",omd->name().data());
+
+               omd->setBriefDescription(item->briefDescription(), item->briefFile(), item->briefLine());
+               omd->setDocumentation(item->documentation(), item->docFile(), item->docLine());
+               omd->setInbodyDocumentation(item->inbodyDocumentation(), item->inbodyFile(), item->inbodyLine());
+            }
+         }
+
          break;
       }
-   }
-   if (md) { // distribute docs of md to other members of the list
-      //printf("Member %s has documentation!\n",md->name().data());
-      MemberDef *omd;
-      for (li.toFirst(); (omd = li.current()); ++li) {
-         if (md != omd && omd->documentation().isEmpty() &&
-               omd->briefDescription().isEmpty() &&
-               omd->inbodyDocumentation().isEmpty()
-            ) {
-            //printf("Copying documentation to member %s\n",omd->name().data());
-            omd->setBriefDescription(md->briefDescription(), md->briefFile(), md->briefLine());
-            omd->setDocumentation(md->documentation(), md->docFile(), md->docLine());
-            omd->setInbodyDocumentation(md->inbodyDocumentation(), md->inbodyFile(), md->inbodyLine());
-         }
-      }
-   }
+   }   
 }
 
 int MemberGroup::varCount() const
@@ -271,15 +261,16 @@ void MemberGroup::setInGroup(bool b)
 }
 
 QByteArray MemberGroup::anchor() const
-{
-   uchar md5_sig[16];
-   QByteArray sigStr(33);
+{     
    QByteArray locHeader = grpHeader;
+
    if (locHeader.isEmpty()) {
       locHeader = "[NOHEADER]";
    }
-   MD5Buffer((const unsigned char *)locHeader.data(), locHeader.length(), md5_sig);
-   MD5SigToString(md5_sig, sigStr.data(), 33);
+
+   QByteArray sigStr;
+   sigStr = QCryptographicHash::hash(locHeader, QCryptographicHash::Md5).toHex();
+
    return "amgrp" + sigStr;
 }
 
@@ -288,11 +279,7 @@ void MemberGroup::addListReferences(Definition *def)
    memberList->addListReferences(def);
    if (m_xrefListItems && def) {
       QByteArray name = def->getOutputFileBase() + "#" + anchor();
-      addRefItem(m_xrefListItems,
-                 name,
-                 theTranslator->trGroup(true, true),
-                 name,
-                 grpHeader, 0, def);
+      addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, 0, def);
    }
 }
 
@@ -341,13 +328,11 @@ void MemberGroup::setRefItems(const QList<ListItemInfo> *sli)
    if (sli) {
       // deep copy the list
       if (m_xrefListItems == 0) {
-         m_xrefListItems = new QList<ListItemInfo>;
-         m_xrefListItems->setAutoDelete(true);
-      }
-      QListIterator<ListItemInfo> slii(*sli);
-      ListItemInfo *lii;
-      for (slii.toFirst(); (lii = slii.current()); ++slii) {
-         m_xrefListItems->append(new ListItemInfo(*lii));
+         m_xrefListItems = new QList<ListItemInfo>;        
+      }    
+
+      for (auto item : *sli ) {
+         m_xrefListItems->append(ListItemInfo(item));
       }
    }
 }
@@ -361,16 +346,15 @@ void MemberGroup::writeTagFile(FTextStream &tagFile)
 
 void MemberGroupInfo::setRefItems(const QList<ListItemInfo> *sli)
 {
-   if (!sli) {
+   if (! sli) {
       return;
    }
+
    if (m_sli == 0) {
-      m_sli = new QList<ListItemInfo>;
-      m_sli->setAutoDelete(true);
+      m_sli = new QList<ListItemInfo>;      
    }
-   QListIterator<ListItemInfo> slii(*sli);
-   ListItemInfo *ili;
-   for (slii.toFirst(); (ili = slii.current()); ++slii) {
-      m_sli->append(new ListItemInfo(*ili));
+
+   for (auto item : *sli ) {
+      m_sli->append(ListItemInfo(item));
    }
 }

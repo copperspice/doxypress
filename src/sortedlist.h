@@ -22,9 +22,12 @@
 
 class BaseClassDef;
 class ClassDef;
+class DirDef;
 class DotNode;
+class FileDef;
 class FileList;
 class FileName;
+class GroupDef;
 class MemberDef;
 
  
@@ -45,11 +48,14 @@ void SortedList<T>::inSort(const T &data)
 }
 
 int compareValues(const BaseClassDef *item1, const BaseClassDef *item2);
-int compareValues(const ClassDef *item1, const ClassDef *item2);
-int compareValues(const DotNode *item1, const DotNode *item2); 
-int compareValues(const FileList *item1, const FileList *item2); 
-int compareValues(const FileName *item1, const FileName *item2);
-int compareValues(const MemberDef *c1, const MemberDef *c2);
+int compareValues(const ClassDef *item1,     const ClassDef *item2);
+int compareValues(const DirDef *item1,       const DirDef *item2);
+int compareValues(const DotNode *item1,      const DotNode *item2); 
+int compareValues(const FileDef *item1,      const FileDef *item2);
+int compareValues(const FileList *item1,     const FileList *item2); 
+int compareValues(const FileName *item1,     const FileName *item2);
+int compareValues(const GroupDef *item1,     const GroupDef *item2); 
+int compareValues(const MemberDef *item1,    const MemberDef *item2);
 
 
 #endif

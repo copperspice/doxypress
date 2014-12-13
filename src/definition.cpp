@@ -60,8 +60,9 @@ class DefinitionImpl
 
    MemberSDict *sourceRefByDict;
    MemberSDict *sourceRefsDict;
+
    QList<ListItemInfo> *xrefListItems;
-   GroupList *partOfGroups;
+   SortedList<GroupDef *> *partOfGroups;
 
    DocInfo   *details;    // not exported
    DocInfo   *inbodyDocs; // not exported
@@ -552,20 +553,14 @@ void Definition::writeDocAnchorsToTagFile(FTextStream &tagFile)
 }
 
 bool Definition::_docsAlreadyAdded(const QByteArray &doc, QByteArray &sigList)
-{
-   uchar md5_sig[16];
-  
+{  
    // to avoid mismatches due to differences in indenting, we first remove
    // double whitespaces...
 
    QByteArray docStr = doc.simplifyWhiteSpace();
 
-   QByteArray sigStr();
-   sigStr = QCryptographicHash::hash(docStr, QCryptographicHash::Md5).toHex();
-
-
-   //printf("%s:_docsAlreadyAdded doc='%s' sig='%s' docSigs='%s'\n",
-   //    name().data(),doc.data(),sigStr.data(),sigList.data());
+   QByteArray sigStr;
+   sigStr = QCryptographicHash::hash(docStr, QCryptographicHash::Md5).toHex();  
 
    if (sigList.find(sigStr) == -1) { // new docs, add signature to prevent re-adding it
       sigList += ":" + sigStr;
@@ -1340,8 +1335,9 @@ QByteArray Definition::localName() const
 void Definition::makePartOfGroup(GroupDef *gd)
 {
    if (m_impl->partOfGroups == 0) {
-      m_impl->partOfGroups = new GroupList;
+      m_impl->partOfGroups = new SortedList<GroupDef *>;
    }
+
    m_impl->partOfGroups->append(gd);
 }
 
@@ -1766,7 +1762,7 @@ FileDef *Definition::getBodyDef() const
    return m_impl->body ? m_impl->body->fileDef : 0;
 }
 
-GroupList *Definition::partOfGroups() const
+SortedList<GroupDef *> *Definition::partOfGroups() const
 {
    return m_impl->partOfGroups;
 }

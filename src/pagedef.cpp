@@ -32,10 +32,11 @@ PageDef::PageDef(const char *f, int l, const char *n, const char *d, const char 
    : Definition(f, l, 1, n), m_title(t)
 {
    setDocumentation(d, f, l);
-   m_subPageDict = new PageSDict(7);
-   m_pageScope = 0;
+
+   m_subPageDict  = new PageSDict();
+   m_pageScope    = 0;
    m_nestingLevel = 0;
-   m_showToc = false;
+   m_showToc      = false;
 }
 
 PageDef::~PageDef()
@@ -50,24 +51,35 @@ void PageDef::findSectionsInDocumentation()
 
 GroupDef *PageDef::getGroupDef() const
 {
-   GroupList *groups = partOfGroups();
-   return groups != 0 ? groups->getFirst() : 0;
+   SortedList<GroupDef *> *groups = partOfGroups();
+
+   if (groups) {       
+       return groups->first();
+
+   } else {
+      return 0;
+
+   }
 }
 
 QByteArray PageDef::getOutputFileBase() const
 {
    if (getGroupDef()) {
       return getGroupDef()->getOutputFileBase();
+
    } else {
       return m_fileName;
+
    }
 }
 
 void PageDef::setFileName(const char *name, bool dontEscape)
 {
    static bool shortNames = Config_getBool("SHORT_NAMES");
+
    if (shortNames && !dontEscape) {
       m_fileName = convertNameToFile(name);
+
    } else {
       m_fileName = name;
    }
@@ -77,9 +89,12 @@ void PageDef::setFileName(const char *name, bool dontEscape)
 void PageDef::addInnerCompound(Definition *def)
 {
    if (def->definitionType() == Definition::TypePage) {
-      PageDef *pd = (PageDef *)def;
-      m_subPageDict->append(pd->name(), pd);
+
+      QSharedPointer<PageDef> pd( (PageDef *)def );
+      m_subPageDict->insert(pd->name(), pd);
+
       def->setOuterScope(this);
+
       if (this == Doxygen::mainPage) {
          pd->setNestingLevel(m_nestingLevel);
       } else {
@@ -90,28 +105,33 @@ void PageDef::addInnerCompound(Definition *def)
 
 bool PageDef::hasParentPage() const
 {
-   return getOuterScope() &&
-          getOuterScope()->definitionType() == Definition::TypePage;
+   return getOuterScope() && getOuterScope()->definitionType() == Definition::TypePage;
 }
 
 void PageDef::writeTagFile(FTextStream &tagFile)
 {
-   bool found = name() == "citelist";
-   QHashIterator<QString, RefList> rli(*Doxygen::xrefLists);
-   RefList *rl;
-
-   for (rli.toFirst(); (rl = rli.current()) && !found; ++rli) {
-      if (rl->listName() == name()) {
-         found = true;
-         break;
+   bool found = (name() == "citelist");
+   
+   if (! found ) {      
+      for (auto item : *Doxygen::xrefLists) {         
+   
+         if (item.listName() == name()) {
+            found = true;
+            break;
+         }      
       }
    }
-   if (!found) { // not one of the generated related pages
+
+   if (!found) { 
+      // not one of the generated related pages
+
       tagFile << "  <compound kind=\"page\">" << endl;
       tagFile << "    <name>" << name() << "</name>" << endl;
       tagFile << "    <title>" << convertToXML(title()) << "</title>" << endl;
       tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << "</filename>" << endl;
+
       writeDocAnchorsToTagFile(tagFile);
+
       tagFile << "  </compound>" << endl;
    }
 }
@@ -142,6 +162,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    }
 
    ol.pushGeneratorState();
+
    //2.{
    ol.disableAllBut(OutputGenerator::Man);
    startFile(ol, getOutputFileBase(), manPageName, title(), HLI_Pages, !generateTreeView);
@@ -157,14 +178,17 @@ void PageDef::writeDocumentation(OutputList &ol)
       }
       ol.endQuickIndices();
    }
-   SectionInfo *si = Doxygen::sectionDict->find(name());
+
+   QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(name());
 
    // save old generator state and write title only to Man generator
    ol.pushGeneratorState();
+
    //2.{
    ol.disableAllBut(OutputGenerator::Man);
    ol.startTitleHead(manPageName);
    ol.endTitleHead(manPageName, manPageName);
+
    if (si) {
       ol.generateDoc(docFile(), docLine(), this, 0, si->title, true, false, 0, true, false);
       ol.endSection(si->label, si->type);
@@ -174,18 +198,17 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    // for Latex the section is already generated as a chapter in the index!
    ol.pushGeneratorState();
+
    //2.{
    ol.disable(OutputGenerator::Latex);
    ol.disable(OutputGenerator::RTF);
    ol.disable(OutputGenerator::Man);
+
    if (!title().isEmpty() && !name().isEmpty() && si != 0) {
-      //ol.startSection(si->label,si->title,si->type);
+ 
       startTitle(ol, getOutputFileBase(), this);
       ol.generateDoc(docFile(), docLine(), this, 0, si->title, true, false, 0, true, false);
-      //stringToSearchIndex(getOutputFileBase(),
-      //                    theTranslator->trPage(true,true)+" "+si->title,
-      //                    si->title);
-      //ol.endSection(si->label,si->type);
+      
       endTitle(ol, getOutputFileBase(), name());
    }
    ol.startContents();
@@ -234,17 +257,15 @@ void PageDef::writePageDocumentation(OutputList &ol)
    Doxygen::markdownSupport = markdownEnabled;
 
    if (hasSubPages()) {
-      // for printed documentation we write subpages as section's of the
-      // parent page.
+      // for printed documentation we write subpages as section's of the parent page.
       ol.pushGeneratorState();
       ol.disableAll();
       ol.enable(OutputGenerator::Latex);
-      ol.enable(OutputGenerator::RTF);
+      ol.enable(OutputGenerator::RTF);  
 
-      PageSDict::Iterator pdi(*m_subPageDict);
-      PageDef *subPage = pdi.toFirst();
-      for (pdi.toFirst(); (subPage = pdi.current()); ++pdi) {
+      for (auto subPage : *m_subPageDict) {
          SectionInfo::SectionType sectionType = SectionInfo::Paragraph;
+
          switch (m_nestingLevel) {
             case  0:
                sectionType = SectionInfo::Page;
@@ -281,19 +302,13 @@ void PageDef::writePageDocumentation(OutputList &ol)
 bool PageDef::visibleInIndex() const
 {
    static bool externalPages = Config_getBool("EXTERNAL_PAGES");
-   return // not part of a group
-      !getGroupDef() &&
-      // not an externally defined page
-      (!isReference() || externalPages)
-      ;
+
+   return ! getGroupDef() && (!isReference() || externalPages);
 }
 
 bool PageDef::documentedPage() const
 {
-   return // not part of a group
-      !getGroupDef() &&
-      // not an externally defined page
-      !isReference();
+   return ! getGroupDef() && ! isReference();
 }
 
 bool PageDef::hasSubPages() const

@@ -397,26 +397,25 @@ struct SearchDocEntry {
    QByteArray args;
    QByteArray extId;
    QByteArray url;
+
    GrowBuf  importantText;
    GrowBuf  normalText;
 };
 
 struct SearchIndexExternal::Private {
-   Private() : docEntries(12251) {}
+  
    StringMap<QSharedPointer<SearchDocEntry>> docEntries;
    SearchDocEntry *current;
 };
 
 SearchIndexExternal::SearchIndexExternal() : SearchIndexIntf(External)
 {
-   p = new SearchIndexExternal::Private;
-   p->docEntries.setAutoDelete(true);
+   p = new SearchIndexExternal::Private;  
    p->current = 0;
 }
 
 SearchIndexExternal::~SearchIndexExternal()
 {
-   //printf("p->docEntries.count()=%d\n",p->docEntries.count());
    delete p;
 }
 

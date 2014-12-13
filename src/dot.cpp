@@ -4019,7 +4019,7 @@ void DotGroupCollaboration::buildGraph(GroupDef *gd)
    // hierarchy.
 
    // Write parents
-   GroupList *groups = gd->partOfGroups();
+   SortedList<GroupDef *> *groups = gd->partOfGroups();
    if ( groups ) {
       GroupListIterator gli(*groups);
       GroupDef *d;

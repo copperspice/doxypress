@@ -22,39 +22,25 @@
 #include <QList>
 
 #include <stringmap.h>
+#include <sortedlist.h>
 
 class Definition;
 
 /** This struct represents an item in the list of references. */
 struct RefItem {
-   RefItem() : scope(0) {}
+   RefItem() : scope(0) 
+   {}
+
    QByteArray text;           //!< text of the item.
    QByteArray listAnchor;     //!< anchor in the list
-
-   QByteArray prefix;         //!< type prefix for the name
-   Definition *scope;       //!< scope to use for references.
+   QByteArray prefix;         //!< type prefix for the name  
    QByteArray name;           //!< name of the entity containing the reference
    QByteArray title;          //!< display name of the entity
    QByteArray args;           //!< optional arguments for the entity (if function)
-   //bool written;
-   QList<RefItem> extraItems; //!< more items belonging to the same entity
+
+   Definition *scope;         //!< scope to use for references.  
 };
 
-/** List of items sorted by title */
-class SortedRefItems : public StringMap<QSharedPointer<RefItem>>
-{
- public:
-   SortedRefItems() : StringMap<QSharedPointer<RefItem>>()
-   {}
-
-   virtual ~SortedRefItems() 
-   {}
-
- private:
-   int compareValues(const RefItem *r1, const RefItem *r2) const {
-      return qstricmp(r1->title, r2->title);
-   }
-};
 
 /** List of cross-referenced items
  *
@@ -89,10 +75,10 @@ class RefList
 
    QByteArray m_listName;
    QByteArray m_pageTitle;
-   QByteArray m_secTitle;
+   QByteArray m_secTitle;  
 
-   SortedRefItems *m_itemList;
-
+   QMap<QByteArray, QList<RefItem>> m_itemMap;
+  
    QHash<long, RefItem *> *m_dict;
    QHashIterator<long, RefItem *> *m_dictIterator;
 };

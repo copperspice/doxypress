@@ -45,14 +45,15 @@
 //---------------------------------------------------------------------------
 
 GroupDef::GroupDef(const char *df, int dl, const char *na, const char *t, const char *refFileName) : Definition(df, dl, 1, na)
-{
-   fileList       = new FileList;
-   classSDict     = new ClassSDict();
-   groupList      = new GroupList;
+{   
+   classSDict     = new ClassSDict();   
    namespaceSDict = new NamespaceSDict();
    pageDict       = new PageSDict();
    exampleDict    = new PageSDict();
-   dirList        = new DirList;
+
+   dirList        = new SortedList<DirDef *>;
+   fileList       = new FileList;
+   groupList      = new SortedList<GroupDef *>;
 
    allMemberNameInfoSDict = new MemberNameInfoSDict();
    
@@ -75,16 +76,18 @@ GroupDef::GroupDef(const char *df, int dl, const char *na, const char *t, const 
 
 GroupDef::~GroupDef()
 {
+   delete dirList;
    delete fileList;
-   delete classSDict;
    delete groupList;
+
+   delete classSDict;   
    delete namespaceSDict;
    delete pageDict;
    delete exampleDict;
    delete allMemberList;
    delete allMemberNameInfoSDict;
    delete memberGroupSDict;
-   delete dirList;
+ 
 }
 
 void GroupDef::setGroupTitle( const char *t )
@@ -507,13 +510,17 @@ bool GroupDef::containsGroup(const GroupDef *def)
 {
    if (this == def) {
       return true;
+
    } else if (groupList->find(def) >= 0) {
       return true;
+
    } else { // look for subgroups as well
-      GroupList *groups = partOfGroups();
+      SortedList<GroupDef *> *groups = partOfGroups();
+
       if (groups) {
          GroupListIterator it(*groups);
          GroupDef *gd;
+
          for (; (gd = it.current()); ++it) {
             if (gd->containsGroup(def)) {
                return true;
@@ -525,17 +532,13 @@ bool GroupDef::containsGroup(const GroupDef *def)
 }
 
 void GroupDef::addGroup(const GroupDef *def)
-{
-   //printf("adding group `%s' to group `%s'\n",def->name().data(),name().data());
-   //if (Config_getBool("SORT_MEMBER_DOCS"))
-   //  groupList->inSort(def);
-   //else
+{   
    groupList->append(*def);
 }
 
 bool GroupDef::isASubGroup() const
 {
-   GroupList *groups = partOfGroups();
+   SortedList<GroupDef *> *groups = partOfGroups();
    return groups != 0 && groups->count() != 0;
 }
 

@@ -25,16 +25,17 @@
 
 #define DOX_NOGROUP -1
 
+class ClassDef;
+class Definition;
+class FileDef;
+class FTextStream;
+class GroupDef;
 class MemberList;
 class MemberDef;
-class ClassDef;
 class NamespaceDef;
-class FileDef;
-class GroupDef;
 class OutputList;
-class Definition;
 class StorageIntf;
-class FTextStream;
+
 struct ListItemInfo;
 
 /** A class representing a group of members. */
@@ -42,12 +43,13 @@ class MemberGroup
 {
  public:
    MemberGroup();
-   MemberGroup(Definition *parent, int id, const char *header,
-               const char *docs, const char *docFile);
+   MemberGroup(Definition *parent, int id, const char *header, const char *docs, const char *docFile);
    ~MemberGroup();
+
    QByteArray header() const {
       return grpHeader;
    }
+
    int groupId() const {
       return grpId;
    }
@@ -56,24 +58,25 @@ class MemberGroup
    void writePlainDeclarations(OutputList &ol,
                                ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
                                ClassDef *inheritedFrom, const char *inheritId);
-   void writeDeclarations(OutputList &ol,
-                          ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
+
+   void writeDeclarations(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
                           bool showInline = false);
-   void writeDocumentation(OutputList &ol, const char *scopeName,
-                           Definition *container, bool showEnumValues, bool showInline);
-   void writeDocumentationPage(OutputList &ol, const char *scopeName,
-                               Definition *container);
+
+   void writeDocumentation(OutputList &ol, const char *scopeName, Definition *container, bool showEnumValues, bool showInline);
+   void writeDocumentationPage(OutputList &ol, const char *scopeName, Definition *container);
    void writeTagFile(FTextStream &);
-   void addGroupedInheritedMembers(OutputList &ol, ClassDef *cd,
-                                   MemberListType lt,
+
+   void addGroupedInheritedMembers(OutputList &ol, ClassDef *cd, MemberListType lt,
                                    ClassDef *inheritedFrom, const QByteArray &inheritId);
 
    const QByteArray &documentation() const {
       return doc;
    }
+
    bool allMembersInSameSection() const {
       return inSameSection;
    }
+
    void addToDeclarationSection();
    int countDecMembers(GroupDef *gd = 0);
    int countDocMembers();
@@ -94,12 +97,15 @@ class MemberGroup
    void setInGroup(bool b);
    void addListReferences(Definition *d);
    void setRefItems(const QList<ListItemInfo> *sli);
+
    MemberList *members() const {
       return memberList;
    }
+
    Definition *parent() const {
       return m_parent;
    }
+
    QByteArray anchor() const;
 
    void marshal(StorageIntf *s);
@@ -108,16 +114,20 @@ class MemberGroup
  private:
    MemberList *memberList;      // list of all members in the group
    MemberList *inDeclSection;
+
    int grpId;
    QByteArray grpHeader;
    QByteArray fileName;           // base name of the generated file
-   Definition *scope;
    QByteArray doc;
+   QByteArray m_docFile;
+
+   Definition *scope;
+   Definition *m_parent;
+  
    bool inSameSection;
    int  m_numDecMembers;
-   int  m_numDocMembers;
-   Definition *m_parent;
-   QByteArray m_docFile;
+   int  m_numDocMembers; 
+   
    QList<ListItemInfo> *m_xrefListItems;
 };
 
@@ -136,7 +146,9 @@ class MemberGroupSDict : public LongMap<QSharedPointer<MemberGroup>>
 
 /** Data collected for a member group */
 struct MemberGroupInfo {
-   MemberGroupInfo() : m_sli(0) {}
+   MemberGroupInfo() : m_sli(0)
+   {}
+
    ~MemberGroupInfo() {
       delete m_sli;
       m_sli = 0;
@@ -148,6 +160,7 @@ struct MemberGroupInfo {
    QByteArray doc;
    QByteArray docFile;
    QByteArray compoundName;
+
    QList<ListItemInfo> *m_sli;
 };
 

@@ -6075,26 +6075,22 @@ PageDef *addRelatedPage(const char *name, const QByteArray &ptitle,
 
 //----------------------------------------------------------------------------
 
-void addRefItem(const QList<ListItemInfo> *sli,
-                const char *key,
+void addRefItem(const QList<ListItemInfo> *sli, const char *key, 
                 const char *prefix, const char *name, const char *title, const char *args, Definition *scope)
-{
-   //printf("addRefItem(sli=%p,key=%s,prefix=%s,name=%s,title=%s,args=%s)\n",sli,key,prefix,name,title,args);
-   if (sli && key && key[0] != '@') { // check for @ to skip anonymous stuff (see bug427012)
-      QListIterator<ListItemInfo> slii(*sli);
-      ListItemInfo *lii;
-      for (slii.toFirst(); (lii = slii.current()); ++slii) {
+{   
+   if (sli && key && key[0] != '@') { 
+      // check for @ to skip anonymous stuff (see bug427012)
+    
+      for (auto lii : *sli) {   
          RefList *refList = Doxygen::xrefLists->find(lii->type);
-         if (refList
-               &&
-               (
-                  // either not a built-in list or the list is enabled
-                  (lii->type != "todo"       || Config_getBool("GENERATE_TODOLIST")) &&
-                  (lii->type != "test"       || Config_getBool("GENERATE_TESTLIST")) &&
-                  (lii->type != "bug"        || Config_getBool("GENERATE_BUGLIST"))  &&
-                  (lii->type != "deprecated" || Config_getBool("GENERATE_DEPRECATEDLIST"))
-               )
-            ) {
+
+         if (refList && ( (lii->type != "todo"       || Config_getBool("GENERATE_TODOLIST")) &&
+                          (lii->type != "test"       || Config_getBool("GENERATE_TESTLIST")) &&
+                          (lii->type != "bug"        || Config_getBool("GENERATE_BUGLIST"))  &&
+                          (lii->type != "deprecated" || Config_getBool("GENERATE_DEPRECATEDLIST")) ) ) {
+
+            // either not a built-in list or the list is enabled
+
             RefItem *item = refList->getRefItem(lii->itemId);
             assert(item != 0);
 
@@ -6113,16 +6109,21 @@ void addRefItem(const QList<ListItemInfo> *sli,
 
 bool recursivelyAddGroupListToTitle(OutputList &ol, Definition *d, bool root)
 {
-   GroupList *groups = d->partOfGroups();
-   if (groups) { // write list of group to which this definition belongs
-      if (root) {
+   SortedList<GroupDef *> *groups = d->partOfGroups();
+
+   if (groups) { 
+      // write list of group to which this definition belongs
+
+      if (root) { 
          ol.pushGeneratorState();
          ol.disableAllBut(OutputGenerator::Html);
          ol.writeString("<div class=\"ingroups\">");
       }
+
       GroupListIterator gli(*groups);
       GroupDef *gd;
       bool first = true;
+
       for (gli.toFirst(); (gd = gli.current()); ++gli) {
          if (recursivelyAddGroupListToTitle(ol, gd, false)) {
             ol.writeString(" &raquo; ");

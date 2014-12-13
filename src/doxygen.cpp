@@ -1479,7 +1479,7 @@ static ClassDef *createTagLessInstance(ClassDef *rootCd, ClassDef *templ, const 
       fd->insertClass(cd);
    }
 
-   GroupList *groups = rootCd->partOfGroups();
+   SortedList<GroupDef *> *groups = rootCd->partOfGroups();
 
    if ( groups != 0 ) {
       for (auto item : *groups) {
@@ -4799,26 +4799,18 @@ static void addListReferences()
       }
       {
          QList<ListItemInfo> *xrefItems = pd->xrefListItems();
-         addRefItem(xrefItems,
-                    name,
-                    theTranslator->trPage(true, true),
-                    name, pd->title(), 0, 0);
+         addRefItem(xrefItems, name, theTranslator->trPage(true, true), name, pd->title(), 0, 0);
       }
    }
 
    DirSDict::Iterator ddi(*Doxygen::directories);
    DirDef *dd = 0;
+
    for (ddi.toFirst(); (dd = ddi.current()); ++ddi) {
-      QByteArray name = dd->getOutputFileBase();
-      //if (dd->getGroupDef())
-      //{
-      //  name = dd->getGroupDef()->getOutputFileBase();
-      //}
+      QByteArray name = dd->getOutputFileBase();  
       QList<ListItemInfo> *xrefItems = dd->xrefListItems();
-      addRefItem(xrefItems,
-                 name,
-                 theTranslator->trDir(true, true),
-                 name, dd->displayName(), 0, 0);
+
+      addRefItem(xrefItems, name, theTranslator->trDir(true, true), name, dd->displayName(), 0, 0);
    }
 }
 

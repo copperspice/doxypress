@@ -21,23 +21,17 @@
 #include <QList>
 #include <QStringList>
 
-#include <stringmap.h>
 #include <definition.h>
+#include <stringmap.h>
+#include <sortedlist.h>
 
-class FileList;
 class ClassSDict;
+class DirDef;
 class FileDef;
+class FTextStream;
 class OutputList;
 class UsedDir;
-class FTextStream;
-class DirDef;
 
-/** A list of directories. */
-class DirList : public QList<DirDef>
-{
- public:
-   int compareValues(const DirDef *item1, const DirDef *item2) const;
-};
 
 /** A model of a directory symbol. */
 class DirDef : public Definition
@@ -67,12 +61,12 @@ class DirDef : public Definition
    }
 
    void addSubDir(DirDef *subdir);
-   FileList    *getFiles() const        {
+   FileList *getFiles() const        {
       return m_fileList;
    }
 
    void addFile(FileDef *fd);
-   const DirList &subDirs() const {
+   const SortedList<DirDef *> &subDirs() const {
       return m_subdirs;
    }
 
@@ -129,13 +123,18 @@ class DirDef : public Definition
    void addUsesDependency(DirDef *usedDir, FileDef *srcFd,FileDef *dstFd, bool inherited);
    void computeDependencies();
 
-   DirList m_subdirs;
+   SortedList<DirDef *> m_subdirs;
+
    QByteArray m_dispName;
    QByteArray m_shortName;
    QByteArray m_diskName;
-   FileList *m_fileList;                 // list of files in the group
+
+   // list of files in the group
+   FileList *m_fileList;                 
+
    int m_dirCount;
    int m_level;
+
    DirDef *m_parent;
 
    QHash<QString, UsedDir> *m_usedDirs;
@@ -216,10 +215,6 @@ class DirRelation
    UsedDir *m_dst;
 };
 
-inline int DirList::compareValues(const DirDef *item1, const DirDef *item2) const
-{
-   return qstricmp(item1->shortName(), item2->shortName());
-}
 
 /** A sorted dictionary of DirDef objects. */
 class DirSDict : public StringMap<QSharedPointer<DirDef>>

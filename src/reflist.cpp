@@ -28,22 +28,21 @@
  *  @param secTitle String representing the title of the section.
  */
 RefList::RefList(const char *listName, const char *pageTitle, const char *secTitle)
-{
-   m_itemList = 0;
+{   
    m_dict = 0;
    m_dictIterator = 0;
    m_id = 0;
-   m_listName = listName;
+
+   m_listName  = listName;
    m_pageTitle = pageTitle;
-   m_secTitle = secTitle;
+   m_secTitle  = secTitle;
 }
 
 /*! Destroy the todo list. Currently not called! */
 RefList::~RefList()
 {
    delete m_dictIterator;
-   delete m_dict;
-   delete m_itemList;
+   delete m_dict; 
 }
 
 /*! Adds a new item to the list.
@@ -103,8 +102,9 @@ RefItem *RefList::getNextRefItem()
 {  
    RefItem *retval = 0;
 
-   if (m_dictIterator && m_dictIterator->hasNext())  {     
-      retval = m_dictIterator->next();
+   if (m_dictIterator && m_dictIterator->hasNext())  {         
+      m_dictIterator->next();
+      retval = m_dictIterator->value();
    }  
 
    return retval;
@@ -127,75 +127,71 @@ QByteArray RefList::sectionTitle() const
 }
 
 void RefList::insertIntoList(const char *key, RefItem *item)
-{
-   if (m_itemList) {
-      m_itemList = new SortedRefItems();
-   }
+{     
+   bool found = m_itemMap.contains(key);
 
-   RefItem *ri = m_itemList->find(key);
+   if (found) {         
+      m_itemMap[key].append(*item);
+     
+   } else {     
+      QList<RefItem> xList;
+      xList.append(*item);
 
-   if (ri == 0) {
-      m_itemList->append(key, item);
-
-   } else {
-      // item already added to the list (i.e. multiple item for the same entity)   
-
-      if (ri != item) {
-         ri->extraItems.append(item);
-      }
+      m_itemMap.insert(key, xList);
    }
 }
 
 void RefList::generatePage()
-{
-   if (m_itemList) {
-      return;
+{  
+   QMap<QByteArray, QList<RefItem>> titleMap;
+
+   for (auto list : m_itemMap) {
+      RefItem &item = list.first();     
+      titleMap.insert(item.title, list);
    }
 
-   m_itemList->sort();
-
-   StringMap<QSharedPointer<RefItem>>::Iterator it(*m_itemList);
-   RefItem *item;
-
+   //
    QByteArray doc;
    doc += "<dl class=\"reflist\">";
 
-   for (it.toFirst(); (item = it.current()); ++it) {
+   for (auto list : titleMap) {
+
+      RefItem &item = list.first();
+
       doc += " <dt>";
       doc +=  "\\anchor ";
-      doc += item->listAnchor;
+      doc += item.listAnchor;
       doc += "\n";
 
-      if (item->scope) {
+      if (item.scope) {
          doc += "\\_setscope ";
-         doc += item->scope->name();
+         doc += item.scope->name();
          doc += " ";
       }
 
-      doc += item->prefix;
+      doc += item.prefix;
       doc += " \\_internalref ";
-      doc += item->name;
+      doc += item.name;
       doc += " \"";
-      doc += item->title;
+      doc += item.title;
       doc += "\" ";
 
       // write declaration in case a function with arguments
-      if (!item->args.isEmpty()) {
-         doc += item->args;
+      if (! item.args.isEmpty()) {
+         doc += item.args;
       }
 
       doc += "</dt><dd> ";
-      doc += item->text;
-      QListIterator<RefItem> li(item->extraItems);
-      RefItem *extraItem;
-      for (li.toFirst(); (extraItem = li.current()); ++li) {
-         doc += "<p>" + extraItem->text;
+      doc += item.text;
+      
+      for (auto xx = list.begin() + 1; xx != list.end(); ++xx) {
+         doc += "<p>" + xx->text;
       }
+
       doc += "</dd>";
    }
 
    doc += "</dl>\n";
 
-   //printf("generatePage('%s')\n",doc.data());
    addRelatedPage(m_listName, m_pageTitle, doc, 0, m_listName, 1, 0, 0, 0);
 }

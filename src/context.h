@@ -26,33 +26,33 @@
 #include <template.h>
 #include <sortedlist.h>
 
-class Definition;
+class ArgumentList;
 class ClassDef;
 class ClassSDict;
-class PageDef;
-class GroupDef;
-class NamespaceDef;
-class NamespaceSDict;
+class Definition;
+class DirDef;
+class DirSDict;
 class FileDef;
 class FileList;
-class DirSDict;
-class DirList;
-class DirDef;
-class PageSDict;
+class GroupDef;
 class GroupSDict;
 class GroupDef;
-class GroupList;
-struct IncludeInfo;
+class MemberNameInfoSDict;
+class MemberGroup;
+class MemberGroupSDict;
 class MemberList;
 class MemberSDict;
 class MemberDef;
-struct Argument;
-class ArgumentList;
-class MemberNameInfoSDict;
-struct MemberInfo;
-class MemberGroup;
-class MemberGroupSDict;
+class NamespaceDef;
+class NamespaceSDict;
+class PageDef;
+class PageSDict;
+
 class QList<MemberGroup>;
+
+struct Argument;
+struct IncludeInfo;
+struct MemberInfo;
 
 //----------------------------------------------------
 
@@ -638,14 +638,14 @@ class NestingContext : public RefCountedContext, public TemplateListIntf
    void addNamespaces(const NamespaceSDict &nsDict, bool rootOnly, bool addClasses);
    void addClasses(const ClassSDict &clDict, bool rootOnly);
    void addDirs(const DirSDict &);
-   void addDirs(const DirList &);
+   void addDirs(const SortedList<DirDef *> &);
 
    void addFiles(const SortedList<FileName *> &);
    void addFiles(const SortedList<FileName *> &);
 
    void addPages(const PageSDict &pages, bool rootOnly);
    void addModules(const GroupSDict &modules);
-   void addModules(const GroupList &modules);
+   void addModules(const SortedList<GroupDef *> &modules);
 
  private:
    NestingContext(const NestingNodeContext *parent, int level);
@@ -910,7 +910,7 @@ class ModuleListContext : public RefCountedContext, public TemplateListIntf
    }
 
    void addModules(const GroupSDict &);
-   void addModules(const GroupList &);
+   void addModules(const SortedList<GroupDef *> &);
 
  private:
    ModuleListContext();

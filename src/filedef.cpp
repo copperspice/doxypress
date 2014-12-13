@@ -75,8 +75,7 @@ class DevNullCodeDocInterface : public CodeOutputInterface
     \a nm the file name, and \a lref is an HTML anchor name if the
     file was read from a tag file or 0 otherwise
 */
-FileDef::FileDef(const char *p, const char *nm,
-                 const char *lref, const char *dn)
+FileDef::FileDef(const char *p, const char *nm, const char *lref, const char *dn)
    : Definition((QByteArray)p + nm, 1, 1, nm)
 {
    m_path = p;

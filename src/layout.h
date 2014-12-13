@@ -29,6 +29,7 @@ class QTextStream;
 /** @brief Base class representing a piece of a documentation page */
 struct LayoutDocEntry {
    virtual ~LayoutDocEntry() {}
+
    enum Kind {
       // Generic items for all pages
       MemberGroups,
@@ -214,6 +215,7 @@ struct LayoutNavEntry {
 class LayoutDocManager
 {
    class Private;
+
  public:
    enum LayoutPart {
       Class, Namespace, File, Group, Directory,
@@ -223,7 +225,7 @@ class LayoutDocManager
    static LayoutDocManager &instance();
 
    /** Returns the list of LayoutDocEntry's in representation order for a given page identified by @a part. */
-   const QList<LayoutDocEntry> &docEntries(LayoutPart part) const;
+   const QList<LayoutDocEntry *> &docEntries(LayoutPart part) const;
 
    /** returns the (invisible) root of the navigation tree. */
    LayoutNavEntry *rootNavEntry() const;
@@ -231,11 +233,13 @@ class LayoutDocManager
    /** Parses a user provided layout */
    void parse(QTextStream &t, const char *fileName);
    void init();
+
  private:
    void addEntry(LayoutPart p, LayoutDocEntry *e);
    void clear(LayoutPart p);
    LayoutDocManager();
    ~LayoutDocManager();
+
    Private *d;
    friend class LayoutParser;
 };

@@ -60,9 +60,9 @@ Entry::Entry()
 }
 
 Entry::Entry(const Entry &e)
-{
-   //printf("Entry::Entry(%p):copy\n",this);
+{  
    num++;
+
    section     = e.section;
    type        = e.type;
    name        = e.name;
@@ -80,7 +80,9 @@ Entry::Entry(const Entry &e)
    virt        = e.virt;
    args        = e.args;
    bitfields   = e.bitfields;
-   argList     = e.argList->deepCopy();
+
+   argList     = e.argList;
+
    tArgLists = 0;
    program     = e.program;
    initializer = e.initializer;
@@ -131,7 +133,9 @@ Entry::Entry(const Entry &e)
    lang        = e.lang;
    hidden      = e.hidden;
    artificial  = e.artificial;
+
    groupDocType = e.groupDocType;
+
    id          = e.id;
 
    m_parent    = e.m_parent;

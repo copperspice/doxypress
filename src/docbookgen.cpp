@@ -995,7 +995,7 @@ static void writeInnerPages(const PageSDict *pl, FTextStream &t)
    }
 }
 
-static void writeInnerGroups(const GroupList *gl, FTextStream &t)
+static void writeInnerGroups(const SortedList<GroupDef *> *gl, FTextStream &t)
 {
    if (gl) {
       GroupListIterator gli(*gl);
@@ -1024,12 +1024,13 @@ static void writeInnerGroups(const GroupList *gl, FTextStream &t)
    }
 }
 
-static void writeInnerDirs(const DirList *dl, FTextStream &t)
+static void writeInnerDirs(const SortedList<DirDef *> *dl, FTextStream &t)
 {
    if (dl) {
       QListIterator<DirDef> subdirs(*dl);
       DirDef *subdir;
       QByteArray title = "Directories";
+
       if (subdirs.toFirst()) {
          t << "        <simplesect>" << endl;
          t << "            <title> " << title << " </title>" << endl;
@@ -1051,7 +1052,7 @@ static void writeInnerDirs(const DirList *dl, FTextStream &t)
    }
 }
 
-static void writeInnerGroupFiles(const GroupList *gl, FTextStream &t)
+static void writeInnerGroupFiles(const SortedList<GroupDef *> *gl, FTextStream &t)
 {
    if (gl) {
       GroupListIterator gli(*gl);

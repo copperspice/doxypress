@@ -2296,11 +2296,13 @@ void PerlModGenerator::generatePerlModForGroup(GroupDef *gd)
       m_output.closeList();
    }
 
-   GroupList *gl = gd->getSubGroups();
+   SortedList<GroupDef *> *gl = gd->getSubGroups();
+
    if (gl) {
       m_output.openList("groups");
       GroupListIterator gli(*gl);
       GroupDef *sgd;
+
       for (gli.toFirst(); (sgd = gli.current()); ++gli)
          m_output.openHash()
          .addFieldQuotedString("title", sgd->groupTitle())

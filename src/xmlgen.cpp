@@ -22,33 +22,33 @@
 
 #include <stdlib.h>
 
-#include <xmlgen.h>
-#include <doxygen.h>
-#include <message.h>
+#include <arguments.h>
 #include <config.h>
 #include <classlist.h>
-#include <util.h>
-#include <defargs.h>
-#include <outputgen.h>
-#include <dot.h>
-#include <pagedef.h>
-#include <filename.h>
-#include <dox_build_info.h>
-#include <xmldocvisitor.h>
+#include <dirdef.h>
 #include <docparser.h>
-#include <language.h>
-#include <parserintf.h>
-#include <arguments.h>
-#include <memberlist.h>
+#include <doxygen.h>
+#include <dox_build_info.h>
+#include <dot.h>
+#include <defargs.h>
 #include <groupdef.h>
+#include <htmlentity.h>
+#include <filename.h>
+#include <language.h>
+#include <message.h>
 #include <memberdef.h>
-#include <namespacedef.h>
+#include <memberlist.h>
 #include <membername.h>
 #include <membergroup.h>
-#include <dirdef.h>
-#include <section.h>
-#include <htmlentity.h>
+#include <namespacedef.h>
+#include <outputgen.h>
+#include <pagedef.h>
+#include <parserintf.h>
 #include <resourcemgr.h>
+#include <section.h>
+#include <util.h>
+#include <xmlgen.h>
+#include <xmldocvisitor.h>
 
 // no debug info
 #define XML_DB(x) do {} while(0)
@@ -1281,7 +1281,7 @@ static void writeInnerPages(const PageSDict *pl, FTextStream &t)
    }
 }
 
-static void writeInnerGroups(const GroupList *gl, FTextStream &t)
+static void writeInnerGroups(const SortedList<GroupDef *> *gl, FTextStream &t)
 {
    if (gl) {
       GroupListIterator gli(*gl);
@@ -1294,11 +1294,12 @@ static void writeInnerGroups(const GroupList *gl, FTextStream &t)
    }
 }
 
-static void writeInnerDirs(const DirList *dl, FTextStream &t)
+static void writeInnerDirs(const SortedList<DirDef *> *dl, FTextStream &t)
 {
    if (dl) {
       QListIterator<DirDef> subdirs(*dl);
       DirDef *subdir;
+
       for (subdirs.toFirst(); (subdir = subdirs.current()); ++subdirs) {
          t << "    <innerdir refid=\"" << subdir->getOutputFileBase()
            << "\">" << convertToXML(subdir->displayName()) << "</innerdir>" << endl;

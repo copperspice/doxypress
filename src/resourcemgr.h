@@ -23,10 +23,13 @@
 /** @brief Compiled resource */
 struct Resource {
    enum Type { Verbatim, Luminance, LumAlpha, CSS };
+
    const char *category;
    const char *name;
-   const unsigned char *data;
+
+   const char *data;
    int size;
+
    Type type;
 };
 
@@ -58,8 +61,8 @@ class ResourceMgr
  private:
    ResourceMgr();
    ~ResourceMgr();
-   class Private;
-   Private *p;
+
+   QHash<QString, const Resource *> m_resources;   
 };
 
 #endif

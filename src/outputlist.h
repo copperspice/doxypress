@@ -67,7 +67,8 @@ class OutputList : public OutputDocInterface
    OutputList(bool);
    virtual ~OutputList();
 
-   void add(const OutputGenerator *);
+   void add(OutputGenerator *);
+
    uint count() const {
       return m_outputs.count();
    }

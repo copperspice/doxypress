@@ -249,7 +249,7 @@ void marshalBodyInfo(StorageIntf *s, BodyInfo *bodyInfo)
    }
 }
 
-void marshalGroupList(StorageIntf *s, GroupList *groupList)
+void marshalGroupList(StorageIntf *s, SortedList<GroupDef *> *groupList)
 {
    if (groupList == 0) {
       marshalUInt(s, NULL_LIST); // null pointer representation
@@ -642,19 +642,24 @@ BodyInfo *unmarshalBodyInfo(StorageIntf *s)
    return result;
 }
 
-GroupList *unmarshalGroupList(StorageIntf *s)
+SortedList<GroupDef *> *unmarshalGroupList(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
+
    if (count == NULL_LIST) {
-      return 0;   // null list
+      return 0;   
    }
+
    assert(count < 1000000);
-   GroupList *result = new GroupList;
+
+   SortedList<GroupDef *> *result = new SortedList<GroupDef *>;
+
    for (i = 0; i < count; i++) {
       GroupDef *gd = (GroupDef *)unmarshalObjPointer(s);
       result->append(gd);
    }
+
    return result;
 }
 
@@ -662,15 +667,19 @@ MemberList *unmarshalMemberList(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
+
    if (count == NULL_LIST) {
       return 0;
    }
+
    MemberList *result = new MemberList;
    assert(count < 1000000);
+
    for (i = 0; i < count; i++) {
       MemberDef *md = (MemberDef *)unmarshalObjPointer(s);
       result->append(md);
    }
+
    result->unmarshal(s);
    return result;
 }

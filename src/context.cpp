@@ -2514,16 +2514,20 @@ class DirContext::Private : public DefinitionContext<DirContext::Private>
       return TemplateVariant(m_dirDef->shortName());
    }
    TemplateVariant dirs() const {
+
       if (!m_cache.dirs) {
          m_cache.dirs.reset(TemplateList::alloc());
-         const DirList &subDirs = m_dirDef->subDirs();
+         const SortedList<DirDef *> &subDirs = m_dirDef->subDirs();
+
          QListIterator<DirDef> it(subDirs);
          DirDef *dd;
+
          for (it.toFirst(); (dd = it.current()); ++it) {
             DirContext *dc = new DirContext(dd);
             m_cache.dirs->append(dc);
          }
       }
+
       return m_cache.dirs.get();
    }
    TemplateVariant files() const {
@@ -4683,9 +4687,10 @@ class NestingContext::Private : public GenericNodeListContext
       }
    }
 
-   void addDirs(const DirList &dirList) {
+   void addDirs(const SortedList<DirDef *> &dirList) {
       QListIterator<DirDef> li(dirList);
       DirDef *dd;
+
       for (li.toFirst(); (dd = li.current()); ++li) {
          append(NestingNodeContext::alloc(m_parent, dd, m_index, m_level, false));
          m_index++;
@@ -4739,9 +4744,10 @@ class NestingContext::Private : public GenericNodeListContext
          }
       }
    }
-   void addModules(const GroupList &list) {
+   void addModules(const SortedList<GroupDef *> &list) {
       GroupListIterator gli(list);
       GroupDef *gd;
+
       for (gli.toFirst(); (gd = gli.current()); ++gli) {
          if (gd->isVisible()) {
             append(NestingNodeContext::alloc(m_parent, gd, m_index, m_level, false));
@@ -4791,12 +4797,12 @@ void NestingContext::addNamespaces(const NamespaceSDict &nsDict, bool rootOnly, 
    p->addNamespaces(nsDict, rootOnly, addClasses);
 }
 
-void NestingContext::addDirs(const DirSDict &dirs)
+void NestingContext::addDirs(const SortedList<DirDef *> &dirs)
 {
    p->addDirs(dirs);
 }
 
-void NestingContext::addDirs(const DirList &dirs)
+void NestingContext::addDirs(const SortedList<DirDef *> &dirs)
 {
    p->addDirs(dirs);
 }
@@ -4821,7 +4827,7 @@ void NestingContext::addModules(const GroupSDict &modules)
    p->addModules(modules);
 }
 
-void NestingContext::addModules(const GroupList &modules)
+void NestingContext::addModules(const SortedList<GroupDef *> &modules)
 {
    p->addModules(modules);
 }
@@ -7074,6 +7080,7 @@ void generateOutputViaTemplate()
    {
       TemplateEngine e;
       TemplateContext *ctx = e.createContext();
+
       if (ctx) {
          SharedPtr<DoxygenContext>               doxygen              (DoxygenContext::alloc());
          SharedPtr<ConfigContext>                config               (ConfigContext::alloc());
@@ -7098,54 +7105,77 @@ void generateOutputViaTemplate()
 
          //%% Doxygen doxygen:
          ctx->set("doxygen", doxygen.get());
+
          //%% Translator tr:
          ctx->set("tr", tr.get());
+
          //%% Config config:
          ctx->set("config", config.get());
+
          //%% ClassList classList:
          ctx->set("classList", classList.get()); // not used for standard HTML
+
          //%% ClassTree classTree:
          ctx->set("classTree", classTree.get());
+
          //%% ClassIndex classIndex:
          ctx->set("classIndex", classIndex.get());
+
          //%% ClassHierarchy classHierarchy:
          ctx->set("classHierarchy", classHierarchy.get());
+
          //%% NamespaceList namespaceList:
          ctx->set("namespaceList", namespaceList.get());
+
          //%% NamespaceTree namespaceTree:
          ctx->set("namespaceTree", namespaceTree.get());
+
          //%% FileList fileList:
          ctx->set("fileList", fileList.get());
+
          //%% FileTree fileTree:
          ctx->set("fileTree", fileTree.get());
+
          //%% PageList pageList
          ctx->set("pageList", pageList.get());
+
          //%% PageTree pageTree
          ctx->set("pageTree", pageTree.get());
+
          //%% ExampleList exampleList
          ctx->set("exampleList", exampleList.get());
+
          //%% ModuleTree moduleTree
          ctx->set("moduleTree", moduleTree.get());
+
          //%% ModuleList moduleList
          ctx->set("moduleList", moduleList.get());
+        
          //%% DirList dirList
          ctx->set("dirList", dirList.get());
+
          //%% Page mainPage
          if (Doxygen::mainPage) {
             SharedPtr<PageContext> mainPage(PageContext::alloc(Doxygen::mainPage, true));
             ctx->set("mainPage", mainPage.get());
+
          } else {
             ctx->set("mainPage", false);
+
          }
+
          //%% GlobalsIndex globalsIndex:
          ctx->set("globalsIndex", globalsIndex.get());
+
          //%% ClassMembersIndex classMembersIndex:
          ctx->set("classMembersIndex", classMembersIndex.get());
+
          //%% NamespaceMembersIndex namespaceMembersIndex:
          ctx->set("namespaceMembersIndex", namespaceMembersIndex.get());
 
          // render HTML output
          Template *tpl = e.loadByName("htmllayout.tpl", 1);
+
          if (tpl) {
             g_globals.outputFormat = ContextGlobals::Html;
             g_globals.dynSectionId = 0;
@@ -7167,6 +7197,7 @@ void generateOutputViaTemplate()
          e.destroyContext(ctx);
       }
    }
+
 #if DEBUG_REF // should be 0, i.e. all objects are deleted
    printf("==== total ref count %d\n", RefCountedContext::s_totalCount);
 #endif

@@ -678,16 +678,13 @@ void ClassDef::insertUsedFile(FileDef *fd)
       return;
    }
 
-   if (m_impl->files.find(fd) == -1) {
+   if (! m_impl->files.contains(fd)) {
       m_impl->files.append(fd);
    }
 
-   if (m_impl->templateInstances) {
-      QHashIterator<QString, ClassDef> qdi(*m_impl->templateInstances);
-      ClassDef *cd;
-
-      for (qdi.toFirst(); (cd = qdi.current()); ++qdi) {
-         cd->insertUsedFile(fd);
+   if (m_impl->templateInstances) {     
+      for (auto item : *m_impl->templateInstances) {
+         item->insertUsedFile(fd);
       }
    }
 }
@@ -3117,7 +3114,7 @@ QByteArray ClassDef::getOutputFileBase() const
       if (inlineGroupedClasses && partOfGroups() != 0) {
          // point to the group that embeds this class
 
-         GroupList *temp = partOfGroups();
+         SortedList<GroupDef *> *temp = partOfGroups();
          GroupDef def = temp->at(0);
 
          return def.getOutputFileBase();
@@ -3125,7 +3122,7 @@ QByteArray ClassDef::getOutputFileBase() const
       } else if (inlineSimpleClasses && m_impl->isSimple && partOfGroups() != 0) {
          // point to simple struct inside a group
 
-         GroupList *temp = partOfGroups();
+         SortedList<GroupDef *> *temp = partOfGroups();
          GroupDef def = temp->at(0);
 
          return def.getOutputFileBase();
@@ -3448,16 +3445,11 @@ void ClassDef::addListReferences()
    //printf("ClassDef(%s)::addListReferences()\n",name().data());
    {
       QList<ListItemInfo> *xrefItems = xrefListItems();
-      addRefItem(xrefItems,
-                 qualifiedName(),
-                 lang == SrcLangExt_Fortran ? theTranslator->trType(true, true)
-                 : theTranslator->trClass(true, true),
-                 getOutputFileBase(),
-                 displayName(),
-                 0,
-                 this
-                );
+      addRefItem(xrefItems, qualifiedName(), 
+                 lang == SrcLangExt_Fortran ? theTranslator->trType(true, true) : theTranslator->trClass(true, true),
+                 getOutputFileBase(), displayName(), 0, this );
    }
+
    if (m_impl->memberGroupSDict) {
       MemberGroupSDict::Iterator mgli(*m_impl->memberGroupSDict);
       MemberGroup *mg;
@@ -3465,8 +3457,10 @@ void ClassDef::addListReferences()
          mg->addListReferences(this);
       }
    }
+
    QListIterator<MemberList> mli(m_impl->memberLists);
    MemberList *ml;
+
    for (mli.toFirst(); (ml = mli.current()); ++mli) {
       if (ml->listType()&MemberListType_detailedLists) {
          ml->addListReferences(this);

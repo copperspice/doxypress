@@ -25,20 +25,21 @@
 #include <definition.h>
 #include <memberlist.h>
 #include <stringmap.h>
+#include <sortedlist.h>
 
-class MemberList;
-class FileDef;
-class FileList;
 class ClassSDict;
 class ClassDef;
+class DirDef;
+class FileDef;
+class FileList;
+class FTextStream;
 class MemberDef;
-class OutputList;
+class MemberList;
+class MemberGroupSDict;
 class NamespaceDef;
 class NamespaceSDict;
-class MemberGroupSDict;
-class PackageDef;
-class DirDef;
-class FTextStream;
+class OutputList;
+class PackageDef; 
 
 /** Class representing the data associated with a \#include statement. */
 struct IncludeInfo {
@@ -299,7 +300,7 @@ class FileDef : public Definition
 };
 
 /** Class representing a list of FileDef objects. */
-class FileList : public QList<FileDef *>
+class FileList : public SortedList<FileDef *>
 {
  public:
    FileList() : m_pathName("tmp")
@@ -315,11 +316,7 @@ class FileList : public QList<FileDef *>
       return m_pathName;
    }
 
- private:
-   int compareValues(const FileDef *md1, const FileDef *md2) const {
-      return qstricmp(md1->name(), md2->name());
-   }
-
+ private:  
    QByteArray m_pathName;
 };
 

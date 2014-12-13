@@ -26,6 +26,7 @@
 #include <stringmap.h>
 #include <store.h>
 #include <section.h>
+#include <sortedlist.h>
 
 class ArgumentList;
 struct BaseInfo;
@@ -33,7 +34,6 @@ struct Grouping;
 struct SectionInfo;
 struct ListItemInfo;
 class MemberSDict;
-class GroupList;
 class MemberList;
 struct BodyInfo;
 struct DocInfo;
@@ -63,7 +63,7 @@ void marshalMemberSDict(StorageIntf *s,     MemberSDict *memberSDict);
 void marshalDocInfo(StorageIntf *s,         DocInfo *docInfo);
 void marshalBriefInfo(StorageIntf *s,       BriefInfo *briefInfo);
 void marshalBodyInfo(StorageIntf *s,        BodyInfo *bodyInfo);
-void marshalGroupList(StorageIntf *s,       GroupList *groupList);
+void marshalGroupList(StorageIntf *s,       SortedList<GroupDef *> *groupList);
 void marshalMemberList(StorageIntf *s,      MemberList *ml);
 void marshalExampleSDict(StorageIntf *s,    ExampleSDict *ed);
 void marshalMemberLists(StorageIntf *s,     StringMap<QSharedPointer<MemberList>> *mls);
@@ -76,21 +76,29 @@ int                  unmarshalInt(StorageIntf *s);
 uint                 unmarshalUInt(StorageIntf *s);
 uint64_t             unmarshalUInt64(StorageIntf *s);
 bool                 unmarshalBool(StorageIntf *s);
+
 QByteArray           unmarshalQByteArray(StorageIntf *s);
 QByteArray           unmarshalQGString(StorageIntf *s);
+
 ArgumentList        *unmarshalArgumentList(StorageIntf *s);
+
 QList<ArgumentList> *unmarshalArgumentLists(StorageIntf *s);
 QList<BaseInfo>     *unmarshalBaseInfoList(StorageIntf *s);
 QList<Grouping>     *unmarshalGroupingList(StorageIntf *s);
 QList<SectionInfo> *unmarshalSectionInfoList(StorageIntf *s);
 QList<ListItemInfo> *unmarshalItemInfoList(StorageIntf *s);
+
 void                *unmarshalObjPointer(StorageIntf *s);
+
 SectionDict         *unmarshalSectionDict(StorageIntf *s);
 MemberSDict         *unmarshalMemberSDict(StorageIntf *s);
+
 DocInfo             *unmarshalDocInfo(StorageIntf *s);
 BriefInfo           *unmarshalBriefInfo(StorageIntf *s);
 BodyInfo            *unmarshalBodyInfo(StorageIntf *s);
-GroupList           *unmarshalGroupList(StorageIntf *s);
+
+SortedList<GroupDef *> *unmarshalGroupList(StorageIntf *s);
+
 MemberList          *unmarshalMemberList(StorageIntf *s);
 ExampleSDict        *unmarshalExampleSDict(StorageIntf *s);
 

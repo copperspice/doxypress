@@ -17,18 +17,18 @@
 
 #include <QCryptographicHash>
 
-#include <dirdef.h>
-#include <filename.h>
-#include <doxygen.h>
-#include <util.h>
-#include <outputlist.h>
-#include <language.h>
-#include <message.h>
-#include <dot.h>
-#include <layout.h>
-#include <ftextstream.h>
 #include <config.h>
 #include <docparser.h>
+#include <dirdef.h>
+#include <dot.h>
+#include <doxygen.h>
+#include <filename.h>
+#include <ftextstream.h>
+#include <layout.h>
+#include <language.h>
+#include <message.h>
+#include <outputlist.h>
+#include <util.h>
 
 static int g_dirCount = 0;
 
@@ -60,7 +60,7 @@ DirDef::DirDef(const char *path) : Definition(path, 1, 1, path), visited(false)
    }
 
    m_fileList = new FileList;
-   m_usedDirs = new QHash<QString, UsedDir>(257);
+   m_usedDirs = new QHash<QString, UsedDir>;
    
    m_dirCount = g_dirCount++;
    m_level    = -1;
@@ -133,11 +133,11 @@ void DirDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
          ol.generateDoc(briefFile(), briefLine(), this, 0, briefDescription(), false, false);
       }
       // separator between brief and details
-      if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF") &&
-            !documentation().isEmpty()) {
+      if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF") && !documentation().isEmpty()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::RTF);
+
          // ol.newParagraph();  // FIXME:PARA
          ol.enableAll();
          ol.disableAllBut(OutputGenerator::Man);
@@ -209,15 +209,15 @@ void DirDef::writeSubDirList(OutputList &ol)
       ol.parseText(theTranslator->trDir(true, false));
       ol.endMemberHeader();
       ol.startMemberList();
-      QListIterator<DirDef> it(m_subdirs);
-      DirDef *dd;
-      for (; (dd = it.current()); ++it) {
+      
+      for (auto dd : m_subdirs) {
          ol.startMemberDeclaration();
          ol.startMemberItem(dd->getOutputFileBase(), 0);
          ol.parseText(theTranslator->trDir(false, true) + " ");
          ol.insertMemberAlign();
          ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName());
          ol.endMemberItem();
+
          if (!dd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
             ol.startMemberDescription(dd->getOutputFileBase());
             ol.generateDoc(briefFile(), briefLine(), dd, 0, dd->briefDescription(),
@@ -244,13 +244,13 @@ void DirDef::writeFileList(OutputList &ol)
       ol.parseText(theTranslator->trFile(true, false));
       ol.endMemberHeader();
       ol.startMemberList();
-      QListIterator<FileDef> it(*m_fileList);
-      FileDef *fd;
-      for (; (fd = it.current()); ++it) {
+    
+      for (auto fd : *m_fileList) {
          ol.startMemberDeclaration();
          ol.startMemberItem(fd->getOutputFileBase(), 0);
          ol.docify(theTranslator->trFile(false, true) + " ");
          ol.insertMemberAlign();
+
          if (fd->isLinkable()) {
             ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0, fd->name());
          } else {
@@ -258,6 +258,7 @@ void DirDef::writeFileList(OutputList &ol)
             ol.docify(fd->name());
             ol.endBold();
          }
+
          if (fd->generateSourceFile()) {
             ol.pushGeneratorState();
             ol.disableAllBut(OutputGenerator::Html);
@@ -269,7 +270,9 @@ void DirDef::writeFileList(OutputList &ol)
             ol.endTextLink();
             ol.popGeneratorState();
          }
+
          ol.endMemberItem();
+
          if (!fd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
             ol.startMemberDescription(fd->getOutputFileBase());
             ol.generateDoc(briefFile(), briefLine(), fd, 0, fd->briefDescription(),
@@ -314,16 +317,19 @@ void DirDef::writeTagFile(FTextStream &tagFile)
    tagFile << "    <name>" << convertToXML(displayName()) << "</name>" << endl;
    tagFile << "    <path>" << convertToXML(name()) << "</path>" << endl;
    tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxygen::htmlFileExtension << "</filename>" << endl;
-   QListIterator<LayoutDocEntry> eli(
-      LayoutDocManager::instance().docEntries(LayoutDocManager::Directory));
-   LayoutDocEntry *lde;
-   for (eli.toFirst(); (lde = eli.current()); ++eli) {
+
+   QListIterator<LayoutDocEntry *> element(LayoutDocManager::instance().docEntries(LayoutDocManager::Directory));
+   LayoutDocEntry *lde;  
+
+   while (element.hasNext()) {
+      lde = element.next();
+
       switch (lde->kind()) {
          case LayoutDocEntry::DirSubDirs: {
+
             if (m_subdirs.count() > 0) {
-               DirDef *dd;
-               QListIterator<DirDef> it(m_subdirs);
-               for (; (dd = it.current()); ++it) {
+
+               for (auto dd : m_subdirs) {
                   tagFile << "    <dir>" << convertToXML(dd->displayName()) << "</dir>" << endl;
                }
             }
@@ -331,9 +337,8 @@ void DirDef::writeTagFile(FTextStream &tagFile)
          break;
          case LayoutDocEntry::DirFiles: {
             if (m_fileList->count() > 0) {
-               QListIterator<FileDef> it(*m_fileList);
-               FileDef *fd;
-               for (; (fd = it.current()); ++it) {
+              
+               for (auto fd : *m_fileList) {
                   tagFile << "    <file>" << convertToXML(fd->name()) << "</file>" << endl;
                }
             }
@@ -375,10 +380,13 @@ void DirDef::writeDocumentation(OutputList &ol)
    //---------------------------------------- start flexible part -------------------------------
 
    SrcLangExt lang = getLanguage();
-   QListIterator<LayoutDocEntry> eli(
-      LayoutDocManager::instance().docEntries(LayoutDocManager::Directory));
-   LayoutDocEntry *lde;
-   for (eli.toFirst(); (lde = eli.current()); ++eli) {
+
+   QListIterator<LayoutDocEntry *> element(LayoutDocManager::instance().docEntries(LayoutDocManager::Directory));
+   LayoutDocEntry *lde;  
+
+   while (element.hasNext()) {
+      lde = element.next();
+
       switch (lde->kind()) {
          case LayoutDocEntry::BriefDesc:
             writeBriefDescription(ol);
@@ -467,28 +475,24 @@ void DirDef::setLevel()
 /** Add as "uses" dependency between \a this dir and \a dir,
  *  that was caused by a dependency on file \a fd.
  */
-void DirDef::addUsesDependency(DirDef *dir, FileDef *srcFd,
-                               FileDef *dstFd, bool inherited)
+void DirDef::addUsesDependency(DirDef *dir, FileDef *srcFd, FileDef *dstFd, bool inherited)
 {
    if (this == dir) {
       return;   // do not add self-dependencies
    }
-   //static int count=0;
-   //printf("  %d add dependency %s->%s due to %s->%s\n",
-   //    count++,shortName().data(),
-   //    dir->shortName().data(),
-   //    srcFd->name().data(),
-   //    dstFd->name().data());
-
+  
    // levels match => add direct dependency
    bool added = false;
-   UsedDir *usedDir = m_usedDirs->find(dir->getOutputFileBase());
+   UsedDir *usedDir = m_usedDirs->value(dir->getOutputFileBase());
 
-   if (usedDir) { // dir dependency already present
+   if (usedDir) { 
+      // dir dependency already present
       FilePair *usedPair = usedDir->findFilePair(srcFd->getOutputFileBase() + dstFd->getOutputFileBase());
 
-      if (usedPair == 0) { // new file dependency
+      if (usedPair == 0) { 
+         // new file dependency
          //printf("  => new file\n");
+
          usedDir->addFileDep(srcFd, dstFd);
          added = true;
 
@@ -496,11 +500,15 @@ void DirDef::addUsesDependency(DirDef *dir, FileDef *srcFd,
          // dir & file dependency already added
       }
 
-   } else { // new directory dependency
+   } else { 
+      // new directory dependency
       //printf("  => new file\n");
+
       usedDir = new UsedDir(dir, inherited);
+
       usedDir->addFileDep(srcFd, dstFd);
       m_usedDirs->insert(dir->getOutputFileBase(), usedDir);
+
       added = true;
    }
 
@@ -521,26 +529,24 @@ void DirDef::addUsesDependency(DirDef *dir, FileDef *srcFd,
 void DirDef::computeDependencies()
 {
    FileList *fl = m_fileList;
-   if (fl) {
-      QListIterator<FileDef> fli(*fl);
-      FileDef *fd;
-      for (fli.toFirst(); (fd = fli.current()); ++fli) { // foreach file in dir dd
-         //printf("  File %s\n",fd->name().data());
-         //printf("** dir=%s file=%s\n",shortName().data(),fd->name().data());
+
+   if (fl) {      
+
+      for (auto fd : *fl) {        
          QList<IncludeInfo> *ifl = fd->includeFileList();
-         if (ifl) {
-            QListIterator<IncludeInfo> ifli(*ifl);
-            IncludeInfo *ii;
-            for (ifli.toFirst(); (ii = ifli.current()); ++ifli) { // foreach include file
-               //printf("  > %s\n",ii->includeName.data());
-               //printf("    #include %s\n",ii->includeName.data());
-               if (ii->fileDef && ii->fileDef->isLinkable()) { // linkable file
-                  DirDef *usedDir = ii->fileDef->getDirDef();
+
+         if (ifl) {           
+            // foreach include file
+
+            for (auto item : *ifl) {                  
+
+               if (item.fileDef && item.fileDef->isLinkable()) { 
+                  // linkable file
+                  DirDef *usedDir = item.fileDef->getDirDef();
+
                   if (usedDir) {
-                     // add dependency: thisDir->usedDir
-                     //static int count=0;
-                     //printf("      %d: add dependency %s->%s\n",count++,name().data(),usedDir->name().data());
-                     addUsesDependency(usedDir, fd, ii->fileDef, false);
+                     // add dependency: thisDir->usedDir   
+                     addUsesDependency(usedDir, fd, item.fileDef, false);
                   }
                }
             }
@@ -553,8 +559,10 @@ bool DirDef::isParentOf(DirDef *dir) const
 {
    if (dir->parent() == this) { // this is a parent of dir
       return true;
+
    } else if (dir->parent()) { // repeat for the parent of dir
       return isParentOf(dir->parent());
+
    } else {
       return false;
    }
@@ -601,8 +609,10 @@ DirDef *DirDef::createNewDir(const char *path)
    assert(path != 0);
    DirDef *dir = Doxygen::directories->find(path);
 
-   if (dir == 0) { // new dir
+   if (dir == 0) { 
+      // new dir
       //printf("Adding new dir %s\n",path);
+
       dir = new DirDef(path);
 
       //printf("createNewDir %s short=%s\n",path,dir->shortName().data());
@@ -614,13 +624,17 @@ DirDef *DirDef::createNewDir(const char *path)
 bool DirDef::matchPath(const QByteArray &path, QStringList &l)
 {
    const char *s = l.first();
+
    while (s) {
       QByteArray prefix = s;
-      if (qstricmp(prefix.left(path.length()), path) == 0) { // case insensitive compare
+
+      if (qstricmp(prefix.left(path.length()), path) == 0) { 
+         // case insensitive compare
          return true;
       }
       s = l.next();
    }
+
    return false;
 }
 
@@ -641,6 +655,7 @@ DirDef *DirDef::mergeDirectoryInTree(const QByteArray &path)
       }
       p = i + 1;
    }
+
    return dir;
 }
 
@@ -657,6 +672,7 @@ static void writePartialDirPath(OutputList &ol, const DirDef *root, const DirDef
       writePartialDirPath(ol, root, target->parent());
       ol.writeString("&#160;/&#160;");
    }
+
    ol.writeObjectLink(target->getReference(), target->getOutputFileBase(), 0, target->shortName());
 }
 
@@ -666,8 +682,10 @@ static void writePartialFilePath(OutputList &ol, const DirDef *root, const FileD
       writePartialDirPath(ol, root, fd->getDirDef());
       ol.writeString("&#160;/&#160;");
    }
+
    if (fd->isLinkable()) {
       ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0, fd->name());
+
    } else {
       ol.startBold();
       ol.docify(fd->name());
@@ -681,13 +699,10 @@ void DirRelation::writeDocumentation(OutputList &ol)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   QByteArray shortTitle = theTranslator->trDirRelation(
-                              m_src->shortName() + " &rarr; " +
-                              m_dst->dir()->shortName());
-   QByteArray title = theTranslator->trDirRelation(
-                         m_src->displayName() + " -> " +
-                         m_dst->dir()->shortName());
-   startFile(ol, getOutputFileBase(), getOutputFileBase(),
+   QByteArray shortTitle = theTranslator->trDirRelation( m_src->shortName() + " &rarr; " + m_dst->dir()->shortName());
+   QByteArray title = theTranslator->trDirRelation( m_src->displayName() + " -> " + m_dst->dir()->shortName());
+
+   startFile(ol, getOutputFileBase(), getOutputFileBase(), 
              title, HLI_None, !generateTreeView, m_src->getOutputFileBase());
 
    if (!generateTreeView) {
@@ -695,16 +710,21 @@ void DirRelation::writeDocumentation(OutputList &ol)
       m_src->writeNavigationPath(ol);
       ol.endQuickIndices();
    }
+
    ol.startContents();
 
    ol.writeString("<h3>" + shortTitle + "</h3>");
    ol.writeString("<table class=\"dirtab\">");
    ol.writeString("<tr class=\"dirtab\">");
    ol.writeString("<th class=\"dirtab\">");
+
    ol.parseText(theTranslator->trFileIn(m_src->pathFragment()));
+
    ol.writeString("</th>");
    ol.writeString("<th class=\"dirtab\">");
+
    ol.parseText(theTranslator->trIncludesFileIn(m_dst->dir()->pathFragment()));
+
    ol.writeString("</th>");
    ol.writeString("</tr>");
 
@@ -714,13 +734,18 @@ void DirRelation::writeDocumentation(OutputList &ol)
    for (fpi.toFirst(); (fp = fpi.current()); ++fpi) {
       ol.writeString("<tr class=\"dirtab\">");
       ol.writeString("<td class=\"dirtab\">");
+
       writePartialFilePath(ol, m_src, fp->source());
+
       ol.writeString("</td>");
       ol.writeString("<td class=\"dirtab\">");
+
       writePartialFilePath(ol, m_dst->dir(), fp->destination());
+
       ol.writeString("</td>");
       ol.writeString("</tr>");
    }
+
    ol.writeString("</table>");
 
    ol.endContents();
@@ -743,7 +768,8 @@ static void computeCommonDirPrefix()
 
    DirSDict::Iterator sdi(*Doxygen::directories);
 
-   if (Doxygen::directories->count() > 0) { // we have at least one dir
+   if (Doxygen::directories->count() > 0) { 
+      // we have at least one dir
       // start will full path of first dir
       sdi.toFirst();
 
@@ -802,6 +828,7 @@ static void computeCommonDirPrefix()
          }
       }
    }
+
    for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {
       QByteArray diskName = dir->name().right(dir->name().length() - path.length());
       dir->setDiskName(diskName);
@@ -812,13 +839,12 @@ static void computeCommonDirPrefix()
 void buildDirectories()
 {
    // for each input file
-   FileNameListIterator fnli(*Doxygen::inputNameList);
-   FileName *fn;
-   for (fnli.toFirst(); (fn = fnli.current()); ++fnli) {
-      FileNameIterator fni(*fn);
-      FileDef *fd;
-      for (; (fd = fni.current()); ++fni) {
+
+   for (auto fn : *Doxygen::inputNameList) {   
+    
+      for (auto fd : *fn) {  
          //printf("buildDirectories %s\n",fd->name().data());
+
          if (fd->getReference().isEmpty() && !fd->isDocumentationFile()) {
             DirDef *dir;
             if ((dir = Doxygen::directories->find(fd->getPath())) == 0) { // new directory
@@ -832,13 +858,10 @@ void buildDirectories()
          }
       }
    }
-
-   //DirDef *root = new DirDef("root:");
+   
    // compute relations between directories => introduce container dirs.
-   DirDef *dir;
-   DirSDict::Iterator sdi(*Doxygen::directories);
-
-   for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {
+ 
+   for (auto sdi : *Doxygen::directories) {  
       //printf("New dir %s\n",dir->displayName().data());
 
       QByteArray name = dir->name();

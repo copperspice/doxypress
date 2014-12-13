@@ -21,25 +21,24 @@
 #include <stringmap.h>
 #include <definition.h>
 
-class MemberList;
-class FileList;
-class ClassSDict;
-class FileDef;
 class ClassDef;
-class NamespaceDef;
-class GroupList;
-class OutputList;
-class NamespaceSDict;
+class ClassSDict;
+class DirDef;
+class Entry;
+class FileList;
+class FileDef;
+class FTextStream;
+class FTVHelp;
+class MemberDef;
+class MemberList;
 class MemberGroupSDict;
 class MemberNameInfoSDict;
+class NamespaceDef;
+class NamespaceSDict;
+class OutputList;
 class PageSDict;
 class PageDef;
-class DirDef;
-class DirList;
-class FTVHelp;
-class Entry;
-class MemberDef;
-class FTextStream;
+
 
 /** A model of a group of symbols. */
 class GroupDef : public Definition
@@ -125,29 +124,35 @@ class GroupDef : public Definition
       return memberGroupSDict;
    }
 
-   FileList       *getFiles() const        {
-      return fileList;
-   }
-   ClassSDict     *getClasses() const      {
+   ClassSDict *getClasses() const {
       return classSDict;
    }
-   NamespaceSDict *getNamespaces() const   {
+
+   NamespaceSDict *getNamespaces() const {
       return namespaceSDict;
    }
-   GroupList      *getSubGroups() const    {
-      return groupList;
-   }
-   PageSDict      *getPages() const        {
+
+   PageSDict *getPages() const {
       return pageDict;
    }
-   DirList        *getDirs() const         {
+  
+   PageSDict *getExamples() const {
+      return exampleDict;
+   } 
+ 
+   SortedList<DirDef *> *getDirs() const {
       return dirList;
    }
-   PageSDict      *getExamples() const     {
-      return exampleDict;
+
+   FileList *getFiles() const {
+      return fileList;
    }
-   bool hasDetailedDescription() const;
-   //MemberList*     getMembers() const      { return allMemberList; }
+
+   SortedList<GroupDef *> *getSubGroups() const {
+      return groupList;
+   }
+    
+   bool hasDetailedDescription() const;   
    void sortSubGroups();
 
  protected:
@@ -181,14 +186,16 @@ class GroupDef : public Definition
    QByteArray title;                    // title of the group
    bool titleSet;                       // true if title is not the same as the name
    QByteArray fileName;                 // base name of the generated file
-   FileList *fileList;                  // list of files in the group
+   
    ClassSDict *classSDict;              // list of classes in the group
-   NamespaceSDict *namespaceSDict;      // list of namespaces in the group
-   GroupList *groupList;                // list of sub groups.
+   NamespaceSDict *namespaceSDict;      // list of namespaces in the group 
    PageSDict *pageDict;                 // list of pages in the group
    PageSDict *exampleDict;              // list of examples in the group
-   DirList *dirList;                    // list of directories in the group
 
+   SortedList<DirDef *> *dirList;       // list of directories in the group
+   FileList *fileList;                  // list of files in the group
+   SortedList<GroupDef *> *groupList;   // list of sub groups.
+  
    MemberList *allMemberList;
    MemberNameInfoSDict *allMemberNameInfoSDict;
 
@@ -196,7 +203,7 @@ class GroupDef : public Definition
 
    QList<MemberList> m_memberLists;
    MemberGroupSDict *memberGroupSDict;
-   bool              m_subGrouping;
+   bool m_subGrouping;
 
 };
 
@@ -211,25 +218,6 @@ class GroupSDict : public StringMap<QSharedPointer<GroupDef>>
    int compareValues(const GroupDef *item1, const GroupDef *item2) const {
       return qstrcmp(item1->groupTitle(), item2->groupTitle());
    }
-};
-
-/** A list of GroupDef objects. */
-class GroupList : public QList<GroupDef>
-{
- public:
-   int compareValues(const GroupDef *item1, const GroupDef *item2) const {
-      return qstrcmp(item1->groupTitle(), item2->groupTitle());
-   }
-};
-
-/** An iterator for GroupDef objects in a GroupList. */
-class GroupListIterator : public QListIterator<GroupDef>
-{
- public:
-   GroupListIterator(const GroupList &l) : QListIterator<GroupDef>(l) 
-   {}
-
-   virtual ~GroupListIterator() {}
 };
 
 void addClassToGroups(Entry *root, ClassDef *cd);

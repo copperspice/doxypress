@@ -77,6 +77,7 @@ LayoutNavEntry *LayoutNavEntry::find(LayoutNavEntry::Kind kind, const char *file
    LayoutNavEntry *result = 0;
    QListIterator<LayoutNavEntry> li(m_children);
    LayoutNavEntry *entry;
+
    for (li.toFirst(); (entry = li.current()); ++li) {
       // depth first search, needed to find the entry furthest from the
       // root in case an entry is in the tree twice
@@ -1338,7 +1339,7 @@ LayoutDocManager &LayoutDocManager::instance()
    return *theInstance;
 }
 
-const QList<LayoutDocEntry> &LayoutDocManager::docEntries(LayoutDocManager::LayoutPart part) const
+const QList<LayoutDocEntry *> &LayoutDocManager::docEntries(LayoutDocManager::LayoutPart part) const
 {
    return d->docEntries[(int)part];
 }
