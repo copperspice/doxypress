@@ -478,7 +478,7 @@ void MemberList::writeDeclarations(OutputList &ol,
    (void)showEnumValues; // unused
 
    //printf("----- writeDeclaration() this=%p ---- inheritedFrom=%p\n",this,inheritedFrom);
-   static bool optimizeVhdl = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
+   
    QByteArray inheritId;
 
    countDecMembers(/*showEnumValues*/false, gd); // count members shown in this section
@@ -498,28 +498,32 @@ void MemberList::writeDeclarations(OutputList &ol,
 
    int num = numDecMembers();
    if (inheritedFrom) {
-      //if ( cd && !optimizeVhdl && countInheritableMembers(inheritedFrom)>0 )
-      if ( cd && !optimizeVhdl && cd->countMembersIncludingGrouped(
-               m_listType, inheritedFrom, true) > 0 ) {
+     
+      if ( cd && cd->countMembersIncludingGrouped(m_listType, inheritedFrom, true) > 0 ) {
          ol.pushGeneratorState();
          ol.disableAllBut(OutputGenerator::Html);
-         inheritId = substitute(listTypeAsString(lt), "-", "_") + "_" +
-                     stripPath(cd->getOutputFileBase());
+
+         inheritId = substitute(listTypeAsString(lt), "-", "_") + "_" + stripPath(cd->getOutputFileBase());
+
          if (title) {
-            ol.writeInheritedSectionTitle(inheritId, cd->getReference(),
-                                          cd->getOutputFileBase(),
-                                          cd->anchor(), title, cd->displayName());
+            ol.writeInheritedSectionTitle(inheritId, cd->getReference(), cd->getOutputFileBase(), cd->anchor(), title, cd->displayName());
          }
+
          ol.popGeneratorState();
       }
+
    } else if (num > 0) {
+
       if (title) {
+
          if (showInline) {
             ol.startInlineHeader();
          } else {
             ol.startMemberHeader(listTypeAsString(m_listType));
          }
+
          ol.parseText(title);
+
          if (showInline) {
             ol.endInlineHeader();
          } else {
@@ -543,11 +547,8 @@ void MemberList::writeDeclarations(OutputList &ol,
       //    indentation, or at the very least, extra space after
       //    the group is done
       // 2. This might need to be repeated below for memberGroupLists
-      if (optimizeVhdl) { // use specific declarations function
-         VhdlDocGen::writeVhdlDeclarations(this, ol, 0, cd, 0, 0);
-      } else {
-         writePlainDeclarations(ol, cd, nd, fd, gd, inheritedFrom, inheritId);
-      }
+
+      writePlainDeclarations(ol, cd, nd, fd, gd, inheritedFrom, inheritId);      
 
       //printf("memberGroupList=%p\n",memberGroupList);
       if (memberGroupList) {
@@ -919,16 +920,15 @@ void MemberList::writeTagFile(FTextStream &tagFile)
 {
    QListIterator<MemberDef> mli(*this);
    MemberDef *md;
-   for ( ; (md = mli.current()) ; ++mli) {
-      if (md->getLanguage() != SrcLangExt_VHDL) {
-         md->writeTagFile(tagFile);
-      } else {
-         VhdlDocGen::writeTagFile(md, tagFile);
-      }
+
+   for ( ; (md = mli.current()) ; ++mli) {      
+      md->writeTagFile(tagFile);    
    }
+
    if (memberGroupList) {
       QListIterator<MemberGroup> mgli(*memberGroupList);
       MemberGroup *mg;
+
       for (; (mg = mgli.current()); ++mgli) {
          mg->writeTagFile(tagFile);
       }

@@ -1681,20 +1681,6 @@ void RTFDocVisitor::visitPost(DocHtmlBlockQuote *)
    m_lastIsPara = true;
 }
 
-void RTFDocVisitor::visitPre(DocVhdlFlow *)
-{
-   if (m_hide) {
-      return;
-   }
-}
-
-void RTFDocVisitor::visitPost(DocVhdlFlow *)
-{
-   if (m_hide) {
-      return;
-   }
-}
-
 void RTFDocVisitor::visitPre(DocParBlock *)
 {
    if (m_hide) {
@@ -1709,36 +1695,14 @@ void RTFDocVisitor::visitPost(DocParBlock *)
    }
 }
 
-
-//static char* getMultiByte(int c)
-//{
-//    static char s[10];
-//    sprintf(s,"\\'%X",c);
-//    return s;
-//}
-
 void RTFDocVisitor::filter(const char *str, bool verbatim)
 {
    if (str) {
       const unsigned char *p = (const unsigned char *)str;
       unsigned char c;
-      //unsigned char pc='\0';
-      while (*p) {
-         //static bool MultiByte = false;
+      
+      while (*p) {         
          c = *p++;
-
-         //if ( MultiByte )
-         //{
-         //  m_t << getMultiByte( c );
-         //  MultiByte = false;
-         //  continue;
-         //}
-         //if ( c >= 0x80 )
-         //{
-         //  MultiByte = true;
-         //  m_t << getMultiByte( c );
-         //  continue;
-         //}
 
          switch (c) {
             case '{':
@@ -1760,7 +1724,7 @@ void RTFDocVisitor::filter(const char *str, bool verbatim)
             default:
                m_t << (char)c;
          }
-         //pc = c;
+         
       }
    }
 }

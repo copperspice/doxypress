@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
- * All rights reserved.    
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -24,17 +24,18 @@
 #include <QTextCodec>
 #include <QTextStream>
 
+#include <errno.h>
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <errno.h>
-#include <locale.h>
+
 
 #include <dox_build_info.h>
 #include <doxygen.h>
-#include <scanner.h>
 #include <entry.h>
+#include <scanner.h>
 #include <index.h>
 #include <logos.h>
 #include <message.h>
@@ -78,7 +79,6 @@
 #include <code.h>
 #include <objcache.h>
 #include <store.h>
-#include <marshal.h>
 #include <portable.h>
 #include <eclipsehelp.h>
 #include <cite.h>
@@ -101,10 +101,13 @@
 extern void initResources();
 
 #define RECURSE_ENTRYTREE(func,var) \
-  do { if (var->children()) { \
-    EntryNavListIterator eli(*var->children()); \
-    for (;eli.current();++eli) func(eli.current()); \
-  } } while(0)
+  do {  \
+    if (var->children()) { \
+       for (auto eli :*var->children() ) { \
+         func(eli);   \
+       }  \
+     }  \
+  } while(0)
 
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
@@ -129,7 +132,7 @@ PageSDict       *Doxygen::exampleSDict = 0;
 SectionDict     *Doxygen::sectionDict = 0;         // all page sections
 CiteDict        *Doxygen::citeDict = 0;            // database of bibliographic references
 StringDict       Doxygen::aliasDict(257);          // aliases
-DirSDict        *Doxygen::directories;
+DirSDict         Doxygen::directories;
 GenericsSDict   *Doxygen::genericsDict;
 
 FileNameDict    *Doxygen::includeNameDict = 0;     // include names
@@ -198,7 +201,7 @@ static bool             g_useOutputTemplate = false;
 void clearAll()
 {
    g_inputFiles.clear();
-  
+
    Doxygen::classSDict->clear();
    Doxygen::namespaceSDict->clear();
    Doxygen::pageSDict->clear();
@@ -226,8 +229,8 @@ void clearAll()
 class Statistics
 {
  public:
-   Statistics() 
-   {      
+   Statistics()
+   {
    }
 
    void begin(const char *name) {
@@ -251,7 +254,7 @@ class Statistics
       }
 
       msg("----------------------\n");
-    
+
       for (auto item : stats) {
          msg("Spent %.3f seconds in %s", item->elapsed, item->name);
       }
@@ -316,14 +319,14 @@ static STLInfo g_stlinfo[] = {
    // className              baseClass1                      baseClass2             templType1     templName1     templType2, templName2, virtInheritance, iterators
 
    { "allocator",            0,                              0,                     "T",           "elements",    0,     0,             false,   false },
-   { "array",                0,                              0,                     "T",           "elements",    0,     0,             false,   false }, 
-   { "auto_ptr",             0,                              0,                     "T",           "ptr",         0,     0,             false,   false }, 
-   { "smart_ptr",            0,                              0,                     "T",           "ptr",         0,     0,             false,   false }, 
-   { "unique_ptr",           0,                              0,                     "T",           "ptr",         0,     0,             false,   false }, 
-   { "weak_ptr",             0,                              0,                     "T",           "ptr",         0,     0,             false,   false }, 
-   { "ios_base",             0,                              0,                     0,             0,             0,     0,             false,   false }, 
-   { "error_code",           0,                              0,                     0,             0,             0,     0,             false,   false }, 
-   { "error_category",       0,                              0,                     0,             0,             0,     0,             false,   false }, 
+   { "array",                0,                              0,                     "T",           "elements",    0,     0,             false,   false },
+   { "auto_ptr",             0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
+   { "smart_ptr",            0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
+   { "unique_ptr",           0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
+   { "weak_ptr",             0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
+   { "ios_base",             0,                              0,                     0,             0,             0,     0,             false,   false },
+   { "error_code",           0,                              0,                     0,             0,             0,     0,             false,   false },
+   { "error_category",       0,                              0,                     0,             0,             0,     0,             false,   false },
    { "system_error",         0,                              0,                     0,             0,             0,     0,             false,   false },
    { "error_condition",      0,                              0,                     0,             0,             0,     0,             false,   false },
    { "thread",               0,                              0,                     0,             0,             0,     0,             false,   false },
@@ -362,15 +365,15 @@ static STLInfo g_stlinfo[] = {
    { "bitset",               0,                              0,                     "Bits",        0,             0,     0,             false,   false },
    { "deque",                0,                              0,                     "T",           "elements",    0,     0,             false,   true  },
    { "list",                 0,                              0,                     "T",           "elements",    0,     0,             false,   true  },
-   { "forward_list",         0,                              0,                     "T",           "elements",    0,     0,             false,   true  }, 
+   { "forward_list",         0,                              0,                     "T",           "elements",    0,     0,             false,   true  },
    { "map",                  0,                              0,                     "K",           "keys",        "T",   "elements",    false,   true  },
-   { "unordered_map",        0,                              0,                     "K",           "keys",        "T",   "elements",    false,   true  }, 
+   { "unordered_map",        0,                              0,                     "K",           "keys",        "T",   "elements",    false,   true  },
    { "multimap",             0,                              0,                     "K",           "keys",        "T",   "elements",    false,   true  },
-   { "unordered_multimap",   0,                              0,                     "K",           "keys",        "T",   "elements",    false,   true  }, 
+   { "unordered_multimap",   0,                              0,                     "K",           "keys",        "T",   "elements",    false,   true  },
    { "set",                  0,                              0,                     "K",           "keys",        0,     0,             false,   true  },
-   { "unordered_set",        0,                              0,                     "K",           "keys",        0,     0,             false,   true  }, 
+   { "unordered_set",        0,                              0,                     "K",           "keys",        0,     0,             false,   true  },
    { "multiset",             0,                              0,                     "K",           "keys",        0,     0,             false,   true  },
-   { "unordered_multiset",   0,                              0,                     "K",           "keys",        0,     0,             false,   true  }, 
+   { "unordered_multiset",   0,                              0,                     "K",           "keys",        0,     0,             false,   true  },
    { "vector",               0,                              0,                     "T",           "elements",    0,     0,             false,   true  },
    { "queue",                0,                              0,                     "T",           "elements",    0,     0,             false,   false },
    { "priority_queue",       0,                              0,                     "T",           "elements",    0,     0,             false,   false },
@@ -480,7 +483,7 @@ static void addSTLClasses(EntryNav *rootNav)
          a.name = info->templType1;
          al.append(a);
 
-         if (info->templType2) { 
+         if (info->templType2) {
             // another template argument
             a = Argument();
 
@@ -489,7 +492,7 @@ static void addSTLClasses(EntryNav *rootNav)
             al.append(a);
          }
 
-         classEntry->tArgLists = new QList<ArgumentList>;        
+         classEntry->tArgLists = new QList<ArgumentList>;
          classEntry->tArgLists->append(al);
       }
 
@@ -502,7 +505,7 @@ static void addSTLClasses(EntryNav *rootNav)
          addSTLMember(classEntryNav, info->templType2, info->templName2);
       }
 
-      if (fullName == "std::auto_ptr" || fullName == "std::smart_ptr" || 
+      if (fullName == "std::auto_ptr" || fullName == "std::smart_ptr" ||
             fullName == "std::unique_ptr" || fullName == "std::weak_ptr") {
 
          Entry *memEntry      = new Entry;
@@ -651,10 +654,8 @@ static void buildGroupListFiltered(EntryNav *rootNav, bool additional, bool incl
       rootNav->releaseEntry();
    }
 
-   if (rootNav->children()) {
-      EntryNavListIterator eli(*rootNav->children());
-      EntryNav *e;
-      for (; (e = eli.current()); ++eli) {
+   if (rootNav->children()) {     
+      for (auto e : *rootNav->children() ) { 
          buildGroupListFiltered(e, additional, includeExternal);
       }
    }
@@ -719,10 +720,8 @@ static void organizeSubGroupsFiltered(EntryNav *rootNav, bool additional)
       rootNav->releaseEntry();
    }
 
-   if (rootNav->children()) {
-      EntryNavListIterator eli(*rootNav->children());
-      EntryNav *e;
-      for (; (e = eli.current()); ++eli) {
+   if (rootNav->children()) {  
+      for (auto e : *rootNav->children() ) { 
          organizeSubGroupsFiltered(e, additional);
       }
    }
@@ -872,7 +871,7 @@ static void addIncludeFile(ClassDef *cd, FileDef *ifd, Entry *root)
                iName = fd->name();
             }
          } else if (!Config_getList("STRIP_FROM_INC_PATH").isEmpty()) {
-            iName = stripFromIncludePath(fd->absFilePath());
+            iName = stripFromIncludePath(fd->absoluteFilePath());
          } else { // use name of the file containing the class definition
             iName = fd->name();
          }
@@ -1492,7 +1491,7 @@ static ClassDef *createTagLessInstance(ClassDef *rootCd, ClassDef *templ, const 
 
    MemberList *ml = templ->getMemberList(MemberListType_pubAttribs);
 
-   if (ml) {     
+   if (ml) {
 
       for (auto md : *ml) {
          //printf("    Member %s type=%s\n",md->name().data(),md->typeString());
@@ -2295,7 +2294,7 @@ static MemberDef *addVariableToFile(
          return 0;   // anonymous scope!
       }
 
-      nd = getResolvedNamespace(scope);     
+      nd = getResolvedNamespace(scope);
    }
 
    QByteArray def;
@@ -2346,7 +2345,7 @@ static MemberDef *addVariableToFile(
       for (mni.toFirst(); (md = mni.current()); ++mni) {
          if (
             ((nd == 0 && md->getNamespaceDef() == 0 && md->getFileDef() &&
-              root->fileName == md->getFileDef()->absFilePath()
+              root->fileName == md->getFileDef()->absoluteFilePath()
              ) // both variable names in the same file
              || (nd != 0 && md->getNamespaceDef() == nd) // both in same namespace
             )
@@ -2531,7 +2530,7 @@ static bool isVarWithConstructor(EntryNav *rootNav)
    if (typeIsClass) {
       // now we still have to check if the arguments are
       // types or values. Since we do not have complete type info
-      // we need to rely on heuristics :-(   
+      // we need to rely on heuristics :-(
 
       ArgumentList *al = root->argList;
       if (al == 0 || al->isEmpty()) {
@@ -2564,7 +2563,7 @@ static bool isVarWithConstructor(EntryNav *rootNav)
          }
 
          if (a->type.at(a->type.length() - 1) == '*' || a->type.at(a->type.length() - 1) == '&') {
-            // type ends with * or & => pointer or reference         
+            // type ends with * or & => pointer or reference
             result = false;
             goto done;
          }
@@ -2593,7 +2592,7 @@ static bool isVarWithConstructor(EntryNav *rootNav)
       result = true;
    }
 
-done:   
+done:
    rootNav->releaseEntry();
    return result;
 }
@@ -2802,6 +2801,7 @@ nextMember:
 static void buildTypedefList(EntryNav *rootNav)
 {
    //printf("buildVarList(%s)\n",rootNav->name().data());
+
    if (!rootNav->name().isEmpty() &&
          rootNav->section() == Entry::VARIABLE_SEC &&
          rootNav->type().find("typedef ") != -1 // its a typedef
@@ -2809,9 +2809,8 @@ static void buildTypedefList(EntryNav *rootNav)
       addVariable(rootNav);
    }
    if (rootNav->children()) {
-      EntryNavListIterator eli(*rootNav->children());
-      EntryNav *e;
-      for (; (e = eli.current()); ++eli) {
+ 
+      for (auto e : *rootNav->children() ) { 
          if (e->section() != Entry::ENUM_SEC) {
             buildTypedefList(e);
          }
@@ -2842,10 +2841,9 @@ static void buildVarList(EntryNav *rootNav)
       ) { // documented variable
       addVariable(rootNav, isFuncPtr);
    }
-   if (rootNav->children()) {
-      EntryNavListIterator eli(*rootNav->children());
-      EntryNav *e;
-      for (; (e = eli.current()); ++eli) {
+
+   if (rootNav->children()) {    
+      for (auto e : *rootNav->children() ) { 
          if (e->section() != Entry::ENUM_SEC) {
             buildVarList(e);
          }
@@ -3310,7 +3308,7 @@ static void buildFunctionList(EntryNav *rootNav)
                      // see if we need to create a new member
                      found = (mnd && rnd && nsName == rnsName) || // members are in the same namespace
                              ((mnd == 0 && rnd == 0 && mfd != 0 && // no external reference and
-                               mfd->absFilePath() == root->fileName // prototype in the same file
+                               mfd->absoluteFilePath() == root->fileName // prototype in the same file
                               )
                              );
                      // otherwise, allow a duplicate global member with the same argument list
@@ -3750,7 +3748,7 @@ static void transferRelatedFunctionDocumentation()
 static QHash<QString, int> *getTemplateArgumentsInName(ArgumentList *templateArguments, const QByteArray &name)
 {
    QHash<QString, int> *templateNames = new QHash<QString, int>();
-   
+
    static QRegExp re("[a-z_A-Z][a-z_A-Z0-9:]*");
 
    if (templateArguments) {
@@ -3761,7 +3759,7 @@ static QHash<QString, int> *getTemplateArgumentsInName(ArgumentList *templateArg
          int i;
          int l;
          int p = 0;
-       
+
          while ((i = re.match(name, p, &l)) != -1) {
             QByteArray n = name.mid(i, l);
 
@@ -4807,7 +4805,7 @@ static void addListReferences()
    DirDef *dd = 0;
 
    for (ddi.toFirst(); (dd = ddi.current()); ++ddi) {
-      QByteArray name = dd->getOutputFileBase();  
+      QByteArray name = dd->getOutputFileBase();
       QList<ListItemInfo> *xrefItems = dd->xrefListItems();
 
       addRefItem(xrefItems, name, theTranslator->trDir(true, true), name, dd->displayName(), 0, 0);
@@ -5000,11 +4998,11 @@ static bool findGlobalMember(EntryNav *rootNav,
       mn = Doxygen::functionNameSDict->find(n); // try without template arguments
    }
 
-   if (mn) { 
+   if (mn) {
       // function name defined
 
       Debug::print(Debug::FindMembers, 0, "3. Found symbol scope\n");
-      
+
       MemberNameIterator mni(*mn);
       MemberDef *md;
       bool found = false;
@@ -5012,10 +5010,10 @@ static bool findGlobalMember(EntryNav *rootNav,
       for (mni.toFirst(); (md = mni.current()) && !found; ++mni) {
          NamespaceDef *nd = md->getNamespaceDef();
 
- 
-         FileDef *fd = rootNav->fileDef();         
+
+         FileDef *fd = rootNav->fileDef();
          NamespaceSDict *nl = fd ? fd->getUsedNamespaces() : 0;
-        
+
 
          // search in the list of namespaces that are imported via a
          // using declaration
@@ -5043,10 +5041,10 @@ static bool findGlobalMember(EntryNav *rootNav,
                (mdAl == 0 && root->argList->count() == 0) ||
                md->isVariable() || md->isTypedef() || /* in case of function pointers */
                matchArguments2(md->getOuterScope(), md->getFileDef(), mdAl,
-                               rnd ? rnd : Doxygen::globalScope, fd, root->argList, false);  
+                               rnd ? rnd : Doxygen::globalScope, fd, root->argList, false);
 
-            // for template members we need to check if the number of 
-            // template arguments is the same, otherwise we are dealing with 
+            // for template members we need to check if the number of
+            // template arguments is the same, otherwise we are dealing with
             // different functions.
             if (matching && root->tArgLists) {
                ArgumentList *mdTempl = md->templateArguments();
@@ -5056,7 +5054,7 @@ static bool findGlobalMember(EntryNav *rootNav,
                   }
                }
             }
-           
+
             // for static members we also check if the comment block was found in
             // the same file. This is needed because static members with the same
             // name can be in different files. Thus it would be wrong to just
@@ -6340,9 +6338,7 @@ static void findMemberDocumentation(EntryNav *rootNav)
       rootNav->releaseEntry();
    }
    if (rootNav->children()) {
-      EntryNavListIterator eli(*rootNav->children());
-      EntryNav *e;
-      for (; (e = eli.current()); ++eli) {
+      for (auto e : *rootNav->children() ) { 
          if (e->section() != Entry::ENUM_SEC) {
             findMemberDocumentation(e);
          }
@@ -6355,13 +6351,13 @@ static void findMemberDocumentation(EntryNav *rootNav)
 static void findObjCMethodDefinitions(EntryNav *rootNav)
 {
    if (rootNav->children()) {
-      EntryNavListIterator eli(*rootNav->children());
-      EntryNav *objCImplNav;
-      for (; (objCImplNav = eli.current()); ++eli) {
+    
+      for (auto objCIplNav : *rootNav->children() ) { 
+
          if (objCImplNav->section() == Entry::OBJCIMPL_SEC && objCImplNav->children()) {
-            EntryNavListIterator seli(*objCImplNav->children());
-            EntryNav *objCMethodNav;
-            for (; (objCMethodNav = seli.current()); ++seli) {
+          
+            for (auto objCMethodNav : *objCImplNav->children() ) { 
+
                if (objCMethodNav->section() == Entry::FUNCTION_SEC) {
                   objCMethodNav->loadEntry(g_storage);
                   Entry *objCMethod = objCMethodNav->entry();
@@ -6369,6 +6365,7 @@ static void findObjCMethodDefinitions(EntryNav *rootNav)
                   //Printf("  Found ObjC method definition %s\n",objCMethod->name.data());
                   findMember(objCMethodNav, objCMethod->type + " " + objCImplNav->name() + "::" +
                              objCMethod->name + " " + objCMethod->args, false, true);
+
                   objCMethod->section = Entry::EMPTY_SEC;
 
                   objCMethodNav->releaseEntry();
@@ -6620,12 +6617,14 @@ static void addEnumValuesToEnums(EntryNav *rootNav)
          if (mn) {
             MemberNameIterator mni(*mn);
             MemberDef *md;
+
             for (mni.toFirst(); (md = mni.current()) ; ++mni) { // for each enum in this list
+
                if (md->isEnumerate() && rootNav->children()) {
                   //printf("   enum with %d children\n",rootNav->children()->count());
-                  EntryNavListIterator eli(*rootNav->children()); // for each enum value
-                  EntryNav *e;
-                  for (; (e = eli.current()); ++eli) {
+                
+                  for (auto e : *rootNav->children() ) { 
+
                      SrcLangExt sle;
                      if (
                         (sle = rootNav->lang()) == SrcLangExt_CSharp ||
@@ -7098,7 +7097,7 @@ static void generateFileSources()
             FileNameIterator fni(*fn);
             FileDef *fd;
             for (; (fd = fni.current()); ++fni) {
-               g_filesToProcess.insert(fd->absFilePath(), (void *)0x8);
+               g_filesToProcess.insert(fd->absoluteFilePath(), (void *)0x8);
             }
          }
          // process source files (and their include dependencies)
@@ -7123,7 +7122,7 @@ static void generateFileSources()
 
                   char *incFile = filesInSameTu.first();
                   while (incFile && g_filesToProcess.find(incFile)) {
-                     if (fd->absFilePath() != incFile && !g_processedFiles.find(incFile)) {
+                     if (fd->absoluteFilePath() != incFile && !g_processedFiles.find(incFile)) {
                         QStringList moreFiles;
                         bool ambig;
                         FileDef *ifd = findFileDef(Doxygen::inputNameDict, incFile, ambig);
@@ -7144,7 +7143,7 @@ static void generateFileSources()
                      incFile = filesInSameTu.next();
                   }
                   fd->finishParsing();
-                  g_processedFiles.insert(fd->absFilePath(), (void *)0x8);
+                  g_processedFiles.insert(fd->absoluteFilePath(), (void *)0x8);
                }
             }
          }
@@ -7153,7 +7152,7 @@ static void generateFileSources()
             FileNameIterator fni(*fn);
             FileDef *fd;
             for (; (fd = fni.current()); ++fni) {
-               if (!g_processedFiles.find(fd->absFilePath())) { // not yet processed
+               if (!g_processedFiles.find(fd->absoluteFilePath())) { // not yet processed
                   QStringList filesInSameTu;
                   fd->startParsing();
                   if (fd->generateSourceFile()) { // sources need to be shown in the output
@@ -7703,7 +7702,7 @@ static void findDefineDocumentation(EntryNav *rootNav)
             for (mni.toFirst(); (md = mni.current()); ++mni) {
                if (md->memberType() == MemberType_Define) {
                   FileDef *fd = md->getFileDef();
-                  if (fd && fd->absFilePath() == root->fileName)
+                  if (fd && fd->absoluteFilePath() == root->fileName)
                      // doc and define in the same file assume they belong together.
                   {
 #if 0
@@ -8104,13 +8103,12 @@ void printNavTree(EntryNav *rootNav, int indent)
 {
    QByteArray indentStr;
    indentStr.fill(' ', indent);
-   msg("%s%s (sec=0x%x)\n",
-       indentStr.isEmpty() ? "" : indentStr.data(),
-       rootNav->name().isEmpty() ? "<empty>" : rootNav->name().data(),
-       rootNav->section());
-   if (rootNav->children()) {
-      EntryNavListIterator eli(*rootNav->children());
-      for (; eli.current(); ++eli) {
+
+   msg("%s%s (sec=0x%x)\n", indentStr.isEmpty() ? "" : indentStr.data(),
+       rootNav->name().isEmpty() ? "<empty>" : rootNav->name().data(),rootNav->section());
+
+   if (rootNav->children()) {    
+      for (auto e : *rootNav->children() ) { 
          printNavTree(eli.current(), indent + 2);
       }
    }
@@ -8272,12 +8270,12 @@ static bool openOutputFile(const char *outFile, QFile &f)
  *  If the \a shortList parameter is true a configuration file without
  *  comments will be generated.
  */
-static void generateConfigFile(const char *configFile, bool shortList,
-                               bool updateOnly = false)
+static void generateConfigFile(const char *configFile, bool shortList, bool updateOnly = false)
 {
    QFile f;
    bool fileOpened = openOutputFile(configFile, f);
    bool writeToStdout = (configFile[0] == '-' && configFile[1] == '\0');
+
    if (fileOpened) {
       FTextStream t(&f);
       Config::instance()->writeTemplate(t, shortList, updateOnly);
@@ -8324,7 +8322,7 @@ static void readTagFile(Entry *root, const char *tl)
       fileName = tagLine.left(eqPos).trimmed();
       destName = tagLine.right(tagLine.length() - eqPos - 1).trimmed();
       QFileInfo fi(fileName);
-      Doxygen::tagDestinationDict.insert(fi.absFilePath().toUtf8(), new QByteArray(destName));
+      Doxygen::tagDestinationDict.insert(fi.absoluteFilePath().toUtf8(), new QByteArray(destName));
       //printf("insert tagDestination %s->%s\n",fi.fileName().data(),destName.data());
    } else {
       fileName = tagLine;
@@ -8343,7 +8341,7 @@ static void readTagFile(Entry *root, const char *tl)
       msg("Reading tag file `%s'...\n", fileName.data());
    }
 
-   parseTagFile(root, fi.absFilePath().toUtf8());
+   parseTagFile(root, fi.absoluteFilePath().toUtf8());
 }
 
 //----------------------------------------------------------------------------
@@ -8634,7 +8632,7 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
             QStringList *patList, QStringList *exclPatList, QList<QByteArray> *resultList, StringDict *resultDict,
             bool errorIfNotExist, bool recursive, QHash<QString, void> *killDict, QHash<QString, void> *paths)
 {
-   QByteArray dirName = fi->absFilePath().toUtf8();
+   QByteArray dirName = fi->absoluteFilePath().toUtf8();
    if (paths && paths->find(dirName) == 0) {
       paths->insert(dirName, (void *)0x8);
    }
@@ -8651,7 +8649,7 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
    QDir dir(dirName);
    dir.setFilter( QDir::Files | QDir::Dirs | QDir::Hidden );
    int totalSize = 0;
-   msg("Searching for files in directory %s\n", fi->absFilePath().data());
+   msg("Searching for files in directory %s\n", fi->absoluteFilePath().data());
    //printf("killDict=%p count=%d\n",killDict,killDict->count());
 
    const QFileInfoList *list = dir.entryInfoList();
@@ -8660,20 +8658,20 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
       QFileInfo *cfi;
 
       while ((cfi = it.current())) {
-         if (exclDict == 0 || exclDict->find(cfi->absFilePath().toUtf8()) == 0) {
+         if (exclDict == 0 || exclDict->find(cfi->absoluteFilePath().toUtf8()) == 0) {
             // file should not be excluded
-            //printf("killDict->find(%s)\n",cfi->absFilePath().data());
+            //printf("killDict->find(%s)\n",cfi->absoluteFilePath().data());
             if (!cfi->exists() || !cfi->isReadable()) {
                if (errorIfNotExist) {
-                  warn_uncond("source %s is not a readable file or directory... skipping.\n", cfi->absFilePath().data());
+                  warn_uncond("source %s is not a readable file or directory... skipping.\n", cfi->absoluteFilePath().data());
                }
             } else if (cfi->isFile() &&
                        (!Config_getBool("EXCLUDE_SYMLINKS") || !cfi->isSymLink()) &&
                        (patList == 0 || patternMatch(*cfi, patList)) &&
                        !patternMatch(*cfi, exclPatList) &&
-                       (killDict == 0 || killDict->find(cfi->absFilePath().toUtf8()) == 0)
+                       (killDict == 0 || killDict->find(cfi->absoluteFilePath().toUtf8()) == 0)
                       ) {
-               totalSize += cfi->size() + cfi->absFilePath().length() + 4;
+               totalSize += cfi->size() + cfi->absoluteFilePath().length() + 4;
                QByteArray name = cfi->fileName().toUtf8();
                //printf("New file %s\n",name.data());
                if (fnDict) {
@@ -8682,7 +8680,7 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
                   if (!name.isEmpty() && (fn = (*fnDict)[name])) {
                      fn->append(fd);
                   } else {
-                     fn = new FileName(cfi->absFilePath().toUtf8(), name);
+                     fn = new FileName(cfi->absoluteFilePath().toUtf8(), name);
                      fn->append(fd);
                      if (fnList) {
                         fnList->inSort(fn);
@@ -8692,23 +8690,23 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
                }
                QByteArray *rs = 0;
                if (resultList || resultDict) {
-                  rs = new QByteArray(cfi->absFilePath().toUtf8());
+                  rs = new QByteArray(cfi->absoluteFilePath().toUtf8());
                }
                if (resultList) {
                   resultList->append(rs);
                }
                if (resultDict) {
-                  resultDict->insert(cfi->absFilePath().toUtf8(), rs);
+                  resultDict->insert(cfi->absoluteFilePath().toUtf8(), rs);
                }
                if (killDict) {
-                  killDict->insert(cfi->absFilePath().toUtf8(), (void *)0x8);
+                  killDict->insert(cfi->absoluteFilePath().toUtf8(), (void *)0x8);
                }
             } else if (recursive &&
                        (!Config_getBool("EXCLUDE_SYMLINKS") || !cfi->isSymLink()) &&
                        cfi->isDir() &&
                        !patternMatch(*cfi, exclPatList) &&
                        cfi->fileName().at(0) != '.') { // skip "." ".." and ".dir"
-               cfi->setFile(cfi->absFilePath());
+               cfi->setFile(cfi->absoluteFilePath());
                totalSize += readDir(cfi, fnList, fnDict, exclDict,
                                     patList, exclPatList, resultList, resultDict, errorIfNotExist,
                                     recursive, killDict, paths);
@@ -8754,7 +8752,7 @@ int readFileOrDirectory(const char *s,
    //printf("readFileOrDirectory(%s)\n",s);
    int totalSize = 0;
    {
-      if (exclDict == 0 || exclDict->find(fi.absFilePath().toUtf8()) == 0) {
+      if (exclDict == 0 || exclDict->find(fi.absoluteFilePath().toUtf8()) == 0) {
          if (!fi.exists() || !fi.isReadable()) {
             if (errorIfNotExist) {
                warn_uncond("source %s is not a readable file or directory... skipping.\n", s);
@@ -8762,13 +8760,13 @@ int readFileOrDirectory(const char *s,
          } else if (!Config_getBool("EXCLUDE_SYMLINKS") || !fi.isSymLink()) {
             if (fi.isFile()) {
                QByteArray dirPath = fi.dirPath(true).toUtf8();
-               QByteArray filePath = fi.absFilePath().toUtf8();
+               QByteArray filePath = fi.absoluteFilePath().toUtf8();
                if (paths && paths->find(dirPath)) {
                   paths->insert(dirPath, (void *)0x8);
                }
-               //printf("killDict->find(%s)\n",fi.absFilePath().data());
+               //printf("killDict->find(%s)\n",fi.absoluteFilePath().data());
                if (killDict == 0 || killDict->find(filePath) == 0) {
-                  totalSize += fi.size() + fi.absFilePath().length() + 4; //readFile(&fi,fiList,input);
+                  totalSize += fi.size() + fi.absoluteFilePath().length() + 4; //readFile(&fi,fiList,input);
                   //fiList->inSort(new FileInfo(fi));
                   QByteArray name = fi.fileName().toUtf8();
                   //printf("New file %s\n",name.data());
@@ -8798,7 +8796,7 @@ int readFileOrDirectory(const char *s,
                   }
 
                   if (killDict) {
-                     killDict->insert(fi.absFilePath().toUtf8(), (void *)0x8);
+                     killDict->insert(fi.absoluteFilePath().toUtf8(), (void *)0x8);
                   }
                }
             } else if (fi.isDir()) { // readable dir
@@ -8832,7 +8830,7 @@ void readFormulaRepository()
             QByteArray formText = line.right(line.length() - se - 1);
 
             Formula *f = new Formula(formText);
-            
+
             Doxygen::formulaList->append(f);
             Doxygen::formulaDict->insert(formText, f);
             Doxygen::formulaNameDict->insert(formName, f);
@@ -8890,7 +8888,7 @@ static void escapeAliases()
 
 void readAliases()
 {
-   // add aliases to a dictionary   
+   // add aliases to a dictionary
    QStringList &aliasList = Config_getList("ALIASES");
    const char *s = aliasList.first();
 
@@ -9059,18 +9057,18 @@ void initDoxygen()
    initClassMemberIndices();
    initNamespaceMemberIndices();
    initFileMemberIndices();
-  
+
 #ifdef USE_LIBCLANG
    Doxygen::clangUsrMap       = new QHash<QString, Definition>();
 #endif
 
    Doxygen::symbolMap         = new QHash<QString, DefinitionIntf>();
-   Doxygen::inputNameList     = new SortedList<FileName *>;  
+   Doxygen::inputNameList     = new SortedList<FileName *>;
 
    Doxygen::memberNameSDict   = new MemberNameSDict();
    Doxygen::functionNameSDict = new MemberNameSDict();
    Doxygen::groupSDict        = new GroupSDict();
- 
+
    Doxygen::globalScope       = new NamespaceDef("<globalScope>", 1, 1, "<globalScope>");
 
    Doxygen::namespaceSDict    = new NamespaceSDict();
@@ -9095,7 +9093,7 @@ void initDoxygen()
    Doxygen::formulaDict       = new FormulaDict();
    Doxygen::formulaNameDict   = new FormulaDict();
    Doxygen::sectionDict       = new SectionDict();
- 
+
    /**************************************************************************
     *            Initialize some global constants
     **************************************************************************/
@@ -9472,7 +9470,7 @@ void readConfiguration(int argc, char **argv)
 
    /* Perlmod wants to know the path to the config file.*/
    QFileInfo configFileInfo(configName);
-   setPerlModDoxyfile(configFileInfo.absFilePath().data());
+   setPerlModDoxyfile(configFileInfo.absoluteFilePath().data());
 
 }
 
@@ -9501,7 +9499,7 @@ void adjustConfiguration()
 
    while (s) {
       QFileInfo fi(s);
-      addSearchDir(fi.absFilePath().toUtf8());
+      addSearchDir(fi.absoluteFilePath().toUtf8());
       s = includePath.next();
    }
 
@@ -9713,7 +9711,7 @@ void searchInputFiles()
    QStringList &exclPatterns = Config_getList("EXCLUDE_PATTERNS");
    bool alwaysRecursive = Config_getBool("RECURSIVE");
    StringDict excludeNameDict(1009);
-   
+
    // gather names of all files in the include path
    g_s.begin("Searching for include files...\n");
    QStringList &includePathList = Config_getList("INCLUDE_PATH");
@@ -10187,7 +10185,7 @@ void parseInput()
    g_s.begin("Computing class relations...\n");
    computeTemplateClassRelations();
    flushUnresolvedRelations();
-  
+
    computeClassRelations();
    g_classEntries.clear();
    g_s.end();

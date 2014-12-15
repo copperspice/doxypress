@@ -29,34 +29,40 @@
 #include <sortedlist.h>
 
 class ArgumentList;
+class ExampleSDict;
+class Entry;
+class MemberSDict;
+class MemberList;
+
 struct BaseInfo;
 struct Grouping;
 struct SectionInfo;
 struct ListItemInfo;
-class MemberSDict;
-class MemberList;
 struct BodyInfo;
 struct DocInfo;
 struct BriefInfo;
-class ExampleSDict;
-class Entry;
 
 #define NULL_LIST 0xffffffff
 
 //----- marshaling function: datatype -> byte stream --------------------
 
-void marshalInt(StorageIntf *s, int v);
-void marshalUInt(StorageIntf *s, uint v);
+void marshalInt(StorageIntf *s,    int v);
+void marshalUInt(StorageIntf *s,   uint v);
 void marshalUInt64(StorageIntf *s, uint64_t v);
+
 void marshalBool(StorageIntf *s, bool b);
+
 void marshalQByteArray(StorageIntf *s,      const QByteArray &str);
-void marshalQGString(StorageIntf *s,        const QByteArray &str);
-void marshalArgumentList(StorageIntf *s,    ArgumentList *argList);
+void marshalQString(StorageIntf *s,         const QString &str);
+
+void marshalArgumentList(StorageIntf *s,    ArgumentList argList);
 void marshalArgumentLists(StorageIntf *s,   QList<ArgumentList> *argLists);
 void marshalBaseInfoList(StorageIntf *s,    QList<BaseInfo> *baseList);
 void marshalGroupingList(StorageIntf *s,    QList<Grouping> *groups);
+
 void marshalSectionInfoList(StorageIntf *s, QList<SectionInfo> *anchors);
 void marshalItemInfoList(StorageIntf *s,    QList<ListItemInfo> *sli);
+
 void marshalObjPointer(StorageIntf *s,      void *obj);
 void marshalSectionDict(StorageIntf *s,     SectionDict *sections);
 void marshalMemberSDict(StorageIntf *s,     MemberSDict *memberSDict);

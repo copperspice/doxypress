@@ -66,6 +66,7 @@ class DirDef : public Definition
    }
 
    void addFile(FileDef *fd);
+
    const SortedList<DirDef *> &subDirs() const {
       return m_subdirs;
    }
@@ -86,7 +87,7 @@ class DirDef : public Definition
       return m_dirCount;
    }
 
-   const QHash<QString, UsedDir> *usedDirs() const {
+   const QHash<QString, UsedDir *> &usedDirs() const {
       return m_usedDirs;
    }
 
@@ -100,8 +101,9 @@ class DirDef : public Definition
    void writeDepGraph(FTextStream &t);
    void writeTagFile(FTextStream &t);
 
-   static DirDef *mergeDirectoryInTree(const QByteArray &path);
+   static QSharedPointer<DirDef> mergeDirectoryInTree(const QByteArray &path);
    bool visited;
+
    void setDiskName(const QByteArray &name) {
       m_diskName = name;
    }
@@ -118,7 +120,8 @@ class DirDef : public Definition
    void endMemberDeclarations(OutputList &ol);
 
    void setLevel();
-   static DirDef *createNewDir(const char *path);
+
+   static QSharedPointer<DirDef> createNewDir(const char *path);
    static bool matchPath(const QByteArray &path, QStringList &l);
    void addUsesDependency(DirDef *usedDir, FileDef *srcFd,FileDef *dstFd, bool inherited);
    void computeDependencies();
@@ -137,7 +140,7 @@ class DirDef : public Definition
 
    DirDef *m_parent;
 
-   QHash<QString, UsedDir> *m_usedDirs;
+   QHash<QString, UsedDir *> m_usedDirs;
 };
 
 /** Class representing a pair of FileDef objects */
@@ -174,14 +177,16 @@ class UsedDir
    virtual ~UsedDir();
 
    void addFileDep(FileDef *srcFd, FileDef *dstFd);
-   FilePair *findFilePair(const char *name);
+   QSharedPointer<FilePair> findFilePair(const char *name);
 
    const FilePairDict &filePairs() const {
       return m_filePairs;
    }
+
    const DirDef *dir() const {
       return m_dir;
    }
+
    bool inherited() const {
       return m_inherited;
    }

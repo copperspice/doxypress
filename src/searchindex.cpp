@@ -53,22 +53,23 @@ const int numIndexEntries = 256 * 256;
 
 //--------------------------------------------------------------------
 
-IndexWord::IndexWord(const char *word) : m_word(word), m_urls(17)
-{
-   m_urls.setAutoDelete(true);
-   //printf("IndexWord::IndexWord(%s)\n",word);
+IndexWord::IndexWord(const char *word) : m_word(word)
+{  
 }
 
 void IndexWord::addUrlIndex(int idx, bool hiPriority)
 {
    //printf("IndexWord::addUrlIndex(%d,%d)\n",idx,hiPriority);
    URLInfo *ui = m_urls.find(idx);
+
    if (ui == 0) {
       //printf("URLInfo::URLInfo(%d)\n",idx);
       ui = new URLInfo(idx, 0);
       m_urls.insert(idx, ui);
    }
+
    ui->freq += 2;
+
    if (hiPriority) {
       ui->freq |= 1;   // mark as high priority document
    }
@@ -80,10 +81,7 @@ SearchIndex::SearchIndex() : SearchIndexIntf(Internal),
    m_words(328829), m_index(numIndexEntries), m_url2IdMap(10007), m_urls(10007), m_urlIndex(-1)
 {
    int i;
-   m_words.setAutoDelete(true);
-   m_url2IdMap.setAutoDelete(true);
-   m_urls.setAutoDelete(true);
-   m_index.setAutoDelete(true);
+  
    for (i = 0; i < numIndexEntries; i++) {
       m_index.insert(i, new QList<IndexWord>);
    }

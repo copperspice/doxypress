@@ -619,53 +619,53 @@ class PrintDocVisitor : public DocVisitor
       indent_pre();
       printf("<secrefitem target=\"%s\">\n", ref->target().data());
    }
+
    void visitPost(DocSecRefItem *) {
       indent_post();
       printf("</secrefitem>\n");
    }
+
    void visitPre(DocSecRefList *) {
       indent_pre();
       printf("<secreflist>\n");
    }
+
    void visitPost(DocSecRefList *) {
       indent_post();
       printf("</secreflist>\n");
    }
-   //void visitPre(DocLanguage *l)
-   //{
-   //  indent_pre();
-   //  printf("<language id=%s>\n",l->id().data());
-   //}
-   //void visitPost(DocLanguage *)
-   //{
-   //  indent_post();
-   //  printf("</language>\n");
-   //}
+  
    void visitPre(DocParamList *pl) {
       indent_pre();
-      //QStringListIterator sli(pl->parameters());
-      QListIterator<DocNode> sli(pl->parameters());
-      //const char *s;
+        
       DocNode *param;
+
       printf("<parameters>");
-      for (sli.toFirst(); (param = sli.current()); ++sli) {
+     
+      for (auto param : pl->parameters()) { 
          printf("<param>");
+
          if (param->kind() == DocNode::Kind_Word) {
             visit((DocWord *)param);
          } else if (param->kind() == DocNode::Kind_LinkedWord) {
             visit((DocLinkedWord *)param);
          }
+
          printf("</param>");
       }
+
       printf("\n");
    }
+
    void visitPost(DocParamList *) {
       indent_post();
       printf("</parameters>\n");
    }
+
    void visitPre(DocParamSect *ps) {
       indent_pre();
       printf("<paramsect type=");
+
       switch (ps->type()) {
          case DocParamSect::Param:
             printf("param");
@@ -718,26 +718,22 @@ class PrintDocVisitor : public DocVisitor
       indent_pre();
       printf("<text>\n");
    }
+
    void visitPost(DocText *) {
       indent_post();
       printf("</text>\n");
    }
+
    void visitPre(DocHtmlBlockQuote *) {
       indent_pre();
       printf("<blockquote>\n");
    }
+   
    void visitPost(DocHtmlBlockQuote *) {
       indent_post();
       printf("</blockquote>\n");
    }
-   void visitPre(DocVhdlFlow *) {
-      indent_pre();
-      printf("<vhdlflow>\n");
-   }
-   void visitPost(DocVhdlFlow *) {
-      indent_post();
-      printf("</vhdlflow>\n");
-   }
+  
    void visitPre(DocParBlock *) {
       indent_pre();
       printf("<parblock>\n");

@@ -1211,14 +1211,6 @@ void ManDocVisitor::visitPost(DocHtmlBlockQuote *)
    m_firstCol = true;
 }
 
-void ManDocVisitor::visitPre(DocVhdlFlow *)
-{
-}
-
-void ManDocVisitor::visitPost(DocVhdlFlow *)
-{
-}
-
 void ManDocVisitor::visitPre(DocParBlock *)
 {
 }

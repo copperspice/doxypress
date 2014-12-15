@@ -1377,7 +1377,7 @@ static ClassDef *getResolvedClassRec(Definition *scope,
    int scopeNameLen = scope->name().length() + 1;
    int nameLen = name.length() + 1;
    int explicitPartLen = explicitScopePart.length();
-   int fileScopeLen = hasUsingStatements ? 1 + fileScope->absFilePath().length() : 0;
+   int fileScopeLen = hasUsingStatements ? 1 + fileScope->absoluteFilePath().length() : 0;
 
    // below is a more efficient coding of
    // QByteArray key=scope->name()+"+"+name+"+"+explicitScopePart;
@@ -1400,7 +1400,7 @@ static ClassDef *getResolvedClassRec(Definition *scope,
       // below is a more efficient coding of
       // key+="+"+fileScope->name();
       *p++ = '+';
-      qstrcpy(p, fileScope->absFilePath());
+      qstrcpy(p, fileScope->absoluteFilePath());
       p += fileScopeLen - 1;
    }
    *p = '\0';
@@ -4476,7 +4476,7 @@ bool resolveLink(/* in */ const char *scName,
       *resContext = nd;
       return true;
 
-   } else if ((dir = Doxygen::directories->find(QFileInfo(linkRef).absFilePath().toUtf8() + "/")) && dir->isLinkable()) { 
+   } else if ((dir = Doxygen::directories->find(QFileInfo(linkRef).absoluteFilePath().toUtf8() + "/")) && dir->isLinkable()) { 
       // TODO: make this location independent like filedefs
 
       *resContext = dir;
@@ -4705,7 +4705,7 @@ QByteArray showFileDefMatches(const FileNameDict *fnDict, const char *n)
       FileDef *fd;
       for (fni.toFirst(); (fd = fni.current()); ++fni) {
          if (path.isEmpty() || fd->getPath().right(path.length()) == path) {
-            result += "   " + fd->absFilePath() + "\n";
+            result += "   " + fd->absoluteFilePath() + "\n";
          }
       }
    }
@@ -5829,13 +5829,13 @@ QByteArray substituteTemplateArgumentsInString(
 QList<ArgumentList> *copyArgumentLists(const QList<ArgumentList> *srcLists)
 {
    assert(srcLists != 0);
+
    QList<ArgumentList> *dstLists = new QList<ArgumentList>;
-   dstLists->setAutoDelete(true);
-   QListIterator<ArgumentList> sli(*srcLists);
-   ArgumentList *sl;
-   for (; (sl = sli.current()); ++sli) {
-      dstLists->append(sl->deepCopy());
+  
+   for (auto sl : *srcLists ) {
+      dstLists->append(sl);
    }
+
    return dstLists;
 }
 
@@ -7275,7 +7275,7 @@ bool patternMatch(const QFileInfo &fi, const QStringList *patList)
      
       QByteArray fn  = fi.fileName().data();
       QByteArray fp  = fi.filePath().data();
-      QByteArray afp = fi.absFilePath().data();
+      QByteArray afp = fi.absoluteFilePath().data();
     
       for ( auto pattern : *patList ) {
 

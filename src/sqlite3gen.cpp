@@ -309,23 +309,26 @@ SqlStmt innernamespace_insert = {"INSERT INTO  innernamespaces "
 class TextGeneratorSqlite3Impl : public TextGeneratorIntf
 {
  public:
-   TextGeneratorSqlite3Impl(QList<QByteArray> &l) : l(l) {
-      l.setAutoDelete(true);
+   TextGeneratorSqlite3Impl(QList<QByteArray> &l) : l(l) {      
    }
+
    void writeString(const char * /*s*/, bool /*keepSpaces*/) const {
    }
+
    void writeBreak(int) const {
       DBG_CTX(("writeBreak\n"));
    }
-   void writeLink(const char * /*extRef*/, const char *file,
-                  const char *anchor, const char * /*text*/
-                 ) const {
+
+   void writeLink(const char * /*extRef*/, const char *file, const char *anchor, const char * /*text*/ ) const {
       QByteArray *rs = new QByteArray(file);
+
       if (anchor) {
          rs->append("_1").append(anchor);
       }
+
       l.append(rs);
    }
+
  private:
    QList<QByteArray> &l;
    // the list is filled by linkifyText and consumed by the caller
@@ -849,7 +852,7 @@ static void generateSqlite3ForMember(sqlite3 *db, MemberDef *md, Definition *def
          bindIntParameter(memberdef_insert, ":column", md->getDefColumn());
 
          if (md->getStartBodyLine() != -1) {
-            int id_bodyfile = insertFile(db, md->getBodyDef()->absFilePath());
+            int id_bodyfile = insertFile(db, md->getBodyDef()->absoluteFilePath());
             if (id_bodyfile == -1) {
                sqlite3_clear_bindings(memberdef_insert.stmt);
             } else {
@@ -1117,7 +1120,7 @@ static void generateSqlite3ForFile(sqlite3 *db, FileDef *fd)
    if (fd->includeFileList()) {
       QListIterator<IncludeInfo> ili(*fd->includeFileList());
       for (ili.toFirst(); (ii = ili.current()); ++ili) {
-         int id_src = insertFile(db, fd->absFilePath().data());
+         int id_src = insertFile(db, fd->absoluteFilePath().data());
          int id_dst = insertFile(db, ii->includeName.data());
          bindIntParameter(incl_select, ":local", ii->local);
          bindIntParameter(incl_select, ":id_src", id_src);
@@ -1136,7 +1139,7 @@ static void generateSqlite3ForFile(sqlite3 *db, FileDef *fd)
       QListIterator<IncludeInfo> ili(*fd->includedByFileList());
       for (ili.toFirst(); (ii = ili.current()); ++ili) {
          int id_src = insertFile(db, ii->includeName);
-         int id_dst = insertFile(db, fd->absFilePath());
+         int id_dst = insertFile(db, fd->absoluteFilePath());
          bindIntParameter(incl_select, ":local", ii->local);
          bindIntParameter(incl_select, ":id_src", id_src);
          bindIntParameter(incl_select, ":id_dst", id_dst);

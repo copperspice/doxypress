@@ -30,7 +30,6 @@
 #include <message.h>
 #include <doxygen.h>
 #include <language.h>
-#include <portable.h>
 #include <groupdef.h>
 #include <memberdef.h>
 #include <filedef.h>
@@ -40,11 +39,12 @@
 
 /** Class representing a field in the HTML help index. */
 struct IndexField {
-   QByteArray name;
+   QString name;
    QByteArray url;
    QByteArray anchor;
-   bool     link;
-   bool     reversed;
+
+   bool link;
+   bool reversed;
 };
 
 /** Sorted dictionary of IndexField objects. */
@@ -56,7 +56,7 @@ class IndexFieldSDict : public StringMap<QSharedPointer<IndexField>>
 
  private:
    int compareValues(const IndexField *item1, const IndexField *item2) const {
-      return qstricmp(item1->name, item2->name);
+      return item1->name.compare(item2->name, Qt::CaseInsensitive);
    }
 };
 
@@ -69,9 +69,7 @@ class HtmlHelpIndex
    HtmlHelpIndex(HtmlHelp *help);
    ~HtmlHelpIndex();
 
-   void addItem(const char *first, const char *second,
-                const char *url, const char *anchor,
-                bool hasLink, bool reversed);
+   void addItem(const char *first, const char *second, const char *url, const char *anchor, bool hasLink, bool reversed);
    void writeFields(FTextStream &t);
 
  private:
@@ -104,41 +102,43 @@ HtmlHelpIndex::~HtmlHelpIndex()
  *  \param reversed true if level1 is the member name and level2 the compound
  *         name.
  */
-void HtmlHelpIndex::addItem(const char *level1, const char *level2,
-                            const char *url, const char *anchor, bool hasLink,
-                            bool reversed)
+void HtmlHelpIndex::addItem(const char *level1, const char *level2, const char *url, const char *anchor, 
+                            bool hasLink, bool reversed)
 {
-   QByteArray key = level1;
+   QString key = level1;
 
    if (level2) {
-      key += (QByteArray)"?" + level2;
+      key += (QString)"?" + level2;
    }
 
-   if (key.indexOf(QRegExp("@[0-9]+")) != -1) { // skip anonymous stuff
+   if (key.indexOf(QRegExp("@[0-9]+")) != -1) { 
+      // skip anonymous stuff
       return;
    }
 
    if (dict->find(key) == 0) { 
       // new key
-      //printf(">>>>>>>>> HtmlHelpIndex::addItem(%s,%s,%s,%s)\n",
-      //      level1,level2,url,anchor);
+   
+      QSharedPointer<IndexField> f (new IndexField);
 
-      IndexField *f = new IndexField;
       f->name     = key;
       f->url      = url;
       f->anchor   = anchor;
       f->link     = hasLink;
       f->reversed = reversed;
-      dict->append(key, f);
+
+      dict->insert(key, f);
    }
 }
 
-static QByteArray field2URL(const IndexField *f, bool checkReversed)
+static QByteArray field2URL(QSharedPointer<IndexField> f, bool checkReversed)
 {
    QByteArray result = f->url + Doxygen::htmlFileExtension;
-   if (!f->anchor.isEmpty() && (!checkReversed || f->reversed)) {
+
+   if (! f->anchor.isEmpty() && (!checkReversed || f->reversed)) {
       result += "#" + f->anchor;
    }
+
    return result;
 }
 
@@ -169,18 +169,20 @@ static QByteArray field2URL(const IndexField *f, bool checkReversed)
  *  </pre>
  */
 void HtmlHelpIndex::writeFields(FTextStream &t)
-{
-   dict->sort();
-
-   IndexFieldSDict::Iterator ifli(*dict);
-   IndexField *f;
-
-   QByteArray lastLevel1;
+{  
+   QString lastLevel1;
    bool level2Started = false;
 
-   for (; (f = ifli.current()); ++ifli) {
-      QByteArray level1, level2;
+   auto nextItem = dict->begin();
+
+   for (auto f : *dict) {
+      QString level1;
+      QString level2;
+
       int i;
+
+      // strange code but this is ok for now
+      ++nextItem; 
 
       if ((i = f->name.indexOf('?')) != -1) {
 
@@ -194,35 +196,43 @@ void HtmlHelpIndex::writeFields(FTextStream &t)
 
       if (level1 != lastLevel1) {
          // finish old list at level 2
+
          if (level2Started) {
             t << "  </UL>" << endl;
          }
-         level2Started = false;
 
-         // <Antony>
+         level2Started = false;
+        
          // Added this code so that an item with only one subitem is written
          // without any subitem.
          // For example:
          //   a1, b1 -> will create only a1, not separate subitem for b1
          //   a2, b2
          //   a2, b3
-         QByteArray nextLevel1;
-         IndexField *fnext = ++ifli;
-         if (fnext) {
-            nextLevel1 = fnext->name.left(fnext->name.find('?'));
-            --ifli;
-         }
-         if (level1 != nextLevel1) {
-            level2 = "";
-         }
-         // </Antony>
 
+         if ( nextItem != dict->end() ) {
+
+            QString nextLevel1;
+            QSharedPointer<IndexField> fnext = *nextItem;
+              
+            nextLevel1 = fnext->name.left(fnext->name.indexOf('?'));            
+            
+            if (level1 != nextLevel1) {
+               level2 = "";
+            }
+
+         } else {
+            level2 = "";
+
+         }
+        
          if (level2.isEmpty()) {
             t << "  <LI><OBJECT type=\"text/sitemap\">";
             t << "<param name=\"Local\" value=\"" << field2URL(f, true);
             t << "\">";
             t << "<param name=\"Name\" value=\"" << m_help->recode(level1) << "\">"
               "</OBJECT>\n";
+
          } else {
             if (f->link) {
                t << "  <LI><OBJECT type=\"text/sitemap\">";
@@ -242,11 +252,13 @@ void HtmlHelpIndex::writeFields(FTextStream &t)
          // start new list at level 2
          t << "  <UL>" << endl;
          level2Started = true;
+
       } else if (level2Started && level2.isEmpty()) {
          // end list at level 2
          t << "  </UL>" << endl;
          level2Started = false;
       }
+
       if (level2Started) {
          t << "    <LI><OBJECT type=\"text/sitemap\">";
          t << "<param name=\"Local\" value=\"" << field2URL(f, false);
@@ -254,11 +266,14 @@ void HtmlHelpIndex::writeFields(FTextStream &t)
          t << "<param name=\"Name\" value=\"" << m_help->recode(level2) << "\">"
            "</OBJECT>\n";
       }
+
       lastLevel1 = level1;
    }
+
    if (level2Started) {
       t << "  </UL>" << endl;
    }
+
 }
 
 //----------------------------------------------------------------------------
@@ -273,16 +288,14 @@ HtmlHelp::HtmlHelp() : indexFileDict()
 {
    /* initial depth */
    dc = 0;
-   cf = kf = 0;
-   index = new HtmlHelpIndex(this);
-   m_fromUtf8 = (void *)(-1);
+   cf = 0;
+   kf = 0;
+
+   index = new HtmlHelpIndex(this);  
 }
 
 HtmlHelp::~HtmlHelp()
-{
-   if (m_fromUtf8 != (void *)(-1)) {
-      portable_iconv_close(m_fromUtf8);
-   }
+{  
    delete index;
 }
 
@@ -296,25 +309,30 @@ static QHash<QString, QByteArray *> s_languageDict;
 void HtmlHelp::initialize()
 {
    const char *str = Config_getString("CHM_INDEX_ENCODING");
-   if (!str) {
-      str = "CP1250";   // use safe and likely default
+
+   if (! str) {
+      str = "Windows-1250";   // use safe and likely default
    }
 
-   m_fromUtf8 = portable_iconv_open(str, "UTF-8");
-   if (m_fromUtf8 == (void *)(-1)) {
-      err("unsupported character conversion for CHM_INDEX_ENCODING: '%s'->'UTF-8'\n", str);
+   m_toNewCodec = QTextCodec::codecForName(str);
+
+   if (m_toNewCodec == nullptr) {
+      err("Unsupported character conversion for CHM_INDEX_ENCODING: '%s'\n", str);
       exit(1);
    }
 
    /* open the contents file */
    QByteArray fName = Config_getString("HTML_OUTPUT") + "/index.hhc";
    cf = new QFile(fName);
-   if (!cf->open(QIODevice::WriteOnly)) {
+
+   if (! cf->open(QIODevice::WriteOnly)) {
       err("Could not open file %s for writing\n", fName.data());
       exit(1);
    }
+
    /* Write the header of the contents file */
    cts.setDevice(cf);
+
    cts << "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">\n"
        "<HTML><HEAD></HEAD><BODY>\n"
        "<OBJECT type=\"text/site properties\">\n"
@@ -461,10 +479,12 @@ void HtmlHelp::createProjectFile()
    /* Write the project file */
    QByteArray fName = Config_getString("HTML_OUTPUT") + "/index.hhp";
    QFile f(fName);
+
    if (f.open(QIODevice::WriteOnly)) {
       FTextStream t(&f);
 
       QByteArray indexName = "index" + Doxygen::htmlFileExtension;
+
       t << "[OPTIONS]\n";
       if (!Config_getString("CHM_FILE").isEmpty()) {
          t << "Compiled file=" << Config_getString("CHM_FILE") << "\n";
@@ -476,12 +496,15 @@ void HtmlHelp::createProjectFile()
         "Default topic=" << indexName << "\n"
         "Index file=index.hhk\n"
         "Language=" << getLanguageString() << endl;
+
       if (Config_getBool("BINARY_TOC")) {
          t << "Binary TOC=YES\n";
       }
+
       if (Config_getBool("GENERATE_CHI")) {
          t << "Create CHI file=YES\n";
       }
+
       t << "Title=" << recode(Config_getString("PROJECT_NAME")) << endl << endl;
 
       t << "[WINDOWS]" << endl;
@@ -496,10 +519,12 @@ void HtmlHelp::createProjectFile()
       //       are shown. They can only be shown in case of a binary toc.
       //          dee http://www.mif2go.com/xhtml/htmlhelp_0016_943addingtabsandtoolbarbuttonstohtmlhelp.htm#Rz108x95873
       //       Value has been taken from htmlhelp.h file of the HTML Help Workshop
+
       if (Config_getBool("BINARY_TOC")) {
          t << "main=\"" << recode(Config_getString("PROJECT_NAME")) << "\",\"index.hhc\","
            "\"index.hhk\",\"" << indexName << "\",\"" <<
            indexName << "\",,,,,0x23520,,0x70387e,,,,,,,,0" << endl << endl;
+
       } else {
          t << "main=\"" << recode(Config_getString("PROJECT_NAME")) << "\",\"index.hhc\","
            "\"index.hhk\",\"" << indexName << "\",\"" <<
@@ -507,16 +532,18 @@ void HtmlHelp::createProjectFile()
       }
 
       t << "[FILES]" << endl;
-      char *s = indexFiles.first();
-      while (s) {
+
+      for (auto s : indexFiles) {
          t << s << endl;
-         s = indexFiles.next();
       }
+
       uint i;
       for (i = 0; i < imageFiles.count(); i++) {
          t << imageFiles.at(i) << endl;
       }
+
       f.close();
+
    } else {
       err("Could not open file %s for writing\n", fName.data());
    }
@@ -524,7 +551,7 @@ void HtmlHelp::createProjectFile()
 
 void HtmlHelp::addIndexFile(const char *s)
 {
-   if (indexFileDict.find(s) == 0) {
+   if (indexFileDict.contains(s)) {
       indexFiles.append(s);
       indexFileDict.insert(s, (void *)0x8);
    }
@@ -565,9 +592,11 @@ void HtmlHelp::finalize()
 void HtmlHelp::incContentsDepth()
 {
    int i;
+
    for (i = 0; i < dc + 1; i++) {
       cts << "  ";
    }
+
    cts << "<UL>\n";
    ++dc;
 }
@@ -579,30 +608,18 @@ void HtmlHelp::incContentsDepth()
 void HtmlHelp::decContentsDepth()
 {
    int i;
+
    for (i = 0; i < dc; i++) {
       cts << "  ";
    }
+
    cts << "</UL>\n";
    --dc;
 }
 
-QByteArray HtmlHelp::recode(const QByteArray &s)
+QByteArray HtmlHelp::recode(const QString &s)
 {
-   int iSize        = s.length();
-   int oSize        = iSize * 4 + 1;
-   QByteArray output(oSize);
-   size_t iLeft     = iSize;
-   size_t oLeft     = oSize;
-   char *iPtr       = s.data();
-   char *oPtr       = output.data();
-   if (!portable_iconv(m_fromUtf8, &iPtr, &iLeft, &oPtr, &oLeft)) {
-      oSize -= (int)oLeft;
-      output.resize(oSize + 1);
-      output.at(oSize) = '\0';
-      return output;
-   } else {
-      return s;
-   }
+   return m_toNewCodec->fromUnicode(s);
 }
 
 /*! Add an list item to the contents file.
@@ -615,30 +632,23 @@ QByteArray HtmlHelp::recode(const QByteArray &s)
  *  \param addToNavIndex not used.
  *  \param def not used.
  */
-void HtmlHelp::addContentsItem(bool isDir,
-                               const char *name,
-                               const char * /*ref*/,
-                               const char *file,
-                               const char *anchor,
-                               bool /* separateIndex */,
-                               bool /* addToNavIndex */,
-                               Definition * /* def */)
+void HtmlHelp::addContentsItem(bool isDir, const char *name, const char *ref, const char *file, const char *anchor, 
+            bool seperateIndex, bool addToNavIndex, Definition *def)
 {
    // If we're using a binary toc then folders cannot have links.
    // Tried this and I didn't see any problems, when not using
    // the resetting of file and anchor the TOC works better
    // (prev / next button)
-   //if(Config_getBool("BINARY_TOC") && isDir)
-   //{
-   //file = 0;
-   //anchor = 0;
-   //}
+  
    int i;
+
    for (i = 0; i < dc; i++) {
       cts << "  ";
    }
+
    cts << "<LI><OBJECT type=\"text/sitemap\">";
    cts << "<param name=\"Name\" value=\"" << convertToHtml(recode(name), true) << "\">";
+
    if (file) {    // made file optional param - KPW
       if (file && (file[0] == '!' || file[0] == '^')) { // special markers for user defined URLs
          cts << "<param name=\"";
@@ -647,8 +657,10 @@ void HtmlHelp::addContentsItem(bool isDir,
          } else {
             cts << "Local";
          }
+
          cts << "\" value=\"";
          cts << &file[1];
+
       } else {
          cts << "<param name=\"Local\" value=\"";
          cts << file << Doxygen::htmlFileExtension;
@@ -658,22 +670,25 @@ void HtmlHelp::addContentsItem(bool isDir,
       }
       cts << "\">";
    }
+
    cts << "<param name=\"ImageNumber\" value=\"";
+
    if (isDir) { // added - KPW
       cts << (int)BOOK_CLOSED ;
    } else {
       cts << (int)TEXT;
    }
+
    cts << "\">";
    cts << "</OBJECT>\n";
 }
 
 
-void HtmlHelp::addIndexItem(Definition *context, MemberDef *md,
-                            const char *sectionAnchor, const char *word)
+void HtmlHelp::addIndexItem(Definition *context, MemberDef *md, const char *sectionAnchor, const char *word)
 {
    if (md) {
       static bool separateMemberPages = Config_getBool("SEPARATE_MEMBER_PAGES");
+
       if (context == 0) { // global member
          if (md->getGroupDef()) {
             context = md->getGroupDef();
@@ -681,6 +696,7 @@ void HtmlHelp::addIndexItem(Definition *context, MemberDef *md,
             context = md->getFileDef();
          }
       }
+
       if (context == 0) {
          return;   // should not happen
       }
@@ -694,6 +710,7 @@ void HtmlHelp::addIndexItem(Definition *context, MemberDef *md,
       QByteArray anchor  = sectionAnchor ? QByteArray(sectionAnchor) : md->anchor();
       index->addItem(level1, level2, contRef, anchor, true, false);
       index->addItem(level2, level1, memRef, anchor, true, true);
+
    } else if (context) {
       QByteArray level1  = word ? QByteArray(word) : context->name();
       index->addItem(level1, 0, context->getOutputFileBase(), sectionAnchor, true, false);

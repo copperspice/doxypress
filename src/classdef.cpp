@@ -3689,8 +3689,9 @@ void ClassDef::writeAdditionalInheritedMembers(OutputList &ol)
 
       if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
+
          if (lmd->type != MemberListType_friends) {
-            QPtrDict<void> visited(17);
+            QHash<void *, void *> visited;
             writeInheritedMemberDeclarations(ol, lmd->type, -1, lmd->title(getLanguage()), this, true, false, &visited);
          }
       }

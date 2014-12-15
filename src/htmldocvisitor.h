@@ -23,11 +23,11 @@
 
 #include <docvisitor.h>
 
+class CodeOutputInterface;
 class Definition;
-class MemberDef;
 class DocNode;
 class FTextStream;
-class CodeOutputInterface;
+class MemberDef;
 
 /*! @brief Concrete visitor implementation for HTML output. */
 class HtmlDocVisitor : public DocVisitor
@@ -132,8 +132,6 @@ class HtmlDocVisitor : public DocVisitor
    void visitPost(DocText *);
    void visitPre(DocHtmlBlockQuote *);
    void visitPost(DocHtmlBlockQuote *);
-   void visitPre(DocVhdlFlow *);
-   void visitPost(DocVhdlFlow *);
    void visitPre(DocParBlock *);
    void visitPost(DocParBlock *);
 

@@ -1541,7 +1541,6 @@ class AlphaIndexTableRows : public QList<AlphaIndexTableCell>
 {
  public:
    AlphaIndexTableRows() {
-      setAutoDelete(true);
    }
 };
 
@@ -1558,7 +1557,6 @@ class AlphaIndexTableColumns : public QList<AlphaIndexTableRows>
 {
  public:
    AlphaIndexTableColumns() {
-      setAutoDelete(true);
    }
 };
 

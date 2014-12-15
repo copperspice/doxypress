@@ -217,13 +217,13 @@ void generateDEFForMember(MemberDef *md, FTextStream &t, Definition *def, const 
                t << ';' << endl;
             }
 
-            if (defArg && ! defArg.name.isEmpty() && defArg.name != a.name) {
+            if (! defArg.name.isEmpty() && defArg.name != a.name) {
                t << fcnPrefix << "defname = ";
                writeDEFString(t, defArg.name);
                t << ';' << endl;
             }
 
-            if (!a->array.isEmpty()) {
+            if (! a.array.isEmpty()) {
                t << fcnPrefix << "array = ";
                writeDEFString(t, a.array);
                t << ';' << endl;
@@ -233,11 +233,9 @@ void generateDEFForMember(MemberDef *md, FTextStream &t, Definition *def, const 
                t << fcnPrefix << "defval = <<_EnD_oF_dEf_TeXt_" << endl
                  << a.defval << endl << "_EnD_oF_dEf_TeXt_;" << endl;
             }
-
-            if (defArg) {
-               ++defAli;
-            }
-
+            
+            ++defAli;
+            
             t << "      }; /*" << fcnPrefix << "-param */" << endl;
          }
       }
@@ -245,13 +243,12 @@ void generateDEFForMember(MemberDef *md, FTextStream &t, Definition *def, const 
       delete declAl;
 
    } else if (  md->memberType() == MemberType_Define && md->argsString() != 0) {
-      ArgumentListIterator ali(*md->argumentList());
-      Argument *a;
+       
       QByteArray defPrefix = "  " + memPrefix + "def-";
-
-      for (ali.toFirst(); (a = ali.current()); ++ali) {
+    
+      for (auto a : *md->argumentList()){
          t << memPrefix << "param  = {" << endl;
-         t << defPrefix << "name = '" << a->type << "';" << endl;
+         t << defPrefix << "name = '" << a.type << "';" << endl;
          t << "      }; /*" << defPrefix << "-param */" << endl;
       }
    }
@@ -260,19 +257,22 @@ void generateDEFForMember(MemberDef *md, FTextStream &t, Definition *def, const 
       t << memPrefix << "initializer = <<_EnD_oF_dEf_TeXt_" << endl
         << md->initializer() << endl << "_EnD_oF_dEf_TeXt_;" << endl;
    }
+
    // TODO: exceptions, const volatile
    if (md->memberType() == MemberType_Enumeration) { // enum
       MemberList *enumList = md->enumFieldList();
-      if (enumList != 0) {
-         QListIterator<MemberDef> emli(*enumList);
-         MemberDef *emd;
-         for (emli.toFirst(); (emd = emli.current()); ++emli) {
+
+      if (enumList != 0) {       
+
+         for (auto emd : *enumList) {
             t << memPrefix << "enum = { enum-name = " << emd->name() << ';';
+
             if (!emd->initializer().isEmpty()) {
                t << " enum-value = ";
                writeDEFString(t, emd->initializer());
                t << ';';
             }
+
             t << " };" << endl;
          }
       }
@@ -280,22 +280,25 @@ void generateDEFForMember(MemberDef *md, FTextStream &t, Definition *def, const 
 
    t << memPrefix << "desc-file = '" << md->getDefFileName() << "';" << endl;
    t << memPrefix << "desc-line = '" << md->getDefLine()     << "';" << endl;
+
    t << memPrefix << "briefdesc =    <<_EnD_oF_dEf_TeXt_"    << endl
      << md->briefDescription() << endl << "_EnD_oF_dEf_TeXt_;" << endl;
+
    t << memPrefix << "documentation = <<_EnD_oF_dEf_TeXt_"   << endl
      << md->documentation() << endl << "_EnD_oF_dEf_TeXt_;" << endl;
 
    //printf("md->getReferencesMembers()=%p\n",md->getReferencesMembers());
 
    MemberSDict *mdict = md->getReferencesMembers();
+
    if (mdict) {
-      MemberSDict::Iterator mdi(*mdict);
-      MemberDef *rmd;
+    
       QByteArray refPrefix = "  " + memPrefix + "ref-";
 
-      for (mdi.toFirst(); (rmd = mdi.current()); ++mdi) {
+      for (auto rmd : *mdict) {
          if (rmd->getStartBodyLine() != -1 && rmd->getBodyDef()) {
             t << memPrefix << "referenceto = {" << endl;
+
             t << refPrefix << "id = '"
               << rmd->getBodyDef()->getOutputFileBase()
               << "_1"   // encoded `:' character (see util.cpp:convertNameToFile)
@@ -316,13 +319,13 @@ void generateDEFForMember(MemberDef *md, FTextStream &t, Definition *def, const 
          }
       } /* for (mdi.toFirst...) */
    }
-   mdict = md->getReferencedByMembers();
-   if (mdict) {
-      MemberSDict::Iterator mdi(*mdict);
-      MemberDef *rmd;
-      QByteArray refPrefix = "  " + memPrefix + "ref-";
 
-      for (mdi.toFirst(); (rmd = mdi.current()); ++mdi) {
+   mdict = md->getReferencedByMembers();
+
+   if (mdict) {      
+      QByteArray refPrefix = "  " + memPrefix + "ref-";
+    
+      for (auto rmd : *mdict) {
          if (rmd->getStartBodyLine() != -1 && rmd->getBodyDef()) {
             t << memPrefix << "referenceby = {" << endl;
             t << refPrefix << "id = '"
@@ -350,18 +353,13 @@ void generateDEFForMember(MemberDef *md, FTextStream &t, Definition *def, const 
 }
 
 
-void generateDEFClassSection(ClassDef *cd,
-                             FTextStream &t,
-                             MemberList *ml,
-                             const char *kind)
+void generateDEFClassSection(ClassDef *cd, FTextStream &t, MemberList *ml, const char *kind)
 {
    if (cd && ml && ml->count() > 0) {
       t << "  cp-section = {" << endl;
       t << "    sec-kind = '" << kind << "';" << endl;
 
-      QListIterator<MemberDef> mli(*ml);
-      MemberDef *md;
-      for (mli.toFirst(); (md = mli.current()); ++mli) {
+      for (auto md : *ml) {
          generateDEFForMember(md, t, cd, "sec");
       }
       t << "  }; /* cp-section */" << endl;
@@ -387,9 +385,11 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
    if (cd->isReference()) {
       return;   // skip external references.
    }
+
    if (cd->name().indexOf('@') != -1) {
       return;   // skip anonymous compounds.
    }
+
    if (cd->templateMaster() != 0) {
       return;   // skip generated template instances.
    }
@@ -399,13 +399,14 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
    t << "  cp-name   = '" << cd->name() << "';" << endl;
 
    if (cd->baseClasses()) {
-      QListIterator<BaseClassDef *> bcli(*cd->baseClasses());
-      BaseClassDef *bcd;
-      for (bcli.toFirst(); (bcd = bcli.current()); ++bcli) {
+     
+      for (auto bcd : *cd->baseClasses()) {
          t << "  cp-ref     = {" << endl << "    ref-type = base;" << endl;
          t << "    ref-id   = '"
            << bcd->classDef->getOutputFileBase() << "';" << endl;
+
          t << "    ref-prot = ";
+
          switch (bcd->prot) {
             case Public:
                t << "public;"    << endl;
@@ -418,7 +419,9 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
                t << "private;"   << endl;
                break;
          }
+
          t << "    ref-virt = ";
+
          switch (bcd->virt) {
             case Normal:
                t << "non-virtual;";
@@ -435,14 +438,13 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
    }
 
    if (cd->subClasses()) {
-      QListIterator<BaseClassDef *> bcli(*cd->subClasses());
-      BaseClassDef *bcd;
-
-      for (bcli.toFirst(); (bcd = bcli.current()); ++bcli) {
+    
+      for (auto bcd : *cd->baseClasses()) {
          t << "  cp-ref     = {" << endl << "    ref-type = derived;" << endl;
          t << "    ref-id   = '"
            << bcd->classDef->getOutputFileBase() << "';" << endl;
          t << "    ref-prot = ";
+
          switch (bcd->prot) {
             case Public:
                t << "public;"    << endl;
@@ -455,6 +457,7 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
                t << "private;"   << endl;
                break;
          }
+
          t << "    ref-virt = ";
          switch (bcd->virt) {
             case Normal:
@@ -472,13 +475,13 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
    }
 
    int numMembers = 0;
-   QListIterator<MemberList> mli(cd->getMemberLists());
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
+
+   for (auto ml : cd->getMemberLists()) {
       if ((ml->listType()&MemberListType_detailedLists) == 0) {
          numMembers += ml->count();
       }
    }
+
    if (numMembers > 0) {
       generateDEFClassSection(cd, t, cd->getMemberList(MemberListType_pubTypes), "public-type");
       generateDEFClassSection(cd, t, cd->getMemberList(MemberListType_interfaces), "interfaces");
@@ -521,27 +524,29 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
       inheritanceGraph.writeDEF(t);
       t << endl << "_EnD_oF_dEf_TeXt_;" << endl;
    }
+
    DotClassGraph collaborationGraph(cd, DotNode::Collaboration);
    if (!collaborationGraph.isTrivial()) {
       t << "  cp-collaborationgraph = <<_EnD_oF_dEf_TeXt_" << endl;
       collaborationGraph.writeDEF(t);
       t << endl << "_EnD_oF_dEf_TeXt_;" << endl;
    }
+
    t << "}; /* " <<  cd->compoundTypeString() << " */" << endl;
 }
 
-void generateDEFSection(Definition *d,
-                        FTextStream &t,
-                        MemberList *ml,
-                        const char *kind)
+void generateDEFSection(Definition *d, FTextStream &t, MemberList *ml, const char *kind)
 {
    if (ml && ml->count() > 0) {
       t << "    " << kind << " = {" << endl;
+
       QListIterator<MemberDef> mli(*ml);
       MemberDef *md;
+
       for (mli.toFirst(); (md = mli.current()); ++mli) {
          generateDEFForMember(md, t, d, kind);
       }
+
       t << "    };" << endl;
    }
 }
@@ -551,9 +556,11 @@ void generateDEFForNamespace(NamespaceDef *nd, FTextStream &t)
    if (nd->isReference()) {
       return;   // skip external references
    }
+
    t << "  namespace = {" << endl;
    t << "    ns-id   = '" << nd->getOutputFileBase() << "';" << endl;
    t << "    ns-name = ";
+
    writeDEFString(t, nd->name());
    t << ';' << endl;
 
@@ -609,16 +616,21 @@ void generateDEFForFile(FileDef *fd, FTextStream &t)
 void generateDEF()
 {
    QByteArray outputDirectory = Config_getString("OUTPUT_DIRECTORY");
+
    if (outputDirectory.isEmpty()) {
       outputDirectory = QDir::currentPath().toUtf8();
+
    } else {
       QDir dir(outputDirectory);
+
       if (!dir.exists()) {
          dir.setPath(QDir::currentPath());
+
          if (!dir.mkdir(outputDirectory)) {
             err("tag OUTPUT_DIRECTORY: Output directory `%s' does not "
                 "exist and cannot be created\n", outputDirectory.data());
             exit(1);
+
          } else {
             msg("Notice: Output directory `%s' does not exist. "
                 "I have created it for you.\n", outputDirectory.data());
@@ -629,6 +641,7 @@ void generateDEF()
    }
 
    QDir dir(outputDirectory);
+
    if (!dir.exists()) {
       dir.setPath(QDir::currentPath());
       if (!dir.mkdir(outputDirectory)) {

@@ -53,8 +53,7 @@ NamespaceDef::NamespaceDef(const char *df, int dl, int dc, const char *name, con
    m_allMembersDict = 0;
 
    setReference(lref);
-   memberGroupSDict = new MemberGroupSDict;
-   memberGroupSDict->setAutoDelete(true);
+   memberGroupSDict = new MemberGroupSDict;  
    visited = false;
 
    m_subGrouping = Config_getBool("SUBGROUPING");
@@ -964,10 +963,10 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title,
 }
 
 MemberList *NamespaceDef::createMemberList(MemberListType lt)
-{
-   m_memberLists.setAutoDelete(true);
+{   
    QListIterator<MemberList> mli(m_memberLists);
    MemberList *ml;
+
    for (mli.toFirst(); (ml = mli.current()); ++mli) {
       if (ml->listType() == lt) {
          return ml;

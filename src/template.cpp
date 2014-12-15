@@ -412,8 +412,8 @@ bool TemplateVariant::raw() const
 class TemplateStruct::Private
 {
  public:
-   Private() : fields(17), refCount(0) {
-      // CS BROOM  fields.setAutoDelete(true);
+   Private() : refCount(0) 
+   {      
    }
 
    QHash<QString, TemplateVariant> fields;
@@ -438,9 +438,11 @@ int TemplateStruct::addRef()
 int TemplateStruct::release()
 {
    int count = --p->refCount;
+
    if (count <= 0) {
       delete this;
    }
+
    return count;
 }
 
@@ -4400,39 +4402,26 @@ class TemplateEngine::Private
       QByteArray m_blockName;
       int m_line;
    };
+
  public:
-   Private(TemplateEngine *engine) : m_templateCache(17) /*, m_indent(0)*/, m_engine(engine) {
-      // CS BROOM  m_templateCache.setAutoDelete(true);
-      // CS BROOM  m_includeStack.setAutoDelete(true);
+   Private(TemplateEngine *engine) :  m_engine(engine) {      
    }
 
    Template *loadByName(const QByteArray &fileName, int line) {
       //for (int i=0;i<m_indent;i++) printf("  ");
       //m_indent++;
       //printf("loadByName(%s,%d) {\n",fileName.data(),line);
+
       m_includeStack.append(new IncludeEntry(IncludeEntry::Template, fileName, QByteArray(), line));
       Template *templ = m_templateCache.find(fileName);
+
       if (templ == 0) {
          const Resource *res = ResourceMgr::instance().get(fileName);
          if (res) {
             templ = new TemplateImpl(m_engine, fileName, (const char *)res->data, res->size);
             m_templateCache.insert(fileName, templ);
          }
-#if 0
-         QFile f(fileName);
-         if (f.open(QIODevice::ReadOnly)) {
-            uint size = f.size();
-            char *data = new char[size + 1];
-            if (data) {
-               data[size] = 0;
-               if (f.readBlock(data, f.size())) {
-                  templ = new TemplateImpl(m_engine, fileName, data);
-                  m_templateCache.insert(fileName, templ);
-               }
-               delete[] data;
-            }
-         }
-#endif
+
          else {
             err("Cound not open template file %s\n", fileName.data());
          }

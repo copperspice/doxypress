@@ -15,9 +15,10 @@
  *
 *************************************************************************/
 
+#include <assert.h>
+
 #include <arguments.h>
 #include <marshal.h>
-#include <assert.h>
 
 /*! the argument list is documented if one of its
  *  arguments is documented
@@ -40,14 +41,13 @@ ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return 0;   // null list
+      return 0;   
    }
 
    ArgumentList *result = new ArgumentList;
 
    assert(count < 1000000);
-
-   //printf("unmarshalArgumentList: %d\n",count);
+  
    for (i = 0; i < count; i++) {
       Argument a;
 
@@ -66,13 +66,15 @@ ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
    result->volatileSpecifier  = unmarshalBool(s);
    result->pureSpecifier      = unmarshalBool(s);
    result->trailingReturnType = unmarshalQByteArray(s);
+
    return result;
 }
 
 void ArgumentList::marshal(StorageIntf *s, ArgumentList *argList)
 {
    if (argList == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, argList->count());
 

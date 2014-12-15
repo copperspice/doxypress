@@ -244,31 +244,23 @@ class LayoutParser : public QXmlDefaultHandler
       static LayoutParser *theInstance = new LayoutParser;
       return *theInstance;
    }
-   void init() {
-      m_sHandler.setAutoDelete(true);
-      m_eHandler.setAutoDelete(true);
+
+   void init() {     
       m_part = -1; // invalid
       m_rootNav = 0;
 
-      //bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
-      //bool vhdlOpt    = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
+      //bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");     
       //bool javaOpt    = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
 
       // start & end handlers
-      m_sHandler.insert("doxygenlayout",
-                        new StartElementHandler(this, &LayoutParser::startLayout));
-      m_eHandler.insert("doxygenlayout",
-                        new EndElementHandler(this, &LayoutParser::endLayout));
+      m_sHandler.insert("doxygenlayout", new StartElementHandler(this, &LayoutParser::startLayout));
+      m_eHandler.insert("doxygenlayout", new EndElementHandler(this, &LayoutParser::endLayout));
 
       // class layout handlers
-      m_sHandler.insert("navindex",
-                        new StartElementHandler(this, &LayoutParser::startNavIndex));
-      m_sHandler.insert("navindex/tab",
-                        new StartElementHandler(this, &LayoutParser::startNavEntry));
-      m_eHandler.insert("navindex/tab",
-                        new EndElementHandler(this, &LayoutParser::endNavEntry));
-      m_eHandler.insert("navindex",
-                        new EndElementHandler(this, &LayoutParser::endNavIndex));
+      m_sHandler.insert("navindex",      new StartElementHandler(this, &LayoutParser::startNavIndex));
+      m_sHandler.insert("navindex/tab",  new StartElementHandler(this, &LayoutParser::startNavEntry));
+      m_eHandler.insert("navindex/tab",  new EndElementHandler(this, &LayoutParser::endNavEntry));
+      m_eHandler.insert("navindex",      new EndElementHandler(this, &LayoutParser::endNavIndex));
 
       // class layout handlers
       m_sHandler.insert("class",
@@ -294,13 +286,15 @@ class LayoutParser : public QXmlDefaultHandler
                         new StartElementHandler(this, &LayoutParser::startMemberDecl));
       m_sHandler.insert("class/memberdecl/membergroups",
                         new StartElementHandlerKind(this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
+
+
       m_sHandler.insert("class/memberdecl/nestedclasses",
                         new StartElementHandlerSection(this, LayoutDocEntry::ClassNestedClasses, &LayoutParser::startSectionEntry,
                               COMPILE_FOR_2_OPTIONS(
                                  theTranslator->trCompounds(),
                                  SrcLangExt_VHDL, VhdlDocGen::trVhdlType(VhdlDocGen::ENTITY, false),
-                                 SrcLangExt_Fortran, theTranslator->trDataTypes()
-                              )));
+                                 SrcLangExt_Fortran, theTranslator->trDataTypes() )));
+
       m_sHandler.insert("class/memberdecl/services",
                         new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_services, theTranslator->trServices()));
@@ -1225,7 +1219,7 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
  private:
-   LayoutParser() : m_sHandler(163), m_eHandler(17), m_invalidEntry(false) { }
+   LayoutParser() :  m_invalidEntry(false) { }
 
    QHash<QString, StartElementHandler> m_sHandler;
    QHash<QString, EndElementHandler>   m_eHandler;
@@ -1300,12 +1294,9 @@ class LayoutDocManager::Private
 LayoutDocManager::LayoutDocManager()
 {
    d = new Private;
+
    int i;
-
-   for (i = 0; i < LayoutDocManager::NrParts; i++) {
-      d->docEntries[i].setAutoDelete(true);
-   }
-
+ 
    d->rootNav = new LayoutNavEntry;
    LayoutParser::instance().init();
 }

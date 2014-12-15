@@ -77,11 +77,10 @@ class DocLinkedWord;
 class DocParamSect;
 class DocParamList;
 class DocInternalRef;
-class DocCopy; // TODO: no longer generated => remove
+class DocCopy;             // TODO: no longer generated => remove
 class DocText;
 class DocSimpleSectSep;
 class DocHtmlBlockQuote;
-class DocVhdlFlow;
 class DocParBlock;
 
 /*! @brief Abstract visitor that participates in the visitor pattern.
@@ -191,9 +190,7 @@ class DocVisitor
    virtual void visitPre(DocText *) = 0;
    virtual void visitPost(DocText *) = 0;
    virtual void visitPre(DocHtmlBlockQuote *) = 0;
-   virtual void visitPost(DocHtmlBlockQuote *) = 0;
-   virtual void visitPre(DocVhdlFlow *) = 0;
-   virtual void visitPost(DocVhdlFlow *) = 0;
+   virtual void visitPost(DocHtmlBlockQuote *) = 0;   
    virtual void visitPre(DocParBlock *) = 0;
    virtual void visitPost(DocParBlock *) = 0;
    /*! @} */

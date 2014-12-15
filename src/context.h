@@ -637,12 +637,13 @@ class NestingContext : public RefCountedContext, public TemplateListIntf
 
    void addNamespaces(const NamespaceSDict &nsDict, bool rootOnly, bool addClasses);
    void addClasses(const ClassSDict &clDict, bool rootOnly);
+ 
    void addDirs(const DirSDict &);
    void addDirs(const SortedList<DirDef *> &);
 
    void addFiles(const SortedList<FileName *> &);
-   void addFiles(const SortedList<FileName *> &);
-
+   void addFiles(const FileList &);
+   
    void addPages(const PageSDict &pages, bool rootOnly);
    void addModules(const GroupSDict &modules);
    void addModules(const SortedList<GroupDef *> &modules);

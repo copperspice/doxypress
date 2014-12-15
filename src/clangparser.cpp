@@ -655,16 +655,19 @@ void ClangParser::linkInclude(CodeOutputInterface &ol, FileDef *fd,
    QByteArray incName = text;
    incName = incName.mid(1, incName.length() - 2); // strip ".." or  <..>
    FileDef *ifd = 0;
+
    if (!incName.isEmpty()) {
       FileName *fn = Doxygen::inputNameDict->find(incName);
+
       if (fn) {
          bool found = false;
          FileNameIterator fni(*fn);
+
          // for each include name
          for (fni.toFirst(); !found && (ifd = fni.current()); ++fni) {
             // see if this source file actually includes the file
-            found = fd->isIncluded(ifd->absFilePath());
-            //printf("      include file %s found=%d\n",ifd->absFilePath().data(),found);
+            found = fd->isIncluded(ifd->absoluteFilePath());
+            //printf("      include file %s found=%d\n",ifd->absoluteFilePath().data(),found);
          }
       }
    }

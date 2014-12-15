@@ -897,14 +897,17 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    (void)filesInSameTu;
 #if USE_LIBCLANG
    static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
-   if (clangAssistedParsing &&
-         (getLanguage() == SrcLangExt_Cpp || getLanguage() == SrcLangExt_ObjC)) {
+
+   if (clangAssistedParsing && (getLanguage() == SrcLangExt_Cpp || getLanguage() == SrcLangExt_ObjC)) {
+
       ol.startCodeFragment();
+
       if (!sameTu) {
-         ClangParser::instance()->start(absFilePath(), filesInSameTu);
+         ClangParser::instance()->start(absoluteFilePath(), filesInSameTu);
       } else {
-         ClangParser::instance()->switchToFile(absFilePath());
+         ClangParser::instance()->switchToFile(getFilePath());
       }
+
       ClangParser::instance()->writeSources(ol, this);
       ol.endCodeFragment();
    } else
@@ -913,21 +916,19 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       ParserInterface *pIntf = Doxygen::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
       ol.startCodeFragment();
-      bool needs2PassParsing =
+
+      bool needs2PassParsing = 
          Doxygen::parseSourcesNeeded &&                // we need to parse (filtered) sources for cross-references
          !filterSourceFiles &&                         // but user wants to show sources as-is
-         !getFileFilter(absFilePath(), true).isEmpty(); // and there is a filter used while parsing
+         !getFileFilter(getFilePath(), true).isEmpty(); // and there is a filter used while parsing
 
       if (needs2PassParsing) {
          // parse code for cross-references only (see bug707641)
-         pIntf->parseCode(devNullIntf, 0,
-                          fileToString(absFilePath(), true, true),
-                          getLanguage(),
-                          false, 0, this
-                         );
+         pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), true, true), 
+                          getLanguage(),  false, 0, this );
       }
       pIntf->parseCode(ol, 0,
-                       fileToString(absFilePath(), filterSourceFiles, true),
+                       fileToString(getFilePath(), filterSourceFiles, true),
                        getLanguage(),      // lang
                        false,              // isExampleBlock
                        0,                  // exampleName
@@ -953,27 +954,29 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
    DevNullCodeDocInterface devNullIntf;
    (void)sameTu;
    (void)filesInSameTu;
+
 #if USE_LIBCLANG
    static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
-   if (clangAssistedParsing &&
-         (getLanguage() == SrcLangExt_Cpp || getLanguage() == SrcLangExt_ObjC)) {
+
+   if (clangAssistedParsing && (getLanguage() == SrcLangExt_Cpp || getLanguage() == SrcLangExt_ObjC)) {
+
       if (!sameTu) {
-         ClangParser::instance()->start(absFilePath(), filesInSameTu);
+         ClangParser::instance()->start(getFilePath(), filesInSameTu);
       } else {
-         ClangParser::instance()->switchToFile(absFilePath());
+         ClangParser::instance()->switchToFile(getFilePath());
       }
+
       ClangParser::instance()->writeSources(devNullIntf, this);
+
    } else
+
 #endif
+
    {
       ParserInterface *pIntf = Doxygen::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
-      pIntf->parseCode(
-         devNullIntf, 0,
-         fileToString(absFilePath(), filterSourceFiles, true),
-         getLanguage(),
-         false, 0, this
-      );
+      pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), filterSourceFiles, true), 
+                        getLanguage(), false, 0, this);
    }
 }
 
@@ -1068,9 +1071,11 @@ void FileDef::insertClass(ClassDef *cd)
    if (cd->isHidden()) {
       return;
    }
+
    if (m_classSDict == 0) {
-      m_classSDict = new ClassSDict(17);
+      m_classSDict = new ClassSDict;
    }
+
    if (Config_getBool("SORT_BRIEF_DOCS")) {
       m_classSDict->inSort(cd->name(), cd);
    } else {
@@ -1183,7 +1188,7 @@ void FileDef::addIncludeDependency(FileDef *fd, const char *incName, bool local,
    QByteArray iName;
 
    if (fd) {
-      iName = fd->absFilePath().data();
+      iName = fd->absoluteFilePath().data();
    } else {
       iName = incName;
    }
@@ -1282,13 +1287,13 @@ void FileDef::addIncludedByDependency(FileDef *fd, const char *incName,
                                       bool local, bool imported)
 {
    //printf("FileDef::addIncludedByDependency(%p,%s,%d)\n",fd,incName,local);
-   QByteArray iName = fd ? fd->absFilePath().data() : incName;
+   QByteArray iName = fd ? fd->absoluteFilePath().data() : incName;
    if (!iName.isEmpty() && (m_includedByDict == 0 || m_includedByDict->find(iName) == 0)) {
       if (m_includedByDict == 0) {
          m_includedByDict = new QHash<QString, IncludeInfo>(61);
-         m_includedByList = new QList<IncludeInfo>;
-         m_includedByList->setAutoDelete(true);
+         m_includedByList = new QList<IncludeInfo>;        
       }
+
       IncludeInfo *ii = new IncludeInfo;
       ii->fileDef     = fd;
       ii->includeName = incName;
@@ -1409,10 +1414,10 @@ static Directory *findDirNode(Directory *root, const QByteArray &name)
                base->addChild(dir);
                base->addChild(newBranch);
                dir->setLast(false);
-               // remove DirEntry container from list (without deleting it)
-               root->children().setAutoDelete(false);
+
+               // remove DirEntry container from list (without deleting it)               
                root->children().removeRef(dir);
-               root->children().setAutoDelete(true);
+              
                // add new branch to the root
                if (!root->children().isEmpty()) {
                   root->children().getLast()->setLast(false);
@@ -1441,7 +1446,7 @@ static Directory *findDirNode(Directory *root, const QByteArray &name)
 static void mergeFileDef(Directory *root, FileDef *fd)
 {
    QByteArray rootPath = root->name();
-   QByteArray filePath = fd->absFilePath();
+   QByteArray filePath = fd->absoluteFilePath();
    //printf("merging %s\n",filePath.data());
    Directory *dirNode = findDirNode(root, filePath);
    if (!dirNode->children().isEmpty()) {
@@ -1650,10 +1655,10 @@ QByteArray FileDef::includeName() const
 }
 
 MemberList *FileDef::createMemberList(MemberListType lt)
-{
-   m_memberLists.setAutoDelete(true);
+{  
    QListIterator<MemberList> mli(m_memberLists);
    MemberList *ml;
+
    for (mli.toFirst(); (ml = mli.current()); ++mli) {
       if (ml->listType() == lt) {
          return ml;
@@ -1742,10 +1747,10 @@ static void getAllIncludeFilesRecursively(QHash<QString, void> *filesVisited, co
 
       for (auto item : *fd->includeFileList() ) {   
 
-         if (item->fileDef && ! item->fileDef->isReference() && ! filesVisited->find(item->fileDef->absFilePath())) {
+         if (item->fileDef && ! item->fileDef->isReference() && ! filesVisited->find(item->fileDef->absoluteFilePath())) {
 
-            incFiles.append(item->fileDef->absFilePath());
-            filesVisited->insert(item->fileDef->absFilePath(), (void *)0x8);
+            incFiles.append(item->fileDef->absoluteFilePath());
+            filesVisited->insert(item->fileDef->absoluteFilePath(), (void *)0x8);
 
             getAllIncludeFilesRecursively(filesVisited, item->fileDef, incFiles);
          }

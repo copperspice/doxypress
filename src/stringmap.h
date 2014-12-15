@@ -63,6 +63,16 @@ class StringMap
       return m_dict.end();  
    }  
 
+   using const_iterator = typename QMap<QString, T>::const_iterator;
+   
+   const_iterator begin() const {     
+      return m_dict.begin();      
+   }  
+
+   const_iterator end() const {     
+      return m_dict.end();  
+   }  
+
    /*! Appends an element to the dictionary. The element is owned by the
     *  dictionary.
     *  \param key The unique key to use to quicky find the item later on.
@@ -70,6 +80,14 @@ class StringMap
     *  \sa find()
     */
    void insert(const char *key, const T &d) {     
+      m_dict.insert(key, d);   
+   }  
+
+   void insert(QByteArray key, const T &d) {     
+      m_dict.insert(key, d);   
+   }  
+
+   void insert(QString key, const T &d) {     
       m_dict.insert(key, d);   
    }  
 

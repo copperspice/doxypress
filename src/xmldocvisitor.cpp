@@ -17,19 +17,19 @@
 
 #include <QFileInfo>
 
-#include <xmldocvisitor.h>
-#include <docparser.h>
-#include <language.h>
-#include <doxygen.h>
-#include <outputgen.h>
-#include <xmlgen.h>
-#include <dot.h>
-#include <message.h>
-#include <util.h>
-#include <parserintf.h>
-#include <filename.h>
 #include <config.h>
+#include <docparser.h>
+#include <dot.h>
+#include <doxygen.h>
+#include <filename.h>
 #include <htmlentity.h>
+#include <language.h>
+#include <message.h>
+#include <outputgen.h>
+#include <parserintf.h>
+#include <util.h>
+#include <xmlgen.h>
+#include <xmldocvisitor.h>
 
 XmlDocVisitor::XmlDocVisitor(FTextStream &t, CodeOutputInterface &ci)
    : DocVisitor(DocVisitor_XML), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false)
@@ -1191,14 +1191,6 @@ void XmlDocVisitor::visitPost(DocHtmlBlockQuote *)
       return;
    }
    m_t << "</blockquote>";
-}
-
-void XmlDocVisitor::visitPre(DocVhdlFlow *)
-{
-}
-
-void XmlDocVisitor::visitPost(DocVhdlFlow *)
-{
 }
 
 void XmlDocVisitor::visitPre(DocParBlock *)

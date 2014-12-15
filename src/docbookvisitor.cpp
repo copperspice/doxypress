@@ -977,7 +977,7 @@ void DocbookDocVisitor::visitPost(DocImage *img)
       bool ambig;
       FileDef *fd = findFileDef(Doxygen::imageNameDict, baseName, ambig);
       if (fd) {
-         m_file = fd->absFilePath();
+         m_file = fd->absoluteFilePath();
       }
 
       QFile inImage(m_file);
@@ -1288,17 +1288,6 @@ void DocbookDocVisitor::visitPost(DocHtmlBlockQuote *)
    m_t << "</blockquote>";
 }
 
-void DocbookDocVisitor::visitPre(DocVhdlFlow *)
-{
-   // TODO: to be implemented
-}
-
-
-void DocbookDocVisitor::visitPost(DocVhdlFlow *)
-{
-   // TODO: to be implemented
-}
-
 void DocbookDocVisitor::visitPre(DocParBlock *)
 {
 }
@@ -1306,7 +1295,6 @@ void DocbookDocVisitor::visitPre(DocParBlock *)
 void DocbookDocVisitor::visitPost(DocParBlock *)
 {
 }
-
 
 void DocbookDocVisitor::filter(const char *str)
 {

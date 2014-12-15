@@ -26,14 +26,15 @@
 #ifndef FTVHELP_H
 #define FTVHELP_H
 
+#include <QFile>
 #include <QList>
 
 #include <index.h>
 
-class QFile;
 class Definition;
-struct FTVNode;
 class FTextStream;
+
+struct FTVNode;
 
 /** A class that generates a dynamic tree view side panel.
  */
@@ -42,18 +43,15 @@ class FTVHelp : public IndexIntf
  public:
    FTVHelp(bool LTI);
    ~FTVHelp();
+
    void initialize();
    void finalize();
    void incContentsDepth();
    void decContentsDepth();
-   void addContentsItem(bool isDir,
-                        const char *name,
-                        const char *ref,
-                        const char *file,
-                        const char *anchor,
-                        bool separateIndex,
-                        bool addToNavIndex,
-                        Definition *def);
+
+   void addContentsItem(bool isDir, const char *name, const char *ref, const char *file, const char *anchor,
+                        bool separateIndex, bool addToNavIndex, Definition *def);
+
    void addIndexItem(Definition *, MemberDef *, const char *, const char *) {}
    void addIndexFile(const char *) {}
    void addImageFile(const char *) {}
@@ -62,19 +60,27 @@ class FTVHelp : public IndexIntf
    void generateTreeViewInline(FTextStream &t);
    static void generateTreeViewImages();
    void generateTreeViewScripts();
+
  private:
-   void generateTree(FTextStream &t, const QList<FTVNode> &nl, int level, int maxLevel, int &index);
-   //bool generateJSTree(FTextStream &tidx,FTextStream &t,const QList<FTVNode> &nl,int level,bool &first);
-   //bool generateJSTreeTopLevel(FTextStream &tidx,FTextStream &t,const QList<FTVNode> &nl,int level,bool &first);
+   void generateTree(FTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index);
+  
    QByteArray generateIndentLabel(FTVNode *n, int level);
    void generateIndent(FTextStream &t, FTVNode *n, bool opened);
    void generateLink(FTextStream &t, FTVNode *n);
-   //void generateJSLink(FTextStream &t,FTVNode *n);
-   QList<FTVNode> *m_indentNodes;
+   
+   QList<FTVNode *> *m_indentNodes;
+
    int m_indent;
    bool m_topLevelIndex;
 };
 
+struct NavIndexEntry {
+   NavIndexEntry(const QByteArray &u, const QByteArray &p) : url(u), path(p)
+   {}
 
-#endif /* FTVHELP_H */
+   QByteArray url;
+   QByteArray path;
+};
 
+
+#endif

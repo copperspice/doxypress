@@ -364,7 +364,7 @@ void writeDocbookCodeBlock(FTextStream &t, FileDef *fd)
 
    pIntf->parseCode(*docbookGen,  // codeOutIntf
                     0,           // scopeName
-                    fileToString(fd->absFilePath(), Config_getBool("FILTER_SOURCE_FILES")),
+                    fileToString(fd->absoluteFilePath(), Config_getBool("FILTER_SOURCE_FILES")),
                     langExt,     // lang
                     false,       // isExampleBlock
                     0,           // exampleName
@@ -1226,7 +1226,7 @@ static void generateDocbookForClass(ClassDef *cd, FTextStream &ti)
      FileDef *bodyDef = cd->getBodyDef();
      if (bodyDef)
      {
-     t << " bodyfile=\"" << bodyDef->absFilePath() << "\"";
+     t << " bodyfile=\"" << bodyDef->absoluteFilePath() << "\"";
      }
      t << " bodystart=\"" << cd->getStartBodyLine() << "\" bodyend=\""
      << cd->getEndBodyLine() << "\"";

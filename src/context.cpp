@@ -969,7 +969,7 @@ static TemplateVariant parseCode(FileDef *fd, const QByteArray &relPath)
    FTextStream t(&s);
    HtmlCodeGenerator codeGen(t, relPath);
    pIntf->parseCode(codeGen, 0,
-                    fileToString(fd->absFilePath(), filterSourceFiles, true), // the sources
+                    fileToString(fd->absoluteFilePath(), filterSourceFiles, true), // the sources
                     fd->getLanguage(),  // lang
                     false,              // isExampleBlock
                     0,                  // exampleName
@@ -3483,7 +3483,7 @@ class MemberContext::Private : public DefinitionContext<MemberContext::Private>
          FileDef *fd   = m_memberDef->getBodyDef();
          int startLine = m_memberDef->getStartBodyLine();
          int endLine   = m_memberDef->getEndBodyLine();
-         if (fd && readCodeFragment(fd->absFilePath(),
+         if (fd && readCodeFragment(fd->absoluteFilePath(),
                                     startLine, endLine, codeFragment)
             ) {
             QByteArray scopeName;

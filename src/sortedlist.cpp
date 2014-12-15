@@ -14,7 +14,11 @@
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
- 
+
+//   BROOM
+//   src/[a-z]*\.h 
+
+
 #include <sortedlist.h>
 
 #include <classdef.h>
@@ -24,6 +28,7 @@
 #include <filedef.h>
 #include <filename.h>
 #include <groupdef.h>
+#include <ftvhelp.h>
 
 
 // BaseClassList --> SortedList<BaseClassDef *>
@@ -137,10 +142,22 @@ int compareValues(const MemberDef *c1, const MemberDef *c2)
 }
 
 
+// NavIndexEntryList --> SortedList<NavIndexEntry *>
+
+ 
+// sort list based on url
+int compareValues(const NavIndexEntry *item1, const NavIndexEntry *item2)
+{  
+   return qstrcmp(item1->url, item2->url);  
+}
+
+
 // OutputNameList -->  SortedList<FileList *>
 
 int compareValues(const FileList *item1, const FileList *item2) 
 {
    return qstricmp(item1->path(), item2->path());
 }
+
+
 

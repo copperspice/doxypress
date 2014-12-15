@@ -1614,20 +1614,6 @@ void LatexDocVisitor::visitPost(DocHtmlBlockQuote *)
    m_t << "\\end{quote}" << endl;
 }
 
-void LatexDocVisitor::visitPre(DocVhdlFlow *)
-{
-   if (m_hide) {
-      return;
-   }
-}
-
-void LatexDocVisitor::visitPost(DocVhdlFlow *)
-{
-   if (m_hide) {
-      return;
-   }
-}
-
 void LatexDocVisitor::visitPre(DocParBlock *)
 {
    if (m_hide) {

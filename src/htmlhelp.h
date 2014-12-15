@@ -22,8 +22,8 @@
 #include <QHash>
 #include <QFile>
 
-#include <index.h>
 #include <ftextstream.h>
+#include <index.h>
 
 class Definition;
 class HtmlHelpIndex;
@@ -94,8 +94,10 @@ class HtmlHelp  : public IndexIntf
    QHash<QString, void *> indexFileDict;
 
    static HtmlHelp *theInstance;
-   QByteArray recode(const QByteArray &s);
-   void *m_fromUtf8;
+
+   QByteArray recode(const QString &s);
+
+   QTextCodec *m_toNewCodec;
 };
 
 #endif

@@ -60,7 +60,6 @@ DirDef::DirDef(const char *path) : Definition(path, 1, 1, path), visited(false)
    }
 
    m_fileList = new FileList;
-   m_usedDirs = new QHash<QString, UsedDir>;
    
    m_dirCount = g_dirCount++;
    m_level    = -1;
@@ -69,13 +68,12 @@ DirDef::DirDef(const char *path) : Definition(path, 1, 1, path), visited(false)
 
 DirDef::~DirDef()
 {
-   delete m_fileList;
-   delete m_usedDirs;
+   delete m_fileList;   
 }
 
 bool DirDef::isLinkableInProject() const
 {
-   return !isReference();
+   return ! isReference();
 }
 
 bool DirDef::isLinkable() const
@@ -483,15 +481,15 @@ void DirDef::addUsesDependency(DirDef *dir, FileDef *srcFd, FileDef *dstFd, bool
   
    // levels match => add direct dependency
    bool added = false;
-   UsedDir *usedDir = m_usedDirs->value(dir->getOutputFileBase());
+   UsedDir *usedDir = m_usedDirs.value(dir->getOutputFileBase());
 
    if (usedDir) { 
       // dir dependency already present
-      FilePair *usedPair = usedDir->findFilePair(srcFd->getOutputFileBase() + dstFd->getOutputFileBase());
+      QSharedPointer<FilePair> usedPair = usedDir->findFilePair(srcFd->getOutputFileBase() + dstFd->getOutputFileBase());
 
-      if (usedPair == 0) { 
+      if (usedPair) { 
          // new file dependency
-         //printf("  => new file\n");
+         // printf("  => new file\n");
 
          usedDir->addFileDep(srcFd, dstFd);
          added = true;
@@ -505,9 +503,9 @@ void DirDef::addUsesDependency(DirDef *dir, FileDef *srcFd, FileDef *dstFd, bool
       //printf("  => new file\n");
 
       usedDir = new UsedDir(dir, inherited);
-
       usedDir->addFileDep(srcFd, dstFd);
-      m_usedDirs->insert(dir->getOutputFileBase(), usedDir);
+
+      m_usedDirs.insert(dir->getOutputFileBase(), usedDir);
 
       added = true;
    }
@@ -595,44 +593,48 @@ UsedDir::~UsedDir()
 
 void UsedDir::addFileDep(FileDef *srcFd, FileDef *dstFd)
 {
-   m_filePairs.insert(srcFd->getOutputFileBase() + dstFd->getOutputFileBase(), new FilePair(srcFd, dstFd));
+   m_filePairs.insert(srcFd->getOutputFileBase() + dstFd->getOutputFileBase(), 
+                      QSharedPointer<FilePair> (new FilePair(srcFd, dstFd)) );
 }
 
-FilePair *UsedDir::findFilePair(const char *name)
+QSharedPointer<FilePair> UsedDir::findFilePair(const char *name)
 {
    QByteArray n = name;
-   return n.isEmpty() ? 0 : m_filePairs.find(n);
+
+   if (n.isEmpty()) {
+      return QSharedPointer<FilePair>(); 
+   } else { 
+      return m_filePairs.find(n);
+   }
 }
 
-DirDef *DirDef::createNewDir(const char *path)
+QSharedPointer<DirDef> DirDef::createNewDir(const char *path)
 {
    assert(path != 0);
-   DirDef *dir = Doxygen::directories->find(path);
+   QSharedPointer<DirDef> dir = Doxygen::directories.find(path);
 
-   if (dir == 0) { 
+   if (dir) { 
       // new dir
       //printf("Adding new dir %s\n",path);
 
-      dir = new DirDef(path);
+      dir = QSharedPointer<DirDef> (new DirDef(path));
 
       //printf("createNewDir %s short=%s\n",path,dir->shortName().data());
-      Doxygen::directories->inSort(path, dir);
+      Doxygen::directories.insert(path, dir);
    }
+
    return dir;
 }
 
-bool DirDef::matchPath(const QByteArray &path, QStringList &l)
-{
-   const char *s = l.first();
-
-   while (s) {
-      QByteArray prefix = s;
+bool DirDef::matchPath(const QByteArray &path, QStringList &list)
+{  
+   for (auto s : list) {
+      QByteArray prefix = s.toUtf8();
 
       if (qstricmp(prefix.left(path.length()), path) == 0) { 
          // case insensitive compare
          return true;
-      }
-      s = l.next();
+      }      
    }
 
    return false;
@@ -641,18 +643,21 @@ bool DirDef::matchPath(const QByteArray &path, QStringList &l)
 /*! strip part of \a path if it matches
  *  one of the paths in the Config_getList("STRIP_FROM_PATH") list
  */
-DirDef *DirDef::mergeDirectoryInTree(const QByteArray &path)
+QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QByteArray &path)
 {
    //printf("DirDef::mergeDirectoryInTree(%s)\n",path.data());
-   int p = 0, i = 0;
-   DirDef *dir = 0;
+   int p = 0;
+   int i = 0;
 
-   while ((i = path.indexO('/', p)) != -1) {
+   QSharedPointer<DirDef> dir;
+
+   while ((i = path.indexOf('/', p)) != -1) {
       QByteArray part = path.left(i + 1);
 
       if (! matchPath(part, Config_getList("STRIP_FROM_PATH")) && (part != "/" && part != "//")) {
          dir = createNewDir(part);
       }
+
       p = i + 1;
    }
 
@@ -727,11 +732,8 @@ void DirRelation::writeDocumentation(OutputList &ol)
 
    ol.writeString("</th>");
    ol.writeString("</tr>");
-
-   StringMap<QSharedPointer<FilePair>>::Iterator fpi(m_dst->filePairs());
-   FilePair *fp;
-
-   for (fpi.toFirst(); (fp = fpi.current()); ++fpi) {
+  
+   for (auto fp : m_dst->filePairs())  {
       ol.writeString("<tr class=\"dirtab\">");
       ol.writeString("<td class=\"dirtab\">");
 
@@ -764,18 +766,19 @@ void DirRelation::writeDocumentation(OutputList &ol)
 static void computeCommonDirPrefix()
 {
    QByteArray path;
-   DirDef *dir;
+   QSharedPointer<DirDef> dir;
 
-   DirSDict::Iterator sdi(*Doxygen::directories);
+   DirSDict::Iterator sdi(Doxygen::directories);
 
-   if (Doxygen::directories->count() > 0) { 
+   if (Doxygen::directories.count() > 0) { 
       // we have at least one dir
       // start will full path of first dir
       sdi.toFirst();
 
       dir   = sdi.current();
       path  = dir->name();
-      int i = path.listIndexOf('/', path.length() - 2);
+
+      int i = path.lastIndexOf('/', path.length() - 2);   // BROOM - check if really lastIndexOf
 
       path = path.left(i + 1);
       bool done = false;
@@ -792,14 +795,18 @@ static void computeCommonDirPrefix()
                QByteArray dirName = dir->name();
 
                if (dirName.length() > path.length()) {
-                  if (qstrncmp(dirName, path, l) != 0) { // dirName does not start with path
+
+                  if (qstrncmp(dirName, path, l) != 0) { 
+                     // dirName does not start with path
                      int i = path.lastIndexOf('/', l - 2);
 
-                     if (i == -1) { // no unique prefix -> stop
+                     if (i == -1) { 
+                        // no unique prefix -> stop
                         path = "";
                         done = true;
 
-                     } else { // restart with shorter path
+                     } else { 
+                        // restart with shorter path
                         path = path.left(i + 1);
                         break;
                      }
@@ -808,19 +815,22 @@ static void computeCommonDirPrefix()
                } else { // dir is shorter than path -> take path of dir as new start
                   path = dir->name();
                   int i = path.lastIndexOf('/', l - 2);
-                  if (i == -1) { // no unique prefix -> stop
+
+                  if (i == -1) { 
+                     // no unique prefix -> stop
                      path = "";
                      done = true;
 
                   } else { // restart with shorter path
                      path = path.left(i + 1);
                   }
+
                   break;
                }
                count++;
             }
 
-            if (count == Doxygen::directories->count())
+            if (count == Doxygen::directories.count())
                // path matches for all directories -> found the common prefix
             {
                done = true;
@@ -846,13 +856,17 @@ void buildDirectories()
          //printf("buildDirectories %s\n",fd->name().data());
 
          if (fd->getReference().isEmpty() && !fd->isDocumentationFile()) {
-            DirDef *dir;
-            if ((dir = Doxygen::directories->find(fd->getPath())) == 0) { // new directory
+            QSharedPointer<DirDef> dir;
+
+            if ((dir = Doxygen::directories.find(fd->getPath())) == 0) { 
+               // new directory
                dir = DirDef::mergeDirectoryInTree(fd->getPath());
             }
+
             if (dir) {
                dir->addFile(fd);
             }
+
          } else {
             // do something for file imported via tag files.
          }
@@ -861,17 +875,19 @@ void buildDirectories()
    
    // compute relations between directories => introduce container dirs.
  
-   for (auto sdi : *Doxygen::directories) {  
+   for (auto dir : Doxygen::directories) {  
       //printf("New dir %s\n",dir->displayName().data());
 
       QByteArray name = dir->name();
       int i = name.lastIndexOf('/', name.length() - 2);
 
       if (i > 0) {
-         DirDef *parent = Doxygen::directories->find(name.left(i + 1));
+         QSharedPointer<DirDef> parent = Doxygen::directories.find(name.left(i + 1));
         
          if (parent) {
-            parent->addSubDir(dir);
+            // BROOM - resolve raw pointer issue!            
+
+            parent->addSubDir(dir.data());
 
             //printf("DirDef::addSubdir(): Adding subdir\n%s to\n%s\n",
             //  dir->displayName().data(), parent->displayName().data());
@@ -883,16 +899,13 @@ void buildDirectories()
 
 void computeDirDependencies()
 {
-   DirDef *dir;
-   DirSDict::Iterator sdi(*Doxygen::directories);
-
    // compute nesting level for each directory
-   for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {
+   for (auto dir : Doxygen::directories) {  
       dir->setLevel();
    }
 
    // compute uses dependencies between directories
-   for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {
+   for (auto dir : Doxygen::directories) { 
       //printf("computeDependencies for %s: #dirs=%d\n",dir->name().data(),Doxygen::directories.count());
       dir->computeDependencies();
    }
@@ -900,20 +913,13 @@ void computeDirDependencies()
 
 void generateDirDocs(OutputList &ol)
 {
-   DirDef *dir;
-   DirSDict::Iterator sdi(*Doxygen::directories);
-
-   for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {
+   for (auto dir : Doxygen::directories) { 
       dir->writeDocumentation(ol);
    }
 
-   if (Config_getBool("DIRECTORY_GRAPH")) {
-      StringMap<QSharedPointer<DirRelation>>::Iterator rdi(Doxygen::dirRelations);
-      DirRelation *dr;
-
-      for (rdi.toFirst(); (dr = rdi.current()); ++rdi) {
-         dr->writeDocumentation(ol);
+   if (Config_getBool("DIRECTORY_GRAPH")) {    
+      for (auto item : Doxygen::dirRelations) { 
+         item->writeDocumentation(ol);
       }
    }
 }
-

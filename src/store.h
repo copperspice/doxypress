@@ -29,8 +29,10 @@ class StorageIntf
  public:
    /*! Required by gcc */
    virtual ~StorageIntf() {}
+
    /*! Read \a size bytes from the store into \a buf. */
    virtual int read(char *buf, uint size) = 0;
+
    /*! Write \a size bytes from \a buf into the store. */
    virtual int write(const char *buf, uint size) = 0;
 };
@@ -106,10 +108,12 @@ class Store : public StorageIntf
       Reading,
       Writing
    };
+
    struct Node {
       portable_off_t pos;
       struct Node *next;
    };
+
    void printFreeList();
    FILE *m_file;
    portable_off_t m_front;

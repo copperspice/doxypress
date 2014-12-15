@@ -140,9 +140,7 @@ class TextDocVisitor : public DocVisitor
    void visitPre(DocText *) {}
    void visitPost(DocText *) {}
    void visitPre(DocHtmlBlockQuote *) {}
-   void visitPost(DocHtmlBlockQuote *) {}
-   void visitPre(DocVhdlFlow *) {}
-   void visitPost(DocVhdlFlow *) {}
+   void visitPost(DocHtmlBlockQuote *) {}  
    void visitPre(DocParBlock *) {}
    void visitPost(DocParBlock *) {}
 

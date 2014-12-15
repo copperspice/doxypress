@@ -36,8 +36,10 @@ struct ListItemInfo;
  */
 struct BaseInfo {
    /*! Creates an object representing an inheritance relation */
+
    BaseInfo(const char *n, Protection p, Specifier v) :
       name(n), prot(p), virt(v) {}
+
    QByteArray   name; //!< the name of the base class
    Protection prot; //!< inheritance type
    Specifier  virt; //!< virtualness
@@ -110,9 +112,10 @@ class Entry
       PACKAGE_SEC      = 0x15000000,
       PACKAGEDOC_SEC   = 0x16000000,
       OBJCIMPL_SEC     = 0x17000000,
-      DIRDOC_SEC       = 0x18000000
-                         , EXPORTED_INTERFACE_SEC = 0x19000000
-                               , INCLUDED_SERVICE_SEC = 0x1A000000
+      DIRDOC_SEC       = 0x18000000,
+
+      EXPORTED_INTERFACE_SEC = 0x19000000,
+      INCLUDED_SERVICE_SEC   = 0x1A000000
    };
 
    // class specifiers (add new items to the end)
@@ -183,7 +186,7 @@ class Entry
       GROUPDOC_NORMAL,        //!< defgroup
       GROUPDOC_ADD,           //!< addgroup
       GROUPDOC_WEAK           //!< weakgroup
-   };                        //!< kind of group
+   };                         //!< kind of group
 
    Entry();
    Entry(const Entry &);
@@ -208,90 +211,88 @@ class Entry
    /*! Returns the list of children for this Entry
     *  @see addSubEntry() and removeSubEntry()
     */
-   const QList<Entry> *children() const {
+   const QList<Entry> &children() const {
       return m_sublist;
    }
 
    /*! Adds entry \a e as a child to this entry */
    void addSubEntry (Entry *e) ;
 
-   /*! Removes entry \a e from the list of children.
-    *  Returns a pointer to the entry or 0 if the entry was not a child.
-    *  Note the entry will not be deleted.
+   /*! Removes entry \a e from the list of children.    *  
     */
-   Entry *removeSubEntry(Entry *e);
+   void removeSubEntry(Entry *e);
 
    /*! Restore the state of this Entry to the default value it has
     *  at construction time.
     */
    void reset();
-
-   /*! Serialize this entry to a persistent storage stream. */
-   void marshall(StorageIntf *);
-
-   /*! Reinitialize this entry from a persistent storage stream. */
-   void unmarshall(StorageIntf *);
+ 
 
  public:
 
    // identification
-   int          section;     //!< entry type (see Sections);
-   QByteArray	 type;        //!< member type
-   QByteArray	 name;        //!< member name
-   TagInfo     *tagInfo;     //!< tag file info
+    
+   TagInfo      *tagInfo;    //!< tag file info
+   ArgumentList *argList;    //!< member arguments as a list 
+   ArgumentList *typeConstr; //!< where clause (C#) for type constraints
+   
+   RelatesType  relatesType; //!< how relates is handled
+   Specifier    virt;        //!< virtualness of the entry
+   Protection   protection;  //!< class protection
+   MethodTypes  mtype;       //!< signal, slot, (dcop) method, or property?
+   GroupDocType groupDocType;
+   SrcLangExt  lang;         //!< programming language in which this entry was found
+ 
+   uint64_t spec;            //!< class/member specifiers
 
-   // content
-   Protection protection;    //!< class protection
-   MethodTypes mtype;        //!< signal, slot, (dcop) method, or property?
-   uint64_t spec;              //!< class/member specifiers
+   int  section;             //!< entry type (see Sections);
    int  initLines;           //!< define/variable initializer lines to show
+   int  docLine;             //!< line number at which the documentation was found
+   int  briefLine;           //!< line number at which the brief desc. was found
+   int  inbodyLine;          //!< line number at which the body doc was found
+   int  bodyLine;            //!< line number of the definition in the source
+   int  endBodyLine;         //!< line number where the definition ends
+   int  mGrpId;              //!< member group id
+   int  startLine;           //!< start line of entry in the source
+   int  startColumn;         //!< start column of entry in the source
+
    bool stat;                //!< static ?
    bool explicitExternal;    //!< explicitly defined as external?
    bool proto;               //!< prototype ?
    bool subGrouping;         //!< automatically group class members?
    bool callGraph;           //!< do we need to draw the call graph?
    bool callerGraph;         //!< do we need to draw the caller graph?
-   Specifier    virt;        //!< virtualness of the entry
-   QByteArray     args;        //!< member argument string
-   QByteArray     bitfields;   //!< member's bit fields
-   ArgumentList *argList;    //!< member arguments as a list
-   QList<ArgumentList> *tArgLists; //!< template argument declarations
+  
+   QList<ArgumentList> *tArgLists;    //!< template argument declarations
+   QList<BaseInfo> *extends;          //!< list of base classes
+   QList<Grouping> *groups;           //!< list of groups this entry belongs to
+   QList<SectionInfo> *anchors;       //!< list of anchors defined in this entry
+   QList<ListItemInfo> *sli;          //!< special lists (test/todo/bug/deprecated/..) this entry is in
+
+   QByteArray	 type;        //!< member type
+   QByteArray	 name;        //!< member name
+   QByteArray   args;        //!< member argument string
+   QByteArray   bitfields;   //!< member's bit fields  
    QByteArray	 program;     //!< the program text
-   QByteArray     initializer; //!< initial value (for variables)
-   QByteArray     includeFile; //!< include file (2 arg of \\class, must be unique)
-   QByteArray     includeName; //!< include name (3 arg of \\class)
-   QByteArray     doc;         //!< documentation block (partly parsed)
-   int          docLine;     //!< line number at which the documentation was found
-   QByteArray     docFile;     //!< file in which the documentation was found
-   QByteArray     brief;       //!< brief description (doc block)
-   int          briefLine;   //!< line number at which the brief desc. was found
-   QByteArray     briefFile;   //!< file in which the brief desc. was found
-   QByteArray     inbodyDocs;  //!< documentation inside the body of a function
-   int          inbodyLine;  //!< line number at which the body doc was found
-   QByteArray     inbodyFile;  //!< file in which the body doc was found
-   QByteArray     relates;     //!< related class (doc block)
-   RelatesType  relatesType; //!< how relates is handled
-   QByteArray     read;        //!< property read accessor
-   QByteArray     write;       //!< property write accessor
-   QByteArray     inside;      //!< name of the class in which documents are found
-   QByteArray     exception;   //!< throw specification
-   ArgumentList *typeConstr; //!< where clause (C#) for type constraints
-   int          bodyLine;    //!< line number of the definition in the source
-   int          endBodyLine; //!< line number where the definition ends
-   int          mGrpId;      //!< member group id
-   QList<BaseInfo> *extends; //!< list of base classes
-   QList<Grouping> *groups;  //!< list of groups this entry belongs to
-   QList<SectionInfo> *anchors; //!< list of anchors defined in this entry
-   QByteArray	fileName;     //!< file this entry was extracted from
-   int		startLine;    //!< start line of entry in the source
-   int		startColumn;  //!< start column of entry in the source
-   QList<ListItemInfo> *sli; //!< special lists (test/todo/bug/deprecated/..) this entry is in
-   SrcLangExt  lang;         //!< programming language in which this entry was found
+   QByteArray   initializer; //!< initial value (for variables)
+   QByteArray   includeFile; //!< include file (2 arg of \\class, must be unique)
+   QByteArray   includeName; //!< include name (3 arg of \\class)
+   QByteArray   doc;         //!< documentation block (partly parsed)
+   QByteArray   docFile;     //!< file in which the documentation was found
+   QByteArray   brief;       //!< brief description (doc block)  
+   QByteArray   briefFile;   //!< file in which the brief desc. was found
+   QByteArray   inbodyDocs;  //!< documentation inside the body of a function 
+   QByteArray   inbodyFile;  //!< file in which the body doc was found
+   QByteArray   relates;     //!< related class (doc block)
+   QByteArray   read;        //!< property read accessor
+   QByteArray   write;       //!< property write accessor
+   QByteArray   inside;      //!< name of the class in which documents are found
+   QByteArray   exception;   //!< throw specification
+   QByteArray	 fileName;    //!< file this entry was extracted from
+   QByteArray   id;          //!< libclang id   
+      
    bool        hidden;       //!< does this represent an entity that is hidden from the output
    bool        artificial;   //!< Artificially introduced item
-   GroupDocType groupDocType;
-   QByteArray    id;           //!< libclang id
-
 
    static int  num;          //!< counts the total number of entries
 
@@ -326,8 +327,10 @@ class Entry
 
  private:
    void createSubtreeIndex(EntryNav *nav, FileStorage *storage, FileDef *fd);
+
    Entry         *m_parent;    //!< parent node in the tree
-   QList<Entry>  *m_sublist;   //!< entries that are children of this one
+   QList<Entry>  m_sublist;    //!< entries that are children of this one
+
    Entry &operator=(const Entry &);
 };
 
@@ -341,11 +344,13 @@ class EntryNav
  public:
    EntryNav(EntryNav *parent, Entry *e);
    ~EntryNav();
+
    void addChild(EntryNav *);
    bool loadEntry(FileStorage *storage);
    bool saveEntry(Entry *e, FileStorage *storage);
    void setEntry(Entry *e);
    void releaseEntry();
+
    void changeSection(int section) {
       m_section = section;
    }
@@ -371,7 +376,7 @@ class EntryNav
    TagInfo *tagInfo() const {
       return m_tagInfo;
    }
-   const QList<EntryNav> *children() const {
+   const QList<EntryNav> &children() const {
       return m_subList;
    }
    EntryNav *parent() const {
@@ -385,26 +390,19 @@ class EntryNav
 
    // navigation
    EntryNav        *m_parent;    //!< parent node in the tree
-   QList<EntryNav> *m_subList;   //!< entries that are children of this one
+   QList<EntryNav>  m_subList;   //!< entries that are children of this one
 
    // identification
    int          m_section;     //!< entry type (see Sections);
-   QByteArray	m_type;        //!< member type
+   QByteArray	 m_type;        //!< member type
    QByteArray   m_name;        //!< member name
-   TagInfo     *m_tagInfo;      //!< tag file info
+   TagInfo     *m_tagInfo;     //!< tag file info
    FileDef     *m_fileDef;
-   SrcLangExt   m_lang;         //!< programming language in which this entry was found
+   SrcLangExt   m_lang;        //!< programming language in which this entry was found
 
    Entry       *m_info;
    int64_t      m_offset;
    bool         m_noLoad;
 };
-
-
-typedef QList<Entry> EntryList;
-typedef QListIterator<Entry> EntryListIterator;
-
-typedef QList<EntryNav> EntryNavList;
-typedef QListIterator<EntryNav> EntryNavListIterator;
 
 #endif

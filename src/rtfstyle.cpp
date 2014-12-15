@@ -18,6 +18,7 @@
 #include <QFile>
 #include <QTextStream>
 
+#include <cassert>
 #include <stdlib.h>
 
 #include <rtfstyle.h>
@@ -410,18 +411,23 @@ const QRegExp StyleData::s_clause("\\\\s[0-9]+\\s*");
 
 StyleData::StyleData(const char *reference, const char *definition)
 {
-   int start = s_clause.match(reference);
+   //  QString temp = reference;
+
+   int start = s_clause.indexIn(reference);
    assert(start >= 0);
+
    reference += start;
    index = (int)atol(reference + 2);
-   assert(index > 0);
 
+   assert(index > 0);
    assert(reference != 0);
+
    size_t size = 1 + strlen(reference);
    memcpy(this->reference = new char[size], reference, size);
 
    assert(definition != 0);
    size = 1 + strlen(definition);
+
    memcpy(this->definition = new char[size], definition, size);
 }
 
@@ -438,11 +444,15 @@ bool StyleData::setStyle(const char *s, const char *styleName)
 
    int len = 0;     // length of a particular RTF formatting control
    int ref_len = 0; // length of the whole formatting section of a style
-   int start = s_clause.match(s, 0, &len);
+
+   int start = s_clause.indexIn(s);
+   len = s_clause.matchedLength();   
+ 
    if (start < 0) {
       err("Style sheet '%s' contains no '\\s' clause.\n{%s}\n", styleName, s);
       return false;
    }
+
    s += start;
    index = (int)atol(s + 2);
    assert(index > 0);
@@ -450,40 +460,62 @@ bool StyleData::setStyle(const char *s, const char *styleName)
    // search for the end of pure formatting codes
    const char *end = s + len;
    ref_len = len;
+
    bool haveNewDefinition = true;
-   for (;;) {
+
+   while (true) {
+
       if (*end == '{') {
          // subgroups are used for \\additive
-         if (0 != subgroup.match(end, 0, &len)) {
+
+         int startX = subgroup.indexIn(end);
+         len = subgroup.matchedLength();  
+
+         if (startX != 0) {
             break;
+
          } else {
             end += len;
             ref_len += len;
          }
+
       } else if (*end == '\\') {
          if (0 == qstrncmp(end, "\\snext", 6)) {
             break;
          }
+
          if (0 == qstrncmp(end, "\\sbasedon", 9)) {
             break;
          }
-         if (0 != any_clause.match(end, 0, &len)) {
+
+         int startX = any_clause.indexIn(end);
+         len = any_clause.matchedLength();  
+
+         if (startX != 0) {
             break;
          }
+
          end += len;
          ref_len += len;
+
       } else if (*end == 0) {
          // no style-definition part, keep default value
          haveNewDefinition = false;
          break;
-      } else { // plain name without leading \\snext
+
+      } else { 
+         // plain name without leading \\snext
          break;
+
       }
    }
+
    delete[] reference;
+
    reference = new char[ref_len + 1];
    memcpy(reference, s, ref_len);
    reference[ref_len] = 0;
+
    if (haveNewDefinition) {
       delete[] definition;
       size_t size = 1 + strlen(end);
@@ -496,74 +528,94 @@ bool StyleData::setStyle(const char *s, const char *styleName)
 void loadStylesheet(const char *name, QHash<QString, StyleData> &dict)
 {
    QFile file(name);
-   if (!file.open(QIODevice::ReadOnly)) {
+
+   if (! file.open(QIODevice::ReadOnly)) {
       err("Can't open RTF style sheet file %s. Using defaults.\n", name);
       return;
    }
    msg("Loading RTF style sheet %s...\n", name);
 
-   static const QRegExp separator("[ \t]*=[ \t]*");
+   static const QRegExp seperator("[ \t]*=[ \t]*");
    uint lineNr = 1;
-   QTextStream t(&file);
-   t.setEncoding(QTextStream::UnicodeUTF8);
 
-   while (!t.eof()) {
-      QByteArray s(4096); // string buffer of max line length
+   QTextStream t(&file);
+   t.setCodec("UTF-8");
+
+   while (! t.atEnd()) {
+      QByteArray s;       
       s = t.readLine().trimmed().toUtf8();
+
       if (s.isEmpty() || s.at(0) == '#') {
          continue;   // skip blanks & comments
       }
+
+      int sepStart;
       int sepLength;
-      int sepStart = separator.match(s, 0, &sepLength);
-      if (sepStart <= 0) { // no valid assignment statement
+      
+      sepStart  = seperator.indexIn(s);
+      sepLength = seperator.matchedLength();  
+
+      if (sepStart <= 0) {
+         // no valid assignment statement
          warn(name, lineNr, "Assignment of style sheet name expected!\n");
          continue;
       }
+
       QByteArray key = s.left(sepStart);
-      if (dict[key] == 0) { // not a valid style sheet name
+
+      if (! dict.contains(key)) { 
+         // not a valid style sheet name
          warn(name, lineNr, "Invalid style sheet name %s ignored.\n", key.data());
          continue;
       }
-      StyleData *styleData = dict.find(key);
-      if (styleData == 0) {
-         warn(name, lineNr, "Unknown style sheet name %s ignored.\n", key.data());
-         continue;
-      }
-      s += " "; // add command separator
-      styleData->setStyle(s.data() + sepStart + sepLength, key.data());
+
+      // add command separator   
+      StyleData &styleData = dict.find(key).value();
+
+      s += " "; 
+      styleData.setStyle(s.data() + sepStart + sepLength, key.data());
+
       lineNr++;
    }
 }
 
-QHash<QString, StyleData> rtf_Style(257);
+QHash<QString, StyleData> rtf_Style;
 
 void loadExtensions(const char *name)
 {
    QFile file(name);
    if (!file.open(QIODevice::ReadOnly)) {
-      err("Can't open RTF extensions file %s. Using defaults.\n", name);
+      err("Can not open RTF extensions file %s. Using defaults.\n", name);
       return;
    }
    msg("Loading RTF extensions %s...\n", name);
 
    static const QRegExp separator("[ \t]*=[ \t]*");
    uint lineNr = 1;
-   QTextStream t(&file);
-   t.setEncoding(QTextStream::UnicodeUTF8);
 
-   while (!t.eof()) {
-      QByteArray s(4096); // string buffer of max line length
+   QTextStream t(&file);
+   t.setCodec("UTF-8");
+
+   while (! t.atEnd()) {
+      // string buffer of max line length
+
+      QByteArray s;       
       s = t.readLine().trimmed().toUtf8();
+
       if (s.length() == 0 || s.at(0) == '#') {
          continue;   // skip blanks & comments
       }
-      int sepLength;
-      int sepStart = separator.match(s, 0, &sepLength);
-      if (sepStart <= 0) { // no valid assignment statement
+
+      int sepStart  = separator.indexIn(s);
+      int sepLength = separator.matchedLength();  
+
+      if (sepStart <= 0) { 
+         // no valid assignment statement
          warn(name, lineNr, "Assignment of extension field expected!\n");
          continue;
       }
-      QByteArray key = s.left(sepStart);
+
+      QByteArray key  = s.left(sepStart);
       QByteArray data = s.data() + sepStart + sepLength;
 
       if (key == "Title") {

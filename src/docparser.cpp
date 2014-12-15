@@ -241,7 +241,7 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
    FileDef *fd;
    //printf("Search for %s\n",fileName);
    if ((fd = findFileDef(Doxygen::imageNameDict, fileName, ambig))) {
-      QByteArray inputFile = fd->absFilePath();
+      QByteArray inputFile = fd->absoluteFilePath();
       QFile inImage(inputFile);
       if (inImage.open(QIODevice::ReadOnly)) {
          result = fileName;
@@ -1564,7 +1564,7 @@ static void readTextFileByName(const QByteArray &file, QByteArray &text)
    bool ambig;
    FileDef *fd;
    if ((fd = findFileDef(Doxygen::exampleNameDict, file, ambig))) {
-      text = fileToString(fd->absFilePath(), Config_getBool("FILTER_SOURCE_FILES"));
+      text = fileToString(fd->absoluteFilePath(), Config_getBool("FILTER_SOURCE_FILES"));
    } else if (ambig) {
       warn_doc_error(g_fileName, doctokenizerYYlineno, "included file name %s is ambiguous"
                      "Possible candidates:\n%s", qPrint(file),
@@ -2471,7 +2471,7 @@ void DocDotFile::parse()
       fd = findFileDef(Doxygen::dotFileNameDict, m_name + ".dot", ambig);
    }
    if (fd) {
-      m_file = fd->absFilePath();
+      m_file = fd->absoluteFilePath();
    } else if (ambig) {
       warn_doc_error(g_fileName, doctokenizerYYlineno, "included dot file name %s is ambiguous.\n"
                      "Possible candidates:\n%s", qPrint(m_name),
@@ -2540,7 +2540,7 @@ void DocMscFile::parse()
       fd = findFileDef(Doxygen::mscFileNameDict, m_name + ".msc", ambig);
    }
    if (fd) {
-      m_file = fd->absFilePath();
+      m_file = fd->absoluteFilePath();
    } else if (ambig) {
       warn_doc_error(g_fileName, doctokenizerYYlineno, "included msc file name %s is ambiguous.\n"
                      "Possible candidates:\n%s", qPrint(m_name),
@@ -2611,7 +2611,7 @@ void DocDiaFile::parse()
       fd = findFileDef(Doxygen::diaFileNameDict, m_name + ".dia", ambig);
    }
    if (fd) {
-      m_file = fd->absFilePath();
+      m_file = fd->absoluteFilePath();
    } else if (ambig) {
       warn_doc_error(g_fileName, doctokenizerYYlineno, "included dia file name %s is ambiguous.\n"
                      "Possible candidates:\n%s", qPrint(m_name),
@@ -2627,61 +2627,11 @@ void DocDiaFile::parse()
    assert(n == this);
 }
 
-//---------------------------------------------------------------------------
-
-DocVhdlFlow::DocVhdlFlow(DocNode *parent)
-{
-   m_parent = parent;
-}
-
-void DocVhdlFlow::parse()
-{
-   g_nodeStack.push(this);
-   DBG(("DocVhdlFlow::parse() start\n"));
-
-   doctokenizerYYsetStateTitle();
-
-   int tok;
-
-   while ((tok = doctokenizerYYlex())) {
-      if (!defaultHandleToken(this, tok, m_children)) {
-         switch (tok) {
-            case TK_COMMAND:
-               warn_doc_error(g_fileName, doctokenizerYYlineno, "Illegal command %s as part of a \\mscfile",
-                              qPrint(g_token->name));
-               break;
-            case TK_SYMBOL:
-               warn_doc_error(g_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
-                              qPrint(g_token->name));
-               break;
-            default:
-               warn_doc_error(g_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok));
-               break;
-         }
-      }
-   }
-   tok = doctokenizerYYlex();
-
-   doctokenizerYYsetStatePara();
-   handlePendingStyleCommands(this, m_children);
-
-   DBG(("DocVhdlFlow::parse() end\n"));
-   DocNode *n = g_nodeStack.pop();
-
-   assert(n == this);
-
-   VhdlDocGen::createFlowChart(g_memberDef);
-}
-
 
 //---------------------------------------------------------------------------
 
-DocImage::DocImage(DocNode *parent, const HtmlAttribList &attribs, const QByteArray &name,
-                   Type t, const QByteArray &url) :
-   m_attribs(attribs), m_name(name),
-   m_type(t), m_relPath(g_relPath),
-   m_url(url)
+DocImage::DocImage(DocNode *parent, const HtmlAttribList &attribs, const QByteArray &name, Type t, const QByteArray &url) 
+   : m_attribs(attribs), m_name(name), m_type(t), m_relPath(g_relPath), m_url(url)
 {
    m_parent = parent;
 }
@@ -4768,23 +4718,16 @@ void DocPara::handleDiaFile(const QByteArray &cmdName)
    df->parse();
 }
 
-void DocPara::handleVhdlFlow()
-{
-   DocVhdlFlow *vf = new DocVhdlFlow(this);
-   m_children.append(vf);
-   vf->parse();
-}
-
 void DocPara::handleLink(const QByteArray &cmdName, bool isJavaLink)
 {
    int tok = doctokenizerYYlex();
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(g_fileName, doctokenizerYYlineno, "expected whitespace after %s command",
-                     qPrint(cmdName));
+      warn_doc_error(g_fileName, doctokenizerYYlineno, "expected whitespace after %s command", qPrint(cmdName));
       return;
    }
    doctokenizerYYsetStateLink();
    tok = doctokenizerYYlex();
+
    if (tok != TK_WORD) {
       warn_doc_error(g_fileName, doctokenizerYYlineno, "%s as the argument of %s",
                      tokToString(tok), qPrint(cmdName));
@@ -4793,6 +4736,7 @@ void DocPara::handleLink(const QByteArray &cmdName, bool isJavaLink)
    doctokenizerYYsetStatePara();
    DocLink *lnk = new DocLink(this, g_token->name);
    m_children.append(lnk);
+
    QByteArray leftOver = lnk->parse(isJavaLink);
    if (!leftOver.isEmpty()) {
       m_children.append(new DocWord(this, leftOver));
@@ -5329,9 +5273,7 @@ int DocPara::handleCommand(const QByteArray &cmdName)
       case CMD_DOTFILE:
          handleDotFile(cmdName);
          break;
-      case CMD_VHDLFLOW:
-         handleVhdlFlow();
-         break;
+    
       case CMD_MSCFILE:
          handleMscFile(cmdName);
          break;
@@ -5347,10 +5289,12 @@ int DocPara::handleCommand(const QByteArray &cmdName)
       case CMD_CITE:
          handleCite();
          break;
+
       case CMD_REF: // fall through
       case CMD_SUBPAGE:
          handleRef(cmdName);
          break;
+
       case CMD_SECREFLIST: {
          DocSecRefList *list = new DocSecRefList(this);
          m_children.append(list);

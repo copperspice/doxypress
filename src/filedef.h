@@ -110,7 +110,7 @@ class FileDef : public Definition
    QByteArray includeName() const;
 
    /*! Returns the absolute path including the file name. */
-   QByteArray absFilePath() const {
+   QByteArray getFilePath() const {
       return m_filePath;
    }
 

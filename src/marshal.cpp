@@ -17,17 +17,18 @@
 
 #include <QFile>
 
-#include <assert.h>
+#include <cassert>
 
-#include <stringmap.h>
-#include <marshal.h>
-#include <entry.h>
-#include <section.h>
-#include <memberlist.h>
-#include <definition.h>
-#include <groupdef.h>
-#include <example.h>
 #include <arguments.h>
+#include <definition.h>
+#include <entry.h>
+#include <example.h>
+#include <groupdef.h>
+#include <marshal.h>
+#include <memberlist.h>
+#include <section.h>
+#include <stringmap.h>
+
 
 #define HEADER ('D'<<24)+('O'<<16)+('X'<<8)+'!'
 
@@ -72,10 +73,11 @@ void marshalQByteArray(StorageIntf *s, const QByteArray &str)
    }
 }
 
-void marshalQGString(StorageIntf *s, const QByteArray &str)
+void marshalQString(StorageIntf *s, const QByteArray &str)
 {
    uint l = str.length();
    marshalUInt(s, l);
+
    if (l > 0) {
       s->write(str.data(), l);
    }
@@ -89,12 +91,12 @@ void marshalArgumentList(StorageIntf *s, ArgumentList *argList)
 void marshalArgumentLists(StorageIntf *s, QList<ArgumentList> *argLists)
 {
    if (argLists == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, argLists->count());
-      QListIterator<ArgumentList> ali(*argLists);
-      ArgumentList *al;
-      for (ali.toFirst(); (al = ali.current()); ++ali) {
+    
+      for (auto al : *argLists) {
          marshalArgumentList(s, al);
       }
    }
@@ -103,15 +105,14 @@ void marshalArgumentLists(StorageIntf *s, QList<ArgumentList> *argLists)
 void marshalBaseInfoList(StorageIntf *s, QList<BaseInfo> *baseList)
 {
    if (baseList == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
    } else {
       marshalUInt(s, baseList->count());
-      QListIterator<BaseInfo> bli(*baseList);
-      BaseInfo *bi;
-      for (bli.toFirst(); (bi = bli.current()); ++bli) {
-         marshalQByteArray(s, bi->name);
-         marshalInt(s, (int)bi->prot);
-         marshalInt(s, (int)bi->virt);
+      
+      for (auto bi : *baseList) {
+         marshalQByteArray(s, bi.name);
+         marshalInt(s, (int)bi.prot);
+         marshalInt(s, (int)bi.virt);
       }
    }
 }
@@ -119,14 +120,14 @@ void marshalBaseInfoList(StorageIntf *s, QList<BaseInfo> *baseList)
 void marshalGroupingList(StorageIntf *s, QList<Grouping> *groups)
 {
    if (groups == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, groups->count());
-      QListIterator<Grouping> gli(*groups);
-      Grouping *g;
-      for (gli.toFirst(); (g = gli.current()); ++gli) {
-         marshalQByteArray(s, g->groupname);
-         marshalInt(s, (int)g->pri);
+     
+      for (auto g : *groups) {
+         marshalQByteArray(s, g.groupname);
+         marshalInt(s, (int)g.pri);
       }
    }
 }
@@ -134,19 +135,19 @@ void marshalGroupingList(StorageIntf *s, QList<Grouping> *groups)
 void marshalSectionInfoList(StorageIntf *s, QList<SectionInfo> *anchors)
 {
    if (anchors == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, anchors->count());
-      QListIterator<SectionInfo> sli(*anchors);
-      SectionInfo *si;
-      for (sli.toFirst(); (si = sli.current()); ++sli) {
-         marshalQByteArray(s, si->label);
-         marshalQByteArray(s, si->title);
-         marshalQByteArray(s, si->ref);
-         marshalInt(s, (int)si->type);
-         marshalQByteArray(s, si->fileName);
-         marshalInt(s, si->lineNr);
-         marshalInt(s, si->level);
+  
+      for (auto si : *anchors) {
+         marshalQByteArray(s, si.label);
+         marshalQByteArray(s, si.title);
+         marshalQByteArray(s, si.ref);
+         marshalInt(s, (int)si.type);
+         marshalQByteArray(s, si.fileName);
+         marshalInt(s, si.lineNr);
+         marshalInt(s, si.level);
       }
    }
 }
@@ -154,14 +155,14 @@ void marshalSectionInfoList(StorageIntf *s, QList<SectionInfo> *anchors)
 void marshalItemInfoList(StorageIntf *s, QList<ListItemInfo> *sli)
 {
    if (sli == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, sli->count());
-      QListIterator<ListItemInfo> liii(*sli);
-      ListItemInfo *lii;
-      for (liii.toFirst(); (lii = liii.current()); ++liii) {
-         marshalQByteArray(s, lii->type);
-         marshalInt(s, lii->itemId);
+   
+      for (auto item : *sli) {
+         marshalQByteArray(s, item.type);
+         marshalInt(s, item.itemId);
       }
    }
 }
@@ -175,16 +176,14 @@ void marshalObjPointer(StorageIntf *s, void *obj)
 void marshalSectionDict(StorageIntf *s, SectionDict *sections)
 {
    if (sections == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
 
    } else {
       marshalUInt(s, sections->count());
-      StringMap<QSharedPointer<SectionInfo>>::IteratorDict sli(*sections);
-      SectionInfo *si;
-
-      for (sli.toFirst(); (si = sli.current()); ++sli) {
-         marshalQByteArray(s, sli.currentKey());
-         marshalObjPointer(s, si);
+     
+      for (auto item = sections->begin(); item != sections->end(); ++item) {
+         marshalQString(s, item.key());
+         marshalObjPointer(s, item.value().data() );
       }
    }
 }
@@ -192,19 +191,17 @@ void marshalSectionDict(StorageIntf *s, SectionDict *sections)
 void marshalMemberSDict(StorageIntf *s, MemberSDict *memberSDict)
 {
    if (memberSDict == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, memberSDict->count());
-      //printf("  marshalMemberSDict: items=%d\n",memberSDict->count());
-
-      StringMap<QSharedPointer<MemberDef>>::IteratorDict mdi(*memberSDict);
+ 
       MemberDef *md;
       int count = 0;
 
-      for (mdi.toFirst(); (md = mdi.current()); ++mdi) {
-         //printf("  marshalMemberSDict: %d: key=%s value=%p\n",count,mdi.currentKey().data(),md);
-         marshalQByteArray(s, mdi.currentKey());
-         marshalObjPointer(s, md);
+      for (auto item = memberSDict->begin(); item != memberSDict->end(); ++item) {
+         marshalQString(s, item.key());
+         marshalObjPointer(s, item.value().data());
          count++;
       }
 
@@ -215,7 +212,8 @@ void marshalMemberSDict(StorageIntf *s, MemberSDict *memberSDict)
 void marshalDocInfo(StorageIntf *s, DocInfo *docInfo)
 {
    if (docInfo == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, 1);
       marshalQByteArray(s, docInfo->doc);
@@ -227,7 +225,8 @@ void marshalDocInfo(StorageIntf *s, DocInfo *docInfo)
 void marshalBriefInfo(StorageIntf *s, BriefInfo *briefInfo)
 {
    if (briefInfo == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST);
+
    } else {
       marshalUInt(s, 1);
       marshalQByteArray(s, briefInfo->doc);
@@ -240,7 +239,8 @@ void marshalBriefInfo(StorageIntf *s, BriefInfo *briefInfo)
 void marshalBodyInfo(StorageIntf *s, BodyInfo *bodyInfo)
 {
    if (bodyInfo == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, 1);
       marshalInt(s, bodyInfo->startLine);
@@ -252,13 +252,13 @@ void marshalBodyInfo(StorageIntf *s, BodyInfo *bodyInfo)
 void marshalGroupList(StorageIntf *s, SortedList<GroupDef *> *groupList)
 {
    if (groupList == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, groupList->count());
-      QListIterator<GroupDef> gli(*groupList);
-      GroupDef *gd = 0;
-      for (gli.toFirst(); (gd = gli.current()); ++gli) {
-         marshalObjPointer(s, gd);
+    
+      for (auto item : *groupList) {
+         marshalObjPointer(s, item);
       }
    }
 }
@@ -266,16 +266,18 @@ void marshalGroupList(StorageIntf *s, SortedList<GroupDef *> *groupList)
 void marshalMemberList(StorageIntf *s, MemberList *ml)
 {
    if (ml == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, ml->count());
-      QListIterator<MemberDef> mli(*ml);
-      MemberDef *md;
+      
       uint count = 0;
-      for (mli.toFirst(); (md = mli.current()); ++mli) {
-         marshalObjPointer(s, md);
+     
+      for (auto item : *ml) {
+         marshalObjPointer(s, item);
          count++;
       }
+
       assert(count == ml->count());
 
       ml->marshal(s);
@@ -288,14 +290,12 @@ void marshalExampleSDict(StorageIntf *s, ExampleSDict *ed)
       marshalUInt(s, NULL_LIST); // null pointer representation
 
    } else {
-      marshalUInt(s, ed->count());
-      //printf("  marshalMemberSDict: items=%d\n",memberSDict->count());
-      StringMap<QSharedPointer<Example>>::IteratorDict edi(*ed);
-      Example *e;
+      marshalUInt(s, ed->count());         
 
-      for (edi.toFirst(); (e = edi.current()); ++edi) {
-         //printf("  marshalMemberSDict: %d: key=%s value=%p\n",count,mdi.currentKey().data(),md);
-         marshalQByteArray(s, edi.currentKey());
+      for (auto item = ed->begin(); item != ed->end(); ++item) {        
+         marshalQString(s, item.key());
+
+         QSharedPointer<Example> e = item.value();
          marshalQByteArray(s, e->anchor);
          marshalQByteArray(s, e->name);
          marshalQByteArray(s, e->file);
@@ -306,17 +306,14 @@ void marshalExampleSDict(StorageIntf *s, ExampleSDict *ed)
 void marshalMemberLists(StorageIntf *s, StringMap<QSharedPointer<MemberList>> *mls)
 {
    if (mls == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
+      marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, mls->count());
-      //printf("  marshalMemberSDict: items=%d\n",memberSDict->count());
-      StringMap<QSharedPointer<MemberList>>::IteratorDict mli(*mls);
-      MemberList *ml;
-
-      for (mli.toFirst(); (ml = mli.current()); ++mli) {
-         //printf("  marshalMemberSDict: %d: key=%s value=%p\n",count,mdi.currentKey().data(),md);
-         marshalQByteArray(s, mli.currentKey());
-         marshalObjPointer(s, ml); // assume we are not owner of the list
+  
+      for (auto item = mls->begin(); item != mls->end(); ++item) {
+         marshalQString(s, item.key());
+         marshalObjPointer(s, item.value().data()); 
       }
    }
 }
@@ -338,12 +335,16 @@ void marshalEntry(StorageIntf *s, Entry *e)
    marshalBool(s, e->callGraph);
    marshalBool(s, e->callerGraph);
    marshalInt(s, (int)e->virt);
+
    marshalQByteArray(s, e->args);
    marshalQByteArray(s, e->bitfields);
+
    marshalArgumentList(s, e->argList);
    marshalArgumentLists(s, e->tArgLists);
-   marshalQGString(s, e->program);
-   marshalQGString(s, e->initializer);
+
+   marshalQString(s, e->program);
+   marshalQString(s, e->initializer);
+
    marshalQByteArray(s, e->includeFile);
    marshalQByteArray(s, e->includeName);
    marshalQByteArray(s, e->doc);
@@ -381,11 +382,10 @@ void marshalEntry(StorageIntf *s, Entry *e)
 void marshalEntryTree(StorageIntf *s, Entry *e)
 {
    marshalEntry(s, e);
-   marshalUInt(s, e->children()->count());
-   QListIterator<Entry> eli(*e->children());
-   Entry *child;
-   for (eli.toFirst(); (child = eli.current()); ++eli) {
-      marshalEntryTree(s, child);
+   marshalUInt(s, e->children().count());
+  
+   for (auto child : e->children()) {
+      marshalEntryTree(s, &child);
    }
 }
 
@@ -396,6 +396,7 @@ int unmarshalInt(StorageIntf *s)
    uchar b[4];
    s->read((char *)b, 4);
    int result = (int)((((uint)b[0]) << 24) + ((uint)b[1] << 16) + ((uint)b[2] << 8) + (uint)b[3]);
+
    //printf("unmarshalInt: %x %x %x %x: %x offset=%llx\n",b[0],b[1],b[2],b[3],result,f.pos());
    return result;
 }
@@ -405,6 +406,7 @@ uint unmarshalUInt(StorageIntf *s)
    uchar b[4];
    s->read((char *)b, 4);
    uint result = (((uint)b[0]) << 24) + ((uint)b[1] << 16) + ((uint)b[2] << 8) + (uint)b[3];
+
    //printf("unmarshalUInt: %x %x %x %x: %x offset=%llx\n",b[0],b[1],b[2],b[3],result,f.pos());
    return result;
 }
@@ -420,33 +422,39 @@ bool unmarshalBool(StorageIntf *s)
 {
    char result;
    s->read(&result, sizeof(result));
-   //printf("unmarshalBool: %x offset=%llx\n",result,f.pos());
+
    return result;
 }
 
 QByteArray unmarshalQByteArray(StorageIntf *s)
 {
    uint len = unmarshalUInt(s);
-   //printf("unmarshalQByteArray: len=%d offset=%llx\n",len,f.pos());
-   QByteArray result(len + 1);
-   result.at(len) = '\0';
+
+   QByteArray result;
+
+   result.resize(len + 1);
+   result[len] = '\0';
+  
    if (len > 0) {
       s->read(result.data(), len);
    }
-   //printf("unmarshalQByteArray: result=%s\n",result.data());
+
    return result;
 }
 
-QByteArray unmarshalQGString(StorageIntf *s)
+QString unmarshalQString(StorageIntf *s)
 {
    uint len = unmarshalUInt(s);
-   //printf("unmarshalQByteArray: len=%d offset=%llx\n",len,f.pos());
-   QByteArray result(len + 1);
-   result.at(len) = '\0';
+
+   QByteArray result;
+  
+   result.resize(len + 1);
+   result[len] = '\0';
+
    if (len > 0) {
       s->read(result.data(), len);
    }
-   //printf("unmarshalQByteArray: result=%s\n",result.data());
+   
    return result;
 }
 
@@ -459,16 +467,19 @@ QList<ArgumentList> *unmarshalArgumentLists(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
+
    if (count == NULL_LIST) {
-      return 0;   // null list
+      return 0; 
    }
+
    QList<ArgumentList> *result = new QList<ArgumentList>;
-   result->setAutoDelete(true);
+   
    assert(count < 1000000);
-   //printf("unmarshalArgumentLists: %d\n",count);
+   
    for (i = 0; i < count; i++) {
-      result->append(unmarshalArgumentList(s));
+      result->append(*unmarshalArgumentList(s));
    }
+
    return result;
 }
 
@@ -476,17 +487,21 @@ QList<BaseInfo> *unmarshalBaseInfoList(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
+
    if (count == NULL_LIST) {
-      return 0;   // null list
+      return 0; 
    }
-   QList<BaseInfo> *result = new QList<BaseInfo>;
-   result->setAutoDelete(true);
+
+   QList<BaseInfo> *result = new QList<BaseInfo>;  
    assert(count < 1000000);
+
    for (i = 0; i < count; i++) {
       QByteArray name   = unmarshalQByteArray(s);
+
       Protection prot = (Protection)unmarshalInt(s);
       Specifier virt  = (Specifier)unmarshalInt(s);
-      result->append(new BaseInfo(name, prot, virt));
+
+      result->append(BaseInfo(name, prot, virt));
    }
    return result;
 }
@@ -495,17 +510,21 @@ QList<Grouping> *unmarshalGroupingList(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
+
    if (count == NULL_LIST) {
       return 0;   // null list
    }
+
    QList<Grouping> *result = new QList<Grouping>;
-   result->setAutoDelete(true);
    assert(count < 1000000);
+
    for (i = 0; i < count; i++) {
       QByteArray name = unmarshalQByteArray(s);
       Grouping::GroupPri_t prio = (Grouping::GroupPri_t)unmarshalInt(s);
-      result->append(new Grouping(name, prio));
+
+      result->append(Grouping(name, prio));
    }
+
    return result;
 }
 
@@ -513,21 +532,26 @@ QList<SectionInfo> *unmarshalSectionInfoList(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
+
    if (count == NULL_LIST) {
-      return 0;   // null list
+      return 0;
    }
-   QList<SectionInfo> *result = new QList<SectionInfo>;
-   result->setAutoDelete(true);
+
+   QList<SectionInfo> *result = new QList<SectionInfo>;  
    assert(count < 1000000);
+
    for (i = 0; i < count; i++) {
       QByteArray label = unmarshalQByteArray(s);
       QByteArray title = unmarshalQByteArray(s);
       QByteArray ref   = unmarshalQByteArray(s);
+
       SectionInfo::SectionType type = (SectionInfo::SectionType)unmarshalInt(s);
+
       QByteArray fileName = unmarshalQByteArray(s);
+
       int lineNr = unmarshalInt(s);
-      int level = unmarshalInt(s);
-      result->append(new SectionInfo(fileName, lineNr, label, title, type, level, ref));
+      int level  = unmarshalInt(s);
+      result->append(SectionInfo(fileName, lineNr, label, title, type, level, ref));
    }
    return result;
 }
@@ -536,16 +560,20 @@ QList<ListItemInfo> *unmarshalItemInfoList(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
+
    if (count == NULL_LIST) {
-      return 0;   // null list
+      return 0;  
    }
+
    QList<ListItemInfo> *result = new QList<ListItemInfo>;
-   result->setAutoDelete(true);
+
    assert(count < 1000000);
+
    for (i = 0; i < count; i++) {
-      ListItemInfo *lii = new ListItemInfo;
-      lii->type   = unmarshalQByteArray(s);
-      lii->itemId = unmarshalInt(s);
+      ListItemInfo lii;
+      lii.type   = unmarshalQByteArray(s);
+      lii.itemId = unmarshalInt(s);
+
       result->append(lii);
    }
    return result;
@@ -562,17 +590,19 @@ SectionDict *unmarshalSectionDict(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
-   //printf("unmarshalSectionDict count=%d\n",count);
+   
    if (count == NULL_LIST) {
-      return 0;   // null list
+      return 0;  
    }
-   SectionDict *result = new SectionDict(17);
+
+   SectionDict *result = new SectionDict;
    assert(count < 1000000);
+
    for (i = 0; i < count; i++) {
-      QByteArray key    = unmarshalQByteArray(s);
-      SectionInfo *si = (SectionInfo *)unmarshalObjPointer(s);
-      //printf("  unmarshalSectionDict i=%d key=%s si=%s\n",count,key.data(),si->label.data());
-      result->append(key, si);
+      QByteArray key  = unmarshalQByteArray(s);
+      QSharedPointer<SectionInfo> si ((SectionInfo *)unmarshalObjPointer(s));
+      
+      result->insert(key, si);
    }
    return result;
 }
@@ -581,21 +611,21 @@ MemberSDict *unmarshalMemberSDict(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
-   //printf("--- unmarshalMemberSDict count=%d\n",count);
+ 
    if (count == NULL_LIST) {
       //printf("--- end unmarshalMemberSDict\n");
-      return 0; // null list
+      return 0; 
    }
    MemberSDict *result = new MemberSDict;
    assert(count < 1000000);
+
    //printf("Reading %d key-value pairs\n",count);
    for (i = 0; i < count; i++) {
-      //printf("  unmarshaling pair %d\n",i);
-      QByteArray key    = unmarshalQByteArray(s);
-      //printf("  unmarshaling key %s\n",key.data());
-      MemberDef *md = (MemberDef *)unmarshalObjPointer(s);
-      //printf("  unmarshalMemberSDict i=%d key=%s md=%p\n",i,key.data(),md);
-      result->append(key, md);
+      
+      QByteArray key    = unmarshalQByteArray(s);          
+      QSharedPointer<MemberDef> md ((MemberDef *)unmarshalObjPointer(s));
+      
+      result->insert(key, md);
    }
 
    //printf("--- end unmarshalMemberSDict\n");
@@ -688,19 +718,25 @@ ExampleSDict *unmarshalExampleSDict(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
+
    if (count == NULL_LIST) {
       return 0;
    }
+
    ExampleSDict *result = new ExampleSDict;
    assert(count < 1000000);
+
    for (i = 0; i < count; i++) {
       QByteArray key = unmarshalQByteArray(s);
-      Example *e = new Example;
+      QSharedPointer<Example> e (new Example);
+
       e->anchor = unmarshalQByteArray(s);
       e->name   = unmarshalQByteArray(s);
       e->file   = unmarshalQByteArray(s);
-      result->inSort(key, e);
+
+      result->insert(key, e);
    }
+
    return result;
 }
 
@@ -719,8 +755,8 @@ StringMap<QSharedPointer<MemberList>> *unmarshalMemberLists(StorageIntf *s)
    for (i = 0; i < count; i++) {
       QByteArray key = unmarshalQByteArray(s);
 
-      MemberList *ml = (MemberList *)unmarshalObjPointer(s);
-      result->append(key, ml);
+      QSharedPointer<MemberList> ml ((MemberList *)unmarshalObjPointer(s));
+      result->insert(key, ml);
    }
 
    return result;
@@ -729,8 +765,10 @@ StringMap<QSharedPointer<MemberList>> *unmarshalMemberLists(StorageIntf *s)
 Entry *unmarshalEntry(StorageIntf *s)
 {
    Entry *e = new Entry;
+
    uint header = unmarshalUInt(s);
    assert(header == HEADER);
+
    e->name             = unmarshalQByteArray(s);
    e->type             = unmarshalQByteArray(s);
    e->section          = unmarshalInt(s);
@@ -750,8 +788,10 @@ Entry *unmarshalEntry(StorageIntf *s)
    delete e->argList;
    e->argList          = unmarshalArgumentList(s);
    e->tArgLists        = unmarshalArgumentLists(s);
-   e->program          = unmarshalQGString(s);
-   e->initializer      = unmarshalQGString(s);
+
+   e->program          = unmarshalQByteArray(s);
+   e->initializer      = unmarshalQByteArray(s);
+
    e->includeFile      = unmarshalQByteArray(s);
    e->includeName      = unmarshalQByteArray(s);
    e->doc              = unmarshalQByteArray(s);
@@ -793,8 +833,10 @@ Entry *unmarshalEntry(StorageIntf *s)
 Entry *unmarshalEntryTree(StorageIntf *s)
 {
    Entry *e = unmarshalEntry(s);
+
    uint count = unmarshalUInt(s);
    uint i;
+
    for (i = 0; i < count; i++) {
       e->addSubEntry(unmarshalEntryTree(s));
    }

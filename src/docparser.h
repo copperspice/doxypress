@@ -124,7 +124,7 @@ class DocNode
                Kind_Text           = 47,
                Kind_MscFile        = 48,
                Kind_HtmlBlockQuote = 49,
-               Kind_VhdlFlow       = 50,
+            
                Kind_ParBlock       = 51,
                Kind_DiaFile        = 52
              };
@@ -1098,24 +1098,6 @@ class DocDiaFile : public CompAccept<DocDiaFile>, public DocNode
    QByteArray  m_width;
    QByteArray  m_height;
    QByteArray  m_context;
-};
-
-/** Node representing a VHDL flow chart */
-class DocVhdlFlow : public CompAccept<DocVhdlFlow>, public DocNode
-{
- public:
-   DocVhdlFlow(DocNode *parent);
-   void parse();
-   Kind kind() const    {
-      return Kind_VhdlFlow;
-   }
-   bool hasCaption()    {
-      return !m_children.isEmpty();
-   }
-   void accept(DocVisitor *v) {
-      CompAccept<DocVhdlFlow>::accept(this, v);
-   }
- private:
 };
 
 /** Node representing a link to some item */

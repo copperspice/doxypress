@@ -1564,16 +1564,19 @@ void DotNode::writeBox(FTextStream &t,
    if (m_classDef && umlLook && (gt == Inheritance || gt == Collaboration)) {
       // add names shown as relations to a dictionary, so we don't show
       // them as attributes as well
-      QHash<QString, void> arrowNames(17);
+      QHash<QString, void> arrowNames;
+
       if (m_edgeInfo) {
          // for each edge
          QListIterator<EdgeInfo> li(*m_edgeInfo);
          EdgeInfo *ei;
+
          for (li.toFirst(); (ei = li.current()); ++li) {
             if (!ei->m_label.isEmpty()) { // labels joined by \n
                int li = ei->m_label.find('\n');
                int p = 0;
                QByteArray lab;
+
                while ((li = ei->m_label.find('\n', p)) != -1) {
                   lab = stripProtectionPrefix(ei->m_label.mid(p, li - p));
                   arrowNames.insert(lab, (void *)0x8);
@@ -3080,7 +3083,7 @@ void DotInclDepGraph::buildGraph(DotNode *n, FileDef *fd, int distance)
          //printf(">>>> in=`%s' bfd=%p\n",ii->includeName.data(),bfd);
          bool doc = true, src = false;
          if (bfd) {
-            in  = bfd->absFilePath();
+            in  = bfd->absoluteFilePath();
             doc = bfd->isLinkable() && !bfd->isHidden();
             src = bfd->generateSourceFile();
          }
@@ -3183,7 +3186,7 @@ DotInclDepGraph::DotInclDepGraph(FileDef *fd, bool inverse)
                             );
    m_startNode->setDistance(0);
    m_usedNodes = new QHash<QString, DotNode>(1009);
-   m_usedNodes->insert(fd->absFilePath(), m_startNode);
+   m_usedNodes->insert(fd->absoluteFilePath(), m_startNode);
    buildGraph(m_startNode, fd, 1);
 
    static int nodes = Config_getInt("DOT_GRAPH_MAX_NODES");

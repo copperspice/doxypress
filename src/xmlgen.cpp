@@ -479,7 +479,7 @@ void writeXMLCodeBlock(FTextStream &t, FileDef *fd)
    XMLCodeGenerator *xmlGen = new XMLCodeGenerator(t);
    pIntf->parseCode(*xmlGen,  // codeOutIntf
                     0,           // scopeName
-                    fileToString(fd->absFilePath(), Config_getBool("FILTER_SOURCE_FILES")),
+                    fileToString(fd->absoluteFilePath(), Config_getBool("FILTER_SOURCE_FILES")),
                     langExt,     // lang
                     false,       // isExampleBlock
                     0,           // exampleName
@@ -498,11 +498,14 @@ static void writeMemberReference(FTextStream &t, Definition *def, MemberDef *rmd
 {
    QByteArray scope = rmd->getScopeString();
    QByteArray name = rmd->name();
+
    if (!scope.isEmpty() && scope != def->name()) {
       name.prepend(scope + getLanguageSpecificSeparator(rmd->getLanguage()));
    }
+
    t << "        <" << tagName << " refid=\"";
    t << rmd->getOutputFileBase() << "_1" << rmd->anchor() << "\"";
+
    if (rmd->getStartBodyLine() != -1 && rmd->getBodyDef()) {
       t << " compoundref=\"" << rmd->getBodyDef()->getOutputFileBase() << "\"";
       t << " startline=\"" << rmd->getStartBodyLine() << "\"";
@@ -510,6 +513,7 @@ static void writeMemberReference(FTextStream &t, Definition *def, MemberDef *rmd
          t << " endline=\"" << rmd->getEndBodyLine() << "\"";
       }
    }
+
    t << ">" << convertToXML(name) << "</" << tagName << ">" << endl;
 
 }
@@ -517,25 +521,30 @@ static void writeMemberReference(FTextStream &t, Definition *def, MemberDef *rmd
 static void stripQualifiers(QByteArray &typeStr)
 {
    bool done = false;
-   while (!done) {
-      if (typeStr.stripPrefix("static "));
-      else if (typeStr.stripPrefix("virtual "));
-      else if (typeStr.stripPrefix("volatile "));
-      else if (typeStr == "virtual") {
+
+   while (! done) {
+      if (typeStr.stripPrefix("static ")) {
+         
+
+      } else if (typeStr.stripPrefix("virtual ")) {
+         
+
+      } else if (typeStr.stripPrefix("volatile ")) {
+         
+
+      } else if (typeStr == "virtual") {
          typeStr = "";
+
       } else {
          done = true;
+
       }
    }
 }
 
 static QByteArray classOutputFileBase(ClassDef *cd)
-{
-   //static bool inlineGroupedClasses = Config_getBool("INLINE_GROUPED_CLASSES");
-   //if (inlineGroupedClasses && cd->partOfGroups()!=0)
-   return cd->getOutputFileBase();
-   //else
-   //  return cd->getOutputFileBase();
+{ 
+   return cd->getOutputFileBase();   
 }
 
 static QByteArray memberOutputFileBase(MemberDef *md)
@@ -1087,7 +1096,7 @@ static void generateXMLForMember(MemberDef *md, FTextStream &ti, FTextStream &t,
       if (md->getStartBodyLine() != -1) {
          FileDef *bodyDef = md->getBodyDef();
          if (bodyDef) {
-            t << " bodyfile=\"" << bodyDef->absFilePath() << "\"";
+            t << " bodyfile=\"" << bodyDef->absoluteFilePath() << "\"";
          }
          t << " bodystart=\"" << md->getStartBodyLine() << "\" bodyend=\""
            << md->getEndBodyLine() << "\"";
@@ -1536,7 +1545,7 @@ static void generateXMLForClass(ClassDef *cd, FTextStream &ti)
    if (cd->getStartBodyLine() != -1) {
       FileDef *bodyDef = cd->getBodyDef();
       if (bodyDef) {
-         t << " bodyfile=\"" << bodyDef->absFilePath() << "\"";
+         t << " bodyfile=\"" << bodyDef->absoluteFilePath() << "\"";
       }
       t << " bodystart=\"" << cd->getStartBodyLine() << "\" bodyend=\""
         << cd->getEndBodyLine() << "\"";

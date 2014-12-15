@@ -434,15 +434,19 @@ void Definition::addSectionsToDefinition(QList<SectionInfo> *anchorList)
    for (; (si = it.current()); ++it) {
       //printf("Add section `%s' to definition `%s'\n",
       //    si->label.data(),name().data());
+
       SectionInfo *gsi = Doxygen::sectionDict->find(si->label);
+
       //printf("===== label=%s gsi=%p\n",si->label.data(),gsi);
       if (gsi == 0) {
          gsi = new SectionInfo(*si);
          Doxygen::sectionDict->append(si->label, gsi);
       }
+
       if (m_impl->sectionDict == 0) {
-         m_impl->sectionDict = new SectionDict(17);
+         m_impl->sectionDict = new SectionDict();
       }
+
       if (m_impl->sectionDict->find(gsi->label) == 0) {
          m_impl->sectionDict->append(gsi->label, gsi);
          gsi->definition = this;
@@ -1043,7 +1047,7 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
    if (inlineSources && hasSources()) {
       QByteArray codeFragment;
       int actualStart = m_impl->body->startLine, actualEnd = m_impl->body->endLine;
-      if (readCodeFragment(m_impl->body->fileDef->absFilePath(),
+      if (readCodeFragment(m_impl->body->fileDef->absoluteFilePath(),
                            actualStart, actualEnd, codeFragment)
          ) {
          //printf("Adding code fragement '%s' ext='%s'\n",

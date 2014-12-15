@@ -181,10 +181,13 @@ static QByteArray isBlockCommand(const char *data, int offset, int size)
    if (end == 1) {
       return QByteArray();
    }
+
    QByteArray blockName;
    convertStringFragment(blockName, data + 1, end - 1);
+
    if (blockName == "code" && openBracket) {
       return "}";
+
    } else if (blockName == "dot"         ||
               blockName == "code"        ||
               blockName == "msc"         ||
@@ -194,18 +197,22 @@ static QByteArray isBlockCommand(const char *data, int offset, int size)
               blockName == "xmlonly"     ||
               blockName == "rtfonly"     ||
               blockName == "manonly"     ||
-              blockName == "docbookonly"
-             ) {
+              blockName == "docbookonly" ) {
       return "end" + blockName;
+
    } else if (blockName == "startuml") {
       return "enduml";
+
    } else if (blockName == "f" && end < size) {
       if (data[end] == '$') {
          return "f$";
+
       } else if (data[end] == '[') {
          return "f]";
+
       } else if (data[end] == '}') {
          return "f}";
+
       }
    }
    return QByteArray();
@@ -461,25 +468,34 @@ static int processHtmlTag(GrowBuf &out, const char *data, int offset, int size)
    // find the end of the html tag
    int i = 1;
    int l = 0;
+
    // compute length of the tag name
    while (i < size && isIdChar(i)) {
       i++, l++;
    }
+
    QByteArray tagName;
    convertStringFragment(tagName, data + 1, i - 1);
-   if (tagName.lower() == "pre") { // found <pre> tag
+
+   if (tagName.toLower() == "pre") { 
+      // found <pre> tag
       bool insideStr = false;
+
       while (i < size - 6) {
          char c = data[i];
-         if (!insideStr && c == '<') { // potential start of html tag
-            if (data[i + 1] == '/' &&
-                  tolower(data[i + 2]) == 'p' && tolower(data[i + 3]) == 'r' &&
+
+         if (! insideStr && c == '<') {
+            // potential start of html tag
+
+            if (data[i + 1] == '/' && tolower(data[i + 2]) == 'p' && tolower(data[i + 3]) == 'r' &&
                   tolower(data[i + 4]) == 'e' && tolower(data[i + 5]) == '>') {
+
                // found </pre> tag, copy from start to end of tag
                out.addStr(data, i + 6);
-               //printf("found <pre>..</pre> [%d..%d]\n",0,i+6);
+              
                return i + 6;
             }
+
          } else if (insideStr && c == '"') {
             if (data[i - 1] != '\\') {
                insideStr = false;
@@ -2226,7 +2242,7 @@ QByteArray processMarkdown(const QByteArray &fileName, const int lineNr, Entry *
 
 QByteArray markdownFileNameToId(const QByteArray &fileName)
 {
-   QByteArray baseFn  = stripFromPath(QFileInfo(fileName).absFilePath().toUtf8());
+   QByteArray baseFn  = stripFromPath(QFileInfo(fileName).absoluteFilePath().toUtf8());
    int i = baseFn.lastIndexOf('.');
    if (i != -1) {
       baseFn = baseFn.left(i);
@@ -2260,8 +2276,8 @@ void MarkdownFileParser::parseInput(const char *fileName,
    }
    if (!mdfileAsMainPage.isEmpty() &&
          (fn == mdfileAsMainPage || // name reference
-          QFileInfo(fileName).absFilePath() ==
-          QFileInfo(mdfileAsMainPage).absFilePath()) // file reference with path
+          QFileInfo(fileName).absoluteFilePath() ==
+          QFileInfo(mdfileAsMainPage).absoluteFilePath()) // file reference with path
       ) {
       docs.prepend("@mainpage\n");
    } else if (id == "mainpage" || id == "index") {
