@@ -76,16 +76,12 @@ MemberList::~MemberList()
 int MemberList::countInheritableMembers(ClassDef *inheritedFrom) const
 {
    int count = 0;
-   QListIterator<MemberDef> mli(*this);
-   MemberDef *md;
 
-   for (mli.toFirst(); (md = mli.current()); ++mli) {
+   for ( auto md : *this ) {
       if (md->isBriefSectionVisible()) {
-         if (md->memberType() != MemberType_Friend &&
-               md->memberType() != MemberType_EnumValue) {
-            //printf("member %s: isReimplementedBy(%s)=%d\n",md->name().data(),
-            //    inheritedFrom->name().data(),
-            //    md->isReimplementedBy(inheritedFrom));
+
+         if (md->memberType() != MemberType_Friend && md->memberType() != MemberType_EnumValue) {
+            
             if (md->memberType() == MemberType_Function) {
                if (!md->isReimplementedBy(inheritedFrom)) {
                   count++;
@@ -96,16 +92,14 @@ int MemberList::countInheritableMembers(ClassDef *inheritedFrom) const
          }
       }
    }
+
    if (memberGroupList) {
-      QListIterator<MemberGroup> mgli(*memberGroupList);
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
+   
+      for (auto mg : *memberGroupList) {
          count += mg->countInheritableMembers(inheritedFrom);
       }
    }
-   //printf("%s::countInheritableMembers(%s)=%d\n",
-   //    listTypeAsString().data(),
-   //    inheritedFrom->name().data(),count);
+ 
    return count;
 }
 
@@ -119,12 +113,11 @@ void MemberList::countDecMembers(bool countEnumValues, GroupDef *gd)
    }
 
    //printf("----- countDecMembers count=%d ----\n",count());
-   m_varCnt = m_funcCnt = m_enumCnt = m_enumValCnt = 0;
+   m_varCnt  = m_funcCnt = m_enumCnt = m_enumValCnt = 0;
    m_typeCnt = m_protoCnt = m_defCnt = m_friendCnt = 0;
    m_numDecMembers = 0;
-   QListIterator<MemberDef> mli(*this);
-   MemberDef *md;
-   for (mli.toFirst(); (md = mli.current()); ++mli) {
+
+   for (auto md : *this) {
       //printf("MemberList::countDecMembers(md=%s,%d)\n",md->name().data(),md->isBriefSectionVisible());
       if (md->isBriefSectionVisible()) {
          switch (md->memberType()) {
@@ -174,9 +167,8 @@ void MemberList::countDecMembers(bool countEnumValues, GroupDef *gd)
       }
    }
    if (memberGroupList) {
-      QListIterator<MemberGroup> mgli(*memberGroupList);
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
+     
+      for (auto mg : *memberGroupList) {
          mg->countDecMembers(gd);
          m_varCnt += mg->varCount();
          m_funcCnt += mg->funcCount();
@@ -189,9 +181,7 @@ void MemberList::countDecMembers(bool countEnumValues, GroupDef *gd)
          m_numDecMembers += mg->numDecMembers();
       }
    }
-   //printf("----- end countDecMembers ----\n");
-
-   //printf("MemberList::countDecMembers()=%d\n",m_numDecMembers);
+   
 }
 
 void MemberList::countDocMembers(bool countEnumValues)
@@ -200,9 +190,8 @@ void MemberList::countDocMembers(bool countEnumValues)
       return;   // used cached value
    }
    m_numDocMembers = 0;
-   QListIterator<MemberDef> mli(*this);
-   MemberDef *md;
-   for (mli.toFirst(); (md = mli.current()); ++mli) {
+  
+   for (auto md : *this) {
       if (md->isDetailedSectionVisible(m_inGroup, m_inFile)) {
          // do not count enum values, since they do not produce entries of their own
          if (countEnumValues || md->memberType() != MemberType_EnumValue) {
@@ -210,14 +199,14 @@ void MemberList::countDocMembers(bool countEnumValues)
          }
       }
    }
-   if (memberGroupList) {
-      QListIterator<MemberGroup> mgli(*memberGroupList);
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
+
+   if (memberGroupList) {     
+      for (auto mg : *memberGroupList) {
          mg->countDocMembers();
          m_numDocMembers += mg->numDocMembers();
       }
    }
+
    //printf("MemberList::countDocMembers()=%d memberGroupList=%p\n",m_numDocMembers,memberGroupList);
 }
 
@@ -238,10 +227,9 @@ QListIterator<MemberDef>::QListIterator<MemberDef>(const QList<MemberDef> &l) :
 
 bool MemberList::declVisible() const
 {
-   QListIterator<MemberDef> mli(*this);
-   MemberDef *md;
-   for ( ; (md = mli.current()); ++mli ) {
+   for (auto mg : *this) {
       if (md->isBriefSectionVisible()) {
+
          switch (md->memberType()) {
             case MemberType_Define:    // fall through
             case MemberType_Typedef:   // fall through
@@ -293,31 +281,24 @@ bool MemberList::declVisible() const
    return false;
 }
 
-void MemberList::writePlainDeclarations(OutputList &ol,
-                                        ClassDef *cd, NamespaceDef *nd, FileDef *fd,
-                                        GroupDef *gd, ClassDef *inheritedFrom, const char *inheritId
-                                       )
+void MemberList::writePlainDeclarations(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd,
+                                        GroupDef *gd, ClassDef *inheritedFrom, const char *inheritId )
 {
-   //printf("----- writePlainDeclaration() ----\n");
    countDecMembers();
+
    if (numDecMembers() == 0) {
-      //printf("  --> no members!\n");
-      return; // no members in this list
+      // no members in this list
+      return; 
    }
-   //printf("  --> writePlainDeclaration() numDecMembers()=%d\n",
-   //    numDecMembers());
 
    ol.pushGeneratorState();
 
    bool first = true;
-   MemberDef *md;
-   QListIterator<MemberDef> mli(*this);
-   for ( ; (md = mli.current()); ++mli ) {
-      //printf(">>> Member `%s' type=%d visible=%d\n",
-      //    md->name().data(),md->memberType(),md->isBriefSectionVisible());
-      if ((inheritedFrom == 0 || !md->isReimplementedBy(inheritedFrom)) &&
-            md->isBriefSectionVisible()) {
-         //printf(">>> rendering\n");
+ 
+   for (auto md : *this) {
+
+      if ((inheritedFrom == 0 || !md->isReimplementedBy(inheritedFrom)) && md->isBriefSectionVisible()) {
+         
          switch (md->memberType()) {
             case MemberType_Define:    // fall through
             //case MemberType_Prototype: // fall through

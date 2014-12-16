@@ -61,13 +61,17 @@ class MemberNameSDict : public StringMap<QSharedPointer<MemberName>>
 struct MemberInfo {
    MemberInfo(MemberDef *md, Protection p, Specifier v, bool inh) :
       memberDef(md), prot(p), virt(v), inherited(inh), ambigClass(0) {}
+
    ~MemberInfo() {}
+
    MemberDef *memberDef;
    Protection prot;
    Specifier  virt;
-   bool       inherited;
+
+   bool         inherited;
    QByteArray   scopePath;
    QByteArray   ambiguityResolutionScope;
+
    ClassDef  *ambigClass;
 };
 
@@ -77,9 +81,11 @@ class MemberNameInfo : public QList<MemberInfo>
  public:
    MemberNameInfo(const char *name);
    ~MemberNameInfo() {}
+
    const char *memberName() const {
       return name;
    }
+
  private:
    int compareValues(const MemberInfo *item1, const MemberInfo *item2) const;
    QByteArray name;

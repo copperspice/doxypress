@@ -94,7 +94,7 @@ static QByteArray             g_relPath;
 
 static bool                   g_hasParamCommand;
 static bool                   g_hasReturnCommand;
-static QHash<QString, void>   g_paramsFound;
+static QHash<QString, void *> g_paramsFound;
 static MemberDef             *g_memberDef;
 static bool                   g_isExample;
 static QByteArray             g_exampleName;
@@ -126,7 +126,7 @@ struct DocParserContext {
 
    MemberDef *memberDef;
 
-   QHash<QString, void>  paramsFound;
+   QHash<QString, void *>  paramsFound;
 
    bool isExample;
    QByteArray   exampleName;
@@ -146,42 +146,41 @@ static QStack<DocParserContext> g_parserStack;
 //---------------------------------------------------------------------------
 
 static void docParserPushContext(bool saveParamInfo = true)
-{
-   //QByteArray indent;
-   //indent.fill(' ',g_parserStack.count()*2+2);
-   //printf("%sdocParserPushContext() count=%d\n",indent.data(),g_nodeStack.count());
-
+{  
    doctokenizerYYpushContext();
-   DocParserContext *ctx   = new DocParserContext;
-   ctx->scope              = g_scope;
-   ctx->context            = g_context;
-   ctx->inSeeBlock         = g_inSeeBlock;
-   ctx->xmlComment         = g_xmlComment;
-   ctx->insideHtmlLink     = g_insideHtmlLink;
-   ctx->nodeStack          = g_nodeStack;
-   ctx->styleStack         = g_styleStack;
-   ctx->initialStyleStack  = g_initialStyleStack;
-   ctx->copyStack          = g_copyStack;
-   ctx->fileName           = g_fileName;
-   ctx->relPath            = g_relPath;
+
+   DocParserContext ctx;
+
+   ctx.scope              = g_scope;
+   ctx.context            = g_context;
+   ctx.inSeeBlock         = g_inSeeBlock;
+   ctx.xmlComment         = g_xmlComment;
+   ctx.insideHtmlLink     = g_insideHtmlLink;
+   ctx.nodeStack          = g_nodeStack;
+   ctx.styleStack         = g_styleStack;
+   ctx.initialStyleStack  = g_initialStyleStack;
+   ctx.copyStack          = g_copyStack;
+   ctx.fileName           = g_fileName;
+   ctx.relPath            = g_relPath;
 
    if (saveParamInfo) {
-      ctx->hasParamCommand    = g_hasParamCommand;
-      ctx->hasReturnCommand   = g_hasReturnCommand;
-      ctx->paramsFound        = g_paramsFound;
+      ctx.hasParamCommand    = g_hasParamCommand;
+      ctx.hasReturnCommand   = g_hasReturnCommand;
+      ctx.paramsFound        = g_paramsFound;
    }
 
-   ctx->memberDef          = g_memberDef;
-   ctx->isExample          = g_isExample;
-   ctx->exampleName        = g_exampleName;
-   ctx->sectionDict        = g_sectionDict;
-   ctx->searchUrl          = g_searchUrl;
+   ctx.memberDef          = g_memberDef;
+   ctx.isExample          = g_isExample;
+   ctx.exampleName        = g_exampleName;
+   ctx.sectionDict        = g_sectionDict;
+   ctx.searchUrl          = g_searchUrl;
 
-   ctx->includeFileText    = g_includeFileText;
-   ctx->includeFileOffset  = g_includeFileOffset;
-   ctx->includeFileLength  = g_includeFileLength;
+   ctx.includeFileText    = g_includeFileText;
+   ctx.includeFileOffset  = g_includeFileOffset;
+   ctx.includeFileLength  = g_includeFileLength;
 
-   ctx->token              = g_token;
+   ctx.token              = g_token;
+
    g_token = new TokenInfo;
 
    g_parserStack.push(ctx);
@@ -189,43 +188,39 @@ static void docParserPushContext(bool saveParamInfo = true)
 
 static void docParserPopContext(bool keepParamInfo = false)
 {
-   DocParserContext *ctx = g_parserStack.pop();
-   g_scope               = ctx->scope;
-   g_context             = ctx->context;
-   g_inSeeBlock          = ctx->inSeeBlock;
-   g_xmlComment          = ctx->xmlComment;
-   g_insideHtmlLink      = ctx->insideHtmlLink;
-   g_nodeStack           = ctx->nodeStack;
-   g_styleStack          = ctx->styleStack;
-   g_initialStyleStack   = ctx->initialStyleStack;
-   g_copyStack           = ctx->copyStack;
-   g_fileName            = ctx->fileName;
-   g_relPath             = ctx->relPath;
+   DocParserContext ctx = g_parserStack.pop();
+
+   g_scope               = ctx.scope;
+   g_context             = ctx.context;
+   g_inSeeBlock          = ctx.inSeeBlock;
+   g_xmlComment          = ctx.xmlComment;
+   g_insideHtmlLink      = ctx.insideHtmlLink;
+   g_nodeStack           = ctx.nodeStack;
+   g_styleStack          = ctx.styleStack;
+   g_initialStyleStack   = ctx.initialStyleStack;
+   g_copyStack           = ctx.copyStack;
+   g_fileName            = ctx.fileName;
+   g_relPath             = ctx.relPath;
 
    if (!keepParamInfo) {
-      g_hasParamCommand     = ctx->hasParamCommand;
-      g_hasReturnCommand    = ctx->hasReturnCommand;
-      g_paramsFound         = ctx->paramsFound;
+      g_hasParamCommand     = ctx.hasParamCommand;
+      g_hasReturnCommand    = ctx.hasReturnCommand;
+      g_paramsFound         = ctx.paramsFound;
    }
-   g_memberDef           = ctx->memberDef;
-   g_isExample           = ctx->isExample;
-   g_exampleName         = ctx->exampleName;
-   g_sectionDict         = ctx->sectionDict;
-   g_searchUrl           = ctx->searchUrl;
+   g_memberDef           = ctx.memberDef;
+   g_isExample           = ctx.isExample;
+   g_exampleName         = ctx.exampleName;
+   g_sectionDict         = ctx.sectionDict;
+   g_searchUrl           = ctx.searchUrl;
 
-   g_includeFileText     = ctx->includeFileText;
-   g_includeFileOffset   = ctx->includeFileOffset;
-   g_includeFileLength   = ctx->includeFileLength;
+   g_includeFileText     = ctx.includeFileText;
+   g_includeFileOffset   = ctx.includeFileOffset;
+   g_includeFileLength   = ctx.includeFileLength;
 
    delete g_token;
-   g_token               = ctx->token;
-
-   delete ctx;
-   doctokenizerYYpopContext();
-
-   //QByteArray indent;
-   //indent.fill(' ',g_parserStack.count()*2+2);
-   //printf("%sdocParserPopContext() count=%d\n",indent.data(),g_nodeStack.count());
+   g_token               = ctx.token;
+  
+   doctokenizerYYpopContext();   
 }
 
 //---------------------------------------------------------------------------
@@ -239,18 +234,23 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
    QByteArray result;
    bool ambig;
    FileDef *fd;
+
    //printf("Search for %s\n",fileName);
+
    if ((fd = findFileDef(Doxygen::imageNameDict, fileName, ambig))) {
       QByteArray inputFile = fd->absoluteFilePath();
       QFile inImage(inputFile);
+
       if (inImage.open(QIODevice::ReadOnly)) {
          result = fileName;
          int i;
+
          if ((i = result.lastIndexOf('/')) != -1 || (i = result.lastIndexOf('\\')) != -1) {
             result = result.right(result.length() - i - 1);
          }
-         //printf("fileName=%s result=%s\n",fileName,result.data());
+         
          QByteArray outputDir;
+
          switch (type) {
             case DocImage::Html:
                if (!Config_getBool("GENERATE_HTML")) {
@@ -277,19 +277,22 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
                outputDir = Config_getString("RTF_OUTPUT");
                break;
          }
+
          QByteArray outputFile = outputDir + "/" + result;
          QFileInfo outfi(outputFile);
+
          if (outfi.isSymLink()) {
             QFile::remove(outputFile);
-            warn_doc_error(g_fileName, doctokenizerYYlineno,
-                           "destination of image %s is a symlink, replacing with image",
-                           qPrint(outputFile));
+
+            warn_doc_error(g_fileName, doctokenizerYYlineno, "destination of image %s is a symlink, replacing with image", qPrint(outputFile));
          }
 
-         if (outputFile != inputFile) { // prevent copying to ourself
+         if (outputFile != inputFile) { 
+            // prevent copying to ourself
             QFile outImage(outputFile.data());
 
-            if (outImage.open(QIODevice::WriteOnly)) { // copy the image
+            if (outImage.open(QIODevice::WriteOnly)) { 
+               // copy the image
                char *buffer = new char[inImage.size()];
                inImage.read(buffer, inImage.size());
 
@@ -301,13 +304,14 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
                if (type == DocImage::Html) {
                   Doxygen::indexList->addImageFile(result);
                }
+
             } else {
-               warn_doc_error(g_fileName, doctokenizerYYlineno,
-                              "could not write output image %s", qPrint(outputFile));
+               warn_doc_error(g_fileName, doctokenizerYYlineno, "could not write output image %s", qPrint(outputFile));
             }
          } else {
             printf("Source & Destination are the same!\n");
          }
+
       } else {
          warn_doc_error(g_fileName, doctokenizerYYlineno, "could not open image %s", qPrint(fileName));
       }
@@ -342,11 +346,10 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
 
    } else {
       result = fileName;
+
       if (result.left(5) != "http:" && result.left(6) != "https:") {
-         warn_doc_error(g_fileName, doctokenizerYYlineno,
-                        "image file %s is not found in IMAGE_PATH: "
-                        "assuming external image.", qPrint(fileName)
-                       );
+         warn_doc_error(g_fileName, doctokenizerYYlineno, "image file %s is not found in IMAGE_PATH: "
+                        "assuming external image.", qPrint(fileName) );
       }
    }
    return result;
@@ -363,34 +366,43 @@ static void checkArgumentName(const QByteArray &name, bool isParam)
    if (!Config_getBool("WARN_IF_DOC_ERROR")) {
       return;
    }
+
    if (g_memberDef == 0) {
-      return;   // not a member
+      return; 
    }
-   ArgumentList *al = g_memberDef->isDocsForDefinition() ?
-                      g_memberDef->argumentList() :
-                      g_memberDef->declArgumentList();
+
+   ArgumentList *al = g_memberDef->isDocsForDefinition() ? g_memberDef->argumentList() : g_memberDef->declArgumentList();
    SrcLangExt lang = g_memberDef->getLanguage();
-   //printf("isDocsForDefinition()=%d\n",g_memberDef->isDocsForDefinition());
+ 
    if (al == 0) {
-      return;   // no argument list
+      return;  
    }
 
    static QRegExp re("$?[a-zA-Z0-9_\\x80-\\xFF]+\\.*");
-   int p = 0, i = 0, l;
-   while ((i = re.match(name, p, &l)) != -1) { // to handle @param x,y
+   int p = 0;
+   int i = 0;
+   int l;
+
+   while ((i = re.match(name, p, &l)) != -1) { 
+      // to handle @param x,y
       QByteArray aName = name.mid(i, l);
+
       if (lang == SrcLangExt_Fortran) {
          aName = aName.lower();
       }
-      //printf("aName=`%s'\n",aName.data());
+      
       ArgumentListIterator ali(*al);
       Argument *a;
+
       bool found = false;
+
       for (ali.toFirst(); (a = ali.current()); ++ali) {
          QByteArray argName = g_memberDef->isDefine() ? a->type : a->name;
+
          if (lang == SrcLangExt_Fortran) {
             argName = argName.lower();
          }
+
          argName = argName.trimmed();
          //printf("argName=`%s' aName=%s\n",argName.data(),aName.data());
          if (argName.right(3) == "...") {

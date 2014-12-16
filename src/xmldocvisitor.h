@@ -144,8 +144,7 @@ class XmlDocVisitor : public DocVisitor
    //--------------------------------------
 
    void filter(const char *str);
-   void startLink(const QByteArray &ref, const QByteArray &file,
-                  const QByteArray &anchor);
+   void startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor);
    void endLink();
 
    void pushEnabled();
@@ -157,8 +156,10 @@ class XmlDocVisitor : public DocVisitor
 
    FTextStream &m_t;
    CodeOutputInterface &m_ci;
+
    bool m_insidePre;
    bool m_hide;
+
    QStack<bool> m_enabled;
    QByteArray m_langExt;
 };

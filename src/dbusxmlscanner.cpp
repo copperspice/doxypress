@@ -18,20 +18,18 @@
 
 #include <QFile>
 #include <QString>
-#include <QXmlDefaultHandler>
 #include <QXmlAttributes>
+#include <QXmlDefaultHandler>
 #include <QXmlLocator>
+#include <QXmlSimpleReader>
 
-#include <dbusxmlscanner.h>
+#include <arguments.h>
 #include <commentscan.h>
+#include <dbusxmlscanner.h>
 #include <entry.h>
 #include <message.h>
 #include <util.h>
-#include <arguments.h>
 
-// -----------------------------------------------------------------------
-// Convenience defines:
-// -----------------------------------------------------------------------
 
 #define CONDITION(cond, msg) \
     do {\
@@ -59,31 +57,43 @@
 #define DBUS(name) isDBusElement(namespaceURI, localName, qName, name)
 #define EXTENSION(name) isExtensionElement(namespaceURI, localName, qName, name)
 
-// -----------------------------------------------------------------------
-// DBusXMLHandler class
-// -----------------------------------------------------------------------
-
 const QString EXTENSION_URI("http://psiamp.org/dtd/doxygen_dbusxml.dtd");
+
+class DBusXmlLocator : public QXmlLocator
+{
+   public:
+      DBusXmlLocator(QXmlSimpleReader *reader)
+      { 
+         m_reader = reader;
+      }
+     
+      int columnNumber() const override {
+         // BROOM - fix this   return ( m_reader->columnNr == -1 ? -1  : m_reader->columnNr + 1 );
+         return 0;
+      }
+     
+      int lineNumber() const override {
+         // BROOM - fix this   return ( m_reader->lineNr == -1 ? -1  : m_reader->lineNr + 1 );
+         return 0;
+      }
+
+    private:
+      QXmlSimpleReader *m_reader;
+
+};
+
 
 /** DBus implementation of the generic QXmlDefaultHandler. */
 class DBusXMLHandler : public QXmlDefaultHandler
 {
  public:
    DBusXMLHandler(ParserInterface *parser, QXmlSimpleReader *reader, const char *file_name, Entry *root) :
-      m_parser(parser),
-      m_locator(reader),
-      m_currentEntry(0),
-      m_currentInterface(0),
-      m_currentMethod(0),
-      m_currentArgument(0),
-      m_currentProperty(0),
-      m_currentEnum(0),
-      m_fileName(file_name),
-      m_currentComment(0) {
-      setDocumentLocator(&m_locator);
+      m_parser(parser), m_locator(reader), m_currentEntry(0), m_currentInterface(0), m_currentMethod(0),
+      m_currentArgument(0), m_currentProperty(0), m_currentEnum(0), m_fileName(file_name), m_currentComment(0) 
+   {
 
+      setDocumentLocator(&m_locator); 
       m_scopeCount = 0;
-
       openScopes(root);
    }
 
@@ -97,7 +107,7 @@ class DBusXMLHandler : public QXmlDefaultHandler
 
    bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &attributes) {
       // add to elements stack:
-      m_elementStack.append(new ElementData(qName.toUtf8()));
+      m_elementStack.append(ElementData(qName.toUtf8()));
 
       // First we need a node.
       if (DBUS("node")) {
@@ -239,7 +249,7 @@ class DBusXMLHandler : public QXmlDefaultHandler
          COND_DOC_ERROR(idx < 0, "Anonymous namespace found.");
 
          m_namespaceStack.append(openNamespace(attributes.value(idx)));
-         openScopes(m_namespaceStack.getLast());
+         openScopes(m_namespaceStack.last());
       }
 
       if (EXTENSION("struct")) {
@@ -259,7 +269,7 @@ class DBusXMLHandler : public QXmlDefaultHandler
 
          current_struct->type = current_struct->name + " struct";
 
-         m_structStack.append(new StructData(current_struct));
+         m_structStack.append(StructData(current_struct));
       }
 
       if (EXTENSION("member")) {
@@ -276,7 +286,7 @@ class DBusXMLHandler : public QXmlDefaultHandler
          m_currentEntry->type = getType(attributes).toUtf8();
 
          QString type(getDBusType(m_currentEntry->type));
-         m_structStack.getLast()->type.append(type.toUtf8());
+         m_structStack.last().type.append(type.toUtf8());
       }
 
       if (EXTENSION("enum") || EXTENSION("flagset")) {
@@ -333,8 +343,8 @@ class DBusXMLHandler : public QXmlDefaultHandler
       // Since we made sure to get the elements in the proper order when
       // adding we do not need to do so again here.
 
-      COND_DOC_ERROR(m_elementStack.getLast()->element != qName.toUtf8(),
-                     QString("Malformed XML: Unexpected closing element found.").arg(m_elementStack.getLast()->element).toUtf8());
+      COND_DOC_ERROR(m_elementStack.last().element != qName.toUtf8(),
+                     QString("Malformed XML: Unexpected closing element found.").arg(m_elementStack.last().element).toUtf8());
 
       m_elementStack.removeLast();
 
@@ -368,12 +378,12 @@ class DBusXMLHandler : public QXmlDefaultHandler
       if (DBUS("arg")) {
          CONDITION(!m_currentMethod, "end of arg found outside method.");
 
-         m_currentMethod->argList->append(m_currentArgument);
+         m_currentMethod->argList->append(* m_currentArgument);
          m_currentArgument = 0;
       }
 
       if (EXTENSION("namespace")) {
-         Entry *current = m_namespaceStack.getLast();
+         Entry *current = m_namespaceStack.last();
          CONDITION(!current, "end of namespace without start.");
 
          m_namespaceStack.removeLast();
@@ -383,7 +393,7 @@ class DBusXMLHandler : public QXmlDefaultHandler
       }
 
       if (EXTENSION("struct")) {
-         StructData *data = m_structStack.getLast();
+         StructData *data = m_structStack.last();
          CONDITION(!data, "end of struct without start.");
 
          data->entry->endBodyLine = lineNumber();
@@ -401,7 +411,7 @@ class DBusXMLHandler : public QXmlDefaultHandler
       }
 
       if (EXTENSION("member")) {
-         StructData *data = m_structStack.getLast();
+         StructData *data = m_structStack.last();
          CONDITION(!data, "end of member outside struct.");
 
          data->entry->addSubEntry(m_currentEntry);
@@ -509,18 +519,12 @@ class DBusXMLHandler : public QXmlDefaultHandler
    }
 
  private:
-   bool isDBusElement(const QString &namespaceURI,
-                      const QString &localName,
-                      const QString &qName,
-                      const QString &element) {
+   bool isDBusElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QString &element) {
       return (namespaceURI.isEmpty() && localName == element && qName == element) ||
              (namespaceURI.isEmpty() && localName.isEmpty() && qName == element);
    }
 
-   bool isExtensionElement(const QString &namespaceURI,
-                           const QString &localName,
-                           const QString &qName,
-                           const QString &element) {
+   bool isExtensionElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QString &element) {
       (void)qName;
 
       return namespaceURI == EXTENSION_URI && localName == element;
@@ -722,7 +726,7 @@ class DBusXMLHandler : public QXmlDefaultHandler
 
    ParserInterface *m_parser;
 
-   QXmlLocator m_locator;
+   DBusXmlLocator m_locator;
    QByteArray m_currentNode; // Nodes can not be nested, no entry necessary.
 
    struct ElementData {
@@ -734,16 +738,19 @@ class DBusXMLHandler : public QXmlDefaultHandler
       QByteArray element;  // The element name
       QByteArray text;     // The actual xml code.
    };
+
    QList<ElementData> m_elementStack;
 
-   Entry *m_currentEntry;  // The currently open entry.
+   Entry *m_currentEntry;          // The currently open entry.
+   Entry *m_currentInterface;      // Interfaces can not be nested.
+   Entry *m_currentMethod;         // Methods can not be nested.
 
-   Entry *m_currentInterface;  // Interfaces can not be nested.
-   Entry *m_currentMethod;  // Methods can not be nested.
-   Argument *m_currentArgument;  // Arguments can not be nested.
-   Entry *m_currentProperty;  // Properties can not be nested.
-   Entry *m_currentEnum;  // Enums can not be nested.
-   QList<Entry> m_namespaceStack;
+   Argument *m_currentArgument;    // Arguments can not be nested.
+
+   Entry *m_currentProperty;       // Properties can not be nested.
+   Entry *m_currentEnum;           // Enums can not be nested.
+
+   QList<Entry *> m_namespaceStack;
 
    struct StructData {
       StructData(Entry *e) : entry(e) { }

@@ -28,17 +28,15 @@ class LatexGenerator : public OutputGenerator
  public:
    LatexGenerator();
    ~LatexGenerator();
+
    static void init();
    static void writeStyleSheetFile(QFile &f);
    static void writeHeaderFile(QFile &f);
    static void writeFooterFile(QFile &f);
-
-   //OutputGenerator *copy();
-   //OutputGenerator *clone() { return new LatexGenerator(*this); }
-   //void append(const OutputGenerator *o);
+ 
    void enable() {
-      if (genStack->top()) {
-         active = *genStack->top();
+      if (genStack.top()) {
+         active = genStack.top();
       } else {
          active = true;
       }

@@ -477,8 +477,8 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
    int numMembers = 0;
 
    for (auto ml : cd->getMemberLists()) {
-      if ((ml->listType()&MemberListType_detailedLists) == 0) {
-         numMembers += ml->count();
+      if ((ml.listType()&MemberListType_detailedLists) == 0) {
+         numMembers += ml.count();
       }
    }
 
@@ -539,11 +539,8 @@ void generateDEFSection(Definition *d, FTextStream &t, MemberList *ml, const cha
 {
    if (ml && ml->count() > 0) {
       t << "    " << kind << " = {" << endl;
-
-      QListIterator<MemberDef> mli(*ml);
-      MemberDef *md;
-
-      for (mli.toFirst(); (md = mli.current()); ++mli) {
+     
+      for (auto md : *ml) {
          generateDEFForMember(md, t, d, kind);
       }
 
@@ -661,24 +658,22 @@ void generateDEF()
       err("Cannot open file %s for writing!\n", fileName.data());
       return;
    }
+
    FTextStream t(&f);
    t << "AutoGen Definitions dummy;" << endl;
 
-   if (Doxygen::classSDict->count() + Doxygen::inputNameList->count() > 0) {
-      ClassSDict::Iterator cli(*Doxygen::classSDict);
-      ClassDef *cd;
-
-      for (cli.toFirst(); (cd = cli.current()); ++cli) {
-         generateDEFForClass(cd, t);
+   if (Doxygen::classSDict->count() + Doxygen::inputNameList->count() > 0) {     
+      for (auto cd : *Doxygen::classSDict) {
+         // BROOM, passing raw pointer
+         generateDEFForClass(cd.data(), t);
       }
      
-      for (auto fn : *Doxygen::inputNameList ) {
-         FileNameIterator fni(*fn);
-         FileDef *fd;
-         for (; (fd = fni.current()); ++fni) {
+      for (auto fn : *Doxygen::inputNameList ) {         
+         for (auto fd : *fn) {
             generateDEFForFile(fd, t);
          }
       }
+
    } else {
       t << "dummy_value = true;" << endl;
    }

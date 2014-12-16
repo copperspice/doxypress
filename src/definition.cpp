@@ -222,30 +222,31 @@ void Definition::addToMap(const char *name, Definition *d)
    QByteArray symbolName = name;
    int index = computeQualifiedIndex(symbolName);
 
-   if (!vhdlOpt && index != -1) {
+   if (! vhdlOpt && index != -1) {
       symbolName = symbolName.mid(index + 2);
    }
 
-   if (!symbolName.isEmpty()) {
-      //printf("******* adding symbol `%s' (%p)\n",symbolName.data(),d);
+   if (! symbolName.isEmpty()) {     
       DefinitionIntf *di = Doxygen::symbolMap->find(symbolName);
 
-      if (di == 0) { // new Symbol
-         //printf("  new symbol!\n");
+      if (di == 0) { 
+         // new Symbol         
          Doxygen::symbolMap->insert(symbolName, d);
 
       } else {
          // existing symbol
         
-         if (di->definitionType() == DefinitionIntf::TypeSymbolList) { // already multiple symbols
-            //printf("adding to exiting list\n");
+         if (di->definitionType() == DefinitionIntf::TypeSymbolList) { 
+            // already multiple symbols
             DefinitionList *dl = (DefinitionList *)di;
             dl->append(d);
 
-         } else { // going from one to two symbols
+         } else { 
+            // going from one to two symbols
             Doxygen::symbolMap->take(symbolName);
+
             DefinitionList *dl = new DefinitionList;
-            //printf("replacing symbol by list %p with elements %p and %p\n",dl,di,d);
+          
             dl->append((Definition *)di);
             dl->append(d);
             Doxygen::symbolMap->insert(symbolName, dl);

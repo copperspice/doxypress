@@ -267,58 +267,57 @@ void XmlDocVisitor::visit(DocInclude *inc)
    if (m_hide) {
       return;
    }
+
    SrcLangExt langExt = getLanguageFromFileName(inc->extension());
+
    switch (inc->type()) {
       case DocInclude::IncWithLines: {
          m_t << "<programlisting>";
+
          QFileInfo cfi( inc->file() );
-         FileDef fd( cfi.dirPath().toUtf8(), cfi.fileName().toUtf8() );
-         Doxygen::parserManager->getParser(inc->extension())
-         ->parseCode(m_ci, inc->context(),
-                     inc->text(),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile(), &fd);
+         FileDef fd( cfi.dir().path().toUtf8(), cfi.fileName().toUtf8() );
+
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                     inc->text(), langExt, inc->isExample(), inc->exampleFile(), &fd); 
+
          m_t << "</programlisting>";
       }
       break;
+
       case DocInclude::Include:
          m_t << "<programlisting>";
-         Doxygen::parserManager->getParser(inc->extension())
-         ->parseCode(m_ci, inc->context(),
-                     inc->text(),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile());
+
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(),
+                     langExt, inc->isExample(), inc->exampleFile());
+
          m_t << "</programlisting>";
          break;
+
       case DocInclude::DontInclude:
          break;
+
       case DocInclude::HtmlInclude:
          m_t << "<htmlonly>";
          filter(inc->text());
          m_t << "</htmlonly>";
          break;
+
       case DocInclude::LatexInclude:
          m_t << "<latexonly>";
          filter(inc->text());
          m_t << "</latexonly>";
          break;
+
       case DocInclude::VerbInclude:
          m_t << "<verbatim>";
          filter(inc->text());
          m_t << "</verbatim>";
          break;
+
       case DocInclude::Snippet:
          m_t << "<programlisting>";
-         Doxygen::parserManager->getParser(inc->extension())
-         ->parseCode(m_ci,
-                     inc->context(),
-                     extractBlock(inc->text(), inc->blockId()),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile()
-                    );
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
+                     langExt, inc->isExample(), inc->exampleFile() );
          m_t << "</programlisting>";
          break;
    }
@@ -826,7 +825,9 @@ void XmlDocVisitor::visitPre(DocImage *img)
    if (m_hide) {
       return;
    }
+
    m_t << "<image type=\"";
+
    switch (img->type()) {
       case DocImage::Html:
          m_t << "html";
@@ -862,9 +863,10 @@ void XmlDocVisitor::visitPre(DocImage *img)
 
    // copy the image to the output dir
    QFile inImage(img->name());
-   QFile outImage(Config_getString("XML_OUTPUT") + "/" + baseName.data());
+   QFile outImage(Config_getString("XML_OUTPUT") + "/" + baseName);
 
    if (inImage.open(QIODevice::ReadOnly)) {
+
       if (outImage.open(QIODevice::WriteOnly)) {
          char *buffer = new char[inImage.size()];
          inImage.read(buffer, inImage.size());
@@ -1054,29 +1056,32 @@ void XmlDocVisitor::visitPre(DocParamList *pl)
    if (m_hide) {
       return;
    }
+
    m_t << "<parameteritem>" << endl;
    m_t << "<parameternamelist>" << endl;
-   //QStringListIterator li(pl->parameters());
-   //const char *s;
-   QListIterator<DocNode> li(pl->parameters());
-   DocNode *param;
-   for (li.toFirst(); (param = li.current()); ++li) {
+
+   for (auto param : pl->parameters()) {
+
       if (pl->paramTypes().count() > 0) {
-         QListIterator<DocNode> li(pl->paramTypes());
-         DocNode *type;
-         for (li.toFirst(); (type = li.current()); ++li) {
+        
+         for (auto type : pl->paramTypes()) {
             m_t << "<parametertype>";
+
             if (type->kind() == DocNode::Kind_Word) {
                visit((DocWord *)type);
             } else if (type->kind() == DocNode::Kind_LinkedWord) {
                visit((DocLinkedWord *)type);
             }
+
             m_t << "</parametertype>" << endl;
          }
       }
+
       m_t << "<parametername";
+
       if (pl->direction() != DocParamSect::Unspecified) {
          m_t << " direction=\"";
+
          if (pl->direction() == DocParamSect::In) {
             m_t << "in";
          } else if (pl->direction() == DocParamSect::Out) {
@@ -1086,6 +1091,7 @@ void XmlDocVisitor::visitPre(DocParamList *pl)
          }
          m_t << "\"";
       }
+
       m_t << ">";
       if (param->kind() == DocNode::Kind_Word) {
          visit((DocWord *)param);
@@ -1094,6 +1100,7 @@ void XmlDocVisitor::visitPre(DocParamList *pl)
       }
       m_t << "</parametername>" << endl;
    }
+
    m_t << "</parameternamelist>" << endl;
    m_t << "<parameterdescription>" << endl;
 }
@@ -1103,6 +1110,7 @@ void XmlDocVisitor::visitPost(DocParamList *)
    if (m_hide) {
       return;
    }
+
    m_t << "</parameterdescription>" << endl;
    m_t << "</parameteritem>" << endl;
 }
@@ -1219,15 +1227,19 @@ void XmlDocVisitor::startLink(const QByteArray &ref, const QByteArray &file, con
 {
    //printf("XmlDocVisitor: file=%s anchor=%s\n",file.data(),anchor.data());
    m_t << "<ref refid=\"" << file;
+
    if (!anchor.isEmpty()) {
       m_t << "_1" << anchor;
    }
+
    m_t << "\" kindref=\"";
+
    if (!anchor.isEmpty()) {
       m_t << "member";
    } else {
       m_t << "compound";
    }
+
    m_t << "\"";
    if (!ref.isEmpty()) {
       m_t << " external=\"" << ref << "\"";
@@ -1242,15 +1254,12 @@ void XmlDocVisitor::endLink()
 
 void XmlDocVisitor::pushEnabled()
 {
-   m_enabled.push(new bool(m_hide));
+   m_enabled.push(m_hide);
 }
 
 void XmlDocVisitor::popEnabled()
 {
-   bool *v = m_enabled.pop();
-   assert(v != 0);
-
-   m_hide = *v;
-   delete v;
+   bool v = m_enabled.pop();
+   m_hide = v;   
 }
 

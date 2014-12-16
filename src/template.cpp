@@ -3409,32 +3409,36 @@ class TemplateNodeIndexEntry : public TemplateNodeCreator<TemplateNodeIndexEntry
 {
    struct Mapping {
       Mapping(const QByteArray &n, ExprAst *e) : name(n), value(e) {}
+
       ~Mapping() {
          delete value;
       }
+
       QByteArray name;
       ExprAst *value;
    };
+
  public:
    TemplateNodeIndexEntry(TemplateParser *parser, TemplateNode *parent, int line, const QByteArray &data)
       : TemplateNodeCreator<TemplateNodeIndexEntry>(parser, parent, line) {
-      TRACE(("{TemplateNodeIndexEntry(%s)\n", data.data()));
-
-      // CS BROOM m_args.setAutoDelete(true);
+      TRACE(("{TemplateNodeIndexEntry(%s)\n", data.data()));    
 
       ExpressionParser expParser(parser, line);
       QList<QByteArray> args = split(data, " ");
-      QListIterator<QByteArray> it = args.begin();
 
-      if (it == args.end() || (*it).find('=') != -1) {
+      QList<QByteArray>::iterator it = args.begin();
+
+      if (it == args.end() || it->indexOf('=') != -1) {
          parser->warn(parser->templateName(), line, "Missing name for indexentry tag");
 
       } else {
          m_name = *it;
          ++it;
+
          while (it != args.end()) {
             QByteArray arg = *it;
             int j = arg.find('=');
+
             if (j > 0) {
                ExprAst *expr = expParser.parse(arg.mid(j + 1));
                if (expr) {

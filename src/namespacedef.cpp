@@ -15,22 +15,21 @@
  *
 *************************************************************************/
 
+#include <config.h>
+#include <classdef.h>
+#include <classlist.h>
+#include <docparser.h>
+#include <doxygen.h>
+#include <language.h>
+#include <layout.h>
+#include <memberlist.h>
+#include <message.h>
+#include <searchindex.h>
+#include <membergroup.h>
 #include <namespacedef.h>
 #include <outputlist.h>
 #include <util.h>
-#include <language.h>
-#include <classdef.h>
-#include <classlist.h>
-#include <memberlist.h>
-#include <doxygen.h>
-#include <message.h>
-#include <docparser.h>
-#include <searchindex.h>
-#include <layout.h>
-#include <membergroup.h>
-#include <config.h>
 
-//------------------------------------------------------------------
 
 NamespaceDef::NamespaceDef(const char *df, int dl, int dc, const char *name, const char *lref,
                            const char *fName, const char *type, bool isPublished) :

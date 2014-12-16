@@ -58,6 +58,7 @@ Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
 
 
 Doxygen_SOURCES = \
+   src/doxygen.cpp \
    src/arguments.cpp \
    src/cite.cpp \
    src/clangparser.cpp \
@@ -67,7 +68,6 @@ Doxygen_SOURCES = \
    src/condparser.cpp \
    src/context.cpp \
    src/cppvalue.cpp \
-   src/dbusxmlscanner.cpp \
    src/debug.cpp \
    src/defgen.cpp \
    src/define.cpp \
@@ -75,12 +75,9 @@ Doxygen_SOURCES = \
    src/dia.cpp \
    src/diagram.cpp \
    src/dirdef.cpp \
-   src/docbookgen.cpp \
-   src/docbookvisitor.cpp \
    src/docparser.cpp \
    src/docsets.cpp \
    src/dot.cpp \
-   src/doxygen.cpp \
    src/eclipsehelp.cpp \
    src/entry.cpp \
    src/filedef.cpp \
@@ -98,8 +95,6 @@ Doxygen_SOURCES = \
    src/image.cpp \
    src/index.cpp \
    src/language.cpp \
-   src/latexdocvisitor.cpp \
-   src/latexgen.cpp \
    src/layout.cpp \
    src/lodepng.cpp \
    src/logos.cpp \
@@ -119,16 +114,12 @@ Doxygen_SOURCES = \
    src/outputgen.cpp \
    src/outputlist.cpp \
    src/pagedef.cpp \
-   src/perlmodgen.cpp \
    src/plantuml.cpp \
    src/portable.cpp \
    src/qhp.cpp \
    src/qhpxmlwriter.cpp \
    src/reflist.cpp \
    src/resourcemgr.cpp \
-   src/rtfdocvisitor.cpp \
-   src/rtfgen.cpp \
-   src/rtfstyle.cpp \
    src/sortedlist.cpp \
    src/searchindex.cpp \
    src/sqlite3gen.cpp \
@@ -137,9 +128,20 @@ Doxygen_SOURCES = \
    src/template.cpp \
    src/textdocvisitor.cpp \
    src/tooltip.cpp \
-   src/util.cpp \
-   src/xmldocvisitor.cpp \
-   src/xmlgen.cpp
+   src/util.cpp
+
+#   src/docbookgen.cpp
+#   src/docbookvisitor.cpp
+#   src/dbusxmlscanner.cpp
+#   src/latexdocvisitor.cpp
+#   src/latexgen.cpp
+#   src/perlmodgen.cpp
+#   src/rtfdocvisitor.cpp
+#   src/rtfgen.cpp
+#   src/rtfstyle.cpp         done
+#   src/xmldocvisitor.cpp    done
+#   src/xmlgen.cpp
+
 
 RESOURCES = doxygen.qrc
 

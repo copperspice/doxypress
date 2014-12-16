@@ -29,17 +29,19 @@ class RTFGenerator : public OutputGenerator
  public:
    RTFGenerator();
    ~RTFGenerator();
+
    static void init();
    static void writeStyleSheetFile(QFile &f);
    static void writeExtensionsFile(QFile &file);
 
    void enable() {
-      if (genStack->top()) {
-         active = *genStack->top();
+      if (genStack.top()) {
+         active = genStack.top();
       } else {
          active = true;
       }
    }
+
    void disable() {
       active = false;
    }
