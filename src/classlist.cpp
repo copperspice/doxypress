@@ -15,19 +15,20 @@
  *
 *************************************************************************/
 
+#include <arguments.h>
 #include <classlist.h>
 #include <config.h>
-#include <util.h>
-#include <outputlist.h>
-#include <language.h>
 #include <doxygen.h>
 #include <defargs.h>
-#include <arguments.h>
 #include <groupdef.h>
+#include <language.h>
+#include <outputlist.h>
+#include <util.h>
 
 static int compItems(const ClassDef *c1, const ClassDef *c2)
 {
    static bool b = Config_getBool("SORT_BY_SCOPE_NAME");
+
    if (b) {
       return qstricmp(c1->name(), c2->name());
    } else {
@@ -43,48 +44,48 @@ int ClassSDict::compareValues(const ClassDef *item1, const ClassDef *item2) cons
 
 bool ClassSDict::declVisible(const ClassDef::CompoundType *filter) const
 {
-   static bool hideUndocClasses = Config_getBool("HIDE_UNDOC_CLASSES");
+   static bool hideUndocClasses    = Config_getBool("HIDE_UNDOC_CLASSES");
    static bool extractLocalClasses = Config_getBool("EXTRACT_LOCAL_CLASSES");
 
    if (count() > 0) {
       ClassSDict::Iterator sdi(*this);
-      ClassDef *cd = 0;
+
+      QSharedPointer<ClassDef> cd;
+
       for (sdi.toFirst(); (cd = sdi.current()); ++sdi) {
-         if (cd->name().indexOf('@') == -1 &&
-               (filter == 0 || *filter == cd->compoundType())
-            ) {
+         if (cd->name().indexOf('@') == -1 && (filter == 0 || *filter == cd->compoundType()) ) {
             bool isLink = cd->isLinkable();
-            if (isLink ||
-                  (!hideUndocClasses &&
-                   (!cd->isLocal() || extractLocalClasses)
-                  )
-               ) {
+
+            if (isLink || (! hideUndocClasses && (!cd->isLocal() || extractLocalClasses) ) ) {
                return true;
             }
          }
       }
    }
+
    return false;
 }
 
-void ClassSDict::writeDeclaration(OutputList &ol, const ClassDef::CompoundType *filter,
-                                  const char *header, bool localNames)
+void ClassSDict::writeDeclaration(OutputList &ol, const ClassDef::CompoundType *filter, const char *header, bool localNames)
 {
    static bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
+
    if (count() > 0) {
+
       ClassSDict::Iterator sdi(*this);
-      ClassDef *cd = 0;
+
+      QSharedPointer<ClassDef> cd;
       bool found = false;
+
       for (sdi.toFirst(); (cd = sdi.current()); ++sdi) {
          //printf("  ClassSDict::writeDeclaration for %s\n",cd->name().data());
-         if (cd->name().indexOf('@') == -1 &&
-               !cd->isExtension() &&
-               (cd->protection() != Private || extractPrivate) &&
-               (filter == 0 || *filter == cd->compoundType())
-            ) {
+
+         if (cd->name().indexOf('@') == -1 && ! cd->isExtension() && (cd->protection() != Private || extractPrivate) &&
+               (filter == 0 || *filter == cd->compoundType()) ) {
             cd->writeDeclarationLink(ol, found, header, localNames);
          }
       }
+
       if (found) {
          ol.endMemberList();
       }
@@ -96,7 +97,8 @@ void ClassSDict::writeDocumentation(OutputList &ol, Definition *container)
    static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
 
    static bool inlineGroupedClasses = Config_getBool("INLINE_GROUPED_CLASSES");
-   static bool inlineSimpleClasses = Config_getBool("INLINE_SIMPLE_STRUCTS");
+   static bool inlineSimpleClasses  = Config_getBool("INLINE_SIMPLE_STRUCTS");
+
    if (!inlineGroupedClasses && !inlineSimpleClasses) {
       return;
    }
@@ -105,26 +107,27 @@ void ClassSDict::writeDocumentation(OutputList &ol, Definition *container)
       bool found = false;
 
       ClassSDict::Iterator sdi(*this);
-      ClassDef *cd = 0;
+      QSharedPointer<ClassDef> cd;
+
       for (sdi.toFirst(); (cd = sdi.current()); ++sdi) {
          //printf("%s:writeDocumentation() %p linkable=%d embedded=%d container=%p partOfGroups=%d\n",
          //  cd->name().data(),cd->getOuterScope(),cd->isLinkableInProject(),cd->isEmbeddedInOuterScope(),
          //  container,cd->partOfGroups() ? cd->partOfGroups()->count() : 0);
 
-         if (cd->name().indexOf('@') == -1 &&
-               cd->isLinkableInProject() &&
-               cd->isEmbeddedInOuterScope() &&
-               (container == 0 || cd->partOfGroups() == 0) // if container==0 -> show as part of the group docs, otherwise only show if not part of a group
-            ) {
+         if (cd->name().indexOf('@') == -1 && cd->isLinkableInProject() && cd->isEmbeddedInOuterScope() &&
+               (container == 0 || cd->partOfGroups() == 0)             ) {
+
+            // if container==0 -> show as part of the group docs, otherwise only show if not part of a group
             //printf("  showing class %s\n",cd->name().data());
+
             if (!found) {
                ol.writeRuler();
                ol.startGroupHeader();
-               ol.parseText(fortranOpt ? theTranslator->trTypeDocumentation() :
-                            theTranslator->trClassDocumentation());
+               ol.parseText(fortranOpt ? theTranslator->trTypeDocumentation() : theTranslator->trClassDocumentation());
                ol.endGroupHeader();
                found = true;
             }
+
             cd->writeInlineDocumentation(ol);
          }
       }
@@ -145,6 +148,7 @@ void GenericsSDict::insert(const QByteArray &key, ClassDef *cd)
    stringToArgumentList(key.mid(i), &argList);
 
    int c = argList.count();
+
    if (c == 0) {
       return;
    }
@@ -153,7 +157,8 @@ void GenericsSDict::insert(const QByteArray &key, ClassDef *cd)
 
    if (collection == 0) {
       // new hash
-      collection = new QHash<long, ClassDef *>();
+
+      collection = QSharedPointer<QHash<long, ClassDef *>> (new QHash<long, ClassDef *>());       
 
       // add new hash to m_dict
       m_dict.insert(key.left(i), collection);

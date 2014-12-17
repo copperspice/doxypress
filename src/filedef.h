@@ -320,13 +320,6 @@ class FileList : public SortedList<FileDef *>
    QByteArray m_pathName;
 };
 
-class OutputNameDict : public QHash<QString, FileList>
-{
- public:
-   OutputNameDict() : QHash<QString, FileList>() {}
-   ~OutputNameDict() {}
-};
-
 class Directory;
 
 /** Class representing an entry (file or sub directory) in a directory */

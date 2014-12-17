@@ -85,7 +85,7 @@ int compareValues(const DotNode *item1, const DotNode *item2)
 
 int compareValues(const FileDef *md1, const FileDef *md2) 
 {
-      return qstricmp(md1->name(), md2->name());
+   return qstricmp(md1->name(), md2->name());
 }
 
 

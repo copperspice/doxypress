@@ -59,6 +59,10 @@ Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
 
 Doxygen_SOURCES = \
    src/doxygen.cpp \
+\
+   src/configoptions.cpp  \
+   src/portable.cpp \
+\
    src/arguments.cpp \
    src/cite.cpp \
    src/clangparser.cpp \
@@ -115,7 +119,6 @@ Doxygen_SOURCES = \
    src/outputlist.cpp \
    src/pagedef.cpp \
    src/plantuml.cpp \
-   src/portable.cpp \
    src/qhp.cpp \
    src/qhpxmlwriter.cpp \
    src/reflist.cpp \
@@ -128,7 +131,9 @@ Doxygen_SOURCES = \
    src/template.cpp \
    src/textdocvisitor.cpp \
    src/tooltip.cpp \
-   src/util.cpp
+   src/util.cpp \
+   src/xmldocvisitor.cpp
+
 
 #   src/docbookgen.cpp
 #   src/docbookvisitor.cpp
@@ -139,8 +144,8 @@ Doxygen_SOURCES = \
 #   src/rtfdocvisitor.cpp
 #   src/rtfgen.cpp
 #   src/rtfstyle.cpp         done
-#   src/xmldocvisitor.cpp    done
 #   src/xmlgen.cpp
+
 
 
 RESOURCES = doxygen.qrc

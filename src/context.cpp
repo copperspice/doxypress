@@ -1145,15 +1145,15 @@ class DefinitionContext : public PropertyMapper
          case SrcLangExt_Fortran:
             result = "fortran";
             break;
-         case SrcLangExt_VHDL:
-            result = "vhdl";
-            break;
+        
          case SrcLangExt_XML:
             result = "xml";
             break;
+
          case SrcLangExt_Tcl:
             result = "tcl";
             break;
+
          case SrcLangExt_Markdown:
             result = "markdown";
             break;
@@ -4204,26 +4204,18 @@ class ClassInheritanceNodeContext::Private : public PropertyMapper
       for (bcli.toFirst() ; (bcd = bcli.current()) ; ++bcli) {
          ClassDef *cd = bcd->classDef;
         
-         bool b;
-         if (cd->getLanguage() == SrcLangExt_VHDL) {
-            b = hasVisibleRoot(cd->subClasses());
-         } else {
-            b = hasVisibleRoot(cd->baseClasses());
-         }
-
+         bool b = hasVisibleRoot(cd->baseClasses());
+         
          if (cd->isVisibleInHierarchy() && b) { // hasVisibleRoot(cd->baseClasses()))
             bool hasChildren = !cd->visited && !hideSuper && classHasVisibleChildren(cd);
             ClassInheritanceNodeContext *tnc = new ClassInheritanceNodeContext(cd);
             m_children.append(tnc);
+
             if (hasChildren) {
                //printf("Class %s at %p visited=%d\n",cd->name().data(),cd,cd->visited);
                bool wasVisited = cd->visited;
-               cd->visited = true;
-               if (cd->getLanguage() == SrcLangExt_VHDL) {
-                  tnc->addChildren(cd->baseClasses(), wasVisited);
-               } else {
-                  tnc->addChildren(cd->subClasses(), wasVisited);
-               }
+               cd->visited = true;               
+               tnc->addChildren(cd->subClasses(), wasVisited);               
             }
          }
       }
@@ -4291,10 +4283,8 @@ class ClassInheritanceContext::Private : public GenericNodeListContext
                append(tnc);
 
                bool hasChildren = !cd->visited && classHasVisibleChildren(cd);
-               if (cd->getLanguage() == SrcLangExt_VHDL && hasChildren) {
-                  tnc->addChildren(cd->baseClasses(), cd->visited);
-                  cd->visited = true;
-               } else if (hasChildren) {
+              
+               if (hasChildren) {
                   tnc->addChildren(cd->subClasses(), cd->visited);
                   cd->visited = true;
                }

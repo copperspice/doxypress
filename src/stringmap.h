@@ -135,12 +135,7 @@ class StringMap
 
       return item.value();
    }
-
-   /*! Equavalent to find(). */
-   T *operator[](const char *key) const {
-      return m_dict.find(key);
-   }
-
+   
    /*! Clears the dictionary.  
     */
    void clear() {
@@ -160,6 +155,11 @@ class StringMap
       }
 
       return 0;
+   }
+
+   /*! Equavalent to find(). */
+   T &operator[](const char *key) const {
+      return m_dict.find(key).value();
    }
   
 
@@ -251,6 +251,9 @@ class LongMap
    QMap<long, T> m_dict;
    
  public:  
+
+   using const_iterator = typename QMap<long, T>::const_iterator;
+
    LongMap() {
    }
 
@@ -263,61 +266,13 @@ class LongMap
    iterator begin() {     
       return m_dict.begin();      
    }  
-
-   iterator end() {     
-      return m_dict.end();  
+  
+   const_iterator begin() const {     
+      return m_dict.begin();      
    }  
-
-   /*! Appends an element to the dictionary. The element is owned by the
-    *  dictionary.
-    *  \param key The unique key to use to quicky find the item later on.
-    *  \param d The compound to add.
-    *  \sa find()
-    */
-   void insert(long key, const T &d) {     
-      m_dict.insert(key, d);   
-   }  
-
-   /*! Remove an item from the dictionary */
-   bool remove(long key) { 
-      return m_dict.remove(key); 
-   }
-
-   /*! Take an item out of the dictionary without deleting it */
-   T *take(long key) {
-      return m_dict.take(key);
-   } 
-   
-   /*! Looks up a compound given its key.
-    *  \param key The key to identify this element.
-    *  \return The requested compound or zero if it cannot be found.
-    *  \sa append()
-    */
-   T *find(long key) {
-       auto item = m_dict.find(key);
-
-      if (item == m_dict.end()) {   
-         return T();
-      }
-
-      return item.value();
-   }
-
-   /*! Equavalent to find(). */
-   T *operator[](long key) const {
-      return m_dict.find(key);
-   }
-
-   /*! Clears the dictionary.  
-    */
+    
    void clear() {
       m_dict.clear();
-   }
-
-   /*! Returns the number of items stored in the dictionary
-    */
-   int count() const {
-      return m_dict.count();
    }
 
    int compareValues(const T &item1, const T &item2) const {
@@ -327,6 +282,44 @@ class LongMap
       }
 
       return 0;
+   }
+
+   bool contains(long key) {
+      return m_dict.contains(key);
+   }
+  
+   int count() const {
+      return m_dict.count();
+   }
+
+   iterator end() {     
+      return m_dict.end();  
+   }    
+
+   const_iterator end() const {     
+      return m_dict.end();  
+   }  
+    
+   T *find(long key) {
+       auto item = m_dict.find(key);
+
+      if (item == m_dict.end()) {   
+         return T();
+      }
+
+      return item.value();
+   }
+  
+   void insert(long key, const T &d) {     
+      m_dict.insert(key, d);   
+   }     
+  
+    bool remove(long key) { 
+      return m_dict.remove(key); 
+   }
+   
+   T &operator[](long key) const {
+      return m_dict.find(key).value();
    }
 
 

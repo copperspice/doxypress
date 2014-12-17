@@ -54,8 +54,6 @@
    data[i]=='='  || data[i]=='+' || data[i]=='-' || data[i]=='\\' || \
    data[i]=='@')
 
-//----------
-
 struct LinkRef {
    LinkRef(const QByteArray &l, const QByteArray &t) : link(l), title(t) {}
    QByteArray link;
@@ -66,13 +64,11 @@ typedef int (*action_t)(GrowBuf &out, const char *data, int offset, int size);
 
 enum Alignment { AlignNone, AlignLeft, AlignCenter, AlignRight };
 
+static QHash<QString, LinkRef> g_linkRefs;
 
-//----------
-
-static QHash<QString, LinkRef> g_linkRefs(257);
 static action_t       g_actions[256];
 static Entry         *g_current;
-static QByteArray       g_fileName;
+static QByteArray     g_fileName;
 static int            g_lineNr;
 
 // In case a markdown page starts with a level1 header, that header is used
@@ -81,12 +77,10 @@ static int            g_lineNr;
 // This flag is true if corrections are needed.
 //static bool           g_correctSectionLevel;
 
-
-//----------
-
 const int codeBlockIndent = 4;
 
 static void processInline(GrowBuf &out, const char *data, int size);
+
 
 // escape characters that have a special meaning later on.
 static QByteArray escapeSpecialChars(const QByteArray &s)
@@ -94,6 +88,7 @@ static QByteArray escapeSpecialChars(const QByteArray &s)
    if (s.isEmpty()) {
       return "";
    }
+
    GrowBuf growBuf;
    const char *p = s;
    char c;
@@ -125,9 +120,11 @@ static void convertStringFragment(QByteArray &result, const char *data, int size
    if (size < 0) {
       size = 0;
    }
+
    result.resize(size + 1);
    memcpy(result.data(), data, size);
-   result.at(size) = '\0';
+  
+   result[size] = '\0';
 }
 
 /** helper function to convert presence of left and/or right alignment markers
@@ -511,10 +508,12 @@ static int processHtmlTag(GrowBuf &out, const char *data, int offset, int size)
             //printf("Found htmlTag={%s}\n",QByteArray(data).left(i+2).data());
             out.addStr(data, i + 2);
             return i + 2;
+
          } else if (data[i] == '>') { // <bla>
             //printf("Found htmlTag={%s}\n",QByteArray(data).left(i+1).data());
             out.addStr(data, i + 1);
             return i + 1;
+
          } else if (data[i] == ' ') { // <bla attr=...
             i++;
             bool insideAttr = false;
@@ -577,10 +576,12 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
    QByteArray content;
    QByteArray link;
    QByteArray title;
+
    int contentStart, contentEnd, linkStart, titleStart, titleEnd;
    bool isImageLink = false;
    bool isToc = false;
    int i = 1;
+
    if (data[0] == '!') {
       isImageLink = true;
       if (size < 2 || data[1] != '[') {
@@ -588,9 +589,11 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
       }
       i++;
    }
+
    contentStart = i;
    int level = 1;
    int nl = 0;
+
    // find the matching ]
    while (i < size) {
       if (data[i - 1] == '\\') { // skip escaped characters
@@ -657,10 +660,12 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
       }
       convertStringFragment(link, data + linkStart, i - linkStart);
       link = link.trimmed();
+
       //printf("processLink: link={%s}\n",link.data());
       if (link.isEmpty()) {
          return 0;
       }
+
       if (link.at(link.length() - 1) == '>') {
          link = link.left(link.length() - 1);
       }
@@ -671,6 +676,7 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
          i++;
          titleStart = i;
          nl = 0;
+
          while (i < size && data[i] != ')') {
             if (data[i] == '\n') {
                if (nl > 1) {
@@ -680,9 +686,11 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
             }
             i++;
          }
-         if (i >= size) {
+
+            if (i >= size) {
             return 0;
          }
+
          titleEnd = i - 1;
          // search back for closing marker
          while (titleEnd > titleStart && data[titleEnd] == ' ') {
@@ -696,10 +704,13 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
          }
       }
       i++;
-   } else if (i < size && data[i] == '[') { // reference link
+
+   } else if (i < size && data[i] == '[') { 
+      // reference link
       i++;
       linkStart = i;
       nl = 0;
+
       // find matching ]
       while (i < size && data[i] != ']') {
          if (data[i] == '\n') {
@@ -710,38 +721,51 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
          }
          i++;
       }
+
       if (i >= size) {
          return 0;
       }
+
       // extract link
       convertStringFragment(link, data + linkStart, i - linkStart);
-      //printf("processLink: link={%s}\n",link.data());
+     
       link = link.trimmed();
-      if (link.isEmpty()) { // shortcut link
+
+      if (link.isEmpty()) { 
+         // shortcut link
          link = content;
       }
+
       // lookup reference
-      LinkRef *lr = g_linkRefs.find(link.lower());
-      if (lr) { // found it
+      auto lr = g_linkRefs.find(link.toLower());
+
+      if (lr != g_linkRefs.end()) { 
+         // found it
          link  = lr->link;
-         title = lr->title;
-         //printf("processLink: ref: link={%s} title={%s}\n",link.data(),title.data());
-      } else { // reference not found!
-         //printf("processLink: ref {%s} do not exist\n",link.lower().data());
+         title = lr->title;      
+
+      } else { 
+         // reference not found!         
          return 0;
       }
       i++;
-   } else if (i < size && data[i] != ':' && !content.isEmpty()) { // minimal link ref notation [some id]
-      LinkRef *lr = g_linkRefs.find(content.lower());
-      //printf("processLink: minimal link {%s} lr=%p",content.data(),lr);
-      if (lr) { // found it
+
+   } else if (i < size && data[i] != ':' && !content.isEmpty()) { 
+      // minimal link ref notation [some id]
+
+      auto lr = g_linkRefs.find(content.toLower());
+
+      if (lr != g_linkRefs.end()) { 
+         // found it
          link  = lr->link;
          title = lr->title;
          explicitTitle = true;
          i = contentEnd;
+
       } else if (content == "TOC") {
          isToc = true;
          i = contentEnd;
+
       } else {
          return 0;
       }
@@ -749,24 +773,30 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
    } else {
       return 0;
    }
+
    static QRegExp re("^[@\\]ref ");
-   if (isToc) { // special case for [TOC]
+   if (isToc) { 
+      // special case for [TOC]
       if (g_current) {
          g_current->stat = true;
       }
+
    } else if (isImageLink) {
       bool ambig;
       FileDef *fd = 0;
-      if (link.find("@ref ") != -1 || link.find("\\ref ") != -1 ||
-            (fd = findFileDef(Doxygen::imageNameDict, link, ambig)))
+
+      if (link.indexOf("@ref ") != -1 || link.indexOf("\\ref ") != -1 || (fd = findFileDef(Doxygen::imageNameDict, link, ambig)))
          // assume doxygen symbol link or local image link
+
       {
          out.addStr("@image html ");
          out.addStr(link.mid(fd ? 0 : 5));
+
          if (!explicitTitle && !content.isEmpty()) {
             out.addStr(" \"");
             out.addStr(content);
             out.addStr("\"");
+
          } else if ((content.isEmpty() || explicitTitle) && !title.isEmpty()) {
             out.addStr(" \"");
             out.addStr(title);
@@ -778,17 +808,20 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
          out.addStr("\" alt=\"");
          out.addStr(content);
          out.addStr("\"");
+
          if (!title.isEmpty()) {
             out.addStr(" title=\"");
-            out.addStr(substitute(title.simplifyWhiteSpace(), "\"", "&quot;"));
+            out.addStr(substitute(title.simplified(), "\"", "&quot;"));
             out.addStr("\"");
          }
          out.addStr("/>");
       }
+
    } else {
       SrcLangExt lang = getLanguageFromFileName(link);
       int lp = -1;
-      if ((lp = link.find("@ref ")) != -1 || (lp = link.find("\\ref ")) != -1 || lang == SrcLangExt_Markdown)
+
+      if ((lp = link.indexOf("@ref ")) != -1 || (lp = link.indexOf("\\ref ")) != -1 || lang == SrcLangExt_Markdown)
          // assume doxygen symbol link
       {
          if (lp == -1) { // link to markdown page
@@ -802,20 +835,25 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
             out.addStr(content);
          }
          out.addStr("\"");
-      } else if (link.find('/') != -1 || link.find('.') != -1 || link.find('#') != -1) {
+
+      } else if (link.indexOf('/') != -1 || link.indexOf('.') != -1 || link.indexOf('#') != -1) {
          // file/url link
          out.addStr("<a href=\"");
          out.addStr(link);
          out.addStr("\"");
+
          if (!title.isEmpty()) {
             out.addStr(" title=\"");
-            out.addStr(substitute(title.simplifyWhiteSpace(), "\"", "&quot;"));
+            out.addStr(substitute(title.simplified(), "\"", "&quot;"));
             out.addStr("\"");
          }
+
          out.addStr(">");
-         out.addStr(content.simplifyWhiteSpace());
+         out.addStr(content.simplified());
          out.addStr("</a>");
-      } else { // avoid link to e.g. F[x](y)
+
+      } else { 
+         // avoid link to e.g. F[x](y)
          //printf("no link for '%s'\n",link.data());
          return 0;
       }
@@ -1162,21 +1200,26 @@ static QByteArray extractTitleId(QByteArray &title)
 {
    //static QRegExp r1("^[a-z_A-Z][a-z_A-Z0-9\\-]*:");
    static QRegExp r2("\\{#[a-z_A-Z][a-z_A-Z0-9\\-]*\\}");
+
    int l = 0;
-   int i = r2.match(title, 0, &l);
-   if (i != -1 && title.mid(i + l).trimmed().isEmpty()) { // found {#id} style id
+   int i = r2.indexIn(title);
+   l = r2.matchedLength();
+
+   if (i != -1 && title.mid(i + l).trimmed().isEmpty()) { 
+      // found {#id} style id
       QByteArray id = title.mid(i + 2, l - 3);
       title = title.left(i);
+
       //printf("found id='%s' title='%s'\n",id.data(),title.data());
       return id;
    }
+
    //printf("no id found in title '%s'\n",title.data());
    return "";
 }
 
 
-static int isAtxHeader(const char *data, int size,
-                       QByteArray &header, QByteArray &id)
+static int isAtxHeader(const char *data, int size, QByteArray &header, QByteArray &id)
 {
    int i = 0, end;
    int level = 0, blanks = 0;
@@ -1639,23 +1682,28 @@ static int writeTableBlock(GrowBuf &out, const char *data, int size)
    out.addStr("</table> ");
 
    delete[] columnAlignment;
+
    return i;
 }
-
 
 void writeOneLineHeaderOrRuler(GrowBuf &out, const char *data, int size)
 {
    int level;
+
    QByteArray header;
    QByteArray id;
+
    if (isHRuler(data, size)) {
       out.addStr("<hr>\n");
+
    } else if ((level = isAtxHeader(data, size, header, id))) {
-      //if (level==1) g_correctSectionLevel=false;
-      //if (g_correctSectionLevel) level--;
-      QByteArray hTag;
-      if (level < 5 && !id.isEmpty()) {
+      
+      QString hTag;
+
+      if (level < 5 && ! id.isEmpty()) {
+
          SectionInfo::SectionType type = SectionInfo::Anchor;
+
          switch (level) {
             case 1:
                out.addStr("@section ");
@@ -1674,33 +1722,47 @@ void writeOneLineHeaderOrRuler(GrowBuf &out, const char *data, int size)
                type = SectionInfo::Paragraph;
                break;
          }
+
          out.addStr(id);
          out.addStr(" ");
          out.addStr(header);
          out.addStr("\n");
-         SectionInfo *si = Doxygen::sectionDict->find(id);
+
+         QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(id);
+
          if (si) {
             if (si->lineNr != -1) {
-               warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)", header.data(), si->fileName.data(), si->lineNr);
+               warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)", 
+                    header.data(), si->fileName.data(), si->lineNr);
+
             } else {
-               warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s)", header.data(), si->fileName.data());
+               warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s)", 
+                    header.data(), si->fileName.data());
             }
+
          } else {
-            si = new SectionInfo(g_fileName, g_lineNr, id, header, type, level);
+            si = QSharedPointer<SectionInfo> (new SectionInfo(g_fileName, g_lineNr, id, header, type, level));
+
             if (g_current) {
-               g_current->anchors->append(si);
+               g_current->anchors->append(*(si.data()));
             }
-            Doxygen::sectionDict->append(id, si);
+
+            Doxygen::sectionDict->insert(id, si);
          }
+
       } else {
          if (!id.isEmpty()) {
             out.addStr("\\anchor " + id + "\n");
          }
-         hTag.sprintf("h%d", level);
-         out.addStr("<" + hTag + ">");
+         
+         hTag = QString("h%1").arg(level);
+
+         out.addStr("<" + hTag.toUtf8() + ">");         
+
          out.addStr(header);
-         out.addStr("</" + hTag + ">\n");
+         out.addStr("</" + hTag.toUtf8() + ">\n");      
       }
+
    } else { // nothing interesting -> just output the line
       out.addStr(data, size);
    }
@@ -1850,9 +1912,11 @@ static void findEndOfLine(GrowBuf &out, const char *data, int size,
                 ) {
          if (tolower(data[end]) == 'p' && tolower(data[end + 1]) == 'r' &&
                tolower(data[end + 2]) == 'e' && data[end + 3] == '>') { // <pre> tag
+
             if (pi != -1) { // output previous line if available
                out.addStr(data + pi, i - pi);
             }
+
             // output part until <pre>
             out.addStr(data + i, end - 1 - i);
             // output part until </pre>
@@ -1979,26 +2043,25 @@ static QByteArray processBlocks(const QByteArray &s, int indent)
    // process each line
    while (i < size) {
       findEndOfLine(out, data, size, pi, i, end);
+
       // line is now found at [i..end)
-
-      //printf("findEndOfLine: pi=%d i=%d end=%d\n",pi,i,end);
-
+      
       if (pi != -1) {
          int blockStart, blockEnd, blockOffset;
+
          QByteArray lang;
          blockIndent = indent;
-         //printf("isHeaderLine(%s)=%d\n",QByteArray(data+i).left(size-i).data(),level);
-         if ((level = isHeaderline(data + i, size - i)) > 0) {
-            //if (level==1) g_correctSectionLevel=false;
-            //if (g_correctSectionLevel) level--;
-            //printf("Found header at %d-%d\n",i,end);
+         
+         if ((level = isHeaderline(data + i, size - i)) > 0) {            
+
             while (pi < size && data[pi] == ' ') {
                pi++;
             }
+
             QByteArray header, id;
             convertStringFragment(header, data + pi, i - pi - 1);
             id = extractTitleId(header);
-            //printf("header='%s' is='%s'\n",header.data(),id.data());
+
             if (!header.isEmpty()) {
                if (!id.isEmpty()) {
                   out.addStr(level == 1 ? "@section " : "@subsection ");
@@ -2006,43 +2069,59 @@ static QByteArray processBlocks(const QByteArray &s, int indent)
                   out.addStr(" ");
                   out.addStr(header);
                   out.addStr("\n\n");
-                  SectionInfo *si = Doxygen::sectionDict->find(id);
+
+                  QSharedPointer<SectionInfo> si (Doxygen::sectionDict->find(id));
+
                   if (si) {
                      if (si->lineNr != -1) {
-                        warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)", header.data(), si->fileName.data(), si->lineNr);
+                        warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)", 
+                             header.data(), si->fileName.data(), si->lineNr);
+
                      } else {
-                        warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s)", header.data(), si->fileName.data());
+                        warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s)", 
+                             header.data(), si->fileName.data());
                      }
+
                   } else {
-                     si = new SectionInfo(g_fileName, g_lineNr, id, header,
-                                          level == 1 ? SectionInfo::Section : SectionInfo::Subsection, level);
+                     si = QSharedPointer<SectionInfo> (new SectionInfo(g_fileName, g_lineNr, id, header, 
+                                          level == 1 ? SectionInfo::Section : SectionInfo::Subsection, level));
+
                      if (g_current) {
-                        g_current->anchors->append(si);
+                        g_current->anchors->append(*si); 
                      }
-                     Doxygen::sectionDict->append(id, si);
+
+                     Doxygen::sectionDict->insert(id, si);
                   }
+
                } else {
                   out.addStr(level == 1 ? "<h1>" : "<h2>");
                   out.addStr(header);
                   out.addStr(level == 1 ? "\n</h1>\n" : "\n</h2>\n");
                }
+
             } else {
                out.addStr("<hr>\n");
             }
+
             pi = -1;
             i = end;
             end = i + 1;
             continue;
+
          } else if ((ref = isLinkRef(data + pi, size - pi, id, link, title))) {
             //printf("found link ref: id='%s' link='%s' title='%s'\n",
             //       id.data(),link.data(),title.data());
-            g_linkRefs.insert(id.lower(), new LinkRef(link, title));
-            i = ref + pi;
-            pi = -1;
+
+            g_linkRefs.insert(id.toLower(), LinkRef(link, title));
+
+            i   = ref + pi;
+            pi  = -1;
             end = i + 1;
+
          } else if (isFencedCodeBlock(data + pi, size - pi, indent, lang, blockStart, blockEnd, blockOffset)) {
             //printf("Found FencedCodeBlock lang='%s' start=%d end=%d code={%s}\n",
             //       lang.data(),blockStart,blockEnd,QByteArray(data+pi+blockStart).left(blockEnd-blockStart).data());
+
             writeFencedCodeBlock(out, data + pi, lang, blockStart, blockEnd);
             i = pi + blockOffset;
             pi = -1;
@@ -2063,15 +2142,17 @@ static QByteArray processBlocks(const QByteArray &s, int indent)
             writeOneLineHeaderOrRuler(out, data + pi, i - pi);
          }
       }
+
       pi = i;
       i = end;
    }
+
    //printf("last line %d size=%d\n",i,size);
    if (pi != -1 && pi < size) { // deal with the last line
-      if (isLinkRef(data + pi, size - pi, id, link, title)) {
-         //printf("found link ref: id='%s' link='%s' title='%s'\n",
-         //    id.data(),link.data(),title.data());
-         g_linkRefs.insert(id.lower(), new LinkRef(link, title));
+
+      if (isLinkRef(data + pi, size - pi, id, link, title)) {         
+         g_linkRefs.insert(id.toLower(), LinkRef(link, title));
+
       } else {
          writeOneLineHeaderOrRuler(out, data + pi, size - pi);
       }
@@ -2085,30 +2166,37 @@ static QByteArray extractPageTitle(QByteArray &docs, QByteArray &id)
 {
    int ln = 0;
    // first first non-empty line
+
    QByteArray title;
    const char *data = docs.data();
    int i = 0;
    int size = docs.size();
+
    while (i < size && (data[i] == ' ' || data[i] == '\n')) {
       if (data[i] == '\n') {
          ln++;
       }
       i++;
    }
+
    if (i >= size) {
       return "";
    }
+
    int end1 = i + 1;
+
    while (end1 < size && data[end1 - 1] != '\n') {
       end1++;
    }
+
    //printf("i=%d end1=%d size=%d line='%s'\n",i,end1,size,docs.mid(i,end1-i).data());
    // first line from i..end1
    if (end1 < size) {
       ln++;
       // second line form end1..end2
       int end2 = end1 + 1;
-      while (end2 < size && data[end2 - 1] != '\n') {
+     
+ while (end2 < size && data[end2 - 1] != '\n') {
          end2++;
       }
       if (isHeaderline(data + end1, size - end1)) {
@@ -2295,6 +2383,7 @@ void MarkdownFileParser::parseInput(const char *fileName,
 
    bool needsEntry = false;
    Protection prot = Public;
+
    while (parseCommentBlock(
              this,
              current,

@@ -1642,7 +1642,7 @@ void MemberDef::writeDeclaration(OutputList &ol, ClassDef *cd, NamespaceDef *nd,
       if (!isDefine()) {
          //ol.writeString(" = ");
          ol.writeString(" ");
-         linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), this, m_impl->initializer.simplifyWhiteSpace());
+         linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), this, m_impl->initializer.simplified());
       } else {
          ol.writeNonBreakableSpace(3);
          linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), this, m_impl->initializer);
@@ -2514,14 +2514,13 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol,
       return;
    }
 
-   SrcLangExt lang = getLanguage();
-   //printf("member=%s lang=%d\n",name().data(),lang);
-   bool optVhdl = lang == SrcLangExt_VHDL;
+   SrcLangExt lang = getLanguage();   
    QByteArray sep = getLanguageSpecificSeparator(lang, true);
 
    QByteArray scopeName = scName;
    QByteArray memAnchor = anchor();
    QByteArray ciname = container->name();
+
    if (container->definitionType() == TypeGroup) {
       if (getClassDef()) {
          scopeName = getClassDef()->displayName();
@@ -2725,7 +2724,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol,
          if (!isDefine()) {
             //ol.docify(" = ");
             ol.docify(" ");
-            QByteArray init = m_impl->initializer.simplifyWhiteSpace();
+            QByteArray init = m_impl->initializer.simplified();
             linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), this, init);
          } else {
             ol.writeNonBreakableSpace(3);
@@ -4537,7 +4536,7 @@ void MemberDef::mergeMemberSpecifiers(uint64_t s)
 
 void MemberDef::setBitfields(const char *s)
 {
-   m_impl->bitfields = QByteArray(s).simplifyWhiteSpace();
+   m_impl->bitfields = QByteArray(s).simplified();
 }
 
 void MemberDef::setMaxInitLines(int lines)

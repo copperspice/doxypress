@@ -3597,6 +3597,7 @@ int ClassDef::countMemberDeclarations(MemberListType lt, ClassDef *inheritedFrom
    int count = 0;
    MemberList *ml  = getMemberList(lt);
    MemberList *ml2 = getMemberList((MemberListType)lt2);
+
    if (getLanguage() != SrcLangExt_VHDL) { // use specific declarations function
       if (ml) {
          ml->countDecMembers();

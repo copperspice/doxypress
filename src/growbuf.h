@@ -28,15 +28,19 @@ class GrowBuf
 {
  public:
    GrowBuf() : str(0), pos(0), len(0) {}
-   ~GrowBuf()         {
+
+   ~GrowBuf()        
+    {
       free(str);
       str = 0;
       pos = 0;
       len = 0;
    }
+
    void clear()      {
       pos = 0;
    }
+
    void addChar(char c)  {
       if (pos >= len) {
          len += GROW_AMOUNT;
@@ -44,6 +48,7 @@ class GrowBuf
       }
       str[pos++] = c;
    }
+
    void addStr(const char *s) {
       if (s) {
          int l = strlen(s);
@@ -55,6 +60,7 @@ class GrowBuf
          pos += l;
       }
    }
+
    void addStr(const char *s, int n) {
       if (s) {
          int l = strlen(s);
@@ -69,15 +75,19 @@ class GrowBuf
          pos += l;
       }
    }
+
    const char *get()     {
       return str;
    }
+
    int getPos() const    {
       return pos;
    }
+
    char at(int i) const  {
       return str[i];
    }
+
  private:
    char *str;
    int pos;

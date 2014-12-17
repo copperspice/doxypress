@@ -562,7 +562,7 @@ bool Definition::_docsAlreadyAdded(const QByteArray &doc, QByteArray &sigList)
    // to avoid mismatches due to differences in indenting, we first remove
    // double whitespaces...
 
-   QByteArray docStr = doc.simplifyWhiteSpace();
+   QByteArray docStr = doc.simplified();
 
    QByteArray sigStr;
    sigStr = QCryptographicHash::hash(docStr, QCryptographicHash::Md5).toHex();  

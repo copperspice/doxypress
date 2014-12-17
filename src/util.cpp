@@ -4819,24 +4819,18 @@ bool classHasVisibleChildren(ClassDef *cd)
 {
    SortedList<BaseClassDef *> *bcl;
 
-   if (cd->getLanguage() == SrcLangExt_VHDL) { // reverse baseClass/subClass relation
-      if (cd->baseClasses() == 0) {
-         return false;
-      }
-      bcl = cd->baseClasses();
-   } else {
-      if (cd->subClasses() == 0) {
-         return false;
-      }
-      bcl = cd->subClasses();
+   if (cd->subClasses() == 0) {
+      return false;
    }
 
-   BaseClassListIterator bcli(*bcl);
-   for ( ; bcli.current() ; ++bcli) {
-      if (bcli.current()->classDef->isVisibleInHierarchy()) {
+   bcl = cd->subClasses(); 
+
+   for (auto item : *bcl) {
+      if (item->classDef->isVisibleInHierarchy()) {
          return true;
       }
    }
+
    return false;
 }
 
@@ -4844,10 +4838,8 @@ bool classHasVisibleChildren(ClassDef *cd)
 //----------------------------------------------------------------------------
 
 void initClassHierarchy(ClassSDict *cl)
-{
-   ClassSDict::Iterator cli(*cl);
-   ClassDef *cd;
-   for ( ; (cd = cli.current()); ++cli) {
+{  
+   for (auto cd : *cl) {
       cd->visited = false;
       initBaseClassHierarchy(cd->baseClasses());
    }

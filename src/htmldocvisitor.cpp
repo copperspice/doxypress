@@ -519,10 +519,11 @@ void HtmlDocVisitor::visit(DocInclude *inc)
       case DocInclude::IncWithLines: {
          forceEndParagraph(inc);
          m_t << PREFRAG_START;
+
          QFileInfo cfi( inc->file() );
-         FileDef fd( cfi.dirPath().toUtf8(), cfi.fileName().toUtf8() );
-         Doxygen::parserManager->getParser(inc->extension())
-         ->parseCode(m_ci,
+         FileDef fd( cfi.path().toUtf8(), cfi.fileName().toUtf8() );
+
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci,
                      inc->context(),
                      inc->text(),
                      langExt,

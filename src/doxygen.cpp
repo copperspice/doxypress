@@ -887,8 +887,7 @@ static void addIncludeFile(ClassDef *cd, FileDef *ifd, Entry *root)
  *  full qualified name \a name. Creates an artificial scope if the scope is
  *  not found and set the parent/child scope relation if the scope is found.
  */
-static Definition *buildScopeFromQualifiedName(const QByteArray name,
-      int level, SrcLangExt lang, TagInfo *tagInfo)
+static Definition *buildScopeFromQualifiedName(const QByteArray name, int level, SrcLangExt lang, TagInfo *tagInfo)
 {
    //printf("buildScopeFromQualifiedName(%s) level=%d\n",name.data(),level);
    int i = 0;
@@ -957,11 +956,8 @@ static Definition *buildScopeFromQualifiedName(const QByteArray name,
    return prevScope;
 }
 
-static Definition *findScopeFromQualifiedName(Definition *startScope, const QByteArray &n,
-      FileDef *fileScope, TagInfo *tagInfo)
-{
-   //printf("<findScopeFromQualifiedName(%s,%s)\n",startScope ? startScope->name().data() : 0, n.data());
-
+static Definition *findScopeFromQualifiedName(Definition *startScope, const QByteArray &n, FileDef *fileScope, TagInfo *tagInfo)
+{  
    Definition *resultScope = startScope;
 
    if (resultScope == 0) {
@@ -971,6 +967,7 @@ static Definition *findScopeFromQualifiedName(Definition *startScope, const QByt
    QByteArray scope = stripTemplateSpecifiersFromScope(n, false);
    int l1 = 0, i1;
    i1 = getScopeFragment(scope, 0, &l1);
+
    if (i1 == -1) {
       //printf(">no fragments!\n");
       return resultScope;
@@ -982,9 +979,8 @@ static Definition *findScopeFromQualifiedName(Definition *startScope, const QByt
       QByteArray nestedNameSpecifier = scope.mid(i1, l1);
       Definition *orgScope = resultScope;
 
-      //printf("  nestedNameSpecifier=%s\n",nestedNameSpecifier.data());
       resultScope = resultScope->findInnerCompound(nestedNameSpecifier);
-      //printf("  resultScope=%p\n",resultScope);
+     
 
       if (resultScope == 0) {
          NamespaceSDict *usedNamespaces;
@@ -1020,24 +1016,24 @@ static Definition *findScopeFromQualifiedName(Definition *startScope, const QByt
          // the scope relations!
          // Therefore loop through all used classes and see if there is a right
          // scope match between the used class and nestedNameSpecifier.
-         QHashIterator<QString, FileDef> ui(g_usingDeclarations);
-         FileDef *usedFd;
 
-         for (ui.toFirst(); (usedFd = ui.current()); ++ui) {
-            //printf("Checking using class %s\n",ui.currentKey());
-
-            if (rightScopeMatch(ui.currentKey(), nestedNameSpecifier)) {
+         auto item = g_usingDeclarations.begin();
+        
+         for (auto usedFd : g_usingDeclarations)  {   
+            
+            if (rightScopeMatch(item.key().toUtf8(), nestedNameSpecifier)) {
                // ui.currentKey() is the fully qualified name of nestedNameSpecifier
                // so use this instead.
 
-               QByteArray fqn = QByteArray(ui.currentKey()) + scope.right(scope.length() - p);
-               resultScope = buildScopeFromQualifiedName(fqn, fqn.contains("::"), 
-                             startScope->getLanguage(), 0);
+               QByteArray fqn = QByteArray(item.key().toUtf8()) + scope.right(scope.length() - p);
+               resultScope = buildScopeFromQualifiedName(fqn, fqn.count("::"), startScope->getLanguage(), 0);
  
                if (resultScope) {
                    return resultScope;
                }
             }
+
+            ++item;
          }
 
          //printf("> name %s not found in scope %s\n",nestedNameSpecifier.data(),orgScope->name().data());
@@ -1049,36 +1045,38 @@ static Definition *findScopeFromQualifiedName(Definition *startScope, const QByt
       l1 = l2;
       p = i2 + l2;
    }
-
-   //printf(">findScopeFromQualifiedName scope %s\n",resultScope->name().data());
+   
    return resultScope;
 }
 
 ArgumentList *getTemplateArgumentsFromName( const QByteArray &name, const QList<ArgumentList> *tArgLists)
 {
-   if (tArgLists == 0) {
+   if (tArgLists) {
       return 0;
    }
 
-   QListIterator<ArgumentList> ali(*tArgLists);
-   // for each scope fragment, check if it is a template and advance through
-   // the list if so.
-   int i, p = 0;
+   auto item = tArgLists->begin();
+
+   // for each scope fragment, check if it is a template and advance through the list if so.
+   int i;
+   int p = 0;
 
    while ((i = name.indexOf("::", p)) != -1) {
-      NamespaceDef *nd = Doxygen::namespaceSDict->find(name.left(i));
+     QSharedPointer<NamespaceDef> nd (Doxygen::namespaceSDict->find(name.left(i)));
 
-      if (nd == 0) {
+      if (nd) {
          ClassDef *cd = getClass(name.left(i));
+
          if (cd) {
             if (cd->templateArguments()) {
-               ++ali;
+               ++item;
             }
          }
       }
       p = i + 2;
    }
-   return ali.current();
+
+   return const_cast<ArgumentList *> (&(*item));
 }
 
 static
@@ -1222,7 +1220,7 @@ static void addClassToContext(EntryNav *rootNav)
             // symbols imported via tag files may come without the parent scope,
             // so we artificially create it here
          {
-            buildScopeFromQualifiedName(fullName, fullName.contains("::"), root->lang, tagInfo);
+            buildScopeFromQualifiedName(fullName, fullName.count("::"), root->lang, tagInfo);
          }
       }
 
@@ -1265,16 +1263,13 @@ static void addClassToContext(EntryNav *rootNav)
       cd->setBodyDef(fd);
 
       // see if the class is found inside a namespace
-      //bool found=addNamespace(root,cd);
-
       cd->insertUsedFile(fd);
 
-      // add class to the list
-      //printf("ClassDict.insert(%s)\n",fullName.data());
-      Doxygen::classSDict->append(fullName, cd);
+      // add class to the list      
+      Doxygen::classSDict->insert(fullName, QSharedPointer<ClassDef> (cd) );
 
-      if (cd->isGeneric()) { // generics are also stored in a separate dictionary for fast lookup of instantions
-         //printf("inserting generic '%s' cd=%p\n",fullName.data(),cd);
+      if (cd->isGeneric()) { 
+         // generics are also stored in a separate dictionary for fast lookup of instantions        
          Doxygen::genericsDict->insert(fullName, cd);
       }
    }
@@ -1283,18 +1278,16 @@ static void addClassToContext(EntryNav *rootNav)
    if (!root->subGrouping) {
       cd->setSubGrouping(false);
    }
+
    if (cd->hasDocumentation()) {
       addIncludeFile(cd, fd, root);
    }
-   if (fd && (root->section & Entry::COMPOUND_MASK)) {
-      //printf(">> Inserting class `%s' in file `%s' (root->fileName=`%s')\n",
-      //    cd->name().data(),
-      //    fd->name().data(),
-      //    root->fileName.data()
-      //   );
+
+   if (fd && (root->section & Entry::COMPOUND_MASK)) {     
       cd->setFileDef(fd);
       fd->insertClass(cd);
    }
+
    addClassToGroups(root, cd);
    cd->setRefItems(root->sli);
 
@@ -1328,58 +1321,62 @@ static void buildClassDocList(EntryNav *rootNav)
 static void resolveClassNestingRelations()
 {
    ClassSDict::Iterator cli(*Doxygen::classSDict);
+
    for (cli.toFirst(); cli.current(); ++cli) {
       cli.current()->visited = false;
    }
 
    bool done = false;
    int iteration = 0;
+
    while (!done) {
       done = true;
       ++iteration;
-      ClassDef *cd = 0;
+
+      QSharedPointer<ClassDef> cd;
+
       for (cli.toFirst(); (cd = cli.current()); ++cli) {
-         if (!cd->visited) {
+
+         if (! cd->visited) {
             QByteArray name = stripAnonymousNamespaceScope(cd->name());
-            //printf("processing=%s, iteration=%d\n",cd->name().data(),iteration);
+           
             // also add class to the correct structural context
-            Definition *d = findScopeFromQualifiedName(Doxygen::globalScope,
-                            name, cd->getFileDef(), 0);
-            if (d) {
-               //printf("****** adding %s to scope %s in iteration %d\n",cd->name().data(),d->name().data(),iteration);
-               d->addInnerCompound(cd);
+            Definition *d = findScopeFromQualifiedName(Doxygen::globalScope, name, cd->getFileDef(), 0);
+
+            if (d) {              
+               d->addInnerCompound(cd.data());
+
                cd->setOuterScope(d);
                cd->visited = true;
+
                done = false;
             }
-            //else
-            //{
-            //  printf("****** ignoring %s: scope not (yet) found in iteration %d\n",cd->name().data(),iteration);
-            //}
+            
          }
       }
    }
 
    //give warnings for unresolved compounds
-   ClassDef *cd = 0;
+   QSharedPointer<ClassDef> cd;
+
    for (cli.toFirst(); (cd = cli.current()); ++cli) {
-      if (!cd->visited) {
+
+      if (! cd->visited) {
          QByteArray name = stripAnonymousNamespaceScope(cd->name());
-         //printf("processing unresolved=%s, iteration=%d\n",cd->name().data(),iteration);
+       
          /// create the scope artificially
          // anyway, so we can at least relate scopes properly.
-         Definition *d = buildScopeFromQualifiedName(name, name.contains("::"), cd->getLanguage(), 0);
+
+         Definition *d = buildScopeFromQualifiedName(name, name.count("::"), cd->getLanguage(), 0);
+
          if (d != cd && !cd->getDefFileName().isEmpty())
             // avoid recursion in case of redundant scopes, i.e: namespace N { class N::C {}; }
             // for this case doxygen assumes the exitance of a namespace N::N in which C is to be found!
             // also avoid warning for stuff imported via a tagfile.
          {
-            d->addInnerCompound(cd);
+            d->addInnerCompound(cd.data());
             cd->setOuterScope(d);
-            warn(cd->getDefFileName(), cd->getDefLine(),
-                 "Internal inconsistency: scope for class %s not "
-                 "found!", name.data()
-                );
+            warn(cd->getDefFileName(), cd->getDefLine(), "Internal inconsistency: scope for class %s not found", name.data());
          }
       }
    }
@@ -1392,28 +1389,30 @@ void distributeClassGroupRelations()
    //printf("** distributeClassGroupRelations()\n");
 
    ClassSDict::Iterator cli(*Doxygen::classSDict);
+
    for (cli.toFirst(); cli.current(); ++cli) {
       cli.current()->visited = false;
    }
 
-   ClassDef *cd;
+   QSharedPointer<ClassDef> cd;
+
    for (cli.toFirst(); (cd = cli.current()); ++cli) {
       //printf("Checking %s\n",cd->name().data());
       // distribute the group to nested classes as well
-      if (!cd->visited && cd->partOfGroups() != 0 && cd->getClassSDict()) {
-         //printf("  Candidate for merging\n");
-         ClassSDict::Iterator ncli(*cd->getClassSDict());
-         ClassDef *ncd;
-         GroupDef *gd = cd->partOfGroups()->at(0);
-         for (ncli.toFirst(); (ncd = ncli.current()); ++ncli) {
-            if (ncd->partOfGroups() == 0) {
-               //printf("  Adding %s to group '%s'\n",ncd->name().data(),
-               //    gd->groupTitle());
+
+      GroupDef *gd = cd->partOfGroups()->at(0);
+
+      if (! cd->visited && cd->partOfGroups() != 0 && cd->getClassSDict()) {
+                
+         for (auto ncd : *cd->getClassSDict() ) { 
+            if (ncd->partOfGroups() == 0) {              
                ncd->makePartOfGroup(gd);
-               gd->addClass(ncd);
+               gd->addClass(ncd.data());
             }
          }
-         cd->visited = true; // only visit every class once
+
+         // only visit every class once
+         cd->visited = true; 
       }
    }
 }
@@ -1423,15 +1422,15 @@ void distributeClassGroupRelations()
 static ClassDef *createTagLessInstance(ClassDef *rootCd, ClassDef *templ, const QByteArray &fieldName)
 {
    QByteArray fullName = removeAnonymousScopes(templ->name());
+
    if (fullName.right(2) == "::") {
       fullName = fullName.left(fullName.length() - 2);
    }
+
    fullName += "." + fieldName;
-   ClassDef *cd = new ClassDef(templ->getDefFileName(),
-                               templ->getDefLine(),
-                               templ->getDefColumn(),
-                               fullName,
+   ClassDef *cd = new ClassDef(templ->getDefFileName(), templ->getDefLine(), templ->getDefColumn(), fullName,
                                templ->compoundType());
+
    cd->setDocumentation(templ->documentation(), templ->docFile(), templ->docLine()); // copy docs to definition
    cd->setBriefDescription(templ->briefDescription(), templ->briefFile(), templ->briefLine());
    cd->setLanguage(templ->getLanguage());
@@ -1459,7 +1458,7 @@ static ClassDef *createTagLessInstance(ClassDef *rootCd, ClassDef *templ, const 
       }
    }
    //printf("** adding class %s based on %s\n",fullName.data(),templ->name().data());
-   Doxygen::classSDict->append(fullName, cd);
+   Doxygen::classSDict->insert(fullName, QSharedPointer<ClassDef> (cd) );
 
    MemberList *ml = templ->getMemberList(MemberListType_pubAttribs);
 
@@ -1497,32 +1496,32 @@ static ClassDef *createTagLessInstance(ClassDef *rootCd, ClassDef *templ, const 
  *  recursively. Later on we need to patch the member types so we keep
  *  track of the hierarchy of classes we create.
  */
-static void processTagLessClasses(ClassDef *rootCd,
-                                  ClassDef *cd,
-                                  ClassDef *tagParentCd,
-                                  const QByteArray &prefix, int count)
+static void processTagLessClasses(ClassDef *rootCd, ClassDef *cd,ClassDef *tagParentCd, const QByteArray &prefix, int count)
 {
    //printf("%d: processTagLessClasses %s\n",count,cd->name().data());
    //printf("checking members for %s\n",cd->name().data());
+
    if (cd->getClassSDict()) {
       MemberList *ml = cd->getMemberList(MemberListType_pubAttribs);
 
       if (ml) {
-         QListIterator<MemberDef> li(*ml);
-         MemberDef *md;
-
-         for (li.toFirst(); (md = li.current()); ++li) {
+        
+         for (auto md : *ml) { 
             QByteArray type = md->typeString();
 
-            if (type.indexOf("::@") != -1) { // member of tag less struct/union
+            if (type.indexOf("::@") != -1) { 
+               // member of tag less struct/union
+
+/* BROOM-16
                ClassSDict::Iterator it(*cd->getClassSDict());
                ClassDef *icd;
-
                for (it.toFirst(); (icd = it.current()); ++it) {
-                  //printf("  member %s: type='%s'\n",md->name().data(),type.data());
-                  //printf("  comparing '%s'<->'%s'\n",type.data(),icd->name().data());
+*/
+               
+               for (auto icd : *cd->getClassSDict()) {
 
-                  if (type.indexOf(icd->name()) != -1) { // matching tag less struct/union
+                  if (type.indexOf(icd->name()) != -1) { 
+                     // matching tag less struct/union
                      QByteArray name = md->name();
 
                      if (name.at(0) == '@') {
@@ -1533,10 +1532,13 @@ static void processTagLessClasses(ClassDef *rootCd,
                         name.prepend(prefix + ".");
                      }
 
-                     //printf("    found %s for class %s\n",name.data(),cd->name().data());
-                     ClassDef *ncd = createTagLessInstance(rootCd, icd, name);
+              
+                     QSharedPointer<ClassDef> ncd (createTagLessInstance(rootCd, icd.data(), name));
+
+
                      processTagLessClasses(rootCd, icd, ncd, name, count + 1);
-                     //printf("    addTagged %s to %s\n",ncd->name().data(),tagParentCd->name().data());
+      
+
                      tagParentCd->addTaggedInnerClass(ncd);
                      ncd->setTagLessReference(icd);
 
@@ -1547,14 +1549,14 @@ static void processTagLessClasses(ClassDef *rootCd,
                      // recursive calls cd is the original tag-less struct (of which
                      // there is only one instance) and tagParentCd is the newly
                      // generated tagged struct of which there can be multiple instances!
+
                      MemberList *pml = tagParentCd->getMemberList(MemberListType_pubAttribs);
+
                      if (pml) {
-                        QListIterator<MemberDef> pli(*pml);
-                        MemberDef *pmd;
-                        for (pli.toFirst(); (pmd = pli.current()); ++pli) {
+                       
+                        for (auto pmd : *pml) {
                            if (pmd->name() == md->name()) {
-                              pmd->setAccessorType(ncd, substitute(pmd->typeString(), icd->name(), ncd->name()));
-                              //pmd->setType(substitute(pmd->typeString(),icd->name(),ncd->name()));
+                              pmd->setAccessorType(ncd, substitute(pmd->typeString(), icd->name(), ncd->name()));                              
                            }
                         }
                      }
@@ -8727,26 +8729,31 @@ int readFileOrDirectory(const char *s,
       fs = fs.left(fs.length() - 1);
    }
 
-   QFileInfo fi(fs);
-   //printf("readFileOrDirectory(%s)\n",s);
+   QFileInfo fi(fs);   
    int totalSize = 0;
+
    {
       if (exclDict == 0 || exclDict->find(fi.absoluteFilePath().toUtf8()) == 0) {
-         if (!fi.exists() || !fi.isReadable()) {
+
+         if (! fi.exists() || ! fi.isReadable()) {
             if (errorIfNotExist) {
                warn_uncond("source %s is not a readable file or directory... skipping.\n", s);
             }
+
          } else if (!Config_getBool("EXCLUDE_SYMLINKS") || !fi.isSymLink()) {
+
             if (fi.isFile()) {
-               QByteArray dirPath = fi.dirPath(true).toUtf8();
+               QByteArray dirPath  = fi.absolutePath().toUtf8();
                QByteArray filePath = fi.absoluteFilePath().toUtf8();
+
                if (paths && paths->find(dirPath)) {
                   paths->insert(dirPath, (void *)0x8);
                }
+
                //printf("killDict->find(%s)\n",fi.absoluteFilePath().data());
                if (killDict == 0 || killDict->find(filePath) == 0) {
                   totalSize += fi.size() + fi.absoluteFilePath().length() + 4; //readFile(&fi,fiList,input);
-                  //fiList->inSort(new FileInfo(fi));
+                
                   QByteArray name = fi.fileName().toUtf8();
                   //printf("New file %s\n",name.data());
                   if (fnDict) {
@@ -9557,7 +9564,8 @@ static void stopDoxygen(int)
 {
    QDir thisDir;
    msg("Cleaning up...\n");
-   if (!Doxygen::entryDBFileName.isEmpty()) {
+
+   if (! Doxygen::entryDBFileName.isEmpty()) {
       thisDir.remove(Doxygen::entryDBFileName);
    }
    if (!Doxygen::objDBFileName.isEmpty()) {

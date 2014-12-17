@@ -275,7 +275,7 @@ void ManDocVisitor::visit(DocInclude *inc)
          m_t << ".nf" << endl;
 
          QFileInfo cfi( inc->file() );
-         FileDef fd( cfi.dir().path().toUtf8(), cfi.fileName().toUtf8() );
+         FileDef fd( cfi.path().toUtf8(), cfi.fileName().toUtf8() );
 
          Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(), 
                                            langExt, inc->isExample(), inc->exampleFile(), &fd);
