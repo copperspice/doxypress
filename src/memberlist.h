@@ -45,9 +45,10 @@ class MemberList : public SortedList<MemberDef *>
    }
 
    static QByteArray listTypeAsString(MemberListType type);
-   bool insert(uint index, const MemberDef *md); 
-   void append(const MemberDef *md);
 
+   void append(MemberDef *md);
+   void insert(uint index, MemberDef *md); 
+ 
    int varCount() const       {
       assert(m_numDecMembers != -1);
       return m_varCnt;
@@ -95,9 +96,7 @@ class MemberList : public SortedList<MemberDef *>
       assert(m_numDocMembers != -1);
       return m_numDocMembers;
    }
-   bool needsSorting() const  {
-      return m_needsSorting;
-   }
+  
    void countDecMembers(bool countEnumValues = false, GroupDef *gd = 0);
    void countDocMembers(bool countEnumValues = false);
    int countInheritableMembers(ClassDef *inheritedFrom) const;
@@ -131,8 +130,7 @@ class MemberList : public SortedList<MemberDef *>
 
    void addListReferences(Definition *def);
    void findSectionsInDocumentation();
-   void setNeedsSorting(bool b);
-
+ 
    QList<MemberGroup> *getMemberGroupList() const {
       return memberGroupList;
    }
@@ -149,23 +147,24 @@ class MemberList : public SortedList<MemberDef *>
    int m_protoCnt;
    int m_defCnt;
    int m_friendCnt;
-   int m_numDecMembers; // number of members in the brief part of the memberlist
-   int m_numDocMembers; // number of members in the detailed part of the memberlist
+   int m_numDecMembers;  // number of members in the brief part of the memberlist
+   int m_numDocMembers;  // number of members in the detailed part of the memberlist
 
    QList<MemberGroup> *memberGroupList;
 
-   bool m_inGroup; // is this list part of a group definition
-   bool m_inFile;  // is this list part of a file definition
-   MemberListType m_listType;
+   bool m_inGroup;       // is this list part of a group definition
+   bool m_inFile;        // is this list part of a file definition
 
-   bool m_needsSorting;
+   MemberListType m_listType; 
 };
 
 /** An unsorted dictionary of MemberDef objects. */
 class MemberDict : public QHash<QString, MemberDef>
 {
  public:
-   MemberDict() : QHash<QString, MemberDef>() {}
+   MemberDict() : QHash<QString, MemberDef>() 
+   {}
+
    virtual ~MemberDict() {}
 };
 

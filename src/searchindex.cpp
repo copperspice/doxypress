@@ -583,6 +583,7 @@ class SearchDefinitionList : public QList<Definition>
    uint letter() const {
       return m_letter;
    }
+
  private:
    uint m_letter;
 };
@@ -590,7 +591,8 @@ class SearchDefinitionList : public QList<Definition>
 class SearchIndexList : public StringMap<QSharedPointer<SearchDefinitionList>>
 {
  public:
-   typedef Definition ElementType;
+   using ElementType = Definition
+
    SearchIndexList(uint letter) : StringMap<QSharedPointer<SearchDefinitionList>>(Qt:CaseInsensitive), m_letter(letter)
    {      
    }

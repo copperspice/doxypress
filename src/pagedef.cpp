@@ -86,19 +86,23 @@ void PageDef::setFileName(const char *name, bool dontEscape)
 }
 
 
-void PageDef::addInnerCompound(Definition *def)
+void PageDef::addInnerCompound(QSharedPointer<Definition> d)
 {
-   if (def->definitionType() == Definition::TypePage) {
+   if (d->definitionType() == Definition::TypePage) {
 
-      QSharedPointer<PageDef> pd( (PageDef *)def );
+      QSharedPointer<PageDef> pd = d.dynamicCast<PageDef>();
+      assert(pd);    
+           
       m_subPageDict->insert(pd->name(), pd);
 
-      def->setOuterScope(this);
+      d->setOuterScope(this);
 
       if (this == Doxygen::mainPage) {
          pd->setNestingLevel(m_nestingLevel);
+
       } else {
          pd->setNestingLevel(m_nestingLevel + 1);
+
       }
    }
 }

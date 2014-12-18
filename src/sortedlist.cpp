@@ -15,10 +15,6 @@
  *
 *************************************************************************/
 
-//   BROOM
-//   src/[a-z]*\.h 
-
-
 #include <sortedlist.h>
 
 #include <classdef.h>
@@ -27,9 +23,8 @@
 #include <dot.h>
 #include <filedef.h>
 #include <filename.h>
-#include <groupdef.h>
 #include <ftvhelp.h>
-
+#include <groupdef.h>
 
 // BaseClassList --> SortedList<BaseClassDef *>
 // BaseClassListIterator --> QListIterator<BaseClassDef *>

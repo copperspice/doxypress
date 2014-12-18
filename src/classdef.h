@@ -346,7 +346,9 @@ class ClassDef : public Definition
    void setSubGrouping(bool enabled);
    void setProtection(Protection p);
    void setGroupDefForAllMembers(GroupDef *g, Grouping::GroupPri_t pri, const QByteArray &fileName, int startLine, bool hasDocs);
-   void addInnerCompound(Definition *d);
+
+   void addInnerCompound(QSharedPointer<Definition> d) override; 
+
    ClassDef *insertTemplateInstance(const QByteArray &fileName, int startLine, int startColumn,
                                     const QByteArray &templSpec, bool &freshInstance);
 

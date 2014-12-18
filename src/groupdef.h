@@ -72,7 +72,7 @@ class GroupDef : public Definition
    }
 
    void addFile(FileDef *def);
-   bool addClass(const ClassDef *def);
+   bool addClass(QSharedPointer<const ClassDef> cd);
    bool addNamespace(const NamespaceDef *def);
    void addGroup(const GroupDef *def);
    void addParentGroup(const GroupDef *def);
@@ -97,7 +97,7 @@ class GroupDef : public Definition
    void findSectionsInDocumentation();
 
    void addListReferences();
-   void sortMemberLists();
+  
    bool subGrouping() const {
       return m_subGrouping;
    }

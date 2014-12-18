@@ -30,7 +30,6 @@
 #include <outputlist.h>
 #include <util.h>
 
-
 NamespaceDef::NamespaceDef(const char *df, int dl, int dc, const char *name, const char *lref,
                            const char *fName, const char *type, bool isPublished) :
    Definition(df, dl, dc, name), m_isPublished(isPublished)
@@ -46,9 +45,7 @@ NamespaceDef::NamespaceDef(const char *df, int dl, int dc, const char *name, con
    classSDict       = new ClassSDict();
    namespaceSDict   = new NamespaceSDict();
    m_innerCompounds = new StringMap<QSharedPointer<Definition>>();
-
-   usingDirList     = 0;
-   usingDeclList    = 0;
+      
    m_allMembersDict = 0;
 
    setReference(lref);
@@ -76,18 +73,14 @@ NamespaceDef::~NamespaceDef()
 {
    delete classSDict;
    delete namespaceSDict;
-   delete m_innerCompounds;
-   delete usingDirList;
-   delete usingDeclList;
+   delete m_innerCompounds;     
    delete memberGroupSDict;
    delete m_allMembersDict;
 }
 
 void NamespaceDef::distributeMemberGroupDocumentation()
 {
-   MemberGroupSDict::Iterator mgli(*memberGroupSDict);
-   MemberGroup *mg;
-   for (; (mg = mgli.current()); ++mgli) {
+   for (auto mg : *memberGroupSDict) {
       mg->distributeMemberGroupDocumentation();
    }
 }
@@ -95,15 +88,13 @@ void NamespaceDef::distributeMemberGroupDocumentation()
 void NamespaceDef::findSectionsInDocumentation()
 {
    docFindSections(documentation(), this, 0, docFile());
-   MemberGroupSDict::Iterator mgli(*memberGroupSDict);
-   MemberGroup *mg;
-   for (; (mg = mgli.current()); ++mgli) {
+   
+   for (auto mg : *memberGroupSDict) {
       mg->findSectionsInDocumentation();
-   }
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
-      if (ml->listType()&MemberListType_declarationLists) {
+   }  
+
+   for (auto ml : m_memberLists) {
+      if (ml->listType() & MemberListType_declarationLists) {
          ml->findSectionsInDocumentation();
       }
    }
@@ -114,63 +105,62 @@ void NamespaceDef::insertUsedFile(FileDef *fd)
    if (fd == 0) {
       return;
    }
-   if (files.find(fd) == -1) {
+
+   if (files.contains(fd)) {
       if (Config_getBool("SORT_MEMBER_DOCS")) {
          files.inSort(fd);
+
       } else {
          files.append(fd);
       }
    }
 }
 
-void NamespaceDef::addInnerCompound(Definition *d)
+void NamespaceDef::addInnerCompound(QSharedPointer<Definition> d)
 {
-   m_innerCompounds->append(d->localName(), d);
+   m_innerCompounds->insert(d->localName(), d);
+  
    if (d->definitionType() == Definition::TypeNamespace) {
-      insertNamespace((NamespaceDef *)d);
+
+      QSharedPointer<NamespaceDef> nd = d.dynamicCast<NamespaceDef>();
+      assert(nd);    
+
+      insertNamespace(nd);
+
    } else if (d->definitionType() == Definition::TypeClass) {
-      insertClass((ClassDef *)d);
+
+      QSharedPointer<ClassDef> cd = d.dynamicCast<ClassDef>();
+      assert(cd);    
+
+      insertClass(cd);
    }
 }
 
-void NamespaceDef::insertClass(ClassDef *cd)
+void NamespaceDef::insertClass(QSharedPointer<ClassDef> cd)
 {
-   if (classSDict->find(cd->name()) == 0) {
-      if (Config_getBool("SORT_BRIEF_DOCS")) {
-         classSDict->inSort(cd->name(), cd);
-      } else {
-         classSDict->append(cd->name(), cd);
-      }
+   if (classSDict->find(cd->name()) == 0) {      
+      classSDict->insert(cd->name(), cd);
    }
 }
 
-void NamespaceDef::insertNamespace(NamespaceDef *nd)
+void NamespaceDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
 {
-   if (namespaceSDict->find(nd->name()) == 0) {
-      if (Config_getBool("SORT_MEMBER_DOCS")) {
-         namespaceSDict->inSort(nd->name(), nd);
-      } else {
-         namespaceSDict->append(nd->name(), nd);
-      }
+   if (namespaceSDict->find(nd->name()) == 0) {     
+      namespaceSDict->insert(nd->name(), nd);
    }
 }
-
 
 void NamespaceDef::addMembersToMemberGroup()
-{
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
-      if (ml->listType()&MemberListType_declarationLists) {
+{  
+   for (auto ml : m_memberLists) {
+      if (ml->listType() & MemberListType_declarationLists) {
          ::addMembersToMemberGroup(ml, &memberGroupSDict, this);
       }
    }
 
    // add members inside sections to their groups
-   if (memberGroupSDict) {
-      MemberGroupSDict::Iterator mgli(*memberGroupSDict);
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
+   if (memberGroupSDict) {     
+      for (auto mg : *memberGroupSDict) {
          if (mg->allMembersInSameSection() && m_subGrouping) {
             //printf("----> addToDeclarationSection(%s)\n",mg->header().data());
             mg->addToDeclarationSection();
@@ -179,47 +169,58 @@ void NamespaceDef::addMembersToMemberGroup()
    }
 }
 
-void NamespaceDef::insertMember(MemberDef *md)
+void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
 {
    if (md->isHidden()) {
       return;
    }
+
    MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
-   if (allMemberList == 0) {
+
+   if (! allMemberList) {
       allMemberList = new MemberList(MemberListType_allMembersList);
       m_memberLists.append(allMemberList);
    }
-   allMemberList->append(md);
-   if (m_allMembersDict == 0) {
+
+   allMemberList->append(md.data());
+
+   //
+   if (! m_allMembersDict) {
       m_allMembersDict = new MemberSDict;
    }
-   //printf("%s::m_allMembersDict->append(%s)\n",name().data(),md->localName().data());
-   m_allMembersDict->append(md->localName(), md);
-   //::addNamespaceMemberNameToIndex(md);
-   //static bool sortBriefDocs=Config_getBool("SORT_BRIEF_DOCS");
+  
+   m_allMembersDict->insert(md->localName(), md);
+  
    switch (md->memberType()) {
+
       case MemberType_Variable:
-         addMemberToList(MemberListType_decVarMembers, md);
-         addMemberToList(MemberListType_docVarMembers, md);
+         addMemberToList(MemberListType_decVarMembers, md.data());
+         addMemberToList(MemberListType_docVarMembers, md.data());
          break;
+
       case MemberType_Function:
-         addMemberToList(MemberListType_decFuncMembers, md);
-         addMemberToList(MemberListType_docFuncMembers, md);
+         addMemberToList(MemberListType_decFuncMembers, md.data());
+         addMemberToList(MemberListType_docFuncMembers, md.data());
          break;
+
       case MemberType_Typedef:
-         addMemberToList(MemberListType_decTypedefMembers, md);
-         addMemberToList(MemberListType_docTypedefMembers, md);
+         addMemberToList(MemberListType_decTypedefMembers, md.data());
+         addMemberToList(MemberListType_docTypedefMembers, md.data());
          break;
+
       case MemberType_Enumeration:
-         addMemberToList(MemberListType_decEnumMembers, md);
-         addMemberToList(MemberListType_docEnumMembers, md);
+         addMemberToList(MemberListType_decEnumMembers, md.data());
+         addMemberToList(MemberListType_docEnumMembers, md.data());
          break;
+
       case MemberType_EnumValue:
          break;
+
       case MemberType_Define:
-         addMemberToList(MemberListType_decDefineMembers, md);
-         addMemberToList(MemberListType_docDefineMembers, md);
+         addMemberToList(MemberListType_decDefineMembers, md.data());
+         addMemberToList(MemberListType_docDefineMembers, md.data());
          break;
+
       default:
          err("NamespaceDef::insertMembers(): "
              "member `%s' with class scope `%s' inserted in namespace scope `%s'!\n",
@@ -249,24 +250,19 @@ void NamespaceDef::writeTagFile(FTextStream &tagFile)
    tagFile << "  <compound kind=\"namespace\">" << endl;
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
    tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxygen::htmlFileExtension << "</filename>" << endl;
+
    QByteArray idStr = id();
    if (!idStr.isEmpty()) {
       tagFile << "    <clangid>" << convertToXML(idStr) << "</clangid>" << endl;
    }
-   QListIterator<LayoutDocEntry> eli(LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace));
-   LayoutDocEntry *lde;
-
-   for (eli.toFirst(); (lde = eli.current()); ++eli) {
-
+   
+   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
       switch (lde->kind()) {
 
          case LayoutDocEntry::NamespaceNestedNamespaces:
          {
-            if (namespaceSDict) {
-               StringMap<QSharedPointer<NamespaceDef>>::Iterator ni(*namespaceSDict);
-               NamespaceDef *nd;
-
-               for (ni.toFirst(); (nd = ni.current()); ++ni) {
+            if (namespaceSDict) {              
+               for (auto nd : *namespaceSDict) {
                   if (nd->isLinkableInProject()) {
                      tagFile << "    <namespace>" << convertToXML(nd->name()) << "</namespace>" << endl;
                   }
@@ -277,11 +273,8 @@ void NamespaceDef::writeTagFile(FTextStream &tagFile)
 
          case LayoutDocEntry::NamespaceClasses:
          {
-            if (classSDict) {
-               StringMap<QSharedPointer<ClassDef>>::Iterator ci(*classSDict);
-               ClassDef *cd;
-
-               for (ci.toFirst(); (cd = ci.current()); ++ci) {
+            if (classSDict) {              
+               for (auto cd : *classSDict) {
                   if (cd->isLinkableInProject()) {
                      tagFile << "    <class kind=\"" << cd->compoundTypeString()
                              << "\">" << convertToXML(cd->name()) << "</class>" << endl;
@@ -294,6 +287,7 @@ void NamespaceDef::writeTagFile(FTextStream &tagFile)
          {
             LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
             MemberList *ml = getMemberList(lmd->type);
+
             if (ml) {
                ml->writeTagFile(tagFile);
             }
@@ -302,11 +296,8 @@ void NamespaceDef::writeTagFile(FTextStream &tagFile)
 
          case LayoutDocEntry::MemberGroups: 
          {
-            if (memberGroupSDict) {
-               MemberGroupSDict::Iterator mgli(*memberGroupSDict);
-               MemberGroup *mg;
-
-               for (; (mg = mgli.current()); ++mgli) {
+            if (memberGroupSDict) {              
+               for (auto mg : *memberGroupSDict) {
                   mg->writeTagFile(tagFile);
                }
             }
@@ -445,15 +436,13 @@ void NamespaceDef::writeMemberGroups(OutputList &ol)
 {
    /* write user defined member groups */
    if (memberGroupSDict) {
-      memberGroupSDict->sort();
-      MemberGroupSDict::Iterator mgli(*memberGroupSDict);
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
-         if ((!mg->allMembersInSameSection() || !m_subGrouping)
-               && mg->header() != "[NOHEADER]") {
+     
+      for (auto mg : *memberGroupSDict) {
+         if ((! mg->allMembersInSameSection() || ! m_subGrouping) && mg->header() != "[NOHEADER]") {
             mg->writeDeclarations(ol, 0, this, 0, 0);
          }
       }
+
    }
 }
 
@@ -473,28 +462,33 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
 {
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
-   QListIterator<LayoutDocEntry> eli(
-      LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace));
-   LayoutDocEntry *lde;
+   
    bool first = true;
+
    SrcLangExt lang = getLanguage();
-   for (eli.toFirst(); (lde = eli.current()); ++eli) {
+
+   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
+
       if ((lde->kind() == LayoutDocEntry::NamespaceClasses && classSDict && classSDict->declVisible()) ||
-            (lde->kind() == LayoutDocEntry::NamespaceNestedNamespaces && namespaceSDict && namespaceSDict->declVisible())
-         ) {
+            (lde->kind() == LayoutDocEntry::NamespaceNestedNamespaces && namespaceSDict && namespaceSDict->declVisible())) {
+
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
          QByteArray label = lde->kind() == LayoutDocEntry::NamespaceClasses ? "nested-classes" : "namespaces";
+
          ol.writeSummaryLink(0, label, ls->title(lang), first);
          first = false;
+
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
          MemberList *ml = getMemberList(lmd->type);
+
          if (ml && ml->declVisible()) {
             ol.writeSummaryLink(0, MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }
    }
+
    if (!first) {
       ol.writeString("  </div>\n");
    }
@@ -517,6 +511,7 @@ void NamespaceDef::addNamespaceAttributes(OutputList &ol)
 void NamespaceDef::writeDocumentation(OutputList &ol)
 {
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+
    //static bool outputJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
    //static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
 
@@ -547,10 +542,8 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
    //---------------------------------------- start flexible part -------------------------------
 
    SrcLangExt lang = getLanguage();
-   QListIterator<LayoutDocEntry> eli(
-      LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace));
-   LayoutDocEntry *lde;
-   for (eli.toFirst(); (lde = eli.current()); ++eli) {
+  
+   for (auto lde :LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
       switch (lde->kind()) {
          case LayoutDocEntry::BriefDesc:
             writeBriefDescription(ol);
@@ -646,9 +639,11 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
 
    if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
       MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
+
       if (allMemberList) {
          allMemberList->sort();
       }
+
       writeMemberPages(ol);
    }
 }
@@ -658,9 +653,7 @@ void NamespaceDef::writeMemberPages(OutputList &ol)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
+   for (auto ml : m_memberLists) {
       if (ml->listType()&MemberListType_documentationLists) {
          ml->writeDocumentationPage(ol, displayName(), this);
       }
@@ -676,18 +669,21 @@ void NamespaceDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) c
    ol.writeString("        <table>\n");
 
    MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
+
    if (allMemberList) {
-      QListIterator<MemberDef> mli(*allMemberList);
-      MemberDef *md;
-      for (mli.toFirst(); (md = mli.current()); ++mli) {
+      
+      for (auto md : *allMemberList) {
+
          if (md->getNamespaceDef() == this && md->isLinkable() && !md->isEnumValue()) {
             ol.writeString("          <tr><td class=\"navtab\">");
+
             if (md->isLinkableInProject()) {
                if (md == currentMd) { // selected item => highlight
                   ol.writeString("<a class=\"qindexHL\" ");
                } else {
                   ol.writeString("<a class=\"qindex\" ");
                }
+
                ol.writeString("href=\"");
                if (createSubDirs) {
                   ol.writeString("../../");
@@ -717,33 +713,22 @@ int NamespaceDef::countMembers()
    return (allMemberList ? allMemberList->numDocMembers() : 0) + classSDict->count();
 }
 
-void NamespaceDef::addUsingDirective(NamespaceDef *nd)
-{
-   if (usingDirList == 0) {
-      usingDirList = new NamespaceSDict;
-   }
-
-   if (usingDirList->find(nd->qualifiedName()) == 0) {
-      usingDirList->append(nd->qualifiedName(), nd);
-   }
-
-   //printf("%p: NamespaceDef::addUsingDirective: %s:%d\n",this,name().data(),usingDirList->count());
+void NamespaceDef::addUsingDirective(QSharedPointer<NamespaceDef> nd)
+{   
+   if (m_usingDirMap.find(nd->qualifiedName()) == 0) {
+      m_usingDirMap.insert(nd->qualifiedName(), nd);
+   }   
 }
 
-NamespaceSDict *NamespaceDef::getUsedNamespaces() const
+const NamespaceSDict &NamespaceDef::getUsedNamespaces() const
 {
-   //printf("%p: NamespaceDef::getUsedNamespace: %s:%d\n",this,name().data(),usingDirList?usingDirList->count():0);
-   return usingDirList;
+   return m_usingDirMap;
 }
 
-void NamespaceDef::addUsingDeclaration(Definition *d)
+void NamespaceDef::addUsingDeclaration(QSharedPointer<Definition> d)
 {
-   if (usingDeclList == 0) {
-      usingDeclList = new StringMap<QSharedPointer<Definition>>();
-   }
-
-   if (usingDeclList->find(d->qualifiedName()) == 0) {
-      usingDeclList->append(d->qualifiedName(), d);
+   if (m_usingDeclMap.find(d->qualifiedName()) == 0) {
+      m_usingDeclMap.insert(d->qualifiedName(), d);
    }
 }
 
@@ -763,18 +748,17 @@ Definition *NamespaceDef::findInnerCompound(const char *n)
       return 0;
    }
 
-   Definition *d = m_innerCompounds->find(n);
+   QSharedPointer<Definition> d = m_innerCompounds->find(n);
 
-   if (d == 0) {
-      if (usingDirList) {
-         d = usingDirList->find(n);
-      }
-      if (d == 0 && usingDeclList) {
-         d = usingDeclList->find(n);
+   if (! d) {      
+      d = m_usingDirMap.find(n);
+      
+      if (! d) {
+         d = m_usingDeclMap.find(n);
       }
    }
 
-   return d;
+   return d.data();
 }
 
 void NamespaceDef::addListReferences()
@@ -782,24 +766,16 @@ void NamespaceDef::addListReferences()
    //bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
    {
       QList<ListItemInfo> *xrefItems = xrefListItems();
-      addRefItem(xrefItems,
-                 qualifiedName(),
-                 getLanguage() == SrcLangExt_Fortran ?
-                 theTranslator->trModule(true, true) :
-                 theTranslator->trNamespace(true, true),
-                 getOutputFileBase(), displayName(),
-                 0,
-                 this
-                );
-   }
-   MemberGroupSDict::Iterator mgli(*memberGroupSDict);
-   MemberGroup *mg;
-   for (; (mg = mgli.current()); ++mgli) {
+      addRefItem(xrefItems, qualifiedName(), 
+                 getLanguage() == SrcLangExt_Fortran ? theTranslator->trModule(true, true) : theTranslator->trNamespace(true, true),
+                 getOutputFileBase(), displayName(), 0, this );
+   }  
+
+   for (auto mg : *memberGroupSDict) {
       mg->addListReferences(this);
    }
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
+
+   for (auto ml : m_memberLists) {
       if (ml->listType()&MemberListType_documentationLists) {
          ml->addListReferences(this);
       }
@@ -811,6 +787,7 @@ QByteArray NamespaceDef::displayName(bool includeScope) const
    QByteArray result = includeScope ? name() : localName();
    SrcLangExt lang = getLanguage();
    QByteArray sep = getLanguageSpecificSeparator(lang);
+
    if (sep != "::") {
       result = substitute(result, "::", sep);
    }
@@ -822,6 +799,7 @@ QByteArray NamespaceDef::localName() const
 {
    QByteArray result = name();
    int i = result.lastIndexOf("::");
+
    if (i != -1) {
       result = result.mid(i + 2);
    }
@@ -835,48 +813,33 @@ void NamespaceDef::combineUsingRelations()
    }
 
    visited = true;
-
-   if (usingDirList) {
-      NamespaceSDict::Iterator nli(*usingDirList);
-      NamespaceDef *nd;
-
-      for (nli.toFirst(); (nd = nli.current()); ++nli) {
-         nd->combineUsingRelations();
+ 
+   for (auto nd : m_usingDirMap) {
+      nd->combineUsingRelations();
+   }
+  
+   for (auto nd : m_usingDirMap) {
+      // add used namespaces of namespace nd to this namespace
+      
+      for (auto und : nd->getUsedNamespaces() ) {
+         addUsingDirective(und);
       }
-
-      for (nli.toFirst(); (nd = nli.current()); ++nli) {
-         // add used namespaces of namespace nd to this namespace
-
-         if (nd->getUsedNamespaces()) {
-            NamespaceSDict::Iterator unli(*nd->getUsedNamespaces());
-            NamespaceDef *und;
-
-            for (unli.toFirst(); (und = unli.current()); ++unli) {
-               //printf("Adding namespace %s to the using list of %s\n",und->qualifiedName().data(),qualifiedName().data());
-               addUsingDirective(und);
-            }
-         }
-
-         // add used classes of namespace nd to this namespace
-         if (nd->getUsedClasses()) {
-            StringMap<QSharedPointer<Definition>>::Iterator cli(*nd->getUsedClasses());
-            Definition *ucd;
-
-            for (cli.toFirst(); (ucd = cli.current()); ++cli) {
-               //printf("Adding class %s to the using list of %s\n",cd->qualifiedName().data(),qualifiedName().data());
-               addUsingDeclaration(ucd);
-            }
-         }
+  
+      // add used classes of namespace nd to this namespace     
+      for (auto ucd : nd->getUsedClasses() ) {
+         addUsingDeclaration(ucd);
       }
    }
 }
 
+int NamespaceSDict::compareValues(const NamespaceDef *item1, const NamespaceDef *item2) const
+{
+   return qstricmp(item1->name(), item2->name());
+}
+
 bool NamespaceSDict::declVisible() const
 {
-   StringMap<QSharedPointer<NamespaceDef>>::Iterator ni(*this);
-   NamespaceDef *nd;
-
-   for (ni.toFirst(); (nd = ni.current()); ++ni) {
+   for (auto nd : *this) {
       if (nd->isLinkable()) {
          return true;
       }
@@ -885,8 +848,7 @@ bool NamespaceSDict::declVisible() const
    return false;
 }
 
-void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title,
-                                      bool const isConstantGroup, bool localName)
+void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title, bool const isConstantGroup, bool localName)
 {
    if (count() == 0) {
       return;   // no namespaces in the list
@@ -896,12 +858,14 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title,
       return;
    }
 
-   StringMap<QSharedPointer<NamespaceDef>>::Iterator ni(*this);
-
-   NamespaceDef *nd;
    bool found = false;
+  
+   for (auto nd : *this) {
 
-   for (ni.toFirst(); (nd = ni.current()) && !found; ++ni) {
+      if (found) {
+         break;
+      }
+
       if (nd->isLinkable()) {
          SrcLangExt lang = nd->getLanguage();
 
@@ -910,6 +874,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title,
                found = true;
                break;
             }
+
          } else if (!isConstantGroup) { // ensure we only get extra section in IDL
             if (nd->isConstantGroup()) {
                err("Internal inconsistency: constant group but not IDL?\n");
@@ -919,42 +884,56 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title,
          }
       }
    }
+
    if (!found) {
       return;   // no linkable namespaces in the list
    }
 
    // write list of namespaces
    ol.startMemberHeader("namespaces");
+
    //bool javaOpt    = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
    //bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+
    ol.parseText(title);
    ol.endMemberHeader();
    ol.startMemberList();
-   for (ni.toFirst(); (nd = ni.current()); ++ni) {
+    
+   for (auto nd : *this) {
+
       if (nd->isLinkable()) {
+
          SrcLangExt lang = nd->getLanguage();
+
          if (lang == SrcLangExt_IDL && (isConstantGroup != nd->isConstantGroup())) {
             continue;   // will be output in another pass, see layout_default.xml
          }
+
          ol.startMemberDeclaration();
          ol.startMemberItem(nd->getOutputFileBase(), 0);
+
          QByteArray ct = nd->compoundTypeString();
          ol.docify(ct);
          ol.docify(" ");
          ol.insertMemberAlign();
+
          QByteArray name;
          if (localName) {
             name = nd->localName();
          } else {
             name = nd->displayName();
          }
+
          ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), 0, name);
          ol.endMemberItem();
-         if (!nd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+
+         if (! nd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+
             ol.startMemberDescription(nd->getOutputFileBase());
-            ol.generateDoc(nd->briefFile(), nd->briefLine(), nd, 0, nd->briefDescription(), false, false, 0, true);
+            ol.generateDoc(nd->briefFile(), nd->briefLine(), nd.data(), 0, nd->briefDescription(), false, false, 0, true);
             ol.endMemberDescription();
          }
+
          ol.endMemberDeclaration(0, 0);
       }
    }
@@ -963,78 +942,44 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title,
 
 MemberList *NamespaceDef::createMemberList(MemberListType lt)
 {   
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
-      if (ml->listType() == lt) {
-         return ml;
+   for (auto item : m_memberLists) {
+      if (item->listType() == lt) {
+         return item;
       }
    }
+
    // not found, create a new member list
-   ml = new MemberList(lt);
+   MemberList *ml = new MemberList(lt);
    m_memberLists.append(ml);
+ 
    return ml;
 }
 
 void NamespaceDef::addMemberToList(MemberListType lt, MemberDef *md)
-{
-   static bool sortBriefDocs = Config_getBool("SORT_BRIEF_DOCS");
-   static bool sortMemberDocs = Config_getBool("SORT_MEMBER_DOCS");
+{  
    MemberList *ml = createMemberList(lt);
-   ml->setNeedsSorting(
-      ((ml->listType()&MemberListType_declarationLists) && sortBriefDocs) ||
-      ((ml->listType()&MemberListType_documentationLists) && sortMemberDocs));
    ml->append(md);
 
-#if 0
-   if (ml->needsSorting()) {
-      ml->inSort(md);
-   } else {
-      ml->append(md);
-   }
-#endif
-
-   if (ml->listType()&MemberListType_declarationLists) {
+   if (ml->listType() & MemberListType_declarationLists) {
       md->setSectionList(this, ml);
    }
 }
 
-void NamespaceDef::sortMemberLists()
-{
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
-      if (ml->needsSorting()) {
-         ml->sort();
-         ml->setNeedsSorting(false);
-      }
-   }
-   if (classSDict) {
-      classSDict->sort();
-   }
-   if (namespaceSDict) {
-      namespaceSDict->sort();
-   }
-}
-
-
-
 MemberList *NamespaceDef::getMemberList(MemberListType lt) const
 {
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
+   for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
          return ml;
       }
    }
+
    return 0;
 }
 
 void NamespaceDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title)
 {
    MemberList *ml = getMemberList(lt);
+
    if (ml) {
       ml->writeDeclarations(ol, 0, this, 0, 0, title, 0);
    }
@@ -1043,6 +988,7 @@ void NamespaceDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, co
 void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title)
 {
    MemberList *ml = getMemberList(lt);
+
    if (ml) {
       ml->writeDocumentation(ol, displayName(), this, title);
    }
@@ -1052,22 +998,21 @@ void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, c
 bool NamespaceDef::isLinkableInProject() const
 {
    int i = name().lastIndexOf("::");
+
    if (i == -1) {
       i = 0;
    } else {
       i += 2;
    }
+
    static bool extractAnonNs = Config_getBool("EXTRACT_ANON_NSPACES");
-   if (extractAnonNs &&                             // extract anonymous ns
-         name().mid(i, 20) == "anonymous_namespace{"  // correct prefix
-      ) {                                           // not disabled by config
+
+   if (extractAnonNs && name().mid(i, 20) == "anonymous_namespace{") {                                          
       return true;
    }
-   return !name().isEmpty() && name().at(i) != '@' && // not anonymous
-          (hasDocumentation() || getLanguage() == SrcLangExt_CSharp) && // documented
-          !isReference() &&      // not an external reference
-          !isHidden() &&         // not hidden
-          !isArtificial();       // or artificial
+
+   return !name().isEmpty() && name().at(i) != '@' &&  (hasDocumentation() || getLanguage() == SrcLangExt_CSharp) && 
+          !isReference() && !isHidden() && ! isArtificial();      
 }
 
 bool NamespaceDef::isLinkable() const
@@ -1077,26 +1022,32 @@ bool NamespaceDef::isLinkable() const
 
 MemberDef *NamespaceDef::getMemberByName(const QByteArray &n) const
 {
-   MemberDef *md = 0;
+   QSharedPointer<MemberDef> md;
+
    if (m_allMembersDict && !n.isEmpty()) {
-      md = m_allMembersDict->find(n);
-      //printf("%s::m_allMembersDict->find(%s)=%p\n",name().data(),n.data(),md);
+      md = QSharedPointer<MemberDef> (m_allMembersDict->find(n));
    }
-   return md;
+
+   return md.data();
 }
 
 QByteArray NamespaceDef::title() const
 {
    SrcLangExt lang = getLanguage();
    QByteArray pageTitle;
+
    if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
       pageTitle = theTranslator->trPackage(displayName());
+
    } else if (lang == SrcLangExt_Fortran) {
       pageTitle = theTranslator->trModuleReference(displayName());
+
    } else if (lang == SrcLangExt_IDL) {
-      pageTitle = isConstantGroup()
+
+      pageTitle = isConstantGroup() 
                   ? theTranslator->trConstantGroupReference(displayName())
                   : theTranslator->trModuleReference(displayName());
+
    } else {
       pageTitle = theTranslator->trNamespaceReference(displayName());
    }
@@ -1106,16 +1057,23 @@ QByteArray NamespaceDef::title() const
 QByteArray NamespaceDef::compoundTypeString() const
 {
    SrcLangExt lang = getLanguage();
+
    if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
       return "package";
+
    } else if (lang == SrcLangExt_Fortran) {
       return "module";
+
    } else if (lang == SrcLangExt_IDL) {
+
       if (isModule()) {
          return "module";
+
       } else if (isConstantGroup()) {
+
          return "constants";
       } else if (isLibrary()) {
+
          return "library";
       } else {
          err("Internal inconsistency: namespace in IDL not module, library or constant group\n");
@@ -1123,4 +1081,3 @@ QByteArray NamespaceDef::compoundTypeString() const
    }
    return "";
 }
-

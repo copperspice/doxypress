@@ -25,15 +25,30 @@
 #include <definition.h>
 #include <filedef.h>
 
-class MemberList;
 class ClassDef;
-class OutputList;
 class ClassSDict;
+class FTextStream;
+class MemberList;
 class MemberDef;
-class NamespaceList;
 class MemberGroupSDict;
 class NamespaceSDict;
-class FTextStream;
+class NamespaceList;
+class OutputList;
+
+/** A sorted dictionary of NamespaceDef objects. */
+class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
+{
+ public:
+   NamespaceSDict() : StringMap<QSharedPointer<NamespaceDef>>() {}
+   ~NamespaceSDict() {}
+
+   void writeDeclaration(OutputList &ol, const char *title, bool isConstantGroup = false, bool localName = false);
+   bool declVisible() const;
+
+ private:
+   int compareValues(const NamespaceDef *item1, const NamespaceDef *item2) const;       
+};
+
 
 /** A model of a namespace symbol. */
 class NamespaceDef : public Definition
@@ -43,11 +58,13 @@ class NamespaceDef : public Definition
                 const char *refFile = 0, const char *type = 0, bool isPublished = false);
 
    ~NamespaceDef();
+
    DefType definitionType() const {
       return TypeNamespace;
    }
 
    QByteArray getOutputFileBase() const;
+
    QByteArray anchor() const {
       return QByteArray();
    }
@@ -59,18 +76,20 @@ class NamespaceDef : public Definition
    void writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const;
    void writeTagFile(FTextStream &);
 
-   void insertClass(ClassDef *cd);
-   void insertNamespace(NamespaceDef *nd);
-   void insertMember(MemberDef *md);
+   void insertClass(QSharedPointer<ClassDef> cd);
+   void insertNamespace(QSharedPointer<NamespaceDef> nd);
+   void insertMember(QSharedPointer<MemberDef> md);
 
    void computeAnchors();
    int countMembers();
-   void addUsingDirective(NamespaceDef *nd);
-   NamespaceSDict *getUsedNamespaces() const;
-   void addUsingDeclaration(Definition *def);
 
-   StringMap<QSharedPointer<Definition>> *getUsedClasses() const {
-      return usingDeclList;
+   void addUsingDirective(QSharedPointer<NamespaceDef> nd);
+   void addUsingDeclaration(QSharedPointer<Definition> def);
+
+   const NamespaceSDict &getUsedNamespaces() const;
+
+   const StringMap<QSharedPointer<Definition>> &getUsedClasses() const {
+      return m_usingDeclMap;
    }
 
    void combineUsingRelations();
@@ -95,10 +114,11 @@ class NamespaceDef : public Definition
    void addMembersToMemberGroup();
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
-   void sortMemberLists();
-
+ 
    virtual Definition *findInnerCompound(const char *name);
-   void addInnerCompound(Definition *d);
+
+   virtual void addInnerCompound(QSharedPointer<Definition> d) override;
+
    void addListReferences();
 
    bool subGrouping() const {
@@ -106,10 +126,12 @@ class NamespaceDef : public Definition
    }
 
    MemberList *getMemberList(MemberListType lt) const;
-   const QList<MemberList> &getMemberLists() const {
+
+   const QList<MemberList *> &getMemberLists() const {
       return m_memberLists;
    }
-   MemberDef    *getMemberByName(const QByteArray &) const;
+
+   MemberDef *getMemberByName(const QByteArray &) const;
 
    /*! Returns the user defined member groups */
    MemberGroupSDict *getMemberGroupSDict() const {
@@ -142,8 +164,7 @@ class NamespaceDef : public Definition
    void endMemberDeclarations(OutputList &ol);
    void writeClassDeclarations(OutputList &ol, const QByteArray &title);
    void writeInlineClasses(OutputList &ol);
-   void writeNamespaceDeclarations(OutputList &ol, const QByteArray &title,
-                                   bool isConstantGroup = false);
+   void writeNamespaceDeclarations(OutputList &ol, const QByteArray &title, bool isConstantGroup = false);
    void writeMemberGroups(OutputList &ol);
    void writeAuthorSection(OutputList &ol);
    void startMemberDocumentation(OutputList &ol);
@@ -151,23 +172,25 @@ class NamespaceDef : public Definition
    void writeSummaryLinks(OutputList &ol);
    void addNamespaceAttributes(OutputList &ol);
 
-   QByteArray           fileName;
-   FileList             files;
+   bool m_subGrouping;
+   bool m_isPublished;
 
-   NamespaceSDict      *usingDirList;
+   QByteArray  fileName;
+   FileList    files;
+  
+   StringMap<QSharedPointer<Definition>>   m_usingDeclMap;
+   StringMap<QSharedPointer<Definition>>  *m_innerCompounds;
 
-   StringMap<QSharedPointer<Definition>>   *usingDeclList;
-   StringMap<QSharedPointer<Definition>>   *m_innerCompounds;
-
+   NamespaceSDict        m_usingDirMap;
+   NamespaceSDict       *namespaceSDict;
    MemberSDict          *m_allMembersDict;
-   QList<MemberList>     m_memberLists;
    MemberGroupSDict     *memberGroupSDict;
    ClassSDict           *classSDict;
-   NamespaceSDict       *namespaceSDict;
-   bool                  m_subGrouping;
-
+  
+   QList<MemberList *>   m_memberLists;
+ 
    enum { NAMESPACE, MODULE, CONSTANT_GROUP, LIBRARY } m_type;
-   bool m_isPublished;
+   
 };
 
 /** A list of NamespaceDef objects. */
@@ -175,6 +198,7 @@ class NamespaceList : public QList<NamespaceDef>
 {
  public:
    ~NamespaceList() {}
+
    int compareValues(const NamespaceDef *nd1, const NamespaceDef *nd2) const {
       return qstricmp(nd1->name(), nd2->name());
    }
@@ -188,30 +212,12 @@ class NamespaceListIterator : public QListIterator<NamespaceDef>
       QListIterator<NamespaceDef>(l) {}
 };
 
-
-
 /** An unsorted dictionary of NamespaceDef objects. */
 class NamespaceDict : public QHash<QString,NamespaceDef>
 {
  public:
    NamespaceDict() : QHash<QString, NamespaceDef>() {}
    ~NamespaceDict() {}
-};
-
-/** A sorted dictionary of NamespaceDef objects. */
-class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
-{
- public:
-   NamespaceSDict() : StringMap<QSharedPointer<NamespaceDef>>() {}
-   ~NamespaceSDict() {}
-
-   void writeDeclaration(OutputList &ol, const char *title, bool isConstantGroup = false, bool localName = false);
-   bool declVisible() const;
-
- private:
-   int compareValues(const NamespaceDef *item1, const NamespaceDef *item2) const {
-      return qstricmp(item1->name(), item2->name());
-   }
 };
 
 #endif

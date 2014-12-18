@@ -1240,7 +1240,7 @@ LayoutDocManager::LayoutDocManager()
 void LayoutDocManager::init()
 {
    // parse the default layout
-   LayoutErrorHandler errorHandler( "layout_default.xml" );
+   LayoutErrorHandler errorHandler("layout_default.xml");
 
    QByteArray layoutData = getLayout_Default();
   

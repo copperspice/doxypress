@@ -576,7 +576,6 @@ static void addRelatedPage(EntryNav *rootNav)
       }
    }
 
-   //printf("---> addRelatedPage() %s gd=%p\n",root->name.data(),gd);
    QByteArray doc;
 
    if (root->brief.isEmpty()) {
@@ -584,8 +583,7 @@ static void addRelatedPage(EntryNav *rootNav)
    } else {
       doc = root->brief + "\n\n" + root->doc + root->inbodyDocs;
    }
-
-   // BROOM - shared pointer data
+   
    PageDef *pd = addRelatedPage(root->name, root->args, doc, root->anchors, root->docFile, root->docLine,
                                 root->sli, gd.data(), rootNav->tagInfo(), root->lang );
 
@@ -899,9 +897,11 @@ static Definition *buildScopeFromQualifiedName(const QByteArray name, int level,
    while (i < level) {
       int idx = getScopeFragment(name, p, &l);
       QByteArray nsName = name.mid(idx, l);
+
       if (nsName.isEmpty()) {
          return prevScope;
       }
+
       if (!fullScope.isEmpty()) {
          fullScope += "::";
       }
@@ -921,10 +921,9 @@ static Definition *buildScopeFromQualifiedName(const QByteArray name, int level,
          innerScope = cd;
 
       } else if (nd == 0 && cd == 0 && fullScope.indexOf('<') == -1) { 
-         // scope is not known and could be a namespace!
+         // scope is not known and could be a namespace
          // introduce bogus namespace
-         //printf("++ adding dummy namespace %s to %s tagInfo=%p\n",nsName.data(),prevScope->name().data(),tagInfo);
-
+       
          nd = QSharedPointer<NamespaceDef> (new NamespaceDef( "[generated]", 1, 1, fullScope, tagInfo ? tagInfo->tagName : QByteArray(),
             tagInfo ? tagInfo->fileName : QByteArray())); 
 
@@ -944,7 +943,8 @@ static Definition *buildScopeFromQualifiedName(const QByteArray name, int level,
          prevScope->addInnerCompound(innerScope);
          innerScope->setOuterScope(prevScope);
 
-      } else { // current scope is a class, so return only the namespace part...
+      } else { 
+         // current scope is a class, so return only the namespace part...
          return prevScope;
       }
 
@@ -1511,13 +1511,7 @@ static void processTagLessClasses(ClassDef *rootCd, ClassDef *cd,ClassDef *tagPa
 
             if (type.indexOf("::@") != -1) { 
                // member of tag less struct/union
-
-/* BROOM-16
-               ClassSDict::Iterator it(*cd->getClassSDict());
-               ClassDef *icd;
-               for (it.toFirst(); (icd = it.current()); ++it) {
-*/
-               
+             
                for (auto icd : *cd->getClassSDict()) {
 
                   if (type.indexOf(icd->name()) != -1) { 
@@ -1531,16 +1525,13 @@ static void processTagLessClasses(ClassDef *rootCd, ClassDef *cd,ClassDef *tagPa
                      if (!prefix.isEmpty()) {
                         name.prepend(prefix + ".");
                      }
-
-              
+             
                      QSharedPointer<ClassDef> ncd (createTagLessInstance(rootCd, icd.data(), name));
 
-
-                     processTagLessClasses(rootCd, icd, ncd, name, count + 1);
+                     processTagLessClasses(rootCd, icd.data(), ncd.data(), name, count + 1);
       
-
-                     tagParentCd->addTaggedInnerClass(ncd);
-                     ncd->setTagLessReference(icd);
+                     tagParentCd->addTaggedInnerClass(ncd.data());
+                     ncd->setTagLessReference(icd.data());
 
                      // replace tag-less type for generated/original member
                      // by newly created class name.
@@ -1556,7 +1547,7 @@ static void processTagLessClasses(ClassDef *rootCd, ClassDef *cd,ClassDef *tagPa
                        
                         for (auto pmd : *pml) {
                            if (pmd->name() == md->name()) {
-                              pmd->setAccessorType(ncd, substitute(pmd->typeString(), icd->name(), ncd->name()));                              
+                              pmd->setAccessorType(ncd.data(), substitute(pmd->typeString(), icd->name(), ncd->name()));                              
                            }
                         }
                      }
@@ -1570,13 +1561,10 @@ static void processTagLessClasses(ClassDef *rootCd, ClassDef *cd,ClassDef *tagPa
 
 static void findTagLessClasses(ClassDef *cd)
 {
-   if (cd->getClassSDict()) {
-      ClassSDict::Iterator it(*cd->getClassSDict());
-      ClassDef *icd;
-
-      for (it.toFirst(); (icd = it.current()); ++it) {
-         if (icd->name().find("@") == -1) { // process all non-anonymous inner classes
-            findTagLessClasses(icd);
+   if (cd->getClassSDict()) {     
+      for (auto icd : *cd->getClassSDict()) {
+         if (icd->name().indexOf("@") == -1) { // process all non-anonymous inner classes
+            findTagLessClasses(icd.data());
          }
       }
    }
@@ -1586,13 +1574,10 @@ static void findTagLessClasses(ClassDef *cd)
 
 static void findTagLessClasses()
 {
-   ClassSDict::Iterator cli(*Doxygen::classSDict);
-   ClassDef *cd;
-
-   for (cli.toFirst(); (cd = cli.current()); ++cli) { // for each class
+   for (auto cd : *Doxygen::classSDict) {
       Definition *scope = cd->getOuterScope();
       if (scope && scope->definitionType() != Definition::TypeClass) { // that is not nested
-         findTagLessClasses(cd);
+         findTagLessClasses(cd.data());
       }
    }
 }
@@ -1603,13 +1588,9 @@ static void findTagLessClasses()
 // and all namespaces that have a documentation block before their definition.
 static void buildNamespaceList(EntryNav *rootNav)
 {
-   if (
-      (rootNav->section() == Entry::NAMESPACE_SEC ||
-       rootNav->section() == Entry::NAMESPACEDOC_SEC ||
-       rootNav->section() == Entry::PACKAGEDOC_SEC
-      ) &&
-      !rootNav->name().isEmpty()
-   ) {
+   if ( (rootNav->section() == Entry::NAMESPACE_SEC || rootNav->section() == Entry::NAMESPACEDOC_SEC ||
+       rootNav->section() == Entry::PACKAGEDOC_SEC) && !rootNav->name().isEmpty()) {
+
       rootNav->loadEntry(g_storage);
       Entry *root = rootNav->entry();
 
@@ -1622,13 +1603,16 @@ static void buildNamespaceList(EntryNav *rootNav)
 
       QByteArray fullName = stripAnonymousNamespaceScope(fName);
       if (!fullName.isEmpty()) {
-         //printf("Found namespace %s in %s at line %d\n",root->name.data(),
-         //        root->fileName.data(), root->startLine);
-         NamespaceDef *nd;
-         if ((nd = Doxygen::namespaceSDict->find(fullName))) { // existing namespace
+        
+         QSharedPointer<NamespaceDef> nd;
+
+         if ((nd = Doxygen::namespaceSDict->find(fullName))) { 
+            // existing namespace
+
             nd->setDocumentation(root->doc, root->docFile, root->docLine);
             nd->setName(fullName); // change name to match docs
             nd->addSectionsToDefinition(root->anchors);
+
             nd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
             if (nd->getLanguage() == SrcLangExt_Unknown) {
                nd->setLanguage(root->lang);
@@ -1642,18 +1626,22 @@ static void buildNamespaceList(EntryNav *rootNav)
             }
             addNamespaceToGroups(root, nd);
             nd->setRefItems(root->sli);
+
          } else { // fresh namespace
             QByteArray tagName;
             QByteArray tagFileName;
+
             TagInfo *tagInfo = rootNav->tagInfo();
             if (tagInfo) {
                tagName     = tagInfo->tagName;
                tagFileName = tagInfo->fileName;
             }
+
             //printf("++ new namespace %s lang=%s tagName=%s\n",fullName.data(),langToString(root->lang).data(),tagName.data());
             NamespaceDef *nd = new NamespaceDef(root->fileName, root->startLine,
                                                 root->startColumn, fullName, tagName, tagFileName,
                                                 root->type, root->spec & Entry::Published);
+
             nd->setDocumentation(root->doc, root->docFile, root->docLine); // copy docs to definition
             nd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
             nd->addSectionsToDefinition(root->anchors);
@@ -1668,6 +1656,7 @@ static void buildNamespaceList(EntryNav *rootNav)
 
             // file definition containing the namespace nd
             FileDef *fd = rootNav->fileDef();
+
             // insert the namespace in the file definition
             if (fd) {
                fd->insertNamespace(nd);
@@ -1678,20 +1667,24 @@ static void buildNamespaceList(EntryNav *rootNav)
             nd->insertUsedFile(fd);
             nd->setBodySegment(root->bodyLine, root->endBodyLine);
             nd->setBodyDef(fd);
+
             // add class to the list
-            Doxygen::namespaceSDict->inSort(fullName, nd);
+            Doxygen::namespaceSDict->insert(fullName, nd);
 
             // also add namespace to the correct structural context
             Definition *d = findScopeFromQualifiedName(Doxygen::globalScope, fullName, 0, tagInfo);
-            //printf("adding namespace %s to context %s\n",nd->name().data(),d?d->name().data():"<none>");
-            if (d == 0) // we didn't find anything, create the scope artificially
+            
+            if (d == 0)  {
+               // we didn't find anything, create the scope artificially
                // anyway, so we can at least relate scopes properly.
-            {
-               Definition *d = buildScopeFromQualifiedName(fullName, fullName.contains("::"), nd->getLanguage(), tagInfo);
+            
+               Definition *d = buildScopeFromQualifiedName(fullName, fullName.count("::"), nd->getLanguage(), tagInfo);
                d->addInnerCompound(nd);
                nd->setOuterScope(d);
+
                // TODO: Due to the order in which the tag file is written
                // a nested class can be found before its parent!
+
             } else {
                d->addInnerCompound(nd);
                nd->setOuterScope(d);
@@ -1704,20 +1697,14 @@ static void buildNamespaceList(EntryNav *rootNav)
    RECURSE_ENTRYTREE(buildNamespaceList, rootNav);
 }
 
-//----------------------------------------------------------------------
-
-static NamespaceDef *findUsedNamespace(NamespaceSDict *unl,
-                                       const QByteArray &name)
+static NamespaceDef *findUsedNamespace(NamespaceSDict *unl, const QByteArray &name)
 {
    NamespaceDef *usingNd = 0;
-   if (unl) {
-      //printf("Found namespace dict %d\n",unl->count());
-      NamespaceSDict::Iterator unli(*unl);
-      NamespaceDef *und;
-      for (unli.toFirst(); (und = unli.current()); ++unli) {
+
+   if (unl) {      
+      for (auto und : *unl ) {
          QByteArray uScope = und->name() + "::";
-         usingNd = getResolvedNamespace(uScope + name);
-         //printf("Also trying with scope=`%s' usingNd=%p\n",(uScope+name).data(),usingNd);
+         usingNd = getResolvedNamespace(uScope + name);         
       }
    }
    return usingNd;
@@ -1810,7 +1797,9 @@ static void findUsingDirectives(EntryNav *rootNav)
             nd->setDocumentation(root->doc, root->docFile, root->docLine); // copy docs to definition
             nd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
             nd->addSectionsToDefinition(root->anchors);
+
             //printf("** Adding namespace %s hidden=%d\n",name.data(),root->hidden);
+
             nd->setHidden(root->hidden);
             nd->setArtificial(true);
             nd->setLanguage(root->lang);
@@ -1834,14 +1823,16 @@ static void findUsingDirectives(EntryNav *rootNav)
             // the empty string test is needed for extract all case
             nd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
             nd->insertUsedFile(fd);
+
             // add class to the list
-            Doxygen::namespaceSDict->inSort(name, nd);
+            Doxygen::namespaceSDict->insert(name, nd);
             nd->setRefItems(root->sli);
          }
       }
 
       rootNav->releaseEntry();
    }
+
    RECURSE_ENTRYTREE(findUsingDirectives, rootNav);
 }
 
@@ -2454,120 +2445,145 @@ static bool isVarWithConstructor(EntryNav *rootNav)
    static QRegExp idChars("[a-z_A-Z][a-z_A-Z0-9]*");
    bool result = false;
    bool typeIsClass;
+
    QByteArray type;
    Definition *ctx = 0;
+
    FileDef *fd = 0;
    int ti;
-
-   //printf("isVarWithConstructor(%s)\n",rootNav->name().data());
+   
    rootNav->loadEntry(g_storage);
    Entry *root = rootNav->entry();
 
-   //  CS BROOM !
+   bool outerBreak = false;
 
-   if (rootNav->parent()->section() & Entry::COMPOUND_MASK) {
-      // inside a class
-      result = false;
-      goto done;
+   do {
 
-   } else if ((fd = rootNav->fileDef()) &&
-              (fd->name().right(2) == ".c" || fd->name().right(2) == ".h")
-             ) {
-      // inside a .c file
-      result = false;
-      goto done;
-   }
+      if (rootNav->parent()->section() & Entry::COMPOUND_MASK) {
+         // inside a class
+         result = false;
+         break;
+   
+      } else if ((fd = rootNav->fileDef()) && (fd->name().right(2) == ".c" || fd->name().right(2) == ".h") ) {
+         // inside a .c file
+         result = false;
+         break;
+      }
+   
+      if (root->type.isEmpty()) {
+         result = false;
+          break;
+      }
+   
+      if (!rootNav->parent()->name().isEmpty()) {
+         ctx = Doxygen::namespaceSDict->find(rootNav->parent()->name());
+      }
+   
+      type = root->type;
+   
+      // remove qualifiers
+      findAndRemoveWord(type, "const");
+      findAndRemoveWord(type, "static");
+      findAndRemoveWord(type, "volatile");
+   
+      //if (type.left(6)=="const ") type=type.right(type.length()-6);
+      typeIsClass = getResolvedClass(ctx, fd, type) != 0;
+   
+      if (!typeIsClass && (ti = type.find('<')) != -1) {
+         typeIsClass = getResolvedClass(ctx, fd, type.left(ti)) != 0;
+      }
+   
+      if (typeIsClass) {
+         // now we still have to check if the arguments are
+         // types or values. Since we do not have complete type info
+         // we need to rely on heuristics :-(
+   
+         ArgumentList *al = root->argList;
+         if (al == 0 || al->isEmpty()) {
+            result = false; // empty arg list -> function prototype.
+            break;
+         }
+   
+         ArgumentListIterator ali(*al);
+         Argument *a;
+   
+         for (ali.toFirst(); (a = ali.current()); ++ali) {
+            if (!a->name.isEmpty() || !a->defval.isEmpty()) {
+               if (a->name.find(initChars) == 0) {
+                  result = true;
+               } else {
+                  result = false; // arg has (type,name) pair -> function prototype
+               }
 
-   if (root->type.isEmpty()) {
-      result = false;
-      goto done;
-   }
+               outerBreak = true;
+               break;               
+            }
+   
+            if (a->type.isEmpty() || getResolvedClass(ctx, fd, a->type) != 0) {
+               result = false; // arg type is a known type
 
-   if (!rootNav->parent()->name().isEmpty()) {
-      ctx = Doxygen::namespaceSDict->find(rootNav->parent()->name());
-   }
+               outerBreak = true;
+               break;  
+            }
+   
+            if (checkIfTypedef(ctx, fd, a->type)) {
+               //printf("%s:%d: false (arg is typedef)\n",__FILE__,__LINE__);
+               result = false; // argument is a typedef
 
-   type = root->type;
+               outerBreak = true;
+               break;  
+            }
+   
+            if (a->type.at(a->type.length() - 1) == '*' || a->type.at(a->type.length() - 1) == '&') {
+               // type ends with * or & => pointer or reference
+               result = false;
+ 
+               outerBreak = true;
+               break;  
+            }
+   
+            if (a->type.find(initChars) == 0) {
+               result = true; // argument type starts with typical initializer char
 
-   // remove qualifiers
-   findAndRemoveWord(type, "const");
-   findAndRemoveWord(type, "static");
-   findAndRemoveWord(type, "volatile");
+               outerBreak = true;
+               break;  
+            }
+   
+            QByteArray resType = resolveTypeDef(ctx, a->type);
+            if (resType.isEmpty()) {
+               resType = a->type;
+            }
 
-   //if (type.left(6)=="const ") type=type.right(type.length()-6);
-   typeIsClass = getResolvedClass(ctx, fd, type) != 0;
+            int len;
+            if (idChars.match(resType, 0, &len) == 0) { 
+               // resType starts with identifier
+               resType = resType.left(len);
+              
+               if (resType == "int"    || resType == "long" || resType == "float" ||
+                   resType == "double" || resType == "char" || resType == "signed" ||
+                   resType == "const"  || resType == "unsigned" || resType == "void") {
 
-   if (!typeIsClass && (ti = type.find('<')) != -1) {
-      typeIsClass = getResolvedClass(ctx, fd, type.left(ti)) != 0;
-   }
+                  result = false; 
 
-   if (typeIsClass) {
-      // now we still have to check if the arguments are
-      // types or values. Since we do not have complete type info
-      // we need to rely on heuristics :-(
+                  // type keyword -> function prototype
 
-      ArgumentList *al = root->argList;
-      if (al == 0 || al->isEmpty()) {
-         result = false; // empty arg list -> function prototype.
-         goto done;
+                  outerBreak = true;
+                  break;  
+               }
+            }
+         }
+
+         if (outerBreak) {
+            break;
+         }
+
+         result = true;
       }
 
-      ArgumentListIterator ali(*al);
-      Argument *a;
+   } while(false);
 
-      for (ali.toFirst(); (a = ali.current()); ++ali) {
-         if (!a->name.isEmpty() || !a->defval.isEmpty()) {
-            if (a->name.find(initChars) == 0) {
-               result = true;
-            } else {
-               result = false; // arg has (type,name) pair -> function prototype
-            }
-            goto done;
-         }
-
-         if (a->type.isEmpty() || getResolvedClass(ctx, fd, a->type) != 0) {
-            result = false; // arg type is a known type
-            goto done;
-         }
-
-         if (checkIfTypedef(ctx, fd, a->type)) {
-            //printf("%s:%d: false (arg is typedef)\n",__FILE__,__LINE__);
-            result = false; // argument is a typedef
-            goto done;
-         }
-
-         if (a->type.at(a->type.length() - 1) == '*' || a->type.at(a->type.length() - 1) == '&') {
-            // type ends with * or & => pointer or reference
-            result = false;
-            goto done;
-         }
-
-         if (a->type.find(initChars) == 0) {
-            result = true; // argument type starts with typical initializer char
-            goto done;
-         }
-
-         QByteArray resType = resolveTypeDef(ctx, a->type);
-         if (resType.isEmpty()) {
-            resType = a->type;
-         }
-         int len;
-         if (idChars.match(resType, 0, &len) == 0) { // resType starts with identifier
-            resType = resType.left(len);
-            //printf("resType=%s\n",resType.data());
-            if (resType == "int"    || resType == "long" || resType == "float" ||
-                  resType == "double" || resType == "char" || resType == "signed" ||
-                  resType == "const"  || resType == "unsigned" || resType == "void") {
-               result = false; // type keyword -> function prototype
-               goto done;
-            }
-         }
-      }
-      result = true;
-   }
-
-done:
    rootNav->releaseEntry();
+
    return result;
 }
 

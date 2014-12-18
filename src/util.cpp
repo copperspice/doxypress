@@ -5512,30 +5512,33 @@ QByteArray getOverloadDocs()
    //       "function only in what argument(s) it accepts.";
 }
 
-void addMembersToMemberGroup(MemberList *ml,
-                             MemberGroupSDict **ppMemberGroupSDict,
-                             Definition *context)
+void addMembersToMemberGroup(MemberList *ml, MemberGroupSDict **ppMemberGroupSDict, Definition *context)
 {
    assert(context != 0);
-   //printf("addMemberToMemberGroup()\n");
+   
    if (ml == 0) {
       return;
    }
+
    QListIterator<MemberDef> mli(*ml);
    MemberDef *md;
    uint index;
+
    for (index = 0; (md = mli.current());) {
       if (md->isEnumerate()) { // insert enum value of this enum into groups
          MemberList *fmdl = md->enumFieldList();
          if (fmdl != 0) {
             QListIterator<MemberDef> fmli(*fmdl);
             MemberDef *fmd;
+
             for (fmli.toFirst(); (fmd = fmli.current()); ++fmli) {
                int groupId = fmd->getMemberGroupId();
+
                if (groupId != -1) {
                   MemberGroupInfo *info = Doxygen::memGrpInfoDict[groupId];
                   //QByteArray *pGrpHeader = Doxygen::memberHeaderDict[groupId];
                   //QByteArray *pDocs      = Doxygen::memberDocDict[groupId];
+
                   if (info) {
                      if (*ppMemberGroupSDict == 0) {
                         *ppMemberGroupSDict = new MemberGroupSDict;
@@ -5559,17 +5562,22 @@ void addMembersToMemberGroup(MemberList *ml,
             }
          }
       }
+
       int groupId = md->getMemberGroupId();
+
       if (groupId != -1) {
          MemberGroupInfo *info = Doxygen::memGrpInfoDict[groupId];
          //QByteArray *pGrpHeader = Doxygen::memberHeaderDict[groupId];
          //QByteArray *pDocs      = Doxygen::memberDocDict[groupId];
+
          if (info) {
             if (*ppMemberGroupSDict == 0) {
                *ppMemberGroupSDict = new MemberGroupSDict;
                (*ppMemberGroupSDict)->setAutoDelete(true);
             }
+
             MemberGroup *mg = (*ppMemberGroupSDict)->find(groupId);
+
             if (mg == 0) {
                mg = new MemberGroup(
                   context,
@@ -5580,6 +5588,7 @@ void addMembersToMemberGroup(MemberList *ml,
                );
                (*ppMemberGroupSDict)->append(groupId, mg);
             }
+
             md = ml->take(index); // remove from member list
             mg->insertMember(md); // insert in member group
             mg->setRefItems(info->m_sli);
@@ -5587,6 +5596,7 @@ void addMembersToMemberGroup(MemberList *ml,
             continue;
          }
       }
+
       ++mli;
       ++index;
    }

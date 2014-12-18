@@ -49,18 +49,23 @@ class PageDef : public Definition
 
    // functions to get a uniform interface with Definitions
    QByteArray getOutputFileBase() const;
+
    QByteArray anchor() const {
       return QByteArray();
    }
+
    void findSectionsInDocumentation();
    QByteArray title() const {
       return m_title;
    }
+
    GroupDef   *getGroupDef() const;
    PageSDict *getSubPages() const {
       return m_subPageDict;
    }
-   void addInnerCompound(Definition *d);
+
+   void addInnerCompound(QSharedPointer<Definition> d) override; 
+
    bool visibleInIndex() const;
    bool documentedPage() const;
    bool hasSubPages() const;

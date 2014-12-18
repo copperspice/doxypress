@@ -58,11 +58,15 @@ Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
 
 
 Doxygen_SOURCES = \
-   src/doxygen.cpp \
+   src/groupdef.cpp  \
+   src/classdef.cpp  \
+   src/filedef.cpp  \
+   src/memberdef.cpp  \
 \
    src/configoptions.cpp  \
    src/portable.cpp \
 \
+   src/doxygen.cpp \
    src/arguments.cpp \
    src/cite.cpp \
    src/clangparser.cpp \

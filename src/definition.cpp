@@ -1278,11 +1278,6 @@ Definition *Definition::findInnerCompound(const char *)
    return 0;
 }
 
-void Definition::addInnerCompound(Definition *)
-{
-   err("Definition::addInnerCompound() called\n");
-}
-
 QByteArray Definition::qualifiedName() const
 {
    //static int count=0;
@@ -1305,13 +1300,11 @@ QByteArray Definition::qualifiedName() const
 
    if (m_impl->outerScope->name() == "<globalScope>") {
       m_impl->qualifiedName = m_impl->localName;
+
    } else {
-      m_impl->qualifiedName = m_impl->outerScope->qualifiedName() +
-                              getLanguageSpecificSeparator(getLanguage()) +
-                              m_impl->localName;
+      m_impl->qualifiedName = m_impl->outerScope->qualifiedName() + getLanguageSpecificSeparator(getLanguage()) + m_impl->localName;
    }
-   //printf("end %s::qualifiedName()=%s\n",name().data(),m_impl->qualifiedName.data());
-   //count--;
+   
    return m_impl->qualifiedName;
 }
 

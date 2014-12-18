@@ -54,9 +54,11 @@ static QByteArray addTemplateNames(const QByteArray &s, const QByteArray &n, con
 {
    QByteArray result;
    QByteArray clRealName = n;
-   int p = 0, i;
 
-   if ((i = clRealName.find('<')) != -1) {
+   int p = 0;
+   int i;
+
+   if ((i = clRealName.indexOf('<')) != -1) {
       clRealName = clRealName.left(i); // strip template specialization
    }
 

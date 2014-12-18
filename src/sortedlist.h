@@ -36,6 +36,7 @@ class SortedList : public QList<T>
 {
    public:
       void inSort(const T &data);
+      void sort();
 };
 
 template <class T>
@@ -45,6 +46,12 @@ void SortedList<T>::inSort(const T &data)
    location = std::lower_bound(this->begin(), this->end(), data, [](const T &temp1, const T &temp2){ return compareValues(temp1, temp2) < 0; } );
 
    this->insert(location, data);  
+}
+
+template <class T>
+void SortedList<T>::sort()
+{
+   std::sort(this->begin(), this->end(), [](const T &temp1, const T &temp2){ return compareValues(temp1, temp2) < 0; } );
 }
 
 int compareValues(const BaseClassDef *item1,  const BaseClassDef *item2);

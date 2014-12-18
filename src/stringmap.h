@@ -39,6 +39,10 @@ class StringMap
     *  \param caseSensitive indicated whether the keys should be sorted
     *         in a case sensitive way.
     */
+
+   using iterator = typename QMap<QString, T>::iterator;
+   using const_iterator = typename QMap<QString, T>::const_iterator;
+   
    StringMap(Qt::CaseSensitivity foo = Qt::CaseSensitive) {
 
       if (foo) {
@@ -52,60 +56,44 @@ class StringMap
    /*! Destroys the dictionary */
    virtual ~StringMap() {            
    }
-
-   using iterator = typename QMap<QString, T>::iterator;
-   
+     
    iterator begin() {     
       return m_dict.begin();      
    }  
+ 
+    const_iterator begin() const {     
+      return m_dict.begin();      
+   }  
+
+   /*! Clears the dictionary.  
+    */
+   void clear() {
+      m_dict->clear();
+   }
+
+   /*! Returns the number of items stored in the dictionary
+    */
+   int count() const {
+      return m_dict.count();
+   }
+
+   int compareValues(const T &item1, const T &item2) const {
+
+      if (item1 < item2) {
+         return -1;
+      }
+
+      return 0;
+   }
 
    iterator end() {     
       return m_dict.end();  
-   }  
-
-   using const_iterator = typename QMap<QString, T>::const_iterator;
-   
-   const_iterator begin() const {     
-      return m_dict.begin();      
    }  
 
    const_iterator end() const {     
       return m_dict.end();  
    }  
 
-   /*! Appends an element to the dictionary. The element is owned by the
-    *  dictionary.
-    *  \param key The unique key to use to quicky find the item later on.
-    *  \param d The compound to add.
-    *  \sa find()
-    */
-   void insert(const char *key, const T &d) {     
-      m_dict.insert(key, d);   
-   }  
-
-   void insert(QByteArray key, const T &d) {     
-      m_dict.insert(key, d);   
-   }  
-
-   void insert(QString key, const T &d) {     
-      m_dict.insert(key, d);   
-   }  
-
-   /*! Remove an item from the dictionary */
-   bool remove(const char *key) { 
-      return m_dict.remove(key); 
-   }
-
-   /*! Take an item out of the dictionary without deleting it */
-   T *take(const char *key) {
-      return m_dict.take(key);
-   } 
-   
-   /*! Looks up a compound given its key.
-    *  \param key The key to identify this element.
-    *  \return The requested compound or zero if it cannot be found.
-    *  \sa append()
-    */
    T find(const char *key) {
        auto item = m_dict.find(key);
 
@@ -135,31 +123,35 @@ class StringMap
 
       return item.value();
    }
-   
-   /*! Clears the dictionary.  
-    */
-   void clear() {
-      m_dict->clear();
+  
+   void insert(const char *key, const T &d) {     
+      m_dict.insert(key, d);   
+   }  
+
+   void insert(QByteArray key, const T &d) {     
+      m_dict.insert(key, d);   
+   }  
+
+   void insert(QString key, const T &d) {     
+      m_dict.insert(key, d);   
+   }  
+
+   /*! Remove an item from the dictionary */
+   bool remove(const char *key) { 
+      return m_dict.remove(key); 
    }
 
-   /*! Returns the number of items stored in the dictionary
-    */
-   int count() const {
-      return m_dict.count();
+   /*! Take an item out of the dictionary without deleting it */
+   T *take(const char *key) {
+      return m_dict.take(key);
+   }        
+ 
+   T &operator[](const char *key) {
+      return m_dict[key];
    }
 
-   int compareValues(const T &item1, const T &item2) const {
-
-      if (item1 < item2) {
-         return -1;
-      }
-
-      return 0;
-   }
-
-   /*! Equavalent to find(). */
-   T &operator[](const char *key) const {
-      return m_dict.find(key).value();
+   T operator[](const char *key) const {
+      return m_dict[key];
    }
   
 
@@ -300,7 +292,7 @@ class LongMap
       return m_dict.end();  
    }  
     
-   T *find(long key) {
+   T find(long key) {
        auto item = m_dict.find(key);
 
       if (item == m_dict.end()) {   
@@ -318,10 +310,13 @@ class LongMap
       return m_dict.remove(key); 
    }
    
-   T &operator[](long key) const {
-      return m_dict.find(key).value();
+   T &operator[](long key) {
+      return m_dict[key];
    }
 
+   T operator[](long key) const {
+      return m_dict[key];
+   }
 
    class Iterator;         // first forward declare
    friend class Iterator;  // then make it a friend

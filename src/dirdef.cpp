@@ -84,6 +84,7 @@ bool DirDef::isLinkable() const
 void DirDef::addSubDir(DirDef *subdir)
 {
    m_subdirs.inSort(subdir);
+
    subdir->setOuterScope(this);
    subdir->m_parent = this;
 }
@@ -778,7 +779,7 @@ static void computeCommonDirPrefix()
       dir   = sdi.current();
       path  = dir->name();
 
-      int i = path.lastIndexOf('/', path.length() - 2);   // BROOM - check if really lastIndexOf
+      int i = path.lastIndexOf('/', path.length() - 2);
 
       path = path.left(i + 1);
       bool done = false;
@@ -884,13 +885,8 @@ void buildDirectories()
       if (i > 0) {
          QSharedPointer<DirDef> parent = Doxygen::directories.find(name.left(i + 1));
         
-         if (parent) {
-            // BROOM - resolve raw pointer issue!            
-
+         if (parent) {                       
             parent->addSubDir(dir.data());
-
-            //printf("DirDef::addSubdir(): Adding subdir\n%s to\n%s\n",
-            //  dir->displayName().data(), parent->displayName().data());
          }
       }
    }

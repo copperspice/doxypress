@@ -119,29 +119,37 @@ static void endIndexHierarchy(OutputList &ol, int level)
 
 //----------------------------------------------------------------------------
 
-class MemberIndexList : public QList<MemberDef>
+class MemberIndexList : public QList<MemberDef *>
 {
  public:
-   typedef MemberDef ElementType;
-   MemberIndexList(uint letter) : QList<MemberDef>(), m_letter(letter) {}
-   ~MemberIndexList() {}
+   using ElementType = MemberDef;
+
+   MemberIndexList(uint letter) : m_letter(letter)
+   {}
+
+   ~MemberIndexList()
+    {}
+
    int compareValues(const MemberDef *md1, const MemberDef *md2) const {
       int result = qstricmp(md1->name(), md2->name());
+
       if (result == 0) {
          result = qstricmp(md1->qualifiedName(), md2->qualifiedName());
       }
       return result;
    }
+
    uint letter() const {
       return m_letter;
    }
+
  private:
    uint m_letter;
 };
 
-static LetterToIndexMap<MemberIndexList> g_memberIndexLetterUsed[CMHL_Total];
-static LetterToIndexMap<MemberIndexList> g_fileIndexLetterUsed[FMHL_Total];
-static LetterToIndexMap<MemberIndexList> g_namespaceIndexLetterUsed[NMHL_Total];
+static LetterToIndexMap<MemberIndexList>   g_memberIndexLetterUsed[CMHL_Total];
+static LetterToIndexMap<MemberIndexList>   g_fileIndexLetterUsed[FMHL_Total];
+static LetterToIndexMap<MemberIndexList>   g_namespaceIndexLetterUsed[NMHL_Total];
 
 const int maxItemsBeforeQuickIndex = MAX_ITEMS_BEFORE_QUICK_INDEX;
 
@@ -306,11 +314,8 @@ void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part, const QByteArr
 
    ClassSDict *classes = def->getClassSDict();
 
-   if (classes) {
-      ClassDef *cd;
-      ClassSDict::Iterator it(*classes);
-
-      for (; (cd = it.current()); ++it) {
+   if (classes) {    
+      for (auto cd : *classes) {
          if (cd->isLinkable()) {
             numClasses++;
          }
@@ -1499,7 +1504,8 @@ static QByteArray letterToLabel(uint startLetter)
 class PrefixIgnoreClassList : public SortedList<ClassDef *>
 {
  public:
-   typedef ClassDef ElementType;
+   using ElementType = ClassDef;
+
    PrefixIgnoreClassList(uint letter) : m_letter(letter) {}
 
    uint letter() const {
@@ -1979,7 +1985,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
    for (QSharedPointer<MemberIndexList> ml : memberLists) {
 
       if (page != -1) {
-         ml = memberLists[page];         
+         ml = memberLists[page];
       }
 
       if (ml == 0 || ml->count() == 0) {
@@ -1989,10 +1995,10 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
       for (auto md : *ml) {
          const char *sep;
 
-         bool isFunc = ! md.isObjCMethod() && (md.isFunction() || md.isSlot() || md.isSignal());
+         bool isFunc = ! md->isObjCMethod() && (md->isFunction() || md->isSlot() || md->isSignal());
 
          QByteArray name = md->name();
-         int startIndex = getPrefixIndex(name);
+         int startIndex  = getPrefixIndex(name);
 
          if (QByteArray(name.data() + startIndex) != prevName) { 
             // new entry
@@ -2051,7 +2057,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
 
          if (index < 3) {
             // write the link for the specific list type
-            writeLinkForMemberMap[index](ol, &md, sep, prevDefName);
+            writeLinkForMemberMap[index](ol, md, sep, prevDefName);
          }
       }
 
@@ -2084,10 +2090,11 @@ void addClassMemberNameToIndex(MemberDef *md)
 
    if (md->isLinkableInProject() && (cd = md->getClassDef())  && cd->isLinkableInProject() && cd->templateMaster() == 0) {
       QByteArray n = md->name();
-      int index = getPrefixIndex(n);
+
+      int index   = getPrefixIndex(n);
       uint letter = getUtf8CodeToLower(n, index);
 
-      if (!n.isEmpty()) {
+      if (! n.isEmpty()) {
 
          bool isFriendToHide = hideFriendCompounds && (QByteArray(md->typeString()) == "friend class" ||
                                 QByteArray(md->typeString()) == "friend struct" || QByteArray(md->typeString()) == "friend union");
@@ -2914,7 +2921,7 @@ static void writePages(PageDef *pd, FTVHelp *ftv)
 
    if (subPages) {    
       for (auto subPage : *subPages ) {
-         writePages(subPage, ftv);
+         writePages(subPage.data(), ftv);
       }
    }
 
@@ -2954,7 +2961,7 @@ static void writePageIndex(OutputList &ol)
 
       for (auto pd : *Doxygen::pageSDict) {
          if ((pd->getOuterScope() == 0 || pd->getOuterScope()->definitionType() != Definition::TypePage) && ! pd->isReference() ) {
-            writePages(pd, ftv);
+            writePages(pd.data(), ftv);
          }
       }
 
@@ -2990,7 +2997,7 @@ static int countDirs()
 {
    int count = 0;
 
-   for (auto dd : *Doxygen::directories) {
+   for (auto dd : Doxygen::directories) {
       if (dd->isLinkableInProject()) {
          dd->visited = false;
          count++;
@@ -3028,8 +3035,8 @@ void writeGraphInfo(OutputList &ol)
    ol.startContents();
 
    QByteArray legendDocs = theTranslator->trLegendDocs();
-   int s = legendDocs.find("<center>");
-   int e = legendDocs.find("</center>");
+   int s = legendDocs.indexOf("<center>");
+   int e = legendDocs.indexOf("</center>");
 
    if (Config_getEnum("DOT_IMAGE_FORMAT") == "svg" && s != -1 && e != -1) {
       legendDocs = legendDocs.left(s + 8) + "[!-- SVG 0 --]\n" + legendDocs.mid(e);
@@ -3070,23 +3077,21 @@ static void writeGroupTreeNode(OutputList &ol, GroupDef *gd, int level, FTVHelp 
       // write group info
 
       bool hasSubGroups = gd->getSubGroups()->count() > 0;
-      bool hasSubPages = gd->getPages()->count() > 0;
-      int numSubItems = 0;
-
-      if (1 /*Config_getBool("TOC_EXPAND")*/) {
-        
-         for (auto ml : gd->getMemberLists()) {
-            if (ml->listType()&MemberListType_documentationLists) {
-               numSubItems += ml->count();
-            }
+      bool hasSubPages  = gd->getPages()->count() > 0;
+      int numSubItems   = 0;
+         
+      for (auto ml : gd->getMemberLists()) {
+         if (ml.listType() & MemberListType_documentationLists) {
+            numSubItems += ml.count();
          }
-
-         numSubItems += gd->getNamespaces()->count();
-         numSubItems += gd->getClasses()->count();
-         numSubItems += gd->getFiles()->count();
-         numSubItems += gd->getDirs()->count();
-         numSubItems += gd->getPages()->count();
       }
+
+      numSubItems += gd->getNamespaces()->count();
+      numSubItems += gd->getClasses()->count();
+      numSubItems += gd->getFiles()->count();
+      numSubItems += gd->getDirs()->count();
+      numSubItems += gd->getPages()->count();
+    
 
       bool isDir = hasSubGroups || hasSubPages || numSubItems > 0;
       //printf("gd=`%s': pageDict=%d\n",gd->name().data(),gd->pageDict->count());
@@ -3111,11 +3116,7 @@ static void writeGroupTreeNode(OutputList &ol, GroupDef *gd, int level, FTVHelp 
          ol.docify(" [external]");
          ol.endTypewriter();
       }
-    
-
-// BROOM - check the for loop vars 
-
-
+ 
       for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {   
 
          if (lde->kind() == LayoutDocEntry::MemberDef && addToIndex) {
@@ -3128,16 +3129,14 @@ static void writeGroupTreeNode(OutputList &ol, GroupDef *gd, int level, FTVHelp 
                   MemberList *enumList = md->enumFieldList();
                   bool isDir = enumList != 0 && md->isEnumerate();
 
-                  if (md->isVisible() && md->name().find('@') == -1) {
+                  if (md->isVisible() && md->name().indexOf('@') == -1) {
                      Doxygen::indexList->addContentsItem(isDir, md->name(), md->getReference(), md->getOutputFileBase(), md->anchor(), false, addToIndex);
                   }
 
                   if (isDir) {
                      Doxygen::indexList->incContentsDepth();
-                     QListIterator<MemberDef> emli(*enumList);
-                     MemberDef *emd;
-
-                     for (emli.toFirst(); (emd = emli.current()); ++emli) {
+                    
+                     for (auto emd : *enumList) {
                         if (emd->isVisible()) {
                            Doxygen::indexList->addContentsItem(false, emd->name(), emd->getReference(), emd->getOutputFileBase(),
                                                                emd->anchor(), false, addToIndex);
@@ -3153,7 +3152,7 @@ static void writeGroupTreeNode(OutputList &ol, GroupDef *gd, int level, FTVHelp 
             
             for (auto cd : *gd->getClasses()) {
                 if (cd->isVisible() /*&& !nestedClassInSameGroup*/) {                
-                  addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), addToIndex, true);                 
+                  addMembersToIndex(cd.data(), LayoutDocManager::Class, cd->displayName(false), cd->anchor(), addToIndex, true);                 
                }
             }
 
@@ -3168,7 +3167,7 @@ static void writeGroupTreeNode(OutputList &ol, GroupDef *gd, int level, FTVHelp 
 
          } else if (lde->kind() == LayoutDocEntry::GroupFiles && addToIndex) {
            
-            for (auto nd : *gd->getFiles()) {
+            for (auto fd : *gd->getFiles()) {
                if (fd->isVisible()) {
                   Doxygen::indexList->addContentsItem(false, fd->displayName(), fd->getReference(),
                                                       fd->getOutputFileBase(), 0, false, false);
@@ -3185,13 +3184,11 @@ static void writeGroupTreeNode(OutputList &ol, GroupDef *gd, int level, FTVHelp 
             }
 
          } else if (lde->kind() == LayoutDocEntry::GroupPageDocs && addToIndex) {
-            StringMap<QSharedPointer<PageDef>>::Iterator it(*gd->getPages());
-            PageDef *pd;
+       
+            for (auto pd : *gd->getPages()) {
+               QSharedPointer<SectionInfo> si;
 
-            for (; (pd = it.current()); ++it) {
-               SectionInfo *si = 0;
-
-               if (!pd->name().isEmpty()) {
+               if (! pd->name().isEmpty()) {
                   si = Doxygen::sectionDict->find(pd->name());
                }
 
@@ -3210,19 +3207,18 @@ static void writeGroupTreeNode(OutputList &ol, GroupDef *gd, int level, FTVHelp 
                   pd->addSectionsToIndex();
                }
 
-               writePages(pd, 0);
+               writePages(pd.data(), 0);
                if (hasSections || hasSubPages) {
                   Doxygen::indexList->decContentsDepth();
                }
             }
 
          } else if (lde->kind() == LayoutDocEntry::GroupNestedGroups) {
+
             if (gd->getSubGroups()->count() > 0) {
                startIndexHierarchy(ol, level + 1);
-               QListIterator<GroupDef> gli(*gd->getSubGroups());
-               GroupDef *subgd = 0;
-
-               for (gli.toFirst(); (subgd = gli.current()); ++gli) {
+             
+               for (auto subgd : *gd->getSubGroups()) {
                   writeGroupTreeNode(ol, subgd, level + 1, ftv, addToIndex);
                }
 
@@ -3251,11 +3247,9 @@ static void writeGroupHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
    }
 
    startIndexHierarchy(ol, 0);
-   GroupSDict::Iterator gli(*Doxygen::groupSDict);
-   GroupDef *gd;
 
-   for (gli.toFirst(); (gd = gli.current()); ++gli) {
-      writeGroupTreeNode(ol, gd, 0, ftv, addToIndex);
+   for (auto gd : *Doxygen::groupSDict) {
+      writeGroupTreeNode(ol, gd.data(), 0, ftv, addToIndex);
    }
 
    endIndexHierarchy(ol, 0);
@@ -3349,19 +3343,19 @@ static void writeUserGroupStubPage(OutputList &ol, LayoutNavEntry *lne)
       endTitle(ol, 0, 0);
 
       ol.startContents();
-      QListIterator<LayoutNavEntry> li(lne->children());
-      LayoutNavEntry *entry;
-
+   
       int count = 0;
 
-      for (li.toFirst(); (entry = li.current()); ++li) {
+      for (auto entry : lne->children()) {
          if (entry->visible()) {
             count++;
          }
       }
+
       if (count > 0) {
          ol.writeString("<ul>\n");
-         for (li.toFirst(); (entry = li.current()); ++li) {
+
+         for (auto entry : lne->children()) {
             if (entry->visible()) { 
                ol.writeString("<li><a href=\"" + entry->url() + "\"><span>" + fixSpaces(entry->title()) + "</span></a></li>\n");
             }
@@ -3519,16 +3513,12 @@ static void writeIndex(OutputList &ol)
       ol.endIndexSection(isMainPage);
    }
 
-   if (documentedPages > 0) {
-      //ol.parseText(projPrefix+theTranslator->trPageDocumentation());
-      //ol.endIndexSection(isPageDocumentation);
-      PageSDict::Iterator pdi(*Doxygen::pageSDict);
-      PageDef *pd = pdi.toFirst();
+   if (documentedPages > 0) {  
       bool first = Doxygen::mainPage == 0;
+     
+      for (auto pd : *Doxygen::pageSDict) {
 
-      for (pdi.toFirst(); (pd = pdi.current()); ++pdi) {
-
-         if (!pd->getGroupDef() && !pd->isReference() && (!pd->hasParentPage() || (Doxygen::mainPage == pd->getOuterScope())) ) {
+         if (! pd->getGroupDef() && !pd->isReference() && (!pd->hasParentPage() || (Doxygen::mainPage == pd->getOuterScope())) ) {
             bool isCitationPage = pd->name() == "citelist";
 
             if (isCitationPage) {
@@ -3651,27 +3641,28 @@ static void writeIndex(OutputList &ol)
 
 static QVector<bool> indexWritten;
 
-static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntry> &entries)
-{
-   QListIterator<LayoutNavEntry> li(entries);
-   LayoutNavEntry *lne;
-
-   for (li.toFirst(); (lne = li.current()); ++li) {
+static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntry *> &entries)
+{   
+   for (auto lne : entries) { 
       LayoutNavEntry::Kind kind = lne->kind();
       uint index = (uint)kind;
+
       if (index >= indexWritten.size()) {
          uint i;
          uint oldSize = indexWritten.size();
          uint newSize = index + 1;
+
          indexWritten.resize(newSize);
-         for (i = oldSize; i < newSize; i++) {
-            indexWritten.at(i) = false;
+
+         for (i = oldSize; i < newSize; i++) {   
+            indexWritten[i] = false;
          }
       }
-      //printf("starting %s kind=%d\n",lne->title().data(),lne->kind());
-      bool addToIndex = lne == 0 || lne->visible();
+      
+      bool addToIndex   = (lne == 0 || lne->visible());
       bool needsClosing = false;
-      if (!indexWritten.at(index)) {
+
+      if (! indexWritten.at(index)) {
          switch (kind) {
             case LayoutNavEntry::MainPage:
                msg("Generating index page...\n");
@@ -3808,11 +3799,14 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                writeUserGroupStubPage(ol, lne);
                break;
          }
+
          if (kind != LayoutNavEntry::User && kind != LayoutNavEntry::UserGroup) { // User entry may appear multiple times
-            indexWritten.at(index) = true;
+            indexWritten[index] = true;
          }
       }
+
       writeIndexHierarchyEntries(ol, lne->children());
+
       if (needsClosing) {
          switch (kind) {
             case LayoutNavEntry::Namespaces:
@@ -3825,7 +3819,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                break;
          }
       }
-      //printf("ending %s kind=%d\n",lne->title().data(),lne->kind());
+     
    }
 }
 
@@ -3836,4 +3830,3 @@ void writeIndexHierarchy(OutputList &ol)
       writeIndexHierarchyEntries(ol, lne->children());
    }
 }
-

@@ -1287,9 +1287,9 @@ void ClassDef::writeAllMembersLink(OutputList &ol)
 void ClassDef::writeMemberGroups(OutputList &ol, bool showInline)
 {
    // write user defined member groups
-   if (m_impl->memberGroupSDict) {
-      m_impl->memberGroupSDict->sort();
 
+   if (m_impl->memberGroupSDict) {
+     
       MemberGroupSDict::Iterator mgli(*m_impl->memberGroupSDict);
       MemberGroup *mg;
 
@@ -1297,9 +1297,9 @@ void ClassDef::writeMemberGroups(OutputList &ol, bool showInline)
          if (!mg->allMembersInSameSection() || !m_impl->subGrouping) { // group is in its own section
             mg->writeDeclarations(ol, this, 0, 0, 0, showInline);
 
-         } else { // add this group to the corresponding member section
-            //printf("addToDeclarationSection(%s)\n",mg->header().data());
-            //mg->addToDeclarationSection();
+         } else { 
+            // add this group to the corresponding member section
+            
          }
       }
    }
@@ -3227,29 +3227,33 @@ void ClassDef::setGroupDefForAllMembers(GroupDef *gd, Grouping::GroupPri_t pri, 
    }
 }
 
-void ClassDef::addInnerCompound(Definition *d)
-{
-   //printf("**** %s::addInnerCompound(%s)\n",name().data(),d->name().data());
-   if (d->definitionType() == Definition::TypeClass) // only classes can be
-      // nested in classes.
-   {
-      if (m_impl->innerClasses == 0) {
-         m_impl->innerClasses = new ClassSDict();
-      }
+void ClassDef::addInnerCompound(QSharedPointer<Definition> d)
+{  
+   if (d->definitionType() == Definition::TypeClass)  {   
 
-      m_impl->innerClasses->insert(d->localName(), (ClassDef *)d);
+     QSharedPointer<ClassDef> cd = d.dynamicCast<ClassDef>();
+     assert(cd);    
+     
+     if (m_impl->innerClasses == 0) {
+         m_impl->innerClasses = new ClassSDict();
+     }
+     
+     m_impl->innerClasses->insert(d->localName(), cd);
    }
 }
 
 Definition *ClassDef::findInnerCompound(const char *name)
 {
    Definition *result = 0;
+
    if (name == 0) {
       return 0;
    }
+
    if (m_impl->innerClasses) {
       result = m_impl->innerClasses->find(name);
    }
+
    return result;
 }
 
@@ -3553,6 +3557,7 @@ MemberList *ClassDef::getMemberList(MemberListType lt)
 {
    QListIterator<MemberList> mli(m_impl->memberLists);
    MemberList *ml;
+
    for (; (ml = mli.current()); ++mli) {
       if (ml->listType() == lt) {
          return ml;
@@ -3563,30 +3568,12 @@ MemberList *ClassDef::getMemberList(MemberListType lt)
 
 void ClassDef::addMemberToList(MemberListType lt, MemberDef *md, bool isBrief)
 {
-   static bool sortBriefDocs = Config_getBool("SORT_BRIEF_DOCS");
-   static bool sortMemberDocs = Config_getBool("SORT_MEMBER_DOCS");
-   MemberList *ml = createMemberList(lt);
-   ml->setNeedsSorting((isBrief && sortBriefDocs) || (!isBrief && sortMemberDocs));
+   MemberList *ml = createMemberList(lt); 
    ml->append(md);
 
    // for members in the declaration lists we set the section, needed for member grouping
-   if ((ml->listType()&MemberListType_detailedLists) == 0) {
+   if ((ml->listType() & MemberListType_detailedLists) == 0) {
       md->setSectionList(this, ml);
-   }
-}
-
-void ClassDef::sortMemberLists()
-{
-   QListIterator<MemberList> mli(m_impl->memberLists);
-   MemberList *ml;
-   for (; (ml = mli.current()); ++mli) {
-      if (ml->needsSorting()) {
-         ml->sort();
-         ml->setNeedsSorting(false);
-      }
-   }
-   if (m_impl->innerClasses) {
-      m_impl->innerClasses->sort();
    }
 }
 

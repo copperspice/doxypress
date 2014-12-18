@@ -21,35 +21,37 @@
 #include <QStack>
 #include <QString>
 #include <QStringlist>
+#include <QXmlAttributes>
 #include <QXmlDefaultHandler>
 #include <QXmlErrorHandler>
-#include <QXmlParseException>
-#include <QXmlAttributes>
-#include <QXmlLocator>
 #include <QXmlInputSource>
+#include <QXmlLocator>
+#include <QXmlParseException>
 #include <QXmlSimpleReader>
 
 #include <stdio.h>
 #include <stdarg.h>
 
-#include <tagreader.h>
-#include <entry.h>
-#include <classdef.h>
-#include <doxygen.h>
-#include <util.h>
-#include <message.h>
-#include <defargs.h>
 #include <arguments.h>
+#include <classdef.h>
+#include <defargs.h>
+#include <doxygen.h>
+#include <entry.h>
 #include <filedef.h>
 #include <filename.h>
+#include <message.h>
 #include <section.h>
+#include <tagreader.h>
+#include <util.h>
 
 /** Information about an linkable anchor */
 class TagAnchorInfo
 {
  public:
    TagAnchorInfo(const QByteArray &f, const QByteArray &l, const QByteArray &t = QByteArray())
-      : label(l), fileName(f), title(t) {}
+      : label(l), fileName(f), title(t) 
+   {}
+
    QByteArray label;
    QByteArray fileName;
    QByteArray title;
@@ -59,9 +61,10 @@ class TagAnchorInfo
 class TagAnchorInfoList : public QList<TagAnchorInfo>
 {
  public:
-   TagAnchorInfoList() : QList<TagAnchorInfo>() {
-      setAutoDelete(true);
+   TagAnchorInfoList() : QList<TagAnchorInfo>() 
+   {     
    }
+
    virtual ~TagAnchorInfoList() {}
 };
 
@@ -79,9 +82,10 @@ class TagEnumValueInfo
 class TagMemberInfo
 {
  public:
-   TagMemberInfo() : prot(Public), virt(Normal), isStatic(false) {
-      enumValues.setAutoDelete(true);
+   TagMemberInfo() : prot(Public), virt(Normal), isStatic(false)
+   {    
    }
+
    QByteArray type;
    QByteArray name;
    QByteArray anchorFile;
@@ -89,10 +93,13 @@ class TagMemberInfo
    QByteArray arglist;
    QByteArray kind;
    QByteArray clangId;
+
    TagAnchorInfoList docAnchors;
    Protection prot;
    Specifier virt;
+
    bool isStatic;
+
    QList<TagEnumValueInfo> enumValues;
 };
 
@@ -101,15 +108,18 @@ class TagClassInfo
 {
  public:
    enum Kind { Class, Struct, Union, Interface, Exception, Protocol, Category, Enum, Service, Singleton };
+
    TagClassInfo() {
-      bases = 0, templateArguments = 0;
-      members.setAutoDelete(true);
+      bases = 0;
+      templateArguments = 0;      
       isObjC = false;
    }
+
    ~TagClassInfo() {
       delete bases;
       delete templateArguments;
    }
+
    QByteArray name;
    QByteArray filename;
    QByteArray clangId;
@@ -126,15 +136,18 @@ class TagClassInfo
 class TagNamespaceInfo
 {
  public:
-   TagNamespaceInfo() {
-      members.setAutoDelete(true);
+   TagNamespaceInfo()
+   {
    }
+
    QByteArray name;
    QByteArray filename;
    QByteArray clangId;
    QStringList classList;
    QStringList namespaceList;
+
    TagAnchorInfoList docAnchors;
+
    QList<TagMemberInfo> members;
 };
 
@@ -142,13 +155,16 @@ class TagNamespaceInfo
 class TagPackageInfo
 {
  public:
-   TagPackageInfo() {
-      members.setAutoDelete(true);
+   TagPackageInfo() 
+   {      
    }
+
    QByteArray name;
    QByteArray filename;
+
    TagAnchorInfoList docAnchors;
    QList<TagMemberInfo> members;
+
    QStringList classList;
 };
 
@@ -159,6 +175,7 @@ class TagIncludeInfo
    QByteArray id;
    QByteArray name;
    QByteArray text;
+
    bool isLocal;
    bool isImported;
 };
@@ -167,17 +184,21 @@ class TagIncludeInfo
 class TagFileInfo
 {
  public:
-   TagFileInfo() {
-      members.setAutoDelete(true);
-      includes.setAutoDelete(true);
+   TagFileInfo() 
+   {
    }
+
    QByteArray name;
    QByteArray path;
    QByteArray filename;
+
    TagAnchorInfoList docAnchors;
+
    QList<TagMemberInfo> members;
+
    QStringList classList;
    QStringList namespaceList;
+
    QList<TagIncludeInfo> includes;
 };
 
@@ -185,14 +206,18 @@ class TagFileInfo
 class TagGroupInfo
 {
  public:
-   TagGroupInfo() {
-      members.setAutoDelete(true);
+   TagGroupInfo() 
+   {
    }
+
    QByteArray name;
    QByteArray title;
    QByteArray filename;
+
    TagAnchorInfoList docAnchors;
+
    QList<TagMemberInfo> members;
+
    QStringList subgroupList;
    QStringList classList;
    QStringList namespaceList;
@@ -208,6 +233,7 @@ class TagPageInfo
    QByteArray name;
    QByteArray title;
    QByteArray filename;
+
    TagAnchorInfoList docAnchors;
 };
 
@@ -243,19 +269,23 @@ class TagFileParser : public QXmlDefaultHandler
                 InDir,
                 InTempArgList
               };
+
    class StartElementHandler
    {
-      typedef void (TagFileParser::*Handler)(const QXmlAttributes &attrib);
+      typedef void (TagFileParser::*Handler)   (const QXmlAttributes &attrib);
 
-    public:
-      StartElementHandler(TagFileParser *parent, Handler h) : m_parent(parent), m_handler(h) {}
-      void operator()(const QXmlAttributes &attrib) {
-         (m_parent->*m_handler)(attrib);
-      }
+      public:
+         StartElementHandler(TagFileParser *parent, Handler h) : m_parent(parent), m_handler(h) 
+         {
+         }
 
-    private:
-      TagFileParser *m_parent;
-      Handler m_handler;
+         void operator()(const QXmlAttributes &attrib) {
+            (m_parent->*m_handler)(attrib);
+         }
+
+       private:
+         TagFileParser *m_parent;
+         Handler m_handler;
    };
 
    class EndElementHandler
@@ -300,6 +330,7 @@ class TagFileParser : public QXmlDefaultHandler
    void warn(const char *fmt) {
       ::warn(m_inputFileName, m_locator->lineNumber(), fmt);
    }
+
    void warn(const char *fmt, const char *s) {
       ::warn(m_inputFileName, m_locator->lineNumber(), fmt, s);
    }
@@ -307,7 +338,7 @@ class TagFileParser : public QXmlDefaultHandler
    void startCompound( const QXmlAttributes &attrib ) {
       m_curString = "";
 
-      QString kind = attrib.value("kind");
+      QString kind   = attrib.value("kind");
       QString isObjC = attrib.value("objc");
 
       if (kind == "class") {
@@ -346,32 +377,41 @@ class TagFileParser : public QXmlDefaultHandler
          m_curClass = new TagClassInfo;
          m_curClass->kind = TagClassInfo::Service;
          m_state = InClass;
+
       } else if (kind == "singleton") {
          m_curClass = new TagClassInfo;
          m_curClass->kind = TagClassInfo::Singleton;
          m_state = InClass;
+
       } else if (kind == "file") {
          m_curFile = new TagFileInfo;
          m_state = InFile;
+
       } else if (kind == "namespace") {
          m_curNamespace = new TagNamespaceInfo;
          m_state = InNamespace;
+
       } else if (kind == "group") {
          m_curGroup = new TagGroupInfo;
          m_state = InGroup;
+
       } else if (kind == "page") {
          m_curPage = new TagPageInfo;
          m_state = InPage;
+
       } else if (kind == "package") {
          m_curPackage = new TagPackageInfo;
          m_state = InPackage;
+
       } else if (kind == "dir") {
          m_curDir = new TagDirInfo;
          m_state = InDir;
+
       } else {
-         warn("Unknown compound attribute `%s' found!\n", kind.data());
+         warn("Unknown compound attribute `%s' found!\n", qPrintable(kind) );
          m_state = Invalid;
       }
+
       if (isObjC == "yes" && m_curClass) {
          m_curClass->isObjC = true;
       }
@@ -380,80 +420,98 @@ class TagFileParser : public QXmlDefaultHandler
    void endCompound() {
       switch (m_state) {
          case InClass:
-            m_tagFileClasses.append(m_curClass);
+            m_tagFileClasses.append(*m_curClass);
             m_curClass = 0;
             break;
+
          case InFile:
-            m_tagFileFiles.append(m_curFile);
+            m_tagFileFiles.append(*m_curFile);
             m_curFile = 0;
             break;
+
          case InNamespace:
-            m_tagFileNamespaces.append(m_curNamespace);
+            m_tagFileNamespaces.append(*m_curNamespace);
             m_curNamespace = 0;
             break;
+
          case InGroup:
-            m_tagFileGroups.append(m_curGroup);
+            m_tagFileGroups.append(*m_curGroup);
             m_curGroup = 0;
             break;
+
          case InPage:
-            m_tagFilePages.append(m_curPage);
+            m_tagFilePages.append(*m_curPage);
             m_curPage = 0;
             break;
+
          case InDir:
-            m_tagFileDirs.append(m_curDir);
+            m_tagFileDirs.append(*m_curDir);
             m_curDir = 0;
             break;
+
          case InPackage:
-            m_tagFilePackages.append(m_curPackage);
+            m_tagFilePackages.append(*m_curPackage);
             m_curPackage = 0;
             break;
+
          default:
-            warn("tag `compound' was not expected!\n");
+            warn("tag `compound' was not expected\n");
       }
    }
 
    void startMember( const QXmlAttributes &attrib) {
       m_curMember = new TagMemberInfo;
       m_curMember->kind = attrib.value("kind").toUtf8();
+
       QByteArray protStr   = attrib.value("protection").toUtf8();
       QByteArray virtStr   = attrib.value("virtualness").toUtf8();
       QByteArray staticStr = attrib.value("static").toUtf8();
+
       if (protStr == "protected") {
          m_curMember->prot = Protected;
+
       } else if (protStr == "private") {
          m_curMember->prot = Private;
       }
+
       if (virtStr == "virtual") {
          m_curMember->virt = Virtual;
       } else if (virtStr == "pure") {
          m_curMember->virt = Pure;
       }
+
       if (staticStr == "yes") {
          m_curMember->isStatic = true;
       }
-      m_stateStack.push(new State(m_state));
+
+      m_stateStack.push(m_state);
       m_state = InMember;
    }
 
    void endMember() {
-      m_state = *m_stateStack.top();
-      m_stateStack.remove();
+      m_state = m_stateStack.pop();
+
       switch (m_state) {
          case InClass:
-            m_curClass->members.append(m_curMember);
+            m_curClass->members.append(*m_curMember);
             break;
+
          case InFile:
-            m_curFile->members.append(m_curMember);
+            m_curFile->members.append(*m_curMember);
             break;
+
          case InNamespace:
-            m_curNamespace->members.append(m_curMember);
+            m_curNamespace->members.append(*m_curMember);
             break;
+
          case InGroup:
-            m_curGroup->members.append(m_curMember);
+            m_curGroup->members.append(*m_curMember);
             break;
+
          case InPackage:
-            m_curPackage->members.append(m_curMember);
+            m_curPackage->members.append(*m_curMember);
             break;
+
          default:
             warn("Unexpected tag `member' found\n");
             break;
@@ -467,8 +525,10 @@ class TagFileParser : public QXmlDefaultHandler
          m_curEnumValue->file = attrib.value("file").toUtf8();
          m_curEnumValue->anchor = attrib.value("anchor").toUtf8();
          m_curEnumValue->clangid = attrib.value("clangid").toUtf8();
-         m_stateStack.push(new State(m_state));
+
+         m_stateStack.push(m_state);
          m_state = InEnumValue;
+
       } else {
          warn("Found enumvalue tag outside of member tag\n");
       }
@@ -476,10 +536,11 @@ class TagFileParser : public QXmlDefaultHandler
 
    void endEnumValue() {
       m_curEnumValue->name = m_curString.trimmed();
-      m_state = *m_stateStack.top();
-      m_stateStack.remove();
+
+      m_state = m_stateStack.pop();
+
       if (m_state == InMember) {
-         m_curMember->enumValues.append(m_curEnumValue);
+         m_curMember->enumValues.append(*m_curEnumValue);
          m_curEnumValue = 0;
       }
    }
@@ -487,28 +548,28 @@ class TagFileParser : public QXmlDefaultHandler
    void endDocAnchor() {
       switch (m_state) {
          case InClass:
-            m_curClass->docAnchors.append(new TagAnchorInfo(m_fileName, m_curString));
+            m_curClass->docAnchors.append(TagAnchorInfo(m_fileName, m_curString));
             break;
          case InFile:
-            m_curFile->docAnchors.append(new TagAnchorInfo(m_fileName, m_curString));
+            m_curFile->docAnchors.append(TagAnchorInfo(m_fileName, m_curString));
             break;
          case InNamespace:
-            m_curNamespace->docAnchors.append(new TagAnchorInfo(m_fileName, m_curString));
+            m_curNamespace->docAnchors.append(TagAnchorInfo(m_fileName, m_curString));
             break;
          case InGroup:
-            m_curGroup->docAnchors.append(new TagAnchorInfo(m_fileName, m_curString));
+            m_curGroup->docAnchors.append(TagAnchorInfo(m_fileName, m_curString));
             break;
          case InPage:
-            m_curPage->docAnchors.append(new TagAnchorInfo(m_fileName, m_curString, m_title));
+            m_curPage->docAnchors.append(TagAnchorInfo(m_fileName, m_curString, m_title));
             break;
          case InMember:
-            m_curMember->docAnchors.append(new TagAnchorInfo(m_fileName, m_curString));
+            m_curMember->docAnchors.append(TagAnchorInfo(m_fileName, m_curString));
             break;
          case InPackage:
-            m_curPackage->docAnchors.append(new TagAnchorInfo(m_fileName, m_curString));
+            m_curPackage->docAnchors.append(TagAnchorInfo(m_fileName, m_curString));
             break;
          case InDir:
-            m_curDir->docAnchors.append(new TagAnchorInfo(m_fileName, m_curString));
+            m_curDir->docAnchors.append(TagAnchorInfo(m_fileName, m_curString));
             break;
          default:
             warn("Unexpected tag `member' found\n");
@@ -644,24 +705,32 @@ class TagFileParser : public QXmlDefaultHandler
 
    void startBase(const QXmlAttributes &attrib ) {
       m_curString = "";
+
       if (m_state == InClass && m_curClass) {
          QString protStr = attrib.value("protection");
          QString virtStr = attrib.value("virtualness");
+
          Protection prot = Public;
          Specifier  virt = Normal;
+
          if (protStr == "protected") {
             prot = Protected;
+
          } else if (protStr == "private") {
             prot = Private;
+
          }
+
          if (virtStr == "virtual") {
             virt = Virtual;
          }
+
          if (m_curClass->bases == 0) {
-            m_curClass->bases = new QList<BaseInfo>;
-            m_curClass->bases->setAutoDelete(true);
+            m_curClass->bases = new QList<BaseInfo>;            
          }
-         m_curClass->bases->append(new BaseInfo(m_curString, prot, virt));
+
+         m_curClass->bases->append(BaseInfo(m_curString, prot, virt));
+
       } else {
          warn("Unexpected tag `base' found\n");
       }
@@ -669,7 +738,8 @@ class TagFileParser : public QXmlDefaultHandler
 
    void endBase() {
       if (m_state == InClass && m_curClass) {
-         m_curClass->bases->getLast()->name = m_curString;
+         m_curClass->bases->last().name = m_curString;
+
       } else {
          warn("Unexpected tag `base' found\n");
       }
@@ -677,15 +747,19 @@ class TagFileParser : public QXmlDefaultHandler
 
    void startIncludes(const QXmlAttributes &attrib ) {
       if (m_state == InFile && m_curFile) {
+
          m_curIncludes = new TagIncludeInfo;
          m_curIncludes->id = attrib.value("id").toUtf8();
          m_curIncludes->name = attrib.value("name").toUtf8();
          m_curIncludes->isLocal = attrib.value("local").toUtf8() == "yes" ? true : false;
          m_curIncludes->isImported = attrib.value("imported").toUtf8() == "yes" ? true : false;
-         m_curFile->includes.append(m_curIncludes);
+
+         m_curFile->includes.append(* m_curIncludes);
+
       } else {
          warn("Unexpected tag `includes' found\n");
       }
+
       m_curString = "";
    }
 
@@ -696,10 +770,11 @@ class TagFileParser : public QXmlDefaultHandler
    void endTemplateArg() {
       if (m_state == InClass && m_curClass) {
          if (m_curClass->templateArguments == 0) {
-            m_curClass->templateArguments = new QList<QByteArray>;
-            m_curClass->templateArguments->setAutoDelete(true);
+            m_curClass->templateArguments = new QList<QByteArray>;            
          }
-         m_curClass->templateArguments->append(new QByteArray(m_curString));
+
+         m_curClass->templateArguments->append(QByteArray(m_curString));
+
       } else {
          warn("Unexpected tag `templarg' found\n");
       }
@@ -708,7 +783,7 @@ class TagFileParser : public QXmlDefaultHandler
    void endFilename() {
       switch (m_state) {
          case InClass:
-            m_curClass->filename     = m_curString;
+            m_curClass->filename = m_curString;
             break;
          case InNamespace:
             m_curNamespace->filename = m_curString;
@@ -824,86 +899,88 @@ class TagFileParser : public QXmlDefaultHandler
       m_curPackage = 0;
       m_curDir = 0;
 
-      m_stateStack.setAutoDelete(true);
-      m_tagFileClasses.setAutoDelete(true);
-      m_tagFileFiles.setAutoDelete(true);
-      m_tagFileNamespaces.setAutoDelete(true);
-      m_tagFileGroups.setAutoDelete(true);
-      m_tagFilePages.setAutoDelete(true);
-      m_tagFilePackages.setAutoDelete(true);
-      m_tagFileDirs.setAutoDelete(true);
+      m_startElementHandlers.insert("compound",    StartElementHandler(this, &TagFileParser::startCompound));
+      m_startElementHandlers.insert("member",      StartElementHandler(this, &TagFileParser::startMember));
+      m_startElementHandlers.insert("enumvalue",   StartElementHandler(this, &TagFileParser::startEnumValue));
+      m_startElementHandlers.insert("name",        StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("base",        StartElementHandler(this, &TagFileParser::startBase));
+      m_startElementHandlers.insert("filename",    StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("includes",    StartElementHandler(this, &TagFileParser::startIncludes));
+      m_startElementHandlers.insert("path",        StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("anchorfile",  StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("anchor",      StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("clangid",     StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("arglist",     StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("title",       StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("subgroup",    StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("class",       StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("namespace",   StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("file",        StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("dir",         StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("page",        StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("docanchor",   StartElementHandler(this, &TagFileParser::startDocAnchor));
+      m_startElementHandlers.insert("tagfile",     StartElementHandler(this, &TagFileParser::startIgnoreElement));
+      m_startElementHandlers.insert("templarg",    StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("type",        StartElementHandler(this, &TagFileParser::startStringValue));
 
-      m_startElementHandlers.insert("compound",    new StartElementHandler(this, &TagFileParser::startCompound));
-      m_startElementHandlers.insert("member",      new StartElementHandler(this, &TagFileParser::startMember));
-      m_startElementHandlers.insert("enumvalue",   new StartElementHandler(this, &TagFileParser::startEnumValue));
-      m_startElementHandlers.insert("name",        new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("base",        new StartElementHandler(this, &TagFileParser::startBase));
-      m_startElementHandlers.insert("filename",    new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("includes",    new StartElementHandler(this, &TagFileParser::startIncludes));
-      m_startElementHandlers.insert("path",        new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("anchorfile",  new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("anchor",      new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("clangid",     new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("arglist",     new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("title",       new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("subgroup",    new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("class",       new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("namespace",   new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("file",        new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("dir",         new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("page",        new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("docanchor",   new StartElementHandler(this, &TagFileParser::startDocAnchor));
-      m_startElementHandlers.insert("tagfile",     new StartElementHandler(this, &TagFileParser::startIgnoreElement));
-      m_startElementHandlers.insert("templarg",    new StartElementHandler(this, &TagFileParser::startStringValue));
-      m_startElementHandlers.insert("type",        new StartElementHandler(this, &TagFileParser::startStringValue));
-
-      m_endElementHandlers.insert("compound",    new EndElementHandler(this, &TagFileParser::endCompound));
-      m_endElementHandlers.insert("member",      new EndElementHandler(this, &TagFileParser::endMember));
-      m_endElementHandlers.insert("enumvalue",   new EndElementHandler(this, &TagFileParser::endEnumValue));
-      m_endElementHandlers.insert("name",        new EndElementHandler(this, &TagFileParser::endName));
-      m_endElementHandlers.insert("base",        new EndElementHandler(this, &TagFileParser::endBase));
-      m_endElementHandlers.insert("filename",    new EndElementHandler(this, &TagFileParser::endFilename));
-      m_endElementHandlers.insert("includes",    new EndElementHandler(this, &TagFileParser::endIncludes));
-      m_endElementHandlers.insert("path",        new EndElementHandler(this, &TagFileParser::endPath));
-      m_endElementHandlers.insert("anchorfile",  new EndElementHandler(this, &TagFileParser::endAnchorFile));
-      m_endElementHandlers.insert("anchor",      new EndElementHandler(this, &TagFileParser::endAnchor));
-      m_endElementHandlers.insert("clangid",     new EndElementHandler(this, &TagFileParser::endClangId));
-      m_endElementHandlers.insert("arglist",     new EndElementHandler(this, &TagFileParser::endArglist));
-      m_endElementHandlers.insert("title",       new EndElementHandler(this, &TagFileParser::endTitle));
-      m_endElementHandlers.insert("subgroup",    new EndElementHandler(this, &TagFileParser::endSubgroup));
-      m_endElementHandlers.insert("class"   ,    new EndElementHandler(this, &TagFileParser::endClass));
-      m_endElementHandlers.insert("namespace",   new EndElementHandler(this, &TagFileParser::endNamespace));
-      m_endElementHandlers.insert("file",        new EndElementHandler(this, &TagFileParser::endFile));
-      m_endElementHandlers.insert("dir",         new EndElementHandler(this, &TagFileParser::endDir));
-      m_endElementHandlers.insert("page",        new EndElementHandler(this, &TagFileParser::endPage));
-      m_endElementHandlers.insert("docanchor",   new EndElementHandler(this, &TagFileParser::endDocAnchor));
-      m_endElementHandlers.insert("tagfile",     new EndElementHandler(this, &TagFileParser::endIgnoreElement));
-      m_endElementHandlers.insert("templarg",    new EndElementHandler(this, &TagFileParser::endTemplateArg));
-      m_endElementHandlers.insert("type",        new EndElementHandler(this, &TagFileParser::endType));
+      m_endElementHandlers.insert("compound",      EndElementHandler(this, &TagFileParser::endCompound));
+      m_endElementHandlers.insert("member",        EndElementHandler(this, &TagFileParser::endMember));
+      m_endElementHandlers.insert("enumvalue",     EndElementHandler(this, &TagFileParser::endEnumValue));
+      m_endElementHandlers.insert("name",          EndElementHandler(this, &TagFileParser::endName));
+      m_endElementHandlers.insert("base",          EndElementHandler(this, &TagFileParser::endBase));
+      m_endElementHandlers.insert("filename",      EndElementHandler(this, &TagFileParser::endFilename));
+      m_endElementHandlers.insert("includes",      EndElementHandler(this, &TagFileParser::endIncludes));
+      m_endElementHandlers.insert("path",          EndElementHandler(this, &TagFileParser::endPath));
+      m_endElementHandlers.insert("anchorfile",    EndElementHandler(this, &TagFileParser::endAnchorFile));
+      m_endElementHandlers.insert("anchor",        EndElementHandler(this, &TagFileParser::endAnchor));
+      m_endElementHandlers.insert("clangid",       EndElementHandler(this, &TagFileParser::endClangId));
+      m_endElementHandlers.insert("arglist",       EndElementHandler(this, &TagFileParser::endArglist));
+      m_endElementHandlers.insert("title",         EndElementHandler(this, &TagFileParser::endTitle));
+      m_endElementHandlers.insert("subgroup",      EndElementHandler(this, &TagFileParser::endSubgroup));
+      m_endElementHandlers.insert("class"   ,      EndElementHandler(this, &TagFileParser::endClass));
+      m_endElementHandlers.insert("namespace",     EndElementHandler(this, &TagFileParser::endNamespace));
+      m_endElementHandlers.insert("file",          EndElementHandler(this, &TagFileParser::endFile));
+      m_endElementHandlers.insert("dir",           EndElementHandler(this, &TagFileParser::endDir));
+      m_endElementHandlers.insert("page",          EndElementHandler(this, &TagFileParser::endPage));
+      m_endElementHandlers.insert("docanchor",     EndElementHandler(this, &TagFileParser::endDocAnchor));
+      m_endElementHandlers.insert("tagfile",       EndElementHandler(this, &TagFileParser::endIgnoreElement));
+      m_endElementHandlers.insert("templarg",      EndElementHandler(this, &TagFileParser::endTemplateArg));
+      m_endElementHandlers.insert("type",          EndElementHandler(this, &TagFileParser::endType));
 
       return true;
    }
 
-   bool startElement( const QString &, const QString &,
-                      const QString &name, const QXmlAttributes &attrib ) {
-      //printf("startElement `%s'\n",name.data());
-      StartElementHandler *handler = m_startElementHandlers[name.toUtf8()];
-      if (handler) {
-         (*handler)(attrib);
+   bool startElement(const QString &, const QString &, const QString &name, const QXmlAttributes &attrib) {
+
+      auto iter = m_startElementHandlers.find(name.toUtf8());
+
+      if (iter != m_startElementHandlers.end())  {
+
+         StartElementHandler &handler = *iter;
+         handler(attrib);
+
       } else {
-         warn("Unknown tag `%s' found!\n", name.data());
+         warn("Unknown tag `%s' found\n", qPrintable(name)); 
+
       }
+
       return true;
    }
 
    bool endElement( const QString &, const QString &, const QString &name ) {
-      //printf("endElement `%s'\n",name.data());
-      EndElementHandler *handler = m_endElementHandlers[name.toUtf8()];
-      if (handler) {
-         (*handler)();
+ 
+      auto iter = m_endElementHandlers.find(name.toUtf8());
+
+      if (iter != m_endElementHandlers.end()) { 
+
+         EndElementHandler &handler = *iter;
+         handler();    
+
       } else {
-         warn("Unknown tag `%s' found!\n", name.data());
+         warn("Unknown tag `%s' found\n", qPrintable(name));
+
       }
+
       return true;
    }
 
@@ -919,6 +996,7 @@ class TagFileParser : public QXmlDefaultHandler
  private:
    void buildMemberList(Entry *ce, QList<TagMemberInfo> &members);
    void addDocAnchors(Entry *e, const TagAnchorInfoList &l);
+
    QList<TagClassInfo>        m_tagFileClasses;
    QList<TagFileInfo>         m_tagFileFiles;
    QList<TagNamespaceInfo>    m_tagFileNamespaces;
@@ -926,8 +1004,10 @@ class TagFileParser : public QXmlDefaultHandler
    QList<TagPageInfo>         m_tagFilePages;
    QList<TagPackageInfo>      m_tagFilePackages;
    QList<TagDirInfo>          m_tagFileDirs;
-   QHash<QString, StartElementHandler> m_startElementHandlers;
-   QHash<QString, EndElementHandler>   m_endElementHandlers;
+
+   QHash<QString, StartElementHandler>  m_startElementHandlers;
+   QHash<QString, EndElementHandler>    m_endElementHandlers;
+
    TagClassInfo              *m_curClass;
    TagFileInfo               *m_curFile;
    TagNamespaceInfo          *m_curNamespace;
@@ -938,14 +1018,17 @@ class TagFileParser : public QXmlDefaultHandler
    TagMemberInfo             *m_curMember;
    TagEnumValueInfo          *m_curEnumValue;
    TagIncludeInfo            *m_curIncludes;
-   QByteArray                   m_curString;
-   QByteArray                   m_tagName;
-   QByteArray                   m_fileName;
-   QByteArray                   m_title;
+
+   QByteArray                 m_curString;
+   QByteArray                 m_tagName;
+   QByteArray                 m_fileName;
+   QByteArray                 m_title;
    State                      m_state;
+
    QStack<State>              m_stateStack;
+
    QXmlLocator               *m_locator;
-   QByteArray                   m_inputFileName;
+   QByteArray                 m_inputFileName;
 };
 
 /** Error handler for the XML tag file parser.
@@ -956,19 +1039,23 @@ class TagFileErrorHandler : public QXmlErrorHandler
 {
  public:
    virtual ~TagFileErrorHandler() {}
-   bool warning( const QXmlParseException &) {
+
+   bool warning( const QXmlParseException &) override {
       return false;
    }
-   bool error( const QXmlParseException &) {
+
+   bool error( const QXmlParseException &) override {
       return false;
    }
-   bool fatalError( const QXmlParseException &exception ) {
+
+   bool fatalError( const QXmlParseException &exception ) override {
       err("Fatal error at line %d column %d: %s\n",
           exception.lineNumber(), exception.columnNumber(),
           exception.message().data());
       return false;
    }
-   QString errorString() {
+
+   QString errorString() const override {
       return "";
    }
 
@@ -979,257 +1066,255 @@ class TagFileErrorHandler : public QXmlErrorHandler
 /*! Dumps the internal structures. For debugging only! */
 void TagFileParser::dump()
 {
-   msg("Result:\n");
-   QListIterator<TagClassInfo> lci(m_tagFileClasses);
+   msg("Result:\n");  
 
-   //============== CLASSES
-   TagClassInfo *cd;
-   for (; (cd = lci.current()); ++lci) {
-      msg("class `%s'\n", cd->name.data());
-      msg("  filename `%s'\n", cd->filename.data());
-      if (cd->bases) {
-         QListIterator<BaseInfo> bii(*cd->bases);
-         BaseInfo *bi;
-         for ( bii.toFirst() ; (bi = bii.current()) ; ++bii) {
-            msg( "  base: %s \n", bi->name.data() );
+   //  CLASSES  
+   for (auto cd : m_tagFileClasses) {
+      msg("class `%s'\n",      cd.name.data());
+      msg("  filename `%s'\n", cd.filename.data());
+
+      if (cd.bases) {         
+         for (auto bi : *cd.bases) {
+            msg( "  base: %s \n", bi.name.data() );
          }
       }
-
-      QListIterator<TagMemberInfo> mci(cd->members);
-      TagMemberInfo *md;
-      for (; (md = mci.current()); ++mci) {
+     
+      for (auto md : cd.members) {
          msg("  member:\n");
-         msg("    kind: `%s'\n", md->kind.data());
-         msg("    name: `%s'\n", md->name.data());
-         msg("    anchor: `%s'\n", md->anchor.data());
-         msg("    arglist: `%s'\n", md->arglist.data());
+         msg("    kind: `%s'\n",    md.kind.data());
+         msg("    name: `%s'\n",    md.name.data());
+         msg("    anchor: `%s'\n",  md.anchor.data());
+         msg("    arglist: `%s'\n", md.arglist.data());
       }
    }
-   //============== NAMESPACES
-   QListIterator<TagNamespaceInfo> lni(m_tagFileNamespaces);
-   TagNamespaceInfo *nd;
-   for (; (nd = lni.current()); ++lni) {
-      msg("namespace `%s'\n", nd->name.data());
-      msg("  filename `%s'\n", nd->filename.data());
-      QStringList::Iterator it;
-      for ( it = nd->classList.begin();
-            it != nd->classList.end(); ++it ) {
-         msg( "  class: %s \n", (*it).latin1() );
-      }
 
-      QListIterator<TagMemberInfo> mci(nd->members);
-      TagMemberInfo *md;
-      for (; (md = mci.current()); ++mci) {
+   //  NAMESPACES
+   for (auto nd : m_tagFileNamespaces) {
+      msg("namespace `%s'\n",  nd.name.data());
+      msg("  filename `%s'\n", nd.filename.data());
+
+      QStringList::Iterator it;
+      for ( it = nd.classList.begin(); it != nd.classList.end(); ++it ) {
+         msg( "  class: %s \n", qPrintable((*it)) );
+      }
+     
+      for (auto md : nd.members) {
          msg("  member:\n");
-         msg("    kind: `%s'\n", md->kind.data());
-         msg("    name: `%s'\n", md->name.data());
-         msg("    anchor: `%s'\n", md->anchor.data());
-         msg("    arglist: `%s'\n", md->arglist.data());
+         msg("    kind: `%s'\n",    md.kind.data());
+         msg("    name: `%s'\n",    md.name.data());
+         msg("    anchor: `%s'\n",  md.anchor.data());
+         msg("    arglist: `%s'\n", md.arglist.data());
       }
    }
-   //============== FILES
-   QListIterator<TagFileInfo> lfi(m_tagFileFiles);
-   TagFileInfo *fd;
-   for (; (fd = lfi.current()); ++lfi) {
-      msg("file `%s'\n", fd->name.data());
-      msg("  filename `%s'\n", fd->filename.data());
+
+   //  FILES  
+   for (auto fd : m_tagFileFiles) {
+      msg("file `%s'\n",       fd.name.data());
+      msg("  filename `%s'\n", fd.filename.data());
+
       QStringList::Iterator it;
-      for ( it = fd->namespaceList.begin();
-            it != fd->namespaceList.end(); ++it ) {
-         msg( "  namespace: %s \n", (*it).latin1() );
-      }
-      for ( it = fd->classList.begin();
-            it != fd->classList.end(); ++it ) {
-         msg( "  class: %s \n", (*it).latin1() );
+      for ( it = fd.namespaceList.begin(); it != fd.namespaceList.end(); ++it ) {
+         msg( "  namespace: %s \n", qPrintable((*it)) );
       }
 
-      QListIterator<TagMemberInfo> mci(fd->members);
-      TagMemberInfo *md;
-      for (; (md = mci.current()); ++mci) {
+      for ( it = fd.classList.begin(); it != fd.classList.end(); ++it ) {
+         msg( "  class: %s \n", qPrintable((*it)) );
+      }
+     
+      for (auto md : fd.members) {
          msg("  member:\n");
-         msg("    kind: `%s'\n", md->kind.data());
-         msg("    name: `%s'\n", md->name.data());
-         msg("    anchor: `%s'\n", md->anchor.data());
-         msg("    arglist: `%s'\n", md->arglist.data());
-      }
+         msg("    kind: `%s'\n",    md.kind.data());
+         msg("    name: `%s'\n",    md.name.data());
+         msg("    anchor: `%s'\n",  md.anchor.data());
+         msg("    arglist: `%s'\n", md.arglist.data());
+      }  
 
-      QListIterator<TagIncludeInfo> mii(fd->includes);
-      TagIncludeInfo *ii;
-      for (; (ii = mii.current()); ++mii) {
-         msg("  includes id: %s name: %s\n", ii->id.data(), ii->name.data());
+      for (auto item : fd.includes) {
+         msg("  includes id: %s name: %s\n", item.id.data(), item.name.data());
       }
    }
 
-   //============== GROUPS
-   QListIterator<TagGroupInfo> lgi(m_tagFileGroups);
-   TagGroupInfo *gd;
-   for (; (gd = lgi.current()); ++lgi) {
-      msg("group `%s'\n", gd->name.data());
-      msg("  filename `%s'\n", gd->filename.data());
+   //  GROUPS 
+   for (auto gd : m_tagFileGroups) {
+      msg("group `%s'\n",      gd.name.data());
+      msg("  filename `%s'\n", gd.filename.data());
+
       QStringList::Iterator it;
-      for ( it = gd->namespaceList.begin();
-            it != gd->namespaceList.end(); ++it ) {
-         msg( "  namespace: %s \n", (*it).latin1() );
-      }
-      for ( it = gd->classList.begin();
-            it != gd->classList.end(); ++it ) {
-         msg( "  class: %s \n", (*it).latin1() );
-      }
-      for ( it = gd->fileList.begin();
-            it != gd->fileList.end(); ++it ) {
-         msg( "  file: %s \n", (*it).latin1() );
-      }
-      for ( it = gd->subgroupList.begin();
-            it != gd->subgroupList.end(); ++it ) {
-         msg( "  subgroup: %s \n", (*it).latin1() );
-      }
-      for ( it = gd->pageList.begin();
-            it != gd->pageList.end(); ++it ) {
-         msg( "  page: %s \n", (*it).latin1() );
+      for ( it = gd.namespaceList.begin(); it != gd.namespaceList.end(); ++it ) {
+         msg( "  namespace: %s \n", qPrintable((*it)) );
       }
 
-      QListIterator<TagMemberInfo> mci(gd->members);
-      TagMemberInfo *md;
-      for (; (md = mci.current()); ++mci) {
+      for ( it = gd.classList.begin(); it != gd.classList.end(); ++it ) {
+         msg( "  class: %s \n", qPrintable((*it)) );
+      }
+
+      for ( it = gd.fileList.begin(); it != gd.fileList.end(); ++it ) {
+         msg( "  file: %s \n", qPrintable((*it)) );
+      }
+
+      for ( it = gd.subgroupList.begin(); it != gd.subgroupList.end(); ++it ) {
+         msg( "  subgroup: %s \n",qPrintable((*it)) );
+      }
+      for ( it = gd.pageList.begin(); it != gd.pageList.end(); ++it ) {
+         msg( "  page: %s \n", qPrintable((*it)) );
+      }
+   
+      for (auto md : gd.members) {
          msg("  member:\n");
-         msg("    kind: `%s'\n", md->kind.data());
-         msg("    name: `%s'\n", md->name.data());
-         msg("    anchor: `%s'\n", md->anchor.data());
-         msg("    arglist: `%s'\n", md->arglist.data());
+         msg("    kind: `%s'\n",    md.kind.data());
+         msg("    name: `%s'\n",    md.name.data());
+         msg("    anchor: `%s'\n",  md.anchor.data());
+         msg("    arglist: `%s'\n", md.arglist.data());
       }
    }
-   //============== PAGES
-   QListIterator<TagPageInfo> lpi(m_tagFilePages);
-   TagPageInfo *pd;
-   for (; (pd = lpi.current()); ++lpi) {
-      msg("page `%s'\n", pd->name.data());
-      msg("  title `%s'\n", pd->title.data());
-      msg("  filename `%s'\n", pd->filename.data());
+
+   //  PAGES  
+   for (auto pd : m_tagFilePages) {
+      msg("page `%s'\n",       pd.name.data());
+      msg("  title `%s'\n",    pd.title.data());
+      msg("  filename `%s'\n", pd.filename.data());
    }
-   //============== DIRS
-   QListIterator<TagDirInfo> ldi(m_tagFileDirs);
-   TagDirInfo *dd;
-   for (; (dd = ldi.current()); ++ldi) {
-      msg("dir `%s'\n", dd->name.data());
-      msg("  path `%s'\n", dd->path.data());
+
+   //  DIRS
+   for (auto dd : m_tagFileDirs) {
+      msg("dir `%s'\n",    dd.name.data());
+      msg("  path `%s'\n", dd.path.data());
+
       QStringList::Iterator it;
-      for ( it = dd->fileList.begin();
-            it != dd->fileList.end(); ++it ) {
-         msg( "  file: %s \n", (*it).latin1() );
+      for ( it = dd.fileList.begin(); it != dd.fileList.end(); ++it ) {
+         msg( "  file: %s \n", qPrintable((*it)) );
       }
-      for ( it = dd->subdirList.begin();
-            it != dd->subdirList.end(); ++it ) {
-         msg( "  subdir: %s \n", (*it).latin1() );
+
+      for ( it = dd.subdirList.begin(); it != dd.subdirList.end(); ++it ) {
+         msg( "  subdir: %s \n", qPrintable((*it)) );
       }
    }
 }
 
-void TagFileParser::addDocAnchors(Entry *e, const TagAnchorInfoList &l)
-{
-   QListIterator<TagAnchorInfo> tli(l);
-   TagAnchorInfo *ta;
-   for (tli.toFirst(); (ta = tli.current()); ++tli) {
-      if (Doxygen::sectionDict->find(ta->label) == 0) {
-         //printf("New sectionInfo file=%s anchor=%s\n",
-         //    ta->fileName.data(),ta->label.data());
-         SectionInfo *si = new SectionInfo(ta->fileName, -1, ta->label, ta->title,
-                                           SectionInfo::Anchor, 0, m_tagName);
-         Doxygen::sectionDict->append(ta->label, si);
-         e->anchors->append(si);
+void TagFileParser::addDocAnchors(Entry *e, const TagAnchorInfoList &list)
+{   
+   for (auto ta : list) {
+      if (Doxygen::sectionDict->find(ta.label) == 0) {
+         
+         QSharedPointer<SectionInfo> si (new SectionInfo(ta.fileName, -1, ta.label, ta.title, SectionInfo::Anchor, 0, m_tagName));
+         Doxygen::sectionDict->insert(ta.label, si);
+
+         e->anchors->append(*si);
+
       } else {
-         warn("Duplicate anchor %s found\n", ta->label.data());
+         warn("Duplicate anchor %s found\n", ta.label.data());
       }
    }
 }
 
 void TagFileParser::buildMemberList(Entry *ce, QList<TagMemberInfo> &members)
 {
-   QListIterator<TagMemberInfo> mii(members);
-   TagMemberInfo *tmi;
-   for (; (tmi = mii.current()); ++mii) {
-      Entry *me      = new Entry;
-      me->type       = tmi->type;
-      me->name       = tmi->name;
-      me->args       = tmi->arglist;
-      if (!me->args.isEmpty()) {
+   for (auto tmi : members) {
+      Entry *me = new Entry;
+
+      me->type  = tmi.type;
+      me->name  = tmi.name;
+      me->args  = tmi.arglist;
+
+      if (! me->args.isEmpty()) {
          delete me->argList;
+
          me->argList = new ArgumentList;
          stringToArgumentList(me->args, me->argList);
       }
-      if (tmi->enumValues.count() > 0) {
-         me->spec |= Entry::Strong;
-         QListIterator<TagEnumValueInfo> evii(tmi->enumValues);
-         TagEnumValueInfo *evi;
-         for (evii.toFirst(); (evi = evii.current()); ++evii) {
+
+      if (tmi.enumValues.count() > 0) {
+         me->spec |= Entry::Strong;        
+
+         for (auto evi : tmi.enumValues) {
             Entry *ev      = new Entry;
             ev->type       = "@";
-            ev->name       = evi->name;
-            ev->id         = evi->clangid;
+            ev->name       = evi.name;
+            ev->id         = evi.clangid;
             ev->section    = Entry::VARIABLE_SEC;
             TagInfo *ti    = new TagInfo;
             ti->tagName    = m_tagName;
-            ti->anchor     = evi->anchor;
-            ti->fileName   = evi->file;
+            ti->anchor     = evi.anchor;
+            ti->fileName   = evi.file;
             ev->tagInfo    = ti;
+
             me->addSubEntry(ev);
          }
       }
-      me->protection = tmi->prot;
-      me->virt       = tmi->virt;
-      me->stat       = tmi->isStatic;
+
+      me->protection = tmi.prot;
+      me->virt       = tmi.virt;
+      me->stat       = tmi.isStatic;
       me->fileName   = ce->fileName;
-      me->id         = tmi->clangId;
+      me->id         = tmi.clangId;
+
       if (ce->section == Entry::GROUPDOC_SEC) {
-         me->groups->append(new Grouping(ce->name, Grouping::GROUPING_INGROUP));
+         me->groups->append(Grouping(ce->name, Grouping::GROUPING_INGROUP));
       }
-      addDocAnchors(me, tmi->docAnchors);
+
+      addDocAnchors(me, tmi.docAnchors);
       TagInfo *ti    = new TagInfo;
+
       ti->tagName    = m_tagName;
-      ti->anchor     = tmi->anchor;
-      ti->fileName   = tmi->anchorFile;
+      ti->anchor     = tmi.anchor;
+      ti->fileName   = tmi.anchorFile;
       me->tagInfo    = ti;
-      if (tmi->kind == "define") {
+
+      if (tmi.kind == "define") {
          me->type = "#define";
          me->section = Entry::DEFINE_SEC;
-      } else if (tmi->kind == "enumvalue") {
+
+      } else if (tmi.kind == "enumvalue") {
          me->section = Entry::VARIABLE_SEC;
          me->mtype = Method;
-      } else if (tmi->kind == "property") {
+
+      } else if (tmi.kind == "property") {
          me->section = Entry::VARIABLE_SEC;
          me->mtype = Property;
-      } else if (tmi->kind == "event") {
+
+      } else if (tmi.kind == "event") {
          me->section = Entry::VARIABLE_SEC;
          me->mtype = Event;
-      } else if (tmi->kind == "variable") {
+
+      } else if (tmi.kind == "variable") {
          me->section = Entry::VARIABLE_SEC;
          me->mtype = Method;
-      } else if (tmi->kind == "typedef") {
+
+      } else if (tmi.kind == "typedef") {
          me->section = Entry::VARIABLE_SEC; //Entry::TYPEDEF_SEC;
          me->type.prepend("typedef ");
          me->mtype = Method;
-      } else if (tmi->kind == "enumeration") {
+
+      } else if (tmi.kind == "enumeration") {
          me->section = Entry::ENUM_SEC;
          me->mtype = Method;
-      } else if (tmi->kind == "function") {
+
+      } else if (tmi.kind == "function") {
          me->section = Entry::FUNCTION_SEC;
          me->mtype = Method;
-      } else if (tmi->kind == "signal") {
+
+      } else if (tmi.kind == "signal") {
          me->section = Entry::FUNCTION_SEC;
          me->mtype = Signal;
-      } else if (tmi->kind == "prototype") {
+
+      } else if (tmi.kind == "prototype") {
          me->section = Entry::FUNCTION_SEC;
          me->mtype = Method;
-      } else if (tmi->kind == "friend") {
+
+      } else if (tmi.kind == "friend") {
          me->section = Entry::FUNCTION_SEC;
          me->type.prepend("friend ");
          me->mtype = Method;
-      } else if (tmi->kind == "dcop") {
+
+      } else if (tmi.kind == "dcop") {
          me->section = Entry::FUNCTION_SEC;
          me->mtype = DCOP;
-      } else if (tmi->kind == "slot") {
+
+      } else if (tmi.kind == "slot") {
          me->section = Entry::FUNCTION_SEC;
          me->mtype = Slot;
       }
+
       ce->addSubEntry(me);
    }
 }
@@ -1251,216 +1336,227 @@ static QByteArray stripPath(const QByteArray &s)
 void TagFileParser::buildLists(Entry *root)
 {
    // build class list
-   QListIterator<TagClassInfo> cit(m_tagFileClasses);
-   TagClassInfo *tci;
-   for (cit.toFirst(); (tci = cit.current()); ++cit) {
+   for (auto tci : m_tagFileClasses) {
+
       Entry *ce = new Entry;
       ce->section = Entry::CLASS_SEC;
-      switch (tci->kind) {
+
+      switch (tci.kind) {
          case TagClassInfo::Class:
             break;
+
          case TagClassInfo::Struct:
             ce->spec = Entry::Struct;
             break;
+
          case TagClassInfo::Union:
             ce->spec = Entry::Union;
             break;
+
          case TagClassInfo::Interface:
             ce->spec = Entry::Interface;
             break;
+
          case TagClassInfo::Enum:
             ce->spec = Entry::Enum;
             break;
+
          case TagClassInfo::Exception:
             ce->spec = Entry::Exception;
             break;
+
          case TagClassInfo::Protocol:
             ce->spec = Entry::Protocol;
             break;
+
          case TagClassInfo::Category:
             ce->spec = Entry::Category;
             break;
+
          case TagClassInfo::Service:
             ce->spec = Entry::Service;
             break;
+
          case TagClassInfo::Singleton:
             ce->spec = Entry::Singleton;
             break;
       }
-      ce->name     = tci->name;
-      if (tci->kind == TagClassInfo::Protocol) {
+
+      ce->name = tci.name;
+
+      if (tci.kind == TagClassInfo::Protocol) {
          ce->name += "-p";
       }
-      addDocAnchors(ce, tci->docAnchors);
+
+      addDocAnchors(ce, tci.docAnchors);
       TagInfo *ti  = new TagInfo;
+
       ti->tagName  = m_tagName;
-      ti->fileName = tci->filename;
-      ce->id       = tci->clangId;
+      ti->fileName = tci.filename;
+      ce->id       = tci.clangId;
       ce->tagInfo  = ti;
-      ce->lang     = tci->isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
+      ce->lang     = tci.isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
+
       // transfer base class list
-      if (tci->bases) {
+
+      if (tci.bases) {
          delete ce->extends;
-         ce->extends = tci->bases;
-         tci->bases = 0;
+         ce->extends = tci.bases;
+         tci.bases = 0;
       }
-      if (tci->templateArguments) {
+
+      if (tci.templateArguments) {
          if (ce->tArgLists == 0) {
-            ce->tArgLists = new QList<ArgumentList>;
-            ce->tArgLists->setAutoDelete(true);
+            ce->tArgLists = new QList<ArgumentList>;           
          }
-         ArgumentList *al = new ArgumentList;
+
+         ArgumentList al;
          ce->tArgLists->append(al);
 
-         QListIterator<QByteArray> sli(*tci->templateArguments);
-         QByteArray *argName;
-         for (; (argName = sli.current()); ++sli) {
-            Argument *a = new Argument;
-            a->type = "class";
-            a->name = *argName;
-            al->append(a);
+         for (auto argName : *tci.templateArguments) {
+            Argument a;
+
+            a.type = "class";
+            a.name = argName;
+
+            al.append(a);
          }
       }
 
-      buildMemberList(ce, tci->members);
+      buildMemberList(ce, tci.members);
       root->addSubEntry(ce);
    }
 
    // build file list
-   QListIterator<TagFileInfo> fit(m_tagFileFiles);
-   TagFileInfo *tfi;
-   for (fit.toFirst(); (tfi = fit.current()); ++fit) {
+   
+   for (auto tfi : m_tagFileFiles) {
       Entry *fe = new Entry;
-      fe->section = guessSection(tfi->name);
-      fe->name     = tfi->name;
-      addDocAnchors(fe, tfi->docAnchors);
+      fe->section = guessSection(tfi.name);
+      fe->name     = tfi.name;
+
+      addDocAnchors(fe, tfi.docAnchors);
+
       TagInfo *ti  = new TagInfo;
       ti->tagName  = m_tagName;
-      ti->fileName = tfi->filename;
+      ti->fileName = tfi.filename;
       fe->tagInfo  = ti;
 
-      QByteArray fullName = m_tagName + ":" + tfi->path + stripPath(tfi->name);
+      QByteArray fullName = m_tagName + ":" + tfi.path + stripPath(tfi.name);
       fe->fileName = fullName;
+
       //printf("new FileDef() filename=%s\n",tfi->filename.data());
-      FileDef *fd = new FileDef(m_tagName + ":" + tfi->path,
-                                tfi->name, m_tagName,
-                                tfi->filename
-                               );
-      FileName *mn;
-      if ((mn = Doxygen::inputNameDict->find(tfi->name))) {
+      FileDef *fd = new FileDef(m_tagName + ":" + tfi.path, tfi.name, m_tagName, tfi.filename );
+     
+      QSharedPointer<FileName> mn (Doxygen::inputNameDict->find(tfi.name));
+
+      if (mn) {
          mn->append(fd);
-      } else {
-         mn = new FileName(fullName, tfi->name);
+
+      } else {       
+         mn = QSharedPointer<FileName> (new FileName(fullName, tfi.name));
          mn->append(fd);
-         Doxygen::inputNameList->inSort(mn);
-         Doxygen::inputNameDict->insert(tfi->name, mn);
+
+         Doxygen::inputNameList->inSort(mn.data());
+         Doxygen::inputNameDict->insert(tfi.name, mn);
       }
-      buildMemberList(fe, tfi->members);
+
+      buildMemberList(fe, tfi.members);
       root->addSubEntry(fe);
    }
 
-   // build namespace list
-   QListIterator<TagNamespaceInfo> nit(m_tagFileNamespaces);
-   TagNamespaceInfo *tni;
-   for (nit.toFirst(); (tni = nit.current()); ++nit) {
+   // build namespace list   
+   for (auto tni : m_tagFileNamespaces) {
       Entry *ne    = new Entry;
       ne->section  = Entry::NAMESPACE_SEC;
-      ne->name     = tni->name;
-      addDocAnchors(ne, tni->docAnchors);
+      ne->name     = tni.name;
+      addDocAnchors(ne, tni.docAnchors);
+
       TagInfo *ti  = new TagInfo;
       ti->tagName  = m_tagName;
-      ti->fileName = tni->filename;
-      ne->id       = tni->clangId;
+      ti->fileName = tni.filename;
+      ne->id       = tni.clangId;
       ne->tagInfo  = ti;
 
-      buildMemberList(ne, tni->members);
+      buildMemberList(ne, tni.members);
       root->addSubEntry(ne);
    }
 
-   // build package list
-   QListIterator<TagPackageInfo> pit(m_tagFilePackages);
-   TagPackageInfo *tpgi;
-   for (pit.toFirst(); (tpgi = pit.current()); ++pit) {
+   // build package list 
+   for (auto tpgi : m_tagFilePackages) {
       Entry *pe    = new Entry;
       pe->section  = Entry::PACKAGE_SEC;
-      pe->name     = tpgi->name;
-      addDocAnchors(pe, tpgi->docAnchors);
+      pe->name     = tpgi.name;
+      addDocAnchors(pe, tpgi.docAnchors);
+
       TagInfo *ti  = new TagInfo;
       ti->tagName  = m_tagName;
-      ti->fileName = tpgi->filename;
+      ti->fileName = tpgi.filename;
       pe->tagInfo  = ti;
 
-      buildMemberList(pe, tpgi->members);
+      buildMemberList(pe, tpgi.members);
       root->addSubEntry(pe);
    }
 
-   // build group list
-   QListIterator<TagGroupInfo> git(m_tagFileGroups);
-   TagGroupInfo *tgi;
-   for (git.toFirst(); (tgi = git.current()); ++git) {
+   // build group list  
+   for (auto tgi : m_tagFileGroups) {
       Entry *ge    = new Entry;
       ge->section  = Entry::GROUPDOC_SEC;
-      ge->name     = tgi->name;
-      ge->type     = tgi->title;
-      addDocAnchors(ge, tgi->docAnchors);
+      ge->name     = tgi.name;
+      ge->type     = tgi.title;
+
+      addDocAnchors(ge, tgi.docAnchors);
+
       TagInfo *ti  = new TagInfo;
       ti->tagName  = m_tagName;
-      ti->fileName = tgi->filename;
+      ti->fileName = tgi.filename;
       ge->tagInfo  = ti;
 
-      buildMemberList(ge, tgi->members);
+      buildMemberList(ge, tgi.members);
       root->addSubEntry(ge);
    }
 
-   // build page list
-   QListIterator<TagPageInfo> pgit(m_tagFilePages);
-   TagPageInfo *tpi;
-   for (pgit.toFirst(); (tpi = pgit.current()); ++pgit) {
+   // build page list 
+   for (auto tpi : m_tagFilePages) {
       Entry *pe    = new Entry;
-      pe->section  = tpi->filename == "index" ? Entry::MAINPAGEDOC_SEC : Entry::PAGEDOC_SEC;
-      pe->name     = tpi->name;
-      pe->args     = tpi->title;
-      addDocAnchors(pe, tpi->docAnchors);
+      pe->section  = tpi.filename == "index" ? Entry::MAINPAGEDOC_SEC : Entry::PAGEDOC_SEC;
+      pe->name     = tpi.name;
+      pe->args     = tpi.title;
+
+      addDocAnchors(pe, tpi.docAnchors);
+
       TagInfo *ti  = new TagInfo;
       ti->tagName  = m_tagName;
-      ti->fileName = tpi->filename;
+      ti->fileName = tpi.filename;
       pe->tagInfo  = ti;
+
       root->addSubEntry(pe);
    }
 }
 
 void TagFileParser::addIncludes()
-{
-   QListIterator<TagFileInfo> fit(m_tagFileFiles);
-   TagFileInfo *tfi;
-   for (fit.toFirst(); (tfi = fit.current()); ++fit) {
+{ 
+   for (auto tfi : m_tagFileFiles) {
       //printf("tag file tagName=%s path=%s name=%s\n",m_tagName.data(),tfi->path.data(),tfi->name.data());
-      FileName *fn = Doxygen::inputNameDict->find(tfi->name);
+      QSharedPointer<FileName> fn (Doxygen::inputNameDict->find(tfi.name));
+
       if (fn) {
-         //printf("found\n");
-         FileNameIterator fni(*fn);
-         FileDef *fd;
-         for (; (fd = fni.current()); ++fni) {
-            //printf("input file path=%s name=%s\n",fd->getPath().data(),fd->name().data());
-            if (fd->getPath() == QByteArray(m_tagName + ":" + tfi->path)) {
-               //printf("found\n");
-               QListIterator<TagIncludeInfo> mii(tfi->includes);
-               TagIncludeInfo *ii;
-               for (; (ii = mii.current()); ++mii) {
-                  //printf("ii->name=`%s'\n",ii->name.data());
-                  FileName *ifn = Doxygen::inputNameDict->find(ii->name);
+                 
+         for (auto fd : *fn) {
+            if (fd->getPath() == QByteArray(m_tagName + ":" + tfi.path)) {
+                            
+               for (auto item : tfi.includes) {
+               
+                  QSharedPointer<FileName> ifn (Doxygen::inputNameDict->find(item.name));
                   assert(ifn != 0);
-                  if (ifn) {
-                     FileNameIterator ifni(*ifn);
-                     FileDef *ifd;
-                     for (; (ifd = ifni.current()); ++ifni) {
-                        //printf("ifd->getOutputFileBase()=%s ii->id=%s\n",
-                        //        ifd->getOutputFileBase().data(),ii->id.data());
-                        if (ifd->getOutputFileBase() == QByteArray(ii->id)) {
-                           fd->addIncludeDependency(ifd, ii->text, ii->isLocal, ii->isImported, false);
+
+                  if (ifn) {                   
+                     for (auto ifd : *ifn) {
+                        if (ifd->getOutputFileBase() == QByteArray(item.id)) {
+                           fd->addIncludeDependency(ifd, item.text, item.isLocal, item.isImported, false);
                         }
                      }
                   }
+
                }
             }
          }
@@ -1471,21 +1567,29 @@ void TagFileParser::addIncludes()
 void parseTagFile(Entry *root, const char *fullName)
 {
    QFileInfo fi(fullName);
-   if (!fi.exists()) {
+
+   if (! fi.exists()) {
       return;
    }
-   TagFileParser handler( fullName ); // tagName
-   handler.setFileName(fullName);
+
    TagFileErrorHandler errorHandler;
-   QFile xmlFile( fullName );
-   QXmlInputSource source( xmlFile );
+
+   // tagName
+   TagFileParser handler(fullName);
+   handler.setFileName(fullName);
+   
+   //
+   QFile xmlFile(fullName);   
+   QByteArray data = xmlFile.readAll();
+  
+   QXmlInputSource source;
+   source.setData(data);
+
    QXmlSimpleReader reader;
-   reader.setContentHandler( &handler );
-   reader.setErrorHandler( &errorHandler );
-   reader.parse( source );
+   reader.setContentHandler(&handler);
+   reader.setErrorHandler(&errorHandler);
+   reader.parse(source);
+
    handler.buildLists(root);
-   handler.addIncludes();
-   //handler.dump();
+   handler.addIncludes();   
 }
-
-

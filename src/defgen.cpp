@@ -663,8 +663,7 @@ void generateDEF()
    t << "AutoGen Definitions dummy;" << endl;
 
    if (Doxygen::classSDict->count() + Doxygen::inputNameList->count() > 0) {     
-      for (auto cd : *Doxygen::classSDict) {
-         // BROOM, passing raw pointer
+      for (auto cd : *Doxygen::classSDict) {        
          generateDEFForClass(cd.data(), t);
       }
      

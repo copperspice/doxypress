@@ -1075,12 +1075,9 @@ void FileDef::insertClass(ClassDef *cd)
    if (m_classSDict == 0) {
       m_classSDict = new ClassSDict;
    }
-
-   if (Config_getBool("SORT_BRIEF_DOCS")) {
-      m_classSDict->inSort(cd->name(), cd);
-   } else {
-      m_classSDict->append(cd->name(), cd);
-   }
+ 
+   m_classSDict->insert(cd->name(), cd);
+   
 }
 
 /*! Adds namespace definition \a nd to the list of all compounds of this file */
@@ -1089,16 +1086,14 @@ void FileDef::insertNamespace(NamespaceDef *nd)
    if (nd->isHidden()) {
       return;
    }
-   if (!nd->name().isEmpty() &&
-         (m_namespaceSDict == 0 || m_namespaceSDict->find(nd->name()) == 0)) {
+
+   if (!nd->name().isEmpty() && (m_namespaceSDict == 0 || m_namespaceSDict->find(nd->name()) == 0)) {
+
       if (m_namespaceSDict == 0) {
          m_namespaceSDict = new NamespaceSDict;
       }
-      if (Config_getBool("SORT_BRIEF_DOCS")) {
-         m_namespaceSDict->inSort(nd->name(), nd);
-      } else {
-         m_namespaceSDict->append(nd->name(), nd);
-      }
+     
+      m_namespaceSDict->insert(nd->name(), nd);      
    }
 }
 
@@ -1672,37 +1667,15 @@ MemberList *FileDef::createMemberList(MemberListType lt)
 
 void FileDef::addMemberToList(MemberListType lt, MemberDef *md)
 {
-   static bool sortBriefDocs = Config_getBool("SORT_BRIEF_DOCS");
-   static bool sortMemberDocs = Config_getBool("SORT_MEMBER_DOCS");
-   MemberList *ml = createMemberList(lt);
-   ml->setNeedsSorting(
-      ((ml->listType()&MemberListType_declarationLists) && sortBriefDocs) ||
-      ((ml->listType()&MemberListType_documentationLists) && sortMemberDocs));
+   MemberList *ml = createMemberList(lt);  
    ml->append(md);
-#if 0
-   if (ml->needsSorting()) {
-      ml->inSort(md);
-   } else {
-      ml->append(md);
-   }
-#endif
+
    if (lt & MemberListType_documentationLists) {
       ml->setInFile(true);
    }
-   if (ml->listType()&MemberListType_declarationLists) {
-      md->setSectionList(this, ml);
-   }
-}
 
-void FileDef::sortMemberLists()
-{
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (; (ml = mli.current()); ++mli) {
-      if (ml->needsSorting()) {
-         ml->sort();
-         ml->setNeedsSorting(false);
-      }
+   if (ml->listType() & MemberListType_declarationLists) {
+      md->setSectionList(this, ml);
    }
 }
 

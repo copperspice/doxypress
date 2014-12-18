@@ -19,6 +19,8 @@
 #define MEMBERDEF_H
 
 #include <QList>
+class QStringList;
+class QTextStream;
 
 #include <sys/types.h>
 #include <types.h>
@@ -33,10 +35,9 @@ class MemberGroup;
 class ExampleSDict;
 class OutputList;
 class GroupDef;
-class QTextStream;
 class ArgumentList;
 class MemberDefImpl;
-class QStringList;
+
 struct TagInfo;
 
 /** A model of a class/file/namespace member symbol. */

@@ -310,9 +310,11 @@ class Definition : public DefinitionIntf
 
    void setRefItems(const QList<ListItemInfo> *sli);
    void mergeRefItems(Definition *d);
-   virtual void addInnerCompound(Definition *d);
-   virtual void setOuterScope(Definition *d);
 
+   virtual void addInnerCompound(QSharedPointer<Definition> d)
+   {};   
+
+   virtual void setOuterScope(Definition *d);
    virtual void setHidden(bool b);
 
    void setArtificial(bool b);
