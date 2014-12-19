@@ -59,31 +59,29 @@ static QByteArray addTemplateNames(const QByteArray &s, const QByteArray &n, con
    int i;
 
    if ((i = clRealName.indexOf('<')) != -1) {
-      clRealName = clRealName.left(i); // strip template specialization
+      // strip template specialization
+      clRealName = clRealName.left(i); 
    }
 
    if ((i = clRealName.lastIndexOf("::")) != -1) {
       clRealName = clRealName.right(clRealName.length() - i - 2);
    }
 
-   while ((i = s.find(clRealName, p)) != -1) {
+   while ((i = s.indexOf(clRealName, p)) != -1) {
       result += s.mid(p, i - p);
       uint j = clRealName.length() + i;
 
-      if (s.length() == j || (s.at(j) != '<' && !isId(s.at(j)))) {
-         // add template names
-         //printf("Adding %s+%s\n",clRealName.data(),t.data());
+      if (s.length() == j || (s.at(j) != '<' && ! isId(s.at(j)))) {
          result += clRealName + t;
       } else {
-         // template names already present
-         //printf("Adding %s\n",clRealName.data());
          result += clRealName;
       }
+
       p = i + clRealName.length();
    }
 
    result += s.right(s.length() - p);
-   //printf("addTemplateNames(%s,%s,%s)=%s\n",s.data(),n.data(),t.data(),result.data());
+   
    return result;
 }
 
@@ -135,22 +133,21 @@ static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray 
       if (defArgList->count() == 0) {
          return false;
       }
-
-      ArgumentListIterator ali(*defArgList);
-      Argument *a;
+     
       ol.endMemberDocName();
       ol.startParameterList(false);
       ol.startParameterType(true, 0);
       ol.endParameterType();
       ol.startParameterName(false);
-
-      for (; (a = ali.current()); ++ali) {
-         if (a->defval.isEmpty()) {
-            ol.docify(a->name + " ");
+      
+      for (auto a: *defArgList) {
+         if (a.defval.isEmpty()) {
+            ol.docify(a.name + " ");
          } else {
-            ol.docify("?" + a->name + "? ");
+            ol.docify("?" + a.name + "? ");
          }
       }
+
       ol.endParameterName(true, false, false);
       return true;
    }
@@ -192,14 +189,17 @@ static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray 
    QByteArray cName;
    if (cd) {
       cName = cd->name();
-      int il = cName.find('<');
+      int il = cName.indexOf('<');
       int ir = cName.lastIndexOf('>');
+
       if (il != -1 && ir != -1 && ir > il) {
          cName = cName.mid(il, ir - il + 1);
          //printf("1. cName=%s\n",cName.data());
+
       } else if (cd->templateArguments()) {
          cName = tempArgListToString(cd->templateArguments(), cd->getLanguage());
          //printf("2. cName=%s\n",cName.data());
+
       } else { // no template specifier
          cName.resize(0);
       }
@@ -210,20 +210,26 @@ static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray 
    bool first = true;
    bool paramTypeStarted = false;
    bool isDefine = md->isDefine();
+
    ArgumentListIterator ali(*defArgList);
    Argument *a = ali.current();
+
    while (a) {
       if (isDefine || first) {
          ol.startParameterType(first, 0);
          paramTypeStarted = true;
+
          if (isDefine) {
             ol.endParameterType();
             ol.startParameterName(true);
          }
       }
-      QRegExp re(")("), res("(.*\\*");
-      int vp = a->type.find(re);
-      int wp = a->type.find(res);
+
+      QRegExp re(")(");
+      QRegExp res("(.*\\*");
+
+      int vp = re.indexIn(a->type);
+      int wp = res.indexIn(a->type);
 
       // use the following to put the function pointer type before the name
       bool hasFuncPtrType = false;
@@ -231,26 +237,35 @@ static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray 
       if (!a->attrib.isEmpty() && !md->isObjCMethod()) { // argument has an IDL attribute
          ol.docify(a->attrib + " ");
       }
-      if (hasFuncPtrType) { // argument type is a function pointer
+
+      if (hasFuncPtrType) { 
+         // argument type is a function pointer
          //printf("a->type=`%s' a->name=`%s'\n",a->type.data(),a->name.data());
+
          QByteArray n = a->type.left(vp);
          if (hasFuncPtrType) {
             n = a->type.left(wp);
          }
+
          if (md->isObjCMethod()) {
             n.prepend("(");
             n.append(")");
          }
+
          if (!cName.isEmpty()) {
             n = addTemplateNames(n, cd->name(), cName);
          }
+
          linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, n);
+
       } else { // non-function pointer type
          QByteArray n = a->type;
+
          if (md->isObjCMethod()) {
             n.prepend("(");
             n.append(")");
          }
+
          if (a->type != "...") {
             if (!cName.isEmpty()) {
                n = addTemplateNames(n, cd->name(), cName);
@@ -265,9 +280,11 @@ static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray 
          }
          ol.startParameterName(defArgList->count() < 2);
       }
+
       if (hasFuncPtrType) {
          ol.docify(a->type.mid(wp, vp - wp));
       }
+
       if (!a->name.isEmpty() || a->type == "...") { // argument has a name
          //if (!hasFuncPtrType)
          //{
@@ -387,28 +404,32 @@ static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray 
    return true;
 }
 
-static void writeExceptionListImpl(
-   OutputList &ol, ClassDef *cd, MemberDef *md, QByteArray const &exception)
+static void writeExceptionListImpl(OutputList &ol, ClassDef *cd, MemberDef *md, QByteArray const &exception)
 {
    // this is ordinary exception spec - there must be a '('
    //printf("exception='%s'\n",exception.data());
-   int index = exception.find('(');
+   int index = exception.indexOf('(');
+
    if (index != -1) {
       ol.exceptionEntry(exception.left(index), false);
-      ++index; // paren in second column so skip it here
-      for (int comma = exception.find(',', index); comma != -1; ) {
+      ++index; 
+
+      // paren in second column so skip it here
+
+      for (int comma = exception.indexOf(',', index); comma != -1; ) {
          ++comma; // include comma
-         linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md,
-                     exception.mid(index, comma - index));
+         linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, exception.mid(index, comma - index));
          ol.exceptionEntry(0, false);
          index = comma;
-         comma = exception.find(',', index);
+         comma = exception.indexOf(',', index);
       }
-      int close = exception.find(')', index);
+
+      int close = exception.indexOf(')', index);
       if (close != -1) {
          QByteArray type = removeRedundantWhiteSpace(exception.mid(index, close - index));
          linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, type);
          ol.exceptionEntry(0, true);
+
       } else {
          warn(md->getDefFileName(), md->getDefLine(),
               "missing ) in exception list on member %s", qPrint(md->name()));
@@ -422,19 +443,26 @@ static void writeExceptionListImpl(
 static void writeExceptionList(OutputList &ol, ClassDef *cd, MemberDef *md)
 {
    QByteArray exception(QByteArray(md->excpString()).trimmed());
-   if ('{' == exception.at(0)) {
+
+   if (exception.at(0) == '{' ) {
+
       // this is an UNO IDL attribute - need special handling
-      int index = exception.find(';');
+      int index = exception.indexOf(';');
+
       int oldIndex = 1;
+
       while (-1 != index) { // there should be no more than 2 (set / get)
          // omit '{' and ';' -> "set raises (...)"
          writeExceptionListImpl(ol, cd, md, exception.mid(oldIndex, index - oldIndex));
          oldIndex = index + 1;
-         index = exception.find(';', oldIndex);
+         index = exception.indexOf(';', oldIndex);
       }
+
       // the rest is now just '}' - omit that
+
    } else {
       writeExceptionListImpl(ol, cd, md, exception);
+
    }
 }
 
@@ -443,26 +471,29 @@ static void writeTemplatePrefix(OutputList &ol, ArgumentList *al)
    ol.docify("template<");
    ArgumentListIterator ali(*al);
    Argument *a = ali.current();
+
    while (a) {
       ol.docify(a->type);
       ol.docify(" ");
       ol.docify(a->name);
+
+
       if (a->defval.length() != 0) {
          ol.docify(" = ");
          ol.docify(a->defval);
       }
+
       ++ali;
       a = ali.current();
+
       if (a) {
          ol.docify(", ");
       }
    }
+
    ol.docify("> ");
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 
 class MemberDefImpl
 {
@@ -569,7 +600,9 @@ class MemberDefImpl
    bool hasDocumentedParams;
    bool hasDocumentedReturnType;
    bool isDMember;
+
    Relationship related;     // relationship of this to the class
+
    bool stat;                // is it a static function?
    bool proto;               // is it a prototype;
    bool docEnumValues;       // is an enum with documented enum values.
@@ -763,13 +796,11 @@ MemberDef::MemberDef(const MemberDef &md) : Definition(md), visited(false)
    m_isConstructorCached = 0;
    m_isDestructorCached  = 0;
 
-#warning Missing code to complete the deep Copy. . . 
-
+   // BROOM - we may be missing code to complete the deep Copy. . . 
 }
 
 MemberDef &MemberDef::operator=(const MemberDef &)
 {
-
 } 
 
 MemberDef *MemberDef::deepCopy() const
@@ -789,28 +820,20 @@ MemberDef *MemberDef::deepCopy() const
    result->m_impl->declArgList       = 0;
 
    // replace pointers owned by the object by deep copies
-   if (m_impl->redefinedBy) {
-      QListIterator<MemberDef> mli(*m_impl->redefinedBy);
-      MemberDef *md;
-
-      for (mli.toFirst(); (md = mli.current()); ++mli) {
+   if (m_impl->redefinedBy) {     
+      for (auto ml: *m_impl->redefinedBy) {
          result->insertReimplementedBy(md);
       }
    }
 
-   if (m_impl->exampleSDict) {
-      ExampleSDict::Iterator it(*m_impl->exampleSDict);
-      Example *e;
-
-      for (it.toFirst(); (e = it.current()); ++it) {
+   if (m_impl->exampleSDict) {     
+      for (auto e: *m_impl->exanpmeSDict) {
          result->addExample(e->anchor, e->name, e->file);
       }
    }
 
-   if (m_impl->enumFields) {
-      QListIterator<MemberDef> mli(*m_impl->enumFields);
-      MemberDef *md;
-      for (mli.toFirst(); (md = mli.current()); ++mli) {
+   if (m_impl->enumFields) {     
+      for (auto md: *m_impl->enumFields) {
          result->insertEnumField(md);
       }
    }
@@ -4799,19 +4822,17 @@ static void transferArgumentDocumentation(ArgumentList *decAl, ArgumentList *def
 {
    if (decAl && defAl) {
       ArgumentListIterator decAli(*decAl);
+
       ArgumentListIterator defAli(*defAl);
       Argument *decA, *defA;
-      for (decAli.toFirst(), defAli.toFirst();
-            (decA = decAli.current()) && (defA = defAli.current());
-            ++decAli, ++defAli) {
-         //printf("Argument decA->name=%s (doc=%s) defA->name=%s (doc=%s)\n",
-         //    decA->name.data(),decA->docs.data(),
-         //    defA->name.data(),defA->docs.data()
-         //      );
+
+      for (decAli.toFirst(), defAli.toFirst(); (decA = decAli.current()) && (defA = defAli.current()); ++decAli, ++defAli) {
+            
          if (decA->docs.isEmpty() && !defA->docs.isEmpty()) {
-            decA->docs = defA->docs.copy();
+            decA->docs = defA->docs;
+
          } else if (defA->docs.isEmpty() && !decA->docs.isEmpty()) {
-            defA->docs = decA->docs.copy();
+            defA->docs = decA->docs;
          }
       }
    }

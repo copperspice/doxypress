@@ -364,7 +364,7 @@ char portable_pathListSeparator()
 const char *portable_ghostScriptCommand()
 {
 
-// CS BROOM 
+// CS BROOM  - all user to define GhostScript exe name
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
    return "gswin32c.exe";

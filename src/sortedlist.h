@@ -35,10 +35,27 @@ template <class T>
 class SortedList : public QList<T>
 {
    public:
+
+      template <class U>
+      bool contains(const U &data);
+
       void inSort(const T &data);
       void sort();
 };
 
+template <class T>
+template <class U>
+bool SortedList<T>::contains(const U &data)
+{
+   for (auto item : *this) {
+      if (item == data) {
+         return true;
+      }      
+   }
+
+   return false;
+}
+   
 template <class T>
 void SortedList<T>::inSort(const T &data)
 {

@@ -1209,7 +1209,7 @@ static QByteArray getLayout_Default()
    QFile file(":/resources/layout_default.xml");
 
    if (! file.open(QFile::ReadOnly | QFile::Text)) {
-      // CS BROOM - report error
+      // CS BROOM - add error handling
 
       //const QString msg = "Unable to open file " + m_fileName + " : " + file.errorString();
       // QMessageBox::warning( 0, "XML", msg );

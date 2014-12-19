@@ -27,7 +27,7 @@ if OSTYPE_WIN
 endif
 
 # target app name
-bin_PROGRAMS = Doxygen
+bin_PROGRAMS = CS_Doxygen
 
 # copy required CopperSpice and gcc files for deployment
 .PHONY: deploy
@@ -54,17 +54,13 @@ endif
 VPATH = ../
 
 # linking
-Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
+CS_Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
 
 
-Doxygen_SOURCES = \
-   src/groupdef.cpp  \
+CS_Doxygen_SOURCES = \
+   src/memberdef.cpp  \
    src/classdef.cpp  \
    src/filedef.cpp  \
-   src/memberdef.cpp  \
-\
-   src/configoptions.cpp  \
-   src/portable.cpp \
 \
    src/doxygen.cpp \
    src/arguments.cpp \
@@ -136,7 +132,9 @@ Doxygen_SOURCES = \
    src/textdocvisitor.cpp \
    src/tooltip.cpp \
    src/util.cpp \
-   src/xmldocvisitor.cpp
+   src/xmldocvisitor.cpp  \
+   src/configoptions.cpp  \
+   src/portable.cpp
 
 
 #   src/docbookgen.cpp
@@ -152,10 +150,10 @@ Doxygen_SOURCES = \
 
 
 
-RESOURCES = doxygen.qrc
+RESOURCES = cs_doxygen.qrc
 
 # use wilcard to obtain just the dependency list
-qrc_doxygen.cpp: doxygen.qrc   $(wildcard ../resources/*)
+qrc_cs_doxygen.cpp: cs_doxygen.qrc   $(wildcard ../resources/*)
 
 # required to compile qrc
-nodist_Doxygen_SOURCES=qrc_doxygen.cpp
+nodist_CS_Doxygen_SOURCES=qrc_cs_doxygen.cpp

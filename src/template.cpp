@@ -939,8 +939,7 @@ class FilterListSort
    class SortList : public QList<ListElem>
    {
     public:
-      SortList() {
-         // CS BROOM  setAutoDelete(true);
+      SortList() {         
       }
 
     private:
@@ -1018,8 +1017,7 @@ class FilterGroupBy
    class SortList : public QList<ListElem>
    {
     public:
-      SortList() {
-          // CS BROOM  setAutoDelete(true);
+      SortList() {         
       }
 
     private:
