@@ -445,5 +445,8 @@ void convertProtectionLevel(
 
 bool mainPageHasTitle();
 
+QString stripPrefix(QString input, const char *prefix); 
+QByteArray stripPrefix(QByteArray input, const char *prefix);
+
 #endif
 

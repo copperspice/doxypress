@@ -18,12 +18,14 @@
 #ifndef MEMBERDEF_H
 #define MEMBERDEF_H
 
+#include <QCryptographicHash>
 #include <QList>
-class QStringList;
-class QTextStream;
+#include <QStringList>
+#include <QTextStream>
 
 #include <sys/types.h>
 #include <types.h>
+
 #include <definition.h>
 
 class ClassDef;
@@ -83,7 +85,7 @@ class MemberDef : public Definition
    int initializerLines() const;
    uint64_t getMemberSpecifiers() const;
 
-   MemberList *getSectionList(Definition *d) const;
+   QSharedPointer<MemberList> getSectionList(Definition *d) const;
    QByteArray    displayDefinition() const;
 
    // scope query members
@@ -287,7 +289,7 @@ class MemberDef : public Definition
    void setBitfields(const char *s);
    void setMaxInitLines(int lines);
    void setMemberClass(ClassDef *cd);
-   void setSectionList(Definition *d, MemberList *sl);
+   void setSectionList(Definition *d, QSharedPointer<MemberList> sl);
 
    void setGroupDef(GroupDef *gd, Grouping::GroupPri_t pri,
                     const QByteArray &fileName, int startLine, bool hasDocs, MemberDef *member = 0);

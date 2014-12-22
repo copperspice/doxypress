@@ -24,12 +24,14 @@
 
 #include <types.h>
 
-struct SectionInfo;
+#include <arguments.h>
+
 class EntryNav;
 class FileDef;
 class FileStorage;
 class StorageIntf;
-class ArgumentList;
+
+struct SectionInfo;
 struct ListItemInfo;
 
 /** This class stores information about an inheritance relation
@@ -233,15 +235,15 @@ class Entry
    // identification
     
    TagInfo      *tagInfo;    //!< tag file info
-   ArgumentList *argList;    //!< member arguments as a list 
-   ArgumentList *typeConstr; //!< where clause (C#) for type constraints
+   ArgumentList  argList;    //!< member arguments as a list 
+   ArgumentList  typeConstr; //!< where clause (C#) for type constraints
    
    RelatesType  relatesType; //!< how relates is handled
    Specifier    virt;        //!< virtualness of the entry
    Protection   protection;  //!< class protection
    MethodTypes  mtype;       //!< signal, slot, (dcop) method, or property?
    GroupDocType groupDocType;
-   SrcLangExt  lang;         //!< programming language in which this entry was found
+   SrcLangExt   lang;        //!< programming language in which this entry was found
  
    uint64_t spec;            //!< class/member specifiers
 

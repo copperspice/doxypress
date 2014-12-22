@@ -40,10 +40,8 @@ Entry::Entry()
    extends   = new QList<BaseInfo>;   
    groups    = new QList<Grouping>; 
    anchors   = new QList<SectionInfo>;    // Doxygen::sectionDict takes ownership of the items!
-   argList   = new ArgumentList;
-  
+       
    tArgLists  = 0;
-   typeConstr = 0;
    mGrpId     = -1;
    tagInfo    = 0;
    sli        = 0;
@@ -78,9 +76,9 @@ Entry::Entry(const Entry &e)
    args        = e.args;
    bitfields   = e.bitfields;
 
-   argList     = e.argList;
-
-   tArgLists = 0;
+   argList     = e.argList; 
+   tArgLists   = 0;     
+   
    program     = e.program;
    initializer = e.initializer;
    includeFile = e.includeFile;
@@ -99,8 +97,7 @@ Entry::Entry(const Entry &e)
    read        = e.read;
    write       = e.write;
    inside      = e.inside;
-   exception   = e.exception;
-   typeConstr  = 0;
+   exception   = e.exception;   
    bodyLine    = e.bodyLine;
    endBodyLine = e.endBodyLine;
    mGrpId      = e.mGrpId;
@@ -150,11 +147,9 @@ Entry::Entry(const Entry &e)
       anchors->append(item);
    }
 
-   // copy type contraint list
-   if (e.typeConstr) {
-      typeConstr  = e.typeConstr;
-   }
-
+   // copy type contraint list  
+   typeConstr  = e.typeConstr;       
+   
    // copy template argument lists
    if (e.tArgLists) {
       tArgLists = copyArgumentLists(e.tArgLists);
@@ -167,11 +162,9 @@ Entry::~Entry()
    // our children.
    delete extends;
    delete groups;
-   delete anchors;
-   delete argList;
+   delete anchors;  
    delete tArgLists;
-   delete tagInfo;
-   delete typeConstr;
+   delete tagInfo;   
    delete sli;
 
    num--;
@@ -238,7 +231,7 @@ void Entry::reset()
    extends->clear();
    groups->clear();
    anchors->clear();
-   argList->clear();
+   argList.clear();
 
    if (tagInfo)    {
       delete tagInfo;
@@ -254,11 +247,8 @@ void Entry::reset()
       delete sli;
       sli = 0;
    }
-
-   if (typeConstr) {
-      delete typeConstr;
-      typeConstr = 0;
-   }  
+   
+   typeConstr = ArgumentList();     
 }
 
 

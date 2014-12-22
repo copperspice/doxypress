@@ -581,6 +581,7 @@ ClassDef *newResolveTypedef(FileDef *fileScope, MemberDef *md,
    type.stripPrefix("const ");  // strip leading "const"
    type.stripPrefix("struct "); // strip leading "struct"
    type.stripPrefix("union ");  // strip leading "union"
+
    int sp = 0;
    tl = type.length(); // length may have been changed
    while (sp < tl && type.at(sp) == ' ') {
@@ -5835,7 +5836,7 @@ QList<ArgumentList> *copyArgumentLists(const QList<ArgumentList> *srcLists)
    QList<ArgumentList> *dstLists = new QList<ArgumentList>;
   
    for (auto sl : *srcLists ) {
-      dstLists->append(sl);
+      dstLists->append(sl);     // BROOM  BROOM deepCopy - please check this out
    }
 
    return dstLists;
@@ -8002,3 +8003,24 @@ bool mainPageHasTitle()
    return true;
 }
 
+QString stripPrefix(QString input, const char *prefix) 
+{
+   QString retval = input;
+
+   if (input.startsWith(prefix) {
+      retval = retval.remove(0, strlen(prefix));
+   }
+
+   return retval
+}
+
+QByteArray stripPrefix(QByteArray input, const char *prefix) 
+{
+   QByteArray retval = input;
+
+   if (input.startsWith(prefix) {
+      retval = retval.remove(0, strlen(prefix));
+   }
+
+   return retval
+}
