@@ -387,9 +387,11 @@ QByteArray resolveTypeDef(Definition *context, const QByteArray &qualifiedName,
       }
    }
    MemberDef *md = 0;
+
    while (mContext && md == 0) {
       // step 1: get the right scope
-      Definition *resScope = mContext;
+      QSharedPointer<Definition> resScope = mContext;
+
       if (scopeIndex != -1) {
          // split-off scope part
          QByteArray resScopeName = qualifiedName.left(scopeIndex);
@@ -398,14 +400,17 @@ QByteArray resolveTypeDef(Definition *context, const QByteArray &qualifiedName,
          // look-up scope in context
          int is, ps = 0;
          int l;
+
          while ((is = getScopeFragment(resScopeName, ps, &l)) != -1) {
             QByteArray qualScopePart = resScopeName.mid(is, l);
             QByteArray tmp = resolveTypeDef(mContext, qualScopePart);
             if (!tmp.isEmpty()) {
                qualScopePart = tmp;
             }
+
             resScope = resScope->findInnerCompound(qualScopePart);
             //printf("qualScopePart=`%s' resScope=%p\n",qualScopePart.data(),resScope);
+
             if (resScope == 0) {
                break;
             }
@@ -760,8 +765,10 @@ static Definition *followPath(Definition *start, FileDef *fileScope, const QByte
    while ((is = getScopeFragment(path, ps, &l)) != -1) {
       // try to resolve the part if it is a typedef
       MemberDef *typeDef = 0;
+
       QByteArray qualScopePart = substTypedef(current, fileScope, path.mid(is, l), &typeDef);
       //printf("      qualScopePart=%s\n",qualScopePart.data());
+
       if (typeDef) {
          ClassDef *type = newResolveTypedef(fileScope, typeDef);
          if (type) {
@@ -769,24 +776,24 @@ static Definition *followPath(Definition *start, FileDef *fileScope, const QByte
             return type;
          }
       }
-      Definition *next = current->findInnerCompound(qualScopePart);
-      //printf("++ Looking for %s inside %s result %s\n",
-      //     qualScopePart.data(),
-      //     current->name().data(),
-      //     next?next->name().data():"<null>");
+
+      QSharedPointer<Definition> next = current->findInnerCompound(qualScopePart);
+     
       if (next == 0) { // failed to follow the path
          //printf("==> next==0!\n");
+
          if (current->definitionType() == Definition::TypeNamespace) {
-            next = endOfPathIsUsedClass(
-                      ((NamespaceDef *)current)->getUsedClasses(), qualScopePart);
+            next = endOfPathIsUsedClass(((NamespaceDef *)current)->getUsedClasses(), qualScopePart);
+
          } else if (current->definitionType() == Definition::TypeFile) {
-            next = endOfPathIsUsedClass(
-                      ((FileDef *)current)->getUsedClasses(), qualScopePart);
+            next = endOfPathIsUsedClass(((FileDef *)current)->getUsedClasses(), qualScopePart);
          }
+
          current = next;
          if (current == 0) {
             break;
          }
+
       } else { // continue to follow scope
          current = next;
          //printf("==> current = %p\n",current);

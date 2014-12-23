@@ -115,7 +115,7 @@ class NamespaceDef : public Definition
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
  
-   virtual Definition *findInnerCompound(const char *name);
+   virtual QSharedPointer<Definition> findInnerCompound(const char *name) override;
 
    virtual void addInnerCompound(QSharedPointer<Definition> d) override;
 

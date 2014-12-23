@@ -1273,9 +1273,9 @@ void Definition::addSourceReferences(MemberDef *md)
    }
 }
 
-Definition *Definition::findInnerCompound(const char *)
+QSharedPointer<Definition> Definition::findInnerCompound(const char *)
 {
-   return 0;
+   return QSharedPointer<Definition>();
 }
 
 QByteArray Definition::qualifiedName() const

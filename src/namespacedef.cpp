@@ -742,10 +742,10 @@ QByteArray NamespaceDef::getOutputFileBase() const
    }
 }
 
-Definition *NamespaceDef::findInnerCompound(const char *n)
+QSharedPointer<Definition> NamespaceDef::findInnerCompound(const char *n)
 {
    if (n == 0) {
-      return 0;
+      return QSharedPointer<Definition>();
    }
 
    QSharedPointer<Definition> d = m_innerCompounds->find(n);
@@ -758,7 +758,7 @@ Definition *NamespaceDef::findInnerCompound(const char *n)
       }
    }
 
-   return d.data();
+   return d;
 }
 
 void NamespaceDef::addListReferences()

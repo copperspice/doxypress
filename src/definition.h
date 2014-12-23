@@ -256,7 +256,7 @@ class Definition : public DefinitionIntf
 
    QList<ListItemInfo> *xrefListItems() const;
 
-   virtual Definition *findInnerCompound(const char *name);
+   virtual QSharedPointer<Definition> findInnerCompound(const char *name);
    virtual Definition *getOuterScope() const;
 
    MemberSDict *getReferencesMembers() const;

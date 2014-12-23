@@ -240,7 +240,7 @@ class ClassDef : public Definition
     *  available, or 0 otherwise.
     *  @param name The name of the nested compound
     */
-   virtual Definition *findInnerCompound(const char *name);
+   virtual QSharedPointer<Definition> findInnerCompound(const char *name) override;
 
    /** Returns the template parameter lists that form the template
     *  declaration of this class.

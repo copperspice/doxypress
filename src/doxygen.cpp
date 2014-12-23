@@ -956,9 +956,9 @@ static Definition *buildScopeFromQualifiedName(const QByteArray name, int level,
    return prevScope;
 }
 
-static Definition *findScopeFromQualifiedName(Definition *startScope, const QByteArray &n, FileDef *fileScope, TagInfo *tagInfo)
+static Definition *findScopeFromQualifiedName(QSharedPointer<Definition> startScope, const QByteArray &n, FileDef *fileScope, TagInfo *tagInfo)
 {  
-   Definition *resultScope = startScope;
+   QSharedPointer<Definition> resultScope = startScope;
 
    if (resultScope == 0) {
       resultScope = Doxygen::globalScope;
@@ -980,8 +980,7 @@ static Definition *findScopeFromQualifiedName(Definition *startScope, const QByt
       Definition *orgScope = resultScope;
 
       resultScope = resultScope->findInnerCompound(nestedNameSpecifier);
-     
-
+    
       if (resultScope == 0) {
          NamespaceSDict *usedNamespaces;
 
