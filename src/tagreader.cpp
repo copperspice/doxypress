@@ -1217,10 +1217,8 @@ void TagFileParser::buildMemberList(Entry *ce, QList<TagMemberInfo> &members)
       me->args  = tmi.arglist;
 
       if (! me->args.isEmpty()) {
-         delete me->argList;
-
-         me->argList = new ArgumentList;
-         stringToArgumentList(me->args, me->argList);
+         me->argList = ArgumentList();
+         stringToArgumentList(me->args.constData(), &(me->argList));
       }
 
       if (tmi.enumValues.count() > 0) {

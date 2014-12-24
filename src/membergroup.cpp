@@ -36,21 +36,18 @@ MemberGroup::MemberGroup()
 }
 
 MemberGroup::MemberGroup(Definition *parent, int id, const char *hdr, const char *d, const char *docFile)
-{
-   //printf("New member group id=%d header=%s desc=%s\n",id,hdr,d);
+{   
    memberList      = new MemberList(MemberListType_memberGroup);
    grpId           = id;
    grpHeader       = hdr;
    doc             = d;
    scope           = 0;
    inSameSection   = true;
-   inDeclSection   = 0;
    m_numDecMembers = -1;
    m_numDocMembers = -1;
    m_parent        = parent;
    m_docFile       = docFile;
-   m_xrefListItems = 0;
-   //printf("Member group docs=`%s'\n",doc.data());
+   m_xrefListItems = 0;   
 }
 
 MemberGroup::~MemberGroup()
@@ -67,7 +64,7 @@ void MemberGroup::insertMember(MemberDef *md)
 
    } else if (inDeclSection == 0) {
       inDeclSection = md->getSectionList(m_parent);
-      //printf("inDeclSection=%p type=%d\n",inDeclSection,inDeclSection->listType());
+      
    }
 
    memberList->append(md);
@@ -292,7 +289,7 @@ void MemberGroup::findSectionsInDocumentation()
 void MemberGroup::marshal(StorageIntf *s)
 {
    marshalMemberList(s, memberList);
-   marshalObjPointer(s, inDeclSection); // reference only
+   marshalObjPointer(s, inDeclSection.data()); // reference only
    marshalInt(s, grpId);
    marshalQByteArray(s, grpHeader);
    marshalQByteArray(s, fileName);
@@ -309,7 +306,7 @@ void MemberGroup::marshal(StorageIntf *s)
 void MemberGroup::unmarshal(StorageIntf *s)
 {
    memberList      = unmarshalMemberList(s);
-   inDeclSection   = (MemberList *)unmarshalObjPointer(s);
+   inDeclSection   = QSharedPointer<MemberList>((MemberList *)unmarshalObjPointer(s));
    grpId           = unmarshalInt(s);
    grpHeader       = unmarshalQByteArray(s);
    fileName        = unmarshalQByteArray(s);

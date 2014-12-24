@@ -125,9 +125,9 @@ class NamespaceDef : public Definition
       return m_subGrouping;
    }
 
-   MemberList *getMemberList(MemberListType lt) const;
+   QSharedPointer<MemberList> getMemberList(MemberListType lt) const;
 
-   const QList<MemberList *> &getMemberLists() const {
+   const QList<QSharedPointer<MemberList>> &getMemberLists() const {
       return m_memberLists;
    }
 
@@ -154,7 +154,8 @@ class NamespaceDef : public Definition
    bool visited;
 
  private:
-   MemberList *createMemberList(MemberListType lt);
+   QSharedPointer<MemberList> createMemberList(MemberListType lt);
+
    void addMemberToList(MemberListType lt, MemberDef *md);
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title);
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title);
@@ -187,7 +188,7 @@ class NamespaceDef : public Definition
    MemberGroupSDict     *memberGroupSDict;
    ClassSDict           *classSDict;
   
-   QList<MemberList *>   m_memberLists;
+   QList<QSharedPointer<MemberList>> m_memberLists;
  
    enum { NAMESPACE, MODULE, CONSTANT_GROUP, LIBRARY } m_type;
    

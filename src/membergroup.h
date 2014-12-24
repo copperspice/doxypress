@@ -113,7 +113,7 @@ class MemberGroup
 
  private:
    MemberList *memberList;      // list of all members in the group
-   MemberList *inDeclSection;
+   QSharedPointer<MemberList> inDeclSection;
 
    int grpId;
    QByteArray grpHeader;

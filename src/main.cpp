@@ -30,11 +30,14 @@
 int main(int argc, char **argv)
 {
    initDoxygen();
+
    readConfiguration(argc, argv);
    checkConfiguration();
    adjustConfiguration();
+
    parseInput();
    generateOutput();
+
    return 0;
 }
 

@@ -292,7 +292,7 @@ class ClassDef : public Definition
    MemberList *getMemberList(MemberListType lt);
 
    /** Returns the list containing the list of members sorted per type */
-   const QList<MemberList> &getMemberLists() const;
+   const QList<QSharedPointer<MemberList>> &getMemberLists() const;
 
    /** Returns the member groups defined for this class */
    MemberGroupSDict *getMemberGroupSDict() const;
@@ -410,7 +410,8 @@ class ClassDef : public Definition
    void writeDocumentationContents(OutputList &ol, const QByteArray &pageTitle);
    void internalInsertMember(MemberDef *md, Protection prot, bool addToAllList);
    void addMemberToList(MemberListType lt, MemberDef *md, bool isBrief);
-   MemberList *createMemberList(MemberListType lt);
+
+   QSharedPointer<MemberList> createMemberList(MemberListType lt);
 
    void writeInheritedMemberDeclarations(OutputList &ol, MemberListType lt, int lt2,
                                          const QByteArray &title, ClassDef *inheritedFrom,

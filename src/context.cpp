@@ -46,8 +46,7 @@
 #include <arguments.h>
 #include <groupdef.h>
 
-// TODO: pass the current file to Dot*::writeGraph, so the user can put dot graphs in other
-//       files as well
+// TODO: pass the current file to Dot*::writeGraph, so the user can put dot graphs in other files as well
 
 #define ADD_PROPERTY(name) addProperty(#name,this,&Private::name);
 
@@ -61,8 +60,8 @@ struct ContextGlobals {
       Xml,
       TagFile
    };
-   int          dynSectionId;
-   QByteArray     outputDir;
+   int dynSectionId;
+   QByteArray outputDir;
    OutputFormat outputFormat;
 } g_globals;
 
@@ -152,14 +151,19 @@ class GenericConstIterator : public TemplateListIntf::ConstIterator
 {
  public:
    GenericConstIterator(const QList<TemplateVariant> &list)
-      : m_it(list) { }
+      : m_it(list) 
+   { }
+
    virtual ~GenericConstIterator() {}
+
    void toFirst() {
       m_it.toFirst();
    }
+
    void toLast() {
       m_it.toLast();
    }
+
    void toNext() {
       if (m_it.current()) {
          ++m_it;
@@ -204,6 +208,7 @@ class GenericNodeListContext : public TemplateListIntf
    int count() const {
       return (int)m_children.count();
    }
+
    TemplateVariant at(int index) const {
       TemplateVariant result;
       if (index >= 0 && index < count()) {
@@ -211,6 +216,7 @@ class GenericNodeListContext : public TemplateListIntf
       }
       return result;
    }
+
    TemplateListIntf::ConstIterator *createIterator() const {
       return new GenericConstIterator(m_children);
    }
@@ -218,12 +224,15 @@ class GenericNodeListContext : public TemplateListIntf
    void append(const TemplateVariant &ctn) {
       m_children.append(new TemplateVariant(ctn));
    }
+
    bool isEmpty() const {
       return m_children.isEmpty();
    }
+
    int addRef() {
       return ++m_refCount;
    }
+
    int release() {
       int count = --m_refCount;
       if (count <= 0) {
@@ -231,6 +240,7 @@ class GenericNodeListContext : public TemplateListIntf
       }
       return count;
    }
+
  private:
    mutable QList<TemplateVariant> m_children;
    int m_refCount;
@@ -348,26 +358,39 @@ ConfigContext::~ConfigContext()
 TemplateVariant ConfigContext::get(const char *name) const
 {
    TemplateVariant result;
+
    if (name) {
+
+/* BROOM - out for now
+
       ConfigOption *option = Config::instance()->get(name);
+
       if (option) {
          switch (option->kind()) {
             case ConfigOption::O_Bool:
                return TemplateVariant(*((ConfigBool *)option)->valueRef());
+
             case ConfigOption::O_Int:
                return TemplateVariant(*((ConfigInt *)option)->valueRef());
+
             case ConfigOption::O_Enum:
                return TemplateVariant(*((ConfigEnum *)option)->valueRef());
+
             case ConfigOption::O_String:
                return TemplateVariant(*((ConfigString *)option)->valueRef());
+
             case ConfigOption::O_List:
                return p->fetchList(name, ((ConfigList *)option)->valueRef());
                break;
+
             default:
                break;
          }
       }
+*/
+
    }
+
    return result;
 }
 
@@ -7188,7 +7211,8 @@ void generateOutputViaTemplate()
       }
    }
 
-#if DEBUG_REF // should be 0, i.e. all objects are deleted
+#if DEBUG_REF 
+   // should be 0, since all objects are deleted
    printf("==== total ref count %d\n", RefCountedContext::s_totalCount);
 #endif
 }

@@ -59,6 +59,9 @@ static bool elemIsVisible(const QXmlAttributes &attrib, bool defVal = true)
 
    if (visible.at(0) == '$' && visible.length() > 1) {
       QByteArray id = visible.mid(1);
+
+/*    BROOM - test if the option is a BOOL
+
       ConfigOption *opt = Config::instance()->get(id);
 
       if (opt && opt->kind() == ConfigOption::O_Bool) {
@@ -67,6 +70,9 @@ static bool elemIsVisible(const QXmlAttributes &attrib, bool defVal = true)
       } else if (!opt) {
          err("found unsupported value %s for visible attribute in layout file\n", visible.data());
       }
+*/
+
+
    }
 
    return visible != "no" && visible != "0";

@@ -129,9 +129,11 @@ class ConfigContext : public RefCountedContext, public TemplateStructIntf
 
    // TemplateStructIntf methods
    virtual TemplateVariant get(const char *name) const;
+
    virtual int addRef()  {
       return RefCountedContext::addRef();
    }
+
    virtual int release() {
       return RefCountedContext::release();
    }
@@ -154,9 +156,11 @@ class DoxygenContext : public RefCountedContext, public TemplateStructIntf
 
    // TemplateStructIntf methods
    virtual TemplateVariant get(const char *name) const;
+
    virtual int addRef()  {
       return RefCountedContext::addRef();
    }
+
    virtual int release() {
       return RefCountedContext::release();
    }
@@ -179,9 +183,11 @@ class TranslateContext : public RefCountedContext, public TemplateStructIntf
 
    // TemplateStructIntf methods
    virtual TemplateVariant get(const char *name) const;
+
    virtual int addRef()  {
       return RefCountedContext::addRef();
    }
+
    virtual int release() {
       return RefCountedContext::release();
    }
@@ -234,9 +240,11 @@ class IncludeInfoContext : public RefCountedContext, public TemplateStructIntf
 
    // TemplateStructIntf methods
    virtual TemplateVariant get(const char *name) const;
+
    virtual int addRef()  {
       return RefCountedContext::addRef();
    }
+
    virtual int release() {
       return RefCountedContext::release();
    }
@@ -287,9 +295,11 @@ class ClassContext : public RefCountedContext, public TemplateStructIntf
 
    // TemplateStructIntf methods
    virtual TemplateVariant get(const char *name) const;
+
    virtual int addRef()  {
       return RefCountedContext::addRef();
    }
+
    virtual int release() {
       return RefCountedContext::release();
    }

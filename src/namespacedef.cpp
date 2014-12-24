@@ -154,15 +154,14 @@ void NamespaceDef::addMembersToMemberGroup()
 {  
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
-         ::addMembersToMemberGroup(ml, &memberGroupSDict, this);
+         ::addMembersToMemberGroup(ml.data(), &memberGroupSDict, this);
       }
    }
 
    // add members inside sections to their groups
    if (memberGroupSDict) {     
       for (auto mg : *memberGroupSDict) {
-         if (mg->allMembersInSameSection() && m_subGrouping) {
-            //printf("----> addToDeclarationSection(%s)\n",mg->header().data());
+         if (mg->allMembersInSameSection() && m_subGrouping) {            
             mg->addToDeclarationSection();
          }
       }
@@ -175,10 +174,10 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
       return;
    }
 
-   MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
+   QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
    if (! allMemberList) {
-      allMemberList = new MemberList(MemberListType_allMembersList);
+      allMemberList = QSharedPointer<MemberList> (new MemberList(MemberListType_allMembersList));
       m_memberLists.append(allMemberList);
    }
 
@@ -232,9 +231,10 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
 
 void NamespaceDef::computeAnchors()
 {
-   MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
+   QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
+
    if (allMemberList) {
-      setAnchors(allMemberList);
+      setAnchors(allMemberList.data());
    }
 }
 
@@ -286,7 +286,7 @@ void NamespaceDef::writeTagFile(FTextStream &tagFile)
          case LayoutDocEntry::MemberDecl: 
          {
             LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
-            MemberList *ml = getMemberList(lmd->type);
+            QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
             if (ml) {
                ml->writeTagFile(tagFile);
@@ -480,7 +480,7 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
-         MemberList *ml = getMemberList(lmd->type);
+         QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
             ol.writeSummaryLink(0, MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
@@ -638,7 +638,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
    endFileWithNavPath(this, ol);
 
    if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
-      MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
+      QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
       if (allMemberList) {
          allMemberList->sort();
@@ -668,7 +668,7 @@ void NamespaceDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) c
    ol.writeString("      <div class=\"navtab\">\n");
    ol.writeString("        <table>\n");
 
-   MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
+   QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
    if (allMemberList) {
       
@@ -704,7 +704,7 @@ void NamespaceDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) c
 
 int NamespaceDef::countMembers()
 {
-   MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
+   QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
    if (allMemberList) {
       allMemberList->countDocMembers();
@@ -940,7 +940,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title, bool co
    ol.endMemberList();
 }
 
-MemberList *NamespaceDef::createMemberList(MemberListType lt)
+QSharedPointer<MemberList> NamespaceDef::createMemberList(MemberListType lt)
 {   
    for (auto item : m_memberLists) {
       if (item->listType() == lt) {
@@ -949,7 +949,7 @@ MemberList *NamespaceDef::createMemberList(MemberListType lt)
    }
 
    // not found, create a new member list
-   MemberList *ml = new MemberList(lt);
+   QSharedPointer<MemberList> ml (new MemberList(lt));
    m_memberLists.append(ml);
  
    return ml;
@@ -957,7 +957,7 @@ MemberList *NamespaceDef::createMemberList(MemberListType lt)
 
 void NamespaceDef::addMemberToList(MemberListType lt, MemberDef *md)
 {  
-   MemberList *ml = createMemberList(lt);
+   QSharedPointer<MemberList> ml = createMemberList(lt);
    ml->append(md);
 
    if (ml->listType() & MemberListType_declarationLists) {
@@ -965,7 +965,7 @@ void NamespaceDef::addMemberToList(MemberListType lt, MemberDef *md)
    }
 }
 
-MemberList *NamespaceDef::getMemberList(MemberListType lt) const
+QSharedPointer<MemberList> NamespaceDef::getMemberList(MemberListType lt) const
 {
    for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
@@ -973,12 +973,12 @@ MemberList *NamespaceDef::getMemberList(MemberListType lt) const
       }
    }
 
-   return 0;
+   return QSharedPointer<MemberList>();
 }
 
 void NamespaceDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title)
 {
-   MemberList *ml = getMemberList(lt);
+   QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
       ml->writeDeclarations(ol, 0, this, 0, 0, title, 0);
@@ -987,7 +987,7 @@ void NamespaceDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, co
 
 void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title)
 {
-   MemberList *ml = getMemberList(lt);
+   QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
       ml->writeDocumentation(ol, displayName(), this, title);

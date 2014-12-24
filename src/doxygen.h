@@ -147,7 +147,7 @@ class Doxygen
    static QHash<QString, RefList>           *xrefLists;           // array of xref lists: todo, test, bug, deprecated ...
    static QHash<QString, int>               *htmlDirMap;
    static QHash<QString, DefinitionIntf *>  *symbolMap;
-   static QHash<QString, Definition>        *clangUsrMap;
+   static QHash<QString, Definition *>      *clangUsrMap;
 
    static StringMap<QSharedPointer<DirRelation>> dirRelations; 
      

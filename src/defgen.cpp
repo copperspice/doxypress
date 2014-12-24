@@ -477,8 +477,8 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
    int numMembers = 0;
 
    for (auto ml : cd->getMemberLists()) {
-      if ((ml.listType()&MemberListType_detailedLists) == 0) {
-         numMembers += ml.count();
+      if ((ml->listType()&MemberListType_detailedLists) == 0) {
+         numMembers += ml->count();
       }
    }
 
@@ -561,12 +561,12 @@ void generateDEFForNamespace(NamespaceDef *nd, FTextStream &t)
    writeDEFString(t, nd->name());
    t << ';' << endl;
 
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decDefineMembers), "define");
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decProtoMembers), "prototype");
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decTypedefMembers), "typedef");
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decEnumMembers), "enum");
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decFuncMembers), "func");
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decVarMembers), "var");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decDefineMembers).data(), "define");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decProtoMembers).data(), "prototype");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decTypedefMembers).data(), "typedef");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decEnumMembers).data(), "enum");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decFuncMembers).data(), "func");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decVarMembers).data(), "var");
 
    t << "  ns-filename  = '" << nd->getDefFileName() << "';" << endl;
    t << "  ns-fileline  = '" << nd->getDefLine()     << "';" << endl;

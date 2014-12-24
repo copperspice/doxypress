@@ -305,8 +305,8 @@ class Definition : public DefinitionIntf
    // source references
    void setBodySegment(int bls, int ble);
    void setBodyDef(FileDef *fd);
-   void addSourceReferencedBy(MemberDef *d);
-   void addSourceReferences(MemberDef *d);
+   void addSourceReferencedBy(QSharedPointer<MemberDef>d);
+   void addSourceReferences(QSharedPointer<MemberDef>d);
 
    void setRefItems(const QList<ListItemInfo> *sli);
    void mergeRefItems(Definition *d);
@@ -352,13 +352,11 @@ class Definition : public DefinitionIntf
 
  private:
    static void addToMap(const char *name, Definition *d);
-   static void removeFromMap(Definition *d);
-
+ 
    void _setSymbolName(const QByteArray &name);
 
    int  _getXRefListId(const char *listName) const;
-   void _writeSourceRefList(OutputList &ol, const char *scopeName,
-                            const QByteArray &text, MemberSDict *members, bool);
+   void _writeSourceRefList(OutputList &ol, const char *scopeName,const QByteArray &text, MemberSDict *members, bool);
 
    void _setBriefDescription(const char *b, const char *briefFile, int briefLine);
    void _setDocumentation(const char *d, const char *docFile, int docLine, bool stripWhiteSpace, bool atTop);

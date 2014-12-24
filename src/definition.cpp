@@ -160,7 +160,7 @@ static bool matchExcludedSymbols(const char *name)
 
    for (auto item : exclSyms) { 
 
-      QString pat = *item; 
+      QString pat = item; 
       QByteArray pattern = pat.toLatin1();
 
       bool forceStart = false;
@@ -179,7 +179,8 @@ static bool matchExcludedSymbols(const char *name)
          QRegExp re(substitute(pattern, "*", ".*"), Qt::CaseSensitive);
 
          int i, pl;
-         i = re.match(symName, 0, &pl);
+         i = re.indexIn(symName, 0);
+         pl = re.matchedLength();
 
          //printf("  %d = re.match(%s) pattern=%s\n",i,symName.data(),pattern.data());
 
@@ -227,18 +228,19 @@ void Definition::addToMap(const char *name, Definition *d)
    }
 
    if (! symbolName.isEmpty()) {     
-      DefinitionIntf *di = Doxygen::symbolMap->find(symbolName);
+      auto di = Doxygen::symbolMap->find(symbolName);
 
-      if (di == 0) { 
+      if (di == Doxygen::symbolMap->end() ) { 
          // new Symbol         
          Doxygen::symbolMap->insert(symbolName, d);
+         di = Doxygen::symbolMap->find(symbolName);
 
       } else {
          // existing symbol
         
-         if (di->definitionType() == DefinitionIntf::TypeSymbolList) { 
+         if ( (*di)->definitionType() == DefinitionIntf::TypeSymbolList) { 
             // already multiple symbols
-            DefinitionList *dl = (DefinitionList *)di;
+            DefinitionList *dl = (DefinitionList *) *di;
             dl->append(d);
 
          } else { 
@@ -247,48 +249,13 @@ void Definition::addToMap(const char *name, Definition *d)
 
             DefinitionList *dl = new DefinitionList;
           
-            dl->append((Definition *)di);
+            dl->append((Definition *) *di);
             dl->append(d);
             Doxygen::symbolMap->insert(symbolName, dl);
          }
       }
-
-      // auto resize if needed
-      static int sizeIndex = 9;
-
-      if (Doxygen::symbolMap->size() > SDict_primes[sizeIndex]) {
-         Doxygen::symbolMap->resize(SDict_primes[++sizeIndex]);
-      }
-
+      
       d->_setSymbolName(symbolName);
-   }
-}
-
-void Definition::removeFromMap(Definition *d)
-{
-   QByteArray symbolName = d->m_symbolName;
-
-   if (!symbolName.isEmpty()) {
-      //printf("******* removing symbol `%s' (%p)\n",symbolName.data(),d);
-      DefinitionIntf *di = Doxygen::symbolMap->find(symbolName);
-
-      if (di) {
-         if (di != d) { // symbolName not unique
-            //printf("  removing from list: %p!\n",di);
-            DefinitionList *dl = (DefinitionList *)di;
-            bool b = dl->removeRef(d);
-
-            assert(b == true);
-
-            if (dl->isEmpty()) {
-               Doxygen::symbolMap->take(symbolName);
-            }
-
-         } else { // symbolName unique
-            //printf("  removing symbol %p\n",di);
-            Doxygen::symbolMap->take(symbolName);
-         }
-      }
    }
 }
 
@@ -317,10 +284,12 @@ Definition::Definition(const char *df, int dl, int dc, const char *name, const c
 
 Definition::Definition(const Definition &d) : DefinitionIntf()
 {
-   m_name = d.m_name;
+   m_name   = d.m_name;
    m_defLine = d.m_defLine;
+
    m_impl = new DefinitionImpl;
    *m_impl = *d.m_impl;
+
    m_impl->sectionDict = 0;
    m_impl->sourceRefByDict = 0;
    m_impl->sourceRefsDict = 0;
@@ -333,51 +302,49 @@ Definition::Definition(const Definition &d) : DefinitionIntf()
 
    if (d.m_impl->sectionDict) {
       m_impl->sectionDict = new SectionDict();
-
-      StringMap<QSharedPointer<SectionInfo>>::Iterator it(*d.m_impl->sectionDict);
-      SectionInfo *si;
-
-      for (it.toFirst(); (si = it.current()); ++it) {
-         m_impl->sectionDict->append(si->label, si);
+    
+      for (auto si : *d.m_impl->sectionDict) {  
+         m_impl->sectionDict->insert(si->label, si);
       }
    }
 
    if (d.m_impl->sourceRefByDict) {
       m_impl->sourceRefByDict = new MemberSDict;
-      MemberSDict::IteratorDict it(*d.m_impl->sourceRefByDict);
-      MemberDef *md;
-      for (it.toFirst(); (md = it.current()); ++it) {
-         m_impl->sourceRefByDict->append(it.currentKey(), md);
+      
+      for (auto iter = d.m_impl->sourceRefByDict->begin();  iter != d.m_impl->sourceRefByDict->end(); ++iter) {   
+         m_impl->sourceRefByDict->insert(iter.key(), iter.value());
       }
    }
 
    if (d.m_impl->sourceRefsDict) {
       m_impl->sourceRefsDict = new MemberSDict;
-      MemberSDict::IteratorDict it(*d.m_impl->sourceRefsDict);
-      MemberDef *md;
-      for (it.toFirst(); (md = it.current()); ++it) {
-         m_impl->sourceRefsDict->append(it.currentKey(), md);
+    
+      for (auto iter= d.m_impl->sourceRefsDict->begin(); iter != d.m_impl->sourceRefsDict->end(); ++iter) {   
+         m_impl->sourceRefsDict->insert(iter.key(), iter.value());
       }
    }
-   if (d.m_impl->partOfGroups) {
-      GroupListIterator it(*d.m_impl->partOfGroups);
-      GroupDef *gd;
-      for (it.toFirst(); (gd = it.current()); ++it) {
+   if (d.m_impl->partOfGroups) {     
+      for (auto gd : *d.m_impl->partOfGroups) {   
          makePartOfGroup(gd);
       }
    }
+
    if (d.m_impl->xrefListItems) {
       setRefItems(d.m_impl->xrefListItems);
    }
+
    if (d.m_impl->brief) {
       m_impl->brief = new BriefInfo(*d.m_impl->brief);
    }
+
    if (d.m_impl->details) {
       m_impl->details = new DocInfo(*d.m_impl->details);
    }
+
    if (d.m_impl->body) {
       m_impl->body = new BodyInfo(*d.m_impl->body);
    }
+
    if (d.m_impl->inbodyDocs) {
       m_impl->inbodyDocs = new DocInfo(*d.m_impl->inbodyDocs);
    }
@@ -389,10 +356,7 @@ Definition::Definition(const Definition &d) : DefinitionIntf()
 }
 
 Definition::~Definition()
-{
-   if (m_isSymbol) {
-      removeFromMap(this);
-   }
+{  
    if (m_impl) {
       delete m_impl;
       m_impl = 0;
@@ -412,9 +376,10 @@ void Definition::setId(const char *id)
    if (id == 0) {
       return;
    }
+
    m_impl->id = id;
-   if (Doxygen::clangUsrMap) {
-      //printf("Definition::setId '%s'->'%s'\n",id,m_name.data());
+
+   if (Doxygen::clangUsrMap) {  
       Doxygen::clangUsrMap->insert(id, this);
    }
 }
@@ -426,22 +391,17 @@ QByteArray Definition::id() const
 
 void Definition::addSectionsToDefinition(QList<SectionInfo> *anchorList)
 {
-   if (!anchorList) {
+   if (! anchorList) {
       return;
    }
-   //printf("%s: addSectionsToDefinition(%d)\n",name().data(),anchorList->count());
-   QListIterator<SectionInfo> it(*anchorList);
-   SectionInfo *si;
-   for (; (si = it.current()); ++it) {
-      //printf("Add section `%s' to definition `%s'\n",
-      //    si->label.data(),name().data());
 
-      SectionInfo *gsi = Doxygen::sectionDict->find(si->label);
-
-      //printf("===== label=%s gsi=%p\n",si->label.data(),gsi);
-      if (gsi == 0) {
-         gsi = new SectionInfo(*si);
-         Doxygen::sectionDict->append(si->label, gsi);
+   for (auto si : *anchorList) {   
+    
+      QSharedPointer<SectionInfo> gsi (Doxygen::sectionDict->find(si.label));
+      
+      if (! gsi) {
+         gsi = QSharedPointer<SectionInfo> (new SectionInfo(si));
+         Doxygen::sectionDict->insert(si.label, gsi);
       }
 
       if (m_impl->sectionDict == 0) {
@@ -449,30 +409,21 @@ void Definition::addSectionsToDefinition(QList<SectionInfo> *anchorList)
       }
 
       if (m_impl->sectionDict->find(gsi->label) == 0) {
-         m_impl->sectionDict->append(gsi->label, gsi);
+         m_impl->sectionDict->insert(gsi->label, gsi);
          gsi->definition = this;
       }
    }
 }
 
 bool Definition::hasSections() const
-{
-   //printf("Definition::hasSections(%s) #sections=%d\n",name().data(),
-   //    m_impl->sectionDict ? m_impl->sectionDict->count() : 0);
-
+{ 
    if (m_impl->sectionDict == 0) {
       return false;
    }
-
-   StringMap<QSharedPointer<SectionInfo>>::Iterator li(*m_impl->sectionDict);
-   SectionInfo *si;
-
-   for (li.toFirst(); (si = li.current()); ++li) {
-
-      if (si->type == SectionInfo::Section ||
-            si->type == SectionInfo::Subsection ||
-            si->type == SectionInfo::Subsubsection ||
-            si->type == SectionInfo::Paragraph) {
+  
+   for (auto si : *m_impl->sectionDict) {   
+      if (si->type == SectionInfo::Section || si->type == SectionInfo::Subsection ||
+            si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
          return true;
       }
    }
@@ -485,14 +436,10 @@ void Definition::addSectionsToIndex()
    if (m_impl->sectionDict == 0) {
       return;
    }
-   
-   //printf("Definition::addSectionsToIndex()\n");
-   StringMap<QSharedPointer<SectionInfo>>::Iterator li(*m_impl->sectionDict);
 
-   SectionInfo *si;
    int level = 1;
-
-   for (li.toFirst(); (si = li.current()); ++li) {
+  
+   for (auto si : *m_impl->sectionDict) {   
 
       if (si->type == SectionInfo::Section         || si->type == SectionInfo::Subsection    ||
             si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
@@ -518,8 +465,7 @@ void Definition::addSectionsToIndex()
             title = si->label;
          }
 
-         Doxygen::indexList->addContentsItem(true, title, getReference(), getOutputFileBase(),
-                                             si->label, false, true);
+         Doxygen::indexList->addContentsItem(true, title, getReference(), getOutputFileBase(),si->label, false, true);
          level = nextLevel;
       }
    }
@@ -533,13 +479,8 @@ void Definition::addSectionsToIndex()
 void Definition::writeDocAnchorsToTagFile(FTextStream &tagFile)
 {
    if (m_impl->sectionDict) {
-      //printf("%s: writeDocAnchorsToTagFile(%d)\n",name().data(),m_impl->sectionDict->count());
-
-      StringMap<QSharedPointer<SectionInfo>>::Iterator sdi(*m_impl->sectionDict);
-      SectionInfo *si;
-
-      for (; (si = sdi.current()); ++sdi) {
-
+ 
+      for (auto si : *m_impl->sectionDict) {   
          if (!si->generated) {
             //printf("write an entry!\n");
             if (definitionType() == TypeMember) {
@@ -567,7 +508,8 @@ bool Definition::_docsAlreadyAdded(const QByteArray &doc, QByteArray &sigList)
    QByteArray sigStr;
    sigStr = QCryptographicHash::hash(docStr, QCryptographicHash::Md5).toHex();  
 
-   if (sigList.find(sigStr) == -1) { // new docs, add signature to prevent re-adding it
+   if (sigList.indexOf(sigStr) == -1) { 
+      // new docs, add signature to prevent re-adding it
       sigList += ":" + sigStr;
       return false;
 
@@ -633,26 +575,30 @@ static bool lastCharIsMultibyte(const QByteArray &s)
    int l = s.length();
    int p = 0;
    int pp = -1;
+
    while ((p = nextUtf8CharPosition(s, l, p)) < l) {
       pp = p;
    }
+
    if (pp == -1 || ((uchar)s[pp]) < 0x80) {
       return false;
    }
+
    return true;
 }
 
 void Definition::_setBriefDescription(const char *b, const char *briefFile, int briefLine)
 {
    static QByteArray outputLanguage = Config_getEnum("OUTPUT_LANGUAGE");
-   static bool needsDot = outputLanguage != "Japanese" &&
-                          outputLanguage != "Chinese" &&
-                          outputLanguage != "Korean";
+   static bool needsDot = outputLanguage != "Japanese" && outputLanguage != "Chinese" && outputLanguage != "Korean";
+
    QByteArray brief = b;
    brief = brief.trimmed();
+
    if (brief.isEmpty()) {
       return;
    }
+
    int bl = brief.length();
    if (bl > 0 && needsDot) { // add punctuation if needed
       int c = brief.at(bl - 1);
@@ -756,11 +702,10 @@ bool readCodeFragment(const char *fileName,
       Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", cmd.data());
       f = portable_popen(cmd, "r");
    }
-   bool found = lang == SrcLangExt_VHDL   ||
-                lang == SrcLangExt_Tcl    ||
-                lang == SrcLangExt_Python ||
-                lang == SrcLangExt_Fortran;
-   // for VHDL, TCL, Python, and Fortran no bracket search is possible
+   bool found = lang == SrcLangExt_Tcl | lang == SrcLangExt_Python || lang == SrcLangExt_Fortran;
+
+   // for TCL, Python, and Fortran no bracket search is possible
+
    if (f) {
       int c = 0;
       int col = 0;
@@ -905,39 +850,48 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
    static bool latexSourceCode = Config_getBool("LATEX_SOURCE_CODE");
    ol.pushGeneratorState();
    //printf("Definition::writeSourceRef %d %p\n",bodyLine,bodyDef);
+
    QByteArray fn = getSourceFileBase();
-   if (!fn.isEmpty()) {
+
+   if (! fn.isEmpty()) {
       QByteArray refText = theTranslator->trDefinedAtLineInSourceFile();
-      int lineMarkerPos = refText.find("@0");
-      int fileMarkerPos = refText.find("@1");
-      if (lineMarkerPos != -1 && fileMarkerPos != -1) { // should always pass this.
-         QByteArray lineStr;
-         lineStr.sprintf("%d", m_impl->body->startLine);
+      int lineMarkerPos = refText.indexOf("@0");
+      int fileMarkerPos = refText.indexOf("@1");
+
+      if (lineMarkerPos != -1 && fileMarkerPos != -1) { 
+         // should always pass this.
+         QString lineStr;
+         lineStr = QString("%1").arg(m_impl->body->startLine);
+
          QByteArray anchorStr = getSourceAnchor();
          ol.startParagraph();
+
          if (lineMarkerPos < fileMarkerPos) { // line marker before file marker
             // write text left from linePos marker
             ol.parseText(refText.left(lineMarkerPos));
             ol.pushGeneratorState();
             ol.disable(OutputGenerator::RTF);
             ol.disable(OutputGenerator::Man);
+
             if (!latexSourceCode) {
                ol.disable(OutputGenerator::Latex);
             }
+
             // write line link (HTML, LaTeX optionally)
-            ol.writeObjectLink(0, fn, anchorStr, lineStr);
+            ol.writeObjectLink(0, fn, anchorStr, lineStr.toUtf8());
             ol.enableAll();
             ol.disable(OutputGenerator::Html);
+
             if (latexSourceCode) {
                ol.disable(OutputGenerator::Latex);
             }
+
             // write normal text (Man/RTF, Latex optionally)
-            ol.docify(lineStr);
+            ol.docify(lineStr.toUtf8());
             ol.popGeneratorState();
 
             // write text between markers
-            ol.parseText(refText.mid(lineMarkerPos + 2,
-                                     fileMarkerPos - lineMarkerPos - 2));
+            ol.parseText(refText.mid(lineMarkerPos + 2, fileMarkerPos - lineMarkerPos - 2));
 
             ol.pushGeneratorState();
             ol.disable(OutputGenerator::RTF);
@@ -948,17 +902,19 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             // write file link (HTML, LaTeX optionally)
             ol.writeObjectLink(0, fn, 0, m_impl->body->fileDef->name());
             ol.enableAll();
+
             ol.disable(OutputGenerator::Html);
             if (latexSourceCode) {
                ol.disable(OutputGenerator::Latex);
             }
+
             // write normal text (Man/RTF, Latex optionally)
             ol.docify(m_impl->body->fileDef->name());
             ol.popGeneratorState();
 
             // write text right from file marker
-            ol.parseText(refText.right(
-                            refText.length() - fileMarkerPos - 2));
+            ol.parseText(refText.right(refText.length() - fileMarkerPos - 2));
+
          } else { // file marker before line marker
             // write text left from file marker
             ol.parseText(refText.left(fileMarkerPos));
@@ -970,6 +926,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             }
             // write file link (HTML only)
             ol.writeObjectLink(0, fn, 0, m_impl->body->fileDef->name());
+
             ol.enableAll();
             ol.disable(OutputGenerator::Html);
             if (latexSourceCode) {
@@ -980,8 +937,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             ol.popGeneratorState();
 
             // write text between markers
-            ol.parseText(refText.mid(fileMarkerPos + 2,
-                                     lineMarkerPos - fileMarkerPos - 2));
+            ol.parseText(refText.mid(fileMarkerPos + 2, lineMarkerPos - fileMarkerPos - 2));
 
             ol.pushGeneratorState();
             ol.disable(OutputGenerator::RTF);
@@ -991,19 +947,20 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             }
             ol.disableAllBut(OutputGenerator::Html);
             // write line link (HTML only)
-            ol.writeObjectLink(0, fn, anchorStr, lineStr);
+            ol.writeObjectLink(0, fn, anchorStr, lineStr.toUtf8());
             ol.enableAll();
             ol.disable(OutputGenerator::Html);
+
             if (latexSourceCode) {
                ol.disable(OutputGenerator::Latex);
             }
+
             // write normal text (Latex/Man only)
-            ol.docify(lineStr);
+            ol.docify(lineStr.toUtf8());
             ol.popGeneratorState();
 
             // write text right from linePos marker
-            ol.parseText(refText.right(
-                            refText.length() - lineMarkerPos - 2));
+            ol.parseText(refText.right(refText.length() - lineMarkerPos - 2));
          }
          ol.endParagraph();
       } else {
@@ -1043,19 +1000,17 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
 {
    static bool inlineSources = Config_getBool("INLINE_SOURCES");
    ol.pushGeneratorState();
-   //printf("Source Fragment %s: %d-%d bodyDef=%p\n",name().data(),
-   //        m_startBodyLine,m_endBodyLine,m_bodyDef);
+   
    if (inlineSources && hasSources()) {
       QByteArray codeFragment;
+
       int actualStart = m_impl->body->startLine, actualEnd = m_impl->body->endLine;
-      if (readCodeFragment(m_impl->body->fileDef->absoluteFilePath(),
-                           actualStart, actualEnd, codeFragment)
-         ) {
-         //printf("Adding code fragement '%s' ext='%s'\n",
-         //    codeFragment.data(),m_impl->defFileExt.data());
+
+      if (readCodeFragment(m_impl->body->fileDef->getFilePath(), actualStart, actualEnd, codeFragment) ) {
+
          ParserInterface *pIntf = Doxygen::parserManager->getParser(m_impl->defFileExt);
          pIntf->resetCodeParserState();
-         //printf("Read:\n`%s'\n\n",codeFragment.data());
+        
          MemberDef *thisMd = 0;
          if (definitionType() == TypeMember) {
             thisMd = (MemberDef *)this;
@@ -1090,9 +1045,10 @@ void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
    static bool latexSourceCode = Config_getBool("LATEX_SOURCE_CODE");
    static bool sourceBrowser   = Config_getBool("SOURCE_BROWSER");
    static bool refLinkSource   = Config_getBool("REFERENCES_LINK_SOURCE");
+
    ol.pushGeneratorState();
-   if (members) {
-      members->sort();
+
+   if (members) {      
 
       ol.startParagraph();
       ol.parseText(text);
@@ -1103,28 +1059,29 @@ void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
       QRegExp marker("@[0-9]+");
       int index = 0, newIndex, matchLen;
 
+      auto iter = members->begin();
+
       // now replace all markers in inheritLine with links to the classes
-      while ((newIndex = marker.match(ldefLine, index, &matchLen)) != -1) {
-         bool ok;
-         ol.parseText(ldefLine.mid(index, newIndex - index));
-         uint entryIndex = ldefLine.mid(newIndex + 1, matchLen - 1).toUInt(&ok);
-         MemberDef *md = members->at(entryIndex);
+      while ((newIndex = marker.indexIn(ldefLine, index)) != -1) {
 
-         if (ok && md) {
+         matchLen = marker.matchedLength();
+      
+         ol.parseText(ldefLine.mid(index, newIndex - index));        
+
+         QSharedPointer<MemberDef> md = iter.value();
+
+         if (md) {
             QByteArray scope = md->getScopeString();
-            QByteArray name = md->name();
-
-            //printf("class=%p scope=%s scopeName=%s\n",md->getClassDef(),scope.data(),scopeName);
+            QByteArray name  = md->name();
+           
             if (!scope.isEmpty() && scope != scopeName) {
                name.prepend(scope + getLanguageSpecificSeparator(m_impl->lang));
             }
-            if (!md->isObjCMethod() &&
-                  (md->isFunction() || md->isSlot() ||
-                   md->isPrototype() || md->isSignal()
-                  )
-               ) {
+
+            if (!md->isObjCMethod() && (md->isFunction() || md->isSlot() || md->isPrototype() || md->isSignal() )) {
                name += "()";
             }
+
             //Definition *d = md->getOutputFileBase();
             //if (d==Doxygen::globalScope) d=md->getBodyDef();
             if (sourceBrowser &&
@@ -1232,7 +1189,7 @@ bool Definition::hasUserDocumentation() const
 }
 
 
-void Definition::addSourceReferencedBy(MemberDef *md)
+void Definition::addSourceReferencedBy(QSharedPointer<MemberDef> md)
 {
    if (md) {
       QByteArray name  = md->name();
@@ -1245,13 +1202,14 @@ void Definition::addSourceReferencedBy(MemberDef *md)
       if (m_impl->sourceRefByDict == 0) {
          m_impl->sourceRefByDict = new MemberSDict;
       }
+
       if (m_impl->sourceRefByDict->find(name) == 0) {
-         m_impl->sourceRefByDict->append(name, md);
+         m_impl->sourceRefByDict->insert(name, md);
       }
    }
 }
 
-void Definition::addSourceReferences(MemberDef *md)
+void Definition::addSourceReferences(QSharedPointer<MemberDef> md)
 {
    QByteArray name  = md->name();
    QByteArray scope = md->getScopeString();
@@ -1267,8 +1225,9 @@ void Definition::addSourceReferences(MemberDef *md)
       if (m_impl->sourceRefsDict == 0) {
          m_impl->sourceRefsDict = new MemberSDict;
       }
+
       if (m_impl->sourceRefsDict->find(name) == 0) {
-         m_impl->sourceRefsDict->append(name, md);
+         m_impl->sourceRefsDict->insert(name, md);
       }
    }
 }
@@ -1341,18 +1300,14 @@ void Definition::makePartOfGroup(GroupDef *gd)
 
 void Definition::setRefItems(const QList<ListItemInfo> *sli)
 {
-   
-   if (sli) {
+      if (sli) {
       // deep copy the list
       if (m_impl->xrefListItems == 0) {
          m_impl->xrefListItems = new QList<ListItemInfo>;        
       }
-
-      QListIterator<ListItemInfo> slii(*sli);
-      ListItemInfo *lii;
-
-      for (slii.toFirst(); (lii = slii.current()); ++slii) {
-         m_impl->xrefListItems->append(new ListItemInfo(*lii));
+   
+      for (auto lii : *sli) {
+         m_impl->xrefListItems->append(lii);
       }
    }
 }
@@ -1367,13 +1322,10 @@ void Definition::mergeRefItems(Definition *d)
       if (m_impl->xrefListItems == 0) {
          m_impl->xrefListItems = new QList<ListItemInfo>;         
       }
-
-      QListIterator<ListItemInfo> slii(*xrefList);
-      ListItemInfo *lii;
-
-      for (slii.toFirst(); (lii = slii.current()); ++slii) {
-         if (_getXRefListId(lii->type) == -1) {
-            m_impl->xrefListItems->append(new ListItemInfo(*lii));
+    
+      for (auto lii : *xrefList) {  
+         if (_getXRefListId(lii.type) == -1) {
+            m_impl->xrefListItems->append(lii);
          }
       }
    }
@@ -1381,12 +1333,10 @@ void Definition::mergeRefItems(Definition *d)
 
 int Definition::_getXRefListId(const char *listName) const
 {
-   if (m_impl->xrefListItems) {
-      QListIterator<ListItemInfo> slii(*m_impl->xrefListItems);
-      ListItemInfo *lii;
-      for (slii.toFirst(); (lii = slii.current()); ++slii) {
-         if (qstrcmp(lii->type, listName) == 0) {
-            return lii->itemId;
+   if (m_impl->xrefListItems) {     
+      for (auto lii : *m_impl->xrefListItems) {  
+         if (qstrcmp(lii.type, listName) == 0) {
+            return lii.itemId;
          }
       }
    }
@@ -1397,7 +1347,6 @@ QList<ListItemInfo> *Definition::xrefListItems() const
 {
    return m_impl->xrefListItems;
 }
-
 
 QByteArray Definition::convertNameToFile(const char *name, bool allowDots) const
 {
@@ -1411,20 +1360,25 @@ QByteArray Definition::convertNameToFile(const char *name, bool allowDots) const
 QByteArray Definition::pathFragment() const
 {
    QByteArray result;
+
    if (m_impl->outerScope && m_impl->outerScope != Doxygen::globalScope) {
       result = m_impl->outerScope->pathFragment();
    }
+
    if (isLinkable()) {
       if (!result.isEmpty()) {
          result += "/";
       }
       if (definitionType() == Definition::TypeGroup && ((const GroupDef *)this)->groupTitle()) {
          result += ((const GroupDef *)this)->groupTitle();
+
       } else if (definitionType() == Definition::TypePage && !((const PageDef *)this)->title().isEmpty()) {
          result += ((const PageDef *)this)->title();
+
       } else {
          result += m_impl->localName;
       }
+
    } else {
       result += m_impl->localName;
    }
@@ -1507,27 +1461,25 @@ void Definition::writeToc(OutputList &ol)
    ol.writeString(theTranslator->trRTFTableOfContents());
    ol.writeString("</h3>\n");
    ol.writeString("<ul>");
-
-   StringMap<QSharedPointer<SectionInfo>>::Iterator li(*sectionDict);
-   SectionInfo *si;
-
-   int level = 1, l;
+  
+   int level = 1;
+   int l;
    char cs[2];
    cs[1] = '\0';
 
-   bool inLi[5] = { false, false, false, false };
+   bool inLi[5] = { false, false, false, false };   
 
-   for (li.toFirst(); (si = li.current()); ++li) {
-      if (si->type == SectionInfo::Section       ||
-            si->type == SectionInfo::Subsection    ||
-            si->type == SectionInfo::Subsubsection ||
-            si->type == SectionInfo::Paragraph) {
-         //printf("  level=%d title=%s\n",level,si->title.data());
+   for (auto si : *sectionDict) {
+      if (si->type == SectionInfo::Section || si->type == SectionInfo::Subsection    ||
+            si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
+        
          int nextLevel = (int)si->type;
+
          if (nextLevel > level) {
             for (l = level; l < nextLevel; l++) {
                ol.writeString("<ul>");
             }
+
          } else if (nextLevel < level) {
             for (l = level; l > nextLevel; l--) {
                if (inLi[l]) {
@@ -1621,14 +1573,14 @@ QByteArray abbreviate(const char *s, const char *name)
 
    // strip any predefined prefix
    QStringList &briefDescAbbrev = Config_getList("ABBREVIATE_BRIEF");
-   const char *p = briefDescAbbrev.first();
-
-   while (p) {
-      QByteArray s = p;
-      s.replace(QRegExp("\\$name"), scopelessName);     // replace $name with entity name
+  
+   for (auto s : briefDescAbbrev) {     
+      s.replace(QRegExp("\\$name"), scopelessName);     
+      
+      // replace $name with entity name
       s += " ";
-      stripWord(result, s);
-      p = briefDescAbbrev.next();
+
+      stripWord(result, s.toUtf8());      
    }
 
    // capitalize first word
@@ -1642,15 +1594,9 @@ QByteArray abbreviate(const char *s, const char *name)
    return result;
 }
 
-
-//----------------------
-
 QByteArray Definition::briefDescription(bool abbr) const
 {
-   //printf("%s::briefDescription(%d)='%s'\n",name().data(),abbr,m_impl->brief?m_impl->brief->doc.data():"<none>");
-   return m_impl->brief ?
-          (abbr ? abbreviate(m_impl->brief->doc, displayName()) : m_impl->brief->doc) :
-          QByteArray("");
+   return m_impl->brief ? (abbr ? abbreviate(m_impl->brief->doc, displayName()) : m_impl->brief->doc) : QByteArray("");
 }
 
 QByteArray Definition::briefDescriptionAsTooltip() const

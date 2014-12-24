@@ -15,35 +15,34 @@
  *
 *************************************************************************/
 
-#include <memberlist.h>
-#include <classlist.h>
-#include <filedef.h>
-#include <doxygen.h>
-#include <memberdef.h>
-#include <classdef.h>
-#include <namespacedef.h>
-#include <util.h>
-#include <language.h>
-#include <outputlist.h>
-#include <dot.h>
-#include <message.h>
-#include <docparser.h>
-#include <searchindex.h>
-#include <htags.h>
-#include <parserintf.h>
-#include <portable.h>
-#include <debug.h>
-#include <layout.h>
-#include <entry.h>
-#include <groupdef.h>
-#include <filename.h>
-#include <membergroup.h>
-#include <dirdef.h>
 #include <config.h>
 #include <clangparser.h>
+#include <classlist.h>
+#include <classdef.h>
+#include <debug.h>
+#include <dirdef.h>
+#include <docparser.h>
+#include <doxygen.h>
+#include <dot.h>
+#include <entry.h>
+#include <filename.h>
+#include <filedef.h>
+#include <groupdef.h>
+#include <htags.h>
+#include <layout.h>
+#include <language.h>
+#include <memberdef.h>
+#include <message.h>
+#include <membergroup.h>
+#include <memberlist.h>
+#include <namespacedef.h>
+#include <outputlist.h>
+#include <parserintf.h>
+#include <portable.h>
+#include <searchindex.h>
 #include <settings.h>
+#include <util.h>
 
-//---------------------------------------------------------------------------
 
 /** Class implementing CodeOutputInterface by throwing away everything. */
 class DevNullCodeDocInterface : public CodeOutputInterface
@@ -140,10 +139,8 @@ void FileDef::computeAnchors()
 void FileDef::distributeMemberGroupDocumentation()
 {
    //printf("FileDef::distributeMemberGroupDocumentation()\n");
-   if (m_memberGroupSDict) {
-      MemberGroupSDict::Iterator mgli(*m_memberGroupSDict);
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
+   if (m_memberGroupSDict) {      
+      for (auto mg : *m_memberGroupSDict) {
          mg->distributeMemberGroupDocumentation();
       }
    }
@@ -152,19 +149,16 @@ void FileDef::distributeMemberGroupDocumentation()
 void FileDef::findSectionsInDocumentation()
 {
    docFindSections(documentation(), this, 0, docFile());
+
    if (m_memberGroupSDict) {
-      MemberGroupSDict::Iterator mgli(*m_memberGroupSDict);
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
+    for (auto mg : *m_memberGroupSDict) {
          mg->findSectionsInDocumentation();
       }
-   }
+   } 
 
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
-      if (ml->listType()&MemberListType_declarationLists) {
-         ml->findSectionsInDocumentation();
+   for (auto ml : m_memberLists) {
+      if (ml.listType()&MemberListType_declarationLists) {
+         ml.findSectionsInDocumentation();
       }
    }
 }
@@ -185,43 +179,42 @@ void FileDef::writeTagFile(FTextStream &tagFile)
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
    tagFile << "    <path>" << convertToXML(getPath()) << "</path>" << endl;
    tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << "</filename>" << endl;
+
    if (m_includeList && m_includeList->count() > 0) {
-      QListIterator<IncludeInfo> ili(*m_includeList);
-      IncludeInfo *ii;
-      for (; (ii = ili.current()); ++ili) {
-         if (!ii->indirect) {
-            FileDef *fd = ii->fileDef;
+      
+      for (auto ii : *m_includeList) {
+         if (! ii.indirect) {
+            FileDef *fd = ii.fileDef;
+
             if (fd && fd->isLinkable() && !fd->isReference()) {
                bool isIDLorJava = false;
                SrcLangExt lang = fd->getLanguage();
+
                isIDLorJava = lang == SrcLangExt_IDL || lang == SrcLangExt_Java;
-               const char *locStr = (ii->local    || isIDLorJava) ? "yes" : "no";
-               const char *impStr = (ii->imported || isIDLorJava) ? "yes" : "no";
+               const char *locStr = (ii.local    || isIDLorJava) ? "yes" : "no";
+               const char *impStr = (ii.imported || isIDLorJava) ? "yes" : "no";
+
                tagFile << "    <includes id=\""
                        << convertToXML(fd->getOutputFileBase()) << "\" "
                        << "name=\"" << convertToXML(fd->name()) << "\" "
                        << "local=\"" << locStr << "\" "
                        << "imported=\"" << impStr << "\">"
-                       << convertToXML(ii->includeName)
+                       << convertToXML(ii.includeName)
                        << "</includes>"
                        << endl;
             }
          }
       }
    }
-   QListIterator<LayoutDocEntry> eli(LayoutDocManager::instance().docEntries(LayoutDocManager::File));
-   LayoutDocEntry *lde;
+     
 
-   for (eli.toFirst(); (lde = eli.current()); ++eli) {
+   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
       switch (lde->kind())  {
       
          case LayoutDocEntry::FileClasses: 
          {
-            if (m_classSDict) {
-               StringMap<QSharedPointer<ClassDef>>::Iterator ci(*m_classSDict);
-               ClassDef *cd;
-
-               for (ci.toFirst(); (cd = ci.current()); ++ci) {
+            if (m_classSDict) {              
+               for (auto cd : *m_classSDict) {
                   if (cd->isLinkableInProject()) {
                      tagFile << "    <class kind=\"" << cd->compoundTypeString() <<
                              "\">" << convertToXML(cd->name()) << "</class>" << endl;
@@ -233,10 +226,8 @@ void FileDef::writeTagFile(FTextStream &tagFile)
 
          case LayoutDocEntry::FileNamespaces: 
          {
-            if (m_namespaceSDict) {
-               StringMap<QSharedPointer<NamespaceDef>>::Iterator ni(*m_namespaceSDict);
-               NamespaceDef *nd;
-               for (ni.toFirst(); (nd = ni.current()); ++ni) {
+            if (m_namespaceSDict) {              
+               for (auto nd : *m_namespaceSDict) {
                   if (nd->isLinkableInProject()) {
                      tagFile << "    <namespace>" << convertToXML(nd->name()) << "</namespace>" << endl;
                   }
@@ -258,9 +249,7 @@ void FileDef::writeTagFile(FTextStream &tagFile)
 
          case LayoutDocEntry::MemberGroups: {
             if (m_memberGroupSDict) {
-               MemberGroupSDict::Iterator mgli(*m_memberGroupSDict);
-               MemberGroup *mg;
-               for (; (mg = mgli.current()); ++mgli) {
+               for (auto mg : *m_memberGroupSDict) {
                   mg->writeTagFile(tagFile);
                }
             }
@@ -369,31 +358,37 @@ void FileDef::writeIncludeFiles(OutputList &ol)
 {
    if (m_includeList && m_includeList->count() > 0) {
       ol.startTextBlock(true);
-      QListIterator<IncludeInfo> ili(*m_includeList);
-      IncludeInfo *ii;
-      for (; (ii = ili.current()); ++ili) {
-         if (!ii->indirect) {
-            FileDef *fd = ii->fileDef;
+     
+      for (auto ii : *m_includeList) {
+         if (! ii.indirect) {
+            FileDef *fd = ii.fileDef;
             bool isIDLorJava = false;
+
             if (fd) {
                SrcLangExt lang   = fd->getLanguage();
                isIDLorJava = lang == SrcLangExt_IDL || lang == SrcLangExt_Java;
             }
+
             ol.startTypewriter();
+
             if (isIDLorJava) { // IDL/Java include
                ol.docify("import ");
-            } else if (ii->imported) { // Objective-C include
+
+            } else if (ii.imported) { // Objective-C include
                ol.docify("#import ");
+
             } else { // C/C++ include
                ol.docify("#include ");
             }
-            if (ii->local || isIDLorJava) {
+
+            if (ii.local || isIDLorJava) {
                ol.docify("\"");
             } else {
                ol.docify("<");
             }
+
             ol.disable(OutputGenerator::Html);
-            ol.docify(ii->includeName);
+            ol.docify(ii.includeName);
             ol.enableAll();
             ol.disableAllBut(OutputGenerator::Html);
 
@@ -401,22 +396,26 @@ void FileDef::writeIncludeFiles(OutputList &ol)
             // we could also we the name as it is used within doxygen,
             // then we should have used fd->docName() instead of ii->includeName
             if (fd && fd->isLinkable()) {
-               ol.writeObjectLink(fd->getReference(),
+               ol.writeObjectLink(fd->getReference(), 
                                   fd->generateSourceFile() ? fd->includeName() : fd->getOutputFileBase(),
-                                  0, ii->includeName);
+                                  0, ii.includeName);
+
             } else {
-               ol.docify(ii->includeName);
+               ol.docify(ii.includeName);
             }
 
             ol.enableAll();
-            if (ii->local || isIDLorJava) {
+            if (ii.local || isIDLorJava) {
                ol.docify("\"");
+
             } else {
                ol.docify(">");
             }
+
             if (isIDLorJava) {
                ol.docify(";");
             }
+
             ol.endTypewriter();
             ol.lineBreak();
          }
@@ -429,9 +428,12 @@ void FileDef::writeIncludeGraph(OutputList &ol)
 {
    if (Config_getBool("HAVE_DOT") /*&& Config_getBool("INCLUDE_GRAPH")*/) {
       //printf("Graph for file %s\n",name().data());
+
       DotInclDepGraph incDepGraph(this, false);
+
       if (incDepGraph.isTooBig()) {
          warn_uncond("Include graph for '%s' not generated, too many nodes. Consider increasing DOT_GRAPH_MAX_NODES.\n", name().data());
+
       } else if (!incDepGraph.isTrivial()) {
          ol.startTextBlock();
          ol.disable(OutputGenerator::Man);
@@ -545,11 +547,9 @@ void FileDef::writeMemberGroups(OutputList &ol)
    /* write user defined member groups */
    if (m_memberGroupSDict) {
       m_memberGroupSDict->sort();
-      MemberGroupSDict::Iterator mgli(*m_memberGroupSDict);
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
-         if ((!mg->allMembersInSameSection() || !m_subGrouping)
-               && mg->header() != "[NOHEADER]") {
+
+      for (auto mg : *m_memberGroupSDict) {
+         if ((!mg->allMembersInSameSection() || !m_subGrouping) && mg->header() != "[NOHEADER]") {
             mg->writeDeclarations(ol, 0, 0, this, 0);
          }
       }
@@ -572,61 +572,56 @@ void FileDef::writeSummaryLinks(OutputList &ol)
 {
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
-   QListIterator<LayoutDocEntry> eli(
-      LayoutDocManager::instance().docEntries(LayoutDocManager::File));
-   LayoutDocEntry *lde;
+  
    bool first = true;
    SrcLangExt lang = getLanguage();
-   for (eli.toFirst(); (lde = eli.current()); ++eli) {
-      if ((lde->kind() == LayoutDocEntry::FileClasses &&
-            m_classSDict && m_classSDict->declVisible()) ||
-            (lde->kind() == LayoutDocEntry::FileNamespaces &&
-             m_namespaceSDict && m_namespaceSDict->declVisible())
-         ) {
+  
+   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
+
+      if ((lde->kind() == LayoutDocEntry::FileClasses && m_classSDict && m_classSDict->declVisible()) ||
+            (lde->kind() == LayoutDocEntry::FileNamespaces && m_namespaceSDict && m_namespaceSDict->declVisible()) ) {
+
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
          QByteArray label = lde->kind() == LayoutDocEntry::FileClasses ? "nested-classes" : "namespaces";
          ol.writeSummaryLink(0, label, ls->title(lang), first);
          first = false;
+
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
          MemberList *ml = getMemberList(lmd->type);
+
          if (ml && ml->declVisible()) {
             ol.writeSummaryLink(0, MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }
    }
+
    if (!first) {
       ol.writeString("  </div>\n");
    }
    ol.popGeneratorState();
 }
 
-/*! Write the documentation page for this file to the file of output
+/*! Write the documentation page for this file to the file of output 
     generators \a ol.
 */
 void FileDef::writeDocumentation(OutputList &ol)
 {
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
-   //funcList->countDecMembers();
-
-   //QByteArray fn = name();
-   //if (Config_getBool("FULL_PATH_NAMES"))
-   //{
-   //  fn.prepend(stripFromPath(getPath().copy()));
-   //}
-
-   //printf("WriteDocumentation diskname=%s\n",diskname.data());
 
    QByteArray versionTitle;
+
    if (!m_fileVersion.isEmpty()) {
       versionTitle = ("(" + m_fileVersion + ")");
    }
+
    QByteArray title = m_docname + versionTitle;
    QByteArray pageTitle = theTranslator->trFileReference(m_docname);
 
    if (getDirDef()) {
       startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_FileVisible, !generateTreeView);
+
       if (!generateTreeView) {
          getDirDef()->writeNavigationPath(ol);
          ol.endQuickIndices();
@@ -642,11 +637,14 @@ void FileDef::writeDocumentation(OutputList &ol)
       ol.popGeneratorState();
       addGroupListToTitle(ol, this);
       endTitle(ol, getOutputFileBase(), title);
+
    } else {
       startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_FileVisible, !generateTreeView);
+
       if (!generateTreeView) {
          ol.endQuickIndices();
       }
+
       startTitle(ol, getOutputFileBase(), this);
       ol.parseText(pageTitle);
       addGroupListToTitle(ol, this);
@@ -671,11 +669,9 @@ void FileDef::writeDocumentation(OutputList &ol)
 
    //---------------------------------------- start flexible part -------------------------------
 
-   SrcLangExt lang = getLanguage();
-   QListIterator<LayoutDocEntry> eli(
-      LayoutDocManager::instance().docEntries(LayoutDocManager::File));
-   LayoutDocEntry *lde;
-   for (eli.toFirst(); (lde = eli.current()); ++eli) {
+   SrcLangExt lang = getLanguage();    
+
+   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
       switch (lde->kind()) {
          case LayoutDocEntry::BriefDesc:
             writeBriefDescription(ol);
@@ -779,6 +775,7 @@ void FileDef::writeDocumentation(OutputList &ol)
 
    if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
       MemberList *ml = getMemberList(MemberListType_allMembersList);
+
       if (ml) {
          ml->sort();
       }
@@ -790,12 +787,10 @@ void FileDef::writeMemberPages(OutputList &ol)
 {
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
-
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
-      if (ml->listType()&MemberListType_documentationLists) {
-         ml->writeDocumentationPage(ol, name(), this);
+  
+   for (auto ml : m_memberLists) {
+      if (ml.listType()&MemberListType_documentationLists) {
+         ml.writeDocumentationPage(ol, name(), this);
       }
    }
 
@@ -810,10 +805,11 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
    ol.writeString("        <table>\n");
 
    MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
+
    if (allMemberList) {
-      QListIterator<MemberDef> mli(*allMemberList);
-      MemberDef *md;
-      for (mli.toFirst(); (md = mli.current()); ++mli) {
+      
+      for (auto md : *allMemberList) {
+
          if (md->getFileDef() == this && md->getNamespaceDef() == 0 && md->isLinkable() && !md->isEnumValue()) {
             ol.writeString("          <tr><td class=\"navtab\">");
             if (md->isLinkableInProject()) {
@@ -848,18 +844,22 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    static bool latexSourceCode   = Config_getBool("LATEX_SOURCE_CODE");
    DevNullCodeDocInterface devNullIntf;
    QByteArray title = m_docname;
+
    if (!m_fileVersion.isEmpty()) {
       title += (" (" + m_fileVersion + ")");
    }
+
    QByteArray pageTitle = theTranslator->trSourceFile(title);
    ol.disable(OutputGenerator::Man);
    ol.disable(OutputGenerator::RTF);
+
    if (!latexSourceCode) {
       ol.disable(OutputGenerator::Latex);
    }
 
    bool isDocFile = isDocumentationFile();
    bool genSourceFile = !isDocFile && generateSourceFile();
+
    if (getDirDef()) {
       startFile(ol, getSourceFileBase(), 0, pageTitle, HLI_FileVisible,
                 !generateTreeView,
@@ -895,6 +895,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
 
    (void)sameTu;
    (void)filesInSameTu;
+
 #if USE_LIBCLANG
    static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
 
@@ -990,20 +991,16 @@ void FileDef::finishParsing()
 }
 
 void FileDef::addMembersToMemberGroup()
-{
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
-      if (ml->listType()&MemberListType_declarationLists) {
+{ 
+   for (auto ml : m_memberLists) {
+      if (ml.listType()&MemberListType_declarationLists) {
          ::addMembersToMemberGroup(ml, &m_memberGroupSDict, this);
       }
    }
 
    // add members inside sections to their groups
    if (m_memberGroupSDict) {
-      MemberGroupSDict::Iterator mgli(*m_memberGroupSDict);
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
+     for (auto mg : *m_memberGroupSDict) {
          if (mg->allMembersInSameSection() && m_subGrouping) {
             //printf("----> addToDeclarationSection(%s)\n",mg->header().data());
             mg->addToDeclarationSection();
@@ -1020,8 +1017,9 @@ void FileDef::insertMember(MemberDef *md)
    }
    //printf("%s:FileDef::insertMember(%s (=%p) list has %d elements)\n",
    //    name().data(),md->name().data(),md,allMemberList.count());
+
    MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
-   if (allMemberList && allMemberList->findRef(md) != -1) { // TODO optimize the findRef!
+   if (allMemberList && allMemberList->lastIndexOf(md) != -1) { 
       return;
    }
 
@@ -1029,6 +1027,7 @@ void FileDef::insertMember(MemberDef *md)
       allMemberList = new MemberList(MemberListType_allMembersList);
       m_memberLists.append(allMemberList);
    }
+
    allMemberList->append(md);
    //::addFileMemberNameToIndex(md);
    switch (md->memberType()) {
@@ -1178,8 +1177,6 @@ void FileDef::addUsingDeclaration(Definition *d)
 
 void FileDef::addIncludeDependency(FileDef *fd, const char *incName, bool local, bool imported, bool indirect)
 {
-   //printf("FileDef::addIncludeDependency(%p,%s,%d)\n",fd,incName,local);
-
    QByteArray iName;
 
    if (fd) {
@@ -1212,36 +1209,37 @@ void FileDef::addIncludedUsingDirectives()
       return;
    }
    visited = true;
-   //printf("( FileDef::addIncludedUsingDirectives for file %s\n",name().data());
 
    NamespaceList nl;
-   if (m_includeList) { // file contains #includes
-      {
-         QListIterator<IncludeInfo> iii(*m_includeList);
-         IncludeInfo *ii;
-         for (iii.toFirst(); (ii = iii.current()); ++iii) { // foreach #include...
+
+   if (m_includeList) { 
+      // file contains #includes
+      {         
+         for (auto ii : *m_includeList) {
+            // foreach #include...
             if (ii->fileDef && !ii->fileDef->visited) { // ...that is a known file
                // recurse into this file
                ii->fileDef->addIncludedUsingDirectives();
             }
          }
       }
-      {
-         QListIterator<IncludeInfo> iii(*m_includeList);
-         IncludeInfo *ii;
-         // iterate through list from last to first
-         for (iii.toLast(); (ii = iii.current()); --iii) {
+
+      {      
+         for (auto ii : *m_includeList) {
+
             if (ii->fileDef && ii->fileDef != this) {
                // add using directives
                NamespaceSDict *unl = ii->fileDef->m_usingDirList;
+
                if (unl) {
-                  NamespaceSDict::Iterator nli(*unl);
-                  NamespaceDef *nd;
-                  for (nli.toLast(); (nd = nli.current()); --nli) {
+                
+                  for (auto nd : *unl) {
                      // append each using directive found in a #include file
+
                      if (m_usingDirList == 0) {
                         m_usingDirList = new NamespaceSDict;
                      }
+
                      //printf("Prepending used namespace %s to the list of file %s\n",
                      //    nd->name().data(),name().data());
                      if (m_usingDirList->find(nd->qualifiedName()) == 0) { // not yet added
@@ -1258,8 +1256,9 @@ void FileDef::addIncludedUsingDirectives()
                   Definition *d;
 
                   for (udi.toLast(); (d = udi.current()); --udi) {
-                     //printf("Adding using declaration %s\n",d->name().data());
 
+// broom (check for --var) for (auto d : *udl) {
+              
                      if (m_usingDeclList == 0) {
                         m_usingDeclList = new StringMap<QSharedPointer<Definition>();
                      }
@@ -1273,17 +1272,16 @@ void FileDef::addIncludedUsingDirectives()
             }
          }
       }
-   }
-   //printf(") end FileDef::addIncludedUsingDirectives for file %s\n",name().data());
+   }   
 }
 
-
-void FileDef::addIncludedByDependency(FileDef *fd, const char *incName,
-                                      bool local, bool imported)
+void FileDef::addIncludedByDependency(FileDef *fd, const char *incName, bool local, bool imported)
 {
    //printf("FileDef::addIncludedByDependency(%p,%s,%d)\n",fd,incName,local);
    QByteArray iName = fd ? fd->absoluteFilePath().data() : incName;
+
    if (!iName.isEmpty() && (m_includedByDict == 0 || m_includedByDict->find(iName) == 0)) {
+
       if (m_includedByDict == 0) {
          m_includedByDict = new QHash<QString, IncludeInfo>(61);
          m_includedByList = new QList<IncludeInfo>;        
@@ -1313,12 +1311,9 @@ bool FileDef::generateSourceFile() const
    static bool sourceBrowser = Config_getBool("SOURCE_BROWSER");
    static bool verbatimHeaders = Config_getBool("VERBATIM_HEADERS");
    QByteArray extension = name().right(4);
-   return !isReference() &&
-          (sourceBrowser ||
-           (verbatimHeaders && guessSection(name()) == Entry::HEADER_SEC)
-          ) &&
-          extension != ".doc" && extension != ".txt" && extension != ".dox" &&
-          extension != ".md" && name().right(9) != ".markdown";
+
+   return ! isReference() && (sourceBrowser || (verbatimHeaders && guessSection(name()) == Entry::HEADER_SEC) ) &&
+          extension != ".doc" && extension != ".txt" && extension != ".dox" && extension != ".md" && name().right(9) != ".markdown";
 }
 
 
@@ -1326,24 +1321,17 @@ void FileDef::addListReferences()
 {
    {
       QList<ListItemInfo> *xrefItems = xrefListItems();
-      addRefItem(xrefItems,
-                 getOutputFileBase(),
-                 theTranslator->trFile(true, true),
-                 getOutputFileBase(), name(),
-                 0,
-                 0
-                );
+      addRefItem(xrefItems, getOutputFileBase(), theTranslator->trFile(true, true),
+                 getOutputFileBase(), name(), 0, 0 );
    }
+
    if (m_memberGroupSDict) {
-      MemberGroupSDict::Iterator mgli(*m_memberGroupSDict);
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
+     for (auto mg : *m_memberGroupSDict) {
          mg->addListReferences(this);
       }
    }
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
+   
+   for (auto ml : m_memberLists) {
       if (ml->listType()&MemberListType_documentationLists) {
          ml->addListReferences(this);
       }
@@ -1356,6 +1344,7 @@ static int findMatchingPart(const QByteArray &path, const QByteArray dir)
 {
    int si1;
    int pos1 = 0, pos2 = 0;
+
    while ((si1 = path.find('/', pos1)) != -1) {
       int si2 = dir.find('/', pos2);
       //printf("  found slash at pos %d in path %d: %s<->%s\n",si1,si2,
@@ -1373,37 +1362,36 @@ static int findMatchingPart(const QByteArray &path, const QByteArray dir)
 }
 
 static Directory *findDirNode(Directory *root, const QByteArray &name)
-{
-   QListIterator<DirEntry> dli(root->children());
-   DirEntry *de;
-   for (dli.toFirst(); (de = dli.current()); ++dli) {
+{  
+   for (auto de : root->children()) {
+
       if (de->kind() == DirEntry::Dir) {
          Directory *dir = (Directory *)de;
+
          QByteArray dirName = dir->name();
          int sp = findMatchingPart(name, dirName);
-         //printf("findMatchingPart(%s,%s)=%d\n",name.data(),dirName.data(),sp);
-         if (sp > 0) { // match found
+
+         if (sp > 0) { 
+            // match found
+
             if ((uint)sp == dirName.length()) { // whole directory matches
                // recurse into the directory
                return findDirNode(dir, name.mid(dirName.length() + 1));
+
             } else { // partial match => we need to split the path into three parts
                QByteArray baseName     = dirName.left(sp);
                QByteArray oldBranchName = dirName.mid(sp + 1);
                QByteArray newBranchName = name.mid(sp + 1);
+
                // strip file name from path
                int newIndex = newBranchName.lastIndexOf('/');
                if (newIndex > 0) {
                   newBranchName = newBranchName.left(newIndex);
                }
-
-               //printf("Splitting off part in new branch \n"
-               //    "base=%s old=%s new=%s\n",
-               //    baseName.data(),
-               //    oldBranchName.data(),
-               //    newBranchName.data()
-               //      );
+              
                Directory *base = new Directory(root, baseName);
                Directory *newBranch = new Directory(base, newBranchName);
+
                dir->reParent(base);
                dir->rename(oldBranchName);
                base->addChild(dir);
@@ -1423,16 +1411,19 @@ static Directory *findDirNode(Directory *root, const QByteArray &name)
          }
       }
    }
+
    int si = name.lastIndexOf('/');
    if (si == -1) { // no subdir
       return root; // put the file under the root node.
+
    } else { // need to create a subdir
       QByteArray baseName = name.left(si);
-      //printf("new subdir %s\n",baseName.data());
+
       Directory *newBranch = new Directory(root, baseName);
       if (!root->children().isEmpty()) {
          root->children().getLast()->setLast(false);
       }
+
       root->addChild(newBranch);
       return newBranch;
    }
@@ -1442,82 +1433,22 @@ static void mergeFileDef(Directory *root, FileDef *fd)
 {
    QByteArray rootPath = root->name();
    QByteArray filePath = fd->absoluteFilePath();
-   //printf("merging %s\n",filePath.data());
+ 
    Directory *dirNode = findDirNode(root, filePath);
    if (!dirNode->children().isEmpty()) {
       dirNode->children().getLast()->setLast(false);
    }
+
    DirEntry *e = new DirEntry(dirNode, fd);
    dirNode->addChild(e);
 }
-
-#if 0
-static void generateIndent(QTextStream &t, DirEntry *de, int level)
-{
-   if (de->parent()) {
-      generateIndent(t, de->parent(), level + 1);
-   }
-   // from the root up to node n do...
-   if (level == 0) { // item before a dir or document
-      if (de->isLast()) {
-         if (de->kind() == DirEntry::Dir) {
-            t << "<img " << FTV_IMGATTRIBS(plastnode) << "/>";
-         } else {
-            t << "<img " << FTV_IMGATTRIBS(lastnode) << "/>";
-         }
-      } else {
-         if (de->kind() == DirEntry::Dir) {
-            t << "<img " << FTV_IMGATTRIBS(pnode) << "/>";
-         } else {
-            t << "<img " << FTV_IMGATTRIBS(node) << "/>";
-         }
-      }
-   } else { // item at another level
-      if (de->isLast()) {
-         t << "<img " << FTV_IMGATTRIBS(blank) << "/>";
-      } else {
-         t << "<img " << FTV_IMGATTRIBS(vertline) << "/>";
-      }
-   }
-}
-
-static void writeDirTreeNode(QTextStream &t, Directory *root, int level)
-{
-   QByteArray indent;
-   indent.fill(' ', level * 2);
-   QListIterator<DirEntry> dli(root->children());
-   DirEntry *de;
-   for (dli.toFirst(); (de = dli.current()); ++dli) {
-      t << indent << "<p>";
-      generateIndent(t, de, 0);
-      if (de->kind() == DirEntry::Dir) {
-         Directory *dir = (Directory *)de;
-         //printf("%s [dir]: %s (last=%d,dir=%d)\n",indent.data(),dir->name().data(),dir->isLast(),dir->kind()==DirEntry::Dir);
-         t << "<img " << FTV_IMGATTRIBS(folderclosed) << "/>";
-         t << dir->name();
-         t << "</p>\n";
-         t << indent << "<div>\n";
-         writeDirTreeNode(t, dir, level + 1);
-         t << indent << "</div>\n";
-      } else {
-         //printf("%s [file]: %s (last=%d,dir=%d)\n",indent.data(),de->file()->name().data(),de->isLast(),de->kind()==DirEntry::Dir);
-         t << "<img " << FTV_IMGATTRIBS(doc) << "/>";
-         t << de->file()->name();
-         t << "</p>\n";
-      }
-   }
-}
-#endif
 
 static void addDirsAsGroups(Directory *root, GroupDef *parent, int level)
 {
    GroupDef *gd = 0;
    if (root->kind() == DirEntry::Dir) {
-      gd = new GroupDef("[generated]",
-                        1,
-                        root->path(), // name
-                        root->name()  // title
-                       );
+      gd = new GroupDef("[generated]", 1, root->path(), root->name() );
+
       if (parent) {
          parent->addGroup(gd);
          gd->makePartOfGroup(parent);
@@ -1525,9 +1456,8 @@ static void addDirsAsGroups(Directory *root, GroupDef *parent, int level)
          Doxygen::groupSDict->append(root->path(), gd);
       }
    }
-   QListIterator<DirEntry> dli(root->children());
-   DirEntry *de;
-   for (dli.toFirst(); (de = dli.current()); ++dli) {
+  
+   for (auto de : root->children()) {
       if (de->kind() == DirEntry::Dir) {
          addDirsAsGroups((Directory *)de, gd, level + 1);
       }
@@ -1547,14 +1477,10 @@ void generateFileTree()
          mergeFileDef(root, fd);
       }
    }
-   //t << "<div class=\"directory\">\n";
-   //writeDirTreeNode(t,root,0);
-   //t << "</div>\n";
+ 
    addDirsAsGroups(root, 0, 0);
    delete root;
 }
-
-//-------------------------------------------------------------------
 
 void FileDef::combineUsingRelations()
 {
@@ -1564,30 +1490,25 @@ void FileDef::combineUsingRelations()
 
    visited = true;
    if (m_usingDirList) {
-      NamespaceSDict::Iterator nli(*m_usingDirList);
-      NamespaceDef *nd;
-
-      for (nli.toFirst(); (nd = nli.current()); ++nli) {
+     
+      for (auto nd : *m_usingDirList) {
          nd->combineUsingRelations();
       }
 
-      for (nli.toFirst(); (nd = nli.current()); ++nli) {
+      for (auto nd : *m_usingDirList) {
          // add used namespaces of namespace nd to this namespace
-         if (nd->getUsedNamespaces()) {
-            NamespaceSDict::Iterator unli(*nd->getUsedNamespaces());
-            NamespaceDef *und;
-            for (unli.toFirst(); (und = unli.current()); ++unli) {
+
+         if (nd->getUsedNamespaces()) {          
+            for (auto und : *nd->getUsedNamespaces()) {
                //printf("Adding namespace %s to the using list of %s\n",und->qualifiedName().data(),qualifiedName().data());
                addUsingDirective(und);
             }
          }
 
          // add used classes of namespace nd to this namespace
-         if (nd->getUsedClasses()) {
-            StringMap<QSharedPointer<Definition>>::Iterator cli(*nd->getUsedClasses());
-            Definition *ucd;
+         if (nd->getUsedClasses()) {          
 
-            for (cli.toFirst(); (ucd = cli.current()); ++cli) {
+            for (auto nucd : *nd->getUsedClasses()) ) {
                //printf("Adding class %s to the using list of %s\n",cd->qualifiedName().data(),qualifiedName().data());
                addUsingDeclaration(ucd);
             }
@@ -1608,19 +1529,23 @@ bool FileDef::isDocumentationFile() const
 void FileDef::acquireFileVersion()
 {
    QByteArray vercmd = Config_getString("FILE_VERSION_FILTER");
+
    if (!vercmd.isEmpty() && !m_filePath.isEmpty() && m_filePath != "generated") {
       msg("Version of %s : ", m_filePath.data());
       QByteArray cmd = vercmd + " \"" + m_filePath + "\"";
       Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", cmd.data());
+
       FILE *f = portable_popen(cmd, "r");
       if (!f) {
          err("could not execute %s\n", vercmd.data());
          return;
       }
+
       const int bufSize = 1024;
       char buf[bufSize];
       int numRead = (int)fread(buf, 1, bufSize - 1, f);
       portable_pclose(f);
+
       if (numRead > 0 && numRead < bufSize) {
          buf[numRead] = '\0';
          m_fileVersion = QByteArray(buf, numRead).trimmed();
@@ -1650,15 +1575,13 @@ QByteArray FileDef::includeName() const
 }
 
 MemberList *FileDef::createMemberList(MemberListType lt)
-{  
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
+{     
+   for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
          return ml;
       }
    }
+
    // not found, create a new member list
    ml = new MemberList(lt);
    m_memberLists.append(ml);
@@ -1681,9 +1604,7 @@ void FileDef::addMemberToList(MemberListType lt, MemberDef *md)
 
 MemberList *FileDef::getMemberList(MemberListType lt) const
 {
-   QListIterator<MemberList> mli(m_memberLists);
-   MemberList *ml;
-   for (; (ml = mli.current()); ++mli) {
+   for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
          return ml;
       }
@@ -1719,7 +1640,6 @@ static void getAllIncludeFilesRecursively(QHash<QString, void> *filesVisited, co
    if (fd->includeFileList()) {
 
       for (auto item : *fd->includeFileList() ) {   
-
          if (item->fileDef && ! item->fileDef->isReference() && ! filesVisited->find(item->fileDef->absoluteFilePath())) {
 
             incFiles.append(item->fileDef->absoluteFilePath());
