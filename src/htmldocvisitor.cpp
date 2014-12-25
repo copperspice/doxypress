@@ -35,15 +35,23 @@
 #include <htmlentity.h>
 #include <plantuml.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 static const int NUM_HTML_LIST_TYPES = 4;
 static const char types[][NUM_HTML_LIST_TYPES] = {"1", "a", "i", "A"};
 
 static QByteArray convertIndexWordToAnchor(const QString &word)
 {
    static char hex[] = "0123456789abcdef";
+
    QByteArray result;
-   const char *str = word.data();
+
+   QByteArray temp = word.toUtf8();
+   const char *str = temp.data();
+
    unsigned char c;
+
    if (str) {
       while ((c = *str++)) {
          if ((c >= 'a' && c <= 'z') || // ALPHA
@@ -65,6 +73,7 @@ static QByteArray convertIndexWordToAnchor(const QString &word)
          }
       }
    }
+
    return result;
 }
 
@@ -122,15 +131,14 @@ static bool mustBeOutsideParagraph(DocNode *n)
 static QString htmlAttribsToString(const HtmlAttribList &attribs)
 {
    QString result;
-   HtmlAttribListIterator li(attribs);
-   HtmlAttrib *att;
-   for (li.toFirst(); (att = li.current()); ++li) {
-      if (!att->value.isEmpty())  // ignore attribute without values as they
-         // are not XHTML compliant
-      {
+  
+   for (auto att : attribs) { 
+      if (! att.value.isEmpty())  {
+         // ignore attribute without values as they are not XHTML compliant
+
          result += " ";
-         result += att->name;
-         result += "=\"" + convertToXML(att->value) + "\"";
+         result += att.name;
+         result += "=\"" + convertToXML(att.value) + "\"";
       }
    }
    return result;
@@ -138,10 +146,8 @@ static QString htmlAttribsToString(const HtmlAttribList &attribs)
 
 //-------------------------------------------------------------------------
 
-HtmlDocVisitor::HtmlDocVisitor(FTextStream &t, CodeOutputInterface &ci,
-                               Definition *ctx)
-   : DocVisitor(DocVisitor_Html), m_t(t), m_ci(ci), m_insidePre(false),
-     m_hide(false), m_ctx(ctx)
+HtmlDocVisitor::HtmlDocVisitor(FTextStream &t, CodeOutputInterface &ci, Definition *ctx)
+   : DocVisitor(DocVisitor_Html), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false), m_ctx(ctx)
 {
    if (ctx) {
       m_langExt = ctx->getDefFileExtension();
@@ -390,6 +396,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          m_t << "</pre>" /*<< PREFRAG_END*/;
          forceStartParagraph(s);
          break;
+
       case DocVerbatim::HtmlOnly:
          if (s->isBlock()) {
             forceEndParagraph(s);
@@ -399,6 +406,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
             forceStartParagraph(s);
          }
          break;
+
       case DocVerbatim::ManOnly:
       case DocVerbatim::LatexOnly:
       case DocVerbatim::XmlOnly:
@@ -409,13 +417,10 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
 
       case DocVerbatim::Dot: {
          static int dotindex = 1;
-         QByteArray fileName(4096);
 
-         fileName.sprintf("%s%d%s",
-                          (Config_getString("HTML_OUTPUT") + "/inline_dotgraph_").data(),
-                          dotindex++,
-                          ".dot"
-                         );
+         QString fileName;
+         fileName = QString("%1%2.dot").arg(QString(Config_getString("HTML_OUTPUT") + "/inline_dotgraph_")).arg(dotindex++);
+
          QFile file(fileName);
 
          if (!file.open(QIODevice::WriteOnly)) {
@@ -427,7 +432,8 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
 
          forceEndParagraph(s);
          m_t << "<div align=\"center\">" << endl;
-         writeDotFile(fileName, s->relPath(), s->context());
+
+         writeDotFile(fileName.toUtf8(), s->relPath(), s->context());
          m_t << "</div>" << endl;
          forceStartParagraph(s);
 
@@ -436,20 +442,21 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          }
       }
       break;
+
       case DocVerbatim::Msc: {
          forceEndParagraph(s);
 
          static int mscindex = 1;
-         QByteArray baseName(4096);
 
-         baseName.sprintf("%s%d",
-                          (Config_getString("HTML_OUTPUT") + "/inline_mscgraph_").data(),
-                          mscindex++
-                         );
+         QString baseName;
+         baseName = QString("%1%2").arg(QString(Config_getString("HTML_OUTPUT") + "/inline_mscgraph_")).arg(mscindex++);
+
          QFile file(baseName + ".msc");
+
          if (!file.open(QIODevice::WriteOnly)) {
             err("Could not open file %s.msc for writing\n", baseName.data());
          }
+
          QByteArray text = "msc {";
          text += s->text();
          text += "}";
@@ -458,13 +465,16 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          file.close();
 
          m_t << "<div align=\"center\">" << endl;
-         writeMscFile(baseName + ".msc", s->relPath(), s->context());
+
+         writeMscFile((baseName + ".msc").toUtf8(), s->relPath(), s->context());
          if (Config_getBool("DOT_CLEANUP")) {
             file.remove();
          }
+
          m_t << "</div>" << endl;
          forceStartParagraph(s);
       }
+
       break;
       case DocVerbatim::PlantUML: {
          forceEndParagraph(s);
@@ -777,34 +787,38 @@ void HtmlDocVisitor::visitPost(DocAutoListItem *li)
 template<class T>
 bool isFirstChildNode(T *parent, DocNode *node)
 {
-   return parent->children().getFirst() == node;
+   return parent->children().first() == node;
 }
 
 template<class T>
 bool isLastChildNode(T *parent, DocNode *node)
 {
-   return parent->children().getLast() == node;
+   return parent->children().last() == node;
 }
 
 bool isSeparatedParagraph(DocSimpleSect *parent, DocPara *par)
 {
-   QList<DocNode> nodes = parent->children();
-   int i = nodes.findRef(par);
+   QList<DocNode *> nodes = parent->children();
+
+   int i = nodes.indexOf(par);
+
    if (i == -1) {
       return false;
    }
+
    int count = parent->children().count();
    if (count > 1 && i == 0) { // first node
       if (nodes.at(i + 1)->kind() == DocNode::Kind_SimpleSectSep) {
          return true;
       }
+
    } else if (count > 1 && i == count - 1) { // last node
       if (nodes.at(i - 1)->kind() == DocNode::Kind_SimpleSectSep) {
          return true;
       }
+
    } else if (count > 2 && i > 0 && i < count - 1) { // intermediate node
-      if (nodes.at(i - 1)->kind() == DocNode::Kind_SimpleSectSep &&
-            nodes.at(i + 1)->kind() == DocNode::Kind_SimpleSectSep) {
+      if (nodes.at(i - 1)->kind() == DocNode::Kind_SimpleSectSep && nodes.at(i + 1)->kind() == DocNode::Kind_SimpleSectSep) {
          return true;
       }
    }
@@ -813,18 +827,22 @@ bool isSeparatedParagraph(DocSimpleSect *parent, DocPara *par)
 
 static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
 {
-   int t = 0;
+   int t   = 0;
    isFirst = false;
-   isLast = false;
+   isLast   = false;
+
    if (p && p->parent()) {
+
       switch (p->parent()->kind()) {
          case DocNode::Kind_ParBlock: {
             // hierarchy: node N -> para -> parblock -> para
             // adapt return value to kind of N
+
             DocNode::Kind kind = DocNode::Kind_Para;
             if ( p->parent()->parent() && p->parent()->parent()->parent() ) {
                kind = p->parent()->parent()->parent()->kind();
             }
+
             isFirst = isFirstChildNode((DocParBlock *)p->parent(), p);
             isLast = isLastChildNode ((DocParBlock *)p->parent(), p);
             t = 0;
@@ -1412,18 +1430,22 @@ void HtmlDocVisitor::visitPre(DocHtmlCaption *c)
    if (m_hide) {
       return;
    }
-   bool hasAlign      = false;
-   HtmlAttribListIterator li(c->attribs());
-   HtmlAttrib *att;
-   for (li.toFirst(); (att = li.current()); ++li) {
-      if (att->name == "align") {
+
+   bool hasAlign = false;
+  
+   for (auto att : c->attribs()) {    
+      if (att.name == "align") {
          hasAlign = true;
+         break;
       }
    }
+
    m_t << "<caption" << htmlAttribsToString(c->attribs());
-   if (!hasAlign) {
+
+   if (! hasAlign) {
       m_t << " align=\"bottom\"";
    }
+
    m_t << ">";
 }
 
@@ -1782,32 +1804,38 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
       }
       m_t << "</td>";
    }
+
    if (sect && sect->hasTypeSpecifier()) {
       m_t << "<td class=\"paramtype\">";
-      QListIterator<DocNode> li(pl->paramTypes());
-      DocNode *type;
+      ;
       bool first = true;
-      for (li.toFirst(); (type = li.current()); ++li) {
+      
+      for (auto type : pl->paramTypes()) { 
          if (!first) {
             m_t << "&#160;|&#160;";
+
          } else {
             first = false;
          }
+
          if (type->kind() == DocNode::Kind_Word) {
             visit((DocWord *)type);
+
          } else if (type->kind() == DocNode::Kind_LinkedWord) {
             visit((DocLinkedWord *)type);
          }
       }
+
       m_t << "</td>";
    }
+
    m_t << "<td class=\"paramname\">";
    //QStringListIterator li(pl->parameters());
    //const char *s;
-   QListIterator<DocNode> li(pl->parameters());
-   DocNode *param;
+  
    bool first = true;
-   for (li.toFirst(); (param = li.current()); ++li) {
+ 
+   for (auto param : pl->parameters()) {
       if (!first) {
          m_t << ",";
       } else {
@@ -2045,64 +2073,67 @@ void HtmlDocVisitor::pushEnabled()
 
 void HtmlDocVisitor::popEnabled()
 {
-   bool *v = m_enabled.pop();
-   assert(v != 0);
-   m_hide = *v;
-   delete v;
+   bool v = m_enabled.pop();
+   m_hide = v;   
 }
 
-void HtmlDocVisitor::writeDotFile(const QByteArray &fn, const QByteArray &relPath,
-                                  const QByteArray &context)
+void HtmlDocVisitor::writeDotFile(const QByteArray &fn, const QByteArray &relPath, const QByteArray &context)
 {
    QByteArray baseName = fn;
    int i;
+
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
-   if ((i = baseName.find('.')) != -1) { // strip extension
+
+   if ((i = baseName.indexOf('.')) != -1) { // strip extension
       baseName = baseName.left(i);
    }
+
    baseName.prepend("dot_");
    QByteArray outDir = Config_getString("HTML_OUTPUT");
    writeDotGraphFromFile(fn, outDir, baseName, GOF_BITMAP);
    writeDotImageMapFromFile(m_t, fn, outDir, relPath, baseName, context);
 }
 
-void HtmlDocVisitor::writeMscFile(const QByteArray &fileName,
-                                  const QByteArray &relPath,
-                                  const QByteArray &context)
+void HtmlDocVisitor::writeMscFile(const QByteArray &fileName, const QByteArray &relPath, const QByteArray &context)
 {
    QByteArray baseName = fileName;
    int i;
    if ((i = baseName.lastIndexOf('/')) != -1) { // strip path
       baseName = baseName.right(baseName.length() - i - 1);
    }
-   if ((i = baseName.find('.')) != -1) { // strip extension
+
+   if ((i = baseName.indexOf('.')) != -1) { // strip extension
       baseName = baseName.left(i);
    }
    baseName.prepend("msc_");
    QByteArray outDir = Config_getString("HTML_OUTPUT");
    QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+
    MscOutputFormat mscFormat = MSC_BITMAP;
+
    if ("svg" == imgExt) {
       mscFormat = MSC_SVG;
    }
+
    writeMscGraphFromFile(fileName, outDir, baseName, mscFormat);
    writeMscImageMapFromFile(m_t, fileName, outDir, relPath, baseName, context, mscFormat);
 }
 
-void HtmlDocVisitor::writeDiaFile(const QByteArray &fileName,
-                                  const QByteArray &relPath,
-                                  const QByteArray &)
+void HtmlDocVisitor::writeDiaFile(const QByteArray &fileName, const QByteArray &relPath, const QByteArray &)
 {
    QByteArray baseName = fileName;
    int i;
+
    if ((i = baseName.lastIndexOf('/')) != -1) { // strip path
       baseName = baseName.right(baseName.length() - i - 1);
    }
-   if ((i = baseName.find('.')) != -1) { // strip extension
+
+   if ((i = baseName.indexOf('.')) != -1) { // strip extension
       baseName = baseName.left(i);
    }
+
    baseName.prepend("dia_");
    QByteArray outDir = Config_getString("HTML_OUTPUT");
    writeDiaGraphFromFile(fileName, outDir, baseName, DIA_BITMAP);
@@ -2110,18 +2141,18 @@ void HtmlDocVisitor::writeDiaFile(const QByteArray &fileName,
    m_t << "<img src=\"" << relPath << baseName << ".png" << "\" />" << endl;
 }
 
-void HtmlDocVisitor::writePlantUMLFile(const QByteArray &fileName,
-                                       const QByteArray &relPath,
-                                       const QByteArray &)
+void HtmlDocVisitor::writePlantUMLFile(const QByteArray &fileName, const QByteArray &relPath, const QByteArray &)
 {
    QByteArray baseName = fileName;
    int i;
+
    if ((i = baseName.lastIndexOf('/')) != -1) { // strip path
       baseName = baseName.right(baseName.length() - i - 1);
    }
    if ((i = baseName.lastIndexOf('.')) != -1) { // strip extension
       baseName = baseName.left(i);
    }
+
    static QByteArray outDir = Config_getString("HTML_OUTPUT");
    static QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
    if (imgExt == "svg") {
@@ -2142,14 +2173,15 @@ void HtmlDocVisitor::writePlantUMLFile(const QByteArray &fileName,
  */
 void HtmlDocVisitor::forceEndParagraph(DocNode *n)
 {
-   //printf("forceEndParagraph(%p) %d\n",n,n->kind());
-   if (n->parent() && n->parent()->kind() == DocNode::Kind_Para) {
+     if (n->parent() && n->parent()->kind() == DocNode::Kind_Para) {
       DocPara *para = (DocPara *)n->parent();
-      int nodeIndex = para->children().findRef(n);
+      int nodeIndex = para->children().indexOf(n);
+
       nodeIndex--;
       if (nodeIndex < 0) {
          return;   // first node
       }
+
       while (nodeIndex >= 0 &&
              para->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace
             ) {
@@ -2180,16 +2212,17 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
  *  the paragraph, that was previously ended by forceEndParagraph().
  */
 void HtmlDocVisitor::forceStartParagraph(DocNode *n)
-{
-   //printf("forceStartParagraph(%p) %d\n",n,n->kind());
+{  
    if (n->parent() && n->parent()->kind() == DocNode::Kind_Para) { // if we are inside a paragraph
       DocPara *para = (DocPara *)n->parent();
-      int nodeIndex = para->children().findRef(n);
+      int nodeIndex = para->children().indexOf(n);
       int numNodes  = para->children().count();
       nodeIndex++;
+
       if (nodeIndex == numNodes) {
          return;   // last node
       }
+
       while (nodeIndex < numNodes &&
              para->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace
             ) {
@@ -2206,6 +2239,7 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
 
       bool isFirst;
       bool isLast;
+
       getParagraphContext(para, isFirst, isLast);
       //printf("forceStart first=%d last=%d\n",isFirst,isLast);
       if (isFirst && isLast) {

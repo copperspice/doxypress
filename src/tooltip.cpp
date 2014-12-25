@@ -26,6 +26,9 @@
 #include <outputgen.h>
 #include <util.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 TooltipManager *TooltipManager::s_theInstance = 0;
 
 TooltipManager::TooltipManager()

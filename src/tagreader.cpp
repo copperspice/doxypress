@@ -44,6 +44,9 @@
 #include <tagreader.h>
 #include <util.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 /** Information about an linkable anchor */
 class TagAnchorInfo
 {

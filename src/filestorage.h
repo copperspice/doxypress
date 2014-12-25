@@ -64,7 +64,7 @@ class FileStorage : public StorageIntf
       m_file.close();
    }
 
-   void setName( const char *name ) {
+   void setName(QString name ) {
       m_file.setFileName(name);
    }
 

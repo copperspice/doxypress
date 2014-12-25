@@ -21,15 +21,15 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include <code.h>
+#include <config.h>
+#include <htmlhelp.h>
+#include <language.h>
 #include <memberdef.h>
 #include <membername.h>
 #include <doxygen.h>
 #include <entry.h>
-#include <util.h>
-#include <code.h>
 #include <message.h>
-#include <htmlhelp.h>
-#include <language.h>
 #include <outputlist.h>
 #include <example.h>
 #include <membergroup.h>
@@ -45,7 +45,10 @@
 #include <memberlist.h>
 #include <namespacedef.h>
 #include <filedef.h>
-#include <config.h>
+#include <util.h>
+
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
 
 int MemberDef::s_indentLevel = 0;
 
@@ -719,16 +722,20 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
 
    // copy function template arguments (if any)
    if (tal) {
-      tArgList = tal->deepCopy();
+      tArgList = new ArgumentList (*tal);
+
    } else {
       tArgList = 0;
+
    }
    
    // copy function definition arguments (if any)
    if (al) {
-      defArgList = al->deepCopy();
+      defArgList = new ArgumentList (*al);
+
    } else {
       defArgList = 0;
+
    }
 
    // convert function declaration arguments (if any)
@@ -782,9 +789,8 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
 
 MemberDef::MemberDef(const char *df, int dl, int dc, const char *t, const char *na, const char *a, const char *e,
                      Protection p, Specifier v, bool s, Relationship r, MemberType mt, const ArgumentList *tal, const ArgumentList *al) 
-   : Definition(df, dl, dc, removeRedundantWhiteSpace(na)), visited(false) {
-   
-   m_impl = new MemberDefImpl;
+   : Definition(df, dl, dc, removeRedundantWhiteSpace(na)), visited(false), m_impl(new MemberDefImpl)  
+{
    m_impl->init(this, t, a, e, p, v, s, r, mt, tal, al);
 
    m_isLinkableCached    = 0;
@@ -792,16 +798,11 @@ MemberDef::MemberDef(const char *df, int dl, int dc, const char *t, const char *
    m_isDestructorCached  = 0;
 }
 
-MemberDef::MemberDef(const MemberDef &md) : Definition(md), visited(false)
-{
-   m_impl = new MemberDefImpl(md.m_impl);
-
+MemberDef::MemberDef(const MemberDef &md) : Definition(md), visited(false), m_impl(new MemberDefImpl(*md.m_impl))
+{  
    m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
-   m_isDestructorCached  = 0;
-
-   // BROOM - we may be missing code to complete the deep Copy. . . 
-
+   m_isDestructorCached  = 0;  
 }
 
 MemberDef &MemberDef::operator=(const MemberDef &)
@@ -810,7 +811,7 @@ MemberDef &MemberDef::operator=(const MemberDef &)
 
 MemberDef *MemberDef::deepCopy() const
 {   
-   // copy the object
+   // make a copy of the object
    MemberDef *result = new MemberDef(*this);
   
    // clear pointers owned by object
@@ -844,15 +845,15 @@ MemberDef *MemberDef::deepCopy() const
    }
 
    if (m_impl->defArgList) {
-      result->m_impl->defArgList = m_impl->defArgList->deepCopy();
+      result->m_impl->defArgList = m_impl->defArgList;
    }
 
    if (m_impl->tArgList) {
-      result->m_impl->tArgList = m_impl->tArgList->deepCopy();
+      result->m_impl->tArgList = m_impl->tArgList;
    }
 
    if (m_impl->typeConstraints) {
-      result->m_impl->typeConstraints = m_impl->typeConstraints->deepCopy();
+      result->m_impl->typeConstraints = m_impl->typeConstraints;
    }
 
    result->setDefinitionTemplateParameterLists(m_impl->defTmpArgLists);
@@ -867,7 +868,7 @@ MemberDef *MemberDef::deepCopy() const
    }
 
    if (m_impl->declArgList) {
-      result->m_impl->declArgList = m_impl->declArgList->deepCopy();
+      result->m_impl->declArgList = m_impl->declArgList;
    }
 
    return result;
@@ -3396,7 +3397,7 @@ MemberDef *MemberDef::createTemplateInstanceMember(
    ArgumentList *actualArgList = 0;
 
    if (m_impl->defArgList) {
-      actualArgList = m_impl->defArgList->deepCopy();
+      actualArgList = m_impl->defArgList;
 
       // replace formal arguments with actuals
       

@@ -18,7 +18,7 @@
 #ifndef TRANSLATOR_ADAPTER_H
 #define TRANSLATOR_ADAPTER_H
 
-#include <dox_build_info.h>
+#include <doxy_build_info.h>
 #include <translator.h>
 
 /** Base of the translator adapter tree.

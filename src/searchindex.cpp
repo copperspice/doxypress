@@ -29,7 +29,7 @@
 #include <pagedef.h>
 #include <growbuf.h>
 #include <message.h>
-#include <dox_build_info.h>
+#include <doxy_build_info.h>
 #include <groupdef.h>
 #include <classlist.h>
 #include <filedef.h>

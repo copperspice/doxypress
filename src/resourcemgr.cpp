@@ -24,7 +24,7 @@
 
 #include <resourcemgr.h>
 #include <util.h>
-#include <dox_build_info.h>
+#include <doxy_build_info.h>
 #include <ftextstream.h>
 #include <message.h>
 #include <config.h>

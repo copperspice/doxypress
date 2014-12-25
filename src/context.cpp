@@ -29,7 +29,7 @@
 #include <pagedef.h>
 #include <groupdef.h>
 #include <util.h>
-#include <dox_build_info.h>
+#include <doxy_build_info.h>
 #include <language.h>
 #include <message.h>
 #include <filename.h>
@@ -45,6 +45,9 @@
 #include <portable.h>
 #include <arguments.h>
 #include <groupdef.h>
+
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
 
 // TODO: pass the current file to Dot*::writeGraph, so the user can put dot graphs in other files as well
 

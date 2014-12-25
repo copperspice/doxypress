@@ -30,6 +30,9 @@
 #include <doxygen.h>
 #include <filedef.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 static QByteArray makeFileName(const char *withoutExtension)
 {
    QByteArray result = withoutExtension;

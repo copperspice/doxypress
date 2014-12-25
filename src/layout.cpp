@@ -29,11 +29,14 @@
 
 #include <config.h>
 #include <doxygen.h>
-#include <dox_build_info.h>
+#include <doxy_build_info.h>
 #include <layout.h>
 #include <language.h>
 #include <message.h>
 #include <util.h>
+
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
 
 #define ADD_OPTION(langId,text) "|"+QByteArray().setNum(langId)+"="+text
 

@@ -32,7 +32,7 @@
 #include <dot.h>
 #include <pagedef.h>
 #include <filename.h>
-#include <dox_build_info.h>
+#include <doxy_build_info.h>
 #include <docbookvisitor.h>
 #include <docparser.h>
 #include <language.h>

@@ -43,6 +43,8 @@
 #include <searchindex.h>
 #include <util.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
 
 //---------------------------------------------------------------------------
 
@@ -395,13 +397,14 @@ bool GroupDef::insertMember(MemberDef *md, bool docOnly)
 
 void GroupDef::removeMember(MemberDef *md)
 {
-   QSharedPointer<MemberNameInfo> mni (allMemberNameInfoSDict->find(md->name()));
+   QSharedPointer<MemberNameInfo> mni(allMemberNameInfoSDict->find(md->name()));
 
    if (mni) {
-      for (auto item : *mni) { 
 
-         if (item.memberDef == md) {
-            mni->removeOne(item);
+      for (auto iter = mni->begin(); iter != mni->end(); ++iter) { 
+
+         if (iter->memberDef == md) {
+            mni->erase(iter);
             break;
           }
       }

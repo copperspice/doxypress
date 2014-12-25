@@ -30,6 +30,9 @@
 #include <outputlist.h>
 #include <util.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 NamespaceDef::NamespaceDef(const char *df, int dl, int dc, const char *name, const char *lref,
                            const char *fName, const char *type, bool isPublished) :
    Definition(df, dl, dc, name), m_isPublished(isPublished)

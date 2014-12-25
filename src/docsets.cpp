@@ -26,6 +26,9 @@
 #include <namespacedef.h>
 #include <util.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 DocSets::DocSets()
 {
    m_nf = 0;

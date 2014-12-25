@@ -47,6 +47,9 @@
 #include <membergroup.h>
 #include <sortedlist.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 #define MAP_CMD "cmapx"
 
 //#define FONTNAME "Helvetica"

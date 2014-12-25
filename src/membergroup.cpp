@@ -31,6 +31,9 @@
 #include <outputlist.h>
 #include <util.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 MemberGroup::MemberGroup()
 {
 }

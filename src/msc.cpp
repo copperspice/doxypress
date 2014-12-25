@@ -26,6 +26,9 @@
 #include <util.h>
 #include <ftextstream.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 static const int maxCmdLine = 40960;
 
 static bool convertMapFile(FTextStream &t, const char *mapName, const QByteArray relPath,

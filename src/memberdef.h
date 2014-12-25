@@ -53,8 +53,6 @@ class MemberDef : public Definition
              Relationship related, MemberType t, const ArgumentList *tal,
              const ArgumentList *al);
 
-   MemberDef(const MemberDef &);  
-
    ~MemberDef();
 
    DefType definitionType() const {
@@ -405,6 +403,8 @@ class MemberDef : public Definition
    void loadFromDisk() const;
 
  private:
+   MemberDef(const MemberDef &);  
+
    void lock() const;
    void unlock() const;
    void saveToDisk() const;

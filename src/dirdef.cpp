@@ -30,6 +30,9 @@
 #include <outputlist.h>
 #include <util.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 static int g_dirCount = 0;
 
 DirDef::DirDef(const char *path) : Definition(path, 1, 1, path), visited(false)

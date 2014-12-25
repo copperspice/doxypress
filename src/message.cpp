@@ -27,6 +27,9 @@
 #include <filedef.h>
 #include <message.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 static QByteArray outputFormat;
 
 static const char *warning_str = "warning: ";

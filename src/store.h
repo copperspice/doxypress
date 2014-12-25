@@ -63,7 +63,7 @@ class Store : public StorageIntf
    /*! Opens the file underlying the store using \a name as the file name.
     *  Returns 0 upon success, or -1 otherwise.
     */
-   int open(const char *name);
+   int open(QString name);
 
    /*! Allocates a handle to write to and read from. */
    portable_off_t alloc();

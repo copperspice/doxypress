@@ -19,10 +19,15 @@
 #define DOXYGEN_H
 
 #include <QCache>
+#include <QDir>
 #include <QDatetime>
+#include <QFile>
 #include <QFileInfo>
 #include <QHash>
+#include <QRegExp>
 #include <QStringList>
+#include <QTextCodec>
+#include <QTextStream>
 
 #include <ftextstream.h>
 #include <stringmap.h>
@@ -32,6 +37,13 @@
 #include <section.h>
 #include <sortedlist.h>
 
+class DefinitionIntf;
+class DirSDict;
+class DirRelation;
+class FormulaList;
+class FormulaDict;
+class FormulaNameDict;
+class IndexList;
 class RefList;
 class PageSList;
 class PageSDict;
@@ -53,13 +65,6 @@ class MemberNameSDict;
 class FileNameDict;
 class NamespaceSDict;
 class NamespaceDef;
-class DefinitionIntf;
-class DirSDict;
-class DirRelation;
-class IndexList;
-class FormulaList;
-class FormulaDict;
-class FormulaNameDict;
 
 struct MemberGroupInfo;
 
@@ -84,99 +89,11 @@ class StringDict : public QHash<QString, QByteArray>
    virtual ~StringDict() {}
 };
 
-/*! \brief This class serves as a namespace for global variables used by doxygen.
- *
- *  All fields in this class are public and static, so they can be used directly.
- */
-class Doxygen
-{
- public:
-   static PageDef                          *mainPage;
-   static NamespaceDef                     *globalScope;
- 
-   static CiteDict                         *citeDict;
-
-   static ClassSDict                       *classSDict;
-   static ClassSDict                       *hiddenClasses;
-
-   static DirSDict                          directories;
- 
-   static FormulaDict                      *formulaDict;
-   static FormulaDict                      *formulaNameDict;
-    
-   static GenericsSDict                     *genericsDict;
-     
-   static GroupSDict                       *groupSDict;
-  
-   static FileNameDict                     *includeNameDict;
-   static FileNameDict                     *exampleNameDict;   
-   static FileNameDict                     *inputNameDict;
-   static SortedList<FileName *>           *inputNameList;
-   static FileNameDict                     *imageNameDict;
-   static FileNameDict                     *dotFileNameDict;
-   static FileNameDict                     *mscFileNameDict;
-   static FileNameDict                     *diaFileNameDict;   
-
-   static MemberNameSDict                  *memberNameSDict;
-   static MemberNameSDict                  *functionNameSDict;
-
-   static NamespaceSDict                   *namespaceSDict;
-
-   static PageSDict                        *exampleSDict;
-   static PageSDict                        *pageSDict;
-
-   static SectionDict                      *sectionDict;
-
-   static StringDict                        namespaceAliasDict;
-   static StringDict                        tagDestinationDict;
-   static StringDict                        aliasDict;    
-
-   //
-   static FormulaList                      *formulaList; 
-   static ParserManager                     *parserManager;  
-   static SearchIndexIntf                   *searchIndex; 
-   static Store                             *symbolStorage;  
-   static IndexList                         *indexList;
-
-   //
-   static QList<QByteArray>                  tagfileList;   
-
-   static QHash<QString, void *>             inputPaths;   
-   static QHash<long, MemberGroupInfo>       memGrpInfoDict;
-   static QHash<QString, void *>             expandAsDefinedDict;   
-   static QHash<QString, RefList>           *xrefLists;           // array of xref lists: todo, test, bug, deprecated ...
-   static QHash<QString, int>               *htmlDirMap;
-   static QHash<QString, DefinitionIntf *>  *symbolMap;
-   static QHash<QString, Definition *>      *clangUsrMap;
-
-   static StringMap<QSharedPointer<DirRelation>> dirRelations; 
-     
-   static QCache<QString, LookupInfo>       *lookupCache;
-      
-   static QTime       runningTime;   
-   static int         subpageNestingLevel;
-
-   static QByteArray  htmlFileExtension;
-   static QByteArray  objDBFileName;
-   static QByteArray  entryDBFileName;
-   static QByteArray  spaces;
-  
-   static bool  suppressDocWarnings;
-   static bool  outputToWizard;
-   static bool  gatherDefines;
-   static bool  userComments;   
-   static bool  insideMainPage;
-   static bool  parseSourcesNeeded;
-   static bool  generatingXmlOutput;
-   static bool  markdownSupport;
-  
-};
-
 void initDoxygen();
 void readConfiguration(int argc, char **argv);
 void checkConfiguration();
 void adjustConfiguration();
-void searchInputFiles(QList<QByteArray>  &inputFiles);
+void searchInputFiles();      // QList<QByteArray>  &inputFiles
 void parseInput();
 void generateOutput();
 void readAliases();

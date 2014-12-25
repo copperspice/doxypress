@@ -28,6 +28,9 @@
 #include <namespacedef.h>
 #include <reflist.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 PageDef::PageDef(const char *f, int l, const char *n, const char *d, const char *t)
    : Definition(f, l, 1, n), m_title(t)
 {

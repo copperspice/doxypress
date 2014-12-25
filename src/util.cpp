@@ -34,7 +34,7 @@
 #include <config.h>
 #include <htmlhelp.h>
 #include <example.h>
-#include <dox_build_info.h>
+#include <doxy_build_info.h>
 #include <groupdef.h>
 #include <reflist.h>
 #include <pagedef.h>
@@ -57,6 +57,9 @@
 #include <membergroup.h>
 #include <dirdef.h>
 #include <htmlentity.h>
+
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
 
 #define ENABLE_TRACINGSUPPORT 0
 
@@ -5842,8 +5845,8 @@ QList<ArgumentList> *copyArgumentLists(const QList<ArgumentList> *srcLists)
 
    QList<ArgumentList> *dstLists = new QList<ArgumentList>;
   
-   for (auto sl : *srcLists ) {
-      dstLists->append(sl);     // BROOM  BROOM deepCopy - please check this out
+   for (auto sl : *srcLists ) {      
+      dstLists->append(sl);     
    }
 
    return dstLists;

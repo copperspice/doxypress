@@ -26,7 +26,7 @@
 #include <util.h>
 #include <diagram.h>
 #include <language.h>
-#include <dox_build_info.h>
+#include <doxy_build_info.h>
 #include <dot.h>
 #include <pagedef.h>
 #include <docparser.h>

@@ -42,6 +42,9 @@
 #include <filedef.h>
 #include <dirdef.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 #define START_MARKER 0x4445465B // DEF[
 #define END_MARKER   0x4445465D // DEF]
 

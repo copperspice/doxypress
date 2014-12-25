@@ -30,7 +30,7 @@
 #include <diagram.h>
 #include <language.h>
 #include <dot.h>
-#include <dox_build_info.h>
+#include <doxy_build_info.h>
 #include <pagedef.h>
 #include <rtfstyle.h>
 #include <rtfdocvisitor.h>

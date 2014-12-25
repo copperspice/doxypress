@@ -48,6 +48,9 @@
 #include <filename.h>
 #include <sortedlist.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 #define MAX_ITEMS_BEFORE_MULTIPAGE_INDEX 200
 #define MAX_ITEMS_BEFORE_QUICK_INDEX 30
 

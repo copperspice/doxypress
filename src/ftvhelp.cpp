@@ -36,6 +36,9 @@
 #include <util.h>
 #include <resourcemgr.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 #define MAX_INDENT 1024
 
 static int folderId = 1;

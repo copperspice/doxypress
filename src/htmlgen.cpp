@@ -27,7 +27,7 @@
 #include <doxygen.h>
 #include <logos.h>
 #include <diagram.h>
-#include <dox_build_info.h>
+#include <doxy_build_info.h>
 #include <dot.h>
 #include <language.h>
 #include <htmlhelp.h>
@@ -42,6 +42,9 @@
 #include <ftvhelp.h>
 #include <bufstr.h>
 #include <resourcemgr.h>
+
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
 
 //#define DBG_HTML(x) x;
 #define DBG_HTML(x)

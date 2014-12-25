@@ -33,6 +33,9 @@
 #include <doxygen.h>
 #include <ftextstream.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 Formula::Formula(const char *text)
 {
    static int count = 0;

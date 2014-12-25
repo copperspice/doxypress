@@ -46,7 +46,7 @@ QByteArray Config::json_ReadFile(QString fName)
 
 void Config::parseConfig()
 {
-   // temp test code (broom)
+   // temp test code (broom)    BROOM - Hard Coded file name ! 
    QString m_jsonFname = "cfg_test.json";
 
    // get existing json data

@@ -46,6 +46,9 @@
 #include <groupdef.h>
 #include <util.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 //-----------------------------------------------------------------------------
 
 /** Private data associated with a ClassDef object. */
@@ -2917,7 +2920,8 @@ void ClassDef::mergeCategory(ClassDef *category)
                          
             for (auto &mi : *srcMni )   {
                Protection prot = mi.prot;
-              
+
+               // deepCopy() is in memberDef.cpp                 
                MemberDef *newMd = mi.memberDef->deepCopy();
                
                newMd->moveTo(this);

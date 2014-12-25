@@ -43,6 +43,9 @@
 #include <settings.h>
 #include <util.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 
 /** Class implementing CodeOutputInterface by throwing away everything. */
 class DevNullCodeDocInterface : public CodeOutputInterface

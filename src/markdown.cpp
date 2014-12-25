@@ -35,6 +35,9 @@
 #include <section.h>
 #include <message.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 // is character at position i in data part of an identifier?
 #define isIdChar(i) \
   ((data[i]>='a' && data[i]<='z') || \

@@ -35,6 +35,9 @@
 #include <filedef.h>
 #include <util.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 //----------------------------------------------------------------------------
 
 /** Class representing a field in the HTML help index. */

@@ -11,7 +11,7 @@ AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
 # name of one source file
-AC_CONFIG_SRCDIR([src/doxygen.cpp])
+AC_CONFIG_SRCDIR([src/main.cpp])
 
 # not a gnu project
 AM_INIT_AUTOMAKE( [foreign] )
@@ -60,5 +60,5 @@ echo "Application configured for "$BITSIZE"-bit system"
 echo
 
 # location of .am files that will create Makefiles
-AC_CONFIG_FILES( [Makefile bin/Makefile   src/dox_build_info.h])
+AC_CONFIG_FILES( [Makefile bin/Makefile   src/doxy_build_info.h])
 AC_OUTPUT

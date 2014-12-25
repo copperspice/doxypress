@@ -15,6 +15,8 @@
  *
 *************************************************************************/
 
+#include <QString>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -69,14 +71,17 @@ Store::~Store()
    }
 }
 
-int Store::open(const char *name)
+int Store::open(QString name)
 {
    int i;
    STORE_ASSERT(m_state == Init);
+
    if (m_file) {
       return 0;   // already open
    }
-   m_file = portable_fopen(name, "w+b");
+
+   m_file = portable_fopen(qPrintable(name), "w+b");
+
    if (m_file == 0) {
       return -1;
    }
@@ -92,10 +97,12 @@ int Store::open(const char *name)
       fputc('N', m_file);
       fputc(0, m_file);
    }
+
    m_front  = BLOCK_SIZE;
    m_cur    = BLOCK_SIZE;
    m_head   = 0;
    m_state  = Reading;
+
    return 0;
 }
 

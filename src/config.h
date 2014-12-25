@@ -103,7 +103,7 @@ class Config
     *  is \c true the description of each configuration option will
     *  be omitted.
     */
-   void writeTemplate(FTextStream &t, bool shortIndex, bool updateOnly);
+   void writeNewCfg();
 
    void setHeader(const char *header) {
       m_header = header;

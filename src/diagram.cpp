@@ -33,6 +33,9 @@
 #include <index.h>
 #include <classlist.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 #define IMAGE_EXT ".png"
 
 /** Class representing a single node in the built-in class diagram */

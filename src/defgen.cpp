@@ -35,6 +35,9 @@
 #include <filedef.h>
 #include <filename.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 #define DEF_DB(x)
 
 inline void writeDEFString(FTextStream &t, const char *s)

@@ -31,6 +31,9 @@
 #include <xmlgen.h>
 #include <xmldocvisitor.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 XmlDocVisitor::XmlDocVisitor(FTextStream &t, CodeOutputInterface &ci)
    : DocVisitor(DocVisitor_XML), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false)
 {

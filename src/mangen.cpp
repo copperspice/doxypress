@@ -32,6 +32,9 @@
 #include <mandocvisitor.h>
 #include <language.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 static QByteArray getExtension()
 {
    /*

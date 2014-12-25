@@ -28,7 +28,7 @@
 #include <dirdef.h>
 #include <docparser.h>
 #include <doxygen.h>
-#include <dox_build_info.h>
+#include <doxy_build_info.h>
 #include <dot.h>
 #include <defargs.h>
 #include <groupdef.h>

@@ -15,15 +15,6 @@
  *
 *************************************************************************/
 
-#include <QDir>
-#include <QFileInfo>
-#include <QFile>
-#include <QHash>
-#include <QRegExp>
-#include <QStringList>
-#include <QTextCodec>
-#include <QTextStream>
-
 #include <errno.h>
 #include <locale.h>
 #include <stdio.h>
@@ -31,70 +22,47 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include <arguments.h>
-#include <bufstr.h>
 #include <cite.h>
 #include <classlist.h>
 #include <cmdmapper.h>
 #include <code.h>
-#include <commentcnv.h>
 #include <config.h>
-#include <context.h>
-#include <dbusxmlscanner.h>
-#include <debug.h>
-#include <declinfo.h>
-#include <defargs.h>
-#include <defgen.h>
-#include <dirdef.h>
-#include <docbookgen.h>
-#include <docparser.h>
-#include <docsets.h>
-#include <dot.h>
-#include <dox_build_info.h>
 #include <doxygen.h>
-#include <eclipsehelp.h>
+#include <doxy_build_info.h>
 #include <entry.h>
 #include <filename.h>
 #include <fileparser.h>
 #include <filestorage.h>
 #include <formula.h>
-#include <fortranscanner.h>
-#include <ftvhelp.h>
 #include <groupdef.h>
-#include <htags.h>
 #include <htmlgen.h>
-#include <htmlhelp.h>
 #include <index.h>
 #include <language.h>
 #include <latexgen.h>
 #include <layout.h>
-#include <logos.h>
-#include <mangen.h>
 #include <markdown.h>
 #include <membername.h>
-#include <message.h>
-#include <msc.h>
 #include <namespacedef.h>
-#include <objcache.h>
 #include <outputlist.h>
 #include <pagedef.h>
-#include <parserintf.h>
 #include <perlmodgen.h>
 #include <portable.h>
 #include <pre.h>
-#include <pyscanner.h>
-#include <qhp.h>
 #include <reflist.h>
 #include <rtfgen.h>
 #include <scanner.h>
-#include <searchindex.h>
-#include <settings.h>
-#include <sqlite3gen.h>
-#include <store.h>
-#include <tagreader.h>
-#include <tclscanner.h>
 #include <util.h>
-#include <xmlgen.h>
+
+// globals
+#include <doxy_globals.h>
+
+namespace {
+   const char *getArg(int argc, char **argv, int &optind);
+   void generateConfigFile(const char *configFile, bool shortList, bool updateOnly = false);
+   bool openOutputFile(const char *outFile, QFile &f);
+   void usageDev();
+   void usage(const char *name);
+}
 
 void initDoxygen()
 {
@@ -112,11 +80,11 @@ void initDoxygen()
    initPreprocessor();
 
    Doxygen::parserManager = new ParserManager;
-   Doxygen::parserManager->registerDefaultParser(         new FileParser);
-   Doxygen::parserManager->registerParser("c",            new CLanguageScanner);
+   Doxygen::parserManager->registerDefaultParser(new FileParser);
+   Doxygen::parserManager->registerParser("c", new CLanguageScanner);
 
 // BROOM  (out for now)
-//   Doxygen::parserManager->registerParser("python",       new PythonLanguageScanner);
+//   Doxygen::parserManager->registerParser("python", new PythonLanguageScanner);
 
 // BROOM  (out for now)
 //   Doxygen::parserManager->registerParser("fortran",      new FortranLanguageScanner);
@@ -129,9 +97,9 @@ void initDoxygen()
 // BROOM  (out for now)
 //   Doxygen::parserManager->registerParser("tcl",          new TclLanguageScanner);
 
-   Doxygen::parserManager->registerParser("md",           new MarkdownFileParser);
+   Doxygen::parserManager->registerParser("md",             new MarkdownFileParser);
 
-   // register any additional parsers here...
+   // register any additional parsers here
 
    initDefaultExtensionMapping();
    initClassMemberIndices();
@@ -142,7 +110,7 @@ void initDoxygen()
    Doxygen::clangUsrMap       = new QHash<QString, Definition *>();
 #endif
 
-   Doxygen::symbolMap         = new QHash<QString, DefinitionIntf>();
+   Doxygen::symbolMap         = new QHash<QString, DefinitionIntf *>();
    Doxygen::inputNameList     = new SortedList<FileName *>;
 
    Doxygen::memberNameSDict   = new MemberNameSDict();
@@ -154,8 +122,7 @@ void initDoxygen()
    Doxygen::namespaceSDict    = new NamespaceSDict();
    Doxygen::classSDict        = new ClassSDict();
    Doxygen::hiddenClasses     = new ClassSDict();
-   Doxygen::directories       = new DirSDict();
-
+  
    Doxygen::pageSDict         = new PageSDict();          // all doc pages
    Doxygen::exampleSDict      = new PageSDict();          // all examples
 
@@ -174,18 +141,14 @@ void initDoxygen()
    Doxygen::formulaNameDict   = new FormulaDict();
    Doxygen::sectionDict       = new SectionDict();
 
-   /**************************************************************************
-    *            Initialize some global constants
-    **************************************************************************/
-
-   g_compoundKeywordDict.insert("template class", (void *)8);
-   g_compoundKeywordDict.insert("template struct", (void *)8);
-   g_compoundKeywordDict.insert("class", (void *)8);
-   g_compoundKeywordDict.insert("struct", (void *)8);
-   g_compoundKeywordDict.insert("union", (void *)8);
-   g_compoundKeywordDict.insert("interface", (void *)8);
-   g_compoundKeywordDict.insert("exception", (void *)8);
-
+   // Initialize some global constants
+   Doxy_Globals::g_compoundKeywordDict.insert("template class", (void *)8);
+   Doxy_Globals::g_compoundKeywordDict.insert("template struct", (void *)8);
+   Doxy_Globals::g_compoundKeywordDict.insert("class",  (void *)8);
+   Doxy_Globals::g_compoundKeywordDict.insert("struct", (void *)8);
+   Doxy_Globals::g_compoundKeywordDict.insert("union",  (void *)8);
+   Doxy_Globals::g_compoundKeywordDict.insert("interface", (void *)8);
+   Doxy_Globals::g_compoundKeywordDict.insert("exception", (void *)8);
 }
 
 void cleanUpDoxygen()
@@ -213,7 +176,7 @@ void cleanUpDoxygen()
    cleanUpPreprocessor();
 
    delete theTranslator;
-   delete g_outputList;
+   delete Doxy_Globals::g_outputList;
 
    Mappers::freeMappers();
    codeFreeScanner();
@@ -221,13 +184,13 @@ void cleanUpDoxygen()
    if (Doxygen::symbolMap) {
       // iterate through Doxygen::symbolMap and delete all
       // DefinitionList objects, since they have no owner
-      QHashIterator<QString,DefinitionIntf> dli(*Doxygen::symbolMap);
-      DefinitionIntf *di;
+     
+      for (auto dli = Doxygen::symbolMap->begin(); dli != Doxygen::symbolMap->end(); ) {
 
-      for (dli.toFirst(); (di = dli.current());) {
-         if (di->definitionType() == DefinitionIntf::TypeSymbolList) {
-            DefinitionIntf *tmp = Doxygen::symbolMap->take(dli.currentKey());
+         if ((*dli)->definitionType() == DefinitionIntf::TypeSymbolList) {
+            DefinitionIntf *tmp = Doxygen::symbolMap->take(dli.key());
             delete (DefinitionList *)tmp;
+
          } else {
             ++dli;
          }
@@ -240,13 +203,7 @@ void cleanUpDoxygen()
    delete Doxygen::groupSDict;
    delete Doxygen::classSDict;
    delete Doxygen::hiddenClasses;
-   delete Doxygen::namespaceSDict;
-   delete Doxygen::directories;
-
-   //delete Doxygen::symbolMap; <- we cannot do this unless all static lists
-   //                              (such as Doxygen::namespaceSDict)
-   //                              with objects based on Definition are made
-   //                              dynamic first
+   delete Doxygen::namespaceSDict;   
 }
 
 
@@ -286,6 +243,7 @@ void readConfiguration(int argc, char **argv)
          case 'l':
             genLayout = true;
             layoutName = getArg(argc, argv, optind);
+
             if (!layoutName) {
                layoutName = "DoxygenLayout.xml";
             }
@@ -293,43 +251,51 @@ void readConfiguration(int argc, char **argv)
 
          case 'd':
             debugLabel = getArg(argc, argv, optind);
-            if (!debugLabel) {
+
+            if (! debugLabel) {
                err("option \"-d\" is missing debug specifier.\n");
-               devUsage();
+               usageDev();
                cleanUpDoxygen();
                exit(1);
             }
+
             retVal = Debug::setFlag(debugLabel);
-            if (!retVal) {
+            if (! retVal) {
                err("option \"-d\" has unknown debug specifier: \"%s\".\n", debugLabel);
                cleanUpDoxygen();
                exit(1);
             }
             break;
+
          case 's':
             shortList = true;
             break;
        
          case 'e':
             formatName = getArg(argc, argv, optind);
+
             if (!formatName) {
                err("option \"-e\" is missing format specifier rtf.\n");
                cleanUpDoxygen();
                exit(1);
             }
+
             if (qstricmp(formatName, "rtf") == 0) {
                if (optind + 1 >= argc) {
                   err("option \"-e rtf\" is missing an extensions file name\n");
                   cleanUpDoxygen();
                   exit(1);
                }
+
                QFile f;
                if (openOutputFile(argv[optind + 1], f)) {
                   RTFGenerator::writeExtensionsFile(f);
                }
+
                cleanUpDoxygen();
                exit(0);
             }
+
             err("option \"-e\" has invalid format specifier.\n");
             cleanUpDoxygen();
             exit(1);
@@ -356,23 +322,38 @@ void readConfiguration(int argc, char **argv)
                exit(1);
 
             } else if (qstricmp(formatName, "html") == 0) {
+
                if (optind + 4 < argc || QFileInfo("Doxyfile").exists()) {
-                  QByteArray df = optind + 4 < argc ? argv[optind + 4] : QByteArray("Doxyfile");
+
+                  QByteArray df;
+
+                  if (optind + 4 < argc) {
+                     df = argv[optind + 4]; 
+
+                  } else {
+                     df = "Doxyfile";
+                  }
+
                   if (!Config::instance()->parse(df)) {
                      err("error opening or reading configuration file %s!\n", argv[optind + 4]);
                      cleanUpDoxygen();
                      exit(1);
                   }
+
                   Config::instance()->substituteEnvironmentVars();
                   Config::instance()->convertStrToVal();
+
                   // avoid bootstrapping issues when the config file already
                   // refers to the files that we are supposed to parse.
+
                   Config_getString("HTML_HEADER") = "";
                   Config_getString("HTML_FOOTER") = "";
                   Config::instance()->check();
+
                } else {
                   Config::instance()->init();
                }
+
                if (optind + 3 >= argc) {
                   err("option \"-w html\" does not have enough arguments\n");
                   cleanUpDoxygen();
@@ -444,7 +425,7 @@ void readConfiguration(int argc, char **argv)
             break;
 
          case 'm':
-            g_dumpSymbolMap = true;
+            Doxy_Globals::g_dumpSymbolMap = true;
             break;
 
          case 'v':
@@ -477,7 +458,8 @@ void readConfiguration(int argc, char **argv)
             msg("Warning: this option activates output generation via Django like template files. "
                 "This option is scheduled for doxygen 2.0, is currently incomplete and highly experimental! "
                 "Only use if you are a doxygen developer\n");
-            g_useOutputTemplate = true;
+
+            Doxy_Globals::g_useOutputTemplate = true;
             break;
 
          case 'h':
@@ -493,11 +475,8 @@ void readConfiguration(int argc, char **argv)
       }
       optind++;
    }
-
-   /**************************************************************************
-    *            Parse or generate the config file                           *
-    **************************************************************************/
-   
+      
+   // Parse or generate the config file  
    Config::instance()->init();
 
    if (genConfig) {
@@ -541,7 +520,10 @@ void readConfiguration(int argc, char **argv)
    }
 
 
-   printf("\n  Parse the Json file");
+   printf("\n  Parse the Json file here ");
+
+   // add test for failures
+   Config::instance()->parseConfig();
 
 /*
 
@@ -555,7 +537,7 @@ void readConfiguration(int argc, char **argv)
   
    // Perlmod wants to know the path to the config file
    QFileInfo configFileInfo(configName);
-   setPerlModDoxyfile(configFileInfo.absoluteFilePath().data());
+   setPerlModDoxyfile(qPrintable(configFileInfo.absoluteFilePath()));
 
 }
 
@@ -662,8 +644,92 @@ void adjustConfiguration()
 
 }
 
-// print developer options of doxygen
-static void devUsage()
+static const char *getArg(int argc, char **argv, int &optind)
+{
+   char *s = 0;
+   if (qstrlen(&argv[optind][2]) > 0) {
+      s = &argv[optind][2];
+   } else if (optind + 1 < argc && argv[optind + 1][0] != '-') {
+      s = argv[++optind];
+   }
+   return s;
+}
+
+/*! Generate a new version of the configuration file 
+ */
+static void generateConfigFile(const char *configFile)
+{
+   QFile f;
+
+   bool fileOpened    = openOutputFile(configFile, f);
+   bool writeToStdout = (configFile[0] == '-' && configFile[1] == '\0');
+
+   if (fileOpened) {
+
+      FTextStream t(&f);
+      Config::instance()->writeNewCfg();      
+
+      if (writeToStdout) {     
+        // do nothing else
+         
+      } else {    
+         msg("\n\nConfiguration file `%s' created.\n\n", configFile);
+         msg("Now edit the configuration file and enter\n\n");
+
+         if (qstrcmp(configFile, "Doxyfile") || qstrcmp(configFile, "doxyfile")) {
+            msg("  doxygen %s\n\n", configFile);
+
+         } else {
+            msg("  doxygen\n\n");
+
+         }
+
+         msg("to generate the documentation for your project\n\n");        
+      }
+
+   } else {
+      err("Can not open file %s for writing\n", configFile);
+      exit(1);
+   }
+}
+
+static bool openOutputFile(const char *outFile, QFile &f)
+{
+   bool fileOpened = false;
+   bool writeToStdout = (outFile[0] == '-' && outFile[1] == '\0');
+
+   if (writeToStdout) { 
+      // write to stdout
+      fileOpened = f.open(stdout, QIODevice::WriteOnly);
+
+   } else { 
+      // write to file
+      QFileInfo fi(outFile);
+
+      if (fi.exists()) { 
+         // create a backup
+
+         QDir dir = fi.dir();
+         QFileInfo backup(fi.fileName() + ".bak");
+
+         if (backup.exists()) { 
+            // remove existing backup
+            dir.remove(backup.fileName());
+         }
+
+         dir.rename(fi.fileName(), fi.fileName() + ".bak");
+      }
+
+      f.setFileName(outFile);
+
+      fileOpened = f.open(QIODevice::WriteOnly | QIODevice::Text);
+   }
+
+   return fileOpened;
+}
+
+// print developer options
+static void usageDev()
 {
    msg("Developer parameters:\n");
    msg("  -m          dump symbol map\n");
@@ -674,7 +740,7 @@ static void devUsage()
    Debug::printFlags();
 }
 
-// print the usage of doxygen
+// print the usage
 static void usage(const char *name)
 {
    msg("Doxygen version %s\n\n", versionString);
@@ -684,22 +750,22 @@ static void usage(const char *name)
    msg("    If - is used for configName doxygen will write to standard output.\n\n"); 
    msg("    If configName is omitted `Doxyfile' will be used as a default.\n\n");
 
-   msg("3) Use doxygen to generate documentation using an existing ");
+   msg("2) Use doxygen to generate documentation using an existing ");
    msg("configuration file:\n");
    msg("    %s [configName]\n\n", name);
    msg("    If - is used for configName doxygen will read from standard input.\n\n");
 
-   msg("4) Use doxygen to generate a template file controlling the layout of the\n");
+   msg("3) Use doxygen to generate a template file controlling the layout of the\n");
    msg("   generated documentation:\n");
    msg("    %s -l layoutFileName.xml\n\n", name);
 
-   msg("5) Use doxygen to generate a template style sheet file for RTF, HTML or Latex.\n");
+   msg("4) Use doxygen to generate a template style sheet file for RTF, HTML or Latex.\n");
    msg("    RTF:        %s -w rtf styleSheetFile\n", name);
    msg("    HTML:       %s -w html headerFile footerFile styleSheetFile [configFile]\n", name);
    msg("    LaTeX:      %s -w latex headerFile footerFile styleSheetFile [configFile]\n\n", name);
 
-   msg("6) Use doxygen to generate a rtf extensions file\n");
+   msg("5) Use doxygen to generate a rtf extensions file\n");
    msg("    RTF:   %s -e rtf extensionsFile\n\n", name);
 
-   msg("7) -v print version string\n");
+   msg("6) -v print version string\n");
 }

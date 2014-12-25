@@ -17,11 +17,14 @@
 
 #include <QFile>
 
-#include <eclipsehelp.h>
-#include <util.h>
 #include <config.h>
-#include <message.h>
+#include <eclipsehelp.h>
 #include <doxygen.h>
+#include <message.h>
+#include <util.h>
+
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
 
 EclipseHelp::EclipseHelp() : m_depth(0), m_endtag(false), m_openTags(0), m_tocfile(0)
 {

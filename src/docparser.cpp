@@ -53,6 +53,9 @@
 #include <markdown.h>
 #include <htmlentity.h>
 
+// must appear after the previous include - resolve soon 
+#include <doxy_globals.h>
+
 // debug off
 #define DBG(x) do {} while(0)
 
