@@ -22,12 +22,16 @@
 #include <QList>
 #include <QVector>
 
+#include <stringmap.h>
+
 class FTextStream;
 class Definition;
 class MemberDef;
+class SearchDocEntry;
 
 /*! Initialize the search indexer */
 void initSearchIndexer();
+
 /*! Cleanup the search indexer */
 void finializeSearchIndexer();
 
@@ -38,7 +42,6 @@ struct URL {
    QByteArray name;
    QByteArray url;
 };
-
 
 struct URLInfo {
    URLInfo(int idx, int f) : urlIdx(idx), freq(f) {}
@@ -69,7 +72,9 @@ class SearchIndexIntf
 {
  public:
    enum Kind { Internal, External };
+
    SearchIndexIntf(Kind k) : m_kind(k) {}
+
    virtual ~SearchIndexIntf() {}
    virtual void setCurrentDoc(Definition *ctx, const char *anchor, bool isSourceFile) = 0;
    virtual void addWord(const char *word, bool hiPriority) = 0;
@@ -94,8 +99,8 @@ class SearchIndex : public SearchIndexIntf
  private:
    void addWord(const char *word, bool hiPrio, bool recurse);
 
-   QHash<QString, IndexWord> m_words;
-   QVector< QList<IndexWord> > m_index;
+   QHash<QString, IndexWord *>  m_words;         // broom - merge these two containers
+   QVector<QList<IndexWord *>>  m_index;
 
    QHash<QString,int> m_url2IdMap;
 
@@ -107,15 +112,18 @@ class SearchIndex : public SearchIndexIntf
 
 class SearchIndexExternal : public SearchIndexIntf
 {
-   struct Private;
+  
  public:
    SearchIndexExternal();
    ~SearchIndexExternal();
    void setCurrentDoc(Definition *ctx, const char *anchor, bool isSourceFile);
    void addWord(const char *word, bool hiPriority);
    void write(const char *file);
- private:
-   Private *p;
+
+ private:   
+   StringMap<QSharedPointer<SearchDocEntry>> m_docEntries;
+   QSharedPointer<SearchDocEntry> m_current;
+
 };
 
 //------- client side search index ----------------------

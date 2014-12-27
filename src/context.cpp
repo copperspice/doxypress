@@ -51,7 +51,7 @@
 
 // TODO: pass the current file to Dot*::writeGraph, so the user can put dot graphs in other files as well
 
-#define ADD_PROPERTY(name) addProperty(#name,this,&Private::name);
+#define ADD_PROPERTY(name) addProperty(#name, this, &Private::name);
 
 struct ContextGlobals {
    enum OutputFormat {
@@ -1744,10 +1744,9 @@ class ClassContext::Private : public DefinitionContext<ClassContext::Private>
    }
    void addMembers(ClassDef *cd, MemberListType lt) const {
       MemberList *ml = cd->getMemberList(lt);
+
       if (ml) {
-         QListIterator<MemberDef> li(*ml);
-         const MemberDef *md;
-         for (li.toFirst(); (md = li.current()); ++li) {
+         for (auto md : *ml( {
             if (md->isBriefSectionVisible()) {
                m_cache.allMembers.append(md);
             }
@@ -6791,17 +6790,17 @@ class InheritedMemberInfoListContext::Private : public GenericNodeListContext
          if (lt2 != -1) {
             addMemberGroupsOfClass(inheritedFrom, cd, (MemberListType)lt2, combinedList);
          }
+
          append(InheritedMemberInfoContext::alloc(cd, combinedList, title));
       }
    }
 
    void findInheritedMembers(ClassDef *inheritedFrom, ClassDef *cd, MemberListType lt, int lt2, const QByteArray &title, 
                              bool additionalList, QHash<void *, void *> *visitedClasses) {
-      if (cd->baseClasses()) {
-         QListIterator<BaseClassDef *> it(*cd->baseClasses());
-         BaseClassDef *ibcd;
 
-         for (it.toFirst(); (ibcd = it.current()); ++it) {
+      if (cd->baseClasses()) {
+         
+         for (auto ibcd : *cd->baseClasses() ) { 
             ClassDef *icd = ibcd->classDef;
 
             if (icd->isLinkable()) {
@@ -6812,8 +6811,10 @@ class InheritedMemberInfoListContext::Private : public GenericNodeListContext
                   lt2 = lt3;
                }
 
-               if (visitedClasses->find(icd) == 0) {
-                  visitedClasses->insert(icd, icd); // guard for multiple virtual inheritance
+               if (! visitedClasses->contains(icd)) {
+                  visitedClasses->insert(icd, icd); 
+
+                  // guard for multiple virtual inheritance
                   if (lt1 != -1) {
                      // add member info for members of cd with list type lt
                      addInheritedMembers(inheritedFrom, icd, lt, (MemberListType)lt1, lt2, title, additionalList);
@@ -6841,8 +6842,7 @@ void InheritedMemberInfoListContext::addMemberList(
    bool memberInSection = cd->countMembersIncludingGrouped(lt, cd, false) > 0;
    bool show = (additionalList && !memberInSection) || // inherited member to show in the additional inherited members list
                (!additionalList && memberInSection);   // inherited member to show in a member list of the class
-
-   //printf("%s:%s show=%d\n",cd->name().data(),MemberList::listTypeAsString(lt).data(),show);
+  
    if (show) {
       p->findInheritedMembers(cd, cd, lt, -1, title, additionalList, &visited);
    }
@@ -6886,36 +6886,47 @@ class ArgumentContext::Private : public PropertyMapper
       addProperty("array",    this, &Private::array);
       addProperty("namePart", this, &Private::namePart);
    }
+  
    TemplateVariant type() const {
       return createLinkedText(m_def, m_relPath, m_argument->type);
    }
+  
    TemplateVariant attrib() const {
       return m_argument->attrib;
    }
+
    TemplateVariant name() const {
       return m_argument->name;
    }
+
    TemplateVariant defVal() const {
       return createLinkedText(m_def, m_relPath, m_argument->defval);
    }
+
    TemplateVariant array() const {
       return m_argument->array;
    }
+
    TemplateVariant docs() const {
-      if (!m_cache.docs && m_def) {
+      if (! m_cache.docs && m_def) {
+
          if (!m_argument->docs.isEmpty()) {
             m_cache.docs.reset(new TemplateVariant(
-                                  parseDoc(m_def, m_def->docFile(), m_def->docLine(),
-                                           m_relPath, m_argument->docs, true)));
+                               parseDoc(m_def, m_def->docFile(), m_def->docLine(), m_relPath, m_argument->docs, true)));
+
          } else {
             m_cache.docs.reset(new TemplateVariant(""));
+
          }
       }
+
       return *m_cache.docs;
    }
+
    TemplateVariant namePart() const {
       QByteArray result = m_argument->attrib;
       int l = result.length();
+
       if (l > 2 && result.at(0) == '[' && result.at(l - 1) == ']') {
          result = result.mid(1, l - 2);
          if (result != ",") {
@@ -6924,13 +6935,16 @@ class ArgumentContext::Private : public PropertyMapper
       }
       return result;
    }
+
  private:
    const Argument *m_argument;
    Definition *m_def;
    QByteArray m_relPath;
+
    struct Cachable {
       ScopedPtr<TemplateVariant> docs;
    };
+
    mutable Cachable m_cache;
 };
 //%% }
@@ -6950,8 +6964,6 @@ TemplateVariant ArgumentContext::get(const char *name) const
    return p->get(name);
 }
 
-//------------------------------------------------------------------------
-
 //%% list ArgumentList[Argument] : list of inherited classes
 class ArgumentListContext::Private : public GenericNodeListContext
 {
@@ -6970,10 +6982,9 @@ ArgumentListContext::ArgumentListContext(const ArgumentList *list,
       Definition *def, const QByteArray &relPath) : RefCountedContext("ArgumentListContext")
 {
    p = new Private;
+
    if (list) {
-      ArgumentListIterator ali(*list);
-      const Argument *arg;
-      for (ali.toFirst(); (arg = ali.current()); ++ali) {
+      for (auto &arg : *list) {
          p->addArgument(arg, def, relPath);
       }
    }

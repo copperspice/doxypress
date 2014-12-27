@@ -57,11 +57,12 @@ VPATH = ../
 CS_Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
 
 
-CS_Doxygen_SOURCES = \   
-   src/htmlgen.cpp  \
-   src/searchindex.cpp \
-   src/filedef.cpp  \
-   src/.cpp \
+CS_Doxygen_SOURCES = \
+   src/template.cpp \
+   src/context.cpp \
+   src/util.cpp \
+   src/dot.cpp \
+   src/docparser.cpp \
 \
    src/doxy_work.cpp \
    src/doxy_setup.cpp \

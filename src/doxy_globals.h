@@ -101,7 +101,7 @@ class Doxygen
    static FormulaDict                      *formulaDict;
    static FormulaDict                      *formulaNameDict;
     
-   static GenericsSDict                     *genericsDict;
+   static GenericsSDict                    *genericsDict;
      
    static GroupSDict                       *groupSDict;
   

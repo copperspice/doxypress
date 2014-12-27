@@ -121,19 +121,25 @@ QByteArray clearBlock(const char *s, const char *begin, const char *end)
    resLen += qstrlen(p);
    // resLen is the length of the string without the marked block
 
-   QByteArray result(resLen + 1);
+   QByteArray result;
+   result.resize(resLen + 1);
+
    char *r;
+
    for (r = result.data(), p = s; (q = strstr(p, begin)) != 0; p = q + endLen) {
       int l = (int)(q - p);
       memcpy(r, p, l);
+
       r += l;
       p = q + beginLen;
+
       if ((q = strstr(p, end)) == 0) {
          memcpy(r, begin, beginLen);
          r += beginLen;
          break;
       }
    }
+
    qstrcpy(r, p);
    return result;
 }
@@ -165,6 +171,7 @@ static QByteArray getSearchBox(bool serverSide, QByteArray relPath, bool highlig
 {
    QByteArray result;
    FTextStream t(&result);
+
    if (serverSide) {
       writeServerSearchBox(t, relPath, highlightSearch);
    } else {
@@ -176,34 +183,38 @@ static QByteArray getSearchBox(bool serverSide, QByteArray relPath, bool highlig
 static QByteArray removeEmptyLines(const QByteArray &s)
 {
    BufStr out(s.length() + 1);
-   char *p = s.data();
+   const char *p = s.data();
+
    if (p) {
       char c;
+
       while ((c = *p++)) {
          if (c == '\n') {
-            char *e = p;
+            const char *e = p;
+
             while (*e == ' ' || *e == '\t') {
                e++;
             }
+
             if (*e == '\n') {
                p = e;
             } else {
                out.addChar(c);
             }
+
          } else {
             out.addChar(c);
          }
       }
    }
+
    out.addChar('\0');
-   //printf("removeEmptyLines(%s)=%s\n",s.data(),out.data());
+   
    return out.data();
 }
 
-static QByteArray substituteHtmlKeywords(const QByteArray &s,
-      const QByteArray &title,
-      const QByteArray &relPath,
-      const QByteArray &navPath = QByteArray())
+static QByteArray substituteHtmlKeywords(const QByteArray &s, const QByteArray &title, const QByteArray &relPath,
+                                         const QByteArray &navPath = QByteArray())
 {
    // Build CSS/Javascript tags depending on treeview, search engine settings
    QByteArray cssFile;
@@ -221,7 +232,9 @@ static QByteArray substituteHtmlKeywords(const QByteArray &s,
    static bool searchEngine = Config_getBool("SEARCHENGINE");
    static bool serverBasedSearch = Config_getBool("SERVER_BASED_SEARCH");
    static bool mathJax = Config_getBool("USE_MATHJAX");
+
    static QByteArray mathJaxFormat = Config_getEnum("MATHJAX_FORMAT");
+
    static bool disableIndex = Config_getBool("DISABLE_INDEX");
    static bool hasProjectName = !projectName.isEmpty();
    static bool hasProjectNumber = !Config_getString("PROJECT_NUMBER").isEmpty();
@@ -232,10 +245,13 @@ static QByteArray substituteHtmlKeywords(const QByteArray &s,
    cssFile = Config_getString("HTML_STYLESHEET");
    if (cssFile.isEmpty()) {
       cssFile = "doxygen.css";
+
    } else {
       QFileInfo cssfi(cssFile);
+
       if (cssfi.exists()) {
          cssFile = cssfi.fileName().toUtf8();
+
       } else {
          cssFile = "doxygen.css";
       }
@@ -243,12 +259,14 @@ static QByteArray substituteHtmlKeywords(const QByteArray &s,
 
    extraCssText = "";
    extraCssFile = Config_getList("HTML_EXTRA_STYLESHEET");
-   for (uint i = 0; i < extraCssFile.count(); ++i) {
-      QByteArray fileName(extraCssFile.at(i));
-      if (!fileName.isEmpty()) {
+
+   for (auto fileName : extraCssFile) {          
+
+      if (! fileName.isEmpty()) {
          QFileInfo fi(fileName);
+
          if (fi.exists()) {
-            extraCssText += "<link href=\"$relpath^" + stripPath(fileName) + "\" rel=\"stylesheet\" type=\"text/css\"/>\n";
+            extraCssText += "<link href=\"$relpath^" + stripPath(qPrintable(fileName)) + "\" rel=\"stylesheet\" type=\"text/css\"/>\n";
          }
       }
    }
@@ -301,31 +319,38 @@ static QByteArray substituteHtmlKeywords(const QByteArray &s,
 
    if (mathJax) {
       QByteArray path = Config_getString("MATHJAX_RELPATH");
+
       if (!path.isEmpty() && path.at(path.length() - 1) != '/') {
          path += "/";
       }
+
       if (path.isEmpty() || path.left(2) == "..") { // relative path
          path.prepend(relPath);
       }
+
       mathJaxJs = "<script type=\"text/x-mathjax-config\">\n"
                   "  MathJax.Hub.Config({\n"
                   "    extensions: [\"tex2jax.js\"";
+
       QStringList &mathJaxExtensions = Config_getList("MATHJAX_EXTENSIONS");
-      const char *s = mathJaxExtensions.first();
-      while (s) {
-         mathJaxJs += ", \"" + QByteArray(s) + ".js\"";
-         s = mathJaxExtensions.next();
+     
+      for (auto s : mathJaxExtensions) {
+         mathJaxJs += ", \"" + s.toUtf8() + ".js\"";         
       }
+
       if (mathJaxFormat.isEmpty()) {
          mathJaxFormat = "HTML-CSS";
       }
+
       mathJaxJs += "],\n"
                    "    jax: [\"input/TeX\",\"output/" + mathJaxFormat + "\"],\n"
                    "});\n";
+
       if (!g_mathjax_code.isEmpty()) {
          mathJaxJs += g_mathjax_code;
          mathJaxJs += "\n";
       }
+
       mathJaxJs += "</script>";
       mathJaxJs += "<script src=\"" + path + "MathJax.js\"></script>\n";
    }
@@ -937,11 +962,11 @@ void HtmlGenerator::endProjectNumber()
 }
 
 void HtmlGenerator::writeStyleInfo(int part)
-{
-   //printf("writeStyleInfo(%d)\n",part);
+{   
    if (part == 0) {
-      if (Config_getString("HTML_STYLESHEET").isEmpty()) { // write default style sheet
-         //printf("write doxygen.css\n");
+
+      if (Config_getString("HTML_STYLESHEET").isEmpty()) {    
+         // write default style sheet        
          startPlainFile("doxygen.css");
 
          // alternative, cooler looking titles
@@ -951,9 +976,11 @@ void HtmlGenerator::writeStyleInfo(int part)
          t << replaceColorMarkers(substitute(ResourceMgr::instance().getAsString("doxygen.css"), "$doxygenversion", versionString));
          endPlainFile();
          Doxygen::indexList->addStyleSheetFile("doxygen.css");
+
       } else { // write user defined style sheet
          QByteArray cssname = Config_getString("HTML_STYLESHEET");
          QFileInfo cssfi(cssname);
+
          if (!cssfi.exists() || !cssfi.isFile() || !cssfi.isReadable()) {
             err("style sheet %s does not exist or is not readable!", Config_getString("HTML_STYLESHEET").data());
          } else {
@@ -966,11 +993,14 @@ void HtmlGenerator::writeStyleInfo(int part)
          }
          Doxygen::indexList->addStyleSheetFile(cssfi.fileName().toUtf8());
       }
+
       static QStringList extraCssFile = Config_getList("HTML_EXTRA_STYLESHEET");
-      for (uint i = 0; i < extraCssFile.count(); ++i) {
-         QByteArray fileName(extraCssFile.at(i));
-         if (!fileName.isEmpty()) {
+
+      for (auto fileName :  extraCssFile) {
+         
+         if (! fileName.isEmpty()) {
             QFileInfo fi(fileName);
+
             if (fi.exists()) {
                Doxygen::indexList->addStyleSheetFile(fi.fileName().toUtf8());
             }
@@ -979,9 +1009,7 @@ void HtmlGenerator::writeStyleInfo(int part)
    }
 }
 
-void HtmlGenerator::startDoxyAnchor(const char *, const char *,
-                                    const char *anchor, const char *,
-                                    const char *)
+void HtmlGenerator::startDoxyAnchor(const char *, const char *, const char *anchor, const char *, const char *)
 {
    t << "<a class=\"anchor\" id=\"" << anchor << "\"></a>";
 }
@@ -1961,21 +1989,22 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
 }
 
 static void renderQuickLinksAsTree(FTextStream &t, const QByteArray &relPath, LayoutNavEntry *root)
-
 {
-   QListIterator<LayoutNavEntry> li(root->children());
-   LayoutNavEntry *entry;
    int count = 0;
-   for (li.toFirst(); (entry = li.current()); ++li) {
+
+   for (auto entry : root->children()) {   
       if (entry->visible() && quickLinkVisible(entry->kind())) {
          count++;
       }
    }
+
    if (count > 0) { // at least one item is visible
       startQuickIndexList(t, false);
-      for (li.toFirst(); (entry = li.current()); ++li) {
+      
+      for (auto entry : root->children()) {  
          if (entry->visible() && quickLinkVisible(entry->kind())) {
             QByteArray url = entry->url();
+
             t << "<li><a href=\"" << relPath << url << "\"><span>";
             t << fixSpaces(entry->title());
             t << "</span></a>\n";
@@ -1984,6 +2013,7 @@ static void renderQuickLinksAsTree(FTextStream &t, const QByteArray &relPath, La
             t << "</li>";
          }
       }
+
       endQuickIndexList(t, false);
    }
 }
@@ -1993,43 +2023,48 @@ static void renderQuickLinksAsTabs(FTextStream &t, const QByteArray &relPath,
                                    LayoutNavEntry *hlEntry, LayoutNavEntry::Kind kind,
                                    bool highlightParent, bool highlightSearch)
 {
-   if (hlEntry->parent()) { // first draw the tabs for the parent of hlEntry
+   if (hlEntry->parent()) { 
+      // first draw the tabs for the parent of hlEntry
       renderQuickLinksAsTabs(t, relPath, hlEntry->parent(), kind, highlightParent, highlightSearch);
    }
+
    if (hlEntry->parent() && hlEntry->parent()->children().count() > 0) { // draw tabs for row containing hlEntry
       bool topLevel = hlEntry->parent()->parent() == 0;
-      QListIterator<LayoutNavEntry> li(hlEntry->parent()->children());
-      LayoutNavEntry *entry;
+     int count = 0;    
 
-      int count = 0;
-      for (li.toFirst(); (entry = li.current()); ++li) {
+      for (auto entry : hlEntry->parent()->children()) {  
          if (entry->visible() && quickLinkVisible(entry->kind())) {
             count++;
          }
       }
-      if (count > 0) { // at least one item is visible
+
+      if (count > 0) { 
+         // at least one item is visible
          startQuickIndexList(t, true, topLevel);
-         for (li.toFirst(); (entry = li.current()); ++li) {
+
+         for (auto entry : hlEntry->parent()->children()) {  
             if (entry->visible() && quickLinkVisible(entry->kind())) {
                QByteArray url = entry->url();
-               startQuickIndexItem(t, url,
-                                   entry == hlEntry  &&
-                                   (entry->children().count() > 0 ||
-                                    (entry->kind() == kind && !highlightParent)
-                                   ),
-                                   true, relPath);
+
+               startQuickIndexItem(t, url, entry == hlEntry  &&
+                                   (entry->children().count() > 0 || (entry->kind() == kind && !highlightParent) ), true, relPath);
+
                t << fixSpaces(entry->title());
                endQuickIndexItem(t, url);
             }
          }
+
          if (hlEntry->parent() == LayoutDocManager::instance().rootNavEntry()) { // first row is special as it contains the search box
             static bool searchEngine      = Config_getBool("SEARCHENGINE");
             static bool serverBasedSearch = Config_getBool("SERVER_BASED_SEARCH");
+
             if (searchEngine) {
                t << "      <li>\n";
+
                if (!serverBasedSearch) { // pure client side search
                   writeClientSearchBox(t, relPath);
                   t << "      </li>\n";
+
                } else { // server based search
                   writeServerSearchBox(t, relPath, highlightSearch);
                   if (!highlightSearch) {
@@ -2037,6 +2072,7 @@ static void renderQuickLinksAsTabs(FTextStream &t, const QByteArray &relPath,
                   }
                }
             }
+
             if (!highlightSearch) // on the search page the index will be ended by the
                // page itself
             {
@@ -2049,23 +2085,25 @@ static void renderQuickLinksAsTabs(FTextStream &t, const QByteArray &relPath,
    }
 }
 
-static void writeDefaultQuickLinks(FTextStream &t, bool compact,
-                                   HighlightedItem hli,
-                                   const char *file,
+static void writeDefaultQuickLinks(FTextStream &t, bool compact, HighlightedItem hli, const char *file, 
                                    const QByteArray &relPath)
 {
    LayoutNavEntry *root = LayoutDocManager::instance().rootNavEntry();
    LayoutNavEntry::Kind kind = (LayoutNavEntry::Kind) - 1;
    LayoutNavEntry::Kind altKind = (LayoutNavEntry::Kind) - 1; // fall back for the old layout file
    bool highlightParent = false;
-   switch (hli) { // map HLI enums to LayoutNavEntry::Kind enums
+
+   switch (hli) { 
+      // map HLI enums to LayoutNavEntry::Kind enums
+
       case HLI_Main:
          kind = LayoutNavEntry::MainPage;
          break;
+
       case HLI_Modules:
          kind = LayoutNavEntry::Modules;
          break;
-      //case HLI_Directories:      kind = LayoutNavEntry::Dirs;             break;
+ 
       case HLI_Namespaces:
          kind = LayoutNavEntry::NamespaceList;
          altKind = LayoutNavEntry::Namespaces;
@@ -2127,24 +2165,32 @@ static void writeDefaultQuickLinks(FTextStream &t, bool compact,
    if (compact) {
       // find highlighted index item
       LayoutNavEntry *hlEntry = root->find(kind, kind == LayoutNavEntry::UserGroup ? file : 0);
+
       if (!hlEntry && altKind != (LayoutNavEntry::Kind) - 1) {
          hlEntry = root->find(altKind);
          kind = altKind;
       }
-      if (!hlEntry) { // highlighted item not found in the index! -> just show the level 1 index...
+
+      if (!hlEntry) { 
+         // highlighted item not found in the index! -> just show the level 1 index...
          highlightParent = true;
-         hlEntry = root->children().getFirst();
+         hlEntry = root->children().first();
+
          if (hlEntry == 0) {
-            return; // argl, empty index!
+            // argl, empty index
+            return; 
          }
       }
+
       if (kind == LayoutNavEntry::UserGroup) {
-         LayoutNavEntry *e = hlEntry->children().getFirst();
+         LayoutNavEntry *e = hlEntry->children().first();
          if (e) {
             hlEntry = e;
          }
       }
+
       renderQuickLinksAsTabs(t, relPath, hlEntry, kind, highlightParent, hli == HLI_Search);
+
    } else {
       renderQuickLinksAsTree(t, relPath, root);
    }
@@ -2333,8 +2379,10 @@ void HtmlGenerator::writeExternalSearchPage()
 
       writePageFooter(t, "Search", "", "");
    }
+
    QByteArray scriptName = Config_getString("HTML_OUTPUT") + "/search/search.js";
    QFile sf(scriptName);
+
    if (sf.open(QIODevice::WriteOnly)) {
       FTextStream t(&sf);
       t << "var searchResultsText=["
@@ -2343,29 +2391,36 @@ void HtmlGenerator::writeExternalSearchPage()
         << "\"" << theTranslator->trSearchResults(2) << "\"];" << endl;
       t << "var serverUrl=\"" << Config_getString("SEARCHENGINE_URL") << "\";" << endl;
       t << "var tagMap = {" << endl;
+
       bool first = true;
+
       // add search mappings
       QStringList &extraSearchMappings = Config_getList("EXTRA_SEARCH_MAPPINGS");
-      char *ml = extraSearchMappings.first();
-      while (ml) {
-         QByteArray mapLine = ml;
-         int eqPos = mapLine.find('=');
+     
+      for (auto ml : extraSearchMappings) { 
+         QByteArray mapLine = ml.toUtf8();
+         int eqPos = mapLine.indexOf('=');
+
          if (eqPos != -1) { // tag command contains a destination
             QByteArray tagName = mapLine.left(eqPos).trimmed();
             QByteArray destName = mapLine.right(mapLine.length() - eqPos - 1).trimmed();
+
             if (!tagName.isEmpty()) {
                if (!first) {
                   t << "," << endl;
                }
+
                t << "  \"" << tagName << "\": \"" << destName << "\"";
                first = false;
             }
          }
-         ml = extraSearchMappings.next();
+        
       }
+
       if (!first) {
          t << endl;
       }
+
       t << "};" << endl << endl;
       t << ResourceMgr::instance().getAsString("extsearch.js");
       t << endl;

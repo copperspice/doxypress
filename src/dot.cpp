@@ -1474,9 +1474,11 @@ static QByteArray escapeTooltip(const QByteArray &tooltip)
 {
    QByteArray result;
    const char *p = tooltip.data();
+
    if (p == 0) {
       return result;
    }
+
    char c;
    while ((c = *p++)) {
       switch (c) {
@@ -1491,30 +1493,32 @@ static QByteArray escapeTooltip(const QByteArray &tooltip)
    return result;
 }
 
-static void writeBoxMemberList(FTextStream &t,
-                               char prot, MemberList *ml, ClassDef *scope,
-                               bool isStatic = false, const QHash<QString, void> *skipNames = 0)
+static void writeBoxMemberList(FTextStream &t, char prot, MemberList *ml, ClassDef *scope,
+                               bool isStatic = false, const QHash<QString, void *> *skipNames = 0)
 {
    (void)isStatic;
+
    if (ml) {
       QListIterator<MemberDef> mlia(*ml);
       MemberDef *mma;
       int totalCount = 0;
+
       for (mlia.toFirst(); (mma = mlia.current()); ++mlia) {
-         if (mma->getClassDef() == scope &&
-               (skipNames == 0 || skipNames->find(mma->name()) == 0)) {
+         if (mma->getClassDef() == scope && (skipNames == 0 || ! skipNames->contains(mma->name())) {
             totalCount++;
          }
       }
 
       int count = 0;
       for (mlia.toFirst(); (mma = mlia.current()); ++mlia) {
-         if (mma->getClassDef() == scope &&
-               (skipNames == 0 || skipNames->find(mma->name()) == 0)) {
+         if (mma->getClassDef() == scope && (skipNames == 0 || ! skipNames->contains(mma->name()))) {
+
             static int limit = Config_getInt("UML_LIMIT_NUM_FIELDS");
+
             if (limit > 0 && (totalCount > limit * 3 / 2 && count >= limit)) {
                t << theTranslator->trAndMore(QByteArray().sprintf("%d", totalCount - count)) << "\\l";
                break;
+
             } else {
                t << prot << " ";
                t << convertLabel(mma->name());
@@ -1527,6 +1531,7 @@ static void writeBoxMemberList(FTextStream &t,
             }
          }
       }
+
       // write member groups within the memberlist
       QList<MemberGroup> *mgl = ml->getMemberGroupList();
       if (mgl) {
@@ -1567,7 +1572,7 @@ void DotNode::writeBox(FTextStream &t,
    if (m_classDef && umlLook && (gt == Inheritance || gt == Collaboration)) {
       // add names shown as relations to a dictionary, so we don't show
       // them as attributes as well
-      QHash<QString, void> arrowNames;
+      QHash<QString, void *> arrowNames;
 
       if (m_edgeInfo) {
          // for each edge
@@ -2629,13 +2634,16 @@ void DotClassGraph::buildGraph(ClassDef *cd, DotNode *n, bool base, int distance
       if (dict) {
          UsesClassDictIterator ucdi(*dict);
          UsesClassDef *ucd;
+
          for (; (ucd = ucdi.current()); ++ucdi) {
             QByteArray label;
-            QDictIterator<void> dvi(*ucd->accessors);
+            QDictIterator<void *> dvi(*ucd->accessors);
+
             const char *s;
             bool first = true;
             int count = 0;
             int maxLabels = 10;
+
             for (; (s = dvi.currentKey()) && count < maxLabels; ++dvi, ++count) {
                if (first) {
                   label = s;

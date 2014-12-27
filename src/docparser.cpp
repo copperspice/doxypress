@@ -464,54 +464,64 @@ static void checkUndocumentedParams()
          ArgumentListIterator ali(*al);
          Argument *a;
          bool found = false;
+
          for (ali.toFirst(); (a = ali.current()); ++ali) {
             QByteArray argName = g_memberDef->isDefine() ? a->type : a->name;
             if (lang == SrcLangExt_Fortran) {
                argName = argName.lower();
             }
+
             argName = argName.trimmed();
             if (argName.right(3) == "...") {
                argName = argName.left(argName.length() - 3);
             }
+
             if (g_memberDef->getLanguage() == SrcLangExt_Python && argName == "self") {
                // allow undocumented self parameter for Python
-            } else if (!argName.isEmpty() && g_paramsFound.find(argName) == 0 && a->docs.isEmpty()) {
+
+            } else if (!argName.isEmpty() && ! g_paramsFound.contains(argName) && a->docs.isEmpty()) {
                found = true;
                break;
             }
          }
+
          if (found) {
             bool first = true;
-            QByteArray errMsg =
-               "The following parameters of " +
-               QByteArray(g_memberDef->qualifiedName()) +
-               QByteArray(argListToString(al)) +
-               " are not documented:\n";
+
+            QByteArray errMsg = "The following parameters of " + QByteArray(g_memberDef->qualifiedName()) +
+               QByteArray(argListToString(al)) + " are not documented:\n";
+
             for (ali.toFirst(); (a = ali.current()); ++ali) {
                QByteArray argName = g_memberDef->isDefine() ? a->type : a->name;
+
                if (lang == SrcLangExt_Fortran) {
                   argName = argName.lower();
                }
+
                argName = argName.trimmed();
+
                if (g_memberDef->getLanguage() == SrcLangExt_Python && argName == "self") {
                   // allow undocumented self parameter for Python
-               } else if (!argName.isEmpty() && g_paramsFound.find(argName) == 0) {
+
+               } else if (!argName.isEmpty() && ! g_paramsFound.contains(argName)) {
+
                   if (!first) {
                      errMsg += "\n";
+
                   } else {
                      first = false;
+
                   }
+
                   errMsg += "  parameter '" + argName + "'";
                }
             }
+
             if (g_memberDef->inheritsDocsFrom()) {
-               warn_doc_error(g_memberDef->getDefFileName(),
-                              g_memberDef->getDefLine(),
-                              substitute(errMsg, "%", "%%"));
+               warn_doc_error(g_memberDef->getDefFileName(), g_memberDef->getDefLine(), substitute(errMsg, "%", "%%"));
+
             } else {
-               warn_doc_error(g_memberDef->docFile(),
-                              g_memberDef->docLine(),
-                              substitute(errMsg, "%", "%%"));
+               warn_doc_error(g_memberDef->docFile(), g_memberDef->docLine(), substitute(errMsg, "%", "%%"));
             }
          }
       }
@@ -1825,7 +1835,7 @@ void DocCopy::parse(QList<DocNode> &children)
          bool  hasParamCommand  = g_hasParamCommand;
          bool  hasReturnCommand = g_hasReturnCommand;
 
-         QHash<QString, void>  paramsFound  = g_paramsFound;
+         QHash<QString, void *>  paramsFound  = g_paramsFound;
 
          //printf("..1 hasParamCommand=%d hasReturnCommand=%d paramsFound=%d\n",
          //      g_hasParamCommand,g_hasReturnCommand,g_paramsFound.count());

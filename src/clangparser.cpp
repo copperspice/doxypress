@@ -159,7 +159,7 @@ static void inclusionVisitor(CXFile includedFile,
 void ClangParser::determineInputFilesInSameTu(QStringList &files)
 {
    // put the files in this translation unit in a dictionary
-   QHash<QString, void> incFound(257);
+   QHash<QString, void *> incFound;
 
    clang_getInclusions(p->tu, inclusionVisitor, (CXClientData)&incFound  );
    // create a new filtered file list

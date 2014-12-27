@@ -160,8 +160,8 @@ void FileDef::findSectionsInDocumentation()
    } 
 
    for (auto ml : m_memberLists) {
-      if (ml.listType()&MemberListType_declarationLists) {
-         ml.findSectionsInDocumentation();
+      if (ml->listType() & MemberListType_declarationLists) {
+         ml->findSectionsInDocumentation();
       }
    }
 }
@@ -170,10 +170,11 @@ bool FileDef::hasDetailedDescription() const
 {
    static bool repeatBrief = Config_getBool("REPEAT_BRIEF");
    static bool sourceBrowser = Config_getBool("SOURCE_BROWSER");
-   return ((!briefDescription().isEmpty() && repeatBrief) ||
-           !documentation().trimmed().isEmpty() || // avail empty section
-           (sourceBrowser && getStartBodyLine() != -1 && getBodyDef())
-          );
+
+   // avail empty section
+
+   return ((! briefDescription().isEmpty() && repeatBrief) ||
+            !documentation().trimmed().isEmpty() ||  (sourceBrowser && getStartBodyLine() != -1 && getBodyDef()) );
 }
 
 void FileDef::writeTagFile(FTextStream &tagFile)
@@ -298,12 +299,13 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
          ol.writeString("\n\n");
          ol.popGeneratorState();
       }
+
       if (!documentation().isEmpty()) {
          ol.generateDoc(docFile(), docLine(), this, 0, documentation() + "\n", true, false);
       }
-      //printf("Writing source ref for file %s\n",name().data());
+      
       if (Config_getBool("SOURCE_BROWSER")) {
-         //if Latex enabled and LATEX_SOURCE_CODE isn't -> skip, bug_738548
+         //if Latex enabled and LATEX_SOURCE_CODE is not -> skip, bug_738548
          ol.pushGeneratorState();
          if (ol.isEnabled(OutputGenerator::Latex) && !Config_getBool("LATEX_SOURCE_CODE")) {
             ol.disable(OutputGenerator::Latex);
@@ -311,14 +313,14 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
 
          ol.startParagraph();
          QByteArray refText = theTranslator->trDefinedInSourceFile();
-         int fileMarkerPos = refText.find("@0");
+         int fileMarkerPos = refText.indexOf("@0");
+
          if (fileMarkerPos != -1) { // should always pass this.
             ol.parseText(refText.left(fileMarkerPos)); //text left from marker 1
-            ol.writeObjectLink(0, getSourceFileBase(),
-                               0, name());
-            ol.parseText(refText.right(
-                            refText.length() - fileMarkerPos - 2)); // text right from marker 2
+            ol.writeObjectLink(0, getSourceFileBase(), 0, name());
+            ol.parseText(refText.right( refText.length() - fileMarkerPos - 2)); // text right from marker 2
          }
+
          ol.endParagraph();
          //Restore settings, bug_738548
          ol.popGeneratorState();
@@ -549,8 +551,7 @@ void FileDef::writeMemberGroups(OutputList &ol)
 {
    /* write user defined member groups */
    if (m_memberGroupSDict) {
-      m_memberGroupSDict->sort();
-
+     
       for (auto mg : *m_memberGroupSDict) {
          if ((!mg->allMembersInSameSection() || !m_subGrouping) && mg->header() != "[NOHEADER]") {
             mg->writeDeclarations(ol, 0, 0, this, 0);
@@ -771,7 +772,6 @@ void FileDef::writeDocumentation(OutputList &ol)
    }
 
    //---------------------------------------- end flexible part -------------------------------
-
    ol.endContents();
 
    endFileWithNavPath(this, ol);
@@ -792,8 +792,8 @@ void FileDef::writeMemberPages(OutputList &ol)
    ol.disableAllBut(OutputGenerator::Html);
   
    for (auto ml : m_memberLists) {
-      if (ml.listType()&MemberListType_documentationLists) {
-         ml.writeDocumentationPage(ol, name(), this);
+      if (ml->listType()&MemberListType_documentationLists) {
+         ml->writeDocumentationPage(ol, name(), this);
       }
    }
 
@@ -979,8 +979,7 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
    {
       ParserInterface *pIntf = Doxygen::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
-      pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), filterSourceFiles, true), 
-                        getLanguage(), false, 0, this);
+      pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), filterSourceFiles, true), getLanguage(), false, 0, this);
    }
 }
 
@@ -995,9 +994,9 @@ void FileDef::finishParsing()
 
 void FileDef::addMembersToMemberGroup()
 { 
-   for (auto ml : m_memberLists) {
-      if (ml.listType()&MemberListType_declarationLists) {
-         ::addMembersToMemberGroup(ml, &m_memberGroupSDict, this);
+   for (auto &ml : m_memberLists) {
+      if (ml->listType() & MemberListType_declarationLists) {
+         ::addMembersToMemberGroup(ml.data(), &m_memberGroupSDict, this);
       }
    }
 
@@ -1018,21 +1017,20 @@ void FileDef::insertMember(MemberDef *md)
    if (md->isHidden()) {
       return;
    }
-   //printf("%s:FileDef::insertMember(%s (=%p) list has %d elements)\n",
-   //    name().data(),md->name().data(),md,allMemberList.count());
 
    MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
+
    if (allMemberList && allMemberList->lastIndexOf(md) != -1) { 
       return;
    }
 
-   if (allMemberList == 0) {
-      allMemberList = new MemberList(MemberListType_allMembersList);
-      m_memberLists.append(allMemberList);
+   if (allMemberList == nullptr) {   
+      m_memberLists.append(QSharedPointer<MemberList>(new MemberList(MemberListType_allMembersList)));
+      allMemberList = m_memberLists.last().data();
    }
 
    allMemberList->append(md);
-   //::addFileMemberNameToIndex(md);
+  
    switch (md->memberType()) {
       case MemberType_Variable:
       case MemberType_Property:
@@ -1068,7 +1066,7 @@ void FileDef::insertMember(MemberDef *md)
 }
 
 /*! Adds compound definition \a cd to the list of all compounds of this file */
-void FileDef::insertClass(ClassDef *cd)
+void FileDef::insertClass(QSharedPointer<ClassDef> cd)
 {
    if (cd->isHidden()) {
       return;
@@ -1083,7 +1081,7 @@ void FileDef::insertClass(ClassDef *cd)
 }
 
 /*! Adds namespace definition \a nd to the list of all compounds of this file */
-void FileDef::insertNamespace(NamespaceDef *nd)
+void FileDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
 {
    if (nd->isHidden()) {
       return;
@@ -1108,73 +1106,72 @@ QByteArray FileDef::name() const
    }
 }
 
-void FileDef::addSourceRef(int line, Definition *d, MemberDef *md)
-{
-   //printf("FileDef::addSourceDef(%d,%p,%p)\n",line,d,md);
+void FileDef::addSourceRef(int line, QSharedPointer<Definition> d, QSharedPointer<MemberDef> md)
+{   
    if (d) {
-      if (m_srcDefDict == 0) {
-         m_srcDefDict    = new QHash<long, Definition>();
+      if (m_srcDefDict == nullptr) {
+         m_srcDefDict = new QHash<long, QSharedPointer<Definition>>();
       }
 
-      if (m_srcMemberDict == 0) {
-         m_srcMemberDict = new QHash<long,MemberDef>();
+      if (m_srcMemberDict == nullptr) {
+         m_srcMemberDict = new QHash<long, QSharedPointer<MemberDef>>();
       }
 
       m_srcDefDict->insert(line, d);
+
       if (md) {
          m_srcMemberDict->insert(line, md);
       }
-      //printf("Adding member %s with anchor %s at line %d to file %s\n",
-      //    md?md->name().data():"<none>",md?md->anchor().data():"<none>",line,name().data());
+      
    }
 }
 
-Definition *FileDef::getSourceDefinition(int lineNr) const
+QSharedPointer<Definition> FileDef::getSourceDefinition(int lineNr) const
 {
-   Definition *result = 0;
+   QSharedPointer<Definition> result;
+
    if (m_srcDefDict) {
-      result = m_srcDefDict->find(lineNr);
+      result = m_srcDefDict->value(lineNr);
    }
-   //printf("%s::getSourceDefinition(%d)=%s\n",name().data(),lineNr,result?result->name().data():"none");
+ 
    return result;
 }
 
-MemberDef *FileDef::getSourceMember(int lineNr) const
+QSharedPointer<MemberDef> FileDef::getSourceMember(int lineNr) const
 {
-   MemberDef *result = 0;
+   QSharedPointer<MemberDef> result;
+
    if (m_srcMemberDict) {
-      result = m_srcMemberDict->find(lineNr);
+      result = m_srcMemberDict->value(lineNr);
    }
-   //printf("%s::getSourceMember(%d)=%s\n",name().data(),lineNr,result?result->name().data():"none");
+  
    return result;
 }
 
-
-void FileDef::addUsingDirective(NamespaceDef *nd)
+void FileDef::addUsingDirective(QSharedPointer<NamespaceDef> nd)
 {
    if (m_usingDirList == 0) {
       m_usingDirList = new NamespaceSDict;
    }
-   if (m_usingDirList->find(nd->qualifiedName()) == 0) {
-      m_usingDirList->append(nd->qualifiedName(), nd);
-   }
-   //printf("%p: FileDef::addUsingDirective: %s:%d\n",this,name().data(),usingDirList->count());
+
+   if (! m_usingDirList->find(nd->qualifiedName()) ) {
+      m_usingDirList->insert(nd->qualifiedName(), nd);
+   }   
 }
 
 NamespaceSDict *FileDef::getUsedNamespaces() const
 {
-   //printf("%p: FileDef::getUsedNamespace: %s:%d\n",this,name().data(),usingDirList?usingDirList->count():0);
    return m_usingDirList;
 }
 
-void FileDef::addUsingDeclaration(Definition *d)
+void FileDef::addUsingDeclaration(QSharedPointer<Definition> d)
 {
    if (m_usingDeclList == 0) {
       m_usingDeclList = new StringMap<QSharedPointer<Definition>>();
    }
 
-   if (m_usingDeclList->find(d->qualifiedName()) == 0) {
-      m_usingDeclList->append(d->qualifiedName(), d);
+   if (! m_usingDeclList->find(d->qualifiedName()) ) {
+      m_usingDeclList->insert(d->qualifiedName(), d);
    }
 }
 
@@ -1183,24 +1180,26 @@ void FileDef::addIncludeDependency(FileDef *fd, const char *incName, bool local,
    QByteArray iName;
 
    if (fd) {
-      iName = fd->absoluteFilePath().data();
+      iName = fd->getFilePath().data();
+
    } else {
       iName = incName;
    }
 
-   if (! iName.isEmpty() && (! m_includeDict || m_includeDict->find(iName) == 0)) {
+   if (! iName.isEmpty() && (! m_includeDict || ! m_includeDict->contains(iName))) {
 
       if (m_includeDict == 0) {
-         m_includeDict   = new QHash<QString, IncludeInfo>(61);
+         m_includeDict   = new QHash<QString, IncludeInfo>;
          m_includeList   = new QList<IncludeInfo>;        
       }
 
-      IncludeInfo *ii = new IncludeInfo;
-      ii->fileDef     = fd;
-      ii->includeName = incName;
-      ii->local       = local;
-      ii->imported    = imported;
-      ii->indirect    = indirect;
+      IncludeInfo ii;
+      ii.fileDef     = fd;
+      ii.includeName = incName;
+      ii.local       = local;
+      ii.imported    = imported;
+      ii.indirect    = indirect;
+
       m_includeList->append(ii);
       m_includeDict->insert(iName, ii);
    }
@@ -1211,18 +1210,21 @@ void FileDef::addIncludedUsingDirectives()
    if (visited) {
       return;
    }
+
    visited = true;
 
    NamespaceList nl;
 
    if (m_includeList) { 
       // file contains #includes
+
       {         
-         for (auto ii : *m_includeList) {
-            // foreach #include...
-            if (ii->fileDef && !ii->fileDef->visited) { // ...that is a known file
+         for (auto &item : *m_includeList) {
+
+            // foreach #include which is a known file
+            if (item.fileDef && ! item.fileDef->visited) {                
                // recurse into this file
-               ii->fileDef->addIncludedUsingDirectives();
+               item.fileDef->addIncludedUsingDirectives();
             }
          }
       }
@@ -1230,9 +1232,9 @@ void FileDef::addIncludedUsingDirectives()
       {      
          for (auto ii : *m_includeList) {
 
-            if (ii->fileDef && ii->fileDef != this) {
+            if (ii.fileDef && ii.fileDef != this) {
                // add using directives
-               NamespaceSDict *unl = ii->fileDef->m_usingDirList;
+               NamespaceSDict *unl = ii.fileDef->m_usingDirList;
 
                if (unl) {
                 
@@ -1242,32 +1244,26 @@ void FileDef::addIncludedUsingDirectives()
                      if (m_usingDirList == 0) {
                         m_usingDirList = new NamespaceSDict;
                      }
-
-                     //printf("Prepending used namespace %s to the list of file %s\n",
-                     //    nd->name().data(),name().data());
-                     if (m_usingDirList->find(nd->qualifiedName()) == 0) { // not yet added
-                        m_usingDirList->prepend(nd->qualifiedName(), nd);
+                   
+                     if (m_usingDirList->find(nd->qualifiedName()) == 0) { 
+                        // not yet added
+                        m_usingDirList->insert(nd->qualifiedName(), nd);
                      }
                   }
                }
 
                // add using declarations
-               StringMap<QSharedPointer<Definition>> *udl = ii->fileDef->m_usingDeclList;
+               StringMap<QSharedPointer<Definition>> *udl = ii.fileDef->m_usingDeclList;
 
-               if (udl) {
-                  StringMap<QSharedPointer<Definition>>::Iterator udi(*udl);
-                  Definition *d;
-
-                  for (udi.toLast(); (d = udi.current()); --udi) {
-
-// broom (check for --var) for (auto d : *udl) {
+               if (udl) {                  
+                  for (auto d : *udl) {
               
                      if (m_usingDeclList == 0) {
-                        m_usingDeclList = new StringMap<QSharedPointer<Definition>();
+                        m_usingDeclList = new StringMap<QSharedPointer<Definition>>();
                      }
 
                      if (m_usingDeclList->find(d->qualifiedName()) == 0) {
-                        m_usingDeclList->prepend(d->qualifiedName(), d);
+                        m_usingDeclList->insert(d->qualifiedName(), d);
                      }
 
                   }
@@ -1280,22 +1276,22 @@ void FileDef::addIncludedUsingDirectives()
 
 void FileDef::addIncludedByDependency(FileDef *fd, const char *incName, bool local, bool imported)
 {
-   //printf("FileDef::addIncludedByDependency(%p,%s,%d)\n",fd,incName,local);
-   QByteArray iName = fd ? fd->absoluteFilePath().data() : incName;
+   QByteArray iName = fd ? fd->getFilePath().data() : incName;
 
-   if (!iName.isEmpty() && (m_includedByDict == 0 || m_includedByDict->find(iName) == 0)) {
+   if (!iName.isEmpty() && (m_includedByDict == 0 || ! m_includedByDict->contains(iName))) {
 
       if (m_includedByDict == 0) {
-         m_includedByDict = new QHash<QString, IncludeInfo>(61);
+         m_includedByDict = new QHash<QString, IncludeInfo>;
          m_includedByList = new QList<IncludeInfo>;        
       }
 
-      IncludeInfo *ii = new IncludeInfo;
-      ii->fileDef     = fd;
-      ii->includeName = incName;
-      ii->local       = local;
-      ii->imported    = imported;
-      ii->indirect    = false;
+      IncludeInfo ii;
+      ii.fileDef     = fd;
+      ii.includeName = incName;
+      ii.local       = local;
+      ii.imported    = imported;
+      ii.indirect    = false;
+
       m_includedByList->append(ii);
       m_includedByDict->insert(iName, ii);
    }
@@ -1306,13 +1302,15 @@ bool FileDef::isIncluded(const QByteArray &name) const
    if (name.isEmpty()) {
       return false;
    }
-   return m_includeDict != 0 && m_includeDict->find(name) != 0;
+
+   return m_includeDict != 0 && ! m_includeDict->contains(name);
 }
 
 bool FileDef::generateSourceFile() const
 {
    static bool sourceBrowser = Config_getBool("SOURCE_BROWSER");
    static bool verbatimHeaders = Config_getBool("VERBATIM_HEADERS");
+
    QByteArray extension = name().right(4);
 
    return ! isReference() && (sourceBrowser || (verbatimHeaders && guessSection(name()) == Entry::HEADER_SEC) ) &&
@@ -1334,33 +1332,35 @@ void FileDef::addListReferences()
       }
    }
    
-   for (auto ml : m_memberLists) {
-      if (ml->listType()&MemberListType_documentationLists) {
+   for (auto &ml : m_memberLists) {
+      if (ml->listType() & MemberListType_documentationLists) {
          ml->addListReferences(this);
       }
    }
 }
-
-//-------------------------------------------------------------------
 
 static int findMatchingPart(const QByteArray &path, const QByteArray dir)
 {
    int si1;
    int pos1 = 0, pos2 = 0;
 
-   while ((si1 = path.find('/', pos1)) != -1) {
-      int si2 = dir.find('/', pos2);
-      //printf("  found slash at pos %d in path %d: %s<->%s\n",si1,si2,
-      //    path.mid(pos1,si1-pos2).data(),dir.mid(pos2).data());
-      if (si2 == -1 && path.mid(pos1, si1 - pos2) == dir.mid(pos2)) { // match at end
+   while ((si1 = path.indexOf('/', pos1)) != -1) {
+      int si2 = dir.indexOf('/', pos2);
+     
+      if (si2 == -1 && path.mid(pos1, si1 - pos2) == dir.mid(pos2)) { 
+         // match at end
          return dir.length();
       }
-      if (si1 != si2 || path.mid(pos1, si1 - pos2) != dir.mid(pos2, si2 - pos2)) { // no match in middle
+
+      if (si1 != si2 || path.mid(pos1, si1 - pos2) != dir.mid(pos2, si2 - pos2)) { 
+         // no match in middle
          return qMax(pos1 - 1, 0);
       }
+
       pos1 = si1 + 1;
       pos2 = si2 + 1;
    }
+
    return 0;
 }
 
@@ -1402,12 +1402,13 @@ static Directory *findDirNode(Directory *root, const QByteArray &name)
                dir->setLast(false);
 
                // remove DirEntry container from list (without deleting it)               
-               root->children().removeRef(dir);
+               root->children().removeOne(dir);
               
                // add new branch to the root
                if (!root->children().isEmpty()) {
-                  root->children().getLast()->setLast(false);
+                  root->children().last()->setLast(false);
                }
+
                root->addChild(base);
                return newBranch;
             }
@@ -1424,7 +1425,7 @@ static Directory *findDirNode(Directory *root, const QByteArray &name)
 
       Directory *newBranch = new Directory(root, baseName);
       if (!root->children().isEmpty()) {
-         root->children().getLast()->setLast(false);
+         root->children().last()->setLast(false);
       }
 
       root->addChild(newBranch);
@@ -1435,11 +1436,12 @@ static Directory *findDirNode(Directory *root, const QByteArray &name)
 static void mergeFileDef(Directory *root, FileDef *fd)
 {
    QByteArray rootPath = root->name();
-   QByteArray filePath = fd->absoluteFilePath();
+   QByteArray filePath = fd->getFilePath();
  
    Directory *dirNode = findDirNode(root, filePath);
+
    if (!dirNode->children().isEmpty()) {
-      dirNode->children().getLast()->setLast(false);
+      dirNode->children().last()->setLast(false);
    }
 
    DirEntry *e = new DirEntry(dirNode, fd);
@@ -1448,21 +1450,23 @@ static void mergeFileDef(Directory *root, FileDef *fd)
 
 static void addDirsAsGroups(Directory *root, GroupDef *parent, int level)
 {
-   GroupDef *gd = 0;
+   QSharedPointer<GroupDef> gd;
+
    if (root->kind() == DirEntry::Dir) {
-      gd = new GroupDef("[generated]", 1, root->path(), root->name() );
+      gd = QSharedPointer<GroupDef>(new GroupDef("[generated]", 1, root->path(), root->name() ));
 
       if (parent) {
-         parent->addGroup(gd);
+         parent->addGroup(gd.data());
          gd->makePartOfGroup(parent);
+
       } else {
-         Doxygen::groupSDict->append(root->path(), gd);
+         Doxygen::groupSDict->insert(root->path(), gd);
       }
    }
   
    for (auto de : root->children()) {
       if (de->kind() == DirEntry::Dir) {
-         addDirsAsGroups((Directory *)de, gd, level + 1);
+         addDirsAsGroups((Directory *)de, gd.data(), level + 1);
       }
    }
 }
@@ -1472,16 +1476,14 @@ void generateFileTree()
    Directory *root = new Directory(0, "root");
    root->setLast(true);
   
-   for (auto fn : *Doxygen::inputNameList ) {
-      FileNameIterator fni(*fn);
-      FileDef *fd;
-
-      for (; (fd = fni.current()); ++fni) {
+   for (auto fn : *Doxygen::inputNameList ) {    
+      for (auto fd :*fn) { 
          mergeFileDef(root, fd);
       }
    }
  
    addDirsAsGroups(root, 0, 0);
+
    delete root;
 }
 
@@ -1500,22 +1502,15 @@ void FileDef::combineUsingRelations()
 
       for (auto nd : *m_usingDirList) {
          // add used namespaces of namespace nd to this namespace
-
-         if (nd->getUsedNamespaces()) {          
-            for (auto und : *nd->getUsedNamespaces()) {
-               //printf("Adding namespace %s to the using list of %s\n",und->qualifiedName().data(),qualifiedName().data());
-               addUsingDirective(und);
-            }
+             
+         for (auto und : nd->getUsedNamespaces()) {  
+            addUsingDirective(und);
          }
-
-         // add used classes of namespace nd to this namespace
-         if (nd->getUsedClasses()) {          
-
-            for (auto nucd : *nd->getUsedClasses()) ) {
-               //printf("Adding class %s to the using list of %s\n",cd->qualifiedName().data(),qualifiedName().data());
-               addUsingDeclaration(ucd);
-            }
-         }
+        
+         // add used classes of namespace nd to this namespace                 
+         for (auto ucd : nd->getUsedClasses()) {
+            addUsingDeclaration(ucd);
+         }         
       }
    }
 }
@@ -1535,10 +1530,12 @@ void FileDef::acquireFileVersion()
 
    if (!vercmd.isEmpty() && !m_filePath.isEmpty() && m_filePath != "generated") {
       msg("Version of %s : ", m_filePath.data());
+
       QByteArray cmd = vercmd + " \"" + m_filePath + "\"";
       Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", cmd.data());
 
       FILE *f = portable_popen(cmd, "r");
+
       if (!f) {
          err("could not execute %s\n", vercmd.data());
          return;
@@ -1552,11 +1549,13 @@ void FileDef::acquireFileVersion()
       if (numRead > 0 && numRead < bufSize) {
          buf[numRead] = '\0';
          m_fileVersion = QByteArray(buf, numRead).trimmed();
+
          if (!m_fileVersion.isEmpty()) {
             msg("%s\n", m_fileVersion.data());
             return;
          }
       }
+
       msg("no version available\n");
    }
 }
@@ -1577,7 +1576,7 @@ QByteArray FileDef::includeName() const
    return getSourceFileBase();
 }
 
-MemberList *FileDef::createMemberList(MemberListType lt)
+QSharedPointer<MemberList> FileDef::createMemberList(MemberListType lt)
 {     
    for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
@@ -1585,15 +1584,15 @@ MemberList *FileDef::createMemberList(MemberListType lt)
       }
    }
 
-   // not found, create a new member list
-   ml = new MemberList(lt);
-   m_memberLists.append(ml);
-   return ml;
+   // not found, create a new member list   
+   m_memberLists.append(QSharedPointer<MemberList>(new MemberList(lt)));
+   
+   return m_memberLists.last();
 }
 
 void FileDef::addMemberToList(MemberListType lt, MemberDef *md)
 {
-   MemberList *ml = createMemberList(lt);  
+   QSharedPointer<MemberList> ml = createMemberList(lt);  
    ml->append(md);
 
    if (lt & MemberListType_documentationLists) {
@@ -1607,12 +1606,13 @@ void FileDef::addMemberToList(MemberListType lt, MemberDef *md)
 
 MemberList *FileDef::getMemberList(MemberListType lt) const
 {
-   for (auto ml : m_memberLists) {
+   for (auto &ml : m_memberLists) {
       if (ml->listType() == lt) {
-         return ml;
+         return const_cast<MemberList *>(ml.data());
       }
    }
-   return 0;
+
+   return nullptr;
 }
 
 void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title)
@@ -1638,17 +1638,17 @@ bool FileDef::isLinkableInProject() const
    return hasDocumentation() && ! isReference() && showFiles;
 }
 
-static void getAllIncludeFilesRecursively(QHash<QString, void> *filesVisited, const FileDef *fd, QStringList &incFiles)
+static void getAllIncludeFilesRecursively(QHash<QString, void *> *filesVisited, const FileDef *fd, QStringList &incFiles)
 {
    if (fd->includeFileList()) {
 
       for (auto item : *fd->includeFileList() ) {   
-         if (item->fileDef && ! item->fileDef->isReference() && ! filesVisited->find(item->fileDef->absoluteFilePath())) {
+         if (item.fileDef && ! item.fileDef->isReference() && ! filesVisited->contains(item.fileDef->getFilePath())) {
 
-            incFiles.append(item->fileDef->absoluteFilePath());
-            filesVisited->insert(item->fileDef->absoluteFilePath(), (void *)0x8);
+            incFiles.append(item.fileDef->getFilePath());
+            filesVisited->insert(item.fileDef->getFilePath(), (void *)0x8);
 
-            getAllIncludeFilesRecursively(filesVisited, item->fileDef, incFiles);
+            getAllIncludeFilesRecursively(filesVisited, item.fileDef, incFiles);
          }
       }
    }

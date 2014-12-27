@@ -124,9 +124,7 @@ static void endIndexHierarchy(OutputList &ol, int level)
 
 class MemberIndexList : public QList<MemberDef *>
 {
- public:
-   using ElementType = MemberDef;
-
+ public: 
    MemberIndexList(uint letter) : m_letter(letter)
    {}
 
@@ -142,6 +140,10 @@ class MemberIndexList : public QList<MemberDef *>
       return result;
    }
 
+   void insertDef(MemberDef *d) {
+      append(d);
+   }
+
    uint letter() const {
       return m_letter;
    }
@@ -155,10 +157,6 @@ static LetterToIndexMap<MemberIndexList>   g_fileIndexLetterUsed[FMHL_Total];
 static LetterToIndexMap<MemberIndexList>   g_namespaceIndexLetterUsed[NMHL_Total];
 
 const int maxItemsBeforeQuickIndex = MAX_ITEMS_BEFORE_QUICK_INDEX;
-
-//----------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------
 
 static void startQuickIndexList(OutputList &ol, bool letterTabs = false)
 {
@@ -184,8 +182,7 @@ static void endQuickIndexList(OutputList &ol)
    ol.writeString("  </div>\n");
 }
 
-static void startQuickIndexItem(OutputList &ol, const char *l,
-                                bool hl, bool compact, bool &first)
+static void startQuickIndexItem(OutputList &ol, const char *l, bool hl, bool compact, bool &first)
 {
    bool fancyTabs = true;
    if (!first && compact && !fancyTabs) {
@@ -1506,10 +1503,12 @@ static QByteArray letterToLabel(uint startLetter)
 /** Special class list where sorting takes IGNORE_PREFIX into account. */
 class PrefixIgnoreClassList : public SortedList<ClassDef *>
 {
- public:
-   using ElementType = ClassDef;
-
+ public:   
    PrefixIgnoreClassList(uint letter) : m_letter(letter) {}
+
+   void insertDef(ClassDef *d) {
+      append(d);
+   }
 
    uint letter() const {
       return m_letter;
@@ -1638,7 +1637,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
          int index   = getPrefixIndex(cd->className());
          startLetter = getUtf8Code(cd->className(), index);
                        
-         classesByLetter.append(startLetter, cd.data());         
+         classesByLetter.insertElement(startLetter, cd.data());         
       }
    }
 
@@ -2103,40 +2102,40 @@ void addClassMemberNameToIndex(MemberDef *md)
                                 QByteArray(md->typeString()) == "friend struct" || QByteArray(md->typeString()) == "friend union");
 
          if (!(md->isFriend() && isFriendToHide) && (!md->isEnumValue() || (md->getEnumScope() && !md->getEnumScope()->isStrong()))) {
-            g_memberIndexLetterUsed[CMHL_All].append(letter, md);
+            g_memberIndexLetterUsed[CMHL_All].insertElement(letter, md);
             documentedClassMembers[CMHL_All]++;
          }
 
          if (md->isFunction()  || md->isSlot() || md->isSignal()) {
-            g_memberIndexLetterUsed[CMHL_Functions].append(letter, md);
+            g_memberIndexLetterUsed[CMHL_Functions].insertElement(letter, md);
             documentedClassMembers[CMHL_Functions]++;
 
          } else if (md->isVariable()) {
-            g_memberIndexLetterUsed[CMHL_Variables].append(letter, md);
+            g_memberIndexLetterUsed[CMHL_Variables].insertElement(letter, md);
             documentedClassMembers[CMHL_Variables]++;
 
          } else if (md->isTypedef()) {
-            g_memberIndexLetterUsed[CMHL_Typedefs].append(letter, md);
+            g_memberIndexLetterUsed[CMHL_Typedefs].insertElement(letter, md);
             documentedClassMembers[CMHL_Typedefs]++;
 
          } else if (md->isEnumerate()) {
-            g_memberIndexLetterUsed[CMHL_Enums].append(letter, md);
+            g_memberIndexLetterUsed[CMHL_Enums].insertElement(letter, md);
             documentedClassMembers[CMHL_Enums]++;
 
          } else if (md->isEnumValue() && md->getEnumScope() && !md->getEnumScope()->isStrong()) {
-            g_memberIndexLetterUsed[CMHL_EnumValues].append(letter, md);
+            g_memberIndexLetterUsed[CMHL_EnumValues].insertElement(letter, md);
             documentedClassMembers[CMHL_EnumValues]++;
 
          } else if (md->isProperty()) {
-            g_memberIndexLetterUsed[CMHL_Properties].append(letter, md);
+            g_memberIndexLetterUsed[CMHL_Properties].insertElement(letter, md);
             documentedClassMembers[CMHL_Properties]++;
 
          } else if (md->isEvent()) {
-            g_memberIndexLetterUsed[CMHL_Events].append(letter, md);
+            g_memberIndexLetterUsed[CMHL_Events].insertElement(letter, md);
             documentedClassMembers[CMHL_Events]++;
 
          } else if (md->isRelated() || md->isForeign() || (md->isFriend() && !isFriendToHide)) {
-            g_memberIndexLetterUsed[CMHL_Related].append(letter, md);
+            g_memberIndexLetterUsed[CMHL_Related].insertElement(letter, md);
             documentedClassMembers[CMHL_Related]++;
          }
       }
@@ -2166,28 +2165,28 @@ void addNamespaceMemberNameToIndex(MemberDef *md)
 
       if (!n.isEmpty()) {
          if (!md->isEnumValue() || (md->getEnumScope() && !md->getEnumScope()->isStrong())) {
-            g_namespaceIndexLetterUsed[NMHL_All].append(letter, md);
+            g_namespaceIndexLetterUsed[NMHL_All].insertElement(letter, md);
             documentedNamespaceMembers[NMHL_All]++;
          }
 
          if (md->isFunction()) {
-            g_namespaceIndexLetterUsed[NMHL_Functions].append(letter, md);
+            g_namespaceIndexLetterUsed[NMHL_Functions].insertElement(letter, md);
             documentedNamespaceMembers[NMHL_Functions]++;
 
          } else if (md->isVariable()) {
-            g_namespaceIndexLetterUsed[NMHL_Variables].append(letter, md);
+            g_namespaceIndexLetterUsed[NMHL_Variables].insertElement(letter, md);
             documentedNamespaceMembers[NMHL_Variables]++;
 
          } else if (md->isTypedef()) {
-            g_namespaceIndexLetterUsed[NMHL_Typedefs].append(letter, md);
+            g_namespaceIndexLetterUsed[NMHL_Typedefs].insertElement(letter, md);
             documentedNamespaceMembers[NMHL_Typedefs]++;
 
          } else if (md->isEnumerate()) {
-            g_namespaceIndexLetterUsed[NMHL_Enums].append(letter, md);
+            g_namespaceIndexLetterUsed[NMHL_Enums].insertElement(letter, md);
             documentedNamespaceMembers[NMHL_Enums]++;
 
          } else if (md->isEnumValue() && md->getEnumScope() && !md->getEnumScope()->isStrong()) {
-            g_namespaceIndexLetterUsed[NMHL_EnumValues].append(letter, md);
+            g_namespaceIndexLetterUsed[NMHL_EnumValues].insertElement(letter, md);
             documentedNamespaceMembers[NMHL_EnumValues]++;
          }
       }
@@ -2219,27 +2218,32 @@ void addFileMemberNameToIndex(MemberDef *md)
       if (! n.isEmpty()) {
 
          if (!md->isEnumValue() || (md->getEnumScope() && !md->getEnumScope()->isStrong())) {
-            g_fileIndexLetterUsed[FMHL_All].append(letter, md);
+            g_fileIndexLetterUsed[FMHL_All].insertElement(letter, md);
             documentedFileMembers[FMHL_All]++;
          }
 
          if (md->isFunction()) {
-            g_fileIndexLetterUsed[FMHL_Functions].append(letter, md);
+            g_fileIndexLetterUsed[FMHL_Functions].insertElement(letter, md);
             documentedFileMembers[FMHL_Functions]++;
+
          } else if (md->isVariable()) {
-            g_fileIndexLetterUsed[FMHL_Variables].append(letter, md);
+            g_fileIndexLetterUsed[FMHL_Variables].insertElement(letter, md);
             documentedFileMembers[FMHL_Variables]++;
+
          } else if (md->isTypedef()) {
-            g_fileIndexLetterUsed[FMHL_Typedefs].append(letter, md);
+            g_fileIndexLetterUsed[FMHL_Typedefs].insertElement(letter, md);
             documentedFileMembers[FMHL_Typedefs]++;
+
          } else if (md->isEnumerate()) {
-            g_fileIndexLetterUsed[FMHL_Enums].append(letter, md);
+            g_fileIndexLetterUsed[FMHL_Enums].insertElement(letter, md);
             documentedFileMembers[FMHL_Enums]++;
+
          } else if (md->isEnumValue() && md->getEnumScope() && !md->getEnumScope()->isStrong()) {
-            g_fileIndexLetterUsed[FMHL_EnumValues].append(letter, md);
+            g_fileIndexLetterUsed[FMHL_EnumValues].insertElement(letter, md);
             documentedFileMembers[FMHL_EnumValues]++;
+
          } else if (md->isDefine()) {
-            g_fileIndexLetterUsed[FMHL_Defines].append(letter, md);
+            g_fileIndexLetterUsed[FMHL_Defines].insertElement(letter, md);
             documentedFileMembers[FMHL_Defines]++;
          }
       }

@@ -34,6 +34,9 @@
 #include <util.h>
 #include <resourcemgr.h>
 
+class TemplateToken;
+class TemplateNodeBlock;
+
 #define ENABLE_TRACING 0
 
 #if ENABLE_TRACING
@@ -42,17 +45,13 @@
 #define TRACE(x)
 #endif
 
-class TemplateToken;
-
-//-------------------------------------------------------------------
-
 static QList<QByteArray> split(const QByteArray &str, const QByteArray &sep,
                                bool allowEmptyEntries = false, bool cleanup = true)
 {
    QList<QByteArray> lst;
 
    int j = 0;
-   int i = str.find( sep, j );
+   int i = str.indexOf( sep, j);
 
    while (i != -1) {
       if ( str.mid(j, i - j).length() > 0 ) {
@@ -61,20 +60,24 @@ static QList<QByteArray> split(const QByteArray &str, const QByteArray &sep,
          } else {
             lst.append(str.mid(j, i - j));
          }
+
       } else if (allowEmptyEntries) {
          lst.append("");
       }
+
       j = i + sep.length();
-      i = str.find(sep, j);
+      i = str.indexOf(sep, j);
    }
 
    int l = str.length() - 1;
+
    if (str.mid(j, l - j + 1).length() > 0) {
       if (cleanup) {
          lst.append(str.mid(j, l - j + 1).trimmed());
       } else {
          lst.append(str.mid(j, l - j + 1));
       }
+
    } else if (allowEmptyEntries) {
       lst.append("");
    }
@@ -82,17 +85,17 @@ static QList<QByteArray> split(const QByteArray &str, const QByteArray &sep,
    return lst;
 }
 
-//----------------------------------------------------------------------------
-
 #if ENABLE_TRACING
 static QByteArray replace(const char *s, char csrc, char cdst)
 {
    QByteArray result = s;
+
    for (char *p = result.data(); *p; p++) {
       if (*p == csrc) {
          *p = cdst;
       }
    }
+
    return result;
 }
 #endif
@@ -103,10 +106,12 @@ static QByteArray replace(const char *s, char csrc, char cdst)
 class TemplateVariant::Private
 {
  public:
-   Private(Type t) : type(t), intVal(0), boolVal(true), strukt(0), list(0), raw(false) {}
+   Private(Type t) : type(t), intVal(0), boolVal(true), strukt(0), list(0), raw(false)
+   {}
+
    Type                type;
    int                 intVal;
-   QByteArray            strVal;
+   QByteArray          strVal;
    bool                boolVal;
    TemplateStructIntf *strukt;
    TemplateListIntf   *list;
@@ -179,6 +184,7 @@ TemplateVariant::TemplateVariant(const TemplateVariant &v)
 {
    p = new Private(v.p->type);
    p->raw     = v.p->raw;
+
    switch (p->type) {
       case None:
          break;
@@ -437,7 +443,7 @@ int TemplateStruct::addRef()
 
 int TemplateStruct::release()
 {
-   int count = --p->refCount;
+   int count = --(p->refCount);
 
    if (count <= 0) {
       delete this;
@@ -448,18 +454,29 @@ int TemplateStruct::release()
 
 void TemplateStruct::set(const char *name, const TemplateVariant &v)
 {
-   TemplateVariant *pv = p->fields.find(name);
-   if (pv) { // change existing field
+   auto pv = p->fields.find(name);
+
+   if (pv != p->fields.end()) { 
+      // change existing field
       *pv = v;
-   } else { // insert new field
-      p->fields.insert(name, new TemplateVariant(v));
+
+   } else { 
+      // insert new field
+      p->fields.insert(name, v);
    }
 }
 
 TemplateVariant TemplateStruct::get(const char *name) const
 {
-   TemplateVariant *v = p->fields.find(name);
-   return v ? *v : TemplateVariant();
+   auto v = p->fields.find(name);
+
+   TemplateVariant retval;
+
+   if (v != p->fields.end()) {
+      retval = *v;  
+   }
+
+   return retval;
 }
 
 TemplateStruct *TemplateStruct::alloc()
@@ -469,12 +486,13 @@ TemplateStruct *TemplateStruct::alloc()
 
 //- Template list implementation ----------------------------------------------
 
-
 /** @brief Private data of a template list object */
 class TemplateList::Private
 {
  public:
-   Private() : index(-1), refCount(0) {}
+   Private() : index(-1), refCount(0) 
+   {}
+
    QList<TemplateVariant> elems;
    int index;
    int refCount;
@@ -522,21 +540,26 @@ class TemplateListConstIterator : public TemplateListIntf::ConstIterator
    TemplateListConstIterator(const TemplateList &l) : m_list(l) {
       m_index = -1;
    }
+
    virtual ~TemplateListConstIterator() {}
+
    virtual void toFirst() {
       m_it = m_list.p->elems.begin();
       m_index = 0;
    }
+
    virtual void toLast() {
       m_it = m_list.p->elems.fromLast();
       m_index = m_list.count() - 1;
    }
+
    virtual void toNext() {
       if (m_it != m_list.p->elems.end()) {
          ++m_it;
          ++m_index;
       }
    }
+
    virtual void toPrev() {
       if (m_index > 0) {
          --m_it;
@@ -545,6 +568,7 @@ class TemplateListConstIterator : public TemplateListIntf::ConstIterator
          m_index = -1;
       }
    }
+
    virtual bool current(TemplateVariant &v) const {
       if (m_index < 0 || m_it == m_list.p->elems.end()) {
          v = TemplateVariant();
@@ -554,6 +578,7 @@ class TemplateListConstIterator : public TemplateListIntf::ConstIterator
          return true;
       }
    }
+
  private:
    const TemplateList &m_list;
    QList<TemplateVariant>::ConstIterator m_it;
@@ -652,10 +677,6 @@ class Operator
       return "?";
    }
 };
-
-//-----------------------------------------------------------------------------
-
-class TemplateNodeBlock;
 
 /** @brief Class holding stacks of blocks available in the context */
 class TemplateBlockContext
@@ -770,8 +791,6 @@ class TemplateContextImpl : public TemplateContext
    QHash<QString,  QStack<TemplateVariant> > m_indexStacks;
 };
 
-//-----------------------------------------------------------------------------
-
 /** @brief The implementation of the "add" filter */
 class FilterAdd
 {
@@ -801,8 +820,6 @@ class FilterAdd
    }
 };
 
-//-----------------------------------------------------------------------------
-
 /** @brief The implementation of the "get" filter */
 class FilterGet
 {
@@ -812,15 +829,13 @@ class FilterGet
          TemplateVariant result = v.toStruct()->get(arg.toString());
          //printf("\nok[%s]=%d\n",arg.toString().data(),result.type());
          return result;
+
       } else {
          //printf("\nnok[%s]\n",arg.toString().data());
          return false;
       }
    }
 };
-
-
-//-----------------------------------------------------------------------------
 
 /** @brief The implementation of the "append" filter */
 class FilterAppend
@@ -836,8 +851,6 @@ class FilterAppend
    }
 };
 
-//-----------------------------------------------------------------------------
-
 /** @brief The implementation of the "prepend" filter */
 class FilterPrepend
 {
@@ -852,8 +865,6 @@ class FilterPrepend
    }
 };
 
-//--------------------------------------------------------------------
-
 /** @brief The implementation of the "length" filter */
 class FilterLength
 {
@@ -862,17 +873,18 @@ class FilterLength
       if (!v.isValid()) {
          return TemplateVariant();
       }
+
       if (v.type() == TemplateVariant::List) {
          return TemplateVariant(v.toList()->count());
+
       } else if (v.type() == TemplateVariant::String) {
          return TemplateVariant((int)v.toString().length());
+
       } else {
          return TemplateVariant();
       }
    }
 };
-
-//--------------------------------------------------------------------
 
 /** @brief The implementation of the "default" filter */
 class FilterDefault
@@ -888,8 +900,6 @@ class FilterDefault
       }
    }
 };
-
-//--------------------------------------------------------------------
 
 /** @brief The implementation of the "flatten" filter */
 class FilterFlatten
@@ -926,8 +936,6 @@ class FilterFlatten
    }
 };
 
-//--------------------------------------------------------------------
-
 /** @brief The implementation of the "listsort" filter */
 class FilterListSort
 {
@@ -936,6 +944,7 @@ class FilterListSort
       QByteArray key;
       TemplateVariant value;
    };
+
    class SortList : public QList<ListElem>
    {
     public:
@@ -947,10 +956,12 @@ class FilterListSort
          return qstrcmp(item1->key, item2->key);
       }
    };
+
  public:
    static TemplateVariant apply(const TemplateVariant &v, const TemplateVariant &args) {
+
       if (v.type() == TemplateVariant::List && args.type() == TemplateVariant::String) {
-         //printf("FilterListSort::apply: v=%s args=%s\n",v.toString().data(),args.toString().data());
+        
          TemplateListIntf::ConstIterator *it = v.toList()->createIterator();
 
          TemplateVariant item;
@@ -958,27 +969,30 @@ class FilterListSort
 
          // create list of items based on v using the data in args as a sort key
          SortList sortList;
-         for (it->toFirst(); (it->current(item)); it->toNext()) {
+
+         for (it->toFirst(); (it->current(item)); it->toNext()) {        
             TemplateStructIntf *s = item.toStruct();
+
             if (s) {
                QByteArray sortKey = determineSortKey(s, args.toString());
                sortList.append(new ListElem(sortKey, item));
-               //printf("sortKey=%s\n",sortKey.data());
             }
          }
+
          delete it;
+
+
 
          // sort the list
          sortList.sort();
 
          // add sorted items to the result list
-         QListIterator<ListElem> sit(sortList);
-         ListElem *elem;
-         for (sit.toFirst(); (elem = sit.current()); ++sit) {
+         for (auto elem : sortList) {
             result->append(elem->value);
          }
          return result;
       }
+
       return v;
    }
 
@@ -1004,8 +1018,6 @@ class FilterListSort
    }
 };
 
-//--------------------------------------------------------------------
-
 /** @brief The implementation of the "groupBy" filter */
 class FilterGroupBy
 {
@@ -1014,6 +1026,7 @@ class FilterGroupBy
       QByteArray key;
       TemplateVariant value;
    };
+
    class SortList : public QList<ListElem>
    {
     public:
@@ -1025,6 +1038,7 @@ class FilterGroupBy
          return qstrcmp(item1->key, item2->key);
       }
    };
+
  public:
    static TemplateVariant apply(const TemplateVariant &v, const TemplateVariant &args) {
       if (v.type() == TemplateVariant::List && args.type() == TemplateVariant::String) {
@@ -1110,8 +1124,6 @@ class FilterPaginate
    }
 };
 
-//--------------------------------------------------------------------
-
 /** @brief The implementation of the "alphaIndex" filter */
 class FilterAlphaIndex
 {
@@ -1121,6 +1133,7 @@ class FilterAlphaIndex
       uint key;
       TemplateVariant value;
    };
+
    class SortList : public QList<ListElem>
    {
     public:
@@ -1182,8 +1195,10 @@ class FilterAlphaIndex
 
          // create list of items based on v using the data in args as a sort key
          SortList sortList;
+
          for (it->toFirst(); (it->current(item)); it->toNext()) {
             TemplateStructIntf *s = item.toStruct();
+
             if (s) {
                uint sortKey = determineSortKey(s, args.toString());
                sortList.append(new ListElem(sortKey, item));
@@ -1197,11 +1212,12 @@ class FilterAlphaIndex
 
          // create an index from the sorted list
          uint letter = 0;
-         QListIterator<ListElem> sit(sortList);
-         ListElem *elem;
+       
          TemplateStruct *indexNode = 0;
          TemplateList *indexList = 0;
-         for (sit.toFirst(); (elem = sit.current()); ++sit) {
+        
+         for (auto elem : sortList) {
+
             if (letter != elem->key || indexNode == 0) {
                // create new indexNode
                indexNode = TemplateStruct::alloc();
@@ -1220,8 +1236,6 @@ class FilterAlphaIndex
    }
 };
 
-//--------------------------------------------------------------------
-
 /** @brief The implementation of the "default" filter */
 class FilterStripPath
 {
@@ -1230,20 +1244,22 @@ class FilterStripPath
       if (!v.isValid() || v.type() != TemplateVariant::String) {
          return v;
       }
+
       QByteArray result = v.toString();
       int i = result.lastIndexOf('/');
+
       if (i != -1) {
          result = result.mid(i + 1);
       }
+
       i = result.lastIndexOf('\\');
       if (i != -1) {
+
          result = result.mid(i + 1);
       }
       return result;
    }
 };
-
-//--------------------------------------------------------------------
 
 /** @brief The implementation of the "default" filter */
 class FilterNoWrap
@@ -1253,12 +1269,11 @@ class FilterNoWrap
       if (!v.isValid() || v.type() != TemplateVariant::String) {
          return v;
       }
+
       QByteArray s = v.toString();
       return substitute(s, " ", "&#160;");
    }
 };
-
-//--------------------------------------------------------------------
 
 /** @brief The implementation of the "divisibleby" filter */
 class FilterDivisibleBy
@@ -1268,6 +1283,7 @@ class FilterDivisibleBy
       if (!v.isValid() || !n.isValid()) {
          return TemplateVariant();
       }
+
       if (v.type() == TemplateVariant::Integer && n.type() == TemplateVariant::Integer) {
          int ni = n.toInt();
          if (ni > 0) {
@@ -1281,8 +1297,6 @@ class FilterDivisibleBy
    }
 };
 
-
-//--------------------------------------------------------------------
 
 /** @brief Factory singleton for registering and creating filters */
 class TemplateFilterFactory
@@ -1314,7 +1328,8 @@ class TemplateFilterFactory
    }
 
    /** @brief Helper class for registering a filter function */
-   template<class T> class AutoRegister
+   template<class T> 
+   class AutoRegister
    {
     public:
       AutoRegister<T>(const QByteArray &key) {
@@ -1323,7 +1338,7 @@ class TemplateFilterFactory
    };
 
  private:
-   QHash<QString, void> m_registry;
+   QHash<QString, void *> m_registry;
 };
 
 // register a handlers for each filter we support
@@ -1342,7 +1357,6 @@ static TemplateFilterFactory::AutoRegister<FilterStripPath>   fStripPath("stripP
 static TemplateFilterFactory::AutoRegister<FilterAlphaIndex>  fAlphaIndex("alphaIndex");
 static TemplateFilterFactory::AutoRegister<FilterDivisibleBy> fDivisibleBy("divisibleby");
 
-//--------------------------------------------------------------------
 
 /** @brief Base class for all nodes in the abstract syntax tree of an
  *  expression.
@@ -1405,8 +1419,7 @@ class ExprAstFunctionVariable : public ExprAst
  public:
    ExprAstFunctionVariable(ExprAst *var, const QList<ExprAst> &args)
       : m_var(var), m_args(args) {
-      TRACE(("ExprAstFunctionVariable()\n"));
-      // CS BROOM  m_args.setAutoDelete(true);
+      TRACE(("ExprAstFunctionVariable()\n"));      
    }
 
    virtual TemplateVariant resolve(TemplateContext *c) {
@@ -1631,8 +1644,6 @@ class ExprAstBinary : public ExprAst
    ExprAst *m_rhs;
 };
 
-//----------------------------------------------------------
-
 /** @brief Base class of all nodes in a template's AST */
 class TemplateNode
 {
@@ -1650,7 +1661,6 @@ class TemplateNode
    TemplateNode *m_parent;
 };
 
-//----------------------------------------------------------
 
 /** @brief Parser for templates */
 class TemplateParser
@@ -2210,11 +2220,7 @@ class TemplateImpl : public TemplateNode, public Template
 TemplateContextImpl::TemplateContextImpl(const TemplateEngine *e)
    : m_engine(e), m_templateName("<unknown>"), m_line(1), m_activeEscapeIntf(0),
      m_spacelessIntf(0), m_spacelessEnabled(false), m_indices(TemplateStruct::alloc())
-{
-   // CS BROOM  m_indexStacks.setAutoDelete(true);
-   // CS BROOM  m_contextStack.setAutoDelete(true);
-   // CS BROOM  m_escapeIntfDict.setAutoDelete(true);
-
+{   
    push();
    set("index", m_indices.get());
 }
@@ -2226,60 +2232,75 @@ TemplateContextImpl::~TemplateContextImpl()
 
 void TemplateContextImpl::set(const char *name, const TemplateVariant &v)
 {
-   TemplateVariant *pv = m_contextStack.getFirst()->find(name);
+   TemplateVariant *pv = m_contextStack.first()->find(name);
 
    if (pv) {
-      m_contextStack.getFirst()->remove(name);
+      m_contextStack.first()->remove(name);
    }
-   m_contextStack.getFirst()->insert(name, new TemplateVariant(v));
+
+   m_contextStack.first()->insert(name, new TemplateVariant(v));
 }
 
 TemplateVariant TemplateContextImpl::get(const QByteArray &name) const
 {
-   int i = name.find('.');
-   if (i == -1) { // simple name
+   int i = name.indexOf('.');
+
+   if (i == -1) { 
+      // simple name
       return getPrimary(name);
-   } else { // obj.prop
+
+   } else { 
+      // obj.prop
+
       TemplateVariant v;
       QByteArray objName = name.left(i);
       v = getPrimary(objName);
+
       QByteArray propName = name.mid(i + 1);
+
       while (!propName.isEmpty()) {
-         //printf("getPrimary(%s) type=%d:%s\n",objName.data(),v.type(),v.toString().data());
+        
          if (v.type() == TemplateVariant::Struct) {
             i = propName.find(".");
             int l = i == -1 ? propName.length() : i;
             v = v.toStruct()->get(propName.left(l));
+
             if (!v.isValid()) {
                warn(m_templateName, m_line, "requesting non-existing property '%s' for object '%s'", propName.left(l).data(), objName.data());
             }
+
             if (i != -1) {
                objName = propName.left(i);
                propName = propName.mid(i + 1);
             } else {
                propName.resize(0);
             }
+
          } else if (v.type() == TemplateVariant::List) {
             i = propName.find(".");
             int l = i == -1 ? propName.length() : i;
             bool b;
             int index = propName.left(l).toInt(&b);
+
             if (b) {
                v = v.toList()->at(index);
             } else {
                warn(m_templateName, m_line, "list index '%s' is not valid", propName.data());
                break;
             }
+
             if (i != -1) {
                propName = propName.mid(i + 1);
             } else {
                propName.resize(0);
             }
+
          } else {
             warn(m_templateName, m_line, "using . on an object '%s' is not an struct or list", objName.data());
             return TemplateVariant();
          }
       }
+
       return v;
    }
 }
@@ -2521,22 +2542,21 @@ class TemplateNodeVariable : public TemplateNode
    QList<ExprAst> m_args;
 };
 
-//----------------------------------------------------------
 
 /** @brief Helper class for creating template AST tag nodes and returning
   * the template for a given node.
  */
-template<class T> class TemplateNodeCreator : public TemplateNode
+template<class T> 
+class TemplateNodeCreator : public TemplateNode
 {
  public:
    TemplateNodeCreator(TemplateParser *parser, TemplateNode *parent, int line)
       : TemplateNode(parent), m_templateName(parser->templateName()), m_line(line) {}
-   static TemplateNode *createInstance(TemplateParser *parser,
-                                       TemplateNode *parent,
-                                       int line,
+   static TemplateNode *createInstance(TemplateParser *parser, TemplateNode *parent, int line,
                                        const QByteArray &data) {
       return new T(parser, parent, line, data);
    }
+
    TemplateImpl *getTemplate() {
       TemplateNode *root = this;
       while (root && root->parent()) {
@@ -2544,6 +2564,7 @@ template<class T> class TemplateNodeCreator : public TemplateNode
       }
       return dynamic_cast<TemplateImpl *>(root);
    }
+
  protected:
    void mkpath(TemplateContextImpl *ci, const QByteArray &fileName) {
       int i = fileName.find('/');
@@ -2576,8 +2597,6 @@ template<class T> class TemplateNodeCreator : public TemplateNode
    QByteArray m_templateName;
    int m_line;
 };
-
-//----------------------------------------------------------
 
 /** @brief Class representing an 'if' tag in a template */
 class TemplateNodeIf : public TemplateNodeCreator<TemplateNodeIf>
@@ -2673,7 +2692,6 @@ class TemplateNodeIf : public TemplateNodeCreator<TemplateNodeIf>
    TemplateNodeList m_falseNodes;
 };
 
-//----------------------------------------------------------
 /** @brief Class representing a 'for' tag in a template */
 class TemplateNodeRepeat : public TemplateNodeCreator<TemplateNodeRepeat>
 {
@@ -2689,9 +2707,11 @@ class TemplateNodeRepeat : public TemplateNodeCreator<TemplateNodeRepeat>
       parser->removeNextToken(); // skip over endrepeat
       TRACE(("}TemplateNodeRepeat(%s)\n", data.data()));
    }
+
    ~TemplateNodeRepeat() {
       delete m_expr;
    }
+
    void render(FTextStream &ts, TemplateContext *c) {
       TemplateContextImpl *ci = dynamic_cast<TemplateContextImpl *>(c);
       if (ci == 0) {
@@ -2721,8 +2741,6 @@ class TemplateNodeRepeat : public TemplateNodeCreator<TemplateNodeRepeat>
    TemplateNodeList m_repeatNodes;
    ExprAst *m_expr;
 };
-
-//----------------------------------------------------------
 
 /** @brief Class representing a 'range' tag in a template */
 class TemplateNodeRange : public TemplateNodeCreator<TemplateNodeRange>
@@ -2855,8 +2873,6 @@ class TemplateNodeRange : public TemplateNodeCreator<TemplateNodeRange>
    QByteArray m_var;
    TemplateNodeList m_loopNodes;
 };
-
-//----------------------------------------------------------
 
 /** @brief Class representing a 'for' tag in a template */
 class TemplateNodeFor : public TemplateNodeCreator<TemplateNodeFor>
@@ -2996,9 +3012,7 @@ class TemplateNodeFor : public TemplateNodeCreator<TemplateNodeFor>
    TemplateNodeList m_emptyNodes;
 };
 
-//----------------------------------------------------------
-
-/** @brief Class representing an 'markers' tag in a template */
+//** @brief Class representing an 'markers' tag in a template */
 class TemplateNodeMsg : public TemplateNodeCreator<TemplateNodeMsg>
 {
  public:
@@ -3011,6 +3025,7 @@ class TemplateNodeMsg : public TemplateNodeCreator<TemplateNodeMsg>
       parser->removeNextToken(); // skip over endmsg
       TRACE(("}TemplateNodeMsg()\n"));
    }
+
    void render(FTextStream &, TemplateContext *c) {
       TemplateContextImpl *ci = dynamic_cast<TemplateContextImpl *>(c);
       if (ci == 0) {
@@ -3032,9 +3047,7 @@ class TemplateNodeMsg : public TemplateNodeCreator<TemplateNodeMsg>
 };
 
 
-//----------------------------------------------------------
-
-/** @brief Class representing a 'block' tag in a template */
+//** @brief Class representing a 'block' tag in a template */
 class TemplateNodeBlock : public TemplateNodeCreator<TemplateNodeBlock>
 {
  public:
@@ -3100,8 +3113,6 @@ class TemplateNodeBlock : public TemplateNodeCreator<TemplateNodeBlock>
    QByteArray m_blockName;
    TemplateNodeList m_nodes;
 };
-
-//----------------------------------------------------------
 
 /** @brief Class representing a 'extend' tag in a template */
 class TemplateNodeExtend : public TemplateNodeCreator<TemplateNodeExtend>
@@ -3224,8 +3235,6 @@ class TemplateNodeInclude : public TemplateNodeCreator<TemplateNodeInclude>
    ExprAst *m_includeExpr;
 };
 
-//----------------------------------------------------------
-
 /** @brief Class representing an 'create' tag in a template */
 class TemplateNodeCreate : public TemplateNodeCreator<TemplateNodeCreate>
 {
@@ -3233,6 +3242,7 @@ class TemplateNodeCreate : public TemplateNodeCreator<TemplateNodeCreate>
    TemplateNodeCreate(TemplateParser *parser, TemplateNode *parent, int line, const QByteArray &data)
       : TemplateNodeCreator<TemplateNodeCreate>(parser, parent, line), m_templateExpr(0), m_fileExpr(0) {
       TRACE(("TemplateNodeCreate(%s)\n", data.data()));
+
       ExpressionParser ep(parser, line);
       if (data.isEmpty()) {
          parser->warn(m_templateName, line, "create tag is missing arguments");
@@ -3308,8 +3318,6 @@ class TemplateNodeCreate : public TemplateNodeCreator<TemplateNodeCreate>
    ExprAst *m_fileExpr;
 };
 
-//----------------------------------------------------------
-
 /** @brief Class representing an 'tree' tag in a template */
 class TemplateNodeTree : public TemplateNodeCreator<TemplateNodeTree>
 {
@@ -3320,6 +3328,7 @@ class TemplateNodeTree : public TemplateNodeCreator<TemplateNodeTree>
       const TemplateListIntf *list;
       TemplateContext  *templateCtx;
    };
+
  public:
    TemplateNodeTree(TemplateParser *parser, TemplateNode *parent, int line, const QByteArray &data)
       : TemplateNodeCreator<TemplateNodeTree>(parser, parent, line) {
@@ -3400,8 +3409,6 @@ class TemplateNodeTree : public TemplateNodeCreator<TemplateNodeTree>
    TemplateNodeList m_treeNodes;
 };
 
-//----------------------------------------------------------
-
 /** @brief Class representing an 'indexentry' tag in a template */
 class TemplateNodeIndexEntry : public TemplateNodeCreator<TemplateNodeIndexEntry>
 {
@@ -3472,7 +3479,6 @@ class TemplateNodeIndexEntry : public TemplateNodeCreator<TemplateNodeIndexEntry
    QList<Mapping> m_args;
 };
 
-//----------------------------------------------------------
 
 /** @brief Class representing an 'opensubindex' tag in a template */
 class TemplateNodeOpenSubIndex : public TemplateNodeCreator<TemplateNodeOpenSubIndex>
@@ -3504,8 +3510,6 @@ class TemplateNodeOpenSubIndex : public TemplateNodeCreator<TemplateNodeOpenSubI
    QByteArray m_name;
 };
 
-//----------------------------------------------------------
-
 /** @brief Class representing an 'closesubindex' tag in a template */
 class TemplateNodeCloseSubIndex : public TemplateNodeCreator<TemplateNodeCloseSubIndex>
 {
@@ -3536,53 +3540,62 @@ class TemplateNodeCloseSubIndex : public TemplateNodeCreator<TemplateNodeCloseSu
    QByteArray m_name;
 };
 
-
-//----------------------------------------------------------
-
 /** @brief Class representing an 'with' tag in a template */
 class TemplateNodeWith : public TemplateNodeCreator<TemplateNodeWith>
 {
    struct Mapping {
-      Mapping(const QByteArray &n, ExprAst *e) : name(n), value(e) {}
+      Mapping(const QByteArray &n, ExprAst *e) : name(n), value(e) 
+      {
+      }
+
       ~Mapping() {
          delete value;
       }
+
       QByteArray name;
       ExprAst *value;
    };
+
  public:
    TemplateNodeWith(TemplateParser *parser, TemplateNode *parent, int line, const QByteArray &data)
       : TemplateNodeCreator<TemplateNodeWith>(parser, parent, line) {
 
       TRACE(("{TemplateNodeWith(%s)\n", data.data()));
-
-      // CS BROOM  m_args.setAutoDelete(true);
-
+    
       ExpressionParser expParser(parser, line);
       QList<QByteArray> args = split(data, " ");
-      QListIterator<QByteArray> it = args.begin();
+     
+      for (auto item : args) {
+         
+         int j = item.indexOf('=');
 
-      while (it != args.end()) {
-         QByteArray arg = *it;
-         int j = arg.find('=');
          if (j > 0) {
-            ExprAst *expr = expParser.parse(arg.mid(j + 1));
+            ExprAst *expr = expParser.parse(item.mid(j + 1));
+
             if (expr) {
-               m_args.append(new Mapping(arg.left(j), expr));
+               m_args.append(new Mapping(item.left(j), expr));
             }
+
          } else {
-            parser->warn(parser->templateName(), line, "invalid argument '%s' for 'with' tag", arg.data());
+            parser->warn(parser->templateName(), line, "invalid argument '%s' for 'with' tag", item.constData());
+
          }
-         ++it;
+         
       }
+
       QStringList stopAt;
       stopAt.append("endwith");
+
       parser->parse(this, line, stopAt, m_nodes);
       parser->removeNextToken(); // skip over endwith
+
       TRACE(("}TemplateNodeWith(%s)\n", data.data()));
    }
-   ~TemplateNodeWith() {
+
+   ~TemplateNodeWith() 
+   {
    }
+
    void render(FTextStream &ts, TemplateContext *c) {
       TemplateContextImpl *ci = dynamic_cast<TemplateContextImpl *>(c);
       if (ci == 0) {
@@ -3604,35 +3617,35 @@ class TemplateNodeWith : public TemplateNodeCreator<TemplateNodeWith>
    QList<Mapping> m_args;
 };
 
-//----------------------------------------------------------
-
 /** @brief Class representing an 'set' tag in a template */
 class TemplateNodeCycle : public TemplateNodeCreator<TemplateNodeCycle>
 {
  public:
    TemplateNodeCycle(TemplateParser *parser, TemplateNode *parent, int line, const QByteArray &data)
       : TemplateNodeCreator<TemplateNodeCycle>(parser, parent, line) {
-      TRACE(("{TemplateNodeCycle(%s)\n", data.data()));
 
-      // CS BROOM m_args.setAutoDelete(true);
+      TRACE(("{TemplateNodeCycle(%s)\n", data.data()));
+     
       m_index = 0;
 
       ExpressionParser expParser(parser, line);
-      QList<QByteArray> args = split(data, " ");
-      QListIterator<QByteArray> it = args.begin();
+      QList<QByteArray> args = split(data, " ");      
+      
+      for (auto item : args) {
+         ExprAst *expr = expParser.parse(item);
 
-      while (it != args.end()) {
-         ExprAst *expr = expParser.parse(*it);
          if (expr) {
             m_args.append(expr);
-         }
-         ++it;
+         }         
       }
+
       if (m_args.count() < 2) {
          parser->warn(parser->templateName(), line, "expected at least two arguments for cycle command, got %d", m_args.count());
       }
+
       TRACE(("}TemplateNodeCycle(%s)\n", data.data()));
    }
+
    void render(FTextStream &ts, TemplateContext *c) {
       TemplateContextImpl *ci = dynamic_cast<TemplateContextImpl *>(c);
       ci->setLocation(m_templateName, m_line);
@@ -3659,8 +3672,6 @@ class TemplateNodeCycle : public TemplateNodeCreator<TemplateNodeCycle>
    uint m_index;
    QList<ExprAst> m_args;
 };
-
-//----------------------------------------------------------
 
 /** @brief Class representing an 'set' tag in a template */
 class TemplateNodeSet : public TemplateNodeCreator<TemplateNodeSet>
@@ -3704,8 +3715,6 @@ class TemplateNodeSet : public TemplateNodeCreator<TemplateNodeSet>
    Mapping *m_mapping;
 };
 
-//----------------------------------------------------------
-
 /** @brief Class representing an 'spaceless' tag in a template */
 class TemplateNodeSpaceless : public TemplateNodeCreator<TemplateNodeSpaceless>
 {
@@ -3733,8 +3742,6 @@ class TemplateNodeSpaceless : public TemplateNodeCreator<TemplateNodeSpaceless>
  private:
    TemplateNodeList m_nodes;
 };
-
-//----------------------------------------------------------
 
 /** @brief Class representing an 'markers' tag in a template */
 class TemplateNodeMarkers : public TemplateNodeCreator<TemplateNodeMarkers>
@@ -3817,8 +3824,6 @@ class TemplateNodeMarkers : public TemplateNodeCreator<TemplateNodeMarkers>
    ExprAst *m_patternExpr;
 };
 
-//----------------------------------------------------------
-
 /** @brief Class representing an 'markers' tag in a template */
 class TemplateNodeResource : public TemplateNodeCreator<TemplateNodeResource>
 {
@@ -3876,16 +3881,11 @@ class TemplateNodeResource : public TemplateNodeCreator<TemplateNodeResource>
    ExprAst *m_asExpr;
 };
 
-//----------------------------------------------------------
-
 /** @brief Factory class for creating tag AST nodes found in a template */
 class TemplateNodeFactory
 {
  public:
-   typedef TemplateNode *(*CreateFunc)(TemplateParser *parser,
-                                       TemplateNode *parent,
-                                       int line,
-                                       const QByteArray &data);
+   typedef TemplateNode *(*CreateFunc)(TemplateParser *parser, TemplateNode *parent, int line, const QByteArray &data);
 
    static TemplateNodeFactory *instance() {
       static TemplateNodeFactory *instance = 0;
@@ -3895,14 +3895,11 @@ class TemplateNodeFactory
       return instance;
    }
 
-   TemplateNode *create(const QByteArray &name,
-                        TemplateParser *parser,
-                        TemplateNode *parent,
-                        int line,
-                        const QByteArray &data) {
-      if (m_registry.find(name) == 0) {
+   TemplateNode *create(const QByteArray &name, TemplateParser *parser, TemplateNode *parent, int line, const QByteArray &data) {
+      if (! m_registry.contains(name)) {
          return 0;
       }
+
       return ((CreateFunc)m_registry[name])(parser, parent, line, data);
    }
 
@@ -3911,7 +3908,8 @@ class TemplateNodeFactory
    }
 
    /** @brief Helper class for registering a template AST node */
-   template<class T> class AutoRegister
+   template<class T>
+   class AutoRegister
    {
     public:
       AutoRegister<T>(const QByteArray &key) {
@@ -3920,7 +3918,7 @@ class TemplateNodeFactory
    };
 
  private:
-   QHash<QString, void> m_registry;
+   QHash<QString, void *> m_registry;
 };
 
 // register a handler for each start tag we support
@@ -3944,16 +3942,15 @@ static TemplateNodeFactory::AutoRegister<TemplateNodeIndexEntry>    autoRefIndex
 static TemplateNodeFactory::AutoRegister<TemplateNodeOpenSubIndex>  autoRefOpenSubIndex("opensubindex");
 static TemplateNodeFactory::AutoRegister<TemplateNodeCloseSubIndex> autoRefCloseSubIndex("closesubindex");
 
-//----------------------------------------------------------
 
-TemplateBlockContext::TemplateBlockContext() : m_blocks(257)
+TemplateBlockContext::TemplateBlockContext()
 {
-   // CS BROOM   m_blocks.setAutoDelete(true);
 }
 
 TemplateNodeBlock *TemplateBlockContext::get(const QByteArray &name) const
 {
    QList<TemplateNodeBlock> *list = m_blocks.find(name);
+
    if (list == 0 || list->count() == 0) {
       return 0;
    } else {
@@ -4012,19 +4009,15 @@ void TemplateBlockContext::push(TemplateNodeBlock *block)
    list->append(block);
 }
 
-
-//----------------------------------------------------------
-
 /** @brief Lexer class for turning a template into a list of tokens */
 class TemplateLexer
 {
  public:
    TemplateLexer(const TemplateEngine *engine, const QByteArray &fileName, const char *data, int size);
    void tokenize(QList<TemplateToken> &tokens);
+
  private:
-   void addToken(QList<TemplateToken> &tokens,
-                 const char *data, int line, int startPos, int endPos,
-                 TemplateToken::Type type);
+   void addToken(QList<TemplateToken> &tokens,const char *data, int line, int startPos, int endPos, TemplateToken::Type type);
    void reset();
    const TemplateEngine *m_engine;
    QByteArray m_fileName;
@@ -4344,8 +4337,6 @@ TemplateImpl::TemplateImpl(TemplateEngine *engine, const QByteArray &name, const
    TemplateLexer lexer(engine, name, data, size);
    QList<TemplateToken> tokens;
    
-   // CS BROOM     tokens.setAutoDelete(true);
-
    lexer.tokenize(tokens);
    TemplateParser parser(engine, name, tokens);
    parser.parse(this, 1, QStringList(), m_nodes);
@@ -4374,8 +4365,6 @@ void TemplateImpl::render(FTextStream &ts, TemplateContext *c)
    }
 }
 
-//----------------------------------------------------------
-
 /** @brief Private data of the template engine */
 class TemplateEngine::Private
 {
@@ -4385,6 +4374,7 @@ class TemplateEngine::Private
       enum Type { Template, Block };
       IncludeEntry(Type type, const QByteArray &fileName, const QByteArray &blockName, int line)
          : m_type(type), m_fileName(fileName), m_blockName(blockName), m_line(line) {}
+
       Type type() const {
          return m_type;
       }

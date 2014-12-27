@@ -95,17 +95,18 @@ class LetterToIndexMap : public LongMap<QSharedPointer<T>>
    {      
    }
 
-   void append(uint letter, typename T::ElementType *elem) {
+   template<class E>
+   void insertElement(uint letter, E elem) {
 
       if (! this->contains(letter)) {      
          QSharedPointer<T> data (new T(letter));
          this->insert(letter, data);
 
-         data->append(elem);
+         data->insertDef(elem);
 
       }  else  {
          auto data = this->find(letter);
-         data->append(elem);
+         data->insertDef(elem);
 
       }     
    }

@@ -126,8 +126,8 @@ class FileDef : public Definition
 
    bool isDocumentationFile() const;
 
-   Definition *getSourceDefinition(int lineNr) const;
-   MemberDef *getSourceMember(int lineNr) const;
+   QSharedPointer<Definition> getSourceDefinition(int lineNr) const;
+   QSharedPointer<MemberDef> getSourceMember(int lineNr) const;
 
    /*! Returns the absolute path of this file. */
    QByteArray getPath() const {
@@ -171,7 +171,8 @@ class FileDef : public Definition
    void getAllIncludeFilesRecursively(QStringList &incFiles) const;
 
    MemberList *getMemberList(MemberListType lt) const;
-   const QList<MemberList> &getMemberLists() const {
+
+   const QList<QSharedPointer<MemberList>> &getMemberLists() const {
       return m_memberLists;
    }
 
@@ -180,11 +181,11 @@ class FileDef : public Definition
       return m_memberGroupSDict;
    }
 
-   NamespaceSDict *getNamespaceSDict() const     {
+   NamespaceSDict *getNamespaceSDict() const {
       return m_namespaceSDict;
    }
 
-   ClassSDict *getClassSDict() const             {
+   ClassSDict *getClassSDict() const {
       return m_classSDict;
    }
 
@@ -196,9 +197,7 @@ class FileDef : public Definition
       return m_subGrouping;
    }
 
-   //---------------------------------
-
-   void addSourceRef(int line, Definition *d, MemberDef *md);
+   void addSourceRef(int line, QSharedPointer<Definition> d, QSharedPointer<MemberDef> md);
 
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
@@ -213,19 +212,20 @@ class FileDef : public Definition
 
    friend void generatedFileNames();
    void insertMember(MemberDef *md);
-   void insertClass(ClassDef *cd);
-   void insertNamespace(NamespaceDef *nd);
+   void insertClass(QSharedPointer<ClassDef> cd);
+   void insertNamespace(QSharedPointer<NamespaceDef> nd);
    void computeAnchors();
 
    void setPackageDef(PackageDef *pd) {
       m_package = pd;
    }
+
    void setDirDef(DirDef *dd) {
       m_dir = dd;
    }
 
-   void addUsingDirective(NamespaceDef *nd);
-   void addUsingDeclaration(Definition *def);
+   void addUsingDirective(QSharedPointer<NamespaceDef> nd);
+   void addUsingDeclaration(QSharedPointer<Definition> def);
    void combineUsingRelations();
 
    bool generateSourceFile() const;
@@ -251,7 +251,8 @@ class FileDef : public Definition
    void acquireFileVersion();
 
  private:
-   MemberList *createMemberList(MemberListType lt);
+   QSharedPointer<MemberList> createMemberList(MemberListType lt);
+
    void addMemberToList(MemberListType lt, MemberDef *md);
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title);
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title);
@@ -285,14 +286,16 @@ class FileDef : public Definition
    QByteArray               m_fileName;
    QByteArray               m_docname;
 
-   QHash<long, Definition> *m_srcDefDict;
-   QHash<long, MemberDef>  *m_srcMemberDict;
+   QHash<long, QSharedPointer<Definition>> *m_srcDefDict;
+   QHash<long, QSharedPointer<MemberDef>>  *m_srcMemberDict;
 
    bool                     m_isSource;
    QByteArray               m_fileVersion;
    PackageDef              *m_package;
    DirDef                  *m_dir;
-   QList<MemberList>        m_memberLists;
+
+   QList<QSharedPointer<MemberList>> m_memberLists;
+
    MemberGroupSDict        *m_memberGroupSDict;
    NamespaceSDict          *m_namespaceSDict;
    ClassSDict              *m_classSDict;

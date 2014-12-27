@@ -102,13 +102,13 @@ class TemplateVariant
 
       /** Creates a delegate given an object. The method to call is passed as a template parameter */
       template <class T, TemplateVariant (T::*TMethod)(const QList<TemplateVariant> &) const>
-
       static Delegate fromMethod(const T *objectPtr) {
          Delegate d;
          d.m_objectPtr = objectPtr;
          d.m_stubPtr   = &methodStub<T, TMethod>;
          return d;
       }
+
       /** Creates a delegate given an object, and a plain function. */
       static Delegate fromFunction(const void *obj, StubType func) {
          Delegate d;
@@ -196,13 +196,13 @@ class TemplateVariant
    bool operator==(TemplateVariant &other);
 
    /** Returns the variant as a string. */
-   QByteArray            toString() const;
+   QByteArray toString() const;
 
    /** Returns the variant as a boolean. */
-   bool                toBool() const;
+   bool toBool() const;
 
    /** Returns the variant as an integer. */
-   int                 toInt() const;
+   int toInt() const;
 
    /** Returns the pointer to list referenced by this variant
     *  or 0 if this variant does not have list type.
@@ -235,9 +235,8 @@ class TemplateVariant
    Private *p;
 };
 
-//------------------------------------------------------------------------
-
-template<class T> class TemplateAutoRef
+template<class T> 
+class TemplateAutoRef
 {
  public:
    TemplateAutoRef(T *obj) : m_obj(obj) {
@@ -274,14 +273,19 @@ class TemplateListIntf
     public:
       /** Destructor for the iterator */
       virtual ~ConstIterator() {}
+
       /** Moves iterator to the first element in the list */
       virtual void toFirst() = 0;
+
       /** Moves iterator to the last element in the list */
       virtual void toLast() = 0;
+
       /** Moves iterator to the next element in the list */
       virtual void toNext() = 0;
+
       /** Moves iterator to the previous element in the list */
       virtual void toPrev() = 0;
+
       /* Returns true if the iterator points to a valid element
        * in the list, or false otherwise.
        * If true is returned, the value pointed to be the
@@ -390,8 +394,6 @@ class TemplateStruct : public TemplateStructIntf
    Private *p;
 };
 
-//------------------------------------------------------------------------
-
 /** @brief Interface used to escape characters in a string */
 class TemplateEscapeIntf
 {
@@ -400,19 +402,16 @@ class TemplateEscapeIntf
    virtual QByteArray escape(const QByteArray &input) = 0;
 };
 
-//------------------------------------------------------------------------
-
 /** @brief Interface used to remove redundant spaces inside a spaceless block */
 class TemplateSpacelessIntf
 {
  public:
    /** Returns the \a input after removing redundant whitespace */
    virtual QByteArray remove(const QByteArray &input) = 0;
+
    /** Reset filter state */
    virtual void reset() = 0;
 };
-
-//------------------------------------------------------------------------
 
 /** @brief Abstract interface for a template context.
  *

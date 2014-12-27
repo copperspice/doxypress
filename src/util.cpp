@@ -114,7 +114,7 @@ void TextGeneratorOLImpl::writeString(const char *s, bool keepSpaces) const
    if (s == 0) {
       return;
    }
-   //printf("TextGeneratorOlImpl::writeString('%s',%d)\n",s,keepSpaces);
+   
    if (keepSpaces) {
       const char *p = s;
       if (p) {
@@ -129,8 +129,10 @@ void TextGeneratorOLImpl::writeString(const char *s, bool keepSpaces) const
             }
          }
       }
+
    } else {
       m_od.docify(s);
+
    }
 }
 
@@ -143,18 +145,13 @@ void TextGeneratorOLImpl::writeBreak(int indent) const
    }
 }
 
-void TextGeneratorOLImpl::writeLink(const char *extRef, const char *file,
-                                    const char *anchor, const char *text
-                                   ) const
+void TextGeneratorOLImpl::writeLink(const char *extRef, const char *file, const char *anchor, const char *text) const
 {
-   //printf("TextGeneratorOlImpl::writeLink('%s')\n",text);
    m_od.writeObjectLink(extRef, file, anchor, text);
 }
 
-//------------------------------------------------------------------------
-//------------------------------------------------------------------------
 
-// an inheritance tree of depth of 100000 should be enough for everyone :-)
+// an inheritance tree of depth of 100000 should be enough
 const int maxInheritanceDepth = 100000;
 
 /*!
@@ -174,30 +171,38 @@ const int maxInheritanceDepth = 100000;
 QByteArray removeAnonymousScopes(const QByteArray &s)
 {
    QByteArray result;
+
    if (s.isEmpty()) {
       return result;
    }
+
    static QRegExp re("[ :]*@[0-9]+[: ]*");
    int i, l, sl = s.length();
    int p = 0;
+
    while ((i = re.match(s, p, &l)) != -1) {
       result += s.mid(p, i - p);
       int c = i;
       bool b1 = false, b2 = false;
+
       while (c < i + l && s.at(c) != '@') if (s.at(c++) == ':') {
             b1 = true;
-         }
+      }
+
       c = i + l - 1;
       while (c >= i && s.at(c) != '@') if (s.at(c--) == ':') {
             b2 = true;
-         }
+      }
+
       if (b1 && b2) {
          result += "::";
       }
+
       p = i + l;
    }
+
    result += s.right(sl - p);
-   //printf("removeAnonymousScopes(`%s')=`%s'\n",s.data(),result.data());
+  
    return result;
 }
 
@@ -205,26 +210,31 @@ QByteArray removeAnonymousScopes(const QByteArray &s)
 QByteArray replaceAnonymousScopes(const QByteArray &s, const char *replacement)
 {
    QByteArray result;
+
    if (s.isEmpty()) {
       return result;
    }
+
    static QRegExp re("@[0-9]+");
    int i, l, sl = s.length();
    int p = 0;
+
    while ((i = re.match(s, p, &l)) != -1) {
       result += s.mid(p, i - p);
+
       if (replacement) {
          result += replacement;
       } else {
          result += "__anonymous__";
       }
+
       p = i + l;
    }
+
    result += s.right(sl - p);
-   //printf("replaceAnonymousScopes(`%s')=`%s'\n",s.data(),result.data());
+   
    return result;
 }
-
 
 // strip anonymous left hand side part of the scope
 QByteArray stripAnonymousNamespaceScope(const QByteArray &s)
@@ -232,26 +242,28 @@ QByteArray stripAnonymousNamespaceScope(const QByteArray &s)
    int i, p = 0, l;
    QByteArray newScope;
    int sl = s.length();
-   while ((i = getScopeFragment(s, p, &l)) != -1) {
-      //printf("Scope fragment %s\n",s.mid(i,l).data());
+
+   while ((i = getScopeFragment(s, p, &l)) != -1) {      
       if (Doxygen::namespaceSDict->find(s.left(i + l)) != 0) {
+
          if (s.at(i) != '@') {
             if (!newScope.isEmpty()) {
                newScope += "::";
             }
             newScope += s.mid(i, l);
          }
+
       } else if (i < sl) {
          if (!newScope.isEmpty()) {
             newScope += "::";
          }
          newScope += s.right(sl - i);
-         goto done;
+         break;
       }
+
       p = i + l;
    }
-done:
-   //printf("stripAnonymousNamespaceScope(`%s')=`%s'\n",s.data(),newScope.data());
+   
    return newScope;
 }
 
@@ -261,12 +273,15 @@ void writePageRef(OutputDocInterface &od, const char *cn, const char *mn)
 
    od.disable(OutputGenerator::Html);
    od.disable(OutputGenerator::Man);
+   
    if (Config_getBool("PDF_HYPERLINKS")) {
       od.disable(OutputGenerator::Latex);
    }
+
    if (Config_getBool("RTF_HYPERLINKS")) {
       od.disable(OutputGenerator::RTF);
    }
+
    od.startPageRef();
    od.docify(theTranslator->trPageAbbreviation());
    od.endPageRef(cn, mn);
@@ -292,6 +307,7 @@ static QByteArray stripFromPath(const QByteArray &path, QStringList &l)
    const char *s = l.first();
    QByteArray potential;
    unsigned int length = 0;
+
    while (s) {
       QByteArray prefix = s;
       if (prefix.length() > length &&
@@ -834,34 +850,30 @@ bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, Fi
 bool accessibleViaUsingNamespace(const NamespaceSDict *nl, FileDef *fileScope, Definition *item,
                                  const QByteArray &explicitScopePart = "")
 {
-   static QHash<QString, void> visitedDict;
+   static QHash<QString, void *> visitedDict;
 
-   if (nl) { // check used namespaces for the class
-      NamespaceSDict::Iterator nli(*nl);
-      NamespaceDef *und;
-      int count = 0;
+   if (nl) { 
+      // check used namespaces for the class 
 
-      for (nli.toFirst(); (und = nli.current()); ++nli, count++) {
-         //printf("[Trying via used namespace %s: count=%d/%d\n",und->name().data(),
-         //    count,nl->count());
+      for (auto und : *nl) {
          Definition *sc = explicitScopePart.isEmpty() ? und : followPath(und, fileScope, explicitScopePart);
-         if (sc && item->getOuterScope() == sc) {
-            //printf("] found it\n");
+
+         if (sc && item->getOuterScope() == sc) {           
             return true;
          }
 
          QByteArray key = und->name();
-         if (und->getUsedNamespaces() && visitedDict.find(key) == 0) {
+
+         if (und->getUsedNamespaces() && ! visitedDict.contains(key)) {
             visitedDict.insert(key, (void *)0x08);
 
-            if (accessibleViaUsingNamespace(und->getUsedNamespaces(), fileScope, item, explicitScopePart)) {
-               //printf("] found it via recursion\n");
+            if (accessibleViaUsingNamespace(und->getUsedNamespaces(), fileScope, item, explicitScopePart)) {             
                return true;
             }
 
             visitedDict.remove(key);
-         }
-         //printf("] Try via used namespace done\n");
+         } 
+        
       }
    }
 
@@ -1116,15 +1128,11 @@ int isAccessibleFromWithExpScope(Definition *scope, FileDef *fileScope,
 
             NamespaceSDict *nl = nscope->getUsedNamespaces();
 
-            if (nl) {
-               NamespaceSDict::Iterator nli(*nl);
-               NamespaceDef *nd;
-               for (nli.toFirst(); (nd = nli.current()); ++nli) {
-                  if (g_visitedNamespaces.find(nd->name()) == 0) {
-                     //printf("Trying for namespace %s\n",nd->name().data());
+            if (nl) {              
+               for (auto nd : *nl) {
+                  if (! g_visitedNamespaces.contains(nd->name())) {                    
                      i = isAccessibleFromWithExpScope(scope, fileScope, item, nd->name());
-                     if (i != -1) {
-                        //printf("> found via explicit scope of used namespace\n");
+                     if (i != -1) {                        
                         goto done;
                      }
                   }
@@ -1136,22 +1144,23 @@ int isAccessibleFromWithExpScope(Definition *scope, FileDef *fileScope,
          if (scope != Doxygen::globalScope) {
             i = isAccessibleFromWithExpScope(scope->getOuterScope(), fileScope, item, explicitScopePart);
          }
-
-         //printf("  | result=%d\n",i);
+         
          result = (i == -1) ? -1 : i + 2;
       }
 
-   } else { // failed to resolve explicitScope
-      //printf("    failed to resolve: scope=%s\n",scope->name().data());
-
+   } else { 
+      // failed to resolve explicitScope
+      
       if (scope->definitionType() == Definition::TypeNamespace) {
          NamespaceDef *nscope = (NamespaceDef *)scope;
          NamespaceSDict *nl = nscope->getUsedNamespaces();
+
          if (accessibleViaUsingNamespace(nl, fileScope, item, explicitScopePart)) {
             //printf("> found in used namespace\n");
             goto done;
          }
       }
+
       if (scope == Doxygen::globalScope) {
          if (fileScope) {
             NamespaceSDict *nl = fileScope->getUsedNamespaces();
@@ -6522,30 +6531,39 @@ bool updateLanguageMapping(const QByteArray &extension, const QByteArray &langua
    // found the language
    SrcLangExt parserId = p->parserId;
    QByteArray extName = extension.toLower();
+
    if (extName.isEmpty()) {
       return false;
    }
+
    if (extName.at(0) != '.') {
       extName.prepend(".");
    }
-   if (g_extLookup.find(extension) != 0) { // language was already register for this ext
+
+   if (g_extLookup.contains(extension)) { 
+      // language was already register for this ext
       g_extLookup.remove(extension);
    }
-   //printf("registering extension %s\n",extName.data());
+   
+
    g_extLookup.insert(extName, new int(parserId));
+
    if (!Doxygen::parserManager->registerExtension(extName, p->parserName)) {
       err("Failed to assign extension %s to parser %s for language %s\n",
           extName.data(), p->parserName, language.data());
+
    } else {
       //msg("Registered extension %s to language parser %s...\n",
       //    extName.data(),language.data());
    }
+
    return true;
 }
 
 void initDefaultExtensionMapping()
 {
    g_extLookup.setAutoDelete(true);
+
    //                  extension      parser id
    updateLanguageMapping(".dox",      "c");
    updateLanguageMapping(".txt",      "c");
@@ -6591,9 +6609,7 @@ void initDefaultExtensionMapping()
    updateLanguageMapping(".f90",      "fortran");
    updateLanguageMapping(".vhd",      "vhdl");
    updateLanguageMapping(".vhdl",     "vhdl");
-   updateLanguageMapping(".tcl",      "tcl");
-   updateLanguageMapping(".ucf",      "vhdl");
-   updateLanguageMapping(".qsf",      "vhdl");
+   updateLanguageMapping(".tcl",      "tcl");  
    updateLanguageMapping(".md",       "md");
    updateLanguageMapping(".markdown", "md");
 
@@ -6603,30 +6619,33 @@ void initDefaultExtensionMapping()
 SrcLangExt getLanguageFromFileName(const QByteArray fileName)
 {
    int i = fileName.lastIndexOf('.');
-   if (i != -1) { // name has an extension
+
+   if (i != -1) { 
+      // name has an extension
       QByteArray extStr = fileName.right(fileName.length() - i).toLower();
-      if (!extStr.isEmpty()) { // non-empty extension
+
+      if (!extStr.isEmpty()) { 
+         // non-empty extension
          int *pVal = g_extLookup.find(extStr);
-         if (pVal) { // listed extension
+
+         if (pVal) { 
+            // listed extension
             //printf("getLanguageFromFileName(%s)=%x\n",extStr.data(),*pVal);
             return (SrcLangExt) * pVal;
          }
       }
    }
+
    //printf("getLanguageFromFileName(%s) not found!\n",fileName.data());
    return SrcLangExt_Cpp; // not listed => assume C-ish language.
 }
 
 //--------------------------------------------------------------------------
 
-MemberDef *getMemberFromSymbol(Definition *scope, FileDef *fileScope,
-                               const char *n)
+MemberDef *getMemberFromSymbol(Definition *scope, FileDef *fileScope, const char *n)
 {
-   if (scope == 0 ||
-         (scope->definitionType() != Definition::TypeClass &&
-          scope->definitionType() != Definition::TypeNamespace
-         )
-      ) {
+   if (scope == 0 || (scope->definitionType() != Definition::TypeClass && 
+          scope->definitionType() != Definition::TypeNamespace) ) {
       scope = Doxygen::globalScope;
    }
 
@@ -6643,6 +6662,7 @@ MemberDef *getMemberFromSymbol(Definition *scope, FileDef *fileScope,
    // mostly copied from getResolvedClassRec()
    QByteArray explicitScopePart;
    int qualifierIndex = computeQualifiedIndex(name);
+
    if (qualifierIndex != -1) {
       explicitScopePart = name.left(qualifierIndex);
       replaceNamespaceAliases(explicitScopePart, explicitScopePart.length());
@@ -6658,6 +6678,7 @@ MemberDef *getMemberFromSymbol(Definition *scope, FileDef *fileScope,
       // find the closest closest matching definition
       DefinitionListIterator dli(*(DefinitionList *)di);
       Definition *d;
+
       for (dli.toFirst(); (d = dli.current()); ++dli) {
          if (d->definitionType() == Definition::TypeMember) {
             g_visitedNamespaces.clear();
@@ -6817,9 +6838,7 @@ QByteArray parseCommentAsText(const Definition *scope, const MemberDef *md,
    return result.data();
 }
 
-//--------------------------------------------------------------------------------------
-
-static QHash<QString, void> aliasesProcessed;
+static QHash<QString, void *> aliasesProcessed;
 
 static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion = false);
 
@@ -6977,38 +6996,44 @@ static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
       int argsLen = args.length();
       QByteArray cmd = value.mid(i + 1, l - 1);
       QByteArray cmdNoArgs = cmd;
+
       int numArgs = 0;
+
       if (hasArgs) {
          numArgs = countAliasArguments(args);
          cmd += QByteArray().sprintf("{%d}", numArgs); // alias name + {n}
       }
+
       QByteArray *aliasText = Doxygen::aliasDict.find(cmd);
+
       if (numArgs > 1 && aliasText == 0) {
          // in case there is no command with numArgs parameters, but there is a command with 1 parameter,
-         // we also accept all text as the argument of that command (so you don't have to escape commas)
+         // we also accept all text as the argument of that command (so you do not have to escape commas)
+
          aliasText = Doxygen::aliasDict.find(cmdNoArgs + "{1}");
          if (aliasText) {
             cmd = cmdNoArgs + "{1}";
             args = escapeCommas(args); // escape , so that everything is seen as one argument
          }
       }
-      //printf("Found command s='%s' cmd='%s' numArgs=%d args='%s' aliasText=%s\n",
-      //    s.data(),cmd.data(),numArgs,args.data(),aliasText?aliasText->data():"<none>");
-      if ((allowRecursion || aliasesProcessed.find(cmd) == 0) && aliasText) { // expand the alias
-         //printf("is an alias!\n");
-         if (!allowRecursion) {
+     
+      if ((allowRecursion || ! aliasesProcessed.contains(cmd)) && aliasText) { 
+         // expand the alias
+         
+         if (! allowRecursion) {
             aliasesProcessed.insert(cmd, (void *)0x8);
          }
+
          QByteArray val = *aliasText;
          if (hasArgs) {
-            val = replaceAliasArguments(val, args);
-            //printf("replace '%s'->'%s' args='%s'\n",
-            //       aliasText->data(),val.data(),args.data());
+            val = replaceAliasArguments(val, args);            
          }
+
          result += expandAliasRec(val);
          if (!allowRecursion) {
             aliasesProcessed.remove(cmd);
          }
+
          p = i + l;
          if (hasArgs) {
             p += argsLen + 2;
