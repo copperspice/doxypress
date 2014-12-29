@@ -30,7 +30,6 @@
 #include <code.h>
 #include <commentcnv.h>
 #include <config.h>
-#include <context.h>
 #include <dbusxmlscanner.h>
 #include <declinfo.h>
 #include <defargs.h>
@@ -210,6 +209,7 @@ namespace {
 
    void addMethodToClass(EntryNav *rootNav, ClassDef *cd, const QByteArray &rname, bool isFriend);
 
+   void addMembersToIndex();
    void addMembersToMemberGroup();
 
    void addMemberDocs(EntryNav *rootNav, MemberDef *md, const char *funcDecl,
@@ -250,10 +250,13 @@ namespace {
    void buildTypedefList(EntryNav *rootNav);
    void buildVarList(EntryNav *rootNav);
 
+   void checkPageRelations();
+
    void combineUsingRelations();
    void computeClassRelations();
    int computeIdealCacheParam(uint v);
    void computeMemberReferences();
+   void computeMemberRelations();
    void computePageRelations(EntryNav *rootNav);
    void computeTemplateClassRelations();
 
@@ -267,6 +270,7 @@ namespace {
    void dumpSymbol(FTextStream &t, Definition *d);
    void dumpSymbolMap();
 
+   void findEnumDocumentation(EntryNav *rootNav);
    QByteArray extractClassName(EntryNav *rootNav);
    void exitDoxygen();
 
@@ -284,9 +288,11 @@ namespace {
 
    void findDefineDocumentation(EntryNav *rootNav);
    void findDirDocumentation(EntryNav *rootNav);
-   void findEnums(EntryNav *rootNav);
-   int findEndOfTemplate(const QByteArray &s, int startPos);
+   void findDocumentedEnumValues();
 
+  int findEndOfTemplate(const QByteArray &s, int startPos);
+   void findEnums(EntryNav *rootNav);
+  
    void findFriends();
    int findFunctionPtr(const QByteArray &type, int lang, int *pLength = 0);
 
@@ -299,11 +305,15 @@ namespace {
    void findMainPage(EntryNav *rootNav);
    void findMainPageTagFiles(EntryNav *rootNav);
    void findMember(EntryNav *rootNav, QByteArray funcDecl, bool overloaded, bool isFunc);
-   void findSectionsInDocumentation();
+   void findMemberDocumentation(EntryNav *rootNav);
 
+   void findObjCMethodDefinitions(EntryNav *rootNav);
+  
    Definition *findScopeFromQualifiedName(Definition *startScope, const QByteArray &n, FileDef *fileScope, TagInfo *tagInfo);
    Definition *findScopeFromQualifiedName(QSharedPointer<Definition> startScope, const QByteArray &n, FileDef *fileScope, TagInfo *tagInfo);
-
+  
+   void findSectionsInDocumentation();
+  
    void findTagLessClasses();
    void findTagLessClasses(ClassDef *cd);
 
@@ -755,13 +765,6 @@ void parseInput()
    findGroupScope(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Sorting lists...\n");
-   Doxygen::memberNameSDict->sort();
-   Doxygen::functionNameSDict->sort();
-   Doxygen::hiddenClasses->sort();
-   Doxygen::classSDict->sort();
-   Doxy_Globals::g_stats.end();
-
    msg("Freeing entry tree\n");
    delete rootNav;
 
@@ -1040,17 +1043,7 @@ void generateOutput()
       Doxygen::formulaList->generateBitmaps(Config_getString("HTML_OUTPUT"));
       Doxy_Globals::g_stats.end();
    }
-
-   if (Config_getBool("SORT_GROUP_NAMES")) {
-      Doxygen::groupSDict->sort();
-      GroupSDict::Iterator gli(*Doxygen::groupSDict);
-      GroupDef *gd;
-
-      for (gli.toFirst(); (gd = gli.current()); ++gli) {
-         gd->sortSubGroups();
-      }
-   }
-
+ 
    if (Doxy_Globals::g_outputList->count() > 0) {
       writeIndexHierarchy(*Doxy_Globals::g_outputList);
    }
@@ -1122,11 +1115,7 @@ void generateOutput()
       }
       Doxy_Globals::g_stats.end();
    }
-
-   if (Doxy_Globals::g_useOutputTemplate) {
-      generateOutputViaTemplate();
-   }
-
+ 
    if (generateRtf) {
       Doxy_Globals::g_stats.begin("Combining RTF output...\n");
       if (!RTFGenerator::preProcessFileInplace(Config_getString("RTF_OUTPUT"), "refman.rtf")) {
@@ -7089,8 +7078,6 @@ static void findMemberDocumentation(EntryNav *rootNav)
    }
 }
 
-//----------------------------------------------------------------------
-
 static void findObjCMethodDefinitions(EntryNav *rootNav)
 {
    if (rootNav->children()) {
@@ -7647,10 +7634,12 @@ static void addMembersToIndex()
 {
    MemberName *mn;
    MemberNameSDict::Iterator mnli(*Doxygen::memberNameSDict);
+
    // for each member name
    for (mnli.toFirst(); (mn = mnli.current()); ++mnli) {
       MemberDef *md;
       MemberNameIterator mni(*mn);
+
       // for each member definition
       for (mni.toFirst(); (md = mni.current()); ++mni) {
          addClassMemberNameToIndex(md);
@@ -7776,11 +7765,11 @@ static void mergeCategories()
 }
 
 // builds the list of all members for each class
-
 static void buildCompleteMemberLists()
 {
    ClassDef *cd;
    ClassSDict::Iterator cli(*Doxygen::classSDict);
+
    // merge the member list of base classes into the inherited classes.
    for (cli.toFirst(); (cd = cli.current()); ++cli) {
       if (// !cd->isReference() && // not an external class
@@ -7790,13 +7779,8 @@ static void buildCompleteMemberLists()
          cd->mergeMembers();
       }
    }
-   // now sort the member list of all classes.
-   for (cli.toFirst(); (cd = cli.current()); ++cli) {
-      if (cd->memberNameInfoSDict()) {
-         cd->memberNameInfoSDict()->sort();
-      }
-   }
 }
+   
 
 static void generateFileSources()
 {
@@ -8653,8 +8637,10 @@ static void checkPageRelations()
 {
    PageSDict::Iterator pdi(*Doxygen::pageSDict);
    PageDef *pd = 0;
+
    for (pdi.toFirst(); (pd = pdi.current()); ++pdi) {
       Definition *ppd = pd->getOuterScope();
+
       while (ppd) {
          if (ppd == pd) {
             err("page defined at line %d of file %s with label %s is a subpage "
@@ -8754,11 +8740,9 @@ static void buildExampleList(EntryNav *rootNav)
       Entry *root = rootNav->entry();
 
       if (Doxygen::exampleSDict->find(root->name)) {
-         warn(root->fileName, root->startLine,
-              "Example %s was already documented. Ignoring "
-              "documentation found here.",
-              root->name.data()
-             );
+         warn(root->fileName, root->startLine, "Example %s was already documented. Ignoring "
+              "documentation found here.", root->name.data());
+
       } else {
          PageDef *pd = new PageDef(root->fileName, root->startLine,
                                    root->name, root->brief + root->doc + root->inbodyDocs, root->args);
@@ -8768,9 +8752,7 @@ static void buildExampleList(EntryNav *rootNav)
          pd->setLanguage(root->lang);
          //pi->addSections(root->anchors);
 
-         Doxygen::exampleSDict->inSort(root->name, pd);
-         //we don't add example to groups
-         //addExampleToGroups(root,pd);
+         Doxygen::exampleSDict->inSort(root->name, pd);         
       }
 
       rootNav->releaseEntry();

@@ -59,8 +59,7 @@
 namespace {
    const char *getArg(int argc, char **argv, int &optind);
    void generateConfigFile(const char *configFile, bool shortList, bool updateOnly = false);
-   bool openOutputFile(const char *outFile, QFile &f);
-   void usageDev();
+   bool openOutputFile(const char *outFile, QFile &f);   
    void usage(const char *name);
 }
 
@@ -253,8 +252,7 @@ void readConfiguration(int argc, char **argv)
             debugLabel = getArg(argc, argv, optind);
 
             if (! debugLabel) {
-               err("option \"-d\" is missing debug specifier.\n");
-               usageDev();
+               err("option \"-d\" is missing debug specifier.\n");              
                cleanUpDoxygen();
                exit(1);
             }
@@ -308,6 +306,7 @@ void readConfiguration(int argc, char **argv)
                cleanUpDoxygen();
                exit(1);
             }
+
             if (qstricmp(formatName, "rtf") == 0) {
                if (optind + 1 >= argc) {
                   err("option \"-w rtf\" is missing a style sheet file name\n");
@@ -342,10 +341,7 @@ void readConfiguration(int argc, char **argv)
 
                   Config::instance()->substituteEnvironmentVars();
                   Config::instance()->convertStrToVal();
-
-                  // avoid bootstrapping issues when the config file already
-                  // refers to the files that we are supposed to parse.
-
+                
                   Config_getString("HTML_HEADER") = "";
                   Config_getString("HTML_FOOTER") = "";
                   Config::instance()->check();
@@ -379,6 +375,7 @@ void readConfiguration(int argc, char **argv)
                }
                cleanUpDoxygen();
                exit(0);
+
             } else if (qstricmp(formatName, "latex") == 0) {
                if (optind + 4 < argc) { // use config file to get settings
                   if (!Config::instance()->parse(argv[optind + 4])) {
@@ -452,14 +449,6 @@ void readConfiguration(int argc, char **argv)
          case 'b':
             setvbuf(stdout, NULL, _IONBF, 0);
             Doxygen::outputToWizard = true;
-            break;
-
-         case 'T':
-            msg("Warning: this option activates output generation via Django like template files. "
-                "This option is scheduled for doxygen 2.0, is currently incomplete and highly experimental! "
-                "Only use if you are a doxygen developer\n");
-
-            Doxy_Globals::g_useOutputTemplate = true;
             break;
 
          case 'h':
@@ -728,44 +717,37 @@ static bool openOutputFile(const char *outFile, QFile &f)
    return fileOpened;
 }
 
-// print developer options
-static void usageDev()
-{
-   msg("Developer parameters:\n");
-   msg("  -m          dump symbol map\n");
-   msg("  -b          output to wizard\n");
-   msg("  -T          activates output generation via Django like template\n");
-   msg("  -d <level>  enable a debug level, such as (multiple invocations of -d are possible):\n");
-
-   Debug::printFlags();
-}
-
-// print the usage
+// print usage
 static void usage(const char *name)
 {
-   msg("Doxygen version %s\n\n", versionString);
-   msg("You can use doxygen in a number of ways:\n\n");
-   msg("1) Use doxygen to generate a template configuration file:\n");
+   msg("CS Doxygen version %s\n\n", versionString);
+ 
+   msg("Generate a template configuration file:\n");
    msg("    %s [-s] -g [configName]\n\n", name);
    msg("    If - is used for configName doxygen will write to standard output.\n\n"); 
    msg("    If configName is omitted `Doxyfile' will be used as a default.\n\n");
 
-   msg("2) Use doxygen to generate documentation using an existing ");
-   msg("configuration file:\n");
-   msg("    %s [configName]\n\n", name);
-   msg("    If - is used for configName doxygen will read from standard input.\n\n");
-
-   msg("3) Use doxygen to generate a template file controlling the layout of the\n");
-   msg("   generated documentation:\n");
+   msg("Generate a file to modify the layout of the generated documentation:\n");
    msg("    %s -l layoutFileName.xml\n\n", name);
 
-   msg("4) Use doxygen to generate a template style sheet file for RTF, HTML or Latex.\n");
+   msg("Generate documentation using an existing configuration file:\n");   
+   msg("    %s [configName]\n\n", name);
+   msg("    If - is used for configName doxygen will read from standard input.\n\n");
+  
+   msg("Generate a style sheet file for RTF, HTML or Latex.\n");
    msg("    RTF:        %s -w rtf styleSheetFile\n", name);
    msg("    HTML:       %s -w html headerFile footerFile styleSheetFile [configFile]\n", name);
    msg("    LaTeX:      %s -w latex headerFile footerFile styleSheetFile [configFile]\n\n", name);
 
-   msg("5) Use doxygen to generate a rtf extensions file\n");
+   msg("Generate rtf extensions file\n");
    msg("    RTF:   %s -e rtf extensionsFile\n\n", name);
 
-   msg("6) -v print version string\n");
+   msg("  -v print version string\n");
+
+   msg("** Developer parameters:\n");
+   msg("  -m          dump symbol map\n");
+   msg("  -b          output to wizard\n"); 
+   msg("  -d <level>  enable a debug level, such as (multiple invocations of -d are possible):\n");
+  
+   Debug::printFlags();   
 }

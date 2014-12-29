@@ -45,7 +45,9 @@ char           portable_pathSeparator();
 char           portable_pathListSeparator();
 const char    *portable_ghostScriptCommand();
 const char    *portable_commandExtension();
-bool           portable_fileSystemIsCaseSensitive();
+
+Qt::CaseSensitivity   portable_fileSystemIsCaseSensitive();
+
 FILE          *portable_popen(const char *name, const char *type);
 int            portable_pclose(FILE *stream);
 void           portable_sysTimerStart();

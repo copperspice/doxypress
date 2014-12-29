@@ -154,8 +154,7 @@ class GroupDef : public Definition
    }
     
    bool hasDetailedDescription() const;   
-   void sortSubGroups();
-
+  
  protected:
    void addMemberListToGroup(MemberList *, bool (MemberDef::*)() const);
 

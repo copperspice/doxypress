@@ -58,8 +58,6 @@ CS_Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
 
 
 CS_Doxygen_SOURCES = \
-   src/template.cpp \
-   src/context.cpp \
    src/util.cpp \
    src/dot.cpp \
    src/docparser.cpp \
@@ -73,7 +71,6 @@ CS_Doxygen_SOURCES = \
    src/classlist.cpp \
    src/cmdmapper.cpp \
    src/condparser.cpp \
-   src/context.cpp \
    src/cppvalue.cpp \
    src/debug.cpp \
    src/defgen.cpp \
@@ -131,7 +128,6 @@ CS_Doxygen_SOURCES = \
    src/sqlite3gen.cpp \
    src/store.cpp \
    src/tagreader.cpp \
-   src/template.cpp \
    src/textdocvisitor.cpp \
    src/tooltip.cpp \
    src/util.cpp \

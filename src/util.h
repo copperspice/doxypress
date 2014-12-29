@@ -26,29 +26,29 @@
 #include <ctype.h>
 #include <types.h>
 
-#include <stringmap.h>
+#include <arguments.h>
+#include <bufstr.h>
+#include <classdef.h>
 #include <docparser.h>
+#include <filedef.h>
+#include <groupdef.h>
+#include <membergroup.h>
+#include <pagedef.h>
+#include <stringmap.h>
+#include <outputlist.h>
 
-class ArgumentList;
 class BaseClassDef;
-class BufStr;
-class ClassDef;
 class ClassSDict;
 class Definition;
 class ExampleSDict;
-class FileDef;
 class FileNameDict;
 class FTextStream;
-class GroupDef;
 class MemberList;
 class MemberDef;
-class MemberGroupSDict;
 class MemberNameInfoSDict;
 class NamespaceDef;
 class NamespaceSDict;
-class OutputList;
 class OutputDocInterface;
-class PageDef;
 
 struct ListItemInfo;
 struct SectionInfo;
@@ -155,7 +155,7 @@ bool getDefs(const QByteArray &scopeName,
              const char *forceTagFile = 0
             );
 
-QByteArray getFileFilter(const char *name, bool isSourceCode);
+QString getFileFilter(const char *name, bool isSourceCode);
 
 bool resolveRef(/* in */  const char *scName,
                           /* in */  const char *name,
@@ -236,9 +236,8 @@ void writeExample(OutputList &ol, ExampleSDict *el);
 
 QByteArray stripAnonymousNamespaceScope(const QByteArray &s);
 
-QByteArray stripFromPath(const QByteArray &path);
-
-QByteArray stripFromIncludePath(const QByteArray &path);
+QString stripFromPath(const QString &path);
+QString stripFromIncludePath(const QString &path);
 
 bool rightScopeMatch(const QByteArray &scope, const QByteArray &name);
 
@@ -429,7 +428,7 @@ QByteArray stripIndentation(const QByteArray &s);
 
 bool fileVisibleInIndex(FileDef *fd, bool &genSourceFile);
 
-void addDocCrossReference(MemberDef *src, MemberDef *dst);
+void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDef> dst);
 
 uint getUtf8Code( const QByteArray &s, int idx );
 uint getUtf8CodeToLower( const QByteArray &s, int idx );

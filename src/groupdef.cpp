@@ -1420,11 +1420,6 @@ void GroupDef::removeMemberFromList(MemberListType lt, MemberDef *md)
    }
 }
 
-void GroupDef::sortSubGroups()
-{
-   groupList->sort();
-}
-
 bool GroupDef::isLinkableInProject() const
 {
    return !isReference() && isLinkable();

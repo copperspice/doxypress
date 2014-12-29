@@ -22,13 +22,13 @@
 #include <QByteArray>
 
 #include <stdio.h>
+
+#include <definition.h>
 #include <docvisitor.h>
 #include <htmlattrib.h>
+#include <memberDef.h>
+#include <memberGroup.h>
 #include <section.h>
-
-class MemberDef;
-class Definition;
-class MemberGroup;
 
 /*! Main entry point for the documentation parser.
  *  @param fileName  File in which the documentation block is found (or the
@@ -50,10 +50,8 @@ class MemberGroup;
  *  @returns         Root node of the abstract syntax tree. Ownership of the
  *                   pointer is handed over to the caller.
  */
-DocRoot *validatingParseDoc(const char *fileName, int startLine,
-                            Definition *context, MemberDef *md,
-                            const char *input, bool indexWords,
-                            bool isExample, const char *exampleName = 0,
+DocRoot *validatingParseDoc(const char *fileName, int startLine, Definition *context, MemberDef *md,
+                            const char *input, bool indexWords, bool isExample, const char *exampleName = 0,
                             bool singleLine = false, bool linkFromIndex = false);
 
 /*! Main entry point for parsing simple text fragments. These
@@ -62,12 +60,7 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine,
 DocText *validatingParseText(const char *input);
 
 /*! Searches for section and anchor commands in the input */
-void docFindSections(const char *input,
-                     Definition *d,
-                     MemberGroup *m,
-                     const char *fileName);
-
-//---------------------------------------------------------------------------
+void docFindSections(const char *input, Definition *d, MemberGroup *m, const char *fileName);
 
 /** Abstract node interface with type information. */
 class DocNode

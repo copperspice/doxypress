@@ -88,7 +88,7 @@ class NamespaceDef : public Definition
 
    const NamespaceSDict &getUsedNamespaces() const;
 
-   const StringMap<QSharedPointer<Definition>> &getUsedClasses() const {
+   StringMap<QSharedPointer<Definition>> &getUsedClasses() {
       return m_usingDeclMap;
    }
 
