@@ -139,14 +139,14 @@ class Doxygen
    static QList<QByteArray>                  tagfileList;   
 
    static QHash<QString, void *>             inputPaths;   
-   static QHash<long, MemberGroupInfo>       memGrpInfoDict;
    static QHash<QString, void *>             expandAsDefinedDict;   
    static QHash<QString, RefList>           *xrefLists;           // array of xref lists: todo, test, bug, deprecated ...
    static QHash<QString, int>               *htmlDirMap;
    static QHash<QString, DefinitionIntf *>  *symbolMap;
    static QHash<QString, Definition *>      *clangUsrMap;
 
-   static StringMap<QSharedPointer<DirRelation>> dirRelations; 
+   static QHash<long, QSharedPointer<MemberGroupInfo>>  memGrpInfoDict;
+   static StringMap<QSharedPointer<DirRelation>>        dirRelations; 
      
    static QCache<QString, LookupInfo>       *lookupCache;
       

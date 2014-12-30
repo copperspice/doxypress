@@ -68,7 +68,7 @@ class StringMap
    /*! Clears the dictionary.  
     */
    void clear() {
-      m_dict->clear();
+      m_dict.clear();
    }
 
    /*! Returns the number of items stored in the dictionary

@@ -45,7 +45,6 @@ int compareValues(const BaseClassDef *item1, const BaseClassDef *item2)
 
 // ClassList --> SortedList<ClassDef *>
 // ClassListIterator --> QListIterator<ClassDef *>
-
 int compareValues(const ClassDef *item1, const ClassDef *item2)
 {
    static bool b = Config_getBool("SORT_BY_SCOPE_NAME");
@@ -59,17 +58,14 @@ int compareValues(const ClassDef *item1, const ClassDef *item2)
    }
 }
 
-
 // DirList ->  SortedList<DirDef *>
-
 int compareValues(const DirDef *item1, const DirDef *item2)
 {
-    return qstricmp(item1->shortName(), item2->shortName());
+    return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
 }
 
 
 // DotNodeList --> SortedList<DotNode *>
-
 int compareValues(const DotNode *item1, const DotNode *item2) 
 {
    return qstricmp(item1->label(), item2->label());
@@ -77,7 +73,6 @@ int compareValues(const DotNode *item1, const DotNode *item2)
 
 
 // FileList 
-
 int compareValues(const FileDef *md1, const FileDef *md2) 
 {
    return qstricmp(md1->name(), md2->name());
@@ -86,7 +81,6 @@ int compareValues(const FileDef *md1, const FileDef *md2)
 
 // FileNameList --> SortedList<FileName *>
 // FileNameListIterator -->  QListIterator<FileName *>
-
 int compareValues(const FileName *item1, const FileName *item2)
 {
    int retval;

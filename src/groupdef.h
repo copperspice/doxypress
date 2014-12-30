@@ -57,7 +57,7 @@ class GroupDef : public Definition
       return QByteArray();
    }
 
-   QByteArray displayName(bool = true) const {
+   QString displayName(bool = true) const override {
       return hasGroupTitle() ? title : Definition::name();
    }
 

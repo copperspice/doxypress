@@ -49,11 +49,10 @@ class EclipseHelp : public IndexIntf
    virtual void finalize();
    virtual void incContentsDepth();
    virtual void decContentsDepth();
-   virtual void addContentsItem(bool isDir, const char *name, const char *ref,
-                                const char *file, const char *anchor, bool separateIndex, bool addToNavIndex,
-                                Definition *def);
-   virtual void addIndexItem(Definition *context, MemberDef *md,
-                             const char *sectionAnchor, const char *title);
+   virtual void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, 
+                                const char *anchor, bool separateIndex, bool addToNavIndex, Definition *def);
+
+   virtual void addIndexItem(Definition *context, MemberDef *md, const char *sectionAnchor, const char *title);
    virtual void addIndexFile(const char *name);
    virtual void addImageFile(const char *name);
    virtual void addStyleSheetFile(const char *name);

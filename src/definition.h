@@ -109,7 +109,7 @@ class Definition : public DefinitionIntf
    }
 
    /*! Returns the name of the definition as it appears in the output */
-   virtual QByteArray displayName(bool includeScope = true) const = 0;
+   virtual QString displayName(bool includeScope = true) const = 0;
 
    /*! Returns the local name without any scope qualifiers. */
    QByteArray localName() const;
@@ -324,7 +324,8 @@ class Definition : public DefinitionIntf
    // --- actions ----
    //-----------------------------------------------------------------------------------
 
-   QByteArray convertNameToFile(const char *name, bool allowDots = false) const;
+   QString convertNameToFile(const char *name, bool allowDots = false) const;
+
    void writeSourceDef(OutputList &ol, const char *scopeName);
    void writeInlineCode(OutputList &ol, const char *scopeName);
    void writeSourceRefs(OutputList &ol, const char *scopeName);
@@ -341,7 +342,7 @@ class Definition : public DefinitionIntf
     *  the Doxygen::tagFile stream.
     */
    void writeDocAnchorsToTagFile(FTextStream &);
-   void setLocalName(const QByteArray name);
+   void setLocalName(const QString &name);
 
    void addSectionsToIndex();
    void writeToc(OutputList &ol);

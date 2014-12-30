@@ -168,14 +168,13 @@ void EclipseHelp::decContentsDepth()
  * @param def not used.
  */
 void EclipseHelp::addContentsItem(
-   bool /* isDir */,
-   const char *name,
+   bool /* isDir */, 
+   const QString &name,
    const char * /* ref */,
-   const char *file,
-   const char *anchor,
+   const char *file, const char *anchor,
    bool /* separateIndex */,
    bool /* addToNavIndex */,
-   Definition * /*def*/)
+   Definition * /*def*/ )
 {
    // -- write the topic tag
    closedTag();

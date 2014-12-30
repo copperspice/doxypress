@@ -1462,7 +1462,7 @@ void RTFDocVisitor::visitPre(DocParamList *pl)
       if (useTable) {
          m_t << "{";
       }
-      QListIterator<DocNode> li(pl->paramTypes());
+      QListIterator<DocNode *> li(pl->paramTypes());
       DocNode *type;
       bool first = true;
       for (li.toFirst(); (type = li.current()); ++li) {
@@ -1490,9 +1490,11 @@ void RTFDocVisitor::visitPre(DocParamList *pl)
    m_t << "{\\i ";
    //QStringListIterator li(pl->parameters());
    //const char *s;
-   QListIterator<DocNode> li(pl->parameters());
+
+   QListIterator<DocNode *> li(pl->parameters());
    DocNode *param;
    bool first = true;
+
    for (li.toFirst(); (param = li.current()); ++li) {
       if (!first) {
          m_t << ",";

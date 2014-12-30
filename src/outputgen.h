@@ -123,7 +123,7 @@ class CodeOutputInterface
    virtual void writeCodeAnchor(const char *name) = 0;
 
    virtual void setCurrentDoc(Definition *context, const char *anchor, bool isSourceFile) = 0;
-   virtual void addWord(const char *word, bool hiPriority) = 0;
+   virtual void addWord(const QString &word, bool hiPriority) = 0;
 };
 
 /** Base Interface used for generating output outside of the
@@ -138,14 +138,9 @@ class BaseOutputDocInterface : public CodeOutputInterface
 {
  public:
    virtual ~BaseOutputDocInterface() {}
+
    enum ParamListTypes { Param, RetVal, Exception };
-   enum SectionTypes { /*See, Return, Author, Version,
-                    Since, Date, Bug, Note,
-                    Warning, Par, Deprecated, Pre,
-                    Post, Invar, Remark, Attention,
-                    Todo, Test, RCS, */ EnumValues,
-      Examples
-   };
+   enum SectionTypes { EnumValues,  Examples};
 
    virtual bool parseText(const QByteArray &s)  {
       return s.isEmpty();
@@ -174,6 +169,17 @@ class BaseOutputDocInterface : public CodeOutputInterface
     */
    virtual void docify(const char *s) = 0;
 
+   void docify(const QString &s)
+   {
+      docify(qPrintable(s));
+   }
+
+   void docify(const QByteArray &s)
+   {
+      docify(s.constData());
+   }
+
+  
    /*! Writes a single ASCII character to the output. Converts characters
     *  that have a special meaning.
     */

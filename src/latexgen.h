@@ -344,8 +344,7 @@ class LatexGenerator : public OutputGenerator
 
    void writeCodeAnchor(const char *) {}
    void setCurrentDoc(Definition *, const char *, bool) {}
-   void addWord(const char *, bool) {}
-
+   void addWord(const QString &word, bool hiPriority) override {}
 
  private:
    LatexGenerator(const LatexGenerator &);

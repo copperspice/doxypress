@@ -40,6 +40,7 @@ DirDef::DirDef(const char *path) : Definition(path, 1, 1, path), visited(false)
    bool fullPathNames = Config_getBool("FULL_PATH_NAMES");
    // get display name (stipping the paths mentioned in STRIP_FROM_PATH)
    // get short name (last part of path)
+
    m_shortName = path;
    m_diskName = path;
 
@@ -99,10 +100,8 @@ void DirDef::addFile(FileDef *fd)
 }
 
 static QByteArray encodeDirName(const QByteArray &anchor)
-{
-   // convert to md5 hash  
+{ 
    QByteArray sigStr;
-
    sigStr = QCryptographicHash::hash(anchor, QCryptographicHash::Md5).toHex();
 
    return sigStr;  
@@ -110,9 +109,7 @@ static QByteArray encodeDirName(const QByteArray &anchor)
 
 QByteArray DirDef::getOutputFileBase() const
 {
-   // printf("DirDef::getOutputFileBase() %s->dir_%s\n", m_diskName.data(),encodeDirName(m_diskName).data());
-
-   return "dir_" + encodeDirName(m_diskName);
+   return "dir_" + encodeDirName(m_diskName.toUtf8() );
 }
 
 void DirDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
@@ -190,14 +187,19 @@ void DirDef::writeDirectoryGraph(OutputList &ol)
    // write graph dependency graph
    if (Config_getBool("DIRECTORY_GRAPH") && Config_getBool("HAVE_DOT")) {
       DotDirDeps dirDep(this);
+
       if (!dirDep.isTrivial()) {
          msg("Generating dependency graph for directory %s\n", displayName().data());
          ol.disable(OutputGenerator::Man);
+
          //ol.startParagraph();
+
          ol.startDirDepGraph();
-         ol.parseText(theTranslator->trDirDepGraph(shortName()));
+         ol.parseText(theTranslator->trDirDepGraph(qPrintable(shortName())));
          ol.endDirDepGraph(dirDep);
+
          //ol.endParagraph();
+
          ol.enableAll();
       }
    }
@@ -304,7 +306,7 @@ void DirDef::endMemberDeclarations(OutputList &ol)
 
 QByteArray DirDef::shortTitle() const
 {
-   return theTranslator->trDirReference(m_shortName);
+   return theTranslator->trDirReference(qPrintable(m_shortName));
 }
 
 bool DirDef::hasDetailedDescription() const
@@ -359,7 +361,7 @@ void DirDef::writeDocumentation(OutputList &ol)
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
    ol.pushGeneratorState();
 
-   QByteArray title = theTranslator->trDirReference(m_dispName);
+   QByteArray title = theTranslator->trDirReference(qPrintable(m_dispName));
    startFile(ol, getOutputFileBase(), name(), title, HLI_None, !generateTreeView);
 
    if (!generateTreeView) {
@@ -708,8 +710,8 @@ void DirRelation::writeDocumentation(OutputList &ol)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   QByteArray shortTitle = theTranslator->trDirRelation( m_src->shortName() + " &rarr; " + m_dst->dir()->shortName());
-   QByteArray title = theTranslator->trDirRelation( m_src->displayName() + " -> " + m_dst->dir()->shortName());
+   QByteArray shortTitle = theTranslator->trDirRelation( qPrintable(m_src->shortName() + " &rarr; " + m_dst->dir()->shortName()) );
+   QByteArray title = theTranslator->trDirRelation( qPrintable(m_src->displayName() + " -> " + m_dst->dir()->shortName()) );
 
    startFile(ol, getOutputFileBase(), getOutputFileBase(), 
              title, HLI_None, !generateTreeView, m_src->getOutputFileBase());

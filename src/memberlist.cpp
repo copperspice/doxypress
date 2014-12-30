@@ -508,7 +508,7 @@ void MemberList::writeDeclarations(OutputList &ol, ClassDef *cd, NamespaceDef *n
          inheritId = substitute(listTypeAsString(lt), "-", "_") + "_" + stripPath(cd->getOutputFileBase());
 
          if (title) {
-            ol.writeInheritedSectionTitle(inheritId, cd->getReference(), cd->getOutputFileBase(), cd->anchor(), title, cd->displayName());
+            ol.writeInheritedSectionTitle(inheritId, cd->getReference(), cd->getOutputFileBase(), cd->anchor(), title, qPrintable(cd->displayName()) );
          }
 
          ol.popGeneratorState();

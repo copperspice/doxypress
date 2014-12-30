@@ -478,7 +478,7 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
          QByteArray label = lde->kind() == LayoutDocEntry::NamespaceClasses ? "nested-classes" : "namespaces";
 
-         ol.writeSummaryLink(0, label, ls->title(lang), first);
+         ol.writeSummaryLink(QString(""), label, ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
@@ -486,7 +486,7 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
          QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
-            ol.writeSummaryLink(0, MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+            ol.writeSummaryLink(QString(""), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }
@@ -997,7 +997,6 @@ void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, c
    }
 }
 
-
 bool NamespaceDef::isLinkableInProject() const
 {
    int i = name().lastIndexOf("::");
@@ -1040,7 +1039,7 @@ QByteArray NamespaceDef::title() const
    QByteArray pageTitle;
 
    if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
-      pageTitle = theTranslator->trPackage(displayName());
+      pageTitle = theTranslator->trPackage( qPrintable(displayName() ));
 
    } else if (lang == SrcLangExt_Fortran) {
       pageTitle = theTranslator->trModuleReference(displayName());
@@ -1053,7 +1052,9 @@ QByteArray NamespaceDef::title() const
 
    } else {
       pageTitle = theTranslator->trNamespaceReference(displayName());
+
    }
+
    return pageTitle;
 }
 

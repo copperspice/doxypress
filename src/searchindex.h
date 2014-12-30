@@ -77,7 +77,7 @@ class SearchIndexIntf
 
    virtual ~SearchIndexIntf() {}
    virtual void setCurrentDoc(Definition *ctx, const char *anchor, bool isSourceFile) = 0;
-   virtual void addWord(const char *word, bool hiPriority) = 0;
+   virtual void addWord(const QString &word, bool hiPriority) = 0;
    virtual void write(const char *file) = 0;
 
    Kind kind() const {
@@ -93,11 +93,11 @@ class SearchIndex : public SearchIndexIntf
  public:
    SearchIndex();
    void setCurrentDoc(Definition *ctx, const char *anchor, bool isSourceFile);
-   void addWord(const char *word, bool hiPriority);
+   void addWord(const QString &word, bool hiPriority) override;
    void write(const char *file);
 
  private:
-   void addWord(const char *word, bool hiPrio, bool recurse);
+   void addWord(const QString &word, bool hiPrio, bool recurse);
 
    QHash<QString, IndexWord *>  m_words;         // broom - merge these two containers
    QVector<QList<IndexWord *>>  m_index;
@@ -117,7 +117,7 @@ class SearchIndexExternal : public SearchIndexIntf
    SearchIndexExternal();
    ~SearchIndexExternal();
    void setCurrentDoc(Definition *ctx, const char *anchor, bool isSourceFile);
-   void addWord(const char *word, bool hiPriority);
+   void addWord(const QString &word, bool hiPriority) override;
    void write(const char *file);
 
  private:   

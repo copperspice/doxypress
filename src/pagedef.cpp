@@ -81,7 +81,7 @@ void PageDef::setFileName(const char *name, bool dontEscape)
    static bool shortNames = Config_getBool("SHORT_NAMES");
 
    if (shortNames && !dontEscape) {
-      m_fileName = convertNameToFile(name);
+      m_fileName = convertNameToFile(name).toUtf8();
 
    } else {
       m_fileName = name;

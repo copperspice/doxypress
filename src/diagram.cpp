@@ -357,7 +357,7 @@ QByteArray DiagramItem::label() const
       result = insertTemplateSpecifierInScope(n, templSpec);
 
    } else {
-      result = classDef->displayName();
+      result = classDef->displayName().toUtf8();
    }
 
    if (Config_getBool("HIDE_SCOPE_NAMES")) {

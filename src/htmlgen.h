@@ -47,11 +47,12 @@ class HtmlCodeGenerator : public CodeOutputInterface
    void endFontClass();
    void writeCodeAnchor(const char *anchor);
    void setCurrentDoc(Definition *, const char *, bool) {}
-   void addWord(const char *, bool) {}
+   void addWord(const QString &name, bool) override {}
 
  private:
    void _writeCodeLink(const char *className, const char *ref, const char *file, const char *anchor, const char *name, const char *tooltip);
    void docify(const char *str);
+
    bool m_streamSet;
    FTextStream m_t;
    int m_col;
@@ -155,7 +156,7 @@ class HtmlGenerator : public OutputGenerator
 
    // **
    void setCurrentDoc(Definition *context, const char *anchor, bool isSourceFile);
-   void addWord(const char *word, bool hiPriority);
+   void addWord(const QString &word, bool hiPriority) override;
    void writeDoc(DocNode *, Definition *, MemberDef *);
 
    void startFile(const char *name, const char *manName, const char *title);

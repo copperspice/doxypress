@@ -2625,17 +2625,22 @@ void HtmlGenerator::writeSummaryLink(const char *file, const char *anchor, const
 {
    if (first) {
       t << "  <div class=\"summary\">\n";
+
    } else {
       t << " &#124;\n";
    }
+
    t << "<a href=\"";
-   if (file) {
+
+   if (file && *file) {
       t << relPath << file;
       t << Doxygen::htmlFileExtension;
+
    } else {
       t << "#";
       t << anchor;
    }
+
    t << "\">";
    t << title;
    t << "</a>";
@@ -2657,7 +2662,7 @@ void HtmlGenerator::setCurrentDoc(Definition *context, const char *anchor, bool 
    }
 }
 
-void HtmlGenerator::addWord(const char *word, bool hiPriority)
+void HtmlGenerator::addWord(const QString &word, bool hiPriority)
 {
    if (Doxygen::searchIndex) {
       Doxygen::searchIndex->addWord(word, hiPriority);

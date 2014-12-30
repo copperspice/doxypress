@@ -36,7 +36,7 @@ class IndexIntf
    virtual void finalize() = 0;
    virtual void incContentsDepth() = 0;
    virtual void decContentsDepth() = 0;
-   virtual void addContentsItem(bool isDir, const char *name, const char *ref, const char *file, const char *anchor, 
+   virtual void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor, 
                                 bool separateIndex, bool addToNavIndex, Definition *def) = 0;
 
    virtual void addIndexItem(Definition *context, MemberDef *md, const char *sectionAnchor, const char *title) = 0;
@@ -156,11 +156,11 @@ class IndexList : public IndexIntf
       }
    }
 
-   void addContentsItem(bool isDir, const char *name, const char *ref, const char *file, const char *anchor, 
+   void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor, 
                         bool separateIndex = false, bool addToNavIndex = false, Definition *def = 0) {
 
       if (m_enabled)  {
-         call_forEach<bool, const char *, const char *, const char *, const char *, bool, bool, Definition *>
+         call_forEach<bool, const QString &, const char *, const char *, const char *, bool, bool, Definition *>
             (&IndexIntf::addContentsItem, isDir, name, ref, file, anchor, separateIndex, addToNavIndex, def);
       }
    }

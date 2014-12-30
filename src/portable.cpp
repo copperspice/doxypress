@@ -18,6 +18,7 @@
 #include <qglobal.h>
 #include <QDateTime>
 #include <QDir>
+#include <QFSFileEngine>
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -382,13 +383,15 @@ const char *portable_commandExtension()
 #endif
 }
 
-bool portable_fileSystemIsCaseSensitive()
+Qt::CaseSensitivity portable_fileSystemIsCaseSensitive()
 {
-#if defined(_WIN32) || defined(__MACOSX__) || defined(__APPLE__)
-   return false;
-#else
-   return true;
-#endif
+   QFSFileEngine engine;
+   
+   if (engine.caseSensitive()){ 
+      return Qt::CaseSensitive;
+   } else {
+      return Qt::CaseInsensitive;
+   }
 }
 
 FILE *portable_popen(const char *name, const char *type)

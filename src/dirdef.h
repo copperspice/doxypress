@@ -52,11 +52,12 @@ class DirDef : public Definition
 
    bool isLinkableInProject() const;
    bool isLinkable() const;
-   QByteArray displayName(bool = true) const {
+
+   QString displayName(bool = true) const override {
       return m_dispName;
    }
 
-   const QByteArray &shortName() const {
+   const QString &shortName() const {
       return m_shortName;
    }
 
@@ -128,9 +129,9 @@ class DirDef : public Definition
 
    SortedList<DirDef *> m_subdirs;
 
-   QByteArray m_dispName;
-   QByteArray m_shortName;
-   QByteArray m_diskName;
+   QString m_dispName;
+   QString m_shortName;
+   QString m_diskName;
 
    // list of files in the group
    FileList *m_fileList;                 
@@ -228,7 +229,7 @@ class DirSDict : public StringMap<QSharedPointer<DirDef>>
    DirSDict() : StringMap<QSharedPointer<DirDef>>() {}
 
    int compareValues(const DirDef *item1, const DirDef *item2) const {
-      return qstricmp(item1->shortName(), item2->shortName());
+      return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
    }
 };
 

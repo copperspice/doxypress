@@ -214,16 +214,15 @@ static int charsToIndex(const char *word)
    return c1 * 256 + c2;
 }
 
-void SearchIndex::addWord(const char *word, bool hiPriority, bool recurse)
+void SearchIndex::addWord(const QString &word, bool hiPriority, bool recurse)
 {
    static QRegExp nextPart("[_a-z:][A-Z]");
 
-   if (word == 0 || word[0] == '\0') {
+   if (word.isEmpty()) {
       return;
    }
 
-   QByteArray wStr = QByteArray(word).toLower();
-   
+   QByteArray wStr = word.toLower().toUtf8();   
    IndexWord *w = m_words.value(wStr);
 
    if (! w) {
@@ -244,7 +243,7 @@ void SearchIndex::addWord(const char *word, bool hiPriority, bool recurse)
 
    if (!recurse) { 
       // the first time we check if we can strip the prefix
-      i = getPrefixIndex(word);
+      i = getPrefixIndex(word.toUtf8());
 
       if (i > 0) {
          addWord(word + i, hiPriority, true);
@@ -260,7 +259,7 @@ void SearchIndex::addWord(const char *word, bool hiPriority, bool recurse)
    }
 }
 
-void SearchIndex::addWord(const char *word, bool hiPriority)
+void SearchIndex::addWord(const QString &word, bool hiPriority)
 {
    addWord(word, hiPriority, false);
 }
@@ -535,9 +534,9 @@ void SearchIndexExternal::setCurrentDoc(Definition *ctx, const char *anchor, boo
    }
 }
 
-void SearchIndexExternal::addWord(const char *word, bool hiPriority)
+void SearchIndexExternal::addWord(const QString &word, bool hiPriority)
 {
-   if (word == 0 || !isId(*word) || m_current == 0) {
+   if (word.isEmpty() || ! isId(word[0].unicode()) || m_current == 0) {
       return;
    }
 
@@ -553,6 +552,7 @@ void SearchIndexExternal::addWord(const char *word, bool hiPriority)
 void SearchIndexExternal::write(const char *fileName)
 {
    QFile f(fileName);
+
    if (f.open(QIODevice::WriteOnly)) {
       FTextStream t(&f);
       t << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
@@ -561,6 +561,7 @@ void SearchIndexExternal::write(const char *fileName)
       for (auto doc : m_docEntries) {
          doc->normalText.addChar(0);    // make sure buffer ends with a 0 terminator
          doc->importantText.addChar(0); // make sure buffer ends with a 0 terminator
+
          t << "  <doc>" << endl;
          t << "    <field name=\"type\">"     << doc->type << "</field>" << endl;
          t << "    <field name=\"name\">"     << convertToXML(doc->name) << "</field>" << endl;
@@ -1155,18 +1156,23 @@ void writeJavascriptSearchIndex()
                      if (overloadedFunction) { // overloaded member function
                         prefix += convertToXML(md->argsString());
                         // show argument list to disambiguate overloaded functions
+
                      } else if (md) { // unique member function
                         prefix += "()"; // only to show it is a function
                      }
 
                      QByteArray name;
                      if (d->definitionType() == Definition::TypeClass) {
-                        name = convertToXML(((ClassDef *)d)->displayName());
+                        name  = convertToXML(((ClassDef *)d)->displayName());
                         found = true;
+
                      } else if (d->definitionType() == Definition::TypeNamespace) {
-                        name = convertToXML(((NamespaceDef *)d)->displayName());
+                        name  = convertToXML(((NamespaceDef *)d)->displayName());
                         found = true;
-                     } else if (scope == 0 || scope == Doxygen::globalScope) { // in global scope
+
+                     } else if (scope == 0 || scope == Doxygen::globalScope) { 
+                        // in global scope
+
                         if (md) {
                            FileDef *fd = md->getBodyDef();
                            if (fd == 0) {

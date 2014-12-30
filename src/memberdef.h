@@ -259,7 +259,7 @@ class MemberDef : public Definition
    ClassDef *category() const;
    MemberDef *categoryRelation() const;
 
-   QByteArray displayName(bool = true) const;
+   QString displayName(bool = true) const override;
    QByteArray getDeclType() const;
    void getLabels(QStringList &sl, Definition *container) const;
 

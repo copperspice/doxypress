@@ -49,6 +49,15 @@ class GrowBuf
       str[pos++] = c;
    }
 
+   void addStr(const QString &s) {
+      QByteArray temp = s.toUtf8();
+      addStr(temp.constData());
+   }
+
+   void addStr(const QByteArray &s) {    
+      addStr(s.constData());
+   }
+
    void addStr(const char *s) {
       if (s) {
          int l = strlen(s);

@@ -247,13 +247,11 @@ void DocSets::decContentsDepth()
    //printf("DocSets::decContentsDepth() m_dc=%d\n",m_dc);
 }
 
-void DocSets::addContentsItem(bool isDir, const char *name, const char *ref, const char *file, const char *anchor,
-                              bool /* separateIndex */,
-                              bool /* addToNavIndex */,
-                              Definition * /*def*/)
+void DocSets::addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
+                              bool /* separateIndex */, bool /* addToNavIndex */, Definition * /*def*/)
 {
    (void)isDir;
-   //printf("DocSets::addContentsItem(%s) m_dc=%d\n",name,m_dc);
+  
    if (ref == 0) {
 
       if (! m_firstNode.at(m_dc - 1)) {

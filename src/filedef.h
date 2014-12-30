@@ -77,23 +77,23 @@ class FileDef : public Definition
    FileDef(const char *p, const char *n, const char *ref = 0, const char *dn = 0);
    ~FileDef();
 
-   // ----------------------------------------------------------------------
-
    DefType definitionType() const {
       return TypeFile;
    }
 
    /*! Returns the unique file name (this may include part of the path). */
    QByteArray name() const;
-   QByteArray displayName(bool = true) const {
+
+   QString displayName(bool = true) const override {
       return name();
    }
+
    QByteArray fileName() const {
       return m_fileName;
    }
 
    QByteArray getOutputFileBase() const {
-      return convertNameToFile(m_diskName);
+      return convertNameToFile(m_diskName).toUtf8();
    }
 
    QByteArray anchor() const {

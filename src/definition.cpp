@@ -685,26 +685,31 @@ void Definition::setInbodyDocumentation(const char *d, const char *inbodyFile, i
  * The line actually containing the bracket is returned via endLine.
  * Note that for VHDL code the bracket search is not done.
  */
-bool readCodeFragment(const char *fileName,
-                      int &startLine, int &endLine, QByteArray &result)
+bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteArray &result)
 {
    static bool filterSourceFiles = Config_getBool("FILTER_SOURCE_FILES");
    static int tabSize = Config_getInt("TAB_SIZE");
-   //printf("readCodeFragment(%s,%d,%d)\n",fileName,startLine,endLine);
+   
    if (fileName == 0 || fileName[0] == 0) {
       return false;   // not a valid file name
    }
-   QByteArray filter = getFileFilter(fileName, true);
+
+   QByteArray filter = getFileFilter(fileName, true).toUtf8();
+
    FILE *f = 0;
    bool usePipe = !filter.isEmpty() && filterSourceFiles;
+
    SrcLangExt lang = getLanguageFromFileName(fileName);
+
    if (!usePipe) { // no filter given or wanted
       f = portable_fopen(fileName, "r");
+
    } else { // use filter
       QByteArray cmd = filter + " \"" + fileName + "\"";
       Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", cmd.data());
       f = portable_popen(cmd, "r");
    }
+
    bool found = lang == SrcLangExt_Tcl | lang == SrcLangExt_Python || lang == SrcLangExt_Fortran;
 
    // for TCL, Python, and Fortran no bracket search is possible
@@ -881,7 +886,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             }
 
             // write line link (HTML, LaTeX optionally)
-            ol.writeObjectLink(0, fn, anchorStr, lineStr.toUtf8());
+            ol.writeObjectLink(0, fn, anchorStr, lineStr);
             ol.enableAll();
             ol.disable(OutputGenerator::Html);
 
@@ -890,7 +895,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             }
 
             // write normal text (Man/RTF, Latex optionally)
-            ol.docify(lineStr.toUtf8());
+            ol.docify(lineStr);
             ol.popGeneratorState();
 
             // write text between markers
@@ -950,7 +955,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             }
             ol.disableAllBut(OutputGenerator::Html);
             // write line link (HTML only)
-            ol.writeObjectLink(0, fn, anchorStr, lineStr.toUtf8());
+            ol.writeObjectLink(0, fn, anchorStr, lineStr);
             ol.enableAll();
             ol.disable(OutputGenerator::Html);
 
@@ -959,7 +964,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             }
 
             // write normal text (Latex/Man only)
-            ol.docify(lineStr.toUtf8());
+            ol.docify(lineStr);
             ol.popGeneratorState();
 
             // write text right from linePos marker
@@ -1351,12 +1356,14 @@ QList<ListItemInfo> *Definition::xrefListItems() const
    return m_impl->xrefListItems;
 }
 
-QByteArray Definition::convertNameToFile(const char *name, bool allowDots) const
+QString Definition::convertNameToFile(const char *name, bool allowDots) const
 {
-   if (!m_impl->ref.isEmpty()) {
+   if (! m_impl->ref.isEmpty()) {
       return name;
+
    } else {
       return ::convertNameToFile(name, allowDots);
+
    }
 }
 
@@ -1587,11 +1594,12 @@ QByteArray abbreviate(const char *s, const char *name)
    }
 
    // capitalize first word
-   if (!result.isEmpty()) {
+   if (! result.isEmpty()) {
       int c = result[0];
       if (c >= 'a' && c <= 'z') {
          c += 'A' - 'a';
       }
+
       result[0] = c;
    }
    return result;
@@ -1599,7 +1607,7 @@ QByteArray abbreviate(const char *s, const char *name)
 
 QByteArray Definition::briefDescription(bool abbr) const
 {
-   return m_impl->brief ? (abbr ? abbreviate(m_impl->brief->doc, displayName()) : m_impl->brief->doc) : QByteArray("");
+   return m_impl->brief ? (abbr ? abbreviate(m_impl->brief->doc, displayName().toUtf8()) : m_impl->brief->doc) : QByteArray("");
 }
 
 QByteArray Definition::briefDescriptionAsTooltip() const
@@ -1607,6 +1615,7 @@ QByteArray Definition::briefDescriptionAsTooltip() const
    if (m_impl->brief) {
       if (m_impl->brief->tooltip.isEmpty() && !m_impl->brief->doc.isEmpty()) {
          static bool reentering = false;
+
          if (!reentering) {
             MemberDef *md = definitionType() == TypeMember ? (MemberDef *)this : 0;
             const Definition *scope = definitionType() == TypeMember ? getOuterScope() : this;
@@ -1749,16 +1758,15 @@ void Definition::setArtificial(bool b)
    m_impl->isArtificial = b;
 }
 
-void Definition::setLocalName(const QByteArray name)
+void Definition::setLocalName(const QString &name)
 {
-   m_impl->localName = name;
+   m_impl->localName = name.toUtf8();
 }
 
 void Definition::setLanguage(SrcLangExt lang)
 {
    m_impl->lang = lang;
 }
-
 
 void Definition::_setSymbolName(const QByteArray &name)
 {

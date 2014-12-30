@@ -192,19 +192,37 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::docify, s);
    }
 
+   void docify(const QString &s)
+   {
+      docify(qPrintable(s));
+   }
+
+   void docify(const QByteArray &s)
+   {
+      docify(s.constData());
+   }
+
    void codify(const char *s) {
       forall(&OutputGenerator::codify, s);
    }
 
-   void writeObjectLink(const char *ref, const char *file,
-                        const char *anchor, const char *name) {
+   void writeObjectLink(const char *ref, const char *file, const char *anchor, const char *name) {
       forall(&OutputGenerator::writeObjectLink, ref, file, anchor, name);
    }
-   void writeCodeLink(const char *ref, const char *file,
-                      const char *anchor, const char *name,
-                      const char *tooltip) {
+
+   void writeObjectLink(const char *ref, const char *file, const char *anchor, const QString &name) {
+      forall(&OutputGenerator::writeObjectLink, ref, file, anchor, qPrintable(name));
+   }
+
+   void writeObjectLink(const char *ref, const char *file, const char *anchor, const QByteArray &name) {
+      forall(&OutputGenerator::writeObjectLink, ref, file, anchor, name.constData());
+   }
+
+   void writeCodeLink(const char *ref, const char *file, const char *anchor, const char *name,const char *tooltip) 
+   {
       forall(&OutputGenerator::writeCodeLink, ref, file, anchor, name, tooltip);
    }
+
    void writeTooltip(const char *id, const DocLinkInfo &docInfo, const char *decl,
                      const char *desc, const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo) {
       forall(&OutputGenerator::writeTooltip, id, docInfo, decl, desc, defInfo, declInfo);
@@ -508,9 +526,15 @@ class OutputList : public OutputDocInterface
    void writeQuickLinks(bool compact, HighlightedItem hli, const char *file) {
       forall(&OutputGenerator::writeQuickLinks, compact, hli, file);
    }
+
    void writeSummaryLink(const char *file, const char *anchor, const char *title, bool first) {
       forall(&OutputGenerator::writeSummaryLink, file, anchor, title, first);
    }
+
+   void writeSummaryLink(const QString &file, const char *anchor, const QByteArray &title, bool first) {
+      forall(&OutputGenerator::writeSummaryLink, qPrintable(file), anchor, title.constData(), first);
+   }
+
    void startContents() {
       forall(&OutputGenerator::startContents);
    }
@@ -688,7 +712,7 @@ class OutputList : public OutputDocInterface
    void setCurrentDoc(Definition *context, const char *anchor, bool isSourceFile) {
       forall(&OutputGenerator::setCurrentDoc, context, anchor, isSourceFile);
    }
-   void addWord(const char *word, bool hiPriority) {
+   void addWord(const QString &word, bool hiPriority) override {
       forall(&OutputGenerator::addWord, word, hiPriority);
    }
 
@@ -712,6 +736,7 @@ class OutputList : public OutputDocInterface
    void clear();
 
    void forall(void (OutputGenerator::*func)());
+
    FORALLPROTO1(const char *);
    FORALLPROTO1(char);
    FORALLPROTO1(IndexSections);
@@ -727,6 +752,8 @@ class OutputList : public OutputDocInterface
    FORALLPROTO1(bool);
    FORALLPROTO2(bool, int);
    FORALLPROTO2(bool, bool);
+
+   FORALLPROTO2(const QString &, bool);
    FORALLPROTO2(const char *, bool);
    FORALLPROTO4(const char *, const char *, const char *, int);
 

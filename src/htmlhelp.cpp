@@ -635,7 +635,7 @@ QByteArray HtmlHelp::recode(const QString &s)
  *  \param addToNavIndex not used.
  *  \param def not used.
  */
-void HtmlHelp::addContentsItem(bool isDir, const char *name, const char *ref, const char *file, const char *anchor, 
+void HtmlHelp::addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor, 
             bool seperateIndex, bool addToNavIndex, Definition *def)
 {
    // If we're using a binary toc then folders cannot have links.

@@ -1168,8 +1168,10 @@ void DocbookDocVisitor::visitPre(DocParamList *pl)
    if (m_hide) {
       return;
    }
-   QListIterator<DocNode> li(pl->parameters());
+
+   QListIterator<DocNode *> li(pl->parameters());
    DocNode *param;
+
    m_t << "                            <row>" << endl;
    if (!li.toFirst()) {
       m_t << "                                <entry></entry>" << endl;

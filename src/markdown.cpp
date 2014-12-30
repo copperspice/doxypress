@@ -2333,26 +2333,27 @@ QByteArray processMarkdown(const QByteArray &fileName, const int lineNr, Entry *
 
 QByteArray markdownFileNameToId(const QByteArray &fileName)
 {
-   QByteArray baseFn  = stripFromPath(QFileInfo(fileName).absoluteFilePath().toUtf8());
+   QByteArray baseFn  = stripFromPath(QFileInfo(fileName).absoluteFilePath().toUtf8()).toUtf8();
+
    int i = baseFn.lastIndexOf('.');
    if (i != -1) {
       baseFn = baseFn.left(i);
    }
+
    QByteArray baseName = substitute(substitute(baseFn, " ", "_"), "/", "_");
+
    return "md_" + baseName;
 }
 
-void MarkdownFileParser::parseInput(const char *fileName,
-                                    const char *fileBuf,
-                                    Entry *root,
-                                    bool /*sameTranslationUnit*/,
-                                    QStringList & /*filesInSameTranslationUnit*/)
+void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, Entry *root,
+                                    bool /*sameTranslationUnit*/, QStringList & /*filesInSameTranslationUnit*/)
 {
    Entry *current = new Entry;
    current->lang = SrcLangExt_Markdown;
    current->fileName = fileName;
    current->docFile  = fileName;
    current->docLine  = 1;
+
    QByteArray docs = fileBuf;
    QByteArray id;
    QByteArray title = extractPageTitle(docs, id).trimmed();

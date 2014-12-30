@@ -93,7 +93,7 @@ class NamespaceDef : public Definition
    }
 
    void combineUsingRelations();
-   QByteArray displayName(bool = true) const;
+   QString displayName(bool = true) const override;
    QByteArray localName() const;
 
    bool isConstantGroup() const {

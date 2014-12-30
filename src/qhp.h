@@ -33,12 +33,10 @@ class Qhp : public IndexIntf
    void finalize();
    void incContentsDepth();
    void decContentsDepth();
-   void addContentsItem(bool isDir, const char *name, const char *ref,
-                        const char *file, const char *anchor,
-                        bool separateIndex, bool addToNavIndex,
-                        Definition *def);
-   void addIndexItem(Definition *context, MemberDef *md,
-                     const char *sectionAnchor, const char *title);
+   void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
+                        bool separateIndex, bool addToNavIndex, Definition *def);
+
+   void addIndexItem(Definition *context, MemberDef *md, const char *sectionAnchor, const char *title);
    void addIndexFile(const char *name);
    void addImageFile(const char *name);
    void addStyleSheetFile(const char *name);
@@ -49,7 +47,7 @@ class Qhp : public IndexIntf
  private:
    void handlePrevSection();
    void clearPrevSection();
-   void setPrevSection(const char *title, const char *basename, const char *anchor, int level);
+   void setPrevSection(const QString &title, const char *basename, const char *anchor, int level);
    void addFile(const char *fileName);
 
    static QByteArray getFullProjectName();

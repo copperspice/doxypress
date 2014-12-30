@@ -1193,14 +1193,16 @@ void MemberDef::writeLink(OutputList &ol, ClassDef *, NamespaceDef *, FileDef *f
    static bool hideScopeNames = Config_getBool("HIDE_SCOPE_NAMES");
 
    QByteArray sep = getLanguageSpecificSeparator(lang, true);
-   QByteArray n = name();
+   QString n = name();
 
-   if (!hideScopeNames) {
+   if (! hideScopeNames) {
       if (m_impl->enumScope && m_impl->livesInsideEnum) {
          n.prepend(m_impl->enumScope->displayName() + sep);
       }
+
       if (m_impl->classDef && gd && !isRelated()) {
          n.prepend(m_impl->classDef->displayName() + sep);
+
       } else if (m_impl->nspace && (gd || fd)) {
          n.prepend(m_impl->nspace->displayName() + sep);
       }
@@ -1218,14 +1220,15 @@ void MemberDef::writeLink(OutputList &ol, ClassDef *, NamespaceDef *, FileDef *f
       if (m_impl->mtype == MemberType_EnumValue && getGroupDef() == 0 &&      // enum value is not grouped
             getEnumScope() && getEnumScope()->getGroupDef()) { // but its container is
          GroupDef *enumValGroup = getEnumScope()->getGroupDef();
-         ol.writeObjectLink(enumValGroup->getReference(),
-                            enumValGroup->getOutputFileBase(),
-                            anchor(), n);
+
+         ol.writeObjectLink(enumValGroup->getReference(), enumValGroup->getOutputFileBase(), anchor(), n);
+
       } else {
          ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), n);
       }
 
-   } else { // write only text
+   } else { 
+      // write only text
       ol.startBold();
       ol.docify(n);
       ol.endBold();
@@ -1307,13 +1310,13 @@ bool MemberDef::isBriefSectionVisible() const
    static bool repeatBrief         = Config_getBool("REPEAT_BRIEF");
    static bool hideFriendCompounds = Config_getBool("HIDE_FRIEND_COMPOUNDS");
  
-   MemberGroupInfo info = Doxygen::memGrpInfoDict[m_impl->grpId];
+   QSharedPointer<MemberGroupInfo> info = Doxygen::memGrpInfoDict[m_impl->grpId];
 
-   bool hasDocs = hasDocumentation() || (m_impl->grpId != -1 && !(info.doc.isEmpty() && info.header.isEmpty()));
+   bool hasDocs = hasDocumentation() || (m_impl->grpId != -1 && !(info->doc.isEmpty() && info->header.isEmpty()));
 
    // only include static members with file/namespace scope if
    // explicitly enabled in the config file
-   bool visibleIfStatic = ! (getClassDef() == 0 && isStatic() && !extractStatic );
+   bool visibleIfStatic = ! (getClassDef() == 0 && isStatic() && ! extractStatic );
 
    // only include members is the are documented or
    // HIDE_UNDOC_MEMBERS is NO in the config file
@@ -1397,7 +1400,7 @@ void MemberDef::writeDeclaration(OutputList &ol, ClassDef *cd, NamespaceDef *nd,
    _addToSearchIndex();
 
    QByteArray cname  = d->name();
-   QByteArray cdname = d->displayName();
+   QString    cdname = d->displayName();
    QByteArray cfname = getOutputFileBase();
 
    // search for the last anonymous scope in the member type
@@ -1407,8 +1410,7 @@ void MemberDef::writeDeclaration(OutputList &ol, ClassDef *cd, NamespaceDef *nd,
 
    // start a new member declaration
    bool isAnonymous = annoClassDef || m_impl->annMemb || m_impl->annEnumType;
-   ///printf("startMemberItem for %s\n",name().data());
-
+  
    ol.startMemberItem(anchor(), isAnonymous ? 1 : m_impl->tArgList ? 3 : 0, inheritId );
 
    // If there is no detailed description we need to write the anchor here.
@@ -1421,7 +1423,7 @@ void MemberDef::writeDeclaration(OutputList &ol, ClassDef *cd, NamespaceDef *nd,
          QByteArray doxyName = name();
 
          if (!cname.isEmpty()) {
-            doxyName.prepend(cdname + getLanguageSpecificSeparator(getLanguage()));
+            doxyName.prepend( (cdname + getLanguageSpecificSeparator(getLanguage())).toUtf8() );
          }
          ol.startDoxyAnchor(cfname, cname, anchor(), doxyName, doxyArgs);
       }
@@ -1704,7 +1706,7 @@ void MemberDef::writeDeclaration(OutputList &ol, ClassDef *cd, NamespaceDef *nd,
       auto nextItem = sl.begin();
 
       for (auto s : sl) { 
-         ol.docify(qPrintable(s));
+         ol.docify(s);
 
          ++nextItem;          
 
@@ -1738,7 +1740,7 @@ void MemberDef::writeDeclaration(OutputList &ol, ClassDef *cd, NamespaceDef *nd,
 
       for (auto s : sl) { 
       
-         ol.docify(qPrintable(s));
+         ol.docify(s);
          ++nextItem;          
 
          if (nextItem != sl.end()) {
@@ -2282,14 +2284,18 @@ void MemberDef::_writeCategoryRelation(OutputList &ol)
       QByteArray ref;
       QByteArray file;
       QByteArray anc;
-      QByteArray name;
+
+      QString name;
+
       int i = -1;
+
       if (m_impl->categoryRelation && m_impl->categoryRelation->isLinkable()) {
          if (m_impl->category) {
             // this member is in a normal class and implements method categoryRelation from category
             // so link to method 'categoryRelation' with 'provided by category 'category' text.
             text = theTranslator->trProvidedByCategory();
             name = m_impl->category->displayName();
+
          } else if (m_impl->classDef->categoryOf()) {
             // this member is part of a category so link to the corresponding class member of the class we extend
             // so link to method 'categoryRelation' with 'extends class 'classDef->categoryOf()'
@@ -2566,21 +2572,25 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    }
 
    SrcLangExt lang = getLanguage();   
-   QByteArray sep = getLanguageSpecificSeparator(lang, true);
+   QByteArray sep  = getLanguageSpecificSeparator(lang, true);
 
-   QByteArray scopeName = scName;
+   QString scopeName    = scName;
    QByteArray memAnchor = anchor();
-   QByteArray ciname = container->name();
+   QByteArray ciname    = container->name();
 
    if (container->definitionType() == TypeGroup) {
       if (getClassDef()) {
          scopeName = getClassDef()->displayName();
+
       } else if (getNamespaceDef()) {
          scopeName = getNamespaceDef()->displayName();
+
       } else if (getFileDef()) {
          scopeName = getFileDef()->displayName();
       }
+
       ciname = ((GroupDef *)container)->groupTitle();
+
    } else if (container->definitionType() == TypeFile && getNamespaceDef()) {
       // member is in a namespace, but is written as part of the file documentation
       // as well, so we need to make sure its label is unique.
@@ -2593,10 +2603,12 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
 
    // get member name
    QByteArray doxyName = name();
+
    // prepend scope if there is any. TODO: make this optional for C only docs
-   if (!scopeName.isEmpty()) {
-      doxyName.prepend(scopeName + sep);
+   if (! scopeName.isEmpty()) {
+      doxyName.prepend((scopeName + sep).toUtf8());
    }
+
    QByteArray doxyArgs = argsString();
 
    QByteArray ldef = definition();
@@ -2792,7 +2804,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       }
      
       linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), this, substitute(ldef, "::", sep));
-      hasParameterList = writeDefArgumentList(ol, cd, scopeName, this);
+      hasParameterList = writeDefArgumentList(ol, cd, scopeName.toUtf8(), this);
      
       if (hasOneLineInitializer()) { // add initializer
          if (!isDefine()) {
@@ -2878,23 +2890,29 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       ) {
       //printf("md=%s initLines=%d init=`%s'\n",name().data(),initLines,init.data());
       ol.startBold();
+
       if (m_impl->mtype == MemberType_Define) {
          ol.parseText(theTranslator->trDefineValue());
       } else {
          ol.parseText(theTranslator->trInitialValue());
       }
+
       ol.endBold();
       ParserInterface *pIntf = Doxygen::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
       ol.startCodeFragment();
-      pIntf->parseCode(ol, scopeName, m_impl->initializer, lang, false, 0, getFileDef(),
+
+      pIntf->parseCode(ol, qPrintable(scopeName), m_impl->initializer, lang, false, 0, getFileDef(),
                        -1, -1, true, this, false, this);
+
       ol.endCodeFragment();
    }
 
    QByteArray brief           = briefDescription();
    QByteArray detailed        = documentation();
+
    ArgumentList *docArgList = m_impl->defArgList;
+
    if (m_impl->templateMaster) {
       brief      = m_impl->templateMaster->briefDescription();
       detailed   = m_impl->templateMaster->documentation();
@@ -2902,15 +2920,12 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    }
 
    /* write brief description */
-   if (!brief.isEmpty() &&
-         (Config_getBool("REPEAT_BRIEF") ||
-          !Config_getBool("BRIEF_MEMBER_DESC")
-         )
-      ) {
+   if (!brief.isEmpty() && (Config_getBool("REPEAT_BRIEF") || !Config_getBool("BRIEF_MEMBER_DESC")) ) {
       ol.startParagraph();
-      ol.generateDoc(briefFile(), briefLine(),
-                     getOuterScope() ? getOuterScope() : container, this,
+
+      ol.generateDoc(briefFile(), briefLine(), getOuterScope() ? getOuterScope() : container, this,
                      brief, false, false, 0, true, false);
+
       ol.endParagraph();
    }
 
@@ -2930,15 +2945,10 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       }
    }
 
-
-   //printf("***** defArgList=%p name=%s docs=%s hasDocs=%d\n",
-   //     defArgList,
-   //     defArgList?defArgList->hasDocumentation():-1);
    if (docArgList != 0 && docArgList->hasDocumentation()) {
       QByteArray paramDocs;
      
-      // convert the parameter documentation into a list of @param commands
-      
+      // convert the parameter documentation into a list of @param commands      
       for (auto a : *docArgList) {
          if (a.hasDocumentation()) {
             QByteArray direction = extractDirection(a.docs);
@@ -3285,30 +3295,36 @@ void MemberDef::setMemberGroup(MemberGroup *grp)
 
 bool MemberDef::visibleMemberGroup(bool hideNoHeader)
 {
-   return m_impl->memberGroup != 0 &&
-          (!hideNoHeader || m_impl->memberGroup->header() != "[NOHEADER]");
+   return m_impl->memberGroup != 0 && (!hideNoHeader || m_impl->memberGroup->header() != "[NOHEADER]");
 }
 
 QByteArray MemberDef::getScopeString() const
 {
-   QByteArray result;
+   QString result;
+
    if (getClassDef()) {
       result = getClassDef()->displayName();
+
    } else if (getNamespaceDef()) {
       result = getNamespaceDef()->displayName();
+
    }
-   return result;
+
+   return result.toUtf8();
 }
 
 #if 0
 static QByteArray escapeAnchor(const QByteArray &anchor)
 {
    QByteArray result;
+
    int l = anchor.length(), i;
+
    for (i = 0; i < l; i++) {
       char c = anchor.at(i);
       if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
          result += c;
+
       } else {
          static char hexStr[] = "0123456789ABCDEF";
          char escChar[] = { '_', 0, 0, 0 };
@@ -3468,6 +3484,7 @@ void MemberDef::addListReference(Definition *)
    }
 
    QByteArray memLabel;
+
    if (optimizeOutputForC) {
       memLabel = theTranslator->trGlobal(true, true);
 
@@ -3480,8 +3497,9 @@ void MemberDef::addListReference(Definition *)
 
    QByteArray memName = name();
    Definition *pd = getOuterScope();
+
    QByteArray pdName = pd->definitionType() == Definition::TypeClass ?
-                       ((ClassDef *)pd)->displayName() : pd->name();
+                       ((ClassDef *)pd)->displayName().toUtf8() : pd->name();
 
    QByteArray sep = getLanguageSpecificSeparator(lang, true);
    QByteArray memArgs;
@@ -4880,7 +4898,7 @@ void MemberDef::invalidateCachedArgumentTypes()
    invalidateCachedTypesInArgumentList(m_impl->declArgList);
 }
 
-QByteArray MemberDef::displayName(bool) const
+QString MemberDef::displayName(bool) const
 {
    return Definition::name();
 }
@@ -4895,8 +4913,10 @@ void MemberDef::_addToSearchIndex()
 
       if (ln != qn) {
          Doxygen::searchIndex->addWord(qn, true);
+
          if (getClassDef()) {
             Doxygen::searchIndex->addWord(getClassDef()->displayName(), true);
+
          } else if (getNamespaceDef()) {
             Doxygen::searchIndex->addWord(getNamespaceDef()->displayName(), true);
          }

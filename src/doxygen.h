@@ -100,10 +100,9 @@ void readAliases();
 void readFormulaRepository();
 void cleanUpDoxygen();
 
-int readFileOrDirectory(const char *s, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict *exclDict,
-                        QList<QByteArray>  *patList, QList<QByteArray>  *exclPatList, QList<QByteArray>  *resultList,
-                        StringDict *resultDict, bool recursive, bool errorIfNotExist = true, QHash<QString,
-                        void *> *killDict = 0, QHash<QString, void *> *paths = 0 );
+int readFileOrDirectory(const QString &s, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict *exclDict,
+                        QStringList *patList, QStringList *exclPatList, QStringList *resultList, StringDict *resultDict, 
+                        bool recursive, bool errorIfNotExist = true, QHash<QString, void *> *killDict = 0, QHash<QString, void *> *paths = 0);
 
 int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict  *exclDict,
             QList<QByteArray>  *patList, QList<QByteArray>  *exclPatList, QList<QByteArray>  *resultList,

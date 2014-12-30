@@ -291,17 +291,17 @@ ClassDef::~ClassDef()
    delete m_impl;
 }
 
-QByteArray ClassDef::getMemberListFileName() const
+QString ClassDef::getMemberListFileName() const
 {
    return convertNameToFile(compoundTypeString() + name() + "-members");
 }
 
-QByteArray ClassDef::displayName(bool includeScope) const
+QString ClassDef::displayName(bool includeScope) const
 {
    //static bool optimizeOutputForJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
    SrcLangExt lang = getLanguage();
 
-   QByteArray n;
+   QString n;
 
    if (includeScope) {
       n = qualifiedNameWithTemplateParameters();
@@ -312,7 +312,7 @@ QByteArray ClassDef::displayName(bool includeScope) const
    QByteArray sep = getLanguageSpecificSeparator(lang);
 
    if (sep != "::") {
-      n = substitute(n, "::", sep);
+      n = substitute(n.toUtf8(), "::", sep);
    }
 
    if (m_impl->compType == ClassDef::Protocol && n.right(2) == "-p") {
@@ -320,7 +320,7 @@ QByteArray ClassDef::displayName(bool includeScope) const
    }
 
    if (n.indexOf('@') != -1) {
-      return removeAnonymousScopes(n);
+      return removeAnonymousScopes(n.toUtf8());
    } else {
       return n;
    }
@@ -712,7 +712,7 @@ static void writeInheritanceSpecifier(OutputList &ol, BaseClassDef *bcd)
       while (it.hasNext()) {
 
          QString s = it.next();
-         ol.docify(qPrintable(s));
+         ol.docify(s);
 
          if (it.hasNext()) {
             ol.docify(", ");
@@ -1000,6 +1000,7 @@ void ClassDef::showUsedFiles(OutputList &ol)
 
       ol.startItemListItem();
       QByteArray path = fd->getPath();
+
       if (Config_getBool("FULL_PATH_NAMES")) {
          ol.docify(stripFromPath(path));
       }
@@ -1012,11 +1013,11 @@ void ClassDef::showUsedFiles(OutputList &ol)
       // for HTML
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
+
       if (fd->generateSourceFile()) {
          ol.writeObjectLink(0, fd->getSourceFileBase(), 0, fname);
       } else if (fd->isLinkable()) {
-         ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0,
-                            fname);
+         ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0, fname);
       } else {
          ol.docify(fname);
       }
@@ -1026,8 +1027,7 @@ void ClassDef::showUsedFiles(OutputList &ol)
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
       if (fd->isLinkable()) {
-         ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0,
-                            fname);
+         ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0, fname);
       } else {
          ol.docify(fname);
       }
@@ -1083,7 +1083,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.startDotGraph();
-         ol.parseText(theTranslator->trClassDiagram(displayName()));
+         ol.parseText(theTranslator->trClassDiagram(qPrintable(displayName())));
          ol.endDotGraph(inheritanceGraph);
          ol.popGeneratorState();
          renderDiagram = true;
@@ -1095,9 +1095,9 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
       ClassDiagram diagram(this); // create a diagram of this class.
       ol.startClassDiagram();
       ol.disable(OutputGenerator::Man);
-      ol.parseText(theTranslator->trClassDiagram(displayName()));
+      ol.parseText(theTranslator->trClassDiagram( qPrintable(displayName())));
       ol.enable(OutputGenerator::Man);
-      ol.endClassDiagram(diagram, getOutputFileBase(), displayName());
+      ol.endClassDiagram(diagram, getOutputFileBase(), qPrintable(displayName()));
       renderDiagram = true;
    }
 
@@ -1109,8 +1109,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
 
    if (m_impl->m_parents && m_impl->m_parents->count() > 0) {
       ol.startParagraph();
-      //parseText(ol,theTranslator->trInherits()+" ");
-
+     
       QByteArray inheritLine = theTranslator->trInheritsList(m_impl->m_parents->count());
       QRegExp marker("@[0-9]+");
       int index = 0, newIndex, matchLen;
@@ -1131,7 +1130,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
 
             // use the class name but with the template arguments as given
             // in the inheritance relation
-            QByteArray displayName = insertTemplateSpecifierInScope( cd->displayName(), bcd->templSpecifiers);
+            QByteArray displayName = insertTemplateSpecifierInScope(cd->displayName().toUtf8(), bcd->templSpecifiers);
 
             if (cd->isLinkable()) {
                ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), displayName);
@@ -1202,7 +1201,7 @@ void ClassDef::writeCollaborationGraph(OutputList &ol)
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.startDotGraph();
-         ol.parseText(theTranslator->trCollaborationDiagram(displayName()));
+         ol.parseText(theTranslator->trCollaborationDiagram(qPrintable(displayName())));
          ol.endDotGraph(usageImplGraph);
          ol.popGeneratorState();
       }
@@ -1383,7 +1382,7 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
 
       if (lde->kind() == LayoutDocEntry::ClassNestedClasses && m_impl->innerClasses  && m_impl->innerClasses->declVisible()) {
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
-         ol.writeSummaryLink(0, "nested-classes", ls->title(lang), first);
+         ol.writeSummaryLink(QString(""), "nested-classes", ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::ClassAllMembersLink && m_impl->allMemberNameInfoSDict && 
@@ -1397,7 +1396,7 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
          MemberList *ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
-            ol.writeSummaryLink(0, MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+            ol.writeSummaryLink(QString(""), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }
@@ -1646,8 +1645,7 @@ void ClassDef::writeMoreLink(OutputList &ol, const QByteArray &anchor)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
    ol.docify(" ");
-   ol.startTextLink(getOutputFileBase(),
-                    anchor.isEmpty() ? QByteArray("details") : anchor);
+   ol.startTextLink(getOutputFileBase(), anchor.isEmpty() ? QByteArray("details") : anchor);
    ol.parseText(theTranslator->trMore());
    ol.endTextLink();
    ol.popGeneratorState();
@@ -1701,9 +1699,7 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const char *hea
             ol.parseText(header);
 
          } else {
-            ol.parseText(lang == SrcLangExt_Fortran ?
-                         theTranslator->trDataTypes() :
-                         theTranslator->trCompounds());
+            ol.parseText(lang == SrcLangExt_Fortran ? theTranslator->trDataTypes() : theTranslator->trCompounds());
          }
 
          ol.endMemberHeader();
@@ -1713,8 +1709,9 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const char *hea
 
       ol.startMemberDeclaration();
       ol.startMemberItem(anchor(), false);
+
       QByteArray ctype = compoundTypeString();
-      QByteArray cname = displayName(!localNames);
+      QByteArray cname = displayName(! localNames).toUtf8();
 
       ol.writeString(ctype);
       ol.writeString(" ");
@@ -1907,26 +1904,24 @@ QByteArray ClassDef::title() const
    SrcLangExt lang = getLanguage();
 
    if (lang == SrcLangExt_Fortran) {
-      pageTitle = theTranslator->trCompoundReferenceFortran(displayName(),
-                  m_impl->compType,
-                  m_impl->tempArgs != 0);         
+      pageTitle = theTranslator->trCompoundReferenceFortran( qPrintable(displayName()), m_impl->compType, m_impl->tempArgs != 0);         
 
    } else if (isJavaEnum()) {
-      pageTitle = theTranslator->trEnumReference(displayName());
+      pageTitle = theTranslator->trEnumReference(qPrintable(displayName()));
 
    } else if (m_impl->compType == Service) {
-      pageTitle = theTranslator->trServiceReference(displayName());
+      pageTitle = theTranslator->trServiceReference(qPrintable(displayName()));
 
    } else if (m_impl->compType == Singleton) {
-      pageTitle = theTranslator->trSingletonReference(displayName());
+      pageTitle = theTranslator->trSingletonReference(qPrintable(displayName()));
 
    } else {
       if (Config_getBool("HIDE_COMPOUND_REFERENCE")) {
-         pageTitle = displayName();
+         pageTitle = displayName().toUtf8();
+
       } else {
-         pageTitle = theTranslator->trCompoundReference(displayName(),
-                     m_impl->compType == Interface && getLanguage() == SrcLangExt_ObjC ? Class : m_impl->compType,
-                     m_impl->tempArgs != 0);
+         pageTitle = theTranslator->trCompoundReference(qPrintable(displayName()),
+                     m_impl->compType == Interface && getLanguage() == SrcLangExt_ObjC ? Class : m_impl->compType, m_impl->tempArgs != 0);
       }
    }
    return pageTitle;
@@ -1937,7 +1932,7 @@ void ClassDef::writeDocumentation(OutputList &ol)
 {
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
    //static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
-   //static bool vhdlOpt    = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
+
    QByteArray pageTitle = title();
 
    startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_ClassVisible, !generateTreeView);
@@ -1952,7 +1947,7 @@ void ClassDef::writeDocumentation(OutputList &ol)
    ol.parseText(pageTitle);
    addClassAttributes(ol);
    addGroupListToTitle(ol, this);
-   endTitle(ol, getOutputFileBase(), displayName());
+   endTitle(ol, getOutputFileBase(), qPrintable(displayName()));
    writeDocumentationContents(ol, pageTitle);
 
    endFileWithNavPath(this, ol);
@@ -1975,7 +1970,7 @@ void ClassDef::writeMemberPages(OutputList &ol)
       ml->countDocMembers();
 
       if (ml->numDocMembers() > 0 && (ml->listType()&MemberListType_detailedLists)) {
-         ml->writeDocumentationPage(ol, displayName(), this);
+         ml->writeDocumentationPage(ol, qPrintable(displayName()), this);
       }
    }
 
@@ -2050,14 +2045,17 @@ void ClassDef::writeMemberList(OutputList &ol)
    static bool cOpt    = Config_getBool("OPTIMIZE_OUTPUT_FOR_C");
    //static bool vhdlOpt = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+
    if (m_impl->allMemberNameInfoSDict == 0 || cOpt) {
       return;
    }
+
    // only for HTML
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   QByteArray memListFile = getMemberListFileName();
+   QByteArray memListFile = getMemberListFileName().toUtf8();
+
    startFile(ol, memListFile, memListFile, theTranslator->trMemberList(),
              HLI_ClassVisible, !generateTreeView, getOutputFileBase());
 
@@ -2069,8 +2067,9 @@ void ClassDef::writeMemberList(OutputList &ol)
    }
 
    startTitle(ol, 0);
-   ol.parseText(displayName() + " " + theTranslator->trMemberList());
+   ol.parseText((displayName() + " " + theTranslator->trMemberList()).toUtf8());
    endTitle(ol, 0, 0);
+
    ol.startContents();
    ol.startParagraph();
    ol.parseText(theTranslator->trThisIsTheListOfAllMembers());
@@ -2181,12 +2180,14 @@ void ClassDef::writeMemberList(OutputList &ol)
                }
                ol.writeString(" (");
                ol.parseText(theTranslator->trDefinedIn() + " ");
+
                if (cd->isLinkable()) {
                   ol.writeObjectLink(
                      cd->getReference(),
                      cd->getOutputFileBase(),
                      cd->anchor(),
-                     cd->displayName());
+                     qPrintable(cd->displayName()));
+
                } else {
                   ol.startBold();
                   ol.docify(cd->displayName());
@@ -2300,7 +2301,7 @@ void ClassDef::writeMemberList(OutputList &ol)
                for (auto s : sl ) { 
                   ++nextItem;
 
-                  ol.docify(qPrintable(s));                  
+                  ol.docify(s);                  
 
                   if (nextItem != sl.end()) {
                      ol.writeString("</span><span class=\"mlabel\">");
@@ -2442,15 +2443,16 @@ bool ClassDef::hasNonReferenceSuperClass()
  *  definition of an anonymous struct, union or class.
  */
 void ClassDef::writeDeclaration(OutputList &ol, MemberDef *md, bool inGroup, ClassDef *inheritedFrom, const char *inheritId)
-{
-   
+{   
    ol.docify(compoundTypeString());
-   QByteArray cn = displayName(false);
+   QString cn = displayName(false);
 
    if (!cn.isEmpty()) {
       ol.docify(" ");
+
       if (md && isLinkable()) {
          ol.writeObjectLink(0, 0, md->anchor(), cn);
+
       } else {
          ol.startBold();
          ol.docify(cn);
@@ -3146,19 +3148,22 @@ QByteArray ClassDef::getOutputFileBase() const
    if (m_impl->templateMaster) {
       // point to the template of which this class is an instance
       return m_impl->templateMaster->getOutputFileBase();
+
    } else if (isReference()) {
       // point to the external location
       return m_impl->fileName;
+
    } else {
       // normal locally defined class
-      return convertNameToFile(m_impl->fileName);
+      return convertNameToFile(m_impl->fileName).toUtf8();
    }
 }
 
-QByteArray ClassDef::getInstanceOutputFileBase() const
+QString ClassDef::getInstanceOutputFileBase() const
 {
    if (isReference()) {
       return m_impl->fileName;
+
    } else {
       return convertNameToFile(m_impl->fileName);
    }
@@ -3465,7 +3470,7 @@ void ClassDef::addListReferences()
       QList<ListItemInfo> *xrefItems = xrefListItems();
       addRefItem(xrefItems, qualifiedName(), 
                  lang == SrcLangExt_Fortran ? theTranslator->trType(true, true) : theTranslator->trClass(true, true),
-                 getOutputFileBase(), displayName(), 0, this );
+                 getOutputFileBase(), qPrintable(displayName()), 0, this );
    }
 
    if (m_impl->memberGroupSDict) {     
@@ -3802,7 +3807,7 @@ void ClassDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const
    MemberList *ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, displayName(), this, title, false, showInline);
+      ml->writeDocumentation(ol, qPrintable(displayName()), this, title, false, showInline);
    }
 }
 
@@ -3810,6 +3815,7 @@ void ClassDef::writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt)
 {
    //printf("%s: ClassDef::writeSimpleMemberDocumentation()\n",name().data());
    MemberList *ml = getMemberList(lt);
+
    if (ml) {
       ml->writeSimpleDocumentation(ol, this);
    }
@@ -4051,12 +4057,14 @@ QByteArray ClassDef::anchor() const
       if (m_impl->templateMaster) {
          // point to the template of which this class is an instance
          anc = m_impl->templateMaster->getOutputFileBase();
+
       } else if (isReference()) {
          // point to the external location
          anc = m_impl->fileName;
+
       } else {
          // normal locally defined class
-         anc = convertNameToFile(m_impl->fileName);
+         anc = convertNameToFile(m_impl->fileName).toUtf8();
       }
    }
    return anc;
@@ -4065,7 +4073,7 @@ QByteArray ClassDef::anchor() const
 bool ClassDef::isEmbeddedInOuterScope() const
 {
    static bool inlineGroupedClasses = Config_getBool("INLINE_GROUPED_CLASSES");
-   static bool inlineSimpleClasses = Config_getBool("INLINE_SIMPLE_STRUCTS");
+   static bool inlineSimpleClasses  = Config_getBool("INLINE_SIMPLE_STRUCTS");
 
    Definition *container = getOuterScope();
 

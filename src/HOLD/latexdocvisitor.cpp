@@ -1466,9 +1466,11 @@ void LatexDocVisitor::visitPre(DocParamList *pl)
       }
    }
    if (sect && sect->hasTypeSpecifier()) {
-      QListIterator<DocNode> li(pl->paramTypes());
+      QListIterator<DocNode *> li(pl->paramTypes());
       DocNode *type;
+
       bool first = true;
+
       for (li.toFirst(); (type = li.current()); ++li) {
          if (!first) {
             m_t << " | ";
@@ -1488,9 +1490,11 @@ void LatexDocVisitor::visitPre(DocParamList *pl)
    m_t << "{\\em ";
    //QStringListIterator li(pl->parameters());
    //const char *s;
-   QListIterator<DocNode> li(pl->parameters());
+
+   QListIterator<DocNode *> li(pl->parameters());
    DocNode *param;
    bool first = true;
+
    for (li.toFirst(); (param = li.current()); ++li) {
       if (!first) {
          m_t << ",";

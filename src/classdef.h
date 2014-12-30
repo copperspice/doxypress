@@ -110,7 +110,7 @@ class ClassDef : public Definition
 
    /** Returns the unique base name (without extension) of the class's file on disk */
    QByteArray getOutputFileBase() const;
-   QByteArray getInstanceOutputFileBase() const;
+   QString getInstanceOutputFileBase() const;
    QByteArray getFileBase() const;
 
    /** Returns the base name for the source code file */
@@ -135,7 +135,7 @@ class ClassDef : public Definition
    bool hasDetailedDescription() const;
 
    /** Returns the name as it is appears in the documentation */
-   QByteArray displayName(bool includeScope = true) const;
+   QString displayName(bool = true) const override;
 
    /** Returns the type of compound this is, i.e. class/struct/union/.. */
    CompoundType compoundType() const;
@@ -326,9 +326,8 @@ class ClassDef : public Definition
    const ArgumentList *typeConstraints() const;
    const ExampleSDict *exampleList() const;
    bool hasExamples() const;
-   QByteArray getMemberListFileName() const;
+   QString getMemberListFileName() const;
    bool subGrouping() const;
-
 
    //-----------------------------------------------------------------------------------
    // --- setters ----

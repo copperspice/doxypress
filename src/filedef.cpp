@@ -68,7 +68,9 @@ class DevNullCodeDocInterface : public CodeOutputInterface
    virtual void writeCodeAnchor(const char *) {}
    virtual void linkableSymbol(int, const char *, Definition *, Definition *) {}
    virtual void setCurrentDoc(Definition *, const char *, bool) {}
-   virtual void addWord(const char *, bool) {}
+
+   virtual void addWord(const QString &, bool) override
+   {}
 };
 
 //---------------------------------------------------------------------------
@@ -105,10 +107,11 @@ FileDef::FileDef(const char *p, const char *nm, const char *lref, const char *dn
    m_dir               = 0;
 
    if (Config_getBool("FULL_PATH_NAMES")) {
-      m_docname.prepend(stripFromPath(m_path));
+      m_docname.prepend(stripFromPath(m_path).toUtf8());
    }
 
    setLanguage(getLanguageFromFileName(name()));
+
    m_memberGroupSDict = 0;
    acquireFileVersion();
    m_subGrouping = Config_getBool("SUBGROUPING");
@@ -587,7 +590,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
 
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
          QByteArray label = lde->kind() == LayoutDocEntry::FileClasses ? "nested-classes" : "namespaces";
-         ol.writeSummaryLink(0, label, ls->title(lang), first);
+         ol.writeSummaryLink(QString(""), label, ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
@@ -595,7 +598,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
          MemberList *ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
-            ol.writeSummaryLink(0, MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+            ol.writeSummaryLink(QString(""), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }
@@ -845,6 +848,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    static bool generateTreeView  = Config_getBool("GENERATE_TREEVIEW");
    static bool filterSourceFiles = Config_getBool("FILTER_SOURCE_FILES");
    static bool latexSourceCode   = Config_getBool("LATEX_SOURCE_CODE");
+
    DevNullCodeDocInterface devNullIntf;
    QByteArray title = m_docname;
 
@@ -864,10 +868,11 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    bool genSourceFile = !isDocFile && generateSourceFile();
 
    if (getDirDef()) {
+
       startFile(ol, getSourceFileBase(), 0, pageTitle, HLI_FileVisible,
-                !generateTreeView,
-                !isDocFile && genSourceFile ? QByteArray() : getOutputFileBase());
-      if (!generateTreeView) {
+                !generateTreeView, !isDocFile && genSourceFile ? QByteArray() : getOutputFileBase());
+
+      if (! generateTreeView) {
          getDirDef()->writeNavigationPath(ol);
          ol.endQuickIndices();
       }
@@ -1560,13 +1565,12 @@ void FileDef::acquireFileVersion()
    }
 }
 
-
 QByteArray FileDef::getSourceFileBase() const
 {
    if (Htags::useHtags) {
       return Htags::path2URL(m_filePath);
    } else {
-      return convertNameToFile(m_diskName) + "_source";
+      return (convertNameToFile(m_diskName) + "_source").toUtf8();
    }
 }
 

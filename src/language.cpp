@@ -166,22 +166,26 @@ bool setTranslator(const char *langName)
    if (L_EQUAL("english")) {
       theTranslator = new TranslatorEnglish;
    }
+
 #if !defined(ENGLISH_ONLY)
 #ifdef LANG_NL
    else if (L_EQUAL("dutch")) {
       theTranslator = new TranslatorDutch;
    }
 #endif
+
 #ifdef LANG_AM
    else if (L_EQUAL("armenian")) {
       theTranslator = new TranslatorArmenian;
    }
 #endif
+
 #ifdef LANG_SV
    else if (L_EQUAL("swedish")) {
       theTranslator = new TranslatorSwedish;
    }
 #endif
+
 #ifdef LANG_CZ
    else if (L_EQUAL("czech")) {
       theTranslator = new TranslatorCzech;

@@ -945,7 +945,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
                             lde->kind() == LayoutDocEntry::GroupNestedGroups ? "groups"         :
                             "dirs";
 
-         ol.writeSummaryLink(0, label, ls->title(lang), first);
+         ol.writeSummaryLink(QString(""), label, ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
@@ -953,7 +953,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
          MemberList *ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
-            ol.writeSummaryLink(0, MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+            ol.writeSummaryLink(QString(""), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }
@@ -1320,7 +1320,6 @@ void addMemberToGroups(Entry *root, MemberDef *md)
    }
 }
 
-
 void addExampleToGroups(Entry *root, QSharedPointer<PageDef> eg)
 {
    for (auto g : *root->groups) {
@@ -1338,7 +1337,7 @@ QByteArray GroupDef::getOutputFileBase() const
    if (isReference()) {
       return fileName;
    } else {
-      return convertNameToFile(fileName);
+      return convertNameToFile(fileName).toUtf8();
    }
 }
 

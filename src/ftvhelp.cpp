@@ -187,13 +187,13 @@ void FTVHelp::decContentsDepth()
  *  \param addToNavIndex add this entry to the quick navigation index
  *  \param def Definition corresponding to this entry
  */
-void FTVHelp::addContentsItem(bool isDir, const char *name, const char *ref, const char *file, const char *anchor,
+void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
                               bool separateIndex, bool addToNavIndex, Definition *def )
 {
    //printf("%p: m_indent=%d addContentsItem(%s,%s,%s,%s)\n",this,m_indent,name,ref,file,anchor);
    QList<FTVNode *> *nl = &m_indentNodes[m_indent];
 
-   FTVNode *newNode = new FTVNode(isDir, ref, file, anchor, name, separateIndex, addToNavIndex, def);
+   FTVNode *newNode = new FTVNode(isDir, ref, file, anchor, qPrintable(name), separateIndex, addToNavIndex, def);
 
    if (! nl->isEmpty()) {
       nl->last()->isLast = false;
@@ -206,7 +206,6 @@ void FTVHelp::addContentsItem(bool isDir, const char *name, const char *ref, con
       QList<FTVNode *> *pnl = &m_indentNodes[m_indent - 1];
       newNode->parent = pnl->last();
    }
-
 }
 
 static QByteArray node2URL(FTVNode *n, bool overruleFile = false, bool srcLink = false)

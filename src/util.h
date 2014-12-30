@@ -263,7 +263,7 @@ bool classVisibleInIndex(ClassDef *cd);
 int minClassDistance(const ClassDef *cd, const ClassDef *bcd, int level = 0);
 Protection classInheritedProtectionLevel(ClassDef *cd, ClassDef *bcd, Protection prot = Public, int level = 0);
 
-QByteArray convertNameToFile(const char *name, bool allowDots = false, bool allowUnderscore = false);
+QString convertNameToFile(const char *name, bool allowDots = false, bool allowUnderscore = false);
 
 void extractNamespaceName(const QByteArray &scopeName, QByteArray &className, QByteArray &namespaceName,
                           bool allowEmptyClass = false);
@@ -274,7 +274,7 @@ QByteArray stripScope(const char *name);
 
 QByteArray convertToHtml(const char *s, bool keepEntities = true);
 
-QByteArray convertToXML(const char *s);
+QByteArray convertToXML(const QString &s);
 
 QByteArray convertToJSString(const char *s);
 
@@ -434,14 +434,10 @@ uint getUtf8Code( const QByteArray &s, int idx );
 uint getUtf8CodeToLower( const QByteArray &s, int idx );
 uint getUtf8CodeToUpper( const QByteArray &s, int idx );
 
-QByteArray extractDirection(QByteArray &docs);
+QByteArray extractDirection(QString docs);
 
-void convertProtectionLevel(
-   MemberListType inListType,
-   Protection inProt,
-   int *outListType1,
-   int *outListType2
-);
+void convertProtectionLevel(MemberListType inListType,Protection inProt,
+   int *outListType1, int *outListType2);
 
 bool mainPageHasTitle();
 

@@ -83,7 +83,7 @@ class PageDef : public Definition
       return m_pageScope;
    }
 
-   QByteArray displayName(bool = true) const {
+   QString displayName(bool = true) const override {
       return !m_title.isEmpty() ? m_title : Definition::name();
    }
 

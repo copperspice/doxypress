@@ -72,7 +72,7 @@ class HtmlHelp  : public IndexIntf
    void incContentsDepth();
    void decContentsDepth();
 
-   void addContentsItem(bool isDir, const char *name, const char *ref, const char *file, const char *anchor,
+   void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
                         bool separateIndex, bool addToNavIndex, Definition *def);
 
    void addIndexItem(Definition *context, MemberDef *md, const char *sectionAnchor, const char *title);

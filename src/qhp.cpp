@@ -194,16 +194,12 @@ void Qhp::decContentsDepth()
    m_sectionLevel--;
 }
 
-void Qhp::addContentsItem(bool /*isDir*/, const char *name,
-                          const char * /*ref*/, const char *file,
-                          const char *anchor, bool /* separateIndex */,
-                          bool /* addToNavIndex */,
-                          Definition * /*def*/)
+void Qhp::addContentsItem(bool /*isDir*/, const QString &name, const char * /*ref*/, const char *file,
+                          const char *anchor, bool /* separateIndex */, bool /* addToNavIndex */, Definition * /*def*/)
 {
-   //printf("Qhp::addContentsItem(%s) %d\n",name,m_sectionLevel);
    // Backup difference before modification
-
    QByteArray f = file;
+
    if (!f.isEmpty() && f.at(0) == '^') {
       return;   // absolute URL not supported
    }
@@ -213,8 +209,7 @@ void Qhp::addContentsItem(bool /*isDir*/, const char *name,
    handlePrevSection();
    setPrevSection(name, f, anchor, m_sectionLevel);
 
-   // Close sections as needed
-   //printf("Qhp::addContentsItem() closing %d sections\n",diff);
+   // Close sections as needed  
    for (; diff > 0; diff--) {
       m_toc.close("section");
    }
@@ -337,9 +332,9 @@ void Qhp::handlePrevSection()
    clearPrevSection();
 }
 
-void Qhp::setPrevSection(const char *title, const char *basename, const char *anchor, int level)
+void Qhp::setPrevSection(const QString &title, const char *basename, const char *anchor, int level)
 {
-   m_prevSectionTitle = title;
+   m_prevSectionTitle = title.toUtf8();
    m_prevSectionBaseName = basename;
    m_prevSectionAnchor = anchor;
    m_prevSectionLevel = level;

@@ -1427,12 +1427,13 @@ void PerlModDocVisitor::visitPost(DocParamSect *)
 void PerlModDocVisitor::visitPre(DocParamList *pl)
 {
    leaveText();
+
    m_output.openHash()
    .openList("parameters");
-   //QStringListIterator li(pl->parameters());
-   //const char *s;
-   QListIterator<DocNode> li(pl->parameters());
+  
+   QListIterator<DocNode *> li(pl->parameters());
    DocNode *param;
+
    for (li.toFirst(); (param = li.current()); ++li) {
       QByteArray s;
       if (param->kind() == DocNode::Kind_Word) {

@@ -59,12 +59,11 @@ QHash<QString, void *>            Doxygen::expandAsDefinedDict;                 
 QHash<QString, DefinitionIntf *> *Doxygen::symbolMap = 0;
 QHash<QString, Definition *>     *Doxygen::clangUsrMap = 0;
 
-QHash<long, MemberGroupInfo>      Doxygen::memGrpInfoDict;                             // dictionary of the member groups heading
 QHash<QString, RefList>         *Doxygen::xrefLists = new QHash<QString, RefList>;    // dictionary of cross-referenced item lists
-
 QHash<QString, int>             *Doxygen::htmlDirMap = 0;
 
-StringMap<QSharedPointer<DirRelation>>   Doxygen::dirRelations;
+QHash<long, QSharedPointer<MemberGroupInfo>> Doxygen::memGrpInfoDict;                 // dictionary of the member groups heading
+StringMap<QSharedPointer<DirRelation>>       Doxygen::dirRelations;
 
 PageDef         *Doxygen::mainPage = 0;
 NamespaceDef    *Doxygen::globalScope = 0;

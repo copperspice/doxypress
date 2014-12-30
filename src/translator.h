@@ -64,11 +64,11 @@ class Translator
    virtual QByteArray trDefinedIn() = 0;
 
    // quick reference sections
-
    virtual QByteArray trModules() = 0;
    virtual QByteArray trClassHierarchy() = 0;
    virtual QByteArray trCompoundList() = 0;
    virtual QByteArray trFileList() = 0;
+
    //virtual QByteArray trHeaderFiles() = 0;
    virtual QByteArray trCompoundMembers() = 0;
    virtual QByteArray trFileMembers() = 0;
@@ -128,27 +128,12 @@ class Translator
    virtual QByteArray trExceptions() = 0;
    virtual QByteArray trGeneratedBy() = 0;
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-990307
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trNamespaceList() = 0;
    virtual QByteArray trNamespaceListDescription(bool extractAll) = 0;
    virtual QByteArray trFriends() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-990405
-   //////////////////////////////////////////////////////////////////////////
-
+ 
    virtual QByteArray trRelatedFunctionDocumentation() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-990425
-   //////////////////////////////////////////////////////////////////////////
-
-   virtual QByteArray trCompoundReference(const char *clName,
-                                          ClassDef::CompoundType compType,
-                                          bool isTemplate) = 0;
+   virtual QByteArray trCompoundReference(const char *clName, ClassDef::CompoundType compType, bool isTemplate) = 0;
 
    virtual QByteArray trFileReference(const char *fileName) = 0;
    virtual QByteArray trNamespaceReference(const char *namespaceName) = 0;
@@ -173,46 +158,19 @@ class Translator
    virtual QByteArray trNamespaceIndex() = 0;
    virtual QByteArray trNamespaceDocumentation() = 0;
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-990522
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trNamespaces() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-990728
-   //////////////////////////////////////////////////////////////////////////
-
-   virtual QByteArray trGeneratedFromFiles(ClassDef::CompoundType compType,
-                                           bool single) = 0;
-   //virtual QByteArray trAlphabeticalList() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-990901
-   //////////////////////////////////////////////////////////////////////////
-
+  
+   virtual QByteArray trGeneratedFromFiles(ClassDef::CompoundType compType, bool single) = 0;
+  
    virtual QByteArray trReturnValues() = 0;
    virtual QByteArray trMainPage() = 0;
    virtual QByteArray trPageAbbreviation() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-991003
-   //////////////////////////////////////////////////////////////////////////
-
-   //virtual QByteArray trSources() = 0;
+   
    virtual QByteArray trDefinedAtLineInSourceFile() = 0;
    virtual QByteArray trDefinedInSourceFile() = 0;
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-991205
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trDeprecated() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.0.0
-   //////////////////////////////////////////////////////////////////////////
-
+ 
    virtual QByteArray trCollaborationDiagram(const char *clName) = 0;
    virtual QByteArray trInclDepGraph(const char *fName) = 0;
    virtual QByteArray trConstructorDocumentation() = 0;
@@ -229,10 +187,6 @@ class Translator
    virtual QByteArray trGotoTextualHierarchy() = 0;
    virtual QByteArray trPageIndex() = 0;
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.1.0
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trNote() = 0;
    virtual QByteArray trPublicTypes() = 0;
    virtual QByteArray trPublicAttribs() = 0;
@@ -244,16 +198,8 @@ class Translator
    virtual QByteArray trPrivateAttribs() = 0;
    virtual QByteArray trStaticPrivateAttribs() = 0;
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.1.3
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trTodo() = 0;
    virtual QByteArray trTodoList() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.1.4
-   //////////////////////////////////////////////////////////////////////////
 
    virtual QByteArray trReferencedBy() = 0;
    virtual QByteArray trRemarks() = 0;
@@ -261,58 +207,29 @@ class Translator
    virtual QByteArray trInclByDepGraph() = 0;
    virtual QByteArray trSince() = 0;
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.1.5
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trLegendTitle() = 0;
    virtual QByteArray trLegendDocs() = 0;
    virtual QByteArray trLegend() = 0;
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.0
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trTest() = 0;
    virtual QByteArray trTestList() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.1
-   //////////////////////////////////////////////////////////////////////////
-
-   //virtual QByteArray trDCOPMethods() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.2
-   //////////////////////////////////////////////////////////////////////////
 
    virtual QByteArray trProperties() = 0;
    virtual QByteArray trPropertyDocumentation() = 0;
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.4
-   //////////////////////////////////////////////////////////////////////////
-
-   //virtual QByteArray trInterfaces() = 0;
    virtual QByteArray trClasses() = 0;
+
+
    virtual QByteArray trPackage(const char *name) = 0;
+
    virtual QByteArray trPackageList() = 0;
    virtual QByteArray trPackageListDescription() = 0;
    virtual QByteArray trPackages() = 0;
    //virtual QByteArray trPackageDocumentation() = 0;
    virtual QByteArray trDefineValue() = 0;
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.5
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trBug() = 0;
    virtual QByteArray trBugList() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.6
-   //////////////////////////////////////////////////////////////////////////
-
 
    /*! Used as ansicpg for RTF file
     *

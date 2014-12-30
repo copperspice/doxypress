@@ -40,13 +40,14 @@ void warn_doc_error(const char *file, int line, QString fmt_q, ...);
 void warn_uncond(const char *fmt, ...);
 void va_warn(const char *file, int line, const char *fmt, va_list args);
 
-
 inline const char *qPrint(const char *s)
 {
   if (s) {
    return s;
+
   } else {
    return "";
+
   }
 }
 

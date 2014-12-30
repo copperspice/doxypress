@@ -75,6 +75,8 @@ void initDoxygen()
    setlocale(LC_CTYPE, "C");       // to get isspace(0xA0)==0, needed for UTF-8
    setlocale(LC_NUMERIC, "C");
 
+   QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+
    Doxygen::runningTime.start();
    initPreprocessor();
 

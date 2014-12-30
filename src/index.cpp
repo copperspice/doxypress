@@ -996,13 +996,13 @@ static void writeSingleFileIndex(OutputList &ol, FileDef *fd)
    bool nameOk = !fd->isDocumentationFile();
 
    if (nameOk && (doc || src) && !fd->isReference()) {
-      QByteArray path;
+      QString path;
 
       if (Config_getBool("FULL_PATH_NAMES")) {
          path = stripFromPath(fd->getPath());
       }
 
-      QByteArray fullName = fd->name();
+      QString fullName = fd->name();
       if (!path.isEmpty()) {
          if (path.at(path.length() - 1) != '/') {
             fullName.prepend("/");
@@ -1014,19 +1014,12 @@ static void writeSingleFileIndex(OutputList &ol, FileDef *fd)
       ol.docify(path);
 
       if (doc) {
-         ol.writeObjectLink(0, fd->getOutputFileBase(), 0, fd->name());
-         //if (addToIndex)
-         //{
-         //  addMembersToIndex(fd,LayoutDocManager::File,fullName,QByteArray());
-         //}
+         ol.writeObjectLink(0, fd->getOutputFileBase(), 0, fd->name());       
+
       } else {
          ol.startBold();
          ol.docify(fd->name());
-         ol.endBold();
-         //if (addToIndex)
-         //{
-         //  Doxygen::indexList->addContentsItem(false,fullName,0,0,0);
-         //}
+         ol.endBold(); 
       }
       if (src) {
          ol.pushGeneratorState();
@@ -1041,11 +1034,12 @@ static void writeSingleFileIndex(OutputList &ol, FileDef *fd)
       }
 
       ol.endIndexKey();
+
       bool hasBrief = !fd->briefDescription().isEmpty();
       ol.startIndexValue(hasBrief);
 
       if (hasBrief) {
-         //ol.docify(" (");
+         
          ol.generateDoc(
             fd->briefFile(), fd->briefLine(),
             fd, 0,
@@ -1056,12 +1050,10 @@ static void writeSingleFileIndex(OutputList &ol, FileDef *fd)
             true,  // single line
             true   // link from index
          );
-         //ol.docify(")");
+         
       }
 
-      ol.endIndexValue(fd->getOutputFileBase(), hasBrief);
-      //ol.popGeneratorState();
-      // --------------------------------------------------------
+      ol.endIndexValue(fd->getOutputFileBase(), hasBrief);      
    }
 }
 
@@ -3185,7 +3177,7 @@ static void writeGroupTreeNode(OutputList &ol, GroupDef *gd, int level, FTVHelp 
          
             for (auto dd : *gd->getDirs()) {
                if (dd->isVisible()) {
-                  Doxygen::indexList->addContentsItem(false, dd->shortName(), dd->getReference(),
+                  Doxygen::indexList->addContentsItem(false, dd->shortName(), dd->getReference(), 
                                                       dd->getOutputFileBase(), 0, false, false);
                }
             }
