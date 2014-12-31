@@ -58,7 +58,7 @@ CS_Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
 
 
 CS_Doxygen_SOURCES = \
-   src/docparser.cpp \
+   src/doxy_work.cpp \
    src/dot.cpp \
 \
    src/doxy_work.cpp \

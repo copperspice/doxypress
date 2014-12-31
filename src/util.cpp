@@ -3660,7 +3660,11 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
              ClassDef *&cd, FileDef *&fd, NamespaceDef *&nd, GroupDef *&gd, bool forceEmptyScope,
              FileDef *currentFile, bool checkCV, const char *forceTagFile )
 {
-   fd = 0, md = 0, cd = 0, nd = 0, gd = 0;
+   fd = 0;
+   md = 0;
+   cd = 0;
+   nd = 0;
+   gd = 0;
 
    if (mbName.isEmpty()) {
       return false;   /* empty name => nothing to link */
@@ -3668,31 +3672,33 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
 
    QByteArray scopeName = scName;
    QByteArray memberName = mbName;
+
    scopeName = substitute(scopeName, "\\", "::"); // for PHP
    memberName = substitute(memberName, "\\", "::"); // for PHP
 
    int is, im = 0, pm = 0;
 
    // strip common part of the scope from the scopeName
-   while ((is = scopeName.lastIndexOf("::")) != -1 &&
-          (im = memberName.indexOf("::", pm)) != -1 &&
+   while ((is = scopeName.lastIndexOf("::")) != -1 && (im = memberName.indexOf("::", pm)) != -1 &&
           (scopeName.right(scopeName.length() - is - 2) == memberName.mid(pm, im - pm))) {
+
       scopeName = scopeName.left(is);
+
       pm = im + 2;
    }
-
-   //printf("result after scope corrections scope=%s name=%s\n",
-   //          scopeName.data(),memberName.data());
-
+ 
    QByteArray mName = memberName;
    QByteArray mScope;
-   if (memberName.left(9) != "operator " && // treat operator conversion methods
+
+   if (memberName.left(9) != "operator " && (im = memberName.lastIndexOf("::")) != -1 &&
+         im < (int)memberName.length() - 2) {
+
+         // treat operator conversion methods
          // as a special case
-         (im = memberName.lastIndexOf("::")) != -1 &&
-         im < (int)memberName.length() - 2 // not A::
-      ) {
+         // not A::
+
       mScope = memberName.left(im);
-      mName = memberName.right(memberName.length() - im - 2);
+      mName  = memberName.right(memberName.length() - im - 2);
    }
 
    // handle special the case where both scope name and member scope are equal
@@ -3702,13 +3708,14 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
 
    QSharedPointer<MemberName> mn = Doxygen::memberNameSDict->find(mName);
  
-  if ((!forceEmptyScope || scopeName.isEmpty()) && mn && !(scopeName.isEmpty() && mScope.isEmpty())) {
+   if ((!forceEmptyScope || scopeName.isEmpty()) && mn && !(scopeName.isEmpty() && mScope.isEmpty())) {
       // this was changed for bug638856, forceEmptyScope => empty scopeName
      
       int scopeOffset = scopeName.length();
 
       do {
          QByteArray className = scopeName.left(scopeOffset);
+
          if (!className.isEmpty() && !mScope.isEmpty()) {
             className += "::" + mScope;
          } else if (!mScope.isEmpty()) {
@@ -3806,6 +3813,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                         cd = tmd->getClassDef();
                         md = emd;
                         return true;
+
                      } else {
                         cd = 0;
                         md = 0;

@@ -115,7 +115,19 @@ class MemberList : public SortedList<MemberDef *>
                            Definition *container, const char *title, bool showEnumValues = false, bool showInline = false);
 
    void writeSimpleDocumentation(OutputList &ol, Definition *container);   
+
    void writeDocumentationPage(OutputList &ol, const char *scopeName, Definition *container);
+
+   void writeDocumentationPage(OutputList &ol, const QString &scopeName, Definition *container)
+   {
+      writeDocumentationPage(ol, qPrintable(scopeName), container);
+   }
+
+   void writeDocumentationPage(OutputList &ol, const QByteArray &scopeName, Definition *container)
+   {
+      writeDocumentationPage(ol, scopeName.constData(), container);
+   }
+
    void writeTagFile(FTextStream &);
    bool declVisible() const;
    void addMemberGroup(MemberGroup *mg);

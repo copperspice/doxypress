@@ -18,8 +18,9 @@
 #ifndef INDEX_H
 #define INDEX_H
 
-#include <QList>
 #include <QByteArray>
+#include <QList>
+#include <QString>
 #include <QSharedPointer>
 
 class Definition;
@@ -306,6 +307,16 @@ extern int documentedPages;
 
 void startTitle(OutputList &ol, const char *fileName, Definition *def = 0);
 void endTitle(OutputList &ol, const char *fileName, const char *name);
+
+inline void endTitle(OutputList &ol, const char *fileName, const QString &name)
+{
+   endTitle(ol, fileName, qPrintable(name));  
+}
+
+inline void endTitle(OutputList &ol, const char *fileName, const QByteArray &name)
+{
+   endTitle(ol, fileName, name.constData());  
+}
 
 void startFile(OutputList &ol, const char *name, const char *manName,
                const char *title, HighlightedItem hli = HLI_None,

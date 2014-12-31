@@ -117,23 +117,12 @@ class LetterToIndexMap : public LongMap<QSharedPointer<T>>
    }
 };
 
-//--------------------------------------------------------------------
-
 QByteArray langToString(SrcLangExt lang);
 QByteArray getLanguageSpecificSeparator(SrcLangExt lang, bool classScope = false);
 
-//--------------------------------------------------------------------
-
-void linkifyText(const TextGeneratorIntf &ol,
-                 Definition *scope,
-                 FileDef *fileScope,
-                 Definition *self,
-                 const char *text,
-                 bool autoBreak = false,
-                 bool external = true,
-                 bool keepSpaces = false,
-                 int indentLevel = 0
-                );
+void linkifyText(const TextGeneratorIntf &ol, Definition *scope, FileDef *fileScope, Definition *self,
+                 const char *text, bool autoBreak = false, bool external = true, bool keepSpaces = false, 
+                 int indentLevel = 0);
 
 void setAnchors(MemberList *ml);
 
@@ -141,19 +130,9 @@ QByteArray fileToString(const char *name, bool filter = false, bool isSourceCode
 
 QByteArray dateToString(bool);
 
-bool getDefs(const QByteArray &scopeName,
-             const QByteArray &memberName,
-             const char *,
-             MemberDef *&md,
-             ClassDef *&cd,
-             FileDef *&fd,
-             NamespaceDef *&nd,
-             GroupDef *&gd,
-             bool forceEmptyScope = false,
-             FileDef *currentFile = 0,
-             bool checkCV = false,
-             const char *forceTagFile = 0
-            );
+bool getDefs(const QByteArray &scopeName, const QByteArray &memberName, const char *, MemberDef *&md, 
+             ClassDef *&cd, FileDef *&fd, NamespaceDef *&nd, GroupDef *&gd, bool forceEmptyScope = false,
+             FileDef *currentFile = 0, bool checkCV = false, const char *forceTagFile = 0);
 
 QString getFileFilter(const char *name, bool isSourceCode);
 

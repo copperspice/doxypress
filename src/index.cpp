@@ -300,9 +300,8 @@ void endFileWithNavPath(Definition *d, OutputList &ol)
    endFile(ol, generateTreeView, true, navPath);
 }
 
-//----------------------------------------------------------------------
 template<class T>
-void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part, const QByteArray &name, const QByteArray &anchor,
+void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part, const QString &name, const QByteArray &anchor,
                        bool addToIndex = true, bool preventSeparateIndex = false)
 {
    bool hasMembers = def->getMemberLists().count() > 0 || def->getMemberGroupSDict() != 0;
@@ -321,9 +320,7 @@ void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part, const QByteArr
          }
       }
    }
-
-   //printf("addMembersToIndex(def=%s hasMembers=%d numClasses=%d)\n",def->name().data(),hasMembers,numClasses);
-
+ 
    if (hasMembers || numClasses > 0) {
 
       Doxygen::indexList->incContentsDepth();
@@ -1918,7 +1915,7 @@ static void writeAnnotatedIndex(OutputList &ol)
 }
 
 //----------------------------------------------------------------------------
-static void writeClassLinkForMember(OutputList &ol, MemberDef *md, const char *separator, QByteArray &prevClassName)
+static void writeClassLinkForMember(OutputList &ol, MemberDef *md, const char *separator, QString &prevClassName)
 {
    ClassDef *cd = md->getClassDef();
 
@@ -1930,7 +1927,7 @@ static void writeClassLinkForMember(OutputList &ol, MemberDef *md, const char *s
    }
 }
 
-static void writeFileLinkForMember(OutputList &ol, MemberDef *md, const char *separator, QByteArray &prevFileName)
+static void writeFileLinkForMember(OutputList &ol, MemberDef *md, const char *separator, QString &prevFileName)
 {
    FileDef *fd = md->getFileDef();
 
@@ -1942,7 +1939,7 @@ static void writeFileLinkForMember(OutputList &ol, MemberDef *md, const char *se
    }
 }
 
-static void writeNamespaceLinkForMember(OutputList &ol, MemberDef *md, const char *separator, QByteArray &prevNamespaceName)
+static void writeNamespaceLinkForMember(OutputList &ol, MemberDef *md, const char *separator, QString &prevNamespaceName)
 {
    NamespaceDef *nd = md->getNamespaceDef();
 
@@ -1960,7 +1957,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
    int index = (int)type;
    assert(index < 3);
 
-   using writeLinkForMember_t = void (*)(OutputList & ol, MemberDef * md, const char *separator, QByteArray & prevNamespaceName);
+   using writeLinkForMember_t = void (*)(OutputList & ol, MemberDef * md, const char *separator, QString &prevNamespaceName);
 
    // each index tab has its own write function
    static writeLinkForMember_t   writeLinkForMemberMap[3] = {
@@ -1970,7 +1967,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
    };
 
    QByteArray prevName;
-   QByteArray prevDefName;
+   QString prevDefName;
 
    bool first = true;
    bool firstSection = true;

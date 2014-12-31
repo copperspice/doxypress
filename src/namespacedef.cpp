@@ -741,7 +741,7 @@ QByteArray NamespaceDef::getOutputFileBase() const
       return fileName;
 
    } else {
-      return convertNameToFile(fileName);
+      return convertNameToFile(fileName).toUtf8();
    }
 }
 
@@ -771,7 +771,7 @@ void NamespaceDef::addListReferences()
       QList<ListItemInfo> *xrefItems = xrefListItems();
       addRefItem(xrefItems, qualifiedName(), 
                  getLanguage() == SrcLangExt_Fortran ? theTranslator->trModule(true, true) : theTranslator->trNamespace(true, true),
-                 getOutputFileBase(), displayName(), 0, this );
+                 getOutputFileBase(), qPrintable(displayName()), 0, this );
    }  
 
    for (auto mg : *memberGroupSDict) {
@@ -785,16 +785,17 @@ void NamespaceDef::addListReferences()
    }
 }
 
-QByteArray NamespaceDef::displayName(bool includeScope) const
+QString NamespaceDef::displayName(bool includeScope) const
 {
-   QByteArray result = includeScope ? name() : localName();
+   QString result = includeScope ? name() : localName();
+
    SrcLangExt lang = getLanguage();
-   QByteArray sep = getLanguageSpecificSeparator(lang);
+   QByteArray sep  = getLanguageSpecificSeparator(lang);
 
    if (sep != "::") {
-      result = substitute(result, "::", sep);
+      result = substitute(result.toUtf8(), "::", sep);
    }
-   //printf("NamespaceDef::displayName() %s->%s lang=%d\n",name().data(),result.data(),lang);
+  
    return result;
 }
 
@@ -920,7 +921,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title, bool co
          ol.docify(" ");
          ol.insertMemberAlign();
 
-         QByteArray name;
+         QString name;
          if (localName) {
             name = nd->localName();
          } else {
@@ -993,7 +994,7 @@ void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, c
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, displayName(), this, title);
+      ml->writeDocumentation(ol, qPrintable(displayName()), this, title);
    }
 }
 
@@ -1038,20 +1039,21 @@ QByteArray NamespaceDef::title() const
    SrcLangExt lang = getLanguage();
    QByteArray pageTitle;
 
+   QByteArray tempDisplay = displayName().toUtf8();
+
    if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
-      pageTitle = theTranslator->trPackage( qPrintable(displayName() ));
+      pageTitle = theTranslator->trPackage(tempDisplay.constData());
 
    } else if (lang == SrcLangExt_Fortran) {
-      pageTitle = theTranslator->trModuleReference(displayName());
+      pageTitle = theTranslator->trModuleReference(tempDisplay.constData());
 
    } else if (lang == SrcLangExt_IDL) {
 
-      pageTitle = isConstantGroup() 
-                  ? theTranslator->trConstantGroupReference(displayName())
-                  : theTranslator->trModuleReference(displayName());
+      pageTitle = isConstantGroup() ? theTranslator->trConstantGroupReference(tempDisplay.constData())
+                  : theTranslator->trModuleReference(tempDisplay.constData());
 
    } else {
-      pageTitle = theTranslator->trNamespaceReference(displayName());
+      pageTitle = theTranslator->trNamespaceReference(tempDisplay.constData());
 
    }
 

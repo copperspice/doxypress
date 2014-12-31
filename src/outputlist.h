@@ -92,8 +92,18 @@ class OutputList : public OutputDocInterface
                     bool indexWords, bool isExample, const char *exampleName = 0,
                     bool singleLine = false, bool linkFromIndex = false);
    void writeDoc(DocRoot *root, Definition *ctx, MemberDef *md);
+
    bool parseText(const QByteArray &textStr);
 
+   bool parseText(const QString &textStr) 
+   {
+      parseText(textStr.toUtf8());
+   }
+
+   bool parseText(const char *textStr) 
+   {
+      parseText(QByteArray(textStr));
+   }
 
    void startIndexSection(IndexSections is) {
       forall(&OutputGenerator::startIndexSection, is);

@@ -209,7 +209,7 @@ class DotClassGraph
  private:
    void buildGraph(ClassDef *cd, DotNode *n, bool base, int distance);
    bool determineVisibleNodes(DotNode *rootNode, int maxNodes, bool includeParents);
-   void determineTruncatedNodes(QList<DotNode> &queue, bool includeParents);
+   void determineTruncatedNodes(QList<DotNode *> &queue, bool includeParents);
    void addClass(ClassDef *cd, DotNode *n, int prot, const char *label,
                  const char *usedName, const char *templSpec,
                  bool base, int distance);
@@ -242,8 +242,8 @@ class DotInclDepGraph
 
  private:
    void buildGraph(DotNode *n, FileDef *fd, int distance);
-   void determineVisibleNodes(QList<DotNode> &queue, int &maxNodes);
-   void determineTruncatedNodes(QList<DotNode> &queue);
+   void determineVisibleNodes(QList<DotNode *> &queue, int &maxNodes);
+   void determineTruncatedNodes(QList<DotNode *> &queue);
 
    DotNode                   *m_startNode;
    QHash<QString, DotNode *> *m_usedNodes;
@@ -268,8 +268,8 @@ class DotCallGraph
    void buildGraph(DotNode *n, MemberDef *md, int distance);
    bool isTrivial() const;
    bool isTooBig() const;
-   void determineVisibleNodes(QList<DotNode> &queue, int &maxNodes);
-   void determineTruncatedNodes(QList<DotNode> &queue);
+   void determineVisibleNodes(QList<DotNode *> &queue, int &maxNodes);
+   void determineTruncatedNodes(QList<DotNode *> &queue);
 
  private:
    DotNode        *m_startNode;
@@ -335,7 +335,7 @@ class DotGroupCollaboration
       DotNode *pNEnd;
       EdgeType eType;
 
-      QList<Link> links;
+      QList<Link *> m_links;
       void write( FTextStream &t ) const;
    };
 
@@ -361,7 +361,7 @@ class DotGroupCollaboration
    QHash<QString, DotNode *> *m_usedNodes;
 
    QByteArray      m_diskName;
-   QList<Edge>     m_edges;
+   QList<Edge *>   m_edges;
 };
 
 /** Helper class to run dot from doxygen.

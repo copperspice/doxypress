@@ -381,26 +381,33 @@ class DocCite : public DocNode
 class DocStyleChange : public DocNode
 {
  public:
-   enum Style { Bold, Italic, Code, Center, Small,
-                Subscript, Superscript, Preformatted,
-                Span, Div
-              };
-   DocStyleChange(DocNode *parent, uint position, Style s, bool enable,
-                  const HtmlAttribList *attribs = 0) :
-      m_position(position), m_style(s), m_enable(enable) {
+   enum Style { Bold, Italic, Code, Center, Small, Subscript, Superscript,
+                Preformatted, Span, Div };
+
+   DocStyleChange(DocNode *parent, uint position, Style s, bool enable, const HtmlAttribList *attribs = 0)    
+      : m_position(position), m_style(s), m_enable(enable) 
+   {
       m_parent = parent;
+
       if (attribs) {
          m_attribs = *attribs;
       }
    }
-   Kind kind() const                     {
+
+   DocStyleChange()         
+   {
+   }
+
+   Kind kind() const {
       return Kind_StyleChange;
    }
-   Style style() const                   {
+
+   Style style() const {
       return m_style;
    }
+
    const char *styleString() const;
-   bool enable() const                   {
+   bool enable() const {
       return m_enable;
    }
    uint position() const                 {
