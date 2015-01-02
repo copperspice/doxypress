@@ -59,10 +59,9 @@ CS_Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
 
 CS_Doxygen_SOURCES = \
    src/doxy_work.cpp \
-   src/dot.cpp \
-\
-   src/doxy_work.cpp \
    src/doxy_setup.cpp \
+\
+   src/a_define.cpp \
    src/arguments.cpp \
    src/cite.cpp \
    src/clangparser.cpp \
@@ -71,9 +70,7 @@ CS_Doxygen_SOURCES = \
    src/cmdmapper.cpp \
    src/condparser.cpp \
    src/cppvalue.cpp \
-   src/debug.cpp \
    src/defgen.cpp \
-   src/define.cpp \
    src/definition.cpp \
    src/dia.cpp \
    src/diagram.cpp \
@@ -132,8 +129,24 @@ CS_Doxygen_SOURCES = \
    src/util.cpp \
    src/xmldocvisitor.cpp  \
    src/config.cpp \
+\
    src/portable.cpp  \
    src/ce_parse.cpp
+
+#   src/generated/code.cpp \
+#   src/generated/commentcnv.cpp \
+#   src/generated/commentscan.cpp \
+#   src/generated/constexp.cpp \
+#   src/generated/declinfo.cpp \
+#   src/generated/defargs.cpp \
+#   src/generated/doctokenizer.cpp \
+#   src/generated/fortrancode.cpp \
+#   src/generated/fortranscanner.cpp \
+#   src/generated/pre.cpp \
+#   src/generated/pycode.cpp \
+#   src/generated/pyscanner.cpp \
+#   src/generated/scanner.cpp \
+#   src/generated/tclscanner.cpp
 
 
 #   src/docbookgen.cpp
@@ -144,9 +157,8 @@ CS_Doxygen_SOURCES = \
 #   src/perlmodgen.cpp
 #   src/rtfdocvisitor.cpp
 #   src/rtfgen.cpp
-#   src/rtfstyle.cpp         done
+#   src/rtfstyle.cpp         compiles
 #   src/xmlgen.cpp
-
 
 
 RESOURCES = cs_doxygen.qrc

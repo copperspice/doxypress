@@ -27,6 +27,9 @@
 #include <doxygen.h>
 #include <language.h>
 #include <message.h>
+#include <marshal.h>
+#include <memberlist.h>
+#include <namespacedef.h>
 #include <outputlist.h>
 #include <code.h>
 #include <util.h>
@@ -35,10 +38,6 @@
 #include <section.h>
 #include <htags.h>
 #include <parserintf.h>
-#include <marshal.h>
-#include <debug.h>
-#include <memberlist.h>
-#include <namespacedef.h>
 #include <filedef.h>
 #include <dirdef.h>
 
@@ -75,7 +74,7 @@ class DefinitionImpl
    QByteArray   docSignatures;
 
    QByteArray localName;      // local (unqualified) name of the definition
-   // in the future m_name should become m_localName
+   
    QByteArray qualifiedName;
    QByteArray ref;   // reference to external documentation
 
@@ -1240,11 +1239,6 @@ void Definition::addSourceReferences(QSharedPointer<MemberDef> md)
    }
 }
 
-QSharedPointer<Definition> Definition::findInnerCompound(const char *)
-{
-   return QSharedPointer<Definition>();
-}
-
 QByteArray Definition::qualifiedName() const
 {
    //static int count=0;
@@ -1721,6 +1715,11 @@ FileDef *Definition::getBodyDef() const
 SortedList<GroupDef *> *Definition::partOfGroups() const
 {
    return m_impl->partOfGroups;
+}
+
+QSharedPointer<Definition> Definition::findInnerCompound(const char *)
+{
+   return QSharedPointer<Definition>();
 }
 
 Definition *Definition::getOuterScope() const

@@ -23,6 +23,39 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+/** Class containing a print function for diagnostics. */
+class Debug
+{
+ public:
+   enum DebugMask { Quiet        = 0x00000000,
+                    FindMembers  = 0x00000001,
+                    Functions    = 0x00000002,
+                    Variables    = 0x00000004,
+                    Preprocessor = 0x00000008,
+                    Classes      = 0x00000010,
+                    CommentCnv   = 0x00000020,
+                    CommentScan  = 0x00000040,
+                    Validate     = 0x00000080,
+                    PrintTree    = 0x00000100,
+                    Time         = 0x00000200,
+                    ExtCmd       = 0x00000400,
+                    Markdown     = 0x00000800,
+                    FilterOutput = 0x00001000,
+                    Lex          = 0x00002000
+                  };
+
+   static void print(DebugMask mask, int prio, const char *fmt, ...);
+   static int  setFlag(const char *label);
+   static void clearFlag(const char *label);
+   static bool isFlagSet(DebugMask mask);
+   static void printFlags(void);
+   static void setPriority(int p);
+
+ private:
+   static DebugMask curMask;
+   static int curPrio;
+};
+
 void err(const char *fmt, ...);
 void msg(const char *fmt, ...);
 

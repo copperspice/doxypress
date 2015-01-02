@@ -1762,13 +1762,17 @@ static void writeAlphabeticalClassList(OutputList &ol)
 
                      if (!namesp.isEmpty()) {
                         ol.docify(" (");
-                        NamespaceDef *nd = getResolvedNamespace(namesp);
+
+                        QSharedPointer<NamespaceDef> nd = getResolvedNamespace(namesp);
 
                         if (nd && nd->isLinkable()) {
                            ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), 0, nsDispName);
+
                         } else {
                            ol.docify(nsDispName);
+
                         }
+
                         ol.docify(")");
                      }
                      ol.writeNonBreakableSpace(3);

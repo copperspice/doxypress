@@ -181,16 +181,11 @@ QByteArray resolveDefines(const char *n);
 
 ClassDef *getClass(const char *key);
 
-ClassDef *getResolvedClass(Definition *scope,
-                           FileDef *fileScope,
-                           const char *key,
-                           MemberDef **pTypeDef = 0,
-                           QByteArray *pTemplSpec = 0,
-                           bool mayBeUnlinkable = false,
-                           bool mayBeHidden = false,
+ClassDef *getResolvedClass(Definition *scope, FileDef *fileScope, const char *key, MemberDef **pTypeDef = 0,
+                           QByteArray *pTemplSpec = 0, bool mayBeUnlinkable = false, bool mayBeHidden = false,
                            QByteArray *pResolvedType = 0);
 
-NamespaceDef *getResolvedNamespace(const char *key);
+QSharedPointer<NamespaceDef> getResolvedNamespace(const char *key);
 
 FileDef *findFileDef(const FileNameDict *fnDict, const char *n, bool &ambig);
 
@@ -332,16 +327,11 @@ bool findAndRemoveWord(QByteArray &s, const QByteArray &word);
 
 QByteArray stripLeadingAndTrailingEmptyLines(const QByteArray &s, int &docLine);
 
-//void stringToSearchIndex(const QByteArray &docUrlBase,const QByteArray &title,
-//                         const QByteArray &str, bool priority=false,
-//                         const QByteArray &anchor="");
-
 bool updateLanguageMapping(const QByteArray &extension, const QByteArray &parser);
 SrcLangExt getLanguageFromFileName(const QByteArray fileName);
 void initDefaultExtensionMapping();
 
-MemberDef *getMemberFromSymbol(Definition *scope, FileDef *fileScope,
-                               const char *n);
+MemberDef *getMemberFromSymbol(Definition *scope, FileDef *fileScope, const char *n);
 bool checkIfTypedef(Definition *scope, FileDef *fileScope, const char *n);
 
 ClassDef *newResolveTypedef(FileDef *fileScope, MemberDef *md,

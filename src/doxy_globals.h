@@ -25,7 +25,6 @@
 #include <QString>
 #include <QTime>
 
-#include <debug.h>
 #include <entry.h>
 #include <filestorage.h>
 #include <message.h>
@@ -175,7 +174,7 @@ class Doxy_Globals
 {
    public:
       static QHash<QString, EntryNav>  g_classEntries;
-      static QList<QByteArray>         g_inputFiles;
+      static QStringList               g_inputFiles;
       static QHash<QString, void *>    g_compoundKeywordDict;   // keywords recognised as compounds
       static QHash<QString, FileDef>   g_usingDeclarations;     // used classes
       static QHash<QString, void *>    g_pathsVisited;
@@ -189,5 +188,12 @@ class Doxy_Globals
       static bool g_dumpSymbolMap;
       static bool g_useOutputTemplate;
 };
+
+template<class T>
+QSharedPointer<T> dummyShared(T *ptr)
+{
+   return QSharedPointer<T> (ptr, [](T *){} );
+}
+
 
 #endif

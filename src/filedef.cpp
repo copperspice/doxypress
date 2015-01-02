@@ -19,7 +19,6 @@
 #include <clangparser.h>
 #include <classlist.h>
 #include <classdef.h>
-#include <debug.h>
 #include <dirdef.h>
 #include <docparser.h>
 #include <doxygen.h>

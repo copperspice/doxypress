@@ -203,7 +203,9 @@ class DirRelation
 {
  public:
    DirRelation(const QByteArray &name, DirDef *src, UsedDir *dst)
-      : m_name(name), m_src(src), m_dst(dst) {}
+      : m_name(name), m_src(src), m_dst(dst)
+   {}
+
    DirDef  *source() const      {
       return m_src;
    }

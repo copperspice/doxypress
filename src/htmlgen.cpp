@@ -15,33 +15,32 @@
  *
 *************************************************************************/
 
+#include <QDir>
+#include <QRegExp>
+
 #include <stdlib.h>
 
-#include <qdir.h>
-#include <qregexp.h>
-
-#include <message.h>
-#include <htmlgen.h>
+#include <bufstr.h>
 #include <config.h>
-#include <util.h>
+#include <dirdef.h>
+#include <docparser.h>
+#include <doxy_build_info.h>
 #include <doxygen.h>
 #include <logos.h>
 #include <diagram.h>
-#include <doxy_build_info.h>
 #include <dot.h>
-#include <language.h>
+#include <htmlgen.h>
 #include <htmlhelp.h>
-#include <docparser.h>
+#include <language.h>
+#include <message.h>
 #include <htmldocvisitor.h>
 #include <searchindex.h>
 #include <pagedef.h>
-#include <debug.h>
-#include <dirdef.h>
 #include <layout.h>
 #include <image.h>
 #include <ftvhelp.h>
-#include <bufstr.h>
 #include <resourcemgr.h>
+#include <util.h>
 
 // must appear after the previous include - resolve soon 
 #include <doxy_globals.h>

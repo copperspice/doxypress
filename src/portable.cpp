@@ -42,7 +42,7 @@ extern char **environ;
 #include <portable.h>
 
 #ifndef NODEBUG
-#include <debug.h>
+#include <message.h>
 #endif
 
 static double  g_sysElapsedTime;

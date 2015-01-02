@@ -26,7 +26,6 @@
 
 #include <classlist.h>
 #include <config.h>
-#include <debug.h>
 #include <defargs.h>
 #include <dirdef.h>
 #include <doxygen.h>
@@ -533,10 +532,10 @@ ClassDef *getClass(const char *n)
    return result;
 }
 
-NamespaceDef *getResolvedNamespace(const char *name)
+QSharedPointer<NamespaceDef> getResolvedNamespace(const char *name)
 {
    if (name == 0 || name[0] == '\0') {
-      return 0;
+      return QSharedPointer<NamespaceDef>();
    }
 
    QByteArray subst = Doxygen::namespaceAliasDict[name];
@@ -555,10 +554,11 @@ NamespaceDef *getResolvedNamespace(const char *name)
       if (count == 10) {
          warn_uncond("possible recursive namespace alias detected for %s!\n", name);
       }
-      return Doxygen::namespaceSDict->find(subst.data()).data();
+
+      return Doxygen::namespaceSDict->find(subst.data());
 
    } else {
-      return Doxygen::namespaceSDict->find(name).data();
+      return Doxygen::namespaceSDict->find(name);
    }
 }
 
@@ -5185,7 +5185,8 @@ void extractNamespaceName(const QByteArray &scopeName, QByteArray &className, QB
 {
    int i, p;
    QByteArray clName = scopeName;
-   NamespaceDef *nd = 0;
+   
+   QSharedPointer<NamespaceDef> nd;
 
    if (! clName.isEmpty() && (nd = getResolvedNamespace(clName)) && getClass(clName) == 0) {
       // the whole name is a namespace (and not a class)

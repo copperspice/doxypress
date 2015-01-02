@@ -133,7 +133,8 @@ class DotNode
    QList<DotNode *>  *m_parents;   //!< list of parent nodes (incoming arrows)
    QList<DotNode *>  *m_children;  //!< list of child nodes (outgoing arrows)
 
-   QList<EdgeInfo> *m_edgeInfo;  //!< edge info for each child
+   QList<EdgeInfo *> *m_edgeInfo;  //!< edge info for each child
+
    bool             m_deleted;   //!< used to mark a node as deleted
    bool             m_written;   //!< used to mark a node as written
    bool             m_hasDoc;    //!< used to mark a node as documented
@@ -288,6 +289,7 @@ class DotDirDeps
  public:
    DotDirDeps(DirDef *dir);
    ~DotDirDeps();
+
    bool isTrivial() const;
    QByteArray writeGraph(FTextStream &out,
                          GraphOutputFormat gf,
@@ -349,9 +351,16 @@ class DotGroupCollaboration
    bool isTrivial() const;
 
  private :
-   void addCollaborationMember( Definition *def, QByteArray &url, EdgeType eType );
+   void addCollaborationMember(Definition *def, QByteArray &url, EdgeType eType);
+
+   void addCollaborationMember(QSharedPointer<Definition> def, QByteArray &url, EdgeType eType)
+   {
+      addCollaborationMember(def.data(), url, eType);
+   }
+
    void addMemberList( class MemberList *ml );
    void writeGraphHeader(FTextStream &t, const QByteArray &title) const;
+
    Edge *addEdge( DotNode *_pNStart, DotNode *_pNEnd, EdgeType _eType,
                   const QByteArray &_label, const QByteArray &_url );
 
@@ -448,9 +457,10 @@ class DotRunnerQueue
    void enqueue(DotRunner *runner);
    DotRunner *dequeue();
    uint count() const;
+
  private:
    QWaitCondition  m_bufferNotEmpty;
-   QQueue<DotRunner> m_queue;
+   QQueue<DotRunner *> m_queue;
    mutable QMutex  m_mutex;
 };
 
@@ -461,6 +471,7 @@ class DotWorkerThread : public QThread
    DotWorkerThread(DotRunnerQueue *queue);
    void run();
    void cleanup();
+
  private:
    DotRunnerQueue *m_queue;
    QList<DotRunner::CleanupItem> m_cleanupItems;
@@ -476,10 +487,13 @@ class DotManager
    int  addMap(const QByteArray &file, const QByteArray &mapFile,
                const QByteArray &relPath, bool urlOnly,
                const QByteArray &context, const QByteArray &label);
+
    int addFigure(const QByteArray &file, const QByteArray &baseName,
                  const QByteArray &figureName, bool heightCheck);
+
    int addSVGConversion(const QByteArray &file, const QByteArray &relPath,
                         bool urlOnly, const QByteArray &context, bool zoomable, int graphId);
+
    int addSVGObject(const QByteArray &file, const QByteArray &baseName,
                     const QByteArray &figureNAme, const QByteArray &relPath);
    bool run();
@@ -488,13 +502,13 @@ class DotManager
    DotManager();
    virtual ~DotManager();
 
-   QList<DotRunner>       m_dotRuns;
+   QList<DotRunner *> m_dotRuns;
 
    StringMap<QSharedPointer<DotFilePatcher>> m_dotMaps;
 
-   static DotManager     *m_theInstance;
-   DotRunnerQueue        *m_queue;
-   QList<DotWorkerThread> m_workers;
+   static DotManager        *m_theInstance;
+   DotRunnerQueue           *m_queue;
+   QList<DotWorkerThread *>  m_workers;
 };
 
 

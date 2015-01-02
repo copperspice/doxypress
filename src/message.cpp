@@ -17,25 +17,69 @@
 
 #include <QDateTime>
 
+#include <stdarg.h>
 #include <stdio.h>
 
 #include <config.h>
-#include <util.h>
-#include <debug.h>
 #include <doxygen.h>
 #include <portable.h>
 #include <filedef.h>
 #include <message.h>
+#include <util.h>
 
 // must appear after the previous include - resolve soon 
 #include <doxy_globals.h>
 
+/** Helper struct representing a mapping from debug label to a debug ID */
+struct LabelMap {
+   const char *name;
+   Debug::DebugMask event;
+};
+
+/** Class representing a mapping from debug labels to debug IDs. */
+class LabelMapper
+{
+ public:
+   LabelMapper();
+ 
+   Debug::DebugMask *find(const char *s) const {
+      if (s == 0) {
+         return 0;
+      }
+      return m_map.value(s);
+   }
+
+ private:
+   QHash<QString, Debug::DebugMask *> m_map;
+};
+
+Debug::DebugMask Debug::curMask = Debug::Quiet;
+int Debug::curPrio = 0;
+
 static QByteArray outputFormat;
+static FILE *warnFile = stderr;
+static LabelMapper g_labelMapper;
 
 static const char *warning_str = "warning: ";
 static const char *error_str   = "error: ";
 
-static FILE *warnFile = stderr;
+static LabelMap s_labels[] = {
+   { "findmembers",  Debug::FindMembers  },
+   { "functions",    Debug::Functions    },
+   { "variables",    Debug::Variables    },
+   { "preprocessor", Debug::Preprocessor },
+   { "classes",      Debug::Classes      },
+   { "commentcnv",   Debug::CommentCnv   },
+   { "commentscan",  Debug::CommentScan  },
+   { "validate",     Debug::Validate     },
+   { "printtree",    Debug::PrintTree    },
+   { "time",         Debug::Time         },
+   { "extcmd",       Debug::ExtCmd       },
+   { "markdown",     Debug::Markdown     },
+   { "filteroutput", Debug::FilterOutput },
+   { "lex",          Debug::Lex },
+   { 0,             (Debug::DebugMask)0  }
+};
 
 static void format_warn(const char *file, int line, const char *text)
 {
@@ -96,8 +140,74 @@ static void do_warn(const char *tag, const char *file, int line, const char *pre
    format_warn(file, line, text);
 }
 
-
 // ** 
+LabelMapper::LabelMapper() 
+{     
+   LabelMap *p = s_labels;
+
+   while (p->name) {
+      m_map.insert(p->name, new Debug::DebugMask(p->event));
+      p++;
+   }
+}
+
+// **
+void Debug::print(DebugMask mask, int prio, const char *fmt, ...)
+{
+   if ((curMask & mask) && prio <= curPrio) {
+      va_list args;
+      va_start(args, fmt);
+      vfprintf(stdout, fmt, args);
+      va_end(args);
+   }
+}
+
+static int labelToEnumValue(const char *l)
+{
+   QByteArray label = l;
+   Debug::DebugMask *event = g_labelMapper.find(label.toLower());
+
+   if (event) {
+      return *event;
+   } else {
+      return 0;
+   }
+}
+
+int Debug::setFlag(const char *lab)
+{
+   int retVal = labelToEnumValue(lab);
+   curMask = (DebugMask)(curMask | labelToEnumValue(lab));
+   return retVal;
+}
+
+void Debug::clearFlag(const char *lab)
+{
+   curMask = (DebugMask)(curMask & ~labelToEnumValue(lab));
+}
+
+void Debug::setPriority(int p)
+{
+   curPrio = p;
+}
+
+bool Debug::isFlagSet(DebugMask mask)
+{
+   return (curMask & mask) != 0;
+}
+
+void Debug::printFlags(void)
+{
+   int i;
+   for (i = 0; i < (int)(sizeof(s_labels) / sizeof(*s_labels)); i++) {
+      if (s_labels[i].name) {
+         msg("\t%s\n", s_labels[i].name);
+      }
+   }
+}
+
+
+// **
 void err(const char *fmt, ...)
 {
    va_list args;
@@ -188,7 +298,7 @@ void warn_doc_error(const char *file, int line, QString fmt_q, ...)
    QByteArray fmt = fmt_q.toLatin1();
 
    va_list args;
-   va_start(args, fmt.constData());
+   va_start(args, fmt_q);
 
    do_warn("WARN_IF_DOC_ERROR", file, line, warning_str, fmt.constData(), args);
 

@@ -27,7 +27,6 @@
 #include <ctype.h>
 
 #include <doxygen.h>
-#include <debug.h>
 #include <util.h>
 #include <pagedef.h>
 #include <docparser.h>

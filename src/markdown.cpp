@@ -22,18 +22,17 @@
 
 #include <stdio.h>
 
+#include <config.h>
 #include <markdown.h>
 #include <growbuf.h>
-#include <debug.h>
-#include <util.h>
 #include <doxygen.h>
 #include <commentscan.h>
 #include <entry.h>
 #include <bufstr.h>
 #include <commentcnv.h>
-#include <config.h>
 #include <section.h>
 #include <message.h>
+#include <util.h>
 
 // must appear after the previous include - resolve soon 
 #include <doxy_globals.h>

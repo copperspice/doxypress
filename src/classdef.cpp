@@ -26,7 +26,6 @@
 #include <config.h>
 #include <dot.h>
 #include <defargs.h>
-#include <debug.h>
 #include <docparser.h>
 #include <doxygen.h>
 #include <diagram.h>
