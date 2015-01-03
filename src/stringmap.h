@@ -153,7 +153,22 @@ class StringMap
    T operator[](const char *key) const {
       return m_dict[key];
    }
+
+   T &operator[](const QString &key) {
+      return m_dict[key];
+   }
+
+   T operator[](const QString &key) const {
+      return m_dict[key];
+   }
   
+   T &operator[](const QByteArray &key) {
+      return m_dict[key];
+   }
+
+   T operator[](const QByteArray &key) const {
+      return m_dict[key];
+   }
 
    class Iterator;         // first forward declare
    friend class Iterator;  // then make it a friend

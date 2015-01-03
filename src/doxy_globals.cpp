@@ -15,11 +15,26 @@
  *
 *************************************************************************/
 
+#include <cite.h>
+#include <classlist.h>
+#include <dirdef.h>
+#include <doxygen.h>
+#include <filename.h>
+#include <formula.h>
+#include <groupdef.h>
+#include <index.h>
+#include <membergroup.h>
+#include <membername.h>
+#include <namespacedef.h>
+#include <parserintf.h>
+#include <pagedef.h>
+#include <section.h>
+#include <searchindex.h>
+#include <reflist.h>
+
 #include <doxy_globals.h>
 
-
 // part 1
-
 ClassSDict      *Doxygen::classSDict = 0;
 ClassSDict      *Doxygen::hiddenClasses = 0;
 NamespaceSDict  *Doxygen::namespaceSDict = 0;
@@ -98,7 +113,7 @@ QHash<QString, EntryNav>  Doxy_Globals::g_classEntries;
 QStringList               Doxy_Globals::g_inputFiles;
 QHash<QString, void *>    Doxy_Globals::g_compoundKeywordDict;   
 QHash<QString, FileDef>   Doxy_Globals::g_usingDeclarations;  
-QHash<QString, void *>    g_pathsVisited;  
+QHash<QString, void *>    Doxy_Globals::g_pathsVisited;  
 
 OutputList               *Doxy_Globals::g_outputList = 0;           
 FileStorage              *Doxy_Globals::g_storage = 0;

@@ -1624,7 +1624,7 @@ class DocPara : public CompAccept<DocPara>, public DocNode
    void handleRef(const QByteArray &cmdName);
    void handleSection(const QByteArray &cmdName);
    void handleInheritDoc();
-   void handleVhdlFlow();
+ 
    int handleStartCode();
    int handleHtmlHeader(const HtmlAttribList &tagHtmlAttribs, int level);
 

@@ -20,7 +20,7 @@ endif
 
 if OSTYPE_WIN
    # disable console on window
-   AM_CXXFLAGS+=-mwindows
+   # AM_CXXFLAGS+=-mwindows
 
    # location for 'make install'
    installdir=$(abs_top_builddir)/install
@@ -54,11 +54,12 @@ endif
 VPATH = ../
 
 # linking
-CS_Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
+CS_Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs)) -lole32
 
 
 CS_Doxygen_SOURCES = \
    src/doxy_work.cpp \
+   src/doxy_globals.cpp \
    src/doxy_setup.cpp \
 \
    src/a_define.cpp \
@@ -67,6 +68,7 @@ CS_Doxygen_SOURCES = \
    src/clangparser.cpp \
    src/classdef.cpp \
    src/classlist.cpp \
+   src/config_json.cpp \
    src/cmdmapper.cpp \
    src/condparser.cpp \
    src/cppvalue.cpp \
@@ -128,18 +130,20 @@ CS_Doxygen_SOURCES = \
    src/tooltip.cpp \
    src/util.cpp \
    src/xmldocvisitor.cpp  \
-   src/config.cpp \
 \
+   src/config.cpp    \
    src/portable.cpp  \
-   src/ce_parse.cpp
+   src/ce_parse.cpp  \
+\
+   src/generated/constexp.cpp \
+   src/generated/defargs.cpp \
+   src/generated/declinfo.cpp  \
+   src/generated/doctokenizer.cpp
+
 
 #   src/generated/code.cpp \
 #   src/generated/commentcnv.cpp \
-#   src/generated/commentscan.cpp \
-#   src/generated/constexp.cpp \
-#   src/generated/declinfo.cpp \
-#   src/generated/defargs.cpp \
-#   src/generated/doctokenizer.cpp \
+#   src/generated/commentscan.cpp \ #
 #   src/generated/fortrancode.cpp \
 #   src/generated/fortranscanner.cpp \
 #   src/generated/pre.cpp \

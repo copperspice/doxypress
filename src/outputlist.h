@@ -722,6 +722,7 @@ class OutputList : public OutputDocInterface
    void setCurrentDoc(Definition *context, const char *anchor, bool isSourceFile) {
       forall(&OutputGenerator::setCurrentDoc, context, anchor, isSourceFile);
    }
+
    void addWord(const QString &word, bool hiPriority) override {
       forall(&OutputGenerator::addWord, word, hiPriority);
    }

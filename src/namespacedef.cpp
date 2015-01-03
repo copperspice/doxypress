@@ -857,11 +857,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title, bool co
    if (count() == 0) {
       return;   // no namespaces in the list
    }
-
-   if (Config_getBool("OPTIMIZE_OUTPUT_VHDL")) {
-      return;
-   }
-
+  
    bool found = false;
   
    for (auto nd : *this) {

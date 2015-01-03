@@ -2387,18 +2387,17 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, E
    bool needsEntry = false;
    Protection prot = Public;
 
-   while (parseCommentBlock(
-             this,
-             current,
-             docs,
-             fileName,
-             lineNr,
+// BROOM 
+
+/*
+   while (parseCommentBlock(this, current, docs, fileName,lineNr,
              false,     // isBrief
              false,     // javadoc autobrief
              false,     // inBodyDocs
              prot,      // protection
              position,
              needsEntry)) {
+
       if (needsEntry) {
          QByteArray docFile = current->docFile;
          root->addSubEntry(current);
@@ -2408,6 +2407,9 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, E
          current->docLine = lineNr;
       }
    }
+
+*/
+
    if (needsEntry) {
       root->addSubEntry(current);
    }

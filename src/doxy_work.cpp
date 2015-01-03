@@ -378,6 +378,7 @@ namespace Doxy_Work{
    void processTagLessClasses(ClassDef *rootCd, ClassDef *cd,ClassDef *tagParentCd, const QByteArray &prefix, int count);
 
    void resolveClassNestingRelations();
+   QByteArray resolveSymlink(QByteArray path);
    void resolveUserReferences();
    void readTagFile(Entry *root, const char *tl);
 
@@ -473,7 +474,7 @@ void parseInput()
    QByteArray htmlOutput;
    bool &generateHtml = Config_getBool("GENERATE_HTML");
 
-   if (generateHtml || Doxy_Globals::g_useOutputTemplate /* TODO: temp hack */) {
+   if (generateHtml) {
       htmlOutput = createOutputDirectory(outputDirectory, "HTML_OUTPUT", "/html");
    }
 
@@ -625,9 +626,9 @@ void parseInput()
    // we are done with input scanning now, so free up the buffers used by flex
    // (can be around 4MB)
 
-   preFreeScanner();
-   scanFreeScanner();
-   pyscanFreeScanner();
+//BROOM    preFreeScanner();
+//BROOM    scanFreeScanner();
+//BROOM    pyscanFreeScanner();
 
    if (! Doxy_Globals::g_storage->open(QIODevice::ReadOnly)) {
       err("Failed to open temporary storage file %s for reading", Doxygen::entryDBFileName.data());
@@ -952,21 +953,25 @@ void generateOutput()
       copyExtraFiles("HTML_EXTRA_FILES", "HTML_OUTPUT");
       FTVHelp::generateTreeViewImages();
    }
+
    if (generateLatex) {
-      Doxy_Globals::g_outputList->add(new LatexGenerator);
-      LatexGenerator::init();
+//BROOM       Doxy_Globals::g_outputList->add(new LatexGenerator);
+//BROOM       LatexGenerator::init();
 
       // copy static stuff
-      copyExtraFiles("LATEX_EXTRA_FILES", "LATEX_OUTPUT");
+//BROOM       copyExtraFiles("LATEX_EXTRA_FILES", "LATEX_OUTPUT");
    }
+
    if (generateMan) {
       Doxy_Globals::g_outputList->add(new ManGenerator);
       ManGenerator::init();
    }
+
    if (generateRtf) {
-      Doxy_Globals::g_outputList->add(new RTFGenerator);
-      RTFGenerator::init();
+//BROOM      Doxy_Globals::g_outputList->add(new RTFGenerator);
+//BROOM     RTFGenerator::init();
    }
+
    if (Config_getBool("USE_HTAGS")) {
       Htags::useHtags = true;
       QByteArray htmldir = Config_getString("HTML_OUTPUT");
@@ -1094,19 +1099,19 @@ void generateOutput()
    if (Config_getBool("GENERATE_XML")) {
       Doxy_Globals::g_stats.begin("Generating XML output...\n");
       Doxygen::generatingXmlOutput = true;
-      generateXML();
+//BROOM      generateXML();
       Doxygen::generatingXmlOutput = false;
       Doxy_Globals::g_stats.end();
    }
    if (USE_SQLITE3) {
       Doxy_Globals::g_stats.begin("Generating SQLITE3 output...\n");
-      generateSqlite3();
+//BROOM      generateSqlite3();
       Doxy_Globals::g_stats.end();
    }
 
    if (Config_getBool("GENERATE_DOCBOOK")) {
       Doxy_Globals::g_stats.begin("Generating Docbook output...\n");
-      generateDocbook();
+ //BROOM     generateDocbook();
       Doxy_Globals::g_stats.end();
    }
 
@@ -1117,14 +1122,16 @@ void generateOutput()
    }
    if (Config_getBool("GENERATE_PERLMOD")) {
       Doxy_Globals::g_stats.begin("Generating Perl module output...\n");
-      generatePerlMod();
+//BROOM      generatePerlMod();
       Doxy_Globals::g_stats.end();
    }
+
    if (generateHtml && searchEngine && serverBasedSearch) {
       Doxy_Globals::g_stats.begin("Generating search index\n");
       if (Doxygen::searchIndex->kind() == SearchIndexIntf::Internal) { // write own search index
          HtmlGenerator::writeSearchPage();
          Doxygen::searchIndex->write(Config_getString("HTML_OUTPUT") + "/search/search.idx");
+
       } else { // write data for external search index
          HtmlGenerator::writeExternalSearchPage();
          QByteArray searchDataFile = Config_getString("SEARCHDATA_FILE");
@@ -1141,9 +1148,9 @@ void generateOutput()
 
    if (generateRtf) {
       Doxy_Globals::g_stats.begin("Combining RTF output...\n");
-      if (!RTFGenerator::preProcessFileInplace(Config_getString("RTF_OUTPUT"), "refman.rtf")) {
-         err("An error occurred during post-processing the RTF files!\n");
-      }
+//BROOM      if (!RTFGenerator::preProcessFileInplace(Config_getString("RTF_OUTPUT"), "refman.rtf")) {
+//BROOM          err("An error occurred during post-processing the RTF files!\n");
+//BROOM       }
       Doxy_Globals::g_stats.end();
    }
 
@@ -4798,7 +4805,7 @@ bool Doxy_Work::findTemplateInstanceRelation(Entry *root, Definition *context, C
       instanceClass->setTemplateBaseClassNames(templateNames);
 
       // search for new template instances caused by base classes of instanceClass
-      EntryNav *templateRootNav = const_cast<EntryNav *>(&Doxy_Globals::g_classEntries[templateClass->name()]);
+      EntryNav *templateRootNav = const_cast<EntryNav *>(&(*Doxy_Globals::g_classEntries.find(templateClass->name())));
 
       if (templateRootNav) {
          bool unloadNeeded = false;
@@ -8058,25 +8065,14 @@ void Doxy_Work::addSourceReferences()
 
 void Doxy_Work::sortMemberLists()
 {
-   // sort class member lists 
-   for (auto cd : *Doxygen::classSDict) {
-      cd->sortMemberLists();
-   }
- 
-   // sort file member lists 
-   for (auto fn : *Doxygen::inputNameList) {      
-      for (auto fd : *fn) {
-         fd->sortMemberLists();
-      }
-   }
+   // broom - sort things here 
 }
 
 // generate the documentation of all classes
 void Doxy_Work::generateClassList(ClassSDict &classSDict)
 {
    for (auto cd : *Doxygen::classSDict) {
-      
-      
+            
       if (cd && (cd->getOuterScope() == 0 || // <-- should not happen, but can if we read an old tag file
                  cd->getOuterScope() == Doxygen::globalScope) && !cd->isHidden() && ! cd->isEmbeddedInOuterScope()) {
 
@@ -8326,29 +8322,32 @@ void Doxy_Work::findDefineDocumentation(EntryNav *rootNav)
       rootNav->loadEntry(Doxy_Globals::g_storage);
       Entry *root = rootNav->entry();
 
-      if (rootNav->tagInfo() && !root->name.isEmpty()) { // define read from a tag file
-         MemberDef *md = new MemberDef("<tagfile>", 1, 1,
-                                       "#define", root->name, root->args, 0,
+      if (rootNav->tagInfo() && !root->name.isEmpty()) { 
+
+         // define read from a tag file
+         MemberDef *md = new MemberDef("<tagfile>", 1, 1, "#define", root->name, root->args, 0,
                                        Public, Normal, false, Member, MemberType_Define, 0, 0);
 
          md->setTagInfo(rootNav->tagInfo());
          md->setLanguage(root->lang);         
          md->setFileDef(rootNav->parent()->fileDef());
        
-         MemberName *mn;
+         QSharedPointer<MemberName> mn;
 
          if ((mn = Doxygen::functionNameSDict->find(root->name))) {
             mn->append(md);
+
          } else {
-            mn = new MemberName(root->name);
+            mn = QSharedPointer<MemberName>(new MemberName(root->name));
+
             mn->append(md);
-            Doxygen::functionNameSDict->append(root->name, mn);
+            Doxygen::functionNameSDict->insert(root->name, mn);
          }
       }
 
-      MemberName *mn = Doxygen::functionNameSDict->find(root->name);
-      if (mn) {
-    
+      QSharedPointer<MemberName> mn = Doxygen::functionNameSDict->find(root->name);
+
+      if (mn) {    
          int count = 0;
    
          for (auto md : *mn) {
@@ -8363,87 +8362,76 @@ void Doxy_Work::findDefineDocumentation(EntryNav *rootNav)
                   md->setDocumentation(root->doc, root->docFile, root->docLine);
                   md->setDocsForDefinition(!root->proto);
                   md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
+
                   if (md->inbodyDocumentation().isEmpty()) {
                      md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
                   }
+
                   md->setBodySegment(root->bodyLine, root->endBodyLine);
                   md->setBodyDef(rootNav->fileDef());
                   md->addSectionsToDefinition(root->anchors);
                   md->setMaxInitLines(root->initLines);
                   md->setRefItems(root->sli);
+
                   if (root->mGrpId != -1) {
                      md->setMemberGroupId(root->mGrpId);
                   }
+
                   addMemberToGroups(root, md);
                }
             }
 
-         } else if (count > 1 &&
-                    (!root->doc.isEmpty() ||
-                     !root->brief.isEmpty() ||
-                     root->bodyLine != -1
-                    )
-                   )
+         } else if (count > 1 && (! root->doc.isEmpty() || !root->brief.isEmpty() || root->bodyLine != -1))
             // multiple defines don't know where to add docs
             // but maybe they are in different files together with their documentation
-         {
-            for (mni.toFirst(); (md = mni.current()); ++mni) {
+                            
+            for (auto md : *mn) {
+
                if (md->memberType() == MemberType_Define) {
                   FileDef *fd = md->getFileDef();
-                  if (fd && fd->absoluteFilePath() == root->fileName)
+
+                  if (fd && fd->getFilePath() == root->fileName) {
                      // doc and define in the same file assume they belong together.
-                  {
-#if 0
-                     if (md->documentation().isEmpty())
-#endif
-                     {
-                        md->setDocumentation(root->doc, root->docFile, root->docLine);
-                        md->setDocsForDefinition(!root->proto);
-                     }
-#if 0
-                     if (md->briefDescription().isEmpty())
-#endif
-                     {
-                        md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-                     }
+                                       
+                     md->setDocumentation(root->doc, root->docFile, root->docLine);
+                     md->setDocsForDefinition(!root->proto);                                          
+                     md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
+                     
                      if (md->inbodyDocumentation().isEmpty()) {
                         md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
                      }
+
                      md->setBodySegment(root->bodyLine, root->endBodyLine);
                      md->setBodyDef(rootNav->fileDef());
                      md->addSectionsToDefinition(root->anchors);
                      md->setRefItems(root->sli);
                      md->setLanguage(root->lang);
+
                      if (root->mGrpId != -1) {
                         md->setMemberGroupId(root->mGrpId);
                      }
+
                      addMemberToGroups(root, md);
                   }
                }
             }
-            //warn("define %s found in the following files:\n",root->name.data());
-            //warn("Cannot determine where to add the documentation found "
-            //     "at line %d of file %s. \n",
-            //     root->startLine,root->fileName.data());
-         }
+           
       } else if (!root->doc.isEmpty() || !root->brief.isEmpty()) { // define not found
          static bool preEnabled = Config_getBool("ENABLE_PREPROCESSING");
+
          if (preEnabled) {
-            warn(root->fileName, root->startLine,
-                 "documentation for unknown define %s found.\n",
-                 root->name.data()
-                );
+            warn(root->fileName, root->startLine, "documentation for unknown define %s found.\n",
+                 root->name.data() );
+
          } else {
-            warn(root->fileName, root->startLine,
-                 "found documented #define but ignoring it because "
-                 "ENABLE_PREPROCESSING is NO.\n",
-                 root->name.data()
-                );
+            warn(root->fileName, root->startLine, "found documented #define but ignoring it because "
+                 "ENABLE_PREPROCESSING is NO.\n", root->name.data() );
          }
       }
 
       rootNav->releaseEntry();
    }
+
    RECURSE_ENTRYTREE(findDefineDocumentation, rootNav);
 }
 
@@ -8455,10 +8443,7 @@ void Doxy_Work::findDirDocumentation(EntryNav *rootNav)
 
       QByteArray normalizedName = root->name;
       normalizedName = substitute(normalizedName, "\\", "/");
-
-      //printf("root->docFile=%s normalizedName=%s\n",
-      //    root->docFile.data(),normalizedName.data());
-
+     
       if (root->docFile == normalizedName) { // current dir?
          int lastSlashPos = normalizedName.lastIndexOf('/');
          if (lastSlashPos != -1) { // strip file name
@@ -8470,23 +8455,20 @@ void Doxy_Work::findDirDocumentation(EntryNav *rootNav)
          normalizedName += '/';
       }
 
-      DirDef *dir, *matchingDir = 0;
-      StringMap<QSharedPointer<DirDef>>::Iterator sdi(*Doxygen::directories);
+      QSharedPointer<DirDef> matchingDir;
 
-      for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {
-         //printf("Dir: %s<->%s\n",dir->name().data(),normalizedName.data());
-
+      for (auto dir : Doxygen::directories) {
+  
          if (dir->name().right(normalizedName.length()) == normalizedName) {
             if (matchingDir) {
 
-               warn(root->fileName, root->startLine,
-                    "\\dir command matches multiple directories.\n"
+               warn(root->fileName, root->startLine, "\\dir command matches multiple directories.\n"
                     "  Applying the command for directory %s\n"
-                    "  Ignoring the command for directory %s\n",
-                    matchingDir->name().data(), dir->name().data() );
+                    "  Ignoring the command for directory %s\n", matchingDir->name().constData(), dir->name().constData() );
 
             } else {
                matchingDir = dir;
+
             }
          }
       }
@@ -8496,7 +8478,7 @@ void Doxy_Work::findDirDocumentation(EntryNav *rootNav)
          matchingDir->setBriefDescription(root->brief, root->briefFile, root->briefLine);
          matchingDir->setDocumentation(root->doc, root->docFile, root->docLine);
          matchingDir->setRefItems(root->sli);
-         addDirToGroups(root, matchingDir);
+         addDirToGroups(root, matchingDir.data());
 
       } else {
          warn(root->fileName, root->startLine, "No matching "
@@ -8564,36 +8546,35 @@ void Doxy_Work::findMainPage(EntryNav *rootNav)
          Doxygen::mainPage->setShowToc(root->stat);
          addPageToContext(Doxygen::mainPage, rootNav);
 
-         SectionInfo *si = Doxygen::sectionDict->find(Doxygen::mainPage->name());
+         QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(Doxygen::mainPage->name());
+
          if (si) {
             if (si->lineNr != -1) {
                warn(root->fileName, root->startLine, "multiple use of section label '%s' for main page, (first occurrence: %s, line %d)",
                     Doxygen::mainPage->name().data(), si->fileName.data(), si->lineNr);
+
             } else {
-               warn(root->fileName, root->startLine, "multiple use of section label '%s' for main page, (first occurrence: %s)", Doxygen::mainPage->name().data(),
-                    si->fileName.data());
+               warn(root->fileName, root->startLine, "multiple use of section label '%s' for main page, (first occurrence: %s)", 
+                    Doxygen::mainPage->name().data(),si->fileName.data());
             }
+
          } else {
             // a page name is a label as well! but should no be double either
-            si = new SectionInfo(
-               indexName, root->startLine,
-               Doxygen::mainPage->name(),
-               Doxygen::mainPage->title(),
-               SectionInfo::Page,
-               0); // level 0
-            Doxygen::sectionDict->append(indexName, si);
+            si = QSharedPointer<SectionInfo>(new SectionInfo(indexName, root->startLine, Doxygen::mainPage->name(), Doxygen::mainPage->title(),
+               SectionInfo::Page, 0));
+
+            Doxygen::sectionDict->insert(indexName, si);
             Doxygen::mainPage->addSectionsToDefinition(root->anchors);
          }
+
       } else if (rootNav->tagInfo() == 0) {
          Entry *root = rootNav->entry();
-         warn(root->fileName, root->startLine,
-              "found more than one \\mainpage comment block! Skipping this "
-              "block."
-             );
+         warn(root->fileName, root->startLine, "found more than one \\mainpage comment block, skipping this block.");
       }
 
       rootNav->releaseEntry();
    }
+
    RECURSE_ENTRYTREE(findMainPage, rootNav);
 }
 
@@ -8613,50 +8594,45 @@ void Doxy_Work::findMainPageTagFiles(EntryNav *rootNav)
 
 void Doxy_Work::computePageRelations(EntryNav *rootNav)
 {
-   if ((rootNav->section() == Entry::PAGEDOC_SEC ||
-         rootNav->section() == Entry::MAINPAGEDOC_SEC
-       )
-         && !rootNav->name().isEmpty()
-      ) {
+   if ((rootNav->section() == Entry::PAGEDOC_SEC || rootNav->section() == Entry::MAINPAGEDOC_SEC) 
+               && !rootNav->name().isEmpty() ) {
+
       rootNav->loadEntry(Doxy_Globals::g_storage);
       Entry *root = rootNav->entry();
 
-      PageDef *pd = root->section == Entry::PAGEDOC_SEC ?
-                    Doxygen::pageSDict->find(root->name) :
-                    Doxygen::mainPage;
-      if (pd) {
-         QListIterator<BaseInfo> bii(*root->extends);
-         BaseInfo *bi;
-         for (bii.toFirst(); (bi = bii.current()); ++bii) {
-            PageDef *subPd = Doxygen::pageSDict->find(bi->name);
+      PageDef *pd = root->section == Entry::PAGEDOC_SEC ? Doxygen::pageSDict->find(root->name).data() : Doxygen::mainPage;
+
+      if (pd) {       
+
+         for (auto bi : *root->extends) {
+            QSharedPointer<PageDef> subPd = Doxygen::pageSDict->find(bi.name);
+
             if (subPd) {
-               pd->addInnerCompound(subPd);
-               //printf("*** Added subpage relation: %s->%s\n",
-               //    pd->name().data(),subPd->name().data());
+               pd->addInnerCompound(subPd);              
             }
          }
       }
 
       rootNav->releaseEntry();
    }
+
    RECURSE_ENTRYTREE(computePageRelations, rootNav);
 }
 
 void Doxy_Work::checkPageRelations()
-{
-   PageSDict::Iterator pdi(*Doxygen::pageSDict);
-   PageDef *pd = 0;
-
-   for (pdi.toFirst(); (pd = pdi.current()); ++pdi) {
+{  
+   for (auto pd : *Doxygen::pageSDict) {
       Definition *ppd = pd->getOuterScope();
 
       while (ppd) {
          if (ppd == pd) {
             err("page defined at line %d of file %s with label %s is a subpage "
-                "of itself! Please remove this cyclic dependency.\n",
-                pd->docLine(), pd->docFile().data(), pd->name().data());
+                "of itself! Please remove this cyclic dependency.\n", pd->docLine(), 
+                 pd->docFile().data(), pd->name().data()); 
+
             exit(1);
          }
+
          ppd = ppd->getOuterScope();
       }
    }
@@ -8664,41 +8640,32 @@ void Doxy_Work::checkPageRelations()
 
 void Doxy_Work::resolveUserReferences()
 {
-   StringMap<QSharedPointer<SectionInfo>>::Iterator sdi(*Doxygen::sectionDict);
-   SectionInfo *si;
-
-   for (; (si = sdi.current()); ++sdi) {
-      //printf("si->label=`%s' si->definition=%s si->fileName=`%s'\n",
-      //        si->label.data(),si->definition?si->definition->name().data():"<none>",
-      //        si->fileName.data());
-      PageDef *pd = 0;
+    for (auto si : *Doxygen::sectionDict) {
+      QSharedPointer<PageDef> pd;
 
       // hack: the items of a todo/test/bug/deprecated list are all fragments from
       // different files, so the resulting section's all have the wrong file
       // name (not from the todo/test/bug/deprecated list, but from the file in
-      // which they are defined). We correct this here by looking at the
-      // generated section labels!
+      // which they are defined). We correct this here by looking at the generated section labels
+    
+      for (auto rl : *Doxygen::xrefLists) {
+         QByteArray label = "_" + rl.listName(); 
 
-      QHashIterator<QString, RefList> rli(*Doxygen::xrefLists);
-      RefList *rl;
-
-      for (rli.toFirst(); (rl = rli.current()); ++rli) {
-         QByteArray label = "_" + rl->listName(); // "_todo", "_test", ...
+         // "_todo", "_test", ...
 
          if (si->label.left(label.length()) == label) {
-            si->fileName = rl->listName();
+            si->fileName = rl.listName();
             si->generated = true;
+
             break;
          }
       }
-
-      //printf("start: si->label=%s si->fileName=%s\n",si->label.data(),si->fileName.data());
-      if (!si->generated) {
+      
+      if (! si->generated) {
          // if this section is in a page and the page is in a group, then we
          // have to adjust the link file name to point to the group.
-         if (!si->fileName.isEmpty() &&
-               (pd = Doxygen::pageSDict->find(si->fileName)) &&
-               pd->getGroupDef()) {
+
+         if (! si->fileName.isEmpty() && (pd = Doxygen::pageSDict->find(si->fileName)) && pd->getGroupDef()) {
             si->fileName = pd->getGroupDef()->getOutputFileBase();
          }
 
@@ -8706,6 +8673,7 @@ void Doxy_Work::resolveUserReferences()
             // TODO: there should be one function in Definition that returns
             // the file to link to, so we can avoid the following tests.
             GroupDef *gd = 0;
+
             if (si->definition->definitionType() == Definition::TypeMember) {
                gd = ((MemberDef *)si->definition)->getGroupDef();
             }
@@ -8724,17 +8692,16 @@ void Doxy_Work::resolveUserReferences()
 
 // generate all separate documentation pages
 void Doxy_Work::generatePageDocs()
-{
-   //printf("documentedPages=%d real=%d\n",documentedPages,Doxygen::pageSDict->count());
+{   
    if (documentedPages == 0) {
       return;
-   }
-   PageSDict::Iterator pdi(*Doxygen::pageSDict);
-   PageDef *pd = 0;
+   }  
 
-   for (pdi.toFirst(); (pd = pdi.current()); ++pdi) {
+   for (auto pd : *Doxygen::pageSDict) {
+
       if (!pd->getGroupDef() && !pd->isReference()) {
          msg("Generating docs for page %s...\n", pd->name().data());
+
          Doxygen::insideMainPage = true;
          pd->writeDocumentation(*Doxy_Globals::g_outputList);
          Doxygen::insideMainPage = false;
@@ -8754,14 +8721,15 @@ void Doxy_Work::buildExampleList(EntryNav *rootNav)
               "documentation found here.", root->name.data());
 
       } else {
-         PageDef *pd = new PageDef(root->fileName, root->startLine,
-                                   root->name, root->brief + root->doc + root->inbodyDocs, root->args);
+         QSharedPointer<PageDef> pd(new PageDef(root->fileName, root->startLine,
+                                   root->name, root->brief + root->doc + root->inbodyDocs, root->args));
+
          pd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-         pd->setFileName(convertNameToFile(pd->name() + "-example", false, true), false);
+         pd->setFileName( qPrintable(convertNameToFile(pd->name() + "-example", false, true)), false);
          pd->addSectionsToDefinition(root->anchors);
          pd->setLanguage(root->lang);
 
-         Doxygen::exampleSDict->inSort(root->name, pd);
+         Doxygen::exampleSDict->insert(root->name, pd);
       }
 
       rootNav->releaseEntry();
@@ -8777,23 +8745,20 @@ void printNavTree(EntryNav *rootNav, int indent)
 
    msg("%s%s (sec=0x%x)\n", indentStr.isEmpty() ? "" : indentStr.data(),
        rootNav->name().isEmpty() ? "<empty>" : rootNav->name().data(),rootNav->section());
-
-   if (rootNav->children()) {
-      for (auto e : *rootNav->children() ) {
-         printNavTree(eli.current(), indent + 2);
-      }
-   }
+  
+   for (auto &e : rootNav->children()) {
+      printNavTree(const_cast<EntryNav *>(&e), indent + 2);
+   }   
 }
 
 // generate the example documentation
 void Doxy_Work::generateExampleDocs()
 {
    Doxy_Globals::g_outputList->disable(OutputGenerator::Man);
-   PageSDict::Iterator pdi(*Doxygen::exampleSDict);
-   PageDef *pd = 0;
-   for (pdi.toFirst(); (pd = pdi.current()); ++pdi) {
+  
+   for (auto pd : *Doxygen::exampleSDict) {
       msg("Generating docs for example %s...\n", pd->name().data());
-      resetCCodeParserState();
+//BROOM       resetCCodeParserState();
 
       QByteArray n = pd->getOutputFileBase();
       startFile(*Doxy_Globals::g_outputList, n, n, pd->name());
@@ -8803,15 +8768,9 @@ void Doxy_Work::generateExampleDocs()
       endTitle(*Doxy_Globals::g_outputList, n, 0);
 
       Doxy_Globals::g_outputList->startContents();
-      Doxy_Globals::g_outputList->generateDoc(pd->docFile(),                            // file
-                                pd->docLine(),                            // startLine
-                                pd,                                       // context
-                                0,                                        // memberDef
-                                pd->documentation() + "\n\n\\include " + pd->name(),      // docs
-                                true,                                     // index words
-                                true,                                     // is example
-                                pd->name()
-                               );
+      Doxy_Globals::g_outputList->generateDoc(pd->docFile(), pd->docLine(), pd.data(), 0,
+                  pd->documentation() + "\n\n\\include " + pd->name(), true, true, pd->name() );
+
       endFile(*Doxy_Globals::g_outputList); // contains g_outputList->endContents()
    }
 
@@ -8820,10 +8779,8 @@ void Doxy_Work::generateExampleDocs()
 
 // generate module pages
 void Doxy_Work::generateGroupDocs()
-{
-   GroupSDict::Iterator gli(*Doxygen::groupSDict);
-   GroupDef *gd;
-   for (gli.toFirst(); (gd = gli.current()); ++gli) {
+{ 
+   for (auto gd : *Doxygen::groupSDict) {
       if (!gd->isReference()) {
          gd->writeDocumentation(*Doxy_Globals::g_outputList);
       }
@@ -8848,32 +8805,27 @@ void Doxy_Work::generateGroupDocs()
 // generate module pages
 void Doxy_Work::generateNamespaceDocs()
 {
-   NamespaceSDict::Iterator nli(*Doxygen::namespaceSDict);
-   NamespaceDef *nd;
-
    // for each namespace...
-   for (; (nd = nli.current()); ++nli) {
+     for (auto nd : *Doxygen::namespaceSDict) {
 
       if (nd->isLinkableInProject()) {
          msg("Generating docs for namespace %s\n", nd->name().data());
          nd->writeDocumentation(*Doxy_Globals::g_outputList);
       }
 
-      // for each class in the namespace...
-      ClassSDict::Iterator cli(*nd->getClassSDict());
-      ClassDef *cd;
-      for ( ; (cd = cli.current()) ; ++cli ) {
-         if ( ( cd->isLinkableInProject() &&
-                cd->templateMaster() == 0
-              ) // skip external references, anonymous compounds and
-               // template instances and nested classes
-               && !cd->isHidden() && !cd->isEmbeddedInOuterScope()
-            ) {
+      // for each class in the namespace   
+      for (auto cd : *nd->getClassSDict()) {
+
+         if ( ( cd->isLinkableInProject() && cd->templateMaster() == 0)   && !cd->isHidden() && !cd->isEmbeddedInOuterScope() ) {
+              // skip external references, anonymous compounds and
+              // template instances and nested classes             
+         
             msg("Generating docs for compound %s...\n", cd->name().data());
 
             cd->writeDocumentation(*Doxy_Globals::g_outputList);
             cd->writeMemberList(*Doxy_Globals::g_outputList);
          }
+
          cd->writeDocumentationForInnerClasses(*Doxy_Globals::g_outputList);
       }
    }
@@ -8884,6 +8836,7 @@ static QByteArray fixSlashes(QByteArray &s)
 {
    QByteArray result;
    uint i;
+
    for (i = 0; i < s.length(); i++) {
       switch (s.at(i)) {
          case '/':
@@ -8902,7 +8855,7 @@ void Doxy_Work::copyStyleSheet()
 {
    QByteArray &htmlStyleSheet = Config_getString("HTML_STYLESHEET");
 
-   if (!htmlStyleSheet.isEmpty()) {
+   if (! htmlStyleSheet.isEmpty()) {
       QFileInfo fi(htmlStyleSheet);
 
       if (!fi.exists()) {
@@ -8910,8 +8863,8 @@ void Doxy_Work::copyStyleSheet()
          htmlStyleSheet.resize(0); // revert to the default
 
       } else {
-         QByteArray destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName().data();
-         copyFile(htmlStyleSheet, destFileName);
+         QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
+         copyFile(htmlStyleSheet, destFileName.toUtf8());
       }
    }
 
@@ -8924,10 +8877,11 @@ void Doxy_Work::copyStyleSheet()
          QFileInfo fi(fileName);
 
          if (!fi.exists()) {
-            err("Style sheet '%s' specified by HTML_EXTRA_STYLESHEET does not exist!\n", fileName.data());
+            err("Style sheet '%s' specified by HTML_EXTRA_STYLESHEET does not exist!\n", qPrintable(fileName));
+
          } else {
-            QByteArray destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName().data();
-            copyFile(fileName, destFileName);
+            QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
+            copyFile(fileName, destFileName.toUtf8());
          }
       }
    }
@@ -8936,15 +8890,19 @@ void Doxy_Work::copyStyleSheet()
 void Doxy_Work::copyLogo()
 {
    QByteArray &projectLogo = Config_getString("PROJECT_LOGO");
+
    if (!projectLogo.isEmpty()) {
       QFileInfo fi(projectLogo);
-      if (!fi.exists()) {
+
+      if (! fi.exists()) {
          err("Project logo '%s' specified by PROJECT_LOGO does not exist!\n", projectLogo.data());
          projectLogo.resize(0); // revert to the default
+
       } else {
-         QByteArray destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName().data();
-         copyFile(projectLogo, destFileName);
-         Doxygen::indexList->addImageFile(fi.fileName().data());
+         QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
+
+         copyFile(projectLogo, destFileName.toUtf8());
+         Doxygen::indexList->addImageFile(qPrintable(fi.fileName()));
       }
    }
 }
@@ -8955,18 +8913,19 @@ void Doxy_Work::copyExtraFiles(const QByteArray &filesOption, const QByteArray &
    uint i;
 
    for (i = 0; i < files.count(); ++i) {
-      QByteArray fileName(files.at(i).toUtf8());
+      QString fileName(files.at(i));
 
       if (!fileName.isEmpty()) {
          QFileInfo fi(fileName);
 
-         if (!fi.exists()) {
-            err("Extra file '%s' specified in " + filesOption + " does not exist!\n", fileName.data());
+         if (! fi.exists()) {
+            err("Extra file '%s' specified in " + filesOption + " does not exist!\n", qPrintable(fileName));
 
          } else {
-            QByteArray destFileName = Config_getString(outputOption) + "/" + fi.fileName().data();
+            QString destFileName = Config_getString(outputOption) + "/" + fi.fileName();
+
             Doxygen::indexList->addImageFile(fi.fileName().toUtf8());
-            copyFile(fileName, destFileName);
+            copyFile(fileName.toUtf8(), destFileName.toUtf8());
          }
       }
    }
@@ -8974,22 +8933,23 @@ void Doxy_Work::copyExtraFiles(const QByteArray &filesOption, const QByteArray &
 
 static ParserInterface *getParserForFile(const char *fn)
 {
-   QByteArray fileName = fn;
-   QByteArray extension;
+   QString fileName = fn;
+   QString extension;
 
    int sep = fileName.lastIndexOf('/');
-   int ei = fileName.lastIndexOf('.');
+   int ei  = fileName.lastIndexOf('.');
 
    if (ei != -1 && (sep == -1 || ei > sep)) { // matches dir/file.ext but not dir.1/file
       extension = fileName.right(fileName.length() - ei);
+
    } else {
       extension = ".no_extension";
    }
 
-   return Doxygen::parserManager->getParser(extension);
+   return Doxygen::parserManager->getParser(qPrintable(extension));
 }
 
-static void parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNav, FileDef *fd, const char *fn,
+void Doxy_Work::parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNav, FileDef *fd, const char *fn,
                       bool sameTu, QStringList &filesInSameTu)
 {
 #if USE_LIBCLANG
@@ -9010,13 +8970,15 @@ static void parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNav, F
    QFileInfo fi(fileName);
    BufStr preBuf(fi.size() + 4096);
 
-   if (Config_getBool("ENABLE_PREPROCESSING") &&
-         parser->needsPreprocessing(extension)) {
+   if (Config_getBool("ENABLE_PREPROCESSING") && parser->needsPreprocessing(extension)) {
       BufStr inBuf(fi.size() + 4096);
       msg("Preprocessing %s...\n", fn);
       readInputFile(fileName, inBuf);
-      preprocessFile(fileName, inBuf, preBuf);
-   } else { // no preprocessing
+
+//BROOM       preprocessFile(fileName, inBuf, preBuf);
+
+   } else { 
+      // no preprocessing
       msg("Reading %s...\n", fn);
       readInputFile(fileName, preBuf);
    }
@@ -9024,7 +8986,7 @@ static void parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNav, F
    BufStr convBuf(preBuf.curPos() + 1024);
 
    // convert multi-line C++ comments to C style comments
-   convertCppComments(&preBuf, &convBuf, fileName);
+//BROOM   convertCppComments(&preBuf, &convBuf, fileName);
 
    convBuf.addChar('\0');
 
@@ -9043,91 +9005,109 @@ static void parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNav, F
 }
 
 //! parse the list of input files
-static void parseFiles(Entry *root, EntryNav *rootNav)
+void Doxy_Work::parseFiles(Entry *root, EntryNav *rootNav)
 {
 
 #if USE_LIBCLANG
    static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
 
    if (clangAssistedParsing) {
-      QHash<QString, void *> g_processedFiles;
+      QHash<QString, void *> processedFiles;
 
       // create a dictionary with files to process
-      QHash<QString, void *> g_filesToProcess;
-      QListIterator<QByteArray> it(g_inputFiles);
-
-      QByteArray *s;
-
-      for (; (s = it.current()); ++it) {
-         g_filesToProcess.insert(*s, (void *)0x8);
+      QHash<QString, void *> filesToProcess;
+      
+      for (auto s : Doxy_Globals::g_inputFiles) { 
+         filesToProcess.insert(s, (void *)0x8);
       }
 
       // process source files (and their include dependencies)
-      for (it.toFirst(); (s = it.current()); ++it) {
+     
+      for (auto s : Doxy_Globals::g_inputFiles) { 
          bool ambig;
-         FileDef *fd = findFileDef(Doxygen::inputNameDict, s->data(), ambig);
-         assert(fd != 0);
-         if (fd->isSource() && !fd->isReference()) { // this is a source file
-            QStringList filesInSameTu;
-            ParserInterface *parser = getParserForFile(s->data());
-            parser->startTranslationUnit(s->data());
-            parseFile(parser, root, rootNav, fd, s->data(), false, filesInSameTu);
-            //printf("  got %d extra files in tu\n",filesInSameTu.count());
 
+         FileDef *fd = findFileDef(Doxygen::inputNameDict, s.toUtf8(), ambig);
+         assert(fd != 0);
+
+         if (fd->isSource() && ! fd->isReference()) { 
+            // this is a source file
+            QStringList filesInSameTu;
+
+            ParserInterface *parser = getParserForFile(s.toUtf8());
+            parser->startTranslationUnit(s.toUtf8());
+            parseFile(parser, root, rootNav, fd, qPrintable(s), false, filesInSameTu);
+           
             // Now process any include files in the same translation unit
             // first. When libclang is used this is much more efficient.
-            char *incFile = filesInSameTu.first();
-            while (incFile && g_filesToProcess.find(incFile)) {
-               if (qstrcmp(incFile, s->data()) && !g_processedFiles.find(incFile)) {
-                  FileDef *ifd = findFileDef(Doxygen::inputNameDict, incFile, ambig);
-                  if (ifd && !ifd->isReference()) {
-                     QStringList moreFiles;
-                     //printf("  Processing %s in same translation unit as %s\n",incFile,s->data());
-                     parseFile(parser, root, rootNav, ifd, incFile, true, moreFiles);
-                     g_processedFiles.insert(incFile, (void *)0x8);
-                  }
+          
+            for (auto incFile : filesInSameTu) {
+
+               if (! filesToProcess.contains(incFile)) {
+                  break;
                }
-               incFile = filesInSameTu.next();
+
+               if (incFile == s && ! processedFiles.contains(incFile)) {
+                  FileDef *ifd = findFileDef(Doxygen::inputNameDict, qPrintable(incFile), ambig);
+
+                  if (ifd && ! ifd->isReference()) {
+                     QStringList moreFiles;
+                     
+                     parseFile(parser, root, rootNav, ifd, qPrintable(incFile), true, moreFiles);
+                     processedFiles.insert(incFile, (void *)0x8);
+                  }
+               }               
             }
+
             parser->finishTranslationUnit();
-            g_processedFiles.insert(*s, (void *)0x8);
+            processedFiles.insert(s, (void *)0x8);
          }
       }
+
       // process remaining files
-      for (it.toFirst(); (s = it.current()); ++it) {
-         if (!g_processedFiles.find(*s)) { // not yet processed
+      for (auto s : Doxy_Globals::g_inputFiles) { 
+
+         if (! processedFiles.contains(s)) { 
+            // not yet processed
             bool ambig;
             QStringList filesInSameTu;
-            FileDef *fd = findFileDef(Doxygen::inputNameDict, s->data(), ambig);
+
+            FileDef *fd = findFileDef(Doxygen::inputNameDict, s.toUtf8(), ambig);
             assert(fd != 0);
-            ParserInterface *parser = getParserForFile(s->data());
-            parser->startTranslationUnit(s->data());
-            parseFile(parser, root, rootNav, fd, s->data(), false, filesInSameTu);
+
+            ParserInterface *parser = getParserForFile(s.toUtf8());
+            parser->startTranslationUnit(s.toUtf8());
+
+            parseFile(parser, root, rootNav, fd, s.toUtf8(), false, filesInSameTu);
             parser->finishTranslationUnit();
-            g_processedFiles.insert(*s, (void *)0x8);
+
+            processedFiles.insert(s, (void *)0x8);
          }
       }
+
    } else // normal pocessing
+
 #endif
    {
-      QListIterator<QByteArray> it(g_inputFiles);
-      QByteArray *s;
+     
+      for (auto s : Doxy_Globals::g_inputFiles) { 
 
-      for (; (s = it.current()); ++it) {
          bool ambig;
          QStringList filesInSameTu;
-         FileDef *fd = findFileDef(Doxygen::inputNameDict, s->data(), ambig);
+
+         FileDef *fd = findFileDef(Doxygen::inputNameDict, s.toUtf8(), ambig);
          assert(fd != 0);
-         ParserInterface *parser = getParserForFile(s->data());
-         parser->startTranslationUnit(s->data());
-         parseFile(parser, root, rootNav, fd, s->data(), false, filesInSameTu);
+
+         ParserInterface *parser = getParserForFile(s.toUtf8());
+         parser->startTranslationUnit(s.toUtf8());
+
+         parseFile(parser, root, rootNav, fd, s.toUtf8(), false, filesInSameTu);
       }
    }
 }
 
 // resolves a path that may include symlinks, if a recursive symlink is
 // found an empty string is returned.
-static QByteArray resolveSymlink(QByteArray path)
+QByteArray Doxy_Work::resolveSymlink(QByteArray path)
 {
    int sepPos = 0;
    int oldPos = 0;
@@ -9141,6 +9121,7 @@ static QByteArray resolveSymlink(QByteArray path)
    QByteArray oldPrefix = "/";
 
    do {
+
 #ifdef WIN32
       // UNC path, skip server and share name
 
@@ -9165,7 +9146,7 @@ static QByteArray resolveSymlink(QByteArray path)
             bool isRelative = QFileInfo(target).isRelative();
 
             if (isRelative) {
-               target = QDir::cleanDirPath(oldPrefix + "/" + target.data());
+               target = QDir::cleanPath(oldPrefix + "/" + target);
             }
 
             if (sepPos != -1) {
@@ -9175,20 +9156,24 @@ static QByteArray resolveSymlink(QByteArray path)
                target += result.mid(sepPos);
             }
 
-            result = QDir::cleanDirPath(target).data();
+            result = QDir::cleanPath(target).toUtf8();
             sepPos = 0;
 
-            if (known.find(result)) {
-               return QByteArray();   // recursive symlink!
+            if (known.contains(result)) {
+               return QByteArray();   // recursive symlink
             }
 
             known.insert(result, (void *)0x8);
+
             if (isRelative) {
                sepPos = oldPos;
-            } else { // link to absolute path
+
+            } else { 
+               // link to absolute path
                sepPos = 0;
                oldPrefix = "/";
             }
+
          } else {
             nonSymlinks.insert(prefix, (void *)0x8);
             oldPrefix = prefix;
@@ -9198,17 +9183,18 @@ static QByteArray resolveSymlink(QByteArray path)
 
    } while (sepPos != -1);
 
-   return QDir::cleanDirPath(result).data();
+   return QDir::cleanPath(result).toUtf8();
 }
 
-static void exitDoxygen()
+void Doxy_Work::exitDoxygen()
 {
-   if (!g_successfulRun) {
+   if (! Doxy_Globals::g_successfulRun) {
       // premature exit
+
       QDir thisDir;
       msg("Exiting...\n");
 
-      if (!Doxygen::entryDBFileName.isEmpty()) {
+      if (! Doxygen::entryDBFileName.isEmpty()) {
          thisDir.remove(Doxygen::entryDBFileName);
       }
 
@@ -9218,7 +9204,7 @@ static void exitDoxygen()
    }
 }
 
-static void readTagFile(Entry *root, const char *tl)
+void Doxy_Work::readTagFile(Entry *root, const char *tl)
 {
    QByteArray tagLine = tl;
    QByteArray fileName;
@@ -9231,7 +9217,7 @@ static void readTagFile(Entry *root, const char *tl)
       destName = tagLine.right(tagLine.length() - eqPos - 1).trimmed();
       QFileInfo fi(fileName);
 
-      Doxygen::tagDestinationDict.insert(fi.absoluteFilePath().toUtf8(), new QByteArray(destName));
+      Doxygen::tagDestinationDict.insert(fi.absoluteFilePath().toUtf8(), destName);
 
    } else {
       fileName = tagLine;
@@ -9283,7 +9269,7 @@ QByteArray Doxy_Work::createOutputDirectory(const QByteArray &baseDirName, const
 // The contents of all files is append to the input string
 
 int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict  *exclDict,
-            QStringList *patList, QStringList *exclPatList, QList<QByteArray> *resultList, StringDict *resultDict,
+            QStringList *patList, QStringList *exclPatList, QStringList *resultList, StringDict *resultDict,
             bool errorIfNotExist, bool recursive, QHash<QString, void *> *killDict, QHash<QString, void *> *paths)
 {
    QByteArray dirName = fi->absoluteFilePath().toUtf8();
@@ -9294,13 +9280,16 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
 
    if (fi->isSymLink()) {
       dirName = resolveSymlink(dirName.data());
+
       if (dirName.isEmpty()) {
          return 0;   // recusive symlink
       }
-      if (g_pathsVisited.find(dirName)) {
+
+      if (Doxy_Globals::g_pathsVisited.contains(dirName)) {
          return 0;   // already visited path
       }
-      g_pathsVisited.insert(dirName, (void *)0x8);
+
+      Doxy_Globals::g_pathsVisited.insert(dirName, (void *)0x8);
    }
 
    QDir dir(dirName);
@@ -9309,71 +9298,76 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
    int totalSize = 0;
    msg("Searching for files in directory %s\n", fi->absoluteFilePath().data());
 
-   const QFileInfoList *list = dir.entryInfoList();
+   const QFileInfoList list = dir.entryInfoList();
 
-   if (list) {
+   for (auto &item : list) {
 
-      for (auto cfi : *list) {
+      auto &cfi = const_cast<QFileInfo &>(item);
 
-         if (exclDict == 0 || exclDict->find(cfi->absoluteFilePath().toUtf8()) == 0) {
-            // file should not be excluded
+      if (exclDict == 0 || ! exclDict->contains(cfi.absoluteFilePath().toUtf8())) {
+         // file should not be excluded
 
-            if (! cfi.exists() || ! cfi.isReadable()) {
-               if (errorIfNotExist) {
-                  warn_uncond("source %s is not a readable file or directory... skipping.\n", cfi->absoluteFilePath().data());
-               }
-
-            } else if (cfi.isFile() && (! Config_getBool("EXCLUDE_SYMLINKS") || !cfi.isSymLink()) &&
-                       (patList == 0 || patternMatch(cfi, patList)) && !patternMatch(cfi, exclPatList) &&
-                       (killDict == 0 || ! killDict->contains(cfi.absoluteFilePath().toUtf8())) ) {
-
-               totalSize += cfi->size() + cfi.absoluteFilePath().length() + 4;
-               QByteArray name = cfi.fileName().toUtf8();
-
-               if (fnDict) {
-                  FileDef  *fd = new FileDef(cfi.dirPath().toUtf8() + "/", name);
-                  FileName *fn = 0;
-
-                  if (!name.isEmpty() && (fn = (*fnDict)[name])) {
-                     fn->append(fd);
-
-                  } else {
-                     fn = new FileName(cfi->absoluteFilePath().toUtf8(), name);
-                     fn->append(fd);
-
-                     if (fnList) {
-                        fnList->inSort(fn);
-                     }
-                     fnDict->insert(name, fn);
-                  }
-               }
-
-               QByteArray *rs = 0;
-               if (resultList || resultDict) {
-                  rs = new QByteArray(cfi.absoluteFilePath().toUtf8());
-               }
-               if (resultList) {
-                  resultList->append(rs);
-               }
-               if (resultDict) {
-                  resultDict->insert(cfi.absoluteFilePath().toUtf8(), rs);
-               }
-               if (killDict) {
-                  killDict->insert(cfi.absoluteFilePath().toUtf8(), (void *)0x8);
-               }
-
-            } else if (recursive && (! Config_getBool("EXCLUDE_SYMLINKS") || !cfi.isSymLink()) &&
-                       cfi.isDir() && !patternMatch(*cfi, exclPatList) && cfi.fileName().at(0) != '.') {
-
-               cfi.->setFile(cfi.absoluteFilePath());
-
-               totalSize += readDir(cfi, fnList, fnDict, exclDict, patList, exclPatList, resultList,
-                                    resultDict, errorIfNotExist, recursive, killDict, paths);
+         if (! cfi.exists() || ! cfi.isReadable()) {
+            if (errorIfNotExist) {
+               warn_uncond("source %s is not a readable file or directory... skipping.\n", cfi.absoluteFilePath().data());
             }
-         }
 
+         } else if (cfi.isFile() && (! Config_getBool("EXCLUDE_SYMLINKS") || ! cfi.isSymLink()) &&
+                    (patList == 0 || patternMatch(cfi, patList)) && !patternMatch(cfi, exclPatList) &&
+                    (killDict == 0 || ! killDict->contains(cfi.absoluteFilePath().toUtf8())) ) {
+
+            totalSize += cfi.size() + cfi.absoluteFilePath().length() + 4;
+            QByteArray name = cfi.fileName().toUtf8();
+
+            if (fnDict) {
+               FileDef  *fd = new FileDef(cfi.path().toUtf8() + "/", name);
+               QSharedPointer<FileName> fn;
+
+               if (! name.isEmpty() && (fn = (*fnDict)[name])) {
+                  fn->append(fd);
+
+               } else {
+                  fn = QSharedPointer<FileName>(new FileName(cfi.absoluteFilePath().toUtf8(), name));
+                  fn->append(fd);
+
+                  if (fnList) {
+                     fnList->inSort(fn.data());
+                  }
+
+                  fnDict->insert(name, fn);
+               }
+            }
+
+            QByteArray rs;
+
+            if (resultList || resultDict) {
+               rs = cfi.absoluteFilePath().toUtf8();
+            }
+
+            if (resultList) {
+               resultList->append(rs);
+            }
+
+            if (resultDict) {
+               resultDict->insert(cfi.absoluteFilePath().toUtf8(), rs);
+            }
+
+            if (killDict) {
+               killDict->insert(cfi.absoluteFilePath().toUtf8(), (void *)0x8);
+            }
+
+         } else if (recursive && (! Config_getBool("EXCLUDE_SYMLINKS") || !cfi.isSymLink()) &&
+                    cfi.isDir() && ! patternMatch(cfi, exclPatList) && cfi.fileName().at(0) != '.') {
+
+            cfi.setFile(cfi.absoluteFilePath());
+
+            totalSize += readDir(&cfi, fnList, fnDict, exclDict, patList, exclPatList, resultList,
+                                 resultDict, errorIfNotExist, recursive, killDict, paths);
+         }
       }
+
    }
+ 
    return totalSize;
 }
 
@@ -9385,109 +9379,108 @@ int readFileOrDirectory(const QString &s, SortedList<FileName *> *fnList, FileNa
                         bool recursive, bool errorIfNotExist, QHash<QString, void *> *killDict, QHash<QString, void *> *paths)
 {
    // strip trailing slashes
-   if (s == 0) {
+   if (s.isEmpty()) {
       return 0;
    }
 
-   QByteArray fs = s;
-   char lc = fs.at(fs.length() - 1);
-
-   if (lc == '/' || lc == '\\') {
+   QString fs = s;
+  
+   if (fs.endsWith('/') || fs.endsWith('\\')) {
       fs = fs.left(fs.length() - 1);
    }
 
    QFileInfo fi(fs);
    int totalSize = 0;
+   
+   if (exclDict == 0 || ! exclDict->contains(fi.absoluteFilePath().toUtf8())) {
 
-   {
-      if (exclDict == 0 || ! exclDict->contains(fi.absoluteFilePath().toUtf8())) {
+      if (! fi.exists() || ! fi.isReadable()) {
+         if (errorIfNotExist) {
+            warn_uncond("Source %s is not a readable file or directory... skipping.\n", qPrintable(s));
+         }
 
-         if (! fi.exists() || ! fi.isReadable()) {
-            if (errorIfNotExist) {
-               warn_uncond("source %s is not a readable file or directory... skipping.\n", s);
+      } else if (! Config_getBool("EXCLUDE_SYMLINKS") || ! fi.isSymLink()) {
+
+         if (fi.isFile()) {
+            QString dirPath  = fi.absolutePath();
+            QString filePath = fi.absoluteFilePath();
+
+            if (paths->contains(dirPath)) {
+               paths->insert(dirPath, (void *)0x8);
             }
+            
+            if (killDict == 0 || ! killDict->contains(filePath)) {
+               totalSize += fi.size() + fi.absoluteFilePath().length() + 4;
 
-         } else if (!Config_getBool("EXCLUDE_SYMLINKS") || !fi.isSymLink()) {
+               QString name = fi.fileName();
 
-            if (fi.isFile()) {
-               QByteArray dirPath  = fi.absolutePath().toUtf8();
-               QByteArray filePath = fi.absoluteFilePath().toUtf8();
+               if (fnDict) {
+                  FileDef  *fd = new FileDef( qPrintable(dirPath + "/"), qPrintable(name));
+                  QSharedPointer<FileName> fn;
 
-               if (paths && paths->find(dirPath)) {
-                  paths->insert(dirPath, (void *)0x8);
-               }
+                  if (! name.isEmpty() && (fn = (*fnDict)[name])) {
+                     fn->append(fd);
 
-               //printf("killDict->find(%s)\n",fi.absoluteFilePath().data());
-               if (killDict == 0 || ! killDict->contains(filePath)) {
-                  totalSize += fi.size() + fi.absoluteFilePath().length() + 4;
+                  } else {
+                     fn = QSharedPointer<FileName>(new FileName(qPrintable(filePath), qPrintable(name)));
+                     fn->append(fd);
 
-                  QByteArray name = fi.fileName().toUtf8();
-
-                  if (fnDict) {
-                     FileDef  *fd = new FileDef(dirPath + "/", name);
-                     FileName *fn = 0;
-
-                     if (!name.isEmpty() && (fn = (*fnDict)[name])) {
-                        fn->append(fd);
-
-                     } else {
-                        fn = new FileName(filePath, name);
-                        fn->append(fd);
-
-                        if (fnList) {
-                           fnList->inSort(fn);
-                        }
-
-                        fnDict->insert(name, fn);
+                     if (fnList) {
+                        fnList->inSort(fn.data());
                      }
-                  }
 
-                  QByteArray *rs = 0;
-                  if (resultList || resultDict) {
-                     rs = new QByteArray(filePath);
-                     if (resultList) {
-                        resultList->append(rs);
-                     }
-                     if (resultDict) {
-                        resultDict->insert(filePath, rs);
-                     }
-                  }
-
-                  if (killDict) {
-                     killDict->insert(fi.absoluteFilePath().toUtf8(), (void *)0x8);
+                     fnDict->insert(name, fn);
                   }
                }
-            } else if (fi.isDir()) { // readable dir
-               totalSize += readDir(&fi, fnList, fnDict, exclDict, patList,
-                                    exclPatList, resultList, resultDict, errorIfNotExist,
-                                    recursive, killDict, paths);
+            
+               if (resultList || resultDict) {
+                
+                  if (resultList) {
+                     resultList->append(filePath);
+                  }
+
+                  if (resultDict) {
+                     resultDict->insert(filePath, filePath.toUtf8());
+                  }
+               }
+
+               if (killDict) {
+                  killDict->insert(fi.absoluteFilePath().toUtf8(), (void *)0x8);
+               }
             }
+
+         } else if (fi.isDir()) { // readable dir
+            totalSize += readDir(&fi, fnList, fnDict, exclDict, patList, exclPatList, resultList, resultDict, 
+                                 errorIfNotExist, recursive, killDict, paths);
          }
       }
    }
+  
    return totalSize;
 }
 
 void readFormulaRepository()
 {
    QFile f(Config_getString("HTML_OUTPUT") + "/formula.repository");
+
    if (f.open(QIODevice::ReadOnly)) { // open repository
       msg("Reading formula repository...\n");
       QTextStream t(&f);
       QByteArray line;
 
-      while (!t.eof()) {
+      while (! t.atEnd()) {
          line = t.readLine().toUtf8();
          int se = line.indexOf(':'); // find name and text separator.
 
          if (se == -1) {
             warn_uncond("formula.repository is corrupted!\n");
             break;
+
          } else {
             QByteArray formName = line.left(se);
             QByteArray formText = line.right(line.length() - se - 1);
 
-            Formula *f = new Formula(formText);
+            Formula f = Formula(formText);
 
             Doxygen::formulaList->append(f);
             Doxygen::formulaDict->insert(formText, f);

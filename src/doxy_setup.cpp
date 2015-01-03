@@ -27,6 +27,7 @@
 #include <cmdmapper.h>
 #include <code.h>
 #include <config.h>
+#include <config_json.h>
 #include <doxygen.h>
 #include <doxy_build_info.h>
 #include <entry.h>
@@ -56,12 +57,14 @@
 // globals
 #include <doxy_globals.h>
 
-namespace {
+namespace Doxy_Setup {
    const char *getArg(int argc, char **argv, int &optind);
-   void generateConfigFile(const char *configFile, bool shortList, bool updateOnly = false);
+   void generateConfigFile(const char *configFile);
    bool openOutputFile(const char *outFile, QFile &f);   
    void usage(const char *name);
 }
+
+using namespace Doxy_Setup;
 
 void initDoxygen()
 {
@@ -78,11 +81,11 @@ void initDoxygen()
    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
    Doxygen::runningTime.start();
-   initPreprocessor();
+//BROOM  - ROUND 1   initPreprocessor();
 
    Doxygen::parserManager = new ParserManager;
    Doxygen::parserManager->registerDefaultParser(new FileParser);
-   Doxygen::parserManager->registerParser("c", new CLanguageScanner);
+// BROOM   Doxygen::parserManager->registerParser("c", new CLanguageScanner);
 
 // BROOM  (out for now)
 //   Doxygen::parserManager->registerParser("python", new PythonLanguageScanner);
@@ -106,6 +109,7 @@ void initDoxygen()
    initClassMemberIndices();
    initNamespaceMemberIndices();
    initFileMemberIndices();
+ 
 
 #ifdef USE_LIBCLANG
    Doxygen::clangUsrMap       = new QHash<QString, Definition *>();
@@ -174,13 +178,13 @@ void cleanUpDoxygen()
    delete Doxygen::xrefLists;
    delete Doxygen::parserManager;
 
-   cleanUpPreprocessor();
+//BROOM  ROUND 1   cleanUpPreprocessor();
 
    delete theTranslator;
    delete Doxy_Globals::g_outputList;
 
    Mappers::freeMappers();
-   codeFreeScanner();
+//BROOM    codeFreeScanner();
 
    if (Doxygen::symbolMap) {
       // iterate through Doxygen::symbolMap and delete all
@@ -206,7 +210,6 @@ void cleanUpDoxygen()
    delete Doxygen::hiddenClasses;
    delete Doxygen::namespaceSDict;   
 }
-
 
 // **
 void readConfiguration(int argc, char **argv)
@@ -289,7 +292,7 @@ void readConfiguration(int argc, char **argv)
 
                QFile f;
                if (openOutputFile(argv[optind + 1], f)) {
-                  RTFGenerator::writeExtensionsFile(f);
+// BROOM                   RTFGenerator::writeExtensionsFile(f);
                }
 
                cleanUpDoxygen();
@@ -303,7 +306,8 @@ void readConfiguration(int argc, char **argv)
 
          case 'w':
             formatName = getArg(argc, argv, optind);
-            if (!formatName) {
+
+            if (! formatName) {
                err("option \"-w\" is missing format specifier rtf, html or latex\n");
                cleanUpDoxygen();
                exit(1);
@@ -317,7 +321,7 @@ void readConfiguration(int argc, char **argv)
                }
                QFile f;
                if (openOutputFile(argv[optind + 1], f)) {
-                  RTFGenerator::writeStyleSheetFile(f);
+// BROOM                   RTFGenerator::writeStyleSheetFile(f);
                }
                cleanUpDoxygen();
                exit(1);
@@ -404,23 +408,27 @@ void readConfiguration(int argc, char **argv)
 
                QFile f;
                if (openOutputFile(argv[optind + 1], f)) {
-                  LatexGenerator::writeHeaderFile(f);
+//BROOM                  LatexGenerator::writeHeaderFile(f);
                }
                f.close();
+
                if (openOutputFile(argv[optind + 2], f)) {
-                  LatexGenerator::writeFooterFile(f);
+//BROOM                  LatexGenerator::writeFooterFile(f);
                }
                f.close();
+
                if (openOutputFile(argv[optind + 3], f)) {
-                  LatexGenerator::writeStyleSheetFile(f);
+//BROOM                  LatexGenerator::writeStyleSheetFile(f);
                }
                cleanUpDoxygen();
                exit(0);
+
             } else {
                err("Illegal format specifier \"%s\": should be one of rtf, html or latex\n", formatName);
                cleanUpDoxygen();
                exit(1);
             }
+
             break;
 
          case 'm':
@@ -471,7 +479,7 @@ void readConfiguration(int argc, char **argv)
    Config::instance()->init();
 
    if (genConfig) {
-      generateConfigFile(configName, shortList);
+      generateConfigFile(configName);
       cleanUpDoxygen();
       exit(0);
    } 
@@ -511,39 +519,34 @@ void readConfiguration(int argc, char **argv)
    }
 
 
-   printf("\n  Parse the Json file here ");
-
+   // printf("\n  Parse the Json file here ");
    // add test for failures
-   Config::instance()->parseConfig();
+   // Config_Json::instance()->parseConfig();
 
-/*
-
-   //BROOM - out for now
+   
    if (! Config::instance()->parse(configName)) {
       err("could not open or read configuration file %s!\n", configName);
       cleanUpDoxygen();
       exit(1);
    }
-*/
+
   
    // Perlmod wants to know the path to the config file
    QFileInfo configFileInfo(configName);
-   setPerlModDoxyfile(qPrintable(configFileInfo.absoluteFilePath()));
+//BROOM   setPerlModDoxyfile(qPrintable(configFileInfo.absoluteFilePath()));
 
 }
 
 // check and resolve config options
 void checkConfiguration()
 {
-
    printf("\n  Verify the cfg file is ok");   
 
+   Config::instance()->substituteEnvironmentVars();
+   Config::instance()->convertStrToVal();
+   Config::instance()->check();
+   initWarningFormat();
 
-//BROOM - out for now   Config::instance()->substituteEnvironmentVars();
-//BROOM - out for now   Config::instance()->convertStrToVal();
-//BROOM - out for now   Config::instance()->check();
-
-//BROOM - out for now   initWarningFormat();
 }
 
 
@@ -552,6 +555,7 @@ void adjustConfiguration()
 {
 
    printf("\n  Adjust the Cfg file");   
+
 
 /*
 
@@ -635,7 +639,7 @@ void adjustConfiguration()
 
 }
 
-static const char *getArg(int argc, char **argv, int &optind)
+const char *Doxy_Setup::getArg(int argc, char **argv, int &optind)
 {
    char *s = 0;
    if (qstrlen(&argv[optind][2]) > 0) {
@@ -648,7 +652,7 @@ static const char *getArg(int argc, char **argv, int &optind)
 
 /*! Generate a new version of the configuration file 
  */
-static void generateConfigFile(const char *configFile)
+void Doxy_Setup::generateConfigFile(const char *configFile)
 {
    QFile f;
 
@@ -658,7 +662,9 @@ static void generateConfigFile(const char *configFile)
    if (fileOpened) {
 
       FTextStream t(&f);
-      Config::instance()->writeNewCfg();      
+
+      // BROOM   
+      // Config_Json::instance()->writeNewCfg();      
 
       if (writeToStdout) {     
         // do nothing else
@@ -684,7 +690,7 @@ static void generateConfigFile(const char *configFile)
    }
 }
 
-static bool openOutputFile(const char *outFile, QFile &f)
+bool Doxy_Setup::openOutputFile(const char *outFile, QFile &f)
 {
    bool fileOpened = false;
    bool writeToStdout = (outFile[0] == '-' && outFile[1] == '\0');
@@ -720,7 +726,7 @@ static bool openOutputFile(const char *outFile, QFile &f)
 }
 
 // print usage
-static void usage(const char *name)
+void Doxy_Setup::usage(const char *name)
 {
    msg("CS Doxygen version %s\n\n", versionString);
  

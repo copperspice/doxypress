@@ -2608,10 +2608,11 @@ class DefineManager
       void addInclude(const char *fileName) {
          m_includedFiles.insert(fileName, (void *)0x8);
       }
-      void collectDefines(DefineDict *dict, QDict<void> &includeStack);
+      void collectDefines(DefineDict *dict, QHash<QString, void *> &includeStack);
+
     private:
       DefineDict m_defines;
-      QDict<void> m_includedFiles;
+      QHash<QString, void *> m_includedFiles;
    };
 
  public:
@@ -2669,7 +2670,7 @@ class DefineManager
          m_fileMap.insert(fileName, dpf);
       } else {
          //printf("existing file!\n");
-         QDict<void> includeStack(17);
+         QHash<QString, void *> includeStack(17);
          dpf->collectDefines(&m_contextDefines, includeStack);
       }
    }
@@ -2738,7 +2739,7 @@ class DefineManager
       }
       DefinesPerFile *dpf = m_fileMap.find(fileName);
       if (dpf) {
-         QDict<void> includeStack(17);
+         QHash<QString, void *> includeStack(17);
          dpf->collectDefines(dict, includeStack);
       }
    }
@@ -2759,7 +2760,7 @@ class DefineManager
    virtual ~DefineManager() {
    }
 
-   QDict<DefinesPerFile> m_fileMap;
+   QHash<QString, DefinesPerFile *> m_fileMap;
    DefineDict m_contextDefines;
 };
 
@@ -2774,29 +2775,29 @@ DefineManager *DefineManager::theInstance = 0;
  *         case there is a cyclic include dependency.
  */
 void DefineManager::DefinesPerFile::collectDefines(
-   DefineDict *dict, QDict<void> &includeStack)
-{
-   //printf("DefinesPerFile::collectDefines #defines=%d\n",m_defines.count());
-   {
-      QDictIterator<void> di(m_includedFiles);
-      for (di.toFirst(); (di.current()); ++di) {
-         QByteArray incFile = di.currentKey();
+   DefineDict *dict, QHash<QString, void *> &includeStack)
+{ 
+   {        
+      for (auto di = m_includedFiles.begin(); di != m_includedFiles.end(); ++di) {
+         QByteArray incFile = di.key();
+         
          DefinesPerFile *dpf = DefineManager::instance().find(incFile);
-         if (dpf && includeStack.find(incFile) == 0) {
-            //printf("  processing include %s\n",incFile.data());
+
+         if (dpf && includeStack.find(incFile) == 0) {          
             includeStack.insert(incFile, (void *)0x8);
             dpf->collectDefines(dict, includeStack);
          }
       }
    }
+
    {
-      QDictIterator<A_Define> di(m_defines);
-      A_Define *def;
-      for (di.toFirst(); (def = di.current()); ++di) {
+      for (auto def : m_defines)  {
          A_Define *d = dict->find(def->name);
+
          if (d != 0) { // redefine
             dict->remove(d->name);
          }
+
          dict->insert(def->name, def);
          //printf("  adding define %s\n",def->name.data());
       }
@@ -2816,8 +2817,8 @@ static FileDef           *g_yyFileDef;
 static FileDef           *g_inputFileDef;
 static int                g_ifcount    = 0;
 static QStringList          *g_pathList = 0;
-static QStack<FileState>  g_includeStack;
-static QDict<int>        *g_argDict;
+static QStack<FileState>     g_includeStack;
+static QHash<QString, int>  *g_argDict;
 static int                g_defArgs = -1;
 static QByteArray           g_defName;
 static QByteArray           g_defText;
@@ -2919,7 +2920,7 @@ static void setCaseDone(bool value)
    g_levelGuard[g_level - 1] = value;
 }
 
-static QDict<void> g_allIncludes(10009);
+static QHash<QString, void *> g_allIncludes;
 
 static FileState *checkAndOpenFile(const QByteArray &fileName, bool &alreadyIncluded)
 {
@@ -3209,7 +3210,7 @@ static bool replaceFunctionMacro(const QByteArray &expr, QByteArray *rest, int p
    }
    getNextChar(expr, rest, j); // eat the `(' character
 
-   QDict<QByteArray> argTable;  // list of arguments
+   QHash<QString, QByteArray *> argTable;  // list of arguments
 
    QByteArray arg;
    int argCount = 0;
@@ -7487,7 +7488,7 @@ void initPreprocessor()
 {
    g_pathList = new QStringList;
    addSearchDir(".");
-   g_expandedDict = new DefineDict(17);
+   g_expandedDict = new DefineDict();
 }
 
 void cleanUpPreprocessor()
@@ -7525,16 +7526,18 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
    DefineManager::instance().startContext(g_yyFileName);
 
    static bool firstTime = TRUE;
+
    if (firstTime) {
       // add predefined macros
-      char *defStr;
       QStringList &predefList = Config_getList("PREDEFINED");
-      QStringListIterator sli(predefList);
-      for (sli.toFirst(); (defStr = sli.current()); ++sli) {
+     
+      for (auto defStr : predefList) { 
          QByteArray ds = defStr;
+
          int i_equals = ds.find('=');
          int i_obrace = ds.find('(');
          int i_cbrace = ds.find(')');
+
          bool nonRecursive = i_equals > 0 && ds.at(i_equals - 1) == ':';
 
          if (i_obrace == 0) {
@@ -7542,12 +7545,12 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
          }
 
          if (i_obrace < i_equals && i_cbrace < i_equals &&
-               i_obrace != -1      && i_cbrace != -1      &&
-               i_obrace < i_cbrace
-            ) { // predefined function macro definition
-            //printf("predefined function macro '%s'\n",defStr);
+               i_obrace != -1      && i_cbrace != -1  &&  i_obrace < i_cbrace ) {
+
+            // predefined function macro definition
+           
             QRegExp reId("[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*"); // regexp matching an id
-            QDict<int> argDict;
+            QHash<QString, int> argDict;
 
             int i = i_obrace + 1, p, l, count = 0;
             // gather the formal arguments in a dictionary
@@ -7657,25 +7660,14 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
    }
    // make sure we don't extend a \cond with missing \endcond over multiple files (see bug 624829)
    forceEndCondSection();
-
-   // remove locally defined macros so they can be redefined in another source file
-   //if (g_fileDefineDict->count()>0)
-   //{
-   //  QDictIterator<Define> di(*g_fileDefineDict);
-   //  Define *d;
-   //  for (di.toFirst();(d=di.current());++di)
-   //  {
-   //    g_globalDefineDict->remove(di.currentKey());
-   //  }
-   //  g_fileDefineDict->clear();
-   //}
-
+  
    if (Debug::isFlagSet(Debug::Preprocessor)) {
       char *orgPos = output.data() + orgOffset;
       char *newPos = output.data() + output.curPos();
       Debug::print(Debug::Preprocessor, 0, "Preprocessor output (size: %d bytes):\n", newPos - orgPos);
       int line = 1;
       Debug::print(Debug::Preprocessor, 0, "---------\n00001 ");
+
       while (orgPos < newPos) {
          putchar(*orgPos);
          if (*orgPos == '\n') {
@@ -7683,16 +7675,21 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
          }
          orgPos++;
       }
+
       Debug::print(Debug::Preprocessor, 0, "\n---------\n");
       if (DefineManager::instance().defineContext().count() > 0) {
          Debug::print(Debug::Preprocessor, 0, "Macros accessible in this file:\n");
          Debug::print(Debug::Preprocessor, 0, "---------\n");
-         QDictIterator<Define> di(DefineManager::instance().defineContext());
-         Define *def;
+
+         QHashIterator<QString, A_Define *> di(DefineManager::instance().defineContext());
+         A_Define *def;
+
          for (di.toFirst(); (def = di.current()); ++di) {
             Debug::print(Debug::Preprocessor, 0, "%s ", def->name.data());
          }
+
          Debug::print(Debug::Preprocessor, 0, "\n---------\n");
+
       } else {
          Debug::print(Debug::Preprocessor, 0, "No macros accessible in this file.\n");
       }

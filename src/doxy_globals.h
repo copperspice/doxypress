@@ -19,6 +19,7 @@
 #define DOXY_GLOBALS_H
 
 #include <QByteArray>
+#include <QCache>
 #include <QFileInfo>
 #include <QHash>
 #include <QList>

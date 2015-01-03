@@ -213,19 +213,16 @@ static bool matchExcludedSymbols(const char *name)
          }
       }      
    }
-
-   //printf("--> name=%s: no match\n",name);
+   
    return false;
 }
 
 void Definition::addToMap(const char *name, Definition *d)
-{
-   bool vhdlOpt = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
-
+{   
    QByteArray symbolName = name;
    int index = computeQualifiedIndex(symbolName);
 
-   if (! vhdlOpt && index != -1) {
+   if (index != -1) {
       symbolName = symbolName.mid(index + 2);
    }
 

@@ -29,7 +29,11 @@
  */
 int main(int argc, char **argv)
 {
+   printf("main A\n\n");
+
    initDoxygen();
+
+   printf("main B\n\n");
 
    readConfiguration(argc, argv);
    checkConfiguration();

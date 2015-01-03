@@ -73,19 +73,21 @@ void marshalQByteArray(StorageIntf *s, const QByteArray &str)
    }
 }
 
-void marshalQString(StorageIntf *s, const QByteArray &str)
+void marshalQString(StorageIntf *s, const QString &str)
 {
-   uint l = str.length();
+   QByteArray temp = str.toUtf8();
+
+   uint l = temp.length();
    marshalUInt(s, l);
 
    if (l > 0) {
-      s->write(str.data(), l);
+      s->write(temp.constData(), l);
    }
 }
 
-void marshalArgumentList(StorageIntf *s, ArgumentList *argList)
+void marshalArgumentList(StorageIntf *s, ArgumentList argList)
 {
-   ArgumentList::marshal(s, argList);
+   ArgumentList::marshal(s, &argList);
 }
 
 void marshalArgumentLists(StorageIntf *s, QList<ArgumentList> *argLists)

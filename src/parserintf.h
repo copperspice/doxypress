@@ -159,7 +159,7 @@ class ParserManager
 
    /** Registers an additional parser.
     *  @param[in] name      A symbolic name of the parser, i.e. "c",
-    *                       "python", "fortran", "vhdl", ...
+    *                       "python", "fortran" 
     *  @param[in] parser    The parser that is to be used for the
     *                       given name.
     */
