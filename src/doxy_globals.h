@@ -20,15 +20,31 @@
 
 #include <QByteArray>
 #include <QCache>
-#include <QFileInfo>
 #include <QHash>
 #include <QList>
 #include <QString>
+#include <QSharedPointer>
 #include <QTime>
 
+#include <dirdef.h>
 #include <entry.h>
 #include <filestorage.h>
 #include <message.h>
+#include <searchindex.h>
+
+struct LookupInfo {
+   LookupInfo() : classDef(0), typeDef(0)
+   {}
+
+   LookupInfo(ClassDef *cd, MemberDef *td, QByteArray ts, QByteArray rt)
+      : classDef(cd), typeDef(td), templSpec(ts), resolvedType(rt)
+   {}
+
+   ClassDef    *classDef;
+   MemberDef   *typeDef;
+   QByteArray   templSpec;
+   QByteArray   resolvedType;
+};
 
 class Statistics
 {
@@ -157,9 +173,7 @@ class Doxygen
 
    static QString  objDBFileName;
    static QString  entryDBFileName;
-
-   static QByteArray  spaces;
-  
+   
    static bool  suppressDocWarnings;
    static bool  outputToWizard;
    static bool  gatherDefines;
@@ -182,7 +196,7 @@ class Doxy_Globals
    
       static OutputList               *g_outputList;            // list of output generating objects     
       static FileStorage              *g_storage;
-
+      
       static Statistics g_stats; 
    
       static bool g_successfulRun;

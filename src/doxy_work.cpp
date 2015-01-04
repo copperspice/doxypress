@@ -40,6 +40,7 @@
 #include <docsets.h>
 #include <dot.h>
 #include <doxygen.h>
+#include <doxy_setup.h>
 #include <eclipsehelp.h>
 #include <entry.h>
 #include <filename.h>
@@ -626,7 +627,7 @@ void parseInput()
    // we are done with input scanning now, so free up the buffers used by flex
    // (can be around 4MB)
 
-//BROOM    preFreeScanner();
+   preFreeScanner();
 //BROOM    scanFreeScanner();
 //BROOM    pyscanFreeScanner();
 
@@ -8960,7 +8961,9 @@ void Doxy_Work::parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNa
 
    QByteArray fileName = fn;
    QByteArray extension;
+
    int ei = fileName.lastIndexOf('.');
+
    if (ei != -1) {
       extension = fileName.right(fileName.length() - ei);
    } else {
@@ -8973,9 +8976,9 @@ void Doxy_Work::parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNa
    if (Config_getBool("ENABLE_PREPROCESSING") && parser->needsPreprocessing(extension)) {
       BufStr inBuf(fi.size() + 4096);
       msg("Preprocessing %s...\n", fn);
-      readInputFile(fileName, inBuf);
 
-//BROOM       preprocessFile(fileName, inBuf, preBuf);
+      readInputFile(fileName, inBuf);
+      preprocessFile(fileName, inBuf, preBuf);
 
    } else { 
       // no preprocessing

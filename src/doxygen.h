@@ -18,24 +18,18 @@
 #ifndef DOXYGEN_H
 #define DOXYGEN_H
 
-#include <QCache>
-#include <QDir>
-#include <QDatetime>
-#include <QFile>
+#include <QByteArray>  
 #include <QFileInfo>
 #include <QHash>
-#include <QRegExp>
 #include <QStringList>
-#include <QTextCodec>
-#include <QTextStream>
 
+#include <dirdef.h> 
 #include <ftextstream.h>
-#include <stringmap.h>
 #include <membergroup.h>
-#include <dirdef.h>
 #include <memberlist.h>
 #include <section.h>
 #include <sortedlist.h>
+#include <stringmap.h>
 
 class DefinitionIntf;
 class DirSDict;
@@ -68,37 +62,15 @@ class NamespaceDef;
 
 struct MemberGroupInfo;
 
-extern QByteArray   g_spaces;
-
-struct LookupInfo {
-   LookupInfo() : classDef(0), typeDef(0) {}
-
-   LookupInfo(ClassDef *cd, MemberDef *td, QByteArray ts, QByteArray rt)
-      : classDef(cd), typeDef(td), templSpec(ts), resolvedType(rt) {}
-
-   ClassDef    *classDef;
-   MemberDef   *typeDef;
-   QByteArray   templSpec;
-   QByteArray   resolvedType;
-};
-
 class StringDict : public QHash<QString, QByteArray>
 {
  public:
-   StringDict() : QHash<QString, QByteArray>() {}
-   virtual ~StringDict() {}
-};
+   StringDict() : QHash<QString, QByteArray>() 
+   {}
 
-void initDoxygen();
-void readConfiguration(int argc, char **argv);
-void checkConfiguration();
-void adjustConfiguration();
-void searchInputFiles();      // QList<QByteArray>  &inputFiles
-void parseInput();
-void generateOutput();
-void readAliases();
-void readFormulaRepository();
-void cleanUpDoxygen();
+   virtual ~StringDict()
+   {}
+};
 
 int readFileOrDirectory(const QString &s, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict *exclDict,
                         QStringList *patList, QStringList *exclPatList, QStringList *resultList, StringDict *resultDict, 

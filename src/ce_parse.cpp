@@ -656,7 +656,7 @@ do								\
     }								\
   else								\
     {								\
-      yyerror (YY_("syntax error: cannot back up")); \
+      yyerror (YY_("Error: Syntax error, unable to back up")); \
       YYERROR;							\
     }								\
 while (YYID (0))

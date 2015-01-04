@@ -1302,14 +1302,12 @@ void LayoutDocManager::parse(QTextStream &t, const char *fileName)
    reader.parse( source );
 }
 
-//---------------------------------------------------------------------------------
-
-void writeDefaultLayoutFile(const char *fileName)
+void writeDefaultLayoutFile(const QString &fileName)
 {
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Failed to open file %s for writing!\n", fileName);
+      err("Unable to open file %s for writing\n", qPrintable(fileName));
       return;
    }
 
@@ -1318,8 +1316,6 @@ void writeDefaultLayoutFile(const char *fileName)
    QTextStream t(&f);
    t << substitute(layoutData, "$doxygenversion", versionString);
 }
-
-//----------------------------------------------------------------------------------
 
 // Convert input to a title.
 // The format of input can be a simple title "A title" or in case there are different

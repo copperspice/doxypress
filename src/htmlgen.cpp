@@ -421,12 +421,14 @@ void HtmlCodeGenerator::codify(const char *str)
       while (*p) {
          c = *p++;
          switch (c) {
+
             case '\t':
-               spacesToNextTabStop =
-                  tabSize - (m_col % tabSize);
-               m_t << Doxygen::spaces.left(spacesToNextTabStop);
+               spacesToNextTabStop = tabSize - (m_col % tabSize);
+               m_t << QString(' ', spacesToNextTabStop);
                m_col += spacesToNextTabStop;
+
                break;
+
             case '\n':
                m_t << "\n";
                m_col = 0;

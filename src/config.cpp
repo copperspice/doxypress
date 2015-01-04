@@ -823,14 +823,15 @@ void ConfigBool::convertStrToVal()
 
 QByteArray  s_empty;
 QStringList s_emptyList;
-
+int s_emptyInt = 0;
+bool s_emptyBool = false;
 
 QByteArray &Config::getString(const char *fileName, int num, const char *name) const
 {
    ConfigOption *opt = m_dict->value(name);
 
    if (opt == 0) {
-      config_err("%s<%d>: Internal error: %s is not valid\n", fileName, num, name);
+      config_err("%s<%d>: Internal error: %s is not valid string\n", fileName, num, name);
 // BROOM      exit(1);
      return s_empty;
 
@@ -846,7 +847,7 @@ QStringList &Config::getList(const char *fileName, int num, const char *name) co
 {
    ConfigOption *opt = m_dict->value(name);
    if (opt == 0) {
-      config_err("%s<%d>: Internal error: %s is not valid\n", fileName, num, name);
+      config_err("%s<%d>: Internal error: %s is not valid list\n", fileName, num, name);
  // BROOM      exit(1);
      return s_emptyList;
 
@@ -862,12 +863,12 @@ QByteArray &Config::getEnum(const char *fileName, int num, const char *name) con
 {
    ConfigOption *opt = m_dict->value(name);
    if (opt == 0) {
-      config_err("%s<%d>: Internal error: %s is not valid\n", fileName, num, name);
+      config_err("%s<%d>: Internal error: %s is not valid enum\n", fileName, num, name);
 // BROOM      exit(1);
      return s_empty;
 
    } else if (opt->kind() != ConfigOption::O_Enum) {
-      config_err("%s<%d>: Internal error: %s is not a enum\n", fileName, num, name);
+      config_err("%s<%d>: Internal error: %s is not an enum\n", fileName, num, name);
 // BROOM   exit(1); 
      return s_empty;
 
@@ -880,12 +881,15 @@ int &Config::getInt(const char *fileName, int num, const char *name) const
 {
    ConfigOption *opt = m_dict->value(name);
    if (opt == 0) {
-      config_err("%s<%d>: Internal error: %s is not valid\n", fileName, num, name);
-      exit(1);
+      config_err("%s<%d>: Internal error: %s is not valid integer\n", fileName, num, name);
+// BROOM      exit(1);
+      return s_emptyInt;
+
    } else if (opt->kind() != ConfigOption::O_Int) {
       config_err("%s<%d>: Internal error: %s is not an integer\n", fileName, num, name);
       exit(1);
    }
+
    return *((ConfigInt *)opt)->valueRef();
 }
 
@@ -893,12 +897,16 @@ bool &Config::getBool(const char *fileName, int num, const char *name) const
 {
    ConfigOption *opt = m_dict->value(name);
    if (opt == 0) {
-      config_err("%s<%d>: Internal error: Requested unknown option %s!\n", fileName, num, name);
-      exit(1);
+      config_err("%s<%d>: Internal error: %s is not valid boolean\n", fileName, num, name);
+// BROOM      exit(1);
+      return s_emptyBool;
+
    } else if (opt->kind() != ConfigOption::O_Bool) {
-      config_err("%s<%d>: Internal error: Requested option %s not of boolean type!\n", fileName, num, name);
+      config_err("%s<%d>: Internal error: %s is not a boolean\n", fileName, num, name);
       exit(1);
+
    }
+
    return *((ConfigBool *)opt)->valueRef();
 }
 
@@ -1179,8 +1187,9 @@ static void readIncludeFile(const char *incName)
       fs->newState = YY_CURRENT_BUFFER;
       yyFileName = inc;
       includeDepth++;
+
    } else {
-      config_err("Error: @INCLUDE = %s: not found!\n", inc.data());
+      config_err("Error: @INCLUDE = %s: was not found\n", inc.data());
       exit(1);
    }
 }
@@ -3491,6 +3500,10 @@ void addConfigOptions(Config *cfg)
   ce->addValue("English");
 
   cl = cfg->addList("EXCLUDE_SYMBOLS","");
+
+  cb = cfg->addBool("SUBGROUPING", "", TRUE);
+  cb = cfg->addBool("CASE_SENSE_NAMES", "", portable_fileSystemIsCaseSensitive());
+  cb = cfg->addBool("QUIET", "", false);
 
 }
 

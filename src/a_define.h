@@ -103,7 +103,7 @@ class DefineNameList : public QList<DefineName>
 };
 
 /** An unsorted dictionary of A_Define objects. */
-using DefineDict     = QHash<QString, A_Define>;
+using DefineDict     = QHash<QString, A_Define *>;      // only used in pre.cpp (lex code)
 
 /** A sorted dictionary of DefineName object. */
 using DefineNameDict = QHash<QString, DefineName>;

@@ -206,7 +206,7 @@ void CiteDict::generatePage() const
          }
 
       } else if (!fi.exists()) {
-         err("bib file %s not found!\n", bibFile.data());
+         err("Bib file %s was not found\n", bibFile.data());
       }
    }
 
@@ -317,7 +317,7 @@ void CiteDict::generatePage() const
             }
 
          } else {
-            err("bib file %s not found!\n", bibFile.data());
+            err("Bib file %s was not found\n", bibFile.data());
          }
 
       }

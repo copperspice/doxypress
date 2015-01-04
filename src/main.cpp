@@ -15,7 +15,9 @@
  *
 *************************************************************************/
 
-#include <doxygen.h>
+#include <QString>
+
+#include <doxy_setup.h>
 
 /*! \file
  *  \brief main entry point for doxygen
@@ -29,13 +31,23 @@
  */
 int main(int argc, char **argv)
 {
-   printf("main A\n\n");
+   // passed parameters
+   QStringList argList;
 
-   initDoxygen();
+   for (int k = 1; k < argc; ++k)   {
+      QString value = argv[k];     
+      argList.append(value);      
+   }
 
-   printf("main B\n\n");
+   initDoxygen();  
 
-   readConfiguration(argc, argv);
+   //    
+   struct CommandLine cmdArgs;
+
+   cmdArgs = parseCommandLine(argList);
+   readConfiguration(cmdArgs);
+
+   //
    checkConfiguration();
    adjustConfiguration();
 

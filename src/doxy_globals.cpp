@@ -103,8 +103,6 @@ QByteArray       Doxygen::htmlFileExtension;
 QString          Doxygen::objDBFileName;
 QString          Doxygen::entryDBFileName;
 
-QByteArray       Doxygen::spaces;
-
 int              Doxygen::subpageNestingLevel = 0;
 
 

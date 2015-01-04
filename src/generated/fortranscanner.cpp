@@ -57734,31 +57734,7 @@ YY_DECL {
                yy_push_state(AttributeList);
             }
             YY_BREAK
-         /*  Dimitri: macro expansion should already be done during preprocessing not here!
-         ^{BS}{PP_ID}{KIND}?			{ // check for preprocessor symbol expand to type
-         					  QByteArray str = fortranscannerYYtext;
-         					  str = str.trimmed();
-         					  //DefineDict* defines = getGlobalDefineDict();
-         					  QByteArray name;
-         					  int index = str.find("(");
-         					  if (index != -1)
-         					    name = str.left(index).trimmed();
-         					  else
-         					    name = str;
-
-         					  Define *define = 0; //(*defines)[name];
-         					  if (define != 0 && isTypeName(define->definition))
-         					  {
-         					    argType = str;
-         					    yy_push_state(AttributeList);
-         					  }
-         					  else
-         					  {
-         					    yyColNr -= (int)fortranscannerYYleng;
-         					    REJECT;
-         					  }
-         					}
-           */
+      
          case 60:
             *yy_cp = (yy_hold_char); /* undo effects of setting up fortranscannerYYtext */
             (yy_c_buf_p) = yy_cp = yy_bp + 8;

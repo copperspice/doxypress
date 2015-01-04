@@ -20,7 +20,6 @@
 
 #include <QTextStream>
 
-/** @brief Simplified and optimized version of QTextStream */
 class FTextStream : public QTextStream
 {
    public:   
@@ -54,86 +53,4 @@ class FTextStream : public QTextStream
 
 };
 
-
-/*
-
-{
- public:
-   FTextStream();
-   FTextStream( QIODevice *);
-   FTextStream( QByteArray *);
-   FTextStream( FILE *);
-
-   virtual ~FTextStream();
-
-   QIODevice	*device() const;
-   void	 setDevice( QIODevice *);
-   void	 unsetDevice();
-
-   FTextStream &operator<<( char );
-   FTextStream &operator<<( const char *);
-   FTextStream &operator<<( const QString &);
-   FTextStream &operator<<( const QByteArray &);
-   FTextStream &operator<<( signed short );
-   FTextStream &operator<<( unsigned short );
-   FTextStream &operator<<( signed int );
-   FTextStream &operator<<( unsigned int );
-   FTextStream &operator<<( signed long );
-   FTextStream &operator<<( unsigned long );
-   FTextStream &operator<<( float );
-   FTextStream &operator<<( double );
-
- private:
-   QIODevice *m_dev;
-   bool m_owndev;
-   FTextStream &output_int( ulong n, bool neg );
-
- private:	// Disabled copy constructor and operator=
-#if defined(Q_DISABLE_COPY)
-   FTextStream( const FTextStream &);
-   FTextStream &operator=( const FTextStream &);
 #endif
-};
-
-inline FTextStream &FTextStream::operator<<( char c)
-{
-   if (m_dev) {
-      m_dev->putChar(c);
-   }
-   return *this;
-}
-
-inline FTextStream &FTextStream::operator<<( const char *s)
-{
-   uint len = qstrlen( s );
-   if (m_dev) {
-      m_dev->write( s, len );
-   }
-   return *this;
-}
-
-inline FTextStream &FTextStream::operator<<( const QString &s)
-{
-   return operator<<(s.toUtf8().constData());
-}
-
-inline FTextStream &FTextStream::operator<<( const QByteArray &s)
-{
-   return operator<<(s.constData());
-}
-
-typedef FTextStream &(*FTSFUNC)(FTextStream &); // manipulator function
-
-inline FTextStream &operator<<( FTextStream &s, FTSFUNC f )
-{
-   return (*f)( s );
-}
-
-inline FTextStream &endl( FTextStream &s)
-{
-   return s << '\n';
-}
-
-*/
-
-#endif // FTEXTSTREAM_H

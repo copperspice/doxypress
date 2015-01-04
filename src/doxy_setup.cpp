@@ -15,6 +15,8 @@
  *
 *************************************************************************/
 
+#include <QTextCodec>
+
 #include <errno.h>
 #include <locale.h>
 #include <stdio.h>
@@ -28,7 +30,7 @@
 #include <code.h>
 #include <config.h>
 #include <config_json.h>
-#include <doxygen.h>
+#include <doxy_setup.h>
 #include <doxy_build_info.h>
 #include <entry.h>
 #include <filename.h>
@@ -58,13 +60,26 @@
 #include <doxy_globals.h>
 
 namespace Doxy_Setup {
-   const char *getArg(int argc, char **argv, int &optind);
-   void generateConfigFile(const char *configFile);
-   bool openOutputFile(const char *outFile, QFile &f);   
-   void usage(const char *name);
+   QString getValue(QStringList::iterator &iter, QStringList::iterator end);
+   void generateConfigFile(const QString &configFile);
+   bool openOutputFile(const QString &outFile, QFile &f);   
+   void usage();
 }
 
 using namespace Doxy_Setup;
+
+enum Options {
+     INVALID, 
+     BLANK_CFG, 
+     BLANK_LAYOUT,
+     BLANK_STYLE,
+     DEBUG_DUMP, 
+     DEBUG_SYMBOLS,
+     HELP, 
+     OUTPUT_WIZARD,
+     RTF_EXTENSIONS,            
+     DOXY_VERSION,      
+};
 
 void initDoxygen()
 {
@@ -81,11 +96,11 @@ void initDoxygen()
    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
    Doxygen::runningTime.start();
-//BROOM  - ROUND 1   initPreprocessor();
+   initPreprocessor();
 
    Doxygen::parserManager = new ParserManager;
    Doxygen::parserManager->registerDefaultParser(new FileParser);
-// BROOM   Doxygen::parserManager->registerParser("c", new CLanguageScanner);
+   Doxygen::parserManager->registerParser("c", new CLanguageScanner);
 
 // BROOM  (out for now)
 //   Doxygen::parserManager->registerParser("python", new PythonLanguageScanner);
@@ -104,8 +119,8 @@ void initDoxygen()
    Doxygen::parserManager->registerParser("md",             new MarkdownFileParser);
 
    // register any additional parsers here
-
    initDefaultExtensionMapping();
+
    initClassMemberIndices();
    initNamespaceMemberIndices();
    initFileMemberIndices();
@@ -177,11 +192,13 @@ void cleanUpDoxygen()
    delete Doxygen::globalScope;
    delete Doxygen::xrefLists;
    delete Doxygen::parserManager;
-
-//BROOM  ROUND 1   cleanUpPreprocessor();
+   
+   cleanUpPreprocessor();
 
    delete theTranslator;
    delete Doxy_Globals::g_outputList;
+
+   printf("\n\n Clean Up - ONE");
 
    Mappers::freeMappers();
 //BROOM    codeFreeScanner();
@@ -202,6 +219,8 @@ void cleanUpDoxygen()
       }
    }
 
+   printf("\n\n Clean Up - TWO");
+
    delete Doxygen::inputNameList;
    delete Doxygen::memberNameSDict;
    delete Doxygen::functionNameSDict;
@@ -212,199 +231,122 @@ void cleanUpDoxygen()
 }
 
 // **
-void readConfiguration(int argc, char **argv)
+struct CommandLine parseCommandLine(QStringList argList)
 {   
-   int optind = 1;
+   CommandLine cmdArgs;
 
-   const char *configName = 0;
-   const char *layoutName = 0;
-   const char *debugLabel;
-   const char *formatName;
+   QMap<QString, Options> argMap;
+   argMap.insert( "--b", OUTPUT_WIZARD   );
+   argMap.insert( "--d", DEBUG_DUMP      );
+   argMap.insert( "--e", RTF_EXTENSIONS  );
+   argMap.insert( "--g", BLANK_CFG       );
+   argMap.insert( "--h", HELP            );
+   argMap.insert( "--l", BLANK_LAYOUT    );
+   argMap.insert( "--m", DEBUG_SYMBOLS   );
+   argMap.insert( "--w", BLANK_STYLE     );
+   argMap.insert( "--v", DOXY_VERSION    );
 
-   bool genConfig = false;
-   bool shortList = false;  
-   bool genLayout = false;
+   QStringList dashList;
 
-   int retVal;
+   for (auto item : argList)   {      
+      if (item.startsWith("--")) {
+         dashList.append(item);
+      }
+   }
+   
+   auto iter = argList.begin();
+ 
+   for (auto item : dashList)   {    
 
-   while (optind < argc && argv[optind][0] == '-' && (isalpha(argv[optind][1]) || argv[optind][1] == '?' || argv[optind][1] == '-')) {
+      Options value = INVALID;
+      
+      if (argMap.contains(item)) {
+         value = argMap.value(item);
 
-      switch (argv[optind][1]) {
-         case 'g':
-            genConfig = true;
-            configName = getArg(argc, argv, optind);
-
-            if (optind + 1 < argc && qstrcmp(argv[optind + 1], "-") == 0) {
-               configName = "-";
-               optind++;
-            }
-
-            if (!configName) {
-               configName = "Doxyfile";
-            }
-            break;
-
-         case 'l':
-            genLayout = true;
-            layoutName = getArg(argc, argv, optind);
-
-            if (!layoutName) {
-               layoutName = "DoxygenLayout.xml";
-            }
-            break;
-
-         case 'd':
-            debugLabel = getArg(argc, argv, optind);
-
-            if (! debugLabel) {
-               err("option \"-d\" is missing debug specifier.\n");              
-               cleanUpDoxygen();
-               exit(1);
-            }
-
-            retVal = Debug::setFlag(debugLabel);
-            if (! retVal) {
-               err("option \"-d\" has unknown debug specifier: \"%s\".\n", debugLabel);
-               cleanUpDoxygen();
-               exit(1);
-            }
-            break;
-
-         case 's':
-            shortList = true;
-            break;
-       
-         case 'e':
-            formatName = getArg(argc, argv, optind);
-
-            if (!formatName) {
-               err("option \"-e\" is missing format specifier rtf.\n");
-               cleanUpDoxygen();
-               exit(1);
-            }
-
-            if (qstricmp(formatName, "rtf") == 0) {
-               if (optind + 1 >= argc) {
-                  err("option \"-e rtf\" is missing an extensions file name\n");
-                  cleanUpDoxygen();
-                  exit(1);
-               }
-
-               QFile f;
-               if (openOutputFile(argv[optind + 1], f)) {
-// BROOM                   RTFGenerator::writeExtensionsFile(f);
-               }
-
-               cleanUpDoxygen();
-               exit(0);
-            }
-
-            err("option \"-e\" has invalid format specifier.\n");
-            cleanUpDoxygen();
-            exit(1);
-            break;
-
-         case 'w':
-            formatName = getArg(argc, argv, optind);
-
-            if (! formatName) {
-               err("option \"-w\" is missing format specifier rtf, html or latex\n");
-               cleanUpDoxygen();
-               exit(1);
-            }
-
-            if (qstricmp(formatName, "rtf") == 0) {
-               if (optind + 1 >= argc) {
-                  err("option \"-w rtf\" is missing a style sheet file name\n");
-                  cleanUpDoxygen();
-                  exit(1);
-               }
-               QFile f;
-               if (openOutputFile(argv[optind + 1], f)) {
-// BROOM                   RTFGenerator::writeStyleSheetFile(f);
-               }
-               cleanUpDoxygen();
-               exit(1);
-
-            } else if (qstricmp(formatName, "html") == 0) {
-
-               if (optind + 4 < argc || QFileInfo("Doxyfile").exists()) {
-
-                  QByteArray df;
-
-                  if (optind + 4 < argc) {
-                     df = argv[optind + 4]; 
-
-                  } else {
-                     df = "Doxyfile";
-                  }
-
-                  if (!Config::instance()->parse(df)) {
-                     err("error opening or reading configuration file %s!\n", argv[optind + 4]);
-                     cleanUpDoxygen();
-                     exit(1);
-                  }
-
-                  Config::instance()->substituteEnvironmentVars();
-                  Config::instance()->convertStrToVal();
+         ++iter;
+      }
                 
-                  Config_getString("HTML_HEADER") = "";
-                  Config_getString("HTML_FOOTER") = "";
-                  Config::instance()->check();
+      switch (value) {
 
-               } else {
-                  Config::instance()->init();
-               }
+         case INVALID:
+            err("Option %s is invalid\n", qPrintable(item)); 
+            exit(0);
+            
+         case BLANK_CFG:
+            cmdArgs.genConfig  = true;
+            cmdArgs.configName = getValue(iter, argList.end());
+           
+            if (cmdArgs.configName.isEmpty()) {
+               cmdArgs.configName = "Doxyfile.json";
+            }
 
-               if (optind + 3 >= argc) {
-                  err("option \"-w html\" does not have enough arguments\n");
-                  cleanUpDoxygen();
-                  exit(1);
-               }
+            break;
 
-               QByteArray outputLanguage = Config_getEnum("OUTPUT_LANGUAGE");
-               if (!setTranslator(outputLanguage)) {
-                  warn_uncond("Output language %s not supported! Using English instead.\n", outputLanguage.data());
-               }
+         case BLANK_LAYOUT:
+            cmdArgs. genLayout  = true;
+            cmdArgs.layoutName = getValue(iter, argList.end());
+           
+            if (cmdArgs.layoutName.isEmpty()) {
+               cmdArgs.layoutName = "DoxygenLayout.xml";
+            }
+
+            break;
+
+         case BLANK_STYLE:
+            cmdArgs.formatName = getValue(iter, argList.end());
+
+            if (cmdArgs.formatName.isEmpty()) {
+               err("Option \"-w\" is missing format specifier rtf, html or latex\n");
+               cleanUpDoxygen();
+               exit(1);
+            }
+
+            cmdArgs.formatName = cmdArgs.formatName.toLower();
+
+            if (cmdArgs.formatName == "rtf-stle") {
+               cmdArgs.rtfStyle = getValue(iter, argList.end());
+
+//               QFile f;
+//               if (openOutputFile(argv[optind + 1], f)) {
+//                  RTFGenerator::writeStyleSheetFile(f);
+//               }
+
+
+            } else  if (cmdArgs.formatName == "html-style") {
+              cmdArgs.htmlStyle = getValue(iter, argList.end());
+
+//              QFile f;
+//              if (openOutputFile(argv[optind + 3], f)) {
+//                 HtmlGenerator::writeStyleSheetFile(f);
+//              }
+
+
+
+/* missing 2
 
                QFile f;
                if (openOutputFile(argv[optind + 1], f)) {
                   HtmlGenerator::writeHeaderFile(f, argv[optind + 3]);
                }
                f.close();
+
                if (openOutputFile(argv[optind + 2], f)) {
                   HtmlGenerator::writeFooterFile(f);
                }
-               f.close();
-               if (openOutputFile(argv[optind + 3], f)) {
-                  HtmlGenerator::writeStyleSheetFile(f);
-               }
-               cleanUpDoxygen();
-               exit(0);
 
-            } else if (qstricmp(formatName, "latex") == 0) {
-               if (optind + 4 < argc) { // use config file to get settings
-                  if (!Config::instance()->parse(argv[optind + 4])) {
-                     err("error opening or reading configuration file %s!\n", argv[optind + 4]);
-                     exit(1);
-                  }
-                  Config::instance()->substituteEnvironmentVars();
-                  Config::instance()->convertStrToVal();
-                  Config_getString("LATEX_HEADER") = "";
-                  Config::instance()->check();
-               } else { // use default config
-                  Config::instance()->init();
-               }
-               if (optind + 3 >= argc) {
-                  err("option \"-w latex\" does not have enough arguments\n");
-                  cleanUpDoxygen();
-                  exit(1);
-               }
+*/
 
-               QByteArray outputLanguage = Config_getEnum("OUTPUT_LANGUAGE");
-               if (!setTranslator(outputLanguage)) {
-                  warn_uncond("Output language %s not supported! Using English instead.\n", outputLanguage.data());
+            } else if (cmdArgs.formatName == "latex-style") {
+              cmdArgs.latexStyle = getValue(iter, argList.end());
+
+/* BROOM
+              if (openOutputFile(argv[optind + 3], f)) {
+                 LatexGenerator::writeStyleSheetFile(f);
                }
+/*
+
+
+/* missing 2
 
                QFile f;
                if (openOutputFile(argv[optind + 1], f)) {
@@ -417,78 +359,112 @@ void readConfiguration(int argc, char **argv)
                }
                f.close();
 
-               if (openOutputFile(argv[optind + 3], f)) {
-//BROOM                  LatexGenerator::writeStyleSheetFile(f);
-               }
-               cleanUpDoxygen();
-               exit(0);
+*/ 
 
-            } else {
-               err("Illegal format specifier \"%s\": should be one of rtf, html or latex\n", formatName);
+
+            } else  {
+               err("Option \"-w %s\" are invalid  \n", qPrintable(cmdArgs.formatName));
                cleanUpDoxygen();
                exit(1);
+
             }
 
-            break;
-
-         case 'm':
-            Doxy_Globals::g_dumpSymbolMap = true;
-            break;
-
-         case 'v':
-            msg("%s\n", versionString);
             cleanUpDoxygen();
             exit(0);
-            break;
 
-         case '-':
-            if (qstrcmp(&argv[optind][2], "help") == 0) {
-               usage(argv[0]);
-               exit(0);
-            } else if (qstrcmp(&argv[optind][2], "version") == 0) {
-               msg("%s\n", versionString);
+         case DEBUG_DUMP:
+            cmdArgs.debugLabel = getValue(iter, argList.end());
+
+            if (cmdArgs.debugLabel.isEmpty() ) {
+               err("Option \"-d\" is missing a debug specifier.\n");              
                cleanUpDoxygen();
-               exit(0);
-            } else {
-               err("Unknown option \"-%s\"\n", &argv[optind][1]);
-               usage(argv[0]);
                exit(1);
             }
+           
+            if (! Debug::setFlag(cmdArgs.debugLabel)) {
+               err("Option \"-d\" has an unknown debug specifier: \"%s\".\n", qPrintable(cmdArgs.debugLabel));
+
+               cleanUpDoxygen();
+               exit(1);
+            }
+
             break;
 
-         case 'b':
+         case DEBUG_SYMBOLS:
+            Doxy_Globals::g_dumpSymbolMap = true;
+            break;
+       
+         case RTF_EXTENSIONS:
+            cmdArgs.formatName = getValue(iter, argList.end());
+
+            if (cmdArgs.formatName.isEmpty()) {
+               err("Option \"-e\" is missing an RTF format specifier\n");
+               cleanUpDoxygen();
+               exit(1);
+            }
+
+/*   BROOM
+            if (qstricmp(formatName, "rtf") == 0) {
+               if (optind + 1 >= argc) {
+                  err("option \"-e rtf\" is missing an extensions file name\n");
+                  cleanUpDoxygen();
+                  exit(1);
+               }
+
+               QFile f;
+               if (openOutputFile(argv[optind + 1], f)) {
+                   RTFGenerator::writeExtensionsFile(f);
+               }
+
+               cleanUpDoxygen();
+               exit(0);
+            }
+*/
+
+            err("Option \"-e\" has invalid format specifier.\n");
+            cleanUpDoxygen();
+            exit(1);
+          
+         case DOXY_VERSION:
+            msg("%s\n", versionString);
+
+            cleanUpDoxygen();
+            exit(0);
+                  
+         case OUTPUT_WIZARD:
             setvbuf(stdout, NULL, _IONBF, 0);
+
             Doxygen::outputToWizard = true;
             break;
 
-         case 'h':
-         case '?':
-            usage(argv[0]);
-            exit(0);
-            break;
-
-         default:
-            err("Unknown option \"-%c\"\n", argv[optind][1]);
-            usage(argv[0]);
-            exit(1);
-      }
-      optind++;
+         case HELP:       
+            usage();
+            exit(0);                    
+      }      
    }
-      
+
+   return cmdArgs;
+}
+
+void readConfiguration(struct CommandLine cmdArgs)
+{      
    // Parse or generate the config file  
    Config::instance()->init();
 
-   if (genConfig) {
-      generateConfigFile(configName);
+   if (cmdArgs.genConfig) {
+      generateConfigFile(cmdArgs.configName);
       cleanUpDoxygen();
       exit(0);
    } 
 
-   if (genLayout) {
-      writeDefaultLayoutFile(layoutName);
+   if (cmdArgs.genLayout) {
+      writeDefaultLayoutFile(cmdArgs.layoutName);
       cleanUpDoxygen();
       exit(0);
    }
+
+
+/*   BROOM - out for initial test
 
    QFileInfo configFileInfo1("Doxyfile"), configFileInfo2("doxyfile");
 
@@ -500,8 +476,8 @@ void readConfiguration(int argc, char **argv)
          configName = "doxyfile";
 
       } else {
-         err("Doxyfile not found and no input file specified!\n");
-         usage(argv[0]);
+         err("CS Doxyfile not found and no input file specified!\n");
+         usage();
          exit(1);
       }
 
@@ -512,27 +488,29 @@ void readConfiguration(int argc, char **argv)
          configName = argv[optind];
 
       } else {
-         err("configuration file %s not found!\n", argv[optind]);
-         usage(argv[0]);
+         err("Configuration file %s was not found\n", argv[optind]);
+         usage();
          exit(1);
       }
    }
 
+
+*/
 
    // printf("\n  Parse the Json file here ");
    // add test for failures
    // Config_Json::instance()->parseConfig();
 
    
-   if (! Config::instance()->parse(configName)) {
-      err("could not open or read configuration file %s!\n", configName);
+   if (! Config::instance()->parse( qPrintable(cmdArgs.configName) )) {
+      err("Unable to open or read configuration file %s\n", qPrintable(cmdArgs.configName));
       cleanUpDoxygen();
       exit(1);
    }
 
   
    // Perlmod wants to know the path to the config file
-   QFileInfo configFileInfo(configName);
+   QFileInfo configFileInfo(cmdArgs.configName);
 //BROOM   setPerlModDoxyfile(qPrintable(configFileInfo.absoluteFilePath()));
 
 }
@@ -639,58 +617,48 @@ void adjustConfiguration()
 
 }
 
-const char *Doxy_Setup::getArg(int argc, char **argv, int &optind)
+QString Doxy_Setup::getValue(QStringList::iterator &iter, QStringList::iterator end)
 {
-   char *s = 0;
-   if (qstrlen(&argv[optind][2]) > 0) {
-      s = &argv[optind][2];
-   } else if (optind + 1 < argc && argv[optind + 1][0] != '-') {
-      s = argv[++optind];
+   QString retval;
+
+   if (iter == end) {
+      // nothing
+      
+   } else {     
+
+      if (! iter->startsWith("--")) {
+         retval = *iter;
+         ++iter;
+      }
    }
-   return s;
+
+   return retval;
 }
 
 /*! Generate a new version of the configuration file 
  */
-void Doxy_Setup::generateConfigFile(const char *configFile)
+void Doxy_Setup::generateConfigFile(const QString &configFile)
 {
    QFile f;
 
-   bool fileOpened    = openOutputFile(configFile, f);
-   bool writeToStdout = (configFile[0] == '-' && configFile[1] == '\0');
-
+   bool fileOpened = openOutputFile(configFile, f);
+ 
    if (fileOpened) {
-
       FTextStream t(&f);
 
       // BROOM   
       // Config_Json::instance()->writeNewCfg();      
-
-      if (writeToStdout) {     
-        // do nothing else
-         
-      } else {    
-         msg("\n\nConfiguration file `%s' created.\n\n", configFile);
-         msg("Now edit the configuration file and enter\n\n");
-
-         if (qstrcmp(configFile, "Doxyfile") || qstrcmp(configFile, "doxyfile")) {
-            msg("  doxygen %s\n\n", configFile);
-
-         } else {
-            msg("  doxygen\n\n");
-
-         }
-
-         msg("to generate the documentation for your project\n\n");        
-      }
+    
+      msg("\n\nConfiguration file `%s' created.\n\n", qPrintable(configFile));        
+               
 
    } else {
-      err("Can not open file %s for writing\n", configFile);
+      err("Unable to open file %s for writing\n", qPrintable(configFile));  
       exit(1);
    }
 }
 
-bool Doxy_Setup::openOutputFile(const char *outFile, QFile &f)
+bool Doxy_Setup::openOutputFile(const QString &outFile, QFile &f)
 {
    bool fileOpened = false;
    bool writeToStdout = (outFile[0] == '-' && outFile[1] == '\0');
@@ -725,37 +693,50 @@ bool Doxy_Setup::openOutputFile(const char *outFile, QFile &f)
    return fileOpened;
 }
 
-// print usage
-void Doxy_Setup::usage(const char *name)
+void Doxy_Setup::usage()
 {
-   msg("CS Doxygen version %s\n\n", versionString);
- 
-   msg("Generate a template configuration file:\n");
-   msg("    %s [-s] -g [configName]\n\n", name);
-   msg("    If - is used for configName doxygen will write to standard output.\n\n"); 
-   msg("    If configName is omitted `Doxyfile' will be used as a default.\n\n");
+   msg("CS Doxygen: Version %s\n", versionString);
 
-   msg("Generate a file to modify the layout of the generated documentation:\n");
-   msg("    %s -l layoutFileName.xml\n\n", name);
+   msg("\n"); 
+   msg("Generate a blank configuration file:\n");
+   msg("   --g [config file name]\n\n");  
+   msg("   Defalut file name is `Doxyfile.json'\n");
 
+   msg("\n");
+   msg("Generate a layout file to configure the documentation:\n");
+   msg("   --l [layout file name]\n\n");
+   msg("   Default file name is `Layout.xml'\n");
+
+   msg("\n");
    msg("Generate documentation using an existing configuration file:\n");   
-   msg("    %s [configName]\n\n", name);
-   msg("    If - is used for configName doxygen will read from standard input.\n\n");
+   msg("   [config file name]\n\n");
   
-   msg("Generate a style sheet file for RTF, HTML or Latex.\n");
-   msg("    RTF:        %s -w rtf styleSheetFile\n", name);
-   msg("    HTML:       %s -w html headerFile footerFile styleSheetFile [configFile]\n", name);
-   msg("    LaTeX:      %s -w latex headerFile footerFile styleSheetFile [configFile]\n\n", name);
+   msg("\n");
+   msg("Generate a style sheet file for RTF, HTML or Latex:\n");
+   msg("   RTF:     --w  rtf-style [stylesheet file name]\n");
 
+   msg("\n");
+   msg("   HTML:    --w html-head  [header file name] \n");
+   msg("   HTML:    --w html-foot  [footer file name] \n");
+   msg("   HTML:    --w html-style [styleSheet file name] \n");
+  
+   msg("\n");
+   msg("   LaTeX:   --w  latex-head  [header file name] \n");
+   msg("   LaTeX:   --w  latex-foot  [footer file name] \n");
+   msg("   LaTeX:   --w  latex-style [styleSheet file name] \n");
+
+   msg("\n");
    msg("Generate rtf extensions file\n");
-   msg("    RTF:   %s -e rtf extensionsFile\n\n", name);
+   msg("   RTF:   --e  rtf extensionsFile\n\n");
 
-   msg("  -v print version string\n");
-
-   msg("** Developer parameters:\n");
-   msg("  -m          dump symbol map\n");
-   msg("  -b          output to wizard\n"); 
-   msg("  -d <level>  enable a debug level, such as (multiple invocations of -d are possible):\n");
+   msg("\n");
+   msg("   --h          display usage\n");
+   msg("   --v          display version\n");
+    
+   msg("\n");
+   msg("   --m          dump symbol map\n");
+   msg("   --b          output to CS DoxyWizard\n"); 
+   msg("   --d <level>  enable one or more debug levels\n");
   
    Debug::printFlags();   
 }

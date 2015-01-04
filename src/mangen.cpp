@@ -340,18 +340,22 @@ void ManGenerator::codify(const char *str)
       const char *p = str;
       char c;
       int spacesToNextTabStop;
+
       while (*p) {
          c = *p++;
          switch (c) {
             case '.':
                t << "\\&.";
                break; // see  bug652277
+
             case '\t':
-               spacesToNextTabStop =
-                  Config_getInt("TAB_SIZE") - (col % Config_getInt("TAB_SIZE"));
-               t << Doxygen::spaces.left(spacesToNextTabStop);
+               spacesToNextTabStop = Config_getInt("TAB_SIZE") - (col % Config_getInt("TAB_SIZE"));
+
+               t << QString(' ', spacesToNextTabStop);
                col += spacesToNextTabStop;
+
                break;
+
             case '\n':
                t << "\n";
                firstCol = true;

@@ -244,7 +244,7 @@ class LayoutDocManager
    friend class LayoutParser;
 };
 
-void writeDefaultLayoutFile(const char *fileName);
+void writeDefaultLayoutFile(const QString &fileName);
 
 #endif
 

@@ -58,10 +58,10 @@ int Debug::curPrio = 0;
 
 static QByteArray outputFormat;
 static FILE *warnFile = stderr;
-static LabelMapper g_labelMapper;
+static LabelMapper s_labelMapper;
 
-static const char *warning_str = "warning: ";
-static const char *error_str   = "error: ";
+static const char *warning_str = "Warning: ";
+
 
 static LabelMap s_labels[] = {
    { "findmembers",  Debug::FindMembers  },
@@ -77,7 +77,7 @@ static LabelMap s_labels[] = {
    { "extcmd",       Debug::ExtCmd       },
    { "markdown",     Debug::Markdown     },
    { "filteroutput", Debug::FilterOutput },
-   { "lex",          Debug::Lex },
+   { "lex",          Debug::Lex          },
    { 0,             (Debug::DebugMask)0  }
 };
 
@@ -162,22 +162,24 @@ void Debug::print(DebugMask mask, int prio, const char *fmt, ...)
    }
 }
 
-static int labelToEnumValue(const char *l)
+static int labelToEnumValue(const QString &data)
 {
-   QByteArray label = l;
-   Debug::DebugMask *event = g_labelMapper.find(label.toLower());
+   QByteArray label = data.toUtf8();
+   Debug::DebugMask *event = s_labelMapper.find(label.toLower());
 
    if (event) {
       return *event;
+
    } else {
       return 0;
    }
 }
 
-int Debug::setFlag(const char *lab)
+int Debug::setFlag(const QString &label)
 {
-   int retVal = labelToEnumValue(lab);
-   curMask = (DebugMask)(curMask | labelToEnumValue(lab));
+   int retVal = labelToEnumValue(label);
+   curMask = (DebugMask)(curMask | labelToEnumValue(label));
+
    return retVal;
 }
 
@@ -199,13 +201,13 @@ bool Debug::isFlagSet(DebugMask mask)
 void Debug::printFlags(void)
 {
    int i;
+
    for (i = 0; i < (int)(sizeof(s_labels) / sizeof(*s_labels)); i++) {
       if (s_labels[i].name) {
          msg("\t%s\n", s_labels[i].name);
       }
-   }
+   }   
 }
-
 
 // **
 void err(const char *fmt, ...)
@@ -213,7 +215,8 @@ void err(const char *fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   vfprintf(warnFile, (QByteArray(error_str) + fmt).data(), args);
+   QByteArray temp = "Error:";   
+   vfprintf(warnFile, (temp + fmt).constData(), args);
 
    va_end(args);
 }

@@ -1979,7 +1979,7 @@ void writeDoxFont(const char *dir)
       f.write((char *)FreeSans_ttf, FreeSans_ttf_len);
 
    } else {
-      fprintf(stderr, "error: Cannot open file %s for writing\n", fileName.data());
+      fprintf(stderr, "Error: Can not open file %s for writing\n", fileName.data());
    }
 
    f.close();

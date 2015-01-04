@@ -747,7 +747,7 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
          title = lr->title;      
 
       } else { 
-         // reference not found!         
+         // reference not found        
          return 0;
       }
       i++;

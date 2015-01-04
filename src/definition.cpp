@@ -968,7 +968,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
          }
          ol.endParagraph();
       } else {
-         err("translation error: invalid markers in trDefinedInSourceFile()\n");
+         err("Error: Translation has invalid markers in trDefinedInSourceFile()\n");
       }
    }
    ol.popGeneratorState();

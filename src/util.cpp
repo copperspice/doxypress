@@ -15,10 +15,13 @@
  *
 *************************************************************************/
 
+#include <QByteArray>
 #include <QCache>
 #include <QCryptographicHash>
 #include <QDateTime>
+#include <QHash>
 #include <QRegExp>
+#include <QTextCodec>
 
 #include <stdlib.h>
 #include <errno.h>
@@ -4356,8 +4359,7 @@ bool resolveRef(/* in */  const char *scName,
          return true;
       }
    }
-   //printf("resolveRef: %s not found!\n",name);
-
+   
    return false;
 }
 
@@ -4722,9 +4724,7 @@ FileDef *findFileDef(const FileNameDict *fnDict, const char *n, bool &ambig)
          s_findFileDefCache.insert(key, cachedResult);
 
          return lastMatch;
-      }
-   } else {
-      //printf("not found!\n");
+      }   
    }
 
 exit:   
@@ -5209,8 +5209,7 @@ void extractNamespaceName(const QByteArray &scopeName, QByteArray &className, QB
       }
       p = i - 2; // try a smaller piece of the scope
    }
-   //printf("not found!\n");
-
+  
    // not found, so we just have to guess.
    className = scopeName;
    namespaceName.resize(0);
@@ -6543,7 +6542,8 @@ bool updateLanguageMapping(const QByteArray &extension, const QByteArray &langua
       }
       p++;
    }
-   if (!p->langName) {
+
+   if (! p->langName) {
       return false;
    }
 
@@ -6566,7 +6566,7 @@ bool updateLanguageMapping(const QByteArray &extension, const QByteArray &langua
    
    s_extLookup.insert(extName, parserId);
 
-   if (!Doxygen::parserManager->registerExtension(extName, p->parserName)) {
+   if (! Doxygen::parserManager->registerExtension(extName, p->parserName)) {
       err("Failed to assign extension %s to parser %s for language %s\n",
           extName.data(), p->parserName, language.data());
    }

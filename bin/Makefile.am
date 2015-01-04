@@ -86,7 +86,6 @@ CS_Doxygen_SOURCES = \
    src/filename.cpp \
    src/fileparser.cpp \
    src/formula.cpp \
-   src/ftextstream.cpp \
    src/ftvhelp.cpp \
    src/groupdef.cpp \
    src/htags.cpp \
@@ -138,7 +137,9 @@ CS_Doxygen_SOURCES = \
    src/generated/constexp.cpp \
    src/generated/defargs.cpp \
    src/generated/declinfo.cpp  \
-   src/generated/doctokenizer.cpp
+   src/generated/doctokenizer.cpp \
+   src/generated/pre.cpp \
+   src/generated/scanner.cpp
 
 
 #   src/generated/code.cpp \
@@ -146,10 +147,8 @@ CS_Doxygen_SOURCES = \
 #   src/generated/commentscan.cpp \ #
 #   src/generated/fortrancode.cpp \
 #   src/generated/fortranscanner.cpp \
-#   src/generated/pre.cpp \
 #   src/generated/pycode.cpp \
-#   src/generated/pyscanner.cpp \
-#   src/generated/scanner.cpp \
+#   src/generated/pyscanner.cpp \#
 #   src/generated/tclscanner.cpp
 
 
