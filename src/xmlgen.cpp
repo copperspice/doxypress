@@ -970,14 +970,11 @@ static void generateXMLForMember(MemberDef *md, FTextStream &ti, FTextStream &t,
    if (isFunc) { 
       //function
       ArgumentList *declAl = md->declArgumentList();
-      ArgumentList *defAl = md->argumentList();
+      ArgumentList *defAl  = md->argumentList();
 
       if (declAl && declAl->count() > 0) {
         
-//         ArgumentListIterator defAli(*defAl);       
-//         for (declAli.toFirst(); (a = declAli.current()); ++declAli) {
-
-         for (auto a : *declAl) {
+         for (auto a : *defAl) {
 
             Argument *defArg = defAli.current();
 
@@ -1032,10 +1029,10 @@ static void generateXMLForMember(MemberDef *md, FTextStream &ti, FTextStream &t,
          // disguish it from "foo".
       {
          t << "        <param></param>" << endl;
+
       } else {
-         ArgumentListIterator ali(*md->argumentList());
-         Argument *a;
-         for (ali.toFirst(); (a = ali.current()); ++ali) {
+
+         for (auto a : *md->argumentList() {
             t << "        <param><defname>" << a->type << "</defname></param>" << endl;
          }
       }
@@ -1055,16 +1052,17 @@ static void generateXMLForMember(MemberDef *md, FTextStream &ti, FTextStream &t,
 
    if (md->memberType() == MemberType_Enumeration) { // enum
       MemberList *enumFields = md->enumFieldList();
+
       if (enumFields) {
-         QListIterator<MemberDef> emli(*enumFields);
-         MemberDef *emd;
-         for (emli.toFirst(); (emd = emli.current()); ++emli) {
+       
+         for (auto emd : *enumFields) {
             ti << "    <member refid=\"" << memberOutputFileBase(emd)
                << "_1" << emd->anchor() << "\" kind=\"enumvalue\"><name>"
                << convertToXML(emd->name()) << "</name></member>" << endl;
 
             t << "        <enumvalue id=\"" << memberOutputFileBase(emd) << "_1"
               << emd->anchor() << "\" prot=\"";
+
             switch (emd->protection()) {
                case Public:
                   t << "public";
@@ -1125,13 +1123,13 @@ static void generateXMLForMember(MemberDef *md, FTextStream &ti, FTextStream &t,
 
    //printf("md->getReferencesMembers()=%p\n",md->getReferencesMembers());
    MemberSDict *mdict = md->getReferencesMembers();
-   if (mdict) {
-      MemberSDict::Iterator mdi(*mdict);
-      MemberDef *rmd;
-      for (mdi.toFirst(); (rmd = mdi.current()); ++mdi) {
+
+   if (mdict) {     
+      for (auto rmd : *mdict) {
          writeMemberReference(t, def, rmd, "references");
       }
    }
+
    mdict = md->getReferencedByMembers();
    if (mdict) {
       MemberSDict::Iterator mdi(*mdict);

@@ -134,6 +134,8 @@ CS_Doxygen_SOURCES = \
    src/portable.cpp  \
    src/ce_parse.cpp  \
 \
+   src/generated/code.cpp  \
+   src/generated/commentscan.cpp  \
    src/generated/constexp.cpp \
    src/generated/defargs.cpp \
    src/generated/declinfo.cpp  \
@@ -142,13 +144,11 @@ CS_Doxygen_SOURCES = \
    src/generated/scanner.cpp
 
 
-#   src/generated/code.cpp \
 #   src/generated/commentcnv.cpp \
-#   src/generated/commentscan.cpp \ #
 #   src/generated/fortrancode.cpp \
 #   src/generated/fortranscanner.cpp \
 #   src/generated/pycode.cpp \
-#   src/generated/pyscanner.cpp \#
+#   src/generated/pyscanner.cpp \
 #   src/generated/tclscanner.cpp
 
 

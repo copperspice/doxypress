@@ -3236,7 +3236,6 @@ char *commentscanYYtext;
 #include "outputlist.h"
 #include "membergroup.h"
 #include "reflist.h"
-#include "debug.h"
 #include "parserintf.h"
 #include "cite.h"
 #include "markdown.h"
@@ -3493,7 +3492,7 @@ class DocCmdMapper
    DocCmdMapper() {
       DocCmdMap *p = docCmdMap;
       while (p->cmdName) {
-         if (m_map.find(p->cmdName) != 0) {
+         if (m_map.contains(p->cmdName)) {
             err("DocCmdMapper: command %s already added\n", p->cmdName);
             exit(1);
          }
@@ -3506,9 +3505,10 @@ class DocCmdMapper
    }
 
    Cmd *find(const char *name) {
-      return m_map.find(name);
+      return m_map.value(name);
    }
-   QDict<Cmd> m_map;
+
+   QHash<QString, Cmd *> m_map;
    static DocCmdMapper *s_instance;
 };
 
@@ -3586,7 +3586,7 @@ static XRefKind         newXRefKind;         //
 static GuardType        guardType;           // kind of guard for conditional section
 static bool             enabledSectionFound;
 static QByteArray         functionProto;       // function prototype
-static QStack<GuardedSection> guards;        // tracks nested conditional sections (if,ifnot,..)
+static QStack<GuardedSection *> guards;        // tracks nested conditional sections (if,ifnot,..)
 static Entry		*current      = 0 ;   // working entry
 //static Entry*		current_root = 0 ;   // parent of working entry
 
@@ -3622,7 +3622,7 @@ static bool             g_insideParBlock;
 
 //-----------------------------------------------------------------------------
 
-static QStack<Grouping> g_autoGroupStack;
+static QStack<Grouping *> g_autoGroupStack;
 static int              g_memberGroupId = DOX_NOGROUP;
 static QByteArray         g_memberGroupHeader;
 static QByteArray         g_memberGroupDocs;
@@ -3713,75 +3713,87 @@ static void addXRefItem(const char *listName, const char *itemTitle,
                         const char *listTitle, bool append)
 {
    Entry *docEntry = current; // inBody && previous ? previous : current;
+  
    if (listName == 0) {
       return;
    }
-   //printf("addXRefItem(%s,%s,%s,%d)\n",listName,itemTitle,listTitle,append);
-
+ 
    ListItemInfo *lii = 0;
-   RefList *refList = Doxygen::xrefLists->find(listName);
+
+   RefList *refList = Doxygen::xrefLists->value(listName);
+
    if (refList == 0) { // new list
       refList = new RefList(listName, listTitle, itemTitle);
       Doxygen::xrefLists->insert(listName, refList);
       //printf("new list!\n");
    }
+
    if (docEntry->sli) {
       QListIterator<ListItemInfo> slii(*docEntry->sli);
+
       for (slii.toFirst(); (lii = slii.current()); ++slii) {
+      
          if (qstrcmp(lii->type, listName) == 0) {
             //printf("found %s lii->type=%s\n",listName,lii->type);
             break;
          }
       }
    }
+
    if (lii && append) { // already found item of same type just before this one
       //printf("listName=%s item id = %d existing\n",listName,lii->itemId);
       RefItem *item = refList->getRefItem(lii->itemId);
-      ASSERT(item != 0);
+      assert(item != 0);
       item->text += " <p>";
+
       if (Doxygen::markdownSupport) {
          item->text += processMarkdown(yyFileName, yyLineNr, current, outputXRef);
       } else {
          item->text += outputXRef;
       }
-      //printf("%s: text +=%s\n",listName,item->text.data());
+      
    } else { // new item
       int itemId  = refList->addRefItem();
-      //printf("listName=%s item id = %d new current=%p\n",listName,itemId,current);
-
+     
       // if we have already an item from the same list type (e.g. a second @todo)
       // in the same Entry (i.e. lii!=0) then we reuse its link anchor.
+
       char anchorLabel[1024];
-      //sprintf(anchorLabel,"_%s%06d",listName,lii ? lii->itemId : itemId);
       sprintf(anchorLabel, "_%s%06d", listName, itemId);
+
       RefItem *item = refList->getRefItem(itemId);
-      ASSERT(item != 0);
+      assert(item != 0);
+
       if (Doxygen::markdownSupport) {
          item->text = processMarkdown(yyFileName, yyLineNr, current, outputXRef);
       } else {
          item->text = outputXRef;
       }
+
       item->listAnchor = anchorLabel;
       docEntry->addSpecialListItem(listName, itemId);
+
       QByteArray cmdString;
-      cmdString.sprintf("\\xrefitem %s %d.", listName, itemId);
+      cmdString = QString("\\xrefitem %1 %2.").arg(listName).arg(itemId).toUtf8();
+
       if (inBody) {
          docEntry->inbodyDocs += cmdString;
       } else {
          docEntry->doc += cmdString;
       }
+
       SectionInfo *si = Doxygen::sectionDict->find(anchorLabel);
+
       if (si) {
          if (si->lineNr != -1) {
             warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)", anchorLabel, si->fileName.data(), si->lineNr);
          } else {
             warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s)", anchorLabel, si->fileName.data());
          }
+
       } else {
-         si = new SectionInfo(listName, yyLineNr, anchorLabel,
-                              g_sectionTitle, SectionInfo::Anchor,
-                              g_sectionLevel);
-         Doxygen::sectionDict->append(anchorLabel, si);
+         si = new SectionInfo(listName, yyLineNr, anchorLabel, g_sectionTitle, SectionInfo::Anchor, g_sectionLevel);
+         Doxygen::sectionDict->insert(anchorLabel, si);
          docEntry->anchors->append(si);
       }
    }
@@ -3797,19 +3809,23 @@ static QByteArray addFormula()
    QByteArray formLabel;
    QByteArray fText = formulaText.simplified();
    Formula *f = 0;
+
    if ((f = Doxygen::formulaDict->find(fText)) == 0) {
       f = new Formula(fText);
       Doxygen::formulaList->append(f);
       Doxygen::formulaDict->insert(fText, f);
       formLabel.sprintf("\\form#%d", f->getId());
       Doxygen::formulaNameDict->insert(formLabel, f);
+
    } else {
       formLabel.sprintf("\\form#%d", f->getId());
    }
+
    int i;
    for (i = 0; i < formulaNewLines; i++) {
       formLabel += "@_fakenl";   // add fake newlines to
    }
+
    // keep the warnings
    // correctly aligned.
    return formLabel;
@@ -3938,7 +3954,7 @@ static inline void setOutput(OutputContext ctx)
                        );
             break;
          case XRef_None:
-            ASSERT(0);
+            assert(0);
             break;
       }
    }
@@ -4000,6 +4016,14 @@ static inline void addOutput(char c)
 {
    *pOutputString += c;
 }
+
+
+// add a character to the output
+static inline void addOutput(QByteArray c)
+{
+   addOutput(c.constData());
+}
+
 
 static void endBrief(bool addToOutput = TRUE)
 {
@@ -8583,14 +8607,11 @@ void groupEnterFile(const char *fileName, int)
 }
 
 void groupLeaveFile(const char *fileName, int line)
-{
-   //if (g_memberGroupId!=DOX_NOGROUP)
-   //{
-   //  warn(fileName,line,"end of file while inside a member group\n");
-   //}
+{  
    g_memberGroupId = DOX_NOGROUP;
    g_memberGroupRelates.resize(0);
    g_memberGroupDocs.resize(0);
+
    if (!g_autoGroupStack.isEmpty()) {
       warn(fileName, line, "end of file while inside a group\n");
    }
@@ -8605,7 +8626,7 @@ void groupEnterCompound(const char *fileName, int line, const char *name)
    g_memberGroupRelates.resize(0);
    g_memberGroupDocs.resize(0);
    g_compoundName = name;
-   int i = g_compoundName.find('(');
+   int i = g_compoundName.indexOf('(');
    if (i != -1) {
       g_compoundName = g_compoundName.left(i); // strip category (Obj-C)
    }
@@ -8616,12 +8637,7 @@ void groupEnterCompound(const char *fileName, int line, const char *name)
 }
 
 void groupLeaveCompound(const char *, int, const char * /*name*/)
-{
-   //printf("groupLeaveCompound(%s)\n",name);
-   //if (g_memberGroupId!=DOX_NOGROUP)
-   //{
-   //  warn(fileName,line,"end of compound %s while inside a member group\n",name);
-   //}
+{   
    g_memberGroupId = DOX_NOGROUP;
    g_memberGroupRelates.resize(0);
    g_memberGroupDocs.resize(0);
@@ -8630,28 +8646,28 @@ void groupLeaveCompound(const char *, int, const char * /*name*/)
 
 static int findExistingGroup(int &groupId, const MemberGroupInfo *info)
 {
-   //printf("findExistingGroup %s:%s\n",info->header.data(),info->compoundName.data());
-   QIntDictIterator<MemberGroupInfo> di(Doxygen::memGrpInfoDict);
-   MemberGroupInfo *mi;
-   for (di.toFirst(); (mi = di.current()); ++di) {
+   for (auto di = Doxygen::memGrpInfoDict.begin(); di != Doxygen::memGrpInfoDict.end(); ++di) {
+
+      auto mi = *di;
+
       if (g_compoundName == mi->compoundName && // same file or scope
             !mi->header.isEmpty() &&             // not a nameless group
             qstricmp(mi->header, info->header) == 0 // same header name
          ) {
          //printf("Found it!\n");
-         return (int)di.currentKey(); // put the item in this group
+         return (int)di.key(); // put the item in this group
       }
    }
+
    groupId++; // start new group
    return groupId;
 }
 
 void openGroup(Entry *e, const char *, int)
-{
-   //printf("==> openGroup(name=%s,sec=%x) g_autoGroupStack=%d\n",
-   //  	e->name.data(),e->section,g_autoGroupStack.count());
+{   
    if (e->section == Entry::GROUPDOC_SEC) { // auto group
       g_autoGroupStack.push(new Grouping(e->name, e->groupingPri()));
+
    } else { // start of a member group
       //printf("    membergroup id=%d %s\n",g_memberGroupId,g_memberGroupHeader.data());
       if (g_memberGroupId == DOX_NOGROUP) { // no group started yet
@@ -8674,8 +8690,10 @@ void closeGroup(Entry *e, const char *fileName, int, bool foundInline)
 {
    //printf("==> closeGroup(name=%s,sec=%x) g_autoGroupStack=%d\n",
    //    e->name.data(),e->section,g_autoGroupStack.count());
+
    if (g_memberGroupId != DOX_NOGROUP) { // end of member group
-      MemberGroupInfo *info = Doxygen::memGrpInfoDict.find(g_memberGroupId);
+
+      MemberGroupInfo *info = Doxygen::memGrpInfoDict.value(g_memberGroupId);
       if (info) { // known group
          info->doc = g_memberGroupDocs;
          info->docFile = fileName;
@@ -8705,11 +8723,9 @@ void initGroupInfo(Entry *e)
    //       g_memberGroupRelates.data(),e);
    e->mGrpId     = g_memberGroupId;
    e->relates    = g_memberGroupRelates;
-   if (!g_autoGroupStack.isEmpty()) {
-      //printf("Appending group %s to %s: count=%d entry=%p\n",
-      //	g_autoGroupStack.top()->groupname.data(),
-      //	e->name.data(),e->groups->count(),e);
-      e->groups->append(new Grouping(*g_autoGroupStack.top()));
+
+   if (!g_autoGroupStack.isEmpty()) {     
+      e->groups->append(*g_autoGroupStack.top());
    }
 }
 
@@ -8722,7 +8738,7 @@ static void groupAddDocs(Entry *e, const char *fileName)
          g_memberGroupDocs += "\n\n";
       }
       g_memberGroupDocs += e->doc;
-      MemberGroupInfo *info = Doxygen::memGrpInfoDict.find(g_memberGroupId);
+      MemberGroupInfo *info = Doxygen::memGrpInfoDict.value(g_memberGroupId);
       if (info) {
          info->doc = g_memberGroupDocs;
          info->docFile = fileName;

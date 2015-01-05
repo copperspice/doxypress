@@ -10560,19 +10560,20 @@ char *scannerYYtext;
 #include <ctype.h>
 #include <unistd.h>
 
-#include "scanner.h"
+#include "arguments.h"
+#include "config.h"
+#include "clangparser.h"
+#include "commentscan.h"
+#include "code.h"
 #include "entry.h"
 #include "message.h"
-#include "config.h"
 #include "doxygen.h"
 #include "util.h"
 #include "defargs.h"
 #include "language.h"
-#include "commentscan.h"
-#include "code.h"
-#include "arguments.h"
+#include "scanner.h"
 
-#include "clangparser.h"
+#include <doxy_globals.h>
 
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
@@ -10682,7 +10683,7 @@ static QByteArray         *pCopyQuotedGString;
 static QByteArray         *pCopyHereDocGString;
 static QByteArray         *pCopyRawGString;
 static QByteArray         *pSkipVerbString;
-static QStack<Grouping> autoGroupStack;
+static QStack<Grouping *> autoGroupStack;
 
 static bool             insideFormula;
 static bool  	        insideTryBlock = FALSE;
@@ -10864,7 +10865,7 @@ static void addType( Entry *current )
    }
    current->type += current->args ;
    current->args.resize(0) ;
-   current->argList->clear();
+   current->argList.clear();
 }
 
 
@@ -10891,7 +10892,7 @@ static void handleParametersCommentBlocks(ArgumentList *al);
 
 static bool nameIsOperator(QByteArray &name)
 {
-   int i = name.find("operator");
+   int i = name.indexOf("operator");
    if (i == -1) {
       return FALSE;
    }
@@ -10927,35 +10928,21 @@ static void setContext()
    //	);
 }
 
-//-----------------------------------------------------------------------------
-
 static void prependScope()
 {
    if (current_root->section & Entry::SCOPE_MASK) {
-      //printf("--- prependScope %s to %s\n",current_root->name.data(),current->name.data());
       current->name.prepend(current_root->name + "::");
+
       if (current_root->tArgLists) {
+
          if (current->tArgLists == 0) {
             current->tArgLists = new QList<ArgumentList>;
          }
-         //printf("prependScope #=%d #current=%d\n",current_root->tArgLists->count(),current->tArgLists->count());
-         QListIterator<ArgumentList> talsi(*current_root->tArgLists);
-         ArgumentList *srcAl = 0;
-         for (talsi.toLast(); (srcAl = talsi.current()); --talsi) {
-            ArgumentList *dstAl = new ArgumentList;
-            QListIterator<Argument> tali(*srcAl);
-            Argument *a;
-            for (; (a = tali.current()); ++tali) {
-               dstAl->append(new Argument(*a));
-               //printf("appending argument %s %s\n",a->type.data(),a->name.data());
-            }
-            current->tArgLists->insert(0, dstAl);
-         }
+      
+         *current->tArgLists = *current_root->tArgLists;
       }
    }
 }
-
-//-----------------------------------------------------------------------------
 
 /*! Returns TRUE iff the current entry could be a K&R style C function */
 static bool checkForKnRstyleC()
@@ -10963,15 +10950,15 @@ static bool checkForKnRstyleC()
    if (((QByteArray)yyFileName).right(2).toLower() != ".c") {
       return FALSE;   // must be a C file
    }
-   if (!current->argList) {
+
+   if (current->argList.isEmpty()) {
       return FALSE;   // must have arguments
    }
-   ArgumentListIterator ali(*current->argList);
-   Argument *a;
-   for (ali.toFirst(); (a = ali.current()); ++ali) {
+  
+   for (auto a : current->argList) {
       // in K&R style argument do not have a type, but doxygen expects a type
       // so it will think the argument has no name
-      if (a->type.isEmpty() || !a->name.isEmpty()) {
+      if (a.type.isEmpty() || ! a.name.isEmpty()) {
          return FALSE;
       }
    }
@@ -10983,11 +10970,14 @@ static bool checkForKnRstyleC()
 static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
 {
    int si = current->args.length();
+
    if (oldStyleArgType.isEmpty()) { // new argument
       static QRegExp re("([^)]*)");
-      int bi1 = current->args.lastIndexOf(re);
-      int bi2 = bi1 != -1 ? current->args.lastIndexOf(re, bi1 - 1) : -1;
+
+      int bi1 = re.lastIndexIn(current->args);
+      int bi2 = bi1 != -1 ? re.lastIndexIn(current->args, bi1 - 1) : -1;
       char c;
+
       if (bi1 != -1 && bi2 != -1) { // found something like "int (*func)(int arg)"
          int s = bi2 + 1;
          oldStyleArgType = current->args.left(s);
@@ -11034,7 +11024,7 @@ static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
             oldStyleArgPtr = current->args.mid(i, j - i);
             oldStyleArgName = current->args.mid(j).trimmed();
          } else {
-            oldStyleArgName = current->args.copy().trimmed();
+            oldStyleArgName = current->args.trimmed();
          }
       }
    } else { // continuation like *arg2 in "int *args,*arg2"
@@ -11047,7 +11037,7 @@ static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
          oldStyleArgPtr = current->args.left(j);
          oldStyleArgName = current->args.mid(j).trimmed();
       } else {
-         oldStyleArgName = current->args.copy().trimmed();
+         oldStyleArgName = current->args.trimmed();
       }
    }
 }
@@ -11062,18 +11052,21 @@ static void addKnRArgInfo(const QByteArray &type, const QByteArray &name,
                           const QByteArray &brief, const QByteArray &docs)
 {  
    for (auto a : current->argList) {
-      if (a->type == name) {
-         a->type = type.trimmed();
-         if (a->type.left(9) == "register ") { // strip keyword
-            a->type = a->type.mid(9);
+      if (a.type == name) {
+         a.type = type.trimmed();
+
+         if (a.type.left(9) == "register ") { // strip keyword
+            a.type = a.type.mid(9);
          }
-         a->name = name.trimmed();
+
+         a.name = name.trimmed();
+
          if (!brief.isEmpty() && !docs.isEmpty()) {
-            a->docs = brief + "\n\n" + docs;
+            a.docs = brief + "\n\n" + docs;
          } else if (!brief.isEmpty()) {
-            a->docs = brief;
+            a.docs = brief;
          } else {
-            a->docs = docs;
+            a.docs = docs;
          }
       }
    }
@@ -11087,13 +11080,12 @@ void fixArgumentListForJavaScript(ArgumentList *al)
    if (al == 0) {
       return;
    }
-   ArgumentListIterator ali(*al);
-   Argument *a;
-   for (ali.toFirst(); (a = ali.current()); ++ali) {
-      if (!a->type.isEmpty() && a->name.isEmpty()) {
+
+   for (auto a : *al) {
+      if (! a.type.isEmpty() && a.name.isEmpty()) {
          // a->type is actually the (typeless) parameter name, so move it
-         a->name = a->type;
-         a->type.resize(0);
+         a.name = a.type;
+         a.type.resize(0);
       }
    }
 }
@@ -11118,145 +11110,10 @@ static int yyread(char *buf, int max_size)
 /* language parsing states */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /** Prototype scanner states */
 
 
-
-
-
 /** comment parsing states */
-
-
-
 
 
 #define INITIAL 0
@@ -11916,7 +11773,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount() ;
             }
             YY_BREAK
@@ -11930,7 +11787,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount() ;
             }
             YY_BREAK
@@ -11945,7 +11802,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount() ;
             }
             YY_BREAK
@@ -11959,7 +11816,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount();
             }
             YY_BREAK
@@ -11973,7 +11830,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount();
             }
             YY_BREAK
@@ -11987,7 +11844,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount();
             }
             YY_BREAK
@@ -12001,7 +11858,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount() ;
             }
             YY_BREAK
@@ -12018,7 +11875,7 @@ YY_DECL {
                   current->type.resize(0);
                   current->name.resize(0);
                   current->args.resize(0);
-                  current->argList->clear();
+                  current->argList.clear();
                   lineCount() ;
                } else
                {
@@ -12036,7 +11893,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount() ;
             }
             YY_BREAK
@@ -12050,7 +11907,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount() ;
             }
             YY_BREAK
@@ -12191,7 +12048,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount() ;
             }
             YY_BREAK
@@ -12205,7 +12062,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount() ;
             }
             YY_BREAK
@@ -12219,7 +12076,7 @@ YY_DECL {
                current->type.resize(0);
                current->name.resize(0);
                current->args.resize(0);
-               current->argList->clear();
+               current->argList.clear();
                lineCount() ;
             }
             YY_BREAK
@@ -12248,7 +12105,7 @@ YY_DECL {
                   current->type.resize(0);
                   current->name.resize(0);
                   current->args.resize(0);
-                  current->argList->clear();
+                  current->argList.clear();
                   BEGIN( ObjCMethod );
                }
             }
@@ -12283,11 +12140,15 @@ YY_DECL {
             {
                // start of parameter list
                current->name += ':';
-               Argument *a = new Argument;
-               current->argList->append(a);
+
+               Argument temp;
+               current->argList.append(temp);
+
+               Argument *a = &current->argList.last();               
                BEGIN( ObjCParams );
             }
             YY_BREAK
+
          case 51:
             /* rule 51 can match eol */
             YY_RULE_SETUP
@@ -12318,14 +12179,16 @@ YY_DECL {
                {
                   current->name += keyw + ":";
                }
-               if (current->argList->getLast()->type.isEmpty())
+               if (current->argList.last().type.isEmpty())
                {
-                  current->argList->getLast()->type = "id";
+                  current->argList.last().type = "id";
                }
-               Argument *a = new Argument;
-               a->attrib = (QByteArray)"[" + keyw + "]";
-               current->argList->append(a);
+
+               Argument a;
+               a.attrib = (QByteArray)"[" + keyw + "]";
+               current->argList.append(a);
             }
+
             YY_BREAK
          case 54:
             /* rule 54 can match eol */
@@ -12334,7 +12197,7 @@ YY_DECL {
             {
                // name of parameter
                lineCount();
-               current->argList->getLast()->name = QByteArray(scannerYYtext).trimmed();
+               current->argList.last().name = QByteArray(scannerYYtext).trimmed();
             }
             YY_BREAK
          case 55:
@@ -12346,10 +12209,11 @@ YY_DECL {
                lineCount();
                // do we want the comma as part of the name?
                //current->name += ",";
-               Argument *a = new Argument;
-               a->attrib = "[,]";
-               a->type = "...";
-               current->argList->append(a);
+
+               Argument a;
+               a.attrib = "[,]";
+               a.type = "...";
+               current->argList.append(a);
             }
             YY_BREAK
          /*
@@ -12362,7 +12226,7 @@ YY_DECL {
 
             {
                roundCount = 0;
-               current->argList->getLast()->type.resize(0);
+               current->argList.last().type.resize(0);
                BEGIN( ObjCParamType );
             }
             YY_BREAK
@@ -12371,7 +12235,7 @@ YY_DECL {
 
             {
                roundCount++;
-               current->argList->getLast()->type += scannerYYtext;
+               current->argList.last().type += scannerYYtext;
             }
             YY_BREAK
          case 58:
@@ -12386,7 +12250,7 @@ YY_DECL {
                   BEGIN( ObjCParams );
                } else
                {
-                  current->argList->getLast()->type += scannerYYtext;
+                  current->argList.last().type += scannerYYtext;
                   roundCount--;
                }
             }
@@ -12396,7 +12260,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current->argList->getLast()->type += QByteArray(scannerYYtext).trimmed();
+               current->argList.last().type += QByteArray(scannerYYtext).trimmed();
             }
             YY_BREAK
          case 60:
@@ -12404,12 +12268,13 @@ YY_DECL {
 
             {
                // end of method declaration
-               if (current->argList->getLast() && current->argList->getLast()->type.isEmpty())
+               if (! current->argList.isEmpty() && current->argList.last().type.isEmpty())
                {
-                  current->argList->getLast()->type = "id";
+                  current->argList.last().type = "id";
                }
-               current->args = argListToString(current->argList);
-               //printf("argList=%s\n",current->args.data());
+
+               current->args = argListToString(&current->argList);
+    
                unput(';');
                BEGIN( Function );
             }
@@ -12424,11 +12289,11 @@ YY_DECL {
                //printf("Type=%s Name=%s args=%s\n",
                //    current->type.data(),current->name.data(),argListToString(current->argList).data()
                //    );
-               if (current->argList->getLast() && current->argList->getLast()->type.isEmpty())
+               if (! current->argList.isEmpty() && current->argList.last().type.isEmpty())
                {
-                  current->argList->getLast()->type = "id";
+                  current->argList.last().type = "id";
                }
-               current->args = argListToString(current->argList);
+               current->args = argListToString(&current->argList);
                unput('{');
                BEGIN( Function );
             }
@@ -13037,9 +12902,9 @@ YY_DECL {
 
             {
                QByteArray decl = scannerYYtext;
-               isTypedef = decl.find("typedef") != -1;
-               bool isConst = decl.find("const") != -1;
-               bool isVolatile = decl.find("volatile") != -1;
+               isTypedef = decl.indexOf("typedef") != -1;
+               bool isConst = decl.indexOf("const") != -1;
+               bool isVolatile = decl.indexOf("volatile") != -1;
                current->section = Entry::CLASS_SEC;
                addType( current ) ;
                if (isConst)
@@ -13179,9 +13044,9 @@ YY_DECL {
 
             {
                QByteArray decl = scannerYYtext;
-               isTypedef = decl.find("typedef") != -1;
-               bool isConst = decl.find("const") != -1;
-               bool isVolatile = decl.find("volatile") != -1;
+               isTypedef = decl.indexOf("typedef") != -1;
+               bool isConst = decl.indexOf("const") != -1;
+               bool isVolatile = decl.indexOf("volatile") != -1;
                current->section = Entry::CLASS_SEC ;
                current->spec    = Entry::Struct |
                (current->spec & Entry::Published); // preserve UNO IDL
@@ -13289,9 +13154,9 @@ YY_DECL {
 
             {
                QByteArray decl = scannerYYtext;
-               isTypedef = decl.find("typedef") != -1;
-               bool isConst = decl.find("const") != -1;
-               bool isVolatile = decl.find("volatile") != -1;
+               isTypedef = decl.indexOf("typedef") != -1;
+               bool isConst = decl.indexOf("const") != -1;
+               bool isVolatile = decl.indexOf("volatile") != -1;
                current->section = Entry::CLASS_SEC;
                current->spec    = Entry::Union;
                // bug 582676: can be a struct nested in an interface so keep insideObjC state
@@ -13327,8 +13192,9 @@ YY_DECL {
             {
                // for IDL: typedef [something] enum
                QByteArray text = scannerYYtext;
-               isTypedef    = text.find("typedef") != -1;
-               bool isStrongEnum = text.find("struct") != -1 || text.find("class") != -1;
+               isTypedef    = text.indexOf("typedef") != -1;
+
+               bool isStrongEnum = text.indexOf("struct") != -1 || text.indexOf("class") != -1;
                if (insideJava)
                {
                   current->section = Entry::CLASS_SEC;
@@ -13426,14 +13292,19 @@ YY_DECL {
                {
                   current->tArgLists = new QList<ArgumentList>;
                }
-               ArgumentList *al = new ArgumentList;
-               //current->spec |= (scannerYYtext[0]=='g') ? Entry::Generic : Entry::Template;
-               current->tArgLists->append(al);
+               
+               ArgumentList temp;
+               current->tArgLists->append(temp);
+               
+               ArgumentList *al = &current->tArgLists->last();
+               
                currentArgumentList = al;
                templateStr = "<";
+
                fullArgString = templateStr;
                copyArgString = &templateStr;
                currentArgumentContext = FindMembers;
+
                BEGIN( ReadTempArgs );
             }
             YY_BREAK
@@ -13458,19 +13329,8 @@ YY_DECL {
          case 135:
             YY_RULE_SETUP
 
-            {
-               //printf("Inserting namespace alias %s::%s->%s\n",current_root->name.data(),aliasName.data(),scannerYYtext);
-               //if (current_root->name.isEmpty())
-               //{
-               // TODO: namespace aliases are now treated as global entities
-               // while they should be aware of the scope they are in
-               Doxygen::namespaceAliasDict.insert(aliasName, new QByteArray(scannerYYtext));
-               //}
-               //else
-               //{
-               //  Doxygen::namespaceAliasDict.insert(current_root->name+"::"+aliasName,
-               //	new QByteArray(current_root->name+"::"+scannerYYtext));
-               //}
+            {                      
+               Doxygen::namespaceAliasDict.insert(aliasName, scannerYYtext);             
             }
             YY_BREAK
          case 136:
@@ -13524,9 +13384,10 @@ YY_DECL {
 
             {
                //printf("PHP: adding use as relation: %s->%s\n",scannerYYtext,aliasName.data());
-               Doxygen::namespaceAliasDict.insert(scannerYYtext,
-               new QByteArray(removeRedundantWhiteSpace(
-                  substitute(aliasName, "\\", "::"))));
+
+               Doxygen::namespaceAliasDict.insert(scannerYYtext, 
+                     removeRedundantWhiteSpace(substitute(aliasName, "\\", "::")));
+
                aliasName.resize(0);
             }
             YY_BREAK
@@ -13858,7 +13719,7 @@ YY_DECL {
                   current->bodyLine = yyLineNr;
                   current->args = "(";
                   currentArgumentContext = FuncQual;
-                  fullArgString = current->args.copy();
+                  fullArgString = current->args;
                   copyArgString = &current->args;
                   //printf("Found %s\n",current->name.data());
                   BEGIN( ReadFuncArgType ) ;
@@ -14556,7 +14417,7 @@ YY_DECL {
                current->args = "(";
                current->bodyLine = yyLineNr;
                currentArgumentContext = DefineEnd;
-               fullArgString = current->args.copy();
+               fullArgString = current->args;
                copyArgString = &current->args;
                BEGIN( ReadFuncArgType ) ;
             }
@@ -14954,7 +14815,7 @@ YY_DECL {
                {
                   QByteArray text = scannerYYtext;
                   current->initializer += text;
-                  int i = text.find('"');
+                  int i = text.indexOf('"');
                   g_delimiter = scannerYYtext + i + 1;
                   g_delimiter = g_delimiter.left(g_delimiter.length() - 1);
                   lastRawStringContext = YY_START;
@@ -15567,8 +15428,8 @@ YY_DECL {
             {
                // end of included file marker
                QByteArray line = QByteArray(scannerYYtext);
-               int s = line.find(' ');
-               int e = line.find('"', s);
+               int s = line.indexOf(' ');
+               int e = line.indexOf('"', s);
                yyLineNr = line.mid(s, e - s).toInt();
                if (scannerYYtext[scannerYYleng - 1] == '\n')
                {
@@ -15684,7 +15545,9 @@ YY_DECL {
                   if (current->type.isEmpty()) // anonymous padding field, e.g. "int :7;"
                   {
                      addType(current);
-                     current->name.sprintf("__pad%d__", padCount++);
+
+                     current->name = QString("__pad%1__").arg(padCount++).toUtf8();
+
                   }
                   BEGIN(BitFields);
                   current->bitfields += ":";
@@ -15990,10 +15853,12 @@ YY_DECL {
 
             {
                // Rare: Another parameter ([propput] HRESULT Item(int index, [in] Type theRealProperty);)
-               if (!current->args)
+               if (current->args.isEmpty())
                {
                   current->args = "(";
+
                } else
+
                { current->args += ", "; }
                current->args += idlAttr;
                current->args += " ";
@@ -16019,12 +15884,14 @@ YY_DECL {
 
             {
                current->fileName   = yyFileName;
-               current->type		= idlProp;
+               current->type		  = idlProp;
                current->args       = current->args.simplified();
-               if (current->args)
+
+               if (! current->args.isEmpty())
                {
                   current->args += ")";
                }
+
                current->name       = current->name.trimmed();
                current->section    = Entry::VARIABLE_SEC;
                current_root->addSubEntry(current);
@@ -16407,7 +16274,7 @@ YY_DECL {
                {
                   current->endBodyLine = yyLineNr;
                   QByteArray &cn = current->name;
-                  QByteArray rn = current_root->name.copy();
+                  QByteArray rn = current_root->name;
                   //printf("cn=`%s' rn=`%s' isTypedef=%d\n",cn.data(),rn.data(),isTypedef);
                   if (!cn.isEmpty() && !rn.isEmpty())
                   {
@@ -16452,8 +16319,10 @@ YY_DECL {
                         } else
                         {
                            static QRegExp re("@[0-9]+$");
-                           if (!isTypedef && memspecEntry &&
-                           memspecEntry->name.find(re) == -1) // not typedef or anonymous type (see bug691071)
+
+                           if (!isTypedef && memspecEntry && re.indexIn(memspecEntry->name) == -1)
+
+                            // not typedef or anonymous type (see bug691071)
                            {
                               // enabled the next two lines for bug 623424
                               current->doc.resize(0);
@@ -16482,7 +16351,7 @@ YY_DECL {
                   isTypedef = TRUE;
                   current->endBodyLine = yyLineNr;
                   QByteArray &cn = current->name;
-                  QByteArray rn = current_root->name.copy();
+                  QByteArray rn = current_root->name;
                   if (!cn.isEmpty() && !rn.isEmpty())
                   {
                      prependScope();
@@ -16529,11 +16398,14 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* typedef of anonymous type */
-               current->name.sprintf("@%d", anonCount++);
+
+               current->name = QString("@%1").arg(anonCount++).toUtf8();
+
                if ((current->section == Entry::ENUM_SEC) || (current->spec & Entry::Enum))
                {
                   current->program += ','; // add field terminator
                }
+
                // add compound definition to the tree
                current->args = current->args.simplified();
                current->type = current->type.simplified();
@@ -16558,7 +16430,7 @@ YY_DECL {
                   i++;
                }
                msName = QByteArray(scannerYYtext).right(l - i).trimmed();
-               j = msName.find("[");
+               j = msName.indexOf("[");
                if (j != -1)
                {
                   msArgs = msName.right(msName.length() - j);
@@ -16604,16 +16476,21 @@ YY_DECL {
                   // special `anonymous' variable.
                   //Entry *p=current_root;
                   Entry *p = current;
+
                   while (p) {
                      // only look for class scopes, not namespace scopes
                      if ((p->section & Entry::COMPOUND_MASK) && !p->name.isEmpty()) {
                         //printf("Trying scope `%s'\n",p->name.data());
+
                         int i = p->name.lastIndexOf("::");
                         int pi = (i == -1) ? 0 : i + 2;
+
                         if (p->name.at(pi) == '@') {
                            // anonymous compound inside -> insert dummy variable name
                            //printf("Adding anonymous variable for scope %s\n",p->name.data());
-                           msName.sprintf("@%d", anonCount++);
+
+                           msName = QString("@%1").arg(anonCount++).toUtf8();
+
                            break;
                         }
                      }
@@ -16666,22 +16543,19 @@ YY_DECL {
                      varEntry->fileName = yyFileName;
                      varEntry->startLine = yyLineNr;
                      varEntry->startColumn = yyColNr;
-                     varEntry->doc = current->doc.copy();
-                     varEntry->brief = current->brief.copy();
+                     varEntry->doc = current->doc;
+                     varEntry->brief = current->brief;
                      varEntry->mGrpId = current->mGrpId;
                      varEntry->initializer = current->initializer;
 
                      // deep copy group list
-                     QListIterator<Grouping> gli(*current->groups);
-                     Grouping *g;
-                     for (; (g = gli.current()); ++gli) {
-                        varEntry->groups->append(new Grouping(*g));
+                     for (auto g : *current->groups) { 
+                        varEntry->groups->append(g);
                      }
-                     if (current->sli) { // copy special list items
-                        QListIterator<ListItemInfo> li(*current->sli);
-                        ListItemInfo *lii;
-                        for (li.toFirst(); (lii = li.current()); ++li) {
-                           varEntry->addSpecialListItem(lii->type, lii->itemId);
+
+                     if (current->sli) { // copy special list items                       
+                        for (auto lii : *current->sli) {
+                           varEntry->addSpecialListItem(lii.type, lii.itemId);
                         }
                      }
 
@@ -16923,7 +16797,7 @@ YY_DECL {
                //BEGIN( FuncFunc );
                current->bodyLine = yyLineNr;
                currentArgumentContext = FuncFuncEnd;
-               fullArgString = current->args.copy();
+               fullArgString = current->args;
                copyArgString = &current->args;
                BEGIN( ReadFuncArgType ) ;
             }
@@ -17067,7 +16941,7 @@ YY_DECL {
                   current->args = scannerYYtext;
                   current->bodyLine = yyLineNr;
                   currentArgumentContext = FuncQual;
-                  fullArgString = current->args.copy();
+                  fullArgString = current->args;
                   copyArgString = &current->args;
                   BEGIN( ReadFuncArgType ) ;
                   //printf(">>> Read function arguments!\n");
@@ -17096,7 +16970,7 @@ YY_DECL {
                   current->args = scannerYYtext;
                   current->bodyLine = yyLineNr;
                   currentArgumentContext = FuncQual;
-                  fullArgString = current->args.copy();
+                  fullArgString = current->args;
                   copyArgString = &current->args;
                   BEGIN( ReadFuncArgType ) ;
                   //printf(">>> Read function arguments current->argList->count()=%d\n",current->argList->count());
@@ -17186,19 +17060,21 @@ YY_DECL {
             {
                *copyArgString += *scannerYYtext;
                fullArgString += *scannerYYtext;
-               stringToArgumentList(fullArgString, current->argList);
+
+               stringToArgumentList(fullArgString, &current->argList);
+
                if (insideJS)
                {
-                  fixArgumentListForJavaScript(current->argList);
+                  fixArgumentListForJavaScript(&current->argList);
                }
-               handleParametersCommentBlocks(current->argList);
+               handleParametersCommentBlocks(&current->argList);
 
                /* remember the current documentation block, since
                   we could overwrite it with the documentation of
                   a function argument, which we then have to correct later
                   on
                 */
-               docBackup = current->doc;
+               docBackup   = current->doc;
                briefBackup = current->brief;
 
                BEGIN( currentArgumentContext );
@@ -17217,9 +17093,10 @@ YY_DECL {
                   for (i = (int)scannerYYleng - 1; i >= 0; i--) {
                      unput(scannerYYtext[i]);
                   }
-                  stringToArgumentList(fullArgString, current->argList);
-                  handleParametersCommentBlocks(current->argList);
+                  stringToArgumentList(fullArgString, &current->argList);
+                  handleParametersCommentBlocks(&current->argList);
                   BEGIN( currentArgumentContext );
+
                } else // not a define
                {
                   // for functions we interpret a comment
@@ -17287,8 +17164,8 @@ YY_DECL {
                   }
                   *copyArgString += *scannerYYtext;
                   fullArgString += *scannerYYtext;
-                  stringToArgumentList(fullArgString, current->argList);
-                  handleParametersCommentBlocks(current->argList);
+                  stringToArgumentList(fullArgString, &current->argList);
+                  handleParametersCommentBlocks(&current->argList);
                   BEGIN( currentArgumentContext );
                } else
                {
@@ -17299,7 +17176,7 @@ YY_DECL {
                   text = text.trimmed();
                   lastCommentInArgContext = YY_START;
                   fullArgString += text;
-                  if (text.find("//") != -1)
+                  if (text.indexOf("//") != -1)
                   {
                      BEGIN( CopyArgCommentLine );
                   } else
@@ -17363,14 +17240,15 @@ YY_DECL {
 
             {
                docBlockName = &scannerYYtext[1];
-               if (docBlockName.at(1) == '[')
+               if (docBlockName[1] == '[')
                {
-                  docBlockName.at(1) = '}';
+                  docBlockName[1] = '}';
                }
-               if (docBlockName.at(1) == '{')
+               if (docBlockName[1] == '{')
                {
-                  docBlockName.at(1) = '}';
+                  docBlockName[1] = '}';
                }
+
                fullArgString += scannerYYtext;
                BEGIN(CopyArgVerbatim);
             }
@@ -17689,7 +17567,7 @@ YY_DECL {
                // const member function
                lineCount() ;
                current->args += " const ";
-               current->argList->constSpecifier = TRUE;
+               current->argList.constSpecifier = TRUE;
             }
             YY_BREAK
          case 476:
@@ -17700,7 +17578,7 @@ YY_DECL {
                // volatile member function
                lineCount() ;
                current->args += " volatile ";
-               current->argList->volatileSpecifier = TRUE;
+               current->argList.volatileSpecifier = TRUE;
             }
             YY_BREAK
          case 477:
@@ -17738,7 +17616,7 @@ YY_DECL {
                lineCount() ;
                current->args += " = 0";
                current->virt = Pure;
-               current->argList->pureSpecifier = TRUE;
+               current->argList.pureSpecifier = TRUE;
                BEGIN(FuncQual);
             }
             YY_BREAK
@@ -17772,7 +17650,7 @@ YY_DECL {
 
             {
                lineCount();
-               current->argList->trailingReturnType = " -> ";
+               current->argList.trailingReturnType = " -> ";
                current->args += " -> ";
                BEGIN(TrailingReturn);
             }
@@ -17789,7 +17667,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current->argList->trailingReturnType += scannerYYtext;
+               current->argList.trailingReturnType += scannerYYtext;
                current->args += scannerYYtext;
             }
             YY_BREAK
@@ -17799,7 +17677,7 @@ YY_DECL {
 
             {
                lineCount();
-               current->argList->trailingReturnType += scannerYYtext;
+               current->argList.trailingReturnType += scannerYYtext;
                current->args += ' ';
             }
             YY_BREAK
@@ -17955,10 +17833,11 @@ YY_DECL {
                if (insideCS && qstrcmp(scannerYYtext, "where") == 0)
                {
                   // type contraint for a method
-                  delete current->typeConstr;
-                  current->typeConstr = new ArgumentList;
-                  current->typeConstr->append(new Argument);
+                  current->typeConstr = ArgumentList();
+                  current->typeConstr.append(Argument());
+
                   lastCSConstraint = YY_START;
+
                   BEGIN( CSConstraintName );
                } else if (checkForKnRstyleC())
                {
@@ -17981,12 +17860,12 @@ YY_DECL {
                QByteArray doc, brief;
                if (current->doc != docBackup)
                {
-                  doc = current->doc.copy();
+                  doc = current->doc;
                   current->doc = docBackup;
                }
                if (current->brief != briefBackup)
                {
-                  brief = current->brief.copy();
+                  brief = current->brief;
                   current->brief = briefBackup;
                }
                addKnRArgInfo(oldStyleArgType + oldStyleArgPtr,
@@ -18007,7 +17886,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current->args = argListToString(current->argList);
+               current->args = argListToString(&current->argList);
+
                unput('{');
                BEGIN(FuncQual);
             }
@@ -18164,13 +18044,15 @@ YY_DECL {
                current->fileName = yyFileName;
                current->startLine = yyBegLineNr;
                current->startColumn = yyBegColNr;
+
                static QRegExp re("([^)]*[*&][^)]*)"); // (...*...)
                if (*scannerYYtext != ';' || (current_root->section & Entry::COMPOUND_MASK) )
                {
-                  int tempArg = current->name.find('<');
-                  int ts = current->type.find('<');
+                  int tempArg = current->name.indexOf('<');
+                  int ts = current->type.indexOf('<');
                   int te = current->type.lastIndexOf('>');
-                  int ti = current->type.find(re, 0);
+
+                  int ti = re.indexIn(current->type, 0);
 
                   // bug677315: A<int(void *, char *)> get(); is not a function pointer
                   bool isFunction = ti == -1 || // not a (...*...) pattern
@@ -18199,12 +18081,13 @@ YY_DECL {
                } else // a global function prototype or function variable
                {
                   //printf("Scanner.l: prototype? type=`%s' name=`%s' args=`%s'\n",current->type.data(),current->name.data(),current->args.data());
-                  if (!current->type.isEmpty() &&
-                  (current->type.find(re, 0) != -1 || current->type.left(8) == "typedef "))
+                  if (! current->type.isEmpty() &&
+                     (re.indexIn(current->type, 0) != -1 || current->type.left(8) == "typedef "))
                   {
                      if (isTypedef && current->type.left(8) != "typedef ") {
                         current->type.prepend("typedef ");
                      }
+
                      //printf("Scanner.l: found function variable!\n");
                      current->section = Entry::VARIABLE_SEC;
                   } else
@@ -18324,11 +18207,9 @@ YY_DECL {
                } else
                {
                   if (current->sli && previous) // copy special list items
-                  {
-                     QListIterator<ListItemInfo> li(*current->sli);
-                     ListItemInfo *lii;
-                     for (li.toFirst(); (lii = li.current()); ++li) {
-                        previous->addSpecialListItem(lii->type, lii->itemId);
+                  {                    
+                     for (auto lii : *current->sli) {
+                        previous->addSpecialListItem(lii.type, lii.itemId);
                      }
                      delete current->sli;
                      current->sli = 0;
@@ -18638,7 +18519,8 @@ YY_DECL {
                current->type.resize(0) ;
                current->name.resize(0) ;
                current->args.resize(0) ;
-               current->argList->clear();
+               current->argList.clear();
+
                BEGIN( FindMembers ) ;
             }
             YY_BREAK
@@ -18656,11 +18538,12 @@ YY_DECL {
                   }
                   current->name = current->name.trimmed();
                   // there can be only one base class here
+
                   if (!baseName.isEmpty()) {
-                     current->extends->append(
-                        new BaseInfo(baseName, Public, Normal));
+                     current->extends->append(BaseInfo(baseName, Public, Normal));
                      baseName.resize(0);
                   }
+
                   current_root->addSubEntry( current ) ;
                   current = new Entry;
                } else
@@ -18669,7 +18552,7 @@ YY_DECL {
                   current->type.resize(0) ;
                   current->name.resize(0) ;
                   current->args.resize(0) ;
-                  current->argList->clear();
+                  current->argList.clear();
                }
                BEGIN( FindMembers ) ;
             }
@@ -18712,15 +18595,17 @@ YY_DECL {
                {
                   current->tArgLists = new QList<ArgumentList>;
                }
-               ArgumentList *al = new ArgumentList;
-               // check bug 612858 before enabling the next line
-               //current->spec |= Entry::Template;
-               current->tArgLists->append(al);
+
+               current->tArgLists->append(ArgumentList());
+               ArgumentList *al = &current->tArgLists->last();   
+
                currentArgumentList = al;
+
                templateStr = "<";
                current->name += "<";
                fullArgString = templateStr;
                copyArgString = &current->name;
+
                //copyArgString = &templateStr;
                currentArgumentContext = ClassVar;
                BEGIN( ReadTempArgs );
@@ -18782,7 +18667,7 @@ YY_DECL {
                   current->name = scannerYYtext;
                   current->name = current->name.left(current->name.length() - 1).trimmed();
                   //printf("template class declaration for %s!\n",current->name.data());
-                  QByteArray rn = current_root->name.copy();
+                  QByteArray rn = current_root->name;
                   //printf("cn=`%s' rn=`%s' isTypedef=%d\n",cn.data(),rn.data(),isTypedef);
                   if (!current->name.isEmpty() && !rn.isEmpty()) {
                      prependScope();
@@ -19014,10 +18899,11 @@ YY_DECL {
                   baseName.resize(0);
                   BEGIN( BasesProt ) ;
                } else if (insideCS && qstrcmp(scannerYYtext, "where") == 0) // C# type contraint
-               {
-                  delete current->typeConstr;
-                  current->typeConstr = new ArgumentList;
-                  current->typeConstr->append(new Argument);
+
+               {                 
+                  current->typeConstr = ArgumentList();
+                  current->typeConstr.append(Argument());
+
                   lastCSConstraint = YY_START;
                   BEGIN( CSConstraintName );
                } else if (insideCli &&  qstrcmp(scannerYYtext, "abstract") == 0)
@@ -19092,7 +18978,7 @@ YY_DECL {
 
             {
                // artificially inserted token to signal end of comment block
-               current->typeConstr->getLast()->docs = fullArgString;
+               current->typeConstr.last().docs = fullArgString;
             }
             YY_BREAK
          case 582:
@@ -19101,7 +18987,7 @@ YY_DECL {
             {
                // end of type constraint reached
                // parse documentation of the constraints
-               handleParametersCommentBlocks(current->typeConstr);
+               handleParametersCommentBlocks(&current->typeConstr);
                unput('{');
                BEGIN( lastCSConstraint );
             }
@@ -19110,7 +18996,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               handleParametersCommentBlocks(current->typeConstr);
+               handleParametersCommentBlocks(&current->typeConstr);
                unput(';');
                BEGIN( lastCSConstraint );
             }
@@ -19127,7 +19013,7 @@ YY_DECL {
 
             {
                // parameter name
-               current->typeConstr->getLast()->name = scannerYYtext;
+               current->typeConstr.last().name = scannerYYtext;
             }
             YY_BREAK
          case 586:
@@ -19135,7 +19021,7 @@ YY_DECL {
 
             {
                // another constraint for a different param
-               current->typeConstr->append(new Argument);
+               current->typeConstr.append(Argument());
                BEGIN( CSConstraintName );
             }
             YY_BREAK
@@ -19143,16 +19029,16 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (current->typeConstr->getLast()->type.isEmpty())
+               if (current->typeConstr.last().type.isEmpty())
                   // first type constraint for this parameter
                {
-                  current->typeConstr->getLast()->type = scannerYYtext;
+                  current->typeConstr.last().type = scannerYYtext;
                } else // new type constraint for same parameter
                {
-                  QByteArray name = current->typeConstr->getLast()->name;
-                  current->typeConstr->append(new Argument);
-                  current->typeConstr->getLast()->name = name;
-                  current->typeConstr->getLast()->type = scannerYYtext;
+                  QByteArray name = current->typeConstr.last().name;
+                  current->typeConstr.append(Argument());
+                  current->typeConstr.last().name = name;
+                  current->typeConstr.last().type = scannerYYtext;
                }
             }
             YY_BREAK
@@ -19332,11 +19218,13 @@ YY_DECL {
                   if (current->section == Entry::NAMESPACE_SEC) { // allow reopening of anonymous namespaces
                      if (Config_getBool("EXTRACT_ANON_NSPACES")) { // use visible name
                         current->name = "anonymous_namespace{" + stripPath(current->fileName) + "}";
+
                      } else { // use invisible name
-                        current->name.sprintf("@%d", anonNSCount);
+                        current->name = QString("@%1").arg(anonNSCount).toUtf8();
                      }
+
                   } else {
-                     current->name.sprintf("@%d", anonCount++);
+                     current->name = QString("@%1").arg(anonCount++).toUtf8();
                   }
                }
                curlyCount = 0;
@@ -19431,9 +19319,10 @@ YY_DECL {
                if (insideCS && baseScope.trimmed() == "where")
                {
                   // type contraint for a class
-                  delete current->typeConstr;
-                  current->typeConstr = new ArgumentList;
-                  current->typeConstr->append(new Argument);
+                 
+                  current->typeConstr = ArgumentList();
+                  current->typeConstr.append(Argument());
+
                   lastCSConstraint = YY_START;
                   BEGIN( CSConstraintName );
                } else
@@ -19657,9 +19546,7 @@ YY_DECL {
                current->name = removeRedundantWhiteSpace(current->name);
                if (!baseName.isEmpty())
                {
-                  current->extends->append(
-                     new BaseInfo(baseName, baseProt, baseVirt)
-                  );
+                  current->extends->append(BaseInfo(baseName, baseProt, baseVirt));
                }
                if ((current->spec & (Entry::Interface | Entry::Struct)) ||
                insideJava || insidePHP || insideCS ||
@@ -19699,11 +19586,13 @@ YY_DECL {
                current->startLine = yyLineNr ;
                current->startColumn = yyColNr;
                current->name = removeRedundantWhiteSpace(current->name);
-               if (!baseName.isEmpty())
-                  current->extends->append(
-                     new BaseInfo(baseName, baseProt, baseVirt)
-                  );
+
+               if (! baseName.isEmpty()) {
+                  current->extends->append(BaseInfo(baseName, baseProt, baseVirt));
+               }   
+
                curlyCount = 0;
+
                if (insideObjC)
                {
                   BEGIN( ReadBodyIntf );
@@ -20227,10 +20116,12 @@ YY_DECL {
             {
                docBlock += scannerYYtext;
                docBlockName = &scannerYYtext[1];
+
                if (docBlockName.at(1) == '{')
                {
-                  docBlockName.at(1) = '}';
+                  docBlockName[1] = '}';
                }
+
                g_fencedSize = 0;
                g_nestedComment = FALSE;
                BEGIN(DocCopyBlock);
@@ -20515,7 +20406,7 @@ YY_DECL {
             {
                current->args += *scannerYYtext;
                currentArgumentContext = PrototypeQual;
-               fullArgString = current->args.copy();
+               fullArgString = current->args;
                copyArgString = &current->args;
                BEGIN( ReadFuncArgType ) ;
             }
@@ -20524,7 +20415,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current->type += current->name + scannerYYtext;
+               current->type += current->name + QByteArray(scannerYYtext);
                current->name.resize(0);
                BEGIN( PrototypePtr );
             }
@@ -20543,7 +20434,7 @@ YY_DECL {
             {
                current->args += *scannerYYtext;
                currentArgumentContext = PrototypeQual;
-               fullArgString = current->args.copy();
+               fullArgString = current->args;
                copyArgString = &current->args;
                BEGIN( ReadFuncArgType ) ;
             }
@@ -20575,7 +20466,7 @@ YY_DECL {
 
             {
                current->args += " const ";
-               current->argList->constSpecifier = TRUE;
+               current->argList.constSpecifier = TRUE;
             }
             YY_BREAK
          case 702:
@@ -20583,7 +20474,7 @@ YY_DECL {
 
             {
                current->args += " volatile ";
-               current->argList->volatileSpecifier = TRUE;
+               current->argList.volatileSpecifier = TRUE;
             }
             YY_BREAK
          case 703:
@@ -20592,7 +20483,7 @@ YY_DECL {
             {
                current->args += " = 0";
                current->virt = Pure;
-               current->argList->pureSpecifier = TRUE;
+               current->argList.pureSpecifier = TRUE;
             }
             YY_BREAK
          case 704:
@@ -21969,13 +21860,10 @@ static void handleCommentBlock(const QByteArray &doc, bool brief)
 }
 
 static void handleParametersCommentBlocks(ArgumentList *al)
-{
-   //printf(">>>>>>> handleParametersCommentBlocks()\n");
-   ArgumentListIterator ali(*al);
-   Argument *a;
-   for (ali.toFirst(); (a = ali.current()); ++ali) {
-      //printf("    Param %s docs=%s\n",a->name.data(),a->docs.data());
-      if (!a->docs.isEmpty()) {
+{  
+   for (auto &a : *al) {
+     
+      if (! a.docs.isEmpty()) {
          int position = 0;
          bool needsEntry;
 
@@ -21992,7 +21880,7 @@ static void handleParametersCommentBlocks(ArgumentList *al)
          while (parseCommentBlock(
                    g_thisParser,
                    current,
-                   a->docs,            // text
+                   a.docs,            // text
                    yyFileName,         // file
                    current->docLine,   // line of block start
                    FALSE,
@@ -22011,7 +21899,7 @@ static void handleParametersCommentBlocks(ArgumentList *al)
          if (needsEntry) {
             newEntry();
          }
-         a->docs = current->doc;
+         a.docs = current->doc;
 
          // restore context
          current->doc       = orgDoc;
@@ -22026,34 +21914,35 @@ static void handleParametersCommentBlocks(ArgumentList *al)
 //----------------------------------------------------------------------------
 
 static void parseCompounds(Entry *rt)
-{
-   //printf("parseCompounds(%s)\n",rt->name.data());
-   EntryListIterator eli(*rt->children());
-   Entry *ce;
-   for (; (ce = eli.current()); ++eli) {
-      if (!ce->program.isEmpty()) {
-         //printf("-- %s ---------\n%s\n---------------\n",
-         //  ce->name.data(),ce->program.data());
-         // init scanner state
+{  
+   for(auto &ce : rt->children() ) {
+
+      if (! ce.program.isEmpty()) {       
          padCount = 0;
          //depthIf = 0;
          g_column = 0;
-         inputString = ce->program;
+         inputString = ce.program;
          inputPosition = 0;
-         scannerYYrestart( scannerYYin ) ;
-         if (ce->section == Entry::ENUM_SEC || (ce->spec & Entry::Enum)) {
+
+         scannerYYrestart( scannerYYin );
+
+         if (ce.section == Entry::ENUM_SEC || (ce.spec & Entry::Enum)) {
             BEGIN( FindFields ) ;
          } else {
             BEGIN( FindMembers ) ;
          }
-         current_root = ce ;
-         yyFileName = ce->fileName;
+
+         current_root = const_cast<Entry *>(&ce);
+         yyFileName = ce.fileName;
+
          //setContext();
-         yyLineNr = ce->startLine ;
-         yyColNr = ce->startColumn ;
-         insideObjC = ce->lang == SrcLangExt_ObjC;
+         yyLineNr = ce.startLine ;
+         yyColNr = ce.startColumn ;
+         insideObjC = ce.lang == SrcLangExt_ObjC;
+
          //printf("---> Inner block starts at line %d objC=%d\n",yyLineNr,insideObjC);
          //current->reset();
+
          if (current) {
             delete current;
          }
@@ -22062,28 +21951,27 @@ static void parseCompounds(Entry *rt)
          initEntry();
 
          // deep copy group list from parent (see bug 727732)
-         if (rt->groups) {
-            QListIterator<Grouping> gli(*rt->groups);
-            Grouping *g;
-            for (; (g = gli.current()); ++gli) {
-               ce->groups->append(new Grouping(*g));
+         if (rt->groups) {           
+            for (auto g : *rt->groups) {
+               ce.groups->append(g);
             }
          }
 
-         int ni = ce->name.lastIndexOf("::");
+         int ni = ce.name.lastIndexOf("::");
          if (ni == -1) {
             ni = 0;
          } else {
             ni += 2;
          }
+
          // set default protection based on the compound type
-         if ( ce->section == Entry::CLASS_SEC ) { // class
+         if ( ce.section == Entry::CLASS_SEC ) { // class
             if (insidePHP || insideD || insideJS || insideIDL) {
                current->protection = protection = Public ;
             } else if (insideJava) {
-               current->protection = protection = (ce->spec & (Entry::Interface | Entry::Enum)) ?  Public : Package;
-            } else if (ce->spec & (Entry::Interface | Entry::Ref | Entry::Value | Entry::Struct | Entry::Union)) {
-               if (ce->lang == SrcLangExt_ObjC) {
+               current->protection = protection = (ce.spec & (Entry::Interface | Entry::Enum)) ?  Public : Package;
+            } else if (ce.spec & (Entry::Interface | Entry::Ref | Entry::Value | Entry::Struct | Entry::Union)) {
+               if (ce.lang == SrcLangExt_ObjC) {
                   current->protection = protection = Protected ;
                } else {
                   current->protection = protection = Public ;
@@ -22091,16 +21979,20 @@ static void parseCompounds(Entry *rt)
             } else {
                current->protection = protection = Private ;
             }
-         } else if (ce->section == Entry::ENUM_SEC ) { // enum
-            current->protection = protection = ce->protection;
-         } else if (!ce->name.isEmpty() && ce->name.at(ni) == '@') { // unnamed union or namespace
-            if (ce->section == Entry::NAMESPACE_SEC ) { // unnamed namespace
+
+         } else if (ce.section == Entry::ENUM_SEC ) { // enum
+            current->protection = protection = ce.protection;
+
+         } else if (! ce.name.isEmpty() && ce.name.at(ni) == '@') { // unnamed union or namespace
+            if (ce.section == Entry::NAMESPACE_SEC ) { // unnamed namespace
                current->stat = gstat = TRUE;
             }
-            current->protection = protection = ce->protection;
+            current->protection = protection = ce.protection;
+
          } else { // named struct, union, protocol, category
             current->protection = protection = Public ;
          }
+
          mtype = Method;
          virt = Normal;
          //printf("name=%s current->stat=%d gstat=%d\n",ce->name.data(),current->stat,gstat);
@@ -22108,25 +22000,20 @@ static void parseCompounds(Entry *rt)
          //memberGroupId = DOX_NOGROUP;
          //memberGroupRelates.resize(0);
          //memberGroupInside.resize(0);
-         groupEnterCompound(yyFileName, yyLineNr, ce->name);
+         groupEnterCompound(yyFileName, yyLineNr, ce.name);
 
          scannerYYlex() ;
          g_lexInit = TRUE;
          //forceEndGroup();
 
-         groupLeaveCompound(yyFileName, yyLineNr, ce->name);
+         groupLeaveCompound(yyFileName, yyLineNr, ce.name);
 
          delete current;
          current = 0;
-         ce->program.resize(0);
-
-
-         //if (depthIf>0)
-         //{
-         //	warn(yyFileName,yyLineNr,"Documentation block ended in the middle of a conditional section!");
-         //}
+         const_cast<Entry &>(ce).program.resize(0);
       }
-      parseCompounds(ce);
+
+      parseCompounds(const_cast<Entry *>(&ce));
    }
 }
 
@@ -22152,8 +22039,11 @@ static void parseMain(const char *fileName,
    virt          = Normal;
    current_root  = rt;
    global_root   = rt;
-   inputFile.setName(fileName);
-   if (inputFile.open(IO_ReadOnly)) {
+
+   inputFile.setFileName(fileName);
+
+   if (inputFile.open(QIODevice::ReadOnly)) {
+
       yyLineNr = 1 ;
       yyFileName = fileName;
       setContext();
@@ -22193,7 +22083,7 @@ static void parseMain(const char *fileName,
       g_lexInit = TRUE;
 
       if (YY_START == Comment) {
-         warn(yyFileName, yyLineNr, "File ended in the middle of a comment block! Perhaps a missing \\endcode?");
+         warn(yyFileName, yyLineNr, "File ended in the middle of a comment block, Check for a missing \\endcode?");
       }
 
       //forceEndGroup();
@@ -22205,13 +22095,20 @@ static void parseMain(const char *fileName,
       //}
 
       rt->program.resize(0);
-      if (rt->children()->contains(current) == 0)
+
+
+// ** BROOM  
+
+/*
+      if (rt->children().contains(current) == 0)
          // it could be that current is already added as a child to rt, so we
          // only delete it if this is not the case. See bug 635317.
       {
          delete current;
          current = 0;
       }
+
+*/
 
       parseCompounds(rt);
 

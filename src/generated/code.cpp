@@ -10619,7 +10619,8 @@ static QByteArray      g_name;
 static QByteArray      g_args;
 static QByteArray      g_classScope;
 static QByteArray      g_realScope;
-static QStack<int>   g_scopeStack;      //!< 1 if bracket starts a scope,
+static QStack<int *>   g_scopeStack;      //!< 1 if bracket starts a scope,
+
 //   2 for internal blocks
 static int           g_anchorCount;
 static FileDef      *g_sourceFileDef;
@@ -10658,7 +10659,7 @@ static bool          g_insideProtocolList;
 
 static bool          g_lexInit = FALSE;
 
-static QStack<int>   g_classScopeLengthStack;
+static QStack<int *>   g_classScopeLengthStack;
 
 static Definition   *g_searchCtx;
 static bool          g_collectXRefs;
@@ -10682,11 +10683,12 @@ static int g_currentCtxId = 0;
 static int g_currentNameId = 0;
 static int g_currentObjId = 0;
 static int g_currentWordId = 0;
-static QStack<ObjCCallCtx> g_contextStack;
-static QHash<long, ObjCCallCtx> g_contextDict;
-static QHash<long, QByteArray> g_nameDict;
-static QHash<long, QByteArray> g_objectDict;
-static QHash<long, QByteArray> g_wordDict;
+
+static QStack<ObjCCallCtx *>      g_contextStack;
+static QHash<long, ObjCCallCtx *> g_contextDict;
+static QHash<long, QByteArray *>  g_nameDict;
+static QHash<long, QByteArray *>  g_objectDict;
+static QHash<long, QByteArray *>  g_wordDict;
 static int g_braceCount = 0;
 
 static void saveObjCContext();
@@ -10729,7 +10731,7 @@ class VariableContext
    void popScope() {
       if (m_scopes.count() > 0) {
          DBG_CTX((stderr, "** Pop var context %d\n", m_scopes.count()));
-         m_scopes.remove(m_scopes.count() - 1);
+         m_scopes.removeAt(m_scopes.count() - 1);
       } else {
          DBG_CTX((stderr, "** ILLEGAL: Pop var context\n"));
       }
@@ -10754,7 +10756,7 @@ class VariableContext
 
  private:
    Scope        m_globalScope;
-   QList<Scope> m_scopes;
+   QList<Scope *> m_scopes;
 };
 
 void VariableContext::addVariable(const QByteArray &type, const QByteArray &name)
@@ -10772,7 +10774,7 @@ void VariableContext::addVariable(const QByteArray &type, const QByteArray &name
    }
    DBG_CTX((stderr, "** addVariable trying: type='%s' name='%s' g_currentDefinition=%s\n",
             ltype.data(), lname.data(), g_currentDefinition ? g_currentDefinition->name().data() : "<none>"));
-   Scope *scope = m_scopes.count() == 0 ? &m_globalScope : m_scopes.getLast();
+   Scope *scope = m_scopes.count() == 0 ? &m_globalScope : m_scopes.last();
    ClassDef *varType;
    int i = 0;
    if (
@@ -10780,8 +10782,9 @@ void VariableContext::addVariable(const QByteArray &type, const QByteArray &name
       (varType = getResolvedClass(g_currentDefinition, g_sourceFileDef, ltype)) // look for global class definitions
    ) {
       DBG_CTX((stderr, "** addVariable type='%s' name='%s'\n", ltype.data(), lname.data()));
-      scope->append(lname, varType); // add it to a list
-   } else if ((i = ltype.find('<')) != -1) {
+      scope->insert(lname, varType); // add it to a list
+
+   } else if ((i = ltype.indexOf('<')) != -1) {
       // probably a template class
       QByteArray typeName(ltype.left(i));
       ClassDef *newDef = 0;
@@ -10821,11 +10824,11 @@ ClassDef *VariableContext::findVariable(const QByteArray &name)
       return 0;
    }
    ClassDef *result = 0;
-   QListIterator<Scope> sli(m_scopes);
-   Scope *scope;
+ 
    QByteArray key = name;
+
    // search from inner to outer scope
-   for (sli.toLast(); (scope = sli.current()); --sli) {
+   for (auto scope : m_scopes) {
       result = scope->find(key);
       if (result) {
          DBG_CTX((stderr, "** findVariable(%s)=%p\n", name.data(), result));
@@ -10833,7 +10836,7 @@ ClassDef *VariableContext::findVariable(const QByteArray &name)
       }
    }
    // nothing found -> also try the global scope
-   result = m_globalScope.find(name);
+   result = m_globalScope.indexOf(name);
    DBG_CTX((stderr, "** findVariable(%s)=%p\n", name.data(), result));
    return result;
 }
@@ -10858,7 +10861,7 @@ class CallContext
    }
    virtual ~CallContext() {}
    void setScope(Definition *d) {
-      Ctx *ctx = m_defList.getLast();
+      Ctx *ctx = m_defList.last();
       if (ctx) {
          DBG_CTX((stderr, "** Set call context %s (%p)\n", d == 0 ? "<null>" : d->name().data(), d));
          ctx->d = d;
@@ -10871,7 +10874,7 @@ class CallContext
    void popScope() {
       if (m_defList.count() > 1) {
          DBG_CTX((stderr, "** Pop call context %d\n", m_defList.count()));
-         Ctx *ctx = m_defList.getLast();
+         Ctx *ctx = m_defList.last();
          if (ctx) {
             g_name = ctx->name;
             g_type = ctx->type;
@@ -10887,7 +10890,7 @@ class CallContext
       m_defList.append(new Ctx);
    }
    Definition *getScope() const {
-      Ctx *ctx = m_defList.getLast();
+      Ctx *ctx = m_defList.last();
       if (ctx) {
          return ctx->d;
       } else {
@@ -10896,7 +10899,7 @@ class CallContext
    }
 
  private:
-   QList<Ctx> m_defList;
+   QList<Ctx *> m_defList;
 };
 
 static CallContext g_theCallContext;
@@ -10952,7 +10955,7 @@ static void setClassScope(const QByteArray &name)
    //printf("setClassScope(%s)\n",name.data());
    QByteArray n = name;
    n = n.simplified();
-   int ts = n.find('<'); // start of template
+   int ts = n.indexOf('<'); // start of template
    int te = n.lastIndexOf('>'); // end of template
    //printf("ts=%d te=%d\n",ts,te);
    if (ts != -1 && te != -1 && te > ts) {
@@ -10964,7 +10967,7 @@ static void setClassScope(const QByteArray &name)
    }
    g_classScope.resize(0);
    int i;
-   while ((i = n.find("::")) != -1) {
+   while ((i = n.indexOf("::")) != -1) {
       pushScope(n.left(i));
       n = n.mid(i + 2);
    }
@@ -11165,17 +11168,19 @@ static void setParameterList(MemberDef *md)
    ArgumentListIterator it(*al);
    Argument *a;
    for (; (a = it.current()); ++it) {
-      g_parmName = a->name.copy();
-      g_parmType = a->type.copy();
-      int i = g_parmType.find('*');
+      g_parmName = a->name;
+      g_parmType = a->type;
+      int i = g_parmType.indexOf('*');
       if (i != -1) {
          g_parmType = g_parmType.left(i);
       }
-      i = g_parmType.find('&');
+      i = g_parmType.indexOf('&');
       if (i != -1) {
          g_parmType = g_parmType.left(i);
       }
-      g_parmType.stripPrefix("const ");
+
+      g_parmType = stripPrefix(g_parmType, "const ");
+
       g_parmType = g_parmType.trimmed();
       g_theVarContext.addVariable(g_parmType, g_parmName);
    }
@@ -11419,7 +11424,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
       DBG_CTX((stderr, "non-local variable name=%s context=%d cd=%s md=%s!\n",
                className.data(), g_theVarContext.count(), cd ? cd->name().data() : "<none>",
                md ? md->name().data() : "<none>"));
-      if (cd == 0 && md == 0 && (i = className.find('<')) != -1) {
+      if (cd == 0 && md == 0 && (i = className.indexOf('<')) != -1) {
          QByteArray bareName = className.left(i); //stripTemplateSpecifiersFromScope(className);
          DBG_CTX((stderr, "bareName=%s\n", bareName.data()));
          if (bareName != className) {
@@ -11752,14 +11757,14 @@ static void generateFunctionLink(CodeOutputInterface &ol, const char *funcName)
    if (i > 0) {
       funcScope = locFunc.left(i);
       locFunc = locFunc.right(locFunc.length() - i - len).trimmed();
-      int ts = locScope.find('<'); // start of template
+      int ts = locScope.indexOf('<'); // start of template
       int te = locScope.lastIndexOf('>'); // end of template
       //printf("ts=%d te=%d\n",ts,te);
       if (ts != -1 && te != -1 && te > ts) {
          // remove template from scope
          locScope = locScope.left(ts) + locScope.right(locScope.length() - te - 1);
       }
-      ts = funcScope.find('<'); // start of template
+      ts = funcScope.indexOf('<'); // start of template
       te = funcScope.lastIndexOf('>'); // end of template
       //printf("ts=%d te=%d\n",ts,te);
       if (ts != -1 && te != -1 && te > ts) {
@@ -11902,8 +11907,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
          }
       }
    }
-
-   //printf("[");
+   
    while ((c = *p++)) { // for each character in ctx->format
       if (c == '$') {
          char nc = *p++;
@@ -11917,9 +11921,11 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                   refIdStr += nc;
                   nc = *p++;
                }
+
                p--;
                int refId = refIdStr.toInt();
-               QByteArray *pName = g_nameDict.find(refId);
+               QByteArray *pName = g_nameDict.value(refId);
+
                if (pName) {
                   if (ctx->method && ctx->method->isLinkable()) {
                      writeMultiLineCodeLink(*g_code, ctx->method, pName->data());
@@ -11939,9 +11945,11 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                   refIdStr += nc;
                   nc = *p++;
                }
+
                p--;
                int refId = refIdStr.toInt();
-               QByteArray *pObject = g_objectDict.find(refId);
+               QByteArray *pObject = g_objectDict.value(refId);
+
                if (pObject) {
                   if (*pObject == "self") {
                      if (g_currentDefinition &&
@@ -11957,18 +11965,21 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                      startFontClass("keyword");
                      codifyLines(pObject->data());
                      endFontClass();
+
                   } else if (*pObject == "super") {
-                     if (g_currentDefinition &&
-                           g_currentDefinition->definitionType() == Definition::TypeClass) {
+
+                     if (g_currentDefinition && g_currentDefinition->definitionType() == Definition::TypeClass) {
                         ClassDef *cd = (ClassDef *)g_currentDefinition;
+
                         if (cd->categoryOf()) {
                            cd = cd->categoryOf();
                         }
-                        BaseClassList *bcd = cd->baseClasses();
-                        if (bcd) { // get direct base class (there should be only one)
-                           BaseClassListIterator bli(*bcd);
-                           BaseClassDef *bclass;
-                           for (bli.toFirst(); (bclass = bli.current()); ++bli) {
+
+                        SortedList<BaseClassDef *> *bcd = cd->baseClasses();
+
+                        if (bcd) { // get direct base class (there should be only one)                          
+
+                           for (auto bclass : *bcd) {
                               if (bclass->classDef->compoundType() != ClassDef::Protocol) {
                                  ctx->objectType = bclass->classDef;
                                  if (ctx->objectType) {
@@ -11977,7 +11988,9 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                               }
                            }
                         }
+
                      }
+
                      startFontClass("keyword");
                      codifyLines(pObject->data());
                      endFontClass();
@@ -12016,7 +12029,8 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                }
                p--;
                int refId = refIdStr.toInt();
-               ObjCCallCtx *ictx = g_contextDict.find(refId);
+               ObjCCallCtx *ictx = g_contextDict.value(refId);
+
                if (ictx) { // recurse into nested call
                   writeObjCMethodCall(ictx);
                   if (ictx->method) { // link to nested call successfully
@@ -12051,12 +12065,12 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                }
                p--;
                int refId = refIdStr.toInt();
-               QByteArray *pWord = g_wordDict.find(refId);
+               QByteArray *pWord = g_wordDict.value(refId);
                if (pWord) {
                   codifyLines(pWord->data());
                }
             } else { // illegal marker
-               ASSERT(!"invalid escape sequence");
+               assert(!"invalid escape sequence");
             }
          }
       } else { // normal non-marker character
@@ -12670,11 +12684,7 @@ YY_DECL {
                //FileInfo *f;
                bool ambig;
                bool found = FALSE;
-               //QByteArray absPath = codeYYtext;
-               //if (g_sourceFileDef && QDir::isRelativePath(absPath))
-               //{
-               //  absPath = QDir::cleanDirPath(g_sourceFileDef->getPath()+"/"+absPath);
-               //}
+               
 
                FileDef *fd = findFileDef(Doxygen::inputNameDict, codeYYtext, ambig);
                //printf("looking for include %s -> %s fd=%p\n",codeYYtext,absPath.data(),fd);
@@ -12682,16 +12692,18 @@ YY_DECL {
                {
                   if (ambig) { // multiple input files match the name
                      //printf("===== yes %s is ambiguous\n",codeYYtext);
-                     QByteArray name = QDir::cleanDirPath(codeYYtext).toUtf8();
+                     QByteArray name = QDir::cleanPath(codeYYtext).toUtf8();
                      if (!name.isEmpty() && g_sourceFileDef) {
                         FileName *fn = Doxygen::inputNameDict->find(name);
-                        if (fn) {
-                           FileNameIterator fni(*fn);
-                           // for each include name
-                           for (fni.toFirst(); !found && (fd = fni.current()); ++fni) {
+
+                        if (fn) {                          
+                           // for each include name                        
+                           for (auto fd : *fn) {
+
+                              if (found) { break; }
+
                               // see if this source file actually includes the file
-                              found = g_sourceFileDef->isIncluded(fd->absFilePath());
-                              //printf("      include file %s found=%d\n",fd->absFilePath().data(),found);
+                              found = g_sourceFileDef->isIncluded(fd->absoluteFilePath());                              
                            }
                         }
                      }
@@ -12699,7 +12711,7 @@ YY_DECL {
                      found = TRUE;
                   }
                }
-               //printf("      include file %s found=%d\n",fd ? fd->absFilePath().data() : "<none>",found);
+               
                if (found)
                {
                   writeMultiLineCodeLink(*g_code, fd, codeYYtext);
@@ -12860,7 +12872,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_type = g_curClassName.copy();
+               g_type = g_curClassName;
                g_name.resize(0);
                g_code->codify(codeYYtext);
                BEGIN( Body ); // variable of type struct *
@@ -12994,7 +13006,7 @@ YY_DECL {
             YY_BREAK
          case 47:
             YY_RULE_SETUP {
-               g_type = g_curClassName.copy();
+               g_type = g_curClassName;
                g_name = codeYYtext;
                if (g_insideBody)
                {
@@ -13021,7 +13033,7 @@ YY_DECL {
                g_curlyCount++;
                if (YY_START == ClassVar && g_curClassName.isEmpty())
                {
-                  g_curClassName = g_name.copy();
+                  g_curClassName = g_name;
                }
                if (g_searchingForBody)
                {
@@ -13447,7 +13459,7 @@ YY_DECL {
             /* rule 92 can match eol */
             YY_RULE_SETUP {
                // A<T> *pt;
-               int i = QByteArray(codeYYtext).find('<');
+               int i = QByteArray(codeYYtext).indexOf('<');
                QByteArray kw = QByteArray(codeYYtext).left(i).trimmed();
                if (kw.right(5) == "_cast" && YY_START == Body)
                {
@@ -13514,7 +13526,7 @@ YY_DECL {
             /* rule 97 can match eol */
             YY_RULE_SETUP {
                QByteArray text = codeYYtext;
-               int i = text.find('R');
+               int i = text.indexOf('R');
                g_code->codify(text.left(i + 1));
                startFontClass("stringliteral");
                g_code->codify(codeYYtext + i + 1);
@@ -13746,8 +13758,8 @@ YY_DECL {
                } else
                {
                   g_code->codify(codeYYtext);
-                  g_saveName = g_name.copy();
-                  g_saveType = g_type.copy();
+                  g_saveName = g_name;
+                  g_saveType = g_type;
                   if (*codeYYtext != '[' && !g_type.isEmpty())
                   {
                      //printf("g_scopeStack.bottom()=%p\n",g_scopeStack.bottom());
@@ -13941,8 +13953,8 @@ YY_DECL {
                g_theCallContext.popScope();
                g_code->codify(codeYYtext);
                // TODO: nested arrays like: a[b[0]->func()]->func()
-               g_name = g_saveName.copy();
-               g_type = g_saveType.copy();
+               g_name = g_saveName;
+               g_type = g_saveType;
             }
             YY_BREAK
          case 141:
@@ -14301,7 +14313,7 @@ YY_DECL {
                {
                   g_bodyCurlyCount++;
                }
-               if (g_name.find("::") != -1)
+               if (g_name.indexOf("::") != -1)
                {
                   DBG_CTX((stderr, "** scope stack push SCOPEBLOCK\n"));
                   g_scopeStack.push(SCOPEBLOCK);
@@ -14654,7 +14666,7 @@ YY_DECL {
             YY_RULE_SETUP {
                // special pattern /*[tag:filename]*/ to force linking to a tag file
                g_forceTagReference = codeYYtext;
-               int s = g_forceTagReference.find(':');
+               int s = g_forceTagReference.indexOf(':');
                int e = g_forceTagReference.lastIndexOf(']');
                g_forceTagReference = g_forceTagReference.mid(s + 1, e - s - 1);
             }

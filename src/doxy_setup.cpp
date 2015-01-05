@@ -306,61 +306,93 @@ struct CommandLine parseCommandLine(QStringList argList)
             if (cmdArgs.formatName == "rtf-stle") {
                cmdArgs.rtfStyle = getValue(iter, argList.end());
 
-//               QFile f;
-//               if (openOutputFile(argv[optind + 1], f)) {
-//                  RTFGenerator::writeStyleSheetFile(f);
-//               }
+/*  broom
+
+               QFile f;
+               if (openOutputFile(cmdArgs.rtfStyle, f)) {
+                  RTFGenerator::writeStyleSheetFile(f);
+               }
+               f.close();
+*/
+
+            } else  if (cmdArgs.formatName == "html-header") {
+               cmdArgs.htmlHead = getValue(iter, argList.end());
+
+               if (cmdArgs.htmlHead.isEmpty()) {
+                  cmdArgs.htmlHead = "doxy_header.html";
+               }
+
+               QFile f;
+               if (openOutputFile(cmdArgs.htmlHead, f)) {
+                  HtmlGenerator::writeHeaderFile(f, qPrintable(cmdArgs.htmlHead));
+               }
+               f.close();
+
+
+            } else  if (cmdArgs.formatName == "html-footer") {
+               cmdArgs.htmlFoot = getValue(iter, argList.end());
+
+               if (cmdArgs.htmlFoot.isEmpty()) {
+                  cmdArgs.htmlFoot = "doxy_footerer.html";
+               }
+
+               QFile f;
+               if (openOutputFile(cmdArgs.htmlFoot, f)) {
+                  HtmlGenerator::writeFooterFile(f);
+               }
+               f.close();
 
 
             } else  if (cmdArgs.formatName == "html-style") {
               cmdArgs.htmlStyle = getValue(iter, argList.end());
 
-//              QFile f;
-//              if (openOutputFile(argv[optind + 3], f)) {
-//                 HtmlGenerator::writeStyleSheetFile(f);
-//              }
 
+              if (cmdArgs.htmlStyle.isEmpty()) {
+                 cmdArgs.htmlStyle = "doxy_style.css";
+              }
 
-
-/* missing 2
-
+/* BROOM
                QFile f;
-               if (openOutputFile(argv[optind + 1], f)) {
-                  HtmlGenerator::writeHeaderFile(f, argv[optind + 3]);
+               if (openOutputFile(cmdArgs.htmlStyle, f)) {
+                  HtmlGenerator::writeStyleSheetFile(f);
                }
                f.close();
-
-               if (openOutputFile(argv[optind + 2], f)) {
-                  HtmlGenerator::writeFooterFile(f);
-               }
-
 */
+
+
+            } else if (cmdArgs.formatName == "latex-head") {
+              cmdArgs.latexHead = getValue(iter, argList.end());
+
+/* BROOM 
+               QFile f;
+               if (openOutputFile(argv[optind + 1], f)) {
+                 LatexGenerator::writeHeaderFile(f);
+               }
+               f.close();
+*/
+
+
+            } else if (cmdArgs.formatName == "latex-foot") {
+              cmdArgs.latexFoot = getValue(iter, argList.end());
+
+/* BROOM   
+               QFile f;
+               if (openOutputFile(argv[optind + 2], f)) {
+                  LatexGenerator::writeFooterFile(f);
+               }
+               f.close();
+*/ 
 
             } else if (cmdArgs.formatName == "latex-style") {
               cmdArgs.latexStyle = getValue(iter, argList.end());
 
 /* BROOM
+              QFile f;
               if (openOutputFile(argv[optind + 3], f)) {
                  LatexGenerator::writeStyleSheetFile(f);
                }
-/*
-
-
-/* missing 2
-
-               QFile f;
-               if (openOutputFile(argv[optind + 1], f)) {
-//BROOM                  LatexGenerator::writeHeaderFile(f);
-               }
                f.close();
-
-               if (openOutputFile(argv[optind + 2], f)) {
-//BROOM                  LatexGenerator::writeFooterFile(f);
-               }
-               f.close();
-
-*/ 
-
+*/
 
             } else  {
                err("Option \"-w %s\" are invalid  \n", qPrintable(cmdArgs.formatName));
