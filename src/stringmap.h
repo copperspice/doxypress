@@ -61,7 +61,7 @@ class StringMap
       return m_dict.begin();      
    }  
  
-    const_iterator begin() const {     
+   const_iterator begin() const {     
       return m_dict.begin();      
    }  
 
@@ -188,7 +188,7 @@ class StringMap
          std::sort(temp2.begin(), temp2.end(), [&dict](const T &v1, const T &v2){ return dict.compareValues(v1, v2) < 0; } );
 
          if (temp1 != temp2) {
-            std::string msg = "StringMap::Iterator Key and Value are not the same data "; 
+            std::string msg = "StringMap::Iterator Key and Value are not the same BROOM ";    // BROOM
             msg += typeid(T).name();
 
             throw std::runtime_error(msg);
@@ -208,20 +208,35 @@ class StringMap
        */
       T toFirst() {
          m_li = m_list.begin();
-         return *m_li;
+
+         if (m_li == m_list.end()) {
+            return T();
+         } else {
+            return *m_li;
+         }     
       }
 
       /*! Set the iterator to the last element in the list.
        *  \return The first compound, or zero if the list was empty.
        */
       T toLast()  {
+         if (m_list.isEmpty()) {
+            m_li = m_list.end();
+            return T();
+         }    
+
          m_li = m_list.end() - 1;
          return *m_li;
       }
 
       /*! Returns the current compound */
       T current() const {
-         return *m_li;
+
+         if (m_li == m_list.end()) {
+            return T();
+         } else {
+            return *m_li;
+         }         
       }
 
       /*! Moves the iterator to the next element.

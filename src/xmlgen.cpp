@@ -1970,7 +1970,7 @@ void generateXML()
    QDir xmlDir(outputDirectory);
    createSubDirs(xmlDir);
 
-   ResourceMgr::instance().copyResource("index.xsd", outputDirectory);
+   ResourceMgr::instance().copyResource("xml/index.xsd", outputDirectory);
 
    QByteArray fileName = outputDirectory + "/compound.xsd";
    QFile f(fileName);
@@ -1980,7 +1980,7 @@ void generateXML()
    }
 
    // write compound.xsd, but replace special marker with the entities
-   QByteArray compound_xsd = ResourceMgr::instance().getAsString("compound.xsd");
+   QByteArray compound_xsd = ResourceMgr::instance().getAsString("xml/compound.xsd");
    const char *startLine = compound_xsd.data();
 
    while (*startLine) {

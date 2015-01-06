@@ -777,8 +777,7 @@ static void computeCommonDirPrefix()
    DirSDict::Iterator sdi(Doxygen::directories);
 
    if (Doxygen::directories.count() > 0) { 
-      // we have at least one dir
-      // start will full path of first dir
+      // we have at least one dir, start will full path of first dir
       sdi.toFirst();
 
       dir   = sdi.current();
@@ -818,7 +817,8 @@ static void computeCommonDirPrefix()
                      }
                   }
 
-               } else { // dir is shorter than path -> take path of dir as new start
+               } else { 
+                  // dir is shorter than path -> take path of dir as new start
                   path = dir->name();
                   int i = path.lastIndexOf('/', l - 2);
 
@@ -836,30 +836,29 @@ static void computeCommonDirPrefix()
                count++;
             }
 
-            if (count == Doxygen::directories.count())
-               // path matches for all directories -> found the common prefix
-            {
+            if (count == Doxygen::directories.count()) {
+               // path matches for all directories -> found the common prefix            
                done = true;
             }
          }
       }
    }
-
-   for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {
+   
+   for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {   
       QByteArray diskName = dir->name().right(dir->name().length() - path.length());
       dir->setDiskName(diskName);
-      //printf("set disk name: %s -> %s\n",dir->name().data(),diskName.data());
+
+      //  printf("set disk name: %s -> %s\n",dir->name().data(),diskName.data());
    }
 }
 
 void buildDirectories()
 {
-   // for each input file
-
+   // for each input file  
    for (auto fn : *Doxygen::inputNameList) {   
     
       for (auto fd : *fn) {  
-         //printf("buildDirectories %s\n",fd->name().data());
+         // printf("buildDirectories %s\n",fd->name().data());
 
          if (fd->getReference().isEmpty() && !fd->isDocumentationFile()) {
             QSharedPointer<DirDef> dir;
@@ -882,7 +881,7 @@ void buildDirectories()
    // compute relations between directories => introduce container dirs.
  
    for (auto dir : Doxygen::directories) {  
-      //printf("New dir %s\n",dir->displayName().data());
+      // printf("New dir %s\n",dir->displayName().data());
 
       QByteArray name = dir->name();
       int i = name.lastIndexOf('/', name.length() - 2);
@@ -895,6 +894,7 @@ void buildDirectories()
          }
       }
    }
+
    computeCommonDirPrefix();
 }
 

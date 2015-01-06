@@ -3709,8 +3709,7 @@ static QByteArray stripQuotes(const char *s)
 
 //-----------------------------------------------------------------
 
-static void addXRefItem(const char *listName, const char *itemTitle,
-                        const char *listTitle, bool append)
+static void addXRefItem(const char *listName, const char *itemTitle, const char *listTitle, bool append)
 {
    Entry *docEntry = current; // inBody && previous ? previous : current;
   
@@ -3718,32 +3717,34 @@ static void addXRefItem(const char *listName, const char *itemTitle,
       return;
    }
  
-   ListItemInfo *lii = 0;
+   auto refList = Doxygen::xrefLists->find(listName);
 
-   RefList *refList = Doxygen::xrefLists->value(listName);
-
-   if (refList == 0) { // new list
-      refList = new RefList(listName, listTitle, itemTitle);
-      Doxygen::xrefLists->insert(listName, refList);
-      //printf("new list!\n");
+   if (refList == Doxygen::xrefLists->end()) { 
+      // new list     
+      Doxygen::xrefLists->insert(listName, RefList(listName, listTitle, itemTitle));      
+      refList = Doxygen::xrefLists->find(listName);
    }
 
-   if (docEntry->sli) {
-      QListIterator<ListItemInfo> slii(*docEntry->sli);
+   ListItemInfo *lii = 0;
 
-      for (slii.toFirst(); (lii = slii.current()); ++slii) {
-      
-         if (qstrcmp(lii->type, listName) == 0) {
-            //printf("found %s lii->type=%s\n",listName,lii->type);
+   if (docEntry->sli) {
+     
+      for (auto &item : *docEntry->sli) {
+         lii = &item;
+
+         if (qstrcmp(lii->type, listName) == 0) {           
             break;
          }
       }
    }
 
-   if (lii && append) { // already found item of same type just before this one
+   if (lii && append) { 
+      // already found item of same type just before this one
       //printf("listName=%s item id = %d existing\n",listName,lii->itemId);
+
       RefItem *item = refList->getRefItem(lii->itemId);
       assert(item != 0);
+
       item->text += " <p>";
 
       if (Doxygen::markdownSupport) {
@@ -3782,7 +3783,7 @@ static void addXRefItem(const char *listName, const char *itemTitle,
          docEntry->doc += cmdString;
       }
 
-      SectionInfo *si = Doxygen::sectionDict->find(anchorLabel);
+      QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(anchorLabel);
 
       if (si) {
          if (si->lineNr != -1) {
@@ -3792,9 +3793,9 @@ static void addXRefItem(const char *listName, const char *itemTitle,
          }
 
       } else {
-         si = new SectionInfo(listName, yyLineNr, anchorLabel, g_sectionTitle, SectionInfo::Anchor, g_sectionLevel);
+         si = QSharedPointer<SectionInfo>(new SectionInfo(listName, yyLineNr, anchorLabel, g_sectionTitle, SectionInfo::Anchor, g_sectionLevel));
          Doxygen::sectionDict->insert(anchorLabel, si);
-         docEntry->anchors->append(si);
+         docEntry->anchors->append(*si);
       }
    }
    outputXRef.resize(0);
@@ -3808,17 +3809,23 @@ static QByteArray addFormula()
 {
    QByteArray formLabel;
    QByteArray fText = formulaText.simplified();
-   Formula *f = 0;
+   
+   auto f = Doxygen::formulaDict->find(fText);
 
-   if ((f = Doxygen::formulaDict->find(fText)) == 0) {
-      f = new Formula(fText);
-      Doxygen::formulaList->append(f);
-      Doxygen::formulaDict->insert(fText, f);
-      formLabel.sprintf("\\form#%d", f->getId());
-      Doxygen::formulaNameDict->insert(formLabel, f);
+   if (f == Doxygen::formulaDict->end()) {
+      Formula temp = Formula(fText);
+
+      Doxygen::formulaList->append(temp);
+      Doxygen::formulaDict->insert(fText, temp);
+
+      formLabel = QString("\\form#%1").arg(temp.getId()).toUtf8();
+
+      Doxygen::formulaNameDict->insert(formLabel, temp);
+      f = Doxygen::formulaDict->find(fText);
 
    } else {
-      formLabel.sprintf("\\form#%d", f->getId());
+      formLabel = QString("\\form#%1").arg(f->getId()).toUtf8();
+
    }
 
    int i;
@@ -3846,26 +3853,30 @@ static SectionInfo::SectionType sectionLevelToType(int level)
 
 static void addSection()
 {
-   SectionInfo *si = Doxygen::sectionDict->find(g_sectionLabel);
+   QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(g_sectionLabel);
+
    if (si) {
       if (si->lineNr != -1) {
-         warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding section, (first occurrence: %s, line %d)", g_sectionLabel.data(), si->fileName.data(),
-              si->lineNr);
+         warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding section, (first occurrence: %s, line %d)", 
+                  g_sectionLabel.data(), si->fileName.data(),si->lineNr);
+
       } else {
-         warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding section, (first occurrence: %s)", g_sectionLabel.data(), si->fileName.data());
+         warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding section, (first occurrence: %s)", 
+                  g_sectionLabel.data(), si->fileName.data());
       }
+
    } else {
       // create a new section element
       g_sectionTitle += commentscanYYtext;
       g_sectionTitle = g_sectionTitle.trimmed();
-      si = new SectionInfo(yyFileName, yyLineNr, g_sectionLabel,
-                           g_sectionTitle, sectionLevelToType(g_sectionLevel), g_sectionLevel);
+      si = QSharedPointer<SectionInfo>(new SectionInfo(yyFileName, yyLineNr, g_sectionLabel,
+                           g_sectionTitle, sectionLevelToType(g_sectionLevel), g_sectionLevel));
 
       // add section to this entry
-      current->anchors->append(si);
+      current->anchors->append(*si);
 
       // add section to the global dictionary
-      Doxygen::sectionDict->append(g_sectionLabel, si);
+      Doxygen::sectionDict->insert(g_sectionLabel, si);
    }
 }
 
@@ -4060,48 +4071,6 @@ static int yyread(char *buf, int max_size)
 
 /* start command character */
 /* comment parsing states. */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #define INITIAL 0
 #define Comment 1
@@ -4688,9 +4657,9 @@ YY_DECL {
 
             {
                // language switch command
-               QByteArray langId = QString(commentscanYYtext).trimmed().data() + 2;
-               if (!langId.isEmpty() &&
-               qstricmp(Config_getEnum("OUTPUT_LANGUAGE"), langId) != 0)
+               QByteArray langId = QString(commentscanYYtext).trimmed().toUtf8().mid(2);
+
+               if (!langId.isEmpty() && qstricmp(Config_getEnum("OUTPUT_LANGUAGE"), langId) != 0)
                {
                   // enable language specific section
                   BEGIN(SkipLang);
@@ -4703,7 +4672,8 @@ YY_DECL {
             {
                // start of a formula with custom environment
                formulaText = "\\begin";
-               formulaEnv = QString(commentscanYYtext).trimmed().data() + 2;
+               formulaEnv = QString(commentscanYYtext).trimmed().toUtf8().mid(2);
+
                if (formulaEnv.at(formulaEnv.length() - 1) == '{')
                {
                   // remove trailing open brace
@@ -5885,7 +5855,7 @@ YY_DECL {
                addOutput(commentscanYYtext);
                // we add subpage labels as a kind of "inheritance" relation to prevent
                // needing to add another list to the Entry class.
-               current->extends->append(new BaseInfo(commentscanYYtext, Public, Normal));
+               current->extends->append(BaseInfo(commentscanYYtext, Public, Normal));
                BEGIN(SubpageTitle);
             }
             YY_BREAK
@@ -5940,20 +5910,23 @@ YY_DECL {
 
             {
                // found argument
-               SectionInfo *si = Doxygen::sectionDict->find(commentscanYYtext);
+               QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(commentscanYYtext);
                if (si)
                {
                   if (si->lineNr != -1) {
-                     warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding anchor, (first occurrence: %s, line %d)", commentscanYYtext, si->fileName.data(), si->lineNr);
+                     warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding anchor, (first occurrence: %s, line %d)", 
+                           commentscanYYtext, si->fileName.data(), si->lineNr);
                   } else {
-                     warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding anchor, (first occurrence: %s)", commentscanYYtext, si->fileName.data());
+                     warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding anchor, (first occurrence: %s)", 
+                           commentscanYYtext, si->fileName.data());
                   }
                } else
                {
-                  si = new SectionInfo(yyFileName, yyLineNr, commentscanYYtext, 0, SectionInfo::Anchor, 0);
-                  Doxygen::sectionDict->append(commentscanYYtext, si);
-                  current->anchors->append(si);
+                  si = QSharedPointer<SectionInfo>(new SectionInfo(yyFileName, yyLineNr, commentscanYYtext, 0, SectionInfo::Anchor, 0));
+                  Doxygen::sectionDict->insert(commentscanYYtext, si);
+                  current->anchors->append(*si);
                }
+
                addOutput(commentscanYYtext);
                BEGIN( Comment );
             }
@@ -6490,9 +6463,7 @@ YY_DECL {
 
             {
                // group id
-               current->groups->append(
-                  new Grouping(commentscanYYtext, Grouping::GROUPING_INGROUP)
-               );
+               current->groups->append(Grouping(commentscanYYtext, Grouping::GROUPING_INGROUP));
                inGroupParamFound = TRUE;
             }
             YY_BREAK
@@ -6642,9 +6613,7 @@ YY_DECL {
 
             {
                // found argument
-               current->extends->append(
-                  new BaseInfo(removeRedundantWhiteSpace(commentscanYYtext), Public, Normal)
-               );
+               current->extends->append(BaseInfo(removeRedundantWhiteSpace(commentscanYYtext), Public, Normal));
                BEGIN( Comment );
             }
             YY_BREAK
@@ -6682,9 +6651,7 @@ YY_DECL {
 
             {
                // found argument
-               current->extends->append(
-                  new BaseInfo(removeRedundantWhiteSpace(commentscanYYtext), Public, Normal)
-               );
+               current->extends->append(BaseInfo(removeRedundantWhiteSpace(commentscanYYtext), Public, Normal));
                BEGIN( Comment );
             }
             YY_BREAK
@@ -6718,6 +6685,7 @@ YY_DECL {
 
             { /* language switch */
                QByteArray langId = &commentscanYYtext[2];
+
                if (langId.isEmpty() ||
                qstricmp(Config_getEnum("OUTPUT_LANGUAGE"), langId) == 0)
                {
@@ -8515,7 +8483,8 @@ bool parseCommentBlock(/* in */     ParserInterface *parser,
    g_spaceBeforeCmd.resize(0);
    g_spaceBeforeIf.resize(0);
 
-   printlex(commentscanYY_flex_debug, TRUE, __FILE__, fileName ? fileName.data() : NULL);
+   printlex(commentscanYY_flex_debug, TRUE, __FILE__, ! fileName.isEmpty() ? fileName.constData() : NULL);
+
    if (!current->inbodyDocs.isEmpty() && isInbody) { // separate in body fragments
       current->inbodyDocs += "\n\n";
    }
@@ -8591,7 +8560,7 @@ bool parseCommentBlock(/* in */     ParserInterface *parser,
    //printf("position=%d parseMore=%d newEntryNeeded=%d\n",
    //  position,parseMore,newEntryNeeded);
 
-   printlex(commentscanYY_flex_debug, FALSE, __FILE__, fileName ? fileName.data() : NULL);
+   printlex(commentscanYY_flex_debug, FALSE, __FILE__, ! fileName.isEmpty() ? fileName.constData() : NULL);
    return parseMore;
 }
 
@@ -8673,11 +8642,12 @@ void openGroup(Entry *e, const char *, int)
       if (g_memberGroupId == DOX_NOGROUP) { // no group started yet
          static int curGroupId = 0;
 
-         MemberGroupInfo *info = new MemberGroupInfo;
+         QSharedPointer<MemberGroupInfo> info(new MemberGroupInfo);
+
          info->header = g_memberGroupHeader.trimmed();
          info->compoundName = g_compoundName;
-         g_memberGroupId = findExistingGroup(curGroupId, info);
-         //printf("    use membergroup %d\n",g_memberGroupId);
+         g_memberGroupId = findExistingGroup(curGroupId, info.data());
+ 
          Doxygen::memGrpInfoDict.insert(g_memberGroupId, info);
 
          g_memberGroupRelates = e->relates;
@@ -8693,15 +8663,18 @@ void closeGroup(Entry *e, const char *fileName, int, bool foundInline)
 
    if (g_memberGroupId != DOX_NOGROUP) { // end of member group
 
-      MemberGroupInfo *info = Doxygen::memGrpInfoDict.value(g_memberGroupId);
+      QSharedPointer<MemberGroupInfo> info = Doxygen::memGrpInfoDict.value(g_memberGroupId);
+
       if (info) { // known group
          info->doc = g_memberGroupDocs;
          info->docFile = fileName;
       }
+
       g_memberGroupId = DOX_NOGROUP;
       g_memberGroupRelates.resize(0);
       g_memberGroupDocs.resize(0);
       e->mGrpId = DOX_NOGROUP;
+
       //printf("new group id=%d\n",g_memberGroupId);
    } else if (!g_autoGroupStack.isEmpty()) { // end of auto group
       Grouping *grp = g_autoGroupStack.pop();
@@ -8738,12 +8711,15 @@ static void groupAddDocs(Entry *e, const char *fileName)
          g_memberGroupDocs += "\n\n";
       }
       g_memberGroupDocs += e->doc;
-      MemberGroupInfo *info = Doxygen::memGrpInfoDict.value(g_memberGroupId);
+
+      QSharedPointer<MemberGroupInfo> info = Doxygen::memGrpInfoDict.value(g_memberGroupId);
+
       if (info) {
          info->doc = g_memberGroupDocs;
          info->docFile = fileName;
          info->setRefItems(e->sli);
       }
+
       e->doc.resize(0);
       e->brief.resize(0);
    }

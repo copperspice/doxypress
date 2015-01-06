@@ -405,6 +405,8 @@ using namespace Doxy_Work;
 
 void parseInput()
 {
+   printf("**  Parse input files\n");   
+
    atexit(exitDoxygen);
 
    // Make sure the output directory exists
@@ -416,20 +418,20 @@ void parseInput()
    } else {
       QDir dir(outputDirectory);
 
-      if (!dir.exists()) {
+      if (! dir.exists()) {
          dir.setPath(QDir::currentPath());
 
          if (!dir.mkdir(outputDirectory)) {
-            err("tag OUTPUT_DIRECTORY: Output directory `%s' does not "
-                "exist and cannot be created\n", outputDirectory.data());
+            err("Output directory `%s' does not exist and can not be created\n", outputDirectory.data());
 
             cleanUpDoxygen();
             exit(1);
 
          } else {
-            msg("Notice: Output directory `%s' does not exist. "
-                "I have created it for you.\n", outputDirectory.data());
+            msg("Notice: Output directory `%s' did not exist, it was automatically created\n", outputDirectory.data());
+
          }
+
          dir.cd(outputDirectory);
       }
 
@@ -532,10 +534,10 @@ void parseInput()
          portable_setenv("DOTFONTPATH", curFontPath);
       }
    }
-
+  
    // Handle layout file
    LayoutDocManager::instance().init();
-
+ 
    QByteArray &layoutFileName = Config_getString("LAYOUT_FILE");
    bool defaultLayoutUsed = false;
 
@@ -543,11 +545,11 @@ void parseInput()
       layoutFileName = "DoxygenLayout.xml";
       defaultLayoutUsed = true;
    }
-
+ 
    QFile layoutFile(layoutFileName);
 
    if (layoutFile.open(QIODevice::ReadOnly)) {
-      msg("Parsing layout file %s...\n", layoutFileName.data());
+      msg("Parsing layout file %s\n", layoutFileName.data());
 
       QTextStream t(&layoutFile);
       t.setCodec("UTF-8");
@@ -557,6 +559,7 @@ void parseInput()
    } else if (!defaultLayoutUsed) {
       warn_uncond("failed to open layout file '%s' for reading!\n", layoutFileName.data());
    }
+ 
 
    /**************************************************************************
     *             Read and preprocess input                                  *
@@ -628,7 +631,8 @@ void parseInput()
    // (can be around 4MB)
 
    preFreeScanner();
-//BROOM    scanFreeScanner();
+   scanFreeScanner();
+
 //BROOM    pyscanFreeScanner();
 
    if (! Doxy_Globals::g_storage->open(QIODevice::ReadOnly)) {
@@ -637,38 +641,38 @@ void parseInput()
    }
 
    // gather information
-   Doxy_Globals::g_stats.begin("Building group list...\n");
+   Doxy_Globals::g_stats.begin("Building group list\n");
    buildGroupList(rootNav);
    organizeSubGroups(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Building directory list...\n");
+   Doxy_Globals::g_stats.begin("Building directory list\n");   
    buildDirectories();
    findDirDocumentation(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Building namespace list...\n");
+   Doxy_Globals::g_stats.begin("Building namespace list\n");
    buildNamespaceList(rootNav);
    findUsingDirectives(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Building file list...\n");
+   Doxy_Globals::g_stats.begin("Building file list\n");
    buildFileList(rootNav);
    Doxy_Globals::g_stats.end();
    //generateFileTree();
 
-   Doxy_Globals::g_stats.begin("Building class list...\n");
+   Doxy_Globals::g_stats.begin("Building class list\n");
    buildClassList(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Associating documentation with classes...\n");
+   Doxy_Globals::g_stats.begin("Associating documentation with classes\n");
    buildClassDocList(rootNav);
 
    // build list of using declarations here (global list)
    buildListOfUsingDecls(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Computing nesting relations for classes...\n");
+   Doxy_Globals::g_stats.begin("Computing nesting relations for classes\n");
    resolveClassNestingRelations();
    Doxy_Globals::g_stats.end();
 
@@ -683,11 +687,11 @@ void parseInput()
    // we don't need the list of using declaration anymore
    Doxy_Globals::g_usingDeclarations.clear();
 
-   Doxy_Globals::g_stats.begin("Building example list...\n");
+   Doxy_Globals::g_stats.begin("Building example list\n");
    buildExampleList(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Searching for enumerations...\n");
+   Doxy_Globals::g_stats.begin("Searching for enumerations\n");
    findEnums(rootNav);
    Doxy_Globals::g_stats.end();
 
@@ -695,63 +699,64 @@ void parseInput()
    // and this calls getResolvedClass we need to process
    // typedefs first so the relations between classes via typedefs
    // are properly resolved. See bug 536385 for an example.
-   Doxy_Globals::g_stats.begin("Searching for documented typedefs...\n");
+
+   Doxy_Globals::g_stats.begin("Searching for documented typedefs\n");
    buildTypedefList(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Searching for members imported via using declarations...\n");
+   Doxy_Globals::g_stats.begin("Searching for members imported via using declarations\n");
    findUsingDeclImports(rootNav);
    // this should be after buildTypedefList in order to properly import used typedefs
    findUsingDeclarations(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Searching for included using directives...\n");
+   Doxy_Globals::g_stats.begin("Searching for included using directives\n");
    findIncludedUsingDirectives();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Searching for documented variables...\n");
+   Doxy_Globals::g_stats.begin("Searching for documented variables\n");
    buildVarList(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Building interface member list...\n");
+   Doxy_Globals::g_stats.begin("Building interface member list\n");
    buildInterfaceAndServiceList(rootNav); // UNO IDL
 
-   Doxy_Globals::g_stats.begin("Building member list...\n"); // using class info only !
+   Doxy_Globals::g_stats.begin("Building member list\n"); // using class info only !
    buildFunctionList(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Searching for friends...\n");
+   Doxy_Globals::g_stats.begin("Searching for friends\n");
    findFriends();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Searching for documented defines...\n");
+   Doxy_Globals::g_stats.begin("Searching for documented defines\n");
    findDefineDocumentation(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Computing class inheritance relations...\n");
+   Doxy_Globals::g_stats.begin("Computing class inheritance relations\n");
    findClassEntries(rootNav);
    findInheritedTemplateInstances();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Computing class usage relations...\n");
+   Doxy_Globals::g_stats.begin("Computing class usage relations\n");
    findUsedTemplateInstances();
    Doxy_Globals::g_stats.end();
 
    if (Config_getBool("INLINE_SIMPLE_STRUCTS")) {
-      Doxy_Globals::g_stats.begin("Searching for tag less structs...\n");
+      Doxy_Globals::g_stats.begin("Searching for tag less structs\n");
       findTagLessClasses();
       Doxy_Globals::g_stats.end();
    }
 
-   Doxy_Globals::g_stats.begin("Flushing cached template relations that have become invalid...\n");
+   Doxy_Globals::g_stats.begin("Flushing cached template relations that have become invalid\n");
    flushCachedTemplateRelations();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Creating members for template instances...\n");
+   Doxy_Globals::g_stats.begin("Creating members for template instances\n");
    createTemplateInstanceMembers();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Computing class relations...\n");
+   Doxy_Globals::g_stats.begin("Computing class relations\n");
    computeTemplateClassRelations();
    flushUnresolvedRelations();
 
@@ -759,12 +764,12 @@ void parseInput()
    Doxy_Globals::g_classEntries.clear();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Add enum values to enums...\n");
+   Doxy_Globals::g_stats.begin("Add enum values to enums\n");
    addEnumValuesToEnums(rootNav);
    findEnumDocumentation(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Searching for member function documentation...\n");
+   Doxy_Globals::g_stats.begin("Searching for member function documentation\n");
    findObjCMethodDefinitions(rootNav);
    findMemberDocumentation(rootNav); // may introduce new members !
 
@@ -772,21 +777,21 @@ void parseInput()
    transferFunctionDocumentation();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Building page list...\n");
+   Doxy_Globals::g_stats.begin("Building page list\n");
    buildPageList(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Search for main page...\n");
+   Doxy_Globals::g_stats.begin("Search for main page\n");
    findMainPage(rootNav);
    findMainPageTagFiles(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Computing page relations...\n");
+   Doxy_Globals::g_stats.begin("Computing page relations\n");
    computePageRelations(rootNav);
    checkPageRelations();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Determining the scope of groups...\n");
+   Doxy_Globals::g_stats.begin("Determining the scope of groups\n");
    findGroupScope(rootNav);
    Doxy_Globals::g_stats.end();
 
@@ -804,12 +809,12 @@ void parseInput()
    findDocumentedEnumValues();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Computing member relations...\n");
+   Doxy_Globals::g_stats.begin("Computing member relations\n");
    mergeCategories();
    computeMemberRelations();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Building full member lists recursively...\n");
+   Doxy_Globals::g_stats.begin("Building full member lists recursively\n");
    buildCompleteMemberLists();
    Doxy_Globals::g_stats.end();
 
@@ -823,12 +828,12 @@ void parseInput()
       Doxy_Globals::g_stats.end();
    }
 
-   Doxy_Globals::g_stats.begin("Computing member references...\n");
+   Doxy_Globals::g_stats.begin("Computing member references\n");
    computeMemberReferences();
    Doxy_Globals::g_stats.end();
 
    if (Config_getBool("INHERIT_DOCS")) {
-      Doxy_Globals::g_stats.begin("Inheriting documentation...\n");
+      Doxy_Globals::g_stats.begin("Inheriting documentation\n");
       inheritDocumentation();
       Doxy_Globals::g_stats.end();
    }
@@ -836,7 +841,7 @@ void parseInput()
    // compute the shortest possible names of all files
    // without losing the uniqueness of the file names.
 
-   Doxy_Globals::g_stats.begin("Generating disk names...\n");
+   Doxy_Globals::g_stats.begin("Generating disk names\n");
 
    for (auto item : *Doxygen::inputNameList) {
       item->generateDiskNames();
@@ -844,53 +849,53 @@ void parseInput()
 
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Adding source references...\n");
+   Doxy_Globals::g_stats.begin("Adding source references\n");
    addSourceReferences();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Adding xrefitems...\n");
+   Doxy_Globals::g_stats.begin("Adding xrefitems\n");
    addListReferences();
    generateXRefPages();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Sorting member lists...\n");
+   Doxy_Globals::g_stats.begin("Sorting member lists\n");
    sortMemberLists();
    Doxy_Globals::g_stats.end();
 
    if (Config_getBool("DIRECTORY_GRAPH")) {
-      Doxy_Globals::g_stats.begin("Computing dependencies between directories...\n");
+      Doxy_Globals::g_stats.begin("Computing dependencies between directories\n");
       computeDirDependencies();
       Doxy_Globals::g_stats.end();
    }
 
-   //Doxy_Globals::g_stats.begin("Resolving citations...\n");
+   //Doxy_Globals::g_stats.begin("Resolving citations\n");
    //Doxygen::citeDict->resolve();
 
-   Doxy_Globals::g_stats.begin("Generating citations page...\n");
+   Doxy_Globals::g_stats.begin("Generating citations page\n");
    Doxygen::citeDict->generatePage();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Counting data structures...\n");
+   Doxy_Globals::g_stats.begin("Counting data structures\n");
    countDataStructures();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Resolving user defined references...\n");
+   Doxy_Globals::g_stats.begin("Resolving user defined references\n");
    resolveUserReferences();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Finding anchors and sections in the documentation...\n");
+   Doxy_Globals::g_stats.begin("Finding anchors and sections in the documentation\n");
    findSectionsInDocumentation();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Transferring function references...\n");
+   Doxy_Globals::g_stats.begin("Transferring function references\n");
    transferFunctionReferences();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Combining using relations...\n");
+   Doxy_Globals::g_stats.begin("Combining using relations\n");
    combineUsingRelations();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Adding members to index pages...\n");
+   Doxy_Globals::g_stats.begin("Adding members to index pages\n");
    addMembersToIndex();
    Doxy_Globals::g_stats.end();
 }
@@ -898,6 +903,7 @@ void parseInput()
 void generateOutput()
 {
    // Initialize output generators
+   printf("**  Generate Documention Output\n");   
 
    // dump all symbols
    if (Doxy_Globals::g_dumpSymbolMap) {
@@ -999,7 +1005,7 @@ void generateOutput()
       writeDoxFont(Config_getString("RTF_OUTPUT"));
    }
 
-   Doxy_Globals::g_stats.begin("Generating style sheet...\n");
+   Doxy_Globals::g_stats.begin("Generating style sheet\n");
    //printf("writing style info\n");
    Doxy_Globals::g_outputList->writeStyleInfo(0); // write first part
    Doxy_Globals::g_stats.end();
@@ -1011,7 +1017,7 @@ void generateOutput()
    // pages as these contain a drop down menu with options depending on
    // what categories we find in this function.
    if (generateHtml && searchEngine) {
-      Doxy_Globals::g_stats.begin("Generating search indices...\n");
+      Doxy_Globals::g_stats.begin("Generating search indices\n");
       QByteArray searchDirName = Config_getString("HTML_OUTPUT") + "/search";
       QDir searchDir(searchDirName);
 
@@ -1027,48 +1033,48 @@ void generateOutput()
       Doxy_Globals::g_stats.end();
    }
 
-   Doxy_Globals::g_stats.begin("Generating example documentation...\n");
+   Doxy_Globals::g_stats.begin("Generating example documentation\n");
    generateExampleDocs();
    Doxy_Globals::g_stats.end();
 
    if (!Htags::useHtags) {
-      Doxy_Globals::g_stats.begin("Generating file sources...\n");
+      Doxy_Globals::g_stats.begin("Generating file sources\n");
       generateFileSources();
       Doxy_Globals::g_stats.end();
    }
 
-   Doxy_Globals::g_stats.begin("Generating file documentation...\n");
+   Doxy_Globals::g_stats.begin("Generating file documentation\n");
    generateFileDocs();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Generating page documentation...\n");
+   Doxy_Globals::g_stats.begin("Generating page documentation\n");
    generatePageDocs();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Generating group documentation...\n");
+   Doxy_Globals::g_stats.begin("Generating group documentation\n");
    generateGroupDocs();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Generating class documentation...\n");
+   Doxy_Globals::g_stats.begin("Generating class documentation\n");
    generateClassDocs();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Generating namespace index...\n");
+   Doxy_Globals::g_stats.begin("Generating namespace index\n");
    generateNamespaceDocs();
    Doxy_Globals::g_stats.end();
 
    if (Config_getBool("GENERATE_LEGEND")) {
-      Doxy_Globals::g_stats.begin("Generating graph info page...\n");
+      Doxy_Globals::g_stats.begin("Generating graph info page\n");
       writeGraphInfo(*Doxy_Globals::g_outputList);
       Doxy_Globals::g_stats.end();
    }
 
-   Doxy_Globals::g_stats.begin("Generating directory documentation...\n");
+   Doxy_Globals::g_stats.begin("Generating directory documentation\n");
    generateDirDocs(*Doxy_Globals::g_outputList);
    Doxy_Globals::g_stats.end();
 
    if (Doxygen::formulaList->count() > 0 && generateHtml && !Config_getBool("USE_MATHJAX")) {
-      Doxy_Globals::g_stats.begin("Generating bitmaps for formulas in HTML...\n");
+      Doxy_Globals::g_stats.begin("Generating bitmaps for formulas in HTML\n");
       Doxygen::formulaList->generateBitmaps(Config_getString("HTML_OUTPUT"));
       Doxy_Globals::g_stats.end();
    }
@@ -1077,11 +1083,11 @@ void generateOutput()
       writeIndexHierarchy(*Doxy_Globals::g_outputList);
    }
 
-   Doxy_Globals::g_stats.begin("finalizing index lists...\n");
+   Doxy_Globals::g_stats.begin("finalizing index lists\n");
    Doxygen::indexList->finalize();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("writing tag file...\n");
+   Doxy_Globals::g_stats.begin("writing tag file\n");
    writeTagFile();
    Doxy_Globals::g_stats.end();
 
@@ -1098,31 +1104,31 @@ void generateOutput()
    }
 
    if (Config_getBool("GENERATE_XML")) {
-      Doxy_Globals::g_stats.begin("Generating XML output...\n");
+      Doxy_Globals::g_stats.begin("Generating XML output\n");
       Doxygen::generatingXmlOutput = true;
 //BROOM      generateXML();
       Doxygen::generatingXmlOutput = false;
       Doxy_Globals::g_stats.end();
    }
    if (USE_SQLITE3) {
-      Doxy_Globals::g_stats.begin("Generating SQLITE3 output...\n");
+      Doxy_Globals::g_stats.begin("Generating SQLITE3 output\n");
 //BROOM      generateSqlite3();
       Doxy_Globals::g_stats.end();
    }
 
    if (Config_getBool("GENERATE_DOCBOOK")) {
-      Doxy_Globals::g_stats.begin("Generating Docbook output...\n");
+      Doxy_Globals::g_stats.begin("Generating Docbook output\n");
  //BROOM     generateDocbook();
       Doxy_Globals::g_stats.end();
    }
 
    if (Config_getBool("GENERATE_AUTOGEN_DEF")) {
-      Doxy_Globals::g_stats.begin("Generating AutoGen DEF output...\n");
+      Doxy_Globals::g_stats.begin("Generating AutoGen DEF output\n");
       generateDEF();
       Doxy_Globals::g_stats.end();
    }
    if (Config_getBool("GENERATE_PERLMOD")) {
-      Doxy_Globals::g_stats.begin("Generating Perl module output...\n");
+      Doxy_Globals::g_stats.begin("Generating Perl module output\n");
 //BROOM      generatePerlMod();
       Doxy_Globals::g_stats.end();
    }
@@ -1148,7 +1154,7 @@ void generateOutput()
    }
 
    if (generateRtf) {
-      Doxy_Globals::g_stats.begin("Combining RTF output...\n");
+      Doxy_Globals::g_stats.begin("Combining RTF output\n");
 //BROOM      if (!RTFGenerator::preProcessFileInplace(Config_getString("RTF_OUTPUT"), "refman.rtf")) {
 //BROOM          err("An error occurred during post-processing the RTF files!\n");
 //BROOM       }
@@ -1156,27 +1162,29 @@ void generateOutput()
    }
 
    if (Config_getBool("HAVE_DOT")) {
-      Doxy_Globals::g_stats.begin("Running dot...\n");
+      Doxy_Globals::g_stats.begin("Running dot\n");
       DotManager::instance()->run();
       Doxy_Globals::g_stats.end();
    }
 
-   if (generateHtml &&
-         Config_getBool("GENERATE_HTMLHELP") &&
-         !Config_getString("HHC_LOCATION").isEmpty()) {
-      Doxy_Globals::g_stats.begin("Running html help compiler...\n");
+   if (generateHtml && Config_getBool("GENERATE_HTMLHELP") && !Config_getString("HHC_LOCATION").isEmpty()) {
+
+      Doxy_Globals::g_stats.begin("Running html help compiler\n");
       QString oldDir = QDir::currentPath();
       QDir::setCurrent(Config_getString("HTML_OUTPUT"));
       portable_sysTimerStart();
+
       if (portable_system(Config_getString("HHC_LOCATION"), "index.hhp", false)) {
          err("failed to run html help compiler on index.hhp\n");
       }
+
       portable_sysTimerStop();
       QDir::setCurrent(oldDir);
       Doxy_Globals::g_stats.end();
    }
+
    if ( generateHtml && Config_getBool("GENERATE_QHP") && !Config_getString("QHG_LOCATION").isEmpty()) {
-      Doxy_Globals::g_stats.begin("Running qhelpgenerator...\n");
+      Doxy_Globals::g_stats.begin("Running qhelpgenerator\n");
 
       QString qhpFileName = Qhp::getQhpFileName();
       QString qchFileName = getQchFileName();
@@ -1211,17 +1219,17 @@ void generateOutput()
 
    }
 
-   // Start cleaning up
-   cleanUpDoxygen();
-
+   // all done, cleaning up and exit
    finializeSearchIndexer();
    Doxygen::symbolStorage->close();
 
    QDir thisDir;
    thisDir.remove(Doxygen::objDBFileName);
+
    Config::deleteInstance();
 
-   delete Doxygen::symbolMap;
+   cleanUpDoxygen();
+   
    delete Doxygen::clangUsrMap;
    delete Doxygen::symbolStorage;
 
@@ -1866,7 +1874,7 @@ QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QByteArr
          innerScope->setOuterScope(prevScope.data());
 
       } else {
-         // current scope is a class, so return only the namespace part...
+         // current scope is a class, so return only the namespace part
          return prevScope;
       }
 
@@ -7901,13 +7909,13 @@ void Doxy_Work::generateFileSources()
                   fd->startParsing();
 
                   if (fd->generateSourceFile()) { // sources need to be shown in the output
-                     msg("Generating code for file %s...\n", fd->docName().data());
+                     msg("Generating code for file %s\n", fd->docName().data());
                      fd->writeSource(*Doxy_Globals::g_outputList, false, filesInSameTu);
 
                   } else if (!fd->isReference() && Doxygen::parseSourcesNeeded) {
                      // we needed to parse the sources even if we do not show them
                   
-                     msg("Parsing code for file %s...\n", fd->docName().data());
+                     msg("Parsing code for file %s\n", fd->docName().data());
                      fd->parseSource(false, filesInSameTu);
                   }
 
@@ -7922,13 +7930,13 @@ void Doxy_Work::generateFileSources()
 
                         if (ifd && !ifd->isReference()) {
                            if (ifd->generateSourceFile()) { // sources need to be shown in the output
-                              msg(" Generating code for file %s...\n", ifd->docName().data());
+                              msg(" Generating code for file %s\n", ifd->docName().data());
                               ifd->writeSource(*Doxy_Globals::g_outputList, true, moreFiles);
 
                            } else if (!ifd->isReference() && Doxygen::parseSourcesNeeded)  {
                               // we needed to parse the sources even if we do not show them
                            
-                              msg(" Parsing code for file %s...\n", ifd->docName().data());
+                              msg(" Parsing code for file %s\n", ifd->docName().data());
                               ifd->parseSource(true, moreFiles);
                            }
 
@@ -7954,13 +7962,13 @@ void Doxy_Work::generateFileSources()
                   fd->startParsing();
 
                   if (fd->generateSourceFile()) { // sources need to be shown in the output
-                     msg("Generating code for file %s...\n", fd->docName().data());
+                     msg("Generating code for file %s\n", fd->docName().data());
                      fd->writeSource(*Doxy_Globals::g_outputList, false, filesInSameTu);
 
                   } else if (!fd->isReference() && Doxygen::parseSourcesNeeded)
                      // we needed to parse the sources even if we do not show them
                   {
-                     msg("Parsing code for file %s...\n", fd->docName().data());
+                     msg("Parsing code for file %s\n", fd->docName().data());
                      fd->parseSource(false, filesInSameTu);
                   }
                   fd->finishParsing();
@@ -7978,13 +7986,13 @@ void Doxy_Work::generateFileSources()
                fd->startParsing();
 
                if (fd->generateSourceFile()) { // sources need to be shown in the output
-                  msg("Generating code for file %s...\n", fd->docName().data());
+                  msg("Generating code for file %s\n", fd->docName().data());
                   fd->writeSource(*Doxy_Globals::g_outputList, false, filesInSameTu);
 
                } else if (!fd->isReference() && Doxygen::parseSourcesNeeded) {
                   // we needed to parse the sources even if we do not show them
                
-                  msg("Parsing code for file %s...\n", fd->docName().data());
+                  msg("Parsing code for file %s\n", fd->docName().data());
                   fd->parseSource(false, filesInSameTu);
                }
 
@@ -8009,7 +8017,7 @@ void Doxy_Work::generateFileDocs()
             bool doc = fd->isLinkableInProject();
 
             if (doc) {
-               msg("Generating docs for file %s...\n", fd->docName().data());
+               msg("Generating docs for file %s\n", fd->docName().data());
                fd->writeDocumentation(*Doxy_Globals::g_outputList);
             }
          }
@@ -8081,7 +8089,7 @@ void Doxy_Work::generateClassList(ClassSDict &classSDict)
          // template instances
 
          if ( cd->isLinkableInProject() && cd->templateMaster() == 0) {
-            msg("Generating docs for compound %s...\n", cd->name().data());
+            msg("Generating docs for compound %s\n", cd->name().data());
 
             cd->writeDocumentation(*Doxy_Globals::g_outputList);
             cd->writeMemberList(*Doxy_Globals::g_outputList);
@@ -8701,7 +8709,7 @@ void Doxy_Work::generatePageDocs()
    for (auto pd : *Doxygen::pageSDict) {
 
       if (!pd->getGroupDef() && !pd->isReference()) {
-         msg("Generating docs for page %s...\n", pd->name().data());
+         msg("Generating docs for page %s\n", pd->name().data());
 
          Doxygen::insideMainPage = true;
          pd->writeDocumentation(*Doxy_Globals::g_outputList);
@@ -8758,8 +8766,8 @@ void Doxy_Work::generateExampleDocs()
    Doxy_Globals::g_outputList->disable(OutputGenerator::Man);
   
    for (auto pd : *Doxygen::exampleSDict) {
-      msg("Generating docs for example %s...\n", pd->name().data());
-//BROOM       resetCCodeParserState();
+      msg("Generating docs for example %s\n", pd->name().data());
+      resetCCodeParserState();
 
       QByteArray n = pd->getOutputFileBase();
       startFile(*Doxy_Globals::g_outputList, n, n, pd->name());
@@ -8806,8 +8814,8 @@ void Doxy_Work::generateGroupDocs()
 // generate module pages
 void Doxy_Work::generateNamespaceDocs()
 {
-   // for each namespace...
-     for (auto nd : *Doxygen::namespaceSDict) {
+   // for each namespace
+   for (auto nd : *Doxygen::namespaceSDict) {
 
       if (nd->isLinkableInProject()) {
          msg("Generating docs for namespace %s\n", nd->name().data());
@@ -8821,7 +8829,7 @@ void Doxy_Work::generateNamespaceDocs()
               // skip external references, anonymous compounds and
               // template instances and nested classes             
          
-            msg("Generating docs for compound %s...\n", cd->name().data());
+            msg("Generating docs for compound %s\n", cd->name().data());
 
             cd->writeDocumentation(*Doxy_Globals::g_outputList);
             cd->writeMemberList(*Doxy_Globals::g_outputList);
@@ -8975,14 +8983,14 @@ void Doxy_Work::parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNa
 
    if (Config_getBool("ENABLE_PREPROCESSING") && parser->needsPreprocessing(extension)) {
       BufStr inBuf(fi.size() + 4096);
-      msg("Preprocessing %s...\n", fn);
+      msg("Preprocessing %s\n", fn);
 
       readInputFile(fileName, inBuf);
       preprocessFile(fileName, inBuf, preBuf);
 
    } else { 
       // no preprocessing
-      msg("Reading %s...\n", fn);
+      msg("Reading %s\n", fn);
       readInputFile(fileName, preBuf);
    }
 
@@ -9195,7 +9203,7 @@ void Doxy_Work::exitDoxygen()
       // premature exit
 
       QDir thisDir;
-      msg("Exiting...\n");
+      msg("Exiting\n");
 
       if (! Doxygen::entryDBFileName.isEmpty()) {
          thisDir.remove(Doxygen::entryDBFileName);
@@ -9229,15 +9237,14 @@ void Doxy_Work::readTagFile(Entry *root, const char *tl)
 
    QFileInfo fi(fileName);
    if (! fi.exists() || !fi.isFile()) {
-      err("Tag file `%s' does not exist or is not a file. Skipping it...\n",
-          fileName.data());
+      err("Tag file `%s' does not exist or is not a file.\n", fileName.data());
       return;
    }
 
    if (!destName.isEmpty()) {
-      msg("Reading tag file `%s', location `%s'...\n", fileName.data(), destName.data());
+      msg("Reading tag file `%s', location `%s'\n", fileName.data(), destName.data());
    } else {
-      msg("Reading tag file `%s'...\n", fileName.data());
+      msg("Reading tag file `%s'\n", fileName.data());
    }
 
    parseTagFile(root, fi.absoluteFilePath().toUtf8());
@@ -9255,8 +9262,9 @@ QByteArray Doxy_Work::createOutputDirectory(const QByteArray &baseDirName, const
    }
 
    QDir formatDir(formatDirName);
-   if (!formatDir.exists() && !formatDir.mkdir(formatDirName)) {
+   if (! formatDir.exists() && !formatDir.mkdir(formatDirName)) {
       err("Could not create output directory %s\n", formatDirName.data());
+
       cleanUpDoxygen();
       exit(1);
    }
@@ -9312,7 +9320,7 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
 
          if (! cfi.exists() || ! cfi.isReadable()) {
             if (errorIfNotExist) {
-               warn_uncond("source %s is not a readable file or directory... skipping.\n", cfi.absoluteFilePath().data());
+               warn_uncond("Source %s is not a readable file or directory\n", cfi.absoluteFilePath().data());
             }
 
          } else if (cfi.isFile() && (! Config_getBool("EXCLUDE_SYMLINKS") || ! cfi.isSymLink()) &&
@@ -9399,7 +9407,7 @@ int readFileOrDirectory(const QString &s, SortedList<FileName *> *fnList, FileNa
 
       if (! fi.exists() || ! fi.isReadable()) {
          if (errorIfNotExist) {
-            warn_uncond("Source %s is not a readable file or directory... skipping.\n", qPrintable(s));
+            warn_uncond("Source %s is not a readable file or directory\n", qPrintable(s));
          }
 
       } else if (! Config_getBool("EXCLUDE_SYMLINKS") || ! fi.isSymLink()) {
@@ -9467,7 +9475,7 @@ void readFormulaRepository()
    QFile f(Config_getString("HTML_OUTPUT") + "/formula.repository");
 
    if (f.open(QIODevice::ReadOnly)) { // open repository
-      msg("Reading formula repository...\n");
+      msg("Reading formula repository\n");
       QTextStream t(&f);
       QByteArray line;
 
@@ -9627,7 +9635,7 @@ int Doxy_Work::computeIdealCacheParam(uint v)
 static void stopDoxygen(int)
 {
    QDir thisDir;
-   msg("Cleaning up...\n");
+   msg("Cleaning up\n");
 
    if (! Doxygen::entryDBFileName.isEmpty()) {
       thisDir.remove(Doxygen::entryDBFileName);
@@ -9738,7 +9746,7 @@ void searchInputFiles()
    StringDict excludeNameDict;
 
    // gather names of all files in the include path
-   Doxy_Globals::g_stats.begin("Searching for include files...\n");
+   Doxy_Globals::g_stats.begin("Searching for include files\n");
    QStringList &includePathList = Config_getList("INCLUDE_PATH");
 
    for (auto s : includePathList) {
@@ -9753,7 +9761,7 @@ void searchInputFiles()
    Doxy_Globals::g_stats.end();
 
    //
-   Doxy_Globals::g_stats.begin("Searching for example files...\n");
+   Doxy_Globals::g_stats.begin("Searching for example files\n");
    QStringList &examplePathList = Config_getList("EXAMPLE_PATH");
 
    for (auto s : examplePathList) {
@@ -9763,7 +9771,7 @@ void searchInputFiles()
    Doxy_Globals::g_stats.end();
 
    //
-   Doxy_Globals::g_stats.begin("Searching for images...\n");
+   Doxy_Globals::g_stats.begin("Searching for images\n");
 
    QStringList &imagePathList = Config_getList("IMAGE_PATH");
 
@@ -9773,7 +9781,7 @@ void searchInputFiles()
    Doxy_Globals::g_stats.end();
 
    //
-   Doxy_Globals::g_stats.begin("Searching for dot files...\n");
+   Doxy_Globals::g_stats.begin("Searching for dot files\n");
    QStringList &dotFileList = Config_getList("DOTFILE_DIRS");
 
    for (auto s : dotFileList) {
@@ -9782,7 +9790,7 @@ void searchInputFiles()
    Doxy_Globals::g_stats.end();
 
    //
-   Doxy_Globals::g_stats.begin("Searching for msc files...\n");
+   Doxy_Globals::g_stats.begin("Searching for msc files\n");
    QStringList &mscFileList = Config_getList("MSCFILE_DIRS");
 
    for (auto s : mscFileList) {
@@ -9791,7 +9799,7 @@ void searchInputFiles()
    Doxy_Globals::g_stats.end();
 
    //
-   Doxy_Globals::g_stats.begin("Searching for dia files...\n");
+   Doxy_Globals::g_stats.begin("Searching for dia files\n");
    QStringList &diaFileList = Config_getList("DIAFILE_DIRS");
 
    for (auto s : diaFileList) {
@@ -9808,7 +9816,7 @@ void searchInputFiles()
    Doxy_Globals::g_stats.end();
 
    // Determine Input Files
-   Doxy_Globals::g_stats.begin("Searching for files to process...\n");
+   Doxy_Globals::g_stats.begin("Searching for files to process\n");
 
    QHash<QString, void *> killDict;
    QStringList &inputList = Config_getList("INPUT");

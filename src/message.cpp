@@ -215,7 +215,7 @@ void err(const char *fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   QByteArray temp = "Error:";   
+   QByteArray temp = "Error: ";   
    vfprintf(warnFile, (temp + fmt).constData(), args);
 
    va_end(args);

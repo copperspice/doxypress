@@ -693,7 +693,7 @@ static void generateJSNavTree(const QList<FTVNode *> &nodeList)
       t << endl << "var SYNCONMSG = '"  << theTranslator->trPanelSynchronisationTooltip(false) << "';";
       t << endl << "var SYNCOFFMSG = '" << theTranslator->trPanelSynchronisationTooltip(true)  << "';";
    }
-   ResourceMgr::instance().copyResource("navtree.js", htmlOutput);
+   ResourceMgr::instance().copyResource("html/navtree.js", htmlOutput);
 }
 
 //-----------------------------------------------------------
@@ -704,12 +704,12 @@ void FTVHelp::generateTreeViewImages()
    QByteArray dname = Config_getString("HTML_OUTPUT");
    const ResourceMgr &rm = ResourceMgr::instance();
 
-   rm.copyResource("doc.luma", dname);
-   rm.copyResource("folderopen.luma", dname);
-   rm.copyResource("folderclosed.luma", dname);
-   rm.copyResource("arrowdown.luma", dname);
-   rm.copyResource("arrowright.luma", dname);
-   rm.copyResource("splitbar.lum", dname);
+   rm.copyResource("html/doc.luma", dname);
+   rm.copyResource("html/folderopen.luma", dname);
+   rm.copyResource("html/folderclosed.luma", dname);
+   rm.copyResource("html/arrowdown.luma", dname);
+   rm.copyResource("html/arrowright.luma", dname);
+   rm.copyResource("html/splitbar.lum", dname);
 }
 
 // new style scripts
@@ -721,8 +721,8 @@ void FTVHelp::generateTreeViewScripts()
    generateJSNavTree(m_indentNodes[0]);
 
    // copy resize.js & navtree.css
-   ResourceMgr::instance().copyResource("resize.js", htmlOutput);
-   ResourceMgr::instance().copyResource("navtree.css", htmlOutput);
+   ResourceMgr::instance().copyResource("html/resize.js", htmlOutput);
+   ResourceMgr::instance().copyResource("html/navtree.css", htmlOutput);
 }
 
 // write tree inside page

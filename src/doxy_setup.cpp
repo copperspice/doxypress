@@ -103,7 +103,7 @@ void initDoxygen()
    Doxygen::parserManager->registerParser("c", new CLanguageScanner);
 
 // BROOM  (out for now)
-//   Doxygen::parserManager->registerParser("python", new PythonLanguageScanner);
+//   Doxygen::parserManager->registerParser("python",       new PythonLanguageScanner);
 
 // BROOM  (out for now)
 //   Doxygen::parserManager->registerParser("fortran",      new FortranLanguageScanner);
@@ -161,7 +161,7 @@ void initDoxygen()
    Doxygen::formulaNameDict   = new FormulaDict();
    Doxygen::sectionDict       = new SectionDict();
 
-   // Initialize some global constants
+   // Initialize global constants
    Doxy_Globals::g_compoundKeywordDict.insert("template class", (void *)8);
    Doxy_Globals::g_compoundKeywordDict.insert("template struct", (void *)8);
    Doxy_Globals::g_compoundKeywordDict.insert("class",  (void *)8);
@@ -197,30 +197,11 @@ void cleanUpDoxygen()
 
    delete theTranslator;
    delete Doxy_Globals::g_outputList;
-
-   printf("\n\n Clean Up - ONE");
-
+   delete Doxygen::symbolMap;
+  
    Mappers::freeMappers();
-//BROOM    codeFreeScanner();
-
-   if (Doxygen::symbolMap) {
-      // iterate through Doxygen::symbolMap and delete all
-      // DefinitionList objects, since they have no owner
-     
-      for (auto dli = Doxygen::symbolMap->begin(); dli != Doxygen::symbolMap->end(); ) {
-
-         if ((*dli)->definitionType() == DefinitionIntf::TypeSymbolList) {
-            DefinitionIntf *tmp = Doxygen::symbolMap->take(dli.key());
-            delete (DefinitionList *)tmp;
-
-         } else {
-            ++dli;
-         }
-      }
-   }
-
-   printf("\n\n Clean Up - TWO");
-
+   codeFreeScanner();
+   
    delete Doxygen::inputNameList;
    delete Doxygen::memberNameSDict;
    delete Doxygen::functionNameSDict;
@@ -237,8 +218,7 @@ struct CommandLine parseCommandLine(QStringList argList)
 
    QMap<QString, Options> argMap;
    argMap.insert( "--b", OUTPUT_WIZARD   );
-   argMap.insert( "--d", DEBUG_DUMP      );
-   argMap.insert( "--e", RTF_EXTENSIONS  );
+   argMap.insert( "--d", DEBUG_DUMP      );   
    argMap.insert( "--g", BLANK_CFG       );
    argMap.insert( "--h", HELP            );
    argMap.insert( "--l", BLANK_LAYOUT    );
@@ -269,8 +249,11 @@ struct CommandLine parseCommandLine(QStringList argList)
       switch (value) {
 
          case INVALID:
+            msg("\n");
             err("Option %s is invalid\n", qPrintable(item)); 
-            exit(0);
+
+            cleanUpDoxygen();
+            exit(0);      
             
          case BLANK_CFG:
             cmdArgs.genConfig  = true;
@@ -280,16 +263,18 @@ struct CommandLine parseCommandLine(QStringList argList)
                cmdArgs.configName = "Doxyfile.json";
             }
 
+            cmdArgs.generateDoxy = false;   
             break;
 
          case BLANK_LAYOUT:
-            cmdArgs. genLayout  = true;
+            cmdArgs.genLayout = true;
             cmdArgs.layoutName = getValue(iter, argList.end());
            
             if (cmdArgs.layoutName.isEmpty()) {
                cmdArgs.layoutName = "DoxygenLayout.xml";
             }
 
+            cmdArgs.generateDoxy = false; 
             break;
 
          case BLANK_STYLE:
@@ -303,11 +288,29 @@ struct CommandLine parseCommandLine(QStringList argList)
 
             cmdArgs.formatName = cmdArgs.formatName.toLower();
 
-            if (cmdArgs.formatName == "rtf-stle") {
+            if (cmdArgs.formatName == "rtf-ext") {
+               cmdArgs.rtfExt = getValue(iter, argList.end());
+
+               if (cmdArgs.rtfExt.isEmpty()) {
+                  cmdArgs.rtfExt = "doxy_style.rtf";
+               }
+
+/*   BROOM rtf
+               QFile f;
+               if (openOutputFile(cmdArgs.rtfExt, f)) {
+                   RTFGenerator::writeExtensionsFile(f);
+               }
+               f.close();                
+*/
+
+            } else if (cmdArgs.formatName == "rtf-style") {
                cmdArgs.rtfStyle = getValue(iter, argList.end());
 
-/*  broom
+               if (cmdArgs.rtfStyle.isEmpty()) {
+                  cmdArgs.rtfStyle = "doxy_style.rtf";
+               }
 
+/*  broom rtf
                QFile f;
                if (openOutputFile(cmdArgs.rtfStyle, f)) {
                   RTFGenerator::writeStyleSheetFile(f);
@@ -315,7 +318,7 @@ struct CommandLine parseCommandLine(QStringList argList)
                f.close();
 */
 
-            } else  if (cmdArgs.formatName == "html-header") {
+            } else  if (cmdArgs.formatName == "html-head") {
                cmdArgs.htmlHead = getValue(iter, argList.end());
 
                if (cmdArgs.htmlHead.isEmpty()) {
@@ -324,16 +327,16 @@ struct CommandLine parseCommandLine(QStringList argList)
 
                QFile f;
                if (openOutputFile(cmdArgs.htmlHead, f)) {
-                  HtmlGenerator::writeHeaderFile(f, qPrintable(cmdArgs.htmlHead));
+                  HtmlGenerator::writeHeaderFile(f);
                }
                f.close();
 
 
-            } else  if (cmdArgs.formatName == "html-footer") {
+            } else  if (cmdArgs.formatName == "html-foot") {
                cmdArgs.htmlFoot = getValue(iter, argList.end());
 
                if (cmdArgs.htmlFoot.isEmpty()) {
-                  cmdArgs.htmlFoot = "doxy_footerer.html";
+                  cmdArgs.htmlFoot = "doxy_footer.html";
                }
 
                QFile f;
@@ -346,38 +349,41 @@ struct CommandLine parseCommandLine(QStringList argList)
             } else  if (cmdArgs.formatName == "html-style") {
               cmdArgs.htmlStyle = getValue(iter, argList.end());
 
-
               if (cmdArgs.htmlStyle.isEmpty()) {
                  cmdArgs.htmlStyle = "doxy_style.css";
               }
 
-/* BROOM
                QFile f;
                if (openOutputFile(cmdArgs.htmlStyle, f)) {
                   HtmlGenerator::writeStyleSheetFile(f);
                }
                f.close();
-*/
 
 
             } else if (cmdArgs.formatName == "latex-head") {
               cmdArgs.latexHead = getValue(iter, argList.end());
 
-/* BROOM 
+               if (cmdArgs.latexHead.isEmpty()) {
+                  cmdArgs.latexHead = "doxy_header.latex";
+               }
+/* BROOM  latex
                QFile f;
-               if (openOutputFile(argv[optind + 1], f)) {
+               if (openOutputFile(cmdArgs.latexHead, f)) {
                  LatexGenerator::writeHeaderFile(f);
                }
                f.close();
 */
 
-
             } else if (cmdArgs.formatName == "latex-foot") {
               cmdArgs.latexFoot = getValue(iter, argList.end());
+   
+               if (cmdArgs.latexFoot.isEmpty()) {
+                  cmdArgs.latexFoot = "doxy_footer.latex";
+               }
 
-/* BROOM   
+/* BROOM  latex
                QFile f;
-               if (openOutputFile(argv[optind + 2], f)) {
+               if (openOutputFile(cmdArgs.latexFoot, f)) {
                   LatexGenerator::writeFooterFile(f);
                }
                f.close();
@@ -386,23 +392,27 @@ struct CommandLine parseCommandLine(QStringList argList)
             } else if (cmdArgs.formatName == "latex-style") {
               cmdArgs.latexStyle = getValue(iter, argList.end());
 
-/* BROOM
+               if (cmdArgs.htmlStyle.isEmpty()) {
+                  cmdArgs.htmlStyle= "doxy_style.latex";
+               }
+
+/* BROOM latex
               QFile f;
-              if (openOutputFile(argv[optind + 3], f)) {
+              if (openOutputFile(cmdArgs.latexStyle, f)) {
                  LatexGenerator::writeStyleSheetFile(f);
                }
                f.close();
 */
 
             } else  {
-               err("Option \"-w %s\" are invalid  \n", qPrintable(cmdArgs.formatName));
+               err("Option \"-w %s\" is invalid\n", qPrintable(cmdArgs.formatName));
                cleanUpDoxygen();
                exit(1);
 
             }
 
-            cleanUpDoxygen();
-            exit(0);
+            cmdArgs.generateDoxy = false; 
+            break;
 
          case DEBUG_DUMP:
             cmdArgs.debugLabel = getValue(iter, argList.end());
@@ -425,40 +435,9 @@ struct CommandLine parseCommandLine(QStringList argList)
          case DEBUG_SYMBOLS:
             Doxy_Globals::g_dumpSymbolMap = true;
             break;
-       
-         case RTF_EXTENSIONS:
-            cmdArgs.formatName = getValue(iter, argList.end());
-
-            if (cmdArgs.formatName.isEmpty()) {
-               err("Option \"-e\" is missing an RTF format specifier\n");
-               cleanUpDoxygen();
-               exit(1);
-            }
-
-/*   BROOM
-            if (qstricmp(formatName, "rtf") == 0) {
-               if (optind + 1 >= argc) {
-                  err("option \"-e rtf\" is missing an extensions file name\n");
-                  cleanUpDoxygen();
-                  exit(1);
-               }
-
-               QFile f;
-               if (openOutputFile(argv[optind + 1], f)) {
-                   RTFGenerator::writeExtensionsFile(f);
-               }
-
-               cleanUpDoxygen();
-               exit(0);
-            }
-*/
-
-            err("Option \"-e\" has invalid format specifier.\n");
-            cleanUpDoxygen();
-            exit(1);
           
          case DOXY_VERSION:
-            msg("%s\n", versionString);
+            msg("\nCS Doxygen Version: %s\n", versionString);
 
             cleanUpDoxygen();
             exit(0);
@@ -471,10 +450,15 @@ struct CommandLine parseCommandLine(QStringList argList)
 
          case HELP:       
             usage();
+
+            cleanUpDoxygen();
             exit(0);                    
       }      
    }
 
+   // is there anything left in the arguemnent list
+   cmdArgs.configName = getValue(iter, argList.end());
+ 
    return cmdArgs;
 }
 
@@ -484,50 +468,45 @@ void readConfiguration(struct CommandLine cmdArgs)
    Config::instance()->init();
 
    if (cmdArgs.genConfig) {
-      generateConfigFile(cmdArgs.configName);
-      cleanUpDoxygen();
-      exit(0);
+      generateConfigFile(cmdArgs.configName);     
    } 
 
    if (cmdArgs.genLayout) {
-      writeDefaultLayoutFile(cmdArgs.layoutName);
+      writeDefaultLayoutFile(cmdArgs.layoutName);      
+   }
+
+   if (! cmdArgs.generateDoxy) {      
       cleanUpDoxygen();
-      exit(0);
+      exit(0);      
    }
 
+   if (cmdArgs.configName.isEmpty()) {
+   
+      for (auto item : QDir::current().entryList()) {          
 
-/*   BROOM - out for initial test
-
-   QFileInfo configFileInfo1("Doxyfile"), configFileInfo2("doxyfile");
-
-   if (optind >= argc) {
-      if (configFileInfo1.exists()) {
-         configName = "Doxyfile";
-
-      } else if (configFileInfo2.exists()) {
-         configName = "doxyfile";
-
-      } else {
-         err("CS Doxyfile not found and no input file specified!\n");
-         usage();
-         exit(1);
+         if (item.compare("doxyfile", Qt::CaseInsensitive) == 0) {
+            cmdArgs.configName = item;
+            break;
+         } 
       }
+     
+      if (cmdArgs.configName.isEmpty()) {
+         err("No configuration file name was specified and 'Doxyfile' was not found"); 
 
-   } else {
-      QFileInfo fi(argv[optind]);
-
-      if (fi.exists() || qstrcmp(argv[optind], "-") == 0) {
-         configName = argv[optind];
-
-      } else {
-         err("Configuration file %s was not found\n", argv[optind]);
-         usage();
+         cleanUpDoxygen();
          exit(1);
-      }
+      }        
+   }  
+
+   QFileInfo fi(cmdArgs.configName);
+
+   if (! fi.exists()) {  
+      err("Configuration file %s was not found\n", qPrintable(cmdArgs.configName));
+
+      cleanUpDoxygen();
+      exit(1);
    }
-
-
-*/
+  
 
    // printf("\n  Parse the Json file here ");
    // add test for failures
@@ -536,21 +515,22 @@ void readConfiguration(struct CommandLine cmdArgs)
    
    if (! Config::instance()->parse( qPrintable(cmdArgs.configName) )) {
       err("Unable to open or read configuration file %s\n", qPrintable(cmdArgs.configName));
+
       cleanUpDoxygen();
       exit(1);
    }
-
   
    // Perlmod wants to know the path to the config file
    QFileInfo configFileInfo(cmdArgs.configName);
-//BROOM   setPerlModDoxyfile(qPrintable(configFileInfo.absoluteFilePath()));
+
+//BROOM   setPerlModDoxyfile(qPrintable(cmdArgs.configName.absoluteFilePath()));
 
 }
 
 // check and resolve config options
 void checkConfiguration()
 {
-   printf("\n  Verify the cfg file is ok");   
+   printf("\n**  Verifying the configuration file\n");   
 
    Config::instance()->substituteEnvironmentVars();
    Config::instance()->convertStrToVal();
@@ -559,15 +539,10 @@ void checkConfiguration()
 
 }
 
-
 // adjust globals that depend on configuration settings 
 void adjustConfiguration()
 {
-
-   printf("\n  Adjust the Cfg file");   
-
-
-/*
+   printf("**  Adjust the Configuration file\n");   
 
    QByteArray outputLanguage = Config_getEnum("OUTPUT_LANGUAGE");
 
@@ -576,12 +551,10 @@ void adjustConfiguration()
    }
 
    QStringList &includePath = Config_getList("INCLUDE_PATH");
-   char *s = includePath.first();
-
-   while (s) {
+ 
+   for (auto s : includePath) { 
       QFileInfo fi(s);
-      addSearchDir(fi.absoluteFilePath().toUtf8());
-      s = includePath.next();
+      addSearchDir(fi.absoluteFilePath().toUtf8());      
    }
 
    // Set the global html file extension. 
@@ -592,46 +565,40 @@ void adjustConfiguration()
 
    Doxygen::markdownSupport = Config_getBool("MARKDOWN_SUPPORT");
 
-
    // Add custom extension mappings 
    QStringList &extMaps = Config_getList("EXTENSION_MAPPING");
-   char *mapping = extMaps.first();
-
-   while (mapping) {
-      QByteArray mapStr = mapping;
+  
+   for (auto mapping : extMaps) {
+      QString mapStr = mapping;
       int i;
 
-      if ((i = mapStr.find('=')) != -1) {
-         QByteArray ext = mapStr.left(i).trimmed().toLower();
-         QByteArray language = mapStr.mid(i + 1).trimmed().toLower();
+      if ((i = mapStr.indexOf('=')) != -1) {
+         QString ext = mapStr.left(i).trimmed().toLower();
+         QString language = mapStr.mid(i + 1).trimmed().toLower();
 
-         if (!updateLanguageMapping(ext, language)) {
-            err("Failed to map file extension '%s' to unsupported language '%s'.\n"
-                "Check the EXTENSION_MAPPING setting in the config file.\n", ext.data(), language.data());
+         if (! updateLanguageMapping(ext.toUtf8(), language.toUtf8())) {
+            err("Unable to map file extension '%s' to '%s', verify the EXTENSION_MAPPING settings\n", qPrintable(ext), qPrintable(language));
 
          } else {
-            msg("Adding custom extension mapping: .%s will be treated as language %s\n", ext.data(), language.data());
+            msg("Adding custom extension mapping: .%s will be treated as language %s\n", qPrintable(ext), qPrintable(language));
          }
       }
 
-      mapping = extMaps.next();
-   }
-
+   }     
 
    // add predefined macro name to a dictionary
    QStringList &expandAsDefinedList = Config_getList("EXPAND_AS_DEFINED");
 
-   s = expandAsDefinedList.first();
-
-   while (s) {
+   for (auto s : expandAsDefinedList) {
       if (Doxygen::expandAsDefinedDict[s] == 0) {
          Doxygen::expandAsDefinedDict.insert(s, (void *)666);
-      }
-      s = expandAsDefinedList.next();
+      }      
    }
 
    // read aliases and store them in a dictionary
    readAliases();
+
+/* Broom - should not need this code
 
    // store number of spaces in a tab into Doxygen::spaces
    int &tabSize = Config_getInt("TAB_SIZE");
@@ -644,8 +611,8 @@ void adjustConfiguration()
    }
 
    Doxygen::spaces.at(tabSize) = '\0';
-
 */
+
 
 }
 
@@ -727,48 +694,45 @@ bool Doxy_Setup::openOutputFile(const QString &outFile, QFile &f)
 
 void Doxy_Setup::usage()
 {
-   msg("CS Doxygen: Version %s\n", versionString);
-
-   msg("\n"); 
-   msg("Generate a blank configuration file:\n");
-   msg("   --g [config file name]\n\n");  
-   msg("   Defalut file name is `Doxyfile.json'\n");
-
    msg("\n");
-   msg("Generate a layout file to configure the documentation:\n");
-   msg("   --l [layout file name]\n\n");
-   msg("   Default file name is `Layout.xml'\n");
+   msg("CS Doxygen: Version %s\n", versionString);
 
    msg("\n");
    msg("Generate documentation using an existing configuration file:\n");   
-   msg("   [config file name]\n\n");
-  
+   msg("   [config file name]\n");
+
+   msg("\n"); 
+   msg("Generate a blank configuration file:\n");
+   msg("   --g [config file name]   Default file name is `Doxyfile.json'\n");  
+   
+   msg("\n");
+   msg("Generate a layout file to configure the documentation:\n");
+   msg("   --l [layout file name]   Default file name is `Layout.xml'\n");
+     
    msg("\n");
    msg("Generate a style sheet file for RTF, HTML or Latex:\n");
-   msg("   RTF:     --w  rtf-style [stylesheet file name]\n");
+   msg("   RTF:    --w  rtf-ext   [extensions file name]\n");
+   msg("   RTF:    --w  rtf-style [stylesheet file name]\n");
 
    msg("\n");
-   msg("   HTML:    --w html-head  [header file name] \n");
-   msg("   HTML:    --w html-foot  [footer file name] \n");
-   msg("   HTML:    --w html-style [styleSheet file name] \n");
+   msg("   HTML:   --w  html-head  [header file name] \n");
+   msg("   HTML:   --w  html-foot  [footer file name] \n");
+   msg("   HTML:   --w  html-style [styleSheet file name] \n");
   
    msg("\n");
-   msg("   LaTeX:   --w  latex-head  [header file name] \n");
-   msg("   LaTeX:   --w  latex-foot  [footer file name] \n");
-   msg("   LaTeX:   --w  latex-style [styleSheet file name] \n");
-
+   msg("   LaTeX:  --w  latex-head  [header file name] \n");
+   msg("   LaTeX:  --w  latex-foot  [footer file name] \n");
+   msg("   LaTeX:  --w  latex-style [styleSheet file name] \n");
+   
    msg("\n");
-   msg("Generate rtf extensions file\n");
-   msg("   RTF:   --e  rtf extensionsFile\n\n");
-
-   msg("\n");
-   msg("   --h          display usage\n");
-   msg("   --v          display version\n");
+   msg("Other Options:\n");
+   msg("   --h  display usage\n");
+   msg("   --v  display version\n");
     
    msg("\n");
-   msg("   --m          dump symbol map\n");
-   msg("   --b          output to CS DoxyWizard\n"); 
-   msg("   --d <level>  enable one or more debug levels\n");
+   msg("   --b  output to CS DoxyWizard\n"); 
+   msg("   --m  dump symbol map\n");  
+   msg("   --d  <level> enable one or more debug levels\n");
   
    Debug::printFlags();   
 }

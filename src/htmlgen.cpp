@@ -693,69 +693,72 @@ HtmlGenerator::HtmlGenerator() : OutputGenerator()
 }
 
 HtmlGenerator::~HtmlGenerator()
-{
-   //printf("HtmlGenerator::~HtmlGenerator()\n");
+{  
 }
 
 void HtmlGenerator::init()
 {
    QByteArray dname = Config_getString("HTML_OUTPUT");
    QDir d(dname);
+
    if (!d.exists() && !d.mkdir(dname)) {
       err("Could not create output directory %s\n", dname.data());
       exit(1);
    }
-   //writeLogo(dname);
-   if (!Config_getString("HTML_HEADER").isEmpty()) {
-      g_header = fileToString(Config_getString("HTML_HEADER"));
-      //printf("g_header='%s'\n",g_header.data());
+   
+   if (! Config_getString("HTML_HEADER").isEmpty()) {
+      g_header = fileToString(Config_getString("HTML_HEADER"));      
    } else {
-      g_header = ResourceMgr::instance().getAsString("header.html");
+      g_header = ResourceMgr::instance().getAsString("html/header.html");
    }
 
    if (!Config_getString("HTML_FOOTER").isEmpty()) {
-      g_footer = fileToString(Config_getString("HTML_FOOTER"));
-      //printf("g_footer='%s'\n",g_footer.data());
+      g_footer = fileToString(Config_getString("HTML_FOOTER"));      
    } else {
-      g_footer = ResourceMgr::instance().getAsString("footer.html");
+      g_footer = ResourceMgr::instance().getAsString("html/footer.html");
    }
 
    if (Config_getBool("USE_MATHJAX")) {
       if (!Config_getString("MATHJAX_CODEFILE").isEmpty()) {
-         g_mathjax_code = fileToString(Config_getString("MATHJAX_CODEFILE"));
-         //printf("g_mathjax_code='%s'\n",g_mathjax_code.data());
+         g_mathjax_code = fileToString(Config_getString("MATHJAX_CODEFILE"));         
       }
    }
    createSubDirs(d);
 
    ResourceMgr &mgr = ResourceMgr::instance();
-   mgr.copyResource("tabs.css", dname);
-   mgr.copyResource("jquery.js", dname);
-   if (Config_getBool("INTERACTIVE_SVG")) {
-      mgr.copyResource("svgpan.js", dname);
-   }
+   mgr.copyResource("html/tabs.css", dname);
+   mgr.copyResource("html/jquery.js", dname);
 
-   {
-      QFile f(dname + "/dynsections.js");
-      if (f.open(QIODevice::WriteOnly)) {
-         const Resource *res = mgr.get("dynsections.js");
-         if (res) {
-            FTextStream t(&f);
-            t << (const char *)res->data;
-            if (Config_getBool("SOURCE_BROWSER") && Config_getBool("SOURCE_TOOLTIPS")) {
-               t << endl <<
-                 "$(document).ready(function() {\n"
-                 "  $('.code,.codeRef').each(function() {\n"
-                 "    $(this).data('powertip',$('#'+$(this).attr('href').replace(/.*\\//,'').replace(/[^a-z_A-Z0-9]/g,'_')).html());\n"
-                 "    $(this).powerTip({ placement: 's', smartPlacement: true, mouseOnToPopup: true });\n"
-                 "  });\n"
-                 "});\n";
-            }
-         } else {
-            err("Resource dynsections.js not compiled in");
+   if (Config_getBool("INTERACTIVE_SVG")) {
+      mgr.copyResource("html/svgpan.js", dname);
+   }
+   
+   QFile f(dname + "/dynsections.js");
+
+   if (f.open(QIODevice::WriteOnly)) {
+
+      QByteArray resource = mgr.getAsString("html/dynsections.js");
+
+      if (! resource.isEmpty()) {
+         FTextStream t(&f);
+         t << resource.constData();
+
+         if (Config_getBool("SOURCE_BROWSER") && Config_getBool("SOURCE_TOOLTIPS")) {
+            t << endl <<
+              "$(document).ready(function() {\n"
+              "  $('.code,.codeRef').each(function() {\n"
+              "    $(this).data('powertip',$('#'+$(this).attr('href').replace(/.*\\//,'').replace(/[^a-z_A-Z0-9]/g,'_')).html());\n"
+              "    $(this).powerTip({ placement: 's', smartPlacement: true, mouseOnToPopup: true });\n"
+              "  });\n"
+              "});\n";
          }
+
+      } else {
+         err("Resource file dynsections.js was not found");
+
       }
    }
+  
 }
 
 /// Additional initialization after indices have been created
@@ -764,64 +767,67 @@ void HtmlGenerator::writeTabData()
    Doxygen::indexList->addStyleSheetFile("tabs.css");
    QByteArray dname = Config_getString("HTML_OUTPUT");
    ResourceMgr &mgr = ResourceMgr::instance();
-   //writeColoredImgData(dname,colored_tab_data);
-   mgr.copyResource("tab_a.lum", dname);
-   mgr.copyResource("tab_b.lum", dname);
-   mgr.copyResource("tab_h.lum", dname);
-   mgr.copyResource("tab_s.lum", dname);
-   mgr.copyResource("nav_h.lum", dname);
-   mgr.copyResource("nav_f.lum", dname);
-   mgr.copyResource("bc_s.luma", dname);
-   mgr.copyResource("doxygen.luma", dname);
-   mgr.copyResource("closed.luma", dname);
-   mgr.copyResource("open.luma", dname);
-   mgr.copyResource("bdwn.luma", dname);
-   mgr.copyResource("sync_on.luma", dname);
-   mgr.copyResource("sync_off.luma", dname);
 
-   //{
-   //  unsigned char shadow[6] = { 5, 5, 5, 5, 5, 5 };
-   //  unsigned char shadow_alpha[6]  = { 80, 60, 40, 20, 10, 0 };
-   //  ColoredImage img(1,6,shadow,shadow_alpha,0,0,100);
-   //  img.save(dname+"/nav_g.png");
-   //}
-   mgr.copyResource("nav_g.png", dname);
+   //writeColoredImgData(dname,colored_tab_data);
+   mgr.copyResource("html/tab_a.lum", dname);
+   mgr.copyResource("html/tab_b.lum", dname);
+   mgr.copyResource("html/tab_h.lum", dname);
+   mgr.copyResource("html/tab_s.lum", dname);
+   mgr.copyResource("html/nav_h.lum", dname);
+   mgr.copyResource("html/nav_f.lum", dname);
+   mgr.copyResource("html/bc_s.luma", dname);
+   mgr.copyResource("html/doxygen.luma", dname);
+   mgr.copyResource("html/closed.luma", dname);
+   mgr.copyResource("html/open.luma", dname);
+   mgr.copyResource("html/bdwn.luma", dname);
+   mgr.copyResource("html/sync_on.luma", dname);
+   mgr.copyResource("html/sync_off.luma", dname);      
+   mgr.copyResource("html/nav_g.png", dname);
 }
 
 void HtmlGenerator::writeSearchData(const char *dir)
 {
    static bool serverBasedSearch = Config_getBool("SERVER_BASED_SEARCH");
-   //writeImgData(dir,serverBasedSearch ? search_server_data : search_client_data);
+  
    ResourceMgr &mgr = ResourceMgr::instance();
 
-   mgr.copyResource("search_l.png", dir);
+   mgr.copyResource("html/search_l.png", dir);
    Doxygen::indexList->addImageFile("search/search_l.png");
-   mgr.copyResource("search_m.png", dir);
+
+   mgr.copyResource("html/search_m.png", dir);
    Doxygen::indexList->addImageFile("search/search_m.png");
-   mgr.copyResource("search_r.png", dir);
+
+   mgr.copyResource("html/search_r.png", dir);
    Doxygen::indexList->addImageFile("search/search_r.png");
+
    if (serverBasedSearch) {
-      mgr.copyResource("mag.png", dir);
+      mgr.copyResource("html/mag.png", dir);
       Doxygen::indexList->addImageFile("search/mag.png");
+
    } else {
-      mgr.copyResource("close.png", dir);
+      mgr.copyResource("html/close.png", dir);
       Doxygen::indexList->addImageFile("search/close.png");
-      mgr.copyResource("mag_sel.png", dir);
+
+      mgr.copyResource("html/mag_sel.png", dir);
       Doxygen::indexList->addImageFile("search/mag_sel.png");
    }
 
    QByteArray searchDirName = Config_getString("HTML_OUTPUT") + "/search";
    QFile f(searchDirName + "/search.css");
+
    if (f.open(QIODevice::WriteOnly)) {
       const Resource *res = mgr.get("search.css");
+
       if (res) {
          FTextStream t(&f);
          QByteArray searchCss = replaceColorMarkers((const char *)res->data);
          searchCss = substitute(searchCss, "$doxygenversion", versionString);
+
          if (Config_getBool("DISABLE_INDEX")) {
             // move up the search box if there are no tabs
             searchCss = substitute(searchCss, "margin-top: 8px;", "margin-top: 0px;");
          }
+
          t << searchCss;
          Doxygen::indexList->addStyleSheetFile("search/search.css");
       }
@@ -831,34 +837,36 @@ void HtmlGenerator::writeSearchData(const char *dir)
 void HtmlGenerator::writeStyleSheetFile(QFile &file)
 {
    FTextStream t(&file);
-   t << replaceColorMarkers(substitute(ResourceMgr::instance().getAsString("doxygen.css"), "$doxygenversion", versionString));
+   t << replaceColorMarkers(substitute(ResourceMgr::instance().getAsString("html/doxygen.css"), "$doxygenversion", versionString));
 }
 
-void HtmlGenerator::writeHeaderFile(QFile &file, const char * /*cssname*/)
+void HtmlGenerator::writeHeaderFile(QFile &file)
 {
    FTextStream t(&file);
-   t << "<!-- HTML header for doxygen " << versionString << "-->" << endl;
-   t << ResourceMgr::instance().getAsString("header.html");
+
+   t << "<!-- HTML header for CS doxygen " << versionString << "-->" << endl;
+   t << ResourceMgr::instance().getAsString("html/header.html");
 }
 
 void HtmlGenerator::writeFooterFile(QFile &file)
 {
    FTextStream t(&file);
-   t << "<!-- HTML footer for doxygen " << versionString << "-->" <<  endl;
-   t << ResourceMgr::instance().getAsString("footer.html");
+   t << "<!-- HTML footer for CS doxygen " << versionString << "-->" <<  endl;
+   t << ResourceMgr::instance().getAsString("html/footer.html");
 }
 
-void HtmlGenerator::startFile(const char *name, const char *,
-                              const char *title)
+void HtmlGenerator::startFile(const char *name, const char *, const char *title)
 {
    //printf("HtmlGenerator::startFile(%s)\n",name);
    QByteArray fileName = name;
+
    lastTitle = title;
    relPath = relativePathToRoot(fileName);
 
    if (fileName.right(Doxygen::htmlFileExtension.length()) != Doxygen::htmlFileExtension) {
       fileName += Doxygen::htmlFileExtension;
    }
+
    startPlainFile(fileName);
    m_codeGen.setTextStream(t);
    m_codeGen.setRelativePath(relPath);
@@ -974,7 +982,7 @@ void HtmlGenerator::writeStyleInfo(int part)
          //t << "H1 { text-align: center; border-width: thin none thin none;" << endl;
          //t << "     border-style : double; border-color : blue; padding-left : 1em; padding-right : 1em }" << endl;
 
-         t << replaceColorMarkers(substitute(ResourceMgr::instance().getAsString("doxygen.css"), "$doxygenversion", versionString));
+         t << replaceColorMarkers(substitute(ResourceMgr::instance().getAsString("html/doxygen.css"), "$doxygenversion", versionString));
          endPlainFile();
          Doxygen::indexList->addStyleSheetFile("doxygen.css");
 
@@ -2289,22 +2297,23 @@ void HtmlGenerator::writeSearchPage()
       t << "</script>\n";
    }
 
-   ResourceMgr::instance().copyResource("search_functions.php", htmlOutput);
-   ResourceMgr::instance().copyResource("search_opensearch.php", htmlOutput);
-   // OPENSEARCH_PROVIDER }
+   ResourceMgr::instance().copyResource("html/search_functions.php", htmlOutput);
+   ResourceMgr::instance().copyResource("html/search_opensearch.php", htmlOutput);
 
    QByteArray fileName = htmlOutput + "/search.php";
    QFile f(fileName);
+
    if (f.open(QIODevice::WriteOnly)) {
       FTextStream t(&f);
       t << substituteHtmlKeywords(g_header, "Search", "");
 
-      t << "<!-- " << theTranslator->trGeneratedBy() << " Doxygen "
+      t << "<!-- " << theTranslator->trGeneratedBy() << " CS Doxygen "
         << versionString << " -->" << endl;
       t << "<script type=\"text/javascript\">\n";
       t << "var searchBox = new SearchBox(\"searchBox\", \""
         << "search\",false,'" << theTranslator->trSearch() << "');\n";
       t << "</script>\n";
+
       if (!Config_getBool("DISABLE_INDEX")) {
          writeDefaultQuickLinks(t, true, HLI_Search, 0, "");
       } else {
@@ -2325,13 +2334,15 @@ void HtmlGenerator::writeSearchPage()
 
       writePageFooter(t, "Search", "", "");
    }
+
    QByteArray scriptName = htmlOutput + "/search/search.js";
    QFile sf(scriptName);
+
    if (sf.open(QIODevice::WriteOnly)) {
       FTextStream t(&sf);
-      t << ResourceMgr::instance().getAsString("extsearch.js");
+      t << ResourceMgr::instance().getAsString("html/extsearch.js");
    } else {
-      err("Failed to open file '%s' for writing...\n", scriptName.data());
+      err("Can not open file '%s' for writing\n", scriptName.data());
    }
 }
 
@@ -2423,7 +2434,7 @@ void HtmlGenerator::writeExternalSearchPage()
       }
 
       t << "};" << endl << endl;
-      t << ResourceMgr::instance().getAsString("extsearch.js");
+      t << ResourceMgr::instance().getAsString("html/extsearch.js");
       t << endl;
       t << "$(document).ready(function() {" << endl;
       t << "  var query = trim(getURLParameter('query'));" << endl;

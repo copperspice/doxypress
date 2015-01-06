@@ -7445,17 +7445,21 @@ void writeColoredImgData(const char *dir, ColoredImgDataItem data[])
    static int hue   = Config_getInt("HTML_COLORSTYLE_HUE");
    static int sat   = Config_getInt("HTML_COLORSTYLE_SAT");
    static int gamma = Config_getInt("HTML_COLORSTYLE_GAMMA");
+
    while (data->name) {
       QByteArray fileName;
       fileName = (QByteArray)dir + "/" + data->name;
+
       QFile f(fileName);
+
       if (f.open(QIODevice::WriteOnly)) {
-         ColoredImage img(data->width, data->height, data->content, data->alpha,
-                          sat, hue, gamma);
+         ColoredImage img(data->width, data->height, data->content, data->alpha, sat, hue, gamma);
          img.save(fileName);
+
       } else {
          fprintf(stderr, "Warning: Cannot open file %s for writing\n", data->name);
       }
+
       Doxygen::indexList->addImageFile(data->name);
       data++;
    }

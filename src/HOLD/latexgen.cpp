@@ -488,7 +488,7 @@ static void writeDefaultHeaderPart3(FTextStream &t)
 
 static void writeDefaultStyleSheet(FTextStream &t)
 {
-   t << ResourceMgr::instance().getAsString("doxygen.sty");
+   t << ResourceMgr::instance().getAsString("latex/doxygen.sty");
 }
 
 static void writeDefaultFooter(FTextStream &t)
@@ -501,11 +501,13 @@ static void writeDefaultFooter(FTextStream &t)
 
    // Index
    QByteArray unit;
+
    if (Config_getBool("COMPACT_LATEX")) {
       unit = "section";
    } else {
       unit = "chapter";
    }
+
    t << "% Index\n"
      "\\backmatter\n"
      "\\newpage\n"

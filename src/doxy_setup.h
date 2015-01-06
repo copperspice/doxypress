@@ -27,6 +27,7 @@ struct CommandLine {
    QString debugLabel;
    QString formatName;
 
+   QString rtfExt;
    QString rtfStyle;
 
    QString htmlHead;
@@ -39,6 +40,8 @@ struct CommandLine {
 
    bool genConfig = false;  
    bool genLayout = false;   
+
+   bool generateDoxy = true;
 };
 
 void initDoxygen();

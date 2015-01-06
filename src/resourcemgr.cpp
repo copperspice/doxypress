@@ -64,31 +64,59 @@ bool ResourceMgr::copyCategory(const char *categoryName, const char *targetDir) 
    return true;
 }
 
-bool ResourceMgr::copyResourceAs(const char *name, const char *targetDir, const char *targetName) const
+bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir, const QString &targetName) const
 {
-   QByteArray pathName = QByteArray(targetDir) + "/" + targetName;
-   const Resource *res = m_resources.value(name);
+   QByteArray resData;
+ 
+   //
+   QString resourceFileName = ":/resources/" + fName;
 
-   if (res) {
-      switch (res->type) {
+   QFile resource(resourceFileName);
+   if ( resource.open(QIODevice::ReadOnly) ) {
+      resData = resource.readAll();            
+   }
+
+   //
+   QString outputName = targetDir + "/" + targetName;
+ 
+   if (! resData.isEmpty()) {
+
+      Resource::Type type =  Resource::Verbatim;
+
+      if (fName.endsWith(".lum")) {
+         type =  Resource::Luminance;
+
+      } else if (fName.endsWith(".luma")) {
+         type =  Resource::LumAlpha;
+
+      } else if (fName.endsWith(".css")) {
+         type =  Resource::CSS;
+
+      }
+
+      switch (type) {
 
          case Resource::Verbatim: {
-            QFile f(pathName);
+            QFile f(outputName);
 
-            if (f.open(QIODevice::WriteOnly) && f.write((const char *)res->data, res->size) == res->size) {
-               return true;
+            if (f.open(QIODevice::WriteOnly))  {
+
+               if (f.write(resData) == resData.size() ) {
+                  return true;
+               }
             }
          }
+
          break;
 
          case Resource::Luminance: {
             // replace .lum by .png
 
-            QByteArray n = name;
-
+            QByteArray n = fName.toUtf8();
             n = n.left(n.length() - 4) + ".png"; 
 
-            uchar *p = (uchar *)res->data;
+            const uchar *p = (const uchar *)resData.constData();
+
             int width   = (p[0] << 8) + p[1];
             int height  = (p[2] << 8) + p[3];
 
@@ -100,7 +128,7 @@ bool ResourceMgr::copyResourceAs(const char *name, const char *targetDir, const 
             images[0].alpha   = 0;
             images[1].name    = 0; // terminator
 
-            writeColoredImgData(targetDir, images);
+            writeColoredImgData(qPrintable(targetDir), images);
             return true;
          }
          break;
@@ -108,10 +136,11 @@ bool ResourceMgr::copyResourceAs(const char *name, const char *targetDir, const 
          case Resource::LumAlpha: {
             // replace .luma by .png
 
-            QByteArray n = name;
+            QByteArray n = fName.toUtf8();
             n = n.left(n.length() - 5) + ".png"; 
 
-            uchar *p = (uchar *)res->data;
+            const uchar *p = (const uchar *)resData.constData();
+
             int width   = (p[0] << 8) + p[1];
             int height  = (p[2] << 8) + p[3];
 
@@ -123,25 +152,24 @@ bool ResourceMgr::copyResourceAs(const char *name, const char *targetDir, const 
             images[0].alpha   = &p[4 + width * height];
             images[1].name    = 0; // terminator
 
-            writeColoredImgData(targetDir, images);
+            writeColoredImgData(qPrintable(targetDir), images);
             return true;
          }
          break;
 
          case Resource::CSS: {
-            QFile f(pathName);
+            QFile f(outputName);
 
             if (f.open(QIODevice::WriteOnly)) {
-               QByteArray buffer(res->data, res->size); 
-               
+              
                FTextStream t(&f);
-               buffer = replaceColorMarkers(buffer);
+               resData = replaceColorMarkers(resData);
 
-               if (qstrcmp(name, "navtree.css") == 0) {
-                  t << substitute(buffer, "$width", QByteArray().setNum(Config_getInt("TREEVIEW_WIDTH")) + "px");
+               if (fName == "navtree.css") {
+                  t << substitute(resData, "$width", QByteArray().setNum(Config_getInt("TREEVIEW_WIDTH")) + "px");
 
                } else {
-                  t << substitute(buffer, "$doxygenversion", versionString);
+                  t << substitute(resData, "$doxygenversion", versionString);
                }
 
                return true;
@@ -151,16 +179,16 @@ bool ResourceMgr::copyResourceAs(const char *name, const char *targetDir, const 
       }
 
    } else {
-      err("requested resource '%s' not compiled in!\n", name);
+      err("Requested resource '%s' is unknown\n", qPrintable(fName));
 
    }
 
    return false;
 }
 
-bool ResourceMgr::copyResource(const char *name, const char *targetDir) const
+bool ResourceMgr::copyResource(const QString &fName, const QString &targetDir) const
 {
-   return copyResourceAs(name, targetDir, name);
+   return copyResourceAs(fName, targetDir, fName);
 }
 
 const Resource *ResourceMgr::get(const char *name) const
@@ -168,16 +196,17 @@ const Resource *ResourceMgr::get(const char *name) const
    return m_resources.value(name);
 }
 
-QByteArray ResourceMgr::getAsString(const char *name) const
+QByteArray ResourceMgr::getAsString(const QString &fName) const
 {
-   const Resource *strucRes = m_resources.value(name);
+   QString resourceFileName = ":/resources/" + fName;
 
    QByteArray retval;
 
-   if (strucRes) {      
-      retval = QByteArray(strucRes->data, strucRes->size);      
+   QFile resource(resourceFileName);
+   if ( resource.open(QIODevice::ReadOnly) ) {
+      retval = resource.readAll();            
    }
-
+              
    return retval;
 }
 

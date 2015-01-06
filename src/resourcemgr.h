@@ -26,11 +26,9 @@ struct Resource {
 
    const char *category;
    const char *name;
-
    const char *data;
-   int size;
 
-   Type type;
+   int size;  
 };
 
 /** @brief Singleton for managing resources compiled into an executable */
@@ -47,16 +45,16 @@ class ResourceMgr
    bool copyCategory(const char *categoryName, const char *targetDir) const;
 
    /** Copies a registered resource to a given target directory */
-   bool copyResource(const char *name, const char *targetDir) const;
+   bool copyResource(const QString & fNname, const QString &targetDir) const;
 
    /** Copies a registered resource to a given target directory under a given target name */
-   bool copyResourceAs(const char *name, const char *targetDir, const char *targetName) const;
+   bool copyResourceAs(const QString &fName, const QString &targetDir, const QString &targetName) const;
 
    /** Returns a pointer to the resource object with the given name. */
    const Resource *get(const char *name) const;
 
-   /** Gets the resource data as a C string */
-   QByteArray getAsString(const char *name) const;
+   /** Gets the resource data as a QByteArray */
+   QByteArray getAsString(const QString &fName) const;
 
  private:
    ResourceMgr();

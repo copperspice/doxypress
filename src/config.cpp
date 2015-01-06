@@ -837,7 +837,8 @@ QByteArray &Config::getString(const char *fileName, int num, const char *name) c
 
    } else if (opt->kind() != ConfigOption::O_String) {
       config_err("%s<%d>: Internal error: %s is not a string\n", fileName, num, name);
-      exit(1);
+ // BROOM      exit(1);
+    return s_empty;
    }
 
    return *((ConfigString *)opt)->valueRef();
@@ -852,8 +853,9 @@ QStringList &Config::getList(const char *fileName, int num, const char *name) co
      return s_emptyList;
 
    } else if (opt->kind() != ConfigOption::O_List) {
-      config_err("%d<%d>: Internal error: %s is not a list\n", fileName, num, name);
-      exit(1);
+      config_err("%s<%d>: Internal error: %s is not a list\n", fileName, num, name);
+ // BROOM      exit(1);
+    return s_emptyList;
    }
 
    return *((ConfigList *)opt)->valueRef();
@@ -887,7 +889,8 @@ int &Config::getInt(const char *fileName, int num, const char *name) const
 
    } else if (opt->kind() != ConfigOption::O_Int) {
       config_err("%s<%d>: Internal error: %s is not an integer\n", fileName, num, name);
-      exit(1);
+// BROOM      exit(1);
+      return s_emptyInt;
    }
 
    return *((ConfigInt *)opt)->valueRef();
@@ -903,7 +906,8 @@ bool &Config::getBool(const char *fileName, int num, const char *name) const
 
    } else if (opt->kind() != ConfigOption::O_Bool) {
       config_err("%s<%d>: Internal error: %s is not a boolean\n", fileName, num, name);
-      exit(1);
+// BROOM      exit(1);
+      return s_emptyBool;
 
    }
 
@@ -1147,8 +1151,7 @@ static FILE *findFile(const char *fileName)
 static void readIncludeFile(const char *incName)
 {
    if (includeDepth == MAX_INCLUDE_DEPTH) {
-      config_err("Error: maximum include depth (%d) reached, %s is not included. Aborting...\n",
-                 MAX_INCLUDE_DEPTH, incName);
+      config_err("Error: Maximum include depth (%d) reached, %s is not included. Aborting\n", MAX_INCLUDE_DEPTH, incName);
       exit(1);
    }
 
@@ -1156,6 +1159,7 @@ static void readIncludeFile(const char *incName)
    substEnvVarsInString(inc);
    inc = inc.trimmed();
    uint incLen = inc.length();
+
    if (incLen > 0 && inc.at(0) == '"' && inc.at(incLen - 1) == '"') { // strip quotes
       inc = inc.mid(1, incLen - 2);
    }
@@ -1487,23 +1491,30 @@ YY_DECL {
 
             {
                QByteArray cmd = configYYtext;
+
                cmd = cmd.left(cmd.length() - 1).trimmed();
                ConfigOption *option = config->get(cmd);
-               if (option == 0) // oops not known
-               {
-                  config_err("Warning: ignoring unsupported tag `%s' at line %d, file %s\n",
+
+
+               if (option == 0)  {
+                  // oops not known
+               
+                  config_err("Warning: Ignoring unsupported tag `%s' at line %d, file %s\n",
                   configYYtext, yyLineNr, yyFileName.data());
                   BEGIN(SkipInvalid);
-               } else // known tag
-               {
+
+               } else  {
+                  // known tag 
                   option->setUserComment(config->takeUserComment());
                   option->setEncoding(encoding);
+
                   switch (option->kind())
                   {
                      case ConfigOption::O_Info:
-                        // shouldn't get here!
+                        // should not get here!
                         BEGIN(SkipInvalid);
                         break;
+
                      case ConfigOption::O_List:
                         l = ((ConfigList *)option)->valueRef();
                         l->clear();
@@ -1565,7 +1576,7 @@ YY_DECL {
                ConfigOption *option = config->get(cmd);
                if (option == 0) // oops not known
                {
-                  config_err("Warning: ignoring unsupported tag `%s' at line %d, file %s\n",
+                  config_err("Warning: Ignoring unsupported tag `%s' at line %d, file %s\n",
                   configYYtext, yyLineNr, yyFileName.data());
                   BEGIN(SkipInvalid);
                } else // known tag
@@ -2799,12 +2810,15 @@ void Config::convertStrToVal()
 
 static void substEnvVarsInString(QByteArray &s)
 {
+   // For e.g. PROGRAMFILES(X86)
+
    static QRegExp re("\\$\\([a-z_A-Z0-9.-]+\\)");
-   static QRegExp re2("\\$\\([a-z_A-Z0-9.-]+\\([a-z_A-Z0-9.-]+\\)\\)"); // For e.g. PROGRAMFILES(X86)
+   static QRegExp re2("\\$\\([a-z_A-Z0-9.-]+\\([a-z_A-Z0-9.-]+\\)\\)"); 
 
    if (s.isEmpty()) {
       return;
    }
+
    int p = 0;
    int i, l;
   
@@ -2813,13 +2827,13 @@ static void substEnvVarsInString(QByteArray &s)
 
       QByteArray env = portable_getenv(s.mid(i + 2, l - 3));
       substEnvVarsInString(env); // recursively expand variables if needed.
+
       s = s.left(i) + env + s.right(s.length() - i - l);
       p = i + env.length(); // next time start at the end of the expanded string
    }
 
-   s = s.trimmed(); // to strip the bogus space that was added when an argument
-   // has quotes
-   //printf("substEnvVarInString(%s) end\n",s.data());
+   // to strip the bogus space that was added when an argument
+   s = s.trimmed();  
 }
 
 static void substEnvVarsInStrList(QStringList &sl)
@@ -2835,17 +2849,16 @@ static void substEnvVarsInStrList(QStringList &sl)
       // here we strip the quote again
       substEnvVarsInString(result);
 
-      if (! wasQuoted) /* as a result of the expansion, a single string
-		       may have expanded into a list, which we'll
-		       add to sl. If the original string already
-		       contained multiple elements no further
-		       splitting is done to allow quoted items with spaces! */
-      {
+      if (! wasQuoted) {
+
+         /* as a result of the expansion, a single string may have expanded into a list, which we will add to sl.
+            If the original string already contained multiple elements no further splitting is done to allow quoted
+            items with spaces! */
+
          int l = result.length();
          int i, p = 0;
 
-         // skip spaces
-         // search for a "word"
+         // skip spaces, search for a "word"
 
          for (i = 0; i < l; i++) {
             char c = 0;
@@ -2932,8 +2945,7 @@ void ConfigEnum::substEnvVars()
 }
 
 void Config::substituteEnvironmentVars()
-{
- 
+{ 
    for (auto option : *m_options) {
       option->substEnvVars();
    }
@@ -3492,7 +3504,11 @@ void addConfigOptions(Config *cfg)
   ConfigBool   *cb;
 
   cs = cfg->addString("DOXYFILE_ENCODING", "");
+
+  cs = cfg->addString("PROJECT_NUMBER",""); 
+  cs = cfg->addString("PROJECT_BRIEF",""); 
   cs = cfg->addString("PROJECT_NAME",""); 
+  cs = cfg->addString("PROJECT_LOGO",""); 
   cs = cfg->addString("OUTPUT_DIRECTORY","");
 
   ce = cfg->addEnum("OUTPUT_LANGUAGE","","English");
@@ -3504,6 +3520,261 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("SUBGROUPING", "", TRUE);
   cb = cfg->addBool("CASE_SENSE_NAMES", "", portable_fileSystemIsCaseSensitive());
   cb = cfg->addBool("QUIET", "", false);
+
+  cl = cfg->addList("STRIP_FROM_PATH", "");
+
+  cl = cfg->addList("STRIP_FROM_INC_PATH", "");
+
+  ce = cfg->addEnum("PAPER_TYPE", "", "letter");
+  ce->addValue("a4");
+  ce->addValue("letter");
+
+  cb = cfg->addBool("OPTIMIZE_OUTPUT_VHDL", "", false);
+   
+  cb = cfg->addBool("CREATE_SUBDIRS", "", false);
+  cb = cfg->addBool("ALLOW_UNICODE_NAMES", "", true);
+  cs = cfg->addString("BRIEF_MEMBER_DESC", "");
+  cs = cfg->addString("REPEAT_BRIEF", "");
+  cl = cfg->addList("ABBREVIATE_BRIEF", "");
+  cs = cfg->addString("ALWAYS_DETAILED_SEC", "");
+  cs = cfg->addString("INLINE_INHERITED_MEMB", "");
+  cb = cfg->addBool("FULL_PATH_NAMES", "", true); 
+  cb = cfg->addBool("SHORT_NAMES", "",false);
+  cs = cfg->addString("JAVADOC_AUTOBRIEF", "");
+  cs = cfg->addString("QT_AUTOBRIEF", "");
+  cs = cfg->addString("MULTILINE_CPP_IS_BRIEF", "");
+  cb = cfg->addBool("INHERIT_DOCS", "", true);
+  cb = cfg->addBool("SEPARATE_MEMBER_PAGES", "", false);
+  cs = cfg->addString("TAB_SIZE", "");
+  cl = cfg->addList("ALIASES", "");
+  cs = cfg->addString("TCL_SUBST", "");
+  cb = cfg->addBool("OPTIMIZE_OUTPUT_FOR_C", "", true);
+  cb = cfg->addBool("OPTIMIZE_OUTPUT_JAVA", "", false);
+  cb = cfg->addBool("OPTIMIZE_FOR_FORTRAN", "", false);
+  cl = cfg->addList("EXTENSION_MAPPING", "");
+  cb = cfg->addBool("MARKDOWN_SUPPORT", "", true);
+  cs = cfg->addString("AUTOLINK_SUPPORT", "");
+  cb = cfg->addBool("BUILTIN_STL_SUPPORT", "", true);
+  cb = cfg->addBool("CPP_CLI_SUPPORT", "", false);
+  cs = cfg->addString("SIP_SUPPORT", "");
+  cs = cfg->addString("IDL_PROPERTY_SUPPORT", "");
+  cb = cfg->addBool("DISTRIBUTE_GROUP_DOC", "", false);
+  cs = cfg->addString("INLINE_GROUPED_CLASSES", "");
+  cb = cfg->addBool("INLINE_SIMPLE_STRUCTS", "", false);
+  cs = cfg->addString("TYPEDEF_HIDES_STRUCT", "");
+  ci = cfg->addInt("LOOKUP_CACHE_SIZE", "",0,9,0);
+  cb = cfg->addBool("EXTRACT_ALL", "", false);
+  cs = cfg->addString("EXTRACT_PRIVATE", "");
+  cs = cfg->addString("EXTRACT_PACKAGE", "");
+  cs = cfg->addString("EXTRACT_STATIC", "");
+  cs = cfg->addString("EXTRACT_LOCAL_CLASSES", "");
+  cs = cfg->addString("EXTRACT_LOCAL_METHODS", "");
+  cs = cfg->addString("EXTRACT_ANON_NSPACES", "");
+  cs = cfg->addString("HIDE_UNDOC_MEMBERS", "");
+  cs = cfg->addString("HIDE_UNDOC_CLASSES", "");
+  cs = cfg->addString("HIDE_FRIEND_COMPOUNDS", "");
+  cs = cfg->addString("HIDE_IN_BODY_DOCS", "");
+  cs = cfg->addString("INTERNAL_DOCS", "");
+  cs = cfg->addString("HIDE_SCOPE_NAMES", "");
+  cs = cfg->addString("SHOW_INCLUDE_FILES", "");
+  cs = cfg->addString("SHOW_GROUPED_MEMB_INC", "");
+  cs = cfg->addString("FORCE_LOCAL_INCLUDES", "");
+  cs = cfg->addString("INLINE_INFO", "");
+  cs = cfg->addString("SORT_MEMBER_DOCS", "");
+  cs = cfg->addString("SORT_BRIEF_DOCS", "");
+  cs = cfg->addString("SORT_MEMBERS_CTORS_1ST", "");
+  cs = cfg->addString("SORT_GROUP_NAMES", "");
+  cs = cfg->addString("SORT_BY_SCOPE_NAME", "");
+  cs = cfg->addString("STRICT_PROTO_MATCHING", "");
+  cs = cfg->addString("GENERATE_TODOLIST", "");
+  cs = cfg->addString("GENERATE_TESTLIST", "");
+  cs = cfg->addString("GENERATE_BUGLIST", "");
+  cs = cfg->addString("GENERATE_DEPRECATEDLIST", "");
+  cs = cfg->addString("ENABLED_SECTIONS", "");
+  cs = cfg->addString("MAX_INITIALIZER_LINES", "");
+  cb = cfg->addBool("SHOW_USED_FILES", "", false);
+  cb = cfg->addBool("SHOW_FILES", "", false);
+  cb = cfg->addBool("SHOW_NAMESPACES", "", false);
+  cs = cfg->addString("FILE_VERSION_FILTER", "");
+  cs = cfg->addString("LAYOUT_FILE", "");
+  cl = cfg->addList("CITE_BIB_FILES", "");
+  cs = cfg->addString("WARNINGS", "");
+  cs = cfg->addString("WARN_IF_UNDOCUMENTED", "");
+  cs = cfg->addString("WARN_IF_DOC_ERROR", "");
+  cs = cfg->addString("WARN_NO_PARAMDOC", "");
+  cs = cfg->addString("WARN_FORMAT", "");
+  cs = cfg->addString("WARN_LOGFILE", "");
+  cl = cfg->addList("INPUT", "");
+  cs = cfg->addString("INPUT_ENCODING", "");
+  cl = cfg->addList("FILE_PATTERNS", "");
+  cb = cfg->addBool("RECURSIVE", "", true);
+  cl = cfg->addList("EXCLUDE", "");
+  cb = cfg->addBool("EXCLUDE_SYMLINKS", "", true);
+  cl = cfg->addList("EXCLUDE_PATTERNS", "");
+  cl = cfg->addList("EXAMPLE_PATH", "");
+  cl = cfg->addList("EXAMPLE_PATTERNS", "");
+  cb = cfg->addBool("EXAMPLE_RECURSIVE", "", false);
+  cl = cfg->addList("IMAGE_PATH", "");
+  cs = cfg->addString("INPUT_FILTER", "");
+  cl = cfg->addList("FILTER_PATTERNS", "");
+  cs = cfg->addString("FILTER_SOURCE_FILES", "");
+  cl = cfg->addList("FILTER_SOURCE_PATTERNS", "");
+  cs = cfg->addString("USE_MDFILE_AS_MAINPAGE", "");
+  cb = cfg->addBool("SOURCE_BROWSER", "", false);
+  cs = cfg->addString("INLINE_SOURCES", "");
+  cs = cfg->addString("STRIP_CODE_COMMENTS", "");
+  cb = cfg->addBool("REFERENCED_BY_RELATION", "", false);
+  cb = cfg->addBool("REFERENCES_RELATION", "", false);
+  cs = cfg->addString("REFERENCES_LINK_SOURCE", "");
+  cs = cfg->addString("SOURCE_TOOLTIPS", "");
+  cb = cfg->addBool("USE_HTAGS", "", false);
+  cb = cfg->addBool("VERBATIM_HEADERS", "", false);
+  cs = cfg->addString("CLANG_ASSISTED_PARSING", "");
+  cs = cfg->addString("CLANG_OPTIONS", "");
+  cs = cfg->addString("ALPHABETICAL_INDEX", "");
+  cs = cfg->addString("COLS_IN_ALPHA_INDEX", "");
+  cs = cfg->addString("IGNORE_PREFIX", "");
+  cb = cfg->addBool("GENERATE_HTML", "", true);
+  cs = cfg->addString("HTML_OUTPUT", "");
+  cs = cfg->addString("HTML_FILE_EXTENSION", "");
+  cs = cfg->addString("HTML_HEADER", "");
+  cs = cfg->addString("HTML_FOOTER", "");
+  cs = cfg->addString("HTML_STYLESHEET", "");
+  cl = cfg->addList("HTML_EXTRA_STYLESHEET", "");
+  cl = cfg->addList("HTML_EXTRA_FILES", "");
+  ci = cfg->addInt("HTML_COLORSTYLE_HUE", "",0,359,220);
+  ci = cfg->addInt("HTML_COLORSTYLE_SAT", "",0,255,100);
+  ci = cfg->addInt("HTML_COLORSTYLE_GAMMA", "",40,240,80);
+  cb = cfg->addBool("HTML_TIMESTAMP", "", true);
+  cs = cfg->addString("HTML_DYNAMIC_SECTIONS", "");
+  cs = cfg->addString("HTML_INDEX_NUM_ENTRIES", "");
+  cb = cfg->addBool("GENERATE_DOCSET", "", false);
+  cs = cfg->addString("DOCSET_FEEDNAME", "");
+  cs = cfg->addString("DOCSET_BUNDLE_ID", "");
+  cs = cfg->addString("DOCSET_PUBLISHER_ID", "");
+  cs = cfg->addString("DOCSET_PUBLISHER_NAME", "");
+  cb = cfg->addBool("GENERATE_HTMLHELP", "", false);
+  cs = cfg->addString("CHM_FILE", "");
+  cs = cfg->addString("HHC_LOCATION", "");
+  cs = cfg->addString("GENERATE_CHI", "");
+  cs = cfg->addString("CHM_INDEX_ENCODING", "");
+  cs = cfg->addString("BINARY_TOC", "");
+  cs = cfg->addString("TOC_EXPAND", "");
+  cb = cfg->addBool("GENERATE_QHP", "", false);
+  cs = cfg->addString("QCH_FILE", "");
+  cs = cfg->addString("QHP_NAMESPACE", "");
+  cs = cfg->addString("QHP_VIRTUAL_FOLDER", "");
+  cs = cfg->addString("QHP_CUST_FILTER_NAME", "");
+  cs = cfg->addString("QHP_CUST_FILTER_ATTRS", "");
+  cs = cfg->addString("QHP_SECT_FILTER_ATTRS", "");
+  cs = cfg->addString("QHG_LOCATION", "");
+  cb = cfg->addBool("GENERATE_ECLIPSEHELP", "", false);
+  cs = cfg->addString("ECLIPSE_DOC_ID", "");
+  cb = cfg->addBool("DISABLE_INDEX", "", false);
+  cb = cfg->addBool("GENERATE_TREEVIEW", "", false);
+  cs = cfg->addString("ENUM_VALUES_PER_LINE", "");
+  cs = cfg->addString("TREEVIEW_WIDTH", "");
+  cs = cfg->addString("EXT_LINKS_IN_WINDOW", "");
+  cs = cfg->addString("FORMULA_FONTSIZE", "");
+  cs = cfg->addString("FORMULA_TRANSPARENT", "");
+  cb = cfg->addBool("USE_MATHJAX", "", false);
+  ce = cfg->addEnum("MATHJAX_FORMAT", "", "HTML-CSS");
+  cs = cfg->addString("MATHJAX_RELPATH", "");
+  cs = cfg->addString("MATHJAX_EXTENSIONS", "");
+  cs = cfg->addString("MATHJAX_CODEFILE", "");
+  cb = cfg->addBool("SEARCHENGINE", "", false);
+  cb = cfg->addBool("SERVER_BASED_SEARCH", "", false);
+  cb = cfg->addBool("EXTERNAL_SEARCH", "", false);
+  cs = cfg->addString("SEARCHENGINE_URL", "");
+  cs = cfg->addString("SEARCHDATA_FILE", "");
+  cs = cfg->addString("EXTERNAL_SEARCH_ID", "");
+  cs = cfg->addString("EXTRA_SEARCH_MAPPINGS", "");
+  cb = cfg->addBool("GENERATE_LATEX", "",false);
+  cs = cfg->addString("LATEX_OUTPUT", "");
+  cs = cfg->addString("LATEX_CMD_NAME", "");
+  cs = cfg->addString("MAKEINDEX_CMD_NAME", "");
+  cs = cfg->addString("COMPACT_LATEX", "");
+  cs = cfg->addString("EXTRA_PACKAGES", "");
+  cs = cfg->addString("LATEX_HEADER", "");
+  cs = cfg->addString("LATEX_FOOTER", "");
+  cs = cfg->addString("LATEX_EXTRA_FILES", "");
+  cs = cfg->addString("PDF_HYPERLINKS", "");
+  cs = cfg->addString("USE_PDFLATEX", "");
+  cs = cfg->addString("LATEX_BATCHMODE", "");
+  cs = cfg->addString("LATEX_HIDE_INDICES", "");
+  cs = cfg->addString("LATEX_SOURCE_CODE", "");
+  cs = cfg->addString("LATEX_BIB_STYLE", "");
+  cb = cfg->addBool("GENERATE_RTF", "", false);
+  cs = cfg->addString("RTF_OUTPUT", "");
+  cs = cfg->addString("COMPACT_RTF", "");
+  cs = cfg->addString("RTF_HYPERLINKS", "");
+  cs = cfg->addString("RTF_STYLESHEET_FILE", "");
+  cs = cfg->addString("RTF_EXTENSIONS_FILE", "");
+  cb = cfg->addBool("GENERATE_MAN", "", false);
+  cs = cfg->addString("MAN_OUTPUT", "");
+  cs = cfg->addString("MAN_EXTENSION", "");
+  cs = cfg->addString("MAN_SUBDIR", "");
+  cs = cfg->addString("MAN_LINKS", "");
+  cb = cfg->addBool("GENERATE_XML", "", false);
+  cs = cfg->addString("XML_OUTPUT", "");
+  cs = cfg->addString("XML_PROGRAMLISTING", "");
+  cb = cfg->addBool("GENERATE_DOCBOOK", "", false);
+  cs = cfg->addString("DOCBOOK_OUTPUT", "");
+  cs = cfg->addString("DOCBOOK_PROGRAMLISTING", "");
+  cs = cfg->addString("GENERATE_AUTOGEN_DEF", "");
+  cs = cfg->addString("GENERATE_PERLMOD", "");
+  cs = cfg->addString("PERLMOD_LATEX", "");
+  cs = cfg->addString("PERLMOD_PRETTY", "");
+  cs = cfg->addString("PERLMOD_MAKEVAR_PREFIX", "");
+  cb = cfg->addBool("ENABLE_PREPROCESSING", "", false);
+  cb = cfg->addBool("MACRO_EXPANSION", "", false);
+  cb = cfg->addBool("EXPAND_ONLY_PREDEF", "",false);
+  cs = cfg->addString("SEARCH_INCLUDES", "");
+  cl = cfg->addList("INCLUDE_PATH", "");
+  cl = cfg->addList("INCLUDE_FILE_PATTERNS", "");
+  cl = cfg->addList("PREDEFINED", "");
+  cl = cfg->addList("EXPAND_AS_DEFINED", "");
+  cs = cfg->addString("SKIP_FUNCTION_MACROS", "");
+  cl = cfg->addList("TAGFILES", "");
+  cs = cfg->addString("GENERATE_TAGFILE", "");
+  cb = cfg->addBool("ALLEXTERNALS", "", false);
+  cs = cfg->addString("EXTERNAL_GROUPS", "");
+  cs = cfg->addString("EXTERNAL_PAGES", "");
+  cs = cfg->addString("PERL_PATH", "");
+  cs = cfg->addString("CLASS_DIAGRAMS", "");
+  cs = cfg->addString("MSCGEN_PATH", "");
+  cs = cfg->addString("DIA_PATH", "");
+  cs = cfg->addString("HIDE_UNDOC_RELATIONS", "");
+  cb = cfg->addBool("HAVE_DOT", "", false);
+  cs = cfg->addString("DOT_NUM_THREADS", "");
+  cs = cfg->addString("DOT_FONTNAME", "");
+  cs = cfg->addString("DOT_FONTSIZE", "");
+  cs = cfg->addString("DOT_FONTPATH", "");
+  cs = cfg->addString("CLASS_GRAPH", "");
+  cs = cfg->addString("COLLABORATION_GRAPH", "");
+  cs = cfg->addString("GROUP_GRAPHS", "");
+  cs = cfg->addString("UML_LOOK", "");
+  cs = cfg->addString("UML_LIMIT_NUM_FIELDS", "");
+  cs = cfg->addString("TEMPLATE_RELATIONS", "");
+  cs = cfg->addString("INCLUDE_GRAPH", "");
+  cs = cfg->addString("INCLUDED_BY_GRAPH", "");
+  cb = cfg->addBool("CALL_GRAPH", "", false);
+  cb = cfg->addBool("CALLER_GRAPH", "", false);
+  cs = cfg->addString("GRAPHICAL_HIERARCHY", "");
+  cb = cfg->addBool("DIRECTORY_GRAPH", "", false);
+  ce = cfg->addEnum("DOT_IMAGE_FORMAT", "", "png");
+  cb = cfg->addBool("INTERACTIVE_SVG", "", false);
+  cs = cfg->addString("DOT_PATH", "");
+  cl = cfg->addList("DOTFILE_DIRS", "");
+  cl = cfg->addList("MSCFILE_DIRS", "");
+  cl = cfg->addList("DIAFILE_DIRS", "");
+  cs = cfg->addString("PLANTUML_JAR_PATH", "");
+  ci = cfg->addInt("DOT_GRAPH_MAX_NODES", "",0,10000,50);
+  ci = cfg->addInt("MAX_DOT_GRAPH_DEPTH", "",0,1000,0);
+  cs = cfg->addString("DOT_TRANSPARENT", "");
+  cs = cfg->addString("DOT_MULTI_TARGETS", "");
+  cb = cfg->addBool("GENERATE_LEGEND", "", false);
+  cs = cfg->addString("DOT_CLEANUP", "");
 
 }
 

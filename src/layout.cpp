@@ -131,14 +131,12 @@ QByteArray LayoutNavEntry::url() const
    return url;
 }
 
-//---------------------------------------------------------------------------------
-
 class LayoutParser : public QXmlDefaultHandler
 {
  private:
    class StartElementHandler
    {
-      typedef void (LayoutParser::*Handler)(const QXmlAttributes &attrib);
+    typedef void (LayoutParser::*Handler)(const QXmlAttributes &attrib);
 
     public:
       StartElementHandler(LayoutParser *parent, Handler h)
@@ -167,7 +165,7 @@ class LayoutParser : public QXmlDefaultHandler
       StartElementHandlerKind(LayoutParser *parent, LayoutDocEntry::Kind k, Handler h)
          : m_parent(parent), m_kind(k), m_handler(h) {}
 
-      void operator()(const QXmlAttributes &attrib) {
+      void operator()(const QXmlAttributes &attrib) override {
          (m_parent->*m_handler)(m_kind, attrib);
       }
 
@@ -261,464 +259,466 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    void init() {     
-      m_part = -1; // invalid
+      m_part    = -1;
       m_rootNav = 0;
 
-      //bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");     
-      //bool javaOpt    = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
+      // bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");     
+      // bool javaOpt    = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
 
       // start & end handlers
-      m_sHandler.insert("doxygenlayout", StartElementHandler(this, &LayoutParser::startLayout));
-      m_eHandler.insert("doxygenlayout", EndElementHandler(this, &LayoutParser::endLayout));
+      m_sHandler.insert("doxygenlayout",             new StartElementHandler(this, &LayoutParser::startLayout));
+      m_eHandler.insert("doxygenlayout",             new EndElementHandler(this, &LayoutParser::endLayout));
 
       // class layout handlers
-      m_sHandler.insert("navindex",      StartElementHandler(this, &LayoutParser::startNavIndex));
-      m_sHandler.insert("navindex/tab",  StartElementHandler(this, &LayoutParser::startNavEntry));
-      m_eHandler.insert("navindex/tab",  EndElementHandler(this, &LayoutParser::endNavEntry));
-      m_eHandler.insert("navindex",      EndElementHandler(this, &LayoutParser::endNavIndex));
+      m_sHandler.insert("navindex",                  new StartElementHandler(this, &LayoutParser::startNavIndex));
+      m_sHandler.insert("navindex/tab",              new StartElementHandler(this, &LayoutParser::startNavEntry));
+      m_eHandler.insert("navindex/tab",              new EndElementHandler(this, &LayoutParser::endNavEntry));
+      m_eHandler.insert("navindex",                  new EndElementHandler(this, &LayoutParser::endNavIndex));
 
       // class layout handlers
-      m_sHandler.insert("class",                     StartElementHandler(this, &LayoutParser::startClass));
-      m_sHandler.insert("class/briefdescription",    StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class",                     new StartElementHandler(this, &LayoutParser::startClass));
+      m_sHandler.insert("class/briefdescription",    new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("class/detaileddescription", StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
+      m_sHandler.insert("class/detaileddescription", new StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
                               theTranslator->trDetailedDescription()));
 
-      m_sHandler.insert("class/authorsection",       StartElementHandlerKind(this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("class/includes",            StartElementHandlerKind(this, LayoutDocEntry::ClassIncludes, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("class/inheritancegraph",    StartElementHandlerKind(this, LayoutDocEntry::ClassInheritanceGraph, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("class/collaborationgraph",  StartElementHandlerKind(this, LayoutDocEntry::ClassCollaborationGraph, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("class/allmemberslink",      StartElementHandlerKind(this, LayoutDocEntry::ClassAllMembersLink, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("class/usedfiles",           StartElementHandlerKind(this, LayoutDocEntry::ClassUsedFiles, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("class/memberdecl",          StartElementHandler(this, &LayoutParser::startMemberDecl));
+      m_sHandler.insert("class/authorsection",       new StartElementHandlerKind(this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/includes",            new StartElementHandlerKind(this, LayoutDocEntry::ClassIncludes, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/inheritancegraph",    new StartElementHandlerKind(this, LayoutDocEntry::ClassInheritanceGraph, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/collaborationgraph",  new StartElementHandlerKind(this, LayoutDocEntry::ClassCollaborationGraph, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/allmemberslink",      new StartElementHandlerKind(this, LayoutDocEntry::ClassAllMembersLink, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/usedfiles",           new StartElementHandlerKind(this, LayoutDocEntry::ClassUsedFiles, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/memberdecl",          new StartElementHandler(this, &LayoutParser::startMemberDecl));
 
-      m_sHandler.insert("class/memberdecl/membergroups",  StartElementHandlerKind(this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/memberdecl/membergroups",  new StartElementHandlerKind(this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("class/memberdecl/nestedclasses", StartElementHandlerSection(this, LayoutDocEntry::ClassNestedClasses, &LayoutParser::startSectionEntry,
+      m_sHandler.insert("class/memberdecl/nestedclasses", new StartElementHandlerSection(this, LayoutDocEntry::ClassNestedClasses, &LayoutParser::startSectionEntry,
                               COMPILE_FOR_1_OPTION(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes())));
 
-      m_sHandler.insert("class/memberdecl/services",      StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/services",      new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_services, theTranslator->trServices()));
 
-      m_sHandler.insert("class/memberdecl/interfaces",    StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/interfaces",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_interfaces, theTranslator->trInterfaces()));
 
-      m_sHandler.insert("class/memberdecl/publictypes",   StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publictypes",   new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_pubTypes, theTranslator->trPublicTypes()));
 
-      m_sHandler.insert("class/memberdecl/publicslots",   StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicslots",   new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_pubSlots, theTranslator->trPublicSlots()));
 
-      m_sHandler.insert("class/memberdecl/signals",       StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/signals",       new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_signals, theTranslator->trSignals()));
 
-      m_sHandler.insert("class/memberdecl/publicmethods", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry, MemberListType_pubMethods, 
+      m_sHandler.insert("class/memberdecl/publicmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry, MemberListType_pubMethods, 
                               COMPILE_FOR_1_OPTION(theTranslator->trPublicMembers(), SrcLangExt_ObjC, theTranslator->trInstanceMethods())));
 
-      m_sHandler.insert("class/memberdecl/publicstaticmethods", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicstaticmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_pubStaticMethods, COMPILE_FOR_1_OPTION( theTranslator->trStaticPublicMembers(),
                                  SrcLangExt_ObjC, theTranslator->trClassMethods() )));
 
-      m_sHandler.insert("class/memberdecl/publicattributes", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicattributes",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_pubAttribs, theTranslator->trPublicAttribs()));
 
-      m_sHandler.insert("class/memberdecl/publicstaticattributes", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicstaticattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_pubStaticAttribs, theTranslator->trStaticPublicAttribs()));
 
-      m_sHandler.insert("class/memberdecl/protectedtypes", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedtypes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_proTypes, theTranslator->trProtectedTypes()));
 
-      m_sHandler.insert("class/memberdecl/protectedslots", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_proSlots, theTranslator->trProtectedSlots()));
 
-      m_sHandler.insert("class/memberdecl/protectedmethods", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_proMethods, theTranslator->trProtectedMembers()));
 
-      m_sHandler.insert("class/memberdecl/protectedstaticmethods", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedstaticmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_proStaticMethods, theTranslator->trStaticProtectedMembers()));
 
-      m_sHandler.insert("class/memberdecl/protectedattributes", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_proAttribs, theTranslator->trProtectedAttribs()));
 
-      m_sHandler.insert("class/memberdecl/protectedstaticattributes", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedstaticattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_proStaticAttribs, theTranslator->trStaticProtectedAttribs()));
 
-      m_sHandler.insert("class/memberdecl/packagetypes", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/packagetypes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_pacTypes, theTranslator->trPackageTypes()));
 
-      m_sHandler.insert("class/memberdecl/packagemethods", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/packagemethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_pacMethods, theTranslator->trPackageMembers()));
 
-      m_sHandler.insert("class/memberdecl/packagestaticmethods", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/packagestaticmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_pacStaticMethods, theTranslator->trStaticPackageMembers()));
 
-      m_sHandler.insert("class/memberdecl/packageattributes", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/packageattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_pacAttribs, theTranslator->trPackageAttribs()));
 
-      m_sHandler.insert("class/memberdecl/packagestaticattributes", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/packagestaticattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_pacStaticAttribs, theTranslator->trStaticPackageAttribs()));
 
-      m_sHandler.insert("class/memberdecl/properties", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/properties", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_properties, theTranslator->trProperties()));
 
-      m_sHandler.insert("class/memberdecl/events", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/events", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_events, theTranslator->trEvents()));
 
-      m_sHandler.insert("class/memberdecl/privatetypes", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privatetypes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_priTypes, theTranslator->trPrivateTypes()));
 
-      m_sHandler.insert("class/memberdecl/privateslots", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privateslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_priSlots, theTranslator->trPrivateSlots()));
 
-      m_sHandler.insert("class/memberdecl/privatemethods", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privatemethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_priMethods, theTranslator->trPrivateMembers()));
 
-      m_sHandler.insert("class/memberdecl/privatestaticmethods", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privatestaticmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_priStaticMethods, theTranslator->trStaticPrivateMembers()));
 
-      m_sHandler.insert("class/memberdecl/privateattributes", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privateattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_priAttribs, theTranslator->trPrivateAttribs()));
 
-      m_sHandler.insert("class/memberdecl/privatestaticattributes", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privatestaticattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_priStaticAttribs, theTranslator->trStaticPrivateAttribs()));
 
-      m_sHandler.insert("class/memberdecl/friends", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/friends", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_friends, theTranslator->trFriends()));
 
-      m_sHandler.insert("class/memberdecl/related", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/related", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_related, theTranslator->trRelatedFunctions(), theTranslator->trRelatedSubscript()));
 
-      m_eHandler.insert("class/memberdecl", EndElementHandler(this, &LayoutParser::endMemberDecl));
-      m_sHandler.insert("class/memberdef",  StartElementHandler(this, &LayoutParser::startMemberDef));
+      m_eHandler.insert("class/memberdecl", new EndElementHandler(this, &LayoutParser::endMemberDecl));
+      m_sHandler.insert("class/memberdef",  new StartElementHandler(this, &LayoutParser::startMemberDef));
 
-      m_sHandler.insert("class/memberdef/inlineclasses", StartElementHandlerSection(this, LayoutDocEntry::ClassInlineClasses, 
+      m_sHandler.insert("class/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::ClassInlineClasses, 
                               &LayoutParser::startSectionEntry, COMPILE_FOR_1_OPTION( theTranslator->trClassDocumentation(), 
                               SrcLangExt_Fortran, theTranslator->trTypeDocumentation() )));
 
-      m_sHandler.insert("class/memberdef/typedefs", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_typedefMembers, theTranslator->trMemberTypedefDocumentation()));
 
-      m_sHandler.insert("class/memberdef/enums", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_enumMembers, theTranslator->trMemberEnumerationDocumentation()));
 
-      m_sHandler.insert("class/memberdef/services", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/services", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_serviceMembers, theTranslator->trInterfaces()));
 
-      m_sHandler.insert("class/memberdef/interfaces", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/interfaces", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_interfaceMembers, theTranslator->trInterfaces()));
 
-      m_sHandler.insert("class/memberdef/constructors", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/constructors", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_constructors, theTranslator->trConstructorDocumentation()));
 
-      m_sHandler.insert("class/memberdef/functions", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_functionMembers, COMPILE_FOR_2_OPTIONS(theTranslator->trMemberFunctionDocumentation(),
                               SrcLangExt_ObjC, theTranslator->trMethodDocumentation(), 
                               SrcLangExt_Fortran, theTranslator->trMemberFunctionDocumentationFortran() )));
 
-      m_sHandler.insert("class/memberdef/related", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/related", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_relatedMembers, theTranslator->trRelatedFunctionDocumentation()));
 
-      m_sHandler.insert("class/memberdef/variables", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_variableMembers, theTranslator->trMemberDataDocumentation()));
 
-      m_sHandler.insert("class/memberdef/properties", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/properties", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_propertyMembers, theTranslator->trPropertyDocumentation()));
 
-      m_sHandler.insert("class/memberdef/events", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/events", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_eventMembers, theTranslator->trEventDocumentation()));
 
-      m_eHandler.insert("class/memberdef", EndElementHandler(this, &LayoutParser::endMemberDef));
+      m_eHandler.insert("class/memberdef", new EndElementHandler(this, &LayoutParser::endMemberDef));
 
-      m_eHandler.insert("class", EndElementHandler(this, &LayoutParser::endClass));
+      m_eHandler.insert("class", new EndElementHandler(this, &LayoutParser::endClass));
 
 
       // namespace layout handlers
-      m_sHandler.insert("namespace", StartElementHandler(this, &LayoutParser::startNamespace));
-      m_sHandler.insert("namespace/briefdescription", StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("namespace", new StartElementHandler(this, &LayoutParser::startNamespace));
+      m_sHandler.insert("namespace/briefdescription", new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("namespace/detaileddescription", StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
+      m_sHandler.insert("namespace/detaileddescription", new StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
                               theTranslator->trDetailedDescription()));
 
-      m_sHandler.insert("namespace/authorsection", StartElementHandlerKind(this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("namespace/authorsection", new StartElementHandlerKind(this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("namespace/memberdecl", StartElementHandler(this, &LayoutParser::startMemberDecl));
+      m_sHandler.insert("namespace/memberdecl", new StartElementHandler(this, &LayoutParser::startMemberDecl));
 
-      m_sHandler.insert("namespace/memberdecl/nestednamespaces", StartElementHandlerSection(this, LayoutDocEntry::NamespaceNestedNamespaces,
+      m_sHandler.insert("namespace/memberdecl/nestednamespaces", new StartElementHandlerSection(this, LayoutDocEntry::NamespaceNestedNamespaces,
                               &LayoutParser::startSectionEntry, COMPILE_FOR_3_OPTIONS( theTranslator->trNamespaces(),
                               SrcLangExt_Java, theTranslator->trPackages(), SrcLangExt_IDL, theTranslator->trModules(), 
                               SrcLangExt_Fortran, theTranslator->trModules() )));
 
-      m_sHandler.insert("namespace/memberdecl/constantgroups", StartElementHandlerSection(this, LayoutDocEntry::NamespaceNestedConstantGroups,
+      m_sHandler.insert("namespace/memberdecl/constantgroups", new StartElementHandlerSection(this, LayoutDocEntry::NamespaceNestedConstantGroups,
                               &LayoutParser::startSectionEntry, theTranslator->trConstantGroups()));
 
-      m_sHandler.insert("namespace/memberdecl/classes", StartElementHandlerSection(this, LayoutDocEntry::NamespaceClasses, 
+      m_sHandler.insert("namespace/memberdecl/classes", new StartElementHandlerSection(this, LayoutDocEntry::NamespaceClasses, 
                               &LayoutParser::startSectionEntry, COMPILE_FOR_1_OPTION(theTranslator->trCompounds(),                              
                               SrcLangExt_Fortran, theTranslator->trDataTypes() )));
 
-      m_sHandler.insert("namespace/memberdecl/membergroups", StartElementHandlerKind(this, LayoutDocEntry::MemberGroups, 
+      m_sHandler.insert("namespace/memberdecl/membergroups", new StartElementHandlerKind(this, LayoutDocEntry::MemberGroups, 
                               &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("namespace/memberdecl/typedefs", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("namespace/memberdecl/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decTypedefMembers, theTranslator->trTypedefs()));
 
-      m_sHandler.insert("namespace/memberdecl/enums", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("namespace/memberdecl/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decEnumMembers, theTranslator->trEnumerations()));
 
-      m_sHandler.insert("namespace/memberdecl/functions", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("namespace/memberdecl/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decFuncMembers, COMPILE_FOR_1_OPTION( theTranslator->trFunctions(),
                               SrcLangExt_Fortran, theTranslator->trSubprograms() )));
 
-      m_sHandler.insert("namespace/memberdecl/variables", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("namespace/memberdecl/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decVarMembers, theTranslator->trVariables()));
 
-      m_eHandler.insert("namespace/memberdecl", EndElementHandler(this, &LayoutParser::endMemberDecl));
-      m_sHandler.insert("namespace/memberdef",  StartElementHandler(this, &LayoutParser::startMemberDef));
+      m_eHandler.insert("namespace/memberdecl", new EndElementHandler(this, &LayoutParser::endMemberDecl));
+      m_sHandler.insert("namespace/memberdef",  new StartElementHandler(this, &LayoutParser::startMemberDef));
 
-      m_sHandler.insert("namespace/memberdef/inlineclasses", StartElementHandlerSection(this, LayoutDocEntry::NamespaceInlineClasses,
+      m_sHandler.insert("namespace/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::NamespaceInlineClasses,
                               &LayoutParser::startSectionEntry, COMPILE_FOR_1_OPTION(theTranslator->trClassDocumentation(),
                               SrcLangExt_Fortran, theTranslator->trTypeDocumentation() )));
 
-      m_sHandler.insert("namespace/memberdef/typedefs", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("namespace/memberdef/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docTypedefMembers, theTranslator->trTypedefDocumentation()));
 
-      m_sHandler.insert("namespace/memberdef/enums", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("namespace/memberdef/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docEnumMembers, theTranslator->trEnumerationTypeDocumentation()));
 
-      m_sHandler.insert("namespace/memberdef/functions", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("namespace/memberdef/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docFuncMembers, COMPILE_FOR_1_OPTION( theTranslator->trFunctionDocumentation(),
                               SrcLangExt_Fortran, theTranslator->trSubprogramDocumentation() )));
 
-      m_sHandler.insert("namespace/memberdef/variables", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("namespace/memberdef/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docVarMembers, theTranslator->trVariableDocumentation()));
 
-      m_eHandler.insert("namespace/memberdef", EndElementHandler(this, &LayoutParser::endMemberDef));
-      m_eHandler.insert("namespace", EndElementHandler(this, &LayoutParser::endNamespace));
+      m_eHandler.insert("namespace/memberdef", new EndElementHandler(this, &LayoutParser::endMemberDef));
+      m_eHandler.insert("namespace", new EndElementHandler(this, &LayoutParser::endNamespace));
 
       // file layout handlers
-      m_sHandler.insert("file", StartElementHandler(this, &LayoutParser::startFile));
-      m_sHandler.insert("file/briefdescription", StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("file", new StartElementHandler(this, &LayoutParser::startFile));
+      m_sHandler.insert("file/briefdescription", new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("file/detaileddescription", StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
+      m_sHandler.insert("file/detaileddescription", new StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
                               theTranslator->trDetailedDescription()));
 
-      m_sHandler.insert("file/authorsection", StartElementHandlerKind(this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("file/includes", StartElementHandlerKind(this, LayoutDocEntry::FileIncludes, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("file/includegraph", StartElementHandlerKind(this, LayoutDocEntry::FileIncludeGraph, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("file/includedbygraph", StartElementHandlerKind(this, LayoutDocEntry::FileIncludedByGraph, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("file/sourcelink", StartElementHandlerKind(this, LayoutDocEntry::FileSourceLink, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("file/memberdecl/membergroups", StartElementHandlerKind(this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("file/memberdecl", StartElementHandler(this, &LayoutParser::startMemberDecl));
+      m_sHandler.insert("file/authorsection", new StartElementHandlerKind(this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("file/includes", new StartElementHandlerKind(this, LayoutDocEntry::FileIncludes, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("file/includegraph", new StartElementHandlerKind(this, LayoutDocEntry::FileIncludeGraph, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("file/includedbygraph", new StartElementHandlerKind(this, LayoutDocEntry::FileIncludedByGraph, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("file/sourcelink", new StartElementHandlerKind(this, LayoutDocEntry::FileSourceLink, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("file/memberdecl/membergroups", new StartElementHandlerKind(this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("file/memberdecl", new StartElementHandler(this, &LayoutParser::startMemberDecl));
 
-      m_sHandler.insert("file/memberdecl/classes", StartElementHandlerSection(this, LayoutDocEntry::FileClasses, &LayoutParser::startSectionEntry,
+      m_sHandler.insert("file/memberdecl/classes", new StartElementHandlerSection(this, LayoutDocEntry::FileClasses, &LayoutParser::startSectionEntry,
                               COMPILE_FOR_1_OPTION(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes() )));
 
-      m_sHandler.insert("file/memberdecl/namespaces", StartElementHandlerSection(this, LayoutDocEntry::FileNamespaces, 
+      m_sHandler.insert("file/memberdecl/namespaces", new StartElementHandlerSection(this, LayoutDocEntry::FileNamespaces, 
                               &LayoutParser::startSectionEntry, COMPILE_FOR_3_OPTIONS( theTranslator->trNamespaces(), SrcLangExt_Java,
                               theTranslator->trPackages(), SrcLangExt_IDL, theTranslator->trModules(), 
                               SrcLangExt_Fortran, theTranslator->trModules() )));
 
-      m_sHandler.insert("file/memberdecl/constantgroups", StartElementHandlerSection(this, LayoutDocEntry::FileConstantGroups,
+      m_sHandler.insert("file/memberdecl/constantgroups", new StartElementHandlerSection(this, LayoutDocEntry::FileConstantGroups,
                               &LayoutParser::startSectionEntry, theTranslator->trConstantGroups()));
 
-      m_sHandler.insert("file/memberdecl/defines", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("file/memberdecl/defines", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decDefineMembers, theTranslator->trDefines()));
 
-      m_sHandler.insert("file/memberdecl/typedefs", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("file/memberdecl/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decTypedefMembers, theTranslator->trTypedefs()));
 
-      m_sHandler.insert("file/memberdecl/enums", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("file/memberdecl/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decEnumMembers, theTranslator->trEnumerations()));
 
-      m_sHandler.insert("file/memberdecl/functions", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("file/memberdecl/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decFuncMembers, COMPILE_FOR_1_OPTION(
                               theTranslator->trFunctions(), SrcLangExt_Fortran, theTranslator->trSubprograms() )));
 
-      m_sHandler.insert("file/memberdecl/variables", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("file/memberdecl/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decVarMembers, theTranslator->trVariables()));
 
-      m_eHandler.insert("file/memberdecl", EndElementHandler(this, &LayoutParser::endMemberDecl));
-      m_sHandler.insert("file/memberdef",  StartElementHandler(this, &LayoutParser::startMemberDef));
+      m_eHandler.insert("file/memberdecl", new EndElementHandler(this, &LayoutParser::endMemberDecl));
+      m_sHandler.insert("file/memberdef",  new StartElementHandler(this, &LayoutParser::startMemberDef));
 
-      m_sHandler.insert("file/memberdef/inlineclasses", StartElementHandlerSection(this, LayoutDocEntry::FileInlineClasses, 
+      m_sHandler.insert("file/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::FileInlineClasses, 
                               &LayoutParser::startSectionEntry,
                               COMPILE_FOR_1_OPTION( theTranslator->trClassDocumentation(), SrcLangExt_Fortran, 
                               theTranslator->trTypeDocumentation() )));
 
-      m_sHandler.insert("file/memberdef/defines", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("file/memberdef/defines", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docDefineMembers, theTranslator->trDefineDocumentation()));
 
-      m_sHandler.insert("file/memberdef/typedefs", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("file/memberdef/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docTypedefMembers, theTranslator->trTypedefDocumentation()));
 
-      m_sHandler.insert("file/memberdef/enums", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("file/memberdef/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docEnumMembers, theTranslator->trEnumerationTypeDocumentation()));
 
-      m_sHandler.insert("file/memberdef/functions", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("file/memberdef/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docFuncMembers, COMPILE_FOR_1_OPTION(theTranslator->trFunctionDocumentation(),
                               SrcLangExt_Fortran, theTranslator->trSubprogramDocumentation() )));
 
-      m_sHandler.insert("file/memberdef/variables", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("file/memberdef/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docVarMembers, theTranslator->trVariableDocumentation()));
 
-      m_eHandler.insert("file/memberdef", EndElementHandler(this, &LayoutParser::endMemberDef));
-      m_eHandler.insert("file", EndElementHandler(this, &LayoutParser::endFile));
+      m_eHandler.insert("file/memberdef", new EndElementHandler(this, &LayoutParser::endMemberDef));
+      m_eHandler.insert("file", new EndElementHandler(this, &LayoutParser::endFile));
 
       // group layout handlers
-      m_sHandler.insert("group", StartElementHandler(this, &LayoutParser::startGroup));
-      m_sHandler.insert("group/briefdescription", StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("group", new StartElementHandler(this, &LayoutParser::startGroup));
+      m_sHandler.insert("group/briefdescription", new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("group/detaileddescription", StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
+      m_sHandler.insert("group/detaileddescription", new StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
                               theTranslator->trDetailedDescription()));
 
-      m_sHandler.insert("group/authorsection", StartElementHandlerKind(this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("group/groupgraph", StartElementHandlerKind(this, LayoutDocEntry::GroupGraph, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("group/memberdecl/membergroups", StartElementHandlerKind(this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("group/memberdecl", StartElementHandler(this, &LayoutParser::startMemberDecl));
+      m_sHandler.insert("group/authorsection", new StartElementHandlerKind(this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("group/groupgraph", new StartElementHandlerKind(this, LayoutDocEntry::GroupGraph, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("group/memberdecl/membergroups", new StartElementHandlerKind(this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("group/memberdecl", new StartElementHandler(this, &LayoutParser::startMemberDecl));
 
-      m_sHandler.insert("group/memberdecl/classes", StartElementHandlerSection(this, LayoutDocEntry::GroupClasses, &LayoutParser::startSectionEntry,
+      m_sHandler.insert("group/memberdecl/classes", new StartElementHandlerSection(this, LayoutDocEntry::GroupClasses, &LayoutParser::startSectionEntry,
                               COMPILE_FOR_1_OPTION( theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes() )));
 
-      m_sHandler.insert("group/memberdecl/namespaces", StartElementHandlerSection(this, LayoutDocEntry::GroupNamespaces,
+      m_sHandler.insert("group/memberdecl/namespaces", new StartElementHandlerSection(this, LayoutDocEntry::GroupNamespaces,
                               &LayoutParser::startSectionEntry, COMPILE_FOR_2_OPTIONS( theTranslator->trNamespaces(),
                               SrcLangExt_Java, theTranslator->trPackages(), SrcLangExt_Fortran, theTranslator->trModules() )));
 
-      m_sHandler.insert("group/memberdecl/dirs", StartElementHandlerSection(this, LayoutDocEntry::GroupDirs, &LayoutParser::startSectionEntry,
+      m_sHandler.insert("group/memberdecl/dirs", new StartElementHandlerSection(this, LayoutDocEntry::GroupDirs, &LayoutParser::startSectionEntry,
                               theTranslator->trDirectories() ));
 
-      m_sHandler.insert("group/memberdecl/nestedgroups", StartElementHandlerSection(this, LayoutDocEntry::GroupNestedGroups, 
+      m_sHandler.insert("group/memberdecl/nestedgroups", new StartElementHandlerSection(this, LayoutDocEntry::GroupNestedGroups, 
                               &LayoutParser::startSectionEntry, theTranslator->trModules() ));
 
-      m_sHandler.insert("group/memberdecl/files", StartElementHandlerSection(this, LayoutDocEntry::GroupFiles, &LayoutParser::startSectionEntry,
+      m_sHandler.insert("group/memberdecl/files", new StartElementHandlerSection(this, LayoutDocEntry::GroupFiles, &LayoutParser::startSectionEntry,
                               theTranslator->trFile(true, false) ));
 
-      m_sHandler.insert("group/memberdecl/defines", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/defines", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decDefineMembers, theTranslator->trDefines()));
 
-      m_sHandler.insert("group/memberdecl/typedefs", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decTypedefMembers, theTranslator->trTypedefs()));
 
-      m_sHandler.insert("group/memberdecl/enums", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decEnumMembers, theTranslator->trEnumerations()));
 
-      m_sHandler.insert("group/memberdecl/enumvalues", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/enumvalues", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decEnumValMembers, theTranslator->trEnumerationValues()));
 
-      m_sHandler.insert("group/memberdecl/functions", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decFuncMembers, COMPILE_FOR_1_OPTION(
                                  theTranslator->trFunctions(), SrcLangExt_Fortran, theTranslator->trSubprograms() )));
 
-      m_sHandler.insert("group/memberdecl/variables", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decVarMembers, theTranslator->trVariables()));
 
-      m_sHandler.insert("group/memberdecl/signals", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/signals", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decSignalMembers, theTranslator->trSignals()));
 
-      m_sHandler.insert("group/memberdecl/publicslots", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/publicslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decPubSlotMembers, theTranslator->trPublicSlots()));
 
-      m_sHandler.insert("group/memberdecl/protectedslots", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/protectedslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decProSlotMembers, theTranslator->trProtectedSlots()));
 
-      m_sHandler.insert("group/memberdecl/privateslots", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/privateslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decPriSlotMembers, theTranslator->trPrivateSlots()));
 
-      m_sHandler.insert("group/memberdecl/events", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/events", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decEventMembers, theTranslator->trEvents()));
 
-      m_sHandler.insert("group/memberdecl/properties", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/properties", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decPropMembers, theTranslator->trProperties()));
 
-      m_sHandler.insert("group/memberdecl/friends", StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/friends", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                               MemberListType_decFriendMembers, theTranslator->trFriends()));
 
-      m_eHandler.insert("group/memberdecl", EndElementHandler(this, &LayoutParser::endMemberDecl));
-      m_sHandler.insert("group/memberdef", StartElementHandler(this, &LayoutParser::startMemberDef));
-      m_sHandler.insert("group/memberdef/pagedocs", StartElementHandlerKind(this, LayoutDocEntry::GroupPageDocs, &LayoutParser::startSimpleEntry));
+      m_eHandler.insert("group/memberdecl", new EndElementHandler(this, &LayoutParser::endMemberDecl));
+      m_sHandler.insert("group/memberdef", new StartElementHandler(this, &LayoutParser::startMemberDef));
+      m_sHandler.insert("group/memberdef/pagedocs", new StartElementHandlerKind(this, LayoutDocEntry::GroupPageDocs, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("group/memberdef/inlineclasses", StartElementHandlerSection(this, LayoutDocEntry::GroupInlineClasses, 
-                              &LayoutParser::startSectionEntry, COMPILE_FOR_1_OPTION(theTranslator->trClassDocumentation(), SrcLangExt_Fortran,
-                              theTranslator->trTypeDocumentation() )));
+      m_sHandler.insert("group/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::GroupInlineClasses, 
+                         &LayoutParser::startSectionEntry, COMPILE_FOR_1_OPTION(theTranslator->trClassDocumentation(), SrcLangExt_Fortran,
+                         theTranslator->trTypeDocumentation() )));
 
-      m_sHandler.insert("group/memberdef/defines", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docDefineMembers, theTranslator->trDefineDocumentation()));
+      m_sHandler.insert("group/memberdef/defines", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                         MemberListType_docDefineMembers, theTranslator->trDefineDocumentation()));
 
-      m_sHandler.insert("group/memberdef/typedefs", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docTypedefMembers, theTranslator->trTypedefDocumentation()));
+      m_sHandler.insert("group/memberdef/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                         MemberListType_docTypedefMembers, theTranslator->trTypedefDocumentation()));
 
-      m_sHandler.insert("group/memberdef/enums", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docEnumMembers, theTranslator->trEnumerationTypeDocumentation()));
+      m_sHandler.insert("group/memberdef/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                         MemberListType_docEnumMembers, theTranslator->trEnumerationTypeDocumentation()));
 
-      m_sHandler.insert("group/memberdef/enumvalues", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docEnumValMembers, theTranslator->trEnumerationValueDocumentation()));
+      m_sHandler.insert("group/memberdef/enumvalues", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                         MemberListType_docEnumValMembers, theTranslator->trEnumerationValueDocumentation()));
 
-      m_sHandler.insert("group/memberdef/functions", StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docFuncMembers, COMPILE_FOR_1_OPTION( theTranslator->trFunctionDocumentation(),
-                                 SrcLangExt_Fortran, theTranslator->trSubprogramDocumentation() )));
+      m_sHandler.insert("group/memberdef/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                         MemberListType_docFuncMembers, COMPILE_FOR_1_OPTION( theTranslator->trFunctionDocumentation(),
+                         SrcLangExt_Fortran, theTranslator->trSubprogramDocumentation() )));
 
       m_sHandler.insert("group/memberdef/variables",
-                        StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                        new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docVarMembers, theTranslator->trVariableDocumentation()));
       m_sHandler.insert("group/memberdef/signals",
-                        StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                        new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docSignalMembers, theTranslator->trSignals()));
       m_sHandler.insert("group/memberdef/publicslots",
-                        StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                        new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docPubSlotMembers, theTranslator->trPublicSlots()));
       m_sHandler.insert("group/memberdef/protectedslots",
-                        StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                        new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docProSlotMembers, theTranslator->trProtectedSlots()));
       m_sHandler.insert("group/memberdef/privateslots",
-                        StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                        new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docPriSlotMembers, theTranslator->trPrivateSlots()));
       m_sHandler.insert("group/memberdef/events",
-                        StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                        new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docEventMembers, theTranslator->trEvents()));
-      m_sHandler.insert("group/memberdef/properties",
-                        StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docPropMembers, theTranslator->trProperties()));
-      m_sHandler.insert("group/memberdef/friends",
-                        StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docFriendMembers, theTranslator->trFriends()));
-      m_eHandler.insert("group/memberdef",
-                        EndElementHandler(this, &LayoutParser::endMemberDef));
 
-      m_eHandler.insert("group", EndElementHandler(this, &LayoutParser::endGroup));
+      m_sHandler.insert("group/memberdef/properties", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                              MemberListType_docPropMembers, theTranslator->trProperties()));
+
+      m_sHandler.insert("group/memberdef/friends", new  StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                              MemberListType_docFriendMembers, theTranslator->trFriends()));
+
+      m_eHandler.insert("group/memberdef", new EndElementHandler(this, &LayoutParser::endMemberDef));
+
+      m_eHandler.insert("group", new EndElementHandler(this, &LayoutParser::endGroup));
 
       // directory layout handlers
-      m_sHandler.insert("directory",
-                        StartElementHandler(this, &LayoutParser::startDirectory));
-      m_sHandler.insert("directory/briefdescription",
-                        StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("directory", new StartElementHandler(this, &LayoutParser::startDirectory));
+      m_sHandler.insert("directory/briefdescription", 
+                        new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
+
       m_sHandler.insert("directory/detaileddescription",
-                        StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
-                              theTranslator->trDetailedDescription()));
+                        new StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
+                        theTranslator->trDetailedDescription()));
+
       m_sHandler.insert("directory/directorygraph",
-                        StartElementHandlerKind(this, LayoutDocEntry::DirGraph, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("directory/memberdecl",
-                        StartElementHandler(this, &LayoutParser::startMemberDecl));
+                        new StartElementHandlerKind(this, LayoutDocEntry::DirGraph, &LayoutParser::startSimpleEntry));
+
+      m_sHandler.insert("directory/memberdecl", new StartElementHandler(this, &LayoutParser::startMemberDecl));
+
       m_sHandler.insert("directory/memberdecl/dirs",
-                        StartElementHandlerKind(this, LayoutDocEntry::DirSubDirs, &LayoutParser::startSimpleEntry));
+                        new StartElementHandlerKind(this, LayoutDocEntry::DirSubDirs, &LayoutParser::startSimpleEntry));
+
       m_sHandler.insert("directory/memberdecl/files",
-                        StartElementHandlerKind(this, LayoutDocEntry::DirFiles, &LayoutParser::startSimpleEntry));
-      m_eHandler.insert("directory/memberdecl",
-                        EndElementHandler(this, &LayoutParser::endMemberDecl));
-      m_eHandler.insert("directory",
-                        EndElementHandler(this, &LayoutParser::endDirectory));
+                        new StartElementHandlerKind(this, LayoutDocEntry::DirFiles, &LayoutParser::startSimpleEntry));
+
+      m_eHandler.insert("directory/memberdecl",new EndElementHandler(this, &LayoutParser::endMemberDecl));
+      m_eHandler.insert("directory", new EndElementHandler(this, &LayoutParser::endDirectory));
    }
 
    void startSimpleEntry(LayoutDocEntry::Kind k, const QXmlAttributes &attrib) {
+ 
       bool isVisible = elemIsVisible(attrib);
-      if (m_part != -1 && isVisible) { LayoutDocManager::instance().addEntry((LayoutDocManager::LayoutPart)m_part, new LayoutDocEntrySimple(k));
+
+      if (m_part != -1 && isVisible) { 
+         LayoutDocManager::instance().addEntry((LayoutDocManager::LayoutPart)m_part, new LayoutDocEntrySimple(k));
       }
    }
 
-   void startSectionEntry(LayoutDocEntry::Kind k, const QXmlAttributes &attrib,
-                          const QByteArray &title) {
+   void startSectionEntry(LayoutDocEntry::Kind k, const QXmlAttributes &attrib, const QByteArray &title) {
       bool isVisible = elemIsVisible(attrib);
       QByteArray userTitle = attrib.value("title").toUtf8();
-
-      //printf("startSectionEntry: title='%s' userTitle='%s'\n",
-      //    title.data(),userTitle.data());
+    
 
       if (userTitle.isEmpty()) {
          userTitle = title;
@@ -732,17 +732,18 @@ class LayoutParser : public QXmlDefaultHandler
 
    void startMemberDeclEntry(const QXmlAttributes &attrib, MemberListType type,
                              const QByteArray &title, const QByteArray &subscript) {
-      //QByteArray visible = convertToQByteArray(attrib.value("visible"));
-      //bool isVisible = visible.isEmpty() || (visible!="no" && visible!="0");
+     
       QByteArray userTitle     = attrib.value("title").toUtf8();
       QByteArray userSubscript = attrib.value("subtitle").toUtf8();
+
       if (userTitle.isEmpty()) {
          userTitle     = title;
       }
+
       if (userSubscript.isEmpty()) {
          userSubscript = subscript;
       }
-      //printf("memberdecl: %s\n",userTitle.data());
+      
       if (m_part != -1 /*&& isVisible*/) {
          LayoutDocManager::instance().addEntry((LayoutDocManager::LayoutPart)m_part,
                                                new LayoutDocEntryMemberDecl(type, userTitle, userSubscript));
@@ -830,7 +831,8 @@ class LayoutParser : public QXmlDefaultHandler
             LayoutNavEntry::Namespaces,
             javaOpt  ? theTranslator->trPackages() : fortranOpt ? theTranslator->trModules() : theTranslator->trNamespaces(),
             javaOpt  ? theTranslator->trPackages() : fortranOpt ? theTranslator->trModulesList() : theTranslator->trNamespaceList(),
-            javaOpt  ? theTranslator->trPackageListDescription() : fortranOpt ? theTranslator->trModulesListDescription(extractAll) : theTranslator->trNamespaceListDescription(extractAll),
+            javaOpt  ? theTranslator->trPackageListDescription() : fortranOpt ? 
+                                 theTranslator->trModulesListDescription(extractAll) : theTranslator->trNamespaceListDescription(extractAll),
             "namespaces"
          },
          {
@@ -838,7 +840,8 @@ class LayoutParser : public QXmlDefaultHandler
             LayoutNavEntry::NamespaceList,
             javaOpt ? theTranslator->trPackages() : fortranOpt ? theTranslator->trModulesList() : theTranslator->trNamespaceList(),
             QByteArray(),
-            javaOpt ? theTranslator->trPackageListDescription() : fortranOpt ? theTranslator->trModulesListDescription(extractAll) : theTranslator->trNamespaceListDescription(extractAll),
+            javaOpt ? theTranslator->trPackageListDescription() : fortranOpt ? 
+                                 theTranslator->trModulesListDescription(extractAll) : theTranslator->trNamespaceListDescription(extractAll),
             "namespaces"
          },
          {
@@ -954,9 +957,11 @@ class LayoutParser : public QXmlDefaultHandler
          }
       };
       LayoutNavEntry::Kind kind;
+
       // find type in the table
       int i = 0;
       QString type = attrib.value("type");
+
       while (mapping[i].typeStr) {
          if (mapping[i].typeStr == type) {
             kind = mapping[i].kind;
@@ -964,6 +969,7 @@ class LayoutParser : public QXmlDefaultHandler
          }
          i++;
       }
+
       if (mapping[i].typeStr == 0) {
          if (type.isEmpty()) {
             err("an entry tag within a navindex has no type attribute! Check your layout file!\n");
@@ -1103,8 +1109,10 @@ class LayoutParser : public QXmlDefaultHandler
 
    void endMemberDecl() {
       int i = m_scope.lastIndexOf("memberdecl/");
+
       if (i != -1) {
          m_scope = m_scope.left(i);
+
          if (m_part != -1) {
             LayoutDocManager::instance().addEntry((LayoutDocManager::LayoutPart)m_part,
                                                   new LayoutDocEntrySimple(LayoutDocEntry::MemberDeclEnd));
@@ -1117,34 +1125,36 @@ class LayoutParser : public QXmlDefaultHandler
       
       QByteArray temp = m_scope + name.toUtf8();
       
-      if (m_sHandler.contains(temp)) {
-         (*m_sHandler.find(temp))(attrib);         
+      StartElementHandler *handler = m_sHandler[temp];
 
+      if (handler) {         
+         (*handler)(attrib);             
+    
       } else {
-         err("Unexpected start tag `%s' found in scope='%s'!\n", name.data(), m_scope.data());
+         err("Unexpected start tag `%s' found in scope='%s'\n", name.data(), m_scope.data());
+
       }
 
       return true;
    }
 
    bool endElement( const QString &, const QString &, const QString &name ) {           
-      auto item = m_eHandler.end();
+      EndElementHandler *handler;
 
-      if (! m_scope.isEmpty() && m_scope.right(name.length() + 1) == name.toUtf8() + "/") {
-         // element ends current scope
-         item = m_eHandler.find(m_scope.left(m_scope.length() - 1));
+      if (! m_scope.isEmpty() && m_scope.right(name.length() + 1 ) == name.toUtf8() + "/") { 
+        // element ends current scope
+        handler = m_eHandler[m_scope.left(m_scope.length()-1)];
 
-      } else { 
-         // continue with current scope
-         item = m_eHandler.find(m_scope + name.toUtf8());
-
+      }  else  {
+         // continue with current scope      
+        handler = m_eHandler[m_scope + name.toUtf8()];
       }
 
-      if (item != m_eHandler.end()) {
-         (*item)();
+      if (handler) {
+        (*handler)();
       }
 
-      return true;
+      return TRUE;
    }
 
    bool startDocument() {
@@ -1154,8 +1164,8 @@ class LayoutParser : public QXmlDefaultHandler
  private:
    LayoutParser() :  m_invalidEntry(false) { }
 
-   QHash<QString, StartElementHandler> m_sHandler;
-   QHash<QString, EndElementHandler>   m_eHandler;
+   QHash<QString, StartElementHandler *> m_sHandler;
+   QHash<QString, EndElementHandler *>   m_eHandler;
    QByteArray m_scope;
 
    int m_part;
@@ -1165,8 +1175,6 @@ class LayoutParser : public QXmlDefaultHandler
 };
 
 int LayoutParser::m_userGroupCount = 0;
-
-//---------------------------------------------------------------------------------
 
 class LayoutErrorHandler : public QXmlErrorHandler
 {
@@ -1204,14 +1212,12 @@ class LayoutErrorHandler : public QXmlErrorHandler
    QString fileName;
 };
 
-//---------------------------------------------------------------------------------
-
 static QByteArray getLayout_Default()
 {  
    QFile file(":/resources/layout_default.xml");
 
    if (! file.open(QFile::ReadOnly | QFile::Text)) {
-      // CS BROOM - add error handling
+      // BROOM - add error handling
 
       //const QString msg = "Unable to open file " + m_fileName + " : " + file.errorString();
       // QMessageBox::warning( 0, "XML", msg );
@@ -1250,6 +1256,7 @@ void LayoutDocManager::init()
    source.setData(layoutData);
 
    QXmlSimpleReader reader;
+  
    reader.setContentHandler( &LayoutParser::instance() );
    reader.setErrorHandler( &errorHandler );
    reader.parse( source );

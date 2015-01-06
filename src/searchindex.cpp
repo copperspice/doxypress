@@ -1298,8 +1298,9 @@ void writeJavascriptSearchIndex()
          }
          t << "};" << endl << endl;
       }
-      ResourceMgr::instance().copyResource("search.js", searchDirName);
+      ResourceMgr::instance().copyResource("html/search.js", searchDirName);
    }
+
    {
       QFile f(searchDirName + "/nomatches.html");
       if (f.open(QIODevice::WriteOnly)) {
