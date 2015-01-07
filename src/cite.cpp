@@ -170,11 +170,11 @@ void CiteDict::generatePage() const
 
    // 2. generate bib2xhtml
    QByteArray bib2xhtmlFile  = outputDir + "/bib2xhtml.pl";
-   ResourceMgr::instance().copyResource("html/bib2xhtml.pl", outputDir);
+   ResourceMgr::instance().copyResourceAs("html/bib2xhtml.pl", outputDir, "bib2xhtml.pl");
 
    // 3. generate doxygen.bst
    QByteArray doxygenBstFile = outputDir + "/doxygen.bst";
-   ResourceMgr::instance().copyResource("html/doxygen.bst", outputDir);
+   ResourceMgr::instance().copyResourceAs("html/doxygen.bst", outputDir, "doxygen.bst");
 
    // 4. for all formats we just copy the bib files to as special output directory
    //    so bibtex can find them without path (bibtex doesn't support paths or

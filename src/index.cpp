@@ -436,16 +436,17 @@ static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl
         
          bool hasChildren = !cd->visited && !hideSuper && classHasVisibleChildren(cd);
         
-         if (cd->isLinkable()) {
-            //printf("Writing class %s\n",cd->displayName().data());
+         if (cd->isLinkable()) {           
             ol.startIndexItem(cd->getReference(), cd->getOutputFileBase());
             ol.parseText(cd->displayName());
             ol.endIndexItem(cd->getReference(), cd->getOutputFileBase());
+
             if (cd->isReference()) {
                ol.startTypewriter();
                ol.docify(" [external]");
                ol.endTypewriter();
             }
+
             if (addToIndex) {
                Doxygen::indexList->addContentsItem(hasChildren, cd->displayName(), cd->getReference(), cd->getOutputFileBase(), cd->anchor());
             }
@@ -555,6 +556,7 @@ static void writeDirTreeNode(OutputList &ol, DirDef *dd, int level, FTVHelp *ftv
    ol.startIndexItem(dd->getReference(), dd->getOutputFileBase());
    ol.parseText(dd->shortName());
    ol.endIndexItem(dd->getReference(), dd->getOutputFileBase());
+
    if (dd->isReference()) {
       ol.startTypewriter();
       ol.docify(" [external]");
@@ -1395,8 +1397,17 @@ static int countAnnotatedClasses(int *cp)
 {
    int count = 0;
    int countPrinted = 0;
+
+printf("\n index.cpp Can we COUNT?\n\n");
+
   
    for (auto cd : *Doxygen::classSDict) {
+
+
+// broom
+printf("\n\n index.cpp countAnnotatedClasses");
+   
+
       if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
          if (!cd->isEmbeddedInOuterScope()) {
             countPrinted++;
@@ -1409,7 +1420,6 @@ static int countAnnotatedClasses(int *cp)
 
    return count;
 }
-
 
 static void writeAnnotatedClassList(OutputList &ol)
 {
@@ -1814,6 +1824,7 @@ static void writeAlphabeticalIndex(OutputList &ol)
 
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
+
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::ClassIndex);
    QByteArray title = lne ? lne->title() : theTranslator->trCompoundIndex();
    bool addToIndex = lne == 0 || lne->visible();
@@ -1834,8 +1845,6 @@ static void writeAlphabeticalIndex(OutputList &ol)
 
    ol.popGeneratorState();
 }
-
-//----------------------------------------------------------------------------
 
 static void writeAnnotatedIndex(OutputList &ol)
 {  
@@ -3368,9 +3377,6 @@ static void writeUserGroupStubPage(OutputList &ol, LayoutNavEntry *lne)
    }
 }
 
-//----------------------------------------------------------------------------
-
-
 static void writeIndex(OutputList &ol)
 {
    static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");   
@@ -3384,9 +3390,7 @@ static void writeIndex(OutputList &ol)
       projPrefix = projectName + " ";
    }
 
-   //--------------------------------------------------------------------
    // write HTML index
-   //--------------------------------------------------------------------
    ol.disableAllBut(OutputGenerator::Html);
 
    QByteArray defFileName = Doxygen::mainPage ? Doxygen::mainPage->docFile().data() : "[generated]";
@@ -3426,7 +3430,8 @@ static void writeIndex(OutputList &ol)
 
    bool headerWritten = false;
 
-   if (Doxygen::mainPage && !Doxygen::mainPage->title().isEmpty()) {
+   if (Doxygen::mainPage && ! Doxygen::mainPage->title().isEmpty()) {
+
       if (Doxygen::mainPage->title().toLower() != "notitle") {
          ol.startHeaderSection(); 
          ol.startTitleHead(0);
@@ -3436,14 +3441,19 @@ static void writeIndex(OutputList &ol)
 
          headerWritten = true;
       }
+
    } else {
-      if (!projectName.isEmpty()) {
+
+      if (! projectName.isEmpty()) {
+
          ol.startHeaderSection();
          ol.startTitleHead(0);
          ol.parseText(projPrefix + theTranslator->trDocumentation());
+
          headerWritten = true;
       }
    }
+
    if (headerWritten) {
       ol.endTitleHead(0, 0);
       ol.endHeaderSection();
@@ -3453,7 +3463,7 @@ static void writeIndex(OutputList &ol)
    if (Config_getBool("DISABLE_INDEX") && Doxygen::mainPage == 0) {
       ol.writeQuickLinks(false, HLI_Main, 0);
    }
-
+ 
    if (Doxygen::mainPage) {
       Doxygen::insideMainPage = true;
       if (Doxygen::mainPage->showToc() && Doxygen::mainPage->hasSections()) {
@@ -3472,9 +3482,7 @@ static void writeIndex(OutputList &ol)
    endFile(ol);
    ol.disable(OutputGenerator::Html);
 
-   //--------------------------------------------------------------------
-   // write LaTeX/RTF index
-   //--------------------------------------------------------------------
+   // write Latex & Rtf index
    ol.enable(OutputGenerator::Latex);
    ol.enable(OutputGenerator::RTF);
 
@@ -3555,7 +3563,7 @@ static void writeIndex(OutputList &ol)
       }
    }
 
-   if (!Config_getBool("LATEX_HIDE_INDICES")) {      
+   if (! Config_getBool("LATEX_HIDE_INDICES")) {      
 
       if (documentedGroups > 0) {
          ol.startIndexSection(isModuleIndex);
@@ -3665,17 +3673,20 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
       if (! indexWritten.at(index)) {
          switch (kind) {
             case LayoutNavEntry::MainPage:
-               msg("Generating index page...\n");
+               msg("Generating index page\n");
                writeIndex(ol);
                break;
+
             case LayoutNavEntry::Pages:
-               msg("Generating page index...\n");
+               msg("Generating page index\n");
                writePageIndex(ol);
                break;
+
             case LayoutNavEntry::Modules:
-               msg("Generating module index...\n");
+               msg("Generating module index\n");
                writeGroupIndex(ol);
                break;
+
             case LayoutNavEntry::Namespaces: {
                static bool showNamespaces = Config_getBool("SHOW_NAMESPACES");
                if (showNamespaces) {
@@ -3684,56 +3695,69 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                      Doxygen::indexList->incContentsDepth();
                      needsClosing = true;
                   }
-                  if (LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Namespaces) != lne) { // for backward compatibility with old layout file
-                     msg("Generating namespace index...\n");
+
+                  if (LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Namespaces) != lne) {
+                      // for backward compatibility with old layout file
+                     msg("Generating namespace index\n");
                      writeNamespaceIndex(ol);
                   }
                }
             }
             break;
+
             case LayoutNavEntry::NamespaceList: {
                static bool showNamespaces = Config_getBool("SHOW_NAMESPACES");
                if (showNamespaces) {
-                  msg("Generating namespace index...\n");
+                  msg("Generating namespace index\n");
                   writeNamespaceIndex(ol);
                }
             }
             break;
+
             case LayoutNavEntry::NamespaceMembers:
                msg("Generating namespace member index...\n");
                writeNamespaceMemberIndex(ol);
                break;
+
             case LayoutNavEntry::Classes:
                if (annotatedClasses > 0 && addToIndex) {
                   Doxygen::indexList->addContentsItem(true, lne->title(), 0, 0, 0);
                   Doxygen::indexList->incContentsDepth();
                   needsClosing = true;
                }
-               if (LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Classes) != lne) { // for backward compatibility with old layout file
-                  msg("Generating annotated compound index...\n");
+
+               if (LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Classes) != lne) { 
+                  // for backward compatibility with old layout file
+                  msg("Generating annotated compound index\n");
                   writeAnnotatedIndex(ol);
                }
+
                break;
+
             case LayoutNavEntry::ClassList:
-               msg("Generating annotated compound index...\n");
+               msg("Generating annotated compound index\n");
                writeAnnotatedIndex(ol);
                break;
+
             case LayoutNavEntry::ClassIndex:
                msg("Generating alphabetical compound index...\n");
                writeAlphabeticalIndex(ol);
                break;
+
             case LayoutNavEntry::ClassHierarchy:
-               msg("Generating hierarchical class index...\n");
+               msg("Generating hierarchical class index\n");
                writeHierarchicalIndex(ol);
                if (Config_getBool("HAVE_DOT") && Config_getBool("GRAPHICAL_HIERARCHY")) {
-                  msg("Generating graphical class hierarchy...\n");
+                  msg("Generating graphical class hierarchy\n");
                   writeGraphicalClassHierarchy(ol);
                }
                break;
+
             case LayoutNavEntry::ClassMembers:
                msg("Generating member index...\n");
                writeClassMemberIndex(ol);
                break;
+
             case LayoutNavEntry::Files: {
                static bool showFiles = Config_getBool("SHOW_FILES");
                if (showFiles) {
@@ -3742,7 +3766,9 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                      Doxygen::indexList->incContentsDepth();
                      needsClosing = true;
                   }
-                  if (LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Files) != lne) { // for backward compatibility with old layout file
+
+                  if (LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Files) != lne) { 
+                     // for backward compatibility with old layout file
                      msg("Generating file index...\n");
                      writeFileIndex(ol);
                   }

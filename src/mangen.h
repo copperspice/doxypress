@@ -30,7 +30,7 @@ class ManGenerator : public OutputGenerator
    ~ManGenerator();
 
    void enable() {
-      if (genStack.top()) {
+      if (! genStack.isEmpty()) {
          active = genStack.top();
 
       } else {

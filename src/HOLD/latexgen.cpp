@@ -460,7 +460,7 @@ static void writeDefaultHeaderPart3(FTextStream &t)
 {
    // part 3
    // Finalize project number
-   t << " Doxygen " << versionString << "}\\\\\n"
+   t << " CS Doxygen " << versionString << "}\\\\\n"
      "\\vspace*{0.5cm}\n"
      "{\\small " << dateToString(true) << "}\\\\\n"
      "\\end{center}\n"
@@ -522,7 +522,7 @@ static void writeDefaultFooter(FTextStream &t)
 void LatexGenerator::writeHeaderFile(QFile &f)
 {
    FTextStream t(&f);
-   t << "% Latex header for doxygen " << versionString << endl;
+   t << "% Latex header for CS Doxygen " << versionString << endl;
    writeDefaultHeaderPart1(t);
    t << "Your title here";
    writeDefaultHeaderPart2(t);
@@ -533,14 +533,14 @@ void LatexGenerator::writeHeaderFile(QFile &f)
 void LatexGenerator::writeFooterFile(QFile &f)
 {
    FTextStream t(&f);
-   t << "% Latex footer for doxygen " << versionString << endl;
+   t << "% Latex footer for CS Doxygen " << versionString << endl;
    writeDefaultFooter(t);
 }
 
 void LatexGenerator::writeStyleSheetFile(QFile &f)
 {
    FTextStream t(&f);
-   t << "% stylesheet for doxygen " << versionString << endl;
+   t << "% stylesheet for CS Doxygen " << versionString << endl;
    writeDefaultStyleSheet(t);
 }
 

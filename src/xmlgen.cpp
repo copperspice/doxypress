@@ -204,12 +204,13 @@ static void writeCombineScript()
    QByteArray fileName = outputDirectory + "/combine.xslt";
    QFile f(fileName);
 
-   if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+   if (! f.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
    FTextStream t(&f);
-   //t.setEncoding(FTextStream::UnicodeUTF8);
+
+   // t.setEncoding(FTextStream::UnicodeUTF8);
 
    t <<
      "<!-- XSLT script to combine the generated output into a single file. \n"
@@ -227,8 +228,8 @@ static void writeCombineScript()
      "    </doxygen>\n"
      "  </xsl:template>\n"
      "</xsl:stylesheet>\n";
-
 }
+
 
 void writeXMLLink(FTextStream &t, const char *extRef, const char *compoundId,
                   const char *anchorId, const char *text, const char *tooltip)
@@ -1131,10 +1132,8 @@ static void generateXMLForMember(MemberDef *md, FTextStream &ti, FTextStream &t,
    }
 
    mdict = md->getReferencedByMembers();
-   if (mdict) {
-      MemberSDict::Iterator mdi(*mdict);
-      MemberDef *rmd;
-      for (mdi.toFirst(); (rmd = mdi.current()); ++mdi) {
+   if (mdict) {      
+      for (auto rmd : *mdict) {
          writeMemberReference(t, def, rmd, "referencedby");
       }
    }
@@ -1142,37 +1141,42 @@ static void generateXMLForMember(MemberDef *md, FTextStream &ti, FTextStream &t,
    t << "      </memberdef>" << endl;
 }
 
-static void generateXMLSection(Definition *d, FTextStream &ti, FTextStream &t,
-                               MemberList *ml, const char *kind, const char *header = 0,
-                               const char *documentation = 0)
+static void generateXMLSection(Definition *d, FTextStream &ti, FTextStream &t, MemberList *ml, 
+                               const char *kind, const char *header = 0, const char *documentation = 0)
 {
    if (ml == 0) {
       return;
    }
-   QListIterator<MemberDef> mli(*ml);
-   MemberDef *md;
+
    int count = 0;
-   for (mli.toFirst(); (md = mli.current()); ++mli) {
+
+   for (auto md : *ml) {
       // namespace members are also inserted in the file scope, but
       // to prevent this duplication in the XML output, we filter those here.
+
       if (d->definitionType() != Definition::TypeFile || md->getNamespaceDef() == 0) {
          count++;
       }
    }
+
    if (count == 0) {
       return;   // empty list
    }
 
    t << "      <sectiondef kind=\"" << kind << "\">" << endl;
+
    if (header) {
       t << "      <header>" << convertToXML(header) << "</header>" << endl;
    }
+
    if (documentation) {
       t << "      <description>";
       writeXMLDocBlock(t, d->docFile(), d->docLine(), d, 0, documentation);
       t << "</description>" << endl;
    }
-   for (mli.toFirst(); (md = mli.current()); ++mli) {
+
+ 
+   for (auto md : *ml) {
       // namespace members are also inserted in the file scope, but
       // to prevent this duplication in the XML output, we filter those here.
       if (d->definitionType() != Definition::TypeFile || md->getNamespaceDef() == 0) {
@@ -1185,21 +1189,23 @@ static void generateXMLSection(Definition *d, FTextStream &ti, FTextStream &t,
 static void writeListOfAllMembers(ClassDef *cd, FTextStream &t)
 {
    t << "    <listofallmembers>" << endl;
+
    if (cd->memberNameInfoSDict()) {
-      MemberNameInfoSDict::Iterator mnii(*cd->memberNameInfoSDict());
-      MemberNameInfo *mni;
+     
+      for (auto mni : *cd->memberNameInfoSDict()) {
 
-      for (mnii.toFirst(); (mni = mnii.current()); ++mnii) {
-         MemberNameInfoIterator mii(*mni);
-         MemberInfo *mi;
+        for (auto mni : *mni {
 
-         for (mii.toFirst(); (mi = mii.current()); ++mii) {
             MemberDef *md = mi->memberDef;
-            if (md->name().at(0) != '@') { // skip anonymous members
+
+            if (md->name().at(0) != '@') { 
+               // skip anonymous members
                Protection prot = mi->prot;
                Specifier virt = md->virtualness();
+
                t << "      <member refid=\"" << memberOutputFileBase(md) << "_1" <<
                  md->anchor() << "\" prot=\"";
+
                switch (prot) {
                   case Public:
                      t << "public";
@@ -1214,6 +1220,7 @@ static void writeListOfAllMembers(ClassDef *cd, FTextStream &t)
                      t << "package";
                      break;
                }
+
                t << "\" virt=\"";
                switch (virt) {
                   case Normal:
@@ -1242,13 +1249,12 @@ static void writeListOfAllMembers(ClassDef *cd, FTextStream &t)
 static void writeInnerClasses(const ClassSDict *cl, FTextStream &t)
 {
    if (cl) {
-      ClassSDict::Iterator cli(*cl);
-      ClassDef *cd;
 
-      for (cli.toFirst(); (cd = cli.current()); ++cli) {
+      for (auto cd : *cl) {
          if (!cd->isHidden() && cd->name().find('@') == -1) { // skip anonymous scopes
             t << "    <innerclass refid=\"" << classOutputFileBase(cd)
               << "\" prot=\"";
+
             switch (cd->protection()) {
                case Public:
                   t << "public";
@@ -1370,7 +1376,7 @@ static void generateXMLForClass(ClassDef *cd, FTextStream &ti)
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 
@@ -1593,48 +1599,48 @@ static void generateXMLForNamespace(NamespaceDef *nd, FTextStream &ti)
       << convertToXML(nd->name()) << "</name>" << endl;
 
    QByteArray outputDirectory = Config_getString("XML_OUTPUT");
+
    QByteArray fileName = outputDirectory + "/" + nd->getOutputFileBase() + ".xml";
    QFile f(fileName);
-   if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+
+   if (! f.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
-   FTextStream t(&f);
-   //t.setEncoding(FTextStream::UnicodeUTF8);
 
+   FTextStream t(&f);
+  
    writeXMLHeader(t);
    t << "  <compounddef id=\"" << nd->getOutputFileBase()
      << "\" kind=\"namespace\" language=\""
      << langToString(nd->getLanguage()) << "\">" << endl;
    t << "    <compoundname>";
+
    writeXMLString(t, nd->name());
    t << "</compoundname>" << endl;
 
    writeInnerClasses(nd->getClassSDict(), t);
    writeInnerNamespaces(nd->getNamespaceSDict(), t);
 
-   if (nd->getMemberGroupSDict()) {
-      MemberGroupSDict::Iterator mgli(*nd->getMemberGroupSDict());
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
-         generateXMLSection(nd, ti, t, mg->members(), "user-defined", mg->header(),
-                            mg->documentation());
+   if (nd->getMemberGroupSDict()) {    
+       for (auto mg : *nd->getMemberGroupSDict()) {
+         generateXMLSection(nd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
       }
    }
-
-   QListIterator<MemberList> mli(nd->getMemberLists());
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
+  
+   for (auto ml : nd->getMemberLists()) {
       if ((ml->listType()&MemberListType_declarationLists) != 0) {
          generateXMLSection(nd, ti, t, ml, g_xmlSectionMapper.find(ml->listType()));
       }
    }
 
    t << "    <briefdescription>" << endl;
-   writeXMLDocBlock(t, nd->briefFile(), nd->briefLine(), nd, 0, nd->briefDescription());
+  
+ writeXMLDocBlock(t, nd->briefFile(), nd->briefLine(), nd, 0, nd->briefDescription());
    t << "    </briefdescription>" << endl;
    t << "    <detaileddescription>" << endl;
-   writeXMLDocBlock(t, nd->docFile(), nd->docLine(), nd, 0, nd->documentation());
+ 
+  writeXMLDocBlock(t, nd->docFile(), nd->docLine(), nd, 0, nd->documentation());
    t << "    </detaileddescription>" << endl;
    t << "    <location file=\""
      << nd->getDefFileName() << "\" line=\""
@@ -1673,10 +1679,12 @@ static void generateXMLForFile(FileDef *fd, FTextStream &ti)
    QByteArray outputDirectory = Config_getString("XML_OUTPUT");
    QByteArray fileName = outputDirectory + "/" + fd->getOutputFileBase() + ".xml";
    QFile f(fileName);
+
    if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
+
    FTextStream t(&f);
    //t.setEncoding(FTextStream::UnicodeUTF8);
 
@@ -1691,21 +1699,24 @@ static void generateXMLForFile(FileDef *fd, FTextStream &ti)
    IncludeInfo *inc;
 
    if (fd->includeFileList()) {
-      QListIterator<IncludeInfo> ili1(*fd->includeFileList());
-      for (ili1.toFirst(); (inc = ili1.current()); ++ili1) {
+
+      for (auto inc : *fd->includeFileList()) {
          t << "    <includes";
-         if (inc->fileDef && !inc->fileDef->isReference()) { // TODO: support external references
+
+         if (inc->fileDef && !inc->fileDef->isReference()) { 
+            // TODO: support external references
             t << " refid=\"" << inc->fileDef->getOutputFileBase() << "\"";
          }
+
          t << " local=\"" << (inc->local ? "yes" : "no") << "\">";
          t << inc->includeName;
          t << "</includes>" << endl;
       }
    }
 
-   if (fd->includedByFileList()) {
-      QListIterator<IncludeInfo> ili2(*fd->includedByFileList());
-      for (ili2.toFirst(); (inc = ili2.current()); ++ili2) {
+   if (fd->includedByFileList()) {    
+
+      for (auto inc : *fd->includedByFileList())   {
          t << "    <includedby";
          if (inc->fileDef && !inc->fileDef->isReference()) { // TODO: support external references
             t << " refid=\"" << inc->fileDef->getOutputFileBase() << "\"";
@@ -1741,25 +1752,25 @@ static void generateXMLForFile(FileDef *fd, FTextStream &ti)
       MemberGroupSDict::Iterator mgli(*fd->getMemberGroupSDict());
       MemberGroup *mg;
       for (; (mg = mgli.current()); ++mgli) {
-         generateXMLSection(fd, ti, t, mg->members(), "user-defined", mg->header(),
-                            mg->documentation());
+         generateXMLSection(fd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
       }
    }
-
-   QListIterator<MemberList> mli(fd->getMemberLists());
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
+ 
+   for (auto ml : fd->getMemberLists()) {
       if ((ml->listType()&MemberListType_declarationLists) != 0) {
          generateXMLSection(fd, ti, t, ml, g_xmlSectionMapper.find(ml->listType()));
       }
    }
 
    t << "    <briefdescription>" << endl;
+
    writeXMLDocBlock(t, fd->briefFile(), fd->briefLine(), fd, 0, fd->briefDescription());
    t << "    </briefdescription>" << endl;
    t << "    <detaileddescription>" << endl;
+
    writeXMLDocBlock(t, fd->docFile(), fd->docLine(), fd, 0, fd->documentation());
    t << "    </detaileddescription>" << endl;
+
    if (Config_getBool("XML_PROGRAMLISTING")) {
       t << "    <programlisting>" << endl;
       writeXMLCodeBlock(t, fd);
@@ -1795,14 +1806,17 @@ static void generateXMLForGroup(GroupDef *gd, FTextStream &ti)
 
    QByteArray outputDirectory = Config_getString("XML_OUTPUT");
    QByteArray fileName = outputDirectory + "/" + gd->getOutputFileBase() + ".xml";
+
    QFile f(fileName);
-   if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+
+   if (! f.open(QIODevice::WriteOnly)) {
+       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 
    FTextStream t(&f);
    //t.setEncoding(FTextStream::UnicodeUTF8);
+
    writeXMLHeader(t);
    t << "  <compounddef id=\""
      << gd->getOutputFileBase() << "\" kind=\"group\">" << endl;
@@ -1816,26 +1830,24 @@ static void generateXMLForGroup(GroupDef *gd, FTextStream &ti)
    writeInnerGroups(gd->getSubGroups(), t);
 
    if (gd->getMemberGroupSDict()) {
-      MemberGroupSDict::Iterator mgli(*gd->getMemberGroupSDict());
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
-         generateXMLSection(gd, ti, t, mg->members(), "user-defined", mg->header(),
-                            mg->documentation());
+     
+      for (auto mg : *gd->getMemberGroupSDict()) {
+         generateXMLSection(gd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
       }
    }
-
-   QListIterator<MemberList> mli(gd->getMemberLists());
-   MemberList *ml;
-   for (mli.toFirst(); (ml = mli.current()); ++mli) {
+   
+   for (auto ml : gd->getMemberLists()) {
       if ((ml->listType()&MemberListType_declarationLists) != 0) {
          generateXMLSection(gd, ti, t, ml, g_xmlSectionMapper.find(ml->listType()));
       }
    }
 
    t << "    <briefdescription>" << endl;
+
    writeXMLDocBlock(t, gd->briefFile(), gd->briefLine(), gd, 0, gd->briefDescription());
    t << "    </briefdescription>" << endl;
    t << "    <detaileddescription>" << endl;
+
    writeXMLDocBlock(t, gd->docFile(), gd->docLine(), gd, 0, gd->documentation());
    t << "    </detaileddescription>" << endl;
    t << "  </compounddef>" << endl;
@@ -1856,8 +1868,9 @@ static void generateXMLForDir(DirDef *dd, FTextStream &ti)
    QByteArray outputDirectory = Config_getString("XML_OUTPUT");
    QByteArray fileName = outputDirectory + "/" + dd->getOutputFileBase() + ".xml";
    QFile f(fileName);
+
    if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 
@@ -1911,8 +1924,9 @@ static void generateXMLForPage(PageDef *pd, FTextStream &ti, bool isExample)
    QByteArray outputDirectory = Config_getString("XML_OUTPUT");
    QByteArray fileName = outputDirectory + "/" + pageName + ".xml";
    QFile f(fileName);
+
    if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 
@@ -1943,11 +1957,10 @@ static void generateXMLForPage(PageDef *pd, FTextStream &ti, bool isExample)
    writeInnerPages(pd->getSubPages(), t);
    t << "    <detaileddescription>" << endl;
    if (isExample) {
-      writeXMLDocBlock(t, pd->docFile(), pd->docLine(), pd, 0,
-                       pd->documentation() + "\n\\include " + pd->name());
+      writeXMLDocBlock(t, pd->docFile(), pd->docLine(), pd, 0, pd->documentation() + "\n\\include " + pd->name());
+
    } else {
-      writeXMLDocBlock(t, pd->docFile(), pd->docLine(), pd, 0,
-                       pd->documentation());
+      writeXMLDocBlock(t, pd->docFile(), pd->docLine(), pd, 0,pd->documentation());
    }
    t << "    </detaileddescription>" << endl;
 
@@ -1970,12 +1983,13 @@ void generateXML()
    QDir xmlDir(outputDirectory);
    createSubDirs(xmlDir);
 
-   ResourceMgr::instance().copyResource("xml/index.xsd", outputDirectory);
+   ResourceMgr::instance().copyResourceAs("xml/index.xsd", outputDirectory, "index.xsd");
 
    QByteArray fileName = outputDirectory + "/compound.xsd";
    QFile f(fileName);
-   if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+
+   if (! f.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
       return;
    }
 
@@ -2000,6 +2014,7 @@ void generateXML()
          if (s.find("<!-- Automatically insert here the HTML entities -->") != -1) {
             FTextStream t(&f);
             HtmlEntityMapper::instance()->writeXMLSchema(t);
+
          } else {
             f.write(startLine, len);
          }
@@ -2008,15 +2023,16 @@ void generateXML()
    }
    f.close();
 
+   //
    fileName = outputDirectory + "/index.xml";
    f.setFileName(fileName);
 
-   if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+   if (! f.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
-   FTextStream t(&f);
-   //t.setEncoding(FTextStream::UnicodeUTF8);
+
+   FTextStream t(&f);  
 
    // write index header
    t << "<?xml version='1.0' encoding='UTF-8' standalone='no'?>" << endl;;

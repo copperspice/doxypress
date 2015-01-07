@@ -37,18 +37,23 @@ class Image
    void drawVertArrow(int x, int ys, int ye, uchar colIndex, uint mask);
    void drawRect(int x, int y, int width, int height, uchar colIndex, uint mask);
    void fillRect(int x, int y, int width, int height, uchar colIndex, uint mask);
-   bool save(const char *fileName, int mode = 0);
+
+   QByteArray convert(int mode = 0);
+
    friend uint stringLength(const char *s);
 
    uint getWidth() const {
       return width;
    }
+
    uint getHeight() const {
       return height;
    }
+
    uchar *getData() const {
       return data;
    }
+
    static uint stringLength(const char *s);
 
  private:
@@ -61,13 +66,15 @@ class Image
 class ColoredImage
 {
  public:
-   ColoredImage(int width, int height,
-                const uchar *greyLevels, const uchar *alphaLevels,
+   ColoredImage(int width, int height, const uchar *greyLevels, const uchar *alphaLevels,
                 int saturation, int hue, int gamma);
+
    ~ColoredImage();
-   bool save(const char *fileName);
-   static void hsl2rgb(double h, double s, double l,
-                       double *pRed, double *pGreen, double *pBlue);
+
+   QByteArray convert();
+
+   static void hsl2rgb(double h, double s, double l, double *pRed, double *pGreen, double *pBlue);
+
  private:
    int m_width;
    int m_height;

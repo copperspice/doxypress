@@ -78,7 +78,7 @@ class HtmlGenerator : public OutputGenerator
    static QByteArray writeSplitBarAsString(const char *name, const char *relpath);
 
    void enable() {
-      if (genStack.top()) {
+      if (! genStack.isEmpty()) {
          active = genStack.top();
 
       } else {

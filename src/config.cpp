@@ -2785,7 +2785,7 @@ void configYYfree (void *ptr )
 
 void Config::writeTemplate(FTextStream &t, bool sl, bool upd)
 {
-   t << "# Doxyfile " << versionString << endl << endl;
+   t << "# CS Doxyfile " << versionString << endl << endl;
    if (!sl) {
       t << convertToComment(m_header, "");
    }
@@ -3509,7 +3509,10 @@ void addConfigOptions(Config *cfg)
   cs = cfg->addString("PROJECT_BRIEF",""); 
   cs = cfg->addString("PROJECT_NAME",""); 
   cs = cfg->addString("PROJECT_LOGO",""); 
+
   cs = cfg->addString("OUTPUT_DIRECTORY","");
+
+  cl = cfg->addList("INPUT", "");
 
   ce = cfg->addEnum("OUTPUT_LANGUAGE","","English");
   ce->addValue("Dutch");
@@ -3603,8 +3606,7 @@ void addConfigOptions(Config *cfg)
   cs = cfg->addString("WARN_IF_DOC_ERROR", "");
   cs = cfg->addString("WARN_NO_PARAMDOC", "");
   cs = cfg->addString("WARN_FORMAT", "");
-  cs = cfg->addString("WARN_LOGFILE", "");
-  cl = cfg->addList("INPUT", "");
+  cs = cfg->addString("WARN_LOGFILE", ""); 
   cs = cfg->addString("INPUT_ENCODING", "");
   cl = cfg->addList("FILE_PATTERNS", "");
   cb = cfg->addBool("RECURSIVE", "", true);
@@ -3701,7 +3703,7 @@ void addConfigOptions(Config *cfg)
   cs = cfg->addString("PDF_HYPERLINKS", "");
   cs = cfg->addString("USE_PDFLATEX", "");
   cs = cfg->addString("LATEX_BATCHMODE", "");
-  cs = cfg->addString("LATEX_HIDE_INDICES", "");
+  cb = cfg->addBool("LATEX_HIDE_INDICES", "",false);
   cs = cfg->addString("LATEX_SOURCE_CODE", "");
   cs = cfg->addString("LATEX_BIB_STYLE", "");
   cb = cfg->addBool("GENERATE_RTF", "", false);
@@ -3721,8 +3723,8 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("GENERATE_DOCBOOK", "", false);
   cs = cfg->addString("DOCBOOK_OUTPUT", "");
   cs = cfg->addString("DOCBOOK_PROGRAMLISTING", "");
-  cs = cfg->addString("GENERATE_AUTOGEN_DEF", "");
-  cs = cfg->addString("GENERATE_PERLMOD", "");
+  cb = cfg->addBool("GENERATE_AUTOGEN_DEF", "", false);
+  cb = cfg->addBool("GENERATE_PERLMOD", "", false);
   cs = cfg->addString("PERLMOD_LATEX", "");
   cs = cfg->addString("PERLMOD_PRETTY", "");
   cs = cfg->addString("PERLMOD_MAKEVAR_PREFIX", "");
@@ -3774,8 +3776,7 @@ void addConfigOptions(Config *cfg)
   cs = cfg->addString("DOT_TRANSPARENT", "");
   cs = cfg->addString("DOT_MULTI_TARGETS", "");
   cb = cfg->addBool("GENERATE_LEGEND", "", false);
-  cs = cfg->addString("DOT_CLEANUP", "");
-
+  cb = cfg->addBool("DOT_CLEANUP", "",true);
 }
 
 static QByteArray configFileToString(const char *name)

@@ -290,13 +290,14 @@ void FormulaList::generateBitmaps(const char *path)
                      filteredImage.setPixel(x, y, s);
                   }
                }
-               // down-sample the image to 1/16th of the area using 16 gray scale
-               // colors.
-               // TODO: optimize this code.
+
+               // down-sample the image to 1/16th of the area using 16 gray scale colors.
+             
                for (y = 0; y < dstImage.getHeight(); y++) {
                   for (x = 0; x < dstImage.getWidth(); x++) {
                      int xp = x << 2;
                      int yp = y << 2;
+
                      int c = filteredImage.getPixel(xp + 0, yp + 0) +
                              filteredImage.getPixel(xp + 1, yp + 0) +
                              filteredImage.getPixel(xp + 2, yp + 0) +
@@ -313,6 +314,7 @@ void FormulaList::generateBitmaps(const char *path)
                              filteredImage.getPixel(xp + 1, yp + 3) +
                              filteredImage.getPixel(xp + 2, yp + 3) +
                              filteredImage.getPixel(xp + 3, yp + 3);
+
                      // here we scale and clip the color value so the
                      // resulting image has a reasonable contrast
                      dstImage.setPixel(x, y, qMin(15, (c * 15) / (16 * 10)));
@@ -320,13 +322,24 @@ void FormulaList::generateBitmaps(const char *path)
                }
 
                // save the result as a bitmap
-               QString resultName;
-               resultName = QString("form_%1.png").arg(pageNum);
+               QString fileName;
+               fileName = QString("form_%1.png").arg(pageNum);                          
+              
+               QFile f(fileName);
 
-               // the option parameter 1 is used here as a temporary hack
-               // to select the right color palette!
+               if (f.open(QIODevice::WriteOnly)) {
+               
+                  // parameter 1 is used as a temporary hack to select the right color palette
+                  QByteArray buffer = dstImage.convert(1);
+ 
+                  f.write(buffer);
+                  f.close();
+   
+               } else {
+                  fprintf(stderr, "Warning: Unable to save image file %s, %d\n", qPrintable(fileName), f.error());
 
-               dstImage.save(strdup(qPrintable(resultName)), 1);
+               }            
+
                delete[] data;
             }
 

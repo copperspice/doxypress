@@ -35,7 +35,7 @@ class RTFGenerator : public OutputGenerator
    static void writeExtensionsFile(QFile &file);
 
    void enable() {
-      if (genStack.top()) {
+      if (! genStack.isEmpty()) {
          active = genStack.top();
       } else {
          active = true;

@@ -693,23 +693,23 @@ static void generateJSNavTree(const QList<FTVNode *> &nodeList)
       t << endl << "var SYNCONMSG = '"  << theTranslator->trPanelSynchronisationTooltip(false) << "';";
       t << endl << "var SYNCOFFMSG = '" << theTranslator->trPanelSynchronisationTooltip(true)  << "';";
    }
-   ResourceMgr::instance().copyResource("html/navtree.js", htmlOutput);
-}
 
-//-----------------------------------------------------------
+   ResourceMgr::instance().copyResourceAs("html/navtree.js", htmlOutput, "navtree.js");
+}
 
 // new style images
 void FTVHelp::generateTreeViewImages()
 {
-   QByteArray dname = Config_getString("HTML_OUTPUT");
+   QByteArray htmlOutput = Config_getString("HTML_OUTPUT");
+
    const ResourceMgr &rm = ResourceMgr::instance();
 
-   rm.copyResource("html/doc.luma", dname);
-   rm.copyResource("html/folderopen.luma", dname);
-   rm.copyResource("html/folderclosed.luma", dname);
-   rm.copyResource("html/arrowdown.luma", dname);
-   rm.copyResource("html/arrowright.luma", dname);
-   rm.copyResource("html/splitbar.lum", dname);
+   rm.copyResourceAs("html/doc.luma",          htmlOutput, "doc.png");
+   rm.copyResourceAs("html/folderopen.luma",   htmlOutput, "folderopen.png");
+   rm.copyResourceAs("html/folderclosed.luma", htmlOutput, "folderclosed.png");
+   rm.copyResourceAs("html/arrowdown.luma",    htmlOutput, "arrowdown.png");
+   rm.copyResourceAs("html/arrowright.luma",   htmlOutput, "arrowright.png");
+   rm.copyResourceAs("html/splitbar.lum",      htmlOutput, "splitbar.png");
 }
 
 // new style scripts
@@ -719,10 +719,9 @@ void FTVHelp::generateTreeViewScripts()
 
    // generate navtree.js & navtreeindex.js
    generateJSNavTree(m_indentNodes[0]);
-
-   // copy resize.js & navtree.css
-   ResourceMgr::instance().copyResource("html/resize.js", htmlOutput);
-   ResourceMgr::instance().copyResource("html/navtree.css", htmlOutput);
+   
+   ResourceMgr::instance().copyResourceAs("html/resize.js",   htmlOutput, "resize.js");
+   ResourceMgr::instance().copyResourceAs("html/navtree.css", htmlOutput, "navtree.js");
 }
 
 // write tree inside page

@@ -43,10 +43,7 @@ class ResourceMgr
 
    /** Copies all resource belonging to a given category to a given target directory */
    bool copyCategory(const char *categoryName, const char *targetDir) const;
-
-   /** Copies a registered resource to a given target directory */
-   bool copyResource(const QString & fNname, const QString &targetDir) const;
-
+ 
    /** Copies a registered resource to a given target directory under a given target name */
    bool copyResourceAs(const QString &fName, const QString &targetDir, const QString &targetName) const;
 

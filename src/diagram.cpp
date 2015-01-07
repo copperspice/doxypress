@@ -1448,8 +1448,7 @@ void ClassDiagram::writeFigure(FTextStream &output, const char *path, const char
    }
 }
 
-
-void ClassDiagram::writeImage(FTextStream &t, const char *path, const char *relPath, const char *fileName, bool generateMap) const
+void ClassDiagram::writeImage(FTextStream &t, const char *path, const char *relPath, const char *fName, bool generateMap) const
 {
    uint baseRows = base->computeRows();
    uint superRows = super->computeRows();
@@ -1475,8 +1474,23 @@ void ClassDiagram::writeImage(FTextStream &t, const char *path, const char *relP
    base->drawConnectors(t, &image, true, true, baseRows, superRows, cellWidth, cellHeight);
    super->drawConnectors(t, &image, false, true, baseRows, superRows, cellWidth, cellHeight);
 
-   image.save((QByteArray)path + "/" + fileName + IMAGE_EXT);
-   Doxygen::indexList->addImageFile(QByteArray(fileName) + IMAGE_EXT);
+   QByteArray fileName = QByteArray(path) + "/" + fName + IMAGE_EXT;
+
+   QFile f(fileName);
+
+   if (f.open(QIODevice::WriteOnly)) {
+         
+      QByteArray buffer =  image.convert();
+
+      f.write(buffer);
+      f.close();
+
+   } else {
+      fprintf(stderr, "Warning: Unable to save image file %s, %d\n", qPrintable(fileName), f.error());
+
+   }            
+
+   Doxygen::indexList->addImageFile(fileName);
 
    if (generateMap) {
       t << "</map>" << endl;

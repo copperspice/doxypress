@@ -70,12 +70,13 @@ void OutputGenerator::pushGeneratorState()
 void OutputGenerator::popGeneratorState()
 {   
    bool lb = genStack.pop();    
-
+ 
    if (lb) {
       enable();
 
    } else {
       disable();
+
    }  
 }
 

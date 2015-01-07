@@ -374,14 +374,15 @@ const char *writeUtf8Char(FTextStream &t, const char *s);
 
 /** Data associated with a HSV colored image. */
 struct ColoredImgDataItem {
-   const char *name;
+   QString  path;
+   QString  name;
    unsigned short width;
    unsigned short height;
    const unsigned char *content;
    const unsigned char *alpha;
 };
 
-void writeColoredImgData(const char *dir, ColoredImgDataItem data[]);
+void writeColoredImgData(ColoredImgDataItem data);
 QByteArray replaceColorMarkers(const char *str);
 
 bool copyFile(const QByteArray &src, const QByteArray &dest);

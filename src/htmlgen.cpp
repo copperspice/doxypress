@@ -702,7 +702,7 @@ void HtmlGenerator::init()
    QDir d(dname);
 
    if (!d.exists() && !d.mkdir(dname)) {
-      err("Could not create output directory %s\n", dname.data());
+      err("Unable to create output directory %s\n", dname.data());      
       exit(1);
    }
    
@@ -726,14 +726,15 @@ void HtmlGenerator::init()
    createSubDirs(d);
 
    ResourceMgr &mgr = ResourceMgr::instance();
-   mgr.copyResource("html/tabs.css", dname);
-   mgr.copyResource("html/jquery.js", dname);
+   mgr.copyResourceAs("html/tabs.css",  dname, "tabs.css");
+   mgr.copyResourceAs("html/jquery.js", dname, "jquery.css");
 
    if (Config_getBool("INTERACTIVE_SVG")) {
-      mgr.copyResource("html/svgpan.js", dname);
+      mgr.copyResourceAs("html/svgpan.js", dname, "svgpan.js");
    }
-   
-   QFile f(dname + "/dynsections.js");
+
+   QString fileName = dname + "/dynsections.js";   
+   QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
 
@@ -757,6 +758,10 @@ void HtmlGenerator::init()
          err("Resource file dynsections.js was not found");
 
       }
+
+   } else { 
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+
    }
   
 }
@@ -766,23 +771,24 @@ void HtmlGenerator::writeTabData()
 {
    Doxygen::indexList->addStyleSheetFile("tabs.css");
    QByteArray dname = Config_getString("HTML_OUTPUT");
+
    ResourceMgr &mgr = ResourceMgr::instance();
 
    //writeColoredImgData(dname,colored_tab_data);
-   mgr.copyResource("html/tab_a.lum", dname);
-   mgr.copyResource("html/tab_b.lum", dname);
-   mgr.copyResource("html/tab_h.lum", dname);
-   mgr.copyResource("html/tab_s.lum", dname);
-   mgr.copyResource("html/nav_h.lum", dname);
-   mgr.copyResource("html/nav_f.lum", dname);
-   mgr.copyResource("html/bc_s.luma", dname);
-   mgr.copyResource("html/doxygen.luma", dname);
-   mgr.copyResource("html/closed.luma", dname);
-   mgr.copyResource("html/open.luma", dname);
-   mgr.copyResource("html/bdwn.luma", dname);
-   mgr.copyResource("html/sync_on.luma", dname);
-   mgr.copyResource("html/sync_off.luma", dname);      
-   mgr.copyResource("html/nav_g.png", dname);
+   mgr.copyResourceAs("html/tab_a.lum",    dname, "tab_a.png");
+   mgr.copyResourceAs("html/tab_b.lum",    dname, "tab_b.png");
+   mgr.copyResourceAs("html/tab_h.lum",    dname, "tab_h.png");
+   mgr.copyResourceAs("html/tab_s.lum",    dname, "tab_s.png");
+   mgr.copyResourceAs("html/nav_h.lum",    dname, "nav_h.png");
+   mgr.copyResourceAs("html/nav_f.lum",    dname, "nav_f.png");
+   mgr.copyResourceAs("html/bc_s.luma",    dname, "bc_s.png");
+   mgr.copyResourceAs("html/doxygen.luma", dname, "doxygen.png");
+   mgr.copyResourceAs("html/closed.luma",  dname, "closed.png");
+   mgr.copyResourceAs("html/open.luma",    dname, "open.png");
+   mgr.copyResourceAs("html/bdwn.luma",    dname, "bdwn.png");
+   mgr.copyResourceAs("html/sync_on.luma", dname, "sync_on.png");
+   mgr.copyResourceAs("html/sync_off.luma",dname, "sync_off.png");    
+   mgr.copyResourceAs("html/nav_g.png",    dname, "nav_g.png");
 }
 
 void HtmlGenerator::writeSearchData(const char *dir)
@@ -791,32 +797,34 @@ void HtmlGenerator::writeSearchData(const char *dir)
   
    ResourceMgr &mgr = ResourceMgr::instance();
 
-   mgr.copyResource("html/search_l.png", dir);
+   mgr.copyResourceAs("html/search_l.png", dir, "search_l.png");
    Doxygen::indexList->addImageFile("search/search_l.png");
 
-   mgr.copyResource("html/search_m.png", dir);
+   mgr.copyResourceAs("html/search_m.png", dir, "search_m.png");
    Doxygen::indexList->addImageFile("search/search_m.png");
 
-   mgr.copyResource("html/search_r.png", dir);
+   mgr.copyResourceAs("html/search_r.png", dir, "search_r.png");
    Doxygen::indexList->addImageFile("search/search_r.png");
 
    if (serverBasedSearch) {
-      mgr.copyResource("html/mag.png", dir);
+      mgr.copyResourceAs("html/mag.png", dir, "mag.png");
       Doxygen::indexList->addImageFile("search/mag.png");
 
    } else {
-      mgr.copyResource("html/close.png", dir);
+      mgr.copyResourceAs("html/close.png", dir, "close.png");
       Doxygen::indexList->addImageFile("search/close.png");
 
-      mgr.copyResource("html/mag_sel.png", dir);
+      mgr.copyResourceAs("html/mag_sel.png", dir, "mag_sel.png");
       Doxygen::indexList->addImageFile("search/mag_sel.png");
    }
 
    QByteArray searchDirName = Config_getString("HTML_OUTPUT") + "/search";
-   QFile f(searchDirName + "/search.css");
+
+   QString fileName = searchDirName + "/search.css";
+   QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
-      const Resource *res = mgr.get("search.css");
+      const Resource *res = mgr.get("search.css");   // BROOM
 
       if (res) {
          FTextStream t(&f);
@@ -831,6 +839,9 @@ void HtmlGenerator::writeSearchData(const char *dir)
          t << searchCss;
          Doxygen::indexList->addStyleSheetFile("search/search.css");
       }
+
+   } else {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error()); 
    }
 }
 
@@ -875,7 +886,7 @@ void HtmlGenerator::startFile(const char *name, const char *, const char *title)
    lastFile = fileName;
    t << substituteHtmlKeywords(g_header, convertToHtml(filterTitle(title)), relPath);
 
-   t << "<!-- " << theTranslator->trGeneratedBy() << " Doxygen "
+   t << "<!-- " << theTranslator->trGeneratedBy() << " CS Doxygen "
      << versionString << " -->" << endl;
    //static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
    static bool searchEngine = Config_getBool("SEARCHENGINE");
@@ -991,12 +1002,15 @@ void HtmlGenerator::writeStyleInfo(int part)
          QFileInfo cssfi(cssname);
 
          if (!cssfi.exists() || !cssfi.isFile() || !cssfi.isReadable()) {
-            err("style sheet %s does not exist or is not readable!", Config_getString("HTML_STYLESHEET").data());
+            err("Style sheet %s does not exist or is not readable", Config_getString("HTML_STYLESHEET").constData());
+
          } else {
             // convert style sheet to string
             QByteArray fileStr = fileToString(cssname);
+
             // write the string into the output dir
             startPlainFile(cssfi.fileName().toUtf8());
+
             t << fileStr;
             endPlainFile();
          }
@@ -1957,6 +1971,7 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
 {
    static bool showFiles = Config_getBool("SHOW_FILES");
    static bool showNamespaces = Config_getBool("SHOW_NAMESPACES");
+
    switch (kind) {
       case LayoutNavEntry::MainPage:
          return true;
@@ -2272,8 +2287,9 @@ void HtmlGenerator::writeSearchPage()
    static QByteArray htmlOutput = Config_getString("HTML_OUTPUT");
 
    // OPENSEARCH_PROVIDER {
-   QByteArray configFileName = htmlOutput + "/search_config.php";
+   QString configFileName = htmlOutput + "/search_config.php";
    QFile cf(configFileName);
+
    if (cf.open(QIODevice::WriteOnly)) {
       FTextStream t(&cf);
       t << "<script language=\"php\">\n\n";
@@ -2295,10 +2311,14 @@ void HtmlGenerator::writeSearchPage()
       t << "  'logo' => \"" << substitute(substitute(writeLogoAsString(""), "\"", "\\\""), "\n", "\\n") << "\",\n";
       t << ");\n\n";
       t << "</script>\n";
+
+   } else {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(configFileName), cf.error()); 
+
    }
 
-   ResourceMgr::instance().copyResource("html/search_functions.php", htmlOutput);
-   ResourceMgr::instance().copyResource("html/search_opensearch.php", htmlOutput);
+   ResourceMgr::instance().copyResourceAs("html/search_functions.php",  htmlOutput, "search_functions.php");
+   ResourceMgr::instance().copyResourceAs("html/search_opensearch.php", htmlOutput, "search_opensearch.php");
 
    QByteArray fileName = htmlOutput + "/search.php";
    QFile f(fileName);
@@ -2341,8 +2361,9 @@ void HtmlGenerator::writeSearchPage()
    if (sf.open(QIODevice::WriteOnly)) {
       FTextStream t(&sf);
       t << ResourceMgr::instance().getAsString("html/extsearch.js");
+
    } else {
-      err("Can not open file '%s' for writing\n", scriptName.data());
+      err("Unable to open file for writing %s, error: %d\n", scriptName.constData(), f.error());
    }
 }
 
@@ -2350,12 +2371,14 @@ void HtmlGenerator::writeExternalSearchPage()
 {
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
    QByteArray fileName = Config_getString("HTML_OUTPUT") + "/search" + Doxygen::htmlFileExtension;
+
    QFile f(fileName);
+
    if (f.open(QIODevice::WriteOnly)) {
       FTextStream t(&f);
       t << substituteHtmlKeywords(g_header, "Search", "");
 
-      t << "<!-- " << theTranslator->trGeneratedBy() << " Doxygen "
+      t << "<!-- " << theTranslator->trGeneratedBy() << " CS Doxygen "
         << versionString << " -->" << endl;
       t << "<script type=\"text/javascript\">\n";
       t << "var searchBox = new SearchBox(\"searchBox\", \""
@@ -2363,7 +2386,10 @@ void HtmlGenerator::writeExternalSearchPage()
       t << "</script>\n";
       if (!Config_getBool("DISABLE_INDEX")) {
          writeDefaultQuickLinks(t, true, HLI_Search, 0, "");
-         t << "            <input type=\"text\" id=\"MSearchField\" name=\"query\" value=\"\" size=\"20\" accesskey=\"S\" onfocus=\"searchBox.OnSearchFieldFocus(true)\" onblur=\"searchBox.OnSearchFieldFocus(false)\"/>\n";
+
+         t << "            <input type=\"text\" id=\"MSearchField\" name=\"query\" value=\"\" size=\"20\" accesskey=\"S\""
+                "onfocus=\"searchBox.OnSearchFieldFocus(true)\" onblur=\"searchBox.OnSearchFieldFocus(false)\"/>\n";
+
          t << "            </form>\n";
          t << "          </div><div class=\"right\"></div>\n";
          t << "        </div>\n";
@@ -2390,6 +2416,10 @@ void HtmlGenerator::writeExternalSearchPage()
       }
 
       writePageFooter(t, "Search", "", "");
+
+   } else {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+
    }
 
    QByteArray scriptName = Config_getString("HTML_OUTPUT") + "/search/search.js";
@@ -2445,8 +2475,9 @@ void HtmlGenerator::writeExternalSearchPage()
       t << "    results.html('<p>" << theTranslator->trSearchResults(0) << "</p>');" << endl;
       t << "  }" << endl;
       t << "});" << endl;
+
    } else {
-      err("Failed to open file '%s' for writing...\n", scriptName.data());
+      err("Unable to open file for writing %s, error: %d\n", scriptName.constData(), sf.error());
    }
 }
 

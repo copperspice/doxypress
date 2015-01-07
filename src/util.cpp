@@ -4761,14 +4761,10 @@ QByteArray showFileDefMatches(const FileNameDict *fnDict, const char *n)
 }
 
 /// substitute all occurrences of \a old in \a str by \a dest
-QByteArray substitute(const QByteArray &str, const QByteArray &old, const QByteArray &dest)
-{ 
-   if (str.isEmpty() || dest.isEmpty()) {
-      return str;
-   }
-
-   QByteArray retval = str;   
-   retval.replace(old, dest);
+QByteArray substitute(const QByteArray &origString, const QByteArray &oldWord, const QByteArray &newWord)
+{  
+   QByteArray retval = origString;   
+   retval.replace(oldWord, newWord);
 
    return retval;
 }
@@ -4790,6 +4786,8 @@ QByteArray substituteKeywords(const QByteArray &s, const char *title, const char
    result = substitute(result, "$projectnumber",  projNum);
    result = substitute(result, "$projectbrief",   projBrief);
    result = substitute(result, "$projectlogo",   stripPath(Config_getString("PROJECT_LOGO")));
+
+   // broom (may want to delete empty lines)  
 
    return result;
 }
@@ -6567,8 +6565,9 @@ bool updateLanguageMapping(const QByteArray &extension, const QByteArray &langua
    s_extLookup.insert(extName, parserId);
 
    if (! Doxygen::parserManager->registerExtension(extName, p->parserName)) {
-      err("Failed to assign extension %s to parser %s for language %s\n",
-          extName.data(), p->parserName, language.data());
+
+      msg("Unable to assign extension %-4s (%-7s) for %-7s language, currently unsupported\n",
+          extName.constData(), p->parserName, language.constData());
    }
 
    return true;
@@ -7440,29 +7439,35 @@ QByteArray externalRef(const QByteArray &relPath, const QByteArray &ref, bool hr
 /** Writes the intensity only bitmap representated by \a data as an image to
  *  directory \a dir using the colors defined by HTML_COLORSTYLE_*.
  */
-void writeColoredImgData(const char *dir, ColoredImgDataItem data[])
+void writeColoredImgData(ColoredImgDataItem data)
 {
    static int hue   = Config_getInt("HTML_COLORSTYLE_HUE");
    static int sat   = Config_getInt("HTML_COLORSTYLE_SAT");
    static int gamma = Config_getInt("HTML_COLORSTYLE_GAMMA");
+  
+   QString fileName = data.path + "/" + data.name;
 
-   while (data->name) {
-      QByteArray fileName;
-      fileName = (QByteArray)dir + "/" + data->name;
+   QFile f(fileName);
 
-      QFile f(fileName);
+   if (f.open(QIODevice::WriteOnly)) {
 
-      if (f.open(QIODevice::WriteOnly)) {
-         ColoredImage img(data->width, data->height, data->content, data->alpha, sat, hue, gamma);
-         img.save(fileName);
-
-      } else {
-         fprintf(stderr, "Warning: Cannot open file %s for writing\n", data->name);
+      ColoredImage image(data.width, data.height, data.content, data.alpha, sat, hue, gamma);  
+      QByteArray buffer = image.convert();
+ 
+      if (f.write(buffer) == -1) {
+         fprintf(stderr, "Error occureced while writing file %s, %d\n", qPrintable(fileName), f.error());
       }
 
-      Doxygen::indexList->addImageFile(data->name);
-      data++;
+      f.close();
+
+   } else {
+      fprintf(stderr, "Warning: Unable to save image file %s, %d\n", qPrintable(fileName), f.error());
+
    }
+
+   const char *temp = strdup(qPrintable(data.name));
+   Doxygen::indexList->addImageFile(temp);
+   
 }
 
 /** Replaces any markers of the form \#\#AA in input string \a str

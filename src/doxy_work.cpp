@@ -918,6 +918,7 @@ void generateOutput()
    bool generateMan   = Config_getBool("GENERATE_MAN");
    bool generateRtf   = Config_getBool("GENERATE_RTF");
 
+  
    Doxy_Globals::g_outputList = new OutputList(true);
 
    if (generateHtml) {
@@ -953,11 +954,12 @@ void generateOutput()
 
       Doxygen::indexList->initialize();
       HtmlGenerator::writeTabData();
-
+ 
       // copy static stuff
-      copyStyleSheet();
-      copyLogo();
+      copyStyleSheet(); 
+      copyLogo();   
       copyExtraFiles("HTML_EXTRA_FILES", "HTML_OUTPUT");
+
       FTVHelp::generateTreeViewImages();
    }
 
@@ -966,7 +968,7 @@ void generateOutput()
 //BROOM       LatexGenerator::init();
 
       // copy static stuff
-//BROOM       copyExtraFiles("LATEX_EXTRA_FILES", "LATEX_OUTPUT");
+      copyExtraFiles("LATEX_EXTRA_FILES", "LATEX_OUTPUT");
    }
 
    if (generateMan) {
@@ -2090,7 +2092,8 @@ void Doxy_Work::addClassToContext(EntryNav *rootNav)
 
       cd->setCompoundType(convertToCompoundType(root->section, root->spec));
 
-   } else { // new class
+   } else { 
+      // new class
       ClassDef::CompoundType sec = convertToCompoundType(root->section, root->spec);
 
       QByteArray className;
@@ -2129,6 +2132,9 @@ void Doxy_Work::addClassToContext(EntryNav *rootNav)
          tArgList = getTemplateArgumentsFromName(fullName, root->tArgLists);
 
       }
+
+printf("\n doxy_work  About to add a new class\n\n");
+
 
       cd = QSharedPointer<ClassDef>(new ClassDef(root->fileName, root->startLine, root->startColumn,
                         fullName, sec, tagName, refFileName, true, root->spec & Entry::Enum));
@@ -8867,8 +8873,8 @@ void Doxy_Work::copyStyleSheet()
    if (! htmlStyleSheet.isEmpty()) {
       QFileInfo fi(htmlStyleSheet);
 
-      if (!fi.exists()) {
-         err("Style sheet '%s' specified by HTML_STYLESHEET does not exist!\n", htmlStyleSheet.data());
+      if (! fi.exists()) {
+         err("Style sheet '%s' specified by HTML_STYLESHEET does not exist\n", htmlStyleSheet.data());
          htmlStyleSheet.resize(0); // revert to the default
 
       } else {
@@ -8882,11 +8888,11 @@ void Doxy_Work::copyStyleSheet()
    for (uint i = 0; i < htmlExtraStyleSheet.count(); ++i) {
       QByteArray fileName(htmlExtraStyleSheet.at(i).toUtf8());
 
-      if (!fileName.isEmpty()) {
+      if (! fileName.isEmpty()) {
          QFileInfo fi(fileName);
 
          if (!fi.exists()) {
-            err("Style sheet '%s' specified by HTML_EXTRA_STYLESHEET does not exist!\n", qPrintable(fileName));
+            err("Style sheet '%s' specified by HTML_EXTRA_STYLESHEET does not exist\n", qPrintable(fileName));
 
          } else {
             QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
@@ -8904,7 +8910,7 @@ void Doxy_Work::copyLogo()
       QFileInfo fi(projectLogo);
 
       if (! fi.exists()) {
-         err("Project logo '%s' specified by PROJECT_LOGO does not exist!\n", projectLogo.data());
+         err("Project logo '%s' specified by PROJECT_LOGO does not exist\n", projectLogo.data());
          projectLogo.resize(0); // revert to the default
 
       } else {
@@ -8928,7 +8934,7 @@ void Doxy_Work::copyExtraFiles(const QByteArray &filesOption, const QByteArray &
          QFileInfo fi(fileName);
 
          if (! fi.exists()) {
-            err("Extra file '%s' specified in " + filesOption + " does not exist!\n", qPrintable(fileName));
+            err("Extra file '%s' specified in " + filesOption + " does not exist\n", qPrintable(fileName));
 
          } else {
             QString destFileName = Config_getString(outputOption) + "/" + fi.fileName();
@@ -8948,7 +8954,8 @@ static ParserInterface *getParserForFile(const char *fn)
    int sep = fileName.lastIndexOf('/');
    int ei  = fileName.lastIndexOf('.');
 
-   if (ei != -1 && (sep == -1 || ei > sep)) { // matches dir/file.ext but not dir.1/file
+   if (ei != -1 && (sep == -1 || ei > sep)) { 
+      // matches dir/file.ext but not dir.1/file
       extension = fileName.right(fileName.length() - ei);
 
    } else {
@@ -8961,6 +8968,7 @@ static ParserInterface *getParserForFile(const char *fn)
 void Doxy_Work::parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNav, FileDef *fd, const char *fn,
                       bool sameTu, QStringList &filesInSameTu)
 {
+
 #if USE_LIBCLANG
    static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
 #else

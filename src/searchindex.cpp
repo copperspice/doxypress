@@ -981,7 +981,7 @@ void writeJavascriptSearchIndex()
                  " \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" << endl;
                t << "<html><head><title></title>" << endl;
                t << "<meta http-equiv=\"Content-Type\" content=\"text/xhtml;charset=UTF-8\"/>" << endl;
-               t << "<meta name=\"generator\" content=\"Doxygen " << versionString << "\"/>" << endl;
+               t << "<meta name=\"generator\" content=\"CS Doxygen " << versionString << "\"/>" << endl;
                t << "<link rel=\"stylesheet\" type=\"text/css\" href=\"search.css\"/>" << endl;
                t << "<script type=\"text/javascript\" src=\"" << baseName << ".js\"></script>" << endl;
                t << "<script type=\"text/javascript\" src=\"search.js\"></script>" << endl;
@@ -1298,11 +1298,13 @@ void writeJavascriptSearchIndex()
          }
          t << "};" << endl << endl;
       }
-      ResourceMgr::instance().copyResource("html/search.js", searchDirName);
+
+      ResourceMgr::instance().copyResourceAs("html/search.js", searchDirName, "search.js");
    }
 
    {
       QFile f(searchDirName + "/nomatches.html");
+
       if (f.open(QIODevice::WriteOnly)) {
          FTextStream t(&f);
          t << "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" "

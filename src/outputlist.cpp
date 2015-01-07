@@ -148,20 +148,22 @@ void OutputList::writeDoc(DocRoot *root, Definition *ctx, MemberDef *md)
 bool OutputList::parseText(const QByteArray &textStr)
 {
    int count = 0;
-
-   for (auto item : m_outputs ) {
+ 
+   for (auto item : m_outputs) {
       if (item->isEnabled()) {
          count++;
       }
    }
 
    if (count == 0) {
-      return true;   // no output formats enabled.
+       // no output formats enabled
+      return true;  
    }
 
    DocText *root = validatingParseText(textStr);
 
-   for (auto item : m_outputs ) {
+   for (auto item : m_outputs) {
+  
       if (item->isEnabled()) {
          item->writeDoc(root, 0, 0);
       }
@@ -174,7 +176,6 @@ bool OutputList::parseText(const QByteArray &textStr)
 }
 
 
-//--------------------------------------------------------------------------
 // Create some overloaded definitions of the forall function.
 // Using template functions here would have made it a little less
 // portable (I guess).

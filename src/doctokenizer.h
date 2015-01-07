@@ -113,6 +113,7 @@ struct TokenInfo {
 };
 
 // globals
+extern TokenInfo *g_token;
 extern int doctokenizerYYlineno;
 extern FILE *doctokenizerYYin;
 

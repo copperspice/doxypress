@@ -2001,13 +2001,17 @@ class DocText : public CompAccept<DocText>, public DocNode
 {
  public:
    DocText() {}
+
    Kind kind() const       {
       return Kind_Text;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocText>::accept(this, v);
    }
+
    void parse();
+
    bool isEmpty() const    {
       return m_children.isEmpty();
    }

@@ -53,9 +53,9 @@ void ResourceMgr::registerResources(const Resource resources[], int numResources
 bool ResourceMgr::copyCategory(const char *categoryName, const char *targetDir) const
 {  
    for (auto item : m_resources) {        
-      if (qstrcmp(item->category, categoryName) == 0) {
 
-         if (! copyResource(item->name, targetDir)) {
+      if (qstrcmp(item->category, categoryName) == 0) {
+         if (! copyResourceAs(item->name, targetDir, item->name)) {
             return false;
          }
       }
@@ -110,49 +110,79 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
          break;
 
          case Resource::Luminance: {
-            // replace .lum by .png
+            // replace .lum with .png
 
-            QByteArray n = fName.toUtf8();
-            n = n.left(n.length() - 4) + ".png"; 
+            // convert file, throw out any line starting with #            
+            QString data = resData;
 
+            QRegExp comment("#.*\\n"); 
+            comment.setMinimal(true);
+
+            data.replace(comment, "");
+
+            QRegExp blanks("\\s+"); 
+            QStringList dataList = data.split(blanks);
+
+            int width  = dataList[0].toInt();
+            int height = dataList[1].toInt();     
+
+            resData.clear();
+            
+            for (int k = 2; k < dataList.size(); ++k) {
+               resData.append(dataList[k].toInt());
+            }               
+
+            //
             const uchar *p = (const uchar *)resData.constData();
-
-            int width   = (p[0] << 8) + p[1];
-            int height  = (p[2] << 8) + p[3];
-
-            ColoredImgDataItem images[2];
-            images[0].name    = n;
-            images[0].width   = width;
-            images[0].height  = height;
-            images[0].content = &p[4];
-            images[0].alpha   = 0;
-            images[1].name    = 0; // terminator
-
-            writeColoredImgData(qPrintable(targetDir), images);
+           
+            ColoredImgDataItem images;
+            images.path    = targetDir;
+            images.name    = targetName;
+            images.width   = width;
+            images.height  = height;
+            images.content = p;
+            images.alpha   = 0;
+          
+            writeColoredImgData(images);
             return true;
          }
          break;
 
          case Resource::LumAlpha: {
-            // replace .luma by .png
+            // replace .luma with .png
 
-            QByteArray n = fName.toUtf8();
-            n = n.left(n.length() - 5) + ".png"; 
+            // convert file, throw out any line starting with #            
+            QString data = resData;
+            
+            QRegExp comment("#.*\\n"); 
+            comment.setMinimal(true);
 
+            data.replace(comment, "");
+
+            QRegExp blanks("\\s+"); 
+            QStringList dataList = data.split(blanks);
+
+            int width  = dataList[0].toInt();
+            int height = dataList[1].toInt();         
+
+            resData.clear();
+            
+            for (int k = 2; k < dataList.size(); ++k) {
+               resData.append(dataList[k].toInt());
+            }           
+            
+            //       
             const uchar *p = (const uchar *)resData.constData();
-
-            int width   = (p[0] << 8) + p[1];
-            int height  = (p[2] << 8) + p[3];
-
-            ColoredImgDataItem images[2];
-            images[0].name    = n;
-            images[0].width   = width;
-            images[0].height  = height;
-            images[0].content = &p[4];
-            images[0].alpha   = &p[4 + width * height];
-            images[1].name    = 0; // terminator
-
-            writeColoredImgData(qPrintable(targetDir), images);
+          
+            ColoredImgDataItem images;
+            images.path    = targetDir;
+            images.name    = targetName;
+            images.width   = width;
+            images.height  = height;
+            images.content = p;
+            images.alpha   = p + (width * height);
+        
+            writeColoredImgData(images);
             return true;
          }
          break;
@@ -186,11 +216,6 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
    return false;
 }
 
-bool ResourceMgr::copyResource(const QString &fName, const QString &targetDir) const
-{
-   return copyResourceAs(fName, targetDir, fName);
-}
-
 const Resource *ResourceMgr::get(const char *name) const
 { 
    return m_resources.value(name);
@@ -209,5 +234,3 @@ QByteArray ResourceMgr::getAsString(const QString &fName) const
               
    return retval;
 }
-
-

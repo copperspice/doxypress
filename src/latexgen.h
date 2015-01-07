@@ -35,7 +35,7 @@ class LatexGenerator : public OutputGenerator
    static void writeFooterFile(QFile &f);
  
    void enable() {
-      if (genStack.top()) {
+      if (! genStack.isEmpty()) {
          active = genStack.top();
       } else {
          active = true;
