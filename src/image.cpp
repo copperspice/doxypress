@@ -201,7 +201,6 @@ static Color palette3[] = {
    { 0x00, 0x00, 0x00, 0xff }
 };
 
-
 Image::Image(int w, int h)
 {
    static int hue   = Config_getInt("HTML_COLORSTYLE_HUE");
@@ -490,17 +489,14 @@ void ColoredImage::hsl2rgb(double h, double s, double l, double *pRed, double *p
    *pBlue  = b;
 }
 
-ColoredImage::ColoredImage(int width, int height, const uchar *greyLevels, const uchar *alphaLevels,
-                           int saturation, int hue, int gamma)
+ColoredImage::ColoredImage(int width, int height, const uchar *greyLevels, const uchar *alphaLevels, int saturation, int hue, int gamma)
 {
    m_hasAlpha = alphaLevels != 0;
    m_width    = width;
    m_height   = height;
    m_data     = (uchar *)malloc(width * height * 4);
-   
-   int i;
-
-   for (i = 0; i < width * height; i++) {
+    
+   for (int i = 0; i < width * height; i++) {
       uchar r, g, b, a;
       double red, green, blue;      
 

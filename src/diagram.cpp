@@ -1439,7 +1439,7 @@ void ClassDiagram::writeFigure(FTextStream &output, const char *path, const char
       portable_sysTimerStart();
 
       if (portable_system("epstopdf", epstopdfArgs.toLatin1()) != 0) {
-         err("Problems running epstopdf. Check your TeX installation!\n");
+         err("Problem running epstopdf. Verify your TeX installation\n");
          portable_sysTimerStop();
          return;
       }
@@ -1486,7 +1486,7 @@ void ClassDiagram::writeImage(FTextStream &t, const char *path, const char *relP
       f.close();
 
    } else {
-      fprintf(stderr, "Warning: Unable to save image file %s, %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
 
    }            
 

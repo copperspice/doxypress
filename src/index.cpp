@@ -1397,16 +1397,8 @@ static int countAnnotatedClasses(int *cp)
 {
    int count = 0;
    int countPrinted = 0;
-
-printf("\n index.cpp Can we COUNT?\n\n");
-
   
    for (auto cd : *Doxygen::classSDict) {
-
-
-// broom
-printf("\n\n index.cpp countAnnotatedClasses");
-   
 
       if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
          if (!cd->isEmbeddedInOuterScope()) {
@@ -2844,14 +2836,13 @@ static void writeExampleIndex(OutputList &ol)
    ol.popGeneratorState();
 }
 
-
-//----------------------------------------------------------------------------
-
 static void countRelatedPages(int &docPages, int &indexPages)
 {
-   docPages = indexPages = 0;
+   docPages   = 0;
+   indexPages = 0;
  
    for (auto pd : *Doxygen::pageSDict) {
+
       if ( pd->visibleInIndex()) {
          indexPages++;
       }
@@ -2861,8 +2852,6 @@ static void countRelatedPages(int &docPages, int &indexPages)
       }
    }
 }
-
-//----------------------------------------------------------------------------
 
 static bool mainPageHasOwnTitle()
 {
@@ -3715,7 +3704,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
             break;
 
             case LayoutNavEntry::NamespaceMembers:
-               msg("Generating namespace member index...\n");
+               msg("Generating namespace member index\n");
                writeNamespaceMemberIndex(ol);
                break;
 
@@ -3740,7 +3729,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                break;
 
             case LayoutNavEntry::ClassIndex:
-               msg("Generating alphabetical compound index...\n");
+               msg("Generating alphabetical compound index\n");
                writeAlphabeticalIndex(ol);
                break;
 
@@ -3754,7 +3743,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                break;
 
             case LayoutNavEntry::ClassMembers:
-               msg("Generating member index...\n");
+               msg("Generating member index\n");
                writeClassMemberIndex(ol);
                break;
 
@@ -3769,7 +3758,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
 
                   if (LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Files) != lne) { 
                      // for backward compatibility with old layout file
-                     msg("Generating file index...\n");
+                     msg("Generating file index\n");
                      writeFileIndex(ol);
                   }
                }
@@ -3778,17 +3767,17 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
             case LayoutNavEntry::FileList: {
                static bool showFiles = Config_getBool("SHOW_FILES");
                if (showFiles) {
-                  msg("Generating file index...\n");
+                  msg("Generating file index\n");
                   writeFileIndex(ol);
                }
             }
             break;
             case LayoutNavEntry::FileGlobals:
-               msg("Generating file member index...\n");
+               msg("Generating file member index\n");
                writeFileMemberIndex(ol);
                break;
             case LayoutNavEntry::Examples:
-               msg("Generating example index...\n");
+               msg("Generating example index\n");
                writeExampleIndex(ol);
                break;
             case LayoutNavEntry::User: {

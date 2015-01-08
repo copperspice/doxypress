@@ -1214,18 +1214,15 @@ class LayoutErrorHandler : public QXmlErrorHandler
 
 static QByteArray getLayout_Default()
 {  
-   QFile file(":/resources/layout_default.xml");
+   QString fileName = ":/resources/layout_default.xml";
+   QFile f(fileName);
 
-   if (! file.open(QFile::ReadOnly | QFile::Text)) {
-      // BROOM - add error handling
-
-      //const QString msg = "Unable to open file " + m_fileName + " : " + file.errorString();
-      // QMessageBox::warning( 0, "XML", msg );
-
+   if (! f.open(QFile::ReadOnly | QFile::Text)) {
+      err("Unable to open file %s, error: %d\n", qPrintable(fileName), f.error());    
       return "";
    }
 
-   return file.readAll();
+   return f.readAll();
 }
 
 class LayoutDocManager::Private

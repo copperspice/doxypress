@@ -3673,14 +3673,14 @@ static bool getDocSectionName(int s)
 //-----------------------------------------------------------------------------
 
 static bool makeStructuralIndicator(Entry::Sections s)
-{
-   //printf("current->section=%x\n",current->section);
+{   
    if (getDocSectionName(current->section)) {
       return TRUE;
+
    } else {
       needNewEntry = TRUE;
-      current->section = s;
-      current->fileName = yyFileName;
+      current->section   = s;
+      current->fileName  = yyFileName;
       current->startLine = yyLineNr;
       return FALSE;
    }
@@ -4296,11 +4296,9 @@ extern int commentscanYYlex (void);
 /** The main scanner function which does all the work.
  */
 YY_DECL {
-   register yy_state_type yy_current_state;
-   register char *yy_cp, *yy_bp;
-   register int yy_act;
-
-
+   yy_state_type yy_current_state;
+   char *yy_cp, *yy_bp;
+   int yy_act;
 
 
    /* What can happen in while parsing a comment block:
@@ -4319,8 +4317,6 @@ YY_DECL {
     *   quoted text, such as "foo@bar"
     *   XML commands, <summary></summary><remarks></remarks>
     */
-
-
 
    if ( !(yy_init) )
    {
@@ -4596,20 +4592,24 @@ YY_DECL {
                inInternalDocs = FALSE;
             }
             YY_BREAK
+
          case 18:
             YY_RULE_SETUP
 
             {
                // potentially interesting command
                // the {B}* in the front was added for bug620924
+
                QByteArray cmdName = QByteArray(commentscanYYtext).trimmed().data() + 1;
                DocCmdMapper::Cmd *cmdPtr = DocCmdMapper::map(cmdName);
+
                if (cmdPtr) // special action is required
                {
                   int i = 0;
                   while (commentscanYYtext[i] == ' ' || commentscanYYtext[i] == '\t') {
                      i++;
                   }
+
                   g_spaceBeforeCmd = QByteArray(commentscanYYtext).left(i);
                   if (cmdPtr->endsBrief && inContext != OutputXRef) {
                      briefEndsAtDot = FALSE;

@@ -283,10 +283,10 @@ Definition::Definition(const char *df, int dl, int dc, const char *name, const c
 
 Definition::Definition(const Definition &d) : DefinitionIntf()
 {
-   m_name   = d.m_name;
+   m_name    = d.m_name;
    m_defLine = d.m_defLine;
 
-   m_impl = new DefinitionImpl;
+   m_impl  = new DefinitionImpl;
    *m_impl = *d.m_impl;
 
    m_impl->sectionDict = 0;

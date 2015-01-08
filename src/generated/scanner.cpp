@@ -11443,10 +11443,6 @@ YY_DECL {
    register int yy_act;
 
 
-
-
-
-
    if ( !(yy_init) )
    {
       (yy_init) = 1;
@@ -20011,6 +20007,7 @@ YY_DECL {
             YY_BREAK
          case 663:
             /* rule 663 can match eol */
+
             *yy_cp = (yy_hold_char); /* undo effects of setting up scannerYYtext */
             (yy_c_buf_p) = yy_cp -= 1;
             YY_DO_BEFORE_ACTION; /* set up scannerYYtext again */
@@ -21814,6 +21811,7 @@ static void handleCommentBlock(const QByteArray &doc, bool brief)
    static bool hideInBodyDocs = Config_getBool("HIDE_IN_BODY_DOCS");
    int position = 0;
    bool needsEntry = FALSE;
+
    if (docBlockInBody && hideInBodyDocs) {
       return;
    }
@@ -21910,38 +21908,32 @@ static void handleParametersCommentBlocks(ArgumentList *al)
    }
 }
 
-
-//----------------------------------------------------------------------------
-
 static void parseCompounds(Entry *rt)
 {  
-   for(auto &ce : rt->children() ) {
+   for(auto ce : rt->children() ) {
 
-      if (! ce.program.isEmpty()) {       
+      if (! ce->program.isEmpty()) {       
          padCount = 0;
          //depthIf = 0;
          g_column = 0;
-         inputString = ce.program;
+         inputString = ce->program;
          inputPosition = 0;
 
          scannerYYrestart( scannerYYin );
 
-         if (ce.section == Entry::ENUM_SEC || (ce.spec & Entry::Enum)) {
+         if (ce->section == Entry::ENUM_SEC || (ce->spec & Entry::Enum)) {
             BEGIN( FindFields ) ;
          } else {
             BEGIN( FindMembers ) ;
          }
 
-         current_root = const_cast<Entry *>(&ce);
-         yyFileName = ce.fileName;
+         current_root = const_cast<Entry *>(ce);
+         yyFileName = ce->fileName;
 
          //setContext();
-         yyLineNr = ce.startLine ;
-         yyColNr = ce.startColumn ;
-         insideObjC = ce.lang == SrcLangExt_ObjC;
-
-         //printf("---> Inner block starts at line %d objC=%d\n",yyLineNr,insideObjC);
-         //current->reset();
+         yyLineNr = ce->startLine ;
+         yyColNr  = ce->startColumn ;
+         insideObjC = ce->lang == SrcLangExt_ObjC;
 
          if (current) {
             delete current;
@@ -21953,11 +21945,11 @@ static void parseCompounds(Entry *rt)
          // deep copy group list from parent (see bug 727732)
          if (rt->groups) {           
             for (auto g : *rt->groups) {
-               ce.groups->append(g);
+               ce->groups->append(g);
             }
          }
 
-         int ni = ce.name.lastIndexOf("::");
+         int ni = ce->name.lastIndexOf("::");
          if (ni == -1) {
             ni = 0;
          } else {
@@ -21965,13 +21957,13 @@ static void parseCompounds(Entry *rt)
          }
 
          // set default protection based on the compound type
-         if ( ce.section == Entry::CLASS_SEC ) { // class
+         if ( ce->section == Entry::CLASS_SEC ) { // class
             if (insidePHP || insideD || insideJS || insideIDL) {
                current->protection = protection = Public ;
             } else if (insideJava) {
-               current->protection = protection = (ce.spec & (Entry::Interface | Entry::Enum)) ?  Public : Package;
-            } else if (ce.spec & (Entry::Interface | Entry::Ref | Entry::Value | Entry::Struct | Entry::Union)) {
-               if (ce.lang == SrcLangExt_ObjC) {
+               current->protection = protection = (ce->spec & (Entry::Interface | Entry::Enum)) ?  Public : Package;
+            } else if (ce->spec & (Entry::Interface | Entry::Ref | Entry::Value | Entry::Struct | Entry::Union)) {
+               if (ce->lang == SrcLangExt_ObjC) {
                   current->protection = protection = Protected ;
                } else {
                   current->protection = protection = Public ;
@@ -21980,14 +21972,14 @@ static void parseCompounds(Entry *rt)
                current->protection = protection = Private ;
             }
 
-         } else if (ce.section == Entry::ENUM_SEC ) { // enum
-            current->protection = protection = ce.protection;
+         } else if (ce->section == Entry::ENUM_SEC ) { // enum
+            current->protection = protection = ce->protection;
 
-         } else if (! ce.name.isEmpty() && ce.name.at(ni) == '@') { // unnamed union or namespace
-            if (ce.section == Entry::NAMESPACE_SEC ) { // unnamed namespace
+         } else if (! ce->name.isEmpty() && ce->name.at(ni) == '@') { // unnamed union or namespace
+            if (ce->section == Entry::NAMESPACE_SEC ) { // unnamed namespace
                current->stat = gstat = TRUE;
             }
-            current->protection = protection = ce.protection;
+            current->protection = protection = ce->protection;
 
          } else { // named struct, union, protocol, category
             current->protection = protection = Public ;
@@ -22000,39 +21992,34 @@ static void parseCompounds(Entry *rt)
          //memberGroupId = DOX_NOGROUP;
          //memberGroupRelates.resize(0);
          //memberGroupInside.resize(0);
-         groupEnterCompound(yyFileName, yyLineNr, ce.name);
+         groupEnterCompound(yyFileName, yyLineNr, ce->name);
 
          scannerYYlex() ;
          g_lexInit = TRUE;
          //forceEndGroup();
 
-         groupLeaveCompound(yyFileName, yyLineNr, ce.name);
+         groupLeaveCompound(yyFileName, yyLineNr, ce->name);
 
          delete current;
          current = 0;
-         const_cast<Entry &>(ce).program.resize(0);
+         const_cast<Entry *>(ce)->program.resize(0);
       }
 
-      parseCompounds(const_cast<Entry *>(&ce));
+      parseCompounds(const_cast<Entry *>(ce));
    }
 }
 
 //----------------------------------------------------------------------------
 
-static void parseMain(const char *fileName,
-                      const char *fileBuf,
-                      Entry *rt,
-                      bool sameTranslationUnit,
-                      QStringList &filesInSameTranslationUnit)
+static void parseMain(const char *fileName, const char *fileBuf, Entry *rt, 
+                      bool sameTranslationUnit, QStringList &filesInSameTranslationUnit)
 {
    initParser();
 
-   inputString = fileBuf;
+   inputString   = fileBuf;
    inputPosition = 0;
-   g_column = 0;
-
-   //anonCount     = 0;  // don't reset per file
-   //depthIf       = 0;
+   g_column      = 0;
+ 
    protection    = Public;
    mtype         = Method;
    gstat         = FALSE;
@@ -22046,33 +22033,43 @@ static void parseMain(const char *fileName,
 
       yyLineNr = 1 ;
       yyFileName = fileName;
+
       setContext();
       bool processWithClang = insideCpp || insideObjC;
+
       if (processWithClang) {
-         if (!sameTranslationUnit) { // new file
+         if (! sameTranslationUnit) { // new file
             ClangParser::instance()->start(fileName, filesInSameTranslationUnit);
          } else {
             ClangParser::instance()->switchToFile(fileName);
          }
       }
-      rt->lang = language;
-      msg("Parsing file %s...\n", yyFileName.data());
 
+      rt->lang = language;
       current_root  = rt ;
+
+      msg("Parsing input file %s\n", yyFileName.data());
+   
       initParser();
       groupEnterFile(yyFileName, yyLineNr);
-      current       = new Entry;
-      //printf("current=%p current_root=%p\n",current,current_root);
+
+      current = new Entry;     
       int sec = guessSection(yyFileName);
+
       if (sec) {
          current->name    = yyFileName;
          current->section = sec;
+
          current_root->addSubEntry(current);
-         current          = new Entry;
+
+         current = new Entry;
       }
+
       current->reset();
+
       initEntry();
       scannerYYrestart( scannerYYin );
+
       if ( insidePHP ) {
          BEGIN( FindMembersPHP );
       } else {
@@ -22085,21 +22082,13 @@ static void parseMain(const char *fileName,
       if (YY_START == Comment) {
          warn(yyFileName, yyLineNr, "File ended in the middle of a comment block, Check for a missing \\endcode?");
       }
-
-      //forceEndGroup();
+    
       groupLeaveFile(yyFileName, yyLineNr);
-
-      //if (depthIf>0)
-      //{
-      //  warn(yyFileName,yyLineNr,"Documentation block ended in the middle of a conditional section!");
-      //}
-
       rt->program.resize(0);
+ 
 
+/*    ** BROOM 
 
-// ** BROOM  
-
-/*
       if (rt->children().contains(current) == 0)
          // it could be that current is already added as a child to rt, so we
          // only delete it if this is not the case. See bug 635317.
@@ -22107,28 +22096,24 @@ static void parseMain(const char *fileName,
          delete current;
          current = 0;
       }
-
 */
 
       parseCompounds(rt);
-
       inputFile.close();
 
       anonNSCount++;
-
    }
 }
 
-//----------------------------------------------------------------------------
-
 static void parsePrototype(const QByteArray &text)
-{
-   //printf("**** parsePrototype(%s) begin\n",text.data());
+{  
    if (text.isEmpty()) {
       warn(yyFileName, yyLineNr, "Empty prototype found!");
       return;
    }
-   if (!current) { // nothing to store (see bug683516)
+
+   if (!current) { 
+      // nothing to store (see bug683516)
       return;
    }
 
@@ -22175,20 +22160,6 @@ void scanFreeScanner()
 #endif
 }
 
-//static void handleGroupStartCommand(const char *header)
-//{
-//  memberGroupHeader=header;
-//  startGroupInDoc();
-//}
-//
-//static void handleGroupEndCommand()
-//{
-//  endGroup();
-//  previous=0;
-//}
-
-//----------------------------------------------------------------------------
-
 void CLanguageScanner::startTranslationUnit(const char *)
 {
 }
@@ -22201,18 +22172,14 @@ void CLanguageScanner::finishTranslationUnit()
    }
 }
 
-void CLanguageScanner::parseInput(const char *fileName,
-                                  const char *fileBuf,
-                                  Entry *root,
-                                  bool sameTranslationUnit,
-                                  QStringList &filesInSameTranslationUnit)
+void CLanguageScanner::parseInput(const char *fileName, const char *fileBuf, Entry *root,
+                                  bool sameTranslationUnit, QStringList &filesInSameTranslationUnit)
 {
    g_thisParser = this;
 
    printlex(scannerYY_flex_debug, TRUE, __FILE__, fileName);
 
-   ::parseMain(fileName, fileBuf, root,
-               sameTranslationUnit, filesInSameTranslationUnit);
+   ::parseMain(fileName, fileBuf, root, sameTranslationUnit, filesInSameTranslationUnit);
 
    printlex(scannerYY_flex_debug, FALSE, __FILE__, fileName);
 }

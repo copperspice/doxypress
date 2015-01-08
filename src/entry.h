@@ -18,9 +18,9 @@
 #ifndef ENTRY_H
 #define ENTRY_H
 
-#include <QList>
 #include <QByteArray>
 #include <QFile>
+#include <QList>
 
 #include <types.h>
 
@@ -59,8 +59,7 @@ struct TagInfo {
 /** Represents an unstructured piece of information, about an
  *  entity found in the sources.
  *
- *  parseMain() in scanner.l will generate a tree of these
- *  entries.
+ *  parseMain() in scanner.l will generate a tree of these entries.
  */
 class Entry
 {
@@ -213,7 +212,7 @@ class Entry
    /*! Returns the list of children for this Entry
     *  @see addSubEntry() and removeSubEntry()
     */
-   const QList<Entry> &children() const {
+   const QList<Entry *> &children() const {
       return m_sublist;
    }
 
@@ -231,7 +230,6 @@ class Entry
  
 
  public:
-
    // identification
     
    TagInfo      *tagInfo;    //!< tag file info
@@ -315,6 +313,7 @@ class Entry
       if ( section != GROUPDOC_SEC ) {
          return Grouping::GROUPING_LOWEST;
       }
+
       switch ( groupDocType ) {
          case GROUPDOC_NORMAL:
             return Grouping::GROUPING_AUTO_DEF;
@@ -330,8 +329,8 @@ class Entry
  private:
    void createSubtreeIndex(EntryNav *nav, FileStorage *storage, FileDef *fd);
 
-   Entry         *m_parent;    //!< parent node in the tree
-   QList<Entry>  m_sublist;    //!< entries that are children of this one
+   Entry          *m_parent;     //!< parent node in the tree
+   QList<Entry *>  m_sublist;    //!< entries that are children of this one
 
    Entry &operator=(const Entry &);
 };
@@ -356,6 +355,7 @@ class EntryNav
    void changeSection(int section) {
       m_section = section;
    }
+
    void setFileDef(FileDef *fd) {
       m_fileDef = fd;
    }
@@ -363,27 +363,35 @@ class EntryNav
    Entry *entry() const {
       return m_info;
    }
+
    int section() const {
       return m_section;
    }
+
    SrcLangExt lang() const {
       return m_lang;
    }
+
    const QByteArray &type() const {
       return m_type;
    }
+
    const QByteArray &name() const {
       return m_name;
    }
+
    TagInfo *tagInfo() const {
       return m_tagInfo;
    }
-   const QList<EntryNav> &children() const {
+
+   const QList<EntryNav *> &children() const {
       return m_subList;
    }
+
    EntryNav *parent() const {
       return m_parent;
    }
+
    FileDef *fileDef() const {
       return m_fileDef;
    }
@@ -391,8 +399,8 @@ class EntryNav
  private:
 
    // navigation
-   EntryNav        *m_parent;    //!< parent node in the tree
-   QList<EntryNav>  m_subList;   //!< entries that are children of this one
+   EntryNav          *m_parent;    //!< parent node in the tree
+   QList<EntryNav *>  m_subList;   //!< entries that are children of this one
 
    // identification
    int          m_section;     //!< entry type (see Sections);

@@ -411,7 +411,7 @@ class TagFileParser : public QXmlDefaultHandler
          m_state = InDir;
 
       } else {
-         warn("Unknown compound attribute `%s' found!\n", qPrintable(kind) );
+         warn("Unknown compound attribute `%s' found\n", qPrintable(kind) );
          m_state = Invalid;
       }
 
@@ -458,7 +458,7 @@ class TagFileParser : public QXmlDefaultHandler
             break;
 
          default:
-            warn("tag `compound' was not expected\n");
+            warn("Tag `compound' was not expected\n");
       }
    }
 
@@ -475,12 +475,15 @@ class TagFileParser : public QXmlDefaultHandler
 
       } else if (protStr == "private") {
          m_curMember->prot = Private;
+
       }
 
       if (virtStr == "virtual") {
          m_curMember->virt = Virtual;
+
       } else if (virtStr == "pure") {
          m_curMember->virt = Pure;
+
       }
 
       if (staticStr == "yes") {
@@ -1399,7 +1402,6 @@ void TagFileParser::buildLists(Entry *root)
       ce->lang     = tci.isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
 
       // transfer base class list
-
       if (tci.bases) {
          delete ce->extends;
          ce->extends = tci.bases;
@@ -1428,12 +1430,11 @@ void TagFileParser::buildLists(Entry *root)
       root->addSubEntry(ce);
    }
 
-   // build file list
-   
+   // build file list   
    for (auto tfi : m_tagFileFiles) {
       Entry *fe = new Entry;
       fe->section = guessSection(tfi.name);
-      fe->name     = tfi.name;
+      fe->name    = tfi.name;
 
       addDocAnchors(fe, tfi.docAnchors);
 
@@ -1444,8 +1445,7 @@ void TagFileParser::buildLists(Entry *root)
 
       QByteArray fullName = m_tagName + ":" + tfi.path + stripPath(tfi.name);
       fe->fileName = fullName;
-
-      //printf("new FileDef() filename=%s\n",tfi->filename.data());
+      
       FileDef *fd = new FileDef(m_tagName + ":" + tfi.path, tfi.name, m_tagName, tfi.filename );
      
       QSharedPointer<FileName> mn (Doxygen::inputNameDict->find(tfi.name));
@@ -1518,8 +1518,16 @@ void TagFileParser::buildLists(Entry *root)
 
    // build page list 
    for (auto tpi : m_tagFilePages) {
-      Entry *pe    = new Entry;
-      pe->section  = tpi.filename == "index" ? Entry::MAINPAGEDOC_SEC : Entry::PAGEDOC_SEC;
+      Entry *pe = new Entry;
+
+      // hard sets the section
+      if (tpi.filename == "index") { 
+         pe->section = Entry::MAINPAGEDOC_SEC;
+
+      } else {
+         pe->section = Entry::PAGEDOC_SEC;
+      }
+
       pe->name     = tpi.name;
       pe->args     = tpi.title;
 
@@ -1536,8 +1544,7 @@ void TagFileParser::buildLists(Entry *root)
 
 void TagFileParser::addIncludes()
 { 
-   for (auto tfi : m_tagFileFiles) {
-      //printf("tag file tagName=%s path=%s name=%s\n",m_tagName.data(),tfi->path.data(),tfi->name.data());
+   for (auto tfi : m_tagFileFiles) {      
       QSharedPointer<FileName> fn (Doxygen::inputNameDict->find(tfi.name));
 
       if (fn) {

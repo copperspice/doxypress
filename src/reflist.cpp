@@ -143,6 +143,10 @@ void RefList::insertIntoList(const char *key, RefItem *item)
 
 void RefList::generatePage()
 {  
+
+printf("\n BROOM reflist.cpp  add related page \n\n");
+
+
    QMap<QByteArray, QList<RefItem>> titleMap;
 
    for (auto list : m_itemMap) {

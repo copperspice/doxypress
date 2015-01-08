@@ -387,19 +387,17 @@ void marshalEntryTree(StorageIntf *s, Entry *e)
    marshalUInt(s, e->children().count());
   
    for (auto child : e->children()) {
-      marshalEntryTree(s, &child);
+      marshalEntryTree(s, child);
    }
 }
-
-//------------------------------------------------------------------
 
 int unmarshalInt(StorageIntf *s)
 {
    uchar b[4];
+
    s->read((char *)b, 4);
    int result = (int)((((uint)b[0]) << 24) + ((uint)b[1] << 16) + ((uint)b[2] << 8) + (uint)b[3]);
-
-   //printf("unmarshalInt: %x %x %x %x: %x offset=%llx\n",b[0],b[1],b[2],b[3],result,f.pos());
+   
    return result;
 }
 

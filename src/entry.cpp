@@ -31,15 +31,14 @@ int Entry::num = 0;
 
 Entry::Entry()
 {
-   //printf("Entry::Entry(%p)\n",this);
    num++;
 
    m_parent = 0;
-   section  = EMPTY_SEC;
+   section  = Entry::EMPTY_SEC;
   
    extends   = new QList<BaseInfo>;   
    groups    = new QList<Grouping>; 
-   anchors   = new QList<SectionInfo>;    // Doxygen::sectionDict takes ownership of the items!
+   anchors   = new QList<SectionInfo>;    // Doxygen::sectionDict takes ownership of the items
        
    tArgLists  = 0;
    mGrpId     = -1;
@@ -130,7 +129,7 @@ Entry::Entry(const Entry &e)
     
    // copy of the child entry list  
    for (auto item : e.m_sublist) { 
-      m_sublist.append(item);
+      m_sublist.append(new Entry(*item));
    }
 
    // copy base class list
@@ -174,7 +173,7 @@ void Entry::addSubEntry(Entry *current)
 {
    current->m_parent = this;
 
-   m_sublist.append(*current);
+   m_sublist.append(current);
 }
 
 void Entry::reset()
@@ -211,7 +210,7 @@ void Entry::reset()
    callGraph   = false;
    callerGraph = false;
 
-   section = EMPTY_SEC;
+   section = Entry::EMPTY_SEC;
    mtype   = Method;
    virt    = Normal;
    stat    = false;
@@ -264,15 +263,13 @@ void Entry::createSubtreeIndex(EntryNav *nav, FileStorage *storage, FileDef *fd)
    nav->addChild(childNav);
    childNav->setFileDef(fd);
    childNav->saveEntry(this, storage);
-
-   if (m_sublist.size() == 0) {
-     
-      for (auto childNode : m_sublist) {
-         childNode.createSubtreeIndex(childNav, storage, fd);
-      }
-      
-      m_sublist.clear();
+    
+   for (auto childNode : m_sublist) {
+      childNode->createSubtreeIndex(childNav, storage, fd);
    }
+   
+   m_sublist.clear();
+   
 }
 
 void Entry::createNavigationIndex(EntryNav *rootNav, FileStorage *storage, FileDef *fd)
@@ -293,21 +290,16 @@ void Entry::addSpecialListItem(const char *listName, int itemId)
    sli->append(*ili);
 }
 
-# ifdef BROOM
 void Entry::removeSubEntry(Entry *e)
 {
    // called from lex code, appears to be used when parsing Fortran only
 
-   int i = m_sublist.indexOf(*e);
+   int i = m_sublist.indexOf(e);
 
    if (i != -1) {
       m_sublist.removeAt(i);
    }  
 }
-#endif
-
-//------------------------------------------------------------------
-
 
 EntryNav::EntryNav(EntryNav *parent, Entry *e)
    : m_parent(parent), m_section(e->section), m_type(e->type), m_name(e->name), 
@@ -334,7 +326,7 @@ EntryNav::~EntryNav()
 
 void EntryNav::addChild(EntryNav *e)
 {  
-   m_subList.append(*e);
+   m_subList.append(e);
 }
 
 bool EntryNav::loadEntry(FileStorage *storage)
@@ -368,8 +360,7 @@ bool EntryNav::loadEntry(FileStorage *storage)
 bool EntryNav::saveEntry(Entry *e, FileStorage *storage)
 {
    m_offset = storage->pos();
-   //printf("EntryNav::saveEntry offset=%llx\n",m_offset);
-
+   
    marshalEntry(storage, e);
    return true;
 }

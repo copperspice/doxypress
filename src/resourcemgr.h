@@ -19,6 +19,7 @@
 #define RESOURCEMGR_H
 
 #include <QByteArray>
+#include <QString>
 
 /** @brief Compiled resource */
 struct Resource {
@@ -27,7 +28,6 @@ struct Resource {
    const char *category;
    const char *name;
    const char *data;
-
    int size;  
 };
 
@@ -37,27 +37,16 @@ class ResourceMgr
  public:
    /** Returns the one and only instance of this class */
    static ResourceMgr &instance();
-
-   /** Registers an array of resources */
-   void registerResources(const Resource resources[], int numResources);
-
-   /** Copies all resource belonging to a given category to a given target directory */
-   bool copyCategory(const char *categoryName, const char *targetDir) const;
- 
+  
    /** Copies a registered resource to a given target directory under a given target name */
    bool copyResourceAs(const QString &fName, const QString &targetDir, const QString &targetName) const;
-
-   /** Returns a pointer to the resource object with the given name. */
-   const Resource *get(const char *name) const;
-
+ 
    /** Gets the resource data as a QByteArray */
    QByteArray getAsString(const QString &fName) const;
 
  private:
    ResourceMgr();
    ~ResourceMgr();
-
-   QHash<QString, const Resource *> m_resources;   
 };
 
 #endif

@@ -15,19 +15,17 @@
  *
 *************************************************************************/
 
-#include <QHash>
-#include <QFile>
-#include <QByteArray>
 #include <qglobal.h>
 
-#include <string.h>
+#include <QFile>
+#include <QRegExp>
 
-#include <resourcemgr.h>
-#include <util.h>
+#include <config.h>
 #include <doxy_build_info.h>
 #include <ftextstream.h>
 #include <message.h>
-#include <config.h>
+#include <resourcemgr.h>
+#include <util.h>
 
 ResourceMgr &ResourceMgr::instance()
 {
@@ -43,42 +41,11 @@ ResourceMgr::~ResourceMgr()
 {
 }
 
-void ResourceMgr::registerResources(const Resource resources[], int numResources)
-{
-   for (int i = 0; i < numResources; i++) {
-      m_resources.insert(resources[i].name, &resources[i]);
-   }
-}
-
-bool ResourceMgr::copyCategory(const char *categoryName, const char *targetDir) const
-{  
-   for (auto item : m_resources) {        
-
-      if (qstrcmp(item->category, categoryName) == 0) {
-         if (! copyResourceAs(item->name, targetDir, item->name)) {
-            return false;
-         }
-      }
-   }
-
-   return true;
-}
-
 bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir, const QString &targetName) const
 {
-   QByteArray resData;
- 
-   //
-   QString resourceFileName = ":/resources/" + fName;
-
-   QFile resource(resourceFileName);
-   if ( resource.open(QIODevice::ReadOnly) ) {
-      resData = resource.readAll();            
-   }
-
-   //
    QString outputName = targetDir + "/" + targetName;
- 
+   QByteArray resData = getAsString(fName);     
+   
    if (! resData.isEmpty()) {
 
       Resource::Type type =  Resource::Verbatim;
@@ -216,21 +183,17 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
    return false;
 }
 
-const Resource *ResourceMgr::get(const char *name) const
-{ 
-   return m_resources.value(name);
-}
-
 QByteArray ResourceMgr::getAsString(const QString &fName) const
 {
-   QString resourceFileName = ":/resources/" + fName;
-
    QByteArray retval;
 
+   QString resourceFileName = ":/resources/" + fName; 
    QFile resource(resourceFileName);
-   if ( resource.open(QIODevice::ReadOnly) ) {
+
+   if (resource.open(QIODevice::ReadOnly)) {
       retval = resource.readAll();            
    }
               
    return retval;
 }
+

@@ -818,17 +818,19 @@ void HtmlGenerator::writeSearchData(const char *dir)
       Doxygen::indexList->addImageFile("search/mag_sel.png");
    }
 
-   QByteArray searchDirName = Config_getString("HTML_OUTPUT") + "/search";
+   QByteArray outputName = Config_getString("HTML_OUTPUT") + "/search";
 
-   QString fileName = searchDirName + "/search.css";
+   QString fileName = outputName + "/search.css";
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
-      const Resource *res = mgr.get("search.css");   // BROOM
 
-      if (res) {
+      QByteArray resData = mgr.getAsString("html/search.css");
+      
+      if (! resData.isEmpty()) {
+
          FTextStream t(&f);
-         QByteArray searchCss = replaceColorMarkers((const char *)res->data);
+         QByteArray searchCss = replaceColorMarkers(resData);
          searchCss = substitute(searchCss, "$doxygenversion", versionString);
 
          if (Config_getBool("DISABLE_INDEX")) {
@@ -904,6 +906,7 @@ void HtmlGenerator::writeSearchInfo(FTextStream &t, const QByteArray &relPath)
 {
    static bool searchEngine      = Config_getBool("SEARCHENGINE");
    static bool serverBasedSearch = Config_getBool("SERVER_BASED_SEARCH");
+
    if (searchEngine && !serverBasedSearch) {
       (void)relPath;
       t << "<!-- window showing the filter options -->\n";
@@ -993,15 +996,19 @@ void HtmlGenerator::writeStyleInfo(int part)
          //t << "H1 { text-align: center; border-width: thin none thin none;" << endl;
          //t << "     border-style : double; border-color : blue; padding-left : 1em; padding-right : 1em }" << endl;
 
-         t << replaceColorMarkers(substitute(ResourceMgr::instance().getAsString("html/doxygen.css"), "$doxygenversion", versionString));
+         QByteArray resData = ResourceMgr::instance().getAsString("html/doxygen.css");
+         t << replaceColorMarkers(substitute(resData, "$doxygenversion", versionString));
+
          endPlainFile();
          Doxygen::indexList->addStyleSheetFile("doxygen.css");
 
-      } else { // write user defined style sheet
+      } else { 
+         // write user defined style sheet
          QByteArray cssname = Config_getString("HTML_STYLESHEET");
+
          QFileInfo cssfi(cssname);
 
-         if (!cssfi.exists() || !cssfi.isFile() || !cssfi.isReadable()) {
+         if (! cssfi.exists() || ! cssfi.isFile() || !cssfi.isReadable()) {
             err("Style sheet %s does not exist or is not readable", Config_getString("HTML_STYLESHEET").constData());
 
          } else {

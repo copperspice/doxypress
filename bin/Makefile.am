@@ -129,6 +129,7 @@ CS_Doxygen_SOURCES = \
    src/tooltip.cpp \
    src/util.cpp \
    src/xmldocvisitor.cpp  \
+   src/xmlgen.cpp  \
 \
    src/config.cpp    \
    src/portable.cpp  \
@@ -152,16 +153,16 @@ CS_Doxygen_SOURCES = \
 #   src/generated/tclscanner.cpp
 
 
-#   src/docbookgen.cpp
-#   src/docbookvisitor.cpp
-#   src/dbusxmlscanner.cpp
-#   src/latexdocvisitor.cpp
-#   src/latexgen.cpp
-#   src/perlmodgen.cpp
-#   src/rtfdocvisitor.cpp
-#   src/rtfgen.cpp
-#   src/rtfstyle.cpp         compiles
-#   src/xmlgen.cpp
+#1   src/docbookgen.cpp
+#2   src/docbookvisitor.cpp
+#3   src/dbusxmlscanner.cpp
+#4   src/latexdocvisitor.cpp
+#5   src/latexgen.cpp
+#6   src/perlmodgen.cpp
+#7   src/rtfdocvisitor.cpp
+#8   src/rtfgen.cpp
+#    src/rtfstyle.cpp         compiles
+
 
 
 RESOURCES = cs_doxygen.qrc

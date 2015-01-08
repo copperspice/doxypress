@@ -23,15 +23,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <formula.h>
-#include <image.h>
-#include <util.h>
-#include <message.h>
 #include <config.h>
-#include <portable.h>
-#include <index.h>
 #include <doxygen.h>
+#include <formula.h>
 #include <ftextstream.h>
+#include <image.h>
+#include <index.h>
+#include <message.h>
+#include <portable.h>
+#include <util.h>
 
 // must appear after the previous include - resolve soon 
 #include <doxy_globals.h>
@@ -59,7 +59,7 @@ void FormulaList::generateBitmaps(const char *path)
 
    // store the original directory
    if (!d.exists()) {
-      err("Output dir %s does not exist!\n", path);
+      err("Output dir %s does not exist\n", path);
       exit(1);
    }
    QByteArray oldDir = QDir::currentPath().toUtf8();
@@ -118,8 +118,7 @@ void FormulaList::generateBitmaps(const char *path)
    }
 
    if (pagesToGenerate.count() > 0) {
-      // there are new formulas
-      //printf("Running latex...\n");
+      // there are new formulas   
       //system("latex _formulas.tex </dev/null >/dev/null");
 
       QByteArray latexCmd = Config_getString("LATEX_CMD_NAME");
@@ -130,10 +129,8 @@ void FormulaList::generateBitmaps(const char *path)
       portable_sysTimerStart();
 
       if (portable_system(latexCmd, "_formulas.tex") != 0) {
-         err("Problems running latex. Check your installation or look "
-             "for typos in _formulas.tex and check _formulas.log!\n");
-         formulaError = true;
-         //return;
+         err("Problems running latex. Check your installation, verify _formulas.tex, and review the _formulas.log\n");
+         formulaError = true;         
       }
 
       portable_sysTimerStop();
@@ -155,7 +152,7 @@ void FormulaList::generateBitmaps(const char *path)
          portable_sysTimerStart();
 
          if (portable_system("dvips", dviArgs) != 0) {
-            err("Problems running dvips. Check your installation!\n");
+            err("Problem running dvips. Check your installation\n");
             portable_sysTimerStop();
             return;
          }
@@ -195,6 +192,7 @@ void FormulaList::generateBitmaps(const char *path)
             t << "(" << formBase << ".eps) run" << endl;
             f.close();
          }
+
          // scale the image so that it is four times larger than needed.
          // and the sizes are a multiple of four.
          double scaleFactor = 16.0 / 3.0;
@@ -209,20 +207,18 @@ void FormulaList::generateBitmaps(const char *path)
          int gy = (((int)((y2 - y1) * scaleFactor)) + 3) & ~1;
 
          // Then we run ghostscript to convert the postscript to a pixmap
-         // The pixmap is a truecolor image, where only black and white are
-         // used.
+         // The pixmap is a truecolor image, where only black and white are used         
 
          char gsArgs[4096];
          sprintf(gsArgs, "-q -g%dx%d -r%dx%dx -sDEVICE=ppmraw "
                  "-sOutputFile=%s.pnm -dNOPAUSE -dBATCH -- %s.ps",
                  gx, gy, (int)(scaleFactor * 72), (int)(scaleFactor * 72),
-                 formBase.data(), formBase.data()
-                );
+                 formBase.data(), formBase.data() );
 
          portable_sysTimerStart();
 
          if (portable_system(portable_ghostScriptCommand(), gsArgs) != 0) {
-            err("Problem running ghostscript %s %s. Check your installation!\n", portable_ghostScriptCommand(), gsArgs);
+            err("Problem running ghostscript %s %s. Check your installation\n", portable_ghostScriptCommand(), gsArgs);
             portable_sysTimerStop();
 
             return;
@@ -336,7 +332,7 @@ void FormulaList::generateBitmaps(const char *path)
                   f.close();
    
                } else {
-                  fprintf(stderr, "Warning: Unable to save image file %s, %d\n", qPrintable(fileName), f.error());
+                  err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
 
                }            
 
@@ -397,6 +393,7 @@ int main()
    fl.append(new Formula("$y^2$"));
    fl.append(new Formula("$\\sqrt{x_0^2+x_1^2+x_2^2}$"));
    fl.generateBitmaps("dest");
+
    return 0;
 }
 #endif

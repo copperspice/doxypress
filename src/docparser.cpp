@@ -5697,6 +5697,7 @@ int DocPara::handleHtmlStartTag(const QByteArray &tagName, const HtmlAttribList 
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'name' attribute from <exception> tag.");
          }
       }
+
       break;
       case XML_ITEM:
       case XML_LISTHEADER:
@@ -5708,43 +5709,48 @@ int DocPara::handleHtmlStartTag(const QByteArray &tagName, const HtmlAttribList 
             warn_doc_error(s_fileName, doctokenizerYYlineno, "lonely <item> tag found");
          }
          break;
+
       case XML_RETURNS:
          retval = handleSimpleSection(DocSimpleSect::Return, true);
          s_hasReturnCommand = true;
          break;
+
       case XML_TERM:
          //m_children.append(new DocStyleChange(this,s_nodeStack.count(),DocStyleChange::Bold,true));
          if (insideTable(this)) {
             retval = RetVal_TableCell;
          }
          break;
+
       case XML_SEE:
-         // I'm not sure if <see> is the same as <seealso> or if it
-         // should you link a member without producing a section. The
-         // C# specification is extremely vague about this (but what else
-         // can we expect from Microsoft...)
+         // not sure if <see> is the same as <seealso> or if it should you link a member
+         // without producing a section. The C# specification is extremely vague about this 
       {
          QByteArray cref;
-         //printf("XML_SEE: empty tag=%d\n",g_token->emptyTag);
+         
          if (findAttribute(tagHtmlAttribs, "cref", &cref)) {
-            if (g_token->emptyTag) { // <see cref="..."/> style
+            if (g_token->emptyTag) { 
+               // <see cref="..."/> style
+
                bool inSeeBlock = s_inSeeBlock;
                g_token->name = cref;
                s_inSeeBlock = true;
                handleLinkedWord(this, m_children);
                s_inSeeBlock = inSeeBlock;
-            } else { // <see cref="...">...</see> style
-               //DocRef *ref = new DocRef(this,cref);
-               //m_children.append(ref);
-               //ref->parse();
+
+            } else { 
+               // <see cref="...">...</see> style
+              
                doctokenizerYYsetStatePara();
                DocLink *lnk = new DocLink(this, cref);
                m_children.append(lnk);
+
                QByteArray leftOver = lnk->parse(false, true);
                if (!leftOver.isEmpty()) {
                   m_children.append(new DocWord(this, leftOver));
                }
             }
+
          } else {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'cref' attribute from <see> tag.");
          }

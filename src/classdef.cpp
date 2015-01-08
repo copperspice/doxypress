@@ -233,11 +233,13 @@ void ClassDefImpl::init(const char *defFileName, const char *name, const QByteAr
 
    // we cannot use getLanguage at this point, as setLanguage has not been called.
    SrcLangExt lang = getLanguageFromFileName(defFileName);
-   if ((lang == SrcLangExt_Cpp || lang == SrcLangExt_ObjC) &&
-         guessSection(defFileName) == Entry::SOURCE_SEC) {
+
+   if ((lang == SrcLangExt_Cpp || lang == SrcLangExt_ObjC) && guessSection(defFileName) == Entry::SOURCE_SEC) {
       isLocal = true;
+
    } else {
       isLocal = false;
+
    }
 
    isGeneric = (lang == SrcLangExt_CSharp || lang == SrcLangExt_Java) && QByteArray(name).indexOf('<') != -1;

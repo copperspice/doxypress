@@ -365,42 +365,41 @@ QString stripFromIncludePath(const QString &path)
 }
 
 /*! try to determine if \a name is a source or a header file name by looking
- * at the extension. A number of variations is allowed in both upper and
- * lower case) If anyone knows or uses another extension please let me know :-)
+ * at the extension. A number of variations are allowed in both upper and lower case 
  */
 int guessSection(const char *name)
 {
-   QByteArray n = ((QByteArray)name).toLower();
+   QByteArray n = QByteArray(name).toLower();
 
    // source
    if (n.right(2) == ".c"    || 
-         n.right(3) == ".cc"   ||
-         n.right(4) == ".cxx"  ||
-         n.right(4) == ".cpp"  ||
-         n.right(4) == ".c++"  ||
-         n.right(5) == ".java" ||
-         n.right(2) == ".m"    ||
-         n.right(2) == ".M"    ||
-         n.right(3) == ".mm"   ||
-         n.right(3) == ".ii"   || // inline
-         n.right(4) == ".ixx"  ||
-         n.right(4) == ".ipp"  ||
-         n.right(4) == ".i++"  ||
-         n.right(4) == ".inl"  ||
-         n.right(4) == ".xml") 
+       n.right(3) == ".cc"   ||
+       n.right(4) == ".cxx"  ||
+       n.right(4) == ".cpp"  ||
+       n.right(4) == ".c++"  ||
+       n.right(5) == ".java" ||
+       n.right(2) == ".m"    ||
+       n.right(2) == ".M"    ||
+       n.right(3) == ".mm"   ||
+       n.right(3) == ".ii"   || // inline
+       n.right(4) == ".ixx"  ||
+       n.right(4) == ".ipp"  ||
+       n.right(4) == ".i++"  ||
+       n.right(4) == ".inl"  ||
+       n.right(4) == ".xml") 
    {
       return Entry::SOURCE_SEC;
    }
 
    // header
    if (n.right(2) == ".h"   || 
-         n.right(3) == ".hh"  ||
-         n.right(4) == ".hxx" ||
-         n.right(4) == ".hpp" ||
-         n.right(4) == ".h++" ||
-         n.right(4) == ".idl" ||
-         n.right(4) == ".ddl" ||
-         n.right(5) == ".pidl") 
+       n.right(3) == ".hh"  ||
+       n.right(4) == ".hxx" ||
+       n.right(4) == ".hpp" ||
+       n.right(4) == ".h++" ||
+       n.right(4) == ".idl" ||
+       n.right(4) == ".ddl" ||
+       n.right(5) == ".pidl") 
    {
       return Entry::HEADER_SEC;
    }
@@ -5970,10 +5969,13 @@ int getScopeFragment(const QByteArray &s, int p, int *l)
    int sl = s.length();
    int sp = p;
    int count = 0;
+
    bool done;
+
    if (sp >= sl) {
       return -1;
    }
+
    while (sp < sl) {
       char c = s.at(sp);
       if (c == ':') {
@@ -5982,42 +5984,53 @@ int getScopeFragment(const QByteArray &s, int p, int *l)
          break;
       }
    }
+
    while (sp < sl) {
       char c = s.at(sp);
+
       switch (c) {
-         case ':': // found next part
-            goto found;
-         case '<': // skip template specifier
+         case ':': 
+            // found next part
+            break;
+
+         case '<': 
+            // skip template specifier
             count = 1;
             sp++;
+
             done = false;
+
             while (sp < sl && !done) {
                // TODO: deal with << and >> operators!
                char c = s.at(sp++);
+
                switch (c) {
                   case '<':
                      count++;
                      break;
+
                   case '>':
                      count--;
+
                      if (count == 0) {
                         done = true;
                      }
                      break;
+
                   default:
                      break;
                }
             }
             break;
+
          default:
             sp++;
             break;
       }
    }
 
-found:
    *l = sp - p;
-   //printf("getScopeFragment(%s,%d)=%s\n",s.data(),p,s.mid(p,*l).data());
+  
    return p;
 }
 
@@ -6026,9 +6039,9 @@ PageDef *addRelatedPage(const char *name, const QByteArray &ptitle, const QByteA
                         TagInfo *tagInfo, SrcLangExt lang)
 {
    QSharedPointer<PageDef> pd;
- 
-   if ((pd = Doxygen::pageSDict->find(name)) && !tagInfo) {
-      // append documentation block to the page.
+
+   if ((pd = Doxygen::pageSDict->find(name)) && ! tagInfo) {
+      // append documentation block to the page
       pd->setDocumentation(doc, fileName, startLine);
 
 
@@ -6038,6 +6051,7 @@ PageDef *addRelatedPage(const char *name, const QByteArray &ptitle, const QByteA
 
       if (baseName.right(4) == ".tex") {
          baseName = baseName.left(baseName.length() - 4);
+
       } else if (baseName.right(Doxygen::htmlFileExtension.length()) == Doxygen::htmlFileExtension) {
          baseName = baseName.left(baseName.length() - Doxygen::htmlFileExtension.length());
       }
@@ -6063,9 +6077,8 @@ PageDef *addRelatedPage(const char *name, const QByteArray &ptitle, const QByteA
          gd->addPage(pd);
       }
 
-      if (!pd->title().isEmpty()) {
-         //outputList->writeTitle(pi->name,pi->title);
-
+      if (! pd->title().isEmpty()) {
+        
          // a page name is a label as well
          QByteArray file;
 
