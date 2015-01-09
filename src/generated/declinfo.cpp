@@ -2224,11 +2224,13 @@ void parseFuncDecl(const QByteArray &decl, bool objC, QByteArray &cl, QByteArray
                    QByteArray &n, QByteArray &a, QByteArray &ftl, QByteArray &exc)
 {
    printlex(declinfoYY_flex_debug, TRUE, __FILE__, NULL);
+
    inputString   = decl;
-   //printf("Input=`%s'\n",inputString);
+
    if (inputString == 0) {
       return;
    }
+
    inputPosition      = 0;
    classTempListFound = FALSE;
    funcTempListFound  = FALSE;
@@ -2241,6 +2243,7 @@ void parseFuncDecl(const QByteArray &decl, bool objC, QByteArray &cl, QByteArray
    type.resize(0);
    args.resize(0);
    exceptionString.resize(0);
+
    // first we try to find the type, scope, name and arguments
    declinfoYYrestart( declinfoYYin );
    BEGIN( Start );
@@ -2280,15 +2283,14 @@ void parseFuncDecl(const QByteArray &decl, bool objC, QByteArray &cl, QByteArray
    cl = scope;
    n = removeRedundantWhiteSpace(name);
    int il, ir;
+
    if ((il = n.indexOf('<')) != -1 && (ir = n.lastIndexOf('>')) != -1)
       // TODO: handle cases like where n="operator<< <T>"
    {
       ftl = removeRedundantWhiteSpace(n.right(n.length() - il));
       n = n.left(il);
    }
-
-   //ctl=classTempList.copy();
-   //ftl=funcTempList.copy();
+ 
    t = removeRedundantWhiteSpace(type);
    a = removeRedundantWhiteSpace(args);
    exc = removeRedundantWhiteSpace(exceptionString);
@@ -2297,13 +2299,10 @@ void parseFuncDecl(const QByteArray &decl, bool objC, QByteArray &cl, QByteArray
       a.prepend(")");
       t = t.left(t.length() - 1);
    }
-   //printf("type=`%s' class=`%s' name=`%s' args=`%s'\n",
-   //        t.data(),cl.data(),n.data(),a.data());
-
+  
    printlex(declinfoYY_flex_debug, FALSE, __FILE__, NULL);
+
    return;
-
-
 }
 
 //extern "C" { // some bogus code to keep the compiler happy

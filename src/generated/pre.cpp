@@ -3793,10 +3793,11 @@ void addDefine()
    //printf("addDefine %s %s\n",g_defName.data(),g_defArgsStr.data());
    //ArgumentList *al = new ArgumentList;
    //stringToArgumentList(g_defArgsStr,al);
-   MemberDef *md = new MemberDef(
-      g_yyFileName, g_yyLineNr - g_yyMLines, g_yyColNr,
-      "#define", g_defName, g_defArgsStr, 0,
-      Public, Normal, FALSE, Member, MemberType_Define, 0, 0);
+   QSharedPointer<MemberDef> md(new MemberDef(g_yyFileName, g_yyLineNr - g_yyMLines, g_yyColNr,
+               "#define", g_defName, g_defArgsStr, 0,
+               Public, Normal, FALSE, Member, MemberType_Define, 0, 0));
+
+
    if (!g_defArgsStr.isEmpty()) {
       ArgumentList *argList = new ArgumentList;
       //printf("addDefine() g_defName=`%s' g_defArgsStr=`%s'\n",g_defName.data(),g_defArgsStr.data());
@@ -3822,8 +3823,7 @@ void addDefine()
       g_defLitText = g_defLitText.mid(l + 1, k - l - 1) + g_defLitText.trimmed();
    }
    md->setInitializer(g_defLitText.trimmed());
-
-   //printf("pre.l: md->setFileDef(%p)\n",g_inputFileDef);
+ 
    md->setFileDef(g_inputFileDef);
    md->setDefinition("#define " + g_defName);
 
@@ -3835,8 +3835,9 @@ void addDefine()
    }
 
    mn->append(md);
+
    if (g_yyFileDef) {
-      g_yyFileDef->insertMember(md);
+      g_yyFileDef->insertMember(md.data());
    }
 }
 

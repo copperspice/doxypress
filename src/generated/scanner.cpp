@@ -22086,17 +22086,13 @@ static void parseMain(const char *fileName, const char *fileBuf, Entry *rt,
       groupLeaveFile(yyFileName, yyLineNr);
       rt->program.resize(0);
  
-
-/*    ** BROOM 
-
-      if (rt->children().contains(current) == 0)
+      if (rt->children().contains(current) == 0)  {
          // it could be that current is already added as a child to rt, so we
          // only delete it if this is not the case. See bug 635317.
-      {
+      
          delete current;
          current = 0;
       }
-*/
 
       parseCompounds(rt);
       inputFile.close();

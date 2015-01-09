@@ -6814,27 +6814,28 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, Definition *ctx
 
    s_fileName = fileName;
    s_relPath = (!linkFromIndex && ctx) ? QByteArray(relativePathToRoot(ctx->getOutputFileBase())) : QByteArray("");
-
-   //printf("ctx->name=%s relPath=%s\n",ctx->name().data(),s_relPath.data());
+  
    s_memberDef = md;
    s_nodeStack.clear();
    s_styleStack.clear();
    s_initialStyleStack.clear();
-   s_inSeeBlock = false;
-   s_xmlComment = false;
-   s_insideHtmlLink = false;
-   s_includeFileText = "";
+
+   s_inSeeBlock        = false;
+   s_xmlComment        = false;
+   s_insideHtmlLink    = false;
+   s_includeFileText   = "";
    s_includeFileOffset = 0;
    s_includeFileLength = 0;
-   s_isExample = isExample;
+
+   s_isExample   = isExample;
    s_exampleName = exampleName;
-   s_hasParamCommand = false;
+
+   s_hasParamCommand  = false;
    s_hasReturnCommand = false;
    
    s_paramsFound.clear();
    s_sectionDict = 0; //sections;
 
-   //printf("Starting comment block at %s:%d\n",s_fileName.data(),startLine);
    doctokenizerYYlineno = startLine;
    uint inpLen = qstrlen(input);
 
@@ -6842,7 +6843,7 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, Definition *ctx
    if (inpStr.isEmpty() || inpStr.at(inpStr.length() - 1) != '\n') {
       inpStr += '\n';
    }
-   //printf("processCopyDoc(in='%s' out='%s')\n",input,inpStr.data());
+  
    doctokenizerYYinit(inpStr, s_fileName);
 
    // build abstract syntax tree

@@ -50,7 +50,7 @@ Entry::Entry()
 
    groupDocType = GROUPDOC_NORMAL;
 
-   reset();
+   reset();  
 }
 
 Entry::Entry(const Entry &e)
@@ -153,7 +153,6 @@ Entry::Entry(const Entry &e)
    if (e.tArgLists) {
       tArgLists = copyArgumentLists(e.tArgLists);
    }
-
 }
 
 Entry::~Entry()
@@ -200,6 +199,7 @@ void Entry::reset()
    inside.resize(0);
    fileName.resize(0);
    initializer.resize(0);
+
    initLines = -1;
    startLine = 1;
    startColumn = 1;

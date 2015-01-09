@@ -3545,7 +3545,7 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("SHORT_NAMES", "",false);
   cs = cfg->addString("JAVADOC_AUTOBRIEF", "");
   cb = cfg->addBool("QT_AUTOBRIEF", "", false);
-  cs = cfg->addString("MULTILINE_CPP_IS_BRIEF", "");
+  cb = cfg->addBool("MULTILINE_CPP_IS_BRIEF", "",false);
   cb = cfg->addBool("INHERIT_DOCS", "", true);
   cb = cfg->addBool("SEPARATE_MEMBER_PAGES", "", false);
   ci = cfg->addInt("TAB_SIZE", "",0,16,4);
@@ -3582,7 +3582,7 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("SHOW_INCLUDE_FILES", "", false);
   cs = cfg->addString("SHOW_GROUPED_MEMB_INC", "");
   cb = cfg->addBool("FORCE_LOCAL_INCLUDES", "", false);
-  cs = cfg->addString("INLINE_INFO", "");
+  cb = cfg->addBool("INLINE_INFO", "", false);
   cs = cfg->addString("SORT_MEMBER_DOCS", "");
   cs = cfg->addString("SORT_BRIEF_DOCS", "");
   cs = cfg->addString("SORT_MEMBERS_CTORS_1ST", "");
@@ -3704,7 +3704,7 @@ void addConfigOptions(Config *cfg)
   cs = cfg->addString("USE_PDFLATEX", "");
   cs = cfg->addString("LATEX_BATCHMODE", "");
   cb = cfg->addBool("LATEX_HIDE_INDICES", "",false);
-  cs = cfg->addString("LATEX_SOURCE_CODE", "");
+  cb = cfg->addBool("LATEX_SOURCE_CODE", "", false);
   cs = cfg->addString("LATEX_BIB_STYLE", "");
   cb = cfg->addBool("GENERATE_RTF", "", false);
   cs = cfg->addString("RTF_OUTPUT", "");

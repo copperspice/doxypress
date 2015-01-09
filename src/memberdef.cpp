@@ -994,36 +994,49 @@ QByteArray MemberDef::getOutputFileBase() const
    //    name().data(),m_impl->templateMaster,m_impl->group,m_impl->classDef,
    //    m_impl->nspace,m_impl->fileDef);
 
-   if (!m_impl->explicitOutputFileBase.isEmpty()) {
+   if (! m_impl->explicitOutputFileBase.isEmpty()) {
       return m_impl->explicitOutputFileBase;
+
    } else if (m_impl->templateMaster) {
       return m_impl->templateMaster->getOutputFileBase();
+
    } else if (m_impl->group) {
       baseName = m_impl->group->getOutputFileBase();
+
    } else if (m_impl->classDef) {
+
+printf("\n\n BROOM  getOutput  x1.5  ");
+
       baseName = m_impl->classDef->getOutputFileBase();
+
       if (inlineSimpleClasses && m_impl->classDef->isSimple()) {
          return baseName;
       }
+
    } else if (m_impl->nspace) {
       baseName = m_impl->nspace->getOutputFileBase();
+
    } else if (m_impl->fileDef) {
       baseName = m_impl->fileDef->getOutputFileBase();
+
    }
 
    if (baseName.isEmpty()) {
       warn(getDefFileName(), getDefLine(),
-           "Internal inconsistency: member %s does not belong to any"
-           " container!", qPrint(name())
-          );
+           "Internal inconsistency: member %s does not belong to any container", qPrint(name()) );
+
       return "dummy";
+
    } else if (separateMemberPages && isDetailedSectionLinkable()) {
-      if (getEnumScope()) { // enum value, which is part of enum's documentation
+      if (getEnumScope()) { 
+         // enum value, which is part of enum's documentation
          baseName += "_" + getEnumScope()->anchor();
+
       } else {
          baseName += "_" + anchor();
       }
    }
+
    return baseName;
 }
 

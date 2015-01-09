@@ -1032,26 +1032,7 @@ goto find_rule; \
 #define YY_RESTORE_YY_MORE_OFFSET
 char *commentcnvYYtext;
 
-/*****************************************************************************
- *
- *
- *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
- *
- * Permission to use, copy, modify, and distribute this software and its
- * documentation under the terms of the GNU General Public License is hereby
- * granted. No representations are made about the suitability of this software
- * for any purpose. It is provided "as is" without express or implied warranty.
- * See the GNU General Public License for more details.
- *
- * Documents produced by Doxygen are derivative works derived from the
- * input used in their production; they are not affected by this license.
- *
- */
-
-
 #define YY_NEVER_INTERACTIVE 1
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1062,7 +1043,7 @@ char *commentcnvYYtext;
 #include <qglobal.h>
 
 #include "bufstr.h"
-#include "debug.h"
+
 #include "message.h"
 #include "config.h"
 #include "doxygen.h"
@@ -1078,7 +1059,9 @@ char *commentcnvYYtext;
 
 struct CondCtx {
    CondCtx(int line, QByteArray id, bool b)
-      : lineNr(line), sectionId(id), skip(b) {}
+      : lineNr(line), sectionId(id), skip(b) 
+   {}
+
    int lineNr;
    QByteArray sectionId;
    bool skip;
@@ -1086,7 +1069,9 @@ struct CondCtx {
 
 struct CommentCtx {
    CommentCtx(int line)
-      : lineNr(line) {}
+      : lineNr(line) 
+   {}
+
    int lineNr;
 };
 
@@ -1101,9 +1086,11 @@ static bool     g_skip;
 static QByteArray g_fileName;
 static int      g_lineNr;
 static int      g_condCtx;
-static QStack<CondCtx> g_condStack;
-static QStack<CommentCtx> g_commentStack;
-static QByteArray g_blockName;
+
+static QStack<CondCtx *>     g_condStack;
+static QStack<CommentCtx *>  g_commentStack;
+static QByteArray            g_blockName;
+
 static int      g_lastCommentContext;
 static bool     g_inSpecialComment;
 static bool     g_inRoseComment;
@@ -1238,7 +1225,6 @@ static void endCondSection()
 static void replaceAliases(const char *s)
 {
    QByteArray result = resolveAliasCmd(s);
-   //printf("replaceAliases(%s)->'%s'\n",s,result.data());
    copyToOutput(result, result.length());
 }
 
@@ -1249,24 +1235,13 @@ static void replaceAliases(const char *s)
 static int yyread(char *buf, int max_size)
 {
    int bytesInBuf = g_inBuf->curPos() - g_inBufPos;
-   int bytesToCopy = QMIN(max_size, bytesInBuf);
+   int bytesToCopy = qMin(max_size, bytesInBuf);
    memcpy(buf, g_inBuf->data() + g_inBufPos, bytesToCopy);
    g_inBufPos += bytesToCopy;
    return bytesToCopy;
 }
 
 void replaceComment(int offset);
-
-
-
-
-
-
-
-
-
-
-
 
 
 #define INITIAL 0
@@ -1465,10 +1440,6 @@ YY_DECL {
    register yy_state_type yy_current_state;
    register char *yy_cp, *yy_bp;
    register int yy_act;
-
-
-
-
 
 
    if ( !(yy_init) )
@@ -1710,10 +1681,9 @@ YY_DECL {
             {
                copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
                g_charContext = YY_START;
-               if (g_lang != SrcLangExt_VHDL)
-               {
-                  BEGIN(SkipChar);
-               }
+               
+               BEGIN(SkipChar);
+               
             }
             YY_BREAK
          case 10:
@@ -1830,19 +1800,10 @@ YY_DECL {
          case 18:
             YY_RULE_SETUP
 
-            {
-               if (g_lang != SrcLangExt_VHDL)
-               {
-                  REJECT;
-               } else
-               {
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
-                  g_nestingCount = 0;
-                  g_commentStack.clear(); /*  to be on the save side */
-                  BEGIN(CComment);
-                  g_commentStack.push(new CommentCtx(g_lineNr));
-               }
+            {              
+               REJECT;              
             }
+
             YY_BREAK
          case 19:
             YY_RULE_SETUP
@@ -1905,10 +1866,10 @@ YY_DECL {
                g_blockName = &commentcnvYYtext[1];
                if (g_blockName.at(1) == '[')
                {
-                  g_blockName.at(1) = ']';
+                  g_blockName[1] = ']';
                } else if (g_blockName.at(1) == '{')
                {
-                  g_blockName.at(1) = '}';
+                  g_blockName[1] = '}';
                }
                g_lastCommentContext = YY_START;
                BEGIN(Verbatim);
@@ -2218,16 +2179,11 @@ YY_DECL {
             YY_DO_BEFORE_ACTION; /* set up commentcnvYYtext again */
             YY_RULE_SETUP
 
-            { /* end of VHDL comment */
-               if (g_lang != SrcLangExt_VHDL)
-               {
-                  REJECT;
-               } else
-               {
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
-                  BEGIN(Scan);
-               }
+            {            
+                  REJECT;               
             }
+
+
             YY_BREAK
          /* removed for bug 674842 (bug was introduced in rev 768)
          <CComment>"'"			   {
@@ -2413,9 +2369,7 @@ YY_DECL {
                if (YY_START == CComment && oldSkip && !g_skip)
                {
                   //printf("** Adding start of comment!\n");
-                  if (g_lang != SrcLangExt_Python &&
-                  g_lang != SrcLangExt_VHDL &&
-                  g_lang != SrcLangExt_Fortran) {
+                  if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Fortran) {
                      ADDCHAR('/');
                      ADDCHAR('*');
                      if (g_specialComment) {
@@ -2434,9 +2388,7 @@ YY_DECL {
                if ((g_condCtx == CComment || g_readLineCtx == SComment) &&
                !oldSkip && g_skip)
                {
-                  if (g_lang != SrcLangExt_Python &&
-                  g_lang != SrcLangExt_VHDL &&
-                  g_lang != SrcLangExt_Fortran) {
+                  if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Fortran) {
                      ADDCHAR('*');
                      ADDCHAR('/');
                   }
@@ -2473,12 +2425,11 @@ YY_DECL {
                }
                bool oldSkip = g_skip;
                startCondSection(" "); // fake section id causing the section to be hidden unconditionally
-               if ((g_condCtx == CComment || g_readLineCtx == SComment) &&
-               !oldSkip && g_skip)
+               if ((g_condCtx == CComment || g_readLineCtx == SComment) && ! oldSkip && g_skip)
+
                {
                   //printf("** Adding terminator for comment!\n");
-                  if (g_lang != SrcLangExt_Python &&
-                  g_lang != SrcLangExt_VHDL) {
+                  if (g_lang != SrcLangExt_Python ) {
                      ADDCHAR('*');
                      ADDCHAR('/');
                   }
@@ -2498,7 +2449,6 @@ YY_DECL {
             YY_BREAK
          case 72:
             YY_RULE_SETUP
-
             {
                // expand alias without arguments
                replaceAliases(commentcnvYYtext);
@@ -3704,7 +3654,9 @@ void convertCppComments(BufStr *inBuf, BufStr *outBuf, const char *fileName)
    g_outBuf   = outBuf;
    g_inBufPos = 0;
    g_col      = 0;
+
    g_mlBrief = Config_getBool("MULTILINE_CPP_IS_BRIEF");
+
    g_skip     = FALSE;
    g_fileName = fileName;
    g_lang = getLanguageFromFileName(fileName);
@@ -3715,6 +3667,7 @@ void convertCppComments(BufStr *inBuf, BufStr *outBuf, const char *fileName)
 
    printlex(commentcnvYY_flex_debug, TRUE, __FILE__, fileName);
    isFixedForm = FALSE;
+
    if (g_lang == SrcLangExt_Fortran) {
       isFixedForm = recognizeFixedForm(inBuf->data());
    }
@@ -3723,40 +3676,52 @@ void convertCppComments(BufStr *inBuf, BufStr *outBuf, const char *fileName)
       g_nestingCount = 0;
       BEGIN(CComment);
       g_commentStack.push(new CommentCtx(g_lineNr));
+
    } else {
       BEGIN(Scan);
    }
+
    commentcnvYYlex();
+
    while (!g_condStack.isEmpty()) {
       CondCtx *ctx = g_condStack.pop();
       QByteArray sectionInfo = " ";
+
       if (ctx->sectionId != " ") {
-         sectionInfo.sprintf(" with label %s ", ctx->sectionId.data());
+         sectionInfo = QString(" with label %1 ").arg(ctx->sectionId.constData()).toUtf8();
       }
-      warn(g_fileName, ctx->lineNr, "Conditional section%sdoes not have "
-           "a corresponding \\endcond command within this file.", sectionInfo.data());
+
+      warn(g_fileName, ctx->lineNr, "Conditional section %s does not have "
+           "a corresponding \\endcond command", sectionInfo.constData());
    }
+
    if (g_nestingCount > 0 || (YY_START == CComment && g_lang != SrcLangExt_Markdown)) {
       QByteArray tmp = "(probable line reference: ";
+
       bool first = TRUE;
+
       while (!g_commentStack.isEmpty()) {
          CommentCtx *ctx = g_commentStack.pop();
          if (!first) {
             tmp += ", ";
          }
+
          tmp += QByteArray().setNum(ctx->lineNr);
          first = FALSE;
          delete ctx;
       }
+
       tmp += ")";
       warn(g_fileName, g_lineNr, "Reached end of file while still inside a (nested) comment. "
            "Nesting level %d %s", g_nestingCount + 1, tmp.data()); // add one for "normal" expected end of comment
    }
+
    g_commentStack.clear();
    if (Debug::isFlagSet(Debug::CommentCnv)) {
       g_outBuf->at(g_outBuf->curPos()) = '\0';
       msg("-------------\n%s\n-------------\n", g_outBuf->data());
    }
+
    printlex(commentcnvYY_flex_debug, FALSE, __FILE__, fileName);
 }
 

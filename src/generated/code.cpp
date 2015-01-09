@@ -11310,11 +11310,11 @@ static MemberDef *setCallContextForVar(const QByteArray &name)
       //printf("global var `%s'\n",name.data());
 
       if (mn->count() == 1) { // global defined only once
-         MemberDef *md = mn->first();
+         QSharedPointer<MemberDef> md( mn->first());
 
          if (! md->isStatic() || md->getBodyDef() == g_sourceFileDef) {
             g_theCallContext.setScope(stripClassName(md->typeString(), dummyShared(md->getOuterScope()) ));
-            return md;
+            return md.data();
          }
 
          return 0;
@@ -11332,7 +11332,7 @@ static MemberDef *setCallContextForVar(const QByteArray &name)
 
                g_theCallContext.setScope(stripClassName(md->typeString(), dummyShared(md->getOuterScope()) ));
                
-               return md;
+               return md.data();
             }
          }
 
@@ -12116,9 +12116,11 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                         //    mn==0?-1:(int)mn->count(),
                         //    ictx->method->name().data(),
                         //    ctx->methodName.data());
+
                         if (mn && mn->count() == 1) { // member name unique
-                           ctx->method = mn->first();
+                           ctx->method = mn->first().data();
                         }
+
                      } else {
                         ctx->objectType = stripClassName(ictx->method->typeString());
                         if (ctx->objectType) {

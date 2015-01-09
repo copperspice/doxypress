@@ -24,7 +24,7 @@
 #include <stringmap.h>
 
 /** Class representing all MemberDef objects with the same name */
-class MemberName : public QList<MemberDef *>
+class MemberName : public QList<QSharedPointer<MemberDef>>
 {
  public:
    MemberName(const char *name);
@@ -40,7 +40,7 @@ class MemberName : public QList<MemberDef *>
 };
 
 /** Iterator for MemberDef objects in a MemberName list. */
-class MemberNameIterator : public QListIterator<MemberDef *>
+class MemberNameIterator : public QListIterator<QSharedPointer<MemberDef>>
 {
  public:
    MemberNameIterator( const MemberName &list);

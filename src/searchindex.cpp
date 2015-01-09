@@ -823,7 +823,7 @@ class SearchIndexCategoryMapping
 
 void writeJavascriptSearchIndex()
 {
-   if (!Config_getBool("GENERATE_HTML")) {
+   if (! Config_getBool("GENERATE_HTML")) {
       return;
    }
 
@@ -877,7 +877,7 @@ void writeJavascriptSearchIndex()
         
          // for each member definition
          for (auto md : *mn) {  
-            addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md);
+            addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md.data());
          }
       }
    }
@@ -889,7 +889,7 @@ void writeJavascriptSearchIndex()
 
          // for each member definition         
          for (auto md : *mn) { 
-            addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md);
+            addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md.data());
          }
       }
    }

@@ -5264,6 +5264,7 @@ YY_DECL {
             {
                // second argument; include file
                current->includeFile = commentscanYYtext;
+
                BEGIN( ClassDocArg3 );
             }
             YY_BREAK
@@ -5342,9 +5343,11 @@ YY_DECL {
             {
                // group name
                current->name = commentscanYYtext;
+
                //lastDefGroup.groupname = commentscanYYtext;
                //lastDefGroup.pri = current->groupingPri();
                // the .html stuff is for Qt compatibility
+
                if (current->name.right(5) == ".html")
                {
                   current->name = current->name.left(current->name.length() - 5);
@@ -7623,7 +7626,6 @@ static void yy_fatal_error (yyconst char *msg )
 }
 
 /* Redefine yyless() so it works in section 3 code. */
-
 #undef yyless
 #define yyless(n) \
 	do \

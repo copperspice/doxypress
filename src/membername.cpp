@@ -20,7 +20,7 @@
 #include <util.h>
 #include <filedef.h>
 
-MemberName::MemberName(const char *n) : QList<MemberDef *>()
+MemberName::MemberName(const char *n) : QList<QSharedPointer<MemberDef>>()
 {
    name = n;
 }
@@ -72,7 +72,7 @@ int MemberNameInfo::compareValues(const MemberInfo *m1, const MemberInfo *m2) co
 }
 
 MemberNameIterator::MemberNameIterator(const MemberName &mnlist) 
-   : QListIterator<MemberDef *>(mnlist)
+   : QListIterator<QSharedPointer<MemberDef>>(mnlist)
 {
 }
 

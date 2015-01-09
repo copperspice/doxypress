@@ -601,12 +601,6 @@ static void generateDocbookForMember(MemberDef *md, FTextStream &t, Definition *
             int cnt = 0;
             ArgumentListIterator defAli(*defAl);
 
-/*          BROOM
-            ArgumentListIterator declAli(*declAl);            
-            Argument *a;           
-            for (declAli.toFirst(); (a = declAli.current()); ++declAli) {
-*/
-
             for (auto a : *ali) {
                if (cnt != 0) {
                   t << ", ";

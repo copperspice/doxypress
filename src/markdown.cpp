@@ -2387,9 +2387,6 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, E
    bool needsEntry = false;
    Protection prot = Public;
 
-// BROOM 
-
-/*
    while (parseCommentBlock(this, current, docs, fileName,lineNr,
              false,     // isBrief
              false,     // javadoc autobrief
@@ -2407,8 +2404,6 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, E
          current->docLine = lineNr;
       }
    }
-
-*/
 
    if (needsEntry) {
       root->addSubEntry(current);

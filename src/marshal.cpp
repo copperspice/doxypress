@@ -68,6 +68,7 @@ void marshalQByteArray(StorageIntf *s, const QByteArray &str)
 {
    uint l = str.length();
    marshalUInt(s, l);
+
    if (l > 0) {
       s->write(str.data(), l);
    }
@@ -108,6 +109,7 @@ void marshalBaseInfoList(StorageIntf *s, QList<BaseInfo> *baseList)
 {
    if (baseList == 0) {
       marshalUInt(s, NULL_LIST); 
+
    } else {
       marshalUInt(s, baseList->count());
       
@@ -407,7 +409,6 @@ uint unmarshalUInt(StorageIntf *s)
    s->read((char *)b, 4);
    uint result = (((uint)b[0]) << 24) + ((uint)b[1] << 16) + ((uint)b[2] << 8) + (uint)b[3];
 
-   //printf("unmarshalUInt: %x %x %x %x: %x offset=%llx\n",b[0],b[1],b[2],b[3],result,f.pos());
    return result;
 }
 
@@ -431,10 +432,8 @@ QByteArray unmarshalQByteArray(StorageIntf *s)
    uint len = unmarshalUInt(s);
 
    QByteArray result;
-
-   result.resize(len + 1);
-   result[len] = '\0';
-  
+   result.resize(len);
+    
    if (len > 0) {
       s->read(result.data(), len);
    }
@@ -446,10 +445,8 @@ QString unmarshalQString(StorageIntf *s)
 {
    uint len = unmarshalUInt(s);
 
-   QByteArray result;
-  
-   result.resize(len + 1);
-   result[len] = '\0';
+   QByteArray result;  
+   result.resize(len);   
 
    if (len > 0) {
       s->read(result.data(), len);
@@ -512,7 +509,7 @@ QList<Grouping> *unmarshalGroupingList(StorageIntf *s)
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return 0;   // null list
+      return 0; 
    }
 
    QList<Grouping> *result = new QList<Grouping>;
@@ -583,6 +580,7 @@ void *unmarshalObjPointer(StorageIntf *s)
 {
    void *result;
    s->read((char *)&result, sizeof(void *));
+
    return result;
 }
 
@@ -612,14 +610,12 @@ MemberSDict *unmarshalMemberSDict(StorageIntf *s)
    uint i;
    uint count = unmarshalUInt(s);
  
-   if (count == NULL_LIST) {
-      //printf("--- end unmarshalMemberSDict\n");
+   if (count == NULL_LIST) {      
       return 0; 
    }
    MemberSDict *result = new MemberSDict;
    assert(count < 1000000);
 
-   //printf("Reading %d key-value pairs\n",count);
    for (i = 0; i < count; i++) {
       
       QByteArray key    = unmarshalQByteArray(s);          
@@ -628,7 +624,6 @@ MemberSDict *unmarshalMemberSDict(StorageIntf *s)
       result->insert(key, md);
    }
 
-   //printf("--- end unmarshalMemberSDict\n");
    return result;
 }
 
@@ -638,10 +633,12 @@ DocInfo *unmarshalDocInfo(StorageIntf *s)
    if (count == NULL_LIST) {
       return 0;
    }
+
    DocInfo *result = new DocInfo;
    result->doc  = unmarshalQByteArray(s);
    result->line = unmarshalInt(s);
    result->file = unmarshalQByteArray(s);
+
    return result;
 }
 
@@ -651,6 +648,7 @@ BriefInfo *unmarshalBriefInfo(StorageIntf *s)
    if (count == NULL_LIST) {
       return 0;
    }
+
    BriefInfo *result = new BriefInfo;
    result->doc     = unmarshalQByteArray(s);
    result->tooltip = unmarshalQByteArray(s);
@@ -665,10 +663,12 @@ BodyInfo *unmarshalBodyInfo(StorageIntf *s)
    if (count == NULL_LIST) {
       return 0;
    }
+
    BodyInfo *result = new BodyInfo;
    result->startLine = unmarshalInt(s);
    result->endLine   = unmarshalInt(s);
    result->fileDef   = (FileDef *)unmarshalObjPointer(s);
+
    return result;
 }
 

@@ -2925,11 +2925,11 @@ void ClassDef::mergeCategory(ClassDef *category)
                Protection prot = mi.prot;
 
                // deepCopy() is in memberDef.cpp                 
-               MemberDef *newMd = mi.memberDef->deepCopy();
+               QSharedPointer<MemberDef> newMd(mi.memberDef->deepCopy());
                
                newMd->moveTo(this);
 
-               MemberInfo newMi = MemberInfo(newMd, prot, mi.virt, mi.inherited);
+               MemberInfo newMi = MemberInfo(newMd.data(), prot, mi.virt, mi.inherited);
 
                newMi.scopePath  = mi.scopePath;
                newMi.ambigClass = mi.ambigClass;
@@ -2955,13 +2955,13 @@ void ClassDef::mergeCategory(ClassDef *category)
 
                newMd->setCategory(category);
                newMd->setCategoryRelation(mi.memberDef);
-               mi.memberDef->setCategoryRelation(newMd);
+               mi.memberDef->setCategoryRelation(newMd.data());
 
                if (makePrivate || isExtension) {
                   newMd->makeImplementationDetail();
                }
 
-               internalInsertMember(newMd, prot, false);
+               internalInsertMember(newMd.data(), prot, false);
             }
 
             // add it to the dictionary
@@ -3137,27 +3137,43 @@ QByteArray ClassDef::getOutputFileBase() const
 
       } else if (inlineSimpleClasses && m_impl->isSimple && (scope = getOuterScope())) {
 
-         if (scope == Doxygen::globalScope && getFileDef() && getFileDef()->isLinkableInProject()) { // simple struct embedded in file
+         if (scope == Doxygen::globalScope && getFileDef() && getFileDef()->isLinkableInProject()) { 
+            // simple struct embedded in file
             return getFileDef()->getOutputFileBase();
 
-         } else if (scope->isLinkableInProject()) { // simple struct embedded in other container (namespace/group/class)
+         } else if (scope->isLinkableInProject()) {       
+            // simple struct embedded in other container (namespace/group/class)
             return getOuterScope()->getOutputFileBase();
          }
       }
    }
 
+
+printf("\n\n BROOM    get Name   A1  ");
+
    if (m_impl->templateMaster) {
+
+printf("\n\n BROOM    get Name   A2  ");
+
       // point to the template of which this class is an instance
       return m_impl->templateMaster->getOutputFileBase();
 
    } else if (isReference()) {
+
+printf("\n\n BROOM    get Name   A3  ");
+
       // point to the external location
       return m_impl->fileName;
 
    } else {
+
+printf("\n\n BROOM    get Name   A4  ");
+
       // normal locally defined class
       return convertNameToFile(m_impl->fileName).toUtf8();
    }
+
+
 }
 
 QString ClassDef::getInstanceOutputFileBase() const
@@ -3333,7 +3349,7 @@ void ClassDef::addMembersToTemplateInstance(ClassDef *cd, const char *templSpec)
 
          MemberDef *md = mi.memberDef;
 
-         MemberDef *imd = md->createTemplateInstanceMember(cd->templateArguments(), actualArguments);
+         QSharedPointer<MemberDef> imd(md->createTemplateInstanceMember(cd->templateArguments(), actualArguments));
          delete actualArguments;
 
          //printf("%s->setMemberClass(%p)\n",imd->name().data(),this);
@@ -3345,7 +3361,7 @@ void ClassDef::addMembersToTemplateInstance(ClassDef *cd, const char *templSpec)
          imd->setMemberSpecifiers(md->getMemberSpecifiers());
          imd->setMemberGroupId(md->getMemberGroupId());
 
-         insertMember(imd);
+         insertMember(imd.data());
         
          QSharedPointer<MemberName> mn = Doxygen::memberNameSDict->find(imd->name());
 

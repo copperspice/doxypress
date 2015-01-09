@@ -272,7 +272,7 @@ QByteArray stripAnonymousNamespaceScope(const QByteArray &s)
       if (Doxygen::namespaceSDict->find(s.left(i + l)) != 0) {
 
          if (s.at(i) != '@') {
-            if (!newScope.isEmpty()) {
+            if (! newScope.isEmpty()) {
                newScope += "::";
             }
             newScope += s.mid(i, l);
@@ -282,6 +282,7 @@ QByteArray stripAnonymousNamespaceScope(const QByteArray &s)
          if (!newScope.isEmpty()) {
             newScope += "::";
          }
+
          newScope += s.right(sl - i);
          break;
       }
@@ -432,7 +433,7 @@ QByteArray resolveTypeDef(Definition *context, const QByteArray &qualifiedName, 
       }
    }
 
-   MemberDef *md = 0;
+   QSharedPointer<MemberDef> md;
 
    while (mContext && md == 0) {
       // step 1: get the right scope
@@ -482,7 +483,7 @@ QByteArray resolveTypeDef(Definition *context, const QByteArray &qualifiedName, 
             for (auto tmd : *mn) {   
 
                if (tmd->isTypedef()) {
-                  int dist = isAccessibleFrom(resScope, 0, tmd);
+                  int dist = isAccessibleFrom(resScope, 0, tmd.data());
 
                   if (dist != -1 && (md == 0 || dist < minDist)) {
                      md = tmd;
@@ -1363,13 +1364,8 @@ static void getResolvedSymbol(Definition *scope, FileDef *fileScope, Definition 
  * match against the input name. Can recursively call itself when
  * resolving typedefs.
  */
-static ClassDef *getResolvedClassRec(Definition *scope,
-                                     FileDef *fileScope,
-                                     const char *n,
-                                     MemberDef **pTypeDef,
-                                     QByteArray *pTemplSpec,
-                                     QByteArray *pResolvedType
-                                    )
+static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, const char *n, MemberDef **pTypeDef,
+                                     QByteArray *pTemplSpec, QByteArray *pResolvedType )
 {
    QByteArray name;
    QByteArray explicitScopePart;
@@ -1386,8 +1382,8 @@ static ClassDef *getResolvedClassRec(Definition *scope,
 
    int qualifierIndex = computeQualifiedIndex(name);
    
-   if (qualifierIndex != -1) { // qualified name
-      // split off the explicit scope part
+   if (qualifierIndex != -1) { 
+      // qualified name, split off the explicit scope part
       explicitScopePart = name.left(qualifierIndex);
 
       // todo: improve namespace alias substitution
@@ -1395,9 +1391,8 @@ static ClassDef *getResolvedClassRec(Definition *scope,
       name = name.mid(qualifierIndex + 2);
    }
 
-   if (name.isEmpty()) {
-     
-      return 0; // empty name
+   if (name.isEmpty()) {     
+      return 0; 
    }
 
    DefinitionIntf *di = Doxygen::symbolMap->value(name);
@@ -1585,7 +1580,8 @@ ClassDef *getResolvedClass(Definition *scope, FileDef *fileScope, const char *n,
 static bool findOperator(const QByteArray &s, int i)
 {
    int b = s.lastIndexOf("operator", i);
-   if (b == -1) {
+ 
+  if (b == -1) {
       return false;   // not found
    }
 
@@ -1595,7 +1591,7 @@ static bool findOperator(const QByteArray &s, int i)
       // check if there are only spaces in between
       // the operator and the >
    
-      if (!isspace((uchar)s.at(b))) {
+      if (! isspace((uchar)s.at(b))) {
          return false;
       }
 
@@ -1630,7 +1626,7 @@ static const char virtualScope[] = { 'v', 'i', 'r', 't', 'u', 'a', 'l', ':' };
 QByteArray removeRedundantWhiteSpace(const QByteArray &s)
 {
    static bool cliSupport = Config_getBool("CPP_CLI_SUPPORT");
-   
+  
    if (s.isEmpty()) {
       return s;
    }
@@ -1643,7 +1639,9 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
    uint csp = 0;
    uint vsp = 0;
    char c;
+
    for (i = 0; i < l; i++) {
+
    nextChar:
       c = s.at(i);
 
@@ -1651,10 +1649,9 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
       if (csp < 6 && c == constScope[csp] && // character matches substring "const"
             (csp > 0 ||                   // if it is the first character
              i == 0  ||                   // the previous may not be a digit
-             !isId(s.at(i - 1))
-            )
-         ) {
+             !isId(s.at(i - 1))) ) {
          csp++;
+
       } else { // reset counter
          csp = 0;
       }
@@ -1663,137 +1660,148 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
       if (vsp < 8 && c == virtualScope[vsp] && // character matches substring "virtual"
             (vsp > 0 ||                     // if it is the first character
              i == 0  ||                     // the previous may not be a digit
-             !isId(s.at(i - 1))
-            )
-         ) {
+             !isId(s.at(i - 1)) ) ) {
          vsp++;
+
       } else { // reset counter
          vsp = 0;
       }
 
-      if (c == '"') { // quoted string
+      if (c == '"') { 
+         // quoted string
          i++;
+
          growBuf.addChar(c);
+
          while (i < l) {
             char cc = s.at(i);
             growBuf.addChar(cc);
+
             if (cc == '\\') { // escaped character
                growBuf.addChar(s.at(i + 1));
                i += 2;
+
             } else if (cc == '"') { // end of string
                i++;
+
                goto nextChar;
+
             } else { // any other character
                i++;
+
             }
-         }
-      } else if (i < l - 2 && c == '<' && // current char is a <
-                 (isId(s.at(i + 1)) || isspace((uchar)s.at(i + 1))) && // next char is an id char or space
-                 (i < 8 || !findOperator(s, i)) // string in front is not "operator"
-                ) {
+        }
+
+      } else if (i < l - 2 && c == '<' && 
+                 (isId(s.at(i + 1)) || isspace((uchar)s.at(i + 1))) && (i < 8 || !findOperator(s, i)) ) {
+
+         // string in front is not "operator"
          growBuf.addChar('<');
          growBuf.addChar(' ');
-      } else if (i > 0 && c == '>' && // current char is a >
-                 (isId(s.at(i - 1)) || isspace((uchar)s.at(i - 1)) || s.at(i - 1) == '*' || s.at(i - 1) == '&') && // prev char is an id char or space
-                 (i < 8 || !findOperator(s, i)) // string in front is not "operator"
-                ) {
+
+      } else if (i > 0 && c == '>' && 
+                 (isId(s.at(i - 1)) || isspace((uchar)s.at(i - 1)) || s.at(i - 1) == '*' || s.at(i - 1) == '&') &&          
+                 (i < 8 || !findOperator(s, i)) ) {
+
+          // prev char is an id char or space
          growBuf.addChar(' ');
          growBuf.addChar('>');
-      } else if (i > 0 && c == ',' && !isspace((uchar)s.at(i - 1))
-                 && ((i < l - 1 && (isId(s.at(i + 1)) || s.at(i + 1) == '[')) // the [ is for attributes (see bug702170)
-                     || (i < l - 2 && s.at(i + 1) == '$' && isId(s.at(i + 2))) // for PHP
-                     || (i < l - 3 && s.at(i + 1) == '&' && s.at(i + 2) == '$' && isId(s.at(i + 3))))) { // for PHP
+
+      } else if (i > 0 && c == ',' && ! isspace((uchar)s.at(i - 1))
+                 && ((i < l - 1 && (isId(s.at(i + 1)) || s.at(i + 1) == '[')) 
+                     || (i < l - 2 && s.at(i + 1) == '$' && isId(s.at(i + 2))) 
+                     || (i < l - 3 && s.at(i + 1) == '&' && s.at(i + 2) == '$' && isId(s.at(i + 3))))) { 
+
+         // for PHP
          growBuf.addChar(',');
          growBuf.addChar(' ');
-      } else if (i > 0 &&
-                 (
-                    (s.at(i - 1) == ')' && isId(c))
-                    ||
-                    (c == '\''  && s.at(i - 1) == ' ')
-                 )
-                ) {
+
+      } else if (i > 0 && ( (s.at(i - 1) == ')' && isId(c)) || (c == '\''  && s.at(i - 1) == ' ')) ) {
          growBuf.addChar(' ');
          growBuf.addChar(c);
-      } else if (c == 't' && csp == 5 /*&& (i<5 || !isId(s.at(i-5)))*/ &&
-                 !(isId(s.at(i + 1)) /*|| s.at(i+1)==' '*/ ||
-                   s.at(i + 1) == ')' ||
-                   s.at(i + 1) == ',' ||
-                   s.at(i + 1) == '\0'
-                  )
-                )
+
+      } else if (c == 't' && csp == 5  &&  i < l -1  &&  ! (isId(s.at(i + 1)) ||
+                   s.at(i + 1) == ')' || s.at(i + 1) == ',' ) )  {
          // prevent const ::A from being converted to const::A
-      {
+      
          growBuf.addChar('t');
          growBuf.addChar(' ');
+
          if (s.at(i + 1) == ' ') {
             i++;
          }
+
          csp = 0;
-      } else if (c == ':' && csp == 6 /*&& (i<6 || !isId(s.at(i-6)))*/)
+
+      } else if (c == ':' && csp == 6)  {
          // replace const::A by const ::A
-      {
+      
          growBuf.addChar(' ');
          growBuf.addChar(':');
          csp = 0;
-      } else if (c == 'l' && vsp == 7 /*&& (i<7 || !isId(s.at(i-7)))*/ &&
-                 !(isId(s.at(i + 1)) /*|| s.at(i+1)==' '*/ ||
-                   s.at(i + 1) == ')' ||
-                   s.at(i + 1) == ',' ||
-                   s.at(i + 1) == '\0'
-                  )
-                )
+
+      } else if (c == 'l' && vsp == 7 && i < l -1 && 
+                     !(isId(s.at(i + 1)) || s.at(i + 1) == ')' || s.at(i + 1) == ',')  ) {
+
          // prevent virtual ::A from being converted to virtual::A
-      {
+      
          growBuf.addChar('l');
          growBuf.addChar(' ');
+
          if (s.at(i + 1) == ' ') {
             i++;
          }
+
          vsp = 0;
-      } else if (c == ':' && vsp == 8 /*&& (i<8 || !isId(s.at(i-8)))*/)
+
+      } else if (c == ':' && vsp == 8)  {
          // replace virtual::A by virtual ::A
-      {
+      
          growBuf.addChar(' ');
          growBuf.addChar(':');
+
          vsp = 0;
-      } else if (!isspace((uchar)c) || // not a space
-                 ( i > 0 && i < l - 1 &&    // internal character
+
+      } else if (! isspace((uchar)c) || 
+                 ( i > 0 && i < l - 1 &&   
                    (isId(s.at(i - 1)) || s.at(i - 1) == ')' || s.at(i - 1) == ',' || s.at(i - 1) == '>' || s.at(i - 1) == ']') &&
                    (isId(s.at(i + 1)) ||
                     (i < l - 2 && s.at(i + 1) == '$' && isId(s.at(i + 2))) ||
-                    (i < l - 3 && s.at(i + 1) == '&' && s.at(i + 2) == '$' && isId(s.at(i + 3)))
-                   )
-                 )
-                ) {
+                    (i < l - 3 && s.at(i + 1) == '&' && s.at(i + 2) == '$' && isId(s.at(i + 3))) ) ) ) {
+
          if (c == '\t') {
             c = ' ';
          }
+
          if (c == '*' || c == '&' || c == '@' || c == '$') {
             //uint rl=result.length();
             uint rl = growBuf.getPos();
+
             if ((rl > 0 && (isId(growBuf.at(rl - 1)) || growBuf.at(rl - 1) == '>')) &&
-                  ((c != '*' && c != '&') || !findOperator2(s, i)) // avoid splitting operator* and operator->* and operator&
-               ) {
+                  ((c != '*' && c != '&') || !findOperator2(s, i)) ) {
+
+               // avoid splitting operator* and operator->* and operator&
                growBuf.addChar(' ');
             }
+
          } else if (c == '-') {
             uint rl = growBuf.getPos();
-            if (rl > 0 && growBuf.at(rl - 1) == ')' && i < l - 1 && s.at(i + 1) == '>') { // trailing return type ')->' => ') ->'
+
+            if (rl > 0 && growBuf.at(rl - 1) == ')' && i < l - 1 && s.at(i + 1) == '>') { 
+               // trailing return type ')->' => ') ->'
                growBuf.addChar(' ');
             }
          }
+
          growBuf.addChar(c);
-         if (cliSupport &&
-               (c == '^' || c == '%') && i > 1 && isId(s.at(i - 1)) &&
-               !findOperator(s, i)
-            ) {
+         if (cliSupport && (c == '^' || c == '%') && i > 1 && isId(s.at(i - 1)) && !findOperator(s, i) ) {
             growBuf.addChar(' '); // C++/CLI: Type^ name and Type% name
          }
       }
    }
+
    growBuf.addChar(0);
-   //printf("removeRedundantWhiteSpace(`%s')=`%s'\n",s.data(),growBuf.get());
-   //result.resize(resultPos);
+  
    return growBuf.get();
 }
 
@@ -1805,6 +1813,7 @@ int findParameterList(const QByteArray &name)
 {
    int pos = -1;
    int templateDepth = 0;
+
    do {
       if (templateDepth > 0) {
          int nextOpenPos = name.lastIndexOf('>', pos);
@@ -1838,24 +1847,21 @@ bool rightScopeMatch(const QByteArray &scope, const QByteArray &name)
 {
    int sl = scope.length();
    int nl = name.length();
+
    return (name == scope || // equal
            (scope.right(nl) == name && // substring
-            sl - nl > 1 && scope.at(sl - nl - 1) == ':' && scope.at(sl - nl - 2) == ':' // scope
-           )
-          );
+            sl - nl > 1 && scope.at(sl - nl - 1) == ':' && scope.at(sl - nl - 2) == ':'));
 }
 
 bool leftScopeMatch(const QByteArray &scope, const QByteArray &name)
 {
    int sl = scope.length();
    int nl = name.length();
+
    return (name == scope || // equal
            (scope.left(nl) == name && // substring
-            sl > nl + 1 && scope.at(nl) == ':' && scope.at(nl + 1) == ':' // scope
-           )
-          );
+            sl > nl + 1 && scope.at(nl) == ':' && scope.at(nl + 1) == ':') );
 }
-
 
 void linkifyText(const TextGeneratorIntf &out, Definition *scope, FileDef *fileScope, Definition *self,
                  const char *text, bool autoBreak, bool external, bool keepSpaces, int indentLevel)
@@ -2165,6 +2171,7 @@ QByteArray tempArgListToString(ArgumentList *al, SrcLangExt lang)
       } else { 
          // extract name from type
          int i = a.type.length() - 1;
+
          while (i >= 0 && isId(a.type.at(i))) {
             i--;
          }
@@ -2380,7 +2387,7 @@ QByteArray fileToString(const char *name, bool filter, bool isSourceCode)
    }
 
    if (!fileOpened) {
-      err("cannot open file `%s' for reading\n", name);
+      err("Unable to open file `%s' for reading\n", name);
    }
 
    return "";
@@ -3218,9 +3225,10 @@ static QByteArray getCanonicalTypeForIdentifier(Definition *d, FileDef *fs, cons
 
    // lookup class / class template instance
    cd = getResolvedClass(d, fs, word + templSpec, &mType, &ts, true, true, &resolvedType);
+
    bool isTemplInst = cd && !templSpec.isEmpty();
 
-   if (!cd && !templSpec.isEmpty()) {
+   if (! cd && ! templSpec.isEmpty()) {
       // class template specialization not known, look up class template
       cd = getResolvedClass(d, fs, word, &mType, &ts, true, true, &resolvedType);
    }
@@ -3229,7 +3237,9 @@ static QByteArray getCanonicalTypeForIdentifier(Definition *d, FileDef *fs, cons
       cd = 0;   // ignore types introduced by usage relations
    }
  
-   if (cd) { // resolves to a known class type
+   if (cd) { 
+      // resolves to a known class type
+
       if (cd == d && tSpec) {
          *tSpec = "";
       }
@@ -3265,13 +3275,11 @@ static QByteArray getCanonicalTypeForIdentifier(Definition *d, FileDef *fs, cons
             *tSpec = "";
          }
       }
+
    } else if (mType && mType->isEnumerate()) { // an enum
       result = mType->qualifiedName();
 
-   } else if (mType && mType->isTypedef()) { // a typedef
-      //result = mType->qualifiedName(); // changed after 1.7.2
-      //result = mType->typeString();
-      //printf("word=%s typeString=%s\n",word.data(),mType->typeString());
+   } else if (mType && mType->isTypedef()) { // a typedef     
       if (word != mType->typeString()) {
          result = getCanonicalTypeForIdentifier(d, fs, mType->typeString(), tSpec, count + 1);
       } else {
@@ -3306,7 +3314,8 @@ static QByteArray extractCanonicalType(Definition *d, FileDef *fs, QByteArray ty
    type = stripPrefix(type, "typename ");
 
    type = removeRedundantWhiteSpace(type);
-   
+
+  
    QByteArray canType;
    QByteArray templSpec, word;
    int i, p = 0, pp = 0;
@@ -3362,7 +3371,7 @@ static QByteArray extractCanonicalArgType(Definition *d, FileDef *fs, const Argu
 {
    QByteArray type = arg->type.trimmed();
    QByteArray name = arg->name;
-   
+ 
    if ((type == "const" || type == "volatile") && !name.isEmpty()) {
       // name is part of type => correct
       type += " ";
@@ -3394,6 +3403,7 @@ static bool matchArgument2(Definition *srcScope, FileDef *srcFileScope, Argument
 
    stripIrrelevantConstVolatile(srcType);
    stripIrrelevantConstVolatile(dstType);
+
  
    if (sSrcName == dstType.right(sSrcName.length())) {
       // case "unsigned int" <-> "unsigned int i"
@@ -3411,6 +3421,7 @@ static bool matchArgument2(Definition *srcScope, FileDef *srcFileScope, Argument
    if (srcA->canType.isEmpty()) {
       srcA->canType = extractCanonicalArgType(srcScope, srcFileScope, srcA);
    }
+
    if (dstA->canType.isEmpty()) {
       dstA->canType = extractCanonicalArgType(dstScope, dstFileScope, dstA);
    }
@@ -3418,6 +3429,7 @@ static bool matchArgument2(Definition *srcScope, FileDef *srcFileScope, Argument
    if (srcA->canType == dstA->canType) {
       DOX_MATCH
       return true;
+
    } else {
       //printf("   Canonical types do not match [%s]<->[%s]\n",
       //    srcA->canType.data(),dstA->canType.data());
@@ -3489,6 +3501,7 @@ bool matchArguments2(Definition *srcScope, FileDef *srcFileScope, ArgumentList *
    auto item = dstAl->begin();
 
    for (auto &srcA : *srcAl ) {
+
       if (! matchArgument2(srcScope, srcFileScope, &srcA,  dstScope, dstFileScope, &(*item))) {
          DOX_NOMATCH
          return false;
@@ -3496,6 +3509,7 @@ bool matchArguments2(Definition *srcScope, FileDef *srcFileScope, ArgumentList *
 
       ++item;
    }
+
 
    DOX_MATCH
    return true; // all arguments match
@@ -3630,7 +3644,7 @@ static void findMembersWithSpecificName(MemberName *mn, const char *args, bool c
          }
 
          if (match && (forceTagFile == 0 || md->getReference() == forceTagFile)) {           
-            members.append(md);
+            members.append(md.data());
          }
       }
    }
@@ -3755,7 +3769,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                         if (m < mdist && mcd->isLinkable()) {
                            mdist = m;
                            cd = mcd;
-                           md = mmd;
+                           md = mmd.data();
                         }
                      }
                   }
@@ -3780,7 +3794,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                         
                         mdist = m;
                         cd = mcd;
-                        md = mmd;
+                        md = mmd.data();
                      }
                   }
                   
@@ -3853,7 +3867,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
       MemberDef *temp = nullptr; 
 
       for (auto item : *mn) { 
-         temp = item;
+         temp = item.data();
 
          if (! item->isLinkable() || (! item->isRelated() && ! item->isForeign()) || ! item->getClassDef()) {
             continue;
@@ -3873,7 +3887,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
          }
 
          if (! fuzzy_mmd && hasEmptyArgs) {
-            fuzzy_mmd = item;
+            fuzzy_mmd = item.data();
          }
       }
 
@@ -3925,12 +3939,14 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                  
                   if (emd->getNamespaceDef() == fnd && rightScopeMatch(mScope, emd->localName())) {                    
                      nd = fnd.data();
-                     md = mmd;
+                     md = mmd.data();
+
                      found = true;
 
                   } else {
                      md = 0;
                      cd = 0;
+
                      return false;
                   }
 
@@ -3950,7 +3966,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
 
                   if (match) {
                      nd = fnd.data();
-                     md = mmd;
+                     md = mmd.data();
                      found = true;
                   }
 
@@ -3972,7 +3988,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
 
                   if (mmd->getNamespaceDef() == fnd) {
                      nd = fnd.data();
-                     md = mmd;
+                     md = mmd.data();
                      found = true;
                   }
                }
@@ -4014,7 +4030,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
 
                if (tmd && tmd->isStrong() && (notInNS || sameNS) && namespaceName.length() > 0) { 
                   // enum is part of namespace so this should not be empty                 
-                  md = mmd;
+                  md = mmd.data();
                   fd = mmd->getFileDef();
                   gd = mmd->getGroupDef();
 
@@ -4060,7 +4076,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                MemberDef *tmd = md->getEnumScope();
 
                if ((gd && gd->isLinkable()) || (fd && fd->isLinkable()) || (tmd && tmd->isStrong())) {
-                  members.append(md);
+                  members.append(md.data());
                }
             }
          }
@@ -5879,7 +5895,7 @@ QByteArray stripTemplateSpecifiersFromScope(const QByteArray &fullName, bool par
       bool done = false;
       int count = 1;
 
-      while (e < l && !done) {
+      while (e < l && ! done) {
          char c = fullName.at(e++);
 
          if (c == '<') {
@@ -7021,13 +7037,17 @@ static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
    static QRegExp cmdPat("[\\\\@][a-z_A-Z][a-z_A-Z0-9]*");
 
    QByteArray value = s;
-   int i, p = 0, l;
+
+   int i;
+   int p = 0;
+   int l;
 
    while ((i = cmdPat.indexIn(value, p)) != -1) {
       l = cmdPat.matchedLength();
       result += value.mid(p, i - p);
 
       QByteArray args = extractAliasArgs(value, i + l);
+
       bool hasArgs = !args.isEmpty();            // found directly after command
       int argsLen = args.length();
 
@@ -7113,28 +7133,36 @@ QByteArray extractAliasArgs(const QByteArray &args, int pos)
 {
    int i;
    int bc = 0;
+
    char prevChar = 0;
 
-   if (args.at(pos) == '{') { // alias has argument
-      for (i = pos; i < (int)args.length(); i++) {
+   if (args.length() > pos && args.at(pos) == '{') { 
+
+      // alias has argument
+      for (i = pos; i < args.length(); i++) {
+
          if (prevChar != '\\') {
             if (args.at(i) == '{') {
                bc++;
             }
+
             if (args.at(i) == '}') {
                bc--;
             }
+
             prevChar = args.at(i);
+
          } else {
             prevChar = 0;
+
          }
 
-         if (bc == 0) {
-            //printf("extractAliasArgs('%s')->'%s'\n",args.data(),args.mid(pos+1,i-pos-1).data());
+         if (bc == 0) {           
             return args.mid(pos + 1, i - pos - 1);
          }
       }
    }
+
    return "";
 }
 
@@ -7142,7 +7170,7 @@ QByteArray resolveAliasCmd(const QByteArray aliasCmd)
 {
    QByteArray result;
 
-   aliasesProcessed.clear();  
+   aliasesProcessed.clear(); 
    result = expandAliasRec(aliasCmd);
    
    return result;

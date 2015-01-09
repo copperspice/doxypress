@@ -1651,9 +1651,6 @@ QByteArray Definition::inbodyFile() const
    return m_impl->inbodyDocs ? m_impl->inbodyDocs->file : QByteArray("<" + m_name + ">");
 }
 
-
-//----------------------
-
 QByteArray Definition::getDefFileName() const
 {
    return m_impl->defFileName;
@@ -1772,7 +1769,7 @@ void Definition::_setSymbolName(const QByteArray &name)
 bool Definition::hasBriefDescription() const
 {
    static bool briefMemberDesc = Config_getBool("BRIEF_MEMBER_DESC");
-   return !briefDescription().isEmpty() && briefMemberDesc;
+   return ! briefDescription().isEmpty() && briefMemberDesc;
 }
 
 
