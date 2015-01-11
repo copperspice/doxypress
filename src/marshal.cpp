@@ -786,7 +786,7 @@ Entry *unmarshalEntry(StorageIntf *s)
    e->args             = unmarshalQByteArray(s);
    e->bitfields        = unmarshalQByteArray(s);
   
-   e->argList          = *unmarshalArgumentList(s);      // BROOM - possible memory leak
+   e->argList          = *unmarshalArgumentList(s);      // CopperSpice - check for memory leak
    e->tArgLists        = unmarshalArgumentLists(s);
 
    e->program          = unmarshalQByteArray(s);
@@ -809,7 +809,7 @@ Entry *unmarshalEntry(StorageIntf *s)
    e->write            = unmarshalQByteArray(s);
    e->inside           = unmarshalQByteArray(s);
    e->exception        = unmarshalQByteArray(s);      
-   e->typeConstr       = *unmarshalArgumentList(s);      // BROOM - possible memory leak
+   e->typeConstr       = *unmarshalArgumentList(s);      // CopperSpice -check for memory leak
    e->bodyLine         = unmarshalInt(s);
    e->endBodyLine      = unmarshalInt(s);
    e->mGrpId           = unmarshalInt(s);

@@ -64,7 +64,10 @@ struct StyleData {
    char *definition; // aditional tags like \snext and style name
 
    StyleData(const char *reference, const char *definition);
+   StyleData();
+
    ~StyleData();
+
    bool setStyle(const char *s, const char *styleName);
 
    static const QRegExp s_clause;

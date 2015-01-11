@@ -821,24 +821,18 @@ void ConfigBool::convertStrToVal()
    }
 }
 
-QByteArray  s_empty;
-QStringList s_emptyList;
-int s_emptyInt = 0;
-bool s_emptyBool = false;
-
 QByteArray &Config::getString(const char *fileName, int num, const char *name) const
 {
    ConfigOption *opt = m_dict->value(name);
 
    if (opt == 0) {
       config_err("%s<%d>: Internal error: %s is not valid string\n", fileName, num, name);
-// BROOM      exit(1);
-     return s_empty;
+      exit(1);     
 
    } else if (opt->kind() != ConfigOption::O_String) {
       config_err("%s<%d>: Internal error: %s is not a string\n", fileName, num, name);
- // BROOM      exit(1);
-    return s_empty;
+      exit(1);
+    
    }
 
    return *((ConfigString *)opt)->valueRef();
@@ -847,15 +841,16 @@ QByteArray &Config::getString(const char *fileName, int num, const char *name) c
 QStringList &Config::getList(const char *fileName, int num, const char *name) const
 {
    ConfigOption *opt = m_dict->value(name);
+
    if (opt == 0) {
       config_err("%s<%d>: Internal error: %s is not valid list\n", fileName, num, name);
- // BROOM      exit(1);
-     return s_emptyList;
+      exit(1);
+     
 
    } else if (opt->kind() != ConfigOption::O_List) {
       config_err("%s<%d>: Internal error: %s is not a list\n", fileName, num, name);
- // BROOM      exit(1);
-    return s_emptyList;
+      exit(1);
+    
    }
 
    return *((ConfigList *)opt)->valueRef();
@@ -864,15 +859,15 @@ QStringList &Config::getList(const char *fileName, int num, const char *name) co
 QByteArray &Config::getEnum(const char *fileName, int num, const char *name) const
 {
    ConfigOption *opt = m_dict->value(name);
+
    if (opt == 0) {
       config_err("%s<%d>: Internal error: %s is not valid enum\n", fileName, num, name);
-// BROOM      exit(1);
-     return s_empty;
+      exit(1);
+
 
    } else if (opt->kind() != ConfigOption::O_Enum) {
       config_err("%s<%d>: Internal error: %s is not an enum\n", fileName, num, name);
-// BROOM   exit(1); 
-     return s_empty;
+      exit(1); 
 
    }
 
@@ -882,15 +877,15 @@ QByteArray &Config::getEnum(const char *fileName, int num, const char *name) con
 int &Config::getInt(const char *fileName, int num, const char *name) const
 {
    ConfigOption *opt = m_dict->value(name);
+
    if (opt == 0) {
       config_err("%s<%d>: Internal error: %s is not valid integer\n", fileName, num, name);
-// BROOM      exit(1);
-      return s_emptyInt;
+      exit(1);
 
    } else if (opt->kind() != ConfigOption::O_Int) {
       config_err("%s<%d>: Internal error: %s is not an integer\n", fileName, num, name);
-// BROOM      exit(1);
-      return s_emptyInt;
+      exit(1);
+
    }
 
    return *((ConfigInt *)opt)->valueRef();
@@ -899,15 +894,15 @@ int &Config::getInt(const char *fileName, int num, const char *name) const
 bool &Config::getBool(const char *fileName, int num, const char *name) const
 {
    ConfigOption *opt = m_dict->value(name);
+
    if (opt == 0) {
       config_err("%s<%d>: Internal error: %s is not valid boolean\n", fileName, num, name);
-// BROOM      exit(1);
-      return s_emptyBool;
+      exit(1);
+      
 
    } else if (opt->kind() != ConfigOption::O_Bool) {
       config_err("%s<%d>: Internal error: %s is not a boolean\n", fileName, num, name);
-// BROOM      exit(1);
-      return s_emptyBool;
+      exit(1);      
 
    }
 
@@ -1130,6 +1125,7 @@ static FILE *findFile(const char *fileName)
    if (fileName == 0) {
       return 0;
    }
+
    if (portable_isAbsolutePath(fileName)) {
       return tryPath(NULL, fileName);
    }
@@ -2953,14 +2949,17 @@ void Config::substituteEnvironmentVars()
 
 static void cleanUpPaths(QStringList &str)
 {
-   for (auto &sfp : str) {    
+   for (auto &sfp : str) {  
+
+      if (sfp.isEmpty()) {
+         continue;
+      }
 
       sfp.replace("\\", "/");
     
       QByteArray path = sfp.toUtf8();
 
-      if ((path.at(0) != '/' && (path.length() <= 2 || path.at(1) != ':')) ||
-            path.at(path.length() - 1) != '/' ) {
+      if ((path.at(0) != '/' && (path.length() <= 2 || path.at(1) != ':')) || path.at(path.length() - 1) != '/' ) {
 
          QFileInfo fi(path);
 
@@ -3543,7 +3542,7 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("INLINE_INHERITED_MEMB", "", false);
   cb = cfg->addBool("FULL_PATH_NAMES", "", true); 
   cb = cfg->addBool("SHORT_NAMES", "",false);
-  cs = cfg->addString("JAVADOC_AUTOBRIEF", "");
+  cb = cfg->addBool("JAVADOC_AUTOBRIEF", "",false);
   cb = cfg->addBool("QT_AUTOBRIEF", "", false);
   cb = cfg->addBool("MULTILINE_CPP_IS_BRIEF", "",false);
   cb = cfg->addBool("INHERIT_DOCS", "", true);
@@ -3580,7 +3579,7 @@ void addConfigOptions(Config *cfg)
   cs = cfg->addString("INTERNAL_DOCS", "");
   cb = cfg->addBool("HIDE_SCOPE_NAMES", "", false);
   cb = cfg->addBool("SHOW_INCLUDE_FILES", "", false);
-  cs = cfg->addString("SHOW_GROUPED_MEMB_INC", "");
+  cb = cfg->addBool("SHOW_GROUPED_MEMB_INC", "", false);
   cb = cfg->addBool("FORCE_LOCAL_INCLUDES", "", false);
   cb = cfg->addBool("INLINE_INFO", "", false);
   cs = cfg->addString("SORT_MEMBER_DOCS", "");
@@ -3593,7 +3592,7 @@ void addConfigOptions(Config *cfg)
   cs = cfg->addString("GENERATE_TESTLIST", "");
   cs = cfg->addString("GENERATE_BUGLIST", "");
   cs = cfg->addString("GENERATE_DEPRECATEDLIST", "");
-  cs = cfg->addString("ENABLED_SECTIONS", "");
+  cl = cfg->addList("ENABLED_SECTIONS", "");
   ci = cfg->addInt("MAX_INITIALIZER_LINES", "",0,1000,1);
   cb = cfg->addBool("SHOW_USED_FILES", "", false);
   cb = cfg->addBool("SHOW_FILES", "", false);
@@ -3602,9 +3601,9 @@ void addConfigOptions(Config *cfg)
   cs = cfg->addString("LAYOUT_FILE", "");
   cl = cfg->addList("CITE_BIB_FILES", "");
   cb = cfg->addBool("WARNINGS", "", false);
-  cs = cfg->addString("WARN_IF_UNDOCUMENTED", "");
-  cs = cfg->addString("WARN_IF_DOC_ERROR", "");
-  cs = cfg->addString("WARN_NO_PARAMDOC", "");
+  cb = cfg->addBool("WARN_IF_UNDOCUMENTED", "", false);
+  cb = cfg->addBool("WARN_IF_DOC_ERROR", "", false);
+  cb = cfg->addBool("WARN_NO_PARAMDOC", "", false);
   cs = cfg->addString("WARN_FORMAT", "");
   cs = cfg->addString("WARN_LOGFILE", ""); 
   cs = cfg->addString("INPUT_ENCODING", "");
@@ -3619,12 +3618,12 @@ void addConfigOptions(Config *cfg)
   cl = cfg->addList("IMAGE_PATH", "");
   cs = cfg->addString("INPUT_FILTER", "");
   cl = cfg->addList("FILTER_PATTERNS", "");
-  cs = cfg->addString("FILTER_SOURCE_FILES", "");
+  cb = cfg->addBool("FILTER_SOURCE_FILES", "",false);
   cl = cfg->addList("FILTER_SOURCE_PATTERNS", "");
   cs = cfg->addString("USE_MDFILE_AS_MAINPAGE", "");
   cb = cfg->addBool("SOURCE_BROWSER", "", false);
-  cs = cfg->addString("INLINE_SOURCES", "");
-  cs = cfg->addString("STRIP_CODE_COMMENTS", "");
+  cb = cfg->addBool("INLINE_SOURCES", "", false);
+  cb = cfg->addBool("STRIP_CODE_COMMENTS", "", false);
   cb = cfg->addBool("REFERENCED_BY_RELATION", "", false);
   cb = cfg->addBool("REFERENCES_RELATION", "", false);
   cs = cfg->addString("REFERENCES_LINK_SOURCE", "");
@@ -3634,7 +3633,7 @@ void addConfigOptions(Config *cfg)
   cs = cfg->addString("CLANG_ASSISTED_PARSING", "");
   cs = cfg->addString("CLANG_OPTIONS", "");
   cs = cfg->addString("ALPHABETICAL_INDEX", "");
-  cs = cfg->addString("COLS_IN_ALPHA_INDEX", "");
+  ci = cfg->addInt("COLS_IN_ALPHA_INDEX", "", 1,20,5);  
   cl = cfg->addList("IGNORE_PREFIX", "");
   cb = cfg->addBool("GENERATE_HTML", "", true);
   cs = cfg->addString("HTML_OUTPUT", "");
@@ -3649,7 +3648,7 @@ void addConfigOptions(Config *cfg)
   ci = cfg->addInt("HTML_COLORSTYLE_GAMMA", "",40,240,80);
   cb = cfg->addBool("HTML_TIMESTAMP", "", true);
   cs = cfg->addString("HTML_DYNAMIC_SECTIONS", "");
-  cs = cfg->addString("HTML_INDEX_NUM_ENTRIES", "");
+  ci = cfg->addInt("HTML_INDEX_NUM_ENTRIES", "",0,9999,100);
   cb = cfg->addBool("GENERATE_DOCSET", "", false);
   cs = cfg->addString("DOCSET_FEEDNAME", "");
   cs = cfg->addString("DOCSET_BUNDLE_ID", "");
@@ -3807,11 +3806,11 @@ static QByteArray configFileToString(const char *name)
             contents.resize(totalSize + bSize);
          }
 
-         totalSize += size + 2;
+         totalSize += size + 1;
          contents.resize(totalSize);
 
-         contents[totalSize - 2] = '\n'; // to help the scanner   
-         contents[totalSize - 1] = '\0';
+         contents[totalSize - 1] = '\n'; // to help the scanner   
+// broom         contents[totalSize - 1] = '\0';
 
          return contents;
       }

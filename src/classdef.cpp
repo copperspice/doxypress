@@ -57,7 +57,7 @@ class ClassDefImpl
    ClassDefImpl();
    ~ClassDefImpl();
 
-   void init(const char *defFileName, const char *name, const QByteArray &ctStr, const char *fName);
+   void init(const char *defFileName, const QByteArray &name, const QByteArray &ctStr, const QByteArray &fName);
 
    /*! file name that forms the base for the output file containing the
     *  class documentation. For compatibility with Qt (e.g. links via tag
@@ -191,12 +191,14 @@ class ClassDefImpl
    uint64_t spec;
 };
 
-void ClassDefImpl::init(const char *defFileName, const char *name, const QByteArray &ctStr, const char *fName)
+void ClassDefImpl::init(const char *defFileName, const QByteArray &name, const QByteArray &ctStr, const QByteArray &fName)
 {
-   if (fName) {
+   if (! fName.isEmpty()) {
       fileName = stripExtension(fName);
+
    } else {
       fileName = ctStr + name;
+
    }
 
    exampleSDict = 0;
@@ -214,6 +216,7 @@ void ClassDefImpl::init(const char *defFileName, const char *name, const QByteAr
    usesIntfClassDict = 0;
    memberGroupSDict = 0;
    innerClasses = 0;
+
    subGrouping = Config_getBool("SUBGROUPING");
    templateInstances = 0;
    variableInstances = 0;
@@ -225,13 +228,14 @@ void ClassDefImpl::init(const char *defFileName, const char *name, const QByteAr
    membersMerged = false;
    categoryOf = 0;
    usedOnly = false;
+
    isSimple = Config_getBool("INLINE_SIMPLE_STRUCTS");
    arrowOperator = 0;
    taggedInnerClasses = 0;
    tagLessRef = 0;
    spec = 0;
 
-   // we cannot use getLanguage at this point, as setLanguage has not been called.
+   // we can not use getLanguage at this point, as setLanguage has not been called
    SrcLangExt lang = getLanguageFromFileName(defFileName);
 
    if ((lang == SrcLangExt_Cpp || lang == SrcLangExt_ObjC) && guessSection(defFileName) == Entry::SOURCE_SEC) {
@@ -242,8 +246,8 @@ void ClassDefImpl::init(const char *defFileName, const char *name, const QByteAr
 
    }
 
-   isGeneric = (lang == SrcLangExt_CSharp || lang == SrcLangExt_Java) && QByteArray(name).indexOf('<') != -1;
-   isAnonymous = QByteArray(name).indexOf('@') != -1;
+   isGeneric = (lang == SrcLangExt_CSharp || lang == SrcLangExt_Java) && name.indexOf('<') != -1;
+   isAnonymous = name.indexOf('@') != -1;
 }
 
 ClassDefImpl::ClassDefImpl()
@@ -271,18 +275,17 @@ ClassDefImpl::~ClassDefImpl()
 }
 
 // constructs a new class definition
-ClassDef::ClassDef(
-   const char *defFileName, int defLine, int defColumn,
-   const char *nm, CompoundType ct,
-   const char *lref, const char *fName,
-   bool isSymbol, bool isJavaEnum)
+ClassDef::ClassDef(const char *defFileName, int defLine, int defColumn, const char *nm, CompoundType ct,
+                   const char *lref, const char *fName, bool isSymbol, bool isJavaEnum)
    : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(nm), 0, 0, isSymbol)
 {
    visited = false;
    setReference(lref);
+
    m_impl = new ClassDefImpl;
    m_impl->compType = ct;
    m_impl->isJavaEnum = isJavaEnum;
+
    m_impl->init(defFileName, name(), compoundTypeString(), fName);
 }
 
@@ -1801,9 +1804,8 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QByteArray & /*p
    }
 
    bool exampleFlag = hasExamples();
-
-   //---------------------------------------- start flexible part -------------------------------
-
+ 
+   // start flexible part 
    SrcLangExt lang = getLanguage();
 
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class) ) { 
@@ -1811,62 +1813,79 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QByteArray & /*p
          case LayoutDocEntry::BriefDesc:
             writeBriefDescription(ol, exampleFlag);
             break;
+
          case LayoutDocEntry::ClassIncludes:
             writeIncludeFiles(ol);
             break;
+
          case LayoutDocEntry::ClassInheritanceGraph:
             writeInheritanceGraph(ol);
             break;
+
          case LayoutDocEntry::ClassCollaborationGraph:
             writeCollaborationGraph(ol);
             break;
+
          case LayoutDocEntry::ClassAllMembersLink:
             //writeAllMembersLink(ol); // this is now part of the summary links
             break;
+
          case LayoutDocEntry::MemberDeclStart:
             startMemberDeclarations(ol);
             break;
+
          case LayoutDocEntry::MemberGroups:
             writeMemberGroups(ol);
             break;
+
          case LayoutDocEntry::MemberDecl: {
             LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
             writeMemberDeclarations(ol, lmd->type, lmd->title(lang), lmd->subtitle(lang));
          }
          break;
+
          case LayoutDocEntry::ClassNestedClasses: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeNestedClasses(ol, ls->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberDeclEnd:
             endMemberDeclarations(ol);
             break;
+
          case LayoutDocEntry::DetailedDesc: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeDetailedDescription(ol, pageType, exampleFlag, ls->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberDefStart:
             startMemberDocumentation(ol);
             break;
+
          case LayoutDocEntry::ClassInlineClasses:
             writeInlineClasses(ol);
             break;
+
          case LayoutDocEntry::MemberDef: {
             LayoutDocEntryMemberDef *lmd = (LayoutDocEntryMemberDef *)lde;
             writeMemberDocumentation(ol, lmd->type, lmd->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberDefEnd:
             endMemberDocumentation(ol);
             break;
+
          case LayoutDocEntry::ClassUsedFiles:
             showUsedFiles(ol);
             break;
+
          case LayoutDocEntry::AuthorSection:
             writeAuthorSection(ol);
             break;
+
          case LayoutDocEntry::NamespaceNestedNamespaces:
          case LayoutDocEntry::NamespaceNestedConstantGroups:
          case LayoutDocEntry::NamespaceClasses:
@@ -1889,9 +1908,9 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QByteArray & /*p
          case LayoutDocEntry::GroupPageDocs:
          case LayoutDocEntry::DirSubDirs:
          case LayoutDocEntry::DirFiles:
+
          case LayoutDocEntry::DirGraph:
-            err("Internal inconsistency: member %d should not be part of "
-                "LayoutDocManager::Class entry list\n", lde->kind());
+            err("Internal problem: Member %d should not be part of LayoutDocManager::Class entry list\n", lde->kind());
             break;
       }
    }
@@ -1936,8 +1955,9 @@ void ClassDef::writeDocumentation(OutputList &ol)
 
    QByteArray pageTitle = title();
 
-   startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_ClassVisible, !generateTreeView);
-   if (!generateTreeView) {
+   startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_ClassVisible, ! generateTreeView);
+
+   if (! generateTreeView) {
       if (getOuterScope() != Doxygen::globalScope) {
          writeNavigationPath(ol);
       }
@@ -1946,11 +1966,12 @@ void ClassDef::writeDocumentation(OutputList &ol)
 
    startTitle(ol, getOutputFileBase(), this);
    ol.parseText(pageTitle);
+
    addClassAttributes(ol);
    addGroupListToTitle(ol, this);
+
    endTitle(ol, getOutputFileBase(), qPrintable(displayName()));
    writeDocumentationContents(ol, pageTitle);
-
    endFileWithNavPath(this, ol);
 
    if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
@@ -3148,32 +3169,18 @@ QByteArray ClassDef::getOutputFileBase() const
       }
    }
 
-
-printf("\n\n BROOM    get Name   A1  ");
-
    if (m_impl->templateMaster) {
-
-printf("\n\n BROOM    get Name   A2  ");
-
       // point to the template of which this class is an instance
       return m_impl->templateMaster->getOutputFileBase();
 
    } else if (isReference()) {
-
-printf("\n\n BROOM    get Name   A3  ");
-
       // point to the external location
       return m_impl->fileName;
 
    } else {
-
-printf("\n\n BROOM    get Name   A4  ");
-
       // normal locally defined class
       return convertNameToFile(m_impl->fileName).toUtf8();
    }
-
-
 }
 
 QString ClassDef::getInstanceOutputFileBase() const
@@ -3819,12 +3826,11 @@ void ClassDef::addGroupedInheritedMembers(OutputList &ol, MemberListType lt,
 }
 
 void ClassDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title, bool showInline)
-{
-   //printf("%s: ClassDef::writeMemberDocumentation()\n",name().data());
+{ 
    MemberList *ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, qPrintable(displayName()), this, title, false, showInline);
+      ml->writeDocumentation(ol, qPrintable(displayName()), this, title, false, showInline); 
    }
 }
 

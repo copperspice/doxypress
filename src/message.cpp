@@ -94,6 +94,7 @@ static void format_warn(const char *file, int line, const char *text)
    if (file) { // get version from file name
       bool ambig;
       FileDef *fd = findFileDef(Doxygen::inputNameDict, file, ambig);
+
       if (fd) {
          versionSubst = fd->getVersion();
       }
@@ -122,7 +123,8 @@ static void format_warn(const char *file, int line, const char *text)
 static void do_warn(const char *tag, const char *file, int line, const char *prefix, const char *fmt, va_list args)
 {
    if (! Config_getBool(tag)) {
-      return;   // warning type disabled
+      // is this warning type disabled
+      return;   
    }
 
    const int bufSize = 40960;
@@ -240,11 +242,15 @@ void initWarningFormat()
 {
    outputFormat = Config_getString("WARN_FORMAT");
 
+   // if the user wants a line break, make it happen
+   outputFormat.replace("\\n", "\n");
+   outputFormat.replace("\\t", "\t");
+
    if (! Config_getString("WARN_LOGFILE").isEmpty()) {
       warnFile = portable_fopen(Config_getString("WARN_LOGFILE"), "w");
    }
 
-   if (!warnFile) { 
+   if (! warnFile) { 
       // point it to something valid, because warn() relies on it
       warnFile = stderr;
    }

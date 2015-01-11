@@ -557,7 +557,7 @@ void parseInput()
       LayoutDocManager::instance().parse(t, layoutFileName);
 
    } else if (!defaultLayoutUsed) {
-      warn_uncond("failed to open layout file '%s' for reading!\n", layoutFileName.data());
+      warn_uncond("Unable to open layout file '%s' for reading\n", layoutFileName.data());
    }
  
 
@@ -678,9 +678,8 @@ void parseInput()
    // no longer add nested classes to the group as well
    // distributeClassGroupRelations();
 
-   // calling buildClassList may result in cached relations that
-   // become invalid after resolveClassNestingRelations(), that's why
-   // we need to clear the cache here
+   // calling buildClassList may result in cached relations which become invalid
+   // after resolveClassNestingRelations(), that is why we clear the cache here
    Doxygen::lookupCache->clear();
 
    // we do not need the list of using declaration anymore
@@ -976,8 +975,8 @@ void generateOutput()
    }
 
    if (generateRtf) {
-//BROOM      Doxy_Globals::g_outputList->add(new RTFGenerator);
-//BROOM     RTFGenerator::init();
+      Doxy_Globals::g_outputList->add(new RTFGenerator);
+      RTFGenerator::init();
    }
 
    if (Config_getBool("USE_HTAGS")) {
@@ -1030,8 +1029,6 @@ void generateOutput()
       }
 
       HtmlGenerator::writeSearchData(searchDirName);
-
-
 
       if (! serverBasedSearch) { 
          // client side search index
@@ -1148,7 +1145,8 @@ void generateOutput()
          HtmlGenerator::writeSearchPage();
          Doxygen::searchIndex->write(Config_getString("HTML_OUTPUT") + "/search/search.idx");
 
-      } else { // write data for external search index
+      } else { 
+         // write data for external search index
          HtmlGenerator::writeExternalSearchPage();
          QByteArray searchDataFile = Config_getString("SEARCHDATA_FILE");
          if (searchDataFile.isEmpty()) {
@@ -1164,9 +1162,10 @@ void generateOutput()
 
    if (generateRtf) {
       Doxy_Globals::g_stats.begin("Combining RTF output\n");
-//BROOM      if (!RTFGenerator::preProcessFileInplace(Config_getString("RTF_OUTPUT"), "refman.rtf")) {
-//BROOM          err("An error occurred during post-processing the RTF files!\n");
-//BROOM       }
+      if (!RTFGenerator::preProcessFileInplace(Config_getString("RTF_OUTPUT"), "refman.rtf")) {
+         err("An error occurred during post processing the RTF files\n");
+      }
+
       Doxy_Globals::g_stats.end();
    }
 
@@ -1684,8 +1683,7 @@ void Doxy_Work::buildFileList(EntryNav *rootNav)
 
       //printf("**************** root->name=%s fd=%p\n",root->name.data(),fd);
       if (fd && !ambig) {
-         {
-            //printf("Adding documentation!\n");
+         {           
             // using false in setDocumentation is small hack to make sure a file
             // is documented even if a \file command is used without further documentation
 
@@ -2079,7 +2077,7 @@ void Doxy_Work::addClassToContext(EntryNav *rootNav)
 
    if (cd) {
       fullName = cd->name();
-      Debug::print(Debug::Classes, 0, "  Existing class %s!\n", cd->name().data());
+      Debug::print(Debug::Classes, 0, "  Existing class %s\n", cd->name().data());
 
       cd->setDocumentation(root->doc, root->docFile, root->docLine);
       cd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
@@ -2226,11 +2224,12 @@ void Doxy_Work::resolveClassNestingRelations()
    bool done = false;
    int iteration = 0;
 
-   while (!done) {
+   while (! done) {
       done = true;
       ++iteration;
 
       for (auto cd : *Doxygen::classSDict) {
+
          if (! cd->visited) {
             QByteArray name = stripAnonymousNamespaceScope(cd->name());
 
@@ -2245,7 +2244,6 @@ void Doxy_Work::resolveClassNestingRelations()
 
                done = false;
             }
-
          }
       }
    }
@@ -3173,7 +3171,7 @@ MemberDef *Doxy_Work::addVariableToFile(EntryNav *rootNav, MemberType mtype, con
       }
    }
 
-   Debug::print(Debug::Variables, 0, "    new variable, nd=%s!\n", nd ? nd->name().data() : "<global>");
+   Debug::print(Debug::Variables, 0, "    new variable, nd=%s\n", nd ? nd->name().data() : "<global>");
 
    // new global variable, enum value or typedef
    QSharedPointer<MemberDef> md (new MemberDef(root->fileName, root->startLine, root->startColumn, root->type, name,
@@ -4024,7 +4022,7 @@ void Doxy_Work::buildFunctionList(EntryNav *rootNav)
                // type contains ..)(.. and not "operator"
                // language other than C
 
-               Debug::print(Debug::Functions, 0, "  --> member %s of class %s!\n", rname.data(), cd->name().data());
+               Debug::print(Debug::Functions, 0, "  --> member %s of class %s\n", rname.data(), cd->name().data());
                addMethodToClass(rootNav, cd, rname, isFriend);
 
                done = true;
@@ -4051,7 +4049,7 @@ void Doxy_Work::buildFunctionList(EntryNav *rootNav)
             QSharedPointer<MemberDef> md;
 
             if (mn) {
-               Debug::print(Debug::Functions, 0, "  --> function %s already found!\n", rname.data());
+               Debug::print(Debug::Functions, 0, "  --> function %s already found\n", rname.data());
 
                for (auto mni : *mn) {
                   if (found) {
@@ -4181,7 +4179,7 @@ void Doxy_Work::buildFunctionList(EntryNav *rootNav)
             }
 
             if (!found) { /* global function is unique with respect to the file */
-               Debug::print(Debug::Functions, 0, "  --> new function %s found!\n", rname.data());
+               Debug::print(Debug::Functions, 0, "  --> new function %s found\n", rname.data());
 
                // new global function
                ArgumentList *tArgList = root->tArgLists ? &root->tArgLists->last() : 0;
@@ -4308,7 +4306,7 @@ void Doxy_Work::buildFunctionList(EntryNav *rootNav)
             }
 
          } else {
-            Debug::print(Debug::Functions, 0, "  --> %s not processed!\n", rname.data());
+            Debug::print(Debug::Functions, 0, "  --> %s not processed\n", rname.data());
 
          }
 
@@ -4776,7 +4774,7 @@ void Doxy_Work::findBaseClassesForClass(EntryNav *rootNav, Definition *context, 
       if (mode == DocumentedOnly) {
          // find a documented base class in the correct scope
 
-         if (!findClassRelation(rootNav, context, instanceCd, &tbi, templateNames, DocumentedOnly, isArtificial)) {
+         if (! findClassRelation(rootNav, context, instanceCd, &tbi, templateNames, DocumentedOnly, isArtificial)) {
             // 1.8.2: decided to show inheritance relations even if not documented,
             //        make them artificial, so they do not appear in the index
             //if (!Config_getBool("HIDE_UNDOC_RELATIONS"))
@@ -4790,6 +4788,7 @@ void Doxy_Work::findBaseClassesForClass(EntryNav *rootNav, Definition *context, 
 
       } else if (mode == TemplateInstances) {
          findClassRelation(rootNav, context, instanceCd, &tbi, templateNames, TemplateInstances, isArtificial);
+
       }
 
       if (delTempNames) {
@@ -4821,7 +4820,7 @@ bool Doxy_Work::findTemplateInstanceRelation(Entry *root, Definition *context, C
    instanceClass->setLanguage(root->lang);
 
    if (freshInstance) {
-      Debug::print(Debug::Classes, 0, "      found fresh instance '%s'!\n", instanceClass->name().data());
+      Debug::print(Debug::Classes, 0, "      found fresh instance '%s'\n", instanceClass->name().data());
       Doxygen::classSDict->insert(instanceClass->name(), instanceClass);
 
       instanceClass->setTemplateBaseClassNames(templateNames);
@@ -4842,7 +4841,7 @@ bool Doxy_Work::findTemplateInstanceRelation(Entry *root, Definition *context, C
             unloadNeeded = true;
          }
 
-         Debug::print(Debug::Classes, 0, "        template root found %s templSpec=%s!\n",
+         Debug::print(Debug::Classes, 0, "        template root found %s templSpec=%s\n",
                       templateRoot->name.data(), templSpec.data());
 
          ArgumentList *templArgs = new ArgumentList;
@@ -4860,14 +4859,14 @@ bool Doxy_Work::findTemplateInstanceRelation(Entry *root, Definition *context, C
          }
 
       } else {
-         Debug::print(Debug::Classes, 0, "        no template root entry found!\n");
+         Debug::print(Debug::Classes, 0, "        no template root entry found\n");
          // TODO: what happened if we get here?
       }
 
       //Debug::print(Debug::Classes,0,"    Template instance %s : \n",instanceClass->name().data());
       //ArgumentList *tl = templateClass->templateArguments();
    } else {
-      Debug::print(Debug::Classes, 0, "      instance already exists!\n");
+      Debug::print(Debug::Classes, 0, "      instance already exists\n");
    }
    return true;
 }
@@ -4976,7 +4975,12 @@ bool Doxy_Work::findClassRelation(EntryNav *rootNav, Definition *context, ClassD
    QByteArray biName = bi->name;
    bool explicitGlobalScope = false;
 
-   if (biName.left(2) == "::") { // explicit global scope
+
+printf("\n\n BROOM  findClassRelation  A ");
+
+
+   if (biName.left(2) == "::") { 
+      // explicit global scope
       biName = biName.right(biName.length() - 2);
       explicitGlobalScope = true;
    }
@@ -4990,6 +4994,8 @@ bool Doxy_Work::findClassRelation(EntryNav *rootNav, Definition *context, ClassD
    do {
       QByteArray scopeName = parentNode ? parentNode->name().data() : "";
       int scopeOffset = explicitGlobalScope ? 0 : scopeName.length();
+
+printf("\n\n BROOM  findClassRelation  A1 ");
 
       do {
 
@@ -5006,11 +5012,18 @@ bool Doxy_Work::findClassRelation(EntryNav *rootNav, Definition *context, ClassD
          MemberDef *baseClassTypeDef = 0;
          QByteArray templSpec;
 
-         QSharedPointer<ClassDef> baseClass = dummyShared(getResolvedClass(explicitGlobalScope ? Doxygen::globalScope : context,
-                                              cd->getFileDef(), baseClassName, &baseClassTypeDef,
-                                              &templSpec, mode == Undocumented, true));
+printf("\n\n BROOM  findClassRelation  A3 ");
 
-         if (!isRecursiveBaseClass(rootNav->name(), baseClassName) || explicitGlobalScope
+
+         QSharedPointer<ClassDef> baseClass = dummyShared(getResolvedClass(explicitGlobalScope ? Doxygen::globalScope : context, 
+                        cd->getFileDef(), baseClassName, &baseClassTypeDef, &templSpec, mode == Undocumented, true));
+
+
+printf("\n\n BROOM  findClassRelation  A4 ");
+
+
+
+         if (! isRecursiveBaseClass(rootNav->name(), baseClassName) || explicitGlobalScope
                || (rootNav->lang() == SrcLangExt_IDL &&
                    (rootNav->section() == Entry::EXPORTED_INTERFACE_SEC ||
                     rootNav->section() == Entry::INCLUDED_SERVICE_SEC))) {
@@ -5123,8 +5136,8 @@ bool Doxy_Work::findClassRelation(EntryNav *rootNav, Definition *context, ClassD
             // warning: the following line doesn't work for Mixin classes (see bug 560623)
             // templSpec = getCanonicalTemplateSpec(cd, cd->getFileDef(), templSpec);
 
-            if (found) { Debug::print(Debug::Classes, 0, "    Documented base class `%s' templSpec=%s\n", biName.data(),
-                                      templSpec.isEmpty() ? "" : templSpec.data());
+            if (found) { Debug::print(Debug::Classes, 0, "    Documented base class `%s' templSpec=%s\n", 
+                           biName.data(), templSpec.isEmpty() ? "" : templSpec.data());
 
                // add base class to this class
 
@@ -5254,7 +5267,7 @@ bool Doxy_Work::findClassRelation(EntryNav *rootNav, Definition *context, ClassD
          } else {
             if (mode != TemplateInstances) {
                warn(root->fileName, root->startLine, "Detected potential recursive class relation "
-                    "between class %s and base class %s!\n", root->name.data(), baseClassName.data());
+                    "between class %s and base class %s\n", root->name.data(), baseClassName.data());
             }
 
             // for mode==TemplateInstance this case is quite common and
@@ -5647,12 +5660,10 @@ void Doxy_Work::addMemberDocs(EntryNav *rootNav, MemberDef *md, const char *func
       md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
       md->setDocsForDefinition(!root->proto);
 
-   } else {
-      //printf("overwrite!\n");
+   } else {     
       md->setDocumentation(root->doc, root->docFile, root->docLine);
       md->setDocsForDefinition(!root->proto);
 
-      //printf("overwrite!\n");
       md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
 
       if (
@@ -8086,8 +8097,7 @@ void Doxy_Work::generateClassList(ClassSDict &classSDict)
       if (cd && (cd->getOuterScope() == 0 || // <-- should not happen, but can if we read an old tag file
                  cd->getOuterScope() == Doxygen::globalScope) && ! cd->isHidden() && ! cd->isEmbeddedInOuterScope()) {
 
-         // skip external references, anonymous compounds and
-         // template instances
+         // skip external references, anonymous compounds and template instances
 
          if ( cd->isLinkableInProject() && cd->templateMaster() == 0) {
             msg("Generating docs for compound %s\n", cd->name().data());
@@ -9485,7 +9495,7 @@ void readFormulaRepository()
          int se = line.indexOf(':'); // find name and text separator.
 
          if (se == -1) {
-            warn_uncond("formula.repository is corrupted!\n");
+            warn_uncond("formula.repository is corrupted\n");
             break;
 
          } else {

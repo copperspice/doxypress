@@ -295,13 +295,11 @@ struct CommandLine parseCommandLine(QStringList argList)
                   cmdArgs.rtfExt = "doxy_style.rtf";
                }
 
-/*   BROOM rtf
                QFile f;
                if (openOutputFile(cmdArgs.rtfExt, f)) {
                    RTFGenerator::writeExtensionsFile(f);
                }
                f.close();                
-*/
 
             } else if (cmdArgs.formatName == "rtf-style") {
                cmdArgs.rtfStyle = getValue(iter, argList.end());
@@ -310,13 +308,12 @@ struct CommandLine parseCommandLine(QStringList argList)
                   cmdArgs.rtfStyle = "doxy_style.rtf";
                }
 
-/*  broom rtf
                QFile f;
                if (openOutputFile(cmdArgs.rtfStyle, f)) {
                   RTFGenerator::writeStyleSheetFile(f);
                }
                f.close();
-*/
+
 
             } else  if (cmdArgs.formatName == "html-head") {
                cmdArgs.htmlHead = getValue(iter, argList.end());
@@ -597,23 +594,6 @@ void adjustConfiguration()
 
    // read aliases and store them in a dictionary
    readAliases();
-
-/* Broom - should not need this code
-
-   // store number of spaces in a tab into Doxygen::spaces
-   int &tabSize = Config_getInt("TAB_SIZE");
-
-   Doxygen::spaces.resize(tabSize + 1);
-   int sp;
-
-   for (sp = 0; sp < tabSize; sp++) {
-      Doxygen::spaces.at(sp) = ' ';
-   }
-
-   Doxygen::spaces.at(tabSize) = '\0';
-*/
-
-
 }
 
 QString Doxy_Setup::getValue(QStringList::iterator &iter, QStringList::iterator end)
@@ -645,7 +625,7 @@ void Doxy_Setup::generateConfigFile(const QString &configFile)
    if (fileOpened) {
       FTextStream t(&f);
 
-      // BROOM   
+      // BROOM  - json set up  
       // Config_Json::instance()->writeNewCfg();      
     
       msg("\n\nConfiguration file `%s' created.\n\n", qPrintable(configFile));        

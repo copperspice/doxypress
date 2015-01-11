@@ -46,7 +46,7 @@ class StringMap
    StringMap(Qt::CaseSensitivity foo = Qt::CaseSensitive) {
 
       if (foo) {
-         // CS BROOM - add case stuff
+         // CS BROOM - add additional code here for case sensitive
          // m_dict = QMap<QString, T>;
       } else { 
          // m_dict = QMap<QString, T>;
@@ -188,7 +188,7 @@ class StringMap
          std::sort(temp2.begin(), temp2.end(), [&dict](const T &v1, const T &v2){ return dict.compareValues(v1, v2) < 0; } );
 
          if (temp1 != temp2) {
-            std::string msg = "StringMap::Iterator Key and Value are not the same BROOM ";    // BROOM
+            std::string msg = "StringMap::Iterator Key and Value did not agree, possible sorting issue";    
             msg += typeid(T).name();
 
             throw std::runtime_error(msg);

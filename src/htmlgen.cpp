@@ -52,7 +52,6 @@ static QByteArray g_header;
 static QByteArray g_footer;
 static QByteArray g_mathjax_code;
 
-
 static void writeClientSearchBox(FTextStream &t, const char *relPath)
 {
    t << "        <div id=\"MSearchBox\" class=\"MSearchBoxInactive\">\n";
@@ -97,66 +96,38 @@ static void writeServerSearchBox(FTextStream &t, const char *relPath, bool highl
    }
 }
 
-//------------------------------------------------------------------------
-
 /// Clear a text block \a s from \a begin to \a end markers
-QByteArray clearBlock(const char *s, const char *begin, const char *end)
+QByteArray clearBlock(const QByteArray &s, const QByteArray &begin, const QByteArray &end)
 {
-   if (s == 0 || begin == 0 || end == 0) {
-      return s;
+   QByteArray retval = s;
+
+   int beginPos = s.indexOf(begin);
+   int endPos   = s.indexOf(end, beginPos);
+
+   if (beginPos == -1 || endPos == -1 ) {
+      return retval;
    }
-   const char *p, *q;
-   int beginLen = qstrlen(begin);
-   int endLen = qstrlen(end);
-   int resLen = 0;
-   for (p = s; (q = strstr(p, begin)) != 0; p = q + endLen) {
-      resLen += (int)(q - p);
-      p = q + beginLen;
-      if ((q = strstr(p, end)) == 0) {
-         resLen += beginLen;
-         break;
-      }
-   }
-   resLen += qstrlen(p);
-   // resLen is the length of the string without the marked block
+   
+   int len = (endPos + end.length()) - beginPos;
 
-   QByteArray result;
-   result.resize(resLen + 1);
-
-   char *r;
-
-   for (r = result.data(), p = s; (q = strstr(p, begin)) != 0; p = q + endLen) {
-      int l = (int)(q - p);
-      memcpy(r, p, l);
-
-      r += l;
-      p = q + beginLen;
-
-      if ((q = strstr(p, end)) == 0) {
-         memcpy(r, begin, beginLen);
-         r += beginLen;
-         break;
-      }
-   }
-
-   qstrcpy(r, p);
-   return result;
+   retval.replace(beginPos, len, "");     
 }
-//----------------------------------------------------------------------
 
 QByteArray selectBlock(const QByteArray &s, const QByteArray &name, bool enable)
-{
-   // TODO: this is an expensive function that is called a lot -> optimize it
-   const QByteArray begin = "<!--BEGIN " + name + "-->";
-   const QByteArray end = "<!--END " + name + "-->";
+{  
+   const QByteArray begin   = "<!--BEGIN " + name + "-->";
+   const QByteArray end     = "<!--END " + name + "-->";
+
    const QByteArray nobegin = "<!--BEGIN !" + name + "-->";
-   const QByteArray noend = "<!--END !" + name + "-->";
+   const QByteArray noend   = "<!--END !" + name + "-->";
 
    QByteArray result = s;
+
    if (enable) {
       result = substitute(result, begin, "");
       result = substitute(result, end, "");
       result = clearBlock(result, nobegin, noend);
+
    } else {
       result = substitute(result, nobegin, "");
       result = substitute(result, noend, "");
@@ -181,35 +152,27 @@ static QByteArray getSearchBox(bool serverSide, QByteArray relPath, bool highlig
 
 static QByteArray removeEmptyLines(const QByteArray &s)
 {
-   BufStr out(s.length() + 1);
-   const char *p = s.data();
+   QByteArray retval;
+   QByteArray line;  
+  
+   for (auto letter : s) {         
+      line.append(letter);
 
-   if (p) {
-      char c;
+      if (letter == '\n')  {
 
-      while ((c = *p++)) {
-         if (c == '\n') {
-            const char *e = p;
-
-            while (*e == ' ' || *e == '\t') {
-               e++;
-            }
-
-            if (*e == '\n') {
-               p = e;
-            } else {
-               out.addChar(c);
-            }
-
-         } else {
-            out.addChar(c);
+         if (line.trimmed() != "") {
+            retval.append(line);
          }
-      }
+
+         line = "";
+       }    
    }
 
-   out.addChar('\0');
+   if (line.trimmed() != "") {
+      retval.append(line);
+   }
    
-   return out.data();
+   return retval;
 }
 
 static QByteArray substituteHtmlKeywords(const QByteArray &s, const QByteArray &title, const QByteArray &relPath,
@@ -272,6 +235,7 @@ static QByteArray substituteHtmlKeywords(const QByteArray &s, const QByteArray &
 
    if (timeStamp) {
       generatedBy = theTranslator->trGeneratedAt(dateToString(true), convertToHtml(Config_getString("PROJECT_NAME")));
+
    } else {
       generatedBy = theTranslator->trGeneratedBy();
    }
@@ -311,6 +275,7 @@ static QByteArray substituteHtmlKeywords(const QByteArray &s, const QByteArray &
                         "type=\"application/opensearchdescription+xml\" title=\"" +
                         (hasProjectName ? projectName : QByteArray("Doxygen")) +
                         "\"/>";
+
          // OPENSEARCH_PROVIDER }
       }
       searchBox = getSearchBox(serverBasedSearch, relPath, false);
@@ -355,10 +320,9 @@ static QByteArray substituteHtmlKeywords(const QByteArray &s, const QByteArray &
    }
 
    // first substitute generic keywords
-   QByteArray result = substituteKeywords(s, title,
-                                          convertToHtml(Config_getString("PROJECT_NAME")),
-                                          convertToHtml(Config_getString("PROJECT_NUMBER")),
-                                          convertToHtml(Config_getString("PROJECT_BRIEF")));
+   QByteArray result = substituteKeywords(s, title, convertToHtml(Config_getString("PROJECT_NAME")),
+                                                    convertToHtml(Config_getString("PROJECT_NUMBER")),
+                                                    convertToHtml(Config_getString("PROJECT_BRIEF")));
 
    // additional HTML only keywords
    result = substitute(result, "$navpath", navPath);
@@ -386,8 +350,6 @@ static QByteArray substituteHtmlKeywords(const QByteArray &s, const QByteArray &
 
    return result;
 }
-
-//--------------------------------------------------------------------------
 
 HtmlCodeGenerator::HtmlCodeGenerator()
    : m_streamSet(false), m_col(0)
@@ -727,7 +689,7 @@ void HtmlGenerator::init()
 
    ResourceMgr &mgr = ResourceMgr::instance();
    mgr.copyResourceAs("html/tabs.css",  dname, "tabs.css");
-   mgr.copyResourceAs("html/jquery.js", dname, "jquery.css");
+   mgr.copyResourceAs("html/jquery.js", dname, "jquery.js");
 
    if (Config_getBool("INTERACTIVE_SVG")) {
       mgr.copyResourceAs("html/svgpan.js", dname, "svgpan.js");
@@ -869,8 +831,7 @@ void HtmlGenerator::writeFooterFile(QFile &file)
 }
 
 void HtmlGenerator::startFile(const char *name, const char *, const char *title)
-{
-   //printf("HtmlGenerator::startFile(%s)\n",name);
+{   
    QByteArray fileName = name;
 
    lastTitle = title;
@@ -888,17 +849,17 @@ void HtmlGenerator::startFile(const char *name, const char *, const char *title)
    lastFile = fileName;
    t << substituteHtmlKeywords(g_header, convertToHtml(filterTitle(title)), relPath);
 
-   t << "<!-- " << theTranslator->trGeneratedBy() << " CS Doxygen "
-     << versionString << " -->" << endl;
-   //static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+   t << "<!-- " << theTranslator->trGeneratedBy() << " CS Doxygen " << versionString << " -->" << endl;
+   
    static bool searchEngine = Config_getBool("SEARCHENGINE");
+
    if (searchEngine /*&& !generateTreeView*/) {
       t << "<script type=\"text/javascript\">\n";
       t << "var searchBox = new SearchBox(\"searchBox\", \""
         << relPath << "search\",false,'" << theTranslator->trSearch() << "');\n";
       t << "</script>\n";
    }
-   //generateDynamicSections(t,relPath);
+  
    m_sectionCount = 0;
 }
 

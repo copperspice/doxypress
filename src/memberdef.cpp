@@ -448,8 +448,7 @@ static void writeExceptionListImpl(OutputList &ol, ClassDef *cd, MemberDef *md, 
          ol.exceptionEntry(0, true);
 
       } else {
-         warn(md->getDefFileName(), md->getDefLine(),
-              "missing ) in exception list on member %s", qPrint(md->name()));
+         warn(md->getDefFileName(), md->getDefLine(), "missing ) in exception list on member %s", qPrint(md->name()));
       }
    } else { // Java Exception
       ol.docify(" ");
@@ -458,28 +457,31 @@ static void writeExceptionListImpl(OutputList &ol, ClassDef *cd, MemberDef *md, 
 }
 
 static void writeExceptionList(OutputList &ol, ClassDef *cd, MemberDef *md)
-{
+{ 
    QByteArray exception(QByteArray(md->excpString()).trimmed());
-
-   if (exception.at(0) == '{' ) {
-
-      // this is an UNO IDL attribute - need special handling
-      int index = exception.indexOf(';');
-
-      int oldIndex = 1;
-
-      while (-1 != index) { // there should be no more than 2 (set / get)
-         // omit '{' and ';' -> "set raises (...)"
-         writeExceptionListImpl(ol, cd, md, exception.mid(oldIndex, index - oldIndex));
-         oldIndex = index + 1;
-         index = exception.indexOf(';', oldIndex);
+   int len = exception.length(); 
+ 
+   if (len > 0 )  {
+      if (exception.at(0) == '{' ) {
+   
+         // this is an UNO IDL attribute - need special handling
+         int index = exception.indexOf(';');
+   
+         int oldIndex = 1;
+   
+         while (-1 != index) { // there should be no more than 2 (set / get)
+            // omit '{' and ';' -> "set raises (...)"
+            writeExceptionListImpl(ol, cd, md, exception.mid(oldIndex, index - oldIndex));
+            oldIndex = index + 1;
+            index = exception.indexOf(';', oldIndex);
+         }
+   
+         // the rest is now just '}' - omit that
+   
+      } else {
+         writeExceptionListImpl(ol, cd, md, exception);
+   
       }
-
-      // the rest is now just '}' - omit that
-
-   } else {
-      writeExceptionListImpl(ol, cd, md, exception);
-
    }
 }
 
@@ -989,11 +991,7 @@ QByteArray MemberDef::getOutputFileBase() const
    static bool inlineSimpleClasses = Config_getBool("INLINE_SIMPLE_STRUCTS");
 
    QByteArray baseName;
-
-   //printf("Member: %s: templateMaster=%p group=%p classDef=%p nspace=%p fileDef=%p\n",
-   //    name().data(),m_impl->templateMaster,m_impl->group,m_impl->classDef,
-   //    m_impl->nspace,m_impl->fileDef);
-
+ 
    if (! m_impl->explicitOutputFileBase.isEmpty()) {
       return m_impl->explicitOutputFileBase;
 
@@ -1004,9 +1002,6 @@ QByteArray MemberDef::getOutputFileBase() const
       baseName = m_impl->group->getOutputFileBase();
 
    } else if (m_impl->classDef) {
-
-printf("\n\n BROOM  getOutput  x1.5  ");
-
       baseName = m_impl->classDef->getOutputFileBase();
 
       if (inlineSimpleClasses && m_impl->classDef->isSimple()) {
@@ -1021,10 +1016,8 @@ printf("\n\n BROOM  getOutput  x1.5  ");
 
    }
 
-   if (baseName.isEmpty()) {
-      warn(getDefFileName(), getDefLine(),
-           "Internal inconsistency: member %s does not belong to any container", qPrint(name()) );
-
+   if (baseName.isEmpty()) {      
+      warn(getDefFileName(), getDefLine(), "Internal problem, member %s does not belong to any container", qPrint(name()));
       return "dummy";
 
    } else if (separateMemberPages && isDetailedSectionLinkable()) {
@@ -2574,12 +2567,10 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    bool inFile = container->definitionType() == Definition::TypeFile;
    bool hasDocs = isDetailedSectionVisible(inGroup, inFile);
 
-   //printf("MemberDef::writeDocumentation(): name=`%s' hasDocs=`%d' containerType=%d inGroup=%d sectionLinkable=%d\n",
-   //    name().data(),hasDocs,container->definitionType(),inGroup,isDetailedSectionLinkable());
-
-   if ( !hasDocs ) {
+   if (! hasDocs) {
       return;
    }
+
    if (isEnumValue() && !showEnumValues) {
       return;
    }
@@ -2624,31 +2615,35 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
 
    QByteArray doxyArgs = argsString();
 
-   QByteArray ldef = definition();
+   QByteArray ldef  = definition();
    QByteArray title = name();
-   //printf("member `%s' def=`%s'\n",name().data(),ldef.data());
+ 
 
-   if (isEnumerate()) {
+   if (isEnumerate() && ! title.isEmpty() ) {
+     
       if (title.at(0) == '@') {
          ldef = title = "anonymous enum";
-         if (!m_impl->enumBaseType.isEmpty()) {
+
+         if (! m_impl->enumBaseType.isEmpty()) {
             ldef += " : " + m_impl->enumBaseType;
          }
+
       } else {
          ldef.prepend("enum ");
       }
 
-   } else if (isEnumValue()) {
+   } else if (isEnumValue() && ! ldef.isEmpty()) {
+
       if (ldef.at(0) == '@') {
          ldef = ldef.mid(2);
       }
    }
 
-   int i = 0, l;
-   static QRegExp r("@[0-9]+");
-
-   //----------------------------------------
-
+   
+   int i = 0;
+   int l;
+   static QRegExp r("@[0-9]+");   
+ 
    ol.pushGeneratorState();
 
    bool htmlEndLabelTable = false;
@@ -2667,22 +2662,26 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
             break;
          }   
 
-
          if (vmd->isEnumerate() && ldef.mid(i, l) == vmd->name()) {
             ol.startDoxyAnchor(cfname, cname, memAnchor, doxyName, doxyArgs);
             ol.startMemberDoc(ciname, name(), memAnchor, name(), showInline);
 
             linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), this, ldef.left(i));
+
             vmd->writeEnumDeclaration(ol, getClassDef(), getNamespaceDef(), getFileDef(), getGroupDef());
             linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), this, ldef.right(ldef.length() - i - l));
 
             found = true;
          }
       }
-      if (!found) { // anonymous compound
+
+      if (! found) { 
+         // anonymous compound
          //printf("Anonymous compound `%s'\n",cname.data());
+
          ol.startDoxyAnchor(cfname, cname, memAnchor, doxyName, doxyArgs);
          ol.startMemberDoc(ciname, name(), memAnchor, name(), showInline);
+
          // search for the last anonymous compound name in the definition
 
          int si = ldef.indexOf(' '), pi, ei = i + l;
@@ -2777,6 +2776,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       }
 
       ol.startMemberDocName(isObjCMethod());
+
       if (cd && cd->isObjectiveC()) {
          // strip scope name
          int ep = ldef.indexOf("::");
@@ -2789,20 +2789,25 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
                ldef = ldef.mid(ep + 2);
             }
          }
+
          // strip keywords
          int dp = ldef.indexOf(':');
+
          if (dp != -1) {
             ldef = ldef.left(dp + 1);
          }
-         int l = ldef.length();
-         //printf("start >%s<\n",ldef.data());
+
+         int l = ldef.length();         
          int i = l - 1;
+
          while (i >= 0 && (isId(ldef.at(i)) || ldef.at(i) == ':')) {
             i--;
          }
+
          while (i >= 0 && isspace((uchar)ldef.at(i))) {
             i--;
          }
+
          if (i > 0) {
             // insert braches around the type
             QByteArray tmp("(" + ldef.left(i + 1) + ")" + ldef.mid(i + 1));
@@ -2815,22 +2820,25 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
             ldef.prepend("- ");
          }
       }
-     
+    
       linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), this, substitute(ldef, "::", sep));
       hasParameterList = writeDefArgumentList(ol, cd, scopeName.toUtf8(), this);
      
       if (hasOneLineInitializer()) { // add initializer
-         if (!isDefine()) {
-            //ol.docify(" = ");
+         if (! isDefine()) {            
             ol.docify(" ");
+
             QByteArray init = m_impl->initializer.simplified();
             linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), this, init);
+
          } else {
             ol.writeNonBreakableSpace(3);
             linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), this, m_impl->initializer);
          }
       }
-      if (excpString()) { // add exception list
+
+      if (excpString()) { 
+         // add exception list
          writeExceptionList(ol, cd, this);
          hasParameterList = true; // call endParameterList below
       }

@@ -266,20 +266,23 @@ QByteArray stripAnonymousNamespaceScope(const QByteArray &s)
 {
    int i, p = 0, l;
    QByteArray newScope;
+
    int sl = s.length();
 
-   while ((i = getScopeFragment(s, p, &l)) != -1) {      
+   while ((i = getScopeFragment(s, p, &l)) != -1) {   
+
       if (Doxygen::namespaceSDict->find(s.left(i + l)) != 0) {
 
          if (s.at(i) != '@') {
             if (! newScope.isEmpty()) {
                newScope += "::";
             }
+
             newScope += s.mid(i, l);
          }
 
       } else if (i < sl) {
-         if (!newScope.isEmpty()) {
+         if (! newScope.isEmpty()) {
             newScope += "::";
          }
 
@@ -288,8 +291,8 @@ QByteArray stripAnonymousNamespaceScope(const QByteArray &s)
       }
 
       p = i + l;
-   }
-   
+   }  
+
    return newScope;
 }
 
@@ -1371,6 +1374,10 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
    QByteArray explicitScopePart;
    QByteArray strippedTemplateParams;
 
+
+printf("\n\n BROOM  A  getResolvedClassRec ");
+
+
    name = stripTemplateSpecifiersFromScope(removeRedundantWhiteSpace(n), true, &strippedTemplateParams);
 
    ArgumentList actTemplParams;
@@ -1390,6 +1397,8 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
       replaceNamespaceAliases(explicitScopePart, explicitScopePart.length());
       name = name.mid(qualifierIndex + 2);
    }
+
+printf("\n\n BROOM  B  getResolvedClassRec ");
 
    if (name.isEmpty()) {     
       return 0; 
@@ -1435,6 +1444,10 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
    // below is a more efficient coding of
    // QByteArray key=scope->name()+"+"+name+"+"+explicitScopePart;
 
+
+printf("\n\n BROOM  C  getResolvedClassRec ");
+
+
    QByteArray key;
    key.resize(scopeNameLen + nameLen + explicitPartLen + fileScopeLen + 1);
 
@@ -1450,6 +1463,9 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
 
    qstrcpy(p, explicitScopePart);
    p += explicitPartLen;
+
+
+printf("\n\n BROOM  D  getResolvedClassRec ");
 
    // if a file scope is given and it contains using statements we should
    // also use the file part in the key (as a class name can be in
@@ -1492,6 +1508,10 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
       Doxygen::lookupCache->insert(key, new LookupInfo);
    }
 
+
+printf("\n\n BROOM  E  getResolvedClassRec ");
+
+
    ClassDef *bestMatch = 0;
    MemberDef *bestTypedef = 0;
    QByteArray bestTemplSpec;
@@ -1527,6 +1547,9 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
       *pResolvedType = bestResolvedType;
    }
 
+
+printf("\n\n BROOM  F  getResolvedClassRec ");
+
    pval = Doxygen::lookupCache->object(key);
 
    if (pval) {
@@ -1551,6 +1574,9 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
 ClassDef *getResolvedClass(Definition *scope, FileDef *fileScope, const char *n, MemberDef **pTypeDef, QByteArray *pTemplSpec,
                            bool mayBeUnlinkable, bool mayBeHidden, QByteArray *pResolvedType)
 {  
+
+printf("\n\n BROOM  getResolvedClass  B1 ");
+
    s_resolvedTypedefs.clear();
 
    if (scope == 0 || (scope->definitionType() != Definition::TypeClass && scope->definitionType() != Definition::TypeNamespace ) ||
@@ -1561,6 +1587,8 @@ ClassDef *getResolvedClass(Definition *scope, FileDef *fileScope, const char *n,
    ClassDef *result;
   
    result = getResolvedClassRec(scope, fileScope, n, pTypeDef, pTemplSpec, pResolvedType);
+
+printf("\n\n BROOM  getResolvedClass  B2 ");
    
    if (result == 0)  {
       // for nested classes imported via tag files, the scope may not
@@ -2358,7 +2386,6 @@ QByteArray fileToString(const char *name, bool filter, bool isSourceCode)
          contents.resize(totalSize);
          
          contents.append('\n');    // to help the scanner
-         contents.append('\0');
 
          return contents;
       }
@@ -2386,7 +2413,7 @@ QByteArray fileToString(const char *name, bool filter, bool isSourceCode)
       }
    }
 
-   if (!fileOpened) {
+   if (! fileOpened) {
       err("Unable to open file `%s' for reading\n", name);
    }
 
@@ -4802,8 +4829,6 @@ QByteArray substituteKeywords(const QByteArray &s, const char *title, const char
    result = substitute(result, "$projectbrief",   projBrief);
    result = substitute(result, "$projectlogo",   stripPath(Config_getString("PROJECT_LOGO")));
 
-   // broom (may want to delete empty lines)  
-
    return result;
 }
 
@@ -5098,9 +5123,10 @@ QString convertNameToFile(const char *name, bool allowDots, bool allowUnderscore
    }
 
    if (createSubdirs) {
-      int l1Dir = 0, l2Dir = 0;
+      int l1Dir = 0;
+      int l2Dir = 0;
 
-#if MAP_ALGO==ALGO_COUNT
+#if MAP_ALGO == ALGO_COUNT
       // old algorithm, has the problem that after regeneration the
       // output can be located in a different dir.
 
@@ -5133,7 +5159,7 @@ QString convertNameToFile(const char *name, bool allowDots, bool allowUnderscore
 
 #elif MAP_ALGO == ALGO_MD5
       // third algorithm based on MD5 hash
-   
+ 
       QByteArray sigStr;
       sigStr = QCryptographicHash::hash(result.toUtf8(), QCryptographicHash::Md5);  
 
@@ -5994,12 +6020,16 @@ int getScopeFragment(const QByteArray &s, int p, int *l)
 
    while (sp < sl) {
       char c = s.at(sp);
+
       if (c == ':') {
          sp++, p++;
+
       } else {
          break;
       }
    }
+
+   bool goAway = false;
 
    while (sp < sl) {
       char c = s.at(sp);
@@ -6007,6 +6037,7 @@ int getScopeFragment(const QByteArray &s, int p, int *l)
       switch (c) {
          case ':': 
             // found next part
+            goAway = true;
             break;
 
          case '<': 
@@ -6043,6 +6074,11 @@ int getScopeFragment(const QByteArray &s, int p, int *l)
             sp++;
             break;
       }
+
+      if (goAway) {
+         break;
+      }
+
    }
 
    *l = sp - p;
@@ -7259,7 +7295,7 @@ static int transcodeCharacterBuffer(const char *fileName, BufStr &srcBuf, int si
   
    if (! inCodec || ! outCodec) {
       err("Unsupported character conversion: '%s'->'%s': %s\n"
-          "Check the INPUT_ENCODING setting in the config file!\n",
+          "Check the INPUT_ENCODING setting in the config file\n",
           inputEncoding, outputEncoding, strerror(errno));
 
       exit(1);

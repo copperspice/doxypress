@@ -916,9 +916,11 @@ static void writeHierarchicalIndex(OutputList &ol)
 
       ftv->generateTreeViewInline(t);
       ol.pushGeneratorState();
-      ol.disableAllBut(OutputGenerator::Html);
+      ol.disableAllBut(OutputGenerator::Html);      
       ol.writeString(outStr);
+
       ol.popGeneratorState();
+
       delete ftv;
    }
 
@@ -1520,21 +1522,20 @@ class AlphaIndexTableCell
 {
  public:
    AlphaIndexTableCell(int row, int col, uint letter, ClassDef *cd) :
-      m_letter(letter), m_class(cd), m_row(row), m_col(col) {
-      //printf("AlphaIndexTableCell(%d,%d,%c,%s)\n",row,col,letter!=0 ? letter: '-',
-      //       cd!=(ClassDef*)0x8 ? cd->name().data() : "<null>");
+      m_letter(letter), m_class(cd), m_row(row), m_col(col) 
+   {     
    }
 
    ClassDef *classDef() const {
       return m_class;
    }
-   uint letter()        const {
+   uint letter() const {
       return m_letter;
    }
-   int row()            const {
+   int row() const {
       return m_row;
    }
-   int column()         const {
+   int column() const {
       return m_col;
    }
 
@@ -1610,15 +1611,12 @@ static void writeAlphabeticalClassList(OutputList &ol)
    int totalItems = headerItems * 2 + annotatedClasses;    // number of items in the table (headers span 2 items)
    int rows = (totalItems + columns - 1) / columns;        // number of rows in the table
 
-   //printf("headerItems=%d totalItems=%d columns=%d rows=%d itemsInLastRow=%d\n",
-   //    headerItems,totalItems,columns,rows,itemsInLastRow);
-
    // Keep a list of classes for each starting letter
    LetterToIndexMap<PrefixIgnoreClassList> classesByLetter;
    QList<QList<AlphaIndexTableCell*> *> tableColumns;
 
    // fill the columns with the class list (row elements in each column,
-   // expect for the columns with number >= itemsInLastRow, which get one item less.
+   // expect for the columns with number >= itemsInLastRow, which get one item less
   
    startLetter = 0;
          
@@ -1635,7 +1633,10 @@ static void writeAlphabeticalClassList(OutputList &ol)
    QList<AlphaIndexTableCell *> *tableRows = new QList<AlphaIndexTableCell *>;
    tableColumns.append(tableRows);
 
-   int col = 0, row = 0, maxRows = 0;
+   int col = 0;
+   int row = 0;
+   int maxRows = 0;
+
    PrefixIgnoreClassList *cl; 
 
    for (auto cl : classesByLetter) { 
@@ -1667,7 +1668,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
         tableColumns.append(tableRows);        
       }          
               
-      for ( auto cit = cl->begin() +  1; cit != cl->end(); ++cit)  {
+      for (auto cit = cl->begin() +  1; cit != cl->end(); ++cit)  {
          // add normal cell
 
          cd = *cit;
@@ -1675,7 +1676,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
          tableRows->append(new AlphaIndexTableCell(row, col, 0, cd));
          row++;
 
-         if (row  >maxRows) {
+         if (row > maxRows) {
             maxRows = row;            
          }
    
@@ -1689,19 +1690,6 @@ static void writeAlphabeticalClassList(OutputList &ol)
       }
    }
 
-   // create row iterators for each column
-   QList<AlphaIndexTableCell *>::iterator **colIterators = new QList<AlphaIndexTableCell *>::iterator *[columns];
-
-   for (i = 0; i < columns; i++) {   
-
-      if (i < tableColumns.count()) {
-         colIterators[i] = new QList<AlphaIndexTableCell *>::iterator (tableColumns.at(i)->begin());
-
-      } else { 
-         // empty column
-         colIterators[i] = 0;
-      }
-   }
 
    ol.writeString("<table style=\"margin: 10px; white-space: nowrap;\" align=\"center\" "
                   "width=\"95%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n");
@@ -1716,97 +1704,102 @@ static void writeAlphabeticalClassList(OutputList &ol)
     
       for (j = 0; j < columns; j++) { 
          // foreach table column
+              
+         AlphaIndexTableCell *cell = nullptr;
 
-         if (colIterators[j]) {
-            AlphaIndexTableCell *cell = **(colIterators[j]);
+         if (j < tableColumns.count()) {
 
-            if (cell) {
-               if (cell->row() == i) {
-
-                  if (cell->letter() != 0) {
-                     QByteArray s = letterToLabel(cell->letter());
-                     ol.writeString("<td rowspan=\"2\" valign=\"bottom\">");
-                     ol.writeString("<a name=\"letter_");
-                     ol.writeString(s);
-                     ol.writeString("\"></a>");
-
-                     ol.writeString("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">"
-                                    "<tr>"
-                                    "<td><div class=\"ah\">&#160;&#160;");
-
-                     ol.writeString(QString(QChar(cell->letter())).toUtf8());
-                     ol.writeString(         "&#160;&#160;</div>"
-                                             "</td>"
-                                             "</tr>"
-                                             "</table>\n");
-
-                  } else if (cell->classDef() != (ClassDef *)0x8) {
-                     ClassDef * cd = cell->classDef();
-
-                     ol.writeString("<td valign=\"top\">");
-                     QByteArray namesp, cname;                   
-
-                     extractNamespaceName(cd->name(), cname, namesp);
-                     QByteArray nsDispName;
-                     SrcLangExt lang = cd->getLanguage();
-
-                     QByteArray sep = getLanguageSpecificSeparator(lang);
-
-                     if (sep != "::") {
-                        nsDispName = substitute(namesp, "::", sep);
-                        cname = substitute(cname, "::", sep);
-
-                     } else {
-                        nsDispName = namesp;
-                     }
-
-                     ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), cname);
-
-                     if (!namesp.isEmpty()) {
-                        ol.docify(" (");
-
-                        QSharedPointer<NamespaceDef> nd = getResolvedNamespace(namesp);
-
-                        if (nd && nd->isLinkable()) {
-                           ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), 0, nsDispName);
-
-                        } else {
-                           ol.docify(nsDispName);
-
-                        }
-
-                        ol.docify(")");
-                     }
-                     ol.writeNonBreakableSpace(3);
-                  }
-
-                  ++(*colIterators[j]);
-
-                  if (cell->letter() != 0 || cell->classDef() != (ClassDef *)0x8) {
-                     ol.writeString("</td>");
-                  }
-               }
-
-            } else {
-               ol.writeString("<td></td>");
+            if (i < tableColumns[j]->count()) {                
+               cell = tableColumns[j]->at(i);
             }
          }
+
+         // CopperSpice: if cells are shifted up, add a nullptr cell in the for loop above
+
+         if (cell) {
+
+            if (cell->row() == i) {
+
+               if (cell->letter() != 0) {
+                  QByteArray s = letterToLabel(cell->letter());
+
+                  ol.writeString("<td rowspan=\"2\" valign=\"bottom\">");
+                  ol.writeString("<a name=\"letter_");
+                  ol.writeString(s);
+                  ol.writeString("\"></a>");
+
+                  ol.writeString("<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">"
+                                 "<tr>"
+                                 "<td><div class=\"ah\">&#160;&#160;");
+
+                  ol.writeString(QString(QChar(cell->letter())).toUtf8());
+                  ol.writeString(         "&#160;&#160;</div>"
+                                          "</td>"
+                                          "</tr>"
+                                          "</table>\n");
+
+               } else if (cell->classDef() != (ClassDef *)0x8) {
+
+                  ClassDef * cd = cell->classDef();
+
+                  ol.writeString("<td valign=\"top\">");
+                  QByteArray namesp, cname;                   
+
+                  extractNamespaceName(cd->name(), cname, namesp);
+                  QByteArray nsDispName;
+                  SrcLangExt lang = cd->getLanguage();
+
+                  QByteArray sep = getLanguageSpecificSeparator(lang);
+
+                  if (sep != "::") {
+                     nsDispName = substitute(namesp, "::", sep);
+                     cname = substitute(cname, "::", sep);
+
+                  } else {
+                     nsDispName = namesp;
+                  }
+
+                  ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), cname);
+
+                  if (! namesp.isEmpty()) {
+                     ol.docify(" (");
+
+                     QSharedPointer<NamespaceDef> nd = getResolvedNamespace(namesp);
+
+                     if (nd && nd->isLinkable()) {
+                        ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), 0, nsDispName);
+
+                     } else {
+                        ol.docify(nsDispName);
+
+                     }
+
+                     ol.docify(")");
+                  }
+                  ol.writeNonBreakableSpace(3);
+               }
+
+
+               if (cell->letter() != 0 || cell->classDef() != (ClassDef *)0x8) {
+                  ol.writeString("</td>");
+               }
+
+            }
+
+         } else {
+            ol.writeString("<td></td>");
+
+         }
+         
       }
+
       ol.writeString("</tr>\n");
+
    }
+
    ol.writeString("</table>\n");
-
-   ol.writeString(alphaLinks);
-
-   // release the temporary memory
-   for (i = 0; i < columns; i++) {
-      delete colIterators[i];
-   }
-
-   delete[] colIterators;
+   ol.writeString(alphaLinks); 
 }
-
-//----------------------------------------------------------------------------
 
 static void writeAlphabeticalIndex(OutputList &ol)
 {
@@ -1819,7 +1812,7 @@ static void writeAlphabeticalIndex(OutputList &ol)
 
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::ClassIndex);
    QByteArray title = lne ? lne->title() : theTranslator->trCompoundIndex();
-   bool addToIndex = lne == 0 || lne->visible();
+   bool addToIndex  = lne == 0 || lne->visible();
 
    startFile(ol, "classes", 0, title, HLI_Classes);
 
@@ -1832,6 +1825,7 @@ static void writeAlphabeticalIndex(OutputList &ol)
    }
 
    ol.startContents();
+
    writeAlphabeticalClassList(ol);
    endFile(ol); // contains ol.endContents()
 
@@ -2946,9 +2940,11 @@ static void writePageIndex(OutputList &ol)
 
    QByteArray title = lne ? lne->title() : theTranslator->trRelatedPages();
    startFile(ol, "pages", 0, title, HLI_Pages);
+  
    startTitle(ol, 0);
    ol.parseText(title);
    endTitle(ol, 0, 0);
+
    ol.startContents();
    ol.startTextBlock();
    ol.parseText(lne ? lne->intro() : theTranslator->trRelatedPagesDescription());
@@ -2970,9 +2966,6 @@ static void writePageIndex(OutputList &ol)
 
       delete ftv;
    }
-
-   //  ol.popGeneratorState();
-   // ------
 
    endFile(ol);
    ol.popGeneratorState();

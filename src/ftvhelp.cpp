@@ -308,7 +308,7 @@ void FTVHelp::generateLink(FTextStream &t, FTVNode *n)
 static void generateBriefDoc(FTextStream &t, Definition *def)
 {
    QByteArray brief = def->briefDescription(true);
-   //printf("*** %p: generateBriefDoc(%s)='%s'\n",def,def->name().data(),brief.data());
+  
    if (!brief.isEmpty()) {
       DocNode *root = validatingParseDoc(def->briefFile(), def->briefLine(),
                                          def, 0, brief, false, false, 0, true, true);
@@ -326,17 +326,23 @@ void FTVHelp::generateTree(FTextStream &t, const QList<FTVNode *> &nl, int level
    for (auto n : nl) {
       t << "<tr id=\"row_" << generateIndentLabel(n, 0) << "\"";
 
-      if ((index & 1) == 0) { // even row
+      if ((index & 1) == 0) { 
+         // even row
          t << " class=\"even\"";
       }
 
-      if (level >= maxLevel) { // item invisible by default
+      if (level >= maxLevel) { 
+         // item invisible by default
          t << " style=\"display:none;\"";
-      } else { // item visible by default
+
+      } else { 
+         // item visible by default
          index++;
+
       }
 
       t << "><td class=\"entry\">";
+
       bool nodeOpened = level + 1 < maxLevel;
       generateIndent(t, n, nodeOpened);
 
@@ -373,7 +379,8 @@ void FTVHelp::generateTree(FTextStream &t, const QList<FTVNode *> &nl, int level
 
          generateTree(t, n->children, level + 1, maxLevel, index);
 
-      } else { // leaf node
+      } else {   
+         // leaf node
          FileDef *srcRef = 0;
 
          if (n->def && n->def->definitionType() == Definition::TypeFile &&
@@ -413,12 +420,11 @@ void FTVHelp::generateTree(FTextStream &t, const QList<FTVNode *> &nl, int level
          if (n->def) {
             generateBriefDoc(t, n->def);
          }
+
          t << "</td></tr>" << endl;
       }
    }
 }
-
-//-----------------------------------------------------------
 
 static QByteArray pathToNode(FTVNode *leaf, FTVNode *n)
 {
@@ -721,7 +727,7 @@ void FTVHelp::generateTreeViewScripts()
    generateJSNavTree(m_indentNodes[0]);
    
    ResourceMgr::instance().copyResourceAs("html/resize.js",   htmlOutput, "resize.js");
-   ResourceMgr::instance().copyResourceAs("html/navtree.css", htmlOutput, "navtree.js");
+   ResourceMgr::instance().copyResourceAs("html/navtree.css", htmlOutput, "navtree.css");
 }
 
 // write tree inside page
@@ -752,10 +758,12 @@ void FTVHelp::generateTreeViewInline(FTextStream &t)
       t << "<div class=\"levels\">[";
       t << theTranslator->trDetailLevel();
       t << " ";
+
       int i;
       for (i = 1; i <= depth; i++) {
          t << "<span onclick=\"javascript:toggleLevel(" << i << ");\">" << i << "</span>";
       }
+
       t << "]</div>";
 
       if (preferredNumEntries > 0) {
@@ -780,11 +788,10 @@ void FTVHelp::generateTreeViewInline(FTextStream &t)
    t << "<table class=\"directory\">\n";
 
    int index = 0;
-
    generateTree(t, m_indentNodes[0], 0, preferredDepth, index);
 
    t << "</table>\n";
-   t << "</div><!-- directory -->\n";
+   t << "</div><!-- directory -->\n" << endl;
 }
 
 // write old style index.html and tree.html

@@ -99,28 +99,18 @@ void ClassSDict::writeDocumentation(OutputList &ol, Definition *container)
    static bool inlineGroupedClasses = Config_getBool("INLINE_GROUPED_CLASSES");
    static bool inlineSimpleClasses  = Config_getBool("INLINE_SIMPLE_STRUCTS");
 
-   if (!inlineGroupedClasses && !inlineSimpleClasses) {
+   if (! inlineGroupedClasses && !inlineSimpleClasses) {
       return;
    }
 
    if (count() > 0) {
       bool found = false;
-
-      ClassSDict::Iterator sdi(*this);
-      QSharedPointer<ClassDef> cd;
-
-      for (sdi.toFirst(); (cd = sdi.current()); ++sdi) {
-         //printf("%s:writeDocumentation() %p linkable=%d embedded=%d container=%p partOfGroups=%d\n",
-         //  cd->name().data(),cd->getOuterScope(),cd->isLinkableInProject(),cd->isEmbeddedInOuterScope(),
-         //  container,cd->partOfGroups() ? cd->partOfGroups()->count() : 0);
-
+           
+      for (auto cd : *this) {
          if (cd->name().indexOf('@') == -1 && cd->isLinkableInProject() && cd->isEmbeddedInOuterScope() &&
-               (container == 0 || cd->partOfGroups() == 0)             ) {
+               (container == 0 || cd->partOfGroups() == 0) ) {
 
-            // if container==0 -> show as part of the group docs, otherwise only show if not part of a group
-            //printf("  showing class %s\n",cd->name().data());
-
-            if (!found) {
+            if (! found) {
                ol.writeRuler();
                ol.startGroupHeader();
                ol.parseText(fortranOpt ? theTranslator->trTypeDocumentation() : theTranslator->trClassDocumentation());

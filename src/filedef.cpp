@@ -618,7 +618,7 @@ void FileDef::writeDocumentation(OutputList &ol)
 
    QByteArray versionTitle;
 
-   if (!m_fileVersion.isEmpty()) {
+   if (! m_fileVersion.isEmpty()) {
       versionTitle = ("(" + m_fileVersion + ")");
    }
 
@@ -628,10 +628,11 @@ void FileDef::writeDocumentation(OutputList &ol)
    if (getDirDef()) {
       startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_FileVisible, !generateTreeView);
 
-      if (!generateTreeView) {
+      if (! generateTreeView) {
          getDirDef()->writeNavigationPath(ol);
          ol.endQuickIndices();
       }
+
       QByteArray pageTitleShort = theTranslator->trFileReference(name());
       startTitle(ol, getOutputFileBase(), this);
       ol.pushGeneratorState();

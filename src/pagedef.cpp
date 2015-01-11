@@ -129,7 +129,7 @@ void PageDef::writeTagFile(FTextStream &tagFile)
       }
    }
 
-   if (!found) { 
+   if (! found) { 
       // not one of the generated related pages
 
       tagFile << "  <compound kind=\"page\">" << endl;

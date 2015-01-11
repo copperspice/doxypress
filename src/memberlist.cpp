@@ -625,6 +625,7 @@ void MemberList::writeDocumentation(OutputList &ol, const char *scopeName, Defin
          mg.writeDocumentation(ol, scopeName, container, showEnumValues, showInline);
       }
    }
+
    ol.endMemberDocList();
 }
 

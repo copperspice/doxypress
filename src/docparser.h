@@ -756,7 +756,7 @@ class DocFormula : public DocNode
    QByteArray  m_name;
    QByteArray  m_text;
    QByteArray  m_relPath;
-   int      m_id;
+   int m_id;
 };
 
 /** Node representing an entry in the index. */

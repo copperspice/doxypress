@@ -801,6 +801,7 @@ class LayoutParser : public QXmlDefaultHandler
          QByteArray subName;          // optional name for an item if it is rendered as a child
          QByteArray intro;            // introduction text to be put on the index page
          QByteArray baseFile;         // base name of the file containing the index page
+
       } mapping[] = {
          {
             "mainpage",
