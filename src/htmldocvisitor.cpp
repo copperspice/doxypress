@@ -356,23 +356,29 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
    }
 }
 
-
 void HtmlDocVisitor::visit(DocVerbatim *s)
 {
    if (m_hide) {
       return;
    }
+
    QByteArray lang = m_langExt;
-   if (!s->language().isEmpty()) { // explicit language setting
+   if (! s->language().isEmpty()) { 
+      // explicit language setting
       lang = s->language();
    }
+
    SrcLangExt langExt = getLanguageFromFileName(lang);
+
    switch (s->type()) {
+
       case DocVerbatim::Code:
          forceEndParagraph(s);
+
          m_t << PREFRAG_START;
-         Doxygen::parserManager->getParser(lang)
-         ->parseCode(m_ci,
+         m_t << flush;      // added by copperspice
+
+         Doxygen::parserManager->getParser(lang)->parseCode(m_ci,
                      s->context(),
                      s->text(),
                      langExt,
@@ -386,9 +392,13 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
                      true,  // show line numbers
                      m_ctx  // search context
                     );
+
+         m_t << flush;      // added by copperspice
          m_t << PREFRAG_END;
+
          forceStartParagraph(s);
          break;
+
       case DocVerbatim::Verbatim:
          forceEndParagraph(s);
          m_t << /*PREFRAG_START <<*/ "<pre class=\"fragment\">";
@@ -503,13 +513,16 @@ void HtmlDocVisitor::visit(DocInclude *inc)
    if (m_hide) {
       return;
    }
+
    SrcLangExt langExt = getLanguageFromFileName(inc->extension());
+
    switch (inc->type()) {
+
       case DocInclude::Include:
          forceEndParagraph(inc);
          m_t << PREFRAG_START;
-         Doxygen::parserManager->getParser(inc->extension())
-         ->parseCode(m_ci,
+
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci,
                      inc->context(),
                      inc->text(),
                      langExt,
@@ -526,6 +539,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          m_t << PREFRAG_END;
          forceStartParagraph(inc);
          break;
+
       case DocInclude::IncWithLines: {
          forceEndParagraph(inc);
          m_t << PREFRAG_START;
@@ -558,6 +572,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          break;
       case DocInclude::LatexInclude:
          break;
+
       case DocInclude::VerbInclude:
          forceEndParagraph(inc);
          m_t << /*PREFRAG_START <<*/ "<pre class=\"fragment\">";
@@ -565,11 +580,12 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          m_t << "</pre>" /*<< PREFRAG_END*/;
          forceStartParagraph(inc);
          break;
+
       case DocInclude::Snippet: {
          forceEndParagraph(inc);
          m_t << PREFRAG_START;
-         Doxygen::parserManager->getParser(inc->extension())
-         ->parseCode(m_ci,
+
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci,
                      inc->context(),
                      extractBlock(inc->text(), inc->blockId()),
                      langExt,
@@ -591,22 +607,21 @@ void HtmlDocVisitor::visit(DocInclude *inc)
 }
 
 void HtmlDocVisitor::visit(DocIncOperator *op)
-{
-   //printf("DocIncOperator: type=%d first=%d, last=%d text=`%s'\n",
-   //    op->type(),op->isFirst(),op->isLast(),op->text().data());
+{  
    if (op->isFirst()) {
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << PREFRAG_START;
       }
       pushEnabled();
       m_hide = true;
    }
+
    SrcLangExt langExt = getLanguageFromFileName(m_langExt);
+
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (!m_hide) {
-         Doxygen::parserManager->getParser(m_langExt)
-         ->parseCode(
+         Doxygen::parserManager->getParser(m_langExt)->parseCode(
             m_ci,
             op->context(),
             op->text(),
@@ -642,7 +657,9 @@ void HtmlDocVisitor::visit(DocFormula *f)
    if (m_hide) {
       return;
    }
-   bool bDisplay = !f->isInline();
+
+   bool bDisplay = ! f->isInline();
+
    if (bDisplay) {
       forceEndParagraph(f);
       m_t << "<p class=\"formulaDsp\">" << endl;

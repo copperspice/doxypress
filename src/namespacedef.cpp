@@ -924,7 +924,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title, bool co
             name = nd->displayName();
          }
 
-         ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), 0, name);
+         ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), 0, name.toUtf8());
          ol.endMemberItem();
 
          if (! nd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {

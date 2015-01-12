@@ -1261,34 +1261,40 @@ void LatexGenerator::endPageRef(const char *clname, const char *anchor)
    t << "}";
 }
 
-void LatexGenerator::writeCodeLink(const char *ref, const char *f,
-                                   const char *anchor, const char *name,
-                                   const char *)
+void LatexGenerator::writeCodeLink(const QByteArray &ref, const QByteArray &f, const QByteArray &anchor, 
+                                   const QByteArray &name, const QByteArray &)
 {
    static bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
    static bool usePDFLatex   = Config_getBool("USE_PDFLATEX");
    int l = qstrlen(name);
+
    if (col + l > 80) {
       t << "\n      ";
       col = 0;
    }
+
    if (/*m_prettyCode &&*/ !disableLinks && !ref && usePDFLatex && pdfHyperlinks) {
       t << "\\hyperlink{";
       if (f) {
          t << stripPath(f);
       }
-      if (f && anchor) {
+
+      if (! f.isEmpty() && ! anchor.isEmpty()) {
          t << "_";
       }
-      if (anchor) {
+
+      if (! anchor.isEmpty()) {
          t << anchor;
       }
+
       t << "}{";
       codify(name);
       t << "}";
+
    } else {
       t << name;
    }
+
    col += l;
 }
 

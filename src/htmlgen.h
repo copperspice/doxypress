@@ -33,14 +33,16 @@ class HtmlCodeGenerator : public CodeOutputInterface
    HtmlCodeGenerator();
    void setTextStream(FTextStream &t);
    void setRelativePath(const QByteArray &path);
-   void codify(const char *text);
 
-   void writeCodeLink(const char *ref, const char *file, const char *anchor, const char *name, const char *tooltip);
+   void codify(const QByteArray &text) override;
 
-   void writeTooltip(const char *id, const DocLinkInfo &docInfo, const char *decl, const char *desc, 
-                     const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo );
+   void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
+                      const QByteArray &name, const QByteArray &tooltip) override;
 
-   void writeLineNumber(const char *, const char *, const char *, int);
+   void writeTooltip(const char *id, const DocLinkInfo &docInfo, const QByteArray &decl, const QByteArray &desc, 
+                     const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo) override;
+
+   void writeLineNumber(const char *, const QByteArray &, const char *, int) override;
    void startCodeLine(bool);
    void endCodeLine();
    void startFontClass(const char *s);
@@ -50,8 +52,10 @@ class HtmlCodeGenerator : public CodeOutputInterface
    void addWord(const QString &name, bool) override {}
 
  private:
-   void _writeCodeLink(const char *className, const char *ref, const char *file, const char *anchor, const char *name, const char *tooltip);
-   void docify(const char *str);
+   void _writeCodeLink(const QByteArray &className, const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
+                       const QByteArray &name, const QByteArray &tooltip);
+
+   void docify(const QByteArray &str);
 
    bool m_streamSet;
    FTextStream m_t;
@@ -65,6 +69,7 @@ class HtmlGenerator : public OutputGenerator
  public:
    HtmlGenerator();
    virtual ~HtmlGenerator();
+
    static void init();
    static void writeStyleSheetFile(QFile &f);
    static void writeHeaderFile(QFile &f);
@@ -115,22 +120,22 @@ class HtmlGenerator : public OutputGenerator
    OutputGenerator *get(OutputType o) {
       return (o == Html) ? this : 0;
    }
-
-   // ---- CodeOutputInterface
-   void codify(const char *text) {
+ 
+   void codify(const QByteArray &text) override {
       m_codeGen.codify(text);
    }
 
-   void writeCodeLink(const char *ref, const char *file, const char *anchor, const char *name, const char *tooltip) {
+   void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
+                      const QByteArray &name, const QByteArray &tooltip) override {
       m_codeGen.writeCodeLink(ref, file, anchor, name, tooltip);
    }
 
-   void writeLineNumber(const char *ref, const char *file, const char *anchor, int lineNumber) {
+   void writeLineNumber(const char *ref, const QByteArray &file, const char *anchor, int lineNumber) {
       m_codeGen.writeLineNumber(ref, file, anchor, lineNumber);
    }
 
-   void writeTooltip(const char *id, const DocLinkInfo &docInfo, const char *decl, const char *desc, 
-                     const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo ) {
+   void writeTooltip(const char *id, const DocLinkInfo &docInfo, const QByteArray &decl, const QByteArray &desc, 
+                     const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo ) override {
       m_codeGen.writeTooltip(id, docInfo, decl, desc, defInfo, declInfo);
    }
 
@@ -186,15 +191,16 @@ class HtmlGenerator : public OutputGenerator
    void startIndexValue(bool);
    void endIndexValue(const char *, bool);
    
-   void startIndexItem(const char *ref, const char *file);
-   void endIndexItem(const char *ref, const char *file);
-   void docify(const char *text);
+   void startIndexItem(const QByteArray &ref, const QByteArray &file) override;
+   void endIndexItem(const QByteArray &ref, const QByteArray &file) override;
+   void docify(const QByteArray &text) override;
 
-   void writeObjectLink(const char *ref, const char *file, const char *anchor, const char *name);
+   void writeObjectLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, const QByteArray &name) override;
 
-   void startTextLink(const char *file, const char *anchor);
+   void startTextLink(const QByteArray &file, const QByteArray &anchor) override;
+
    void endTextLink();
-   void startHtmlLink(const char *url);
+   void startHtmlLink(const QByteArray &url) override;
    void endHtmlLink();
  
    void startMemberSections();
@@ -218,10 +224,10 @@ class HtmlGenerator : public OutputGenerator
    void endAnonTypeScope(int)
    {}
 
-   void startMemberItem(const char *anchor, int, const char *inheritId);
+   void startMemberItem(const char *anchor, int, const QByteArray &inheritId) override;
    void endMemberItem();
    void startMemberTemplateParams();
-   void endMemberTemplateParams(const char *anchor, const char *inheritId);
+   void endMemberTemplateParams(const char *anchor, const QByteArray &inheritId) override;
 
    void startMemberGroupHeader(bool);
    void endMemberGroupHeader();
@@ -231,17 +237,17 @@ class HtmlGenerator : public OutputGenerator
    void endMemberGroup(bool);
 
    void insertMemberAlign(bool);
-   void startMemberDescription(const char *anchor, const char *inheritId);
+   void startMemberDescription(const char *anchor, const QByteArray &inheritId) override;
    void endMemberDescription();
 
    void startMemberDeclaration() 
    {
    }
 
-   void endMemberDeclaration(const char *anchor, const char *inheritId);
+   void endMemberDeclaration(const char *anchor, const QByteArray &inheritId) override;
 
-   void writeInheritedSectionTitle(const char *id, const char *ref, const char *file, 
-                                   const char *anchor, const char *title, const char *name);
+   void writeInheritedSectionTitle(const char *id, const QByteArray &ref, const char *file, 
+                                   const char *anchor, const char *title, const char *name) override;
 
    void startGroupHeader(int);
    void endGroupHeader(int);
@@ -404,14 +410,8 @@ class HtmlGenerator : public OutputGenerator
    void endTextBlock(bool) {
       t << "</div>";
    }
-
-
-   //void startDescList(SectionTypes)   { t << "<dl compact><dt><b>" << endl; }
-   //void endDescList()                 { t << "</dl>"; }
-   //void writeDescItem()               { t << "<dd>" << endl; }
-
-
-   void lineBreak(const char *style);
+  
+   void lineBreak(const QByteArray &style) override ;
    void writeChar(char c);
    void startMemberDoc(const char *, const char *, const char *, const char *, bool);
    void endMemberDoc(bool);
@@ -423,9 +423,9 @@ class HtmlGenerator : public OutputGenerator
    {
    }
   
-   void writeStartAnnoItem(const char *type, const char *file, const char *path, const char *name);
-   
-   void startSimpleSect(SectionTypes, const char *, const char *, const char *);
+   void writeStartAnnoItem(const char *type, const QByteArray &file, const QByteArray &path, const char *name) override;   
+   void startSimpleSect(SectionTypes, const QByteArray &, const char *, const char *) override ;
+
    void endSimpleSect();
    void startParamList(ParamListTypes, const char *);
    void endParamList();
@@ -439,14 +439,14 @@ class HtmlGenerator : public OutputGenerator
    void startClassDiagram();
    void endClassDiagram(const ClassDiagram &, const char *, const char *);
    void startPageRef() {}
-   void endPageRef(const char *, const char *) {}
+   void endPageRef(const QByteArray &, const QByteArray &) override {}
    void startQuickIndices() {}
    void endQuickIndices();
    void writeSplitBar(const char *name);
    void writeNavigationPath(const char *s);
    void writeLogo();
    void writeQuickLinks(bool compact, HighlightedItem hli, const char *file);
-   void writeSummaryLink(const char *file, const char *anchor, const char *title, bool first);
+   void writeSummaryLink(const QByteArray &file, const char *anchor, const char *title, bool first) override;
    void startContents();
    void endContents();
    void writeNonBreakableSpace(int);  
@@ -469,14 +469,14 @@ class HtmlGenerator : public OutputGenerator
    void endMemberDocPrefixItem();
    void startMemberDocName(bool);
    void endMemberDocName();
-   void startParameterType(bool first, const char *key);
+   void startParameterType(bool first, const QByteArray &key) override;
    void endParameterType();
    void startParameterName(bool);
    void endParameterName(bool last, bool emptyList, bool closeBracket);
    void startParameterList(bool);
    void endParameterList();
 
-   virtual void exceptionEntry(const char *, bool);
+   void exceptionEntry(const QByteArray &, bool) override;
 
    void startConstraintList(const char *);
    void startConstraintParam();
@@ -505,7 +505,7 @@ class HtmlGenerator : public OutputGenerator
    QByteArray lastTitle;
    QByteArray lastFile;
    QByteArray relPath;
-   void docify(const char *text, bool inHtmlComment);
+   void docify(const QByteArray &text, bool inHtmlComment);
 
    HtmlGenerator &operator=(const HtmlGenerator &g);
    HtmlGenerator(const HtmlGenerator &g);

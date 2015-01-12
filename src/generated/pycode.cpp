@@ -1820,18 +1820,15 @@ static bool findMemberLink(CodeOutputInterface &ol, Definition *sym, const char 
 }
 
 static void findMemberLink(CodeOutputInterface &ol, char *symName)
-{
-   //printf("Member reference: %s scope=%s member=%s\n",
-   //    pycodeYYtext,
-   //    g_currentDefinition?g_currentDefinition->name().data():"<none>",
-   //    g_currentMemberDef?g_currentMemberDef->name().data():"<none>"
-   //    );
+{   
    if (g_currentDefinition) {
       DefinitionIntf *di = Doxygen::symbolMap->find(symName);
+
       if (di) {
          if (di->definitionType() == DefinitionIntf::TypeSymbolList) { // multiple symbols
             DefinitionListIterator dli(*(DefinitionList *)di);
             Definition *sym;
+
             for (dli.toFirst(); (sym = dli.current()); ++dli) {
                if (findMemberLink(ol, sym, symName)) {
                   return;
@@ -1844,7 +1841,7 @@ static void findMemberLink(CodeOutputInterface &ol, char *symName)
          }
       }
    }
-   //printf("sym %s not found\n",&pycodeYYtext[5]);
+   
    codify(symName);
 }
 

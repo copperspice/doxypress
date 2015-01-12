@@ -1332,7 +1332,7 @@ static void writeNamespaceIndex(OutputList &ol)
          }
          
          ol.startIndexKey();         
-         ol.writeObjectLink(0, nd->getOutputFileBase(), 0, nd->displayName());         
+         ol.writeObjectLink(0, nd->getOutputFileBase(), 0, nd->displayName().toUtf8());         
          ol.endIndexKey();
 
          bool hasBrief = !nd->briefDescription().isEmpty();
@@ -1431,7 +1431,7 @@ static void writeAnnotatedClassList(OutputList &ol)
          QByteArray type = cd->compoundTypeString();
          ol.startIndexKey();
         
-         ol.writeObjectLink(0, cd->getOutputFileBase(), cd->anchor(), cd->displayName());
+         ol.writeObjectLink(0, cd->getOutputFileBase(), cd->anchor(), cd->displayName().toUtf8());
          ol.endIndexKey();
 
          bool hasBrief = !cd->briefDescription().isEmpty();
@@ -1920,7 +1920,7 @@ static void writeClassLinkForMember(OutputList &ol, MemberDef *md, const char *s
 
    if ( cd && prevClassName != cd->displayName()) {
       ol.docify(separator);
-      ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), cd->displayName());
+      ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), cd->displayName().toUtf8());
       ol.writeString("\n");
       prevClassName = cd->displayName();
    }

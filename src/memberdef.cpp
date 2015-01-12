@@ -1227,10 +1227,10 @@ void MemberDef::writeLink(OutputList &ol, ClassDef *, NamespaceDef *, FileDef *f
             getEnumScope() && getEnumScope()->getGroupDef()) { // but its container is
          GroupDef *enumValGroup = getEnumScope()->getGroupDef();
 
-         ol.writeObjectLink(enumValGroup->getReference(), enumValGroup->getOutputFileBase(), anchor(), n);
+         ol.writeObjectLink(enumValGroup->getReference(), enumValGroup->getOutputFileBase(), anchor(), n.toUtf8());
 
       } else {
-         ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), n);
+         ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), n.toUtf8());
       }
 
    } else { 
@@ -2161,20 +2161,18 @@ void MemberDef::_writeReimplements(OutputList &ol)
 
          if (markerPos != -1) { // should always pass this.
             ol.parseText(reimplFromLine.left(markerPos)); //text left from marker
-            if (bmd->isLinkable()) { // replace marker with link
-               //Definition *bd=bmd->group;
-               //if (bd==0) bd=bcd;
-               ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(),
-                                  bmd->anchor(), bcd->displayName());
 
-               //ol.writeObjectLink(bcd->getReference(),bcd->getOutputFileBase(),
-               //    bmd->anchor(),bcd->name());
+            if (bmd->isLinkable()) { // replace marker with link
+              
+               ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bcd->displayName().toUtf8());
+          
                if ( bmd->isLinkableInProject() ) {
                   writePageRef(ol, bmd->getOutputFileBase(), bmd->anchor());
                }
+
             } else {
-               ol.writeObjectLink(bcd->getReference(), bcd->getOutputFileBase(),
-                                  0, bcd->displayName());
+               ol.writeObjectLink(bcd->getReference(), bcd->getOutputFileBase(), 0, bcd->displayName().toUtf8());
+
                if (bcd->isLinkableInProject()/* && !Config_getBool("PDF_HYPERLINKS")*/ ) {
                   writePageRef(ol, bcd->getOutputFileBase(), bcd->anchor());
                }
@@ -2259,7 +2257,7 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
             if (ok && bcd && bmd) { 
                // write link for marker
                
-               ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bcd->displayName());
+               ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bcd->displayName().toUtf8());
 
                if (bmd->isLinkableInProject() ) {
                   writePageRef(ol, bmd->getOutputFileBase(), bmd->anchor());
@@ -2321,7 +2319,7 @@ void MemberDef::_writeCategoryRelation(OutputList &ol)
       if (i != -1 && !name.isEmpty()) {
          ol.startParagraph();
          ol.parseText(text.left(i));
-         ol.writeObjectLink(ref, file, anc, name);
+         ol.writeObjectLink(ref, file, anc, name.toUtf8());
          ol.parseText(text.mid(i + 2));
          ol.endParagraph();
       }

@@ -84,7 +84,7 @@ class TranslatorEnglish : public Translator
 
    /*! subscript for the related functions. */
    virtual QByteArray trRelatedSubscript() {
-      return "(Note that these are not member functions.)";
+      return "(These are not member functions)";
    }
 
    /*! header that is put before the detailed description of files, classes and namespaces. */

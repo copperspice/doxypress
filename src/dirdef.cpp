@@ -219,7 +219,7 @@ void DirDef::writeSubDirList(OutputList &ol)
          ol.startMemberItem(dd->getOutputFileBase(), 0);
          ol.parseText(theTranslator->trDir(false, true) + " ");
          ol.insertMemberAlign();
-         ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName());
+         ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName().toUtf8());
          ol.endMemberItem();
 
          if (!dd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
@@ -684,7 +684,7 @@ static void writePartialDirPath(OutputList &ol, const DirDef *root, const DirDef
       ol.writeString("&#160;/&#160;");
    }
 
-   ol.writeObjectLink(target->getReference(), target->getOutputFileBase(), 0, target->shortName());
+   ol.writeObjectLink(target->getReference(), target->getOutputFileBase(), 0, target->shortName().toUtf8());
 }
 
 static void writePartialFilePath(OutputList &ol, const DirDef *root, const FileDef *fd)

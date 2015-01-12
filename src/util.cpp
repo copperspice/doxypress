@@ -631,7 +631,7 @@ ClassDef *newResolveTypedef(FileDef *fileScope, MemberDef *md,  MemberDef **pMem
       sp++;
    }
 
-   MemberDef *memTypeDef = 0;
+   MemberDef *memTypeDef = nullptr;
    ClassDef  *result = getResolvedClassRec(md->getOuterScope(), fileScope, type, &memTypeDef, 0, pResolvedType);
 
    // if type is a typedef then return what it resolves to.
@@ -712,65 +712,57 @@ done:
 /*! Substitutes a simple unqualified \a name within \a scope. Returns the
  *  value of the typedef or \a name if no typedef was found.
  */
-static QByteArray substTypedef(Definition *scope, FileDef *fileScope, const QByteArray &name,
+static QByteArray substTypedef(Definition *scope, FileDef *fileScope, const QByteArray &name, 
                                MemberDef **pTypeDef = 0)
 {
    QByteArray result = name;
+
    if (name.isEmpty()) {
       return result;
    }
 
    // lookup scope fragment in the symbol map
-   DefinitionIntf *di = Doxygen::symbolMap->value(name);
+   auto di = Doxygen::symbolMap->find(name);
 
-   if (di == 0) {
-      return result;   // no matches
+   if (di == Doxygen::symbolMap->end()) {
+      // could not find any matching symbols
+      return 0;   
    }
 
-   MemberDef *bestMatch = 0;
-   if (di->definitionType() == DefinitionIntf::TypeSymbolList) { 
-      // multi symbols, search for the best match
-     
-      int minDistance = 10000; // init at "infinite"
+   int minDistance = 10000; // init at "infinite"
+
+   MemberDef *bestMatch = nullptr;
+
+   QSharedPointer<QList<Definition *>> dl;  
+   dl = *di;  
     
-      for (auto d : *(DefinitionList *)di) {
-         // only look at members
+    // search for the best match  
+   for (auto d : *dl) {
+      // only look at members
 
-         if (d->definitionType() == Definition::TypeMember) {
-            // that are also typedefs
-            MemberDef *md = (MemberDef *)d;
+      if (d->definitionType() == Definition::TypeMember) {
+         // that are also typedefs
+         MemberDef *md = dynamic_cast<MemberDef *>(d);   
 
-            if (md->isTypedef()) { // d is a typedef
-               // test accessibility of typedef within scope.
-               int distance = isAccessibleFromWithExpScope(scope, fileScope, d, "");
+         if (md->isTypedef()) { 
+            // d is a typedef, test accessibility of typedef within scope
 
-               if (distance != -1 && distance < minDistance) {
-                  // definition is accessible and a better match
-               
-                  minDistance = distance;
-                  bestMatch = md;
-               }
+            int distance = isAccessibleFromWithExpScope(scope, fileScope, d, "");
+
+            if (distance != -1 && distance < minDistance) {
+               // definition is accessible and a better match
+            
+               minDistance = distance;
+               bestMatch = md;
             }
          }
       }
+    }
+   
 
-   } else if (di->definitionType() == DefinitionIntf::TypeMember) { // single symbol
-      Definition *d = (Definition *)di;
-
-      // that are also typedefs
-      MemberDef *md = (MemberDef *)di;
-
-      if (md->isTypedef()) { 
-         // d is a typedef
-         // test accessibility of typedef within scope.
-         int distance = isAccessibleFromWithExpScope(scope, fileScope, d, "");
-         if (distance != -1) { // definition is accessible
-            bestMatch = md;
-         }
-      }
-   }
    if (bestMatch) {
       result = bestMatch->typeString();
+
       if (pTypeDef) {
          *pTypeDef = bestMatch;
       }
@@ -805,11 +797,12 @@ static Definition *followPath(Definition *start, FileDef *fileScope, const QByte
 
    Definition *current = start;
    ps = 0;
-   //printf("followPath: start='%s' path='%s'\n",start?start->name().data():"<none>",path.data());
+   
    // for each part of the explicit scope
+
    while ((is = getScopeFragment(path, ps, &l)) != -1) {
       // try to resolve the part if it is a typedef
-      MemberDef *typeDef = 0;
+      MemberDef *typeDef = nullptr;
 
       QByteArray qualScopePart = substTypedef(current, fileScope, path.mid(is, l), &typeDef);
       
@@ -1254,10 +1247,8 @@ static void getResolvedSymbol(Definition *scope, FileDef *fileScope, Definition 
             ClassDef *cd = (ClassDef *)d;
             
             if (!cd->isTemplateArgument()) {
-               // skip classes that
-               // are only there to
-               // represent a template
-               // argument
+               // skip classes whice are only there to 
+               // represent a template argument
                           
                if (distance < minDistance) { 
                   // found a definition that is "closer"
@@ -1310,8 +1301,10 @@ static void getResolvedSymbol(Definition *scope, FileDef *fileScope, Definition 
                   if (distance < minDistance) {
                      QByteArray spec;
                      QByteArray type;
+
                      minDistance = distance;
                      MemberDef *enumType = 0;
+
                      ClassDef *cd = newResolveTypedef(fileScope, md, &enumType, &spec, &type, actTemplParams);
                      if (cd) { // type resolves to a class
                         //printf("      bestTypeDef=%p spec=%s type=%s\n",md,spec.data(),type.data());
@@ -1337,12 +1330,15 @@ static void getResolvedSymbol(Definition *scope, FileDef *fileScope, Definition 
                         bestResolvedType.resize(0);
                         //printf("      no match\n");
                      }
+
                   } else {
                      //printf("      not the best match %d min=%d\n",distance,minDistance);
                   }
+
                } else {
                   //printf("     not a simple typedef\n")
                }
+
             } else if (md->isEnumerate()) {
                if (distance < minDistance) {
                   minDistance = distance;
@@ -1353,12 +1349,12 @@ static void getResolvedSymbol(Definition *scope, FileDef *fileScope, Definition 
                }
             }
          }
-      } // if definition accessible
-      else {
+
+      }  else {
          //printf("  Not accessible!\n");
+
       }
-   } // if definition is a class or member
-   //printf("  bestMatch=%p bestResolvedType=%s\n",bestMatch,bestResolvedType.data());
+   }   
 }
 
 /* Find the fully qualified class name referred to by the input class
@@ -1373,10 +1369,6 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
    QByteArray name;
    QByteArray explicitScopePart;
    QByteArray strippedTemplateParams;
-
-
-printf("\n\n BROOM  A  getResolvedClassRec ");
-
 
    name = stripTemplateSpecifiersFromScope(removeRedundantWhiteSpace(n), true, &strippedTemplateParams);
 
@@ -1398,21 +1390,19 @@ printf("\n\n BROOM  A  getResolvedClassRec ");
       name = name.mid(qualifierIndex + 2);
    }
 
-printf("\n\n BROOM  B  getResolvedClassRec ");
-
    if (name.isEmpty()) {     
       return 0; 
    }
 
-   DefinitionIntf *di = Doxygen::symbolMap->value(name);
+   QSharedPointer<QList<Definition *>> dl = Doxygen::symbolMap->value(name);
 
    // the -g (for C# generics) and -p (for ObjC protocols) are now already
    // stripped from the key used in the symbolMap, so that is not needed here.
 
-   if (di == 0) {
-      di = Doxygen::symbolMap->value(name + "-p");
+   if (dl == 0) {
+      dl = Doxygen::symbolMap->value(name + "-p");
 
-      if (di == 0) {      
+      if (dl == 0) {      
          return 0;
       }
       
@@ -1444,10 +1434,6 @@ printf("\n\n BROOM  B  getResolvedClassRec ");
    // below is a more efficient coding of
    // QByteArray key=scope->name()+"+"+name+"+"+explicitScopePart;
 
-
-printf("\n\n BROOM  C  getResolvedClassRec ");
-
-
    QByteArray key;
    key.resize(scopeNameLen + nameLen + explicitPartLen + fileScopeLen + 1);
 
@@ -1463,9 +1449,6 @@ printf("\n\n BROOM  C  getResolvedClassRec ");
 
    qstrcpy(p, explicitScopePart);
    p += explicitPartLen;
-
-
-printf("\n\n BROOM  D  getResolvedClassRec ");
 
    // if a file scope is given and it contains using statements we should
    // also use the file part in the key (as a class name can be in
@@ -1508,47 +1491,35 @@ printf("\n\n BROOM  D  getResolvedClassRec ");
       Doxygen::lookupCache->insert(key, new LookupInfo);
    }
 
-
-printf("\n\n BROOM  E  getResolvedClassRec ");
-
-
-   ClassDef *bestMatch = 0;
+   ClassDef *bestMatch    = 0;
    MemberDef *bestTypedef = 0;
+
    QByteArray bestTemplSpec;
    QByteArray bestResolvedType;
 
    int minDistance = 10000; // init at "infinite"
-
-   if (di->definitionType() == DefinitionIntf::TypeSymbolList) { 
-      // not a unique name         
-      int count = 0;
-     
-      for (auto d : *(DefinitionList *)di) {    
-         getResolvedSymbol(scope, fileScope, d, explicitScopePart, &actTemplParams,
-                           minDistance, bestMatch, bestTypedef, bestTemplSpec, bestResolvedType);
-
-         ++count;
-      }
-
-   } else { // unique name
-      //printf("  name is unique\n");
-      Definition *d = (Definition *)di;
+  
+   // not a unique name         
+   int count = 0;
+           
+   for (auto d : *dl) {               
       getResolvedSymbol(scope, fileScope, d, explicitScopePart, &actTemplParams,
                         minDistance, bestMatch, bestTypedef, bestTemplSpec, bestResolvedType);
-   }
 
+      ++count;
+   }
+ 
    if (pTypeDef) {
       *pTypeDef = bestTypedef;
    }
+
    if (pTemplSpec) {
       *pTemplSpec = bestTemplSpec;
    }
+
    if (pResolvedType) {
       *pResolvedType = bestResolvedType;
    }
-
-
-printf("\n\n BROOM  F  getResolvedClassRec ");
 
    pval = Doxygen::lookupCache->object(key);
 
@@ -1574,9 +1545,6 @@ printf("\n\n BROOM  F  getResolvedClassRec ");
 ClassDef *getResolvedClass(Definition *scope, FileDef *fileScope, const char *n, MemberDef **pTypeDef, QByteArray *pTemplSpec,
                            bool mayBeUnlinkable, bool mayBeHidden, QByteArray *pResolvedType)
 {  
-
-printf("\n\n BROOM  getResolvedClass  B1 ");
-
    s_resolvedTypedefs.clear();
 
    if (scope == 0 || (scope->definitionType() != Definition::TypeClass && scope->definitionType() != Definition::TypeNamespace ) ||
@@ -1587,9 +1555,7 @@ printf("\n\n BROOM  getResolvedClass  B1 ");
    ClassDef *result;
   
    result = getResolvedClassRec(scope, fileScope, n, pTypeDef, pTemplSpec, pResolvedType);
-
-printf("\n\n BROOM  getResolvedClass  B2 ");
-   
+  
    if (result == 0)  {
       // for nested classes imported via tag files, the scope may not
       // present, so we check the class name directly as well. See also bug701314   
@@ -4459,7 +4425,7 @@ bool generateRef(OutputDocInterface &od, const char *scName,
    //printf("generateRef(scName=%s,name=%s,inSee=%d,rt=%s)\n",scName,name,inSeeBlock,rt);
 
    Definition *compound;
-   MemberDef *md;
+   MemberDef *md = nullptr;
 
    // create default link text
    QByteArray linkText = linkToText(rt, false);
@@ -4576,7 +4542,7 @@ bool resolveLink(const char *scName, const char *lr, bool xx, Definition **resCo
 
    } else { 
       // probably a member reference
-      MemberDef *md;
+      MemberDef *md = nullptr;
       bool res = resolveRef(scName, lr, true, resContext, &md);
 
       if (md) {
@@ -5657,21 +5623,34 @@ int extractClassNameFromType(const QByteArray &type, int &pos, QByteArray &name,
 
    name.resize(0);
    templSpec.resize(0);
-   int i, l;
+
+   int i;
+   int l;
    int typeLen = type.length();
 
    if (typeLen > 0) {
+
       if (lang == SrcLangExt_Fortran) {
-         if (type.at(pos) == ',') {
+
+         if (typeLen <= pos) {
             return -1;
+
+         } else if (type.at(pos) == ',') {
+            return -1;
+
          }
+
          if (type.left(4).toLower() == "type") {
             re = re_norm;
+
          } else {
             re = re_ftn;
+
          }
+
       } else {
          re = re_norm;
+
       }
 
       if ((i = re.indexIn(type, pos)) != -1) { 
@@ -5681,14 +5660,18 @@ int extractClassNameFromType(const QByteArray &type, int &pos, QByteArray &name,
          int ts = i + l;
          int te = ts;
          int tl = 0;
-         while (type.at(ts) == ' ' && ts < typeLen) {
+
+         while (ts < typeLen && type.at(ts) == ' ') {
             ts++, tl++;   // skip any whitespace
          }
-         if (type.at(ts) == '<') { // assume template instance
+
+         if (ts < typeLen && type.at(ts) == '<') { // assume template instance
             // locate end of template
             te = ts + 1;
             int brCount = 1;
+
             while (te < typeLen && brCount != 0) {
+
                if (type.at(te) == '<') {
                   if (te < typeLen - 1 && type.at(te + 1) == '<') {
                      te++;
@@ -5696,6 +5679,7 @@ int extractClassNameFromType(const QByteArray &type, int &pos, QByteArray &name,
                      brCount++;
                   }
                }
+
                if (type.at(te) == '>') {
                   if (te < typeLen - 1 && type.at(te + 1) == '>') {
                      te++;
@@ -5706,21 +5690,24 @@ int extractClassNameFromType(const QByteArray &type, int &pos, QByteArray &name,
                te++;
             }
          }
+
          name = type.mid(i, l);
+
          if (te > ts) {
             templSpec = type.mid(ts, te - ts), tl += te - ts;
             pos = i + l + tl;
+
          } else { // no template part
             pos = i + l;
          }
-         //printf("extractClassNameFromType([in] type=%s,[out] pos=%d,[out] name=%s,[out] templ=%s)=true\n",
-         //    type.data(),pos,name.data(),templSpec.data());
+
+         
          return i;
       }
    }
+
    pos = typeLen;
-   //printf("extractClassNameFromType([in] type=%s,[out] pos=%d,[out] name=%s,[out] templ=%s)=false\n",
-   //       type.data(),pos,name.data(),templSpec.data());
+  
    return -1;
 }
 
@@ -6720,14 +6707,17 @@ MemberDef *getMemberFromSymbol(Definition *scope, FileDef *fileScope, const char
    }
 
    QByteArray name = n;
+
    if (name.isEmpty()) {
-      return 0;   // no name was given
+      // no name was given
+      return 0;   
    }
 
    auto di = Doxygen::symbolMap->find(name);
 
    if (di == Doxygen::symbolMap->end()) {
-      return 0;   // could not find any matching symbols
+      // could not find any matching symbols
+      return 0;   
    }
 
    // mostly copied from getResolvedClassRec()
@@ -6741,36 +6731,29 @@ MemberDef *getMemberFromSymbol(Definition *scope, FileDef *fileScope, const char
    }
  
    int minDistance = 10000;
-   MemberDef *bestMatch = 0;
 
-   if ((*di)->definitionType() == DefinitionIntf::TypeSymbolList) {
-      // find the closest closest matching definition
+   MemberDef *bestMatch = nullptr;
+
+   QSharedPointer<QList<Definition *>> dl;  
+   dl = *di;  
    
-      for (auto d : *((DefinitionList *)*di)) { 
-         if (d->definitionType() == Definition::TypeMember) {
-            s_visitedNamespaces.clear();
+   // find the closest matching definition   
+   for (auto d : *dl) { 
 
-            int distance = isAccessibleFromWithExpScope(scope, fileScope, d, explicitScopePart);
+      if (d->definitionType() == Definition::TypeMember) {
+         s_visitedNamespaces.clear();
 
-            if (distance != -1 && distance < minDistance) {
-               minDistance = distance;
-               bestMatch = (MemberDef *)d;
-               //printf("new best match %s distance=%d\n",bestMatch->qualifiedName().data(),distance);
-            }
+         int distance = isAccessibleFromWithExpScope(scope, fileScope, d, explicitScopePart);
+
+         if (distance != -1 && distance < minDistance) {
+            minDistance = distance;
+
+            MemberDef *md = dynamic_cast<MemberDef *>(d);  
+            bestMatch = md;            
          }
       }
-
-   } else if ((*di)->definitionType() == Definition::TypeMember) {      
-      Definition *d = (Definition *)*di;
-      s_visitedNamespaces.clear();
-
-      int distance = isAccessibleFromWithExpScope(scope, fileScope, d, explicitScopePart);
-
-      if (distance != -1 && distance < minDistance) {
-         minDistance = distance;
-         bestMatch = (MemberDef *)d;         
-      }
    }
+
    return bestMatch;
 }
 
@@ -6790,23 +6773,29 @@ const char *writeUtf8Char(FTextStream &t, const char *s)
 {
    char c = *s++;
    t << c;
+
    if (c < 0) { // multibyte character
       if (((uchar)c & 0xE0) == 0xC0) {
          t << *s++; // 11xx.xxxx: >=2 byte character
       }
+
       if (((uchar)c & 0xF0) == 0xE0) {
          t << *s++; // 111x.xxxx: >=3 byte character
       }
+
       if (((uchar)c & 0xF8) == 0xF0) {
          t << *s++; // 1111.xxxx: >=4 byte character
       }
+
       if (((uchar)c & 0xFC) == 0xF8) {
          t << *s++; // 1111.1xxx: >=5 byte character
       }
+
       if (((uchar)c & 0xFE) == 0xFC) {
          t << *s++; // 1111.1xxx: 6 byte character
       }
    }
+
    return s;
 }
 

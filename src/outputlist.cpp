@@ -31,12 +31,10 @@
 
 OutputList::OutputList(bool)
 {
-   //printf("OutputList::OutputList()\n");
 }
 
 OutputList::~OutputList()
 {
-   //printf("OutputList::~OutputList()\n");
 }
 
 void OutputList::add(OutputGenerator *og)
@@ -115,7 +113,6 @@ bool OutputList::generateDoc(const char *fileName, int startLine, Definition *ct
       return true;
    }
 
-
    for (auto item : m_outputs ) {
       if (item->isEnabled()) {
          count++;
@@ -174,140 +171,3 @@ bool OutputList::parseText(const QByteArray &textStr)
 
    return isEmpty;
 }
-
-
-// Create some overloaded definitions of the forall function.
-// Using template functions here would have made it a little less
-// portable (I guess).
-
-// zero arguments
-void OutputList::forall(void (OutputGenerator::*func)())
-{
-   for (auto item : m_outputs ) {
-      if (item->isEnabled()) {
-         (item->*func)();
-      }
-   }
-}
-
-// one argument
-#define FORALL1(a1,p1)                                        \
-void OutputList::forall(void (OutputGenerator::*func)(a1),a1) \
-{                                                             \
-  for (auto item : m_outputs ) {                              \
-    if (item->isEnabled()) (item->*func)(p1);                 \
-  }                                                           \
-}
-
-// two arguments
-#define FORALL2(a1,a2,p1,p2)                                        \
-void OutputList::forall(void (OutputGenerator::*func)(a1,a2),a1,a2) \
-{                                                                   \
-  for (auto item : m_outputs ) {                                    \
-    if (item->isEnabled()) (item->*func)(p1,p2);                    \
-  }                                                                 \
-}
-
-// three arguments
-#define FORALL3(a1,a2,a3,p1,p2,p3)                                        \
-void OutputList::forall(void (OutputGenerator::*func)(a1,a2,a3),a1,a2,a3) \
-{                                                                         \
-  for (auto item : m_outputs ) {                                          \
-    if (item->isEnabled()) (item->*func)(p1,p2,p3);                       \
-  }                                                                       \
-}
-
-// four arguments
-#define FORALL4(a1,a2,a3,a4,p1,p2,p3,p4)                                        \
-void OutputList::forall(void (OutputGenerator::*func)(a1,a2,a3,a4),a1,a2,a3,a4) \
-{                                                                               \
-  for (auto item : m_outputs ) {                                                \
-    if (item->isEnabled()) (item->*func)(p1,p2,p3,p4);                          \
-  }                                                                             \
-}
-
-// five arguments
-#define FORALL5(a1,a2,a3,a4,a5,p1,p2,p3,p4,p5)                                        \
-void OutputList::forall(void (OutputGenerator::*func)(a1,a2,a3,a4,a5),a1,a2,a3,a4,a5) \
-{                                                                                     \
-  for (auto item : m_outputs ) {                                                      \
-    if (item->isEnabled()) (item->*func)(p1,p2,p3,p4,p5);                             \
-  }                                                                                   \
-}
-
-// six arguments
-#define FORALL6(a1,a2,a3,a4,a5,a6,p1,p2,p3,p4,p5,p6)                                  \
-void OutputList::forall(void (OutputGenerator::*func)(a1,a2,a3,a4,a5,a6),a1,a2,a3,a4,a5,a6) \
-{                                                                                     \
-  for (auto item : m_outputs ) {                                                      \
-    if (item->isEnabled()) (item->*func)(p1,p2,p3,p4,p5,p6);                          \
-  }                                                                                   \
-}
-
-// seven arguments
-#define FORALL7(a1,a2,a3,a4,a5,a6,a7,p1,p2,p3,p4,p5,p6,p7)                      \
-void OutputList::forall(void (OutputGenerator::*func)(a1,a2,a3,a4,a5,a6,a7),a1,a2,a3,a4,a5,a6,a7) \
-{                                                                                     \
-  for (auto item : m_outputs ) {                                                      \
-    if (item->isEnabled()) (item->*func)(p1,p2,p3,p4,p5,p6,p7);                       \
-  }                                                                                   \
-}
-
-
-// eight arguments
-#define FORALL8(a1,a2,a3,a4,a5,a6,a7,a8,p1,p2,p3,p4,p5,p6,p7,p8)                      \
-void OutputList::forall(void (OutputGenerator::*func)(a1,a2,a3,a4,a5,a6,a7,a8),a1,a2,a3,a4,a5,a6,a7,a8) \
-{                                                                                     \
-   for (auto item : m_outputs ) {                                                     \
-    if (item->isEnabled()) (item->*func)(p1,p2,p3,p4,p5,p6,p7,p8);                    \
-  }                                                                                   \
-}
-
-// now instantiate only the ones we need
-
-FORALL1(const char *a1, a1)
-FORALL1(char a1, a1)
-FORALL1(int a1, a1)
-FORALL1(const DotClassGraph &a1, a1)
-FORALL1(const DotInclDepGraph &a1, a1)
-FORALL1(const DotCallGraph &a1, a1)
-FORALL1(const DotDirDeps &a1, a1)
-FORALL1(const DotGfxHierarchyTable &a1, a1)
-FORALL1(const DotGroupCollaboration &a1, a1)
-FORALL1(SectionTypes a1, a1)
-
-
-FORALL1(bool a1, a1)
-FORALL2(bool a1, int a2, a1, a2)
-FORALL2(bool a1, bool a2, a1, a2)
-FORALL2(const char *a1, bool a2, a1, a2)
-FORALL4(const char *a1, const char *a2, const char *a3, bool a4, a1, a2, a3, a4)
-
-FORALL2(const QString &a1, bool a2, a1, a2);
-
-
-FORALL2(int a1, bool a2, a1, a2)
-FORALL2(bool a1, const char *a2, a1, a2)
-FORALL2(ParamListTypes a1, const char *a2, a1, a2)
-FORALL1(IndexSections a1, a1)
-FORALL2(const char *a1, const char *a2, a1, a2)
-FORALL2(const char *a1, int a2, a1, a2)
-FORALL2(const char *a1, SectionInfo::SectionType a2, a1, a2)
-FORALL3(bool a1, HighlightedItem a2, const char *a3, a1, a2, a3)
-FORALL3(bool a1, bool a2, bool a3, a1, a2, a3)
-FORALL3(const ClassDiagram &a1, const char *a2, const char *a3, a1, a2, a3)
-FORALL3(const char *a1, const char *a2, const char *a3, a1, a2, a3)
-FORALL3(const char *a1, const char *a2, bool a3, a1, a2, a3)
-FORALL3(const char *a1, int a2, const char *a3, a1, a2, a3)
-FORALL3(const char *a1, const char *a2, SectionInfo::SectionType a3, a1, a2, a3)
-FORALL3(uchar a1, uchar a2, uchar a3, a1, a2, a3)
-FORALL3(Definition *a1, const char *a2, bool a3, a1, a2, a3)
-FORALL4(SectionTypes a1, const char *a2, const char *a3, const char *a4, a1, a2, a3, a4)
-FORALL4(const char *a1, const char *a2, const char *a3, const char *a4, a1, a2, a3, a4)
-FORALL4(const char *a1, const char *a2, const char *a3, int a4, a1, a2, a3, a4)
-FORALL5(const char *a1, const char *a2, const char *a3, const char *a4, const char *a5, a1, a2, a3, a4, a5)
-FORALL5(const char *a1, const char *a2, const char *a3, const char *a4, bool a5, a1, a2, a3, a4, a5)
-FORALL6(const char *a1, const char *a2, const char *a3, const char *a4, const char *a5, const char *a6, a1, a2, a3, a4, a5, a6)
-FORALL6(const char *a1, const DocLinkInfo &a2, const char *a3, const char *a4, const SourceLinkInfo &a5,
-        const SourceLinkInfo &a6, a1, a2, a3, a4, a5, a6)
-

@@ -4631,7 +4631,9 @@ void Doxy_Work::findUsedClassesForClass(EntryNav *rootNav, Definition *context, 
                   type = substituteTemplateArgumentsInString(type, formalArgs, actualArgs);
                }
 
-               while (!found && extractClassNameFromType(type, pos, usedClassName, templSpec, rootNav->lang()) != -1) {
+
+               while (! found && extractClassNameFromType(type, pos, usedClassName, templSpec, rootNav->lang()) != -1) {
+
                   // find the type (if any) that matches usedClassName
                   ClassDef *typeCd = getResolvedClass(masterCd, masterCd->getFileDef(), usedClassName,
                                                       0, 0, false, true);
@@ -4649,6 +4651,7 @@ void Doxy_Work::findUsedClassesForClass(EntryNav *rootNav, Definition *context, 
                      // replace any namespace aliases
                      replaceNamespaceAliases(usedClassName, si);
                   }
+
                   // add any template arguments to the class
                   QByteArray usedName = removeRedundantWhiteSpace(usedClassName + templSpec);
 
@@ -4674,8 +4677,9 @@ void Doxy_Work::findUsedClassesForClass(EntryNav *rootNav, Definition *context, 
                            QSharedPointer<ClassDef> usedCd = Doxygen::hiddenClasses->find(usedName);
 
                            if (! usedCd) {
-                              usedCd = QSharedPointer<ClassDef>(new ClassDef( masterCd->getDefFileName(), masterCd->getDefLine(),
-                                                        masterCd->getDefColumn(), usedName, ClassDef::Class));
+                              usedCd = QSharedPointer<ClassDef>(new ClassDef( masterCd->getDefFileName(), 
+                                       masterCd->getDefLine(),
+                                       masterCd->getDefColumn(), usedName, ClassDef::Class));
 
                               usedCd->makeTemplateArgument();
                               usedCd->setUsedOnly(true);
@@ -4688,12 +4692,17 @@ void Doxy_Work::findUsedClassesForClass(EntryNav *rootNav, Definition *context, 
                               usedCd->setArtificial(true);
                            }
 
+printf("\n\n BROOM  indUsedClassesForClass B \n");
+
                            Debug::print(Debug::Classes, 0, "      Adding used class `%s' (1)\n", usedCd->name().data());
                            instanceCd->addUsedClass(usedCd.data(), md->name(), md->protection());
                            usedCd->addUsedByClass(instanceCd, md->name(), md->protection());
                         }
                      }
                   }
+
+printf("\n\n BROOM  indUsedClassesForClass C \n");
+
 
                   if (! found) {
                      QSharedPointer<ClassDef> usedCd = dummyShared(findClassWithinClassContext(context, masterCd, usedName));
@@ -4975,10 +4984,6 @@ bool Doxy_Work::findClassRelation(EntryNav *rootNav, Definition *context, ClassD
    QByteArray biName = bi->name;
    bool explicitGlobalScope = false;
 
-
-printf("\n\n BROOM  findClassRelation  A ");
-
-
    if (biName.left(2) == "::") { 
       // explicit global scope
       biName = biName.right(biName.length() - 2);
@@ -4995,8 +5000,6 @@ printf("\n\n BROOM  findClassRelation  A ");
       QByteArray scopeName = parentNode ? parentNode->name().data() : "";
       int scopeOffset = explicitGlobalScope ? 0 : scopeName.length();
 
-printf("\n\n BROOM  findClassRelation  A1 ");
-
       do {
 
          // try all parent scope prefixes, starting with the largest scope
@@ -5012,16 +5015,8 @@ printf("\n\n BROOM  findClassRelation  A1 ");
          MemberDef *baseClassTypeDef = 0;
          QByteArray templSpec;
 
-printf("\n\n BROOM  findClassRelation  A3 ");
-
-
          QSharedPointer<ClassDef> baseClass = dummyShared(getResolvedClass(explicitGlobalScope ? Doxygen::globalScope : context, 
                         cd->getFileDef(), baseClassName, &baseClassTypeDef, &templSpec, mode == Undocumented, true));
-
-
-printf("\n\n BROOM  findClassRelation  A4 ");
-
-
 
          if (! isRecursiveBaseClass(rootNav->name(), baseClassName) || explicitGlobalScope
                || (rootNav->lang() == SrcLangExt_IDL &&
@@ -9607,20 +9602,11 @@ void Doxy_Work::dumpSymbolMap()
    if (f.open(QIODevice::WriteOnly)) {
       FTextStream t(&f);
 
-      for (auto intf : *Doxygen::symbolMap) {
-         if (intf->definitionType() == DefinitionIntf::TypeSymbolList) { // list of symbols
+      for (auto item : *Doxygen::symbolMap) {
+         // list of symbols
 
-            // for each symbol
-            for (auto d : *(DefinitionList *)intf) {
-               dumpSymbol(t, d);
-            }
-
-         } else { // single symbol
-            Definition *d = (Definition *)intf;
-
-            if (d != Doxygen::globalScope) {
-               dumpSymbol(t, d);
-            }
+         for (auto d : *item) {
+            dumpSymbol(t, d);
          }
       }
    }
@@ -9636,8 +9622,7 @@ int Doxy_Work::computeIdealCacheParam(uint v)
    while (v != 0) {
       v >>= 1, r++;
    }
-   // r = log2(v)
-
+  
    // convert to a valid cache size value
    return qMax(0, qMin(r - 16, 9));
 }

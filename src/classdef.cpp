@@ -1178,10 +1178,11 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
             ClassDef *cd = bcd->classDef;
 
             if (cd->isLinkable()) {
-               ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), cd->displayName());
+               ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), cd->displayName().toUtf8());
             } else {
                ol.docify(cd->displayName());
             }
+
             writeInheritanceSpecifier(ol, bcd);
          }
 
@@ -2095,7 +2096,7 @@ void ClassDef::writeMemberList(OutputList &ol)
    ol.startContents();
    ol.startParagraph();
    ol.parseText(theTranslator->trThisIsTheListOfAllMembers());
-   ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), displayName());
+   ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), displayName().toUtf8());
    ol.parseText(theTranslator->trIncludingInheritedMembers());
    ol.endParagraph();
  
@@ -2221,12 +2222,10 @@ void ClassDef::writeMemberList(OutputList &ol)
             }
             if (memberWritten) {
                ol.writeString("<td class=\"entry\">");
-               ol.writeObjectLink(cd->getReference(),
-                                  cd->getOutputFileBase(),
-                                  cd->anchor(),
-                                  md->category() ?
-                                  md->category()->displayName() :
-                                  cd->displayName());
+
+               ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(),
+                                  md->category() ? md->category()->displayName().toUtf8() : cd->displayName().toUtf8());
+
                ol.writeString("</td>");
                ol.writeString("<td class=\"entry\">");
             }
@@ -2473,7 +2472,7 @@ void ClassDef::writeDeclaration(OutputList &ol, MemberDef *md, bool inGroup, Cla
       ol.docify(" ");
 
       if (md && isLinkable()) {
-         ol.writeObjectLink(0, 0, md->anchor(), cn);
+         ol.writeObjectLink(0, 0, md->anchor(), cn.toUtf8());
 
       } else {
          ol.startBold();
@@ -2992,8 +2991,6 @@ void ClassDef::mergeCategory(ClassDef *category)
    }
 }
 
-//----------------------------------------------------------------------------
-
 void ClassDef::addUsedClass(ClassDef *cd, const char *accessName, Protection prot)
 {
    static bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
@@ -3002,8 +2999,7 @@ void ClassDef::addUsedClass(ClassDef *cd, const char *accessName, Protection pro
    if (prot == Private && ! extractPrivate) {
       return;
    }
-
-   //printf("%s::addUsedClass(%s,%s)\n",name().data(),cd->name().data(),accessName);
+   
    if (m_impl->usesImplClassDict == 0) {
       m_impl->usesImplClassDict = new UsesClassDict();      
    }
@@ -3017,6 +3013,10 @@ void ClassDef::addUsedClass(ClassDef *cd, const char *accessName, Protection pro
    }
 
    QByteArray acc = accessName;
+
+
+printf("\n\n BROOM  indUsedClassesForClass   Y \n");
+
 
    if (umlLook) {
       switch (prot) {
@@ -3039,6 +3039,9 @@ void ClassDef::addUsedClass(ClassDef *cd, const char *accessName, Protection pro
    }
 
    ucd->addAccessor(acc);
+
+
+printf("\n\n BROOM  indUsedClassesForClass   Z \n");
 }
 
 void ClassDef::addUsedByClass(ClassDef *cd, const char *accessName, Protection prot)
@@ -3049,8 +3052,7 @@ void ClassDef::addUsedByClass(ClassDef *cd, const char *accessName, Protection p
    if (prot == Private && ! extractPrivate) {
       return;
    }
-
-   //printf("%s::addUsedByClass(%s,%s)\n",name().data(),cd->name().data(),accessName);
+   
    if (m_impl->usedByImplClassDict == 0) {
       m_impl->usedByImplClassDict = new UsesClassDict();      
    }

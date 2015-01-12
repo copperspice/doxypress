@@ -50,16 +50,16 @@
 class DevNullCodeDocInterface : public CodeOutputInterface
 {
  public:
-   virtual void codify(const char *) {}
+   virtual void codify(const QByteArray &) override {}
 
-   virtual void writeCodeLink(const char *, const char *, const char *, const char *, const char *)
+   virtual void writeCodeLink(const QByteArray &, const QByteArray &, const QByteArray &, 
+                              const QByteArray &, const QByteArray &) override  {}
+
+   virtual void writeTooltip(const char *, const DocLinkInfo &, const QByteArray &,
+                             const QByteArray &, const SourceLinkInfo &, const SourceLinkInfo & ) override
    {}
 
-   virtual void writeTooltip(const char *, const DocLinkInfo &, const char *,
-                             const char *, const SourceLinkInfo &, const SourceLinkInfo & )
-   {}
-
-   virtual void writeLineNumber(const char *, const char *, const char *, int) {}
+   virtual void writeLineNumber(const char *, const QByteArray &, const char *, int)  override {}
    virtual void startCodeLine(bool) {}
    virtual void endCodeLine() {}
    virtual void startFontClass(const char *) {}

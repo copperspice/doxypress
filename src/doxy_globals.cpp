@@ -68,11 +68,12 @@ StringDict       Doxygen::tagDestinationDict;      // all tag locations
 
 QCache<QString, LookupInfo>     *Doxygen::lookupCache;
 
-QHash<QString, void *>            Doxygen::inputPaths;
-QHash<QString, void *>            Doxygen::expandAsDefinedDict;                        // all macros that should be expanded
+QHash<QString, void *>           Doxygen::inputPaths;
+QHash<QString, void *>           Doxygen::expandAsDefinedDict;                        // all macros that should be expanded
 
-QHash<QString, DefinitionIntf *> *Doxygen::symbolMap = 0;
-QHash<QString, Definition *>     *Doxygen::clangUsrMap = 0;
+QHash<QString, QSharedPointer<QList<Definition *>>> *Doxygen::symbolMap = 0;
+ 
+QHash<QString, Definition *>    *Doxygen::clangUsrMap = 0;
 
 QHash<QString, RefList>         *Doxygen::xrefLists = new QHash<QString, RefList>;    // dictionary of cross-referenced item lists
 QHash<QString, int>             *Doxygen::htmlDirMap = 0;

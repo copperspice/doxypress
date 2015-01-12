@@ -61,8 +61,9 @@ struct BodyInfo {
 class DefinitionIntf
 {
  public:
-   DefinitionIntf() {}
-   virtual ~DefinitionIntf() {}
+   DefinitionIntf() { }
+
+   virtual ~DefinitionIntf() { }
 
    /*! Types of derived classes */
    enum DefType {
@@ -352,9 +353,9 @@ class Definition : public DefinitionIntf
    Definition(const Definition &d);
 
  private:
-   static void addToMap(const char *name, Definition *d);
+   void addToMap(const QByteArray &name);
  
-   void _setSymbolName(const QByteArray &name);
+   void setSymbolName(const QByteArray &name);
 
    int  _getXRefListId(const char *listName) const;
    void _writeSourceRefList(OutputList &ol, const char *scopeName,const QByteArray &text, MemberSDict *members, bool);
@@ -374,7 +375,7 @@ class Definition : public DefinitionIntf
 };
 
 /** A list of Definition objects. */
-class DefinitionList : public QList<Definition *>, public DefinitionIntf
+class DefinitionList : public QList<QSharedPointer<Definition>>, public DefinitionIntf
 {
  public:
    ~DefinitionList() {}
@@ -390,11 +391,12 @@ class DefinitionList : public QList<Definition *>, public DefinitionIntf
 };
 
 /** An iterator for Definition objects in a DefinitionList. */
-class DefinitionListIterator : public QListIterator<Definition *>
+class DefinitionListIterator : public QListIterator<QSharedPointer<Definition>>
 {
  public:
    DefinitionListIterator(const DefinitionList &list)
-      : QListIterator<Definition *>(list) {}
+      : QListIterator<QSharedPointer<Definition>>(list)
+   {}
 
    ~DefinitionListIterator() {}
 };

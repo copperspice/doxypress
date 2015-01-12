@@ -227,35 +227,32 @@ void ManGenerator::writeString(const char *text)
    docify(text);
 }
 
-void ManGenerator::startIndexItem(const char *, const char *)
+void ManGenerator::startIndexItem(const QByteArray &, const QByteArray &)
 {
 }
 
-void ManGenerator::endIndexItem(const char *, const char *)
+void ManGenerator::endIndexItem(const QByteArray &, const QByteArray &)
 {
 }
 
-void ManGenerator::writeStartAnnoItem(const char *, const char *,
-                                      const char *, const char *)
+void ManGenerator::writeStartAnnoItem(const char *, const QByteArray &, const QByteArray &, const char *)
 {
 }
 
-void ManGenerator::writeObjectLink(const char *, const char *,
-                                   const char *, const char *name)
+void ManGenerator::writeObjectLink(const QByteArray &, const QByteArray &, const QByteArray &, const QByteArray &name)
 {
    startBold();
    docify(name);
    endBold();
 }
 
-void ManGenerator::writeCodeLink(const char *, const char *,
-                                 const char *, const char *name,
-                                 const char *)
+void ManGenerator::writeCodeLink(const QByteArray &, const QByteArray &, const QByteArray &, 
+                                 const QByteArray &name, const QByteArray &)
 {
    docify(name);
 }
 
-void ManGenerator::startHtmlLink(const char *)
+void ManGenerator::startHtmlLink(const QByteArray &)
 {
 }
 
@@ -301,11 +298,12 @@ void ManGenerator::endMemberHeader()
    paragraph = false;
 }
 
-void ManGenerator::docify(const char *str)
+void ManGenerator::docify(const QByteArray &str)
 {
-   if (str) {
-      const char *p = str;
+   if (! str.isEmpty()) {
+      const char *p = str.constData();
       char c = 0;
+
       while ((c = *p++)) {
          switch (c) {
             case '.':
@@ -328,16 +326,15 @@ void ManGenerator::docify(const char *str)
          }
       }
       firstCol = (c == '\n');
-      //printf("%s",str);fflush(stdout);
+      
    }
    paragraph = false;
 }
 
-void ManGenerator::codify(const char *str)
-{
-   //static char spaces[]="        ";
-   if (str) {
-      const char *p = str;
+void ManGenerator::codify(const QByteArray &str)
+{   
+   if (! str.isEmpty()) {
+      const char *p = str.constData();
       char c;
       int spacesToNextTabStop;
 
@@ -606,7 +603,7 @@ void ManGenerator::endAnonTypeScope(int indentLevel)
 }
 
 
-void ManGenerator::startMemberItem(const char *, int, const char *)
+void ManGenerator::startMemberItem(const char *, int, const QByteArray &)
 {
    if (firstCol && !insideTabbing) {
       t << ".in +1c\n";
@@ -695,7 +692,7 @@ void ManGenerator::startSection(const char *, const char *, SectionInfo::Section
 
 void ManGenerator::endSection(const char *, SectionInfo::SectionType type)
 {
-   if ( !inHeader ) {
+   if (! inHeader ) {
       switch (type) {
          case SectionInfo::Page:
             endGroupHeader(0);
@@ -716,6 +713,7 @@ void ManGenerator::endSection(const char *, SectionInfo::SectionType type)
             assert(0);
             break;
       }
+
    } else {
       t << "\n";
       firstCol = true;
@@ -724,15 +722,15 @@ void ManGenerator::endSection(const char *, SectionInfo::SectionType type)
    }
 }
 
-void ManGenerator::startSimpleSect(SectionTypes, const char *,
-                                   const char *, const char *title)
+void ManGenerator::startSimpleSect(SectionTypes, const QByteArray &, const char *, const char *title)
 {
-   if (!firstCol) {
+   if (! firstCol) {
       t << endl << ".PP" << endl;
       firstCol = true;
       paragraph = true;
       col = 0;
    }
+
    paragraph = false;
    startBold();
    docify(title);

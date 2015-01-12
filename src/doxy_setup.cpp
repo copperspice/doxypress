@@ -130,7 +130,7 @@ void initDoxygen()
    Doxygen::clangUsrMap       = new QHash<QString, Definition *>();
 #endif
 
-   Doxygen::symbolMap         = new QHash<QString, DefinitionIntf *>();
+   Doxygen::symbolMap         = new QHash<QString, QSharedPointer<QList<Definition *>>>();
    Doxygen::inputNameList     = new SortedList<FileName *>;
 
    Doxygen::memberNameSDict   = new MemberNameSDict();

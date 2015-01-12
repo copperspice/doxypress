@@ -103,28 +103,33 @@ class LatexGenerator : public OutputGenerator
    void endIndexKey();
    void startIndexValue(bool);
    void endIndexValue(const char *, bool);
+
    void startItemList()  {
       t << "\\begin{DoxyCompactItemize}" << endl;
    }
+
    void endItemList()    {
       t << "\\end{DoxyCompactItemize}"   << endl;
    }
    void startIndexItem(const char *ref, const char *file);
    void endIndexItem(const char *ref, const char *file);
-   void docify(const char *text);
-   void codify(const char *text);
-   void writeObjectLink(const char *ref, const char *file,
-                        const char *anchor, const char *name);
-   void writeCodeLink(const char *ref, const char *file,
-                      const char *anchor, const char *name,
-                      const char *tooltip);
-   void writeTooltip(const char *, const DocLinkInfo &, const char *,
-                     const char *, const SourceLinkInfo &, const SourceLinkInfo &
-                    ) {}
-   void startTextLink(const char *, const char *);
+
+   void docify(const QByteArray &text) override;
+   void codify(const QByteArray &text) override;
+
+   void writeObjectLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, const QByteArray &name) override;
+
+   void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
+                      const QByteArray &name, const QByteArray &tooltip) override;
+
+   void writeTooltip(const char *, const DocLinkInfo &, const QByteArray &, const QByteArray &, const SourceLinkInfo &, 
+                     const SourceLinkInfo & ) override {}
+
+   void startTextLink(const QByteArray &, const QByteArray &) override;
    void endTextLink();
-   void startHtmlLink(const char *url);
+   void startHtmlLink(const QByteArray &url) override;
    void endHtmlLink();
+
    void startTypewriter() {
       t << "{\\ttfamily ";
    }
@@ -193,18 +198,21 @@ class LatexGenerator : public OutputGenerator
    void endDescription();
    void startDescItem();
    void endDescItem();
-   void lineBreak(const char *style = 0);
+
+   void lineBreak(const QByteArray &style = 0) override ;
    void startMemberDoc(const char *, const char *, const char *, const char *, bool);
    void endMemberDoc(bool);
    void startDoxyAnchor(const char *, const char *, const char *, const char *, const char *);
    void endDoxyAnchor(const char *, const char *);
    void writeChar(char c);
+
    void writeLatexSpacing() {
       t << "\\hspace{0.3cm}";
    }
-   void writeStartAnnoItem(const char *type, const char *file,
-                           const char *path, const char *name);
-   void writeEndAnnoItem(const char *name);
+
+   void writeStartAnnoItem(const char *type, const QByteArray &file, const QByteArray &path, const char *name) override;
+   void writeEndAnnoItem(const char *name) override;
+
    void startSubsection() {
       t << "\\subsection*{";
    }
@@ -258,14 +266,14 @@ class LatexGenerator : public OutputGenerator
    void startClassDiagram();
    void endClassDiagram(const ClassDiagram &, const char *, const char *);
    void startPageRef();
-   void endPageRef(const char *, const char *);
+   void endPageRef(const QByteArray &, const QByteArray &) override ;
    void startQuickIndices() {}
    void endQuickIndices() {}
    void writeSplitBar(const char *) {}
    void writeNavigationPath(const char *) {}
    void writeLogo() {}
    void writeQuickLinks(bool, HighlightedItem, const char *) {}
-   void writeSummaryLink(const char *, const char *, const char *, bool) {}
+   void writeSummaryLink(const QByteArray &, const char *, const char *, bool) override {}
    void startContents() {}
    void endContents() {}
    void writeNonBreakableSpace(int);
@@ -309,13 +317,13 @@ class LatexGenerator : public OutputGenerator
    void endMemberDocPrefixItem() {}
    void startMemberDocName(bool) {}
    void endMemberDocName() {}
-   void startParameterType(bool, const char *);
+   void startParameterType(bool, const QByteArray &) override ; 
    void endParameterType();
    void startParameterName(bool);
    void endParameterName(bool, bool, bool);
    void startParameterList(bool);
    void endParameterList();
-   void exceptionEntry(const char *, bool);
+   void exceptionEntry(const QByteArray &, bool) override;
 
    void startConstraintList(const char *);
    void startConstraintParam();

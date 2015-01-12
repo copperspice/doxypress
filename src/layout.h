@@ -87,16 +87,19 @@ struct LayoutDocEntrySection: public LayoutDocEntrySimple {
 
 /** @brief Represents of a member declaration list with configurable title and subtitle. */
 struct LayoutDocEntryMemberDecl: public LayoutDocEntry {
-   LayoutDocEntryMemberDecl(MemberListType tp,
-                            const QByteArray &tl, const QByteArray &ss)
-      : type(tp), m_title(tl), m_subscript(ss) {}
+
+   LayoutDocEntryMemberDecl(MemberListType tp, const QByteArray &tl, const QByteArray &ss)
+      : type(tp), m_title(tl), m_subscript(ss) 
+   {}
 
    Kind kind() const {
       return MemberDecl;
    }
+
    MemberListType type;
    QByteArray title(SrcLangExt lang) const;
    QByteArray subtitle(SrcLangExt lang) const;
+
  private:
    QByteArray m_title;
    QByteArray m_subscript;
@@ -105,13 +108,16 @@ struct LayoutDocEntryMemberDecl: public LayoutDocEntry {
 /** @brief Represents of a member definition list with configurable title. */
 struct LayoutDocEntryMemberDef: public LayoutDocEntry {
    LayoutDocEntryMemberDef(MemberListType tp, const QByteArray &tl)
-      : type(tp), m_title(tl) {}
+      : type(tp), m_title(tl) 
+   {}
 
    Kind kind() const {
       return MemberDef;
    }
+
    MemberListType type;
    QByteArray title(SrcLangExt lang) const;
+
  private:
    QByteArray m_title;
 };

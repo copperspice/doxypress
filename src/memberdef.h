@@ -55,7 +55,7 @@ class MemberDef : public Definition
 
    ~MemberDef();
 
-   DefType definitionType() const {
+   DefType definitionType() const override {
       return TypeMember;
    }
 

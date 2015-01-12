@@ -3754,7 +3754,7 @@ void addConfigOptions(Config *cfg)
   cs = cfg->addString("CLASS_GRAPH", "");
   cs = cfg->addString("COLLABORATION_GRAPH", "");
   cs = cfg->addString("GROUP_GRAPHS", "");
-  cs = cfg->addString("UML_LOOK", "");
+  cb = cfg->addBool("UML_LOOK", "", false);
   cs = cfg->addString("UML_LIMIT_NUM_FIELDS", "");
   cs = cfg->addString("TEMPLATE_RELATIONS", "");
   cs = cfg->addString("INCLUDE_GRAPH", "");
@@ -3778,6 +3778,9 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("DOT_CLEANUP", "",true);
 
   cb = cfg->addBool("HIDE_COMPOUND_REFERENCE", "", false);
+  cs = cfg->addString("XML_SCHEMA", "");
+  cs = cfg->addString("XML_DTD", "");
+
 }
 
 static QByteArray configFileToString(const char *name)

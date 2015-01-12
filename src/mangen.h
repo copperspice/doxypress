@@ -106,20 +106,22 @@ class ManGenerator : public OutputGenerator
       newParagraph();
    }
 
-   void startIndexItem(const char *ref, const char *file);
-   void endIndexItem(const char *ref, const char *file);
-   void docify(const char *text);
-   void codify(const char *text);
+   void startIndexItem(const QByteArray &ref, const QByteArray &file) override;
+   void endIndexItem(const QByteArray &ref, const QByteArray &file) override;
 
-   void writeObjectLink(const char *ref, const char *file, const char *anchor, const char *name);
-   void writeCodeLink(const char *ref, const char *file, const char *anchor, const char *name, const char *tooltip);
+   void docify(const QByteArray &text) override;
+   void codify(const QByteArray &text) override;
 
-   void writeTooltip(const char *, const DocLinkInfo &, const char *, const char *, const SourceLinkInfo &, const SourceLinkInfo &)
-   {}
+   void writeObjectLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, const QByteArray &name) override;
+   void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
+                      const QByteArray &name, const QByteArray &tooltip) override;
 
-   void startTextLink(const char *, const char *) {}
-   void endTextLink() {}
-   void startHtmlLink(const char *url);
+   void writeTooltip(const char *, const DocLinkInfo &, const QByteArray &, const QByteArray &, const SourceLinkInfo &,
+                     const SourceLinkInfo &) override {}
+
+   void startTextLink(const QByteArray &, const QByteArray &) override {}
+   void endTextLink() override{}
+   void startHtmlLink(const QByteArray &url) override;
    void endHtmlLink();
 
    void startTypewriter() {
@@ -142,7 +144,7 @@ class ManGenerator : public OutputGenerator
    void startMemberSubtitle() {}
    void endMemberSubtitle() {}
   
- //void writeListItem();
+   //void writeListItem();
    void startItemListItem();
    void endItemListItem();
    void startMemberDocList() {}
@@ -153,10 +155,10 @@ class ManGenerator : public OutputGenerator
    void endInlineHeader();
    void startAnonTypeScope(int);
    void endAnonTypeScope(int);
-   void startMemberItem(const char *, int, const char *);
+   void startMemberItem(const char *, int, const QByteArray &) override;
    void endMemberItem();
    void startMemberTemplateParams() {}
-   void endMemberTemplateParams(const char *, const char *) {}
+   void endMemberTemplateParams(const char *, const QByteArray &) override {}
 
    void startMemberGroupHeader(bool);
    void endMemberGroupHeader();
@@ -169,7 +171,7 @@ class ManGenerator : public OutputGenerator
    void writeAnchor(const char *, const char *) {}
    void startCodeFragment();
    void endCodeFragment();
-   void writeLineNumber(const char *, const char *, const char *, int l) {
+   void writeLineNumber(const char *, const QByteArray &, const char *, int l) override {
       t << l << " ";
    }
    void startCodeLine(bool) {}
@@ -198,7 +200,7 @@ class ManGenerator : public OutputGenerator
    void startDescItem();
    void endDescItem();
 
-   void lineBreak(const char *) {
+   void lineBreak(const QByteArray &) override {
       t << "\n.br" << endl;
    }
 
@@ -209,7 +211,7 @@ class ManGenerator : public OutputGenerator
    void endDoxyAnchor(const char *, const char *) {}
    void writeLatexSpacing() {}
 
-   void writeStartAnnoItem(const char *type, const char *file, const char *path, const char *name);
+   void writeStartAnnoItem(const char *type, const QByteArray &file, const QByteArray &path, const char *name) override;
 
    void writeEndAnnoItem(const char *) {
       t << endl;
@@ -225,7 +227,7 @@ class ManGenerator : public OutputGenerator
    void startSmall()         {}
    void endSmall()           {}
 
-   void startMemberDescription(const char *, const char *) {
+   void startMemberDescription(const char *, const QByteArray &) {
       t << "\n.RI \"\\fI";
       firstCol = false;
    }
@@ -236,15 +238,16 @@ class ManGenerator : public OutputGenerator
    }
 
    void startMemberDeclaration() {}
-   void endMemberDeclaration(const char *, const char *) {}
-   void writeInheritedSectionTitle(const char *, const char *, const char *, const char *, const char *, const char *)
+   void endMemberDeclaration(const char *, const QByteArray &) {}
+   void writeInheritedSectionTitle(const char *, const QByteArray &, const char *, const char *, const char *, 
+                                   const char *) override 
    {}
 
    void startDescList(SectionTypes);
    void endDescList() 
    {}
 
-   void startSimpleSect(SectionTypes, const char *, const char *, const char *);
+   void startSimpleSect(SectionTypes, const QByteArray &, const char *, const char *) override;
    void endSimpleSect();
    void startParamList(ParamListTypes, const char *title);
    void endParamList();
@@ -261,14 +264,14 @@ class ManGenerator : public OutputGenerator
    void startClassDiagram() {}
    void endClassDiagram(const ClassDiagram &, const char *, const char *) {}
    void startPageRef() {}
-   void endPageRef(const char *, const char *) {}
+   void endPageRef(const QByteArray &, const QByteArray &)override {}
    void startQuickIndices() {}
    void endQuickIndices() {}
    void writeSplitBar(const char *) {}
    void writeNavigationPath(const char *) {}
    void writeLogo() {}
    void writeQuickLinks(bool, HighlightedItem, const char *) {}
-   void writeSummaryLink(const char *, const char *, const char *, bool) {}
+   void writeSummaryLink(const QByteArray &, const char *, const char *, bool) override {}
    void startContents() {}
    void endContents() {}
 
@@ -323,13 +326,13 @@ class ManGenerator : public OutputGenerator
    void endMemberDocPrefixItem() {}
    void startMemberDocName(bool) {}
    void endMemberDocName() {}
-   void startParameterType(bool, const char *) {}
+   void startParameterType(bool, const QByteArray &) override {}
    void endParameterType() {}
    void startParameterName(bool) {}
    void endParameterName(bool, bool, bool) {}
    void startParameterList(bool) {}
    void endParameterList() {}
-   void exceptionEntry(const char *, bool) {}
+   void exceptionEntry(const QByteArray &, bool) override {}
 
    void startFontClass(const char *) {}
    void endFontClass() {}

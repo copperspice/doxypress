@@ -129,7 +129,7 @@ CS_Doxygen_SOURCES = \
    src/tooltip.cpp \
    src/util.cpp \
    src/rtfdocvisitor.cpp \
-   src/hold/rtfgen.cpp \
+   src/rtfgen.cpp \
    src/rtfstyle.cpp  \
    src/xmldocvisitor.cpp  \
    src/xmlgen.cpp  \

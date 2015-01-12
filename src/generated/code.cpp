@@ -12430,9 +12430,9 @@ extern int codeYYlex (void);
 /** The main scanner function which does all the work.
  */
 YY_DECL {
-   register yy_state_type yy_current_state;
-   register char *yy_cp, *yy_bp;
-   register int yy_act;
+   yy_state_type yy_current_state;
+   char *yy_cp, *yy_bp;
+   int yy_act;
 
    if ( !(yy_init) )
    {
@@ -12638,10 +12638,11 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (!g_insideObjC || g_insideBody)
-               {
+               if (! g_insideObjC || g_insideBody) {
                   g_code->codify(codeYYtext);
+
                } else // Start of Objective-C method
+
                {
                   //printf("Method!\n");
                   g_code->codify(codeYYtext);
@@ -16000,12 +16001,8 @@ void resetCCodeParserState()
 void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray &s,
                 SrcLangExt lang, bool exBlock, const char *exName, FileDef *fd,
                 int startLine, int endLine, bool inlineFragment,
-                MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx,
-                bool collectXRefs)
-{
-   //printf("***parseCode() exBlock=%d exName=%s fd=%p className=%s searchCtx=%s\n",
-   //      exBlock,exName,fd,className,searchCtx?searchCtx->name().data():"<none>");
-
+                MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx,bool collectXRefs)
+{   
    if (s.isEmpty()) {
       return;
    }
@@ -16013,9 +16010,11 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
    printlex(codeYY_flex_debug, TRUE, __FILE__, fd ? fd->fileName().data() : NULL);
 
    TooltipManager::instance()->clearTooltips();
+
    if (g_codeClassSDict == 0) {
       resetCCodeParserState();
    }
+
    g_code = &od;
    g_inputString   = s;
    g_inputPosition = 0;
@@ -16024,6 +16023,7 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
    g_searchCtx = searchCtx;
    g_collectXRefs = collectXRefs;
    g_inFunctionTryBlock = FALSE;
+
    if (endLine != -1) {
       g_inputLines  = endLine + 1;
    } else {
@@ -16044,12 +16044,15 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
    g_theCallContext.clear();
    g_scopeStack.clear();
    g_classScope    = className;
+
    //printf("parseCCode %s\n",className);
+
    g_exampleBlock  = exBlock;
    g_exampleName   = exName;
    g_sourceFileDef = fd;
    g_lineNumbers   = fd != 0 && showLineNumbers;
    bool cleanupSourceDef = FALSE;
+
    if (fd == 0) {
       // create a dummy filedef for the example
       g_sourceFileDef = new FileDef("", (exName ? exName : "generated"));
@@ -16086,7 +16089,9 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
    }
    codeYYrestart( codeYYin );
    BEGIN( Body );
+
    codeYYlex();
+
    g_lexInit = TRUE;
    if (g_needsTermination) {
       endFontClass();

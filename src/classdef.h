@@ -104,7 +104,7 @@ class ClassDef : public Definition
    //-----------------------------------------------------------------------------------
 
    /** Used for RTTI, this is a class */
-   DefType definitionType() const {
+   DefType definitionType() const override {
       return TypeClass;
    }
 
@@ -474,9 +474,13 @@ struct UsesClassDef {
 
    void addAccessor(const char *s) {
 
+
+
       if (accessors->contains(s)) {
          accessors->insert(s, (void *)666);
       }
+
+
 
    }
 

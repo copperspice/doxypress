@@ -823,7 +823,7 @@ void GroupDef::writeDirs(OutputList &ol, const QByteArray &title)
          ol.startMemberItem(dd->getOutputFileBase(), 0);
          ol.parseText(theTranslator->trDir(false, true));
          ol.insertMemberAlign();
-         ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName());
+         ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName().toUtf8());
          ol.endMemberItem();
 
          if (!dd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {

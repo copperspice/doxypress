@@ -47,9 +47,6 @@
 #define START_MARKER 0x4445465B // DEF[
 #define END_MARKER   0x4445465D // DEF]
 
-//-----------------------------------------------------------------------------------------
-
-
 /** Private data associated with a Symbol Definition object. */
 class DefinitionImpl
 {
@@ -148,8 +145,6 @@ void DefinitionImpl::init(const char *df, const char *n)
    lang            = SrcLangExt_Unknown;
 }
 
-//-----------------------------------------------------------------------------------------
-
 static bool matchExcludedSymbols(const char *name)
 {
    static QStringList &exclSyms = Config_getList("EXCLUDE_SYMBOLS");
@@ -217,7 +212,7 @@ static bool matchExcludedSymbols(const char *name)
    return false;
 }
 
-void Definition::addToMap(const char *name, Definition *d)
+void Definition::addToMap(const QByteArray &name)
 {   
    QByteArray symbolName = name;
    int index = computeQualifiedIndex(symbolName);
@@ -229,32 +224,22 @@ void Definition::addToMap(const char *name, Definition *d)
    if (! symbolName.isEmpty()) {     
       auto di = Doxygen::symbolMap->find(symbolName);
 
+      QSharedPointer<QList<Definition *>> dl;
+
       if (di == Doxygen::symbolMap->end() ) { 
          // new Symbol         
-         Doxygen::symbolMap->insert(symbolName, d);
-         di = Doxygen::symbolMap->find(symbolName);
 
+         dl = QSharedPointer<QList<Definition *>>(new QList<Definition *>);       
+         Doxygen::symbolMap->insert(symbolName, dl);    
+     
       } else {
-         // existing symbol
+         // update existing symbol
+         dl = *di;
         
-         if ( (*di)->definitionType() == DefinitionIntf::TypeSymbolList) { 
-            // already multiple symbols
-            DefinitionList *dl = (DefinitionList *) *di;
-            dl->append(d);
-
-         } else { 
-            // going from one to two symbols
-            Doxygen::symbolMap->take(symbolName);
-
-            DefinitionList *dl = new DefinitionList;
-          
-            dl->append((Definition *) *di);
-            dl->append(d);
-            Doxygen::symbolMap->insert(symbolName, dl);
-         }
       }
-      
-      d->_setSymbolName(symbolName);
+
+      dl->append(this);      
+      this->setSymbolName(symbolName);
    }
 }
 
@@ -270,7 +255,7 @@ Definition::Definition(const char *df, int dl, int dc, const char *name, const c
    m_isSymbol = isSymbol;
 
    if (isSymbol) {
-      addToMap(name, this);
+      addToMap(name);
    }
 
    _setBriefDescription(b, df, dl);
@@ -350,7 +335,7 @@ Definition::Definition(const Definition &d) : DefinitionIntf()
 
    m_isSymbol = d.m_isSymbol;
    if (m_isSymbol) {
-      addToMap(m_name, this);
+      addToMap(m_name);
    }
 }
 
@@ -359,6 +344,16 @@ Definition::~Definition()
    if (m_impl) {
       delete m_impl;
       m_impl = 0;
+   }
+
+   auto di = Doxygen::symbolMap->find(m_symbolName);
+
+   if (di != Doxygen::symbolMap->end()) { 
+
+      QSharedPointer<QList<Definition *>> dl;  
+      dl = *di;  
+
+      dl->removeAll(this);
    }
 }
 
@@ -882,7 +877,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             }
 
             // write line link (HTML, LaTeX optionally)
-            ol.writeObjectLink(0, fn, anchorStr, lineStr);
+            ol.writeObjectLink(0, fn, anchorStr, lineStr.toUtf8());
             ol.enableAll();
             ol.disable(OutputGenerator::Html);
 
@@ -951,7 +946,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             }
             ol.disableAllBut(OutputGenerator::Html);
             // write line link (HTML only)
-            ol.writeObjectLink(0, fn, anchorStr, lineStr);
+            ol.writeObjectLink(0, fn, anchorStr, lineStr.toUtf8());
             ol.enableAll();
             ol.disable(OutputGenerator::Html);
 
@@ -1761,7 +1756,7 @@ void Definition::setLanguage(SrcLangExt lang)
    m_impl->lang = lang;
 }
 
-void Definition::_setSymbolName(const QByteArray &name)
+void Definition::setSymbolName(const QByteArray &name)
 {
    m_symbolName = name;
 }

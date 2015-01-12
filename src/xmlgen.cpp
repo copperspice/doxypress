@@ -288,8 +288,9 @@ class XMLCodeGenerator : public CodeOutputInterface
    virtual ~XMLCodeGenerator() 
    { }
 
-   void codify(const char *text) {
+   void codify(const QByteArray &text) override {
       XML_DB(("(codify \"%s\")\n", text));
+
       if (m_insideCodeLine && !m_insideSpecialHL && m_normalHLNeedStartTag) {
          m_t << "<highlight class=\"normal\">";
          m_normalHLNeedStartTag = false;
@@ -298,19 +299,22 @@ class XMLCodeGenerator : public CodeOutputInterface
       writeXMLCodeString(m_t, text, m_col);
    }
 
-   void writeCodeLink(const char *ref, const char *file, const char *anchor, const char *name, const char *tooltip) {
+   void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
+                      const QByteArray &name, const QByteArray &tooltip) override {
+
       XML_DB(("(writeCodeLink)\n"));
 
       if (m_insideCodeLine && !m_insideSpecialHL && m_normalHLNeedStartTag) {
          m_t << "<highlight class=\"normal\">";
          m_normalHLNeedStartTag = false;
       }
+
       writeXMLLink(m_t, ref, file, anchor, name, tooltip);
       m_col += qstrlen(name);
    }
 
-   void writeTooltip(const char *, const DocLinkInfo &, const char *,
-                     const char *, const SourceLinkInfo &, const SourceLinkInfo &) {
+   void writeTooltip(const char *, const DocLinkInfo &, const QByteArray &,
+                     const QByteArray &, const SourceLinkInfo &, const SourceLinkInfo &) override {
 
       XML_DB(("(writeToolTip)\n"));
    }
@@ -371,7 +375,7 @@ class XMLCodeGenerator : public CodeOutputInterface
    void writeCodeAnchor(const char *) {
       XML_DB(("(writeCodeAnchor)\n"));
    }
-   void writeLineNumber(const char *extRef, const char *compId, const char *anchorId, int l) {
+   void writeLineNumber(const char *extRef, const QByteArray &compId, const char *anchorId, int l) override {
       XML_DB(("(writeLineNumber)\n"));
 
       // we remember the information provided here to use it
@@ -379,7 +383,7 @@ class XMLCodeGenerator : public CodeOutputInterface
 
       m_lineNumber = l;
 
-      if (compId) {
+      if (! compId.isEmpty()) {
          m_refId = compId;
 
          if (anchorId) {
