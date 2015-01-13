@@ -22,7 +22,6 @@
 
 #include <outputgen.h>
 
-
 /** Generator for RTF output. */
 class RTFGenerator : public OutputGenerator
 {
@@ -122,10 +121,10 @@ class RTFGenerator : public OutputGenerator
    void endHtmlLink();
 
    void startTypewriter() {
-      t << "{\\f2 ";
+      m_textStream << "{\\f2 ";
    }
    void endTypewriter()   {
-      t << "}";
+      m_textStream << "}";
    }
    void startGroupHeader(int);
    void endGroupHeader(int);
@@ -167,7 +166,7 @@ class RTFGenerator : public OutputGenerator
    void startCodeFragment();
    void endCodeFragment();
    void writeLineNumber(const char *, const QByteArray &, const char *, int l) override {
-      t << l << " ";
+      m_textStream << l << " ";
    }
    void startCodeLine(bool) {
       col = 0;
@@ -176,16 +175,16 @@ class RTFGenerator : public OutputGenerator
       lineBreak();
    }
    void startEmphasis() {
-      t << "{\\i ";
+      m_textStream << "{\\i ";
    }
    void endEmphasis()   {
-      t << "}";
+      m_textStream << "}";
    }
    void startBold()     {
-      t << "{\\b ";
+      m_textStream << "{\\b ";
    }
    void endBold()       {
-      t << "}";
+      m_textStream << "}";
    }
    void startDescription();
    void endDescription();
@@ -199,7 +198,9 @@ class RTFGenerator : public OutputGenerator
    void startDoxyAnchor(const char *, const char *, const char *, const char *, const char *);
    void endDoxyAnchor(const char *, const char *);
    void writeChar(char c);
-   void writeLatexSpacing() {};//{ t << "\\hspace{0.3cm}"; }
+
+   void writeLatexSpacing() {};      
+ // { m_textStream << "\\hspace{0.3cm}"; }
 
    void writeStartAnnoItem(const char *type, const QByteArray &file, const QByteArray &path, const char *name) override;
    void writeEndAnnoItem(const char *name) override;
@@ -209,16 +210,16 @@ class RTFGenerator : public OutputGenerator
    void startSubsubsection();
    void endSubsubsection();
    void startCenter()      {
-      t << "{\\qc" << endl;
+      m_textStream << "{\\qc" << endl;
    }
    void endCenter()        {
-      t << "}";
+      m_textStream << "}";
    }
    void startSmall()       {
-      t << "{\\sub ";
+      m_textStream << "{\\sub ";
    }
    void endSmall()         {
-      t << "}";
+      m_textStream << "}";
    }
 
    void startMemberDescription(const char *, const QByteArray &);
@@ -363,6 +364,12 @@ class RTFGenerator : public OutputGenerator
    void rtfwriteRuler_thin();
    void writeRTFReference(const char *label);
    //char *getMultiByte(int c);
+
+
+   // BROOM BROOM 
+   QTextStream t;   
+
+
 };
 
 #endif

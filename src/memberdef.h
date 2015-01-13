@@ -389,7 +389,7 @@ class MemberDef : public Definition
 
    void writeMemberDocSimple(OutputList &ol, Definition *container);
    void writeEnumDeclaration(OutputList &typeDecl, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd);
-   void writeTagFile(FTextStream &);
+   void writeTagFile(QTextStream &);
    void warnIfUndocumented();
 
    MemberDef *createTemplateInstanceMember(ArgumentList *formalArgs, ArgumentList *actualArgs);

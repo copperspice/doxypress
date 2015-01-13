@@ -18,9 +18,11 @@
 #ifndef MANGEN_H
 #define MANGEN_H
 
-#include <outputgen.h>
+#include <QByteArray>
+#include <QFile>
+#include <QString>
 
-class QFile;
+#include <outputgen.h>
 
 /** Generator for Man page output. */
 class ManGenerator : public OutputGenerator
@@ -125,11 +127,11 @@ class ManGenerator : public OutputGenerator
    void endHtmlLink();
 
    void startTypewriter() {
-      t << "\\fC";
+      m_textStream << "\\fC";
       firstCol = false;
    }
    void endTypewriter()   {
-      t << "\\fP";
+      m_textStream << "\\fP";
       firstCol = false;
    }
    void startGroupHeader(int);
@@ -172,7 +174,7 @@ class ManGenerator : public OutputGenerator
    void startCodeFragment();
    void endCodeFragment();
    void writeLineNumber(const char *, const QByteArray &, const char *, int l) override {
-      t << l << " ";
+      m_textStream << l << " ";
    }
    void startCodeLine(bool) {}
    void endCodeLine() {
@@ -180,19 +182,19 @@ class ManGenerator : public OutputGenerator
       col = 0;
    }
    void startEmphasis() {
-      t << "\\fI";
+      m_textStream << "\\fI";
       firstCol = false;
    }
    void endEmphasis()   {
-      t << "\\fP";
+      m_textStream << "\\fP";
       firstCol = false;
    }
    void startBold()     {
-      t << "\\fB";
+      m_textStream << "\\fB";
       firstCol = false;
    }
    void endBold()       {
-      t << "\\fP";
+      m_textStream << "\\fP";
       firstCol = false;
    }
    void startDescription() {}
@@ -201,7 +203,7 @@ class ManGenerator : public OutputGenerator
    void endDescItem();
 
    void lineBreak(const QByteArray &) override {
-      t << "\n.br" << endl;
+      m_textStream << "\n.br" << endl;
    }
 
    void writeChar(char c);
@@ -214,7 +216,7 @@ class ManGenerator : public OutputGenerator
    void writeStartAnnoItem(const char *type, const QByteArray &file, const QByteArray &path, const char *name) override;
 
    void writeEndAnnoItem(const char *) {
-      t << endl;
+      m_textStream << endl;
       firstCol = true;
    }
 
@@ -228,12 +230,12 @@ class ManGenerator : public OutputGenerator
    void endSmall()           {}
 
    void startMemberDescription(const char *, const QByteArray &) {
-      t << "\n.RI \"\\fI";
+      m_textStream << "\n.RI \"\\fI";
       firstCol = false;
    }
 
    void endMemberDescription()   {
-      t << "\\fP\"";
+      m_textStream << "\\fP\"";
       firstCol = false;
    }
 
@@ -276,9 +278,9 @@ class ManGenerator : public OutputGenerator
    void endContents() {}
 
    void writeNonBreakableSpace(int n) {
-      int i;
-      for (i = 0; i < n; i++) {
-         t << " ";
+      
+      for (int i = 0; i < n; i++) {
+         m_textStream << " ";
       }
    }
 
@@ -301,7 +303,7 @@ class ManGenerator : public OutputGenerator
       endBold();
    }
    void startDescTableData() {
-      t << endl;
+      m_textStream << endl;
       firstCol = true;
    }
    void endDescTableData() {}
@@ -376,6 +378,12 @@ class ManGenerator : public OutputGenerator
 
    ManGenerator(const ManGenerator &g);
    ManGenerator &operator=(const ManGenerator &g);
+
+
+   // BROOM BROOM 
+   QTextStream t;    
+
+
 };
 
 #endif

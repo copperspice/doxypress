@@ -32,7 +32,6 @@
 #include <groupdef.h>
 #include <language.h>
 #include <layout.h>
-
 #include <membername.h>
 #include <memberlist.h>
 #include <message.h>
@@ -525,7 +524,7 @@ void GroupDef::computeAnchors()
    setAnchors(allMemberList);
 }
 
-void GroupDef::writeTagFile(FTextStream &tagFile)
+void GroupDef::writeTagFile(QTextStream &tagFile)
 {
    tagFile << "  <compound kind=\"group\">" << endl;
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;

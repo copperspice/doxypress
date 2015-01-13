@@ -18,8 +18,10 @@
 #ifndef FILEDEF_H
 #define FILEDEF_H
 
+#include <QByteArray>
 #include <QList>
 #include <QHash>
+#include <QTextStream>
 
 #include <index.h>
 #include <definition.h>
@@ -32,7 +34,6 @@ class ClassDef;
 class DirDef;
 class FileDef;
 class FileList;
-class FTextStream;
 class MemberDef;
 class MemberList;
 class MemberGroupSDict;
@@ -203,7 +204,7 @@ class FileDef : public Definition
    void writeMemberPages(OutputList &ol);
    void writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const;
    void writeSummaryLinks(OutputList &ol);
-   void writeTagFile(FTextStream &t);
+   void writeTagFile(QTextStream &t);
 
    void startParsing();
    void writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameTu);

@@ -63,7 +63,7 @@ static QByteArray align(DocHtmlCell *cell)
    return "";
 }
 
-RTFDocVisitor::RTFDocVisitor(FTextStream &t, CodeOutputInterface &ci, const char *langExt)
+RTFDocVisitor::RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt)
    : DocVisitor(DocVisitor_RTF), m_t(t), m_ci(ci), m_insidePre(false),
      m_hide(false), m_indentLevel(0), m_lastIsPara(false), m_langExt(langExt)
 {

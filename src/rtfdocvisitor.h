@@ -18,19 +18,19 @@
 #ifndef RTFDOCVISITOR_H
 #define RTFDOCVISITOR_H
 
-#include <QStack>
 #include <QByteArray>
+#include <QStack>
+#include <QTextStream>
 
 #include <docvisitor.h>
 
-class FTextStream;
 class CodeOutputInterface;
 
 /*! @brief Concrete visitor implementation for RTF output. */
 class RTFDocVisitor : public DocVisitor
 {
  public:
-   RTFDocVisitor(FTextStream &t, CodeOutputInterface &ci, const char *langExt);
+   RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt);
 
    //--------------------------------------
    // visitor functions for leaf nodes
@@ -159,7 +159,7 @@ class RTFDocVisitor : public DocVisitor
    // state variables
    //--------------------------------------
 
-   FTextStream &m_t;
+   QTextStream &m_t;
    CodeOutputInterface &m_ci;
    bool m_insidePre;
    bool m_hide;

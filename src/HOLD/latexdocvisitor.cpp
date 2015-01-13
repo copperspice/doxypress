@@ -131,7 +131,7 @@ QByteArray LatexDocVisitor::escapeMakeIndexChars(const char *s)
 }
 
 
-LatexDocVisitor::LatexDocVisitor(FTextStream &t, CodeOutputInterface &ci, const char *langExt, bool insideTabbing)
+LatexDocVisitor::LatexDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt, bool insideTabbing)
    : DocVisitor(DocVisitor_Latex), m_t(t), m_ci(ci), m_insidePre(false), m_insideItem(false), m_hide(false), m_insideTabbing(insideTabbing),
      m_insideTable(false), m_langExt(langExt), m_currentColumn(0), m_inRowspan(false), m_inColspan(false)
 {

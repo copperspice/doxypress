@@ -21,28 +21,27 @@
 #include <QList>
 #include <QHash>
 #include <QTextStream>
+#include <QSet>
 
 #include <definition.h>
 
-class MemberDef;
-class MemberList;
-class MemberDict;
+class ArgumentList;
 class ClassSDict;
-class OutputList;
+class ClassDefPrivate;
+class ExampleSDict;
 class FileDef;
 class FileList;
-class NamespaceDef;
-class MemberDef;
-class ExampleSDict;
-class MemberNameInfoSDict;
-class UsesClassDict;
-class MemberGroupSDict;
-class PackageDef;
 class GroupDef;
+class MemberDef;
+class MemberDict;
+class MemberGroupSDict;
+class MemberList;
+class MemberNameInfoSDict;
+class NamespaceDef;
+class OutputList;
+class PackageDef;
 class StringDict;
-class ClassDefImpl;
-class ArgumentList;
-class FTextStream;
+class UsesClassDict;
 
 struct IncludeInfo;
 struct BaseClassDef;
@@ -95,7 +94,7 @@ class ClassDef : public Definition
             const char *name, CompoundType ct,
             const char *ref = 0, const char *fName = 0,
             bool isSymbol = true, bool isJavaEnum = false);
-
+  
    /** Destroys a compound definition. */
    ~ClassDef();
 
@@ -396,7 +395,7 @@ class ClassDef : public Definition
    void addGroupedInheritedMembers(OutputList &ol, MemberListType lt, ClassDef *inheritedFrom, const QByteArray &inheritId);
    int countMembersIncludingGrouped(MemberListType lt, ClassDef *inheritedFrom, bool additional);
    int countInheritanceNodes();
-   void writeTagFile(FTextStream &);
+   void writeTagFile(QTextStream &);
 
    bool visited;
 
@@ -450,52 +449,45 @@ class ClassDef : public Definition
    int countMemberDeclarations(MemberListType lt, ClassDef *inheritedFrom,
                                int lt2, bool invert, bool showAlways, QHash<void *, void *> *visitedClasses);
 
-   int countInheritedDecMembers(MemberListType lt,
-                                ClassDef *inheritedFrom, bool invert, bool showAlways,
+   int countInheritedDecMembers(MemberListType lt, ClassDef *inheritedFrom, bool invert, bool showAlways,
                                 QHash<void *, void *> *visitedClasses);
 
    void getTitleForMemberListType(MemberListType type, QByteArray &title, QByteArray &subtitle);
    QByteArray includeStatement() const;
 
-   ClassDefImpl *m_impl;
+   QSharedPointer<ClassDefPrivate> m_private;
 };
 
 /** Class that contains information about a usage relation.
  */
-struct UsesClassDef {
-   UsesClassDef(ClassDef *cd) : classDef(cd) {
-      accessors = new QHash<QString, void *>();
-      containment = true;
+class UsesClassDef 
+{
+ public:
+   UsesClassDef(ClassDef *cd) : m_classDef(cd) {      
+      m_containment = true;
    }
 
-   ~UsesClassDef() {
-      delete accessors;
-   }
+   ~UsesClassDef() 
+   { }
 
    void addAccessor(const char *s) {
-
-
-
-      if (accessors->contains(s)) {
-         accessors->insert(s, (void *)666);
+      if (m_accessors.contains(s)) {
+         m_accessors.insert(s);        
       }
-
-
-
    }
 
-   /** Class definition that this relation uses. */
-   ClassDef *classDef;
+   /** Class definition this relation uses. */
+   ClassDef *m_classDef;
 
    /** Dictionary of member variable names that form the edge labels of the
     *  usage relation.
     */
-   QHash<QString, void *> *accessors;
+   QSet<QString> m_accessors;
 
    /** Template arguments used for the base class */
-   QByteArray templSpecifiers;
+   QByteArray m_templSpecifiers;
 
-   bool containment;
+   bool m_containment;
 };
 
 /** Dictionary of usage relations.
@@ -504,10 +496,10 @@ class UsesClassDict : public QHash<QString, UsesClassDef>
 {
  public:
    UsesClassDict() : QHash<QString, UsesClassDef>()
-   {
-   }
+   { }
 
-   ~UsesClassDict() {}
+   ~UsesClassDict()
+   {}
 };
 
 /** Iterator class to iterate over a dictionary of usage relations.
@@ -521,11 +513,12 @@ class UsesClassDictIterator : public QHashIterator<QString, UsesClassDef>
    ~UsesClassDictIterator() {}
 };
 
-/** Class that contains information about an inheritance relation.
+/** Class that contains information about an inheritance relation
  */
 struct BaseClassDef {
    BaseClassDef(ClassDef *cd, const char *n, Protection p, Specifier v, const char *t) :
-      classDef(cd), usedName(n), prot(p), virt(v), templSpecifiers(t) {}
+      classDef(cd), usedName(n), prot(p), virt(v), templSpecifiers(t)
+   {}
 
    /** Class definition which this relation inherits from. */
    ClassDef *classDef;
@@ -533,7 +526,7 @@ struct BaseClassDef {
    /** name used in the inheritance list
     * (may be a typedef name instead of the class name)
     */
-   QByteArray   usedName;
+   QByteArray usedName;
 
    /** Protection level of the inheritance relation:
     *  Public, Protected, or Private
@@ -543,7 +536,7 @@ struct BaseClassDef {
    /** Virtualness of the inheritance relation:
     *  Normal, or Virtual
     */
-   Specifier  virt;
+   Specifier virt;
 
    /** Template arguments used for the base class */
    QByteArray templSpecifiers;

@@ -19,6 +19,7 @@
 #include <QStack>
 #include <QHash>
 #include <QFile>
+#include <QTextStream>
 
 #include <stdlib.h>
 
@@ -28,7 +29,6 @@
 #include <doxygen.h>
 #include <pagedef.h>
 #include <memberlist.h>
-#include <ftextstream.h>
 #include <arguments.h>
 #include <config.h>
 #include <groupdef.h>
@@ -49,9 +49,9 @@ class PerlModOutputStream
  public:
 
    QByteArray m_s;
-   FTextStream *m_t;
+   QTextStream *m_t;
 
-   PerlModOutputStream(FTextStream *t = 0) : m_t(t) { }
+   PerlModOutputStream(QTextStream *t = 0) : m_t(t) { }
 
    void add(char c);
    void add(const char *s);
@@ -2351,7 +2351,7 @@ bool PerlModGenerator::generatePerlModOutput()
       return false;
    }
 
-   FTextStream outputTextStream(&outputFile);
+   QTextStream outputTextStream(&outputFile);
    PerlModOutputStream outputStream(&outputTextStream);
    m_output.setPerlModOutputStream(&outputStream);
    m_output.add("$doxydocs=").openHash();
@@ -2465,7 +2465,7 @@ bool PerlModGenerator::generateDoxyStructurePM()
       return false;
    }
 
-   FTextStream doxyModelPMStream(&doxyModelPM);
+   QTextStream doxyModelPMStream(&doxyModelPM);
    doxyModelPMStream <<
                      "sub memberlist($) {\n"
                      "    my $prefix = $_[0];\n"
@@ -2653,7 +2653,7 @@ bool PerlModGenerator::generateDoxyRules()
    bool perlmodLatex = Config_getBool("PERLMOD_LATEX");
    QByteArray prefix = Config_getString("PERLMOD_MAKEVAR_PREFIX");
 
-   FTextStream doxyRulesStream(&doxyRules);
+   QTextStream doxyRulesStream(&doxyRules);
    doxyRulesStream <<
                    prefix << "DOXY_EXEC_PATH = " << pathDoxyExec << "\n" <<
                    prefix << "DOXYFILE = " << pathDoxyfile << "\n" <<
@@ -2751,7 +2751,7 @@ bool PerlModGenerator::generateMakefile()
    bool perlmodLatex = Config_getBool("PERLMOD_LATEX");
    QByteArray prefix = Config_getString("PERLMOD_MAKEVAR_PREFIX");
 
-   FTextStream makefileStream(&makefile);
+   QTextStream makefileStream(&makefile);
    makefileStream <<
                   ".PHONY: default clean" << (perlmodLatex ? " pdf" : "") << "\n"
                   "default: " << (perlmodLatex ? "pdf" : "clean") << "\n"
@@ -2776,7 +2776,7 @@ bool PerlModGenerator::generateDoxyLatexStructurePL()
       return false;
    }
 
-   FTextStream doxyLatexStructurePLStream(&doxyLatexStructurePL);
+   QTextStream doxyLatexStructurePLStream(&doxyLatexStructurePL);
    doxyLatexStructurePLStream <<
                               "use DoxyStructure;\n"
                               "\n"
@@ -2811,7 +2811,7 @@ bool PerlModGenerator::generateDoxyLatexPL()
       return false;
    }
 
-   FTextStream doxyLatexPLStream(&doxyLatexPL);
+   QTextStream doxyLatexPLStream(&doxyLatexPL);
    doxyLatexPLStream <<
                      "use DoxyStructure;\n"
                      "use DoxyDocs;\n"
@@ -2935,7 +2935,7 @@ bool PerlModGenerator::generateDoxyFormatTex()
       return false;
    }
 
-   FTextStream doxyFormatTexStream(&doxyFormatTex);
+   QTextStream doxyFormatTexStream(&doxyFormatTex);
    doxyFormatTexStream <<
                        "\\def\\Defcs#1{\\long\\expandafter\\def\\csname#1\\endcsname}\n"
                        "\\Defcs{Empty}{}\n"
@@ -3099,7 +3099,7 @@ bool PerlModGenerator::generateDoxyLatexTex()
       return false;
    }
 
-   FTextStream doxyLatexTexStream(&doxyLatexTex);
+   QTextStream doxyLatexTexStream(&doxyLatexTex);
    doxyLatexTexStream <<
                       "\\documentclass[a4paper,12pt]{article}\n"
                       "\\usepackage[latin1]{inputenc}\n"

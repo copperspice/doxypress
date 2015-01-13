@@ -45,7 +45,6 @@
 // must appear after the previous include - resolve soon 
 #include <doxy_globals.h>
 
-
 /** Class implementing CodeOutputInterface by throwing away everything. */
 class DevNullCodeDocInterface : public CodeOutputInterface
 {
@@ -179,7 +178,7 @@ bool FileDef::hasDetailedDescription() const
             !documentation().trimmed().isEmpty() ||  (sourceBrowser && getStartBodyLine() != -1 && getBodyDef()) );
 }
 
-void FileDef::writeTagFile(FTextStream &tagFile)
+void FileDef::writeTagFile(QTextStream &tagFile)
 {
    tagFile << "  <compound kind=\"file\">" << endl;
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;

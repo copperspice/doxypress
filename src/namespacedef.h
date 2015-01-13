@@ -18,8 +18,10 @@
 #ifndef NAMESPACEDEF_H
 #define NAMESPACEDEF_H
 
-#include <QStringList>
 #include <QHash>
+#include <QStringList>
+#include <QSharedPointer>
+#include <QTextStream>
 
 #include <stringmap.h>
 #include <definition.h>
@@ -27,7 +29,6 @@
 
 class ClassDef;
 class ClassSDict;
-class FTextStream;
 class MemberList;
 class MemberDef;
 class MemberGroupSDict;
@@ -74,7 +75,7 @@ class NamespaceDef : public Definition
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
    void writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const;
-   void writeTagFile(FTextStream &);
+   void writeTagFile(QTextStream &);
 
    void insertClass(QSharedPointer<ClassDef> cd);
    void insertNamespace(QSharedPointer<NamespaceDef> nd);

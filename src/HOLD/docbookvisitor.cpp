@@ -35,7 +35,7 @@
 #include <htmlentity.h>
 #include <plantuml.h>
 
-DocbookDocVisitor::DocbookDocVisitor(FTextStream &t, CodeOutputInterface &ci)
+DocbookDocVisitor::DocbookDocVisitor(QTextStream &t, CodeOutputInterface &ci)
    : DocVisitor(DocVisitor_Docbook), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false)
 {
 }

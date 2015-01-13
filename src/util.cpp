@@ -6226,7 +6226,7 @@ void addGroupListToTitle(OutputList &ol, Definition *d)
    recursivelyAddGroupListToTitle(ol, d, true);
 }
 
-void filterLatexString(FTextStream &t, const char *str, bool insideTabbing, bool insidePre, bool insideItem)
+void filterLatexString(QTextStream &t, const char *str, bool insideTabbing, bool insidePre, bool insideItem)
 {
    if (str == 0) {
       return;
@@ -6769,7 +6769,7 @@ bool checkIfTypedef(Definition *scope, FileDef *fileScope, const char *n)
    }
 }
 
-const char *writeUtf8Char(FTextStream &t, const char *s)
+const char *writeUtf8Char(QTextStream &t, const char *s)
 {
    char c = *s++;
    t << c;
@@ -6861,7 +6861,7 @@ QByteArray parseCommentAsText(const Definition *scope, const MemberDef *md,
       return s.data();
    }
 
-   FTextStream t(&s);
+   QTextStream t(&s);
    DocNode *root = validatingParseDoc(fileName, lineNr, (Definition *)scope, (MemberDef *)md, doc, false, false);
    TextDocVisitor *visitor = new TextDocVisitor(t);
    root->accept(visitor);

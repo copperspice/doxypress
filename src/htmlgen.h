@@ -18,22 +18,22 @@
 #ifndef HTMLGEN_H
 #define HTMLGEN_H
 
+#include <QByteArray>
+#include <QFile>
+#include <QString>
+#include <QTextStream>
+
 #include <outputgen.h>
-#include <ftextstream.h>
 
 #define PREFRAG_START   "<div class=\"fragment\">"
 #define PREFRAG_END     "</div><!-- fragment -->"
 
-class QFile;
-
 class HtmlCodeGenerator : public CodeOutputInterface
 {
  public:
-   HtmlCodeGenerator(FTextStream &t, const QByteArray &relPath);
-   HtmlCodeGenerator();
-   void setTextStream(FTextStream &t);
-   void setRelativePath(const QByteArray &path);
+   HtmlCodeGenerator(QTextStream &t, const QByteArray &relPath);
 
+   void setRelativePath(const QByteArray &path);
    void codify(const QByteArray &text) override;
 
    void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
@@ -57,9 +57,9 @@ class HtmlCodeGenerator : public CodeOutputInterface
 
    void docify(const QByteArray &str);
 
-   bool m_streamSet;
-   FTextStream m_t;
-   int m_col;
+   QTextStream &m_streamX;  
+
+   int m_col;  
    QByteArray m_relPath;
 };
 
@@ -75,7 +75,7 @@ class HtmlGenerator : public OutputGenerator
    static void writeHeaderFile(QFile &f);
    static void writeFooterFile(QFile &f);
    static void writeTabData();
-   static void writeSearchInfo(FTextStream &t, const QByteArray &relPath);
+   static void writeSearchInfo(QTextStream &t, const QByteArray &relPath);
    static void writeSearchData(const char *dir);
    static void writeSearchPage();
    static void writeExternalSearchPage();
@@ -122,41 +122,41 @@ class HtmlGenerator : public OutputGenerator
    }
  
    void codify(const QByteArray &text) override {
-      m_codeGen.codify(text);
+      m_codeGen->codify(text);
    }
 
    void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
                       const QByteArray &name, const QByteArray &tooltip) override {
-      m_codeGen.writeCodeLink(ref, file, anchor, name, tooltip);
+      m_codeGen->writeCodeLink(ref, file, anchor, name, tooltip);
    }
 
    void writeLineNumber(const char *ref, const QByteArray &file, const char *anchor, int lineNumber) {
-      m_codeGen.writeLineNumber(ref, file, anchor, lineNumber);
+      m_codeGen->writeLineNumber(ref, file, anchor, lineNumber);
    }
 
    void writeTooltip(const char *id, const DocLinkInfo &docInfo, const QByteArray &decl, const QByteArray &desc, 
                      const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo ) override {
-      m_codeGen.writeTooltip(id, docInfo, decl, desc, defInfo, declInfo);
+      m_codeGen->writeTooltip(id, docInfo, decl, desc, defInfo, declInfo);
    }
 
    void startCodeLine(bool hasLineNumbers) {
-      m_codeGen.startCodeLine(hasLineNumbers);
+      m_codeGen->startCodeLine(hasLineNumbers);
    }
 
    void endCodeLine() {
-      m_codeGen.endCodeLine();
+      m_codeGen->endCodeLine();
    }
 
    void startFontClass(const char *s) {
-      m_codeGen.startFontClass(s);
+      m_codeGen->startFontClass(s);
    }
 
    void endFontClass() {
-      m_codeGen.endFontClass();
+      m_codeGen->endFontClass();
    }
 
    void writeCodeAnchor(const char *anchor) {
-      m_codeGen.writeCodeAnchor(anchor);
+      m_codeGen->writeCodeAnchor(anchor);
    }
 
    // **
@@ -255,160 +255,161 @@ class HtmlGenerator : public OutputGenerator
 
    // **
    void startTitle() {
-      t << "<div class=\"title\">";
+      m_textStream << "<div class=\"title\">";
    }
 
    void endTitle() {
-      t << "</div>";
+      m_textStream << "</div>";
    }
 
    void startItemList()  {
-      t << "<ul>"  << endl;
+      m_textStream << "<ul>"  << endl;
    }
 
    void endItemList()    {
-      t << "</ul>" << endl;
+      m_textStream << "</ul>" << endl;
    }
 
    void startTypewriter() {
-      t << "<code>";
+      m_textStream << "<code>";
    }
 
    void endTypewriter()   {
-      t << "</code>";
+      m_textStream << "</code>";
    }
    
    void startItemListItem() {
-      t << "<li>";
+      m_textStream << "<li>";
    }
 
    void endItemListItem() {
-      t << "</li>\n";
+      m_textStream << "</li>\n";
    }
 
    void writeRuler()    {
-      t << "<hr/>";
+      m_textStream << "<hr/>";
    }
    void writeAnchor(const char *, const char *name) {
-      t << "<a name=\"" << name << "\" id=\"" << name << "\"></a>";
+      m_textStream << "<a name=\"" << name << "\" id=\"" << name << "\"></a>";
    }
 
    void startCodeFragment() {
-      t << PREFRAG_START;
+      m_textStream << PREFRAG_START;
    }
 
    void endCodeFragment()   {
-      t << PREFRAG_END;
+      m_textStream << PREFRAG_END;
    }
 
    void startEmphasis() {
-      t << "<em>";
+      m_textStream << "<em>";
    }
 
    void endEmphasis()   {
-      t << "</em>";
+      m_textStream << "</em>";
    }
  
    void startBold()     {
-      t << "<b>";
+      m_textStream << "<b>";
    }
  
    void endBold()       {
-      t << "</b>";
+      m_textStream << "</b>";
    }
 
    void startDescription() {
-      t << endl << "<dl>" << endl;
+      m_textStream << endl << "<dl>" << endl;
    }
 
    void endDescription()   {
-      t << endl << "</dl>\n" << endl;
+      m_textStream << endl << "</dl>\n" << endl;
    }
 
    void startDescItem()    {
-      t << "<dt>";
+      m_textStream << "<dt>";
    }
 
    void endDescItem()      {
-      t << "</dt>";
+      m_textStream << "</dt>";
    }
 
    void startDescForItem() {
-      t << "<dd>";
+      m_textStream << "<dd>";
    }
 
    void endDescForItem()   {
-      t << "</dd>\n";
+      m_textStream << "</dd>\n";
    }
 
    void writeEndAnnoItem(const char *) {
-      t << endl;
+      m_textStream << endl;
    }
+
    void startSubsection()    {
-      t << "<h2>";
+      m_textStream << "<h2>";
    }
    void endSubsection()      {
-      t << "</h2>" << endl;
+      m_textStream << "</h2>" << endl;
    }
 
    void startSubsubsection() {
-      t << "<h3>";
+      m_textStream << "<h3>";
    }
 
    void endSubsubsection()   {
-      t << "</h3>" << endl;
+      m_textStream << "</h3>" << endl;
    }
 
    void startCenter()        {
-      t << "<center>" << endl;
+      m_textStream << "<center>" << endl;
    }
 
    void endCenter()          {
-      t << "</center>" << endl;
+      m_textStream << "</center>" << endl;
    }
 
    void startSmall()         {
-      t << "<small>" << endl;
+      m_textStream << "<small>" << endl;
    }
 
    void endSmall()           {
-      t << "</small>" << endl;
+      m_textStream << "</small>" << endl;
    }
 
    void startDescTable(const char *title)   
    {
-      t << "<table class=\"fieldtable\">" << endl
+      m_textStream << "<table class=\"fieldtable\">" << endl
         << "<tr><th colspan=\"2\">" << title << "</th></tr>";
    }
 
    void endDescTable() {
-      t << "</table>" << endl;
+      m_textStream << "</table>" << endl;
    }
 
    void startDescTableTitle()  
    {
-      t << "<tr><td class=\"fieldname\">";
+      m_textStream << "<tr><td class=\"fieldname\">";
    }
 
    void endDescTableTitle() {
-      t << "&#160;</td>";
+      m_textStream << "&#160;</td>";
    }
     
    void startDescTableData()  
    {
-      t << "<td class=\"fielddoc\">" << endl;
+      m_textStream << "<td class=\"fielddoc\">" << endl;
    }
 
    void endDescTableData() {
-      t << "</td></tr>" << endl;
+      m_textStream << "</td></tr>" << endl;
    }
 
    void startTextBlock(bool) {
-      t << "<div class=\"textblock\">";
+      m_textStream << "<div class=\"textblock\">";
    }
 
    void endTextBlock(bool) {
-      t << "</div>";
+      m_textStream << "</div>";
    }
   
    void lineBreak(const QByteArray &style) override ;
@@ -501,10 +502,11 @@ class HtmlGenerator : public OutputGenerator
    void endLabels();
 
  private:
-   static void writePageFooter(FTextStream &t, const QByteArray &, const QByteArray &, const QByteArray &);
+   static void writePageFooter(QTextStream &t, const QByteArray &, const QByteArray &, const QByteArray &);
    QByteArray lastTitle;
    QByteArray lastFile;
    QByteArray relPath;
+
    void docify(const QByteArray &text, bool inHtmlComment);
 
    HtmlGenerator &operator=(const HtmlGenerator &g);
@@ -512,7 +514,8 @@ class HtmlGenerator : public OutputGenerator
 
    int m_sectionCount;
    bool m_emptySection;
-   HtmlCodeGenerator m_codeGen;
+
+   QSharedPointer<HtmlCodeGenerator> m_codeGen;
 };
 
 #endif

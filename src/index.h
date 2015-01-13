@@ -24,7 +24,6 @@
 #include <QSharedPointer>
 
 class Definition;
-class FTextStream;
 class MemberDef;
 class OutputList;
 

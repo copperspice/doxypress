@@ -22,16 +22,16 @@
 
 #include <stdio.h>
 
+#include <bufstr.h>
 #include <config.h>
-#include <markdown.h>
+#include <commentscan.h>
+#include <commentcnv.h>
+#include <entry.h>
 #include <growbuf.h>
 #include <doxygen.h>
-#include <commentscan.h>
-#include <entry.h>
-#include <bufstr.h>
-#include <commentcnv.h>
-#include <section.h>
+#include <markdown.h>
 #include <message.h>
+#include <section.h>
 #include <util.h>
 
 // must appear after the previous include - resolve soon 

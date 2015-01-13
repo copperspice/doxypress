@@ -3596,7 +3596,7 @@ Specifier MemberDef::virtualness(int count) const
    return v;
 }
 
-void MemberDef::writeTagFile(FTextStream &tagFile)
+void MemberDef::writeTagFile(QTextStream &tagFile)
 {
    if (!isLinkableInProject()) {
       return;

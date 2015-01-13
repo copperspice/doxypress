@@ -19,13 +19,13 @@
 #ifndef QHPXMLWRITER_H
 #define QHPXMLWRITER_H
 
+#include <QByteArray>
 #include <QString>
 #include <QFile>
+#include <QTextStream>
 
-#include <ftextstream.h>
+class QhpXmlWriter{
 
-class QhpXmlWriter
-{
  public:
    QhpXmlWriter();
    ~QhpXmlWriter();
@@ -45,19 +45,17 @@ class QhpXmlWriter
  private:
    void indent();
    void newLine();
-   void openPureHelper(char const *elementName,
-                       char const *const *attributes, bool close);
-   void openPure(char const *elementName,
-                 char const *const *attributes = 0);
+   void openPureHelper(char const *elementName, char const *const *attributes, bool close);
+   void openPure(char const *elementName,char const *const *attributes = 0);
    void openClosePure(char const *elementName, char const *const *attributes = 0);
    void closePure(char const *elementName);
 
    QByteArray m_backend;
-   FTextStream m_out;
+   QTextStream m_out;
    int  m_indentLevel;
    bool m_curLineIndented;
    bool m_compress;
 
 };
 
-#endif // QHPXMLWRITER_H
+#endif

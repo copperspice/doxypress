@@ -24,7 +24,6 @@
 #include <message.h>
 #include <util.h>
 #include <language.h>
-#include <ftextstream.h>
 #include <resourcemgr.h>
 
 const QByteArray CiteConsts::fileName("citelist");
@@ -36,7 +35,7 @@ CiteDict::CiteDict() : m_entries()
 {  
 }
 
-void CiteDict::writeLatexBibliography(FTextStream &t)
+void CiteDict::writeLatexBibliography(QTextStream &t)
 {
    if (m_entries.isEmpty()) {
       return;
@@ -154,7 +153,7 @@ void CiteDict::generatePage() const
       err("could not open file %s for writing\n", citeListFile.data());
    }
 
-   FTextStream t(&f);
+   QTextStream t(&f);
    t << "<!-- BEGIN CITATIONS -->" << endl;
    t << "<!--" << endl;
 

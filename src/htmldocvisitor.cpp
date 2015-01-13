@@ -15,7 +15,7 @@
  *
 *************************************************************************/
 
-#include <qdir.h>
+#include <QDir>
 
 #include <htmldocvisitor.h>
 #include <docparser.h>
@@ -146,7 +146,7 @@ static QString htmlAttribsToString(const HtmlAttribList &attribs)
 
 //-------------------------------------------------------------------------
 
-HtmlDocVisitor::HtmlDocVisitor(FTextStream &t, CodeOutputInterface &ci, Definition *ctx)
+HtmlDocVisitor::HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, Definition *ctx)
    : DocVisitor(DocVisitor_Html), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false), m_ctx(ctx)
 {
    if (ctx) {
@@ -376,7 +376,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          forceEndParagraph(s);
 
          m_t << PREFRAG_START;
-         m_t << flush;      // added by copperspice
+//         m_t << flush;      // added by copperspice
 
          Doxygen::parserManager->getParser(lang)->parseCode(m_ci,
                      s->context(),
@@ -393,7 +393,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
                      m_ctx  // search context
                     );
 
-         m_t << flush;      // added by copperspice
+//         m_t << flush;      // added by copperspice
          m_t << PREFRAG_END;
 
          forceStartParagraph(s);

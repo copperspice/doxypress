@@ -80,7 +80,7 @@ void DocSets::initialize()
          err("Could not open file %s for writing\n", mfName.data());
          exit(1);
       }
-      FTextStream ts(&makefile);
+      QTextStream ts(&makefile);
 
       ts << "DOCSET_NAME=" << bundleId << ".docset\n"
          "DOCSET_CONTENTS=$(DOCSET_NAME)/Contents\n"
@@ -130,7 +130,7 @@ void DocSets::initialize()
          err("Could not open file %s for writing\n", plName.data());
          exit(1);
       }
-      FTextStream ts(&plist);
+      QTextStream ts(&plist);
 
       ts << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
          "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\"\n"
@@ -541,7 +541,7 @@ void DocSets::addIndexItem(Definition *context, MemberDef *md,
    }
 }
 
-void DocSets::writeToken(FTextStream &t, const Definition *d, const QByteArray &type, const QByteArray &lang,
+void DocSets::writeToken(QTextStream &t, const Definition *d, const QByteArray &type, const QByteArray &lang,
                          const char *scope, const char *anchor, const QByteArray &decl)
 {
    t << "  <Token>" << endl;

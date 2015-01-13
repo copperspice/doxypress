@@ -18,8 +18,9 @@
 #ifndef MSC_H
 #define MSC_H
 
-class QByteArray;
-class FTextStream;
+#include <QByteArray>
+#include <QTextStream>
+
 
 enum MscOutputFormat { MSC_BITMAP , MSC_EPS, MSC_SVG };
 
@@ -29,10 +30,9 @@ void writeMscGraphFromFile(const char *inFile, const char *outDir,
 QByteArray getMscImageMapFromFile(const QByteArray &inFile, const QByteArray &outDir,
                                   const QByteArray &relPath, const QByteArray &context);
 
-void writeMscImageMapFromFile(FTextStream &t, const QByteArray &inFile,
+void writeMscImageMapFromFile(QTextStream &t, const QByteArray &inFile,
                               const QByteArray &outDir, const QByteArray &relPath,
-                              const QByteArray &baseName, const QByteArray &context,
-                              MscOutputFormat format );
+                              const QByteArray &baseName, const QByteArray &context, MscOutputFormat format );
 
 #endif
 

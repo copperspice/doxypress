@@ -17,6 +17,7 @@
 
 #include <QFile>
 #include <QRegExp>
+#include <QTextStream>
 
 #include <ctype.h>
 #include <assert.h>
@@ -223,7 +224,7 @@ void SearchIndex::addWord(const QString &word, bool hiPriority, bool recurse)
    }
 
    QByteArray wStr = word.toLower().toUtf8();   
-   IndexWord *w = m_words.value(wStr);
+   IndexWord *w    = m_words.value(wStr);
 
    if (! w) {
       int idx = charsToIndex(wStr);
@@ -238,23 +239,26 @@ void SearchIndex::addWord(const QString &word, bool hiPriority, bool recurse)
    }
 
    w->addUrlIndex(m_urlIndex, hiPriority);
+
    int i;
    bool found = false;
 
-   if (!recurse) { 
+   if (! recurse) { 
       // the first time we check if we can strip the prefix
       i = getPrefixIndex(word.toUtf8());
 
       if (i > 0) {
-         addWord(word + i, hiPriority, true);
+         addWord(word.mid(i), hiPriority, true);
          found = true;
       }
    }
 
    if (! found) { 
       // no prefix stripped
-      if ((i = nextPart.indexIn(word)) >= 1) {
-         addWord(word + i + 1, hiPriority, true);
+      i = nextPart.indexIn(word);
+
+      if (i >= 1) {       
+         addWord(word.mid(i+1), hiPriority, true);
       }
    }
 }
@@ -554,7 +558,7 @@ void SearchIndexExternal::write(const char *fileName)
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
-      FTextStream t(&f);
+      QTextStream t(&f);
       t << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
       t << "<add>" << endl;
       
@@ -975,7 +979,7 @@ void writeJavascriptSearchIndex()
 
          if (outFile.open(QIODevice::WriteOnly) && dataOutFile.open(QIODevice::WriteOnly)) {
             {
-               FTextStream t(&outFile);
+               QTextStream t(&outFile);
 
                t << "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""
                  " \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" << endl;
@@ -1010,7 +1014,7 @@ void writeJavascriptSearchIndex()
                t << "</body>" << endl;
                t << "</html>" << endl;
             }
-            FTextStream ti(&dataOutFile);
+            QTextStream ti(&dataOutFile);
 
             ti << "var searchData=" << endl;
             // format
@@ -1229,7 +1233,7 @@ void writeJavascriptSearchIndex()
    {
       QFile f(searchDirName + "/searchdata.js");
       if (f.open(QIODevice::WriteOnly)) {
-         FTextStream t(&f);
+         QTextStream t(&f);
          t << "var indexSectionsWithContent =" << endl;
          t << "{" << endl;
          bool first = true;
@@ -1306,7 +1310,7 @@ void writeJavascriptSearchIndex()
       QFile f(searchDirName + "/nomatches.html");
 
       if (f.open(QIODevice::WriteOnly)) {
-         FTextStream t(&f);
+         QTextStream t(&f);
          t << "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" "
            "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" << endl;
          t << "<html><head><title></title>" << endl;
@@ -1326,19 +1330,20 @@ void writeJavascriptSearchIndex()
    Doxygen::indexList->addStyleSheetFile("search/search.js");
 }
 
-//---------------------------------------------------------------------------------------------
-
 void initSearchIndexer()
 {
    static bool searchEngine      = Config_getBool("SEARCHENGINE");
    static bool serverBasedSearch = Config_getBool("SERVER_BASED_SEARCH");
    static bool externalSearch    = Config_getBool("EXTERNAL_SEARCH");
+
    if (searchEngine && serverBasedSearch) {
       if (externalSearch) { // external tools produce search index and engine
          Doxygen::searchIndex = new SearchIndexExternal;
+
       } else { // doxygen produces search index and engine
          Doxygen::searchIndex = new SearchIndex;
       }
+
    } else { // no search engine or pure javascript based search function
       Doxygen::searchIndex = 0;
    }

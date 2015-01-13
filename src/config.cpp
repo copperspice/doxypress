@@ -724,7 +724,7 @@ static QByteArray convertToComment(const QByteArray &s, const QByteArray &u)
    return result;
 }
 
-void ConfigOption::writeBoolValue(FTextStream &t, bool v)
+void ConfigOption::writeBoolValue(QTextStream &t, bool v)
 {
    t << " ";
    if (v) {
@@ -734,12 +734,12 @@ void ConfigOption::writeBoolValue(FTextStream &t, bool v)
    }
 }
 
-void ConfigOption::writeIntValue(FTextStream &t, int i)
+void ConfigOption::writeIntValue(QTextStream &t, int i)
 {
    t << " " << i;
 }
 
-void ConfigOption::writeStringValue(FTextStream &t, QByteArray &s)
+void ConfigOption::writeStringValue(QTextStream &t, QByteArray &s)
 {
    char c;
    bool needsEscaping = FALSE;
@@ -770,7 +770,7 @@ void ConfigOption::writeStringValue(FTextStream &t, QByteArray &s)
    }
 }
 
-void ConfigOption::writeStringList(FTextStream &t, QStringList &l)
+void ConfigOption::writeStringList(QTextStream &t, QStringList &l)
 {
    bool first = TRUE;
 
@@ -909,7 +909,7 @@ bool &Config::getBool(const char *fileName, int num, const char *name) const
    return *((ConfigBool *)opt)->valueRef();
 }
 
-void ConfigInfo::writeTemplate(FTextStream &t, bool sl, bool)
+void ConfigInfo::writeTemplate(QTextStream &t, bool sl, bool)
 {
    if (!sl) {
       t << "\n";
@@ -919,7 +919,7 @@ void ConfigInfo::writeTemplate(FTextStream &t, bool sl, bool)
    t << "#---------------------------------------------------------------------------\n";
 }
 
-void ConfigList::writeTemplate(FTextStream &t, bool sl, bool)
+void ConfigList::writeTemplate(QTextStream &t, bool sl, bool)
 {
    if (!sl) {
       t << endl;
@@ -933,7 +933,7 @@ void ConfigList::writeTemplate(FTextStream &t, bool sl, bool)
    t << "\n";
 }
 
-void ConfigEnum::writeTemplate(FTextStream &t, bool sl, bool)
+void ConfigEnum::writeTemplate(QTextStream &t, bool sl, bool)
 {
    if (!sl) {
       t << endl;
@@ -947,7 +947,7 @@ void ConfigEnum::writeTemplate(FTextStream &t, bool sl, bool)
    t << "\n";
 }
 
-void ConfigString::writeTemplate(FTextStream &t, bool sl, bool)
+void ConfigString::writeTemplate(QTextStream &t, bool sl, bool)
 {
    if (!sl) {
       t << endl;
@@ -961,7 +961,7 @@ void ConfigString::writeTemplate(FTextStream &t, bool sl, bool)
    t << "\n";
 }
 
-void ConfigInt::writeTemplate(FTextStream &t, bool sl, bool upd)
+void ConfigInt::writeTemplate(QTextStream &t, bool sl, bool upd)
 {
    if (!sl) {
       t << endl;
@@ -979,7 +979,7 @@ void ConfigInt::writeTemplate(FTextStream &t, bool sl, bool upd)
    t << "\n";
 }
 
-void ConfigBool::writeTemplate(FTextStream &t, bool sl, bool upd)
+void ConfigBool::writeTemplate(QTextStream &t, bool sl, bool upd)
 {
    if (!sl) {
       t << endl;
@@ -997,8 +997,8 @@ void ConfigBool::writeTemplate(FTextStream &t, bool sl, bool upd)
    t << "\n";
 }
 
-void ConfigObsolete::writeTemplate(FTextStream &, bool, bool) {}
-void ConfigDisabled::writeTemplate(FTextStream &, bool, bool) {}
+void ConfigObsolete::writeTemplate(QTextStream &, bool, bool) {}
+void ConfigDisabled::writeTemplate(QTextStream &, bool, bool) {}
 
 /* -----------------------------------------------------------------
  *
@@ -2779,7 +2779,7 @@ void configYYfree (void *ptr )
 
 #define YYTABLES_NAME "yytables"
 
-void Config::writeTemplate(FTextStream &t, bool sl, bool upd)
+void Config::writeTemplate(QTextStream &t, bool sl, bool upd)
 {
    t << "# CS Doxyfile " << versionString << endl << endl;
    if (!sl) {
@@ -3110,13 +3110,13 @@ void Config::check()
  
    for (auto s: aliasList) {
       QRegExp re1("[a-z_A-Z][a-z_A-Z0-9]*[ \t]*=");         // alias without argument
-      QRegExp re2("[a-z_A-Z][a-z_A-Z0-9]*{[0-9]*}[ \t]*="); // alias with argument
+      QRegExp re2("[a-z_A-Z][a-z_A-Z0-9]*\\{[0-9]*\\}[ \t]*="); // alias with argument
 
       QByteArray alias = s.toUtf8();
       alias = alias.trimmed();
 
-      if (re1.indexIn(alias) != 0 && re2.indexIn(alias) != 0) {
-         config_err("Error: Illegal alias format `%s'. Use \"name=value\" or \"name(n)=value\", where n is the number of arguments\n",
+      if (! (re1.indexIn(alias) == 0 || re2.indexIn(alias) == 0)) {
+         config_err("Error: Alias format: `%s' \nForma is invalid, use \"name=value\" or \"name{n}=value\", where n is the number of arguments\n\n",
                     alias.data());
       }
       
@@ -3558,7 +3558,7 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("AUTOLINK_SUPPORT", "", false);
   cb = cfg->addBool("BUILTIN_STL_SUPPORT", "", true);
   cb = cfg->addBool("CPP_CLI_SUPPORT", "", false);
-  cs = cfg->addString("SIP_SUPPORT", "");
+  cb = cfg->addBool("SIP_SUPPORT", "", false);
   cs = cfg->addString("IDL_PROPERTY_SUPPORT", "");
   cb = cfg->addBool("DISTRIBUTE_GROUP_DOC", "", false);
   cb = cfg->addBool("INLINE_GROUPED_CLASSES", "", false);

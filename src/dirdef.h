@@ -20,6 +20,7 @@
 
 #include <QList>
 #include <QStringList>
+#include <QTextStream>
 
 #include <definition.h>
 #include <stringmap.h>
@@ -28,10 +29,8 @@
 class ClassSDict;
 class DirDef;
 class FileDef;
-class FTextStream;
 class OutputList;
 class UsedDir;
-
 
 /** A model of a directory symbol. */
 class DirDef : public Definition
@@ -99,8 +98,8 @@ class DirDef : public Definition
 
    // generate output
    void writeDocumentation(OutputList &ol);
-   void writeDepGraph(FTextStream &t);
-   void writeTagFile(FTextStream &t);
+   void writeDepGraph(QTextStream &t);
+   void writeTagFile(QTextStream &t);
 
    static QSharedPointer<DirDef> mergeDirectoryInTree(const QByteArray &path);
    bool visited;

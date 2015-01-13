@@ -16,6 +16,7 @@
 *************************************************************************/
 
 #include <QTextCodec>
+#include <QTextStream>
 
 #include <errno.h>
 #include <locale.h>
@@ -197,7 +198,9 @@ void cleanUpDoxygen()
 
    delete theTranslator;
    delete Doxy_Globals::g_outputList;
+
    delete Doxygen::symbolMap;
+   Doxygen::symbolMap = 0;
   
    Mappers::freeMappers();
    codeFreeScanner();
@@ -623,7 +626,7 @@ void Doxy_Setup::generateConfigFile(const QString &configFile)
    bool fileOpened = openOutputFile(configFile, f);
  
    if (fileOpened) {
-      FTextStream t(&f);
+      QTextStream t(&f);
 
       // BROOM  - json set up  
       // Config_Json::instance()->writeNewCfg();      

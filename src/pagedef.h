@@ -18,12 +18,13 @@
 #ifndef PAGEDEF_H
 #define PAGEDEF_H
 
+#include <QTextStream>
+
 #include <definition.h>
 #include <stringmap.h>
 
 class PageSDict;
 class OutputList;
-class FTextStream;
 
 /** @brief A model of a page symbol. */
 class PageDef : public Definition
@@ -88,7 +89,7 @@ class PageDef : public Definition
    }
 
    void writeDocumentation(OutputList &ol);
-   void writeTagFile(FTextStream &);
+   void writeTagFile(QTextStream &);
 
  private:
    void setNestingLevel(int l);

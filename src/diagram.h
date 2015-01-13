@@ -19,10 +19,10 @@
 #define DIAGRAM_H
 
 #include <qglobal.h>
+#include <QTextStream>
 
 class ClassDef;
 class TreeDiagram;
-class FTextStream;
 
 /** Class representing a built-in class diagram. */
 class ClassDiagram
@@ -31,9 +31,9 @@ class ClassDiagram
    ClassDiagram(ClassDef *root);
    ~ClassDiagram();
 
-   void writeFigure(FTextStream &t, const char *path, const char *file) const;
+   void writeFigure(QTextStream &t, const char *path, const char *file) const;
 
-   void writeImage(FTextStream &t, const char *path, const char *relPath,
+   void writeImage(QTextStream &t, const char *path, const char *relPath,
                    const char *file, bool generateMap = true) const;
 
  private:

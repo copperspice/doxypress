@@ -212,5 +212,10 @@ QSharedPointer<T> dummyShared(T *ptr)
    return QSharedPointer<T> (ptr, [](T *){} );
 }
 
+template<class T, class ...Ts>
+QSharedPointer<T> QMakeShared(Ts &&...vs)
+{
+   return QSharedPointer<T> (new T(vs...));
+}
 
 #endif

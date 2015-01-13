@@ -113,7 +113,7 @@ bool OutputList::generateDoc(const char *fileName, int startLine, Definition *ct
       return true;
    }
 
-   for (auto item : m_outputs ) {
+   for (auto item : m_outputs) {
       if (item->isEnabled()) {
          count++;
       }
@@ -125,6 +125,7 @@ bool OutputList::generateDoc(const char *fileName, int startLine, Definition *ct
 
    DocRoot *root = 0;
    root = validatingParseDoc(fileName, startLine, ctx, md, docStr, indexWords, isExample, exampleName, singleLine, linkFromIndex);
+
    writeDoc(root, ctx, md);
 
    bool isEmpty = root->isEmpty();
@@ -135,7 +136,7 @@ bool OutputList::generateDoc(const char *fileName, int startLine, Definition *ct
 
 void OutputList::writeDoc(DocRoot *root, Definition *ctx, MemberDef *md)
 {
-   for (auto item : m_outputs ) {
+   for (auto item : m_outputs) {
       if (item->isEnabled()) {
          item->writeDoc(root, ctx, md);
       }

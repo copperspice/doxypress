@@ -19,10 +19,10 @@
 #define DOCSETS_H
 
 #include <QFile>
+#include <QTextStream>
 
-#include <stringmap.h>
-#include <ftextstream.h>
 #include <index.h>
+#include <stringmap.h>
 
 class Definition;
 
@@ -52,7 +52,7 @@ class DocSets  : public IndexIntf
    void addStyleSheetFile(const char *) {}
 
  private:
-   void writeToken(FTextStream &t, const Definition *d, const QByteArray &type, const QByteArray &lang,
+   void writeToken(QTextStream &t, const Definition *d, const QByteArray &type, const QByteArray &lang,
                    const char *scope = 0, const char *anchor = 0, const QByteArray &decl = QByteArray() ); 
 
    struct NodeDef {
@@ -73,8 +73,8 @@ class DocSets  : public IndexIntf
    QFile *m_nf;
    QFile *m_tf;
 
-   FTextStream m_nts;
-   FTextStream m_tts;
+   QTextStream m_nts;
+   QTextStream m_tts;
 
    int m_dc;
    int m_id;

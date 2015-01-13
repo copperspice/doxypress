@@ -22,6 +22,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QStringList>
+#include <QTextStream>
 
 #include <ctype.h>
 #include <types.h>
@@ -42,7 +43,6 @@ class ClassSDict;
 class Definition;
 class ExampleSDict;
 class FileNameDict;
-class FTextStream;
 class MemberList;
 class MemberDef;
 class MemberNameInfoSDict;
@@ -295,7 +295,7 @@ QByteArray escapeCharsInString(const char *name, bool allowDots, bool allowUnder
 
 void addGroupListToTitle(OutputList &ol, Definition *d);
 
-void filterLatexString(FTextStream &t, const char *str, bool insideTabbing = false,
+void filterLatexString(QTextStream &t, const char *str, bool insideTabbing = false,
                        bool insidePre = false, bool insideItem = false);
 
 QByteArray rtfFormatBmkStr(const char *name);
@@ -369,7 +369,7 @@ bool patternMatch(const QFileInfo &fi, const QStringList *patList);
 QByteArray externalLinkTarget();
 QByteArray externalRef(const QByteArray &relPath, const QByteArray &ref, bool href);
 int nextUtf8CharPosition(const QByteArray &utf8Str, int len, int startPos);
-const char *writeUtf8Char(FTextStream &t, const char *s);
+const char *writeUtf8Char(QTextStream &t, const char *s);
 
 
 /** Data associated with a HSV colored image. */

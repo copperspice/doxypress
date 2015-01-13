@@ -17,7 +17,6 @@
 
 #include <htmlentity.h>
 #include <message.h>
-#include <ftextstream.h>
 
 //! Number of doxygen commands mapped as if it were HTML entities
 static const int g_numberHtmlMappedCmds = 11;
@@ -474,10 +473,11 @@ DocSymbol::SymType HtmlEntityMapper::name2sym(const QByteArray &symName) const
    }   
 }
 
-void HtmlEntityMapper::writeXMLSchema(FTextStream &t)
+void HtmlEntityMapper::writeXMLSchema(QTextStream &t)
 {
    for (int i = 0; i < g_numHtmlEntities - g_numberHtmlMappedCmds; i++) {
       QByteArray bareName = g_htmlEntities[i].xml;
+
       if (!bareName.isEmpty() && bareName.at(0) == '<' && bareName.right(2) == "/>") {
          bareName = bareName.mid(1, bareName.length() - 3); // strip < and />
          t << "      <xsd:element name=\"" << bareName << "\" type=\"docEmptyType\" />\n";

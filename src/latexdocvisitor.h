@@ -18,20 +18,19 @@
 #ifndef LATEXDOCVISITOR_H
 #define LATEXDOCVISITOR_H
 
-#include <QStack>
 #include <QByteArray>
 #include <QList>
+#include <QStack>
+#include <QTextStream>
 
 #include <docvisitor.h>
-
-class FTextStream;
 class CodeOutputInterface;
 
 /*! @brief Concrete visitor implementation for LaTeX output. */
 class LatexDocVisitor : public DocVisitor
 {
  public:
-   LatexDocVisitor(FTextStream &t, CodeOutputInterface &ci, const char *langExt, bool insideTabbing);
+   LatexDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt, bool insideTabbing);
 
    //--------------------------------------
    // visitor functions for leaf nodes
@@ -180,7 +179,7 @@ class LatexDocVisitor : public DocVisitor
    // state variables
    //--------------------------------------
 
-   FTextStream &m_t;
+   QTextStream &m_t;
    CodeOutputInterface &m_ci;
    bool m_insidePre;
    bool m_insideItem;

@@ -115,7 +115,7 @@ bool PageDef::hasParentPage() const
    return getOuterScope() && getOuterScope()->definitionType() == Definition::TypePage;
 }
 
-void PageDef::writeTagFile(FTextStream &tagFile)
+void PageDef::writeTagFile(QTextStream &tagFile)
 {
    bool found = (name() == "citelist");
    
@@ -146,9 +146,9 @@ void PageDef::writeTagFile(FTextStream &tagFile)
 void PageDef::writeDocumentation(OutputList &ol)
 {
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
-
-   //outputList->disable(OutputGenerator::Man);
+   
    QByteArray pageName, manPageName;
+
    pageName    = escapeCharsInString(name(), false, true);
    manPageName = escapeCharsInString(name(), true, true);
 
@@ -179,7 +179,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.popGeneratorState();
    //2.}
 
-   if (!generateTreeView) {
+   if (! generateTreeView) {
       if (getOuterScope() != Doxygen::globalScope && !Config_getBool("DISABLE_INDEX")) {
          getOuterScope()->writeNavigationPath(ol);
       }
@@ -212,12 +212,13 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.disable(OutputGenerator::Man);
 
    if (!title().isEmpty() && !name().isEmpty() && si != 0) {
- 
+
       startTitle(ol, getOutputFileBase(), this);
       ol.generateDoc(docFile(), docLine(), this, 0, si->title, true, false, 0, true, false);
       
       endTitle(ol, getOutputFileBase(), name());
    }
+
    ol.startContents();
    ol.popGeneratorState();
    //2.}
@@ -243,13 +244,16 @@ void PageDef::writeDocumentation(OutputList &ol)
 
 void PageDef::writePageDocumentation(OutputList &ol)
 {
-
    bool markdownEnabled = Doxygen::markdownSupport;
+
    if (getLanguage() == SrcLangExt_Markdown) {
       Doxygen::markdownSupport = true;
    }
 
    ol.startTextBlock();
+
+printf("\n BROOM          --->  about to generateDoc " );
+
    ol.generateDoc(
       docFile(),           // fileName
       docLine(),           // startLine
@@ -260,6 +264,10 @@ void PageDef::writePageDocumentation(OutputList &ol)
       false                // not an example
    );
    ol.endTextBlock();
+
+printf("\n BROOM           -->  back from generateDoc " );
+
+
 
    Doxygen::markdownSupport = markdownEnabled;
 

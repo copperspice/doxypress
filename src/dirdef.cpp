@@ -23,7 +23,6 @@
 #include <dot.h>
 #include <doxygen.h>
 #include <filename.h>
-#include <ftextstream.h>
 #include <layout.h>
 #include <language.h>
 #include <message.h>
@@ -315,7 +314,7 @@ bool DirDef::hasDetailedDescription() const
    return (!briefDescription().isEmpty() && repeatBrief) || !documentation().isEmpty();
 }
 
-void DirDef::writeTagFile(FTextStream &tagFile)
+void DirDef::writeTagFile(QTextStream &tagFile)
 {
    tagFile << "  <compound kind=\"dir\">" << endl;
    tagFile << "    <name>" << convertToXML(displayName()) << "</name>" << endl;
@@ -670,12 +669,10 @@ QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QByteArray &path)
    return dir;
 }
 
-void DirDef::writeDepGraph(FTextStream &t)
+void DirDef::writeDepGraph(QTextStream &t)
 {
    writeDotDirDepGraph(t, this);
 }
-
-//----------------------------------------------------------------------
 
 static void writePartialDirPath(OutputList &ol, const DirDef *root, const DirDef *target)
 {

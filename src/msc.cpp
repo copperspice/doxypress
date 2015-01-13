@@ -16,6 +16,7 @@
 *************************************************************************/
 
 #include <QDir>
+#include <QTextStream>
 
 #include <msc.h>
 #include <portable.h>
@@ -24,14 +25,13 @@
 #include <docparser.h>
 #include <doxygen.h>
 #include <util.h>
-#include <ftextstream.h>
 
 // must appear after the previous include - resolve soon 
 #include <doxy_globals.h>
 
 static const int maxCmdLine = 40960;
 
-static bool convertMapFile(FTextStream &t, const char *mapName, const QByteArray relPath,
+static bool convertMapFile(QTextStream &t, const char *mapName, const QByteArray relPath,
                            const QByteArray &context)
 {
    QFile f(mapName);
@@ -195,7 +195,8 @@ QByteArray getMscImageMapFromFile(const QByteArray &inFile, const QByteArray &ou
    portable_sysTimerStop();
 
    QByteArray result;
-   FTextStream tmpout(&result);
+   QTextStream tmpout(&result);
+
    convertMapFile(tmpout, outFile, relPath, context);
    QDir().remove(outFile);
 
@@ -203,16 +204,13 @@ QByteArray getMscImageMapFromFile(const QByteArray &inFile, const QByteArray &ou
    return result.data();
 }
 
-void writeMscImageMapFromFile(FTextStream &t, const QByteArray &inFile,
-                              const QByteArray &outDir,
-                              const QByteArray &relPath,
-                              const QByteArray &baseName,
-                              const QByteArray &context,
-                              MscOutputFormat format
-                             )
+void writeMscImageMapFromFile(QTextStream &t, const QByteArray &inFile, const QByteArray &outDir,
+                              const QByteArray &relPath, const QByteArray &baseName, const QByteArray &context,
+                              MscOutputFormat format)
 {
    QByteArray mapName = baseName + ".map";
    QByteArray mapFile = inFile + ".map";
+
    t << "<img src=\"" << relPath << baseName << ".";
    switch (format) {
       case MSC_BITMAP:

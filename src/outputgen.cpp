@@ -50,12 +50,12 @@ void OutputGenerator::startPlainFile(const char *name)
       exit(1);
    }
 
-   t.setDevice(file);
+   m_textStream.setDevice(file);
 }
 
 void OutputGenerator::endPlainFile()
 {
-   t.setDevice(0);
+   m_textStream.setDevice(0);
    delete file;
 
    file = 0;

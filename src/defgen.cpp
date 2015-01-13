@@ -40,7 +40,7 @@
 
 #define DEF_DB(x)
 
-inline void writeDEFString(FTextStream &t, const char *s)
+inline void writeDEFString(QTextStream &t, const char *s)
 {
    const char *p = s;
    char c;
@@ -55,7 +55,7 @@ inline void writeDEFString(FTextStream &t, const char *s)
    t << '\'';
 }
 
-void generateDEFForMember(MemberDef *md, FTextStream &t, Definition *def, const char *Prefix)
+void generateDEFForMember(MemberDef *md, QTextStream &t, Definition *def, const char *Prefix)
 {
    QByteArray memPrefix;
 
@@ -356,7 +356,7 @@ void generateDEFForMember(MemberDef *md, FTextStream &t, Definition *def, const 
 }
 
 
-void generateDEFClassSection(ClassDef *cd, FTextStream &t, MemberList *ml, const char *kind)
+void generateDEFClassSection(ClassDef *cd, QTextStream &t, MemberList *ml, const char *kind)
 {
    if (cd && ml && ml->count() > 0) {
       t << "  cp-section = {" << endl;
@@ -369,7 +369,7 @@ void generateDEFClassSection(ClassDef *cd, FTextStream &t, MemberList *ml, const
    }
 }
 
-void generateDEFForClass(ClassDef *cd, FTextStream &t)
+void generateDEFForClass(ClassDef *cd, QTextStream &t)
 {
    // + brief description
    // + detailed description
@@ -538,7 +538,7 @@ void generateDEFForClass(ClassDef *cd, FTextStream &t)
    t << "}; /* " <<  cd->compoundTypeString() << " */" << endl;
 }
 
-void generateDEFSection(Definition *d, FTextStream &t, MemberList *ml, const char *kind)
+void generateDEFSection(Definition *d, QTextStream &t, MemberList *ml, const char *kind)
 {
    if (ml && ml->count() > 0) {
       t << "    " << kind << " = {" << endl;
@@ -551,7 +551,7 @@ void generateDEFSection(Definition *d, FTextStream &t, MemberList *ml, const cha
    }
 }
 
-void generateDEFForNamespace(NamespaceDef *nd, FTextStream &t)
+void generateDEFForNamespace(NamespaceDef *nd, QTextStream &t)
 {
    if (nd->isReference()) {
       return;   // skip external references
@@ -581,7 +581,7 @@ void generateDEFForNamespace(NamespaceDef *nd, FTextStream &t)
    t << "  };" << endl;
 }
 
-void generateDEFForFile(FileDef *fd, FTextStream &t)
+void generateDEFForFile(FileDef *fd, QTextStream &t)
 {
    if (fd->isReference()) {
       return;   // skip external references
@@ -662,7 +662,7 @@ void generateDEF()
       return;
    }
 
-   FTextStream t(&f);
+   QTextStream t(&f);
    t << "AutoGen Definitions dummy;" << endl;
 
    if (Doxygen::classSDict->count() + Doxygen::inputNameList->count() > 0) {     

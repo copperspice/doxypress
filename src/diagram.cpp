@@ -15,13 +15,13 @@
  *
 *************************************************************************/
 
-#include <QList>
 #include <QByteArray>
 #include <QFile>
+#include <QList>
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <ftextstream.h>
+
 #include <diagram.h>
 #include <image.h>
 #include <classdef.h>
@@ -153,10 +153,10 @@ class TreeDiagram : public QList<DiagramRow *>
    void moveChildren(DiagramItem *root, int dx);
    void computeExtremes(uint *labelWidth, uint *xpos);
 
-   void drawBoxes(FTextStream &t, Image *image, bool doBase, bool bitmap,uint baseRows, uint superRows, 
+   void drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap,uint baseRows, uint superRows, 
                   uint cellWidth, uint cellHeight, QByteArray relPath = "", bool generateMap = true);
 
-   void drawConnectors(FTextStream &t, Image *image, bool doBase, bool bitmap,
+   void drawConnectors(QTextStream &t, Image *image, bool doBase, bool bitmap,
                        uint baseRows, uint superRows, uint cellWidth, uint cellheight);
 
  private:
@@ -276,7 +276,7 @@ static void writeBitmapBox(DiagramItem *di, Image *image, int x, int y, int w, i
    }
 }
 
-static void writeVectorBox(FTextStream &t, DiagramItem *di, float x, float y, bool children = false)
+static void writeVectorBox(QTextStream &t, DiagramItem *di, float x, float y, bool children = false)
 {
    if (di->virtualness() == Virtual) {
       t << "dashed\n";
@@ -290,7 +290,7 @@ static void writeVectorBox(FTextStream &t, DiagramItem *di, float x, float y, bo
    }
 }
 
-static void writeMapArea(FTextStream &t, ClassDef *cd, QByteArray relPath, int x, int y, int w, int h)
+static void writeMapArea(QTextStream &t, ClassDef *cd, QByteArray relPath, int x, int y, int w, int h)
 {
    if (cd->isLinkable()) {
       QByteArray ref = cd->getReference();
@@ -676,7 +676,7 @@ void TreeDiagram::computeExtremes(uint *maxLabelLen, uint *maxXPos)
    }
 }
 
-void TreeDiagram::drawBoxes(FTextStream &t, Image *image, bool doBase, bool bitmap, uint baseRows, uint superRows,
+void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap, uint baseRows, uint superRows,
                             uint cellWidth, uint cellHeight, QByteArray relPath, bool generateMap) 
 {  
    int skip = 0;
@@ -820,8 +820,8 @@ void TreeDiagram::drawBoxes(FTextStream &t, Image *image, bool doBase, bool bitm
    }
 }
 
-void TreeDiagram::drawConnectors(FTextStream &t, Image *image, bool doBase, bool bitmap, 
-            uint baseRows, uint superRows, uint cellWidth, uint cellHeight)
+void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool bitmap, 
+                                 uint baseRows, uint superRows, uint cellWidth, uint cellHeight)
 {   
    bool done = false;
    
@@ -1153,7 +1153,7 @@ ClassDiagram::~ClassDiagram()
    delete super;
 }
 
-void ClassDiagram::writeFigure(FTextStream &output, const char *path, const char *fileName) const
+void ClassDiagram::writeFigure(QTextStream &output, const char *path, const char *fileName) const
 {
    uint baseRows = base->computeRows();
    uint superRows = super->computeRows();
@@ -1205,7 +1205,7 @@ void ClassDiagram::writeFigure(FTextStream &output, const char *path, const char
       exit(1);
    }
 
-   FTextStream t(&f1);
+   QTextStream t(&f1);
 
    // generate EPS header and postscript variables and procedures
 
@@ -1448,7 +1448,7 @@ void ClassDiagram::writeFigure(FTextStream &output, const char *path, const char
    }
 }
 
-void ClassDiagram::writeImage(FTextStream &t, const char *path, const char *relPath, const char *fName, bool generateMap) const
+void ClassDiagram::writeImage(QTextStream &t, const char *path, const char *relPath, const char *fName, bool generateMap) const
 {
    uint baseRows = base->computeRows();
    uint superRows = super->computeRows();

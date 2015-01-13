@@ -15,8 +15,8 @@
  *
 *************************************************************************/
 
-#include <QList>
 #include <QHash>
+#include <QFile>
 #include <QFileInfo>
 
 #include <stdio.h>
@@ -252,7 +252,7 @@ QByteArray FTVHelp::generateIndentLabel(FTVNode *n, int level)
    return result;
 }
 
-void FTVHelp::generateIndent(FTextStream &t, FTVNode *n, bool opened)
+void FTVHelp::generateIndent(QTextStream &t, FTVNode *n, bool opened)
 {
    int indent = 0;
    FTVNode *p = n->parent;
@@ -276,7 +276,7 @@ void FTVHelp::generateIndent(FTextStream &t, FTVNode *n, bool opened)
    }
 }
 
-void FTVHelp::generateLink(FTextStream &t, FTVNode *n)
+void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
 {
    //printf("FTVHelp::generateLink(ref=%s,file=%s,anchor=%s\n",
    //    n->ref.data(),n->file.data(),n->anchor.data());
@@ -305,23 +305,26 @@ void FTVHelp::generateLink(FTextStream &t, FTVNode *n)
    }
 }
 
-static void generateBriefDoc(FTextStream &t, Definition *def)
+static void generateBriefDoc(QTextStream &t, Definition *def)
 {
    QByteArray brief = def->briefDescription(true);
   
    if (!brief.isEmpty()) {
       DocNode *root = validatingParseDoc(def->briefFile(), def->briefLine(),
                                          def, 0, brief, false, false, 0, true, true);
+
       QByteArray relPath = relativePathToRoot(def->getOutputFileBase());
+
       HtmlCodeGenerator htmlGen(t, relPath);
       HtmlDocVisitor *visitor = new HtmlDocVisitor(t, htmlGen, def);
       root->accept(visitor);
+
       delete visitor;
       delete root;
    }
 }
 
-void FTVHelp::generateTree(FTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index)
+void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index)
 {
    for (auto n : nl) {
       t << "<tr id=\"row_" << generateIndentLabel(n, 0) << "\"";
@@ -452,7 +455,7 @@ static bool dupOfParent(const FTVNode *n)
    return false;
 }
 
-static void generateJSLink(FTextStream &t, FTVNode *n)
+static void generateJSLink(QTextStream &t, FTVNode *n)
 {
    if (n->file.isEmpty()) { // no link
       t << "\"" << convertToJSString(n->name) << "\", null, ";
@@ -474,7 +477,7 @@ static QByteArray convertFileId2Var(const QByteArray &fileId)
    return substitute(varId, "-", "_");
 }
 
-static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, FTextStream &t, const QList<FTVNode *> &nl, int level, bool &first)
+static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t, const QList<FTVNode *> &nl, int level, bool &first)
 {
    static QByteArray htmlOutput = Config_getString("HTML_OUTPUT");
 
@@ -542,7 +545,7 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, FTextStream &t
             QFile f(htmlOutput + "/" + fileId + ".js");
 
             if (f.open(QIODevice::WriteOnly)) {
-               FTextStream tt(&f);
+               QTextStream tt(&f);
 
                tt << "var " << convertFileId2Var(fileId) << " =" << endl;
                generateJSTree(navIndex, tt, n->children, 1, firstChild);
@@ -581,11 +584,11 @@ static void generateJSNavTree(const QList<FTVNode *> &nodeList)
    SortedList<NavIndexEntry *> navIndex;
 
    if (f.open(QIODevice::WriteOnly) /*&& fidx.open(QIODevice::WriteOnly)*/) {
-      //FTextStream tidx(&fidx);
+      //QTextStream tidx(&fidx);
       //tidx << "var NAVTREEINDEX =" << endl;
       //tidx << "{" << endl;
 
-      FTextStream t(&f);
+      QTextStream t(&f);
       t << "var NAVTREE =" << endl;
       t << "[" << endl;
       t << "  [ ";
@@ -632,8 +635,8 @@ static void generateJSNavTree(const QList<FTVNode *> &nodeList)
       QFile fsidx(htmlOutput + "/navtreeindex0.js");
 
       if (/*fidx.open(QIODevice::WriteOnly) &&*/ fsidx.open(QIODevice::WriteOnly)) {
-         //FTextStream tidx(&fidx);
-         FTextStream tsidx(&fsidx);
+         
+         QTextStream tsidx(&fsidx);
 
          t << "var NAVTREEINDEX =" << endl;
          t << "[" << endl;
@@ -731,7 +734,7 @@ void FTVHelp::generateTreeViewScripts()
 }
 
 // write tree inside page
-void FTVHelp::generateTreeViewInline(FTextStream &t)
+void FTVHelp::generateTreeViewInline(QTextStream &t)
 {
    int preferredNumEntries = Config_getInt("HTML_INDEX_NUM_ENTRIES");
 

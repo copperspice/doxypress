@@ -18,11 +18,12 @@
 #ifndef HTMLENTITY_H
 #define HTMLENTITY_H
 
+#include <QByteArray>
 #include <QHash>
+#include <QString>
+#include <QTextStream>
 
 #include <docparser.h>
-
-class FTextStream;
 
 /** @brief Singleton helper class to map html entities to other formats */
 class HtmlEntityMapper
@@ -39,7 +40,7 @@ class HtmlEntityMapper
    const char *man(DocSymbol::SymType symb) const;
    const char *rtf(DocSymbol::SymType symb) const;
    const DocSymbol::PerlSymb *perl(DocSymbol::SymType symb) const;
-   void  writeXMLSchema(FTextStream &t);
+   void  writeXMLSchema(QTextStream &t);
 
  private:
    void  validate();

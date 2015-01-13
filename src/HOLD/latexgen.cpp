@@ -70,7 +70,7 @@ static void writeLatexMakefile()
    QByteArray latex_command = Config_getString("LATEX_CMD_NAME");
    QByteArray mkidx_command = Config_getString("MAKEINDEX_CMD_NAME");
    // end insertion by KONNO Akihisa <konno@researchers.jp> 2002-03-05
-   FTextStream t(&file);
+   QTextStream t(&file);
    if (!Config_getBool("USE_PDFLATEX")) { // use plain old latex
       t << "all: refman.dvi" << endl
         << endl
@@ -155,7 +155,7 @@ static void writeMakeBat()
       err("Could not open file %s for writing\n", fileName.data());
       exit(1);
    }
-   FTextStream t(&file);
+   QTextStream t(&file);
    t << "set Dir_Old=%cd%\n";
    t << "cd /D %~dp0\n\n";
    t << "del /s /f *.ps *.dvi *.aux *.toc *.idx *.ind *.ilg *.log *.out *.brf *.blg *.bbl refman.pdf\n\n";
@@ -235,7 +235,7 @@ void LatexGenerator::init()
    createSubDirs(d);
 }
 
-static void writeDefaultHeaderPart1(FTextStream &t)
+static void writeDefaultHeaderPart1(QTextStream &t)
 {
    // part 1
 
@@ -340,7 +340,7 @@ static void writeDefaultHeaderPart1(FTextStream &t)
 
    // Headers & footers
    QByteArray genString;
-   FTextStream tg(&genString);
+   QTextStream tg(&genString);
    filterLatexString(tg,
                      theTranslator->trGeneratedAt(dateToString(true),
                            Config_getString("PROJECT_NAME")),
@@ -447,7 +447,7 @@ static void writeDefaultHeaderPart1(FTextStream &t)
      "{\\Large ";
 }
 
-static void writeDefaultHeaderPart2(FTextStream &t)
+static void writeDefaultHeaderPart2(QTextStream &t)
 {
    // part 2
    // Finalize project name
@@ -456,7 +456,7 @@ static void writeDefaultHeaderPart2(FTextStream &t)
      "{\\large ";
 }
 
-static void writeDefaultHeaderPart3(FTextStream &t)
+static void writeDefaultHeaderPart3(QTextStream &t)
 {
    // part 3
    // Finalize project number
@@ -486,12 +486,12 @@ static void writeDefaultHeaderPart3(FTextStream &t)
      "%--- Begin generated contents ---\n";
 }
 
-static void writeDefaultStyleSheet(FTextStream &t)
+static void writeDefaultStyleSheet(QTextStream &t)
 {
    t << ResourceMgr::instance().getAsString("latex/doxygen.sty");
 }
 
-static void writeDefaultFooter(FTextStream &t)
+static void writeDefaultFooter(QTextStream &t)
 {
    t << "%--- End generated contents ---\n"
      "\n";
@@ -521,7 +521,7 @@ static void writeDefaultFooter(FTextStream &t)
 
 void LatexGenerator::writeHeaderFile(QFile &f)
 {
-   FTextStream t(&f);
+   QTextStream t(&f);
    t << "% Latex header for CS Doxygen " << versionString << endl;
    writeDefaultHeaderPart1(t);
    t << "Your title here";
@@ -532,14 +532,14 @@ void LatexGenerator::writeHeaderFile(QFile &f)
 
 void LatexGenerator::writeFooterFile(QFile &f)
 {
-   FTextStream t(&f);
+   QTextStream t(&f);
    t << "% Latex footer for CS Doxygen " << versionString << endl;
    writeDefaultFooter(t);
 }
 
 void LatexGenerator::writeStyleSheetFile(QFile &f)
 {
-   FTextStream t(&f);
+   QTextStream t(&f);
    t << "% stylesheet for CS Doxygen " << versionString << endl;
    writeDefaultStyleSheet(t);
 }
@@ -577,7 +577,7 @@ void LatexGenerator::startProjectNumber()
 static QByteArray convertToLaTeX(const QByteArray &s)
 {
    QByteArray result;
-   FTextStream t(&result);
+   QTextStream t(&result);
    filterLatexString(t, s, false, false, false);
    return result.data();
 }

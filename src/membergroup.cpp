@@ -337,12 +337,10 @@ void MemberGroup::setRefItems(const QList<ListItemInfo> *sli)
    }
 }
 
-void MemberGroup::writeTagFile(FTextStream &tagFile)
+void MemberGroup::writeTagFile(QTextStream &tagFile)
 {
    memberList->writeTagFile(tagFile);
 }
-
-//--------------------------------------------------------------------------
 
 void MemberGroupInfo::setRefItems(const QList<ListItemInfo> *sli)
 {

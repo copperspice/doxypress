@@ -15,13 +15,9 @@
  *
 *************************************************************************/
 
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
-#include <QQueue>
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
-#include <QCryptographicHash>
 
 #include <stdlib.h>
 
@@ -39,7 +35,6 @@
 #include <pagedef.h>
 #include <portable.h>
 #include <dirdef.h>
-#include <ftextstream.h>
 #include <groupdef.h>
 #include <classlist.h>
 #include <filename.h>
@@ -245,7 +240,7 @@ static int getDotFontSize()
    return dotFontSize;
 }
 
-static void writeGraphHeader(FTextStream &t, const QByteArray &title = QByteArray())
+static void writeGraphHeader(QTextStream &t, const QByteArray &title = QByteArray())
 {
    static bool interactiveSVG = Config_getBool("INTERACTIVE_SVG");
    t << "digraph ";
@@ -271,7 +266,7 @@ static void writeGraphHeader(FTextStream &t, const QByteArray &title = QByteArra
      "fontsize=\"" << FONTSIZE << "\",shape=record];\n";
 }
 
-static void writeGraphFooter(FTextStream &t)
+static void writeGraphFooter(QTextStream &t)
 {
    t << "}" << endl;
 }
@@ -363,7 +358,7 @@ static QByteArray replaceRef(const QByteArray &buf, const QByteArray relPath,
  *                 map file was found
  *  \returns true if successful.
  */
-static bool convertMapFile(FTextStream &t, const char *mapName, const QByteArray relPath, bool urlOnly = false,
+static bool convertMapFile(QTextStream &t, const char *mapName, const QByteArray relPath, bool urlOnly = false,
                            const QByteArray &context = QByteArray())
 {
    QFile f(mapName);
@@ -495,7 +490,7 @@ static bool readBoundingBox(const char *fileName, int *width, int *height, bool 
    return false;
 }
 
-static bool writeVecGfxFigure(FTextStream &out, const QByteArray &baseName, const QByteArray &figureName)
+static bool writeVecGfxFigure(QTextStream &out, const QByteArray &baseName, const QByteArray &figureName)
 {
    int width = 400, height = 550;
 
@@ -581,14 +576,14 @@ static bool readSVGSize(const QByteArray &fileName, int *width, int *height)
    return true;
 }
 
-static void writeSVGNotSupported(FTextStream &out)
+static void writeSVGNotSupported(QTextStream &out)
 {
    out << "<p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p>";
 }
 
 // check if a reference to a SVG figure can be written and does so if possible.
 // return false if not possible (for instance because the SVG file is not yet generated).
-static bool writeSVGFigureLink(FTextStream &out, const QByteArray &relPath,
+static bool writeSVGFigureLink(QTextStream &out, const QByteArray &relPath,
                                const QByteArray &baseName, const QByteArray &absImgName)
 {
    int width = 600, height = 600;
@@ -660,14 +655,14 @@ static void checkDotResult(const QByteArray &imgName)
    }
 }
 
-static bool insertMapFile(FTextStream &out, const QByteArray &mapFile,
+static bool insertMapFile(QTextStream &out, const QByteArray &mapFile,
                           const QByteArray &relPath, const QByteArray &mapLabel)
 {
    QFileInfo fi(mapFile);
 
    if (fi.exists() && fi.size() > 0) { // reuse existing map file
       QByteArray tmpstr;
-      FTextStream tmpout(&tmpstr);
+      QTextStream tmpout(&tmpstr);
       convertMapFile(tmpout, mapFile, relPath);
       if (!tmpstr.isEmpty()) {
          out << "<map name=\"" << mapLabel << "\" id=\"" << mapLabel << "\">" << endl;
@@ -938,7 +933,7 @@ bool DotFilePatcher::run()
       return false;
    }
 
-   FTextStream t(&fo);
+   QTextStream t(&fo);
    const int maxLineLen = 100 * 1024;
    int lineNr = 1;
    int width, height;
@@ -1090,7 +1085,7 @@ bool DotFilePatcher::run()
          return false;
       }
 
-      FTextStream t(&fo);
+      QTextStream t(&fo);
       while (!fi.atEnd()) { // foreach line
          QByteArray line;
          line.resize(maxLineLen);
@@ -1598,7 +1593,7 @@ static QByteArray escapeTooltip(const QByteArray &tooltip)
    return result;
 }
 
-static void writeBoxMemberList(FTextStream &t, char prot, MemberList *ml, ClassDef *scope,
+static void writeBoxMemberList(QTextStream &t, char prot, MemberList *ml, ClassDef *scope,
                                bool isStatic = false, const QHash<QString, void *> *skipNames = 0)
 {
    (void)isStatic;
@@ -1664,7 +1659,7 @@ static QByteArray stripProtectionPrefix(const QByteArray &s)
    }
 }
 
-void DotNode::writeBox(FTextStream &t, GraphType gt, GraphOutputFormat, bool hasNonReachableChildren, bool reNumber)
+void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool hasNonReachableChildren, bool reNumber)
 {
    const char *labCol = m_url.isEmpty() ? "grey75" :  // non link
       ( (hasNonReachableChildren) ? "red" : "black");
@@ -1775,7 +1770,7 @@ void DotNode::writeBox(FTextStream &t, GraphType gt, GraphOutputFormat, bool has
    t << "];" << endl;
 }
 
-void DotNode::writeArrow(FTextStream &t, GraphType gt, GraphOutputFormat format, DotNode *cn, EdgeInfo *ei,
+void DotNode::writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat format, DotNode *cn, EdgeInfo *ei,
                          bool topDown, bool pointBack, bool reNumber)
 {
    t << "  Node";
@@ -1827,7 +1822,7 @@ void DotNode::writeArrow(FTextStream &t, GraphType gt, GraphOutputFormat format,
    t << "];" << endl;
 }
 
-void DotNode::write(FTextStream &t, GraphType gt, GraphOutputFormat format, bool topDown,
+void DotNode::write(QTextStream &t, GraphType gt, GraphOutputFormat format, bool topDown,
                     bool toChildren, bool backArrows, bool reNumber)
 {
    if (m_written) {
@@ -1873,7 +1868,7 @@ void DotNode::write(FTextStream &t, GraphType gt, GraphOutputFormat format, bool
    }   
 }
 
-void DotNode::writeXML(FTextStream &t, bool isClassGraph)
+void DotNode::writeXML(QTextStream &t, bool isClassGraph)
 {
    t << "      <node id=\"" << m_number << "\">" << endl;
    t << "        <label>" << convertToXML(m_label) << "</label>" << endl;
@@ -1955,7 +1950,7 @@ void DotNode::writeXML(FTextStream &t, bool isClassGraph)
    t << "      </node>" << endl;
 }
 
-void DotNode::writeDocbook(FTextStream &t, bool isClassGraph)
+void DotNode::writeDocbook(QTextStream &t, bool isClassGraph)
 {
    t << "      <node id=\"" << m_number << "\">" << endl;
    t << "        <label>" << convertToXML(m_label) << "</label>" << endl;
@@ -2034,7 +2029,7 @@ void DotNode::writeDocbook(FTextStream &t, bool isClassGraph)
 }
 
 
-void DotNode::writeDEF(FTextStream &t)
+void DotNode::writeDEF(QTextStream &t)
 {
    const char *nodePrefix = "        node-";
 
@@ -2181,7 +2176,7 @@ const DotNode *DotNode::findDocNode() const
    return 0;
 }
 
-void DotGfxHierarchyTable::writeGraph(FTextStream &out, const char *path, const char *fileName) const
+void DotGfxHierarchyTable::writeGraph(QTextStream &out, const char *path, const char *fileName) const
 {
    if (m_rootSubgraphs->count() == 0) {
       return;
@@ -2216,7 +2211,7 @@ void DotGfxHierarchyTable::writeGraph(FTextStream &out, const char *path, const 
       // compute md5 checksum of the graph were are about to generate
       QByteArray theGraph;
 
-      FTextStream md5stream(&theGraph);
+      QTextStream md5stream(&theGraph);
       writeGraphHeader(md5stream, theTranslator->trGraphicalHierarchy());
       md5stream << "  rankdir=\"LR\";" << endl;
    
@@ -2251,7 +2246,7 @@ void DotGfxHierarchyTable::writeGraph(FTextStream &out, const char *path, const 
             return;
          }
 
-         FTextStream t(&f);
+         QTextStream t(&f);
          t << theGraph;
          f.close();
          resetReNumbering();
@@ -2687,7 +2682,7 @@ void DotClassGraph::buildGraph(ClassDef *cd, DotNode *n, bool base, int distance
             int count     = 0;
             int maxLabels = 10;
            
-            for (auto s : ucd.accessors->keys() ) {
+            for (auto s : ucd.m_accessors ) {
 
                if (count >= maxLabels) {
                   break;
@@ -2708,7 +2703,7 @@ void DotClassGraph::buildGraph(ClassDef *cd, DotNode *n, bool base, int distance
                label += "\n...";
             }
             
-            addClass(ucd.classDef, n, EdgeInfo::Purple, label, 0, ucd.templSpecifiers, base, distance);
+            addClass(ucd.m_classDef, n, EdgeInfo::Purple, label, 0, ucd.m_templSpecifiers, base, distance);
          }
       }
    }
@@ -2831,7 +2826,7 @@ QByteArray computeMd5Signature(DotNode *root, DotNode::GraphType gt, GraphOutput
    //printf("computeMd5Signature\n");
    QByteArray buf;
 
-   FTextStream md5stream(&buf);
+   QTextStream md5stream(&buf);
    writeGraphHeader(md5stream, title);
 
    if (lrRank) {
@@ -2886,7 +2881,7 @@ static bool updateDotGraph(DotNode *root, DotNode::GraphType gt, const QByteArra
    QFile f(baseName + ".dot");
 
    if (f.open(QIODevice::WriteOnly)) {
-      FTextStream t(&f);
+      QTextStream t(&f);
       t << theGraph;
    }
 
@@ -2913,7 +2908,7 @@ QByteArray DotClassGraph::diskName() const
    return result;
 }
 
-QByteArray DotClassGraph::writeGraph(FTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
+QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
                                      const char *path, const char *fileName, const char *relPath, bool /*isTBRank*/,
                                      bool generateImageMap, int graphId) const 
 {
@@ -3104,21 +3099,21 @@ QByteArray DotClassGraph::writeGraph(FTextStream &out, GraphOutputFormat graphFo
    return baseName;
 }
 
-void DotClassGraph::writeXML(FTextStream &t)
+void DotClassGraph::writeXML(QTextStream &t)
 {   
    for (auto node : *m_usedNodes) {
       node->writeXML(t, true);
    }
 }
 
-void DotClassGraph::writeDocbook(FTextStream &t)
+void DotClassGraph::writeDocbook(QTextStream &t)
 {
   for (auto node : *m_usedNodes) {
       node->writeDocbook(t, true);
    }
 }
 
-void DotClassGraph::writeDEF(FTextStream &t)
+void DotClassGraph::writeDEF(QTextStream &t)
 {
    for (auto node : *m_usedNodes) {
       node->writeDEF(t);
@@ -3278,7 +3273,7 @@ QByteArray DotInclDepGraph::diskName() const
    return convertNameToFile(result).toUtf8();
 }
 
-QByteArray DotInclDepGraph::writeGraph(FTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,                                                                  
+QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,                                                                  
                                        const char *path, const char *fileName, const char *relPath, bool generateImageMap, int graphId) const
 {
    QDir d(path);
@@ -3408,14 +3403,14 @@ bool DotInclDepGraph::isTooBig() const
    return numNodes >= maxNodes;
 }
 
-void DotInclDepGraph::writeXML(FTextStream &t)
+void DotInclDepGraph::writeXML(QTextStream &t)
 {  
    for (auto node : *m_usedNodes) { 
       node->writeXML(t, false);
    }
 }
 
-void DotInclDepGraph::writeDocbook(FTextStream &t)
+void DotInclDepGraph::writeDocbook(QTextStream &t)
 {
    for (auto node : *m_usedNodes) { 
       node->writeDocbook(t, false);
@@ -3556,7 +3551,7 @@ DotCallGraph::~DotCallGraph()
    delete m_usedNodes;
 }
 
-QByteArray DotCallGraph::writeGraph(FTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
+QByteArray DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
                                     const char *path, const char *fileName, const char *relPath, bool generateImageMap, 
                                     int graphId) const
 {
@@ -3694,7 +3689,7 @@ DotDirDeps::~DotDirDeps()
 {
 }
 
-QByteArray DotDirDeps::writeGraph(FTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
+QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
                                   const char *path, const char *fileName, const char *relPath, bool generateImageMap,
                                   int graphId) const
 {
@@ -3721,7 +3716,7 @@ QByteArray DotDirDeps::writeGraph(FTextStream &out, GraphOutputFormat graphForma
 
    // compute md5 checksum of the graph were are about to generate
    QByteArray theGraph;
-   FTextStream md5stream(&theGraph);
+   QTextStream md5stream(&theGraph);
    m_dir->writeDepGraph(md5stream);
 
    QByteArray sigStr;
@@ -3773,7 +3768,7 @@ QByteArray DotDirDeps::writeGraph(FTextStream &out, GraphOutputFormat graphForma
          err("Cannot create file %s.dot for writing!\n", baseName.constData());
       }
 
-      FTextStream t(&f);
+      QTextStream t(&f);
       t << theGraph.data();
       f.close();
 
@@ -3874,7 +3869,7 @@ void generateGraphLegend(const char *path)
    }
 
    QByteArray theGraph;
-   FTextStream md5stream(&theGraph);
+   QTextStream md5stream(&theGraph);
    writeGraphHeader(md5stream, theTranslator->trLegendTitle());
 
    md5stream << "  Node9 [shape=\"box\",label=\"Inherited\",fontsize=\"" << FONTSIZE << "\",height=0.2,width=0.4,fontname=\"" << FONTNAME <<
@@ -3930,7 +3925,7 @@ void generateGraphLegend(const char *path)
          return;
       }
 
-      FTextStream dotText(&dotFile);
+      QTextStream dotText(&dotFile);
       dotText << theGraph;
       dotFile.close();
 
@@ -4006,7 +4001,7 @@ void writeDotGraphFromFile(const char *inFile, const char *outDir,
  *  \param context the scope in which this graph is found (for resolving links)
  *  \param graphId a unique id for this graph, use for dynamic sections
  */
-void writeDotImageMapFromFile(FTextStream &t, const QByteArray &inFile, const QByteArray &outDir, 
+void writeDotImageMapFromFile(QTextStream &t, const QByteArray &inFile, const QByteArray &outDir, 
                               const QByteArray &relPath, const QByteArray &baseName, 
                               const QByteArray &context, int graphId)
 {
@@ -4238,7 +4233,7 @@ void DotGroupCollaboration::addCollaborationMember(Definition *def, QByteArray &
 }
 
 
-QByteArray DotGroupCollaboration::writeGraph( FTextStream &t, GraphOutputFormat graphFormat, 
+QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat graphFormat, 
       EmbeddedOutputFormat textFormat, const char *path, const char *fileName, const char *relPath,
       bool writeImageMap, int graphId) const
 {
@@ -4253,7 +4248,7 @@ QByteArray DotGroupCollaboration::writeGraph( FTextStream &t, GraphOutputFormat 
    static bool usePDFLatex = Config_getBool("USE_PDFLATEX");
 
    QByteArray theGraph;
-   FTextStream md5stream(&theGraph);
+   QTextStream md5stream(&theGraph);
 
    writeGraphHeader(md5stream, m_rootNode->label());
 
@@ -4333,7 +4328,7 @@ QByteArray DotGroupCollaboration::writeGraph( FTextStream &t, GraphOutputFormat 
 
       QFile dotfile(absDotName);
       if (dotfile.open(QIODevice::WriteOnly)) {
-         FTextStream tdot(&dotfile);
+         QTextStream tdot(&dotfile);
          tdot << theGraph;
          dotfile.close();
       }
@@ -4418,7 +4413,7 @@ QByteArray DotGroupCollaboration::writeGraph( FTextStream &t, GraphOutputFormat 
    return baseName;
 }
 
-void DotGroupCollaboration::Edge::write( FTextStream &t ) const
+void DotGroupCollaboration::Edge::write( QTextStream &t ) const
 {
    const char *linkTypeColor[] = {
       "darkorchid3"
@@ -4485,7 +4480,7 @@ bool DotGroupCollaboration::isTrivial() const
    return m_usedNodes->count() <= 1;
 }
 
-void DotGroupCollaboration::writeGraphHeader(FTextStream &t,
+void DotGroupCollaboration::writeGraphHeader(QTextStream &t,
       const QByteArray &title) const
 {
    t << "digraph ";
@@ -4508,7 +4503,7 @@ void DotGroupCollaboration::writeGraphHeader(FTextStream &t,
    t << "  rankdir=LR;\n";
 }
 
-void writeDotDirDepGraph(FTextStream &t, DirDef *dd)
+void writeDotDirDepGraph(QTextStream &t, DirDef *dd)
 {
    t << "digraph \"" << dd->displayName() << "\" {\n";
 

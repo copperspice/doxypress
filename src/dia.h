@@ -19,7 +19,6 @@
 #define _DIA_H
 
 class QByteArray;
-class FTextStream;
 
 enum DiaOutputFormat { DIA_BITMAP , DIA_EPS };
 

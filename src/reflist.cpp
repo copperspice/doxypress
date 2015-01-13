@@ -19,7 +19,6 @@
 
 #include <reflist.h>
 #include <util.h>
-#include <ftextstream.h>
 #include <definition.h>
 
 /*! Create a list of items that are cross referenced with documentation blocks

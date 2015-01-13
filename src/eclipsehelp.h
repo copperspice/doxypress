@@ -18,7 +18,7 @@
 /*
  * eclipsehelp.h
  *
- * Created on: 7.11.2009
+ * Created: 7.11.2009
  * Author: ondrej
  *
  */
@@ -26,11 +26,13 @@
 #ifndef ECLIPSEHELP_H
 #define ECLIPSEHELP_H
 
-#include <index.h>
-#include <ftextstream.h>
+#include <QByteArray>
+#include <QFile>
+#include <QString>
+#include <QTextStream>
 
-class QFile;
-class Definition;
+#include <index.h>
+#include <definition.h>
 
 /** Generator for Eclipse help files.
  *
@@ -63,7 +65,7 @@ class EclipseHelp : public IndexIntf
    int m_openTags;
 
    QFile *m_tocfile;
-   FTextStream m_tocstream;
+   QTextStream m_tocstream;
    QByteArray m_pathprefix;
 
    /* -- avoid copying */

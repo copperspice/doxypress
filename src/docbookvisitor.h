@@ -15,23 +15,22 @@
  *
 *************************************************************************/
 
-
 #ifndef _DOCBOOKDOCVISITOR_H
 #define _DOCBOOKDOCVISITOR_H
 
-#include "docvisitor.h"
-#include <QStack>
 #include <QByteArray>
+#include <QStack>
+#include <QTextStream>
 
-class FTextStream;
+#include <docvisitor.h>
+
 class CodeOutputInterface;
-class QByteArray;
 
 /*! @brief Concrete visitor implementation for Docbook output. */
 class DocbookDocVisitor : public DocVisitor
 {
  public:
-   DocbookDocVisitor(FTextStream &t, CodeOutputInterface &ci);
+   DocbookDocVisitor(QTextStream &t, CodeOutputInterface &ci);
    //--------------------------------------
    // visitor functions for leaf nodes
    //--------------------------------------
@@ -159,7 +158,7 @@ class DocbookDocVisitor : public DocVisitor
    //--------------------------------------
    // state variables
    //--------------------------------------
-   FTextStream &m_t;
+   QTextStream &m_t;
    CodeOutputInterface &m_ci;
    bool m_insidePre;
    bool m_hide;

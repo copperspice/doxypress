@@ -19,6 +19,7 @@
 #define MEMBERLIST_H
 
 #include <QList>
+#include <QTextStream>
 
 #include <cassert>
 
@@ -128,7 +129,7 @@ class MemberList : public SortedList<MemberDef *>
       writeDocumentationPage(ol, scopeName.constData(), container);
    }
 
-   void writeTagFile(FTextStream &);
+   void writeTagFile(QTextStream &);
    bool declVisible() const;
    void addMemberGroup(MemberGroup *mg);
 

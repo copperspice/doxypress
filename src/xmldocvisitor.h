@@ -18,19 +18,19 @@
 #ifndef XMLDOCVISITOR_H
 #define XMLDOCVISITOR_H
 
-#include <QStack>
 #include <QByteArray>
+#include <QStack>
+#include <QTextStream>
 
 #include <docvisitor.h>
 
-class FTextStream;
 class CodeOutputInterface;
 
 /*! @brief Concrete visitor implementation for XML output. */
 class XmlDocVisitor : public DocVisitor
 {
  public:
-   XmlDocVisitor(FTextStream &t, CodeOutputInterface &ci);
+   XmlDocVisitor(QTextStream &t, CodeOutputInterface &ci);
 
    //--------------------------------------
    // visitor functions for leaf nodes
@@ -154,7 +154,7 @@ class XmlDocVisitor : public DocVisitor
    // state variables
    //--------------------------------------
 
-   FTextStream &m_t;
+   QTextStream &m_t;
    CodeOutputInterface &m_ci;
 
    bool m_insidePre;

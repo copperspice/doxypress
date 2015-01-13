@@ -15,10 +15,10 @@
  *
 *************************************************************************/
 
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
-#include <QDir>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -26,7 +26,6 @@
 #include <config.h>
 #include <doxygen.h>
 #include <formula.h>
-#include <ftextstream.h>
 #include <image.h>
 #include <index.h>
 #include <message.h>
@@ -76,7 +75,7 @@ void FormulaList::generateBitmaps(const char *path)
    bool formulaError = false;
 
    if (f.open(QIODevice::WriteOnly)) {
-      FTextStream t(&f);
+      QTextStream t(&f);
 
       if (Config_getBool("LATEX_BATCHMODE")) {
          t << "\\batchmode" << endl;
@@ -178,7 +177,8 @@ void FormulaList::generateBitmaps(const char *path)
          f.setFileName(formBase + ".ps");
 
          if (f.open(QIODevice::WriteOnly)) {
-            FTextStream t(&f);
+            QTextStream t(&f);
+
             t << "1 1 1 setrgbcolor" << endl;  // anti-alias to white background
             t << "newpath" << endl;
             t << "-1 -1 moveto" << endl;
@@ -372,7 +372,7 @@ void FormulaList::generateBitmaps(const char *path)
    f.setFileName("formula.repository");
 
    if (f.open(QIODevice::WriteOnly)) {
-      FTextStream t(&f);
+      QTextStream t(&f);
 
       for (auto formula : *this) {      
          t << "\\form#" << formula.getId() << ":" << formula.getFormulaText() << endl;

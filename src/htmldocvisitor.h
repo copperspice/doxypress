@@ -18,22 +18,22 @@
 #ifndef HTMLDOCVISITOR_H
 #define HTMLDOCVISITOR_H
 
-#include <QStack>
 #include <QByteArray>
+#include <QStack>
+#include <QTextStream>
 
 #include <docvisitor.h>
 
 class CodeOutputInterface;
 class Definition;
 class DocNode;
-class FTextStream;
 class MemberDef;
 
 /*! @brief Concrete visitor implementation for HTML output. */
 class HtmlDocVisitor : public DocVisitor
 {
  public:
-   HtmlDocVisitor(FTextStream &t, CodeOutputInterface &ci, Definition *ctx);
+   HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, Definition *ctx);
 
    //--------------------------------------
    // visitor functions for leaf nodes
@@ -163,7 +163,7 @@ class HtmlDocVisitor : public DocVisitor
    // state variables
    //--------------------------------------
 
-   FTextStream &m_t;
+   QTextStream &m_t;
    CodeOutputInterface &m_ci;
    bool m_insidePre;
    bool m_hide;

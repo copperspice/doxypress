@@ -16,9 +16,7 @@
 *************************************************************************/
 
 #include <QList>
-#include <QHash>
 #include <QRegExp>
-#include <QFile>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,7 +71,7 @@ class HtmlHelpIndex
    ~HtmlHelpIndex();
 
    void addItem(const char *first, const char *second, const char *url, const char *anchor, bool hasLink, bool reversed);
-   void writeFields(FTextStream &t);
+   void writeFields(QTextStream &t);
 
  private:
    IndexFieldSDict *dict;
@@ -171,7 +169,7 @@ static QByteArray field2URL(QSharedPointer<IndexField> f, bool checkReversed)
  *      b1     -> link to url#anchor
  *  </pre>
  */
-void HtmlHelpIndex::writeFields(FTextStream &t)
+void HtmlHelpIndex::writeFields(QTextStream &t)
 {  
    QString lastLevel1;
    bool level2Started = false;
@@ -484,7 +482,7 @@ void HtmlHelp::createProjectFile()
    QFile f(fName);
 
    if (f.open(QIODevice::WriteOnly)) {
-      FTextStream t(&f);
+      QTextStream t(&f);
 
       QByteArray indexName = "index" + Doxygen::htmlFileExtension;
 

@@ -84,7 +84,7 @@ class LatexGenerator : public OutputGenerator
    void startTitle();
    void endTitleHead(const char *, const char *name);
    void endTitle()   {
-      t << "}";
+      m_textStream << "}";
    }
 
    void newParagraph();
@@ -94,10 +94,10 @@ class LatexGenerator : public OutputGenerator
    void startIndexListItem() {}
    void endIndexListItem() {}
    void startIndexList() {
-      t << "\\begin{DoxyCompactList}"    << endl;
+      m_textStream << "\\begin{DoxyCompactList}"    << endl;
    }
    void endIndexList()   {
-      t << "\\end{DoxyCompactList}"      << endl;
+      m_textStream << "\\end{DoxyCompactList}"      << endl;
    }
    void startIndexKey();
    void endIndexKey();
@@ -105,11 +105,11 @@ class LatexGenerator : public OutputGenerator
    void endIndexValue(const char *, bool);
 
    void startItemList()  {
-      t << "\\begin{DoxyCompactItemize}" << endl;
+      m_textStream << "\\begin{DoxyCompactItemize}" << endl;
    }
 
    void endItemList()    {
-      t << "\\end{DoxyCompactItemize}"   << endl;
+      m_textStream << "\\end{DoxyCompactItemize}"   << endl;
    }
    void startIndexItem(const char *ref, const char *file);
    void endIndexItem(const char *ref, const char *file);
@@ -131,15 +131,15 @@ class LatexGenerator : public OutputGenerator
    void endHtmlLink();
 
    void startTypewriter() {
-      t << "{\\ttfamily ";
+      m_textStream << "{\\ttfamily ";
    }
    void endTypewriter()   {
-      t << "}";
+      m_textStream << "}";
    }
    void startGroupHeader(int);
    void endGroupHeader(int);
    void startItemListItem() {
-      t << "\\item " << endl;
+      m_textStream << "\\item " << endl;
    }
    void endItemListItem()   {}
 
@@ -174,7 +174,7 @@ class LatexGenerator : public OutputGenerator
    void insertMemberAlign(bool) {}
 
    void writeRuler() {
-      t << endl << endl;
+      m_textStream << endl << endl;
    }
    void writeAnchor(const char *fileName, const char *name);
    void startCodeFragment();
@@ -183,16 +183,16 @@ class LatexGenerator : public OutputGenerator
    void startCodeLine(bool hasLineNumbers);
    void endCodeLine();
    void startEmphasis() {
-      t << "{\\em ";
+      m_textStream << "{\\em ";
    }
    void endEmphasis()   {
-      t << "}";
+      m_textStream << "}";
    }
    void startBold()     {
-      t << "{\\bfseries ";
+      m_textStream << "{\\bfseries ";
    }
    void endBold()       {
-      t << "}";
+      m_textStream << "}";
    }
    void startDescription();
    void endDescription();
@@ -207,35 +207,35 @@ class LatexGenerator : public OutputGenerator
    void writeChar(char c);
 
    void writeLatexSpacing() {
-      t << "\\hspace{0.3cm}";
+      m_textStream << "\\hspace{0.3cm}";
    }
 
    void writeStartAnnoItem(const char *type, const QByteArray &file, const QByteArray &path, const char *name) override;
    void writeEndAnnoItem(const char *name) override;
 
    void startSubsection() {
-      t << "\\subsection*{";
+      m_textStream << "\\subsection*{";
    }
    void endSubsection() {
-      t << "}" << endl;
+      m_textStream << "}" << endl;
    }
    void startSubsubsection() {
-      t << "\\subsubsection*{";
+      m_textStream << "\\subsubsection*{";
    }
    void endSubsubsection() {
-      t << "}" << endl;
+      m_textStream << "}" << endl;
    }
    void startCenter()      {
-      t << "\\begin{center}" << endl;
+      m_textStream << "\\begin{center}" << endl;
    }
    void endCenter()        {
-      t << "\\end{center}" << endl;
+      m_textStream << "\\end{center}" << endl;
    }
    void startSmall()       {
-      t << "\\footnotesize ";
+      m_textStream << "\\footnotesize ";
    }
    void endSmall()         {
-      t << "\\normalsize ";
+      m_textStream << "\\normalsize ";
    }
    void startMemberDescription(const char *, const char *);
    void endMemberDescription();
@@ -244,17 +244,17 @@ class LatexGenerator : public OutputGenerator
    void writeInheritedSectionTitle(const char *, const char *, const char *,
                                    const char *, const char *, const char *) {}
    void startDescList(SectionTypes)     {
-      t << "\\begin{Desc}\n\\item[";
+      m_textStream << "\\begin{Desc}\n\\item[";
    }
    void endDescList()       {
-      t << "\\end{Desc}" << endl;
+      m_textStream << "\\end{Desc}" << endl;
    }
    void startSimpleSect(SectionTypes, const char *, const char *, const char *);
    void endSimpleSect();
    void startParamList(ParamListTypes, const char *title);
    void endParamList();
    void startDescForItem()     {
-      t << "\\par" << endl;
+      m_textStream << "\\par" << endl;
    }
    void endDescForItem()       {}
    void startSection(const char *, const char *, SectionInfo::SectionType);
@@ -281,18 +281,18 @@ class LatexGenerator : public OutputGenerator
    void startDescTable(const char *title) {
       startSimpleSect(EnumValues, 0, 0, title);
       startDescForItem();
-      t << "\\begin{description}" << endl;
+      m_textStream << "\\begin{description}" << endl;
    }
    void endDescTable() {
-      t << "\\end{description}" << endl;
+      m_textStream << "\\end{description}" << endl;
       endDescForItem();
       endSimpleSect();
    }
    void startDescTableTitle() {
-      t << "\\item[{\\em " << endl;
+      m_textStream << "\\item[{\\em " << endl;
    }
    void endDescTableTitle() {
-      t << "}]";
+      m_textStream << "}]";
    }
    void startDescTableData() {}
    void endDescTableData() {}

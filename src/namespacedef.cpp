@@ -248,7 +248,7 @@ bool NamespaceDef::hasDetailedDescription() const
            !documentation().isEmpty());
 }
 
-void NamespaceDef::writeTagFile(FTextStream &tagFile)
+void NamespaceDef::writeTagFile(QTextStream &tagFile)
 {
    tagFile << "  <compound kind=\"namespace\">" << endl;
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;

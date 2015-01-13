@@ -33,7 +33,7 @@
 // must appear after the previous include - resolve soon 
 #include <doxy_globals.h>
 
-ManDocVisitor::ManDocVisitor(FTextStream &t, CodeOutputInterface &ci, const char *langExt)
+ManDocVisitor::ManDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt)
    : DocVisitor(DocVisitor_Man), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false), m_firstCol(false),
      m_indent(0), m_langExt(langExt)
 {

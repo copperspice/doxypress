@@ -19,6 +19,7 @@
 #define MEMBERGROUP_H
 
 #include <QList>
+#include <QTextStream>
 
 #include <stringmap.h>
 #include <types.h>
@@ -28,7 +29,6 @@
 class ClassDef;
 class Definition;
 class FileDef;
-class FTextStream;
 class GroupDef;
 class MemberList;
 class MemberDef;
@@ -64,7 +64,7 @@ class MemberGroup
 
    void writeDocumentation(OutputList &ol, const char *scopeName, Definition *container, bool showEnumValues, bool showInline);
    void writeDocumentationPage(OutputList &ol, const char *scopeName, Definition *container);
-   void writeTagFile(FTextStream &);
+   void writeTagFile(QTextStream &);
 
    void addGroupedInheritedMembers(OutputList &ol, ClassDef *cd, MemberListType lt,
                                    ClassDef *inheritedFrom, const QByteArray &inheritId);

@@ -24,7 +24,6 @@
 
 #include <stringmap.h>
 
-class FTextStream;
 class Definition;
 class MemberDef;
 class SearchDocEntry;

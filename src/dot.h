@@ -18,19 +18,20 @@
 #ifndef DOT_H
 #define DOT_H
 
+#include <QByteArray>
 #include <QList>
 #include <QHash>
-#include <QWaitCondition>
-#include <Qmutex>
+#include <QMutex>
 #include <QQueue>
+#include <QTextStream>
 #include <QThread>
+#include <QWaitCondition>
 
 #include <stringmap.h>
 #include <sortedlist.h>
 
 class ClassDef;
 class FileDef;
-class FTextStream;
 class ClassSDict;
 class MemberDef;
 class Definition;
@@ -77,14 +78,14 @@ class DotNode
    void removeParent(DotNode *n);
    int findParent( DotNode *n );
 
-   void write(FTextStream &t, GraphType gt, GraphOutputFormat f,
+   void write(QTextStream &t, GraphType gt, GraphOutputFormat f,
               bool topDown, bool toChildren, bool backArrows, bool reNumber);
 
    int  m_subgraphId;
    void clearWriteFlag();
-   void writeXML(FTextStream &t, bool isClassGraph);
-   void writeDocbook(FTextStream &t, bool isClassGraph);
-   void writeDEF(FTextStream &t);
+   void writeXML(QTextStream &t, bool isClassGraph);
+   void writeDocbook(QTextStream &t, bool isClassGraph);
+   void writeDEF(QTextStream &t);
 
    QByteArray label() const {
       return m_label;
@@ -108,10 +109,10 @@ class DotNode
 
  private:
    void colorConnectedNodes(int curColor);
-   void writeBox(FTextStream &t, GraphType gt, GraphOutputFormat f,
+   void writeBox(QTextStream &t, GraphType gt, GraphOutputFormat f,
                  bool hasNonReachableChildren, bool reNumber = false);
 
-   void writeArrow(FTextStream &t, GraphType gt, GraphOutputFormat f, DotNode *cn,
+   void writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat f, DotNode *cn,
                    EdgeInfo *ei, bool topDown, bool pointBack = true, bool reNumber = false);
 
    void setDistance(int distance);
@@ -176,7 +177,7 @@ class DotGfxHierarchyTable
  public:
    DotGfxHierarchyTable();
    ~DotGfxHierarchyTable();
-   void writeGraph(FTextStream &t, const char *path, const char *fileName) const;
+   void writeGraph(QTextStream &t, const char *path, const char *fileName) const;
 
  private:
    void addHierarchy(DotNode *n, ClassDef *cd, bool hide);
@@ -198,13 +199,13 @@ class DotClassGraph
    bool isTrivial() const;
    bool isTooBig() const;
 
-   QByteArray writeGraph(FTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
+   QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const char *path, const char *fileName, const char *relPath,
                          bool TBRank = true, bool imageMap = true, int graphId = -1) const;
 
-   void writeXML(FTextStream &t);
-   void writeDocbook(FTextStream &t);
-   void writeDEF(FTextStream &t);
+   void writeXML(QTextStream &t);
+   void writeDocbook(QTextStream &t);
+   void writeDEF(QTextStream &t);
    QByteArray diskName() const;
 
  private:
@@ -230,15 +231,15 @@ class DotInclDepGraph
  public:
    DotInclDepGraph(FileDef *fd, bool inverse);
    ~DotInclDepGraph();
-   QByteArray writeGraph(FTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
+   QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const char *path, const char *fileName, const char *relPath,
                          bool writeImageMap = true, int graphId = -1) const;
 
    bool isTrivial() const;
    bool isTooBig() const;
    QByteArray diskName() const;
-   void writeXML(FTextStream &t);
-   void writeDocbook(FTextStream &t);
+   void writeXML(QTextStream &t);
+   void writeDocbook(QTextStream &t);
 
 
  private:
@@ -261,7 +262,7 @@ class DotCallGraph
    DotCallGraph(MemberDef *md, bool inverse);
    ~DotCallGraph();
 
-   QByteArray writeGraph(FTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
+   QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const char *path, const char *fileName,
                          const char *relPath, bool writeImageMap = true,
                          int graphId = -1) const;
@@ -291,14 +292,8 @@ class DotDirDeps
    ~DotDirDeps();
 
    bool isTrivial() const;
-   QByteArray writeGraph(FTextStream &out,
-                         GraphOutputFormat gf,
-                         EmbeddedOutputFormat ef,
-                         const char *path,
-                         const char *fileName,
-                         const char *relPath,
-                         bool writeImageMap = true,
-                         int graphId = -1) const;
+   QByteArray writeGraph(QTextStream &out, GraphOutputFormat gf, EmbeddedOutputFormat ef, const char *path,
+                         const char *fileName, const char *relPath, bool writeImageMap = true, int graphId = -1) const;
  private:
    DirDef *m_dir;
 };
@@ -338,12 +333,12 @@ class DotGroupCollaboration
       EdgeType eType;
 
       QList<Link *> m_links;
-      void write( FTextStream &t ) const;
+      void write( QTextStream &t ) const;
    };
 
    DotGroupCollaboration(GroupDef *gd);
    ~DotGroupCollaboration();
-   QByteArray writeGraph(FTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
+   QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const char *path, const char *fileName, const char *relPath,
                          bool writeImageMap = true, int graphId = -1) const;
 
@@ -359,7 +354,7 @@ class DotGroupCollaboration
    }
 
    void addMemberList( class MemberList *ml );
-   void writeGraphHeader(FTextStream &t, const QByteArray &title) const;
+   void writeGraphHeader(QTextStream &t, const QByteArray &title) const;
 
    Edge *addEdge( DotNode *_pNStart, DotNode *_pNEnd, EdgeType _eType,
                   const QByteArray &_label, const QByteArray &_url );
@@ -518,11 +513,10 @@ void generateGraphLegend(const char *path);
 void writeDotGraphFromFile(const char *inFile, const char *outDir,
                            const char *outFile, GraphOutputFormat format);
 
-void writeDotImageMapFromFile(FTextStream &t,
-                              const QByteArray &inFile, const QByteArray &outDir,
+void writeDotImageMapFromFile(QTextStream &t, const QByteArray &inFile, const QByteArray &outDir,
                               const QByteArray &relPath, const QByteArray &baseName,
                               const QByteArray &context, int graphId = -1);
 
-void writeDotDirDepGraph(FTextStream &t, DirDef *dd);
+void writeDotDirDepGraph(QTextStream &t, DirDef *dd);
 
 #endif

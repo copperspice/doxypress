@@ -346,14 +346,16 @@ Definition::~Definition()
       m_impl = 0;
    }
 
-   auto di = Doxygen::symbolMap->find(m_symbolName);
-
-   if (di != Doxygen::symbolMap->end()) { 
-
-      QSharedPointer<QList<Definition *>> dl;  
-      dl = *di;  
-
-      dl->removeAll(this);
+   if (Doxygen::symbolMap) {
+      auto di = Doxygen::symbolMap->find(m_symbolName);
+   
+      if (di != Doxygen::symbolMap->end()) { 
+   
+         QSharedPointer<QList<Definition *>> dl;  
+         dl = *di;  
+   
+         dl->removeAll(this);
+      }
    }
 }
 
@@ -470,7 +472,7 @@ void Definition::addSectionsToIndex()
    }
 }
 
-void Definition::writeDocAnchorsToTagFile(FTextStream &tagFile)
+void Definition::writeDocAnchorsToTagFile(QTextStream &tagFile)
 {
    if (m_impl->sectionDict) {
  

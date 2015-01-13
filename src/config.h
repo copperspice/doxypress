@@ -19,11 +19,10 @@
 #define CONFIG_H
 
 #include <QByteArray>
-#include <QStringList>
 #include <QHash>
 #include <QList>
-
-#include <ftextstream.h>
+#include <QStringList>
+#include <QTextStream>
 
 /** Abstract base class for any configuration option.
  */
@@ -71,15 +70,15 @@ class ConfigOption
     void setUserComment(const QByteArray &u) { m_userComment = u; }
 
   protected:
-    virtual void writeTemplate(FTextStream &t,bool sl,bool upd) = 0;
+    virtual void writeTemplate(QTextStream &t,bool sl,bool upd) = 0;
     virtual void convertStrToVal() {}
     virtual void substEnvVars() = 0;
     virtual void init() {}
 
-    void writeBoolValue(FTextStream &t,bool v);
-    void writeIntValue(FTextStream &t,int i);
-    void writeStringValue(FTextStream &t,QByteArray &s);
-    void writeStringList(FTextStream &t,QStringList &l);
+    void writeBoolValue(QTextStream &t,bool v);
+    void writeIntValue(QTextStream &t,int i);
+    void writeStringValue(QTextStream &t,QByteArray &s);
+    void writeStringList(QTextStream &t,QStringList &l);
 
     QByteArray m_spaces;
     QByteArray m_name;
@@ -101,7 +100,7 @@ class ConfigInfo : public ConfigOption
       m_name = name;
       m_doc = doc;
     }
-    void writeTemplate(FTextStream &t, bool sl,bool);
+    void writeTemplate(QTextStream &t, bool sl,bool);
     void substEnvVars() {}
 };
 
@@ -122,7 +121,7 @@ class ConfigList : public ConfigOption
     void setWidgetType(WidgetType w) { m_widgetType = w; }
     WidgetType widgetType() const { return m_widgetType; }
     QStringList *valueRef() { return &m_value; }
-    void writeTemplate(FTextStream &t,bool sl,bool);
+    void writeTemplate(QTextStream &t,bool sl,bool);
     void substEnvVars();
     void init() { m_value.clear(); }
 
@@ -153,7 +152,7 @@ class ConfigEnum : public ConfigOption
 
     QByteArray *valueRef() { return &m_value; }
     void substEnvVars();
-    void writeTemplate(FTextStream &t,bool sl,bool);
+    void writeTemplate(QTextStream &t,bool sl,bool);
     void init() { m_value = m_defValue; }
 
   private:
@@ -182,7 +181,7 @@ class ConfigString : public ConfigOption
     WidgetType widgetType() const { return m_widgetType; }
     void setDefaultValue(const char *v) { m_defValue = v; }
     QByteArray *valueRef() { return &m_value; }
-    void writeTemplate(FTextStream &t,bool sl,bool);
+    void writeTemplate(QTextStream &t,bool sl,bool);
     void substEnvVars();
     void init() { m_value = m_defValue; }
   
@@ -213,7 +212,7 @@ class ConfigInt : public ConfigOption
     int maxVal() const { return m_maxVal; }
     void convertStrToVal();
     void substEnvVars();
-    void writeTemplate(FTextStream &t,bool sl,bool upd);
+    void writeTemplate(QTextStream &t,bool sl,bool upd);
     void init() { m_value = m_defValue; }
   private:
     int m_value;
@@ -241,7 +240,7 @@ class ConfigBool : public ConfigOption
     void convertStrToVal();
     void substEnvVars();
     void setValueString(const QByteArray &v) { m_valueString = v; }
-    void writeTemplate(FTextStream &t,bool sl,bool upd);
+    void writeTemplate(QTextStream &t,bool sl,bool upd);
     void init() { m_value = m_defValue; }
   private:
     bool m_value;
@@ -256,7 +255,7 @@ class ConfigObsolete : public ConfigOption
   public:
     ConfigObsolete(const char *name) : ConfigOption(O_Obsolete)  
     { m_name = name; }
-    void writeTemplate(FTextStream &,bool,bool);
+    void writeTemplate(QTextStream &,bool,bool);
     void substEnvVars() {}
 };
 
@@ -267,7 +266,7 @@ class ConfigDisabled : public ConfigOption
   public:
     ConfigDisabled(const char *name) : ConfigOption(O_Disabled)  
     { m_name = name; }
-    void writeTemplate(FTextStream &,bool,bool);
+    void writeTemplate(QTextStream &,bool,bool);
     void substEnvVars() {}
 };
 
@@ -465,7 +464,7 @@ class Config
      *  is \c TRUE the description of each configuration option will
      *  be omitted.
      */
-    void writeTemplate(FTextStream &t,bool shortIndex,bool updateOnly);
+    void writeTemplate(QTextStream &t,bool shortIndex,bool updateOnly);
 
     void setHeader(const char *header) { m_header = header; }
 

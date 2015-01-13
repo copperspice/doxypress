@@ -19,8 +19,7 @@
 #define CITEDB_H
 
 #include <QHash>
-
-class FTextStream;
+#include <QTextStream>
 
 /// String constants for citations
 struct CiteConsts {
@@ -83,7 +82,7 @@ class CiteDict
    /** writes the latex code for the standard bibliography
     *  section to text stream \a t
     */
-   void writeLatexBibliography(FTextStream &t);
+   void writeLatexBibliography(QTextStream &t);
 
  private:  
    QHash<QString, CiteInfo> m_entries;

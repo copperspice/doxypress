@@ -15,8 +15,6 @@
  *
 *************************************************************************/
 
-#include <QFile>
-
 #include <config.h>
 #include <eclipsehelp.h>
 #include <doxygen.h>
@@ -81,7 +79,7 @@ void EclipseHelp::initialize()
 
    // -- initialize its text stream
    m_tocstream.setDevice(m_tocfile);
-   //m_tocstream.setEncoding(FTextStream::UnicodeUTF8);
+   //m_tocstream.setEncoding(QTextStream::UnicodeUTF8);
 
    // -- write the opening tag
    QByteArray title = Config_getString("PROJECT_NAME");
@@ -118,7 +116,7 @@ void EclipseHelp::finalize()
    QFile pluginFile(name);
    if (pluginFile.open(QIODevice::WriteOnly)) {
       QString docId = Config_getString("ECLIPSE_DOC_ID");
-      FTextStream t(&pluginFile);
+      QTextStream t(&pluginFile);
       t << "<plugin name=\""  << docId << "\" id=\"" << docId << "\"" << endl;
       t << "        version=\"1.0.0\" provider-name=\"Doxygen\">" << endl;
       t << "  <extension point=\"org.eclipse.help.toc\">" << endl;

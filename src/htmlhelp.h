@@ -18,11 +18,13 @@
 #ifndef HTMLHELP_H
 #define HTMLHELP_H
 
-#include <QStringList>
-#include <QHash>
+#include <QByteArray>
 #include <QFile>
+#include <QHash>
+#include <QStringList>
+#include <QTextCodec>
+#include <QTextStream>
 
-#include <ftextstream.h>
 #include <index.h>
 
 class Definition;
@@ -85,7 +87,7 @@ class HtmlHelp  : public IndexIntf
    void createProjectFile();
 
    QFile *cf, *kf;
-   FTextStream cts, kts;
+   QTextStream cts, kts;
    HtmlHelpIndex *index;
    int dc;
 

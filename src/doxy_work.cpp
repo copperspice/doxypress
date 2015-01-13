@@ -274,7 +274,7 @@ namespace Doxy_Work{
    ClassDef *createTagLessInstance(ClassDef *rootCd, ClassDef *templ, const QByteArray &fieldName);
 
    void distributeMemberGroupDocumentation();
-   void dumpSymbol(FTextStream &t, Definition *d);
+   void dumpSymbol(QTextStream &t, Definition *d);
    void dumpSymbolMap();
 
    void escapeAliases();
@@ -746,7 +746,7 @@ void parseInput()
       Doxy_Globals::g_stats.end();
    }
 
-   Doxy_Globals::g_stats.begin("Flushing cached template relations that have become invalid\n");
+   Doxy_Globals::g_stats.begin("Flushing cached template relations\n");
    flushCachedTemplateRelations();
    Doxy_Globals::g_stats.end();
 
@@ -758,9 +758,15 @@ void parseInput()
    computeTemplateClassRelations();
    flushUnresolvedRelations();
 
+
+printf("\n\n BROOM  HERE X   ");
+
    computeClassRelations();
    Doxy_Globals::g_classEntries.clear();
    Doxy_Globals::g_stats.end();
+
+printf("\n\n BROOM  HERE Y   \n\n");
+
 
    Doxy_Globals::g_stats.begin("Add enum values to enums\n");
    addEnumValuesToEnums(rootNav);
@@ -816,12 +822,12 @@ void parseInput()
    buildCompleteMemberLists();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Adding members to member groups.\n");
+   Doxy_Globals::g_stats.begin("Adding members to member groups\n");
    addMembersToMemberGroup();
    Doxy_Globals::g_stats.end();
 
    if (Config_getBool("DISTRIBUTE_GROUP_DOC")) {
-      Doxy_Globals::g_stats.begin("Distributing member group documentation.\n");
+      Doxy_Globals::g_stats.begin("Distributing member group documentation\n");
       distributeMemberGroupDocumentation();
       Doxy_Globals::g_stats.end();
    }
@@ -4692,17 +4698,12 @@ void Doxy_Work::findUsedClassesForClass(EntryNav *rootNav, Definition *context, 
                               usedCd->setArtificial(true);
                            }
 
-printf("\n\n BROOM  indUsedClassesForClass B \n");
-
                            Debug::print(Debug::Classes, 0, "      Adding used class `%s' (1)\n", usedCd->name().data());
                            instanceCd->addUsedClass(usedCd.data(), md->name(), md->protection());
                            usedCd->addUsedByClass(instanceCd, md->name(), md->protection());
                         }
                      }
                   }
-
-printf("\n\n BROOM  indUsedClassesForClass C \n");
-
 
                   if (! found) {
                      QSharedPointer<ClassDef> usedCd = dummyShared(findClassWithinClassContext(context, masterCd, usedName));
@@ -4763,11 +4764,25 @@ void Doxy_Work::findBaseClassesForClass(EntryNav *rootNav, Definition *context, 
 
    masterCd->visited = true;
 
-   // base class could ofcouse also be a non-nested class
+   // base class could also be a non-nested class
    ArgumentList *formalArgs = masterCd->templateArguments();
+
+
+printf("\n\n BROOM  A1   findBase ");
+
+
+if (! root->extends )  {
+   printf("\n\n BROOM  find Base    NOW WHAT?    As");
+} else {
+   printf("\n\n BROOM  find Base    NOW WHAT?    B  %d   %s",  root->extends->size(), root->name.constData() );
+}
+
 
    for (auto bi : *root->extends) {
       bool delTempNames = false;
+
+printf("\n\n BROOM  A2   findBase ");
+
 
       if (templateNames == 0) {
          templateNames = getTemplateArgumentsInName(formalArgs, bi.name);
@@ -4776,7 +4791,8 @@ void Doxy_Work::findBaseClassesForClass(EntryNav *rootNav, Definition *context, 
 
       BaseInfo tbi(bi.name, bi.prot, bi.virt);
 
-      if (actualArgs) { // substitute the formal template arguments of the base class
+      if (actualArgs) { 
+         // substitute the formal template arguments of the base class
          tbi.name = substituteTemplateArgumentsInString(bi.name, formalArgs, actualArgs);
       }
 
@@ -4808,7 +4824,7 @@ void Doxy_Work::findBaseClassesForClass(EntryNav *rootNav, Definition *context, 
 }
 
 bool Doxy_Work::findTemplateInstanceRelation(Entry *root, Definition *context, ClassDef *templateClass, const QByteArray &templSpec,
-                                         QHash<QString, int> *templateNames, bool isArtificial)
+                                             QHash<QString, int> *templateNames, bool isArtificial)
 {
    Debug::print(Debug::Classes, 0, "    derived from template %s with parameters %s\n",
                 templateClass->name().data(), templSpec.data());
@@ -5397,18 +5413,26 @@ void Doxy_Work::computeClassRelations()
       item->visited = false;
    }
 
+printf("\n\n BROOM  next issue A   ");
+
    for (auto &rootNav : Doxy_Globals::g_classEntries) {
       ClassDef *cd;
 
       rootNav.loadEntry(Doxy_Globals::g_storage);
       Entry *root = rootNav.entry();
 
+printf("\n\n BROOM  next issue  D1  ");
+
       QByteArray bName = extractClassName(&rootNav);
       Debug::print(Debug::Classes, 0, "  Relations: Class %s : \n", bName.data());
 
-      if ((cd = getClass(bName))) {
+printf("\n\n BROOM  next issue  D2  ");
+
+      if (cd = getClass(bName)) {
          findBaseClassesForClass(&rootNav, cd, cd, cd, DocumentedOnly, false);
       }
+
+printf("\n\n BROOM  next issue  E  ");
 
       int numMembers = cd && cd->memberNameInfoSDict() ? cd->memberNameInfoSDict()->count() : 0;
 
@@ -5424,6 +5448,8 @@ void Doxy_Work::computeClassRelations()
             warn_undoc(root->fileName, root->startLine, "Compound %s is not documented.", root->name.data());
       }
 
+printf("\n\n BROOM  next issue  F  ");
+
       rootNav.releaseEntry();
    }
 }
@@ -5436,6 +5462,7 @@ void Doxy_Work::computeTemplateClassRelations()
 
       QByteArray bName = stripAnonymousNamespaceScope(root->name);
       bName = stripTemplateSpecifiersFromScope(bName);
+
       ClassDef *cd = getClass(bName);
 
       // strip any anonymous scopes first
@@ -7843,13 +7870,13 @@ void Doxy_Work::computeMemberRelations()
 void Doxy_Work::createTemplateInstanceMembers()
 {   
    // for each class
-   for (auto cd : *Doxygen::classSDict) { 
-      // that is a template
+   for (auto cd : *Doxygen::classSDict) {       
       QHash<QString, ClassDef> *templInstances = cd->getTemplateInstances();
 
       if (templInstances) {             
          // for each instance of the template
-         for (auto iter = templInstances->begin(); iter != templInstances->end(); ++ iter) {
+
+         for (auto iter = templInstances->begin(); iter != templInstances->end(); ++iter) {
             iter->addMembersToTemplateInstance(cd.data(), qPrintable(iter.key()));
          }
       }
@@ -8713,7 +8740,8 @@ void Doxy_Work::generatePageDocs()
 
    for (auto pd : *Doxygen::pageSDict) {
 
-      if (! pd->getGroupDef() && !pd->isReference()) {
+      if (! pd->getGroupDef() && ! pd->isReference()) {
+
          msg("Generating docs for page %s\n", pd->name().data());
 
          Doxygen::insideMainPage = true;
@@ -9575,7 +9603,7 @@ void readAliases()
    escapeAliases();
 }
 
-void Doxy_Work::dumpSymbol(FTextStream &t, Definition *d)
+void Doxy_Work::dumpSymbol(QTextStream &t, Definition *d)
 {
    QByteArray anchor;
    if (d->definitionType() == Definition::TypeMember) {
@@ -9600,7 +9628,7 @@ void Doxy_Work::dumpSymbolMap()
    QFile f("symbols.sql");
 
    if (f.open(QIODevice::WriteOnly)) {
-      FTextStream t(&f);
+      QTextStream t(&f);
 
       for (auto item : *Doxygen::symbolMap) {
          // list of symbols
@@ -9661,7 +9689,7 @@ void Doxy_Work::writeTagFile()
       return;
    }
 
-   FTextStream tagFile(&tag);
+   QTextStream tagFile(&tag);
    tagFile << "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>" << endl;
    tagFile << "<tagfile>" << endl;
 

@@ -20,13 +20,13 @@
 
 #include <QList>
 #include <QHash>
+#include <QTextStream>
 
 #include <types.h>
 #include <sortedlist.h>
 
 class DefinitionImpl;
 class FileDef;
-class FTextStream;
 class GroupDef;
 class MemberSDict;
 class MemberDef;
@@ -342,7 +342,7 @@ class Definition : public DefinitionIntf
    /*! Writes the documentation anchors of the definition to
     *  the Doxygen::tagFile stream.
     */
-   void writeDocAnchorsToTagFile(FTextStream &);
+   void writeDocAnchorsToTagFile(QTextStream &);
    void setLocalName(const QString &name);
 
    void addSectionsToIndex();

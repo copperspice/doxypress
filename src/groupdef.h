@@ -18,8 +18,13 @@
 #ifndef GROUPDEF_H
 #define GROUPDEF_H
 
-#include <stringmap.h>
+#include <QByteArray>
+#include <QString>
+#include <QSharedPointer>
+#include <QTextStream>
+
 #include <definition.h>
+#include <stringmap.h>
 
 class ClassDef;
 class ClassSDict;
@@ -27,7 +32,6 @@ class DirDef;
 class Entry;
 class FileList;
 class FileDef;
-class FTextStream;
 class FTVHelp;
 class MemberDef;
 class MemberList;
@@ -38,7 +42,6 @@ class NamespaceSDict;
 class OutputList;
 class PageSDict;
 class PageDef;
-
 
 /** A model of a group of symbols. */
 class GroupDef : public Definition
@@ -85,7 +88,7 @@ class GroupDef : public Definition
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
    void writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const;
-   void writeTagFile(FTextStream &);
+   void writeTagFile(QTextStream &);
    int  countMembers() const;
    bool isLinkableInProject() const;
    bool isLinkable() const;

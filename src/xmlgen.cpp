@@ -107,12 +107,12 @@ class XmlSectionMapper : public QHash<long, const char *>
 
 static XmlSectionMapper g_xmlSectionMapper;
 
-inline void writeXMLString(FTextStream &t, const char *s)
+inline void writeXMLString(QTextStream &t, const char *s)
 {
    t << convertToXML(s);
 }
 
-inline void writeXMLCodeString(FTextStream &t, const char *s, int &col)
+inline void writeXMLCodeString(QTextStream &t, const char *s, int &col)
 {
    char c;
    while ((c = *s++)) {
@@ -190,7 +190,7 @@ inline void writeXMLCodeString(FTextStream &t, const char *s, int &col)
    }
 }
 
-static void writeXMLHeader(FTextStream &t)
+static void writeXMLHeader(QTextStream &t)
 {
    t << "<?xml version='1.0' encoding='UTF-8' standalone='no'?>" << endl;;
    t << "<doxygen xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ";
@@ -208,10 +208,10 @@ static void writeCombineScript()
       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
-   FTextStream t(&f);
 
-   // t.setEncoding(FTextStream::UnicodeUTF8);
+   QTextStream t(&f);
 
+  
    t <<
      "<!-- XSLT script to combine the generated output into a single file. \n"
      "     If you have xsltproc you could use:\n"
@@ -231,7 +231,7 @@ static void writeCombineScript()
 }
 
 
-void writeXMLLink(FTextStream &t, const char *extRef, const char *compoundId,
+void writeXMLLink(QTextStream &t, const char *extRef, const char *compoundId,
                   const char *anchorId, const char *text, const char *tooltip)
 {
    t << "<ref refid=\"" << compoundId;
@@ -260,7 +260,7 @@ void writeXMLLink(FTextStream &t, const char *extRef, const char *compoundId,
 class TextGeneratorXMLImpl : public TextGeneratorIntf
 {
  public:
-   TextGeneratorXMLImpl(FTextStream &t): m_t(t) {}
+   TextGeneratorXMLImpl(QTextStream &t): m_t(t) {}
    void writeString(const char *s, bool /*keepSpaces*/) const {
       writeXMLString(m_t, s);
    }
@@ -272,7 +272,7 @@ class TextGeneratorXMLImpl : public TextGeneratorIntf
    }
 
  private:
-   FTextStream &m_t;
+   QTextStream &m_t;
 };
 
 
@@ -281,7 +281,7 @@ class XMLCodeGenerator : public CodeOutputInterface
 {
  public:
 
-   XMLCodeGenerator(FTextStream &t) : m_t(t), m_lineNumber(-1), m_isMemberRef(false), m_col(0),
+   XMLCodeGenerator(QTextStream &t) : m_t(t), m_lineNumber(-1), m_isMemberRef(false), m_col(0),
       m_insideCodeLine(false), m_normalHLNeedStartTag(true), m_insideSpecialHL(false) 
    {}
 
@@ -408,7 +408,7 @@ class XMLCodeGenerator : public CodeOutputInterface
    }
 
  private:
-   FTextStream &m_t;
+   QTextStream &m_t;
    QByteArray m_refId;
    QByteArray m_external;
    int m_lineNumber;
@@ -420,7 +420,7 @@ class XMLCodeGenerator : public CodeOutputInterface
    bool m_insideSpecialHL;
 };
 
-static void writeTemplateArgumentList(ArgumentList *al, FTextStream &t, Definition *scope, 
+static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, Definition *scope, 
                                       FileDef *fileScope, int indent)
 {
    QByteArray indentStr;
@@ -452,7 +452,7 @@ static void writeTemplateArgumentList(ArgumentList *al, FTextStream &t, Definiti
    }
 }
 
-static void writeMemberTemplateLists(MemberDef *md, FTextStream &t)
+static void writeMemberTemplateLists(MemberDef *md, QTextStream &t)
 {
    ArgumentList *templMd = md->templateArguments();
 
@@ -461,12 +461,12 @@ static void writeMemberTemplateLists(MemberDef *md, FTextStream &t)
    }
 }
 
-static void writeTemplateList(ClassDef *cd, FTextStream &t)
+static void writeTemplateList(ClassDef *cd, QTextStream &t)
 {
    writeTemplateArgumentList(cd->templateArguments(), t, cd, 0, 4);
 }
 
-static void writeXMLDocBlock(FTextStream &t, const QByteArray &fileName, int lineNr,
+static void writeXMLDocBlock(QTextStream &t, const QByteArray &fileName, int lineNr,
                              Definition *scope, MemberDef *md, const QByteArray &text)
 {
    QByteArray stext = text.trimmed();
@@ -493,7 +493,7 @@ static void writeXMLDocBlock(FTextStream &t, const QByteArray &fileName, int lin
    delete root;
 }
 
-void writeXMLCodeBlock(FTextStream &t, FileDef *fd)
+void writeXMLCodeBlock(QTextStream &t, FileDef *fd)
 {
    ParserInterface *pIntf = Doxygen::parserManager->getParser(fd->getDefFileExtension());
    SrcLangExt langExt = getLanguageFromFileName(fd->getDefFileExtension());
@@ -518,7 +518,7 @@ void writeXMLCodeBlock(FTextStream &t, FileDef *fd)
    delete xmlGen;
 }
 
-static void writeMemberReference(FTextStream &t, Definition *def, MemberDef *rmd, const char *tagName)
+static void writeMemberReference(QTextStream &t, Definition *def, MemberDef *rmd, const char *tagName)
 {
    QByteArray scope = rmd->getScopeString();
    QByteArray name  = rmd->name();
@@ -577,7 +577,7 @@ static QByteArray memberOutputFileBase(MemberDef *md)
    return md->getOutputFileBase();
 }
 
-static void generateXMLForMember(MemberDef *md, FTextStream &ti, FTextStream &t, Definition *def)
+static void generateXMLForMember(MemberDef *md, QTextStream &ti, QTextStream &t, Definition *def)
 {
    // + declaration/definition arg lists
    // + reimplements
@@ -1150,7 +1150,7 @@ static void generateXMLForMember(MemberDef *md, FTextStream &ti, FTextStream &t,
    t << "      </memberdef>" << endl;
 }
 
-static void generateXMLSection(Definition *d, FTextStream &ti, FTextStream &t, MemberList *ml, 
+static void generateXMLSection(Definition *d, QTextStream &ti, QTextStream &t, MemberList *ml, 
                                const char *kind, const char *header = 0, const char *documentation = 0)
 {
    if (ml == 0) {
@@ -1195,7 +1195,7 @@ static void generateXMLSection(Definition *d, FTextStream &ti, FTextStream &t, M
    t << "      </sectiondef>" << endl;
 }
 
-static void writeListOfAllMembers(ClassDef *cd, FTextStream &t)
+static void writeListOfAllMembers(ClassDef *cd, QTextStream &t)
 {
    t << "    <listofallmembers>" << endl;
 
@@ -1257,7 +1257,7 @@ static void writeListOfAllMembers(ClassDef *cd, FTextStream &t)
    t << "    </listofallmembers>" << endl;
 }
 
-static void writeInnerClasses(const ClassSDict *cl, FTextStream &t)
+static void writeInnerClasses(const ClassSDict *cl, QTextStream &t)
 {
    if (cl) {
 
@@ -1287,7 +1287,7 @@ static void writeInnerClasses(const ClassSDict *cl, FTextStream &t)
    }
 }
 
-static void writeInnerNamespaces(const NamespaceSDict *nl, FTextStream &t)
+static void writeInnerNamespaces(const NamespaceSDict *nl, QTextStream &t)
 {
    if (nl) {  
       for (auto nd : *nl) {
@@ -1299,7 +1299,7 @@ static void writeInnerNamespaces(const NamespaceSDict *nl, FTextStream &t)
    }
 }
 
-static void writeInnerFiles(const FileList *fl, FTextStream &t)
+static void writeInnerFiles(const FileList *fl, QTextStream &t)
 {
    if (fl) {     
       for (auto fd : *fl) {
@@ -1309,7 +1309,7 @@ static void writeInnerFiles(const FileList *fl, FTextStream &t)
    }
 }
 
-static void writeInnerPages(const PageSDict *pl, FTextStream &t)
+static void writeInnerPages(const PageSDict *pl, QTextStream &t)
 {
    if (pl) {
      for (auto pd : *pl) {
@@ -1322,7 +1322,7 @@ static void writeInnerPages(const PageSDict *pl, FTextStream &t)
    }
 }
 
-static void writeInnerGroups(const SortedList<GroupDef *> *gl, FTextStream &t)
+static void writeInnerGroups(const SortedList<GroupDef *> *gl, QTextStream &t)
 {
    if (gl) {
       for (auto sgd : *gl) {
@@ -1333,7 +1333,7 @@ static void writeInnerGroups(const SortedList<GroupDef *> *gl, FTextStream &t)
    }
 }
 
-static void writeInnerDirs(const SortedList<DirDef *> *dl, FTextStream &t)
+static void writeInnerDirs(const SortedList<DirDef *> *dl, QTextStream &t)
 {
    if (dl) {     
       for (auto subdir : *dl) {
@@ -1343,7 +1343,7 @@ static void writeInnerDirs(const SortedList<DirDef *> *dl, FTextStream &t)
    }
 }
 
-static void generateXMLForClass(ClassDef *cd, FTextStream &ti)
+static void generateXMLForClass(ClassDef *cd, QTextStream &ti)
 {
    // + brief description
    // + detailed description
@@ -1394,9 +1394,8 @@ static void generateXMLForClass(ClassDef *cd, FTextStream &ti)
       return;
    }
 
-   FTextStream t(&f);
-   //t.setEncoding(FTextStream::UnicodeUTF8);
-
+   QTextStream t(&f);
+ 
    writeXMLHeader(t);
    t << "  <compounddef id=\""
      << classOutputFileBase(cd) << "\" kind=\""
@@ -1594,7 +1593,7 @@ static void generateXMLForClass(ClassDef *cd, FTextStream &ti)
    ti << "  </compound>" << endl;
 }
 
-static void generateXMLForNamespace(NamespaceDef *nd, FTextStream &ti)
+static void generateXMLForNamespace(NamespaceDef *nd, QTextStream &ti)
 {
    // + contained class definitions
    // + contained namespace definitions
@@ -1623,7 +1622,7 @@ static void generateXMLForNamespace(NamespaceDef *nd, FTextStream &ti)
       return;
    }
 
-   FTextStream t(&f);
+   QTextStream t(&f);
   
    writeXMLHeader(t);
    t << "  <compounddef id=\"" << nd->getOutputFileBase()
@@ -1667,7 +1666,7 @@ static void generateXMLForNamespace(NamespaceDef *nd, FTextStream &ti)
    ti << "  </compound>" << endl;
 }
 
-static void generateXMLForFile(FileDef *fd, FTextStream &ti)
+static void generateXMLForFile(FileDef *fd, QTextStream &ti)
 {
    // + includes files
    // + includedby files
@@ -1700,8 +1699,8 @@ static void generateXMLForFile(FileDef *fd, FTextStream &ti)
       return;
    }
 
-   FTextStream t(&f);
-   //t.setEncoding(FTextStream::UnicodeUTF8);
+   QTextStream t(&f);
+   //t.setEncoding(QTextStream::UnicodeUTF8);
 
    writeXMLHeader(t);
    t << "  <compounddef id=\"" << fd->getOutputFileBase()
@@ -1797,7 +1796,7 @@ static void generateXMLForFile(FileDef *fd, FTextStream &ti)
    ti << "  </compound>" << endl;
 }
 
-static void generateXMLForGroup(GroupDef *gd, FTextStream &ti)
+static void generateXMLForGroup(GroupDef *gd, QTextStream &ti)
 {
    // + members
    // + member groups
@@ -1828,8 +1827,8 @@ static void generateXMLForGroup(GroupDef *gd, FTextStream &ti)
       return;
    }
 
-   FTextStream t(&f);
-   //t.setEncoding(FTextStream::UnicodeUTF8);
+   QTextStream t(&f);
+   //t.setEncoding(QTextStream::UnicodeUTF8);
 
    writeXMLHeader(t);
    t << "  <compounddef id=\""
@@ -1870,7 +1869,7 @@ static void generateXMLForGroup(GroupDef *gd, FTextStream &ti)
    ti << "  </compound>" << endl;
 }
 
-static void generateXMLForDir(DirDef *dd, FTextStream &ti)
+static void generateXMLForDir(DirDef *dd, QTextStream &ti)
 {
    if (dd->isReference()) {
       return;   // skip external references
@@ -1888,8 +1887,8 @@ static void generateXMLForDir(DirDef *dd, FTextStream &ti)
       return;
    }
 
-   FTextStream t(&f);
-   //t.setEncoding(FTextStream::UnicodeUTF8);
+   QTextStream t(&f);
+   //t.setEncoding(QTextStream::UnicodeUTF8);
    writeXMLHeader(t);
    t << "  <compounddef id=\""
      << dd->getOutputFileBase() << "\" kind=\"dir\">" << endl;
@@ -1911,7 +1910,7 @@ static void generateXMLForDir(DirDef *dd, FTextStream &ti)
    ti << "  </compound>" << endl;
 }
 
-static void generateXMLForPage(PageDef *pd, FTextStream &ti, bool isExample)
+static void generateXMLForPage(PageDef *pd, QTextStream &ti, bool isExample)
 {
    // + name
    // + title
@@ -1944,8 +1943,8 @@ static void generateXMLForPage(PageDef *pd, FTextStream &ti, bool isExample)
       return;
    }
 
-   FTextStream t(&f);
-   //t.setEncoding(FTextStream::UnicodeUTF8);
+   QTextStream t(&f);
+   //t.setEncoding(QTextStream::UnicodeUTF8);
    writeXMLHeader(t);
    t << "  <compounddef id=\"" << pageName;
    t << "\" kind=\"" << kindName << "\">" << endl;
@@ -2032,7 +2031,7 @@ void generateXML()
          s[len] = '\0';
 
          if (s.indexOf("<!-- Automatically insert here the HTML entities -->") != -1) {
-            FTextStream t(&f);
+            QTextStream t(&f);
             HtmlEntityMapper::instance()->writeXMLSchema(t);
 
          } else {
@@ -2052,7 +2051,7 @@ void generateXML()
       return;
    }
 
-   FTextStream t(&f);  
+   QTextStream t(&f);  
 
    // write index header
    t << "<?xml version='1.0' encoding='UTF-8' standalone='no'?>" << endl;;

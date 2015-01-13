@@ -910,7 +910,7 @@ QByteArray MemberList::listTypeAsString(MemberListType type)
    return "";
 }
 
-void MemberList::writeTagFile(FTextStream &tagFile)
+void MemberList::writeTagFile(QTextStream &tagFile)
 { 
    for (auto md : *this) {     
       md->writeTagFile(tagFile);    

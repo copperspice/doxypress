@@ -18,47 +18,48 @@
 #ifndef DOXYGEN_H
 #define DOXYGEN_H
 
-#include <QByteArray>  
-#include <QFileInfo>
+#include <QByteArray> 
 #include <QHash>
+#include <QFileInfo>
+#include <QString>
 #include <QStringList>
+#include <QTextStream>
 
 #include <dirdef.h> 
-#include <ftextstream.h>
 #include <membergroup.h>
 #include <memberlist.h>
 #include <section.h>
 #include <sortedlist.h>
 #include <stringmap.h>
 
+class BufStr;
+class CiteDict;
+class ClassDef;
+class ClassSDict;
 class DefinitionIntf;
 class DirSDict;
 class DirRelation;
 class FormulaList;
 class FormulaDict;
 class FormulaNameDict;
+class FileNameDict;
+class FileDef;
+class GroupDef;
+class GroupSDict;
+class GenericsSDict;
 class IndexList;
-class RefList;
+class MemberDef;
+class MemberNameSDict;
+class NamespaceSDict;
+class NamespaceDef;
+class ObjCache;
+class ParserManager;
 class PageSList;
 class PageSDict;
 class PageDef;
+class RefList;
 class SearchIndexIntf;
-class ParserManager;
-class ObjCache;
 class Store;
-class BufStr;
-class CiteDict;
-class MemberDef;
-class GroupDef;
-class GroupSDict;
-class FileDef;
-class ClassDef;
-class ClassSDict;
-class GenericsSDict;
-class MemberNameSDict;
-class FileNameDict;
-class NamespaceSDict;
-class NamespaceDef;
 
 struct MemberGroupInfo;
 

@@ -18,7 +18,8 @@
 /* http://www.cubic.org/source/archive/fileform/txt/man/ has some
    nice introductions to groff and man pages. */
 
-#include <qdir.h>
+#include <QDir>
+#include <QTextStream>
 
 #include <stdlib.h>
 #include <string.h>
@@ -491,10 +492,11 @@ void ManGenerator::startDoxyAnchor(const char *, const char *manName,
    // - remove dangerous characters and append suffix, then add dir prefix
    QByteArray fileName = dir + "/" + buildFileName( baseName );
    QFile linkfile( fileName );
+
    // - only create file if it doesn't exist already
    if ( !linkfile.open( QIODevice::ReadOnly ) ) {
       if ( linkfile.open( QIODevice::WriteOnly ) ) {
-         FTextStream linkstream;
+         QTextStream linkstream;
          linkstream.setDevice(&linkfile);
          //linkstream.setEncoding(QTextStream::UnicodeUTF8);
          linkstream << ".so " << getSubdir() << "/" << buildFileName( manName ) << endl;

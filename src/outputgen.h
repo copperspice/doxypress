@@ -18,12 +18,13 @@
 #ifndef OUTPUTGEN_H
 #define OUTPUTGEN_H
 
-#include <QStack>
+#include <QByteArray>
 #include <QFile>
+#include <QStack>
+#include <QTextStream>
 
 #include <index.h>
 #include <section.h>
-#include <ftextstream.h>
 
 class ClassDiagram;
 class DotClassGraph;
@@ -312,10 +313,8 @@ class OutputGenerator : public BaseOutputDocInterface
 
    OutputGenerator();
    virtual ~OutputGenerator();
-
-   ///////////////////////////////////////////////////////////////
+    
    // generic generator methods
-   ///////////////////////////////////////////////////////////////
    virtual void enable() = 0;
    virtual void disable() = 0;
    virtual void enableIf(OutputType o) = 0;
@@ -323,24 +322,21 @@ class OutputGenerator : public BaseOutputDocInterface
    virtual void disableIfNot(OutputType o) = 0;
    virtual bool isEnabled(OutputType o) = 0;
    virtual OutputGenerator *get(OutputType o) = 0;
+
    void startPlainFile(const char *name);
    void endPlainFile();
-   //QByteArray getContents() const;
+  
    bool isEnabled() const {
       return active;
    }
+
    void pushGeneratorState();
    void popGeneratorState();
-   //void setEncoding(const QByteArray &enc) { encoding = enc; }
-   //virtual void postProcess(QByteArray &) { }
 
    virtual void writeDoc(DocNode *, Definition *ctx, MemberDef *md) = 0;
-
-   ///////////////////////////////////////////////////////////////
-   // structural output interface
-   ///////////////////////////////////////////////////////////////
-   virtual void startFile(const char *name, const char *manName,
-                          const char *title) = 0;
+  
+   // structural output interface   
+   virtual void startFile(const char *name, const char *manName,const char *title) = 0;
    virtual void writeSearchInfo() = 0;
    virtual void writeFooter(const char *navPath) = 0;
    virtual void endFile() = 0;
@@ -478,7 +474,8 @@ class OutputGenerator : public BaseOutputDocInterface
    virtual void endLabels() = 0;
 
  protected:
-   FTextStream t;
+   QTextStream m_textStream;
+
    QFile *file;
    QByteArray fileName;
    QByteArray dir;

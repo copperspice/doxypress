@@ -16,13 +16,12 @@
 *************************************************************************/
 
 #include <qglobal.h>
-
 #include <QFile>
 #include <QRegExp>
+#include <QTextStream>
 
 #include <config.h>
 #include <doxy_build_info.h>
-#include <ftextstream.h>
 #include <message.h>
 #include <resourcemgr.h>
 #include <util.h>
@@ -159,7 +158,7 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
 
             if (f.open(QIODevice::WriteOnly)) {
               
-               FTextStream t(&f);
+               QTextStream t(&f);
                resData = replaceColorMarkers(resData);
 
                if (fName == "navtree.css") {

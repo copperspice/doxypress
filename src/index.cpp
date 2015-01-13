@@ -19,10 +19,10 @@
  *  @brief This file contains functions for the various index pages.
  */
 
-#include <QTextStream>
 #include <QDateTime>
 #include <QDir>
 #include <QRegExp>
+#include <QTextStream>
 
 #include <stdlib.h>
 
@@ -912,7 +912,7 @@ static void writeHierarchicalIndex(OutputList &ol)
       writeClassHierarchy(ol, ftv, addToIndex);
 
       QByteArray outStr;
-      FTextStream t(&outStr);
+      QTextStream t(&outStr);
 
       ftv->generateTreeViewInline(t);
       ol.pushGeneratorState();
@@ -1168,7 +1168,7 @@ static void writeFileIndex(OutputList &ol)
    writeDirHierarchy(ol, ftv, addToIndex);
    QByteArray outStr;
 
-   FTextStream t(&outStr);
+   QTextStream t(&outStr);
    ftv->generateTreeViewInline(t);
 
    ol.writeString(outStr);
@@ -1376,7 +1376,7 @@ static void writeNamespaceIndex(OutputList &ol)
       writeNamespaceTree(Doxygen::namespaceSDict, ftv, true, false, addToIndex);
 
       QByteArray outStr;
-      FTextStream t(&outStr);
+      QTextStream t(&outStr);
       ftv->generateTreeViewInline(t);
       ol.writeString(outStr);
 
@@ -1895,7 +1895,7 @@ static void writeAnnotatedIndex(OutputList &ol)
       writeClassTree(Doxygen::classSDict, ftv, addToIndex, true);
 
       QByteArray outStr;
-      FTextStream t(&outStr);
+      QTextStream t(&outStr);
 
       ftv->generateTreeViewInline(t);
       ol.writeString(outStr);
@@ -2960,7 +2960,7 @@ static void writePageIndex(OutputList &ol)
       }
 
       QByteArray outStr;
-      FTextStream t(&outStr);
+      QTextStream t(&outStr);
       ftv->generateTreeViewInline(t);
       ol.writeString(outStr);
 
@@ -3304,7 +3304,7 @@ static void writeGroupIndex(OutputList &ol)
       FTVHelp *ftv = new FTVHelp(false);
       writeGroupHierarchy(ol, ftv, addToIndex);
       QByteArray outStr;
-      FTextStream t(&outStr);
+      QTextStream t(&outStr);
       ftv->generateTreeViewInline(t);
       ol.disableAllBut(OutputGenerator::Html);
       ol.writeString(outStr);

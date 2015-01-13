@@ -26,13 +26,13 @@
 #ifndef FTVHELP_H
 #define FTVHELP_H
 
-#include <QFile>
+#include <QByteArray>
 #include <QList>
+#include <QString>
+#include <QTextStream>
 
 #include <index.h>
-
-class Definition;
-class FTextStream;
+#include <definition.h>
 
 struct FTVNode;
 
@@ -57,16 +57,16 @@ class FTVHelp : public IndexIntf
    void addImageFile(const char *) {}
    void addStyleSheetFile(const char *) {}
    void generateTreeView();
-   void generateTreeViewInline(FTextStream &t);
+   void generateTreeViewInline(QTextStream &t);
    static void generateTreeViewImages();
    void generateTreeViewScripts();
 
  private:
-   void generateTree(FTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index);
+   void generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index);
   
    QByteArray generateIndentLabel(FTVNode *n, int level);
-   void generateIndent(FTextStream &t, FTVNode *n, bool opened);
-   void generateLink(FTextStream &t, FTVNode *n);
+   void generateIndent(QTextStream &t, FTVNode *n, bool opened);
+   void generateLink(QTextStream &t, FTVNode *n);
    
    QList<FTVNode *> *m_indentNodes;
 
@@ -81,6 +81,5 @@ struct NavIndexEntry {
    QByteArray url;
    QByteArray path;
 };
-
 
 #endif
