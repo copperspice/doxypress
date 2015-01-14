@@ -2949,26 +2949,28 @@ static FileState *checkAndOpenFile(const QByteArray &fileName, bool &alreadyIncl
       }
 
       // check include stack for absName
-
       QStack<FileState *> tmpStack;
+      
+      while (! g_includeStack.isEmpty()) {
+         fs = g_includeStack.pop();
 
-      while ((fs = g_includeStack.pop())) {
          if (fs->fileName == absName) {
             alreadyIncluded = TRUE;
          }
+
          tmpStack.push(fs);
       }
-      while ((fs = tmpStack.pop())) {
+
+      while (! tmpStack.isEmpty()) {
+         fs = tmpStack.pop();
+
          g_includeStack.push(fs);
       }
 
-
       if (alreadyIncluded) {
-         //printf("  already included 2\n");
          return 0;
       }
-      //printf("#include %s\n",absName.data());
-
+      
       fs = new FileState(fi.size() + 4096);
       alreadyIncluded = FALSE;
       if (!readInputFile(absName, fs->fileBuf)) {
@@ -4037,11 +4039,11 @@ static void endCondSection()
 {
    if (g_condStack.isEmpty()) {
       g_skip = FALSE;
+
    } else {
       CondCtx *ctx = g_condStack.pop();
       g_skip = ctx->skip;
-   }
-   //printf("endCondSection: skip=%d stack=%d\n",g_skip,g_condStack.count());
+   }   
 }
 
 static void forceEndCondSection()
@@ -4049,6 +4051,7 @@ static void forceEndCondSection()
    while (!g_condStack.isEmpty()) {
       g_condStack.pop();
    }
+
    g_skip = FALSE;
 }
 
@@ -4331,14 +4334,9 @@ extern int preYYlex (void);
 /** The main scanner function which does all the work.
  */
 YY_DECL {
-   register yy_state_type yy_current_state;
-   register char *yy_cp, *yy_bp;
-   register int yy_act;
-
-
-
-
-
+   yy_state_type yy_current_state;
+   char *yy_cp, *yy_bp;
+   int yy_act;
 
    if ( !(yy_init) )
    {
@@ -4446,6 +4444,9 @@ YY_DECL {
       YY_DO_BEFORE_ACTION;
 
    do_action:	/* This label is used only to access EOF actions. */
+
+
+printf("\n BROOM   preprocess / switch %d", yy_act);
 
       switch ( yy_act ) {
          /* beginning of action switch */
@@ -6365,12 +6366,14 @@ YY_DECL {
 
          {
             DBG_CTX((stderr, "End of include file\n"));
-            //printf("Include stack depth=%d\n",g_includeStack.count());
+            
             if (g_includeStack.isEmpty()) {
                DBG_CTX((stderr, "Terminating scanner!\n"));
                yyterminate();
+
             } else {
                FileState *fs = g_includeStack.pop();
+
                //fileDefineCache->merge(g_yyFileName,fs->fileName);
                YY_BUFFER_STATE oldBuf = YY_CURRENT_BUFFER;
                preYY_switch_to_buffer(fs->bufState );
@@ -7539,6 +7542,7 @@ void cleanUpPreprocessor()
 void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
 {
    printlex(preYY_flex_debug, TRUE, __FILE__, fileName);
+
    uint orgOffset = output.curPos();
    //printf("##########################\n%s\n####################\n",
    //    input.data());
@@ -7600,6 +7604,7 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
                   i++;
                }
             }
+
             // strip definition part
             QByteArray tmp = ds.right(ds.length() - i_equals - 1);
             QByteArray definition;
@@ -7691,9 +7696,10 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
    g_guardExpr.resize(0);
 
    preYYlex();
+
    g_lexInit = TRUE;
 
-   while (!g_condStack.isEmpty()) {
+   while (! g_condStack.isEmpty()) {
       CondCtx *ctx = g_condStack.pop();
       QString sectionInfo = " ";
 

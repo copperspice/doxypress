@@ -264,7 +264,7 @@ class Entry
    bool callerGraph;         //!< do we need to draw the caller graph?
   
    QList<ArgumentList> *tArgLists;    //!< template argument declarations
-   QList<BaseInfo> *extends;          //!< list of base classes
+   QList<BaseInfo>  extends;          //!< list of base classes
    QList<Grouping> *groups;           //!< list of groups this entry belongs to
    QList<SectionInfo> *anchors;       //!< list of anchors defined in this entry
    QList<ListItemInfo> *sli;          //!< special lists (test/todo/bug/deprecated/..) this entry is in

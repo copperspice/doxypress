@@ -18536,7 +18536,7 @@ YY_DECL {
                   // there can be only one base class here
 
                   if (!baseName.isEmpty()) {
-                     current->extends->append(BaseInfo(baseName, Public, Normal));
+                     current->extends.append(BaseInfo(baseName, Public, Normal));
                      baseName.resize(0);
                   }
 
@@ -19542,7 +19542,7 @@ YY_DECL {
                current->name = removeRedundantWhiteSpace(current->name);
                if (!baseName.isEmpty())
                {
-                  current->extends->append(BaseInfo(baseName, baseProt, baseVirt));
+                  current->extends.append(BaseInfo(baseName, baseProt, baseVirt));
                }
                if ((current->spec & (Entry::Interface | Entry::Struct)) ||
                insideJava || insidePHP || insideCS ||
@@ -19584,7 +19584,7 @@ YY_DECL {
                current->name = removeRedundantWhiteSpace(current->name);
 
                if (! baseName.isEmpty()) {
-                  current->extends->append(BaseInfo(baseName, baseProt, baseVirt));
+                  current->extends.append(BaseInfo(baseName, baseProt, baseVirt));
                }   
 
                curlyCount = 0;
@@ -22205,6 +22205,7 @@ bool CLanguageScanner::needsPreprocessing(const QByteArray &extension)
 {
    QByteArray fe = extension.toLower();
    SrcLangExt lang = getLanguageFromFileName(extension);
+
    return (SrcLangExt_Cpp == lang) ||
           !( fe == ".java" || fe == ".as"  || fe == ".d"    || fe == ".php" ||
              fe == ".php4" || fe == ".inc" || fe == ".phtml"

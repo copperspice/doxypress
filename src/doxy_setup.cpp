@@ -51,6 +51,7 @@
 #include <pagedef.h>
 #include <perlmodgen.h>
 #include <portable.h>
+#include <pyscanner.h>
 #include <pre.h>
 #include <reflist.h>
 #include <rtfgen.h>
@@ -103,8 +104,7 @@ void initDoxygen()
    Doxygen::parserManager->registerDefaultParser(new FileParser);
    Doxygen::parserManager->registerParser("c", new CLanguageScanner);
 
-// BROOM  (out for now)
-//   Doxygen::parserManager->registerParser("python",       new PythonLanguageScanner);
+   Doxygen::parserManager->registerParser("python",         new PythonLanguageScanner);
 
 // BROOM  (out for now)
 //   Doxygen::parserManager->registerParser("fortran",      new FortranLanguageScanner);
@@ -263,7 +263,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             cmdArgs.configName = getValue(iter, argList.end());
            
             if (cmdArgs.configName.isEmpty()) {
-               cmdArgs.configName = "Doxyfile.json";
+               cmdArgs.configName = "CS_Doxyfile.json";
             }
 
             cmdArgs.generateDoxy = false;   
@@ -484,14 +484,14 @@ void readConfiguration(struct CommandLine cmdArgs)
    
       for (auto item : QDir::current().entryList()) {          
 
-         if (item.compare("doxyfile", Qt::CaseInsensitive) == 0) {
+         if (item.compare("CS_Doxyfile.json", Qt::CaseInsensitive) == 0) {
             cmdArgs.configName = item;
             break;
          } 
       }
      
       if (cmdArgs.configName.isEmpty()) {
-         err("No configuration file name was specified and 'Doxyfile' was not found"); 
+         err("No configuration file name was specified and 'CS_Doxyfile.json' was not found"); 
 
          cleanUpDoxygen();
          exit(1);
@@ -508,9 +508,15 @@ void readConfiguration(struct CommandLine cmdArgs)
    }
   
 
-   // printf("\n  Parse the Json file here ");
-   // add test for failures
-   // Config_Json::instance()->parseConfig();
+/*   broom - json set up
+
+   if (! Config_Json::parseConfig(cmdArgs.configName) ) {
+      err("Unable to open or read CS Doxygen configuration file %s\n", qPrintable(cmdArgs.configName));
+
+      cleanUpDoxygen();
+      exit(1);
+   }
+*/
 
    
    if (! Config::instance()->parse( qPrintable(cmdArgs.configName) )) {
@@ -539,7 +545,7 @@ void checkConfiguration()
 
 }
 
-// adjust globals that depend on configuration settings 
+// adjust globals which depend on configuration settings 
 void adjustConfiguration()
 {
    printf("**  Adjust the Configuration file\n");   
@@ -547,7 +553,7 @@ void adjustConfiguration()
    QByteArray outputLanguage = Config_getEnum("OUTPUT_LANGUAGE");
 
    if (!setTranslator(outputLanguage)) {
-      warn_uncond("Output language %s not supported! Using English instead.\n",outputLanguage.data());
+      warn_uncond("Output language %s not supported, using English\n", outputLanguage.data());
    }
 
    QStringList &includePath = Config_getList("INCLUDE_PATH");
@@ -557,7 +563,7 @@ void adjustConfiguration()
       addSearchDir(fi.absoluteFilePath().toUtf8());      
    }
 
-   // Set the global html file extension. 
+   // Set the global html file extension 
    Doxygen::htmlFileExtension = Config_getString("HTML_FILE_EXTENSION");
 
    Doxygen::parseSourcesNeeded = Config_getBool("CALL_GRAPH") ||  Config_getBool("CALLER_GRAPH") ||
@@ -583,7 +589,6 @@ void adjustConfiguration()
             msg("Adding custom extension mapping: .%s will be treated as language %s\n", qPrintable(ext), qPrintable(language));
          }
       }
-
    }     
 
    // add predefined macro name to a dictionary
@@ -629,9 +634,9 @@ void Doxy_Setup::generateConfigFile(const QString &configFile)
       QTextStream t(&f);
 
       // BROOM  - json set up  
-      // Config_Json::instance()->writeNewCfg();      
+      // Config_Json::->writeNewConfig();      
     
-      msg("\n\nConfiguration file `%s' created.\n\n", qPrintable(configFile));        
+      msg("\n\nConfiguration file `%s' created\n\n", qPrintable(configFile));        
                
 
    } else {

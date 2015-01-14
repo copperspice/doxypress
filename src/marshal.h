@@ -89,7 +89,7 @@ QByteArray           unmarshalQGString(StorageIntf *s);
 ArgumentList        *unmarshalArgumentList(StorageIntf *s);
 
 QList<ArgumentList> *unmarshalArgumentLists(StorageIntf *s);
-QList<BaseInfo>     *unmarshalBaseInfoList(StorageIntf *s);
+QList<BaseInfo>      unmarshalBaseInfoList(StorageIntf *s);
 QList<Grouping>     *unmarshalGroupingList(StorageIntf *s);
 QList<SectionInfo> *unmarshalSectionInfoList(StorageIntf *s);
 QList<ListItemInfo> *unmarshalItemInfoList(StorageIntf *s);

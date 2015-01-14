@@ -5858,7 +5858,7 @@ YY_DECL {
                addOutput(commentscanYYtext);
                // we add subpage labels as a kind of "inheritance" relation to prevent
                // needing to add another list to the Entry class.
-               current->extends->append(BaseInfo(commentscanYYtext, Public, Normal));
+               current->extends.append(BaseInfo(commentscanYYtext, Public, Normal));
                BEGIN(SubpageTitle);
             }
             YY_BREAK
@@ -6616,7 +6616,7 @@ YY_DECL {
 
             {
                // found argument
-               current->extends->append(BaseInfo(removeRedundantWhiteSpace(commentscanYYtext), Public, Normal));
+               current->extends.append(BaseInfo(removeRedundantWhiteSpace(commentscanYYtext), Public, Normal));
                BEGIN( Comment );
             }
             YY_BREAK
@@ -6654,7 +6654,7 @@ YY_DECL {
 
             {
                // found argument
-               current->extends->append(BaseInfo(removeRedundantWhiteSpace(commentscanYYtext), Public, Normal));
+               current->extends.append(BaseInfo(removeRedundantWhiteSpace(commentscanYYtext), Public, Normal));
                BEGIN( Comment );
             }
             YY_BREAK

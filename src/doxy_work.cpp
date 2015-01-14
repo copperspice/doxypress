@@ -517,6 +517,7 @@ void parseInput()
    //if (generateSql)
    //  sqlOutput = createOutputDirectory(outputDirectory,"SQLITE3_OUTPUT","/sqlite3");
 
+
    if (Config_getBool("HAVE_DOT")) {
       QByteArray curFontPath = Config_getString("DOT_FONTPATH");
 
@@ -559,7 +560,6 @@ void parseInput()
    } else if (!defaultLayoutUsed) {
       warn_uncond("Unable to open layout file '%s' for reading\n", layoutFileName.data());
    }
- 
 
    /**************************************************************************
     *             Read and preprocess input                                  *
@@ -622,6 +622,7 @@ void parseInput()
       addSTLClasses(rootNav);
    }
 
+
    Doxy_Globals::g_stats.begin("Parsing files\n");
    parseFiles(root, rootNav);
 
@@ -632,7 +633,7 @@ void parseInput()
    // we are done with input scanning now, so free up the buffers used by flex (can be around 4MB)
    preFreeScanner();
    scanFreeScanner();
-//BROOM    pyscanFreeScanner();
+   pyscanFreeScanner();
 
    if (! Doxy_Globals::g_storage->open(QIODevice::ReadOnly)) {
       err("Failed to open temporary storage file %s for reading", Doxygen::entryDBFileName.data());
@@ -758,15 +759,9 @@ void parseInput()
    computeTemplateClassRelations();
    flushUnresolvedRelations();
 
-
-printf("\n\n BROOM  HERE X   ");
-
    computeClassRelations();
    Doxy_Globals::g_classEntries.clear();
    Doxy_Globals::g_stats.end();
-
-printf("\n\n BROOM  HERE Y   \n\n");
-
 
    Doxy_Globals::g_stats.begin("Add enum values to enums\n");
    addEnumValuesToEnums(rootNav);
@@ -1466,11 +1461,11 @@ void Doxy_Work::addSTLClasses(EntryNav *rootNav)
       }
 
       if (info->baseClass1) {
-         classEntry->extends->append(BaseInfo(info->baseClass1, Public, info->virtualInheritance ? Virtual : Normal));
+         classEntry->extends.append(BaseInfo(info->baseClass1, Public, info->virtualInheritance ? Virtual : Normal));
       }
 
       if (info->baseClass2) {
-         classEntry->extends->append(BaseInfo(info->baseClass2, Public, info->virtualInheritance ? Virtual : Normal));
+         classEntry->extends.append(BaseInfo(info->baseClass2, Public, info->virtualInheritance ? Virtual : Normal));
       }
 
       if (info->iterators) {
@@ -4768,20 +4763,14 @@ void Doxy_Work::findBaseClassesForClass(EntryNav *rootNav, Definition *context, 
    ArgumentList *formalArgs = masterCd->templateArguments();
 
 
-printf("\n\n BROOM  A1   findBase ");
+printf("\n  BROOM  findBaseClasses   A   %x", root);
 
 
-if (! root->extends )  {
-   printf("\n\n BROOM  find Base    NOW WHAT?    As");
-} else {
-   printf("\n\n BROOM  find Base    NOW WHAT?    B  %d   %s",  root->extends->size(), root->name.constData() );
-}
-
-
-   for (auto bi : *root->extends) {
+   for (auto bi : root->extends) {
       bool delTempNames = false;
 
-printf("\n\n BROOM  A2   findBase ");
+
+printf("\n  BROOM  findBaseClasses   B");
 
 
       if (templateNames == 0) {
@@ -4815,6 +4804,8 @@ printf("\n\n BROOM  A2   findBase ");
          findClassRelation(rootNav, context, instanceCd, &tbi, templateNames, TemplateInstances, isArtificial);
 
       }
+
+printf("\n  BROOM  findBaseClasses   C");
 
       if (delTempNames) {
          delete templateNames;
@@ -5320,7 +5311,7 @@ bool Doxy_Work::isClassSection(EntryNav *rootNav)
          rootNav->loadEntry(Doxy_Globals::g_storage);
          Entry *root = rootNav->entry();
 
-         bool extends = root->extends->count() > 0;
+         bool extends = root->extends.count() > 0;
          rootNav->releaseEntry();
 
          if (extends) {
@@ -5413,42 +5404,36 @@ void Doxy_Work::computeClassRelations()
       item->visited = false;
    }
 
-printf("\n\n BROOM  next issue A   ");
-
    for (auto &rootNav : Doxy_Globals::g_classEntries) {
       ClassDef *cd;
 
       rootNav.loadEntry(Doxy_Globals::g_storage);
       Entry *root = rootNav.entry();
 
-printf("\n\n BROOM  next issue  D1  ");
-
       QByteArray bName = extractClassName(&rootNav);
       Debug::print(Debug::Classes, 0, "  Relations: Class %s : \n", bName.data());
 
-printf("\n\n BROOM  next issue  D2  ");
+printf("\n  BROOM  computerClassRelations  A");
 
       if (cd = getClass(bName)) {
          findBaseClassesForClass(&rootNav, cd, cd, cd, DocumentedOnly, false);
       }
 
-printf("\n\n BROOM  next issue  E  ");
+printf("\n  BROOM  computerClassRelations  B");
 
       int numMembers = cd && cd->memberNameInfoSDict() ? cd->memberNameInfoSDict()->count() : 0;
 
       if ((cd == 0 || (!cd->hasDocumentation() && !cd->isReference())) && numMembers > 0 && bName.right(2) != "::") {
 
-         if (!root->name.isEmpty() && root->name.indexOf('@') == -1 && // normal name
+         if (! root->name.isEmpty() && root->name.indexOf('@') == -1 && // normal name
                (guessSection(root->fileName) == Entry::HEADER_SEC ||
-                Config_getBool("EXTRACT_LOCAL_CLASSES")) && // not defined in source file
+                   Config_getBool("EXTRACT_LOCAL_CLASSES")) && // not defined in source file
                protectionLevelVisible(root->protection) && // hidden by protection
-               !Config_getBool("HIDE_UNDOC_CLASSES") // undocumented class are visible
+                  ! Config_getBool("HIDE_UNDOC_CLASSES") // undocumented class are visible
             )
 
             warn_undoc(root->fileName, root->startLine, "Compound %s is not documented.", root->name.data());
       }
-
-printf("\n\n BROOM  next issue  F  ");
 
       rootNav.releaseEntry();
    }
@@ -5480,9 +5465,9 @@ void Doxy_Work::computeTemplateClassRelations()
             ArgumentList *templArgs = new ArgumentList;
             stringToArgumentList(qPrintable(templSpec), templArgs);
 
-            QList<BaseInfo> *baseList = root->extends;
+            QList<BaseInfo> &baseList = root->extends;
 
-            for (auto &bi : *baseList) {
+            for (auto &bi : baseList) {
                // for each base class of the template
                // check if the base class is a template argument
 
@@ -8647,7 +8632,7 @@ void Doxy_Work::computePageRelations(EntryNav *rootNav)
 
       if (pd) {       
 
-         for (auto bi : *root->extends) {
+         for (auto bi : root->extends) {
             QSharedPointer<PageDef> subPd = Doxygen::pageSDict->find(bi.name);
 
             if (subPd) {
@@ -9012,7 +8997,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNa
    } else {
       extension = ".no_extension";
    }
-
+ 
    QFileInfo fi(fileName);
    BufStr preBuf(fi.size() + 4096);
 
@@ -9042,7 +9027,6 @@ void Doxy_Work::parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNa
 
    // use language parse to parse the file
    parser->parseInput(fileName, convBuf.data(), root, sameTu, filesInSameTu);
-
 
    // store the Entry tree in a file and create an index to navigate/load entries
    root->createNavigationIndex(rootNav, Doxy_Globals::g_storage, fd);
@@ -9131,8 +9115,8 @@ void Doxy_Work::parseFiles(Entry *root, EntryNav *rootNav)
    } else // normal pocessing
 
 #endif
-   {
-     
+
+   {     
       for (auto s : Doxy_Globals::g_inputFiles) { 
 
          bool ambig;
@@ -9145,6 +9129,7 @@ void Doxy_Work::parseFiles(Entry *root, EntryNav *rootNav)
          parser->startTranslationUnit(s.toUtf8());
 
          parseFile(parser, root, rootNav, fd, s.toUtf8(), false, filesInSameTu);
+
       }
    }
 }

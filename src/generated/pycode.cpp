@@ -1193,16 +1193,18 @@ static bool          g_collectXRefs;
 static int           g_inputLines;      //!< number of line in the code fragment
 static int	     g_yyLineNr;        //!< current line number
 static FileDef      *g_sourceFileDef;
-static Definition   *g_currentDefinition;
-static MemberDef    *g_currentMemberDef;
+
+static QSharedPointer<Definition>   g_currentDefinition;    
+static QSharedPointer<MemberDef>    g_currentMemberDef;   
+
 static bool          g_includeCodeFragment;
-static QByteArray      g_realScope;
-//static bool          g_insideBody;
+static QByteArray    g_realScope;
+//static bool        g_insideBody;
 static int           g_bodyCurlyCount;
 static bool          g_searchingForBody;
-static QByteArray      g_classScope;
+static QByteArray    g_classScope;
 static int           g_paramParens;
-//static int           g_anchorCount;
+//static int         g_anchorCount;
 
 static bool          g_exampleBlock;
 static QByteArray      g_exampleName;
@@ -1216,7 +1218,7 @@ static bool          g_doubleQuote;
 static bool          g_noSuiteFound;
 static int           g_stringContext;
 
-static QStack<uint> g_indents;  //!< Tracks indentation levels for scoping in python
+static QStack<uint>  g_indents;  //!< Tracks indentation levels for scoping in python
 
 static void endFontClass();
 static void adjustScopesAndSuites(unsigned indentLength);
@@ -1230,8 +1232,9 @@ static void adjustScopesAndSuites(unsigned indentLength);
 class PyVariableContext
 {
  public:
-   static const ClassDef *dummyContext;
-   class Scope : public StringMap<ClassDef>
+   static ClassDef *dummyContext;
+
+   class Scope : public StringMap<ClassDef *>
    {
     public:
       Scope() {}
@@ -1244,12 +1247,12 @@ class PyVariableContext
    }
 
    void pushScope() {
-      m_scopes.append(new Scope);
+      m_scopes.append(new Scope);     
    }
 
    void popScope() {
       if (m_scopes.count() > 0) {
-         m_scopes.remove(m_scopes.count() - 1);
+         m_scopes.removeAt(m_scopes.count() - 1);
       }
    }
 
@@ -1266,29 +1269,38 @@ class PyVariableContext
    ClassDef *findVariable(const QByteArray &name);
 
  private:
-   Scope        m_globalScope;
-   QList<Scope> m_scopes;
+   Scope          m_globalScope;
+   QList<Scope *> m_scopes;
 };
 
 void PyVariableContext::addVariable(const QByteArray &type, const QByteArray &name)
-{
-   //printf("PyVariableContext::addVariable(%s,%s)\n",type.data(),name.data());
+{   
    QByteArray ltype = type.simplified();
    QByteArray lname = name.simplified();
 
-   Scope *scope = m_scopes.count() == 0 ? &m_globalScope : m_scopes.getLast();
-   ClassDef *varType;
-   if (
-      (varType = g_codeClassSDict[ltype]) || // look for class definitions inside the code block
-      (varType = getResolvedClass(g_currentDefinition, g_sourceFileDef, ltype)) // look for global class definitions
-   ) {
-      scope->append(lname, varType); // add it to a list
+   Scope *scope; 
+
+   if (m_scopes.count() == 0 ) {
+      scope = &m_globalScope;
    } else {
-      if (m_scopes.count() > 0) // for local variables add a dummy entry so the name
+      scope = m_scopes.last();
+   }
+
+   QSharedPointer<ClassDef> varType;
+
+   if ( (varType = g_codeClassSDict[ltype]) || (varType = dummyShared(getResolvedClass(g_currentDefinition.data(), g_sourceFileDef, ltype))) ) {
+      // look for class definitions inside the code block
+      // look for global class definitions   
+
+      scope->insert(lname, varType.data()); 
+
+   } else {
+      if (m_scopes.count() > 0)  {
+         // for local variables add a dummy entry so the name
          // is hidden to avoid FALSE links to global variables with the same name
          // TODO: make this work for namespaces as well!
-      {
-         scope->append(lname, dummyContext);
+      
+         scope->insert(lname, dummyContext);
       }
    }
 }
@@ -1298,29 +1310,35 @@ ClassDef *PyVariableContext::findVariable(const QByteArray &name)
    if (name.isEmpty()) {
       return 0;
    }
+
    ClassDef *result = 0;
-   QListIterator<Scope> sli(m_scopes);
-   Scope *scope;
+ 
    // search from inner to outer scope
-   for (sli.toLast(); (scope = sli.current()); --sli) {
-      result = scope->find(name);
+   for (int k = m_scopes.size() - 1; k >= 0; --k) {
+
+      result = m_scopes[k]->find(name);
+
       if (result) {
          return result;
       }
    }
+
    // nothing found -> also try the global scope
    result = m_globalScope.find(name);
+
    return result;
 }
 
 static PyVariableContext g_theVarContext;
-const ClassDef *PyVariableContext::dummyContext = (ClassDef *)0x8;
+ClassDef *PyVariableContext::dummyContext = (ClassDef *)0x8;
 
 class PyCallContext
 {
  public:
    struct Ctx {
-      Ctx() : name(g_name), type(g_type), cd(0) {}
+      Ctx() : name(g_name), type(g_type), cd(0)
+      {}
+
       QByteArray name;
       QByteArray type;
       ClassDef *cd;
@@ -1333,18 +1351,19 @@ class PyCallContext
    virtual ~PyCallContext() {}
 
    void setClass(ClassDef *cd) {
-      Ctx *ctx = m_classList.getLast();
+      Ctx *ctx = m_classList.last();
       if (ctx) {
          ctx->cd = cd;
       }
    }
+
    void pushScope() {
       m_classList.append(new Ctx);
    }
 
    void popScope() {
       if (m_classList.count() > 1) {
-         Ctx *ctx = m_classList.getLast();
+         Ctx *ctx = m_classList.last();
          if (ctx) {
             g_name = ctx->name;
             g_type = ctx->type;
@@ -1360,7 +1379,7 @@ class PyCallContext
    }
 
    ClassDef *getClass() const {
-      Ctx *ctx = m_classList.getLast();
+      Ctx *ctx = m_classList.last();
 
       if (ctx) {
          return ctx->cd;
@@ -1370,7 +1389,7 @@ class PyCallContext
    }
 
  private:
-   QList<Ctx> m_classList;
+   QList<Ctx *> m_classList;
 };
 
 static PyCallContext g_theCallContext;
@@ -1416,22 +1435,27 @@ static void addToSearchIndex(const char *text)
 }
 
 
-static ClassDef *stripClassName(const char *s, Definition *d = g_currentDefinition)
+static ClassDef *stripClassName(const char *s, QSharedPointer<Definition> d = g_currentDefinition)
 {
    int pos = 0;
+
    QByteArray type = s;
    QByteArray className;
    QByteArray templSpec;
+
    while (extractClassNameFromType(type, pos, className, templSpec) != -1) {
       QByteArray clName = className + templSpec;
 
       ClassDef *cd = 0;
-      if (!g_classScope.isEmpty()) {
-         cd = getResolvedClass(d, g_sourceFileDef, g_classScope + "::" + clName);
+
+      if (! g_classScope.isEmpty()) {
+         cd = getResolvedClass(d.data(), g_sourceFileDef, g_classScope + "::" + clName);
       }
+
       if (cd == 0) {
-         cd = getResolvedClass(d, g_sourceFileDef, clName);
+         cd = getResolvedClass(d.data(), g_sourceFileDef, clName);
       }
+
       if (cd) {
          return cd;
       }
@@ -1447,36 +1471,35 @@ static ClassDef *stripClassName(const char *s, Definition *d = g_currentDefiniti
  * number is linked to the documentation of that definition.
  */
 static void startCodeLine()
-{
-   //if (g_currentFontClass) { g_code->endFontClass(); }
+{  
    if (g_sourceFileDef) {
-      //QByteArray lineNumber,lineAnchor;
-      //lineNumber.sprintf("%05d",g_yyLineNr);
-      //lineAnchor.sprintf("l%05d",g_yyLineNr);
-
-      Definition *d   = g_sourceFileDef->getSourceDefinition(g_yyLineNr);
-      //printf("startCodeLine %d d=%p\n",g_yyLineNr,d);
-      //g_code->startLineNumber();
-      if (!g_includeCodeFragment && d && d->isLinkableInProject()) {
+      QSharedPointer<Definition> d = g_sourceFileDef->getSourceDefinition(g_yyLineNr);
+    
+      if (! g_includeCodeFragment && d && d->isLinkableInProject()) {
          g_currentDefinition = d;
-         g_currentMemberDef = g_sourceFileDef->getSourceMember(g_yyLineNr);
+         g_currentMemberDef  = g_sourceFileDef->getSourceMember(g_yyLineNr);
+
          //g_insideBody = FALSE;
          g_searchingForBody = TRUE;
-         g_realScope = d->name().copy();
-         g_classScope = d->name().copy();
+
+         g_realScope = d->name();
+         g_classScope = d->name();
+
          //printf("Real scope: `%s'\n",g_realScope.data());
          g_bodyCurlyCount = 0;
+
          QByteArray lineAnchor;
-         lineAnchor.sprintf("l%05d", g_yyLineNr);
+         lineAnchor = QString("l%1").arg(g_yyLineNr, 5, 10, QChar('0')).toUtf8();   
+
          if (g_currentMemberDef) {
             g_code->writeLineNumber(g_currentMemberDef->getReference(),
                                     g_currentMemberDef->getOutputFileBase(),
                                     g_currentMemberDef->anchor(), g_yyLineNr);
+
             setCurrentDoc(lineAnchor);
+
          } else {
-            g_code->writeLineNumber(d->getReference(),
-                                    d->getOutputFileBase(),
-                                    0, g_yyLineNr);
+            g_code->writeLineNumber(d->getReference(), d->getOutputFileBase(), 0, g_yyLineNr);
             setCurrentDoc(lineAnchor);
          }
       } else {
@@ -1491,7 +1514,7 @@ static void startCodeLine()
    }
 }
 
-static void codify(const char *text)
+static void codify(const QByteArray &text)
 {
    g_code->codify(text);
 }
@@ -1506,6 +1529,7 @@ static void nextCodeLine()
 {
    const char *fc = g_currentFontClass;
    endCodeLine();
+
    if (g_yyLineNr < g_inputLines) {
       g_currentFontClass = fc;
       startCodeLine();
@@ -1517,19 +1541,20 @@ static void nextCodeLine()
  * line numbers for each line. If \a text contains newlines, the link will be
  * split into multiple links with the same destination, one for each line.
  */
-static void writeMultiLineCodeLink(CodeOutputInterface &ol,
-                                   Definition *d,
-                                   const char *text)
+static void writeMultiLineCodeLink(CodeOutputInterface &ol, Definition *d, const char *text)
 {
    static bool sourceTooltips = Config_getBool("SOURCE_TOOLTIPS");
    TooltipManager::instance()->addTooltip(d);
+
    QByteArray ref  = d->getReference();
    QByteArray file = d->getOutputFileBase();
    QByteArray anchor = d->anchor();
    QByteArray tooltip;
+
    if (!sourceTooltips) { // fall back to simple "title" tooltips
       tooltip = d->briefDescriptionAsTooltip();
    }
+
    bool done = FALSE;
    char *p = (char *)text;
    while (!done) {
@@ -1557,6 +1582,7 @@ static void codifyLines(char *text)
    char *p = text, *sp = p;
    char c;
    bool done = FALSE;
+
    while (!done) {
       sp = p;
       while ((c = *p++) && c != '\n') { }
@@ -1573,56 +1599,45 @@ static void codifyLines(char *text)
 }
 
 
-static bool getLinkInScope(const QByteArray &c,  // scope
-                           const QByteArray &m,  // member
-                           const char *memberText, // exact text
-                           CodeOutputInterface &ol,
-                           const char *text
-                          )
+static bool getLinkInScope(const QByteArray &c, const QByteArray &m,  const char *memberText, 
+                           CodeOutputInterface &ol, const char *text )
 {
    MemberDef    *md;
    ClassDef     *cd;
    FileDef      *fd;
    NamespaceDef *nd;
    GroupDef     *gd;
-   //printf("Trying `%s'::`%s'\n",c.data(),m.data());
-   if (getDefs(c, m, "()", md, cd, fd, nd, gd, FALSE, g_sourceFileDef) &&
-         md->isLinkable()) {
-      //Definition *d=0;
-      //if (cd) d=cd; else if (nd) d=nd; else if (fd) d=fd; else d=gd;
 
-      Definition *d = md->getOuterScope() == Doxygen::globalScope ?
-                      md->getBodyDef() : md->getOuterScope();
-      //printf("Found! d=%s\n",d?d->name().data():"<none>");
+   if (getDefs(c, m, "()", md, cd, fd, nd, gd, FALSE, g_sourceFileDef) && md->isLinkable()) {
+      
+      Definition *d = md->getOuterScope() == Doxygen::globalScope ? md->getBodyDef() : md->getOuterScope();
+   
       if (md->getGroupDef()) {
          d = md->getGroupDef();
       }
+
       if (d && d->isLinkable()) {
-         g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()));
-         //printf("g_currentDefinition=%p g_currentMemberDef=%p\n",
-         //        g_currentDefinition,g_currentMemberDef);
+         g_theCallContext.setClass(stripClassName(md->typeString(), dummyShared(md->getOuterScope()) ));
 
-         if (g_currentDefinition && g_currentMemberDef &&
-               md != g_currentMemberDef && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, md);
+         if (g_currentDefinition && g_currentMemberDef && md != g_currentMemberDef && g_collectXRefs) {
+            addDocCrossReference(g_currentMemberDef, dummyShared(md) );
          }
-         //printf("d->getReference()=`%s' d->getOutputBase()=`%s' name=`%s' member name=`%s'\n",d->getReference().data(),d->getOutputFileBase().data(),d->name().data(),md->name().data());
-
+        
          writeMultiLineCodeLink(ol, md, text ? text : memberText);
          addToSearchIndex(text ? text : memberText);
          return TRUE;
       }
    }
+
    return FALSE;
 }
 
-static bool getLink(const char *className,
-                    const char *memberName,
-                    CodeOutputInterface &ol,
+static bool getLink(const char *className, const char *memberName, CodeOutputInterface &ol,
                     const char *text = 0)
 {
    QByteArray m = removeRedundantWhiteSpace(memberName);
    QByteArray c = className;
+
    if (!getLinkInScope(c, m, memberName, ol, text)) {
       if (!g_curClassName.isEmpty()) {
          if (!c.isEmpty()) {
@@ -1641,8 +1656,7 @@ static bool getLink(const char *className,
   For a given string in the source code,
   finds its class or global id and links to it.
 */
-static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName,
-                                      bool typeOnly = FALSE)
+static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, bool typeOnly = FALSE)
 {
    QByteArray className = clName;
 
@@ -1654,30 +1668,36 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName,
    DBG_CTX((stderr, "generateClassOrGlobalLink(className=%s)\n", className.data()));
 
    ClassDef *cd = 0, *lcd = 0; /** Class def that we may find */
-   MemberDef *md = 0;      /** Member def that we may find */
-   //bool isLocal=FALSE;
+  
+   // Member def that we may find
+   MemberDef *md = 0;      
 
    if ((lcd = g_theVarContext.findVariable(className)) == 0) { // not a local variable
-      Definition *d = g_currentDefinition;
+      QSharedPointer<Definition> d = g_currentDefinition;
+
       QByteArray scope = substitute(className, ".", "::");
 
-      cd = getResolvedClass(d, g_sourceFileDef, substitute(className, ".", "::"), &md);
+      cd = getResolvedClass(d.data(), g_sourceFileDef, substitute(className, ".", "::"), &md);
 
-      DBG_CTX((stderr, "d=%s g_sourceFileDef=%s\n",
-               d ? d->displayName().data() : "<null>",
+      DBG_CTX((stderr, "d=%s g_sourceFileDef=%s\n", d ? d->displayName().data() : "<null>",
                g_currentDefinition ? g_currentDefinition->displayName().data() : "<null>"));
+
       DBG_CTX((stderr, "is found as a type %s\n", cd ? cd->name().data() : "<null>"));
 
-      if (cd == 0 && md == 0) { // also see if it is variable or enum or enum value
-         NamespaceDef *nd = getResolvedNamespace(scope);
+      if (cd == 0 && md == 0) { 
+         // also see if it is variable or enum or enum value
+         QSharedPointer<NamespaceDef> nd = getResolvedNamespace(scope);
+
          if (nd) {
-            writeMultiLineCodeLink(ol, nd, clName);
+            writeMultiLineCodeLink(ol, nd.data(), clName);
             addToSearchIndex(className);
             return;
+
          } else if (getLink(g_classScope, clName, ol, clName)) {
             return;
          }
       }
+
    } else {
       if (lcd != PyVariableContext::dummyContext) {
          g_theCallContext.setClass(lcd);
@@ -1689,58 +1709,73 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName,
    if (cd && cd->isLinkable()) { // is it a linkable class
       writeMultiLineCodeLink(ol, cd, clName);
       addToSearchIndex(className);
+
       if (md) {
          Definition *d = md->getOuterScope() == Doxygen::globalScope ?
                          md->getBodyDef() : md->getOuterScope();
+
          if (md->getGroupDef()) {
             d = md->getGroupDef();
          }
-         if (d && d->isLinkable() && md->isLinkable() &&
-               g_currentMemberDef && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, md);
+
+         if (d && d->isLinkable() && md->isLinkable() && g_currentMemberDef && g_collectXRefs) {
+            addDocCrossReference(g_currentMemberDef, dummyShared(md) );
          }
       }
+
    } else { // not a class, maybe a global member
       int scopeEnd = className.lastIndexOf(".");
+
       if (scopeEnd != -1 && !typeOnly) { // name with explicit scope
          QByteArray scope = substitute(className.left(scopeEnd), ".", "::");
          QByteArray locName = className.right(className.length() - scopeEnd - 1);
+
          ClassDef *mcd = getClass(scope);
+
          DBG_CTX((stderr, "scope=%s locName=%s mcd=%p\n", scope.data(), locName.data(), mcd));
+
          if (mcd) {
             MemberDef *md = mcd->getMemberByName(locName);
+
             if (md) {
-               g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()));
+               g_theCallContext.setClass(stripClassName(md->typeString(), dummyShared(md->getOuterScope())) );
                writeMultiLineCodeLink(ol, md, clName);
                addToSearchIndex(className);
+
                Definition *d = md->getOuterScope() == Doxygen::globalScope ?
                                md->getBodyDef() : md->getOuterScope();
+
                if (md->getGroupDef()) {
                   d = md->getGroupDef();
                }
-               if (d && d->isLinkable() && md->isLinkable() &&
-                     g_currentMemberDef && g_collectXRefs) {
-                  addDocCrossReference(g_currentMemberDef, md);
+
+               if (d && d->isLinkable() && md->isLinkable() && g_currentMemberDef && g_collectXRefs) {
+                  addDocCrossReference(g_currentMemberDef, dummyShared(md) );
                }
+
                return;
             }
+
          } else { // check namespace as well
-            NamespaceDef *mnd = getResolvedNamespace(scope);
+            QSharedPointer<NamespaceDef> mnd = getResolvedNamespace(scope);
+
             if (mnd) {
                MemberDef *md = mnd->getMemberByName(locName);
-               if (md) {
-                  //printf("name=%s scope=%s\n",locName.data(),scope.data());
-                  g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()));
+
+               if (md) {                 
+                  g_theCallContext.setClass(stripClassName(md->typeString(), dummyShared(md->getOuterScope())) );
                   writeMultiLineCodeLink(ol, md, clName);
                   addToSearchIndex(className);
+
                   Definition *d = md->getOuterScope() == Doxygen::globalScope ?
                                   md->getBodyDef() : md->getOuterScope();
+
                   if (md->getGroupDef()) {
                      d = md->getGroupDef();
                   }
-                  if (d && d->isLinkable() && md->isLinkable() &&
-                        g_currentMemberDef && g_collectXRefs) {
-                     addDocCrossReference(g_currentMemberDef, md);
+
+                  if (d && d->isLinkable() && md->isLinkable() && g_currentMemberDef && g_collectXRefs) {
+                     addDocCrossReference(g_currentMemberDef, dummyShared(md));
                   }
                   return;
                }
@@ -1763,29 +1798,31 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName,
 */
 static void generateFunctionLink(CodeOutputInterface &ol, char *funcName)
 {
-   //CodeClassDef *ccd=0;
-   ClassDef *ccd = 0;
-   QByteArray locScope = g_classScope.copy();
+   QSharedPointer<ClassDef> ccd;
+
+   QByteArray locScope = g_classScope;
    QByteArray locFunc = removeRedundantWhiteSpace(funcName);
+
    DBG_CTX((stdout, "*** locScope=%s locFunc=%s\n", locScope.data(), locFunc.data()));
    int i = locFunc.lastIndexOf("::");
+
    if (i > 0) {
       locScope = locFunc.left(i);
       locFunc = locFunc.right(locFunc.length() - i - 2).trimmed();
    }
-   //printf("generateFunctionLink(%s) classScope=`%s'\n",locFunc.data(),locScope.data());
-   if (!locScope.isEmpty() && (ccd = g_codeClassSDict[locScope])) {
-      //printf("using classScope %s\n",g_classScope.data());
-      if (ccd->baseClasses()) {
-         BaseClassListIterator bcli(*ccd->baseClasses());
-         for ( ; bcli.current() ; ++bcli) {
-            if (getLink(bcli.current()->classDef->name(), locFunc, ol, funcName)) {
+
+   if (! locScope.isEmpty() && (ccd = g_codeClassSDict[locScope])) {
+ 
+      if (ccd->baseClasses()) {    
+         for (auto item : *ccd->baseClasses() ) { 
+            if (getLink(item->classDef->name(), locFunc, ol, funcName)) {
                return;
             }
          }
       }
    }
-   if (!getLink(locScope, locFunc, ol, funcName)) {
+
+   if (! getLink(locScope, locFunc, ol, funcName)) {
       generateClassOrGlobalLink(ol, funcName);
    }
    return;
@@ -1793,52 +1830,44 @@ static void generateFunctionLink(CodeOutputInterface &ol, char *funcName)
 
 static bool findMemberLink(CodeOutputInterface &ol, Definition *sym, const char *symName)
 {
-   //printf("sym %s outerScope=%s equal=%d\n",
-   //    sym->name().data(),sym->getOuterScope()->name().data(),
-   //    sym->getOuterScope()==g_currentDefinition);
-
-   if (sym->getOuterScope() &&
-         sym->getOuterScope()->definitionType() == Definition::TypeClass &&
+   if (sym->getOuterScope() && sym->getOuterScope()->definitionType() == Definition::TypeClass &&
          g_currentDefinition->definitionType() == Definition::TypeClass) {
+
       ClassDef *cd = (ClassDef *)sym->getOuterScope();
-      ClassDef *thisCd = (ClassDef *)g_currentDefinition;
+      QSharedPointer<ClassDef> thisCd = g_currentDefinition.dynamicCast<ClassDef>();
+
       if (sym->definitionType() == Definition::TypeMember) {
          if (g_currentMemberDef && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, (MemberDef *)sym);
+            addDocCrossReference(g_currentMemberDef, dummyShared((MemberDef *)sym));
          }
       }
+
       DBG_CTX((stderr, "cd=%s thisCd=%s\n", cd ? cd->name().data() : "<none>", thisCd ? thisCd->name().data() : "<none>"));
 
-      // TODO: find the nearest base class in case cd is a base class of
-      // thisCd
+      // TODO: find the nearest base class in case cd is a base class of thisCd
+
       if (cd == thisCd || (thisCd && thisCd->isBaseClass(cd, TRUE))) {
          writeMultiLineCodeLink(ol, sym, symName);
          return TRUE;
       }
    }
+
    return FALSE;
 }
 
 static void findMemberLink(CodeOutputInterface &ol, char *symName)
 {   
-   if (g_currentDefinition) {
-      DefinitionIntf *di = Doxygen::symbolMap->find(symName);
+   if (g_currentDefinition) {  
 
-      if (di) {
-         if (di->definitionType() == DefinitionIntf::TypeSymbolList) { // multiple symbols
-            DefinitionListIterator dli(*(DefinitionList *)di);
-            Definition *sym;
+      auto di = Doxygen::symbolMap->find(symName);
 
-            for (dli.toFirst(); (sym = dli.current()); ++dli) {
-               if (findMemberLink(ol, sym, symName)) {
-                  return;
-               }
-            }
-         } else { // single symbol
-            if (findMemberLink(ol, (Definition *)di, symName)) {
+      if (di != Doxygen::symbolMap->end()) {      
+           
+         for (auto sym : **di) { 
+            if (findMemberLink(ol, sym, symName)) {
                return;
             }
-         }
+         }         
       }
    }
    
@@ -1873,22 +1902,6 @@ static int yyread(char *buf, int max_size)
    }
    return c;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #define INITIAL 0
 #define Body 1
@@ -2286,7 +2299,8 @@ YY_DECL {
                // probably be more strict
                // about what to accept.
 
-               g_curClassBases.inSort(pycodeYYtext);
+               g_curClassBases.append(pycodeYYtext);
+
                generateClassOrGlobalLink(*g_code, pycodeYYtext);
                // codify(pycodeYYtext);
             }
@@ -2297,32 +2311,30 @@ YY_DECL {
             {
                codify(pycodeYYtext);
 
-               // Assume this will
-               // be a one-line suite;
-               // found counter-example
-               // in SuiteStart.
+               // Assume this will be a one-line suite;
+               // found counter-example in SuiteStart.
 
                // Push a class scope
 
-               ClassDef *classDefToAdd = new ClassDef("<code>", 1, 1, g_curClassName, ClassDef::Class, 0, 0, FALSE);
-               g_codeClassSDict.append(g_curClassName, classDefToAdd);
-               char *s = g_curClassBases.first();
-               while (s)
-               {
-                  ClassDef *baseDefToAdd;
+               QSharedPointer<ClassDef> classDefToAdd = QMakeShared<ClassDef> ("<code>", 1, 1, g_curClassName.constData(), 
+                           ClassDef::Class, nullptr, nullptr, false);
+
+               g_codeClassSDict.insert(g_curClassName, classDefToAdd);
+
+               for (auto s : g_curClassBases) {
+               
+                  QSharedPointer<ClassDef> baseDefToAdd;
                   baseDefToAdd = g_codeClassSDict[s];
 
-                  // Try to find class in global
-                  // scope
+                  // Try to find class in global scope
+
                   if (baseDefToAdd == 0) {
-                     baseDefToAdd = getResolvedClass(g_currentDefinition, g_sourceFileDef, s);
+                     baseDefToAdd = dummyShared(getResolvedClass(g_currentDefinition.data(), g_sourceFileDef, qPrintable(s) ));
                   }
 
                   if (baseDefToAdd && baseDefToAdd != classDefToAdd) {
-                     classDefToAdd->insertBaseClass(baseDefToAdd, s, Public, Normal);
+                     classDefToAdd->insertBaseClass(baseDefToAdd.data(), qPrintable(s), Public, Normal);
                   }
-
-                  s = g_curClassBases.next();
                }
 
                // Reset class-parsing variables.
@@ -2526,10 +2538,11 @@ YY_DECL {
             {
                // This state lasts momentarily,
                // to check the indentation
-               // level that is about to be
-               // used.
+               // level that is about to be used.
+
                codifyLines(pycodeYYtext);
                g_indents.push(pycodeYYleng);
+
                // printf("Captured indent of %d [line %d]\n", pycodeYYleng, g_yyLineNr);
                BEGIN( Suite );
             }
@@ -3804,17 +3817,11 @@ void pycodeYYfree (void *ptr )
 
 #define YYTABLES_NAME "yytables"
 
-
-
-
-
-/*@ ----------------------------------------------------------------------------
- */
-
 void resetPythonCodeParserState()
 {
-   g_currentDefinition = 0;
-   g_currentMemberDef = 0;
+   g_currentDefinition = QSharedPointer<Definition>();
+   g_currentMemberDef  = QSharedPointer<MemberDef>();
+
    g_doubleStringIsDoc = FALSE;
    g_paramParens = 0;
    g_indents.clear();
@@ -3833,9 +3840,10 @@ static void adjustScopesAndSuites(unsigned indentLength)
          // printf("Exited scope indent of [%d]\n", g_indents.top());
          g_indents.pop(); // Pop the old suite's indentation
 
-         g_currentMemberDef = 0;
+         g_currentMemberDef = QSharedPointer<MemberDef>();
+
          if (g_currentDefinition) {
-            g_currentDefinition = g_currentDefinition->getOuterScope();
+            g_currentDefinition = dummyShared(g_currentDefinition->getOuterScope());
          }
       }
    }

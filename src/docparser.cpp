@@ -933,7 +933,16 @@ static void handlePendingStyleCommands(DocNode *parent, QList<DocNode *> &childr
          }
 
          s_styleStack.pop();
-         sc = s_styleStack.top();
+
+
+         if (s_styleStack.isEmpty())  {
+            // all done 
+            break;
+   
+         } else {
+            sc = s_styleStack.top();
+
+         }   
       }
    }
 }
@@ -1601,12 +1610,11 @@ static int internalValidatingParseDoc(DocNode *parent, QList<DocNode *> &childre
 
    do {
       DocPara *par = new DocPara(parent);
+
       if (isFirst) {
          par->markFirst();
          isFirst = false;
       }
-
-printf("\n  Broom (docparser) marker 1");
 
       retval = par->parse();
 
@@ -2873,13 +2881,8 @@ endheader:
    handlePendingStyleCommands(this, m_children);
    DBG(("DocHtmlHeader::parse() end\n"));
 
-assert(! s_nodeStack.isEmpty() );   
-
    DocNode *n = s_nodeStack.pop();
    assert(n == this);
-
-
-printf("\n\n BROOM  SPOT 35  ");
 
    return retval;
 }
@@ -2947,15 +2950,14 @@ int DocInternal::parse(int level)
    DocPara *lastPar = 0;
    do {
       DocPara *par = new DocPara(this);
+
       if (isFirst) {
          par->markFirst();
          isFirst = false;
       }
 
-
-printf("\n  Broom (docparser) marker  10");
-
       retval = par->parse();
+
       if (!par->isEmpty()) {
          m_children.append(par);
          lastPar = par;
@@ -3201,15 +3203,16 @@ int DocHtmlCell::parse()
    // parse one or more paragraphs
    bool isFirst = true;
    DocPara *par = 0;
+
    do {
       par = new DocPara(this);
+
       if (isFirst) {
          par->markFirst();
          isFirst = false;
       }
-      m_children.append(par);
 
-printf("\n  Broom (docparser) marker 20");
+      m_children.append(par);
 
       retval = par->parse();
       if (retval == TK_HTMLTAG) {
@@ -3240,17 +3243,18 @@ int DocHtmlCell::parseXml()
    // parse one or more paragraphs
    bool isFirst = true;
    DocPara *par = 0;
+
    do {
       par = new DocPara(this);
       if (isFirst) {
          par->markFirst();
          isFirst = false;
       }
+
       m_children.append(par);
 
-printf("\n  Broom (docparser) marker 40");
-
       retval = par->parse();
+
       if (retval == TK_HTMLTAG) {
          int tagId = Mappers::htmlTagMapper->map(g_token->name);
          if (tagId == XML_ITEM && g_token->endTag) { // found </item> tag
@@ -3758,23 +3762,24 @@ int DocHtmlDescData::parse()
    m_attribs = g_token->attribs;
    int retval = 0;
    s_nodeStack.push(this);
+
    DBG(("DocHtmlDescData::parse() start\n"));
 
    bool isFirst = true;
    DocPara *par = 0;
+
    do {
       par = new DocPara(this);
       if (isFirst) {
          par->markFirst();
          isFirst = false;
       }
+
       m_children.append(par);
-
-
-printf("\n  Broom (docparser) marker 41");
 
       retval = par->parse();
    } while (retval == TK_NEWPARA);
+
    if (par) {
       par->markLast();
    }
@@ -3782,6 +3787,7 @@ printf("\n  Broom (docparser) marker 41");
    DBG(("DocHtmlDescData::parse() end\n"));
    DocNode *n = s_nodeStack.pop();
    assert(n == this);
+
    return retval;
 }
 
@@ -3857,6 +3863,7 @@ int DocHtmlListItem::parse()
    // parse one or more paragraphs
    bool isFirst = true;
    DocPara *par = 0;
+
    do {
       par = new DocPara(this);
       if (isFirst) {
@@ -3865,10 +3872,9 @@ int DocHtmlListItem::parse()
       }
       m_children.append(par);
 
-printf("\n  Broom (docparser) marker 42");
-
       retval = par->parse();
    } while (retval == TK_NEWPARA);
+
    if (par) {
       par->markLast();
    }
@@ -3888,6 +3894,7 @@ int DocHtmlListItem::parseXml()
    // parse one or more paragraphs
    bool isFirst = true;
    DocPara *par = 0;
+
    do {
       par = new DocPara(this);
       if (isFirst) {
@@ -3896,9 +3903,8 @@ int DocHtmlListItem::parseXml()
       }
       m_children.append(par);
 
-printf("\n  Broom (docparser) marker 44");
-
       retval = par->parse();
+
       if (retval == 0) {
          break;
       }
@@ -3908,6 +3914,7 @@ printf("\n  Broom (docparser) marker 44");
       if (retval == RetVal_ListItem) {
          break;
       }
+
    } while (retval != RetVal_CloseXml);
 
    if (par) {
@@ -4059,19 +4066,20 @@ int DocHtmlBlockQuote::parse()
    // parse one or more paragraphs
    bool isFirst = true;
    DocPara *par = 0;
+
    do {
       par = new DocPara(this);
       if (isFirst) {
          par->markFirst();
          isFirst = false;
       }
+
       m_children.append(par);
 
-
-printf("\n  Broom (docparser) marker 50");
-
       retval = par->parse();
+
    } while (retval == TK_NEWPARA);
+
    if (par) {
       par->markLast();
    }
@@ -5013,13 +5021,7 @@ int DocPara::handleHtmlHeader(const HtmlAttribList &tagHtmlAttribs, int level)
    DocHtmlHeader *header = new DocHtmlHeader(this, tagHtmlAttribs, level);
    m_children.append(header);
 
-
    int retval = header->parse();
-
-printf("\n\n BROOM  SPOT after the header");
-
-
-
    return (retval == RetVal_OK) ? TK_NEWPARA : retval;
 }
 
@@ -5873,9 +5875,6 @@ int DocPara::handleHtmlStartTag(const QByteArray &tagName, const HtmlAttribList 
          break;
    }
 
-
-printf("\n\n BROOM  end of  handleHtmlStartTag ");
-
    return retval;
 }
 
@@ -6093,7 +6092,9 @@ int DocPara::parse()
             // prevent leading whitespace and collapse multiple whitespace areas
             DocNode::Kind k;
 
-            if (insidePRE(this) || // all whitespace is relevant
+            if (insidePRE(this) || 
+               // all whitespace is relevant
+
                   (
                      // remove leading whitespace
                      !m_children.isEmpty()  &&
@@ -6116,6 +6117,7 @@ int DocPara::parse()
 
          case TK_LISTITEM: {
             DBG(("found list item at %d parent=%d\n", g_token->indent, parent()->kind()));
+
             DocNode *n = parent();
             while (n && n->kind() != DocNode::Kind_AutoList) {
                n = n->parent();
@@ -6188,9 +6190,10 @@ int DocPara::parse()
                   // end of list marker ends this paragraph
                   retval = TK_ENDLIST;
                   goto endparagraph;
+
                } else {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "End of list marker found "
-                                 "has invalid indent level");
+                  warn_doc_error(s_fileName, doctokenizerYYlineno, "End of list marker found with "
+                                 "an invalid indent level");
                }
             } else {
                warn_doc_error(s_fileName, doctokenizerYYlineno, "End of list marker found without any preceding "
@@ -6265,18 +6268,20 @@ int DocPara::parse()
 
          case TK_HTMLTAG: {
 
-            if (!g_token->endTag) { // found a start tag
-
-printf("\n  BROOM  before call to handleHtmlStartTag " );
-
+            if (! g_token->endTag) { 
+               // found a start tag
                retval = handleHtmlStartTag(g_token->name, g_token->attribs);
-            } else { // found an end tag
+
+            } else { 
+               // found an end tag
                retval = handleHtmlEndTag(g_token->name);
+
             }
 
             if (retval == RetVal_OK) {
-               // the command ended normally, keep scanner for new tokens.
+               // the command ended normally, keep scanner for new tokens
                retval = 0;
+
             } else {
                goto endparagraph;
             }
@@ -6296,6 +6301,7 @@ printf("\n  BROOM  before call to handleHtmlStartTag " );
          case TK_NEWPARA:
             retval = TK_NEWPARA;
             goto endparagraph;
+
          case TK_RCSTAG: {
             DocNode *n = parent();
             while (n &&
@@ -6319,17 +6325,18 @@ printf("\n  BROOM  before call to handleHtmlStartTag " );
             ss->parseRcs();
          }
          break;
+
          default:
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Found unexpected token (id=%x)\n", tok);
             break;
       }
    }
+
    retval = 0;
 
 endparagraph:
-   handlePendingStyleCommands(this, m_children);
 
-assert( ! s_nodeStack.isEmpty() );
+   handlePendingStyleCommands(this, m_children);
 
    DocNode *n = s_nodeStack.pop();
    assert(n == this);
@@ -6380,6 +6387,7 @@ int DocSection::parse()
       }
 
       retval = par->parse();
+
       if (!par->isEmpty()) {
          m_children.append(par);
          lastPar = par;
@@ -6568,11 +6576,6 @@ void DocRoot::parse()
 {
    DBG(("DocRoot::parse() start\n"));
 
-
-printf("\n BROOM at the start of the last one for the night");
-
-
-
    s_nodeStack.push(this);
    doctokenizerYYsetStatePara();
    int retval = 0;
@@ -6642,11 +6645,6 @@ printf("\n BROOM at the start of the last one for the night");
    }
 
    handleUnclosedStyleCommands();
-
-printf("\n BROOM at the end of the last one for the night");
-
-assert( ! s_nodeStack.isEmpty() );
-
 
    DocNode *n = s_nodeStack.pop();
    assert(n == this);

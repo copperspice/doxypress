@@ -444,7 +444,6 @@ void HtmlCodeGenerator::codify(const QByteArray &str)
          }
       }
 
-//       m_streamX << flush;      // added by copperspice
    }
 }
 
@@ -640,10 +639,7 @@ void HtmlCodeGenerator::startCodeLine(bool hasLineNumbers)
 
 void HtmlCodeGenerator::endCodeLine()
 {
-   m_streamX << "</div>\n";
-
-// BROOM   m_streamX << flush;            // added by copperspice
-  
+   m_streamX << "</div>\n";  
 }
 
 void HtmlCodeGenerator::startFontClass(const char *s)

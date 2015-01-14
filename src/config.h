@@ -174,9 +174,11 @@ class ConfigString : public ConfigOption
       m_doc = doc;
       m_widgetType = String;
     }
+
    ~ConfigString()
     {
     }
+
     void setWidgetType(WidgetType w) { m_widgetType = w; }
     WidgetType widgetType() const { return m_widgetType; }
     void setDefaultValue(const char *v) { m_defValue = v; }

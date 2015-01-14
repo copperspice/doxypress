@@ -169,27 +169,30 @@ void ManGenerator::startFile(const char *, const char *manName, const char *)
 
 void ManGenerator::endFile()
 {
-   t << endl;
+   m_textStream << endl;
    endPlainFile();
 }
 
 void ManGenerator::endTitleHead(const char *, const char *name)
 {
-   t << ".TH \"" << name << "\" " << getExtension() << " \""
+   m_textStream << ".TH \"" << name << "\" " << getExtension() << " \""
      << dateToString(false) << "\" \"";
+
    if (!Config_getString("PROJECT_NUMBER").isEmpty()) {
-      t << "Version " << Config_getString("PROJECT_NUMBER") << "\" \"";
+      m_textStream << "Version " << Config_getString("PROJECT_NUMBER") << "\" \"";
    }
+
    if (Config_getString("PROJECT_NAME").isEmpty()) {
-      t << "Doxygen";
+      m_textStream << "CS Doxygen";
+
    } else {
-      t << Config_getString("PROJECT_NAME");
+      m_textStream << Config_getString("PROJECT_NAME");
    }
-   t << "\" \\\" -*- nroff -*-" << endl;
-   t << ".ad l" << endl;
-   t << ".nh" << endl;
-   t << ".SH NAME" << endl;
-   t << name << " \\- ";
+   m_textStream << "\" \\\" -*- nroff -*-" << endl;
+   m_textStream << ".ad l" << endl;
+   m_textStream << ".nh" << endl;
+   m_textStream << ".SH NAME" << endl;
+   m_textStream << name << " \\- ";
    firstCol = false;
    paragraph = true;
    inHeader = true;
@@ -199,9 +202,9 @@ void ManGenerator::newParagraph()
 {
    if (!paragraph) {
       if (!firstCol) {
-         t << endl;
+         m_textStream << endl;
       }
-      t << ".PP" << endl;
+      m_textStream << ".PP" << endl;
       firstCol = true;
    }
    paragraph = true;
@@ -211,9 +214,9 @@ void ManGenerator::startParagraph()
 {
    if (!paragraph) {
       if (!firstCol) {
-         t << endl;
+         m_textStream << endl;
       }
-      t << ".PP" << endl;
+      m_textStream << ".PP" << endl;
       firstCol = true;
    }
    paragraph = true;
@@ -269,16 +272,16 @@ void ManGenerator::endHtmlLink()
 void ManGenerator::startGroupHeader(int)
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << ".SH \"";
+   m_textStream << ".SH \"";
    upperCase = true;
    firstCol = false;
 }
 
 void ManGenerator::endGroupHeader(int)
 {
-   t << "\"\n.PP " << endl;
+   m_textStream << "\"\n.PP " << endl;
    firstCol = true;
    paragraph = true;
    upperCase = false;
@@ -287,14 +290,14 @@ void ManGenerator::endGroupHeader(int)
 void ManGenerator::startMemberHeader(const char *)
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << ".SS \"";
+   m_textStream << ".SS \"";
 }
 
 void ManGenerator::endMemberHeader()
 {
-   t << "\"\n";
+   m_textStream << "\"\n";
    firstCol = true;
    paragraph = false;
 }
@@ -308,20 +311,20 @@ void ManGenerator::docify(const QByteArray &str)
       while ((c = *p++)) {
          switch (c) {
             case '.':
-               t << "\\&.";
+               m_textStream << "\\&.";
                break; // see  bug652277
             case '\\':
-               t << "\\\\";
+               m_textStream << "\\\\";
                col++;
                break;
             case '\n':
-               t << "\n";
+               m_textStream << "\n";
                col = 0;
                break;
             case '\"':
                c = '\''; // no break!
             default:
-               t << c;
+               m_textStream << c;
                col++;
                break;
          }
@@ -343,29 +346,29 @@ void ManGenerator::codify(const QByteArray &str)
          c = *p++;
          switch (c) {
             case '.':
-               t << "\\&.";
+               m_textStream << "\\&.";
                break; // see  bug652277
 
             case '\t':
                spacesToNextTabStop = Config_getInt("TAB_SIZE") - (col % Config_getInt("TAB_SIZE"));
 
-               t << QString(' ', spacesToNextTabStop);
+               m_textStream << QString(' ', spacesToNextTabStop);
                col += spacesToNextTabStop;
 
                break;
 
             case '\n':
-               t << "\n";
+               m_textStream << "\n";
                firstCol = true;
                col = 0;
                break;
             case '\\':
-               t << "\\";
+               m_textStream << "\\";
                col++;
                break;
             case '\"':  // no break!
             default:
-               p = writeUtf8Char(t, p - 1);
+               p = writeUtf8Char(m_textStream, p - 1);
                firstCol = false;
                col++;
                break;
@@ -386,12 +389,12 @@ void ManGenerator::writeChar(char c)
    }
    switch (c) {
       case '\\':
-         t << "\\\\";
+         m_textStream << "\\\\";
          break;
       case '\"':
          c = '\''; // no break!
       default:
-         t << c;
+         m_textStream << c;
          break;
    }
    //printf("%c",c);fflush(stdout);
@@ -401,7 +404,7 @@ void ManGenerator::writeChar(char c)
 void ManGenerator::startDescList(SectionTypes)
 {
    if (!firstCol) {
-      t << endl << ".PP" << endl;
+      m_textStream << endl << ".PP" << endl;
       firstCol = true;
       paragraph = true;
       col = 0;
@@ -413,24 +416,24 @@ void ManGenerator::startDescList(SectionTypes)
 void ManGenerator::startTitle()
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << ".SH \"";
+   m_textStream << ".SH \"";
    firstCol = false;
    paragraph = false;
 }
 
 void ManGenerator::endTitle()
 {
-   t << "\"";
+   m_textStream << "\"";
 }
 
 void ManGenerator::startItemListItem()
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << ".TP" << endl;
+   m_textStream << ".TP" << endl;
    firstCol = true;
    paragraph = false;
    col = 0;
@@ -443,7 +446,7 @@ void ManGenerator::endItemListItem()
 void ManGenerator::startCodeFragment()
 {
    newParagraph();
-   t << ".nf" << endl;
+   m_textStream << ".nf" << endl;
    firstCol = true;
    paragraph = false;
 }
@@ -451,9 +454,9 @@ void ManGenerator::startCodeFragment()
 void ManGenerator::endCodeFragment()
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << ".fi" << endl;
+   m_textStream << ".fi" << endl;
    firstCol = true;
    paragraph = false;
    col = 0;
@@ -462,9 +465,9 @@ void ManGenerator::endCodeFragment()
 void ManGenerator::startMemberDoc(const char *, const char *, const char *, const char *, bool)
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << ".SS \"";
+   m_textStream << ".SS \"";
    firstCol = false;
    paragraph = false;
 }
@@ -507,46 +510,46 @@ void ManGenerator::startDoxyAnchor(const char *, const char *manName,
 
 void ManGenerator::endMemberDoc(bool)
 {
-   t << "\"\n";
+   m_textStream << "\"\n";
 }
 
 void ManGenerator::startSubsection()
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << ".SS \"";
+   m_textStream << ".SS \"";
    firstCol = false;
    paragraph = false;
 }
 
 void ManGenerator::endSubsection()
 {
-   t << "\"";
+   m_textStream << "\"";
 }
 
 
 void ManGenerator::startSubsubsection()
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << "\n.SS \"";
+   m_textStream << "\n.SS \"";
    firstCol = false;
    paragraph = false;
 }
 
 void ManGenerator::endSubsubsection()
 {
-   t << "\"";
+   m_textStream << "\"";
 }
 
 void ManGenerator::writeSynopsis()
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << ".SH SYNOPSIS\n.br\n.PP\n";
+   m_textStream << ".SH SYNOPSIS\n.br\n.PP\n";
    firstCol = true;
    paragraph = false;
 }
@@ -554,9 +557,9 @@ void ManGenerator::writeSynopsis()
 void ManGenerator::startDescItem()
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << ".IP \"";
+   m_textStream << ".IP \"";
    firstCol = false;
 }
 
@@ -569,12 +572,12 @@ void ManGenerator::startDescItem()
 void ManGenerator::startDescForItem()
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
    if (!paragraph) {
-      t << ".in -1c" << endl;
+      m_textStream << ".in -1c" << endl;
    }
-   t << ".in +1c" << endl;
+   m_textStream << ".in +1c" << endl;
    firstCol = true;
    paragraph = false;
    col = 0;
@@ -586,7 +589,7 @@ void ManGenerator::endDescForItem()
 
 void ManGenerator::endDescItem()
 {
-   t << "\" 1c" << endl;
+   m_textStream << "\" 1c" << endl;
    firstCol = true;
 }
 
@@ -604,25 +607,24 @@ void ManGenerator::endAnonTypeScope(int indentLevel)
    }
 }
 
-
 void ManGenerator::startMemberItem(const char *, int, const QByteArray &)
 {
    if (firstCol && !insideTabbing) {
-      t << ".in +1c\n";
+      m_textStream << ".in +1c\n";
    }
-   t << "\n.ti -1c\n.RI \"";
+   m_textStream << "\n.ti -1c\n.RI \"";
    firstCol = false;
 }
 
 void ManGenerator::endMemberItem()
 {
-   t << "\"\n.br";
+   m_textStream << "\"\n.br";
 }
 
 void ManGenerator::startMemberList()
 {
    if (!insideTabbing) {
-      t << "\n.in +1c";
+      m_textStream << "\n.in +1c";
       firstCol = false;
    }
 }
@@ -630,19 +632,19 @@ void ManGenerator::startMemberList()
 void ManGenerator::endMemberList()
 {
    if (!insideTabbing) {
-      t << "\n.in -1c";
+      m_textStream << "\n.in -1c";
       firstCol = false;
    }
 }
 
 void ManGenerator::startMemberGroupHeader(bool)
 {
-   t << "\n.PP\n.RI \"\\fB";
+   m_textStream << "\n.PP\n.RI \"\\fB";
 }
 
 void ManGenerator::endMemberGroupHeader()
 {
-   t << "\\fP\"\n.br\n";
+   m_textStream << "\\fP\"\n.br\n";
    firstCol = true;
 }
 
@@ -652,17 +654,17 @@ void ManGenerator::startMemberGroupDocs()
 
 void ManGenerator::endMemberGroupDocs()
 {
-   t << "\n.PP";
+   m_textStream << "\n.PP";
 }
 
 void ManGenerator::startMemberGroup()
 {
-   t << "\n.in +1c";
+   m_textStream << "\n.in +1c";
 }
 
 void ManGenerator::endMemberGroup(bool)
 {
-   t << "\n.in -1c";
+   m_textStream << "\n.in -1c";
    firstCol = false;
 }
 
@@ -717,7 +719,7 @@ void ManGenerator::endSection(const char *, SectionInfo::SectionType type)
       }
 
    } else {
-      t << "\n";
+      m_textStream << "\n";
       firstCol = true;
       paragraph = false;
       inHeader = false;
@@ -727,7 +729,7 @@ void ManGenerator::endSection(const char *, SectionInfo::SectionType type)
 void ManGenerator::startSimpleSect(SectionTypes, const QByteArray &, const char *, const char *title)
 {
    if (! firstCol) {
-      t << endl << ".PP" << endl;
+      m_textStream << endl << ".PP" << endl;
       firstCol = true;
       paragraph = true;
       col = 0;
@@ -747,7 +749,7 @@ void ManGenerator::endSimpleSect()
 void ManGenerator::startParamList(ParamListTypes, const char *title)
 {
    if (!firstCol) {
-      t << endl << ".PP" << endl;
+      m_textStream << endl << ".PP" << endl;
       firstCol = true;
       paragraph = true;
       col = 0;
@@ -765,7 +767,7 @@ void ManGenerator::endParamList()
 
 void ManGenerator::writeDoc(DocNode *n, Definition *ctx, MemberDef *)
 {
-   ManDocVisitor *visitor = new ManDocVisitor(t, *this, ctx ? ctx->getDefFileExtension() : QByteArray(""));
+   ManDocVisitor *visitor = new ManDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QByteArray(""));
    n->accept(visitor);
    delete visitor;
    firstCol = false;
@@ -775,7 +777,7 @@ void ManGenerator::writeDoc(DocNode *n, Definition *ctx, MemberDef *)
 void ManGenerator::startConstraintList(const char *header)
 {
    if (!firstCol) {
-      t << endl << ".PP" << endl;
+      m_textStream << endl << ".PP" << endl;
       firstCol = true;
       paragraph = true;
       col = 0;
@@ -797,7 +799,7 @@ void ManGenerator::endConstraintParam()
 {
    endEmphasis();
    endItemListItem();
-   t << " : ";
+   m_textStream << " : ";
 }
 
 void ManGenerator::startConstraintType()
@@ -816,7 +818,7 @@ void ManGenerator::startConstraintDocs()
 
 void ManGenerator::endConstraintDocs()
 {
-   t << endl;
+   m_textStream << endl;
    firstCol = true;
 }
 
@@ -828,35 +830,35 @@ void ManGenerator::endConstraintList()
 void ManGenerator::startInlineHeader()
 {
    if (!firstCol) {
-      t << endl << ".PP" << endl << ".in -1c" << endl;
+      m_textStream << endl << ".PP" << endl << ".in -1c" << endl;
    }
-   t << ".RI \"\\fB";
+   m_textStream << ".RI \"\\fB";
 }
 
 void ManGenerator::endInlineHeader()
 {
-   t << "\\fP\"" << endl << ".in +1c" << endl;
+   m_textStream << "\\fP\"" << endl << ".in +1c" << endl;
    firstCol = false;
 }
 
 void ManGenerator::startMemberDocSimple()
 {
    if (!firstCol) {
-      t << endl << ".PP" << endl;
+      m_textStream << endl << ".PP" << endl;
    }
-   t << "\\fB";
+   m_textStream << "\\fB";
    docify(theTranslator->trCompoundMembers());
-   t << ":\\fP" << endl;
-   t << ".RS 4" << endl;
+   m_textStream << ":\\fP" << endl;
+   m_textStream << ".RS 4" << endl;
 }
 
 void ManGenerator::endMemberDocSimple()
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << ".RE" << endl;
-   t << ".PP" << endl;
+   m_textStream << ".RE" << endl;
+   m_textStream << ".PP" << endl;
    firstCol = true;
 }
 
@@ -866,17 +868,17 @@ void ManGenerator::startInlineMemberType()
 
 void ManGenerator::endInlineMemberType()
 {
-   t << " ";
+   m_textStream << " ";
 }
 
 void ManGenerator::startInlineMemberName()
 {
-   t << "\\fI";
+   m_textStream << "\\fI";
 }
 
 void ManGenerator::endInlineMemberName()
 {
-   t << "\\fP ";
+   m_textStream << "\\fP ";
 }
 
 void ManGenerator::startInlineMemberDoc()
@@ -886,10 +888,10 @@ void ManGenerator::startInlineMemberDoc()
 void ManGenerator::endInlineMemberDoc()
 {
    if (!firstCol) {
-      t << endl;
+      m_textStream << endl;
    }
-   t << ".br" << endl;
-   t << ".PP" << endl;
+   m_textStream << ".br" << endl;
+   m_textStream << ".PP" << endl;
    firstCol = true;
 }
 
@@ -899,9 +901,9 @@ void ManGenerator::startLabels()
 
 void ManGenerator::writeLabel(const char *l, bool isLast)
 {
-   t << "\\fC [" << l << "]\\fP";
+   m_textStream << "\\fC [" << l << "]\\fP";
    if (!isLast) {
-      t << ", ";
+      m_textStream << ", ";
    }
 }
 

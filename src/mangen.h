@@ -378,12 +378,6 @@ class ManGenerator : public OutputGenerator
 
    ManGenerator(const ManGenerator &g);
    ManGenerator &operator=(const ManGenerator &g);
-
-
-   // BROOM BROOM 
-   QTextStream t;    
-
-
 };
 
 #endif

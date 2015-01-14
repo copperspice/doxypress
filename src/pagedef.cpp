@@ -252,8 +252,6 @@ void PageDef::writePageDocumentation(OutputList &ol)
 
    ol.startTextBlock();
 
-printf("\n BROOM          --->  about to generateDoc " );
-
    ol.generateDoc(
       docFile(),           // fileName
       docLine(),           // startLine
@@ -264,10 +262,6 @@ printf("\n BROOM          --->  about to generateDoc " );
       false                // not an example
    );
    ol.endTextBlock();
-
-printf("\n BROOM           -->  back from generateDoc " );
-
-
 
    Doxygen::markdownSupport = markdownEnabled;
 

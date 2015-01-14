@@ -146,12 +146,12 @@ CS_Doxygen_SOURCES = \
    src/generated/declinfo.cpp  \
    src/generated/doctokenizer.cpp \
    src/generated/pre.cpp \
+   src/generated/pycode.cpp  \
+   src/generated/pyscanner.cpp \
    src/generated/scanner.cpp
 
 #   src/generated/fortrancode.cpp \
 #   src/generated/fortranscanner.cpp \
-#   src/generated/pycode.cpp \
-#   src/generated/pyscanner.cpp \
 #   src/generated/tclscanner.cpp
 
 #1   src/latexdocvisitor.cpp

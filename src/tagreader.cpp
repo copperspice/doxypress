@@ -1402,9 +1402,10 @@ void TagFileParser::buildLists(Entry *root)
       ce->lang     = tci.isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
 
       // transfer base class list
-      if (tci.bases) {
-         delete ce->extends;
-         ce->extends = tci.bases;
+      if (tci.bases) {         
+         ce->extends = *tci.bases;
+
+         delete tci.bases;
          tci.bases = 0;
       }
 

@@ -370,7 +370,9 @@ void marshalEntry(StorageIntf *s, Entry *e)
    marshalInt(s, e->bodyLine);
    marshalInt(s, e->endBodyLine);
    marshalInt(s, e->mGrpId);
-   marshalBaseInfoList(s, e->extends);
+
+   marshalBaseInfoList(s, &e->extends);
+
    marshalGroupingList(s, e->groups);
    marshalSectionInfoList(s, e->anchors);
    marshalQByteArray(s, e->fileName);
@@ -480,16 +482,16 @@ QList<ArgumentList> *unmarshalArgumentLists(StorageIntf *s)
    return result;
 }
 
-QList<BaseInfo> *unmarshalBaseInfoList(StorageIntf *s)
+QList<BaseInfo> unmarshalBaseInfoList(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return 0; 
+      return QList<BaseInfo>();
    }
 
-   QList<BaseInfo> *result = new QList<BaseInfo>;  
+   QList<BaseInfo> result;  
    assert(count < 1000000);
 
    for (i = 0; i < count; i++) {
@@ -498,8 +500,9 @@ QList<BaseInfo> *unmarshalBaseInfoList(StorageIntf *s)
       Protection prot = (Protection)unmarshalInt(s);
       Specifier virt  = (Specifier)unmarshalInt(s);
 
-      result->append(BaseInfo(name, prot, virt));
+      result.append(BaseInfo(name, prot, virt));
    }
+
    return result;
 }
 
@@ -813,12 +816,15 @@ Entry *unmarshalEntry(StorageIntf *s)
    e->bodyLine         = unmarshalInt(s);
    e->endBodyLine      = unmarshalInt(s);
    e->mGrpId           = unmarshalInt(s);
-   delete e->extends;
+  
    e->extends          = unmarshalBaseInfoList(s);
+
    delete e->groups;
    e->groups           = unmarshalGroupingList(s);
+
    delete e->anchors;
    e->anchors          = unmarshalSectionInfoList(s);
+
    e->fileName         = unmarshalQByteArray(s);
    e->startLine        = unmarshalInt(s);
    e->sli              = unmarshalItemInfoList(s);

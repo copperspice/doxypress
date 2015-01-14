@@ -376,7 +376,6 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          forceEndParagraph(s);
 
          m_t << PREFRAG_START;
-//         m_t << flush;      // added by copperspice
 
          Doxygen::parserManager->getParser(lang)->parseCode(m_ci,
                      s->context(),
@@ -393,7 +392,6 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
                      m_ctx  // search context
                     );
 
-//         m_t << flush;      // added by copperspice
          m_t << PREFRAG_END;
 
          forceStartParagraph(s);

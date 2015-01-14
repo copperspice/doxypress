@@ -29,9 +29,7 @@ QByteArray Config_Json::json_ReadFile(QString fName)
 
    QFile file(fName);
 
-   if (! file.open(QFile::ReadWrite | QFile::Text)) {
-      //const QString msg = tr("Unable to open Configuration File: ") +  m_jsonFname + " : " + file.errorString();
-      //csError(tr("Read Json"), msg);
+   if (! file.open(QFile::ReadWrite | QFile::Text)) {      
       return data;
    }
 
@@ -42,27 +40,34 @@ QByteArray Config_Json::json_ReadFile(QString fName)
    return data;
 }
 
-void Config_Json::parseConfig()
-{
-   // temp test code (broom)    BROOM - Hard Coded file name ! 
-   QString m_jsonFname = "cfg_test.json";
-
+void Config_Json::parseConfig(QString fName)
+{  
    // get existing json data
-   QByteArray data = json_ReadFile(m_jsonFname);
+   QByteArray data = Config_Json::json_ReadFile(fName);
 
    //
    QJsonDocument doc  = QJsonDocument::fromJson(data);
    QJsonObject object = doc.object();
    
    for (auto iter = object.begin(); iter != object.end(); ++iter) {
+      // walk the config file
+
+/*
+
+      X->project_name->setText( object.value("project-name").toString());
+      X->project_brief->setText( object.value("project-brief").toString());
+      X->project_number->setText( object.value("project-number").toString());
+
 
       if (iter.value().isString()) {
-         m_cfg_String.insert( iter.key(), iter.value().toString());         
+         FOO.insert( iter.key(), iter.value().toString());         
       } 
 
       if (iter.value().isBool()) {
-         m_cfg_Bool.insert( iter.key(), iter.value().toBool());         
+         FOO.insert( iter.key(), iter.value().toBool());         
       } 
+*/
+
 
    }
 }

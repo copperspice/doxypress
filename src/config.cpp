@@ -3730,12 +3730,12 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("ENABLE_PREPROCESSING", "", false);
   cb = cfg->addBool("MACRO_EXPANSION", "", false);
   cb = cfg->addBool("EXPAND_ONLY_PREDEF", "",false);
-  cs = cfg->addString("SEARCH_INCLUDES", "");
+  cb = cfg->addBool("SEARCH_INCLUDES", "", false);
   cl = cfg->addList("INCLUDE_PATH", "");
   cl = cfg->addList("INCLUDE_FILE_PATTERNS", "");
   cl = cfg->addList("PREDEFINED", "");
   cl = cfg->addList("EXPAND_AS_DEFINED", "");
-  cs = cfg->addString("SKIP_FUNCTION_MACROS", "");
+  cb = cfg->addBool("SKIP_FUNCTION_MACROS", "",false);
   cl = cfg->addList("TAGFILES", "");
   cs = cfg->addString("GENERATE_TAGFILE", "");
   cb = cfg->addBool("ALLEXTERNALS", "", false);
@@ -3812,8 +3812,8 @@ static QByteArray configFileToString(const char *name)
          totalSize += size + 1;
          contents.resize(totalSize);
 
-         contents[totalSize - 1] = '\n'; // to help the scanner   
-// broom         contents[totalSize - 1] = '\0';
+         // to help the scanner   
+         contents[totalSize - 1] = '\n'; 
 
          return contents;
       }

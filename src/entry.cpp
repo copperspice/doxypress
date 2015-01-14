@@ -35,8 +35,7 @@ Entry::Entry()
 
    m_parent = 0;
    section  = Entry::EMPTY_SEC;
-  
-   extends   = new QList<BaseInfo>;   
+       
    groups    = new QList<Grouping>; 
    anchors   = new QList<SectionInfo>;    // Doxygen::sectionDict takes ownership of the items
        
@@ -100,8 +99,7 @@ Entry::Entry(const Entry &e)
    bodyLine    = e.bodyLine;
    endBodyLine = e.endBodyLine;
    mGrpId      = e.mGrpId;
-
-   extends     = new QList<BaseInfo>;   
+  
    groups      = new QList<Grouping>;  
    anchors     = new QList<SectionInfo>;
 
@@ -133,8 +131,8 @@ Entry::Entry(const Entry &e)
    }
 
    // copy base class list
-   for (auto item : *e.extends) { 
-      extends->append(item);
+   for (auto item : e.extends) { 
+      extends.append(item);
    }
 
    // copy group list
@@ -157,8 +155,7 @@ Entry::Entry(const Entry &e)
 
 Entry::~Entry()
 {
-   // our children.
-   delete extends;
+   // our children   
    delete groups;
    delete anchors;  
    delete tArgLists;
@@ -227,7 +224,7 @@ void Entry::reset()
 
    m_sublist.clear();
 
-   extends->clear();
+   extends.clear();
    groups->clear();
    anchors->clear();
    argList.clear();

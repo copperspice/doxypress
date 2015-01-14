@@ -1190,39 +1190,10 @@ goto find_rule; \
 #define YY_RESTORE_YY_MORE_OFFSET
 char *pyscannerYYtext;
 
-/******************************************************************************
- *
- *
- *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
- *
- * Permission to use, copy, modify, and distribute this software and its
- * documentation under the terms of the GNU General Public License is hereby
- * granted. No representations are made about the suitability of this software
- * for any purpose. It is provided "as is" without express or implied warranty.
- * See the GNU General Public License for more details.
- *
- * Documents produced by Doxygen are derivative works derived from the
- * input used in their production; they are not affected by this license.
- *
- */
-/*  This code is based on the work done by the MoxyPyDoxy team
- *  (Linda Leong, Mike Rivera, Kim Truong, and Gabriel Estrada)
- *  in Spring 2005 as part of CS 179E: Compiler Design Project
- *  at the University of California, Riverside; the course was
- *  taught by Peter H. Froehlich <phf@acm.org>.
- */
-
-
-/*
- *	includes
- */
-
 #include <QFile>
 #include <QFileInfo>
+#include <QHash>
 #include <QRegExp>
-#include <QStack>
-#include <QVector>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1230,17 +1201,19 @@ char *pyscannerYYtext;
 #include <ctype.h>
 #include <unistd.h>
 
-#include "pyscanner.h"
-#include "entry.h"
-#include "message.h"
+#include "arguments.h"
+#include "commentscan.h"
 #include "config.h"
 #include "doxygen.h"
-#include "util.h"
 #include "defargs.h"
+#include "entry.h"
 #include "language.h"
-#include "commentscan.h"
+#include "message.h"
+#include "pyscanner.h"
 #include "pycode.h"
-#include "arguments.h"
+#include "util.h"
+
+#include <doxy_globals.h>
 
 // Toggle for some debugging info
 //#define DBG_CTX(x) fprintf x
@@ -1257,7 +1230,7 @@ char *pyscannerYYtext;
 
 static ParserInterface *g_thisParser;
 static const char      *inputString;
-static int		inputPosition;
+static int		         inputPosition;
 static QFile            inputFile;
 
 static Protection	protection;
@@ -1266,15 +1239,15 @@ static Entry		*current_root = 0 ;
 static Entry		*current      = 0 ;
 static Entry		*previous     = 0 ;
 static Entry		*bodyEntry    = 0 ;
-static int		yyLineNr     = 1 ;
+static int		      yyLineNr     = 1 ;
 static QByteArray		yyFileName;
 static MethodTypes 	mtype;
 static bool    		gstat;
-static Specifier 	virt;
+static Specifier    	virt;
 
 static int              docBlockContext;
-static QByteArray         docBlock;
-static QByteArray         docBlockName;
+static QByteArray       docBlock;
+static QByteArray       docBlockName;
 static bool             docBlockInBody;
 static bool             docBlockJavaStyle;
 static bool             docBrief;
@@ -1283,31 +1256,30 @@ static bool             docBlockSpecial;
 static bool             g_doubleQuote;
 static bool             g_specialBlock;
 static int              g_stringContext;
-static QByteArray        *g_copyString;
+static QByteArray       *g_copyString;
 static int              g_indent = 0;
 static int              g_curIndent = 0;
 
-static QDict<QByteArray>  g_packageNameCache(257);
-static QByteArray         g_packageScope;
+static QHash<QString, QByteArray *>  g_packageNameCache;
+
+static QByteArray       g_packageScope;
 
 static char             g_atomStart;
 static char             g_atomEnd;
 static int              g_atomCount;
 
-//static bool             g_insideConstructor;
+//static bool           g_insideConstructor;
 
-static QByteArray         g_moduleScope;
-static QByteArray         g_packageName;
+static QByteArray       g_moduleScope;
+static QByteArray       g_packageName;
 
-//static bool             g_hideClassDocs;
+//static bool           g_hideClassDocs;
 
-static QByteArray         g_defVal;
+static QByteArray       g_defVal;
 static int              g_braceCount;
 
 static bool             g_lexInit = FALSE;
 static bool             g_packageCommentAllowed;
-
-//-----------------------------------------------------------------------------
 
 
 static void initParser()
@@ -1383,23 +1355,30 @@ static inline int computeIndent(const char *s)
 
 static QByteArray findPackageScopeFromPath(const QByteArray &path)
 {
-   QByteArray *pScope = g_packageNameCache.find(path);
+   QByteArray *pScope = g_packageNameCache.value(path);
+
    if (pScope) {
       return *pScope;
    }
+
    QFileInfo pf(path + "/__init__.py"); // found package initialization file
+
    if (pf.exists()) {
       int i = path.lastIndexOf('/');
+
       if (i != -1) {
          QByteArray scope = findPackageScopeFromPath(path.left(i));
+
          if (!scope.isEmpty()) {
             scope += "::";
          }
+
          scope += path.mid(i + 1);
          g_packageNameCache.insert(path, new QByteArray(scope));
          return scope;
       }
    }
+
    return "";
 }
 
@@ -1408,11 +1387,11 @@ static QByteArray findPackageScope(const char *fileName)
    if (fileName == 0) {
       return "";
    }
-   QFileInfo fi(fileName);
-   return findPackageScopeFromPath(fi.dirPath(TRUE).data());
-}
 
-//-----------------------------------------------------------------------------
+   QFileInfo fi(fileName);
+
+   return findPackageScopeFromPath(fi.absolutePath().toUtf8());
+}
 
 static void lineCount()
 {
@@ -1462,9 +1441,7 @@ static QByteArray stripQuotes(const char *s)
    return name;
 }
 #endif
-//-----------------------------------------------------------------
 
-//-----------------------------------------------------------------
 static void startCommentBlock(bool brief)
 {
    if (brief) {
@@ -1587,7 +1564,9 @@ static void searchFoundDef()
    current->type.resize(0);
    current->name.resize(0);
    current->args.resize(0);
-   current->argList->clear();
+
+   current->argList.clear();
+
    g_packageCommentAllowed = FALSE;
    gstat = FALSE;
    //printf("searchFoundDef at=%d\n",yyLineNr);
@@ -1596,16 +1575,15 @@ static void searchFoundDef()
 static void searchFoundClass()
 {
    current->section = Entry::CLASS_SEC;
-   current->argList->clear();
+   current->argList.clear();
    current->type += "class" ;
+
    current->fileName  = yyFileName;
    current->startLine  = yyLineNr;
    current->bodyLine  = yyLineNr;
    g_packageCommentAllowed = FALSE;
 }
 
-//-----------------------------------------------------------------------------
-/* ----------------------------------------------------------------- */
 #undef	YY_INPUT
 #define	YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
 
@@ -1635,23 +1613,17 @@ static int yyread(char *buf, int max_size)
 
 
 
-
 /* Class states */
-
 
 
 
 /* Variable states */
 
 
-
 /* String states */
 
 
-
 /* import */
-
-
 
 
 
@@ -2242,11 +2214,12 @@ YY_DECL {
             YY_BREAK
          case 29:
             YY_RULE_SETUP
-
             {
-               QByteArray item = g_packageName + "." + pyscannerYYtext;
+               QByteArray item = g_packageName + "." + QByteArray(pyscannerYYtext);
+
                current->name = removeRedundantWhiteSpace(substitute(item, ".", "::"));
                current->fileName = yyFileName;
+
                //printf("Adding using declaration: found:%s:%d name=%s\n",yyFileName.data(),yyLineNr,current->name.data());
                current->section = Entry::USINGDECL_SEC;
                current_root->addSubEntry(current);
@@ -2254,17 +2227,20 @@ YY_DECL {
                initEntry();
             }
             YY_BREAK
+
          case 30:
             YY_RULE_SETUP
 
             {
-               QByteArray item = g_packageName + "." + pyscannerYYtext;
+               QByteArray item = g_packageName + "." + QByteArray(pyscannerYYtext);
                current->name = removeRedundantWhiteSpace(substitute(item, ".", "::"));
                current->fileName = yyFileName;
+
                //printf("Adding using declaration: found:%s:%d name=%s\n",yyFileName.data(),yyLineNr,current->name.data());
                current->section = Entry::USINGDECL_SEC;
                current_root->addSubEntry(current);
                current = new Entry ;
+
                initEntry();
                BEGIN(Search);
             }
@@ -2669,12 +2645,13 @@ YY_DECL {
             {
                // Name of parameter
                lineCount();
-               Argument *a = new Argument;
-               current->argList->append(a);
-               current->argList->getLast()->name = QByteArray(pyscannerYYtext).trimmed();
-               current->argList->getLast()->type = "";
+              
+               current->argList.append( Argument() );
+               current->argList.last().name = QByteArray(pyscannerYYtext).trimmed();
+               current->argList.last().type = "";
             }
             YY_BREAK
+
          case 69:
             YY_RULE_SETUP
 
@@ -2693,7 +2670,7 @@ YY_DECL {
 
             {
                // end of parameter list
-               current->args = argListToString(current->argList);
+               current->args = argListToString(&(current->argList));
             }
             YY_BREAK
          case 71:
@@ -2739,10 +2716,12 @@ YY_DECL {
             {
                if (g_braceCount == 0) // end of default argument
                {
-                  if (current->argList->getLast()) {
-                     current->argList->getLast()->defval = g_defVal.trimmed();
+                  if (! current->argList.isEmpty()) {
+                     current->argList.last().defval = g_defVal.trimmed();
                   }
+
                   BEGIN(FunctionParams);
+
                } else // continue
                {
                   g_braceCount--;
@@ -2750,6 +2729,7 @@ YY_DECL {
                }
             }
             YY_BREAK
+
          case 77:
             YY_RULE_SETUP
 
@@ -2976,9 +2956,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current->extends->append(
-                  new BaseInfo(substitute(pyscannerYYtext, ".", "::"), Public, Normal)
-               );
+               current->extends.append(BaseInfo(substitute(pyscannerYYtext, ".", "::"), Public, Normal));
                //Has base class-do stuff
             }
             YY_BREAK
@@ -4645,39 +4623,30 @@ void pyscannerYYfree (void *ptr )
 
 #define YYTABLES_NAME "yytables"
 
-
-
-
-
-//----------------------------------------------------------------------------
-
 static void parseCompounds(Entry *rt)
-{
-   //printf("parseCompounds(%s)\n",rt->name.data());
-   EntryListIterator eli(*rt->children());
-   Entry *ce;
-   for (; (ce = eli.current()); ++eli) {
-      if (!ce->program.isEmpty()) {
-         //printf("-- %s ---------\n%s\n---------------\n",
-         //  ce->name.data(),ce->program.data());
+{    
+   for (auto ce : rt->children() ) {
+      if (! ce->program.isEmpty()) {         
          // init scanner state
          inputString = ce->program;
          inputPosition = 0;
          pyscannerYYrestart( pyscannerYYin ) ;
+
          if (ce->section & Entry::COMPOUND_MASK) {
             current_root = ce ;
             BEGIN( Search );
+
          } else if (ce->parent()) {
-            current_root = ce->parent();
-            //printf("Searching for member variables in %s parent=%s\n",
-            //    ce->name.data(),ce->parent->name.data());
+            current_root = ce->parent();            
             BEGIN( SearchMemVars );
          }
+
          yyFileName = ce->fileName;
          yyLineNr   = ce->bodyLine ;
          if (current) {
             delete current;
          }
+
          current = new Entry;
          initEntry();
 
@@ -4696,9 +4665,6 @@ static void parseCompounds(Entry *rt)
    }
 }
 
-//----------------------------------------------------------------------------
-
-
 static void parseMain(const char *fileName, const char *fileBuf, Entry *rt)
 {
    initParser();
@@ -4713,11 +4679,12 @@ static void parseMain(const char *fileName, const char *fileBuf, Entry *rt)
    current_root  = rt;
    g_specialBlock = FALSE;
 
+   inputFile.setFileName(fileName);
 
-   inputFile.setName(fileName);
-   if (inputFile.open(IO_ReadOnly)) {
+   if (inputFile.open(QIODevice::ReadOnly)) {
       yyLineNr = 1 ;
       yyFileName = fileName;
+
       //setContext();
       msg("Parsing file %s...\n", yyFileName.data());
 

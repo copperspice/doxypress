@@ -24,14 +24,14 @@
 
 class Config_Json
 {
-
-   public:
-      QByteArray json_ReadFile(QString fName);
-      void parseConfig();
+   public:      
+      static void parseConfig(QString fName);
 
    private:
-       QHash<QString, QString> m_cfg_String;
-       QHash<QString, bool>    m_cfg_Bool;
+      QHash<QString, QString> m_cfg_String;
+      QHash<QString, bool>    m_cfg_Bool;
+
+      static QByteArray json_ReadFile(QString fName);
 
 };
 

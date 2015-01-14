@@ -363,13 +363,8 @@ class RTFGenerator : public OutputGenerator
    void rtfwriteRuler_thick();
    void rtfwriteRuler_thin();
    void writeRTFReference(const char *label);
+
    //char *getMultiByte(int c);
-
-
-   // BROOM BROOM 
-   QTextStream t;   
-
-
 };
 
 #endif
