@@ -114,6 +114,7 @@ CS_Doxygen_SOURCES = \
    src/objcache.cpp \
    src/outputgen.cpp \
    src/outputlist.cpp \
+   src/parser_make.cpp \
    src/pagedef.cpp \
    src/plantuml.cpp \
    src/qhp.cpp \

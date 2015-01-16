@@ -1661,7 +1661,7 @@ void RTFGenerator::codify(const QByteArray &str)
          switch (c) {
             case '\t':
                spacesToNextTabStop = Config_getInt("TAB_SIZE") - (col % Config_getInt("TAB_SIZE"));
-               m_textStream << QString(' ', spacesToNextTabStop);
+               m_textStream << QString(spacesToNextTabStop, ' ');
 
                col += spacesToNextTabStop;
                break;

@@ -3693,21 +3693,20 @@ static void lineCount()
    }
 }
 
-
 static QByteArray stripQuotes(const char *s)
 {
-   QByteArray name;
-   if (s == 0 || *s == 0) {
+   QByteArray name = s;
+
+   if (name.isEmpty()) {
       return name;
    }
-   name = s;
+
    if (name.at(0) == '"' && name.at(name.length() - 1) == '"') {
       name = name.mid(1, name.length() - 2);
    }
+
    return name;
 }
-
-//-----------------------------------------------------------------
 
 static void addXRefItem(const char *listName, const char *itemTitle, const char *listTitle, bool append)
 {
@@ -3887,18 +3886,20 @@ static void addCite()
    Doxygen::citeDict->insert(commentscanYYtext);
 }
 
-//-----------------------------------------------------------------------------
 
 // strip trailing whitespace (excluding newlines) from string s
 static void stripTrailingWhiteSpace(QByteArray &s)
 {
    uint len = s.length();
-   int i = (int)len - 1;
+
+   int i = len - 1;
    char c;
+
    while (i >= 0 && ((c = s.at(i)) == ' ' || c == '\t' || c == '\r')) {
       i--;
    }
-   if (i != (int)len - 1) {
+
+   if (i != len - 1) {
       s.resize(i + 2); // string up to and including char at pos i and \0 terminator
    }
 }
@@ -8297,19 +8298,23 @@ static bool handleCallergraph(const QByteArray &)
 
 static bool handleInternal(const QByteArray &)
 {
-   if (!Config_getBool("INTERNAL_DOCS")) {
-      // make sure some whitespace before a \internal command
+   if (! Config_getBool("INTERNAL_DOCS")) {
+      // make sure some whitespace before \internal command
       // is not treated as "documentation"
+
       if (current->doc.trimmed().isEmpty()) {
          current->doc.resize(0);
       }
+
       g_condCount = 0;
       BEGIN( SkipInternal );
+
    } else {
       // re-enabled for bug640828
       addOutput("\\internal ");
       inInternalDocs = TRUE;
    }
+
    return FALSE;
 }
 
@@ -8371,8 +8376,7 @@ static bool handlePublicSection(const QByteArray &)
 
 static bool handleToc(const QByteArray &)
 {
-   if (current->section == Entry::PAGEDOC_SEC ||
-         current->section == Entry::MAINPAGEDOC_SEC) {
+   if (current->section == Entry::PAGEDOC_SEC || current->section == Entry::MAINPAGEDOC_SEC) {
       current->stat = TRUE; // we 'abuse' stat to pass whether or the TOC is enabled
    }
    return FALSE;
@@ -8430,16 +8434,12 @@ static bool handleCopyDoc(const QByteArray &)
    return FALSE;
 }
 
-//----------------------------------------------------------------------------
-
 static void checkFormula()
 {
    if (YY_START == ReadFormulaShort || YY_START == ReadFormulaLong) {
       warn(yyFileName, yyLineNr, "End of comment block while inside formula.");
    }
 }
-
-//----------------------------------------------------------------------------
 
 bool parseCommentBlock(/* in */     ParserInterface *parser,
                                     /* in */     Entry *curEntry,
@@ -8451,20 +8451,18 @@ bool parseCommentBlock(/* in */     ParserInterface *parser,
                                     /* in */     bool isInbody,
                                     /* in,out */ Protection &prot,
                                     /* in,out */ int &position,
-                                    /* out */    bool &newEntryNeeded
-                      )
+                                    /* out */    bool &newEntryNeeded )
 {
-   //printf("parseCommentBlock() isBrief=%d isAutoBriefOn=%d lineNr=%d\n",
-   //    isBrief,isAutoBriefOn,lineNr);
-
    initParser();
 
    guards.clear();
    langParser     = parser;
    current        = curEntry;
+
    if (comment.isEmpty()) {
       return FALSE;   // avoid empty strings
    }
+
    inputString    = comment;
    inputString.append(" ");
    inputPosition  = position;
@@ -8480,6 +8478,7 @@ bool parseCommentBlock(/* in */     ParserInterface *parser,
    outputXRef.resize(0);
    setOutput( isBrief || isAutoBriefOn ? OutputBrief : OutputDoc );
    briefEndsAtDot = isAutoBriefOn;
+
    g_condCount    = 0;
    g_sectionLevel = 0;
    g_spaceBeforeCmd.resize(0);

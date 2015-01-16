@@ -26,10 +26,20 @@
 #include <QSharedPointer>
 #include <QTime>
 
+#include <cite.h>
+#include <doxygen.h>
 #include <dirdef.h>
 #include <entry.h>
+#include <filename.h>
 #include <filestorage.h>
+#include <formula.h>
+#include <groupdef.h>
+#include <membergroup.h>
+#include <membername.h>
 #include <message.h>
+#include <namespacedef.h>
+#include <pagedef.h>
+#include <reflist.h>
 #include <searchindex.h>
 
 struct LookupInfo {

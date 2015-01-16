@@ -62,13 +62,10 @@ struct LinkRef {
    QByteArray title;
 };
 
-typedef int (*action_t)(GrowBuf &out, const char *data, int offset, int size);
-
 enum Alignment { AlignNone, AlignLeft, AlignCenter, AlignRight };
 
 static QHash<QString, LinkRef> g_linkRefs;
 
-static action_t       g_actions[256];
 static Entry         *g_current;
 static QByteArray     g_fileName;
 static int            g_lineNr;
@@ -77,7 +74,8 @@ static int            g_lineNr;
 // as a title of the page, in effect making it a level0 header, so the
 // level of all other sections needs to be corrected as well.
 // This flag is true if corrections are needed.
-//static bool           g_correctSectionLevel;
+
+// static bool g_correctSectionLevel;
 
 const int codeBlockIndent = 4;
 
@@ -123,10 +121,7 @@ static void convertStringFragment(QByteArray &result, const char *data, int size
       size = 0;
    }
 
-   result.resize(size + 1);
-   memcpy(result.data(), data, size);
-  
-   result[size] = '\0';
+   result = QByteArray(data, size);    
 }
 
 /** helper function to convert presence of left and/or right alignment markers
@@ -165,18 +160,22 @@ static Alignment markersToAlignment(bool leftMarker, bool rightMarker)
 // \xmlonly..\endxmlonly
 // \rtfonly..\endrtfonly
 // \manonly..\endmanonly
+
 static QByteArray isBlockCommand(const char *data, int offset, int size)
 {
    bool openBracket = offset > 0 && data[-1] == '{';
    bool isEscaped = offset > 0 && (data[-1] == '\\' || data[-1] == '@');
+
    if (isEscaped) {
       return QByteArray();
    }
 
    int end = 1;
+
    while (end < size && (data[end] >= 'a' && data[end] <= 'z')) {
       end++;
    }
+
    if (end == 1) {
       return QByteArray();
    }
@@ -197,6 +196,7 @@ static QByteArray isBlockCommand(const char *data, int offset, int size)
               blockName == "rtfonly"     ||
               blockName == "manonly"     ||
               blockName == "docbookonly" ) {
+
       return "end" + blockName;
 
    } else if (blockName == "startuml") {
@@ -214,6 +214,7 @@ static QByteArray isBlockCommand(const char *data, int offset, int size)
 
       }
    }
+
    return QByteArray();
 }
 
@@ -319,9 +320,11 @@ static int processEmphasis1(GrowBuf &out, const char *data, int size, char c)
 
    while (i < size) {
       len = findEmphasisChar(data + i, size - i, c, 1);
+
       if (len == 0) {
          return 0;
       }
+
       i += len;
       if (i >= size) {
          return 0;
@@ -331,9 +334,12 @@ static int processEmphasis1(GrowBuf &out, const char *data, int size, char c)
          i++;
          continue;
       }
+
       if (data[i] == c && data[i - 1] != ' ' && data[i - 1] != '\n') {
          out.addStr("<em>");
+
          processInline(out, data, i);
+
          out.addStr("</em>");
          return i + 1;
       }
@@ -353,15 +359,18 @@ static int processEmphasis2(GrowBuf &out, const char *data, int size, char c)
       }
       i += len;
       if (i + 1 < size && data[i] == c && data[i + 1] == c && i && data[i - 1] != ' ' &&
-            data[i - 1] != '\n'
-         ) {
+            data[i - 1] != '\n') {
          out.addStr("<strong>");
+
          processInline(out, data, i);
+
          out.addStr("</strong>");
          return i + 2;
       }
+
       i++;
    }
+
    return 0;
 }
 
@@ -374,9 +383,11 @@ static int processEmphasis3(GrowBuf &out, const char *data, int size, char c)
 
    while (i < size) {
       len = findEmphasisChar(data + i, size - i, c, 3);
+
       if (len == 0) {
          return 0;
       }
+
       i += len;
 
       /* skip whitespace preceded symbols */
@@ -389,6 +400,7 @@ static int processEmphasis3(GrowBuf &out, const char *data, int size, char c)
          processInline(out, data, i);
          out.addStr("</strong></em>");
          return i + 3;
+
       } else if (i + 1 < size && data[i + 1] == c) {
          // double symbol found, handing over to emph1
          len = processEmphasis1(out, data - 2, size + 2, c);
@@ -397,6 +409,7 @@ static int processEmphasis3(GrowBuf &out, const char *data, int size, char c)
          } else {
             return len - 2;
          }
+
       } else {
          // single symbol found, handing over to emph2
          len = processEmphasis2(out, data - 1, size + 1, c);
@@ -414,25 +427,37 @@ static int processEmphasis3(GrowBuf &out, const char *data, int size, char c)
 static int processNmdash(GrowBuf &out, const char *data, int off, int size)
 {
    // precondition: data[0]=='-'
-   int i = 1;
+
+   int i     = 1;
    int count = 1;
+
    if (i < size && data[i] == '-') { // found --
-      count++, i++;
+      count++;
+      i++;
    }
+
    if (i < size && data[i] == '-') { // found ---
-      count++, i++;
+      count++;
+      i++;
    }
+
    if (i < size && data[i] == '-') { // found ----
       count++;
    }
-   if (count == 2 && (off < 8 || qstrncmp(data - 8, "operator", 8) != 0)) { // -- => ndash
+
+   if (count == 2 && (off < 8 || qstrncmp(data - 8, "operator", 8) != 0)) { 
+      // -- => ndash
       out.addStr("&ndash;");
       return 2;
-   } else if (count == 3) { // --- => ndash
+
+   } else if (count == 3) { 
+      // --- => mdash
       out.addStr("&mdash;");
       return 3;
    }
+
    // not an ndash or mdash
+
    return 0;
 }
 
@@ -930,58 +955,139 @@ static int processCodeSpan(GrowBuf &out, const char *data, int /*offset*/, int s
 static int processSpecialCommand(GrowBuf &out, const char *data, int offset, int size)
 {
    int i = 1;
+
    QByteArray endBlockName = isBlockCommand(data, offset, size);
-   if (!endBlockName.isEmpty()) {
+
+   if (! endBlockName.isEmpty()) {
       int l = endBlockName.length();
-      while (i < size - l) {
-         if ((data[i] == '\\' || data[i] == '@') && // command
-               data[i - 1] != '\\' && data[i - 1] != '@') { // not escaped
-            if (qstrncmp(&data[i + 1], endBlockName, l) == 0) {
-               //printf("found end at %d\n",i);
+
+      while (i < (size - l)) {
+         if ((data[i] == '\\' || data[i] == '@') && data[i - 1] != '\\' && data[i - 1] != '@') { 
+            // not escaped
+
+            if (qstrncmp(&data[i + 1], endBlockName, l) == 0) {              
                out.addStr(data, i + 1 + l);
                return i + 1 + l;
             }
          }
+
          i++;
       }
    }
+
    if (size > 1 && data[0] == '\\') {
       char c = data[1];
+
       if (c == '[' || c == ']' || c == '*' || c == '+' || c == '-' ||
             c == '!' || c == '(' || c == ')' || c == '.' || c == '`' || c == '_') {
-         if (c == '-' && size > 3 && data[2] == '-' && data[3] == '-') { // \---
+
+         if (c == '-' && size > 3 && data[2] == '-' && data[3] == '-') { 
+            // \---
             out.addStr(&data[1], 3);
             return 4;
-         } else if (c == '-' && size > 2 && data[2] == '-') { // \--
+
+         } else if (c == '-' && size > 2 && data[2] == '-') { 
+             // \--
             out.addStr(&data[1], 2);
             return 3;
          }
+
          out.addStr(&data[1], 1);
          return 2;
       }
    }
+
    return 0;
 }
 
 static void processInline(GrowBuf &out, const char *data, int size)
 {
-   int i = 0, end = 0;
-   action_t action = 0;
+   int i = 0;
+   int index = 0;
+
+   QSet<char> keys;
+   keys.insert('_');   // processEmphasis
+   keys.insert('*');   // processEmphasis
+   keys.insert('`');   // processCodeSpan
+   keys.insert('\\');  // processSpecialCommand
+   keys.insert('@');   // processSpecialCommand
+   keys.insert('[');   // processLink
+   keys.insert('!');   // processLink
+   keys.insert('<');   // processHtmlTag
+   keys.insert('-');   // processNmdash
+   keys.insert('"');   // processQuoted
+ 
    while (i < size) {
-      while (end < size && ((action = g_actions[(uchar)data[end]]) == 0)) {
-         end++;
+    
+      while (index < size)  {  
+
+         if (keys.contains(data[index])) { 
+            break;         
+         }        
+
+         index++;
       }
-      out.addStr(data + i, end - i);
-      if (end >= size) {
+   
+      out.addStr(data + i, index - i);
+
+      if (index >= size) {
          break;
       }
-      i = end;
-      end = action(out, data + i, i, size - i);
-      if (!end) {
-         end = i + 1;
-      } else {
-         i += end;
-         end = i;
+
+      int skipCount;
+
+      switch (data[index]) {
+
+         case '_':
+            skipCount = processEmphasis(out, data + index, index, size - index);
+            break;
+
+         case '*':
+            skipCount = processEmphasis(out, data + index, index, size - index);
+            break;
+
+         case '`':
+            skipCount = processCodeSpan(out, data + index, index, size - index);
+            break;
+
+         case '\\':
+            skipCount = processSpecialCommand(out, data + index, index, size - index);
+            break;
+
+         case '@':
+            skipCount = processSpecialCommand(out, data + index, index, size - index);
+            break;
+
+         case '[':
+            skipCount = processLink(out, data + index, index, size - index);
+            break;
+
+         case '!':
+            skipCount = processLink(out, data + index, index, size - index);
+            break;
+
+         case '<':
+           skipCount = processHtmlTag(out, data + index, index, size - index);
+            break;
+
+         case '-':
+            skipCount = processNmdash(out, data + index, index, size - index);
+            break;
+
+         case '"':
+            skipCount = processQuoted(out, data + index, index, size - index);
+            break;
+
+      }
+    
+      if (skipCount == 0) {
+         i = index;
+         index++;
+         
+
+      } else {     
+         i = index + skipCount;   
+         index = i;
       }
    }
 }
@@ -990,6 +1096,7 @@ static void processInline(GrowBuf &out, const char *data, int size)
 static int isHeaderline(const char *data, int size)
 {
    int i = 0, c = 0;
+
    while (i < size && data[i] == ' ') {
       i++;
    }
@@ -1873,8 +1980,7 @@ static int writeCodeBlock(GrowBuf &out, const char *data, int size, int refInden
 
 // start searching for the end of the line start at offset \a i
 // keeping track of possible blocks that need to to skipped.
-static void findEndOfLine(GrowBuf &out, const char *data, int size,
-                          int &pi, int &i, int &end)
+static void findEndOfLine(GrowBuf &out, const char *data, int size, int &pi, int &i, int &end)
 {
    // find end of the line
    int nb = 0;
@@ -1882,11 +1988,15 @@ static void findEndOfLine(GrowBuf &out, const char *data, int size,
    while (end <= size && data[end - 1] != '\n') {
       // while looking for the end of the line we might encounter a block
       // that needs to be passed unprocessed.
+
       if ((data[end - 1] == '\\' || data[end - 1] == '@') &&  // command
-            (end <= 1 || (data[end - 2] != '\\' && data[end - 2] != '@')) // not escaped
-         ) {
+            (end <= 1 || (data[end - 2] != '\\' && data[end - 2] != '@')) ) {
+
+         // not escaped
+         
          QByteArray endBlockName = isBlockCommand(data + end - 1, end - 1, size - (end - 1));
          end++;
+
          if (!endBlockName.isEmpty()) {
             int l = endBlockName.length();
             for (; end < size - l - 1; end++) { // search for end of block marker
@@ -2275,32 +2385,17 @@ static QByteArray detab(const QByteArray &s, int &refIndent)
    return out.get();
 }
 
-//---------------------------------------------------------------------------
-
 QByteArray processMarkdown(const QByteArray &fileName, const int lineNr, Entry *e, const QByteArray &input)
 {
-   static bool init = false;
-   if (!init) {
-      // setup callback table for special characters
-      g_actions[(unsigned int)'_'] = processEmphasis;
-      g_actions[(unsigned int)'*'] = processEmphasis;
-      g_actions[(unsigned int)'`'] = processCodeSpan;
-      g_actions[(unsigned int)'\\'] = processSpecialCommand;
-      g_actions[(unsigned int)'@'] = processSpecialCommand;
-      g_actions[(unsigned int)'['] = processLink;
-      g_actions[(unsigned int)'!'] = processLink;
-      g_actions[(unsigned int)'<'] = processHtmlTag;
-      g_actions[(unsigned int)'-'] = processNmdash;
-      g_actions[(unsigned int)'"'] = processQuoted;
-      init = true;
-   }
- 
+    
    g_linkRefs.clear();
-   g_current = e;
+
+   g_current  = e;
    g_fileName = fileName;
    g_lineNr   = lineNr;
 
    static GrowBuf out;
+
    if (input.isEmpty()) {
       return input;
    }
@@ -2324,7 +2419,10 @@ QByteArray processMarkdown(const QByteArray &fileName, const int lineNr, Entry *
    processInline(out, s, s.length());
 
    out.addChar(0);
-   Debug::print(Debug::Markdown, 0, "======== Markdown =========\n---- input ------- \n%s\n---- output -----\n%s\n---------\n", input.data(), out.get());
+
+   Debug::print(Debug::Markdown, 0, "======== Markdown =========\n---- input ------- \n%s\n---- output -----\n%s\n---------\n", 
+         input.data(), out.get());
+
    return out.get();
 }
 
@@ -2410,38 +2508,27 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, E
    }
 
    // restore setting
-   Doxygen::markdownSupport = markdownEnabled;
-   //g_correctSectionLevel = false;
+   Doxygen::markdownSupport = markdownEnabled; 
 }
 
-void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf,
-                                   const char *scopeName,
-                                   const QByteArray &input,
-                                   SrcLangExt lang,
-                                   bool isExampleBlock,
-                                   const char *exampleName,
-                                   FileDef *fileDef,
-                                   int startLine,
-                                   int endLine,
-                                   bool inlineFragment,
-                                   MemberDef *memberDef,
-                                   bool showLineNumbers,
-                                   Definition *searchCtx,
-                                   bool collectXRefs
-                                  )
+void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input,
+                                   SrcLangExt lang, bool isExampleBlock, const char *exampleName, FileDef *fileDef,
+                                   int startLine, int endLine, bool inlineFragment, MemberDef *memberDef,
+                                   bool showLineNumbers, Definition *searchCtx, bool collectXRefs )
 {
    ParserInterface *pIntf = Doxygen::parserManager->getParser("*.cpp");
+
    if (pIntf != this) {
-      pIntf->parseCode(
-         codeOutIntf, scopeName, input, lang, isExampleBlock, exampleName,
-         fileDef, startLine, endLine, inlineFragment, memberDef, showLineNumbers,
-         searchCtx, collectXRefs);
+      pIntf->parseCode(codeOutIntf, scopeName, input, lang, isExampleBlock, exampleName,
+                       fileDef, startLine, endLine, inlineFragment, memberDef, showLineNumbers,
+                       searchCtx, collectXRefs);
    }
 }
 
 void MarkdownFileParser::resetCodeParserState()
 {
    ParserInterface *pIntf = Doxygen::parserManager->getParser("*.cpp");
+
    if (pIntf != this) {
       pIntf->resetCodeParserState();
    }
@@ -2450,6 +2537,7 @@ void MarkdownFileParser::resetCodeParserState()
 void MarkdownFileParser::parsePrototype(const char *text)
 {
    ParserInterface *pIntf = Doxygen::parserManager->getParser("*.cpp");
+
    if (pIntf != this) {
       pIntf->parsePrototype(text);
    }

@@ -383,7 +383,7 @@ void HtmlCodeGenerator::codify(const QByteArray &str)
 
             case '\t':
                spacesToNextTabStop = tabSize - (m_col % tabSize);
-               m_streamX << QString(' ', spacesToNextTabStop);
+               m_streamX << QString(spacesToNextTabStop, ' ');
 
                m_col += spacesToNextTabStop;
 
@@ -492,6 +492,7 @@ void HtmlCodeGenerator::writeLineNumber(const char *ref, const QByteArray &filen
    const int maxLineNrStr = 10;
    char lineNumber[maxLineNrStr];
    char lineAnchor[maxLineNrStr];
+
    qsnprintf(lineNumber, maxLineNrStr, "%5d", l);
    qsnprintf(lineAnchor, maxLineNrStr, "l%05d", l);
 
@@ -630,7 +631,7 @@ void HtmlCodeGenerator::writeTooltip(const char *id, const DocLinkInfo &docInfo,
 
 void HtmlCodeGenerator::startCodeLine(bool hasLineNumbers)
 {  
-   if (!hasLineNumbers) {
+   if (! hasLineNumbers) {
       m_streamX << "<div class=\"line\">";
    }
 

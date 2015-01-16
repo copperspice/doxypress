@@ -1152,21 +1152,21 @@ char *pycodeYYtext;
 
 #include <stdio.h>
 
-#include <pycode.h>
-#include <message.h>
-#include "scanner.h"
-#include "entry.h"
-#include "doxygen.h"
-#include "outputlist.h"
-#include "util.h"
-#include "membername.h"
-#include "searchindex.h"
-#include "config.h"
-#include "groupdef.h"
 #include "classlist.h"
+#include "config.h"
+#include "doxygen.h"
+#include "entry.h"
 #include "filedef.h"
+#include "groupdef.h"
+#include "membername.h"
+#include <message.h>
 #include "namespacedef.h"
+#include "outputlist.h"
+#include <pycode.h>
+#include "scanner.h"
+#include "searchindex.h"
 #include "tooltip.h"
+#include "util.h"
 
 // at the end
 #include <doxy_globals.h>
@@ -1178,9 +1178,9 @@ char *pycodeYYtext;
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
 
-static ClassSDict    g_codeClassSDict;
-static QByteArray      g_curClassName;
-static QStringList      g_curClassBases;
+static ClassSDict     g_codeClassSDict;
+static QByteArray     g_curClassName;
+static QStringList    g_curClassBases;
 
 
 static CodeOutputInterface *g_code;
@@ -1485,7 +1485,6 @@ static void startCodeLine()
          g_realScope = d->name();
          g_classScope = d->name();
 
-         //printf("Real scope: `%s'\n",g_realScope.data());
          g_bodyCurlyCount = 0;
 
          QByteArray lineAnchor;
@@ -1502,13 +1501,14 @@ static void startCodeLine()
             g_code->writeLineNumber(d->getReference(), d->getOutputFileBase(), 0, g_yyLineNr);
             setCurrentDoc(lineAnchor);
          }
-      } else {
-         //g_code->codify(lineNumber);
+
+      } else {        
          g_code->writeLineNumber(0, 0, 0, g_yyLineNr);
-      }
-      //g_code->endLineNumber();
+      }      
    }
+
    g_code->startCodeLine(g_sourceFileDef);
+
    if (g_currentFontClass) {
       g_code->startFontClass(g_currentFontClass);
    }
@@ -3860,15 +3860,13 @@ void parsePythonCode(CodeOutputInterface &od, const char * /*className*/,
                      const QByteArray &s, bool exBlock, const char *exName,
                      FileDef *fd, int startLine, int endLine, bool /*inlineFragment*/,
                      MemberDef *, bool, Definition *searchCtx, bool collectXRefs)
-{
-
-   //printf("***parseCode()\n");
-
-   //--------------------------------------
+{ 
    if (s.isEmpty()) {
       return;
    }
+
    printlex(pycodeYY_flex_debug, TRUE, __FILE__, fd ? fd->fileName().data() : NULL);
+
    TooltipManager::instance()->clearTooltips();
    g_code = &od;
    g_inputString   = s;
@@ -3877,6 +3875,7 @@ void parsePythonCode(CodeOutputInterface &od, const char * /*className*/,
    g_needsTermination = FALSE;
    g_searchCtx = searchCtx;
    g_collectXRefs = collectXRefs;
+
    if (endLine != -1) {
       g_inputLines  = endLine + 1;
    } else {
@@ -3899,6 +3898,7 @@ void parsePythonCode(CodeOutputInterface &od, const char * /*className*/,
       g_sourceFileDef = new FileDef("", (exName ? exName : "generated"));
       cleanupSourceDef = TRUE;
    }
+
    if (g_sourceFileDef) {
       setCurrentDoc("l00001");
    }
@@ -3925,8 +3925,8 @@ void parsePythonCode(CodeOutputInterface &od, const char * /*className*/,
       delete g_sourceFileDef;
       g_sourceFileDef = 0;
    }
-   printlex(pycodeYY_flex_debug, FALSE, __FILE__, fd ? fd->fileName().data() : NULL);
-   return;
+
+   printlex(pycodeYY_flex_debug, FALSE, __FILE__, fd ? fd->fileName().data() : NULL);   
 }
 
 

@@ -1167,7 +1167,9 @@ static inline int computeIndent(const char *s)
 static inline void copyToOutput(const char *s, int len)
 {
    int i;
-   if (g_skip) { // only add newlines.
+   if (g_skip) { 
+      // only add newlines
+
       for (i = 0; i < len; i++) {
          if (s[i] == '\n') {
             ADDCHAR('\n');
@@ -1175,9 +1177,11 @@ static inline void copyToOutput(const char *s, int len)
             g_lineNr++;
          }
       }
+
    } else if (len > 0) {
       ADDARRAY(s, len);
       static int tabSize = Config_getInt("TAB_SIZE");
+
       for (i = 0; i < len; i++) {
          switch (s[i]) {
             case '\n':
@@ -1704,29 +1708,33 @@ YY_DECL {
             /* rule 12 can match eol */
             YY_RULE_SETUP
 
-            { /* start C++ style special comment block */
-               if (g_mlBrief)
-               {
+            { /* start C++ style special comment block   \code{.cpp} */
+
+               if (g_mlBrief)  {
                   REJECT; // bail out if we do not need to convert
-               } else
-               {
+
+               } else {
                   int i = 3;
                   if (commentcnvYYtext[2] == '/')
+
                   {
                      while (i < (int)commentcnvYYleng && commentcnvYYtext[i] == '/') {
                         i++;
                      }
                   }
+
                   g_blockHeadCol = g_col;
                   copyToOutput("/**", 3);
+
                   replaceAliases(commentcnvYYtext + i);
                   g_inSpecialComment = TRUE;
-                  //BEGIN(SComment);
+                 
                   g_readLineCtx = SComment;
                   BEGIN(ReadLine);
                }
             }
             YY_BREAK
+
          case 13:
             /* rule 13 can match eol */
             *yy_cp = (yy_hold_char); /* undo effects of setting up commentcnvYYtext */
@@ -1864,17 +1872,19 @@ YY_DECL {
             {
                copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
                g_blockName = &commentcnvYYtext[1];
-               if (g_blockName.at(1) == '[')
-               {
+
+               if (g_blockName.at(1) == '[') {
                   g_blockName[1] = ']';
-               } else if (g_blockName.at(1) == '{')
-               {
+
+               } else if (g_blockName.at(1) == '{')  {
                   g_blockName[1] = '}';
                }
+
                g_lastCommentContext = YY_START;
                BEGIN(Verbatim);
             }
             YY_BREAK
+
          case 23:
             /* rule 23 can match eol */
             *yy_cp = (yy_hold_char); /* undo effects of setting up commentcnvYYtext */
@@ -1998,23 +2008,24 @@ YY_DECL {
             YY_BREAK
          case 32:
             YY_RULE_SETUP
-
             {
-               if (g_blockName == "dot" || g_blockName == "msc" || g_blockName == "uml" || g_blockName.at(0) == 'f')
-               {
-                  // see bug 487871, strip /// from dot images and formulas.
+               if (g_blockName == "dot" || g_blockName == "msc" || g_blockName == "uml" || g_blockName.startsWith('f') ) {               
+                  // see bug 487871, strip /// from dot images and formulas
+
                   int l = 0;
                   while (commentcnvYYtext[l] == ' ' || commentcnvYYtext[l] == '\t') {
                      l++;
                   }
                   copyToOutput(commentcnvYYtext, l);
                   copyToOutput("   ", 3);
+
                } else // even slashes are verbatim (e.g. \verbatim, \code)
                {
                   REJECT;
                }
             }
             YY_BREAK
+
          case 33:
             YY_RULE_SETUP
 

@@ -1134,6 +1134,7 @@ void generateOutput()
       generateDEF();
       Doxy_Globals::g_stats.end();
    }
+
    if (Config_getBool("GENERATE_PERLMOD")) {
       Doxy_Globals::g_stats.begin("Generating Perl module output\n");
 //BROOM      generatePerlMod();

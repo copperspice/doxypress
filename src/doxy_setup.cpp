@@ -48,6 +48,7 @@
 #include <membername.h>
 #include <namespacedef.h>
 #include <outputlist.h>
+#include <parser_make.h>
 #include <pagedef.h>
 #include <perlmodgen.h>
 #include <portable.h>
@@ -118,6 +119,7 @@ void initDoxygen()
 //   Doxygen::parserManager->registerParser("tcl",          new TclLanguageScanner);
 
    Doxygen::parserManager->registerParser("md",             new MarkdownFileParser);
+   Doxygen::parserManager->registerParser("make",           new MakeFileParser);
 
    // register any additional parsers here
    initDefaultExtensionMapping();

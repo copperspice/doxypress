@@ -22,23 +22,23 @@
  *  taught by Peter H. Froehlich <phf@acm.org>.
 */
 
-
 #ifndef PYCODE_H
 #define PYCODE_H
+
+#include <QByteArray>
 
 #include <types.h>
 
 class CodeOutputInterface;
 class FileDef;
 class MemberDef;
-class QByteArray;
 class Definition;
 
 extern void parsePythonCode(CodeOutputInterface &, const char *, const QByteArray &,
-                            bool , const char *, FileDef *fd,
-                            int startLine, int endLine, bool inlineFragment,
-                            MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx,
-                            bool collectXRefs);
+                            bool , const char *, FileDef *fd, int startLine, int endLine, bool inlineFragment,
+                            MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx, bool collectXRefs);
+
 extern void resetPythonCodeParserState();
+
 
 #endif

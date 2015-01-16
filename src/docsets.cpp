@@ -336,11 +336,11 @@ void DocSets::addIndexItem(Definition *context, MemberDef *md,
       break;
       case SrcLangExt_IDL:
          lang = "idl";
-         break;        // IDL
+         break;        
 
       case SrcLangExt_CSharp:
          lang = "csharp";
-         break;     // C#
+         break;    
 
       case SrcLangExt_PHP:
          lang = "php";
@@ -348,23 +348,23 @@ void DocSets::addIndexItem(Definition *context, MemberDef *md,
 
       case SrcLangExt_D:
          lang = "d";
-         break;          // D
+         break;         
 
       case SrcLangExt_Java:
          lang = "java";
-         break;       // Java
+         break;       
 
       case SrcLangExt_JS:
          lang = "javascript";
-         break; // Javascript
+         break; 
 
       case SrcLangExt_Python:
          lang = "python";
-         break;     // Python
+         break;     
 
       case SrcLangExt_Fortran:
          lang = "fortran";
-         break;    // Fortran
+         break;    
 
       case SrcLangExt_XML:
          lang = "xml";
@@ -372,11 +372,15 @@ void DocSets::addIndexItem(Definition *context, MemberDef *md,
 
       case SrcLangExt_Tcl:
          lang = "tcl";
-         break;        // Tcl
+         break;        
  
      case SrcLangExt_Markdown:
          lang = "markdown";
-         break;   // Markdown
+         break; 
+
+     case SrcLangExt_Make:
+         lang = "make";
+         break;  
 
       case SrcLangExt_Unknown:
          lang = "unknown";

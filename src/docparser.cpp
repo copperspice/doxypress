@@ -1033,7 +1033,10 @@ static void handleUnclosedStyleCommands()
       DocStyleChange sc = s_initialStyleStack.top();
 
       s_initialStyleStack.pop();
+
       handleUnclosedStyleCommands();
+
+printf("\n  BROOM - div issue reported here \n");
 
       warn_doc_error(s_fileName, doctokenizerYYlineno, "end of comment block while expecting "
                      "command </%s>", qPrint(sc.styleString()));

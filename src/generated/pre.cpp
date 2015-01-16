@@ -2854,7 +2854,7 @@ static bool               g_expandOnlyPredef; // from the configuration
 static int                g_commentCount;
 static bool               g_insideComment;
 static bool               g_isImported;
-static QByteArray           g_blockName;
+static QByteArray         g_blockName;
 static int                g_condCtx;
 static bool               g_skip;
 static QStack<CondCtx *>    g_condStack;
@@ -4445,9 +4445,6 @@ YY_DECL {
 
    do_action:	/* This label is used only to access EOF actions. */
 
-
-printf("\n BROOM   preprocess / switch %d", yy_act);
-
       switch ( yy_act ) {
          /* beginning of action switch */
          case 1:
@@ -5737,22 +5734,27 @@ printf("\n BROOM   preprocess / switch %d", yy_act);
                outputArray(preYYtext, (int)preYYleng);
                g_yyLineNr += QByteArray(preYYtext).count('\n');
                g_fenceSize = 0;
-               if (preYYtext[1] == 'f')
-               {
-                  g_blockName = "f";
-               } else
-               {
+
+               if (preYYtext[1] == 'f')  {
+                  g_blockName = "f"; 
+
+               } else {
                   QByteArray bn = &preYYtext[1];
-                  int i = bn.indexOf('{'); // for \code{.c}
-                  if (i != -1)
-                  {
+
+                  int i = bn.indexOf('{'); 
+
+                  // for \code{.c}
+                  if (i != -1) {
                      bn = bn.left(i);
                   }
+
                   g_blockName = bn.trimmed();
                }
+
                BEGIN(SkipVerbatim);
             }
             YY_BREAK
+
          case 122:
             YY_RULE_SETUP
 
@@ -5928,9 +5930,11 @@ printf("\n BROOM   preprocess / switch %d", yy_act);
 
             { /* end of verbatim block */
                outputArray(preYYtext, (int)preYYleng);
+
                if (preYYtext[1] == 'f' && g_blockName == "f")
                {
                   BEGIN(SkipCComment);
+
                } else if (&preYYtext[4] == g_blockName)
                {
                   BEGIN(SkipCComment);

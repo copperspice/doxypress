@@ -4816,21 +4816,11 @@ bool PythonLanguageScanner::needsPreprocessing(const QByteArray &)
    return FALSE;
 }
 
-void PythonLanguageScanner::parseCode(CodeOutputInterface &codeOutIntf,
-                                      const char *scopeName,
-                                      const QByteArray &input,
-                                      SrcLangExt /*lang*/,
-                                      bool isExampleBlock,
-                                      const char *exampleName,
-                                      FileDef *fileDef,
-                                      int startLine,
-                                      int endLine,
-                                      bool inlineFragment,
-                                      MemberDef *memberDef,
-                                      bool showLineNumbers,
-                                      Definition *searchCtx,
-                                      bool collectXRefs
-                                     )
+void PythonLanguageScanner::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName,
+                                      const QByteArray &input, SrcLangExt /*lang*/, bool isExampleBlock,
+                                      const char *exampleName, FileDef *fileDef, int startLine,
+                                      int endLine, bool inlineFragment, MemberDef *memberDef,
+                                      bool showLineNumbers, Definition *searchCtx, bool collectXRefs )
 {
    ::parsePythonCode(codeOutIntf, scopeName, input, isExampleBlock, exampleName,
                      fileDef, startLine, endLine, inlineFragment, memberDef,

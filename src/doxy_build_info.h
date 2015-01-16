@@ -19,6 +19,6 @@
 #define DOXY_BUILD_INFO_H_IN
 
 //  CS Doxygen Version  "1.0.0"
-constexpr const char *versionString = "1.0";
+constexpr const char *versionString = "1.0.0";
 
 #endif

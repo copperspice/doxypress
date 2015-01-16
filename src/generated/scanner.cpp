@@ -10854,15 +10854,19 @@ static inline int computeIndent(const char *s, int startIndent)
 static void addType( Entry *current )
 {
    uint tl = current->type.length();
-   if ( tl > 0 && !current->name.isEmpty() && current->type.at(tl - 1) != '.') {
+
+   if ( tl > 0 && ! current->name.isEmpty() && current->type.at(tl - 1) != '.') {
       current->type += ' ' ;
    }
+
    current->type += current->name ;
    current->name.resize(0) ;
    tl = current->type.length();
+
    if ( tl > 0 && !current->args.isEmpty() && current->type.at(tl - 1) != '.') {
       current->type += ' ' ;
    }
+
    current->type += current->args ;
    current->args.resize(0) ;
    current->argList.clear();
@@ -10871,41 +10875,53 @@ static void addType( Entry *current )
 
 static QByteArray stripQuotes(const char *s)
 {
-   QByteArray name;
-   if (s == 0 || *s == 0) {
+   QByteArray name = s;
+
+   if (name.isEmpty()) {
       return name;
    }
-   name = s;
+      
    if (name.at(0) == '"' && name.at(name.length() - 1) == '"') {
       name = name.mid(1, name.length() - 2);
    }
+
    return name;
 }
-
-//-----------------------------------------------------------------
 
 static void startCommentBlock(bool);
 static void handleCommentBlock(const QByteArray &doc, bool brief);
 static void handleParametersCommentBlocks(ArgumentList *al);
 
-//-----------------------------------------------------------------
-
 static bool nameIsOperator(QByteArray &name)
 {
    int i = name.indexOf("operator");
-   if (i == -1) {
+
+   if (i == -1) {    
       return FALSE;
    }
-   if (i == 0 && !isId(name.at(8))) {
-      return TRUE;   // case operator ::X
+  
+   if (i == 0) { 
+     int len = name.length();
+   
+      if (len > 8 && ! isId(name.at(8))) {
+         // case operator ::X
+         return TRUE;  
+      }
    }
-   if (i > 0 && !isId(name.at(i - 1)) && !isId(name.at(i + 8))) {
-      return TRUE;   // case X::operator
-   }
-   return FALSE; // case TEXToperatorTEXT
-}
 
-//-----------------------------------------------------------------------------
+   if (i > 0) {
+      int len = name.length();
+
+      if ( (len > (i + 8))  &&  ! isId(name.at(i - 1)) && ! isId(name.at(i + 8))) {
+         // case X::operator
+         return TRUE;  
+      }
+   }
+
+   // case TEXToperatorTEXT
+
+   return FALSE; 
+}
 
 static void setContext()
 {
@@ -10981,17 +10997,22 @@ static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
       if (bi1 != -1 && bi2 != -1) { // found something like "int (*func)(int arg)"
          int s = bi2 + 1;
          oldStyleArgType = current->args.left(s);
+
          int i = s;
+
          while (i < si && ((c = current->args.at(i)) == '*' || isspace((uchar)c))) {
             i++;
          }
          oldStyleArgType += current->args.mid(s, i - s);
          s = i;
+
          while (i < si && isId(current->args.at(i))) {
             i++;
          }
+
          oldStyleArgName = current->args.mid(s, i - s);
          oldStyleArgType += current->args.mid(i);
+
       } else if (bi1 != -1) { // redundant braces like in "int (*var)"
          int s = bi1;
          oldStyleArgType = current->args.left(s);
@@ -11438,10 +11459,9 @@ extern int scannerYYlex (void);
 /** The main scanner function which does all the work.
  */
 YY_DECL {
-   register yy_state_type yy_current_state;
-   register char *yy_cp, *yy_bp;
-   register int yy_act;
-
+   yy_state_type yy_current_state;
+   char *yy_cp, *yy_bp;
+   int yy_act;
 
    if ( !(yy_init) )
    {
@@ -13609,8 +13629,10 @@ YY_DECL {
                addType( current );
                current->name = scannerYYtext;
                current->name = current->name.trimmed();
+
                //current->scopeSpec.resize(0);
                // currentTemplateSpec = &current->scopeSpec;
+
                if (nameIsOperator(current->name))
                {
                   BEGIN( Operator );
@@ -14015,68 +14037,73 @@ YY_DECL {
                {
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
+
                yyBegColNr = yyColNr;
                yyBegLineNr = yyLineNr;
                lineCount();
-               if (insideIDL && scannerYYleng == 9 && qstrcmp(scannerYYtext, "cpp_quote") == 0)
-               {
+
+               if (insideIDL && scannerYYleng == 9 && qstrcmp(scannerYYtext, "cpp_quote") == 0) {
                   BEGIN(CppQuote);
-               } else if ((insideIDL || insideJava || insideD) && scannerYYleng == 6 && qstrcmp(scannerYYtext, "import") == 0)
-               {
+
+               } else if ((insideIDL || insideJava || insideD) && scannerYYleng == 6 && qstrcmp(scannerYYtext, "import") == 0) {
+
                   if (insideIDL) {
                      BEGIN(NextSemi);
                   } else { // insideJava or insideD
                      BEGIN(JavaImport);
                   }
-               } else if (insidePHP && qstrcmp(scannerYYtext, "use") == 0)
-               {
+
+               } else if (insidePHP && qstrcmp(scannerYYtext, "use") == 0) {
                   BEGIN(PHPUse);
-               } else if (insideJava && qstrcmp(scannerYYtext, "package") == 0)
-               {
+
+               } else if (insideJava && qstrcmp(scannerYYtext, "package") == 0) {
                   lineCount();
                   BEGIN(PackageName);
-               } else if (insideIDL && qstrcmp(scannerYYtext, "case") == 0)
-               {
+
+               } else if (insideIDL && qstrcmp(scannerYYtext, "case") == 0) {
                   BEGIN(IDLUnionCase);
-               } else if (insideTryBlock && qstrcmp(scannerYYtext, "catch") == 0)
-               {
+
+               } else if (insideTryBlock && qstrcmp(scannerYYtext, "catch") == 0) { 
                   insideTryBlock = FALSE;
                   BEGIN(TryFunctionBlock);
-               } else if (insideCpp && qstrcmp(scannerYYtext, "alignas") == 0)
-               {
+
+               } else if (insideCpp && qstrcmp(scannerYYtext, "alignas") == 0) {
                   lastAlignAsContext = YY_START;
                   BEGIN(AlignAs);
-               } else if (insideJS && qstrcmp(scannerYYtext, "var") == 0)
-               {
+
+               } else if (insideJS && qstrcmp(scannerYYtext, "var") == 0) {
                   // javascript variable
                   current->type = "var";
-               } else if (insideJS && qstrcmp(scannerYYtext, "function") == 0)
-               {
+
+               } else if (insideJS && qstrcmp(scannerYYtext, "function") == 0) {
                   // javascript function
                   current->type = "function";
-               } else if (insideCS && qstrcmp(scannerYYtext, "this") == 0)
-               {
+
+               } else if (insideCS && qstrcmp(scannerYYtext, "this") == 0) {
                   // C# indexer
                   addType( current ) ;
                   current->name = "this";
                   BEGIN(CSIndexer);
-               } else if (insideCpp && qstrcmp(scannerYYtext, "static_assert") == 0)
-               {
+
+               } else if (insideCpp && qstrcmp(scannerYYtext, "static_assert") == 0) {
                   // C++11 static_assert
                   BEGIN(StaticAssert);
-               } else if (insideCpp && qstrcmp(scannerYYtext, "decltype") == 0)
-               {
+
+               } else if (insideCpp && qstrcmp(scannerYYtext, "decltype") == 0) {
                   // C++11 decltype(x)
                   current->type += scannerYYtext;
                   BEGIN(DeclType);
-               } else
-               {
+
+               } else {
+
                   if (YY_START == FindMembers)
                   {
                      addType( current ) ;
                   }
+
                   bool javaLike = insideJava || insideCS || insideD || insidePHP || insideJS;
                   if (javaLike && qstrcmp(scannerYYtext, "public") == 0)
+
                   {
                      current->protection = Public;
                   } else if (javaLike && qstrcmp(scannerYYtext, "protected") == 0)
@@ -14125,17 +14152,19 @@ YY_DECL {
                         current->name = current->name.mid(6);
                      }
                   }
+
                   QByteArray tmp = scannerYYtext;
-                  if (nameIsOperator(tmp))
-                  {
+
+                  if (nameIsOperator(tmp)) {
                      BEGIN( Operator );
-                  } else
-                  {
+
+                  } else {
                      BEGIN(FindMembers);
                   }
                }
             }
             YY_BREAK
+
          case 196:
             YY_RULE_SETUP
 
@@ -16481,10 +16510,10 @@ YY_DECL {
                         int i = p->name.lastIndexOf("::");
                         int pi = (i == -1) ? 0 : i + 2;
 
-                        if (p->name.at(pi) == '@') {
-                           // anonymous compound inside -> insert dummy variable name
-                           //printf("Adding anonymous variable for scope %s\n",p->name.data());
+                        int len = p->name.length();
 
+                        if (len > pi && p->name.at(pi) == '@') { 
+                           // anonymous compound inside -> insert dummy variable name 
                            msName = QString("@%1").arg(anonCount++).toUtf8();
 
                            break;
@@ -20383,9 +20412,8 @@ YY_DECL {
 
          {
             warn(yyFileName, yyLineNr,
-                 "reached end of file while inside a %s block!\n"
-                 "The command that should end the block seems to be missing!\n",
-                 docBlockName.data());
+                 "Reached end of file while inside a %s block\n"
+                 "The command which should end the block seems to be missing\n", docBlockName.data());
             yyterminate();
          }
          YY_BREAK
@@ -20902,11 +20930,14 @@ YY_DECL {
          }
 
          default:
-            YY_FATAL_ERROR(
-               "fatal flex scanner internal error--no action found" );
+            YY_FATAL_ERROR("Fatal Flex Scanner internal error, no action found" );
+
       } /* end of action switch */
+
    } /* end of scanning one token */
+
 } /* end of scannerYYlex */
+
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -21912,10 +21943,15 @@ static void parseCompounds(Entry *rt)
 {  
    for(auto ce : rt->children() ) {
 
-      if (! ce->program.isEmpty()) {       
+printf("\n  BROOM SPOT    A1"); 
+
+      if (! ce->program.isEmpty()) {      
+
+printf("\n  BROOM SPOT    A2"); 
+ 
          padCount = 0;
-         //depthIf = 0;
          g_column = 0;
+
          inputString = ce->program;
          inputPosition = 0;
 
@@ -21938,6 +21974,7 @@ static void parseCompounds(Entry *rt)
          if (current) {
             delete current;
          }
+
          current = new Entry;
          gstat = FALSE;
          initEntry();
@@ -21960,16 +21997,20 @@ static void parseCompounds(Entry *rt)
          if ( ce->section == Entry::CLASS_SEC ) { // class
             if (insidePHP || insideD || insideJS || insideIDL) {
                current->protection = protection = Public ;
+
             } else if (insideJava) {
                current->protection = protection = (ce->spec & (Entry::Interface | Entry::Enum)) ?  Public : Package;
+
             } else if (ce->spec & (Entry::Interface | Entry::Ref | Entry::Value | Entry::Struct | Entry::Union)) {
                if (ce->lang == SrcLangExt_ObjC) {
-                  current->protection = protection = Protected ;
+                  current->protection = protection = Protected;
+
                } else {
-                  current->protection = protection = Public ;
+                  current->protection = protection = Public;
                }
+
             } else {
-               current->protection = protection = Private ;
+               current->protection = protection = Private;
             }
 
          } else if (ce->section == Entry::ENUM_SEC ) { // enum
@@ -21981,35 +22022,35 @@ static void parseCompounds(Entry *rt)
             }
             current->protection = protection = ce->protection;
 
-         } else { // named struct, union, protocol, category
+         } else { 
+            // named struct, union, protocol, category
             current->protection = protection = Public ;
          }
 
          mtype = Method;
          virt = Normal;
-         //printf("name=%s current->stat=%d gstat=%d\n",ce->name.data(),current->stat,gstat);
-
-         //memberGroupId = DOX_NOGROUP;
-         //memberGroupRelates.resize(0);
-         //memberGroupInside.resize(0);
+         
          groupEnterCompound(yyFileName, yyLineNr, ce->name);
 
          scannerYYlex() ;
          g_lexInit = TRUE;
-         //forceEndGroup();
-
+       
          groupLeaveCompound(yyFileName, yyLineNr, ce->name);
 
          delete current;
          current = 0;
+
          const_cast<Entry *>(ce)->program.resize(0);
       }
 
       parseCompounds(const_cast<Entry *>(ce));
-   }
-}
 
-//----------------------------------------------------------------------------
+
+printf("\n  BROOM SPOT    W2");
+
+   }
+
+}
 
 static void parseMain(const char *fileName, const char *fileBuf, Entry *rt, 
                       bool sameTranslationUnit, QStringList &filesInSameTranslationUnit)
@@ -22127,8 +22168,10 @@ static void parsePrototype(const QByteArray &text)
    inputString = text;
    inputPosition = 0;
    g_column = 0;
+
    scannerYYrestart( scannerYYin );
    BEGIN(Prototype);
+
    scannerYYlex();
    g_lexInit = TRUE;
 

@@ -1548,13 +1548,14 @@ YY_DECL {
                         }
                         BEGIN(SkipInvalid);
                         break;
+
                      case ConfigOption::O_Disabled:
                         if (config_upd) {
-                           config_err("Warning: Tag `%s' at line %d of file `%s' belongs to an option that was not enabled at compile time.\n"
+                           config_err("Warning: Tag `%s' at line %d of file `%s' belongs to an option which was not enabled at compile time.\n"
                                       "         This tag has been removed.\n", cmd.data(), yyLineNr, yyFileName.data());
                         } else {
-                           config_err("Warning: Tag `%s' at line %d of file `%s' belongs to an option that was not enabled at compile time.\n"
-                                      "         To avoid this warning please remove this line from your configuration "
+                           config_err("Warning: Tag `%s' at line %d of file `%s' belongs to an option which was not enabled at compile time.\n"
+                                      "         To avoid this warning remove this line from your configuration "
                                       "file or upgrade it using \"doxygen -u\", or recompile doxygen with this feature enabled.\n", cmd.data(), yyLineNr, yyFileName.data());
                         }
                         BEGIN(SkipInvalid);
@@ -1643,12 +1644,11 @@ YY_DECL {
          case YY_STATE_EOF(GetEnvVar):
          case YY_STATE_EOF(Include):
 
-         {
-            //printf("End of include file\n");
-            //printf("Include stack depth=%d\n",g_includeStack.count());
+         {            
             if (includeStack.isEmpty()) {
                //printf("Terminating scanner!\n");
                yyterminate();
+
             } else {
                ConfigFileState *fs = includeStack.pop();
                fclose(fs->filePtr);
@@ -3563,7 +3563,7 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("DISTRIBUTE_GROUP_DOC", "", false);
   cb = cfg->addBool("INLINE_GROUPED_CLASSES", "", false);
   cb = cfg->addBool("INLINE_SIMPLE_STRUCTS", "", false);
-  cs = cfg->addString("TYPEDEF_HIDES_STRUCT", "");
+  cb = cfg->addBool("TYPEDEF_HIDES_STRUCT", "", false);
   ci = cfg->addInt("LOOKUP_CACHE_SIZE", "",0,9,0);
   cb = cfg->addBool("EXTRACT_ALL", "", false);
   cb = cfg->addBool("EXTRACT_PRIVATE", "", false);
@@ -3576,7 +3576,7 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("HIDE_UNDOC_CLASSES", "",false);
   cb = cfg->addBool("HIDE_FRIEND_COMPOUNDS", "", false);
   cb = cfg->addBool("HIDE_IN_BODY_DOCS", "", false);
-  cs = cfg->addString("INTERNAL_DOCS", "");
+  cb = cfg->addBool("INTERNAL_DOCS", "", false);
   cb = cfg->addBool("HIDE_SCOPE_NAMES", "", false);
   cb = cfg->addBool("SHOW_INCLUDE_FILES", "", false);
   cb = cfg->addBool("SHOW_GROUPED_MEMB_INC", "", false);
