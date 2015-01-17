@@ -84,47 +84,61 @@ static bool mustBeOutsideParagraph(DocNode *n)
       case DocNode::Kind_HtmlList:
       case DocNode::Kind_SimpleList:
       case DocNode::Kind_AutoList:
+
       /* <dl> */
       case DocNode::Kind_SimpleSect:
       case DocNode::Kind_ParamSect:
       case DocNode::Kind_HtmlDescList:
       case DocNode::Kind_XRefItem:
+
       /* <table> */
       case DocNode::Kind_HtmlTable:
+
       /* <h?> */
       case DocNode::Kind_Section:
       case DocNode::Kind_HtmlHeader:
+
       /* \internal */
       case DocNode::Kind_Internal:
+
       /* <div> */
       case DocNode::Kind_Include:
       case DocNode::Kind_Image:
       case DocNode::Kind_SecRefList:
+
       /* <hr> */
       case DocNode::Kind_HorRuler:
       /* CopyDoc gets paragraph markers from the wrapping DocPara node,
        * but needs to insert them for all documentation being copied to
        * preserve formatting.
        */
+
       case DocNode::Kind_Copy:
       /* <blockquote> */
+
       case DocNode::Kind_HtmlBlockQuote:
       /* \parblock */
+
       case DocNode::Kind_ParBlock:
          return true;
+
       case DocNode::Kind_Verbatim: {
          DocVerbatim *dv = (DocVerbatim *)n;
          return dv->type() != DocVerbatim::HtmlOnly || dv->isBlock();
       }
+
       case DocNode::Kind_StyleChange:
          return ((DocStyleChange *)n)->style() == DocStyleChange::Preformatted ||
                 ((DocStyleChange *)n)->style() == DocStyleChange::Div ||
                 ((DocStyleChange *)n)->style() == DocStyleChange::Center;
+
       case DocNode::Kind_Formula:
          return !((DocFormula *)n)->isInline();
+
       default:
          break;
    }
+
    return false;
 }
 
@@ -143,8 +157,6 @@ static QString htmlAttribsToString(const HtmlAttribList &attribs)
    }
    return result;
 }
-
-//-------------------------------------------------------------------------
 
 HtmlDocVisitor::HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, Definition *ctx)
    : DocVisitor(DocVisitor_Html), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false), m_ctx(ctx)
@@ -172,7 +184,7 @@ void HtmlDocVisitor::visit(DocLinkedWord *w)
    if (m_hide) {
       return;
    }
-   //printf("linked word: %s\n",w->word().data());
+   
    startLink(w->ref(), w->file(), w->relPath(), w->anchor(), w->tooltip());
    filter(w->word());
    endLink();
@@ -183,6 +195,7 @@ void HtmlDocVisitor::visit(DocWhiteSpace *w)
    if (m_hide) {
       return;
    }
+
    if (m_insidePre) {
       m_t << w->chars();
    } else {
@@ -195,6 +208,7 @@ void HtmlDocVisitor::visit(DocSymbol *s)
    if (m_hide) {
       return;
    }
+
    const char *res = HtmlEntityMapper::instance()->html(s->symbol());
    if (res) {
       m_t << res;
@@ -208,6 +222,7 @@ void HtmlDocVisitor::writeObfuscatedMailAddress(const QByteArray &url)
    m_t << "<a href=\"#\" onclick=\"location.href='mai'+'lto:'";
    uint i;
    int size = 3;
+
    for (i = 0; i < url.length();) {
       m_t << "+'" << url.mid(i, size) << "'";
       i += size;
@@ -225,10 +240,12 @@ void HtmlDocVisitor::visit(DocURL *u)
    if (m_hide) {
       return;
    }
+
    if (u->isEmail()) { // mail address
       QByteArray url = u->url();
       writeObfuscatedMailAddress(url);
       uint size = 5, i;
+
       for (i = 0; i < url.length();) {
          filter(url.mid(i, size));
          if (i < url.length() - size) {
@@ -242,6 +259,7 @@ void HtmlDocVisitor::visit(DocURL *u)
          }
       }
       m_t << "</a>";
+
    } else { // web address
       m_t << "<a href=\"";
       m_t << u->url() << "\">";
@@ -263,6 +281,7 @@ void HtmlDocVisitor::visit(DocHorRuler *hr)
    if (m_hide) {
       return;
    }
+
    forceEndParagraph(hr);
    m_t << "<hr/>\n";
    forceStartParagraph(hr);
@@ -273,6 +292,7 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
    if (m_hide) {
       return;
    }
+
    switch (s->style()) {
       case DocStyleChange::Bold:
          if (s->enable()) {
@@ -281,6 +301,7 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</b>";
          }
          break;
+
       case DocStyleChange::Italic:
          if (s->enable()) {
             m_t << "<em" << htmlAttribsToString(s->attribs()) << ">";
@@ -288,6 +309,7 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</em>";
          }
          break;
+
       case DocStyleChange::Code:
          if (s->enable()) {
             m_t << "<code" << htmlAttribsToString(s->attribs()) << ">";
@@ -295,6 +317,7 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</code>";
          }
          break;
+
       case DocStyleChange::Subscript:
          if (s->enable()) {
             m_t << "<sub" << htmlAttribsToString(s->attribs()) << ">";
@@ -302,6 +325,7 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</sub>";
          }
          break;
+
       case DocStyleChange::Superscript:
          if (s->enable()) {
             m_t << "<sup" << htmlAttribsToString(s->attribs()) << ">";
@@ -309,6 +333,7 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</sup>";
          }
          break;
+
       case DocStyleChange::Center:
          if (s->enable()) {
             forceEndParagraph(s);
@@ -318,6 +343,7 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
             forceStartParagraph(s);
          }
          break;
+
       case DocStyleChange::Small:
          if (s->enable()) {
             m_t << "<small" << htmlAttribsToString(s->attribs()) << ">";
@@ -325,26 +351,31 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</small>";
          }
          break;
+
       case DocStyleChange::Preformatted:
          if (s->enable()) {
             forceEndParagraph(s);
             m_t << "<pre" << htmlAttribsToString(s->attribs()) << ">";
             m_insidePre = true;
+
          } else {
             m_insidePre = false;
             m_t << "</pre>";
             forceStartParagraph(s);
          }
          break;
+
       case DocStyleChange::Div:
          if (s->enable()) {
             forceEndParagraph(s);
-            m_t << "<div" << htmlAttribsToString(s->attribs()) << ">";
+            m_t << "<div " << htmlAttribsToString(s->attribs()) << ">";
+
          } else {
             m_t << "</div>";
             forceStartParagraph(s);
          }
          break;
+
       case DocStyleChange::Span:
          if (s->enable()) {
             m_t << "<span" << htmlAttribsToString(s->attribs()) << ">";
@@ -861,6 +892,7 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
             isFirst = isFirstChildNode((DocParBlock *)p->parent(), p);
             isLast = isLastChildNode ((DocParBlock *)p->parent(), p);
             t = 0;
+
             if (isFirst) {
                if (kind == DocNode::Kind_HtmlListItem ||
                      kind == DocNode::Kind_SecRefItem) {
@@ -889,21 +921,25 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
             }
             break;
          }
+
          case DocNode::Kind_AutoListItem:
             isFirst = isFirstChildNode((DocAutoListItem *)p->parent(), p);
             isLast = isLastChildNode ((DocAutoListItem *)p->parent(), p);
             t = 1; // not used
             break;
+
          case DocNode::Kind_SimpleListItem:
             isFirst = true;
             isLast = true;
             t = 1; // not used
             break;
+
          case DocNode::Kind_ParamList:
             isFirst = true;
             isLast = true;
             t = 1; // not used
             break;
+
          case DocNode::Kind_HtmlListItem:
             isFirst = isFirstChildNode((DocHtmlListItem *)p->parent(), p);
             isLast = isLastChildNode ((DocHtmlListItem *)p->parent(), p);
@@ -1018,6 +1054,7 @@ void HtmlDocVisitor::visitPre(DocPara *p)
    // the paragraph (<ul>,<dl>,<table>,..) then that will already started the
    // paragraph and we don't need to do it here
    uint nodeIndex = 0;
+
    if (p && nodeIndex < p->children().count()) {
       while (nodeIndex < p->children().count() &&
              p->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace) {
@@ -1035,6 +1072,7 @@ void HtmlDocVisitor::visitPre(DocPara *p)
    // this allows us to mark the tag with a special class so we can
    // fix the otherwise ugly spacing.
    int t;
+
    static const char *contexts[7] = {
       "",                     // 0
       " class=\"startli\"",   // 1
@@ -1044,10 +1082,12 @@ void HtmlDocVisitor::visitPre(DocPara *p)
       " class=\"starttd\"",   // 5
       " class=\"endtd\""      // 6
    };
+
    bool isFirst;
    bool isLast;
+
    t = getParagraphContext(p, isFirst, isLast);
-   //printf("startPara first=%d last=%d\n",isFirst,isLast);
+  
    if (isFirst && isLast) {
       needsTag = false;
    }
@@ -1795,15 +1835,17 @@ void HtmlDocVisitor::visitPost(DocParamSect *s)
 
 void HtmlDocVisitor::visitPre(DocParamList *pl)
 {
-   //printf("DocParamList::visitPre\n");
    if (m_hide) {
       return;
    }
+
    m_t << "    <tr>";
    DocParamSect *sect = 0;
+
    if (pl->parent()->kind() == DocNode::Kind_ParamSect) {
       sect = (DocParamSect *)pl->parent();
    }
+
    if (sect && sect->hasInOutSpecifier()) {
       m_t << "<td class=\"paramdir\">";
       if (pl->direction() != DocParamSect::Unspecified) {
@@ -2182,29 +2224,31 @@ void HtmlDocVisitor::writePlantUMLFile(const QByteArray &fileName, const QByteAr
    }
 }
 
+
 /** Used for items found inside a paragraph, which due to XHTML restrictions
  *  have to be outside of the paragraph. This method will forcefully end
  *  the current paragraph and forceStartParagraph() will restart it.
  */
 void HtmlDocVisitor::forceEndParagraph(DocNode *n)
 {
-     if (n->parent() && n->parent()->kind() == DocNode::Kind_Para) {
+   if (n->parent() && n->parent()->kind() == DocNode::Kind_Para) {
+
       DocPara *para = (DocPara *)n->parent();
       int nodeIndex = para->children().indexOf(n);
 
       nodeIndex--;
       if (nodeIndex < 0) {
-         return;   // first node
+         // first node
+         return;   
       }
 
-      while (nodeIndex >= 0 &&
-             para->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace
-            ) {
+      while (nodeIndex >= 0 && para->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace) {
          nodeIndex--;
       }
+
       if (nodeIndex >= 0) {
          DocNode *n = para->children().at(nodeIndex);
-         //printf("n=%p kind=%d outside=%d\n",n,n->kind(),mustBeOutsideParagraph(n));
+        
          if (mustBeOutsideParagraph(n)) {
             return;
          }
@@ -2212,8 +2256,9 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
 
       bool isFirst;
       bool isLast;
+
       getParagraphContext(para, isFirst, isLast);
-      //printf("forceEnd first=%d last=%d\n",isFirst,isLast);
+      
       if (isFirst && isLast) {
          return;
       }
@@ -2228,7 +2273,9 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
  */
 void HtmlDocVisitor::forceStartParagraph(DocNode *n)
 {  
-   if (n->parent() && n->parent()->kind() == DocNode::Kind_Para) { // if we are inside a paragraph
+   if (n->parent() && n->parent()->kind() == DocNode::Kind_Para) { 
+      // if we are inside a paragraph
+
       DocPara *para = (DocPara *)n->parent();
       int nodeIndex = para->children().indexOf(n);
       int numNodes  = para->children().count();
@@ -2238,16 +2285,17 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
          return;   // last node
       }
 
-      while (nodeIndex < numNodes &&
-             para->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace
-            ) {
+      while (nodeIndex < numNodes && para->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace) {
          nodeIndex++;
       }
+
       if (nodeIndex < numNodes) {
          DocNode *n = para->children().at(nodeIndex);
+
          if (mustBeOutsideParagraph(n)) {
             return;
          }
+
       } else {
          return; // only whitespace at the end!
       }
@@ -2256,7 +2304,7 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
       bool isLast;
 
       getParagraphContext(para, isFirst, isLast);
-      //printf("forceStart first=%d last=%d\n",isFirst,isLast);
+
       if (isFirst && isLast) {
          return;
       }

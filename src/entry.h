@@ -343,13 +343,13 @@ class Entry
 class EntryNav
 {
  public:
-   EntryNav(EntryNav *parent, Entry *e);
+   EntryNav(EntryNav *parent, QSharedPointer<Entry> e);   
    ~EntryNav();
 
-   void addChild(EntryNav *);
+   void addChild( QSharedPointer<EntryNav> e);
    bool loadEntry(FileStorage *storage);
    bool saveEntry(Entry *e, FileStorage *storage);
-   void setEntry(Entry *e);
+   void setEntry( QSharedPointer<Entry> e);
    void releaseEntry();
 
    void changeSection(int section) {
@@ -360,7 +360,7 @@ class EntryNav
       m_fileDef = fd;
    }
 
-   Entry *entry() const {
+   QSharedPointer<Entry> entry() const {
       return m_info;
    }
 
@@ -384,7 +384,7 @@ class EntryNav
       return m_tagInfo;
    }
 
-   const QList<EntryNav *> &children() const {
+   const QList<QSharedPointer<EntryNav>> &children() const {
       return m_subList;
    }
 
@@ -399,8 +399,9 @@ class EntryNav
  private:
 
    // navigation
-   EntryNav          *m_parent;    //!< parent node in the tree
-   QList<EntryNav *>  m_subList;   //!< entries that are children of this one
+   EntryNav *m_parent;         //!< parent node in the tree
+
+   QList<QSharedPointer<EntryNav>>  m_subList;   //!< entries that are children of this one
 
    // identification
    int          m_section;     //!< entry type (see Sections);
@@ -410,7 +411,8 @@ class EntryNav
    FileDef     *m_fileDef;
    SrcLangExt   m_lang;        //!< programming language in which this entry was found
 
-   Entry       *m_info;
+   QSharedPointer<Entry> m_info;
+
    int64_t      m_offset;
    bool         m_noLoad;
 };

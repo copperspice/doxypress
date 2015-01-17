@@ -298,9 +298,9 @@ void Entry::removeSubEntry(Entry *e)
    }  
 }
 
-EntryNav::EntryNav(EntryNav *parent, Entry *e)
+EntryNav::EntryNav(EntryNav *parent, QSharedPointer<Entry> e)
    : m_parent(parent), m_section(e->section), m_type(e->type), m_name(e->name), 
-     m_fileDef(0), m_lang(e->lang), m_info(0), m_offset(-1), m_noLoad(false)
+     m_fileDef(0), m_lang(e->lang), m_offset(-1), m_noLoad(false)
 {
    if (e->tagInfo) {
       m_tagInfo = new TagInfo;
@@ -316,12 +316,11 @@ EntryNav::EntryNav(EntryNav *parent, Entry *e)
 }
 
 EntryNav::~EntryNav()
-{ 
-   delete m_info;
+{    
    delete m_tagInfo;
 }
 
-void EntryNav::addChild(EntryNav *e)
+void EntryNav::addChild( QSharedPointer<EntryNav> e)
 {  
    m_subList.append(e);
 }
@@ -341,14 +340,11 @@ bool EntryNav::loadEntry(FileStorage *storage)
       //printf("seek failed!\n");
       return false;
    }
-
-   if (m_info) {
-      delete m_info;
-   }
-
+  
    m_info = unmarshalEntry(storage);
    m_info->name = m_name;
    m_info->type = m_type;
+
    m_info->section = m_section;
 
    return true;
@@ -364,20 +360,15 @@ bool EntryNav::saveEntry(Entry *e, FileStorage *storage)
 
 void EntryNav::releaseEntry()
 {
-   if (! m_noLoad) {
-      //printf("EntryNav::releaseEntry %p\n",m_info);
-      delete m_info;
-      m_info = 0;
+   if (! m_noLoad) {      
+      m_info =  QSharedPointer<Entry>();
    }
 }
 
-void EntryNav::setEntry(Entry *e)
+void EntryNav::setEntry(QSharedPointer<Entry> e)
 {
-   delete m_info;
    m_info = e;
-
-   //printf("EntryNav::setEntry %p\n",e);
-
+  
    m_noLoad = true;
 }
 

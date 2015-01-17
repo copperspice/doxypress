@@ -66,11 +66,11 @@
 #include <objcache.h>
 #include <outputlist.h>
 #include <pagedef.h>
+#include <parser_py.h>
 #include <parserintf.h>
 #include <perlmodgen.h>
 #include <portable.h>
 #include <pre.h>
-#include <pyscanner.h>
 #include <qhp.h>
 #include <reflist.h>
 #include <rtfgen.h>
@@ -374,14 +374,14 @@ namespace Doxy_Work{
    void parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNav, FileDef *fd, const char *fn,
                 bool sameTu, QStringList &filesInSameTu);
 
-   void parseFiles(Entry *root, EntryNav *rootNav);
+   void parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav);
    void parseInput();
    void processTagLessClasses(ClassDef *rootCd, ClassDef *cd,ClassDef *tagParentCd, const QByteArray &prefix, int count);
 
    void resolveClassNestingRelations();
    QByteArray resolveSymlink(QByteArray path);
    void resolveUserReferences();
-   void readTagFile(Entry *root, const char *tl);
+   void readTagFile(QSharedPointer<Entry> root, const char *tl);
 
    bool scopeIsTemplate(Definition *d);
    void sortMemberLists();
@@ -604,8 +604,8 @@ void parseInput()
       exit(1);
    }
 
-   Entry *root = new Entry;
-   EntryNav *rootNav = new EntryNav(0, root);
+   QSharedPointer<Entry> root = QMakeShared<Entry>();
+   QSharedPointer<EntryNav> rootNav = QMakeShared<EntryNav>(0, root);
    rootNav->setEntry(root);
   
    msg("Reading and parsing tag files\n");
@@ -621,7 +621,6 @@ void parseInput()
    if (Config_getBool("BUILTIN_STL_SUPPORT")) {
       addSTLClasses(rootNav);
    }
-
 
    Doxy_Globals::g_stats.begin("Parsing files\n");
    parseFiles(root, rootNav);
@@ -1338,7 +1337,8 @@ void distributeClassGroupRelations()
 // ** start of static methods
 void Doxy_Work::addSTLMember(EntryNav *rootNav, const char *type, const char *name)
 {
-   Entry *memEntry      = new Entry;
+   QSharedPointer<Entry> memEntry = QMakeShared<Entry>();
+
    memEntry->name       = name;
    memEntry->type       = type;
    memEntry->protection = Public;
@@ -1346,18 +1346,17 @@ void Doxy_Work::addSTLMember(EntryNav *rootNav, const char *type, const char *na
    memEntry->brief      = "STL member";
    memEntry->hidden     = false;
    memEntry->artificial = true;
+  
+   QSharedPointer<EntryNav> memEntryNav = QMakeShared<EntryNav>(rootNav, memEntry);
 
-   //memEntry->parent     = root;
-   //root->addSubEntry(memEntry);
-
-   EntryNav *memEntryNav = new EntryNav(rootNav, memEntry);
    memEntryNav->setEntry(memEntry);
    rootNav->addChild(memEntryNav);
 }
 
 void Doxy_Work::addSTLIterator(EntryNav *classEntryNav, const char *name)
 {
-   Entry *iteratorClassEntry      = new Entry;
+   QSharedPointer<Entry> iteratorClassEntry = QMakeShared<Entry>();
+
    iteratorClassEntry->fileName   = "[STL]";
    iteratorClassEntry->startLine  = 1;
    iteratorClassEntry->name       = name;
@@ -1366,7 +1365,8 @@ void Doxy_Work::addSTLIterator(EntryNav *classEntryNav, const char *name)
    iteratorClassEntry->hidden     = false;
    iteratorClassEntry->artificial = true;
 
-   EntryNav *iteratorClassEntryNav = new EntryNav(classEntryNav, iteratorClassEntry);
+   QSharedPointer<EntryNav> iteratorClassEntryNav = QMakeShared<EntryNav>(classEntryNav, iteratorClassEntry);
+
    iteratorClassEntryNav->setEntry(iteratorClassEntry);
    classEntryNav->addChild(iteratorClassEntryNav);
 }
@@ -1382,8 +1382,7 @@ void Doxy_Work::addSTLClasses(EntryNav *rootNav)
    namespaceEntry->brief     = "STL namespace";
    namespaceEntry->hidden    = false;
    namespaceEntry->artificial = true;
-
-   //root->addSubEntry(namespaceEntry);
+  
    EntryNav *namespaceEntryNav = new EntryNav(rootNav, namespaceEntry);
    namespaceEntryNav->setEntry(namespaceEntry);
    rootNav->addChild(namespaceEntryNav);
@@ -9034,7 +9033,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNa
 }
 
 //! parse the list of input files
-void Doxy_Work::parseFiles(Entry *root, EntryNav *rootNav)
+void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav)
 {
 
 #if USE_LIBCLANG
@@ -9234,7 +9233,7 @@ void Doxy_Work::exitDoxygen()
    }
 }
 
-void Doxy_Work::readTagFile(Entry *root, const char *tl)
+void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const char *tl)
 {
    QByteArray tagLine = tl;
    QByteArray fileName;
@@ -9494,14 +9493,16 @@ void readFormulaRepository()
 {
    QFile f(Config_getString("HTML_OUTPUT") + "/formula.repository");
 
-   if (f.open(QIODevice::ReadOnly)) { // open repository
+   if (f.open(QIODevice::ReadOnly)) { 
+      // open repository
+
       msg("Reading formula repository\n");
       QTextStream t(&f);
       QByteArray line;
 
       while (! t.atEnd()) {
          line = t.readLine().toUtf8();
-         int se = line.indexOf(':'); // find name and text separator.
+         int se = line.indexOf(':'); // find name and text separator
 
          if (se == -1) {
             warn_uncond("formula.repository is corrupted\n");
@@ -9541,7 +9542,9 @@ void Doxy_Work::escapeAliases()
       while ((in = value.indexOf("\\n", p)) != -1) {
          newValue += value.mid(p, in - p);
 
-         // expand \n's except if \n is part of a built-in command.
+         // expand \n's except if \n is part of a built-in command
+
+
          if (value.mid(in, 5) != "\\note" &&
                value.mid(in, 5) != "\\name" &&
                value.mid(in, 10) != "\\namespace" &&
@@ -9596,10 +9599,12 @@ void Doxy_Work::dumpSymbol(QTextStream &t, Definition *d)
       MemberDef *md = (MemberDef *)d;
       anchor = ":" + md->anchor();
    }
+
    QByteArray scope;
    if (d->getOuterScope() && d->getOuterScope() != Doxygen::globalScope) {
       scope = d->getOuterScope()->getOutputFileBase() + Doxygen::htmlFileExtension;
    }
+
    t << "REPLACE INTO symbols (symbol_id,scope_id,name,file,line) VALUES('"
      << d->getOutputFileBase() + Doxygen::htmlFileExtension + anchor << "','"
      << scope << "','"

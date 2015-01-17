@@ -1208,10 +1208,9 @@ char *pyscannerYYtext;
 #include "defargs.h"
 #include "entry.h"
 #include "language.h"
-#include "message.h"
-#include "pyscanner.h"
-#include "pycode.h"
-#include "util.h"
+#include <message.h>
+#include <parser_py.h>"
+#include <util.h>
 
 #include <doxy_globals.h>
 
@@ -1221,12 +1220,6 @@ char *pyscannerYYtext;
 
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
-
-/* -----------------------------------------------------------------
- *
- *	statics
- */
-
 
 static ParserInterface *g_thisParser;
 static const char      *inputString;

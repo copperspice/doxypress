@@ -121,6 +121,7 @@ class DocNode
                Kind_ParBlock       = 51,
                Kind_DiaFile        = 52
              };
+
    /*! Creates a new node */
    DocNode() : m_parent(0), m_insidePre(false) {}
 
@@ -155,7 +156,9 @@ class DocNode
    void setInsidePreformatted(bool p) {
       m_insidePre = p;
    }
+
    DocNode *m_parent;
+
  private:
 
    bool m_insidePre;
@@ -407,13 +410,16 @@ class DocStyleChange : public DocNode
    }
 
    const char *styleString() const;
+
    bool enable() const {
       return m_enable;
    }
-   uint position() const                 {
+
+   uint position() const  {
       return m_position;
    }
-   void accept(DocVisitor *v)            {
+
+   void accept(DocVisitor *v) {
       v->visit(this);
    }
    const HtmlAttribList &attribs() const {
@@ -1540,6 +1546,7 @@ class DocSimpleSectSep : public DocNode
 class DocParamSect : public CompAccept<DocParamSect>, public DocNode
 {
    friend class DocParamList;
+
  public:
    enum Type {
       Unknown, Param, RetVal, Exception, TemplateParam
@@ -1582,13 +1589,17 @@ class DocPara : public CompAccept<DocPara>, public DocNode
       m_isFirst(false), m_isLast(false) {
       m_parent = parent;
    }
-   int parse();
-   Kind kind() const           {
+
+   int parse(bool skipParse = false, int token = 0);
+
+   Kind kind() const {
       return Kind_Para;
    }
-   bool isEmpty() const        {
+
+   bool isEmpty() const {
       return m_children.isEmpty();
    }
+
    void accept(DocVisitor *v)  {
       CompAccept<DocPara>::accept(this, v);
    }
@@ -1610,9 +1621,7 @@ class DocPara : public CompAccept<DocPara>, public DocNode
    int handleHtmlEndTag(const QByteArray &tagName);
    int handleSimpleSection(DocSimpleSect::Type t, bool xmlContext = false);
    int handleXRefItem();
-   int handleParamSection(const QByteArray &cmdName, DocParamSect::Type t,
-                          bool xmlContext,
-                          int direction);
+   int handleParamSection(const QByteArray &cmdName, DocParamSect::Type t, bool xmlContext, int direction);
    void handleIncludeOperator(const QByteArray &cmdName, DocIncOperator::Type t);
    void handleImage(const QByteArray &cmdName);
    void handleDotFile(const QByteArray &cmdName);
@@ -1632,8 +1641,8 @@ class DocPara : public CompAccept<DocPara>, public DocNode
 
  private:
    QByteArray  m_sectionId;
-   bool     m_isFirst;
-   bool     m_isLast;
+   bool m_isFirst;
+   bool m_isLast;
 };
 
 /** Node representing a parameter list. */

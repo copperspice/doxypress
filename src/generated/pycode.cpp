@@ -1148,28 +1148,29 @@ goto find_rule; \
 #define YY_RESTORE_YY_MORE_OFFSET
 char *pycodeYYtext;
 
+#include <QByteArray>
 #include <QStack>
+#include <QSharedPointer>
+#include <QStringList>
 
 #include <stdio.h>
 
-#include "classlist.h"
-#include "config.h"
-#include "doxygen.h"
-#include "entry.h"
-#include "filedef.h"
-#include "groupdef.h"
-#include "membername.h"
-#include <message.h>
-#include "namespacedef.h"
-#include "outputlist.h"
-#include <pycode.h>
-#include "scanner.h"
-#include "searchindex.h"
-#include "tooltip.h"
-#include "util.h"
-
-// at the end
+#include <classlist.h>
+#include <config.h>
+#include <doxygen.h>
 #include <doxy_globals.h>
+#include <entry.h>
+#include <filedef.h>
+#include <groupdef.h>
+#include <membername.h>
+#include <message.h>
+#include <namespacedef.h>
+#include <outputlist.h>
+#include <parser_py.h>
+#include <scanner.h>
+#include <searchindex.h>
+#include <tooltip.h>
+#include <util.h>
 
 // Toggle for some debugging info
 //#define DBG_CTX(x) fprintf x
@@ -1184,8 +1185,9 @@ static QStringList    g_curClassBases;
 
 
 static CodeOutputInterface *g_code;
+
 static const char   *g_inputString;     //!< the code fragment as text
-static int	     g_inputPosition;   //!< read offset during parsing
+static int	         g_inputPosition;   //!< read offset during parsing
 static const char   *g_currentFontClass;
 static bool          g_needsTermination;
 static Definition   *g_searchCtx;

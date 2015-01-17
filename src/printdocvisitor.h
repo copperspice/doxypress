@@ -30,18 +30,19 @@ class PrintDocVisitor : public DocVisitor
    PrintDocVisitor() : DocVisitor(DocVisitor_Other), m_indent(0),
       m_needsEnter(false), m_insidePre(false) {}
 
-   //--------------------------------------
-
    void visit(DocWord *w) {
       indent_leaf();
       printf("%s", w->word().data());
    }
+
    void visit(DocLinkedWord *w) {
       indent_leaf();
       printf("%s", w->word().data());
    }
+
    void visit(DocWhiteSpace *w) {
       indent_leaf();
+
       if (m_insidePre) {
          printf("%s", w->chars().data());
       } else {
@@ -51,6 +52,7 @@ class PrintDocVisitor : public DocVisitor
    void visit(DocSymbol *s) {
       indent_leaf();
       const char *res = HtmlEntityMapper::instance()->utf8(s->symbol(), true);
+
       if (res) {
          printf("%s", res);
       } else {
@@ -61,16 +63,20 @@ class PrintDocVisitor : public DocVisitor
       indent_leaf();
       printf("%s", u->url().data());
    }
+
    void visit(DocLineBreak *) {
       indent_leaf();
       printf("<br/>");
    }
+
    void visit(DocHorRuler *) {
       indent_leaf();
-      printf("<hr>");
+      printf("<hr/>");
    }
+
    void visit(DocStyleChange *s) {
       indent_leaf();
+
       switch (s->style()) {
          case DocStyleChange::Bold:
             if (s->enable()) {
@@ -79,6 +85,7 @@ class PrintDocVisitor : public DocVisitor
                printf("</bold>");
             }
             break;
+
          case DocStyleChange::Italic:
             if (s->enable()) {
                printf("<italic>");
@@ -86,6 +93,7 @@ class PrintDocVisitor : public DocVisitor
                printf("</italic>");
             }
             break;
+
          case DocStyleChange::Code:
             if (s->enable()) {
                printf("<code>");
@@ -128,6 +136,7 @@ class PrintDocVisitor : public DocVisitor
                printf("</pre>");
             }
             break;
+
          case DocStyleChange::Div:
             if (s->enable()) {
                printf("<div>");
@@ -144,8 +153,10 @@ class PrintDocVisitor : public DocVisitor
             break;
       }
    }
+
    void visit(DocVerbatim *s) {
       indent_leaf();
+
       switch (s->type()) {
          case DocVerbatim::Code:
             printf("<code>");
@@ -181,7 +192,9 @@ class PrintDocVisitor : public DocVisitor
             printf("<plantuml>");
             break;
       }
+
       printf("%s", s->text().data());
+
       switch (s->type()) {
          case DocVerbatim::Code:
             printf("</code>");
@@ -218,10 +231,12 @@ class PrintDocVisitor : public DocVisitor
             break;
       }
    }
+
    void visit(DocAnchor *a) {
       indent_leaf();
       printf("<anchor name=\"%s\"/>", a->anchor().data());
    }
+
    void visit(DocInclude *inc) {
       indent_leaf();
       printf("<include file=\"%s\" type=\"", inc->file().data());
@@ -250,6 +265,7 @@ class PrintDocVisitor : public DocVisitor
       }
       printf("\"/>");
    }
+
    void visit(DocIncOperator *op) {
       indent_leaf();
       printf("<incoperator pattern=\"%s\" type=\"", op->pattern().data());
@@ -269,18 +285,22 @@ class PrintDocVisitor : public DocVisitor
       }
       printf("\"/>");
    }
+
    void visit(DocFormula *f) {
       indent_leaf();
       printf("<formula name=%s test=%s/>", f->name().data(), f->text().data());
    }
+
    void visit(DocIndexEntry *i) {
       indent_leaf();
       printf("<indexentry>%s</indexentry\n", i->entry().data());
    }
+
    void visit(DocSimpleSectSep *) {
       indent_leaf();
       printf("<simplesectsep/>");
    }
+
    void visit(DocCite *cite) {
       indent_leaf();
       printf("<cite ref=\"%s\" file=\"%s\" "
@@ -290,7 +310,6 @@ class PrintDocVisitor : public DocVisitor
              cite->text().data());
    }
 
-   //--------------------------------------
 
    void visitPre(DocAutoList *l) {
       indent_pre();
@@ -316,18 +335,22 @@ class PrintDocVisitor : public DocVisitor
       indent_post();
       printf("</li>\n");
    }
+
    void visitPre(DocPara *) {
       indent_pre();
       printf("<para>\n");
    }
+
    void visitPost(DocPara *) {
       indent_post();
       printf("</para>\n");
    }
+
    void visitPre(DocRoot *) {
       indent_pre();
       printf("<root>\n");
    }
+
    void visitPost(DocRoot *) {
       indent_post();
       printf("</root>\n");
@@ -685,6 +708,7 @@ class PrintDocVisitor : public DocVisitor
       }
       printf(">\n");
    }
+
    void visitPost(DocParamSect *) {
       indent_post();
       printf("</paramsect>\n");
@@ -745,25 +769,31 @@ class PrintDocVisitor : public DocVisitor
 
  private:
    // helper functions
+
    void indent() {
       if (m_needsEnter) {
          printf("\n");
       }
+
       for (int i = 0; i < m_indent; i++) {
-         printf(".");
+         printf(" ");
       }
+
       m_needsEnter = false;
    }
+
    void indent_leaf() {
       if (!m_needsEnter) {
          indent();
       }
       m_needsEnter = true;
    }
+
    void indent_pre() {
       indent();
       m_indent++;
    }
+
    void indent_post() {
       m_indent--;
       indent();

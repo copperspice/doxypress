@@ -49,10 +49,10 @@
 #include <namespacedef.h>
 #include <outputlist.h>
 #include <parser_make.h>
+#include <parser_py.h>
 #include <pagedef.h>
 #include <perlmodgen.h>
 #include <portable.h>
-#include <pyscanner.h>
 #include <pre.h>
 #include <reflist.h>
 #include <rtfgen.h>

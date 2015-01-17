@@ -132,10 +132,12 @@ void TextGeneratorOLImpl::writeString(const char *s, bool keepSpaces) const
    
    if (keepSpaces) {
       const char *p = s;
+
       if (p) {
          char cs[2];
          char c;
          cs[1] = '\0';
+
          while ((c = *p++)) {
             if (c == ' ') {
                m_od.writeNonBreakableSpace(1);
@@ -206,13 +208,17 @@ QByteArray removeAnonymousScopes(const QByteArray &s)
       bool b1 = false;
       bool b2 = false;
 
-      while (c < i + len && s.at(c) != '@') if (s.at(c++) == ':') {
+      while (c < i + len && s.at(c) != '@')  {
+         if (s.at(c++) == ':') {
             b1 = true;
+         }
       }
 
       c = i + len - 1;
-      while (c >= i && s.at(c) != '@') if (s.at(c--) == ':') {
+      while (c >= i && s.at(c) != '@')  {
+         if (s.at(c--) == ':') {
             b2 = true;
+         }
       }
 
       if (b1 && b2) {
@@ -1411,7 +1417,6 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
    bool hasUsingStatements = (fileScope && ((fileScope->getUsedNamespaces() && fileScope->getUsedNamespaces()->count() > 0) ||
                      (fileScope->getUsedClasses() && fileScope->getUsedClasses()->count() > 0)) );
 
-   //printf("hasUsingStatements=%d\n",hasUsingStatements);
    // Since it is often the case that the same name is searched in the same
    // scope over an over again (especially for the linked source code generation)
    // we use a cache to collect previous results. This is possible since the
@@ -1427,45 +1432,22 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
 
    if (hasUsingStatements) {
        fileScopeLen = 1 + fileScope->getFilePath().length();
+
    } else { 
       fileScopeLen = 0;
+
    }
-   
-   // below is a more efficient coding of
-   // QByteArray key=scope->name()+"+"+name+"+"+explicitScopePart;
-
-   QByteArray key;
-   key.resize(scopeNameLen + nameLen + explicitPartLen + fileScopeLen + 1);
-
-   char *p = key.data();
-
-   qstrcpy(p, scope->name());
-   *(p + scopeNameLen - 1) = '+';
-   p += scopeNameLen;
-
-   qstrcpy(p, name);
-   *(p + nameLen - 1) = '+';
-   p += nameLen;
-
-   qstrcpy(p, explicitScopePart);
-   p += explicitPartLen;
-
-   // if a file scope is given and it contains using statements we should
-   // also use the file part in the key (as a class name can be in
-   // two different namespaces and a using statement in a file can select
-   // one of them).
+  
+   QByteArray key = scope->name( ) + "+" + name + "+" + explicitScopePart;
+  
+   // if a file scope is given and contains using statements we should also use the file part
+   // in the key (as a class name can be in two different namespaces and a using statement in
+   // a file can select one of them).
 
    if (hasUsingStatements) {
-      // below is a more efficient coding of
-      // key+="+"+fileScope->name();
-      *p++ = '+';
-
-      qstrcpy(p, fileScope->getFilePath());
-      p += fileScopeLen - 1;
+      key += "+" + fileScope->name();
    }
-
-   *p = '\0';
-
+  
    LookupInfo *pval = Doxygen::lookupCache->object(key);
    
    if (pval) {
@@ -1484,10 +1466,8 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
       
       return pval->classDef;
 
-   } else 
-      // not found yet; we already add a 0 to avoid the possibility of
-      // endless recursion.
-   {
+   } else {
+      // not found, we already add a 0 to avoid the possibility of endless recursion.   
       Doxygen::lookupCache->insert(key, new LookupInfo);
    }
 
@@ -1601,15 +1581,20 @@ static bool findOperator2(const QByteArray &s, int i)
    if (b == -1) {
       return false;   // not found
    }
+
    b += 8;
-   while (b < i) // check if there are only non-ascii
+
+   while (b < i)  {
+      // check if there are only non-ascii
       // characters in front of the operator
-   {
+   
       if (isId((uchar)s.at(b))) {
          return false;
       }
+
       b++;
    }
+
    return true;
 }
 
@@ -1862,6 +1847,7 @@ void linkifyText(const TextGeneratorIntf &out, Definition *scope, FileDef *fileS
 {
    static QRegExp regExp("[a-z_A-Z\\x80-\\xFF][~!a-z_A-Z0-9$\\\\.:\\x80-\\xFF]*");
    static QRegExp regExpSplit("(?!:),");
+
    QByteArray txtStr = text;
    int strLen = txtStr.length();
   
@@ -2522,13 +2508,16 @@ static QByteArray trimTemplateSpecifiers(const QByteArray &namespaceName,
 
       while (i >= 0) {
          char c = className.at(i);
+
          if (c == '>') {
             count++, i--;
+
          } else if (c == '<') {
             count--;
             if (count == 0) {
                break;
             }
+
          } else {
             i--;
          }
@@ -2594,11 +2583,13 @@ static int findScopePattern(const QByteArray &pattern, const QByteArray &s, int 
       while (p < sl && pp < pl) {
          if (s.at(p) == '<') { // skip template arguments while matching
             int bc = 1;
-            //printf("skipping pos=%d c=%c\n",p,s.at(p));
+           
             p++;
+
             while (p < sl) {
                if (s.at(p) == '<') {
                   bc++;
+
                } else if (s.at(p) == '>') {
                   bc--;
                   if (bc == 0) {
@@ -2606,13 +2597,14 @@ static int findScopePattern(const QByteArray &pattern, const QByteArray &s, int 
                      break;
                   }
                }
-               //printf("skipping pos=%d c=%c\n",p,s.at(p));
+               
                p++;
             }
          } else if (s.at(p) == pattern.at(pp)) {
             //printf("match at position p=%d pp=%d c=%c\n",p,pp,s.at(p));
             p++;
             pp++;
+
          } else { // no match
             //printf("restarting at %d c=%c pat=%s\n",p,s.at(p),pattern.data());
             p = sp + 1;
@@ -2751,7 +2743,7 @@ static void stripIrrelevantString(QByteArray &target, const QByteArray &str)
    bool changed = false;
 
    while ((i = target.indexOf(str, p)) != -1) {
-      bool isMatch = (i == 0 || !isId(target.at(i - 1))) && // not a character before str
+      bool isMatch = (i == 0 || ! isId(target.at(i - 1))) && // not a character before str
                      (i + l == (int)target.length() || !isId(target.at(i + l))); // not a character after str
 
       if (isMatch) {
@@ -2930,6 +2922,7 @@ static bool matchArgument(const Argument *srcA, const Argument *dstA, const QByt
 
       while (srcPos < srcAType.length() && dstPos < dstAType.length() && equal) {
          equal = srcAType.at(srcPos) == dstAType.at(dstPos);
+
          if (equal) {
             srcPos++, dstPos++;
          }
@@ -2943,6 +2936,7 @@ static bool matchArgument(const Argument *srcA, const Argument *dstA, const QByt
             DOX_NOMATCH
             return false;
          }
+
          if (isId(srcAType.at(srcPos)) && isId(dstAType.at(dstPos))) {
             //printf("partial match srcPos=%d dstPos=%d!\n",srcPos,dstPos);
             // check if a name if already found -> if no then there is no match
@@ -3034,7 +3028,6 @@ static bool matchArgument(const Argument *srcA, const Argument *dstA, const QByt
    DOX_MATCH
    return true;
 }
-
 
 /*!
  * Matches the arguments list srcAl with the argument list dstAl
@@ -3175,10 +3168,7 @@ QByteArray getCanonicalTemplateSpec(Definition *d, FileDef *fs, const QByteArray
 {
    QByteArray templSpec = spec.trimmed();
 
-   // this part had been commented out before... but it is needed to match for instance
-   // std::list<std::string> against list<string> so it is now back again
-
-   if (!templSpec.isEmpty() && templSpec.at(0) == '<') {
+   if (! templSpec.isEmpty() && templSpec.at(0) == '<') {
       templSpec = "< " + extractCanonicalType(d, fs, templSpec.right(templSpec.length() - 1).trimmed());
    }
 
@@ -4139,7 +4129,8 @@ static bool getScopeDefs(const char *docScope, const char *scope, ClassDef *&cd,
    }
 
    bool explicitGlobalScope = false;
-   if (scopeName.at(0) == ':' && scopeName.at(1) == ':') {
+
+   if (scopeName.length() > 1 && scopeName.at(0) == ':' && scopeName.at(1) == ':') {
       scopeName = scopeName.right(scopeName.length() - 2);
       explicitGlobalScope = true;
    }
@@ -4376,17 +4367,17 @@ QByteArray linkToText(SrcLangExt lang, const char *link, bool isFileName)
    //static bool optimizeOutputJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
    QByteArray result = link;
 
-   if (!result.isEmpty()) {
+   if (! result.isEmpty()) {
       // replace # by ::
+
       result = substitute(result, "#", "::");
       // replace . by ::
-
       if (! isFileName && result.indexOf('<') == -1) {
          result = substitute(result, ".", "::");
       }
 
       // strip leading :: prefix if present
-      if (result.at(0) == ':' && result.at(1) == ':') {
+      if (result.length() > 1 && result.at(0) == ':' && result.at(1) == ':') {
          result = result.right(result.length() - 2);
       }
 
@@ -5275,6 +5266,7 @@ QByteArray stripScope(const char *name)
 
       while (p >= 0 && count >= 0) {
          char c = result.at(p);
+
          switch (c) {
             case ':':
                // only exit in the case of ::
@@ -5293,11 +5285,13 @@ QByteArray stripScope(const char *name)
                      break;
                   }
                   count = 1;
-                  //printf("pos < = %d\n",p);
+                  
                   p--;
                   bool foundMatch = false;
+
                   while (p >= 0 && !foundMatch) {
                      c = result.at(p--);
+
                      switch (c) {
                         case '>':
                            count++;
@@ -5913,6 +5907,7 @@ QByteArray stripTemplateSpecifiersFromScope(const QByteArray &fullName, bool par
 
          if (c == '<') {
             count++;
+
          } else if (c == '>') {
             count--;
             done = count == 0;
@@ -6887,11 +6882,11 @@ QByteArray parseCommentAsText(const Definition *scope, const MemberDef *md,
    if (charCnt >= 80) { // try to truncate the string
       while ((i = nextUtf8CharPosition(result, l, i)) < l && charCnt < 100) {
          charCnt++;
+
          if (result.at(i) >= 0 && isspace(result.at(i))) {
             addEllipsis = true;
-         } else if (result.at(i) == ',' ||
-                    result.at(i) == '.' ||
-                    result.at(i) == '?') {
+
+         } else if (result.at(i) == ',' || result.at(i) == '.' || result.at(i) == '?') {
             break;
          }
       }
@@ -6970,7 +6965,6 @@ static QByteArray replaceAliasArguments(const QByteArray &aliasValue, const QByt
       args.append(argList.right(l - s));
    }
   
-
    // next we look for the positions of the markers and add them to a list
    QList<Marker> markerList;
  
@@ -7038,24 +7032,10 @@ static QByteArray replaceAliasArguments(const QByteArray &aliasValue, const QByt
 
 static QByteArray escapeCommas(const QByteArray &s)
 {
-   QByteArray result;
-   const char *p = s.data();
-   char c, pc = 0;
-
-   while ((c = *p++)) {
-      if (c == ',' && pc != '\\') {
-         result += "\\,";
-
-      } else {
-         result += c;
-      }
-
-      pc = c;
-   }
-
-   result += '\0';
-   
-   return result.data();
+   QByteArray retval = s;
+   retval.replace(",", "\\,");
+    
+   return retval;
 }
 
 static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
@@ -7066,39 +7046,41 @@ static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
    QByteArray value = s;
 
    int i;
+   int len;
    int p = 0;
-   int l;
 
    while ((i = cmdPat.indexIn(value, p)) != -1) {
-      l = cmdPat.matchedLength();
+      len = cmdPat.matchedLength();
       result += value.mid(p, i - p);
 
-      QByteArray args = extractAliasArgs(value, i + l);
+      QByteArray args = extractAliasArgs(value, i + len);
 
-      bool hasArgs = !args.isEmpty();            // found directly after command
-      int argsLen = args.length();
-
-      QString cmd = value.mid(i + 1, l - 1);
+      bool hasArgs = ! args.isEmpty();            // found directly after command
+      int argsLen  =   args.length();
+    
+      QString cmd = value.mid(i + 1, len - 1);
       QString cmdNoArgs = cmd;
 
       int numArgs = 0;
 
       if (hasArgs) {
          numArgs = countAliasArguments(args);
-         cmd += QString("{%1}").arg(numArgs);    // alias name + {n}
+
+         cmd = cmd + QString("{%1}").arg(numArgs);    // alias name + {n}
       }
 
       QByteArray aliasText = Doxygen::aliasDict.value(cmd);
 
-      if (numArgs > 1 && ! aliasText.isEmpty()) {
-         // in case there is no command with numArgs parameters, but there is a command with 1 parameter,
+
+      if (numArgs > 1 &&  aliasText.isEmpty()) {
+         // in case there is no command with numArgs parameters, but there is a command with 1 parameter
          // we also accept all text as the argument of that command (so you do not have to escape commas)
 
          aliasText = Doxygen::aliasDict.value(cmdNoArgs + "{1}");
 
          if (! aliasText.isEmpty()) {
             cmd = cmdNoArgs + "{1}";
-            args = escapeCommas(args); // escape , so that everything is seen as one argument
+            args = escapeCommas(args);    // everything is seen as one argument
          }
       }
      
@@ -7119,15 +7101,15 @@ static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
             aliasesProcessed.remove(cmd);
          }
 
-         p = i + l;
+         p = i + len;
          if (hasArgs) {
             p += argsLen + 2;
          }
 
       } else { 
          // command is not an alias        
-         result += value.mid(i, l);
-         p = i + l;
+         result += value.mid(i, len);
+         p = i + len;
       }
    }
 
@@ -7139,17 +7121,17 @@ static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
 int countAliasArguments(const QByteArray argList)
 {
    int count = 1;
-   int l = argList.length();
-   int i;
+   int len   = argList.length();
+   
+   for (int k = 0; k < len; k++) {
+      char c = argList.at(k);
 
-   for (i = 0; i < l; i++) {
-      char c = argList.at(i);
-
-      if (c == ',' && (i == 0 || argList.at(i - 1) != '\\')) {
+      if (c == ',' && (k == 0 || argList.at(k - 1) != '\\')) {
          count++;
+
       } else if (c == '@' || c == '\\') {
          // check if this is the start of another aliased command (see bug704172)
-         i += findEndOfCommand(argList.data() + i + 1);
+         k += findEndOfCommand(argList.data() + k + 1);
       }
    }
    

@@ -57,11 +57,9 @@ class MakeFileParser : public ParserInterface
 
 };
 
-
 extern void parseMakeCode(CodeOutputInterface &, const char *, const QByteArray &,
                           bool , const char *, FileDef *fd, int startLine, int endLine, bool inlineFragment,
                           MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx, bool collectXRefs);
 
-// extern void resetPythonCodeParserState();
 
 #endif

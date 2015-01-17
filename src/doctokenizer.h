@@ -63,7 +63,8 @@ enum Tokens {
    RetVal_EndBlockQuote  = 0x10014,
    RetVal_CopyDoc        = 0x10015,
    RetVal_EndInternal    = 0x10016,
-   RetVal_EndParBlock    = 0x10017
+   RetVal_EndParBlock    = 0x10017,
+   RetVal_EndDiv         = 0x10018
 };
 
 /** @brief Data associated with a token used by the comment block parser. */

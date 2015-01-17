@@ -11048,15 +11048,19 @@ static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
             oldStyleArgName = current->args.trimmed();
          }
       }
+
    } else { // continuation like *arg2 in "int *args,*arg2"
       int l = si, j = 0;
       char c;
+
       while (j < l && ((c = current->args.at(j)) == '*' || isspace((uchar)c))) {
          j++;
       }
+
       if (j > 0) {
          oldStyleArgPtr = current->args.left(j);
          oldStyleArgName = current->args.mid(j).trimmed();
+
       } else {
          oldStyleArgName = current->args.trimmed();
       }
@@ -21941,7 +21945,7 @@ static void handleParametersCommentBlocks(ArgumentList *al)
 
 static void parseCompounds(Entry *rt)
 {  
-   for(auto ce : rt->children() ) {
+   for (auto ce : rt->children() ) {
 
 printf("\n  BROOM SPOT    A1"); 
 
@@ -22046,7 +22050,7 @@ printf("\n  BROOM SPOT    A2");
       parseCompounds(const_cast<Entry *>(ce));
 
 
-printf("\n  BROOM SPOT    W2");
+// CRASH printf("\n  BROOM SPOT    W2");
 
    }
 
