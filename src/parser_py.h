@@ -41,8 +41,8 @@ class PythonLanguageScanner : public ParserInterface
    void startTranslationUnit(const char *) {}
    void finishTranslationUnit() {}
 
-   void parseInput(const char *fileName, const char *fileBuf, Entry *root,
-                   bool sameTranslationUnit, QStringList &filesInSameTranslationUnit);
+   void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
+                   bool sameTranslationUnit, QStringList &filesInSameTranslationUnit) override;
 
    bool needsPreprocessing(const QByteArray &extension);
    void parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input,

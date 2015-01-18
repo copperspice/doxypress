@@ -21,6 +21,7 @@
 
 #include <arguments.h>
 #include <definition.h>
+#include <doxy_globals.h>
 #include <entry.h>
 #include <example.h>
 #include <groupdef.h>
@@ -28,7 +29,6 @@
 #include <memberlist.h>
 #include <section.h>
 #include <stringmap.h>
-
 
 #define HEADER ('D'<<24)+('O'<<16)+('X'<<8)+'!'
 
@@ -322,7 +322,7 @@ void marshalMemberLists(StorageIntf *s, StringMap<QSharedPointer<MemberList>> *m
    }
 }
 
-void marshalEntry(StorageIntf *s, Entry *e)
+void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
 {
    marshalUInt(s, HEADER);
    marshalQByteArray(s, e->name);
@@ -385,7 +385,7 @@ void marshalEntry(StorageIntf *s, Entry *e)
    marshalQByteArray(s, e->id);
 }
 
-void marshalEntryTree(StorageIntf *s, Entry *e)
+void marshalEntryTree(StorageIntf *s, QSharedPointer<Entry> e)
 {
    marshalEntry(s, e);
    marshalUInt(s, e->children().count());
@@ -765,9 +765,9 @@ StringMap<QSharedPointer<MemberList>> *unmarshalMemberLists(StorageIntf *s)
    return result;
 }
 
-Entry *unmarshalEntry(StorageIntf *s)
+QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
 {
-   Entry *e = new Entry;
+   QSharedPointer<Entry> e = QMakeShared<Entry>();
 
    uint header = unmarshalUInt(s);
    assert(header == HEADER);
@@ -833,18 +833,20 @@ Entry *unmarshalEntry(StorageIntf *s)
    e->artificial       = unmarshalBool(s);
    e->groupDocType     = (Entry::GroupDocType)unmarshalInt(s);
    e->id               = unmarshalQByteArray(s);
+
    return e;
 }
 
-Entry *unmarshalEntryTree(StorageIntf *s)
+QSharedPointer<Entry> unmarshalEntryTree(StorageIntf *s)
 {
-   Entry *e = unmarshalEntry(s);
+   QSharedPointer<Entry> e = unmarshalEntry(s);
 
    uint count = unmarshalUInt(s);
    uint i;
 
    for (i = 0; i < count; i++) {
-      e->addSubEntry(unmarshalEntryTree(s));
+      e->addSubEntry(unmarshalEntryTree(s), e);
    }
+
    return e;
 }

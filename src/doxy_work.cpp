@@ -44,7 +44,6 @@
 #include <eclipsehelp.h>
 #include <entry.h>
 #include <filename.h>
-#include <fileparser.h>
 #include <filestorage.h>
 #include <formula.h>
 #include <fortranscanner.h>
@@ -67,6 +66,7 @@
 #include <outputlist.h>
 #include <pagedef.h>
 #include <parser_py.h>
+#include <parser_file.h>
 #include <parserintf.h>
 #include <perlmodgen.h>
 #include <portable.h>
@@ -202,56 +202,56 @@ static STLInfo g_stlinfo[] = {
 };
 
 namespace Doxy_Work{
-   void addClassToContext(EntryNav *rootNav);
-   void addEnumValuesToEnums(EntryNav *rootNav);
+   void addClassToContext(QSharedPointer<EntryNav> rootNav);
+   void addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav);
 
-   void addIncludeFile(ClassDef *cd, FileDef *ifd, Entry *root);
-   void addInterfaceOrServiceToServiceOrSingleton(EntryNav *const rootNav, ClassDef *const cd, QByteArray const &rname);
+   void addIncludeFile(ClassDef *cd, FileDef *ifd, QSharedPointer<Entry> root);
+   void addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<EntryNav> rootNav, ClassDef *const cd, QByteArray const &rname);
 
-   void addMethodToClass(EntryNav *rootNav, ClassDef *cd, const QByteArray &rname, bool isFriend);
+   void addMethodToClass(QSharedPointer<EntryNav> rootNav, ClassDef *cd, const QByteArray &rname, bool isFriend);
 
    void addMembersToIndex();
    void addMembersToMemberGroup();
 
-   void addMemberDocs(EntryNav *rootNav, MemberDef *md, const char *funcDecl,
+   void addMemberDocs(QSharedPointer<EntryNav> rootNav, MemberDef *md, const char *funcDecl,
                       ArgumentList *al, bool over_load, NamespaceSDict *nl = 0);
 
-   void addMemberDocs(EntryNav *rootNav, MemberDef *md, const char *funcDecl, ArgumentList *al,
+   void addMemberDocs(QSharedPointer<EntryNav> rootNav, MemberDef *md, const char *funcDecl, ArgumentList *al,
                              bool over_load, NamespaceSDict *);
 
-   void addPageToContext(PageDef *pd, EntryNav *rootNav);
+   void addPageToContext(PageDef *pd, QSharedPointer<EntryNav> rootNav);
    void addListReferences();
-   void addRelatedPage(EntryNav *rootNav);
+   void addRelatedPage(QSharedPointer<EntryNav> rootNav);
    void addSourceReferences();
-   void addSTLClasses(EntryNav *rootNav);
-   void addSTLIterator(EntryNav *classEntryNav, const char *name);
-   void addSTLMember(EntryNav *rootNav, const char *type, const char *name);
+   void addSTLClasses(QSharedPointer<EntryNav> rootNav);
+   void addSTLIterator(QSharedPointer<EntryNav> classEntryNav, const char *name);
+   void addSTLMember(QSharedPointer<EntryNav> rootNav, const char *type, const char *name);
 
-   void addVariable(EntryNav *rootNav, int isFuncPtr = -1);
+   void addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr = -1);
 
-   MemberDef *addVariableToClass(EntryNav *rootNav, ClassDef *cd, MemberType mtype, const QByteArray &name,
+   MemberDef *addVariableToClass(QSharedPointer<EntryNav> rootNav, ClassDef *cd, MemberType mtype, const QByteArray &name,
                                         bool fromAnnScope, MemberDef *fromAnnMemb, Protection prot, Relationship related);
 
-   MemberDef *addVariableToFile(EntryNav *rootNav, MemberType mtype, const QByteArray &scope, const QByteArray &name,
+   MemberDef *addVariableToFile(QSharedPointer<EntryNav> rootNav, MemberType mtype, const QByteArray &scope, const QByteArray &name,
                                        bool fromAnnScope, MemberDef *fromAnnMemb);
 
-   void buildClassDocList(EntryNav *rootNav);
-   void buildClassList(EntryNav *rootNav);
+   void buildClassDocList(QSharedPointer<EntryNav> rootNav);
+   void buildClassList(QSharedPointer<EntryNav> rootNav);
    void buildCompleteMemberLists();
-   void buildFileList(EntryNav *rootNav);
-   void buildExampleList(EntryNav *rootNav);
-   void buildFunctionList(EntryNav *rootNav);
-   void buildGroupList(EntryNav *rootNav);
-   void buildGroupListFiltered(EntryNav *rootNav, bool additional, bool includeExternal);
-   void buildInterfaceAndServiceList(EntryNav *const rootNav);
-   void buildListOfUsingDecls(EntryNav *rootNav);
-   void buildNamespaceList(EntryNav *rootNav);
-   void buildPageList(EntryNav *rootNav);
+   void buildFileList(QSharedPointer<EntryNav> rootNav);
+   void buildExampleList(QSharedPointer<EntryNav> rootNav);
+   void buildFunctionList(QSharedPointer<EntryNav> rootNav);
+   void buildGroupList(QSharedPointer<EntryNav> rootNav);
+   void buildGroupListFiltered(QSharedPointer<EntryNav> rootNav, bool additional, bool includeExternal);
+   void buildInterfaceAndServiceList(QSharedPointer<EntryNav> rootNav);
+   void buildListOfUsingDecls(QSharedPointer<EntryNav> rootNav);
+   void buildNamespaceList(QSharedPointer<EntryNav> rootNav);
+   void buildPageList(QSharedPointer<EntryNav> rootNav);
 
    QSharedPointer<Definition> buildScopeFromQualifiedName(const QByteArray name, int level, SrcLangExt lang, TagInfo *tagInfo);
 
-   void buildTypedefList(EntryNav *rootNav);
-   void buildVarList(EntryNav *rootNav);
+   void buildTypedefList(QSharedPointer<EntryNav> rootNav);
+   void buildVarList(QSharedPointer<EntryNav> rootNav);
 
    void checkPageRelations();
 
@@ -260,7 +260,7 @@ namespace Doxy_Work{
    int computeIdealCacheParam(uint v);
    void computeMemberReferences();
    void computeMemberRelations();
-   void computePageRelations(EntryNav *rootNav);
+   void computePageRelations(QSharedPointer<EntryNav> rootNav);
    void computeTemplateClassRelations();
 
    ClassDef::CompoundType convertToCompoundType(int section, uint64_t specifier);
@@ -279,47 +279,47 @@ namespace Doxy_Work{
 
    void escapeAliases();
    void expandAliases();
-   QByteArray extractClassName(EntryNav *rootNav);
+   QByteArray extractClassName(QSharedPointer<EntryNav> rootNav);
    void exitDoxygen();
 
-   void filterMemberDocumentation(EntryNav *rootNav);
+   void filterMemberDocumentation(QSharedPointer<EntryNav> rootNav);
 
-   void findBaseClassesForClass(EntryNav *rootNav, Definition *context, ClassDef *masterCd, ClassDef *instanceCd,
+   void findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, Definition *context, ClassDef *masterCd, ClassDef *instanceCd,
                                 FindBaseClassRelation_Mode mode, bool isArtificial, ArgumentList *actualArgs = 0,
                                 QHash<QString, int> *templateNames = 0);
 
    ClassDef *findClassDefinition(FileDef *fd, NamespaceDef *nd, const char *scopeName);
 
-   void findClassEntries(EntryNav *rootNav);
-   bool findClassRelation(EntryNav *rootNav, Definition *context, ClassDef *cd, BaseInfo *bi,
+   void findClassEntries(QSharedPointer<EntryNav> rootNav);
+   bool findClassRelation(QSharedPointer<EntryNav> rootNav, Definition *context, ClassDef *cd, BaseInfo *bi,
                           QHash<QString, int> *templateNames, FindBaseClassRelation_Mode mode, bool isArtificial);
 
    ClassDef *findClassWithinClassContext(Definition *context, ClassDef *cd, const QByteArray &name);
 
-   void findDefineDocumentation(EntryNav *rootNav);
+   void findDefineDocumentation(QSharedPointer<EntryNav> rootNav);
    void findDEV(const MemberNameSDict &mnsd);
-   void findDirDocumentation(EntryNav *rootNav);
+   void findDirDocumentation(QSharedPointer<EntryNav> rootNav);
    void findDocumentedEnumValues();
 
    int findEndOfTemplate(const QByteArray &s, int startPos);
-   void findEnums(EntryNav *rootNav);
-   void findEnumDocumentation(EntryNav *rootNav);
+   void findEnums(QSharedPointer<EntryNav> rootNav);
+   void findEnumDocumentation(QSharedPointer<EntryNav> rootNav);
 
    void findFriends();
    int findFunctionPtr(const QByteArray &type, int lang, int *pLength = 0);
 
-   bool findGlobalMember(EntryNav *rootNav, const QByteArray &namespaceName, const char *type, const char *name,
+   bool findGlobalMember(QSharedPointer<EntryNav> rootNav, const QByteArray &namespaceName, const char *type, const char *name,
                                 const char *tempArg, const char *, const char *decl);
 
-   void findGroupScope(EntryNav *rootNav);
+   void findGroupScope(QSharedPointer<EntryNav> rootNav);
    void findInheritedTemplateInstances();
 
-   void findMainPage(EntryNav *rootNav);
-   void findMainPageTagFiles(EntryNav *rootNav);
-   void findMember(EntryNav *rootNav, QByteArray funcDecl, bool overloaded, bool isFunc);
-   void findMemberDocumentation(EntryNav *rootNav);
+   void findMainPage(QSharedPointer<EntryNav> rootNav);
+   void findMainPageTagFiles(QSharedPointer<EntryNav> rootNav);
+   void findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl, bool overloaded, bool isFunc);
+   void findMemberDocumentation(QSharedPointer<EntryNav> rootNav);
 
-   void findObjCMethodDefinitions(EntryNav *rootNav);
+   void findObjCMethodDefinitions(QSharedPointer<EntryNav> rootNav);
 
    QSharedPointer<Definition> findScopeFromQualifiedName(Definition *startScope, const QByteArray &n,
                                                          FileDef *fileScope, TagInfo *tagInfo);
@@ -329,20 +329,20 @@ namespace Doxy_Work{
    void findTagLessClasses();
    void findTagLessClasses(ClassDef *cd);
 
-   bool findTemplateInstanceRelation(Entry *root, Definition *context, ClassDef *templateClass, const QByteArray &templSpec,
+   bool findTemplateInstanceRelation(QSharedPointer<Entry> root, Definition *context, ClassDef *templateClass, const QByteArray &templSpec,
                                      QHash<QString, int> *templateNames, bool isArtificial);
 
    QSharedPointer<NamespaceDef> findUsedNamespace(NamespaceSDict *unl, const QByteArray &name);
 
-   void findUsedClassesForClass(EntryNav *rootNav, Definition *context, ClassDef *masterCd, ClassDef *instanceCd, bool isArtificial,
+   void findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, Definition *context, ClassDef *masterCd, ClassDef *instanceCd, bool isArtificial,
                                 ArgumentList *actualArgs = 0, QHash<QString, int> *templateNames = 0);
 
    void findUsedTemplateInstances();
 
-   void findUsingDeclarations(EntryNav *rootNav);
+   void findUsingDeclarations(QSharedPointer<EntryNav> rootNav);
    void findIncludedUsingDirectives();
-   void findUsingDirectives(EntryNav *rootNav);
-   void findUsingDeclImports(EntryNav *rootNav);
+   void findUsingDirectives(QSharedPointer<EntryNav> rootNav);
+   void findUsingDeclImports(QSharedPointer<EntryNav> rootNav);
 
    void flushUnresolvedRelations();
    void flushCachedTemplateRelations();
@@ -361,17 +361,17 @@ namespace Doxy_Work{
    QHash<QString, int> *getTemplateArgumentsInName(ArgumentList *templateArguments, const QByteArray &name);
 
    void inheritDocumentation();
-   bool isClassSection(EntryNav *rootNav);
+   bool isClassSection(QSharedPointer<EntryNav> rootNav);
    bool isRecursiveBaseClass(const QByteArray &scope, const QByteArray &name);
    bool isSpecialization(const QList<ArgumentList> &srcTempArgLists, const QList<ArgumentList> &dstTempArgLists);
-   bool isVarWithConstructor(EntryNav *rootNav);
+   bool isVarWithConstructor(QSharedPointer<EntryNav> rootNav);
 
    void mergeCategories();
 
-   void organizeSubGroupsFiltered(EntryNav *rootNav, bool additional);
-   void organizeSubGroups(EntryNav *rootNav);
+   void organizeSubGroupsFiltered(QSharedPointer<EntryNav> rootNav, bool additional);
+   void organizeSubGroups(QSharedPointer<EntryNav> rootNav);
 
-   void parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNav, FileDef *fd, const char *fn,
+   void parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav, FileDef *fd, const char *fn,
                 bool sameTu, QStringList &filesInSameTu);
 
    void parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav);
@@ -605,7 +605,7 @@ void parseInput()
    }
 
    QSharedPointer<Entry> root = QMakeShared<Entry>();
-   QSharedPointer<EntryNav> rootNav = QMakeShared<EntryNav>(0, root);
+   QSharedPointer<EntryNav> rootNav = QMakeShared<EntryNav>(QSharedPointer<EntryNav>(), root);
    rootNav->setEntry(root);
   
    msg("Reading and parsing tag files\n");
@@ -614,7 +614,7 @@ void parseInput()
 
    for (auto s : tagFileList) {
       readTagFile(root, qPrintable(s));
-      root->createNavigationIndex(rootNav, Doxy_Globals::g_storage, 0);
+      root->createNavigationIndex(rootNav, Doxy_Globals::g_storage, 0, root);
    }
 
    // parse source files
@@ -794,7 +794,7 @@ void parseInput()
    Doxy_Globals::g_stats.end();
 
    msg("Freeing entry tree\n");
-   delete rootNav;
+   rootNav = QSharedPointer<EntryNav>();
 
    Doxy_Globals::g_storage->close();
    delete Doxy_Globals::g_storage;
@@ -1124,7 +1124,7 @@ void generateOutput()
 
    if (Config_getBool("GENERATE_DOCBOOK")) {
       Doxy_Globals::g_stats.begin("Generating Docbook output\n");
- //BROOM     generateDocbook();
+//BROOM     generateDocbook();
       Doxy_Globals::g_stats.end();
    }
 
@@ -1335,7 +1335,7 @@ void distributeClassGroupRelations()
 }
 
 // ** start of static methods
-void Doxy_Work::addSTLMember(EntryNav *rootNav, const char *type, const char *name)
+void Doxy_Work::addSTLMember(QSharedPointer<EntryNav> rootNav, const char *type, const char *name)
 {
    QSharedPointer<Entry> memEntry = QMakeShared<Entry>();
 
@@ -1353,7 +1353,7 @@ void Doxy_Work::addSTLMember(EntryNav *rootNav, const char *type, const char *na
    rootNav->addChild(memEntryNav);
 }
 
-void Doxy_Work::addSTLIterator(EntryNav *classEntryNav, const char *name)
+void Doxy_Work::addSTLIterator(QSharedPointer<EntryNav> classEntryNav, const char *name)
 {
    QSharedPointer<Entry> iteratorClassEntry = QMakeShared<Entry>();
 
@@ -1371,9 +1371,9 @@ void Doxy_Work::addSTLIterator(EntryNav *classEntryNav, const char *name)
    classEntryNav->addChild(iteratorClassEntryNav);
 }
 
-void Doxy_Work::addSTLClasses(EntryNav *rootNav)
+void Doxy_Work::addSTLClasses(QSharedPointer<EntryNav> rootNav)
 {
-   Entry *namespaceEntry     = new Entry;
+   QSharedPointer<Entry> namespaceEntry = QMakeShared<Entry>();
    namespaceEntry->fileName  = "[STL]";
    namespaceEntry->startLine = 1;
    //namespaceEntry->parent  = rootNav->entry();
@@ -1383,19 +1383,18 @@ void Doxy_Work::addSTLClasses(EntryNav *rootNav)
    namespaceEntry->hidden    = false;
    namespaceEntry->artificial = true;
   
-   EntryNav *namespaceEntryNav = new EntryNav(rootNav, namespaceEntry);
+   QSharedPointer<EntryNav> namespaceEntryNav = QMakeShared<EntryNav>(rootNav, namespaceEntry);
    namespaceEntryNav->setEntry(namespaceEntry);
    rootNav->addChild(namespaceEntryNav);
 
    STLInfo *info = g_stlinfo;
 
-   while (info->className) {
-      //printf("Adding STL class %s\n",info->className);
+   while (info->className) {      
       QByteArray fullName = info->className;
       fullName.prepend("std::");
 
       // add fake Entry for the class
-      Entry *classEntry     = new Entry;
+      QSharedPointer<Entry> classEntry = QMakeShared<Entry>();
       classEntry->fileName  = "[STL]";
       classEntry->startLine = 1;
       classEntry->name      = fullName;
@@ -1407,7 +1406,7 @@ void Doxy_Work::addSTLClasses(EntryNav *rootNav)
       classEntry->artificial = true;
 
       //namespaceEntry->addSubEntry(classEntry);
-      EntryNav *classEntryNav = new EntryNav(namespaceEntryNav, classEntry);
+      QSharedPointer<EntryNav> classEntryNav = QMakeShared<EntryNav>(namespaceEntryNav, classEntry);
       classEntryNav->setEntry(classEntry);
       namespaceEntryNav->addChild(classEntryNav);
 
@@ -1445,7 +1444,7 @@ void Doxy_Work::addSTLClasses(EntryNav *rootNav)
       if (fullName == "std::auto_ptr" || fullName == "std::smart_ptr" ||
             fullName == "std::unique_ptr" || fullName == "std::weak_ptr") {
 
-         Entry *memEntry      = new Entry;
+         QSharedPointer<Entry> memEntry = QMakeShared<Entry>();
          memEntry->name       = "operator->";
          memEntry->args       = "()";
          memEntry->type       = "T*";
@@ -1455,7 +1454,7 @@ void Doxy_Work::addSTLClasses(EntryNav *rootNav)
          memEntry->hidden     = false;
          memEntry->artificial = false;
 
-         EntryNav *memEntryNav = new EntryNav(classEntryNav, memEntry);
+         QSharedPointer<EntryNav> memEntryNav = QMakeShared<EntryNav>(classEntryNav, memEntry);
          memEntryNav->setEntry(memEntry);
          classEntryNav->addChild(memEntryNav);
       }
@@ -1479,7 +1478,7 @@ void Doxy_Work::addSTLClasses(EntryNav *rootNav)
    }
 }
 
-void Doxy_Work::addPageToContext(PageDef *pd, EntryNav *rootNav)
+void Doxy_Work::addPageToContext(PageDef *pd, QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->parent()) {
       // add the page to it's scope
@@ -1499,9 +1498,9 @@ void Doxy_Work::addPageToContext(PageDef *pd, EntryNav *rootNav)
    }
 }
 
-void Doxy_Work::addRelatedPage(EntryNav *rootNav)
+void Doxy_Work::addRelatedPage(QSharedPointer<EntryNav> rootNav)
 {
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
    QSharedPointer<GroupDef> gd;
 
    for (auto g : *root->groups) {
@@ -1530,13 +1529,13 @@ void Doxy_Work::addRelatedPage(EntryNav *rootNav)
    }
 }
 
-void Doxy_Work::buildGroupListFiltered(EntryNav *rootNav, bool additional, bool includeExternal)
+void Doxy_Work::buildGroupListFiltered(QSharedPointer<EntryNav> rootNav, bool additional, bool includeExternal)
 {
    if (rootNav->section() == Entry::GROUPDOC_SEC && !rootNav->name().isEmpty() &&
          ((! includeExternal && rootNav->tagInfo() == 0) || ( includeExternal && rootNav->tagInfo() != 0)) ) {
 
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       if ((root->groupDocType == Entry::GROUPDOC_NORMAL && !additional) ||
             (root->groupDocType != Entry::GROUPDOC_NORMAL &&  additional)) {
@@ -1587,10 +1586,9 @@ void Doxy_Work::buildGroupListFiltered(EntryNav *rootNav, bool additional, bool 
    for (auto e : rootNav->children() ) {
       buildGroupListFiltered(e, additional, includeExternal);
    }
-
 }
 
-void Doxy_Work::buildGroupList(EntryNav *rootNav)
+void Doxy_Work::buildGroupList(QSharedPointer<EntryNav> rootNav)
 {
    // --- first process only local groups
    // first process the @defgroups blocks
@@ -1607,7 +1605,7 @@ void Doxy_Work::buildGroupList(EntryNav *rootNav)
    buildGroupListFiltered(rootNav, true, true);
 }
 
-void Doxy_Work::findGroupScope(EntryNav *rootNav)
+void Doxy_Work::findGroupScope(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::GROUPDOC_SEC && !rootNav->name().isEmpty() &&
          rootNav->parent() && !rootNav->parent()->name().isEmpty()) {
@@ -1635,19 +1633,19 @@ void Doxy_Work::findGroupScope(EntryNav *rootNav)
    RECURSE_ENTRYTREE(findGroupScope, rootNav);
 }
 
-void Doxy_Work::organizeSubGroupsFiltered(EntryNav *rootNav, bool additional)
+void Doxy_Work::organizeSubGroupsFiltered(QSharedPointer<EntryNav> rootNav, bool additional)
 {
    if (rootNav->section() == Entry::GROUPDOC_SEC && !rootNav->name().isEmpty()) {
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+
+      QSharedPointer<Entry>root = rootNav->entry();
 
       if ((root->groupDocType == Entry::GROUPDOC_NORMAL && !additional) ||
             (root->groupDocType != Entry::GROUPDOC_NORMAL && additional)) {
 
          QSharedPointer<GroupDef> gd;
 
-         if ((gd = Doxygen::groupSDict->find(root->name))) {
-            //printf("adding %s to group %s\n",root->name.data(),gd->name().data());
+         if ((gd = Doxygen::groupSDict->find(root->name))) {           
             addGroupToGroups(root, gd.data());
          }
       }
@@ -1660,7 +1658,7 @@ void Doxy_Work::organizeSubGroupsFiltered(EntryNav *rootNav, bool additional)
    }
 }
 
-void Doxy_Work::organizeSubGroups(EntryNav *rootNav)
+void Doxy_Work::organizeSubGroups(QSharedPointer<EntryNav> rootNav)
 {
    // first process the @defgroups blocks
    organizeSubGroupsFiltered(rootNav, false);
@@ -1669,7 +1667,7 @@ void Doxy_Work::organizeSubGroups(EntryNav *rootNav)
    organizeSubGroupsFiltered(rootNav, true);
 }
 
-void Doxy_Work::buildFileList(EntryNav *rootNav)
+void Doxy_Work::buildFileList(QSharedPointer<EntryNav> rootNav)
 {
    if (((rootNav->section() == Entry::FILEDOC_SEC) ||
          ((rootNav->section() & Entry::FILE_MASK) && Config_getBool("EXTRACT_ALL"))) &&
@@ -1677,7 +1675,7 @@ void Doxy_Work::buildFileList(EntryNav *rootNav)
 
       // skip any file coming from tag files
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       bool ambig;
       FileDef *fd = findFileDef(Doxygen::inputNameDict, root->name, ambig);
@@ -1729,7 +1727,7 @@ void Doxy_Work::buildFileList(EntryNav *rootNav)
    RECURSE_ENTRYTREE(buildFileList, rootNav);
 }
 
-void Doxy_Work::addIncludeFile(ClassDef *cd, FileDef *ifd, Entry *root)
+void Doxy_Work::addIncludeFile(ClassDef *cd, FileDef *ifd, QSharedPointer<Entry> root)
 {
    QString temp1 = root->doc.trimmed();
    QString temp2 = root->brief.trimmed();
@@ -1823,7 +1821,8 @@ void Doxy_Work::addIncludeFile(ClassDef *cd, FileDef *ifd, Entry *root)
  *  full qualified name \a name. Creates an artificial scope if the scope is
  *  not found and set the parent/child scope relation if the scope is found.
  */
-QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QByteArray name, int level, SrcLangExt lang, TagInfo *tagInfo)
+QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QByteArray name, int level, 
+                                                                  SrcLangExt lang, TagInfo *tagInfo)
 {  
    int i = 0;
    int p = 0;
@@ -2044,11 +2043,11 @@ ClassDef::CompoundType Doxy_Work::convertToCompoundType(int section, uint64_t sp
    return sec;
 }
 
-void Doxy_Work::addClassToContext(EntryNav *rootNav)
+void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
 {
    //printf("Loading entry for rootNav=%p name=%s\n",rootNav,rootNav->name().data());
    rootNav->loadEntry(Doxy_Globals::g_storage);
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
 
    //NamespaceDef *nd = 0;
    FileDef *fd = rootNav->fileDef();
@@ -2197,7 +2196,7 @@ void Doxy_Work::addClassToContext(EntryNav *rootNav)
 
 // build a list of all classes mentioned in the documentation
 // and all classes that have a documentation block before their definition.
-void Doxy_Work::buildClassList(EntryNav *rootNav)
+void Doxy_Work::buildClassList(QSharedPointer<EntryNav> rootNav)
 {
    if (((rootNav->section() & Entry::COMPOUND_MASK) || rootNav->section() == Entry::OBJCIMPL_SEC) && !rootNav->name().isEmpty()) {
       addClassToContext(rootNav);
@@ -2206,7 +2205,7 @@ void Doxy_Work::buildClassList(EntryNav *rootNav)
    RECURSE_ENTRYTREE(buildClassList, rootNav);
 }
 
-void Doxy_Work::buildClassDocList(EntryNav *rootNav)
+void Doxy_Work::buildClassDocList(QSharedPointer<EntryNav> rootNav)
 {
    if (
       (rootNav->section() & Entry::COMPOUNDDOC_MASK) && !rootNav->name().isEmpty()
@@ -2440,23 +2439,21 @@ void Doxy_Work::findTagLessClasses()
 
 // build a list of all namespaces mentioned in the documentation
 // and all namespaces that have a documentation block before their definition.
-void Doxy_Work::buildNamespaceList(EntryNav *rootNav)
+void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
 {
    if ( (rootNav->section() == Entry::NAMESPACE_SEC || rootNav->section() == Entry::NAMESPACEDOC_SEC ||
        rootNav->section() == Entry::PACKAGEDOC_SEC) && !rootNav->name().isEmpty()) {
 
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
-
-      //printf("** buildNamespaceList(%s)\n",root->name.data());
-
+      QSharedPointer<Entry> root = rootNav->entry();
+  
       QByteArray fName = root->name;
       if (root->section == Entry::PACKAGEDOC_SEC) {
          fName = substitute(fName, ".", "::");
       }
 
       QByteArray fullName = stripAnonymousNamespaceScope(fName);
-      if (!fullName.isEmpty()) {
+      if (! fullName.isEmpty()) {
 
          QSharedPointer<NamespaceDef> nd;
 
@@ -2565,11 +2562,11 @@ QSharedPointer<NamespaceDef> Doxy_Work::findUsedNamespace(NamespaceSDict *unl, c
    return usingNd;
 }
 
-void Doxy_Work::findUsingDirectives(EntryNav *rootNav)
+void Doxy_Work::findUsingDirectives(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::USINGDIR_SEC) {
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       QByteArray name = substitute(root->name, ".", "::");
 
@@ -2700,13 +2697,13 @@ void Doxy_Work::findUsingDirectives(EntryNav *rootNav)
    RECURSE_ENTRYTREE(findUsingDirectives, rootNav);
 }
 
-void Doxy_Work::buildListOfUsingDecls(EntryNav *rootNav)
+void Doxy_Work::buildListOfUsingDecls(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::USINGDECL_SEC && ! (rootNav->parent()->section()&Entry::COMPOUND_MASK)  ) {
       // not a class/struct member
 
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       QByteArray name = substitute(root->name, ".", "::");
 
@@ -2724,13 +2721,13 @@ void Doxy_Work::buildListOfUsingDecls(EntryNav *rootNav)
    RECURSE_ENTRYTREE(buildListOfUsingDecls, rootNav);
 }
 
-void Doxy_Work::findUsingDeclarations(EntryNav *rootNav)
+void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::USINGDECL_SEC && !(rootNav->parent()->section()&Entry::COMPOUND_MASK) ) {
       // not a class/struct member
       
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();     
+      QSharedPointer<Entry> root = rootNav->entry();     
 
       if (! root->name.isEmpty()) {
          QSharedPointer<ClassDef> usingCd;
@@ -2795,7 +2792,7 @@ void Doxy_Work::findUsingDeclarations(EntryNav *rootNav)
    RECURSE_ENTRYTREE(findUsingDeclarations, rootNav);
 }
 
-void Doxy_Work::findUsingDeclImports(EntryNav *rootNav)
+void Doxy_Work::findUsingDeclImports(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::USINGDECL_SEC && (rootNav->parent()->section()&Entry::COMPOUND_MASK) )  {
      
@@ -2828,8 +2825,7 @@ void Doxy_Work::findUsingDeclImports(EntryNav *rootNav)
                         if (md && md->protection() != Private) {
 
                            rootNav->loadEntry(Doxy_Globals::g_storage);
-                           Entry *root = rootNav->entry();
-
+                           QSharedPointer<Entry>root = rootNav->entry();
 
                            MemberDef *newMd = 0;
                            {
@@ -2903,10 +2899,10 @@ void Doxy_Work::findIncludedUsingDirectives()
    }
 }
 
-MemberDef *Doxy_Work::addVariableToClass(EntryNav *rootNav, ClassDef *cd, MemberType mtype, const QByteArray &name,
+MemberDef *Doxy_Work::addVariableToClass(QSharedPointer<EntryNav> rootNav, ClassDef *cd, MemberType mtype, const QByteArray &name,
                                      bool fromAnnScope, MemberDef *fromAnnMemb, Protection prot, Relationship related)
 {
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
 
    QByteArray qualScope = cd->qualifiedNameWithTemplateParameters();
    QByteArray scopeSeparator = "::";
@@ -3042,10 +3038,10 @@ MemberDef *Doxy_Work::addVariableToClass(EntryNav *rootNav, ClassDef *cd, Member
    return md.data();
 }
 
-MemberDef *Doxy_Work::addVariableToFile(EntryNav *rootNav, MemberType mtype, const QByteArray &scope, const QByteArray &name,
-                                    bool fromAnnScope, MemberDef *fromAnnMemb)
+MemberDef *Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> rootNav, MemberType mtype, const QByteArray &scope, 
+                     const QByteArray &name, bool fromAnnScope, MemberDef *fromAnnMemb)
 {
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
 
    Debug::print(Debug::Variables, 0, "  global variable:\n"
                 "    type=`%s' scope=`%s' name=`%s' args=`%s' prot=`%d mtype=%d lang=%d\n",
@@ -3268,7 +3264,7 @@ int Doxy_Work::findFunctionPtr(const QByteArray &type, int lang, int *pLength)
 /*! Returns true iff \a type is a class within scope \a context.
  *  Used to detect variable declarations that look like function prototypes.
  */
-bool Doxy_Work::isVarWithConstructor(EntryNav *rootNav)
+bool Doxy_Work::isVarWithConstructor(QSharedPointer<EntryNav> rootNav)
 {
    static QRegExp initChars("[0-9\"'&*!^]+");
    static QRegExp idChars("[a-z_A-Z][a-z_A-Z0-9]*");
@@ -3282,7 +3278,7 @@ bool Doxy_Work::isVarWithConstructor(EntryNav *rootNav)
    int ti;
 
    rootNav->loadEntry(Doxy_Globals::g_storage);
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
 
    bool outerBreak = false;
 
@@ -3418,10 +3414,10 @@ bool Doxy_Work::isVarWithConstructor(EntryNav *rootNav)
    return result;
 }
 
-void Doxy_Work::addVariable(EntryNav *rootNav, int isFuncPtr)
+void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
 {
    rootNav->loadEntry(Doxy_Globals::g_storage);
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
 
    Debug::print(Debug::Variables, 0, "VARIABLE_SEC: \n"
                 "  type=`%s' name=`%s' args=`%s' bodyLine=`%d' mGrpId=%d relates=%s\n",
@@ -3477,14 +3473,16 @@ void Doxy_Work::addVariable(EntryNav *rootNav, int isFuncPtr)
    QByteArray scope, name = removeRedundantWhiteSpace(root->name);
 
    // find the scope of this variable
-   EntryNav *p = rootNav->parent();
+   QSharedPointer<EntryNav> p = rootNav->parent();
 
    while ((p->section() & Entry::SCOPE_MASK)) {
       QByteArray scopeName = p->name();
+
       if (!scopeName.isEmpty()) {
          scope.prepend(scopeName);
          break;
       }
+
       p = p->parent();
    }
 
@@ -3618,7 +3616,7 @@ nextMember:
 
 // Searches the Entry tree for typedef documentation sections.
 // If found they are stored in their class or in the global list.
-void Doxy_Work::buildTypedefList(EntryNav *rootNav)
+void Doxy_Work::buildTypedefList(QSharedPointer<EntryNav> rootNav)
 {
    if (! rootNav->name().isEmpty() && rootNav->section() == Entry::VARIABLE_SEC &&
          rootNav->type().indexOf("typedef ") != -1) {
@@ -3629,14 +3627,14 @@ void Doxy_Work::buildTypedefList(EntryNav *rootNav)
 
    for (auto &e : rootNav->children() ) {
       if (e->section() != Entry::ENUM_SEC) {
-         buildTypedefList(const_cast<EntryNav *>(e));
+         buildTypedefList(e);
       }
    }
 }
 
 // Searches the Entry tree for Variable documentation sections.
 // If found they are stored in their class or in the global list.
-void Doxy_Work::buildVarList(EntryNav *rootNav)
+void Doxy_Work::buildVarList(QSharedPointer<EntryNav> rootNav)
 {
    int isFuncPtr = -1;
 
@@ -3652,16 +3650,16 @@ void Doxy_Work::buildVarList(EntryNav *rootNav)
 
    for (auto &e : rootNav->children() ) {
       if (e->section() != Entry::ENUM_SEC) {
-         buildVarList(const_cast<EntryNav *>(e));
+         buildVarList(e);
       }
    }
 }
 
 // Searches the Entry tree for Interface sections (UNO IDL only).
 // If found they are stored in their service or in the global list.
-void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(EntryNav *const rootNav, ClassDef *const cd, QByteArray const &rname)
+void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<EntryNav> rootNav, ClassDef *const cd, QByteArray const &rname)
 {
-   Entry *const root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
    FileDef *const fd = rootNav->fileDef();
 
    enum MemberType const type = (rootNav->section() == Entry::EXPORTED_INTERFACE_SEC)
@@ -3727,12 +3725,12 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(EntryNav *const rootNa
    md->setRefItems(root->sli);
 }
 
-void Doxy_Work::buildInterfaceAndServiceList(EntryNav *const rootNav)
+void Doxy_Work::buildInterfaceAndServiceList(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::EXPORTED_INTERFACE_SEC || rootNav->section() == Entry::INCLUDED_SERVICE_SEC) {
 
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *const root = rootNav->entry();
+      QSharedPointer<const Entry> root = rootNav->entry();
 
       Debug::print(Debug::Functions, 0,"EXPORTED_INTERFACE_SEC:\n"
                    "  `%s' `%s'::`%s' `%s' relates=`%s' relatesType=`%d' file=`%s' "
@@ -3755,7 +3753,7 @@ void Doxy_Work::buildInterfaceAndServiceList(EntryNav *const rootNav)
 
       QByteArray const rname = removeRedundantWhiteSpace(root->name);
 
-      if (!rname.isEmpty()) {
+      if (! rname.isEmpty()) {
          QByteArray const scope = rootNav->parent()->name();
          ClassDef *const cd = getClass(scope);
          assert(cd);
@@ -3788,9 +3786,9 @@ void Doxy_Work::buildInterfaceAndServiceList(EntryNav *const rootNav)
 
 // Searches the Entry tree for Function sections.
 // If found they are stored in their class or in the global list.
-void Doxy_Work::addMethodToClass(EntryNav *rootNav, ClassDef *cd, const QByteArray &rname, bool isFriend)
+void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, ClassDef *cd, const QByteArray &rname, bool isFriend)
 {
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
    FileDef *fd = rootNav->fileDef();
 
    int l;
@@ -3951,11 +3949,11 @@ void Doxy_Work::addMethodToClass(EntryNav *rootNav, ClassDef *cd, const QByteArr
    md->setRefItems(root->sli);
 }
 
-void Doxy_Work::buildFunctionList(EntryNav *rootNav)
+void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::FUNCTION_SEC) {
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       Debug::print(Debug::Functions, 0,"FUNCTION_SEC:\n"
                    "  `%s' `%s'::`%s' `%s' relates=`%s' relatesType=`%d' file=`%s' "
@@ -4598,7 +4596,7 @@ ClassDef *Doxy_Work::findClassWithinClassContext(Definition *context, ClassDef *
    return result;
 }
 
-void Doxy_Work::findUsedClassesForClass(EntryNav *rootNav, Definition *context, ClassDef *masterCd,
+void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, Definition *context, ClassDef *masterCd,
                ClassDef *instanceCd, bool isArtificial, ArgumentList *actualArgs, QHash<QString, int> *templateNames)
 {
    masterCd->visited = true;
@@ -4752,26 +4750,18 @@ void Doxy_Work::findUsedClassesForClass(EntryNav *rootNav, Definition *context, 
    }
 }
 
-void Doxy_Work::findBaseClassesForClass(EntryNav *rootNav, Definition *context, ClassDef *masterCd, ClassDef *instanceCd,
+void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, Definition *context, ClassDef *masterCd, ClassDef *instanceCd,
              FindBaseClassRelation_Mode mode, bool isArtificial, ArgumentList *actualArgs, QHash<QString, int> *templateNames)
 {
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
 
    masterCd->visited = true;
 
    // base class could also be a non-nested class
    ArgumentList *formalArgs = masterCd->templateArguments();
 
-
-printf("\n  BROOM  findBaseClasses   A   %x", root);
-
-
    for (auto bi : root->extends) {
       bool delTempNames = false;
-
-
-printf("\n  BROOM  findBaseClasses   B");
-
 
       if (templateNames == 0) {
          templateNames = getTemplateArgumentsInName(formalArgs, bi.name);
@@ -4805,8 +4795,6 @@ printf("\n  BROOM  findBaseClasses   B");
 
       }
 
-printf("\n  BROOM  findBaseClasses   C");
-
       if (delTempNames) {
          delete templateNames;
          templateNames = 0;
@@ -4814,7 +4802,7 @@ printf("\n  BROOM  findBaseClasses   C");
    }
 }
 
-bool Doxy_Work::findTemplateInstanceRelation(Entry *root, Definition *context, ClassDef *templateClass, const QByteArray &templSpec,
+bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, Definition *context, ClassDef *templateClass, const QByteArray &templSpec,
                                              QHash<QString, int> *templateNames, bool isArtificial)
 {
    Debug::print(Debug::Classes, 0, "    derived from template %s with parameters %s\n",
@@ -4842,11 +4830,11 @@ bool Doxy_Work::findTemplateInstanceRelation(Entry *root, Definition *context, C
       instanceClass->setTemplateBaseClassNames(templateNames);
 
       // search for new template instances caused by base classes of instanceClass
-      EntryNav *templateRootNav = const_cast<EntryNav *>(&(*Doxy_Globals::g_classEntries.find(templateClass->name())));
+      QSharedPointer<EntryNav> templateRootNav = Doxy_Globals::g_classEntries.value(templateClass->name());
 
       if (templateRootNav) {
          bool unloadNeeded = false;
-         Entry *templateRoot = templateRootNav->entry();
+         QSharedPointer<Entry> templateRoot = templateRootNav->entry();
 
          if (templateRoot == 0) { 
             // not yet loaded
@@ -4983,10 +4971,10 @@ int Doxy_Work::findEndOfTemplate(const QByteArray &s, int startPos)
    return brCount == 0 ? e : -1;
 }
 
-bool Doxy_Work::findClassRelation(EntryNav *rootNav, Definition *context, ClassDef *cd, BaseInfo *bi,
+bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, Definition *context, ClassDef *cd, BaseInfo *bi,
                               QHash<QString, int> *templateNames, FindBaseClassRelation_Mode mode, bool isArtificial)
 {
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
 
    QByteArray biName = bi->name;
    bool explicitGlobalScope = false;
@@ -4997,7 +4985,7 @@ bool Doxy_Work::findClassRelation(EntryNav *rootNav, Definition *context, ClassD
       explicitGlobalScope = true;
    }
 
-   EntryNav *parentNode = rootNav->parent();
+   QSharedPointer<EntryNav> parentNode = rootNav->parent();
    bool lastParent = false;
 
    // for each parent scope, starting with the largest scope
@@ -5008,11 +4996,7 @@ bool Doxy_Work::findClassRelation(EntryNav *rootNav, Definition *context, ClassD
       int scopeOffset = explicitGlobalScope ? 0 : scopeName.length();
 
       do {
-
-         // try all parent scope prefixes, starting with the largest scope
-         //printf("scopePrefix=`%s' biName=`%s'\n",
-         //    scopeName.left(scopeOffset).data(),biName.data());
-
+         // try all parent scope prefixes, starting with the largest scope         
          QByteArray baseClassName = biName;
 
          if (scopeOffset > 0) {
@@ -5298,7 +5282,7 @@ bool Doxy_Work::findClassRelation(EntryNav *rootNav, Definition *context, ClassD
 }
 
 // Computes the base and super classes for each class in the tree
-bool Doxy_Work::isClassSection(EntryNav *rootNav)
+bool Doxy_Work::isClassSection(QSharedPointer<EntryNav> rootNav)
 {
    if ( !rootNav->name().isEmpty() ) {
       if (rootNav->section() & Entry::COMPOUND_MASK) {
@@ -5309,7 +5293,7 @@ bool Doxy_Work::isClassSection(EntryNav *rootNav)
          // is it a documentation block with inheritance info.
 
          rootNav->loadEntry(Doxy_Globals::g_storage);
-         Entry *root = rootNav->entry();
+         QSharedPointer<Entry> root = rootNav->entry();
 
          bool extends = root->extends.count() > 0;
          rootNav->releaseEntry();
@@ -5324,16 +5308,16 @@ bool Doxy_Work::isClassSection(EntryNav *rootNav)
 
 /*! Builds a dictionary of all entry nodes in the tree starting with \a root
  */
-void Doxy_Work::findClassEntries(EntryNav *rootNav)
+void Doxy_Work::findClassEntries(QSharedPointer<EntryNav> rootNav)
 {
    if (isClassSection(rootNav)) {
-      Doxy_Globals::g_classEntries.insert(rootNav->name(), *rootNav);
+      Doxy_Globals::g_classEntries.insert(rootNav->name(), rootNav);
    }
 
    RECURSE_ENTRYTREE(findClassEntries, rootNav);
 }
 
-QByteArray Doxy_Work::extractClassName(EntryNav *rootNav)
+QByteArray Doxy_Work::extractClassName(QSharedPointer<EntryNav> rootNav)
 {
    // strip any anonymous scopes first
    QByteArray bName = stripAnonymousNamespaceScope(rootNav->name());
@@ -5362,17 +5346,17 @@ void Doxy_Work::findInheritedTemplateInstances()
       item->visited = false;
    }
 
-   for (auto &rootNav : Doxy_Globals::g_classEntries) {
+   for (auto rootNav : Doxy_Globals::g_classEntries) {
       ClassDef *cd;
-      QByteArray bName = extractClassName(&rootNav);
+      QByteArray bName = extractClassName(rootNav);
 
       Debug::print(Debug::Classes, 0, "  Inheritance: Class %s : \n", bName.data());
 
       if (cd = getClass(bName)) {
-         rootNav.loadEntry(Doxy_Globals::g_storage);
+         rootNav->loadEntry(Doxy_Globals::g_storage);
 
-         findBaseClassesForClass(&rootNav, cd, cd, cd, TemplateInstances, false);
-         rootNav.releaseEntry();
+         findBaseClassesForClass(rootNav, cd, cd, cd, TemplateInstances, false);
+         rootNav->releaseEntry();
       }
    }
 }
@@ -5383,17 +5367,17 @@ void Doxy_Work::findUsedTemplateInstances()
       item->visited = false;
    }
 
-   for (auto &rootNav : Doxy_Globals::g_classEntries) {
+   for (auto rootNav : Doxy_Globals::g_classEntries) {
       ClassDef *cd;
-      QByteArray bName = extractClassName(&rootNav);
+      QByteArray bName = extractClassName(rootNav);
 
       Debug::print(Debug::Classes, 0, "  Usage: Class %s : \n", bName.data());
 
       if (cd = getClass(bName)) {
-         rootNav.loadEntry(Doxy_Globals::g_storage);
+         rootNav->loadEntry(Doxy_Globals::g_storage);
 
-         findUsedClassesForClass(&rootNav, cd, cd, cd, true);
-         rootNav.releaseEntry();
+         findUsedClassesForClass(rootNav, cd, cd, cd, true);
+         rootNav->releaseEntry();
       }
    }
 }
@@ -5404,22 +5388,18 @@ void Doxy_Work::computeClassRelations()
       item->visited = false;
    }
 
-   for (auto &rootNav : Doxy_Globals::g_classEntries) {
+   for (auto rootNav : Doxy_Globals::g_classEntries) {
       ClassDef *cd;
 
-      rootNav.loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav.entry();
+      rootNav->loadEntry(Doxy_Globals::g_storage);
+      QSharedPointer<Entry> root = rootNav->entry();
 
-      QByteArray bName = extractClassName(&rootNav);
+      QByteArray bName = extractClassName(rootNav);
       Debug::print(Debug::Classes, 0, "  Relations: Class %s : \n", bName.data());
 
-printf("\n  BROOM  computerClassRelations  A");
-
       if (cd = getClass(bName)) {
-         findBaseClassesForClass(&rootNav, cd, cd, cd, DocumentedOnly, false);
+         findBaseClassesForClass(rootNav, cd, cd, cd, DocumentedOnly, false);
       }
-
-printf("\n  BROOM  computerClassRelations  B");
 
       int numMembers = cd && cd->memberNameInfoSDict() ? cd->memberNameInfoSDict()->count() : 0;
 
@@ -5428,22 +5408,23 @@ printf("\n  BROOM  computerClassRelations  B");
          if (! root->name.isEmpty() && root->name.indexOf('@') == -1 && // normal name
                (guessSection(root->fileName) == Entry::HEADER_SEC ||
                    Config_getBool("EXTRACT_LOCAL_CLASSES")) && // not defined in source file
-               protectionLevelVisible(root->protection) && // hidden by protection
-                  ! Config_getBool("HIDE_UNDOC_CLASSES") // undocumented class are visible
+                   protectionLevelVisible(root->protection) && // hidden by protection
+                   ! Config_getBool("HIDE_UNDOC_CLASSES") // undocumented class are visible
             )
 
             warn_undoc(root->fileName, root->startLine, "Compound %s is not documented.", root->name.data());
       }
 
-      rootNav.releaseEntry();
+      rootNav->releaseEntry();
    }
 }
 
 void Doxy_Work::computeTemplateClassRelations()
 {
    for (auto rootNav : Doxy_Globals::g_classEntries) {
-      rootNav.loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav.entry();
+      rootNav->loadEntry(Doxy_Globals::g_storage);
+
+      QSharedPointer<Entry> root = rootNav->entry();
 
       QByteArray bName = stripAnonymousNamespaceScope(root->name);
       bName = stripTemplateSpecifiersFromScope(bName);
@@ -5504,9 +5485,9 @@ void Doxy_Work::computeTemplateClassRelations()
                   tbi.name = substituteTemplateArgumentsInString(bi.name, tl, templArgs);
 
                   // find a documented base class in the correct scope
-                  if (! findClassRelation(&rootNav, cd, &*tcd, &tbi, actualTemplateNames, DocumentedOnly, false)) {
+                  if (! findClassRelation(rootNav, cd, &*tcd, &tbi, actualTemplateNames, DocumentedOnly, false)) {
                      // no documented base class -> try to find an undocumented one
-                     findClassRelation(&rootNav, cd, &*tcd, &tbi, actualTemplateNames, Undocumented, true);
+                     findClassRelation(rootNav, cd, &*tcd, &tbi, actualTemplateNames, Undocumented, true);
                   }
 
                   delete actualTemplateNames;
@@ -5519,7 +5500,7 @@ void Doxy_Work::computeTemplateClassRelations()
          // class has no base classes
       }
 
-      rootNav.releaseEntry();
+      rootNav->releaseEntry();
    }
 }
 
@@ -5609,10 +5590,10 @@ void Doxy_Work::generateXRefPages()
 // set the function declaration of the member to `funcDecl'. If the boolean
 // over_load is set the standard overload text is added.
 
-void Doxy_Work::addMemberDocs(EntryNav *rootNav, MemberDef *md, const char *funcDecl, ArgumentList *al,
+void Doxy_Work::addMemberDocs(QSharedPointer<EntryNav> rootNav, MemberDef *md, const char *funcDecl, ArgumentList *al,
                           bool over_load, NamespaceSDict *)
 {
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
 
    QByteArray fDecl = funcDecl;
 
@@ -5738,10 +5719,10 @@ ClassDef *Doxy_Work::findClassDefinition(FileDef *fd, NamespaceDef *nd, const ch
 // Adds the documentation contained in `root' to a global function
 // with name `name' and argument list `args' (for overloading) and
 // function declaration `decl' to the corresponding member definition.
-bool Doxy_Work::findGlobalMember(EntryNav *rootNav, const QByteArray &namespaceName, const char *type, const char *name,
+bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QByteArray &namespaceName, const char *type, const char *name,
                              const char *tempArg, const char *, const char *decl)
 {
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
 
    Debug::print(Debug::FindMembers, 0, "2. findGlobalMember(namespace=%s,type=%s,name=%s,tempArg=%s,decl=%s)\n",
                 namespaceName.data(), type, name, tempArg, decl);
@@ -6059,14 +6040,13 @@ void Doxy_Work::substituteTemplatesInArgList(const QList<ArgumentList> &srcTempA
  * The boolean \a isFunc is a hint that indicates that this is a function
  * instead of a variable or typedef.
  */
-void Doxy_Work::findMember(EntryNav *rootNav, QByteArray funcDecl, bool overloaded, bool isFunc)
+void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl, bool overloaded, bool isFunc)
 {
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
 
    Debug::print(Debug::FindMembers, 0, "findMember(root=%p,funcDecl=`%s',related=`%s',overload=%d,"
-                "isFunc=%d mGrpId=%d tArgList=%p (#=%d) "
-                "spec=%lld lang=%x\n",
-                root, funcDecl.data(), root->relates.data(), overloaded, isFunc, root->mGrpId,
+                "isFunc=%d mGrpId=%d tArgList=%p (#=%d) spec=%lld lang=%x\n",
+                root.data(), funcDecl.data(), root->relates.data(), overloaded, isFunc, root->mGrpId,
                 root->tArgLists, root->tArgLists ? root->tArgLists->count() : 0, root->spec, root->lang);
 
    QByteArray scopeName;
@@ -7086,9 +7066,9 @@ void Doxy_Work::findMember(EntryNav *rootNav, QByteArray funcDecl, bool overload
 
 // find the members corresponding to the different documentation blocks
 // that are extracted from the sources.
-void Doxy_Work::filterMemberDocumentation(EntryNav *rootNav)
+void Doxy_Work::filterMemberDocumentation(QSharedPointer<EntryNav> rootNav)
 {
-   Entry *root = rootNav->entry();
+   QSharedPointer<Entry> root = rootNav->entry();
    int i = -1, l;
 
    Debug::print(Debug::FindMembers, 0, "findMemberDocumentation(): root->type=`%s' root->inside=`%s' root->name=`%s'" 
@@ -7162,7 +7142,7 @@ void Doxy_Work::filterMemberDocumentation(EntryNav *rootNav)
    }
 }
 
-void Doxy_Work::findMemberDocumentation(EntryNav *rootNav)
+void Doxy_Work::findMemberDocumentation(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::MEMBERDOC_SEC || rootNav->section() == Entry::OVERLOADDOC_SEC ||
          rootNav->section() == Entry::FUNCTION_SEC || rootNav->section() == Entry::VARIABLE_SEC ||
@@ -7175,14 +7155,14 @@ void Doxy_Work::findMemberDocumentation(EntryNav *rootNav)
       rootNav->releaseEntry();
    }
    
-   for (auto &e : rootNav->children() ) {
+   for (auto e : rootNav->children() ) {
       if (e->section() != Entry::ENUM_SEC) {
-         findMemberDocumentation(const_cast<EntryNav *>(e));
+         findMemberDocumentation(e);
       }      
    }
 }
 
-void Doxy_Work::findObjCMethodDefinitions(EntryNav *rootNav)
+void Doxy_Work::findObjCMethodDefinitions(QSharedPointer<EntryNav> rootNav)
 {  
    for (auto &objCImplNav : rootNav->children() ) {
       if (objCImplNav->section() == Entry::OBJCIMPL_SEC) {
@@ -7191,10 +7171,10 @@ void Doxy_Work::findObjCMethodDefinitions(EntryNav *rootNav)
 
             if (objCMethodNav->section() == Entry::FUNCTION_SEC) {
 
-               auto temp = const_cast<EntryNav *>(objCMethodNav); 
+               auto temp = objCMethodNav; 
                temp->loadEntry(Doxy_Globals::g_storage);
 
-               Entry *objCMethod = temp->entry();
+               QSharedPointer<Entry> objCMethod = temp->entry();
               
                findMember(temp, objCMethod->type + " " + objCImplNav->name() + "::" +
                           objCMethod->name + " " + objCMethod->args, false, true);
@@ -7209,11 +7189,11 @@ void Doxy_Work::findObjCMethodDefinitions(EntryNav *rootNav)
 }
 
 // find and add the enumeration to their classes, namespaces or files
-void Doxy_Work::findEnums(EntryNav *rootNav)
+void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::ENUM_SEC) {
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       QSharedPointer<MemberDef> md;
       ClassDef   *cd = 0;
@@ -7399,13 +7379,13 @@ void Doxy_Work::findEnums(EntryNav *rootNav)
    }
 }
 
-void Doxy_Work::addEnumValuesToEnums(EntryNav *rootNav)
+void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::ENUM_SEC) {
       // non anonymous enumeration
    
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       ClassDef *cd = 0;
       FileDef  *fd = 0;
@@ -7489,7 +7469,7 @@ void Doxy_Work::addEnumValuesToEnums(EntryNav *rootNav)
                if (md->isEnumerate()) {
                   
                   for (auto &item : rootNav->children() ) {
-                     auto e = const_cast<EntryNav *>(item);
+                     auto e = item;
          
                      SrcLangExt sle;
 
@@ -7502,7 +7482,7 @@ void Doxy_Work::addEnumValuesToEnums(EntryNav *rootNav)
 
                         e->loadEntry(Doxy_Globals::g_storage);
 
-                        Entry *root = e->entry();
+                        QSharedPointer<Entry> root = e->entry();
                         
                         if (substitute(md->qualifiedName(), "::", ".") == // TODO: add function to get canonical representation
                               substitute(rootNav->name(), "::", ".") ||  // enum value scope matches that of the enum
@@ -7621,12 +7601,12 @@ void Doxy_Work::addEnumValuesToEnums(EntryNav *rootNav)
 }
 
 // find the documentation blocks for the enumerations
-void Doxy_Work::findEnumDocumentation(EntryNav *rootNav)
+void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::ENUMDOC_SEC && !rootNav->name().isEmpty() && rootNav->name().at(0) != '@') {
       // skip anonymous enums
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       int i;
       QByteArray name;
@@ -8341,13 +8321,13 @@ void Doxy_Work::flushUnresolvedRelations()
    }
 }
 
-void Doxy_Work::findDefineDocumentation(EntryNav *rootNav)
+void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
 {
    if ((rootNav->section() == Entry::DEFINEDOC_SEC ||
          rootNav->section() == Entry::DEFINE_SEC) && !rootNav->name().isEmpty()) {
 
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       if (rootNav->tagInfo() && !root->name.isEmpty()) { 
 
@@ -8462,11 +8442,11 @@ void Doxy_Work::findDefineDocumentation(EntryNav *rootNav)
    RECURSE_ENTRYTREE(findDefineDocumentation, rootNav);
 }
 
-void Doxy_Work::findDirDocumentation(EntryNav *rootNav)
+void Doxy_Work::findDirDocumentation(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::DIRDOC_SEC) {
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       QByteArray normalizedName = root->name;
       normalizedName = substitute(normalizedName, "\\", "/");
@@ -8500,11 +8480,11 @@ void Doxy_Work::findDirDocumentation(EntryNav *rootNav)
          }
       }
 
-      if (matchingDir) {
-         //printf("Match for with dir %s\n",matchingDir->name().data());
+      if (matchingDir) {         
          matchingDir->setBriefDescription(root->brief, root->briefFile, root->briefLine);
          matchingDir->setDocumentation(root->doc, root->docFile, root->docLine);
          matchingDir->setRefItems(root->sli);
+
          addDirToGroups(root, matchingDir.data());
 
       } else {
@@ -8519,13 +8499,13 @@ void Doxy_Work::findDirDocumentation(EntryNav *rootNav)
 }
 
 // create a (sorted) list of separate documentation pages
-void Doxy_Work::buildPageList(EntryNav *rootNav)
+void Doxy_Work::buildPageList(QSharedPointer<EntryNav> rootNav)
 {
 
    if (rootNav->section() == Entry::PAGEDOC_SEC) {
 
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       if (! root->name.isEmpty()) {
          addRelatedPage(rootNav);
@@ -8536,7 +8516,7 @@ void Doxy_Work::buildPageList(EntryNav *rootNav)
    } else if (rootNav->section() == Entry::MAINPAGEDOC_SEC) {
 
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       QByteArray title = root->args.trimmed();
 
@@ -8554,13 +8534,13 @@ void Doxy_Work::buildPageList(EntryNav *rootNav)
 }
 
 // search for the main page defined in this project
-void Doxy_Work::findMainPage(EntryNav *rootNav)
+void Doxy_Work::findMainPage(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::MAINPAGEDOC_SEC) {
       rootNav->loadEntry(Doxy_Globals::g_storage);
 
       if (Doxygen::mainPage == 0 && rootNav->tagInfo() == 0) {
-         Entry *root = rootNav->entry();
+         QSharedPointer<Entry> root = rootNav->entry();
 
          QByteArray title = root->args.trimmed();
 
@@ -8596,7 +8576,7 @@ void Doxy_Work::findMainPage(EntryNav *rootNav)
          }
 
       } else if (rootNav->tagInfo() == 0) {
-         Entry *root = rootNav->entry();
+         QSharedPointer<Entry> root = rootNav->entry();
          warn(root->fileName, root->startLine, "found more than one \\mainpage comment block, skipping this block.");
       }
 
@@ -8607,26 +8587,26 @@ void Doxy_Work::findMainPage(EntryNav *rootNav)
 }
 
 // search for the main page imported via tag files and add only the section labels
-void Doxy_Work::findMainPageTagFiles(EntryNav *rootNav)
+void Doxy_Work::findMainPageTagFiles(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::MAINPAGEDOC_SEC) {
       rootNav->loadEntry(Doxy_Globals::g_storage);
 
       if (Doxygen::mainPage && rootNav->tagInfo()) {
-         Entry *root = rootNav->entry();
+         QSharedPointer<Entry> root = rootNav->entry();
          Doxygen::mainPage->addSectionsToDefinition(root->anchors);
       }
    }
    RECURSE_ENTRYTREE(findMainPageTagFiles, rootNav);
 }
 
-void Doxy_Work::computePageRelations(EntryNav *rootNav)
+void Doxy_Work::computePageRelations(QSharedPointer<EntryNav> rootNav)
 {
    if ((rootNav->section() == Entry::PAGEDOC_SEC || rootNav->section() == Entry::MAINPAGEDOC_SEC) 
                && !rootNav->name().isEmpty() ) {
 
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       PageDef *pd = root->section == Entry::PAGEDOC_SEC ? Doxygen::pageSDict->find(root->name).data() : Doxygen::mainPage;
 
@@ -8737,11 +8717,11 @@ void Doxy_Work::generatePageDocs()
 }
 
 // create a (sorted) list & dictionary of example pages
-void Doxy_Work::buildExampleList(EntryNav *rootNav)
+void Doxy_Work::buildExampleList(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::EXAMPLE_SEC && !rootNav->name().isEmpty()) {
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      Entry *root = rootNav->entry();
+      QSharedPointer<Entry> root = rootNav->entry();
 
       if (Doxygen::exampleSDict->find(root->name)) {
          warn(root->fileName, root->startLine, "Example %s was already documented. Ignoring "
@@ -8765,7 +8745,7 @@ void Doxy_Work::buildExampleList(EntryNav *rootNav)
 }
 
 // prints the Entry tree (for debugging)
-void printNavTree(EntryNav *rootNav, int indent)
+void printNavTree(QSharedPointer<EntryNav> rootNav, int indent)
 {
    QByteArray indentStr;
    indentStr.fill(' ', indent);
@@ -8774,7 +8754,7 @@ void printNavTree(EntryNav *rootNav, int indent)
        rootNav->name().isEmpty() ? "<empty>" : rootNav->name().data(),rootNav->section());
   
    for (auto e : rootNav->children()) {
-      printNavTree(const_cast<EntryNav *>(e), indent + 2);
+      printNavTree(e, indent + 2);
    }   
 }
 
@@ -8977,8 +8957,8 @@ static ParserInterface *getParserForFile(const char *fn)
    return Doxygen::parserManager->getParser(qPrintable(extension));
 }
 
-void Doxy_Work::parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNav, FileDef *fd, const char *fn,
-                      bool sameTu, QStringList &filesInSameTu)
+void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav, FileDef *fd, 
+                          const char *fn, bool sameTu, QStringList &filesInSameTu)
 {
 
 #if USE_LIBCLANG
@@ -9029,7 +9009,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, Entry *root, EntryNav *rootNa
    parser->parseInput(fileName, convBuf.data(), root, sameTu, filesInSameTu);
 
    // store the Entry tree in a file and create an index to navigate/load entries
-   root->createNavigationIndex(rootNav, Doxy_Globals::g_storage, fd);
+   root->createNavigationIndex(rootNav, Doxy_Globals::g_storage, fd, root);
 }
 
 //! parse the list of input files

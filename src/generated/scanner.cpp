@@ -10584,10 +10584,10 @@ char *scannerYYtext;
  */
 static ParserInterface *g_thisParser;
 static const char      *inputString;
-static int		inputPosition;
+static int		         inputPosition;
 static QFile            inputFile;
-static int		lastContext;
-static int		lastCContext;
+static int		         lastContext;
+static int		         lastCContext;
 static int              lastDocContext;
 static int              lastCPPContext;
 static int              lastSkipSharpContext;
@@ -10606,21 +10606,23 @@ static int              lastCSConstraint;
 static int              lastHereDocContext;
 static int              lastDefineContext;
 static int              lastAlignAsContext;
-static Protection	protection;
-static Protection	baseProt;
-static int		sharpCount   = 0 ;
-static int		roundCount   = 0 ;
-static int		curlyCount   = 0 ;
-static int		squareCount  = 0 ;
+static Protection	      protection;
+static Protection	      baseProt;
+static int		         sharpCount   = 0 ;
+static int	          	roundCount   = 0 ;
+static int              curlyCount   = 0 ;
+static int		         squareCount  = 0 ;
 static int              padCount     = 0 ;
-static QByteArray         slString;
-static Entry		*current_root = 0 ;
-static Entry		*global_root  = 0 ;
-static Entry		*current      = 0 ;
-static Entry		*previous     = 0 ;
-static Entry		*tempEntry    = 0 ;
-static Entry		*firstTypedefEntry = 0 ;
-static Entry		*memspecEntry = 0 ;
+static QByteArray       slString;
+
+static QSharedPointer<Entry> current_root;
+static QSharedPointer<Entry> global_root;
+static QSharedPointer<Entry> current;
+static QSharedPointer<Entry> previous;
+static QSharedPointer<Entry> tempEntry;
+static QSharedPointer<Entry> firstTypedefEntry;
+static QSharedPointer<Entry> memspecEntry;
+
 static int		yyLineNr     = 1 ;
 static int		yyBegLineNr  = yyLineNr ;
 static int		yyColNr      = 1 ;
@@ -10752,10 +10754,11 @@ static void initParser()
    insideFormula = FALSE;
    insideCode = FALSE;
    insideCli = Config_getBool("CPP_CLI_SUPPORT");
-   previous = 0;
-   firstTypedefEntry = 0;
-   tempEntry = 0;
-   memspecEntry = 0;
+
+   previous = QSharedPointer<Entry>();
+   firstTypedefEntry = QSharedPointer<Entry>();
+   tempEntry = QSharedPointer<Entry>();
+   memspecEntry = QSharedPointer<Entry>();
 }
 
 static void initEntry()
@@ -10768,12 +10771,7 @@ static void initEntry()
    current->virt       = virt;
    current->stat       = gstat;
    current->lang       = language;
-   //printf("*** initEntry() language=%d\n",language);
-   //if (!autoGroupStack.isEmpty())
-   //{
-   //  //printf("Appending group %s\n",autoGroupStack.top()->groupname.data());
-   //  current->groups->append(new Grouping(*autoGroupStack.top()));
-   //}
+  
    initGroupInfo(current);
    isTypedef = FALSE;
 }
@@ -10851,25 +10849,25 @@ static inline int computeIndent(const char *s, int startIndent)
    return col;
 }
 
-static void addType( Entry *current )
+static void addType(QSharedPointer<Entry> ce)
 {
-   uint tl = current->type.length();
+   uint tl = ce->type.length();
 
-   if ( tl > 0 && ! current->name.isEmpty() && current->type.at(tl - 1) != '.') {
+   if ( tl > 0 && ! current->name.isEmpty() && ce->type.at(tl - 1) != '.') {
+      ce->type += ' ' ;
+   }
+
+   ce->type += ce->name ;
+   ce->name.resize(0) ;
+   tl = ce->type.length();
+
+   if ( tl > 0 && !current->args.isEmpty() && ce->type.at(tl - 1) != '.') {
       current->type += ' ' ;
    }
 
-   current->type += current->name ;
-   current->name.resize(0) ;
-   tl = current->type.length();
-
-   if ( tl > 0 && !current->args.isEmpty() && current->type.at(tl - 1) != '.') {
-      current->type += ' ' ;
-   }
-
-   current->type += current->args ;
-   current->args.resize(0) ;
-   current->argList.clear();
+   ce->type += current->args ;
+   ce->args.resize(0) ;
+   ce->argList.clear();
 }
 
 
@@ -12492,10 +12490,12 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current_root->addSubEntry(current);
+               current_root->addSubEntry(current, current_root);
                current_root = current ;
-               current = new Entry ;
+
+               current = QMakeShared<Entry>();
                initEntry();
+
                BEGIN(FindMembers);
             }
             YY_BREAK
@@ -13377,20 +13377,26 @@ YY_DECL {
             {
                lineCount();
                current->name = removeRedundantWhiteSpace(substitute(scannerYYtext, "\\", "::"));
+
                //printf("PHP: adding use relation: %s\n",current->name.data());
                current->fileName = yyFileName;
+
                // add a using declaraton
                current->section = Entry::USINGDECL_SEC;
-               current_root->addSubEntry(current);
-               current = new Entry(*current);
+               current_root->addSubEntry(current, current_root);
+
+               current = QMakeShared<Entry>(*current);
+
                // also add it as a using directive
                current->section = Entry::USINGDIR_SEC;
-               current_root->addSubEntry(current);
-               current = new Entry ;
+               current_root->addSubEntry(current, current_root);
+
+               current = QMakeShared<Entry>();
                initEntry();
                aliasName.resize(0);
             }
             YY_BREAK
+
          case 139:
             /* rule 139 can match eol */
             YY_RULE_SETUP
@@ -13435,12 +13441,15 @@ YY_DECL {
                current->name = removeRedundantWhiteSpace(substitute(scope.left(scope.length() - 1), ".", "::"));
                current->fileName = yyFileName;
                current->section = Entry::USINGDIR_SEC;
-               current_root->addSubEntry(current);
-               current = new Entry;
+               current_root->addSubEntry(current, current_root);
+
+               current = QMakeShared<Entry>();
                initEntry();
+
                BEGIN(Using);
             }
             YY_BREAK
+
          case 143:
             /* rule 143 can match eol */
             YY_RULE_SETUP
@@ -13459,12 +13468,13 @@ YY_DECL {
                   //printf("import name = %s -> %s\n",scannerYYtext,current->name.data());
                   current->section = Entry::USINGDECL_SEC;
                }
-               current_root->addSubEntry(current);
-               current = new Entry ;
+               current_root->addSubEntry(current, current_root);
+               current = QMakeShared<Entry>(); ;
                initEntry();
                BEGIN(Using);
             }
             YY_BREAK
+
          case 144:
             /* rule 144 can match eol */
             YY_RULE_SETUP
@@ -13492,9 +13502,11 @@ YY_DECL {
                current->fileName = yyFileName;
                current->section = Entry::USINGDECL_SEC;
                current->startLine = yyLineNr;
-               current_root->addSubEntry(current);
+               current_root->addSubEntry(current, current_root);
+
                previous = current;
-               current             = new Entry ;
+               current = QMakeShared<Entry>();
+
                if (insideCS) /* Hack: in C# a using declaration and
 							   directive have the same syntax, so we
 							   also add it as a using directive here
@@ -13505,9 +13517,11 @@ YY_DECL {
                   current->startLine = yyLineNr;
                   current->startColumn = yyColNr;
                   current->section = Entry::USINGDIR_SEC;
-                  current_root->addSubEntry(current);
-                  current             = new Entry ;
+                  current_root->addSubEntry(current, current_root);
+
+                  current = QMakeShared<Entry>();
                }
+
                initEntry();
                BEGIN(Using);
             }
@@ -13596,9 +13610,11 @@ YY_DECL {
                current->name = removeRedundantWhiteSpace(scannerYYtext);
                current->fileName = yyFileName;
                current->section = Entry::USINGDIR_SEC;
-               current_root->addSubEntry(current);
-               current             = new Entry ;
+               current_root->addSubEntry(current, current_root);
+
+               current = QMakeShared<Entry>();
                initEntry();
+
                BEGIN(Using);
             }
             YY_BREAK
@@ -14489,9 +14505,11 @@ YY_DECL {
                current->args       = current->args.simplified();
                current->name       = current->name.trimmed();
                current->section    = Entry::DEFINE_SEC;
-               current_root->addSubEntry(current);
-               current             = new Entry ;
+               current_root->addSubEntry(current, current_root);
+
+               current = QMakeShared<Entry>();
                initEntry();
+
                BEGIN(lastDefineContext);
             }
             YY_BREAK
@@ -14505,15 +14523,18 @@ YY_DECL {
                current->startColumn = yyColNr;
                current->type.resize(0);
                current->type       = "const";
+
                QByteArray init = current->initializer.data();
                init = init.simplified();
                init = init.left(init.length() - 1);
                current->initializer = init;
                current->name       = current->name.trimmed();
                current->section    = Entry::VARIABLE_SEC;
-               current_root->addSubEntry(current);
-               current             = new Entry ;
+               current_root->addSubEntry(current, current_root);
+
+               current = QMakeShared<Entry>();
                initEntry();
+
                BEGIN(FindMembers);
             }
             YY_BREAK
@@ -14813,11 +14834,15 @@ YY_DECL {
                   current->args       = current->args.simplified();
                   current->name       = current->name.trimmed();
                   current->section    = Entry::VARIABLE_SEC;
-                  current_root->addSubEntry(current);
-                  current = new Entry;
+                  current_root->addSubEntry(current, current_root);
+
+                  current = QMakeShared<Entry>();
                   initEntry();
+
                   BEGIN(FindMembers);
-               } else if (*scannerYYtext == ';' || (lastInitializerContext == FindFields && initBracketCount == 0)) // initBracketCount==0 was added for bug 665778
+
+               } else if (*scannerYYtext == ';' || (lastInitializerContext == FindFields && initBracketCount == 0)) 
+                  // initBracketCount==0 was added for bug 665778
                {
                   unput(*scannerYYtext);
                   BEGIN(lastInitializerContext);
@@ -15636,16 +15661,20 @@ YY_DECL {
                   current->fileName = yyFileName;
                   current->startLine = yyBegLineNr;
                   current->startColumn = yyBegColNr;
-                  current_root->addSubEntry( current ) ;
+                  current_root->addSubEntry(current, current_root) ;
+
                   needNewCurrent = TRUE;
                }
+
                if ( *scannerYYtext == ',')
                {
                   bool stat = current->stat;
+
                   if (needNewCurrent) {
-                     current = new Entry(*current);
+                     current = QMakeShared<Entry>(*current);
                      initEntry();
                   }
+
                   current->stat = stat; // the static attribute holds for all variables
                   current->name.resize(0);
                   current->args.resize(0);
@@ -15654,6 +15683,7 @@ YY_DECL {
                   current->initializer.resize(0);
                   current->bitfields.resize(0);
                   int i = oldType.length();
+
                   while (i > 0 && (oldType[i - 1] == '*' || oldType[i - 1] == '&' || oldType[i - 1] == ' ')) {
                      i--;
                   }
@@ -15664,11 +15694,12 @@ YY_DECL {
                   virt = Normal;
                   if (needNewCurrent)
                   {
-                     current = new Entry ;
-                  } else if (current->groups)
-                  {
+                     current = QMakeShared<Entry>();
+
+                  } else if (current->groups) {
                      current->groups->clear();
                   }
+
                   initEntry();
                }
             }
@@ -15923,9 +15954,11 @@ YY_DECL {
 
                current->name       = current->name.trimmed();
                current->section    = Entry::VARIABLE_SEC;
-               current_root->addSubEntry(current);
-               current             = new Entry;
+               current_root->addSubEntry(current, current_root);
+
+               current = QMakeShared<Entry>();
                initEntry();
+
                BEGIN( FindMembers );
             }
             YY_BREAK
@@ -16089,8 +16122,9 @@ YY_DECL {
                      current->args       = current->args.simplified();
                      current->name       = current->name.trimmed();
                      current->section    = Entry::VARIABLE_SEC;
-                     current_root->addSubEntry(current);
-                     current             = new Entry ;
+                     current_root->addSubEntry(current, current_root);
+
+                     current = QMakeShared<Entry>();
                      initEntry();
                   }
 
@@ -16133,18 +16167,20 @@ YY_DECL {
                   current->name       = current->name.trimmed();
                   current->section    = Entry::VARIABLE_SEC;
                   // add to the scope of the enum
-                  current_root->addSubEntry(current);
-                  if (!insideCS && !insideJava &&
-                        !(current_root->spec & Entry::Strong))
+                  current_root->addSubEntry(current, current_root);
+
+                  if (!insideCS && !insideJava && !(current_root->spec & Entry::Strong))
                      // for C# and Java 1.5+ enum values always have to be explicitly qualified,
                      // same for C++11 style enums (enum class Name {})
                   {
-                     current             = new Entry(*current);
+                     current = QMakeShared<Entry>(*current);
                      // add to the scope surrounding the enum (copy!)
-                     current_root->parent()->addSubEntry(current);
+                     current_root->parent()->addSubEntry(current, current_root->parent());
                   }
-                  current             = new Entry ;
+
+                  current = QMakeShared<Entry>();
                   initEntry();
+
                } else // probably a redundant ,
                {
                   current->reset();
@@ -16152,6 +16188,7 @@ YY_DECL {
                }
             }
             YY_BREAK
+
          case 373:
             YY_RULE_SETUP
 
@@ -16332,19 +16369,21 @@ YY_DECL {
                         BEGIN( ReadBodyIntf ) ;
                      } else
                      {
-                        current_root->addSubEntry( current ) ;
+                        current_root->addSubEntry( current, current_root ) ;
                         memspecEntry = current;
-                        current = new Entry(*current);
-                        if (current->section == Entry::NAMESPACE_SEC ||
-                        (current->spec == Entry::Interface) ||
-                        insideJava || insidePHP || insideCS || insideD || insideJS
-                           )
-                        {
+
+                        current = QMakeShared<Entry>(*current);
+
+                        if (current->section == Entry::NAMESPACE_SEC || (current->spec == Entry::Interface) ||
+                              insideJava || insidePHP || insideCS || insideD || insideJS) {
                            // namespaces and interfaces and java classes ends with a closing bracket without semicolon
                            current->reset();
                            initEntry();
-                           memspecEntry = 0;
-                           BEGIN( FindMembers ) ;
+
+                           memspecEntry = QSharedPointer<Entry>();
+
+                           BEGIN( FindMembers );
+
                         } else
                         {
                            static QRegExp re("@[0-9]+$");
@@ -16412,13 +16451,15 @@ YY_DECL {
                current->args = current->args.simplified();
                current->type = current->type.simplified();
                //printf("Adding compound %s %s %s\n",current->type.data(),current->name.data(),current->args.data());
-               current_root->addSubEntry( current ) ;
+               current_root->addSubEntry( current, current_root ) ;
+
                if (!firstTypedefEntry)
                {
                   firstTypedefEntry = current;
                }
-               current = new Entry;
+               current = QMakeShared<Entry>();
                initEntry();
+
                isTypedef = TRUE; // to undo reset by initEntry()
                BEGIN(MemberSpecSkip);
             }
@@ -16438,14 +16479,17 @@ YY_DECL {
                // add compound definition to the tree
                current->args = current->args.simplified();
                current->type = current->type.simplified();
-               current_root->addSubEntry( current ) ;
+               current_root->addSubEntry( current, current_root ) ;
                memspecEntry = current;
-               current = new Entry(*current);
+
+               current = QMakeShared<Entry>(*current);
                initEntry();
+
                unput(';');
                BEGIN( MemberSpec ) ;
             }
             YY_BREAK
+
          case 391:
             /* rule 391 can match eol */
             YY_RULE_SETUP
@@ -16501,10 +16545,9 @@ YY_DECL {
                if (msName.isEmpty() && !current->name.isEmpty())
                {
                   // see if the compound does not have a name or is inside another
-                  // anonymous compound. If so we insert a
-                  // special `anonymous' variable.
-                  //Entry *p=current_root;
-                  Entry *p = current;
+                  // anonymous compound. If so we insert a special `anonymous' variable
+                  
+                  QSharedPointer<Entry> p = current;
 
                   while (p) {
                      // only look for class scopes, not namespace scopes
@@ -16523,7 +16566,7 @@ YY_DECL {
                            break;
                         }
                      }
-                     //p=p->parent;
+                     
                      if (p == current) {
                         p = current_root;
                      } else {
@@ -16531,22 +16574,20 @@ YY_DECL {
                      }
                   }
                }
-               //printf("msName=%s current->name=%s\n",msName.data(),current->name.data());
-               if (!msName.isEmpty()
-                     /*&& msName!=current->name*/) // skip typedef T {} T;, removed due to bug608493
-               {
+               
+               if (!msName.isEmpty()) {                                
                   static bool typedefHidesStruct = Config_getBool("TYPEDEF_HIDES_STRUCT");
+
                   // case 1: typedef struct _S { ... } S_t;
                   // -> omit typedef and use S_t as the struct name
-                  if (typedefHidesStruct &&
-                        isTypedef &&
-                        ((current->spec & (Entry::Struct | Entry::Union)) ||
-                         current->section == Entry::ENUM_SEC ) &&
-                        msType.trimmed().isEmpty() &&
-                        memspecEntry) {
+
+                  if (typedefHidesStruct && isTypedef && ((current->spec & (Entry::Struct | Entry::Union)) ||
+                         current->section == Entry::ENUM_SEC ) && msType.trimmed().isEmpty() && memspecEntry) {
                      memspecEntry->name = msName;
+
                   } else { // case 2: create a typedef field
-                     Entry *varEntry = new Entry;
+                     QSharedPointer<Entry> varEntry = QMakeShared<Entry>();
+
                      varEntry->lang = language;
                      varEntry->protection = current->protection ;
                      varEntry->mtype = current->mtype;
@@ -16556,10 +16597,12 @@ YY_DECL {
                      varEntry->name = msName.trimmed();
                      varEntry->type = current->type.simplified() + " ";
                      varEntry->args = msArgs;
+
                      if (isTypedef) {
                         varEntry->type.prepend("typedef ");
                         //  //printf("current->name = %s %s\n",current->name.data(),msName.data());
                      }
+
                      if (typedefHidesStruct &&
                            isTypedef &&
                            (current->spec & (Entry::Struct | Entry::Union)) &&
@@ -16588,12 +16631,10 @@ YY_DECL {
                         }
                      }
 
-                     //printf("Add: type=`%s',name=`%s',args=`%s' brief=%s doc=%s\n",
-                     //      varEntry->type.data(),varEntry->name.data(),
-                     //      varEntry->args.data(),varEntry->brief.data(),varEntry->doc.data());
-                     current_root->addSubEntry(varEntry);
+                     current_root->addSubEntry(varEntry, current_root);
                   }
                }
+
                if (*scannerYYtext == ';') // end of a struct/class ...
                {
                   if (!isTypedef && msName.isEmpty() && memspecEntry && (current->section & Entry::COMPOUND_MASK)) {
@@ -16609,8 +16650,10 @@ YY_DECL {
                   msName.resize(0);
                   msArgs.resize(0);
                   isTypedef = FALSE;
-                  firstTypedefEntry = 0;
-                  memspecEntry = 0;
+
+                  firstTypedefEntry = QSharedPointer<Entry>();
+                  memspecEntry = QSharedPointer<Entry>();
+
                   current->reset();
                   initEntry();
                   BEGIN( FindMembers );
@@ -16669,9 +16712,11 @@ YY_DECL {
 
             {
                // end of Objective C block
-               current_root->addSubEntry( current ) ;
-               current = new Entry;
+               current_root->addSubEntry( current, current_root ) ;
+
+               current = QMakeShared<Entry>();
                initEntry();
+
                insideObjC = FALSE;
                BEGIN( FindMembers );
             }
@@ -18153,9 +18198,11 @@ YY_DECL {
                      findAndRemoveWord(current->type, "function");
                   }
                   previous = current;
-                  current_root->addSubEntry(current);
-                  current = new Entry ;
+                  current_root->addSubEntry(current, current_root);
+
+                  current = QMakeShared<Entry>();
                   initEntry();
+
                   // Objective C 2.0: Required/Optional section
                   if (previous->spec & (Entry::Optional | Entry::Required))
                   {
@@ -18267,14 +18314,16 @@ YY_DECL {
 
                   tempEntry = current; // temporarily switch to the previous entry
                   current = previous;
-                  previous = 0;
+                  previous = QSharedPointer<Entry>();
 
                   docBlockContext   = SkipCurlyEndDoc;
                   docBlockInBody    = FALSE;
                   docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config_getBool("JAVADOC_AUTOBRIEF") ) ||
+
                   ( scannerYYtext[scannerYYleng - 2] == '!' && Config_getBool("QT_AUTOBRIEF") );
                   docBlock.resize(0);
                   docBlockTerm = '}';
+
                   if (scannerYYtext[scannerYYleng - 3] == '/')
                   {
                      startCommentBlock(TRUE);
@@ -18318,11 +18367,12 @@ YY_DECL {
                if (tempEntry) // we can only switch back to current if no new item was created
                {
                   current = tempEntry;
-                  tempEntry = 0;
+                  tempEntry = QSharedPointer<Entry>();
                }
                BEGIN( lastCurlyContext );
             }
             YY_BREAK
+
          case 530:
             YY_RULE_SETUP
 
@@ -18573,8 +18623,8 @@ YY_DECL {
                      baseName.resize(0);
                   }
 
-                  current_root->addSubEntry( current ) ;
-                  current = new Entry;
+                  current_root->addSubEntry( current, current_root ) ;
+                  current = QMakeShared<Entry>();
                } else
                {
                   current->section = Entry::EMPTY_SEC ;
@@ -18701,9 +18751,11 @@ YY_DECL {
                   if (!current->name.isEmpty() && !rn.isEmpty()) {
                      prependScope();
                   }
+
                   current->spec |= Entry::ForwardDecl;
-                  current_root->addSubEntry(current);
-                  current = new Entry;
+                  current_root->addSubEntry(current, current_root);
+                  current = QMakeShared<Entry>();
+
                } else if (insideIDL &&
                           (((current_root->spec & (Entry::Interface |
                                                    Entry::Service)) &&
@@ -18721,11 +18773,16 @@ YY_DECL {
                   current->section = (current->spec & Entry::Interface)
                                      ? Entry::EXPORTED_INTERFACE_SEC
                                      : Entry::INCLUDED_SERVICE_SEC;
+
                   //					    current->section = Entry::MEMBERDOC_SEC;
-                  current->spec &= ~(Entry::Interface |
-                                     Entry::Service); // FIXME: horrible: Interface == Gettable, so need to clear it - actually we're mixing values from different enums in this case... granted only Optional and Interface are actually valid in this context but urgh...
-                  current_root->addSubEntry(current);
-                  current = new Entry;
+                  current->spec &= ~(Entry::Interface | Entry::Service); 
+
+// FIXME: horrible: Interface == Gettable, need to clear it, 
+// actually we are mixing values from different enums in this case
+// granted only Optional and Interface are actually valid in this context
+
+                  current_root->addSubEntry(current, current_root);
+                  current = QMakeShared<Entry>();
                }
 
                unput(';');
@@ -21828,53 +21885,45 @@ static void startCommentBlock(bool brief)
 
 static void newEntry()
 {
-   if (tempEntry == 0) // if temp entry is not 0, it holds current,
-      // and current is actually replaced by previous which was
-      // already added to current_root, so we should not add it again
-      // (see bug723314)
-   {
-      current_root->addSubEntry(current);
+   if (tempEntry == 0) {
+      current_root->addSubEntry(current, current_root);
    }
-   tempEntry = 0;
+
+   tempEntry = QSharedPointer<Entry>();
    previous = current;
-   current = new Entry ;
+
+   current = QMakeShared<Entry>();
    initEntry();
 }
 
 static void handleCommentBlock(const QByteArray &doc, bool brief)
 {
    static bool hideInBodyDocs = Config_getBool("HIDE_IN_BODY_DOCS");
+
    int position = 0;
    bool needsEntry = FALSE;
 
    if (docBlockInBody && hideInBodyDocs) {
       return;
    }
-   //printf("parseCommentBlock [%s] brief=%d\n",doc.data(),brief);
+   
    int lineNr = brief ? current->briefLine : current->docLine;   // line of block start
 
    // fill in inbodyFile && inbodyLine the first time, see bug 633891
-   Entry *docEntry = docBlockInBody && previous ? previous : current;
+   QSharedPointer<Entry> docEntry = docBlockInBody && previous ? previous : current;
+
    if (docBlockInBody && docEntry && docEntry->inbodyLine == -1) {
       docEntry->inbodyFile = yyFileName;
       docEntry->inbodyLine = lineNr;
    }
 
-   while (parseCommentBlock(
-             g_thisParser,
-             docBlockInBody && previous ? previous : current,
-             stripIndentation(doc),        // text
-             yyFileName, // file
-             lineNr,     // line of block start
+   while (parseCommentBlock(g_thisParser, docBlockInBody && previous ? previous : current,
+             stripIndentation(doc), yyFileName,  lineNr,   // line of block start
              docBlockInBody ? FALSE : brief,               // isBrief
              docBlockInBody ? FALSE : docBlockAutoBrief,   // isJavaDocStyle
              docBlockInBody,                               // isInBody
-             protection,
-             position,
-             needsEntry
-          )
-         ) {
-      //printf("parseCommentBlock position=%d [%s]\n",position,doc.data()+position);
+             protection, position, needsEntry)) { 
+      
       if (needsEntry) {
          QByteArray docFile = current->docFile;
          newEntry();
@@ -21882,6 +21931,7 @@ static void handleCommentBlock(const QByteArray &doc, bool brief)
          current->docLine = lineNr;
       }
    }
+
    if (needsEntry) {
       newEntry();
    }
@@ -21943,16 +21993,20 @@ static void handleParametersCommentBlocks(ArgumentList *al)
    }
 }
 
-static void parseCompounds(Entry *rt)
+static void parseCompounds(QSharedPointer<Entry> rt)
 {  
    for (auto ce : rt->children() ) {
 
-printf("\n  BROOM SPOT    A1"); 
+printf("\n BROOM   W1");
 
-      if (! ce->program.isEmpty()) {      
+printf("\n BROOM   %s", rt->name.constData() );
 
-printf("\n  BROOM SPOT    A2"); 
+      if (! ce->program.isEmpty()) {  
+
  
+printf("\n BROOM   W2");
+
+
          padCount = 0;
          g_column = 0;
 
@@ -21967,19 +22021,14 @@ printf("\n  BROOM SPOT    A2");
             BEGIN( FindMembers ) ;
          }
 
-         current_root = const_cast<Entry *>(ce);
+         current_root = ce;
          yyFileName = ce->fileName;
-
-         //setContext();
+        
          yyLineNr = ce->startLine ;
          yyColNr  = ce->startColumn ;
          insideObjC = ce->lang == SrcLangExt_ObjC;
-
-         if (current) {
-            delete current;
-         }
-
-         current = new Entry;
+        
+         current = QMakeShared<Entry>();
          gstat = FALSE;
          initEntry();
 
@@ -22039,24 +22088,20 @@ printf("\n  BROOM SPOT    A2");
          scannerYYlex() ;
          g_lexInit = TRUE;
        
-         groupLeaveCompound(yyFileName, yyLineNr, ce->name);
+         groupLeaveCompound(yyFileName, yyLineNr, ce->name);        
+         current = QSharedPointer<Entry>();
 
-         delete current;
-         current = 0;
-
-         const_cast<Entry *>(ce)->program.resize(0);
+         ce->program.resize(0);
       }
 
-      parseCompounds(const_cast<Entry *>(ce));
+      parseCompounds(ce);
 
-
-// CRASH printf("\n  BROOM SPOT    W2");
-
+printf("\n  BROOM SPOT    W3");
    }
 
 }
 
-static void parseMain(const char *fileName, const char *fileBuf, Entry *rt, 
+static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<Entry> rt, 
                       bool sameTranslationUnit, QStringList &filesInSameTranslationUnit)
 {
    initParser();
@@ -22098,16 +22143,16 @@ static void parseMain(const char *fileName, const char *fileBuf, Entry *rt,
       initParser();
       groupEnterFile(yyFileName, yyLineNr);
 
-      current = new Entry;     
+      current = QMakeShared<Entry>();     
       int sec = guessSection(yyFileName);
 
       if (sec) {
          current->name    = yyFileName;
          current->section = sec;
 
-         current_root->addSubEntry(current);
+         current_root->addSubEntry(current, current_root);
 
-         current = new Entry;
+         current = QMakeShared<Entry>();
       }
 
       current->reset();
@@ -22125,18 +22170,14 @@ static void parseMain(const char *fileName, const char *fileBuf, Entry *rt,
       g_lexInit = TRUE;
 
       if (YY_START == Comment) {
-         warn(yyFileName, yyLineNr, "File ended in the middle of a comment block, Check for a missing \\endcode?");
+         warn(yyFileName, yyLineNr, "File ended in the middle of a comment block, Check for a missing \\endcode");
       }
     
       groupLeaveFile(yyFileName, yyLineNr);
       rt->program.resize(0);
  
-      if (rt->children().contains(current) == 0)  {
-         // it could be that current is already added as a child to rt, so we
-         // only delete it if this is not the case. See bug 635317.
-      
-         delete current;
-         current = 0;
+      if (rt->children().contains(current) == 0)  {                     
+         current = QSharedPointer<Entry>();
       }
 
       parseCompounds(rt);
@@ -22149,7 +22190,7 @@ static void parseMain(const char *fileName, const char *fileBuf, Entry *rt,
 static void parsePrototype(const QByteArray &text)
 {  
    if (text.isEmpty()) {
-      warn(yyFileName, yyLineNr, "Empty prototype found!");
+      warn(yyFileName, yyLineNr, "Empty prototype found");
       return;
    }
 
@@ -22215,7 +22256,7 @@ void CLanguageScanner::finishTranslationUnit()
    }
 }
 
-void CLanguageScanner::parseInput(const char *fileName, const char *fileBuf, Entry *root,
+void CLanguageScanner::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
                                   bool sameTranslationUnit, QStringList &filesInSameTranslationUnit)
 {
    g_thisParser = this;

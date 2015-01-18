@@ -197,31 +197,31 @@ class Entry
    int getSize();
 
    void addSpecialListItem(const char *listName, int index);
-   void createNavigationIndex(EntryNav *rootNav, FileStorage *storage, FileDef *fd);
+   void createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage *storage, FileDef *fd, QSharedPointer<Entry> self);
 
    // while parsing a file these function can be used to navigate/build the tree
-   void setParent(Entry *parent) {
+   void setParent(QSharedPointer<Entry> parent) {
       m_parent = parent;
    }
 
    /*! Returns the parent for this Entry or 0 if this entry has no parent. */
-   Entry *parent() const {
-      return m_parent;
+   QSharedPointer<Entry> parent() const {
+      return m_parent.toStrongRef();
    }
 
    /*! Returns the list of children for this Entry
     *  @see addSubEntry() and removeSubEntry()
     */
-   const QList<Entry *> &children() const {
+   const QList<QSharedPointer<Entry>> &children() const {
       return m_sublist;
    }
 
    /*! Adds entry \a e as a child to this entry */
-   void addSubEntry (Entry *e) ;
+   void addSubEntry (QSharedPointer<Entry> e, QSharedPointer<Entry> self) ;
 
    /*! Removes entry \a e from the list of children.    *  
     */
-   void removeSubEntry(Entry *e);
+   void removeSubEntry(QSharedPointer<Entry> e);
 
    /*! Restore the state of this Entry to the default value it has
     *  at construction time.
@@ -327,10 +327,10 @@ class Entry
    }
 
  private:
-   void createSubtreeIndex(EntryNav *nav, FileStorage *storage, FileDef *fd);
+   void createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage, FileDef *fd, QSharedPointer<Entry> self);
 
-   Entry          *m_parent;     //!< parent node in the tree
-   QList<Entry *>  m_sublist;    //!< entries that are children of this one
+   QWeakPointer<Entry> m_parent;               //!< parent node in the tree
+   QList<QSharedPointer<Entry>>  m_sublist;    //!< entries that are children of this one
 
    Entry &operator=(const Entry &);
 };
@@ -343,13 +343,13 @@ class Entry
 class EntryNav
 {
  public:
-   EntryNav(EntryNav *parent, QSharedPointer<Entry> e);   
+   EntryNav(QSharedPointer<EntryNav> parent, QSharedPointer<Entry> e);   
    ~EntryNav();
 
-   void addChild( QSharedPointer<EntryNav> e);
+   void addChild(QSharedPointer<EntryNav> e);
    bool loadEntry(FileStorage *storage);
-   bool saveEntry(Entry *e, FileStorage *storage);
-   void setEntry( QSharedPointer<Entry> e);
+   bool saveEntry(QSharedPointer<Entry> e, FileStorage *storage);
+   void setEntry(QSharedPointer<Entry> e);
    void releaseEntry();
 
    void changeSection(int section) {
@@ -388,8 +388,8 @@ class EntryNav
       return m_subList;
    }
 
-   EntryNav *parent() const {
-      return m_parent;
+   QSharedPointer<EntryNav> parent() const {
+      return m_parent.toStrongRef();
    }
 
    FileDef *fileDef() const {
@@ -399,7 +399,7 @@ class EntryNav
  private:
 
    // navigation
-   EntryNav *m_parent;         //!< parent node in the tree
+   QWeakPointer<EntryNav> m_parent;              //!< parent node in the tree
 
    QList<QSharedPointer<EntryNav>>  m_subList;   //!< entries that are children of this one
 

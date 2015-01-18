@@ -84,7 +84,6 @@ CS_Doxygen_SOURCES = \
    src/entry.cpp \
    src/filedef.cpp \
    src/filename.cpp \
-   src/fileparser.cpp \
    src/formula.cpp \
    src/ftvhelp.cpp \
    src/groupdef.cpp \
@@ -114,6 +113,7 @@ CS_Doxygen_SOURCES = \
    src/objcache.cpp \
    src/outputgen.cpp \
    src/outputlist.cpp \
+   src/parser_file.cpp \
    src/parser_make.cpp \
    src/pagedef.cpp \
    src/plantuml.cpp \

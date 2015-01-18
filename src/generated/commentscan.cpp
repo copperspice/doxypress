@@ -3557,46 +3557,40 @@ class GuardedSection
    bool m_parentVisible;
 };
 
-void openGroup(Entry *e, const char *file, int line);
-void closeGroup(Entry *e, const char *file, int line, bool foundInline = FALSE);
-void initGroupInfo(Entry *e);
-static void groupAddDocs(Entry *e, const char *fileName);
-
-/* -----------------------------------------------------------------
- *
- *	statics
- */
+void openGroup(QSharedPointer<Entry> e, const char *file, int line);
+void closeGroup(QSharedPointer<Entry> e, const char *file, int line, bool foundInline = FALSE);
+void initGroupInfo(QSharedPointer<Entry> e);
+static void groupAddDocs(QSharedPointer<Entry> e, const char *fileName);
 
 static ParserInterface *langParser;          // the language parser that is calling us
-static QByteArray         inputString;         // input string
-static int		inputPosition;       // read pointer
-static QByteArray		yyFileName;          // file name that is read from
-static int		yyLineNr;            // line number in the input
+static QByteArray       inputString;         // input string
+static int		         inputPosition;       // read pointer
+static QByteArray		   yyFileName;          // file name that is read from
+static int		         yyLineNr;            // line number in the input
 static bool             inBody;              // was the comment found inside the body of a function?
 static OutputContext    inContext;           // are we inside the brief, details or xref part
 static bool             briefEndsAtDot;      // does the brief description stop at a dot?
-static QByteArray         formulaText;         // Running text of a formula
-static QByteArray         formulaEnv;          // environment name
+static QByteArray       formulaText;         // Running text of a formula
+static QByteArray       formulaEnv;          // environment name
 static int              formulaNewLines;     // amount of new lines in the formula
-static QByteArray        *pOutputString;       // pointer to string to which the output is appended.
-static QByteArray         outputXRef;          // temp argument of todo/test/../xrefitem commands
-static QByteArray         blockName;           // preformatted block name (e.g. verbatim, latexonly,...)
+static QByteArray      *pOutputString;       // pointer to string to which the output is appended.
+static QByteArray       outputXRef;          // temp argument of todo/test/../xrefitem commands
+static QByteArray       blockName;           // preformatted block name (e.g. verbatim, latexonly,...)
 static XRefKind         xrefKind;            // kind of cross-reference command
 static XRefKind         newXRefKind;         //
 static GuardType        guardType;           // kind of guard for conditional section
 static bool             enabledSectionFound;
-static QByteArray         functionProto;       // function prototype
+static QByteArray       functionProto;       // function prototype
+
 static QStack<GuardedSection *> guards;        // tracks nested conditional sections (if,ifnot,..)
-static Entry		*current      = 0 ;   // working entry
-//static Entry*		current_root = 0 ;   // parent of working entry
 
+static QSharedPointer<Entry>	current;         // working entry
 
-//static Entry*		previous     = 0 ;   // TODO: remove need for this
-static bool             needNewEntry;
+static bool               needNewEntry;
 
 static QByteArray         g_sectionLabel;
-static QByteArray		g_sectionTitle;
-static int              g_sectionLevel;
+static QByteArray		     g_sectionTitle;
+static int                g_sectionLevel;
 static QByteArray         xrefItemKey;
 static QByteArray         newXRefItemKey;
 static QByteArray         xrefItemTitle;
@@ -3710,7 +3704,7 @@ static QByteArray stripQuotes(const char *s)
 
 static void addXRefItem(const char *listName, const char *itemTitle, const char *listTitle, bool append)
 {
-   Entry *docEntry = current; // inBody && previous ? previous : current;
+   QSharedPointer<Entry> docEntry = current; // inBody && previous ? previous : current;
   
    if (listName == 0) {
       return;
@@ -3747,7 +3741,7 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
       item->text += " <p>";
 
       if (Doxygen::markdownSupport) {
-         item->text += processMarkdown(yyFileName, yyLineNr, current, outputXRef);
+         item->text += processMarkdown(yyFileName, yyLineNr, current.data(), outputXRef);
       } else {
          item->text += outputXRef;
       }
@@ -3765,7 +3759,7 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
       assert(item != 0);
 
       if (Doxygen::markdownSupport) {
-         item->text = processMarkdown(yyFileName, yyLineNr, current, outputXRef);
+         item->text = processMarkdown(yyFileName, yyLineNr, current.data(), outputXRef);
       } else {
          item->text = outputXRef;
       }
@@ -4714,6 +4708,7 @@ YY_DECL {
                openGroup(current, yyFileName, yyLineNr);
             }
             YY_BREAK
+
          case 25:
             YY_RULE_SETUP
 
@@ -4724,6 +4719,7 @@ YY_DECL {
                g_memberGroupHeader.resize(0);
                parseMore = TRUE;
                needNewEntry = TRUE;
+
 #if YY_FLEX_MINOR_VERSION>=5 && YY_FLEX_SUBMINOR_VERSION>=33
                inputPosition = prevPosition + (int)(yy_bp - YY_CURRENT_BUFFER_LVALUE->yy_ch_buf) + strlen(commentscanYYtext);
 #else
@@ -8442,7 +8438,7 @@ static void checkFormula()
 }
 
 bool parseCommentBlock(/* in */     ParserInterface *parser,
-                                    /* in */     Entry *curEntry,
+                                    /* in */     QSharedPointer<Entry> curEntry,
                                     /* in */     const QByteArray &comment,
                                     /* in */     const QByteArray &fileName,
                                     /* in,out */ int  &lineNr,
@@ -8456,8 +8452,8 @@ bool parseCommentBlock(/* in */     ParserInterface *parser,
    initParser();
 
    guards.clear();
-   langParser     = parser;
-   current        = curEntry;
+   langParser = parser;
+   current    = curEntry;
 
    if (comment.isEmpty()) {
       return FALSE;   // avoid empty strings
@@ -8525,17 +8521,16 @@ bool parseCommentBlock(/* in */     ParserInterface *parser,
    }
 
    if (Doxygen::markdownSupport) {
-      current->brief      = processMarkdown(fileName, lineNr, current, current->brief);
-      current->doc        = processMarkdown(fileName, lineNr, current, current->doc);
-      current->inbodyDocs = processMarkdown(fileName, lineNr, current, current->inbodyDocs);
+      current->brief      = processMarkdown(fileName, lineNr, current.data(), current->brief);
+      current->doc        = processMarkdown(fileName, lineNr, current.data(), current->doc);
+      current->inbodyDocs = processMarkdown(fileName, lineNr, current.data(), current->inbodyDocs);
    }
 
    Debug::print(Debug::CommentScan, 0,
                 "brief=[line=%d\n%s]\ndocs=[line=%d\n%s]\ninbody=[line=%d\n%s]\n===========\n",
                 current->briefLine, current->brief.data(),
                 current->docLine, current->doc.data(),
-                current->inbodyLine, current->inbodyDocs.data()
-               );
+                current->inbodyLine, current->inbodyDocs.data());
 
    checkFormula();
    prot = protection;
@@ -8633,7 +8628,7 @@ static int findExistingGroup(int &groupId, const MemberGroupInfo *info)
    return groupId;
 }
 
-void openGroup(Entry *e, const char *, int)
+void openGroup(QSharedPointer<Entry> e, const char *, int)
 {   
    if (e->section == Entry::GROUPDOC_SEC) { // auto group
       g_autoGroupStack.push(new Grouping(e->name, e->groupingPri()));
@@ -8657,11 +8652,8 @@ void openGroup(Entry *e, const char *, int)
    }
 }
 
-void closeGroup(Entry *e, const char *fileName, int, bool foundInline)
-{
-   //printf("==> closeGroup(name=%s,sec=%x) g_autoGroupStack=%d\n",
-   //    e->name.data(),e->section,g_autoGroupStack.count());
-
+void closeGroup(QSharedPointer<Entry> e, const char *fileName, int, bool foundInline)
+{   
    if (g_memberGroupId != DOX_NOGROUP) { // end of member group
 
       QSharedPointer<MemberGroupInfo> info = Doxygen::memGrpInfoDict.value(g_memberGroupId);
@@ -8676,14 +8668,14 @@ void closeGroup(Entry *e, const char *fileName, int, bool foundInline)
       g_memberGroupDocs.resize(0);
       e->mGrpId = DOX_NOGROUP;
 
-      //printf("new group id=%d\n",g_memberGroupId);
+  
    } else if (!g_autoGroupStack.isEmpty()) { // end of auto group
       Grouping *grp = g_autoGroupStack.pop();
       // see bug577005: we should not remove the last group for e
       if (!foundInline) {
          e->groups->removeLast();
       }
-      //printf("Removing %s e=%p\n",grp->groupname.data(),e);
+      
       delete grp;
       if (!foundInline) {
          initGroupInfo(e);
@@ -8691,7 +8683,7 @@ void closeGroup(Entry *e, const char *fileName, int, bool foundInline)
    }
 }
 
-void initGroupInfo(Entry *e)
+void initGroupInfo(QSharedPointer<Entry> e)
 {
    //printf("==> initGroup(id=%d,related=%s,e=%p)\n",g_memberGroupId,
    //       g_memberGroupRelates.data(),e);
@@ -8703,7 +8695,7 @@ void initGroupInfo(Entry *e)
    }
 }
 
-static void groupAddDocs(Entry *e, const char *fileName)
+static void groupAddDocs(QSharedPointer<Entry> e, const char *fileName)
 {
    if (e->section == Entry::MEMBERGRP_SEC) {
       g_memberGroupDocs = e->brief.trimmed();

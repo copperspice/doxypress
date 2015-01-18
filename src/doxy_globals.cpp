@@ -108,7 +108,8 @@ int              Doxygen::subpageNestingLevel = 0;
 
 
 // part 2
-QHash<QString, EntryNav>  Doxy_Globals::g_classEntries;
+QHash<QString, QSharedPointer<EntryNav>> Doxy_Globals::g_classEntries;
+
 QStringList               Doxy_Globals::g_inputFiles;
 QHash<QString, void *>    Doxy_Globals::g_compoundKeywordDict;   
 QHash<QString, FileDef>   Doxy_Globals::g_usingDeclarations;  

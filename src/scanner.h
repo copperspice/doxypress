@@ -32,27 +32,17 @@ class CLanguageScanner : public ParserInterface
    virtual ~CLanguageScanner() {}
    void startTranslationUnit(const char *fileName);
    void finishTranslationUnit();
-   void parseInput(const char *fileName,
-                   const char *fileBuf,
-                   Entry *root,
-                   bool sameTranslationUnit,
-                   QStringList &filesInSameTranslationUnit);
+
+   void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
+                   bool sameTranslationUnit,QStringList &filesInSameTranslationUnit) override;
+
    bool needsPreprocessing(const QByteArray &extension);
-   void parseCode(CodeOutputInterface &codeOutIntf,
-                  const char *scopeName,
-                  const QByteArray &input,
-                  SrcLangExt lang,
-                  bool isExampleBlock,
-                  const char *exampleName = 0,
-                  FileDef *fileDef = 0,
-                  int startLine = -1,
-                  int endLine = -1,
-                  bool inlineFragment = false,
-                  MemberDef *memberDef = 0,
-                  bool showLineNumbers = true,
-                  Definition *searchCtx = 0,
-                  bool collectXRefs = true
-                 );
+
+   void parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input, SrcLangExt lang,
+                  bool isExampleBlock, const char *exampleName = 0, FileDef *fileDef = 0, int startLine = -1,
+                  int endLine = -1, bool inlineFragment = false, MemberDef *memberDef = 0, bool showLineNumbers = true,
+                  Definition *searchCtx = 0, bool collectXRefs = true );
+
    void resetCodeParserState();
    void parsePrototype(const char *text);
 };

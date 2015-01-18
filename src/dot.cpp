@@ -633,7 +633,7 @@ static bool writeSVGFigureLink(QTextStream &out, const QByteArray &relPath,
 static void checkDotResult(const QByteArray &imgName)
 {
    if (Config_getEnum("DOT_IMAGE_FORMAT") == "png") {
-      FILE *f = portable_fopen(imgName, "rb");
+      FILE *f = fopen(imgName, "rb");
 
       if (f) {
          char data[4];

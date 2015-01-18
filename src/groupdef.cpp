@@ -1176,7 +1176,7 @@ void GroupDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
    ol.writeString("      </div>\n");
 }
 
-void addClassToGroups(Entry *root, QSharedPointer<ClassDef> cd)
+void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd)
 {
     for (auto g : *root->groups) {
       QSharedPointer<GroupDef> gd;
@@ -1189,7 +1189,7 @@ void addClassToGroups(Entry *root, QSharedPointer<ClassDef> cd)
    }
 }
 
-void addNamespaceToGroups(Entry *root, QSharedPointer<NamespaceDef> nd)
+void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDef> nd)
 { 
    for (auto g : *root->groups) {
       QSharedPointer<GroupDef> gd;
@@ -1202,7 +1202,7 @@ void addNamespaceToGroups(Entry *root, QSharedPointer<NamespaceDef> nd)
    }
 }
 
-void addDirToGroups(Entry *root, DirDef *dd)
+void addDirToGroups(QSharedPointer<Entry> root, DirDef *dd)
 {
    for (auto g : *root->groups) {
        QSharedPointer<GroupDef> gd;
@@ -1214,7 +1214,7 @@ void addDirToGroups(Entry *root, DirDef *dd)
    }
 }
 
-void addGroupToGroups(Entry *root, GroupDef *subGroup)
+void addGroupToGroups(QSharedPointer<Entry> root, GroupDef *subGroup)
 { 
    for (auto g : *root->groups) {
       QSharedPointer<GroupDef> gd;
@@ -1237,7 +1237,7 @@ void addGroupToGroups(Entry *root, GroupDef *subGroup)
 }
 
 /*! Add a member to the group with the highest priority */
-void addMemberToGroups(Entry *root, MemberDef *md)
+void addMemberToGroups(QSharedPointer<Entry> root, MemberDef *md)
 {
    // Search entry's group list for group with highest pri.
 

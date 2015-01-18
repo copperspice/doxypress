@@ -21,6 +21,7 @@
 
 #include <arguments.h>
 #include <doxygen.h>
+#include <doxy_globals.h>
 #include <entry.h>
 #include <filestorage.h>
 #include <marshal.h>
@@ -33,7 +34,7 @@ Entry::Entry()
 {
    num++;
 
-   m_parent = 0;
+   m_parent.clear();
    section  = Entry::EMPTY_SEC;
        
    groups    = new QList<Grouping>; 
@@ -127,7 +128,7 @@ Entry::Entry(const Entry &e)
     
    // copy of the child entry list  
    for (auto item : e.m_sublist) { 
-      m_sublist.append(new Entry(*item));
+      m_sublist.append(QMakeShared<Entry>(*item));
    }
 
    // copy base class list
@@ -165,10 +166,13 @@ Entry::~Entry()
    num--;
 }
 
-void Entry::addSubEntry(Entry *current)
+void Entry::addSubEntry(QSharedPointer<Entry> current, QSharedPointer<Entry> self)
 {
-   current->m_parent = this;
+   if (self != this) {
+      throw std::runtime_error("Internal Issue: passed parameter was not equal to the current object (Entry::addSubEntry)");
+   }
 
+   current->m_parent = self; 
    m_sublist.append(current);
 }
 
@@ -247,31 +251,32 @@ void Entry::reset()
    typeConstr = ArgumentList();     
 }
 
-
 int Entry::getSize()
 {
    return sizeof(Entry);
 }
 
-void Entry::createSubtreeIndex(EntryNav *nav, FileStorage *storage, FileDef *fd)
-{
-   EntryNav *childNav = new EntryNav(nav, this);
+void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage, FileDef *fd, QSharedPointer<Entry> self)
+{  
+   assert(self == this);
+
+   QSharedPointer<EntryNav> childNav = QMakeShared<EntryNav>(nav, self); 
 
    nav->addChild(childNav);
    childNav->setFileDef(fd);
-   childNav->saveEntry(this, storage);
+
+   childNav->saveEntry(self, storage);
     
    for (auto childNode : m_sublist) {
-      childNode->createSubtreeIndex(childNav, storage, fd);
+      childNode->createSubtreeIndex(childNav, storage, fd, childNode);
    }
    
-   m_sublist.clear();
-   
+   m_sublist.clear();   
 }
 
-void Entry::createNavigationIndex(EntryNav *rootNav, FileStorage *storage, FileDef *fd)
+void Entry::createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage *storage, FileDef *fd, QSharedPointer<Entry> self)
 {
-   createSubtreeIndex(rootNav, storage, fd);
+   createSubtreeIndex(rootNav, storage, fd, self);
 }
 
 void Entry::addSpecialListItem(const char *listName, int itemId)
@@ -287,7 +292,7 @@ void Entry::addSpecialListItem(const char *listName, int itemId)
    sli->append(*ili);
 }
 
-void Entry::removeSubEntry(Entry *e)
+void Entry::removeSubEntry(QSharedPointer<Entry> e)
 {
    // called from lex code, appears to be used when parsing Fortran only
 
@@ -298,7 +303,7 @@ void Entry::removeSubEntry(Entry *e)
    }  
 }
 
-EntryNav::EntryNav(EntryNav *parent, QSharedPointer<Entry> e)
+EntryNav::EntryNav(QSharedPointer<EntryNav> parent, QSharedPointer<Entry> e)
    : m_parent(parent), m_section(e->section), m_type(e->type), m_name(e->name), 
      m_fileDef(0), m_lang(e->lang), m_offset(-1), m_noLoad(false)
 {
@@ -350,7 +355,7 @@ bool EntryNav::loadEntry(FileStorage *storage)
    return true;
 }
 
-bool EntryNav::saveEntry(Entry *e, FileStorage *storage)
+bool EntryNav::saveEntry(QSharedPointer<Entry> e, FileStorage *storage)
 {
    m_offset = storage->pos();
    
@@ -367,8 +372,6 @@ void EntryNav::releaseEntry()
 
 void EntryNav::setEntry(QSharedPointer<Entry> e)
 {
-   m_info = e;
-  
+   m_info = e;  
    m_noLoad = true;
 }
-

@@ -41,7 +41,6 @@ void           portable_setenv(const char *variable, const char *value);
 void           portable_unsetenv(const char *variable);
 portable_off_t portable_fseek(FILE *f, portable_off_t offset, int whence);
 portable_off_t portable_ftell(FILE *f);
-FILE          *portable_fopen(const char *fileName, const char *mode);
 char           portable_pathSeparator();
 char           portable_pathListSeparator();
 const char    *portable_ghostScriptCommand();
@@ -49,8 +48,6 @@ const char    *portable_commandExtension();
 
 Qt::CaseSensitivity  portable_fileSystemIsCaseSensitive();
 
-FILE          *portable_popen(const char *name, const char *type);
-int            portable_pclose(FILE *stream);
 void           portable_sysTimerStart();
 void           portable_sysTimerStop();
 double         portable_getSysElapsedTime();

@@ -247,11 +247,11 @@ void initWarningFormat()
    outputFormat.replace("\\t", "\t");
 
    if (! Config_getString("WARN_LOGFILE").isEmpty()) {
-      warnFile = portable_fopen(Config_getString("WARN_LOGFILE"), "w");
+      warnFile = fopen(Config_getString("WARN_LOGFILE"), "w");
    }
 
    if (! warnFile) { 
-      // point it to something valid, because warn() relies on it
+      // point to something valid
       warnFile = stderr;
    }
 }

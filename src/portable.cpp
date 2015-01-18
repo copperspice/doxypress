@@ -81,6 +81,7 @@ int portable_system(const char *command, const char *args, bool commandHasConsol
       perror("fork error");
       return -1;
    }
+
    if (pid == 0) {
       const char *argv[4];
       argv[0] = "sh";
@@ -276,7 +277,7 @@ void portable_unsetenv(const char *variable)
    SetEnvironmentVariable(variable, 0);
 
 #else
-   /* Some systems don't have unsetenv(), so we do it ourselves */
+   /* Some systems do not have unsetenv(), so we do it ourselves */
    size_t len;
    char **ep;
 
@@ -312,10 +313,13 @@ portable_off_t portable_fseek(FILE *f, portable_off_t offset, int whence)
 
 #if defined(__MINGW32__)
    return fseeko64(f, offset, whence);
+
 #elif defined(_WIN32) && !defined(__CYGWIN__)
    return _fseeki64(f, offset, whence);
+
 #else
    return fseeko(f, offset, whence);
+
 #endif
 
 }
@@ -336,19 +340,6 @@ portable_off_t portable_ftell(FILE *f)
 
 }
 
-FILE *portable_fopen(const char *fileName, const char *mode)
-{
-#if defined(_WIN32) && ! defined(__CYGWIN__)
-   QString fn(fileName);
-   QString m(mode);
-   return _wfopen((wchar_t *)fn.utf16(), (wchar_t *)m.utf16());
-
-#else
-   return fopen(fileName, mode);
-
-#endif
-}
-
 char portable_pathSeparator()
 {
    return QDir::separator().toLatin1();   
@@ -367,7 +358,7 @@ char portable_pathListSeparator()
 const char *portable_ghostScriptCommand()
 {
 
-// CS BROOM  - all user to define GhostScript exe name
+// CS BROOM  - add a field to cfg file for the user to define GhostScript exe name
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
    return "gswin32c.exe";
@@ -394,16 +385,6 @@ Qt::CaseSensitivity portable_fileSystemIsCaseSensitive()
    } else {
       return Qt::CaseInsensitive;
    }
-}
-
-FILE *portable_popen(const char *name, const char *type)
-{
-   return popen(name, type);
-}
-
-int portable_pclose(FILE *stream)
-{
-   return pclose(stream);
 }
 
 void portable_sysTimerStart()
@@ -434,5 +415,3 @@ bool portable_isAbsolutePath(const char *fileName)
 {
    return QDir::isAbsolutePath(fileName);
 }
-
-

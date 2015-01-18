@@ -2507,10 +2507,11 @@ QByteArray markdownFileNameToId(const QByteArray &fileName)
    return "md_" + baseName;
 }
 
-void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, Entry *root,
+void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
                                     bool /*sameTranslationUnit*/, QStringList & /*filesInSameTranslationUnit*/)
 {
-   Entry *current = new Entry;
+   QSharedPointer<Entry> current = QMakeShared<Entry>();
+
    current->lang = SrcLangExt_Markdown;
    current->fileName = fileName;
    current->docFile  = fileName;
@@ -2518,27 +2519,34 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, E
 
    QByteArray docs = fileBuf;
    QByteArray id;
-   QByteArray title = extractPageTitle(docs, id).trimmed();
+   QByteArray title   = extractPageTitle(docs, id).trimmed();
    QByteArray titleFn = QFileInfo(fileName).baseName().toUtf8();
    QByteArray fn      = QFileInfo(fileName).fileName().toUtf8();
+
    static QByteArray mdfileAsMainPage = Config_getString("USE_MDFILE_AS_MAINPAGE");
+
    if (id.isEmpty()) {
       id = markdownFileNameToId(fileName);
    }
+
    if (title.isEmpty()) {
       title = titleFn;
    }
+
    if (!mdfileAsMainPage.isEmpty() &&
          (fn == mdfileAsMainPage || // name reference
           QFileInfo(fileName).absoluteFilePath() ==
           QFileInfo(mdfileAsMainPage).absoluteFilePath()) // file reference with path
       ) {
       docs.prepend("@mainpage\n");
+
    } else if (id == "mainpage" || id == "index") {
       docs.prepend("@mainpage " + title + "\n");
+
    } else {
       docs.prepend("@page " + id + " " + title + "\n");
    }
+
    int lineNr = 1;
    int position = 0;
 
@@ -2560,8 +2568,9 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, E
 
       if (needsEntry) {
          QByteArray docFile = current->docFile;
-         root->addSubEntry(current);
-         current = new Entry;
+         root->addSubEntry(current, root);
+
+         current = QMakeShared<Entry>();
          current->lang = SrcLangExt_Markdown;
          current->docFile = docFile;
          current->docLine = lineNr;
@@ -2569,7 +2578,7 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, E
    }
 
    if (needsEntry) {
-      root->addSubEntry(current);
+      root->addSubEntry(current, root);
    }
 
    // restore setting

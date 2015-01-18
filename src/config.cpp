@@ -1108,7 +1108,8 @@ static FILE *tryPath(const char *path, const char *fileName)
    QFileInfo fi(absName);
 
    if (fi.exists() && fi.isFile()) {
-      FILE *f = portable_fopen(absName, "r");
+      FILE *f = fopen(absName, "r");
+
       if (!f) {
          config_err("Error: could not open file %s for reading\n", absName.data());
       }
@@ -3319,8 +3320,9 @@ void Config::check()
       filePatternList.append("*.md");
       filePatternList.append("*.markdown");
 
-      if (portable_fileSystemIsCaseSensitive()) {
+      if (portable_fileSystemIsCaseSensitive() == Qt::CaseSensitive) {
          // unix => case sensitive match => also include useful uppercase versions
+
          filePatternList.append("*.C");
          filePatternList.append("*.CC");
          filePatternList.append("*.C++");

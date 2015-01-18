@@ -20,6 +20,6 @@
 
 class Entry;
 
-void parseTagFile(Entry *root, const char *fullPathName);
+void parseTagFile(QSharedPointer<Entry> root, const char *fullPathName);
 
 #endif

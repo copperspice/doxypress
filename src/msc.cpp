@@ -111,7 +111,8 @@ void writeMscGraphFromFile(const char *inFile, const char *outDir,
 
    // go to the html output directory (i.e. path)
    QDir::setCurrent(outDir);
-   //printf("Going to dir %s\n",QDir::currentPath().data());
+   
+
 
    QByteArray mscExe = Config_getString("MSCGEN_PATH") + "mscgen" + portable_commandExtension();
    QByteArray mscArgs;
@@ -122,29 +123,37 @@ void writeMscGraphFromFile(const char *inFile, const char *outDir,
          mscArgs += "-T png";
          extension = ".png";
          break;
+
       case MSC_EPS:
          mscArgs += "-T eps";
          extension = ".eps";
          break;
+
       case MSC_SVG:
          mscArgs += "-T svg";
          extension = ".svg";
          break;
+
       default:
-         goto error; // I am not very fond of goto statements, but when in Rome...
+         QDir::setCurrent(oldDir);
+         return;
    }
+
    mscArgs += " -i \"";
    mscArgs += inFile;
 
    mscArgs += "\" -o \"";
    mscArgs += outFile;
    mscArgs += extension + "\"";
+
    int exitCode;
-   //  printf("*** running: %s %s outDir:%s %s\n",mscExe.data(),mscArgs.data(),outDir,outFile);
+   
    portable_sysTimerStart();
    if ((exitCode = portable_system(mscExe, mscArgs, false)) != 0) {
       portable_sysTimerStop();
-      goto error;
+     
+      QDir::setCurrent(oldDir);
+      return;
    }
 
    portable_sysTimerStop();
@@ -156,12 +165,12 @@ void writeMscGraphFromFile(const char *inFile, const char *outDir,
 
       portable_sysTimerStart();
       if (portable_system("epstopdf", epstopdfArgs.toLatin1()) != 0) {
-         err("Problems running epstopdf. Check your TeX installation!\n");
+         err("Problem running epstopdf. Check your TeX installation\n");
       }
+
       portable_sysTimerStop();
    }
 
-error:
    QDir::setCurrent(oldDir);
 }
 

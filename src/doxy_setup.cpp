@@ -35,7 +35,6 @@
 #include <doxy_build_info.h>
 #include <entry.h>
 #include <filename.h>
-#include <fileparser.h>
 #include <filestorage.h>
 #include <formula.h>
 #include <groupdef.h>
@@ -48,6 +47,7 @@
 #include <membername.h>
 #include <namespacedef.h>
 #include <outputlist.h>
+#include <parser_file.h>
 #include <parser_make.h>
 #include <parser_py.h>
 #include <pagedef.h>

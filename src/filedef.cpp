@@ -1538,9 +1538,9 @@ void FileDef::acquireFileVersion()
       QByteArray cmd = vercmd + " \"" + m_filePath + "\"";
       Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", cmd.data());
 
-      FILE *f = portable_popen(cmd, "r");
+      FILE *f = popen(cmd, "r");
 
-      if (!f) {
+      if (! f) {
          err("could not execute %s\n", vercmd.data());
          return;
       }
@@ -1548,7 +1548,7 @@ void FileDef::acquireFileVersion()
       const int bufSize = 1024;
       char buf[bufSize];
       int numRead = (int)fread(buf, 1, bufSize - 1, f);
-      portable_pclose(f);
+      pclose(f);
 
       if (numRead > 0 && numRead < bufSize) {
          buf[numRead] = '\0';

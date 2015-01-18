@@ -4794,15 +4794,13 @@ void LodePNG_Encoder_copy(LodePNG_Encoder *dest, const LodePNG_Encoder *source)
 
 #endif /*LODEPNG_COMPILE_PNG*/
 
-/* ////////////////////////////////////////////////////////////////////////// */
-/* / File IO                                                                / */
-/* ////////////////////////////////////////////////////////////////////////// */
 
 #ifdef LODEPNG_COMPILE_DISK
 
-unsigned LodePNG_loadFile(unsigned char **out, size_t *outsize,
-                          const char *filename) /*designed for loading files from hard disk in a dynamically allocated buffer*/
+unsigned LodePNG_loadFile(unsigned char **out, size_t *outsize,const char *filename) 
 {
+   /*designed for loading files from hard disk in a dynamically allocated buffer*/
+
    FILE *file;
    long size;
 
@@ -4810,8 +4808,8 @@ unsigned LodePNG_loadFile(unsigned char **out, size_t *outsize,
    *out = 0;
    *outsize = 0;
 
-   file = portable_fopen(filename, "rb");
-   if (!file) {
+   file = fopen(filename, "rb");
+   if (! file) {
       return 78;
    }
 
@@ -4833,6 +4831,7 @@ unsigned LodePNG_loadFile(unsigned char **out, size_t *outsize,
    if (!(*out) && size) {
       return 80;   /*the above malloc failed*/
    }
+
    return 0;
 }
 
@@ -4840,14 +4839,15 @@ unsigned LodePNG_loadFile(unsigned char **out, size_t *outsize,
 unsigned LodePNG_saveFile(const unsigned char *buffer, size_t buffersize, const char *filename)
 {
    FILE *file;
-   file = portable_fopen(filename, "wb" );
+   file = fopen(filename, "wb" );
 
-   if (!file) {
+   if (! file) {
       return 79;
    }
 
    fwrite((char *)buffer , 1 , buffersize, file);
    fclose(file);
+
    return 0;
 }
 

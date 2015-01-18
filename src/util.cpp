@@ -7320,7 +7320,7 @@ bool readInputFile(const char *fileName, BufStr &inBuf, bool filter, bool isSour
       QString cmd = filterName + " \"" + fileName + "\"";
       Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", qPrintable(cmd));
 
-      FILE *f = portable_popen(qPrintable(cmd), "r");
+      FILE *f = popen(qPrintable(cmd), "r");
 
       if (!f) {
          err("Could not execute filter %s\n", filterName.data());
@@ -7335,7 +7335,7 @@ bool readInputFile(const char *fileName, BufStr &inBuf, bool filter, bool isSour
          inBuf.addArray(buf, numRead), size += numRead;
       }
 
-      portable_pclose(f);
+      pclose(f);
 
       inBuf.at(inBuf.curPos()) = '\0';
       Debug::print(Debug::FilterOutput, 0, "Filter output\n");

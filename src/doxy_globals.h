@@ -171,20 +171,20 @@ class Doxygen
 
    static QHash<QString, QSharedPointer<QList<Definition *>>> *symbolMap;
 
-   static QHash<QString, Definition *>      *clangUsrMap;
+   static QHash<QString, Definition *> *clangUsrMap;
 
-   static QHash<long, QSharedPointer<MemberGroupInfo>>  memGrpInfoDict;
-   static StringMap<QSharedPointer<DirRelation>>        dirRelations; 
+   static QHash<long, QSharedPointer<MemberGroupInfo>> memGrpInfoDict;
+   static StringMap<QSharedPointer<DirRelation>> dirRelations; 
      
-   static QCache<QString, LookupInfo>       *lookupCache;
+   static QCache<QString, LookupInfo> *lookupCache;
       
-   static QTime       runningTime;   
-   static int         subpageNestingLevel;
+   static QTime runningTime;   
+   static int subpageNestingLevel;
 
-   static QByteArray  htmlFileExtension;
+   static QByteArray htmlFileExtension;
 
-   static QString  objDBFileName;
-   static QString  entryDBFileName;
+   static QString objDBFileName;
+   static QString entryDBFileName;
    
    static bool  suppressDocWarnings;
    static bool  outputToWizard;
@@ -200,7 +200,8 @@ class Doxygen
 class Doxy_Globals 
 {
    public:
-      static QHash<QString, EntryNav>  g_classEntries;
+      static QHash<QString, QSharedPointer<EntryNav>>  g_classEntries;
+
       static QStringList               g_inputFiles;
       static QHash<QString, void *>    g_compoundKeywordDict;   // keywords recognised as compounds
       static QHash<QString, FileDef>   g_usingDeclarations;     // used classes

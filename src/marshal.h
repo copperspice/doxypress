@@ -73,8 +73,8 @@ void marshalGroupList(StorageIntf *s,       SortedList<GroupDef *> *groupList);
 void marshalMemberList(StorageIntf *s,      MemberList *ml);
 void marshalExampleSDict(StorageIntf *s,    ExampleSDict *ed);
 void marshalMemberLists(StorageIntf *s,     StringMap<QSharedPointer<MemberList>> *mls);
-void marshalEntry(StorageIntf *s,           Entry *e);
-void marshalEntryTree(StorageIntf *s,       Entry *e);
+void marshalEntry(StorageIntf *s,           QSharedPointer<Entry> e);
+void marshalEntryTree(StorageIntf *s,       QSharedPointer<Entry> e);
 
 //----- unmarshaling function: byte stream -> datatype ------------------
 
@@ -110,7 +110,7 @@ ExampleSDict        *unmarshalExampleSDict(StorageIntf *s);
 
 StringMap<QSharedPointer<MemberList>> *unmarshalMemberLists(StorageIntf *s);
 
-Entry               *unmarshalEntry(StorageIntf *s);
-Entry               *unmarshalEntryTree(StorageIntf *s);
+QSharedPointer<Entry> unmarshalEntry(StorageIntf *s);
+QSharedPointer<Entry> unmarshalEntryTree(StorageIntf *s);
 
 #endif

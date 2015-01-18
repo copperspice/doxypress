@@ -1206,10 +1206,10 @@ char *pyscannerYYtext;
 #include "config.h"
 #include "doxygen.h"
 #include "defargs.h"
-#include "entry.h"
-#include "language.h"
+#include <entry.h>
+#include <language.h>
 #include <message.h>
-#include <parser_py.h>"
+#include <parser_py.h>
 #include <util.h>
 
 #include <doxy_globals.h>
@@ -1228,11 +1228,12 @@ static QFile            inputFile;
 
 static Protection	protection;
 
-static Entry		*current_root = 0 ;
-static Entry		*current      = 0 ;
-static Entry		*previous     = 0 ;
-static Entry		*bodyEntry    = 0 ;
-static int		      yyLineNr     = 1 ;
+static QSharedPointer<Entry> current_root;
+static QSharedPointer<Entry> current;
+static QSharedPointer<Entry> previous;
+static QSharedPointer<Entry> bodyEntry;
+
+static int		      yyLineNr = 1 ;
 static QByteArray		yyFileName;
 static MethodTypes 	mtype;
 static bool    		gstat;
@@ -1261,39 +1262,36 @@ static char             g_atomStart;
 static char             g_atomEnd;
 static int              g_atomCount;
 
-//static bool           g_insideConstructor;
-
 static QByteArray       g_moduleScope;
 static QByteArray       g_packageName;
-
-//static bool           g_hideClassDocs;
-
 static QByteArray       g_defVal;
+
 static int              g_braceCount;
 
 static bool             g_lexInit = FALSE;
 static bool             g_packageCommentAllowed;
-
 
 static void initParser()
 {
    protection = Public;
    mtype = Method;
    gstat = FALSE;
-   virt = Normal;
-   previous = 0;
+   virt  = Normal;
+
+   previous = QSharedPointer<Entry>();
    g_packageCommentAllowed = TRUE;
 }
 
 static void initEntry()
-{
-   //current->python = TRUE;
+{   
    current->protection = protection ;
    current->mtype      = mtype;
    current->virt       = virt;
    current->stat       = gstat;
    current->lang       = SrcLangExt_Python;
+
    current->setParent(current_root);
+
    initGroupInfo(current);
    gstat = FALSE;
 }
@@ -1301,8 +1299,9 @@ static void initEntry()
 static void newEntry()
 {
    previous = current;
-   current_root->addSubEntry(current);
-   current = new Entry ;
+   current_root->addSubEntry(current, current_root);
+
+   current = QMakeShared<Entry>();
    initEntry();
 }
 
@@ -1470,19 +1469,13 @@ static void handleCommentBlock(const QByteArray &doc, bool brief)
    int position = 0;
    bool needsEntry;
    int lineNr = brief ? current->briefLine : current->docLine;
-   while (parseCommentBlock(
-             g_thisParser,
-             (docBlockInBody && previous) ? previous : current,
-             doc,     // text
-             yyFileName, // file
-             lineNr,
-             docBlockInBody ? FALSE : brief,
+
+   while (parseCommentBlock(g_thisParser, (docBlockInBody && previous) ? previous : current,
+             doc, yyFileName, lineNr, docBlockInBody ? FALSE : brief,
              docBlockJavaStyle, // javadoc style // or FALSE,
-             docBlockInBody,
-             protection,
-             position,
-             needsEntry)
-         ) { // need to start a new entry
+             docBlockInBody, protection, position, needsEntry)) {  
+
+      // need to start a new entry
       if (needsEntry) {
          newEntry();
       }
@@ -1495,13 +1488,12 @@ static void handleCommentBlock(const QByteArray &doc, bool brief)
 
 static void endOfDef(int correction = 0)
 {
-   //printf("endOfDef at=%d\n",yyLineNr);
    if (bodyEntry) {
       bodyEntry->endBodyLine  = yyLineNr - correction;
-      bodyEntry = 0;
+      bodyEntry = QSharedPointer<Entry>();
    }
-   newEntry();
-   //g_insideConstructor = FALSE;
+
+   newEntry();   
 }
 
 static inline void addToString(const char *s)
@@ -2179,6 +2171,7 @@ YY_DECL {
             {
             }
             YY_BREAK
+
          case 27:
             YY_RULE_SETUP
 
@@ -2187,7 +2180,6 @@ YY_DECL {
                BEGIN(Search);
             }
             YY_BREAK
-
 
          case 28:
             YY_RULE_SETUP
@@ -2199,12 +2191,14 @@ YY_DECL {
                current->fileName = yyFileName;
                //printf("Adding using directive: found:%s:%d name=%s\n",yyFileName.data(),yyLineNr,current->name.data());
                current->section = Entry::USINGDIR_SEC;
-               current_root->addSubEntry(current);
-               current = new Entry ;
+               current_root->addSubEntry(current, current_root);
+
+               current = QMakeShared<Entry>();
                initEntry();
                BEGIN(Search);
             }
             YY_BREAK
+
          case 29:
             YY_RULE_SETUP
             {
@@ -2215,8 +2209,9 @@ YY_DECL {
 
                //printf("Adding using declaration: found:%s:%d name=%s\n",yyFileName.data(),yyLineNr,current->name.data());
                current->section = Entry::USINGDECL_SEC;
-               current_root->addSubEntry(current);
-               current = new Entry ;
+               current_root->addSubEntry(current, current_root);
+
+               current = QMakeShared<Entry>();
                initEntry();
             }
             YY_BREAK
@@ -2231,10 +2226,11 @@ YY_DECL {
 
                //printf("Adding using declaration: found:%s:%d name=%s\n",yyFileName.data(),yyLineNr,current->name.data());
                current->section = Entry::USINGDECL_SEC;
-               current_root->addSubEntry(current);
-               current = new Entry ;
+               current_root->addSubEntry(current, current_root);
 
+               current = QMakeShared<Entry>();
                initEntry();
+
                BEGIN(Search);
             }
             YY_BREAK
@@ -2277,8 +2273,9 @@ YY_DECL {
                current->fileName = yyFileName;
                //printf("Adding using declaration: found:%s:%d name=%s\n",yyFileName.data(),yyLineNr,current->name.data());
                current->section = Entry::USINGDECL_SEC;
-               current_root->addSubEntry(current);
-               current = new Entry ;
+               current_root->addSubEntry(current, current_root);
+
+               current = QMakeShared<Entry>();
                initEntry();
                BEGIN(Search);
             }
@@ -4616,7 +4613,7 @@ void pyscannerYYfree (void *ptr )
 
 #define YYTABLES_NAME "yytables"
 
-static void parseCompounds(Entry *rt)
+static void parseCompounds(QSharedPointer<Entry> rt)
 {    
    for (auto ce : rt->children() ) {
       if (! ce->program.isEmpty()) {         
@@ -4635,20 +4632,17 @@ static void parseCompounds(Entry *rt)
          }
 
          yyFileName = ce->fileName;
-         yyLineNr   = ce->bodyLine ;
-         if (current) {
-            delete current;
-         }
+         yyLineNr   = ce->bodyLine ;        
 
-         current = new Entry;
+         current = QMakeShared<Entry>();
          initEntry();
 
          groupEnterCompound(yyFileName, yyLineNr, ce->name);
 
          pyscannerYYlex() ;
          g_lexInit = TRUE;
-         delete current;
-         current = 0;
+        
+         current = QSharedPointer<Entry>();
          ce->program.resize(0);
 
          groupLeaveCompound(yyFileName, yyLineNr, ce->name);
@@ -4658,7 +4652,7 @@ static void parseCompounds(Entry *rt)
    }
 }
 
-static void parseMain(const char *fileName, const char *fileBuf, Entry *rt)
+static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<Entry> rt)
 {
    initParser();
 
@@ -4669,6 +4663,7 @@ static void parseMain(const char *fileName, const char *fileBuf, Entry *rt)
    mtype         = Method;
    gstat         = FALSE;
    virt          = Normal;
+
    current_root  = rt;
    g_specialBlock = FALSE;
 
@@ -4683,7 +4678,9 @@ static void parseMain(const char *fileName, const char *fileBuf, Entry *rt)
 
       QFileInfo fi(fileName);
       g_moduleScope = findPackageScope(fileName);
+
       QByteArray baseName = fi.baseName().toUtf8();
+
       if (baseName != "__init__") { // package initializer file is not a package itself
          if (!g_moduleScope.isEmpty()) {
             g_moduleScope += "::";
@@ -4691,7 +4688,7 @@ static void parseMain(const char *fileName, const char *fileBuf, Entry *rt)
          g_moduleScope += baseName;
       }
 
-      current            = new Entry;
+      current            = QMakeShared<Entry>();
       initEntry();
       current->name      = g_moduleScope;
       current->section   = Entry::NAMESPACE_SEC;
@@ -4700,11 +4697,12 @@ static void parseMain(const char *fileName, const char *fileBuf, Entry *rt)
       current->startLine = yyLineNr;
       current->bodyLine  = yyLineNr;
 
-      rt->addSubEntry(current);
+      rt->addSubEntry(current, rt);
 
       current_root  = current ;
       initParser();
-      current       = new Entry;
+
+      current = QMakeShared<Entry>();
 
       groupEnterFile(yyFileName, yyLineNr);
 
@@ -4718,17 +4716,13 @@ static void parseMain(const char *fileName, const char *fileBuf, Entry *rt)
       groupLeaveFile(yyFileName, yyLineNr);
 
       current_root->program.resize(0);
-      delete current;
-      current = 0;
-
+      
+      current = QSharedPointer<Entry>();
       parseCompounds(current_root);
 
       inputFile.close();
    }
-
 }
-
-//----------------------------------------------------------------------------
 
 static void parsePrototype(const QByteArray &text)
 {
@@ -4773,9 +4767,7 @@ static void parsePrototype(const QByteArray &text)
    pyscannerYY_delete_buffer(tmpBuf);
 
    inputString = orgInputString;
-   inputPosition = orgInputPosition;
-
-   //printf("**** parsePrototype end\n");
+   inputPosition = orgInputPosition; 
 }
 
 void pyscanFreeScanner()
@@ -4787,20 +4779,17 @@ void pyscanFreeScanner()
 #endif
 }
 
-//----------------------------------------------------------------------------
-
-void PythonLanguageScanner::parseInput(const char *fileName,
-                                       const char *fileBuf,
-                                       Entry *root,
+void PythonLanguageScanner::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
                                        bool /*sameTranslationUnit*/,
                                        QStringList & /*filesInSameTranslationUnit*/)
 {
    g_thisParser = this;
+
    printlex(pyscannerYY_flex_debug, TRUE, __FILE__, fileName);
    ::parseMain(fileName, fileBuf, root);
    printlex(pyscannerYY_flex_debug, FALSE, __FILE__, fileName);
 
-   // May print the AST for debugging purposes
+   // print the AST for debugging purposes
    // printAST(global_root);
 }
 

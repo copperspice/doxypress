@@ -65,11 +65,8 @@ class ParserInterface
     *  @param[in,out] filesInSameTranslationUnit other files expected to be
     *              found in the same translation unit (used for libclang)
     */
-   virtual void parseInput(const char *fileName,
-                           const char *fileBuf,
-                           Entry *root,
-                           bool sameTranslationUnit,
-                           QStringList &filesInSameTranslationUnit) = 0;
+   virtual void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry>root,
+                           bool sameTranslationUnit, QStringList &filesInSameTranslationUnit) = 0;
 
    /** Returns true if the language identified by \a extension needs
     *  the C preprocessor to be run before feed the result to the input

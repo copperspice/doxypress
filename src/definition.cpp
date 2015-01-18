@@ -695,12 +695,13 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
    SrcLangExt lang = getLanguageFromFileName(fileName);
 
    if (!usePipe) { // no filter given or wanted
-      f = portable_fopen(fileName, "r");
+      f = fopen(fileName, "r");
 
    } else { // use filter
       QByteArray cmd = filter + " \"" + fileName + "\"";
       Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", cmd.data());
-      f = portable_popen(cmd, "r");
+
+      f = popen(cmd, "r");
    }
 
    bool found = lang == SrcLangExt_Tcl | lang == SrcLangExt_Python || lang == SrcLangExt_Fortran;
@@ -807,7 +808,7 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
          }
       }
       if (usePipe) {
-         portable_pclose(f);
+         pclose(f);
          Debug::print(Debug::FilterOutput, 0, "Filter output\n");
          Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", result.data());
       } else {
