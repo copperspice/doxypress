@@ -100,10 +100,8 @@ class Definition : public DefinitionIntf
    /*! Destroys the definition */
    virtual ~Definition();
 
-   //-----------------------------------------------------------------------------------
    // ----  getters -----
-   //-----------------------------------------------------------------------------------
-
+  
    /*! Returns the name of the definition */
    const QByteArray &name() const {
       return m_name;
@@ -367,6 +365,7 @@ class Definition : public DefinitionIntf
 
    DefinitionImpl *m_impl; // internal structure holding all private data
    QByteArray m_name;
+
    bool m_isSymbol;
 
    QByteArray m_symbolName;

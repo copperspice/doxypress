@@ -47,7 +47,7 @@ class PageDef;
 class GroupDef : public Definition
 {
  public:
-   GroupDef(const char *fileName, int line, const char *name, const char *title, const char *refFileName = 0);
+   GroupDef(const char *fileName, int line, const char *name, const char *title, QString refFileName = QString());
    ~GroupDef();
 
    DefType definitionType() const {
@@ -189,7 +189,7 @@ class GroupDef : public Definition
 
    QByteArray title;                    // title of the group
    bool titleSet;                       // true if title is not the same as the name
-   QByteArray fileName;                 // base name of the generated file
+   QString fileName;                 // base name of the generated file
    
    ClassSDict *classSDict;              // list of classes in the group
    NamespaceSDict *namespaceSDict;      // list of namespaces in the group 

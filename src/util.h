@@ -202,7 +202,7 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s);
 
 QByteArray argListToString(ArgumentList *al, bool useCanonicalType = false, bool showDefVals = true);
 
-QByteArray tempArgListToString(ArgumentList *al, SrcLangExt lang);
+QByteArray tempArgListToString(const ArgumentList *al, SrcLangExt lang);
 
 QByteArray generateMarker(int id);
 
@@ -302,7 +302,7 @@ QByteArray rtfFormatBmkStr(const char *name);
 
 QByteArray linkToText(SrcLangExt lang, const char *link, bool isFileName);
 
-QByteArray stripExtension(const char *fName);
+QString stripExtension(QString fName);
 
 void replaceNamespaceAliases(QByteArray &scope, int i);
 

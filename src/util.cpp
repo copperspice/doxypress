@@ -2118,9 +2118,10 @@ QByteArray argListToString(ArgumentList *al, bool useCanonicalType, bool showDef
    return removeRedundantWhiteSpace(result);
 }
 
-QByteArray tempArgListToString(ArgumentList *al, SrcLangExt lang)
+QByteArray tempArgListToString(const ArgumentList *al, SrcLangExt lang)
 {
    QByteArray result;
+
    if (al == 0) {
       return result;
    }
@@ -5770,15 +5771,16 @@ QByteArray normalizeNonTemplateArgumentsInString(const QByteArray &name, Definit
  *  prevent recursive substitution.
  */
 QByteArray substituteTemplateArgumentsInString(const QByteArray &name, ArgumentList *formalArgs, ArgumentList *actualArgs)
-{
-   //printf("substituteTemplateArgumentsInString(name=%s formal=%s actualArg=%s)\n",
-   //    name.data(),argListToString(formalArgs).data(),argListToString(actualArgs).data());
+{  
    if (formalArgs == 0) {
       return name;
    }
+
    QByteArray result;
+
    static QRegExp re("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
    int p = 0, l, i;
+
    // for each identifier in the base class name (e.g. B<T> -> B and T)
 
    while ((i = re.indexIn(name, p)) != -1) {
@@ -5794,11 +5796,16 @@ QByteArray substituteTemplateArgumentsInString(const QByteArray &name, ArgumentL
       auto act_iter = actualArgs->begin();
 
       for (auto formArg : *formalArgs) {   
+
          if (found) {
             break;
          }
 
-         auto actArg = *act_iter;
+         Argument *actArg = nullptr; 
+
+         if (act_iter != actualArgs->end()) {   
+            actArg = &(*act_iter);
+         }
 
          if (formArg.type.left(6) == "class " && formArg.name.isEmpty()) {
             formArg.name = formArg.type.mid(6);
@@ -5810,28 +5817,26 @@ QByteArray substituteTemplateArgumentsInString(const QByteArray &name, ArgumentL
             formArg.type = "typename";
          }
 
-         if (formArg.type == "class" || formArg.type == "typename" || formArg.type.left(8) == "template") {
+
+         if (formArg.type == "class" || formArg.type == "typename" || formArg.type.startsWith("template")) {
           
-            if (formArg.name == n && ! actArg.type.isEmpty()) { 
+            if (formArg.name == n && actArg != nullptr  && ! actArg->type.isEmpty()) { 
                // base class is a template argument
                // replace formal argument with the actual argument of the instance
 
-               if (! leftScopeMatch(actArg.type, n)) {
-                  // the scope guard is to prevent recursive lockup for
-                  // template<class A> class C : public<A::T>,
-                  // where A::T would become A::T::T here,
-                  // since n==A and actArg->type==A::T
-                  // see bug595833 for an example
-               
-                  if (actArg.name.isEmpty()) {
-                     result += actArg.type + " ";
+               if (! leftScopeMatch(actArg->type, n)) {
+                  // the scope guard is to prevent recursive lockup for template<class A> class C : public<A::T>,
+                  // where A::T would become A::T::T here, // since n==A and actArg->type==A::T
+                                 
+                  if (actArg->name.isEmpty()) {
+                     result += actArg->type + " ";
                      found = true;
 
-                  } else
+                  } else {
                      // for case where the actual arg is something like "unsigned int"
-                     // the "int" part is in actArg->name.
-                  {
-                     result += actArg.type + " " + actArg.name + " ";
+                     // the "int" part is in actArg->name
+                  
+                     result += actArg->type + " " + actArg->name + " ";
                      found = true;
                   }
                }
@@ -5850,7 +5855,10 @@ QByteArray substituteTemplateArgumentsInString(const QByteArray &name, ArgumentL
             found = true;
          }
 
-         ++act_iter;
+         if (act_iter != actualArgs->end()) {
+            ++act_iter;
+         }       
+
       }
 
       if (! found) {
@@ -6376,13 +6384,14 @@ QByteArray rtfFormatBmkStr(const char *name)
    return *tag;
 }
 
-QByteArray stripExtension(const char *fName)
+QString stripExtension(QString fName)
 {
-   QByteArray result = fName;
+   QString result = fName;
 
    if (result.right(Doxygen::htmlFileExtension.length()) == Doxygen::htmlFileExtension) {
       result = result.left(result.length() - Doxygen::htmlFileExtension.length());
    }
+
    return result;
 }
 

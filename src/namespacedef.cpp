@@ -33,16 +33,15 @@
 // must appear after the previous include - resolve soon 
 #include <doxy_globals.h>
 
-NamespaceDef::NamespaceDef(const char *df, int dl, int dc, const char *name, const char *lref,
-                           const char *fName, const char *type, bool isPublished) :
-   Definition(df, dl, dc, name), m_isPublished(isPublished)
+NamespaceDef::NamespaceDef(const char *df, int dl, int dc, const char *name, const char *lref, QString fName, 
+                           const char *type, bool isPublished) 
+   : Definition(df, dl, dc, name), m_isPublished(isPublished)
 {
-   if (fName) {
+   if (! fName.isEmpty()) {
       fileName = stripExtension(fName);
 
    } else {
-      fileName = "namespace";
-      fileName += name;
+      fileName = "namespace" + QString(name);
    }
 
    classSDict       = new ClassSDict();
@@ -738,10 +737,10 @@ void NamespaceDef::addUsingDeclaration(QSharedPointer<Definition> d)
 QByteArray NamespaceDef::getOutputFileBase() const
 {
    if (isReference()) {
-      return fileName;
+      return fileName.toUtf8();
 
    } else {
-      return convertNameToFile(fileName).toUtf8();
+      return convertNameToFile(fileName.toUtf8()).toUtf8();
    }
 }
 

@@ -15,36 +15,36 @@
  *
 *************************************************************************/
 
+#include <QByteArray>
+#include <QDir>
+
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <settings.h>
 #include <message.h>
 
+
 #if USE_SQLITE3
 
-#include <QDir>
-
-#include <string.h>
-#include <sqlite3.h>  ??
-
-#include <qtbc.h>
-#include <sqlite3gen.h>
-#include <doxygen.h>
-#include <config.h>
-#include <util.h>
-#include <docparser.h>
-#include <language.h>
-
-#include <dot.h>
 #include <arguments.h>
 #include <classlist.h>
-#include <filedef.h>
-#include <namespacedef.h>
-#include <filename.h>
-#include <groupdef.h>
-#include <pagedef.h>
+#include <config.h>
 #include <dirdef.h>
+#include <docparser.h>
+#include <dot.h> 
+#include <doxygen.h>
+#include <groupdef.h>
+#include <filedef.h>
+#include <filename.h>
+#include <language.h>
+#include <namespacedef.h>
+#include <pagedef.h>
+#include <qtbc.h>
+#include <sqlite3.h> 
+#include <sqlite3gen.h>
+#include <util.h>
 
 //#define DBG_CTX(x) printf x
 #define DBG_CTX(x) do { } while(0)
@@ -194,12 +194,11 @@ const char *schema_queries[][2] = {
    }
 };
 
-//////////////////////////////////////////////////////
 struct SqlStmt {
    const char   *query;
    sqlite3_stmt *stmt;
 };
-//////////////////////////////////////////////////////
+
 SqlStmt incl_insert = { "INSERT INTO includes "
                         "( local, id_src, id_dst ) "
                         "VALUES "
@@ -210,24 +209,25 @@ SqlStmt incl_select = { "SELECT COUNT(*) FROM includes WHERE "
                         "local=:local AND id_src=:id_src AND id_dst=:id_dst"
                         , NULL
                       };
-//////////////////////////////////////////////////////
+
 SqlStmt innerclass_insert = {"INSERT INTO innerclass "
                              "( refid, prot, name )"
                              "VALUES "
                              "(:refid,:prot,:name )"
                              , NULL
                             };
-//////////////////////////////////////////////////////
+
 SqlStmt files_select = {"SELECT rowid FROM files WHERE name=:name"
                         , NULL
                        };
+
 SqlStmt files_insert = {"INSERT INTO files "
                         "( name )"
                         "VALUES "
                         "(:name )"
                         , NULL
                        };
-//////////////////////////////////////////////////////
+
 SqlStmt refids_select =  {"SELECT rowid FROM refids WHERE "
                           "refid=:refid"
                           , NULL
@@ -238,42 +238,42 @@ SqlStmt refids_insert = {"INSERT INTO refids "
                          "(:refid )"
                          , NULL
                         };
-//////////////////////////////////////////////////////
+
 SqlStmt xrefs_insert = {"INSERT INTO xrefs "
                         "( refid_src, refid_dst, id_file, line, column )"
                         "VALUES "
                         "(:refid_src,:refid_dst,:id_file,:line,:column )"
                         , NULL
                        };
-//////////////////////////////////////////////////////
+
 SqlStmt memberdef_insert = {"INSERT INTO memberdef "
                             "( refid, prot, static, const, explicit, inline, final, sealed, new, optional, required, virt, mutable, initonly, readable, writable, gettable, settable, accessor, addable, removable, raisable, name, type, definition, argsstring, scope, initializer, kind, id_bodyfile, bodystart, bodyend, id_file, line, column, detaileddescription, briefdescription, inbodydescription)"
                             "VALUES "
                             "(:refid,:prot,:static,:const,:explicit,:inline,:final,:sealed,:new,:optional,:required,:virt,:mutable,:initonly,:readable,:writable,:gettable,:settable,:accessor,:addable,:removable,:raisable,:name,:type,:definition,:argsstring,:scope,:initializer,:kind,:id_bodyfile,:bodystart,:bodyend,:id_file,:line,:column,:detaileddescription,:briefdescription,:inbodydescription)"
                             , NULL
                            };
-//////////////////////////////////////////////////////
+
 SqlStmt compounddef_insert = {"INSERT INTO compounddef "
                               "( name, kind, prot, refid, id_file, line, column ) "
                               "VALUES "
                               "(:name,:kind,:prot,:refid,:id_file,:line,:column )"
                               , NULL
                              };
-//////////////////////////////////////////////////////
+
 SqlStmt basecompoundref_insert = {"INSERT INTO  basecompoundref "
                                   "( base, derived, refid, prot, virt ) "
                                   "VALUES "
                                   "(:base,:derived,:refid,:prot,:virt )"
                                   , NULL
                                  };
-//////////////////////////////////////////////////////
+
 SqlStmt derivedcompoundref_insert = {"INSERT INTO  derivedcompoundref "
                                      "( refid, prot, virt, base, derived ) "
                                      "VALUES "
                                      "(:refid,:prot,:virt,:base,:derived )"
                                      , NULL
                                     };
-//////////////////////////////////////////////////////
+
 SqlStmt params_select = { "SELECT rowid FROM  params WHERE "
                           "(attributes IS NULL OR attributes=:attributes) AND "
                           "(type IS NULL OR type=:type) AND "
@@ -284,20 +284,21 @@ SqlStmt params_select = { "SELECT rowid FROM  params WHERE "
                           "(briefdescription IS NULL OR briefdescription=:briefdescription)"
                           , NULL
                         };
+
 SqlStmt params_insert = { "INSERT INTO  params "
                           "( attributes, type, declname, defnname, array, defval, briefdescription ) "
                           "VALUES "
                           "(:attributes,:type,:declname,:defnname,:array,:defval,:briefdescription)"
                           , NULL
                         };
-//////////////////////////////////////////////////////
+
 SqlStmt memberdef_params_insert = { "INSERT INTO  memberdef_params "
                                     "( id_memberdef, id_param)"
                                     "VALUES "
                                     "(:id_memberdef,:id_param)"
                                     , NULL
                                   };
-//////////////////////////////////////////////////////
+
 SqlStmt innernamespace_insert = {"INSERT INTO  innernamespaces "
                                  "( refid, name)"
                                  "VALUES "
@@ -351,17 +352,21 @@ static int step(sqlite3 *db, SqlStmt &s, bool getRowId = false, bool select = fa
 {
    int rowid = -1;
    int rc = sqlite3_step(s.stmt);
+
    if (rc != SQLITE_DONE && rc != SQLITE_ROW) {
       msg("sqlite3_step failed: %s\n", sqlite3_errmsg(db));
       sqlite3_clear_bindings(s.stmt);
       return -1;
    }
+
    if (getRowId && select) {
       rowid = sqlite3_column_int(s.stmt, 0);   // works on selects, doesnt on inserts
    }
+
    if (getRowId && !select) {
       rowid = sqlite3_last_insert_rowid(db);   //works on inserts, doesnt on selects
    }
+
    sqlite3_reset(s.stmt);
    sqlite3_clear_bindings(s.stmt); // XXX When should this really be called
    return rowid;
@@ -515,7 +520,6 @@ static void insertMemberDefineParams(sqlite3 *db, int id_memberdef, MemberDef *m
    }
 }
 
-
 static void stripQualifiers(QByteArray &typeStr)
 {
    bool done = false;
@@ -611,7 +615,6 @@ static int initializeSchema(sqlite3 *db)
    return 0;
 }
 
-////////////////////////////////////////////
 static void writeInnerClasses(sqlite3 *db, const ClassSDict *cl)
 {
    if (!cl) {
@@ -647,16 +650,15 @@ static void writeInnerNamespaces(sqlite3 *db, const NamespaceSDict *nl)
 }
 
 
-static void writeTemplateArgumentList(sqlite3 *db,
-                                      ArgumentList *al,
-                                      Definition *scope,
-                                      FileDef *fileScope)
+static void writeTemplateArgumentList(sqlite3 *db, ArgumentList *al, Definition *scope, FileDef *fileScope)
 {
    if (al) {
       ArgumentListIterator ali(*al);
       Argument *a;
+
       for (ali.toFirst(); (a = ali.current()); ++ali) {
          if (!a->type.isEmpty()) {
+
 #warning linkifyText(TextGeneratorXMLImpl(t),scope,fileScope,0,a->type);
             bindTextParameter(params_select, ":type", a->type);
             bindTextParameter(params_insert, ":type", a->type);
@@ -690,9 +692,7 @@ static void writeTemplateList(sqlite3 *db, ClassDef *cd)
 {
    writeTemplateArgumentList(db, cd->templateArguments(), cd, 0);
 }
-////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
 static void generateSqlite3ForMember(sqlite3 *db, MemberDef *md, Definition *def)
 {
    // + declaration/definition arg lists
@@ -821,6 +821,7 @@ static void generateSqlite3ForMember(sqlite3 *db, MemberDef *md, Definition *def
       linkifyText(TextGeneratorSqlite3Impl(l), def, md->getBodyDef(), md, md->initializer());
       QListIterator<QByteArray> li(l);
       QByteArray *s;
+
       while ((s = li.current())) {
          if (md->getBodyDef()) {
             DBG_CTX(("initializer:%s %s %s %d\n",

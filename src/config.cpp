@@ -3589,7 +3589,7 @@ void addConfigOptions(Config *cfg)
   cs = cfg->addString("SORT_MEMBERS_CTORS_1ST", "");
   cs = cfg->addString("SORT_GROUP_NAMES", "");
   cs = cfg->addString("SORT_BY_SCOPE_NAME", "");
-  cs = cfg->addString("STRICT_PROTO_MATCHING", "");
+  cb = cfg->addBool("STRICT_PROTO_MATCHING", "", false);
   cs = cfg->addString("GENERATE_TODOLIST", "");
   cs = cfg->addString("GENERATE_TESTLIST", "");
   cs = cfg->addString("GENERATE_BUGLIST", "");

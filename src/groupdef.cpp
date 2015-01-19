@@ -24,6 +24,7 @@
 #include <classdef.h>
 #include <classlist.h>
 #include <dirdef.h>
+#include <doxy_globals.h>
 #include <doxygen.h>
 #include <dot.h>
 #include <docparser.h>
@@ -42,12 +43,7 @@
 #include <searchindex.h>
 #include <util.h>
 
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
-
-//---------------------------------------------------------------------------
-
-GroupDef::GroupDef(const char *df, int dl, const char *na, const char *t, const char *refFileName) : Definition(df, dl, 1, na)
+GroupDef::GroupDef(const char *df, int dl, const char *na, const char *t, QString refFileName) : Definition(df, dl, 1, na)
 {   
    classSDict     = new ClassSDict();   
    namespaceSDict = new NamespaceSDict();
@@ -60,10 +56,12 @@ GroupDef::GroupDef(const char *df, int dl, const char *na, const char *t, const 
 
    allMemberNameInfoSDict = new MemberNameInfoSDict();
    
-   if (refFileName) {
+   if (! refFileName.isEmpty() ) {
       fileName = stripExtension(refFileName);
+
    } else {
-      fileName = (QByteArray)"group_" + na;
+      fileName = "group_" + QString(na);
+
    }
 
    setGroupTitle(t);
@@ -1334,9 +1332,11 @@ void addExampleToGroups(Entry *root, QSharedPointer<PageDef> eg)
 QByteArray GroupDef::getOutputFileBase() const
 {
    if (isReference()) {
-      return fileName;
+      return fileName.toUtf8();
+
    } else {
-      return convertNameToFile(fileName).toUtf8();
+      return convertNameToFile(fileName.toUtf8()).toUtf8();
+
    }
 }
 

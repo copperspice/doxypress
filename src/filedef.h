@@ -23,22 +23,21 @@
 #include <QHash>
 #include <QTextStream>
 
-#include <index.h>
+#include <classlist.h>
 #include <definition.h>
+#include <filelist.h>
+#include <index.h>
 #include <memberlist.h>
+#include <membergroup.h>
+#include <namespacedef.h>
 #include <stringmap.h>
 #include <sortedlist.h>
 
-class ClassSDict;
 class ClassDef;
 class DirDef;
 class FileDef;
-class FileList;
 class MemberDef;
 class MemberList;
-class MemberGroupSDict;
-class NamespaceDef;
-class NamespaceSDict;
 class OutputList;
 class PackageDef; 
 
@@ -156,17 +155,30 @@ class FileDef : public Definition
       return m_dir;
    }
 
-   NamespaceSDict *getUsedNamespaces() const;
-   StringMap<QSharedPointer<Definition>> *getUsedClasses() const      {
-      return m_usingDeclList;
+   NamespaceSDict *getUsedNamespaces();
+
+   StringMap<QSharedPointer<Definition>> *getUsedClasses()  {
+      return &m_usingDeclList;
    }
 
-   QList<IncludeInfo> *includeFileList() const    {
-      return m_includeList;
+   const QList<IncludeInfo> *includeFileList() const    {
+      if (m_includeList.isEmpty()) {
+         return 0;
+      }
+
+      return &m_includeList;
    }
 
-   QList<IncludeInfo> *includedByFileList() const {
-      return m_includedByList;
+   QList<IncludeInfo> *includeFileList() {
+      if (m_includeList.isEmpty()) {
+         return 0;
+      }
+
+      return &m_includeList;
+   }
+
+   QList<IncludeInfo> *includedByFileList() {
+      return &m_includedByList;
    }
 
    void getAllIncludeFilesRecursively(QStringList &incFiles) const;
@@ -178,16 +190,16 @@ class FileDef : public Definition
    }
 
    /* user defined member groups */
-   MemberGroupSDict *getMemberGroupSDict() const {
-      return m_memberGroupSDict;
+   MemberGroupSDict *getMemberGroupSDict() {
+      return &m_memberGroupSDict;
    }
 
-   NamespaceSDict *getNamespaceSDict() const {
-      return m_namespaceSDict;
+   NamespaceSDict *getNamespaceSDict() {
+      return &m_namespaceSDict;
    }
 
-   ClassSDict *getClassSDict() const {
-      return m_classSDict;
+   ClassSDict *getClassSDict()  {
+      return &m_classSDict;
    }
 
    QByteArray title() const;
@@ -241,8 +253,7 @@ class FileDef : public Definition
    void addIncludedUsingDirectives();
 
    void addListReferences();
-   //bool includes(FileDef *incFile,QHash<QString, FileDef> *includedFiles) const;
-   //bool includesByName(const QByteArray &name) const;
+
    bool visited;
 
  protected:
@@ -273,56 +284,37 @@ class FileDef : public Definition
    void writeDetailedDescription(OutputList &ol, const QByteArray &title);
    void writeBriefDescription(OutputList &ol);
 
-   QHash<QString, IncludeInfo>   *m_includeDict;
-   QList<IncludeInfo>            *m_includeList;
-   QHash<QString, IncludeInfo>   *m_includedByDict;
-   QList<IncludeInfo>            *m_includedByList;
-   NamespaceSDict                *m_usingDirList;
+   QHash<QString, IncludeInfo>   m_includeDict;
+   QList<IncludeInfo>            m_includeList;
+   QHash<QString, IncludeInfo>   m_includedByDict;
+   QList<IncludeInfo>            m_includedByList;
+   NamespaceSDict                m_usingDirList;
 
-   StringMap<QSharedPointer<Definition>>  *m_usingDeclList;
+   StringMap<QSharedPointer<Definition>>  m_usingDeclList;
 
-   QByteArray               m_path;
-   QByteArray               m_filePath;
-   QByteArray               m_diskName;
-   QByteArray               m_fileName;
-   QByteArray               m_docname;
+   QByteArray         m_path;
+   QByteArray         m_filePath;
+   QByteArray         m_diskName;
+   QByteArray         m_fileName;
+   QByteArray         m_docname;
 
-   QHash<long, QSharedPointer<Definition>> *m_srcDefDict;
-   QHash<long, QSharedPointer<MemberDef>>  *m_srcMemberDict;
+   QHash<long, QSharedPointer<Definition>> m_srcDefDict;
+   QHash<long, QSharedPointer<MemberDef>>  m_srcMemberDict;
 
-   bool                     m_isSource;
-   QByteArray               m_fileVersion;
-   PackageDef              *m_package;
-   DirDef                  *m_dir;
+   bool               m_isSource;
+   QByteArray         m_fileVersion;
+   PackageDef        *m_package;
+   DirDef            *m_dir;
 
    QList<QSharedPointer<MemberList>> m_memberLists;
 
-   MemberGroupSDict        *m_memberGroupSDict;
-   NamespaceSDict          *m_namespaceSDict;
-   ClassSDict              *m_classSDict;
-   bool                     m_subGrouping;
+   MemberGroupSDict   m_memberGroupSDict;
+   NamespaceSDict     m_namespaceSDict;
+   ClassSDict         m_classSDict;
+   bool               m_subGrouping;
 };
 
-/** Class representing a list of FileDef objects. */
-class FileList : public SortedList<FileDef *>
-{
- public:
-   FileList() : m_pathName("tmp")
-   {}
 
-   FileList(const char *path) : m_pathName(path) 
-   {}
-
-   ~FileList() 
-   {}
-
-   QByteArray path() const {
-      return m_pathName;
-   }
-
- private:  
-   QByteArray m_pathName;
-};
 
 class Directory;
 

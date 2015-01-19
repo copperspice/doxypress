@@ -22,9 +22,8 @@
 #include <QHash>
 
 #include <classdef.h>
+#include <definition.h>
 #include <stringmap.h>
-
-class Definition;
 
 /** An unsorted dictionary of ClassDef objects. */
 class ClassDict : public QHash<QString, ClassDef>

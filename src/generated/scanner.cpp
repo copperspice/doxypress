@@ -21997,16 +21997,8 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 {  
    for (auto ce : rt->children() ) {
 
-printf("\n BROOM   W1");
-
-printf("\n BROOM   %s", rt->name.constData() );
-
       if (! ce->program.isEmpty()) {  
-
  
-printf("\n BROOM   W2");
-
-
          padCount = 0;
          g_column = 0;
 
@@ -22095,10 +22087,7 @@ printf("\n BROOM   W2");
       }
 
       parseCompounds(ce);
-
-printf("\n  BROOM SPOT    W3");
    }
-
 }
 
 static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<Entry> rt, 

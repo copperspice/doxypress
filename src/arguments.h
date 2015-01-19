@@ -31,25 +31,25 @@ struct Argument {
    /*! Construct a new argument. */
    Argument() {}
 
-   /*! Copy an argument (does a deep copy of all strings). */
+   /*! Copy an argument (does a deep copy of all strings) */
    Argument(const Argument &a) {
       attrib  = a.attrib;
       type    = a.type;
-      name = a.name;
-      defval = a.defval;
-      docs = a.docs;
-      array = a.array;
+      name    = a.name;
+      defval  = a.defval;
+      docs    = a.docs;
+      array   = a.array;
    }
 
-   /*! Assignment of an argument (does a deep copy of all strings). */
+   /*! Assignment of an argument (does a deep copy of all strings) */
    Argument &operator=(const Argument &a) {
       if (this != &a) {
          attrib = a.attrib;
-         type = a.type;
-         name = a.name;
+         type   = a.type;
+         name   = a.name;
          defval = a.defval;
-         docs = a.docs;
-         array = a.array;
+         docs   = a.docs;
+         array  = a.array;
       }
       return *this;
    }

@@ -212,7 +212,7 @@ class Entry
    /*! Returns the list of children for this Entry
     *  @see addSubEntry() and removeSubEntry()
     */
-   const QList<QSharedPointer<Entry>> &children() const {
+   const QList<QSharedPointer<Entry>> children() const {
       return m_sublist;
    }
 
@@ -264,9 +264,9 @@ class Entry
    bool callerGraph;         //!< do we need to draw the caller graph?
   
    QList<ArgumentList> *tArgLists;    //!< template argument declarations
-   QList<BaseInfo>  extends;          //!< list of base classes
-   QList<Grouping> *groups;           //!< list of groups this entry belongs to
-   QList<SectionInfo> *anchors;       //!< list of anchors defined in this entry
+   QList<BaseInfo>      extends;      //!< list of base classes
+   QList<Grouping>     *groups;       //!< list of groups this entry belongs to
+   QList<SectionInfo>  *anchors;      //!< list of anchors defined in this entry
    QList<ListItemInfo> *sli;          //!< special lists (test/todo/bug/deprecated/..) this entry is in
 
    QByteArray	 type;        //!< member type
@@ -330,7 +330,7 @@ class Entry
    void createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage, FileDef *fd, QSharedPointer<Entry> self);
 
    QWeakPointer<Entry> m_parent;               //!< parent node in the tree
-   QList<QSharedPointer<Entry>>  m_sublist;    //!< entries that are children of this one
+   QList<QSharedPointer<Entry>>  m_sublist;    //!< entries that are children 
 
    Entry &operator=(const Entry &);
 };

@@ -4035,7 +4035,8 @@ void MemberDef::setTagInfo(TagInfo *ti)
       //printf("%s: Setting tag name=%s anchor=%s\n",name().data(),ti->tagName.data(),ti->anchor.data());
       m_impl->anc = ti->anchor;
       setReference(ti->tagName);
-      m_impl->explicitOutputFileBase = stripExtension(ti->fileName);
+
+      m_impl->explicitOutputFileBase = stripExtension(ti->fileName).toUtf8();
    }
 }
 

@@ -88,17 +88,9 @@ FileDef::FileDef(const char *p, const char *nm, const char *lref, const char *dn
    if (m_diskName.isEmpty()) {
       m_diskName = nm;
    }
+
    setReference(lref);
-   m_classSDict        = 0;
-   m_includeList       = 0;
-   m_includeDict       = 0;
-   m_includedByList    = 0;
-   m_includedByDict    = 0;
-   m_namespaceSDict    = 0;
-   m_srcDefDict        = 0;
-   m_srcMemberDict     = 0;
-   m_usingDirList      = 0;
-   m_usingDeclList     = 0;
+      
    m_package           = 0;
    m_isSource          = guessSection(nm) == Entry::SOURCE_SEC;
    m_docname           = nm;
@@ -109,26 +101,14 @@ FileDef::FileDef(const char *p, const char *nm, const char *lref, const char *dn
    }
 
    setLanguage(getLanguageFromFileName(name()));
-
-   m_memberGroupSDict = 0;
+   
    acquireFileVersion();
    m_subGrouping = Config_getBool("SUBGROUPING");
 }
 
 /*! destroy the file definition */
 FileDef::~FileDef()
-{
-   delete m_classSDict;
-   delete m_includeDict;
-   delete m_includeList;
-   delete m_includedByDict;
-   delete m_includedByList;
-   delete m_namespaceSDict;
-   delete m_srcDefDict;
-   delete m_srcMemberDict;
-   delete m_usingDirList;
-   delete m_usingDeclList;
-   delete m_memberGroupSDict;
+{       
 }
 
 /*! Compute the HTML anchor names for all members in the class */
@@ -142,23 +122,18 @@ void FileDef::computeAnchors()
 
 void FileDef::distributeMemberGroupDocumentation()
 {
-   //printf("FileDef::distributeMemberGroupDocumentation()\n");
-   if (m_memberGroupSDict) {      
-      for (auto mg : *m_memberGroupSDict) {
-         mg->distributeMemberGroupDocumentation();
-      }
+   for (auto mg : m_memberGroupSDict) {
+      mg->distributeMemberGroupDocumentation();
    }
 }
 
 void FileDef::findSectionsInDocumentation()
 {
    docFindSections(documentation(), this, 0, docFile());
-
-   if (m_memberGroupSDict) {
-    for (auto mg : *m_memberGroupSDict) {
-         mg->findSectionsInDocumentation();
-      }
-   } 
+  
+   for (auto mg : m_memberGroupSDict) {
+      mg->findSectionsInDocumentation();
+   }   
 
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
@@ -185,9 +160,9 @@ void FileDef::writeTagFile(QTextStream &tagFile)
    tagFile << "    <path>" << convertToXML(getPath()) << "</path>" << endl;
    tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << "</filename>" << endl;
 
-   if (m_includeList && m_includeList->count() > 0) {
+   if (m_includeList.count() > 0) {
       
-      for (auto ii : *m_includeList) {
+      for (auto ii : m_includeList) {
          if (! ii.indirect) {
             FileDef *fd = ii.fileDef;
 
@@ -218,25 +193,22 @@ void FileDef::writeTagFile(QTextStream &tagFile)
       
          case LayoutDocEntry::FileClasses: 
          {
-            if (m_classSDict) {              
-               for (auto cd : *m_classSDict) {
-                  if (cd->isLinkableInProject()) {
-                     tagFile << "    <class kind=\"" << cd->compoundTypeString() <<
-                             "\">" << convertToXML(cd->name()) << "</class>" << endl;
-                  }
+            for (auto cd : m_classSDict) {
+               if (cd->isLinkableInProject()) {
+                  tagFile << "    <class kind=\"" << cd->compoundTypeString() <<
+                          "\">" << convertToXML(cd->name()) << "</class>" << endl;
                }
             }
+            
          }
          break;
 
          case LayoutDocEntry::FileNamespaces: 
          {
-            if (m_namespaceSDict) {              
-               for (auto nd : *m_namespaceSDict) {
-                  if (nd->isLinkableInProject()) {
-                     tagFile << "    <namespace>" << convertToXML(nd->name()) << "</namespace>" << endl;
-                  }
-               }
+            for (auto nd : m_namespaceSDict) {
+               if (nd->isLinkableInProject()) {
+                  tagFile << "    <namespace>" << convertToXML(nd->name()) << "</namespace>" << endl;
+               }               
             }
          }
          break;
@@ -253,11 +225,11 @@ void FileDef::writeTagFile(QTextStream &tagFile)
          break;
 
          case LayoutDocEntry::MemberGroups: {
-            if (m_memberGroupSDict) {
-               for (auto mg : *m_memberGroupSDict) {
-                  mg->writeTagFile(tagFile);
-               }
+        
+            for (auto mg : m_memberGroupSDict) {
+               mg->writeTagFile(tagFile);
             }
+        
          }
          break;
          default:
@@ -362,10 +334,10 @@ void FileDef::writeBriefDescription(OutputList &ol)
 
 void FileDef::writeIncludeFiles(OutputList &ol)
 {
-   if (m_includeList && m_includeList->count() > 0) {
+   if (m_includeList.count() > 0) {
       ol.startTextBlock(true);
      
-      for (auto ii : *m_includeList) {
+      for (auto ii : m_includeList) {
          if (! ii.indirect) {
             FileDef *fd = ii.fileDef;
             bool isIDLorJava = false;
@@ -491,18 +463,14 @@ void FileDef::writeSourceLink(OutputList &ol)
 void FileDef::writeNamespaceDeclarations(OutputList &ol, const QByteArray &title,
       bool const isConstantGroup)
 {
-   // write list of namespaces
-   if (m_namespaceSDict) {
-      m_namespaceSDict->writeDeclaration(ol, title, isConstantGroup);
-   }
+   // write list of namespaces 
+   m_namespaceSDict.writeDeclaration(ol, title, isConstantGroup);   
 }
 
 void FileDef::writeClassDeclarations(OutputList &ol, const QByteArray &title)
 {
-   // write list of classes
-   if (m_classSDict) {
-      m_classSDict->writeDeclaration(ol, 0, title, false);
-   }
+   // write list of classes  
+   m_classSDict.writeDeclaration(ol, 0, title, false);   
 }
 
 void FileDef::writeInlineClasses(OutputList &ol)
@@ -511,13 +479,11 @@ void FileDef::writeInlineClasses(OutputList &ol)
    // as a result of setting SEPARATE_MEMBER_PAGES to YES; see bug730512
    bool isEnabled = ol.isEnabled(OutputGenerator::Html);
    ol.enable(OutputGenerator::Html);
-
-   if (m_classSDict) {
-      m_classSDict->writeDocumentation(ol, this);
-   }
-
+   
+   m_classSDict.writeDocumentation(ol, this);
+   
    // restore the initial state if needed
-   if (!isEnabled) {
+   if (! isEnabled) {
       ol.disable(OutputGenerator::Html);
    }
 }
@@ -551,14 +517,12 @@ void FileDef::endMemberDocumentation(OutputList &ol)
 void FileDef::writeMemberGroups(OutputList &ol)
 {
    /* write user defined member groups */
-   if (m_memberGroupSDict) {
-     
-      for (auto mg : *m_memberGroupSDict) {
-         if ((!mg->allMembersInSameSection() || !m_subGrouping) && mg->header() != "[NOHEADER]") {
-            mg->writeDeclarations(ol, 0, 0, this, 0);
-         }
+  
+   for (auto mg : m_memberGroupSDict) {
+      if ((!mg->allMembersInSameSection() || !m_subGrouping) && mg->header() != "[NOHEADER]") {
+         mg->writeDeclarations(ol, 0, 0, this, 0);
       }
-   }
+   }  
 }
 
 void FileDef::writeAuthorSection(OutputList &ol)
@@ -583,8 +547,8 @@ void FileDef::writeSummaryLinks(OutputList &ol)
   
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
 
-      if ((lde->kind() == LayoutDocEntry::FileClasses && m_classSDict && m_classSDict->declVisible()) ||
-            (lde->kind() == LayoutDocEntry::FileNamespaces && m_namespaceSDict && m_namespaceSDict->declVisible()) ) {
+      if ((lde->kind() == LayoutDocEntry::FileClasses && m_classSDict.declVisible()) ||
+            (lde->kind() == LayoutDocEntry::FileNamespaces && m_namespaceSDict.declVisible()) ) {
 
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
          QByteArray label = lde->kind() == LayoutDocEntry::FileClasses ? "nested-classes" : "namespaces";
@@ -602,7 +566,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
       }
    }
 
-   if (!first) {
+   if (! first) {
       ol.writeString("  </div>\n");
    }
    ol.popGeneratorState();
@@ -998,21 +962,23 @@ void FileDef::finishParsing()
 
 void FileDef::addMembersToMemberGroup()
 { 
+   MemberGroupSDict *temp = &m_memberGroupSDict;
+
    for (auto &ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
-         ::addMembersToMemberGroup(ml.data(), &m_memberGroupSDict, this);
+         ::addMembersToMemberGroup(ml.data(), &temp, this);    
       }
    }
 
    // add members inside sections to their groups
-   if (m_memberGroupSDict) {
-     for (auto mg : *m_memberGroupSDict) {
+
+     for (auto mg : m_memberGroupSDict) {
          if (mg->allMembersInSameSection() && m_subGrouping) {
             //printf("----> addToDeclarationSection(%s)\n",mg->header().data());
             mg->addToDeclarationSection();
          }
       }
-   }
+ 
 }
 
 /*! Adds member definition \a md to the list of all members of this file */
@@ -1074,14 +1040,9 @@ void FileDef::insertClass(QSharedPointer<ClassDef> cd)
 {
    if (cd->isHidden()) {
       return;
-   }
-
-   if (m_classSDict == 0) {
-      m_classSDict = new ClassSDict;
-   }
+   } 
  
-   m_classSDict->insert(cd->name(), cd);
-   
+   m_classSDict.insert(cd->name(), cd);   
 }
 
 /*! Adds namespace definition \a nd to the list of all compounds of this file */
@@ -1091,13 +1052,8 @@ void FileDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
       return;
    }
 
-   if (!nd->name().isEmpty() && (m_namespaceSDict == 0 || m_namespaceSDict->find(nd->name()) == 0)) {
-
-      if (m_namespaceSDict == 0) {
-         m_namespaceSDict = new NamespaceSDict;
-      }
-     
-      m_namespaceSDict->insert(nd->name(), nd);      
+   if (! nd->name().isEmpty() && m_namespaceSDict.find(nd->name()) == 0) {    
+      m_namespaceSDict.insert(nd->name(), nd);      
    }
 }
 
@@ -1112,70 +1068,47 @@ QByteArray FileDef::name() const
 
 void FileDef::addSourceRef(int line, QSharedPointer<Definition> d, QSharedPointer<MemberDef> md)
 {   
-   if (d) {
-      if (m_srcDefDict == nullptr) {
-         m_srcDefDict = new QHash<long, QSharedPointer<Definition>>();
-      }
-
-      if (m_srcMemberDict == nullptr) {
-         m_srcMemberDict = new QHash<long, QSharedPointer<MemberDef>>();
-      }
-
-      m_srcDefDict->insert(line, d);
+   if (d) {          
+      m_srcDefDict.insert(line, d);
 
       if (md) {
-         m_srcMemberDict->insert(line, md);
-      }
-      
+         m_srcMemberDict.insert(line, md);
+      }      
    }
 }
 
 QSharedPointer<Definition> FileDef::getSourceDefinition(int lineNr) const
 {
-   QSharedPointer<Definition> result;
-
-   if (m_srcDefDict) {
-      result = m_srcDefDict->value(lineNr);
-   }
- 
+   QSharedPointer<Definition> result; 
+   result = m_srcDefDict.value(lineNr);
+    
    return result;
 }
 
 QSharedPointer<MemberDef> FileDef::getSourceMember(int lineNr) const
 {
    QSharedPointer<MemberDef> result;
-
-   if (m_srcMemberDict) {
-      result = m_srcMemberDict->value(lineNr);
-   }
-  
+   result = m_srcMemberDict.value(lineNr);
+     
    return result;
 }
 
 void FileDef::addUsingDirective(QSharedPointer<NamespaceDef> nd)
 {
-   if (m_usingDirList == 0) {
-      m_usingDirList = new NamespaceSDict;
-   }
-
-   if (! m_usingDirList->find(nd->qualifiedName()) ) {
-      m_usingDirList->insert(nd->qualifiedName(), nd);
+   if (! m_usingDirList.find(nd->qualifiedName()) ) {
+      m_usingDirList.insert(nd->qualifiedName(), nd);
    }   
 }
 
-NamespaceSDict *FileDef::getUsedNamespaces() const
+NamespaceSDict *FileDef::getUsedNamespaces()
 {
-   return m_usingDirList;
+   return &m_usingDirList;
 }
 
 void FileDef::addUsingDeclaration(QSharedPointer<Definition> d)
 {
-   if (m_usingDeclList == 0) {
-      m_usingDeclList = new StringMap<QSharedPointer<Definition>>();
-   }
-
-   if (! m_usingDeclList->find(d->qualifiedName()) ) {
-      m_usingDeclList->insert(d->qualifiedName(), d);
+   if (! m_usingDeclList.find(d->qualifiedName()) ) {
+      m_usingDeclList.insert(d->qualifiedName(), d);
    }
 }
 
@@ -1190,12 +1123,7 @@ void FileDef::addIncludeDependency(FileDef *fd, const char *incName, bool local,
       iName = incName;
    }
 
-   if (! iName.isEmpty() && (! m_includeDict || ! m_includeDict->contains(iName))) {
-
-      if (m_includeDict == 0) {
-         m_includeDict   = new QHash<QString, IncludeInfo>;
-         m_includeList   = new QList<IncludeInfo>;        
-      }
+   if (! iName.isEmpty() && ! m_includeDict.contains(iName)) {
 
       IncludeInfo ii;
       ii.fileDef     = fd;
@@ -1204,8 +1132,8 @@ void FileDef::addIncludeDependency(FileDef *fd, const char *incName, bool local,
       ii.imported    = imported;
       ii.indirect    = indirect;
 
-      m_includeList->append(ii);
-      m_includeDict->insert(iName, ii);
+      m_includeList.append(ii);
+      m_includeDict.insert(iName, ii);
    }
 }
 
@@ -1216,65 +1144,45 @@ void FileDef::addIncludedUsingDirectives()
    }
 
    visited = true;
-
    NamespaceList nl;
 
-   if (m_includeList) { 
+   if (! m_includeList.isEmpty()) { 
       // file contains #includes
+            
+      for (auto &item : m_includeList) {
+         // foreach #include which is a known file
 
-      {         
-         for (auto &item : *m_includeList) {
-
-            // foreach #include which is a known file
-            if (item.fileDef && ! item.fileDef->visited) {                
-               // recurse into this file
-               item.fileDef->addIncludedUsingDirectives();
-            }
+         if (item.fileDef && ! item.fileDef->visited) {                
+            // recurse into this file
+            item.fileDef->addIncludedUsingDirectives();
          }
       }
+                 
+      for (auto incList : m_includeList) {
 
-      {      
-         for (auto ii : *m_includeList) {
-
-            if (ii.fileDef && ii.fileDef != this) {
-               // add using directives
-               NamespaceSDict *unl = ii.fileDef->m_usingDirList;
-
-               if (unl) {
-                
-                  for (auto nd : *unl) {
-                     // append each using directive found in a #include file
-
-                     if (m_usingDirList == 0) {
-                        m_usingDirList = new NamespaceSDict;
-                     }
-                   
-                     if (m_usingDirList->find(nd->qualifiedName()) == 0) { 
-                        // not yet added
-                        m_usingDirList->insert(nd->qualifiedName(), nd);
-                     }
-                  }
-               }
-
-               // add using declarations
-               StringMap<QSharedPointer<Definition>> *udl = ii.fileDef->m_usingDeclList;
-
-               if (udl) {                  
-                  for (auto d : *udl) {
-              
-                     if (m_usingDeclList == 0) {
-                        m_usingDeclList = new StringMap<QSharedPointer<Definition>>();
-                     }
-
-                     if (m_usingDeclList->find(d->qualifiedName()) == 0) {
-                        m_usingDeclList->insert(d->qualifiedName(), d);
-                     }
-
-                  }
+         if (incList.fileDef && incList.fileDef != this) {
+            // add using directives
+            NamespaceSDict &unl = incList.fileDef->m_usingDirList;
+                      
+            for (auto nd : unl) {
+               // append each using directive found in a #include file
+                              
+               if (m_usingDirList.find(nd->qualifiedName()) == 0) {                    
+                  m_usingDirList.insert(nd->qualifiedName(), nd);
                }
             }
+           
+            // add using declarations
+            StringMap<QSharedPointer<Definition>> &udl = incList.fileDef->m_usingDeclList;
+                     
+            for (auto d : udl) {                           
+               if (m_usingDeclList.find(d->qualifiedName()) == 0) {
+                  m_usingDeclList.insert(d->qualifiedName(), d);
+               }
+            }
+           
          }
-      }
+      }      
    }   
 }
 
@@ -1282,13 +1190,8 @@ void FileDef::addIncludedByDependency(FileDef *fd, const char *incName, bool loc
 {
    QByteArray iName = fd ? fd->getFilePath().data() : incName;
 
-   if (!iName.isEmpty() && (m_includedByDict == 0 || ! m_includedByDict->contains(iName))) {
-
-      if (m_includedByDict == 0) {
-         m_includedByDict = new QHash<QString, IncludeInfo>;
-         m_includedByList = new QList<IncludeInfo>;        
-      }
-
+   if (! iName.isEmpty() && ! m_includedByDict.contains(iName)) {
+     
       IncludeInfo ii;
       ii.fileDef     = fd;
       ii.includeName = incName;
@@ -1296,8 +1199,8 @@ void FileDef::addIncludedByDependency(FileDef *fd, const char *incName, bool loc
       ii.imported    = imported;
       ii.indirect    = false;
 
-      m_includedByList->append(ii);
-      m_includedByDict->insert(iName, ii);
+      m_includedByList.append(ii);
+      m_includedByDict.insert(iName, ii);
    }
 }
 
@@ -1307,7 +1210,7 @@ bool FileDef::isIncluded(const QByteArray &name) const
       return false;
    }
 
-   return m_includeDict != 0 && ! m_includeDict->contains(name);
+   return ! m_includeDict.contains(name);
 }
 
 bool FileDef::generateSourceFile() const
@@ -1323,17 +1226,12 @@ bool FileDef::generateSourceFile() const
 
 
 void FileDef::addListReferences()
-{
-   {
-      QList<ListItemInfo> *xrefItems = xrefListItems();
-      addRefItem(xrefItems, getOutputFileBase(), theTranslator->trFile(true, true),
-                 getOutputFileBase(), name(), 0, 0 );
-   }
-
-   if (m_memberGroupSDict) {
-     for (auto mg : *m_memberGroupSDict) {
-         mg->addListReferences(this);
-      }
+{   
+   QList<ListItemInfo> *xrefItems = xrefListItems();
+   addRefItem(xrefItems, getOutputFileBase(), theTranslator->trFile(true, true), getOutputFileBase(), name(), 0, 0 );
+      
+  for (auto mg : m_memberGroupSDict) {
+      mg->addListReferences(this);
    }
    
    for (auto &ml : m_memberLists) {
@@ -1498,24 +1396,22 @@ void FileDef::combineUsingRelations()
    }
 
    visited = true;
-   if (m_usingDirList) {
-     
-      for (auto nd : *m_usingDirList) {
-         nd->combineUsingRelations();
-      }
+       
+   for (auto nd : m_usingDirList) {
+      nd->combineUsingRelations();
+   }
 
-      for (auto nd : *m_usingDirList) {
-         // add used namespaces of namespace nd to this namespace
-             
-         for (auto und : nd->getUsedNamespaces()) {  
-            addUsingDirective(und);
-         }
-        
-         // add used classes of namespace nd to this namespace                 
-         for (auto ucd : nd->getUsedClasses()) {
-            addUsingDeclaration(ucd);
-         }         
+   for (auto nd : m_usingDirList) {
+      // add used namespaces of namespace nd to this namespace
+          
+      for (auto und : nd->getUsedNamespaces()) {  
+         addUsingDirective(und);
       }
+     
+      // add used classes of namespace nd to this namespace                 
+      for (auto ucd : nd->getUsedClasses()) {
+         addUsingDeclaration(ucd);
+      }            
    }
 }
 

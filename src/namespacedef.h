@@ -23,9 +23,9 @@
 #include <QSharedPointer>
 #include <QTextStream>
 
-#include <stringmap.h>
 #include <definition.h>
-#include <filedef.h>
+#include <filelist.h>
+#include <stringmap.h>
 
 class ClassDef;
 class ClassSDict;
@@ -56,7 +56,7 @@ class NamespaceDef : public Definition
 {
  public:
    NamespaceDef(const char *defFileName, int defLine, int defColumn, const char *name, const char *ref = 0,
-                const char *refFile = 0, const char *type = 0, bool isPublished = false);
+                QString refFile = QString(), const char *type = 0, bool isPublished = false);
 
    ~NamespaceDef();
 
@@ -177,8 +177,8 @@ class NamespaceDef : public Definition
    bool m_subGrouping;
    bool m_isPublished;
 
-   QByteArray  fileName;
-   FileList    files;
+   QString  fileName;
+   FileList files;
   
    StringMap<QSharedPointer<Definition>>   m_usingDeclMap;
    StringMap<QSharedPointer<Definition>>  *m_innerCompounds;

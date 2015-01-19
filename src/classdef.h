@@ -20,39 +20,34 @@
 
 #include <QList>
 #include <QHash>
-#include <QTextStream>
 #include <QSet>
+#include <QTextStream>
 
+#include <arguments.h>
 #include <definition.h>
+#include <example.h>
+#include <groupdef.h>
+#include <memberdef.h>
+#include <memberlist.h>
+#include <membergroup.h>
+#include <membername.h>
+#include <namespacedef.h>
+#include <outputlist.h>
 
-class ArgumentList;
-class ClassSDict;
-class ClassDefPrivate;
-class ExampleSDict;
+class ClassDict;
 class FileDef;
-class FileList;
-class GroupDef;
-class MemberDef;
-class MemberDict;
-class MemberGroupSDict;
-class MemberList;
-class MemberNameInfoSDict;
-class NamespaceDef;
-class OutputList;
 class PackageDef;
 class StringDict;
 class UsesClassDict;
 
 struct IncludeInfo;
-struct BaseClassDef;
 
 template <class T>
 class SortedList;
 
-/** A class representing of a compound symbol.
+/** A class representing a compound symbol
  *
- *  A compound can be a class, struct, union, interface, service, singleton,
- *  or exception.
+ *  A compound symbol can be a class, struct, union, interface, service, singleton, or exception.
  *  \note This class should be renamed to CompoundDef
  */
 class ClassDef : public Definition
@@ -70,7 +65,7 @@ class ClassDef : public Definition
                        Singleton, //=Entry::CLASS_SEC
                      };
 
-   /** Creates a new compound definition.
+   /** Creates a new compound definition
     *  \param fileName  full path and file name in which this compound was
     *                   found.
     *  \param startLine line number where the definition of this compound
@@ -90,17 +85,11 @@ class ClassDef : public Definition
     *                    I didn't add this to CompoundType to avoid having
     *                    to adapt all translators.
     */
-   ClassDef(const char *fileName, int startLine, int startColumn,
-            const char *name, CompoundType ct,
-            const char *ref = 0, const char *fName = 0,
-            bool isSymbol = true, bool isJavaEnum = false);
+   ClassDef(const char *fileName, int startLine, int startColumn, const char *name, CompoundType ct,
+            const char *ref = 0, QString fName = QString(), bool isSymbol = true, bool isJavaEnum = false);
   
    /** Destroys a compound definition. */
    ~ClassDef();
-
-   //-----------------------------------------------------------------------------------
-   // --- getters
-   //-----------------------------------------------------------------------------------
 
    /** Used for RTTI, this is a class */
    DefType definitionType() const override {
@@ -179,7 +168,8 @@ class ClassDef : public Definition
    /** Returns the template arguments of this class
     *  Will return 0 if not applicable.
     */
-   ArgumentList *templateArguments() const;
+   const ArgumentList *templateArguments() const;
+   ArgumentList *templateArguments();
 
    /** Returns the namespace this compound is in, or 0 if it has a global
     *  scope.
@@ -250,8 +240,7 @@ class ClassDef : public Definition
     */
    void getTemplateParameterLists(QList<ArgumentList> &lists) const;
 
-   QByteArray qualifiedNameWithTemplateParameters(
-      QList<ArgumentList> *actualParams = 0, int *actualParamIndex = 0) const;
+   QByteArray qualifiedNameWithTemplateParameters(QList<ArgumentList> *actualParams = 0, int *actualParamIndex = 0) const;
 
    /** Returns true if there is at least one pure virtual member in this
     *  class.
@@ -328,10 +317,6 @@ class ClassDef : public Definition
    QString getMemberListFileName() const;
    bool subGrouping() const;
 
-   //-----------------------------------------------------------------------------------
-   // --- setters ----
-   //-----------------------------------------------------------------------------------
-
    void insertBaseClass(ClassDef *, const char *name, Protection p, Specifier s, const char *t = 0);
    void insertSubClass(ClassDef *, Protection p, Specifier s, const char *t = 0);
    void setIncludeFile(FileDef *fd, const char *incName, bool local, bool force);
@@ -370,10 +355,7 @@ class ClassDef : public Definition
    void setTagLessReference(ClassDef *cd);
    void setName(const char *name);
 
-   //-----------------------------------------------------------------------------------
-   // --- actions ----
-   //-----------------------------------------------------------------------------------
-
+   // actions
    void findSectionsInDocumentation();
    void addMembersToMemberGroup();
    void addListReferences();
@@ -454,8 +436,137 @@ class ClassDef : public Definition
 
    void getTitleForMemberListType(MemberListType type, QByteArray &title, QByteArray &subtitle);
    QByteArray includeStatement() const;
+  
+   /*! file name that forms the base for the output file containing the
+    *  class documentation. For compatibility with Qt (e.g. links via tag
+    *  files) this name cannot be derived from the class name directly.
+    */
+   QString m_fileName;
 
-   QSharedPointer<ClassDefPrivate> m_private;
+   /*! Include information about the header file should be included
+    *  in the documentation. 0 by default, set by setIncludeFile().
+    */
+   IncludeInfo *m_incInfo;
+
+   /*! List of base class (or super-classes) from which this class derives
+    *  directly.
+    */
+   SortedList<BaseClassDef *> *m_parents;
+
+   /*! List of sub-classes that directly derive from this class
+    */
+   SortedList<BaseClassDef *> *m_inheritedBy;
+
+   /*! Namespace this class is part of
+    *  (this is the inner most namespace in case of nested namespaces)
+    */
+   NamespaceDef  *m_nspace;
+
+   /*! File this class is defined in */
+   FileDef *m_fileDef;
+
+   /*! List of all members (including inherited members) */
+   MemberNameInfoSDict *m_allMemberNameInfoSDict;
+
+   /*! Template arguments of this class */
+   ArgumentList m_tempArgs;
+
+   /*! Type constraints for template parameters */
+   ArgumentList m_typeConstraints;
+
+   /*! Files that were used for generating the class documentation. */
+   FileList m_files;
+
+   /*! Examples that use this class */
+   ExampleSDict *m_exampleSDict;
+
+   /*! Holds the kind of "class" this is. */
+   ClassDef::CompoundType m_compType;
+
+   /*! The protection level in which this class was found.
+    *  Typically Public, but for nested classes this can also be Protected
+    *  or Private.
+    */
+   Protection m_prot;
+
+   /*! The inner classes contained in this class. Will be 0 if there are
+    *  no inner classes.
+    */
+   ClassSDict *m_innerClasses;
+
+   /* classes for the collaboration diagram */
+   UsesClassDict *m_usesImplClassDict;
+   UsesClassDict *m_usedByImplClassDict;
+   UsesClassDict *m_usesIntfClassDict;
+
+   /*! Template instances that exists of this class, the key in the
+    *  dictionary is the template argument list.
+    */
+   QHash<QString, ClassDef> *m_templateInstances;
+
+   /*! Template instances that exists of this class, as defined by variables.
+    *  We do NOT want to document these individually. The key in the
+    *  dictionary is the template argument list.
+    */
+   QHash<QString, ClassDef> *m_variableInstances;
+
+   QHash<QString, int> *m_templBaseClassNames;
+
+   /*! The class this class is an instance of. */
+   ClassDef *m_templateMaster;
+
+   /*! local class name which could be a typedef'ed alias name. */
+   QByteArray m_className;
+
+   /*! If this class is a Objective-C category, then this points to the
+    *  class which is extended.
+    */
+   ClassDef *m_categoryOf;
+
+   QList<QSharedPointer<MemberList>> m_memberLists;
+
+   /* user defined member groups */
+   MemberGroupSDict *m_memberGroupSDict;
+
+   /*! Is this an abstact class? */
+   bool m_isAbstract;
+
+   /*! Is the class part of an unnamed namespace? */
+   bool m_isStatic;
+
+   /*! true if classes members are merged with those of the base classes. */
+   bool m_membersMerged;
+
+   /*! true if the class is defined in a source file rather than a header file. */
+   bool m_isLocal;
+
+   bool m_isTemplArg;
+
+   /*! Does this class group its user-grouped members
+    *  as a sub-section of the normal (public/protected/..)
+    *  groups?
+    */
+   bool m_subGrouping;
+
+   /** Reason of existence is a "use" relation */
+   bool m_usedOnly;
+
+   /** Is this a simple (non-nested) C structure? */
+   bool m_isSimple;
+
+   /** Does this class overloaded the -> operator? */
+   MemberDef *m_arrowOperator;
+
+   SortedList<ClassDef *> *m_taggedInnerClasses;
+   ClassDef *m_tagLessRef;
+
+   /** Does this class represent a Java style enum? */
+   bool m_isJavaEnum;
+
+   bool m_isGeneric;
+   bool m_isAnonymous;
+
+   uint64_t m_spec;
 };
 
 /** Class that contains information about a usage relation.
