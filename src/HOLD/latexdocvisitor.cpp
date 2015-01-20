@@ -17,29 +17,30 @@
 
 #include <QFileInfo>
 
-#include <htmlattrib.h>
-#include <latexdocvisitor.h>
-#include <docparser.h>
-#include <language.h>
-#include <doxygen.h>
-#include <outputgen.h>
-#include <dot.h>
-#include <util.h>
-#include <message.h>
-#include <parserintf.h>
-#include <msc.h>
-#include <dia.h>
 #include <cite.h>
-#include <filedef.h>
 #include <config.h>
+#include <dia.h>
+#include <docparser.h>
+#include <dot.h>
+#include <doxygen.h>
+#include <filedef.h>
+#include <htmlattrib.h>
 #include <htmlentity.h>
+#include <latexdocvisitor.h>
+#include <language.h>
+#include <message.h>
+#include <msc.h>
+#include <outputgen.h>
+#include <parserintf.h>
 #include <plantuml.h>
+#include <util.h>
 
 static QByteArray escapeLabelName(const char *s)
 {
    QByteArray result;
    const char *p = s;
    char c;
+
    if (p) {
       while ((c = *p++)) {
          switch (c) {
@@ -70,29 +71,36 @@ static QByteArray escapeLabelName(const char *s)
 }
 
 const int maxLevels = 5;
-static const char *secLabels[maxLevels] =
-{ "section", "subsection", "subsubsection", "paragraph", "subparagraph" };
+static const char *secLabels[maxLevels] = { "section", "subsection", "subsubsection", "paragraph", "subparagraph" };
 
 static const char *getSectionName(int level)
 {
    static bool compactLatex = Config_getBool("COMPACT_LATEX");
+
    int l = level;
+
    if (compactLatex) {
       l++;
    }
+
    if (Doxygen::insideMainPage) {
       l--;
    }
+
    return secLabels[qMin(maxLevels - 1, l)];
 }
 
 QByteArray LatexDocVisitor::escapeMakeIndexChars(const char *s)
 {
    QByteArray result;
+
    const char *p = s;
+
    char str[2];
    str[1] = 0;
+
    char c;
+
    if (p) {
       while ((c = *p++)) {
          switch (c) {
@@ -137,15 +145,12 @@ LatexDocVisitor::LatexDocVisitor(QTextStream &t, CodeOutputInterface &ci, const 
 {
 }
 
-//--------------------------------------
-// visitor functions for leaf nodes
-//--------------------------------------
-
 void LatexDocVisitor::visit(DocWord *w)
 {
    if (m_hide) {
       return;
    }
+
    filter(w->word());
 }
 
@@ -154,6 +159,7 @@ void LatexDocVisitor::visit(DocLinkedWord *w)
    if (m_hide) {
       return;
    }
+
    startLink(w->ref(), w->file(), w->anchor());
    filter(w->word());
    endLink(w->ref(), w->file(), w->anchor());
@@ -164,6 +170,7 @@ void LatexDocVisitor::visit(DocWhiteSpace *w)
    if (m_hide) {
       return;
    }
+
    if (m_insidePre) {
       m_t << w->chars();
    } else {
@@ -318,6 +325,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
          m_t << s->text();
          m_t << "\\end{DoxyVerb}\n";
          break;
+
       case DocVerbatim::HtmlOnly:
       case DocVerbatim::XmlOnly:
       case DocVerbatim::ManOnly:
@@ -325,29 +333,30 @@ void LatexDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::DocbookOnly:
          /* nothing */
          break;
+
       case DocVerbatim::LatexOnly:
          m_t << s->text();
          break;
+
       case DocVerbatim::Dot: {
          static int dotindex = 1;
-         QByteArray fileName(4096);
 
-         fileName.sprintf("%s%d%s",
-                          (Config_getString("LATEX_OUTPUT") + "/inline_dotgraph_").data(),
-                          dotindex++,
-                          ".dot"
-                         );
+         QString fileName;
+         fileName = QString("%1%2.dot").arg(Config_getString("LATEX_OUTPUT") + "/inline_dotgraph_".constData()).arg(dotindex++);
+
          QFile file(fileName);
-         if (!file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s for writing\n", fileName.data());
+         if (! file.open(QIODevice::WriteOnly)) {
+            err("Could not open file %s for writing\n", qPrintable(fileName));
          }
 
          file.write( s->text(), s->text().length() );
          file.close();
 
          m_t << "\\begin{center}\n";
+
          startDotFile(fileName, "", "", false);
          endDotFile(false);
+
          m_t << "\\end{center}\n";
 
          if (Config_getBool("DOT_CLEANUP")) {

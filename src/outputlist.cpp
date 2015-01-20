@@ -126,7 +126,11 @@ bool OutputList::generateDoc(const char *fileName, int startLine, Definition *ct
    DocRoot *root = 0;
    root = validatingParseDoc(fileName, startLine, ctx, md, docStr, indexWords, isExample, exampleName, singleLine, linkFromIndex);
 
+printf("\n\n BROOM  b2   ");
+
    writeDoc(root, ctx, md);
+
+printf("\n\n BROOM  b3   ");
 
    bool isEmpty = root->isEmpty();
    delete root;

@@ -3688,6 +3688,9 @@ void DocHtmlTable::computeTableGrid()
 
 void DocHtmlTable::accept(DocVisitor *v)
 {
+
+printf("\n\n BROOM  x1   ");
+
    v->visitPre(this);
 
    // for HTML output we put the caption first
@@ -4435,6 +4438,9 @@ DocSimpleSect::~DocSimpleSect()
 
 void DocSimpleSect::accept(DocVisitor *v)
 {
+
+printf("\n\n BROOM  x2   ");
+
    v->visitPre(this);
 
    if (m_title) {

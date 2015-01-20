@@ -3437,30 +3437,9 @@ void Config::check()
       annotationFromBrief.append("an");
       annotationFromBrief.append("the");
    }
-
    
 
    checkFileName("GENERATE_TAGFILE");
-
-#if 0 // TODO: this breaks test 25; SOURCEBROWSER = NO and SOURCE_TOOLTIPS = YES.
-   // So this and other regressions should be analysed and fixed before this can be enabled
-   // disable any boolean options that depend on disabled options
-   QListIterator<ConfigOption> it = iterator();
-   ConfigOption *option;
-   for (it.toFirst(); (option = it.current()); ++it) {
-      QByteArray depName = option->dependsOn(); // option has a dependency
-      if (!depName.isEmpty()) {
-         ConfigOption *dep = Config::instance()->get(depName);
-         if (dep->kind() == ConfigOption::O_Bool &&
-               Config_getBool(depName) == FALSE) { // dependent option is disabled
-            if (option->kind() == ConfigOption::O_Bool) {
-               printf("disabling option %s\n", option->name().data());
-               Config_getBool(option->name()) = FALSE; // also disable this option
-            }
-         }
-      }
-   }
-#endif
 }
 
 void Config::init()
@@ -3586,7 +3565,7 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("INLINE_INFO", "", false);
   cs = cfg->addString("SORT_MEMBER_DOCS", "");
   cs = cfg->addString("SORT_BRIEF_DOCS", "");
-  cs = cfg->addString("SORT_MEMBERS_CTORS_1ST", "");
+  cb = cfg->addBool("SORT_MEMBERS_CTORS_1ST", "", false);
   cs = cfg->addString("SORT_GROUP_NAMES", "");
   cs = cfg->addString("SORT_BY_SCOPE_NAME", "");
   cb = cfg->addBool("STRICT_PROTO_MATCHING", "", false);
@@ -3629,7 +3608,7 @@ void addConfigOptions(Config *cfg)
   cb = cfg->addBool("REFERENCED_BY_RELATION", "", false);
   cb = cfg->addBool("REFERENCES_RELATION", "", false);
   cs = cfg->addString("REFERENCES_LINK_SOURCE", "");
-  cs = cfg->addString("SOURCE_TOOLTIPS", "");
+  cb = cfg->addBool("SOURCE_TOOLTIPS", "", false);
   cb = cfg->addBool("USE_HTAGS", "", false);
   cb = cfg->addBool("VERBATIM_HEADERS", "", false);
   cs = cfg->addString("CLANG_ASSISTED_PARSING", "");

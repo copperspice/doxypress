@@ -65,7 +65,8 @@ void FileName::generateDiskNames()
          QList<FileDef *>::iterator it;
 
          for (it = this->begin(); it != this->end(); ++it) {   
-            if ((*it)->isReference()) {
+         
+            if (! (*it)->isReference()) {
                fd = *it;               
                break;
             }
@@ -78,13 +79,15 @@ void FileName::generateDiskNames()
                j = i;   // remember last position of dirname
             }
 
-            ++it;
-            while ((fd = *it) && ! found) {
+            if (it != this->end()) {
+               ++it;
+            }
 
-               if (! fd->isReference()) {
-                  //printf("i=%d j=%d fd->path=`%s' fd->name=`%s'\n",i,j,fd->path.left(i).data(),fd->name().data());
+            while ( it != this->end() && (fd = *it) && ! found) {
 
-                  if (i == (int)fd->m_path.length()) {                     
+               if (! fd->isReference()) {                 
+
+                  if (i == fd->m_path.length()) {                     
                      found = true;
 
                   } else if (fd->m_path[i] != c) {
@@ -92,15 +95,17 @@ void FileName::generateDiskNames()
 
                   }
                }
-               ++it;
+              
+               ++it;               
             }
+
             i++;
          }
+
       }     
 
       for (auto item : *this) {   
-         //printf("fd->setName(%s)\n",(fd->path.right(fd->path.length()-j-1)+name).data());
-
+        
          if (! item->isReference()) {
             QByteArray prefix = item->m_path.right(item->m_path.length() - j - 1);
             item->setName(prefix + name);

@@ -16,7 +16,7 @@
 *************************************************************************/
 
 /** @file
- *  @brief This file contains functions for the various index pages.
+ *  @brief This file contains functions for the various index pages
  */
 
 #include <QDateTime>
@@ -78,13 +78,27 @@ static void countRelatedPages(int &docPages, int &indexPages);
 
 void countDataStructures()
 {
-   annotatedClasses           = countAnnotatedClasses(&annotatedClassesPrinted); // "classes" + "annotated"
-   hierarchyClasses           = countClassHierarchy();   // "hierarchy"
-   countFiles(documentedHtmlFiles, documentedFiles);     // "files"
-   countRelatedPages(documentedPages, indexedPages);     // "pages"
-   documentedGroups           = countGroups();           // "modules"
-   documentedNamespaces       = countNamespaces();       // "namespaces"
-   documentedDirs             = countDirs();             // "dirs"
+   // "classes" + "annotated"
+   annotatedClasses = countAnnotatedClasses(&annotatedClassesPrinted); 
+
+   // "hierarchy"
+   hierarchyClasses = countClassHierarchy();   
+
+   // "files"
+   countFiles(documentedHtmlFiles, documentedFiles);     
+
+   // "pages"
+   countRelatedPages(documentedPages, indexedPages);     
+
+   // "modules"
+   documentedGroups = countGroups();           
+
+   // "namespaces"
+   documentedNamespaces = countNamespaces();       
+
+   // "dirs"
+   documentedDirs = countDirs();            
+
    // "globals"
    // "namespacemembers"
    // "functions"
@@ -95,9 +109,11 @@ static void startIndexHierarchy(OutputList &ol, int level)
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Man);
    ol.disable(OutputGenerator::Html);
+
    if (level < 6) {
       ol.startIndexList();
    }
+
    ol.enableAll();
    ol.disable(OutputGenerator::Latex);
    ol.disable(OutputGenerator::RTF);
@@ -110,17 +126,17 @@ static void endIndexHierarchy(OutputList &ol, int level)
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Man);
    ol.disable(OutputGenerator::Html);
+
    if (level < 6) {
       ol.endIndexList();
    }
+
    ol.enableAll();
    ol.disable(OutputGenerator::Latex);
    ol.disable(OutputGenerator::RTF);
    ol.endItemList();
    ol.popGeneratorState();
 }
-
-//----------------------------------------------------------------------------
 
 class MemberIndexList : public QList<MemberDef *>
 {
@@ -161,6 +177,7 @@ const int maxItemsBeforeQuickIndex = MAX_ITEMS_BEFORE_QUICK_INDEX;
 static void startQuickIndexList(OutputList &ol, bool letterTabs = false)
 {
    bool fancyTabs = true;
+
    if (fancyTabs) {
       if (letterTabs) {
          ol.writeString("  <div id=\"navrow4\" class=\"tabs3\">\n");
@@ -168,6 +185,7 @@ static void startQuickIndexList(OutputList &ol, bool letterTabs = false)
          ol.writeString("  <div id=\"navrow3\" class=\"tabs2\">\n");
       }
       ol.writeString("    <ul class=\"tablist\">\n");
+
    } else {
       ol.writeString("  <div class=\"qindex\">");
    }
@@ -176,25 +194,31 @@ static void startQuickIndexList(OutputList &ol, bool letterTabs = false)
 static void endQuickIndexList(OutputList &ol)
 {
    bool fancyTabs = true;
+
    if (fancyTabs) {
       ol.writeString("    </ul>\n");
    }
+
    ol.writeString("  </div>\n");
 }
 
 static void startQuickIndexItem(OutputList &ol, const char *l, bool hl, bool compact, bool &first)
 {
    bool fancyTabs = true;
+
    if (!first && compact && !fancyTabs) {
       ol.writeString(" | ");
    }
+
    first = false;
+
    if (fancyTabs) {
       ol.writeString("      <li");
       if (hl) {
          ol.writeString(" class=\"current\"");
       }
       ol.writeString("><a ");
+
    } else {
       if (!compact) {
          ol.writeString("<li>");
@@ -205,9 +229,11 @@ static void startQuickIndexItem(OutputList &ol, const char *l, bool hl, bool com
          ol.writeString("<a class=\"qindex\" ");
       }
    }
+
    ol.writeString("href=\"");
    ol.writeString(l);
    ol.writeString("\">");
+
    if (fancyTabs) {
       ol.writeString("<span>");
    }
@@ -216,9 +242,11 @@ static void startQuickIndexItem(OutputList &ol, const char *l, bool hl, bool com
 static void endQuickIndexItem(OutputList &ol)
 {
    bool fancyTabs = true;
+
    if (fancyTabs) {
       ol.writeString("</span>");
    }
+
    ol.writeString("</a>");
    if (fancyTabs) {
       ol.writeString("</li>\n");
@@ -250,13 +278,13 @@ void endTitle(OutputList &ol, const char *fileName, const char *name)
    ol.endHeaderSection();
 }
 
-void startFile(OutputList &ol, const char *name, const char *manName,
-               const char *title, HighlightedItem hli, bool additionalIndices,
-               const char *altSidebarName)
+void startFile(OutputList &ol, const char *name, const char *manName, const char *title, HighlightedItem hli, 
+               bool additionalIndices, const char *altSidebarName)
 {
-   static bool disableIndex     = Config_getBool("DISABLE_INDEX");
+   static bool disableIndex = Config_getBool("DISABLE_INDEX");
    ol.startFile(name, manName, title);
    ol.startQuickIndices();
+
    if (!disableIndex) {
       ol.writeQuickLinks(true, hli, name);
    }
@@ -267,20 +295,22 @@ void startFile(OutputList &ol, const char *name, const char *manName,
    ol.writeSearchInfo();
 }
 
-void endFile(OutputList &ol, bool skipNavIndex, bool skipEndContents,
-             const QByteArray &navPath)
+void endFile(OutputList &ol, bool skipNavIndex, bool skipEndContents, const QByteArray &navPath)
 {
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
+
    if (!skipNavIndex) {
       if (!skipEndContents) {
          ol.endContents();
       }
+
       if (generateTreeView) {
          ol.writeString("</div><!-- doc-content -->\n");
       }
    }
+
    ol.writeFooter(navPath); // write the footer
    ol.popGeneratorState();
    ol.endFile();
@@ -289,7 +319,9 @@ void endFile(OutputList &ol, bool skipNavIndex, bool skipEndContents,
 void endFileWithNavPath(Definition *d, OutputList &ol)
 {
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+
    QByteArray navPath;
+
    if (generateTreeView) {
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
@@ -297,6 +329,7 @@ void endFileWithNavPath(Definition *d, OutputList &ol)
       ol.popGeneratorState();
       navPath = d->navigationPathAsString();
    }
+
    endFile(ol, generateTreeView, true, navPath);
 }
 
@@ -706,13 +739,11 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
    }
 
    endIndexHierarchy(ol, 0);
+
    if (ftv) {
       ol.popGeneratorState();
    }
 }
-
-
-//----------------------------------------------------------------------------
 
 static void writeClassTreeForList(OutputList &ol, ClassSDict *cl, bool &started, FTVHelp *ftv, bool addToIndex)
 {
@@ -806,24 +837,29 @@ static void writeClassHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
          Doxygen::indexList->decContentsDepth();
       }
    }
+
    if (ftv) {
       ol.popGeneratorState();
    }
 }
-
-//----------------------------------------------------------------------------
 
 static int countClassesInTreeList(const ClassSDict &cl)
 {
    int count = 0;
 
    for (auto cd : cl) {
-      if (!hasVisibleRoot(cd->baseClasses())) { // filter on root classes
-         if (cd->isVisibleInHierarchy()) { // should it be visible
-            if (cd->subClasses()) { // should have sub classes
+
+      // filter on root classes
+      if (! hasVisibleRoot(cd->baseClasses())) { 
+
+         if (cd->isVisibleInHierarchy()) { 
+            // should have sub classes
+
+            if (cd->subClasses()) { 
                count++;
             }
          }
+
       }
    }
 
@@ -842,8 +878,6 @@ static int countClassHierarchy()
 
    return count;
 }
-
-//----------------------------------------------------------------------------
 
 static void writeHierarchicalIndex(OutputList &ol)
 {

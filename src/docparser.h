@@ -164,8 +164,7 @@ class DocNode
    bool m_insidePre;
 };
 
-/** Default accept implementation for compound nodes in the abstract
- *  syntax tree.
+/** Default accept implementation for compound nodes in the abstract syntax tree.
  */
 template<class T> class CompAccept
 {
@@ -174,6 +173,9 @@ template<class T> class CompAccept
    virtual ~CompAccept() {}
 
    void accept(T *obj, DocVisitor *v) {
+
+printf("\n\n BROOM  x3   ");
+
       v->visitPre(obj);
 
       for (auto n : m_children) {
@@ -202,13 +204,18 @@ class DocWord : public DocNode
 {
  public:
    DocWord(DocNode *parent, const QByteArray &word);
+
    QByteArray word() const {
       return m_word;
    }
+
    Kind kind() const {
       return Kind_Word;
    }
+
    void accept(DocVisitor *v) {
+printf("\n\n BROOM  x4   ");
+
       v->visit(this);
    }
 
@@ -248,7 +255,10 @@ class DocLinkedWord : public DocNode
    QByteArray tooltip() const    {
       return m_tooltip;
    }
+
    void accept(DocVisitor *v) {
+printf("\n\n BROOM  x5   ");
+
       v->visit(this);
    }
 
@@ -269,13 +279,19 @@ class DocURL : public DocNode
       m_url(url), m_isEmail(isEmail) {
       m_parent = parent;
    }
-   QByteArray url() const        {
+
+   QByteArray url() const {
       return m_url;
    }
-   Kind kind() const          {
+
+   Kind kind() const {
       return Kind_URL;
    }
+
    void accept(DocVisitor *v) {
+
+printf("\n\n BROOM  x7   ");
+
       v->visit(this);
    }
    bool isEmail() const       {

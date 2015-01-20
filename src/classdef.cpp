@@ -2242,16 +2242,18 @@ void ClassDef::setTypeConstraints(ArgumentList *al)
  */
 bool ClassDef::hasNonReferenceSuperClass()
 {
-   bool found = !isReference() && isLinkableInProject() && !isHidden();
+   bool found = (! isReference() && isLinkableInProject() && ! isHidden());
 
    if (found) {
-      return true; // we're done if this class is not a reference
+      // this class is not a reference
+      return true; 
    }
 
    if (m_inheritedBy) {     
-       for (auto bcli : *m_inheritedBy) {
-            if (found) {
-               break;
+
+      for (auto bcli : *m_inheritedBy) {
+         if (found) {
+            break;
          }
 
          // for each super class
@@ -2260,26 +2262,27 @@ bool ClassDef::hasNonReferenceSuperClass()
          // recurse into the super class branch
          found = found || bcd->hasNonReferenceSuperClass();
 
-         if (!found) {
+         if (! found) {
             // look for template instances that might have non-reference super classes
             QHash<QString, ClassDef> *cil = bcd->getTemplateInstances();
 
             if (cil) {              
 
-               for (auto tidi : *cil) {
-                  // for each template instance
-                  // recurse into the template instance branch
+               for (auto &tidi : *cil) {
+                  // for each template instance, recurse into the template instance branch                                
+
+                  found = tidi.hasNonReferenceSuperClass();
 
                   if (found) {
                      break;
                   }
 
-                  found = found || tidi.hasNonReferenceSuperClass();
                }
             }
          }
       }
    }
+
    return found;
 }
 
@@ -2354,7 +2357,6 @@ bool ClassDef::isLinkable() const
    }
 }
 
-
 /*! the class is visible in a class diagram, or class hierarchy */
 bool ClassDef::isVisibleInHierarchy()
 {
@@ -2362,9 +2364,30 @@ bool ClassDef::isVisibleInHierarchy()
    static bool hideUndocClasses = Config_getBool("HIDE_UNDOC_CLASSES");
    static bool extractStatic    = Config_getBool("EXTRACT_STATIC");
 
-   return  (allExternals || hasNonReferenceSuperClass()) &&  ! isAnonymous() &&  protectionLevelVisible(m_prot) &&
-      (hasDocumentation() || !hideUndocClasses || (m_templateMaster && m_templateMaster->hasDocumentation()) ||
-       isReference() ) && (!m_isStatic || extractStatic);
+   bool retval =  (allExternals || hasNonReferenceSuperClass()); 
+
+   if (retval && ! isAnonymous() && protectionLevelVisible(m_prot)) {
+
+      if ( hasDocumentation() || ! hideUndocClasses || (m_templateMaster && m_templateMaster->hasDocumentation()) || isReference() )   {
+
+         if (! m_isStatic || extractStatic) {
+            // true
+
+         } else {
+            retval = false;
+         }
+
+      } else {
+         retval = false;
+
+      }   
+
+   } else {
+      retval = false;
+
+   }
+
+   return retval;
 }
 
 bool ClassDef::hasDocumentation() const
@@ -2372,7 +2395,6 @@ bool ClassDef::hasDocumentation() const
    return Definition::hasDocumentation();
 }
 
-//----------------------------------------------------------------------
 // recursive function:
 // returns true iff class definition `bcd' represents an (in)direct base
 // class of class definition `cd'.

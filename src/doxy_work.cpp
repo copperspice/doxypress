@@ -6023,8 +6023,13 @@ QByteArray Doxy_Work::substituteTemplatesInString(const QList<ArgumentList> &src
 
 void Doxy_Work::substituteTemplatesInArgList(const QList<ArgumentList> &srcTempArgLists, const QList<ArgumentList> &dstTempArgLists,
             ArgumentList *src, ArgumentList *dst, ArgumentList *funcTempArgs)
-{
-   Argument da   = dst->first();
+{  
+   Argument da;
+
+   if (! dst->isEmpty())  {
+      da = dst->first();
+   }
+   
    auto destIter = dst->begin();
 
    for (auto sa : *src) {
@@ -6040,6 +6045,7 @@ void Doxy_Work::substituteTemplatesInArgList(const QList<ArgumentList> &srcTempA
          da.array = dstArray;
 
          dst->append(da);
+         destIter = dst->end();
 
       } else {
          destIter->type  = dstType;
@@ -6059,8 +6065,8 @@ void Doxy_Work::substituteTemplatesInArgList(const QList<ArgumentList> &srcTempA
    dst->volatileSpecifier  = src->volatileSpecifier;
    dst->pureSpecifier      = src->pureSpecifier;
    dst->trailingReturnType = substituteTemplatesInString(srcTempArgLists, dstTempArgLists, funcTempArgs, src->trailingReturnType);
-}
 
+}
 
 /*! This function tries to find a member (in a documented class/file/namespace)
  * that corresponds to the function/variable declaration given in \a funcDecl.
@@ -6179,10 +6185,6 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
       }
    }
 
-
-printf("\n     BROOM    PRE    <----------------------> ");
-
-
    if (root->relates.isEmpty() && rootNav->parent() &&
          ((rootNav->parent()->section()&Entry::SCOPE_MASK) ||
           (rootNav->parent()->section() == Entry::OBJCIMPL_SEC) ) &&
@@ -6219,8 +6221,6 @@ printf("\n     BROOM    PRE    <----------------------> ");
          }
       }
    }
-
-printf("\n     BROOM    1  ----> ");
 
    scopeName = stripTemplateSpecifiersFromScope(removeRedundantWhiteSpace(scopeName), false, &funcSpec);
 
@@ -6274,8 +6274,6 @@ printf("\n     BROOM    1  ----> ");
       }
    }
 
-printf("\n     BROOM    2  ----> ");
-
    // rebuild the function declaration (needed to get the scope right).
    if (! scopeName.isEmpty() && !isRelated && !isFriend && !Config_getBool("HIDE_SCOPE_NAMES")) {
       if (!funcType.isEmpty()) {
@@ -6316,9 +6314,6 @@ printf("\n     BROOM    2  ----> ");
    if (funcType == "template class" && ! funcTempList.isEmpty()) {
       return;   // ignore explicit template instantiations
    }
-
-printf("\n     BROOM    3  ----> ");
-
 
    Debug::print(Debug::FindMembers, 0,
                 "findMember() Parse results:\n"
@@ -6362,7 +6357,7 @@ printf("\n     BROOM    3  ----> ");
       if (!isRelated && mn) { // function name already found
          Debug::print(Debug::FindMembers, 0, "2. member name exists (%d members with this name)\n", mn->count());
 
-         if (!className.isEmpty()) { // class name is valid
+         if (! className.isEmpty()) { // class name is valid
             if (funcSpec.isEmpty()) { // not a member specialization
                int count = 0;
 
@@ -6376,12 +6371,10 @@ printf("\n     BROOM    3  ----> ");
                   }
 
                   ClassDef *cd = md->getClassDef();
-                  Debug::print(Debug::FindMembers, 0,
-                               "3. member definition found, "
+                  Debug::print(Debug::FindMembers, 0, "3. member definition found, "
                                "scope needed=`%s' scope=`%s' args=`%s' fileName=%s\n",
                                scopeName.data(), cd ? cd->name().data() : "<none>",
-                               md->argsString(),
-                               root->fileName.data());
+                               md->argsString(), root->fileName.data());
 
                   FileDef *fd = rootNav->fileDef();
 
@@ -6398,10 +6391,8 @@ printf("\n     BROOM    3  ----> ");
                      tcd = cd;
                   }
 
-printf("\n     BROOM    4  ----> ");
-
-
                   if (cd && tcd == cd) { // member's classes match
+
                      Debug::print(Debug::FindMembers, 0, "4. class definition %s found\n", cd->name().data());
 
                      // get the template parameter lists found at the member declaration
@@ -6428,8 +6419,7 @@ printf("\n     BROOM    4  ----> ");
                      ArgumentList *mdAl = md->argumentList();
 
                      if (declTemplArgs.count() > 0 && defTemplArgs &&
-                           declTemplArgs.count() == defTemplArgs->count() &&
-                           mdAl) {
+                           declTemplArgs.count() == defTemplArgs->count() && mdAl) {
 
                         /* the function definition has template arguments
                          * and the class definition also has template arguments, so
@@ -6446,8 +6436,7 @@ printf("\n     BROOM    4  ----> ");
 
                      }
 
-                     Debug::print(Debug::FindMembers, 0,
-                                  "5. matching `%s'<=>`%s' className=%s namespaceName=%s\n",
+                     Debug::print(Debug::FindMembers, 0, "5. matching `%s'<=>`%s' className=%s namespaceName=%s\n",
                                   argListToString(argList, true).data(), argListToString(&root->argList, true).data(),
                                   className.data(), namespaceName.data());
 
@@ -6495,9 +6484,6 @@ printf("\n     BROOM    4  ----> ");
                         matching = false;
                      }
 
-
-printf("\n     BROOM    5  ----> ");
-
                      Debug::print(Debug::FindMembers, 0, "6. match results of matchArguments2 = %d\n", matching);
 
                      if (substDone) { // found a new argument list
@@ -6533,6 +6519,7 @@ printf("\n     BROOM    5  ----> ");
 
                      noMatchCount++;
                   }
+
                }
 
                if (count == 0 && rootNav->parent() && rootNav->parent()->section() == Entry::OBJCIMPL_SEC) {
@@ -6666,9 +6653,6 @@ printf("\n     BROOM    5  ----> ");
                         }
                      }
                   }
-
-
-printf("\n     BROOM    A    <----------------------> ");
 
                   warn_simple(root->fileName, root->startLine, warnMsg);
                }
@@ -6815,8 +6799,6 @@ printf("\n     BROOM    A    <----------------------> ");
                warn(root->fileName, root->startLine, "Cannot determine class for function\n%s",fullFuncDecl.data());
             }
          }
-
-printf("\n     BROOM    B    <----------------------> ");
 
       } else if (isRelated && !  root->relates.isEmpty()) {
          Debug::print(Debug::FindMembers, 0, "2. related function\n"
@@ -7111,9 +7093,6 @@ printf("\n     BROOM    B    <----------------------> ");
       // this should not be called
       warn(root->fileName, root->startLine, "member with no name found");
    }
-
-printf("\n     BROOM    D  ----> ");
-   
 }
 
 // find the members corresponding to the different documentation blocks

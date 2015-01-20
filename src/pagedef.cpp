@@ -151,9 +151,7 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    pageName    = escapeCharsInString(name(), false, true);
    manPageName = escapeCharsInString(name(), true, true);
-
-   //printf("PageDef::writeDocumentation: %s\n",getOutputFileBase().data());
-
+ 
    ol.pushGeneratorState();
    //1.{
 
