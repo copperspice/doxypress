@@ -25,10 +25,13 @@
 void TextDocVisitor::visit(DocSymbol *s)
 {
    const char *res = HtmlEntityMapper::instance()->html(s->symbol());
+
    if (res) {
       m_t << res;
+
    } else {
       err("text: non supported HTML-entity found: %s\n", HtmlEntityMapper::instance()->html(s->symbol(), true));
+
    }
 }
 
@@ -37,11 +40,13 @@ void TextDocVisitor::filter(const char *str)
    if (str == 0) {
       return;
    }
-   //printf("TextDocVisitor::filter(%s)\n",str);
+
    const char *p = str;
    char c;
+
    while (*p) {
       c = *p++;
+
       switch (c) {
          case '\n':
             m_t << " ";

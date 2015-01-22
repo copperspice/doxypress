@@ -151,14 +151,14 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    pageName    = escapeCharsInString(name(), false, true);
    manPageName = escapeCharsInString(name(), true, true);
- 
+
    ol.pushGeneratorState();
    //1.{
 
-   if (m_nestingLevel > 0
-         //&& // a sub page
-         //(Doxygen::mainPage==0 || getOuterScope()!=Doxygen::mainPage) // and not a subpage of the mainpage
-      ) {
+   if (m_nestingLevel > 0) {
+      //&& // a sub page
+      //(Doxygen::mainPage==0 || getOuterScope()!=Doxygen::mainPage) // and not a subpage of the mainpage
+     
       // do not generate sub page output for RTF and LaTeX, as these are
       // part of their parent page
       ol.disableAll();
@@ -209,7 +209,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.disable(OutputGenerator::RTF);
    ol.disable(OutputGenerator::Man);
 
-   if (!title().isEmpty() && !name().isEmpty() && si != 0) {
+   if (! title().isEmpty() && !name().isEmpty() && si != 0) {
 
       startTitle(ol, getOutputFileBase(), this);
       ol.generateDoc(docFile(), docLine(), this, 0, si->title, true, false, 0, true, false);

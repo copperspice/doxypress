@@ -588,6 +588,7 @@ void FileDef::writeDocumentation(OutputList &ol)
    QByteArray title = m_docname + versionTitle;
    QByteArray pageTitle = theTranslator->trFileReference(m_docname);
 
+
    if (getDirDef()) {
       startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_FileVisible, !generateTreeView);
 
@@ -642,6 +643,7 @@ void FileDef::writeDocumentation(OutputList &ol)
    SrcLangExt lang = getLanguage();    
 
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
+
       switch (lde->kind()) {
          case LayoutDocEntry::BriefDesc:
             writeBriefDescription(ol);

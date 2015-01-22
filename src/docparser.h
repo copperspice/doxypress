@@ -173,16 +173,20 @@ template<class T> class CompAccept
    virtual ~CompAccept() {}
 
    void accept(T *obj, DocVisitor *v) {
-
-printf("\n\n BROOM  x3   ");
-
       v->visitPre(obj);
 
       for (auto n : m_children) {
+//  printf("\n BROOM   accept() issue  %s  %s  %s", typeid(T).name(), typeid(*n).name(), typeid(*v).name() );
+
          n->accept(v);
+
+//   printf("\n BROOM  XX  %s  %s  %s", typeid(T).name(), typeid(*n).name(), typeid(*v).name() );
       }
 
       v->visitPost(obj);
+
+printf("\n BROOM  YY issue  %s  %s", typeid(T).name(), typeid(*v).name());
+
    }
 
    const QList<DocNode *> &children() const {
@@ -214,8 +218,6 @@ class DocWord : public DocNode
    }
 
    void accept(DocVisitor *v) {
-printf("\n\n BROOM  x4   ");
-
       v->visit(this);
    }
 
@@ -257,8 +259,6 @@ class DocLinkedWord : public DocNode
    }
 
    void accept(DocVisitor *v) {
-printf("\n\n BROOM  x5   ");
-
       v->visit(this);
    }
 
@@ -289,11 +289,9 @@ class DocURL : public DocNode
    }
 
    void accept(DocVisitor *v) {
-
-printf("\n\n BROOM  x7   ");
-
       v->visit(this);
    }
+
    bool isEmail() const       {
       return m_isEmail;
    }
@@ -327,9 +325,11 @@ class DocHorRuler : public DocNode
    DocHorRuler(DocNode *parent) {
       m_parent = parent;
    }
+
    Kind kind() const          {
       return Kind_HorRuler;
    }
+
    void accept(DocVisitor *v) {
       v->visit(this);
    }
@@ -522,6 +522,7 @@ class DocSymbol : public DocNode
       const char     *symb;
       const PerlType  type;
    } PerlSymb;
+
    DocSymbol(DocNode *parent, SymType s) :
       m_symbol(s) {
       m_parent = parent;
@@ -545,19 +546,23 @@ class DocSymbol : public DocNode
 class DocWhiteSpace : public DocNode
 {
  public:
-   DocWhiteSpace(DocNode *parent, const QByteArray &chars) :
-      m_chars(chars) {
+   DocWhiteSpace(DocNode *parent, const QByteArray &chars) 
+      : m_chars(chars) {
       m_parent = parent;
    }
+
    Kind kind() const          {
       return Kind_WhiteSpace;
    }
+
    QByteArray chars() const      {
       return m_chars;
    }
+
    void accept(DocVisitor *v) {
       v->visit(this);
    }
+
  private:
    QByteArray  m_chars;
 };
@@ -566,50 +571,61 @@ class DocWhiteSpace : public DocNode
 class DocVerbatim : public DocNode
 {
  public:
-   enum Type { Code, HtmlOnly, ManOnly, LatexOnly, RtfOnly, XmlOnly, Verbatim, Dot, Msc, DocbookOnly, PlantUML };
+   enum Type { Code, HtmlOnly, ManOnly, LatexOnly, RtfOnly, XmlOnly, Verbatim, Dot, Msc, DocbookOnly, PlantUML};
+
    DocVerbatim(DocNode *parent, const QByteArray &context,
                const QByteArray &text, Type t, bool isExample,
                const QByteArray &exampleFile, bool isBlock = false, const QByteArray &lang = QByteArray());
-   Kind kind() const            {
+
+   Kind kind() const {
       return Kind_Verbatim;
    }
-   Type type() const            {
+
+   Type type() const {
       return m_type;
    }
-   QByteArray text() const        {
+
+   QByteArray text() const {
       return m_text;
    }
-   QByteArray context() const     {
+
+   QByteArray context() const {
       return m_context;
    }
-   void accept(DocVisitor *v)   {
+
+   void accept(DocVisitor *v) {
       v->visit(this);
    }
-   bool isExample() const       {
+
+   bool isExample() const {
       return m_isExample;
    }
+
    QByteArray exampleFile() const {
       return m_exampleFile;
    }
-   QByteArray relPath() const     {
+
+   QByteArray relPath() const {
       return m_relPath;
    }
-   QByteArray language() const    {
+
+   QByteArray language() const {
       return m_lang;
    }
-   bool isBlock() const         {
+
+   bool isBlock() const {
       return m_isBlock;
    }
 
  private:
    QByteArray  m_context;
    QByteArray  m_text;
-   Type      m_type;
-   bool      m_isExample;
+   Type        m_type;
+   bool        m_isExample;
    QByteArray  m_exampleFile;
    QByteArray  m_relPath;
    QByteArray  m_lang;
-   bool      m_isBlock;
+   bool        m_isBlock;
 };
 
 
@@ -811,8 +827,6 @@ class DocIndexEntry : public DocNode
    Definition *m_scope;
    MemberDef  *m_member;
 };
-
-//-----------------------------------------------------------------------
 
 /** Node representing a copy of documentation block. */
 class DocCopy : public DocNode

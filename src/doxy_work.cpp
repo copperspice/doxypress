@@ -6915,13 +6915,10 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                }
 
                // Problem :
-               // MemberDef::writeDocumentation() in memberdef.cpp
-               // writes the template argument list for the class,
-               // as if this member is a member of the class.
-               // fortunately, MemberDef::writeDocumentation() has
-               // a special mechanism that allows us to totally
-               // override the set of template argument lists that
-               // are printed.  We use that and set it to the
+               // MemberDef::writeDocumentation() in memberdef.cpp writes the template argument list for the class,
+               // as if this member is a member of the class. 
+               // Fortunately, MemberDef::writeDocumentation() has a special mechanism that allows us to totally
+               // override the set of template argument lists that are printed.  We use that and set it to the
                // template argument lists of the related function.
 
                md->setDefinitionTemplateParameterLists(root->tArgLists);

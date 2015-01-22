@@ -10722,6 +10722,7 @@ class VariableContext
 
    VariableContext() {
    }
+
    virtual ~VariableContext() {
    }
 
@@ -10734,6 +10735,7 @@ class VariableContext
       if (m_scopes.count() > 0) {
          DBG_CTX((stderr, "** Pop var context %d\n", m_scopes.count()));
          m_scopes.removeAt(m_scopes.count() - 1);
+
       } else {
          DBG_CTX((stderr, "** ILLEGAL: Pop var context\n"));
       }
@@ -10891,24 +10893,30 @@ class CallContext
       m_defList.append(new Ctx);
       DBG_CTX((stderr, "** Push call context %d\n", m_defList.count()));
    }
+
    void popScope() {
       if (m_defList.count() > 1) {
          DBG_CTX((stderr, "** Pop call context %d\n", m_defList.count()));
          Ctx *ctx = m_defList.last();
+
          if (ctx) {
             g_name = ctx->name;
             g_type = ctx->type;
          }
+
          m_defList.removeLast();
+
       } else {
          DBG_CTX((stderr, "** ILLEGAL: Pop call context\n"));
       }
    }
+
    void clear() {
       DBG_CTX((stderr, "** Clear call context\n"));
       m_defList.clear();
       m_defList.append(new Ctx);
    }
+
    Definition *getScope() const {
       Ctx *ctx = m_defList.last();
       if (ctx) {
@@ -10924,32 +10932,31 @@ class CallContext
 
 static CallContext g_theCallContext;
 
-//-------------------------------------------------------------------
-
 /*! add class/namespace name s to the scope */
 static void pushScope(const char *s)
 {
    g_classScopeLengthStack.push(new int(g_classScope.length()));
+
    if (g_classScope.isEmpty() || leftScopeMatch(s, g_classScope)) {
       g_classScope = s;
+
    } else {
       g_classScope += "::";
       g_classScope += s;
    }
-   //printf("pushScope(%s) result: `%s'\n",s,g_classScope.data());
+ 
 }
 
 /*! remove the top class/namespace name from the scope */
 static void popScope()
 {
-   if (!g_classScopeLengthStack.isEmpty()) {
+   if (! g_classScopeLengthStack.isEmpty()) {
+
       int *pLength = g_classScopeLengthStack.pop();
+
       g_classScope.truncate(*pLength);
-      delete pLength;
-   } else {
-      //err("Too many end of scopes found!\n");
-   }
-   //printf("popScope() result: `%s'\n",g_classScope.data());
+      delete pLength; 
+   }   
 }
 
 static void setCurrentDoc(const QByteArray &anchor)
@@ -10972,27 +10979,28 @@ static void addToSearchIndex(const char *text)
 
 static void setClassScope(const QByteArray &name)
 {
-   //printf("setClassScope(%s)\n",name.data());
    QByteArray n = name;
    n = n.simplified();
    int ts = n.indexOf('<'); // start of template
    int te = n.lastIndexOf('>'); // end of template
-   //printf("ts=%d te=%d\n",ts,te);
+ 
    if (ts != -1 && te != -1 && te > ts) {
       // remove template from scope
       n = n.left(ts) + n.right(n.length() - te - 1);
    }
+
    while (!g_classScopeLengthStack.isEmpty()) {
       popScope();
    }
+
    g_classScope.resize(0);
    int i;
    while ((i = n.indexOf("::")) != -1) {
       pushScope(n.left(i));
       n = n.mid(i + 2);
    }
-   pushScope(n);
-   //printf("--->New class scope `%s'\n",g_classScope.data());
+
+   pushScope(n);  
 }
 
 /*! start a new line of code, inserting a line number if g_sourceFileDef
@@ -12683,6 +12691,7 @@ YY_DECL {
                   }
                   if (!g_curClassName.isEmpty()) { // valid class name
                      pushScope(g_curClassName);
+
                      DBG_CTX((stderr, "** scope stack push SCOPEBLOCK\n"));
                      g_scopeStack.push(SCOPEBLOCK);
                   }
@@ -12880,19 +12889,23 @@ YY_DECL {
                g_type.resize(0);
                g_name.resize(0);
 
-               int *scope = g_scopeStack.pop();
+               int *scope = nullptr;
+
+               if (! g_scopeStack.isEmpty() ) {              
+                  scope = g_scopeStack.pop();
+               }
+
                DBG_CTX((stderr, "** scope stack pop SCOPEBLOCK=%d\n", scope == SCOPEBLOCK));
-               if (scope == SCOPEBLOCK || scope == CLASSBLOCK)
-               {
+
+               if (scope == SCOPEBLOCK || scope == CLASSBLOCK) {
                   popScope();
                }
 
                g_code->codify(codeYYtext);
 
                DBG_CTX((stderr, "g_bodyCurlyCount=%d\n", g_bodyCurlyCount));
-               if (--g_bodyCurlyCount <= 0)
 
-               {
+               if (--g_bodyCurlyCount <= 0) {
                   g_insideBody = FALSE;
                   g_currentMemberDef = QSharedPointer<MemberDef>();
 
@@ -12900,6 +12913,7 @@ YY_DECL {
                      g_currentDefinition = dummyShared(g_currentDefinition->getOuterScope());
                   }
                }
+
                BEGIN(Body);
             }
 
@@ -12919,11 +12933,16 @@ YY_DECL {
                {
                   g_insideObjC = FALSE;
                }
-               if (g_insideBody)
-               {
-                  g_theVarContext.popScope();
 
-                  int *scope = g_scopeStack.pop();
+               if (g_insideBody) {
+                  g_theVarContext.popScope();
+                 
+                  int *scope = nullptr;
+   
+                  if (! g_scopeStack.isEmpty() ) {              
+                     scope = g_scopeStack.pop();
+                  }
+
                   DBG_CTX((stderr, "** scope stack pop SCOPEBLOCK=%d\n", scope == SCOPEBLOCK));
                   if (scope == SCOPEBLOCK || scope == CLASSBLOCK) {
                      popScope();
@@ -14276,6 +14295,7 @@ YY_DECL {
                   if (!g_classScope.isEmpty()) {
                      scope.prepend(g_classScope + "::");
                   }
+
                   ClassDef *cd = getResolvedClass(Doxygen::globalScope, g_sourceFileDef, scope);
                   if (cd) {
                      setClassScope(cd->name());
@@ -16119,8 +16139,6 @@ void codeFreeScanner()
    }
 #endif
 }
-
-
 
 #if !defined(YY_FLEX_SUBMINOR_VERSION)
 extern "C" { // some bogus code to keep the compiler happy

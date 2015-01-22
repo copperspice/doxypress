@@ -172,15 +172,16 @@ HtmlDocVisitor::HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, Definiti
 
 void HtmlDocVisitor::visit(DocWord *w)
 {
-   //printf("word: %s\n",w->word().data());
    if (m_hide) {
       return;
    }
+
    filter(w->word());
 }
 
 void HtmlDocVisitor::visit(DocLinkedWord *w)
 {
+
    if (m_hide) {
       return;
    }
@@ -394,6 +395,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
    }
 
    QByteArray lang = m_langExt;
+
    if (! s->language().isEmpty()) { 
       // explicit language setting
       lang = s->language();
@@ -405,15 +407,10 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
 
       case DocVerbatim::Code:
          forceEndParagraph(s);
-
          m_t << PREFRAG_START;
 
-         Doxygen::parserManager->getParser(lang)->parseCode(m_ci,
-                     s->context(),
-                     s->text(),
-                     langExt,
-                     s->isExample(),
-                     s->exampleFile(),
+         Doxygen::parserManager->getParser(lang)->parseCode(m_ci, s->context(), s->text(),
+                     langExt, s->isExample(), s->exampleFile(),
                      0,     // fileDef
                      -1,    // startLine
                      -1,    // endLine
@@ -426,6 +423,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          m_t << PREFRAG_END;
 
          forceStartParagraph(s);
+
          break;
 
       case DocVerbatim::Verbatim:
@@ -515,6 +513,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
       }
 
       break;
+
       case DocVerbatim::PlantUML: {
          forceEndParagraph(s);
 

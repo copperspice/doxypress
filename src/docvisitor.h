@@ -88,9 +88,12 @@ class DocParBlock;
 class DocVisitor
 {
    int m_id;
+
  public:
    DocVisitor(int id) : m_id(id) {}
+
    virtual ~DocVisitor() {}
+
    int id() const {
       return m_id;
    }

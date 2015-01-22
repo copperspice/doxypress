@@ -37,26 +37,36 @@ class TextDocVisitor : public DocVisitor
    //--------------------------------------
 
    void visit(DocWord *w)        {
+printf("\n BROOM  1   ");
+
       filter(w->word());
    }
+
    void visit(DocLinkedWord *w)  {
       filter(w->word());
    }
+
    void visit(DocWhiteSpace *)   {
       m_t << " ";
    }
+
    void visit(DocSymbol *);
+
    void visit(DocURL *u)         {
       filter(u->url());
    }
+
    void visit(DocLineBreak *)    {
       m_t << " ";
    }
+
    void visit(DocHorRuler *)     {}
    void visit(DocStyleChange *)  {}
+
    void visit(DocVerbatim *s)    {
       filter(s->text());
    }
+
    void visit(DocAnchor *)       {}
    void visit(DocInclude *)      {}
    void visit(DocIncOperator *)  {}
