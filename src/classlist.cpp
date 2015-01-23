@@ -126,7 +126,7 @@ void ClassSDict::writeDocumentation(OutputList &ol, Definition *container)
 
 //-------------------------------------------
 
-void GenericsSDict::insert(const QByteArray &key, ClassDef *cd)
+void GenericsSDict::insert(const QByteArray &key, QSharedPointer<ClassDef> cd)
 {
    int i = key.indexOf('<');
 
@@ -143,12 +143,12 @@ void GenericsSDict::insert(const QByteArray &key, ClassDef *cd)
       return;
    }
 
-   QSharedPointer<QHash<long, ClassDef *>> collection = m_dict.find(key.left(i));
+   QSharedPointer<QHash<long, QSharedPointer<ClassDef>>> collection = m_dict.find(key.left(i));
 
    if (collection == 0) {
       // new hash
 
-      collection = QSharedPointer<QHash<long, ClassDef *>> (new QHash<long, ClassDef *>());       
+      collection = QSharedPointer<QHash<long, QSharedPointer<ClassDef>>> (new QHash<long, QSharedPointer<ClassDef>>());       
 
       // add new hash to m_dict
       m_dict.insert(key.left(i), collection);
@@ -160,19 +160,19 @@ void GenericsSDict::insert(const QByteArray &key, ClassDef *cd)
    }
 }
 
-ClassDef *GenericsSDict::find(const QByteArray &key)
+QSharedPointer<ClassDef> GenericsSDict::find(const QByteArray &key)
 {
    int i = key.indexOf('<');
 
    if (i == -1) {
-       QSharedPointer<QHash<long, ClassDef *>> collection = m_dict.find(key);
+       QSharedPointer<QHash<long, QSharedPointer<ClassDef>>> collection = m_dict.find(key);
 
       if (collection && collection->count() == 1) {        
          return collection->begin().value();
       }
 
    } else {
-      QSharedPointer<QHash<long, ClassDef *>> collection = m_dict.find(key.left(i));
+      QSharedPointer<QHash<long, QSharedPointer<ClassDef>>> collection = m_dict.find(key.left(i));
 
       if (collection) {
          ArgumentList argList;
@@ -183,6 +183,6 @@ ClassDef *GenericsSDict::find(const QByteArray &key)
       }
    }
 
-   return 0;
+   return QSharedPointer<ClassDef>();
 }
 

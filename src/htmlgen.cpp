@@ -1966,12 +1966,9 @@ void HtmlGenerator::writeDoc(DocNode *n, Definition *ctx, MemberDef *)
    assert(m_codeGen);
  
    HtmlDocVisitor *visitor = new HtmlDocVisitor(m_textStream, *m_codeGen, ctx);
-
-printf("\n BROOM  AA");
    n->accept(visitor);
-printf("\n BROOM  BB\n ");
 
-   // delete visitor;
+   delete visitor;
 }
 
 static void startQuickIndexList(QTextStream &t_stream, bool compact, bool topLevel = true)

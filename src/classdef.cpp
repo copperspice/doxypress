@@ -3946,15 +3946,15 @@ bool ClassDef::isEmbeddedInOuterScope() const
    return b1 || b2;  // either reason will do
 }
 
-const SortedList<ClassDef *> *ClassDef::taggedInnerClasses() const
+const SortedList< QSharedPointer<ClassDef>> *ClassDef::taggedInnerClasses() const
 {
    return m_taggedInnerClasses;
 }
 
-void ClassDef::addTaggedInnerClass(ClassDef *cd)
+void ClassDef::addTaggedInnerClass(QSharedPointer<ClassDef> cd)
 {
    if (m_taggedInnerClasses == 0) {
-      m_taggedInnerClasses = new SortedList<ClassDef *>;
+      m_taggedInnerClasses = new SortedList<QSharedPointer<ClassDef>>;
    }
 
    m_taggedInnerClasses->append(cd);

@@ -291,15 +291,16 @@ void DocSets::addIndexItem(Definition *context, MemberDef *md,
       return;
    }
 
-   FileDef *fd      = 0;
-   ClassDef *cd     = 0;
-   NamespaceDef *nd = 0;
+   QSharedPointer<FileDef> fd;
+   QSharedPointer<ClassDef> cd;
+   QSharedPointer<NamespaceDef> nd;
 
    if (md) {
       fd = md->getFileDef();
       cd = md->getClassDef();
       nd = md->getNamespaceDef();
-      if (!md->isLinkable()) {
+
+      if (! md->isLinkable()) {
          return;   // internal symbol
       }
    }

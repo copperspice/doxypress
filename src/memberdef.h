@@ -87,17 +87,17 @@ class MemberDef : public Definition
    QByteArray    displayDefinition() const;
 
    // scope query members
-   ClassDef *getClassDef() const;
-   FileDef  *getFileDef() const;
-   NamespaceDef *getNamespaceDef() const;
-   ClassDef *accessorClass() const;
+   QSharedPointer<ClassDef> getClassDef() const;
+   QSharedPointer<FileDef>  getFileDef() const;
+   QSharedPointer<NamespaceDef> getNamespaceDef() const;
+   QSharedPointer<ClassDef> accessorClass() const;
 
    // grabbing the property read/write accessor names
    const char *getReadAccessor() const;
    const char *getWriteAccessor() const;
 
    // querying the grouping definition
-   GroupDef *getGroupDef() const;
+    QSharedPointer<GroupDef> getGroupDef() const;
    Grouping::GroupPri_t getGroupPri() const;
    const char *getGroupFileName() const;
    int getGroupStartLine() const;
@@ -286,7 +286,7 @@ class MemberDef : public Definition
    void setInitializer(const char *i);
    void setBitfields(const char *s);
    void setMaxInitLines(int lines);
-   void setMemberClass(ClassDef *cd);
+   void setMemberClass(QSharedPointer<ClassDef> cd);
    void setSectionList(Definition *d, QSharedPointer<MemberList> sl);
 
    void setGroupDef(GroupDef *gd, Grouping::GroupPri_t pri,
@@ -333,7 +333,7 @@ class MemberDef : public Definition
    void setDefinitionTemplateParameterLists(QList<ArgumentList> *lists);
    void setTypeConstraints(ArgumentList *al);
    void setType(const char *t);
-   void setAccessorType(ClassDef *cd, const char *t);
+   void setAccessorType(QSharedPointer<ClassDef> cd, const char *t);
 
    // namespace related members
    void setNamespace(NamespaceDef *nd);

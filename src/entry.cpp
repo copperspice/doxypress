@@ -256,7 +256,7 @@ int Entry::getSize()
    return sizeof(Entry);
 }
 
-void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage, FileDef *fd, QSharedPointer<Entry> self)
+void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage, QSharedPointer<FileDef> fd, QSharedPointer<Entry> self)
 {  
    assert(self == this);
 

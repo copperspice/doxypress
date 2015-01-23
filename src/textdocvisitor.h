@@ -36,9 +36,7 @@ class TextDocVisitor : public DocVisitor
    // visitor functions for leaf nodes
    //--------------------------------------
 
-   void visit(DocWord *w)        {
-printf("\n BROOM  1   ");
-
+   void visit(DocWord *w) {
       filter(w->word());
    }
 

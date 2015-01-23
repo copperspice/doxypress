@@ -82,7 +82,7 @@ static const char *sectionLevelToName[] = {
 /** Parser's context to store all global variables.
  */
 struct DocParserContext {
-   Definition *scope;
+   QSharedPointer<Definition> scope;
    QByteArray context;
    bool inSeeBlock;
    bool xmlComment;
@@ -91,7 +91,7 @@ struct DocParserContext {
    QStack<DocNode *> nodeStack;
    QStack<DocStyleChange> styleStack;
    QStack<DocStyleChange> initialStyleStack;
-   QList<Definition *> copyStack;
+   QList<QSharedPointer<Definition>> copyStack;
 
    QByteArray fileName;
    QByteArray relPath;
@@ -117,7 +117,7 @@ struct DocParserContext {
 };
 
 // Parser state variables during a call to validatingParseDoc
-static Definition             *s_scope;
+static QSharedPointer<Definition> s_scope;
 static QByteArray              s_context;
 static bool                    s_inSeeBlock;
 static bool                    s_xmlComment;
@@ -125,7 +125,9 @@ static bool                    s_insideHtmlLink;
 static QStack<DocNode *>       s_nodeStack;
 static QStack<DocStyleChange>  s_styleStack;
 static QStack<DocStyleChange>  s_initialStyleStack;
-static QList<Definition *>     s_copyStack;
+
+static QList<QSharedPointer<Definition>>     s_copyStack;
+
 static QByteArray              s_fileName;
 static QByteArray              s_relPath;
 
@@ -673,33 +675,30 @@ static bool insideTable(DocNode *n)
 }
 
 /*! Looks for a documentation block with name commandName in the current
- *  context (g_context). The resulting documentation string is
- *  put in pDoc, the definition in which the documentation was found is
- *  put in pDef.
- *  @retval true if name was found.
- *  @retval false if name was not found.
+ *  context (g_context). The resulting documentation string is put in doc and 
+ *  the definition in which the documentation was found is put in retval.
  */
-static bool findDocsForMemberOrCompound(const char *commandName, QByteArray *pDoc, QByteArray *pBrief, Definition **pDef)
-{
-   //printf("findDocsForMemberOrCompound(%s)\n",commandName);
-   *pDoc   = "";
-   *pBrief = "";
-   *pDef   = 0;
+static QSharedPointer<Definition> findDocsForMemberOrCompound(QByteArray commandName, QByteArray &doc, QByteArray &brief)
+{  
+   doc   = "";
+   brief = "";
+  
+   QSharedPointer<Definition> retval;
 
-   QByteArray cmdArg = substitute(commandName, "#", "::");
-   int l = cmdArg.length();
+   QByteArray cmdArg = commandName.replace("#", "::");
+   int len = cmdArg.length();
 
-   if (l == 0) {
-      return false;
+   if (len == 0) {
+      return retval;
    }
 
    int funcStart = cmdArg.indexOf('(');
 
    if (funcStart == -1) {
-      funcStart = l;
+      funcStart = len;
 
    } else {
-      // Check for the case of operator() and the like.
+      // Check for the case of operator() and the like
       // beware of scenarios like operator()((foo)bar)
       int secondParen = cmdArg.indexOf('(', funcStart + 1);
       int leftParen   = cmdArg.indexOf(')', funcStart + 1);
@@ -712,40 +711,30 @@ static bool findDocsForMemberOrCompound(const char *commandName, QByteArray *pDo
    }
 
    QByteArray name = removeRedundantWhiteSpace(cmdArg.left(funcStart));
-   QByteArray args = cmdArg.right(l - funcStart);
+   QByteArray args = cmdArg.right(len - funcStart);
 
-   // try if the link is to a member
-   MemberDef    *md = 0;
-   FileDef      *fd = 0;
-
-   QSharedPointer<ClassDef> cd; 
+   // test if the link is to a member
+   QSharedPointer<MemberDef>    md;
+   QSharedPointer<FileDef>      fd;
+   QSharedPointer<ClassDef>     cd; 
    QSharedPointer<NamespaceDef> nd;
-   QSharedPointer<GroupDef> gd;
-   QSharedPointer<PageDef> pd;
- 
-   ClassDef *cd_Temp; 
-   NamespaceDef *nd_Temp;
-   GroupDef *gd_Temp;
-   PageDef *pd_Temp;
-  
+   QSharedPointer<GroupDef>     gd;
+   QSharedPointer<PageDef>      pd;
+     
    // `find('.') is a hack to detect files
-   bool found = getDefs(s_context.indexOf('.') == -1 ? s_context.data() : "", name, args.isEmpty() ? 0 : args.data(), 
-                        md, cd_Temp, fd, nd_Temp, gd_Temp, false, 0, true);
-
-   cd = QSharedPointer<ClassDef>(cd_Temp, [](ClassDef *){});
-   nd = QSharedPointer<NamespaceDef>(nd_Temp, [](NamespaceDef *){}) ;
-   gd = QSharedPointer<GroupDef>(gd_Temp, [](GroupDef *){}) ;
-   pd = QSharedPointer<PageDef>(pd_Temp, [](PageDef *){}) ;
+   bool found = getDefs(s_context.indexOf('.') == -1 ? s_context.constData() : "", name, args.isEmpty() ? 0 : args.constData(), 
+                        md, cd, fd, nd, gd, false, 0, true);
    
    if (found && md) {
-      *pDoc = md->documentation();
-      *pBrief = md->briefDescription();
-      *pDef = md;
+      doc    = md->documentation();
+      brief  = md->briefDescription();
+      retval = md;
 
-      return true;
+      return retval;
    }
 
    int scopeOffset = s_context.length();
+
    do { 
       // for each scope
       QByteArray fullName = cmdArg;
@@ -756,45 +745,54 @@ static bool findDocsForMemberOrCompound(const char *commandName, QByteArray *pDo
 
       // try class, namespace, group, page, file reference
       cd = Doxygen::classSDict->find(fullName);
-      if (cd) { // class
-         *pDoc = cd->documentation();
-         *pBrief = cd->briefDescription();
-         *pDef = cd.data();
 
-         return true;
+      if (cd) {          
+         doc     = cd->documentation();
+         brief   = cd->briefDescription();
+         retval  = cd;
+
+         return retval;
       }
 
       nd = Doxygen::namespaceSDict->find(fullName);
-      if (nd) { // namespace
-         *pDoc = nd->documentation();
-         *pBrief = nd->briefDescription();
-         *pDef = nd.data();
-         return true;
+
+      if (nd) {          
+         doc    = nd->documentation();
+         brief  = nd->briefDescription();
+         retval = nd;
+
+         return retval;
       }
 
       gd = Doxygen::groupSDict->find(cmdArg);
-      if (gd) { // group
-         *pDoc = gd->documentation();
-         *pBrief = gd->briefDescription();
-         *pDef = gd.data();
-         return true;
+
+      if (gd) {          
+         doc    = gd->documentation();
+         brief  = gd->briefDescription();
+         retval = gd;
+
+         return retval;
       }
 
       pd = Doxygen::pageSDict->find(cmdArg);
-      if (pd) { // page
-         *pDoc = pd->documentation();
-         *pBrief = pd->briefDescription();
-         *pDef = pd.data();
-         return true;
+
+      if (pd) {         
+         doc    = pd->documentation();
+         brief  = pd->briefDescription();
+         retval = pd;
+
+         return retval;
       }
 
       bool ambig;
       fd = findFileDef(Doxygen::inputNameDict, cmdArg, ambig);
-      if (fd && !ambig) { // file
-         *pDoc = fd->documentation();
-         *pBrief = fd->briefDescription();
-         *pDef = fd;
-         return true;
+
+      if (fd && ! ambig) {         
+         doc    = fd->documentation();
+         brief  = fd->briefDescription();
+         retval = fd;
+
+         return retval;
       }
 
       if (scopeOffset == 0) {
@@ -802,6 +800,7 @@ static bool findDocsForMemberOrCompound(const char *commandName, QByteArray *pDo
 
       } else {
          scopeOffset = s_context.lastIndexOf("::", scopeOffset - 1);
+
          if (scopeOffset == -1) {
             scopeOffset = 0;
          }
@@ -810,7 +809,7 @@ static bool findDocsForMemberOrCompound(const char *commandName, QByteArray *pDo
    } while (scopeOffset >= 0);
 
 
-   return false;
+   return retval;
 }
 
 static int handleStyleArgument(DocNode *parent, QList<DocNode *> &children, const QByteArray &cmdName)
@@ -1600,6 +1599,7 @@ DocSymbol::SymType DocSymbol::decodeSymbol(const QByteArray &symName)
    DBG(("decodeSymbol(%s)\n", qPrint(symName)));
    return HtmlEntityMapper::instance()->name2sym(symName);
 }
+
 static int internalValidatingParseDoc(DocNode *parent, QList<DocNode *> &children, const QByteArray &doc)
 {
    int retval = RetVal_OK;
@@ -1904,10 +1904,12 @@ void DocIncOperator::parse()
 
 void DocCopy::parse(QList<DocNode *> &children)
 {
-   QByteArray doc, brief;
-   Definition *def;
+   QByteArray doc
+   QByteArray brief;
 
-   if (findDocsForMemberOrCompound(m_link, &doc, &brief, &def)) {
+   QSharedPointer<Definition> def = findDocsForMemberOrCompound(m_link, doc, brief);
+
+   if (def) {
 
       if (s_copyStack.indexOf(def) == -1) { // definition not parsed earlier
          bool  hasParamCommand  = s_hasParamCommand;
@@ -1922,8 +1924,10 @@ void DocCopy::parse(QList<DocNode *> &children)
             if (def->getOuterScope() != Doxygen::globalScope) {
                s_context = def->getOuterScope()->name();
             }
+
          } else if (def != Doxygen::globalScope) {
             s_context = def->name();
+
          }
 
          s_styleStack.clear();
@@ -5245,8 +5249,7 @@ void DocPara::handleInheritDoc()
 
       if (reMd) { // member from which was inherited.
          MemberDef *thisMd = s_memberDef;
-
-         //printf("{InheritDocs:%s=>%s}\n",s_memberDef->qualifiedName().data(),reMd->qualifiedName().data());
+         
          docParserPushContext();
          s_scope = reMd->getOuterScope();
 
@@ -5258,6 +5261,7 @@ void DocPara::handleInheritDoc()
          s_styleStack.clear();
          s_nodeStack.clear();
          s_copyStack.append(reMd);
+
          internalValidatingParseDoc(this, m_children, reMd->briefDescription());
          internalValidatingParseDoc(this, m_children, reMd->documentation());
 
@@ -6850,6 +6854,10 @@ void DocRoot::parse()
       bool divFound = false;
       int tok = doctokenizerYYlex();
 
+
+printf("\n  BROOM  DocRoot::Parse  %d",  tok );
+
+
       if (tok == TK_HTMLTAG) {
 
          int tagId = Mappers::htmlTagMapper->map(g_token->name);
@@ -7050,11 +7058,13 @@ static QByteArray processCopyDoc(const char *data, uint &len)
 
             // extract the argument
             QByteArray id = extractCopyDocId(data, j, len);
-            Definition *def;
+        
+            QByteArray doc
+            QByteArray brief;
 
-            QByteArray doc, brief;
+            QSharedPointer<Definition> def  = findDocsForMemberOrCompound(m_link, doc, brief);
  
-            if (findDocsForMemberOrCompound(id, &doc, &brief, &def)) {               
+            if (def) {        
                if (s_copyStack.indexOf(def) == -1) { // definition not parsed earlier
                   s_copyStack.append(def);
 
@@ -7098,17 +7108,33 @@ static QByteArray processCopyDoc(const char *data, uint &len)
    return buf.get();
 }
 
-DocRoot *validatingParseDoc(const char *fileName, int startLine, Definition *ctx, MemberDef *md, const char *input, bool indexWords,
-                            bool isExample, const char *exampleName, bool singleLine, bool linkFromIndex)
+DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<Definition> ctx, MemberDef *md, 
+                            const char *input, bool indexWords, bool isExample, const char *exampleName, 
+                            bool singleLine, bool linkFromIndex)
 {  
    // store parser state so we can re-enter this function if needed
+
+
+printf("\n BROOM  *** validate parser doc  PRE  1 ");
+
 
    // bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
    docParserPushContext();
 
-   if (ctx && ctx != Doxygen::globalScope &&
-         (ctx->definitionType() == Definition::TypeClass ||
+printf("\n BROOM  *** validate parser doc  PRE  2 ");
+
+
+if (ctx)  {
+   printf("\n BROOM  *** validate parser doc  what is CTX  %x ", ctx);
+
+   int temp = ctx->definitionType() ;
+   printf("\n BROOM  *** validate parser doc  DefinitionType =  %d ",  temp );
+}
+
+
+   if (ctx && ctx != Doxygen::globalScope && (ctx->definitionType() == Definition::TypeClass ||
           ctx->definitionType() == Definition::TypeNamespace)) {
+
       s_context = ctx->name();
 
    } else if (ctx && ctx->definitionType() == Definition::TypePage) {
@@ -7130,6 +7156,11 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, Definition *ctx
    }
 
    s_scope = ctx;
+
+
+printf("\n BROOM  *** validate parser doc  PRE  2 ");
+
+
 
    if (indexWords && Doxygen::searchIndex) {
       if (md) {
@@ -7210,7 +7241,7 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, Definition *ctx
    }
 
    s_fileName = fileName;
-   s_relPath = (!linkFromIndex && ctx) ? QByteArray(relativePathToRoot(ctx->getOutputFileBase())) : QByteArray("");
+   s_relPath = (! linkFromIndex && ctx) ? QByteArray(relativePathToRoot(ctx->getOutputFileBase())) : QByteArray("");
   
    s_memberDef = md;
 
@@ -7241,15 +7272,21 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, Definition *ctx
    if (inpStr.isEmpty() || inpStr.at(inpStr.length() - 1) != '\n') {
       inpStr += '\n';
    }
-  
+
    doctokenizerYYinit(inpStr, s_fileName);
+
+printf("\n BROOM  *** validate parser doc  AAAA ");
 
    // build abstract syntax tree
    DocRoot *root = new DocRoot(md != 0, singleLine);
    root->parse();
 
+printf("\n BROOM  *** validate parser doc  BBBB ");
+
+
    if (Debug::isFlagSet(Debug::PrintTree)) {
       // pretty print the result
+
       PrintDocVisitor *v = new PrintDocVisitor;
       root->accept(v);
       delete v;
@@ -7258,7 +7295,7 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, Definition *ctx
    checkUndocumentedParams();
    detectNoDocumentedParams();
 
-   // TODO: These should be called at the end of the program
+   // TODO: should be called at the end of the program
    // doctokenizerYYcleanup();
    // Mappers::cmdMapper->freeInstance();
    // Mappers::htmlTagMapper->freeInstance();

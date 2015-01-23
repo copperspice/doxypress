@@ -4515,7 +4515,7 @@ void writeDotDirDepGraph(QTextStream &t, DirDef *dd)
    t << "  node [ fontsize=\"" << FONTSIZE << "\", fontname=\"" << FONTNAME << "\"];\n";
    t << "  edge [ labelfontsize=\"" << FONTSIZE << "\", labelfontname=\"" << FONTNAME << "\"];\n";
 
-   QHash<QString, DirDef *> dirsInGraph;
+   QHash<QString, QSharedPointer<DirDef>> dirsInGraph;
    dirsInGraph.insert(dd->getOutputFileBase(), dd);
 
    if (dd->parent()) {

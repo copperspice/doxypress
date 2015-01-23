@@ -33,10 +33,7 @@
 #include <filedef.h>
 #include <util.h>
 
-// must appear after the previous include - resolve soon 
 #include <doxy_globals.h>
-
-//----------------------------------------------------------------------------
 
 /** Class representing a field in the HTML help index. */
 struct IndexField {
@@ -685,7 +682,7 @@ void HtmlHelp::addContentsItem(bool isDir, const QString &name, const char *ref,
 }
 
 
-void HtmlHelp::addIndexItem(Definition *context, MemberDef *md, const char *sectionAnchor, const char *word)
+void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, const char *word)
 {
    if (md) {
       static bool separateMemberPages = Config_getBool("SEPARATE_MEMBER_PAGES");
@@ -693,6 +690,7 @@ void HtmlHelp::addIndexItem(Definition *context, MemberDef *md, const char *sect
       if (context == 0) { // global member
          if (md->getGroupDef()) {
             context = md->getGroupDef();
+
          } else if (md->getFileDef()) {
             context = md->getFileDef();
          }

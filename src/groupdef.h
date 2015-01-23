@@ -80,7 +80,7 @@ class GroupDef : public Definition
    void addGroup(GroupDef *def);  
    void addPage(QSharedPointer<PageDef> def);
    void addExample(QSharedPointer<PageDef> def);
-   void addDir(DirDef *def);
+   void addDir(QSharedPointer<DirDef> def);
 
    bool insertMember(MemberDef *def, bool docOnly = false);
    void removeMember(MemberDef *md);
@@ -144,7 +144,7 @@ class GroupDef : public Definition
       return exampleDict;
    } 
  
-   SortedList<DirDef *> *getDirs() const {
+   SortedList<QSharedPointer<DirDef>> *getDirs() const {
       return dirList;
    }
 
@@ -196,7 +196,7 @@ class GroupDef : public Definition
    PageSDict *pageDict;                 // list of pages in the group
    PageSDict *exampleDict;              // list of examples in the group
 
-   SortedList<DirDef *> *dirList;       // list of directories in the group
+   SortedList<QSharedPointer<DirDef>> *dirList;       // list of directories in the group
    FileList *fileList;                  // list of files in the group
    SortedList<GroupDef *> *groupList;   // list of sub groups
   

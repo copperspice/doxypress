@@ -52,8 +52,6 @@
 
 int MemberDef::s_indentLevel = 0;
 
-//-----------------------------------------------------------------------------
-
 static QByteArray addTemplateNames(const QByteArray &s, const QByteArray &n, const QByteArray &t)
 {
    QByteArray result;
@@ -586,7 +584,7 @@ class MemberDefImpl
    MemberDef *groupAlias;          // Member containing the definition
    int grpId;                      // group id
    MemberGroup *memberGroup;       // group's member definition
-   GroupDef *group;                // group in which this member is in
+   QSharedPointer<GroupDef> group; // group in which this member is in
    Grouping::GroupPri_t grouppri;  // priority of this definition
 
    QByteArray groupFileName;       // file where this grouping was defined
@@ -675,7 +673,9 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
    nspace = 0;
    memDef = 0;
    memDec = 0;
-   group = 0;
+
+   group = QSharedPointer<GroupDef>();
+
    grpId = -1;
    exampleSDict = 0;
    enumFields = 0;
@@ -3411,11 +3411,12 @@ void MemberDef::setEnumScope(MemberDef *md, bool livesInsideEnum)
    }
 }
 
-void MemberDef::setMemberClass(ClassDef *cd)
+void MemberDef::setMemberClass(QSharedPointer<ClassDef> cd)
 {
-   m_impl->classDef = cd;
-   m_isLinkableCached = 0;
+   m_impl->classDef      = cd;
+   m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
+
    setOuterScope(cd);
 }
 
@@ -3937,7 +3938,7 @@ void MemberDef::setType(const char *t)
    m_impl->type = t;
 }
 
-void MemberDef::setAccessorType(ClassDef *cd, const char *t)
+void MemberDef::setAccessorType(QSharedPointer<ClassDef> cd, const char *t)
 {
    m_impl->accessorClass = cd;
    m_impl->accessorType = t;
@@ -4134,7 +4135,7 @@ const char *MemberDef::getWriteAccessor() const
    return m_impl->write;
 }
 
-GroupDef *MemberDef::getGroupDef() const
+ QSharedPointer<GroupDef> MemberDef::getGroupDef() const
 {
    return m_impl->group;
 }

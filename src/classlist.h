@@ -59,11 +59,11 @@ class GenericsSDict
 
    ~GenericsSDict() {}
 
-   void insert(const QByteArray &key, ClassDef *cd);
-   ClassDef *find(const QByteArray &key);
+   void insert(const QByteArray &key, QSharedPointer<ClassDef> cd);
+   QSharedPointer<ClassDef> find(const QByteArray &key);
 
  private:
-   StringMap<QSharedPointer<QHash<long, ClassDef *>>> m_dict;
+   StringMap<QSharedPointer<QHash<long, QSharedPointer<ClassDef>>>> m_dict;
 };
 
 #endif

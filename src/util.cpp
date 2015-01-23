@@ -82,11 +82,11 @@ static QCache<QString, FindFileCacheElem>  s_findFileDefCache;
 static QHash<QString, int>                 s_extLookup;
 
 // forward declaration
-static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, const char *n, MemberDef **pTypeDef,
-                                     QByteArray *pTemplSpec, QByteArray *pResolvedType );
+static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const char *n, 
+               QSharedPointer<MemberDef> *pTypeDef, QByteArray *pTemplSpec, QByteArray *pResolvedType );
 
-int isAccessibleFromWithExpScope(Definition *scope, FileDef *fileScope, Definition *item,
-                                 const QByteArray &explicitScopePart);
+int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
+               QSharedPointer<Definition> item, const QByteArray &explicitScopePart);
 
 // ** selects one of the name to sub-dir mapping algorithms that is used
 // to select a sub directory when CREATE_SUBDIRS is set to YES.
@@ -532,14 +532,14 @@ QByteArray resolveTypeDef(Definition *context, const QByteArray &qualifiedName, 
 /*! Get a class definition given its name.
  *  Returns 0 if the class is not found.
  */
-ClassDef *getClass(const char *n)
+QSharedPointer<ClassDef> getClass(const char *n)
 {
    if (n == 0 || n[0] == '\0') {
-      return 0;
+      return QSharedPointer<ClassDef>();
    }
 
    QByteArray name = n;
-   ClassDef *result = Doxygen::classSDict->find(name).data();
+   QSharedPointer<ClassDef> result = Doxygen::classSDict->find(name);
   
    return result;
 }
@@ -567,7 +567,7 @@ QSharedPointer<NamespaceDef> getResolvedNamespace(const char *name)
          warn_uncond("possible recursive namespace alias detected for %s!\n", name);
       }
 
-      return Doxygen::namespaceSDict->find(subst.data());
+      return Doxygen::namespaceSDict->find(subst.constData());
 
    } else {
       return Doxygen::namespaceSDict->find(name);
@@ -638,7 +638,7 @@ ClassDef *newResolveTypedef(FileDef *fileScope, MemberDef *md,  MemberDef **pMem
    }
 
    MemberDef *memTypeDef = nullptr;
-   ClassDef  *result = getResolvedClassRec(md->getOuterScope(), fileScope, type, &memTypeDef, 0, pResolvedType);
+   QSharedPointer<ClassDef> result = getResolvedClassRec(md->getOuterScope(), fileScope, type, &memTypeDef, 0, pResolvedType);
 
    // if type is a typedef then return what it resolves to.
    if (memTypeDef && memTypeDef->isTypedef()) {
@@ -1369,8 +1369,8 @@ static void getResolvedSymbol(Definition *scope, FileDef *fileScope, Definition 
  * match against the input name. Can recursively call itself when
  * resolving typedefs.
  */
-static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, const char *n, MemberDef **pTypeDef,
-                                     QByteArray *pTemplSpec, QByteArray *pResolvedType )
+static ClassDef *getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const char *n, 
+                  QSharedPointer<MemberDef> *pTypeDef, QByteArray *pTemplSpec, QByteArray *pResolvedType )
 {
    QByteArray name;
    QByteArray explicitScopePart;
@@ -1522,8 +1522,8 @@ static ClassDef *getResolvedClassRec(Definition *scope, FileDef *fileScope, cons
  * Loops through scope and each of its parent scopes looking for a
  * match against the input name.
  */
-ClassDef *getResolvedClass(Definition *scope, FileDef *fileScope, const char *n, MemberDef **pTypeDef, QByteArray *pTemplSpec,
-                           bool mayBeUnlinkable, bool mayBeHidden, QByteArray *pResolvedType)
+QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const char *n, 
+                     QSharedPointer<MemberDef> *pTypeDef, QByteArray *pTemplSpec, bool mayBeUnlinkable, bool mayBeHidden, QByteArray *pResolvedType)
 {  
    s_resolvedTypedefs.clear();
 
@@ -1532,7 +1532,7 @@ ClassDef *getResolvedClass(Definition *scope, FileDef *fileScope, const char *n,
       scope = Doxygen::globalScope;
    }
   
-   ClassDef *result;
+   QSharedPointer<ClassDef>result;
   
    result = getResolvedClassRec(scope, fileScope, n, pTypeDef, pTemplSpec, pResolvedType);
   
@@ -1544,7 +1544,7 @@ ClassDef *getResolvedClass(Definition *scope, FileDef *fileScope, const char *n,
 
    if (! mayBeUnlinkable && result && !result->isLinkable()) {
       if (! mayBeHidden || !result->isHidden()) {         
-         result = 0; // don't link to artificial/hidden classes unless explicitly allowed
+         result = QSharedPointer<ClassDef>(); // don't link to artificial/hidden classes unless explicitly allowed
       }
    }
   
@@ -3423,9 +3423,9 @@ static bool matchArgument2(Definition *srcScope, FileDef *srcFileScope, Argument
 }
 
 
-// new algorithm for argument matching
-bool matchArguments2(Definition *srcScope, FileDef *srcFileScope, ArgumentList *srcAl,
-                     Definition *dstScope, FileDef *dstFileScope, ArgumentList *dstAl, bool checkCV )
+// algorithm for argument matching
+bool matchArguments2(QSharedPointer<Definition> srcScope, FileDef *srcFileScope, ArgumentList *srcAl,
+                     QSharedPointer<Definition> dstScope, FileDef *dstFileScope, ArgumentList *dstAl, bool checkCV )
 {   
    assert(srcScope != 0 && dstScope != 0);
 
@@ -3656,15 +3656,16 @@ static void findMembersWithSpecificName(MemberName *mn, const char *args, bool c
  *   - if `fd' is non zero, the member was found in the global namespace of
  *     file fd.
  */
-bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *args, MemberDef *&md,
-             ClassDef *&cd, FileDef *&fd, NamespaceDef *&nd, GroupDef *&gd, bool forceEmptyScope,
-             FileDef *currentFile, bool checkCV, const char *forceTagFile )
+bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *args, QSharedPointer<MemberDef> &md,
+             QSharedPointer<ClassDef> &cd, QSharedPointer<FileDef> &fd, QSharedPointer<NamespaceDef> &nd, 
+             QSharedPointer<GroupDef> *&gd, bool forceEmptyScope,  QSharedPointer<FileDef>currentFile, 
+             bool checkCV, const char *forceTagFile )
 {
-   fd = 0;
-   md = 0;
-   cd = 0;
-   nd = 0;
-   gd = 0;
+   fd = QSharedPointer<FileDef>();
+   md = QSharedPointer<MemberDef>();
+   cd = QSharedPointer<ClassDef>();
+   nd = QSharedPointer<NamespaceDef>();
+   gd = QSharedPointer<GroupDef>();
 
    if (mbName.isEmpty()) {
       return false;   /* empty name => nothing to link */
@@ -3723,7 +3724,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
          }
 
          MemberDef *tmd = 0;
-         ClassDef *fcd = getResolvedClass(Doxygen::globalScope, 0, className, &tmd);
+         QSharedPointer<ClassDef> fcd = getResolvedClass(Doxygen::globalScope, 0, className, &tmd);
         
          // todo: fill in correct fileScope
          if (fcd &&  fcd->isLinkable() ) {
@@ -3745,7 +3746,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                                     mmdAl, fcd, fcd->getFileDef(), argList, checkCV );
                   
                   if (match) {
-                     ClassDef *mcd = mmd->getClassDef();
+                     QSharedPointer<ClassDef> mcd = mmd->getClassDef();
 
                      if (mcd) {
                         int m = minClassDistance(fcd, mcd);
@@ -3753,7 +3754,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                         if (m < mdist && mcd->isLinkable()) {
                            mdist = m;
                            cd = mcd;
-                           md = mmd.data();
+                           md = mmd;
                         }
                      }
                   }
@@ -3769,7 +3770,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                // no exact match found, but if args="()" an arbitrary member will do            
                   
                for (auto mmd : *mn) {                  
-                  ClassDef *mcd = mmd->getClassDef();
+                  QSharedPointer<ClassDef> mcd = mmd->getClassDef();
                   
                   if (mcd) {
                      int m = minClassDistance(fcd, mcd);
@@ -3778,7 +3779,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                         
                         mdist = m;
                         cd = mcd;
-                        md = mmd.data();
+                        md = mmd;
                      }
                   }
                   
@@ -3903,11 +3904,11 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
          if (! namespaceName.isEmpty() && !mScope.isEmpty()) {
             namespaceName += "::" + mScope;
 
-         } else if (!mScope.isEmpty()) {
+         } else if (! mScope.isEmpty()) {
             namespaceName = mScope;
          }
          
-         if (!namespaceName.isEmpty() && (fnd = Doxygen::namespaceSDict->find(namespaceName)) && fnd->isLinkable()) {
+         if (! namespaceName.isEmpty() && (fnd = Doxygen::namespaceSDict->find(namespaceName)) && fnd->isLinkable()) {
             
             bool found = false;
            
@@ -3922,8 +3923,8 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                if (emd && emd->isStrong()) {
                  
                   if (emd->getNamespaceDef() == fnd && rightScopeMatch(mScope, emd->localName())) {                    
-                     nd = fnd.data();
-                     md = mmd.data();
+                     nd = fnd;
+                     md = mmd;
 
                      found = true;
 
@@ -3945,12 +3946,12 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
 
                      stringToArgumentList(args, argList);
                      match = matchArguments2(mmd->getOuterScope(), mmd->getFileDef(), mmdAl,
-                                fnd.data(), mmd->getFileDef(), argList, checkCV); 
+                                fnd, mmd->getFileDef(), argList, checkCV); 
                   }
 
                   if (match) {
-                     nd = fnd.data();
-                     md = mmd.data();
+                     nd = fnd;
+                     md = mmd;
                      found = true;
                   }
 
@@ -3971,8 +3972,8 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                   }
 
                   if (mmd->getNamespaceDef() == fnd) {
-                     nd = fnd.data();
-                     md = mmd.data();
+                     nd = fnd;
+                     md = mmd;
                      found = true;
                   }
                }
@@ -4014,7 +4015,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
 
                if (tmd && tmd->isStrong() && (notInNS || sameNS) && namespaceName.length() > 0) { 
                   // enum is part of namespace so this should not be empty                 
-                  md = mmd.data();
+                  md = mmd;
                   fd = mmd->getFileDef();
                   gd = mmd->getGroupDef();
 
@@ -4633,11 +4634,12 @@ QByteArray substituteClassNames(const QByteArray &s)
 #endif
 
 /** Cache element for the file name to FileDef mapping cache. */
-FileDef *findFileDef(const FileNameDict *fnDict, const char *n, bool &ambig)
+QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const char *n, bool &ambig)
 {
    ambig = false;
+
    if (n == 0) {
-      return 0;
+      return QSharedPointer<FileDef>();
    }
 
    const int maxAddrSize = 20;
@@ -4652,7 +4654,7 @@ FileDef *findFileDef(const FileNameDict *fnDict, const char *n, bool &ambig)
    
    if (cachedResult) {
       ambig = cachedResult->isAmbig;
-      //printf("cached: fileDef=%p\n",cachedResult->fileDef);
+      
       return cachedResult->fileDef;
 
    } else {
@@ -4730,7 +4732,7 @@ FileDef *findFileDef(const FileNameDict *fnDict, const char *n, bool &ambig)
 exit:   
    s_findFileDefCache.insert(key, cachedResult);
   
-   return 0;
+   return QSharedPointer<FileDef>();
 }
 
 QByteArray showFileDefMatches(const FileNameDict *fnDict, const char *n)
@@ -5743,7 +5745,7 @@ QByteArray normalizeNonTemplateArgumentsInString(const QByteArray &name, Definit
 
       if (!found) {
          // try to resolve the type
-         ClassDef *cd = getResolvedClass(context, 0, n);
+         QSharedPointer<ClassDef> cd = getResolvedClass(context, 0, n);
 
          if (cd) {
             result += cd->name();
@@ -6858,7 +6860,7 @@ int nextUtf8CharPosition(const QByteArray &utf8Str, int len, int startPos)
    return startPos + bytes;
 }
 
-QByteArray parseCommentAsText(const Definition *scope, const MemberDef *md,
+QByteArray parseCommentAsText(QSharedPointer<Definition> scope, const MemberDef *md,
                               const QByteArray &doc, const QByteArray &fileName, int lineNr)
 {
    QByteArray s;
@@ -6867,8 +6869,14 @@ QByteArray parseCommentAsText(const Definition *scope, const MemberDef *md,
       return s.data();
    }
 
+printf("\n\n BROOM  Did we get HERE W1");
+
    QTextStream t(&s);
-   DocNode *root = validatingParseDoc(fileName, lineNr, (Definition *)scope, (MemberDef *)md, doc, false, false);
+   DocNode *root = validatingParseDoc(fileName, lineNr, scope, (MemberDef *)md, doc, false, false);
+
+printf("\n BROOM  Did we get HERE W2");
+
+
    TextDocVisitor *visitor = new TextDocVisitor(t);
    root->accept(visitor);
 
@@ -6879,6 +6887,7 @@ QByteArray parseCommentAsText(const Definition *scope, const MemberDef *md,
    int i = 0;
    int charCnt = 0;
    int l = result.length();
+
    bool addEllipsis = false;
 
    while ((i = nextUtf8CharPosition(result, l, i)) < l) {
@@ -6888,7 +6897,9 @@ QByteArray parseCommentAsText(const Definition *scope, const MemberDef *md,
       }
    }
 
-   if (charCnt >= 80) { // try to truncate the string
+   if (charCnt >= 80) { 
+      // try to truncate the string
+
       while ((i = nextUtf8CharPosition(result, l, i)) < l && charCnt < 100) {
          charCnt++;
 
@@ -6900,9 +6911,11 @@ QByteArray parseCommentAsText(const Definition *scope, const MemberDef *md,
          }
       }
    }
+
    if (addEllipsis || charCnt == 100) {
       result = result.left(i) + "...";
    }
+
    return result.data();
 }
 

@@ -296,7 +296,7 @@ class ClassDef : public Definition
 
    bool isSimple() const;
 
-   const SortedList<ClassDef *>   *taggedInnerClasses() const;
+   const SortedList<QSharedPointer<ClassDef>>   *taggedInnerClasses() const;
    ClassDef *tagLessReference() const;
 
    MemberDef *isSmartPointer() const;
@@ -351,8 +351,8 @@ class ClassDef : public Definition
    void setCategoryOf(ClassDef *cd);
    void setUsedOnly(bool b);
 
-   void addTaggedInnerClass(ClassDef *cd);
-   void setTagLessReference(ClassDef *cd);
+   void addTaggedInnerClass(QSharedPointer<ClassDef> cd);
+   void setTagLessReference(QSharedPointer<ClassDef> cd);
    void setName(const char *name);
 
    // actions
@@ -557,7 +557,7 @@ class ClassDef : public Definition
    /** Does this class overloaded the -> operator? */
    MemberDef *m_arrowOperator;
 
-   SortedList<ClassDef *> *m_taggedInnerClasses;
+   SortedList<QSharedPointer<ClassDef>> *m_taggedInnerClasses;
    ClassDef *m_tagLessRef;
 
    /** Does this class represent a Java style enum? */

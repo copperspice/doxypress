@@ -107,7 +107,8 @@ QByteArray LayoutNavEntry::url() const
       url += Doxygen::htmlFileExtension;
 
    } else if (url.left(5) == "@ref " || url.left(5) == "\\ref ") {
-      Definition *d;
+      QSharedPointer<Definition> d;
+
       QByteArray anchor;
       bool found = false;
 

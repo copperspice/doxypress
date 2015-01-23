@@ -19,6 +19,7 @@
 #define SORTEDLIST_H
 
 #include <QList>
+#include <QSharedPointer>
 
 class BaseClassDef;
 class ClassDef;
@@ -73,7 +74,9 @@ void SortedList<T>::sort()
 
 int compareValues(const BaseClassDef *item1,  const BaseClassDef *item2);
 int compareValues(const ClassDef *item1,      const ClassDef *item2);
-int compareValues(const DirDef *item1,        const DirDef *item2);
+
+int compareValues(const QSharedPointer<DirDef> item1,  const  QSharedPointer<DirDef> item2);
+
 int compareValues(const DotNode *item1,       const DotNode *item2); 
 int compareValues(const FileDef *item1,       const FileDef *item2);
 int compareValues(const FileList *item1,      const FileList *item2); 

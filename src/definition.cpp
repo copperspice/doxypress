@@ -78,7 +78,7 @@ class DefinitionImpl
    bool hidden;
    bool isArtificial;
 
-   Definition *outerScope;  // not owner
+   QSharedPointer<Definition> outerScope;  
 
    // where the item was found
    QByteArray defFileName;
@@ -90,10 +90,8 @@ class DefinitionImpl
 };
 
 DefinitionImpl::DefinitionImpl()
-   : sectionDict(0), sourceRefByDict(0), sourceRefsDict(0),
-     xrefListItems(0), partOfGroups(0),
-     details(0), inbodyDocs(0), brief(0), body(0), hidden(false), isArtificial(false),
-     outerScope(0), lang(SrcLangExt_Unknown)
+   : sectionDict(0), sourceRefByDict(0), sourceRefsDict(0), xrefListItems(0), partOfGroups(0),
+     details(0), inbodyDocs(0), brief(0), body(0), hidden(false), isArtificial(false), lang(SrcLangExt_Unknown)
 {
 }
 
@@ -127,9 +125,7 @@ void DefinitionImpl::init(const char *df, const char *n)
    } else {
       localName = n;
    }
-
-   //printf("m_localName=%s\n",m_localName.data());
-
+ 
    brief           = 0;
    details         = 0;
    body            = 0;
@@ -1236,20 +1232,15 @@ void Definition::addSourceReferences(QSharedPointer<MemberDef> md)
 
 QByteArray Definition::qualifiedName() const
 {
-   //static int count=0;
-   //count++;
-   if (!m_impl->qualifiedName.isEmpty()) {
-      //count--;
+   if (! m_impl->qualifiedName.isEmpty()) {     
       return m_impl->qualifiedName;
    }
-
-   //printf("start %s::qualifiedName() localName=%s\n",name().data(),m_impl->localName.data());
-   if (m_impl->outerScope == 0) {
-      if (m_impl->localName == "<globalScope>") {
-         //count--;
+   
+   if (! m_impl->outerScope) {
+      if (m_impl->localName == "<globalScope>") {       
          return "";
-      } else {
-         //count--;
+
+      } else {         
          return m_impl->localName;
       }
    }
@@ -1264,20 +1255,22 @@ QByteArray Definition::qualifiedName() const
    return m_impl->qualifiedName;
 }
 
-void Definition::setOuterScope(Definition *d)
-{
-   //printf("%s::setOuterScope(%s)\n",name().data(),d?d->name().data():"<none>");
-   Definition *p = m_impl->outerScope;
+void Definition::setOuterScope(QSharedPointer<Definition> d)
+{  
+   QSharedPointer<Definition> p = m_impl->outerScope;
    bool found = false;
-   // make sure that we are not creating a recursive scope relation.
-   while (p && !found) {
+
+   // make sure we are not creating a recursive scope relation
+   while (p && ! found) {
       found = (p == d);
       p = p->m_impl->outerScope;
    }
-   if (!found) {
+
+   if (! found) {
       m_impl->qualifiedName.resize(0); // flush cached scope name
       m_impl->outerScope = d;
    }
+
    m_impl->hidden = m_impl->hidden || d->isHidden();
 }
 
@@ -1368,6 +1361,7 @@ QByteArray Definition::pathFragment() const
       if (!result.isEmpty()) {
          result += "/";
       }
+
       if (definitionType() == Definition::TypeGroup && ((const GroupDef *)this)->groupTitle()) {
          result += ((const GroupDef *)this)->groupTitle();
 
@@ -1381,10 +1375,10 @@ QByteArray Definition::pathFragment() const
    } else {
       result += m_impl->localName;
    }
+
    return result;
 }
 
-//----------------------------------------------------------------------------------------
 
 // TODO: move to htmlgen
 /*! Returns the string used in the footer for $navpath when
@@ -1393,38 +1387,52 @@ QByteArray Definition::pathFragment() const
 QByteArray Definition::navigationPathAsString() const
 {
    QByteArray result;
-   Definition *outerScope = getOuterScope();
+   QSharedPointer<Definition> outerScope = getOuterScope();
+
    QByteArray locName = localName();
+
    if (outerScope && outerScope != Doxygen::globalScope) {
       result += outerScope->navigationPathAsString();
+
    } else if (definitionType() == Definition::TypeFile && ((const FileDef *)this)->getDirDef()) {
       result += ((const FileDef *)this)->getDirDef()->navigationPathAsString();
+
    }
+
    result += "<li class=\"navelem\">";
+
    if (isLinkable()) {
       if (definitionType() == Definition::TypeGroup && ((const GroupDef *)this)->groupTitle()) {
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension + "\">" +
                    ((const GroupDef *)this)->groupTitle() + "</a>";
+
       } else if (definitionType() == Definition::TypePage && !((const PageDef *)this)->title().isEmpty()) {
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension + "\">" +
                    ((const PageDef *)this)->title() + "</a>";
+
       } else if (definitionType() == Definition::TypeClass) {
          QByteArray name = locName;
+
          if (name.right(2) == "-p" /*|| name.right(2)=="-g"*/) {
             name = name.left(name.length() - 2);
          }
+
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension;
          if (!anchor().isEmpty()) {
             result += "#" + anchor();
          }
+
          result += "\">" + name + "</a>";
+
       } else {
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension + "\">" +
                    locName + "</a>";
       }
+
    } else {
       result += "<b>" + locName + "</b>";
    }
+
    result += "</li>";
    return result;
 }
@@ -1514,15 +1522,10 @@ void Definition::writeToc(OutputList &ol)
    ol.popGeneratorState();
 }
 
-//----------------------------------------------------------------------------------------
-
-
 QByteArray Definition::symbolName() const
 {
    return m_symbolName;
 }
-
-//----------------------
 
 QByteArray Definition::documentation() const
 {
@@ -1539,7 +1542,6 @@ QByteArray Definition::docFile() const
    return m_impl->details ? m_impl->details->file : QByteArray("<" + m_name + ">");
 }
 
-//----------------------------------------------------------------------------
 // strips w from s iff s starts with w
 static bool stripWord(QByteArray &s, QByteArray w)
 {
@@ -1602,23 +1604,33 @@ QByteArray Definition::briefDescription(bool abbr) const
 QByteArray Definition::briefDescriptionAsTooltip() const
 {
    if (m_impl->brief) {
-      if (m_impl->brief->tooltip.isEmpty() && !m_impl->brief->doc.isEmpty()) {
+      if (m_impl->brief->tooltip.isEmpty() && ! m_impl->brief->doc.isEmpty()) {
          static bool reentering = false;
 
-         if (!reentering) {
+         if (! reentering) {
             MemberDef *md = definitionType() == TypeMember ? (MemberDef *)this : 0;
-            const Definition *scope = definitionType() == TypeMember ? getOuterScope() : this;
-            reentering = true; // prevent requests for tooltips while parsing a tooltip
-            m_impl->brief->tooltip = parseCommentAsText(
-                                        scope, md,
-                                        m_impl->brief->doc,
-                                        m_impl->brief->file,
-                                        m_impl->brief->line);
+
+            QSharedPointer<Definition> scope;
+
+            if (definitionType() == TypeMember) {
+               scope = getOuterScope();
+
+            } else {
+               scope = this;
+
+            }
+
+            // prevent requests for tooltips while parsing a tooltip
+            reentering = true; 
+
+            m_impl->brief->tooltip = parseCommentAsText(scope, md, m_impl->brief->doc, m_impl->brief->file, m_impl->brief->line);
+
             reentering = false;
          }
       }
       return m_impl->brief->tooltip;
    }
+
    return QByteArray("");
 }
 
@@ -1631,8 +1643,6 @@ QByteArray Definition::briefFile() const
 {
    return m_impl->brief ? m_impl->brief->file : QByteArray("<" + m_name + ">");
 }
-
-//----------------------
 
 QByteArray Definition::inbodyDocumentation() const
 {
@@ -1714,7 +1724,7 @@ QSharedPointer<Definition> Definition::findInnerCompound(const char *)
    return QSharedPointer<Definition>();
 }
 
-Definition *Definition::getOuterScope() const
+QSharedPointer<Definition> Definition::getOuterScope() const
 {
    return m_impl->outerScope;
 }

@@ -24,13 +24,13 @@
  *
  *  This file contains main()
  */
-
-/*! Default main. The idea of separating this from the rest of doxygen,
- *  is to make it possible to write your own main, with a different
- *  generateOutput() function for instance.
- */
 int main(int argc, char **argv)
 {
+
+   // BROOM - test code for printf to unbuffer
+   setbuf(stdout, nullptr);
+
+
    // passed parameters
    QStringList argList;
 

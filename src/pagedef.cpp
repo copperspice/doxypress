@@ -172,6 +172,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.disableAllBut(OutputGenerator::Man);
    startFile(ol, getOutputFileBase(), manPageName, title(), HLI_Pages, !generateTreeView);
    ol.enableAll();
+
    ol.disable(OutputGenerator::Man);
    startFile(ol, getOutputFileBase(), pageName, title(), HLI_Pages, !generateTreeView);
    ol.popGeneratorState();
@@ -227,9 +228,10 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    writePageDocumentation(ol);
 
-   if (generateTreeView && getOuterScope() != Doxygen::globalScope && !Config_getBool("DISABLE_INDEX")) {
+   if (generateTreeView && getOuterScope() != Doxygen::globalScope && ! Config_getBool("DISABLE_INDEX")) {
       ol.endContents();
       endFileWithNavPath(getOuterScope(), ol);
+
    } else {
       endFile(ol);
    }
@@ -250,6 +252,9 @@ void PageDef::writePageDocumentation(OutputList &ol)
 
    ol.startTextBlock();
 
+
+printf("\n\n BROOM    ------->    PageDocumentation  begin ");
+
    ol.generateDoc(
       docFile(),           // fileName
       docLine(),           // startLine
@@ -259,6 +264,9 @@ void PageDef::writePageDocumentation(OutputList &ol)
       true,                // index words
       false                // not an example
    );
+
+printf("\n BROOM    ------->    PageDocumentation  done ");
+
    ol.endTextBlock();
 
    Doxygen::markdownSupport = markdownEnabled;
@@ -290,13 +298,16 @@ void PageDef::writePageDocumentation(OutputList &ol)
                sectionType = SectionInfo::Paragraph;
                break;
          }
+
          QByteArray title = subPage->title();
          if (title.isEmpty()) {
             title = subPage->name();
          }
+
          ol.startSection(subPage->name(), title, sectionType);
          ol.parseText(title);
          ol.endSection(subPage->name(), sectionType);
+
          Doxygen::subpageNestingLevel++;
          subPage->writePageDocumentation(ol);
          Doxygen::subpageNestingLevel--;

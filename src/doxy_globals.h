@@ -115,7 +115,7 @@ class Doxygen
 {
  public:
    static PageDef                          *mainPage;
-   static NamespaceDef                     *globalScope;
+   static QSharedPointer<NamespaceDef>      globalScope;
  
    static CiteDict                         *citeDict;
 
@@ -169,9 +169,9 @@ class Doxygen
    static QHash<QString, RefList>           *xrefLists;           // array of xref lists: todo, test, bug, deprecated ...
    static QHash<QString, int>               *htmlDirMap;
 
-   static QHash<QString, QSharedPointer<QList<Definition *>>> *symbolMap;
+   static QHash<QString, QSharedPointer<QList<QSharedPointer<Definition>>>> symbolMap;
 
-   static QHash<QString, Definition *> *clangUsrMap;
+   static QHash<QString, QSharedPointer<Definition>> clangUsrMap;
 
    static QHash<long, QSharedPointer<MemberGroupInfo>> memGrpInfoDict;
    static StringMap<QSharedPointer<DirRelation>> dirRelations; 

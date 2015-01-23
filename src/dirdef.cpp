@@ -84,11 +84,15 @@ bool DirDef::isLinkable() const
    return isReference() || isLinkableInProject();
 }
 
-void DirDef::addSubDir(DirDef *subdir)
+void DirDef::addSubDir(QSharedPointer<DirDef> subdir, QSharedPointer<DirDef> self)
 {
+   if (this != self) {
+      throw "broom";  // BROOM - fix the throw
+   }   
+
    m_subdirs.inSort(subdir);
 
-   subdir->setOuterScope(this);
+   subdir->setOuterScope(self);
    subdir->m_parent = this;
 }
 
@@ -223,13 +227,15 @@ void DirDef::writeSubDirList(OutputList &ol)
 
          if (!dd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
             ol.startMemberDescription(dd->getOutputFileBase());
-            ol.generateDoc(briefFile(), briefLine(), dd, 0, dd->briefDescription(),
+
+            ol.generateDoc(briefFile(), briefLine(), dd.data(), 0, dd->briefDescription(),
                            false, // indexWords
                            false, // isExample
                            0,     // exampleName
                            true,  // single line
                            true   // link from index
                           );
+
             ol.endMemberDescription();
          }
          ol.endMemberDeclaration(0, 0);
@@ -887,7 +893,7 @@ void buildDirectories()
          QSharedPointer<DirDef> parent = Doxygen::directories.find(name.left(i + 1));
         
          if (parent) {                       
-            parent->addSubDir(dir.data());
+            parent->addSubDir(dir, parent);
          }
       }
    }

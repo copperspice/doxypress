@@ -1290,7 +1290,7 @@ void PyVariableContext::addVariable(const QByteArray &type, const QByteArray &na
 
    QSharedPointer<ClassDef> varType;
 
-   if ( (varType = g_codeClassSDict[ltype]) || (varType = dummyShared(getResolvedClass(g_currentDefinition.data(), g_sourceFileDef, ltype))) ) {
+   if ( (varType = g_codeClassSDict[ltype]) || (varType = dummyShared(getResolvedClass(g_currentDefinition, g_sourceFileDef, ltype))) ) {
       // look for class definitions inside the code block
       // look for global class definitions   
 
@@ -1448,14 +1448,14 @@ static ClassDef *stripClassName(const char *s, QSharedPointer<Definition> d = g_
    while (extractClassNameFromType(type, pos, className, templSpec) != -1) {
       QByteArray clName = className + templSpec;
 
-      ClassDef *cd = 0;
+      QSharedPointer<ClassDef> cd;
 
       if (! g_classScope.isEmpty()) {
-         cd = getResolvedClass(d.data(), g_sourceFileDef, g_classScope + "::" + clName);
+         cd = getResolvedClass(d, g_sourceFileDef, g_classScope + "::" + clName);
       }
 
       if (cd == 0) {
-         cd = getResolvedClass(d.data(), g_sourceFileDef, clName);
+         cd = getResolvedClass(d, g_sourceFileDef, clName);
       }
 
       if (cd) {
@@ -1604,22 +1604,22 @@ static void codifyLines(char *text)
 static bool getLinkInScope(const QByteArray &c, const QByteArray &m,  const char *memberText, 
                            CodeOutputInterface &ol, const char *text )
 {
-   MemberDef    *md;
-   ClassDef     *cd;
-   FileDef      *fd;
-   NamespaceDef *nd;
-   GroupDef     *gd;
+   QSharedPointer<MemberDef>    md;
+   QSharedPointer<ClassDef>     cd;
+   QSharedPointer<FileDef>      fd;
+   QSharedPointer<NamespaceDef> nd;
+   QSharedPointer<GroupDef>     gd;
 
    if (getDefs(c, m, "()", md, cd, fd, nd, gd, FALSE, g_sourceFileDef) && md->isLinkable()) {
       
-      Definition *d = md->getOuterScope() == Doxygen::globalScope ? md->getBodyDef() : md->getOuterScope();
+      QSharedPointer<Definition> d = md->getOuterScope() == Doxygen::globalScope ? md->getBodyDef() : md->getOuterScope();
    
       if (md->getGroupDef()) {
          d = md->getGroupDef();
       }
 
       if (d && d->isLinkable()) {
-         g_theCallContext.setClass(stripClassName(md->typeString(), dummyShared(md->getOuterScope()) ));
+         g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()));
 
          if (g_currentDefinition && g_currentMemberDef && md != g_currentMemberDef && g_collectXRefs) {
             addDocCrossReference(g_currentMemberDef, dummyShared(md) );
@@ -1679,7 +1679,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
 
       QByteArray scope = substitute(className, ".", "::");
 
-      cd = getResolvedClass(d.data(), g_sourceFileDef, substitute(className, ".", "::"), &md);
+      cd = getResolvedClass(d, g_sourceFileDef, substitute(className, ".", "::"), &md);
 
       DBG_CTX((stderr, "d=%s g_sourceFileDef=%s\n", d ? d->displayName().data() : "<null>",
                g_currentDefinition ? g_currentDefinition->displayName().data() : "<null>"));
@@ -1713,7 +1713,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
       addToSearchIndex(className);
 
       if (md) {
-         Definition *d = md->getOuterScope() == Doxygen::globalScope ?
+         QSharedPointer<Definition> d = md->getOuterScope() == Doxygen::globalScope ?
                          md->getBodyDef() : md->getOuterScope();
 
          if (md->getGroupDef()) {
@@ -1732,7 +1732,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
          QByteArray scope = substitute(className.left(scopeEnd), ".", "::");
          QByteArray locName = className.right(className.length() - scopeEnd - 1);
 
-         ClassDef *mcd = getClass(scope);
+         QSharedPointer<ClassDef> mcd = getClass(scope);
 
          DBG_CTX((stderr, "scope=%s locName=%s mcd=%p\n", scope.data(), locName.data(), mcd));
 
@@ -1740,11 +1740,11 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
             MemberDef *md = mcd->getMemberByName(locName);
 
             if (md) {
-               g_theCallContext.setClass(stripClassName(md->typeString(), dummyShared(md->getOuterScope())) );
+               g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()) );
                writeMultiLineCodeLink(ol, md, clName);
                addToSearchIndex(className);
 
-               Definition *d = md->getOuterScope() == Doxygen::globalScope ?
+               QSharedPointer<Definition> d = md->getOuterScope() == Doxygen::globalScope ?
                                md->getBodyDef() : md->getOuterScope();
 
                if (md->getGroupDef()) {
@@ -1765,11 +1765,11 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
                MemberDef *md = mnd->getMemberByName(locName);
 
                if (md) {                 
-                  g_theCallContext.setClass(stripClassName(md->typeString(), dummyShared(md->getOuterScope())) );
+                  g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()) );
                   writeMultiLineCodeLink(ol, md, clName);
                   addToSearchIndex(className);
 
-                  Definition *d = md->getOuterScope() == Doxygen::globalScope ?
+                  QSharedPointer<Definition> d = md->getOuterScope() == Doxygen::globalScope ?
                                   md->getBodyDef() : md->getOuterScope();
 
                   if (md->getGroupDef()) {
@@ -1792,11 +1792,8 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
 }
 
 /*
-   As of June 1, this function seems to work
-   for file members, but scopes are not
-   being correctly tracked for classes
-   so it doesn't work for classes yet.
-
+   this function seems to work for file members, but scopes are not
+   being correctly tracked for classes so it doesn't work for classes yet
 */
 static void generateFunctionLink(CodeOutputInterface &ol, char *funcName)
 {
@@ -1835,7 +1832,7 @@ static bool findMemberLink(CodeOutputInterface &ol, Definition *sym, const char 
    if (sym->getOuterScope() && sym->getOuterScope()->definitionType() == Definition::TypeClass &&
          g_currentDefinition->definitionType() == Definition::TypeClass) {
 
-      ClassDef *cd = (ClassDef *)sym->getOuterScope();
+      QSharedPointer<ClassDef> cd     = sym->getOuterScope().dynamicCast<ClassDef>();
       QSharedPointer<ClassDef> thisCd = g_currentDefinition.dynamicCast<ClassDef>();
 
       if (sym->definitionType() == Definition::TypeMember) {
@@ -1861,9 +1858,9 @@ static void findMemberLink(CodeOutputInterface &ol, char *symName)
 {   
    if (g_currentDefinition) {  
 
-      auto di = Doxygen::symbolMap->find(symName);
+      auto di = Doxygen::symbolMap.find(symName);
 
-      if (di != Doxygen::symbolMap->end()) {      
+      if (di != Doxygen::symbolMap.end()) {      
            
          for (auto sym : **di) { 
             if (findMemberLink(ol, sym, symName)) {
@@ -3845,7 +3842,7 @@ static void adjustScopesAndSuites(unsigned indentLength)
          g_currentMemberDef = QSharedPointer<MemberDef>();
 
          if (g_currentDefinition) {
-            g_currentDefinition = dummyShared(g_currentDefinition->getOuterScope());
+            g_currentDefinition = g_currentDefinition->getOuterScope();
          }
       }
    }

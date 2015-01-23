@@ -327,7 +327,7 @@ class Entry
    }
 
  private:
-   void createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage, FileDef *fd, QSharedPointer<Entry> self);
+   void createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage, QSharedPointer<FileDef> fd, QSharedPointer<Entry> self);
 
    QWeakPointer<Entry> m_parent;               //!< parent node in the tree
    QList<QSharedPointer<Entry>>  m_sublist;    //!< entries that are children 
@@ -356,7 +356,7 @@ class EntryNav
       m_section = section;
    }
 
-   void setFileDef(FileDef *fd) {
+   void setFileDef( QSharedPointer<FileDef> fd) {
       m_fileDef = fd;
    }
 
@@ -392,7 +392,7 @@ class EntryNav
       return m_parent.toStrongRef();
    }
 
-   FileDef *fileDef() const {
+   QSharedPointer<FileDef> fileDef() const {
       return m_fileDef;
    }
 
@@ -408,7 +408,7 @@ class EntryNav
    QByteArray	 m_type;        //!< member type
    QByteArray   m_name;        //!< member name
    TagInfo     *m_tagInfo;     //!< tag file info
-   FileDef     *m_fileDef;
+   QSharedPointer<FileDef>     m_fileDef;
    SrcLangExt   m_lang;        //!< programming language in which this entry was found
 
    QSharedPointer<Entry> m_info;

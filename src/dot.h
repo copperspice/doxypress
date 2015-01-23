@@ -281,7 +281,8 @@ class DotCallGraph
 
    bool            m_inverse;
    QByteArray      m_diskName;
-   Definition     *m_scope;
+
+   QSharedPointer<Definition> m_scope;
 };
 
 /** Representation of an directory dependency graph */

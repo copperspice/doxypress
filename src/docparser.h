@@ -176,16 +176,21 @@ template<class T> class CompAccept
       v->visitPre(obj);
 
       for (auto n : m_children) {
+
 //  printf("\n BROOM   accept() issue  %s  %s  %s", typeid(T).name(), typeid(*n).name(), typeid(*v).name() );
 
          n->accept(v);
-
-//   printf("\n BROOM  XX  %s  %s  %s", typeid(T).name(), typeid(*n).name(), typeid(*v).name() );
       }
 
       v->visitPost(obj);
 
-printf("\n BROOM  YY issue  %s  %s", typeid(T).name(), typeid(*v).name());
+
+/*
+QByteArray temp = typeid(*v).name();
+if (temp.contains("TextDocVis")) {
+   printf("\n BROOM  YY issue  %s  %s", typeid(T).name(), typeid(*v).name());
+}
+*/
 
    }
 

@@ -132,15 +132,14 @@ void initDoxygen()
 #ifdef USE_LIBCLANG
    Doxygen::clangUsrMap       = new QHash<QString, Definition *>();
 #endif
-
-   Doxygen::symbolMap         = new QHash<QString, QSharedPointer<QList<Definition *>>>();
+ 
    Doxygen::inputNameList     = new SortedList<FileName *>;
 
    Doxygen::memberNameSDict   = new MemberNameSDict();
    Doxygen::functionNameSDict = new MemberNameSDict();
    Doxygen::groupSDict        = new GroupSDict();
 
-   Doxygen::globalScope       = new NamespaceDef("<globalScope>", 1, 1, "<globalScope>");
+   Doxygen::globalScope       = QMakeShared<NamespaceDef>("<globalScope>", 1, 1, "<globalScope>");
 
    Doxygen::namespaceSDict    = new NamespaceSDict();
    Doxygen::classSDict        = new ClassSDict();
@@ -191,8 +190,7 @@ void cleanUpDoxygen()
    delete Doxygen::diaFileNameDict;
    delete Doxygen::mainPage;
    delete Doxygen::pageSDict;
-   delete Doxygen::exampleSDict;
-   delete Doxygen::globalScope;
+   delete Doxygen::exampleSDict;  
    delete Doxygen::xrefLists;
    delete Doxygen::parserManager;
    
@@ -200,9 +198,6 @@ void cleanUpDoxygen()
 
    delete theTranslator;
    delete Doxy_Globals::g_outputList;
-
-   delete Doxygen::symbolMap;
-   Doxygen::symbolMap = 0;
   
    Mappers::freeMappers();
    codeFreeScanner();

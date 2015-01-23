@@ -41,9 +41,11 @@ class PageDef : public Definition
    DefType definitionType() const {
       return TypePage;
    }
+
    bool isLinkableInProject() const {
       return /*hasDocumentation() &&*/ !isReference();
    }
+
    bool isLinkable() const {
       return isLinkableInProject() || isReference();
    }

@@ -60,14 +60,15 @@ class DirDef : public Definition
       return m_shortName;
    }
 
-   void addSubDir(DirDef *subdir);
+   void addSubDir(QSharedPointer<DirDef> subdir, QSharedPointer<DirDef>);
+
    FileList *getFiles() const        {
       return m_fileList;
    }
 
    void addFile(FileDef *fd);
 
-   const SortedList<DirDef *> &subDirs() const {
+   const SortedList<QSharedPointer<DirDef>> subDirs() const {
       return m_subdirs;
    }
 
@@ -126,7 +127,7 @@ class DirDef : public Definition
    void addUsesDependency(DirDef *usedDir, FileDef *srcFd,FileDef *dstFd, bool inherited);
    void computeDependencies();
 
-   SortedList<DirDef *> m_subdirs;
+   SortedList<QSharedPointer<DirDef>> m_subdirs;
 
    QString m_dispName;
    QString m_shortName;
@@ -229,7 +230,7 @@ class DirSDict : public StringMap<QSharedPointer<DirDef>>
  public:
    DirSDict() : StringMap<QSharedPointer<DirDef>>() {}
 
-   int compareValues(const DirDef *item1, const DirDef *item2) const {
+   int compareValues(const QSharedPointer<DirDef> item1, const QSharedPointer<DirDef> item2) const {
       return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
    }
 };

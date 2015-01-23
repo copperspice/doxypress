@@ -256,7 +256,7 @@ class Definition : public DefinitionIntf
    QList<ListItemInfo> *xrefListItems() const;
 
    virtual QSharedPointer<Definition> findInnerCompound(const char *name);
-   virtual Definition *getOuterScope() const;
+   virtual QSharedPointer<Definition> getOuterScope() const;
 
    MemberSDict *getReferencesMembers() const;
    MemberSDict *getReferencedByMembers() const;
@@ -313,7 +313,7 @@ class Definition : public DefinitionIntf
    virtual void addInnerCompound(QSharedPointer<Definition> d)
    {};   
 
-   virtual void setOuterScope(Definition *d);
+   virtual void setOuterScope(QSharedPointer<Definition> d);
    virtual void setHidden(bool b);
 
    void setArtificial(bool b);

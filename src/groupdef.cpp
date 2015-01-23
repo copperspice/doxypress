@@ -180,7 +180,7 @@ bool GroupDef::addNamespace(QSharedPointer<NamespaceDef> def)
    return false;
 }
 
-void GroupDef::addDir(DirDef *def)
+void GroupDef::addDir(QSharedPointer<DirDef> def)
 {
    if (def->isHidden()) {
       return;
