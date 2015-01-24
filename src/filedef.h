@@ -224,7 +224,7 @@ class FileDef : public Definition
    void finishParsing();
 
    friend void generatedFileNames();
-   void insertMember(MemberDef *md);
+   void insertMember(QSharedPointer<MemberDef> md);
    void insertClass(QSharedPointer<ClassDef> cd);
    void insertNamespace(QSharedPointer<NamespaceDef> nd);
    void computeAnchors();
@@ -247,7 +247,7 @@ class FileDef : public Definition
    void addIncludeDependency(FileDef *fd, const char *incName, bool local, bool imported, bool indirect);
    void addIncludedByDependency(FileDef *fd, const char *incName, bool local, bool imported);
 
-   void addMembersToMemberGroup();
+   void addMembersToMemberGroup(QSharedPointer<FileDef> self);
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
    void addIncludedUsingDirectives();

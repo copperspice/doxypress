@@ -179,7 +179,7 @@ class ClassDef : public Definition
    /** Returns the file in which this compound's definition can be found.
     *  Should not return 0 (but it might be a good idea to check anyway).
     */
-   FileDef      *getFileDef() const;
+   QSharedPointer<FileDef> getFileDef() const;
 
    /** Returns the Java package this class is in or 0 if not applicable.
     */
@@ -190,7 +190,7 @@ class ClassDef : public Definition
     *  class. This function will recusively traverse all branches of the
     *  inheritance tree.
     */
-   bool isBaseClass(ClassDef *bcd, bool followInstances, int level = 0);
+   bool isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, int level = 0);
 
    /** Returns true iff \a bcd is a direct or indirect sub class of this
     *  class.
@@ -205,7 +205,7 @@ class ClassDef : public Definition
    /** Returns a sorted dictionary with all template instances found for
     *  this template class. Returns 0 if not a template or no instances.
     */
-   QHash<QString, ClassDef> *getTemplateInstances() const;
+   QHash<QString, QSharedPointer<ClassDef>> *getTemplateInstances() const;
 
    /** Returns the template master of which this class is an instance.
     *  Returns 0 if not applicable.
@@ -317,15 +317,15 @@ class ClassDef : public Definition
    QString getMemberListFileName() const;
    bool subGrouping() const;
 
-   void insertBaseClass(ClassDef *, const char *name, Protection p, Specifier s, const char *t = 0);
-   void insertSubClass(ClassDef *, Protection p, Specifier s, const char *t = 0);
-   void setIncludeFile(FileDef *fd, const char *incName, bool local, bool force);
-   void insertMember(MemberDef *);
-   void insertUsedFile(FileDef *);
+   void insertBaseClass(QSharedPointer<ClassDef> cd, const char *name, Protection p, Specifier s, const char *t = 0);
+   void insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifier s, const char *t = 0);
+   void setIncludeFile(QSharedPointer<FileDef> fd, const char *incName, bool local, bool force);
+   void insertMember(QSharedPointer<MemberDef> );
+   void insertUsedFile(QSharedPointer<FileDef> fd);
    bool addExample(const char *anchor, const char *name, const char *file);
    void mergeCategory(ClassDef *category);
    void setNamespace(NamespaceDef *nd);
-   void setFileDef(FileDef *fd);
+   void setFileDef(QSharedPointer<FileDef> fd);
    void setSubGrouping(bool enabled);
    void setProtection(Protection p);
    void setGroupDefForAllMembers(GroupDef *g, Grouping::GroupPri_t pri, const QByteArray &fileName, int startLine, bool hasDocs);
@@ -336,7 +336,7 @@ class ClassDef : public Definition
                                     const QByteArray &templSpec, bool &freshInstance);
 
    void addUsedClass(ClassDef *cd, const char *accessName, Protection prot);
-   void addUsedByClass(ClassDef *cd, const char *accessName, Protection prot);
+   void addUsedByClass(QSharedPointer<ClassDef> cd, const char *accessName, Protection prot);
    void setIsStatic(bool b);
    void setCompoundType(CompoundType t);
    void setClassName(const char *name);
@@ -346,7 +346,7 @@ class ClassDef : public Definition
    void setTemplateBaseClassNames(QHash<QString, int> *templateNames);
    void setTemplateMaster(ClassDef *tm);
    void setTypeConstraints(ArgumentList *al);
-   void addMembersToTemplateInstance(ClassDef *cd, const char *templSpec);
+   void addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const char *templSpec);
    void makeTemplateArgument(bool b = true);
    void setCategoryOf(ClassDef *cd);
    void setUsedOnly(bool b);
@@ -357,7 +357,7 @@ class ClassDef : public Definition
 
    // actions
    void findSectionsInDocumentation();
-   void addMembersToMemberGroup();
+   void addMembersToMemberGroup(QSharedPointer<ClassDef> self);
    void addListReferences();
    void computeAnchors();
    void mergeMembers();

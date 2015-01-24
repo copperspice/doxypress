@@ -74,10 +74,10 @@ class GroupDef : public Definition
       return titleSet;
    }
 
-   void addFile(FileDef *def);
+   void addFile(QSharedPointer<FileDef> def);
    bool addClass(QSharedPointer<ClassDef> cd);
    bool addNamespace(QSharedPointer<NamespaceDef> def);
-   void addGroup(GroupDef *def);  
+   void addGroup(QSharedPointer<GroupDef> def);  
    void addPage(QSharedPointer<PageDef> def);
    void addExample(QSharedPointer<PageDef> def);
    void addDir(QSharedPointer<DirDef> def);
@@ -95,7 +95,7 @@ class GroupDef : public Definition
    bool isASubGroup() const;
    void computeAnchors();
 
-   void addMembersToMemberGroup();
+   void addMembersToMemberGroup(QSharedPointer<GroupDef> self);
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
 
@@ -227,7 +227,7 @@ class GroupSDict : public StringMap<QSharedPointer<GroupDef>>
 void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd);
 void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDef> nd);
 void addGroupToGroups(QSharedPointer<Entry> root, GroupDef *subGroup);
-void addMemberToGroups(QSharedPointer<Entry> root, MemberDef *md);
+void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md);
 void addPageToGroups(Entry *root, PageDef *pd);
 void addExampleToGroups(Entry *root, QSharedPointer<PageDef> eg);
 void addDirToGroups(QSharedPointer<Entry> root, DirDef *dd);

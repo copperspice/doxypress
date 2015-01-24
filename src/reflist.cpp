@@ -192,5 +192,5 @@ void RefList::generatePage()
 
    doc += "</dl>\n";
 
-   addRelatedPage(m_listName, m_pageTitle, doc, 0, m_listName, 1, 0, 0, 0);
+   addRelatedPage(m_listName, m_pageTitle, doc, 0, m_listName, 1, 0, QSharedPointer<GroupDef>(), 0);
 }

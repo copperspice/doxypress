@@ -215,17 +215,12 @@ void Qhp::addContentsItem(bool /*isDir*/, const QString &name, const char * /*re
    }
 }
 
-void Qhp::addIndexItem(Definition *context, MemberDef *md,
+void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md,
                        const char *sectionAnchor, const char *word)
 {
-   (void)word;
-   //printf("addIndexItem(%s %s %s\n",
-   //       context?context->name().data():"<none>",
-   //       md?md->name().data():"<none>",
-   //       word);
-
    if (md) { // member
       static bool separateMemberPages = Config_getBool("SEPARATE_MEMBER_PAGES");
+
       if (context == 0) { // global member
          if (md->getGroupDef()) {
             context = md->getGroupDef();
@@ -233,9 +228,11 @@ void Qhp::addIndexItem(Definition *context, MemberDef *md,
             context = md->getFileDef();
          }
       }
+
       if (context == 0) {
          return;   // should not happen
       }
+
       QByteArray cfname  = md->getOutputFileBase();
       QByteArray cfiname = context->getOutputFileBase();
       QByteArray level1  = context->name();
@@ -248,13 +245,15 @@ void Qhp::addIndexItem(Definition *context, MemberDef *md,
       // <keyword name="foo" id="MyApplication::foo" ref="doc.html#foo"/>
       ref = makeRef(contRef, anchor);
       QByteArray id = level1 + "::" + level2;
+
       const char *attributes[] = {
          "name", level2,
          "id",   id,
          "ref",  ref,
-         0
-      };
+         0};
+
       m_index.openClose("keyword", attributes);
+
    } else if (context) { // container
       // <keyword name="Foo" id="Foo" ref="doc.html#Foo"/>
       QByteArray contRef = context->getOutputFileBase();

@@ -2510,14 +2510,16 @@ QByteArray MemberDef::displayDefinition() const
 
 void MemberDef::_writeGroupInclude(OutputList &ol, bool inGroup)
 {
-   // only write out the include file if this is not part of a class or file
-   // definition
+   // only write out the include file if this is not part of a class or file definition
    static bool showGroupedMembInc = Config_getBool("SHOW_GROUPED_MEMB_INC");
-   FileDef *fd = getFileDef();
+
+   QSharedPointer<FileDef> fd = getFileDef();
    QByteArray nm;
+
    if (fd) {
       nm = getFileDef()->docName();
    }
+
    if (inGroup && fd && showGroupedMembInc && !nm.isEmpty()) {
       ol.startParagraph();
       ol.startTypewriter();
@@ -3243,8 +3245,9 @@ void MemberDef::warnIfUndocumented()
 
    ClassDef     *cd = getClassDef();
    NamespaceDef *nd = getNamespaceDef();
-   FileDef      *fd = getFileDef();
+   QSharedPointer<FileDef> fd = getFileDef();
    GroupDef     *gd = getGroupDef();
+
    Definition *d = 0;
 
    const char *t = 0;
@@ -3384,10 +3387,9 @@ void MemberDef::setAnchor()
    m_impl->anc = "a" + sigStr;
 }
 
-void MemberDef::setGroupDef(GroupDef *gd, Grouping::GroupPri_t pri, const QByteArray &fileName, 
+void MemberDef::setGroupDef(QSharedPointer<GroupDef> gd, Grouping::GroupPri_t pri, const QByteArray &fileName, 
                             int startLine, bool hasDocs, MemberDef *member)
-{
-   //printf("%s MemberDef::setGroupDef(%s)\n",name().data(),gd->name().data());
+{   
    m_impl->group = gd;
    m_impl->grouppri = pri;
    m_impl->groupFileName = fileName;
@@ -3420,7 +3422,7 @@ void MemberDef::setMemberClass(QSharedPointer<ClassDef> cd)
    setOuterScope(cd);
 }
 
-void MemberDef::setNamespace(NamespaceDef *nd)
+void MemberDef::setNamespace(QSharedPointer<NamespaceDef> nd)
 {
    m_impl->nspace = nd;
    setOuterScope(nd);
@@ -4115,7 +4117,7 @@ ClassDef *MemberDef::getClassDef() const
    return m_impl->classDef;
 }
 
-FileDef  *MemberDef::getFileDef() const
+QSharedPointer<FileDef> MemberDef::getFileDef() const
 {
    return m_impl->fileDef;
 }
@@ -4507,7 +4509,7 @@ bool MemberDef::showInCallGraph() const
           isObjCMethod();
 }
 
-ClassDef *MemberDef::relatedAlso() const
+QSharedPointer<ClassDef> MemberDef::relatedAlso() const
 {
    return m_impl->relatedAlso;
 }
@@ -4612,7 +4614,7 @@ bool MemberDef::isTypedefValCached() const
    return m_impl->isTypedefValCached;
 }
 
-ClassDef *MemberDef::getCachedTypedefVal() const
+QSharedPointer<ClassDef> MemberDef::getCachedTypedefVal() const
 {
    return m_impl->cachedTypedefValue;
 }
@@ -4628,22 +4630,22 @@ QByteArray MemberDef::getCachedResolvedTypedef() const
    return m_impl->cachedResolvedType;
 }
 
-MemberDef *MemberDef::memberDefinition() const
+QSharedPointer<MemberDef> MemberDef::memberDefinition() const
 {
    return m_impl->memDef;
 }
 
-MemberDef *MemberDef::memberDeclaration() const
+QSharedPointer<MemberDef> MemberDef::memberDeclaration() const
 {
    return m_impl->memDec;
 }
 
-MemberDef *MemberDef::inheritsDocsFrom() const
+QSharedPointer<MemberDef> MemberDef::inheritsDocsFrom() const
 {
    return m_impl->docProvider;
 }
 
-MemberDef *MemberDef::getGroupAlias() const
+QSharedPointer<MemberDef> MemberDef::getGroupAlias() const
 {
    return m_impl->groupAlias;
 }
@@ -4659,7 +4661,7 @@ void MemberDef::setDefinition(const char *d)
    m_impl->def = d;
 }
 
-void MemberDef::setFileDef(FileDef *fd)
+void MemberDef::setFileDef(QSharedPointer<FileDef> fd)
 {
    m_impl->fileDef = fd;
    m_isLinkableCached = 0;
@@ -4747,12 +4749,12 @@ void MemberDef::setArgsString(const char *as)
    m_impl->args = as;
 }
 
-void MemberDef::setRelatedAlso(ClassDef *cd)
+void MemberDef::setRelatedAlso(QSharedPointer<ClassDef> cd)
 {
    m_impl->relatedAlso = cd;
 }
 
-void MemberDef::setEnumClassScope(ClassDef *cd)
+void MemberDef::setEnumClassScope(QSharedPointer<ClassDef> cd)
 {
    m_impl->classDef = cd;
    m_isLinkableCached = 0;

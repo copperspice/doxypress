@@ -104,8 +104,8 @@ void OutputList::popGeneratorState()
    }
 }
 
-bool OutputList::generateDoc(const char *fileName, int startLine, Definition *ctx, MemberDef *md, const QByteArray &docStr,
-                             bool indexWords, bool isExample, const char *exampleName, bool singleLine, bool linkFromIndex)
+bool OutputList::generateDoc(const char *fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md, 
+               const QByteArray &docStr, bool indexWords, bool isExample, const char *exampleName, bool singleLine, bool linkFromIndex)
 {
    int count = 0;
 

@@ -31,7 +31,6 @@
 #include <outputlist.h>
 #include <util.h>
 
-// must appear after the previous include - resolve soon 
 #include <doxy_globals.h>
 
 MemberGroup::MemberGroup()
@@ -73,7 +72,7 @@ void MemberGroup::insertMember(MemberDef *md)
    memberList->append(md);
 
    // copy the group of the first member in the memberGroup
-   GroupDef *gd;
+   QSharedPointer<GroupDef> gd;
 
    if (firstMd && (gd = firstMd->getGroupDef())) {
       md->setGroupDef(gd, firstMd->getGroupPri(), firstMd->getGroupFileName(), 
@@ -274,9 +273,10 @@ QByteArray MemberGroup::anchor() const
    return "amgrp" + sigStr;
 }
 
-void MemberGroup::addListReferences(Definition *def)
+void MemberGroup::addListReferences(QSharedPointer<Definition> def)
 {
    memberList->addListReferences(def);
+
    if (m_xrefListItems && def) {
       QByteArray name = def->getOutputFileBase() + "#" + anchor();
       addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, 0, def);

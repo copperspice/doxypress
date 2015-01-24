@@ -1078,8 +1078,10 @@ void writeJavascriptSearchIndex()
 
                   if (d->getOuterScope() != Doxygen::globalScope) {
                      ti << "'" << convertToXML(d->getOuterScope()->name()) << "'";
+
                   } else if (md) {
-                     FileDef *fd = md->getBodyDef();
+                     QSharedPointer<FileDef> fd = md->getBodyDef();
+
                      if (fd == 0) {
                         fd = md->getFileDef();
                      }
@@ -1178,7 +1180,8 @@ void writeJavascriptSearchIndex()
                         // in global scope
 
                         if (md) {
-                           FileDef *fd = md->getBodyDef();
+                           QSharedPointer<FileDef> fd = md->getBodyDef();
+
                            if (fd == 0) {
                               fd = md->getFileDef();
                            }

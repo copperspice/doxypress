@@ -39,7 +39,9 @@ class IndexIntf
    virtual void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor, 
                                 bool separateIndex, bool addToNavIndex, Definition *def) = 0;
 
-   virtual void addIndexItem(Definition *context, MemberDef *md, const char *sectionAnchor, const char *title) = 0;
+   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
+                             const char *title) = 0;
+
    virtual void addIndexFile(const char *name) = 0;
    virtual void addImageFile(const char *name) = 0;
    virtual void addStyleSheetFile(const char *name) = 0;
@@ -165,9 +167,10 @@ class IndexList : public IndexIntf
       }
    }
 
-   void addIndexItem(Definition *context, MemberDef *md, const char *sectionAnchor = 0, const char *title = 0) {
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor = 0, 
+                     const char *title = 0) {   
       if (m_enabled) {
-         call_forEach<Definition *, MemberDef *, const char *, const char *>
+         call_forEach<QSharedPointer<Definition>, QSharedPointer<MemberDef>, const char *, const char *>
            (&IndexIntf::addIndexItem, context, md, sectionAnchor, title);
       }
    }

@@ -274,7 +274,8 @@ void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storag
    m_sublist.clear();   
 }
 
-void Entry::createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage *storage, FileDef *fd, QSharedPointer<Entry> self)
+void Entry::createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage *storage, QSharedPointer<FileDef> fd, 
+                                  QSharedPointer<Entry> self)
 {
    createSubtreeIndex(rootNav, storage, fd, self);
 }

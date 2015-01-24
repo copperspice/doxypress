@@ -20,6 +20,7 @@
 #include <classlist.h>
 #include <docparser.h>
 #include <doxygen.h>
+#include <doxy_globals.h>
 #include <language.h>
 #include <layout.h>
 #include <memberlist.h>
@@ -29,9 +30,6 @@
 #include <namespacedef.h>
 #include <outputlist.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 NamespaceDef::NamespaceDef(const char *df, int dl, int dc, const char *name, const char *lref, QString fName, 
                            const char *type, bool isPublished) 
@@ -102,7 +100,7 @@ void NamespaceDef::findSectionsInDocumentation()
    }
 }
 
-void NamespaceDef::insertUsedFile(FileDef *fd)
+void NamespaceDef::insertUsedFile(QSharedPointer<FileDef> fd)
 {
    if (fd == 0) {
       return;
@@ -152,11 +150,15 @@ void NamespaceDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
    }
 }
 
-void NamespaceDef::addMembersToMemberGroup()
+void NamespaceDef::addMembersToMemberGroup(QSharedPointer<NamespaceDef> self)
 {  
+   if (self != this) {
+      throw "broom"; // broom 
+   }
+
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
-         ::addMembersToMemberGroup(ml.data(), &memberGroupSDict, this);
+         ::addMembersToMemberGroup(ml.data(), &memberGroupSDict, self);
       }
    }
 

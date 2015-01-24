@@ -246,7 +246,7 @@ class Definition : public DefinitionIntf
    /*! Returns the file in which the body of this item is located or 0 if no
     *  body is available.
     */
-   FileDef *getBodyDef() const;
+   QSharedPointer<FileDef> getBodyDef() const;
 
    /** Returns the programming language this definition was written in. */
    SrcLangExt getLanguage() const;
@@ -303,7 +303,7 @@ class Definition : public DefinitionIntf
 
    // source references
    void setBodySegment(int bls, int ble);
-   void setBodyDef(FileDef *fd);
+   void setBodyDef(QSharedPointer<FileDef> fd);
    void addSourceReferencedBy(QSharedPointer<MemberDef>d);
    void addSourceReferences(QSharedPointer<MemberDef>d);
 

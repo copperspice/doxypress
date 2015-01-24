@@ -114,7 +114,7 @@ class Statistics
 class Doxygen
 {
  public:
-   static PageDef                          *mainPage;
+   static QSharedPointer<PageDef>           mainPage;
    static QSharedPointer<NamespaceDef>      globalScope;
  
    static CiteDict                         *citeDict;

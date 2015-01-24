@@ -52,7 +52,7 @@ void PageDef::findSectionsInDocumentation()
    docFindSections(documentation(), this, 0, docFile());
 }
 
-GroupDef *PageDef::getGroupDef() const
+QSharedPointer<GroupDef> PageDef::getGroupDef() const
 {
    SortedList<GroupDef *> *groups = partOfGroups();
 

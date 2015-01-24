@@ -56,10 +56,11 @@
 #include <doxy_globals.h>
 
 struct FindFileCacheElem {
-   FindFileCacheElem(FileDef *fd, bool ambig) : fileDef(fd), isAmbig(ambig) 
+   FindFileCacheElem(QSharedPointer<FileDef> fd, bool ambig) 
+      : fileDef(fd), isAmbig(ambig) 
    {}
 
-   FileDef *fileDef;
+   QSharedPointer<FileDef> fileDef;
    bool isAmbig;
 };
 
@@ -76,10 +77,10 @@ struct FindFileCacheElem {
 
 const int MAX_STACK_SIZE = 1000;
 
-static QHash<QString, MemberDef *>         s_resolvedTypedefs;
-static QHash<QString, Definition *>        s_visitedNamespaces;
-static QCache<QString, FindFileCacheElem>  s_findFileDefCache;
-static QHash<QString, int>                 s_extLookup;
+static QHash<QString, QSharedPointer<MemberDef>>   s_resolvedTypedefs;
+static QHash<QString, QSharedPointer<Definition>>  s_visitedNamespaces;
+static QCache<QString, FindFileCacheElem>          s_findFileDefCache;
+static QHash<QString, int>                         s_extLookup;
 
 // forward declaration
 static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const char *n, 
@@ -417,7 +418,8 @@ int guessSection(const char *name)
    return 0;
 }
 
-QByteArray resolveTypeDef(Definition *context, const QByteArray &qualifiedName, Definition **typedefContext)
+QByteArray resolveTypeDef(QSharedPointer<Definition> context, const QByteArray &qualifiedName, 
+                          QSharedPointer<Definition> *typedefContext)
 {
    QByteArray result;
 
@@ -425,7 +427,7 @@ QByteArray resolveTypeDef(Definition *context, const QByteArray &qualifiedName, 
       return result;
    }
 
-   Definition *mContext = context;
+   QSharedPointer<Definition> mContext = context;
    if (typedefContext) {
       *typedefContext = context;
    }
@@ -446,14 +448,15 @@ QByteArray resolveTypeDef(Definition *context, const QByteArray &qualifiedName, 
 
    while (mContext && md == 0) {
       // step 1: get the right scope
-      Definition *resScope = mContext;
+      QSharedPointer<Definition> resScope = mContext;
 
       if (scopeIndex != -1) {
          // split-off scope part
          QByteArray resScopeName = qualifiedName.left(scopeIndex);
          
          // look-up scope in context
-         int is, ps = 0;
+         int is;
+         int ps = 0;
          int l;
 
          while ((is = getScopeFragment(resScopeName, ps, &l)) != -1) {
@@ -464,7 +467,7 @@ QByteArray resolveTypeDef(Definition *context, const QByteArray &qualifiedName, 
                qualScopePart = tmp;
             }
 
-            resScope = resScope->findInnerCompound(qualScopePart).data();
+            resScope = resScope->findInnerCompound(qualScopePart);
            
             if (resScope == 0) {
                break;
@@ -480,6 +483,7 @@ QByteArray resolveTypeDef(Definition *context, const QByteArray &qualifiedName, 
 
          if (resScope->definitionType() == Definition::TypeClass) {
             mnd = Doxygen::memberNameSDict;
+
          } else {
             mnd = Doxygen::functionNameSDict;
          }
@@ -492,7 +496,7 @@ QByteArray resolveTypeDef(Definition *context, const QByteArray &qualifiedName, 
             for (auto tmd : *mn) {   
 
                if (tmd->isTypedef()) {
-                  int dist = isAccessibleFrom(resScope, 0, tmd.data());
+                  int dist = isAccessibleFrom(resScope, QSharedPointer<FileDef>(), tmd);
 
                   if (dist != -1 && (md == 0 || dist < minDist)) {
                      md = tmd;
@@ -582,8 +586,9 @@ QSharedPointer<NamespaceDef> getResolvedNamespace(const char *name)
  *
  *  Example: typedef int T; will return 0, since "int" is not a class.
  */
-ClassDef *newResolveTypedef(FileDef *fileScope, MemberDef *md,  MemberDef **pMemType, QByteArray *pTemplSpec,
-                            QByteArray *pResolvedType, ArgumentList *actTemplParams)
+QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<FileDef> fileScope, QSharedPointer<MemberDef> md,  
+                  QSharedPointer<MemberDef> *pMemType, QByteArray *pTemplSpec, QByteArray *pResolvedType, 
+                  ArgumentList *actTemplParams)
 {
    bool isCached = md->isTypedefValCached(); // value already cached
 
@@ -602,16 +607,16 @@ ClassDef *newResolveTypedef(FileDef *fileScope, MemberDef *md,  MemberDef **pMem
   
    QByteArray qname = md->qualifiedName();
    if (s_resolvedTypedefs.contains(qname)) {
-      return 0;   // typedef already done
+      return QSharedPointer<ClassDef>;   // typedef already done
    }
 
    // put on the trace list
    s_resolvedTypedefs.insert(qname, md); 
 
-   ClassDef *typeClass = md->getClassDef();
+   QSharedPointer<ClassDef> typeClass = md->getClassDef();
    QByteArray type = md->typeString();
 
-    // get the "value" of the typedef
+   // get the "value" of the typedef
    if (typeClass && typeClass->isTemplate() && actTemplParams && actTemplParams->count() > 0) { 
       type = substituteTemplateArgumentsInString(type, typeClass->templateArguments(), actTemplParams);
    }
@@ -637,7 +642,7 @@ ClassDef *newResolveTypedef(FileDef *fileScope, MemberDef *md,  MemberDef **pMem
       sp++;
    }
 
-   MemberDef *memTypeDef = nullptr;
+   QSharedPointer<MemberDef> memTypeDef;
    QSharedPointer<ClassDef> result = getResolvedClassRec(md->getOuterScope(), fileScope, type, &memTypeDef, 0, pResolvedType);
 
    // if type is a typedef then return what it resolves to.
@@ -718,8 +723,8 @@ done:
 /*! Substitutes a simple unqualified \a name within \a scope. Returns the
  *  value of the typedef or \a name if no typedef was found.
  */
-static QByteArray substTypedef(Definition *scope, FileDef *fileScope, const QByteArray &name, 
-                               MemberDef **pTypeDef = 0)
+static QByteArray substTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QByteArray &name, 
+                               QSharedPointer<MemberDef> *pTypeDef = nullptr)
 {
    QByteArray result = name;
 
@@ -728,27 +733,27 @@ static QByteArray substTypedef(Definition *scope, FileDef *fileScope, const QByt
    }
 
    // lookup scope fragment in the symbol map
-   auto di = Doxygen::symbolMap->find(name);
+   auto di = Doxygen::symbolMap.find(name);
 
-   if (di == Doxygen::symbolMap->end()) {
+   if (di == Doxygen::symbolMap.end()) {
       // could not find any matching symbols
       return 0;   
    }
 
    int minDistance = 10000; // init at "infinite"
 
-   MemberDef *bestMatch = nullptr;
+   QSharedPointer<MemberDef> bestMatch;
 
-   QSharedPointer<QList<Definition *>> dl;  
+   QSharedPointer<QList<QSharedPointer<Definition>>> dl;  
    dl = *di;  
     
-    // search for the best match  
+   // search for the best match  
    for (auto d : *dl) {
       // only look at members
 
       if (d->definitionType() == Definition::TypeMember) {
          // that are also typedefs
-         MemberDef *md = dynamic_cast<MemberDef *>(d);   
+         QSharedPointer<MemberDef> md = d.dynamicCast<MemberDef>(); 
 
          if (md->isTypedef()) { 
             // d is a typedef, test accessibility of typedef within scope
@@ -796,24 +801,25 @@ static QSharedPointer<Definition> endOfPathIsUsedClass(StringMap<QSharedPointer<
  *  searched. If found the scope definition is returned, otherwise 0
  *  is returned.
  */
-static Definition *followPath(Definition *start, FileDef *fileScope, const QByteArray &path)
+static QSharedPointer<Definition> followPath(QSharedPointer<Definition> start, QSharedPointer<FileDef> fileScope, const QByteArray &path)
 {
-   int is, ps;
+   int is;
+   int ps;
    int l;
 
-   Definition *current = start;
+   QSharedPointer<Definition> current = start;
    ps = 0;
    
    // for each part of the explicit scope
 
    while ((is = getScopeFragment(path, ps, &l)) != -1) {
       // try to resolve the part if it is a typedef
-      MemberDef *typeDef = nullptr;
+      QSharedPointer<MemberDef> typeDef;
 
       QByteArray qualScopePart = substTypedef(current, fileScope, path.mid(is, l), &typeDef);
       
       if (typeDef) {
-         ClassDef *type = newResolveTypedef(fileScope, typeDef);
+         QSharedPointer<ClassDef> type = newResolveTypedef(fileScope, typeDef);
 
          if (type) {           
             return type;
@@ -822,20 +828,25 @@ static Definition *followPath(Definition *start, FileDef *fileScope, const QByte
 
       QSharedPointer<Definition> next = current->findInnerCompound(qualScopePart);
      
-      if (next == 0) { // failed to follow the path
+      if (next == 0) { 
+         // failed to follow the path
         
          if (current->definitionType() == Definition::TypeNamespace) {
+           
+            QSharedPointer<NamespaceDef> nd = current.dynamicCast<NamespaceDef>();
+            auto temp = nd->getUsedClasses();
 
-            auto temp = &(((NamespaceDef *)current)->getUsedClasses());
             next = endOfPathIsUsedClass(temp, qualScopePart);
 
-         } else if (current->definitionType() == Definition::TypeFile) {
+         } else if (current->definitionType() == Definition::TypeFile) {          
 
-            auto temp = ((FileDef *)current)->getUsedClasses();
+            QSharedPointer<FileDef> fd = current.dynamicCast<FileDef>();
+            auto temp = fd->getUsedClasses();
+
             next = endOfPathIsUsedClass(temp, qualScopePart);
          }
 
-         current = next.data();
+         current = next;
 
          if (current == 0) {
             break;
@@ -843,7 +854,7 @@ static Definition *followPath(Definition *start, FileDef *fileScope, const QByte
 
       } else { 
          // continue to follow scope
-         current = next.data();         
+         current = next;         
       }
 
       ps = is + l;
@@ -854,8 +865,8 @@ static Definition *followPath(Definition *start, FileDef *fileScope, const QByte
    return current; 
 }
 
-bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, FileDef *fileScope,
-                             Definition *item, const QByteArray &explicitScopePart = "" )
+bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QSharedPointer<FileDef> fileScope,
+                             QSharedPointer<Definition> item, const QByteArray &explicitScopePart = "" )
 {
    if (cl) { 
       // see if the class was imported via a using statement    
@@ -863,13 +874,13 @@ bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, Fi
            
       for (auto ucd : *cl) {
 
-         Definition *sc;
+         QSharedPointer<Definition> sc;
 
          if (explicitScopePartEmpty) {
-            sc = ucd.data();  
+            sc = ucd;  
 
          } else {
-            sc = followPath(ucd.data(), fileScope, explicitScopePart);
+            sc = followPath(ucd, fileScope, explicitScopePart);
 
          }
 
@@ -882,7 +893,7 @@ bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, Fi
    return false;
 }
 
-bool accessibleViaUsingNamespace(const NamespaceSDict *nl, FileDef *fileScope, Definition *item,
+bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item,
                                  const QByteArray &explicitScopePart = "")
 {
    static QHash<QString, void *> visitedDict;
@@ -891,13 +902,13 @@ bool accessibleViaUsingNamespace(const NamespaceSDict *nl, FileDef *fileScope, D
       // check used namespaces for the class 
 
       for (auto und : *nl) {       
-         Definition *sc;
+         QSharedPointer<Definition> sc;
 
          if (explicitScopePart.isEmpty()) {
-            sc = und.data();  
+            sc = und;  
 
          } else {
-            sc = followPath(und.data(), fileScope, explicitScopePart);
+            sc = followPath(und, fileScope, explicitScopePart);
 
          }
 
@@ -932,7 +943,7 @@ class AccessStack
    AccessStack() : m_index(0)
    {}
 
-   void push(Definition *scope, FileDef *fileScope, Definition *item) {
+   void push(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item) {
       if (m_index < MAX_STACK_SIZE) {
          m_elements[m_index].scope     = scope;
          m_elements[m_index].fileScope = fileScope;
@@ -940,7 +951,10 @@ class AccessStack
          m_index++;
       }
    }
-   void push(Definition *scope, FileDef *fileScope, Definition *item, const QByteArray &expScope) {
+
+   void push(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item, 
+            const QByteArray &expScope) {
+
       if (m_index < MAX_STACK_SIZE) {
          m_elements[m_index].scope     = scope;
          m_elements[m_index].fileScope = fileScope;
@@ -954,8 +968,10 @@ class AccessStack
          m_index--;
       }
    }
-   bool find(Definition *scope, FileDef *fileScope, Definition *item) {
+
+   bool find(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item) {
       int i = 0;
+
       for (i = 0; i < m_index; i++) {
          AccessElem *e = &m_elements[i];
          if (e->scope == scope && e->fileScope == fileScope && e->item == item) {
@@ -964,8 +980,11 @@ class AccessStack
       }
       return false;
    }
-   bool find(Definition *scope, FileDef *fileScope, Definition *item, const QByteArray &expScope) {
+   bool find(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item, 
+             const QByteArray &expScope) {
+
       int i = 0;
+
       for (i = 0; i < m_index; i++) {
          AccessElem *e = &m_elements[i];
          if (e->scope == scope && e->fileScope == fileScope && e->item == item && e->expScope == expScope) {
@@ -978,11 +997,13 @@ class AccessStack
  private:
    /** Element in the stack. */
    struct AccessElem {
-      Definition *scope;
-      FileDef *fileScope;
-      Definition *item;
+      QSharedPointer<Definition>  scope;
+      QSharedPointer<FileDef>     fileScope;
+      QSharedPointer<Definition>  item;
+
       QByteArray expScope;
    };
+
    int m_index;
    AccessElem m_elements[MAX_STACK_SIZE];
 };
@@ -990,7 +1011,7 @@ class AccessStack
 /* Returns the "distance" (=number of levels up) from item to scope, or -1
  * if item in not inside scope.
  */
-int isAccessibleFrom(Definition *scope, FileDef *fileScope, Definition *item)
+int isAccessibleFrom(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item)
 {
    //printf("<isAccesibleFrom(scope=%s,item=%s itemScope=%s)\n",
    //    scope->name().data(),item->name().data(),item->getOuterScope()->name().data());
@@ -1006,19 +1027,15 @@ int isAccessibleFrom(Definition *scope, FileDef *fileScope, Definition *item)
 
    Definition *itemScope = item->getOuterScope();
 
-   bool memberAccessibleFromScope =
-      (item->definitionType() == Definition::TypeMember &&                 // a member
-       itemScope && itemScope->definitionType() == Definition::TypeClass  && // of a class
-       scope->definitionType() == Definition::TypeClass &&                 // accessible
-       ((ClassDef *)scope)->isAccessibleMember((MemberDef *)item)          // from scope
-      );
+   bool memberAccessibleFromScope = (item->definitionType() == Definition::TypeMember &&                
+       itemScope && itemScope->definitionType() == Definition::TypeClass  && 
+       scope->definitionType() == Definition::TypeClass &&                 
+       ((ClassDef *)scope)->isAccessibleMember((MemberDef *)item) );
 
-   bool nestedClassInsideBaseClass =
-      (item->definitionType() == Definition::TypeClass &&                  // a nested class
-       itemScope && itemScope->definitionType() == Definition::TypeClass && // inside a base
-       scope->definitionType() == Definition::TypeClass &&                 // class of scope
-       ((ClassDef *)scope)->isBaseClass((ClassDef *)itemScope, true)
-      );
+   bool nestedClassInsideBaseClass = (item->definitionType() == Definition::TypeClass &&                 
+       itemScope && itemScope->definitionType() == Definition::TypeClass && 
+       scope->definitionType() == Definition::TypeClass &&                 
+       ((ClassDef *)scope)->isBaseClass((ClassDef *)itemScope, true) );
 
    if (itemScope == scope || memberAccessibleFromScope || nestedClassInsideBaseClass) {
       //printf("> found it\n");
@@ -1053,7 +1070,7 @@ int isAccessibleFrom(Definition *scope, FileDef *fileScope, Definition *item)
       // check if scope is a namespace, which is using other classes and namespaces
 
       if (scope->definitionType() == Definition::TypeNamespace) {
-         NamespaceDef *nscope = (NamespaceDef *)scope;
+         QSharedPointer<NamespaceDef> nscope = scope.dynamicCast<NamespaceDef>();
          
          StringMap<QSharedPointer<Definition>> cl = nscope->getUsedClasses();
 
@@ -1095,8 +1112,8 @@ done:
  *   not found and then A::I is searched in the global scope, which matches and
  *   thus the result is 1.
  */
-int isAccessibleFromWithExpScope(Definition *scope, FileDef *fileScope,
-                                 Definition *item, const QByteArray &explicitScopePart)
+int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
+                                 QSharedPointer<Definition> item, const QByteArray &explicitScopePart)
 {
    if (explicitScopePart.isEmpty()) {
       // handle degenerate case where there is no explicit scope.
@@ -1120,15 +1137,8 @@ int isAccessibleFromWithExpScope(Definition *scope, FileDef *fileScope,
 
    if (newScope) { 
       // explicitScope is inside scope => newScope is the result
-      Definition *itemScope = item->getOuterScope();
-
-      //printf("    scope traversal successful %s<->%s!\n",itemScope->name().data(),newScope->name().data());
-      //if (newScope && newScope->definitionType()==Definition::TypeClass)
-      //{
-      //  ClassDef *cd = (ClassDef *)newScope;
-      //  printf("---> Class %s: bases=%p\n",cd->name().data(),cd->baseClasses());
-      //}
-
+      QSharedPointer<Definition> itemScope = item->getOuterScope();
+  
       if (itemScope == newScope) { 
          // exact match of scopes => distance==0
        
@@ -1231,8 +1241,9 @@ int computeQualifiedIndex(const QByteArray &name)
    return name.lastIndexOf("::", i == -1 ? name.length() : i);
 }
 
-static void getResolvedSymbol(Definition *scope, FileDef *fileScope, Definition *d, const QByteArray &explicitScopePart, 
-                              ArgumentList *actTemplParams, int &minDistance, ClassDef *&bestMatch, MemberDef *&bestTypedef,
+static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> d, 
+                              const QByteArray &explicitScopePart, ArgumentList *actTemplParams, int &minDistance, 
+                              QSharedPointer<ClassDef> &bestMatch, QSharedPointer<MemberDef> &bestTypedef,
                               QByteArray &bestTemplSpec, QByteArray &bestResolvedType)
 {
    // only look at classes and members that are enums or typedefs
@@ -2398,7 +2409,7 @@ static QString yearToString()
 
 // recursive function that returns the number of branches in the
 // inheritance tree that the base class `bcd' is below the class `cd'
-int minClassDistance(const ClassDef *cd, const ClassDef *bcd, int level)
+int minClassDistance(QSharedPointer<const ClassDef> cd, QSharedPointer<const ClassDef> bcd, int level)
 {
    if (bcd->categoryOf())  {
       // use class that is being extended in case of, an Objective-C category
@@ -3424,8 +3435,8 @@ static bool matchArgument2(Definition *srcScope, FileDef *srcFileScope, Argument
 
 
 // algorithm for argument matching
-bool matchArguments2(QSharedPointer<Definition> srcScope, FileDef *srcFileScope, ArgumentList *srcAl,
-                     QSharedPointer<Definition> dstScope, FileDef *dstFileScope, ArgumentList *dstAl, bool checkCV )
+bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef> srcFileScope, ArgumentList *srcAl,
+                     QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope, ArgumentList *dstAl, bool checkCV )
 {   
    assert(srcScope != 0 && dstScope != 0);
 
@@ -3603,7 +3614,7 @@ static void findMembersWithSpecificName(MemberName *mn, const char *args, bool c
                                         bool checkCV, const char *forceTagFile, QList<MemberDef *> &members)
 {
    for (auto md : *mn) {
-      FileDef  *fd = md->getFileDef();
+      QSharedPointer<FileDef> fd = md->getFileDef();
       GroupDef *gd = md->getGroupDef();
     
       if (((gd && gd->isLinkable()) || (fd && fd->isLinkable()) || md->isReference()) && 
@@ -3658,7 +3669,7 @@ static void findMembersWithSpecificName(MemberName *mn, const char *args, bool c
  */
 bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *args, QSharedPointer<MemberDef> &md,
              QSharedPointer<ClassDef> &cd, QSharedPointer<FileDef> &fd, QSharedPointer<NamespaceDef> &nd, 
-             QSharedPointer<GroupDef> *&gd, bool forceEmptyScope,  QSharedPointer<FileDef>currentFile, 
+             QSharedPointer<GroupDef> &gd, bool forceEmptyScope, QSharedPointer<FileDef> currentFile, 
              bool checkCV, const char *forceTagFile )
 {
    fd = QSharedPointer<FileDef>();
@@ -3775,8 +3786,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                   if (mcd) {
                      int m = minClassDistance(fcd, mcd);
 
-                     if (m < mdist) {
-                        
+                     if (m < mdist) {                        
                         mdist = m;
                         cd = mcd;
                         md = mmd;
@@ -3787,15 +3797,18 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
             }
             
             if (mdist < maxInheritanceDepth) {
-               if (!md->isLinkable() || md->isStrongEnumValue()) {
-                  md = 0; // avoid returning things we cannot link to
-                  cd = 0;
+               if (! md->isLinkable() || md->isStrongEnumValue()) {
+                  // avoid returning things we cannot link to
+                  md = QSharedPointer<MemberDef>(); 
+                  cd = QSharedPointer<ClassDef>();
+
                   return false; // match found, but was not linkable
 
                } else {
                   gd = md->getGroupDef();
+
                   if (gd) {
-                     cd = 0;
+                     cd = QSharedPointer<ClassDef>();
                   }
                   return true; /* found match */
                }
@@ -3813,11 +3826,13 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                      if (emd->isLinkable()) {
                         cd = tmd->getClassDef();
                         md = emd;
+
                         return true;
 
                      } else {
-                        cd = 0;
-                        md = 0;
+                        md = QSharedPointer<MemberDef>(); 
+                        cd = QSharedPointer<ClassDef>();
+
                         return false;
                      }
                   }
@@ -3840,7 +3855,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
    if (mn && scopeName.isEmpty() && mScope.isEmpty()) { 
       // Maybe a related function?     
    
-      MemberDef *fuzzy_mmd = 0;
+      QSharedPointer<MemberDef> fuzzy_mmd;
       ArgumentList *argList = 0;
 
       bool hasEmptyArgs = args && qstrcmp(args, "()") == 0;
@@ -3849,10 +3864,10 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
          stringToArgumentList(args, argList = new ArgumentList);
       }    
 
-      MemberDef *temp = nullptr; 
+      QSharedPointer<MemberDef> temp;
 
       for (auto item : *mn) { 
-         temp = item.data();
+         temp = item;
 
          if (! item->isLinkable() || (! item->isRelated() && ! item->isForeign()) || ! item->getClassDef()) {
             continue;
@@ -3863,7 +3878,6 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
          }
 
          QByteArray className = item->getClassDef()->name();
-
          ArgumentList *mmdAl = item->argumentList();
 
          if (matchArguments2(item->getOuterScope(), item->getFileDef(), mmdAl,
@@ -3872,12 +3886,13 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
          }
 
          if (! fuzzy_mmd && hasEmptyArgs) {
-            fuzzy_mmd = item.data();
+            fuzzy_mmd = item;
          }
       }
 
       if (argList) {
-         delete argList, argList = 0;
+         delete argList;
+         argList = 0;
       }
   
       if (! temp) {     
@@ -3929,8 +3944,8 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                      found = true;
 
                   } else {
-                     md = 0;
-                     cd = 0;
+                     md = QSharedPointer<MemberDef>(); 
+                     cd = QSharedPointer<ClassDef>();
 
                      return false;
                   }
@@ -3981,18 +3996,24 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
 
             if (found) {
                if (!md->isLinkable()) {
-                  md = 0;          // avoid returning things we cannot link to
-                  nd = 0;
+                  // avoid returning things we cannot link to
+                  
+                  md = QSharedPointer<MemberDef>(); 
+                  nd = QSharedPointer<NamespaceDef>();
+
                   return false;    // match found but not linkable
 
                } else {
                   gd = md->getGroupDef();
 
                   if (gd && gd->isLinkable()) {
-                     nd = 0;
+                     nd = QSharedPointer<NamespaceDef>();
+
                   } else {
-                     gd = 0;
+                     gd = QSharedPointer<GroupDef>();
+
                   }
+
                   return true;
                }
             }
@@ -4020,10 +4041,10 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                   gd = mmd->getGroupDef();
 
                   if (gd && gd->isLinkable()) {
-                     fd = 0;
+                     fd = QSharedPointer<FileDef>();
 
                   } else {
-                     gd = 0;
+                     gd = QSharedPointer<GroupDef>();
                   }
                   
                   return true;
@@ -4033,6 +4054,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
 
          if (scopeOffset == 0) {
             scopeOffset = -1;
+
          } else if ((scopeOffset = scopeName.lastIndexOf("::", scopeOffset - 1)) == -1) {
             scopeOffset = 0;
          }
@@ -4091,9 +4113,9 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
             gd = md->getGroupDef();
 
             if (gd && gd->isLinkable()) {
-               fd = 0;
+               fd = QSharedPointer<FileDef>();
             } else {
-               gd = 0;
+               gd = QSharedPointer<GroupDef>();
             }
 
             return true;
@@ -4119,10 +4141,10 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
  *   - if `cd` is non zero, the scope was a class pointed to by cd.
  *   - if `nd` is non zero, the scope was a namespace pointed to by nd.
  */
-static bool getScopeDefs(const char *docScope, const char *scope, ClassDef *&cd, NamespaceDef *&nd)
+static bool getScopeDefs(const char *docScope, const char *scope, QSharedPointer<ClassDef> &cd, QSharedPointer<NamespaceDef> &nd)
 {
-   cd = 0;
-   nd = 0;
+   cd = QSharedPointer<ClassDef>();
+   nd = QSharedPointer<NamespaceDef>();
 
    QByteArray scopeName = scope;
 
@@ -5532,7 +5554,7 @@ QByteArray getOverloadDocs()
    //       "function only in what argument(s) it accepts.";
 }
 
-void addMembersToMemberGroup(MemberList *ml, MemberGroupSDict **ppMemberGroupSDict, Definition *context)
+void addMembersToMemberGroup(MemberList *ml, MemberGroupSDict **ppMemberGroupSDict, QSharedPointer<Definition> context)
 {
    assert(context != 0);
    
@@ -6157,7 +6179,7 @@ PageDef *addRelatedPage(const char *name, const QByteArray &ptitle, const QByteA
 }
 
 void addRefItem(const QList<ListItemInfo> *sli, const char *key, 
-                const char *prefix, const char *name, const char *title, const char *args, Definition *scope)
+                const char *prefix, const char *name, const char *title, const char *args, QSharedPointer<Definition> scope)
 {   
    if (sli && key && key[0] != '@') { 
       // check for @ to skip anonymous stuff (see bug427012)
@@ -6766,7 +6788,7 @@ MemberDef *getMemberFromSymbol(Definition *scope, FileDef *fileScope, const char
 }
 
 /*! Returns true iff the given name string appears to be a typedef in scope. */
-bool checkIfTypedef(Definition *scope, FileDef *fileScope, const char *n)
+bool checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const char *n)
 {
    MemberDef *bestMatch = getMemberFromSymbol(scope, fileScope, n);
 
@@ -7850,7 +7872,7 @@ void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDe
          mdDef->addSourceReferencedBy(src);
       }
 
-      MemberDef *mdDecl = dst->memberDeclaration();
+      QSharedPointer<MemberDef> mdDecl = dst->memberDeclaration();
       if (mdDecl) {
          mdDecl->addSourceReferencedBy(src);
       }
@@ -7864,7 +7886,7 @@ void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDe
          mdDef->addSourceReferences(dst);
       }
 
-      MemberDef *mdDecl = src->memberDeclaration();
+      QSharedPointer<MemberDef> mdDecl = src->memberDeclaration();
 
       if (mdDecl) {
          mdDecl->addSourceReferences(dst);

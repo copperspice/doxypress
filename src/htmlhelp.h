@@ -77,7 +77,9 @@ class HtmlHelp  : public IndexIntf
    void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
                         bool separateIndex, bool addToNavIndex, Definition *def);
 
-   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, const char *title);
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
+                     const char *title) override;
+
    void addIndexFile(const char *name);
    void addImageFile(const char *);
    void addStyleSheetFile(const char *) {}

@@ -95,7 +95,7 @@ class MemberGroup
    int numDocMembers() const;
    int countInheritableMembers(ClassDef *inheritedFrom) const;
    void setInGroup(bool b);
-   void addListReferences(Definition *d);
+   void addListReferences(QSharedPointer<Definition> d);
    void setRefItems(const QList<ListItemInfo> *sli);
 
    MemberList *members() const {

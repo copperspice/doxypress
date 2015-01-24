@@ -208,7 +208,7 @@ class MemberDef : public Definition
    MemberList *reimplementedBy() const;
    bool isReimplementedBy(ClassDef *cd) const;
  
-   ClassDef *relatedAlso() const;
+   QSharedPointer<ClassDef> relatedAlso() const;
 
    bool hasDocumentedEnumValues() const;
    MemberDef *getAnonymousEnumType() const;
@@ -247,14 +247,14 @@ class MemberDef : public Definition
 
    // cached typedef functions
    bool isTypedefValCached() const;
-   ClassDef *getCachedTypedefVal() const;
+   QSharedPointer<ClassDef> getCachedTypedefVal() const;
    QByteArray getCachedTypedefTemplSpec() const;
    QByteArray getCachedResolvedTypedef() const;
 
-   MemberDef *memberDefinition() const;
-   MemberDef *memberDeclaration() const;
-   MemberDef *inheritsDocsFrom() const;
-   MemberDef *getGroupAlias() const;
+   QSharedPointer<MemberDef> memberDefinition() const;
+   QSharedPointer<MemberDef> memberDeclaration() const;
+   QSharedPointer<MemberDef> inheritsDocsFrom() const;
+   QSharedPointer<MemberDef> getGroupAlias() const;
 
    ClassDef *category() const;
    MemberDef *categoryRelation() const;
@@ -278,7 +278,7 @@ class MemberDef : public Definition
    // set functions
    void setMemberType(MemberType t);
    void setDefinition(const char *d);
-   void setFileDef(FileDef *fd);
+   void setFileDef(QSharedPointer<FileDef> fd);
    void setAnchor();
    void setProtection(Protection p);
    void setMemberSpecifiers(uint64_t s);
@@ -289,7 +289,7 @@ class MemberDef : public Definition
    void setMemberClass(QSharedPointer<ClassDef> cd);
    void setSectionList(Definition *d, QSharedPointer<MemberList> sl);
 
-   void setGroupDef(GroupDef *gd, Grouping::GroupPri_t pri,
+   void setGroupDef(QSharedPointer<GroupDef> gd, Grouping::GroupPri_t pri,
                     const QByteArray &fileName, int startLine, bool hasDocs, MemberDef *member = 0);
 
    void setExplicitExternal(bool b);
@@ -312,12 +312,12 @@ class MemberDef : public Definition
    // in-body documentation
    //void setInbodyDocumentation(const char *docs,const char *file,int line);
 
-   void setRelatedAlso(ClassDef *cd);
+   void setRelatedAlso(QSharedPointer<ClassDef> cd);
 
    // enumeration specific members
    void insertEnumField(MemberDef *md);
    void setEnumScope(MemberDef *md, bool livesInsideEnum = false);
-   void setEnumClassScope(ClassDef *cd);
+   void setEnumClassScope(QSharedPointer<ClassDef> cd);
    void setDocumentedEnumValues(bool value);
    void setAnonymousEnumType(MemberDef *md);
 
@@ -336,7 +336,7 @@ class MemberDef : public Definition
    void setAccessorType(QSharedPointer<ClassDef> cd, const char *t);
 
    // namespace related members
-   void setNamespace(NamespaceDef *nd);
+   void setNamespace(QSharedPointer<NamespaceDef> nd);
 
    // member group related members
    void setMemberGroup(MemberGroup *grp);

@@ -208,11 +208,7 @@ void EclipseHelp::addContentsItem(
    }
 }
 
-void EclipseHelp::addIndexItem(
-   Definition * /* context */,
-   MemberDef * /* md */,
-   const char * /* sectionAnchor */,
-   const char * /* title */)
+void EclipseHelp::addIndexItem(QSharedPointer<Definition> d, QSharedPointer<MemberDef> md, const char * , const char *)
 {
 }
 

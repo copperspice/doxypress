@@ -45,14 +45,16 @@ class DocSets  : public IndexIntf
    void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor, 
                         bool separateIndex, bool addToNavIndex, Definition *def );
 
-   void addIndexItem(Definition *context, MemberDef *md, const char *sectionAnchor, const char *title);
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
+                     const char *title);
+
    void addIndexFile(const char *name);
 
    void addImageFile(const char *) {}
    void addStyleSheetFile(const char *) {}
 
  private:
-   void writeToken(QTextStream &t, const Definition *d, const QByteArray &type, const QByteArray &lang,
+   void writeToken(QTextStream &t, QSharedPointer<const Definition> d, const QByteArray &type, const QByteArray &lang,
                    const char *scope = 0, const char *anchor = 0, const QByteArray &decl = QByteArray() ); 
 
    struct NodeDef {

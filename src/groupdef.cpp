@@ -127,7 +127,7 @@ void GroupDef::findSectionsInDocumentation()
    }
 }
 
-void GroupDef::addFile(FileDef *def)
+void GroupDef::addFile(QSharedPointer<FileDef> def)
 {
    static bool sortBriefDocs = Config_getBool("SORT_BRIEF_DOCS");
 
@@ -213,11 +213,15 @@ void GroupDef::addExample(QSharedPointer<PageDef> def)
    exampleDict->insert(def->name(), def);
 }
 
-void GroupDef::addMembersToMemberGroup()
+void GroupDef::addMembersToMemberGroup(QSharedPointer<GroupDef> self)
 {
+   if (self != this) {
+      throw "broom"; // broom 
+   }
+
    for (auto ml : m_memberLists) {
       if (ml.listType() & MemberListType_declarationLists) {
-         ::addMembersToMemberGroup(&ml, &memberGroupSDict, this);
+         ::addMembersToMemberGroup(&ml, &memberGroupSDict, self);
       }
    }
 
@@ -1235,7 +1239,7 @@ void addGroupToGroups(QSharedPointer<Entry> root, GroupDef *subGroup)
 }
 
 /*! Add a member to the group with the highest priority */
-void addMemberToGroups(QSharedPointer<Entry> root, MemberDef *md)
+void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
 {
    // Search entry's group list for group with highest pri.
 
@@ -1306,7 +1310,7 @@ void addMemberToGroups(QSharedPointer<Entry> root, MemberDef *md)
          bool success = fgd->insertMember(md);
 
          if (success) {         
-            md->setGroupDef(fgd.data(), pri, root->fileName, root->startLine, !root->doc.isEmpty());
+            md->setGroupDef(fgd, pri, root->fileName, root->startLine, !root->doc.isEmpty());
             ClassDef *cd = md->getClassDefOfAnonymousType();
 
             if (cd) {

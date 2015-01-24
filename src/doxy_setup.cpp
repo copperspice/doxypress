@@ -187,8 +187,7 @@ void cleanUpDoxygen()
    delete Doxygen::imageNameDict;
    delete Doxygen::dotFileNameDict;
    delete Doxygen::mscFileNameDict;
-   delete Doxygen::diaFileNameDict;
-   delete Doxygen::mainPage;
+   delete Doxygen::diaFileNameDict;  
    delete Doxygen::pageSDict;
    delete Doxygen::exampleSDict;  
    delete Doxygen::xrefLists;

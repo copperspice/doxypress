@@ -66,7 +66,7 @@ class DirDef : public Definition
       return m_fileList;
    }
 
-   void addFile(FileDef *fd);
+   void addFile(QSharedPointer<FileDef> fd);
 
    const SortedList<QSharedPointer<DirDef>> subDirs() const {
       return m_subdirs;
@@ -124,7 +124,7 @@ class DirDef : public Definition
 
    static QSharedPointer<DirDef> createNewDir(const char *path);
    static bool matchPath(const QByteArray &path, QStringList &l);
-   void addUsesDependency(DirDef *usedDir, FileDef *srcFd,FileDef *dstFd, bool inherited);
+   void addUsesDependency(QSharedPointer<DirDef> dir, QSharedPointer<FileDef> srcFd, QSharedPointer<FileDef> dstFd, bool inherited);
    void computeDependencies();
 
    SortedList<QSharedPointer<DirDef>> m_subdirs;
@@ -148,16 +148,20 @@ class DirDef : public Definition
 class FilePair
 {
  public:
-   FilePair(FileDef *src, FileDef *dst) : m_src(src), m_dst(dst) {}
-   const FileDef *source() const {
+   FilePair(QSharedPointer<FileDef> src, QSharedPointer<FileDef> dst) 
+      : m_src(src), m_dst(dst) {}
+
+   QSharedPointer<const FileDef> source() const {
       return m_src;
    }
-   const FileDef *destination() const {
+
+   QSharedPointer<const FileDef> destination() const {
       return m_dst;
    }
+
  private:
-   FileDef *m_src;
-   FileDef *m_dst;
+   QSharedPointer<FileDef> m_src;
+   QSharedPointer<FileDef> m_dst;
 };
 
 /** A sorted dictionary of FilePair objects. */
@@ -177,7 +181,7 @@ class UsedDir
    UsedDir(DirDef *dir, bool inherited);
    virtual ~UsedDir();
 
-   void addFileDep(FileDef *srcFd, FileDef *dstFd);
+   void addFileDep(QSharedPointer<FileDef> srcFd, QSharedPointer<FileDef> dstFd);
    QSharedPointer<FilePair> findFilePair(const char *name);
 
    const FilePairDict &filePairs() const {

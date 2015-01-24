@@ -162,7 +162,7 @@ QString ClassDef::displayName(bool includeScope) const
 }
 
 // inserts a base/super class in the inheritance list
-void ClassDef::insertBaseClass(ClassDef *cd, const char *n, Protection p, Specifier s, const char *t)
+void ClassDef::insertBaseClass(QSharedPointer<ClassDef> cd, const char *n, Protection p, Specifier s, const char *t)
 {   
    if (m_parents == 0) {
       m_parents = new SortedList<BaseClassDef *>;
@@ -173,7 +173,7 @@ void ClassDef::insertBaseClass(ClassDef *cd, const char *n, Protection p, Specif
 }
 
 // inserts a derived/sub class in the inherited-by list
-void ClassDef::insertSubClass(ClassDef *cd, Protection p, Specifier s, const char *t)
+void ClassDef::insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifier s, const char *t)
 {
    static bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
 
@@ -191,11 +191,15 @@ void ClassDef::insertSubClass(ClassDef *cd, Protection p, Specifier s, const cha
    m_isSimple = false;
 }
 
-void ClassDef::addMembersToMemberGroup()
+void ClassDef::addMembersToMemberGroup(QSharedPointer<ClassDef> self)
 {
+   if (self != this) {
+      throw "broom"; // broom 
+   }
+
    for (auto item : m_memberLists ) {
-      if ((item->listType()&MemberListType_detailedLists) == 0) {
-         ::addMembersToMemberGroup(item.data(), &m_memberGroupSDict, this);
+      if ((item->listType()&MemberListType_detailedLists) == 0) {      
+         ::addMembersToMemberGroup(item.data(), &m_memberGroupSDict, self);
       }
    }
 
@@ -454,7 +458,7 @@ void ClassDef::internalInsertMember(MemberDef *md, Protection prot, bool addToAl
    }
 }
 
-void ClassDef::insertMember(MemberDef *md)
+void ClassDef::insertMember(QSharedPointer<MemberDef> md)
 {
    internalInsertMember(md, md->protection(), true);
 }
@@ -503,7 +507,7 @@ void ClassDef::findSectionsInDocumentation()
 
 
 // add a file name to the used files set
-void ClassDef::insertUsedFile(FileDef *fd)
+void ClassDef::insertUsedFile(QSharedPointer<FileDef> fd)
 {
    if (fd == 0) {
       return;
@@ -557,17 +561,14 @@ static void writeInheritanceSpecifier(OutputList &ol, BaseClassDef *bcd)
    }
 }
 
-void ClassDef::setIncludeFile(FileDef *fd, const char *includeName, bool local, bool force)
-{
-   //printf("ClassDef::setIncludeFile(%p,%s,%d,%d)\n",fd,includeName,local,force);
+void ClassDef::setIncludeFile(QSharedPointer<FileDef> fd, const char *includeName, bool local, bool force)
+{   
    if (!m_incInfo) {
       m_incInfo = new IncludeInfo;
    }
 
-   if ((includeName && m_incInfo->includeName.isEmpty()) ||
-         (fd != 0 && m_incInfo->fileDef == 0) ) {
+   if ((includeName && m_incInfo->includeName.isEmpty()) || (fd != 0 && m_incInfo->fileDef == 0) ) {
 
-      //printf("Setting file info\n");
       m_incInfo->fileDef     = fd;
       m_incInfo->includeName = includeName;
       m_incInfo->local       = local;
@@ -2264,7 +2265,7 @@ bool ClassDef::hasNonReferenceSuperClass()
 
          if (! found) {
             // look for template instances that might have non-reference super classes
-            QHash<QString, ClassDef> *cil = bcd->getTemplateInstances();
+            QHash<QString, QSharedPointer<ClassDef>> *cil = bcd->getTemplateInstances();
 
             if (cil) {              
 
@@ -2399,7 +2400,7 @@ bool ClassDef::hasDocumentation() const
 // returns true iff class definition `bcd' represents an (in)direct base
 // class of class definition `cd'.
 
-bool ClassDef::isBaseClass(ClassDef *bcd, bool followInstances, int level)
+bool ClassDef::isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, int level)
 {
    bool found = false;
    //printf("isBaseClass(cd=%s) looking for %s\n",name().data(),bcd->name().data());
@@ -2869,7 +2870,7 @@ void ClassDef::addUsedClass(ClassDef *cd, const char *accessName, Protection pro
    ucd->addAccessor(acc);
 }
 
-void ClassDef::addUsedByClass(ClassDef *cd, const char *accessName, Protection prot)
+void ClassDef::addUsedByClass(QSharedPointer<ClassDef> cd, const char *accessName, Protection prot)
 {
    static bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
    static bool umlLook = Config_getBool("UML_LOOK");
@@ -3169,7 +3170,7 @@ QHash<QString, int> *ClassDef::getTemplateBaseClassNames() const
    return m_templBaseClassNames;
 }
 
-void ClassDef::addMembersToTemplateInstance(ClassDef *cd, const char *templSpec)
+void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const char *templSpec)
 {
    if (cd->memberNameInfoSDict() == 0) {
       return;
@@ -3735,12 +3736,12 @@ NamespaceDef *ClassDef::getNamespaceDef() const
    return m_nspace;
 }
 
-FileDef *ClassDef::getFileDef() const
+QSharedPointer<FileDef> ClassDef::getFileDef() const
 {
    return m_fileDef;
 }
 
-QHash<QString, ClassDef> *ClassDef::getTemplateInstances() const
+QHash<QString, QSharedPointer<ClassDef>> *ClassDef::getTemplateInstances() const
 {
    return m_templateInstances;
 }
@@ -3830,12 +3831,12 @@ MemberGroupSDict *ClassDef::getMemberGroupSDict() const
    return m_memberGroupSDict;
 }
 
-void ClassDef::setNamespace(NamespaceDef *nd)
+void ClassDef::setNamespace(QSharedPointer<NamespaceDef> nd)
 {
    m_nspace = nd;
 }
 
-void ClassDef::setFileDef(FileDef *fd)
+void ClassDef::setFileDef(QSharedPointer<FileDef> fd)
 {
    m_fileDef = fd;
 }

@@ -45,7 +45,7 @@ static int folderId = 1;
 
 struct FTVNode {
    FTVNode(bool dir, const char *r, const char *f, const char *a,
-           const char *n, bool sepIndex, bool navIndex, Definition *df)
+           const char *n, bool sepIndex, bool navIndex, QSharedPointer<Definition> df)
       : isLast(true), isDir(dir), ref(r), file(f), anchor(a), name(n), index(0),
         parent(0), separateIndex(sepIndex), addToNavIndex(navIndex), def(df) 
    {       
@@ -70,7 +70,7 @@ struct FTVNode {
    bool separateIndex;
    bool addToNavIndex;
 
-   Definition *def;
+   QSharedPointer<Definition> def;
 };
 
 int FTVNode::computeTreeDepth(int level) const
@@ -504,7 +504,8 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
          // add entry to the navigation index
 
          if (n->def && n->def->definitionType() == Definition::TypeFile) {
-            FileDef *fd = (FileDef *)n->def;
+
+            QSharedPointer<FileDef> fd = n->def.dynamicCast<FileDef>();
 
             bool doc;
             bool src;

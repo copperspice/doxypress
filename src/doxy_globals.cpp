@@ -41,7 +41,7 @@ NamespaceSDict  *Doxygen::namespaceSDict = 0;
 MemberNameSDict *Doxygen::memberNameSDict = 0;
 MemberNameSDict *Doxygen::functionNameSDict = 0;
 
-SortedList<FileName *>  *Doxygen::inputNameList = 0;       // all input files
+SortedList<FileName *>  *Doxygen::inputNameList = 0; // all input files
 
 FileNameDict    *Doxygen::inputNameDict = 0;
 GroupSDict      *Doxygen::groupSDict = 0;
@@ -81,7 +81,7 @@ QHash<QString, int>             *Doxygen::htmlDirMap = 0;
 QHash<long, QSharedPointer<MemberGroupInfo>> Doxygen::memGrpInfoDict;                 // dictionary of the member groups heading
 StringMap<QSharedPointer<DirRelation>>       Doxygen::dirRelations;
 
-PageDef         *Doxygen::mainPage = 0;
+QSharedPointer<PageDef>         Doxygen::mainPage;
 
 QSharedPointer<NamespaceDef> Doxygen::globalScope;
 

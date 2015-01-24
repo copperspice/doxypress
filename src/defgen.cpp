@@ -55,7 +55,7 @@ inline void writeDEFString(QTextStream &t, const char *s)
    t << '\'';
 }
 
-void generateDEFForMember(MemberDef *md, QTextStream &t, Definition *def, const char *Prefix)
+void generateDEFForMember(QSharedPointer<MemberDef> md, QTextStream &t, QSharedPointer<Definition> def, const char *Prefix)
 {
    QByteArray memPrefix;
 
@@ -356,7 +356,7 @@ void generateDEFForMember(MemberDef *md, QTextStream &t, Definition *def, const 
 }
 
 
-void generateDEFClassSection(ClassDef *cd, QTextStream &t, MemberList *ml, const char *kind)
+void generateDEFClassSection(QSharedPointer<ClassDef> cd, QTextStream &t, MemberList *ml, const char *kind)
 {
    if (cd && ml && ml->count() > 0) {
       t << "  cp-section = {" << endl;
@@ -365,6 +365,7 @@ void generateDEFClassSection(ClassDef *cd, QTextStream &t, MemberList *ml, const
       for (auto md : *ml) {
          generateDEFForMember(md, t, cd, "sec");
       }
+
       t << "  }; /* cp-section */" << endl;
    }
 }
@@ -538,7 +539,7 @@ void generateDEFForClass(ClassDef *cd, QTextStream &t)
    t << "}; /* " <<  cd->compoundTypeString() << " */" << endl;
 }
 
-void generateDEFSection(Definition *d, QTextStream &t, MemberList *ml, const char *kind)
+void generateDEFSection(QSharedPointer<Definition> d, QTextStream &t, MemberList *ml, const char *kind)
 {
    if (ml && ml->count() > 0) {
       t << "    " << kind << " = {" << endl;
@@ -551,7 +552,7 @@ void generateDEFSection(Definition *d, QTextStream &t, MemberList *ml, const cha
    }
 }
 
-void generateDEFForNamespace(NamespaceDef *nd, QTextStream &t)
+void generateDEFForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream &t)
 {
    if (nd->isReference()) {
       return;   // skip external references
@@ -564,12 +565,12 @@ void generateDEFForNamespace(NamespaceDef *nd, QTextStream &t)
    writeDEFString(t, nd->name());
    t << ';' << endl;
 
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decDefineMembers).data(), "define");
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decProtoMembers).data(), "prototype");
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decTypedefMembers).data(), "typedef");
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decEnumMembers).data(), "enum");
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decFuncMembers).data(), "func");
-   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decVarMembers).data(), "var");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decDefineMembers), "define");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decProtoMembers), "prototype");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decTypedefMembers), "typedef");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decEnumMembers), "enum");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decFuncMembers), "func");
+   generateDEFSection(nd, t, nd->getMemberList(MemberListType_decVarMembers), "var");
 
    t << "  ns-filename  = '" << nd->getDefFileName() << "';" << endl;
    t << "  ns-fileline  = '" << nd->getDefLine()     << "';" << endl;
@@ -581,7 +582,7 @@ void generateDEFForNamespace(NamespaceDef *nd, QTextStream &t)
    t << "  };" << endl;
 }
 
-void generateDEFForFile(FileDef *fd, QTextStream &t)
+void generateDEFForFile(QSharedPointer<FileDef> fd, QTextStream &t)
 {
    if (fd->isReference()) {
       return;   // skip external references

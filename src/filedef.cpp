@@ -962,29 +962,31 @@ void FileDef::finishParsing()
    ClangParser::instance()->finish();
 }
 
-void FileDef::addMembersToMemberGroup()
+void FileDef::addMembersToMemberGroup(QSharedPointer<FileDef> self)
 { 
+  if (self != this) {
+      throw "broom"; // broom 
+   }
+
    MemberGroupSDict *temp = &m_memberGroupSDict;
 
    for (auto &ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
-         ::addMembersToMemberGroup(ml.data(), &temp, this);    
+         ::addMembersToMemberGroup(ml, &temp, self);    
       }
    }
 
    // add members inside sections to their groups
-
-     for (auto mg : m_memberGroupSDict) {
-         if (mg->allMembersInSameSection() && m_subGrouping) {
-            //printf("----> addToDeclarationSection(%s)\n",mg->header().data());
-            mg->addToDeclarationSection();
-         }
+   for (auto mg : m_memberGroupSDict) {
+      if (mg->allMembersInSameSection() && m_subGrouping) {           
+         mg->addToDeclarationSection();
       }
+   }
  
 }
 
 /*! Adds member definition \a md to the list of all members of this file */
-void FileDef::insertMember(MemberDef *md)
+void FileDef::insertMember(QSharedPointer<MemberDef> md)
 {
    if (md->isHidden()) {
       return;

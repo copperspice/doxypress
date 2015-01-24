@@ -1962,7 +1962,7 @@ static void writeClassLinkForMember(OutputList &ol, MemberDef *md, const char *s
 
 static void writeFileLinkForMember(OutputList &ol, MemberDef *md, const char *separator, QString &prevFileName)
 {
-   FileDef *fd = md->getFileDef();
+   QSharedPointer<FileDef> fd = md->getFileDef();
 
    if (fd && prevFileName != fd->name()) {
       ol.docify(separator);
@@ -2215,8 +2215,6 @@ void addNamespaceMemberNameToIndex(MemberDef *md)
    }
 }
 
-//----------------------------------------------------------------------------
-
 void initFileMemberIndices()
 {
    int j = 0;
@@ -2229,7 +2227,7 @@ void initFileMemberIndices()
 
 void addFileMemberNameToIndex(MemberDef *md)
 {
-   FileDef *fd = md->getFileDef();
+   QSharedPointer<FileDef> fd = md->getFileDef();
 
    if (fd && fd->isLinkableInProject() && md->isLinkableInProject()) {
       QByteArray n = md->name();

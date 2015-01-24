@@ -218,15 +218,15 @@ void Definition::addToMap(const QByteArray &name)
    }
 
    if (! symbolName.isEmpty()) {     
-      auto di = Doxygen::symbolMap->find(symbolName);
+      auto di = Doxygen::symbolMap.find(symbolName);
 
-      QSharedPointer<QList<Definition *>> dl;
+      QSharedPointer<QList<QSharedPointer<Definition>>> dl;
 
-      if (di == Doxygen::symbolMap->end() ) { 
+      if (di == Doxygen::symbolMap.end() ) { 
          // new Symbol         
 
-         dl = QSharedPointer<QList<Definition *>>(new QList<Definition *>);       
-         Doxygen::symbolMap->insert(symbolName, dl);    
+         dl = QMakeShared<QList<QSharedPointer<Definition>>>();       
+         Doxygen::symbolMap.insert(symbolName, dl);    
      
       } else {
          // update existing symbol
@@ -978,7 +978,7 @@ void Definition::setBodySegment(int bls, int ble)
    m_impl->body->endLine = ble;
 }
 
-void Definition::setBodyDef(FileDef *fd)
+void Definition::setBodyDef(QSharedPointer<FileDef> fd)
 {
    if (m_impl->body == 0) {
       m_impl->body = new BodyInfo;
@@ -1709,9 +1709,9 @@ int Definition::getEndBodyLine() const
    return m_impl->body ? m_impl->body->endLine : -1;
 }
 
-FileDef *Definition::getBodyDef() const
+QSharedPointer<FileDef> Definition::getBodyDef() const
 {
-   return m_impl->body ? m_impl->body->fileDef : 0;
+   return m_impl->body ? m_impl->body->fileDef : QSharedPointer<FileDef>();
 }
 
 SortedList<GroupDef *> *Definition::partOfGroups() const

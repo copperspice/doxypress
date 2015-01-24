@@ -284,8 +284,7 @@ void DocSets::addContentsItem(bool isDir, const QString &name, const char *ref, 
    }
 }
 
-void DocSets::addIndexItem(Definition *context, MemberDef *md,
-                           const char *, const char *)
+void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *, const char *)
 {
    if (md == 0 && context == 0) {
       return;
@@ -467,33 +466,42 @@ void DocSets::addIndexItem(Definition *context, MemberDef *md,
       }
       cd = md->getClassDef();
       nd = md->getNamespaceDef();
+
       if (cd) {
          scope = cd->qualifiedName();
       } else if (nd) {
          scope = nd->name();
       }
-      MemberDef *declMd = md->memberDeclaration();
+
+      QSharedPointer<MemberDef> declMd = md->memberDeclaration();
+
       if (declMd == 0) {
          declMd = md;
       }
+
       {
          fd = md->getFileDef();
          if (fd) {
             decl = fd->name();
          }
       }
+
       writeToken(m_tts, md, type, lang, scope, md->anchor(), decl);
 
    } else if (context && context->isLinkable()) {
+
       if (fd == 0 && context->definitionType() == Definition::TypeFile) {
-         fd = (FileDef *)context;
+         fd = context.dynamicCast<FileDef>();
       }
+
       if (cd == 0 && context->definitionType() == Definition::TypeClass) {
-         cd = (ClassDef *)context;
+         cd = context.dynamicCast<ClassDef>();
       }
+
       if (nd == 0 && context->definitionType() == Definition::TypeNamespace) {
-         nd = (NamespaceDef *)context;
+         nd = context.dynamicCast<NamespaceDef>();
       }
+
       if (fd) {
          type = "file";
 
@@ -546,8 +554,8 @@ void DocSets::addIndexItem(Definition *context, MemberDef *md,
    }
 }
 
-void DocSets::writeToken(QTextStream &t, const Definition *d, const QByteArray &type, const QByteArray &lang,
-                         const char *scope, const char *anchor, const QByteArray &decl)
+void DocSets::writeToken(QTextStream &t, QSharedPointer<const Definition> d, const QByteArray &type, const QByteArray &lang,
+                         const char *scope, const char *anchor, const QByteArray &decl) 
 {
    t << "  <Token>" << endl;
    t << "    <TokenIdentifier>" << endl;

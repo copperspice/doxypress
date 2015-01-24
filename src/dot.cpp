@@ -2731,7 +2731,7 @@ void DotClassGraph::buildGraph(ClassDef *cd, DotNode *n, bool base, int distance
          }
 
       } else { // template relations for super classes
-         QHash<QString, ClassDef> *templInstances = cd->getTemplateInstances();
+         QHash<QString, QSharedPointer<ClassDef>> *templInstances = cd->getTemplateInstances();
 
          if (templInstances) {
             auto iter = templInstances->begin();

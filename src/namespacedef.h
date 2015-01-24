@@ -70,7 +70,7 @@ class NamespaceDef : public Definition
       return QByteArray();
    }
 
-   void insertUsedFile(FileDef *fd);
+   void insertUsedFile(QSharedPointer<FileDef> fd);
 
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
@@ -112,7 +112,7 @@ class NamespaceDef : public Definition
    bool isLinkableInProject() const;
    bool isLinkable() const;
    bool hasDetailedDescription() const;
-   void addMembersToMemberGroup();
+   void addMembersToMemberGroup(QSharedPointer<NamespaceDef> self);
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
  

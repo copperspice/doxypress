@@ -837,7 +837,7 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
 
    } else if (isImageLink) {
       bool ambig;
-      FileDef *fd = 0;
+      QSharedPointer<FileDef> fd;
 
       if (link.indexOf("@ref ") != -1 || link.indexOf("\\ref ") != -1 || (fd = findFileDef(Doxygen::imageNameDict, link, ambig)))
          // assume doxygen symbol link or local image link

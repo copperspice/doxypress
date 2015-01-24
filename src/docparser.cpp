@@ -232,7 +232,8 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
 {
    QByteArray result;
    bool ambig;
-   FileDef *fd;
+
+   QSharedPointer<FileDef> fd;
  
    if ((fd = findFileDef(Doxygen::imageNameDict, fileName, ambig))) {
       QByteArray inputFile = fd->getFilePath();
@@ -1062,19 +1063,18 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children)
 
    // ------- try to turn the word 'name' into a link
 
-   Definition *compound = 0;
-   MemberDef  *member = 0;
+   QSharedPointer<Definition> compound;
+   QSharedPointer<MemberDef>  member;
 
    int len = g_token->name.length();
 
-   ClassDef *cd = 0;
+   QSharedPointer<ClassDef> cd;
    bool ambig;
 
-   FileDef *fd = findFileDef(Doxygen::inputNameDict, s_fileName, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(Doxygen::inputNameDict, s_fileName, ambig);
 
    if (! s_insideHtmlLink && (resolveRef(s_context, g_token->name, s_inSeeBlock, &compound, &member, true, fd, true)
-          || (!s_context.isEmpty() &&  // also try with global scope
-              resolveRef("", g_token->name, s_inSeeBlock, &compound, &member, false, 0, true)) )) {
+          || (!s_context.isEmpty() &&  resolveRef("", g_token->name, s_inSeeBlock, &compound, &member, false, 0, true)) )) {
 
      if (member && member->isLinkable()) { 
 
@@ -1667,7 +1667,7 @@ static void readTextFileByName(const QByteArray &file, QByteArray &text)
 
    // as a fallback we also look in the exampleNameDict
    bool ambig;
-   FileDef *fd;
+   QSharedPointer<FileDef> fd;
 
    if ((fd = findFileDef(Doxygen::exampleNameDict, file, ambig))) {
       text = fileToString(fd->getFilePath(), Config_getBool("FILTER_SOURCE_FILES"));
@@ -1904,7 +1904,7 @@ void DocIncOperator::parse()
 
 void DocCopy::parse(QList<DocNode *> &children)
 {
-   QByteArray doc
+   QByteArray doc;
    QByteArray brief;
 
    QSharedPointer<Definition> def = findDocsForMemberOrCompound(m_link, doc, brief);
@@ -2577,7 +2577,7 @@ void DocDotFile::parse()
    handlePendingStyleCommands(this, m_children);
 
    bool ambig;
-   FileDef *fd = findFileDef(Doxygen::dotFileNameDict, m_name, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(Doxygen::dotFileNameDict, m_name, ambig);
 
    if (fd == 0 && m_name.right(4) != ".dot") { // try with .dot extension as well
       fd = findFileDef(Doxygen::dotFileNameDict, m_name + ".dot", ambig);
@@ -2652,12 +2652,15 @@ void DocMscFile::parse()
    handlePendingStyleCommands(this, m_children);
 
    bool ambig;
-   FileDef *fd = findFileDef(Doxygen::mscFileNameDict, m_name, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(Doxygen::mscFileNameDict, m_name, ambig);
+
    if (fd == 0 && m_name.right(4) != ".msc") { // try with .msc extension as well
       fd = findFileDef(Doxygen::mscFileNameDict, m_name + ".msc", ambig);
    }
+
    if (fd) {
       m_file = fd->getFilePath();
+
    } else if (ambig) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included msc file name %s is ambiguous.\n"
                      "Possible candidates:\n%s", qPrint(m_name),
@@ -2726,7 +2729,7 @@ void DocDiaFile::parse()
    handlePendingStyleCommands(this, m_children);
 
    bool ambig;
-   FileDef *fd = findFileDef(Doxygen::diaFileNameDict, m_name, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(Doxygen::diaFileNameDict, m_name, ambig);
 
    if (fd == 0 && m_name.right(4) != ".dia") { // try with .dia extension as well
       fd = findFileDef(Doxygen::diaFileNameDict, m_name + ".dia", ambig);

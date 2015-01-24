@@ -25,7 +25,7 @@
 class FileDef;
 
 /** Class representing a list of FileDef objects. */
-class FileList : public SortedList<FileDef *>
+class FileList : public SortedList<QSharedPointer<FileDef>>
 {
  public:
    FileList() : m_pathName("tmp")

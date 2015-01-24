@@ -11398,7 +11398,7 @@ static bool getLinkInScope(const QByteArray &c,  // scope
          }
       }
 
-      Definition *d = md->getOuterScope() == Doxygen::globalScope ? md->getFileDef() : md->getOuterScope();
+      QSharedPointer<Definition> d = md->getOuterScope() == Doxygen::globalScope ? md->getFileDef() : md->getOuterScope();
 
       if (md->getGroupDef()) {
          d = md->getGroupDef();
@@ -11542,8 +11542,10 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
       writeMultiLineCodeLink(ol, cd, clName);
       addToSearchIndex(className);
       g_theCallContext.setScope(cd);
+
       if (md) {
-         Definition *d = md->getOuterScope() == Doxygen::globalScope ? md->getFileDef() : md->getOuterScope();
+         QSharedPointer<Definition> d = md->getOuterScope() == Doxygen::globalScope ? md->getFileDef() : md->getOuterScope();
+
          if (md->getGroupDef()) {
             d = md->getGroupDef();
          }
@@ -13174,7 +13176,7 @@ YY_DECL {
                         }
 
                         if (bcd && bcd != ncd) {
-                           ncd->insertBaseClass(bcd.data(), qPrintable(s), Public, Normal);
+                           ncd->insertBaseClass(bcd, qPrintable(s), Public, Normal);
                         }
                        
                      }

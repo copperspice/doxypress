@@ -35,7 +35,7 @@ class MemberName : public QList<QSharedPointer<MemberDef>>
    }
 
  private:
-   int compareValues(const MemberDef *item1, const MemberDef *item2) const;
+   int compareValues(QSharedPointer<const MemberDef> item1, QSharedPointer<const MemberDef> item2) const;
    QByteArray name;
 };
 
@@ -87,7 +87,7 @@ class MemberNameInfo : public QList<MemberInfo>
    }
 
  private:
-   int compareValues(const MemberInfo *item1, const MemberInfo *item2) const;
+   int compareValues(QSharedPointer<const MemberInfo> item1, QSharedPointer<const MemberInfo> item2) const;
    QByteArray name;
 };
 

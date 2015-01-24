@@ -29,12 +29,15 @@ class FileName : public FileList
  public:
    FileName(const char *fn, const char *name);
    ~FileName();
+
    const char *fileName() const {
       return name;
    }
+
    const char *fullName() const {
       return fName;
    }
+
    void generateDiskNames();
 
  private:
@@ -45,7 +48,7 @@ class FileName : public FileList
 };
 
 /** Iterator for FileDef objects in a FileName list. */
-class FileNameIterator : public QListIterator<FileDef *>
+class FileNameIterator : public QListIterator<QSharedPointer<FileDef> >
 {
  public:
    FileNameIterator(const FileName &list);

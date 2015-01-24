@@ -1120,8 +1120,10 @@ static void generateXMLForMember(MemberDef *md, QTextStream &ti, QTextStream &t,
         << md->getDefFileName() << "\" line=\""
         << md->getDefLine() << "\"" << " column=\""
         << md->getDefColumn() << "\"" ;
+
       if (md->getStartBodyLine() != -1) {
-         FileDef *bodyDef = md->getBodyDef();
+         QSharedPointer<FileDef> bodyDef = md->getBodyDef();
+
          if (bodyDef) {
             t << " bodyfile=\"" << bodyDef->getFilePath() << "\"";
          }
@@ -1577,8 +1579,10 @@ static void generateXMLForClass(ClassDef *cd, QTextStream &ti)
      << cd->getDefFileName() << "\" line=\""
      << cd->getDefLine() << "\"" << " column=\""
      << cd->getDefColumn() << "\"" ;
+
    if (cd->getStartBodyLine() != -1) {
-      FileDef *bodyDef = cd->getBodyDef();
+      QSharedPointer<FileDef> bodyDef = cd->getBodyDef();
+
       if (bodyDef) {
          t << " bodyfile=\"" << bodyDef->getFilePath() << "\"";
       }

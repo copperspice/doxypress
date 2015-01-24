@@ -2332,7 +2332,7 @@ YY_DECL {
                   }
 
                   if (baseDefToAdd && baseDefToAdd != classDefToAdd) {
-                     classDefToAdd->insertBaseClass(baseDefToAdd.data(), qPrintable(s), Public, Normal);
+                     classDefToAdd->insertBaseClass(baseDefToAdd, qPrintable(s), Public, Normal);
                   }
                }
 

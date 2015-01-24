@@ -29,12 +29,13 @@ MemberName::~MemberName()
 {
 }
 
-int MemberName::compareValues(const MemberDef *m1, const MemberDef *m2) const
+int MemberName::compareValues(QSharedPointer<const MemberDef> m1, QSharedPointer<const MemberDef> m2) const
 {
-   ClassDef *c1 = m1->getClassDef();
-   ClassDef *c2 = m2->getClassDef();
-   FileDef  *f1 = m1->getFileDef();
-   FileDef  *f2 = m2->getFileDef();
+   QSharedPointer<ClassDef> c1 = m1->getClassDef();
+   QSharedPointer<ClassDef> c2 = m2->getClassDef();
+
+   QSharedPointer<FileDef> f1 = m1->getFileDef();
+   QSharedPointer<FileDef> f2 = m2->getFileDef();
 
    if (c1 && c2) {
       return qstrcmp(c1->name(), c2->name());
@@ -52,12 +53,13 @@ MemberNameInfo::MemberNameInfo(const char *n) : QList<MemberInfo>()
    name = n;
 }
 
-int MemberNameInfo::compareValues(const MemberInfo *m1, const MemberInfo *m2) const
+int MemberNameInfo::compareValues(QSharedPointer<const MemberInfo> m1, QSharedPointer<const MemberInfo> m2) const
 {
-   ClassDef *c1 = m1->memberDef->getClassDef();
-   ClassDef *c2 = m2->memberDef->getClassDef();
-   FileDef  *f1 = m1->memberDef->getFileDef();
-   FileDef  *f2 = m2->memberDef->getFileDef();
+   QSharedPointer<ClassDef> c1 = m1->memberDef->getClassDef();
+   QSharedPointer<ClassDef> c2 = m2->memberDef->getClassDef();
+
+   QSharedPointer<FileDef> f1 = m1->memberDef->getFileDef();
+   QSharedPointer<FileDef> f2 = m2->memberDef->getFileDef();
 
    if (c1 && c2) {
       return qstrcmp(c1->name(), c2->name());

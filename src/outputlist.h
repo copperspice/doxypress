@@ -58,9 +58,8 @@ class OutputList : public OutputDocInterface
 
 
    //  OutputDocInterface implementation
-   bool generateDoc(const char *fileName, int startLine,
-                    Definition *ctx, MemberDef *md, const QByteArray &docStr,
-                    bool indexWords, bool isExample, const char *exampleName = 0,
+   bool generateDoc(const char *fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md, 
+                    const QByteArray &docStr,bool indexWords, bool isExample, const char *exampleName = 0,
                     bool singleLine = false, bool linkFromIndex = false);
 
    void writeDoc(DocRoot *root, Definition *ctx, MemberDef *md);

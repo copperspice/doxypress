@@ -726,15 +726,13 @@ void HtmlDocVisitor::visit(DocFormula *f)
 void HtmlDocVisitor::visit(DocIndexEntry *e)
 {
    QByteArray anchor = convertIndexWordToAnchor(e->entry());
+
    if (e->member()) {
       anchor.prepend(e->member()->anchor() + "_");
    }
+
    m_t << "<a name=\"" << anchor << "\"></a>";
-   //printf("*** DocIndexEntry: word='%s' scope='%s' member='%s'\n",
-   //       e->entry().data(),
-   //       e->scope()  ? e->scope()->name().data()  : "<null>",
-   //       e->member() ? e->member()->name().data() : "<null>"
-   //      );
+   
    Doxygen::indexList->addIndexItem(e->scope(), e->member(), anchor, e->entry());
 }
 

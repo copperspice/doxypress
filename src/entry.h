@@ -197,7 +197,8 @@ class Entry
    int getSize();
 
    void addSpecialListItem(const char *listName, int index);
-   void createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage *storage, FileDef *fd, QSharedPointer<Entry> self);
+   void createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage *storage, QSharedPointer<FileDef> fd, 
+                              QSharedPointer<Entry> self);
 
    // while parsing a file these function can be used to navigate/build the tree
    void setParent(QSharedPointer<Entry> parent) {
@@ -356,7 +357,7 @@ class EntryNav
       m_section = section;
    }
 
-   void setFileDef( QSharedPointer<FileDef> fd) {
+   void setFileDef(QSharedPointer<FileDef> fd) {
       m_fileDef = fd;
    }
 
