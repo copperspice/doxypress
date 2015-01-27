@@ -2501,7 +2501,7 @@ void RTFGenerator::exceptionEntry(const QByteArray &prefix, bool closeBracket)
    m_textStream << " ";
 }
 
-void RTFGenerator::writeDoc(DocNode *n, Definition *ctx, MemberDef *)
+void RTFGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
    RTFDocVisitor *visitor = new RTFDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QByteArray(""));
    n->accept(visitor);

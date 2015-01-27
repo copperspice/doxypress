@@ -663,10 +663,10 @@ static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_
    static bool hideFriendCompounds = Config_getBool("HIDE_FRIEND_COMPOUNDS");
    bool isLinkable = md->isLinkable();
 
-   ClassDef *cd = 0;
-   NamespaceDef *nd = 0;
-   FileDef *fd = 0;
-   GroupDef *gd = 0;
+   QSharedPointer<ClassDef>     cd;
+   QSharedPointer<NamespaceDef> nd;
+   QSharedPointer<FileDef>      fd;
+   QSharedPointer<GroupDef>     gd;
 
    if (isLinkable &&  (((cd = md->getClassDef()) && cd->isLinkable() && cd->templateMaster() == 0) || 
                        ((gd = md->getGroupDef()) && gd->isLinkable())) ) {
@@ -1100,14 +1100,14 @@ void writeJavascriptSearchIndex()
                   bool overloadedFunction = false;
                   int childCount = 0;
 
-                  Definition *next;
-                  Definition *prevScope = 0;  
+                  QSharedPointer<Definition> next;
+                  QSharedPointer<Definition> prevScope;  
  
                   auto nextIter = dl->begin();   
 
                   for (auto &d : *dl)  { 
                              
-                     Definition *scope = d->getOuterScope();
+                     QSharedPointer<Definition> scope = d->getOuterScope();
 
                      ++nextIter;   
 
@@ -1117,8 +1117,8 @@ void writeJavascriptSearchIndex()
                         next = *nextIter;
                      }
                   
-                     Definition *nextScope = 0;
-                     MemberDef  *md        = 0;
+                     QSharedPointer<Definition> nextScope;
+                     QSharedPointer<MemberDef>  md;
 
                      bool isMemberDef = d->definitionType() == Definition::TypeMember;
 
@@ -1137,13 +1137,14 @@ void writeJavascriptSearchIndex()
                      }
                      ti << "'" << externalRef("../", d->getReference(), true)
                         << d->getOutputFileBase() << Doxygen::htmlFileExtension;
+
                      if (!anchor.isEmpty()) {
                         ti << "#" << anchor;
                      }
                      ti << "',";
 
                      static bool extLinksInWindow = Config_getBool("EXT_LINKS_IN_WINDOW");
-                     if (!extLinksInWindow || d->getReference().isEmpty()) {
+                     if (! extLinksInWindow || d->getReference().isEmpty()) {
                         ti << "1,";
                      } else {
                         ti << "0,";
@@ -1235,6 +1236,7 @@ void writeJavascriptSearchIndex()
 
    {
       QFile f(searchDirName + "/searchdata.js");
+
       if (f.open(QIODevice::WriteOnly)) {
          QTextStream t(&f);
          t << "var indexSectionsWithContent =" << endl;

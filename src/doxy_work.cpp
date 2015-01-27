@@ -1335,7 +1335,7 @@ void distributeClassGroupRelations()
    for (auto cd : *Doxygen::classSDict) {
       // distribute the group to nested classes as well
 
-      GroupDef *gd = cd->partOfGroups()->at(0);
+      QSharedPointer<GroupDef> gd = cd->partOfGroups()->at(0);
 
       if (! cd->visited && cd->partOfGroups() != 0 && cd->getClassSDict()) {
 
@@ -1542,7 +1542,7 @@ void Doxy_Work::addRelatedPage(QSharedPointer<EntryNav> rootNav)
 
    if (pd) {
       pd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-      pd->addSectionsToDefinition(root->anchors);
+      pd->addSectionsToDefinition(root->anchors, pd);
       pd->setShowToc(root->stat);
 
       addPageToContext(pd, rootNav);
@@ -1575,7 +1575,7 @@ void Doxy_Work::buildGroupListFiltered(QSharedPointer<EntryNav> rootNav, bool ad
             gd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
             gd->setDocumentation( root->doc, root->docFile, root->docLine );
             gd->setInbodyDocumentation( root->inbodyDocs, root->inbodyFile, root->inbodyLine );
-            gd->addSectionsToDefinition(root->anchors);
+            gd->addSectionsToDefinition(root->anchors, gd);
             gd->setRefItems(root->sli);
             gd->setLanguage(root->lang);
 
@@ -1592,7 +1592,7 @@ void Doxy_Work::buildGroupListFiltered(QSharedPointer<EntryNav> rootNav, bool ad
             // allow empty docs for group
             gd->setDocumentation(!root->doc.isEmpty() ? root->doc : QByteArray(" "), root->docFile, root->docLine, false);
             gd->setInbodyDocumentation( root->inbodyDocs, root->inbodyFile, root->inbodyLine );
-            gd->addSectionsToDefinition(root->anchors);
+            gd->addSectionsToDefinition(root->anchors, gd);
 
             Doxygen::groupSDict->insert(root->name, gd);
             gd->setRefItems(root->sli);
@@ -1708,7 +1708,7 @@ void Doxy_Work::buildFileList(QSharedPointer<EntryNav> rootNav)
 
             fd->setDocumentation(root->doc, root->docFile, root->docLine, false);
             fd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-            fd->addSectionsToDefinition(root->anchors);
+            fd->addSectionsToDefinition(root->anchors, fd);
             fd->setRefItems(root->sli);
 
             for (auto g : *root->groups) {
@@ -1716,7 +1716,7 @@ void Doxy_Work::buildFileList(QSharedPointer<EntryNav> rootNav)
 
                if (! g.groupname.isEmpty() && (gd = Doxygen::groupSDict->find(g.groupname))) {
                   gd->addFile(fd);
-                  fd->makePartOfGroup(gd.data());
+                  fd->makePartOfGroup(gd);
                }
             }
          }
@@ -2165,7 +2165,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
       cd->setDocumentation(root->doc, root->docFile, root->docLine); // copy docs to definition
       cd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
       cd->setLanguage(root->lang);
-      cd->setId(root->id);
+      cd->setId(root->id, cd);
       cd->setHidden(root->hidden);
       cd->setArtificial(root->artificial);
       cd->setClassSpecifier(root->spec);
@@ -2193,7 +2193,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
       }
    }
 
-   cd->addSectionsToDefinition(root->anchors);
+   cd->addSectionsToDefinition(root->anchors, cd);
    if (!root->subGrouping) {
       cd->setSubGrouping(false);
    }
@@ -2323,7 +2323,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
       fd->insertClass(cd);
    }
 
-   SortedList<GroupDef *> *groups = rootCd->partOfGroups();
+   SortedList<QSharedPointer<GroupDef>> *groups = rootCd->partOfGroups();
 
    if ( groups != 0 ) {
       for (auto item : *groups) {
@@ -2485,7 +2485,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
 
             nd->setDocumentation(root->doc, root->docFile, root->docLine);
             nd->setName(fullName); // change name to match docs
-            nd->addSectionsToDefinition(root->anchors);
+            nd->addSectionsToDefinition(root->anchors, nd);
 
             nd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
             if (nd->getLanguage() == SrcLangExt_Unknown) {
@@ -2518,11 +2518,11 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
 
             nd->setDocumentation(root->doc, root->docFile, root->docLine); // copy docs to definition
             nd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-            nd->addSectionsToDefinition(root->anchors);
+            nd->addSectionsToDefinition(root->anchors, nd);
             nd->setHidden(root->hidden);
             nd->setArtificial(root->artificial);
             nd->setLanguage(root->lang);
-            nd->setId(root->id);
+            nd->setId(root->id, nd);
 
             addNamespaceToGroups(root, nd);
             nd->setRefItems(root->sli);
@@ -2678,17 +2678,16 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<EntryNav> rootNav)
          } else {
             // unknown namespace, but add it anyway
 
-            QSharedPointer<NamespaceDef> nd(QSharedPointer<NamespaceDef>(new NamespaceDef(root->fileName, root->startLine,
-                                            root->startColumn, name)));
+            QSharedPointer<NamespaceDef> nd = QMakeShared<NamespaceDef>(root->fileName, root->startLine, root->startColumn, name);
 
             nd->setDocumentation(root->doc, root->docFile, root->docLine); // copy docs to definition
             nd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-            nd->addSectionsToDefinition(root->anchors);
+            nd->addSectionsToDefinition(root->anchors, nd);
 
             nd->setHidden(root->hidden);
             nd->setArtificial(true);
             nd->setLanguage(root->lang);
-            nd->setId(root->id);
+            nd->setId(root->id, nd);
 
             for (auto g : *root->groups) {
                QSharedPointer<GroupDef> gd;
@@ -2880,7 +2879,7 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<EntryNav> rootNav)
                            newMd->enableCallGraph(root->callGraph);
                            newMd->enableCallerGraph(root->callerGraph);
                            newMd->setBitfields(md->bitfieldString());
-                           newMd->addSectionsToDefinition(root->anchors);
+                           newMd->addSectionsToDefinition(root->anchors, newMd);
                            newMd->setBodySegment(md->getStartBodyLine(), md->getEndBodyLine());
                            newMd->setBodyDef(md->getBodyDef());
                            newMd->setInitializer(md->initializer());
@@ -2888,7 +2887,7 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<EntryNav> rootNav)
                            newMd->setMemberGroupId(root->mGrpId);
                            newMd->setMemberSpecifiers(md->getMemberSpecifiers());
                            newMd->setLanguage(root->lang);
-                           newMd->setId(root->id);
+                           newMd->setId(root->id, newMd);
 
                            rootNav->releaseEntry();
                         }
@@ -3019,7 +3018,7 @@ MemberDef *Doxy_Work::addVariableToClass(QSharedPointer<EntryNav> rootNav, QShar
    md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
    md->setDefinition(def);
    md->setBitfields(root->bitfields);
-   md->addSectionsToDefinition(root->anchors);
+   md->addSectionsToDefinition(root->anchors, md);
    md->setFromAnonymousScope(fromAnnScope);
    md->setFromAnonymousMember(fromAnnMemb);
 
@@ -3036,7 +3035,7 @@ MemberDef *Doxy_Work::addVariableToClass(QSharedPointer<EntryNav> rootNav, QShar
    md->setHidden(root->hidden);
    md->setArtificial(root->artificial);
    md->setLanguage(root->lang);
-   md->setId(root->id);
+   md->setId(root->id, md);
    addMemberToGroups(root, md);
 
    md->setBodyDef(rootNav->fileDef());
@@ -3209,7 +3208,7 @@ MemberDef *Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> rootNav, Member
    md->setDocumentation(root->doc, root->docFile, root->docLine);
    md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
    md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
-   md->addSectionsToDefinition(root->anchors);
+   md->addSectionsToDefinition(root->anchors, md);
    md->setFromAnonymousScope(fromAnnScope);
    md->setFromAnonymousMember(fromAnnMemb);
    md->setInitializer(root->initializer);
@@ -3217,7 +3216,7 @@ MemberDef *Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> rootNav, Member
    md->setMemberGroupId(root->mGrpId);
    md->setDefinition(def);
    md->setLanguage(root->lang);
-   md->setId(root->id);
+   md->setId(root->id, md);
    md->enableCallGraph(root->callGraph);
    md->enableCallerGraph(root->callerGraph);
    md->setExplicitExternal(root->explicitExternal);
@@ -3713,7 +3712,7 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<EntryNa
    md->setLanguage(root->lang);
    md->setBodyDef(fd);
    md->setFileDef(fd);
-   md->addSectionsToDefinition(root->anchors);
+   md->addSectionsToDefinition(root->anchors, md);
 
    QByteArray const def = root->type + " " + rname;
    md->setDefinition(def);
@@ -3886,11 +3885,11 @@ void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointe
    md->setMemberGroupId(root->mGrpId);
    md->setTypeConstraints(&root->typeConstr);
    md->setLanguage(root->lang);
-   md->setId(root->id);
+   md->setId(root->id, md);
    md->setBodyDef(fd);
    md->setFileDef(fd);
 
-   md->addSectionsToDefinition(root->anchors);
+   md->addSectionsToDefinition(root->anchors, md);
    QByteArray def;
    QByteArray qualScope = cd->qualifiedNameWithTemplateParameters();
 
@@ -4192,7 +4191,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
 
                         item->setBriefDescription(root->brief, root->briefFile, root->briefLine);
 
-                        item->addSectionsToDefinition(root->anchors);
+                        item->addSectionsToDefinition(root->anchors, item);
 
                         item->enableCallGraph(item->hasCallGraph() || root->callGraph);
                         item->enableCallerGraph(item->hasCallerGraph() || root->callerGraph);
@@ -4230,7 +4229,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
 
                md->setTagInfo(rootNav->tagInfo());
                md->setLanguage(root->lang);
-               md->setId(root->id);
+               md->setId(root->id, md);
 
                md->setDocumentation(root->doc, root->docFile, root->docLine);
                md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
@@ -4243,7 +4242,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
 
                QSharedPointer<FileDef> fd = rootNav->fileDef();
                md->setBodyDef(fd);
-               md->addSectionsToDefinition(root->anchors);
+               md->addSectionsToDefinition(root->anchors, md);
                md->setMemberSpecifiers(root->spec);
                md->setMemberGroupId(root->mGrpId);
 
@@ -4733,7 +4732,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                            }
 
                            Debug::print(Debug::Classes, 0, "      Adding used class `%s' (1)\n", usedCd->name().data());
-                           instanceCd->addUsedClass(usedCd.data(), md->name(), md->protection());
+                           instanceCd->addUsedClass(usedCd, md->name(), md->protection());
                            usedCd->addUsedByClass(instanceCd, md->name(), md->protection());
                         }
                      }
@@ -4747,7 +4746,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
 
                         Debug::print(Debug::Classes, 0, "    Adding used class `%s' (2)\n", usedCd->name().data());
 
-                        instanceCd->addUsedClass(usedCd.data(), md->name(), md->protection()); // class exists
+                        instanceCd->addUsedClass(usedCd, md->name(), md->protection()); // class exists
                         usedCd->addUsedByClass(instanceCd, md->name(), md->protection());
                      }
                   }
@@ -4784,7 +4783,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                      }
 
                      Debug::print(Debug::Classes, 0, "    Adding used class `%s' (3)\n", usedCd->name().data());
-                     instanceCd->addUsedClass(usedCd.data(), md->name(), md->protection());
+                     instanceCd->addUsedClass(usedCd, md->name(), md->protection());
                      usedCd->addUsedByClass(instanceCd, md->name(), md->protection());
                   }
                }
@@ -4860,8 +4859,8 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
    }
 
    bool freshInstance = false;
-   QSharedPointer<ClassDef> instanceClass = dummyShared(templateClass->insertTemplateInstance(
-                                            root->fileName, root->startLine, root->startColumn, templSpec, freshInstance));
+   QSharedPointer<ClassDef> instanceClass = templateClass->insertTemplateInstance(
+                                            root->fileName, root->startLine, root->startColumn, templSpec, freshInstance);
    if (isArtificial) {
       instanceClass->setArtificial(true);
    }
@@ -5226,7 +5225,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
                      bi->prot = Public;
                   }
 
-                  if (!cd->isSubClass(baseClass.data())) {
+                  if (! cd->isSubClass(baseClass)) {
                      // check for recursion, see bug690787
                      cd->insertBaseClass(baseClass, usedName, bi->prot, bi->virt, templSpec);
 
@@ -5752,7 +5751,7 @@ void Doxy_Work::addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<M
    md->enableCallerGraph(md->hasCallerGraph() || root->callerGraph);
 
    md->mergeMemberSpecifiers(root->spec);
-   md->addSectionsToDefinition(root->anchors);
+   md->addSectionsToDefinition(root->anchors, md);
    addMemberToGroups(root, md);
 
    if (cd) {
@@ -6717,7 +6716,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
 
                md->setTagInfo(rootNav->tagInfo());
                md->setLanguage(root->lang);
-               md->setId(root->id);
+               md->setId(root->id, md);
                md->setMemberClass(cd);
                md->setTemplateSpecialization(true);
                md->setTypeConstraints(&root->typeConstr);
@@ -6728,7 +6727,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
                md->setDocsForDefinition(!root->proto);
                md->setPrototype(root->proto);
-               md->addSectionsToDefinition(root->anchors);
+               md->addSectionsToDefinition(root->anchors, md);
                md->setBodySegment(root->bodyLine, root->endBodyLine);
 
                QSharedPointer<FileDef> fd = rootNav->fileDef();
@@ -6797,7 +6796,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
 
                md->setTagInfo(rootNav->tagInfo());
                md->setLanguage(root->lang);
-               md->setId(root->id);
+               md->setId(root->id, md);
                md->setTypeConstraints(&root->typeConstr);
                md->setMemberClass(cd);
                md->setDefinition(funcDecl);
@@ -6812,7 +6811,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
                md->setDocsForDefinition(!root->proto);
                md->setPrototype(root->proto);
-               md->addSectionsToDefinition(root->anchors);
+               md->addSectionsToDefinition(root->anchors, md);
                md->setBodySegment(root->bodyLine, root->endBodyLine);
 
                QSharedPointer<FileDef> fd = rootNav->fileDef();
@@ -7016,10 +7015,10 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                md->setDocsForDefinition(!root->proto);
                md->setPrototype(root->proto);
                md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-               md->addSectionsToDefinition(root->anchors);
+               md->addSectionsToDefinition(root->anchors, md);
                md->setMemberGroupId(root->mGrpId);
                md->setLanguage(root->lang);
-               md->setId(root->id);
+               md->setId(root->id, md);
 
                //md->setMemberDefTemplateArguments(root->mtArgList);
                mn->append(md);
@@ -7073,7 +7072,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
 
             md->setTagInfo(rootNav->tagInfo());
             md->setLanguage(root->lang);
-            md->setId(root->id);
+            md->setId(root->id, md);
             md->makeImplementationDetail();
             md->setMemberClass(cd);
             md->setDefinition(funcDecl);
@@ -7084,7 +7083,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
             md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
             md->setDocsForDefinition(!root->proto);
             md->setPrototype(root->proto);
-            md->addSectionsToDefinition(root->anchors);
+            md->addSectionsToDefinition(root->anchors, md);
             md->setBodySegment(root->bodyLine, root->endBodyLine);
 
             QSharedPointer<FileDef> fd = rootNav->fileDef();
@@ -7348,7 +7347,7 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
 
          md->setTagInfo(rootNav->tagInfo());
          md->setLanguage(root->lang);
-         md->setId(root->id);
+         md->setId(root->id, md);
 
          if (!isGlobal) {
             md->setMemberClass(cd);
@@ -7360,7 +7359,7 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
          md->setMemberSpecifiers(root->spec); // UNO IDL "published"
          md->setEnumBaseType(root->args);
          
-         md->addSectionsToDefinition(root->anchors);
+         md->addSectionsToDefinition(root->anchors, md);
          md->setMemberGroupId(root->mGrpId);
          md->enableCallGraph(root->callGraph);
          md->enableCallerGraph(root->callerGraph);
@@ -7572,10 +7571,10 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                            fmd->setOuterScope(md->getOuterScope());
                            fmd->setTagInfo(e->tagInfo());
                            fmd->setLanguage(root->lang);
-                           fmd->setId(root->id);
+                           fmd->setId(root->id, fmd);
                            fmd->setDocumentation(root->doc, root->docFile, root->docLine);
                            fmd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-                           fmd->addSectionsToDefinition(root->anchors);
+                           fmd->addSectionsToDefinition(root->anchors, fmd);
                            fmd->setInitializer(root->initializer);
                            fmd->setMaxInitLines(root->initLines);
                            fmd->setMemberGroupId(root->mGrpId);
@@ -7727,7 +7726,7 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
                         md->setMemberGroupId(root->mGrpId);
                      }
 
-                     md->addSectionsToDefinition(root->anchors);
+                     md->addSectionsToDefinition(root->anchors, md);
                      md->setRefItems(root->sli);
 
                      QSharedPointer<GroupDef> gd = md->getGroupDef();
@@ -7758,7 +7757,7 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
                      md->setDocsForDefinition(!root->proto);
                      md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
                      md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
-                     md->addSectionsToDefinition(root->anchors);
+                     md->addSectionsToDefinition(root->anchors, md);
                      md->setMemberGroupId(root->mGrpId);
 
                      QSharedPointer<GroupDef> gd = md->getGroupDef();
@@ -7924,7 +7923,7 @@ void Doxy_Work::mergeCategories()
          QSharedPointer<ClassDef> baseClass = Doxygen::classSDict->find(baseName);
 
          if (baseClass) {          
-            baseClass->mergeCategory(cd.data());
+            baseClass->mergeCategory(cd);
          }
       }
    }
@@ -8441,7 +8440,7 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
 
                   md->setBodySegment(root->bodyLine, root->endBodyLine);
                   md->setBodyDef(rootNav->fileDef());
-                  md->addSectionsToDefinition(root->anchors);
+                  md->addSectionsToDefinition(root->anchors, md);
                   md->setMaxInitLines(root->initLines);
                   md->setRefItems(root->sli);
 
@@ -8475,7 +8474,7 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
 
                      md->setBodySegment(root->bodyLine, root->endBodyLine);
                      md->setBodyDef(rootNav->fileDef());
-                     md->addSectionsToDefinition(root->anchors);
+                     md->addSectionsToDefinition(root->anchors, md);
                      md->setRefItems(root->sli);
                      md->setLanguage(root->lang);
 
@@ -8636,7 +8635,7 @@ void Doxy_Work::findMainPage(QSharedPointer<EntryNav> rootNav)
                               Doxygen::mainPage->title(), SectionInfo::Page, 0));
 
             Doxygen::sectionDict->insert(indexName, si);
-            Doxygen::mainPage->addSectionsToDefinition(root->anchors);
+            Doxygen::mainPage->addSectionsToDefinition(root->anchors, Doxygen::mainPage);
          }
 
       } else if (rootNav->tagInfo() == 0) {
@@ -8658,7 +8657,7 @@ void Doxy_Work::findMainPageTagFiles(QSharedPointer<EntryNav> rootNav)
 
       if (Doxygen::mainPage && rootNav->tagInfo()) {
          QSharedPointer<Entry> root = rootNav->entry();
-         Doxygen::mainPage->addSectionsToDefinition(root->anchors);
+         Doxygen::mainPage->addSectionsToDefinition(root->anchors,  Doxygen::mainPage);
       }
    }
    RECURSE_ENTRYTREE(findMainPageTagFiles, rootNav);
@@ -8746,7 +8745,8 @@ void Doxy_Work::resolveUserReferences()
             QSharedPointer<GroupDef> gd;
 
             if (si->definition->definitionType() == Definition::TypeMember) {
-               gd = ((MemberDef *)si->definition)->getGroupDef();
+               QSharedPointer<MemberDef> temp = si->definition.dynamicCast<MemberDef>();
+               gd = temp->getGroupDef();
             }
 
             if (gd) {
@@ -8798,7 +8798,7 @@ void Doxy_Work::buildExampleList(QSharedPointer<EntryNav> rootNav)
 
          pd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
          pd->setFileName( qPrintable(convertNameToFile(pd->name() + "-example", false, true)), false);
-         pd->addSectionsToDefinition(root->anchors);
+         pd->addSectionsToDefinition(root->anchors, pd);
          pd->setLanguage(root->lang);
 
          Doxygen::exampleSDict->insert(root->name, pd);
@@ -9670,11 +9670,9 @@ void Doxy_Work::dumpSymbolMap()
       QTextStream t(&f);
 
       for (auto item : Doxygen::symbolMap) {
-         // list of symbols
-
-         for (auto d : *item) {
-            dumpSymbol(t, d);
-         }
+         // list of symbols   
+         QSharedPointer<Definition> self = sharedFrom(item);
+         dumpSymbol(t, self);         
       }
    }
 }

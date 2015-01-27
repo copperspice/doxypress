@@ -29,29 +29,21 @@ class TclLanguageScanner : public ParserInterface
 {
  public:
    virtual ~TclLanguageScanner() {}
+
    void startTranslationUnit(const char *) {}
    void finishTranslationUnit() {}
-   void parseInput(const char *fileName,
-                   const char *fileBuf,
-                   Entry *root,
-                   bool sameTranslationUnit,
+   void parseInput(const char *fileName, const char *fileBuf, Entry *root, bool sameTranslationUnit,
                    QStringList &filesInSameTranslationUnit);
+
    bool needsPreprocessing(const QByteArray &extension);
-   void parseCode(CodeOutputInterface &codeOutIntf,
-                  const char *scopeName,
-                  const QByteArray &input,
-                  SrcLangExt lang,
-                  bool isExampleBlock,
-                  const char *exampleName = 0,
-                  FileDef *fileDef = 0,
-                  int startLine = -1,
-                  int endLine = -1,
-                  bool inlineFragment = false,
-                  MemberDef *memberDef = 0,
-                  bool showLineNumbers = true,
-                  Definition *searchCtx = 0,
-                  bool collectXRefs = true
-                 );
+
+   void parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input, SrcLangExt lang,
+                  bool isExampleBlock, const char *exampleName = 0, 
+                  QSharedPointer<FileDef> fileDef = QSharedPointer<FileDef>(),
+                  int startLine = -1, int endLine = -1, bool inlineFragment = false,
+                  QSharedPointer<MemberDef> memberDef = QSharedPointer<MemberDef>(), bool showLineNumbers = true,
+                  QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override ;
+
    void resetCodeParserState();
    void parsePrototype(const char *text);
 };

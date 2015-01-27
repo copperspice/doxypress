@@ -20,10 +20,12 @@
 
 #include <QList>
 #include <QHash>
+#include <QSharedPointer>
 #include <QTextStream>
 
-#include <types.h>
+#include <doxy_shared.h>
 #include <sortedlist.h>
+#include <types.h>
 
 class DefinitionImpl;
 class FileDef;
@@ -46,7 +48,7 @@ struct DocInfo {
 struct BriefInfo {
    QByteArray doc;
    QByteArray tooltip;
-   int      line;
+   int line;
    QByteArray file;
 };
 
@@ -54,11 +56,12 @@ struct BriefInfo {
 struct BodyInfo {
    int      startLine;   //!< line number of the start of the definition
    int      endLine;     //!< line number of the end of the definition
-   FileDef *fileDef;     //!< file definition containing the function body
+
+   QSharedPointer<FileDef> fileDef;     //!< file definition containing the function body
 };
 
 /** Abstract interface for a Definition or DefinitionList */
-class DefinitionIntf
+class DefinitionIntf : public EnableSharedFromThis
 {
  public:
    DefinitionIntf() { }
@@ -90,14 +93,12 @@ class DefinitionIntf
 class Definition : public DefinitionIntf
 {
  public:
-
-   /*! Create a new definition */
+  
    Definition(
       const char *defFileName, int defLine, int defColumn,
       const char *name, const char *b = 0, const char *d = 0,
       bool isSymbol = true);
-
-   /*! Destroys the definition */
+ 
    virtual ~Definition();
 
    // ----  getters -----
@@ -152,7 +153,7 @@ class Definition : public DefinitionIntf
    /*! Returns a plain text version of the brief description suitable for use
     *  as a tool tip.
     */
-   QByteArray briefDescriptionAsTooltip() const;
+   QByteArray briefDescriptionAsTooltip()  const;
 
    /*! Returns the line number at which the brief description was found. */
    int briefLine() const;
@@ -251,7 +252,7 @@ class Definition : public DefinitionIntf
    /** Returns the programming language this definition was written in. */
    SrcLangExt getLanguage() const;
 
-   SortedList<GroupDef *> *partOfGroups() const;
+   SortedList<QSharedPointer<GroupDef>> *partOfGroups() const;
 
    QList<ListItemInfo> *xrefListItems() const;
 
@@ -277,7 +278,7 @@ class Definition : public DefinitionIntf
    virtual void setName(const char *name);
 
    /*! Sets a unique id for the symbol. Used for libclang integration. */
-   void setId(const char *name);
+   void setId(const char *name, QSharedPointer<Definition> self);
 
    /*! Sets the documentation of this definition to \a d. */
    virtual void setDocumentation(const char *d, const char *docFile, int docLine, bool stripWhiteSpace = true);
@@ -299,7 +300,7 @@ class Definition : public DefinitionIntf
    /*! Add the list of anchors that mark the sections that are found in the
     * documentation.
     */
-   void addSectionsToDefinition(QList<SectionInfo> *anchorList);
+   void addSectionsToDefinition(QList<SectionInfo> *anchorList, QSharedPointer<Definition> self);
 
    // source references
    void setBodySegment(int bls, int ble);
@@ -308,7 +309,7 @@ class Definition : public DefinitionIntf
    void addSourceReferences(QSharedPointer<MemberDef>d);
 
    void setRefItems(const QList<ListItemInfo> *sli);
-   void mergeRefItems(Definition *d);
+   void mergeRefItems(QSharedPointer<Definition> d);
 
    virtual void addInnerCompound(QSharedPointer<Definition> d)
    {};   
@@ -326,15 +327,22 @@ class Definition : public DefinitionIntf
    QString convertNameToFile(const char *name, bool allowDots = false) const;
 
    void writeSourceDef(OutputList &ol, const char *scopeName);
-   void writeInlineCode(OutputList &ol, const char *scopeName);
+   void writeInlineCode(OutputList &ol, const char *scopeName, QSharedPointer<Definition> self);
    void writeSourceRefs(OutputList &ol, const char *scopeName);
    void writeSourceReffedBy(OutputList &ol, const char *scopeName);
-   void makePartOfGroup(GroupDef *gd);
+   void makePartOfGroup(QSharedPointer<GroupDef> gd);
+
    //void writePathFragment(OutputList &ol) const;
+
    void writeNavigationPath(OutputList &ol) const;
    QByteArray navigationPathAsString() const;
-   virtual void writeQuickMemberLinks(OutputList &, MemberDef *) const {}
-   virtual void writeSummaryLinks(OutputList &) {}
+
+   virtual void writeQuickMemberLinks(OutputList &, QSharedPointer<MemberDef> md) const 
+   {}
+
+   virtual void writeSummaryLinks(OutputList &) 
+   {}
+
    QByteArray pathFragment() const;
 
    /*! Writes the documentation anchors of the definition to
@@ -383,7 +391,7 @@ class DefinitionList : public QList<QSharedPointer<Definition>>, public Definiti
       return TypeSymbolList;
    }
 
-   int compareValues(const Definition *item1, const Definition *item2) const {
+   int compareValues(QSharedPointer<const Definition> item1, QSharedPointer<const Definition> item2) const {
       return qstricmp(item1->name(), item2->name());
    }
 

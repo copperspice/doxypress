@@ -333,7 +333,7 @@ class OutputGenerator : public BaseOutputDocInterface
    void pushGeneratorState();
    void popGeneratorState();
 
-   virtual void writeDoc(DocNode *, Definition *ctx, MemberDef *md) = 0;
+   virtual void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md) = 0;
   
    // structural output interface   
    virtual void startFile(const char *name, const char *manName,const char *title) = 0;

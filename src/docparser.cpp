@@ -134,7 +134,9 @@ static QByteArray              s_relPath;
 static bool                    s_hasParamCommand;
 static bool                    s_hasReturnCommand;
 static QHash<QString, void *>  s_paramsFound;
-static MemberDef              *s_memberDef;
+
+static QSharedPointer<MemberDef> s_memberDef;
+
 static bool                    s_isExample;
 static QByteArray              s_exampleName;
 static SectionDict            *s_sectionDict;
@@ -2413,31 +2415,34 @@ DocCite::DocCite(DocNode *parent, const QByteArray &target, const QByteArray &) 
 DocLink::DocLink(DocNode *parent, const QByteArray &target)
 {
    m_parent = parent;
-   Definition *compound = 0;
+   QSharedPointer<Definition> compound;
+
    QByteArray anchor;
    m_refText = target;
    m_relPath = s_relPath;
+
    if (!m_refText.isEmpty() && m_refText.at(0) == '#') {
       m_refText = m_refText.right(m_refText.length() - 1);
    }
-   if (resolveLink(s_context, stripKnownExtensions(target), s_inSeeBlock,
-                   &compound, anchor)) {
+
+   if (resolveLink(s_context, stripKnownExtensions(target), s_inSeeBlock, &compound, anchor)) {
       m_anchor = anchor;
+
       if (compound && compound->isLinkable()) {
          m_file = compound->getOutputFileBase();
          m_ref  = compound->getReference();
-      } else if (compound && compound->definitionType() == Definition::TypeFile &&
-                 ((FileDef *)compound)->generateSourceFile()
-                ) { // undocumented file that has source code we can link to
+
+      } else if (compound && compound->definitionType() == Definition::TypeFile && ((FileDef *)compound)->generateSourceFile()) {
+         // undocumented file that has source code we can link to
          m_file = compound->getSourceFileBase();
          m_ref  = compound->getReference();
       }
+
       return;
    }
 
    // bogus link target
-   warn_doc_error(s_fileName, doctokenizerYYlineno, "unable to resolve link to `%s' for \\link command",
-                  qPrint(target));
+   warn_doc_error(s_fileName, doctokenizerYYlineno, "unable to resolve link to `%s' for \\link command", qPrint(target));
 }
 
 
@@ -6622,7 +6627,7 @@ int DocSection::parse()
    int retval = RetVal_OK;
    s_nodeStack.push(this);
 
-   QSharedPointer<SectionInfo>sec;
+   QSharedPointer<SectionInfo> sec;
 
    if (!m_id.isEmpty()) {
       sec = Doxygen::sectionDict->find(m_id);
@@ -7062,7 +7067,7 @@ static QByteArray processCopyDoc(const char *data, uint &len)
             // extract the argument
             QByteArray id = extractCopyDocId(data, j, len);
         
-            QByteArray doc
+            QByteArray doc;
             QByteArray brief;
 
             QSharedPointer<Definition> def  = findDocsForMemberOrCompound(m_link, doc, brief);
@@ -7111,7 +7116,7 @@ static QByteArray processCopyDoc(const char *data, uint &len)
    return buf.get();
 }
 
-DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<Definition> ctx, MemberDef *md, 
+DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md, 
                             const char *input, bool indexWords, bool isExample, const char *exampleName, 
                             bool singleLine, bool linkFromIndex)
 {  
@@ -7141,14 +7146,14 @@ if (ctx)  {
       s_context = ctx->name();
 
    } else if (ctx && ctx->definitionType() == Definition::TypePage) {
-      Definition *scope = ((PageDef *)ctx)->getPageScope();
+      QSharedPointer<Definition> scope = ((PageDef *)ctx)->getPageScope();
 
       if (scope && scope != Doxygen::globalScope) {
          s_context = scope->name();
       }
 
    } else if (ctx && ctx->definitionType() == Definition::TypeGroup) {
-      Definition *scope = ((GroupDef *)ctx)->getGroupScope();
+      QSharedPointer<Definition> scope = ((GroupDef *)ctx)->getGroupScope();
 
       if (scope && scope != Doxygen::globalScope) {
          s_context = scope->name();
@@ -7360,8 +7365,7 @@ DocText *validatingParseText(const char *input)
    return txt;
 }
 
-void docFindSections(const char *input, Definition *d, MemberGroup *mg, const char *fileName)
+void docFindSections(const char *input, QSharedPointer<Definition> d, MemberGroup *mg, const char *fileName)
 {
    doctokenizerYYFindSections(input, d, mg, fileName);
 }
-

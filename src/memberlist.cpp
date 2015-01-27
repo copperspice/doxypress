@@ -707,7 +707,7 @@ void MemberList::addMemberGroup(MemberGroup *mg)
    memberGroupList->append(*mg);
 }
 
-void MemberList::addListReferences(Definition *def)
+void MemberList::addListReferences(QSharedPointer<Definition> def)
 {  
    for (auto md : *this) {    
       if (md->getGroupDef() == 0 || def->definitionType() == Definition::TypeGroup) {

@@ -158,7 +158,7 @@ static QString htmlAttribsToString(const HtmlAttribList &attribs)
    return result;
 }
 
-HtmlDocVisitor::HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, Definition *ctx)
+HtmlDocVisitor::HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, QSharedPointer<Definition> ctx)
    : DocVisitor(DocVisitor_Html), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false), m_ctx(ctx)
 {
    if (ctx) {
@@ -410,15 +410,11 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          m_t << PREFRAG_START;
 
          Doxygen::parserManager->getParser(lang)->parseCode(m_ci, s->context(), s->text(),
-                     langExt, s->isExample(), s->exampleFile(),
-                     0,     // fileDef
+                     langExt, s->isExample(), s->exampleFile(), QSharedPointer<FileDef>(), 
                      -1,    // startLine
                      -1,    // endLine
                      false, // inlineFragment
-                     0,     // memberDef
-                     true,  // show line numbers
-                     m_ctx  // search context
-                    );
+                     QSharedPointer<MemberDef>(), true, m_ctx);
 
          m_t << PREFRAG_END;
 
@@ -550,20 +546,10 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          forceEndParagraph(inc);
          m_t << PREFRAG_START;
 
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci,
-                     inc->context(),
-                     inc->text(),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile(),
-                     0,     // fileDef
-                     -1,    // startLine
-                     -1,    // endLine
-                     true,  // inlineFragment
-                     0,     // memberDef
-                     false, // show line numbers
-                     m_ctx  // search context
-                    );
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                     inc->text(), langExt, inc->isExample(), inc->exampleFile(),                                     
+                     QSharedPointer<FileDef>(), -1, -1, true, QSharedPointer<MemberDef>(), false, m_ctx);
+
          m_t << PREFRAG_END;
          forceStartParagraph(inc);
          break;
@@ -573,22 +559,12 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          m_t << PREFRAG_START;
 
          QFileInfo cfi( inc->file() );
-         FileDef fd( cfi.path().toUtf8(), cfi.fileName().toUtf8() );
+         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8(), cfi.fileName().toUtf8());
 
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci,
-                     inc->context(),
-                     inc->text(),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile(),
-                     &fd,   // fileDef,
-                     -1,    // start line
-                     -1,    // end line
-                     false, // inline fragment
-                     0,     // memberDef
-                     true,  // show line numbers
-                     m_ctx  // search context
-                    );
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                     inc->text(), langExt, inc->isExample(), inc->exampleFile(),
+                     fd, -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
+
          m_t << PREFRAG_END;
          forceStartParagraph(inc);
       }
@@ -613,20 +589,10 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          forceEndParagraph(inc);
          m_t << PREFRAG_START;
 
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci,
-                     inc->context(),
-                     extractBlock(inc->text(), inc->blockId()),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile(),
-                     0,
-                     -1,    // startLine
-                     -1,    // endLine
-                     true,  // inlineFragment
-                     0,     // memberDef
-                     true,  // show line number
-                     m_ctx  // search context
-                    );
+         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                     extractBlock(inc->text(), inc->blockId()), langExt, inc->isExample(), inc->exampleFile(),
+                     QSharedPointer<FileDef>(), -1, -1, true, QSharedPointer<MemberDef>(), true, m_ctx);
+
          m_t << PREFRAG_END;
          forceStartParagraph(inc);
       }
@@ -648,23 +614,13 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
 
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
+
       if (!m_hide) {
-         Doxygen::parserManager->getParser(m_langExt)->parseCode(
-            m_ci,
-            op->context(),
-            op->text(),
-            langExt,
-            op->isExample(),
-            op->exampleFile(),
-            0,     // fileDef
-            -1,    // startLine
-            -1,    // endLine
-            false, // inline fragment
-            0,     // memberDef
-            true,  // show line numbers
-            m_ctx  // search context
-         );
+         Doxygen::parserManager->getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
+            langExt, op->isExample(), op->exampleFile(),
+            QSharedPointer<FileDef>(), -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
       }
+
       pushEnabled();
       m_hide = true;
    }

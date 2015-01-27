@@ -27,7 +27,6 @@
 #include <sortedlist.h>
 
 class ClassSDict;
-class DirDef;
 class FileDef;
 class OutputList;
 class UsedDir;
@@ -60,7 +59,7 @@ class DirDef : public Definition
       return m_shortName;
    }
 
-   void addSubDir(QSharedPointer<DirDef> subdir, QSharedPointer<DirDef>);
+   void addSubDir(QSharedPointer<DirDef> subdir);
 
    FileList *getFiles() const        {
       return m_fileList;
@@ -80,7 +79,7 @@ class DirDef : public Definition
       return m_level;
    }
 
-   DirDef *parent() const {
+   QSharedPointer<DirDef> parent() const {
       return m_parent;
    }
 
@@ -92,7 +91,7 @@ class DirDef : public Definition
       return m_usedDirs;
    }
 
-   bool isParentOf(DirDef *dir) const;
+   bool isParentOf(QSharedPointer<DirDef> dir) const;
    bool depGraphIsTrivial() const;
    QByteArray shortTitle() const;
    bool hasDetailedDescription() const;
@@ -139,7 +138,7 @@ class DirDef : public Definition
    int m_dirCount;
    int m_level;
 
-   DirDef *m_parent;
+   QSharedPointer<DirDef> m_parent;
 
    QHash<QString, UsedDir *> m_usedDirs;
 };
@@ -178,7 +177,7 @@ class FilePairDict : public StringMap<QSharedPointer<FilePair>>
 class UsedDir
 {
  public:
-   UsedDir(DirDef *dir, bool inherited);
+   UsedDir(QSharedPointer<DirDef> dir, bool inherited);
    virtual ~UsedDir();
 
    void addFileDep(QSharedPointer<FileDef> srcFd, QSharedPointer<FileDef> dstFd);
@@ -188,7 +187,7 @@ class UsedDir
       return m_filePairs;
    }
 
-   const DirDef *dir() const {
+   QSharedPointer<const DirDef> dir() const {
       return m_dir;
    }
 
@@ -197,7 +196,7 @@ class UsedDir
    }
 
  private:
-   DirDef *m_dir;
+   QSharedPointer<DirDef> m_dir;
    FilePairDict m_filePairs;
    bool m_inherited;
 };
@@ -206,16 +205,18 @@ class UsedDir
 class DirRelation
 {
  public:
-   DirRelation(const QByteArray &name, DirDef *src, UsedDir *dst)
+   DirRelation(const QByteArray &name, QSharedPointer<DirDef> src, UsedDir *dst)
       : m_name(name), m_src(src), m_dst(dst)
    {}
 
-   DirDef  *source() const      {
+   QSharedPointer<DirDef> source() const      {
       return m_src;
    }
+
    UsedDir *destination() const {
       return m_dst;
    }
+
    void writeDocumentation(OutputList &ol);
    QByteArray getOutputFileBase() const {
       return m_name;
@@ -223,7 +224,7 @@ class DirRelation
 
  private:
    QByteArray m_name;
-   DirDef  *m_src;
+   QSharedPointer<DirDef> m_src;
    UsedDir *m_dst;
 };
 

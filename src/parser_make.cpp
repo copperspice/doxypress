@@ -25,8 +25,9 @@ static FileDef             *g_sourceFileDef;
 static int                  g_yyLineNr;
 
 void MakeFileParser::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input, 
-         SrcLangExt xx, bool isExampleBlock, const char *exampleName, FileDef *fileDef, int startLine, int endLine, 
-         bool inlineFragment, MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx, bool collectXRefs )
+         SrcLangExt xx, bool isExampleBlock, const char *exampleName, QSharedPointer<FileDef> fileDef, int startLine, int endLine, 
+         bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers, 
+         QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
  
    if (input.isEmpty()) {

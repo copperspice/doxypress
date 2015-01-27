@@ -23,6 +23,7 @@
 #include <stdlib.h>
 
 #include <config.h>
+#include <doxy_globals.h>
 #include <ftvhelp.h>
 #include <message.h>
 #include <doxygen.h>
@@ -33,11 +34,8 @@
 #include <docparser.h>
 #include <htmldocvisitor.h>
 #include <filedef.h>
-#include <util.h>
 #include <resourcemgr.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
+#include <util.h>
 
 #define MAX_INDENT 1024
 
@@ -188,7 +186,7 @@ void FTVHelp::decContentsDepth()
  *  \param def Definition corresponding to this entry
  */
 void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
-                              bool separateIndex, bool addToNavIndex, Definition *def )
+                              bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def )
 {
    //printf("%p: m_indent=%d addContentsItem(%s,%s,%s,%s)\n",this,m_indent,name,ref,file,anchor);
    QList<FTVNode *> *nl = &m_indentNodes[m_indent];
@@ -223,7 +221,7 @@ static QByteArray node2URL(FTVNode *n, bool overruleFile = false, bool srcLink =
       // local file (with optional anchor)
 
       if (overruleFile && n->def && n->def->definitionType() == Definition::TypeFile) {
-         FileDef *fd = (FileDef *)n->def;
+         QSharedPointer<FileDef> fd = n->def.dynamicCast<FileDef>();
 
          if (srcLink) {
             url = fd->getSourceFileBase();
@@ -305,13 +303,13 @@ void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
    }
 }
 
-static void generateBriefDoc(QTextStream &t, Definition *def)
+static void generateBriefDoc(QTextStream &t, QSharedPointer<Definition> def)
 {
    QByteArray brief = def->briefDescription(true);
   
-   if (!brief.isEmpty()) {
+   if (! brief.isEmpty()) {
       DocNode *root = validatingParseDoc(def->briefFile(), def->briefLine(),
-                                         def, 0, brief, false, false, 0, true, true);
+                                         def, QSharedPointer<MemberDef>(), brief, false, false, 0, true, true);
 
       QByteArray relPath = relativePathToRoot(def->getOutputFileBase());
 
@@ -384,11 +382,10 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
 
       } else {   
          // leaf node
-         FileDef *srcRef = 0;
+         QSharedPointer<FileDef> srcRef;
 
-         if (n->def && n->def->definitionType() == Definition::TypeFile &&
-               ((FileDef *)n->def)->generateSourceFile()) {
-            srcRef = (FileDef *)n->def;
+         if (n->def && n->def->definitionType() == Definition::TypeFile && (n->def.dynamicCast<FileDef>())->generateSourceFile()) {
+            srcRef = n->def.dynamicCast<FileDef>();
          }
 
          if (srcRef) {

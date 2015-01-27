@@ -66,7 +66,6 @@ DirDef::DirDef(const char *path) : Definition(path, 1, 1, path), visited(false)
    
    m_dirCount = g_dirCount++;
    m_level    = -1;
-   m_parent   = 0;
 }
 
 DirDef::~DirDef()
@@ -84,22 +83,21 @@ bool DirDef::isLinkable() const
    return isReference() || isLinkableInProject();
 }
 
-void DirDef::addSubDir(QSharedPointer<DirDef> subdir, QSharedPointer<DirDef> self)
+void DirDef::addSubDir(QSharedPointer<DirDef> subdir)
 {
-   if (this != self) {
-      throw "broom";  // BROOM - fix the throw
-   }   
+   QSharedPointer<DirDef> self = sharedFrom(this);
 
    m_subdirs.inSort(subdir);
-
    subdir->setOuterScope(self);
-   subdir->m_parent = this;
+   subdir->m_parent = self;
 }
 
 void DirDef::addFile(QSharedPointer<FileDef> fd)
 {
+   QSharedPointer<DirDef> self = sharedFrom(this);
+
    m_fileList->inSort(fd);
-   fd->setDirDef(this);
+   fd->setDirDef(self);
 }
 
 static QByteArray encodeDirName(const QByteArray &anchor)
@@ -117,6 +115,8 @@ QByteArray DirDef::getOutputFileBase() const
 
 void DirDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
 {
+   QSharedPointer<DirDef> self = sharedFrom(this);
+
    if ((!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF")) || ! documentation().isEmpty()) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
@@ -132,7 +132,7 @@ void DirDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
 
       // repeat brief description
       if (! briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF")) {
-         ol.generateDoc(briefFile(), briefLine(), this, QSharedPointer<MemberDef>(), briefDescription(), false, false);
+         ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
 
       // separator between brief and details
@@ -151,16 +151,18 @@ void DirDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
 
       // write documentation
       if (!documentation().isEmpty()) {
-         ol.generateDoc(docFile(), docLine(), this, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
+         ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
       }
-   }
+   } 
 }
 
 void DirDef::writeBriefDescription(OutputList &ol)
-{
-   if (!briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
-      DocRoot *rootNode = validatingParseDoc(
-                             briefFile(), briefLine(), this, 0, briefDescription(), true, false);
+{  
+   QSharedPointer<DirDef> self = sharedFrom(this);
+
+   if (! briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+      DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), true, false);
+
       if (rootNode && !rootNode->isEmpty()) {
          ol.startParagraph();
          ol.writeDoc(rootNode, this, 0);
@@ -181,8 +183,10 @@ void DirDef::writeBriefDescription(OutputList &ol)
 
          ol.endParagraph();
       }
+
       delete rootNode;
    }
+
    ol.writeSynopsis();
 }
 
@@ -366,6 +370,8 @@ void DirDef::writeTagFile(QTextStream &tagFile)
 
 void DirDef::writeDocumentation(OutputList &ol)
 {
+   QSharedPointer<DirDef> self = sharedFrom(this);
+
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
    ol.pushGeneratorState();
 
@@ -466,18 +472,21 @@ void DirDef::writeDocumentation(OutputList &ol)
 
    ol.endContents();
 
-   endFileWithNavPath(this, ol);
+   endFileWithNavPath(self, ol);
 
    ol.popGeneratorState();
 }
 
 void DirDef::setLevel()
 {
-   if (m_level == -1) { // level not set before
-      DirDef *p = parent();
+   if (m_level == -1) { 
+      // level not set before
+      QSharedPointer<DirDef> p = parent();
+
       if (p) {
          p->setLevel();
          m_level = p->level() + 1;
+
       } else {
          m_level = 0;
       }
@@ -511,8 +520,7 @@ void DirDef::addUsesDependency(QSharedPointer<DirDef> dir, QSharedPointer<FileDe
 
    } else { 
       // new directory dependency
-      //printf("  => new file\n");
-
+     
       usedDir = new UsedDir(dir, inherited);
       usedDir->addFileDep(srcFd, dstFd);
 
@@ -546,13 +554,13 @@ void DirDef::computeDependencies()
          QList<IncludeInfo> *ifl = fd->includeFileList();
 
          if (ifl) {           
-            // foreach include file
+            // for each include file
 
             for (auto item : *ifl) {                  
 
                if (item.fileDef && item.fileDef->isLinkable()) { 
                   // linkable file
-                  DirDef *usedDir = item.fileDef->getDirDef();
+                  QSharedPointer<DirDef> usedDir = item.fileDef->getDirDef();
 
                   if (usedDir) {
                      // add dependency: thisDir->usedDir   
@@ -565,7 +573,7 @@ void DirDef::computeDependencies()
    }
 }
 
-bool DirDef::isParentOf(DirDef *dir) const
+bool DirDef::isParentOf(QSharedPointer<DirDef> dir) const
 {
    if (dir->parent() == this) { // this is a parent of dir
       return true;
@@ -590,7 +598,7 @@ int FilePairDict::compareValues(const FilePair *left, const FilePair *right) con
    return orderHi == 0 ? orderLo : orderHi;
 }
 
-UsedDir::UsedDir(DirDef *dir, bool inherited)
+UsedDir::UsedDir(QSharedPointer<DirDef> dir, bool inherited)
    : m_dir(dir), m_inherited(inherited)
 { 
 }
@@ -622,11 +630,8 @@ QSharedPointer<DirDef> DirDef::createNewDir(const char *path)
 
    if (dir) { 
       // new dir
-      //printf("Adding new dir %s\n",path);
-
-      dir = QSharedPointer<DirDef> (new DirDef(path));
-
-      //printf("createNewDir %s short=%s\n",path,dir->shortName().data());
+    
+      dir = QMakeShared<DirDef>(path);
       Doxygen::directories.insert(path, dir);
    }
 
@@ -673,10 +678,12 @@ QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QByteArray &path)
 
 void DirDef::writeDepGraph(QTextStream &t)
 {
-   writeDotDirDepGraph(t, this);
+   QSharedPointer<DirDef> self = sharedFrom(this);
+
+   writeDotDirDepGraph(t, self);
 }
 
-static void writePartialDirPath(OutputList &ol, const DirDef *root, const DirDef *target)
+static void writePartialDirPath(OutputList &ol, QSharedPointer<const DirDef> root, QSharedPointer<const DirDef> target)
 {
    if (target->parent() != root) {
       writePartialDirPath(ol, root, target->parent());
@@ -761,9 +768,6 @@ void DirRelation::writeDocumentation(OutputList &ol)
 
    ol.popGeneratorState();
 }
-
-//----------------------------------------------------------------------
-// external functions
 
 /** In order to create stable, but unique directory names,
  *  we compute the common part of the path shared by all directories.
@@ -888,7 +892,7 @@ void buildDirectories()
          QSharedPointer<DirDef> parent = Doxygen::directories.find(name.left(i + 1));
         
          if (parent) {                       
-            parent->addSubDir(dir, parent);
+            parent->addSubDir(dir);
          }
       }
    }

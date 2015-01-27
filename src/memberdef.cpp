@@ -120,11 +120,10 @@ static QByteArray addTemplateNames(const QByteArray &s, const QByteArray &n, con
 //   ol.endMemberDoc(hasArgs=false);
 //
 
-static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray & /*scopeName*/, MemberDef *md)
+static bool writeDefArgumentList(OutputList &ol, QSharedPointer<ClassDef> cd, const QByteArray & /*scopeName*/, 
+                                 QSharedPointer<MemberDef> md)
 {
    ArgumentList *defArgList = (md->isDocsForDefinition()) ? md->argumentList() : md->declArgumentList();
-
-   //printf("writeDefArgumentList `%s' isDocsForDefinition()=%d\n",md->name().data(),md->isDocsForDefinition());
 
    if (defArgList == 0 || md->isProperty()) {
       return false; // member has no function like argument list
@@ -419,7 +418,8 @@ static bool writeDefArgumentList(OutputList &ol, ClassDef *cd, const QByteArray 
    return true;
 }
 
-static void writeExceptionListImpl(OutputList &ol, ClassDef *cd, MemberDef *md, QByteArray const &exception)
+static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<MemberDef> md, 
+                                   QByteArray const &exception)
 {
    // this is ordinary exception spec - there must be a '('
    //printf("exception='%s'\n",exception.data());
@@ -448,13 +448,14 @@ static void writeExceptionListImpl(OutputList &ol, ClassDef *cd, MemberDef *md, 
       } else {
          warn(md->getDefFileName(), md->getDefLine(), "missing ) in exception list on member %s", qPrint(md->name()));
       }
+
    } else { // Java Exception
       ol.docify(" ");
       linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, exception);
    }
 }
 
-static void writeExceptionList(OutputList &ol, ClassDef *cd, MemberDef *md)
+static void writeExceptionList(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<MemberDef> md)
 { 
    QByteArray exception(QByteArray(md->excpString()).trimmed());
    int len = exception.length(); 
@@ -518,11 +519,12 @@ class MemberDefImpl
              Protection p, Specifier v, bool s, Relationship r,
              MemberType mt, const ArgumentList *tal, const ArgumentList *al );
 
-   ClassDef     *classDef;      // member of or related to
-   FileDef      *fileDef;       // member of file definition
-   NamespaceDef *nspace;        // the namespace this member is in.
+   QSharedPointer<ClassDef> classDef;      // member of or related to
+   QSharedPointer<FileDef>  fileDef;       // member of file definition
 
-   MemberDef    *enumScope;     // the enclosing scope, if this is an enum field
+   QSharedPointer<NamespaceDef> nspace;      // the namespace this member is in.
+   QSharedPointer<MemberDef>    enumScope;   // the enclosing scope, if this is an enum field
+
    bool          livesInsideEnum;
    MemberDef    *annEnumType;   // the anonymous enum that is the type of this member
    MemberList   *enumFields;    // enumeration fields
@@ -530,15 +532,16 @@ class MemberDefImpl
    MemberDef    *redefines;     // the members that this member redefines
    MemberList   *redefinedBy;   // the list of members that redefine this one
 
-   MemberDef    *memDef;        // member definition for this declaration
-   MemberDef    *memDec;        // member declaration for this definition
-   ClassDef     *relatedAlso;   // points to class marked by relatedAlso
+   QSharedPointer<MemberDef>  memDef;        // member definition for this declaration
+   QSharedPointer<MemberDef>  memDec;        // member declaration for this definition
+   QSharedPointer<ClassDef>   relatedAlso;   // points to class marked by relatedAlso
 
    ExampleSDict *exampleSDict;  // a dictionary of all examples for quick access
 
    QByteArray type;             // return actual type
    QByteArray accessorType;     // return type that tell how to get to this member
-   ClassDef *accessorClass;     // class that this member accesses (for anonymous types)
+
+   QSharedPointer<ClassDef> accessorClass;     // class that this member accesses (for anonymous types)
 
    QByteArray args;             // function arguments/variable array specifiers
    QByteArray def;              // member definition in code (fully qualified name)
@@ -569,19 +572,21 @@ class MemberDefImpl
 
    ArgumentList *tArgList;        // template argument list of function template
    ArgumentList *typeConstraints; // type constraints for template parameters
-   MemberDef *templateMaster;
+
+   QSharedPointer<MemberDef> templateMaster;
 
    // lists of template argument lists for template functions in nested template classes
    QList<ArgumentList> *defTmpArgLists; 
 
-   ClassDef *cachedAnonymousType; // if the member has an anonymous compound
+   QSharedPointer<ClassDef> cachedAnonymousType; // if the member has an anonymous compound
 
    // as its type then this is computed by
    // getClassDefOfAnonymousType() and cached here
 
    StringMap<QSharedPointer<MemberList>> *classSectionSDict; // not accessible
 
-   MemberDef *groupAlias;          // Member containing the definition
+   QSharedPointer<MemberDef> groupAlias;          // Member containing the definition
+
    int grpId;                      // group id
    MemberGroup *memberGroup;       // group's member definition
    QSharedPointer<GroupDef> group; // group in which this member is in
@@ -589,10 +594,11 @@ class MemberDefImpl
 
    QByteArray groupFileName;       // file where this grouping was defined
    int groupStartLine;             // line  "      "      "     "     "
-   MemberDef *groupMember;
+
+   QSharedPointer<MemberDef> groupMember;
 
    bool isTypedefValCached;
-   ClassDef *cachedTypedefValue;
+   QSharedPointer<ClassDef> cachedTypedefValue;
    QByteArray cachedTypedefTemplSpec;
    QByteArray cachedResolvedType;
 
@@ -602,7 +608,7 @@ class MemberDefImpl
    //QByteArray inbodyDocs;
 
    // documentation inheritance
-   MemberDef *docProvider;
+   QSharedPointer<MemberDef> docProvider;
 
    // to store the output file base from tag files
    QByteArray explicitOutputFileBase;
@@ -626,11 +632,10 @@ class MemberDefImpl
    bool explExt;             // member was explicitly declared external
    bool tspec;               // member is a template specialization
    bool groupHasDocs;        // true if the entry that caused the grouping was documented
-   bool docsForDefinition;   // true => documentation block is put before
-   //         definition.
-   // false => block is put before declaration.
-   ClassDef *category;
-   MemberDef *categoryRelation;
+   bool docsForDefinition;   // true => documentation block is put before definition.
+   
+   QSharedPointer<ClassDef> category;
+   QSharedPointer<MemberDef> categoryRelation;
 };
 
 MemberDefImpl::MemberDefImpl() :
@@ -661,16 +666,13 @@ MemberDefImpl::~MemberDefImpl()
    delete declArgList;
 }
 
-void MemberDefImpl::init(Definition *def, const char *t, const char *a, const char *e, Protection p, Specifier v, bool s, 
-                         Relationship r, MemberType mt, const ArgumentList *tal, const ArgumentList *al )
-{
-   classDef = 0;
-   fileDef = 0;
+void MemberDefImpl::init(QSharedPointer<Definition> def, const char *t, const char *a, const char *e, Protection p, 
+                         Specifier v, bool s,  Relationship r, MemberType mt, const ArgumentList *tal, const ArgumentList *al )
+{    
    redefines = 0;
    relatedAlso = 0;
    redefinedBy = 0;
-   accessorClass = 0;
-   nspace = 0;
+   accessorClass = 0;   
    memDef = 0;
    memDec = 0;
 
@@ -678,8 +680,8 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
 
    grpId = -1;
    exampleSDict = 0;
-   enumFields = 0;
-   enumScope = 0;
+   enumFields   = 0;
+  
    livesInsideEnum = false;
    defTmpArgLists = 0;
    hasCallGraph = false;
@@ -762,10 +764,6 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
    docProvider = 0;
    isDMember = def->getDefFileName().right(2).toLower() == ".d";
 }
-
-
-//-----------------------------------------------------------------------------
-
 
 /*! Creates a new member definition.
  *
@@ -876,18 +874,18 @@ MemberDef *MemberDef::deepCopy() const
    return result;
 }
 
-void MemberDef::moveTo(Definition *scope)
+void MemberDef::moveTo(QSharedPointer<Definition> scope)
 {
    setOuterScope(scope);
 
    if (scope->definitionType() == Definition::TypeClass) {
-      m_impl->classDef = (ClassDef *)scope;
+      m_impl->classDef = scope.dynamicCast<ClassDef>();
 
    } else if (scope->definitionType() == Definition::TypeFile) {
-      m_impl->fileDef = (FileDef *)scope;
+      m_impl->fileDef = scope.dynamicCast<FileDef>();
 
    } else if (scope->definitionType() == Definition::TypeNamespace) {
-      m_impl->nspace = (NamespaceDef *)scope;
+      m_impl->nspace = scope.dynamicCast<NamespaceDef>();
    }
 
    m_isLinkableCached    = 0;
@@ -1037,7 +1035,7 @@ QByteArray MemberDef::getReference() const
 {
    QByteArray ref = Definition::getReference();
 
-   if (!ref.isEmpty()) {
+   if (! ref.isEmpty()) {
       return ref;
    }
 
@@ -1224,8 +1222,10 @@ void MemberDef::writeLink(OutputList &ol, ClassDef *, NamespaceDef *, FileDef *f
 
    if (! onlyText && isLinkable()) { // write link
       if (m_impl->mtype == MemberType_EnumValue && getGroupDef() == 0 &&      // enum value is not grouped
-            getEnumScope() && getEnumScope()->getGroupDef()) { // but its container is
-         GroupDef *enumValGroup = getEnumScope()->getGroupDef();
+            getEnumScope() && getEnumScope()->getGroupDef()) {
+
+         // but its container is
+         QSharedPointer<GroupDef> enumValGroup = getEnumScope()->getGroupDef();
 
          ol.writeObjectLink(enumValGroup->getReference(), enumValGroup->getOutputFileBase(), anchor(), n.toUtf8());
 
@@ -3243,12 +3243,12 @@ void MemberDef::warnIfUndocumented()
       return;
    }
 
-   ClassDef     *cd = getClassDef();
-   NamespaceDef *nd = getNamespaceDef();
-   QSharedPointer<FileDef> fd = getFileDef();
-   GroupDef     *gd = getGroupDef();
+   QSharedPointer<ClassDef>     cd = getClassDef();
+   QSharedPointer<NamespaceDef> nd = getNamespaceDef();
+   QSharedPointer<FileDef>      fd = getFileDef();
+   QSharedPointer<GroupDef>     gd = getGroupDef();
 
-   Definition *d = 0;
+   QSharedPointer<Definition> d;
 
    const char *t = 0;
 
@@ -4529,7 +4529,7 @@ bool MemberDef::isDocsForDefinition() const
    return m_impl->docsForDefinition;
 }
 
-MemberDef *MemberDef::getEnumScope() const
+QSharedPointer<MemberDef> MemberDef::getEnumScope() const
 {
    return m_impl->enumScope;
 }
@@ -4863,7 +4863,7 @@ QByteArray MemberDef::enumBaseType() const
 }
 
 
-void MemberDef::cacheTypedefVal(ClassDef *val, const QByteArray &templSpec, const QByteArray &resolvedType)
+void MemberDef::cacheTypedefVal(QSharedPointer<ClassDef> val, const QByteArray &templSpec, const QByteArray &resolvedType)
 {
    m_impl->isTypedefValCached = true;
    m_impl->cachedTypedefValue = val;

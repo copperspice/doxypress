@@ -370,7 +370,7 @@ void generateDEFClassSection(QSharedPointer<ClassDef> cd, QTextStream &t, Member
    }
 }
 
-void generateDEFForClass(ClassDef *cd, QTextStream &t)
+void generateDEFForClass(QSharedPointer<ClassDef> cd, QTextStream &t)
 {
    // + brief description
    // + detailed description
@@ -539,7 +539,7 @@ void generateDEFForClass(ClassDef *cd, QTextStream &t)
    t << "}; /* " <<  cd->compoundTypeString() << " */" << endl;
 }
 
-void generateDEFSection(QSharedPointer<Definition> d, QTextStream &t, MemberList *ml, const char *kind)
+void generateDEFSection(QSharedPointer<Definition> d, QTextStream &t, QSharedPointer<MemberList> ml, const char *kind)
 {
    if (ml && ml->count() > 0) {
       t << "    " << kind << " = {" << endl;
@@ -668,7 +668,7 @@ void generateDEF()
 
    if (Doxygen::classSDict->count() + Doxygen::inputNameList->count() > 0) {     
       for (auto cd : *Doxygen::classSDict) {        
-         generateDEFForClass(cd.data(), t);
+         generateDEFForClass(cd, t);
       }
      
       for (auto fn : *Doxygen::inputNameList ) {         

@@ -1961,7 +1961,7 @@ void HtmlGenerator::endParamList()
    m_textStream << "</dl>";
 }
 
-void HtmlGenerator::writeDoc(DocNode *n, Definition *ctx, MemberDef *)
+void HtmlGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
    assert(m_codeGen);
  

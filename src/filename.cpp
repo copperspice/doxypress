@@ -60,9 +60,9 @@ void FileName::generateDiskNames()
 
       while (! found) { 
          // search for the common prefix of all paths
-         FileDef *fd = 0;
+         QSharedPointer<FileDef> fd;
 
-         QList<FileDef *>::iterator it;
+         QList<QSharedPointer<FileDef>>::iterator it;
 
          for (it = this->begin(); it != this->end(); ++it) {   
          
@@ -109,8 +109,7 @@ void FileName::generateDiskNames()
          if (! item->isReference()) {
             QByteArray prefix = item->m_path.right(item->m_path.length() - j - 1);
             item->setName(prefix + name);
-
-            //printf("!!!!!!!! non unique disk name=%s for fd=%s\n",(prefix+name).data(),fd->diskname.data());
+           
             item->m_diskName = prefix + name;
          }
       }
@@ -122,7 +121,7 @@ int FileName::compareValues(const FileDef *f1, const FileDef *f2) const
    return qstricmp(f1->fileName(), f2->fileName());
 }
 
-FileNameIterator::FileNameIterator(const FileName &fname) : QListIterator<FileDef *>(fname)
+FileNameIterator::FileNameIterator(const FileName &fname) : QListIterator<QSharedPointer<FileDef>>(fname)
 {
 }
 

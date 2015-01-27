@@ -10636,22 +10636,22 @@ static const char   *g_currentFontClass;
 static bool          g_searchingForBody;
 static bool          g_insideBody;
 static int           g_bodyCurlyCount;
-static QByteArray      g_saveName;
-static QByteArray      g_saveType;
-static QByteArray      g_delimiter;
+static QByteArray    g_saveName;
+static QByteArray    g_saveType;
+static QByteArray    g_delimiter;
 
 static int	     g_bracketCount = 0;
 static int	     g_curlyCount   = 0;
 static int	     g_sharpCount   = 0;
-static bool          g_inFunctionTryBlock = FALSE;
-static bool          g_inForEachExpression = FALSE;
+static bool      g_inFunctionTryBlock = FALSE;
+static bool      g_inForEachExpression = FALSE;
 
-static int           g_lastTemplCastContext;
+static int       g_lastTemplCastContext;
 static int	     g_lastSpecialCContext;
-static int           g_lastStringContext;
-static int           g_lastSkipCppContext;
-static int           g_lastVerbStringContext;
-static int           g_memCallContext;
+static int       g_lastStringContext;
+static int       g_lastSkipCppContext;
+static int       g_lastVerbStringContext;
+static int       g_memCallContext;
 static int	     g_lastCContext;
 static int           g_skipInlineInitContext;
 
@@ -10673,9 +10673,9 @@ struct ObjCCallCtx {
    int id;
    QByteArray methodName;
    QByteArray objectTypeOrName;
-   ClassDef *objectType;
-   MemberDef *objectVar;
-   MemberDef *method;
+   QSharedPointer<ClassDef> objectType;
+   QSharedPointer<MemberDef> objectVar;
+   QSharedPointer<MemberDef> method;
    QByteArray format;
    int lexState;
    int braceCount;
@@ -10754,7 +10754,7 @@ class VariableContext
    }
 
    void addVariable(const QByteArray &type, const QByteArray &name);
-   ClassDef *findVariable(const QByteArray &name);
+   QSharedPointer<ClassDef> findVariable(const QByteArray &name);
 
    int count() const {
       return m_scopes.count();
@@ -10813,7 +10813,7 @@ void VariableContext::addVariable(const QByteArray &type, const QByteArray &name
 
          ) && // and it must be a template
          varType->templateArguments()) {
-         newDef = dummyShared(varType->getVariableInstance( templateArgs ));
+         newDef = varType->getVariableInstance(templateArgs);
       }
 
       if (newDef) {
@@ -10839,7 +10839,7 @@ void VariableContext::addVariable(const QByteArray &type, const QByteArray &name
    }
 }
 
-ClassDef *VariableContext::findVariable(const QByteArray &name)
+ QSharedPointer<ClassDef> VariableContext::findVariable(const QByteArray &name)
 {
    if (name.isEmpty()) {
       return 0;
@@ -10866,8 +10866,7 @@ ClassDef *VariableContext::findVariable(const QByteArray &name)
 }
 
 static VariableContext g_theVarContext;
-const QSharedPointer<ClassDef> VariableContext::dummyContext = dummyShared((ClassDef *)0x8);
-
+const QSharedPointer<ClassDef> VariableContext::dummyContext = (ClassDef *)0x8;
 
 class CallContext
 {
@@ -11219,7 +11218,7 @@ static void setParameterList(MemberDef *md)
    }
 }
 
-static ClassDef *stripClassName(const char *s, QSharedPointer<Definition> d = g_currentDefinition)
+static QSharedPointer<ClassDef> stripClassName(const char *s, QSharedPointer<Definition> d = g_currentDefinition)
 {
    int pos = 0;
    QByteArray type = s;
@@ -11228,14 +11227,14 @@ static ClassDef *stripClassName(const char *s, QSharedPointer<Definition> d = g_
 
    while (extractClassNameFromType(type, pos, className, templSpec) != -1) {
       QByteArray clName = className + templSpec;
-      ClassDef *cd = 0;
+      QSharedPointer<ClassDef> cd = 0;
 
       if (!g_classScope.isEmpty()) {
-         cd = getResolvedClass(d.data(), g_sourceFileDef, g_classScope + "::" + clName);
+         cd = getResolvedClass(d, g_sourceFileDef, g_classScope + "::" + clName);
       }
 
       if (cd == 0) {
-         cd = getResolvedClass(d.data(), g_sourceFileDef, clName);
+         cd = getResolvedClass(d, g_sourceFileDef, clName);
       }
 
       //printf("stripClass trying `%s' = %p\n",clName.data(),cd);
@@ -11261,7 +11260,7 @@ static MemberDef *setCallContextForVar(const QByteArray &name)
       QByteArray locName = name.right(name.length() - scopeEnd - 2);
       //printf("explicit scope: name=%s scope=%s\n",locName.data(),scope.data());
 
-      ClassDef *mcd = getClass(scope);
+      QSharedPointer<ClassDef> mcd = getClass(scope);
 
       if (mcd && !locName.isEmpty()) {
          MemberDef *md = mcd->getMemberByName(locName);
@@ -11288,7 +11287,7 @@ static MemberDef *setCallContextForVar(const QByteArray &name)
    }
 
    QSharedPointer<MemberName> mn;
-   ClassDef *mcd = g_theVarContext.findVariable(name);
+   QSharedPointer<ClassDef> mcd = g_theVarContext.findVariable(name);
 
    if (mcd) { // local variable
       DBG_CTX((stderr, "local variable?\n"));
@@ -11358,7 +11357,7 @@ static void updateCallContextForSmartPointer()
    MemberDef *md;
 
    if (d && d->definitionType() == Definition::TypeClass && (md = ((ClassDef *)d)->isSmartPointer())) {
-      ClassDef *ncd = stripClassName(md->typeString(), md->getOuterScope() );
+      QSharedPointer<ClassDef> ncd = stripClassName(md->typeString(), md->getOuterScope() );
 
       if (ncd) {
          g_theCallContext.setScope(ncd);
@@ -11367,19 +11366,14 @@ static void updateCallContextForSmartPointer()
    }
 }
 
-static bool getLinkInScope(const QByteArray &c,  // scope
-                           const QByteArray &m,  // member
-                           const char *memberText, // exact text
-                           CodeOutputInterface &ol,
-                           const char *text,
-                           bool varOnly = FALSE
-                          )
+static bool getLinkInScope(const QByteArray &c, const QByteArray &m, const char *memberText, 
+                           CodeOutputInterface &ol, const char *text, bool varOnly = FALSE)
 {
-   MemberDef    *md;
-   ClassDef     *cd;
-   FileDef      *fd;
-   NamespaceDef *nd;
-   GroupDef     *gd;
+   QSharedPointer<MemberDef>    md;
+   QSharedPointer<ClassDef>     cd;
+   QSharedPointer<FileDef>      fd;
+   QSharedPointer<NamespaceDef> nd;
+   QSharedPointer<GroupDef>     gd;
 
    DBG_CTX((stderr, "getLinkInScope: trying `%s'::`%s' varOnly=%d\n", c.data(), m.data(), varOnly));
 
@@ -11410,7 +11404,7 @@ static bool getLinkInScope(const QByteArray &c,  // scope
          //        g_currentDefinition,g_currentMemberDef,g_insideBody);
 
          if (g_currentDefinition && g_currentMemberDef && md != g_currentMemberDef && g_insideBody && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, dummyShared(md) );
+            addDocCrossReference(g_currentMemberDef, md);
          }
 
          writeMultiLineCodeLink(ol, md, text ? text : memberText);
@@ -11465,17 +11459,17 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
       className = substitute(className, ".", "::"); // for PHP namespaces
    }
 
-   ClassDef *cd  = 0;
-   ClassDef *lcd = 0;
+   QSharedPointer<ClassDef> cd;
+   QSharedPointer<ClassDef> lcd;
+   QSharedPointer<MemberDef> md;
 
-   MemberDef *md = 0;
    bool isLocal = FALSE;
   
    if ((lcd = g_theVarContext.findVariable(className)) == 0) { 
       // not a local variable
       QSharedPointer<Definition> d = g_currentDefinition;
       
-      cd = getResolvedClass(d.data(), g_sourceFileDef, className, &md);
+      cd = getResolvedClass(d, g_sourceFileDef, className, &md);
 
       DBG_CTX((stderr, "non-local variable name=%s context=%d cd=%s md=%s!\n",
                className.data(), g_theVarContext.count(), cd ? cd->name().data() : "<none>",
@@ -11485,7 +11479,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
          QByteArray bareName = className.left(i); //stripTemplateSpecifiersFromScope(className);
          DBG_CTX((stderr, "bareName=%s\n", bareName.data()));
          if (bareName != className) {
-            cd = getResolvedClass(d.data(), g_sourceFileDef, bareName, &md); // try unspecialized version
+            cd = getResolvedClass(d, g_sourceFileDef, bareName, &md); // try unspecialized version
          }
       }
 
@@ -11551,7 +11545,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
          }
 
          if (d && d->isLinkable() && md->isLinkable() && g_currentMemberDef && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, dummyShared(md)) ;
+            addDocCrossReference(g_currentMemberDef, md) ;
          }
       }
 
@@ -11569,7 +11563,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
             }
 
             if (md && g_currentDefinition &&
-                  isAccessibleFrom(g_currentDefinition.data(), g_sourceFileDef, md) == -1) {
+                  isAccessibleFrom(g_currentDefinition, g_sourceFileDef, md) == -1) {
                md = 0; // variable not accessible
             }
          }
@@ -11595,7 +11589,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
                writeMultiLineCodeLink(ol, md, text);
                addToSearchIndex(clName);
                if (g_currentMemberDef && g_collectXRefs) {
-                  addDocCrossReference(g_currentMemberDef, dummyShared(md));
+                  addDocCrossReference(g_currentMemberDef, md);
                }
                return;
             }
@@ -11609,37 +11603,33 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
    }
 }
 
-static bool generateClassMemberLink(CodeOutputInterface &ol, MemberDef *xmd, const char *memName)
+static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<MemberDef> xmd, const char *memName)
 {
    // extract class definition of the return type in order to resolve
    // a->b()->c() like call chains
-
-   //printf("type=`%s' args=`%s' class=%s\n",
-   //  xmd->typeString(),xmd->argsString(),
-   //  xmd->getClassDef()->name().data());
 
    if (g_exampleBlock) {
 
       QByteArray anchor;
       anchor = QString("a%1").arg(g_anchorCount).toUtf8();
-
-      //printf("addExampleFile(%s,%s,%s)\n",anchor.data(),g_exampleName.data(),
-      //                                  g_exampleFile.data());
+     
       if (xmd->addExample(anchor, g_exampleName, g_exampleFile)) {
          ol.writeCodeAnchor(anchor);
          g_anchorCount++;
       }
    }
 
-   ClassDef *typeClass = stripClassName(removeAnonymousScopes(xmd->typeString()), xmd->getOuterScope() );
+   QSharedPointer<ClassDef> typeClass = stripClassName(removeAnonymousScopes(xmd->typeString()), xmd->getOuterScope() );
+
    DBG_CTX((stderr, "%s -> typeName=%p\n", xmd->typeString(), typeClass));
    g_theCallContext.setScope(typeClass);
 
-   Definition *xd = xmd->getOuterScope() == Doxygen::globalScope ?
-                    xmd->getFileDef() : xmd->getOuterScope();
+   Definition *xd = xmd->getOuterScope() == Doxygen::globalScope ? xmd->getFileDef() : xmd->getOuterScope();
+
    if (xmd->getGroupDef()) {
       xd = xmd->getGroupDef();
    }
+
    if (xd && xd->isLinkable()) {
 
       //printf("g_currentDefiniton=%p g_currentMemberDef=%p xmd=%p g_insideBody=%d\n",g_currentDefinition,g_currentMemberDef,xmd,g_insideBody);
@@ -11652,7 +11642,7 @@ static bool generateClassMemberLink(CodeOutputInterface &ol, MemberDef *xmd, con
          // add usage reference
          if (g_currentDefinition && g_currentMemberDef &&
                /*xmd!=g_currentMemberDef &&*/ g_insideBody && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, dummyShared(xmd) );
+            addDocCrossReference(g_currentMemberDef, xmd);
          }
 
          // write the actual link
@@ -11668,13 +11658,15 @@ static bool generateClassMemberLink(CodeOutputInterface &ol, MemberDef *xmd, con
 static bool generateClassMemberLink(CodeOutputInterface &ol, Definition *def, const char *memName)
 {
    if (def && def->definitionType() == Definition::TypeClass) {
-      ClassDef *cd = (ClassDef *)def;
-      MemberDef *xmd = cd->getMemberByName(memName);
-      //printf("generateClassMemberLink(class=%s,member=%s)=%p\n",def->name().data(),memName,xmd);
+      QSharedPointer<ClassDef>  cd  = (ClassDef *)def;
+      QSharedPointer<MemberDef> xmd = cd->getMemberByName(memName);
+      
       if (xmd) {
          return generateClassMemberLink(ol, xmd, memName);
+
       } else {
          QSharedPointer<Definition> innerDef = cd->findInnerCompound(memName);
+
          if (innerDef) {
             g_theCallContext.setScope(innerDef.data());
             addToSearchIndex(memName);
@@ -11707,7 +11699,8 @@ static void generateMemberLink(CodeOutputInterface &ol, const QByteArray &varNam
    }
 
    // look for the variable in the current context
-   ClassDef *vcd = g_theVarContext.findVariable(varName);
+   QSharedPointer<ClassDef> vcd = g_theVarContext.findVariable(varName);
+
    if (vcd) {
       if (vcd != VariableContext::dummyContext) {
          //printf("Class found!\n");
@@ -11727,7 +11720,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QByteArray &varNam
       }
 
    } else { // variable not in current context, maybe it is in a parent context
-      vcd = getResolvedClass(g_currentDefinition.data(), g_sourceFileDef, g_classScope);
+      vcd = getResolvedClass(g_currentDefinition, g_sourceFileDef, g_classScope);
 
       if (vcd && vcd->isLinkable()) {
          //printf("Found class %s for variable `%s'\n",g_classScope.data(),varName.data());
@@ -11738,10 +11731,13 @@ static void generateMemberLink(CodeOutputInterface &ol, const QByteArray &varNam
             int vi;
             QByteArray vn = varName;
             QByteArray scope;
+
             if ((vi = vn.lastIndexOf("::")) != -1 || (vi = vn.lastIndexOf('.')) != -1) { // explicit scope A::b(), probably static member
-               ClassDef *jcd = getClass(vn.left(vi));
+               QSharedPointer<ClassDef> jcd = getClass(vn.left(vi));
+
                vn = vn.right(vn.length() - vi - 2);
                vmn = Doxygen::memberNameSDict->find(vn);
+
                //printf("Trying name `%s' scope=%s\n",vn.data(),scope.data());
 
                if (vmn) {
@@ -11768,7 +11764,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QByteArray &varNam
                   vmd->getClassDef() == vcd) {
 
                   //printf("Found variable type=%s\n",vmd->typeString());
-                  ClassDef *mcd = stripClassName(vmd->typeString(), vmd->getOuterScope() );
+                  QSharedPointer<ClassDef> mcd = stripClassName(vmd->typeString(), vmd->getOuterScope() );
 
                   if (mcd && mcd->isLinkable()) {
                      if (generateClassMemberLink(ol, mcd, memName)) {
@@ -11797,8 +11793,7 @@ static void generatePHPVariableLink(CodeOutputInterface &ol, const char *varName
 }
 
 static void generateFunctionLink(CodeOutputInterface &ol, const char *funcName)
-{
-   //CodeClassDef *ccd=0;
+{  
    QSharedPointer<ClassDef> ccd;
 
    QByteArray locScope = g_classScope;
@@ -11807,7 +11802,9 @@ static void generateFunctionLink(CodeOutputInterface &ol, const char *funcName)
    QByteArray funcWithScope = locFunc;
    QByteArray funcWithFullScope = locFunc;
    QByteArray fullScope = locScope;
+
    DBG_CTX((stdout, "*** locScope=%s locFunc=%s\n", locScope.data(), locFunc.data()));
+
    int len = 2;
    int i = locFunc.lastIndexOf("::");
 
@@ -11930,16 +11927,18 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
    if (ctx == 0) {
       return;
    }
+
    char c;
-   const char *p = ctx->format.data();
-   if (!ctx->methodName.isEmpty()) {
+   const char *p = ctx->format.constData();
+
+   if (! ctx->methodName.isEmpty()) {
       //printf("writeObjCMethodCall(%s) obj=%s method=%s\n",
       //    ctx->format.data(),ctx->objectTypeOrName.data(),ctx->methodName.data());
       if (!ctx->objectTypeOrName.isEmpty() && ctx->objectTypeOrName.at(0) != '$') {
          //printf("Looking for object=%s method=%s\n",ctx->objectTypeOrName.data(),
          //	ctx->methodName.data());
 
-         ClassDef *cd = g_theVarContext.findVariable(ctx->objectTypeOrName);
+         QSharedPointer<ClassDef> cd = g_theVarContext.findVariable(ctx->objectTypeOrName);
 
          if (cd == 0) { // not a local variable
             if (ctx->objectTypeOrName == "self") {
@@ -11949,19 +11948,15 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                }
 
             } else {
-               ctx->objectType = getResolvedClass(
-                                    g_currentDefinition.data(),
-                                    g_sourceFileDef,
-                                    ctx->objectTypeOrName,
-                                    &ctx->method);
+               ctx->objectType = getResolvedClass(g_currentDefinition, g_sourceFileDef, 
+                                                  ctx->objectTypeOrName, &ctx->method);
             }
-            //printf("  object is class? %p\n",ctx->objectType);
+            
             if (ctx->objectType) { // found class
                ctx->method = ctx->objectType->getMemberByName(ctx->methodName);
-               //printf("    yes->method=%s\n",ctx->method?ctx->method->name().data():"<none>");
+               
             } else if (ctx->method == 0) { // search for class variable with the same name
-               //printf("    no\n");
-               //printf("g_currentDefinition=%p\n",g_currentDefinition);
+             
                if (g_currentDefinition &&
                      g_currentDefinition->definitionType() == Definition::TypeClass) {
                   ctx->objectVar = (static_cast<ClassDef *>(g_currentDefinition.data()))->getMemberByName(ctx->objectTypeOrName);
@@ -12009,7 +12004,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                   if (ctx->method && ctx->method->isLinkable()) {
                      writeMultiLineCodeLink(*g_code, ctx->method, pName->data());
                      if (g_currentMemberDef && g_collectXRefs) {
-                        addDocCrossReference(g_currentMemberDef, dummyShared(ctx->method));
+                        addDocCrossReference(g_currentMemberDef, ctx->method);
                      }
                   } else {
                      codifyLines(pName->data());
@@ -12052,7 +12047,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                      if (g_currentDefinition && g_currentDefinition->definitionType() == Definition::TypeClass) {
 
 
-                        ClassDef *cd = static_cast<ClassDef *>(g_currentDefinition.data());
+                        QSharedPointer<ClassDef> cd = static_cast<ClassDef *>(g_currentDefinition.data());
 
                         if (cd->categoryOf()) {
                            cd = cd->categoryOf();
@@ -12077,16 +12072,19 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                      startFontClass("keyword");
                      codifyLines(pObject->data());
                      endFontClass();
+
                   } else if (ctx->objectVar && ctx->objectVar->isLinkable()) { // object is class variable
                      writeMultiLineCodeLink(*g_code, ctx->objectVar, pObject->data());
+
                      if (g_currentMemberDef && g_collectXRefs) {
-                        addDocCrossReference(g_currentMemberDef, dummyShared(ctx->objectVar));
+                        addDocCrossReference(g_currentMemberDef, ctx->objectVar);
                      }
+
                   } else if (ctx->objectType && ctx->objectType != VariableContext::dummyContext &&
                              ctx->objectType->isLinkable() ) { 
 
                      // object is class name
-                     ClassDef *cd = ctx->objectType;
+                     QSharedPointer<ClassDef> cd = ctx->objectType;
                      writeMultiLineCodeLink(*g_code, cd, pObject->data());
 
                   } else { // object still needs to be resolved
@@ -13159,7 +13157,7 @@ YY_DECL {
                   pushScope(g_curClassName);
                   DBG_CTX((stderr, "***** g_curClassName=%s\n", g_curClassName.data()));
 
-                  if (getResolvedClass(g_currentDefinition.data(), g_sourceFileDef, g_curClassName) == 0) {
+                  if (getResolvedClass(g_currentDefinition, g_sourceFileDef, g_curClassName) == 0) {
 
                      DBG_CTX((stderr, "Adding new class %s\n", g_curClassName.data()));
 
@@ -14302,16 +14300,18 @@ YY_DECL {
                      scope.prepend(g_classScope + "::");
                   }
 
-                  ClassDef *cd = getResolvedClass(Doxygen::globalScope, g_sourceFileDef, scope);
+                  QSharedPointer<ClassDef> cd = getResolvedClass(Doxygen::globalScope, g_sourceFileDef, scope);
                   if (cd) {
                      setClassScope(cd->name());
                      g_scopeStack.push(SCOPEBLOCK);
                      DBG_CTX((stderr, "** scope stack push SCOPEBLOCK\n"));
+
                   } else {
                      //setClassScope(g_realScope);
                      g_scopeStack.push(INNERBLOCK);
                      DBG_CTX((stderr, "** scope stack push INNERBLOCK\n"));
                   }
+
                } else
                {
                   DBG_CTX((stderr, "** scope stack push INNERBLOCK\n"));
@@ -16025,9 +16025,10 @@ void resetCCodeParserState()
 }
 
 void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray &s,
-                SrcLangExt lang, bool exBlock, const char *exName, FileDef *fd,
+                SrcLangExt lang, bool exBlock, const char *exName, QSharedPointer<FileDef> fd,
                 int startLine, int endLine, bool inlineFragment,
-                MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx,bool collectXRefs)
+                QSharedPointer<MemberDef> memberDef, bool showLineNumbers, 
+                QSharedPointer<Definition> searchCtx, bool collectXRefs)
 {   
    if (s.isEmpty()) {
       return;
@@ -16062,26 +16063,26 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
       g_yyLineNr    = 1;
    }
 
-   g_curlyCount    = 0;
-   g_bodyCurlyCount    = 0;
-   g_bracketCount  = 0;
-   g_sharpCount    = 0;
-   g_insideTemplate = FALSE;
+   g_curlyCount      = 0;
+   g_bodyCurlyCount  = 0;
+   g_bracketCount    = 0;
+   g_sharpCount      = 0;
+   g_insideTemplate  = FALSE;
+
    g_theCallContext.clear();
    g_scopeStack.clear();
    g_classScope    = className;
 
-   //printf("parseCCode %s\n",className);
-
    g_exampleBlock  = exBlock;
    g_exampleName   = exName;
    g_sourceFileDef = fd;
-   g_lineNumbers   = fd != 0 && showLineNumbers;
+
+   g_lineNumbers   = (fd != 0 && showLineNumbers);
    bool cleanupSourceDef = FALSE;
 
    if (fd == 0) {
       // create a dummy filedef for the example
-      g_sourceFileDef = new FileDef("", (exName ? exName : "generated"));
+      g_sourceFileDef  = QMakeShared<FileDef>("", (exName ? exName : "generated"));
       cleanupSourceDef = TRUE;
    }
    g_insideObjC = lang == SrcLangExt_ObjC;
@@ -16128,9 +16129,8 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
       TooltipManager::instance()->writeTooltips(*g_code);
    }
    if (cleanupSourceDef) {
-      // delete the temporary file definition used for this example
-      delete g_sourceFileDef;
-      g_sourceFileDef = 0;
+      // delete the temporary file definition used for this example      
+      g_sourceFileDef = QSharedPointer<FileDef>();
    }
 
    printlex(codeYY_flex_debug, FALSE, __FILE__, fd ? fd->fileName().data() : NULL);

@@ -26320,8 +26320,8 @@ static bool getFortranDefs(const QByteArray &memberName, const QByteArray &modul
    if (mn) { // name is known
       MemberListIterator mli(*mn);
       for (mli.toFirst(); (md = mli.current()); ++mli) { // all found functions with given name
-         QSharedPointer<FileDef> fd = md->getFileDef();
-         GroupDef *gd = md->getGroupDef();
+         QSharedPointer<FileDef>  fd = md->getFileDef();
+         QSharedPointer<GroupDef> gd = md->getGroupDef();
 
          //cout << "found link with same name: " << fd->fileName() << "  " <<  memberName;
          //if (md->getNamespaceDef() != 0) cout << " in namespace " << md->getNamespaceDef()->name();cout << endl;

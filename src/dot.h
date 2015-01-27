@@ -66,7 +66,8 @@ class DotNode
    enum TruncState { Unknown, Truncated, Untruncated };
 
    DotNode(int n, const char *lab, const char *tip, const char *url,
-           bool rootNode = false, ClassDef *cd = 0);
+           bool rootNode = false, QSharedPointer<ClassDef> cd = QSharedPointer<ClassDef>());
+
    ~DotNode();
 
    void addChild(DotNode *n, int edgeColor = EdgeInfo::Purple, int edgeStyle = EdgeInfo::Solid,
@@ -141,7 +142,8 @@ class DotNode
    bool             m_hasDoc;    //!< used to mark a node as documented
    bool             m_isRoot;    //!< indicates if this is a root node
 
-   ClassDef        *m_classDef;  //!< class representing this node (can be 0)
+   QSharedPointer<ClassDef> m_classDef;  //!< class representing this node (can be 0)
+
    bool             m_visible;   //!< is the node visible in the output
    TruncState       m_truncated; //!< does the node have non-visible children/parents
    int              m_distance;  //!< shortest path to the root node
@@ -164,7 +166,7 @@ class DotNode
 
 inline int DotNode::findParent( DotNode *n )
 {
-   if ( ! m_parents ) {
+   if (! m_parents) {
       return -1;
    }
 
@@ -180,7 +182,7 @@ class DotGfxHierarchyTable
    void writeGraph(QTextStream &t, const char *path, const char *fileName) const;
 
  private:
-   void addHierarchy(DotNode *n, ClassDef *cd, bool hide);
+   void addHierarchy(DotNode *n, QSharedPointer<ClassDef> cd, bool hide);
    void addClassList(ClassSDict *cl);
 
    QList<DotNode *>          *m_rootNodes;
@@ -194,8 +196,9 @@ class DotGfxHierarchyTable
 class DotClassGraph
 {
  public:
-   DotClassGraph(ClassDef *cd, DotNode::GraphType t);
+   DotClassGraph(QSharedPointer<ClassDef> cd, DotNode::GraphType t);
    ~DotClassGraph();
+
    bool isTrivial() const;
    bool isTooBig() const;
 
@@ -209,12 +212,12 @@ class DotClassGraph
    QByteArray diskName() const;
 
  private:
-   void buildGraph(ClassDef *cd, DotNode *n, bool base, int distance);
+   void buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool base, int distance);
    bool determineVisibleNodes(DotNode *rootNode, int maxNodes, bool includeParents);
    void determineTruncatedNodes(QList<DotNode *> &queue, bool includeParents);
-   void addClass(ClassDef *cd, DotNode *n, int prot, const char *label,
-                 const char *usedName, const char *templSpec,
-                 bool base, int distance);
+
+   void addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, const char *label,
+                 const char *usedName, const char *templSpec, bool base, int distance);
 
    DotNode                    *m_startNode;
    QHash<QString, DotNode *>  *m_usedNodes;
@@ -229,7 +232,7 @@ class DotClassGraph
 class DotInclDepGraph
 {
  public:
-   DotInclDepGraph(FileDef *fd, bool inverse);
+   DotInclDepGraph(QSharedPointer<FileDef> fd, bool inverse);
    ~DotInclDepGraph();
    QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const char *path, const char *fileName, const char *relPath,
@@ -243,7 +246,7 @@ class DotInclDepGraph
 
 
  private:
-   void buildGraph(DotNode *n, FileDef *fd, int distance);
+   void buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int distance);
    void determineVisibleNodes(QList<DotNode *> &queue, int &maxNodes);
    void determineTruncatedNodes(QList<DotNode *> &queue);
 
@@ -259,7 +262,7 @@ class DotInclDepGraph
 class DotCallGraph
 {
  public:
-   DotCallGraph(MemberDef *md, bool inverse);
+   DotCallGraph(QSharedPointer<MemberDef> md, bool inverse);
    ~DotCallGraph();
 
    QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
@@ -267,7 +270,7 @@ class DotCallGraph
                          const char *relPath, bool writeImageMap = true,
                          int graphId = -1) const;
 
-   void buildGraph(DotNode *n, MemberDef *md, int distance);
+   void buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int distance);
    bool isTrivial() const;
    bool isTooBig() const;
    void determineVisibleNodes(QList<DotNode *> &queue, int &maxNodes);
@@ -337,13 +340,13 @@ class DotGroupCollaboration
       void write( QTextStream &t ) const;
    };
 
-   DotGroupCollaboration(GroupDef *gd);
+   DotGroupCollaboration(QSharedPointer<GroupDef> gd);
    ~DotGroupCollaboration();
    QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const char *path, const char *fileName, const char *relPath,
                          bool writeImageMap = true, int graphId = -1) const;
 
-   void buildGraph(GroupDef *gd);
+   void buildGraph(QSharedPointer<GroupDef> gd);
    bool isTrivial() const;
 
  private :
@@ -518,6 +521,6 @@ void writeDotImageMapFromFile(QTextStream &t, const QByteArray &inFile, const QB
                               const QByteArray &relPath, const QByteArray &baseName,
                               const QByteArray &context, int graphId = -1);
 
-void writeDotDirDepGraph(QTextStream &t, DirDef *dd);
+void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd);
 
 #endif

@@ -19,6 +19,7 @@
 #define CODE_H
 
 #include <QByteArray>
+#include <QSharedPointer>
 
 #include <types.h>
 
@@ -27,11 +28,9 @@ class FileDef;
 class MemberDef;
 class Definition;
 
-void parseCCode(CodeOutputInterface &, const char *, const QByteArray &,
-                SrcLangExt lang, bool isExample, const char *exName, FileDef *fd,
-                int startLine, int endLine, bool inlineFragment,
-                MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx,
-                bool collectXRefs);
+void parseCCode(CodeOutputInterface &, const char *, const QByteArray &, SrcLangExt lang, bool isExample, 
+                const char *exName, QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
+                QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,bool collectXRefs);
 
 void resetCCodeParserState();
 void codeFreeScanner();

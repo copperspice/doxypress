@@ -38,7 +38,7 @@ struct RefItem {
    QByteArray title;          //!< display name of the entity
    QByteArray args;           //!< optional arguments for the entity (if function)
 
-   Definition *scope;         //!< scope to use for references.  
+   QSharedPointer<Definition> scope;         //!< scope to use for references.  
 };
 
 

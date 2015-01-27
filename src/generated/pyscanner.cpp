@@ -4800,9 +4800,9 @@ bool PythonLanguageScanner::needsPreprocessing(const QByteArray &)
 
 void PythonLanguageScanner::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName,
                                       const QByteArray &input, SrcLangExt /*lang*/, bool isExampleBlock,
-                                      const char *exampleName, FileDef *fileDef, int startLine,
-                                      int endLine, bool inlineFragment, MemberDef *memberDef,
-                                      bool showLineNumbers, Definition *searchCtx, bool collectXRefs )
+                                      const char *exampleName, QSharedPointer<FileDef> fileDef, int startLine,
+                                      int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
+                                      bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
    ::parsePythonCode(codeOutIntf, scopeName, input, isExampleBlock, exampleName,
                      fileDef, startLine, endLine, inlineFragment, memberDef,

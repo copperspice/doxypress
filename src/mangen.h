@@ -66,7 +66,7 @@ class ManGenerator : public OutputGenerator
       return (o == Man) ? this : 0;
    }
 
-   void writeDoc(DocNode *, Definition *, MemberDef *);
+   void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md);
 
    static void init();
    void startFile(const char *name, const char *manName, const char *title);

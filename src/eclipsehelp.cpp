@@ -20,8 +20,6 @@
 #include <doxygen.h>
 #include <message.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
 #include <doxy_globals.h>
 
 EclipseHelp::EclipseHelp() : m_depth(0), m_endtag(false), m_openTags(0), m_tocfile(0)
@@ -165,17 +163,12 @@ void EclipseHelp::decContentsDepth()
  * @param addToNavIndex not used.
  * @param def not used.
  */
-void EclipseHelp::addContentsItem(
-   bool /* isDir */, 
-   const QString &name,
-   const char * /* ref */,
-   const char *file, const char *anchor,
-   bool /* separateIndex */,
-   bool /* addToNavIndex */,
-   Definition * /*def*/ )
+void EclipseHelp::addContentsItem(bool, const QString &name, const char *, const char *file, const char *anchor,
+                  bool, bool, QSharedPointer<Definition>)
 {
    // -- write the topic tag
    closedTag();
+
    if (file) {
       switch (file[0]) { // check for special markers (user defined URLs)
          case '^':

@@ -31,11 +31,10 @@ struct SectionInfo {
                       Paragraph     = 4,
                       Anchor        = 5
                     };
-   SectionInfo(const char *f, const int lin, const char *l, const char *t,
-               SectionType st, int lev, const char *r = 0) :
-      label(l), title(t), type(st), ref(r), definition(0),
-      fileName(f), lineNr(lin), generated(false), level(lev) {
-   }
+   SectionInfo(const char *f, const int lin, const char *l, const char *t, SectionType st, int lev, const char *r = 0) :
+      label(l), title(t), type(st), ref(r), definition(0), fileName(f), lineNr(lin), generated(false), level(lev) 
+   { }
+
    SectionInfo(const SectionInfo &s) {
       label = s.label;
       title = s.title;
@@ -48,12 +47,16 @@ struct SectionInfo {
       generated  = s.generated;
       level      = s.level;
    }
+
    ~SectionInfo() {}
+
    QByteArray label;
    QByteArray title;
    SectionType type;
    QByteArray ref;
-   Definition *definition;
+
+   QSharedPointer<Definition> definition;
+
    QByteArray fileName;
    int lineNr;
    bool generated;

@@ -43,7 +43,7 @@ class MemberGroup
 {
  public:
    MemberGroup();
-   MemberGroup(Definition *parent, int id, const char *header, const char *docs, const char *docFile);
+   MemberGroup(QSharedPointer<Definition> parent, int id, const char *header, const char *docs, const char *docFile);
    ~MemberGroup();
 
    QByteArray header() const {
@@ -53,7 +53,7 @@ class MemberGroup
    int groupId() const {
       return grpId;
    }
-   void insertMember(MemberDef *md);
+   void insertMember(QSharedPointer<MemberDef> md);
    void setAnchors();
    void writePlainDeclarations(OutputList &ol,
                                ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,

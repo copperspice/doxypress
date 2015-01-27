@@ -58,6 +58,8 @@ CS_Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs)) -lole32
 
 
 CS_Doxygen_SOURCES = \
+   src/util.cpp \
+\
    src/doxy_work.cpp \
    src/doxy_globals.cpp \
    src/doxy_setup.cpp \

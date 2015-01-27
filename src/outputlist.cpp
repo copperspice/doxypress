@@ -132,7 +132,7 @@ printf("\n BROOM  ********** START of GenerateDoc");
 
 printf("\n BROOM  ********** MIDDLE of GenerateDoc");
 
-   writeDoc(root, ctx, md);
+   writeDoc(root, ctx.data(), md.data());
 
 printf("\n BROOM  ********** END of GenerateDoc");
 

@@ -232,7 +232,7 @@ void GroupDef::addMembersToMemberGroup(QSharedPointer<GroupDef> self)
 }
 
 
-bool GroupDef::insertMember(MemberDef *md, bool docOnly)
+bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
 {
    if (md->isHidden()) {
       return false;
@@ -484,7 +484,7 @@ bool GroupDef::containsGroup(const GroupDef *def)
 
    } else { 
       // look for subgroups as well
-      SortedList<GroupDef *> *groups = partOfGroups();
+      SortedList<QSharedPointer<GroupDef>> *groups = partOfGroups();
 
       if (groups) {         
          for (auto gd : *groups) {
@@ -504,7 +504,7 @@ void GroupDef::addGroup(GroupDef *def)
 
 bool GroupDef::isASubGroup() const
 {
-   SortedList<GroupDef *> *groups = partOfGroups();
+   SortedList<QSharedPointer<GroupDef>> *groups = partOfGroups();
    return groups != 0 && groups->count() != 0;
 }
 
@@ -1185,7 +1185,7 @@ void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd)
 
       if (! g.groupname.isEmpty() && (gd = Doxygen::groupSDict->find(g.groupname))) {
          if (gd->addClass(cd)) {
-            cd->makePartOfGroup(gd.data());
+            cd->makePartOfGroup(gd);
          }
       }
    }
@@ -1198,7 +1198,7 @@ void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDe
 
       if (! g.groupname.isEmpty() && (gd = Doxygen::groupSDict->find(g.groupname))) {
          if (gd->addNamespace(nd)) {
-            nd->makePartOfGroup(gd.data());
+            nd->makePartOfGroup(gd);
          }       
       }
    }
@@ -1211,7 +1211,7 @@ void addDirToGroups(QSharedPointer<Entry> root, DirDef *dd)
 
       if (! g.groupname.isEmpty() && (gd = Doxygen::groupSDict->find(g.groupname))) {
          gd->addDir(dd);
-         dd->makePartOfGroup(gd.data());
+         dd->makePartOfGroup(gd);
       }
    }
 }
@@ -1232,7 +1232,7 @@ void addGroupToGroups(QSharedPointer<Entry> root, GroupDef *subGroup)
 
          } else {
             gd->addGroup(subGroup);
-            subGroup->makePartOfGroup(gd.data());
+            subGroup->makePartOfGroup(gd);
          }
       }
    }
@@ -1264,7 +1264,7 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
 
    // put member into group defined by this entry?
    if (fgd) {
-      GroupDef *mgd = md->getGroupDef();
+      QSharedPointer<GroupDef> mgd = md->getGroupDef();
      
       bool insertit = false;
 
@@ -1328,7 +1328,7 @@ void addExampleToGroups(Entry *root, QSharedPointer<PageDef> eg)
 
       if (! g.groupname.isEmpty() && (gd = Doxygen::groupSDict->find(g.groupname))) {
          gd->addExample(eg);
-         eg->makePartOfGroup(gd.data());        
+         eg->makePartOfGroup(gd);        
       }
    }
 }

@@ -429,10 +429,8 @@ void LatexDocVisitor::visit(DocInclude *inc)
          FileDef fd( cfi.path().toUtf8(), cfi.fileName().toUtf8() );
 
          Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
-                     inc->text(),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile(), &fd);
+                     inc->text(), langExt, inc->isExample(), inc->exampleFile(), &fd);
+
          m_t << "\\end{DoxyCodeInclude}" << endl;
       }
       break;

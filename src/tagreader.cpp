@@ -1448,7 +1448,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       QByteArray fullName = m_tagName + ":" + tfi.path + stripPath(tfi.name);
       fe->fileName = fullName;
       
-      FileDef *fd = new FileDef(m_tagName + ":" + tfi.path, tfi.name, m_tagName, tfi.filename );
+      QSharedPointer<FileDef> fd = QMakeShared<FileDef>(m_tagName + ":" + tfi.path, tfi.name, m_tagName, tfi.filename);
      
       QSharedPointer<FileName> mn (Doxygen::inputNameDict->find(tfi.name));
 

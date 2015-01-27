@@ -271,19 +271,19 @@ void ManDocVisitor::visit(DocInclude *inc)
 
    switch (inc->type()) {
       case DocInclude::IncWithLines: {
-         if (!m_firstCol) {
+         if (! m_firstCol) {
             m_t << endl;
          }
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
 
          QFileInfo cfi( inc->file() );
-         FileDef fd( cfi.path().toUtf8(), cfi.fileName().toUtf8() );
+         QSharedPointer<FileDef> fd = QMakeShared<FileDef>( cfi.path().toUtf8(), cfi.fileName().toUtf8() );
 
          Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(), 
-                                           langExt, inc->isExample(), inc->exampleFile(), &fd);
+                                           langExt, inc->isExample(), inc->exampleFile(), fd);
 
-         if (!m_firstCol) {
+         if (! m_firstCol) {
             m_t << endl;
          }
 

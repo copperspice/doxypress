@@ -71,8 +71,6 @@ class DevNullCodeDocInterface : public CodeOutputInterface
    {}
 };
 
-//---------------------------------------------------------------------------
-
 /*! create a new file definition, where \a p is the file path,
     \a nm the file name, and \a lref is an HTML anchor name if the
     file was read from a tag file or 0 otherwise
@@ -94,7 +92,7 @@ FileDef::FileDef(const char *p, const char *nm, const char *lref, const char *dn
    m_package           = 0;
    m_isSource          = guessSection(nm) == Entry::SOURCE_SEC;
    m_docname           = nm;
-   m_dir               = 0;
+   m_dir               = QSharedPointer<DirDef>();
 
    if (Config_getBool("FULL_PATH_NAMES")) {
       m_docname.prepend(stripFromPath(m_path).toUtf8());
@@ -577,6 +575,8 @@ void FileDef::writeSummaryLinks(OutputList &ol)
 */
 void FileDef::writeDocumentation(OutputList &ol)
 {
+   QSharedPointer<DirDef> self = sharedFrom(this);
+
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
 
    QByteArray versionTitle;
@@ -606,7 +606,7 @@ void FileDef::writeDocumentation(OutputList &ol)
       ol.disable(OutputGenerator::Html);
       ol.parseText(pageTitle); // other output formats
       ol.popGeneratorState();
-      addGroupListToTitle(ol, this);
+      addGroupListToTitle(ol, self);
       endTitle(ol, getOutputFileBase(), title);
 
    } else {
@@ -636,7 +636,6 @@ void FileDef::writeDocumentation(OutputList &ol)
       Doxygen::searchIndex->setCurrentDoc(this, anchor(), false);
       Doxygen::searchIndex->addWord(localName(), true);
    }
-
 
    //---------------------------------------- start flexible part -------------------------------
 
@@ -741,8 +740,8 @@ void FileDef::writeDocumentation(OutputList &ol)
 
    //---------------------------------------- end flexible part -------------------------------
    ol.endContents();
-
-   endFileWithNavPath(this, ol);
+  
+   endFileWithNavPath(self, ol);
 
    if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
       MemberList *ml = getMemberList(MemberListType_allMembersList);
@@ -917,17 +916,19 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
                       );
       ol.endCodeFragment();
    }
+
+   QSharedPointer<DirDef> self = sharedFrom(this);
+
    ol.endContents();
-   endFileWithNavPath(this, ol);
+   endFileWithNavPath(self, ol);
    ol.enableAll();
 }
 
 void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
 {
    static bool filterSourceFiles = Config_getBool("FILTER_SOURCE_FILES");
-   DevNullCodeDocInterface devNullIntf;
-   (void)sameTu;
-   (void)filesInSameTu;
+
+   DevNullCodeDocInterface devNullIntf;  
 
 #if USE_LIBCLANG
    static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
@@ -1116,7 +1117,7 @@ void FileDef::addUsingDeclaration(QSharedPointer<Definition> d)
    }
 }
 
-void FileDef::addIncludeDependency(FileDef *fd, const char *incName, bool local, bool imported, bool indirect)
+void FileDef::addIncludeDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported, bool indirect)
 {
    QByteArray iName;
 
@@ -1190,7 +1191,7 @@ void FileDef::addIncludedUsingDirectives()
    }   
 }
 
-void FileDef::addIncludedByDependency(FileDef *fd, const char *incName, bool local, bool imported)
+void FileDef::addIncludedByDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported)
 {
    QByteArray iName = fd ? fd->getFilePath().data() : incName;
 
@@ -1520,7 +1521,7 @@ MemberList *FileDef::getMemberList(MemberListType lt) const
 
 void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title)
 { 
-   MemberList *ml = getMemberList(lt);
+   QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {     
       ml->writeDeclarations(ol, 0, 0, this, 0, title, 0);      
@@ -1529,7 +1530,8 @@ void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const Q
 
 void FileDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title)
 {
-   MemberList *ml = getMemberList(lt);
+   QSharedPointer<MemberList> ml = getMemberList(lt);
+
    if (ml) {
       ml->writeDocumentation(ol, name(), this, title);
    }

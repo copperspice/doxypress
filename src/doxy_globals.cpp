@@ -71,9 +71,8 @@ QCache<QString, LookupInfo>     *Doxygen::lookupCache;
 QHash<QString, void *>           Doxygen::inputPaths;
 QHash<QString, void *>           Doxygen::expandAsDefinedDict;                        // all macros that should be expanded
 
-QHash<QString, QSharedPointer<QList<QSharedPointer<Definition>>>> Doxygen::symbolMap;
- 
-QHash<QString, QSharedPointer<Definition>>    Doxygen::clangUsrMap;
+QHash<QString, Definition *> Doxygen::symbolMap; 
+QHash<QString, QSharedPointer<Definition>> Doxygen::clangUsrMap;
 
 QHash<QString, RefList>         *Doxygen::xrefLists = new QHash<QString, RefList>;    // dictionary of cross-referenced item lists
 QHash<QString, int>             *Doxygen::htmlDirMap = 0;
@@ -82,8 +81,7 @@ QHash<long, QSharedPointer<MemberGroupInfo>> Doxygen::memGrpInfoDict;           
 StringMap<QSharedPointer<DirRelation>>       Doxygen::dirRelations;
 
 QSharedPointer<PageDef>         Doxygen::mainPage;
-
-QSharedPointer<NamespaceDef> Doxygen::globalScope;
+QSharedPointer<NamespaceDef>    Doxygen::globalScope;
 
 SearchIndexIntf *Doxygen::searchIndex = 0;
 ParserManager   *Doxygen::parserManager = 0;

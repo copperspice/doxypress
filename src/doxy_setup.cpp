@@ -128,11 +128,6 @@ void initDoxygen()
    initNamespaceMemberIndices();
    initFileMemberIndices();
  
-
-#ifdef USE_LIBCLANG
-   Doxygen::clangUsrMap       = new QHash<QString, Definition *>();
-#endif
- 
    Doxygen::inputNameList     = new SortedList<FileName *>;
 
    Doxygen::memberNameSDict   = new MemberNameSDict();

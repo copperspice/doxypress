@@ -43,7 +43,7 @@ class DocSets  : public IndexIntf
    void incContentsDepth();
    void decContentsDepth();
    void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor, 
-                        bool separateIndex, bool addToNavIndex, Definition *def );
+                        bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) override;
 
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
                      const char *title);
@@ -54,7 +54,7 @@ class DocSets  : public IndexIntf
    void addStyleSheetFile(const char *) {}
 
  private:
-   void writeToken(QTextStream &t, QSharedPointer<const Definition> d, const QByteArray &type, const QByteArray &lang,
+   void writeToken(QTextStream &t, QSharedPointer<Definition> d, const QByteArray &type, const QByteArray &lang,
                    const char *scope = 0, const char *anchor = 0, const QByteArray &decl = QByteArray() ); 
 
    struct NodeDef {

@@ -75,14 +75,18 @@ void SortedList<T>::sort()
 int compareValues(const BaseClassDef *item1,  const BaseClassDef *item2);
 int compareValues(const ClassDef *item1,      const ClassDef *item2);
 
-int compareValues(const QSharedPointer<DirDef> item1,  const  QSharedPointer<DirDef> item2);
+int compareValues(QSharedPointer<DirDef> item1,  QSharedPointer<DirDef> item2);
 
 int compareValues(const DotNode *item1,       const DotNode *item2); 
-int compareValues(const FileDef *item1,       const FileDef *item2);
+
+int compareValues(QSharedPointer<FileDef> item1, QSharedPointer<FileDef> item2);
+
 int compareValues(const FileList *item1,      const FileList *item2); 
 int compareValues(const FileName *item1,      const FileName *item2);
 int compareValues(const GroupDef *item1,      const GroupDef *item2); 
-int compareValues(const MemberDef *item1,     const MemberDef *item2);
+
+int compareValues(QSharedPointer<MemberDef> item1, QSharedPointer<MemberDef> item2);
+
 int compareValues(const NavIndexEntry *item1, const NavIndexEntry *item2);
 
 

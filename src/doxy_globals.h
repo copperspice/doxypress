@@ -43,15 +43,15 @@
 #include <searchindex.h>
 
 struct LookupInfo {
-   LookupInfo() : classDef(0), typeDef(0)
-   {}
+   LookupInfo() {}
 
-   LookupInfo(ClassDef *cd, MemberDef *td, QByteArray ts, QByteArray rt)
+   LookupInfo(QSharedPointer<ClassDef> cd, QSharedPointer<MemberDef> td, QByteArray ts, QByteArray rt)
       : classDef(cd), typeDef(td), templSpec(ts), resolvedType(rt)
    {}
 
-   ClassDef    *classDef;
-   MemberDef   *typeDef;
+   QSharedPointer<ClassDef>  classDef;
+   QSharedPointer<MemberDef> typeDef;
+
    QByteArray   templSpec;
    QByteArray   resolvedType;
 };
@@ -114,63 +114,58 @@ class Statistics
 class Doxygen
 {
  public:
-   static QSharedPointer<PageDef>           mainPage;
-   static QSharedPointer<NamespaceDef>      globalScope;
+   static QSharedPointer<PageDef>      mainPage;
+   static QSharedPointer<NamespaceDef> globalScope;
  
-   static CiteDict                         *citeDict;
+   static CiteDict                 *citeDict;
 
-   static ClassSDict                       *classSDict;
-   static ClassSDict                       *hiddenClasses;
+   static ClassSDict               *classSDict;
+   static ClassSDict               *hiddenClasses;
 
-   static DirSDict                          directories;
+   static DirSDict                 directories;
  
-   static FormulaDict                      *formulaDict;
-   static FormulaDict                      *formulaNameDict;
+   static FormulaDict              *formulaDict;
+   static FormulaDict              *formulaNameDict;
     
-   static GenericsSDict                    *genericsDict;
-     
-   static GroupSDict                       *groupSDict;
+   static GenericsSDict            *genericsDict;     
+   static GroupSDict               *groupSDict;
   
-   static FileNameDict                     *includeNameDict;
-   static FileNameDict                     *exampleNameDict;   
-   static FileNameDict                     *inputNameDict;
-   static SortedList<FileName *>           *inputNameList;
-   static FileNameDict                     *imageNameDict;
-   static FileNameDict                     *dotFileNameDict;
-   static FileNameDict                     *mscFileNameDict;
-   static FileNameDict                     *diaFileNameDict;   
+   static FileNameDict             *includeNameDict;
+   static FileNameDict             *exampleNameDict;   
+   static FileNameDict             *inputNameDict;
+   static SortedList<FileName *>   *inputNameList;
+   static FileNameDict             *imageNameDict;
+   static FileNameDict             *dotFileNameDict;
+   static FileNameDict             *mscFileNameDict;
+   static FileNameDict             *diaFileNameDict;   
 
-   static MemberNameSDict                  *memberNameSDict;
-   static MemberNameSDict                  *functionNameSDict;
+   static MemberNameSDict          *memberNameSDict;
+   static MemberNameSDict          *functionNameSDict;
+   static NamespaceSDict           *namespaceSDict;
+   static PageSDict                *exampleSDict;
+   static PageSDict                *pageSDict;
+   static SectionDict              *sectionDict;
 
-   static NamespaceSDict                   *namespaceSDict;
-
-   static PageSDict                        *exampleSDict;
-   static PageSDict                        *pageSDict;
-
-   static SectionDict                      *sectionDict;
-
-   static StringDict                        namespaceAliasDict;
-   static StringDict                        tagDestinationDict;
-   static StringDict                        aliasDict;    
+   static StringDict                namespaceAliasDict;
+   static StringDict                tagDestinationDict;
+   static StringDict                aliasDict;    
 
    //
-   static FormulaList                      *formulaList; 
-   static ParserManager                     *parserManager;  
-   static SearchIndexIntf                   *searchIndex; 
-   static Store                             *symbolStorage;  
-   static IndexList                         *indexList;
+   static FormulaList              *formulaList; 
+   static ParserManager            *parserManager;  
+   static SearchIndexIntf          *searchIndex; 
+   static Store                    *symbolStorage;  
+   static IndexList                *indexList;
 
    //
-   static QList<QByteArray>                  tagfileList;   
+   static QList<QByteArray>        tagfileList;   
 
-   static QHash<QString, void *>             inputPaths;   
-   static QHash<QString, void *>             expandAsDefinedDict;   
-   static QHash<QString, RefList>           *xrefLists;           // array of xref lists: todo, test, bug, deprecated ...
-   static QHash<QString, int>               *htmlDirMap;
+   static QHash<QString, void *>   inputPaths;   
+   static QHash<QString, void *>   expandAsDefinedDict;   
+   static QHash<QString, RefList>  *xrefLists;           // array of xref lists: todo, test, bug, deprecated ...
+   static QHash<QString, int>      *htmlDirMap;
 
-   static QHash<QString, QSharedPointer<QList<QSharedPointer<Definition>>>> symbolMap;
-
+   static QHash<QString, Definition *> symbolMap;
    static QHash<QString, QSharedPointer<Definition>> clangUsrMap;
 
    static QHash<long, QSharedPointer<MemberGroupInfo>> memGrpInfoDict;
@@ -216,17 +211,5 @@ class Doxy_Globals
       static bool g_dumpSymbolMap;
       static bool g_useOutputTemplate;
 };
-
-template<class T>
-QSharedPointer<T> dummyShared(T *ptr)
-{
-   return QSharedPointer<T> (ptr, [](T *){} );
-}
-
-template<class T, class ...Ts>
-QSharedPointer<T> QMakeShared(Ts &&...vs)
-{
-   return QSharedPointer<T> (new T(vs...));
-}
 
 #endif

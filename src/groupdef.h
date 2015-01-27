@@ -82,7 +82,7 @@ class GroupDef : public Definition
    void addExample(QSharedPointer<PageDef> def);
    void addDir(QSharedPointer<DirDef> def);
 
-   bool insertMember(MemberDef *def, bool docOnly = false);
+   bool insertMember(QSharedPointer<MemberDef> def, bool docOnly = false);
    void removeMember(MemberDef *md);
    bool containsGroup(const GroupDef *def);    // true if def is already a subgroup
    void writeDocumentation(OutputList &ol);

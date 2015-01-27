@@ -316,7 +316,7 @@ void endFile(OutputList &ol, bool skipNavIndex, bool skipEndContents, const QByt
    ol.endFile();
 }
 
-void endFileWithNavPath(Definition *d, OutputList &ol)
+void endFileWithNavPath(QSharedPointer<Definition> d, OutputList &ol)
 {
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
 
@@ -765,7 +765,7 @@ static void writeClassTreeForList(OutputList &ol, ClassSDict *cl, bool &started,
 
             ol.startIndexListItem();
 
-            bool hasChildren = ! cd->visited && classHasVisibleChildren(cd.data());
+            bool hasChildren = ! cd->visited && classHasVisibleChildren(cd);
           
             if (cd->isLinkable()) {
                //printf("Writing class %s isLinkable()=%d isLinkableInProject()=%d cd->templateMaster()=%p\n",
@@ -1252,7 +1252,7 @@ void writeClassTree(ClassSDict *clDict, FTVHelp *ftv, bool addToIndex, bool glob
                }
             }
 
-            if (classVisibleInIndex(cd.data()) && cd->templateMaster() == 0) { 
+            if (classVisibleInIndex(cd) && cd->templateMaster() == 0) { 
 
                ftv->addContentsItem(count > 0, cd->displayName(false), cd->getReference(),
                                     cd->getOutputFileBase(), cd->anchor(), false, true, cd.data());
@@ -1280,7 +1280,7 @@ static void writeNamespaceTree(NamespaceSDict *nsDict, FTVHelp *ftv, bool rootOn
       for (auto nd : *nsDict) {
          if (nd->localName().indexOf('@') == -1 && (! rootOnly || nd->getOuterScope() == Doxygen::globalScope)) {
 
-            bool hasChildren = namespaceHasVisibleChild(nd.data(), showClasses);
+            bool hasChildren = namespaceHasVisibleChild(nd, showClasses);
             bool isLinkable  = nd->isLinkableInProject();
 
             QByteArray ref;

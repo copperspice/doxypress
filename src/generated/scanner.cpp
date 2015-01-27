@@ -22257,21 +22257,10 @@ void CLanguageScanner::parseInput(const char *fileName, const char *fileBuf, QSh
    printlex(scannerYY_flex_debug, FALSE, __FILE__, fileName);
 }
 
-void CLanguageScanner::parseCode(CodeOutputInterface &codeOutIntf,
-                                 const char *scopeName,
-                                 const QByteArray &input,
-                                 SrcLangExt lang,
-                                 bool isExampleBlock,
-                                 const char *exampleName,
-                                 FileDef *fileDef,
-                                 int startLine,
-                                 int endLine,
-                                 bool inlineFragment,
-                                 MemberDef *memberDef,
-                                 bool showLineNumbers,
-                                 Definition *searchCtx,
-                                 bool collectXRefs
-                                )
+void CLanguageScanner::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input,
+                                 SrcLangExt lang, bool isExampleBlock, const char *exampleName, QSharedPointer<FileDef> fileDef,
+                                 int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
+                                 bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs)
 {
    ::parseCCode(codeOutIntf, scopeName, input, lang, isExampleBlock, exampleName,
                 fileDef, startLine, endLine, inlineFragment, memberDef,

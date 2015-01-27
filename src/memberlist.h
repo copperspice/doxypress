@@ -33,7 +33,7 @@ class MemberGroup;
 class StorageIntf;
 
 /** A list of MemberDef objects. */
-class MemberList : public SortedList<MemberDef *>
+class MemberList : public SortedList<QSharedPointer<MemberDef>>
 {
  public:
    MemberList();
@@ -47,20 +47,20 @@ class MemberList : public SortedList<MemberDef *>
 
    static QByteArray listTypeAsString(MemberListType type);
 
-   void append(MemberDef *md);
-   void insert(uint index, MemberDef *md); 
+   void append(QSharedPointer<MemberDef> md);
+   void insert(uint index, QSharedPointer<MemberDef> md); 
  
-   int varCount() const       {
+   int varCount() const {
       assert(m_numDecMembers != -1);
       return m_varCnt;
    }
 
-   int funcCount() const      {
+   int funcCount() const {
       assert(m_numDecMembers != -1);
       return m_funcCnt;
    }
 
-   int enumCount() const      {
+   int enumCount() const  {
       assert(m_numDecMembers != -1);
       return m_enumCnt;
    }
@@ -102,18 +102,16 @@ class MemberList : public SortedList<MemberDef *>
    void countDocMembers(bool countEnumValues = false);
    int countInheritableMembers(ClassDef *inheritedFrom) const;
 
-   void writePlainDeclarations(OutputList &ol,
-                               ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
-                               ClassDef *inheritedFrom, const char *inheritId);
+   void writePlainDeclarations(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
+                  ClassDef *inheritedFrom, const char *inheritId);
 
-   void writeDeclarations(OutputList &ol,
-                          ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
-                          const char *title, const char *subtitle,
-                          bool showEnumValues = false, bool showInline = false,
-                          ClassDef *inheritedFrom = 0, MemberListType lt = MemberListType_pubMethods);
+   void writeDeclarations(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
+                  const char *title, const char *subtitle,
+                  bool showEnumValues = false, bool showInline = false,
+                  ClassDef *inheritedFrom = 0, MemberListType lt = MemberListType_pubMethods);
 
-   void writeDocumentation(OutputList &ol, const char *scopeName,
-                           Definition *container, const char *title, bool showEnumValues = false, bool showInline = false);
+   void writeDocumentation(OutputList &ol, const char *scopeName, Definition *container, const char *title, 
+                  bool showEnumValues = false, bool showInline = false);
 
    void writeSimpleDocumentation(OutputList &ol, Definition *container);   
 
@@ -141,7 +139,7 @@ class MemberList : public SortedList<MemberDef *>
       m_inFile = inFile;
    }
 
-   void addListReferences(Definition *def);
+   void addListReferences(QSharedPointer<Definition> def);
    void findSectionsInDocumentation();
  
    QList<MemberGroup> *getMemberGroupList() const {
@@ -189,7 +187,7 @@ class MemberSDict : public StringMap<QSharedPointer<MemberDef>>
    virtual ~MemberSDict() {}
 
  private:
-   int compareValues(const MemberDef *item1, const MemberDef *item2) const;
+   int compareValues(QSharedPointer<MemberDef> item1, QSharedPointer<MemberDef> item2) const;
 };
 
 

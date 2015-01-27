@@ -213,7 +213,7 @@ class MemberDef : public Definition
    bool hasDocumentedEnumValues() const;
    MemberDef *getAnonymousEnumType() const;
    bool isDocsForDefinition() const;
-   MemberDef *getEnumScope() const;
+   QSharedPointer<MemberDef> getEnumScope() const;
    MemberList *enumFieldList() const;
    void setEnumBaseType(const QByteArray &type);
    QByteArray enumBaseType() const;
@@ -355,7 +355,7 @@ class MemberDef : public Definition
    void setDocsForDefinition(bool b);
    void setGroupAlias(MemberDef *md);
 
-   void cacheTypedefVal(ClassDef *val, const QByteArray &templSpec, const QByteArray &resolvedType);
+   void cacheTypedefVal(QSharedPointer<ClassDef> val, const QByteArray &templSpec, const QByteArray &resolvedType);
    void invalidateTypedefValCache();
 
    void invalidateCachedArgumentTypes();

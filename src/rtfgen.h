@@ -66,7 +66,7 @@ class RTFGenerator : public OutputGenerator
       return (o == RTF) ? this : 0;
    }
 
-   void writeDoc(DocNode *, Definition *, MemberDef *);
+   void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md);
 
    void startFile(const char *name, const char *manName, const char *title);
    void writeSearchInfo() {}

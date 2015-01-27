@@ -62,7 +62,8 @@ class PageDef : public Definition
       return m_title;
    }
 
-   GroupDef   *getGroupDef() const;
+   QSharedPointer<GroupDef> getGroupDef() const;
+
    PageSDict *getSubPages() const {
       return m_subPageDict;
    }

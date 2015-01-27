@@ -25,6 +25,7 @@
 #include <config.h>
 #include <definition.h>
 #include <doxygen.h>
+#include <doxy_globals.h>
 #include <language.h>
 #include <message.h>
 #include <marshal.h>
@@ -41,9 +42,6 @@
 #include <filedef.h>
 #include <dirdef.h>
 
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
-
 #define START_MARKER 0x4445465B // DEF[
 #define END_MARKER   0x4445465D // DEF]
 
@@ -53,6 +51,7 @@ class DefinitionImpl
  public:
    DefinitionImpl();
    ~DefinitionImpl();
+
    void init(const char *df, const char *n);
 
    SectionDict *sectionDict;  // dictionary of all sections, not accessible
@@ -61,12 +60,13 @@ class DefinitionImpl
    MemberSDict *sourceRefsDict;
 
    QList<ListItemInfo> *xrefListItems;
-   SortedList<GroupDef *> *partOfGroups;
+   SortedList<QSharedPointer<GroupDef>> *partOfGroups;
 
    DocInfo   *details;    // not exported
    DocInfo   *inbodyDocs; // not exported
    BriefInfo *brief;      // not exported
    BodyInfo  *body;       // not exported
+
    QByteArray   briefSignatures;
    QByteArray   docSignatures;
 
@@ -217,24 +217,9 @@ void Definition::addToMap(const QByteArray &name)
       symbolName = symbolName.mid(index + 2);
    }
 
-   if (! symbolName.isEmpty()) {     
-      auto di = Doxygen::symbolMap.find(symbolName);
-
-      QSharedPointer<QList<QSharedPointer<Definition>>> dl;
-
-      if (di == Doxygen::symbolMap.end() ) { 
-         // new Symbol         
-
-         dl = QMakeShared<QList<QSharedPointer<Definition>>>();       
-         Doxygen::symbolMap.insert(symbolName, dl);    
-     
-      } else {
-         // update existing symbol
-         dl = *di;
-        
-      }
-
-      dl->append(this);      
+   if (! symbolName.isEmpty()) {                       
+      Doxygen::symbolMap.insertMulti(symbolName, this);    
+                
       this->setSymbolName(symbolName);
    }
 }
@@ -262,7 +247,8 @@ Definition::Definition(const char *df, int dl, int dc, const char *name, const c
    }
 }
 
-Definition::Definition(const Definition &d) : DefinitionIntf()
+Definition::Definition(const Definition &d) 
+   : DefinitionIntf()
 {
    m_name    = d.m_name;
    m_defLine = d.m_defLine;
@@ -342,16 +328,17 @@ Definition::~Definition()
       m_impl = 0;
    }
 
-   if (Doxygen::symbolMap) {
-      auto di = Doxygen::symbolMap->find(m_symbolName);
-   
-      if (di != Doxygen::symbolMap->end()) { 
-   
-         QSharedPointer<QList<Definition *>> dl;  
-         dl = *di;  
-   
-         dl->removeAll(this);
-      }
+   auto di = Doxygen::symbolMap.find(m_symbolName);
+
+   while (di != Doxygen::symbolMap.end() && di.key() == m_symbolName)  {      
+
+      if (di.value() == this) {
+         di = Doxygen::symbolMap.erase(di);
+
+      }  else {
+         ++di;
+
+      }      
    }
 }
 
@@ -363,17 +350,18 @@ void Definition::setName(const char *name)
    m_name = name;
 }
 
-void Definition::setId(const char *id)
+void Definition::setId(const char *id, QSharedPointer<Definition> self)
 {
    if (id == 0) {
       return;
    }
 
-   m_impl->id = id;
-
-   if (Doxygen::clangUsrMap) {  
-      Doxygen::clangUsrMap->insert(id, this);
+   if (self != this) {
+      throw "broom";          // broom
    }
+
+   m_impl->id = id; 
+   Doxygen::clangUsrMap.insert(id, self);
 }
 
 QByteArray Definition::id() const
@@ -381,8 +369,12 @@ QByteArray Definition::id() const
    return m_impl->id;
 }
 
-void Definition::addSectionsToDefinition(QList<SectionInfo> *anchorList)
+void Definition::addSectionsToDefinition(QList<SectionInfo> *anchorList, QSharedPointer<Definition> self)
 {
+   if (self != this) {
+      throw "broom";          // broom
+   }
+
    if (! anchorList) {
       return;
    }
@@ -402,7 +394,7 @@ void Definition::addSectionsToDefinition(QList<SectionInfo> *anchorList)
 
       if (m_impl->sectionDict->find(gsi->label) == 0) {
          m_impl->sectionDict->insert(gsi->label, gsi);
-         gsi->definition = this;
+         gsi->definition = self;
       }
    }
 }
@@ -989,13 +981,16 @@ void Definition::setBodyDef(QSharedPointer<FileDef> fd)
 bool Definition::hasSources() const
 {
    return m_impl->body && m_impl->body->startLine != -1 &&
-          m_impl->body->endLine >= m_impl->body->startLine &&
-          m_impl->body->fileDef;
+          m_impl->body->endLine >= m_impl->body->startLine && m_impl->body->fileDef;
 }
 
 /*! Write code of this definition into the documentation */
-void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
+void Definition::writeInlineCode(OutputList &ol, const char *scopeName, QSharedPointer<Definition> self)
 {
+   if (self != this) {
+      throw "broom";          // broom
+   }
+
    static bool inlineSources = Config_getBool("INLINE_SOURCES");
    ol.pushGeneratorState();
    
@@ -1009,9 +1004,10 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
          ParserInterface *pIntf = Doxygen::parserManager->getParser(m_impl->defFileExt);
          pIntf->resetCodeParserState();
         
-         MemberDef *thisMd = 0;
+         QSharedPointer<MemberDef> thisMd;
+
          if (definitionType() == TypeMember) {
-            thisMd = (MemberDef *)this;
+            thisMd = self.dynamicCast<MemberDef>();
          }
 
          ol.startCodeFragment();
@@ -1020,7 +1016,7 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
                           codeFragment,     // input
                           m_impl->lang,     // lang
                           false,            // isExample
-                          0,                // exampleName
+                          nullptr,          // exampleName
                           m_impl->body->fileDef,  // fileDef
                           actualStart,      // startLine
                           actualEnd,        // endLine
@@ -1028,6 +1024,7 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
                           thisMd,           // memberDef
                           true              // show line numbers
                          );
+
          ol.endCodeFragment();
       }
    }
@@ -1079,27 +1076,24 @@ void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
             if (!md->isObjCMethod() && (md->isFunction() || md->isSlot() || md->isPrototype() || md->isSignal() )) {
                name += "()";
             }
-
-            //Definition *d = md->getOutputFileBase();
-            //if (d==Doxygen::globalScope) d=md->getBodyDef();
-            if (sourceBrowser &&
-                  !(md->isLinkable() && !refLinkSource) &&
-                  md->getStartBodyLine() != -1 &&
-                  md->getBodyDef()
-               ) {
-               //printf("md->getBodyDef()=%p global=%p\n",md->getBodyDef(),Doxygen::globalScope);
+        
+            if (sourceBrowser && !(md->isLinkable() && !refLinkSource) && md->getStartBodyLine() != -1 && md->getBodyDef()) {              
                // for HTML write a real link
+
                ol.pushGeneratorState();
                //ol.disableAllBut(OutputGenerator::Html);
 
                ol.disable(OutputGenerator::RTF);
                ol.disable(OutputGenerator::Man);
+
                if (!latexSourceCode) {
                   ol.disable(OutputGenerator::Latex);
                }
+
                const int maxLineNrStr = 10;
                char anchorStr[maxLineNrStr];
                qsnprintf(anchorStr, maxLineNrStr, "l%05d", md->getStartBodyLine());
+
                //printf("Write object link to %s\n",md->getBodyDef()->getSourceFileBase().data());
                ol.writeObjectLink(0, md->getBodyDef()->getSourceFileBase(), anchorStr, name);
                ol.popGeneratorState();
@@ -1279,10 +1273,10 @@ QByteArray Definition::localName() const
    return m_impl->localName;
 }
 
-void Definition::makePartOfGroup(GroupDef *gd)
+void Definition::makePartOfGroup(QSharedPointer<GroupDef> gd)
 {
    if (m_impl->partOfGroups == 0) {
-      m_impl->partOfGroups = new SortedList<GroupDef *>;
+      m_impl->partOfGroups = new SortedList<QSharedPointer<GroupDef>>;
    }
 
    m_impl->partOfGroups->append(gd);
@@ -1302,7 +1296,7 @@ void Definition::setRefItems(const QList<ListItemInfo> *sli)
    }
 }
 
-void Definition::mergeRefItems(Definition *d)
+void Definition::mergeRefItems(QSharedPointer<Definition> d)
 {
    //printf("%s::mergeRefItems()\n",name().data());
    QList<ListItemInfo> *xrefList = d->xrefListItems();
@@ -1603,12 +1597,14 @@ QByteArray Definition::briefDescription(bool abbr) const
 
 QByteArray Definition::briefDescriptionAsTooltip() const
 {
+   QSharedPointer<Definition> self = sharedFrom(this);
+
    if (m_impl->brief) {
       if (m_impl->brief->tooltip.isEmpty() && ! m_impl->brief->doc.isEmpty()) {
          static bool reentering = false;
 
          if (! reentering) {
-            MemberDef *md = definitionType() == TypeMember ? (MemberDef *)this : 0;
+            QSharedPointer<MemberDef> md = definitionType() == TypeMember ? self.dynamicCast<MemberDef>() : QSharedPointer<MemberDef>();
 
             QSharedPointer<Definition> scope;
 
@@ -1616,7 +1612,7 @@ QByteArray Definition::briefDescriptionAsTooltip() const
                scope = getOuterScope();
 
             } else {
-               scope = this;
+               scope = self;
 
             }
 
@@ -1624,7 +1620,6 @@ QByteArray Definition::briefDescriptionAsTooltip() const
             reentering = true; 
 
             m_impl->brief->tooltip = parseCommentAsText(scope, md, m_impl->brief->doc, m_impl->brief->file, m_impl->brief->line);
-
             reentering = false;
          }
       }
@@ -1714,7 +1709,7 @@ QSharedPointer<FileDef> Definition::getBodyDef() const
    return m_impl->body ? m_impl->body->fileDef : QSharedPointer<FileDef>();
 }
 
-SortedList<GroupDef *> *Definition::partOfGroups() const
+SortedList<QSharedPointer<GroupDef>> *Definition::partOfGroups() const
 {
    return m_impl->partOfGroups;
 }

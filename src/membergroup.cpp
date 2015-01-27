@@ -37,7 +37,7 @@ MemberGroup::MemberGroup()
 {
 }
 
-MemberGroup::MemberGroup(Definition *parent, int id, const char *hdr, const char *d, const char *docFile)
+MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const char *hdr, const char *d, const char *docFile)
 {   
    memberList      = new MemberList(MemberListType_memberGroup);
    grpId           = id;
@@ -57,9 +57,9 @@ MemberGroup::~MemberGroup()
    delete memberList;
 }
 
-void MemberGroup::insertMember(MemberDef *md)
+void MemberGroup::insertMember(QSharedPointer<MemberDef> md)
 {  
-   MemberDef *firstMd = memberList->first();
+   QSharedPointer<MemberDef> firstMd = memberList->first();
 
    if (inSameSection && memberList->count() > 0 && firstMd->getSectionList(m_parent) != md->getSectionList(m_parent)) {
       inSameSection = false;
@@ -279,7 +279,7 @@ void MemberGroup::addListReferences(QSharedPointer<Definition> def)
 
    if (m_xrefListItems && def) {
       QByteArray name = def->getOutputFileBase() + "#" + anchor();
-      addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, 0, def);
+      addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, QSharedPointer<Definition>(), def);
    }
 }
 

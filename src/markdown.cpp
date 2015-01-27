@@ -2586,9 +2586,9 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, Q
 }
 
 void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input,
-                                   SrcLangExt lang, bool isExampleBlock, const char *exampleName, FileDef *fileDef,
-                                   int startLine, int endLine, bool inlineFragment, MemberDef *memberDef,
-                                   bool showLineNumbers, Definition *searchCtx, bool collectXRefs )
+                                   SrcLangExt lang, bool isExampleBlock, const char *exampleName, QSharedPointer<FileDef> fileDef,
+                                   int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
+                                   bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
    ParserInterface *pIntf = Doxygen::parserManager->getParser("*.cpp");
 

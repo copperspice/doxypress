@@ -54,7 +54,7 @@ void PageDef::findSectionsInDocumentation()
 
 QSharedPointer<GroupDef> PageDef::getGroupDef() const
 {
-   SortedList<GroupDef *> *groups = partOfGroups();
+   SortedList<QSharedPointer<GroupDef>> *groups = partOfGroups();
 
    if (groups) {       
        return groups->first();

@@ -42,7 +42,7 @@
 class DiagramItem
 {
  public:
-   DiagramItem(DiagramItem *p, int number, ClassDef *cd, Protection prot, Specifier virt, const char *ts);
+   DiagramItem(DiagramItem *p, int number, QSharedPointer<ClassDef> cd, Protection prot, Specifier virt, const char *ts);
    ~DiagramItem();
 
    QByteArray label() const;
@@ -93,7 +93,7 @@ class DiagramItem
       return inList;
    }
 
-   ClassDef *getClassDef() const {
+   QSharedPointer<ClassDef> getClassDef() const {
       return classDef;
    }
 
@@ -109,7 +109,7 @@ class DiagramItem
 
    QByteArray templSpec;
    bool inList;
-   ClassDef *classDef;
+   QSharedPointer<ClassDef> classDef;
 };
 
 /** Class representing a row in the built-in class diagram */
@@ -121,7 +121,8 @@ class DiagramRow : public QList<DiagramItem *>
       level = l;      
    }
 
-   void insertClass(DiagramItem *parent, ClassDef *cd, bool doBases, Protection prot, Specifier virt, const char *ts);
+   void insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, bool doBases, Protection prot, Specifier virt, const char *ts);
+
    uint number() {
       return level;
    }
@@ -143,7 +144,7 @@ class DiagramRowIterator : public QListIterator<DiagramRow>
 class TreeDiagram : public QList<DiagramRow *>
 {
  public:
-   TreeDiagram(ClassDef *root, bool doBases);
+   TreeDiagram(QSharedPointer<ClassDef> root, bool doBases);
    ~TreeDiagram();
 
    void computeLayout();
@@ -290,7 +291,7 @@ static void writeVectorBox(QTextStream &t, DiagramItem *di, float x, float y, bo
    }
 }
 
-static void writeMapArea(QTextStream &t, ClassDef *cd, QByteArray relPath, int x, int y, int w, int h)
+static void writeMapArea(QTextStream &t, QSharedPointer<ClassDef> cd, QByteArray relPath, int x, int y, int w, int h)
 {
    if (cd->isLinkable()) {
       QByteArray ref = cd->getReference();
@@ -311,6 +312,7 @@ static void writeMapArea(QTextStream &t, ClassDef *cd, QByteArray relPath, int x
       t << "\" ";
 
       QByteArray tooltip = cd->briefDescriptionAsTooltip();
+
       if (!tooltip.isEmpty()) {
          t << "title=\"" << tooltip << "\" ";
       }
@@ -320,9 +322,8 @@ static void writeMapArea(QTextStream &t, ClassDef *cd, QByteArray relPath, int x
       t << (x + w) << "," << (y + h) << "\"/>" << endl;
    }
 }
-//-----------------------------------------------------------------------------
 
-DiagramItem::DiagramItem(DiagramItem *p, int number, ClassDef *cd, Protection pr, Specifier vi, const char *ts)
+DiagramItem::DiagramItem(DiagramItem *p, int number, QSharedPointer<ClassDef> cd, Protection pr, Specifier vi, const char *ts)
 {
    parent = p;
    x = 0;
@@ -409,7 +410,7 @@ void DiagramItem::addChild(DiagramItem *di)
    children.append(di);
 }
 
-void DiagramRow::insertClass(DiagramItem *parent, ClassDef *cd, bool doBases, Protection prot, Specifier virt, const char *ts)
+void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, bool doBases, Protection prot, Specifier virt, const char *ts)
 {
    //if (cd->visited) return; // the visit check does not work in case of multiple inheritance of the same class!
 
@@ -419,7 +420,7 @@ void DiagramRow::insertClass(DiagramItem *parent, ClassDef *cd, bool doBases, Pr
       parent->addChild(di);
    }
 
-   di->move(count()*gridWidth, level * gridHeight);
+   di->move(count() * gridWidth, level * gridHeight);
    append(di);
 
    SortedList<BaseClassDef *> *bcl = doBases ? cd->baseClasses() : cd->subClasses();
@@ -429,12 +430,13 @@ void DiagramRow::insertClass(DiagramItem *parent, ClassDef *cd, bool doBases, Pr
       /* there are base/sub classes */
      
       for (auto bcd : *bcl) { 
-         ClassDef *ccd = bcd->classDef;
+         QSharedPointer<ClassDef> ccd = bcd->classDef;
          if (ccd && ccd->isVisibleInHierarchy() /*&& !ccd->visited*/) {
             count++;
          }
       }
    }
+
    if (count > 0 && (prot != Private || !doBases)) {
       DiagramRow *row = 0;
 
@@ -449,7 +451,7 @@ void DiagramRow::insertClass(DiagramItem *parent, ClassDef *cd, bool doBases, Pr
       /* insert base classes in the next row */
 
       for (auto bcd : *bcl) { 
-         ClassDef *ccd = bcd->classDef;
+         QSharedPointer<ClassDef> ccd = bcd->classDef;
 
          if (ccd && ccd->isVisibleInHierarchy() /*&& !ccd->visited*/) {
             row->insertClass(di, ccd, doBases, bcd->prot, doBases ? bcd->virt : Normal, doBases ? bcd->templSpecifiers.data() : "");
@@ -459,7 +461,7 @@ void DiagramRow::insertClass(DiagramItem *parent, ClassDef *cd, bool doBases, Pr
 }
 
 // **
-TreeDiagram::TreeDiagram(ClassDef *root, bool doBases)
+TreeDiagram::TreeDiagram(QSharedPointer<ClassDef> root, bool doBases)
 {
    DiagramRow *row = new DiagramRow(this, 0);
    append(row);
@@ -1119,7 +1121,7 @@ void clearVisitFlags()
    }
 }
 
-ClassDiagram::ClassDiagram(ClassDef *root)
+ClassDiagram::ClassDiagram(QSharedPointer<ClassDef> root)
 {
    clearVisitFlags();
 

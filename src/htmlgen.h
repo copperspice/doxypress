@@ -162,7 +162,8 @@ class HtmlGenerator : public OutputGenerator
    // **
    void setCurrentDoc(Definition *context, const char *anchor, bool isSourceFile);
    void addWord(const QString &word, bool hiPriority) override;
-   void writeDoc(DocNode *, Definition *, MemberDef *);
+
+   void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md) override;
 
    void startFile(const char *name, const char *manName, const char *title);
    void writeFooter(const char *navPath);

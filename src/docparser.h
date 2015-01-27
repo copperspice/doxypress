@@ -50,9 +50,9 @@
  *  @returns         Root node of the abstract syntax tree. Ownership of the
  *                   pointer is handed over to the caller.
  */
-DocRoot *validatingParseDoc(const char *fileName, int startLine, Definition *context, MemberDef *md,
-                            const char *input, bool indexWords, bool isExample, const char *exampleName = 0,
-                            bool singleLine = false, bool linkFromIndex = false);
+DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<Definition> context, 
+                  QSharedPointer<MemberDef> md, const char *input, bool indexWords, bool isExample, 
+                  const char *exampleName = 0, bool singleLine = false, bool linkFromIndex = false);
 
 /*! Main entry point for parsing simple text fragments. These
  *  fragments are limited to words, whitespace and symbols.
@@ -60,7 +60,7 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, Definition *con
 DocText *validatingParseText(const char *input);
 
 /*! Searches for section and anchor commands in the input */
-void docFindSections(const char *input, Definition *d, MemberGroup *m, const char *fileName);
+void docFindSections(const char *input, QSharedPointer<Definition> d, MemberGroup *m, const char *fileName);
 
 /** Abstract node interface with type information. */
 class DocNode
@@ -806,20 +806,25 @@ class DocFormula : public DocNode
 class DocIndexEntry : public DocNode
 {
  public:
-   DocIndexEntry(DocNode *parent, Definition *scope, MemberDef *md)
+   DocIndexEntry(DocNode *parent, QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md)
       : m_scope(scope), m_member(md) {
       m_parent = parent;
    }
+
    Kind kind() const {
       return Kind_IndexEntry;
    }
+
    int parse();
-   Definition *scope() const    {
+
+   QSharedPointer<Definition> scope() const    {
       return m_scope;
    }
-   MemberDef *member() const    {
+
+   QSharedPointer<MemberDef> member() const    {
       return m_member;
    }
+
    QByteArray entry() const        {
       return m_entry;
    }
@@ -828,9 +833,10 @@ class DocIndexEntry : public DocNode
    }
 
  private:
-   QByteArray     m_entry;
-   Definition *m_scope;
-   MemberDef  *m_member;
+   QByteArray m_entry;
+
+   QSharedPointer<Definition> m_scope;
+   QSharedPointer<MemberDef>  m_member;
 };
 
 /** Node representing a copy of documentation block. */
@@ -838,19 +844,22 @@ class DocCopy : public DocNode
 {
  public:
    DocCopy(DocNode *parent, const QByteArray &link, bool copyBrief, bool copyDetails)
-      : m_link(link),
-        m_copyBrief(copyBrief), m_copyDetails(copyDetails) {
+      : m_link(link), m_copyBrief(copyBrief), m_copyDetails(copyDetails) {
       m_parent = parent;
    }
+
    Kind kind() const          {
       return Kind_Copy;
    }
+
    QByteArray link() const       {
       return m_link;
    }
+
    void accept(DocVisitor * /*v*/) {
       /*CompAccept<DocCopy>::accept(this,v);*/
    }
+
    void parse(QList<DocNode *> &children);
 
  private:

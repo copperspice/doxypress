@@ -31,8 +31,8 @@
 
 int compareValues(const BaseClassDef *item1, const BaseClassDef *item2) 
 {
-   const ClassDef *c1 = item1->classDef;
-   const ClassDef *c2 = item2->classDef;
+   QSharedPointer<const ClassDef> c1 = item1->classDef;
+   QSharedPointer<const ClassDef> c2 = item2->classDef;
 
    if (c1 == 0 || c2 == 0) {
       return false;
@@ -59,7 +59,7 @@ int compareValues(const ClassDef *item1, const ClassDef *item2)
 }
 
 // DirList ->  SortedList<DirDef *>
-int compareValues(const DirDef *item1, const DirDef *item2)
+int compareValues(QSharedPointer<const DirDef> item1, QSharedPointer<const DirDef> item2)
 {
     return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
 }
@@ -73,7 +73,7 @@ int compareValues(const DotNode *item1, const DotNode *item2)
 
 
 // FileList 
-int compareValues(const FileDef *md1, const FileDef *md2) 
+int compareValues(QSharedPointer<const FileDef> md1, QSharedPointer<const FileDef> md2) 
 {
    return qstricmp(md1->name(), md2->name());
 }
@@ -147,6 +147,3 @@ int compareValues(const FileList *item1, const FileList *item2)
 {
    return qstricmp(item1->path(), item2->path());
 }
-
-
-

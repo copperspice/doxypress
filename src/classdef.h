@@ -184,7 +184,7 @@ class ClassDef : public Definition
    /** Returns the Java package this class is in or 0 if not applicable.
     */
 
-   MemberDef    *getMemberByName(const QByteArray &) const;
+   MemberDef *getMemberByName(const QByteArray &) const;
 
    /** Returns true iff \a bcd is a direct or indirect base class of this
     *  class. This function will recusively traverse all branches of the
@@ -195,12 +195,12 @@ class ClassDef : public Definition
    /** Returns true iff \a bcd is a direct or indirect sub class of this
     *  class.
     */
-   bool isSubClass(ClassDef *bcd, int level = 0);
+   bool isSubClass(QSharedPointer<ClassDef> bcd, int level = 0);
 
    /** returns true iff \a md is a member of this class or of the
     *  the public/protected members of a base class
     */
-   bool isAccessibleMember(MemberDef *md);
+   bool isAccessibleMember(QSharedPointer<MemberDef> md);
 
    /** Returns a sorted dictionary with all template instances found for
     *  this template class. Returns 0 if not a template or no instances.
@@ -210,7 +210,7 @@ class ClassDef : public Definition
    /** Returns the template master of which this class is an instance.
     *  Returns 0 if not applicable.
     */
-   ClassDef *templateMaster() const;
+   QSharedPointer<ClassDef> templateMaster() const;
 
    /** Returns true if this class is a template */
    bool isTemplate() const;
@@ -269,7 +269,7 @@ class ClassDef : public Definition
    bool isForwardDeclared() const;
 
    /** Returns the class of which this is a category (Objective-C only) */
-   ClassDef *categoryOf() const;
+   QSharedPointer<ClassDef> categoryOf() const;
 
    /** Returns the name of the class including outer classes, but not
     *  including namespaces.
@@ -287,7 +287,7 @@ class ClassDef : public Definition
 
    QHash<QString, int> *getTemplateBaseClassNames() const;
 
-   ClassDef *getVariableInstance(const char *templSpec);
+   QSharedPointer<ClassDef> getVariableInstance(const char *templSpec);
 
    bool isUsedOnly() const;
 
@@ -297,9 +297,9 @@ class ClassDef : public Definition
    bool isSimple() const;
 
    const SortedList<QSharedPointer<ClassDef>>   *taggedInnerClasses() const;
-   ClassDef *tagLessReference() const;
+   QSharedPointer<ClassDef> tagLessReference() const;
 
-   MemberDef *isSmartPointer() const;
+   QSharedPointer<MemberDef> isSmartPointer() const;
 
    bool isJavaEnum() const;
 
@@ -323,8 +323,8 @@ class ClassDef : public Definition
    void insertMember(QSharedPointer<MemberDef> );
    void insertUsedFile(QSharedPointer<FileDef> fd);
    bool addExample(const char *anchor, const char *name, const char *file);
-   void mergeCategory(ClassDef *category);
-   void setNamespace(NamespaceDef *nd);
+   void mergeCategory(QSharedPointer<ClassDef> category);
+   void setNamespace(QSharedPointer<NamespaceDef> nd);
    void setFileDef(QSharedPointer<FileDef> fd);
    void setSubGrouping(bool enabled);
    void setProtection(Protection p);
@@ -332,10 +332,10 @@ class ClassDef : public Definition
 
    void addInnerCompound(QSharedPointer<Definition> d) override; 
 
-   ClassDef *insertTemplateInstance(const QByteArray &fileName, int startLine, int startColumn,
-                                    const QByteArray &templSpec, bool &freshInstance);
+   QSharedPointer<ClassDef> insertTemplateInstance(const QByteArray &fileName, int startLine, int startColumn,
+                  const QByteArray &templSpec, bool &freshInstance);
 
-   void addUsedClass(ClassDef *cd, const char *accessName, Protection prot);
+   void addUsedClass(QSharedPointer<ClassDef> cd, const char *accessName, Protection prot);
    void addUsedByClass(QSharedPointer<ClassDef> cd, const char *accessName, Protection prot);
    void setIsStatic(bool b);
    void setCompoundType(CompoundType t);
@@ -344,11 +344,11 @@ class ClassDef : public Definition
 
    void setTemplateArguments(ArgumentList *al);
    void setTemplateBaseClassNames(QHash<QString, int> *templateNames);
-   void setTemplateMaster(ClassDef *tm);
+   void setTemplateMaster(QSharedPointer<ClassDef> tm);
    void setTypeConstraints(ArgumentList *al);
    void addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const char *templSpec);
    void makeTemplateArgument(bool b = true);
-   void setCategoryOf(ClassDef *cd);
+   void setCategoryOf(QSharedPointer<ClassDef> cd);
    void setUsedOnly(bool b);
 
    void addTaggedInnerClass(QSharedPointer<ClassDef> cd);
@@ -367,48 +367,50 @@ class ClassDef : public Definition
    void writeDocumentationForInnerClasses(OutputList &ol);
    void writeMemberPages(OutputList &ol);
    void writeMemberList(OutputList &ol);
-   void writeDeclaration(OutputList &ol, MemberDef *md, bool inGroup, ClassDef *inheritedFrom, const char *inheritId);
+   void writeDeclaration(OutputList &ol, MemberDef *md, bool inGroup, QSharedPointer<ClassDef> inheritedFrom, const char *inheritId);
    void writeQuickMemberLinks(OutputList &ol, MemberDef *md) const;
    void writeSummaryLinks(OutputList &ol);
-   void reclassifyMember(MemberDef *md, MemberType t);
+   void reclassifyMember(QSharedPointer<MemberDef> md, MemberType t);
    void writeInlineDocumentation(OutputList &ol);
    void writeDeclarationLink(OutputList &ol, bool &found, const char *header, bool localNames);
-   void removeMemberFromLists(MemberDef *md);
-   void addGroupedInheritedMembers(OutputList &ol, MemberListType lt, ClassDef *inheritedFrom, const QByteArray &inheritId);
-   int countMembersIncludingGrouped(MemberListType lt, ClassDef *inheritedFrom, bool additional);
+   void removeMemberFromLists(QSharedPointer<MemberDef> md);
+   void addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, const QByteArray &inheritId);
+   int countMembersIncludingGrouped(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool additional);
    int countInheritanceNodes();
    void writeTagFile(QTextStream &);
 
    bool visited;
 
  protected:
-   void addUsedInterfaceClasses(MemberDef *md, const char *typeStr);
+   void addUsedInterfaceClasses(QSharedPointer<MemberDef> md, const char *typeStr);
    bool hasNonReferenceSuperClass();
    void showUsedFiles(OutputList &ol);
 
  private:
    void writeDocumentationContents(OutputList &ol, const QByteArray &pageTitle);
-   void internalInsertMember(MemberDef *md, Protection prot, bool addToAllList);
-   void addMemberToList(MemberListType lt, MemberDef *md, bool isBrief);
+   void internalInsertMember(QSharedPointer<MemberDef> md, Protection prot, bool addToAllList);
+   void addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md, bool isBrief);
 
    QSharedPointer<MemberList> createMemberList(MemberListType lt);
 
    void writeInheritedMemberDeclarations(OutputList &ol, MemberListType lt, int lt2,
-                                         const QByteArray &title, ClassDef *inheritedFrom,
-                                         bool invert, bool showAlways,
-                                         QHash<void *, void *> *visitedClasses);
+                  const QByteArray &title, QSharedPointer<ClassDef> inheritedFrom,
+                  bool invert, bool showAlways,
+                  QHash<void *, void *> *visitedClasses);
 
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title,
-                                const char *subTitle = 0, bool showInline = false,
-                                ClassDef *inheritedFrom = 0, int lt2 = -1, bool invert = false,
-                                bool showAlways = false, QHash<void *, void *> *visitedClasses = 0);
+                  const char *subTitle = 0, bool showInline = false,
+                  QSharedPointer<ClassDef> inheritedFrom = 0, int lt2 = -1, bool invert = false,
+                  bool showAlways = false, QHash<void *, void *> *visitedClasses = 0);
 
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title, bool showInline = false);
    void writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt);
-   void writePlainMemberDeclaration(OutputList &ol, MemberListType lt, bool inGroup, ClassDef *inheritedFrom, const char *inheritId);
+   void writePlainMemberDeclaration(OutputList &ol, MemberListType lt, bool inGroup, QSharedPointer<ClassDef> inheritedFrom, 
+                  const char *inheritId);
+
    void writeBriefDescription(OutputList &ol, bool exampleFlag);
    void writeDetailedDescription(OutputList &ol, const QByteArray &pageType, bool exampleFlag,
-                                 const QByteArray &title, const QByteArray &anchor = QByteArray());
+                  const QByteArray &title, const QByteArray &anchor = QByteArray());
 
    void writeIncludeFiles(OutputList &ol);
    //void writeAllMembersLink(OutputList &ol);
@@ -428,10 +430,10 @@ class ClassDef : public Definition
    int countAdditionalInheritedMembers();
    void writeAdditionalInheritedMembers(OutputList &ol);
    void addClassAttributes(OutputList &ol);
-   int countMemberDeclarations(MemberListType lt, ClassDef *inheritedFrom,
+   int countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
                                int lt2, bool invert, bool showAlways, QHash<void *, void *> *visitedClasses);
 
-   int countInheritedDecMembers(MemberListType lt, ClassDef *inheritedFrom, bool invert, bool showAlways,
+   int countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool invert, bool showAlways,
                                 QHash<void *, void *> *visitedClasses);
 
    void getTitleForMemberListType(MemberListType type, QByteArray &title, QByteArray &subtitle);
@@ -513,7 +515,7 @@ class ClassDef : public Definition
    QHash<QString, int> *m_templBaseClassNames;
 
    /*! The class this class is an instance of. */
-   ClassDef *m_templateMaster;
+   QSharedPointer<ClassDef> m_templateMaster;
 
    /*! local class name which could be a typedef'ed alias name. */
    QByteArray m_className;
@@ -521,7 +523,7 @@ class ClassDef : public Definition
    /*! If this class is a Objective-C category, then this points to the
     *  class which is extended.
     */
-   ClassDef *m_categoryOf;
+   QSharedPointer<ClassDef> m_categoryOf;
 
    QList<QSharedPointer<MemberList>> m_memberLists;
 
@@ -555,10 +557,10 @@ class ClassDef : public Definition
    bool m_isSimple;
 
    /** Does this class overloaded the -> operator? */
-   MemberDef *m_arrowOperator;
+   QSharedPointer<MemberDef> m_arrowOperator;
 
    SortedList<QSharedPointer<ClassDef>> *m_taggedInnerClasses;
-   ClassDef *m_tagLessRef;
+   QSharedPointer<ClassDef> m_tagLessRef;
 
    /** Does this class represent a Java style enum? */
    bool m_isJavaEnum;
@@ -574,7 +576,7 @@ class ClassDef : public Definition
 class UsesClassDef 
 {
  public:
-   UsesClassDef(ClassDef *cd) : m_classDef(cd) {      
+   UsesClassDef(QSharedPointer<ClassDef> cd) : m_classDef(cd) {      
       m_containment = true;
    }
 
@@ -588,7 +590,7 @@ class UsesClassDef
    }
 
    /** Class definition this relation uses. */
-   ClassDef *m_classDef;
+   QSharedPointer<ClassDef> m_classDef;
 
    /** Dictionary of member variable names that form the edge labels of the
     *  usage relation.
@@ -627,12 +629,12 @@ class UsesClassDictIterator : public QHashIterator<QString, UsesClassDef>
 /** Class that contains information about an inheritance relation
  */
 struct BaseClassDef {
-   BaseClassDef(ClassDef *cd, const char *n, Protection p, Specifier v, const char *t) :
+   BaseClassDef(QSharedPointer<ClassDef> cd, const char *n, Protection p, Specifier v, const char *t) :
       classDef(cd), usedName(n), prot(p), virt(v), templSpecifiers(t)
    {}
 
    /** Class definition which this relation inherits from. */
-   ClassDef *classDef;
+   QSharedPointer<ClassDef> classDef;
 
    /** name used in the inheritance list
     * (may be a typedef name instead of the class name)

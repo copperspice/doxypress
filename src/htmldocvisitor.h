@@ -33,7 +33,7 @@ class MemberDef;
 class HtmlDocVisitor : public DocVisitor
 {
  public:
-   HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, Definition *ctx);
+   HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, QSharedPointer<Definition> ctx);
 
    //--------------------------------------
    // visitor functions for leaf nodes
@@ -168,7 +168,8 @@ class HtmlDocVisitor : public DocVisitor
    bool m_insidePre;
    bool m_hide;
    QStack<bool> m_enabled;
-   Definition *m_ctx;
+
+   QSharedPointer<Definition> m_ctx;
    QByteArray m_langExt;
 };
 

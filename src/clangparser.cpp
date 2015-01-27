@@ -712,7 +712,8 @@ void ClangParser::linkIdentifier(CodeOutputInterface &ol, FileDef *fd,
    CXString usr = clang_getCursorUSR(c);
    const char *usrStr = clang_getCString(usr);
 
-   Definition *d = usrStr ? Doxygen::clangUsrMap->find(usrStr) : 0;
+   QSharedPointer<Definition> d = usrStr ? Doxygen::clangUsrMap->find(usrStr) : QSharedPointer<Definition>();
+
    //CXCursorKind kind = clang_getCursorKind(c);
    //if (d==0)
    //{

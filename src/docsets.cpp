@@ -16,6 +16,7 @@
 *************************************************************************/
 
 #include <docsets.h>
+#include <doxy_globals.h>
 #include <config.h>
 #include <message.h>
 #include <doxygen.h>
@@ -25,9 +26,6 @@
 #include <memberdef.h>
 #include <namespacedef.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 DocSets::DocSets()
 {
@@ -248,10 +246,8 @@ void DocSets::decContentsDepth()
 }
 
 void DocSets::addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
-                              bool /* separateIndex */, bool /* addToNavIndex */, Definition * /*def*/)
-{
-   (void)isDir;
-  
+                              bool , bool, QSharedPointer<Definition>)
+{    
    if (ref == 0) {
 
       if (! m_firstNode.at(m_dc - 1)) {
@@ -554,7 +550,7 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
    }
 }
 
-void DocSets::writeToken(QTextStream &t, QSharedPointer<const Definition> d, const QByteArray &type, const QByteArray &lang,
+void DocSets::writeToken(QTextStream &t, QSharedPointer<Definition> d, const QByteArray &type, const QByteArray &lang,
                          const char *scope, const char *anchor, const QByteArray &decl) 
 {
    t << "  <Token>" << endl;

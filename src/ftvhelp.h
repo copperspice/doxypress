@@ -50,7 +50,7 @@ class FTVHelp : public IndexIntf
    void decContentsDepth();
 
    void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
-                        bool separateIndex, bool addToNavIndex, Definition *def);
+                        bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) override;
   
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *, 
                      const char *) override {};

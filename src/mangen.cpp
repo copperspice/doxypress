@@ -765,7 +765,7 @@ void ManGenerator::endParamList()
 {
 }
 
-void ManGenerator::writeDoc(DocNode *n, Definition *ctx, MemberDef *)
+void ManGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
    ManDocVisitor *visitor = new ManDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QByteArray(""));
    n->accept(visitor);

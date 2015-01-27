@@ -43,15 +43,14 @@ class PackageDef;
 
 /** Class representing the data associated with a \#include statement. */
 struct IncludeInfo {
-   IncludeInfo() {
-      fileDef  = 0;
+   IncludeInfo() {      
       local    = false;
       indirect = false;
    }
 
    ~IncludeInfo() {}
 
-   FileDef *fileDef;
+   QSharedPointer<FileDef> fileDef;
 
    QByteArray includeName;
    bool local;
@@ -151,7 +150,7 @@ class FileDef : public Definition
       return m_package;
    }
 
-   DirDef *getDirDef() const      {
+   QSharedPointer<DirDef> getDirDef() const      {
       return m_dir;
    }
 
@@ -183,7 +182,7 @@ class FileDef : public Definition
 
    void getAllIncludeFilesRecursively(QStringList &incFiles) const;
 
-   MemberList *getMemberList(MemberListType lt) const;
+   QSharedPointer<MemberList> getMemberList(MemberListType lt) const;
 
    const QList<QSharedPointer<MemberList>> &getMemberLists() const {
       return m_memberLists;
@@ -233,7 +232,7 @@ class FileDef : public Definition
       m_package = pd;
    }
 
-   void setDirDef(DirDef *dd) {
+   void setDirDef(QSharedPointer<DirDef> dd) {
       m_dir = dd;
    }
 
@@ -244,8 +243,8 @@ class FileDef : public Definition
    bool generateSourceFile() const;
    void sortMemberLists();
 
-   void addIncludeDependency(FileDef *fd, const char *incName, bool local, bool imported, bool indirect);
-   void addIncludedByDependency(FileDef *fd, const char *incName, bool local, bool imported);
+   void addIncludeDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported, bool indirect);
+   void addIncludedByDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported);
 
    void addMembersToMemberGroup(QSharedPointer<FileDef> self);
    void distributeMemberGroupDocumentation();
@@ -304,17 +303,16 @@ class FileDef : public Definition
    bool               m_isSource;
    QByteArray         m_fileVersion;
    PackageDef        *m_package;
-   DirDef            *m_dir;
 
+   QSharedPointer<DirDef> m_dir;
    QList<QSharedPointer<MemberList>> m_memberLists;
 
    MemberGroupSDict   m_memberGroupSDict;
    NamespaceSDict     m_namespaceSDict;
    ClassSDict         m_classSDict;
+
    bool               m_subGrouping;
 };
-
-
 
 class Directory;
 
@@ -323,7 +321,8 @@ class DirEntry
 {
  public:
    enum EntryKind { Dir, File };
-   DirEntry(DirEntry *parent, FileDef *fd)
+
+   DirEntry(DirEntry *parent, QSharedPointer<FileDef> fd)
       : m_parent(parent), m_name(fd->name()), m_kind(File), m_fd(fd),m_isLast(false) 
    { }
 
@@ -336,7 +335,7 @@ class DirEntry
       return m_kind;
    }
 
-   FileDef *file()  const {
+   QSharedPointer<FileDef> file()  const {
       return m_fd;
    }
 
@@ -347,12 +346,15 @@ class DirEntry
    void setLast(bool b)   {
       m_isLast = b;
    }
+
    DirEntry *parent() const {
       return m_parent;
    }
+
    QByteArray name() const  {
       return m_name;
    }
+
    QByteArray path() const  {
       return parent() ? parent()->path() + "/" + name() : name();
    }
@@ -363,7 +365,7 @@ class DirEntry
 
  private:
    EntryKind m_kind;
-   FileDef *m_fd;
+   QSharedPointer<FileDef> m_fd;
    bool m_isLast;
 };
 

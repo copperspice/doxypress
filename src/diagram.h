@@ -28,7 +28,7 @@ class TreeDiagram;
 class ClassDiagram
 {
  public:
-   ClassDiagram(ClassDef *root);
+   ClassDiagram(QSharedPointer<ClassDef> root);
    ~ClassDiagram();
 
    void writeFigure(QTextStream &t, const char *path, const char *file) const;
