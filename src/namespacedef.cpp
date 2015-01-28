@@ -87,7 +87,9 @@ void NamespaceDef::distributeMemberGroupDocumentation()
 
 void NamespaceDef::findSectionsInDocumentation()
 {
-   docFindSections(documentation(), this, 0, docFile());
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
+
+   docFindSections(documentation(), self, 0, docFile());
    
    for (auto mg : *memberGroupSDict) {
       mg->findSectionsInDocumentation();
@@ -185,7 +187,7 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
       m_memberLists.append(allMemberList);
    }
 
-   allMemberList->append(md.data());
+   allMemberList->append(md);
 
    //
    if (! m_allMembersDict) {
@@ -319,6 +321,8 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
 
 void NamespaceDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
 {
+  QSharedPointer<NamespaceDef> self = sharedFrom(this);
+
    if (hasDetailedDescription()) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
@@ -333,11 +337,11 @@ void NamespaceDef::writeDetailedDescription(OutputList &ol, const QByteArray &ti
       ol.endGroupHeader();
 
       ol.startTextBlock();
-      if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF")) {
-         ol.generateDoc(briefFile(), briefLine(), this, 0, briefDescription(), false, false);
+      if (! briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF")) {
+         ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
-      if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF") &&
-            !documentation().isEmpty()) {
+
+      if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF") && !documentation().isEmpty()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::RTF);
@@ -348,21 +352,26 @@ void NamespaceDef::writeDetailedDescription(OutputList &ol, const QByteArray &ti
          ol.writeString("\n\n");
          ol.popGeneratorState();
       }
+
       if (!documentation().isEmpty()) {
-         ol.generateDoc(docFile(), docLine(), this, 0, documentation() + "\n", true, false);
+         ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
       }
+
       ol.endTextBlock();
    }
 }
 
 void NamespaceDef::writeBriefDescription(OutputList &ol)
 {
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
+
    if (hasBriefDescription()) {
-      DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), this, 0,
+      DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
                                              briefDescription(), true, false, 0, true, false);
+
       if (rootNode && !rootNode->isEmpty()) {
          ol.startParagraph();
-         ol.writeDoc(rootNode, this, 0);
+         ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::RTF);
          ol.writeString(" \n");
@@ -439,11 +448,13 @@ void NamespaceDef::writeNamespaceDeclarations(OutputList &ol, const QByteArray &
 void NamespaceDef::writeMemberGroups(OutputList &ol)
 {
    /* write user defined member groups */
+  QSharedPointer<NamespaceDef> self = sharedFrom(this);
+
    if (memberGroupSDict) {
      
       for (auto mg : *memberGroupSDict) {
          if ((! mg->allMembersInSameSection() || ! m_subGrouping) && mg->header() != "[NOHEADER]") {
-            mg->writeDeclarations(ol, 0, this, 0, 0);
+            mg->writeDeclarations(ol, QSharedPointer<ClassDef>(), self, QSharedPointer<FileDef>(), QSharedPointer<GroupDef>());
          }
       }
 
@@ -514,6 +525,8 @@ void NamespaceDef::addNamespaceAttributes(OutputList &ol)
 
 void NamespaceDef::writeDocumentation(OutputList &ol)
 {
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
+
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
 
    //static bool outputJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
@@ -522,7 +535,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
    QByteArray pageTitle = title();
    startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_NamespaceVisible, !generateTreeView);
 
-   if (!generateTreeView) {
+   if (! generateTreeView) {
       if (getOuterScope() != Doxygen::globalScope) {
          writeNavigationPath(ol);
       }
@@ -531,17 +544,17 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
 
    startTitle(ol, getOutputFileBase(), this);
    ol.parseText(pageTitle);
-   addGroupListToTitle(ol, this);
+   addGroupListToTitle(ol, self);
    addNamespaceAttributes(ol);
    endTitle(ol, getOutputFileBase(), displayName());
    ol.startContents();
 
    if (Doxygen::searchIndex) {
-      Doxygen::searchIndex->setCurrentDoc(this, anchor(), false);
+      Doxygen::searchIndex->setCurrentDoc(self, anchor(), false);
       Doxygen::searchIndex->addWord(localName(), true);
    }
 
-   Doxygen::indexList->addIndexItem(this, 0);
+   Doxygen::indexList->addIndexItem(self, QSharedPointer<MemberDef>());
 
    //---------------------------------------- start flexible part -------------------------------
 
@@ -639,7 +652,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
 
    ol.endContents();
 
-   endFileWithNavPath(this, ol);
+   endFileWithNavPath(self, ol);
 
    if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
       QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
@@ -654,14 +667,17 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
 
 void NamespaceDef::writeMemberPages(OutputList &ol)
 {
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
+
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
    for (auto ml : m_memberLists) {
       if (ml->listType()&MemberListType_documentationLists) {
-         ml->writeDocumentationPage(ol, displayName(), this);
+         ml->writeDocumentationPage(ol, displayName(), self);
       }
    }
+
    ol.popGeneratorState();
 }
 
@@ -767,21 +783,22 @@ QSharedPointer<Definition> NamespaceDef::findInnerCompound(const char *n)
 
 void NamespaceDef::addListReferences()
 {
-   //bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
-   {
-      QList<ListItemInfo> *xrefItems = xrefListItems();
-      addRefItem(xrefItems, qualifiedName(), 
-                 getLanguage() == SrcLangExt_Fortran ? theTranslator->trModule(true, true) : theTranslator->trNamespace(true, true),
-                 getOutputFileBase(), qPrintable(displayName()), 0, this );
-   }  
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
+   //bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+   
+   QList<ListItemInfo> *xrefItems = xrefListItems();
+   addRefItem(xrefItems, qualifiedName(), 
+                 getLanguage() == SrcLangExt_Fortran ? theTranslator->trModule(true, true) : theTranslator->trNamespace(true, true),
+                 getOutputFileBase(), qPrintable(displayName()), 0, self);
+     
    for (auto mg : *memberGroupSDict) {
-      mg->addListReferences(this);
+      mg->addListReferences(self);
    }
 
    for (auto ml : m_memberLists) {
       if (ml->listType()&MemberListType_documentationLists) {
-         ml->addListReferences(this);
+         ml->addListReferences(self);
       }
    }
 }
@@ -931,7 +948,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title, bool co
          if (! nd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
 
             ol.startMemberDescription(nd->getOutputFileBase());
-            ol.generateDoc(nd->briefFile(), nd->briefLine(), nd.data(), 0, nd->briefDescription(), false, false, 0, true);
+            ol.generateDoc(nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(), nd->briefDescription(), false, false, 0, true);
             ol.endMemberDescription();
          }
 
@@ -958,11 +975,13 @@ QSharedPointer<MemberList> NamespaceDef::createMemberList(MemberListType lt)
 
 void NamespaceDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 {  
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
+
    QSharedPointer<MemberList> ml = createMemberList(lt);
    ml->append(md);
 
    if (ml->listType() & MemberListType_declarationLists) {
-      md->setSectionList(this, ml);
+      md->setSectionList(self, ml);
    }
 }
 
@@ -979,19 +998,21 @@ QSharedPointer<MemberList> NamespaceDef::getMemberList(MemberListType lt) const
 
 void NamespaceDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title)
 {
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDeclarations(ol, 0, this, 0, 0, title, 0);
+      ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), self, QSharedPointer<FileDef>(), QSharedPointer<GroupDef>(), title, 0);
    }
 }
 
 void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title)
 {
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, qPrintable(displayName()), this, title);
+      ml->writeDocumentation(ol, qPrintable(displayName()), self, title);
    }
 }
 

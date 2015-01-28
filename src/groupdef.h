@@ -228,11 +228,10 @@ class GroupSDict : public StringMap<QSharedPointer<GroupDef>>
 
 void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd);
 void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDef> nd);
-void addGroupToGroups(QSharedPointer<Entry> root, GroupDef *subGroup);
+void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGroup);
 void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md);
-void addPageToGroups(Entry *root, PageDef *pd);
 void addExampleToGroups(Entry *root, QSharedPointer<PageDef> eg);
-void addDirToGroups(QSharedPointer<Entry> root, DirDef *dd);
+void addDirToGroups(QSharedPointer<Entry> root, QSharedPointer<DirDef> dd);
 
 #endif
 

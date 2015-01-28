@@ -1119,7 +1119,7 @@ void writeJavascriptSearchIndex()
  
                   auto nextIter = dl->begin();   
 
-                  for (auto &d : *dl)  {               // broom check -
+                  for (auto d : *dl)  {               
                      QSharedPointer<Definition> scope = d->getOuterScope();
 
                      ++nextIter;   

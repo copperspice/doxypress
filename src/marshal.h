@@ -23,34 +23,28 @@
 #include <QByteArray>
 #include <QString>
 
-#include <stringmap.h>
 #include <store.h>
 #include <section.h>
-#include <sortedlist.h>
 
 class ArgumentList;
-class ExampleSDict;
 class Entry;
-class MemberSDict;
 class MemberList;
 
 struct BaseInfo;
 struct Grouping;
 struct SectionInfo;
 struct ListItemInfo;
-struct BodyInfo;
-struct DocInfo;
 struct BriefInfo;
 
 #define NULL_LIST 0xffffffff
 
 //----- marshaling function: datatype -> byte stream --------------------
 
-void marshalInt(StorageIntf *s,    int v);
-void marshalUInt(StorageIntf *s,   uint v);
-void marshalUInt64(StorageIntf *s, uint64_t v);
-
-void marshalBool(StorageIntf *s, bool b);
+void marshalInt(StorageIntf *s,         int v);
+void marshalUInt(StorageIntf *s,        uint v);
+void marshalUInt64(StorageIntf *s,      uint64_t v);
+void marshalBool(StorageIntf *s,        bool b);
+void marshalObjPointer(StorageIntf *s,  void *obj);
 
 void marshalQByteArray(StorageIntf *s,      const QByteArray &str);
 void marshalQString(StorageIntf *s,         const QString &str);
@@ -63,25 +57,18 @@ void marshalGroupingList(StorageIntf *s,    QList<Grouping> *groups);
 void marshalSectionInfoList(StorageIntf *s, QList<SectionInfo> *anchors);
 void marshalItemInfoList(StorageIntf *s,    QList<ListItemInfo> *sli);
 
-void marshalObjPointer(StorageIntf *s,      void *obj);
-void marshalSectionDict(StorageIntf *s,     SectionDict *sections);
-void marshalMemberSDict(StorageIntf *s,     MemberSDict *memberSDict);
-void marshalDocInfo(StorageIntf *s,         DocInfo *docInfo);
 void marshalBriefInfo(StorageIntf *s,       BriefInfo *briefInfo);
-void marshalBodyInfo(StorageIntf *s,        BodyInfo *bodyInfo);
-void marshalGroupList(StorageIntf *s,       SortedList<GroupDef *> *groupList);
 void marshalMemberList(StorageIntf *s,      MemberList *ml);
-void marshalExampleSDict(StorageIntf *s,    ExampleSDict *ed);
-void marshalMemberLists(StorageIntf *s,     StringMap<QSharedPointer<MemberList>> *mls);
 void marshalEntry(StorageIntf *s,           QSharedPointer<Entry> e);
 void marshalEntryTree(StorageIntf *s,       QSharedPointer<Entry> e);
 
-//----- unmarshaling function: byte stream -> datatype ------------------
 
+// ** unmarshaling functions
 int                  unmarshalInt(StorageIntf *s);
 uint                 unmarshalUInt(StorageIntf *s);
 uint64_t             unmarshalUInt64(StorageIntf *s);
 bool                 unmarshalBool(StorageIntf *s);
+void                *unmarshalObjPointer(StorageIntf *s);
 
 QByteArray           unmarshalQByteArray(StorageIntf *s);
 QByteArray           unmarshalQGString(StorageIntf *s);
@@ -94,21 +81,8 @@ QList<Grouping>     *unmarshalGroupingList(StorageIntf *s);
 QList<SectionInfo> *unmarshalSectionInfoList(StorageIntf *s);
 QList<ListItemInfo> *unmarshalItemInfoList(StorageIntf *s);
 
-void                *unmarshalObjPointer(StorageIntf *s);
-
-SectionDict         *unmarshalSectionDict(StorageIntf *s);
-MemberSDict         *unmarshalMemberSDict(StorageIntf *s);
-
-DocInfo             *unmarshalDocInfo(StorageIntf *s);
 BriefInfo           *unmarshalBriefInfo(StorageIntf *s);
-BodyInfo            *unmarshalBodyInfo(StorageIntf *s);
-
-SortedList<GroupDef *> *unmarshalGroupList(StorageIntf *s);
-
 MemberList          *unmarshalMemberList(StorageIntf *s);
-ExampleSDict        *unmarshalExampleSDict(StorageIntf *s);
-
-StringMap<QSharedPointer<MemberList>> *unmarshalMemberLists(StorageIntf *s);
 
 QSharedPointer<Entry> unmarshalEntry(StorageIntf *s);
 QSharedPointer<Entry> unmarshalEntryTree(StorageIntf *s);

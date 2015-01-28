@@ -19,6 +19,7 @@
 
 #include <classdef.h>
 #include <doxygen.h>
+#include <doxy_globals.h>
 #include <docparser.h>
 #include <entry.h>
 #include <filedef.h>
@@ -31,18 +32,14 @@
 #include <outputlist.h>
 #include <util.h>
 
-#include <doxy_globals.h>
-
 MemberGroup::MemberGroup()
 {
 }
 
-// broom check
-
 MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const char *hdr, const char *d, const char *docFile)
    : m_parent(parent)
 {   
-   memberList      = new MemberList(MemberListType_memberGroup);
+   memberList      = QMakeShared<MemberList>(MemberListType_memberGroup);
    grpId           = id;
    grpHeader       = hdr;
    doc             = d;
@@ -56,8 +53,7 @@ MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const char *
 }
 
 MemberGroup::~MemberGroup()
-{
-   delete memberList;
+{   
 }
 
 void MemberGroup::insertMember(QSharedPointer<MemberDef> md)
@@ -110,13 +106,13 @@ void MemberGroup::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef
    memberList->writePlainDeclarations(ol, cd, nd, fd, gd, inheritedFrom, inheritId);
 }
 
-void MemberGroup::writeDocumentation(OutputList &ol, const char *scopeName, Definition *container, 
+void MemberGroup::writeDocumentation(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container, 
                   bool showEnumValues, bool showInline)
 {
    memberList->writeDocumentation(ol, scopeName, container, 0, showEnumValues, showInline);
 }
 
-void MemberGroup::writeDocumentationPage(OutputList &ol, const char *scopeName, Definition *container)
+void MemberGroup::writeDocumentationPage(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container)
 {
    memberList->writeDocumentationPage(ol, scopeName, container);
 }
@@ -161,7 +157,7 @@ void MemberGroup::addToDeclarationSection()
    }
 }
 
-int MemberGroup::countDecMembers(GroupDef *gd)
+int MemberGroup::countDecMembers(QSharedPointer<GroupDef> gd)
 {
    if (m_numDecMembers == -1) { 
       /* number of member not cached */
@@ -296,6 +292,9 @@ void MemberGroup::findSectionsInDocumentation()
 
 void MemberGroup::marshal(StorageIntf *s)
 {
+   printf("\n\n  BROOM  - Reached MemberGroup::marshall");
+   
+/*
    marshalMemberList(s, memberList);
    marshalObjPointer(s, inDeclSection.data()); // reference only
    marshalInt(s, grpId);
@@ -309,10 +308,15 @@ void MemberGroup::marshal(StorageIntf *s)
    marshalObjPointer(s, m_parent);
    marshalQByteArray(s, m_docFile);
    marshalItemInfoList (Doxygen::symbolStorage, m_xrefListItems);
+*/
+
 }
 
 void MemberGroup::unmarshal(StorageIntf *s)
 {
+   printf("\n\n  BROOM  - Reached MemberGroup::unmarshall");
+
+/*
    memberList      = unmarshalMemberList(s);
    inDeclSection   = QSharedPointer<MemberList>((MemberList *)unmarshalObjPointer(s));
    grpId           = unmarshalInt(s);
@@ -326,6 +330,8 @@ void MemberGroup::unmarshal(StorageIntf *s)
    m_parent        = unmarshalObjPointer(s).dynamicCast<Definition>();
    m_docFile       = unmarshalQByteArray(s);
    m_xrefListItems = unmarshalItemInfoList (Doxygen::symbolStorage);
+*/
+
 }
 
 void MemberGroup::setRefItems(const QList<ListItemInfo> *sli)

@@ -206,15 +206,16 @@ class MemberDef : public Definition
 
    QSharedPointer<MemberDef> reimplements() const;
    MemberList *reimplementedBy() const;
-   bool isReimplementedBy(ClassDef *cd) const;
+   bool isReimplementedBy(QSharedPointer<ClassDef> cd) const;
  
    QSharedPointer<ClassDef> relatedAlso() const;
 
    bool hasDocumentedEnumValues() const;
-   MemberDef *getAnonymousEnumType() const;
+   QSharedPointer<MemberDef> getAnonymousEnumType() const;
    bool isDocsForDefinition() const;
    QSharedPointer<MemberDef> getEnumScope() const;
-   MemberList *enumFieldList() const;
+   QSharedPointer<MemberList> enumFieldList() const;
+
    void setEnumBaseType(const QByteArray &type);
    QByteArray enumBaseType() const;
 
@@ -234,7 +235,7 @@ class MemberDef : public Definition
 
    bool fromAnonymousScope() const;
    bool anonymousDeclShown() const;
-   MemberDef *fromAnonymousMember() const;
+   QSharedPointer<MemberDef> fromAnonymousMember() const;
 
    // callgraph related members
    bool hasCallGraph() const;
@@ -256,12 +257,12 @@ class MemberDef : public Definition
    QSharedPointer<MemberDef> inheritsDocsFrom() const;
    QSharedPointer<MemberDef> getGroupAlias() const;
 
-   ClassDef *category() const;
-   MemberDef *categoryRelation() const;
+   QSharedPointer<ClassDef> category() const;
+   QSharedPointer<MemberDef> categoryRelation() const;
 
    QString displayName(bool = true) const override;
    QByteArray getDeclType() const;
-   void getLabels(QStringList &sl, Definition *container) const;
+   void getLabels(QStringList &sl, QSharedPointer<Definition> container) const;
 
    const ArgumentList *typeConstraints() const;
 
@@ -287,10 +288,11 @@ class MemberDef : public Definition
    void setBitfields(const char *s);
    void setMaxInitLines(int lines);
    void setMemberClass(QSharedPointer<ClassDef> cd);
-   void setSectionList(Definition *d, QSharedPointer<MemberList> sl);
+   void setSectionList(QSharedPointer<Definition> d, QSharedPointer<MemberList> sl);
 
    void setGroupDef(QSharedPointer<GroupDef> gd, Grouping::GroupPri_t pri,
-                    const QByteArray &fileName, int startLine, bool hasDocs, MemberDef *member = 0);
+                    const QByteArray &fileName, int startLine, bool hasDocs, 
+                    QSharedPointer<MemberDef> member = QSharedPointer<MemberDef>());
 
    void setExplicitExternal(bool b);
    void setReadAccessor(const char *r);
@@ -345,13 +347,13 @@ class MemberDef : public Definition
 
    // anonymous scope members
    void setFromAnonymousScope(bool b);
-   void setFromAnonymousMember(MemberDef *m);
+   void setFromAnonymousMember(QSharedPointer<MemberDef> m);
 
    void enableCallGraph(bool e);
    void enableCallerGraph(bool e);
 
    void setTemplateMaster(QSharedPointer<MemberDef> mt);
-   void addListReference(Definition *d);
+   void addListReference(QSharedPointer<Definition> d);
    void setDocsForDefinition(bool b);
    void setGroupAlias(QSharedPointer<MemberDef> md);
 
@@ -386,11 +388,15 @@ class MemberDef : public Definition
                  bool inGroup, QSharedPointer<ClassDef> inheritFrom = QSharedPointer<ClassDef>(), 
                  const char *inheritId = 0);
 
-   void writeDocumentation(MemberList *ml, OutputList &ol, const char *scopeName, Definition *container,
+   void writeDocumentation(MemberList *ml, OutputList &ol, const char *scopeName, QSharedPointer<Definition> container,
                  bool inGroup, bool showEnumValues = false, bool showInline = false);
 
-   void writeMemberDocSimple(OutputList &ol, Definition *container);
-   void writeEnumDeclaration(OutputList &typeDecl, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd);
+   void writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> container);
+
+   void writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassDef> cd, 
+                             QSharedPointer<NamespaceDef> nd, QSharedPointer<FileDef> fd, 
+                             QSharedPointer<GroupDef> gd);
+
    void writeTagFile(QTextStream &);
    void warnIfUndocumented();
 
@@ -422,7 +428,7 @@ class MemberDef : public Definition
    void _writeExamples(OutputList &ol);
    void _writeTypeConstraints(OutputList &ol);
 
-   void _writeEnumValues(OutputList &ol, Definition *container,
+   void _writeEnumValues(OutputList &ol, QSharedPointer<Definition> container,
                          const QByteArray &cfname, const QByteArray &ciname, const QByteArray &cname);
 
    void _writeCategoryRelation(OutputList &ol);
@@ -431,7 +437,8 @@ class MemberDef : public Definition
 
    static int s_indentLevel;
     
-   void writeLink(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd, bool onlyText = false);
+   void writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
+                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool onlyText = false);
 
    // unsure if this is needed
    MemberDef &operator=(const MemberDef &);

@@ -761,12 +761,14 @@ void FileDef::writeDocumentation(OutputList &ol)
 
 void FileDef::writeMemberPages(OutputList &ol)
 {
+   QSharedPointer<FileDef> self = sharedFrom(this);
+
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
   
    for (auto ml : m_memberLists) {
       if (ml->listType()&MemberListType_documentationLists) {
-         ml->writeDocumentationPage(ol, name(), this);
+         ml->writeDocumentationPage(ol, name(), self);
       }
    }
 
@@ -1505,6 +1507,8 @@ QSharedPointer<MemberList> FileDef::createMemberList(MemberListType lt)
 
 void FileDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 {
+   QSharedPointer<FileDef> self = sharedFrom(this);
+
    QSharedPointer<MemberList> ml = createMemberList(lt);  
    ml->append(md);
 
@@ -1513,7 +1517,7 @@ void FileDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
    }
 
    if (ml->listType() & MemberListType_declarationLists) {
-      md->setSectionList(this, ml);
+      md->setSectionList(self, ml);
    }
 }
 
@@ -1541,10 +1545,11 @@ void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const Q
 
 void FileDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title)
 {
+   QSharedPointer<FileDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, name(), this, title);
+      ml->writeDocumentation(ol, name(), self, title);
    }
 }
 

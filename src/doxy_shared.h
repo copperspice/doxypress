@@ -48,7 +48,8 @@ QSharedPointer<typename std::enable_if<std::is_base_of<EnableSharedFromThis, T>:
       retval = item->toStrongRef().template dynamicCast<T>();
 
    } else {
-      throw "broom";   // broom
+      std::string className = typeid(T).name();
+      throw std::runtime_error("CS Doxygen::SharedFrom() Class " + className + " was not registerd" );
    }
   
    return retval;   

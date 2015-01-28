@@ -1838,11 +1838,13 @@ void PerlModGenerator::generatePerlModForMember(MemberDef *md, Definition *)
    }
 
    if (md->memberType() == MemberType_Enumeration) { // enum
-      MemberList *enumFields = md->enumFieldList();
+      QSharedPointer<MemberList> enumFields = md->enumFieldList();
+
       if (enumFields) {
          m_output.openList("values");
          QListIterator<MemberDef> emli(*enumFields);
          MemberDef *emd;
+
          for (emli.toFirst(); (emd = emli.current()); ++emli) {
             m_output.openHash()
             .addFieldQuotedString("name", emd->name());

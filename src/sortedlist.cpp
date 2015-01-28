@@ -59,7 +59,7 @@ int compareValues(const ClassDef *item1, const ClassDef *item2)
 }
 
 // DirList ->  SortedList<DirDef *>
-int compareValues(QSharedPointer<const DirDef> item1, QSharedPointer<const DirDef> item2)
+int compareValues(QSharedPointer<DirDef> item1, QSharedPointer<DirDef> item2)
 {
     return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
 }
@@ -73,7 +73,7 @@ int compareValues(const DotNode *item1, const DotNode *item2)
 
 
 // FileList 
-int compareValues(QSharedPointer<const FileDef> md1, QSharedPointer<const FileDef> md2) 
+int compareValues(QSharedPointer<FileDef> md1, QSharedPointer<FileDef> md2) 
 {
    return qstricmp(md1->name(), md2->name());
 }
@@ -100,7 +100,7 @@ int compareValues(const FileName *item1, const FileName *item2)
 //   GroupList --> SortedList<GroupDef *>
 //   GroupListIterator --> QListIterator<GroupDef *>
 
-int compareValues(const GroupDef *item1, const GroupDef *item2) 
+int compareValues(QSharedPointer<GroupDef> item1, QSharedPointer<GroupDef> item2) 
 {
    return qstrcmp(item1->groupTitle(), item2->groupTitle());
 }
@@ -108,7 +108,7 @@ int compareValues(const GroupDef *item1, const GroupDef *item2)
 
 // MemberList
 
-int compareValues(const MemberDef *c1, const MemberDef *c2)
+int compareValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2)
 {
    static bool sortConstructorsFirst = Config_getBool("SORT_MEMBERS_CTORS_1ST");
 

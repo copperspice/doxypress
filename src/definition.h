@@ -278,7 +278,7 @@ class Definition : public DefinitionIntf
    virtual void setName(const char *name);
 
    /*! Sets a unique id for the symbol. Used for libclang integration. */
-   void setId(const char *name, QSharedPointer<Definition> self);
+   void setId(const char *name);
 
    /*! Sets the documentation of this definition to \a d. */
    virtual void setDocumentation(const char *d, const char *docFile, int docLine, bool stripWhiteSpace = true);
@@ -300,7 +300,7 @@ class Definition : public DefinitionIntf
    /*! Add the list of anchors that mark the sections that are found in the
     * documentation.
     */
-   void addSectionsToDefinition(QList<SectionInfo> *anchorList, QSharedPointer<Definition> self);
+   void addSectionsToDefinition(QList<SectionInfo> *anchorList);
 
    // source references
    void setBodySegment(int bls, int ble);
@@ -327,7 +327,7 @@ class Definition : public DefinitionIntf
    QString convertNameToFile(const char *name, bool allowDots = false) const;
 
    void writeSourceDef(OutputList &ol, const char *scopeName);
-   void writeInlineCode(OutputList &ol, const char *scopeName, QSharedPointer<Definition> self);
+   void writeInlineCode(OutputList &ol, const char *scopeName);
    void writeSourceRefs(OutputList &ol, const char *scopeName);
    void writeSourceReffedBy(OutputList &ol, const char *scopeName);
    void makePartOfGroup(QSharedPointer<GroupDef> gd);

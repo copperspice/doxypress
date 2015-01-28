@@ -6875,10 +6875,6 @@ void DocRoot::parse()
       bool divFound = false;
       int tok = doctokenizerYYlex();
 
-
-printf("\n  BROOM  DocRoot::Parse  %d",  tok );
-
-
       if (tok == TK_HTMLTAG) {
 
          int tagId = Mappers::htmlTagMapper->map(g_token->name);
@@ -7135,20 +7131,14 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<
 {  
    // store parser state so we can re-enter this function if needed
 
-
-printf("\n BROOM  *** validate parser doc  PRE  1 ");
-
-
    // bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
    docParserPushContext();
-
-printf("\n BROOM  *** validate parser doc  PRE  2 ");
 
 
 if (ctx)  {
    printf("\n BROOM  *** validate parser doc  what is CTX  %x ", ctx.data() );
 
-   int temp = ctx->definitionType() ;
+   int temp = ctx->definitionType();
    printf("\n BROOM  *** validate parser doc  DefinitionType =  %d ",  temp );
 }
 

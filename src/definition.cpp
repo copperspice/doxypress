@@ -208,6 +208,8 @@ static bool matchExcludedSymbols(const char *name)
    return false;
 }
 
+extern bool dirtyBroom;
+
 void Definition::addToMap(const QByteArray &name)
 {   
    QByteArray symbolName = name;
@@ -218,7 +220,15 @@ void Definition::addToMap(const QByteArray &name)
    }
 
    if (! symbolName.isEmpty()) {                       
-      Doxygen::symbolMap.insertMulti(symbolName, this);    
+
+
+if (dirtyBroom) {
+   Doxygen::symbolMap.insertMulti(symbolName, this);    
+
+}  else {
+   printf("\n Mising Symbol Name: %s", symbolName.constData() );
+
+}
                 
       this->setSymbolName(symbolName);
    }
@@ -350,16 +360,14 @@ void Definition::setName(const char *name)
    m_name = name;
 }
 
-void Definition::setId(const char *id, QSharedPointer<Definition> self)
+void Definition::setId(const char *id)
 {
+   QSharedPointer<Definition> self = sharedFrom(this);
+
    if (id == 0) {
       return;
    }
-
-   if (self != this) {
-      throw "broom";          // broom
-   }
-
+  
    m_impl->id = id; 
    Doxygen::clangUsrMap.insert(id, self);
 }
@@ -369,11 +377,9 @@ QByteArray Definition::id() const
    return m_impl->id;
 }
 
-void Definition::addSectionsToDefinition(QList<SectionInfo> *anchorList, QSharedPointer<Definition> self)
+void Definition::addSectionsToDefinition(QList<SectionInfo> *anchorList)
 {
-   if (self != this) {
-      throw "broom";          // broom
-   }
+   QSharedPointer<Definition> self = sharedFrom(this);
 
    if (! anchorList) {
       return;
@@ -985,11 +991,9 @@ bool Definition::hasSources() const
 }
 
 /*! Write code of this definition into the documentation */
-void Definition::writeInlineCode(OutputList &ol, const char *scopeName, QSharedPointer<Definition> self)
+void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
 {
-   if (self != this) {
-      throw "broom";          // broom
-   }
+   QSharedPointer<Definition> self = sharedFrom(this);
 
    static bool inlineSources = Config_getBool("INLINE_SOURCES");
    ol.pushGeneratorState();

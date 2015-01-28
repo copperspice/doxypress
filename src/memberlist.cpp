@@ -73,15 +73,15 @@ MemberList::~MemberList()
    delete memberGroupList;
 }
 
-void MemberList::append(MemberDef *md)
+void MemberList::append(QSharedPointer<MemberDef> md)
 {
-   SortedList<MemberDef *>::append(md);
+   SortedList<QSharedPointer<MemberDef>>::append(md);
 }
 
 // insert after position index (not a key based insert)
-void MemberList::insert(uint index, MemberDef *md)
+void MemberList::insert(uint index, QSharedPointer<MemberDef> md)
 {
-   SortedList<MemberDef *>::insert(index, md);   
+   SortedList<QSharedPointer<MemberDef>>::insert(index, md);   
 }
 
 int MemberList::countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) const
@@ -94,7 +94,7 @@ int MemberList::countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) 
          if (md->memberType() != MemberType_Friend && md->memberType() != MemberType_EnumValue) {
             
             if (md->memberType() == MemberType_Function) {
-               if (!md->isReimplementedBy(inheritedFrom)) {
+               if (! md->isReimplementedBy(inheritedFrom)) {
                   count++;
                }
             } else {
@@ -117,7 +117,7 @@ int MemberList::countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) 
 /*! Count the number of members in this list that are visible in
  *  the declaration part of a compound's documentation page.
  */
-void MemberList::countDecMembers(bool countEnumValues, GroupDef *gd)
+void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> gd)
 {
    if (m_numDecMembers != -1) {
       return;
@@ -129,7 +129,7 @@ void MemberList::countDecMembers(bool countEnumValues, GroupDef *gd)
    m_numDecMembers = 0;
 
    for (auto md : *this) {
-      //printf("MemberList::countDecMembers(md=%s,%d)\n",md->name().data(),md->isBriefSectionVisible());
+      
       if (md->isBriefSectionVisible()) {
          switch (md->memberType()) {
             case MemberType_Variable:    // fall through
@@ -477,15 +477,14 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
  */
 void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, const char *title, const char *subtitle, 
-                  bool showEnumValues, bool showInline, ClassDef *inheritedFrom, MemberListType lt)
-{
-   (void)showEnumValues; // unused
-   
+                  bool showEnumValues, bool showInline, QSharedPointer<ClassDef> inheritedFrom, MemberListType lt)
+{   
    QByteArray inheritId;
 
-   countDecMembers(/*showEnumValues*/false, gd); // count members shown in this section
+   countDecMembers(false, gd); // count members shown in this section
 
-   Definition *ctx = cd;
+   QSharedPointer<Definition> ctx = cd;
+
    if (ctx == 0 && nd) {
       ctx = nd;
    }
@@ -509,7 +508,8 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
          inheritId = substitute(listTypeAsString(lt), "-", "_") + "_" + stripPath(cd->getOutputFileBase());
 
          if (title) {
-            ol.writeInheritedSectionTitle(inheritId, cd->getReference(), cd->getOutputFileBase(), cd->anchor(), title, qPrintable(cd->displayName()) );
+            ol.writeInheritedSectionTitle(inheritId, cd->getReference(), cd->getOutputFileBase(), 
+                                          cd->anchor(), title, qPrintable(cd->displayName()) );
          }
 
          ol.popGeneratorState();
@@ -536,9 +536,10 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
       if (subtitle) {
          QByteArray st = subtitle;
          st = st.trimmed();
+
          if (!st.isEmpty()) {
             ol.startMemberSubtitle();
-            ol.generateDoc("[generated]", -1, ctx, 0, subtitle, false, false, 0, false, false);
+            ol.generateDoc("[generated]", -1, ctx, QSharedPointer<MemberDef>(), subtitle, false, false, 0, false, false);
             ol.endMemberSubtitle();
          }
       }
@@ -574,7 +575,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
                if (! mg.documentation().isEmpty()) {
                   //printf("Member group has docs!\n");
                   ol.startMemberGroupDocs();
-                  ol.generateDoc("[generated]", -1, ctx, 0, mg.documentation() + "\n", false, false);
+                  ol.generateDoc("[generated]", -1, ctx, QSharedPointer<MemberDef>(), mg.documentation() + "\n", false, false);
                   ol.endMemberGroupDocs();
                }
                ol.startMemberGroup();
@@ -596,7 +597,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
    
 }
 
-void MemberList::writeDocumentation(OutputList &ol, const char *scopeName, Definition *container,
+void MemberList::writeDocumentation(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container,
                                     const char *title, bool showEnumValues, bool showInline)
 {
    countDocMembers(showEnumValues);
@@ -631,7 +632,7 @@ void MemberList::writeDocumentation(OutputList &ol, const char *scopeName, Defin
 }
 
 // members in a table
-void MemberList::writeSimpleDocumentation(OutputList &ol, Definition *container)
+void MemberList::writeSimpleDocumentation(OutputList &ol, QSharedPointer<Definition> container)
 {
    countDocMembers(false);
    
@@ -648,7 +649,7 @@ void MemberList::writeSimpleDocumentation(OutputList &ol, Definition *container)
 }
 
 // separate member pages
-void MemberList::writeDocumentationPage(OutputList &ol, const char *scopeName, Definition *container)
+void MemberList::writeDocumentationPage(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container)
 {
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
   
@@ -714,13 +715,10 @@ void MemberList::addListReferences(QSharedPointer<Definition> def)
       if (md->getGroupDef() == 0 || def->definitionType() == Definition::TypeGroup) {
 
          md->addListReference(def);
-         MemberList *enumFields = md->enumFieldList();
+         QSharedPointer<MemberList> enumFields = md->enumFieldList();
 
-         if (md->memberType() == MemberType_Enumeration && enumFields) {
-            //printf("  Adding enum values!\n");
-           
-            for (auto vmd : *enumFields) {   
-               //printf("   adding %s\n",vmd->name().data());
+         if (md->memberType() == MemberType_Enumeration && enumFields) {                      
+            for (auto vmd : *enumFields) {                  
                vmd->addListReference(def);
             }
          }
@@ -749,6 +747,9 @@ void MemberList::findSectionsInDocumentation()
 
 void MemberList::marshal(StorageIntf *s)
 {
+   printf("\n\n  BROOM  - Reached MemberList::marshall");
+
+/*
    marshalInt(s, (int)m_listType);
    marshalInt(s, m_varCnt);
    marshalInt(s, m_funcCnt);
@@ -773,10 +774,15 @@ void MemberList::marshal(StorageIntf *s)
          mg.marshal(s);
       }
    }
+*/
+
 }
 
 void MemberList::unmarshal(StorageIntf *s)
 {
+   printf("\n\n  BROOM  - Reached MemberList::unmarshall");
+
+/*
    m_listType       = (MemberListType)unmarshalInt(s);
    m_varCnt         = unmarshalInt(s);
    m_funcCnt        = unmarshalInt(s);
@@ -806,6 +812,8 @@ void MemberList::unmarshal(StorageIntf *s)
          memberGroupList->append(*mg);
       }
    }
+*/
+
 }
 
 QByteArray MemberList::listTypeAsString(MemberListType type)
@@ -924,9 +932,7 @@ void MemberList::writeTagFile(QTextStream &tagFile)
    }
 }
 
-//--------------------------------------------------------------------------
-
-int MemberSDict::compareValues(const MemberDef *c1, const MemberDef *c2) const
+int MemberSDict::compareValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2) const
 {
    int cmp = qstricmp(c1->name(), c2->name());
 

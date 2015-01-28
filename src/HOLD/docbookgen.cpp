@@ -490,7 +490,7 @@ static void generateDocbookForMember(MemberDef *md, FTextStream &t, Definition *
       //enum
       bool closePara = true;
       if (md->memberType() == MemberType_Enumeration) {
-         MemberList *enumFields = md->enumFieldList();
+         QSharedPointer<MemberList> enumFields = md->enumFieldList();
 
          t << "                            <para><literallayout>" << memType << " <link linkend=\"";
 
@@ -630,15 +630,20 @@ static void generateDocbookForMember(MemberDef *md, FTextStream &t, Definition *
       t << "                    </listitem>" << endl;
       t << "                </itemizedlist>" << endl;
       t << "            </para>" << endl;
+
    } else {
+
       if (md->memberType() == MemberType_Enumeration) {
-         MemberList *enumFields = md->enumFieldList();
+         QSharedPointer<MemberList> enumFields = md->enumFieldList();
+
          t << "            <section xml:id=\"";
+
          if (md->getGroupDef() && def->definitionType() == Definition::TypeGroup) {
             t << md->getGroupDef()->getOutputFileBase();
          } else {
             t << memberOutputFileBase(md);
          }
+
          t << "_1" << md->anchor() << "\">" << endl;
          t << "               <title>" << memType << " " << convertToXML(md->name()) << " " << "</title>" << endl;
          t << "               ";
@@ -1018,7 +1023,7 @@ static void writeInnerGroups(const SortedList<GroupDef *> *gl, FTextStream &t)
    }
 }
 
-static void writeInnerDirs(const SortedList<DirDef *> *dl, FTextStream &t)
+static void writeInnerDirs(const SortedList<QSharedPointer<DirDef>> dl, FTextStream &t)
 {
    if (dl) {
       QListIterator<DirDef> subdirs(*dl);
@@ -1553,7 +1558,7 @@ static void generateDocbookForDir(DirDef *dd, FTextStream &ti)
       dirdepGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config_getString("DOCBOOK_OUTPUT"), fileName, relPath, false);
    }
 
-   writeInnerDirs(&dd->subDirs(), t);
+   writeInnerDirs(dd->subDirs(), t);
    writeInnerFiles(dd->getFiles(), t);
 
    t << "    <simplesect>" << endl;

@@ -1241,7 +1241,7 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
-         MemberList *ml = getMemberList(lmd->type);
+         QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
             ol.writeSummaryLink(QString(""), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
@@ -1332,7 +1332,8 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::MemberDecl: {
             LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
-            MemberList *ml = getMemberList(lmd->type);
+            QSharedPointer<MemberList> ml = getMemberList(lmd->type);
+
             if (ml) {
                ml->writeTagFile(tagFile);
             }
@@ -1834,16 +1835,17 @@ void ClassDef::writeDocumentation(OutputList &ol)
 
 void ClassDef::writeMemberPages(OutputList &ol)
 {  
-   // Member definitions on separate pages
-  
+   QSharedPointer<ClassDef> self = sharedFrom(this);
+
+   // Member definitions on separate pages  
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
    
    for (auto ml : m_memberLists) {
       ml->countDocMembers();
 
-      if (ml->numDocMembers() > 0 && (ml->listType()&MemberListType_detailedLists)) {
-         ml->writeDocumentationPage(ol, qPrintable(displayName()), this);
+      if (ml->numDocMembers() > 0 && (ml->listType() & MemberListType_detailedLists)) {
+         ml->writeDocumentationPage(ol, qPrintable(displayName()), self);
       }
    }
 
@@ -3407,52 +3409,53 @@ QSharedPointer<MemberList> ClassDef::createMemberList(MemberListType lt)
    return ml;
 }
 
-MemberList *ClassDef::getMemberList(MemberListType lt)
+QSharedPointer<MemberList> ClassDef::getMemberList(MemberListType lt)
 {  
    for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
-         return ml.data();
+         return ml;
       }
    }
-   return 0;
+
+   return QSharedPointer<MemberList>();
 }
 
 void ClassDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md, bool isBrief)
 {
+   QSharedPointer<ClassDef> self = sharedFrom(this);
+
    QSharedPointer<MemberList> ml = createMemberList(lt); 
    ml->append(md);
 
    // for members in the declaration lists we set the section, needed for member grouping
    if ((ml->listType() & MemberListType_detailedLists) == 0) {
-      md->setSectionList(this, ml);
+      md->setSectionList(self, ml);
    }
 }
 
 int ClassDef::countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
                                       int lt2, bool invert, bool showAlways, QHash<void *, void *> *visitedClasses)
 {
-   //printf("%s: countMemberDeclarations for %d and %d\n",name().data(),lt,lt2);
    int count = 0;
 
-   MemberList *ml  = getMemberList(lt);
-   MemberList *ml2 = getMemberList((MemberListType)lt2);
-
+   QSharedPointer<MemberList> ml  = getMemberList(lt);
+   QSharedPointer<MemberList> ml2 = getMemberList((MemberListType)lt2);
 
    if (ml) {
       ml->countDecMembers();
-      count += ml->numDecMembers();
-      //printf("-> ml=%d\n",ml->numDecMembers());
+      count += ml->numDecMembers();     
    }
+
    if (ml2) {
       ml2->countDecMembers();
       count += ml2->numDecMembers();
-      //printf("-> ml2=%d\n",ml2->numDecMembers());
    }
 
    // also include grouped members that have their own section in the class (see bug 722759)
    if (inheritedFrom && m_memberGroupSDict) {       
       for (auto mg : *m_memberGroupSDict) {  
          count += mg->countGroupedInheritedMembers(lt);
+
          if (lt2 != 1) {
             count += mg->countGroupedInheritedMembers((MemberListType)lt2);
          }
@@ -3564,7 +3567,7 @@ void ClassDef::writeAdditionalInheritedMembers(OutputList &ol)
 int ClassDef::countMembersIncludingGrouped(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool additional)
 {
    int count = 0;
-   MemberList *ml = getMemberList(lt);
+   QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
       count = ml->countInheritableMembers(inheritedFrom);
@@ -3636,8 +3639,8 @@ void ClassDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const 
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   MemberList *ml  = getMemberList(lt);
-   MemberList *ml2 = getMemberList((MemberListType)lt2);
+   QSharedPointer<MemberList> ml  = getMemberList(lt);
+   QSharedPointer<MemberList> ml2 = getMemberList((MemberListType)lt2);
       
    QByteArray tt = title;
    QByteArray st = subTitle;
@@ -3681,19 +3684,21 @@ void ClassDef::addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSh
 
 void ClassDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title, bool showInline)
 { 
-   MemberList *ml = getMemberList(lt);
+   QSharedPointer<ClassDef> self = sharedFrom(this);
+   QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, qPrintable(displayName()), this, title, false, showInline); 
+      ml->writeDocumentation(ol, qPrintable(displayName()), self, title, false, showInline); 
    }
 }
 
 void ClassDef::writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt)
 { 
-   MemberList *ml = getMemberList(lt);
+   QSharedPointer<ClassDef> self = sharedFrom(this);
+   QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeSimpleDocumentation(ol, this);
+      ml->writeSimpleDocumentation(ol, self);
    }
 }
 
@@ -3701,7 +3706,7 @@ void ClassDef::writePlainMemberDeclaration(OutputList &ol, MemberListType lt, bo
                                            QSharedPointer<ClassDef> inheritedFrom, const char *inheritId)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
-   MemberList *ml = getMemberList(lt);
+   QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
       ml->setInGroup(inGroup);

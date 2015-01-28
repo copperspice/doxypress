@@ -71,11 +71,10 @@ QCache<QString, LookupInfo>     *Doxygen::lookupCache;
 QHash<QString, void *>           Doxygen::inputPaths;
 QHash<QString, void *>           Doxygen::expandAsDefinedDict;                        // all macros that should be expanded
 
-QHash<QString, Definition *> Doxygen::symbolMap; 
-QHash<QString, QSharedPointer<Definition>> Doxygen::clangUsrMap;
-
 QHash<QString, RefList>         *Doxygen::xrefLists = new QHash<QString, RefList>;    // dictionary of cross-referenced item lists
 QHash<QString, int>             *Doxygen::htmlDirMap = 0;
+
+QHash<QString, QSharedPointer<Definition>> Doxygen::clangUsrMap;
 
 QHash<long, QSharedPointer<MemberGroupInfo>> Doxygen::memGrpInfoDict;                 // dictionary of the member groups heading
 StringMap<QSharedPointer<DirRelation>>       Doxygen::dirRelations;
@@ -122,3 +121,9 @@ Statistics Doxy_Globals::g_stats;
 
 bool Doxy_Globals::g_successfulRun     = false;
 bool Doxy_Globals::g_dumpSymbolMap     = false;
+
+
+QMap<const EnableSharedFromThis *, QWeakPointer<EnableSharedFromThis>> EnableSharedFromThis::m_selfMap;
+
+
+QHash<QString, Definition *> Doxygen::symbolMap; 

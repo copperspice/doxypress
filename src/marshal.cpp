@@ -70,7 +70,7 @@ void marshalQByteArray(StorageIntf *s, const QByteArray &str)
    marshalUInt(s, l);
 
    if (l > 0) {
-      s->write(str.data(), l);
+      s->write(str.constData(), l);
    }
 }
 
@@ -177,55 +177,6 @@ void marshalObjPointer(StorageIntf *s, void *obj)
    s->write(b, sizeof(void *));
 }
 
-void marshalSectionDict(StorageIntf *s, SectionDict *sections)
-{
-   if (sections == 0) {
-      marshalUInt(s, NULL_LIST); 
-
-   } else {
-      marshalUInt(s, sections->count());
-     
-      for (auto item = sections->begin(); item != sections->end(); ++item) {
-         marshalQString(s, item.key());
-         marshalObjPointer(s, item.value().data() );
-      }
-   }
-}
-
-void marshalMemberSDict(StorageIntf *s, MemberSDict *memberSDict)
-{
-   if (memberSDict == 0) {
-      marshalUInt(s, NULL_LIST); 
-
-   } else {
-      marshalUInt(s, memberSDict->count());
- 
-      MemberDef *md;
-      int count = 0;
-
-      for (auto item = memberSDict->begin(); item != memberSDict->end(); ++item) {
-         marshalQString(s, item.key());
-         marshalObjPointer(s, item.value().data());
-         count++;
-      }
-
-      assert(count == memberSDict->count());
-   }
-}
-
-void marshalDocInfo(StorageIntf *s, DocInfo *docInfo)
-{
-   if (docInfo == 0) {
-      marshalUInt(s, NULL_LIST); 
-
-   } else {
-      marshalUInt(s, 1);
-      marshalQByteArray(s, docInfo->doc);
-      marshalInt(s, docInfo->line);
-      marshalQByteArray(s, docInfo->file);
-   }
-}
-
 void marshalBriefInfo(StorageIntf *s, BriefInfo *briefInfo)
 {
    if (briefInfo == 0) {
@@ -240,35 +191,11 @@ void marshalBriefInfo(StorageIntf *s, BriefInfo *briefInfo)
    }
 }
 
-void marshalBodyInfo(StorageIntf *s, BodyInfo *bodyInfo)
-{
-   if (bodyInfo == 0) {
-      marshalUInt(s, NULL_LIST); 
-
-   } else {
-      marshalUInt(s, 1);
-      marshalInt(s, bodyInfo->startLine);
-      marshalInt(s, bodyInfo->endLine);
-      marshalObjPointer(s, bodyInfo->fileDef);
-   }
-}
-
-void marshalGroupList(StorageIntf *s, SortedList<GroupDef *> *groupList)
-{
-   if (groupList == 0) {
-      marshalUInt(s, NULL_LIST); 
-
-   } else {
-      marshalUInt(s, groupList->count());
-    
-      for (auto item : *groupList) {
-         marshalObjPointer(s, item);
-      }
-   }
-}
-
 void marshalMemberList(StorageIntf *s, MemberList *ml)
 {
+   printf("\n\n  BROOM  - Reached marshalMemberList()");
+
+/*
    if (ml == 0) {
       marshalUInt(s, NULL_LIST); 
 
@@ -286,40 +213,8 @@ void marshalMemberList(StorageIntf *s, MemberList *ml)
 
       ml->marshal(s);
    }
-}
+*/
 
-void marshalExampleSDict(StorageIntf *s, ExampleSDict *ed)
-{
-   if (ed == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
-
-   } else {
-      marshalUInt(s, ed->count());         
-
-      for (auto item = ed->begin(); item != ed->end(); ++item) {        
-         marshalQString(s, item.key());
-
-         QSharedPointer<Example> e = item.value();
-         marshalQByteArray(s, e->anchor);
-         marshalQByteArray(s, e->name);
-         marshalQByteArray(s, e->file);
-      }
-   }
-}
-
-void marshalMemberLists(StorageIntf *s, StringMap<QSharedPointer<MemberList>> *mls)
-{
-   if (mls == 0) {
-      marshalUInt(s, NULL_LIST); 
-
-   } else {
-      marshalUInt(s, mls->count());
-  
-      for (auto item = mls->begin(); item != mls->end(); ++item) {
-         marshalQString(s, item.key());
-         marshalObjPointer(s, item.value().data()); 
-      }
-   }
 }
 
 void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
@@ -437,7 +332,7 @@ QByteArray unmarshalQByteArray(StorageIntf *s)
    result.resize(len);
     
    if (len > 0) {
-      s->read(result.data(), len);
+      s->read(result.data(), len); 
    }
 
    return result;
@@ -587,64 +482,6 @@ void *unmarshalObjPointer(StorageIntf *s)
    return result;
 }
 
-SectionDict *unmarshalSectionDict(StorageIntf *s)
-{
-   uint i;
-   uint count = unmarshalUInt(s);
-   
-   if (count == NULL_LIST) {
-      return 0;  
-   }
-
-   SectionDict *result = new SectionDict;
-   assert(count < 1000000);
-
-   for (i = 0; i < count; i++) {
-      QByteArray key  = unmarshalQByteArray(s);
-      QSharedPointer<SectionInfo> si ((SectionInfo *)unmarshalObjPointer(s));
-      
-      result->insert(key, si);
-   }
-   return result;
-}
-
-MemberSDict *unmarshalMemberSDict(StorageIntf *s)
-{
-   uint i;
-   uint count = unmarshalUInt(s);
- 
-   if (count == NULL_LIST) {      
-      return 0; 
-   }
-   MemberSDict *result = new MemberSDict;
-   assert(count < 1000000);
-
-   for (i = 0; i < count; i++) {
-      
-      QByteArray key    = unmarshalQByteArray(s);          
-      QSharedPointer<MemberDef> md ((MemberDef *)unmarshalObjPointer(s));
-      
-      result->insert(key, md);
-   }
-
-   return result;
-}
-
-DocInfo *unmarshalDocInfo(StorageIntf *s)
-{
-   uint count = unmarshalUInt(s);
-   if (count == NULL_LIST) {
-      return 0;
-   }
-
-   DocInfo *result = new DocInfo;
-   result->doc  = unmarshalQByteArray(s);
-   result->line = unmarshalInt(s);
-   result->file = unmarshalQByteArray(s);
-
-   return result;
-}
-
 BriefInfo *unmarshalBriefInfo(StorageIntf *s)
 {
    uint count = unmarshalUInt(s);
@@ -657,21 +494,6 @@ BriefInfo *unmarshalBriefInfo(StorageIntf *s)
    result->tooltip = unmarshalQByteArray(s);
    result->line    = unmarshalInt(s);
    result->file    = unmarshalQByteArray(s);
-   return result;
-}
-
-BodyInfo *unmarshalBodyInfo(StorageIntf *s)
-{
-   uint count = unmarshalUInt(s);
-   if (count == NULL_LIST) {
-      return 0;
-   }
-
-   BodyInfo *result = new BodyInfo;
-   result->startLine = unmarshalInt(s);
-   result->endLine   = unmarshalInt(s);
-   result->fileDef   = unmarshalObjPointer(s).dynamicCast<FileDef>();
-
    return result;
 }
 
@@ -698,6 +520,9 @@ SortedList<GroupDef *> *unmarshalGroupList(StorageIntf *s)
 
 MemberList *unmarshalMemberList(StorageIntf *s)
 {
+  printf("\n\n  BROOM  - Reached unmarshalMemberList()");
+
+/*
    uint i;
    uint count = unmarshalUInt(s);
 
@@ -715,54 +540,8 @@ MemberList *unmarshalMemberList(StorageIntf *s)
 
    result->unmarshal(s);
    return result;
-}
+*/
 
-ExampleSDict *unmarshalExampleSDict(StorageIntf *s)
-{
-   uint i;
-   uint count = unmarshalUInt(s);
-
-   if (count == NULL_LIST) {
-      return 0;
-   }
-
-   ExampleSDict *result = new ExampleSDict;
-   assert(count < 1000000);
-
-   for (i = 0; i < count; i++) {
-      QByteArray key = unmarshalQByteArray(s);
-      QSharedPointer<Example> e (new Example);
-
-      e->anchor = unmarshalQByteArray(s);
-      e->name   = unmarshalQByteArray(s);
-      e->file   = unmarshalQByteArray(s);
-
-      result->insert(key, e);
-   }
-
-   return result;
-}
-
-StringMap<QSharedPointer<MemberList>> *unmarshalMemberLists(StorageIntf *s)
-{
-   uint i;
-   uint count = unmarshalUInt(s);
-
-   if (count == NULL_LIST) {
-      return 0;
-   }
-
-   StringMap<QSharedPointer<MemberList>> *result = new StringMap<QSharedPointer<MemberList>>();
-   assert(count < 1000000);
-
-   for (i = 0; i < count; i++) {
-      QByteArray key = unmarshalQByteArray(s);
-
-      QSharedPointer<MemberList> ml ((MemberList *)unmarshalObjPointer(s));
-      result->insert(key, ml);
-   }
-
-   return result;
 }
 
 QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)

@@ -277,7 +277,7 @@ class ClassDef : public Definition
    QByteArray className() const;
 
    /** Returns the members in the list identified by \a lt */
-   MemberList *getMemberList(MemberListType lt);
+   QSharedPointer<MemberList> getMemberList(MemberListType lt);
 
    /** Returns the list containing the list of members sorted per type */
    const QList<QSharedPointer<MemberList>> &getMemberLists() const;

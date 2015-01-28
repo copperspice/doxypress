@@ -1591,7 +1591,7 @@ static QByteArray escapeTooltip(const QByteArray &tooltip)
    return result;
 }
 
-static void writeBoxMemberList(QTextStream &t, char prot, MemberList *ml, QSharedPointer<ClassDef> scope,
+static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberList> ml, QSharedPointer<ClassDef> scope,
                                bool isStatic = false, const QHash<QString, void *> *skipNames = 0)
 {   
    if (ml) {

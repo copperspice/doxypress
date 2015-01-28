@@ -263,7 +263,7 @@ void generateDEFForMember(QSharedPointer<MemberDef> md, QTextStream &t, QSharedP
 
    // TODO: exceptions, const volatile
    if (md->memberType() == MemberType_Enumeration) { // enum
-      MemberList *enumList = md->enumFieldList();
+      QSharedPointer<MemberList> enumList = md->enumFieldList();
 
       if (enumList != 0) {       
 
@@ -356,7 +356,7 @@ void generateDEFForMember(QSharedPointer<MemberDef> md, QTextStream &t, QSharedP
 }
 
 
-void generateDEFClassSection(QSharedPointer<ClassDef> cd, QTextStream &t, MemberList *ml, const char *kind)
+void generateDEFClassSection(QSharedPointer<ClassDef> cd, QTextStream &t, QSharedPointer<MemberList> ml, const char *kind)
 {
    if (cd && ml && ml->count() > 0) {
       t << "  cp-section = {" << endl;

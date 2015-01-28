@@ -19,6 +19,7 @@
 
 #include <doxy_setup.h>
 
+
 /*! \file
  *  \brief main entry point for doxygen
  *
@@ -26,10 +27,10 @@
  */
 int main(int argc, char **argv)
 {
-
+   dirtyBroom = true;
+ 
    // BROOM - test code for printf to unbuffer
    setbuf(stdout, nullptr);
-
 
    // passed parameters
    QStringList argList;

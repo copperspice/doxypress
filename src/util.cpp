@@ -3809,9 +3809,8 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
          }
 
          if (tmd && tmd->isEnumerate() && tmd->isStrong()) {       
-            // scoped enum
-            
-            MemberList *tml = tmd->enumFieldList();
+            // scoped enum            
+            QSharedPointer<MemberList> tml = tmd->enumFieldList();
 
             if (tml) {              
                for (auto emd : *tml) { 
@@ -5547,7 +5546,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
 
       if (md->isEnumerate()) { 
          // insert enum value of this enum into groups
-         MemberList *fmdl = md->enumFieldList();
+         QSharedPointer<MemberList> fmdl = md->enumFieldList();
 
          if (fmdl != 0) {           
             for (auto fmd : *fmdl) {
@@ -6081,7 +6080,7 @@ int getScopeFragment(const QByteArray &s, int p, int *l)
 }
 
 QSharedPointer<PageDef> addRelatedPage(const char *name, const QByteArray &ptitle, const QByteArray &doc, QList<SectionInfo> *,
-                  const char *fileName, int startLine, const QList<ListItemInfo> *sli, GroupDef *gd, 
+                  const char *fileName, int startLine, const QList<ListItemInfo> *sli, QSharedPointer<GroupDef> gd, 
                   TagInfo *tagInfo, SrcLangExt lang)
 {
    QSharedPointer<PageDef> pd;
@@ -6870,16 +6869,11 @@ QByteArray parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<M
    QByteArray s;
 
    if (doc.isEmpty()) {
-      return s.data();
+      return s.constData();
    }
-
-printf("\n\n BROOM  Did we get HERE W1");
 
    QTextStream t(&s);
    DocNode *root = validatingParseDoc(fileName, lineNr, scope, md, doc, false, false);
-
-printf("\n BROOM  Did we get HERE W2");
-
 
    TextDocVisitor *visitor = new TextDocVisitor(t);
    root->accept(visitor);

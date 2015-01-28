@@ -98,7 +98,7 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>
       return m_numDocMembers;
    }
   
-   void countDecMembers(bool countEnumValues = false, GroupDef *gd = 0);
+   void countDecMembers(bool countEnumValues = false, QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>());
    void countDocMembers(bool countEnumValues = false);
    int countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) const;
 
@@ -113,19 +113,18 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>
                   QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), 
                   MemberListType lt = MemberListType_pubMethods);
 
-   void writeDocumentation(OutputList &ol, const char *scopeName, Definition *container, const char *title, 
+   void writeDocumentation(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container, const char *title, 
                   bool showEnumValues = false, bool showInline = false);
 
-   void writeSimpleDocumentation(OutputList &ol, Definition *container);   
+   void writeSimpleDocumentation(OutputList &ol, QSharedPointer<Definition> container);   
+   void writeDocumentationPage(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container);
 
-   void writeDocumentationPage(OutputList &ol, const char *scopeName, Definition *container);
-
-   void writeDocumentationPage(OutputList &ol, const QString &scopeName, Definition *container)
+   void writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container)
    {
       writeDocumentationPage(ol, qPrintable(scopeName), container);
    }
 
-   void writeDocumentationPage(OutputList &ol, const QByteArray &scopeName, Definition *container)
+   void writeDocumentationPage(OutputList &ol, const QByteArray &scopeName, QSharedPointer<Definition> container)
    {
       writeDocumentationPage(ol, scopeName.constData(), container);
    }

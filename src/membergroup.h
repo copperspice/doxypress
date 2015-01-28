@@ -24,8 +24,6 @@
 #include <stringmap.h>
 #include <types.h>
 
-#define DOX_NOGROUP -1
-
 class ClassDef;
 class Definition;
 class FileDef;
@@ -37,6 +35,8 @@ class OutputList;
 class StorageIntf;
 
 struct ListItemInfo;
+
+#define DOX_NOGROUP -1
 
 /** A class representing a group of members. */
 class MemberGroup
@@ -63,8 +63,8 @@ class MemberGroup
    void writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool showInline = false);
 
-   void writeDocumentation(OutputList &ol, const char *scopeName, Definition *container, bool showEnumValues, bool showInline);
-   void writeDocumentationPage(OutputList &ol, const char *scopeName, Definition *container);
+   void writeDocumentation(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container, bool showEnumValues, bool showInline);
+   void writeDocumentationPage(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container);
    void writeTagFile(QTextStream &);
 
    void addGroupedInheritedMembers(OutputList &ol, QSharedPointer<ClassDef> cd, MemberListType lt,
@@ -79,7 +79,7 @@ class MemberGroup
    }
 
    void addToDeclarationSection();
-   int countDecMembers(GroupDef *gd = 0);
+   int countDecMembers(QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>());
    int countDocMembers();
    int countGroupedInheritedMembers(MemberListType lt);
    void distributeMemberGroupDocumentation();

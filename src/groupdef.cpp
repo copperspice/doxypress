@@ -1138,17 +1138,18 @@ void GroupDef::writeDocumentation(OutputList &ol)
       allMemberList->sort();
       writeMemberPages(ol);
    }
-
 }
 
 void GroupDef::writeMemberPages(OutputList &ol)
 {
+   QSharedPointer<GroupDef> self = sharedFrom(this);
+
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
  
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_documentationLists) {
-         ml->writeDocumentationPage(ol, name(), this);
+         ml->writeDocumentationPage(ol, name(), self);
       }
    }
 
@@ -1424,10 +1425,11 @@ void GroupDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const 
 
 void GroupDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title)
 {
+   QSharedPointer<GroupDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, name(), this, title);
+      ml->writeDocumentation(ol, name(), self, title);
    }
 }
 
