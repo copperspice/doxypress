@@ -19,10 +19,10 @@
 #include <outputgen.h>
 #include <parser_make.h>
 
-static CodeOutputInterface *g_code;
-static const char          *g_currentFontClass;
-static FileDef             *g_sourceFileDef;
-static int                  g_yyLineNr;
+static CodeOutputInterface     *g_code;
+static const char              *g_currentFontClass;
+static QSharedPointer<FileDef> g_sourceFileDef;
+static int                     g_yyLineNr;
 
 void MakeFileParser::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input, 
          SrcLangExt xx, bool isExampleBlock, const char *exampleName, QSharedPointer<FileDef> fileDef, int startLine, int endLine, 

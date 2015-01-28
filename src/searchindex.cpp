@@ -89,7 +89,7 @@ SearchIndex::SearchIndex() : SearchIndexIntf(Internal), m_urlIndex(-1)
    }
 }
 
-void SearchIndex::setCurrentDoc(Definition *ctx, const char *anchor, bool isSourceFile)
+void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const char *anchor, bool isSourceFile)
 {
    if (ctx == 0) {
       return;
@@ -97,7 +97,8 @@ void SearchIndex::setCurrentDoc(Definition *ctx, const char *anchor, bool isSour
 
    assert(! isSourceFile || ctx->definitionType() == Definition::TypeFile);
    
-   QByteArray url = isSourceFile ? ((FileDef *)ctx)->getSourceFileBase() : ctx->getOutputFileBase();
+   QByteArray url = isSourceFile ? ctx.dynamicCast<FileDef>()->getSourceFileBase() : ctx->getOutputFileBase();
+
    url += Config_getString("HTML_FILE_EXTENSION");
 
    QByteArray baseUrl = url;
@@ -113,7 +114,7 @@ void SearchIndex::setCurrentDoc(Definition *ctx, const char *anchor, bool isSour
    QByteArray name = ctx->qualifiedName();
 
    if (ctx->definitionType() == Definition::TypeMember) {
-      MemberDef *md = (MemberDef *)ctx;
+      QSharedPointer<MemberDef> md = ctx.dynamicCast<MemberDef>();
 
       if (md->getLanguage() == SrcLangExt_Fortran) {
          name.prepend(theTranslator->trSubprogram(true, true));
@@ -134,7 +135,8 @@ void SearchIndex::setCurrentDoc(Definition *ctx, const char *anchor, bool isSour
 
       switch (ctx->definitionType()) {
          case Definition::TypePage: {
-            PageDef *pd = (PageDef *)ctx;
+            QSharedPointer<PageDef> pd = ctx.dynamicCast<PageDef>();
+
             if (!pd->title().isEmpty()) {
                name = theTranslator->trPage(true, true) + " " + pd->title();
             } else {
@@ -142,11 +144,13 @@ void SearchIndex::setCurrentDoc(Definition *ctx, const char *anchor, bool isSour
             }
          }
          break;
+
          case Definition::TypeClass: {
-            ClassDef *cd = (ClassDef *)ctx;
+            QSharedPointer<ClassDef> cd = ctx.dynamicCast<ClassDef>();
             name.prepend(cd->compoundTypeString() + " ");
          }
          break;
+
          case Definition::TypeNamespace: {
             if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
                name = theTranslator->trPackage(name);
@@ -157,8 +161,10 @@ void SearchIndex::setCurrentDoc(Definition *ctx, const char *anchor, bool isSour
             }
          }
          break;
+
          case Definition::TypeGroup: {
-            GroupDef *gd = (GroupDef *)ctx;
+            QSharedPointer<GroupDef> gd = ctx.dynamicCast<GroupDef>();
+
             if (gd->groupTitle()) {
                name = theTranslator->trGroup(true, true) + " " + gd->groupTitle();
             } else {
@@ -166,6 +172,7 @@ void SearchIndex::setCurrentDoc(Definition *ctx, const char *anchor, bool isSour
             }
          }
          break;
+
          default:
             break;
       }
@@ -454,10 +461,11 @@ SearchIndexExternal::~SearchIndexExternal()
 {
 }
 
-static QByteArray definitionToName(Definition *ctx)
+static QByteArray definitionToName(QSharedPointer<Definition> ctx)
 {
    if (ctx && ctx->definitionType() == Definition::TypeMember) {
-      MemberDef *md = (MemberDef *)ctx;
+      QSharedPointer<MemberDef> md = ctx.dynamicCast<MemberDef>();
+
       if (md->isFunction()) {
          return "function";
       } else if (md->isSlot()) {
@@ -483,10 +491,12 @@ static QByteArray definitionToName(Definition *ctx)
       } else if (md->isDefine()) {
          return "define";
       }
+
    } else if (ctx) {
       switch (ctx->definitionType()) {
          case Definition::TypeClass:
-            return ((ClassDef *)ctx)->compoundTypeString();
+            return ctx.dynamicCast<ClassDef>()->compoundTypeString();
+
          case Definition::TypeFile:
             return "file";
          case Definition::TypeNamespace:
@@ -506,10 +516,10 @@ static QByteArray definitionToName(Definition *ctx)
    return "unknown";
 }
 
-void SearchIndexExternal::setCurrentDoc(Definition *ctx, const char *anchor, bool isSourceFile)
+void SearchIndexExternal::setCurrentDoc(QSharedPointer<Definition> ctx, const char *anchor, bool isSourceFile)
 {
    QByteArray extId = stripPath(Config_getString("EXTERNAL_SEARCH_ID"));
-   QByteArray baseName = isSourceFile ? ((FileDef *)ctx)->getSourceFileBase() : ctx->getOutputFileBase();
+   QByteArray baseName = isSourceFile ? ctx.dynamicCast<FileDef>()->getSourceFileBase() : ctx->getOutputFileBase();
    QByteArray url = baseName + Doxygen::htmlFileExtension;
 
    if (anchor) {
@@ -527,7 +537,7 @@ void SearchIndexExternal::setCurrentDoc(Definition *ctx, const char *anchor, boo
       e->name = ctx->qualifiedName();
 
       if (ctx->definitionType() == Definition::TypeMember) {
-         e->args = ((MemberDef *)ctx)->argsString();
+         e->args = ctx.dynamicCast<MemberDef>()->argsString();
       }
 
       e->extId = extId;
@@ -606,7 +616,7 @@ void SearchIndexExternal::write(const char *fileName)
 #define SEARCH_INDEX_PAGES      14
 #define NUM_SEARCH_INDICES      15
 
-class SearchDefinitionList : public QList<Definition *>
+class SearchDefinitionList : public QList<QSharedPointer<Definition>>
 {
  public:
    SearchDefinitionList(uint letter) : m_letter(letter) 
@@ -631,7 +641,8 @@ class SearchIndexMap : public StringMap<QSharedPointer<SearchDefinitionList>>
    {
    }
 
-   void insertDef(Definition *d) {
+   void insertDef(QSharedPointer<Definition> d) {
+
       QSharedPointer<SearchDefinitionList> lx = this->find(d->name());
 
       if (! lx) {
@@ -658,7 +669,7 @@ class SearchIndexMap : public StringMap<QSharedPointer<SearchDefinitionList>>
 };
 
 static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_SEARCH_INDICES],
-                                   int symbolCount[NUM_SEARCH_INDICES], MemberDef *md)
+                                   int symbolCount[NUM_SEARCH_INDICES], QSharedPointer<MemberDef> md)
 {
    static bool hideFriendCompounds = Config_getBool("HIDE_FRIEND_COMPOUNDS");
    bool isLinkable = md->isLinkable();
@@ -837,8 +848,8 @@ void writeJavascriptSearchIndex()
       uint letter = getUtf8CodeToLower(cd->localName(), 0);
 
       if (cd->isLinkable() && isId(letter)) {
-         g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, cd.data());
-         g_searchIndexSymbols[SEARCH_INDEX_CLASSES].insertElement(letter, cd.data());
+         g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, cd);
+         g_searchIndexSymbols[SEARCH_INDEX_CLASSES].insertElement(letter, cd);
 
          g_searchIndexCount[SEARCH_INDEX_ALL]++;
          g_searchIndexCount[SEARCH_INDEX_CLASSES]++;
@@ -850,8 +861,8 @@ void writeJavascriptSearchIndex()
       uint letter = getUtf8CodeToLower(nd->name(), 0);
 
       if (nd->isLinkable() && isId(letter)) {
-         g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, nd.data());
-         g_searchIndexSymbols[SEARCH_INDEX_NAMESPACES].insertElement(letter, nd.data());
+         g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, nd);
+         g_searchIndexSymbols[SEARCH_INDEX_NAMESPACES].insertElement(letter, nd);
 
          g_searchIndexCount[SEARCH_INDEX_ALL]++;
          g_searchIndexCount[SEARCH_INDEX_NAMESPACES]++;
@@ -881,7 +892,7 @@ void writeJavascriptSearchIndex()
         
          // for each member definition
          for (auto md : *mn) {  
-            addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md.data());
+            addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md);
          }
       }
    }
@@ -893,7 +904,7 @@ void writeJavascriptSearchIndex()
 
          // for each member definition         
          for (auto md : *mn) { 
-            addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md.data());
+            addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md);
          }
       }
    }
@@ -904,15 +915,15 @@ void writeJavascriptSearchIndex()
       if (gd->isLinkable()) {
          QByteArray title = gd->groupTitle();
 
-         if (!title.isEmpty()) { 
+         if (! title.isEmpty()) { 
             // TODO: able searching for all word in the title
 
             uchar charCode = title.at(0);
             uint letter = charCode < 128 ? tolower(charCode) : charCode;
 
             if (isId(letter)) {
-               g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, gd.data());
-               g_searchIndexSymbols[SEARCH_INDEX_GROUPS].insertElement(letter, gd.data());
+               g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, gd);
+               g_searchIndexSymbols[SEARCH_INDEX_GROUPS].insertElement(letter, gd);
 
                g_searchIndexCount[SEARCH_INDEX_ALL]++;
                g_searchIndexCount[SEARCH_INDEX_GROUPS]++;
@@ -932,8 +943,8 @@ void writeJavascriptSearchIndex()
             uint letter = charCode < 128 ? tolower(charCode) : charCode;
 
             if (isId(letter)) {
-               g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, pd.data());
-               g_searchIndexSymbols[SEARCH_INDEX_PAGES].insertElement(letter, pd.data());
+               g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, pd);
+               g_searchIndexSymbols[SEARCH_INDEX_PAGES].insertElement(letter, pd);
                g_searchIndexCount[SEARCH_INDEX_ALL]++;
                g_searchIndexCount[SEARCH_INDEX_PAGES]++;
             }
@@ -1033,10 +1044,11 @@ void writeJavascriptSearchIndex()
             int itemCount   = 0;
           
             for (auto dl : *sl) { 
-               Definition *d = dl->first();
+               QSharedPointer<Definition> d = dl->first();
+
                QByteArray id = d->localName();
 
-               if (!firstEntry) {
+               if (! firstEntry) {
                   ti << "," << endl;
                }
                firstEntry = false;
@@ -1044,10 +1056,10 @@ void writeJavascriptSearchIndex()
                QByteArray dispName = d->localName();
 
                if (d->definitionType() == Definition::TypeGroup) {
-                  dispName = ((GroupDef *)d)->groupTitle();
+                  dispName = d.dynamicCast<GroupDef>()->groupTitle();
 
                } else if (d->definitionType() == Definition::TypePage) {
-                  dispName = ((PageDef *)d)->title();
+                  dispName = d.dynamicCast<PageDef>()->title();
 
                }
 
@@ -1055,11 +1067,13 @@ void writeJavascriptSearchIndex()
                   << convertToXML(dispName) << "',[";
 
                if (dl->count() == 1) { // item with a unique name
-                  MemberDef  *md   = 0;
+                  QSharedPointer<MemberDef> md;
+
                   bool isMemberDef = d->definitionType() == Definition::TypeMember;
                   if (isMemberDef) {
-                     md = (MemberDef *)d;
+                     md = d.dynamicCast<MemberDef>();
                   }
+
                   QByteArray anchor = d->anchor();
 
                   ti << "'" << externalRef("../", d->getReference(), true)
@@ -1105,16 +1119,17 @@ void writeJavascriptSearchIndex()
  
                   auto nextIter = dl->begin();   
 
-                  for (auto &d : *dl)  { 
-                             
+                  for (auto &d : *dl)  {               // broom check -
                      QSharedPointer<Definition> scope = d->getOuterScope();
 
                      ++nextIter;   
 
                      if (nextIter == dl->end()) {  
-                        next = 0;                                 
+                        next = QSharedPointer<Definition>();
+
                      } else {
                         next = *nextIter;
+
                      }
                   
                      QSharedPointer<Definition> nextScope;
@@ -1123,7 +1138,7 @@ void writeJavascriptSearchIndex()
                      bool isMemberDef = d->definitionType() == Definition::TypeMember;
 
                      if (isMemberDef) {
-                        md = (MemberDef *)d;
+                        md = d.dynamicCast<MemberDef>();
                      }
 
                      if (next) {
@@ -1170,11 +1185,11 @@ void writeJavascriptSearchIndex()
 
                      QByteArray name;
                      if (d->definitionType() == Definition::TypeClass) {
-                        name  = convertToXML(((ClassDef *)d)->displayName());
+                        name  = convertToXML(d.dynamicCast<MemberDef>()->displayName());
                         found = true;
 
                      } else if (d->definitionType() == Definition::TypeNamespace) {
-                        name  = convertToXML(((NamespaceDef *)d)->displayName());
+                        name  = convertToXML(d.dynamicCast<NamespaceDef>()->displayName());
                         found = true;
 
                      } else if (scope == 0 || scope == Doxygen::globalScope) { 
@@ -1194,18 +1209,21 @@ void writeJavascriptSearchIndex()
                               found = true;
                            }
                         }
-                     } else if (md && (md->getClassDef() || md->getNamespaceDef()))
+
+                     } else if (md && (md->getClassDef() || md->getNamespaceDef())) {
                         // member in class or namespace scope
-                     {
+                     
                         SrcLangExt lang = md->getLanguage();
                         name = convertToXML(d->getOuterScope()->qualifiedName())
                                + getLanguageSpecificSeparator(lang) + prefix;
                         found = true;
+
                      } else if (scope) { // some thing else? -> show scope
                         name = prefix + convertToXML(scope->name());
                         found = true;
                      }
-                     if (!found) { // fallback
+
+                     if (! found) { // fallback
                         name = prefix + "(" + theTranslator->trGlobalNamespace() + ")";
                      }
 
@@ -1220,6 +1238,7 @@ void writeJavascriptSearchIndex()
                ti << "]";
                itemCount++;
             }
+
             if (!firstEntry) {
                ti << endl;
             }

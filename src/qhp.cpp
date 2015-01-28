@@ -194,13 +194,13 @@ void Qhp::decContentsDepth()
    m_sectionLevel--;
 }
 
-void Qhp::addContentsItem(bool /*isDir*/, const QString &name, const char * /*ref*/, const char *file,
-                          const char *anchor, bool /* separateIndex */, bool /* addToNavIndex */, Definition * /*def*/)
+void Qhp::addContentsItem(bool, const QString &name, const char *, const char *file,
+                          const char *anchor, bool , bool , QSharedPointer<Definition>)
 {
    // Backup difference before modification
    QByteArray f = file;
 
-   if (!f.isEmpty() && f.at(0) == '^') {
+   if (! f.isEmpty() && f.at(0) == '^') {
       return;   // absolute URL not supported
    }
 

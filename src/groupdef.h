@@ -83,8 +83,8 @@ class GroupDef : public Definition
    void addDir(QSharedPointer<DirDef> def);
 
    bool insertMember(QSharedPointer<MemberDef> def, bool docOnly = false);
-   void removeMember(MemberDef *md);
-   bool containsGroup(const GroupDef *def);    // true if def is already a subgroup
+   void removeMember(QSharedPointer<MemberDef> md);
+   bool containsGroup(QSharedPointer<const GroupDef> def);    // true if def is already a subgroup
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
    void writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const;
@@ -95,7 +95,7 @@ class GroupDef : public Definition
    bool isASubGroup() const;
    void computeAnchors();
 
-   void addMembersToMemberGroup(QSharedPointer<GroupDef> self);
+   void addMembersToMemberGroup();
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
 
@@ -110,16 +110,16 @@ class GroupDef : public Definition
    //friend void writeGroupTreeNode(OutputList&, GroupDef*, int, FTVHelp*);
    // make accessible for writing tree view of group in index.cpp - KPW
 
-   void setGroupScope(Definition *d) {
+   void setGroupScope(QSharedPointer<Definition> d) {
       groupScope = d;
    }
-   Definition *getGroupScope() const {
+   QSharedPointer<Definition> getGroupScope() const {
       return groupScope;
    }
 
-   MemberList *getMemberList(MemberListType lt) ;
+   QSharedPointer<MemberList> getMemberList(MemberListType lt) ;
 
-   const QList<MemberList> &getMemberLists() const {
+   const QList<QSharedPointer<MemberList>> &getMemberLists() const {
       return m_memberLists;
    }
 
@@ -152,22 +152,22 @@ class GroupDef : public Definition
       return fileList;
    }
 
-   SortedList<GroupDef *> *getSubGroups() const {
+   SortedList<QSharedPointer<GroupDef>> *getSubGroups() const {
       return groupList;
    }
     
    bool hasDetailedDescription() const;   
   
  protected:
-   void addMemberListToGroup(MemberList *, bool (MemberDef::*)() const);
+   void addMemberListToGroup(QSharedPointer<MemberList>, bool (MemberDef::*)() const);
 
  private:
-   MemberList &createMemberList(MemberListType lt);
+   QSharedPointer<MemberList> createMemberList(MemberListType lt);
 
-   void addMemberToList(MemberListType lt, MemberDef *md);
+   void addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md);
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title);
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title);
-   void removeMemberFromList(MemberListType lt, MemberDef *md);
+   void removeMemberFromList(MemberListType lt, QSharedPointer<MemberDef> md);
    void writeGroupGraph(OutputList &ol);
    void writeFiles(OutputList &ol, const QByteArray &title);
    void writeNamespaces(OutputList &ol, const QByteArray &title);
@@ -185,11 +185,12 @@ class GroupDef : public Definition
    void endMemberDocumentation(OutputList &ol);
    void writeAuthorSection(OutputList &ol);
    void writeSummaryLinks(OutputList &ol);
-   void updateLanguage(const Definition *);
+
+   void updateLanguage(QSharedPointer<const Definition> d);
 
    QByteArray title;                    // title of the group
    bool titleSet;                       // true if title is not the same as the name
-   QString fileName;                 // base name of the generated file
+   QString fileName;                    // base name of the generated file
    
    ClassSDict *classSDict;              // list of classes in the group
    NamespaceSDict *namespaceSDict;      // list of namespaces in the group 
@@ -198,14 +199,15 @@ class GroupDef : public Definition
 
    SortedList<QSharedPointer<DirDef>> *dirList;       // list of directories in the group
    FileList *fileList;                  // list of files in the group
-   SortedList<GroupDef *> *groupList;   // list of sub groups
+
+   SortedList<QSharedPointer<GroupDef>> *groupList;   // list of sub groups
   
-   MemberList *allMemberList;
+   QSharedPointer<MemberList> allMemberList;
    MemberNameInfoSDict *allMemberNameInfoSDict;
 
-   Definition *groupScope;
+   QSharedPointer<Definition> groupScope;
 
-   QList<MemberList>  m_memberLists;
+   QList<QSharedPointer<MemberList>>  m_memberLists;
    MemberGroupSDict  *memberGroupSDict;
 
    bool m_subGrouping;

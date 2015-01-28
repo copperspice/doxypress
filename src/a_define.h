@@ -42,7 +42,7 @@ class A_Define
    QByteArray args;
    QByteArray anchor;
 
-   FileDef *fileDef;
+   QSharedPointer<FileDef> fileDef;
 
    int lineNr;
    int columnNr;

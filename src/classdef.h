@@ -174,7 +174,7 @@ class ClassDef : public Definition
    /** Returns the namespace this compound is in, or 0 if it has a global
     *  scope.
     */
-   NamespaceDef *getNamespaceDef() const;
+   QSharedPointer<NamespaceDef> getNamespaceDef() const;
 
    /** Returns the file in which this compound's definition can be found.
     *  Should not return 0 (but it might be a good idea to check anyway).
@@ -184,7 +184,7 @@ class ClassDef : public Definition
    /** Returns the Java package this class is in or 0 if not applicable.
     */
 
-   MemberDef *getMemberByName(const QByteArray &) const;
+   QSharedPointer<MemberDef> getMemberByName(const QByteArray &) const;
 
    /** Returns true iff \a bcd is a direct or indirect base class of this
     *  class. This function will recusively traverse all branches of the
@@ -328,7 +328,9 @@ class ClassDef : public Definition
    void setFileDef(QSharedPointer<FileDef> fd);
    void setSubGrouping(bool enabled);
    void setProtection(Protection p);
-   void setGroupDefForAllMembers(GroupDef *g, Grouping::GroupPri_t pri, const QByteArray &fileName, int startLine, bool hasDocs);
+
+   void setGroupDefForAllMembers(QSharedPointer<GroupDef> g, Grouping::GroupPri_t pri, const QByteArray &fileName, 
+                  int startLine, bool hasDocs);
 
    void addInnerCompound(QSharedPointer<Definition> d) override; 
 
@@ -367,7 +369,10 @@ class ClassDef : public Definition
    void writeDocumentationForInnerClasses(OutputList &ol);
    void writeMemberPages(OutputList &ol);
    void writeMemberList(OutputList &ol);
-   void writeDeclaration(OutputList &ol, MemberDef *md, bool inGroup, QSharedPointer<ClassDef> inheritedFrom, const char *inheritId);
+
+   void writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bool inGroup, 
+                  QSharedPointer<ClassDef> inheritedFrom, const char *inheritId);
+
    void writeQuickMemberLinks(OutputList &ol, MemberDef *md) const;
    void writeSummaryLinks(OutputList &ol);
    void reclassifyMember(QSharedPointer<MemberDef> md, MemberType t);
@@ -400,7 +405,7 @@ class ClassDef : public Definition
 
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title,
                   const char *subTitle = 0, bool showInline = false,
-                  QSharedPointer<ClassDef> inheritedFrom = 0, int lt2 = -1, bool invert = false,
+                  QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), int lt2 = -1, bool invert = false,
                   bool showAlways = false, QHash<void *, void *> *visitedClasses = 0);
 
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title, bool showInline = false);
@@ -462,10 +467,10 @@ class ClassDef : public Definition
    /*! Namespace this class is part of
     *  (this is the inner most namespace in case of nested namespaces)
     */
-   NamespaceDef  *m_nspace;
+   QSharedPointer<NamespaceDef> m_nspace;
 
    /*! File this class is defined in */
-   FileDef *m_fileDef;
+   QSharedPointer<FileDef> m_fileDef;
 
    /*! List of all members (including inherited members) */
    MemberNameInfoSDict *m_allMemberNameInfoSDict;
@@ -504,13 +509,13 @@ class ClassDef : public Definition
    /*! Template instances that exists of this class, the key in the
     *  dictionary is the template argument list.
     */
-   QHash<QString, ClassDef> *m_templateInstances;
+   QHash<QString, QSharedPointer<ClassDef>> *m_templateInstances;
 
    /*! Template instances that exists of this class, as defined by variables.
     *  We do NOT want to document these individually. The key in the
     *  dictionary is the template argument list.
     */
-   QHash<QString, ClassDef> *m_variableInstances;
+   QHash<QString, QSharedPointer<ClassDef>> *m_variableInstances;
 
    QHash<QString, int> *m_templBaseClassNames;
 

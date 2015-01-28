@@ -18,21 +18,9 @@
 #include <parser_file.h>
 #include <outputgen.h>
 
-void FileParser::parseCode(CodeOutputInterface &codeOutIntf,
-                           const char *,     // scopeName
-                           const QByteArray      &input,
-                           SrcLangExt,       // lang
-                           bool,             // isExampleBlock
-                           const char *,     // exampleName
-                           FileDef *,        // fileDef
-                           int                  startLine,
-                           int                  endLine,
-                           bool,             // inlineFragment
-                           MemberDef *,      // memberDef
-                           bool                 showLineNumbers,
-                           Definition *,     // searchCtx,
-                           bool              // collectXRefs
-                          )
+void FileParser::parseCode(CodeOutputInterface &codeOutIntf, const char *, const QByteArray &input,
+                  SrcLangExt, bool, const char *,  QSharedPointer<FileDef> fd, int startLine, int endLine,
+                  bool, QSharedPointer<MemberDef> md, bool showLineNumbers, QSharedPointer<Definition> context, bool)
 {
    int lineNr = startLine != -1 ? startLine : 1;
    int length = input.length();

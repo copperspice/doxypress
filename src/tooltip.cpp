@@ -21,13 +21,11 @@
 
 #include <config.h>
 #include <definition.h>
+#include <doxy_globals.h>
 #include <doxygen.h>
 #include <filedef.h>
 #include <outputgen.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 TooltipManager *TooltipManager::s_theInstance = 0;
 
@@ -67,7 +65,7 @@ static QByteArray escapeId(const char *s)
    return res;
 }
 
-void TooltipManager::addTooltip(Definition *d)
+void TooltipManager::addTooltip(QSharedPointer<Definition> d)
 {
    static bool sourceTooltips = Config_getBool("SOURCE_TOOLTIPS");
    if (! sourceTooltips) {
@@ -95,7 +93,7 @@ void TooltipManager::addTooltip(Definition *d)
 
 void TooltipManager::writeTooltips(CodeOutputInterface &ol)
 {
-   QHash<QString, Definition *>::iterator iter = m_tooltipInfo.begin();
+   QHash<QString, QSharedPointer<Definition>>::iterator iter = m_tooltipInfo.begin();
 
    for (auto item : m_tooltipInfo) {
       DocLinkInfo docInfo;
@@ -118,7 +116,7 @@ void TooltipManager::writeTooltips(CodeOutputInterface &ol)
       QByteArray decl;
 
       if (item->definitionType() == Definition::TypeMember) {
-         MemberDef *md = (MemberDef *)item;
+         QSharedPointer<MemberDef> md = item.dynamicCast<MemberDef>();
          decl = md->declaration();
 
          if (! decl.isEmpty() && decl.at(0) == '@') {

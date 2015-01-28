@@ -132,7 +132,7 @@ class NamespaceDef : public Definition
       return m_memberLists;
    }
 
-   MemberDef *getMemberByName(const QByteArray &) const;
+   QSharedPointer<MemberDef> getMemberByName(const QByteArray &) const;
 
    /*! Returns the user defined member groups */
    MemberGroupSDict *getMemberGroupSDict() const {
@@ -157,7 +157,7 @@ class NamespaceDef : public Definition
  private:
    QSharedPointer<MemberList> createMemberList(MemberListType lt);
 
-   void addMemberToList(MemberListType lt, MemberDef *md);
+   void addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md);
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title);
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title);
    void writeDetailedDescription(OutputList &ol, const QByteArray &title);

@@ -99,8 +99,7 @@ struct DocParserContext {
    bool hasParamCommand;
    bool hasReturnCommand;
 
-   MemberDef *memberDef;
-
+   QSharedPointer<MemberDef> memberDef;
    QHash<QString, void *>  paramsFound;
 
    bool isExample;
@@ -126,7 +125,7 @@ static QStack<DocNode *>       s_nodeStack;
 static QStack<DocStyleChange>  s_styleStack;
 static QStack<DocStyleChange>  s_initialStyleStack;
 
-static QList<QSharedPointer<Definition>>     s_copyStack;
+static QList<QSharedPointer<Definition>> s_copyStack;
 
 static QByteArray              s_fileName;
 static QByteArray              s_relPath;
@@ -430,7 +429,7 @@ static void checkArgumentName(const QByteArray &name, bool isParam)
          QByteArray docFile = s_memberDef->docFile();
          int docLine = s_memberDef->docLine();
 
-         MemberDef *inheritedMd = s_memberDef->inheritsDocsFrom();
+         QSharedPointer<MemberDef> inheritedMd = s_memberDef->inheritsDocsFrom();
 
          if (inheritedMd) { 
             // documentation was inherited
@@ -726,7 +725,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QByteArray command
      
    // `find('.') is a hack to detect files
    bool found = getDefs(s_context.indexOf('.') == -1 ? s_context.constData() : "", name, args.isEmpty() ? 0 : args.constData(), 
-                        md, cd, fd, nd, gd, false, 0, true);
+                        md, cd, fd, nd, gd, false, QSharedPointer<FileDef>(), true);
    
    if (found && md) {
       doc    = md->documentation();
@@ -1076,7 +1075,8 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children)
    QSharedPointer<FileDef> fd = findFileDef(Doxygen::inputNameDict, s_fileName, ambig);
 
    if (! s_insideHtmlLink && (resolveRef(s_context, g_token->name, s_inSeeBlock, &compound, &member, true, fd, true)
-          || (!s_context.isEmpty() &&  resolveRef("", g_token->name, s_inSeeBlock, &compound, &member, false, 0, true)) )) {
+          || (! s_context.isEmpty() &&  resolveRef("", g_token->name, s_inSeeBlock, &compound, 
+              &member, false, QSharedPointer<FileDef>(), true)) )) {
 
      if (member && member->isLinkable()) { 
 
@@ -1095,13 +1095,13 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children)
             name = g_token->name;
 
          } else if (compound->definitionType() == Definition::TypeGroup) {
-            name = ((GroupDef *)compound)->groupTitle();
+            name = compound.dynamicCast<GroupDef>()->groupTitle();
          }
 
          children.append(new DocLinkedWord(parent, name, compound->getReference(), compound->getOutputFileBase(),
                                            anchor, compound->briefDescriptionAsTooltip() ) );
 
-      } else if (compound->definitionType() == Definition::TypeFile && ((FileDef *)compound)->generateSourceFile() ) { 
+      } else if (compound->definitionType() == Definition::TypeFile && compound.dynamicCast<FileDef>()->generateSourceFile() ) { 
 
          // undocumented file that has source code we can link to
          children.append(new DocLinkedWord(parent, g_token->name, compound->getReference(), compound->getSourceFileBase(),
@@ -2235,14 +2235,14 @@ void DocInternalRef::parse()
    assert(n == this);
 }
 
-DocRef::DocRef(DocNode *parent, const QByteArray &target, const QByteArray &context) :
-   m_refToSection(false), m_refToAnchor(false), m_isSubPage(false)
+DocRef::DocRef(DocNode *parent, const QByteArray &target, const QByteArray &context) 
+   : m_refToSection(false), m_refToAnchor(false), m_isSubPage(false)
 {
    m_parent = parent;
-   Definition  *compound = 0;
+   QSharedPointer<Definition> compound;
 
    QByteArray  anchor;   
-   assert(!target.isEmpty());
+   assert(! target.isEmpty());
 
    SrcLangExt lang = getLanguageFromFileName(target);
 
@@ -2254,7 +2254,8 @@ DocRef::DocRef(DocNode *parent, const QByteArray &target, const QByteArray &cont
       sec = Doxygen::sectionDict->find(markdownFileNameToId(target));
    }
 
-   if (sec) { // ref to section or anchor      
+   if (sec) { 
+      // ref to section or anchor      
       QSharedPointer<PageDef> pd;
 
       if (sec->type == SectionInfo::Page) {
@@ -2276,46 +2277,48 @@ DocRef::DocRef(DocNode *parent, const QByteArray &target, const QByteArray &cont
       if (sec->type != SectionInfo::Page || m_isSubPage) {
          m_anchor = sec->label;
       }
-      //printf("m_text=%s,m_ref=%s,m_file=%s,m_refToAnchor=%d type=%d\n",
-      //    m_text.data(),m_ref.data(),m_file.data(),m_refToAnchor,sec->type);
+      
       return;
 
    } else if (resolveLink(context, target, true, &compound, anchor)) {
-      bool isFile = compound ?
-                    (compound->definitionType() == Definition::TypeFile ||
-                     compound->definitionType() == Definition::TypePage ? true : false) :
-                    false;
+
+      bool isFile = compound ? (compound->definitionType() == Definition::TypeFile ||
+                     compound->definitionType() == Definition::TypePage ? true : false) : false;
+
       m_text = linkToText(compound ? compound->getLanguage() : SrcLangExt_Unknown, target, isFile);
       m_anchor = anchor;
-      if (compound && compound->isLinkable()) { // ref to compound
-         if (anchor.isEmpty() &&                                  /* compound link */
-               compound->definitionType() == Definition::TypeGroup && /* is group */
-               ((GroupDef *)compound)->groupTitle()                 /* with title */
-            ) {
-            m_text = ((GroupDef *)compound)->groupTitle(); // use group's title as link
+
+      if (compound && compound->isLinkable()) { 
+         if (anchor.isEmpty() && compound->definitionType() == Definition::TypeGroup && 
+               compound.dynamicCast<GroupDef>()->groupTitle() ) {
+
+            m_text = compound.dynamicCast<GroupDef>()->groupTitle(); // use group's title as link
+
          } else if (compound->definitionType() == Definition::TypeMember &&
-                    ((MemberDef *)compound)->isObjCMethod()) {
+                    compound.dynamicCast<MemberDef>()->isObjCMethod()) {
+
             // Objective C Method
-            MemberDef *member = (MemberDef *)compound;
+            QSharedPointer<MemberDef> member = compound.dynamicCast<MemberDef>();
             bool localLink = s_memberDef ? member->getClassDef() == s_memberDef->getClassDef() : false;
             m_text = member->objCMethodName(localLink, s_inSeeBlock);
          }
 
          m_file = compound->getOutputFileBase();
          m_ref  = compound->getReference();
-         //printf("isFile=%d compound=%s (%d)\n",isFile,compound->name().data(),
-         //    compound->definitionType());
+
          return;
+
       } else if (compound && compound->definitionType() == Definition::TypeFile &&
-                 ((FileDef *)compound)->generateSourceFile()
-                ) { // undocumented file that has source code we can link to
+                 compound.dynamicCast<FileDef>()->generateSourceFile() ) { 
+
+         // undocumented file that has source code we can link to
          m_file = compound->getSourceFileBase();
          m_ref  = compound->getReference();
          return;
       }
    }
    m_text = target;
-   warn_doc_error(s_fileName, doctokenizerYYlineno, "unable to resolve reference to `%s' for \\ref command",
+   warn_doc_error(s_fileName, doctokenizerYYlineno, "unable to resolve reference to `%s' for \\ref command", 
                   qPrint(target));
 }
 
@@ -2432,7 +2435,9 @@ DocLink::DocLink(DocNode *parent, const QByteArray &target)
          m_file = compound->getOutputFileBase();
          m_ref  = compound->getReference();
 
-      } else if (compound && compound->definitionType() == Definition::TypeFile && ((FileDef *)compound)->generateSourceFile()) {
+      } else if (compound && compound->definitionType() == Definition::TypeFile && 
+               compound.dynamicCast<FileDef>()->generateSourceFile()) {
+
          // undocumented file that has source code we can link to
          m_file = compound->getSourceFileBase();
          m_ref  = compound->getReference();
@@ -5253,10 +5258,10 @@ int DocPara::handleStartCode()
 void DocPara::handleInheritDoc()
 {
    if (s_memberDef) { // inheriting docs from a member
-      MemberDef *reMd = s_memberDef->reimplements();
+      QSharedPointer<MemberDef> reMd = s_memberDef->reimplements();
 
       if (reMd) { // member from which was inherited.
-         MemberDef *thisMd = s_memberDef;
+         QSharedPointer<MemberDef> thisMd = s_memberDef;
          
          docParserPushContext();
          s_scope = reMd->getOuterScope();
@@ -5590,7 +5595,15 @@ int DocPara::handleCommand(const QByteArray &cmdName)
       }
       break;
       case CMD_ADDINDEX: {
-         DocIndexEntry *ie = new DocIndexEntry(this, s_scope != Doxygen::globalScope ? s_scope : 0, s_memberDef);
+         QSharedPointer<Definition> temp;
+
+         if (s_scope != Doxygen::globalScope) {
+            temp = s_scope;
+         } else {
+            temp = QSharedPointer<Definition>();
+          }  
+
+         DocIndexEntry *ie = new DocIndexEntry(this, temp, s_memberDef);
          m_children.append(ie);
          retval = ie->parse();
       }
@@ -7065,15 +7078,15 @@ static QByteArray processCopyDoc(const char *data, uint &len)
             }
 
             // extract the argument
-            QByteArray id = extractCopyDocId(data, j, len);
-        
+            QByteArray id = extractCopyDocId(data, j, len);                   
             QByteArray doc;
             QByteArray brief;
 
-            QSharedPointer<Definition> def  = findDocsForMemberOrCompound(m_link, doc, brief);
+            QSharedPointer<Definition> def = findDocsForMemberOrCompound(id, doc, brief);
  
             if (def) {        
-               if (s_copyStack.indexOf(def) == -1) { // definition not parsed earlier
+               if (s_copyStack.indexOf(def) == -1) { 
+                  // definition not parsed earlier
                   s_copyStack.append(def);
 
                   if (isBrief) {
@@ -7133,7 +7146,7 @@ printf("\n BROOM  *** validate parser doc  PRE  2 ");
 
 
 if (ctx)  {
-   printf("\n BROOM  *** validate parser doc  what is CTX  %x ", ctx);
+   printf("\n BROOM  *** validate parser doc  what is CTX  %x ", ctx.data() );
 
    int temp = ctx->definitionType() ;
    printf("\n BROOM  *** validate parser doc  DefinitionType =  %d ",  temp );
@@ -7146,14 +7159,14 @@ if (ctx)  {
       s_context = ctx->name();
 
    } else if (ctx && ctx->definitionType() == Definition::TypePage) {
-      QSharedPointer<Definition> scope = ((PageDef *)ctx)->getPageScope();
+      QSharedPointer<Definition> scope = ctx.dynamicCast<PageDef>()->getPageScope();
 
       if (scope && scope != Doxygen::globalScope) {
          s_context = scope->name();
       }
 
    } else if (ctx && ctx->definitionType() == Definition::TypeGroup) {
-      QSharedPointer<Definition> scope = ((GroupDef *)ctx)->getGroupScope();
+      QSharedPointer<Definition> scope = ctx.dynamicCast<GroupDef>()->getGroupScope();
 
       if (scope && scope != Doxygen::globalScope) {
          s_context = scope->name();
@@ -7167,7 +7180,6 @@ if (ctx)  {
 
 
 printf("\n BROOM  *** validate parser doc  PRE  2 ");
-
 
 
    if (indexWords && Doxygen::searchIndex) {
@@ -7229,7 +7241,8 @@ printf("\n BROOM  *** validate parser doc  PRE  2 ");
          }
          break;
          case Definition::TypeGroup: {
-            GroupDef *gd = (GroupDef *)ctx;
+            QSharedPointer<GroupDef> gd = ctx.dynamicCast<GroupDef>();
+
             if (gd->groupTitle()) {
                name = theTranslator->trGroup(true, true) + " " + gd->groupTitle();
             } else {
@@ -7237,6 +7250,7 @@ printf("\n BROOM  *** validate parser doc  PRE  2 ");
             }
          }
          break;
+
          default:
             break;
       }
@@ -7323,7 +7337,7 @@ DocText *validatingParseText(const char *input)
    s_fileName = "<parseText>";
    s_relPath  = "";
 
-   s_memberDef = 0;
+   s_memberDef = QSharedPointer<MemberDef>();
 
    s_nodeStack.clear();
    s_styleStack.clear();

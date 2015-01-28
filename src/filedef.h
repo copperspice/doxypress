@@ -246,7 +246,7 @@ class FileDef : public Definition
    void addIncludeDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported, bool indirect);
    void addIncludedByDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported);
 
-   void addMembersToMemberGroup(QSharedPointer<FileDef> self);
+   void addMembersToMemberGroup();
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
    void addIncludedUsingDirectives();
@@ -264,7 +264,7 @@ class FileDef : public Definition
  private:
    QSharedPointer<MemberList> createMemberList(MemberListType lt);
 
-   void addMemberToList(MemberListType lt, MemberDef *md);
+   void addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md);
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title);
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title);
    void writeIncludeFiles(OutputList &ol);

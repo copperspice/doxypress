@@ -19,8 +19,7 @@
 #include <config.h>
 
 A_Define::A_Define()
-{
-   fileDef  = 0;
+{  
    lineNr   = 1;
    columnNr = 1;
    nargs    = -1;
@@ -33,8 +32,7 @@ A_Define::A_Define()
 
 A_Define::A_Define(const A_Define &d)
    : name(d.name), definition(d.definition), fileName(d.fileName)
-{
-   //name=d.name; definition=d.definition; fileName=d.fileName;
+{   
    lineNr   = d.lineNr;
    columnNr = d.columnNr;
    nargs    = d.nargs;
@@ -42,8 +40,7 @@ A_Define::A_Define(const A_Define &d)
    varArgs  = d.varArgs;
 
    isPredefined = d.isPredefined;
-   nonRecursive = d.nonRecursive;
-   fileDef      = 0;
+   nonRecursive = d.nonRecursive;   
 }
 
 A_Define::~A_Define()

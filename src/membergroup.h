@@ -44,6 +44,7 @@ class MemberGroup
  public:
    MemberGroup();
    MemberGroup(QSharedPointer<Definition> parent, int id, const char *header, const char *docs, const char *docFile);
+
    ~MemberGroup();
 
    QByteArray header() const {
@@ -55,19 +56,19 @@ class MemberGroup
    }
    void insertMember(QSharedPointer<MemberDef> md);
    void setAnchors();
-   void writePlainDeclarations(OutputList &ol,
-                               ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
-                               ClassDef *inheritedFrom, const char *inheritId);
+   void writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
+                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
+                  QSharedPointer<ClassDef> inheritedFrom, const char *inheritId);
 
-   void writeDeclarations(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
-                          bool showInline = false);
+   void writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
+                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool showInline = false);
 
    void writeDocumentation(OutputList &ol, const char *scopeName, Definition *container, bool showEnumValues, bool showInline);
    void writeDocumentationPage(OutputList &ol, const char *scopeName, Definition *container);
    void writeTagFile(QTextStream &);
 
-   void addGroupedInheritedMembers(OutputList &ol, ClassDef *cd, MemberListType lt,
-                                   ClassDef *inheritedFrom, const QByteArray &inheritId);
+   void addGroupedInheritedMembers(OutputList &ol, QSharedPointer<ClassDef> cd, MemberListType lt,
+                                   QSharedPointer<ClassDef> inheritedFrom, const QByteArray &inheritId);
 
    const QByteArray &documentation() const {
       return doc;
@@ -93,16 +94,16 @@ class MemberGroup
    int friendCount() const;
    int numDecMembers() const;
    int numDocMembers() const;
-   int countInheritableMembers(ClassDef *inheritedFrom) const;
+   int countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) const;
    void setInGroup(bool b);
    void addListReferences(QSharedPointer<Definition> d);
    void setRefItems(const QList<ListItemInfo> *sli);
 
-   MemberList *members() const {
+   QSharedPointer<MemberList> members() const {
       return memberList;
    }
 
-   Definition *parent() const {
+   QSharedPointer<Definition> parent() const {
       return m_parent;
    }
 
@@ -112,7 +113,7 @@ class MemberGroup
    void unmarshal(StorageIntf *s);
 
  private:
-   MemberList *memberList;      // list of all members in the group
+   QSharedPointer<MemberList> memberList;      // list of all members in the group
    QSharedPointer<MemberList> inDeclSection;
 
    int grpId;
@@ -121,8 +122,8 @@ class MemberGroup
    QByteArray doc;
    QByteArray m_docFile;
 
-   Definition *scope;
-   Definition *m_parent;
+   QSharedPointer<Definition> scope;
+   QSharedPointer<Definition> m_parent;
   
    bool inSameSection;
    int  m_numDecMembers;

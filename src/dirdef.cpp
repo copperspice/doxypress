@@ -161,11 +161,12 @@ void DirDef::writeBriefDescription(OutputList &ol)
    QSharedPointer<DirDef> self = sharedFrom(this);
 
    if (! briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
-      DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), true, false);
+      DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), 
+                                             briefDescription(), true, false);
 
       if (rootNode && !rootNode->isEmpty()) {
          ol.startParagraph();
-         ol.writeDoc(rootNode, this, 0);
+         ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::RTF);
          ol.writeString(" \n");

@@ -2185,14 +2185,14 @@ QByteArray tempArgListToString(const ArgumentList *al, SrcLangExt lang)
 }
 
 // compute the HTML anchors for a list of members
-void setAnchors(MemberList *ml)
+void setAnchors(QSharedPointer<MemberList> ml)
 { 
    if (ml == 0) {
       return;
    }
  
    for (auto md : *ml) {
-      if (!md->isReference()) {         
+      if (! md->isReference()) {         
          md->setAnchor();        
       }
    }
@@ -5533,7 +5533,7 @@ QByteArray getOverloadDocs()
    //       "function only in what argument(s) it accepts.";
 }
 
-void addMembersToMemberGroup(MemberList *ml, MemberGroupSDict **ppMemberGroupSDict, QSharedPointer<Definition> context)
+void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **ppMemberGroupSDict, QSharedPointer<Definition> context)
 {
    assert(context != 0);
    

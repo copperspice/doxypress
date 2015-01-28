@@ -1513,7 +1513,7 @@ void Doxy_Work::addPageToContext(QSharedPointer<PageDef> pd, QSharedPointer<Entr
                   QSharedPointer<FileDef>(), rootNav->tagInfo());
 
       if (d) {
-         pd->setPageScope(d.data());
+         pd->setPageScope(d);
       }
    }
 }
@@ -1646,7 +1646,7 @@ void Doxy_Work::findGroupScope(QSharedPointer<EntryNav> rootNav)
                   QSharedPointer<FileDef>(), rootNav->tagInfo());
 
          if (d) {
-            gd->setGroupScope(d.data());
+            gd->setGroupScope(d);
          }
       }
    }
@@ -2843,13 +2843,13 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<EntryNav> rootNav)
                   if (mni) {
 
                      for (auto mi : *mni) {
-                        MemberDef *md = mi.memberDef;
+                        QSharedPointer<MemberDef> md = mi.memberDef;
 
                         if (md && md->protection() != Private) {
 
                            rootNav->loadEntry(Doxy_Globals::g_storage);
-                           QSharedPointer<Entry>root = rootNav->entry();
 
+                           QSharedPointer<Entry>root = rootNav->entry();
                            QSharedPointer<MemberDef> newMd;
 
                            {
@@ -2992,7 +2992,7 @@ MemberDef *Doxy_Work::addVariableToClass(QSharedPointer<EntryNav> rootNav, QShar
                // Objective-C 2.0 property, turn variable into a property
 
                md->setProtection(root->protection);
-               cd->reclassifyMember(md.data(), MemberType_Property);
+               cd->reclassifyMember(md, MemberType_Property);
             }
 
             addMemberDocs(rootNav, md, def, 0, false);
@@ -4441,7 +4441,7 @@ void Doxy_Work::transferFunctionDocumentation()
 
          if (mdec->isPrototype() || (mdec->isVariable() && mdec->isExternal()) ) {
             for (auto mdef : *mn ) {
-               combineDeclarationAndDefinition(mdec.data(), mdef.data());
+               combineDeclarationAndDefinition(mdec, mdef);
             }
          }
       }
@@ -4647,7 +4647,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
       for (auto mni : *masterCd->memberNameInfoSDict()) {
 
          for (auto mi : *mni) {
-            MemberDef *md = mi.memberDef;
+            QSharedPointer<MemberDef> md = mi.memberDef;
 
             if (md->isVariable() || md->isObjCProperty()) {
                // for each member variable in this class
@@ -7581,8 +7581,8 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                            fmd->setExplicitExternal(root->explicitExternal);
                            fmd->setRefItems(root->sli);
                            fmd->setAnchor();
-                           md->insertEnumField(fmd.data());
-                           fmd->setEnumScope(md.data(), true);
+                           md->insertEnumField(fmd);
+                           fmd->setEnumScope(md, true);
 
                            QSharedPointer<MemberName> mn = mnsd->find(root->name);
 
@@ -7613,8 +7613,8 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                                     QSharedPointer<NamespaceDef> fnd = fmd->getNamespaceDef();
 
                                     if (fnd == nd) { // enum value is inside a namespace
-                                       md->insertEnumField(fmd.data());
-                                       fmd->setEnumScope(md.data());
+                                       md->insertEnumField(fmd);
+                                       fmd->setEnumScope(md);
                                     }
 
                                  } else if (isGlobal) {
@@ -7622,16 +7622,16 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 
                                     if (ffd == fd) { 
                                        // enum value has file scope
-                                       md->insertEnumField(fmd.data());
-                                       fmd->setEnumScope(md.data());
+                                       md->insertEnumField(fmd);
+                                       fmd->setEnumScope(md);
                                     }
 
                                  } else if (isRelated && cd)  {
                                     // reparent enum value to
                                     // match the enum's scope
                                  
-                                    md->insertEnumField(fmd.data());   // add field def to list
-                                    fmd->setEnumScope(md.data());      // cross ref with enum name
+                                    md->insertEnumField(fmd);          // add field def to list
+                                    fmd->setEnumScope(md);             // cross ref with enum name
                                     fmd->setEnumClassScope(cd);        // cross ref with enum name
                                     fmd->setOuterScope(cd);
                                     fmd->makeRelated();
@@ -7643,8 +7643,8 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                                     if (fcd == cd) { 
                                        // enum value is inside a class
                                      
-                                       md->insertEnumField(fmd.data()); // add field def to list
-                                       fmd->setEnumScope(md.data());    // cross ref with enum name
+                                       md->insertEnumField(fmd);  // add field def to list
+                                       fmd->setEnumScope(md);    // cross ref with enum name
                                     }
                                  }
                               }
@@ -7880,14 +7880,14 @@ void Doxy_Work::computeMemberRelations()
                   if (matchArguments2(bmd->getOuterScope(), bmd->getFileDef(), bmdAl,
                                      md->getOuterScope(), md->getFileDef(), mdAl,true)) {
 
-                     MemberDef *rmd;
+                     QSharedPointer<MemberDef> rmd;
                      if ((rmd = md->reimplements()) == 0 || 
                           minClassDistance(mcd, bmcd) < minClassDistance(mcd, rmd->getClassDef())) {
                         
-                        md->setReimplements(bmd.data());
+                        md->setReimplements(bmd);
                      }
                     
-                     bmd->insertReimplementedBy(md.data());
+                     bmd->insertReimplementedBy(md);
                   }
                }
             }
@@ -8177,7 +8177,7 @@ void Doxy_Work::inheritDocumentation()
          if (md->documentation().isEmpty() && md->briefDescription().isEmpty()) {
             // no documentation yet
 
-            MemberDef *bmd = md->reimplements();
+            QSharedPointer<MemberDef> bmd = md->reimplements();
 
             while (bmd && bmd->documentation().isEmpty() && bmd->briefDescription().isEmpty() ) {
                // search up the inheritance tree for a documentation member
@@ -8233,7 +8233,7 @@ void Doxy_Work::addMembersToMemberGroup()
    // for each file
    for (auto &fn : *Doxygen::inputNameList) {
       for (auto &fd : *fn) {
-         fd->addMembersToMemberGroup(fd);
+         fd->addMembersToMemberGroup();
       }
    }
 
@@ -8244,7 +8244,7 @@ void Doxy_Work::addMembersToMemberGroup()
 
    // for each group
    for (auto gd : *Doxygen::groupSDict) {
-      gd->addMembersToMemberGroup(gd);
+      gd->addMembersToMemberGroup();
    }
 }
 

@@ -21,19 +21,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <config.h>
+#include <doxygen.h>
+#include <doxy_globals.h>
+#include <filedef.h>
+#include <groupdef.h>
+#include <htmlhelp.h>
+#include <language.h>
+#include <message.h>
+#include <memberdef.h>
 #include <qtextcodec.h>
 #include <stringmap.h>
-#include <htmlhelp.h>
-#include <config.h>
-#include <message.h>
-#include <doxygen.h>
-#include <language.h>
-#include <groupdef.h>
-#include <memberdef.h>
-#include <filedef.h>
 #include <util.h>
-
-#include <doxy_globals.h>
 
 /** Class representing a field in the HTML help index. */
 struct IndexField {

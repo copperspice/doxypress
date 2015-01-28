@@ -122,7 +122,7 @@ void linkifyText(const TextGeneratorIntf &ol, QSharedPointer<Definition> scope, 
                  QSharedPointer<Definition> self, const char *text, bool autoBreak = false, bool external = true,
                  bool keepSpaces = false,  int indentLevel = 0);
 
-void setAnchors(MemberList *ml);
+void setAnchors(QSharedPointer<MemberList> ml);
 
 QByteArray fileToString(const char *name, bool filter = false, bool isSourceCode = false);
 
@@ -255,7 +255,7 @@ QByteArray convertToJSString(const char *s);
 
 QByteArray getOverloadDocs();
 
-void addMembersToMemberGroup(MemberList *ml, MemberGroupSDict **ppMemberGroupSDict, QSharedPointer<Definition> context);
+void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **ppMemberGroupSDict, QSharedPointer<Definition> context);
 
 int extractClassNameFromType(const QByteArray &type, int &pos,
                    QByteArray &name, QByteArray &templSpec, SrcLangExt = SrcLangExt_Unknown);

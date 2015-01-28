@@ -34,6 +34,7 @@ class ClassDef;
 class FileDef;
 class ClassSDict;
 class MemberDef;
+class MemberList;
 class Definition;
 class DirDef;
 class GroupDef;
@@ -357,7 +358,7 @@ class DotGroupCollaboration
       addCollaborationMember(def.data(), url, eType);
    }
 
-   void addMemberList( class MemberList *ml );
+   void addMemberList(QSharedPointer<MemberList> ml);
    void writeGraphHeader(QTextStream &t, const QByteArray &title) const;
 
    Edge *addEdge( DotNode *_pNStart, DotNode *_pNEnd, EdgeType _eType,

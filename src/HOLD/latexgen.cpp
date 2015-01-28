@@ -1981,10 +1981,9 @@ void LatexGenerator::exceptionEntry(const char *prefix, bool closeBracket)
    t << " ";
 }
 
-void LatexGenerator::writeDoc(DocNode *n, Definition *ctx, MemberDef *)
+void LatexGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> )
 {
-   LatexDocVisitor *visitor =
-      new LatexDocVisitor(t, *this, ctx ? ctx->getDefFileExtension() : QByteArray(""), insideTabbing);
+   LatexDocVisitor *visitor = new LatexDocVisitor(t, *this, ctx ? ctx->getDefFileExtension() : QByteArray(""), insideTabbing);
    n->accept(visitor);
    delete visitor;
 }

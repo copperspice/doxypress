@@ -411,6 +411,7 @@ class XMLCodeGenerator : public CodeOutputInterface
    QTextStream &m_t;
    QByteArray m_refId;
    QByteArray m_external;
+
    int m_lineNumber;
    bool m_isMemberRef;
    int m_col;
@@ -420,8 +421,8 @@ class XMLCodeGenerator : public CodeOutputInterface
    bool m_insideSpecialHL;
 };
 
-static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, Definition *scope, 
-                                      FileDef *fileScope, int indent)
+static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, QSharedPointer<Definition> scope, 
+                                      QSharedPointer<FileDef> fileScope, int indent)
 {
    QByteArray indentStr;
    indentStr.fill(' ', indent);

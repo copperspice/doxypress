@@ -61,7 +61,7 @@ class MemberDef : public Definition
 
    // move this member into a different scope
    MemberDef *deepCopy() const;
-   void moveTo(Definition *);
+   void moveTo(QSharedPointer<Definition> scope);
 
    //-----------------------------------------------------------------------------------
    // ----  getters -----
@@ -83,7 +83,7 @@ class MemberDef : public Definition
    int initializerLines() const;
    uint64_t getMemberSpecifiers() const;
 
-   QSharedPointer<MemberList> getSectionList(Definition *d) const;
+   QSharedPointer<MemberList> getSectionList(QSharedPointer<Definition> d) const;
    QByteArray    displayDefinition() const;
 
    // scope query members
@@ -204,7 +204,7 @@ class MemberDef : public Definition
    bool isFriendClass() const;
    bool isDocumentedFriendClass() const;
 
-   MemberDef *reimplements() const;
+   QSharedPointer<MemberDef> reimplements() const;
    MemberList *reimplementedBy() const;
    bool isReimplementedBy(ClassDef *cd) const;
  
@@ -241,9 +241,9 @@ class MemberDef : public Definition
    bool hasCallerGraph() const;
    bool visibleMemberGroup(bool hideNoHeader);
 
-   MemberDef *templateMaster() const;
+   QSharedPointer<MemberDef> templateMaster() const;
    QByteArray getScopeString() const;
-   ClassDef *getClassDefOfAnonymousType();
+   QSharedPointer<ClassDef> getClassDefOfAnonymousType();
 
    // cached typedef functions
    bool isTypedefValCached() const;
@@ -301,13 +301,13 @@ class MemberDef : public Definition
    void makeForeign();
    void setHasDocumentedParams(bool b);
    void setHasDocumentedReturnType(bool b);
-   void setInheritsDocsFrom(MemberDef *md);
+   void setInheritsDocsFrom(QSharedPointer<MemberDef> md);
    void setTagInfo(TagInfo *i);
    void setArgsString(const char *as);
 
    // relation to other members
-   void setReimplements(MemberDef *md);
-   void insertReimplementedBy(MemberDef *md);
+   void setReimplements(QSharedPointer<MemberDef> md);
+   void insertReimplementedBy(QSharedPointer<MemberDef> md);
 
    // in-body documentation
    //void setInbodyDocumentation(const char *docs,const char *file,int line);
@@ -315,11 +315,11 @@ class MemberDef : public Definition
    void setRelatedAlso(QSharedPointer<ClassDef> cd);
 
    // enumeration specific members
-   void insertEnumField(MemberDef *md);
-   void setEnumScope(MemberDef *md, bool livesInsideEnum = false);
+   void insertEnumField(QSharedPointer<MemberDef> md);
+   void setEnumScope(QSharedPointer<MemberDef> md, bool livesInsideEnum = false);
    void setEnumClassScope(QSharedPointer<ClassDef> cd);
    void setDocumentedEnumValues(bool value);
-   void setAnonymousEnumType(MemberDef *md);
+   void setAnonymousEnumType(QSharedPointer<MemberDef> md);
 
    // example related members
    bool addExample(const char *anchor, const char *name, const char *file);
@@ -350,10 +350,10 @@ class MemberDef : public Definition
    void enableCallGraph(bool e);
    void enableCallerGraph(bool e);
 
-   void setTemplateMaster(MemberDef *mt);
+   void setTemplateMaster(QSharedPointer<MemberDef> mt);
    void addListReference(Definition *d);
    void setDocsForDefinition(bool b);
-   void setGroupAlias(MemberDef *md);
+   void setGroupAlias(QSharedPointer<MemberDef> md);
 
    void cacheTypedefVal(QSharedPointer<ClassDef> val, const QByteArray &templSpec, const QByteArray &resolvedType);
    void invalidateTypedefValCache();
@@ -361,14 +361,14 @@ class MemberDef : public Definition
    void invalidateCachedArgumentTypes();
 
    // declaration <-> definition relation
-   void setMemberDefinition(MemberDef *md);
-   void setMemberDeclaration(MemberDef *md);
+   void setMemberDefinition(QSharedPointer<MemberDef> md);
+   void setMemberDeclaration(QSharedPointer<MemberDef> md);
 
    void setAnonymousUsed();
-   void copyArgumentNames(MemberDef *bmd);
+   void copyArgumentNames(QSharedPointer<MemberDef> bmd);
 
-   void setCategory(ClassDef *);
-   void setCategoryRelation(MemberDef *);
+   void setCategory(QSharedPointer<ClassDef> cd);
+   void setCategoryRelation(QSharedPointer<MemberDef> md);
 
    void setDocumentation(const char *d, const char *docFile, int docLine, bool stripWhiteSpace = true);
    void setBriefDescription(const char *b, const char *briefFile, int briefLine);
@@ -381,11 +381,13 @@ class MemberDef : public Definition
    //-----------------------------------------------------------------------------------
 
    // output generation
-   void writeDeclaration(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
-                         bool inGroup, ClassDef *inheritFrom = 0, const char *inheritId = 0);
+   void writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
+                 QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
+                 bool inGroup, QSharedPointer<ClassDef> inheritFrom = QSharedPointer<ClassDef>(), 
+                 const char *inheritId = 0);
 
    void writeDocumentation(MemberList *ml, OutputList &ol, const char *scopeName, Definition *container,
-                           bool inGroup, bool showEnumValues = false, bool showInline = false);
+                 bool inGroup, bool showEnumValues = false, bool showInline = false);
 
    void writeMemberDocSimple(OutputList &ol, Definition *container);
    void writeEnumDeclaration(OutputList &typeDecl, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd);
@@ -441,6 +443,6 @@ class MemberDef : public Definition
    uchar m_isDestructorCached;  // 0 = not cached, 1=false, 2=true
 };
 
-void combineDeclarationAndDefinition(MemberDef *mdec, MemberDef *mdef);
+void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPointer<MemberDef> mdef);
 
 #endif

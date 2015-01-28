@@ -17,27 +17,24 @@
 
 #include <QRegExp>
 
-#include <pagedef.h>
-#include <groupdef.h>
-#include <docparser.h>
 #include <config.h>
-#include <util.h>
-#include <outputlist.h>
+#include <docparser.h>
+#include <doxy_globals.h>
 #include <doxygen.h>
+#include <groupdef.h>
 #include <language.h>
 #include <namespacedef.h>
+#include <outputlist.h>
+#include <pagedef.h>
 #include <reflist.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
+#include <util.h>
 
 PageDef::PageDef(const char *f, int l, const char *n, const char *d, const char *t)
    : Definition(f, l, 1, n), m_title(t)
 {
    setDocumentation(d, f, l);
 
-   m_subPageDict  = new PageSDict();
-   m_pageScope    = 0;
+   m_subPageDict  = new PageSDict();   
    m_nestingLevel = 0;
    m_showToc      = false;
 }
@@ -49,7 +46,8 @@ PageDef::~PageDef()
 
 void PageDef::findSectionsInDocumentation()
 {
-   docFindSections(documentation(), this, 0, docFile());
+   QSharedPointer<PageDef> self = sharedFrom(this);
+   docFindSections(documentation(), self, 0, docFile());
 }
 
 QSharedPointer<GroupDef> PageDef::getGroupDef() const
@@ -60,7 +58,7 @@ QSharedPointer<GroupDef> PageDef::getGroupDef() const
        return groups->first();
 
    } else {
-      return 0;
+      return QSharedPointer<GroupDef>();
 
    }
 }
@@ -88,9 +86,10 @@ void PageDef::setFileName(const char *name, bool dontEscape)
    }
 }
 
-
 void PageDef::addInnerCompound(QSharedPointer<Definition> d)
 {
+   QSharedPointer<PageDef> self = sharedFrom(this);
+
    if (d->definitionType() == Definition::TypePage) {
 
       QSharedPointer<PageDef> pd = d.dynamicCast<PageDef>();
@@ -98,7 +97,7 @@ void PageDef::addInnerCompound(QSharedPointer<Definition> d)
            
       m_subPageDict->insert(pd->name(), pd);
 
-      d->setOuterScope(this);
+      d->setOuterScope(self);
 
       if (this == Doxygen::mainPage) {
          pd->setNestingLevel(m_nestingLevel);
@@ -145,9 +144,12 @@ void PageDef::writeTagFile(QTextStream &tagFile)
 
 void PageDef::writeDocumentation(OutputList &ol)
 {
+   QSharedPointer<PageDef> self = sharedFrom(this);
+
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
    
-   QByteArray pageName, manPageName;
+   QByteArray pageName;
+   QByteArray manPageName;
 
    pageName    = escapeCharsInString(name(), false, true);
    manPageName = escapeCharsInString(name(), true, true);
@@ -196,7 +198,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.endTitleHead(manPageName, manPageName);
 
    if (si) {
-      ol.generateDoc(docFile(), docLine(), this, 0, si->title, true, false, 0, true, false);
+      ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, 0, true, false);
       ol.endSection(si->label, si->type);
    }
    ol.popGeneratorState();
@@ -213,7 +215,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    if (! title().isEmpty() && !name().isEmpty() && si != 0) {
 
       startTitle(ol, getOutputFileBase(), this);
-      ol.generateDoc(docFile(), docLine(), this, 0, si->title, true, false, 0, true, false);
+      ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, 0, true, false);
       
       endTitle(ol, getOutputFileBase(), name());
    }
@@ -239,11 +241,12 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.popGeneratorState();
    //1.}
 
-   Doxygen::indexList->addIndexItem(this, 0, 0, filterTitle(title()));
+   Doxygen::indexList->addIndexItem(self, QSharedPointer<MemberDef>(), 0, filterTitle(title()));
 }
-
+ 
 void PageDef::writePageDocumentation(OutputList &ol)
 {
+   QSharedPointer<PageDef> self = sharedFrom(this);
    bool markdownEnabled = Doxygen::markdownSupport;
 
    if (getLanguage() == SrcLangExt_Markdown) {
@@ -255,15 +258,8 @@ void PageDef::writePageDocumentation(OutputList &ol)
 
 printf("\n\n BROOM    ------->    PageDocumentation  begin ");
 
-   ol.generateDoc(
-      docFile(),           // fileName
-      docLine(),           // startLine
-      this,                // context
-      0,                   // memberdef
-      documentation() + inbodyDocumentation(), // docStr
-      true,                // index words
-      false                // not an example
-   );
+   ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), 
+                  documentation() + inbodyDocumentation(), true, false );
 
 printf("\n BROOM    ------->    PageDocumentation  done ");
 

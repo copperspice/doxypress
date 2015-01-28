@@ -25,6 +25,7 @@
 #include <dirdef.h>
 #include <docparser.h>
 #include <doxy_build_info.h>
+#include <doxy_globals.h>
 #include <doxygen.h>
 #include <logos.h>
 #include <diagram.h>
@@ -41,9 +42,6 @@
 #include <ftvhelp.h>
 #include <resourcemgr.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 //#define DBG_HTML(x) x;
 #define DBG_HTML(x)
@@ -2777,7 +2775,7 @@ void HtmlGenerator::endMemberDeclaration(const char *anchor, const  QByteArray &
    m_textStream << "\"><td class=\"memSeparator\" colspan=\"2\">&#160;</td></tr>\n";
 }
 
-void HtmlGenerator::setCurrentDoc(Definition *context, const char *anchor, bool isSourceFile)
+void HtmlGenerator::setCurrentDoc(QSharedPointer<Definition> context, const char *anchor, bool isSourceFile)
 {
    if (Doxygen::searchIndex) {
       Doxygen::searchIndex->setCurrentDoc(context, anchor, isSourceFile);

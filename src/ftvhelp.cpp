@@ -186,7 +186,7 @@ void FTVHelp::decContentsDepth()
  *  \param def Definition corresponding to this entry
  */
 void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
-                              bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def )
+                              bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def)
 {
    //printf("%p: m_indent=%d addContentsItem(%s,%s,%s,%s)\n",this,m_indent,name,ref,file,anchor);
    QList<FTVNode *> *nl = &m_indentNodes[m_indent];

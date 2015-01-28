@@ -670,7 +670,7 @@ BodyInfo *unmarshalBodyInfo(StorageIntf *s)
    BodyInfo *result = new BodyInfo;
    result->startLine = unmarshalInt(s);
    result->endLine   = unmarshalInt(s);
-   result->fileDef   = (FileDef *)unmarshalObjPointer(s);
+   result->fileDef   = unmarshalObjPointer(s).dynamicCast<FileDef>();
 
    return result;
 }

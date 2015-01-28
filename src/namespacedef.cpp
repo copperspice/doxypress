@@ -158,7 +158,7 @@ void NamespaceDef::addMembersToMemberGroup(QSharedPointer<NamespaceDef> self)
 
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
-         ::addMembersToMemberGroup(ml.data(), &memberGroupSDict, self);
+         ::addMembersToMemberGroup(ml, &memberGroupSDict, self);
       }
    }
 
@@ -197,31 +197,31 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
    switch (md->memberType()) {
 
       case MemberType_Variable:
-         addMemberToList(MemberListType_decVarMembers, md.data());
-         addMemberToList(MemberListType_docVarMembers, md.data());
+         addMemberToList(MemberListType_decVarMembers, md);
+         addMemberToList(MemberListType_docVarMembers, md);
          break;
 
       case MemberType_Function:
-         addMemberToList(MemberListType_decFuncMembers, md.data());
-         addMemberToList(MemberListType_docFuncMembers, md.data());
+         addMemberToList(MemberListType_decFuncMembers, md);
+         addMemberToList(MemberListType_docFuncMembers, md);
          break;
 
       case MemberType_Typedef:
-         addMemberToList(MemberListType_decTypedefMembers, md.data());
-         addMemberToList(MemberListType_docTypedefMembers, md.data());
+         addMemberToList(MemberListType_decTypedefMembers, md);
+         addMemberToList(MemberListType_docTypedefMembers, md);
          break;
 
       case MemberType_Enumeration:
-         addMemberToList(MemberListType_decEnumMembers, md.data());
-         addMemberToList(MemberListType_docEnumMembers, md.data());
+         addMemberToList(MemberListType_decEnumMembers, md);
+         addMemberToList(MemberListType_docEnumMembers, md);
          break;
 
       case MemberType_EnumValue:
          break;
 
       case MemberType_Define:
-         addMemberToList(MemberListType_decDefineMembers, md.data());
-         addMemberToList(MemberListType_docDefineMembers, md.data());
+         addMemberToList(MemberListType_decDefineMembers, md);
+         addMemberToList(MemberListType_docDefineMembers, md);
          break;
 
       default:
@@ -238,7 +238,7 @@ void NamespaceDef::computeAnchors()
    QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
    if (allMemberList) {
-      setAnchors(allMemberList.data());
+      setAnchors(allMemberList);
    }
 }
 
@@ -956,7 +956,7 @@ QSharedPointer<MemberList> NamespaceDef::createMemberList(MemberListType lt)
    return ml;
 }
 
-void NamespaceDef::addMemberToList(MemberListType lt, MemberDef *md)
+void NamespaceDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 {  
    QSharedPointer<MemberList> ml = createMemberList(lt);
    ml->append(md);
@@ -1020,15 +1020,15 @@ bool NamespaceDef::isLinkable() const
    return isLinkableInProject() || isReference();
 }
 
-MemberDef *NamespaceDef::getMemberByName(const QByteArray &n) const
+QSharedPointer<MemberDef> NamespaceDef::getMemberByName(const QByteArray &n) const
 {
    QSharedPointer<MemberDef> md;
 
-   if (m_allMembersDict && !n.isEmpty()) {
+   if (m_allMembersDict && ! n.isEmpty()) {
       md = QSharedPointer<MemberDef> (m_allMembersDict->find(n));
    }
 
-   return md.data();
+   return md;
 }
 
 QByteArray NamespaceDef::title() const

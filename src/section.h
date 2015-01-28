@@ -31,8 +31,9 @@ struct SectionInfo {
                       Paragraph     = 4,
                       Anchor        = 5
                     };
-   SectionInfo(const char *f, const int lin, const char *l, const char *t, SectionType st, int lev, const char *r = 0) :
-      label(l), title(t), type(st), ref(r), definition(0), fileName(f), lineNr(lin), generated(false), level(lev) 
+
+   SectionInfo(const char *f, const int lin, const char *l, const char *t, SectionType st, int lev, const char *r = 0) 
+      : label(l), title(t), type(st), ref(r), fileName(f), lineNr(lin), generated(false), level(lev) 
    { }
 
    SectionInfo(const SectionInfo &s) {

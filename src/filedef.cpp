@@ -55,8 +55,7 @@ class DevNullCodeDocInterface : public CodeOutputInterface
                               const QByteArray &, const QByteArray &) override  {}
 
    virtual void writeTooltip(const char *, const DocLinkInfo &, const QByteArray &,
-                             const QByteArray &, const SourceLinkInfo &, const SourceLinkInfo & ) override
-   {}
+                             const QByteArray &, const SourceLinkInfo &, const SourceLinkInfo & ) override {}
 
    virtual void writeLineNumber(const char *, const QByteArray &, const char *, int)  override {}
    virtual void startCodeLine(bool) {}
@@ -65,10 +64,8 @@ class DevNullCodeDocInterface : public CodeOutputInterface
    virtual void endFontClass() {}
    virtual void writeCodeAnchor(const char *) {}
    virtual void linkableSymbol(int, const char *, Definition *, Definition *) {}
-   virtual void setCurrentDoc(Definition *, const char *, bool) {}
-
-   virtual void addWord(const QString &, bool) override
-   {}
+   virtual void setCurrentDoc(QSharedPointer<Definition> d, const char *, bool) override {}
+   virtual void addWord(const QString &, bool) override {}
 };
 
 /*! create a new file definition, where \a p is the file path,
@@ -112,7 +109,8 @@ FileDef::~FileDef()
 /*! Compute the HTML anchor names for all members in the class */
 void FileDef::computeAnchors()
 {
-   MemberList *ml = getMemberList(MemberListType_allMembersList);
+   QSharedPointer<MemberList> ml = getMemberList(MemberListType_allMembersList);
+
    if (ml) {
       setAnchors(ml);
    }
@@ -127,7 +125,9 @@ void FileDef::distributeMemberGroupDocumentation()
 
 void FileDef::findSectionsInDocumentation()
 {
-   docFindSections(documentation(), this, 0, docFile());
+   QSharedPointer<FileDef> self = sharedFrom(this);
+
+   docFindSections(documentation(), self, 0, docFile());
   
    for (auto mg : m_memberGroupSDict) {
       mg->findSectionsInDocumentation();
@@ -162,7 +162,7 @@ void FileDef::writeTagFile(QTextStream &tagFile)
       
       for (auto ii : m_includeList) {
          if (! ii.indirect) {
-            FileDef *fd = ii.fileDef;
+            QSharedPointer<FileDef> fd = ii.fileDef;
 
             if (fd && fd->isLinkable() && !fd->isReference()) {
                bool isIDLorJava = false;
@@ -214,7 +214,7 @@ void FileDef::writeTagFile(QTextStream &tagFile)
          case LayoutDocEntry::MemberDecl: 
          {
             LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
-            MemberList *ml = getMemberList(lmd->type);
+            QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
             if (ml) {
                ml->writeTagFile(tagFile);
@@ -241,6 +241,8 @@ void FileDef::writeTagFile(QTextStream &tagFile)
 
 void FileDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
 {
+   QSharedPointer<FileDef> self = sharedFrom(this);
+
    if (hasDetailedDescription()) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
@@ -256,8 +258,9 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
 
       ol.startTextBlock();
       if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF")) {
-         ol.generateDoc(briefFile(), briefLine(), this, 0, briefDescription(), false, false);
+         ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
+
       if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF") &&
             !documentation().isEmpty()) {
          ol.pushGeneratorState();
@@ -272,7 +275,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
       }
 
       if (!documentation().isEmpty()) {
-         ol.generateDoc(docFile(), docLine(), this, 0, documentation() + "\n", true, false);
+         ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
       }
       
       if (Config_getBool("SOURCE_BROWSER")) {
@@ -302,21 +305,21 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
 
 void FileDef::writeBriefDescription(OutputList &ol)
 {
-   if (!briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
-      DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), this, 0,
+   QSharedPointer<FileDef> self = sharedFrom(this);
+
+   if (! briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+      DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
                                              briefDescription(), true, false, 0, true, false);
 
       if (rootNode && !rootNode->isEmpty()) {
          ol.startParagraph();
-         ol.writeDoc(rootNode, this, 0);
+         ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::RTF);
          ol.writeString(" \n");
          ol.enable(OutputGenerator::RTF);
 
-         if (Config_getBool("REPEAT_BRIEF") ||
-               !documentation().isEmpty()
-            ) {
+         if (Config_getBool("REPEAT_BRIEF") || ! documentation().isEmpty()) {
             ol.disableAllBut(OutputGenerator::Html);
             ol.startTextLink(0, "details");
             ol.parseText(theTranslator->trMore());
@@ -325,8 +328,10 @@ void FileDef::writeBriefDescription(OutputList &ol)
          ol.popGeneratorState();
          ol.endParagraph();
       }
+
       delete rootNode;
    }
+
    ol.writeSynopsis();
 }
 
@@ -337,11 +342,11 @@ void FileDef::writeIncludeFiles(OutputList &ol)
      
       for (auto ii : m_includeList) {
          if (! ii.indirect) {
-            FileDef *fd = ii.fileDef;
+            QSharedPointer<FileDef> fd = ii.fileDef;
             bool isIDLorJava = false;
 
             if (fd) {
-               SrcLangExt lang   = fd->getLanguage();
+               SrcLangExt lang = fd->getLanguage();
                isIDLorJava = lang == SrcLangExt_IDL || lang == SrcLangExt_Java;
             }
 
@@ -372,7 +377,7 @@ void FileDef::writeIncludeFiles(OutputList &ol)
             // we could also we the name as it is used within doxygen,
             // then we should have used fd->docName() instead of ii->includeName
             if (fd && fd->isLinkable()) {
-               ol.writeObjectLink(fd->getReference(), 
+               ol.writeObjectLink(fd->getReference(),  
                                   fd->generateSourceFile() ? fd->includeName() : fd->getOutputFileBase(),
                                   0, ii.includeName);
 
@@ -402,10 +407,11 @@ void FileDef::writeIncludeFiles(OutputList &ol)
 
 void FileDef::writeIncludeGraph(OutputList &ol)
 {
-   if (Config_getBool("HAVE_DOT") /*&& Config_getBool("INCLUDE_GRAPH")*/) {
-      //printf("Graph for file %s\n",name().data());
+   QSharedPointer<FileDef> self = sharedFrom(this);
 
-      DotInclDepGraph incDepGraph(this, false);
+   if (Config_getBool("HAVE_DOT") /*&& Config_getBool("INCLUDE_GRAPH")*/) {
+     
+      DotInclDepGraph incDepGraph(self, false);
 
       if (incDepGraph.isTooBig()) {
          warn_uncond("Include graph for '%s' not generated, too many nodes. Consider increasing DOT_GRAPH_MAX_NODES.\n", name().data());
@@ -418,18 +424,21 @@ void FileDef::writeIncludeGraph(OutputList &ol)
          ol.endInclDepGraph(incDepGraph);
          ol.enableAll();
          ol.endTextBlock(true);
-      }
-      //incDepGraph.writeGraph(Config_getString("HTML_OUTPUT"),fd->getOutputFileBase());
+      }      
    }
 }
 
 void FileDef::writeIncludedByGraph(OutputList &ol)
 {
-   if (Config_getBool("HAVE_DOT") /*&& Config_getBool("INCLUDED_BY_GRAPH")*/) {
-      //printf("Graph for file %s\n",name().data());
-      DotInclDepGraph incDepGraph(this, true);
+   QSharedPointer<FileDef> self = sharedFrom(this);
+
+   if (Config_getBool("HAVE_DOT") /*&& Config_getBool("INCLUDED_BY_GRAPH")*/) {      
+      DotInclDepGraph incDepGraph(self, true);
+
       if (incDepGraph.isTooBig()) {
-         warn_uncond("Included by graph for '%s' not generated, too many nodes. Consider increasing DOT_GRAPH_MAX_NODES.\n", name().data());
+         warn_uncond("Included by graph for '%s' not generated, too many nodes. "
+                     " Consider increasing DOT_GRAPH_MAX_NODES.\n", name().constData());
+
       } else if (!incDepGraph.isTrivial()) {
          ol.startTextBlock();
          ol.disable(OutputGenerator::Man);
@@ -443,10 +452,8 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
    }
 }
 
-
 void FileDef::writeSourceLink(OutputList &ol)
-{
-   //printf("%s: generateSourceFile()=%d\n",name().data(),generateSourceFile());
+{   
    if (generateSourceFile()) {
       ol.disableAllBut(OutputGenerator::Html);
       ol.startParagraph();
@@ -458,8 +465,7 @@ void FileDef::writeSourceLink(OutputList &ol)
    }
 }
 
-void FileDef::writeNamespaceDeclarations(OutputList &ol, const QByteArray &title,
-      bool const isConstantGroup)
+void FileDef::writeNamespaceDeclarations(OutputList &ol, const QByteArray &title, bool const isConstantGroup)
 {
    // write list of namespaces 
    m_namespaceSDict.writeDeclaration(ol, title, isConstantGroup);   
@@ -515,10 +521,11 @@ void FileDef::endMemberDocumentation(OutputList &ol)
 void FileDef::writeMemberGroups(OutputList &ol)
 {
    /* write user defined member groups */
+   QSharedPointer<FileDef> self = sharedFrom(this);
   
    for (auto mg : m_memberGroupSDict) {
-      if ((!mg->allMembersInSameSection() || !m_subGrouping) && mg->header() != "[NOHEADER]") {
-         mg->writeDeclarations(ol, 0, 0, this, 0);
+      if ((! mg->allMembersInSameSection() || ! m_subGrouping) && mg->header() != "[NOHEADER]") {
+         mg->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(), self, QSharedPointer<GroupDef>());
       }
    }  
 }
@@ -555,7 +562,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
-         MemberList *ml = getMemberList(lmd->type);
+         QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
             ol.writeSummaryLink(QString(""), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
@@ -575,8 +582,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
 */
 void FileDef::writeDocumentation(OutputList &ol)
 {
-   QSharedPointer<DirDef> self = sharedFrom(this);
-
+   QSharedPointer<FileDef> self = sharedFrom(this);
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
 
    QByteArray versionTitle;
@@ -618,7 +624,7 @@ void FileDef::writeDocumentation(OutputList &ol)
 
       startTitle(ol, getOutputFileBase(), this);
       ol.parseText(pageTitle);
-      addGroupListToTitle(ol, this);
+      addGroupListToTitle(ol, self);
       endTitle(ol, getOutputFileBase(), title);
    }
 
@@ -633,7 +639,7 @@ void FileDef::writeDocumentation(OutputList &ol)
    }
 
    if (Doxygen::searchIndex) {
-      Doxygen::searchIndex->setCurrentDoc(this, anchor(), false);
+      Doxygen::searchIndex->setCurrentDoc(self, anchor(), false);
       Doxygen::searchIndex->addWord(localName(), true);
    }
 
@@ -744,7 +750,7 @@ void FileDef::writeDocumentation(OutputList &ol)
    endFileWithNavPath(self, ol);
 
    if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
-      MemberList *ml = getMemberList(MemberListType_allMembersList);
+      QSharedPointer<MemberList> ml = getMemberList(MemberListType_allMembersList);
 
       if (ml) {
          ml->sort();
@@ -774,7 +780,7 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
    ol.writeString("      <div class=\"navtab\">\n");
    ol.writeString("        <table>\n");
 
-   MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
+   QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
    if (allMemberList) {
       
@@ -809,6 +815,8 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
 /*! Write a source listing of this file to the output */
 void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameTu)
 {
+   QSharedPointer<FileDef> self = sharedFrom(this);
+
    static bool generateTreeView  = Config_getBool("GENERATE_TREEVIEW");
    static bool filterSourceFiles = Config_getBool("FILTER_SOURCE_FILES");
    static bool latexSourceCode   = Config_getBool("LATEX_SOURCE_CODE");
@@ -885,6 +893,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       ol.endCodeFragment();
    } else
 #endif
+
    {
       ParserInterface *pIntf = Doxygen::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
@@ -898,27 +907,23 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       if (needs2PassParsing) {
          // parse code for cross-references only (see bug707641)
          pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), true, true), 
-                          getLanguage(),  false, 0, this );
+                          getLanguage(), false, 0, self);
       }
+
       pIntf->parseCode(ol, 0,
                        fileToString(getFilePath(), filterSourceFiles, true),
                        getLanguage(),      // lang
                        false,              // isExampleBlock
                        0,                  // exampleName
-                       this,               // fileDef
+                       self,               // fileDef
                        -1,                 // startLine
                        -1,                 // endLine
                        false,              // inlineFragment
-                       0,                  // memberDef
-                       true,               // showLineNumbers
-                       0,                  // searchCtx
-                       !needs2PassParsing  // collectXRefs
-                      );
+                       QSharedPointer<MemberDef>(), true, QSharedPointer<Definition>(), ! needs2PassParsing);
+                      
       ol.endCodeFragment();
    }
-
-   QSharedPointer<DirDef> self = sharedFrom(this);
-
+  
    ol.endContents();
    endFileWithNavPath(self, ol);
    ol.enableAll();
@@ -926,6 +931,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
 
 void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
 {
+   QSharedPointer<FileDef> self = sharedFrom(this);
    static bool filterSourceFiles = Config_getBool("FILTER_SOURCE_FILES");
 
    DevNullCodeDocInterface devNullIntf;  
@@ -950,7 +956,7 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
    {
       ParserInterface *pIntf = Doxygen::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
-      pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), filterSourceFiles, true), getLanguage(), false, 0, this);
+      pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), filterSourceFiles, true), getLanguage(), false, 0, self);
    }
 }
 
@@ -963,15 +969,12 @@ void FileDef::finishParsing()
    ClangParser::instance()->finish();
 }
 
-void FileDef::addMembersToMemberGroup(QSharedPointer<FileDef> self)
+void FileDef::addMembersToMemberGroup()
 { 
-  if (self != this) {
-      throw "broom"; // broom 
-   }
-
+   QSharedPointer<FileDef> self = sharedFrom(this);
    MemberGroupSDict *temp = &m_memberGroupSDict;
 
-   for (auto &ml : m_memberLists) {
+   for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
          ::addMembersToMemberGroup(ml, &temp, self);    
       }
@@ -993,7 +996,7 @@ void FileDef::insertMember(QSharedPointer<MemberDef> md)
       return;
    }
 
-   MemberList *allMemberList = getMemberList(MemberListType_allMembersList);
+   QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
    if (allMemberList && allMemberList->lastIndexOf(md) != -1) { 
       return;
@@ -1001,7 +1004,7 @@ void FileDef::insertMember(QSharedPointer<MemberDef> md)
 
    if (allMemberList == nullptr) {   
       m_memberLists.append(QSharedPointer<MemberList>(new MemberList(MemberListType_allMembersList)));
-      allMemberList = m_memberLists.last().data();
+      allMemberList = m_memberLists.last();
    }
 
    allMemberList->append(md);
@@ -1012,10 +1015,12 @@ void FileDef::insertMember(QSharedPointer<MemberDef> md)
          addMemberToList(MemberListType_decVarMembers, md);
          addMemberToList(MemberListType_docVarMembers, md);
          break;
+
       case MemberType_Function:
          addMemberToList(MemberListType_decFuncMembers, md);
          addMemberToList(MemberListType_docFuncMembers, md);
          break;
+
       case MemberType_Typedef:
          addMemberToList(MemberListType_decTypedefMembers, md);
          addMemberToList(MemberListType_docTypedefMembers, md);
@@ -1232,16 +1237,19 @@ bool FileDef::generateSourceFile() const
 
 void FileDef::addListReferences()
 {   
+   QSharedPointer<FileDef> self = sharedFrom(this);
+
    QList<ListItemInfo> *xrefItems = xrefListItems();
-   addRefItem(xrefItems, getOutputFileBase(), theTranslator->trFile(true, true), getOutputFileBase(), name(), 0, 0 );
+   addRefItem(xrefItems, getOutputFileBase(), theTranslator->trFile(true, true), getOutputFileBase(), name(), 
+              0, QSharedPointer<Definition>());
       
-  for (auto mg : m_memberGroupSDict) {
-      mg->addListReferences(this);
+   for (auto mg : m_memberGroupSDict) {
+      mg->addListReferences(self);
    }
    
    for (auto &ml : m_memberLists) {
       if (ml->listType() & MemberListType_documentationLists) {
-         ml->addListReferences(this);
+         ml->addListReferences(self);
       }
    }
 }
@@ -1249,7 +1257,8 @@ void FileDef::addListReferences()
 static int findMatchingPart(const QByteArray &path, const QByteArray dir)
 {
    int si1;
-   int pos1 = 0, pos2 = 0;
+   int pos1 = 0;
+   int pos2 = 0;
 
    while ((si1 = path.indexOf('/', pos1)) != -1) {
       int si2 = dir.indexOf('/', pos2);
@@ -1340,14 +1349,14 @@ static Directory *findDirNode(Directory *root, const QByteArray &name)
    }
 }
 
-static void mergeFileDef(Directory *root, FileDef *fd)
+static void mergeFileDef(Directory *root, QSharedPointer<FileDef> fd)
 {
    QByteArray rootPath = root->name();
    QByteArray filePath = fd->getFilePath();
  
    Directory *dirNode = findDirNode(root, filePath);
 
-   if (!dirNode->children().isEmpty()) {
+   if (! dirNode->children().isEmpty()) {
       dirNode->children().last()->setLast(false);
    }
 
@@ -1355,7 +1364,7 @@ static void mergeFileDef(Directory *root, FileDef *fd)
    dirNode->addChild(e);
 }
 
-static void addDirsAsGroups(Directory *root, GroupDef *parent, int level)
+static void addDirsAsGroups(Directory *root, QSharedPointer<GroupDef> parent, int level)
 {
    QSharedPointer<GroupDef> gd;
 
@@ -1363,7 +1372,7 @@ static void addDirsAsGroups(Directory *root, GroupDef *parent, int level)
       gd = QSharedPointer<GroupDef>(new GroupDef("[generated]", 1, root->path(), root->name() ));
 
       if (parent) {
-         parent->addGroup(gd.data());
+         parent->addGroup(gd);
          gd->makePartOfGroup(parent);
 
       } else {
@@ -1373,7 +1382,7 @@ static void addDirsAsGroups(Directory *root, GroupDef *parent, int level)
   
    for (auto de : root->children()) {
       if (de->kind() == DirEntry::Dir) {
-         addDirsAsGroups((Directory *)de, gd.data(), level + 1);
+         addDirsAsGroups((Directory *)de, gd, level + 1);
       }
    }
 }
@@ -1389,7 +1398,7 @@ void generateFileTree()
       }
    }
  
-   addDirsAsGroups(root, 0, 0);
+   addDirsAsGroups(root, QSharedPointer<GroupDef>(), 0);
 
    delete root;
 }
@@ -1494,7 +1503,7 @@ QSharedPointer<MemberList> FileDef::createMemberList(MemberListType lt)
    return m_memberLists.last();
 }
 
-void FileDef::addMemberToList(MemberListType lt, MemberDef *md)
+void FileDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 {
    QSharedPointer<MemberList> ml = createMemberList(lt);  
    ml->append(md);
@@ -1508,23 +1517,25 @@ void FileDef::addMemberToList(MemberListType lt, MemberDef *md)
    }
 }
 
-MemberList *FileDef::getMemberList(MemberListType lt) const
+QSharedPointer<MemberList> FileDef::getMemberList(MemberListType lt) const
 {
    for (auto &ml : m_memberLists) {
       if (ml->listType() == lt) {
-         return const_cast<MemberList *>(ml.data());
+         return ml;
       }
    }
 
-   return nullptr;
+   return QSharedPointer<MemberList>();
 }
 
 void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title)
 { 
+   QSharedPointer<FileDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {     
-      ml->writeDeclarations(ol, 0, 0, this, 0, title, 0);      
+      ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(), self, 
+                           QSharedPointer<GroupDef>(), title, 0);      
    }
 }
 
@@ -1543,7 +1554,7 @@ bool FileDef::isLinkableInProject() const
    return hasDocumentation() && ! isReference() && showFiles;
 }
 
-static void getAllIncludeFilesRecursively(QHash<QString, void *> *filesVisited, const FileDef *fd, QStringList &incFiles)
+static void getAllIncludeFilesRecursively(QHash<QString, void *> *filesVisited, QSharedPointer<const FileDef> fd, QStringList &incFiles)
 {
    if (fd->includeFileList()) {
 
@@ -1561,8 +1572,10 @@ static void getAllIncludeFilesRecursively(QHash<QString, void *> *filesVisited, 
 
 void FileDef::getAllIncludeFilesRecursively(QStringList &incFiles) const
 {
+   QSharedPointer<FileDef> self = sharedFrom(this);
+
    QHash<QString, void *> includes;
-   ::getAllIncludeFilesRecursively(&includes, this, incFiles);
+   ::getAllIncludeFilesRecursively(&includes, self, incFiles);
 }
 
 QByteArray FileDef::title() const

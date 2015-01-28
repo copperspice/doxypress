@@ -100,15 +100,18 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>
   
    void countDecMembers(bool countEnumValues = false, GroupDef *gd = 0);
    void countDocMembers(bool countEnumValues = false);
-   int countInheritableMembers(ClassDef *inheritedFrom) const;
+   int countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) const;
 
-   void writePlainDeclarations(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
-                  ClassDef *inheritedFrom, const char *inheritId);
+   void writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
+                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
+                  QSharedPointer<ClassDef> inheritedFrom, const char *inheritId);
 
-   void writeDeclarations(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
+   void writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
+                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
                   const char *title, const char *subtitle,
                   bool showEnumValues = false, bool showInline = false,
-                  ClassDef *inheritedFrom = 0, MemberListType lt = MemberListType_pubMethods);
+                  QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), 
+                  MemberListType lt = MemberListType_pubMethods);
 
    void writeDocumentation(OutputList &ol, const char *scopeName, Definition *container, const char *title, 
                   bool showEnumValues = false, bool showInline = false);

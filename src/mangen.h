@@ -363,8 +363,7 @@ class ManGenerator : public OutputGenerator
 
    void writeCodeAnchor(const char *) {}
 
-   void setCurrentDoc(Definition *, const char *, bool) {}
-
+   void setCurrentDoc(QSharedPointer<Definition> d, const char *, bool) override {}
    void addWord(const QString &word, bool hiPriority) override
    {}
 

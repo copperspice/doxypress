@@ -66,7 +66,7 @@ class LatexGenerator : public OutputGenerator
       return (o == Latex) ? this : 0;
    }
 
-   void writeDoc(DocNode *, Definition *ctx, MemberDef *);
+   void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md); 
 
    void startFile(const char *name, const char *manName, const char *title);
    void writeSearchInfo() {}
@@ -351,7 +351,7 @@ class LatexGenerator : public OutputGenerator
    void endFontClass(); // {}
 
    void writeCodeAnchor(const char *) {}
-   void setCurrentDoc(Definition *, const char *, bool) {}
+   void setCurrentDoc(QSharedPointer<Definition> d, const char *, bool) override {}
    void addWord(const QString &word, bool hiPriority) override {}
 
  private:

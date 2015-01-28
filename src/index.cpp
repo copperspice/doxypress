@@ -29,6 +29,7 @@
 #include <message.h>
 #include <index.h>
 #include <doxygen.h>
+#include <doxy_globals.h>
 #include <config.h>
 #include <filedef.h>
 #include <outputlist.h>
@@ -47,9 +48,6 @@
 #include <namespacedef.h>
 #include <filename.h>
 #include <sortedlist.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 #define MAX_ITEMS_BEFORE_MULTIPAGE_INDEX 200
 #define MAX_ITEMS_BEFORE_QUICK_INDEX 30
@@ -334,7 +332,7 @@ void endFileWithNavPath(QSharedPointer<Definition> d, OutputList &ol)
 }
 
 template<class T>
-void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part, const QString &name, const QByteArray &anchor,
+void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part, const QString &name, const QByteArray &anchor,
                        bool addToIndex = true, bool preventSeparateIndex = false)
 {
    bool hasMembers = def->getMemberLists().count() > 0 || def->getMemberGroupSDict() != 0;
@@ -361,13 +359,12 @@ void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part, const QString 
       for (auto lde : LayoutDocManager::instance().docEntries(part)) { 
 
          if (lde->kind() == LayoutDocEntry::MemberDef) {
-            LayoutDocEntryMemberDef *lmd = (LayoutDocEntryMemberDef *)lde;
-            MemberList *ml = def->getMemberList(lmd->type);
+            LayoutDocEntryMemberDef *lmd  = (LayoutDocEntryMemberDef *)lde;
+            QSharedPointer<MemberList> ml = def->getMemberList(lmd->type);
 
-            if (ml) {
-              
+            if (ml) {              
                for (auto md : *ml ) {
-                  MemberList *enumList = md->enumFieldList();
+                  QSharedPointer<MemberList> enumList = md->enumFieldList();
 
                   bool isDir = (enumList != 0 && md->isEnumerate());
                   bool isAnonymous = md->name().indexOf('@') != -1;
@@ -375,7 +372,7 @@ void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part, const QString 
                   static bool hideUndocMembers = Config_getBool("HIDE_UNDOC_MEMBERS");
                   static bool extractStatic = Config_getBool("EXTRACT_STATIC");
 
-                  if (!isAnonymous && (!hideUndocMembers || md->hasDocumentation()) && (!md->isStatic() || extractStatic)) {
+                  if (! isAnonymous && (!hideUndocMembers || md->hasDocumentation()) && (!md->isStatic() || extractStatic)) {
                      if (md->getOuterScope() == def || md->getOuterScope() == Doxygen::globalScope) {
                         Doxygen::indexList->addContentsItem(isDir, md->name(), md->getReference(), 
                                  md->getOutputFileBase(), md->anchor(), false, addToIndex);
@@ -410,6 +407,7 @@ void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part, const QString 
                   }
                }
             }
+
          } else if (lde->kind() == LayoutDocEntry::NamespaceClasses || lde->kind() == LayoutDocEntry::FileClasses ||
                     lde->kind() == LayoutDocEntry::ClassNestedClasses ) {
 
@@ -420,7 +418,7 @@ void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part, const QString 
                      static bool inlineSimpleStructs = Config_getBool("INLINE_SIMPLE_STRUCTS");
                      bool isNestedClass = def->definitionType() == Definition::TypeClass;
                      
-                     addMembersToIndex(cd.data(), LayoutDocManager::Class, cd->displayName(false), cd->anchor(),
+                     addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(),
                                        addToIndex && (isNestedClass || (cd->isSimple() && inlineSimpleStructs)),
                                        preventSeparateIndex || cd->isEmbeddedInOuterScope());
                   }
@@ -433,8 +431,6 @@ void addMembersToIndex(T *def, LayoutDocManager::LayoutPart part, const QString 
    }
 }
 
-
-//----------------------------------------------------------------------------
 /*! Generates HTML Help tree of classes */
 
 static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl, bool hideSuper, int level, FTVHelp *ftv, bool addToIndex)
@@ -447,14 +443,15 @@ static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl
    
    for (auto item : *bcl) {
 
-      ClassDef *cd = item->classDef;
+      QSharedPointer<ClassDef> cd = item->classDef;
       
       bool b;
       b = hasVisibleRoot(cd->baseClasses());
       
       if (cd->isVisibleInHierarchy() && b) { 
          // hasVisibleRoot(cd->baseClasses()))
-         if (!started) {
+
+         if (! started) {
             startIndexHierarchy(ol, level);
             if (addToIndex) {
                Doxygen::indexList->incContentsDepth();
@@ -525,9 +522,7 @@ static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl
    }
 }
 
-//----------------------------------------------------------------------------
-
-static bool dirHasVisibleChildren(DirDef *dd)
+static bool dirHasVisibleChildren(QSharedPointer<DirDef> dd)
 {
    if (dd->hasDocumentation()) {
       return true;
@@ -552,8 +547,7 @@ static bool dirHasVisibleChildren(DirDef *dd)
    return false;
 }
 
-//----------------------------------------------------------------------------
-static void writeDirTreeNode(OutputList &ol, DirDef *dd, int level, FTVHelp *ftv, bool addToIndex)
+static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int level, FTVHelp *ftv, bool addToIndex)
 {
    if (level > 20) {
       warn(dd->getDefFileName(), dd->getDefLine(),
@@ -563,17 +557,15 @@ static void writeDirTreeNode(OutputList &ol, DirDef *dd, int level, FTVHelp *ftv
       return;
    }
 
-   if (!dirHasVisibleChildren(dd)) {
+   if (! dirHasVisibleChildren(dd)) {
       return;
    }
 
-   static bool tocExpand = true; //Config_getBool("TOC_EXPAND");
-   bool isDir = dd->subDirs().count() > 0 ||  // there are subdirs
-                (tocExpand &&                 // or toc expand and
-                 dd->getFiles() && dd->getFiles()->count() > 0 // there are files
-                );
+   static bool tocExpand = true;    //Config_getBool("TOC_EXPAND");
 
-   //printf("gd=`%s': pageDict=%d\n",gd->name().data(),gd->pageDict->count());
+   bool isDir = dd->subDirs().count() > 0 || (tocExpand && dd->getFiles() && dd->getFiles()->count() > 0);
+
+   // there are files               
 
    if (addToIndex) {
       Doxygen::indexList->addContentsItem(isDir, dd->shortName(), dd->getReference(), dd->getOutputFileBase(), 0, true, true);
@@ -697,7 +689,7 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
           
       for (auto dd : Doxygen::directories) {      
          if (dd->getOuterScope() == Doxygen::globalScope) {
-            writeDirTreeNode(ol, dd.data(), 0, ftv, addToIndex);
+            writeDirTreeNode(ol, dd, 0, ftv, addToIndex);
          }
       }
    }
@@ -1258,7 +1250,7 @@ void writeClassTree(ClassSDict *clDict, FTVHelp *ftv, bool addToIndex, bool glob
                                     cd->getOutputFileBase(), cd->anchor(), false, true, cd.data());
 
                if (addToIndex && (cd->getOuterScope() == 0 || cd->getOuterScope()->definitionType() != Definition::TypeClass)) {
-                  addMembersToIndex(cd.data(), LayoutDocManager::Class, cd->displayName(false), 
+                  addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), 
                                     cd->anchor(), cd->partOfGroups() == 0 && ! cd->isSimple());
                }
 
@@ -3175,7 +3167,7 @@ static void writeGroupTreeNode(OutputList &ol, GroupDef *gd, int level, FTVHelp 
             
             for (auto cd : *gd->getClasses()) {
                 if (cd->isVisible() /*&& !nestedClassInSameGroup*/) {                
-                  addMembersToIndex(cd.data(), LayoutDocManager::Class, cd->displayName(false), cd->anchor(), addToIndex, true);                 
+                  addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), addToIndex, true);                 
                }
             }
 

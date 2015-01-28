@@ -84,7 +84,7 @@ void MemberList::insert(uint index, MemberDef *md)
    SortedList<MemberDef *>::insert(index, md);   
 }
 
-int MemberList::countInheritableMembers(ClassDef *inheritedFrom) const
+int MemberList::countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) const
 {
    int count = 0;
 
@@ -289,8 +289,9 @@ bool MemberList::declVisible() const
    return false;
 }
 
-void MemberList::writePlainDeclarations(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd,
-                                        GroupDef *gd, ClassDef *inheritedFrom, const char *inheritId )
+void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
+                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, QSharedPointer<ClassDef> inheritedFrom, 
+                  const char *inheritId )
 {
    countDecMembers();
 
@@ -474,9 +475,9 @@ void MemberList::writePlainDeclarations(OutputList &ol, ClassDef *cd, NamespaceD
  *         class containing the members.
  *  @param lt Type of list that is inherited from.
  */
-void MemberList::writeDeclarations(OutputList &ol, ClassDef *cd, NamespaceDef *nd, FileDef *fd, GroupDef *gd,
-                                   const char *title, const char *subtitle, bool showEnumValues,
-                                   bool showInline, ClassDef *inheritedFrom, MemberListType lt)
+void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
+                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, const char *title, const char *subtitle, 
+                  bool showEnumValues, bool showInline, ClassDef *inheritedFrom, MemberListType lt)
 {
    (void)showEnumValues; // unused
    

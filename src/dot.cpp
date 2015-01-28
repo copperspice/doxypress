@@ -4161,7 +4161,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    }
 }
 
-void DotGroupCollaboration::addMemberList(MemberList *ml)
+void DotGroupCollaboration::addMemberList(QSharedPointer<MemberList> ml)
 {
    if ( !( ml && ml->count()) ) {
       return;

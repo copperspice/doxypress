@@ -48,7 +48,8 @@ class HtmlCodeGenerator : public CodeOutputInterface
    void startFontClass(const char *s);
    void endFontClass();
    void writeCodeAnchor(const char *anchor);
-   void setCurrentDoc(Definition *, const char *, bool) {}
+
+   void setCurrentDoc(QSharedPointer<Definition> d, const char *, bool) override {}
    void addWord(const QString &name, bool) override {}
 
  private:
@@ -160,7 +161,7 @@ class HtmlGenerator : public OutputGenerator
    }
 
    // **
-   void setCurrentDoc(Definition *context, const char *anchor, bool isSourceFile);
+   void setCurrentDoc(QSharedPointer<Definition> context, const char *anchor, bool isSourceFile) override;
    void addWord(const QString &word, bool hiPriority) override;
 
    void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md) override;

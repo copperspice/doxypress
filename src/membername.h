@@ -59,12 +59,13 @@ class MemberNameSDict : public StringMap<QSharedPointer<MemberName>>
 
 /** Data associated with a MemberDef in an inheritance relation. */
 struct MemberInfo {
-   MemberInfo(MemberDef *md, Protection p, Specifier v, bool inh) :
-      memberDef(md), prot(p), virt(v), inherited(inh), ambigClass(0) {}
+   MemberInfo(QSharedPointer<MemberDef> md, Protection p, Specifier v, bool inh)
+       : memberDef(md), prot(p), virt(v), inherited(inh)
+   {}
 
    ~MemberInfo() {}
 
-   MemberDef *memberDef;
+   QSharedPointer<MemberDef> memberDef;
    Protection prot;
    Specifier  virt;
 
@@ -72,7 +73,7 @@ struct MemberInfo {
    QByteArray   scopePath;
    QByteArray   ambiguityResolutionScope;
 
-   ClassDef  *ambigClass;
+   QSharedPointer<ClassDef> ambigClass;
 };
 
 /** Class representing all MemberInfo objects with the same name */

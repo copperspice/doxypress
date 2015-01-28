@@ -62,7 +62,7 @@ class OutputList : public OutputDocInterface
                     const QByteArray &docStr,bool indexWords, bool isExample, const char *exampleName = 0,
                     bool singleLine = false, bool linkFromIndex = false);
 
-   void writeDoc(DocRoot *root, Definition *ctx, MemberDef *md);
+   void writeDoc(DocRoot *root, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md);
 
    bool parseText(const QByteArray &textStr);
 
@@ -749,7 +749,7 @@ class OutputList : public OutputDocInterface
    void writeCodeAnchor(const char *name) {
       forall(&OutputGenerator::writeCodeAnchor, name);
    }
-   void setCurrentDoc(Definition *context, const char *anchor, bool isSourceFile) {
+   void setCurrentDoc(QSharedPointer<Definition> context, const char *anchor, bool isSourceFile) override {
       forall(&OutputGenerator::setCurrentDoc, context, anchor, isSourceFile);
    }
 

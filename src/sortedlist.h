@@ -83,11 +83,10 @@ int compareValues(QSharedPointer<FileDef> item1, QSharedPointer<FileDef> item2);
 
 int compareValues(const FileList *item1,      const FileList *item2); 
 int compareValues(const FileName *item1,      const FileName *item2);
-int compareValues(const GroupDef *item1,      const GroupDef *item2); 
 
+int compareValues(QSharedPointer<GroupDef>  item1, QSharedPointer<GroupDef>  item2); 
 int compareValues(QSharedPointer<MemberDef> item1, QSharedPointer<MemberDef> item2);
 
 int compareValues(const NavIndexEntry *item1, const NavIndexEntry *item2);
-
 
 #endif

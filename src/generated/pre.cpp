@@ -2546,8 +2546,6 @@ char *preYYtext;
 #include "memberdef.h"
 #include "membername.h"
 #include "util.h"
-
-// at the end
 #include <doxy_globals.h>
 
 // Toggle for some debugging info
@@ -2808,20 +2806,15 @@ void DefineManager::DefinesPerFile::collectDefines(
    }
 }
 
-/* -----------------------------------------------------------------
- *
- *	scanner's state
- */
-
 static int                      g_yyLineNr   = 1;
 static int                      g_yyMLines   = 1;
 static int                      g_yyColNr   = 1;
 static QByteArray               g_yyFileName;
-static FileDef                 *g_yyFileDef;
-static FileDef                 *g_inputFileDef;
+static QSharedPointer<FileDef>  g_yyFileDef;
+static QSharedPointer<FileDef>  g_inputFileDef;
 static int                      g_ifcount    = 0;
 static QStringList             *g_pathList = 0;
-static QStack<FileState *>        g_includeStack;
+static QStack<FileState *>      g_includeStack;
 static QHash<QString, int *>   *g_argDict;
 static int                      g_defArgs = -1;
 static QByteArray               g_defName;
@@ -2833,7 +2826,7 @@ static bool               g_defVarArgs;
 static int                g_level;
 static int                g_lastCContext;
 static int                g_lastCPPContext;
-static QVector<int>        g_levelGuard;
+static QVector<int>       g_levelGuard;
 static BufStr            *g_inputBuf;
 static int                g_inputBufPos;
 static BufStr            *g_outputBuf;
@@ -2842,10 +2835,10 @@ static bool               g_quoteArg;
 static DefineDict        *g_expandedDict;
 static int                g_findDefArgContext;
 static bool               g_expectGuard;
-static QByteArray           g_guardName;
-static QByteArray           g_lastGuardName;
-static QByteArray           g_incName;
-static QByteArray           g_guardExpr;
+static QByteArray         g_guardName;
+static QByteArray         g_lastGuardName;
+static QByteArray         g_incName;
+static QByteArray         g_guardExpr;
 static int                g_curlyCount;
 static bool               g_nospaces; // add extra spaces during macro expansion
 
@@ -2857,7 +2850,7 @@ static bool               g_isImported;
 static QByteArray         g_blockName;
 static int                g_condCtx;
 static bool               g_skip;
-static QStack<CondCtx *>    g_condStack;
+static QStack<CondCtx *>  g_condStack;
 static bool               g_insideCS; // C# has simpler preprocessor
 static bool               g_isSource;
 
@@ -2869,18 +2862,20 @@ static void setFileName(const char *name)
 {
    bool ambig;
    QFileInfo fi(name);
+
    g_yyFileName = fi.absoluteFilePath().toUtf8();
-   g_yyFileDef = findFileDef(Doxygen::inputNameDict, g_yyFileName, ambig);
+   g_yyFileDef  = findFileDef(Doxygen::inputNameDict, g_yyFileName, ambig);
+
    if (g_yyFileDef == 0) // if this is not an input file check if it is an
       // include file
    {
       g_yyFileDef = findFileDef(Doxygen::includeNameDict, g_yyFileName, ambig);
    }
-   //printf("setFileName(%s) g_yyFileName=%s g_yyFileDef=%p\n",
-   //    name,g_yyFileName.data(),g_yyFileDef);
+
    if (g_yyFileDef && g_yyFileDef->isReference()) {
-      g_yyFileDef = 0;
+      g_yyFileDef = QSharedPointer<FileDef>();
    }
+
    g_insideCS = getLanguageFromFileName(g_yyFileName) == SrcLangExt_CSharp;
    g_isSource = guessSection(g_yyFileName);
 }
@@ -3765,6 +3760,7 @@ QByteArray expandMacro(const QByteArray &name)
 A_Define *newDefine()
 {
    A_Define *def = new A_Define;
+
    def->name       = g_defName;
    def->definition = g_defText.trimmed();
    def->nargs      = g_defArgs;
@@ -3773,12 +3769,11 @@ A_Define *newDefine()
    def->lineNr     = g_yyLineNr - g_yyMLines;
    def->columnNr   = g_yyColNr;
    def->varArgs    = g_defVarArgs;
-   //printf("newDefine: %s %s file: %s\n",def->name.data(),def->definition.data(),
-   //    def->fileDef ? def->fileDef->name().data() : def->fileName.data());
-   //printf("newDefine: `%s'->`%s'\n",def->name.data(),def->definition.data());
+   
    if (!def->name.isEmpty() && Doxygen::expandAsDefinedDict[def->name]) {
       def->isPredefined = TRUE;
    }
+
    return def;
 }
 
@@ -3791,10 +3786,7 @@ void addDefine()
    if (!Doxygen::gatherDefines) {
       return;
    }
-
-   //printf("addDefine %s %s\n",g_defName.data(),g_defArgsStr.data());
-   //ArgumentList *al = new ArgumentList;
-   //stringToArgumentList(g_defArgsStr,al);
+  
    QSharedPointer<MemberDef> md(new MemberDef(g_yyFileName, g_yyLineNr - g_yyMLines, g_yyColNr,
                "#define", g_defName, g_defArgsStr, 0,
                Public, Normal, FALSE, Member, MemberType_Define, 0, 0));
@@ -3802,12 +3794,11 @@ void addDefine()
 
    if (!g_defArgsStr.isEmpty()) {
       ArgumentList *argList = new ArgumentList;
-      //printf("addDefine() g_defName=`%s' g_defArgsStr=`%s'\n",g_defName.data(),g_defArgsStr.data());
+      
       stringToArgumentList(g_defArgsStr, argList);
       md->setArgumentList(argList);
    }
-
-   //printf("Setting initializer for `%s' to `%s'\n",g_defName.data(),g_defText.data());
+  
    int l = g_defLitText.indexOf('\n');
 
    if (l > 0 && g_defLitText.left(l).trimmed() == "\\") {
@@ -3839,7 +3830,7 @@ void addDefine()
    mn->append(md);
 
    if (g_yyFileDef) {
-      g_yyFileDef->insertMember(md.data());
+      g_yyFileDef->insertMember(md);
    }
 }
 
@@ -3889,9 +3880,10 @@ static void readIncludeFile(const QByteArray &inc)
       }
 
       QByteArray oldFileName = g_yyFileName;
-      FileDef *oldFileDef  = g_yyFileDef;
-      int oldLineNr        = g_yyLineNr;
-      //printf("Searching for `%s'\n",incFileName.data());
+
+      QSharedPointer<FileDef> oldFileDef = g_yyFileDef;
+      int oldLineNr = g_yyLineNr;
+    
 
       // absIncFileName avoids difficulties for incFileName starting with "../" (bug 641336)
       QByteArray absIncFileName = incFileName;
@@ -3914,13 +3906,13 @@ static void readIncludeFile(const QByteArray &inc)
 
                   if (fi.exists() && fi.isDir()) {
                      QByteArray absName = QByteArray(fi.absoluteFilePath().toUtf8()) + "/" + incFileName;
-                     //printf("trying absName=%s\n",absName.data());
+                     
                      QFileInfo fi2(absName);
                      if (fi2.exists()) {
                         absIncFileName = fi2.absoluteFilePath().toUtf8();
                         break;
                      }
-                     //printf( "absIncFileName = %s\n", absIncFileName.data() );
+                     
                   }
                   
                }
@@ -3934,34 +3926,49 @@ static void readIncludeFile(const QByteArray &inc)
       // findFile will overwrite g_yyFileDef if found
       FileState *fs;
       bool alreadyIncluded = FALSE;
-      //printf("calling findFile(%s)\n",incFileName.data());
+      
       if ((fs = findFile(incFileName, localInclude, alreadyIncluded))) { // see if the include file can be found
-         //printf("Found include file!\n");
+        
          if (Debug::isFlagSet(Debug::Preprocessor)) {
             for (i = 0; i < g_includeStack.count(); i++) {
                Debug::print(Debug::Preprocessor, 0, "  ");
             }
             //msg("#include %s: parsing...\n",incFileName.data());
          }
+
          if (oldFileDef) {
             // add include dependency to the file in which the #include was found
             bool ambig;
+
             // change to absolute name for bug 641336
-            FileDef *incFd = findFileDef(Doxygen::inputNameDict, absIncFileName, ambig);
-            oldFileDef->addIncludeDependency(ambig ? 0 : incFd, incFileName, localInclude, g_isImported, FALSE);
+            QSharedPointer<FileDef> incFd = findFileDef(Doxygen::inputNameDict, absIncFileName, ambig);
+
+            QSharedPointer<FileDef> temp;
+            if (ambig) {
+               temp = QSharedPointer<FileDef>();
+            } else {
+               temp = incFd;
+            }
+
+            oldFileDef->addIncludeDependency(temp, incFileName, localInclude, g_isImported, FALSE);
+
             // add included by dependency
-            if (g_yyFileDef) {
-               //printf("Adding include dependency %s->%s\n",oldFileDef->name().data(),incFileName.data());
+            if (g_yyFileDef) {              
                g_yyFileDef->addIncludedByDependency(oldFileDef, oldFileDef->docName(), localInclude, g_isImported);
             }
+
          } else if (g_inputFileDef) {
-            g_inputFileDef->addIncludeDependency(0, absIncFileName, localInclude, g_isImported, TRUE);
+            g_inputFileDef->addIncludeDependency(QSharedPointer<FileDef>(), absIncFileName, localInclude, g_isImported, TRUE);
+
          }
+
          fs->bufState = YY_CURRENT_BUFFER;
          fs->lineNr   = oldLineNr;
          fs->fileName = oldFileName;
+
          // push the state on the stack
          g_includeStack.push(fs);
+
          // set the scanner to the include file
 
          // Deal with file changes due to
@@ -3983,26 +3990,22 @@ static void readIncludeFile(const QByteArray &inc)
          //printf("  calling findFile(%s) alreadyInc=%d\n",incFileName.data(),alreadyIncluded);
          if (oldFileDef) {
             bool ambig;
-            //QByteArray absPath = incFileName;
-            //if (QDir::isRelativePath(incFileName))
-            //{
-            //  absPath = QDir::cleanDirPath(oldFileDef->getPath()+"/"+incFileName);
-            //  //printf("%s + %s -> resolved path %s\n",oldFileDef->getPath().data(),incFileName.data(),absPath.data());
-            //}
-
+            
             // change to absolute name for bug 641336
-            FileDef *fd = findFileDef(Doxygen::inputNameDict, absIncFileName, ambig);
-            //printf("%s::findFileDef(%s)=%p\n",oldFileDef->name().data(),incFileName.data(),fd);
+            QSharedPointer<FileDef> fd = findFileDef(Doxygen::inputNameDict, absIncFileName, ambig);
+         
             // add include dependency to the file in which the #include was found
-            oldFileDef->addIncludeDependency(ambig ? 0 : fd, incFileName, localInclude, g_isImported, FALSE);
+            oldFileDef->addIncludeDependency(ambig ? QSharedPointer<FileDef>() : fd, incFileName, localInclude, g_isImported, FALSE);
+
             // add included by dependency
-            if (fd) {
-               //printf("Adding include dependency (2) %s->%s ambig=%d\n",oldFileDef->name().data(),fd->name().data(),ambig);
+            if (fd) {               
                fd->addIncludedByDependency(oldFileDef, oldFileDef->docName(), localInclude, g_isImported);
             }
+
          } else if (g_inputFileDef) {
-            g_inputFileDef->addIncludeDependency(0, absIncFileName, localInclude, g_isImported, TRUE);
+            g_inputFileDef->addIncludeDependency(QSharedPointer<FileDef>(), absIncFileName, localInclude, g_isImported, TRUE);
          }
+
          if (Debug::isFlagSet(Debug::Preprocessor)) {
             if (alreadyIncluded) {
                Debug::print(Debug::Preprocessor, 0, "#include %s: already included! skipping...\n", incFileName.data());
@@ -4011,14 +4014,13 @@ static void readIncludeFile(const QByteArray &inc)
             }
             //printf("error: include file %s not found\n",preYYtext);
          }
+
          if (g_curlyCount > 0 && !alreadyIncluded) { // failed to find #include inside { ... }
             warn(g_yyFileName, g_yyLineNr, "include file %s not found, perhaps you forgot to add its directory to INCLUDE_PATH?", incFileName.data());
          }
       }
    }
 }
-
-/* ----------------------------------------------------------------- */
 
 static void startCondSection(const char *sectId)
 {

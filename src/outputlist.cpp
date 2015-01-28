@@ -132,7 +132,7 @@ printf("\n BROOM  ********** START of GenerateDoc");
 
 printf("\n BROOM  ********** MIDDLE of GenerateDoc");
 
-   writeDoc(root, ctx.data(), md.data());
+   writeDoc(root, ctx, md);
 
 printf("\n BROOM  ********** END of GenerateDoc");
 
@@ -142,7 +142,7 @@ printf("\n BROOM  ********** END of GenerateDoc");
    return isEmpty;
 }
 
-void OutputList::writeDoc(DocRoot *root, Definition *ctx, MemberDef *md)
+void OutputList::writeDoc(DocRoot *root, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
    for (auto item : m_outputs) {
       if (item->isEnabled()) {
@@ -171,7 +171,7 @@ bool OutputList::parseText(const QByteArray &textStr)
    for (auto item : m_outputs) {
   
       if (item->isEnabled()) {
-         item->writeDoc(root, 0, 0);
+         item->writeDoc(root, QSharedPointer<Definition>(), QSharedPointer<MemberDef>());
       }
    }
 

@@ -79,11 +79,11 @@ class PageDef : public Definition
       return m_showToc;
    }
 
-   void setPageScope(Definition *d) {
+   void setPageScope(QSharedPointer<Definition> d) {
       m_pageScope = d;
    }
 
-   Definition *getPageScope() const {
+   QSharedPointer<Definition> getPageScope() const {
       return m_pageScope;
    }
 
@@ -100,7 +100,7 @@ class PageDef : public Definition
    QByteArray m_fileName;
    QByteArray m_title;
    PageSDict *m_subPageDict;                 // list of pages in the group
-   Definition *m_pageScope;
+   QSharedPointer<Definition> m_pageScope;
    int m_nestingLevel;
    bool m_showToc;
 };

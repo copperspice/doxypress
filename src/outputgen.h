@@ -117,7 +117,7 @@ class CodeOutputInterface
     */
    virtual void writeCodeAnchor(const char *name) = 0;
 
-   virtual void setCurrentDoc(Definition *context, const char *anchor, bool isSourceFile) = 0;
+   virtual void setCurrentDoc(QSharedPointer<Definition> context, const char *anchor, bool isSourceFile) = 0;
    virtual void addWord(const QString &word, bool hiPriority) = 0;
 };
 

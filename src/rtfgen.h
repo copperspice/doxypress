@@ -328,10 +328,8 @@ class RTFGenerator : public OutputGenerator
    void endFontClass() {}
 
    void writeCodeAnchor(const char *) {}
-   void setCurrentDoc(Definition *, const char *, bool) {}
-
-   void addWord(const QString &word, bool hiPriority) override
-   {}
+   void setCurrentDoc(QSharedPointer<Definition> d, const char *, bool) override {}
+   void addWord(const QString &word, bool hiPriority) override {}
 
    static bool preProcessFileInplace(const char *path, const char *name);
 

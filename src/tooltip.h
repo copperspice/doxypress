@@ -26,11 +26,11 @@ class TooltipManager
  public:
    static TooltipManager *instance();
    void clearTooltips();
-   void addTooltip(Definition *d);
+   void addTooltip(QSharedPointer<Definition> d);
    void writeTooltips(CodeOutputInterface &ol);
 
  private:
-   QHash<QString, Definition *> m_tooltipInfo;
+   QHash<QString, QSharedPointer<Definition>> m_tooltipInfo;
 
    TooltipManager();
    ~TooltipManager();

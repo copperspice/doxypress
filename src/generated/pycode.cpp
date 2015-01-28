@@ -1302,7 +1302,7 @@ void PyVariableContext::addVariable(const QByteArray &type, const QByteArray &na
       if (m_scopes.count() > 0)  {
          // for local variables add a dummy entry so the name
          // is hidden to avoid FALSE links to global variables with the same name
-         // TODO: make this work for namespaces as well!
+         // TODO: make this work for namespaces as well
       
          scope->insert(lname, dummyContext);
       }
@@ -1334,7 +1334,7 @@ QSharedPointer<ClassDef> PyVariableContext::findVariable(const QByteArray &name)
 }
 
 static PyVariableContext g_theVarContext;
-QSharedPointer<ClassDef> PyVariableContext::dummyContext = (ClassDef *)0x8;
+QSharedPointer<ClassDef> PyVariableContext::dummyContext = QMakeShared<ClassDef>("", 0, 0, "dummyContext-python", ClassDef::Class);     
 
 class PyCallContext
 {
@@ -1355,8 +1355,9 @@ class PyCallContext
 
    virtual ~PyCallContext() {}
 
-   void setClass(ClassDef *cd) {
+   void setClass(QSharedPointer<ClassDef> cd) {
       Ctx *ctx = m_classList.last();
+
       if (ctx) {
          ctx->cd = cd;
       }
@@ -1369,12 +1370,12 @@ class PyCallContext
    void popScope() {
       if (m_classList.count() > 1) {
          Ctx *ctx = m_classList.last();
+
          if (ctx) {
             g_name = ctx->name;
             g_type = ctx->type;
          }
-         m_classList.removeLast();
-      } else {
+         m_classList.removeLast();      
       }
    }
 
@@ -1389,7 +1390,7 @@ class PyCallContext
       if (ctx) {
          return ctx->cd;
       } else {
-         return 0;
+         return QSharedPointer<ClassDef>();
       }
    }
 
@@ -1544,7 +1545,7 @@ static void nextCodeLine()
  * line numbers for each line. If \a text contains newlines, the link will be
  * split into multiple links with the same destination, one for each line.
  */
-static void writeMultiLineCodeLink(CodeOutputInterface &ol, Definition *d, const char *text)
+static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d, const char *text)
 {
    static bool sourceTooltips = Config_getBool("SOURCE_TOOLTIPS");
    TooltipManager::instance()->addTooltip(d);
@@ -1638,7 +1639,7 @@ static bool getLinkInScope(const QByteArray &c, const QByteArray &m,  const char
          g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()));
 
          if (g_currentDefinition && g_currentMemberDef && md != g_currentMemberDef && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, md );
+            addDocCrossReference(g_currentMemberDef, md);
          }
         
          writeMultiLineCodeLink(ol, md, text ? text : memberText);
@@ -1709,7 +1710,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
          QSharedPointer<NamespaceDef> nd = getResolvedNamespace(scope);
 
          if (nd) {
-            writeMultiLineCodeLink(ol, nd.data(), clName);
+            writeMultiLineCodeLink(ol, nd, clName);
             addToSearchIndex(className);
             return;
 
@@ -1722,7 +1723,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
       if (lcd != PyVariableContext::dummyContext) {
          g_theCallContext.setClass(lcd);
       }
-      //isLocal=TRUE;
+      
       DBG_CTX((stderr, "is a local variable cd=%p!\n", cd));
    }
 
@@ -1731,8 +1732,13 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
       addToSearchIndex(className);
 
       if (md) {
-         QSharedPointer<Definition> d = md->getOuterScope() == Doxygen::globalScope ?
-                         md->getBodyDef() : md->getOuterScope();
+         QSharedPointer<Definition> d;
+
+         if (md->getOuterScope() == Doxygen::globalScope) { 
+            d = md->getBodyDef();
+         } else {
+            d = md->getOuterScope();
+         }
 
          if (md->getGroupDef()) {
             d = md->getGroupDef();
@@ -1755,15 +1761,20 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
          DBG_CTX((stderr, "scope=%s locName=%s mcd=%p\n", scope.data(), locName.data(), mcd));
 
          if (mcd) {
-            MemberDef *md = mcd->getMemberByName(locName);
+            QSharedPointer<MemberDef> md = mcd->getMemberByName(locName);
 
             if (md) {
                g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()) );
                writeMultiLineCodeLink(ol, md, clName);
                addToSearchIndex(className);
 
-               QSharedPointer<Definition> d = md->getOuterScope() == Doxygen::globalScope ?
-                               md->getBodyDef() : md->getOuterScope();
+               QSharedPointer<Definition> d;
+
+               if (md->getOuterScope() == Doxygen::globalScope) { 
+                  d = md->getBodyDef();
+               } else {
+                  d = md->getOuterScope();
+               }
 
                if (md->getGroupDef()) {
                   d = md->getGroupDef();
@@ -1780,15 +1791,22 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
             QSharedPointer<NamespaceDef> mnd = getResolvedNamespace(scope);
 
             if (mnd) {
-               MemberDef *md = mnd->getMemberByName(locName);
+               QSharedPointer<MemberDef> md = mnd->getMemberByName(locName);
 
                if (md) {                 
                   g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()) );
                   writeMultiLineCodeLink(ol, md, clName);
                   addToSearchIndex(className);
 
-                  QSharedPointer<Definition> d = md->getOuterScope() == Doxygen::globalScope ?
-                                  md->getBodyDef() : md->getOuterScope();
+                  QSharedPointer<Definition> d;
+
+                  if (md->getOuterScope() == Doxygen::globalScope) {
+                     d = md->getBodyDef();
+
+                  } else {
+                     d = md->getOuterScope();
+
+                  }
 
                   if (md->getGroupDef()) {
                      d = md->getGroupDef();
@@ -1797,6 +1815,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
                   if (d && d->isLinkable() && md->isLinkable() && g_currentMemberDef && g_collectXRefs) {
                      addDocCrossReference(g_currentMemberDef, md);
                   }
+
                   return;
                }
             }
