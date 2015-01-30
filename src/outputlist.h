@@ -66,37 +66,42 @@ class OutputList : public OutputDocInterface
 
    bool parseText(const QByteArray &textStr);
 
-   bool parseText(const QString &textStr) 
-   {
-      parseText(textStr.toUtf8());
+   bool parseText(const QString &textStr)  {
+      return parseText(textStr.toUtf8());
    }
 
-   bool parseText(const char *textStr) 
-   {
-      parseText(QByteArray(textStr));
+   bool parseText(const char *textStr)  {
+      return parseText(QByteArray(textStr));
    }
 
    void startIndexSection(IndexSections is) {
       forall(&OutputGenerator::startIndexSection, is);
    }
+
    void endIndexSection(IndexSections is) {
       forall(&OutputGenerator::endIndexSection, is);
    }
+
    void writePageLink(const char *name, bool first) {
       forall(&OutputGenerator::writePageLink, name, first);
    }
+
    void startProjectNumber() {
       forall(&OutputGenerator::startProjectNumber);
    }
+
    void endProjectNumber() {
       forall(&OutputGenerator::endProjectNumber);
    }
+
    void writeStyleInfo(int part) {
       forall(&OutputGenerator::writeStyleInfo, part);
    }
+
    void startFile(const char *name, const char *manName, const char *title) {
       forall(&OutputGenerator::startFile, name, manName, title);
    }
+
    void writeSearchInfo() {
       forall(&OutputGenerator::writeSearchInfo);
    }

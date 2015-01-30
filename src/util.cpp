@@ -5329,10 +5329,12 @@ QByteArray stripScope(const char *name)
                p--;
          }
       }
+
       done = count == 0 || skipBracket; // reparse if brackets do not match
       skipBracket = true;
+
    } while (!done); // if < > unbalanced repeat ignoring them
-   //printf("stripScope(%s)=%s\n",name,name);
+   
    return name;
 }
 
@@ -5353,6 +5355,7 @@ QByteArray convertToXML(const QString &s)
    char c;
 
    while ((c = *p++)) {
+
       switch (c) {
          case '<':
             growBuf.addStr("&lt;");
@@ -5399,11 +5402,13 @@ QByteArray convertToXML(const QString &s)
          case 30:
          case 31:
             break; // skip invalid XML characters (see http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char)
+
          default:
             growBuf.addChar(c);
             break;
       }
    }
+
    growBuf.addChar(0);
    return growBuf.get();
 }

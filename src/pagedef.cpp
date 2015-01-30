@@ -264,6 +264,7 @@ void PageDef::writePageDocumentation(OutputList &ol)
 
    if (hasSubPages()) {
       // for printed documentation we write subpages as section's of the parent page.
+
       ol.pushGeneratorState();
       ol.disableAll();
       ol.enable(OutputGenerator::Latex);

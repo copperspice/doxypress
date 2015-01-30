@@ -359,6 +359,10 @@ namespace Doxy_Work{
    void generatePageDocs();
    void generateXRefPages();
 
+#ifdef HAS_SIGNALS
+   void stopDoxygen(int);
+#endif
+
    QByteArray getQchFileName();
    QHash<QString, int> *getTemplateArgumentsInName(ArgumentList *templateArguments, const QByteArray &name);
 
@@ -1034,8 +1038,6 @@ void generateOutput()
 
       HtmlGenerator::writeSearchData(searchDirName);
 
-printf("\n\n BROOM  C   ");
-
       if (! serverBasedSearch) { 
          // client side search index
          writeJavascriptSearchIndex();
@@ -1048,7 +1050,7 @@ printf("\n\n BROOM  C   ");
    generateExampleDocs();
    Doxy_Globals::g_stats.end();
 
-   if (!Htags::useHtags) {
+   if (! Htags::useHtags) {
       Doxy_Globals::g_stats.begin("Generating file sources\n");
       generateFileSources();
       Doxy_Globals::g_stats.end();
@@ -9699,7 +9701,7 @@ int Doxy_Work::computeIdealCacheParam(uint v)
 }
 
 #ifdef HAS_SIGNALS
-static void stopDoxygen(int)
+void Doxy_Work::stopDoxygen(int)
 {
    QDir thisDir;
    msg("Cleaning up\n");

@@ -885,27 +885,22 @@ void writeJavascriptSearchIndex()
       }
    }
 
-   // index class members
-   {      
-      // for each member name
-      for (auto mn : *Doxygen::memberNameSDict) {
-        
-         // for each member definition
-         for (auto md : *mn) {  
-            addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md);
-         }
+   // index class members, for each member name
+   for (auto mn : *Doxygen::memberNameSDict) {
+     
+      // for each member definition
+      for (auto md : *mn) {  
+         addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md);
       }
    }
 
-   // index file/namespace members
-   {
-      // for each member name            
-      for (auto mn : *Doxygen::functionNameSDict) {
 
-         // for each member definition         
-         for (auto md : *mn) { 
-            addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md);
-         }
+   // index file/namespace members, for each member name          
+   for (auto mn : *Doxygen::functionNameSDict) {
+
+      // for each member definition         
+      for (auto md : *mn) { 
+         addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md);
       }
    }
 
@@ -955,7 +950,7 @@ void writeJavascriptSearchIndex()
    if (Doxygen::mainPage) {
       QByteArray title = Doxygen::mainPage->title();
 
-      if (!title.isEmpty()) {
+      if (! title.isEmpty()) {
          uchar charCode = title.at(0);
          uint letter = charCode < 128 ? tolower(charCode) : charCode;
 
@@ -967,13 +962,11 @@ void writeJavascriptSearchIndex()
          }
       }
    }
-
-   int i;
-   
+    
    // write index files
    QByteArray searchDirName = Config_getString("HTML_OUTPUT") + "/search";
 
-   for (i = 0; i < NUM_SEARCH_INDICES; i++) { 
+   for (int i = 0; i < NUM_SEARCH_INDICES; i++) { 
       // for each index    
       int p = 0;
       
@@ -1025,6 +1018,7 @@ void writeJavascriptSearchIndex()
                t << "</body>" << endl;
                t << "</html>" << endl;
             }
+
             QTextStream ti(&dataOutFile);
 
             ti << "var searchData=" << endl;
@@ -1042,7 +1036,7 @@ void writeJavascriptSearchIndex()
 
             bool firstEntry = true;           
             int itemCount   = 0;
-          
+         
             for (auto dl : *sl) { 
                QSharedPointer<Definition> d = dl->first();
 
@@ -1066,7 +1060,8 @@ void writeJavascriptSearchIndex()
                ti << "  ['" << searchId(dispName) << "',['"
                   << convertToXML(dispName) << "',[";
 
-               if (dl->count() == 1) { // item with a unique name
+               if (dl->count() == 1) { 
+                  // item with a unique name
                   QSharedPointer<MemberDef> md;
 
                   bool isMemberDef = d->definitionType() == Definition::TypeMember;
@@ -1122,7 +1117,9 @@ void writeJavascriptSearchIndex()
                   for (auto d : *dl)  {               
                      QSharedPointer<Definition> scope = d->getOuterScope();
 
-                     ++nextIter;   
+                     if (nextIter != dl->end()) {  
+                        ++nextIter;   
+                     }
 
                      if (nextIter == dl->end()) {  
                         next = QSharedPointer<Definition>();
@@ -1175,20 +1172,24 @@ void writeJavascriptSearchIndex()
                         prefix = convertToXML(md->localName());
                      }
 
-                     if (overloadedFunction) { // overloaded member function
+                     if (overloadedFunction) {
+                        // overloaded member function
                         prefix += convertToXML(md->argsString());
                         // show argument list to disambiguate overloaded functions
 
-                     } else if (md) { // unique member function
+                     } else if (md) {
+                        // unique member function
                         prefix += "()"; // only to show it is a function
                      }
 
                      QByteArray name;
                      if (d->definitionType() == Definition::TypeClass) {
-                        name  = convertToXML(d.dynamicCast<MemberDef>()->displayName());
+
+                        name  = convertToXML(d.dynamicCast<ClassDef>()->displayName());
                         found = true;
 
                      } else if (d->definitionType() == Definition::TypeNamespace) {
+
                         name  = convertToXML(d.dynamicCast<NamespaceDef>()->displayName());
                         found = true;
 
@@ -1201,8 +1202,9 @@ void writeJavascriptSearchIndex()
                            if (fd == 0) {
                               fd = md->getFileDef();
                            }
+
                            if (fd) {
-                              if (!prefix.isEmpty()) {
+                              if (! prefix.isEmpty()) {
                                  prefix += ":&#160;";
                               }
                               name = prefix + convertToXML(fd->localName());
@@ -1216,14 +1218,18 @@ void writeJavascriptSearchIndex()
                         SrcLangExt lang = md->getLanguage();
                         name = convertToXML(d->getOuterScope()->qualifiedName())
                                + getLanguageSpecificSeparator(lang) + prefix;
+
                         found = true;
 
-                     } else if (scope) { // some thing else? -> show scope
+                     } else if (scope) {
+                        // some thing else? -> show scope
+
                         name = prefix + convertToXML(scope->name());
                         found = true;
                      }
 
-                     if (! found) { // fallback
+                     if (! found) { 
+                        // fallback
                         name = prefix + "(" + theTranslator->trGlobalNamespace() + ")";
                      }
 
@@ -1231,22 +1237,25 @@ void writeJavascriptSearchIndex()
 
                      prevScope = scope;
                      childCount++;
+
                   }
 
                   ti << "]]";
                }
+
                ti << "]";
                itemCount++;
             }
 
-            if (!firstEntry) {
+            if (! firstEntry) {
                ti << endl;
             }
 
             ti << "];" << endl;
 
          } else {
-            err("Failed to open file '%s' for writing...\n", fileName.data());
+            err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), outFile.error());
+          
          }
 
          ++p;
@@ -1258,12 +1267,13 @@ void writeJavascriptSearchIndex()
 
       if (f.open(QIODevice::WriteOnly)) {
          QTextStream t(&f);
+
          t << "var indexSectionsWithContent =" << endl;
          t << "{" << endl;
          bool first = true;
          int j = 0;
 
-         for (i = 0; i < NUM_SEARCH_INDICES; i++) {
+         for (int i = 0; i < NUM_SEARCH_INDICES; i++) {
 
             if (g_searchIndexCount[i] > 0) {
 
@@ -1289,41 +1299,51 @@ void writeJavascriptSearchIndex()
          t << "};" << endl << endl;
          t << "var indexSectionNames =" << endl;
          t << "{" << endl;
+
          first = true;
          j = 0;
-         for (i = 0; i < NUM_SEARCH_INDICES; i++) {
+
+         for (int i = 0; i < NUM_SEARCH_INDICES; i++) {
             if (g_searchIndexCount[i] > 0) {
                if (!first) {
                   t << "," << endl;
                }
+
                t << "  " << j << ": \"" << g_searchIndexName[i] << "\"";
                first = false;
                j++;
             }
          }
-         if (!first) {
+
+         if (! first) {
             t << "\n";
          }
+
          t << "};" << endl << endl;
          t << "var indexSectionLabels =" << endl;
          t << "{" << endl;
+
          first = true;
          static SearchIndexCategoryMapping map;
          j = 0;
 
-         for (i = 0; i < NUM_SEARCH_INDICES; i++) {
+         for (int i = 0; i < NUM_SEARCH_INDICES; i++) {
             if (g_searchIndexCount[i] > 0) {
+
                if (!first) {
                   t << "," << endl;
                }
+
                t << "  " << j << ": \"" << convertToXML(map.categoryLabel[i]) << "\"";
                first = false;
                j++;
             }
          }
+
          if (!first) {
             t << "\n";
          }
+
          t << "};" << endl << endl;
       }
 
@@ -1351,6 +1371,7 @@ void writeJavascriptSearchIndex()
          t << "</html>" << endl;
       }
    }
+
    Doxygen::indexList->addStyleSheetFile("search/search.js");
 }
 
@@ -1364,11 +1385,13 @@ void initSearchIndexer()
       if (externalSearch) { // external tools produce search index and engine
          Doxygen::searchIndex = new SearchIndexExternal;
 
-      } else { // doxygen produces search index and engine
+      } else {
+         // doxygen produces search index and engine
          Doxygen::searchIndex = new SearchIndex;
       }
 
-   } else { // no search engine or pure javascript based search function
+   } else { 
+      // no search engine or pure javascript based search function
       Doxygen::searchIndex = 0;
    }
 }
@@ -1377,5 +1400,3 @@ void finializeSearchIndexer()
 {
    delete Doxygen::searchIndex;
 }
-
-

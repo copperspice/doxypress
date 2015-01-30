@@ -16,11 +16,11 @@
 *************************************************************************/
 
 #include <QHash>
-#include <QFileinfo>
+#include <QFileInfo>
 #include <QList>
 #include <QStack>
 #include <QString>
-#include <QStringlist>
+#include <QStringList>
 #include <QXmlAttributes>
 #include <QXmlDefaultHandler>
 #include <QXmlErrorHandler>

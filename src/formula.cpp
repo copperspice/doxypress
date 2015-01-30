@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include <config.h>
+#include <doxy_globals.h>
 #include <doxygen.h>
 #include <formula.h>
 #include <image.h>
@@ -31,9 +32,6 @@
 #include <message.h>
 #include <portable.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 Formula::Formula(const char *text)
 {
@@ -146,7 +144,7 @@ void FormulaList::generateBitmaps(const char *path)
          // encapsulated postscript.
 
          char dviArgs[4096];   
-         sprintf(dviArgs, "-q -D 600 -E -n 1 -p %d -o %s.eps _formulas.dvi",pageIndex, formBase.data());
+         sprintf(dviArgs, "-q -D 600 -E -n 1 -p %d -o %s.eps _formulas.dvi",pageIndex, qPrintable(formBase));
 
          portable_sysTimerStart();
 
@@ -212,8 +210,7 @@ void FormulaList::generateBitmaps(const char *path)
          char gsArgs[4096];
          sprintf(gsArgs, "-q -g%dx%d -r%dx%dx -sDEVICE=ppmraw "
                  "-sOutputFile=%s.pnm -dNOPAUSE -dBATCH -- %s.ps",
-                 gx, gy, (int)(scaleFactor * 72), (int)(scaleFactor * 72),
-                 formBase.data(), formBase.data() );
+                 gx, gy, (int)(scaleFactor * 72), (int)(scaleFactor * 72), qPrintable(formBase), qPrintable(formBase) );
 
          portable_sysTimerStart();
 

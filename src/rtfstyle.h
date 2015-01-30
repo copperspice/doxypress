@@ -18,7 +18,7 @@
 #ifndef RTFSTYLE_H
 #define RTFSTYLE_H
 
-#include <QRegexp>
+#include <QRegExp>
 #include <QHash>
 
 // used for table column width calculation

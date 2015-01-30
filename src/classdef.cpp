@@ -2504,12 +2504,13 @@ void ClassDef::mergeMembers()
 
    m_membersMerged = true;
   
-   bool inlineInheritedMembers = Config_getBool("INLINE_INHERITED_MEMB" );
+   bool inlineInheritedMembers = Config_getBool("INLINE_INHERITED_MEMB");
+
+
+printf("\n\n BROOM  mergeMembers  A1");
+
 
    if (baseClasses()) {
-
-printf("\n\n BROOM  A   ");
-
       
       for (auto bcd : *baseClasses() ) {
          QSharedPointer<ClassDef> bClass = bcd->classDef;
@@ -2525,10 +2526,6 @@ printf("\n\n BROOM  A   ");
             for (auto srcMni : *srcMnd) {
              
                QSharedPointer<MemberNameInfo> dstMni;
-
-
-printf("\n\n BROOM  B   ");
-
 
                if (dstMnd != 0 && (dstMni = dstMnd->find(srcMni->memberName()))) {
                   // a member with that name is already in the class.
@@ -2586,10 +2583,6 @@ printf("\n\n BROOM  B   ");
                            // do not add if base class is virtual or
                            // if scope paths are equal or
                            // if base class is an interface (and thus implicitly virtual).
-
-
-printf("\n\n BROOM  C  ");
-
                            
                            if ((srcMi.virt != Normal && dstMi.virt != Normal) ||
                                  bClass->name() + sep + srcMi.scopePath == dstMi.scopePath ||
@@ -2609,9 +2602,6 @@ printf("\n\n BROOM  C  ");
                         }
                      }
                     
-
-printf("\n\n BROOM  D   ");
-
                      // TODO: fix the case where a member is hidden by inheritance
                      //       of a member with the same name but with another prototype,
                      //       while there is more than one path to the member in the
@@ -2670,11 +2660,9 @@ printf("\n\n BROOM  D   ");
                   // create a deep copy of the list (only the MemberInfo's will be
                   // copied, not the actual MemberDef's)
 
-                  QSharedPointer<MemberNameInfo> newMni (new MemberNameInfo(srcMni->memberName()));
+                  QSharedPointer<MemberNameInfo> newMni = QMakeShared<MemberNameInfo>(srcMni->memberName());
 
                   // copy the member(s) from the base to the sub class
-
-printf("\n\n BROOM  E   ");
                  
                   for (auto mi : *srcMni )   {
                      if (! mi.memberDef->isFriend()) { 
@@ -2699,13 +2687,11 @@ printf("\n\n BROOM  E   ");
                            }
 
                            if (inlineInheritedMembers) {
-                              if (!isStandardFunc(mi.memberDef)) {
-                                 //printf("    insertMember `%s'\n",mi->memberDef->name().data());
+                              if (!isStandardFunc(mi.memberDef)) {                                 
                                  internalInsertMember(mi.memberDef, prot, false);
                               }
                            }
-
-                           //printf("Adding!\n");
+                           
                            MemberInfo newMi = MemberInfo(mi.memberDef, prot, virt, true);
                            newMi.scopePath = bClass->name() + sep + mi.scopePath;
                            newMi.ambigClass = mi.ambigClass;
@@ -2771,9 +2757,9 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
       }
 
    }
-   // make methods private for categories defined in the .m file
-   //printf("%s::mergeCategory makePrivate=%d\n",name().data(),makePrivate);
 
+   // make methods private for categories defined in the .m file
+  
    MemberNameInfoSDict *srcMnd  = category->memberNameInfoSDict();
    MemberNameInfoSDict *dstMnd  = m_allMemberNameInfoSDict;
 

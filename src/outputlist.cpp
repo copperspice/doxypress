@@ -127,7 +127,11 @@ bool OutputList::generateDoc(const char *fileName, int startLine, QSharedPointer
    root = validatingParseDoc(fileName, startLine, ctx, md, docStr, indexWords, isExample, 
                              exampleName, singleLine, linkFromIndex);
 
+//   printf("\n\n BROOM  AA   ");
+
    writeDoc(root, ctx, md);
+
+//   printf("\n\n BROOM  BB   ");
 
    bool isEmpty = root->isEmpty();
    delete root;

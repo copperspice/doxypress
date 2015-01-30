@@ -594,7 +594,6 @@ void FileDef::writeDocumentation(OutputList &ol)
    QByteArray title = m_docname + versionTitle;
    QByteArray pageTitle = theTranslator->trFileReference(m_docname);
 
-
    if (getDirDef()) {
       startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_FileVisible, !generateTreeView);
 
@@ -630,7 +629,7 @@ void FileDef::writeDocumentation(OutputList &ol)
 
    ol.startContents();
 
-   if (!m_fileVersion.isEmpty()) {
+   if (! m_fileVersion.isEmpty()) {
       ol.disableAllBut(OutputGenerator::Html);
       ol.startProjectNumber();
       ol.docify(versionTitle);
@@ -710,12 +709,15 @@ void FileDef::writeDocumentation(OutputList &ol)
             writeMemberDocumentation(ol, lmd->type, lmd->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberDefEnd:
             endMemberDocumentation(ol);
             break;
+
          case LayoutDocEntry::AuthorSection:
             writeAuthorSection(ol);
             break;
+
          case LayoutDocEntry::ClassIncludes:
          case LayoutDocEntry::ClassInheritanceGraph:
          case LayoutDocEntry::ClassNestedClasses:

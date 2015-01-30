@@ -26,8 +26,8 @@
 #include <definition.h>
 #include <docvisitor.h>
 #include <htmlattrib.h>
-#include <memberDef.h>
-#include <memberGroup.h>
+#include <memberdef.h>
+#include <membergroup.h>
 #include <section.h>
 
 /*! Main entry point for the documentation parser.
@@ -177,7 +177,8 @@ template<class T> class CompAccept
       for (auto n : m_children) {
 
 // failed on writeDoc()
-// printf("\n BROOM  *** validate parser doc  CAT - 2  %s  ",  typeid(*n).name() );
+// printf("\n BROOM  *** validate parser doc  CAT-1   %x  ",  n );
+// printf("\n BROOM  *** validate parser doc          %s  ",  typeid(*n).name() );
 
          n->accept(v);
       }
@@ -1784,18 +1785,23 @@ class DocHtmlListItem : public CompAccept<DocHtmlListItem>, public DocNode
       m_attribs(attribs), m_itemNum(num) {
       m_parent = parent;
    }
+
    Kind kind() const                     {
       return Kind_HtmlListItem;
    }
+
    int itemNumber() const                {
       return m_itemNum;
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocHtmlListItem>::accept(this, v);
    }
+
    int parse();
    int parseXml();
 

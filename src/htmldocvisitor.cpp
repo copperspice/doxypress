@@ -1010,6 +1010,7 @@ void HtmlDocVisitor::visitPre(DocPara *p)
       }
       if (nodeIndex < p->children().count()) {
          DocNode *n = p->children().at(nodeIndex);
+
          if (mustBeOutsideParagraph(n)) {
             needsTag = false;
          }
@@ -1079,6 +1080,7 @@ void HtmlDocVisitor::visitPost(DocPara *p)
    // the paragraph (<ul>,<dl>,<table>) then that will already have ended the
    // paragraph and we don't need to do it here
    int nodeIndex = p->children().count() - 1;
+
    if (p && nodeIndex >= 0) {
       while (nodeIndex >= 0 && p->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace) {
          nodeIndex--;

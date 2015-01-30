@@ -15,23 +15,21 @@
  *
 *************************************************************************/
 
-#include <QFileInfo.h>
+#include <QFileInfo>
 
-#include <mandocvisitor.h>
-#include <docparser.h>
-#include <language.h>
-#include <doxygen.h>
-#include <outputgen.h>
 #include <code.h>
+#include <docparser.h>
 #include <dot.h>
-#include <util.h>
-#include <message.h>
-#include <parserintf.h>
+#include <doxy_globals.h>
+#include <doxygen.h>
 #include <filedef.h>
 #include <htmlentity.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
+#include <language.h>
+#include <mandocvisitor.h>
+#include <message.h>
+#include <outputgen.h>
+#include <parserintf.h>
+#include <util.h>
 
 ManDocVisitor::ManDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt)
    : DocVisitor(DocVisitor_Man), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false), m_firstCol(false),
