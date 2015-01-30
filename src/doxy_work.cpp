@@ -7940,8 +7940,7 @@ void Doxy_Work::mergeCategories()
 // builds the list of all members for each class
 void Doxy_Work::buildCompleteMemberLists()
 {
-   // merge the member list of base classes into the inherited classes.
-   
+   // merge the member list of base classes into the inherited classes   
    for (auto cd : *Doxygen::classSDict) { 
 
       if (cd->subClasses() == 0 && cd->baseClasses()) {         

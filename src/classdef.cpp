@@ -2499,7 +2499,7 @@ void ClassDef::mergeMembers()
    //static bool optimizeOutputForJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
    
    SrcLangExt lang = getLanguage();
-   QByteArray sep = getLanguageSpecificSeparator(lang, true);
+   QByteArray sep  = getLanguageSpecificSeparator(lang, true);
    int sepLen = sep.length();
 
    m_membersMerged = true;
@@ -2507,6 +2507,9 @@ void ClassDef::mergeMembers()
    bool inlineInheritedMembers = Config_getBool("INLINE_INHERITED_MEMB" );
 
    if (baseClasses()) {
+
+printf("\n\n BROOM  A   ");
+
       
       for (auto bcd : *baseClasses() ) {
          QSharedPointer<ClassDef> bClass = bcd->classDef;
@@ -2522,6 +2525,10 @@ void ClassDef::mergeMembers()
             for (auto srcMni : *srcMnd) {
              
                QSharedPointer<MemberNameInfo> dstMni;
+
+
+printf("\n\n BROOM  B   ");
+
 
                if (dstMnd != 0 && (dstMni = dstMnd->find(srcMni->memberName()))) {
                   // a member with that name is already in the class.
@@ -2561,14 +2568,16 @@ void ClassDef::mergeMembers()
                              
                               hidden = hidden  || !found;
 
-                           } else // member is in a non base class => multiple inheritance
+                           } else  {
+                              // member is in a non base class => multiple inheritance
                               // using the same base class
-
-                           {
+                           
                               QByteArray scope = dstMi.scopePath.left(dstMi.scopePath.indexOf(sep) + sepLen);
+
                               if (scope != dstMi.ambiguityResolutionScope.left(scope.length())) {
                                  dstMi.ambiguityResolutionScope.prepend(scope);
                               }
+
                               ambigue = true;
                            }
 
@@ -2577,6 +2586,10 @@ void ClassDef::mergeMembers()
                            // do not add if base class is virtual or
                            // if scope paths are equal or
                            // if base class is an interface (and thus implicitly virtual).
+
+
+printf("\n\n BROOM  C  ");
+
                            
                            if ((srcMi.virt != Normal && dstMi.virt != Normal) ||
                                  bClass->name() + sep + srcMi.scopePath == dstMi.scopePath ||
@@ -2596,6 +2609,8 @@ void ClassDef::mergeMembers()
                         }
                      }
                     
+
+printf("\n\n BROOM  D   ");
 
                      // TODO: fix the case where a member is hidden by inheritance
                      //       of a member with the same name but with another prototype,
@@ -2658,6 +2673,8 @@ void ClassDef::mergeMembers()
                   QSharedPointer<MemberNameInfo> newMni (new MemberNameInfo(srcMni->memberName()));
 
                   // copy the member(s) from the base to the sub class
+
+printf("\n\n BROOM  E   ");
                  
                   for (auto mi : *srcMni )   {
                      if (! mi.memberDef->isFriend()) { 
@@ -2709,8 +2726,7 @@ void ClassDef::mergeMembers()
             }
          }
       }
-   }
-   //printf("  end mergeMembers\n");
+   }   
 }
 
 /*! Merges the members of a Objective-C category into this class.
