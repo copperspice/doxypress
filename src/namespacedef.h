@@ -112,7 +112,7 @@ class NamespaceDef : public Definition
    bool isLinkableInProject() const;
    bool isLinkable() const;
    bool hasDetailedDescription() const;
-   void addMembersToMemberGroup(QSharedPointer<NamespaceDef> self);
+   void addMembersToMemberGroup();
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
  

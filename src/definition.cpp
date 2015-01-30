@@ -175,8 +175,6 @@ static bool matchExcludedSymbols(const char *name)
          i = re.indexIn(symName, 0);
          pl = re.matchedLength();
 
-         //printf("  %d = re.match(%s) pattern=%s\n",i,symName.data(),pattern.data());
-
          if (i != -1) { 
             // wildcard match
             int sl = symName.length();
@@ -208,8 +206,6 @@ static bool matchExcludedSymbols(const char *name)
    return false;
 }
 
-extern bool dirtyBroom;
-
 void Definition::addToMap(const QByteArray &name)
 {   
    QByteArray symbolName = name;
@@ -220,16 +216,7 @@ void Definition::addToMap(const QByteArray &name)
    }
 
    if (! symbolName.isEmpty()) {                       
-
-
-if (dirtyBroom) {
-   Doxygen::symbolMap.insertMulti(symbolName, this);    
-
-}  else {
-   printf("\n Mising Symbol Name: %s", symbolName.constData() );
-
-}
-                
+      Doxygen::symbolMap().insertMulti(symbolName, this);         
       this->setSymbolName(symbolName);
    }
 }
@@ -338,12 +325,12 @@ Definition::~Definition()
       m_impl = 0;
    }
 
-   auto di = Doxygen::symbolMap.find(m_symbolName);
+   auto di = Doxygen::symbolMap().find(m_symbolName);
 
-   while (di != Doxygen::symbolMap.end() && di.key() == m_symbolName)  {      
+   while (di != Doxygen::symbolMap().end() && di.key() == m_symbolName)  {      
 
       if (di.value() == this) {
-         di = Doxygen::symbolMap.erase(di);
+         di = Doxygen::symbolMap().erase(di);
 
       }  else {
          ++di;
@@ -433,9 +420,7 @@ void Definition::addSectionsToIndex()
 
       if (si->type == SectionInfo::Section         || si->type == SectionInfo::Subsection    ||
             si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
-
-         //printf("  level=%d title=%s\n",level,si->title.data());
-
+    
          int nextLevel = (int)si->type;
          int i;
 
@@ -471,8 +456,8 @@ void Definition::writeDocAnchorsToTagFile(QTextStream &tagFile)
    if (m_impl->sectionDict) {
  
       for (auto si : *m_impl->sectionDict) {   
-         if (!si->generated) {
-            //printf("write an entry!\n");
+         if (! si->generated) {
+           
             if (definitionType() == TypeMember) {
                tagFile << "  ";
             }
@@ -512,8 +497,6 @@ bool Definition::_docsAlreadyAdded(const QByteArray &doc, QByteArray &sigList)
 void Definition::_setDocumentation(const char *d, const char *docFile, int docLine,
                                    bool stripWhiteSpace, bool atTop)
 {
-   //printf("%s::setDocumentation(%s,%s,%d,%d)\n",name().data(),d,docFile,docLine,stripWhiteSpace);
-
    if (d == 0) {
       return;
    }
@@ -527,10 +510,11 @@ void Definition::_setDocumentation(const char *d, const char *docFile, int docLi
    }
 
    if (!_docsAlreadyAdded(doc, m_impl->docSignatures)) {
-      //printf("setting docs for %s: `%s'\n",name().data(),m_doc.data());
+     
       if (m_impl->details == 0) {
          m_impl->details = new DocInfo;
       }
+
       if (m_impl->details->doc.isEmpty()) { // fresh detailed description
          m_impl->details->doc = doc;
       } else if (atTop) { // another detailed description, append it to the start
@@ -538,6 +522,7 @@ void Definition::_setDocumentation(const char *d, const char *docFile, int docLi
       } else { // another detailed description, append it to the end
          m_impl->details->doc += "\n\n" + doc;
       }
+
       if (docLine != -1) { // store location if valid
          m_impl->details->file = docFile;
          m_impl->details->line = docLine;
@@ -609,15 +594,18 @@ void Definition::_setBriefDescription(const char *b, const char *briefFile, int 
    }
 
    if (!_docsAlreadyAdded(brief, m_impl->briefSignatures)) {
-      if (m_impl->brief && !m_impl->brief->doc.isEmpty()) {
-         //printf("adding to details\n");
+
+      if (m_impl->brief && !m_impl->brief->doc.isEmpty()) {         
          _setDocumentation(brief, briefFile, briefLine, false, true);
+
       } else {
-         //fprintf(stderr,"Definition::setBriefDescription(%s,%s,%d)\n",b,briefFile,briefLine);
+         
          if (m_impl->brief == 0) {
             m_impl->brief = new BriefInfo;
          }
+
          m_impl->brief->doc = brief;
+
          if (briefLine != -1) {
             m_impl->brief->file = briefFile;
             m_impl->brief->line = briefLine;

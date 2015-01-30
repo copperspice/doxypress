@@ -527,6 +527,7 @@ void parseInput()
       if (curFontPath.isEmpty()) {
          portable_getenv("DOTFONTPATH");
          QByteArray newFontPath = ".";
+
          if (!curFontPath.isEmpty()) {
             newFontPath += portable_pathListSeparator();
             newFontPath += curFontPath;
@@ -1009,7 +1010,7 @@ void generateOutput()
    }
 
    Doxy_Globals::g_stats.begin("Generating style sheet\n");
-   //printf("writing style info\n");
+  
    Doxy_Globals::g_outputList->writeStyleInfo(0); // write first part
    Doxy_Globals::g_stats.end();
 
@@ -1027,11 +1028,13 @@ void generateOutput()
 
       if (! searchDir.exists() && !searchDir.mkdir(searchDirName)) {
          err("Could not create search results directory '%s' $PWD='%s'\n",
-             searchDirName.data(), QDir::currentPath().data());
+                      searchDirName.constData(), QDir::currentPath().constData());
          exit(1);
       }
 
       HtmlGenerator::writeSearchData(searchDirName);
+
+printf("\n\n BROOM  C   ");
 
       if (! serverBasedSearch) { 
          // client side search index
@@ -1581,11 +1584,11 @@ void Doxy_Work::buildGroupListFiltered(QSharedPointer<EntryNav> rootNav, bool ad
 
          } else {
             if (rootNav->tagInfo()) {
-               gd = QSharedPointer<GroupDef> (new GroupDef(root->fileName, root->startLine, root->name, root->type, rootNav->tagInfo()->fileName));
+               gd = QMakeShared<GroupDef>(root->fileName, root->startLine, root->name, root->type, rootNav->tagInfo()->fileName);
                gd->setReference(rootNav->tagInfo()->tagName);
 
             } else {
-               gd = QSharedPointer<GroupDef> (new GroupDef(root->fileName, root->startLine, root->name, root->type));
+               gd = QMakeShared<GroupDef>(root->fileName, root->startLine, root->name, root->type);
             }
 
             gd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
@@ -1882,8 +1885,8 @@ QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QByteArr
          // scope is not known and could be a namespace
          // introduce bogus namespace
 
-         nd = QSharedPointer<NamespaceDef> (new NamespaceDef( "[generated]", 1, 1, fullScope, tagInfo ? tagInfo->tagName : QByteArray(),
-            tagInfo ? tagInfo->fileName : QByteArray()));
+         nd = QMakeShared<NamespaceDef>( "[generated]", 1, 1, fullScope, tagInfo ? tagInfo->tagName : QByteArray(),
+                        tagInfo ? tagInfo->fileName : QByteArray());
 
          nd->setLanguage(lang);
 
@@ -2293,7 +2296,8 @@ void Doxy_Work::resolveClassNestingRelations()
    }
 }
 
-QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> templ, const QByteArray &fieldName)
+QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> templ, 
+                  const QByteArray &fieldName)
 {
    QByteArray fullName = removeAnonymousScopes(templ->name());
 
@@ -2302,8 +2306,8 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
    }
 
    fullName += "." + fieldName;
-   QSharedPointer<ClassDef> cd(new ClassDef(templ->getDefFileName(), templ->getDefLine(), templ->getDefColumn(), fullName,
-                               templ->compoundType()));
+   QSharedPointer<ClassDef> cd = QMakeShared<ClassDef>(templ->getDefFileName(), templ->getDefLine(), templ->getDefColumn(), 
+                  fullName, templ->compoundType());
 
    cd->setDocumentation(templ->documentation(), templ->docFile(), templ->docLine()); // copy docs to definition
    cd->setBriefDescription(templ->briefDescription(), templ->briefFile(), templ->briefLine());
@@ -2513,8 +2517,8 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
                tagFileName = tagInfo->fileName;
             }
 
-            nd = QSharedPointer<NamespaceDef>(new NamespaceDef(root->fileName, root->startLine, root->startColumn,
-                                              fullName, tagName, tagFileName, root->type, root->spec & Entry::Published));
+            nd = QMakeShared<NamespaceDef>(root->fileName, root->startLine, root->startColumn,
+                                              fullName, tagName, tagFileName, root->type, root->spec & Entry::Published);
 
             nd->setDocumentation(root->doc, root->docFile, root->docLine); // copy docs to definition
             nd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
@@ -2787,7 +2791,7 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
             Debug::print(Debug::Classes, 0, "  New using class `%s' (sec=0x%08x)! #tArgLists=%d\n",
                          name.data(), root->section, root->tArgLists ? (int)root->tArgLists->count() : -1);
 
-            usingCd = QSharedPointer<ClassDef>(new ClassDef("<using>", 1, 1,name, ClassDef::Class));
+            usingCd = QMakeShared<ClassDef>("<using>", 1, 1,name, ClassDef::Class);
 
             Doxygen::hiddenClasses->insert(root->name, usingCd);
             usingCd->setArtificial(true);
@@ -3005,9 +3009,9 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
    }
 
    // new member variable, typedef or enum value
-   QSharedPointer<MemberDef> md(new MemberDef(root->fileName, root->startLine, root->startColumn, root->type, name,
-            root->args, root->exception, prot, Normal, root->stat, related,
-            mtype, root->tArgLists ? &(root->tArgLists->last()) : 0, 0));
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, 
+            root->type, name, root->args, root->exception, prot, Normal, root->stat, 
+            related, mtype, root->tArgLists ? &(root->tArgLists->last()) : 0, nullptr);
 
    md->setTagInfo(rootNav->tagInfo());
    md->setMemberClass(cd); // also sets outer scope (i.e. getOuterScope())
@@ -3698,8 +3702,8 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<EntryNa
    enum MemberType const type = (rootNav->section() == Entry::EXPORTED_INTERFACE_SEC)
                                 ? MemberType_Interface : MemberType_Service;
 
-   QSharedPointer<MemberDef> md(new MemberDef(root->fileName, root->startLine, root->startColumn, root->type, rname,
-         "", "", root->protection, root->virt, root->stat, Member, type, 0, &root->argList));
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, root->type, rname,
+         "", "", root->protection, root->virt, root->stat, Member, type, nullptr, &root->argList);
 
    md->setTagInfo(rootNav->tagInfo());
    md->setMemberClass(cd);
@@ -3870,11 +3874,13 @@ void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointe
    }
 
    // adding class member
-   QSharedPointer<MemberDef> md(new MemberDef(root->fileName, root->startLine, root->startColumn,
-      root->type, name, root->args, root->exception, root->protection, root->virt,
-      root->stat && root->relatesType != MemberOf, root->relates.isEmpty() ? Member :
-      root->relatesType == MemberOf ? Foreign : Related,mtype, 
-      root->tArgLists ? &root->tArgLists->last() : 0, &root->argList));
+
+
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn,
+               root->type, name, root->args, root->exception, root->protection, root->virt,
+               (root->stat && root->relatesType != MemberOf), 
+               (root->relates.isEmpty() ? Member : root->relatesType == MemberOf ? Foreign : Related),
+               mtype, root->tArgLists ? &root->tArgLists->last() : 0, &root->argList);
 
    md->setTagInfo(rootNav->tagInfo());
    md->setMemberClass(cd);
@@ -4225,9 +4231,9 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
                ArgumentList *tArgList = root->tArgLists ? &root->tArgLists->last() : 0;
                QByteArray name = removeRedundantWhiteSpace(rname);
 
-               md = QSharedPointer<MemberDef>(new MemberDef(root->fileName, root->startLine, root->startColumn, root->type, name,
+               md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, root->type, name,
                   root->args, root->exception, root->protection, root->virt, root->stat, Member,
-                  MemberType_Function, tArgList, &root->argList));
+                  MemberType_Function, tArgList, &root->argList);
 
                md->setTagInfo(rootNav->tagInfo());
                md->setLanguage(root->lang);
@@ -4718,9 +4724,8 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                            QSharedPointer<ClassDef> usedCd = Doxygen::hiddenClasses->find(usedName);
 
                            if (! usedCd) {
-                              usedCd = QSharedPointer<ClassDef>(new ClassDef( masterCd->getDefFileName(), 
-                                       masterCd->getDefLine(),
-                                       masterCd->getDefColumn(), usedName, ClassDef::Class));
+                              usedCd = QMakeShared<ClassDef>(masterCd->getDefFileName(), masterCd->getDefLine(),
+                                       masterCd->getDefColumn(), usedName, ClassDef::Class);
 
                               usedCd->makeTemplateArgument();
                               usedCd->setUsedOnly(true);
@@ -4771,8 +4776,8 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
 
                      Debug::print(Debug::Classes, 0, "  New undocumented used class `%s'\n", type.data());
 
-                     usedCd = QSharedPointer<ClassDef>(new ClassDef( masterCd->getDefFileName(), masterCd->getDefLine(),
-                        masterCd->getDefColumn(), type, ClassDef::Class));
+                     usedCd = QMakeShared<ClassDef>(masterCd->getDefFileName(), masterCd->getDefLine(),
+                        masterCd->getDefColumn(), type, ClassDef::Class);
 
                      usedCd->setUsedOnly(true);
                      usedCd->setLanguage(masterCd->getLanguage());
@@ -5253,8 +5258,8 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
                   baseClass = Doxygen::hiddenClasses->find(baseClassName);
 
                   if (baseClass == 0) {
-                     baseClass = QSharedPointer<ClassDef>(new ClassDef(root->fileName, root->startLine, root->startColumn,
-                                             baseClassName, ClassDef::Class));
+                     baseClass = QMakeShared<ClassDef>(root->fileName, root->startLine, root->startColumn,
+                                             baseClassName, ClassDef::Class);
 
                      Doxygen::hiddenClasses->insert(baseClassName, baseClass);
 
@@ -5269,8 +5274,8 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
                   baseClass = Doxygen::classSDict->find(baseClassName);
 
                   if (baseClass == 0) {
-                     baseClass = QSharedPointer<ClassDef>(new ClassDef(root->fileName, root->startLine, root->startColumn,
-                                             baseClassName, ClassDef::Class));
+                     baseClass = QMakeShared<ClassDef>(root->fileName, root->startLine, root->startColumn,
+                                             baseClassName, ClassDef::Class);
 
                      Doxygen::classSDict->insert(baseClassName, baseClass);
 
@@ -6712,9 +6717,9 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                ArgumentList *tArgList = new ArgumentList;
 
                //  getTemplateArgumentsFromName(cd->name()+"::"+funcName,root->tArgLists);
-               md = QSharedPointer<MemberDef>(new MemberDef(root->fileName, root->startLine, root->startColumn, funcType, funcName,
+               md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, funcType, funcName,
                                   funcArgs, exceptions, declMd ? declMd->protection() : root->protection,
-                                  root->virt, root->stat, Member, mtype, tArgList, &root->argList));
+                                  root->virt, root->stat, Member, mtype, tArgList, &root->argList);
 
                md->setTagInfo(rootNav->tagInfo());
                md->setLanguage(root->lang);
@@ -6792,9 +6797,9 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                // new overloaded member function
                ArgumentList tArgList = getTemplateArgumentsFromName(cd->name() + "::" + funcName, root->tArgLists);
 
-               QSharedPointer<MemberDef> md(new MemberDef(root->fileName, root->startLine, root->startColumn, funcType, funcName,
+               QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, funcType, funcName,
                                             funcArgs, exceptions, root->protection, root->virt, root->stat, Related,
-                                            mtype, &tArgList, &root->argList));
+                                            mtype, &tArgList, &root->argList);
 
                md->setTagInfo(rootNav->tagInfo());
                md->setLanguage(root->lang);
@@ -6943,10 +6948,11 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                // the related function, which don't have to do with
                // those of the related class.
 
-               QSharedPointer<MemberDef>md(new MemberDef( root->fileName, root->startLine, root->startColumn, funcType,
+               QSharedPointer<MemberDef>md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, funcType,
                                 funcName, funcArgs, exceptions, root->protection, root->virt,
-                                root->stat && !isMemberOf, isMemberOf ? Foreign : Related,
-                                mtype, (root->tArgLists ? &root->tArgLists->last() : 0), funcArgs.isEmpty() ? 0 : &root->argList));
+                                root->stat && !isMemberOf, isMemberOf ? Foreign : Related, mtype, 
+                                (root->tArgLists ? &root->tArgLists->last() : nullptr), 
+                                funcArgs.isEmpty() ? nullptr : &root->argList);
 
                if (isDefine && mdDefine) {
                   md->setInitializer(mdDefine->initializer());
@@ -6991,7 +6997,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                            }            
                         }
                      }
-
+   
                      if (rmd) { 
                         // member found -> copy line number info
                         md->setBodySegment(rmd->getStartBodyLine(), rmd->getEndBodyLine());
@@ -7068,9 +7074,9 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
             Debug::print(Debug::FindMembers, 0, "4. Local objective C method %s\n"
                          "  scopeName=%s className=%s\n", root->name.data(), scopeName.data(), className.data());
             
-            QSharedPointer<MemberDef>md(new MemberDef(root->fileName, root->startLine, root->startColumn,
+            QSharedPointer<MemberDef>md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn,
                funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->stat, Member,
-               MemberType_Function, 0, &root->argList));
+               MemberType_Function, nullptr, &root->argList);
 
             md->setTagInfo(rootNav->tagInfo());
             md->setLanguage(root->lang);
@@ -7555,9 +7561,9 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                               rootNav->tagInfo() ) {
 
                            // be less strict for tag files as members can have incomplete scope
-                           QSharedPointer<MemberDef> fmd(new MemberDef(root->fileName, root->startLine, root->startColumn,
-                              root->type, root->name, root->args, 0, Public, Normal, root->stat, Member,
-                              MemberType_EnumValue, 0, 0));
+                           QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(root->fileName, root->startLine, 
+                              root->startColumn, root->type, root->name, root->args, nullptr, Public, Normal, 
+                              root->stat, Member, MemberType_EnumValue, nullptr, nullptr);
 
                            if (md->getClassDef()) {
                               fmd->setMemberClass(md->getClassDef());
@@ -8229,7 +8235,7 @@ void Doxy_Work::addMembersToMemberGroup()
 {
    // for each class
    for (auto cd : *Doxygen::classSDict) {
-      cd->addMembersToMemberGroup(cd);
+      cd->addMembersToMemberGroup();
    }
 
    // for each file
@@ -8241,7 +8247,7 @@ void Doxy_Work::addMembersToMemberGroup()
 
    // for each namespace
    for (auto nd : *Doxygen::namespaceSDict) {
-      nd->addMembersToMemberGroup(nd);
+      nd->addMembersToMemberGroup();
    }
 
    // for each group
@@ -8398,8 +8404,8 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
       if (rootNav->tagInfo() && !root->name.isEmpty()) { 
 
          // define read from a tag file
-         QSharedPointer<MemberDef> md(new MemberDef("<tagfile>", 1, 1, "#define", root->name, root->args, 0,
-                                       Public, Normal, false, Member, MemberType_Define, 0, 0));
+         QSharedPointer<MemberDef> md = QMakeShared<MemberDef>("<tagfile>", 1, 1, "#define", root->name, root->args, nullptr,
+                                       Public, Normal, false, Member, MemberType_Define, nullptr, nullptr);
 
          md->setTagInfo(rootNav->tagInfo());
          md->setLanguage(root->lang);         
@@ -8795,8 +8801,8 @@ void Doxy_Work::buildExampleList(QSharedPointer<EntryNav> rootNav)
               "documentation found here.", root->name.data());
 
       } else {
-         QSharedPointer<PageDef> pd(new PageDef(root->fileName, root->startLine,
-                                   root->name, root->brief + root->doc + root->inbodyDocs, root->args));
+         QSharedPointer<PageDef> pd = QMakeShared<PageDef>(root->fileName, root->startLine,
+                                   root->name, root->brief + root->doc + root->inbodyDocs, root->args);
 
          pd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
          pd->setFileName( qPrintable(convertNameToFile(pd->name() + "-example", false, true)), false);
@@ -9671,7 +9677,7 @@ void Doxy_Work::dumpSymbolMap()
    if (f.open(QIODevice::WriteOnly)) {
       QTextStream t(&f);
 
-      for (auto item : Doxygen::symbolMap) {
+      for (auto item : Doxygen::symbolMap()) {
          // list of symbols   
          QSharedPointer<Definition> self = sharedFrom(item);
          dumpSymbol(t, self);         

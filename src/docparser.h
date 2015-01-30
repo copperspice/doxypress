@@ -146,7 +146,7 @@ class DocNode
     */
    virtual void accept(DocVisitor *v) = 0;
 
-   /*! Returns true iff this node is inside a preformatted section */
+   /*! Returns true if this node is inside a preformatted section */
    bool isPreformatted() const {
       return m_insidePre;
    }
@@ -160,7 +160,6 @@ class DocNode
    DocNode *m_parent;
 
  private:
-
    bool m_insidePre;
 };
 
@@ -176,6 +175,10 @@ template<class T> class CompAccept
       v->visitPre(obj);
 
       for (auto n : m_children) {
+
+// failed on writeDoc()
+// printf("\n BROOM  *** validate parser doc  CAT - 2  %s  ",  typeid(*n).name() );
+
          n->accept(v);
       }
 
@@ -2063,19 +2066,25 @@ class DocRoot : public CompAccept<DocRoot>, public DocNode
 {
  public:
    DocRoot(bool indent, bool sl) : m_indent(indent), m_singleLine(sl) {}
+
    Kind kind() const       {
       return Kind_Root;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocRoot>::accept(this, v);
    }
+
    void parse();
+
    bool indent() const {
       return m_indent;
    }
+
    bool singleLine() const {
       return m_singleLine;
    }
+
    bool isEmpty() const {
       return m_children.isEmpty();
    }

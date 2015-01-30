@@ -46,12 +46,9 @@ struct TagInfo;
 class MemberDef : public Definition
 {
  public:
-
-   MemberDef(const char *defFileName, int defLine, int defColumn,
-             const char *type, const char *name, const char *args,
-             const char *excp, Protection prot, Specifier virt, bool stat,
-             Relationship related, MemberType t, const ArgumentList *tal,
-             const ArgumentList *al);
+   MemberDef(const char *defFileName, int defLine, int defColumn, const char *type, const char *name, 
+             const char *args, const char *excp, Protection prot, Specifier virt, bool stat,
+             Relationship related, MemberType t, const ArgumentList *tal, const ArgumentList *al);
 
    ~MemberDef();
 
@@ -60,7 +57,7 @@ class MemberDef : public Definition
    }
 
    // move this member into a different scope
-   MemberDef *deepCopy() const;
+   QSharedPointer<MemberDef> deepCopy() const;
    void moveTo(QSharedPointer<Definition> scope);
 
    //-----------------------------------------------------------------------------------
@@ -400,7 +397,7 @@ class MemberDef : public Definition
    void writeTagFile(QTextStream &);
    void warnIfUndocumented();
 
-   MemberDef *createTemplateInstanceMember(ArgumentList *formalArgs, ArgumentList *actualArgs);
+   QSharedPointer<MemberDef> createTemplateInstanceMember(ArgumentList *formalArgs, ArgumentList *actualArgs);
 
    void findSectionsInDocumentation();
 
@@ -412,6 +409,9 @@ class MemberDef : public Definition
 
  private:
    MemberDef(const MemberDef &);  
+
+   template<class T, class ...Ts>
+   friend QSharedPointer<typename std::enable_if<std::is_base_of<EnableSharedFromThis, T>::value, T>::type> QMakeShared(Ts &&...vs);
 
    void lock() const;
    void unlock() const;

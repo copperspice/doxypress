@@ -17,6 +17,7 @@
 
 #include <QDir>
 
+#include <doxy_globals.h>
 #include <htmldocvisitor.h>
 #include <docparser.h>
 #include <language.h>
@@ -34,9 +35,6 @@
 #include <memberdef.h>
 #include <htmlentity.h>
 #include <plantuml.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 static const int NUM_HTML_LIST_TYPES = 4;
 static const char types[][NUM_HTML_LIST_TYPES] = {"1", "a", "i", "A"};
@@ -411,10 +409,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
 
          Doxygen::parserManager->getParser(lang)->parseCode(m_ci, s->context(), s->text(),
                      langExt, s->isExample(), s->exampleFile(), QSharedPointer<FileDef>(), 
-                     -1,    // startLine
-                     -1,    // endLine
-                     false, // inlineFragment
-                     QSharedPointer<MemberDef>(), true, m_ctx);
+                     -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
 
          m_t << PREFRAG_END;
 

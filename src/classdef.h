@@ -359,7 +359,7 @@ class ClassDef : public Definition
 
    // actions
    void findSectionsInDocumentation();
-   void addMembersToMemberGroup(QSharedPointer<ClassDef> self);
+   void addMembersToMemberGroup();
    void addListReferences();
    void computeAnchors();
    void mergeMembers();

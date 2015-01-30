@@ -1281,7 +1281,6 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                case CMD_EMPHASIS: {
                   children.append(new DocStyleChange(parent, s_nodeStack.count(), DocStyleChange::Italic, true));
                   tok = handleStyleArgument(parent, children, tokenName);
-
                   children.append(new DocStyleChange(parent, s_nodeStack.count(), DocStyleChange::Italic, false));
 
                   if (tok != TK_WORD) {
@@ -1938,7 +1937,7 @@ void DocCopy::parse(QList<DocNode *> &children)
          s_copyStack.append(def);
 
          // make sure the descriptions end with a newline, so the parser will correctly
-         // handle them in all cases.
+         // handle them in all cases
 
          if (m_copyBrief) {
             brief += '\n';
@@ -2104,6 +2103,7 @@ void DocSecRefItem::parse()
          }
       }
    }
+
    doctokenizerYYsetStatePara();
    handlePendingStyleCommands(this, m_children);
 
@@ -2139,10 +2139,12 @@ void DocSecRefList::parse()
    s_nodeStack.push(this);
 
    int tok = doctokenizerYYlex();
+
    // skip white space
    while (tok == TK_WHITESPACE || tok == TK_NEWPARA) {
       tok = doctokenizerYYlex();
    }
+
    // handle items
    while (tok) {
       if (tok == TK_COMMAND) {
@@ -2230,6 +2232,7 @@ void DocInternalRef::parse()
    }
 
    handlePendingStyleCommands(this, m_children);
+
    DBG(("DocInternalRef::parse() end\n"));
    DocNode *n = s_nodeStack.pop();
    assert(n == this);
@@ -2452,11 +2455,11 @@ DocLink::DocLink(DocNode *parent, const QByteArray &target)
 
 
 QByteArray DocLink::parse(bool isJavaLink, bool isXmlLink)
-{
-   QByteArray result;
+{     
+   DBG(("DocLink::parse() start\n"));
    s_nodeStack.push(this);
 
-   DBG(("DocLink::parse() start\n"));
+   QByteArray result;
    int tok;
 
    while ((tok = doctokenizerYYlex())) {
@@ -2519,7 +2522,8 @@ QByteArray DocLink::parse(bool isJavaLink, bool isXmlLink)
 
 endlink:
 
-   if (m_children.isEmpty()) { // no link text
+   if (m_children.isEmpty()) { 
+      // no link text
       m_children.append(new DocWord(this, m_refText));
    }
 
@@ -2540,10 +2544,9 @@ DocDotFile::DocDotFile(DocNode *parent, const QByteArray &name, const QByteArray
 
 void DocDotFile::parse()
 {
-   s_nodeStack.push(this);
-
    DBG(("DocDotFile::parse() start\n"));
-
+   s_nodeStack.push(this);
+ 
    doctokenizerYYsetStateTitle();
    int tok;
 
@@ -2619,10 +2622,9 @@ DocMscFile::DocMscFile(DocNode *parent, const QByteArray &name, const QByteArray
 
 void DocMscFile::parse()
 {
-   s_nodeStack.push(this);
-
    DBG(("DocMscFile::parse() start\n"));
-
+   s_nodeStack.push(this);
+ 
    doctokenizerYYsetStateTitle();
    int tok;
 
@@ -2694,12 +2696,12 @@ DocDiaFile::DocDiaFile(DocNode *parent, const QByteArray &name, const QByteArray
 
 void DocDiaFile::parse()
 {
-   s_nodeStack.push(this);
-   DBG(("DocDiaFile::parse() start\n"));
-
+  DBG(("DocDiaFile::parse() start\n")); 
+  s_nodeStack.push(this);
+ 
    doctokenizerYYsetStateTitle();
-
    int tok;
+
    while ((tok = doctokenizerYYlex())) {
       if (!defaultHandleToken(this, tok, m_children)) {
          switch (tok) {
@@ -2760,7 +2762,6 @@ void DocDiaFile::parse()
 
    DBG(("DocDiaFile::parse() end\n"));
    DocNode *n = s_nodeStack.pop();
-
    assert(n == this);
 }
 
@@ -2772,8 +2773,8 @@ DocImage::DocImage(DocNode *parent, const HtmlAttribList &attribs, const QByteAr
 
 void DocImage::parse()
 {
-   s_nodeStack.push(this);
    DBG(("DocImage::parse() start\n"));
+   s_nodeStack.push(this);
 
    // parse title
    doctokenizerYYsetStateTitle();
@@ -2810,33 +2811,36 @@ void DocImage::parse()
    while (tok == TK_WORD) { // there are values following the title
       if (g_token->name == "width") {
          m_width = g_token->chars;
+
       } else if (g_token->name == "height") {
          m_height = g_token->chars;
+
       } else {
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Unknown option %s after image title",
                         qPrint(g_token->name));
       }
       tok = doctokenizerYYlex();
    }
+
    doctokenizerYYsetStatePara();
 
    handlePendingStyleCommands(this, m_children);
+
    DBG(("DocImage::parse() end\n"));
    DocNode *n = s_nodeStack.pop();
    assert(n == this);
 }
 
 int DocHtmlHeader::parse()
-{
-   int retval = RetVal_OK;
-
+{  
+   DBG(("DocHtmlHeader::parse() start\n"));
    s_nodeStack.push(this);
 
-   DBG(("DocHtmlHeader::parse() start\n"));
+   int retval = RetVal_OK;   
    int tok;
 
    while ((tok = doctokenizerYYlex())) {
-      if (!defaultHandleToken(this, tok, m_children)) {
+      if (! defaultHandleToken(this, tok, m_children)) {
          switch (tok) {
             case TK_COMMAND:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a <h%d> tag",
@@ -2924,12 +2928,12 @@ endheader:
 
 int DocHRef::parse()
 {
-   int retval = RetVal_OK;
+   DBG(("DocHRef::parse() start\n"));  
    s_nodeStack.push(this);
 
-   DBG(("DocHRef::parse() start\n"));
-
+   int retval = RetVal_OK;
    int tok;
+
    while ((tok = doctokenizerYYlex())) {
       if (!defaultHandleToken(this, tok, m_children)) {
          switch (tok) {
@@ -2964,11 +2968,14 @@ int DocHRef::parse()
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while inside"
                      " <a href=...> tag", doctokenizerYYlineno);
    }
+
 endhref:
    handlePendingStyleCommands(this, m_children);
+
    DBG(("DocHRef::parse() end\n"));
    DocNode *n = s_nodeStack.pop();
    assert(n == this);
+
    return retval;
 }
 
@@ -4358,8 +4365,6 @@ int DocAutoListItem::parse()
    //printf("DocAutoListItem: retval=%d indent=%d\n",retval,g_token->indent);
    return retval;
 }
-
-//--------------------------------------------------------------------------
 
 DocAutoList::DocAutoList(DocNode *parent, int indent, bool isEnumList,
                          int depth) :
@@ -6297,6 +6302,10 @@ int DocPara::parse(bool skipParse, int token)
    DBG(("DocPara::parse() start\n"));
    s_nodeStack.push(this);
 
+
+// printf("\n BROOM  START-->docPara  %d   %x   %x   Kind:%d", s_nodeStack.count(), this, s_nodeStack.top(), this->kind() );
+
+
    // handle style commands "inherited" from the previous paragraph
    handleInitialStyleCommands(this, m_children);
 
@@ -6623,9 +6632,23 @@ endparagraph:
 
    handlePendingStyleCommands(this, m_children);
 
-   DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   if (! s_nodeStack.isEmpty() ) {
+     
+/*
+printf("\n BROOM  END-->docPara - Count :%d", s_nodeStack.count() ); 
 
+DocNode *xx = s_nodeStack.top();
+if (xx != this) {
+    
+} else { 
+   ;
+}
+*/
+
+      DocNode *n = s_nodeStack.pop(); 
+      assert(n == this);
+   }
+ 
    DBG(("DocPara::parse() end retval=%x\n", retval));
 
    INTERNAL_ASSERT(retval == 0 || retval == TK_NEWPARA || retval == TK_LISTITEM ||
@@ -6637,9 +6660,9 @@ endparagraph:
 int DocSection::parse()
 {
    DBG(("DocSection::parse() start %s level=%d\n", qPrint(g_token->sectionId), m_level));
-   int retval = RetVal_OK;
    s_nodeStack.push(this);
 
+   int retval = RetVal_OK;
    QSharedPointer<SectionInfo> sec;
 
    if (!m_id.isEmpty()) {
@@ -6666,6 +6689,7 @@ int DocSection::parse()
 
    do {
       DocPara *par = new DocPara(this);
+
       if (isFirst) {
          par->markFirst();
          isFirst = false;
@@ -6893,7 +6917,7 @@ void DocRoot::parse()
 
             m_children.append(sc);         
          }
-      }   
+      }
 
       if (! divFound) {
          DocPara *par = new DocPara(this);
@@ -6903,7 +6927,11 @@ void DocRoot::parse()
             isFirst = false;
          }
 
+//   printf("\n BROOM  *** docRoot  -- BEFORE parse"); 
+
          retval = par->parse(true, tok);         
+
+//   printf("\n BROOM  *** docRoot  -- AFTER parse  %x \n", this); 
 
          // new code to test for a <div>
          if (! par->isEmpty()) {
@@ -7134,14 +7162,14 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<
    // bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
    docParserPushContext();
 
-
+/*
 if (ctx)  {
    printf("\n BROOM  *** validate parser doc  what is CTX  %x ", ctx.data() );
 
    int temp = ctx->definitionType();
    printf("\n BROOM  *** validate parser doc  DefinitionType =  %d ",  temp );
 }
-
+*/
 
    if (ctx && ctx != Doxygen::globalScope && (ctx->definitionType() == Definition::TypeClass ||
           ctx->definitionType() == Definition::TypeNamespace)) {
@@ -7167,10 +7195,6 @@ if (ctx)  {
    }
 
    s_scope = ctx;
-
-
-printf("\n BROOM  *** validate parser doc  PRE  2 ");
-
 
    if (indexWords && Doxygen::searchIndex) {
       if (md) {
@@ -7287,14 +7311,10 @@ printf("\n BROOM  *** validate parser doc  PRE  2 ");
 
    doctokenizerYYinit(inpStr, s_fileName);
 
-printf("\n BROOM  *** validate parser doc  AAAA ");
-
    // build abstract syntax tree
    DocRoot *root = new DocRoot(md != 0, singleLine);
+
    root->parse();
-
-printf("\n BROOM  *** validate parser doc  BBBB ");
-
 
    if (Debug::isFlagSet(Debug::PrintTree)) {
       // pretty print the result
@@ -7314,7 +7334,7 @@ printf("\n BROOM  *** validate parser doc  BBBB ");
 
    // restore original parser state
    docParserPopContext();
- 
+
    return root;
 }
 

@@ -1894,9 +1894,9 @@ static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> s
 static void findMemberLink(CodeOutputInterface &ol, char *symName)
 {   
    if (g_currentDefinition) { 
-      auto di = Doxygen::symbolMap.find(symName);
+      auto di = Doxygen::symbolMap().find(symName);
 
-      while (di != Doxygen::symbolMap.end() && di.key() == symName) {      
+      while (di != Doxygen::symbolMap().end() && di.key() == symName) {      
          QSharedPointer<Definition> self = sharedFrom(di.value());          
           
          if (findMemberLink(ol, self, symName)) {

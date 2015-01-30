@@ -26,12 +26,7 @@
  *  This file contains main()
  */
 int main(int argc, char **argv)
-{
-   dirtyBroom = true;
- 
-   // BROOM - test code for printf to unbuffer
-   setbuf(stdout, nullptr);
-
+{    
    // passed parameters
    QStringList argList;
 

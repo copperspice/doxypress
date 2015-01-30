@@ -255,13 +255,8 @@ void PageDef::writePageDocumentation(OutputList &ol)
 
    ol.startTextBlock();
 
-
-printf("\n\n BROOM    ------->    PageDocumentation  begin ");
-
    ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), 
                   documentation() + inbodyDocumentation(), true, false );
-
-printf("\n BROOM    ------->    PageDocumentation  done ");
 
    ol.endTextBlock();
 

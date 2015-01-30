@@ -11457,7 +11457,10 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
                                       bool typeOnly = FALSE, bool varOnly = FALSE)
 {
    int i = 0;
-   if (*clName == '~') { // correct for matching negated values i.s.o. destructors.
+
+   if (*clName == '~') { 
+      // correct for matching negated values i.s.o. destructors.
+
       g_code->codify("~");
       clName++;
    }
@@ -11467,12 +11470,14 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
       return;
    }
 
-   if (g_insideProtocolList) { // for Obj-C
+   if (g_insideProtocolList) { 
+      // for Obj-C
       className += "-p";
    }
 
    if (g_insidePHP) {
       className = substitute(className, "\\", "::"); // for PHP namespaces
+
    } else if (g_insideCS || g_insideJava) {
       className = substitute(className, ".", "::"); // for PHP namespaces
    }
@@ -11490,12 +11495,13 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
       cd = getResolvedClass(d, g_sourceFileDef, className, &md);
 
       DBG_CTX((stderr, "non-local variable name=%s context=%d cd=%s md=%s!\n",
-               className.data(), g_theVarContext.count(), cd ? cd->name().data() : "<none>",
-               md ? md->name().data() : "<none>"));
+               className.constData(), g_theVarContext.count(), cd ? cd->name().data() : "<none>",
+               md ? md->name().constData() : "<none>"));
 
       if (cd == 0 && md == 0 && (i = className.indexOf('<')) != -1) {
-         QByteArray bareName = className.left(i); //stripTemplateSpecifiersFromScope(className);
+         QByteArray bareName = className.left(i); 
          DBG_CTX((stderr, "bareName=%s\n", bareName.data()));
+
          if (bareName != className) {
             cd = getResolvedClass(d, g_sourceFileDef, bareName, &md); // try unspecialized version
          }
@@ -11512,23 +11518,25 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
      
       DBG_CTX((stderr, "is found as a type cd=%s nd=%s\n", cd ? cd->name().data() : "<null>", nd ? nd->name().data() : "<null>"));
 
-      if (cd == 0 && md == 0) { // also see if it is variable or enum or enum value
+      if (cd == 0 && md == 0) { 
+         // also see if it is variable or enum or enum value
+
          if (getLink(g_classScope, clName, ol, clName, varOnly)) {
             return;
          }
       }
 
-   } else {
-      //printf("local variable!\n");
-      if (lcd != VariableContext::dummyContext) {
-         //printf("non-dummy context lcd=%s!\n",lcd->name().data());
+   } else {     
+      if (lcd != VariableContext::dummyContext) {        
          g_theCallContext.setScope(lcd);         
       }
 
       isLocal = TRUE;
       DBG_CTX((stderr, "is a local variable cd=%p!\n", cd));
    }
-   if (cd && cd->isLinkable()) { // is it a linkable class
+
+   if (cd && cd->isLinkable()) { 
+      // is it a linkable class
       DBG_CTX((stderr, "is linkable class %s\n", clName));
 
       if (g_exampleBlock) {
@@ -11566,13 +11574,15 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
          }
       }
 
-   } else { // not a class, maybe a global member
+   } else { 
+      // not a class, maybe a global member
       DBG_CTX((stderr, "class %s not linkable! cd=%p md=%p typeOnly=%d\n", clName, cd, md, typeOnly));
 
-      if (!isLocal && (md != 0 || (cd == 0 && !typeOnly))) { 
-         // not a class, see if it is a global enum/variable/typedef.
+      if (! isLocal && (md != 0 || (cd == 0 && ! typeOnly))) { 
+         // not a class, see if it is a global enum/variable/typedef
 
-         if (md == 0) { // not found as a typedef
+         if (md == 0) { 
+            // not found as a typedef
             md = setCallContextForVar(clName);
             
             if (md && g_currentDefinition) {
@@ -11605,7 +11615,8 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
                   md->setName(text);
                   md->setLocalName(text);
 
-               } else { // normal reference
+               } else { 
+                  // normal reference
                   text = clName;
                }
 
@@ -11615,6 +11626,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
                if (g_currentMemberDef && g_collectXRefs) {
                   addDocCrossReference(g_currentMemberDef, md);
                }
+
                return;
             }
          }
@@ -12479,7 +12491,7 @@ extern int codeYYlex (void);
 				(codeYYtext[codeYYleng - 1] == '\n'); \
 	YY_USER_ACTION
 
-/** The main scanner function which does all the work.
+/** The main scanner function which does all the work
  */
 YY_DECL {
    yy_state_type yy_current_state;
@@ -12498,6 +12510,7 @@ YY_DECL {
       if ( ! (yy_state_buf) ) {
          (yy_state_buf) = (yy_state_type *)codeYYalloc(YY_STATE_BUF_SIZE  );
       }
+
       if ( ! (yy_state_buf) ) {
          YY_FATAL_ERROR( "out of dynamic memory in codeYYlex()" );
       }
@@ -12558,32 +12571,39 @@ YY_DECL {
    yy_find_action:
       yy_current_state = *--(yy_state_ptr);
       (yy_lp) = yy_accept[yy_current_state];
+
    find_rule: /* we branch to this label when backing up */
-      for ( ; ; ) { /* until we find what rule we matched */
+      for ( ; ; ) { 
+
+         /* until we find what rule we matched */
          if ( (yy_lp) && (yy_lp) < yy_accept[yy_current_state + 1] ) {
             yy_act = yy_acclist[(yy_lp)];
-            if ( yy_act & YY_TRAILING_HEAD_MASK ||
-                  (yy_looking_for_trail_begin) ) {
+
+            if ( yy_act & YY_TRAILING_HEAD_MASK || (yy_looking_for_trail_begin) ) {
                if ( yy_act == (yy_looking_for_trail_begin) ) {
                   (yy_looking_for_trail_begin) = 0;
                   yy_act &= ~YY_TRAILING_HEAD_MASK;
                   break;
                }
+
             } else if ( yy_act & YY_TRAILING_MASK ) {
                (yy_looking_for_trail_begin) = yy_act & ~YY_TRAILING_MASK;
                (yy_looking_for_trail_begin) |= YY_TRAILING_HEAD_MASK;
                (yy_full_match) = yy_cp;
                (yy_full_state) = (yy_state_ptr);
                (yy_full_lp) = (yy_lp);
+
             } else {
                (yy_full_match) = yy_cp;
                (yy_full_state) = (yy_state_ptr);
                (yy_full_lp) = (yy_lp);
                break;
             }
+
             ++(yy_lp);
             goto find_rule;
          }
+
          --yy_cp;
          yy_current_state = *--(yy_state_ptr);
          (yy_lp) = yy_accept[yy_current_state];
@@ -12593,15 +12613,15 @@ YY_DECL {
 
    do_action:	/* This label is used only to access EOF actions. */
 
+
       switch ( yy_act ) {
-         /* beginning of action switch */
+        
          case 1:
             YY_RULE_SETUP
             YY_BREAK
 
          case 2:
             YY_RULE_SETUP
-
             {
                startFontClass("preprocessor");
                g_code->codify(codeYYtext);
@@ -13198,7 +13218,9 @@ YY_DECL {
 
                      DBG_CTX((stderr, "Adding new class %s\n", g_curClassName.data()));
 
-                     QSharedPointer<ClassDef> ncd(new ClassDef("<code>", 1, 1,g_curClassName, ClassDef::Class, 0, 0, FALSE)); 
+                     QSharedPointer<ClassDef> ncd = QMakeShared<ClassDef>("<code>", 1, 1, g_curClassName, ClassDef::Class, 
+                                    nullptr, "", FALSE); 
+
                      g_codeClassSDict->insert(g_curClassName, ncd);
 
                      // insert base classes                   
@@ -13631,13 +13653,13 @@ YY_DECL {
             YY_BREAK
          case 94:
             /* rule 94 can match eol */
-            YY_RULE_SETUP {
-               // p->func()
+            YY_RULE_SETUP {              
                addType();
                generateClassOrGlobalLink(*g_code, codeYYtext);
                g_name += codeYYtext;
             }
             YY_BREAK
+
          case 95:
             /* rule 95 can match eol */
             YY_RULE_SETUP {
@@ -16122,9 +16144,11 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
    g_insideJava = lang == SrcLangExt_Java;
    g_insideCS   = lang == SrcLangExt_CSharp;
    g_insidePHP  = lang == SrcLangExt_PHP;
+
    if (g_sourceFileDef) {
       setCurrentDoc("l00001");
    }
+
    g_currentDefinition = QSharedPointer<Definition>();
    g_currentMemberDef  = QSharedPointer<MemberDef>();
 
@@ -16137,7 +16161,7 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
    }
 
    g_includeCodeFragment = inlineFragment;
-   //printf("** exBlock=%d exName=%s include=%d\n",exBlock,exName,inlineFragment);
+  
    startCodeLine();
    g_type.resize(0);
    g_name.resize(0);
@@ -16160,15 +16184,18 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
       DBG_CTX((stderr, "endCodeLine(%d)\n", g_yyLineNr));
       g_code->endCodeLine();
    }
+
    if (fd) {
       TooltipManager::instance()->writeTooltips(*g_code);
    }
+
    if (cleanupSourceDef) {
       // delete the temporary file definition used for this example      
       g_sourceFileDef = QSharedPointer<FileDef>();
    }
 
    printlex(codeYY_flex_debug, FALSE, __FILE__, fd ? fd->fileName().data() : NULL);
+
    return;
 }
 

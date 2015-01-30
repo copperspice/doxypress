@@ -152,11 +152,9 @@ void NamespaceDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
    }
 }
 
-void NamespaceDef::addMembersToMemberGroup(QSharedPointer<NamespaceDef> self)
+void NamespaceDef::addMembersToMemberGroup()
 {  
-   if (self != this) {
-      throw "broom"; // broom 
-   }
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {

@@ -83,8 +83,8 @@ static QCache<QString, FindFileCacheElem>          s_findFileDefCache;
 static QHash<QString, int>                         s_extLookup;
 
 // forward declaration
-static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const char *n, 
-               QSharedPointer<MemberDef> *pTypeDef, QByteArray *pTemplSpec, QByteArray *pResolvedType );
+static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
+                  const char *n, QSharedPointer<MemberDef> *pTypeDef, QByteArray *pTemplSpec, QByteArray *pResolvedType );
 
 int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
                QSharedPointer<Definition> item, const QByteArray &explicitScopePart);
@@ -730,9 +730,9 @@ static QByteArray substTypedef(QSharedPointer<Definition> scope, QSharedPointer<
    }
 
    // lookup scope fragment in the symbol map
-   auto di = Doxygen::symbolMap.find(symbolName);
+   auto di = Doxygen::symbolMap().find(symbolName);
 
-   if (di == Doxygen::symbolMap.end()) {
+   if (di == Doxygen::symbolMap().end()) {
       // could not find any matching symbols
       return "";   
    }
@@ -741,7 +741,7 @@ static QByteArray substTypedef(QSharedPointer<Definition> scope, QSharedPointer<
 
    QSharedPointer<MemberDef> bestMatch;
 
-   while (di != Doxygen::symbolMap.end() && di.key() == symbolName)  {      
+   while (di != Doxygen::symbolMap().end() && di.key() == symbolName)  {      
       // search for the best match, only look at members 
 
       QSharedPointer<Definition> self = sharedFrom(di.value());
@@ -1223,10 +1223,8 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointe
       }
    }
 
-done:
-   //printf("  > result=%d\n",result);
+done:  
    accessStack.pop();
-   //Doxygen::lookupCache.insert(key,new int(result));
    return result;
 }
 
@@ -1242,10 +1240,15 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
                               QSharedPointer<ClassDef> &bestMatch, QSharedPointer<MemberDef> &bestTypedef,
                               QByteArray &bestTemplSpec, QByteArray &bestResolvedType)
 {
-   // only look at classes and members that are enums or typedefs
+   // only look at classes and members which are enums or typedefs
 
-   if (d->definitionType() == Definition::TypeClass || (d->definitionType() == Definition::TypeMember &&
-          (d.dynamicCast<MemberDef>())->isTypedef() || ((d.dynamicCast<MemberDef>())->isEnumerate()) ) ) {
+// printf("\n BROOM  getResolved Symbol %d ",  d->definitionType()  );
+
+   bool isClass  = (d->definitionType() == Definition::TypeClass); 
+   bool isMember = (d->definitionType() == Definition::TypeMember);
+
+   if (isClass || (isMember && 
+      ( d.dynamicCast<MemberDef>()->isTypedef() || d.dynamicCast<MemberDef>()->isEnumerate()) ))  {
 
       s_visitedNamespaces.clear();
 
@@ -1289,6 +1292,7 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
                   bestTemplSpec.resize(0);
                   bestResolvedType = cd->qualifiedName();
                }
+
             } else {
                
             }
@@ -1408,9 +1412,9 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
 
    // the -g (for C# generics) and -p (for ObjC protocols) 
 
-   if (! Doxygen::symbolMap.contains(name)) {    
+   if (! Doxygen::symbolMap().contains(name)) {    
    
-      if (! Doxygen::symbolMap.contains(name + "-p")) {    
+      if (! Doxygen::symbolMap().contains(name + "-p")) {    
          return QSharedPointer<ClassDef>();           
       }
    }
@@ -1483,17 +1487,21 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
    // not a unique name         
    int count = 0;
 
-   auto di = Doxygen::symbolMap.find(name);
+   auto di = Doxygen::symbolMap().find(name);
            
-   while (di != Doxygen::symbolMap.end() && di.key() == name)  { 
+   while (di != Doxygen::symbolMap().end() && di.key() == name)  { 
 
       QSharedPointer<Definition> self = sharedFrom(di.value());
+
+// printf("\n BROOM  getResolvedClassRec   A1    %s ", key.constData()  );
             
       getResolvedSymbol(scope, fileScope, self, explicitScopePart, &actTemplParams,
                         minDistance, bestMatch, bestTypedef, bestTemplSpec, bestResolvedType);
 
-      ++count;
+//printf("\n BROOM  getResolvedClassRec   A2 "  );
 
+
+      ++count;
       ++di;
    }
  
@@ -6102,7 +6110,7 @@ QSharedPointer<PageDef> addRelatedPage(const char *name, const QByteArray &ptitl
       }
 
       QByteArray title = ptitle.trimmed();
-      pd = QSharedPointer<PageDef>(new PageDef(fileName, startLine, baseName, doc, title));
+      pd = QMakeShared<PageDef>(fileName, startLine, baseName, doc, title);
 
       pd->setRefItems(sli);
       pd->setLanguage(lang);
@@ -6722,9 +6730,9 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
       return QSharedPointer<MemberDef>();   
    }
 
-   auto di = Doxygen::symbolMap.find(name);
+   auto di = Doxygen::symbolMap().find(name);
 
-   if (di == Doxygen::symbolMap.end()) {
+   if (di == Doxygen::symbolMap().end()) {
       // could not find any matching symbols
       return QSharedPointer<MemberDef>();   
    }
@@ -6744,7 +6752,7 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
    QSharedPointer<MemberDef> bestMatch = QSharedPointer<MemberDef> (); 
    
    // find the closest matching definition   
-   while (di != Doxygen::symbolMap.end() && di.key() == name)  {      
+   while (di != Doxygen::symbolMap().end() && di.key() == name)  {      
       // search for the best match, only look at members 
 
       QSharedPointer<Definition> self = sharedFrom(di.value());

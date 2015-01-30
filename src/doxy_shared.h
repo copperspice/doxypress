@@ -28,28 +28,29 @@ class EnableSharedFromThis
    public: 
       virtual ~EnableSharedFromThis() {};
   
-      static QMap<const EnableSharedFromThis *, QWeakPointer<EnableSharedFromThis>> m_selfMap;
+      static QMap<const EnableSharedFromThis *, QWeakPointer<EnableSharedFromThis>> &m_selfMap();
 };
 
 template<class T>
 void QRegisterSelf(QSharedPointer<T> ptr)
 {
-   EnableSharedFromThis::m_selfMap.insert(ptr.data(), ptr);
+   EnableSharedFromThis::m_selfMap().insert(ptr.data(), ptr);
 }
 
 template<class T>
 QSharedPointer<typename std::enable_if<std::is_base_of<EnableSharedFromThis, T>::value, T>::type> sharedFrom(const T *ptr)
 { 
    QSharedPointer<T> retval;
+   auto &map = EnableSharedFromThis::m_selfMap();
    
-   auto item = EnableSharedFromThis::m_selfMap.find(ptr);    
+   auto item = map.find(ptr);    
 
-   if (item != EnableSharedFromThis::m_selfMap.end())  {
+   if (item != map.end())  {
       retval = item->toStrongRef().template dynamicCast<T>();
 
    } else {
-      std::string className = typeid(T).name();
-      throw std::runtime_error("CS Doxygen::SharedFrom() Class " + className + " was not registerd" );
+      std::string className = typeid(*ptr).name();
+      throw std::runtime_error("\nCS Doxygen::SharedFrom() Class " + className + " was not properly registerd. Please submit a bug report.");
    }
   
    return retval;   

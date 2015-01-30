@@ -164,8 +164,7 @@ class Doxygen
    static QHash<QString, void *>   expandAsDefinedDict;   
    static QHash<QString, RefList>  *xrefLists;           // array of xref lists: todo, test, bug, deprecated ...
    static QHash<QString, int>      *htmlDirMap;
-
-   static QHash<QString, Definition *> symbolMap;
+  
    static QHash<QString, QSharedPointer<Definition>> clangUsrMap;
 
    static QHash<long, QSharedPointer<MemberGroupInfo>> memGrpInfoDict;
@@ -190,6 +189,8 @@ class Doxygen
    static bool  generatingXmlOutput;
    static bool  markdownSupport;
   
+   //
+   static QHash<QString, Definition *> &symbolMap();
 };
 
 class Doxy_Globals 

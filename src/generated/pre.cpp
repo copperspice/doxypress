@@ -3787,12 +3787,11 @@ void addDefine()
       return;
    }
   
-   QSharedPointer<MemberDef> md(new MemberDef(g_yyFileName, g_yyLineNr - g_yyMLines, g_yyColNr,
-               "#define", g_defName, g_defArgsStr, 0,
-               Public, Normal, FALSE, Member, MemberType_Define, 0, 0));
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(g_yyFileName, g_yyLineNr - g_yyMLines, g_yyColNr,
+               "#define", g_defName, g_defArgsStr, nullptr, Public, Normal, FALSE, Member, 
+               MemberType_Define, nullptr, nullptr);
 
-
-   if (!g_defArgsStr.isEmpty()) {
+   if (! g_defArgsStr.isEmpty()) {
       ArgumentList *argList = new ArgumentList;
       
       stringToArgumentList(g_defArgsStr, argList);

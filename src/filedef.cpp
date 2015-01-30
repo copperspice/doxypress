@@ -1371,7 +1371,7 @@ static void addDirsAsGroups(Directory *root, QSharedPointer<GroupDef> parent, in
    QSharedPointer<GroupDef> gd;
 
    if (root->kind() == DirEntry::Dir) {
-      gd = QSharedPointer<GroupDef>(new GroupDef("[generated]", 1, root->path(), root->name() ));
+      gd = QMakeShared<GroupDef>("[generated]", 1, root->path(), root->name());
 
       if (parent) {
          parent->addGroup(gd);

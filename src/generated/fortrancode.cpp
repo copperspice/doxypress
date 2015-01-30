@@ -28710,6 +28710,7 @@ void parseFortranCode(CodeOutputInterface &od, const char *className, const QByt
    g_needsTermination = FALSE;
    g_searchCtx = searchCtx;
    g_collectXRefs = collectXRefs;
+
    if (endLine != -1) {
       g_inputLines  = endLine + 1;
    } else {
@@ -28725,13 +28726,16 @@ void parseFortranCode(CodeOutputInterface &od, const char *className, const QByt
    g_exampleBlock  = exBlock;
    g_exampleName   = exName;
    g_sourceFileDef = fd;
+
    if (exBlock && fd == 0) {
       // create a dummy filedef for the example
-      g_sourceFileDef = new FileDef("", exName);
+      g_sourceFileDef = QMakeShared<FileDef>("", exName);
    }
+
    if (g_sourceFileDef) {
       setCurrentDoc("l00001");
    }
+
    g_currentDefinition = 0;
    g_currentMemberDef = 0;
    if (!g_exampleName.isEmpty()) {

@@ -185,11 +185,9 @@ void ClassDef::insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifi
    m_isSimple = false;
 }
 
-void ClassDef::addMembersToMemberGroup(QSharedPointer<ClassDef> self)
+void ClassDef::addMembersToMemberGroup()
 {
-   if (self != this) {
-      throw "broom"; // broom 
-   }
+   QSharedPointer<ClassDef> self = sharedFrom(this);
 
    for (auto item : m_memberLists ) {
       if ((item->listType()&MemberListType_detailedLists) == 0) {      

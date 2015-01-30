@@ -793,6 +793,10 @@ void HtmlGenerator::writeSearchData(const char *dir)
    QString fileName = outputName + "/search.css";
    QFile f(fileName);
 
+
+printf("\n\n BROOM  A   ");
+
+
    if (f.open(QIODevice::WriteOnly)) {
 
       QByteArray resData = mgr.getAsString("html/search.css");
@@ -815,6 +819,9 @@ void HtmlGenerator::writeSearchData(const char *dir)
    } else {
       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error()); 
    }
+
+printf("\n\n BROOM  B   ");
+
 }
 
 void HtmlGenerator::writeStyleSheetFile(QFile &file)
@@ -1962,7 +1969,7 @@ void HtmlGenerator::endParamList()
 void HtmlGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
    assert(m_codeGen);
- 
+
    HtmlDocVisitor *visitor = new HtmlDocVisitor(m_textStream, *m_codeGen, ctx);
    n->accept(visitor);
 

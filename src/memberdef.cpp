@@ -791,9 +791,9 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
  *            the string past as argument \a a.
  */
 
-MemberDef::MemberDef(const char *df, int dl, int dc, const char *t, const char *na, const char *a, const char *e,
-                     Protection p, Specifier v, bool s, Relationship r, MemberType mt, const ArgumentList *tal,
-                      const ArgumentList *al) 
+MemberDef::MemberDef(const char *df, int dl, int dc, const char *t, const char *na, 
+                     const char *a, const char *e, Protection p, Specifier v, bool s, 
+                     Relationship r, MemberType mt, const ArgumentList *tal, const ArgumentList *al) 
    : Definition(df, dl, dc, removeRedundantWhiteSpace(na)), visited(false), m_impl(new MemberDefImpl)  
 {
    m_impl->init(this, t, a, e, p, v, s, r, mt, tal, al);
@@ -803,7 +803,8 @@ MemberDef::MemberDef(const char *df, int dl, int dc, const char *t, const char *
    m_isDestructorCached  = 0;
 }
 
-MemberDef::MemberDef(const MemberDef &md) : Definition(md), visited(false), m_impl(new MemberDefImpl(*md.m_impl))
+MemberDef::MemberDef(const MemberDef &md) 
+   : Definition(md), visited(false), m_impl(new MemberDefImpl(*md.m_impl))
 {  
    m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
@@ -814,10 +815,10 @@ MemberDef &MemberDef::operator=(const MemberDef &)
 {
 } 
 
-MemberDef *MemberDef::deepCopy() const
+QSharedPointer<MemberDef> MemberDef::deepCopy() const
 {   
    // make a copy of the object
-   MemberDef *result = new MemberDef(*this);
+   QSharedPointer<MemberDef> result = QMakeShared<MemberDef>(*this);
   
    // clear pointers owned by object
    result->m_impl->redefinedBy       = 0;
@@ -3462,10 +3463,8 @@ void MemberDef::setNamespace(QSharedPointer<NamespaceDef> nd)
    setOuterScope(nd);
 }
 
-MemberDef *MemberDef::createTemplateInstanceMember(
-   ArgumentList *formalArgs, ArgumentList *actualArgs)
-{
-   //printf("  Member %s %s %s\n",typeString(),name().data(),argsString());
+QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(ArgumentList *formalArgs, ArgumentList *actualArgs)
+{   
    ArgumentList *actualArgList = 0;
 
    if (m_impl->defArgList) {
@@ -3485,10 +3484,10 @@ MemberDef *MemberDef::createTemplateInstanceMember(
       methodName = substituteTemplateArgumentsInString(methodName, formalArgs, actualArgs);
    }
 
-   MemberDef *imd = new MemberDef( getDefFileName(), getDefLine(), getDefColumn(),
-      substituteTemplateArgumentsInString(m_impl->type, formalArgs, actualArgs),methodName, 
-      substituteTemplateArgumentsInString(m_impl->args, formalArgs, actualArgs),
-      m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->related, m_impl->mtype, 0, 0);
+   QSharedPointer<MemberDef> imd = QMakeShared<MemberDef>(getDefFileName(), getDefLine(), getDefColumn(),
+         substituteTemplateArgumentsInString(m_impl->type, formalArgs, actualArgs),methodName, 
+         substituteTemplateArgumentsInString(m_impl->args, formalArgs, actualArgs),
+         m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->related, m_impl->mtype, nullptr, nullptr);
 
    imd->setArgumentList(actualArgList);
    imd->setDefinition(substituteTemplateArgumentsInString(m_impl->def, formalArgs, actualArgs));

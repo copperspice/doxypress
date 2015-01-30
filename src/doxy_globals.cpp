@@ -123,7 +123,15 @@ bool Doxy_Globals::g_successfulRun     = false;
 bool Doxy_Globals::g_dumpSymbolMap     = false;
 
 
-QMap<const EnableSharedFromThis *, QWeakPointer<EnableSharedFromThis>> EnableSharedFromThis::m_selfMap;
+// part 3
+QMap<const EnableSharedFromThis *, QWeakPointer<EnableSharedFromThis>> &EnableSharedFromThis::m_selfMap()
+{
+   static QMap<const EnableSharedFromThis *, QWeakPointer<EnableSharedFromThis>> data;
+   return data;
+}
 
-
-QHash<QString, Definition *> Doxygen::symbolMap; 
+QHash<QString, Definition *> &Doxygen::symbolMap()
+{
+   static QHash<QString, Definition *> data;
+   return data;  
+} 
