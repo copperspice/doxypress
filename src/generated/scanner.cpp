@@ -20884,14 +20884,10 @@ YY_DECL {
             YY_RESTORE_YY_MORE_OFFSET
 
             if ( YY_CURRENT_BUFFER_LVALUE->yy_buffer_status == YY_BUFFER_NEW ) {
-               /* We're scanning a new file or input source.  It's
-                * possible that this happened because the user
-                * just pointed scannerYYin at a new source and called
-                * scannerYYlex().  If so, then we have to assure
-                * consistency between YY_CURRENT_BUFFER and our
-                * globals.  Here is the right place to do so, because
-                * this is the first action (other than possibly a
-                * back-up) that will match for the new input source.
+               /* scanning a new file or input source.  It is possible this happened because the user
+                * pointed scannerYYin at a new source and called scannerYYlex().  If so, then assure
+                * consistency between YY_CURRENT_BUFFER and our globals.  Here is the right place to do so
+                * because this is the first action (other than possibly a back-up) which will match for the new input source.
                 */
                (yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
                YY_CURRENT_BUFFER_LVALUE->yy_input_file = scannerYYin;
@@ -20911,15 +20907,12 @@ YY_DECL {
 
                (yy_c_buf_p) = (yytext_ptr) + yy_amount_of_matched_text;
 
-               yy_current_state = yy_get_previous_state(  );
+               yy_current_state = yy_get_previous_state();
 
-               /* Okay, we're now positioned to make the NUL
-                * transition.  We couldn't have
-                * yy_get_previous_state() go ahead and do it
-                * for us because it doesn't know how to deal
-                * with the possibility of jamming (and we don't
-                * want to build jamming into it because then it
-                * will run more slowly).
+               /* now positioned to make the NUL transition.  We could not have
+                * yy_get_previous_state() go ahead and do it for us because it does not know 
+                * how to deal with the possibility of jamming (and we do not want to build jamming 
+                * into it because then it will run more slowly).
                 */
 
                yy_next_state = yy_try_NUL_trans( yy_current_state );
@@ -20991,7 +20984,7 @@ YY_DECL {
          }
 
          default:
-            YY_FATAL_ERROR("Fatal Flex Scanner internal error, no action found" );
+            YY_FATAL_ERROR("Fatal Flex Scanner internal error, no action found");
 
       } /* end of action switch */
 
@@ -22127,7 +22120,7 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
       rt->lang = language;
       current_root  = rt ;
 
-      msg("Parsing input file %s\n", yyFileName.data());
+      msg("Parsing input file\n");
    
       initParser();
       groupEnterFile(yyFileName, yyLineNr);

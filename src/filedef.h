@@ -241,8 +241,7 @@ class FileDef : public Definition
    void combineUsingRelations();
 
    bool generateSourceFile() const;
-   void sortMemberLists();
-
+  
    void addIncludeDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported, bool indirect);
    void addIncludedByDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported);
 

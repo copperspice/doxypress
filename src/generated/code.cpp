@@ -10585,17 +10585,14 @@ char *codeYYtext;
 
 #define YY_NEVER_INTERACTIVE 1
 
-#define CLASSBLOCK (int *)4
-#define SCOPEBLOCK (int *)8
-#define INNERBLOCK (int *)12
+#define CLASSBLOCK    1
+#define SCOPEBLOCK    2
+#define INNERBLOCK    3
 
-/* -----------------------------------------------------------------
- *	statics
- */
 
 static CodeOutputInterface *g_code;
 
-static ClassSDict    *g_codeClassSDict = 0;
+static ClassSDict   *g_codeClassSDict = 0;
 static QByteArray    g_curClassName;
 static QStringList   g_curClassBases;
 
@@ -10614,14 +10611,13 @@ static QByteArray    g_exampleName;
 static QByteArray    g_exampleFile;
 
 static bool          g_insideTemplate = FALSE;
-static QByteArray      g_type;
-static QByteArray      g_name;
-static QByteArray      g_args;
-static QByteArray      g_classScope;
-static QByteArray      g_realScope;
-static QStack<int *>   g_scopeStack;      //!< 1 if bracket starts a scope,
+static QByteArray    g_type;
+static QByteArray    g_name;
+static QByteArray    g_args;
+static QByteArray    g_classScope;
+static QByteArray    g_realScope;
 
-//   2 for internal blocks
+static QStack<int>   g_scopeStack;     
 static int           g_anchorCount;
 
 static QSharedPointer<FileDef>  g_sourceFileDef;
@@ -11317,10 +11313,12 @@ static QSharedPointer<MemberDef> setCallContextForVar(const QByteArray &name)
 
          if (md) {
             DBG_CTX((stderr, "Found member %s\n", md->name().data()));
-            if (g_scopeStack.top() != CLASSBLOCK) {
+
+            if (g_scopeStack.isEmpty() || g_scopeStack.top() != CLASSBLOCK) {
                DBG_CTX((stderr, "class member `%s' mcd=%s\n", name.data(), mcd->name().data()));
                g_theCallContext.setScope(stripClassName(md->typeString(), md->getOuterScope() ));
             }
+
             return md;
          }
       }
@@ -12951,7 +12949,7 @@ YY_DECL {
                g_type.resize(0);
                g_name.resize(0);
 
-               int *scope = nullptr;
+               int scope = 0;
 
                if (! g_scopeStack.isEmpty() ) {              
                   scope = g_scopeStack.pop();
@@ -12997,7 +12995,7 @@ YY_DECL {
                if (g_insideBody) {
                   g_theVarContext.popScope();
                  
-                  int *scope = nullptr;
+                  int scope = 0;
    
                   if (! g_scopeStack.isEmpty() ) {              
                      scope = g_scopeStack.pop();
@@ -13007,6 +13005,7 @@ YY_DECL {
                   if (scope == SCOPEBLOCK || scope == CLASSBLOCK) {
                      popScope();
                   }
+
                   g_insideBody = FALSE;
                }
 
@@ -13115,7 +13114,9 @@ YY_DECL {
             YY_RULE_SETUP {
                // PHP namespace
                g_curClassName = substitute(codeYYtext, "\\", "::");
+
                g_scopeStack.push(CLASSBLOCK);
+
                pushScope(g_curClassName);
                addType();
                generateClassOrGlobalLink(*g_code, codeYYtext);
@@ -13127,6 +13128,7 @@ YY_DECL {
                // Obj-C category
                g_curClassName = removeRedundantWhiteSpace(codeYYtext);
                g_scopeStack.push(CLASSBLOCK);
+
                pushScope(g_curClassName);
                addType();
                generateClassOrGlobalLink(*g_code, codeYYtext);
@@ -13211,6 +13213,7 @@ YY_DECL {
                {
                   DBG_CTX((stderr, "** scope stack push CLASSBLOCK\n"));
                   g_scopeStack.push(CLASSBLOCK);
+
                   pushScope(g_curClassName);
                   DBG_CTX((stderr, "***** g_curClassName=%s\n", g_curClassName.data()));
 
@@ -13930,25 +13933,22 @@ YY_DECL {
                   g_code->codify(codeYYtext);
                   g_saveName = g_name;
                   g_saveType = g_type;
-                  if (*codeYYtext != '[' && !g_type.isEmpty())
-                  {
-                     //printf("g_scopeStack.bottom()=%p\n",g_scopeStack.bottom());
-                     //if (g_scopeStack.top()!=CLASSBLOCK) // commented out for bug731363
-                     {
-                        //printf("AddVariable: '%s' '%s' context=%d\n",
-                        //    g_type.data(),g_name.data(),g_theVarContext.count());
-                        g_theVarContext.addVariable(g_type, g_name);
-                     }
+
+                  if (*codeYYtext != '[' && !g_type.isEmpty()) {                    
+                                           
+                     g_theVarContext.addVariable(g_type, g_name);
                      g_name.resize(0);
                   }
-                  if (*codeYYtext == ';' || *codeYYtext == '=')
-                  {
+
+                  if (*codeYYtext == ';' || *codeYYtext == '=') {
                      g_type.resize(0);
                      g_name.resize(0);
-                  } else if (*codeYYtext == '[')
-                  {
+
+                  } else if (*codeYYtext == '[') {
                      g_theCallContext.pushScope();
+
                   }
+
                   g_args.resize(0);
                   g_parmType.resize(0);
                   g_parmName.resize(0);
@@ -14344,10 +14344,10 @@ YY_DECL {
          case 160:
             /* rule 160 can match eol */
             YY_RULE_SETUP {
-               if (g_insideBody)
-               {
+               if (g_insideBody) {
                   g_theVarContext.pushScope();
                }
+
                g_theVarContext.addVariable(g_parmType, g_parmName);
                //g_theCallContext.popScope();
                g_parmType.resize(0);

@@ -169,7 +169,12 @@ template<class T> class CompAccept
 {
  public:
    CompAccept() {  }
-   virtual ~CompAccept() {}
+
+   virtual ~CompAccept() {
+      for (auto item : m_children) {
+         delete item;
+      }
+   }
 
    void accept(T *obj, DocVisitor *v) {
       v->visitPre(obj);

@@ -917,6 +917,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
    bool renderDiagram = false;
 
    if (Config_getBool("HAVE_DOT") && (Config_getBool("CLASS_DIAGRAMS") || Config_getBool("CLASS_GRAPH"))) {
+
       // write class diagram using dot   
       DotClassGraph inheritanceGraph(self, DotNode::Inheritance);
 
@@ -932,19 +933,20 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
 
    } else if (Config_getBool("CLASS_DIAGRAMS") && count > 0) {
       // write class diagram using build-in generator
-   
-      ClassDiagram diagram(self); // create a diagram of this class.
+  
+      ClassDiagram diagram(self); // create a diagram of this class
       ol.startClassDiagram();
+
       ol.disable(OutputGenerator::Man);
       ol.parseText(theTranslator->trClassDiagram( qPrintable(displayName())));
+
       ol.enable(OutputGenerator::Man);
       ol.endClassDiagram(diagram, getOutputFileBase(), qPrintable(displayName()));
       renderDiagram = true;
    }
 
    if (renderDiagram)  {
-      // if we already show the inheritance relations graphically, then hide the text version
-   
+      // if we already show the inheritance relations graphically, then hide the text version   
       ol.disableAllBut(OutputGenerator::Man);
    }
 
@@ -1630,9 +1632,9 @@ void ClassDef::addClassAttributes(OutputList &ol)
          ol.writeLabel(qPrintable(s), nextItem != sl.end());         
       }
 
-
       ol.endLabels();
    }
+
    ol.popGeneratorState();
 }
 
@@ -1645,7 +1647,7 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QByteArray & /*p
    QByteArray pageType = " ";
    pageType += compoundTypeString();
    toupper(pageType.at(1));
-
+  
    Doxygen::indexList->addIndexItem(self, QSharedPointer<MemberDef>());
 
    if (Doxygen::searchIndex) {
@@ -1659,7 +1661,9 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QByteArray & /*p
    SrcLangExt lang = getLanguage();
 
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class) ) { 
+
       switch (lde->kind()) {
+
          case LayoutDocEntry::BriefDesc:
             writeBriefDescription(ol, exampleFlag);
             break;
@@ -2506,10 +2510,6 @@ void ClassDef::mergeMembers()
   
    bool inlineInheritedMembers = Config_getBool("INLINE_INHERITED_MEMB");
 
-
-printf("\n\n BROOM  mergeMembers  A1");
-
-
    if (baseClasses()) {
       
       for (auto bcd : *baseClasses() ) {
@@ -2528,11 +2528,12 @@ printf("\n\n BROOM  mergeMembers  A1");
                QSharedPointer<MemberNameInfo> dstMni;
 
                if (dstMnd != 0 && (dstMni = dstMnd->find(srcMni->memberName()))) {
-                  // a member with that name is already in the class.
+                  // a member with that name is already in the class
                   // the member may hide or reimplement the one in the sub class
                   // or there may be another path to the base class that is already
-                  // visited via another branch in the class hierarchy.
-                                 
+                  // visited via another branch in the class hierarchy
+
+                                
                   for (auto srcMi : *srcMni) {
                      QSharedPointer<MemberDef> srcMd = srcMi.memberDef;
 
@@ -2560,7 +2561,7 @@ printf("\n\n BROOM  mergeMembers  A1");
                               ArgumentList *srcAl = srcMd->argumentList();
                               ArgumentList *dstAl = dstMd->argumentList();
 
-                              found = matchArguments2( srcMd->getOuterScope(), srcMd->getFileDef(), srcAl,
+                              found = matchArguments2(srcMd->getOuterScope(), srcMd->getFileDef(), srcAl,
                                          dstMd->getOuterScope(), dstMd->getFileDef(), dstAl, true );
                              
                               hidden = hidden  || !found;
@@ -2579,24 +2580,23 @@ printf("\n\n BROOM  mergeMembers  A1");
                            }
 
                         } else { 
-                           // same members
-                           // do not add if base class is virtual or
-                           // if scope paths are equal or
-                           // if base class is an interface (and thus implicitly virtual).
+                           // same members do not add if base class is virtual or if scope paths are 
+                           // are equal or if base class is an interface (and thus implicitly virtual)
                            
                            if ((srcMi.virt != Normal && dstMi.virt != Normal) ||
-                                 bClass->name() + sep + srcMi.scopePath == dstMi.scopePath ||
-                                 dstMd->getClassDef()->compoundType() == Interface) {
+                                    bClass->name() + sep + srcMi.scopePath == dstMi.scopePath ||
+                                    dstMd->getClassDef()->compoundType() == Interface) {
                               found = true;
 
                            } else  {
-                              // member can be reached via multiple paths in the
-                              // inheritance tree                                                     
+                              // member can be reached via multiple paths in the inheritance tree                                                     
 
                               QByteArray scope = dstMi.scopePath.left(dstMi.scopePath.indexOf(sep) + sepLen);
+
                               if (scope != dstMi.ambiguityResolutionScope.left(scope.length())) {
                                  dstMi.ambiguityResolutionScope.prepend(scope);
                               }
+
                               ambigue = true;
                            }
                         }
@@ -2656,17 +2656,17 @@ printf("\n\n BROOM  mergeMembers  A1");
                      }
                   }
 
-               } else { // base class has a member that is not in the sub class => copy
-                  // create a deep copy of the list (only the MemberInfo's will be
-                  // copied, not the actual MemberDef's)
+               } else { 
+                  // base class has a member that is not in the sub class
+                  // create a deep copy of the list (only the MemberInfo's will be copied, not the actual MemberDef's)
 
                   QSharedPointer<MemberNameInfo> newMni = QMakeShared<MemberNameInfo>(srcMni->memberName());
 
                   // copy the member(s) from the base to the sub class
-                 
+               
                   for (auto mi : *srcMni )   {
                      if (! mi.memberDef->isFriend()) { 
-                        // don't inherit friends
+                        // do not inherit friends
                         Protection prot = mi.prot;
 
                         if (bcd->prot == Protected) {
@@ -2678,7 +2678,6 @@ printf("\n\n BROOM  mergeMembers  A1");
                            prot = Private;
                         }
                        
-
                         if (mi.prot != Private) {
                            Specifier virt = mi.virt;
 
@@ -2693,7 +2692,7 @@ printf("\n\n BROOM  mergeMembers  A1");
                            }
                            
                            MemberInfo newMi = MemberInfo(mi.memberDef, prot, virt, true);
-                           newMi.scopePath = bClass->name() + sep + mi.scopePath;
+                           newMi.scopePath  = bClass->name() + sep + mi.scopePath;
                            newMi.ambigClass = mi.ambigClass;
                            newMi.ambiguityResolutionScope = mi.ambiguityResolutionScope;
                            newMni->append(newMi);
@@ -2790,7 +2789,7 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
             QSharedPointer<ClassDef> self = sharedFrom(this);
             QSharedPointer<MemberNameInfo> newMni (new MemberNameInfo(srcMni->memberName()));
 
-            // copy the member(s) from the category to this class     BROOM check 
+            // copy the member(s) from the category to this class
                          
             for (auto &mi : *srcMni )   {
                Protection prot = mi.prot;
@@ -2934,6 +2933,7 @@ void ClassDef::addUsedByClass(QSharedPointer<ClassDef> cd, const char *accessNam
 QByteArray ClassDef::compoundTypeString() const
 {
    if (getLanguage() == SrcLangExt_Fortran) {
+
       switch (m_compType) {
          case Class:
             return "module";
@@ -2952,7 +2952,9 @@ QByteArray ClassDef::compoundTypeString() const
          default:
             return "unknown";
       }
+
    } else {
+
       switch (m_compType) {
          case Class:
             return isJavaEnum() ? "enum" : "class";

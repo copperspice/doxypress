@@ -32,8 +32,6 @@
 #include <portable.h>
 #include <index.h>
 #include <classlist.h>
-
-// must appear after the previous include - resolve soon 
 #include <doxy_globals.h>
 
 #define IMAGE_EXT ".png"
@@ -412,7 +410,8 @@ void DiagramItem::addChild(DiagramItem *di)
 
 void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, bool doBases, Protection prot, Specifier virt, const char *ts)
 {
-   //if (cd->visited) return; // the visit check does not work in case of multiple inheritance of the same class!
+   // the visit check does not work in case of multiple inheritance of the same class
+   // if (cd->visited) return; 
 
    DiagramItem *di = new DiagramItem(parent, diagram->at(level)->count(), cd, prot, virt, ts);
    
@@ -463,6 +462,7 @@ void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, b
 // **
 TreeDiagram::TreeDiagram(QSharedPointer<ClassDef> root, bool doBases)
 {
+
    DiagramRow *row = new DiagramRow(this, 0);
    append(row);
 
@@ -533,19 +533,33 @@ void TreeDiagram::computeLayout()
 {    
    QList<DiagramRow *>::iterator iter(this->begin());  
    
-   while (iter != this->end() && *iter && (*iter)->count() < maxTreeWidth)   {
+   while (iter != this->end()) { 
+
+      if ((*iter)->count() >= maxTreeWidth)   {
+         break;
+      }
+
       ++iter;
    }
    
-   DiagramRow *row = *iter;
+   DiagramRow *row; 
+
+   if (iter == this->end()) {
+      row = nullptr;
+
+   } else {
+      row = *iter;
+
+   }
 
    if (row) {         
       DiagramItem *opi = 0;
 
       int delta  = 0;
       bool first = true;
-    
+   
       for (auto item : *row) {
+
          DiagramItem *pi = item->parentItem();
 
          if (pi == opi && ! first) {
@@ -573,7 +587,6 @@ void TreeDiagram::computeLayout()
       DiagramItem *di;
 
       while (rit != row->end()) {
-
          di = *rit;
 
          DiagramItem *pi = di->parentItem();
@@ -595,7 +608,6 @@ void TreeDiagram::computeLayout()
             ++rit;
          }
       }
-
    }
 }
 
@@ -1135,6 +1147,7 @@ ClassDiagram::ClassDiagram(QSharedPointer<ClassDef> root)
 
    DiagramItem *baseItem  = base->first()->first();
    DiagramItem *superItem = super->first()->first();
+
 
    int xbase  = baseItem->xPos();
    int xsuper = superItem->xPos();

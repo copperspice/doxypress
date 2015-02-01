@@ -3442,11 +3442,13 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
    assert(srcScope != 0 && dstScope != 0);
 
    if (srcAl == 0 || dstAl == 0) {
-      bool match = srcAl == dstAl; // at least one of the members is not a function
+      // at least one of the members is not a function
+      bool match = srcAl == dstAl; 
 
       if (match) {
          DOX_MATCH
          return true;
+
       } else {
          DOX_NOMATCH
          return false;
@@ -6096,12 +6098,13 @@ QSharedPointer<PageDef> addRelatedPage(const char *name, const QByteArray &ptitl
                   const char *fileName, int startLine, const QList<ListItemInfo> *sli, QSharedPointer<GroupDef> gd, 
                   TagInfo *tagInfo, SrcLangExt lang)
 {
+   static int id = 1;
+
    QSharedPointer<PageDef> pd;
 
    if ((pd = Doxygen::pageSDict->find(name)) && ! tagInfo) {
       // append documentation block to the page
       pd->setDocumentation(doc, fileName, startLine);
-
 
    } else { 
       // new page
@@ -6125,9 +6128,12 @@ QSharedPointer<PageDef> addRelatedPage(const char *name, const QByteArray &ptitl
          pd->setFileName(tagInfo->fileName, true);
 
       } else {
-         pd->setFileName( qPrintable(convertNameToFile(pd->name(), false, true)), false);
+         pd->setFileName(qPrintable(convertNameToFile(pd->name(), false, true)), false);
 
       }
+
+      pd->setInputOrderId(id);
+      id++;
       
       Doxygen::pageSDict->insert(baseName, pd);
 
@@ -6136,7 +6142,6 @@ QSharedPointer<PageDef> addRelatedPage(const char *name, const QByteArray &ptitl
       }
 
       if (! pd->title().isEmpty()) {
-        
          // a page name is a label as well
          QByteArray file;
 

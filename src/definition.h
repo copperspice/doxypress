@@ -101,7 +101,7 @@ class Definition : public DefinitionIntf
  
    virtual ~Definition();
 
-   // ----  getters -----
+   // ----  getters 
   
    /*! Returns the name of the definition */
    const QByteArray &name() const {
@@ -270,6 +270,10 @@ class Definition : public DefinitionIntf
 
    QByteArray id() const;
 
+   int getInputOrderId() {
+      return m_inputOrderId;
+   }   
+
    //-----------------------------------------------------------------------------------
    // ----  setters -----
    //-----------------------------------------------------------------------------------
@@ -320,6 +324,11 @@ class Definition : public DefinitionIntf
    void setArtificial(bool b);
    void setLanguage(SrcLangExt lang);
 
+   void setInputOrderId(int id) {
+      m_inputOrderId = id;
+   }   
+
+
    //-----------------------------------------------------------------------------------
    // --- actions ----
    //-----------------------------------------------------------------------------------
@@ -355,7 +364,6 @@ class Definition : public DefinitionIntf
    void writeToc(OutputList &ol);
 
  protected:
-
    Definition(const Definition &d);
 
  private:
@@ -379,6 +387,8 @@ class Definition : public DefinitionIntf
    QByteArray m_symbolName;
    int m_defLine;
    int m_defColumn;
+
+   int m_inputOrderId;
 };
 
 /** A list of Definition objects. */

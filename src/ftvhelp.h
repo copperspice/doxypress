@@ -20,7 +20,7 @@
  *
  * Kenney Wong <kwong@ea.com>
  *
- * Folder Tree View for offline help on browsers that do not support HTML Help.
+ * Folder Tree View for offline help on browsers that do not support HTML Help
  */
 
 #ifndef FTVHELP_H
@@ -36,12 +36,12 @@
 
 struct FTVNode;
 
-/** A class that generates a dynamic tree view side panel.
+/** A class that generates a dynamic tree view side panel
  */
 class FTVHelp : public IndexIntf
 {
  public:
-   FTVHelp(bool LTI);
+   FTVHelp(bool lti);
    ~FTVHelp();
 
    void initialize();
@@ -55,9 +55,10 @@ class FTVHelp : public IndexIntf
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *, 
                      const char *) override {};
 
-   void addIndexFile(const char *) {}
-   void addImageFile(const char *) {}
-   void addStyleSheetFile(const char *) {}
+   void addIndexFile(const char *) override {}
+   void addImageFile(const char *) override {}
+   void addStyleSheetFile(const char *) override {}
+
    void generateTreeView();
    void generateTreeViewInline(QTextStream &t);
    static void generateTreeViewImages();
@@ -77,7 +78,8 @@ class FTVHelp : public IndexIntf
 };
 
 struct NavIndexEntry {
-   NavIndexEntry(const QByteArray &u, const QByteArray &p) : url(u), path(p)
+   NavIndexEntry(const QByteArray &u, const QByteArray &p) 
+      : url(u), path(p)
    {}
 
    QByteArray url;

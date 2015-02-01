@@ -57,8 +57,6 @@ class IndexList : public IndexIntf
  private:
    QList<QSharedPointer<IndexIntf>> m_intfs;
 
-   // --- foreach implementations for various number of arguments
-
    void call_forEach(void (IndexIntf::*methodPtr)()) {
       for (auto item : m_intfs) {
          ((*item).*methodPtr)();
@@ -71,49 +69,7 @@ class IndexList : public IndexIntf
          ((*item).*methodPtr)(a1);
       }
    }
-
-   template<typename A1, typename A2, typename A3>
-   void call_forEach(void (IndexIntf::*methodPtr)(A1, A2, A3), A1 a1, A2 a2, A3 a3) {
-      for (auto item : m_intfs) {
-         ((*item).*methodPtr)(a1, a2, a3);
-      }
-   }
-
-   template<typename A1, typename A2, typename A3, typename A4>
-   void call_forEach(void (IndexIntf::*methodPtr)(A1, A2, A3, A4), A1 a1, A2 a2, A3 a3, A4 a4) {
-      for (auto item : m_intfs) {
-         ((*item).*methodPtr)(a1, a2, a3, a4);
-      }
-   }
-
-   template<typename A1, typename A2, typename A3, typename A4, typename A5>
-   void call_forEach(void (IndexIntf::*methodPtr)(A1, A2, A3, A4, A5), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5) {
-      for (auto item : m_intfs) {
-         ((*item).*methodPtr)(a1, a2, a3, a4, a5);
-      }
-   }
-
-   template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
-   void call_forEach(void (IndexIntf::*methodPtr)(A1, A2, A3, A4, A5, A6), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6) {
-     for (auto item : m_intfs) {
-         ((*item).*methodPtr)(a1, a2, a3, a4, a5, a6);
-      }
-   }
-
-   template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8>
-   void call_forEach(void (IndexIntf::*methodPtr)(A1, A2, A3, A4, A5, A6, A7, A8), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8) {
-      for (auto item : m_intfs) {
-         ((*item).*methodPtr)(a1, a2, a3, a4, a5, a6, a7, a8);
-      }
-   }
-
-   template<typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7, typename A8, typename A9>
-   void call_forEach(void (IndexIntf::*methodPtr)(A1, A2, A3, A4, A5, A6, A7, A8, A9), A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6, A7 a7, A8 a8, A9 a9) {
-      for (auto item : m_intfs) {
-         ((*item).*methodPtr)(a1, a2, a3, a4, a5, a6, a7, a8, a9);
-      }
-   }
-
+  
  public:
    /** Creates a list of indexes */
    IndexList() {     
@@ -163,16 +119,18 @@ class IndexList : public IndexIntf
                         QSharedPointer<Definition> def = QSharedPointer<Definition>()) override {
 
       if (m_enabled)  {
-         call_forEach<bool, const QString &, const char *, const char *, const char *, bool, bool, QSharedPointer<Definition>>
-            (&IndexIntf::addContentsItem, isDir, name, ref, file, anchor, separateIndex, addToNavIndex, def);
+         for (auto item : m_intfs) {
+            item->addContentsItem(isDir, name, ref, file, anchor, separateIndex, addToNavIndex, def);
+         }
       }
    }
 
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor = 0, 
                      const char *title = 0) {   
       if (m_enabled) {
-         call_forEach<QSharedPointer<Definition>, QSharedPointer<MemberDef>, const char *, const char *>
-           (&IndexIntf::addIndexItem, context, md, sectionAnchor, title);
+         for (auto item : m_intfs) {
+            item->addIndexItem(context, md, sectionAnchor, title);    
+         }
       }
    }
 

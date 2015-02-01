@@ -153,11 +153,10 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<ClassDef> cd, co
       return true;
    }
 
-   if (!md->isDefine()) {
+   if (! md->isDefine()) {
       ol.docify(" ");
    }
-
-   //printf("writeDefArgList(%d)\n",defArgList->count());
+  
    ol.pushGeneratorState();
    //ol.disableAllBut(OutputGenerator::Html);
    bool htmlOn  = ol.isEnabled(OutputGenerator::Html);
@@ -746,7 +745,8 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
    // convert function declaration arguments (if any)
    if (! args.isEmpty()) {
       declArgList = new ArgumentList;
-      stringToArgumentList(args, declArgList, &extraTypeChars);     
+      stringToArgumentList(args, declArgList, &extraTypeChars);    
+ 
    } else {
       declArgList = 0;
    }
@@ -853,30 +853,29 @@ QSharedPointer<MemberDef> MemberDef::deepCopy() const
    }
 
    if (m_impl->defArgList) {
-      result->m_impl->defArgList = m_impl->defArgList;
+      result->m_impl->defArgList = new ArgumentList(*m_impl->defArgList);
+   }
+
+   if (m_impl->declArgList) {
+      result->m_impl->declArgList = new ArgumentList(*m_impl->declArgList);
    }
 
    if (m_impl->tArgList) {
-      result->m_impl->tArgList = m_impl->tArgList;
+      result->m_impl->tArgList = new ArgumentList(*m_impl->tArgList);
    }
 
    if (m_impl->typeConstraints) {
-      result->m_impl->typeConstraints = m_impl->typeConstraints;
+      result->m_impl->typeConstraints = new ArgumentList(*m_impl->typeConstraints);
    }
 
    result->setDefinitionTemplateParameterLists(m_impl->defTmpArgLists);
 
    if (m_impl->classSectionSDict) {
-
       result->m_impl->classSectionSDict = new StringMap<QSharedPointer<MemberList>>();
       
       for (auto iter = m_impl->classSectionSDict->begin(); iter != m_impl->classSectionSDict->end(); ++iter  ) { 
          result->m_impl->classSectionSDict->insert(iter.key(), iter.value() );
       }
-   }
-
-   if (m_impl->declArgList) {
-      result->m_impl->declArgList = m_impl->declArgList;
    }
 
    return result;
@@ -2985,13 +2984,15 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       
 
       if (!inbodyDocumentation().isEmpty()) {
-         ol.generateDoc(inbodyFile(), inbodyLine(), getOuterScope() ? getOuterScope() : container, self, inbodyDocumentation() + "\n", true, false);
+         ol.generateDoc(inbodyFile(), inbodyLine(), getOuterScope() ? getOuterScope() : container, self, 
+                        inbodyDocumentation() + "\n", true, false);
       }
 
    } else if (!brief.isEmpty() && (Config_getBool("REPEAT_BRIEF") || ! Config_getBool("BRIEF_MEMBER_DESC"))) {
 
       if (!inbodyDocumentation().isEmpty()) {
-         ol.generateDoc(inbodyFile(), inbodyLine(), getOuterScope() ? getOuterScope() : container, self, inbodyDocumentation() + "\n", true, false);
+         ol.generateDoc(inbodyFile(), inbodyLine(), getOuterScope() ? getOuterScope() : container, self, 
+                        inbodyDocumentation() + "\n", true, false);
       }
    }
 
@@ -3468,7 +3469,7 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(ArgumentList *
    ArgumentList *actualArgList = 0;
 
    if (m_impl->defArgList) {
-      actualArgList = m_impl->defArgList;
+      actualArgList = new ArgumentList(*m_impl->defArgList);
 
       // replace formal arguments with actuals
       
@@ -3480,7 +3481,8 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(ArgumentList *
    }
 
    QByteArray methodName = name();
-   if (methodName.left(9) == "operator ") { // conversion operator
+   if (methodName.left(9) == "operator ") { 
+      // conversion operator
       methodName = substituteTemplateArgumentsInString(methodName, formalArgs, actualArgs);
    }
 
@@ -3936,6 +3938,7 @@ void MemberDef::setArgumentList(ArgumentList *al)
    if (m_impl->defArgList) {
       delete m_impl->defArgList;
    }
+
    m_impl->defArgList = al;
 }
 
@@ -3944,6 +3947,7 @@ void MemberDef::setDeclArgumentList(ArgumentList *al)
    if (m_impl->declArgList) {
       delete m_impl->declArgList;
    }
+
    m_impl->declArgList = al;
 }
 
@@ -4920,6 +4924,7 @@ void MemberDef::copyArgumentNames(QSharedPointer<MemberDef> bmd)
          }
       }
    }
+
    {
       ArgumentList *arguments = bmd->declArgumentList();
       if (m_impl->declArgList && arguments) {       

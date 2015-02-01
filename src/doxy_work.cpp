@@ -378,7 +378,7 @@ namespace Doxy_Work{
    void organizeSubGroups(QSharedPointer<EntryNav> rootNav);
 
    void parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav, 
-                  QSharedPointer<FileDef> fd, const char *fn, bool sameTu, QStringList &filesInSameTu);
+                  QSharedPointer<FileDef> fd, QByteArray fileName, bool sameTu, QStringList &filesInSameTu);
 
    void parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav);
    void parseInput();
@@ -391,8 +391,6 @@ namespace Doxy_Work{
    void readTagFile(QSharedPointer<Entry> root, const char *tl);
 
    bool scopeIsTemplate(QSharedPointer<Definition> d);
-   void sortMemberLists();
-
    void substituteTemplatesInArgList(const QList<ArgumentList> &srcTempArgLists, const QList<ArgumentList> &dstTempArgLists,
                ArgumentList *src, ArgumentList *dst, ArgumentList *funcTempArgs = 0);
 
@@ -616,7 +614,7 @@ void parseInput()
    QSharedPointer<EntryNav> rootNav = QMakeShared<EntryNav>(QSharedPointer<EntryNav>(), root);
    rootNav->setEntry(root);
   
-   msg("Reading and parsing tag files\n");
+   msg("Parsing tag files\n");
 
    QStringList &tagFileList = Config_getList("TAGFILES");
 
@@ -637,7 +635,7 @@ void parseInput()
    Doxy_Globals::g_stats.end();
 
 
-   // we are done with input scanning now, so free up the buffers used by flex (can be around 4MB)
+   // done with input scanning, free up the buffers used by flex (can be around 4MB)
    preFreeScanner();
    scanFreeScanner();
    pyscanFreeScanner();
@@ -863,19 +861,15 @@ void parseInput()
    addListReferences();
    generateXRefPages();
    Doxy_Globals::g_stats.end();
-
-   Doxy_Globals::g_stats.begin("Sorting member lists\n");
-   sortMemberLists();
-   Doxy_Globals::g_stats.end();
-
+ 
    if (Config_getBool("DIRECTORY_GRAPH")) {
       Doxy_Globals::g_stats.begin("Computing dependencies between directories\n");
       computeDirDependencies();
       Doxy_Globals::g_stats.end();
    }
 
-   //Doxy_Globals::g_stats.begin("Resolving citations\n");
-   //Doxygen::citeDict->resolve();
+   // Doxy_Globals::g_stats.begin("Resolving citations\n");
+   // Doxygen::citeDict->resolve();
 
    Doxy_Globals::g_stats.begin("Generating citations page\n");
    Doxygen::citeDict->generatePage();
@@ -1096,11 +1090,11 @@ void generateOutput()
       writeIndexHierarchy(*Doxy_Globals::g_outputList);
    }
 
-   Doxy_Globals::g_stats.begin("finalizing index lists\n");
+   Doxy_Globals::g_stats.begin("Finalizing index lists\n");
    Doxygen::indexList->finalize();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("writing tag file\n");
+   Doxy_Globals::g_stats.begin("Writing tag file\n");
    writeTagFile();
    Doxy_Globals::g_stats.end();
 
@@ -8144,11 +8138,6 @@ void Doxy_Work::addSourceReferences()
    }
 }
 
-void Doxy_Work::sortMemberLists()
-{
-   // broom - sort here <-------
-}
-
 // generate the documentation of all classes
 void Doxy_Work::generateClassList(ClassSDict &classSDict)
 {
@@ -9032,8 +9021,8 @@ static ParserInterface *getParserForFile(const char *fn)
    return Doxygen::parserManager->getParser(qPrintable(extension));
 }
 
-void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav, QSharedPointer<FileDef> fd, 
-                          const char *fn, bool sameTu, QStringList &filesInSameTu)
+void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav, 
+                  QSharedPointer<FileDef> fd, QByteArray fileName, bool sameTu, QStringList &filesInSameTu)
 {
 
 #if USE_LIBCLANG
@@ -9041,10 +9030,8 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
 #else
    static bool clangAssistedParsing = false;
 #endif
-
-   QByteArray fileName = fn;
+   
    QByteArray extension;
-
    int ei = fileName.lastIndexOf('.');
 
    if (ei != -1) {
@@ -9058,14 +9045,14 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
 
    if (Config_getBool("ENABLE_PREPROCESSING") && parser->needsPreprocessing(extension)) {
       BufStr inBuf(fi.size() + 4096);
-      msg("Preprocessing %s\n", fn);
+      msg("Preprocessing %s\n", fileName.constData());
 
       readInputFile(fileName, inBuf);
       preprocessFile(fileName, inBuf, preBuf);
 
    } else { 
       // no preprocessing
-      msg("Reading %s\n", fn);
+      msg("Reading %s\n", fileName.constData());
       readInputFile(fileName, preBuf);
    }
 
@@ -9080,7 +9067,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
       fd->getAllIncludeFilesRecursively(filesInSameTu);
    }
 
-   // use language parse to parse the file
+   // use language parser to parse the file
    parser->parseInput(fileName, convBuf.data(), root, sameTu, filesInSameTu);
 
    // store the Entry tree in a file and create an index to navigate/load entries
@@ -9120,8 +9107,8 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
             parser->startTranslationUnit(s.toUtf8());
             parseFile(parser, root, rootNav, fd, qPrintable(s), false, filesInSameTu);
            
-            // Now process any include files in the same translation unit
-            // first. When libclang is used this is much more efficient.
+            // process any include files in the same translation unit first. 
+            // When libclang is used this is much more efficient.
           
             for (auto incFile : filesInSameTu) {
 
@@ -9167,7 +9154,8 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
          }
       }
 
-   } else // normal pocessing
+   } else 
+      // normal pocessing
 
 #endif
 
@@ -9795,7 +9783,7 @@ QByteArray Doxy_Work::getQchFileName()
 {
    QByteArray const &qchFile = Config_getString("QCH_FILE");
 
-   if (!qchFile.isEmpty()) {
+   if (! qchFile.isEmpty()) {
       return qchFile;
    }
 
@@ -9892,12 +9880,12 @@ void searchInputFiles()
 
    for (auto s : inputList) {
       QByteArray path = s.toUtf8();
-      uint l = path.length();
+      uint len = path.length();
 
-      if (l > 0) {
+      if (len > 0) {
          // strip trailing slashes
-         if (path.at(l - 1) == '\\' || path.at(l - 1) == '/') {
-            path = path.left(l - 1);
+         if (path.at(len - 1) == '\\' || path.at(len - 1) == '/') {
+            path = path.left(len - 1);
          }
 
          readFileOrDirectory(path, Doxygen::inputNameList, Doxygen::inputNameDict, &excludeNameDict,

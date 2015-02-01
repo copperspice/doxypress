@@ -363,7 +363,6 @@ class ClassDef : public Definition
    void addListReferences();
    void computeAnchors();
    void mergeMembers();
-   void sortMemberLists();
    void distributeMemberGroupDocumentation();
    void writeDocumentation(OutputList &ol);
    void writeDocumentationForInnerClasses(OutputList &ol);
