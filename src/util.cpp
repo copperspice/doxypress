@@ -1242,8 +1242,6 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
 {
    // only look at classes and members which are enums or typedefs
 
-// printf("\n BROOM  getResolved Symbol %d ",  d->definitionType()  );
-
    bool isClass  = (d->definitionType() == Definition::TypeClass); 
    bool isMember = (d->definitionType() == Definition::TypeMember);
 
@@ -1492,14 +1490,9 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
    while (di != Doxygen::symbolMap().end() && di.key() == name)  { 
 
       QSharedPointer<Definition> self = sharedFrom(di.value());
-
-// printf("\n BROOM  getResolvedClassRec   A1    %s ", key.constData()  );
-            
+           
       getResolvedSymbol(scope, fileScope, self, explicitScopePart, &actTemplParams,
                         minDistance, bestMatch, bestTypedef, bestTemplSpec, bestResolvedType);
-
-//printf("\n BROOM  getResolvedClassRec   A2 "  );
-
 
       ++count;
       ++di;
@@ -2390,17 +2383,28 @@ QByteArray fileToString(const char *name, bool filter, bool isSourceCode)
    return "";
 }
 
+QByteArray dateTimeHHMM()
+{
+   QDateTime current = QDateTime::currentDateTime();
+
+/*
+   return theTranslator->trDateTime(current.date().year(), current.date().month(), 
+                  current.date().day(), current.date().dayOfWeek(), 
+                  current.time().hour(), current.time().minute());   
+
+*/                                 
+
+
+   return "";
+}
+
 QByteArray dateToString(bool includeTime)
 {
    QDateTime current = QDateTime::currentDateTime();
-   return theTranslator->trDateTime(current.date().year(),
-                                    current.date().month(),
-                                    current.date().day(),
-                                    current.date().dayOfWeek(),
-                                    current.time().hour(),
-                                    current.time().minute(),
-                                    current.time().second(),
-                                    includeTime);
+
+   return theTranslator->trDateTime(current.date().year(), current.date().month(), 
+                  current.date().day(), current.date().dayOfWeek(),
+                  current.time().hour(), current.time().minute(), current.time().second(), includeTime);
 }
 
 static QString yearToString()
@@ -4788,14 +4792,16 @@ QByteArray substituteKeywords(const QByteArray &s, const char *title, const char
       result = substitute(result, "$title", title);
    }
 
+   result = substitute(result, "$datetimeHHMM",   dateTimeHHMM());
    result = substitute(result, "$datetime",       dateToString(true));
    result = substitute(result, "$date",           dateToString(false));
    result = substitute(result, "$year",           yearToString().toUtf8());
    result = substitute(result, "$doxygenversion", versionString);
+
    result = substitute(result, "$projectname",    projName);
    result = substitute(result, "$projectnumber",  projNum);
    result = substitute(result, "$projectbrief",   projBrief);
-   result = substitute(result, "$projectlogo",   stripPath(Config_getString("PROJECT_LOGO")));
+   result = substitute(result, "$projectlogo",    stripPath(Config_getString("PROJECT_LOGO")));
 
    return result;
 }

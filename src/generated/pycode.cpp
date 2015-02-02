@@ -1573,7 +1573,7 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Defin
       if (c == '\n') {
          g_yyLineNr++;
 
-         *(p - 1) = '\0';         // BROOM - review this line
+         *(p - 1) = '\0';
          
          ol.writeCodeLink(ref, file, anchor, sp, tooltip);
          nextCodeLine();
@@ -1600,7 +1600,7 @@ static void codifyLines(char *text)
       if (c == '\n') {
          g_yyLineNr++;
 
-         *(p - 1) = '\0';         // BROOM - review this line
+         *(p - 1) = '\0';
 
          g_code->codify(sp);
          nextCodeLine();

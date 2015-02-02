@@ -214,11 +214,14 @@ struct CommandLine parseCommandLine(QStringList argList)
    argMap.insert( "--b", OUTPUT_WIZARD   );
    argMap.insert( "--d", DEBUG_DUMP      );   
    argMap.insert( "--g", BLANK_CFG       );
-   argMap.insert( "--h", HELP            );
+   argMap.insert( "--h", HELP            );  
    argMap.insert( "--l", BLANK_LAYOUT    );
    argMap.insert( "--m", DEBUG_SYMBOLS   );
    argMap.insert( "--w", BLANK_STYLE     );
    argMap.insert( "--v", DOXY_VERSION    );
+
+   argMap.insert( "--help",    HELP         );
+   argMap.insert( "--version", DOXY_VERSION );
 
    QStringList dashList;
 
@@ -254,7 +257,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             cmdArgs.configName = getValue(iter, argList.end());
            
             if (cmdArgs.configName.isEmpty()) {
-               cmdArgs.configName = "CS_Doxyfile.json";
+               cmdArgs.configName = "cs_doxyfile.json";
             }
 
             cmdArgs.generateDoxy = false;   
@@ -265,7 +268,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             cmdArgs.layoutName = getValue(iter, argList.end());
            
             if (cmdArgs.layoutName.isEmpty()) {
-               cmdArgs.layoutName = "DoxygenLayout.xml";
+               cmdArgs.layoutName = "doxy_layout.xml";
             }
 
             cmdArgs.generateDoxy = false; 
@@ -286,7 +289,7 @@ struct CommandLine parseCommandLine(QStringList argList)
                cmdArgs.rtfExt = getValue(iter, argList.end());
 
                if (cmdArgs.rtfExt.isEmpty()) {
-                  cmdArgs.rtfExt = "doxy_style.rtf";
+                  cmdArgs.rtfExt = "doxy_ext.rtf";
                }
 
                QFile f;
@@ -387,7 +390,7 @@ struct CommandLine parseCommandLine(QStringList argList)
                   cmdArgs.htmlStyle= "doxy_style.latex";
                }
 
-/* BROOM latex
+/* BROOM  latex
               QFile f;
               if (openOutputFile(cmdArgs.latexStyle, f)) {
                  LatexGenerator::writeStyleSheetFile(f);
@@ -475,14 +478,14 @@ void readConfiguration(struct CommandLine cmdArgs)
    
       for (auto item : QDir::current().entryList()) {          
 
-         if (item.compare("CS_Doxyfile.json", Qt::CaseInsensitive) == 0) {
+         if (item.compare("cs_doxyfile.json", Qt::CaseInsensitive) == 0) {
             cmdArgs.configName = item;
             break;
          } 
       }
      
       if (cmdArgs.configName.isEmpty()) {
-         err("No configuration file name was specified and 'CS_Doxyfile.json' was not found"); 
+         err("No configuration file name was specified and 'cs_doxyfile.json' was not found"); 
 
          cleanUpDoxygen();
          exit(1);
@@ -499,7 +502,7 @@ void readConfiguration(struct CommandLine cmdArgs)
    }
   
 
-/*   broom - json set up
+/* BROOM - json config file 
 
    if (! Config_Json::parseConfig(cmdArgs.configName) ) {
       err("Unable to open or read CS Doxygen configuration file %s\n", qPrintable(cmdArgs.configName));
@@ -682,11 +685,11 @@ void Doxy_Setup::usage()
 
    msg("\n"); 
    msg("Generate a blank configuration file:\n");
-   msg("   --g [config file name]   Default file name is `Doxyfile.json'\n");  
+   msg("   --g [config file name]   Default file name is `cs_doxyfile.json'\n");  
    
    msg("\n");
    msg("Generate a layout file to configure the documentation:\n");
-   msg("   --l [layout file name]   Default file name is `Layout.xml'\n");
+   msg("   --l [layout file name]   Default file name is `doxy_layout.xml'\n");
      
    msg("\n");
    msg("Generate a style sheet file for RTF, HTML or Latex:\n");

@@ -827,14 +827,14 @@ void HtmlGenerator::writeHeaderFile(QFile &file)
 {
    QTextStream t(&file);
 
-   t << "<!-- HTML header for CS doxygen " << versionString << "-->" << endl;
+   t << "<!-- HTML header for CS Doxygen " << versionString << "-->" << endl;
    t << ResourceMgr::instance().getAsString("html/header.html");
 }
 
 void HtmlGenerator::writeFooterFile(QFile &file)
 {
    QTextStream t(&file);
-   t << "<!-- HTML footer for CS doxygen " << versionString << "-->" <<  endl;
+   t << "<!-- HTML footer for CS Doxygen " << versionString << "-->" <<  endl;
    t << ResourceMgr::instance().getAsString("html/footer.html");
 }
 

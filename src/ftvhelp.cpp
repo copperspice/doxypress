@@ -199,6 +199,15 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, 
       QList<FTVNode *> *pnl = &m_indentNodes[m_indent - 1];
       newNode->parent = pnl->last();
    }   
+
+
+QString temp = file;
+if ( temp.contains("build")  ||  temp.contains("requirements")  || temp.contains("supported-platforms") )   {
+   printf("\n  BROOM   File: %s  Ref: %s", file, ref);
+}
+
+
+
 }
 
 static QByteArray node2URL(FTVNode *n, bool overruleFile = false, bool srcLink = false)

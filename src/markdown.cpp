@@ -2533,11 +2533,11 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, Q
       title = titleFn;
    }
 
-   if (!mdfileAsMainPage.isEmpty() &&
-         (fn == mdfileAsMainPage || // name reference
-          QFileInfo(fileName).absoluteFilePath() ==
-          QFileInfo(mdfileAsMainPage).absoluteFilePath()) // file reference with path
-      ) {
+   if (!mdfileAsMainPage.isEmpty() && (fn == mdfileAsMainPage || 
+          QFileInfo(fileName).absoluteFilePath() == QFileInfo(mdfileAsMainPage).absoluteFilePath()) ) {
+
+      // name reference
+      // file reference with path
       docs.prepend("@mainpage\n");
 
    } else if (id == "mainpage" || id == "index") {
@@ -2545,13 +2545,13 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, Q
 
    } else {
       docs.prepend("@page " + id + " " + title + "\n");
+
    }
 
-   int lineNr = 1;
+   int lineNr   = 1;
    int position = 0;
 
-   // even without markdown support enabled, we still
-   // parse markdown files as such
+   // even without markdown support enabled, we still parse markdown files as such
    bool markdownEnabled = Doxygen::markdownSupport;
    Doxygen::markdownSupport = true;
 

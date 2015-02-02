@@ -5865,9 +5865,8 @@ YY_DECL {
 
             {
                // missing argument
-               warn(yyFileName, yyLineNr,
-               "\\subpage command has no label"
-                   );
+               warn(yyFileName, yyLineNr, "\\subpage command has no label");
+
                if (*commentscanYYtext == '\n')
                {
                   yyLineNr++;

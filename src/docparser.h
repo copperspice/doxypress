@@ -182,8 +182,8 @@ template<class T> class CompAccept
       for (auto n : m_children) {
 
 // failed on writeDoc()
-// printf("\n BROOM  *** validate parser doc  CAT-1   %x  ",  n );
-// printf("\n BROOM  *** validate parser doc          %s  ",  typeid(*n).name() );
+// printf("\n BROOM  *** validate parser doc  %x  ",  n );
+// printf("\n BROOM  *** validate parser doc  %s  ",  typeid(*n).name() );
 
          n->accept(v);
       }
@@ -1186,36 +1186,45 @@ class DocRef : public CompAccept<DocRef>, public DocNode
  public:
    DocRef(DocNode *parent, const QByteArray &target, const QByteArray &context);
    void parse();
-   Kind kind() const            {
+
+   Kind kind() const {
       return Kind_Ref;
    }
-   QByteArray file() const         {
+
+   QByteArray file() const{
       return m_file;
    }
-   QByteArray relPath() const      {
+
+   QByteArray relPath() const {
       return m_relPath;
    }
-   QByteArray ref() const          {
+   QByteArray ref() const {
       return m_ref;
    }
-   QByteArray anchor() const       {
+   QByteArray anchor() const {
       return m_anchor;
    }
-   QByteArray targetTitle() const  {
+
+   QByteArray targetTitle() const {
       return m_text;
    }
-   bool hasLinkText() const     {
+
+   bool hasLinkText() const {
       return !m_children.isEmpty();
    }
+
    bool refToAnchor() const     {
       return m_refToAnchor;
    }
+
    bool refToSection() const    {
       return m_refToSection;
    }
+
    bool isSubPage() const       {
       return m_isSubPage;
    }
+
    void accept(DocVisitor *v)   {
       CompAccept<DocRef>::accept(this, v);
    }

@@ -120,8 +120,7 @@ int portable_system(const char *command, const char *args, bool commandHasConsol
       // initialized before ShellExecuteEx is called. Some Shell extensions
       // require the COM single-threaded apartment (STA) type.
       // For that case COM is initialized as follows
-
-      // broom - find a better way 
+      
       CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
       QString commandw = QString::fromUtf8( command );

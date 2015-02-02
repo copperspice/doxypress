@@ -1363,6 +1363,7 @@ void writeDefaultLayoutFile(const QString &fileName)
 // titles for some programming languages they can take the following form:
 // "A title|16=Another title|8=Yet Another title"
 // where the number is a value of SrcLangExt in decimal notation (i.e. 16=Java, 8=IDL).
+
 QByteArray extractLanguageSpecificTitle(const QByteArray &input, SrcLangExt lang)
 {
    int i;

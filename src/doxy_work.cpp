@@ -88,8 +88,8 @@
 
 #define RECURSE_ENTRYTREE(func,var) \
   do {  \
-       for (auto eli : var->children() ) { \
-         func(eli);   \
+       for (auto item : var->children() ) { \
+         func(item);   \
        }  \
   } while(0)
 
@@ -1126,7 +1126,7 @@ void generateOutput()
 
    if (Config_getBool("GENERATE_DOCBOOK")) {
       Doxy_Globals::g_stats.begin("Generating Docbook output\n");
-//BROOM     generateDocbook();
+//BROOM      generateDocbook();
       Doxy_Globals::g_stats.end();
    }
 
@@ -1238,7 +1238,6 @@ void generateOutput()
    thisDir.remove(Doxygen::objDBFileName);
 
    Config::deleteInstance();
-
    cleanUpDoxygen();
       
    delete Doxygen::symbolStorage;
@@ -1422,7 +1421,7 @@ void Doxy_Work::addSTLClasses(QSharedPointer<EntryNav> rootNav)
       classEntry->hidden     = false;
       classEntry->artificial = true;
 
-      //namespaceEntry->addSubEntry(classEntry);
+      // namespaceEntry->addSubEntry(classEntry);
       QSharedPointer<EntryNav> classEntryNav = QMakeShared<EntryNav>(namespaceEntryNav, classEntry);
       classEntryNav->setEntry(classEntry);
       namespaceEntryNav->addChild(classEntryNav);
@@ -8590,8 +8589,11 @@ void Doxy_Work::buildPageList(QSharedPointer<EntryNav> rootNav)
 
       rootNav->releaseEntry();  
    } 
-
-   RECURSE_ENTRYTREE(buildPageList, rootNav);
+ 
+   // recursive call
+   for (auto item : rootNav->children() ) { 
+      buildPageList(item);   
+   }  
 }
 
 // search for the main page defined in this project

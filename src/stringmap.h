@@ -191,7 +191,7 @@ class StringMap
             std::string msg = "StringMap::Iterator Key and Value did not agree, possible sorting issue";    
             msg += typeid(T).name();
 
-// BROOM    throw std::runtime_error(msg);
+            throw std::runtime_error(msg);
          }   
 
          // save m_list

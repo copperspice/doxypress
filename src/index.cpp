@@ -961,8 +961,6 @@ static void writeHierarchicalIndex(OutputList &ol)
    //1.}
 }
 
-//----------------------------------------------------------------------------
-
 static void writeGraphicalClassHierarchy(OutputList &ol)
 {
    if (hierarchyClasses == 0) {

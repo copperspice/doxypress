@@ -1,5 +1,5 @@
 #
-# Below is a stripped down version of bib2xhtml used by doxygen.
+# Below is a stripped down version of bib2xhtml used by CS Doxygen.
 # For the full version see http://www.spinellis.gr/sw/textproc/bib2xhtml/
 #
 # Convert from bibtex to XHTML.

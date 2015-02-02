@@ -263,8 +263,8 @@ void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storag
    QSharedPointer<EntryNav> childNav = QMakeShared<EntryNav>(nav, self); 
 
    nav->addChild(childNav);
-   childNav->setFileDef(fd);
 
+   childNav->setFileDef(fd);
    childNav->saveEntry(self, storage);
     
    for (auto childNode : m_sublist) {

@@ -5170,19 +5170,22 @@ void DocPara::handleRef(const QByteArray &cmdName)
 {
    DBG(("handleRef(%s)\n", qPrint(cmdName)));
    int tok = doctokenizerYYlex();
+
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "expected whitespace after %s command",
-                     qPrint(cmdName));
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "expected whitespace after %s command", qPrint(cmdName));
       return;
    }
+
    doctokenizerYYsetStateRef();
    tok = doctokenizerYYlex(); // get the reference id
    DocRef *ref = 0;
+
    if (tok != TK_WORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "unexpected token %s as the argument of %s",
                      tokToString(tok), qPrint(cmdName));
       goto endref;
    }
+
    ref = new DocRef(this, g_token->name, s_context);
    m_children.append(ref);
    ref->parse();
@@ -5196,6 +5199,7 @@ void DocPara::handleInclude(const QByteArray &cmdName, DocInclude::Type t)
 {
    DBG(("handleInclude(%s)\n", qPrint(cmdName)));
    int tok = doctokenizerYYlex();
+
    if (tok != TK_WHITESPACE) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "expected whitespace after %s command",
                      qPrint(cmdName));
@@ -6352,12 +6356,6 @@ int DocPara::parse(bool skipParse, int token)
    DBG(("DocPara::parse() start\n"));
    s_nodeStack.push(this);
 
-/*
-if (s_fileName.endsWith("qml-color.dox")) {  
-   printf("\n BROOM  START-->docPara  %d   %x   %x   Kind:%d", s_nodeStack.count(), this, s_nodeStack.top(), this->kind() );
-}
-*/
-
    // handle style commands "inherited" from the previous paragraph
    handleInitialStyleCommands(this, m_children);
 
@@ -6685,15 +6683,6 @@ endparagraph:
    handlePendingStyleCommands(this, m_children);
 
    if (! s_nodeStack.isEmpty() ) {
-
-/*     
-if (s_fileName.endsWith("qml-color.dox")) {  
-   printf("\n BROOM  END-->docPara - Count :%d", s_nodeStack.count() ); 
-   
-   DocNode *xx = s_nodeStack.top();
-}
-*/
-
       DocNode *n = s_nodeStack.pop(); 
       assert(n == this);
    }
