@@ -281,8 +281,7 @@ namespace Doxy_Work{
    void escapeAliases();
    void expandAliases();
    QByteArray extractClassName(QSharedPointer<EntryNav> rootNav);
-   void exitDoxygen();
-
+   
    void filterMemberDocumentation(QSharedPointer<EntryNav> rootNav);
 
    void findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd, 
@@ -411,8 +410,6 @@ using namespace Doxy_Work;
 void parseInput()
 {
    printf("**  Parse input files\n");   
-
-   atexit(exitDoxygen);
 
    // Make sure the output directory exists
    QByteArray &outputDirectory = Config_getString("OUTPUT_DIRECTORY");
@@ -1241,8 +1238,8 @@ void generateOutput()
    cleanUpDoxygen();
       
    delete Doxygen::symbolStorage;
-
-   Doxy_Globals::g_successfulRun = true;
+   
+   Doxy_Globals::g_programExit = true;
 }
 
 // ** other
@@ -9258,24 +9255,6 @@ QByteArray Doxy_Work::resolveSymlink(QByteArray path)
    } while (sepPos != -1);
 
    return QDir::cleanPath(result).toUtf8();
-}
-
-void Doxy_Work::exitDoxygen()
-{
-   if (! Doxy_Globals::g_successfulRun) {
-      // premature exit
-
-      QDir thisDir;
-      msg("Exiting\n");
-
-      if (! Doxygen::entryDBFileName.isEmpty()) {
-         thisDir.remove(Doxygen::entryDBFileName);
-      }
-
-      if (!Doxygen::objDBFileName.isEmpty()) {
-         thisDir.remove(Doxygen::objDBFileName);
-      }
-   }
 }
 
 void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const char *tl)

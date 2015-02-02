@@ -18480,17 +18480,18 @@ YY_DECL {
                BEGIN( SkipString );
             }
             YY_BREAK
+
          case 541:
             YY_RULE_SETUP
 
             {
-               warn(yyFileName, yyLineNr,
-               "Found ';' while parsing initializer list! "
-               "(doxygen could be confused by a macro call without semicolon)"
-                   );
+               warn(yyFileName, yyLineNr, "Found ';' while parsing initializer list "
+                  "(Doxygen could be confused by a macro call without a semicolon)");
+
                BEGIN( FindMembers );
             }
             YY_BREAK
+
          case 542:
             YY_RULE_SETUP
 

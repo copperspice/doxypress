@@ -75,6 +75,7 @@ class SearchIndexIntf
    SearchIndexIntf(Kind k) : m_kind(k) {}
 
    virtual ~SearchIndexIntf() {}
+
    virtual void setCurrentDoc(QSharedPointer<Definition> ctx, const char *anchor, bool isSourceFile) = 0;
    virtual void addWord(const QString &word, bool hiPriority) = 0;
    virtual void write(const char *file) = 0;
@@ -91,6 +92,8 @@ class SearchIndex : public SearchIndexIntf
 {
  public:
    SearchIndex();
+   ~SearchIndex();
+
    void setCurrentDoc(QSharedPointer<Definition> ctx, const char *anchor, bool isSourceFile) override;
    void addWord(const QString &word, bool hiPriority) override;
    void write(const char *file);

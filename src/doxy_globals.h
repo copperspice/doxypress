@@ -207,10 +207,11 @@ class Doxy_Globals
       static FileStorage              *g_storage;
       
       static Statistics g_stats; 
-   
-      static bool g_successfulRun;
+         
       static bool g_dumpSymbolMap;
       static bool g_useOutputTemplate;
+
+      static bool g_programExit;
 };
 
 #endif

@@ -2385,17 +2385,13 @@ QByteArray fileToString(const char *name, bool filter, bool isSourceCode)
 
 QByteArray dateTimeHHMM()
 {
+   QByteArray retval;
    QDateTime current = QDateTime::currentDateTime();
 
-/*
-   return theTranslator->trDateTime(current.date().year(), current.date().month(), 
-                  current.date().day(), current.date().dayOfWeek(), 
-                  current.time().hour(), current.time().minute());   
+   const QString format = "ddd MMM d yyyy hh:mm";
+   retval = current.toString(format).toUtf8();                    
 
-*/                                 
-
-
-   return "";
+   return retval;
 }
 
 QByteArray dateToString(bool includeTime)

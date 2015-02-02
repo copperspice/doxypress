@@ -117,7 +117,13 @@ FTVHelp::FTVHelp(bool data)
 
 /*! Destroys the ftv help object. */
 FTVHelp::~FTVHelp()
-{
+{  
+   for (int k = 0; k < MAX_INDENT; ++k)  {
+      for (auto item : m_indentNodes[k]) {
+         delete item;
+      }
+   }
+
    delete[] m_indentNodes;
 }
 
@@ -198,16 +204,7 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, 
    if (m_indent > 0) {
       QList<FTVNode *> *pnl = &m_indentNodes[m_indent - 1];
       newNode->parent = pnl->last();
-   }   
-
-
-QString temp = file;
-if ( temp.contains("build")  ||  temp.contains("requirements")  || temp.contains("supported-platforms") )   {
-   printf("\n  BROOM   File: %s  Ref: %s", file, ref);
-}
-
-
-
+   }
 }
 
 static QByteArray node2URL(FTVNode *n, bool overruleFile = false, bool srcLink = false)
@@ -614,23 +611,22 @@ static void reSortNodes(QList<FTVNode *> &nodeList)
 
    for (auto item : nodeList) {     
 
-/*
+
       printf("\n  File: %-30s  Alpha: %-3d  ", item->file.constData(), item->index );
       if (item->def) {
          printf("  Our OrderId: %-3d",  item->def->getInputOrderId() );  
       }   
-*/
 
       item->index = counter;
       counter++;
 
       if (item->children.count() != 0 ) {
-//       printf("\n    ** start children" );
+         printf("\n    ** start children" );
 
          QList<FTVNode *> &children = item->children;
          reSortNodes(children);
 
-//       printf("\n    ** end children" );
+         printf("\n    ** end children" );
       }
    }
 

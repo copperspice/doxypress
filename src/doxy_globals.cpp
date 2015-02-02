@@ -119,8 +119,8 @@ FileStorage              *Doxy_Globals::g_storage = 0;
 
 Statistics Doxy_Globals::g_stats;
 
-bool Doxy_Globals::g_successfulRun     = false;
 bool Doxy_Globals::g_dumpSymbolMap     = false;
+bool Doxy_Globals::g_programExit       = false;
 
 
 // part 3

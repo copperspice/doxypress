@@ -325,17 +325,19 @@ Definition::~Definition()
       m_impl = 0;
    }
 
-   auto di = Doxygen::symbolMap().find(m_symbolName);
-
-   while (di != Doxygen::symbolMap().end() && di.key() == m_symbolName)  {      
-
-      if (di.value() == this) {
-         di = Doxygen::symbolMap().erase(di);
-
-      }  else {
-         ++di;
-
-      }      
+   if (! Doxy_Globals::g_programExit)  {
+      auto di = Doxygen::symbolMap().find(m_symbolName);
+   
+      while (di != Doxygen::symbolMap().end() && di.key() == m_symbolName)  {      
+   
+         if (di.value() == this) {
+            di = Doxygen::symbolMap().erase(di);
+   
+         }  else {
+            ++di;
+   
+         }      
+      }
    }
 }
 

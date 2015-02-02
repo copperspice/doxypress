@@ -69,7 +69,7 @@ void IndexWord::addUrlIndex(int idx, bool hiPriority)
    QSharedPointer<URLInfo> ui = m_urls.value(idx);
 
    if (! ui) {     
-      ui =  QSharedPointer<URLInfo>(new URLInfo(idx, 0));
+      ui =  QMakeShared<URLInfo>(idx, 0);
       m_urls.insert(idx, ui);
    }
 
@@ -86,6 +86,13 @@ SearchIndex::SearchIndex() : SearchIndexIntf(Internal), m_urlIndex(-1)
   
    for (i = 0; i < numIndexEntries; i++) {
       m_index.append(QList<IndexWord *>());
+   }
+}
+
+SearchIndex::~SearchIndex()
+{
+   for (auto item : m_words) {
+      delete item;
    }
 }
 
