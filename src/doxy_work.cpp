@@ -5964,7 +5964,9 @@ QByteArray Doxy_Work::substituteTemplatesInString(const QList<ArgumentList> &src
    QByteArray dst;
    QRegExp re( "[A-Za-z_][A-Za-z_0-9]*");
 
-   int i, p = 0, l;
+   int i;
+   int p = 0;
+   int l;
 
    while ((i = re.indexIn(src, p)) != -1) {
       // for each word in srcType
@@ -5989,26 +5991,32 @@ QByteArray Doxy_Work::substituteTemplatesInString(const QList<ArgumentList> &src
             fali = funcTempArgList->begin();
             fa = &*fali;
          }
-
-         auto tempDest = dest->begin();
-
+         
+         auto tempDest = dest->begin();   
+         
          for (auto tsa : source) {
 
             if (found) {
                break;
             }
 
-            Argument *tda = const_cast<Argument *>(&*tempDest);
+            Argument *tda = nullptr;
+
+            if (tempDest != dest->end())  {
+               tda = const_cast<Argument *>(& (*tempDest) );
+            }
 
             if (name == tsa.name) {
+
                if (tda && tda->name.isEmpty()) {
                   int vc = 0;
 
-                  if (tda->type.left(6) == "class ") {
+                  if (tda->type.startsWith("class ")) {
                      vc = 6;
 
-                  } else if (tda->type.left(9) == "typename ") {
+                  } else if (tda->type.startsWith("typename ")) {
                      vc = 9;
+
                   }
 
                   if (vc > 0) {
@@ -6029,7 +6037,10 @@ QByteArray Doxy_Work::substituteTemplatesInString(const QList<ArgumentList> &src
             }
 
             if (tda) {
-               ++tempDest;
+
+               if (tempDest != dest->end())  {
+                  ++tempDest;
+               }
 
             } else if (funcTempArgList) {
 
@@ -6045,7 +6056,9 @@ QByteArray Doxy_Work::substituteTemplatesInString(const QList<ArgumentList> &src
             }
          }
 
-         ++dest;
+         if (dest != dstTempArgLists.end()) {
+            ++dest;
+         }
       }
 
       dst += name;
@@ -6297,7 +6310,6 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
       scopeName = className;
    }
 
-
    QByteArray tempScopeName = scopeName;
    QSharedPointer<ClassDef> cd = getClass(scopeName);
 
@@ -6393,8 +6405,11 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
       if (!isRelated && mn) { // function name already found
          Debug::print(Debug::FindMembers, 0, "2. member name exists (%d members with this name)\n", mn->count());
 
-         if (! className.isEmpty()) { // class name is valid
-            if (funcSpec.isEmpty()) { // not a member specialization
+         if (! className.isEmpty()) { 
+            // class name is valid
+
+            if (funcSpec.isEmpty()) { 
+               // not a member specialization
                int count = 0;
 
                int noMatchCount = 0;
@@ -6426,7 +6441,8 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                      tcd = cd;
                   }
 
-                  if (cd && tcd == cd) { // member's classes match
+                  if (cd && tcd == cd) { 
+                     // member's classes match
 
                      Debug::print(Debug::FindMembers, 0, "4. class definition %s found\n", cd->name().data());
 
@@ -6461,6 +6477,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                          * we must substitute the template names of the class by that
                          * of the function definition before matching.
                          */
+
                         argList = new ArgumentList;
                         substituteTemplatesInArgList(declTemplArgs, *defTemplArgs, mdAl, argList);
 
@@ -6521,14 +6538,17 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
 
                      Debug::print(Debug::FindMembers, 0, "6. match results of matchArguments2 = %d\n", matching);
 
-                     if (substDone) { // found a new argument list
+                     if (substDone) { 
+                        // found a new argument list
+
                         if (matching) { // replace member's argument list
                            md->setDefinitionTemplateParameterLists(root->tArgLists);
                            md->setArgumentList(argList); // new owner of the list => no delete
 
-                        } else { // no match
-                           if (!funcTempList.isEmpty() &&
-                                 isSpecialization(declTemplArgs, *defTemplArgs)) {
+                        } else { 
+                           // no match
+
+                           if (! funcTempList.isEmpty() && isSpecialization(declTemplArgs, *defTemplArgs)) {
                               // check if we are dealing with a partial template
                               // specialization. In this case we add it to the class
                               // even though the member arguments do not match.
@@ -6536,8 +6556,10 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                               // TODO: copy other aspects?
                               root->protection = md->protection(); // copy protection level
                               addMethodToClass(rootNav, cd, md->name(), isFriend);
+
                               return;
                            }
+
                            delete argList;
                         }
                      }
@@ -6610,15 +6632,16 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
 
                   if (! strictProtoMatching) {
                      if (candidates == 1 && ucd && umd) {
-                        // we didn't find an actual match on argument lists, but there is only 1 member with this
-                        // name in the same scope, so that has to be the one.
+                        // we did not find an actual match on argument lists, but there is only 1 member 
+                        // with this name in the same scope, so that has to be the one
+
                         addMemberDocs(rootNav, umd, funcDecl, 0, overloaded, 0);
                         return;
 
                      } else if (candidates > 1 && ecd && emd) {
-                        // we did not find a unique match using type resolution,
-                        // but one of the matches has the exact same signature so
-                        // we take that one.
+                        // we did not find a unique match using type resolution, but one of the matches
+                        // has the exact same signature so we take that one
+
                         addMemberDocs(rootNav, emd, funcDecl, 0, overloaded, 0);
                         return;
                      }
@@ -7124,7 +7147,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
 
    } else {
       // this should not be called
-      warn(root->fileName, root->startLine, "member with no name found");
+      warn(root->fileName, root->startLine, "Member with no name found (unusual error)");
    }
 }
 
@@ -8715,7 +8738,7 @@ void Doxy_Work::resolveUserReferences()
       // name (not from the todo/test/bug/deprecated list, but from the file in
       // which they are defined). We correct this here by looking at the generated section labels
     
-      for (auto rl : *Doxygen::xrefLists) {
+      for (auto &rl : *Doxygen::xrefLists) {
          QByteArray label = "_" + rl.listName(); 
 
          // "_todo", "_test", ...
@@ -9350,7 +9373,7 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
    dir.setFilter( QDir::Files | QDir::Dirs | QDir::Hidden );
 
    int totalSize = 0;
-   msg("Searching for files in directory %s\n", fi->absoluteFilePath().data());
+   msg("Searching for files in directory %s\n", qPrintable(fi->absoluteFilePath()) );
 
    const QFileInfoList list = dir.entryInfoList();
 
@@ -9363,7 +9386,7 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
 
          if (! cfi.exists() || ! cfi.isReadable()) {
             if (errorIfNotExist) {
-               warn_uncond("Source %s is not a readable file or directory\n", cfi.absoluteFilePath().data());
+               warn_uncond("Source %s is not a readable file or directory\n", qPrintable(cfi.absoluteFilePath()));
             }
 
          } else if (cfi.isFile() && (! Config_getBool("EXCLUDE_SYMLINKS") || ! cfi.isSymLink()) &&

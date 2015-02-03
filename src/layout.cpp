@@ -1265,7 +1265,7 @@ static QByteArray getLayout_Default()
 class LayoutDocManager::Private
 {
  public:
-   QList<LayoutDocEntry *> docEntries[LayoutDocManager::NrParts];
+   QList<LayoutDocEntry *> m_docEntries[LayoutDocManager::NUM_PARTS];
    LayoutNavEntry *rootNav;
 };
 
@@ -1310,7 +1310,7 @@ LayoutDocManager &LayoutDocManager::instance()
 
 const QList<LayoutDocEntry *> &LayoutDocManager::docEntries(LayoutDocManager::LayoutPart part) const
 {
-   return d->docEntries[(int)part];
+   return d->m_docEntries[(int)part];
 }
 
 LayoutNavEntry *LayoutDocManager::rootNavEntry() const
@@ -1320,12 +1320,12 @@ LayoutNavEntry *LayoutDocManager::rootNavEntry() const
 
 void LayoutDocManager::addEntry(LayoutDocManager::LayoutPart p, LayoutDocEntry *e)
 {
-   d->docEntries[(int)p].append(e);
+   d->m_docEntries[(int)p].append(e);
 }
 
 void LayoutDocManager::clear(LayoutDocManager::LayoutPart p)
 {
-   d->docEntries[(int)p].clear();
+   d->m_docEntries[(int)p].clear();
 }
 
 void LayoutDocManager::parse(QTextStream &t, const char *fileName)

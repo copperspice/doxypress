@@ -3339,6 +3339,7 @@ static DocCmdMap docCmdMap[] = {
    { "overload",        &handleOverload,         FALSE },
    { "enum",            &handleEnum,             FALSE },
    { "defgroup",        &handleDefGroup,         FALSE },
+   { "group",           &handleDefGroup,         FALSE },
    { "addtogroup",      &handleAddToGroup,       FALSE },
    { "weakgroup",       &handleWeakGroup,        FALSE },
    { "namespace",       &handleNamespace,        FALSE },
@@ -3733,7 +3734,6 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
 
    if (lii && append) { 
       // already found item of same type just before this one
-      //printf("listName=%s item id = %d existing\n",listName,lii->itemId);
 
       RefItem *item = refList->getRefItem(lii->itemId);
       assert(item != 0);
@@ -3746,7 +3746,9 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
          item->text += outputXRef;
       }
       
-   } else { // new item
+   } else { 
+      // new item
+
       int itemId  = refList->addRefItem();
      
       // if we have already an item from the same list type (e.g. a second @todo)
@@ -3780,9 +3782,10 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
 
       if (si) {
          if (si->lineNr != -1) {
-            warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)", anchorLabel, si->fileName.data(), si->lineNr);
+            warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)", 
+                                     anchorLabel, si->fileName.constData(), si->lineNr);
          } else {
-            warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s)", anchorLabel, si->fileName.data());
+            warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s)", anchorLabel, si->fileName.constData());
          }
 
       } else {
@@ -3791,10 +3794,9 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
          docEntry->anchors->append(*si);
       }
    }
+
    outputXRef.resize(0);
 }
-
-//-----------------------------------------------------------------------------
 
 // Adds a formula text to the list/dictionary of formulas if it was
 // not already added. Returns the label of the formula.
@@ -3902,34 +3904,31 @@ static void stripTrailingWhiteSpace(QByteArray &s)
 static inline void setOutput(OutputContext ctx)
 {
    bool xrefAppendToPrev = xrefAppendFlag;
+
    // determine append flag for the next item (i.e. the end of this item)
    xrefAppendFlag = !inBody &&
                     inContext == OutputXRef && ctx == OutputXRef && // two consecutive xref items
                     newXRefKind == xrefKind &&                  // of the same kind
                     (xrefKind != XRef_Item ||
                      newXRefItemKey == xrefItemKey);            // with the same key if \xrefitem
-   //printf("%d && %d && %d && (%d || %d)\n",
-   //                 inContext==OutputXRef,
-   //                 ctx==OutputXRef,
-   //                 newXRefKind==xrefKind,
-   //                 xrefKind!=XRef_Item,
-   //	  	     newXRefItemKey==xrefItemKey);
+   
+   
+   if (inContext == OutputXRef) { 
 
-   //printf("refKind=%d newXRefKind=%d xrefAppendToPrev=%d xrefAppendFlag=%d\n",
-   //   	  xrefKind,newXRefKind,xrefAppendToPrev,xrefAppendFlag);
-
-   //printf("setOutput(inContext=%d ctx=%d)\n",inContext,ctx);
-   if (inContext == OutputXRef) { // end of XRef section => add the item
+      // end of XRef section => add the item
       // See if we can append this new xref item to the previous one.
       // We know this at the start of the next item of the same
       // type and need to remember this until the end of that item.
+
       switch (xrefKind) {
          case XRef_Todo:
+
             addXRefItem("todo",
                         theTranslator->trTodo(),
                         theTranslator->trTodoList(),
                         xrefAppendToPrev
                        );
+
             break;
          case XRef_Test:
             addXRefItem("test",
@@ -3959,6 +3958,7 @@ static inline void setOutput(OutputContext ctx)
                         xrefAppendToPrev
                        );
             break;
+
          case XRef_None:
             assert(0);
             break;
@@ -3968,13 +3968,16 @@ static inline void setOutput(OutputContext ctx)
 
    int oldContext = inContext;
    inContext = ctx;
+
    if (inContext != OutputXRef && inBody) {
       inContext = OutputInbody;
    }
+
    switch (inContext) {
       case OutputDoc:
          if (oldContext != inContext) {
             stripTrailingWhiteSpace(current->doc);
+
             if (current->docFile.isEmpty()) {
                current->docFile = yyFileName;
                current->docLine = yyLineNr;
@@ -3982,6 +3985,7 @@ static inline void setOutput(OutputContext ctx)
          }
          pOutputString = &current->doc;
          break;
+
       case OutputBrief:
          if (oldContext != inContext) {
             if (current->briefFile.isEmpty()) {
@@ -3989,31 +3993,35 @@ static inline void setOutput(OutputContext ctx)
                current->briefLine = yyLineNr;
             }
          }
+
          if (current->brief.trimmed().isEmpty()) // we only want one brief
             // description even if multiple
             // are given...
          {
             pOutputString = &current->brief;
+
          } else {
             pOutputString = &current->doc;
             inContext = OutputDoc; // need to switch to detailed docs, see bug 631380
          }
          break;
+
       case OutputXRef:
          pOutputString = &outputXRef;
          // first item found, so can't append to previous
          //xrefAppendFlag = FALSE;
          break;
+
       case OutputInbody:
          pOutputString = &current->inbodyDocs;
          break;
    }
+
 }
 
 // add a string to the output
 static inline void addOutput(const char *s)
-{
-   //printf("addOutput(%s)\n",s);
+{   
    *pOutputString += s;
 }
 
@@ -4385,6 +4393,7 @@ YY_DECL {
    yy_find_action:
       yy_current_state = *--(yy_state_ptr);
       (yy_lp) = yy_accept[yy_current_state];
+
    find_rule: /* we branch to this label when backing up */
       for ( ; ; ) { /* until we find what rule we matched */
          if ( (yy_lp) && (yy_lp) < yy_accept[yy_current_state + 1] ) {
@@ -4886,43 +4895,56 @@ YY_DECL {
                addOutput(commentscanYYtext);
             }
             YY_BREAK
+
          case 43:
             /* rule 43 can match eol */
             YY_RULE_SETUP
 
             {
                // at least one blank line (or blank line command)
-               if (inContext == OutputXRef)
-               {
+               if (inContext == OutputXRef) {
+
                   // see bug 613024, we need to put the newlines after ending the XRef section.
-                  if (!g_insideParBlock) {
+                  if (! g_insideParBlock) {
                      setOutput(OutputDoc);
                   }
+
                   int i;
                   for (i = 0; i < commentscanYYleng;) {
                      if (commentscanYYtext[i] == '\n') {
-                        addOutput('\n'), i++;
+                        addOutput('\n');
+                        i++;
+
                      } else if (strcmp(commentscanYYtext + i, "\\_linebr") == 0) {
-                        addOutput('\n'), i += 8;
+                        addOutput('\n');
+                        i += 8;
+
                      } else {
                         i++;
                      }
                   }
-               } else if (inContext != OutputBrief)
-               {
+
+               } else if (inContext != OutputBrief) {
+
                   int i;
                   for (i = 0; i < commentscanYYleng;) {
                      if (commentscanYYtext[i] == '\n') {
-                        addOutput('\n'), i++;
+                        addOutput('\n');
+                        i++;
+
                      } else if (strcmp(commentscanYYtext + i, "\\_linebr") == 0) {
-                        addOutput('\n'), i += 8;
+                        addOutput('\n');
+                        i += 8;
+
                      } else {
                         i++;
                      }
                   }
                   setOutput(OutputDoc);
-               } else // inContext==OutputBrief
-               {
+
+               } else  {
+                  // inContext==OutputBrief
+
                   // only go to the detailed description if we have
                   // found some brief description and not just whitespace
                   endBrief(FALSE);
@@ -4930,6 +4952,7 @@ YY_DECL {
                lineCount();
             }
             YY_BREAK
+
          case 44:
             YY_RULE_SETUP
 
@@ -8436,17 +8459,9 @@ static void checkFormula()
    }
 }
 
-bool parseCommentBlock(/* in */     ParserInterface *parser,
-                                    /* in */     QSharedPointer<Entry> curEntry,
-                                    /* in */     const QByteArray &comment,
-                                    /* in */     const QByteArray &fileName,
-                                    /* in,out */ int  &lineNr,
-                                    /* in */     bool isBrief,
-                                    /* in */     bool isAutoBriefOn,
-                                    /* in */     bool isInbody,
-                                    /* in,out */ Protection &prot,
-                                    /* in,out */ int &position,
-                                    /* out */    bool &newEntryNeeded )
+bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, const QByteArray &comment,
+                  const QByteArray &fileName, int  &lineNr, bool isBrief, bool isAutoBriefOn, bool isInbody,
+                  Protection &prot, int &position, bool &newEntryNeeded )
 {
    initParser();
 
@@ -8460,6 +8475,7 @@ bool parseCommentBlock(/* in */     ParserInterface *parser,
 
    inputString    = comment;
    inputString.append(" ");
+
    inputPosition  = position;
    yyLineNr       = lineNr;
    yyFileName     = fileName;
@@ -8486,15 +8502,17 @@ bool parseCommentBlock(/* in */     ParserInterface *parser,
    }
 
    Debug::print(Debug::CommentScan, 0, "-----------\nCommentScanner: %s:%d\n"
-                "input=[\n%s]\n", fileName.data(), lineNr, comment.data()
-               );
+                "input=[\n%s]\n", fileName.data(), lineNr, comment.data() );
+
 
    commentscanYYrestart( commentscanYYin );
    BEGIN( Comment );
    commentscanYYlex();
+
    setOutput( OutputDoc );
 
-   if (YY_START == OverloadParam) { // comment ended with \overload
+   if (YY_START == OverloadParam) { 
+      // comment ended with \overload
       addOutput(getOverloadDocs());
    }
 
@@ -8503,8 +8521,7 @@ bool parseCommentBlock(/* in */     ParserInterface *parser,
    }
 
    if (g_insideParBlock) {
-      warn(yyFileName, yyLineNr,
-           "Documentation block ended while inside a \\parblock. Missing \\endparblock");
+      warn(yyFileName, yyLineNr, "Documentation block ended while inside a \\parblock. Missing \\endparblock");
    }
 
    current->doc = stripLeadingAndTrailingEmptyLines(current->doc, current->docLine);
@@ -8538,9 +8555,8 @@ bool parseCommentBlock(/* in */     ParserInterface *parser,
 
    newEntryNeeded = needNewEntry;
 
-   // if we did not proceed during this call, it does not make
-   // sense to continue, since we get stuck. See bug 567346 for situations
-   // were this happens
+   // if we did not proceed during this call it does not make ense to continue since we get stuck. 
+   // See bug 567346 for situations were this happens
    if (parseMore && position == inputPosition) {
       parseMore = FALSE;
    }
@@ -8552,14 +8568,12 @@ bool parseCommentBlock(/* in */     ParserInterface *parser,
    }
 
    lineNr = yyLineNr;
-   //printf("position=%d parseMore=%d newEntryNeeded=%d\n",
-   //  position,parseMore,newEntryNeeded);
-
    printlex(commentscanYY_flex_debug, FALSE, __FILE__, ! fileName.isEmpty() ? fileName.constData() : NULL);
+
    return parseMore;
 }
 
-//---------------------------------------------------------------------------
+
 
 void groupEnterFile(const char *fileName, int)
 {

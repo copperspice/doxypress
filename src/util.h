@@ -126,7 +126,7 @@ void setAnchors(QSharedPointer<MemberList> ml);
 
 QByteArray fileToString(const char *name, bool filter = false, bool isSourceCode = false);
 
-QByteArray dateToString(bool);
+QString dateToString(bool);
 
 bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *args, QSharedPointer<MemberDef> &md,
              QSharedPointer<ClassDef> &cd, QSharedPointer<FileDef> &fd, QSharedPointer<NamespaceDef> &nd, 
@@ -168,15 +168,8 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
                      QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope, ArgumentList *dstAl, bool checkCV );
 
 void mergeArguments(ArgumentList *, ArgumentList *, bool forceNameOverwrite = false);
-
 QByteArray substituteClassNames(const QByteArray &s);
-
 QByteArray substitute(const QByteArray &s, const QByteArray &src, const QByteArray &dst);
-
-QByteArray clearBlock(const char *s, const char *begin, const char *end);
-
-QByteArray selectBlock(const QByteArray &s, const QByteArray &name, bool which);
-
 QByteArray resolveDefines(const char *n);
 
 QSharedPointer<ClassDef> getClass(const char *key);
@@ -217,8 +210,8 @@ bool rightScopeMatch(const QByteArray &scope, const QByteArray &name);
 
 bool leftScopeMatch(const QByteArray &scope, const QByteArray &name);
 
-QByteArray substituteKeywords(const QByteArray &s, const char *title,
-                              const char *projName, const char *projNum, const char *projBrief);
+QString substituteKeywords(const QByteArray &s, const char *title,
+                           const char *projName, const char *projNum, const char *projBrief);
 
 int getPrefixIndex(const QByteArray &name);
 

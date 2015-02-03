@@ -1557,11 +1557,11 @@ YY_DECL {
                {
                   g_curArgTypeName += *defargsYYtext;
                   BEGIN(FuncQual);
-               } else
-               {
+
+               } else {
                   g_curArgTypeName = removeRedundantWhiteSpace(g_curArgTypeName);
-                  g_curArgDefValue = g_curArgDefValue.trimmed();
-                  //printf("curArgType=`%s' curArgDefVal=`%s'\n",g_curArgTypeName.data(),g_curArgDefValue.data());
+                  g_curArgDefValue = g_curArgDefValue.trimmed();               
+
                   int l = g_curArgTypeName.length();
                   if (l > 0)
                   {

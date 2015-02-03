@@ -11572,6 +11572,7 @@ YY_DECL {
 
    do_action:	/* This label is used only to access EOF actions. */
 
+
       switch ( yy_act ) {
          /* beginning of action switch */
          case 1:
@@ -20124,10 +20125,10 @@ YY_DECL {
                BEGIN( docBlockContext );
             }
             YY_BREAK
+
          /* ---- Comments blocks ------ */
          case 665:
             YY_RULE_SETUP
-
             {
                // end of comment block
                handleCommentBlock(docBlock.data(), FALSE);
@@ -21897,6 +21898,7 @@ static void handleCommentBlock(const QByteArray &doc, bool brief)
    int position = 0;
    bool needsEntry = FALSE;
 
+
    if (docBlockInBody && hideInBodyDocs) {
       return;
    }
@@ -21917,7 +21919,7 @@ static void handleCommentBlock(const QByteArray &doc, bool brief)
              docBlockInBody ? FALSE : docBlockAutoBrief,   // isJavaDocStyle
              docBlockInBody,                               // isInBody
              protection, position, needsEntry)) { 
-      
+     
       if (needsEntry) {
          QByteArray docFile = current->docFile;
          newEntry();
@@ -21952,8 +21954,7 @@ static void handleParametersCommentBlocks(ArgumentList *al)
 
          current->doc.resize(0);
          current->brief.resize(0);
-
-         //printf("handleParametersCommentBlock [%s]\n",doc.data());
+         
          while (parseCommentBlock(
                    g_thisParser,
                    current,
@@ -22033,7 +22034,9 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          }
 
          // set default protection based on the compound type
-         if ( ce->section == Entry::CLASS_SEC ) { // class
+         if ( ce->section == Entry::CLASS_SEC ) { 
+            // class
+
             if (insidePHP || insideD || insideJS || insideIDL) {
                current->protection = protection = Public ;
 
@@ -22055,8 +22058,11 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          } else if (ce->section == Entry::ENUM_SEC ) { // enum
             current->protection = protection = ce->protection;
 
-         } else if (! ce->name.isEmpty() && ce->name.at(ni) == '@') { // unnamed union or namespace
-            if (ce->section == Entry::NAMESPACE_SEC ) { // unnamed namespace
+         } else if (! ce->name.isEmpty() && ce->name.at(ni) == '@') { 
+            // unnamed union or namespace
+
+            if (ce->section == Entry::NAMESPACE_SEC ) { 
+               // unnamed namespace
                current->stat = gstat = TRUE;
             }
             current->protection = protection = ce->protection;
@@ -22073,7 +22079,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
          scannerYYlex() ;
          g_lexInit = TRUE;
-       
+      
          groupLeaveCompound(yyFileName, yyLineNr, ce->name);        
          current = QSharedPointer<Entry>();
 
@@ -22152,13 +22158,14 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
       scannerYYlex();
       g_lexInit = TRUE;
 
+
       if (YY_START == Comment) {
          warn(yyFileName, yyLineNr, "File ended in the middle of a comment block, Check for a missing \\endcode");
       }
     
       groupLeaveFile(yyFileName, yyLineNr);
       rt->program.resize(0);
- 
+
       if (rt->children().contains(current) == 0)  {                     
          current = QSharedPointer<Entry>();
       }
@@ -22167,6 +22174,7 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
       inputFile.close();
 
       anonNSCount++;
+
    }
 }
 

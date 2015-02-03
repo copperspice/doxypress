@@ -27,9 +27,8 @@
  *  @param secTitle String representing the title of the section.
  */
 RefList::RefList(const char *listName, const char *pageTitle, const char *secTitle)
-{   
-   m_dict = 0;
-   m_dictIterator = 0;
+   : m_dictIterator(m_dict)
+{      
    m_id = 0;
 
    m_listName  = listName;
@@ -39,25 +38,18 @@ RefList::RefList(const char *listName, const char *pageTitle, const char *secTit
 
 /*! Destroy the todo list. Currently not called! */
 RefList::~RefList()
-{
-   delete m_dictIterator;
-   delete m_dict; 
+{   
 }
 
 /*! Adds a new item to the list.
  *  \returns A unique id for this item.
  */
 int RefList::addRefItem()
-{
-   if (m_dict) {
-      m_dict = new QHash<long, RefItem *>();   
-      m_dictIterator = new QHashIterator<long, RefItem *>(*m_dict);
-   }
-
+{  
    RefItem *item = new RefItem;
    m_id++;
 
-   m_dict->insert(m_id, item);
+   m_dict.insert(m_id, item);
 
    return m_id;
 }
@@ -70,10 +62,8 @@ RefItem *RefList::getRefItem(int itemId)
 {
    RefItem *retval = 0;
 
-   if (m_dict)  {
-      retval = m_dict->value(itemId);
-   }  
-
+   retval = m_dict.value(itemId);
+     
    return retval;
 }
 
@@ -85,9 +75,9 @@ RefItem *RefList::getFirstRefItem()
 { 
    RefItem *retval = 0;
 
-   if (m_dictIterator)  {
-      m_dictIterator->toFront();
-      retval = m_dictIterator->value();
+   if (! m_dict.isEmpty())  {
+      m_dictIterator.toFront();
+      retval = m_dictIterator.value();
    }  
 
    return retval;
@@ -101,9 +91,9 @@ RefItem *RefList::getNextRefItem()
 {  
    RefItem *retval = 0;
 
-   if (m_dictIterator && m_dictIterator->hasNext())  {         
-      m_dictIterator->next();
-      retval = m_dictIterator->value();
+   if (m_dictIterator.hasNext())  {         
+      m_dictIterator.next();
+      retval = m_dictIterator.value();
    }  
 
    return retval;
@@ -142,6 +132,10 @@ void RefList::insertIntoList(const char *key, RefItem *item)
 
 void RefList::generatePage()
 {  
+   if (m_itemMap.isEmpty()) {
+      return;
+   }
+
    QMap<QByteArray, QList<RefItem>> titleMap;
 
    for (auto list : m_itemMap) {

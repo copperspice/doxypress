@@ -612,21 +612,20 @@ static void reSortNodes(QList<FTVNode *> &nodeList)
    for (auto item : nodeList) {     
 
 
+if (item->file.contains("build-from-source") || item->file.contains("build-options") || item->file.contains("requirements-") ) {
+
       printf("\n  File: %-30s  Alpha: %-3d  ", item->file.constData(), item->index );
       if (item->def) {
          printf("  Our OrderId: %-3d",  item->def->getInputOrderId() );  
       }   
+}
 
       item->index = counter;
       counter++;
 
       if (item->children.count() != 0 ) {
-         printf("\n    ** start children" );
-
          QList<FTVNode *> &children = item->children;
          reSortNodes(children);
-
-         printf("\n    ** end children" );
       }
    }
 

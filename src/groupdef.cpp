@@ -61,7 +61,7 @@ GroupDef::GroupDef(const char *df, int dl, const char *na, const char *t, QStrin
       fileName = stripExtension(refFileName);
 
    } else {
-      fileName = "group_" + QString(na);
+      fileName = "group-" + QString(na);
    }
 
    setGroupTitle(t);
@@ -739,12 +739,13 @@ void GroupDef::writeFiles(OutputList &ol, const QByteArray &title)
       ol.startMemberHeader("files");
       ol.parseText(title);
       ol.endMemberHeader();
-      ol.startMemberList();
-    
+      ol.startMemberList();   
+
       for (auto item : *fileList) {
          ol.startMemberDeclaration();
          ol.startMemberItem(item->getOutputFileBase(), 0);
          ol.docify(theTranslator->trFile(false, true) + " ");
+
          ol.insertMemberAlign();
          ol.writeObjectLink(item->getReference(), item->getOutputFileBase(), 0, item->name());
          ol.endMemberItem();
@@ -758,6 +759,7 @@ void GroupDef::writeFiles(OutputList &ol, const QByteArray &title)
          }
          ol.endMemberDeclaration(0, 0);
       }
+
       ol.endMemberList();
    }
 }
@@ -794,9 +796,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QByteArray &title)
          if (gd->isVisible()) {
             ol.startMemberDeclaration();
             ol.startMemberItem(gd->getOutputFileBase(), 0);
-            //ol.docify(theTranslator->trGroup(false,true));
-            //ol.docify(" ");
-
+     
             ol.insertMemberAlign();
             ol.writeObjectLink(gd->getReference(), gd->getOutputFileBase(), 0, gd->groupTitle());
             ol.endMemberItem();
@@ -828,6 +828,7 @@ void GroupDef::writeDirs(OutputList &ol, const QByteArray &title)
          ol.startMemberDeclaration();
          ol.startMemberItem(dd->getOutputFileBase(), 0);
          ol.parseText(theTranslator->trDir(false, true));
+
          ol.insertMemberAlign();
          ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName().toUtf8());
          ol.endMemberItem();
@@ -939,10 +940,16 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
    ol.disableAllBut(OutputGenerator::Html);
 
    bool first = true;
-
    SrcLangExt lang = getLanguage();
+   
+   auto sortedList = LayoutDocManager::instance().docEntries(LayoutDocManager::Group);
+
+
+   // sort the list now    broom check
+
+
   
-   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {
+   for (auto lde : sortedList) {
 
       if ((lde->kind() == LayoutDocEntry::GroupClasses && classSDict->declVisible()) ||
             (lde->kind() == LayoutDocEntry::GroupNamespaces && namespaceSDict->declVisible()) ||
@@ -952,11 +959,23 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
 
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
 
-         QByteArray label = lde->kind() == LayoutDocEntry::GroupClasses      ? "nested-classes" :
-                            lde->kind() == LayoutDocEntry::GroupNamespaces   ? "namespaces"     :
-                            lde->kind() == LayoutDocEntry::GroupFiles        ? "files"          :
-                            lde->kind() == LayoutDocEntry::GroupNestedGroups ? "groups"         :
-                            "dirs";
+         QByteArray label;
+
+         if (lde->kind() == LayoutDocEntry::GroupClasses) {
+            label = "nested-classes";
+
+         } else if (lde->kind() == LayoutDocEntry::GroupNamespaces)  {
+            label = "namespaces";
+
+         } else if (lde->kind() == LayoutDocEntry::GroupFiles)  {
+            label = "files";
+
+         } else if (lde->kind() == LayoutDocEntry::GroupNestedGroups) {
+            label = "groups"; 
+
+         } else {
+            label = "dirs";
+         }
 
          ol.writeSummaryLink(QString(""), label, ls->title(lang), first);
          first = false;
@@ -972,7 +991,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
       }
    }
 
-   if (!first) {
+   if (! first) {
       ol.writeString("  </div>\n");
    }
    ol.popGeneratorState();

@@ -1112,10 +1112,6 @@ class TranslatorEnglish : public Translator
       return "Value:";
    }
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.5
-   //////////////////////////////////////////////////////////////////////////
-
    /*! Used as a marker that is put before a \\bug item */
    virtual QByteArray trBug() {
       return "Bug";
@@ -1794,37 +1790,7 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trIncludesFileIn(const char *name) {
       return (QByteArray)"Includes file in " + name;
    }
-
-   /** Compiles a date string.
-    *  @param year Year in 4 digits
-    *  @param month Month of the year: 1=January
-    *  @param day Day of the Month: 1..31
-    *  @param dayOfWeek Day of the week: 1=Monday..7=Sunday
-    *  @param hour Hour of the day: 0..23
-    *  @param minutes Minutes in the hour: 0..59
-    *  @param seconds Seconds within the minute: 0..59
-    *  @param includeTime Include time in the result string?
-    */
-   virtual QByteArray trDateTime(int year, int month, int day, int dayOfWeek,
-                                 int hour, int minutes, int seconds, bool includeTime) {
-
-      static const char *days[]   = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
-      static const char *months[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-
-      QString sdate;
-      sdate = QString("%1 %2 %3 %4").arg(days[dayOfWeek - 1]).arg(months[month - 1]).arg(day).arg(year);
-
-      if (includeTime) {
-
-         QString stime;
-         stime = QString(" %1:%2:%3").arg(hour,2,10,QChar('0')).arg(minutes,2,10,QChar('0')).arg(seconds,2,10,QChar('0'));                                                                      
-
-         sdate += stime;
-      }
-
-      return sdate.toUtf8();
-   }
- 
+   
    /*! Header for the page with bibliographic citations */
    virtual QByteArray trCiteReferences() {
       return "Bibliography";

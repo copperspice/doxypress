@@ -1610,7 +1610,7 @@ static bool findOperator2(const QByteArray &s, int i)
 static const char constScope[]   = { 'c', 'o', 'n', 's', 't', ':' };
 static const char virtualScope[] = { 'v', 'i', 'r', 't', 'u', 'a', 'l', ':' };
 
-// Note: this function is not reentrant due to the use of static buffer!
+// Note: this function is not reentrant due to the use of static buffer 
 QByteArray removeRedundantWhiteSpace(const QByteArray &s)
 {
    static bool cliSupport = Config_getBool("CPP_CLI_SUPPORT");
@@ -1619,28 +1619,28 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
       return s;
    }
 
-   static GrowBuf growBuf;
-  
+   static GrowBuf growBuf;  
    growBuf.clear();
+
    uint i;
-   uint l = s.length();
+   uint len = s.length();
    uint csp = 0;
    uint vsp = 0;
    char c;
 
-   for (i = 0; i < l; i++) {
-
-   nextChar:
+   for (i = 0; i < len; i++) {
       c = s.at(i);
 
       // search for "const"
       if (csp < 6 && c == constScope[csp] && // character matches substring "const"
             (csp > 0 ||                   // if it is the first character
              i == 0  ||                   // the previous may not be a digit
-             !isId(s.at(i - 1))) ) {
+             ! isId(s.at(i - 1))) ) {
+
          csp++;
 
-      } else { // reset counter
+      } else { 
+         // reset counter
          csp = 0;
       }
 
@@ -1648,39 +1648,48 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
       if (vsp < 8 && c == virtualScope[vsp] && // character matches substring "virtual"
             (vsp > 0 ||                     // if it is the first character
              i == 0  ||                     // the previous may not be a digit
-             !isId(s.at(i - 1)) ) ) {
+             ! isId(s.at(i - 1)) ) ) {
          vsp++;
 
       } else { // reset counter
          vsp = 0;
+
       }
 
       if (c == '"') { 
          // quoted string
+         bool isDone = false;
+
          i++;
+         growBuf.addChar(c);        
 
-         growBuf.addChar(c);
-
-         while (i < l) {
+         while (i < len) {
             char cc = s.at(i);
             growBuf.addChar(cc);
 
-            if (cc == '\\') { // escaped character
+            if (cc == '\\') { 
+               // escaped character
                growBuf.addChar(s.at(i + 1));
                i += 2;
 
-            } else if (cc == '"') { // end of string
-               i++;
+            } else if (cc == '"') { 
+               // end of string
+               isDone = true;
+               break;
 
-               goto nextChar;
-
-            } else { // any other character
+            } else { 
+               // any other character
                i++;
 
             }
-        }
+         }
 
-      } else if (i < l - 2 && c == '<' && 
+         if (isDone) {
+            continue;
+         }
+
+
+      } else if (i < len - 2 && c == '<' && 
                  (isId(s.at(i + 1)) || isspace((uchar)s.at(i + 1))) && (i < 8 || !findOperator(s, i)) ) {
 
          // string in front is not "operator"
@@ -1691,14 +1700,14 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
                  (isId(s.at(i - 1)) || isspace((uchar)s.at(i - 1)) || s.at(i - 1) == '*' || s.at(i - 1) == '&') &&          
                  (i < 8 || !findOperator(s, i)) ) {
 
-          // prev char is an id char or space
+         // prev char is an id char or space
          growBuf.addChar(' ');
          growBuf.addChar('>');
 
       } else if (i > 0 && c == ',' && ! isspace((uchar)s.at(i - 1))
-                 && ((i < l - 1 && (isId(s.at(i + 1)) || s.at(i + 1) == '[')) 
-                     || (i < l - 2 && s.at(i + 1) == '$' && isId(s.at(i + 2))) 
-                     || (i < l - 3 && s.at(i + 1) == '&' && s.at(i + 2) == '$' && isId(s.at(i + 3))))) { 
+                 && ((i < len - 1 && (isId(s.at(i + 1)) || s.at(i + 1) == '[')) 
+                     || (i < len - 2 && s.at(i + 1) == '$' && isId(s.at(i + 2))) 
+                     || (i < len - 3 && s.at(i + 1) == '&' && s.at(i + 2) == '$' && isId(s.at(i + 3))))) { 
 
          // for PHP
          growBuf.addChar(',');
@@ -1708,7 +1717,7 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
          growBuf.addChar(' ');
          growBuf.addChar(c);
 
-      } else if (c == 't' && csp == 5  &&  i < l -1  &&  ! (isId(s.at(i + 1)) ||
+      } else if (c == 't' && csp == 5  &&  i < len -1  &&  ! (isId(s.at(i + 1)) ||
                    s.at(i + 1) == ')' || s.at(i + 1) == ',' ) )  {
          // prevent const ::A from being converted to const::A
       
@@ -1728,7 +1737,7 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
          growBuf.addChar(':');
          csp = 0;
 
-      } else if (c == 'l' && vsp == 7 && i < l -1 && 
+      } else if (c == 'l' && vsp == 7 && i < len -1 && 
                      !(isId(s.at(i + 1)) || s.at(i + 1) == ')' || s.at(i + 1) == ',')  ) {
 
          // prevent virtual ::A from being converted to virtual::A
@@ -1751,11 +1760,11 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
          vsp = 0;
 
       } else if (! isspace((uchar)c) || 
-                 ( i > 0 && i < l - 1 &&   
+                 ( i > 0 && i < len - 1 &&   
                    (isId(s.at(i - 1)) || s.at(i - 1) == ')' || s.at(i - 1) == ',' || s.at(i - 1) == '>' || s.at(i - 1) == ']') &&
                    (isId(s.at(i + 1)) ||
-                    (i < l - 2 && s.at(i + 1) == '$' && isId(s.at(i + 2))) ||
-                    (i < l - 3 && s.at(i + 1) == '&' && s.at(i + 2) == '$' && isId(s.at(i + 3))) ) ) ) {
+                    (i < len - 2 && s.at(i + 1) == '$' && isId(s.at(i + 2))) ||
+                    (i < len - 3 && s.at(i + 1) == '&' && s.at(i + 2) == '$' && isId(s.at(i + 3))) ) ) ) {
 
          if (c == '\t') {
             c = ' ';
@@ -1775,7 +1784,7 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
          } else if (c == '-') {
             uint rl = growBuf.getPos();
 
-            if (rl > 0 && growBuf.at(rl - 1) == ')' && i < l - 1 && s.at(i + 1) == '>') { 
+            if (rl > 0 && growBuf.at(rl - 1) == ')' && i < len - 1 && s.at(i + 1) == '>') { 
                // trailing return type ')->' => ') ->'
                growBuf.addChar(' ');
             }
@@ -2383,24 +2392,27 @@ QByteArray fileToString(const char *name, bool filter, bool isSourceCode)
    return "";
 }
 
-QByteArray dateTimeHHMM()
-{
-   QByteArray retval;
+QString dateTimeHHMM()
+{   
    QDateTime current = QDateTime::currentDateTime();
 
    const QString format = "ddd MMM d yyyy hh:mm";
-   retval = current.toString(format).toUtf8();                    
-
-   return retval;
+   return current.toString(format);   
 }
 
-QByteArray dateToString(bool includeTime)
+QString dateToString(bool includeTime)
 {
    QDateTime current = QDateTime::currentDateTime();
 
-   return theTranslator->trDateTime(current.date().year(), current.date().month(), 
-                  current.date().day(), current.date().dayOfWeek(),
-                  current.time().hour(), current.time().minute(), current.time().second(), includeTime);
+   if (includeTime) {
+      const QString format = "ddd MMM d yyyy hh:mm:ss";
+      return current.toString(format); 
+
+   } else {
+      const QString format = "ddd MMM d yyyy";
+      return current.toString(format); 
+
+   } 
 }
 
 static QString yearToString()
@@ -4779,25 +4791,26 @@ QByteArray substitute(const QByteArray &origString, const QByteArray &oldWord, c
    return retval;
 }
 
-QByteArray substituteKeywords(const QByteArray &s, const char *title, const char *projName, 
+QString substituteKeywords(const QByteArray &s, const char *title, const char *projName, 
                               const char *projNum, const char *projBrief)
 {
-   QByteArray result = s;
+   QString result = s;
 
    if (title) {
-      result = substitute(result, "$title", title);
+      result = result.replace("$title", title);
    }
 
-   result = substitute(result, "$datetimeHHMM",   dateTimeHHMM());
-   result = substitute(result, "$datetime",       dateToString(true));
-   result = substitute(result, "$date",           dateToString(false));
-   result = substitute(result, "$year",           yearToString().toUtf8());
-   result = substitute(result, "$doxygenversion", versionString);
+   result = result.replace("$datetimeHHMM",   dateTimeHHMM());
+   result = result.replace("$datetime",       dateToString(true));
+   result = result.replace("$date",           dateToString(false));
+   result = result.replace("$year",           yearToString());
 
-   result = substitute(result, "$projectname",    projName);
-   result = substitute(result, "$projectnumber",  projNum);
-   result = substitute(result, "$projectbrief",   projBrief);
-   result = substitute(result, "$projectlogo",    stripPath(Config_getString("PROJECT_LOGO")));
+   result = result.replace("$doxygenversion", versionString);
+
+   result = result.replace("$projectname",    projName);
+   result = result.replace("$projectnumber",  projNum);
+   result = result.replace("$projectbrief",   projBrief);
+   result = result.replace("$projectlogo",    stripPath(Config_getString("PROJECT_LOGO")));
 
    return result;
 }
@@ -6186,7 +6199,7 @@ void addRefItem(const QList<ListItemInfo> *sli, const char *key,
       for (auto lii : *sli) {   
          auto refList = Doxygen::xrefLists->find(lii.type);
 
-         if (refList !=   Doxygen::xrefLists->end()   && ( (lii.type != "todo" || Config_getBool("GENERATE_TODOLIST")) &&
+         if (refList != Doxygen::xrefLists->end() && ( (lii.type != "todo" || Config_getBool("GENERATE_TODOLIST")) &&
                           (lii.type != "test"       || Config_getBool("GENERATE_TESTLIST")) &&
                           (lii.type != "bug"        || Config_getBool("GENERATE_BUGLIST"))  &&
                           (lii.type != "deprecated" || Config_getBool("GENERATE_DEPRECATEDLIST")) ) ) {

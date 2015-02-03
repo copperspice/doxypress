@@ -666,8 +666,7 @@ void ClangParser::linkInclude(CodeOutputInterface &ol, FileDef *fd,
          // for each include name
          for (fni.toFirst(); !found && (ifd = fni.current()); ++fni) {
             // see if this source file actually includes the file
-            found = fd->isIncluded(ifd->absoluteFilePath());
-            //printf("      include file %s found=%d\n",ifd->absoluteFilePath().data(),found);
+            found = fd->isIncluded(ifd->absoluteFilePath());           
          }
       }
    }

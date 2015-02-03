@@ -223,10 +223,11 @@ class LayoutDocManager
    class Private;
 
  public:
+
    enum LayoutPart {
-      Class, Namespace, File, Group, Directory,
-      NrParts
+      Class, Namespace, File, Group, Directory
    };
+
    /** Returns a reference to this singleton. */
    static LayoutDocManager &instance();
 
@@ -245,6 +246,8 @@ class LayoutDocManager
    void clear(LayoutPart p);
    LayoutDocManager();
    ~LayoutDocManager();
+
+   static const int NUM_PARTS = 5;
 
    Private *d;
    friend class LayoutParser;

@@ -1732,35 +1732,6 @@ class TranslatorChinesetraditional : public Translator
       return (QByteArray)"含入檔案在" + name;
    }
 
-   /** Compiles a date string.
-    *  @param year Year in 4 digits
-    *  @param month Month of the year: 1=January
-    *  @param day Day of the Month: 1..31
-    *  @param dayOfWeek Day of the week: 1=Monday..7=Sunday
-    *  @param hour Hour of the day: 0..23
-    *  @param minutes Minutes in the hour: 0..59
-    *  @param seconds Seconds within the minute: 0..59
-    *  @param includeTime Include time in the result string?
-    */
-   virtual QByteArray trDateTime(int year, int month, int day, int dayOfWeek,
-                                 int hour, int minutes, int seconds,
-                                 bool includeTime) {
-      static const char *days[]   = { "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日" };
-      static const char *months[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12" };
-      QByteArray sdate;
-      sdate.sprintf("%d年%s月%d日 %s", year, months[month - 1], day, days[dayOfWeek - 1]);
-      if (includeTime) {
-         QByteArray stime;
-         stime.sprintf(" %.2d:%.2d:%.2d", hour, minutes, seconds);
-         sdate += stime;
-      }
-      return sdate;
-   }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.7.5
-   //////////////////////////////////////////////////////////////////////////
-
    /*! Header for the page with bibliographic citations */
    virtual QByteArray trCiteReferences() {
       return "參考文獻資料";

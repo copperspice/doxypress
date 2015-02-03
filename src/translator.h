@@ -424,38 +424,19 @@ class Translator
    virtual QByteArray trSubprogram(bool first_capital, bool singular) = 0;
    virtual QByteArray trTypeConstraints() = 0;
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.6.0
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trDirRelation(const char *name) = 0;
    virtual QByteArray trLoading() = 0;
    virtual QByteArray trGlobalNamespace() = 0;
    virtual QByteArray trSearching() = 0;
    virtual QByteArray trNoMatches() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.6.3
-   //////////////////////////////////////////////////////////////////////////
-
+  
    //virtual QByteArray trDirDependency(const char *name) = 0;
    virtual QByteArray trFileIn(const char *name) = 0;
    virtual QByteArray trIncludesFileIn(const char *name) = 0;
-   virtual QByteArray trDateTime(int year, int month, int day, int dayOfWeek,
-                                 int hour, int minutes, int seconds,
-                                 bool includeTime) = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.7.5
-   //////////////////////////////////////////////////////////////////////////
-
+ 
    virtual QByteArray trCiteReferences() = 0;
    virtual QByteArray trCopyright() = 0;
    virtual QByteArray trDirDepGraph(const char *name) = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.8.0
-   //////////////////////////////////////////////////////////////////////////
 
    virtual QByteArray trDetailLevel() = 0;
    virtual QByteArray trTemplateParameters() = 0;
@@ -465,10 +446,6 @@ class Translator
    virtual QByteArray trInheritedFrom(const char *members, const char *what) = 0;
    virtual QByteArray trAdditionalInheritedMembers() = 0;
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.8.2
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trPanelSynchronisationTooltip(bool enable) = 0;
    virtual QByteArray trProvidedByCategory() = 0;
    virtual QByteArray trExtendsClass() = 0;
@@ -476,10 +453,6 @@ class Translator
    virtual QByteArray trInstanceMethods() = 0;
    virtual QByteArray trMethodDocumentation() = 0;
    virtual QByteArray trDesignOverview() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.8.4
-   //////////////////////////////////////////////////////////////////////////
 
    virtual QByteArray trInterfaces() = 0;
    virtual QByteArray trServices() = 0;

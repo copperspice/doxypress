@@ -99,9 +99,9 @@ static void writeServerSearchBox(QTextStream &t, const char *relPath, bool highl
 }
 
 /// Clear a text block \a s from \a begin to \a end markers
-QByteArray clearBlock(const QByteArray &s, const QByteArray &begin, const QByteArray &end)
+QString clearBlock(const QString &s, const QString &begin, const QString &end)
 {
-   QByteArray retval = s;
+   QString retval = s;
 
    int beginPos = s.indexOf(begin);
    int endPos   = s.indexOf(end, beginPos);
@@ -115,24 +115,24 @@ QByteArray clearBlock(const QByteArray &s, const QByteArray &begin, const QByteA
    return retval.replace(beginPos, len, "");     
 }
 
-QByteArray selectBlock(const QByteArray &s, const QByteArray &name, bool enable)
+static QString selectBlock(const QString &s, const QString &name, bool enable)
 {  
-   const QByteArray begin   = "<!--BEGIN " + name + "-->";
-   const QByteArray end     = "<!--END " + name + "-->";
+   const QString begin   = "<!--BEGIN " + name + "-->";
+   const QString end     = "<!--END " + name + "-->";
 
-   const QByteArray nobegin = "<!--BEGIN !" + name + "-->";
-   const QByteArray noend   = "<!--END !" + name + "-->";
+   const QString nobegin = "<!--BEGIN !" + name + "-->";
+   const QString noend   = "<!--END !" + name + "-->";
 
-   QByteArray result = s;
+   QString result = s;
 
    if (enable) {
-      result = substitute(result, begin, "");
-      result = substitute(result, end, "");
+      result = result.replace(begin, "");
+      result = result.replace(end, "");
       result = clearBlock(result, nobegin, noend);
 
    } else {
-      result = substitute(result, nobegin, "");
-      result = substitute(result, noend, "");
+      result = result.replace(nobegin, "");
+      result = result.replace(noend, "");
       result = clearBlock(result, begin, end);
    }
 
@@ -153,10 +153,10 @@ static QByteArray getSearchBox(bool serverSide, QByteArray relPath, bool highlig
    return QByteArray(result);
 }
 
-static QByteArray removeEmptyLines(const QByteArray &s)
+static QString removeEmptyLines(const QString &s)
 {
-   QByteArray retval;
-   QByteArray line;  
+   QString retval;
+   QString line;  
   
    for (auto letter : s) {         
       line.append(letter);
@@ -178,8 +178,8 @@ static QByteArray removeEmptyLines(const QByteArray &s)
    return retval;
 }
 
-static QByteArray substituteHtmlKeywords(const QByteArray &s, const QByteArray &title, const QByteArray &relPath,
-                                         const QByteArray &navPath = QByteArray())
+static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &title, const QByteArray &relPath,
+                                      const QByteArray &navPath = QByteArray())
 {
    // Build CSS/Javascript tags depending on treeview, search engine settings
    QByteArray cssFile;
@@ -237,7 +237,7 @@ static QByteArray substituteHtmlKeywords(const QByteArray &s, const QByteArray &
    }
 
    if (timeStamp) {
-      generatedBy = theTranslator->trGeneratedAt(dateToString(true), convertToHtml(Config_getString("PROJECT_NAME")));
+      generatedBy = theTranslator->trGeneratedAt(dateToString(true).toUtf8(), convertToHtml(Config_getString("PROJECT_NAME")));
 
    } else {
       generatedBy = theTranslator->trGeneratedBy();
@@ -323,21 +323,21 @@ static QByteArray substituteHtmlKeywords(const QByteArray &s, const QByteArray &
    }
 
    // first substitute generic keywords
-   QByteArray result = substituteKeywords(s, title, convertToHtml(Config_getString("PROJECT_NAME")),
-                                                    convertToHtml(Config_getString("PROJECT_NUMBER")),
-                                                    convertToHtml(Config_getString("PROJECT_BRIEF")));
+   QString result = substituteKeywords(s, title, convertToHtml(Config_getString("PROJECT_NAME")),
+                                                 convertToHtml(Config_getString("PROJECT_NUMBER")),
+                                                 convertToHtml(Config_getString("PROJECT_BRIEF")));
 
    // additional HTML only keywords
-   result = substitute(result, "$navpath", navPath);
-   result = substitute(result, "$stylesheet", cssFile);
-   result = substitute(result, "$treeview", treeViewCssJs);
-   result = substitute(result, "$searchbox", searchBox);
-   result = substitute(result, "$search", searchCssJs);
-   result = substitute(result, "$mathjax", mathJaxJs);
-   result = substitute(result, "$generatedby", generatedBy);
-   result = substitute(result, "$extrastylesheet", extraCssText);
-   result = substitute(result, "$relpath$", relPath); //<-- obsolete: for backwards compatibility only
-   result = substitute(result, "$relpath^", relPath); //<-- must be last
+   result = result.replace("$navpath", navPath);
+   result = result.replace("$stylesheet", cssFile);
+   result = result.replace("$treeview", treeViewCssJs);
+   result = result.replace("$searchbox", searchBox);
+   result = result.replace("$search", searchCssJs);
+   result = result.replace("$mathjax", mathJaxJs);
+   result = result.replace("$generatedby", generatedBy);
+   result = result.replace("$extrastylesheet", extraCssText);
+   result = result.replace("$relpath$", relPath); //<-- obsolete: for backwards compatibility only
+   result = result.replace("$relpath^", relPath); //<-- must be last
 
    // additional HTML only conditional blocks
    result = selectBlock(result, "DISABLE_INDEX", disableIndex);
@@ -911,10 +911,8 @@ QByteArray HtmlGenerator::writeLogoAsString(const char *path)
    QByteArray result;
 
    if (timeStamp) {
-      result += theTranslator->trGeneratedAt(
-                   dateToString(true),
-                   Config_getString("PROJECT_NAME")
-                );
+      result += theTranslator->trGeneratedAt(dateToString(true).toUtf8(), Config_getString("PROJECT_NAME") ); 
+
    } else {
       result += theTranslator->trGeneratedBy();
    }
@@ -926,6 +924,7 @@ QByteArray HtmlGenerator::writeLogoAsString(const char *path)
    result += "doxygen.png\" alt=\"doxygen\"/></a> ";
    result += versionString;
    result += " ";
+
    return result;
 }
 
@@ -1548,6 +1547,7 @@ void HtmlGenerator::startMemberHeader(const char *anchor)
    }
 
    m_textStream << "<tr class=\"heading\"><td colspan=\"2\"><h2 class=\"groupheader\">";
+
    if (anchor) {
       m_textStream << "<a name=\"" << anchor << "\"></a>" << endl;
    }

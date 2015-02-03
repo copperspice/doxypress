@@ -210,14 +210,10 @@ class TranslatorAdapter_1_6_3 : public TranslatorAdapter_1_7_5
    virtual QByteArray trFileIn(const char *name) {
       return english.trFileIn(name);
    }
+
    virtual QByteArray trIncludesFileIn(const char *name) {
       return english.trIncludesFileIn(name);
-   }
-   virtual QByteArray trDateTime(int year, int month, int day, int dayOfWeek,
-                                 int hour, int minutes, int seconds,
-                                 bool includeTime) {
-      return english.trDateTime(year, month, day, dayOfWeek, hour, minutes, seconds, includeTime);
-   }
+   }  
 };
 
 /** Adapter class for languages that only contain translations up to

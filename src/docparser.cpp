@@ -1996,40 +1996,43 @@ DocXRefItem::DocXRefItem(DocNode *parent, int id, const char *key) :
 bool DocXRefItem::parse()
 {
    QByteArray listName;
-   auto refList = Doxygen::xrefLists->find(m_key);
 
-   if (refList != Doxygen::xrefLists->end() && 
-                  ((m_key != "todo"       || Config_getBool("GENERATE_TODOLIST")) &&
-                   (m_key != "test"       || Config_getBool("GENERATE_TESTLIST")) &&
-                   (m_key != "bug"        || Config_getBool("GENERATE_BUGLIST"))  &&
-                   (m_key != "deprecated" || Config_getBool("GENERATE_DEPRECATEDLIST"))) ) {
+   if (Doxygen::xrefLists->contains(m_key)) {
 
-      // either not a built-in list or the list is enabled
-      RefItem *item = refList->getRefItem(m_id);
+      auto &refList = (*Doxygen::xrefLists)[m_key];
+     
+      if ( (m_key != "todo"       || Config_getBool("GENERATE_TODOLIST")) &&
+           (m_key != "test"       || Config_getBool("GENERATE_TESTLIST")) &&
+           (m_key != "bug"        || Config_getBool("GENERATE_BUGLIST"))  &&
+           (m_key != "deprecated" || Config_getBool("GENERATE_DEPRECATEDLIST")) ) {
 
-      assert(item != 0);
+         // either not a built-in list or the list is enabled
+         RefItem *item = refList.getRefItem(m_id);
+         assert(item != 0);
 
-      if (item) {
-         if (s_memberDef && ! s_memberDef->name().isEmpty() && s_memberDef->name().at(0) == '@') {
-            m_file   = "@";  // can not cross reference anonymous enum
-            m_anchor = "@";
-
-         } else {
-            m_file   = convertNameToFile(refList->listName(), false, true).toUtf8();
-            m_anchor = item->listAnchor;
+         if (item) {
+            if (s_memberDef && ! s_memberDef->name().isEmpty() && s_memberDef->name().at(0) == '@') {
+               m_file   = "@";  // can not cross reference anonymous enum
+               m_anchor = "@";
+   
+            } else {
+               m_file   = convertNameToFile(refList.listName(), false, true).toUtf8();
+               m_anchor = item->listAnchor;
+            }
+   
+            m_title  = refList.sectionTitle();
+          
+            if (! item->text.isEmpty()) {
+               docParserPushContext();
+               internalValidatingParseDoc(this, m_children, item->text);
+               docParserPopContext();
+            }
          }
 
-         m_title  = refList->sectionTitle();
-       
-         if (! item->text.isEmpty()) {
-            docParserPushContext();
-            internalValidatingParseDoc(this, m_children, item->text);
-            docParserPopContext();
-         }
+         return true;
       }
-
-      return true;
    }
+
    return false;
 }
 

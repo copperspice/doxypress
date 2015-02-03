@@ -1794,36 +1794,7 @@ class TranslatorKorean : public Translator
    virtual QByteArray trIncludesFileIn(const char *name) {
       return QByteArray(name) + "의 파일 포함";
    }
-
-   /** Compiles a date string.
-    *  @param year Year in 4 digits
-    *  @param month Month of the year: 1=January
-    *  @param day Day of the Month: 1..31
-    *  @param dayOfWeek Day of the week: 1=Monday..7=Sunday
-    *  @param hour Hour of the day: 0..23
-    *  @param minutes Minutes in the hour: 0..59
-    *  @param seconds Seconds within the minute: 0..59
-    *  @param includeTime Include time in the result string?
-    */
-   virtual QByteArray trDateTime(int year, int month, int day, int dayOfWeek,
-                                 int hour, int minutes, int seconds,
-                                 bool includeTime) {
-      static const char *days[]   = { "월", "화", "수", "목", "금", "토", "일" };
-      static const char *months[] = { "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월" };
-      QByteArray sdate;
-      sdate.sprintf("%s %s %d %d", days[dayOfWeek - 1], months[month - 1], day, year);
-      if (includeTime) {
-         QByteArray stime;
-         stime.sprintf(" %.2d:%.2d:%.2d", hour, minutes, seconds);
-         sdate += stime;
-      }
-      return sdate;
-   }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.7.5
-   //////////////////////////////////////////////////////////////////////////
-
+  
    /*! Header for the page with bibliographic citations */
    virtual QByteArray trCiteReferences() {
       return "참고 문헌";
@@ -1838,10 +1809,6 @@ class TranslatorKorean : public Translator
    virtual QByteArray trDirDepGraph(const char *name) {
       return QByteArray(name) + QByteArray("에 대한 디렉토리 의존성 그래프:");
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.8.0
-   //////////////////////////////////////////////////////////////////////////
 
    /*! Detail level selector shown for hierarchical indices */
    virtual QByteArray trDetailLevel() {

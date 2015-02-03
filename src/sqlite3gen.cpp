@@ -1120,8 +1120,10 @@ static void generateSqlite3ForFile(sqlite3 *db, FileDef *fd)
    IncludeInfo *ii;
    if (fd->includeFileList()) {
       QListIterator<IncludeInfo> ili(*fd->includeFileList());
+
       for (ili.toFirst(); (ii = ili.current()); ++ili) {
-         int id_src = insertFile(db, fd->absoluteFilePath().data());
+         int id_src = insertFile(db, qPrintable(fd->absoluteFilePath()));
+
          int id_dst = insertFile(db, ii->includeName.data());
          bindIntParameter(incl_select, ":local", ii->local);
          bindIntParameter(incl_select, ":id_src", id_src);

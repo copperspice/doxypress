@@ -65,7 +65,11 @@ class RefList
    QByteArray sectionTitle() const;
 
    RefList(const char *listName, const char *pageTitle, const char *secTitle);
-   ~RefList();
+
+   RefList() : m_dictIterator(m_dict)
+   {};
+
+   ~RefList();  
 
    void insertIntoList(const char *key, RefItem *item);
    void generatePage();
@@ -79,8 +83,8 @@ class RefList
 
    QMap<QByteArray, QList<RefItem>> m_itemMap;
   
-   QHash<long, RefItem *> *m_dict;
-   QHashIterator<long, RefItem *> *m_dictIterator;
+   QHash<long, RefItem *> m_dict;
+   QHashIterator<long, RefItem *> m_dictIterator;
 };
 
 #endif

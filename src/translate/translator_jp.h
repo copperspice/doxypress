@@ -1689,34 +1689,6 @@ class TranslatorJapanese : public Translator
       return (QByteArray)name + "にあるファイルを include している";
    }
 
-   /** Compiles a date string.
-    *  @param year Year in 4 digits
-    *  @param month Month of the year: 1=January
-    *  @param day Day of the Month: 1..31
-    *  @param dayOfWeek Day of the week: 1=Monday..7=Sunday
-    *  @param hour Hour of the day: 0..23
-    *  @param minutes Minutes in the hour: 0..59
-    *  @param seconds Seconds within the minute: 0..59
-    *  @param includeTime Include time in the result string?
-    */
-   virtual QByteArray trDateTime(int year, int month, int day, int dayOfWeek,
-                                 int hour, int minutes, int seconds,
-                                 bool includeTime) {
-      static const char *days[]   = { "月", "火", "水", "木", "金", "土", "日" };
-      QByteArray sdate;
-      sdate.sprintf("%.4d年%.2d月%.2d日(%s)", year, month, day, days[dayOfWeek - 1]);
-      if (includeTime) {
-         QByteArray stime;
-         stime.sprintf(" %.2d時%.2d分%.2d秒", hour, minutes, seconds);
-         sdate += stime;
-      }
-      return sdate;
-   }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.7.5
-   //////////////////////////////////////////////////////////////////////////
-
    /*! Header for the page with bibliographic citations */
    virtual QByteArray trCiteReferences() {
       return "書誌参照";
@@ -1731,10 +1703,6 @@ class TranslatorJapanese : public Translator
    virtual QByteArray trDirDepGraph(const char *name) {
       return QByteArray(name) + " のディレクトリ依存関係図";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.8.0
-   //////////////////////////////////////////////////////////////////////////
 
    /*! Detail level selector shown for hierarchical indices */
    virtual QByteArray trDetailLevel() {

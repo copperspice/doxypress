@@ -1517,25 +1517,7 @@ class TranslatorDutch : public Translator
    virtual QByteArray trIncludesFileIn(const char *name) {
       return (QByteArray)"Includeert bestand in " + name;
    }
-   virtual QByteArray trDateTime(int year, int month, int day, int dayOfWeek,
-                                 int hour, int minutes, int seconds,
-                                 bool includeTime) {
-      static const char *days[]   = { "Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo" };
-      static const char *months[] = { "Jan", "Feb", "Maa", "Apr", "Mei", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec" };
-      QByteArray sdate;
-      sdate.sprintf("%s %d %s %d", days[dayOfWeek - 1], day, months[month - 1], year);
-      if (includeTime) {
-         QByteArray stime;
-         stime.sprintf(" %.2d:%.2d:%.2d", hour, minutes, seconds);
-         sdate += stime;
-      }
-      return sdate;
-   }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.7.5
-   //////////////////////////////////////////////////////////////////////////
-
+  
    /*! Header for the page with bibliographic citations */
    virtual QByteArray trCiteReferences() {
       return "Bibliografie";
@@ -1550,10 +1532,7 @@ class TranslatorDutch : public Translator
    virtual QByteArray trDirDepGraph(const char *name) {
       return QByteArray("Folder afhankelijkheidsgraaf voor ") + name + ":";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.8.0
-   //////////////////////////////////////////////////////////////////////////
+ 
 
    /*! Detail level selector shown for hierarchical indices */
    virtual QByteArray trDetailLevel() {

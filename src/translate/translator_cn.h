@@ -1725,29 +1725,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
    virtual QByteArray trIncludesFileIn(const char *name) {
       return (QByteArray)"在"CN_SPC + name + CN_SPC"中引用";
    }
-
-   virtual QByteArray trDateTime(int year, int month, int day, int dayOfWeek,
-                                 int hour, int minutes, int seconds,
-                                 bool includeTime) {
-      static const char *days[]   = { "一", "二", "三", "四", "五", "六", "日" };
-      static const char *months[] = { "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二" };
-
-      QByteArray sdate;
-
-      sdate.sprintf("%d年"CN_SPC"%s月"CN_SPC"%d日"CN_SPC"星期%s", year, months[month - 1], day, days[dayOfWeek - 1]);
-
-      if (includeTime) {
-         QByteArray stime;
-         stime.sprintf(" %.2d:%.2d:%.2d", hour, minutes, seconds);
-         sdate += stime;
-      }
-      return sdate;
-   }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.7.5
-   //////////////////////////////////////////////////////////////////////////
-
+ 
    /*! Header for the page with bibliographic citations */
    virtual QByteArray trCiteReferences() {
       return "参考书目";
