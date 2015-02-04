@@ -72,11 +72,17 @@ void FileName::generateDiskNames()
             }
          }
        
-         if (fd) {
-            char c = fd->m_path.at(i);
+         if (fd) {     
+            // init for safety
+            char letter = '\0';
 
-            if (c == '/') {
-               j = i;   // remember last position of dirname
+            if ( fd->m_path.length() > i) {
+               letter = fd->m_path.at(i);
+           
+               if (letter == '/') {
+                  // remember last position of dirname
+                  j = i;   
+               }
             }
 
             if (it != this->end()) {
@@ -90,7 +96,7 @@ void FileName::generateDiskNames()
                   if (i == fd->m_path.length()) {                     
                      found = true;
 
-                  } else if (fd->m_path[i] != c) {
+                  } else if (fd->m_path[i] != letter) {
                      found = true;
 
                   }

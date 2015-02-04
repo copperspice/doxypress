@@ -665,7 +665,8 @@ class SearchIndexMap : public StringMap<QSharedPointer<SearchDefinitionList>>
    }
 
  private:
-   int compareValues(const SearchDefinitionList *md1, const SearchDefinitionList *md2) const {
+   int compareValues(const QSharedPointer<SearchDefinitionList> &md1, 
+                  const QSharedPointer<SearchDefinitionList> &md2) const override{
       QByteArray n1 = md1->first()->localName();
       QByteArray n2 = md2->first()->localName();
 

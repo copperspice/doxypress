@@ -25,7 +25,7 @@
 #include <outputlist.h>
 #include <util.h>
 
-static int compItems(const ClassDef *c1, const ClassDef *c2)
+static int compItems(const QSharedPointer<ClassDef> &c1, const QSharedPointer<ClassDef> &c2)
 {
    static bool b = Config_getBool("SORT_BY_SCOPE_NAME");
 
@@ -36,11 +36,10 @@ static int compItems(const ClassDef *c1, const ClassDef *c2)
    }
 }
 
-int ClassSDict::compareValues(const ClassDef *item1, const ClassDef *item2) const
+int ClassSDict::compareValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const
 {
    return compItems(item1, item2);
 }
-
 
 bool ClassSDict::declVisible(const ClassDef::CompoundType *filter) const
 {
@@ -56,7 +55,7 @@ bool ClassSDict::declVisible(const ClassDef::CompoundType *filter) const
          if (cd->name().indexOf('@') == -1 && (filter == 0 || *filter == cd->compoundType()) ) {
             bool isLink = cd->isLinkable();
 
-            if (isLink || (! hideUndocClasses && (!cd->isLocal() || extractLocalClasses) ) ) {
+            if (isLink || (! hideUndocClasses && (! cd->isLocal() || extractLocalClasses) ) ) {
                return true;
             }
          }
@@ -78,8 +77,7 @@ void ClassSDict::writeDeclaration(OutputList &ol, const ClassDef::CompoundType *
       bool found = false;
 
       for (sdi.toFirst(); (cd = sdi.current()); ++sdi) {
-         //printf("  ClassSDict::writeDeclaration for %s\n",cd->name().data());
-
+         
          if (cd->name().indexOf('@') == -1 && ! cd->isExtension() && (cd->protection() != Private || extractPrivate) &&
                (filter == 0 || *filter == cd->compoundType()) ) {
             cd->writeDeclarationLink(ol, found, header, localNames);
@@ -123,8 +121,6 @@ void ClassSDict::writeDocumentation(OutputList &ol, Definition *container)
       }
    }
 }
-
-//-------------------------------------------
 
 void GenericsSDict::insert(const QByteArray &key, QSharedPointer<ClassDef> cd)
 {

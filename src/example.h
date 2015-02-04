@@ -40,7 +40,7 @@ class ExampleSDict : public StringMap<QSharedPointer<Example>>
    ~ExampleSDict() {}
 
  private:
-   int compareValues(const Example *item1, const Example *item2) const {
+   int compareValues(const Example *item1, const Example *item2) const override {
       return qstricmp(item1->name, item2->name);
    }
 };

@@ -1906,7 +1906,7 @@ void ClassDef::writeDocumentationForInnerClasses(OutputList &ol)
          if (innerCd->isLinkableInProject() && innerCd->templateMaster() == 0 &&
                protectionLevelVisible(innerCd->protection()) && !innerCd->isEmbeddedInOuterScope() ) {
 
-            msg("Generating docs for nested compound %s...\n", qPrint(innerCd->name()));
+            msg("Generating docs for nested compound %s\n", qPrint(innerCd->name()));
             innerCd->writeDocumentation(ol);
             innerCd->writeMemberList(ol);
          }

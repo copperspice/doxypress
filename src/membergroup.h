@@ -140,7 +140,7 @@ class MemberGroupSDict : public LongMap<QSharedPointer<MemberGroup>>
    ~MemberGroupSDict() {}
 
  private:
-   int compareValues(const MemberGroup *item1, const MemberGroup *item2) const {
+   int compareValues(const MemberGroup *item1, const MemberGroup *item2) const override {
       return item1->groupId() - item2->groupId();
    }
 };

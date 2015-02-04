@@ -401,7 +401,7 @@ class DefinitionList : public QList<QSharedPointer<Definition>>, public Definiti
       return TypeSymbolList;
    }
 
-   int compareValues(QSharedPointer<const Definition> item1, QSharedPointer<const Definition> item2) const {
+   int compareValues(const QSharedPointer<Definition> &item1, const QSharedPointer<Definition> &item2) const {
       return qstricmp(item1->name(), item2->name());
    }
 

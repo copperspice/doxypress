@@ -189,7 +189,7 @@ class MemberSDict : public StringMap<QSharedPointer<MemberDef>>
    virtual ~MemberSDict() {}
 
  private:
-   int compareValues(QSharedPointer<MemberDef> item1, QSharedPointer<MemberDef> item2) const;
+   int compareValues(const QSharedPointer<MemberDef> &item1, const QSharedPointer<MemberDef> &item2) const override;
 };
 
 

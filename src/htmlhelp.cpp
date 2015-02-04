@@ -52,7 +52,7 @@ class IndexFieldSDict : public StringMap<QSharedPointer<IndexField>>
    ~IndexFieldSDict() {}
 
  private:
-   int compareValues(const IndexField *item1, const IndexField *item2) const {
+   int compareValues(const IndexField *item1, const IndexField *item2) const override {
       return item1->name.compare(item2->name, Qt::CaseInsensitive);
    }
 };

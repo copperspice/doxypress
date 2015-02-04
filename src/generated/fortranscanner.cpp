@@ -60647,7 +60647,7 @@ static void parseMain(const char *fileName, const char *fileBuf, Entry *rt, Fort
 
       yyLineNr = 1 ;
       yyFileName = fileName;
-      msg("Parsing file %s...\n", yyFileName.data());
+      msg("Parsing file %s\n", yyFileName.data());
 
       startScope(rt); // implies current_root = rt
       initParser();

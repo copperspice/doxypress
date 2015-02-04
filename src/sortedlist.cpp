@@ -29,7 +29,7 @@
 // BaseClassList --> SortedList<BaseClassDef *>
 // BaseClassListIterator --> QListIterator<BaseClassDef *>
 
-int compareValues(const BaseClassDef *item1, const BaseClassDef *item2) 
+int compareListValues(const BaseClassDef *item1, const BaseClassDef *item2) 
 {
    QSharedPointer<const ClassDef> c1 = item1->classDef;
    QSharedPointer<const ClassDef> c2 = item2->classDef;
@@ -45,7 +45,7 @@ int compareValues(const BaseClassDef *item1, const BaseClassDef *item2)
 
 // ClassList --> SortedList<ClassDef *>
 // ClassListIterator --> QListIterator<ClassDef *>
-int compareValues(const ClassDef *item1, const ClassDef *item2)
+int compareListValues(const ClassDef *item1, const ClassDef *item2)
 {
    static bool b = Config_getBool("SORT_BY_SCOPE_NAME");
 
@@ -59,21 +59,21 @@ int compareValues(const ClassDef *item1, const ClassDef *item2)
 }
 
 // DirList ->  SortedList<DirDef *>
-int compareValues(QSharedPointer<DirDef> item1, QSharedPointer<DirDef> item2)
+int compareListValues(QSharedPointer<DirDef> item1, QSharedPointer<DirDef> item2)
 {
     return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
 }
 
 
 // DotNodeList --> SortedList<DotNode *>
-int compareValues(const DotNode *item1, const DotNode *item2) 
+int compareListValues(const DotNode *item1, const DotNode *item2) 
 {
    return qstricmp(item1->label(), item2->label());
 }
 
 
 // FileList 
-int compareValues(QSharedPointer<FileDef> md1, QSharedPointer<FileDef> md2) 
+int compareListValues(QSharedPointer<FileDef> md1, QSharedPointer<FileDef> md2) 
 {
    return qstricmp(md1->name(), md2->name());
 }
@@ -81,7 +81,7 @@ int compareValues(QSharedPointer<FileDef> md1, QSharedPointer<FileDef> md2)
 
 // FileNameList --> SortedList<FileName *>
 // FileNameListIterator -->  QListIterator<FileName *>
-int compareValues(const FileName *item1, const FileName *item2)
+int compareListValues(const FileName *item1, const FileName *item2)
 {
    int retval;
 
@@ -100,7 +100,7 @@ int compareValues(const FileName *item1, const FileName *item2)
 //   GroupList --> SortedList<GroupDef *>
 //   GroupListIterator --> QListIterator<GroupDef *>
 
-int compareValues(QSharedPointer<GroupDef> item1, QSharedPointer<GroupDef> item2) 
+int compareListValues(QSharedPointer<GroupDef> item1, QSharedPointer<GroupDef> item2) 
 {
    return qstrcmp(item1->groupTitle(), item2->groupTitle());
 }
@@ -108,7 +108,7 @@ int compareValues(QSharedPointer<GroupDef> item1, QSharedPointer<GroupDef> item2
 
 // MemberList
 
-int compareValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2)
+int compareListValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2)
 {
    static bool sortConstructorsFirst = Config_getBool("SORT_MEMBERS_CTORS_1ST");
 
@@ -135,7 +135,7 @@ int compareValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2)
 
  
 // sort list based on url
-int compareValues(const NavIndexEntry *item1, const NavIndexEntry *item2)
+int compareListValues(const NavIndexEntry *item1, const NavIndexEntry *item2)
 {  
    return qstrcmp(item1->url, item2->url);  
 }
@@ -143,7 +143,7 @@ int compareValues(const NavIndexEntry *item1, const NavIndexEntry *item2)
 
 // OutputNameList -->  SortedList<FileList *>
 
-int compareValues(const FileList *item1, const FileList *item2) 
+int compareListValues(const FileList *item1, const FileList *item2) 
 {
    return qstricmp(item1->path(), item2->path());
 }

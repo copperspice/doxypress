@@ -31,30 +31,30 @@ struct LayoutDocEntry {
    virtual ~LayoutDocEntry() {}
 
    enum Kind {
-      // Generic items for all pages
+      // Generic items for all pages 0
       MemberGroups,
       MemberDeclStart, MemberDeclEnd, MemberDecl,
       MemberDefStart, MemberDefEnd, MemberDef,
       BriefDesc, DetailedDesc,
       AuthorSection,
 
-      // Class specific items
+      // Class specific items  10
       ClassIncludes, ClassInlineClasses,
       ClassInheritanceGraph, ClassNestedClasses,
       ClassCollaborationGraph, ClassAllMembersLink,
       ClassUsedFiles,
 
-      // Namespace specific items
+      // Namespace specific items   17
       NamespaceNestedNamespaces, NamespaceNestedConstantGroups,
       NamespaceClasses, NamespaceInlineClasses,
 
-      // File specific items
+      // File specific items  21
       FileClasses, FileNamespaces, FileConstantGroups,
       FileIncludes, FileIncludeGraph,
       FileIncludedByGraph, FileSourceLink,
       FileInlineClasses,
 
-      // Group specific items
+      // Group specific items   29
       GroupClasses, GroupInlineClasses, GroupNamespaces,
       GroupDirs, GroupNestedGroups, GroupFiles,
       GroupGraph, GroupPageDocs,
@@ -63,6 +63,7 @@ struct LayoutDocEntry {
       DirSubDirs, DirFiles, DirGraph
 
    };
+
    virtual Kind kind() const = 0;
 };
 
@@ -70,17 +71,21 @@ struct LayoutDocEntry {
 struct LayoutDocEntrySimple : LayoutDocEntry {
  public:
    LayoutDocEntrySimple(Kind k) : m_kind(k) {}
+
    Kind kind() const {
       return m_kind;
    }
+
  private:
    Kind m_kind;
 };
 
 struct LayoutDocEntrySection: public LayoutDocEntrySimple {
-   LayoutDocEntrySection(Kind k, const QByteArray &tl) :
-      LayoutDocEntrySimple(k), m_title(tl) {}
+   LayoutDocEntrySection(Kind k, const QByteArray &tl) 
+      : LayoutDocEntrySimple(k), m_title(tl) {}
+
    QByteArray title(SrcLangExt lang) const;
+
  private:
    QByteArray m_title;
 };

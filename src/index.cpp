@@ -1578,7 +1578,7 @@ class UsedIndexLetters : public LongMap<uint>
    }
 
  private:
-   int compareValues( const uint *p1, const uint *p2) const {
+   int compareValues( const uint *p1, const uint *p2) const overide {
       return (int) * p1 - (int) * p2; 
    }
 };

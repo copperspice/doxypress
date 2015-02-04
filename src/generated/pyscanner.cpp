@@ -4674,7 +4674,7 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
       yyFileName = fileName;
 
       //setContext();
-      msg("Parsing file %s...\n", yyFileName.data());
+      msg("Parsing file %s\n", yyFileName.data());
 
       QFileInfo fi(fileName);
       g_moduleScope = findPackageScope(fileName);

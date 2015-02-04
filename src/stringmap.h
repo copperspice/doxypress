@@ -77,7 +77,7 @@ class StringMap
       return m_dict.count();
    }
 
-   int compareValues(const T &item1, const T &item2) const {
+   virtual int compareValues(const T &item1, const T &item2) const {
 
       if (item1 < item2) {
          return -1;
@@ -182,21 +182,10 @@ class StringMap
       /*! Create an iterator given the dictionary. */
       Iterator(const StringMap<T> &dict) {
 
-         QList<T> temp1 = dict.m_dict.values();
-
-         QList<T> temp2 = temp1;
-         std::sort(temp2.begin(), temp2.end(), [&dict](const T &v1, const T &v2){ return dict.compareValues(v1, v2) < 0; } );
-
-         if (temp1 != temp2) {
-            std::string msg = "StringMap::Iterator Key and Value did not agree, possible sorting issue";    
-            msg += typeid(T).name();
-
-        //    throw std::runtime_error(msg);
-         }   
-
-         // save m_list
-         m_list = temp2;
-         m_li   = m_list.begin();   
+         m_list = dict.m_dict.values();        
+         std::sort(m_list.begin(), m_list.end(), [&dict](const T &v1, const T &v2){ return dict.compareValues(v1, v2) < 0; } );
+                        
+         m_li = m_list.begin();   
       }
 
       /*! Destroys the dictionary */
@@ -297,8 +286,7 @@ class LongMap
       m_dict.clear();
    }
 
-   int compareValues(const T &item1, const T &item2) const {
-
+   virtual int compareValues(const T &item1, const T &item2) const {
       if (item1 < item2) {
          return -1;
       }
@@ -360,21 +348,10 @@ class LongMap
       /*! Create an iterator given the dictionary. */
       Iterator(const LongMap<T> &dict) {
 
-         QList<T> temp1 = dict.m_dict.values();
+         m_list = dict.m_dict.values();         
+         std::sort(m_list.begin(), m_list.end(), [&dict](const T &v1, const T &v2){ return dict.compareValues(v1, v2) < 0; } );
 
-         QList<T> temp2 = temp1;
-         std::sort(temp2.begin(), temp2.end(), [&dict](const T &v1, const T &v2){ return dict.compareValues(v1, v2) < 0; } );
-
-         if (temp1 != temp2) {
-            std::string msg = "LongMap::Iterator Key and Value are not the same data "; 
-            msg += typeid(T).name();
-
-            throw std::runtime_error(msg);
-         }        
-
-         // save m_list
-         m_list = temp2;
-         m_li   = m_list.begin();
+          m_li = m_list.begin();
       }
 
       /*! Destroys the dictionary */

@@ -538,7 +538,7 @@ void loadStylesheet(const char *name, QHash<QString, StyleData> &dict)
       err("Can't open RTF style sheet file %s. Using defaults.\n", name);
       return;
    }
-   msg("Loading RTF style sheet %s...\n", name);
+   msg("Loading RTF style sheet %s\n", name);
 
    static const QRegExp seperator("[ \t]*=[ \t]*");
    uint lineNr = 1;
@@ -593,7 +593,7 @@ void loadExtensions(const char *name)
       err("Can not open RTF extensions file %s. Using defaults.\n", name);
       return;
    }
-   msg("Loading RTF extensions %s...\n", name);
+   msg("Loading RTF extensions %s\n", name);
 
    static const QRegExp separator("[ \t]*=[ \t]*");
    uint lineNr = 1;

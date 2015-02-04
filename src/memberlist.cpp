@@ -932,7 +932,7 @@ void MemberList::writeTagFile(QTextStream &tagFile)
    }
 }
 
-int MemberSDict::compareValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2) const
+int MemberSDict::compareValues(const QSharedPointer<MemberDef> &c1, const QSharedPointer<MemberDef> &c2) const
 {
    int cmp = qstricmp(c1->name(), c2->name());
 

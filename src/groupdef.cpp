@@ -942,14 +942,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
    bool first = true;
    SrcLangExt lang = getLanguage();
    
-   auto sortedList = LayoutDocManager::instance().docEntries(LayoutDocManager::Group);
-
-
-   // sort the list now    broom check
-
-
-  
-   for (auto lde : sortedList) {
+   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group) ) {
 
       if ((lde->kind() == LayoutDocEntry::GroupClasses && classSDict->declVisible()) ||
             (lde->kind() == LayoutDocEntry::GroupNamespaces && namespaceSDict->declVisible()) ||
@@ -981,6 +974,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
+
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
          QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 

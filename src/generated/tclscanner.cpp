@@ -5043,7 +5043,7 @@ void TclLanguageScanner::parseInput(const char *fileName,
    }
    printlex(tclscannerYY_flex_debug, TRUE, __FILE__, fileName);
 
-   msg("Parsing %s...\n", fileName);
+   msg("Parsing %s\n", fileName);
    groupEnterFile(fileName, tclscannerYYlineno);
 
    tcl_init();
