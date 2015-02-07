@@ -41,7 +41,7 @@ class FileName : public FileList
    void generateDiskNames();
 
  private:
-   int compareValues(const FileDef *item1, const FileDef *item2) const;
+   int compareListValues(const FileDef *item1, const FileDef *item2) const;
 
    QByteArray name;
    QByteArray fName;

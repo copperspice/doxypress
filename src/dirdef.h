@@ -170,7 +170,7 @@ class FilePairDict : public StringMap<QSharedPointer<FilePair>>
    FilePairDict() : StringMap<QSharedPointer<FilePair>>() {}
 
  private:
-   int compareValues(const FilePair *item1, const FilePair *item2) const override;
+   int compareMapValues(const QSharedPointer<FilePair> &item1, const QSharedPointer<FilePair> &item2) const override;
 };
 
 /** Usage information of a directory. */
@@ -235,7 +235,7 @@ class DirSDict : public StringMap<QSharedPointer<DirDef>>
  public:
    DirSDict() : StringMap<QSharedPointer<DirDef>>() {}
 
-   int compareValues(const QSharedPointer<DirDef> &item1, const QSharedPointer<DirDef> &item2) const override {
+   int compareMapValues(const QSharedPointer<DirDef> &item1, const QSharedPointer<DirDef> &item2) const override {
       return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
    }
 };

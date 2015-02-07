@@ -27,7 +27,7 @@ if OSTYPE_WIN
 endif
 
 # target app name
-bin_PROGRAMS = CS_Doxygen
+bin_PROGRAMS = DoxyPress
 
 # copy required CopperSpice and gcc files for deployment
 .PHONY: deploy
@@ -54,10 +54,10 @@ endif
 VPATH = ../
 
 # linking
-CS_Doxygen_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs)) -lole32
+DoxyPress_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs)) -lole32
 
 
-CS_Doxygen_SOURCES = \
+DoxyPress_SOURCES = \
    src/doxy_work.cpp \
    src/doxy_globals.cpp \
    src/doxy_setup.cpp \
@@ -162,10 +162,10 @@ CS_Doxygen_SOURCES = \
 #5   src/perlmodgen.cpp
 #6   src/dbusxmlscanner.cpp
 
-RESOURCES = cs_doxygen.qrc
+RESOURCES = doxypress.qrc
 
 # use wilcard to obtain just the dependency list
-qrc_cs_doxygen.cpp: cs_doxygen.qrc   $(wildcard ../resources/*)
+qrc_doxypress.cpp: doxypress.qrc   $(wildcard ../resources/*)
 
 # required to compile qrc
-nodist_CS_Doxygen_SOURCES=qrc_cs_doxygen.cpp
+nodist_DoxyPress_SOURCES=qrc_doxypress.cpp

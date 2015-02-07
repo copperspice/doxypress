@@ -18,7 +18,7 @@
 #ifndef DOXY_BUILD_INFO_H_IN
 #define DOXY_BUILD_INFO_H_IN
 
-//  CS Doxygen Version  "1.0.0"
+// DoxyPress Version  "1.0.0"
 constexpr const char *versionString = "@PACKAGE_VERSION@";
 
 #endif

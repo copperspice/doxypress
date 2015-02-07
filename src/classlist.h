@@ -47,7 +47,7 @@ class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
    bool declVisible(const ClassDef::CompoundType *filter = 0) const;
 
  private:
-   int compareValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const override;
+   int compareMapValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const override;
 };
 
 class GenericsSDict

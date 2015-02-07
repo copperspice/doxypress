@@ -47,7 +47,7 @@ class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
    bool declVisible() const;
 
  private:
-   int compareValues(const NamespaceDef *item1, const NamespaceDef *item2) const override;       
+   int compareMapValues(const QSharedPointer<NamespaceDef> &item1, const QSharedPointer<NamespaceDef> &item2) const override;       
 };
 
 

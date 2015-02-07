@@ -827,14 +827,14 @@ void HtmlGenerator::writeHeaderFile(QFile &file)
 {
    QTextStream t(&file);
 
-   t << "<!-- HTML header for CS Doxygen " << versionString << "-->" << endl;
+   t << "<!-- HTML header for DoxyPress " << versionString << "-->" << endl;
    t << ResourceMgr::instance().getAsString("html/header.html");
 }
 
 void HtmlGenerator::writeFooterFile(QFile &file)
 {
    QTextStream t(&file);
-   t << "<!-- HTML footer for CS Doxygen " << versionString << "-->" <<  endl;
+   t << "<!-- HTML footer for DoxyPress " << versionString << "-->" <<  endl;
    t << ResourceMgr::instance().getAsString("html/footer.html");
 }
 
@@ -859,7 +859,7 @@ void HtmlGenerator::startFile(const char *name, const char *, const char *title)
    lastFile = fileName;
    m_textStream << substituteHtmlKeywords(g_header, convertToHtml(filterTitle(title)), relPath);
 
-   m_textStream << "<!-- " << theTranslator->trGeneratedBy() << " CS Doxygen " << versionString << " -->" << endl;
+   m_textStream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress " << versionString << " -->" << endl;
    
    static bool searchEngine = Config_getBool("SEARCHENGINE");
 
@@ -2394,7 +2394,7 @@ void HtmlGenerator::writeSearchPage()
 
       t_stream << substituteHtmlKeywords(g_header, "Search", "");
 
-      t_stream << "<!-- " << theTranslator->trGeneratedBy() << " CS Doxygen "
+      t_stream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress "
         << versionString << " -->" << endl;
       t_stream << "<script type=\"text/javascript\">\n";
       t_stream << "var searchBox = new SearchBox(\"searchBox\", \""
@@ -2445,7 +2445,7 @@ void HtmlGenerator::writeExternalSearchPage()
 
       t_stream << substituteHtmlKeywords(g_header, "Search", "");
 
-      t_stream << "<!-- " << theTranslator->trGeneratedBy() << " CS Doxygen "
+      t_stream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress "
         << versionString << " -->" << endl;
       t_stream << "<script type=\"text/javascript\">\n";
       t_stream << "var searchBox = new SearchBox(\"searchBox\", \""

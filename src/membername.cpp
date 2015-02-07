@@ -78,7 +78,7 @@ MemberNameIterator::MemberNameIterator(const MemberName &mnlist)
 {
 }
 
-int MemberNameSDict::compareValues(const MemberName *n1, const MemberName *n2) const
+int MemberNameSDict::compareMapValues(const QSharedPointer<MemberName> &n1, const QSharedPointer<MemberName> &n2) const
 {
    return qstricmp(n1->memberName() + getPrefixIndex(n1->memberName()), n2->memberName() + getPrefixIndex(n2->memberName()) );
 }

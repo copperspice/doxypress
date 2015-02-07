@@ -431,7 +431,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             break;
           
          case DOXY_VERSION:
-            msg("\nCS Doxygen Version: %s\n", versionString);
+            msg("\nDoxyPress Version: %s\n", versionString);
 
             cleanUpDoxygen();
             exit(0);
@@ -505,7 +505,7 @@ void readConfiguration(struct CommandLine cmdArgs)
 /* BROOM - json config file 
 
    if (! Config_Json::parseConfig(cmdArgs.configName) ) {
-      err("Unable to open or read CS Doxygen configuration file %s\n", qPrintable(cmdArgs.configName));
+      err("Unable to open or read DoxyPress configuration file %s\n", qPrintable(cmdArgs.configName));
 
       cleanUpDoxygen();
       exit(1);
@@ -677,7 +677,7 @@ bool Doxy_Setup::openOutputFile(const QString &outFile, QFile &f)
 void Doxy_Setup::usage()
 {
    msg("\n");
-   msg("CS Doxygen: Version %s\n", versionString);
+   msg("DoxyPress: Version %s\n", versionString);
 
    msg("\n");
    msg("Generate documentation using an existing configuration file:\n");   

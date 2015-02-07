@@ -122,7 +122,7 @@ void FileName::generateDiskNames()
    }
 }
 
-int FileName::compareValues(const FileDef *f1, const FileDef *f2) const
+int FileName::compareListValues(const FileDef *f1, const FileDef *f2) const
 {
    return qstricmp(f1->fileName(), f2->fileName());
 }

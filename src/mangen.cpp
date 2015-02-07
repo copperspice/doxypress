@@ -183,7 +183,7 @@ void ManGenerator::endTitleHead(const char *, const char *name)
    }
 
    if (Config_getString("PROJECT_NAME").isEmpty()) {
-      m_textStream << "CS Doxygen";
+      m_textStream << "DoxyPress";
 
    } else {
       m_textStream << Config_getString("PROJECT_NAME");

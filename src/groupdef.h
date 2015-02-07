@@ -221,7 +221,7 @@ class GroupSDict : public StringMap<QSharedPointer<GroupDef>>
    virtual ~GroupSDict() {}
 
  private:
-   int compareValues(const QSharedPointer<GroupDef> &item1, const QSharedPointer<GroupDef> &item2) const override {
+   int compareMapValues(const QSharedPointer<GroupDef> &item1, const QSharedPointer<GroupDef> &item2) const override {
       return qstrcmp(item1->groupTitle(), item2->groupTitle());
    }
 };

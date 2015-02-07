@@ -1878,13 +1878,10 @@ bool MemberDef::isDetailedSectionLinkable() const
                                  isFriend() &&
                                  (m_impl->type == "friend class" ||
                                   m_impl->type == "friend struct" ||
-                                  m_impl->type == "friend union"
-                                 )
-                                );
-
+                                  m_impl->type == "friend union") );
 
    bool result = ((docFilter && staticFilter && privateFilter && friendCompoundFilter && !isHidden()));
-   //printf("%s::isDetailedSectionLinkable: %d\n",name().data(),result);
+  
    return result;
 }
 
@@ -1893,216 +1890,273 @@ bool MemberDef::isDetailedSectionVisible(bool inGroup, bool inFile) const
    static bool separateMemPages = Config_getBool("SEPARATE_MEMBER_PAGES");
    static bool inlineSimpleStructs = Config_getBool("INLINE_SIMPLE_STRUCTS");
    static bool hideUndocMembers = Config_getBool("HIDE_UNDOC_MEMBERS");
+
    bool groupFilter = getGroupDef() == 0 || inGroup || separateMemPages;
    bool fileFilter  = getNamespaceDef() == 0 || !inFile;
+
    bool simpleFilter = (hasBriefDescription() || !hideUndocMembers) && inlineSimpleStructs &&
                        getClassDef() != 0 && getClassDef()->isSimple();
 
-   bool visible = isDetailedSectionLinkable() && groupFilter && fileFilter &&
-                  !isReference();
+   bool visible = isDetailedSectionLinkable() && groupFilter && fileFilter && ! isReference();
    bool result = visible || simpleFilter;
-   //printf("%s::isDetailedSectionVisble: %d groupFilter=%d fileFilter=%d\n",
-   //    name().data(),result,groupFilter,fileFilter);
+   
    return result;
 }
 
 void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container) const
 {
-   static bool inlineInfo = Config_getBool("INLINE_INFO");
+   static bool isInlineInfo = Config_getBool("INLINE_INFO");
+   bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
 
    Specifier lvirt = virtualness();
-   if ((!isObjCMethod() || isOptional() || isRequired()) && (protection() != Public || lvirt != Normal ||
+   SrcLangExt lang = getLanguage();      
+  
+   if  (true) {
+
+
+/*
+      ( (! isObjCMethod() || isOptional() || isRequired()) && 
+         (protection() != Public || lvirt != Normal ||
           isFriend() || isRelated() || (isInline() && inlineInfo) || isSignal() || isSlot() || isStatic() ||
           (m_impl->classDef && m_impl->classDef != container && container->definitionType() == TypeClass) ||
-          (m_impl->memSpec & ~Entry::Inline) != 0 )
-      ) {
+          (m_impl->memSpec & ~Entry::Inline) != 0 ) ) {
+*/
 
-      // write the member specifier list
-      //ol.writeLatexSpacing();
-      //ol.startTypewriter();
-      //ol.docify(" [");
-
-      SrcLangExt lang = getLanguage();      
-      bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
+     
       
       if (isFriend()) {
          sl.append("friend");
-
+   
       } else if (isRelated()) {
          sl.append("related");
-
+     
       } else {
-         if      (Config_getBool("INLINE_INFO") && isInline()) {
+
+         if (isInlineInfo && isInline()) {
             sl.append("inline");
          }
-         if      (isExplicit()) {
+
+         if (isDeprecated()) {
+            sl.append("deprecated");
+         }
+
+         if (isExplicit()) {
             sl.append("explicit");
          }
-         if      (isMutable()) {
+
+         if (isMutable()) {
             sl.append("mutable");
          }
-         if      (isStatic()) {
+
+         if (isStatic()) {
             sl.append("static");
          }
-         if      (isGettable()) {
+
+         if (isGettable()) {
             sl.append("get");
          }
-         if      (isProtectedGettable()) {
+
+         if (isProtectedGettable()) {
             sl.append("protected get");
          }
-         if      (isSettable()) {
+
+         if (isSettable()) {
             sl.append("set");
          }
-         if      (isProtectedSettable()) {
+
+         if (isProtectedSettable()) {
             sl.append("protected set");
          }
+
          if (extractPrivate) {
-            if    (isPrivateGettable()) {
+
+            if (isPrivateGettable()) {
                sl.append("private get");
             }
-            if    (isPrivateSettable()) {
+            
+            if (isPrivateSettable()) {
                sl.append("private set");
             }
          }
-         if      (isAddable()) {
+
+         if (isAddable()) {
             sl.append("add");
          }
-         if      (!isUNOProperty() && isRemovable()) {
+
+         if (! isUNOProperty() && isRemovable()) {
             sl.append("remove");
          }
-         if      (isRaisable()) {
+
+         if (isRaisable()) {
             sl.append("raise");
          }
-         if      (isReadable()) {
+
+         if (isReadable()) {
             sl.append("read");
          }
-         if      (isWritable()) {
+
+         if (isWritable()) {
             sl.append("write");
          }
-         if      (isFinal()) {
+
+         if (isFinal()) {
             sl.append("final");
          }
-         if      (isAbstract()) {
+
+         if (isAbstract()) {
             sl.append("abstract");
          }
-         if      (isOverride()) {
+
+         if (isOverride()) {
             sl.append("override");
          }
-         if      (isInitonly()) {
+
+         if (isInitonly()) {
             sl.append("initonly");
          }
-         if      (isSealed()) {
+
+         if (isSealed()) {
             sl.append("sealed");
          }
-         if      (isNew()) {
+
+         if (isNew()) {
             sl.append("new");
          }
-         if      (isOptional()) {
+
+         if (isOptional()) {
             sl.append("optional");
          }
-         if      (isRequired()) {
+
+         if (isRequired()) {
             sl.append("required");
          }
 
-         if      (isNonAtomic()) {
+         if (isNonAtomic()) {
             sl.append("nonatomic");
+
          } else if (isObjCProperty()) {
             sl.append("atomic");
+
          }
 
          // mutual exclusive Objective 2.0 property attributes
-         if      (isAssign()) {
+         if (isAssign()) {
             sl.append("assign");
+
          } else if (isCopy()) {
             sl.append("copy");
+
          } else if (isRetain()) {
             sl.append("retain");
+
          } else if (isWeak()) {
             sl.append("weak");
+
          } else if (isStrong()) {
             sl.append("strong");
+
          } else if (isUnretained()) {
             sl.append("unsafe_unretained");
+
          }
 
-         if (!isObjCMethod()) {
-            if      (protection() == Protected) {
+         if (! isObjCMethod()) {
+
+            if (protection() == Protected) {
                sl.append("protected");
+
             } else if (protection() == Private) {
                sl.append("private");
+
             } else if (protection() == Package) {
                sl.append("package");
+
             }
 
-            if      (lvirt == Virtual) {
+            if (lvirt == Virtual) {
                sl.append("virtual");
+
             } else if (lvirt == Pure) {
                sl.append("pure virtual");
             }
-            if      (isSignal()) {
+
+            if (isSignal()) {
                sl.append("signal");
             }
-            if      (isSlot()) {
+
+            if (isSlot()) {
                sl.append("slot");
             }
-            if      (isDefault()) {
+
+            if (isDefault()) {
                sl.append("default");
             }
-            if      (isDelete()) {
+
+            if (isDelete()) {
                sl.append("delete");
             }
-            if      (isNoExcept()) {
+
+            if (isNoExcept()) {
                sl.append("noexcept");
             }
-            if      (isAttribute()) {
+
+            if (isAttribute()) {
                sl.append("attribute");
             }
-            if      (isUNOProperty()) {
+
+            if (isUNOProperty()) {
                sl.append("property");
             }
-            if      (isReadonly()) {
+
+            if (isReadonly()) {
                sl.append("readonly");
             }
-            if      (isBound()) {
+
+            if (isBound()) {
                sl.append("bound");
             }
-            if      (isUNOProperty() && isRemovable()) {
+
+            if (isUNOProperty() && isRemovable()) {
                sl.append("removable");
             }
-            if      (isConstrained()) {
+
+            if (isConstrained()) {
                sl.append("constrained");
             }
-            if      (isTransient()) {
+
+            if (isTransient()) {
                sl.append("transient");
             }
-            if      (isMaybeVoid()) {
+
+            if (isMaybeVoid()) {
                sl.append("maybevoid");
             }
-            if      (isMaybeDefault()) {
+
+            if (isMaybeDefault()) {
                sl.append("maybedefault");
             }
-            if      (isMaybeAmbiguous()) {
+
+            if (isMaybeAmbiguous()) {
                sl.append("maybeambiguous");
             }
-            if      (isPublished()) {
+
+            if (isPublished()) {
                sl.append("published");   // enum
             }
          }
+
          if (isObjCProperty() && isImplementation()) {
             sl.append("implementation");
          }
       }
 
-      if (m_impl->classDef &&
-            container->definitionType() == TypeClass &&
-            m_impl->classDef != container &&
-            !isRelated()
-         ) {
+      if (m_impl->classDef && container->definitionType() == TypeClass && m_impl->classDef != container && !isRelated()) {
          sl.append("inherited");
       }
    
    } else if (isObjCMethod() && isImplementation()) {
       sl.append("implementation");
+
    }
 }
 
@@ -4295,6 +4349,11 @@ bool MemberDef::isInline() const
 bool MemberDef::isExplicit() const
 {
    return (m_impl->memSpec & Entry::Explicit) != 0;
+}
+
+bool MemberDef::isDeprecated() const
+{
+   return (m_impl->memSpec & Entry::Deprecated) != 0;
 }
 
 bool MemberDef::isMutable() const

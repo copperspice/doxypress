@@ -665,8 +665,8 @@ class SearchIndexMap : public StringMap<QSharedPointer<SearchDefinitionList>>
    }
 
  private:
-   int compareValues(const QSharedPointer<SearchDefinitionList> &md1, 
-                  const QSharedPointer<SearchDefinitionList> &md2) const override{
+   int compareMapValues(const QSharedPointer<SearchDefinitionList> &md1, 
+                                    const QSharedPointer<SearchDefinitionList> &md2) const override{
       QByteArray n1 = md1->first()->localName();
       QByteArray n2 = md2->first()->localName();
 
@@ -997,7 +997,7 @@ void writeJavascriptSearchIndex()
                  " \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" << endl;
                t << "<html><head><title></title>" << endl;
                t << "<meta http-equiv=\"Content-Type\" content=\"text/xhtml;charset=UTF-8\"/>" << endl;
-               t << "<meta name=\"generator\" content=\"CS Doxygen " << versionString << "\"/>" << endl;
+               t << "<meta name=\"generator\" content=\"DoxyPress " << versionString << "\"/>" << endl;
                t << "<link rel=\"stylesheet\" type=\"text/css\" href=\"search.css\"/>" << endl;
                t << "<script type=\"text/javascript\" src=\"" << baseName << ".js\"></script>" << endl;
                t << "<script type=\"text/javascript\" src=\"search.js\"></script>" << endl;

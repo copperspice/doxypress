@@ -1919,8 +1919,9 @@ void ClassDef::writeDocumentationForInnerClasses(OutputList &ol)
 // write the list of all (inherited) members for this class
 void ClassDef::writeMemberList(OutputList &ol)
 {
-   static bool cOpt    = Config_getBool("OPTIMIZE_OUTPUT_FOR_C");
-   //static bool vhdlOpt = Config_getBool("OPTIMIZE_OUTPUT_VHDL");
+   QSharedPointer<ClassDef> self = sharedFrom(this);
+
+   static bool cOpt = Config_getBool("OPTIMIZE_OUTPUT_FOR_C");
    static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
 
    if (m_allMemberNameInfoSDict == 0 || cOpt) {
@@ -2029,7 +2030,9 @@ void ClassDef::writeMemberList(OutputList &ol)
                if ((idx & 1) == 0) {
                   ol.writeString(" class=\"even\"");
                }
+
                idx++;
+
                ol.writeString("><td class=\"entry\">");
                if (cd->isObjectiveC()) {
                   if (md->isObjCMethod()) {
@@ -2042,9 +2045,11 @@ void ClassDef::writeMemberList(OutputList &ol)
                      ol.writeString("</td><td class=\"entry\">");
                   }
                }
+
                ol.startBold();
                ol.docify(md->name());
                ol.endBold();
+
                if (!md->isObjCMethod()) {
                   if ( md->isFunction() || md->isSignal() || md->isSlot() ) {
                      ol.docify(md->argsString());
@@ -2075,6 +2080,7 @@ void ClassDef::writeMemberList(OutputList &ol)
                ol.writeString("</td>");
                memberWritten = true;
             }
+
             if (memberWritten) {
                ol.writeString("<td class=\"entry\">");
 
@@ -2084,104 +2090,21 @@ void ClassDef::writeMemberList(OutputList &ol)
                ol.writeString("</td>");
                ol.writeString("<td class=\"entry\">");
             }
+            
+            QStringList sl;
+            md->getLabels(sl, self);   
 
-            SrcLangExt lang = md->getLanguage();
+            // not needed           
+            sl.removeOne("inherited");
+                                
 
-            bool x1 = getLanguage() == SrcLangExt_IDL && (md->isOptional() || md->isAttribute() || md->isUNOProperty());
-
-            bool x2 = (prot != Public || (virt != Normal && getLanguage() != SrcLangExt_ObjC) ||
-                               md->isFriend()  || md->isRelated() || md->isExplicit() ||
-                               md->isMutable() || (md->isInline() && Config_getBool("INLINE_INFO")) ||
-                               md->isSignal()  || md->isSlot() ||  x1  || md->isStatic()  );
-
-            if ( x2 && memberWritten) {
-
-               ol.writeString("<span class=\"mlabel\">");
-               QStringList sl;
-
-               if (md->isFriend()) {
-                  sl.append("friend");
-
-               } else if (md->isRelated()) {
-                  sl.append("related");
-
-               } else {
-                  if (Config_getBool("INLINE_INFO") && md->isInline()) {
-                     sl.append("inline");
-                  }
-                  if (md->isExplicit()) {
-                     sl.append("explicit");
-                  }
-                  if (md->isMutable()) {
-                     sl.append("mutable");
-                  }
-                  if (prot == Protected) {
-                     sl.append("protected");
-                  } else if (prot == Private) {
-                     sl.append("private");
-                  } else if (prot == Package) {
-                     sl.append("package");
-                  }
-                  if (virt == Virtual && getLanguage() != SrcLangExt_ObjC) {
-                     sl.append("virtual");
-                  } else if (virt == Pure) {
-                     sl.append("pure virtual");
-                  }
-                  if (md->isStatic()) {
-                     sl.append("static");
-                  }
-                  if (md->isSignal()) {
-                     sl.append("signal");
-                  }
-                  if (md->isSlot()) {
-                     sl.append("slot");
-                  }
-                  // this is the extra member page
-                  if (md->isOptional()) {
-                     sl.append("optional");
-                  }
-                  if (md->isAttribute()) {
-                     sl.append("attribute");
-                  }
-                  if (md->isUNOProperty()) {
-                     sl.append("property");
-                  }
-                  if (md->isReadonly()) {
-                     sl.append("readonly");
-                  }
-                  if (md->isBound()) {
-                     sl.append("bound");
-                  }
-                  if (md->isRemovable()) {
-                     sl.append("removable");
-                  }
-                  if (md->isConstrained()) {
-                     sl.append("constrained");
-                  }
-                  if (md->isTransient()) {
-                     sl.append("transient");
-                  }
-                  if (md->isMaybeVoid()) {
-                     sl.append("maybevoid");
-                  }
-                  if (md->isMaybeDefault()) {
-                     sl.append("maybedefault");
-                  }
-                  if (md->isMaybeAmbiguous()) {
-                     sl.append("maybeambiguous");
-                  }
-               }
-
-               auto nextItem = sl.begin();
+            if (sl.count() > 0) {       
+               ol.writeString("<span class=\"mlabels\">");   
               
-               for (auto s : sl ) { 
-                  ++nextItem;
-
-                  ol.docify(s);                  
-
-                  if (nextItem != sl.end()) {
-                     ol.writeString("</span><span class=\"mlabel\">");
-                  }
+               for (auto s : sl)  {                  
+                  ol.writeString("<span class=\"mlabel\">");                               
+                  ol.docify(s);                                  
+                  ol.writeString("</span>");                 
                }
 
                ol.writeString("</span>");
@@ -2194,8 +2117,7 @@ void ClassDef::writeMemberList(OutputList &ol)
          }
       }
    }
-   //ol.endItemList();
-
+  
    ol.writeString("</table>");
 
    endFile(ol);

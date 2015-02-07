@@ -110,7 +110,7 @@ class LetterToIndexMap : public LongMap<QSharedPointer<T>>
    }
 
  private:
-   int compareValues(const T *l1, const T *l2) const {
+   int compareMapValues(const QSharedPointer<T> &l1, const QSharedPointer<T> &l2) const override {
       return (int)l1->letter() - (int)l2->letter();
    }
 };

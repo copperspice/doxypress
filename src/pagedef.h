@@ -113,7 +113,7 @@ class PageSDict : public StringMap<QSharedPointer<PageDef>>
    virtual ~PageSDict() {}
 
  private:
-   int compareValues(const PageDef *i1, const PageDef *i2) const override {
+   int compareMapValues(const QSharedPointer<PageDef> &i1, const QSharedPointer<PageDef> &i2) const override {
       return qstricmp(i1->name(), i2->name());
    }
 };

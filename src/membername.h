@@ -54,7 +54,7 @@ class MemberNameSDict : public StringMap<QSharedPointer<MemberName>>
    ~MemberNameSDict() {}
 
  private:
-   int compareValues(const MemberName *item1, const MemberName *item2) const override;
+   int compareMapValues(const QSharedPointer<MemberName> &item1, const QSharedPointer<MemberName> &item2) const override;
 };
 
 /** Data associated with a MemberDef in an inheritance relation. */
@@ -108,7 +108,7 @@ class MemberNameInfoSDict : public StringMap<QSharedPointer<MemberNameInfo>>
    ~MemberNameInfoSDict() {}
 
  private:
-   int compareValues(const QSharedPointer<MemberNameInfo> &item1, const QSharedPointer<MemberNameInfo> &item2) const override {
+   int compareMapValues(const QSharedPointer<MemberNameInfo> &item1, const QSharedPointer<MemberNameInfo> &item2) const override {
       return qstricmp(item1->memberName(), item2->memberName());
    }
 };

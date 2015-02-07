@@ -1122,58 +1122,78 @@ void HtmlDocVisitor::visitPre(DocSimpleSect *s)
    if (m_hide) {
       return;
    }
+
    forceEndParagraph(s);
+
    m_t << "<dl class=\"section " << s->typeString() << "\"><dt>";
+
    switch (s->type()) {
       case DocSimpleSect::See:
          m_t << theTranslator->trSeeAlso();
          break;
+
       case DocSimpleSect::Return:
          m_t << theTranslator->trReturns();
          break;
+
       case DocSimpleSect::Author:
          m_t << theTranslator->trAuthor(true, true);
          break;
+
       case DocSimpleSect::Authors:
          m_t << theTranslator->trAuthor(true, false);
          break;
+
       case DocSimpleSect::Version:
          m_t << theTranslator->trVersion();
          break;
+
       case DocSimpleSect::Since:
          m_t << theTranslator->trSince();
          break;
+
       case DocSimpleSect::Date:
          m_t << theTranslator->trDate();
          break;
+
       case DocSimpleSect::Note:
          m_t << theTranslator->trNote();
          break;
+
       case DocSimpleSect::Warning:
          m_t << theTranslator->trWarning();
          break;
+
       case DocSimpleSect::Pre:
          m_t << theTranslator->trPrecondition();
          break;
+
       case DocSimpleSect::Post:
          m_t << theTranslator->trPostcondition();
          break;
+
       case DocSimpleSect::Copyright:
          m_t << theTranslator->trCopyright();
          break;
+
       case DocSimpleSect::Invar:
          m_t << theTranslator->trInvariant();
          break;
+
       case DocSimpleSect::Remark:
          m_t << theTranslator->trRemarks();
          break;
+
       case DocSimpleSect::Attention:
          m_t << theTranslator->trAttention();
          break;
+
       case DocSimpleSect::User:
          break;
+
       case DocSimpleSect::Rcs:
          break;
+
       case DocSimpleSect::Unknown:
          break;
    }
@@ -1743,9 +1763,11 @@ void HtmlDocVisitor::visitPre(DocParamSect *s)
    if (m_hide) {
       return;
    }
+
    forceEndParagraph(s);
    QByteArray className;
    QByteArray heading;
+
    switch (s->type()) {
       case DocParamSect::Param:
          heading = theTranslator->trParameters();
@@ -1766,6 +1788,7 @@ void HtmlDocVisitor::visitPre(DocParamSect *s)
       default:
          assert(0);
    }
+
    m_t << "<dl class=\"" << className << "\"><dt>";
    m_t << heading;
    m_t << "</dt><dd>" << endl;
@@ -1877,18 +1900,23 @@ void HtmlDocVisitor::visitPre(DocXRefItem *x)
 
    forceEndParagraph(x);
    bool anonymousEnum = x->file() == "@";
-   if (!anonymousEnum) {
+
+   if (! anonymousEnum) {
       m_t << "<dl class=\"" << x->key() << "\"><dt><b><a class=\"el\" href=\""
           << x->relPath() << x->file() << Doxygen::htmlFileExtension
           << "#" << x->anchor() << "\">";
+
    } else {
       m_t << "<dl class=\"" << x->key() << "\"><dt><b>";
    }
+
    filter(x->title());
    m_t << ":";
+
    if (!anonymousEnum) {
       m_t << "</a>";
    }
+
    m_t << "</b></dt><dd>";
 }
 

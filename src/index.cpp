@@ -151,6 +151,7 @@ class MemberIndexList : public QList<MemberDef *>
       if (result == 0) {
          result = qstricmp(md1->qualifiedName(), md2->qualifiedName());
       }
+
       return result;
    }
 
@@ -444,7 +445,6 @@ static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl
    bool started = false;
    
    for (auto item : *bcl) {
-
       QSharedPointer<ClassDef> cd = item->classDef;
       
       bool b;
@@ -1290,11 +1290,13 @@ static void writeNamespaceTree(NamespaceSDict *nsDict, FTVHelp *ftv, bool rootOn
                   if (addToIndex) {
                      Doxygen::indexList->incContentsDepth();
                   }
+
                   ftv->incContentsDepth();
                   writeNamespaceTree(nd->getNamespaceSDict(), ftv, false, showClasses, addToIndex);
                   if (showClasses) {
                      writeClassTree(nd->getClassSDict(), ftv, addToIndex, false);
                   }
+
                   ftv->decContentsDepth();
                   if (addToIndex) {
                      Doxygen::indexList->decContentsDepth();
@@ -1411,8 +1413,6 @@ static void writeNamespaceIndex(OutputList &ol)
    ol.popGeneratorState();
 }
 
-//----------------------------------------------------------------------------
-
 static int countAnnotatedClasses(int *cp)
 {
    int count = 0;
@@ -1437,13 +1437,15 @@ static void writeAnnotatedClassList(OutputList &ol)
 {
    ol.startIndexList();
    
+   // broom - may need to alter the sort order for annotated.html
+
    for (auto cd : *Doxygen::classSDict) {     
       ol.pushGeneratorState();
 
       if (cd->isEmbeddedInOuterScope()) {
          ol.disable(OutputGenerator::Latex);
          ol.disable(OutputGenerator::RTF);
-      }
+      }    
 
       if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
          QByteArray type = cd->compoundTypeString();
@@ -1452,17 +1454,16 @@ static void writeAnnotatedClassList(OutputList &ol)
          ol.writeObjectLink(0, cd->getOutputFileBase(), cd->anchor(), cd->displayName().toUtf8());
          ol.endIndexKey();
 
-         bool hasBrief = !cd->briefDescription().isEmpty();
+         bool hasBrief = ! cd->briefDescription().isEmpty();
          ol.startIndexValue(hasBrief);
 
          if (hasBrief) {
-            ol.generateDoc(
-               cd->briefFile(), cd->briefLine(), cd, QSharedPointer<MemberDef>(), cd->briefDescription(true),
-               false,  // indexWords
-               false,  // isExample
-               0,     // example name
-               true,  // single line
-               true   // link from index
+            ol.generateDoc(cd->briefFile(), cd->briefLine(), cd, QSharedPointer<MemberDef>(), cd->briefDescription(true),
+               false,   // indexWords
+               false,   // isExample
+               0,       // example name
+               true,    // single line
+               true     // link from index
             );
          }
          ol.endIndexValue(cd->getOutputFileBase(), hasBrief);
@@ -1471,6 +1472,7 @@ static void writeAnnotatedClassList(OutputList &ol)
 
       ol.popGeneratorState();
    }
+
    ol.endIndexList();
 }
 
@@ -1509,8 +1511,6 @@ static QByteArray letterToLabel(uint startLetter)
    return s;
 }
 
-//----------------------------------------------------------------------------
-
 /** Special class list where sorting takes IGNORE_PREFIX into account. */
 class PrefixIgnoreClassList : public SortedList<ClassDef *>
 {
@@ -1526,9 +1526,11 @@ class PrefixIgnoreClassList : public SortedList<ClassDef *>
    }
 
  private:
-   virtual int compareValue(const ClassDef *c1, const ClassDef *c2) const {
+
+   int compareListValues(const ClassDef *c1, const ClassDef *c2) const {
       QByteArray n1 = c1->className();
       QByteArray n2 = c2->className();
+
       return qstricmp (n1.data() + getPrefixIndex(n1), n2.data() + getPrefixIndex(n2));
    }
 
@@ -1578,8 +1580,8 @@ class UsedIndexLetters : public LongMap<uint>
    }
 
  private:
-   int compareValues( const uint *p1, const uint *p2) const overide {
-      return (int) * p1 - (int) * p2; 
+   int compareMapValues(const uint &p1, const uint &p2) const override {
+      return (int)p1 - (int)p2; 
    }
 };
 
@@ -1894,6 +1896,7 @@ static void writeAnnotatedIndex(OutputList &ol)
    writeAnnotatedClassList(ol);
 
    Doxygen::indexList->enable();
+
    ol.popGeneratorState();
 
    // ---------------
@@ -1919,15 +1922,16 @@ static void writeAnnotatedIndex(OutputList &ol)
       ol.writeString(outStr);
 
       delete ftv;
+
       if (addToIndex) {
          Doxygen::indexList->decContentsDepth();
       }
    }
 
    ol.popGeneratorState();
-   // ------
+   endFile(ol); 
 
-   endFile(ol); // contains ol.endContents()
+   // contains ol.endContents()
    ol.popGeneratorState();
 }
 

@@ -50,7 +50,7 @@ QSharedPointer<typename std::enable_if<std::is_base_of<EnableSharedFromThis, T>:
 
    } else {
       std::string className = typeid(*ptr).name();
-      throw std::runtime_error("\nCS Doxygen::SharedFrom() Class " + className + " was not properly registerd. Please submit a bug report.");
+      throw std::runtime_error("\nDoxyPress::SharedFrom() Class " + className + " was not properly registerd. Please submit a bug report.");
    }
   
    return retval;   

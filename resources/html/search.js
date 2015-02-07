@@ -11,11 +11,11 @@ function convertToId(search)
     }
     else if (cn<16)
     {
-      result+="_0"+cn.toString(16);
+      result+="_0"+cn.toString(10);
     }
     else
     {
-      result+="_"+cn.toString(16);
+      result+="_"+cn.toString(10);
     }
   }
   return result;
@@ -323,7 +323,7 @@ function SearchBox(name, resultsPath, inFrame, label)
     var idx = indexSectionsWithContent[this.searchIndex].indexOf(idxChar);
     if (idx!=-1)
     {
-       var hexCode=idx.toString(16);
+       var hexCode=idx.toString(10);
        resultsPage = this.resultsPath + '/' + indexSectionNames[this.searchIndex] + '_' + hexCode + '.html';
        resultsPageWithSearch = resultsPage+'?'+escape(searchValue);
        hasResultsPage = true;

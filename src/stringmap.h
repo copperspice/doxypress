@@ -77,7 +77,7 @@ class StringMap
       return m_dict.count();
    }
 
-   virtual int compareValues(const T &item1, const T &item2) const {
+   virtual int compareMapValues(const T &item1, const T &item2) const {
 
       if (item1 < item2) {
          return -1;
@@ -183,7 +183,7 @@ class StringMap
       Iterator(const StringMap<T> &dict) {
 
          m_list = dict.m_dict.values();        
-         std::sort(m_list.begin(), m_list.end(), [&dict](const T &v1, const T &v2){ return dict.compareValues(v1, v2) < 0; } );
+         std::sort(m_list.begin(), m_list.end(), [&dict](const T &v1, const T &v2){ return dict.compareMapValues(v1, v2) < 0; } );
                         
          m_li = m_list.begin();   
       }
@@ -286,7 +286,7 @@ class LongMap
       m_dict.clear();
    }
 
-   virtual int compareValues(const T &item1, const T &item2) const {
+   virtual int compareMapValues(const T &item1, const T &item2) const {
       if (item1 < item2) {
          return -1;
       }
@@ -349,7 +349,7 @@ class LongMap
       Iterator(const LongMap<T> &dict) {
 
          m_list = dict.m_dict.values();         
-         std::sort(m_list.begin(), m_list.end(), [&dict](const T &v1, const T &v2){ return dict.compareValues(v1, v2) < 0; } );
+         std::sort(m_list.begin(), m_list.end(), [&dict](const T &v1, const T &v2){ return dict.compareMapValues(v1, v2) < 0; } );
 
           m_li = m_list.begin();
       }

@@ -36,7 +36,7 @@ static int compItems(const QSharedPointer<ClassDef> &c1, const QSharedPointer<Cl
    }
 }
 
-int ClassSDict::compareValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const
+int ClassSDict::compareMapValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const
 {
    return compItems(item1, item2);
 }

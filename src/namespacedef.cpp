@@ -852,7 +852,7 @@ void NamespaceDef::combineUsingRelations()
    }
 }
 
-int NamespaceSDict::compareValues(const NamespaceDef *item1, const NamespaceDef *item2) const
+int NamespaceSDict::compareMapValues(const QSharedPointer<NamespaceDef> &item1, const QSharedPointer<NamespaceDef> &item2) const
 {
    return qstricmp(item1->name(), item2->name());
 }

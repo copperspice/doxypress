@@ -592,7 +592,7 @@ bool DirDef::depGraphIsTrivial() const
    return false;
 }
 
-int FilePairDict::compareValues(const FilePair *left, const FilePair *right) const
+int FilePairDict::compareMapValues(const QSharedPointer<FilePair> &left, const QSharedPointer<FilePair> &right) const
 {
    int orderHi = qstricmp(left->source()->name(), right->source()->name());
    int orderLo = qstricmp(left->destination()->name(), right->destination()->name());

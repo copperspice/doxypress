@@ -3241,8 +3241,6 @@ char *commentscanYYtext;
 #include "markdown.h"
 #include "condparser.h"
 #include "formula.h"
-
-// at the end
 #include <doxy_globals.h>
 
 #define YY_NO_INPUT 1
@@ -3583,9 +3581,9 @@ static GuardType        guardType;           // kind of guard for conditional se
 static bool             enabledSectionFound;
 static QByteArray       functionProto;       // function prototype
 
-static QStack<GuardedSection *> guards;        // tracks nested conditional sections (if,ifnot,..)
+static QStack<GuardedSection *> guards;      // tracks nested conditional sections (if,ifnot,..)
 
-static QSharedPointer<Entry>	current;         // working entry
+static QSharedPointer<Entry>	current;       // working entry
 
 static bool               needNewEntry;
 
@@ -3922,14 +3920,13 @@ static inline void setOutput(OutputContext ctx)
 
       switch (xrefKind) {
          case XRef_Todo:
-
             addXRefItem("todo",
                         theTranslator->trTodo(),
                         theTranslator->trTodoList(),
                         xrefAppendToPrev
                        );
-
             break;
+
          case XRef_Test:
             addXRefItem("test",
                         theTranslator->trTest(),
@@ -3937,6 +3934,7 @@ static inline void setOutput(OutputContext ctx)
                         xrefAppendToPrev
                        );
             break;
+
          case XRef_Bug:
             addXRefItem("bug",
                         theTranslator->trBug(),
@@ -3944,6 +3942,7 @@ static inline void setOutput(OutputContext ctx)
                         xrefAppendToPrev
                        );
             break;
+
          case XRef_Deprecated:
             addXRefItem("deprecated",
                         theTranslator->trDeprecated(),
@@ -8082,6 +8081,9 @@ static bool handleBug(const QByteArray &)
 
 static bool handleDeprecated(const QByteArray &)
 {
+   // mark item for isDeprcated()
+   current->spec |= Entry::Deprecated;
+
    newXRefKind = XRef_Deprecated;
    setOutput(OutputXRef);
    xrefKind = XRef_Deprecated;

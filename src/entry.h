@@ -138,6 +138,7 @@ class Entry
    static const uint64_t ForwardDecl     = (1ULL << 15); // forward declarad template classes
 
    // member specifiers (add new items to the beginning)
+   static const uint64_t Deprecated          = (1ULL << 19);
    static const uint64_t PrivateGettable     = (1ULL << 20); // C# private getter
    static const uint64_t ProtectedGettable   = (1ULL << 21); // C# protected getter
    static const uint64_t PrivateSettable     = (1ULL << 22); // C# private setter
