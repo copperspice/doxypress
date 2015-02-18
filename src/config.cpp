@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -3374,12 +3374,12 @@ void Config::check()
    // check QHP creation requirements
    if (Config_getBool("GENERATE_QHP")) {
       if (Config_getString("QHP_NAMESPACE").isEmpty()) {
-         config_err("Error: GENERATE_QHP=YES requires QHP_NAMESPACE to be set. Using 'org.doxygen.doc' as default!.\n");
-         Config_getString("QHP_NAMESPACE") = "org.doxygen.doc";
+         config_err("Error: GENERATE_QHP=YES requires QHP_NAMESPACE to be set. Using 'org.doxypress.doc' as default.\n");
+         Config_getString("QHP_NAMESPACE") = "org.doxypress.doc";
       }
 
       if (Config_getString("QHP_VIRTUAL_FOLDER").isEmpty()) {
-         config_err("Error: GENERATE_QHP=YES requires QHP_VIRTUAL_FOLDER to be set. Using 'doc' as default!\n");
+         config_err("Error: GENERATE_QHP=YES requires QHP_VIRTUAL_FOLDER to be set. Using 'doc' as default\n");
          Config_getString("QHP_VIRTUAL_FOLDER") = "doc";
       }
    }

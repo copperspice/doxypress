@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -321,7 +321,7 @@ class LatexGenerator : public OutputGenerator
    void endParameterType();
    void startParameterName(bool);
    void endParameterName(bool, bool, bool);
-   void startParameterList(bool);
+   void startParameterList(bool) override;
    void endParameterList();
    void exceptionEntry(const QByteArray &, bool) override;
 

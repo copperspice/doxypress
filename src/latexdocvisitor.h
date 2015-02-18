@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -139,6 +139,7 @@ class LatexDocVisitor : public DocVisitor
    struct ActiveRowSpan {
       ActiveRowSpan(DocHtmlCell *c, int rs, int cs, int col)
          : cell(c), rowSpan(rs), colSpan(cs), column(col) {}
+
       DocHtmlCell *cell;
       int rowSpan;
       int colSpan;
@@ -152,32 +153,23 @@ class LatexDocVisitor : public DocVisitor
    //--------------------------------------
 
    void filter(const char *str);
-   void startLink(const QByteArray &ref, const QByteArray &file,
-                  const QByteArray &anchor);
-   void endLink(const QByteArray &ref, const QByteArray &file,
-                const QByteArray &anchor);
+   void startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor);
+   void endLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor);
    QByteArray escapeMakeIndexChars(const char *s);
-   void startDotFile(const QByteArray &fileName, const QByteArray &width,
-                     const QByteArray &height, bool hasCaption);
+   void startDotFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
    void endDotFile(bool hasCaption);
 
-   void startMscFile(const QByteArray &fileName, const QByteArray &width,
-                     const QByteArray &height, bool hasCaption);
+   void startMscFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
    void endMscFile(bool hasCaption);
    void writeMscFile(const QByteArray &fileName);
 
-   void startDiaFile(const QByteArray &fileName, const QByteArray &width,
-                     const QByteArray &height, bool hasCaption);
+   void startDiaFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
    void endDiaFile(bool hasCaption);
    void writeDiaFile(const QByteArray &fileName);
    void writePlantUMLFile(const QByteArray &fileName);
 
    void pushEnabled();
    void popEnabled();
-
-   //--------------------------------------
-   // state variables
-   //--------------------------------------
 
    QTextStream &m_t;
    CodeOutputInterface &m_ci;
@@ -187,9 +179,11 @@ class LatexDocVisitor : public DocVisitor
    bool m_insideTabbing;
    bool m_insideTable;
    int  m_numCols;
+
    QStack<bool> m_enabled;
    QByteArray m_langExt;
    RowSpanList m_rowSpans;
+
    int m_currentColumn;
    bool m_inRowspan;
    bool m_inColspan;

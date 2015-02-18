@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -41,7 +41,6 @@
 #include <language.h>
 #include <namespacedef.h>
 #include <pagedef.h>
-#include <qtbc.h>
 #include <sqlite3.h> 
 #include <sqlite3gen.h>
 #include <util.h>

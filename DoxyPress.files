@@ -159,7 +159,6 @@ src/qhp.cpp
 src/qhp.h
 src/qhpxmlwriter.cpp
 src/qhpxmlwriter.h
-src/qtbc.h
 src/reflist.cpp
 src/reflist.h
 src/resourcemgr.cpp

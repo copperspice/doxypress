@@ -89,7 +89,7 @@ IndexList       *Doxygen::indexList;
 
 bool             Doxygen::insideMainPage = false;       // are we generating docs for the main page?
 bool             Doxygen::parseSourcesNeeded = false;
-bool             Doxygen::outputToWizard = false;
+bool             Doxygen::outputToApp = false;
 bool             Doxygen::suppressDocWarnings = false;
 bool             Doxygen::gatherDefines = true;
 bool             Doxygen::userComments = false;

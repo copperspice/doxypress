@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -79,7 +79,7 @@ enum Options {
      DEBUG_DUMP, 
      DEBUG_SYMBOLS,
      HELP, 
-     OUTPUT_WIZARD,
+     OUTPUT_APP,
      RTF_EXTENSIONS,            
      DOXY_VERSION,      
 };
@@ -211,7 +211,7 @@ struct CommandLine parseCommandLine(QStringList argList)
    CommandLine cmdArgs;
 
    QMap<QString, Options> argMap;
-   argMap.insert( "--b", OUTPUT_WIZARD   );
+   argMap.insert( "--b", OUTPUT_APP      );
    argMap.insert( "--d", DEBUG_DUMP      );   
    argMap.insert( "--g", BLANK_CFG       );
    argMap.insert( "--h", HELP            );  
@@ -436,10 +436,10 @@ struct CommandLine parseCommandLine(QStringList argList)
             cleanUpDoxygen();
             exit(0);
                   
-         case OUTPUT_WIZARD:
+         case OUTPUT_APP:
             setvbuf(stdout, NULL, _IONBF, 0);
 
-            Doxygen::outputToWizard = true;
+            Doxygen::outputToApp = true;
             break;
 
          case HELP:       
@@ -712,7 +712,7 @@ void Doxy_Setup::usage()
    msg("   --v  display version\n");
     
    msg("\n");
-   msg("   --b  output to CS DoxyWizard\n"); 
+   msg("   --b  output for DoxyPressApp\n"); 
    msg("   --m  dump symbol map\n");  
    msg("   --d  <level> enable one or more debug levels\n");
   

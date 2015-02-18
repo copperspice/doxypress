@@ -95,6 +95,8 @@ DoxyPress_SOURCES = \
    src/image.cpp \
    src/index.cpp \
    src/language.cpp \
+   src/latexdocvisitor.cpp  \
+   src/latexgen.cpp  \
    src/layout.cpp \
    src/lodepng.cpp \
    src/logos.cpp \
@@ -116,6 +118,7 @@ DoxyPress_SOURCES = \
    src/parser_file.cpp \
    src/parser_make.cpp \
    src/pagedef.cpp \
+   src/perlmodgen.cpp \
    src/plantuml.cpp \
    src/qhp.cpp \
    src/qhpxmlwriter.cpp \
@@ -154,13 +157,9 @@ DoxyPress_SOURCES = \
 #   src/generated/fortrancode.cpp \
 #   src/generated/fortranscanner.cpp \
 #   src/generated/tclscanner.cpp
-
-#1   src/latexdocvisitor.cpp
-#2   src/latexgen.cpp
-#3   src/docbookgen.cpp
-#4   src/docbookvisitor.cpp
-#5   src/perlmodgen.cpp
-#6   src/dbusxmlscanner.cpp
+#   src/docbookgen.cpp
+#   src/docbookvisitor.cpp
+#   src/dbusxmlscanner.cpp
 
 RESOURCES = doxypress.qrc
 
