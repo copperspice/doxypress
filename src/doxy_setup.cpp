@@ -257,7 +257,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             cmdArgs.configName = getValue(iter, argList.end());
            
             if (cmdArgs.configName.isEmpty()) {
-               cmdArgs.configName = "cs_doxyfile.json";
+               cmdArgs.configName = "doxypress.json";
             }
 
             cmdArgs.generateDoxy = false;   
@@ -360,13 +360,13 @@ struct CommandLine parseCommandLine(QStringList argList)
                if (cmdArgs.latexHead.isEmpty()) {
                   cmdArgs.latexHead = "doxy_header.latex";
                }
-/* BROOM  latex
+
                QFile f;
                if (openOutputFile(cmdArgs.latexHead, f)) {
                  LatexGenerator::writeHeaderFile(f);
                }
                f.close();
-*/
+
 
             } else if (cmdArgs.formatName == "latex-foot") {
               cmdArgs.latexFoot = getValue(iter, argList.end());
@@ -375,28 +375,26 @@ struct CommandLine parseCommandLine(QStringList argList)
                   cmdArgs.latexFoot = "doxy_footer.latex";
                }
 
-/* BROOM  latex
                QFile f;
                if (openOutputFile(cmdArgs.latexFoot, f)) {
                   LatexGenerator::writeFooterFile(f);
                }
                f.close();
-*/ 
+ 
 
             } else if (cmdArgs.formatName == "latex-style") {
               cmdArgs.latexStyle = getValue(iter, argList.end());
 
-               if (cmdArgs.htmlStyle.isEmpty()) {
-                  cmdArgs.htmlStyle= "doxy_style.latex";
+               if (cmdArgs.latexStyle.isEmpty()) {
+                  cmdArgs.latexStyle= "doxy_style.latex";
                }
 
-/* BROOM  latex
               QFile f;
               if (openOutputFile(cmdArgs.latexStyle, f)) {
                  LatexGenerator::writeStyleSheetFile(f);
                }
                f.close();
-*/
+
 
             } else  {
                err("Option \"-w %s\" is invalid\n", qPrintable(cmdArgs.formatName));
@@ -478,14 +476,14 @@ void readConfiguration(struct CommandLine cmdArgs)
    
       for (auto item : QDir::current().entryList()) {          
 
-         if (item.compare("cs_doxyfile.json", Qt::CaseInsensitive) == 0) {
+         if (item.compare("doxypress.json", Qt::CaseInsensitive) == 0) {
             cmdArgs.configName = item;
             break;
          } 
       }
      
       if (cmdArgs.configName.isEmpty()) {
-         err("No configuration file name was specified and 'cs_doxyfile.json' was not found"); 
+         err("No configuration file name was specified and 'doxypress.json' was not found"); 
 
          cleanUpDoxygen();
          exit(1);
@@ -685,7 +683,7 @@ void Doxy_Setup::usage()
 
    msg("\n"); 
    msg("Generate a blank configuration file:\n");
-   msg("   --g [config file name]   Default file name is `cs_doxyfile.json'\n");  
+   msg("   --g [config file name]   Default file name is `doxypress.json'\n");  
    
    msg("\n");
    msg("Generate a layout file to configure the documentation:\n");

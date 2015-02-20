@@ -546,7 +546,7 @@ void parseInput()
    bool defaultLayoutUsed = false;
 
    if (layoutFileName.isEmpty()) {
-      layoutFileName = "DoxygenLayout.xml";
+      layoutFileName = "doxy_layout.xml";
       defaultLayoutUsed = true;
    }
  

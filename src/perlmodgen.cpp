@@ -1429,37 +1429,34 @@ void PerlModDocVisitor::visitPost(DocParamSect *)
 void PerlModDocVisitor::visitPre(DocParamList *pl)
 {
    leaveText();
-
-   m_output.openHash()
-   .openList("parameters");
+   m_output.openHash().openList("parameters");
   
-   QListIterator<DocNode *> li(pl->parameters());
-   DocNode *param;
-
-   for (li.toFirst(); (param = li.current()); ++li) {
+   for (auto param : pl->parameters()) {
       QByteArray s;
+
       if (param->kind() == DocNode::Kind_Word) {
          s = ((DocWord *)param)->word();
+
       } else if (param->kind() == DocNode::Kind_LinkedWord) {
          s = ((DocLinkedWord *)param)->word();
+
       }
-      m_output.openHash()
-      .addFieldQuotedString("name", s)
-      .closeHash();
+
+      m_output.openHash().addFieldQuotedString("name", s).closeHash();
    }
-   m_output.closeList()
-   .openList("doc");
+
+   m_output.closeList().openList("doc");
 }
 
 void PerlModDocVisitor::visitPost(DocParamList *)
 {
    leaveText();
-   m_output.closeList()
-   .closeHash();
+   m_output.closeList().closeHash();
 }
 
 void PerlModDocVisitor::visitPre(DocXRefItem *x)
 {
+
 #if 0
    m_output.add("<xrefsect id=\"");
    m_output.add(x->file());
@@ -1547,22 +1544,27 @@ static void addTemplateArgumentList(ArgumentList *al, PerlModOutput &output, con
    if (!al) {
       return;
    }
-   output.openList("template_parameters");
-   ArgumentListIterator ali(*al);
-   Argument *a;
-   for (ali.toFirst(); (a = ali.current()); ++ali) {
+
+   output.openList("template_parameters");  
+
+   for (auto a : *al) {
       output.openHash();
-      if (!a->type.isEmpty()) {
-         output.addFieldQuotedString("type", a->type);
+
+      if (! a.type.isEmpty()) {
+         output.addFieldQuotedString("type", a.type);
       }
-      if (!a->name.isEmpty())
-         output.addFieldQuotedString("declaration_name", a->name)
-         .addFieldQuotedString("definition_name", a->name);
-      if (!a->defval.isEmpty()) {
-         output.addFieldQuotedString("default", a->defval);
+
+      if (! a.name.isEmpty()) {
+         output.addFieldQuotedString("declaration_name", a.name).addFieldQuotedString("definition_name", a.name);
       }
+
+      if (! a.defval.isEmpty()) {
+         output.addFieldQuotedString("default", a.defval);
+      }
+
       output.closeHash();
    }
+
    output.closeList();
 }
 
@@ -1571,13 +1573,15 @@ static void addMemberTemplateLists(MemberDef *md, PerlModOutput &output)
 {
    ClassDef *cd = md->getClassDef();
    const char *cname = cd ? cd->name().data() : 0;
-   if (md->templateArguments()) { // function template prefix
+
+   if (md->templateArguments()) { 
+      // function template prefix
       addTemplateArgumentList(md->templateArguments(), output, cname);
    }
 }
 #endif
 
-static void addTemplateList(ClassDef *cd, PerlModOutput &output)
+static void addTemplateList(QSharedPointer<ClassDef> cd, PerlModOutput &output)
 {
    addTemplateArgumentList(cd->templateArguments(), output, cd->name());
 }
@@ -1586,16 +1590,19 @@ static void addPerlModDocBlock(PerlModOutput &output, const char *name, const QB
                                QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md, const QByteArray &text)
 {
    QByteArray stext = text.trimmed();
+
    if (stext.isEmpty()) {
       output.addField(name).add("{}");
 
    } else {
       DocNode *root = validatingParseDoc(fileName, lineNr, scope, md, stext, false, 0);
       output.openHash(name);
+
       PerlModDocVisitor *visitor = new PerlModDocVisitor(output);
       root->accept(visitor);
       visitor->finish();
       output.closeHash();
+
       delete visitor;
       delete root;
    }
@@ -1659,14 +1666,14 @@ class PerlModGenerator
 
    inline PerlModGenerator(bool pretty) : m_output(pretty) { }
 
-   void generatePerlModForMember(QSharedPointer<MemberDef> md, Definition *);
-   void generatePerlModSection(Definition *d, QSharedPointer<MemberList> ml, const char *name, const char *header = 0);
-   void addListOfAllMembers(ClassDef *cd);
-   void generatePerlModForClass(ClassDef *cd);
-   void generatePerlModForNamespace(NamespaceDef *nd);
-   void generatePerlModForFile(FileDef *fd);
-   void generatePerlModForGroup(GroupDef *gd);
-   void generatePerlModForPage(PageDef *pi);
+   void generatePerlModForMember(QSharedPointer<MemberDef> md, QSharedPointer<Definition> def);
+   void generatePerlModSection(QSharedPointer<Definition> def, QSharedPointer<MemberList> ml, const char *name, const char *header = 0);
+   void addListOfAllMembers(QSharedPointer<ClassDef> cd);
+   void generatePerlModForClass(QSharedPointer<ClassDef> cd);
+   void generatePerlModForNamespace(QSharedPointer<NamespaceDef> nd);
+   void generatePerlModForFile(QSharedPointer<FileDef> fd);
+   void generatePerlModForGroup(QSharedPointer<GroupDef> gd);
+   void generatePerlModForPage(QSharedPointer<PageDef> pd);
 
    bool createOutputFile(QFile &f, const char *s);
    bool createOutputDir(QDir &perlModDir);
@@ -1682,7 +1689,7 @@ class PerlModGenerator
    void generate();
 };
 
-void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, Definition *)
+void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QSharedPointer<Definition> def)
 {
    // + declaration/definition arg lists
    // + reimplements
@@ -1765,63 +1772,69 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, De
    }
 
    ArgumentList *al = md->argumentList();
-   if (isFunc) { //function
-      m_output.addFieldBoolean("const", al != 0 && al->constSpecifier)
-      .addFieldBoolean("volatile", al != 0 && al->volatileSpecifier);
+   if (isFunc) { 
+      //function
+      m_output.addFieldBoolean("const", al != 0 && al->constSpecifier).addFieldBoolean("volatile", al != 0 && al->volatileSpecifier);
 
       m_output.openList("parameters");
       ArgumentList *declAl = md->declArgumentList();
       ArgumentList *defAl  = md->argumentList();
-      if (declAl && declAl->count() > 0) {
-         ArgumentListIterator declAli(*declAl);
-         ArgumentListIterator defAli(*defAl);
-         Argument *a;
-         for (declAli.toFirst(); (a = declAli.current()); ++declAli) {
-            Argument *defArg = defAli.current();
-            m_output.openHash();
 
-            if (!a->name.isEmpty()) {
-               m_output.addFieldQuotedString("declaration_name", a->name);
+      if (declAl && declAl->count() > 0) {      
+         auto defAli = defAl->begin();   
+
+         for (auto a : *declAl) {
+            Argument *defArg = nullptr;
+
+            if (defAli != defAl->end()) {
+               defArg = &*defAli;
+
+               // increment must come after the assignement
+               ++defAli;
             }
 
-            if (defArg && !defArg->name.isEmpty() && defArg->name != a->name) {
+            m_output.openHash();
+
+            if (! a.name.isEmpty()) {
+               m_output.addFieldQuotedString("declaration_name", a.name);
+            }
+
+            if (defArg && !defArg->name.isEmpty() && defArg->name != a.name) {
                m_output.addFieldQuotedString("definition_name", defArg->name);
             }
 
-            if (!a->type.isEmpty()) {
-               m_output.addFieldQuotedString("type", a->type);
+            if (! a.type.isEmpty()) {
+               m_output.addFieldQuotedString("type", a.type);
             }
 
-            if (!a->array.isEmpty()) {
-               m_output.addFieldQuotedString("array", a->array);
+            if (! a.array.isEmpty()) {
+               m_output.addFieldQuotedString("array", a.array);
             }
 
-            if (!a->defval.isEmpty()) {
-               m_output.addFieldQuotedString("default_value", a->defval);
+            if (! a.defval.isEmpty()) {
+               m_output.addFieldQuotedString("default_value", a.defval);
             }
 
-            if (!a->attrib.isEmpty()) {
-               m_output.addFieldQuotedString("attributes", a->attrib);
+            if (! a.attrib.isEmpty()) {
+               m_output.addFieldQuotedString("attributes", a.attrib);
             }
 
-            m_output.closeHash();
-            if (defArg) {
-               ++defAli;
-            }
+            m_output.closeHash();           
          }
       }
+
       m_output.closeList();
-   } else if (md->memberType() == MemberType_Define &&
-              md->argsString() != 0) { // define
+
+   } else if (md->memberType() == MemberType_Define && md->argsString() != 0) { 
+      // define
       m_output.openList("parameters");
-      ArgumentListIterator ali(*al);
-      Argument *a;
-      for (ali.toFirst(); (a = ali.current()); ++ali) {
-         m_output.openHash()
-         .addFieldQuotedString("name", a->type)
-         .closeHash();
+     
+      for (auto a : *al) {
+         m_output.openHash().addFieldQuotedString("name", a.type).closeHash();
       }
+
       m_output.closeList();
+
    } else if (md->argsString() != 0) {
       m_output.addFieldQuotedString("arguments", md->argsString());
    }
@@ -1843,21 +1856,21 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, De
          for (auto emd : *enumFields) {
             m_output.openHash().addFieldQuotedString("name", emd->name());
 
-            if (!emd->initializer().isEmpty()) {
+            if (! emd->initializer().isEmpty()) {
                m_output.addFieldQuotedString("initializer", emd->initializer());
             }
 
-            addPerlModDocBlock(m_output, "brief", emd->getDefFileName(), emd->getDefLine(), emd->getOuterScope(), emd, emd->briefDescription());
-
+            addPerlModDocBlock(m_output, "brief",    emd->getDefFileName(), emd->getDefLine(), emd->getOuterScope(), emd, emd->briefDescription());
             addPerlModDocBlock(m_output, "detailed", emd->getDefFileName(), emd->getDefLine(), emd->getOuterScope(), emd, emd->documentation());
 
             m_output.closeHash();
          }
+
          m_output.closeList();
       }
    }
 
-   MemberDef *rmd = md->reimplements();
+   QSharedPointer<MemberDef> rmd = md->reimplements();
 
    if (rmd) {
       m_output.openHash("reimplements").addFieldQuotedString("name", rmd->name()).closeHash();
@@ -1878,7 +1891,7 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, De
    m_output.closeHash();
 }
 
-void PerlModGenerator::generatePerlModSection(Definition *d, QSharedPointer<MemberList> ml, const char *name, const char *header)
+void PerlModGenerator::generatePerlModSection(QSharedPointer<Definition> d, QSharedPointer<MemberList> ml, const char *name, const char *header)
 {
    if (ml == 0) {
       return;   // empty list
@@ -1899,44 +1912,41 @@ void PerlModGenerator::generatePerlModSection(Definition *d, QSharedPointer<Memb
    m_output.closeList().closeHash();
 }
 
-void PerlModGenerator::addListOfAllMembers(ClassDef *cd)
+void PerlModGenerator::addListOfAllMembers(QSharedPointer<ClassDef> cd)
 {
    m_output.openList("all_members");
 
    if (cd->memberNameInfoSDict()) {
-      MemberNameInfoSDict::Iterator mnii(*cd->memberNameInfoSDict());
-      MemberNameInfo *mni;
+      
+      for (auto mni : *cd->memberNameInfoSDict()) {
+       
+         for (auto mi : *mni) {
+            QSharedPointer<MemberDef> md = mi.memberDef;
 
-      for (mnii.toFirst(); (mni = mnii.current()); ++mnii) {
-         MemberNameInfoIterator mii(*mni);
-         MemberInfo *mi;
+            QSharedPointer<ClassDef>   cd  = md->getClassDef();
+            QSharedPointer<Definition> def = md->getGroupDef();
 
-         for (mii.toFirst(); (mi = mii.current()); ++mii) {
-            MemberDef *md = mi->memberDef;
-            ClassDef  *cd = md->getClassDef();
-            Definition *d = md->getGroupDef();
-            if (d == 0) {
-               d = cd;
+            if (def == 0) {
+               def = cd;
             }
 
-            m_output.openHash()
-            .addFieldQuotedString("name", md->name())
-            .addFieldQuotedString("virtualness", getVirtualnessName(md->virtualness()))
-            .addFieldQuotedString("protection", getProtectionName(mi->prot));
+            m_output.openHash().addFieldQuotedString("name", md->name())
+               .addFieldQuotedString("virtualness", getVirtualnessName(md->virtualness()))
+               .addFieldQuotedString("protection",  getProtectionName(mi.prot));
 
-            if (!mi->ambiguityResolutionScope.isEmpty()) {
-               m_output.addFieldQuotedString("ambiguity_scope", mi->ambiguityResolutionScope);
+            if (! mi.ambiguityResolutionScope.isEmpty()) {
+               m_output.addFieldQuotedString("ambiguity_scope", mi.ambiguityResolutionScope);
             }
 
-            m_output.addFieldQuotedString("scope", cd->name())
-            .closeHash();
+            m_output.addFieldQuotedString("scope", cd->name()).closeHash();
          }
       }
    }
+
    m_output.closeList();
 }
 
-void PerlModGenerator::generatePerlModForClass(ClassDef *cd)
+void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
 {
    // + brief description
    // + detailed description
@@ -1973,9 +1983,9 @@ void PerlModGenerator::generatePerlModForClass(ClassDef *cd)
    
       for (auto bcd : *cd->baseClasses()) {
          m_output.openHash()
-         .addFieldQuotedString("name", bcd->classDef->displayName())
+         .addFieldQuotedString("name", bcd->classDef->displayName().toUtf8())
          .addFieldQuotedString("virtualness", getVirtualnessName(bcd->virt))
-         .addFieldQuotedString("protection", getProtectionName(bcd->prot)).closeHash();
+         .addFieldQuotedString("protection",  getProtectionName(bcd->prot)).closeHash();
       }
 
       m_output.closeList();
@@ -1986,9 +1996,9 @@ void PerlModGenerator::generatePerlModForClass(ClassDef *cd)
 
       for (auto bcd : *cd->subClasses()) {
          m_output.openHash()
-         .addFieldQuotedString("name", bcd->classDef->displayName())
+         .addFieldQuotedString("name", bcd->classDef->displayName().toUtf8())
          .addFieldQuotedString("virtualness", getVirtualnessName(bcd->virt))
-         .addFieldQuotedString("protection", getProtectionName(bcd->prot)).closeHash();
+         .addFieldQuotedString("protection",  getProtectionName(bcd->prot)).closeHash();
       }   
 
       m_output.closeList();
@@ -2022,9 +2032,7 @@ void PerlModGenerator::generatePerlModForClass(ClassDef *cd)
             t << " id=\"" << ii->fileDef->getOutputFileBase() << "\"";
          }
 #endif
-         m_output.addFieldBoolean("local", ii->local)
-         .addFieldQuotedString("name", nm)
-         .closeHash();
+         m_output.addFieldBoolean("local", ii->local).addFieldQuotedString("name", nm).closeHash();
       }
    }
 
@@ -2061,8 +2069,10 @@ void PerlModGenerator::generatePerlModForClass(ClassDef *cd)
    generatePerlModSection(cd, cd->getMemberList(MemberListType_friends),          "friend_methods");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_related),          "related_methods");
 
-   addPerlModDocBlock(m_output, "brief", cd->getDefFileName(), cd->getDefLine(), cd, 0, cd->briefDescription());
-   addPerlModDocBlock(m_output, "detailed", cd->getDefFileName(), cd->getDefLine(), cd, 0, cd->documentation());
+   QSharedPointer<MemberDef> nullMem;
+
+   addPerlModDocBlock(m_output, "brief",    cd->getDefFileName(), cd->getDefLine(), cd, nullMem, cd->briefDescription());
+   addPerlModDocBlock(m_output, "detailed", cd->getDefFileName(), cd->getDefLine(), cd, nullMem, cd->documentation());
 
 #if 0
    DotClassGraph inheritanceGraph(cd, DotClassGraph::Inheritance);
@@ -2093,7 +2103,7 @@ void PerlModGenerator::generatePerlModForClass(ClassDef *cd)
    m_output.closeHash();
 }
 
-void PerlModGenerator::generatePerlModForNamespace(NamespaceDef *nd)
+void PerlModGenerator::generatePerlModForNamespace(QSharedPointer<NamespaceDef> nd)
 {
    // + contained class definitions
    // + contained namespace definitions
@@ -2143,15 +2153,18 @@ void PerlModGenerator::generatePerlModForNamespace(NamespaceDef *nd)
    generatePerlModSection(nd, nd->getMemberList(MemberListType_decTypedefMembers), "typedefs");
    generatePerlModSection(nd, nd->getMemberList(MemberListType_decEnumMembers),    "enums");
    generatePerlModSection(nd, nd->getMemberList(MemberListType_decFuncMembers),    "functions");
-   generatePerlModSection(nd, nd->getMemberList(MemberListType_decVarMembers),      "variables");
+   generatePerlModSection(nd, nd->getMemberList(MemberListType_decVarMembers),     "variables");
 
-   addPerlModDocBlock(m_output, "brief",    nd->getDefFileName(), nd->getDefLine(), 0, 0, nd->briefDescription());
-   addPerlModDocBlock(m_output, "detailed", nd->getDefFileName(), nd->getDefLine(), 0, 0, nd->documentation());
+   QSharedPointer<Definition> nullDef;
+   QSharedPointer<MemberDef> nullMem;
+
+   addPerlModDocBlock(m_output, "brief",    nd->getDefFileName(), nd->getDefLine(), nullDef, nullMem, nd->briefDescription());
+   addPerlModDocBlock(m_output, "detailed", nd->getDefFileName(), nd->getDefLine(), nullDef, nullMem, nd->documentation());
 
    m_output.closeHash();
 }
 
-void PerlModGenerator::generatePerlModForFile(FileDef *fd)
+void PerlModGenerator::generatePerlModForFile(QSharedPointer<FileDef> fd)
 {
    // + includes files
    // + includedby files
@@ -2171,33 +2184,34 @@ void PerlModGenerator::generatePerlModForFile(FileDef *fd)
       return;
    }
 
-   m_output.openHash()
-   .addFieldQuotedString("name", fd->name());
+   m_output.openHash().addFieldQuotedString("name", fd->name());
 
    IncludeInfo *inc;
    m_output.openList("includes");
+
    if (fd->includeFileList()) {
-      QListIterator<IncludeInfo> ili1(*fd->includeFileList());
-      for (ili1.toFirst(); (inc = ili1.current()); ++ili1) {
-         m_output.openHash()
-         .addFieldQuotedString("name", inc->includeName);
-         if (inc->fileDef && !inc->fileDef->isReference()) {
-            m_output.addFieldQuotedString("ref", inc->fileDef->getOutputFileBase());
+      for (auto inc : *fd->includeFileList()) {         
+         m_output.openHash().addFieldQuotedString("name", inc.includeName);
+
+         if (inc.fileDef && ! inc.fileDef->isReference()) {
+            m_output.addFieldQuotedString("ref", inc.fileDef->getOutputFileBase());
          }
+
          m_output.closeHash();
       }
    }
    m_output.closeList();
 
    m_output.openList("included_by");
+
    if (fd->includedByFileList()) {
-      QListIterator<IncludeInfo> ili2(*fd->includedByFileList());
-      for (ili2.toFirst(); (inc = ili2.current()); ++ili2) {
-         m_output.openHash()
-         .addFieldQuotedString("name", inc->includeName);
-         if (inc->fileDef && !inc->fileDef->isReference()) {
-            m_output.addFieldQuotedString("ref", inc->fileDef->getOutputFileBase());
+      for (auto inc : *fd->includedByFileList()) {      
+         m_output.openHash().addFieldQuotedString("name", inc.includeName);
+
+         if (inc.fileDef && ! inc.fileDef->isReference()) {
+            m_output.addFieldQuotedString("ref", inc.fileDef->getOutputFileBase());
          }
+
          m_output.closeHash();
       }
    }
@@ -2210,13 +2224,16 @@ void PerlModGenerator::generatePerlModForFile(FileDef *fd)
    generatePerlModSection(fd, fd->getMemberList(MemberListType_decFuncMembers), "functions");
    generatePerlModSection(fd, fd->getMemberList(MemberListType_decVarMembers), "variables");
 
-   addPerlModDocBlock(m_output, "brief", fd->getDefFileName(), fd->getDefLine(), 0, 0, fd->briefDescription());
-   addPerlModDocBlock(m_output, "detailed", fd->getDefFileName(), fd->getDefLine(), 0, 0, fd->documentation());
+   QSharedPointer<Definition> nullDef;
+   QSharedPointer<MemberDef> nullMem;
+
+   addPerlModDocBlock(m_output, "brief",    fd->getDefFileName(), fd->getDefLine(), nullDef, nullMem, fd->briefDescription());
+   addPerlModDocBlock(m_output, "detailed", fd->getDefFileName(), fd->getDefLine(), nullDef, nullMem, fd->documentation());
 
    m_output.closeHash();
 }
 
-void PerlModGenerator::generatePerlModForGroup(GroupDef *gd)
+void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
 {
    // + members
    // + member groups
@@ -2250,57 +2267,48 @@ void PerlModGenerator::generatePerlModForGroup(GroupDef *gd)
    ClassSDict *cl = gd->getClasses();
    if (cl) {
       m_output.openList("classes");
-      ClassSDict::Iterator cli(*cl);
-      ClassDef *cd;
-      for (cli.toFirst(); (cd = cli.current()); ++cli)
-         m_output.openHash()
-         .addFieldQuotedString("name", cd->name())
-         .closeHash();
+     
+      for (auto cd : *cl) {
+         m_output.openHash().addFieldQuotedString("name", cd->name()).closeHash();
+      }
+
       m_output.closeList();
    }
 
    NamespaceSDict *nl = gd->getNamespaces();
    if (nl) {
-      m_output.openList("namespaces");
-      NamespaceSDict::Iterator nli(*nl);
-      NamespaceDef *nd;
-      for (nli.toFirst(); (nd = nli.current()); ++nli)
-         m_output.openHash()
-         .addFieldQuotedString("name", nd->name())
-         .closeHash();
+      m_output.openList("namespaces");     
+
+      for (auto nd : *nl) {
+         m_output.openHash().addFieldQuotedString("name", nd->name()).closeHash();
+      }
       m_output.closeList();
    }
 
    PageSDict *pl = gd->getPages();
    if (pl) {
       m_output.openList("pages");
-      PageSDict::Iterator pli(*pl);
-      PageDef *pd;
-      for (pli.toFirst(); (pd = pli.current()); ++pli)
-         m_output.openHash()
-         .addFieldQuotedString("title", pd->title())
-         .closeHash();
+    
+      for (auto pd : *pl) {
+         m_output.openHash().addFieldQuotedString("title", pd->title()).closeHash();
+      }
       m_output.closeList();
    }
 
-   SortedList<GroupDef *> *gl = gd->getSubGroups();
+   SortedList<QSharedPointer<GroupDef>> *gl = gd->getSubGroups();
 
    if (gl) {
       m_output.openList("groups");
-      GroupListIterator gli(*gl);
-      GroupDef *sgd;
+  
+      for (auto sgd : *gl) {
+         m_output.openHash().addFieldQuotedString("title", sgd->groupTitle()).closeHash();
+      }
 
-      for (gli.toFirst(); (sgd = gli.current()); ++gli)
-         m_output.openHash()
-         .addFieldQuotedString("title", sgd->groupTitle())
-         .closeHash();
       m_output.closeList();
    }
 
    if (gd->getMemberGroupSDict()) {
-      MemberGroupSDict::Iterator mgli(*gd->getMemberGroupSDict());
-      MemberGroup *mg;
-      for (; (mg = mgli.current()); ++mgli) {
+      for (auto mg : *gd->getMemberGroupSDict()){
          generatePerlModSection(gd, mg->members(), "user-defined", mg->header());
       }
    }
@@ -2321,7 +2329,7 @@ void PerlModGenerator::generatePerlModForGroup(GroupDef *gd)
    m_output.closeHash();
 }
 
-void PerlModGenerator::generatePerlModForPage(PageDef *pd)
+void PerlModGenerator::generatePerlModForPage(QSharedPointer<PageDef> pd)
 {
    // + name
    // + title
@@ -2331,15 +2339,17 @@ void PerlModGenerator::generatePerlModForPage(PageDef *pd)
       return;
    }
 
-   m_output.openHash()
-   .addFieldQuotedString("name", pd->name());
+   m_output.openHash().addFieldQuotedString("name", pd->name());
 
-   SectionInfo *si = Doxygen::sectionDict->find(pd->name());
+   QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(pd->name());
    if (si) {
       m_output.addFieldQuotedString("title4", filterTitle(si->title));
    }
 
-   addPerlModDocBlock(m_output, "detailed", pd->docFile(), pd->docLine(), 0, 0, pd->documentation());
+   QSharedPointer<Definition> nullDef;
+   QSharedPointer<MemberDef> nullMem;
+
+   addPerlModDocBlock(m_output, "detailed", pd->docFile(), pd->docLine(), nullDef, nullMem, pd->documentation());
    m_output.closeHash();
 }
 
@@ -2355,48 +2365,37 @@ bool PerlModGenerator::generatePerlModOutput()
    m_output.setPerlModOutputStream(&outputStream);
    m_output.add("$doxydocs=").openHash();
 
-   m_output.openList("classes");
-   ClassSDict::Iterator cli(*Doxygen::classSDict);
-   ClassDef *cd;
-   for (cli.toFirst(); (cd = cli.current()); ++cli) {
+   m_output.openList("classes");  
+   for (auto cd : *Doxygen::classSDict) {
       generatePerlModForClass(cd);
    }
    m_output.closeList();
 
-   m_output.openList("namespaces");
-   NamespaceSDict::Iterator nli(*Doxygen::namespaceSDict);
-   NamespaceDef *nd;
-   for (nli.toFirst(); (nd = nli.current()); ++nli) {
+   m_output.openList("namespaces");  
+   for (auto nd : *Doxygen::namespaceSDict) {
       generatePerlModForNamespace(nd);
    }
    m_output.closeList();
 
    m_output.openList("files");
-   FileNameListIterator fnli(*Doxygen::inputNameList);
-   FileName *fn;
-   for (; (fn = fnli.current()); ++fnli) {
-      FileNameIterator fni(*fn);
-      FileDef *fd;
-      for (; (fd = fni.current()); ++fni) {
+   for (auto fn : *Doxygen::inputNameList) {
+      for (auto fd : *fn)  {
          generatePerlModForFile(fd);
       }
    }
    m_output.closeList();
 
    m_output.openList("groups");
-   GroupSDict::Iterator gli(*Doxygen::groupSDict);
-   GroupDef *gd;
-   for (; (gd = gli.current()); ++gli) {
+   for (auto gd : *Doxygen::groupSDict) {
       generatePerlModForGroup(gd);
    }
    m_output.closeList();
 
-   m_output.openList("pages");
-   PageSDict::Iterator pdi(*Doxygen::pageSDict);
-   PageDef *pd = 0;
-   for (pdi.toFirst(); (pd = pdi.current()); ++pdi) {
+   m_output.openList("pages");  
+   for (auto pd : *Doxygen::pageSDict) {
       generatePerlModForPage(pd);
    }
+
    if (Doxygen::mainPage) {
       generatePerlModForPage(Doxygen::mainPage);
    }
@@ -2411,7 +2410,7 @@ bool PerlModGenerator::createOutputFile(QFile &f, const char *s)
    f.setFileName(s);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", s);
+      err("Can not open file %s for writing!\n", s);
       return false;
    }
 
@@ -2423,18 +2422,21 @@ bool PerlModGenerator::createOutputDir(QDir &perlModDir)
    QByteArray outputDirectory = Config_getString("OUTPUT_DIRECTORY");
    if (outputDirectory.isEmpty()) {
       outputDirectory = QDir::currentPath().toUtf8();
+
    } else {
       QDir dir(outputDirectory);
       if (!dir.exists()) {
          dir.setPath(QDir::currentPath());
+
          if (!dir.mkdir(outputDirectory)) {
             err("tag OUTPUT_DIRECTORY: Output directory `%s' does not "
-                "exist and cannot be created\n", outputDirectory.data());
+                "exist and can not be created\n", outputDirectory.data());
             exit(1);
+
          } else {
-            msg("Notice: Output directory `%s' does not exist. "
-                "I have created it for you.\n", outputDirectory.data());
+            msg("Notice: Output directory `%s' was created.\n", outputDirectory.data());
          }
+
          dir.cd(outputDirectory);
       }
       outputDirectory = dir.absolutePath().toUtf8();
@@ -3174,25 +3176,3 @@ void generatePerlMod()
    PerlModGenerator pmg(Config_getBool("PERLMOD_PRETTY"));
    pmg.generate();
 }
-
-// Local Variables:
-// c-basic-offset: 2
-// End:
-
-/* This elisp function for XEmacs makes Control-Z transform
-   the text in the region into a valid C string.
-
-  (global-set-key '(control z) (lambda () (interactive)
-   (save-excursion
-    (if (< (mark) (point)) (exchange-point-and-mark))
-    (let ((start (point)) (replacers
-     '(("\\\\" "\\\\\\\\")
-       ("\"" "\\\\\"")
-       ("\t" "\\\\t")
-       ("^.*$" "\"\\&\\\\n\""))))
-     (while replacers
-      (while (re-search-forward (caar replacers) (mark) t)
-       (replace-match (cadar replacers) t))
-      (goto-char start)
-      (setq replacers (cdr replacers)))))))
-*/
