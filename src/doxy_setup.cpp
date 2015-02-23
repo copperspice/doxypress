@@ -37,6 +37,7 @@
 #include <filename.h>
 #include <filestorage.h>
 #include <formula.h>
+#include <fortranscanner.h>
 #include <groupdef.h>
 #include <htmlgen.h>
 #include <index.h>
@@ -57,6 +58,7 @@
 #include <reflist.h>
 #include <rtfgen.h>
 #include <scanner.h>
+#include <tclscanner.h>
 #include <util.h>
 
 // globals
@@ -105,21 +107,19 @@ void initDoxygen()
    Doxygen::parserManager->registerDefaultParser(new FileParser);
    Doxygen::parserManager->registerParser("c", new CLanguageScanner);
 
-   Doxygen::parserManager->registerParser("python",         new PythonLanguageScanner);
+   Doxygen::parserManager->registerParser("python",       new PythonLanguageScanner);
 
-// BROOM  (out for now)
-//   Doxygen::parserManager->registerParser("fortran",      new FortranLanguageScanner);
-//   Doxygen::parserManager->registerParser("fortranfree",  new FortranLanguageScannerFree);
-//   Doxygen::parserManager->registerParser("fortranfixed", new FortranLanguageScannerFixed);
+   Doxygen::parserManager->registerParser("fortran",      new FortranLanguageScanner);
+   Doxygen::parserManager->registerParser("fortranfree",  new FortranLanguageScannerFree);
+   Doxygen::parserManager->registerParser("fortranfixed", new FortranLanguageScannerFixed);
 
-// BROOM  (out for now)
-//   Doxygen::parserManager->registerParser("dbusxml",      new DBusXMLScanner);
+// unsupported feature (broom) 
+// Doxygen::parserManager->registerParser("dbusxml",      new DBusXMLScanner);
 
-// BROOM  (out for now)
-//   Doxygen::parserManager->registerParser("tcl",          new TclLanguageScanner);
+   Doxygen::parserManager->registerParser("tcl",          new TclLanguageScanner);
 
-   Doxygen::parserManager->registerParser("md",             new MarkdownFileParser);
-   Doxygen::parserManager->registerParser("make",           new MakeFileParser);
+   Doxygen::parserManager->registerParser("md",           new MarkdownFileParser);
+   Doxygen::parserManager->registerParser("make",         new MakeFileParser);
 
    // register any additional parsers here
    initDefaultExtensionMapping();
@@ -520,9 +520,7 @@ void readConfiguration(struct CommandLine cmdArgs)
   
    // Perlmod wants to know the path to the config file
    QFileInfo configFileInfo(cmdArgs.configName);
-
-//BROOM   setPerlModDoxyfile(qPrintable(cmdArgs.configName.absoluteFilePath()));
-
+   setPerlModDoxyfile(qPrintable(configFileInfo.absoluteFilePath()));
 }
 
 // check and resolve config options

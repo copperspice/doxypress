@@ -25,23 +25,23 @@
 
 static const int maxCmdLine = 40960;
 
-void writeDiaGraphFromFile(const char *inFile, const char *outDir,
-                           const char *outFile, DiaOutputFormat format)
+void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, DiaOutputFormat format)
 {
-   QByteArray absOutFile = outDir;
+   QString absOutFile = outDir;
    absOutFile += portable_pathSeparator();
    absOutFile += outFile;
 
    // chdir to the output dir, so dot can find the font file.
-   QByteArray oldDir = QDir::currentPath().toUtf8();
+   QString oldDir = QDir::currentPath();
 
    // go to the html output directory (i.e. path)
    QDir::setCurrent(outDir);
 
    //printf("Going to dir %s\n",QDir::currentPath().data());
-   QByteArray diaExe = Config_getString("DIA_PATH") + "dia" + portable_commandExtension();
-   QByteArray diaArgs;
-   QByteArray extension;
+   QString diaExe = Config_getString("DIA_PATH") + "dia" + portable_commandExtension();
+
+   QString diaArgs;
+   QString extension;
 
    diaArgs += "-n ";
 
@@ -65,10 +65,9 @@ void writeDiaGraphFromFile(const char *inFile, const char *outDir,
    bool ok = true;
    int exitCode;
 
-   //printf("*** running: %s %s outDir:%s %s\n",diaExe.data(),diaArgs.data(),outDir,outFile);
    portable_sysTimerStart();
 
-   if ((exitCode = portable_system(diaExe, diaArgs, false)) != 0) {
+   if ((exitCode = portable_system(diaExe.toUtf8(), diaArgs.toUtf8(), false)) != 0) {
       portable_sysTimerStop();
       ok = false;     
    }

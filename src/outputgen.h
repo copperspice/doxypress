@@ -64,7 +64,7 @@ class CodeOutputInterface
     *  spaces visible, should break lines at a newline and should convert
     *  tabs to the right number of spaces.
     */
-   virtual void codify(const QByteArray &s) = 0;
+   virtual void codify(const QByteArray &s) = 0 ;
 
    /*! Writes a link to an object in a code fragment.
     *  \param ref      If this is non-zero, the object is to be found in
@@ -84,8 +84,7 @@ class CodeOutputInterface
     *  \param anchor     The anchor part of the URL pointing to the docs.
     *  \param lineNumber The line number to write
     */
-   virtual void writeLineNumber(const char *ref, const QByteArray &file,
-                                const char *anchor, int lineNumber) = 0;
+   virtual void writeLineNumber(const char *ref, const QByteArray &file, const char *anchor, int lineNumber) = 0;
 
    /*! Writes a tool tip definition
     *  \param id       unique identifier for the tooltip

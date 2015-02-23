@@ -150,12 +150,10 @@ bool GroupDef::addClass(QSharedPointer<ClassDef> cd)
    }
 
    updateLanguage(cd);
+   QByteArray qn = cd->qualifiedName();  
 
-   if (classSDict->find(cd->qualifiedName()) == 0) {
-
-      QByteArray qn = cd->qualifiedName();      
-      classSDict->insert(cd->qualifiedName(), cd);        
-
+   if (classSDict->find(qn) == 0) {          
+      classSDict->insert(qn, cd); 
       return true;
    }
 

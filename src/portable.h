@@ -34,7 +34,7 @@ typedef off_t portable_off_t;
  *  @brief Portable versions of functions that are platform dependent.
  */
 
-int            portable_system(const char *command, const char *args, bool commandHasConsole = true);
+int            portable_system(const QByteArray &command, const QByteArray &args, bool commandHasConsole = true);
 uint           portable_pid();
 const char    *portable_getenv(const char *variable);
 void           portable_setenv(const char *variable, const char *value);

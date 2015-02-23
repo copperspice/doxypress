@@ -27,11 +27,10 @@ class FileDef;
 class MemberDef;
 class Definition;
 
-void parseFortranCode(CodeOutputInterface &, const char *, const QByteArray &,
-                      bool , const char *, FileDef *fd,
-                      int startLine, int endLine, bool inlineFragment,
-                      MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx,
-                      bool collectRefs, FortranFormat format);
+void parseFortranCode(CodeOutputInterface &, const char *, const QByteArray &, bool, const char *, 
+                  QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
+                  QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
+                  bool collectRefs, FortranFormat format);
 
 void resetFortranCodeParserState();
 void codeFreeScanner();

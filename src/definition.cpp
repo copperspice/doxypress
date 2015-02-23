@@ -678,10 +678,12 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
 
    SrcLangExt lang = getLanguageFromFileName(fileName);
 
-   if (!usePipe) { // no filter given or wanted
+   if (! usePipe) { 
+      // no filter given or wanted
       f = fopen(fileName, "r");
 
-   } else { // use filter
+   } else { 
+      // use filter
       QByteArray cmd = filter + " \"" + fileName + "\"";
       Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", cmd.data());
 
@@ -696,51 +698,75 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
       int c = 0;
       int col = 0;
       int lineNr = 1;
+
       // skip until the startLine has reached
+
       while (lineNr < startLine && !feof(f)) {
          while ((c = fgetc(f)) != '\n' && c != EOF) /* skip */;
          lineNr++;
+
+         if (found && c == '\n') {
+            c = '\0';
+         }
       }
-      if (!feof(f)) {
+
+      if (! feof(f)) {
          // skip until the opening bracket or lonely : is found
          char cn = 0;
-         while (lineNr <= endLine && !feof(f) && !found) {
+
+         while (lineNr <= endLine && ! feof(f) && !found) {
             int pc = 0;
+
             while ((c = fgetc(f)) != '{' && c != ':' && c != EOF) {
-               //printf("parsing char `%c'\n",c);
+
                if (c == '\n') {
-                  lineNr++, col = 0;
+                  lineNr++;
+                  col = 0;
+
                } else if (c == '\t') {
                   col += tabSize - (col % tabSize);
-               } else if (pc == '/' && c == '/') { // skip single line comment
+
+               } else if (pc == '/' && c == '/') { 
+                  // skip single line comment
+
                   while ((c = fgetc(f)) != '\n' && c != EOF) {
                      pc = c;
                   }
+
                   if (c == '\n') {
                      lineNr++, col = 0;
                   }
-               } else if (pc == '/' && c == '*') { // skip C style comment
+
+               } else if (pc == '/' && c == '*') { 
+                  // skip C style comment
+
                   while (((c = fgetc(f)) != '/' || pc != '*') && c != EOF) {
                      if (c == '\n') {
-                        lineNr++, col = 0;
+                        lineNr++;
+                        col = 0;
                      }
+
                      pc = c;
                   }
+
                } else {
                   col++;
                }
                pc = c;
             }
+
             if (c == ':') {
                cn = fgetc(f);
                if (cn != ':') {
                   found = true;
                }
-            } else if (c == '{') { // } so vi matching brackets has no problem
+
+            } else if (c == '{') { 
+               // } so vi matching brackets has no problem
                found = true;
             }
          }
-         //printf(" -> readCodeFragment(%s,%d,%d) lineNr=%d\n",fileName,startLine,endLine,lineNr);
+         
          if (found) {
             // For code with more than one line,
             // fill the line with spaces until we are at the right column
@@ -750,26 +776,33 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
                spaces.fill(' ', col);
                result += spaces;
             }
-            // copy until end of line
-            result += c;
+
+            // copy until end of line            
+            if (c) {
+               result += c;
+            }
+
             startLine = lineNr;
+
             if (c == ':') {
                result += cn;
                if (cn == '\n') {
                   lineNr++;
                }
             }
+
             const int maxLineLength = 4096;
             char lineStr[maxLineLength];
-            do {
-               //printf("reading line %d in range %d-%d\n",lineNr,startLine,endLine);
+            do {               
                int size_read;
+
                do {
                   // read up to maxLineLength-1 bytes, the last byte being zero
                   char *p = fgets(lineStr, maxLineLength, f);
-                  //printf("  read %s",p);
+                 
                   if (p) {
                      size_read = qstrlen(p);
+
                   } else { // nothing read
                      size_read = -1;
                      lineStr[0] = '\0';

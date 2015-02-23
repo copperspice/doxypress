@@ -48,9 +48,9 @@ extern char **environ;
 static double  g_sysElapsedTime;
 static QTime   g_time;
 
-int portable_system(const char *command, const char *args, bool commandHasConsole)
+int portable_system(const QByteArray &command, const QByteArray &args, bool commandHasConsole)
 {
-   if (command == 0) {
+   if (command.isEmpty()) {
       return 1;
    }
 

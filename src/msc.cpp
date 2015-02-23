@@ -99,21 +99,18 @@ static bool convertMapFile(QTextStream &t, const char *mapName, const QByteArray
    return true;
 }
 
-void writeMscGraphFromFile(const char *inFile, const char *outDir,
-                           const char *outFile, MscOutputFormat format)
+void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, MscOutputFormat format)
 {
-   QByteArray absOutFile = outDir;
+   QString absOutFile = outDir;
    absOutFile += portable_pathSeparator();
    absOutFile += outFile;
 
    // chdir to the output dir, so dot can find the font file.
-   QByteArray oldDir = QDir::currentPath().toUtf8();
+   QString oldDir = QDir::currentPath();
 
    // go to the html output directory (i.e. path)
    QDir::setCurrent(outDir);
    
-
-
    QByteArray mscExe = Config_getString("MSCGEN_PATH") + "mscgen" + portable_commandExtension();
    QByteArray mscArgs;
    QByteArray extension;

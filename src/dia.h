@@ -22,8 +22,7 @@ class QByteArray;
 
 enum DiaOutputFormat { DIA_BITMAP , DIA_EPS };
 
-void writeDiaGraphFromFile(const char *inFile, const char *outDir,
-                           const char *outFile, DiaOutputFormat format);
+void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, DiaOutputFormat format);
 
 #endif
 

@@ -144,14 +144,16 @@ class HtmlDocVisitor : public DocVisitor
    void writeObfuscatedMailAddress(const QByteArray &url);
    void filter(const char *str);
    void filterQuotedCdataAttr(const char *str);
-   void startLink(const QByteArray &ref, const QByteArray &file,
-                  const QByteArray &relPath, const QByteArray &anchor,
+
+   void startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &relPath, const QByteArray &anchor,
                   const QByteArray &tooltip = "");
+
    void endLink();
-   void writeDotFile(const QByteArray &fileName, const QByteArray &relPath, const QByteArray &context);
-   void writeMscFile(const QByteArray &fileName, const QByteArray &relPath, const QByteArray &context);
-   void writeDiaFile(const QByteArray &fileName, const QByteArray &relPath, const QByteArray &context);
-   void writePlantUMLFile(const QByteArray &fileName, const QByteArray &relPath, const QByteArray &context);
+
+   void writeDotFile(const QString &fileName, const QString &relPath, const QByteArray &context);
+   void writeMscFile(const QString &fileName, const QString &relPath, const QByteArray &context);
+   void writeDiaFile(const QString &fileName, const QString &relPath, const QByteArray &context);
+   void writePlantUMLFile(const QString &fileName, const QString &relPath, const QByteArray &context);
 
    void pushEnabled();
    void popEnabled();

@@ -961,8 +961,8 @@ void generateOutput()
    }
 
    if (generateLatex) {
-//BROOM       Doxy_Globals::g_outputList->add(new LatexGenerator);
-//BROOM       LatexGenerator::init();
+      Doxy_Globals::g_outputList->add(new LatexGenerator);
+      LatexGenerator::init();
 
       // copy static stuff
       copyExtraFiles("LATEX_EXTRA_FILES", "LATEX_OUTPUT");
@@ -1115,15 +1115,18 @@ void generateOutput()
       Doxy_Globals::g_stats.end();
    }
 
+/* unsupported feature (broom) 
+
    if (USE_SQLITE3) {
       Doxy_Globals::g_stats.begin("Generating SQLITE3 output\n");
-//BROOM      generateSqlite3();
+      generateSqlite3();
       Doxy_Globals::g_stats.end();
    }
+*/
 
    if (Config_getBool("GENERATE_DOCBOOK")) {
       Doxy_Globals::g_stats.begin("Generating Docbook output\n");
-//BROOM      generateDocbook();
+      generateDocbook();
       Doxy_Globals::g_stats.end();
    }
 
@@ -1135,7 +1138,7 @@ void generateOutput()
 
    if (Config_getBool("GENERATE_PERLMOD")) {
       Doxy_Globals::g_stats.begin("Generating Perl module output\n");
-//BROOM      generatePerlMod();
+      generatePerlMod();
       Doxy_Globals::g_stats.end();
    }
 
@@ -1838,7 +1841,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
  *  not found and set the parent/child scope relation if the scope is found.
  */
 QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QByteArray name, int level, 
-                                                                  SrcLangExt lang, TagInfo *tagInfo)
+                  SrcLangExt lang, TagInfo *tagInfo)
 {  
    int i = 0;
    int p = 0;
@@ -1849,6 +1852,11 @@ QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QByteArr
 
    while (i < level) {
       int idx = getScopeFragment(name, p, &l);
+
+      if (idx == -1) {
+         return prevScope;
+      }   
+
       QByteArray nsName = name.mid(idx, l);
 
       if (nsName.isEmpty()) {
@@ -7377,9 +7385,10 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
          } else {
             md->setFileDef(fd);
          }
+
          md->setBodySegment(root->bodyLine, root->endBodyLine);
          md->setBodyDef(rootNav->fileDef());
-         md->setMemberSpecifiers(root->spec); // UNO IDL "published"
+         md->setMemberSpecifiers(root->spec);
          md->setEnumBaseType(root->args);
          
          md->addSectionsToDefinition(root->anchors);
@@ -7527,7 +7536,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
          }
       }
 
-      if (cd && !name.isEmpty()) { 
+      if (cd && ! name.isEmpty()) { 
          // found a enum inside a compound        
          fd   = QSharedPointer<FileDef>();
          mnsd = Doxygen::memberNameSDict;
@@ -7570,12 +7579,20 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                         e->loadEntry(Doxy_Globals::g_storage);
 
                         QSharedPointer<Entry> root = e->entry();
-                        
-                        if (substitute(md->qualifiedName(), "::", ".") == // TODO: add function to get canonical representation
-                              substitute(rootNav->name(), "::", ".") ||  // enum value scope matches that of the enum
-                              rootNav->tagInfo() ) {
 
+                        QByteArray qualifiedName = substitute(rootNav->name(),"::",".");
+
+                        if (! scope.isEmpty() && rootNav->tagInfo()) {
+                           qualifiedName = substitute(scope,"::",".") + "." + qualifiedName;
+                        }
+                        
+                        // TODO: add function to get canonical representation
+
+                        if (substitute(md->qualifiedName(), "::", ".") == qualifiedName) {
+
+                           // enum value scope matches that of the enum
                            // be less strict for tag files as members can have incomplete scope
+
                            QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(root->fileName, root->startLine, 
                               root->startColumn, root->type, root->name, root->args, nullptr, Public, Normal, 
                               root->stat, Member, MemberType_EnumValue, nullptr, nullptr);
@@ -8952,8 +8969,14 @@ void Doxy_Work::copyStyleSheet()
       QFileInfo fi(htmlStyleSheet);
 
       if (! fi.exists()) {
-         err("Style sheet '%s' specified by HTML_STYLESHEET does not exist\n", htmlStyleSheet.data());
-         htmlStyleSheet.resize(0); // revert to the default
+         err("Style sheet '%s' specified by HTML_STYLESHEET does not exist\n",htmlStyleSheet.constData() );      
+         htmlStyleSheet = ""; 
+
+      } else if (fi.fileName() == "doxygen.css" || fi.fileName() == "tabs.css" || fi.fileName()=="navtree.css") {
+         err("Style sheet %s specified by HTML_STYLESHEET is a built in stylesheet. Please use a "
+               "different name\n", htmlStyleSheet.constData() ); 
+
+         htmlStyleSheet = "";     
 
       } else {
          QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
@@ -8969,9 +8992,13 @@ void Doxy_Work::copyStyleSheet()
       if (! fileName.isEmpty()) {
          QFileInfo fi(fileName);
 
-         if (!fi.exists()) {
-            err("Style sheet '%s' specified by HTML_EXTRA_STYLESHEET does not exist\n", qPrintable(fileName));
+         if (! fi.exists()) {
+            err("Style sheet '%s' specified by HTML_EXTRA_STYLESHEET does not exist\n", fileName.constData());
 
+         } else if (fi.fileName() == "doxygen.css" || fi.fileName() == "tabs.css" || fi.fileName()=="navtree.css") {
+            err("Style sheet %s specified by HTML_EXTRA_STYLESHEET is a built in stylesheet. Please use a "
+               "different name\n", fileName.constData());      
+            
          } else {
             QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
             copyFile(fileName, destFileName.toUtf8());
@@ -9078,6 +9105,10 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
       readInputFile(fileName, preBuf);
    }
 
+   if (preBuf.data() && preBuf.curPos() > 0 && *(preBuf.data() + preBuf.curPos() - 1) != '\n') {
+      preBuf.addChar('\n'); // add extra newline to help parser
+   }
+   
    BufStr convBuf(preBuf.curPos() + 1024);
 
    // convert multi-line C++ comments to C style comments

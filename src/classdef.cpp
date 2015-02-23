@@ -2717,20 +2717,20 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
                Protection prot = mi.prot;
 
                // deepCopy() is in memberDef.cpp                 
-               QSharedPointer<MemberDef> newMd(mi.memberDef->deepCopy());
-               
-               newMd->moveTo(self);
-
-               MemberInfo newMi = MemberInfo(newMd, prot, mi.virt, mi.inherited);
-
-               newMi.scopePath  = mi.scopePath;
-               newMi.ambigClass = mi.ambigClass;
-               newMi.ambiguityResolutionScope = mi.ambiguityResolutionScope;
-
-               newMni->append(newMi);
-
+               QSharedPointer<MemberDef> newMd(mi.memberDef->deepCopy());              
+              
                // also add the newly created member to the global members list
                if (newMd) {
+                  newMd->moveTo(self);
+
+                  MemberInfo newMi = MemberInfo(newMd, prot, mi.virt, mi.inherited);
+
+                  newMi.scopePath  = mi.scopePath;
+                  newMi.ambigClass = mi.ambigClass;
+                  newMi.ambiguityResolutionScope = mi.ambiguityResolutionScope;
+
+                  newMni->append(newMi);
+
                   QSharedPointer<MemberName> mn;
                   QByteArray name = newMd->name();
 
@@ -2743,17 +2743,17 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
 
                      Doxygen::memberNameSDict->insert(name, mn);
                   }
+
+                  newMd->setCategory(category);
+                  newMd->setCategoryRelation(mi.memberDef);
+                  mi.memberDef->setCategoryRelation(newMd);
+
+                  if (makePrivate || isExtension) {
+                     newMd->makeImplementationDetail();
+                  }
+
+                  internalInsertMember(newMd, prot, false);
                }
-
-               newMd->setCategory(category);
-               newMd->setCategoryRelation(mi.memberDef);
-               mi.memberDef->setCategoryRelation(newMd);
-
-               if (makePrivate || isExtension) {
-                  newMd->makeImplementationDetail();
-               }
-
-               internalInsertMember(newMd, prot, false);
             }
 
             // add it to the dictionary

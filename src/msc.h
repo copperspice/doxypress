@@ -24,15 +24,12 @@
 
 enum MscOutputFormat { MSC_BITMAP , MSC_EPS, MSC_SVG };
 
-void writeMscGraphFromFile(const char *inFile, const char *outDir,
-                           const char *outFile, MscOutputFormat format);
+void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, MscOutputFormat format);
 
-QByteArray getMscImageMapFromFile(const QByteArray &inFile, const QByteArray &outDir,
-                                  const QByteArray &relPath, const QByteArray &context);
+QByteArray getMscImageMapFromFile(const QString &nFile, const QString &outDir, const QString &relPath, const QByteArray &contxt);
 
-void writeMscImageMapFromFile(QTextStream &t, const QByteArray &inFile,
-                              const QByteArray &outDir, const QByteArray &relPath,
-                              const QByteArray &baseName, const QByteArray &context, MscOutputFormat format );
+void writeMscImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath,
+                  const QString &baseName, const QByteArray &context, MscOutputFormat format );
 
 #endif
 

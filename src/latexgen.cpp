@@ -1141,17 +1141,18 @@ void LatexGenerator::writeString(const char *text)
    m_textStream << text;
 }
 
-void LatexGenerator::startIndexItem(const char *ref, const char *fn)
+void LatexGenerator::startIndexItem(const QByteArray &ref, const QByteArray &fn)
 {
    m_textStream << "\\item ";
-   if (!ref && fn) {
+
+   if (ref.isEmpty() && ! fn.isEmpty()) {
       m_textStream << "\\contentsline{section}{";
    }
 }
 
-void LatexGenerator::endIndexItem(const char *ref, const char *fn)
+void LatexGenerator::endIndexItem(const QByteArray &ref, const QByteArray &fn)
 {
-   if (!ref && fn) {
+   if (ref.isEmpty() && ! fn.isEmpty()) {
       m_textStream << "}{\\pageref{" << stripPath(fn) << "}}{}" << endl;
    }
 }
@@ -1789,17 +1790,16 @@ void LatexGenerator::startMemberTemplateParams()
    }
 }
 
-void LatexGenerator::endMemberTemplateParams(const char *, const char *)
+void LatexGenerator::endMemberTemplateParams(const char *, const QByteArray &)
 {
    if (templateMemberItem) {
       m_textStream << "}\\\\";
    }
 }
 
-void LatexGenerator::startMemberItem(const char *, int annoType, const char *)
+void LatexGenerator::startMemberItem(const char *, int annoType, const QByteArray &)
 {
-   //printf("LatexGenerator::startMemberItem(%d)\n",annType);
-   if (!insideTabbing) {
+   if (! insideTabbing) {
       m_textStream << "\\item " << endl;
       templateMemberItem = (annoType == 3);
    }
@@ -1814,10 +1814,11 @@ void LatexGenerator::endMemberItem()
    m_textStream << endl;
 }
 
-void LatexGenerator::startMemberDescription(const char *, const char *)
+void LatexGenerator::startMemberDescription(const char *, const QByteArray &)
 {
    if (!insideTabbing) {
       m_textStream << "\\begin{DoxyCompactList}\\small\\item\\em ";
+
    } else {
       for (int i = 0; i < m_indent + 2; i++) {
          m_textStream << "\\>";
@@ -1980,10 +1981,11 @@ void LatexGenerator::endDescItem()
    }
 }
 
-void LatexGenerator::startSimpleSect(SectionTypes, const char *file, const char *anchor, const char *title)
+void LatexGenerator::startSimpleSect(SectionTypes, const QByteArray &file, const char *anchor, const char *title)
 {
    m_textStream << "\\begin{Desc}\n\\item[";
-   if (file) {
+
+   if (! file.isEmpty()) {
       writeObjectLink(0, file, anchor, title);
    } else {
       docify(title);
@@ -2236,7 +2238,7 @@ void LatexGenerator::endCodeFragment()
    m_textStream << "\\end{DoxyCode}\n";
 }
 
-void LatexGenerator::writeLineNumber(const char *ref, const char *fileName, const char *anchor, int len)
+void LatexGenerator::writeLineNumber(const char *ref, const QByteArray &fileName, const char *anchor, int len)
 {
    static bool usePDFLatex   = Config_getBool("USE_PDFLATEX");
    static bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
@@ -2245,7 +2247,7 @@ void LatexGenerator::writeLineNumber(const char *ref, const char *fileName, cons
       QByteArray lineNumber;
       lineNumber = QString("%05d").arg(len).toUtf8();;
 
-      if (fileName && ! sourceFileName.isEmpty()) {
+      if (! fileName.isEmpty() && ! sourceFileName.isEmpty()) {
          QByteArray lineAnchor;
          lineAnchor = QString("_l%05d").arg(len).toUtf8();
 

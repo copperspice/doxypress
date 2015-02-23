@@ -136,24 +136,20 @@ class RTFDocVisitor : public DocVisitor
 
  private:
 
-   //--------------------------------------
-   // helper functions
-   //--------------------------------------
-
    void filter(const char *str, bool verbatim = false);
-   void startLink(const QByteArray &ref, const QByteArray &file,
-                  const QByteArray &anchor);
+   void startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor);
    void endLink(const QByteArray &ref);
+
    QByteArray getStyle(const char *name);
    void incIndentLevel();
    void decIndentLevel();
 
    void pushEnabled();
    void popEnabled();
-   void writeDotFile(const QByteArray &fileName);
-   void writeMscFile(const QByteArray &fileName);
-   void writeDiaFile(const QByteArray &fileName);
-   void writePlantUMLFile(const QByteArray &fileName);
+   void writeDotFile(const QString &fileName);
+   void writeMscFile(const QString &fileName);
+   void writeDiaFile(const QString &fileName);
+   void writePlantUMLFile(const QString &fileName);
 
    //--------------------------------------
    // state variables

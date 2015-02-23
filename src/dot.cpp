@@ -3679,7 +3679,8 @@ bool DotCallGraph::isTooBig() const
    return numNodes >= maxNodes;
 }
 
-DotDirDeps::DotDirDeps(DirDef *dir) : m_dir(dir)
+DotDirDeps::DotDirDeps(QSharedPointer<DirDef> dir) 
+   : m_dir(dir)
 {
 }
 
@@ -3688,8 +3689,7 @@ DotDirDeps::~DotDirDeps()
 }
 
 QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
-                                  const char *path, const char *fileName, const char *relPath, bool generateImageMap,
-                                  int graphId) const
+                  const char *path, const char *fileName, const char *relPath, bool generateImageMap, int graphId) const
 {
    QDir d(path);
 
@@ -3999,47 +3999,50 @@ void writeDotGraphFromFile(const char *inFile, const char *outDir,
  *  \param context the scope in which this graph is found (for resolving links)
  *  \param graphId a unique id for this graph, use for dynamic sections
  */
-void writeDotImageMapFromFile(QTextStream &t, const QByteArray &inFile, const QByteArray &outDir, 
-                              const QByteArray &relPath, const QByteArray &baseName, 
-                              const QByteArray &context, int graphId)
+void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath, 
+                  const QString &baseName, const QByteArray &context, int graphId)
 {
    QDir d(outDir);
 
-   if (!d.exists()) {
+   if (! d.exists()) {
       err("Output dir %s does not exist!\n", outDir.data());
       exit(1);
    }
 
-   QByteArray mapName = baseName + ".map";
-   QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
-   QByteArray imgName = baseName + "." + imgExt;
-   QByteArray absOutFile = d.absolutePath().toUtf8() + "/" + mapName;
+   QString mapName = baseName + ".map";
+   QString imgExt  = Config_getEnum("DOT_IMAGE_FORMAT");
+   QString imgName = baseName + "." + imgExt;
+   QString absOutFile = d.absolutePath() + "/" + mapName;
 
-   DotRunner dotRun(inFile, d.absolutePath().toUtf8(), false);
-   dotRun.addJob(MAP_CMD, absOutFile);
+   DotRunner dotRun(inFile.toUtf8(), d.absolutePath().toUtf8(), false);
+   dotRun.addJob(MAP_CMD, absOutFile.toUtf8());
    dotRun.preventCleanUp();
 
-   if (!dotRun.run()) {
+   if (! dotRun.run()) {
       return;
    }
 
    if (imgExt == "svg") { // vector graphics
       //writeSVGFigureLink(t,relPath,inFile,inFile+".svg");
       //DotFilePatcher patcher(inFile+".svg");
-      QByteArray svgName = outDir + "/" + baseName + ".svg";
-      writeSVGFigureLink(t, relPath, baseName, svgName);
-      DotFilePatcher patcher(svgName);
-      patcher.addSVGConversion(relPath, true, context, true, graphId);
+
+      QString svgName = outDir + "/" + baseName + ".svg";
+      writeSVGFigureLink(t, relPath.toUtf8(), baseName.toUtf8(), svgName.toUtf8());
+
+      DotFilePatcher patcher(svgName.toUtf8());
+      patcher.addSVGConversion(relPath.toUtf8(), true, context, true, graphId);
       patcher.run();
+
    } else { // bitmap graphics
       t << "<img src=\"" << relPath << imgName << "\" alt=\""
         << imgName << "\" border=\"0\" usemap=\"#" << mapName << "\"/>" << endl
         << "<map name=\"" << mapName << "\" id=\"" << mapName << "\">";
 
-      convertMapFile(t, absOutFile, relPath , true, context);
+      convertMapFile(t, absOutFile.toUtf8(), relPath.toUtf8(), true, context);
 
       t << "</map>" << endl;
    }
+
    d.remove(absOutFile);
 }
 
@@ -4066,7 +4069,6 @@ DotGroupCollaboration::~DotGroupCollaboration()
 void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
 {
    QByteArray tmp_url;  
-   // hierarchy.
 
    // Write parents
    SortedList<QSharedPointer<GroupDef>> *groups = gd->partOfGroups();

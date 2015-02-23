@@ -78,6 +78,8 @@ DoxyPress_SOURCES = \
    src/diagram.cpp \
    src/dirdef.cpp \
    src/docparser.cpp \
+   src/docbookgen.cpp  \
+   src/docbookvisitor.cpp \
    src/docsets.cpp \
    src/dot.cpp \
    src/eclipsehelp.cpp \
@@ -149,17 +151,16 @@ DoxyPress_SOURCES = \
    src/generated/defargs.cpp \
    src/generated/declinfo.cpp  \
    src/generated/doctokenizer.cpp \
+   src/generated/fortrancode.cpp \
+   src/generated/fortranscanner.cpp \
    src/generated/pre.cpp \
    src/generated/pycode.cpp  \
    src/generated/pyscanner.cpp \
-   src/generated/scanner.cpp
+   src/generated/scanner.cpp \
+   src/generated/tclscanner.cpp
 
-#   src/generated/fortrancode.cpp \
-#   src/generated/fortranscanner.cpp \
-#   src/generated/tclscanner.cpp
-#   src/docbookgen.cpp
-#   src/docbookvisitor.cpp
-#   src/dbusxmlscanner.cpp
+# not currently using
+# src/dbusxmlscanner.cpp
 
 RESOURCES = doxypress.qrc
 

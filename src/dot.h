@@ -293,14 +293,14 @@ class DotCallGraph
 class DotDirDeps
 {
  public:
-   DotDirDeps(DirDef *dir);
+   DotDirDeps(QSharedPointer<DirDef> dir);
    ~DotDirDeps();
 
    bool isTrivial() const;
    QByteArray writeGraph(QTextStream &out, GraphOutputFormat gf, EmbeddedOutputFormat ef, const char *path,
                          const char *fileName, const char *relPath, bool writeImageMap = true, int graphId = -1) const;
  private:
-   DirDef *m_dir;
+   QSharedPointer<DirDef> m_dir;
 };
 
 /** Representation of a group collaboration graph */
@@ -515,12 +515,10 @@ class DotManager
 /** Generated a graphs legend page */
 void generateGraphLegend(const char *path);
 
-void writeDotGraphFromFile(const char *inFile, const char *outDir,
-                           const char *outFile, GraphOutputFormat format);
+void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, GraphOutputFormat format);
 
-void writeDotImageMapFromFile(QTextStream &t, const QByteArray &inFile, const QByteArray &outDir,
-                              const QByteArray &relPath, const QByteArray &baseName,
-                              const QByteArray &context, int graphId = -1);
+void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath, 
+                  const QString &baseName, const QByteArray &context, int graphId = -1);
 
 void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd);
 

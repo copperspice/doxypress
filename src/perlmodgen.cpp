@@ -2647,7 +2647,7 @@ bool PerlModGenerator::generateDoxyStructurePM()
 bool PerlModGenerator::generateDoxyRules()
 {
    QFile doxyRules;
-   if (!createOutputFile(doxyRules, pathDoxyRules)) {
+   if (! createOutputFile(doxyRules, pathDoxyRules)) {
       return false;
    }
 
@@ -2661,6 +2661,7 @@ bool PerlModGenerator::generateDoxyRules()
                    prefix << "DOXYDOCS_PM = " << pathDoxyDocsPM << "\n" <<
                    prefix << "DOXYSTRUCTURE_PM = " << pathDoxyStructurePM << "\n" <<
                    prefix << "DOXYRULES = " << pathDoxyRules << "\n";
+
    if (perlmodLatex)
       doxyRulesStream <<
                       prefix << "DOXYLATEX_PL = " << pathDoxyLatexPL << "\n" <<

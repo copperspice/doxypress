@@ -2112,9 +2112,9 @@ void HtmlDocVisitor::popEnabled()
    m_hide = v;   
 }
 
-void HtmlDocVisitor::writeDotFile(const QByteArray &fn, const QByteArray &relPath, const QByteArray &context)
+void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, const QByteArray &context)
 {
-   QByteArray baseName = fn;
+   QString baseName = fn;
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) {
@@ -2126,15 +2126,17 @@ void HtmlDocVisitor::writeDotFile(const QByteArray &fn, const QByteArray &relPat
    }
 
    baseName.prepend("dot_");
-   QByteArray outDir = Config_getString("HTML_OUTPUT");
+   QString outDir = Config_getString("HTML_OUTPUT");
+
    writeDotGraphFromFile(fn, outDir, baseName, GOF_BITMAP);
    writeDotImageMapFromFile(m_t, fn, outDir, relPath, baseName, context);
 }
 
-void HtmlDocVisitor::writeMscFile(const QByteArray &fileName, const QByteArray &relPath, const QByteArray &context)
+void HtmlDocVisitor::writeMscFile(const QString &fileName, const QString &relPath, const QByteArray &context)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
+
    if ((i = baseName.lastIndexOf('/')) != -1) { // strip path
       baseName = baseName.right(baseName.length() - i - 1);
    }
@@ -2142,9 +2144,11 @@ void HtmlDocVisitor::writeMscFile(const QByteArray &fileName, const QByteArray &
    if ((i = baseName.indexOf('.')) != -1) { // strip extension
       baseName = baseName.left(i);
    }
+
    baseName.prepend("msc_");
-   QByteArray outDir = Config_getString("HTML_OUTPUT");
-   QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+
+   QString outDir = Config_getString("HTML_OUTPUT");
+   QString imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
 
    MscOutputFormat mscFormat = MSC_BITMAP;
 
@@ -2156,9 +2160,9 @@ void HtmlDocVisitor::writeMscFile(const QByteArray &fileName, const QByteArray &
    writeMscImageMapFromFile(m_t, fileName, outDir, relPath, baseName, context, mscFormat);
 }
 
-void HtmlDocVisitor::writeDiaFile(const QByteArray &fileName, const QByteArray &relPath, const QByteArray &)
+void HtmlDocVisitor::writeDiaFile(const QString &fileName, const QString &relPath, const QByteArray &)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) { // strip path
@@ -2170,15 +2174,16 @@ void HtmlDocVisitor::writeDiaFile(const QByteArray &fileName, const QByteArray &
    }
 
    baseName.prepend("dia_");
-   QByteArray outDir = Config_getString("HTML_OUTPUT");
+
+   QString outDir = Config_getString("HTML_OUTPUT");
    writeDiaGraphFromFile(fileName, outDir, baseName, DIA_BITMAP);
 
    m_t << "<img src=\"" << relPath << baseName << ".png" << "\" />" << endl;
 }
 
-void HtmlDocVisitor::writePlantUMLFile(const QByteArray &fileName, const QByteArray &relPath, const QByteArray &)
+void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &relPath, const QByteArray &)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) { // strip path
@@ -2188,14 +2193,17 @@ void HtmlDocVisitor::writePlantUMLFile(const QByteArray &fileName, const QByteAr
       baseName = baseName.left(i);
    }
 
-   static QByteArray outDir = Config_getString("HTML_OUTPUT");
-   static QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+   static QString outDir = Config_getString("HTML_OUTPUT");
+   static QString imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+
    if (imgExt == "svg") {
       generatePlantUMLOutput(fileName, outDir, PUML_SVG);
+
       //m_t << "<iframe scrolling=\"no\" frameborder=\"0\" src=\"" << relPath << baseName << ".svg" << "\" />" << endl;
       //m_t << "<p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p>";
       //m_t << "</iframe>" << endl;
       m_t << "<object type=\"image/svg+xml\" data=\"" << relPath << baseName << ".svg\"></object>" << endl;
+
    } else {
       generatePlantUMLOutput(fileName, outDir, PUML_BITMAP);
       m_t << "<img src=\"" << relPath << baseName << ".png" << "\" />" << endl;

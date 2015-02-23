@@ -136,6 +136,10 @@ class StringMap
       m_dict.insert(key, d);   
    }  
 
+   bool isEmpty() const {
+      return m_dict.isEmpty();
+   }
+
    /*! Remove an item from the dictionary */
    bool remove(const char *key) { 
       return m_dict.remove(key); 

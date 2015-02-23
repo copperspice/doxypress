@@ -57,12 +57,12 @@ QByteArray writePlantUMLSource(const QByteArray &outDir, const QByteArray &fileN
    return baseName;
 }
 
-void generatePlantUMLOutput(const char *baseName, const char *outDir, PlantUMLOutputFormat format)
+void generatePlantUMLOutput(const QString &baseName, const QString &outDir, PlantUMLOutputFormat format)
 {
    static QByteArray plantumlJarPath = Config_getString("PLANTUML_JAR_PATH");
 
-   QByteArray pumlExe  = "java";
-   QByteArray pumlArgs = "";
+   QString pumlExe  = "java";
+   QString pumlArgs = "";
 
    QStringList pumlIncludePathList = Config_getList("PLANTUML_INCLUDE_PATH");
    QString s = pumlIncludePathList.first();
@@ -103,18 +103,16 @@ void generatePlantUMLOutput(const char *baseName, const char *outDir, PlantUMLOu
    pumlArgs += "-charset " + Config_getString("INPUT_ENCODING") + " ";
 
    int exitCode;
-
-   // printf("*** running: %s %s outDir:%s %s\n",pumlExe.data(),pumlArgs.data(),outDir,outFile);
-
-   msg("Running PlantUML on generated file %s.pu\n", baseName);
+   
+   msg("Running PlantUML on generated file %s.pu\n", qPrintable(baseName));
    portable_sysTimerStart();
 
-   if ((exitCode = portable_system(pumlExe, pumlArgs, false)) != 0) {
-      err("Problems running PlantUML. Verify the command 'java -jar \"%splantuml.jar\" -h' works from the command line. Exit code: %d\n",
-          plantumlJarPath.data(), exitCode);
+   if ((exitCode = portable_system(pumlExe.toUtf8(), pumlArgs.toUtf8(), false)) != 0) {
+      err("Problem running PlantUML, verify the command 'java -jar \"%splantuml.jar\" -h' works from the command line. Exit code: %d\n",
+          plantumlJarPath.constData(), exitCode);
 
    } else if (Config_getBool("DOT_CLEANUP")) {
-      QFile(QByteArray(baseName) + ".pu").remove();
+      QFile(baseName + ".pu").remove();
 
    }
 
@@ -126,8 +124,8 @@ void generatePlantUMLOutput(const char *baseName, const char *outDir, PlantUMLOu
 
       portable_sysTimerStart();
 
-      if ((exitCode = portable_system("epstopdf", epstopdfArgs.toLatin1())) != 0) {
-         err("Problems running epstopdf. Check your TeX installation! Exit code: %d\n", exitCode);
+      if ((exitCode = portable_system("epstopdf", epstopdfArgs.toUtf8())) != 0) {
+         err("Problem running epstopdf, verify your TeX installation, exit code: %d\n", exitCode);
       }
 
       portable_sysTimerStop();

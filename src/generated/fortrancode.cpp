@@ -300,9 +300,7 @@ static YY_BUFFER_STATE *yy_buffer_stack = 0;  /**< Stack as an array. */
  *
  * Returns the top of the stack, or NULL.
  */
-#define YY_CURRENT_BUFFER ( (yy_buffer_stack) \
-                          ? (yy_buffer_stack)[(yy_buffer_stack_top)] \
-                          : NULL)
+#define YY_CURRENT_BUFFER ( (yy_buffer_stack) ? (yy_buffer_stack)[(yy_buffer_stack_top)] : NULL)
 
 /* Same as previous macro, but useful when we know that the buffer stack is not
  * NULL or when we need an lvalue. For internal use only.
@@ -25956,7 +25954,7 @@ int yy_end       = 1;
 class UseEntry
 {
  public:
-   QByteArray module; // just for debug
+   QByteArray module;       // just for debug
    QStringList onlyNames;   /* entries of the ONLY-part */
 };
 
@@ -25964,7 +25962,7 @@ class UseEntry
   module name -> list of ONLY/remote entries
   (module name = name of the module, which can be accessed via use-directive)
 */
-class UseSDict : public StringMap<UseEntry>
+class UseSDict : public StringMap<UseEntry *>
 {
  public:
    UseSDict() {}
@@ -25976,37 +25974,33 @@ class UseSDict : public StringMap<UseEntry>
 class Scope
 {
  public:
-   QStringList useNames; //!< contains names of used modules
-   QHash<QString, void *> localVars; //!< contains names of local variables
+   QStringList useNames;                        //!< contains names of used modules
+   QHash<QString, void *> localVars;            //!< contains names of local variables
 
-   Scope() : localVars(7, FALSE /*caseSensitive*/) {}
+   Scope() {}      // Broom - localVars should be case insensitive
 };
-
-/*===================================================================*/
-/*
- *	statics
- */
 
 static QByteArray  docBlock;                   //!< contents of all lines of a documentation block
 static QByteArray  currentModule = 0;          //!< name of the current enclosing module
-static UseSDict  *useMembers = new UseSDict; //!< info about used modules
-static UseEntry  *useEntry = 0;              //!< current use statement info
-static QList<Scope> scopeStack;
+static UseSDict  *useMembers = new UseSDict;   //!< info about used modules
+static UseEntry  *useEntry = 0;                //!< current use statement info
+static QList<Scope *> scopeStack;
+
 // static QStringList *currentUseNames= new QStringList; //! contains names of used modules of current program unit
-static QByteArray str = "";       //!> contents of fortran string
+static QByteArray str = "";                    //!> contents of fortran string
 
 static CodeOutputInterface *g_code;
 
-// TODO: is this still needed? if so, make it work
-static QByteArray      g_parmType;
-static QByteArray      g_parmName;
+// TODO: is this still needed? 
+static QByteArray    g_parmType;
+static QByteArray    g_parmName;
 
 static const char   *g_inputString;     //!< the code fragment as text
-static int	     g_inputPosition;   //!< read offset during parsing
+static int	         g_inputPosition;   //!< read offset during parsing
 static int           g_inputLines;      //!< number of line in the code fragment
-static int	     g_yyLineNr;        //!< current line number
+static int	         g_yyLineNr;        //!< current line number
 static bool          g_needsTermination;
-static Definition   *g_searchCtx;
+
 static bool          g_collectXRefs;
 static bool          g_isFixedForm;
 
@@ -26014,17 +26008,19 @@ static bool          g_insideBody;      //!< inside subprog/program body? => cre
 static const char   *g_currentFontClass;
 
 static bool          g_exampleBlock;
-static QByteArray      g_exampleName;
-static QByteArray      g_exampleFile;
+static QByteArray    g_exampleName;
+static QString       g_exampleFile;
 
-static FileDef      *g_sourceFileDef;
-static Definition   *g_currentDefinition;
-static MemberDef    *g_currentMemberDef;
+static QSharedPointer<Definition> g_searchCtx;
+static QSharedPointer<FileDef>    g_sourceFileDef;
+static QSharedPointer<Definition> g_currentDefinition;
+static QSharedPointer<MemberDef>  g_currentMemberDef;
+
 static bool          g_includeCodeFragment;
 
 static char          stringStartSymbol; // single or double quote
-// count in variable declaration to filter out
-//  declared from referenced names
+
+// count in variable declaration to filter out declared from referenced names
 static int 	     bracketCount = 0;
 
 static bool      g_endComment;
@@ -26104,8 +26100,10 @@ static void startFontClass(const char *s)
 static void setCurrentDoc(const QByteArray &anchor)
 {
    if (Doxygen::searchIndex) {
+
       if (g_searchCtx) {
          Doxygen::searchIndex->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), FALSE);
+
       } else {
          Doxygen::searchIndex->setCurrentDoc(g_sourceFileDef, anchor, TRUE);
       }
@@ -26126,32 +26124,31 @@ static void addToSearchIndex(const char *text)
 static void startCodeLine()
 {
    if (g_sourceFileDef) {
-      //QByteArray lineNumber,lineAnchor;
-      //lineNumber.sprintf("%05d",g_yyLineNr);
-      //lineAnchor.sprintf("l%05d",g_yyLineNr);
-
-      Definition *d   = g_sourceFileDef->getSourceDefinition(g_yyLineNr);
-      //printf("startCodeLine %d d=%s\n", g_yyLineNr,d ? d->name().data() : "<null>");
-      if (!g_includeCodeFragment && d) {
+      
+      QSharedPointer<Definition> d = g_sourceFileDef->getSourceDefinition(g_yyLineNr);
+     
+      if (! g_includeCodeFragment && d) {
          g_currentDefinition = d;
          g_currentMemberDef = g_sourceFileDef->getSourceMember(g_yyLineNr);
          g_insideBody = FALSE;
          g_endComment = FALSE;
          g_parmType.resize(0);
          g_parmName.resize(0);
+
          QByteArray lineAnchor;
-         lineAnchor.sprintf("l%05d", g_yyLineNr);
+         lineAnchor = QString("l%1").arg(g_yyLineNr, 5, QChar('0')).toUtf8();
+
          if (g_currentMemberDef) {
-            g_code->writeLineNumber(g_currentMemberDef->getReference(),
-                                    g_currentMemberDef->getOutputFileBase(),
+            g_code->writeLineNumber(g_currentMemberDef->getReference(), g_currentMemberDef->getOutputFileBase(),
                                     g_currentMemberDef->anchor(), g_yyLineNr);
+ 
             setCurrentDoc(lineAnchor);
+
          } else if (d->isLinkableInProject()) {
-            g_code->writeLineNumber(d->getReference(),
-                                    d->getOutputFileBase(),
-                                    0, g_yyLineNr);
+            g_code->writeLineNumber(d->getReference(), d->getOutputFileBase(), 0, g_yyLineNr);
             setCurrentDoc(lineAnchor);
          }
+
       } else {
          g_code->writeLineNumber(0, 0, 0, g_yyLineNr);
       }
@@ -26162,8 +26159,8 @@ static void startCodeLine()
    }
 }
 
-
 static void endFontClass();
+
 static void endCodeLine()
 {
    endFontClass();
@@ -26174,15 +26171,16 @@ static void endCodeLine()
  * line numbers for each line.
  */
 static void codifyLines(char *text)
-{
-   //printf("codifyLines(%d,\"%s\")\n",g_yyLineNr,text);
+{   
    char *p = text, *sp = p;
    char c;
    bool done = FALSE;
    const char   *tmp_currentFontClass = g_currentFontClass;
+
    while (!done) {
       sp = p;
       while ((c = *p++) && c != '\n') { }
+
       if (c == '\n') {
          g_yyLineNr++;
          *(p - 1) = '\0';
@@ -26213,20 +26211,24 @@ static void codifyLines(QByteArray str)
  * line numbers for each line. If \a text contains newlines, the link will be
  * split into multiple links with the same destination, one for each line.
  */
-static void writeMultiLineCodeLink(CodeOutputInterface &ol,
-                                   Definition *d, const char *text)
+static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d, const char *text)
 {
    static bool sourceTooltips = Config_getBool("SOURCE_TOOLTIPS");
    TooltipManager::instance()->addTooltip(d);
-   QByteArray ref  = d->getReference();
-   QByteArray file = d->getOutputFileBase();
+
+   QByteArray ref    = d->getReference();
+   QByteArray file   = d->getOutputFileBase();
    QByteArray anchor = d->anchor();
    QByteArray tooltip;
-   if (!sourceTooltips) { // fall back to simple "title" tooltips
+
+   if (!sourceTooltips) { 
+      // fall back to simple "title" tooltips
       tooltip = d->briefDescriptionAsTooltip();
    }
+
    bool done = FALSE;
    char *p = (char *)text;
+
    while (!done) {
       char *sp = p;
       char c;
@@ -26248,8 +26250,6 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol,
    }
 }
 
-
-//-------------------------------------------------------------------------------
 /**
   searches for definition of a type
   @param tname the name of the type
@@ -26259,26 +26259,25 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol,
   @returns true, if type is found
 */
 static bool getFortranTypeDefs(const QByteArray &tname, const QByteArray &moduleName,
-                               ClassDef *&cd, UseSDict *usedict = 0)
+                               QSharedPointer<ClassDef> &cd, UseSDict *usedict = 0)
 {
    if (tname.isEmpty()) {
       return FALSE;   /* empty name => nothing to link */
-   }
-
-   //cout << "=== search for type: " << tname << endl;
+   }  
 
    // search for type
-   if ((cd = Doxygen::classSDict->find(tname))) {
-      //cout << "=== type found in global module" << endl;
+   if ((cd = Doxygen::classSDict->find(tname))) {      
       return TRUE;
-   } else if (moduleName && (cd = Doxygen::classSDict->find(moduleName + "::" + tname))) {
-      //cout << "=== type found in local module" << endl;
+
+   } else if (! moduleName.isEmpty() && (cd = Doxygen::classSDict->find(moduleName + "::" + tname))) {      
       return TRUE;
-   } else {
-      UseEntry *use;
-      for (UseSDict::Iterator di(*usedict); (use = di.current()); ++di) {
-         if ((cd = Doxygen::classSDict->find(use->module + "::" + tname))) {
-            //cout << "===  type found in used module" << endl;
+
+   } else {   
+
+      for (auto use : *usedict)  { 
+         cd = Doxygen::classSDict->find(use->module + "::" + tname);
+
+         if (cd) {            
             return TRUE;
          }
       }
@@ -26296,60 +26295,64 @@ static bool getFortranTypeDefs(const QByteArray &tname, const QByteArray &module
   @returns true, if found
 */
 static bool getFortranDefs(const QByteArray &memberName, const QByteArray &moduleName,
-                           MemberDef *&md, UseSDict *usedict = 0)
+                           QSharedPointer<MemberDef> &md, UseSDict *usedict = 0)
 {
    if (memberName.isEmpty()) {
-      return FALSE;   /* empty name => nothing to link */
+      return FALSE;  
    }
 
-   // look in local variables
-   QListIterator<Scope> it(scopeStack);
-   Scope *scope;
-   for (it.toLast(); (scope = it.current()); --it) {
-      if (scope->localVars.find(memberName)) {
+   // look in local variables  
+   for (auto scope : scopeStack) {
+      if (scope->localVars.contains(memberName)) {
          return FALSE;
       }
    }
 
    // search for function
-   MemberName *mn = Doxygen::functionNameSDict->find(memberName);
-   if (!mn) {
+   QSharedPointer<MemberName> mn = Doxygen::functionNameSDict->find(memberName);
+
+   if (! mn) {
       mn = Doxygen::memberNameSDict->find(memberName);
    }
 
-   if (mn) { // name is known
-      MemberListIterator mli(*mn);
-      for (mli.toFirst(); (md = mli.current()); ++mli) { // all found functions with given name
+   if (mn) { 
+      // name is known
+    
+      for (auto md : *mn) {
+
+         // all found functions with given name
          QSharedPointer<FileDef>  fd = md->getFileDef();
          QSharedPointer<GroupDef> gd = md->getGroupDef();
-
-         //cout << "found link with same name: " << fd->fileName() << "  " <<  memberName;
-         //if (md->getNamespaceDef() != 0) cout << " in namespace " << md->getNamespaceDef()->name();cout << endl;
-
+        
          if ((gd && gd->isLinkable()) || (fd && fd->isLinkable())) {
-            NamespaceDef *nspace = md->getNamespaceDef();
+            QSharedPointer<NamespaceDef> nspace = md->getNamespaceDef();
 
             if (nspace == 0) {
                // found function in global scope
                return TRUE;
+
             } else if (moduleName == nspace->name()) {
                // found in local scope
                return TRUE;
+
             } else {
                // else search in used modules
                QByteArray moduleName = nspace->name();
                UseEntry *ue = usedict->find(moduleName);
+
                if (ue) {
                   // check if only-list exists and if current entry exists is this list
                   QStringList &only = ue->onlyNames;
-                  if (only.isEmpty()) {
-                     //cout << " found in module " << moduleName << " entry " << memberName <<  endl;
+
+                  if (only.isEmpty()) {                    
                      return TRUE; // whole module used
+
                   } else {
+
                      for ( QStringList::Iterator it = only.begin(); it != only.end(); ++it) {
-                        //cout << " search in only: " << moduleName << ":: " << memberName << "==" << (*it)<<  endl;
                         if (memberName == (*it).toUtf8()) {
-                           return TRUE; // found in ONLY-part of use list
+                           // found in ONLY-part of use list
+                           return TRUE; 
                         }
                      }
                   }
@@ -26365,37 +26368,36 @@ static bool getFortranDefs(const QByteArray &memberName, const QByteArray &modul
  gets the link to a generic procedure which depends not on the name, but on the parameter list
  @todo implementation
 */
-static bool getGenericProcedureLink(const ClassDef *cd,
-                                    const char *memberText,
-                                    CodeOutputInterface &ol)
-{
-   (void)cd;
-   (void)memberText;
-   (void)ol;
+static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd, const char *memberText, CodeOutputInterface &ol)
+{ 
    return FALSE;
 }
 
-static bool getLink(UseSDict *usedict, // dictonary with used modules
-                    const char *memberText,  // exact member text
-                    CodeOutputInterface &ol,
-                    const char *text)
+static bool getLink(UseSDict *usedict, const char *memberText, CodeOutputInterface &ol, const char *text)
 {
-   MemberDef *md;
+   QSharedPointer<MemberDef> md;
    QByteArray memberName = removeRedundantWhiteSpace(memberText);
 
    if (getFortranDefs(memberName, currentModule, md, usedict) && md->isLinkable()) {
-      //if (md->isVariable()) return FALSE; // variables aren't handled yet
 
-      Definition *d = md->getOuterScope() == Doxygen::globalScope ?
-                      md->getBodyDef() : md->getOuterScope();
+      QSharedPointer<Definition> d;
+
+      if (md->getOuterScope() == Doxygen::globalScope) {
+         d = md->getBodyDef();
+
+      } else {
+         d->getOuterScope();
+      }
+
       if (md->getGroupDef()) {
          d = md->getGroupDef();
       }
+
       if (d && d->isLinkable()) {
-         if (g_currentDefinition && g_currentMemberDef &&
-               md != g_currentMemberDef && g_insideBody && g_collectXRefs) {
+         if (g_currentDefinition && g_currentMemberDef && md != g_currentMemberDef && g_insideBody && g_collectXRefs) {
             addDocCrossReference(g_currentMemberDef, md);
          }
+
          writeMultiLineCodeLink(ol, md, text ? text : memberText);
          addToSearchIndex(text ? text : memberText);
          return TRUE;
@@ -26407,29 +26409,32 @@ static bool getLink(UseSDict *usedict, // dictonary with used modules
 
 static void generateLink(CodeOutputInterface &ol, char *lname)
 {
-   ClassDef *cd = 0;
+   QSharedPointer<ClassDef> cd;
+
    QByteArray tmp = lname;
    tmp = removeRedundantWhiteSpace(tmp.toLower());
 
    // check if lowercase lname is a linkable type or interface
    if ( (getFortranTypeDefs(tmp, currentModule, cd, useMembers)) && cd->isLinkable() ) {
-      if ( (cd->compoundType() == ClassDef::Class) && // was  Entry::INTERFACE_SEC) &&
-            (getGenericProcedureLink(cd, tmp, ol)) ) {
-         //cout << "=== generic procedure resolved" << endl;
+
+      if ( (cd->compoundType() == ClassDef::Class) && (getGenericProcedureLink(cd, tmp, ol)) ) {
+         // no code
+
       } else {
          // write type or interface link
          writeMultiLineCodeLink(ol, cd, tmp);
          addToSearchIndex(tmp.data());
       }
    }
+
    // check for function/variable
    else if (getLink(useMembers, tmp, ol, tmp)) {
-      //cout << "=== found link for lowercase " << lname << endl;
+      // no code
+
    } else {
       // nothing found, just write out the word
-      //startFontClass("charliteral"); //test
+
       codifyLines(tmp);
-      //endFontClass(); //test
       addToSearchIndex(tmp.data());
    }
 }
@@ -26440,6 +26445,7 @@ static int countLines()
    const char *p = g_inputString;
    char c;
    int count = 1;
+
    while ((c = *p)) {
       p++ ;
       if (c == '\n') {
@@ -26455,7 +26461,6 @@ static int countLines()
    return count;
 }
 
-//----------------------------------------------------------------------------
 /** start scope */
 static void startScope()
 {
@@ -26468,36 +26473,36 @@ static void startScope()
 static void endScope()
 {
    DBG_CTX((stderr, "===> endScope %s", fortrancodeYYtext));
+
    if (scopeStack.isEmpty()) {
-      DBG_CTX((stderr, "WARNING: fortrancode.l: stack empty!\n"));
+      DBG_CTX((stderr, "WARNING: fortrancode.l: Stack is empty\n"));
       return;
    }
 
-   Scope *scope = scopeStack.getLast();
+   Scope *scope = scopeStack.last();
    scopeStack.removeLast();
-   for ( QStringList::Iterator it = scope->useNames.begin(); it != scope->useNames.end(); ++it) {
-      useMembers->remove((*it).toUtf8());
+
+   for (auto it : scope->useNames ) {
+      useMembers->remove(it.toUtf8());
    }
+
    delete scope;
 }
 
 static void addUse(const QByteArray &moduleName)
 {
-   if (!scopeStack.isEmpty()) {
-      scopeStack.getLast()->useNames.append(moduleName);
+   if (! scopeStack.isEmpty()) {
+      scopeStack.last()->useNames.append(moduleName);
    }
 }
 
 static void addLocalVar(const QByteArray &varName)
 {
-   if (!scopeStack.isEmpty()) {
-      scopeStack.getLast()->localVars.insert(varName, (void *)1);
+   if (! scopeStack.isEmpty()) {
+      scopeStack.last()->localVars.insert(varName, (void *)1);
    }
 }
 
-//----------------------------------------------------------------------------
-
-/* -----------------------------------------------------------------*/
 #undef	YY_INPUT
 #define	YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
 
@@ -26515,22 +26520,6 @@ static int yyread(char *buf, int max_size)
 /* Assume that attribute statements are almost the same as attributes. */
 /* |  */
 /*%option debug*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #define INITIAL 0
 #define Start 1
@@ -26971,11 +26960,10 @@ YY_DECL {
 
                /* append module name to use dict */
                useEntry = new UseEntry();
-               //useEntry->module = fortrancodeYYtext;
-               //useMembers->append(fortrancodeYYtext, useEntry);
-               //addUse(fortrancodeYYtext);
+              
                useEntry->module = tmp;
-               useMembers->append(tmp, useEntry);
+               useMembers->insert(tmp, useEntry);
+
                addUse(tmp);
             }
             YY_BREAK
@@ -27417,10 +27405,12 @@ YY_DECL {
             {
                // comment block ends at the end of this line
                // remove special comment (default config)
+
                if (Config_getBool("STRIP_CODE_COMMENTS"))
                {
-                  g_yyLineNr += ((QByteArray)docBlock).contains('\n');
+                  g_yyLineNr += QByteArray(docBlock).count('\n');
                   g_yyLineNr += 1;
+
                   endCodeLine();
                   if (g_yyLineNr < g_inputLines) {
                      startCodeLine();
@@ -27437,6 +27427,7 @@ YY_DECL {
                YY_FTN_RESET
             }
             YY_BREAK
+
          case 48:
             *yy_cp = (yy_hold_char); /* undo effects of setting up fortrancodeYYtext */
             (yy_c_buf_p) = yy_cp -= 1;
@@ -28674,41 +28665,28 @@ void fortrancodeYYfree (void *ptr )
 #define YYTABLES_NAME "yytables"
 
 
-
-
-
-/*@ ----------------------------------------------------------------------------
- */
-
-/*===================================================================*/
-
-
 void resetFortranCodeParserState() {}
 
 void parseFortranCode(CodeOutputInterface &od, const char *className, const QByteArray &s,
-                      bool exBlock, const char *exName, FileDef *fd,
-                      int startLine, int endLine, bool inlineFragment,
-                      MemberDef *memberDef, bool, Definition *searchCtx,
-                      bool collectXRefs, FortranFormat format)
+                  bool exBlock, const char *exName, QSharedPointer<FileDef> fd, int startLine, 
+                  int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool, 
+                  QSharedPointer<Definition> searchCtx, bool collectXRefs, FortranFormat format)
 {
-   //printf("***parseCode() exBlock=%d exName=%s fd=%p\n",exBlock,exName,fd);
-
-   // used parameters
-   (void)memberDef;
-   (void)className;
-
    if (s.isEmpty()) {
       return;
    }
+
    printlex(fortrancodeYY_flex_debug, TRUE, __FILE__, fd ? fd->fileName().data() : NULL);
    TooltipManager::instance()->clearTooltips();
    g_code = &od;
+
    g_inputString   = s;
    g_inputPosition = 0;
-   g_isFixedForm = recognizeFixedForm((const char *)s, format);
+   g_isFixedForm   = recognizeFixedForm((const char *)s, format);
    g_currentFontClass = 0;
    g_needsTermination = FALSE;
-   g_searchCtx = searchCtx;
+
+   g_searchCtx    = searchCtx;
    g_collectXRefs = collectXRefs;
 
    if (endLine != -1) {
@@ -28736,30 +28714,36 @@ void parseFortranCode(CodeOutputInterface &od, const char *className, const QByt
       setCurrentDoc("l00001");
    }
 
-   g_currentDefinition = 0;
-   g_currentMemberDef = 0;
-   if (!g_exampleName.isEmpty()) {
+   g_currentDefinition = QSharedPointer<Definition>();
+   g_currentMemberDef  = QSharedPointer<MemberDef>();
+
+   if (! g_exampleName.isEmpty()) {
       g_exampleFile = convertNameToFile(g_exampleName + "-example");
    }
+
    g_includeCodeFragment = inlineFragment;
    startCodeLine();
    g_parmName.resize(0);
    g_parmType.resize(0);
+
    fortrancodeYYrestart( fortrancodeYYin );
    BEGIN( Start );
    fortrancodeYYlex();
+
    if (g_needsTermination) {
       endFontClass();
       g_code->endCodeLine();
    }
+
    if (fd) {
       TooltipManager::instance()->writeTooltips(*g_code);
    }
+
    if (exBlock && g_sourceFileDef) {
-      // delete the temporary file definition used for this example
-      delete g_sourceFileDef;
-      g_sourceFileDef = 0;
+      // delete the temporary file definition used for this example      
+      g_sourceFileDef = QSharedPointer<FileDef>();
    }
+
    printlex(fortrancodeYY_flex_debug, FALSE, __FILE__, fd ? fd->fileName().data() : NULL);
    return;
 }
@@ -28771,8 +28755,6 @@ extern "C" { // some bogus code to keep the compiler happy
       yy_flex_realloc(0, 0);
    }
 }
-#elif YY_FLEX_SUBMINOR_VERSION<33
-#error "You seem to be using a version of flex newer than 2.5.4 but older than 2.5.33. These versions do NOT work with doxygen! Please use version <=2.5.4 or >=2.5.33 or expect things to be parsed wrongly!"
 #else
 extern "C" { // some bogus code to keep the compiler happy
    void fortrancodeYYdummy()
@@ -28781,5 +28763,3 @@ extern "C" { // some bogus code to keep the compiler happy
    }
 }
 #endif
-
-

@@ -133,31 +133,26 @@ class DocbookDocVisitor : public DocVisitor
    void visitPost(DocParBlock *);
 
  private:
-   //--------------------------------------
-   // helper functions
-   //--------------------------------------
+
    void filter(const char *str);
-   void startLink(const QByteArray &file,
-                  const QByteArray &anchor);
+   void startLink(const QByteArray &file, const QByteArray &anchor);
    void endLink();
    void pushEnabled();
    void popEnabled();
-   void startMscFile(const QByteArray &fileName, const QByteArray &width,
-                     const QByteArray &height, bool hasCaption);
+   void startMscFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
    void endMscFile(bool hasCaption);
-   void writeMscFile(const QByteArray &fileName);
-   void startDiaFile(const QByteArray &fileName, const QByteArray &width,
-                     const QByteArray &height, bool hasCaption);
+  
+   void startDiaFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
    void endDiaFile(bool hasCaption);
-   void writeDiaFile(const QByteArray &fileName);
-   void startDotFile(const QByteArray &fileName, const QByteArray &width,
-                     const QByteArray &height, bool hasCaption);
+  
+   void startDotFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
    void endDotFile(bool hasCaption);
-   void writeDotFile(const QByteArray &fileName);
-   void writePlantUMLFile(const QByteArray &fileName);
-   //--------------------------------------
-   // state variables
-   //--------------------------------------
+
+   void writeDotFile(const QString &fileName);
+   void writeMscFile(const QString &fileName);
+   void writeDiaFile(const QString &fileName);
+   void writePlantUMLFile(const QString &fileName);
+
    QTextStream &m_t;
    CodeOutputInterface &m_ci;
    bool m_insidePre;

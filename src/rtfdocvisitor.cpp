@@ -338,11 +338,12 @@ void RTFDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::DocbookOnly:
          /* nothing */
          break;
+
       case DocVerbatim::Dot: {
          static int dotindex = 1;
 
-         QByteArray fileName;     
-         fileName = QString("%1%2%3").arg((Config_getString("RTF_OUTPUT") + "/inline_dotgraph_").constData()).arg(dotindex++).arg(".dot").toUtf8();
+         QString fileName;     
+         fileName = QString("%1%2.dot").arg((Config_getString("RTF_OUTPUT") + "/inline_dotgraph_").constData()).arg(dotindex++);
 
          QFile file(fileName);
          if (! file.open(QIODevice::WriteOnly)) {
@@ -361,15 +362,16 @@ void RTFDocVisitor::visit(DocVerbatim *s)
          }
       }
       break;
+
       case DocVerbatim::Msc: {
          static int mscindex = 1;
 
-         QByteArray baseName;
-         baseName = QString("%1%2%3").arg((Config_getString("RTF_OUTPUT") + "/inline_mscgraph_").constData()).arg(mscindex++).arg(".msc").toUtf8();
+         QString baseName;
+         baseName = QString("%1%2.msc").arg((Config_getString("RTF_OUTPUT") + "/inline_mscgraph_").constData()).arg(mscindex++);
                          
          QFile file(baseName);
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s for writing\n", baseName.data());
+            err("Unable to open file for writing %s, error: %d\n", qPrintable(baseName), file.error());
          }
 
          QByteArray text = "msc {";
@@ -1843,20 +1845,22 @@ void RTFDocVisitor::popEnabled()
    m_hide = v;  
 }
 
-void RTFDocVisitor::writeDotFile(const QByteArray &fileName)
+void RTFDocVisitor::writeDotFile(const QString &fileName)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
 
    int i;
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   QByteArray outDir = Config_getString("RTF_OUTPUT");
+   QString outDir = Config_getString("RTF_OUTPUT");
    writeDotGraphFromFile(fileName, outDir, baseName, GOF_BITMAP);
+
    if (!m_lastIsPara) {
       m_t << "\\par" << endl;
    }
+
    m_t << "{" << endl;
    m_t << rtf_Style_Reset;
    m_t << "\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
@@ -1866,18 +1870,22 @@ void RTFDocVisitor::writeDotFile(const QByteArray &fileName)
    m_lastIsPara = true;
 }
 
-void RTFDocVisitor::writeMscFile(const QByteArray &fileName)
+void RTFDocVisitor::writeMscFile(const QString &fileName)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
+
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
-   QByteArray outDir = Config_getString("RTF_OUTPUT");
+
+   QString outDir = Config_getString("RTF_OUTPUT");
    writeMscGraphFromFile(fileName, outDir, baseName, MSC_BITMAP);
-   if (!m_lastIsPara) {
+
+   if (! m_lastIsPara) {
       m_t << "\\par" << endl;
    }
+
    m_t << "{" << endl;
    m_t << rtf_Style_Reset;
    m_t << "\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
@@ -1887,15 +1895,18 @@ void RTFDocVisitor::writeMscFile(const QByteArray &fileName)
    m_lastIsPara = true;
 }
 
-void RTFDocVisitor::writeDiaFile(const QByteArray &fileName)
+void RTFDocVisitor::writeDiaFile(const QString &fileName)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
+
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
-   QByteArray outDir = Config_getString("RTF_OUTPUT");
+
+   QString outDir = Config_getString("RTF_OUTPUT");
    writeDiaGraphFromFile(fileName, outDir, baseName, DIA_BITMAP);
+
    if (!m_lastIsPara) {
       m_t << "\\par" << endl;
    }
@@ -1908,15 +1919,18 @@ void RTFDocVisitor::writeDiaFile(const QByteArray &fileName)
    m_lastIsPara = true;
 }
 
-void RTFDocVisitor::writePlantUMLFile(const QByteArray &fileName)
+void RTFDocVisitor::writePlantUMLFile(const QString &fileName)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
+
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
-   }
-   QByteArray outDir = Config_getString("RTF_OUTPUT");
+   
+}
+   QString outDir = Config_getString("RTF_OUTPUT");
    generatePlantUMLOutput(fileName, outDir, PUML_BITMAP);
+
    if (!m_lastIsPara) {
       m_t << "\\par" << endl;
    }

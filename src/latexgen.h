@@ -111,8 +111,9 @@ class LatexGenerator : public OutputGenerator
    void endItemList()    {
       m_textStream << "\\end{DoxyCompactItemize}"   << endl;
    }
-   void startIndexItem(const char *ref, const char *file);
-   void endIndexItem(const char *ref, const char *file);
+
+   void startIndexItem(const QByteArray &ref, const QByteArray &file) override;
+   void endIndexItem(const QByteArray &ref, const QByteArray &file) override;
 
    void docify(const QByteArray &text) override;
    void codify(const QByteArray &text) override;
@@ -159,10 +160,10 @@ class LatexGenerator : public OutputGenerator
    void endInlineHeader();
    void startAnonTypeScope(int);
    void endAnonTypeScope(int);
-   void startMemberItem(const char *, int, const char *);
+   void startMemberItem(const char *, int, const QByteArray &) override;
    void endMemberItem();
    void startMemberTemplateParams();
-   void endMemberTemplateParams(const char *, const char *);
+   void endMemberTemplateParams(const char *, const QByteArray &) override;
 
    void startMemberGroupHeader(bool);
    void endMemberGroupHeader();
@@ -176,12 +177,14 @@ class LatexGenerator : public OutputGenerator
    void writeRuler() {
       m_textStream << endl << endl;
    }
+
    void writeAnchor(const char *fileName, const char *name);
    void startCodeFragment();
    void endCodeFragment();
-   void writeLineNumber(const char *, const char *, const char *, int l);
+   void writeLineNumber(const char *, const QByteArray &, const char *, int l) override;
    void startCodeLine(bool hasLineNumbers);
    void endCodeLine();
+
    void startEmphasis() {
       m_textStream << "{\\em ";
    }
@@ -237,25 +240,32 @@ class LatexGenerator : public OutputGenerator
    void endSmall()         {
       m_textStream << "\\normalsize ";
    }
-   void startMemberDescription(const char *, const char *);
+   void startMemberDescription(const char *, const QByteArray &) override;
    void endMemberDescription();
    void startMemberDeclaration() {}
-   void endMemberDeclaration(const char *, const char *) {}
-   void writeInheritedSectionTitle(const char *, const char *, const char *,
-                                   const char *, const char *, const char *) {}
+
+   void endMemberDeclaration(const char *, const QByteArray &) override {}
+
+   void writeInheritedSectionTitle(const char *, const QByteArray &, const char *,
+                                   const char *, const char *, const char *) override {}
+
    void startDescList(SectionTypes)     {
       m_textStream << "\\begin{Desc}\n\\item[";
    }
+
    void endDescList()       {
       m_textStream << "\\end{Desc}" << endl;
    }
-   void startSimpleSect(SectionTypes, const char *, const char *, const char *);
+
+   void startSimpleSect(SectionTypes, const QByteArray &, const char *, const char *) override;
    void endSimpleSect();
    void startParamList(ParamListTypes, const char *title);
    void endParamList();
+
    void startDescForItem()     {
       m_textStream << "\\par" << endl;
    }
+
    void endDescForItem()       {}
    void startSection(const char *, const char *, SectionInfo::SectionType);
    void endSection(const char *, SectionInfo::SectionType);
