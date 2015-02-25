@@ -25906,10 +25906,9 @@ char *fortrancodeYYtext;
 #include <ctype.h>
 
 #include "entry.h"
-#include "doxygen.h"
+#include <doxy_globals.h>
 #include "message.h"
 #include "outputlist.h"
-#include "util.h"
 #include "membername.h"
 #include "searchindex.h"
 #include "defargs.h"
@@ -25920,9 +25919,7 @@ char *fortrancodeYYtext;
 #include "filedef.h"
 #include "namespacedef.h"
 #include "tooltip.h"
-
-// at the end
-#include <doxy_globals.h>
+#include "util.h"
 
 // Toggle for some debugging info
 //#define DBG_CTX(x) fprintf x
@@ -26213,7 +26210,7 @@ static void codifyLines(QByteArray str)
  */
 static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d, const char *text)
 {
-   static bool sourceTooltips = Config_getBool("SOURCE_TOOLTIPS");
+   static bool sourceTooltips = Config::getBool("source-tooltips");
    TooltipManager::instance()->addTooltip(d);
 
    QByteArray ref    = d->getReference();
@@ -27406,7 +27403,7 @@ YY_DECL {
                // comment block ends at the end of this line
                // remove special comment (default config)
 
-               if (Config_getBool("STRIP_CODE_COMMENTS"))
+               if (Config::getBool("strip-code-comments"))
                {
                   g_yyLineNr += QByteArray(docBlock).count('\n');
                   g_yyLineNr += 1;
@@ -27614,7 +27611,7 @@ YY_DECL {
 
          {
             if (YY_START == DocBlock) {
-               if (!Config_getBool("STRIP_CODE_COMMENTS")) {
+               if (! Config::getBool("strip-code-comments")) {
                   startFontClass("comment");
                   codifyLines(docBlock);
                   endFontClass();

@@ -1970,16 +1970,17 @@ void writeSearchButton(const char *dir)
 }
 #endif
 
-void writeDoxFont(const char *dir)
+void writeDoxFont(const QString &dir)
 {
-   QByteArray fileName = (QByteArray)dir + "/FreeSans.ttf";
+   QString fileName = dir + "/FreeSans.ttf";
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
       f.write((char *)FreeSans_ttf, FreeSans_ttf_len);
 
-   } else {
-      fprintf(stderr, "Error: Can not open file %s for writing\n", fileName.data());
+   } else {   
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+
    }
 
    f.close();

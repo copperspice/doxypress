@@ -41,30 +41,28 @@ void CiteDict::writeLatexBibliography(QTextStream &t)
       return;
    }
 
-   QByteArray style = Config_getString("LATEX_BIB_STYLE");
-   if (style.isEmpty()) {
-      style = "plain";
-   }
-
+   QString style = Config::getString("latex-bib-style");
+ 
    QByteArray unit;
-   if (Config_getBool("COMPACT_LATEX")) {
+   if (Config::getBool("latex-compact")) {
       unit = "section";
    } else {
       unit = "chapter";
    }
 
    t << "% Bibliography\n"  "\\newpage\n" "\\phantomsection\n";
-   bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
+   bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
-   if (!pdfHyperlinks) {
+   if (! pdfHyperlinks) {
       t << "\\clearemptydoublepage\n";
       t << "\\addcontentsline{toc}{" << unit << "}{" << theTranslator->trCiteReferences() << "}\n";
    }
 
    t << "\\bibliographystyle{" << style << "}\n" "\\bibliography{";
-   QStringList &citeDataList = Config_getList("CITE_BIB_FILES");
+   const QStringList citeDataList = Config::getList("cite-bib-files");
 
-// QByteArray latexOutputDir = Config_getString("LATEX_OUTPUT") + "/";
+   // value not used
+   // QString latexOutputDir = Config::getString("latex-output") + "/";
 
    int i = 0;
 
@@ -72,7 +70,7 @@ void CiteDict::writeLatexBibliography(QTextStream &t)
 
       QByteArray bibFile = bibdata.toLatin1();
 
-      // Note: file can now have multiple dots
+      // file can now have multiple dots
       if (! bibFile.isEmpty() && bibFile.right(4) != ".bib") {
          bibFile += ".bib";
       }
@@ -91,9 +89,11 @@ void CiteDict::writeLatexBibliography(QTextStream &t)
    }
 
    t << "}\n";
+
    if (pdfHyperlinks) {
       t << "\\addcontentsline{toc}{" << unit << "}{" << theTranslator->trCiteReferences() << "}\n";
    }
+
    t << "\n";
 }
 
@@ -129,28 +129,27 @@ void CiteDict::clear()
 
 bool CiteDict::isEmpty() const
 {
-   QStringList &citeBibFiles = Config_getList("CITE_BIB_FILES");
+   const QStringList citeBibFiles = Config::getList("cite-bib-files");
    return (citeBibFiles.count() == 0 || m_entries.isEmpty());
 }
 
 void CiteDict::generatePage() const
-{
-   //printf("** CiteDict::generatePage() count=%d\n",m_ordering.count());
-
+{ 
    // do not generate an empty citations page
    if (isEmpty()) {
-      return;   // nothing to cite
+      return;
    }
 
-   // 1. generate file with markers and citations to OUTPUT_DIRECTORY
+   // 1. generate file with markers and citations to output-dir
    QFile f;
 
-   QByteArray outputDir    = Config_getString("OUTPUT_DIRECTORY");
-   QByteArray citeListFile = outputDir + "/citelist.doc";
+   QString outputDir = Config::getString("output-dir");
+
+   QString citeListFile = outputDir + "/citelist.doc";
    f.setFileName(citeListFile);
 
    if ( ! f.open(QIODevice::WriteOnly)) {
-      err("could not open file %s for writing\n", citeListFile.data());
+      err("could not open file %s for writing\n", qPrintable(citeListFile));
    }
 
    QTextStream t(&f);
@@ -168,29 +167,30 @@ void CiteDict::generatePage() const
    f.close();
 
    // 2. generate bib2xhtml
-   QByteArray bib2xhtmlFile  = outputDir + "/bib2xhtml.pl";
+   QString bib2xhtmlFile  = outputDir + "/bib2xhtml.pl";
    ResourceMgr::instance().copyResourceAs("html/bib2xhtml.pl", outputDir, "bib2xhtml.pl");
 
    // 3. generate doxygen.bst
-   QByteArray doxygenBstFile = outputDir + "/doxygen.bst";
+   QString doxygenBstFile = outputDir + "/doxygen.bst";
    ResourceMgr::instance().copyResourceAs("html/doxygen.bst", outputDir, "doxygen.bst");
 
    // 4. for all formats we just copy the bib files to as special output directory
    //    so bibtex can find them without path (bibtex doesn't support paths or
    //    filenames with spaces!)
    //    Strictly not required when only latex is generated
-   QStringList &citeDataList = Config_getList("CITE_BIB_FILES");
-   QByteArray bibOutputDir = outputDir + "/" + bibTmpDir;
-   QByteArray bibOutputFiles = "";
+
+   const QStringList citeDataList = Config::getList("cite-bib-files");
+
+   QString bibOutputDir   = outputDir + "/" + bibTmpDir;
+   QString bibOutputFiles = "";
+
    QDir thisDir;
 
    thisDir.mkdir(bibOutputDir);
+   int i = 0;
 
-   for (auto bibdata : citeDataList ) {
-      int i = 0;
-
-      QByteArray bibFile = bibdata.toLatin1();
-
+   for (auto bibFile : citeDataList ) {   
+     
       if (! bibFile.isEmpty() && bibFile.right(4) != ".bib") {
          bibFile += ".bib";
       }
@@ -200,12 +200,13 @@ void CiteDict::generatePage() const
       if (fi.exists()) {
          if (! bibFile.isEmpty()) {
             ++i;
-            copyFile(bibFile, bibOutputDir + bibTmpFile + QByteArray().setNum(i) + ".bib");
-            bibOutputFiles = bibOutputFiles + " " + bibTmpDir + bibTmpFile + QByteArray().setNum(i) + ".bib";
+
+            copyFile(bibFile, bibOutputDir + bibTmpFile + QString().setNum(i) + ".bib");
+            bibOutputFiles = bibOutputFiles + " " + bibTmpDir + bibTmpFile + QString().setNum(i) + ".bib";
          }
 
-      } else if (!fi.exists()) {
-         err("Bib file %s was not found\n", bibFile.data());
+      } else if (! fi.exists()) {
+         err("Bib file %s was not found\n", qPrintable(bibFile));
       }
    }
 
@@ -214,12 +215,14 @@ void CiteDict::generatePage() const
 
    // 5. run bib2xhtml perl script on the generated file which will insert the
    //    bibliography in citelist.doc
-   int exitCode;
+   
    portable_sysTimerStop();
-   if ((exitCode = portable_system("perl", "\"" + bib2xhtmlFile + "\" " + bibOutputFiles + " \"" +
-                                   citeListFile + "\"")) != 0) {
-      err("Problems running bibtex. Verify that the command 'perl --version' works from the command line. Exit code: %d\n",
-          exitCode);
+
+   QString temp = "\"" + bib2xhtmlFile + "\" " + bibOutputFiles + " \"" + citeListFile + "\"";
+   int exitCode = portable_system("perl", qPrintable(temp)); 
+
+   if (exitCode != 0) {
+      err("Problem running bibtex. Verify the command 'perl --version' works from the command line. Exit code: %d\n", exitCode);
    }
    portable_sysTimerStop();
 
@@ -229,7 +232,7 @@ void CiteDict::generatePage() const
    f.setFileName(citeListFile);
 
    if (! f.open(QIODevice::ReadOnly)) {
-      err("could not open file %s for reading\n", citeListFile.data());
+      err("could not open file %s for reading\n", qPrintable(citeListFile));
    }
 
    bool insideBib = false;
@@ -249,8 +252,7 @@ void CiteDict::generatePage() const
 
    while ((s = input.indexOf('\n', p)) != -1) {
       QByteArray line = input.mid(p, s - p);
-      // printf("p=%d s=%d line=[%s]\n",p,s,line.data());
-
+    
       p = s + 1;
 
       if (line.indexOf("<!-- BEGIN BIBLIOGRAPHY") != -1) {
@@ -275,8 +277,7 @@ void CiteDict::generatePage() const
             QByteArray number = line.mid(j + 2, k - j - 1);
 
             CiteInfo *ci = this->find(label);
-
-            //printf("label='%s' number='%s' => %p\n",label.data(),number.data(),ci);
+            
             if (ci) {
                ci->text = number;
             }
@@ -290,18 +291,19 @@ void CiteDict::generatePage() const
 
    // 8. for latex we just copy the bib files to the output and let
    //    latex do this work.
-   if (Config_getBool("GENERATE_LATEX")) {
+
+   if (Config::getBool("generate-latex")) {
       // copy bib files to the latex output dir
-      QStringList &citeDataList = Config_getList("CITE_BIB_FILES");
-      QByteArray latexOutputDir = Config_getString("LATEX_OUTPUT") + "/";
+
+      const QStringList citeDataList = Config::getList("cite-bib-files");
+      QString latexOutputDir = Config::getString("latex-output") + "/";
 
       int i = 0;
 
-      for (auto bibdata : citeDataList ) {
-         QByteArray bibFile = bibdata.toLatin1();
+      for (auto bibFile : citeDataList ) {
          // Note: file can now have multiple dots
 
-         if (!bibFile.isEmpty() && bibFile.right(4) != ".bib") {
+         if (! bibFile.isEmpty() && bibFile.right(4) != ".bib") {
             bibFile += ".bib";
          }
 
@@ -311,11 +313,12 @@ void CiteDict::generatePage() const
                // bug_700510, multile times the same name were overwriting; creating new names
                // also for names with spaces
                ++i;
-               copyFile(bibFile, latexOutputDir + bibTmpFile + QByteArray().setNum(i) + ".bib");
+               copyFile(bibFile, latexOutputDir + bibTmpFile + QString().setNum(i) + ".bib");
             }
 
          } else {
-            err("Bib file %s was not found\n", bibFile.data());
+            err("Bib file %s was not found\n", qPrintable(bibFile));
+
          }
 
       }
@@ -325,12 +328,15 @@ void CiteDict::generatePage() const
    thisDir.remove(citeListFile);
    thisDir.remove(doxygenBstFile);
    thisDir.remove(bib2xhtmlFile);
+
    // we might try to remove too many files as empty files didn't get a coresponding new file
    // but the remove function does not emit an error for it and we don't catch the error return
    // so no problem.
+
    for (unsigned int j = 1; j <= citeDataList.count(); j++) {
-      thisDir.remove(bibOutputDir + bibTmpFile + QByteArray().setNum(j) + ".bib");
+      thisDir.remove(bibOutputDir + bibTmpFile + QString().setNum(j) + ".bib");
    }
+
    thisDir.rmdir(bibOutputDir);
 }
 

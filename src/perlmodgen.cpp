@@ -30,7 +30,6 @@
 #include <docparser.h>
 #include <message.h>
 #include <doxy_globals.h>
-#include <doxygen.h>
 #include <pagedef.h>
 #include <perlmodgen.h>
 #include <memberlist.h>
@@ -2419,28 +2418,7 @@ bool PerlModGenerator::createOutputFile(QFile &f, const char *s)
 
 bool PerlModGenerator::createOutputDir(QDir &perlModDir)
 {
-   QByteArray outputDirectory = Config_getString("OUTPUT_DIRECTORY");
-   if (outputDirectory.isEmpty()) {
-      outputDirectory = QDir::currentPath().toUtf8();
-
-   } else {
-      QDir dir(outputDirectory);
-      if (!dir.exists()) {
-         dir.setPath(QDir::currentPath());
-
-         if (!dir.mkdir(outputDirectory)) {
-            err("tag OUTPUT_DIRECTORY: Output directory `%s' does not "
-                "exist and can not be created\n", outputDirectory.data());
-            exit(1);
-
-         } else {
-            msg("Notice: Output directory `%s' was created.\n", outputDirectory.data());
-         }
-
-         dir.cd(outputDirectory);
-      }
-      outputDirectory = dir.absolutePath().toUtf8();
-   }
+   QString outputDirectory = Config_getString("output-dir");   
 
    QDir dir(outputDirectory);
    if (!dir.exists()) {

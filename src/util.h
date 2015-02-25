@@ -351,7 +351,7 @@ bool readInputFile(const char *fileName, BufStr &inBuf, bool filter = true, bool
 
 QByteArray filterTitle(const QByteArray &title);
 
-bool patternMatch(const QFileInfo &fi, const QStringList *patList);
+bool patternMatch(const QFileInfo &fi, const QStringList &patList);
 
 QByteArray externalLinkTarget();
 QByteArray externalRef(const QByteArray &relPath, const QByteArray &ref, bool href);
@@ -372,7 +372,7 @@ struct ColoredImgDataItem {
 void writeColoredImgData(ColoredImgDataItem data);
 QByteArray replaceColorMarkers(const char *str);
 
-bool copyFile(const QByteArray &src, const QByteArray &dest);
+bool copyFile(const QString &src, const QString &dest);
 QByteArray extractBlock(const QByteArray text, const QByteArray marker);
 
 QByteArray correctURL(const QByteArray &url, const QByteArray &relPath);

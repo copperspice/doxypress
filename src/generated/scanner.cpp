@@ -10527,28 +10527,6 @@ goto find_rule; \
 #define YY_RESTORE_YY_MORE_OFFSET
 char *scannerYYtext;
 
-/*****************************************************************************
- *
- *
- *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
- *
- * Permission to use, copy, modify, and distribute this software and its
- * documentation under the terms of the GNU General Public License is hereby
- * granted. No representations are made about the suitability of this software
- * for any purpose. It is provided "as is" without express or implied warranty.
- * See the GNU General Public License for more details.
- *
- * Documents produced by Doxygen are derivative works derived from the
- * input used in their production; they are not affected by this license.
- *
- */
-
-
-/*
- *	includes
- */
-
 #include <QFile>
 #include <QHash>
 #include <QStack>
@@ -10565,23 +10543,17 @@ char *scannerYYtext;
 #include "clangparser.h"
 #include "commentscan.h"
 #include "code.h"
+#include <doxy_globals.h>
 #include "entry.h"
 #include "message.h"
-#include "doxygen.h"
 #include "util.h"
 #include "defargs.h"
 #include "language.h"
 #include "scanner.h"
 
-#include <doxy_globals.h>
-
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
 
-/* -----------------------------------------------------------------
- *
- *	statics
- */
 static ParserInterface *g_thisParser;
 static const char      *inputString;
 static int		         inputPosition;
@@ -10753,7 +10725,8 @@ static void initParser()
    insideTryBlock = FALSE;
    insideFormula = FALSE;
    insideCode = FALSE;
-   insideCli = Config_getBool("CPP_CLI_SUPPORT");
+
+   insideCli = Config::getBool("cpp-cli-support");
 
    previous = QSharedPointer<Entry>();
    firstTypedefEntry = QSharedPointer<Entry>();
@@ -10817,8 +10790,9 @@ static void initEntry()
 
 static void lineCount()
 {
-   static int tabSize = Config_getInt("TAB_SIZE");
+   static int tabSize = Config::getInt("tab-size");
    const char *p;
+
    for (p = scannerYYtext ; *p ; ++p ) {
       if (*p == '\n') {
          yyLineNr++, g_column = 0, yyColNr = 1;
@@ -10834,9 +10808,10 @@ static void lineCount()
 static inline int computeIndent(const char *s, int startIndent)
 {
    int col = startIndent;
-   static int tabSize = Config_getInt("TAB_SIZE");
+   static int tabSize = Config::getInt("tab-size");
    const char *p = s;
    char c;
+
    while ((c = *p++)) {
       if (c == '\t') {
          col += tabSize - (col % tabSize);
@@ -13556,8 +13531,10 @@ YY_DECL {
             {
                docBlockContext   = UsingAliasEnd;
                docBlockInBody    = FALSE;
-               docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config_getBool("JAVADOC_AUTOBRIEF") ) ||
-               ( scannerYYtext[scannerYYleng - 2] == '!' && Config_getBool("QT_AUTOBRIEF") );
+
+               docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
+                  ( scannerYYtext[scannerYYleng - 2] == '!' && Config::getBool("qt-auto-brief") );
+
                QByteArray indent;
                indent.fill(' ', computeIndent(scannerYYtext, g_column));
                docBlock = indent;
@@ -14621,13 +14598,14 @@ YY_DECL {
                }
                docBlockContext   = YY_START;
                docBlockInBody    = FALSE;
-               docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config_getBool("JAVADOC_AUTOBRIEF") ) ||
-               ( scannerYYtext[scannerYYleng - 2] == '!' && Config_getBool("QT_AUTOBRIEF") );
+
+               docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
+                  ( scannerYYtext[scannerYYleng - 2] == '!' && Config::getBool("qt-auto-brief") );
 
                QByteArray indent;
                indent.fill(' ', computeIndent(scannerYYtext, g_column));
                docBlock = indent;
-               //printf("indent=%d\n",computeIndent(scannerYYtext+1,g_column));
+              
                lineCount();
 
                docBlockTerm = ';';
@@ -14655,8 +14633,9 @@ YY_DECL {
             {
                docBlockContext   = YY_START;
                docBlockInBody    = FALSE;
-               docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config_getBool("JAVADOC_AUTOBRIEF") ) ||
-               ( scannerYYtext[scannerYYleng - 2] == '!' && Config_getBool("QT_AUTOBRIEF") );
+
+               docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
+                  ( scannerYYtext[scannerYYleng - 2] == '!' && Config::getBool("qt-auto-brief") );
 
                QByteArray indent;
                indent.fill(' ', computeIndent(scannerYYtext, g_column));
@@ -14692,8 +14671,10 @@ YY_DECL {
                }
                docBlockContext   = YY_START;
                docBlockInBody    = FALSE;
-               docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config_getBool("JAVADOC_AUTOBRIEF") ) ||
-               ( scannerYYtext[scannerYYleng - 2] == '!' && Config_getBool("QT_AUTOBRIEF") );
+           
+               docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
+                  ( scannerYYtext[scannerYYleng - 2] == '!' && Config::getBool("qt-auto-brief") );
+
                QByteArray indent;
                indent.fill(' ', computeIndent(scannerYYtext, g_column));
                docBlock = indent;
@@ -14748,8 +14729,10 @@ YY_DECL {
                      docBlockContext   = YY_START;
                      docBlockInBody    = FALSE;
                      docBlock.resize(0);
-                     docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config_getBool("JAVADOC_AUTOBRIEF") ) ||
-                     ( scannerYYtext[scannerYYleng - 2] == '!' && Config_getBool("QT_AUTOBRIEF") );
+
+                     docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
+                        ( scannerYYtext[scannerYYleng - 2] == '!' && Config::getBool("qt-auto-brief") );
+
                      docBlockTerm = 0;
                      startCommentBlock(FALSE);
                      BEGIN(DocBlock);
@@ -15758,7 +15741,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (Config_getBool("IDL_PROPERTY_SUPPORT"))
+               if (Config::getBool("idl-support"))
                {
                   current->mtype = Property;
                }
@@ -15769,7 +15752,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (Config_getBool("IDL_PROPERTY_SUPPORT"))
+               if (Config::getBool("idl-support"))
                {
                   current->mtype = Property;
                }
@@ -16577,7 +16560,7 @@ YY_DECL {
                }
                
                if (!msName.isEmpty()) {                                
-                  static bool typedefHidesStruct = Config_getBool("TYPEDEF_HIDES_STRUCT");
+                  static bool typedefHidesStruct = Config::getBool("typedef-hides-struct");
 
                   // case 1: typedef struct _S { ... } S_t;
                   // -> omit typedef and use S_t as the struct name
@@ -18319,9 +18302,10 @@ YY_DECL {
 
                   docBlockContext   = SkipCurlyEndDoc;
                   docBlockInBody    = FALSE;
-                  docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config_getBool("JAVADOC_AUTOBRIEF") ) ||
 
-                  ( scannerYYtext[scannerYYleng - 2] == '!' && Config_getBool("QT_AUTOBRIEF") );
+                  docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
+                     ( scannerYYtext[scannerYYleng - 2] == '!' && Config::getBool("qt-auto-brief") );
+
                   docBlock.resize(0);
                   docBlockTerm = '}';
 
@@ -18345,8 +18329,10 @@ YY_DECL {
                // desc is followed by another one
                docBlockContext   = SkipCurlyEndDoc;
                docBlockInBody    = FALSE;
-               docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config_getBool("JAVADOC_AUTOBRIEF") ) ||
-               ( scannerYYtext[scannerYYleng - 2] == '!' && Config_getBool("QT_AUTOBRIEF") );
+            
+               docBlockAutoBrief = ( scannerYYtext[scannerYYleng - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
+                     ( scannerYYtext[scannerYYleng - 2] == '!' && Config::getBool("qt-auto-brief") );
+
                docBlock.resize(0);
                docBlockTerm = '}';
                if (scannerYYtext[scannerYYleng - 3] == '/')
@@ -19304,10 +19290,13 @@ YY_DECL {
                if (current->name.isEmpty() && !isTypedef) // anonymous compound
                {
                   if (current->section == Entry::NAMESPACE_SEC) { // allow reopening of anonymous namespaces
-                     if (Config_getBool("EXTRACT_ANON_NSPACES")) { // use visible name
+
+                     if (Config::getBool("extract-anon-namespaces")) { 
+                        // use visible name
                         current->name = "anonymous_namespace{" + stripPath(current->fileName) + "}";
 
-                     } else { // use invisible name
+                     } else { 
+                        // use invisible name
                         current->name = QString("@%1").arg(anonNSCount).toUtf8();
                      }
 
@@ -19778,7 +19767,6 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               //printf("Start doc block at %d\n",yyLineNr);
                removeSlashes = (scannerYYtext[1] == '/');
                tmpDocType = -1;
                if (!current->doc.isEmpty())
@@ -19797,7 +19785,8 @@ YY_DECL {
                }
                docBlockContext   = YY_START;
                docBlockInBody    = YY_START == SkipCurly;
-               docBlockAutoBrief = Config_getBool("QT_AUTOBRIEF");
+
+               docBlockAutoBrief = Config::getBool("qt-auto-brief");
 
                QByteArray indent;
                indent.fill(' ', computeIndent(scannerYYtext, g_column));
@@ -19832,7 +19821,9 @@ YY_DECL {
                current->docFile = yyFileName;
                docBlockContext = YY_START;
                docBlockInBody  = YY_START == SkipCurly;
-               static bool javadocAutoBrief = Config_getBool("JAVADOC_AUTOBRIEF");
+
+               static bool javadocAutoBrief = Config::getBool("javadoc-auto-brief");
+
                docBlockAutoBrief = javadocAutoBrief;
 
                QByteArray indent;
@@ -21876,8 +21867,6 @@ static void startCommentBlock(bool brief)
    }
 }
 
-//----------------------------------------------------------------------------
-
 static void newEntry()
 {
    if (tempEntry == 0) {
@@ -21893,11 +21882,10 @@ static void newEntry()
 
 static void handleCommentBlock(const QByteArray &doc, bool brief)
 {
-   static bool hideInBodyDocs = Config_getBool("HIDE_IN_BODY_DOCS");
+   static bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
 
    int position = 0;
    bool needsEntry = FALSE;
-
 
    if (docBlockInBody && hideInBodyDocs) {
       return;

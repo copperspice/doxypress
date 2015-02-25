@@ -10559,11 +10559,11 @@ char *codeYYtext;
 #include <assert.h>
 #include <ctype.h>
 
-#include <stringmap.h>
 #include "entry.h"
-#include "doxygen.h"
+#include <doxy_globals.h>
 #include "message.h"
 #include "outputlist.h"
+#include <stringmap.h>
 #include "util.h"
 #include "membername.h"
 #include "searchindex.h"
@@ -10576,8 +10576,6 @@ char *codeYYtext;
 #include "namespacedef.h"
 #include "tooltip.h"
 
-// at the end
-#include <doxy_globals.h>
 
 // Toggle for some debugging info
 //#define DBG_CTX(x) fprintf x
@@ -11120,7 +11118,8 @@ static void codifyLines(const char *text)
  */
 static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d, const char *text)
 {
-   static bool sourceTooltips = Config_getBool("SOURCE_TOOLTIPS");
+   static bool sourceTooltips = Config::getBool("source-tooltips");
+
    TooltipManager::instance()->addTooltip(d);
 
    QByteArray ref  = d->getReference();
@@ -14692,7 +14691,8 @@ YY_DECL {
                {
                   REJECT;
                }
-               if (Config_getBool("STRIP_CODE_COMMENTS"))
+
+               if (Config::getBool("strip-code-comments"))
                {
                   g_yyLineNr += ((QByteArray)codeYYtext).count('\n');
                   nextCodeLine();
@@ -14724,7 +14724,7 @@ YY_DECL {
             /* rule 195 can match eol */
             YY_RULE_SETUP {
                // remove one-line group marker
-               if (Config_getBool("STRIP_CODE_COMMENTS"))
+               if (Config::getBool("strip-code-comments"))
                {
                   g_yyLineNr += 2;
                   nextCodeLine();
@@ -14745,7 +14745,7 @@ YY_DECL {
             /* rule 196 can match eol */
             YY_RULE_SETUP {
                // remove one-line group marker
-               if (Config_getBool("STRIP_CODE_COMMENTS"))
+               if (Config::getBool("strip-code-comments"))
                {
                   g_lastSpecialCContext = YY_START;
                   g_yyLineNr++;
@@ -14767,7 +14767,7 @@ YY_DECL {
             /* rule 197 can match eol */
             YY_RULE_SETUP {
                // remove one-line group marker
-               if (Config_getBool("STRIP_CODE_COMMENTS"))
+               if (Config::getBool("strip-code-comments"))
                {
                   g_yyLineNr++;
                   nextCodeLine();
@@ -14782,7 +14782,7 @@ YY_DECL {
          case 198:
             YY_RULE_SETUP {
                // remove multi-line group marker
-               if (Config_getBool("STRIP_CODE_COMMENTS"))
+               if (Config::getBool("strip-code-comments"))
                {
                   g_lastSpecialCContext = YY_START;
                   BEGIN(RemoveSpecialCComment);
@@ -14803,7 +14803,7 @@ YY_DECL {
             /* rule 199 can match eol */
             YY_RULE_SETUP {
                // remove special one-line comment
-               if (Config_getBool("STRIP_CODE_COMMENTS"))
+               if (Config::getBool("strip-code-comments"))
                {
                   g_yyLineNr++;
                   //nextCodeLine();
@@ -14823,7 +14823,7 @@ YY_DECL {
                {
                   REJECT;
                }
-               if (Config_getBool("STRIP_CODE_COMMENTS"))
+               if (Config::getBool("strip-code-comments"))
                {
                   char c[2];
                   c[0] = '\n';
@@ -14852,7 +14852,7 @@ YY_DECL {
             (yy_c_buf_p) = yy_cp -= 1;
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
             YY_RULE_SETUP {
-               if (Config_getBool("STRIP_CODE_COMMENTS"))
+               if (Config::getBool("strip-code-comments"))
                {
                   g_lastSpecialCContext = YY_START;
                   g_yyLineNr++;
@@ -14877,7 +14877,7 @@ YY_DECL {
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
             YY_RULE_SETUP {
                // special C comment block at a new line
-               if (Config_getBool("STRIP_CODE_COMMENTS"))
+               if (Config::getBool("strip-code-comments"))
                {
                   g_lastSpecialCContext = YY_START;
                   BEGIN(RemoveSpecialCComment);
@@ -14905,7 +14905,7 @@ YY_DECL {
                {
                   REJECT;
                }
-               if (Config_getBool("STRIP_CODE_COMMENTS"))
+               if (Config::getBool("strip-code-comments"))
                {
                   g_lastSpecialCContext = YY_START;
                   BEGIN(RemoveSpecialCComment);
@@ -14928,7 +14928,7 @@ YY_DECL {
                {
                   REJECT;
                }
-               if (!Config_getBool("STRIP_CODE_COMMENTS"))
+               if (Config::getBool("strip-code-comments"))
                {
                   startFontClass("comment");
                   g_code->codify(codeYYtext);

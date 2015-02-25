@@ -1204,15 +1204,13 @@ char *pyscannerYYtext;
 #include "arguments.h"
 #include "commentscan.h"
 #include "config.h"
-#include "doxygen.h"
+#include <doxy_globals.h>
 #include "defargs.h"
 #include <entry.h>
 #include <language.h>
 #include <message.h>
 #include <parser_py.h>
 #include <util.h>
-
-#include <doxy_globals.h>
 
 // Toggle for some debugging info
 //#define DBG_CTX(x) fprintf x
@@ -1330,9 +1328,10 @@ static void newFunction()
 static inline int computeIndent(const char *s)
 {
    int col = 0;
-   static int tabSize = Config_getInt("TAB_SIZE");
+   static int tabSize = Config::getInt("tab-size");
    const char *p = s;
    char c;
+
    while ((c = *p++)) {
       if (c == ' ') {
          col++;

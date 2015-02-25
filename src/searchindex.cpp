@@ -23,8 +23,9 @@
 #include <assert.h>
 
 #include <classlist.h>
+#include <classdef.h>
 #include <config.h>
-#include <doxygen.h>
+#include <doxy_globals.h>
 #include <doxy_build_info.h>
 #include <filename.h>
 #include <filedef.h>
@@ -34,18 +35,11 @@
 #include <message.h>
 #include <memberdef.h>
 #include <membername.h>
+#include <namespacedef.h>
 #include <pagedef.h>
 #include <resourcemgr.h>
 #include <searchindex.h>
 #include <util.h>
-
-// ** java script search engine
-#include <classdef.h>
-#include <namespacedef.h>
-#include <pagedef.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 // file format: (all multi-byte values are stored in big endian format)
 //   4 byte header
@@ -301,7 +295,7 @@ static void writeString(QFile &f, const char *s)
    f.putChar(0);
 }
 
-void SearchIndex::write(const char *fileName)
+void SearchIndex::write(const QString &fileName)
 {
    int i;
    int size = 4; 
@@ -570,7 +564,7 @@ void SearchIndexExternal::addWord(const QString &word, bool hiPriority)
    pText->addStr(word); 
 }
 
-void SearchIndexExternal::write(const char *fileName)
+void SearchIndexExternal::write(const QString &fileName)
 {
    QFile f(fileName);
 
@@ -598,8 +592,9 @@ void SearchIndexExternal::write(const char *fileName)
          t << "  </doc>" << endl;
       }
       t << "</add>" << endl;
+
    } else {
-      err("Failed to open file %s for writing!\n", fileName);
+      err("Failed to open file %s for writing!\n", qPrintable(fileName));
    }
 }
 

@@ -1157,7 +1157,6 @@ char *pycodeYYtext;
 
 #include <classlist.h>
 #include <config.h>
-#include <doxygen.h>
 #include <doxy_globals.h>
 #include <entry.h>
 #include <filedef.h>
@@ -1547,11 +1546,11 @@ static void nextCodeLine()
  */
 static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d, const char *text)
 {
-   static bool sourceTooltips = Config_getBool("SOURCE_TOOLTIPS");
+   static bool sourceTooltips = Config::getBool("source-tooltips");
    TooltipManager::instance()->addTooltip(d);
 
-   QByteArray ref  = d->getReference();
-   QByteArray file = d->getOutputFileBase();
+   QByteArray ref    = d->getReference();
+   QByteArray file   = d->getOutputFileBase();
    QByteArray anchor = d->anchor();
    QByteArray tooltip;
 

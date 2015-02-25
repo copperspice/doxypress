@@ -19,7 +19,6 @@
 #include <doxy_globals.h>
 #include <config.h>
 #include <message.h>
-#include <doxygen.h>
 #include <groupdef.h>
 #include <classdef.h>
 #include <filedef.h>
@@ -45,39 +44,47 @@ DocSets::~DocSets()
 void DocSets::initialize()
 {
    // -- get config options
-   QByteArray projectName = Config_getString("PROJECT_NAME");
+   QString projectName = Config::getString("project-name");
    if (projectName.isEmpty()) {
       projectName = "root";
    }
-   QByteArray bundleId = Config_getString("DOCSET_BUNDLE_ID");
+
+   QString bundleId = Config::getString("docset-bundle-id");
    if (bundleId.isEmpty()) {
       bundleId = "org.doxypress.Project";
    }
-   QByteArray feedName = Config_getString("DOCSET_FEEDNAME");
+
+   QString feedName = Config::getString("docset-feedname");
    if (feedName.isEmpty()) {
       feedName = "FeedName";
    }
-   QByteArray publisherId = Config_getString("DOCSET_PUBLISHER_ID");
+
+   QString publisherId = Config::getString("docset-publisher-id");
    if (publisherId.isEmpty()) {
       publisherId = "PublisherId";
    }
-   QByteArray publisherName = Config_getString("DOCSET_PUBLISHER_NAME");
+
+   QString publisherName = Config::getString("docset-publisher-name");
    if (publisherName.isEmpty()) {
       publisherName = "PublisherName";
    }
-   QByteArray projectNumber = Config_getString("PROJECT_NUMBER");
+
+   QString projectNumber = Config::getString("project-version");
    if (projectNumber.isEmpty()) {
-      projectNumber = "ProjectNumber";
+      projectNumber = "ProjectVersion";
    }
 
    // -- write Makefile
    {
-      QByteArray mfName = Config_getString("HTML_OUTPUT") + "/Makefile";
+      QString mfName = Config::getString("html-output") + "/Makefile";
+
       QFile makefile(mfName);
-      if (!makefile.open(QIODevice::WriteOnly)) {
+
+      if (! makefile.open(QIODevice::WriteOnly)) {
          err("Could not open file %s for writing\n", mfName.data());
          exit(1);
       }
+
       QTextStream ts(&makefile);
 
       ts << "DOCSET_NAME=" << bundleId << ".docset\n"
@@ -122,10 +129,12 @@ void DocSets::initialize()
 
    // -- write Info.plist
    {
-      QByteArray plName = Config_getString("HTML_OUTPUT") + "/Info.plist";
+      QString plName = Config::getString("html-output") + "/Info.plist";
+
       QFile plist(plName);
-      if (!plist.open(QIODevice::WriteOnly)) {
-         err("Could not open file %s for writing\n", plName.data());
+
+      if (! plist.open(QIODevice::WriteOnly)) {
+         err("Could not open file %s for writing\n", qPrintable(plName));
          exit(1);
       }
       QTextStream ts(&plist);
@@ -157,16 +166,17 @@ void DocSets::initialize()
    }
 
    // -- start Nodes.xml
-   QByteArray notes = Config_getString("HTML_OUTPUT") + "/Nodes.xml";
+   QString notes = Config::getString("html-output") + "/Nodes.xml";
    m_nf = new QFile(notes);
 
-   if (!m_nf->open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", notes.data());
+   if (! m_nf->open(QIODevice::WriteOnly)) {
+      err("Could not open file %s for writing\n", qPrintable(notes));
       exit(1);
    }
 
-   //QByteArray indexName=Config_getBool("GENERATE_TREEVIEW")?"main":"index";
+   // QString indexName = Config::getBool("generate-treeview") ? "main" : "index";
    QByteArray indexName = "index";
+
    m_nts.setDevice(m_nf);
    m_nts << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
    m_nts << "<DocSetNodes version=\"1.0\">" << endl;
@@ -180,11 +190,11 @@ void DocSets::initialize()
    m_firstNode.resize(m_dc);
    m_firstNode[0] = true;
 
-   QByteArray tokens = Config_getString("HTML_OUTPUT") + "/Tokens.xml";
+   QString tokens = Config::getString("html-output") + "/Tokens.xml";
    m_tf = new QFile(tokens);
   
    if (!m_tf->open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", tokens.data());
+      err("Could not open file %s for writing\n", qPrintable(tokens));
       exit(1);
    }
 

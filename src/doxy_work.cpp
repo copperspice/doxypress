@@ -28,6 +28,7 @@
 #include <classlist.h>
 #include <cmdmapper.h>
 #include <code.h>
+#include <config.h>
 #include <commentcnv.h>
 #include <config.h>
 #include <dbusxmlscanner.h>
@@ -39,8 +40,8 @@
 #include <docparser.h>
 #include <docsets.h>
 #include <dot.h>
-#include <doxygen.h>
 #include <doxy_setup.h>
+#include <doxy_globals.h>
 #include <eclipsehelp.h>
 #include <entry.h>
 #include <filename.h>
@@ -83,8 +84,6 @@
 #include <tclscanner.h>
 #include <util.h>
 #include <xmlgen.h>
-
-#include <doxy_globals.h>
 
 #define RECURSE_ENTRYTREE(func,var) \
   do {  \
@@ -202,6 +201,7 @@ static STLInfo g_stlinfo[] = {
 };
 
 namespace Doxy_Work{
+
    void addClassToContext(QSharedPointer<EntryNav> rootNav);
    void addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav);
 
@@ -270,7 +270,7 @@ namespace Doxy_Work{
    void copyLogo();
    void copyStyleSheet();
 
-   QByteArray createOutputDirectory(const QByteArray &baseDirName, const char *formatDirOption, const char *defaultDirName);
+   QByteArray createOutputDirectory(const QString &baseDirName, const char *formatDirOption, const char *defaultDirName);
    void createTemplateInstanceMembers();
    QSharedPointer<ClassDef> createTagLessInstance(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> templ, const QByteArray &fieldName);
 
@@ -381,8 +381,18 @@ namespace Doxy_Work{
 
    void parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav);
    void parseInput();
+
    void processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef>tagParentCd, 
-                              const QByteArray &prefix, int count);
+                  const QByteArray &prefix, int count);
+
+   int readFileOrDirectory(const QString &s, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict *exclDict,
+                  QStringList *patList, QStringList *exclPatList, QStringList *resultList, StringDict *resultDict, 
+                  bool recursive, bool errorIfNotExist = true, QHash<QString, void *> *killDict = 0, QHash<QString, void *> *paths = 0);
+
+   int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict *exclDict,
+                  QStringList *patList, QStringList *exclPatList, QStringList *resultList,
+                  StringDict *resultDict, bool errorIfNotExist, bool recursive, QHash<QString, void *> *killDict, 
+                  QHash<QString, void *> *paths);
 
    void resolveClassNestingRelations();
    QByteArray resolveSymlink(QByteArray path);
@@ -412,39 +422,12 @@ void parseInput()
    printf("**  Parse input files\n");   
 
    // Make sure the output directory exists
-   QByteArray &outputDirectory = Config_getString("OUTPUT_DIRECTORY");
-
-   if (outputDirectory.isEmpty()) {
-      outputDirectory = QDir::currentPath().toUtf8();
-
-   } else {
-      QDir dir(outputDirectory);
-
-      if (! dir.exists()) {
-         dir.setPath(QDir::currentPath());
-
-         if (!dir.mkdir(outputDirectory)) {
-            err("Output directory `%s' does not exist and can not be created\n", outputDirectory.data());
-
-            cleanUpDoxygen();
-            exit(1);
-
-         } else {
-            msg("Notice: Output directory `%s' did not exist, it was automatically created\n", outputDirectory.data());
-
-         }
-
-         dir.cd(outputDirectory);
-      }
-
-      outputDirectory = dir.absolutePath().toUtf8();
-   }
-
+   QString outputDirectory = Config::getString("output-dir");
+  
    // Initialize global lists and dictionaries
    Doxygen::symbolStorage = new Store;
-
-   // also scale lookup cache with SYMBOL_CACHE_SIZE
-   int cacheSize = Config_getInt("LOOKUP_CACHE_SIZE");
+   
+   int cacheSize = Config::getInt("lookup-cache-size");
 
    if (cacheSize < 0) {
       cacheSize = 0;
@@ -477,51 +460,55 @@ void parseInput()
 
    // Check/create output directorties
    QByteArray htmlOutput;
-   bool &generateHtml = Config_getBool("GENERATE_HTML");
+   const bool generateHtml = Config::getBool("generate-html");
 
    if (generateHtml) {
-      htmlOutput = createOutputDirectory(outputDirectory, "HTML_OUTPUT", "/html");
+      htmlOutput = createOutputDirectory(outputDirectory, "html-output", "/html");
    }
 
    QByteArray docbookOutput;
-   bool &generateDocbook = Config_getBool("GENERATE_DOCBOOK");
+   const bool generateDocbook = Config::getBool("generate-docbook");
 
    if (generateDocbook) {
-      docbookOutput = createOutputDirectory(outputDirectory, "DOCBOOK_OUTPUT", "/docbook");
+      docbookOutput = createOutputDirectory(outputDirectory, "docbook-output", "/docbook");
    }
 
    QByteArray xmlOutput;
-   bool &generateXml = Config_getBool("GENERATE_XML");
+   const bool generateXml = Config::getBool("generate-xml");
+
    if (generateXml) {
-      xmlOutput = createOutputDirectory(outputDirectory, "XML_OUTPUT", "/xml");
+      xmlOutput = createOutputDirectory(outputDirectory, "xml-output", "/xml");
    }
 
    QByteArray latexOutput;
-   bool &generateLatex = Config_getBool("GENERATE_LATEX");
+   const bool generateLatex = Config::getBool("generate-latex");
+
    if (generateLatex) {
-      latexOutput = createOutputDirectory(outputDirectory, "LATEX_OUTPUT", "/latex");
+      latexOutput = createOutputDirectory(outputDirectory, "latex-output", "/latex");
    }
 
    QByteArray rtfOutput;
-   bool &generateRtf = Config_getBool("GENERATE_RTF");
+   const bool generateRtf = Config::getBool("generate-rtf");
+
    if (generateRtf) {
-      rtfOutput = createOutputDirectory(outputDirectory, "RTF_OUTPUT", "/rtf");
+      rtfOutput = createOutputDirectory(outputDirectory, "rtf-output", "/rtf");
    }
 
    QByteArray manOutput;
-   bool &generateMan = Config_getBool("GENERATE_MAN");
+   const bool generateMan = Config::getBool("generate-man");
    if (generateMan) {
-      manOutput = createOutputDirectory(outputDirectory, "MAN_OUTPUT", "/man");
+      manOutput = createOutputDirectory(outputDirectory, "man-output", "/man");
    }
 
-   //QByteArray sqlOutput;
-   //bool &generateSql = Config_getBool("GENERATE_SQLITE3");
-   //if (generateSql)
-   //  sqlOutput = createOutputDirectory(outputDirectory,"SQLITE3_OUTPUT","/sqlite3");
+   // QByteArray sqlOutput;
+   // bool generateSql = Config::getBool("generate-sqlite3");
+   // if (generateSql) {
+   //   sqlOutput = createOutputDirectory(outputDirectory,"sqlite3-output","/sqlite3");
+   // }    
 
 
-   if (Config_getBool("HAVE_DOT")) {
-      QByteArray curFontPath = Config_getString("DOT_FONTPATH");
+   if (Config::getBool("have-dot")) {
+      QString curFontPath = Config::getString("dot-font-path");
 
       if (curFontPath.isEmpty()) {
          portable_getenv("DOTFONTPATH");
@@ -542,34 +529,25 @@ void parseInput()
    // Handle layout file
    LayoutDocManager::instance().init();
  
-   QByteArray &layoutFileName = Config_getString("LAYOUT_FILE");
-   bool defaultLayoutUsed = false;
-
-   if (layoutFileName.isEmpty()) {
-      layoutFileName = "doxy_layout.xml";
-      defaultLayoutUsed = true;
-   }
+   QString layoutFileName = Config::getString("layout-file");
  
    QFile layoutFile(layoutFileName);
 
    if (layoutFile.open(QIODevice::ReadOnly)) {
-      msg("Parsing layout file %s\n", layoutFileName.data());
+      msg("Parsing layout file %s\n", qPrintable(layoutFileName));
 
       QTextStream t(&layoutFile);
       t.setCodec("UTF-8");
 
       LayoutDocManager::instance().parse(t, layoutFileName);
 
-   } else if (!defaultLayoutUsed) {
-      warn_uncond("Unable to open layout file '%s' for reading\n", layoutFileName.data());
+   } else if (layoutFileName != "doxy_layout.xml")  {
+      warn_uncond("Unable to open layout file '%s' for reading\n", qPrintable(layoutFileName));
    }
 
-   /**************************************************************************
-    *             Read and preprocess input                                  *
-    **************************************************************************/
-
+   
    // prevent search in the output directories
-   QStringList &exclPatterns = Config_getList("EXCLUDE_PATTERNS");
+   QStringList exclPatterns = Config::getList("exclude-patterns");
 
    if (generateHtml) {
       exclPatterns.append(htmlOutput);
@@ -590,11 +568,14 @@ void parseInput()
       exclPatterns.append(manOutput);
    }
 
+   // update project data
+   Config::setList("exclude-patterns", exclPatterns);
+
    searchInputFiles();
 
-   // Notice: the order of the function calls below is very important!
+   // **  Note: the order of the function calls below are important
 
-   if (Config_getBool("GENERATE_HTML")) {
+   if (Config::getBool("generate-html")) {
       readFormulaRepository();
    }
 
@@ -613,7 +594,7 @@ void parseInput()
   
    msg("Parsing tag files\n");
 
-   QStringList &tagFileList = Config_getList("TAGFILES");
+   const QStringList tagFileList = Config::getList("tag-files");
 
    for (auto s : tagFileList) {
       readTagFile(root, qPrintable(s));
@@ -621,7 +602,7 @@ void parseInput()
    }
 
    // parse source files
-   if (Config_getBool("BUILTIN_STL_SUPPORT")) {
+   if (Config::getBool("built-in-stl-support")) {
       addSTLClasses(rootNav);
    }
 
@@ -743,7 +724,7 @@ void parseInput()
    findUsedTemplateInstances();
    Doxy_Globals::g_stats.end();
 
-   if (Config_getBool("INLINE_SIMPLE_STRUCTS")) {
+   if (Config::getBool("inline-simple-struct")) {
       Doxy_Globals::g_stats.begin("Searching for tag less structs\n");
       findTagLessClasses();
       Doxy_Globals::g_stats.end();
@@ -823,7 +804,7 @@ void parseInput()
    addMembersToMemberGroup();
    Doxy_Globals::g_stats.end();
 
-   if (Config_getBool("DISTRIBUTE_GROUP_DOC")) {
+   if (Config::getBool("dist-group-doc")) {
       Doxy_Globals::g_stats.begin("Distributing member group documentation\n");
       distributeMemberGroupDocumentation();
       Doxy_Globals::g_stats.end();
@@ -833,7 +814,7 @@ void parseInput()
    computeMemberReferences();
    Doxy_Globals::g_stats.end();
 
-   if (Config_getBool("INHERIT_DOCS")) {
+   if (Config::getBool("inherit-docs")) {
       Doxy_Globals::g_stats.begin("Inheriting documentation\n");
       inheritDocumentation();
       Doxy_Globals::g_stats.end();
@@ -859,7 +840,7 @@ void parseInput()
    generateXRefPages();
    Doxy_Globals::g_stats.end();
  
-   if (Config_getBool("DIRECTORY_GRAPH")) {
+   if (Config::getBool("directory-graph")) {
       Doxy_Globals::g_stats.begin("Computing dependencies between directories\n");
       computeDirDependencies();
       Doxy_Globals::g_stats.end();
@@ -910,11 +891,10 @@ void generateOutput()
 
    initSearchIndexer();
 
-   bool generateHtml  = Config_getBool("GENERATE_HTML");
-   bool generateLatex = Config_getBool("GENERATE_LATEX");
-   bool generateMan   = Config_getBool("GENERATE_MAN");
-   bool generateRtf   = Config_getBool("GENERATE_RTF");
-
+   bool generateHtml  = Config::getBool("generate-html");
+   bool generateLatex = Config::getBool("generate-latex");
+   bool generateMan   = Config::getBool("generate-man");
+   bool generateRtf   = Config::getBool("generate-rtf");
   
    Doxy_Globals::g_outputList = new OutputList(true);
 
@@ -923,11 +903,11 @@ void generateOutput()
       HtmlGenerator::init();
 
       // add HTML indexers that are enabled
-      bool generateHtmlHelp    = Config_getBool("GENERATE_HTMLHELP");
-      bool generateEclipseHelp = Config_getBool("GENERATE_ECLIPSEHELP");
-      bool generateQhp         = Config_getBool("GENERATE_QHP");
-      bool generateTreeView    = Config_getBool("GENERATE_TREEVIEW");
-      bool generateDocSet      = Config_getBool("GENERATE_DOCSET");
+      bool generateHtmlHelp    = Config::getBool("generate-chm");
+      bool generateEclipseHelp = Config::getBool("generate-eclipse");
+      bool generateQhp         = Config::getBool("generate-qthelp");
+      bool generateTreeView    = Config::getBool("generate-treeview");
+      bool generateDocSet      = Config::getBool("generate-docset");
 
       if (generateEclipseHelp) {
          Doxygen::indexList->addIndex(QSharedPointer<EclipseHelp>(new EclipseHelp));
@@ -978,30 +958,31 @@ void generateOutput()
       RTFGenerator::init();
    }
 
-   if (Config_getBool("USE_HTAGS")) {
+   if (Config::getBool("use-htags")) {
       Htags::useHtags = true;
-      QByteArray htmldir = Config_getString("HTML_OUTPUT");
+      QString htmldir = Config::getString("html-output");
 
-      if (!Htags::execute(htmldir)) {
-         err("USE_HTAGS is YES but htags(1) failed. \n");
+      if (! Htags::execute(htmldir)) {
+         err("USE HTAGS is set, however htags(1) failed\n");
       }
-      if (!Htags::loadFilemap(htmldir)) {
-         err("htags(1) ended normally but failed to load the filemap. \n");
+      if (! Htags::loadFilemap(htmldir)) {
+         err("htags(1) ended normally but failed to load the filemap\n");
       }
    }
 
-   /**************************************************************************
-    *                        Generate documentation                          *
-    **************************************************************************/
+ 
+   // ** generate documentation
 
    if (generateHtml) {
-      writeDoxFont(Config_getString("HTML_OUTPUT"));
+      writeDoxFont(Config::getString("html-output"));
    }
+
    if (generateLatex) {
-      writeDoxFont(Config_getString("LATEX_OUTPUT"));
+      writeDoxFont(Config::getString("latex-output"));
    }
+
    if (generateRtf) {
-      writeDoxFont(Config_getString("RTF_OUTPUT"));
+      writeDoxFont(Config::getString("rtf-output"));
    }
 
    Doxy_Globals::g_stats.begin("Generating style sheet\n");
@@ -1009,8 +990,8 @@ void generateOutput()
    Doxy_Globals::g_outputList->writeStyleInfo(0); // write first part
    Doxy_Globals::g_stats.end();
 
-   static bool searchEngine      = Config_getBool("SEARCHENGINE");
-   static bool serverBasedSearch = Config_getBool("SERVER_BASED_SEARCH");
+   static bool searchEngine      = Config::getBool("html-search");
+   static bool serverBasedSearch = Config::getBool("server-based-search");
 
    // generate search indices (need to do this before writing other HTML
    // pages as these contain a drop down menu with options depending on
@@ -1018,12 +999,12 @@ void generateOutput()
 
    if (generateHtml && searchEngine) {
       Doxy_Globals::g_stats.begin("Generating search indices\n");
-      QByteArray searchDirName = Config_getString("HTML_OUTPUT") + "/search";
+      QString searchDirName = Config::getString("html-output") + "/search";
+
       QDir searchDir(searchDirName);
 
-      if (! searchDir.exists() && !searchDir.mkdir(searchDirName)) {
-         err("Could not create search results directory '%s' $PWD='%s'\n",
-                      searchDirName.constData(), QDir::currentPath().constData());
+      if (! searchDir.exists() && ! searchDir.mkdir(searchDirName)) {
+         err("Could not create search results directory '%s' $PWD='%s'\n", qPrintable(searchDirName), qPrintable(QDir::currentPath()));
          exit(1);
       }
 
@@ -1067,7 +1048,7 @@ void generateOutput()
    generateNamespaceDocs();
    Doxy_Globals::g_stats.end();
 
-   if (Config_getBool("GENERATE_LEGEND")) {
+   if (Config::getBool("generate_legend")) {
       Doxy_Globals::g_stats.begin("Generating graph info page\n");
       writeGraphInfo(*Doxy_Globals::g_outputList);
       Doxy_Globals::g_stats.end();
@@ -1077,9 +1058,9 @@ void generateOutput()
    generateDirDocs(*Doxy_Globals::g_outputList);
    Doxy_Globals::g_stats.end();
 
-   if (Doxygen::formulaList->count() > 0 && generateHtml && !Config_getBool("USE_MATHJAX")) {
+   if (Doxygen::formulaList->count() > 0 && generateHtml && ! Config::getBool("use-mathjax")) {
       Doxy_Globals::g_stats.begin("Generating bitmaps for formulas in HTML\n");
-      Doxygen::formulaList->generateBitmaps(Config_getString("HTML_OUTPUT"));
+      Doxygen::formulaList->generateBitmaps(Config::getString("html_output"));
       Doxy_Globals::g_stats.end();
    }
 
@@ -1095,19 +1076,19 @@ void generateOutput()
    writeTagFile();
    Doxy_Globals::g_stats.end();
 
-   if (Config_getBool("DOT_CLEANUP")) {
+   if (Config::getBool("dot-cleanup")) {
       if (generateHtml) {
-         removeDoxFont(Config_getString("HTML_OUTPUT"));
+         removeDoxFont(Config::getString("html-output"));
       }
       if (generateRtf) {
-         removeDoxFont(Config_getString("RTF_OUTPUT"));
+         removeDoxFont(Config::getString("rtf-output"));
       }
       if (generateLatex) {
-         removeDoxFont(Config_getString("LATEX_OUTPUT"));
+         removeDoxFont(Config::getString("latex-output"));
       }
    }
 
-   if (Config_getBool("GENERATE_XML")) {
+   if (Config::getBool("generate-xml")) {
       Doxy_Globals::g_stats.begin("Generating XML output\n");
       Doxygen::generatingXmlOutput = true;
       generateXML();
@@ -1124,19 +1105,19 @@ void generateOutput()
    }
 */
 
-   if (Config_getBool("GENERATE_DOCBOOK")) {
+   if (Config::getBool("generate-docbook")) {
       Doxy_Globals::g_stats.begin("Generating Docbook output\n");
       generateDocbook();
       Doxy_Globals::g_stats.end();
    }
 
-   if (Config_getBool("GENERATE_AUTOGEN_DEF")) {
+   if (Config::getBool("generate-autogen-def")) {
       Doxy_Globals::g_stats.begin("Generating AutoGen DEF output\n");
       generateDEF();
       Doxy_Globals::g_stats.end();
    }
 
-   if (Config_getBool("GENERATE_PERLMOD")) {
+   if (Config::getBool("generate-perl")) {
       Doxy_Globals::g_stats.begin("Generating Perl module output\n");
       generatePerlMod();
       Doxy_Globals::g_stats.end();
@@ -1145,21 +1126,28 @@ void generateOutput()
    if (generateHtml && searchEngine && serverBasedSearch) {
       Doxy_Globals::g_stats.begin("Generating search index\n");
       if (Doxygen::searchIndex->kind() == SearchIndexIntf::Internal) { // write own search index
+
          HtmlGenerator::writeSearchPage();
-         Doxygen::searchIndex->write(Config_getString("HTML_OUTPUT") + "/search/search.idx");
+         Doxygen::searchIndex->write(Config::getString("html-output") + "/search/search.idx");
 
       } else { 
          // write data for external search index
          HtmlGenerator::writeExternalSearchPage();
-         QByteArray searchDataFile = Config_getString("SEARCHDATA_FILE");
+
+         QString searchDataFile = Config::getString("search-data-file");
+
          if (searchDataFile.isEmpty()) {
             searchDataFile = "searchdata.xml";
          }
+
          if (!portable_isAbsolutePath(searchDataFile)) {
-            searchDataFile.prepend(Config_getString("OUTPUT_DIRECTORY") + "/");
+            QString outputDirectory = Config_getString("output-dir");
+            searchDataFile.prepend(outputDirectory + "/");
          }
+
          Doxygen::searchIndex->write(searchDataFile);
       }
+
       Doxy_Globals::g_stats.end();
    }
 
@@ -1172,13 +1160,13 @@ void generateOutput()
       Doxy_Globals::g_stats.end();
    }
 
-   if (Config_getBool("HAVE_DOT")) {
+   if (Config::getBool("have-dot")) {
       Doxy_Globals::g_stats.begin("Running dot\n");
       DotManager::instance()->run();
       Doxy_Globals::g_stats.end();
    }
 
-   if (generateHtml && Config_getBool("GENERATE_HTMLHELP") && !Config_getString("HHC_LOCATION").isEmpty()) {
+   if (generateHtml && Config::getBool("generate_chm") && ! Config::getString("hhc-location").isEmpty()) {
 
       Doxy_Globals::g_stats.begin("Running html help compiler\n");
       QString oldDir = QDir::currentPath();
@@ -1194,8 +1182,8 @@ void generateOutput()
       Doxy_Globals::g_stats.end();
    }
 
-   if ( generateHtml && Config_getBool("GENERATE_QHP") && !Config_getString("QHG_LOCATION").isEmpty()) {
-      Doxy_Globals::g_stats.begin("Running qhelpgenerator\n");
+   if ( generateHtml && Config::getBool("generate-qthelp") && ! Config::getString("qthelp-gen-path").isEmpty()) {
+      Doxy_Globals::g_stats.begin("Running QtHelp generator\n");
 
       QString qhpFileName = Qhp::getQhpFileName();
       QString qchFileName = getQchFileName();
@@ -1230,15 +1218,14 @@ void generateOutput()
 
    }
 
-   // all done, cleaning up and exit
+   // all done, cleaning up and exit     BROOM CHECK
    finializeSearchIndexer();
    Doxygen::symbolStorage->close();
 
    QDir thisDir;
    thisDir.remove(Doxygen::objDBFileName);
-
-   Config::deleteInstance();
-   cleanUpDoxygen();
+  
+   shutDownDoxypress();
       
    delete Doxygen::symbolStorage;
    
@@ -1324,7 +1311,7 @@ void clearAll()
 
 void distributeClassGroupRelations()
 {
-   // static bool inlineGroupedClasses = Config_getBool("INLINE_GROUPED_CLASSES");
+   // static bool inlineGroupedClasses = Config::getBool("inline-grouped-classes");
 
    for (auto cd : *Doxygen::classSDict) {
       cd->visited = false;
@@ -1689,7 +1676,7 @@ void Doxy_Work::organizeSubGroups(QSharedPointer<EntryNav> rootNav)
 void Doxy_Work::buildFileList(QSharedPointer<EntryNav> rootNav)
 {
    if (((rootNav->section() == Entry::FILEDOC_SEC) ||
-         ((rootNav->section() & Entry::FILE_MASK) && Config_getBool("EXTRACT_ALL"))) &&
+         ((rootNav->section() & Entry::FILE_MASK) && Config::getBool("extract-all"))) &&
          ! rootNav->name().isEmpty() && ! rootNav->tagInfo() ) {
 
       // skip any file coming from tag files
@@ -1750,9 +1737,9 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
    QString temp1 = root->doc.trimmed();
    QString temp2 = root->brief.trimmed();
 
-   if ( (! temp1.isEmpty() || ! temp2.isEmpty() || Config_getBool("EXTRACT_ALL")) && root->protection != Private)  {
+   if ( (! temp1.isEmpty() || ! temp2.isEmpty() || Config::getBool("extract-all")) && root->protection != Private)  {
     
-      bool local = Config_getBool("FORCE_LOCAL_INCLUDES");
+      bool local = Config::getBool("force-local-includes");
 
       QByteArray includeFile = root->includeFile;
 
@@ -2958,7 +2945,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
    QByteArray def;
 
    if (!root->type.isEmpty()) {
-      if (related || mtype == MemberType_Friend || Config_getBool("HIDE_SCOPE_NAMES")) {
+      if (related || mtype == MemberType_Friend || Config::getBool("hide-scope-names")) {
          if (root->spec & Entry::Alias) { // turn 'typedef B A' into 'using A = B'
             def = "using " + name + " = " + root->type.mid(7);
          } else {
@@ -4909,7 +4896,8 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
                                  isArtificial, templArgs, templateNames);
          delete templArgs;
 
-         if (unloadNeeded) { // still cleanup to do
+         if (unloadNeeded) { 
+            // still cleanup to do
             templateRootNav->releaseEntry();
          }
 
@@ -8980,7 +8968,7 @@ void Doxy_Work::copyStyleSheet()
 
       } else {
          QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
-         copyFile(htmlStyleSheet, destFileName.toUtf8());
+         copyFile(htmlStyleSheet, destFileName);
       }
    }
 
@@ -9001,7 +8989,7 @@ void Doxy_Work::copyStyleSheet()
             
          } else {
             QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
-            copyFile(fileName, destFileName.toUtf8());
+            copyFile(fileName, destFileName);
          }
       }
    }
@@ -9021,7 +9009,7 @@ void Doxy_Work::copyLogo()
       } else {
          QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
 
-         copyFile(projectLogo, destFileName.toUtf8());
+         copyFile(projectLogo, destFileName);
          Doxygen::indexList->addImageFile(qPrintable(fi.fileName()));
       }
    }
@@ -9045,7 +9033,7 @@ void Doxy_Work::copyExtraFiles(const QByteArray &filesOption, const QByteArray &
             QString destFileName = Config_getString(outputOption) + "/" + fi.fileName();
 
             Doxygen::indexList->addImageFile(fi.fileName().toUtf8());
-            copyFile(fileName.toUtf8(), destFileName.toUtf8());
+            copyFile(fileName.toUtf8(), destFileName);
          }
       }
    }
@@ -9347,13 +9335,14 @@ void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const char *tl)
    parseTagFile(root, fi.absoluteFilePath().toUtf8());
 }
 
-QByteArray Doxy_Work::createOutputDirectory(const QByteArray &baseDirName, const char *formatDirOption, const char *defaultDirName)
+QByteArray Doxy_Work::createOutputDirectory(const QString &baseDirName, const char *formatDirOption, const char *defaultDirName)
 {
-   // Note the & on the next line, we modify the formatDirOption!
-   QByteArray &formatDirName = Config_getString(formatDirOption);
+   // Note the & on the next line, we modify the formatDirOption
+   QString &formatDirName = Config_getString(formatDirOption);
 
    if (formatDirName.isEmpty()) {
       formatDirName = baseDirName + defaultDirName;
+
    } else if (formatDirName[0] != '/' && (formatDirName.length() == 1 || formatDirName[1] != ':')) {
       formatDirName.prepend(baseDirName + '/');
    }
@@ -9362,13 +9351,12 @@ QByteArray Doxy_Work::createOutputDirectory(const QByteArray &baseDirName, const
    if (! formatDir.exists() && !formatDir.mkdir(formatDirName)) {
       err("Could not create output directory %s\n", formatDirName.data());
 
-      cleanUpDoxygen();
+      shutDownDoxypress();
       exit(1);
    }
-   return formatDirName;
-}
 
-// ** end of statics
+   return formatDirName.toUtf8();
+}
 
 
 // Read all files matching at least one pattern in `patList' in the
@@ -9376,7 +9364,7 @@ QByteArray Doxy_Work::createOutputDirectory(const QByteArray &baseDirName, const
 // The directory is read iff the recusiveFlag is set.
 // The contents of all files is append to the input string
 
-int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict  *exclDict,
+int Doxy_Work::readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict  *exclDict,
             QStringList *patList, QStringList *exclPatList, QStringList *resultList, StringDict *resultDict,
             bool errorIfNotExist, bool recursive, QHash<QString, void *> *killDict, QHash<QString, void *> *paths)
 {
@@ -9397,7 +9385,7 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
          return 0;   // already visited path
       }
 
-      Doxy_Globals::g_pathsVisited.insert(dirName, (void *)0x8);
+      Doxy_Globals::g_pathsVisited.insert(dirName);
    }
 
    QDir dir(dirName);
@@ -9420,8 +9408,8 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
                warn_uncond("Source %s is not a readable file or directory\n", qPrintable(cfi.absoluteFilePath()));
             }
 
-         } else if (cfi.isFile() && (! Config_getBool("EXCLUDE_SYMLINKS") || ! cfi.isSymLink()) &&
-                    (patList == 0 || patternMatch(cfi, patList)) && !patternMatch(cfi, exclPatList) &&
+         } else if (cfi.isFile() && (! Config::getBool("exclude-symlinks") || ! cfi.isSymLink()) &&
+                    (patList == nullptr || patternMatch(cfi, *patList)) && ! (exclPatList != nullptr && patternMatch(cfi, *exclPatList)) &&
                     (killDict == 0 || ! killDict->contains(cfi.absoluteFilePath().toUtf8())) ) {
 
             totalSize += cfi.size() + cfi.absoluteFilePath().length() + 4;
@@ -9464,8 +9452,8 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
                killDict->insert(cfi.absoluteFilePath().toUtf8(), (void *)0x8);
             }
 
-         } else if (recursive && (! Config_getBool("EXCLUDE_SYMLINKS") || !cfi.isSymLink()) &&
-                    cfi.isDir() && ! patternMatch(cfi, exclPatList) && cfi.fileName().at(0) != '.') {
+         } else if (recursive && (! Config::getBool("exclude-symlinks") || ! cfi.isSymLink()) &&
+                    cfi.isDir() && ! (exclPatList != nullptr && patternMatch(cfi, *exclPatList)) && cfi.fileName().at(0) != '.') {
 
             cfi.setFile(cfi.absoluteFilePath());
 
@@ -9482,7 +9470,7 @@ int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict,
 // read a file or all files in a directory and append their contents to the
 // input string. The names of the files are appended to the `fiList' list.
 
-int readFileOrDirectory(const QString &s, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict *exclDict,
+int Doxy_Work::readFileOrDirectory(const QString &s, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict *exclDict,
                         QStringList *patList, QStringList *exclPatList, QStringList *resultList, StringDict *resultDict,
                         bool recursive, bool errorIfNotExist, QHash<QString, void *> *killDict, QHash<QString, void *> *paths)
 {

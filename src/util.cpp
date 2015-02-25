@@ -31,7 +31,7 @@
 #include <config.h>
 #include <defargs.h>
 #include <dirdef.h>
-#include <doxygen.h>
+#include <doxy_globals.h>
 #include <doxy_build_info.h>
 #include <entry.h>
 #include <example.h>
@@ -51,9 +51,6 @@
 #include <searchindex.h>
 #include <textdocvisitor.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 struct FindFileCacheElem {
    FindFileCacheElem(QSharedPointer<FileDef> fd, bool ambig) 
@@ -7455,40 +7452,38 @@ QByteArray filterTitle(const QByteArray &title)
 // returns true if the name of the file represented by `fi' matches
 // one of the file patterns in the `patList' list.
 
-bool patternMatch(const QFileInfo &fi, const QStringList *patList)
+bool patternMatch(const QFileInfo &fi, const QStringList &patList)
 {
-   bool found = false;
-
-   if (patList) {
+   bool found = false; 
      
-      QString fn  = fi.fileName();
-      QString fp  = fi.filePath();
-      QString afp = fi.absoluteFilePath();
-    
-      for ( auto pattern : *patList ) {
+   QString fn  = fi.fileName();
+   QString fp  = fi.filePath();
+   QString afp = fi.absoluteFilePath();
+ 
+   for ( auto pattern : *patList ) {
 
-         if (! pattern.isEmpty()) {
-            int i = pattern.indexOf('=');
+      if (! pattern.isEmpty()) {
+         int i = pattern.indexOf('=');
 
-            if (i != -1) {
-               pattern = pattern.left(i);   // strip of the extension specific filter name
-            }
+         if (i != -1) {
+            pattern = pattern.left(i);   // strip of the extension specific filter name
+         }
 
 #if defined(_WIN32) || defined(__MACOSX__) 
-            // Windows or MacOSX
-            QRegExp re(pattern, Qt::CaseInsensitive, QRegExp::Wildcard);  
+         // Windows or MacOSX
+         QRegExp re(pattern, Qt::CaseInsensitive, QRegExp::Wildcard);  
 #else       
-            // unix
-            QRegExp re(pattern, Qt::CaseSensitive, QRegExp::Wildcard);    
+         // unix
+         QRegExp re(pattern, Qt::CaseSensitive, QRegExp::Wildcard);    
 #endif
 
-            found = re.indexIn(fn) != -1 || re.indexIn(fp) != -1 || re.indexIn(afp) != -1;
+         found = re.indexIn(fn) != -1 || re.indexIn(fp) != -1 || re.indexIn(afp) != -1;
 
-            if (found) {
-               break;
-            }            
-         }
+         if (found) {
+            break;
+         }            
       }
+     
    }
 
    return found;
@@ -7630,9 +7625,10 @@ QByteArray replaceColorMarkers(const char *str)
 /** Copies the contents of file with name \a src to the newly created
  *  file with name \a dest. Returns true if successful.
  */
-bool copyFile(const QByteArray &src, const QByteArray &dest)
+bool copyFile(const QString &src, const QString &dest)
 {
    QFile sf(src);
+
    if (sf.open(QIODevice::ReadOnly)) {
       QFileInfo fi(src);
       QFile df(dest);
@@ -7647,13 +7643,15 @@ bool copyFile(const QByteArray &src, const QByteArray &dest)
          delete[] buffer;
 
       } else {
-         err("could not write to file %s\n", dest.data());
+         err("Unable to open file for writing %s, error: %d\n", qPrintable(dest), df.error());
          return false;
       }
+
    } else {
-      err("could not open user specified file %s\n", src.data());
+      err("Unable to open file for reading %s, error: %d\n", qPrintable(src), sf.error());
       return false;
    }
+
    return true;
 }
 

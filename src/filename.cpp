@@ -134,7 +134,7 @@ FileNameIterator::FileNameIterator(const FileName &fname) : QListIterator<QShare
 // ** 
 static Qt::CaseSensitivity getCaseSenseNames()
 {
-   if (Config_getBool("CASE_SENSE_NAMES")) {
+   if (Config::getBool("case-sense-names")) {
       return Qt::CaseSensitive;
    } else {
       return Qt::CaseInsensitive;

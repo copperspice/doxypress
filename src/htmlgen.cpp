@@ -26,7 +26,6 @@
 #include <docparser.h>
 #include <doxy_build_info.h>
 #include <doxy_globals.h>
-#include <doxygen.h>
 #include <logos.h>
 #include <diagram.h>
 #include <dot.h>
@@ -761,9 +760,9 @@ void HtmlGenerator::writeTabData()
    mgr.copyResourceAs("html/nav_g.png",    dname, "nav_g.png");
 }
 
-void HtmlGenerator::writeSearchData(const char *dir)
+void HtmlGenerator::writeSearchData(const QString &dir)
 {
-   static bool serverBasedSearch = Config_getBool("SERVER_BASED_SEARCH");
+   static bool serverBasedSearch = Config::getBool("server-based-search");
   
    ResourceMgr &mgr = ResourceMgr::instance();
 
@@ -788,7 +787,7 @@ void HtmlGenerator::writeSearchData(const char *dir)
       Doxygen::indexList->addImageFile("search/mag_sel.png");
    }
 
-   QByteArray outputName = Config_getString("HTML_OUTPUT") + "/search";
+   QString outputName = Config::getString("html-output") + "/search";
 
    QString fileName = outputName + "/search.css";
    QFile f(fileName);
@@ -803,7 +802,7 @@ void HtmlGenerator::writeSearchData(const char *dir)
          QByteArray searchCss = replaceColorMarkers(resData);
          searchCss = substitute(searchCss, "$doxygenversion", versionString);
 
-         if (Config_getBool("DISABLE_INDEX")) {
+         if (Config::getBool("disable-index")) {
             // move up the search box if there are no tabs
             searchCss = substitute(searchCss, "margin-top: 8px;", "margin-top: 0px;");
          }

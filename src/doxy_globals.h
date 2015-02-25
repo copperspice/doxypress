@@ -27,7 +27,6 @@
 #include <QTime>
 
 #include <cite.h>
-#include <doxygen.h>
 #include <dirdef.h>
 #include <entry.h>
 #include <filename.h>
@@ -42,6 +41,8 @@
 #include <reflist.h>
 #include <searchindex.h>
 
+class ParserManager;
+
 struct LookupInfo {
    LookupInfo() {}
 
@@ -54,6 +55,17 @@ struct LookupInfo {
 
    QByteArray   templSpec;
    QByteArray   resolvedType;
+};
+
+
+class StringDict : public QHash<QString, QByteArray>
+{
+ public:
+   StringDict() : QHash<QString, QByteArray>() 
+   {}
+
+   virtual ~StringDict()
+   {}
 };
 
 class Statistics
@@ -199,9 +211,9 @@ class Doxy_Globals
       static QHash<QString, QSharedPointer<EntryNav>>  g_classEntries;
 
       static QStringList               g_inputFiles;
-      static QHash<QString, void *>    g_compoundKeywordDict;   // keywords recognised as compounds
+      static QSet<QString>             g_compoundKeywordDict;   // keywords recognised as compounds
       static QHash<QString, FileDef>   g_usingDeclarations;     // used classes
-      static QHash<QString, void *>    g_pathsVisited;
+      static QSet<QString>             g_pathsVisited;
    
       static OutputList               *g_outputList;            // list of output generating objects     
       static FileStorage              *g_storage;

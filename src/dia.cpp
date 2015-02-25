@@ -38,7 +38,7 @@ void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const Q
    QDir::setCurrent(outDir);
 
    //printf("Going to dir %s\n",QDir::currentPath().data());
-   QString diaExe = Config_getString("DIA_PATH") + "dia" + portable_commandExtension();
+   QString diaExe = Config::getString("dia-path") + "dia" + portable_commandExtension();
 
    QString diaArgs;
    QString extension;
@@ -75,7 +75,7 @@ void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const Q
    if (ok) {
       portable_sysTimerStop();
    
-      if ( (format == DIA_EPS) && (Config_getBool("USE_PDFLATEX")) ) {      
+      if ( (format == DIA_EPS) && (Config::getBool("latex-pdf")) ) {      
 
          QString epstopdfArgs;
          epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(outFile).arg(outFile);

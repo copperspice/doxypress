@@ -243,7 +243,7 @@ class LayoutDocManager
    LayoutNavEntry *rootNavEntry() const;
 
    /** Parses a user provided layout */
-   void parse(QTextStream &t, const char *fileName);
+   void parse(QTextStream &t, const QString &fileName);
    void init();
 
  private:

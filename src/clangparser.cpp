@@ -28,7 +28,6 @@
 #include <outputgen.h>
 #include <filedef.h>
 #include <memberdef.h>
-#include <doxygen.h>
 #include <util.h>
 #include <config.h>
 #include <growbuf.h>

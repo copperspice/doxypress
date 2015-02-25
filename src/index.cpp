@@ -28,7 +28,6 @@
 
 #include <message.h>
 #include <index.h>
-#include <doxygen.h>
 #include <doxy_globals.h>
 #include <config.h>
 #include <filedef.h>

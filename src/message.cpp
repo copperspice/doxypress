@@ -21,14 +21,11 @@
 #include <stdio.h>
 
 #include <config.h>
-#include <doxygen.h>
+#include <doxy_globals.h>
 #include <portable.h>
 #include <filedef.h>
 #include <message.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 /** Helper struct representing a mapping from debug label to a debug ID */
 struct LabelMap {
@@ -56,12 +53,11 @@ class LabelMapper
 Debug::DebugMask Debug::curMask = Debug::Quiet;
 int Debug::curPrio = 0;
 
-static QByteArray outputFormat;
+static QString outputFormat;
 static FILE *warnFile = stderr;
 static LabelMapper s_labelMapper;
 
 static const char *warning_str = "Warning: ";
-
 
 static LabelMap s_labels[] = {
    { "findmembers",  Debug::FindMembers  },
@@ -122,7 +118,7 @@ static void format_warn(const char *file, int line, const char *text)
 
 static void do_warn(const char *tag, const char *file, int line, const char *prefix, const char *fmt, va_list args)
 {
-   if (! Config_getBool(tag)) {
+   if (! Config::getBool(tag)) {
       // is this warning type disabled
       return;   
    }
@@ -225,7 +221,7 @@ void err(const char *fmt, ...)
 
 void msg(const char *fmt, ...)
 {
-   if (! Config_getBool("QUIET")) {
+   if (! Config::getBool("quiet")) {
       if (Debug::isFlagSet(Debug::Time)) {
          printf("%.3f sec: ", ((double)Doxygen::runningTime.elapsed()) / 1000.0);
       }
@@ -240,14 +236,16 @@ void msg(const char *fmt, ...)
 
 void initWarningFormat()
 {
-   outputFormat = Config_getString("WARN_FORMAT");
+   outputFormat = Config::getString("warn-format");
 
    // if the user wants a line break, make it happen
    outputFormat.replace("\\n", "\n");
    outputFormat.replace("\\t", "\t");
 
-   if (! Config_getString("WARN_LOGFILE").isEmpty()) {
-      warnFile = fopen(Config_getString("WARN_LOGFILE"), "w");
+   QString logFN = Config::getString("warn-logfile");
+
+   if (! logFN.isEmpty()) {
+      warnFile = fopen(qPrintable(logFN), "w");
    }
 
    if (! warnFile) { 
@@ -255,7 +253,6 @@ void initWarningFormat()
       warnFile = stderr;
    }
 }
-
 
 void warn(const char *file, int line, const char *fmt, ...)
 {
@@ -274,8 +271,8 @@ void va_warn(const char *file, int line, const char *fmt, va_list args)
 
 void warn_simple(const char *file, int line, const char *text)
 {
-   if (! Config_getBool("WARNINGS")) {
-      return;   // warning type disabled
+   if (! Config::getBool("warnings")) {
+      return;  
    }
 
    format_warn(file, line, QByteArray(warning_str) + text);

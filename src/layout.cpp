@@ -28,15 +28,12 @@
 #include <assert.h>
 
 #include <config.h>
-#include <doxygen.h>
 #include <doxy_build_info.h>
+#include <doxy_globals.h>
 #include <layout.h>
 #include <language.h>
 #include <message.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 #define ADD_OPTION(langId,text) "|"+QByteArray().setNum(langId)+"="+text
 
@@ -123,9 +120,9 @@ QByteArray LayoutNavEntry::url() const
          }
       }
 
-      if (!found) {
-         msg("Explicit link request to '%s' in layout file '%s' could not be resolved\n", qPrint(url.mid(5)), 
-             qPrint(Config_getString("LAYOUT_FILE")));
+      if (! found) {
+         QString temp = Config::getString("layout-file");
+         msg("Explicit link request to '%s' in layout file '%s' could not be resolved\n", qPrint(url.mid(5)), qPrintable(temp));
       }
    }
   
@@ -263,8 +260,8 @@ class LayoutParser : public QXmlDefaultHandler
       m_part    = -1;
       m_rootNav = 0;
 
-      // bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");     
-      // bool javaOpt    = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
+      // bool fortranOpt = Config::getBool("optimize-fortran");     
+      // bool javaOpt    = Config::getBool("optimize-java");
 
       // start & end handlers
       m_sHandler.insert("doxygenlayout",             new StartElementHandler(this, &LayoutParser::startLayout));
@@ -824,11 +821,11 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    void startNavEntry(const QXmlAttributes &attrib) {
-      static bool javaOpt    = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
-      static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+      static bool javaOpt    = Config::getBool("optimize-java");
+      static bool fortranOpt = Config::getBool("optimize-fortran");
      
-      static bool hasGraphicalHierarchy = Config_getBool("HAVE_DOT") && Config_getBool("GRAPHICAL_HIERARCHY");
-      static bool extractAll = Config_getBool("EXTRACT_ALL");
+      static bool hasGraphicalHierarchy = Config::getBool("have-dot") && Config::getBool("dot-hierarchy");
+      static bool extractAll = Config::getBool("extract-all");
 
       static struct NavEntryMap {
          const char *typeStr;         // type attribute name in the XML file
@@ -1216,27 +1213,25 @@ int LayoutParser::m_userGroupCount = 0;
 class LayoutErrorHandler : public QXmlErrorHandler
 {
  public:
-   LayoutErrorHandler(const char *fn) : fileName(fn) 
+   LayoutErrorHandler(const QString &fn) 
+      : fileName(fn) 
    {}
 
    bool warning( const QXmlParseException &exception ) override {
       warn_uncond("at line %d column %d of %s: %s\n",
-                  exception.lineNumber(), exception.columnNumber(), fileName.data(),
-                  exception.message().data());
+                  exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message());
       return false;
    }
 
    bool error( const QXmlParseException &exception ) override {
       err("at line %d column %d of %s: %s\n",
-          exception.lineNumber(), exception.columnNumber(), fileName.data(),
-          exception.message().data());
+          exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message());
       return false;
    }
 
    bool fatalError( const QXmlParseException &exception ) override {
       err("fatal: at line %d column %d of %s: %s\n",
-          exception.lineNumber(), exception.columnNumber(), fileName.data(),
-          exception.message().data());
+          exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message());
       return false;
    }
 
@@ -1328,7 +1323,7 @@ void LayoutDocManager::clear(LayoutDocManager::LayoutPart p)
    d->m_docEntries[(int)p].clear();
 }
 
-void LayoutDocManager::parse(QTextStream &t, const char *fileName)
+void LayoutDocManager::parse(QTextStream &t, const QString &fileName)
 {
    LayoutErrorHandler errorHandler(fileName);
 

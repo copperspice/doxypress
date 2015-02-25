@@ -21,7 +21,6 @@
 #include <dia.h>
 #include <docbookvisitor.h>
 #include <docparser.h>
-#include <doxygen.h>
 #include <outputgen.h>
 #include <docbookgen.h>
 #include <doxy_globals.h>

@@ -203,9 +203,9 @@ static Color palette3[] = {
 
 Image::Image(int w, int h)
 {
-   static int hue   = Config_getInt("HTML_COLORSTYLE_HUE");
-   static int sat   = Config_getInt("HTML_COLORSTYLE_SAT");
-   static int gamma = Config_getInt("HTML_COLORSTYLE_GAMMA");
+   static int hue   = Config::getInt("html-colorstyle-hue");
+   static int sat   = Config::getInt("html-colorstyle-sat");
+   static int gamma = Config::getInt("html-colorstyle-gamma");
 
    double red1, green1, blue1;
    double red2, green2, blue2;
@@ -391,7 +391,7 @@ void Image::fillRect(int x, int y, int lwidth, int lheight, uchar colIndex, uint
 
 QByteArray Image::convert(int mode)
 {
-   static bool useTransparency = Config_getBool("FORMULA_TRANSPARENT");
+   static bool useTransparency = Config::getBool("formula-transparent");
 
    uchar *buffer;
    size_t bufferSize;

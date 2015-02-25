@@ -34,7 +34,6 @@
 #include <dirdef.h>
 #include <docparser.h>
 #include <dot.h> 
-#include <doxygen.h>
 #include <groupdef.h>
 #include <filedef.h>
 #include <filename.h>
@@ -1198,8 +1197,7 @@ static void generateSqlite3ForPage(sqlite3 *db, PageDef *pd, bool isExample)
 {
 #warning WorkInProgress
 }
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+
 void generateSqlite3()
 {
    // + classes
@@ -1210,16 +1208,20 @@ void generateSqlite3()
    // + examples
    // + main page
 
-   QByteArray outputDirectory = Config_getString("OUTPUT_DIRECTORY");
+   QString outputDirectory = Config_getString("output-dir");
+
    QDir sqlite3Dir(outputDirectory);
    sqlite3 *db;
    sqlite3_initialize();
+
    int rc = sqlite3_open_v2(outputDirectory + "/doxygen_sqlite3.db", &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, 0);
+
    if (rc != SQLITE_OK) {
       sqlite3_close(db);
       msg("database open failed: %s\n", "doxygen_sqlite3.db");
       return;
    }
+
    beginTransaction(db);
    pragmaTuning(db);
 

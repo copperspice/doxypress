@@ -22,7 +22,6 @@
 #include <config.h>
 #include <definition.h>
 #include <doxy_globals.h>
-#include <doxygen.h>
 #include <filedef.h>
 #include <outputgen.h>
 #include <util.h>
@@ -67,7 +66,7 @@ static QByteArray escapeId(const char *s)
 
 void TooltipManager::addTooltip(QSharedPointer<Definition> d)
 {
-   static bool sourceTooltips = Config_getBool("SOURCE_TOOLTIPS");
+   static bool sourceTooltips = Config::getBool("source-tooltips");
    if (! sourceTooltips) {
       return;
    }

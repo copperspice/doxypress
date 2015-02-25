@@ -18,7 +18,6 @@
 #include <QCryptographicHash>
 
 #include <classdef.h>
-#include <doxygen.h>
 #include <doxy_globals.h>
 #include <docparser.h>
 #include <entry.h>

@@ -21,7 +21,7 @@
 #include <classdef.h>
 #include <dirdef.h>
 #include <docparser.h>
-#include <doxygen.h>
+#include <doxy_globals.h>
 #include <dot.h>
 #include <entry.h>
 #include <filename.h>
@@ -41,9 +41,6 @@
 #include <searchindex.h>
 #include <settings.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 /** Class implementing CodeOutputInterface by throwing away everything. */
 class DevNullCodeDocInterface : public CodeOutputInterface
@@ -91,14 +88,14 @@ FileDef::FileDef(const char *p, const char *nm, const char *lref, const char *dn
    m_docname           = nm;
    m_dir               = QSharedPointer<DirDef>();
 
-   if (Config_getBool("FULL_PATH_NAMES")) {
+   if (Config_getBool("full-path-names")) {
       m_docname.prepend(stripFromPath(m_path).toUtf8());
    }
 
    setLanguage(getLanguageFromFileName(name()));
    
    acquireFileVersion();
-   m_subGrouping = Config_getBool("SUBGROUPING");
+   m_subGrouping = Config::getBool("allow-sub-grouping");
 }
 
 /*! destroy the file definition */
@@ -142,8 +139,8 @@ void FileDef::findSectionsInDocumentation()
 
 bool FileDef::hasDetailedDescription() const
 {
-   static bool repeatBrief = Config_getBool("REPEAT_BRIEF");
-   static bool sourceBrowser = Config_getBool("SOURCE_BROWSER");
+   static bool repeatBrief   = Config::getBool("repeat-brief");
+   static bool sourceBrowser = Config::getBool("source-browser");
 
    // avail empty section
 
@@ -257,12 +254,12 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
       ol.endGroupHeader();
 
       ol.startTextBlock();
-      if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF")) {
+
+      if (!briefDescription().isEmpty() && Config::getBool("repeat-brief")) {
          ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
 
-      if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF") &&
-            !documentation().isEmpty()) {
+      if (!briefDescription().isEmpty() && Config::getBool("repeat-brief") && ! documentation().isEmpty()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::RTF);
@@ -278,10 +275,11 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
          ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
       }
       
-      if (Config_getBool("SOURCE_BROWSER")) {
+      if (Config::getBool("source-browser")) {
          //if Latex enabled and LATEX_SOURCE_CODE is not -> skip, bug_738548
+
          ol.pushGeneratorState();
-         if (ol.isEnabled(OutputGenerator::Latex) && !Config_getBool("LATEX_SOURCE_CODE")) {
+         if (ol.isEnabled(OutputGenerator::Latex) && ! Config::getBool("latex-source-code")) {
             ol.disable(OutputGenerator::Latex);
          }
 

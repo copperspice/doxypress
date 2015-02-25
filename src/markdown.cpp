@@ -26,16 +26,13 @@
 #include <config.h>
 #include <commentscan.h>
 #include <commentcnv.h>
+#include <doxy_globals.h>
 #include <entry.h>
 #include <growbuf.h>
-#include <doxygen.h>
 #include <markdown.h>
 #include <message.h>
 #include <section.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 // is character at position i in data part of an identifier?
 #define isIdChar(i) \

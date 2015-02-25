@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -44,7 +44,7 @@ struct CommandLine {
    bool generateDoxy = true;
 };
 
-void initDoxygen();
+void initDoxyPress();
 
 struct CommandLine parseCommandLine(QStringList argList);
 void readConfiguration(struct CommandLine cmdArgs);
@@ -57,6 +57,6 @@ void parseInput();
 void generateOutput();
 void readAliases();
 void readFormulaRepository();
-void cleanUpDoxygen();
+void shutDownDoxypress();
 
 #endif

@@ -19,7 +19,6 @@
 #include <classdef.h>
 #include <classlist.h>
 #include <docparser.h>
-#include <doxygen.h>
 #include <doxy_globals.h>
 #include <language.h>
 #include <layout.h>

@@ -23,20 +23,20 @@
 
 #include <code.h>
 #include <config.h>
+#include <defargs.h>
+#include <docparser.h>
+#include <dot.h>
+#include <doxy_globals.h>
 #include <htmlhelp.h>
 #include <language.h>
 #include <memberdef.h>
 #include <membername.h>
-#include <doxygen.h>
 #include <entry.h>
 #include <message.h>
 #include <outputlist.h>
 #include <example.h>
 #include <membergroup.h>
 #include <groupdef.h>
-#include <defargs.h>
-#include <docparser.h>
-#include <dot.h>
 #include <searchindex.h>
 #include <parserintf.h>
 #include <marshal.h>
@@ -46,9 +46,6 @@
 #include <namespacedef.h>
 #include <filedef.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 int MemberDef::s_indentLevel = 0;
 

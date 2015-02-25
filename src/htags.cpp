@@ -35,18 +35,20 @@ static QHash<QString, QByteArray> g_symbolDict;
  *  \retval true success
  *  \retval false an error has occurred.
  */
-bool Htags::execute(const QByteArray &htmldir)
+bool Htags::execute(const QString &htmldir)
 {
-   static QStringList &inputSource = Config_getList("INPUT");
+   static const QStringList inputSource = Config::getList("input-source");
 
-   static bool quiet    = Config_getBool("QUIET");
-   static bool warnings = Config_getBool("WARNINGS");
+   static bool quiet    = Config::getBool("quiet");
+   static bool warnings = Config::getBool("warnings");
 
-   static QByteArray htagsOptions  = ""; //Config_getString("HTAGS_OPTIONS");
-   static QByteArray projectName   = Config_getString("PROJECT_NAME");
-   static QByteArray projectNumber = Config_getString("PROJECT_NUMBER");
+   static QByteArray htagsOptions  = "";       // Config::getString("htags-options");  BROOM
+
+   static QString projectName   = Config::getString("project-name");
+   static QString projectNumber = Config::getString("project-version");
 
    QByteArray cwd = QDir::currentPath().toUtf8();
+
    if (inputSource.isEmpty()) {
       g_inputDir.setPath(cwd);
 
@@ -54,10 +56,10 @@ bool Htags::execute(const QByteArray &htmldir)
       g_inputDir.setPath(inputSource.first());
 
       if (! g_inputDir.exists())
-         err("Cannot find directory %s. Check the value of the INPUT tag in the configuration file.\n", qPrintable(inputSource.first()) );
+         err("Unable to not find directory %s. Verify the value of the 'INPUT SOURCE' tag.\n", qPrintable(inputSource.first()) );
 
    } else {
-      err("If you use USE_HTAGS then INPUT should specific a single directory. \n");
+      err("If you use 'USE HTAGS' then 'INPUT SOURCE' should specify a single directory\n");
       return false;
    }
 
@@ -89,12 +91,11 @@ bool Htags::execute(const QByteArray &htmldir)
       commandLine += "\" ";
    }
 
-   commandLine += " \"" + htmldir + "\"";
+   commandLine += " \"" + htmldir.toUtf8() + "\"";
 
    QByteArray oldDir = QDir::currentPath().toUtf8();
    QDir::setCurrent(g_inputDir.absolutePath());
-
-   //printf("CommandLine=[%s]\n",commandLine.data());
+  
    portable_sysTimerStart();
 
    bool result = portable_system("htags", commandLine, false) == 0;
@@ -111,9 +112,9 @@ bool Htags::execute(const QByteArray &htmldir)
  *  \retval true success
  *  \retval false error
  */
-bool Htags::loadFilemap(const QByteArray &htmlDir)
+bool Htags::loadFilemap(const QString &htmlDir)
 {
-   QByteArray fileMapName = htmlDir + "/HTML/FILEMAP";
+   QString fileMapName = htmlDir + "/HTML/FILEMAP";
    QByteArray fileMap;
 
    QFileInfo fi(fileMapName);
@@ -160,6 +161,7 @@ bool Htags::loadFilemap(const QByteArray &htmlDir)
          err("file %s cannot be opened\n", fileMapName.data());
       }
    }
+
    return false;
 }
 
@@ -167,10 +169,10 @@ bool Htags::loadFilemap(const QByteArray &htmlDir)
  *  \param path path name
  *  \returns URL NULL: not found.
  */
-QByteArray Htags::path2URL(const QByteArray &path)
+QByteArray Htags::path2URL(const QString &path)
 {
    QByteArray url;
-   QByteArray symName = path;
+   QByteArray symName = path.toUtf8();
    QByteArray dir = g_inputDir.absolutePath().toUtf8();
 
    int dl = dir.length();

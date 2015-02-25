@@ -273,9 +273,10 @@ bool CondParser::evalOperator(int opId, bool lhs, bool rhs)
  */
 bool CondParser::evalVariable(const char *varName)
 {
-   if (Config_getList("ENABLED_SECTIONS").indexOf(varName) == -1) {
+   if (Config::getList("enabled-sections").indexOf(varName) == -1) {
       return false;
    }
+
    return true;
 }
 

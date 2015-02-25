@@ -78,7 +78,7 @@ class SearchIndexIntf
 
    virtual void setCurrentDoc(QSharedPointer<Definition> ctx, const char *anchor, bool isSourceFile) = 0;
    virtual void addWord(const QString &word, bool hiPriority) = 0;
-   virtual void write(const char *file) = 0;
+   virtual void write(const QString &file) = 0;
 
    Kind kind() const {
       return m_kind;
@@ -96,7 +96,7 @@ class SearchIndex : public SearchIndexIntf
 
    void setCurrentDoc(QSharedPointer<Definition> ctx, const char *anchor, bool isSourceFile) override;
    void addWord(const QString &word, bool hiPriority) override;
-   void write(const char *file);
+   void write(const QString &file) override;
 
  private:
    void addWord(const QString &word, bool hiPrio, bool recurse);
@@ -120,7 +120,7 @@ class SearchIndexExternal : public SearchIndexIntf
    ~SearchIndexExternal();
    void setCurrentDoc(QSharedPointer<Definition> ctx, const char *anchor, bool isSourceFile) override;
    void addWord(const QString &word, bool hiPriority) override;
-   void write(const char *file);
+   void write(const QString &file) override;
 
  private:   
    StringMap<QSharedPointer<SearchDocEntry>> m_docEntries;

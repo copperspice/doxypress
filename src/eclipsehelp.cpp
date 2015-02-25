@@ -17,10 +17,9 @@
 
 #include <config.h>
 #include <eclipsehelp.h>
-#include <doxygen.h>
+#include <doxy_globals.h>
 #include <message.h>
 #include <util.h>
-#include <doxy_globals.h>
 
 EclipseHelp::EclipseHelp() : m_depth(0), m_endtag(false), m_openTags(0), m_tocfile(0)
 {
@@ -64,26 +63,28 @@ void EclipseHelp::openedTag()
 void EclipseHelp::initialize()
 {
    // -- read path prefix from the configuration
-   //m_pathprefix = Config_getString("ECLIPSE_PATHPREFIX");
-   //if (m_pathprefix.isEmpty()) m_pathprefix = "html/";
+   // m_pathprefix = Config::getString("eclipse-pathprefix");
+   // if (m_pathprefix.isEmpty()) m_pathprefix = "html/";
 
    // -- open the contents file
-   QByteArray name = Config_getString("HTML_OUTPUT") + "/toc.xml";
+   QString name = Config::getString("html-output") + "/toc.xml";
    m_tocfile = new QFile(name);
+
    if (!m_tocfile->open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", name.data());
+      err("Could not open file %s for writing\n", qPrintable(name));
       exit(1);
    }
 
    // -- initialize its text stream
    m_tocstream.setDevice(m_tocfile);
-   //m_tocstream.setEncoding(QTextStream::UnicodeUTF8);
-
+   
    // -- write the opening tag
-   QByteArray title = Config_getString("PROJECT_NAME");
+   QString title = Config::getString("project-name");
+
    if (title.isEmpty()) {
-      title = "Doxygen generated documentation";
+      title = "DoxyPress generated documentation";
    }
+
    m_tocstream << "<toc label=\"" << convertToXML(title)
                << "\" topic=\"" << convertToXML(m_pathprefix)
                << "index" << Doxygen::htmlFileExtension << "\">" << endl;
@@ -110,10 +111,12 @@ void EclipseHelp::finalize()
    delete m_tocfile;
    m_tocfile = 0;
 
-   QByteArray name = Config_getString("HTML_OUTPUT") + "/plugin.xml";
+   QString name = Config::getString("html-output") + "/plugin.xml";
    QFile pluginFile(name);
+
    if (pluginFile.open(QIODevice::WriteOnly)) {
-      QString docId = Config_getString("ECLIPSE_DOC_ID");
+      QString docId = Config::getString("eclipse-doc-id");
+
       QTextStream t(&pluginFile);
       t << "<plugin name=\""  << docId << "\" id=\"" << docId << "\"" << endl;
       t << "        version=\"1.0.0\" provider-name=\"Doxygen\">" << endl;

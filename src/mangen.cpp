@@ -28,13 +28,10 @@
 #include <mangen.h>
 #include <config.h>
 #include <util.h>
-#include <doxygen.h>
 #include <docparser.h>
+#include <doxy_globals.h>
 #include <mandocvisitor.h>
 #include <language.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 static QByteArray getExtension()
 {

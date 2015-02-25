@@ -20,7 +20,6 @@
 #include <classdef.h>
 #include <config.h>
 #include <docparser.h>
-#include <doxygen.h>
 #include <filedef.h>
 #include <groupdef.h>
 #include <language.h>

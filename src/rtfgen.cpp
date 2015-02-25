@@ -23,28 +23,25 @@
 
 #include <stdlib.h>
 
-#include <rtfgen.h>
 #include <config.h>
-#include <message.h>
-#include <doxygen.h>
-
 #include <classlist.h>
 #include <diagram.h>
-#include <language.h>
+#include <doxy_globals.h>
 #include <dirdef.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_build_info.h>
 #include <filename.h>
 #include <groupdef.h>
+#include <language.h>
+#include <message.h>
 #include <namespacedef.h>
 #include <pagedef.h>
+#include <portable.h>
+#include <rtfgen.h>
 #include <rtfstyle.h>
 #include <rtfdocvisitor.h>
-#include <portable.h>
 #include <util.h>
-
-#include <doxy_globals.h>
 
 #define DBG_RTF(x)
 

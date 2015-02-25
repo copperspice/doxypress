@@ -20,7 +20,6 @@
 #include <stdlib.h>
 
 #include <arguments.h>
-#include <doxygen.h>
 #include <doxy_globals.h>
 #include <entry.h>
 #include <filestorage.h>

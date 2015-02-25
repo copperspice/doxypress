@@ -53,7 +53,7 @@ class Qhp : public IndexIntf
    void setPrevSection(const QString &title, const char *basename, const char *anchor, int level);
    void addFile(const char *fileName);
 
-   static QByteArray getFullProjectName();
+   static QString getFullProjectName();
 
    QhpXmlWriter m_doc;
    QhpXmlWriter m_toc;

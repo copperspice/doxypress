@@ -35,7 +35,7 @@
 #include <arguments.h>
 #include <classdef.h>
 #include <defargs.h>
-#include <doxygen.h>
+#include <doxy_globals.h>
 #include <entry.h>
 #include <filedef.h>
 #include <filename.h>
@@ -43,9 +43,6 @@
 #include <section.h>
 #include <tagreader.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 /** Information about an linkable anchor */
 class TagAnchorInfo

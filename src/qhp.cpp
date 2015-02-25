@@ -21,17 +21,14 @@
 
 #include <string.h>
 
+#include <config.h>
+#include <doxy_globals.h>
 #include <qhp.h>
 #include <qhpxmlwriter.h>
 #include <message.h>
-#include <config.h>
 #include <memberdef.h>
 #include <groupdef.h>
-#include <doxygen.h>
 #include <filedef.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 static QByteArray makeFileName(const char *withoutExtension)
 {
@@ -87,8 +84,9 @@ void Qhp::initialize()
        <filterAttribute>1.0</filterAttribute>
    ..
    */
-   QByteArray nameSpace       = Config_getString("QHP_NAMESPACE");
-   QByteArray virtualFolder   = Config_getString("QHP_VIRTUAL_FOLDER");
+
+   QString nameSpace     = Config::getString("qhp-namespace");
+   QString virtualFolder = Config::getString("qhp-virtual-folder");
 
    m_doc.declaration("1.0", "UTF-8");
 
@@ -100,13 +98,13 @@ void Qhp::initialize()
    m_doc.openCloseContent("virtualFolder", virtualFolder);
 
    // Add custom filter
-   QByteArray filterName = Config_getString("QHP_CUST_FILTER_NAME");
+   QString filterName = Config::getString("qhp-cust-filter-name");
 
    if (! filterName.isEmpty()) {
       const char *tagAttributes[] = { "name", filterName, 0 };
       m_doc.open("customFilter", tagAttributes);
 
-      QStringList customFilterAttributes = QString(Config_getString("QHP_CUST_FILTER_ATTRS")).split(QChar(' '));
+      QStringList customFilterAttributes = Config::getString("qhp-cust-filter-attrib").split(QChar(' '));
 
       for (int i = 0; i < (int)customFilterAttributes.count(); i++) {
          m_doc.openCloseContent("filterAttribute", customFilterAttributes[i].toUtf8());
@@ -118,14 +116,14 @@ void Qhp::initialize()
    m_doc.open("filterSection");
 
    // Add section attributes
-   QString temp = Config_getString("QHP_SECT_FILTER_ATTRS");
+   QString temp = Config::getString("qhp-sect-filter-attrib");
    QStringList sectionFilterAttributes = temp.split(QChar(' '));
 
-   if (! sectionFilterAttributes.contains(QString("doxygen"))) {
+   if (! sectionFilterAttributes.contains("doxygen")) {            // BROOM
       sectionFilterAttributes << "doxygen";
    }
 
-   for (int i = 0; i < (int)sectionFilterAttributes.count(); i++) {
+   for (int i = 0; i < sectionFilterAttributes.count(); i++) {
       m_doc.openCloseContent("filterAttribute", sectionFilterAttributes[i].toUtf8());
    }
 
@@ -171,12 +169,14 @@ void Qhp::finalize()
    m_doc.close("filterSection");
    m_doc.close("QtHelpProject");
 
-   QByteArray fileName = Config_getString("HTML_OUTPUT") + "/" + getQhpFileName();
+   QString fileName = Config::getString("html-output") + "/" + getQhpFileName();
    QFile file(fileName);
-   if (!file.open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", fileName.data());
+
+   if (! file.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), file.error());
       exit(1);
    }
+
    m_doc.dumpTo(file);
 }
 
@@ -219,7 +219,7 @@ void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Member
                        const char *sectionAnchor, const char *word)
 {
    if (md) { // member
-      static bool separateMemberPages = Config_getBool("SEPARATE_MEMBER_PAGES");
+      static bool separateMemberPages = Config::getBool("separate-member-pages");
 
       if (context == 0) { // global member
          if (md->getGroupDef()) {
@@ -279,16 +279,20 @@ QByteArray Qhp::getQhpFileName()
    return "index.qhp";
 }
 
-QByteArray Qhp::getFullProjectName()
+QString Qhp::getFullProjectName()
 {
-   QByteArray projectName = Config_getString("PROJECT_NAME");
-   QByteArray versionText = Config_getString("PROJECT_NUMBER");
+   QString projectName = Config::getString("project-name");
+   QString versionText = Config::getString("project-version");
+
    if (projectName.isEmpty()) {
       projectName = "Root";
    }
-   return projectName + (versionText.isEmpty()
-                         ? QByteArray("")
-                         : QByteArray(" ") + versionText);
+
+   if (versionText.isEmpty()) { 
+      return projectName; 
+   } else {
+     return projectName + " " + versionText;
+   } 
 }
 
 void Qhp::handlePrevSection()

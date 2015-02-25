@@ -21,16 +21,13 @@
 #include <docparser.h>
 #include <dirdef.h>
 #include <dot.h>
-#include <doxygen.h>
+#include <doxy_globals.h>
 #include <filename.h>
 #include <layout.h>
 #include <language.h>
 #include <message.h>
 #include <outputlist.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 static int g_dirCount = 0;
 

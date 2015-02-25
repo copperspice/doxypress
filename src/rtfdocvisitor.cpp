@@ -21,7 +21,7 @@
 #include <dia.h>
 #include <docparser.h>
 #include <dot.h>
-#include <doxygen.h>
+#include <doxy_globals.h>
 #include <filedef.h>
 #include <htmlentity.h>
 #include <language.h>
@@ -34,8 +34,6 @@
 #include <rtfstyle.h>
 #include <rtfdocvisitor.h>
 #include <util.h>
-
-#include <doxy_globals.h>
 
 // #define DBG_RTF(x) m_t << x
 #define DBG_RTF(x) do {} while(0)

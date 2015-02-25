@@ -20,7 +20,6 @@
 #include <config.h>
 #include <docparser.h>
 #include <doxy_globals.h>
-#include <doxygen.h>
 #include <groupdef.h>
 #include <language.h>
 #include <namespacedef.h>
@@ -76,7 +75,7 @@ QByteArray PageDef::getOutputFileBase() const
 
 void PageDef::setFileName(const char *name, bool dontEscape)
 {
-   static bool shortNames = Config_getBool("SHORT_NAMES");
+   static bool shortNames = Config::getBool("short-names");
 
    if (shortNames && !dontEscape) {
       m_fileName = convertNameToFile(name).toUtf8();
@@ -146,7 +145,7 @@ void PageDef::writeDocumentation(OutputList &ol)
 {
    QSharedPointer<PageDef> self = sharedFrom(this);
 
-   static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+   static bool generateTreeView = Config::getBool("generate-treeview");
    
    QByteArray pageName;
    QByteArray manPageName;
@@ -181,7 +180,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    //2.}
 
    if (! generateTreeView) {
-      if (getOuterScope() != Doxygen::globalScope && !Config_getBool("DISABLE_INDEX")) {
+      if (getOuterScope() != Doxygen::globalScope && ! Config::getBool("disable-index")) {
          getOuterScope()->writeNavigationPath(ol);
       }
       ol.endQuickIndices();
@@ -230,7 +229,7 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    writePageDocumentation(ol);
 
-   if (generateTreeView && getOuterScope() != Doxygen::globalScope && ! Config_getBool("DISABLE_INDEX")) {
+   if (generateTreeView && getOuterScope() != Doxygen::globalScope && ! Config::getBool("disable-index")) {
       ol.endContents();
       endFileWithNavPath(getOuterScope(), ol);
 
@@ -311,7 +310,7 @@ void PageDef::writePageDocumentation(OutputList &ol)
 
 bool PageDef::visibleInIndex() const
 {
-   static bool externalPages = Config_getBool("EXTERNAL_PAGES");
+   static bool externalPages = Config::getBool("external-pages");
 
    return ! getGroupDef() && (!isReference() || externalPages);
 }

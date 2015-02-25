@@ -23,9 +23,9 @@ class QByteArray;
 /** This class is a namespace for HTAGS related functions */
 struct Htags {
    static bool useHtags;
-   static bool loadFilemap(const QByteArray &htmldir);
-   static QByteArray path2URL(const QByteArray &path);
-   static bool execute(const QByteArray &htmldir);
+   static bool loadFilemap(const QString &htmldir);
+   static QByteArray path2URL(const QString &path);
+   static bool execute(const QString &htmldir);
 };
 
-#endif /* HTAGS_H */
+#endif 

@@ -37,7 +37,7 @@ typedef off_t portable_off_t;
 int            portable_system(const QByteArray &command, const QByteArray &args, bool commandHasConsole = true);
 uint           portable_pid();
 const char    *portable_getenv(const char *variable);
-void           portable_setenv(const char *variable, const char *value);
+void           portable_setenv(const char *variable, const QString &value);
 void           portable_unsetenv(const char *variable);
 portable_off_t portable_fseek(FILE *f, portable_off_t offset, int whence);
 portable_off_t portable_ftell(FILE *f);

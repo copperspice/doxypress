@@ -21,7 +21,7 @@
 
 #include <stdlib.h>
 #include <defgen.h>
-#include <doxygen.h>
+#include <doxy_globals.h>
 #include <message.h>
 #include <config.h>
 #include <classlist.h>
@@ -34,9 +34,6 @@
 #include <namespacedef.h>
 #include <filedef.h>
 #include <filename.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 #define DEF_DB(x)
 
@@ -616,50 +613,30 @@ void generateDEFForFile(QSharedPointer<FileDef> fd, QTextStream &t)
 
 void generateDEF()
 {
-   QByteArray outputDirectory = Config_getString("OUTPUT_DIRECTORY");
-
-   if (outputDirectory.isEmpty()) {
-      outputDirectory = QDir::currentPath().toUtf8();
-
-   } else {
-      QDir dir(outputDirectory);
-
-      if (!dir.exists()) {
-         dir.setPath(QDir::currentPath());
-
-         if (!dir.mkdir(outputDirectory)) {
-            err("tag OUTPUT_DIRECTORY: Output directory `%s' does not "
-                "exist and cannot be created\n", outputDirectory.data());
-            exit(1);
-
-         } else {
-            msg("Notice: Output directory `%s' does not exist. "
-                "I have created it for you.\n", outputDirectory.data());
-         }
-         dir.cd(outputDirectory);
-      }
-      outputDirectory = dir.absolutePath().toUtf8();
-   }
+   QString outputDirectory = Config::getString("output-dir");
 
    QDir dir(outputDirectory);
 
-   if (!dir.exists()) {
+   if (! dir.exists()) {
       dir.setPath(QDir::currentPath());
-      if (!dir.mkdir(outputDirectory)) {
-         err("Cannot create directory %s\n", outputDirectory.data());
+      if (! dir.mkdir(outputDirectory)) {
+         err("Unable to create directory %s\n", qPrintable(outputDirectory));
          return;
       }
    }
+
    QDir defDir(outputDirectory + "/def");
    if (!defDir.exists() && !defDir.mkdir(outputDirectory + "/def")) {
-      err("Could not create def directory in %s\n", outputDirectory.data());
+      err("Unable to create directory %s\n", qPrintable(outputDirectory));
+
       return;
    }
 
-   QByteArray fileName = outputDirectory + "/def/doxygen.def";
+   QString fileName = outputDirectory + "/def/doxygen.def";
    QFile f(fileName);
-   if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+
+   if (! f.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 

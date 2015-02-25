@@ -18,25 +18,22 @@
 #include <QDir>
 #include <QTextStream>
 
+#include <config.h>
+#include <docparser.h>
+#include <doxy_globals.h>
+#include <message.h>
 #include <msc.h>
 #include <portable.h>
-#include <config.h>
-#include <message.h>
-#include <docparser.h>
-#include <doxygen.h>
 #include <util.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 static const int maxCmdLine = 40960;
 
-static bool convertMapFile(QTextStream &t, const char *mapName, const QByteArray relPath,
-                           const QByteArray &context)
+static bool convertMapFile(QTextStream &t, const char *mapName, const QByteArray relPath, const QByteArray &context)
 {
    QFile f(mapName);
+
    if (! f.open(QIODevice::ReadOnly)) {
-      err("failed to open map file %s for inclusion in the docs!\n"
+      err("failed to open map file %s for inclusion in the docs\n"
           "If you installed Graphviz/dot after a previous failing run, \n"
           "try deleting the output directory and rerun doxygen.\n", mapName);
       return false;
@@ -111,7 +108,8 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
    // go to the html output directory (i.e. path)
    QDir::setCurrent(outDir);
    
-   QByteArray mscExe = Config_getString("MSCGEN_PATH") + "mscgen" + portable_commandExtension();
+   QString mscExe = Config::getString("mscgen-path") + "mscgen" + portable_commandExtension();
+
    QByteArray mscArgs;
    QByteArray extension;
 
@@ -155,7 +153,7 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
 
    portable_sysTimerStop();
 
-   if ( (format == MSC_EPS) && (Config_getBool("USE_PDFLATEX")) ) {
+   if ( (format == MSC_EPS) && (Config::getBool("latex-pdf")) ) {
 
       QString epstopdfArgs;
       epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(outFile).arg(outFile);
@@ -184,7 +182,8 @@ QByteArray getMscImageMapFromFile(const QByteArray &inFile, const QByteArray &ou
    QDir::setCurrent(outDir);
    //printf("Going to dir %s\n",QDir::currentPath().data());
 
-   QByteArray mscExe = Config_getString("MSCGEN_PATH") + "mscgen" + portable_commandExtension();
+   QString mscExe = Config::getString("mscgen-path") + "mscgen" + portable_commandExtension();
+
    QByteArray mscArgs = "-T ismap -i \"";
    mscArgs += inFile;   
 

@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -3226,7 +3226,7 @@ char *commentscanYYtext;
 
 #include "scanner.h"
 #include "entry.h"
-#include "doxygen.h"
+#include <doxy_globals.h>
 #include "message.h"
 #include "config.h"
 #include "util.h"
@@ -3241,7 +3241,7 @@ char *commentscanYYtext;
 #include "markdown.h"
 #include "condparser.h"
 #include "formula.h"
-#include <doxy_globals.h>
+
 
 #define YY_NO_INPUT 1
 
@@ -4662,7 +4662,7 @@ YY_DECL {
                // language switch command
                QByteArray langId = QString(commentscanYYtext).trimmed().toUtf8().mid(2);
 
-               if (!langId.isEmpty() && qstricmp(Config_getEnum("OUTPUT_LANGUAGE"), langId) != 0)
+               if (! langId.isEmpty() && Config::getEnum("output-language").compare(langId, Qt::CaseInsensitive) != 0)
                {
                   // enable language specific section
                   BEGIN(SkipLang);
@@ -6707,8 +6707,7 @@ YY_DECL {
             { /* language switch */
                QByteArray langId = &commentscanYYtext[2];
 
-               if (langId.isEmpty() ||
-               qstricmp(Config_getEnum("OUTPUT_LANGUAGE"), langId) == 0)
+               if (langId.isEmpty() || Config::getEnum("output-language").compare(langId, Qt::CaseInsensitive) == 0)
                {
                   // enable language specific section
                   BEGIN(Comment);
@@ -8318,7 +8317,7 @@ static bool handleCallergraph(const QByteArray &)
 
 static bool handleInternal(const QByteArray &)
 {
-   if (! Config_getBool("INTERNAL_DOCS")) {
+   if (! Config::getBool("internal-docs")) {
       // make sure some whitespace before \internal command
       // is not treated as "documentation"
 

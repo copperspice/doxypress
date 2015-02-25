@@ -77,7 +77,7 @@ class HtmlGenerator : public OutputGenerator
    static void writeFooterFile(QFile &f);
    static void writeTabData();
    static void writeSearchInfo(QTextStream &t, const QByteArray &relPath);
-   static void writeSearchData(const char *dir);
+   static void writeSearchData(const QString &dir);
    static void writeSearchPage();
    static void writeExternalSearchPage();
    static QByteArray writeLogoAsString(const char *path);

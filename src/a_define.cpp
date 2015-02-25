@@ -49,7 +49,7 @@ A_Define::~A_Define()
 
 bool A_Define::hasDocumentation()
 {
-   if (! definition.isEmpty() && (! doc.isEmpty() || Config_getBool("EXTRACT_ALL") )) { 
+   if (! definition.isEmpty() && (! doc.isEmpty() || Config::getBool("extract-all") )) { 
       return true;
    }
 

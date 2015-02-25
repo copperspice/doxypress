@@ -22,7 +22,6 @@
 #include <stdlib.h>
 
 #include <config.h>
-#include <doxygen.h>
 #include <doxy_globals.h>
 #include <filedef.h>
 #include <groupdef.h>

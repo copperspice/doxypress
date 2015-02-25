@@ -15,50 +15,59 @@
  *
 *************************************************************************/
 
-#include <message.h>
 #include <config.h>
 #include <util.h>
 #include <language.h>
-#include <lang_cfg.h>
+#include <message.h>
 #include <translator.h>
 #include <translator_en.h>
 
-#if ! defined(ENGLISH_ONLY)
-#include "translate/translator_adapter.h"
+#include <translate/translator_adapter.h>
 
 #ifdef LANG_NL
 #include "translate/translator_nl.h"
 #endif
+
 #ifdef LANG_AM
 #include "translate/translator_am.h"
 #endif
+
 #ifdef LANG_SV
 #include "translate/translator_sv.h"
 #endif
+
 #ifdef LANG_CZ
 #include "translate/translator_cz.h"
 #endif
+
 #ifdef LANG_FR
 #include "translate/translator_fr.h"
 #endif
+
 #ifdef LANG_ID
 #include "translate/translator_id.h"
 #endif
+
 #ifdef LANG_IT
 #include "translate/translator_it.h"
 #endif
+
 #ifdef LANG_DE
 #include "translate/translator_de.h"
 #endif
+
 #ifdef LANG_JP
 #include "translate/translator_jp.h"
 #endif
+
 #ifdef LANG_JE
 #include "translate/translator_je.h"
 #endif
+
 #ifdef LANG_ES
 #include "translate/translator_es.h"
 #endif
+
 #ifdef LANG_EO
 #include "translate/translator_eo.h"
 #endif
@@ -167,7 +176,6 @@ bool setTranslator(const char *langName)
       theTranslator = new TranslatorEnglish;
    }
 
-#if !defined(ENGLISH_ONLY)
 #ifdef LANG_NL
    else if (L_EQUAL("dutch")) {
       theTranslator = new TranslatorDutch;
@@ -377,7 +385,6 @@ bool setTranslator(const char *langName)
       theTranslator = new TranslatorEsperanto;
    }
 #endif
-#endif // ENGLISH_ONLY
 
    else {
       theTranslator = new TranslatorEnglish;

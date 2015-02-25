@@ -737,7 +737,6 @@ char *tclscannerYYtext;
 #include "entry.h"
 #include "message.h"
 #include "config.h"
-#include "doxygen.h"
 #include <doxy_globals.h>
 #include "util.h"
 #include "defargs.h"
@@ -5089,26 +5088,25 @@ static void tcl_init()
    // Get values from option TCL_SUBST
    tcl.config_subst.clear();
 
-   if (Config::instance()->get("TCL_SUBST")) {
-      QStringList myStrList = Config_getList("TCL_SUBST");
+   QStringList myStrList = Config::getList("tcl-subst");
 
-      for (auto s : myStrList) {
-     
-         QByteArray myStr = s.toUtf8();
-         int i = myStr.indexOf('=');
+   for (auto s : myStrList) {
+  
+      QByteArray myStr = s.toUtf8();
+      int i = myStr.indexOf('=');
 
-         if (i > 0) {
-            QByteArray myName  = myStr.left(i).trimmed();
-            QByteArray myValue = myStr.right(myStr.length() - i - 1).trimmed();
+      if (i > 0) {
+         QByteArray myName  = myStr.left(i).trimmed();
+         QByteArray myValue = myStr.right(myStr.length() - i - 1).trimmed();
 
-            if (! myName.isEmpty() && ! myValue.isEmpty()) {
-               tcl_inf("TCL_SUBST: use '%s'\n", qPrintable(s));
-            }
+         if (! myName.isEmpty() && ! myValue.isEmpty()) {
+            tcl_inf("TCL_SUBST: use '%s'\n", qPrintable(s));
+         }
 
-            tcl.config_subst[myName] = myValue;
-         }         
-      }
+         tcl.config_subst[myName] = myValue;
+      }         
    }
+ 
 
    if (tcl.input_string.at(tcl.input_string.length() - 1) == 0x1A) {
       // no code
@@ -5125,7 +5123,7 @@ static void tcl_init()
    tcl.code_font = NULL;
    tcl.code_line = 1;
    tcl.code_linenumbers = 1;
-   tcl.config_autobrief = Config_getBool("JAVADOC_AUTOBRIEF");
+   tcl.config_autobrief = Config::getBool("javadoc-auto-brief");
    tcl.input_position = 0;
    tcl.file_name = NULL;
    tcl.this_parser = NULL;

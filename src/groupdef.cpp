@@ -25,7 +25,6 @@
 #include <classlist.h>
 #include <dirdef.h>
 #include <doxy_globals.h>
-#include <doxygen.h>
 #include <dot.h>
 #include <docparser.h>
 #include <entry.h>

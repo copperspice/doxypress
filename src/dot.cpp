@@ -23,7 +23,6 @@
 
 #include <config.h>
 #include <dot.h>
-#include <doxygen.h>
 #include <doxy_globals.h>
 #include <language.h>
 #include <defargs.h>

@@ -24,7 +24,6 @@
 #include <assert.h>
 #include <config.h>
 #include <definition.h>
-#include <doxygen.h>
 #include <doxy_globals.h>
 #include <language.h>
 #include <message.h>

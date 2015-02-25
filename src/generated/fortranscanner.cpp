@@ -56463,18 +56463,17 @@ char *fortranscannerYYtext;
 #include <assert.h>
 #include <ctype.h>
 
+#include "arguments.h"
 #include "fortranscanner.h"
 #include "entry.h"
 #include "message.h"
 #include "config.h"
-#include "doxygen.h"
 #include "util.h"
 #include "defargs.h"
 #include "language.h"
 #include "commentscan.h"
 #include "fortrancode.h"
 #include "pre.h"
-#include "arguments.h"
 
 // Toggle for some debugging info
 //#define DBG_CTX(x) fprintf x
@@ -58207,7 +58206,8 @@ YY_DECL {
                   current->docLine  = yyLineNr;
                   docBlockJavaStyle = FALSE;
                   docBlock.resize(0);
-                  docBlockJavaStyle = Config_getBool("JAVADOC_AUTOBRIEF");
+
+                  docBlockJavaStyle = Config::getBool("javadoc-auto-brief");
                   startCommentBlock(TRUE);
                   yy_push_state(DocBackLine);
 
@@ -58285,7 +58285,7 @@ YY_DECL {
                   docBlockInBody = TRUE;
                }
                docBlock.resize(0);
-               docBlockJavaStyle = Config_getBool("JAVADOC_AUTOBRIEF");
+               docBlockJavaStyle = Config::getBool("javadoc-auto-brief");
                startCommentBlock(TRUE);
                BEGIN(DocBlock);
                //cout << "start DocBlock " << endl;
@@ -60419,7 +60419,7 @@ static void startCommentBlock(bool brief)
 static void handleCommentBlock(const QByteArray &doc, bool brief)
 {
    bool needsEntry = FALSE;
-   static bool hideInBodyDocs = Config_getBool("HIDE_IN_BODY_DOCS");
+   static bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
    int position = 0;
 
    if (docBlockInBody && hideInBodyDocs) {

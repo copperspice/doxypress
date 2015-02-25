@@ -21,7 +21,7 @@
 
 
 /*! \file
- *  \brief main entry point for doxygen
+ *  \brief main entry point for DoxyPress
  *
  *  This file contains main()
  */
@@ -35,18 +35,14 @@ int main(int argc, char **argv)
       argList.append(value);      
    }
 
-   initDoxygen();  
+   initDoxyPress();  
 
    //    
    struct CommandLine cmdArgs;
 
    cmdArgs = parseCommandLine(argList);
-   readConfiguration(cmdArgs);
 
-   //
-   checkConfiguration();
-   adjustConfiguration();
-
+   readConfiguration(cmdArgs);  
    parseInput();
    generateOutput();
 

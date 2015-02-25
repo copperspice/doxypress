@@ -26,7 +26,6 @@
 #include <doxy_globals.h>
 #include <ftvhelp.h>
 #include <message.h>
-#include <doxygen.h>
 #include <language.h>
 #include <htmlgen.h>
 #include <layout.h>

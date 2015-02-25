@@ -21,7 +21,7 @@
 class BufStr;
 
 void initPreprocessor();
-void cleanUpPreprocessor();
+void removePreProcessor();
 void addSearchDir(const char *dir);
 void preprocessFile(const char *fileName, BufStr &input, BufStr &output);
 void preFreeScanner();

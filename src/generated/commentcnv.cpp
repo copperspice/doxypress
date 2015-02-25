@@ -1034,23 +1034,21 @@ char *commentcnvYYtext;
 
 #define YY_NEVER_INTERACTIVE 1
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <qstack.h>
 #include <qregexp.h>
 #include <qtextstream.h>
 #include <qglobal.h>
 
-#include "bufstr.h"
-
-#include "message.h"
-#include "config.h"
-#include "doxygen.h"
-#include "util.h"
-#include "condparser.h"
-
 #include <assert.h>
+#include <bufstr.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <config.h>
+#include <condparser.h>
+#include <doxy_globals.h>
+#include <message.h>
+#include <util.h>
 
 #define YY_NO_INPUT 1
 
@@ -1149,9 +1147,10 @@ static void replaceCommentMarker(const char *s, int len)
 static inline int computeIndent(const char *s)
 {
    int col = 0;
-   static int tabSize = Config_getInt("TAB_SIZE");
+   static int tabSize = Config::getInt("tab-size");
    const char *p = s;
    char c;
+
    while ((c = *p++)) {
       if (c == ' ') {
          col++;
@@ -1180,7 +1179,7 @@ static inline void copyToOutput(const char *s, int len)
 
    } else if (len > 0) {
       ADDARRAY(s, len);
-      static int tabSize = Config_getInt("TAB_SIZE");
+      static int tabSize = Config::getInt("tab-size");
 
       for (i = 0; i < len; i++) {
          switch (s[i]) {
@@ -3659,14 +3658,13 @@ static bool recognizeFixedForm(const char *contents)
  *  -# It handles conditional sections (cond...endcond blocks)
  */
 void convertCppComments(BufStr *inBuf, BufStr *outBuf, const char *fileName)
-{
-   //printf("convertCppComments(%s)\n",fileName);
+{   
    g_inBuf    = inBuf;
    g_outBuf   = outBuf;
    g_inBufPos = 0;
    g_col      = 0;
 
-   g_mlBrief = Config_getBool("MULTILINE_CPP_IS_BRIEF");
+   g_mlBrief = Config::getBool("multiline-cpp-brief");
 
    g_skip     = FALSE;
    g_fileName = fileName;

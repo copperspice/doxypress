@@ -33,7 +33,6 @@
 #include <dot.h>
 #include <doxy_globals.h>
 #include <doxy_build_info.h>
-#include <doxygen.h>
 #include <filename.h>
 #include <groupdef.h>
 #include <language.h>

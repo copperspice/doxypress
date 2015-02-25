@@ -20,7 +20,7 @@
 #include <config.h>
 #include <docparser.h>
 #include <dot.h>
-#include <doxygen.h>
+#include <doxy_globals.h>
 #include <filename.h>
 #include <htmlentity.h>
 #include <language.h>
@@ -30,9 +30,6 @@
 #include <util.h>
 #include <xmlgen.h>
 #include <xmldocvisitor.h>
-
-// must appear after the previous include - resolve soon 
-#include <doxy_globals.h>
 
 XmlDocVisitor::XmlDocVisitor(QTextStream &t, CodeOutputInterface &ci)
    : DocVisitor(DocVisitor_XML), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false)
@@ -848,10 +845,12 @@ void XmlDocVisitor::visitPre(DocImage *img)
    m_t << "\"";
 
    QByteArray baseName = img->name();
+
    int i;
    if ((i = baseName.lastIndexOf('/')) != -1 || (i = baseName.lastIndexOf('\\')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
+
    m_t << " name=\"" << baseName << "\"";
    if (!img->width().isEmpty()) {
       m_t << " width=\"";
@@ -866,7 +865,7 @@ void XmlDocVisitor::visitPre(DocImage *img)
 
    // copy the image to the output dir
    QFile inImage(img->name());
-   QFile outImage(Config_getString("XML_OUTPUT") + "/" + baseName);
+   QFile outImage(Config::getString("xml-output") + "/" + baseName);
 
    if (inImage.open(QIODevice::ReadOnly)) {
 

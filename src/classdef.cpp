@@ -27,7 +27,6 @@
 #include <defargs.h>
 #include <docparser.h>
 #include <doxy_globals.h>
-#include <doxygen.h>
 #include <diagram.h>
 #include <entry.h>
 #include <htmlhelp.h>

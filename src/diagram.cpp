@@ -23,16 +23,15 @@
 #include <stdlib.h>
 
 #include <diagram.h>
+#include <doxy_globals.h>
 #include <image.h>
 #include <classdef.h>
 #include <config.h>
 #include <message.h>
 #include <util.h>
-#include <doxygen.h>
 #include <portable.h>
 #include <index.h>
 #include <classlist.h>
-#include <doxy_globals.h>
 
 #define IMAGE_EXT ".png"
 
@@ -359,7 +358,7 @@ QByteArray DiagramItem::label() const
       result = classDef->displayName().toUtf8();
    }
 
-   if (Config_getBool("HIDE_SCOPE_NAMES")) {
+   if (Config::getBool("hide-scope-names")) {
       result = stripScope(result);
    }
 
@@ -1446,7 +1445,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const char *path, const char
 
    f1.close();
 
-   if (Config_getBool("USE_PDFLATEX")) {
+   if (Config::getBool("latex-pdf")) {
           
       QString epstopdfArgs;
       epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(epsBaseName.data()).arg(epsBaseName.data());

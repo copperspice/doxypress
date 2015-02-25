@@ -2529,24 +2529,22 @@ char *preYYtext;
 #include <ctype.h>
 #include <errno.h>
 
-#include "pre.h"
-#include "constexp.h"
 #include "a_define.h"
-#include "doxygen.h"
-#include "config.h"
-#include "defargs.h"
-#include "bufstr.h"
-#include "portable.h"
-#include "bufstr.h"
 #include "arguments.h"
-#include "entry.h"
+#include "bufstr.h"
+#include "constexp.h"
+#include "config.h"
 #include "condparser.h"
+#include <doxy_globals.h>
+#include "defargs.h"
+#include "entry.h"
 #include "filedef.h"
 #include "message.h"
 #include "memberdef.h"
 #include "membername.h"
+#include "portable.h"
+#include "pre.h"
 #include "util.h"
-#include <doxy_globals.h>
 
 // Toggle for some debugging info
 //#define DBG_CTX(x) fprintf x
@@ -2921,11 +2919,13 @@ static FileState *checkAndOpenFile(const QByteArray &fileName, bool &alreadyIncl
 {
    alreadyIncluded = FALSE;
    FileState *fs = 0;
-   //printf("checkAndOpenFile(%s)\n",fileName.data());
+
    QFileInfo fi(fileName);
+
    if (fi.exists() && fi.isFile()) {
-      static QStringList &exclPatterns = Config_getList("EXCLUDE_PATTERNS");
-      if (patternMatch(fi, &exclPatterns)) {
+      static const QStringList exclPatterns = Config::getList("exclude-patterns");
+
+      if (patternMatch(fi, exclPatterns)) {
          return 0;
       }
 
@@ -2935,9 +2935,8 @@ static FileState *checkAndOpenFile(const QByteArray &fileName, bool &alreadyIncl
       if (g_curlyCount == 0) { // not #include inside { ... }
 
          if (g_allIncludes.contains(absName)) {
-            alreadyIncluded = TRUE;
-            //printf("  already included 1\n");
-            return 0; // already done
+            alreadyIncluded = TRUE;           
+            return 0;
          }
 
          g_allIncludes.insert(absName, (void *)0x8);
@@ -3849,13 +3848,11 @@ static inline void outputArray(const char *a, int len)
 
 static void readIncludeFile(const QByteArray &inc)
 {
-   static bool searchIncludes = Config_getBool("SEARCH_INCLUDES");
+   static bool searchIncludes = Config::getBool("search-includes");
    uint i = 0;
 
    // find the start of the include file name
-   while (i < inc.length() &&
-          (inc.at(i) == ' ' || inc.at(i) == '"' || inc.at(i) == '<')
-         ) {
+   while (i < inc.length() && (inc.at(i) == ' ' || inc.at(i) == '"' || inc.at(i) == '<')) {
       i++;
    }
    uint s = i;
@@ -3896,8 +3893,8 @@ static void readIncludeFile(const QByteArray &inc)
             if (fi2.exists()) {
                absIncFileName = fi2.absoluteFilePath().toUtf8();
 
-            } else if (searchIncludes) { // search in INCLUDE_PATH as well
-               QStringList &includePath = Config_getList("INCLUDE_PATH");
+            } else if (searchIncludes) { 
+               const QStringList includePath = Config::getList("include-path");
               
                for (auto s : includePath) {
 
@@ -3916,9 +3913,10 @@ static void readIncludeFile(const QByteArray &inc)
                   
                }
             }
-            //printf( "absIncFileName = %s\n", absIncFileName.data() );
+           
          }
       }
+
       DefineManager::instance().addInclude(g_yyFileName, absIncFileName);
       DefineManager::instance().addFileToContext(absIncFileName);
 
@@ -4511,7 +4509,8 @@ YY_DECL {
 
             {
                // function like macro
-               static bool skipFuncMacros = Config_getBool("SKIP_FUNCTION_MACROS");
+               static bool skipFuncMacros = Config::getBool("skip-function-macros");
+
                QByteArray name(preYYtext);
                name = name.left(name.indexOf('(')).trimmed();
 
@@ -5705,18 +5704,19 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               static bool markdownSupport = Config_getBool("MARKDOWN_SUPPORT");
-               if (!markdownSupport)
-               {
+               static bool markdown = Config::getBool("markdown");
+
+               if (! markdown) {
                   REJECT;
-               } else
-               {
+
+               } else {
                   outputArray(preYYtext, (int)preYYleng);
                   g_fenceSize = preYYleng;
                   BEGIN(SkipVerbatim);
                }
             }
             YY_BREAK
+
          case 120:
             /* rule 120 can match eol */
             YY_RULE_SETUP
@@ -7534,26 +7534,27 @@ void initPreprocessor()
    g_expandedDict = new DefineDict();
 }
 
-void cleanUpPreprocessor()
+void removePreProcessor()
 {
    delete g_expandedDict;
    g_expandedDict = 0;
+
    delete g_pathList;
    g_pathList = 0;
+
    DefineManager::deleteInstance();
 }
-
 
 void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
 {
    printlex(preYY_flex_debug, TRUE, __FILE__, fileName);
 
    uint orgOffset = output.curPos();
-   //printf("##########################\n%s\n####################\n",
-   //    input.data());
+   
 
-   g_macroExpansion = Config_getBool("MACRO_EXPANSION");
-   g_expandOnlyPredef = Config_getBool("EXPAND_ONLY_PREDEF");
+   g_macroExpansion   = Config::getBool("macro-expansion");
+   g_expandOnlyPredef = Config::getBool("expand-only-predefined");
+
    g_skip = FALSE;
    g_curlyCount = 0;
    g_nospaces = FALSE;
@@ -7573,7 +7574,7 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
 
    if (firstTime) {
       // add predefined macros
-      QStringList &predefList = Config_getList("PREDEFINED");
+      const QStringList predefList = Config::getList("predefined-macros");
      
       for (auto defStr : predefList) { 
          QByteArray ds = defStr.toUtf8();
@@ -7588,8 +7589,7 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
             continue;   // no define name
          }
 
-         if (i_obrace < i_equals && i_cbrace < i_equals &&
-               i_obrace != -1      && i_cbrace != -1  &&  i_obrace < i_cbrace ) {
+         if (i_obrace < i_equals && i_cbrace < i_equals && i_obrace != -1      && i_cbrace != -1  &&  i_obrace < i_cbrace ) {
 
             // predefined function macro definition
            

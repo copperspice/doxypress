@@ -18,7 +18,7 @@
 #include <cite.h>
 #include <classlist.h>
 #include <dirdef.h>
-#include <doxygen.h>
+#include <doxy_globals.h>
 #include <filename.h>
 #include <formula.h>
 #include <groupdef.h>
@@ -32,30 +32,27 @@
 #include <searchindex.h>
 #include <reflist.h>
 
-#include <doxy_globals.h>
-
 // part 1
 ClassSDict      *Doxygen::classSDict = 0;
 ClassSDict      *Doxygen::hiddenClasses = 0;
 NamespaceSDict  *Doxygen::namespaceSDict = 0;
 MemberNameSDict *Doxygen::memberNameSDict = 0;
 MemberNameSDict *Doxygen::functionNameSDict = 0;
-
-SortedList<FileName *>  *Doxygen::inputNameList = 0; // all input files
-
-FileNameDict    *Doxygen::inputNameDict = 0;
 GroupSDict      *Doxygen::groupSDict = 0;
+PageSDict       *Doxygen::pageSDict = 0;
+PageSDict       *Doxygen::exampleSDict = 0;
+
 FormulaList     *Doxygen::formulaList = 0;         // all formulas
 FormulaDict     *Doxygen::formulaDict = 0;         // all formulas
 FormulaDict     *Doxygen::formulaNameDict = 0;     // the label name of all formulas
-PageSDict       *Doxygen::pageSDict = 0;
-PageSDict       *Doxygen::exampleSDict = 0;
+
 SectionDict     *Doxygen::sectionDict = 0;         // all page sections
 CiteDict        *Doxygen::citeDict = 0;            // database of bibliographic references
 StringDict       Doxygen::aliasDict;               // aliases
 DirSDict         Doxygen::directories;
 GenericsSDict   *Doxygen::genericsDict;
 
+FileNameDict    *Doxygen::inputNameDict = 0;
 FileNameDict    *Doxygen::includeNameDict = 0;     // include names
 FileNameDict    *Doxygen::exampleNameDict = 0;     // examples
 FileNameDict    *Doxygen::imageNameDict = 0;       // images
@@ -66,21 +63,22 @@ FileNameDict    *Doxygen::diaFileNameDict = 0;     // dia files
 StringDict       Doxygen::namespaceAliasDict;      // all namespace aliases
 StringDict       Doxygen::tagDestinationDict;      // all tag locations
 
-QCache<QString, LookupInfo>     *Doxygen::lookupCache;
+SortedList<FileName *> *Doxygen::inputNameList = 0; // all input files
 
-QHash<QString, void *>           Doxygen::inputPaths;
-QHash<QString, void *>           Doxygen::expandAsDefinedDict;                        // all macros that should be expanded
+QCache<QString, LookupInfo>  *Doxygen::lookupCache;
 
-QHash<QString, RefList>         *Doxygen::xrefLists = new QHash<QString, RefList>;    // dictionary of cross-referenced item lists
-QHash<QString, int>             *Doxygen::htmlDirMap = 0;
+QHash<QString, void *>        Doxygen::inputPaths;
+QHash<QString, void *>        Doxygen::expandAsDefinedDict;                        // all macros that should be expanded
+QHash<QString, RefList>      *Doxygen::xrefLists = new QHash<QString, RefList>;    // dictionary of cross-referenced item lists
+QHash<QString, int>          *Doxygen::htmlDirMap = 0;
 
-QHash<QString, QSharedPointer<Definition>> Doxygen::clangUsrMap;
-
+QHash<QString, QSharedPointer<Definition>>   Doxygen::clangUsrMap;
 QHash<long, QSharedPointer<MemberGroupInfo>> Doxygen::memGrpInfoDict;                 // dictionary of the member groups heading
+
 StringMap<QSharedPointer<DirRelation>>       Doxygen::dirRelations;
 
-QSharedPointer<PageDef>         Doxygen::mainPage;
-QSharedPointer<NamespaceDef>    Doxygen::globalScope;
+QSharedPointer<PageDef>       Doxygen::mainPage;
+QSharedPointer<NamespaceDef>  Doxygen::globalScope;
 
 SearchIndexIntf *Doxygen::searchIndex = 0;
 ParserManager   *Doxygen::parserManager = 0;
@@ -96,31 +94,29 @@ bool             Doxygen::userComments = false;
 bool             Doxygen::generatingXmlOutput = false;
 bool             Doxygen::markdownSupport = true;
 
-QTime            Doxygen::runningTime;
+int              Doxygen::subpageNestingLevel = 0;
 
 QByteArray       Doxygen::htmlFileExtension;
-
 QString          Doxygen::objDBFileName;
 QString          Doxygen::entryDBFileName;
-
-int              Doxygen::subpageNestingLevel = 0;
+QTime            Doxygen::runningTime;
 
 
 // part 2
 QHash<QString, QSharedPointer<EntryNav>> Doxy_Globals::g_classEntries;
 
 QStringList               Doxy_Globals::g_inputFiles;
-QHash<QString, void *>    Doxy_Globals::g_compoundKeywordDict;   
+QSet<QString>             Doxy_Globals::g_compoundKeywordDict;   
 QHash<QString, FileDef>   Doxy_Globals::g_usingDeclarations;  
-QHash<QString, void *>    Doxy_Globals::g_pathsVisited;  
+QSet<QString>             Doxy_Globals::g_pathsVisited;  
 
 OutputList               *Doxy_Globals::g_outputList = 0;           
 FileStorage              *Doxy_Globals::g_storage = 0;
 
 Statistics Doxy_Globals::g_stats;
 
-bool Doxy_Globals::g_dumpSymbolMap     = false;
-bool Doxy_Globals::g_programExit       = false;
+bool Doxy_Globals::g_dumpSymbolMap = false;
+bool Doxy_Globals::g_programExit   = false;
 
 
 // part 3

@@ -186,14 +186,12 @@ uint portable_pid()
 
 static char **last_environ;
 
-void portable_setenv(const char *name, const char *value)
-{
-   if (value == 0) {
-      value = "";
-   }
+void portable_setenv(const char *name, const QString &valueX)
+{  
+   QByteArray value = valueX.toUtf8();
 
 #if defined(_WIN32) && ! defined(__CYGWIN__)
-   SetEnvironmentVariable(name, value);
+   SetEnvironmentVariable(name, value.constData());
 
 #else
 
@@ -201,13 +199,12 @@ void portable_setenv(const char *name, const char *value)
    size_t size;
 
    const size_t namelen = qstrlen(name);
-   const size_t vallen  = qstrlen(value) + 1;
+   const size_t vallen  = value.size() + 1;
 
    size = 0;
    if (environ != 0) {
       for (ep = environ; *ep; ++ep) {
-         if (!qstrncmp (*ep, name, (uint)namelen) &&
-               (*ep)[namelen] == '=') {
+         if (!qstrncmp (*ep, name, (uint)namelen) && (*ep)[namelen] == '=') {
             break;
          } else {
             ++size;
@@ -244,11 +241,13 @@ void portable_setenv(const char *name, const char *value)
       memcpy(new_environ[size], name, namelen);
       new_environ[size][namelen] = '=';
 
-      memcpy(&new_environ[size][namelen + 1], value, vallen);
+      memcpy(&new_environ[size][namelen + 1], value.constData(), vallen);
       new_environ[size + 1] = 0;
       last_environ = environ = new_environ;
 
-   } else { /* replace existing string */
+   } else { 
+      /* replace existing string */
+
       size_t len = qstrlen (*ep);
 
       if (len + 1 < namelen + 1 + vallen) {
@@ -263,7 +262,7 @@ void portable_setenv(const char *name, const char *value)
       memcpy(*ep, name, namelen);
       (*ep)[namelen] = '=';
 
-      memcpy(&(*ep)[namelen + 1], value, vallen);
+      memcpy(&(*ep)[namelen + 1], value.constData(), vallen);
    }
 
 #endif

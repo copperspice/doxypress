@@ -30,7 +30,6 @@
 #include <cmdmapper.h>
 #include <code.h>
 #include <config.h>
-#include <config_json.h>
 #include <doxy_setup.h>
 #include <doxy_build_info.h>
 #include <entry.h>
@@ -65,8 +64,7 @@
 #include <doxy_globals.h>
 
 namespace Doxy_Setup {
-   QString getValue(QStringList::iterator &iter, QStringList::iterator end);
-   void generateConfigFile(const QString &configFile);
+   QString getValue(QStringList::iterator &iter, QStringList::iterator end);   
    bool openOutputFile(const QString &outFile, QFile &f);   
    void usage();
 }
@@ -75,7 +73,6 @@ using namespace Doxy_Setup;
 
 enum Options {
      INVALID, 
-     BLANK_CFG, 
      BLANK_LAYOUT,
      BLANK_STYLE,
      DEBUG_DUMP, 
@@ -86,7 +83,7 @@ enum Options {
      DOXY_VERSION,      
 };
 
-void initDoxygen()
+void initDoxyPress()
 {
    const char *lang = portable_getenv("LC_ALL");
 
@@ -159,16 +156,16 @@ void initDoxygen()
    Doxygen::sectionDict       = new SectionDict();
 
    // Initialize global constants
-   Doxy_Globals::g_compoundKeywordDict.insert("template class", (void *)8);
-   Doxy_Globals::g_compoundKeywordDict.insert("template struct", (void *)8);
-   Doxy_Globals::g_compoundKeywordDict.insert("class",  (void *)8);
-   Doxy_Globals::g_compoundKeywordDict.insert("struct", (void *)8);
-   Doxy_Globals::g_compoundKeywordDict.insert("union",  (void *)8);
-   Doxy_Globals::g_compoundKeywordDict.insert("interface", (void *)8);
-   Doxy_Globals::g_compoundKeywordDict.insert("exception", (void *)8);
+   Doxy_Globals::g_compoundKeywordDict.insert("template class");
+   Doxy_Globals::g_compoundKeywordDict.insert("template struct");
+   Doxy_Globals::g_compoundKeywordDict.insert("class");
+   Doxy_Globals::g_compoundKeywordDict.insert("struct");
+   Doxy_Globals::g_compoundKeywordDict.insert("union");
+   Doxy_Globals::g_compoundKeywordDict.insert("interface");
+   Doxy_Globals::g_compoundKeywordDict.insert("exception");
 }
 
-void cleanUpDoxygen()
+void shutDownDoxypress()
 {
    delete Doxygen::sectionDict;
    delete Doxygen::formulaNameDict;
@@ -188,7 +185,7 @@ void cleanUpDoxygen()
    delete Doxygen::xrefLists;
    delete Doxygen::parserManager;
    
-   cleanUpPreprocessor();
+   removePreProcessor();
 
    delete theTranslator;
    delete Doxy_Globals::g_outputList;
@@ -213,7 +210,6 @@ struct CommandLine parseCommandLine(QStringList argList)
    QMap<QString, Options> argMap;
    argMap.insert( "--b", OUTPUT_APP      );
    argMap.insert( "--d", DEBUG_DUMP      );   
-   argMap.insert( "--g", BLANK_CFG       );
    argMap.insert( "--h", HELP            );  
    argMap.insert( "--l", BLANK_LAYOUT    );
    argMap.insert( "--m", DEBUG_SYMBOLS   );
@@ -249,20 +245,9 @@ struct CommandLine parseCommandLine(QStringList argList)
             msg("\n");
             err("Option %s is invalid\n", qPrintable(item)); 
 
-            cleanUpDoxygen();
-            exit(0);      
-            
-         case BLANK_CFG:
-            cmdArgs.genConfig  = true;
-            cmdArgs.configName = getValue(iter, argList.end());
-           
-            if (cmdArgs.configName.isEmpty()) {
-               cmdArgs.configName = "doxypress.json";
-            }
-
-            cmdArgs.generateDoxy = false;   
-            break;
-
+            shutDownDoxypress();
+            exit(0);                  
+       
          case BLANK_LAYOUT:
             cmdArgs.genLayout = true;
             cmdArgs.layoutName = getValue(iter, argList.end());
@@ -279,7 +264,8 @@ struct CommandLine parseCommandLine(QStringList argList)
 
             if (cmdArgs.formatName.isEmpty()) {
                err("Option \"-w\" is missing format specifier rtf, html or latex\n");
-               cleanUpDoxygen();
+
+               shutDownDoxypress();
                exit(1);
             }
 
@@ -398,7 +384,8 @@ struct CommandLine parseCommandLine(QStringList argList)
 
             } else  {
                err("Option \"-w %s\" is invalid\n", qPrintable(cmdArgs.formatName));
-               cleanUpDoxygen();
+
+               shutDownDoxypress();
                exit(1);
 
             }
@@ -410,15 +397,16 @@ struct CommandLine parseCommandLine(QStringList argList)
             cmdArgs.debugLabel = getValue(iter, argList.end());
 
             if (cmdArgs.debugLabel.isEmpty() ) {
-               err("Option \"-d\" is missing a debug specifier.\n");              
-               cleanUpDoxygen();
+               err("Option \"-d\" is missing a debug specifier.\n");                        
+
+               shutDownDoxypress();
                exit(1);
             }
            
             if (! Debug::setFlag(cmdArgs.debugLabel)) {
                err("Option \"-d\" has an unknown debug specifier: \"%s\".\n", qPrintable(cmdArgs.debugLabel));
 
-               cleanUpDoxygen();
+               shutDownDoxypress();
                exit(1);
             }
 
@@ -431,7 +419,7 @@ struct CommandLine parseCommandLine(QStringList argList)
          case DOXY_VERSION:
             msg("\nDoxyPress Version: %s\n", versionString);
 
-            cleanUpDoxygen();
+            shutDownDoxypress();
             exit(0);
                   
          case OUTPUT_APP:
@@ -443,7 +431,7 @@ struct CommandLine parseCommandLine(QStringList argList)
          case HELP:       
             usage();
 
-            cleanUpDoxygen();
+            shutDownDoxypress();
             exit(0);                    
       }      
    }
@@ -456,19 +444,14 @@ struct CommandLine parseCommandLine(QStringList argList)
 
 void readConfiguration(struct CommandLine cmdArgs)
 {      
-   // Parse or generate the config file  
-   Config::instance()->init();
-
-   if (cmdArgs.genConfig) {
-      generateConfigFile(cmdArgs.configName);     
-   } 
-
+   // Parse project file
+      
    if (cmdArgs.genLayout) {
       writeDefaultLayoutFile(cmdArgs.layoutName);      
    }
 
    if (! cmdArgs.generateDoxy) {      
-      cleanUpDoxygen();
+      shutDownDoxypress();
       exit(0);      
    }
 
@@ -483,9 +466,9 @@ void readConfiguration(struct CommandLine cmdArgs)
       }
      
       if (cmdArgs.configName.isEmpty()) {
-         err("No configuration file name was specified and 'doxypress.json' was not found"); 
+         err("No project configuration file name was specified and 'doxypress.json' was not found"); 
 
-         cleanUpDoxygen();
+         shutDownDoxypress();
          exit(1);
       }        
    }  
@@ -493,105 +476,23 @@ void readConfiguration(struct CommandLine cmdArgs)
    QFileInfo fi(cmdArgs.configName);
 
    if (! fi.exists()) {  
-      err("Configuration file %s was not found\n", qPrintable(cmdArgs.configName));
+      err("Project configuration file %s was not found\n", qPrintable(cmdArgs.configName));
 
-      cleanUpDoxygen();
+      shutDownDoxypress();
       exit(1);
    }
   
+   // step 1 
+   if (! Config::parseConfig(cmdArgs.configName) ) {
+      err("Unable to open or read project configuration file %s\n", qPrintable(cmdArgs.configName));
 
-/* BROOM - json config file 
-
-   if (! Config_Json::parseConfig(cmdArgs.configName) ) {
-      err("Unable to open or read DoxyPress configuration file %s\n", qPrintable(cmdArgs.configName));
-
-      cleanUpDoxygen();
+      shutDownDoxypress();
       exit(1);
    }
-*/
-
-   
-   if (! Config::instance()->parse( qPrintable(cmdArgs.configName) )) {
-      err("Unable to open or read configuration file %s\n", qPrintable(cmdArgs.configName));
-
-      cleanUpDoxygen();
-      exit(1);
-   }
-  
+       
    // Perlmod wants to know the path to the config file
    QFileInfo configFileInfo(cmdArgs.configName);
-   setPerlModDoxyfile(qPrintable(configFileInfo.absoluteFilePath()));
-}
-
-// check and resolve config options
-void checkConfiguration()
-{
-   printf("\n**  Verifying the configuration file\n");   
-
-   Config::instance()->substituteEnvironmentVars();
-   Config::instance()->convertStrToVal();
-   Config::instance()->check();
-   initWarningFormat();
-
-}
-
-// adjust globals which depend on configuration settings 
-void adjustConfiguration()
-{
-   printf("**  Adjust the Configuration file\n");   
-
-   QByteArray outputLanguage = Config_getEnum("OUTPUT_LANGUAGE");
-
-   if (!setTranslator(outputLanguage)) {
-      warn_uncond("Output language %s not supported, using English\n", outputLanguage.data());
-   }
-
-   QStringList &includePath = Config_getList("INCLUDE_PATH");
- 
-   for (auto s : includePath) { 
-      QFileInfo fi(s);
-      addSearchDir(fi.absoluteFilePath().toUtf8());      
-   }
-
-   // Set the global html file extension 
-   Doxygen::htmlFileExtension = Config_getString("HTML_FILE_EXTENSION");
-
-   Doxygen::parseSourcesNeeded = Config_getBool("CALL_GRAPH") ||  Config_getBool("CALLER_GRAPH") ||
-                                 Config_getBool("REFERENCES_RELATION") || Config_getBool("REFERENCED_BY_RELATION");
-
-   Doxygen::markdownSupport = Config_getBool("MARKDOWN_SUPPORT");
-
-   // Add custom extension mappings 
-   QStringList &extMaps = Config_getList("EXTENSION_MAPPING");
-  
-   for (auto mapping : extMaps) {
-      QString mapStr = mapping;
-      int i;
-
-      if ((i = mapStr.indexOf('=')) != -1) {
-         QString ext = mapStr.left(i).trimmed().toLower();
-         QString language = mapStr.mid(i + 1).trimmed().toLower();
-
-         if (! updateLanguageMapping(ext.toUtf8(), language.toUtf8())) {
-            err("Unable to map file extension '%s' to '%s', verify the EXTENSION_MAPPING settings\n", qPrintable(ext), qPrintable(language));
-
-         } else {
-            msg("Adding custom extension mapping: .%s will be treated as language %s\n", qPrintable(ext), qPrintable(language));
-         }
-      }
-   }     
-
-   // add predefined macro name to a dictionary
-   QStringList &expandAsDefinedList = Config_getList("EXPAND_AS_DEFINED");
-
-   for (auto s : expandAsDefinedList) {
-      if (Doxygen::expandAsDefinedDict[s] == 0) {
-         Doxygen::expandAsDefinedDict.insert(s, (void *)666);
-      }      
-   }
-
-   // read aliases and store them in a dictionary
-   readAliases();
+   setPerlModDoxyfile(qPrintable(configFileInfo.absoluteFilePath()));  
 }
 
 QString Doxy_Setup::getValue(QStringList::iterator &iter, QStringList::iterator end)
@@ -610,29 +511,6 @@ QString Doxy_Setup::getValue(QStringList::iterator &iter, QStringList::iterator 
    }
 
    return retval;
-}
-
-/*! Generate a new version of the configuration file 
- */
-void Doxy_Setup::generateConfigFile(const QString &configFile)
-{
-   QFile f;
-
-   bool fileOpened = openOutputFile(configFile, f);
- 
-   if (fileOpened) {
-      QTextStream t(&f);
-
-      // BROOM  - json set up  
-      // Config_Json::->writeNewConfig();      
-    
-      msg("\n\nConfiguration file `%s' created\n\n", qPrintable(configFile));        
-               
-
-   } else {
-      err("Unable to open file %s for writing\n", qPrintable(configFile));  
-      exit(1);
-   }
 }
 
 bool Doxy_Setup::openOutputFile(const QString &outFile, QFile &f)
@@ -678,10 +556,6 @@ void Doxy_Setup::usage()
    msg("\n");
    msg("Generate documentation using an existing configuration file:\n");   
    msg("   [config file name]\n");
-
-   msg("\n"); 
-   msg("Generate a blank configuration file:\n");
-   msg("   --g [config file name]   Default file name is `doxypress.json'\n");  
    
    msg("\n");
    msg("Generate a layout file to configure the documentation:\n");

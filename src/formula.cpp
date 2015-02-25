@@ -25,7 +25,6 @@
 
 #include <config.h>
 #include <doxy_globals.h>
-#include <doxygen.h>
 #include <formula.h>
 #include <image.h>
 #include <index.h>
@@ -75,14 +74,14 @@ void FormulaList::generateBitmaps(const char *path)
    if (f.open(QIODevice::WriteOnly)) {
       QTextStream t(&f);
 
-      if (Config_getBool("LATEX_BATCHMODE")) {
+      if (Config::getBool("latex-batch-mode")) {
          t << "\\batchmode" << endl;
       }
 
       t << "\\documentclass{article}" << endl;
       t << "\\usepackage{epsfig}" << endl; // for those who want to include images
 
-      QStringList s = Config_getList("EXTRA_PACKAGES");
+      QStringList s = Config::getList("latex-extra-packages");
 
       for (auto item : s) {
          t << "\\usepackage{" << item << "}\n";        
@@ -118,15 +117,15 @@ void FormulaList::generateBitmaps(const char *path)
       // there are new formulas   
       //system("latex _formulas.tex </dev/null >/dev/null");
 
-      QByteArray latexCmd = Config_getString("LATEX_CMD_NAME");
+      QString latexCmd = Config::getString("latex-cmd-name");
 
       if (latexCmd.isEmpty()) {
          latexCmd = "latex";
       }
       portable_sysTimerStart();
 
-      if (portable_system(latexCmd, "_formulas.tex") != 0) {
-         err("Problems running latex. Check your installation, verify _formulas.tex, and review the _formulas.log\n");
+      if (portable_system(latexCmd.toUtf8(), "_formulas.tex") != 0) {
+         err("Problem running latex, verify your installation, _formulas.tex, and _formulas.log\n");
          formulaError = true;         
       }
 
@@ -194,7 +193,7 @@ void FormulaList::generateBitmaps(const char *path)
          // scale the image so that it is four times larger than needed.
          // and the sizes are a multiple of four.
          double scaleFactor = 16.0 / 3.0;
-         int zoomFactor = Config_getInt("FORMULA_FONTSIZE");
+         int zoomFactor = Config::getInt("formula-fontsize");
 
          if (zoomFactor < 8 || zoomFactor > 50) {
             zoomFactor = 10;
