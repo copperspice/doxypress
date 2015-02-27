@@ -2380,7 +2380,7 @@ static QByteArray extractPageTitle(QByteArray &docs, QByteArray &id)
 
 static QByteArray detab(const QByteArray &s, int &refIndent)
 {
-   static int tabSize = Config_getInt("TAB_SIZE");
+   static int tabSize = Config::getInt("tab-size");
 
    GrowBuf out;
 
@@ -2520,7 +2520,7 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, Q
    QByteArray titleFn = QFileInfo(fileName).baseName().toUtf8();
    QByteArray fn      = QFileInfo(fileName).fileName().toUtf8();
 
-   static QByteArray mdfileAsMainPage = Config_getString("USE_MDFILE_AS_MAINPAGE");
+   static QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
 
    if (id.isEmpty()) {
       id = markdownFileNameToId(fileName);

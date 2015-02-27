@@ -63,14 +63,14 @@ FileNameDict    *Doxygen::diaFileNameDict = 0;     // dia files
 StringDict       Doxygen::namespaceAliasDict;      // all namespace aliases
 StringDict       Doxygen::tagDestinationDict;      // all tag locations
 
-SortedList<FileName *> *Doxygen::inputNameList = 0; // all input files
+SortedList<QSharedPointer<FileName>> *Doxygen::inputNameList; // all input files
 
 QCache<QString, LookupInfo>  *Doxygen::lookupCache;
 
-QHash<QString, void *>        Doxygen::inputPaths;
-QHash<QString, void *>        Doxygen::expandAsDefinedDict;                        // all macros that should be expanded
-QHash<QString, RefList>      *Doxygen::xrefLists = new QHash<QString, RefList>;    // dictionary of cross-referenced item lists
-QHash<QString, int>          *Doxygen::htmlDirMap = 0;
+QSet<QString>             Doxygen::inputPaths;
+QSet<QString>             Doxygen::expandAsDefinedDict;                        // all macros that should be expanded
+QHash<QString, RefList>  *Doxygen::xrefLists = new QHash<QString, RefList>;    // dictionary of cross-referenced item lists
+QHash<QString, int>       *Doxygen::htmlDirMap = 0;
 
 QHash<QString, QSharedPointer<Definition>>   Doxygen::clangUsrMap;
 QHash<long, QSharedPointer<MemberGroupInfo>> Doxygen::memGrpInfoDict;                 // dictionary of the member groups heading
@@ -96,7 +96,7 @@ bool             Doxygen::markdownSupport = true;
 
 int              Doxygen::subpageNestingLevel = 0;
 
-QByteArray       Doxygen::htmlFileExtension;
+QString          Doxygen::htmlFileExtension;
 QString          Doxygen::objDBFileName;
 QString          Doxygen::entryDBFileName;
 QTime            Doxygen::runningTime;

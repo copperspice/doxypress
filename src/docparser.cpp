@@ -245,48 +245,52 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
             result = result.right(result.length() - i - 1);
          }
          
-         QByteArray outputDir;
+         QString outputDir;
 
          switch (type) {
             case DocImage::Html:
-               if (!Config_getBool("GENERATE_HTML")) {
+
+               if (! Config::getBool("generate-html")) {
                   return result;
                }
-               outputDir = Config_getString("HTML_OUTPUT");
+               outputDir = Config::getString("html-output");
                break;
+
             case DocImage::Latex:
-               if (!Config_getBool("GENERATE_LATEX")) {
+               if (! Config::getBool("generate-latex")) {
                   return result;
                }
-               outputDir = Config_getString("LATEX_OUTPUT");
+               outputDir = Config::getString("latex-output");
                break;
+
             case DocImage::DocBook:
-               if (!Config_getBool("GENERATE_DOCBOOK")) {
+               if (! Config::getBool("generate-docbook")) {
                   return result;
                }
-               outputDir = Config_getString("DOCBOOK_OUTPUT");
+               outputDir = Config::getString("docbook-output");
                break;
+
             case DocImage::Rtf:
-               if (!Config_getBool("GENERATE_RTF")) {
+               if (! Config::getBool("generate-rtf")) {
                   return result;
                }
-               outputDir = Config_getString("RTF_OUTPUT");
+               outputDir = Config::getString("rtf-output");
                break;
          }
 
-         QByteArray outputFile = outputDir + "/" + result;
+         QString outputFile = outputDir + "/" + result;
          QFileInfo outfi(outputFile);
 
          if (outfi.isSymLink()) {
             QFile::remove(outputFile);
 
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Destination of image %s is a symlink, replacing with image", 
-                           qPrint(outputFile));
+                  qPrintable(outputFile));
          }
 
          if (outputFile != inputFile) { 
             // prevent copying to ourself
-            QFile outImage(outputFile.data());
+            QFile outImage(outputFile);
 
             if (outImage.open(QIODevice::WriteOnly)) { 
                // copy the image
@@ -303,34 +307,35 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
                }
 
             } else {
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Could not write output image %s", qPrint(outputFile));
+               warn_doc_error(s_fileName, doctokenizerYYlineno, "Could not write output image %s", qPrintable(outputFile));
             }
+
          } else {
-            printf("Source & Destination are the same\n");
+            printf("Source and Destination directories are the same\n");
+
          }
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Could not open image %s", qPrint(fileName));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Could not open image %s", qPrintable(fileName));
       }
 
-      if (type == DocImage::Latex && Config_getBool("USE_PDFLATEX") && fd->name().right(4) == ".eps") {
+      if (type == DocImage::Latex && Config::getBool("latex-pdf") && fd->name().right(4) == ".eps") {
          // we have an .eps image in pdflatex mode => convert it to a pdf.
 
-         QByteArray outputDir = Config_getString("LATEX_OUTPUT");
-         QByteArray baseName  = fd->name().left(fd->name().length() - 4);
+         QString outputDir = Config::getString("latex-output");
+         QString baseName  = fd->name().left(fd->name().length() - 4);
                              
          QString epstopdfArgs;
-         epstopdfArgs = QString("\"%1/%2.eps\" --outfile=\"%3/%4.pdf\"").arg(outputDir.constData()).arg(baseName.constData()).
-                                                                         arg(outputDir.constData()).arg(baseName.constData());
+         epstopdfArgs = QString("\"%1/%2.eps\" --outfile=\"%3/%4.pdf\"").arg(outputDir).arg(baseName).arg(outputDir).arg(baseName);
 
          portable_sysTimerStart();
 
          if (portable_system("epstopdf", qPrintable(epstopdfArgs)) != 0) {
-            err("Problems running epstopdf. Check your TeX installation!\n");
+            err("Problem running epstopdf, verify TeX installation\n");
          }
 
          portable_sysTimerStop();
-         return baseName;
+         return baseName.toUtf8();
       }
 
    } else if (ambig) {
@@ -346,7 +351,7 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
       result = fileName;
 
       if (result.left(5) != "http:" && result.left(6) != "https:") {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Image file %s was not found in IMAGE_PATH: "
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Image file %s was not found in 'IMAGE PATH': "
                         "assuming external image", qPrint(fileName) );
       }
    }
@@ -361,7 +366,7 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
  */
 static void checkArgumentName(const QByteArray &name, bool isParam)
 {
-   if (!Config_getBool("WARN_IF_DOC_ERROR")) {
+   if (! Config::getBool("warn-doc-error")) {
       return;
    }
 
@@ -456,7 +461,7 @@ static void checkArgumentName(const QByteArray &name, bool isParam)
  */
 static void checkUndocumentedParams()
 {
-   if (s_memberDef && s_hasParamCommand && Config_getBool("WARN_IF_DOC_ERROR")) {
+   if (s_memberDef && s_hasParamCommand && Config::getBool("warn-doc-error")) {
       ArgumentList *al = s_memberDef->isDocsForDefinition() ? s_memberDef->argumentList() : s_memberDef->declArgumentList();
 
       SrcLangExt lang = s_memberDef->getLanguage();
@@ -534,7 +539,7 @@ static void checkUndocumentedParams()
  */
 static void detectNoDocumentedParams()
 {
-   if (s_memberDef && Config_getBool("WARN_NO_PARAMDOC")) {
+   if (s_memberDef && Config::getBool("warn-undoc-param")) {
       ArgumentList *al     = s_memberDef->argumentList();
       ArgumentList *declAl = s_memberDef->declArgumentList();
 
@@ -601,20 +606,21 @@ static void detectNoDocumentedParams()
 /*! Strips known html and tex extensions from \a text. */
 static QByteArray stripKnownExtensions(const char *text)
 {
-   QByteArray result = text;
+   QByteArray result  = text;
+   QByteArray htmlExt = Doxygen::htmlFileExtension.toUtf8();
 
-   if (result.right(4) == ".tex") {
+   if (result.endsWith(".tex")) {
       result = result.left(result.length() - 4);
 
-   } else if (result.right(Doxygen::htmlFileExtension.length()) == QByteArray(Doxygen::htmlFileExtension)) {
-      result = result.left(result.length() - Doxygen::htmlFileExtension.length());
+   } else if (result.endsWith(htmlExt)) {
+      result = result.left(result.length() - htmlExt.length());
    }
 
    return result;
 }
 
 
-/*! Returns true iff node n is a child of a preformatted node */
+/*! Returns true if node n is a child of a preformatted node */
 static bool insidePRE(DocNode *n)
 {
    while (n) {
@@ -1052,7 +1058,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children)
 {
    QByteArray name = linkToText(SrcLangExt_Unknown, g_token->name, true);
  
-   static bool autolinkSupport = Config_getBool("AUTOLINK_SUPPORT");
+   static bool autolinkSupport = Config::getBool("auto-link");
 
    if (! autolinkSupport) { 
       // no autolinking so add as normal word
@@ -1655,14 +1661,14 @@ static int internalValidatingParseDoc(DocNode *parent, QList<DocNode *> &childre
 
 static void readTextFileByName(const QByteArray &file, QByteArray &text)
 {
-   QStringList &examplePathList = Config_getList("EXAMPLE_PATH");
+   const QStringList examplePathList = Config::getList("example-path");
    
    for (auto s : examplePathList) {
       QString absFileName = s + portable_pathSeparator() + file;
       QFileInfo fi(absFileName);
 
       if (fi.exists()) {
-         text = fileToString(qPrintable(absFileName), Config_getBool("FILTER_SOURCE_FILES"));
+         text = fileToString(absFileName, Config::getBool("filter-source-files"));
          return;
       }  
    }
@@ -1672,7 +1678,7 @@ static void readTextFileByName(const QByteArray &file, QByteArray &text)
    QSharedPointer<FileDef> fd;
 
    if ((fd = findFileDef(Doxygen::exampleNameDict, file, ambig))) {
-      text = fileToString(fd->getFilePath(), Config_getBool("FILTER_SOURCE_FILES"));
+      text = fileToString(fd->getFilePath(), Config::getBool("filter-source-files"));
 
    } else if (ambig) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included file name %s is ambiguous"
@@ -1998,10 +2004,10 @@ bool DocXRefItem::parse()
 
       auto &refList = (*Doxygen::xrefLists)[m_key];
      
-      if ( (m_key != "todo"       || Config_getBool("GENERATE_TODOLIST")) &&
-           (m_key != "test"       || Config_getBool("GENERATE_TESTLIST")) &&
-           (m_key != "bug"        || Config_getBool("GENERATE_BUGLIST"))  &&
-           (m_key != "deprecated" || Config_getBool("GENERATE_DEPRECATEDLIST")) ) {
+      if ( (m_key != "todo"       || Config::getBool("generate-todo-list")) &&
+           (m_key != "test"       || Config::getBool("generate-test-list")) &&
+           (m_key != "bug"        || Config::getBool("generate-bug-list"))  &&
+           (m_key != "deprecated" || Config::getBool("generate-deprecated-list")) ) {
 
          // either not a built-in list or the list is enabled
          RefItem *item = refList.getRefItem(m_id);
@@ -2402,14 +2408,14 @@ void DocRef::parse()
    assert(n == this);
 }
 
-DocCite::DocCite(DocNode *parent, const QByteArray &target, const QByteArray &) //context)
+DocCite::DocCite(DocNode *parent, const QByteArray &target, const QByteArray &) 
 {
-   static uint numBibFiles = Config_getList("CITE_BIB_FILES").count();
+   static uint numBibFiles = Config::getList("cite-bib-files").count();
 
    m_parent = parent;
    QByteArray anchor;
 
-   assert(!target.isEmpty());
+   assert(! target.isEmpty());
 
    m_relPath = s_relPath;
    CiteInfo *cite = Doxygen::citeDict->find(target);
@@ -5693,7 +5699,8 @@ int DocPara::handleCommand(const QByteArray &cmdName)
       }
       break;
       case CMD_STARTUML: {
-         static QByteArray jarPath = Config_getString("PLANTUML_JAR_PATH");
+         static QString jarPath = Config::getString("plantuml-jar-path");
+
          doctokenizerYYsetStatePlantUML();
          retval = doctokenizerYYlex();
          if (jarPath.isEmpty()) {
@@ -6102,9 +6109,11 @@ int DocPara::handleHtmlStartTag(const QByteArray &tagName, const HtmlAttribList 
       case XML_PARAM:
       case XML_TYPEPARAM: {
          QByteArray paramName;
+
          if (findAttribute(tagHtmlAttribs, "name", &paramName)) {
+
             if (paramName.isEmpty()) {
-               if (Config_getBool("WARN_NO_PARAMDOC")) {
+               if (Config::getBool("warn-undoc-param")) {
                   warn_doc_error(s_fileName, doctokenizerYYlineno, "empty 'name' attribute for <param> tag.");
                }
             } else {
@@ -7314,7 +7323,7 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<
 {  
    // store parser state so we can re-enter this function if needed
 
-   // bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+   // bool fortranOpt = Config::getBool("optimize-fortran");
    docParserPushContext();
 
    if (ctx && ctx != Doxygen::globalScope && (ctx->definitionType() == Definition::TypeClass ||

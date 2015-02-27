@@ -126,7 +126,7 @@ class Statistics
 class Doxygen
 {
  public:
-   static QSharedPointer<PageDef>      mainPage;
+   static QSharedPointer<PageDef>       mainPage;
    static QSharedPointer<NamespaceDef> globalScope;
  
    static CiteDict                 *citeDict;
@@ -145,7 +145,9 @@ class Doxygen
    static FileNameDict             *includeNameDict;
    static FileNameDict             *exampleNameDict;   
    static FileNameDict             *inputNameDict;
-   static SortedList<FileName *>   *inputNameList;
+
+   static SortedList<QSharedPointer<FileName>> *inputNameList;
+
    static FileNameDict             *imageNameDict;
    static FileNameDict             *dotFileNameDict;
    static FileNameDict             *mscFileNameDict;
@@ -172,8 +174,8 @@ class Doxygen
    //
    static QList<QByteArray>        tagfileList;   
 
-   static QHash<QString, void *>   inputPaths;   
-   static QHash<QString, void *>   expandAsDefinedDict;   
+   static QSet<QString>            inputPaths;   
+   static QSet<QString>            expandAsDefinedDict;   
    static QHash<QString, RefList>  *xrefLists;           // array of xref lists: todo, test, bug, deprecated ...
    static QHash<QString, int>      *htmlDirMap;
   
@@ -187,7 +189,7 @@ class Doxygen
    static QTime runningTime;   
    static int subpageNestingLevel;
 
-   static QByteArray htmlFileExtension;
+   static QString htmlFileExtension;
 
    static QString objDBFileName;
    static QString entryDBFileName;

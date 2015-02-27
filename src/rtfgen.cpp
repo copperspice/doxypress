@@ -60,14 +60,15 @@ static QByteArray dateToRTFDateString()
 
 RTFGenerator::RTFGenerator() : OutputGenerator()
 {
-   dir = Config_getString("RTF_OUTPUT");
+   m_dir = Config::getString("rtf-output");
+
    col = 0;
 
-   //insideTabbing=false;
-   m_listLevel = 0;
-   m_bstartedBody = false;
-   m_omitParagraph = false;
    m_numCols = 0;
+   m_listLevel = 0;
+
+   m_bstartedBody = false;
+   m_omitParagraph = false; 
 }
 
 RTFGenerator::~RTFGenerator()
@@ -1706,18 +1707,18 @@ void RTFGenerator::startClassDiagram()
    DBG_RTF(m_textStream << "{\\comment startClassDiagram }" << endl)
 }
 
-void RTFGenerator::endClassDiagram(const ClassDiagram &d, const char *fileName, const char *)
+void RTFGenerator::endClassDiagram(const ClassDiagram &d, const char *fname, const char *)
 {
    newParagraph();
 
    // create a png file
-   d.writeImage(m_textStream, dir, relPath, fileName, false);
+   d.writeImage(m_textStream, m_dir, relPath, fname, false);
 
    // display the file
    m_textStream << "{" << endl;
    m_textStream << rtf_Style_Reset << endl;
    m_textStream << "\\par\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_textStream << fileName << ".png\"";
+   m_textStream << fname << ".png\"";
    m_textStream << " \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
    m_textStream << "}" << endl;
 }
@@ -2096,12 +2097,12 @@ static void encodeForOutput(QTextStream &t_stream, const char *s)
  * VERY brittle routine inline RTF's included by other RTF's.
  * it is recursive and ugly.
  */
-static bool preProcessFile(QDir &d, QByteArray &infName, QTextStream &t_stream, bool bIncludeHeader = true)
+static bool preProcessFile(QDir &d, QString &infName, QTextStream &t_stream, bool bIncludeHeader = true)
 {
    QFile f(infName);
 
    if (! f.open(QIODevice::ReadOnly)) {
-      err("problems opening rtf file %s for reading\n", infName.data());
+      err("Unable to open file %s, error: %d\n", qPrintable(infName), f.error());
       return false;
    }
 
@@ -2116,12 +2117,14 @@ static bool preProcessFile(QDir &d, QByteArray &infName, QTextStream &t_stream, 
 
    do {
       if (f.readLine(lineBuf.data(), maxLineLength) == -1) {
-         err("read error in %s before end of RTF header\n", infName.data());
+         err("Read error in %s,  error: %d\n", qPrintable(infName), f.error());
          return false;
       }
+
       if (bIncludeHeader) {
          encodeForOutput(t_stream, lineBuf.data());
       }
+
    } while (lineBuf.indexOf("\\comment begin body") == -1);
 
 
@@ -2135,7 +2138,7 @@ static bool preProcessFile(QDir &d, QByteArray &infName, QTextStream &t_stream, 
          QByteArray fileName = lineBuf.mid(startNamePos, endNamePos - startNamePos);
 
          DBG_RTF(t_stream << "{\\comment begin include " << fileName << "}" << endl)
-         if (!preProcessFile(d, fileName, t_stream, false)) {
+         if (! preProcessFile(d, fileName, t_stream, false)) {
             return false;
          }
 
@@ -2259,8 +2262,7 @@ void RTFGenerator::endDirDepGraph(const DotDirDeps &g)
 {
    newParagraph();
 
-   QByteArray fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config_getString("RTF_OUTPUT"),
-                                fileName, relPath, false);
+   QByteArray fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), fileName, relPath, false);
 
    // display the file
    m_textStream << "{" << endl;
@@ -2269,6 +2271,7 @@ void RTFGenerator::endDirDepGraph(const DotDirDeps &g)
    m_textStream << fn << "." << Config_getEnum("DOT_IMAGE_FORMAT");
    m_textStream << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
    m_textStream << "}" << endl;
+
    DBG_RTF(m_textStream << "{\\comment (endDirDepGraph)}"    << endl)
 }
 
@@ -2325,13 +2328,13 @@ err:
  * This is an API to a VERY brittle RTF preprocessor that combines nested
  * RTF files.  This version replaces the infile with the new file
  */
-bool RTFGenerator::preProcessFileInplace(const char *path, const char *name)
+bool RTFGenerator::preProcessFileInplace(const QString &path, const char *name)
 {
    QDir d(path);
 
    // store the original directory
-   if (!d.exists()) {
-      err("Output dir %s does not exist!\n", path);
+   if (! d.exists()) {      
+      err("Output directory %s does not exist\n", qPrintable(path));
       return false;
    }
 
@@ -2341,21 +2344,24 @@ bool RTFGenerator::preProcessFileInplace(const char *path, const char *name)
    QDir::setCurrent(d.absolutePath());
    QDir thisDir;
 
-   QByteArray combinedName = (QByteArray)path + "/combined.rtf";
-   QByteArray mainRTFName  = (QByteArray)path + "/" + name;
+   QString combinedName = path + "/combined.rtf";
+   QString mainRTFName  = path + "/" + name;
 
    QFile outf(combinedName);
-   if (!outf.open(QIODevice::WriteOnly)) {
-      err("Failed to open %s for writing!\n", combinedName.data());
+
+   if (! outf.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(combinedName), outf.error());
       return false;
    }
    QTextStream outt(&outf);
 
-   if (!preProcessFile(thisDir, mainRTFName, outt)) {
-      // it failed, remove the temp file
+   if (! preProcessFile(thisDir, mainRTFName, outt)) {
+      // failed, remove the temp file
       outf.close();
+
       thisDir.remove(combinedName);
       QDir::setCurrent(oldDir);
+
       return false;
    }
 
@@ -2367,6 +2373,7 @@ bool RTFGenerator::preProcessFileInplace(const char *path, const char *name)
    testRTFOutput(mainRTFName);
 
    QDir::setCurrent(oldDir);
+
    return true;
 }
 

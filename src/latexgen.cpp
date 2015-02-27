@@ -42,15 +42,16 @@
 
 LatexGenerator::LatexGenerator() : OutputGenerator()
 {
-   dir = Config_getString("LATEX_OUTPUT");
+   m_dir = Config::getString("latex-output");
+   m_prettyCode = Config::getBool("latex-source-code");
+
    col = 0;
-   //printf("LatexGenerator::LatexGenerator() insideTabbing=false\n");
+   m_indent = 0;
+
    insideTabbing = false;
    firstDescItem = true;
    disableLinks = false;
-   m_indent = 0;
    templateMemberItem = false;
-   m_prettyCode = Config_getBool("LATEX_SOURCE_CODE");
 }
 
 LatexGenerator::~LatexGenerator()
@@ -61,7 +62,7 @@ static void writeLatexMakefile()
 {
    bool generateBib = ! Doxygen::citeDict->isEmpty();
 
-   QByteArray dir = Config_getString("LATEX_OUTPUT");
+   QByteArray dir = Config::getString("latex-output");
    QByteArray fileName = dir + "/Makefile";
    QFile file(fileName);
 
@@ -1756,9 +1757,9 @@ void LatexGenerator::startClassDiagram()
    //m_textStream << "{";
 }
 
-void LatexGenerator::endClassDiagram(const ClassDiagram &d, const char *fileName, const char *)
+void LatexGenerator::endClassDiagram(const ClassDiagram &d, const char *fname, const char *)
 {
-   d.writeFigure(m_textStream, dir, fileName);
+   d.writeFigure(m_textStream, m_dir, fname);
 }
 
 
@@ -2239,8 +2240,8 @@ void LatexGenerator::endCodeFragment()
 
 void LatexGenerator::writeLineNumber(const char *ref, const QByteArray &fileName, const char *anchor, int len)
 {
-   static bool usePDFLatex   = Config_getBool("USE_PDFLATEX");
-   static bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
+   static bool usePDFLatex   = Config::getBool("latex-pdf");
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
    if (m_prettyCode) {
       QByteArray lineNumber;

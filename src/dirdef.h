@@ -122,7 +122,7 @@ class DirDef : public Definition
    void setLevel();
 
    static QSharedPointer<DirDef> createNewDir(const char *path);
-   static bool matchPath(const QByteArray &path, QStringList &l);
+   static bool matchPath(const QString &path, const QStringList &list);
    void addUsesDependency(QSharedPointer<DirDef> dir, QSharedPointer<FileDef> srcFd, QSharedPointer<FileDef> dstFd, bool inherited);
    void computeDependencies();
 

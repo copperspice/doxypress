@@ -492,7 +492,7 @@ static QByteArray convertFileId2Var(const QByteArray &fileId)
 
 static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t, const QList<FTVNode *> &nl, int level, bool &first)
 {
-   static QByteArray htmlOutput = Config_getString("HTML_OUTPUT");
+   static QString htmlOutput = Config::getString("html-output");
 
    QByteArray indentStr;
    indentStr.fill(' ', level * 2);
@@ -632,7 +632,7 @@ if (item->file.contains("build-from-source") || item->file.contains("build-optio
 
 static void generateJSNavTree(QList<FTVNode *> &nodeList)
 {
-   QByteArray htmlOutput = Config_getString("HTML_OUTPUT");
+   QString htmlOutput = Config::getString("html-output");
 
    QFile f(htmlOutput + "/navtreedata.js");
    SortedList<NavIndexEntry *> navIndex;
@@ -644,7 +644,7 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
       t << "[" << endl;
       t << "  [ ";
 
-      QByteArray &projName = Config_getString("PROJECT_NAME");
+      QString projName = Config::getString("project-name");
 
       if (projName.isEmpty()) {
          if (Doxygen::mainPage && !Doxygen::mainPage->title().isEmpty()) { 
@@ -665,10 +665,10 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
       t << "\"index" << Doxygen::htmlFileExtension << "\", ";
 
       // add special entry for index page
-      navIndex.inSort(new NavIndexEntry("index" + Doxygen::htmlFileExtension, ""));
+      navIndex.inSort(new NavIndexEntry("index" + Doxygen::htmlFileExtension.toUtf8(), ""));
 
       // related page index, written as a child of index.html
-      navIndex.inSort(new NavIndexEntry("pages" + Doxygen::htmlFileExtension, ""));
+      navIndex.inSort(new NavIndexEntry("pages" + Doxygen::htmlFileExtension.toUtf8(), ""));
 
       // adjust for display output     
       reSortNodes(nodeList);
@@ -766,7 +766,7 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
 // new style images
 void FTVHelp::generateTreeViewImages()
 {
-   QByteArray htmlOutput = Config_getString("HTML_OUTPUT");
+   QString htmlOutput = Config::getString("html-output");
 
    const ResourceMgr &rm = ResourceMgr::instance();
 
@@ -781,7 +781,7 @@ void FTVHelp::generateTreeViewImages()
 // new style scripts
 void FTVHelp::generateTreeViewScripts()
 {
-   QByteArray htmlOutput = Config_getString("HTML_OUTPUT");
+   QString htmlOutput = Config::getString("html-output");
 
    // generate navtree.js & navtreeindex.js
    generateJSNavTree(m_indentNodes[0]);
@@ -793,7 +793,7 @@ void FTVHelp::generateTreeViewScripts()
 // write tree inside page
 void FTVHelp::generateTreeViewInline(QTextStream &t)
 {
-   int preferredNumEntries = Config_getInt("HTML_INDEX_NUM_ENTRIES");
+   int preferredNumEntries = Config::getInt("html-index-num-entries");
 
    t << "<div class=\"directory\">\n";
      

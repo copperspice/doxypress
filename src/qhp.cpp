@@ -33,9 +33,11 @@
 static QByteArray makeFileName(const char *withoutExtension)
 {
    QByteArray result = withoutExtension;
-   if (!result.isEmpty()) {
+
+   if (! result.isEmpty()) {
       if (result.at(0) == '!') { // relative URL -> strip marker
          result = result.mid(1);
+
       } else { // add specified HTML extension
          result += Doxygen::htmlFileExtension;
       }
@@ -45,14 +47,15 @@ static QByteArray makeFileName(const char *withoutExtension)
 
 static QByteArray makeRef(const char *withoutExtension, const char *anchor)
 {
-   //printf("QHP::makeRef(%s,%s)\n",withoutExtension,anchor);
    if (!withoutExtension) {
       return QByteArray();
    }
+
    QByteArray result = makeFileName(withoutExtension);
    if (!anchor) {
       return result;
    }
+
    return result + "#" + anchor;
 }
 
@@ -70,29 +73,14 @@ Qhp::~Qhp()
 }
 
 void Qhp::initialize()
-{
-   /*
-   <QtHelpProject version="1.0">
-     <namespace>mycompany.com.myapplication.1_0</namespace>
-     <virtualFolder>doc</virtualFolder>
-     <customFilter name="My Application 1.0">
-       <filterAttribute>myapp</filterAttribute>
-       <filterAttribute>1.0</filterAttribute>
-     </customFilter>
-     <filterSection>
-       <filterAttribute>myapp</filterAttribute>
-       <filterAttribute>1.0</filterAttribute>
-   ..
-   */
-
+{   
    QString nameSpace     = Config::getString("qhp-namespace");
    QString virtualFolder = Config::getString("qhp-virtual-folder");
+ 
+   QMap<QString, QString> rootAttributes;
+   rootAttributes.insert("version", "1.0");
 
-   m_doc.declaration("1.0", "UTF-8");
-
-   const char *rootAttributes[] =
-   { "version", "1.0", 0 };
-
+   m_doc.declaration("1.0", "UTF-8"); 
    m_doc.open("QtHelpProject", rootAttributes);
    m_doc.openCloseContent("namespace", nameSpace);
    m_doc.openCloseContent("virtualFolder", virtualFolder);
@@ -101,13 +89,17 @@ void Qhp::initialize()
    QString filterName = Config::getString("qhp-cust-filter-name");
 
    if (! filterName.isEmpty()) {
-      const char *tagAttributes[] = { "name", filterName, 0 };
+    
+      QMap<QString, QString> tagAttributes;
+      tagAttributes.insert("name", filterName);
+
       m_doc.open("customFilter", tagAttributes);
 
-      QStringList customFilterAttributes = Config::getString("qhp-cust-filter-attrib").split(QChar(' '));
+      //
+      QStringList customFilterAttributes = Config::getList("qhp-cust-filter-attrib");
 
-      for (int i = 0; i < (int)customFilterAttributes.count(); i++) {
-         m_doc.openCloseContent("filterAttribute", customFilterAttributes[i].toUtf8());
+      for (int i = 0; i < customFilterAttributes.count(); i++) {
+         m_doc.openCloseContent("filterAttribute", customFilterAttributes[i]);
       }
 
       m_doc.close("customFilter");
@@ -116,33 +108,31 @@ void Qhp::initialize()
    m_doc.open("filterSection");
 
    // Add section attributes
-   QString temp = Config::getString("qhp-sect-filter-attrib");
-   QStringList sectionFilterAttributes = temp.split(QChar(' '));
+   QStringList sectionFilterAttributes = Config::getList("qhp-sect-filter-attrib");
 
-   if (! sectionFilterAttributes.contains("doxygen")) {            // BROOM
+   if (! sectionFilterAttributes.contains("doxygen")) {            // BROOM - check doxygen string
       sectionFilterAttributes << "doxygen";
    }
 
    for (int i = 0; i < sectionFilterAttributes.count(); i++) {
-      m_doc.openCloseContent("filterAttribute", sectionFilterAttributes[i].toUtf8());
+      m_doc.openCloseContent("filterAttribute", sectionFilterAttributes[i]);
    }
 
    m_toc.open("toc");
 
    // Add extra root node
-   QByteArray fullProjectname = getFullProjectName();
-   QByteArray indexFile = "index" + Doxygen::htmlFileExtension;
-
-   const char *const attributes[] = {
-      "title", fullProjectname,
-      "ref",   indexFile,
-      NULL
-   };
+   QString fullProjectName = getFullProjectName();
+   QString indexFile       = "index" + Doxygen::htmlFileExtension;
+ 
+   QMap<QString, QString> attributes;
+   attributes.insert("title", fullProjectName);
+   attributes.insert("ref", indexFile);
 
    m_toc.open("section", attributes);
-   m_prevSectionTitle = getFullProjectName();
+
+   m_prevSectionTitle = fullProjectName;
    m_prevSectionLevel = 1;
-   m_sectionLevel = 1;
+   m_sectionLevel     = 1;
 
    m_index.open("keywords");
    m_files.open("files");
@@ -152,9 +142,11 @@ void Qhp::finalize()
 {
    // Finish TOC
    handlePrevSection();
+
    for (int i = m_prevSectionLevel; i > 0; i--) {
       m_toc.close("section");
    }
+
    m_toc.close("toc");
    m_doc.insert(m_toc);
 
@@ -191,6 +183,7 @@ void Qhp::decContentsDepth()
       m_skipMainPageSection = false;
       return;
    }
+
    m_sectionLevel--;
 }
 
@@ -218,58 +211,80 @@ void Qhp::addContentsItem(bool, const QString &name, const char *, const char *f
 void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md,
                        const char *sectionAnchor, const char *word)
 {
-   if (md) { // member
+   if (md) { 
+      // member
       static bool separateMemberPages = Config::getBool("separate-member-pages");
 
-      if (context == 0) { // global member
+      if (context == 0) { 
+         // global member
+
          if (md->getGroupDef()) {
             context = md->getGroupDef();
+
          } else if (md->getFileDef()) {
             context = md->getFileDef();
+
          }
       }
 
       if (context == 0) {
-         return;   // should not happen
+         // should not happen
+         return;   
       }
 
       QByteArray cfname  = md->getOutputFileBase();
       QByteArray cfiname = context->getOutputFileBase();
-      QByteArray level1  = context->name();
-      QByteArray level2  = word ? QByteArray(word) : md->name();
+
+      QString level1  = context->name();
+      QString level2;
+
+      if (word) {
+         level2 = word;
+      } else {
+         level2 = md->name();
+      }
+
       QByteArray contRef = separateMemberPages ? cfname : cfiname;
       QByteArray anchor  = sectionAnchor ? QByteArray(sectionAnchor) : md->anchor();
 
-      QByteArray ref;
+      QString ref = makeRef(contRef, anchor);
+      QString id  = level1 + "::" + level2;
 
-      // <keyword name="foo" id="MyApplication::foo" ref="doc.html#foo"/>
-      ref = makeRef(contRef, anchor);
-      QByteArray id = level1 + "::" + level2;
-
-      const char *attributes[] = {
-         "name", level2,
-         "id",   id,
-         "ref",  ref,
-         0};
+      QMap<QString, QString> attributes;
+      attributes.insert("name", level2);
+      attributes.insert("id",   id);
+      attributes.insert("ref",  ref);
 
       m_index.openClose("keyword", attributes);
 
-   } else if (context) { // container
+   } else if (context) { 
+      // container
       // <keyword name="Foo" id="Foo" ref="doc.html#Foo"/>
+
       QByteArray contRef = context->getOutputFileBase();
-      QByteArray level1  = word ? QByteArray(word) : context->name();
-      QByteArray ref = makeRef(contRef, sectionAnchor);
-      const char *attributes[] = {
-         "name", level1,
-         "id",   level1,
-         "ref",  ref,
-         0
-      };
+     
+      QString level1;
+
+      if (word) {
+         level1 = word;
+
+      } else {
+         level1 = context->name();
+
+      }
+
+      QString ref = makeRef(contRef, sectionAnchor);
+     
+      QMap<QString, QString> attributes;
+      attributes.insert("name", level1);
+      attributes.insert("id",   level1);
+      attributes.insert("ref",  ref);
+
       m_index.openClose("keyword", attributes);
    }
 }
 
-void Qhp::addIndexFile(const char *name)
+void Qhp::addIndexFile(const QString &name)
 {
    addFile(name);
 }
@@ -297,37 +312,27 @@ QString Qhp::getFullProjectName()
 
 void Qhp::handlePrevSection()
 {
-   /*
-   <toc>
-     <section title="My Application Manual" ref="index.html">
-       <section title="Chapter 1" ref="doc.html#chapter1"/>
-       <section title="Chapter 2" ref="doc.html#chapter2"/>
-       <section title="Chapter 3" ref="doc.html#chapter3"/>
-     </section>
-   </toc>
-   */
-
    if (m_prevSectionTitle.isNull()) {
-      m_prevSectionTitle = " "; // should not happen...
+      m_prevSectionTitle = " "; 
    }
 
-   // We skip "Main Page" as our extra root is pointing to that
-   if (!((m_prevSectionLevel == 1) && (m_prevSectionTitle == getFullProjectName()))) {
+   // skip "Main Page" as our extra root is pointing to that
+   if (! ((m_prevSectionLevel == 1) && (m_prevSectionTitle == getFullProjectName()))) {
       QByteArray finalRef = makeRef(m_prevSectionBaseName, m_prevSectionAnchor);
-
-      const char *const attributes[] = {
-         "title", m_prevSectionTitle,
-         "ref",   finalRef,
-         NULL
-      };
+   
+      QMap<QString, QString> attributes;
+      attributes.insert("title", m_prevSectionTitle);
+      attributes.insert("ref", finalRef);
 
       if (m_prevSectionLevel < m_sectionLevel) {
          // Section with children
          m_toc.open("section", attributes);
+
       } else {
          // Section without children
          m_toc.openClose("section", attributes);
       }
+
    } else {
       m_skipMainPageSection = true;
    }
@@ -337,30 +342,30 @@ void Qhp::handlePrevSection()
 
 void Qhp::setPrevSection(const QString &title, const char *basename, const char *anchor, int level)
 {
-   m_prevSectionTitle = title.toUtf8();
+   m_prevSectionTitle    = title;
    m_prevSectionBaseName = basename;
-   m_prevSectionAnchor = anchor;
-   m_prevSectionLevel = level;
+   m_prevSectionAnchor   = anchor;
+   m_prevSectionLevel    = level;
 }
 
 void Qhp::clearPrevSection()
 {
-   m_prevSectionTitle.resize(0);
+   m_prevSectionTitle = "";
    m_prevSectionBaseName.resize(0);
    m_prevSectionAnchor.resize(0);
 }
 
-void Qhp::addFile(const char *fileName)
+void Qhp::addFile(const QString &fileName)
 {
    m_files.openCloseContent("file", fileName);
 }
 
-void Qhp::addImageFile(const char *fileName)
+void Qhp::addImageFile(const QString &fileName)
 {
    addFile(fileName);
 }
 
-void Qhp::addStyleSheetFile(const char *fileName)
+void Qhp::addStyleSheetFile(const QString &fileName)
 {
    addFile(fileName);
 }

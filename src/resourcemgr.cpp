@@ -43,6 +43,7 @@ ResourceMgr::~ResourceMgr()
 bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir, const QString &targetName) const
 {
    QString outputName = targetDir + "/" + targetName;
+
    QByteArray resData = getAsString(fName);     
    
    if (! resData.isEmpty()) {
@@ -162,7 +163,9 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
                resData = replaceColorMarkers(resData);
 
                if (fName == "navtree.css") {
-                  t << substitute(resData, "$width", QString().setNum(Config::getInt("treeview-width")) + "px");
+
+                  QByteArray temp = QByteArray().setNum(Config::getInt("treeview-width")) + "px";
+                  t << substitute(resData, "$width", temp);         
 
                } else {
                   t << substitute(resData, "$doxygenversion", versionString);

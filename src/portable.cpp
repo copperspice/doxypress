@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#if defined(_WIN32) && ! defined(__CYGWIN__)
+#if HAVE_WINDOWS_H
 #undef UNICODE
 #define _WIN32_DCOM
 #include <windows.h>
@@ -39,42 +39,33 @@ extern char **environ;
 
 #endif
 
+#include <message.h>
 #include <portable.h>
 
-#ifndef NODEBUG
-#include <message.h>
-#endif
+static double g_sysElapsedTime;
+static QTime  g_time;
 
-static double  g_sysElapsedTime;
-static QTime   g_time;
-
-int portable_system(const QByteArray &command, const QByteArray &args, bool commandHasConsole)
+int portable_system(const QString &command, const QString &args, bool commandHasConsole)
 {
-   if (command.isEmpty()) {
+   QString fullCmd = command.trimmed();
+
+   if (fullCmd.isEmpty()) {
       return 1;
    }
 
-   QByteArray fullCmd = command;
-   fullCmd = fullCmd.trimmed();
-
-   if (fullCmd.at(0) != '"' && fullCmd.indexOf(' ') != -1) {
+   if (fullCmd.at(0) != '"' && fullCmd.contains(' ')) {
       // add quotes around command as it contains spaces and is not quoted already
       fullCmd = "\"" + fullCmd + "\"";
    }
 
-   fullCmd += " ";
-   fullCmd += args;
+   fullCmd += " " + args;
 
-#ifndef NODEBUG
-   Debug::print(Debug::ExtCmd, 0, "Executing external command `%s`\n", fullCmd.data());
-#endif
 
-#if ! defined(_WIN32) || defined(__CYGWIN__)
-
-   (void)commandHasConsole;
-   
+#if HAVE_EXECVE
+  
    int pid;
    int status = 0;
+
    pid = fork();
 
    if (pid == -1) {
@@ -83,20 +74,25 @@ int portable_system(const QByteArray &command, const QByteArray &args, bool comm
    }
 
    if (pid == 0) {
+      QByteArray tempCmd = fullCmd.toUtf8();
+
       const char *argv[4];
+
       argv[0] = "sh";
       argv[1] = "-c";
-      argv[2] = fullCmd.data();
+      argv[2] = tempCmd.constData();
       argv[3] = 0;
+
       execve("/bin/sh", (char *const *)argv, environ);
       exit(127);
    }
 
-   for (;;) {
+   while (true) {
       if (waitpid(pid, &status, 0) == -1) {
          if (errno != EINTR) {
             return -1;
          }
+
       } else {
          if (WIFEXITED(status)) {
             return WEXITSTATUS(status);
@@ -108,34 +104,24 @@ int portable_system(const QByteArray &command, const QByteArray &args, bool comm
 
 
 #else 
-   // Win32 specific
+   // Windows
 
    if (commandHasConsole) {
       return system(fullCmd);
 
-   } else {
-      // Because ShellExecuteEx can delegate execution to Shell extensions
-      // (data sources, context menu handlers, verb implementations) that
-      // are activated using Component Object Model (COM), COM should be
-      // initialized before ShellExecuteEx is called. Some Shell extensions
-      // require the COM single-threaded apartment (STA) type.
-      // For that case COM is initialized as follows
-      
+   } else {               
       CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
       QString commandw = QString::fromUtf8( command );
-      QString argsw = QString::fromUtf8( args );
+      QString argsw    = QString::fromUtf8( args );
 
       // gswin32 is a GUI api which will pop up a window and run
       // asynchronously. To prevent both, we use ShellExecuteEx and
       // WaitForSingleObject (thanks to Robert Golias for the code)
 
       SHELLEXECUTEINFOW sInfo = {
-         sizeof(SHELLEXECUTEINFOW),   /* structure size */
-         SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI,  /* tell us the process
-                                                       *  handle so we can wait till it's done |
-                                                       *  do not display msg box if error
-                                                       */
+         sizeof(SHELLEXECUTEINFOW),   
+         SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI,     // wait till the process is  done, do not display msg box if there is an error                                                       
          NULL,                       /* window handle */
          NULL,                       /* action to perform: open */
          (LPCWSTR)commandw.utf16(),  /* file to execute */
@@ -151,13 +137,14 @@ int portable_system(const QByteArray &command, const QByteArray &args, bool comm
          NULL                        /* resulting application handle */
       };
 
-      if (!ShellExecuteExW(&sInfo)) {
+      if (! ShellExecuteExW(&sInfo)) {
          return -1;
 
-      } else if (sInfo.hProcess) {  /* executable was launched, wait for it to finish */
+      } else if (sInfo.hProcess) {  
+         // executable was launched, wait for it to finish 
          WaitForSingleObject(sInfo.hProcess, INFINITE);
 
-         /* get process exit code */
+         // get process exit code 
          DWORD exitCode;
          if (! GetExitCodeProcess(sInfo.hProcess, &exitCode)) {
             exitCode = -1;
@@ -175,10 +162,12 @@ uint portable_pid()
 {
    uint pid;
 
-#if !defined(_WIN32) || defined(__CYGWIN__)
+#if HAVE_GETPID
    pid = (uint)getpid();
+
 #else
    pid = (uint)GetCurrentProcessId();
+
 #endif
 
    return pid;
@@ -190,11 +179,10 @@ void portable_setenv(const char *name, const QString &valueX)
 {  
    QByteArray value = valueX.toUtf8();
 
-#if defined(_WIN32) && ! defined(__CYGWIN__)
+#if HAVE_WINDOWS_H
    SetEnvironmentVariable(name, value.constData());
 
 #else
-
    char **ep = 0;
    size_t size;
 
@@ -271,7 +259,7 @@ void portable_setenv(const char *name, const QString &valueX)
 void portable_unsetenv(const char *variable)
 {
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if HAVE_WINDOWS_H
    SetEnvironmentVariable(variable, 0);
 
 #else
@@ -284,8 +272,8 @@ void portable_unsetenv(const char *variable)
    }
 
    len = qstrlen(variable);
-
    ep = environ;
+
    while (*ep != NULL) {
       if (!qstrncmp(*ep, variable, (uint)len) && (*ep)[len] == '=') {
          /* Found it.  Remove this pointer by moving later ones back.  */
@@ -308,23 +296,20 @@ const char *portable_getenv(const char *variable)
 
 portable_off_t portable_fseek(FILE *f, portable_off_t offset, int whence)
 {
-
 #if defined(__MINGW32__)
    return fseeko64(f, offset, whence);
 
-#elif defined(_WIN32) && !defined(__CYGWIN__)
+#elif defined(_WIN32) && ! defined(__CYGWIN__)
    return _fseeki64(f, offset, whence);
 
 #else
    return fseeko(f, offset, whence);
 
 #endif
-
 }
 
 portable_off_t portable_ftell(FILE *f)
 {
-
 #if defined(__MINGW32__)
    return ftello64(f);
 
@@ -335,39 +320,25 @@ portable_off_t portable_ftell(FILE *f)
    return ftello(f);
 
 #endif
-
 }
 
 char portable_pathSeparator()
 {
-   return QDir::separator().toLatin1();   
+   return QDir::separator().toUtf8();   
 }
-
 
 char portable_pathListSeparator()
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if Q_OS_WIN
    return ';';
 #else
    return ':';
 #endif
 }
 
-const char *portable_ghostScriptCommand()
-{
-
-// CS BROOM  - add a field to cfg file for the user to define GhostScript exe name
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-   return "gswin32c.exe";
-#else
-   return "gs";
-#endif
-}
-
 const char *portable_commandExtension()
 {
-#if defined(_WIN32) && ! defined(__CYGWIN__)
+#if Q_OS_WIN
    return ".exe";
 #else
    return "";
@@ -402,14 +373,10 @@ double portable_getSysElapsedTime()
 
 void portable_sleep(int ms)
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if HAVE_WINDOWS_H
    Sleep(ms);
 #else
    usleep(1000 * ms);
 #endif
 }
 
-bool portable_isAbsolutePath(const char *fileName)
-{
-   return QDir::isAbsolutePath(fileName);
-}

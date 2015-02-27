@@ -113,11 +113,12 @@ inline void writeXMLString(QTextStream &t, const char *s)
 inline void writeXMLCodeString(QTextStream &t, const char *s, int &col)
 {
    char c;
-   while ((c = *s++)) {
+   while (c = *s++) {
 
       switch (c) {
          case '\t': {
-            static int tabSize = Config_getInt("TAB_SIZE");
+            static int tabSize = Config::getInt("tab-size");
+
             int spacesToNextTabStop = tabSize - (col % tabSize);
             col += spacesToNextTabStop;
 
@@ -198,8 +199,9 @@ static void writeXMLHeader(QTextStream &t)
 
 static void writeCombineScript()
 {
-   QByteArray outputDirectory = Config_getString("XML_OUTPUT");
-   QByteArray fileName = outputDirectory + "/combine.xslt";
+   QString outputDirectory = Config::getString("xml-output");
+   QString fileName = outputDirectory + "/combine.xslt";
+
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
@@ -499,7 +501,7 @@ void writeXMLCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
 
    XMLCodeGenerator *xmlGen = new XMLCodeGenerator(t);
 
-   pIntf->parseCode(*xmlGen, 0, fileToString(fd->getFilePath(), Config_getBool("FILTER_SOURCE_FILES")),
+   pIntf->parseCode(*xmlGen, 0, fileToString(fd->getFilePath(), Config::getBool("filter-source-files")),
                     langExt, false, 0, fd, -1, -1, false, QSharedPointer<MemberDef>(), true );
 
    xmlGen->finish();
@@ -1373,8 +1375,9 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
       << "\" kind=\"" << cd->compoundTypeString()
       << "\"><name>" << convertToXML(cd->name()) << "</name>" << endl;
 
-   QByteArray outputDirectory = Config_getString("XML_OUTPUT");
-   QByteArray fileName = outputDirectory + "/" + classOutputFileBase(cd) + ".xml";
+   QString outputDirectory = Config::getString("xml-output");
+   QString fileName = outputDirectory + "/" + classOutputFileBase(cd) + ".xml";
+
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
@@ -1602,9 +1605,9 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
       << "\" kind=\"namespace\"" << "><name>"
       << convertToXML(nd->name()) << "</name>" << endl;
 
-   QByteArray outputDirectory = Config_getString("XML_OUTPUT");
+   QString outputDirectory = Config::getString("xml-output");
+   QString fileName = outputDirectory + "/" + nd->getOutputFileBase() + ".xml";
 
-   QByteArray fileName = outputDirectory + "/" + nd->getOutputFileBase() + ".xml";
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
@@ -1680,8 +1683,9 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       << "\" kind=\"file\"><name>" << convertToXML(fd->name())
       << "</name>" << endl;
 
-   QByteArray outputDirectory = Config_getString("XML_OUTPUT");
-   QByteArray fileName = outputDirectory + "/" + fd->getOutputFileBase() + ".xml";
+   QString outputDirectory = Config::getString("xml-output");
+   QString fileName = outputDirectory + "/" + fd->getOutputFileBase() + ".xml";
+
    QFile f(fileName);
 
    if (!f.open(QIODevice::WriteOnly)) {
@@ -1774,7 +1778,7 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    writeXMLDocBlock(t, fd->docFile(), fd->docLine(), fd, QSharedPointer<MemberDef>(), fd->documentation());
    t << "    </detaileddescription>" << endl;
 
-   if (Config_getBool("XML_PROGRAMLISTING")) {
+   if (Config::getBool("xml-program-listing")) {
       t << "    <programlisting>" << endl;
       writeXMLCodeBlock(t, fd);
       t << "    </programlisting>" << endl;
@@ -1807,8 +1811,8 @@ static void generateXMLForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti)
    ti << "  <compound refid=\"" << gd->getOutputFileBase()
       << "\" kind=\"group\"><name>" << convertToXML(gd->name()) << "</name>" << endl;
 
-   QByteArray outputDirectory = Config_getString("XML_OUTPUT");
-   QByteArray fileName = outputDirectory + "/" + gd->getOutputFileBase() + ".xml";
+   QString outputDirectory = Config::getString("xml-output");
+   QString fileName = outputDirectory + "/" + gd->getOutputFileBase() + ".xml";
 
    QFile f(fileName);
 
@@ -1869,8 +1873,9 @@ static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
       << "\" kind=\"dir\"><name>" << convertToXML(dd->displayName())
       << "</name>" << endl;
 
-   QByteArray outputDirectory = Config_getString("XML_OUTPUT");
-   QByteArray fileName = outputDirectory + "/" + dd->getOutputFileBase() + ".xml";
+   QString outputDirectory = Config::getString("xml-output");
+   QString fileName = outputDirectory + "/" + dd->getOutputFileBase() + ".xml";
+
    QFile f(fileName);
 
    if (!f.open(QIODevice::WriteOnly)) {
@@ -1925,11 +1930,12 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
       << "\" kind=\"" << kindName << "\"><name>" << convertToXML(pd->name())
       << "</name>" << endl;
 
-   QByteArray outputDirectory = Config_getString("XML_OUTPUT");
-   QByteArray fileName = outputDirectory + "/" + pageName + ".xml";
+   QString outputDirectory = Config::getString("xml-output");
+   QString fileName = outputDirectory + "/" + pageName + ".xml";
+
    QFile f(fileName);
 
-   if (!f.open(QIODevice::WriteOnly)) {
+   if (! f.open(QIODevice::WriteOnly)) {
       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
@@ -1943,12 +1949,15 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
      << "</compoundname>" << endl;
 
    if (pd == Doxygen::mainPage) { // main page is special
-      QByteArray title;
-      if (!pd->title().isEmpty() && pd->title().toLower() != "notitle") {
+      QString title;
+
+      if (! pd->title().isEmpty() && pd->title().toLower() != "notitle") {
          title = filterTitle(convertCharEntitiesToUTF8(Doxygen::mainPage->title()));
+
       } else {
-         title = Config_getString("PROJECT_NAME");
+         title = Config::getString("project-name");
       }
+
       t << "    <title>" << convertToXML(convertCharEntitiesToUTF8(title))
         << "</title>" << endl;
 
@@ -1987,13 +1996,14 @@ void generateXML()
    // + related pages
    // - examples
 
-   QByteArray outputDirectory = Config_getString("XML_OUTPUT");
+   QString outputDirectory = Config::getString("xml-output");
    QDir xmlDir(outputDirectory);
+
    createSubDirs(xmlDir);
 
    ResourceMgr::instance().copyResourceAs("xml/index.xsd", outputDirectory, "index.xsd");
 
-   QByteArray fileName = outputDirectory + "/compound.xsd";
+   QString fileName = outputDirectory + "/compound.xsd";
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {

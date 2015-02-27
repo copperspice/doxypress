@@ -59,20 +59,19 @@ QByteArray writePlantUMLSource(const QByteArray &outDir, const QByteArray &fileN
 
 void generatePlantUMLOutput(const QString &baseName, const QString &outDir, PlantUMLOutputFormat format)
 {
-   static QByteArray plantumlJarPath = Config_getString("PLANTUML_JAR_PATH");
+   static QString plantumlJarPath = Config::getString("plantuml-jar-path");
 
    QString pumlExe  = "java";
    QString pumlArgs = "";
 
-   QStringList pumlIncludePathList = Config_getList("PLANTUML_INCLUDE_PATH");
-   QString s = pumlIncludePathList.first();
-
-   if (! pumlIncludePathList.isEmpty()) {     
+   QStringList pumlIncludePathList;    // = Config::getList("plantuml-include-path");   // BROOM missing, not sure why
+   
+   if (! pumlIncludePathList.isEmpty()) {                   
       pumlArgs += "-Dplantuml.include.path=\"";
       pumlArgs += pumlIncludePathList.join( QChar(portable_pathListSeparator()) );
       pumlArgs += "\" ";     
    }
-
+   
    pumlArgs += "-Djava.awt.headless=true -jar \"" + plantumlJarPath + "plantuml.jar\" ";
    pumlArgs += "-o \"";
    pumlArgs += outDir;
@@ -100,24 +99,24 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    pumlArgs += " \"";
    pumlArgs += baseName;
    pumlArgs += ".pu\" ";
-   pumlArgs += "-charset " + Config_getString("INPUT_ENCODING") + " ";
+   pumlArgs += "-charset " + Config::getString("input-encoding") + " ";
 
    int exitCode;
    
    msg("Running PlantUML on generated file %s.pu\n", qPrintable(baseName));
    portable_sysTimerStart();
 
-   if ((exitCode = portable_system(pumlExe.toUtf8(), pumlArgs.toUtf8(), false)) != 0) {
+   if ((exitCode = portable_system(pumlExe, pumlArgs, false)) != 0) {
       err("Problem running PlantUML, verify the command 'java -jar \"%splantuml.jar\" -h' works from the command line. Exit code: %d\n",
           plantumlJarPath.constData(), exitCode);
 
-   } else if (Config_getBool("DOT_CLEANUP")) {
+   } else if (Config::getBool("dot-cleanup")) {
       QFile(baseName + ".pu").remove();
 
    }
 
    portable_sysTimerStop();
-   if ( (format == PUML_EPS) && (Config_getBool("USE_PDFLATEX")) ) {
+   if ( (format == PUML_EPS) && (Config::getBool("latex-pdf")) ) {
 
       QString epstopdfArgs;
       epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(baseName).arg(baseName);

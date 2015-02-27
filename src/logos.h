@@ -19,9 +19,9 @@
 #define LOGOS_H
 
 extern void writeLogo(const char *dir);
-//extern void writeNullImage(const char *dir);
-extern void writeSearchButton(const char *dir);
+
+extern void writeSearchButton(const QString &dir);
 extern void writeDoxFont(const QString &dir);
-extern void removeDoxFont(const char *dir);
+extern void removeDoxFont(const QString &dir);
 
 #endif

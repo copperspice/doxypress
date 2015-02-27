@@ -21,6 +21,6 @@
 #include <translator.h>
 
 extern Translator *theTranslator;
-extern bool setTranslator(const char *languageName);
+bool setTranslator(const QString &languageName);
 
 #endif

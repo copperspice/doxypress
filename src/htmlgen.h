@@ -505,9 +505,10 @@ class HtmlGenerator : public OutputGenerator
 
  private:
    static void writePageFooter(QTextStream &t, const QByteArray &, const QByteArray &, const QByteArray &);
-   QByteArray lastTitle;
-   QByteArray lastFile;
-   QByteArray relPath;
+   QByteArray m_lastTitle; 
+   QByteArray m_relativePath;
+
+   QString m_lastFile;
 
    void docify(const QByteArray &text, bool inHtmlComment);
 

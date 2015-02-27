@@ -712,7 +712,7 @@ void GroupDef::writeGroupGraph(OutputList &ol)
 {
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
-   if (Config_getBool("HAVE_DOT") /*&& Config_getBool("GROUP_GRAPHS")*/ ) {
+   if (Config::getBool("have-dot") /*&& Config_getBool("GROUP_GRAPHS")*/ ) {
       DotGroupCollaboration graph(self);
 
       if (! graph.isTrivial()) {

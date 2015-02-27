@@ -322,7 +322,7 @@ class OutputGenerator : public BaseOutputDocInterface
    virtual bool isEnabled(OutputType o) = 0;
    virtual OutputGenerator *get(OutputType o) = 0;
 
-   void startPlainFile(const char *name);
+   void startPlainFile(const QString &name);
    void endPlainFile();
   
    bool isEnabled() const {
@@ -475,10 +475,10 @@ class OutputGenerator : public BaseOutputDocInterface
  protected:
    QTextStream m_textStream;
 
-   QFile *file;
-   QByteArray fileName;
-   QByteArray dir;
-   bool active;
+   QFile   *m_filePtr;
+   QString  m_fileName;
+   QString  m_dir;
+   bool     active;
 
    QStack<bool> genStack;
 

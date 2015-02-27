@@ -79,6 +79,7 @@ class Config
       static bool read_ProjectFile(QString fName);
 
       static void verify();
+      static void preVerify();
 };
 
 #endif

@@ -446,11 +446,11 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          static int dotindex = 1;
 
          QString fileName;
-         fileName = QString("%1%2.dot").arg(QString(Config_getString("HTML_OUTPUT") + "/inline_dotgraph_")).arg(dotindex++);
+         fileName = QString("%1%2.dot").arg(Config::getString("html-output") + "/inline_dotgraph_").arg(dotindex++);
 
          QFile file(fileName);
 
-         if (!file.open(QIODevice::WriteOnly)) {
+         if (! file.open(QIODevice::WriteOnly)) {
             err("Could not open file %s for writing\n", fileName.data());
          }
 
@@ -464,7 +464,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          m_t << "</div>" << endl;
          forceStartParagraph(s);
 
-         if (Config_getBool("DOT_CLEANUP")) {
+         if (Config::getBool("dot-cleanup")) {
             file.remove();
          }
       }
@@ -476,11 +476,11 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          static int mscindex = 1;
 
          QString baseName;
-         baseName = QString("%1%2").arg(QString(Config_getString("HTML_OUTPUT") + "/inline_mscgraph_")).arg(mscindex++);
+         baseName = QString("%1%2").arg(Config::getString("html-output") + "/inline_mscgraph_").arg(mscindex++);
 
          QFile file(baseName + ".msc");
 
-         if (!file.open(QIODevice::WriteOnly)) {
+         if (! file.open(QIODevice::WriteOnly)) {
             err("Could not open file %s.msc for writing\n", baseName.data());
          }
 
@@ -494,7 +494,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          m_t << "<div align=\"center\">" << endl;
 
          writeMscFile((baseName + ".msc").toUtf8(), s->relPath(), s->context());
-         if (Config_getBool("DOT_CLEANUP")) {
+         if (Config::getBool("dot-cleanup")) {
             file.remove();
          }
 
@@ -507,8 +507,9 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::PlantUML: {
          forceEndParagraph(s);
 
-         static QByteArray htmlOutput = Config_getString("HTML_OUTPUT");
+         static QString htmlOutput = Config::getString("html-output");
          QByteArray baseName = writePlantUMLSource(htmlOutput, s->exampleFile(), s->text());
+
          m_t << "<div align=\"center\">" << endl;
          writePlantUMLFile(baseName, s->relPath(), s->context());
          m_t << "</div>" << endl;
@@ -643,30 +644,35 @@ void HtmlDocVisitor::visit(DocFormula *f)
       m_t << "<p class=\"formulaDsp\">" << endl;
    }
 
-   if (Config_getBool("USE_MATHJAX")) {
+   if (Config::getBool("use-mathjax")) {
       QByteArray text = f->text();
       bool closeInline = false;
-      if (!bDisplay && !text.isEmpty() && text.at(0) == '$' &&
-            text.at(text.length() - 1) == '$') {
+
+      if (!bDisplay && !text.isEmpty() && text.at(0) == '$' && text.at(text.length() - 1) == '$') {
          closeInline = true;
          text = text.mid(1, text.length() - 2);
          m_t << "\\(";
       }
+
       m_t << convertToHtml(text);
       if (closeInline) {
          m_t << "\\)";
       }
+
    } else {
-      m_t << "<img class=\"formula"
-          << (bDisplay ? "Dsp" : "Inl");
+      m_t << "<img class=\"formula" << (bDisplay ? "Dsp" : "Inl"); 
       m_t << "\" alt=\"";
       filterQuotedCdataAttr(f->text());
+
       m_t << "\"";
+
       // TODO: cache image dimensions on formula generation and give height/width
       // for faster preloading and better rendering of the page
+
       m_t << " src=\"" << f->relPath() << f->name() << ".png\"/>";
 
    }
+
    if (bDisplay) {
       m_t << endl << "</p>" << endl;
       forceStartParagraph(f);
@@ -1740,7 +1746,7 @@ void HtmlDocVisitor::visitPost(DocSecRefList *s)
 
 //void HtmlDocVisitor::visitPre(DocLanguage *l)
 //{
-//  QString langId = Config_getEnum("OUTPUT_LANGUAGE");
+//  QString langId = Config::getEnum("output-language");
 //  if (l->id().toLower()!=langId.lower())
 //  {
 //    pushEnabled();
@@ -1750,7 +1756,7 @@ void HtmlDocVisitor::visitPost(DocSecRefList *s)
 //
 //void HtmlDocVisitor::visitPost(DocLanguage *l)
 //{
-//  QString langId = Config_getEnum("OUTPUT_LANGUAGE");
+//  QString langId = Config::getEnum("output-language");
 //  if (l->id().toLower()!=langId.lower())
 //  {
 //    popEnabled();
@@ -2125,7 +2131,7 @@ void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, con
    }
 
    baseName.prepend("dot_");
-   QString outDir = Config_getString("HTML_OUTPUT");
+   QString outDir = Config::getString("html-output");
 
    writeDotGraphFromFile(fn, outDir, baseName, GOF_BITMAP);
    writeDotImageMapFromFile(m_t, fn, outDir, relPath, baseName, context);
@@ -2136,18 +2142,20 @@ void HtmlDocVisitor::writeMscFile(const QString &fileName, const QString &relPat
    QString baseName = fileName;
    int i;
 
-   if ((i = baseName.lastIndexOf('/')) != -1) { // strip path
+   if ((i = baseName.lastIndexOf('/')) != -1) { 
+      // strip path
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   if ((i = baseName.indexOf('.')) != -1) { // strip extension
+   if ((i = baseName.indexOf('.')) != -1) { 
+      // strip extension
       baseName = baseName.left(i);
    }
 
    baseName.prepend("msc_");
 
-   QString outDir = Config_getString("HTML_OUTPUT");
-   QString imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+   QString outDir = Config::getString("html-output");
+   QString imgExt = Config::getEnum("dot-image-format");
 
    MscOutputFormat mscFormat = MSC_BITMAP;
 
@@ -2174,7 +2182,7 @@ void HtmlDocVisitor::writeDiaFile(const QString &fileName, const QString &relPat
 
    baseName.prepend("dia_");
 
-   QString outDir = Config_getString("HTML_OUTPUT");
+   QString outDir = Config::getString("html-output");
    writeDiaGraphFromFile(fileName, outDir, baseName, DIA_BITMAP);
 
    m_t << "<img src=\"" << relPath << baseName << ".png" << "\" />" << endl;
@@ -2192,8 +2200,8 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
       baseName = baseName.left(i);
    }
 
-   static QString outDir = Config_getString("HTML_OUTPUT");
-   static QString imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+   static QString outDir = Config::getString("html-output");
+   static QString imgExt = Config::getEnum("dot-image-format");
 
    if (imgExt == "svg") {
       generatePlantUMLOutput(fileName, outDir, PUML_SVG);

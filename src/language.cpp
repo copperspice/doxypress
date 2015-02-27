@@ -164,13 +164,11 @@
 #include "translate/translator_tr.h"
 #endif
 
-#endif 
-
-#define L_EQUAL(a) ! qstricmp(langName,a)
+#define L_EQUAL(a) ! langName.compare(a, Qt::CaseInsensitive)
 
 Translator *theTranslator = 0;
 
-bool setTranslator(const char *langName)
+bool setTranslator(const QString &langName)
 {
    if (L_EQUAL("english")) {
       theTranslator = new TranslatorEnglish;

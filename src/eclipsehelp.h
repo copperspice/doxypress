@@ -58,9 +58,9 @@ class EclipseHelp : public IndexIntf
    virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
                      const char *title) override;
 
-   virtual void addIndexFile(const char *name);
-   virtual void addImageFile(const char *name);
-   virtual void addStyleSheetFile(const char *name);
+   virtual void addIndexFile(const QString &name) override;
+   virtual void addImageFile(const QString &name) override;
+   virtual void addStyleSheetFile(const QString &name) override;
 
  private:
    int m_depth;

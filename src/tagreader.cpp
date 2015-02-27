@@ -1456,7 +1456,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
          mn = QSharedPointer<FileName> (new FileName(fullName, tfi.name));
          mn->append(fd);
 
-         Doxygen::inputNameList->inSort(mn.data());
+         Doxygen::inputNameList->inSort(mn);
          Doxygen::inputNameDict->insert(tfi.name, mn);
       }
 

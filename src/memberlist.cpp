@@ -158,19 +158,19 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
             case MemberType_Typedef:
                m_typeCnt++, m_numDecMembers++;
                break;
+
             //case MemberType_Prototype:   m_protoCnt++,m_numDecMembers++; break;
+
             case MemberType_Define:
-               if (Config_getBool("EXTRACT_ALL") ||
-                     md->argsString() ||
-                     !md->initializer().isEmpty() ||
-                     md->hasDocumentation()
-                  ) {
+               if (Config::getBool("extract-all") || md->argsString() || !md->initializer().isEmpty() || md->hasDocumentation()) {
                   m_defCnt++, m_numDecMembers++;
                }
                break;
+
             case MemberType_Friend:
                m_friendCnt++, m_numDecMembers++;
                break;
+
             default:
                err("Unknown member type found for member `%s'\n!", md->name().data());
          }
@@ -377,7 +377,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                   }
 
                   ol.endMemberItem();
-                  if (!md->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+                  if (! md->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
 
                      DocRoot *rootNode = validatingParseDoc(md->briefFile(), md->briefLine(),
                                             cd, md, md->briefDescription(), true, false, 0, true, false);
@@ -650,7 +650,7 @@ void MemberList::writeSimpleDocumentation(OutputList &ol, QSharedPointer<Definit
 // separate member pages
 void MemberList::writeDocumentationPage(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container)
 {
-   static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+   static bool generateTreeView = Config::getBool("generate-treeview");
   
    for (auto md : *this) {    
       if (md->isDetailedSectionLinkable()) {

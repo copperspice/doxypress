@@ -48,16 +48,17 @@ int Formula::getId()
    return number;
 }
 
-void FormulaList::generateBitmaps(const char *path)
+void FormulaList::generateBitmaps(const QString &path)
 {
    int x1, y1, x2, y2;
    QDir d(path);
 
    // store the original directory
-   if (!d.exists()) {
-      err("Output dir %s does not exist\n", path);
+   if (! d.exists()) {
+      err("Output dir %s does not exist\n", qPrintable(path));
       exit(1);
    }
+
    QByteArray oldDir = QDir::currentPath().toUtf8();
 
    // go to the html output directory (i.e. path)
@@ -158,7 +159,7 @@ void FormulaList::generateBitmaps(const char *path)
          QFileInfo fi(formBase + ".eps");
  
          if (fi.exists()) {
-            QByteArray eps = fileToString(qPrintable(formBase + ".eps"));
+            QByteArray eps = fileToString(formBase + ".eps");
             int i = eps.indexOf("%%BoundingBox:");
 
             if (i != -1) {
@@ -169,7 +170,7 @@ void FormulaList::generateBitmaps(const char *path)
             }
          }
 
-         // next we generate a postscript file which contains the eps
+         // generate a postscript file which contains the eps
          // and displays it in the right colors and the right bounding box
          f.setFileName(formBase + ".ps");
 
@@ -190,8 +191,8 @@ void FormulaList::generateBitmaps(const char *path)
             f.close();
          }
 
-         // scale the image so that it is four times larger than needed.
-         // and the sizes are a multiple of four.
+         // scale the image so that it is four times larger than needed
+         // and the sizes are a multiple of four
          double scaleFactor = 16.0 / 3.0;
          int zoomFactor = Config::getInt("formula-fontsize");
 
@@ -203,7 +204,7 @@ void FormulaList::generateBitmaps(const char *path)
          int gx = (((int)((x2 - x1) * scaleFactor)) + 3) & ~1;
          int gy = (((int)((y2 - y1) * scaleFactor)) + 3) & ~1;
 
-         // Then we run ghostscript to convert the postscript to a pixmap
+         // run ghostscript to convert the postscript to a pixmap
          // The pixmap is a truecolor image, where only black and white are used         
 
          char gsArgs[4096];
@@ -213,8 +214,10 @@ void FormulaList::generateBitmaps(const char *path)
 
          portable_sysTimerStart();
 
-         if (portable_system(portable_ghostScriptCommand(), gsArgs) != 0) {
-            err("Problem running ghostscript %s %s. Check your installation\n", portable_ghostScriptCommand(), gsArgs);
+         QString gsExe = Config::getString("ghostscript");   
+
+         if (portable_system(gsExe, gsArgs) != 0) {
+            err("Problem running ghostscript %s %s. Verify your installation\n", qPrintable(gsExe), gsArgs);
             portable_sysTimerStop();
 
             return;

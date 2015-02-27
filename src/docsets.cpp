@@ -606,9 +606,3 @@ void DocSets::writeToken(QTextStream &t, QSharedPointer<Definition> d, const QBy
 
    t << "  </Token>" << endl;
 }
-
-void DocSets::addIndexFile(const char *name)
-{
-   (void)name;
-}
-

@@ -48,7 +48,7 @@ void QhpXmlWriter::dumpTo(QFile &file)
    file.write(m_backend.data(), m_backend.length());
 }
 
-void QhpXmlWriter::open(char const *elementName, char const *const *attributes)
+void QhpXmlWriter::open(const QString &elementName, const QMap<QString, QString> &attributes)
 {
    indent();
    openPure(elementName, attributes);
@@ -56,14 +56,14 @@ void QhpXmlWriter::open(char const *elementName, char const *const *attributes)
    m_indentLevel++;
 }
 
-void QhpXmlWriter::openClose(char const *elementName, char const *const *attributes)
+void QhpXmlWriter::openClose(const QString &elementName, const QMap<QString, QString> &attributes)
 {
    indent();
    openClosePure(elementName, attributes);
    newLine();
 }
 
-void QhpXmlWriter::openCloseContent(char const *elementName, char const *content)
+void QhpXmlWriter::openCloseContent(const QString &elementName, const QString &content)
 {
    indent();
    openPure(elementName);
@@ -72,7 +72,7 @@ void QhpXmlWriter::openCloseContent(char const *elementName, char const *content
    newLine();
 }
 
-void QhpXmlWriter::close(char const *elementName)
+void QhpXmlWriter::close(const QString &elementName)
 {
    m_indentLevel--;
    indent();
@@ -105,23 +105,22 @@ void QhpXmlWriter::newLine()
    }
 }
 
-void QhpXmlWriter::openPureHelper(char const *elementName, char const *const *attributes, bool close)
+void QhpXmlWriter::openPureHelper(const QString &elementName, const QMap<QString, QString> &attributes, bool close)
 {
    m_out << "<" << elementName;
+    
+   for (auto iter = attributes.begin(); iter != attributes.end(); ++iter) {   
 
-   if (attributes) {
+      QString key   = iter.key();
+      QString value = iter.value();
 
-      for (char const * const *walker = attributes; walker[0]; walker += 2) {
-         char const *const key   = walker[0];
-         char const *const value = walker[1];
-
-         if (!value) {
-            continue;
-         }
-
-         m_out << " " << key << "=\"" << convertToXML(value) << "\"";
+      if (value.isEmpty()) {
+         continue;
       }
+
+      m_out << " " << key << "=\"" << convertToXML(value) << "\"";
    }
+
 
    if (close) {
       m_out << " /";
@@ -130,17 +129,17 @@ void QhpXmlWriter::openPureHelper(char const *elementName, char const *const *at
    m_out << ">";
 }
 
-void QhpXmlWriter::openPure(char const *elementName, char const *const *attributes)
+void QhpXmlWriter::openPure(const QString &elementName, const QMap<QString, QString> &attributes)
 {
    openPureHelper(elementName, attributes, false);
 }
 
-void QhpXmlWriter::openClosePure(char const *elementName, char const *const *attributes)
+void QhpXmlWriter::openClosePure(const QString &elementName, const QMap<QString, QString> &attributes)
 {
    openPureHelper(elementName, attributes, true);
 }
 
-void QhpXmlWriter::closePure(char const *elementName)
+void QhpXmlWriter::closePure(const QString &elementName)
 {
    m_out << "</" << elementName << ">";
 }

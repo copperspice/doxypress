@@ -27,31 +27,29 @@ class Qhp : public IndexIntf
  public:
    Qhp();
    ~Qhp();
-
-   // BEGIN IndexIntf
+ 
    void initialize();
    void finalize();
    void incContentsDepth();
    void decContentsDepth();
 
    void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
-                        bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) override;
+                  bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) override;
 
-   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
-                     const char *title) override;
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, 
+                  const char *sectionAnchor, const char *title) override;
 
-   void addIndexFile(const char *name);
-   void addImageFile(const char *name);
-   void addStyleSheetFile(const char *name);
-   // END IndexIntf
-
+   void addIndexFile(const QString &name) override;
+   void addImageFile(const QString &name) override;
+   void addStyleSheetFile(const QString &name) override;
+  
    static QByteArray getQhpFileName();
 
  private:
    void handlePrevSection();
    void clearPrevSection();
    void setPrevSection(const QString &title, const char *basename, const char *anchor, int level);
-   void addFile(const char *fileName);
+   void addFile(const QString &fileName);
 
    static QString getFullProjectName();
 
@@ -60,7 +58,7 @@ class Qhp : public IndexIntf
    QhpXmlWriter m_index;
    QhpXmlWriter m_files;
 
-   QByteArray m_prevSectionTitle;
+   QString m_prevSectionTitle;
    QByteArray m_prevSectionBaseName;
    QByteArray m_prevSectionAnchor;
 
@@ -70,5 +68,5 @@ class Qhp : public IndexIntf
    bool m_skipMainPageSection;
 };
 
-#endif // DOXYGEN_QHP_H
+#endif
 

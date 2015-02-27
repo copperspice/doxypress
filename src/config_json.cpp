@@ -383,8 +383,8 @@ void Config::load_Defaults()
    m_ui->qhp_namespace->setText(                   object.value("qhp-namespace").toString());
    m_ui->qhp_virtual_folder->setText(              object.value("qhp-virtual-folder").toString());
    m_ui->qhp_cust_filter_name->setText(            object.value("qhp-cust-filter-name").toString());
-   m_ui->qhp_cust_filter_attrib->setText(          object.value("qhp-cust-filter-attrib").toString());
-   m_ui->qhp_sect_filter_attrib->setText(          object.value("qhp-sect-filter-attrib").toString());
+   m_ui->qhp_cust_filter_attrib->setText(          object.value("qhp-cust-attrib").toString());
+   m_ui->qhp_sect_filter_attrib->setText(          object.value("qhp-sect-attrib").toString());
    m_ui->qthelp_gen_path->setText(                 object.value("qthelp-gen-path").toString());
 
    // tab 3 - rtf
@@ -428,29 +428,67 @@ bool Config::read_ProjectFile(QString fName)
    bool isError = false;
    
    for (auto iter = object.begin(); iter != object.end(); ++iter) {
-      // walk the project  file
+      // walk the project file
+      QString key = iter.key();
+     
+      if (key == "output-language" || key == "dot-image-format" || key == "mathjax-format" || key == "latex-paper-type")  { 
+
+/*       auto hashIter = m_cfgEnum.find(key);
+
+         if (hashIter != m_cfgEnum.end()) {
+            hashIter.value() = { iter.value().toEnum(), PROJECT };            
+
+         }  else {
+            fprintf(stderr, "Error: %s was not found in the project enum table\n", qPrintable(key) );
+            isError = true;
+
+         } 
+*/
+
+      }
 
       if (iter.value().isBool()) {
-         auto hashIter = m_cfgBool.find(iter.key());
+         auto hashIter = m_cfgBool.find(key);
 
          if (hashIter != m_cfgBool.end()) {
             hashIter.value() = { iter.value().toBool(), PROJECT };            
 
          }  else {
-            fprintf(stderr, "Error: %s was not found in the project bool table\n", qPrintable(iter.key()) );
+            fprintf(stderr, "Error: %s was not found in the project bool table\n", qPrintable(key) );
             isError = true;
 
          }
       } 
 
+/*
+      if (iter.value().isInteger()) {
+         auto hashIter = m_cfgInt.find(key);
+
+         if (hashIter != m_cfgInt.end()) {
+            hashIter.value() = { iter.value().toInt(), PROJECT };            
+
+         }  else {
+            fprintf(stderr, "Error: %s was not found in the project integer table\n", qPrintable(key) );
+            isError = true;
+
+         }
+      }
+*/
+
+
+
+//    if (iter.value().isList()) {
+//    }
+
+
       if (iter.value().isString()) {
-         auto hashIter = m_cfgString.find(iter.key());
+         auto hashIter = m_cfgString.find(key);
 
           if (hashIter != m_cfgString.end()) {
             hashIter.value() = { iter.value().toString(), PROJECT };            
 
          }  else {
-            fprintf(stderr, "Error: %s was not found in the project string table\n", qPrintable(iter.key()) );
+            fprintf(stderr, "Error: %s was not found in the project string table\n", qPrintable(key) );
             isError = true;
 
          }

@@ -407,7 +407,7 @@ void FileDef::writeIncludeGraph(OutputList &ol)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   if (Config_getBool("HAVE_DOT") /*&& Config_getBool("INCLUDE_GRAPH")*/) {
+   if (Config::getBool("have-dot") /*&& Config_getBool("INCLUDE_GRAPH")*/) {
      
       DotInclDepGraph incDepGraph(self, false);
 
@@ -430,7 +430,7 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   if (Config_getBool("HAVE_DOT") /*&& Config_getBool("INCLUDED_BY_GRAPH")*/) {      
+   if (Config::getBool("have-dot") /*&& Config_getBool("INCLUDED_BY_GRAPH")*/) {      
       DotInclDepGraph incDepGraph(self, true);
 
       if (incDepGraph.isTooBig()) {
@@ -446,7 +446,7 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
          ol.enableAll();
          ol.endTextBlock(true);
       }
-      //incDepGraph.writeGraph(Config_getString("HTML_OUTPUT"),fd->getOutputFileBase());
+
    }
 }
 
@@ -879,7 +879,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    (void)filesInSameTu;
 
 #if USE_LIBCLANG
-   static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
+   static bool clangAssistedParsing = Config::getBool("clang-parsing");
 
    if (clangAssistedParsing && (getLanguage() == SrcLangExt_Cpp || getLanguage() == SrcLangExt_ObjC)) {
 
@@ -939,7 +939,7 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
    DevNullCodeDocInterface devNullIntf;  
 
 #if USE_LIBCLANG
-   static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
+   static bool clangAssistedParsing = Config::getBool("clang-parsing");
 
    if (clangAssistedParsing && (getLanguage() == SrcLangExt_Cpp || getLanguage() == SrcLangExt_ObjC)) {
 

@@ -20,6 +20,8 @@
 
 #include <stdio.h>
 
+#include <message.h>
+
 // Stripped version of FreeSans.ttf part of FreeFonts package,
 // see http://www.nongnu.org/freefont for more info
 unsigned char FreeSans_ttf[] = {
@@ -1938,32 +1940,32 @@ unsigned char FreeSans_ttf[] = {
 unsigned int FreeSans_ttf_len = 22932;
 
 #if 0
-void writeLogo(const char *dir)
+void writeLogo(const QString &dir)
 {
-   QByteArray fileName = (QByteArray)dir + "/doxygen.png";
+   QString fileName = dir + "/doxygen.png";
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
       f.write((char *)doxygen_png_data, doxygen_png_len);
 
    } else {
-      fprintf(stderr, "warning: Cannot open file %s for writing\n", fileName.data());
+       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
 
    }
 
    f.close();
 }
 
-void writeSearchButton(const char *dir)
+void writeSearchButton(const QString &dir)
 {
-   QByteArray fileName = (QByteArray)dir + "/search.png";
+   QString fileName = dir + "/search.png";
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
       f.write((char *)search_png, search_png_len);
 
    } else {
-      fprintf(stderr, "warning: Cannot open file %s for writing\n", fileName.data());
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
    }
 
    f.close();

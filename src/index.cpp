@@ -894,7 +894,7 @@ static void writeHierarchicalIndex(OutputList &ol)
    ol.startContents();
    ol.startTextBlock();
 
-   if (Config_getBool("HAVE_DOT") && Config_getBool("GRAPHICAL_HIERARCHY")) {
+   if (Config::getBool("have-dot") && Config_getBool("GRAPHICAL_HIERARCHY")) {
       ol.disable(OutputGenerator::Latex);
       ol.disable(OutputGenerator::RTF);
       ol.startParagraph();
@@ -1114,7 +1114,7 @@ static void writeFileIndex(OutputList &ol)
       Doxygen::indexList->incContentsDepth();
    }
 
-   ol.parseText(lne ? lne->intro() : theTranslator->trFileListDescription(Config_getBool("EXTRACT_ALL")));
+   ol.parseText(lne ? lne->intro() : theTranslator->trFileListDescription(Config::getBool("extract-all")));
    ol.endTextBlock();
 
    // ---------------
@@ -3009,7 +3009,7 @@ static int countDirs()
 
 void writeGraphInfo(OutputList &ol)
 {
-   if (!Config_getBool("HAVE_DOT") || !Config_getBool("GENERATE_HTML")) {
+   if (! Config::getBool("have-dot") || ! Config::getBool("generate-html")) {
       return;
    }
 
@@ -3741,7 +3741,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
             case LayoutNavEntry::ClassHierarchy:
                msg("Generating hierarchical class index\n");
                writeHierarchicalIndex(ol);
-               if (Config_getBool("HAVE_DOT") && Config_getBool("GRAPHICAL_HIERARCHY")) {
+               if (Config::getBool("have-dot") && Config_getBool("GRAPHICAL_HIERARCHY")) {
                   msg("Generating graphical class hierarchy\n");
                   writeGraphicalClassHierarchy(ol);
                }

@@ -2418,20 +2418,22 @@ bool PerlModGenerator::createOutputFile(QFile &f, const char *s)
 
 bool PerlModGenerator::createOutputDir(QDir &perlModDir)
 {
-   QString outputDirectory = Config_getString("output-dir");   
+   QString outputDirectory = Config::getString("output-dir");   
 
    QDir dir(outputDirectory);
-   if (!dir.exists()) {
+
+   if (! dir.exists()) {
       dir.setPath(QDir::currentPath());
+
       if (!dir.mkdir(outputDirectory)) {
-         err("Cannot create directory %s\n", outputDirectory.data());
+         err("Unable to create directory %s\n", outputDirectory.data());
          return false;
       }
    }
 
    perlModDir.setPath(outputDirectory + "/perlmod");
-   if (!perlModDir.exists() && !perlModDir.mkdir(outputDirectory + "/perlmod")) {
-      err("Could not create perlmod directory in %s\n", outputDirectory.data());
+   if (! perlModDir.exists() && !perlModDir.mkdir(outputDirectory + "/perlmod")) {
+      err("Unable to create perlmod directory in %s\n", outputDirectory.data());
       return false;
    }
    return true;
@@ -2629,8 +2631,8 @@ bool PerlModGenerator::generateDoxyRules()
       return false;
    }
 
-   bool perlmodLatex = Config_getBool("PERLMOD_LATEX");
-   QByteArray prefix = Config_getString("PERLMOD_MAKEVAR_PREFIX");
+   bool perlmodLatex = Config::getBool("perl-latex");
+   QString prefix = Config::getString("perlmod-prefix");
 
    QTextStream doxyRulesStream(&doxyRules);
    doxyRulesStream <<
@@ -2657,6 +2659,7 @@ bool PerlModGenerator::generateDoxyRules()
                    "clean-perlmod::\n"
                    "\trm -f $(" << prefix << "DOXYSTRUCTURE_PM) \\\n"
                    "\t$(" << prefix << "DOXYDOCS_PM)";
+
    if (perlmodLatex)
       doxyRulesStream <<
                       " \\\n"
@@ -2676,6 +2679,7 @@ bool PerlModGenerator::generateDoxyRules()
                    "$(" << prefix << "DOXYMAKEFILE) \\\n"
                    "$(" << prefix << "DOXYSTRUCTURE_PM) \\\n"
                    "$(" << prefix << "DOXYDOCS_PM)";
+
    if (perlmodLatex) {
       doxyRulesStream <<
                       " \\\n"
@@ -2684,6 +2688,7 @@ bool PerlModGenerator::generateDoxyRules()
                       "$(" << prefix << "DOXYFORMAT_TEX) \\\n"
                       "$(" << prefix << "DOXYLATEX_TEX)";
    }
+
    doxyRulesStream <<
                    ": \\\n"
                    "\t$(" << prefix << "DOXYFILE)\n"
@@ -2728,10 +2733,11 @@ bool PerlModGenerator::generateMakefile()
       return false;
    }
 
-   bool perlmodLatex = Config_getBool("PERLMOD_LATEX");
-   QByteArray prefix = Config_getString("PERLMOD_MAKEVAR_PREFIX");
+   bool perlmodLatex = Config::getBool("perl-latex");
+   QString prefix = Config::getString("perlmod-prefix");
 
    QTextStream makefileStream(&makefile);
+
    makefileStream <<
                   ".PHONY: default clean" << (perlmodLatex ? " pdf" : "") << "\n"
                   "default: " << (perlmodLatex ? "pdf" : "clean") << "\n"
@@ -3110,17 +3116,17 @@ void PerlModGenerator::generate()
    // - examples
 
    QDir perlModDir;
-   if (!createOutputDir(perlModDir)) {
+   if (! createOutputDir(perlModDir)) {
       return;
    }
 
-   bool perlmodLatex = Config_getBool("PERLMOD_LATEX");
+   bool perlmodLatex = Config::getBool("perl-latex");
 
    QByteArray perlModAbsPath = perlModDir.absolutePath().toUtf8();
-   pathDoxyDocsPM = perlModAbsPath + "/DoxyDocs.pm";
+   pathDoxyDocsPM      = perlModAbsPath + "/DoxyDocs.pm";
    pathDoxyStructurePM = perlModAbsPath + "/DoxyStructure.pm";
-   pathMakefile = perlModAbsPath + "/Makefile";
-   pathDoxyRules = perlModAbsPath + "/doxyrules.make";
+   pathMakefile        = perlModAbsPath + "/Makefile";
+   pathDoxyRules       = perlModAbsPath + "/doxyrules.make";
 
    if (perlmodLatex) {
       pathDoxyStructureTex = perlModAbsPath + "/doxystructure.tex";
@@ -3141,10 +3147,7 @@ void PerlModGenerator::generate()
    }
 
    if (perlmodLatex) {
-      if (!(generateDoxyLatexStructurePL()
-            && generateDoxyLatexPL()
-            && generateDoxyLatexTex()
-            && generateDoxyFormatTex())) {
+      if (! (generateDoxyLatexStructurePL() && generateDoxyLatexPL() && generateDoxyLatexTex() && generateDoxyFormatTex())) {
          return;
       }
    }
@@ -3152,6 +3155,6 @@ void PerlModGenerator::generate()
 
 void generatePerlMod()
 {
-   PerlModGenerator pmg(Config_getBool("PERLMOD_PRETTY"));
+   PerlModGenerator pmg(Config::getBool("perl-pretty"));
    pmg.generate();
 }

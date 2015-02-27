@@ -266,11 +266,11 @@ namespace Doxy_Work{
 
    ClassDef::CompoundType convertToCompoundType(int section, uint64_t specifier);
 
-   void copyExtraFiles(const QByteArray &filesOption, const QByteArray &outputOption);
+   void copyExtraFiles(const QString &filesOption, const QString &outputOption);
    void copyLogo();
    void copyStyleSheet();
 
-   QByteArray createOutputDirectory(const QString &baseDirName, const char *formatDirOption, const char *defaultDirName);
+   QString createOutputDirectory(const QString &baseDirName, const QString &formatDirOption, const QString &defaultDirName);
    void createTemplateInstanceMembers();
    QSharedPointer<ClassDef> createTagLessInstance(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> templ, const QByteArray &fieldName);
 
@@ -362,7 +362,7 @@ namespace Doxy_Work{
    void stopDoxygen(int);
 #endif
 
-   QByteArray getQchFileName();
+   QString getQchFileName();
    QHash<QString, int> *getTemplateArgumentsInName(ArgumentList *templateArguments, const QByteArray &name);
 
    void inheritDocumentation();
@@ -385,17 +385,39 @@ namespace Doxy_Work{
    void processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef>tagParentCd, 
                   const QByteArray &prefix, int count);
 
-   int readFileOrDirectory(const QString &s, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict *exclDict,
-                  QStringList *patList, QStringList *exclPatList, QStringList *resultList, StringDict *resultDict, 
-                  bool recursive, bool errorIfNotExist = true, QHash<QString, void *> *killDict = 0, QHash<QString, void *> *paths = 0);
+struct ReadDirArgs {
+   bool recursive = false;
+   bool errorIfNotExist = true; 
+   
+   bool isFnList = false;
+   SortedList<QSharedPointer<FileName>> fnList;
 
-   int readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict *exclDict,
-                  QStringList *patList, QStringList *exclPatList, QStringList *resultList,
-                  StringDict *resultDict, bool errorIfNotExist, bool recursive, QHash<QString, void *> *killDict, 
-                  QHash<QString, void *> *paths);
+   bool isFnDict = false;
+   FileNameDict fnDict;    
 
+   QSet<QString> excludeSet;
+   
+   QStringList patternList; 
+   QStringList excludePatternList; 
+
+   bool isResultList = false;
+   QStringList resultList;
+
+   bool isPrepExclude = false;
+   QSet<QString> prepExcludeSet; 
+
+   bool isKillDict = false;
+   QSet<QString> killDict;
+
+   bool isPathSet = false;
+   QSet<QString> pathSet;
+};
+
+   int readFileOrDirectory(const QString &fileName, ReadDirArgs &data);
+   int readDir(const QFileInfo &fileInfo, ReadDirArgs &data);  
+           
    void resolveClassNestingRelations();
-   QByteArray resolveSymlink(QByteArray path);
+   QString resolveSymlink(QString path);
    void resolveUserReferences();
    void readTagFile(QSharedPointer<Entry> root, const char *tl);
 
@@ -459,49 +481,51 @@ void parseInput()
    }
 
    // Check/create output directorties
-   QByteArray htmlOutput;
+   QString htmlOutput;
    const bool generateHtml = Config::getBool("generate-html");
 
    if (generateHtml) {
       htmlOutput = createOutputDirectory(outputDirectory, "html-output", "/html");
    }
 
-   QByteArray docbookOutput;
+   QString docbookOutput;
    const bool generateDocbook = Config::getBool("generate-docbook");
 
    if (generateDocbook) {
       docbookOutput = createOutputDirectory(outputDirectory, "docbook-output", "/docbook");
    }
 
-   QByteArray xmlOutput;
+   QString xmlOutput;
    const bool generateXml = Config::getBool("generate-xml");
 
    if (generateXml) {
       xmlOutput = createOutputDirectory(outputDirectory, "xml-output", "/xml");
    }
 
-   QByteArray latexOutput;
+   QString latexOutput;
    const bool generateLatex = Config::getBool("generate-latex");
 
    if (generateLatex) {
       latexOutput = createOutputDirectory(outputDirectory, "latex-output", "/latex");
    }
 
-   QByteArray rtfOutput;
+   QString rtfOutput;
    const bool generateRtf = Config::getBool("generate-rtf");
 
    if (generateRtf) {
       rtfOutput = createOutputDirectory(outputDirectory, "rtf-output", "/rtf");
    }
 
-   QByteArray manOutput;
+   QString manOutput;
    const bool generateMan = Config::getBool("generate-man");
+
    if (generateMan) {
       manOutput = createOutputDirectory(outputDirectory, "man-output", "/man");
    }
 
-   // QByteArray sqlOutput;
+   // QString sqlOutput;
    // bool generateSql = Config::getBool("generate-sqlite3");
+   //
    // if (generateSql) {
    //   sqlOutput = createOutputDirectory(outputDirectory,"sqlite3-output","/sqlite3");
    // }    
@@ -511,18 +535,19 @@ void parseInput()
       QString curFontPath = Config::getString("dot-font-path");
 
       if (curFontPath.isEmpty()) {
-         portable_getenv("DOTFONTPATH");
-         QByteArray newFontPath = ".";
+         portable_getenv("dot-font-path");
+         QString  newFontPath = ".";
 
-         if (!curFontPath.isEmpty()) {
+         if (! curFontPath.isEmpty()) {
             newFontPath += portable_pathListSeparator();
             newFontPath += curFontPath;
          }
 
-         portable_setenv("DOTFONTPATH", newFontPath);
+         portable_setenv("dot-font-path", newFontPath);
 
       } else {
-         portable_setenv("DOTFONTPATH", curFontPath);
+         portable_setenv("dot-font-path", curFontPath);
+
       }
    }
   
@@ -935,7 +960,7 @@ void generateOutput()
       // copy static stuff
       copyStyleSheet(); 
       copyLogo();   
-      copyExtraFiles("HTML_EXTRA_FILES", "HTML_OUTPUT");
+      copyExtraFiles("html-extra-files", "html-output");
 
       FTVHelp::generateTreeViewImages();
    }
@@ -945,7 +970,7 @@ void generateOutput()
       LatexGenerator::init();
 
       // copy static stuff
-      copyExtraFiles("LATEX_EXTRA_FILES", "LATEX_OUTPUT");
+      copyExtraFiles("latex-extra-files", "latex-output");
    }
 
    if (generateMan) {
@@ -1048,7 +1073,7 @@ void generateOutput()
    generateNamespaceDocs();
    Doxy_Globals::g_stats.end();
 
-   if (Config::getBool("generate_legend")) {
+   if (Config::getBool("generate-legend")) {
       Doxy_Globals::g_stats.begin("Generating graph info page\n");
       writeGraphInfo(*Doxy_Globals::g_outputList);
       Doxy_Globals::g_stats.end();
@@ -1060,7 +1085,7 @@ void generateOutput()
 
    if (Doxygen::formulaList->count() > 0 && generateHtml && ! Config::getBool("use-mathjax")) {
       Doxy_Globals::g_stats.begin("Generating bitmaps for formulas in HTML\n");
-      Doxygen::formulaList->generateBitmaps(Config::getString("html_output"));
+      Doxygen::formulaList->generateBitmaps(Config::getString("html-output"));
       Doxy_Globals::g_stats.end();
    }
 
@@ -1140,8 +1165,8 @@ void generateOutput()
             searchDataFile = "searchdata.xml";
          }
 
-         if (!portable_isAbsolutePath(searchDataFile)) {
-            QString outputDirectory = Config_getString("output-dir");
+         if (! QDir::isAbsolutePath(searchDataFile)) {        
+            QString outputDirectory = Config::getString("output-dir");
             searchDataFile.prepend(outputDirectory + "/");
          }
 
@@ -1153,7 +1178,7 @@ void generateOutput()
 
    if (generateRtf) {
       Doxy_Globals::g_stats.begin("Combining RTF output\n");
-      if (!RTFGenerator::preProcessFileInplace(Config_getString("RTF_OUTPUT"), "refman.rtf")) {
+      if (! RTFGenerator::preProcessFileInplace(Config::getString("rtf-output"), "refman.rtf")) {
          err("An error occurred during post processing the RTF files\n");
       }
 
@@ -1166,15 +1191,16 @@ void generateOutput()
       Doxy_Globals::g_stats.end();
    }
 
-   if (generateHtml && Config::getBool("generate_chm") && ! Config::getString("hhc-location").isEmpty()) {
+   if (generateHtml && Config::getBool("generate-chm") && ! Config::getString("hhc-location").isEmpty()) {
 
       Doxy_Globals::g_stats.begin("Running html help compiler\n");
       QString oldDir = QDir::currentPath();
-      QDir::setCurrent(Config_getString("HTML_OUTPUT"));
+      QDir::setCurrent(Config::getString("html-output"));
+
       portable_sysTimerStart();
 
-      if (portable_system(Config_getString("HHC_LOCATION"), "index.hhp", false)) {
-         err("failed to run html help compiler on index.hhp\n");
+      if (portable_system(Config::getString("hhc-location"), "index.hhp", false)) {
+         err("Failed to run html help compiler on index.hhp\n");
       }
 
       portable_sysTimerStop();
@@ -1192,11 +1218,11 @@ void generateOutput()
       QString("%1 -o \"%2\"").arg(qhpFileName).arg(qchFileName);
 
       QString const oldDir = QDir::currentPath();
-      QDir::setCurrent(Config_getString("HTML_OUTPUT"));
+      QDir::setCurrent(Config::getString("html-output"));
 
       portable_sysTimerStart();
 
-      if (portable_system(Config_getString("QHG_LOCATION"), qPrintable(args), false)) {
+      if (portable_system(Config::getString("qthhelp-gen-path"), qPrintable(args), false)) {
          err("Failed to run qhelpgenerator on index.qhp\n");
       }
 
@@ -1218,17 +1244,8 @@ void generateOutput()
 
    }
 
-   // all done, cleaning up and exit     BROOM CHECK
-   finializeSearchIndexer();
-   Doxygen::symbolStorage->close();
-
-   QDir thisDir;
-   thisDir.remove(Doxygen::objDBFileName);
-  
-   shutDownDoxypress();
-      
-   delete Doxygen::symbolStorage;
-   
+   // all done, cleaning up and exit  
+   shutDownDoxypress();          
    Doxy_Globals::g_programExit = true;
 }
 
@@ -1804,7 +1821,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
                iName = fd->name();
             }
 
-         } else if (! Config_getList("STRIP_FROM_INC_PATH").isEmpty()) {
+         } else if (! Config::getList("strip-from-inc-path").isEmpty()) {
             iName = stripFromIncludePath(fd->getFilePath());
 
          } else {
@@ -2960,7 +2977,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
          }
       }
    } else {
-      if (Config_getBool("HIDE_SCOPE_NAMES")) {
+      if (Config::getBool("hide-scope-names")) {
          def = name + root->args;
       } else {
          def = qualScope + scopeSeparator + name + root->args;
@@ -3069,7 +3086,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
    QSharedPointer<FileDef> fd = rootNav->fileDef();
 
    // see if we have a typedef that should hide a struct or union
-   if (mtype == MemberType_Typedef && Config_getBool("TYPEDEF_HIDES_STRUCT")) {
+   if (mtype == MemberType_Typedef && Config::getBool("typedef-hides-struct")) {
       QByteArray type = root->type;
 
       type = stripPrefix(type, "typedef ");
@@ -3114,7 +3131,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
    QByteArray def;
 
    // determine the definition of the global variable
-   if (nd && !nd->name().isEmpty() && nd->name().at(0) != '@' && !Config_getBool("HIDE_SCOPE_NAMES") )   {
+   if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@' && ! Config::getBool("hide-scope-names") )   {
       // variable is inside a namespace, so put the scope before the name
 
       SrcLangExt lang = nd->getLanguage();
@@ -3289,6 +3306,7 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<EntryNav> rootNav)
 {
    static QRegExp initChars("[0-9\"'&*!^]+");
    static QRegExp idChars("[a-z_A-Z][a-z_A-Z0-9]*");
+
    bool result = false;
    bool typeIsClass;
 
@@ -3586,7 +3604,8 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
 
       int si = scope.indexOf('@');
 
-      static bool inlineSimpleStructs = Config_getBool("INLINE_SIMPLE_STRUCTS");
+      static bool inlineSimpleStructs = Config::getBool("inline-simple-struct");
+
       if (si != -1 && !inlineSimpleStructs) { // anonymous scope or type
 
          QByteArray pScope;
@@ -3900,7 +3919,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointe
       scopeSeparator = "::";
    }
 
-   if (!root->relates.isEmpty() || isFriend || Config_getBool("HIDE_SCOPE_NAMES")) {
+   if (! root->relates.isEmpty() || isFriend || Config::getBool("hide-scope-names")) {
 
       if (! root->type.isEmpty()) {
          if (! root->argList.isEmpty()) {
@@ -4755,7 +4774,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                   // used class is not documented in any scope
                   QSharedPointer<ClassDef> usedCd = Doxygen::hiddenClasses->find(type);
 
-                  if (usedCd == 0 && ! Config_getBool("HIDE_UNDOC_RELATIONS")) {
+                  if (usedCd == 0 && ! Config::getBool("hide-undoc-relations")) {
                      if (type.right(2) == "(*" || type.right(2) == "(^") { 
                         // type is a function pointer
                         type += md->argsString();
@@ -4817,11 +4836,10 @@ void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
          // find a documented base class in the correct scope
 
          if (! findClassRelation(rootNav, context, instanceCd, &tbi, templateNames, DocumentedOnly, isArtificial)) {
-            // 1.8.2: decided to show inheritance relations even if not documented,
-            //        make them artificial, so they do not appear in the index
-            //if (!Config_getBool("HIDE_UNDOC_RELATIONS"))
-
-            bool b = Config_getBool("HIDE_UNDOC_RELATIONS") ? true : isArtificial;
+            // decided to show inheritance relations even if not documented,
+            // make them artificial, so they do not appear in the index
+           
+            bool b = Config::getBool("hide-undoc-relations") ? true : isArtificial;
 
             // no documented base class -> try to find an undocumented one
             findClassRelation(rootNav, context, instanceCd, &tbi, templateNames, Undocumented, b);
@@ -5215,7 +5233,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
                      usedName = biName;
                   }
 
-                  static bool sipSupport = Config_getBool("SIP_SUPPORT");
+                  static bool sipSupport = Config::getBool("sip-support");
                   if (sipSupport) {
                      bi->prot = Public;
                   }
@@ -5469,12 +5487,10 @@ void Doxy_Work::computeClassRelations()
 
          if (! root->name.isEmpty() && root->name.indexOf('@') == -1 && // normal name
                (guessSection(root->fileName) == Entry::HEADER_SEC ||
-                   Config_getBool("EXTRACT_LOCAL_CLASSES")) && // not defined in source file
-                   protectionLevelVisible(root->protection) && // hidden by protection
-                   ! Config_getBool("HIDE_UNDOC_CLASSES") // undocumented class are visible
-            )
+                   Config::getBool("extract-local-classes")) && protectionLevelVisible(root->protection) &&
+                   ! Config::getBool("hide-undoc-classes") )
 
-            warn_undoc(root->fileName, root->startLine, "Compound %s is not documented.", root->name.data());
+            warn_undoc(root->fileName, root->startLine, "Compound %s was not documented", root->name.data());
       }
 
       rootNav->releaseEntry();
@@ -5904,13 +5920,13 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QByteAr
 
          warn(root->fileName, root->startLine, warnMsg);
       }
-   } else { // got docs for an undefined member
+   } else { 
+      // have docs for an undefined member
 
       if (root->type != "friend class" && root->type != "friend struct" &&
-            root->type != "friend union" && (!Config_getBool("TYPEDEF_HIDES_STRUCT") ||
-            root->type.indexOf("typedef ") == -1)) {
+            root->type != "friend union" && (! Config::getBool("typedef-hides-struct") || root->type.indexOf("typedef ") == -1)) {
 
-         warn(root->fileName, root->startLine, "documented symbol `%s' was not declared or defined.", decl);
+         warn(root->fileName, root->startLine, "documented symbol `%s' was not declared or defined", decl);
       }
    }
 
@@ -6319,7 +6335,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
    }
 
    // rebuild the function declaration (needed to get the scope right).
-   if (! scopeName.isEmpty() && !isRelated && !isFriend && !Config_getBool("HIDE_SCOPE_NAMES")) {
+   if (! scopeName.isEmpty() && !isRelated && !isFriend && ! Config::getBool("hide-scope-names")) {
       if (!funcType.isEmpty()) {
          if (isFunc) { // a function -> we use argList for the arguments
             funcDecl = funcType + " " + tempScopeName + "::" + funcName + funcTempList;
@@ -6624,7 +6640,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                      }
                   }
 
-                  static bool strictProtoMatching = Config_getBool("STRICT_PROTO_MATCHING");
+                  static bool strictProtoMatching = Config::getBool("strict-proto-matching");
 
                   if (! strictProtoMatching) {
                      if (candidates == 1 && ucd && umd) {
@@ -7081,7 +7097,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
       localObjCMethod:
          QSharedPointer<ClassDef> cd;
 
-         if (Config_getBool("EXTRACT_LOCAL_METHODS") && (cd = getClass(scopeName))) {
+         if (Config::getBool("extract-local-methods") && (cd = getClass(scopeName))) {
             Debug::print(Debug::FindMembers, 0, "4. Local objective C method %s\n"
                          "  scopeName=%s className=%s\n", root->name.data(), scopeName.data(), className.data());
             
@@ -7394,7 +7410,7 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
          }
 
          if (nd && !nd->name().isEmpty() && nd->name().at(0) != '@') {
-            if (isRelated || Config_getBool("HIDE_SCOPE_NAMES")) {
+            if (isRelated || Config::getBool("hide-scope-names")) {
                md->setDefinition(name + baseType);
             } else {
                md->setDefinition(nd->name() + "::" + name + baseType);
@@ -7423,7 +7439,7 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
             }
 
          } else if (cd) {
-            if (isRelated || Config_getBool("HIDE_SCOPE_NAMES")) {
+            if (isRelated || Config::getBool("hide-scope-names")) {
                md->setDefinition(name + baseType);
 
             } else {
@@ -7974,17 +7990,16 @@ void Doxy_Work::generateFileSources()
    if (Doxygen::inputNameList->count() > 0) {
 
 #if USE_LIBCLANG
-      static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
+      static bool clangAssistedParsing = Config::getBool("clang-parsing");
 
       if (clangAssistedParsing) {
-         QHash<QString, void *> g_processedFiles;
 
-         // create a dictionary with files to process
-         QHash<QString, void *> g_filesToProcess;
+         QSet<QString> processedFiles;         
+         QSet<QString> filesToProcess;
                     
          for (auto fn : *Doxygen::inputNameList) {
             for (auto fd : *fn) {
-               g_filesToProcess.insert(fd->absoluteFilePath(), (void *)0x8);
+               filesToProcess.insert(fd->absoluteFilePath());
             }
          }
 
@@ -8011,8 +8026,8 @@ void Doxy_Work::generateFileSources()
 
                   char *incFile = filesInSameTu.first();
 
-                  while (incFile && g_filesToProcess.find(incFile)) {
-                     if (fd->absoluteFilePath() != incFile && !g_processedFiles.find(incFile)) {
+                  while (incFile && filesToProcess.find(incFile)) {
+                     if (fd->absoluteFilePath() != incFile && ! processedFiles.find(incFile)) {
                         QStringList moreFiles;
                         bool ambig;
 
@@ -8030,7 +8045,7 @@ void Doxy_Work::generateFileSources()
                               ifd->parseSource(true, moreFiles);
                            }
 
-                           g_processedFiles.insert(incFile, (void *)0x8);
+                           processedFiles.insert(incFile);
                         }
                      }
 
@@ -8038,7 +8053,7 @@ void Doxy_Work::generateFileSources()
                   }
 
                   fd->finishParsing();
-                  g_processedFiles.insert(fd->absoluteFilePath(), (void *)0x8);
+                  g_processedFiles.insert(fd->absoluteFilePath());
                }
             }
          }
@@ -8047,8 +8062,10 @@ void Doxy_Work::generateFileSources()
          for (auto fn : *Doxygen::inputNameList) {         
 
             for (auto fd : *fn) {
-               if (!g_processedFiles.find(fd->absoluteFilePath())) { // not yet processed
+               if (! g_processedFiles.find(fd->absoluteFilePath())) { 
+                  // not yet processed
                   QStringList filesInSameTu;
+
                   fd->startParsing();
 
                   if (fd->generateSourceFile()) { // sources need to be shown in the output
@@ -8510,15 +8527,14 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
             }
            
       } else if (!root->doc.isEmpty() || !root->brief.isEmpty()) { // define not found
-         static bool preEnabled = Config_getBool("ENABLE_PREPROCESSING");
+         static bool preEnabled = Config::getBool("enable-preprocessing");
 
          if (preEnabled) {
-            warn(root->fileName, root->startLine, "documentation for unknown define %s found.\n",
-                 root->name.data() );
+            warn(root->fileName, root->startLine, "documentation for unknown define %s found.\n", root->name.data() );
 
          } else {
-            warn(root->fileName, root->startLine, "found documented #define but ignoring it because "
-                 "ENABLE_PREPROCESSING is NO.\n", root->name.data() );
+            warn(root->fileName, root->startLine, "found documented #define, ignoring since "
+                 "ENABLE PREPROCESSING tag is not set\n", root->name.data() );
          }
       }
 
@@ -8539,6 +8555,7 @@ void Doxy_Work::findDirDocumentation(QSharedPointer<EntryNav> rootNav)
      
       if (root->docFile == normalizedName) { // current dir?
          int lastSlashPos = normalizedName.lastIndexOf('/');
+
          if (lastSlashPos != -1) { // strip file name
             normalizedName = normalizedName.left(lastSlashPos);
          }
@@ -8951,44 +8968,47 @@ static QByteArray fixSlashes(QByteArray &s)
 
 void Doxy_Work::copyStyleSheet()
 {
-   QByteArray &htmlStyleSheet = Config_getString("HTML_STYLESHEET");
+   QString htmlStyleSheet = Config::getString("html-stylesheet");
 
    if (! htmlStyleSheet.isEmpty()) {
       QFileInfo fi(htmlStyleSheet);
 
       if (! fi.exists()) {
-         err("Style sheet '%s' specified by HTML_STYLESHEET does not exist\n",htmlStyleSheet.constData() );      
+         err("Style sheet '%s' specified by HTML STYLESHEET tag does not exist\n", qPrintable(htmlStyleSheet) );      
          htmlStyleSheet = ""; 
 
       } else if (fi.fileName() == "doxygen.css" || fi.fileName() == "tabs.css" || fi.fileName()=="navtree.css") {
-         err("Style sheet %s specified by HTML_STYLESHEET is a built in stylesheet. Please use a "
-               "different name\n", htmlStyleSheet.constData() ); 
+
+         err("Style sheet %s specified by HTML STYLESHEET is a predefined name in DoxyPress.Please use a "
+               "different name\n", qPrintable(htmlStyleSheet) ); 
 
          htmlStyleSheet = "";     
 
       } else {
-         QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
+
+         QString destFileName = Config::getString("html-output") + "/" + fi.fileName();
          copyFile(htmlStyleSheet, destFileName);
       }
    }
 
-   QStringList htmlExtraStyleSheet = Config_getList("HTML_EXTRA_STYLESHEET");
+   const QStringList htmlExtraStyleSheet = Config::getList("html-extra-stylesheet");
 
    for (uint i = 0; i < htmlExtraStyleSheet.count(); ++i) {
-      QByteArray fileName(htmlExtraStyleSheet.at(i).toUtf8());
+
+      QString fileName(htmlExtraStyleSheet.at(i));
 
       if (! fileName.isEmpty()) {
          QFileInfo fi(fileName);
 
          if (! fi.exists()) {
-            err("Style sheet '%s' specified by HTML_EXTRA_STYLESHEET does not exist\n", fileName.constData());
+            err("Style sheet '%s' specified by 'HTML EXTRA STYLESHEET' tag does not exist\n", qPrintable(fileName));
 
          } else if (fi.fileName() == "doxygen.css" || fi.fileName() == "tabs.css" || fi.fileName()=="navtree.css") {
             err("Style sheet %s specified by HTML_EXTRA_STYLESHEET is a built in stylesheet. Please use a "
-               "different name\n", fileName.constData());      
+               "different name\n", qPrintable(fileName));      
             
          } else {
-            QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
+            QString destFileName = Config::getString("html-output") + "/" + fi.fileName();
             copyFile(fileName, destFileName);
          }
       }
@@ -8997,17 +9017,16 @@ void Doxy_Work::copyStyleSheet()
 
 void Doxy_Work::copyLogo()
 {
-   QByteArray &projectLogo = Config_getString("PROJECT_LOGO");
+   const QString projectLogo = Config::getString("project-logo");
 
-   if (!projectLogo.isEmpty()) {
+   if (! projectLogo.isEmpty()) {
       QFileInfo fi(projectLogo);
 
       if (! fi.exists()) {
-         err("Project logo '%s' specified by PROJECT_LOGO does not exist\n", projectLogo.data());
-         projectLogo.resize(0); // revert to the default
+         err("Project logo file '%s' does not exist\n", qPrintable(projectLogo));        
 
       } else {
-         QString destFileName = Config_getString("HTML_OUTPUT") + "/" + fi.fileName();
+         QString destFileName = Config::getString("html-output") + "/" + fi.fileName();
 
          copyFile(projectLogo, destFileName);
          Doxygen::indexList->addImageFile(qPrintable(fi.fileName()));
@@ -9015,25 +9034,24 @@ void Doxy_Work::copyLogo()
    }
 }
 
-void Doxy_Work::copyExtraFiles(const QByteArray &filesOption, const QByteArray &outputOption)
+void Doxy_Work::copyExtraFiles(const QString &filesOption, const QString &outputOption)
 {
-   QStringList files = Config_getList(filesOption);
-   uint i;
-
-   for (i = 0; i < files.count(); ++i) {
+   const QStringList files = Config::getList(filesOption);
+   
+   for (int i = 0; i < files.count(); ++i) {
       QString fileName(files.at(i));
 
-      if (!fileName.isEmpty()) {
+      if (! fileName.isEmpty()) {
          QFileInfo fi(fileName);
 
          if (! fi.exists()) {
-            err("Extra file '%s' specified in " + filesOption + " does not exist\n", qPrintable(fileName));
+            err("Extra file '%s' specified in %s does not exist\n", qPrintable(fileName), qPrintable(filesOption));
 
          } else {
-            QString destFileName = Config_getString(outputOption) + "/" + fi.fileName();
+            QString destFileName = Config::getString(outputOption) + "/" + fi.fileName();
 
             Doxygen::indexList->addImageFile(fi.fileName().toUtf8());
-            copyFile(fileName.toUtf8(), destFileName);
+            copyFile(fileName, destFileName);
          }
       }
    }
@@ -9063,7 +9081,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
 {
 
 #if USE_LIBCLANG
-   static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
+   static bool clangAssistedParsing = Config::getBool("clang-parsing");
 #else
    static bool clangAssistedParsing = false;
 #endif
@@ -9080,7 +9098,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
    QFileInfo fi(fileName);
    BufStr preBuf(fi.size() + 4096);
 
-   if (Config_getBool("ENABLE_PREPROCESSING") && parser->needsPreprocessing(extension)) {
+   if (Config::getBool("enable-preprocessing") && parser->needsPreprocessing(extension)) {
       BufStr inBuf(fi.size() + 4096);
       msg("Preprocessing %s\n", fileName.constData());
 
@@ -9120,16 +9138,14 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
 {
 
 #if USE_LIBCLANG
-   static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
+   static bool clangParsing = Config::getBool("clang-parsing");
 
-   if (clangAssistedParsing) {
-      QHash<QString, void *> processedFiles;
-
-      // create a dictionary with files to process
-      QHash<QString, void *> filesToProcess;
+   if (clangParsing) {
+      QSet<QString> processedFiles;      
+      QSet<QString> filesToProcess;
       
       for (auto s : Doxy_Globals::g_inputFiles) { 
-         filesToProcess.insert(s, (void *)0x8);
+         filesToProcess.insert(s);
       }
 
       // process source files (and their include dependencies)
@@ -9164,13 +9180,13 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
                      QStringList moreFiles;
                      
                      parseFile(parser, root, rootNav, ifd, qPrintable(incFile), true, moreFiles);
-                     processedFiles.insert(incFile, (void *)0x8);
+                     processedFiles.insert(incFile);
                   }
                }               
             }
 
             parser->finishTranslationUnit();
-            processedFiles.insert(s, (void *)0x8);
+            processedFiles.insert(s);
          }
       }
 
@@ -9191,7 +9207,7 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
             parseFile(parser, root, rootNav, fd, s.toUtf8(), false, filesInSameTu);
             parser->finishTranslationUnit();
 
-            processedFiles.insert(s, (void *)0x8);
+            processedFiles.insert(s);
          }
       }
 
@@ -9220,18 +9236,18 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
 
 // resolves a path that may include symlinks, if a recursive symlink is
 // found an empty string is returned.
-QByteArray Doxy_Work::resolveSymlink(QByteArray path)
+QString  Doxy_Work::resolveSymlink(QString  path)
 {
    int sepPos = 0;
    int oldPos = 0;
 
    QFileInfo fi;
 
-   QHash<QString, void *> nonSymlinks;
-   QHash<QString, void *> known;
+   QSet<QString> nonSymlinks;
+   QSet<QString> known;
 
-   QByteArray result = path;
-   QByteArray oldPrefix = "/";
+   QString result = path;
+   QString oldPrefix = "/";
 
    do {
 
@@ -9247,9 +9263,10 @@ QByteArray Doxy_Work::resolveSymlink(QByteArray path)
       }
 #else
       sepPos = result.indexOf('/', sepPos + 1);
+
 #endif
 
-      QByteArray prefix = sepPos == -1 ? result : result.left(sepPos);
+      QString prefix = sepPos == -1 ? result : result.left(sepPos);
 
       if (! nonSymlinks.contains(prefix)) {
          fi.setFile(prefix);
@@ -9273,30 +9290,32 @@ QByteArray Doxy_Work::resolveSymlink(QByteArray path)
             sepPos = 0;
 
             if (known.contains(result)) {
-               return QByteArray();   // recursive symlink
+               // recursive symlink
+               return QByteArray();  
             }
 
-            known.insert(result, (void *)0x8);
+            known.insert(result);
 
             if (isRelative) {
                sepPos = oldPos;
 
             } else { 
                // link to absolute path
-               sepPos = 0;
+               sepPos    = 0;
                oldPrefix = "/";
             }
 
          } else {
-            nonSymlinks.insert(prefix, (void *)0x8);
+            nonSymlinks.insert(prefix);
             oldPrefix = prefix;
          }
+
          oldPos = sepPos;
       }
 
    } while (sepPos != -1);
 
-   return QDir::cleanPath(result).toUtf8();
+   return QDir::cleanPath(result);
 }
 
 void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const char *tl)
@@ -9335,47 +9354,40 @@ void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const char *tl)
    parseTagFile(root, fi.absoluteFilePath().toUtf8());
 }
 
-QByteArray Doxy_Work::createOutputDirectory(const QString &baseDirName, const char *formatDirOption, const char *defaultDirName)
-{
-   // Note the & on the next line, we modify the formatDirOption
-   QString &formatDirName = Config_getString(formatDirOption);
+QString Doxy_Work::createOutputDirectory(const QString &baseDirName, const QString &formatDirOption, const QString &defaultDirName)
+{   
+   QString formatDirName = Config::getString(formatDirOption);
 
    if (formatDirName.isEmpty()) {
       formatDirName = baseDirName + defaultDirName;
 
-   } else if (formatDirName[0] != '/' && (formatDirName.length() == 1 || formatDirName[1] != ':')) {
+   } else if (formatDirName.at(0) != '/' && (formatDirName.length() == 1 || formatDirName[1] != ':')) {
       formatDirName.prepend(baseDirName + '/');
    }
 
    QDir formatDir(formatDirName);
-   if (! formatDir.exists() && !formatDir.mkdir(formatDirName)) {
-      err("Could not create output directory %s\n", formatDirName.data());
 
-      shutDownDoxypress();
+   if (! formatDir.exists() && ! formatDir.mkdir(formatDirName)) {  
+      err("Unable to create output directory %s", qPrintable(formatDirName));  
       exit(1);
    }
 
-   return formatDirName.toUtf8();
+   return formatDirName;
 }
 
+// read all files matching at least one pattern in `patList' in the directory represented by `fi'
+// directory is read if the recusiveFlag is set, contents of all files is append to the input string
 
-// Read all files matching at least one pattern in `patList' in the
-// directory represented by `fi'.
-// The directory is read iff the recusiveFlag is set.
-// The contents of all files is append to the input string
-
-int Doxy_Work::readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict  *exclDict,
-            QStringList *patList, QStringList *exclPatList, QStringList *resultList, StringDict *resultDict,
-            bool errorIfNotExist, bool recursive, QHash<QString, void *> *killDict, QHash<QString, void *> *paths)
+int Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
 {
-   QByteArray dirName = fi->absoluteFilePath().toUtf8();
+   QString dirName = fi.absoluteFilePath();
 
-   if (paths && ! paths->contains(dirName)) {
-      paths->insert(dirName, (void *)0x8);
+   if (data.isPathSet && ! data.pathSet.contains(dirName)) {
+      data.pathSet.insert(dirName);
    }
 
-   if (fi->isSymLink()) {
-      dirName = resolveSymlink(dirName.data());
+   if (fi.isSymLink()) {
+      dirName = resolveSymlink(dirName);
 
       if (dirName.isEmpty()) {
          return 0;   // recusive symlink
@@ -9389,10 +9401,10 @@ int Doxy_Work::readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDi
    }
 
    QDir dir(dirName);
-   dir.setFilter( QDir::Files | QDir::Dirs | QDir::Hidden );
+   dir.setFilter(QDir::Files | QDir::Dirs | QDir::Hidden);
 
    int totalSize = 0;
-   msg("Searching for files in directory %s\n", qPrintable(fi->absoluteFilePath()) );
+   msg("Searching for files in directory %s\n", qPrintable(fi.absoluteFilePath()) );
 
    const QFileInfoList list = dir.entryInfoList();
 
@@ -9400,68 +9412,82 @@ int Doxy_Work::readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDi
 
       auto &cfi = const_cast<QFileInfo &>(item);
 
-      if (exclDict == 0 || ! exclDict->contains(cfi.absoluteFilePath().toUtf8())) {
+      QString filePath = cfi.absoluteFilePath();
+
+      if (! data.excludeSet.contains(filePath)) {
          // file should not be excluded
 
          if (! cfi.exists() || ! cfi.isReadable()) {
-            if (errorIfNotExist) {
-               warn_uncond("Source %s is not a readable file or directory\n", qPrintable(cfi.absoluteFilePath()));
+
+            if (data.errorIfNotExist) {
+               warn_uncond("Source %s is not a readable file or directory\n", qPrintable(filePath));
             }
 
-         } else if (cfi.isFile() && (! Config::getBool("exclude-symlinks") || ! cfi.isSymLink()) &&
-                    (patList == nullptr || patternMatch(cfi, *patList)) && ! (exclPatList != nullptr && patternMatch(cfi, *exclPatList)) &&
-                    (killDict == 0 || ! killDict->contains(cfi.absoluteFilePath().toUtf8())) ) {
+         } else {
+            bool excludeSymlink = Config::getBool("exclude-symlinks");
 
-            totalSize += cfi.size() + cfi.absoluteFilePath().length() + 4;
-            QByteArray name = cfi.fileName().toUtf8();
+            if (excludeSymlink && cfi.isSymLink())  {
+               continue;
+            }              
 
-            if (fnDict) {
-               QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8() + "/", name);
-               QSharedPointer<FileName> fn;
+            if (cfi.isFile()) {
 
-               if (! name.isEmpty() && (fn = (*fnDict)[name])) {
-                  fn->append(fd);
-
-               } else {
-                  fn = QSharedPointer<FileName>(new FileName(cfi.absoluteFilePath().toUtf8(), name));
-                  fn->append(fd);
-
-                  if (fnList) {
-                     fnList->inSort(fn.data());
+               bool testA = (data.patternList.isEmpty() || patternMatch(cfi, data.patternList));                
+               bool testB = (! patternMatch(cfi, data.excludePatternList));
+               
+               if (testA && testB && ! data.killDict.contains(filePath) ) {
+                           
+                  totalSize += cfi.size() + filePath.length() + 4;
+                  QByteArray name = cfi.fileName().toUtf8();
+      
+                  if (data.isFnDict) {
+                     QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8() + "/", name);
+                     QSharedPointer<FileName> fn;
+      
+                     if (! name.isEmpty() && (fn = data.fnDict[name])) {
+                        fn->append(fd);
+      
+                     } else {
+                        fn = QMakeShared<FileName>(filePath.toUtf8(), name);
+                        fn->append(fd);
+      
+                        if (data.isFnList) {
+                           data.fnList.inSort(fn);
+                        }
+      
+                        data.fnDict.insert(name, fn);
+                     }
+                  }                  
+      
+                  if (data.isResultList) {                
+                     data.resultList.append(filePath);                                
                   }
+      
+                  if (data.isPrepExclude) {      
+                     data.prepExcludeSet.insert(filePath);
+                  }
+      
+                  if (data.isKillDict) {         
+                     data.killDict.insert(filePath);                  
+                  }     
 
-                  fnDict->insert(name, fn);
+            } else if (cfi.isDir() && data.recursive) {
+
+               if (cfi.fileName().at(0) == '.') {
+                  continue;
+               }
+
+               if (patternMatch(cfi, data.excludePatternList) ) {
+                  continue;
+               }   
+
+               cfi.setFile(filePath);
+               totalSize += readDir(cfi, data);
+
                }
             }
-
-            QByteArray rs;
-
-            if (resultList || resultDict) {
-               rs = cfi.absoluteFilePath().toUtf8();
-            }
-
-            if (resultList) {
-               resultList->append(rs);
-            }
-
-            if (resultDict) {
-               resultDict->insert(cfi.absoluteFilePath().toUtf8(), rs);
-            }
-
-            if (killDict) {
-               killDict->insert(cfi.absoluteFilePath().toUtf8(), (void *)0x8);
-            }
-
-         } else if (recursive && (! Config::getBool("exclude-symlinks") || ! cfi.isSymLink()) &&
-                    cfi.isDir() && ! (exclPatList != nullptr && patternMatch(cfi, *exclPatList)) && cfi.fileName().at(0) != '.') {
-
-            cfi.setFile(cfi.absoluteFilePath());
-
-            totalSize += readDir(&cfi, fnList, fnDict, exclDict, patList, exclPatList, resultList,
-                                 resultDict, errorIfNotExist, recursive, killDict, paths);
          }
       }
-
    }
  
    return totalSize;
@@ -9470,84 +9496,75 @@ int Doxy_Work::readDir(QFileInfo *fi, SortedList<FileName *> *fnList, FileNameDi
 // read a file or all files in a directory and append their contents to the
 // input string. The names of the files are appended to the `fiList' list.
 
-int Doxy_Work::readFileOrDirectory(const QString &s, SortedList<FileName *> *fnList, FileNameDict *fnDict, StringDict *exclDict,
-                        QStringList *patList, QStringList *exclPatList, QStringList *resultList, StringDict *resultDict,
-                        bool recursive, bool errorIfNotExist, QHash<QString, void *> *killDict, QHash<QString, void *> *paths)
+int Doxy_Work::readFileOrDirectory(const QString &fn, ReadDirArgs &data)
 {
    // strip trailing slashes
-   if (s.isEmpty()) {
+   if (fn.isEmpty()) {
       return 0;
-   }
+   } 
 
-   QString fs = s;
+   QString fileName = fn;
   
-   if (fs.endsWith('/') || fs.endsWith('\\')) {
-      fs = fs.left(fs.length() - 1);
+   if (fileName.endsWith('/') || fileName.endsWith('\\')) {
+      fileName = fileName.left(fileName.length() - 1);
    }
 
-   QFileInfo fi(fs);
+   QFileInfo fi(fileName);
    int totalSize = 0;
+
+   QString dirPath  = fi.absolutePath();
+   QString filePath = fi.absoluteFilePath();
+   QString name     = fi.fileName();
    
-   if (exclDict == 0 || ! exclDict->contains(fi.absoluteFilePath().toUtf8())) {
+   if (! data.excludeSet.contains(filePath)) {
 
       if (! fi.exists() || ! fi.isReadable()) {
-         if (errorIfNotExist) {
-            warn_uncond("Source %s is not a readable file or directory\n", qPrintable(s));
+         if (data.errorIfNotExist) {
+            warn_uncond("Source %s is not a readable file or directory\n", qPrintable(fileName));
          }
 
-      } else if (! Config_getBool("EXCLUDE_SYMLINKS") || ! fi.isSymLink()) {
+      } else if (! Config::getBool("exclude-symlinks") || ! fi.isSymLink()) {
 
-         if (fi.isFile()) {
-            QString dirPath  = fi.absolutePath();
-            QString filePath = fi.absoluteFilePath();
-
-            if (paths->contains(dirPath)) {
-               paths->insert(dirPath, (void *)0x8);
-            }
+         if (fi.isFile()) {          
             
-            if (killDict == 0 || ! killDict->contains(filePath)) {
-               totalSize += fi.size() + fi.absoluteFilePath().length() + 4;
-
-               QString name = fi.fileName();
-
-               if (fnDict) {
+            if (! data.killDict.contains(filePath)) {
+               totalSize += fi.size() + filePath.length() + 4;
+             
+               if (data.isFnDict) {
                   QSharedPointer<FileDef> fd = QMakeShared<FileDef>(qPrintable(dirPath + "/"), qPrintable(name));
                   QSharedPointer<FileName> fn;
 
-                  if (! name.isEmpty() && (fn = (*fnDict)[name])) {
+                  if (! name.isEmpty() && (fn = data.fnDict[name])) {
                      fn->append(fd);
 
                   } else {
-                     fn = QSharedPointer<FileName>(new FileName(qPrintable(filePath), qPrintable(name)));
+                     fn = QMakeShared<FileName>(qPrintable(filePath), qPrintable(name));
                      fn->append(fd);
 
-                     if (fnList) {
-                        fnList->inSort(fn.data());
+                     if (data.isFnList) {
+                        data.fnList.inSort(fn);
                      }
 
-                     fnDict->insert(name, fn);
+                     data.fnDict.insert(name, fn);
                   }
                }
-            
-               if (resultList || resultDict) {
-                
-                  if (resultList) {
-                     resultList->append(filePath);
-                  }
-
-                  if (resultDict) {
-                     resultDict->insert(filePath, filePath.toUtf8());
-                  }
+                        
+               if (data.isResultList) {                
+                  data.resultList.append(filePath);                                
                }
 
-               if (killDict) {
-                  killDict->insert(fi.absoluteFilePath().toUtf8(), (void *)0x8);
+               if (data.isPrepExclude) {      
+                  data.prepExcludeSet.insert(filePath);
                }
+
+               if (data.isKillDict) {         
+                  data.killDict.insert(filePath);                  
+               }                        
             }
 
-         } else if (fi.isDir()) { // readable dir
-            totalSize += readDir(&fi, fnList, fnDict, exclDict, patList, exclPatList, resultList, resultDict, 
-                                 errorIfNotExist, recursive, killDict, paths);
+         } else if (fi.isDir()) { 
+            // readable dir
+            totalSize += readDir(fi, data);
          }
       }
    }
@@ -9557,7 +9574,7 @@ int Doxy_Work::readFileOrDirectory(const QString &s, SortedList<FileName *> *fnL
 
 void readFormulaRepository()
 {
-   QFile f(Config_getString("HTML_OUTPUT") + "/formula.repository");
+   QFile f(Config::getString("html-output") + "/formula.repository");
 
    if (f.open(QIODevice::ReadOnly)) { 
       // open repository
@@ -9632,7 +9649,7 @@ void Doxy_Work::escapeAliases()
 void readAliases()
 {
    // add aliases to a dictionary
-   QStringList &aliasList = Config_getList("ALIASES");
+   const QStringList aliasList = Config::getList("aliases");
 
    for (auto alias : aliasList) {
 
@@ -9667,7 +9684,7 @@ void Doxy_Work::dumpSymbol(QTextStream &t, QSharedPointer<Definition> d)
    QByteArray scope;
 
    if (d->getOuterScope() && d->getOuterScope() != Doxygen::globalScope) {
-      scope = d->getOuterScope()->getOutputFileBase() + Doxygen::htmlFileExtension;
+      scope = d->getOuterScope()->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8();
    }
 
    t << "REPLACE INTO symbols (symbol_id,scope_id,name,file,line) VALUES('"
@@ -9729,16 +9746,16 @@ void Doxy_Work::stopDoxygen(int)
 
 void Doxy_Work::writeTagFile()
 {
-   QByteArray &generateTagFile = Config_getString("GENERATE_TAGFILE");
+   const QString generateTagFile = Config::getString("generate-tagfile");
+
    if (generateTagFile.isEmpty()) {
       return;
    }
 
    QFile tag(generateTagFile);
-   if (!tag.open(QIODevice::WriteOnly)) {
-      err("cannot open tag file %s for writing\n",
-          generateTagFile.data()
-         );
+
+   if (! tag.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(generateTagFile), tag.error());
       return;
    }
 
@@ -9778,7 +9795,7 @@ void Doxy_Work::writeTagFile()
    }
 
    /*
-   if (Doxygen::mainPage && !Config_getString("GENERATE_TAGFILE").isEmpty())
+   if (Doxygen::mainPage && ! Config::getString("generate-tagfile").isEmpty())
    {
      tagFile << "  <compound kind=\"page\">" << endl
                       << "    <name>"
@@ -9799,104 +9816,181 @@ void Doxy_Work::writeTagFile()
    tagFile << "</tagfile>" << endl;
 }
 
-QByteArray Doxy_Work::getQchFileName()
+QString Doxy_Work::getQchFileName()
 {
-   QByteArray const &qchFile = Config_getString("QCH_FILE");
+   const QString qchFile = Config::getString("qch-file");
 
    if (! qchFile.isEmpty()) {
       return qchFile;
    }
 
-   QByteArray const &projectName = Config_getString("PROJECT_NAME");
-   QByteArray const &versionText = Config_getString("PROJECT_NUMBER");
+   QString projectName    = Config::getString("project-name");
+   QString projectVersion = Config::getString("project-version");
 
-   return QByteArray("../qch/")
-          + (projectName.isEmpty() ? QByteArray("index") : projectName)
-          + (versionText.isEmpty() ? QByteArray("") : QByteArray("-") + versionText)
-          + QByteArray(".qch");
+   if (projectName.isEmpty()) {
+      projectName = "index";
+   }
+
+   if (! projectVersion.isEmpty()) {
+      projectVersion = "-" + projectVersion; 
+   }
+
+   QString retval = "../qch/" + projectName + projectVersion + ".qch";
+
+   return retval;
 }
 
 void searchInputFiles()
-{
-   QStringList &exclPatterns = Config_getList("EXCLUDE_PATTERNS");
-   bool alwaysRecursive = Config_getBool("RECURSIVE");
-   StringDict excludeNameDict;
-
-   // gather names of all files in the include path
+{     
+   // ** gather names of all files in the include path
    Doxy_Globals::g_stats.begin("Searching for include files\n");
-   QStringList &includePathList = Config_getList("INCLUDE_PATH");
 
-   for (auto s : includePathList) {
-      QStringList &pl = Config_getList("INCLUDE_FILE_PATTERNS");
+   QSet<QString> local_excludeSet;
 
-      if (pl.count() == 0) {
-         pl = Config_getList("FILE_PATTERNS");
-      }
+   bool alwaysRecursive = Config::getBool("source-recursive");
+   const QStringList includePathList = Config::getList("include-path");
+   const QStringList excludePatterns = Config::getList("exclude-patterns");
 
-      readFileOrDirectory(s, 0, Doxygen::includeNameDict, 0, &pl, &exclPatterns, 0, 0, alwaysRecursive);
+   //
+   QStringList includePatterns = Config::getList("include-file-patterns"); 
+
+   if (includePatterns.isEmpty()) {
+      includePatterns = Config::getList("file-patterns");
+   }
+
+   for (auto s : includePathList) {    
+      ReadDirArgs data;
+
+      data.recursive          = alwaysRecursive;         
+      data.isFnDict           = true;
+      data.fnDict             = *Doxygen::includeNameDict;
+      data.patternList        = includePatterns;
+      data.excludePatternList = excludePatterns;
+
+      readFileOrDirectory(s, data);
+
+      *Doxygen::includeNameDict = data.fnDict;
    }
    Doxy_Globals::g_stats.end();
 
-   //
+
+   // **
    Doxy_Globals::g_stats.begin("Searching for example files\n");
-   QStringList &examplePathList = Config_getList("EXAMPLE_PATH");
+   const QStringList examplePathList = Config::getList("example-path");
 
-   for (auto s : examplePathList) {
-      readFileOrDirectory(s, 0, Doxygen::exampleNameDict, 0, &Config_getList("EXAMPLE_PATTERNS"),
-                          0, 0, 0, (alwaysRecursive || Config_getBool("EXAMPLE_RECURSIVE")));
+   const QStringList tempList = Config::getList("example-patterns");
+   bool exampleRecursive      = Config::getBool("example-recursive");
+
+   for (auto s : examplePathList) {     
+      ReadDirArgs data;
+
+      data.recursive   = (alwaysRecursive || exampleRecursive);
+      data.isFnDict    = true;
+      data.fnDict      = *Doxygen::exampleNameDict;
+      data.patternList = tempList;
+ 
+      readFileOrDirectory(s, data);
+
+      *Doxygen::exampleNameDict = data.fnDict;
+
    }
    Doxy_Globals::g_stats.end();
 
-   //
-   Doxy_Globals::g_stats.begin("Searching for images\n");
 
-   QStringList &imagePathList = Config_getList("IMAGE_PATH");
+   // **
+   Doxy_Globals::g_stats.begin("Searching for images\n");
+   const QStringList imagePathList = Config::getList("image-path");
 
    for (auto s : imagePathList) {
-      readFileOrDirectory(s, 0, Doxygen::imageNameDict, 0, 0, 0, 0, 0, alwaysRecursive);
+      ReadDirArgs data;
+
+      data.recursive   = alwaysRecursive;
+      data.isFnDict    = true;
+      data.fnDict      = *Doxygen::imageNameDict;
+
+      readFileOrDirectory(s, data);
+
+      *Doxygen::imageNameDict = data.fnDict;
    }
    Doxy_Globals::g_stats.end();
 
-   //
+   // **
    Doxy_Globals::g_stats.begin("Searching for dot files\n");
-   QStringList &dotFileList = Config_getList("DOTFILE_DIRS");
+   const QStringList dotFileList = Config::getList("dot-file-dirs");
 
    for (auto s : dotFileList) {
-      readFileOrDirectory(s, 0, Doxygen::dotFileNameDict, 0, 0, 0, 0, 0, alwaysRecursive);
+      ReadDirArgs data;
+
+      data.recursive   = alwaysRecursive;
+      data.isFnDict    = true;
+      data.fnDict      = *Doxygen::dotFileNameDict;
+
+      readFileOrDirectory(s, data);
+
+      *Doxygen::dotFileNameDict = data.fnDict;
    }
    Doxy_Globals::g_stats.end();
 
    //
    Doxy_Globals::g_stats.begin("Searching for msc files\n");
-   QStringList &mscFileList = Config_getList("MSCFILE_DIRS");
+   const QStringList mscFileList = Config::getList("msc-file-dirs");
 
    for (auto s : mscFileList) {
-      readFileOrDirectory(s, 0, Doxygen::mscFileNameDict, 0, 0, 0, 0, 0, alwaysRecursive);
+      ReadDirArgs data;
+
+      data.recursive   = alwaysRecursive;
+      data.isFnDict    = true;
+      data.fnDict      = *Doxygen::mscFileNameDict;
+
+      readFileOrDirectory(s, data);
+
+      *Doxygen::mscFileNameDict = data.fnDict;
    }
    Doxy_Globals::g_stats.end();
 
    //
    Doxy_Globals::g_stats.begin("Searching for dia files\n");
-   QStringList &diaFileList = Config_getList("DIAFILE_DIRS");
+   const QStringList diaFileList = Config::getList("dia-file-dirs");
 
    for (auto s : diaFileList) {
-      readFileOrDirectory(s, 0, Doxygen::diaFileNameDict, 0, 0, 0, 0, 0, alwaysRecursive);
+      ReadDirArgs data;
+
+      data.recursive   = alwaysRecursive;
+      data.isFnDict    = true;
+      data.fnDict      = *Doxygen::diaFileNameDict;
+    
+      readFileOrDirectory(s, data);
+
+      *Doxygen::diaFileNameDict = data.fnDict;
    }
    Doxy_Globals::g_stats.end();
 
    Doxy_Globals::g_stats.begin("Searching for files to exclude\n");
-   QStringList &excludeList = Config_getList("EXCLUDE");
+   const QStringList excludeList  = Config::getList("exclude");
+   const QStringList filePatterns = Config::getList("file-patterns");
 
-   for (auto s : excludeList) {
-      readFileOrDirectory(s, 0, 0, 0, &Config_getList("FILE_PATTERNS"), 0, 0, &excludeNameDict, alwaysRecursive, false);
+   for (auto s : excludeList) {   
+      ReadDirArgs data;
+
+      data.recursive       = alwaysRecursive;
+      data.errorIfNotExist = false;
+      data.patternList     = filePatterns;
+      data.isPrepExclude   = true;
+      data.prepExcludeSet  = local_excludeSet;
+            
+      readFileOrDirectory(s, data);  
+
+      local_excludeSet = data.prepExcludeSet;  
    }
    Doxy_Globals::g_stats.end();
 
-   // Determine Input Files
+
+   // ** Determine Input Files
    Doxy_Globals::g_stats.begin("Searching for files to process\n");
 
-   QHash<QString, void *> killDict;
-   QStringList &inputList = Config_getList("INPUT");
+   QSet<QString> killDict;
+
+   QStringList inputList = Config::getList("input-source");
 
    for (auto s : inputList) {
       QByteArray path = s.toUtf8();
@@ -9908,9 +10002,30 @@ void searchInputFiles()
             path = path.left(len - 1);
          }
 
-         readFileOrDirectory(path, Doxygen::inputNameList, Doxygen::inputNameDict, &excludeNameDict,
-            &Config_getList("FILE_PATTERNS"), &exclPatterns, &Doxy_Globals::g_inputFiles, 0,
-            alwaysRecursive, true, &killDict, &Doxygen::inputPaths);
+         ReadDirArgs data;       
+
+         data.recursive          = true;         
+         data.isFnList           = true;
+         data.fnList             = *Doxygen::inputNameList;
+         data.isFnDict           = true;
+         data.fnDict             = *Doxygen::inputNameDict;
+         data.excludeSet         = local_excludeSet;
+         data.patternList        = filePatterns;
+         data.excludePatternList = excludePatterns;
+         data.isResultList       = true;
+         data.resultList         = Doxy_Globals::g_inputFiles;       
+         data.isKillDict         = true;
+         data.killDict           = killDict;
+         data.isPathSet          = true;
+         data.pathSet            = Doxygen::inputPaths;
+
+         readFileOrDirectory(path, data);              
+
+         *Doxygen::inputNameList    = data.fnList;
+         *Doxygen::inputNameDict    = data.fnDict;
+         Doxy_Globals::g_inputFiles = data.resultList;          
+         killDict                   = data.killDict;
+         Doxygen::inputPaths        = data.pathSet;   
       }
    }
 

@@ -125,7 +125,7 @@ void initDoxyPress()
    initNamespaceMemberIndices();
    initFileMemberIndices();
  
-   Doxygen::inputNameList     = new SortedList<FileName *>;
+   Doxygen::inputNameList     = new SortedList<QSharedPointer<FileName>>;
 
    Doxygen::memberNameSDict   = new MemberNameSDict();
    Doxygen::functionNameSDict = new MemberNameSDict();
@@ -167,6 +167,13 @@ void initDoxyPress()
 
 void shutDownDoxypress()
 {
+   finializeSearchIndexer();
+   Doxygen::symbolStorage->close();
+
+   QDir thisDir;
+   thisDir.remove(Doxygen::objDBFileName);
+
+   //
    delete Doxygen::sectionDict;
    delete Doxygen::formulaNameDict;
    delete Doxygen::formulaDict;
@@ -200,6 +207,8 @@ void shutDownDoxypress()
    delete Doxygen::classSDict;
    delete Doxygen::hiddenClasses;
    delete Doxygen::namespaceSDict;   
+
+   delete Doxygen::symbolStorage;
 }
 
 // **
@@ -243,10 +252,8 @@ struct CommandLine parseCommandLine(QStringList argList)
 
          case INVALID:
             msg("\n");
-            err("Option %s is invalid\n", qPrintable(item)); 
-
-            shutDownDoxypress();
-            exit(0);                  
+            err("Option %s is invalid\n", qPrintable(item));             
+            exit(1);                  
        
          case BLANK_LAYOUT:
             cmdArgs.genLayout = true;
@@ -263,9 +270,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             cmdArgs.formatName = getValue(iter, argList.end());
 
             if (cmdArgs.formatName.isEmpty()) {
-               err("Option \"-w\" is missing format specifier rtf, html or latex\n");
-
-               shutDownDoxypress();
+               err("Option \"-w\" is missing format specifier rtf, html or latex\n");               
                exit(1);
             }
 
@@ -383,9 +388,7 @@ struct CommandLine parseCommandLine(QStringList argList)
 
 
             } else  {
-               err("Option \"-w %s\" is invalid\n", qPrintable(cmdArgs.formatName));
-
-               shutDownDoxypress();
+               err("Option \"-w %s\" is invalid\n", qPrintable(cmdArgs.formatName));               
                exit(1);
 
             }
@@ -397,16 +400,12 @@ struct CommandLine parseCommandLine(QStringList argList)
             cmdArgs.debugLabel = getValue(iter, argList.end());
 
             if (cmdArgs.debugLabel.isEmpty() ) {
-               err("Option \"-d\" is missing a debug specifier.\n");                        
-
-               shutDownDoxypress();
+               err("Option \"-d\" is missing a debug specifier.\n");                       
                exit(1);
             }
            
             if (! Debug::setFlag(cmdArgs.debugLabel)) {
                err("Option \"-d\" has an unknown debug specifier: \"%s\".\n", qPrintable(cmdArgs.debugLabel));
-
-               shutDownDoxypress();
                exit(1);
             }
 
@@ -417,9 +416,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             break;
           
          case DOXY_VERSION:
-            msg("\nDoxyPress Version: %s\n", versionString);
-
-            shutDownDoxypress();
+            msg("\nDoxyPress Version: %s\n", versionString);            
             exit(0);
                   
          case OUTPUT_APP:
@@ -430,8 +427,6 @@ struct CommandLine parseCommandLine(QStringList argList)
 
          case HELP:       
             usage();
-
-            shutDownDoxypress();
             exit(0);                    
       }      
    }
@@ -450,8 +445,7 @@ void readConfiguration(struct CommandLine cmdArgs)
       writeDefaultLayoutFile(cmdArgs.layoutName);      
    }
 
-   if (! cmdArgs.generateDoxy) {      
-      shutDownDoxypress();
+   if (! cmdArgs.generateDoxy) {            
       exit(0);      
    }
 
@@ -466,9 +460,7 @@ void readConfiguration(struct CommandLine cmdArgs)
       }
      
       if (cmdArgs.configName.isEmpty()) {
-         err("No project configuration file name was specified and 'doxypress.json' was not found"); 
-
-         shutDownDoxypress();
+         err("No project configuration file name was specified and 'doxypress.json' was not found");          
          exit(1);
       }        
    }  
@@ -476,17 +468,13 @@ void readConfiguration(struct CommandLine cmdArgs)
    QFileInfo fi(cmdArgs.configName);
 
    if (! fi.exists()) {  
-      err("Project configuration file %s was not found\n", qPrintable(cmdArgs.configName));
-
-      shutDownDoxypress();
+      err("Project configuration file %s was not found\n", qPrintable(cmdArgs.configName));      
       exit(1);
    }
   
    // step 1 
    if (! Config::parseConfig(cmdArgs.configName) ) {
       err("Unable to open or read project configuration file %s\n", qPrintable(cmdArgs.configName));
-
-      shutDownDoxypress();
       exit(1);
    }
        

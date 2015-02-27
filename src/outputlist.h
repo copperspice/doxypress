@@ -762,7 +762,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::addWord, word, hiPriority);
    }
 
-   void startPlainFile(const char *name) {
+   void startPlainFile(const QString &name) {
       for (auto item : m_outputs) {
          if (item->isEnabled()) {
             (item->startPlainFile)(name);

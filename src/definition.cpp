@@ -142,10 +142,11 @@ void DefinitionImpl::init(const char *df, const char *n)
 
 static bool matchExcludedSymbols(const char *name)
 {
-   static QStringList &exclSyms = Config_getList("EXCLUDE_SYMBOLS");
+   static const QStringList exclSyms = Config::getList("exclude-symbols");
 
    if (exclSyms.count() == 0) {
-      return false;   // nothing specified
+      // nothing specified
+      return false;   
    }
 
    QByteArray symName = name;
@@ -153,13 +154,14 @@ static bool matchExcludedSymbols(const char *name)
    for (auto item : exclSyms) { 
 
       QString pat = item; 
-      QByteArray pattern = pat.toLatin1();
+      QByteArray pattern = pat.toUtf8();
 
       bool forceStart = false;
       bool forceEnd   = false;
 
-      if (pattern.at(0) == '^') {
-         pattern = pattern.mid(1), forceStart = true;
+      if (! pattern.isEmpty() && pattern.at(0) == '^') {
+         pattern = pattern.mid(1);
+         forceStart = true;
       }
 
       if (pattern.at(pattern.length() - 1) == '$') {
@@ -171,7 +173,7 @@ static bool matchExcludedSymbols(const char *name)
          QRegExp re(substitute(pattern, "*", ".*"), Qt::CaseSensitive);
 
          int i, pl;
-         i = re.indexIn(symName, 0);
+         i  = re.indexIn(symName, 0);
          pl = re.matchedLength();
 
          if (i != -1) { 
@@ -565,8 +567,8 @@ static bool lastCharIsMultibyte(const QByteArray &s)
 
 void Definition::_setBriefDescription(const char *b, const char *briefFile, int briefLine)
 {
-   static QByteArray outputLanguage = Config_getEnum("OUTPUT_LANGUAGE");
-   static bool needsDot = outputLanguage != "Japanese" && outputLanguage != "Chinese" && outputLanguage != "Korean";
+   static QString outputLanguage = Config::getEnum("output-language");
+   static bool needsDot = (outputLanguage != "Japanese" && outputLanguage != "Chinese" && outputLanguage != "Korean");
 
    QByteArray brief = b;
    brief = brief.trimmed();
@@ -576,8 +578,11 @@ void Definition::_setBriefDescription(const char *b, const char *briefFile, int 
    }
 
    int bl = brief.length();
-   if (bl > 0 && needsDot) { // add punctuation if needed
+
+   if (bl > 0 && needsDot) { 
+      // add punctuation if needed
       int c = brief.at(bl - 1);
+
       switch (c) {
          case '.':
          case '!':
@@ -586,8 +591,9 @@ void Definition::_setBriefDescription(const char *b, const char *briefFile, int 
          case ':':
          case ')':
             break;
+
          default:
-            if (uni_isupper(brief.at(0)) && !lastCharIsMultibyte(brief)) {
+            if (uni_isupper(brief.at(0)) && ! lastCharIsMultibyte(brief)) {
                brief += '.';
             }
             break;
@@ -663,8 +669,8 @@ void Definition::setInbodyDocumentation(const char *d, const char *inbodyFile, i
  */
 bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteArray &result)
 {
-   static bool filterSourceFiles = Config_getBool("FILTER_SOURCE_FILES");
-   static int tabSize = Config_getInt("TAB_SIZE");
+   static bool filterSourceFiles = Config::getBool("filter-source-files");
+   static int tabSize = Config::getInt("tab-size");
    
    if (fileName == 0 || fileName[0] == 0) {
       return false;   // not a valid file name
@@ -839,12 +845,14 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
 QByteArray Definition::getSourceFileBase() const
 {
    assert(definitionType() != Definition::TypeFile); // file overloads this method
+
    QByteArray fn;
-   static bool sourceBrowser = Config_getBool("SOURCE_BROWSER");
-   if (sourceBrowser &&
-         m_impl->body && m_impl->body->startLine != -1 && m_impl->body->fileDef) {
+   static bool sourceBrowser = Config::getBool("source-browser");
+
+   if (sourceBrowser && m_impl->body && m_impl->body->startLine != -1 && m_impl->body->fileDef) {
       fn = m_impl->body->fileDef->getSourceFileBase();
    }
+
    return fn;
 }
 
@@ -865,10 +873,9 @@ QByteArray Definition::getSourceAnchor() const
 /*! Write a reference to the source code defining this definition */
 void Definition::writeSourceDef(OutputList &ol, const char *)
 {
-   static bool latexSourceCode = Config_getBool("LATEX_SOURCE_CODE");
+   static bool latexSourceCode = Config::getBool("latex-source-code");
    ol.pushGeneratorState();
-   //printf("Definition::writeSourceRef %d %p\n",bodyLine,bodyDef);
-
+  
    QByteArray fn = getSourceFileBase();
 
    if (! fn.isEmpty()) {
@@ -1017,7 +1024,7 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
 {
    QSharedPointer<Definition> self = sharedFrom(this);
 
-   static bool inlineSources = Config_getBool("INLINE_SOURCES");
+   static bool inlineSources = Config::getBool("inline-sources");
    ol.pushGeneratorState();
    
    if (inlineSources && hasSources()) {
@@ -1063,9 +1070,9 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
 void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
                                      const QByteArray &text, MemberSDict *members, bool /*funcOnly*/)
 {
-   static bool latexSourceCode = Config_getBool("LATEX_SOURCE_CODE");
-   static bool sourceBrowser   = Config_getBool("SOURCE_BROWSER");
-   static bool refLinkSource   = Config_getBool("REFERENCES_LINK_SOURCE");
+   static bool latexSourceCode = Config::getBool("latex-source-code");
+   static bool sourceBrowser   = Config::getBool("source-browser");
+   static bool refLinkSource   = Config::getBool("ref-link-source");
 
    ol.pushGeneratorState();
 
@@ -1170,39 +1177,40 @@ void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
 
 void Definition::writeSourceReffedBy(OutputList &ol, const char *scopeName)
 {
-   if (Config_getBool("REFERENCED_BY_RELATION")) {
+   if (Config::getBool("ref-by-relation")) {
       _writeSourceRefList(ol, scopeName, theTranslator->trReferencedBy(), m_impl->sourceRefByDict, false);
    }
 }
 
 void Definition::writeSourceRefs(OutputList &ol, const char *scopeName)
 {
-   if (Config_getBool("REFERENCES_RELATION")) {
+   if (Config::getBool("ref-relation")) {
       _writeSourceRefList(ol, scopeName, theTranslator->trReferences(), m_impl->sourceRefsDict, true);
    }
 }
 
 bool Definition::hasDocumentation() const
 {
-   static bool extractAll    = Config_getBool("EXTRACT_ALL");
-   //static bool sourceBrowser = Config_getBool("SOURCE_BROWSER");
-   bool hasDocs =
-      (m_impl->details    && !m_impl->details->doc.isEmpty())    || // has detailed docs
-      (m_impl->brief      && !m_impl->brief->doc.isEmpty())      || // has brief description
-      (m_impl->inbodyDocs && !m_impl->inbodyDocs->doc.isEmpty()) || // has inbody docs
-      extractAll //||                   // extract everything
+   static bool extractAll    = Config::getBool("extract-all");
+   // static bool sourceBrowser = Config::getBool("source-browser");
+
+   bool hasDocs = (m_impl->details    && !m_impl->details->doc.isEmpty())    || 
+                  (m_impl->brief      && !m_impl->brief->doc.isEmpty())      ||
+                  (m_impl->inbodyDocs && !m_impl->inbodyDocs->doc.isEmpty()) ||  extractAll; 
+
+      //||      // extract everything
       //       (sourceBrowser && m_impl->body &&
       //        m_impl->body->startLine!=-1 && m_impl->body->fileDef)
-      ; // link to definition
+    
    return hasDocs;
 }
 
 bool Definition::hasUserDocumentation() const
 {
-   bool hasDocs =
-      (m_impl->details    && !m_impl->details->doc.isEmpty()) ||
-      (m_impl->brief      && !m_impl->brief->doc.isEmpty())   ||
-      (m_impl->inbodyDocs && !m_impl->inbodyDocs->doc.isEmpty());
+   bool hasDocs = (m_impl->details    && !m_impl->details->doc.isEmpty()) ||
+                  (m_impl->brief      && !m_impl->brief->doc.isEmpty())   ||
+                  (m_impl->inbodyDocs && !m_impl->inbodyDocs->doc.isEmpty());
+
    return hasDocs;
 }
 
@@ -1573,7 +1581,6 @@ static bool stripWord(QByteArray &s, QByteArray w)
    return success;
 }
 
-//----------------------------------------------------------------------------
 // some quasi intelligent brief description abbreviator :^)
 QByteArray abbreviate(const char *s, const char *name)
 {
@@ -1593,7 +1600,7 @@ QByteArray abbreviate(const char *s, const char *name)
    }
 
    // strip any predefined prefix
-   QStringList &briefDescAbbrev = Config_getList("ABBREVIATE_BRIEF");
+   const QStringList briefDescAbbrev = Config::getList("abbreviate-brief");
   
    for (auto s : briefDescAbbrev) {     
       s.replace(QRegExp("\\$name"), scopelessName);     
@@ -1797,8 +1804,7 @@ void Definition::setSymbolName(const QByteArray &name)
 
 bool Definition::hasBriefDescription() const
 {
-   static bool briefMemberDesc = Config_getBool("BRIEF_MEMBER_DESC");
+   static bool briefMemberDesc = Config::getBool("brief-member-desc");
    return ! briefDescription().isEmpty() && briefMemberDesc;
 }
-
 

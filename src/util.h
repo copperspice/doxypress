@@ -124,7 +124,7 @@ void linkifyText(const TextGeneratorIntf &ol, QSharedPointer<Definition> scope, 
 
 void setAnchors(QSharedPointer<MemberList> ml);
 
-QByteArray fileToString(const char *name, bool filter = false, bool isSourceCode = false);
+QByteArray fileToString(const QString &name, bool filter = false, bool isSourceCode = false);
 
 QString dateToString(bool);
 
@@ -240,11 +240,9 @@ QByteArray insertTemplateSpecifierInScope(const QByteArray &scope, const QByteAr
 
 QByteArray stripScope(const char *name);
 
-QByteArray convertToHtml(const char *s, bool keepEntities = true);
-
+QByteArray convertToHtml(const QString &s, bool keepEntities = true);
 QByteArray convertToXML(const QString &s);
-
-QByteArray convertToJSString(const char *s);
+QByteArray convertToJSString(const QString &s);
 
 QByteArray getOverloadDocs();
 
@@ -302,7 +300,7 @@ int computeQualifiedIndex(const QByteArray &name);
 
 void addDirPrefix(QByteArray &fileName);
 
-QByteArray relativePathToRoot(const char *name);
+QByteArray relativePathToRoot(const QString &name);
 
 void createSubDirs(QDir &d);
 
@@ -314,7 +312,7 @@ bool findAndRemoveWord(QByteArray &s, const QByteArray &word);
 
 QByteArray stripLeadingAndTrailingEmptyLines(const QByteArray &s, int &docLine);
 
-bool updateLanguageMapping(const QByteArray &extension, const QByteArray &parser);
+bool updateLanguageMapping(const QString &extension, const QString &parser);
 SrcLangExt getLanguageFromFileName(const QByteArray fileName);
 void initDefaultExtensionMapping();
 

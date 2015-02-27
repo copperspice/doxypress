@@ -2982,17 +2982,19 @@ static FileState *checkAndOpenFile(const QByteArray &fileName, bool &alreadyIncl
 
 static FileState *findFile(const char *fileName, bool localInclude, bool &alreadyIncluded)
 {
-   //printf("** findFile(%s,%d) g_yyFileName=%s\n",fileName,localInclude,g_yyFileName.data());
-   if (portable_isAbsolutePath(fileName)) {
+   if (QDir::isAbsolutePath(fileName)) {   
       FileState *fs = checkAndOpenFile(fileName, alreadyIncluded);
+
       if (fs) {
          setFileName(fileName);
          g_yyLineNr = 1;
          return fs;
+
       } else if (alreadyIncluded) {
          return 0;
       }
    }
+
    if (localInclude && !g_yyFileName.isEmpty()) {
       QFileInfo fi(g_yyFileName);
 
@@ -3769,7 +3771,7 @@ A_Define *newDefine()
    def->columnNr   = g_yyColNr;
    def->varArgs    = g_defVarArgs;
    
-   if (!def->name.isEmpty() && Doxygen::expandAsDefinedDict[def->name]) {
+   if (! def->name.isEmpty() && Doxygen::expandAsDefinedDict.contains(def->name)) {
       def->isPredefined = TRUE;
    }
 
@@ -3929,8 +3931,7 @@ static void readIncludeFile(const QByteArray &inc)
          if (Debug::isFlagSet(Debug::Preprocessor)) {
             for (i = 0; i < g_includeStack.count(); i++) {
                Debug::print(Debug::Preprocessor, 0, "  ");
-            }
-            //msg("#include %s: parsing...\n",incFileName.data());
+            }            
          }
 
          if (oldFileDef) {
@@ -3984,7 +3985,7 @@ static void readIncludeFile(const QByteArray &inc)
          preYY_switch_to_buffer(preYY_create_buffer(0, YY_BUF_SIZE));
 
       } else {
-         //printf("  calling findFile(%s) alreadyInc=%d\n",incFileName.data(),alreadyIncluded);
+       
          if (oldFileDef) {
             bool ambig;
             
@@ -7519,9 +7520,10 @@ static void unputChar(const QByteArray &expr, QByteArray *rest, uint &pos, char 
    //printf("result: unputChar(%s,%s,%d,%c)\n",expr.data(),rest ? rest->data() : 0,pos,c);
 }
 
-void addSearchDir(const char *dir)
+void addSearchDir(const QString &dir)
 {
    QFileInfo fi(dir);
+
    if (fi.isDir()) {
       g_pathList->append(fi.absoluteFilePath().toUtf8());
    }
@@ -7531,6 +7533,7 @@ void initPreprocessor()
 {
    g_pathList = new QStringList;
    addSearchDir(".");
+
    g_expandedDict = new DefineDict();
 }
 

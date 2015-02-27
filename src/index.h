@@ -42,9 +42,9 @@ class IndexIntf
    virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
                              const char *title) = 0;
 
-   virtual void addIndexFile(const char *name) = 0;
-   virtual void addImageFile(const char *name) = 0;
-   virtual void addStyleSheetFile(const char *name) = 0;
+   virtual void addIndexFile(const QString &name) = 0;
+   virtual void addImageFile(const QString &name) = 0;
+   virtual void addStyleSheetFile(const QString &name) = 0;
 };
 
 /** \brief A list of index interfaces.
@@ -134,21 +134,21 @@ class IndexList : public IndexIntf
       }
    }
 
-   void addIndexFile(const char *name) {
+   void addIndexFile(const QString &name)  override {
       if (m_enabled) {
-         call_forEach<const char *>(&IndexIntf::addIndexFile, name);
+         call_forEach<const QString &>(&IndexIntf::addIndexFile, name);
       }
    }
 
-   void addImageFile(const char *name) {
+   void addImageFile(const QString &name) override {
       if (m_enabled) {
-         call_forEach<const char *>(&IndexIntf::addImageFile, name);
+         call_forEach<const QString &>(&IndexIntf::addImageFile, name);
       }
    }
 
-   void addStyleSheetFile(const char *name) {
+   void addStyleSheetFile(const QString &name) override {
       if (m_enabled) {
-         call_forEach<const char *>(&IndexIntf::addStyleSheetFile, name);
+         call_forEach<const QString &>(&IndexIntf::addStyleSheetFile, name);
       }
    }
 

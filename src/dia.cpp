@@ -67,7 +67,7 @@ void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const Q
 
    portable_sysTimerStart();
 
-   if ((exitCode = portable_system(diaExe.toUtf8(), diaArgs.toUtf8(), false)) != 0) {
+   if ((exitCode = portable_system(diaExe, diaArgs, false)) != 0) {
       portable_sysTimerStop();
       ok = false;     
    }

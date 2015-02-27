@@ -41,7 +41,7 @@ class Formula
 class FormulaList : public QList<Formula>
 {
  public:
-   void generateBitmaps(const char *path);
+   void generateBitmaps(const QString &path);
 };
 
 /** Iterator for Formula objects in a FormulaList. */

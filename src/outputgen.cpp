@@ -26,40 +26,41 @@
 
 OutputGenerator::OutputGenerator()
 {
-   file   = 0;
-   active = true;   
+   m_filePtr = nullptr;
+   active    = true;   
 }
 
 OutputGenerator::~OutputGenerator()
 {
-   delete file;   
+   delete m_filePtr;   
 }
 
-void OutputGenerator::startPlainFile(const char *name)
+void OutputGenerator::startPlainFile(const QString &name)
 {
-   fileName = dir + "/" + name;
-   file = new QFile(fileName);
+   m_fileName = m_dir + "/" + name;
+   m_filePtr  = new QFile(m_fileName);
 
-   if (! file) {
-      err("Could not create file object for %s\n", fileName.data());
+   if (! m_filePtr) {
+      err("Unable to create file for %s\n", qPrintable(m_fileName));
       exit(1);
    }
 
-   if (! file->open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", fileName.data());
+   if (! m_filePtr->open(QIODevice::WriteOnly)) {   
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(m_fileName), m_filePtr->error());
       exit(1);
    }
 
-   m_textStream.setDevice(file);
+   m_textStream.setDevice(m_filePtr);
 }
 
 void OutputGenerator::endPlainFile()
 {
    m_textStream.setDevice(0);
-   delete file;
 
-   file = 0;
-   fileName.resize(0);
+   delete m_filePtr;      // broom check
+
+   m_filePtr  = nullptr;
+   m_fileName = "";
 }
 
 void OutputGenerator::pushGeneratorState()

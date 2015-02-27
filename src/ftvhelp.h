@@ -52,12 +52,11 @@ class FTVHelp : public IndexIntf
    void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
                         bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) override;
   
-   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *, 
-                     const char *) override {};
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *,  const char *) override {}
 
-   void addIndexFile(const char *) override {}
-   void addImageFile(const char *) override {}
-   void addStyleSheetFile(const char *) override {}
+   void addIndexFile(const QString &) override {}
+   void addImageFile(const QString &) override {}
+   void addStyleSheetFile(const QString &) override {}
 
    void generateTreeView();
    void generateTreeViewInline(QTextStream &t);

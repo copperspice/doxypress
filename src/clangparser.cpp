@@ -176,13 +176,14 @@ void ClangParser::determineInputFilesInSameTu(QStringList &files)
 
 void ClangParser::start(const char *fileName, QStringList &filesInTranslationUnit)
 {
-   static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
-   static QStringList &includePath = Config_getList("INCLUDE_PATH");
-   static QStringList clangOptions = Config_getList("CLANG_OPTIONS");
-   if (!clangAssistedParsing) {
+   static bool clangAssistedParsing = Config::getBool("clang-parsing");
+   static QStringList &includePath  = Config_getList("INCLUDE_PATH");
+   static QStringList clangOptions  = Config_getList("CLANG_OPTIONS");
+
+   if (! clangAssistedParsing) {
       return;
    }
-   //printf("ClangParser::start(%s)\n",fileName);
+  
    p->fileName = fileName;
    p->index    = clang_createIndex(0, 0);
    p->curLine  = 1;
@@ -192,21 +193,24 @@ void ClangParser::start(const char *fileName, QStringList &filesInTranslationUni
    QHashIterator<QString, void *> di(Doxygen::inputPaths);
 
    int argc = 0;
+
    // add include paths for input files
    for (di.toFirst(); di.current(); ++di, ++argc) {
       QByteArray inc = QByteArray("-I") + di.currentKey();
-      argv[argc] = strdup(inc.data());
-      //printf("argv[%d]=%s\n",argc,argv[argc]);
+      argv[argc] = strdup(inc.data());     
    }
+
    // add external include paths
    for (uint i = 0; i < includePath.count(); i++) {
       QByteArray inc = QByteArray("-I") + includePath.at(i);
       argv[argc++] = strdup(inc.data());
    }
+
    // user specified options
    for (uint i = 0; i < clangOptions.count(); i++) {
       argv[argc++] = strdup(clangOptions.at(i));
    }
+
    // extra options
    argv[argc++] = strdup("-ferror-limit=0");
    argv[argc++] = strdup("-x");
@@ -214,8 +218,10 @@ void ClangParser::start(const char *fileName, QStringList &filesInTranslationUni
    // Since we can be presented with a .h file that can contain C/C++ or
    // Objective C code and we need to configure the parser before knowing this,
    // we use the source file to detected the language. Detection will fail if you
-   // pass a bunch of .h files containing ObjC code, and no sources :-(
+   // pass a bunch of .h files containing ObjC code, and no sources 
+
    SrcLangExt lang = getLanguageFromFileName(fileName);
+
    if (lang == SrcLangExt_ObjC || p->detectedLang != ClangParser::Private::Detected_Cpp) {
       QByteArray fn = fileName;
       if (p->detectedLang == ClangParser::Private::Detected_Cpp &&
@@ -223,12 +229,15 @@ void ClangParser::start(const char *fileName, QStringList &filesInTranslationUni
              fn.right(3).toLower() == ".cc" || fn.right(2).toLower() == ".c")) {
          // fall back to C/C++ once we see an extension that indicates this
          p->detectedLang = ClangParser::Private::Detected_Cpp;
+
       } else if (fn.right(3).toLower() == ".mm") { // switch to Objective C++
          p->detectedLang = ClangParser::Private::Detected_ObjCpp;
+
       } else if (fn.right(2).toLower() == ".m") { // switch to Objective C
          p->detectedLang = ClangParser::Private::Detected_ObjC;
       }
    }
+
    switch (p->detectedLang) {
       case ClangParser::Private::Detected_Cpp:
          argv[argc++] = strdup("c++");
@@ -245,17 +254,18 @@ void ClangParser::start(const char *fileName, QStringList &filesInTranslationUni
    // pass the filtered versions
    argv[argc++] = strdup(fileName);
    static bool filterSourceFiles = Config_getBool("FILTER_SOURCE_FILES");
-   //printf("source %s ----------\n%s\n-------------\n\n",
-   //    fileName,p->source.data());
+ 
    uint numUnsavedFiles = filesInTranslationUnit.count() + 1;
    p->numFiles = numUnsavedFiles;
    p->sources = new QByteArray[numUnsavedFiles];
    p->ufs     = new CXUnsavedFile[numUnsavedFiles];
+
    p->sources[0]      = detab(fileToString(fileName, filterSourceFiles, true));
    p->ufs[0].Filename = strdup(fileName);
    p->ufs[0].Contents = p->sources[0].data();
    p->ufs[0].Length   = p->sources[0].length();
    QStringListIterator it(filesInTranslationUnit);
+
    uint i = 1;
    for (it.toFirst(); it.current() && i < numUnsavedFiles; ++it, i++) {
       p->fileMapping.insert(it.current(), new uint(i));
@@ -266,8 +276,7 @@ void ClangParser::start(const char *fileName, QStringList &filesInTranslationUni
    }
 
    // let libclang do the actual parsing
-   p->tu = clang_parseTranslationUnit(p->index, 0,
-                                      argv, argc, p->ufs, numUnsavedFiles,
+   p->tu = clang_parseTranslationUnit(p->index, 0, argv, argc, p->ufs, numUnsavedFiles,
                                       CXTranslationUnit_DetailedPreprocessingRecord);
    // free arguments
    for (int i = 0; i < argc; ++i) {
@@ -282,8 +291,8 @@ void ClangParser::start(const char *fileName, QStringList &filesInTranslationUni
       // show any warnings that the compiler produced
       for (uint i = 0, n = clang_getNumDiagnostics(p->tu); i != n; ++i) {
          CXDiagnostic diag = clang_getDiagnostic(p->tu, i);
-         CXString string = clang_formatDiagnostic(diag,
-                           clang_defaultDiagnosticDisplayOptions());
+         CXString string   = clang_formatDiagnostic(diag,clang_defaultDiagnosticDisplayOptions());
+
          err("%s [clang]\n", clang_getCString(string));
          clang_disposeString(string);
          clang_disposeDiagnostic(diag);
@@ -302,10 +311,12 @@ void ClangParser::start(const char *fileName, QStringList &filesInTranslationUni
       // produce cursors for each token in the stream
       p->cursors = new CXCursor[p->numTokens];
       clang_annotateTokens(p->tu, p->tokens, p->numTokens, p->cursors);
+
    } else {
       p->tokens    = 0;
       p->numTokens = 0;
       p->cursors   = 0;
+
       err("clang: Failed to parse translation unit %s\n", fileName);
    }
 }
@@ -314,7 +325,9 @@ void ClangParser::switchToFile(const char *fileName)
 {
    if (p->tu) {
       delete[] p->cursors;
+
       clang_disposeTokens(p->tu, p->tokens, p->numTokens);
+
       p->tokens    = 0;
       p->numTokens = 0;
       p->cursors   = 0;
@@ -322,9 +335,10 @@ void ClangParser::switchToFile(const char *fileName)
       QFileInfo fi(fileName);
       CXFile f = clang_getFile(p->tu, fileName);
       uint *pIndex = p->fileMapping.find(fileName);
+
       if (pIndex && *pIndex < p->numFiles) {
          uint i = *pIndex;
-         //printf("switchToFile %s: len=%ld\n",fileName,p->ufs[i].Length);
+
          CXSourceLocation fileBegin = clang_getLocationForOffset(p->tu, f, 0);
          CXSourceLocation fileEnd   = clang_getLocationForOffset(p->tu, f, p->ufs[i].Length);
          CXSourceRange    fileRange = clang_getRange(fileBegin, fileEnd);
@@ -335,6 +349,7 @@ void ClangParser::switchToFile(const char *fileName)
 
          p->curLine  = 1;
          p->curToken = 0;
+
       } else {
          err("clang: Failed to find input file %s in mapping\n", fileName);
       }
@@ -343,7 +358,8 @@ void ClangParser::switchToFile(const char *fileName)
 
 void ClangParser::finish()
 {
-   static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
+   static bool clangAssistedParsing = Config::getBool("clang-parsing");
+
    if (!clangAssistedParsing) {
       return;
    }
@@ -386,18 +402,19 @@ int ClangParser::Private::getCurrentTokenLine()
 
 QByteArray ClangParser::lookup(uint line, const char *symbol)
 {
-   //printf("ClangParser::lookup(%d,%s)\n",line,symbol);
    QByteArray result;
    if (symbol == 0) {
       return result;
    }
-   static bool clangAssistedParsing = Config_getBool("CLANG_ASSISTED_PARSING");
+
+   static bool clangAssistedParsing = Config::getBool("clang-parsing");
    if (!clangAssistedParsing) {
       return result;
    }
 
    int sl = strlen(symbol);
    uint l = p->getCurrentTokenLine();
+
    while (l >= line && p->curToken > 0) {
       if (l == line) { // already at the right line
          p->curToken--; // linear search to start of the line

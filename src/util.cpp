@@ -2332,17 +2332,17 @@ QByteArray transcodeCharacterStringToUTF8(const QByteArray &input)
  *  is true the file will be filtered by any user specified input filter.
  *  If \a name is "-" the string will be read from standard input.
  */
-QByteArray fileToString(const char *name, bool filter, bool isSourceCode)
+QByteArray fileToString(const QString &name, bool filter, bool isSourceCode)
 {
-   if (name == 0 || name[0] == 0) {
-      return 0;
+   if (name.isEmpty()) {
+      return "";
    }
 
    QFile f;
 
    bool fileOpened = false;
 
-   if (name[0] == '-' && name[1] == 0) { 
+   if (name == "-") { 
       // read from stdin
       fileOpened = f.open(stdin, QIODevice::ReadOnly);
 
@@ -2352,8 +2352,7 @@ QByteArray fileToString(const char *name, bool filter, bool isSourceCode)
          contents = f.readAll();            
 
          int totalSize = filterCRLF(contents.data(), contents.size());
-         contents.resize(totalSize);
-         
+         contents.resize(totalSize);         
          contents.append('\n');    // to help the scanner
 
          return contents;
@@ -5153,23 +5152,23 @@ QString convertNameToFile(const char *name, bool allowDots, bool allowUnderscore
    return result;
 }
 
-QByteArray relativePathToRoot(const char *name)
+QByteArray relativePathToRoot(const QString &name)
 {
    QByteArray result;
 
-   if (Config_getBool("CREATE_SUBDIRS")) {
-      if (name == 0) {
+   if (Config::getBool("create-subdirs")) {
+      if (name.isEmpty()) {
          return REL_PATH_TO_ROOT;
 
-      } else {
-         QByteArray n = name;
-         int i = n.lastIndexOf('/');
+      } else {         
+         int i = name.lastIndexOf('/');
 
          if (i != -1) {
             result = REL_PATH_TO_ROOT;
          }
       }
    }
+
    return result;
 }
 
@@ -5428,23 +5427,29 @@ QByteArray convertToXML(const QString &s)
 }
 
 /*! Converts a string to a HTML-encoded string */
-QByteArray convertToHtml(const char *s, bool keepEntities)
+QByteArray convertToHtml(const QString &s, bool keepEntities)
 {
    static GrowBuf growBuf;
    growBuf.clear();
-   if (s == 0) {
+
+   if (s.isEmpty()) {
       return "";
    }
-   const char *p = s;
+
+   QByteArray temp = s.toUtf8();
+   const char *p = temp.constData();
    char c;
+
    while ((c = *p++)) {
       switch (c) {
          case '<':
             growBuf.addStr("&lt;");
             break;
+
          case '>':
             growBuf.addStr("&gt;");
             break;
+
          case '&':
             if (keepEntities) {
                const char *e = p;
@@ -5478,36 +5483,24 @@ QByteArray convertToHtml(const char *s, bool keepEntities)
             break;
       }
    }
+
    growBuf.addChar(0);
    return growBuf.get();
 }
 
-QByteArray convertToJSString(const char *s)
+QByteArray convertToJSString(const QString &s)
 {
-   static GrowBuf growBuf;
-   growBuf.clear();
-   if (s == 0) {
+   if (s.isEmpty()) {
       return "";
    }
-   const char *p = s;
-   char c;
-   while ((c = *p++)) {
-      switch (c) {
-         case '"':
-            growBuf.addStr("\\\"");
-            break;
-         case '\\':
-            growBuf.addStr("\\\\");
-            break;
-         default:
-            growBuf.addChar(c);
-            break;
-      }
-   }
-   growBuf.addChar(0);
-   return convertCharEntitiesToUTF8(growBuf.get());
-}
 
+   QByteArray retval = s.toUtf8(); 
+
+   retval.replace("\"", "\\\"");
+   retval.replace("\'", "\\\'");
+         
+   return convertCharEntitiesToUTF8(retval);
+}
 
 QByteArray convertCharEntitiesToUTF8(const QByteArray &s)
 {
@@ -6574,7 +6567,7 @@ QByteArray stripLeadingAndTrailingEmptyLines(const QByteArray &s, int &docLine)
 void stringToSearchIndex(const QByteArray &docBaseUrl, const QByteArray &title,
                          const QByteArray &str, bool priority, const QByteArray &anchor)
 {
-   static bool searchEngine = Config_getBool("SEARCHENGINE");
+   static bool searchEngine = Config::getBool("html-search")
 
    if (searchEngine) {
       Doxygen::searchIndex->setCurrentDoc(title, docBaseUrl, anchor);
@@ -6619,15 +6612,16 @@ g_lang2extMap[] = {
    { 0,              0,               (SrcLangExt)0       }
 };
 
-bool updateLanguageMapping(const QByteArray &extension, const QByteArray &language)
+bool updateLanguageMapping(const QString &extension, const QString &language)
 {
    const Lang2ExtMap *p = g_lang2extMap;
-   QByteArray langName = language.toLower();
+   QString langName = language.toLower();
 
    while (p->langName) {
       if (langName == p->langName) {
          break;
       }
+
       p++;
    }
 
@@ -6637,7 +6631,7 @@ bool updateLanguageMapping(const QByteArray &extension, const QByteArray &langua
 
    // found the language
    SrcLangExt parserId = p->parserId;
-   QByteArray extName = extension.toLower();
+   QBString extName = extension.toLower();
 
    if (extName.isEmpty()) {
       return false;
@@ -6657,7 +6651,7 @@ bool updateLanguageMapping(const QByteArray &extension, const QByteArray &langua
    if (! Doxygen::parserManager->registerExtension(extName, p->parserName)) {
 
       msg("Unable to assign extension %-4s (%-7s) for %-7s language, currently unsupported\n",
-          extName.constData(), p->parserName, language.constData());
+          qPrintable(extName), p->parserName, qPrintable(language));
    }
 
    return true;
@@ -7460,7 +7454,7 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList)
    QString fp  = fi.filePath();
    QString afp = fi.absoluteFilePath();
  
-   for ( auto pattern : *patList ) {
+   for (auto pattern : patList) {
 
       if (! pattern.isEmpty()) {
          int i = pattern.indexOf('=');

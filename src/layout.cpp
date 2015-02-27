@@ -60,14 +60,8 @@ static bool elemIsVisible(const QXmlAttributes &attrib, bool defVal = true)
    if (visible.at(0) == '$' && visible.length() > 1) {
       QByteArray id = visible.mid(1);
 
-      ConfigOption *opt = Config::instance()->get(id);
-
-      if (opt && opt->kind() == ConfigOption::O_Bool) {
-         return *((ConfigBool *)opt)->valueRef();
-
-      } else if (!opt) {
-         err("found unsupported value %s for visible attribute in layout file\n", visible.data());
-      }
+      bool value = Config::getBool(id); 
+      return value;   
    }
 
    return visible != "no" && visible != "0";
@@ -101,6 +95,7 @@ QByteArray LayoutNavEntry::url() const
 
    if ((kind() != LayoutNavEntry::User && kind() != LayoutNavEntry::UserGroup) || 
          (kind() == LayoutNavEntry::UserGroup && url.left(9) == "usergroup")) {
+
       url += Doxygen::htmlFileExtension;
 
    } else if (url.left(5) == "@ref " || url.left(5) == "\\ref ") {
@@ -112,10 +107,12 @@ QByteArray LayoutNavEntry::url() const
       if (resolveLink(0, url.mid(5).trimmed(), true, &d, anchor)) {
 
          if (d && d->isLinkable()) {
-            url = d->getOutputFileBase() + Doxygen::htmlFileExtension;
-            if (!anchor.isEmpty()) {
+            url = d->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8();
+
+            if (! anchor.isEmpty()) {
                url += "#" + anchor;
             }
+
             found = true;
          }
       }
@@ -1219,19 +1216,19 @@ class LayoutErrorHandler : public QXmlErrorHandler
 
    bool warning( const QXmlParseException &exception ) override {
       warn_uncond("at line %d column %d of %s: %s\n",
-                  exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message());
+                  exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message()));
       return false;
    }
 
    bool error( const QXmlParseException &exception ) override {
       err("at line %d column %d of %s: %s\n",
-          exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message());
+          exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message()));
       return false;
    }
 
    bool fatalError( const QXmlParseException &exception ) override {
       err("fatal: at line %d column %d of %s: %s\n",
-          exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message());
+          exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message()));
       return false;
    }
 

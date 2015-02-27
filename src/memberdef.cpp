@@ -717,7 +717,7 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
    tspec   = false;
    cachedAnonymousType = QSharedPointer<ClassDef>();
 
-   maxInitLines = Config_getInt("MAX_INITIALIZER_LINES");
+   maxInitLines  = Config::getInt("max-initializer-lines");
    userInitLines = -1;
    docEnumValues = false;
 
@@ -989,8 +989,8 @@ bool MemberDef::hasExamples()
 
 QByteArray MemberDef::getOutputFileBase() const
 {
-   static bool separateMemberPages = Config_getBool("SEPARATE_MEMBER_PAGES");
-   static bool inlineSimpleClasses = Config_getBool("INLINE_SIMPLE_STRUCTS");
+   static bool separateMemberPages = Config::getBool("separate-member-pages");
+   static bool inlineSimpleClasses = Config::getBool("inline-simple-structs");
 
    QByteArray baseName;
  
@@ -1081,48 +1081,48 @@ QByteArray MemberDef::anchor() const
 
 void MemberDef::_computeLinkableInProject()
 {
-   static bool extractStatic  = Config_getBool("EXTRACT_STATIC");
-   m_isLinkableCached = 2; // linkable
-   //printf("MemberDef::isLinkableInProject(name=%s)\n",name().data());
-   if (isHidden()) {
-      //printf("is hidden\n");
+   static bool extractStatic  = Config::getBool("extract-static");
+
+   // linkable
+   m_isLinkableCached = 2; 
+
+   if (isHidden()) {      
       m_isLinkableCached = 1;
       return;
    }
+
    if (m_impl->templateMaster) {
-      //printf("has template master\n");
       m_isLinkableCached = m_impl->templateMaster->isLinkableInProject() ? 2 : 1;
       return;
    }
-   if (name().isEmpty() || name().at(0) == '@') {
-      //printf("name invalid\n");
+
+   if (name().isEmpty() || name().at(0) == '@') {     
       m_isLinkableCached = 1; // not a valid or a dummy name
       return;
    }
-   if (!hasDocumentation() && !isReference()) {
-      //printf("no docs or reference\n");
+   if (! hasDocumentation() && ! isReference()) {     
       m_isLinkableCached = 1; // no documentation
       return;
    }
+
    if (m_impl->group && !m_impl->group->isLinkableInProject()) {
-      //printf("group but group not linkable!\n");
       m_isLinkableCached = 1; // group but group not linkable
       return;
    }
+
    if (!m_impl->group && m_impl->classDef && !m_impl->classDef->isLinkableInProject()) {
-      //printf("in a class but class not linkable!\n");
       m_isLinkableCached = 1; // in class but class not linkable
       return;
    }
-   if (!m_impl->group && m_impl->nspace && !m_impl->related && !m_impl->nspace->isLinkableInProject()) {
-      //printf("in a namespace but namespace not linkable!\n");
+
+   if (!m_impl->group && m_impl->nspace && !m_impl->related && !m_impl->nspace->isLinkableInProject()) {   
       m_isLinkableCached = 1; // in namespace but namespace not linkable
       return;
    }
-   if (!m_impl->group && !m_impl->nspace &&
-         !m_impl->related && !m_impl->classDef &&
+ 
+  if (!m_impl->group && !m_impl->nspace && !m_impl->related && !m_impl->classDef &&
          m_impl->fileDef && !m_impl->fileDef->isLinkableInProject()) {
-      //printf("in a file but file not linkable!\n");
+
       m_isLinkableCached = 1; // in file (and not in namespace) but file not linkable
       return;
    }
@@ -1131,12 +1131,11 @@ void MemberDef::_computeLinkableInProject()
       m_isLinkableCached = 1; // hidden due to protection
       return;
    }
+
    if (m_impl->stat && m_impl->classDef == 0 && !extractStatic) {
-      //printf("static and invisible!\n");
       m_isLinkableCached = 1; // hidden due to staticness
-      return;
-   }
-   //printf("linkable!\n");
+      return;   }
+  
    return; // linkable!
 }
 
@@ -1199,7 +1198,7 @@ void MemberDef::writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPo
 {
    SrcLangExt lang = getLanguage();
 
-   static bool hideScopeNames = Config_getBool("HIDE_SCOPE_NAMES");
+   static bool hideScopeNames = Config::getBool("hide-scope-names");
 
    QByteArray sep = getLanguageSpecificSeparator(lang, true);
    QString n = name();
@@ -1318,11 +1317,11 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
  */
 bool MemberDef::isBriefSectionVisible() const
 {
-   static bool extractStatic       = Config_getBool("EXTRACT_STATIC");
-   static bool hideUndocMembers    = Config_getBool("HIDE_UNDOC_MEMBERS");
-   static bool briefMemberDesc     = Config_getBool("BRIEF_MEMBER_DESC");
-   static bool repeatBrief         = Config_getBool("REPEAT_BRIEF");
-   static bool hideFriendCompounds = Config_getBool("HIDE_FRIEND_COMPOUNDS");
+   static bool extractStatic       = Config::getBool("extract-static");
+   static bool hideUndocMembers    = Config::getBool("hide-undoc-members");
+   static bool briefMemberDesc     = Config::getbool("brief-member-desc");
+   static bool repeatBrief         = Config::getBool("repeat-brief");
+   static bool hideFriendCompounds = Config::getBool("hide-friend-compounds");
  
    QSharedPointer<MemberGroupInfo> info = Doxygen::memGrpInfoDict[m_impl->grpId];
 
@@ -1575,8 +1574,8 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
       // hide anonymous stuff      
       if (! (name().isEmpty() || name().at(0) == '@') && (hasDocumentation() || isReference()) && 
-            !(m_impl->prot == Private && !Config_getBool("EXTRACT_PRIVATE") && m_impl->mtype != MemberType_Friend) && 
-            !(isStatic() && m_impl->classDef == 0 && !Config_getBool("EXTRACT_STATIC"))) {
+            !(m_impl->prot == Private && ! Config::getBool("extract-private") && m_impl->mtype != MemberType_Friend) && 
+            !(isStatic() && m_impl->classDef == 0 && ! Config::getBool("extract-static"))) {
 
          if (m_impl->annMemb) {
             
@@ -1677,7 +1676,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
       ol.endTypewriter();
    }
 
-   bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
+   bool extractPrivate = Config::getBool("extract-private");
 
    if (isProperty() && (isSettable() || isGettable() || isPrivateSettable() || isPrivateGettable() ||
                         isProtectedSettable() || isProtectedGettable())) {
@@ -1773,7 +1772,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    }
 
    // write brief description
-   if (! briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC") ) {
+   if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc") ) {
 
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), 
                                              getOuterScope() ? getOuterScope() : d, self, briefDescription(),
@@ -1784,7 +1783,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
          ol.writeDoc(rootNode, getOuterScope() ? getOuterScope() : d, self);
 
          if (detailsVisible) {
-            static bool separateMemberPages = Config_getBool("SEPARATE_MEMBER_PAGES");
+            static bool separateMemberPages = Config::getBool("separate-member-pages");
             ol.pushGeneratorState();
             ol.disableAllBut(OutputGenerator::Html);
             //ol.endEmphasis();
@@ -1819,25 +1818,29 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
 bool MemberDef::isDetailedSectionLinkable() const
 {
-   static bool extractAll        = Config_getBool("EXTRACT_ALL");
-   static bool alwaysDetailedSec = Config_getBool("ALWAYS_DETAILED_SEC");
-   static bool repeatBrief       = Config_getBool("REPEAT_BRIEF");
-   static bool briefMemberDesc   = Config_getBool("BRIEF_MEMBER_DESC");
-   static bool hideUndocMembers  = Config_getBool("HIDE_UNDOC_MEMBERS");
-   static bool extractStatic     = Config_getBool("EXTRACT_STATIC");
+   static bool extractAll        = Config::getBool("extract-all");
+   static bool alwaysDetailedSec = Config::getBool("always-detailed-sec");
+   static bool repeatBrief       = Config::getBool("repeat-brief");
+   static bool briefMemberDesc   = Config::getBool("brief-member-desc");
+   static bool hideUndocMembers  = Config::getBool("hide-undoc-members");
+   static bool extractStatic     = Config::getBool("extract-static");
 
    // the member has details documentation for any of the following reasons
-   bool docFilter =
+
+   // code formated poorly - adjust here (broom) 
+   bool docFilter = extractAll ||  ! documentation().isEmpty() ||  ! inbodyDocumentation().isEmpty() ||
+                  (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) ||
+                  (m_impl->mtype == MemberType_EnumValue && !briefDescription().isEmpty()) ||
+   
+
+
       // treat everything as documented
-      extractAll ||
-      // has detailed docs
-      !documentation().isEmpty() ||
-      // has inbody docs
-      !inbodyDocumentation().isEmpty() ||
+      // has detailed docs    
+      // has inbody docs 
       // is an enum with values that are documented
-      (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) ||
+
       // is documented enum value
-      (m_impl->mtype == MemberType_EnumValue && !briefDescription().isEmpty()) ||
+      
       // has brief description that is part of the detailed description
       (!briefDescription().isEmpty() &&           // has brief docs
        (alwaysDetailedSec &&                      // they are visible in
@@ -1846,21 +1849,22 @@ bool MemberDef::isDetailedSectionLinkable() const
         )                                         // shown in brief section
        )
       ) ||
+
       // has a multi-line initialization block
-      //(initLines>0 && initLines<maxInitLines) ||
+      //(initLine s> 0 && initLines < maxInitLines) ||
       (hasMultiLineInitializer() && !hideUndocMembers) ||
+
       // has one or more documented arguments
       (m_impl->defArgList != 0 && m_impl->defArgList->hasDocumentation()) ||
-      // is an attribute or property - need to display that tag
-      (m_impl->memSpec & (Entry::Attribute | Entry::Property)) ||
-      // has user comments
-      Doxygen::userComments
-      ;
+
+      // is an attribute or property - need to display tag
+      (m_impl->memSpec & (Entry::Attribute | Entry::Property)) || Doxygen::userComments;
+
 
    // this is not a global static or global statics should be extracted
    bool staticFilter = getClassDef() != 0 || !isStatic() || extractStatic;
 
-   // only include members that are non-private unless EXTRACT_PRIVATE is
+   // only include members that are non-private unless extract_private is
    // set to YES or the member is part of a   group
    bool privateFilter = protectionLevelVisible(protection()) || m_impl->mtype == MemberType_Friend;
 
@@ -1869,13 +1873,10 @@ bool MemberDef::isDetailedSectionLinkable() const
    //
    //bool inAnonymousScope = !briefDescription().isEmpty() && annUsed;
 
-   // hide friend (class|struct|union) member if HIDE_FRIEND_COMPOUNDS
-   // is true
-   bool friendCompoundFilter = !(Config_getBool("HIDE_FRIEND_COMPOUNDS") &&
-                                 isFriend() &&
-                                 (m_impl->type == "friend class" ||
-                                  m_impl->type == "friend struct" ||
-                                  m_impl->type == "friend union") );
+   // hide friend (class|struct|union) member if HIDE_FRIEND_COMPOUNDS is set
+  
+   bool friendCompoundFilter = !(Config::getBool("hide-friend-compounds") && isFriend() &&
+                  (m_impl->type == "friend class" || m_impl->type == "friend struct" || m_impl->type == "friend union") );
 
    bool result = ((docFilter && staticFilter && privateFilter && friendCompoundFilter && !isHidden()));
   
@@ -1902,14 +1903,13 @@ bool MemberDef::isDetailedSectionVisible(bool inGroup, bool inFile) const
 
 void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container) const
 {
-   static bool isInlineInfo = Config_getBool("INLINE_INFO");
-   bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
+   static bool isInlineInfo = Config::getBool("inline-info");
+   bool extractPrivate      = Config::getBool("extract-private");
 
    Specifier lvirt = virtualness();
    SrcLangExt lang = getLanguage();      
   
-   if  (true) {
-
+   if (true) {
 
 /*
       ( (! isObjCMethod() || isOptional() || isRequired()) && 
@@ -1918,8 +1918,7 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
           (m_impl->classDef && m_impl->classDef != container && container->definitionType() == TypeClass) ||
           (m_impl->memSpec & ~Entry::Inline) != 0 ) ) {
 */
-
-     
+  
       
       if (isFriend()) {
          sl.append("friend");
@@ -2163,7 +2162,7 @@ void MemberDef::_writeCallGraph(OutputList &ol)
 
    // write call graph
    if ((m_impl->hasCallGraph || Config_getBool("CALL_GRAPH"))
-         && (isFunction() || isSlot() || isSignal()) && Config_getBool("HAVE_DOT")) {
+         && (isFunction() || isSlot() || isSignal()) && Config::getBool("have-dot")) {
 
       DotCallGraph callGraph(self, false);
 
@@ -2190,7 +2189,7 @@ void MemberDef::_writeCallerGraph(OutputList &ol)
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
    if ((m_impl->hasCallerGraph || Config_getBool("CALLER_GRAPH"))
-         && (isFunction() || isSlot() || isSignal()) && Config_getBool("HAVE_DOT")) {
+         && (isFunction() || isSlot() || isSignal()) && Config::getBool("have-dot")) {
 
       DotCallGraph callerGraph(self, true);
 
@@ -3096,22 +3095,19 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    ol.endIndent();
 
    // enable LaTeX again
-   //if (Config_getBool("EXTRACT_ALL") && !hasDocs) ol.enable(OutputGenerator::Latex);
+   // if Config::getBool("extract-all") && ! hasDocs) ol.enable(OutputGenerator::Latex);
    ol.popGeneratorState();
 
-   //------------------------------------------------
-
-   if (!Config_getBool("EXTRACT_ALL") && Config_getBool("WARN_IF_UNDOCUMENTED") &&
-         Config_getBool("WARN_NO_PARAMDOC") && !Doxygen::suppressDocWarnings) {
+   if (! Config::getBool("extract-all") && Config::getBool("warn-undoc") &&
+         Config::getBool("warn-undoc-param") && ! Doxygen::suppressDocWarnings) {
 
       if (!hasDocumentedParams()) {
-         warn_doc_error(docFile(), docLine(),
-                        "parameters of member %s are not (all) documented",
+         warn_doc_error(docFile(), docLine(), "parameters of member %s are not (all) documented",
                         qPrint(qualifiedName()));
       }
 
       if (!hasDocumentedReturnType() && isFunction() && hasDocumentation()) {
-         warn_doc_error(docFile(), docLine(), "return type of member %s is not documented",
+         warn_doc_error(docFile(), docLine(), "return type of member %s was not documented",
                         qPrint(qualifiedName()));
       }
    }
@@ -3348,8 +3344,7 @@ void MemberDef::warnIfUndocumented()
       t = "file", d = fd;
    }
 
-   static bool extractAll = Config_getBool("EXTRACT_ALL");
-
+   static bool extractAll = Config::getBool("extract-all");
  
    if ((!hasUserDocumentation() && !extractAll) && !isFriendClass() && name().indexOf('@') == -1 && d && d->name().indexOf('@') == -1 &&
          protectionLevelVisible(m_impl->prot) && !isReference() ) {
@@ -3890,6 +3885,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
    if (i != -1) {
       n = n.right(n.length() - i - 2);   // strip scope (TODO: is this needed?)
    }
+
    if (n[0] != '@') { // not an anonymous enum
       if (isLinkableInProject() || hasDocumentedEnumValues()) {
          //_writeTagData(compoundType);
@@ -3909,7 +3905,8 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
       typeDecl.writeChar(' ');
    }
 
-   uint enumValuesPerLine = (uint)Config_getInt("ENUM_VALUES_PER_LINE");
+   int enumValuesPerLine = Config::getInt("enum-values-per-line");
+
    if (numVisibleEnumValues > 0 && enumValuesPerLine > 0) {
       typeDecl.docify("{ ");
 
@@ -4062,15 +4059,14 @@ void MemberDef::enableCallerGraph(bool e)
 bool MemberDef::protectionVisible() const
 {
    return m_impl->prot == Public ||
-          (m_impl->prot == Private   && Config_getBool("EXTRACT_PRIVATE"))   ||
-          (m_impl->prot == Protected && Config_getBool("EXTRACT_PROTECTED")) ||
-          (m_impl->prot == Package   && Config_getBool("EXTRACT_PACKAGE"));
+          (m_impl->prot == Private   && Config::getBool("extract-private"))   ||
+          (m_impl->prot == Protected && Config::getBool("extract-protected")) ||
+          (m_impl->prot == Package   && Config::getBool("extract-package"));
 }
 #endif
 
 #if 0
-void MemberDef::setInbodyDocumentation(const char *docs,
-                                       const char *docFile, int docLine)
+void MemberDef::setInbodyDocumentation(const char *docs, const char *docFile, int docLine)
 {
    m_impl->inbodyDocs = docs;
    m_impl->inbodyDocs = m_impl->inbodyDocs.trimmed();
@@ -4109,6 +4105,7 @@ QByteArray MemberDef::qualifiedName() const
       qm += name();
       qm += "]";
       return qm;
+
    } else if (m_impl->enumScope && m_impl->enumScope->isStrong()) {
       return m_impl->enumScope->qualifiedName() +
              getLanguageSpecificSeparator(getLanguage()) +
@@ -5194,7 +5191,7 @@ const ArgumentList *MemberDef::typeConstraints() const
 
 bool MemberDef::isFriendToHide() const
 {
-   static bool hideFriendCompounds = Config_getBool("HIDE_FRIEND_COMPOUNDS");
+   static bool hideFriendCompounds = Config::getBool("hide-friend-compounds");
 
    bool isFriendToHide = hideFriendCompounds && (m_impl->type == "friend class"  ||
                           m_impl->type == "friend struct" || m_impl->type == "friend union");

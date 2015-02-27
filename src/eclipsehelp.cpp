@@ -208,15 +208,15 @@ void EclipseHelp::addIndexItem(QSharedPointer<Definition> d, QSharedPointer<Memb
 {
 }
 
-void EclipseHelp::addIndexFile(const char * /* name */)
+void EclipseHelp::addIndexFile(const QString &name)
 {
 }
 
-void EclipseHelp::addImageFile(const char * /* name */)
+void EclipseHelp::addImageFile(const QString &name)
 {
 }
 
-void EclipseHelp::addStyleSheetFile(const char * /* name */)
+void EclipseHelp::addStyleSheetFile(const QString &name)
 {
 }
 

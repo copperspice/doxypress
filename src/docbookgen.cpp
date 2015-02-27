@@ -1233,13 +1233,13 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       }
    }
 
-   if (Config_getBool("HAVE_DOT") && (Config_getBool("CLASS_DIAGRAMS") || Config_getBool("CLASS_GRAPH"))) {
+   if (Config::getBool("have-dot") && (Config_getBool("CLASS_DIAGRAMS") || Config_getBool("CLASS_GRAPH"))) {
       t << "<para>Inheritance diagram for " << convertToXML(cd->name()) << "</para>" << endl;
       DotClassGraph inheritanceGraph(cd, DotNode::Inheritance);
       inheritanceGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config_getString("DOCBOOK_OUTPUT"), fileName, relPath, true, false);
    }
 
-   if (Config_getBool("HAVE_DOT") && Config_getBool("COLLABORATION_GRAPH")) {
+   if (Config::getBool("have-dot") && Config_getBool("COLLABORATION_GRAPH")) {
       t << "<para>Collaboration diagram for " << convertToXML(cd->name()) << "</para>" << endl;
       DotClassGraph collaborationGraph(cd, DotNode::Collaboration);
       collaborationGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config_getString("DOCBOOK_OUTPUT"), fileName, relPath, true, false);
@@ -1471,7 +1471,7 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       }
    }
 
-   if (Config_getBool("HAVE_DOT")) {
+   if (Config::getBool("have-dot")) {
 
       if (Config_getBool("INCLUDE_GRAPH")) {
          t << "<para>Include dependency diagram for " << convertToXML(fd->name()) << "</para>" << endl;
@@ -1569,7 +1569,7 @@ static void generateDocbookForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti
 
    t << "    <title>" << convertToXML(gd->groupTitle()) << "</title>" << endl;
 
-   if (Config_getBool("GROUP_GRAPHS") && Config_getBool("HAVE_DOT")) {
+   if (Config_getBool("GROUP_GRAPHS") && Config::getBool("have-dot")) {
       t << "<para>Collaboration diagram for " << convertToXML(gd->groupTitle()) << "</para>" << endl;
       DotGroupCollaboration collaborationGraph(gd);
       collaborationGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config_getString("DOCBOOK_OUTPUT"), fileName, relPath, false);
@@ -1650,7 +1650,7 @@ static void generateDocbookForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    t << " Directory Reference";
    t << "</title>" << endl;
 
-   if (Config_getBool("DIRECTORY_GRAPH") && Config_getBool("HAVE_DOT")) {
+   if (Config_getBool("DIRECTORY_GRAPH") && Config::getBool("have-dot")) {
       t << "<para>Directory dependency diagram for " << convertToXML(dd->displayName()) << "</para>" << endl;
       DotDirDeps dirdepGraph(dd);
       dirdepGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config_getString("DOCBOOK_OUTPUT"), fileName, relPath, false);
@@ -1905,7 +1905,7 @@ void generateDocbook()
    }
 
    // DIRECTORY DOCUMENTATION
-   if (Config_getBool("DIRECTORY_GRAPH") && Config_getBool("HAVE_DOT")) {
+   if (Config_getBool("DIRECTORY_GRAPH") && Config::getBool("have-dot")) {
 
       //Directory Documentation index header
       if (! Doxygen::directories.isEmpty()) {

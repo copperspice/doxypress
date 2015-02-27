@@ -129,7 +129,7 @@ void HtmlHelpIndex::addItem(const char *level1, const char *level2, const char *
 
 static QByteArray field2URL(QSharedPointer<IndexField> f, bool checkReversed)
 {
-   QByteArray result = f->url + Doxygen::htmlFileExtension;
+   QByteArray result = f->url + Doxygen::htmlFileExtension.toUtf8();
 
    if (! f->anchor.isEmpty() && (!checkReversed || f->reversed)) {
       result += "#" + f->anchor;
@@ -272,15 +272,13 @@ void HtmlHelpIndex::writeFields(QTextStream &t)
 
 }
 
-//----------------------------------------------------------------------------
-
 HtmlHelp *HtmlHelp::theInstance = 0;
 
 /*! Constructs an html object.
  *  The object has to be \link initialize() initialized\endlink before it can
  *  be used.
  */
-HtmlHelp::HtmlHelp() : indexFileDict()
+HtmlHelp::HtmlHelp()
 {
    /* initial depth */
    dc = 0;
@@ -304,25 +302,25 @@ static QHash<QString, QByteArray *> s_languageDict;
  */
 void HtmlHelp::initialize()
 {
-   const char *str = Config_getString("CHM_INDEX_ENCODING");
+   QString str = Config::getString("chm-index-encoding");
 
-   if (! str) {
+   if (str.isEmpty()) {
       str = "Windows-1250";   // use safe and likely default
    }
 
-   m_toNewCodec = QTextCodec::codecForName(str);
+   m_toNewCodec = QTextCodec::codecForName(str.toUtf8());
 
    if (m_toNewCodec == nullptr) {
-      err("Unsupported character conversion for CHM_INDEX_ENCODING: '%s'\n", str);
+      err("Unsupported character conversion for 'CHM INDEX ENCODING' '%s'\n", qPrintable(str));
       exit(1);
    }
 
    /* open the contents file */
-   QByteArray fName = Config_getString("HTML_OUTPUT") + "/index.hhc";
+   QString fName = Config::getString("html-output") + "/index.hhc";
    cf = new QFile(fName);
 
    if (! cf->open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", fName.data());
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fName), cf->error());
       exit(1);
    }
 
@@ -337,11 +335,11 @@ void HtmlHelp::initialize()
        "<UL>\n";
 
    /* open the contents file */
-   fName = Config_getString("HTML_OUTPUT") + "/index.hhk";
+   fName = Config::getString("html-output") + "/index.hhk";
    kf = new QFile(fName);
 
-   if (!kf->open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", fName.data());
+   if (! kf->open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fName), kf->error());
       exit(1);
    }
 
@@ -473,18 +471,19 @@ static QByteArray getLanguageString()
 void HtmlHelp::createProjectFile()
 {
    /* Write the project file */
-   QByteArray fName = Config_getString("HTML_OUTPUT") + "/index.hhp";
+   QString fName = Config::getString("html-output") + "/index.hhp";
    QFile f(fName);
 
    if (f.open(QIODevice::WriteOnly)) {
       QTextStream t(&f);
 
-      QByteArray indexName = "index" + Doxygen::htmlFileExtension;
+      QByteArray indexName = "index" + Doxygen::htmlFileExtension.toUtf8();
 
       t << "[OPTIONS]\n";
-      if (!Config_getString("CHM_FILE").isEmpty()) {
-         t << "Compiled file=" << Config_getString("CHM_FILE") << "\n";
+      if (! Config::getString("chm-file").isEmpty()) {
+         t << "Compiled file=" << Config::getString("chm-file") << "\n";
       }
+
       t << "Compatibility=1.1\n"
         "Full-text search=Yes\n"
         "Contents file=index.hhc\n"
@@ -493,15 +492,15 @@ void HtmlHelp::createProjectFile()
         "Index file=index.hhk\n"
         "Language=" << getLanguageString() << endl;
 
-      if (Config_getBool("BINARY_TOC")) {
+      if (Config::getBool("binary-toc")) {
          t << "Binary TOC=YES\n";
       }
 
-      if (Config_getBool("GENERATE_CHI")) {
+      if (Config::getBool("generate-chi")) {
          t << "Create CHI file=YES\n";
       }
 
-      t << "Title=" << recode(Config_getString("PROJECT_NAME")) << endl << endl;
+      t << "Title=" << recode(Config::getString("project-name")) << endl << endl;
 
       t << "[WINDOWS]" << endl;
 
@@ -516,13 +515,13 @@ void HtmlHelp::createProjectFile()
       //          dee http://www.mif2go.com/xhtml/htmlhelp_0016_943addingtabsandtoolbarbuttonstohtmlhelp.htm#Rz108x95873
       //       Value has been taken from htmlhelp.h file of the HTML Help Workshop
 
-      if (Config_getBool("BINARY_TOC")) {
-         t << "main=\"" << recode(Config_getString("PROJECT_NAME")) << "\",\"index.hhc\","
+      if (Config::getBool("binary-toc")) {
+         t << "main=\"" << recode(Config::getString("project-name")) << "\",\"index.hhc\","
            "\"index.hhk\",\"" << indexName << "\",\"" <<
            indexName << "\",,,,,0x23520,,0x70387e,,,,,,,,0" << endl << endl;
 
       } else {
-         t << "main=\"" << recode(Config_getString("PROJECT_NAME")) << "\",\"index.hhc\","
+         t << "main=\"" << recode(Config::getString("project-name")) << "\",\"index.hhc\","
            "\"index.hhk\",\"" << indexName << "\",\"" <<
            indexName << "\",,,,,0x23520,,0x10387e,,,,,,,,0" << endl << endl;
       }
@@ -541,15 +540,15 @@ void HtmlHelp::createProjectFile()
       f.close();
 
    } else {
-      err("Could not open file %s for writing\n", fName.data());
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fName), f.error());
    }
 }
 
-void HtmlHelp::addIndexFile(const char *s)
+void HtmlHelp::addIndexFile(const QString &file)
 {
-   if (indexFileDict.contains(s)) {
-      indexFiles.append(s);
-      indexFileDict.insert(s, (void *)0x8);
+   if (indexFileDict.contains(file)) {
+      indexFiles.append(file);
+      indexFileDict.insert(file);
    }
 }
 
@@ -683,7 +682,7 @@ void HtmlHelp::addContentsItem(bool isDir, const QString &name, const char *ref,
 void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, const char *word)
 {
    if (md) {
-      static bool separateMemberPages = Config_getBool("SEPARATE_MEMBER_PAGES");
+      static bool separateMemberPages = Config::getBool("separate-member-pages");
 
       if (context == 0) { // global member
          if (md->getGroupDef()) {
@@ -714,7 +713,7 @@ void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<M
    }
 }
 
-void HtmlHelp::addImageFile(const char *fileName)
+void HtmlHelp::addImageFile(const QString &fileName)
 {
    if (!imageFiles.contains(fileName)) {
       imageFiles.append(fileName);

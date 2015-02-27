@@ -915,7 +915,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
 
    bool renderDiagram = false;
 
-   if (Config_getBool("HAVE_DOT") && (Config_getBool("CLASS_DIAGRAMS") || Config_getBool("CLASS_GRAPH"))) {
+   if (Config::getBool("have-dot") && (Config_getBool("CLASS_DIAGRAMS") || Config_getBool("CLASS_GRAPH"))) {
 
       // write class diagram using dot   
       DotClassGraph inheritanceGraph(self, DotNode::Inheritance);
@@ -1039,7 +1039,7 @@ void ClassDef::writeCollaborationGraph(OutputList &ol)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   if (Config_getBool("HAVE_DOT") /*&& Config_getBool("COLLABORATION_GRAPH")*/) {
+   if (Config::getBool("have-dot") /*&& Config_getBool("COLLABORATION_GRAPH")*/) {
       DotClassGraph usageImplGraph(self, DotNode::Collaboration);
 
       if (!usageImplGraph.isTrivial()) {

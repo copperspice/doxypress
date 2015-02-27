@@ -158,21 +158,25 @@ class ParserManager
    /** Registers a file \a extension with a parser with name \a parserName.
     *  Returns true if the extension was successfully registered.
     */
-   bool registerExtension(const char *extension, const char *parserName) {
-      if (parserName == 0 || extension == 0) {
+   bool registerExtension(const QString &extension, const QString &parserName) {
+
+      if (parserName.isEmpty() || extension.isEmpty()) {
          return false;
       }
 
       ParserInterface *intf = m_parsers.value(parserName);
+
       if (intf == 0) {
          return false;
       }
 
-      if (m_extensions.find(extension) !=  m_extensions.end()) { // extension already exists
-         m_extensions.remove(extension); // remove it
+      if (m_extensions.find(extension) !=  m_extensions.end()) { 
+         // extension already exists
+         m_extensions.remove(extension);
       }
 
       m_extensions.insert(extension, intf); // add new mapping
+
       return true;
    }
 

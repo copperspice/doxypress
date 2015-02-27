@@ -180,7 +180,7 @@ class DotGfxHierarchyTable
  public:
    DotGfxHierarchyTable();
    ~DotGfxHierarchyTable();
-   void writeGraph(QTextStream &t, const char *path, const char *fileName) const;
+   void writeGraph(QTextStream &t, const QString &path, const QString &fileName) const;
 
  private:
    void addHierarchy(DotNode *n, QSharedPointer<ClassDef> cd, bool hide);
@@ -204,7 +204,7 @@ class DotClassGraph
    bool isTooBig() const;
 
    QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
-                         const char *path, const char *fileName, const char *relPath,
+                         const QString &path, const QString &fileName, const QString &relPath,
                          bool TBRank = true, bool imageMap = true, int graphId = -1) const;
 
    void writeXML(QTextStream &t);
@@ -236,7 +236,7 @@ class DotInclDepGraph
    DotInclDepGraph(QSharedPointer<FileDef> fd, bool inverse);
    ~DotInclDepGraph();
    QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
-                         const char *path, const char *fileName, const char *relPath,
+                         const QString &path, const QString &fileName, const QString &relPath,
                          bool writeImageMap = true, int graphId = -1) const;
 
    bool isTrivial() const;
@@ -267,9 +267,8 @@ class DotCallGraph
    ~DotCallGraph();
 
    QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
-                         const char *path, const char *fileName,
-                         const char *relPath, bool writeImageMap = true,
-                         int graphId = -1) const;
+                         const QString  &path, const QString  &fileName, const QString  &relPath, 
+                         bool writeImageMap = true, int graphId = -1) const;
 
    void buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int distance);
    bool isTrivial() const;
@@ -297,8 +296,8 @@ class DotDirDeps
    ~DotDirDeps();
 
    bool isTrivial() const;
-   QByteArray writeGraph(QTextStream &out, GraphOutputFormat gf, EmbeddedOutputFormat ef, const char *path,
-                         const char *fileName, const char *relPath, bool writeImageMap = true, int graphId = -1) const;
+   QByteArray writeGraph(QTextStream &out, GraphOutputFormat gf, EmbeddedOutputFormat ef, const QString  &path,
+                         const QString &fileName, const QString  &relPath, bool writeImageMap = true, int graphId = -1) const;
  private:
    QSharedPointer<DirDef> m_dir;
 };
@@ -344,7 +343,7 @@ class DotGroupCollaboration
    DotGroupCollaboration(QSharedPointer<GroupDef> gd);
    ~DotGroupCollaboration();
    QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
-                         const char *path, const char *fileName, const char *relPath,
+                         const QString &path, const QString &fileName, const QString &relPath,
                          bool writeImageMap = true, int graphId = -1) const;
 
    void buildGraph(QSharedPointer<GroupDef> gd);
@@ -432,16 +431,15 @@ class DotFilePatcher
 
    DotFilePatcher(const char *patchFile);
    int addMap(const QByteArray &mapFile, const QByteArray &relPath,
-              bool urlOnly, const QByteArray &context, const QByteArray &label);
+                  bool urlOnly, const QByteArray &context, const QByteArray &label);
 
    int addFigure(const QByteArray &baseName,
-                 const QByteArray &figureName, bool heightCheck);
+                  const QByteArray &figureName, bool heightCheck);
 
    int addSVGConversion(const QByteArray &relPath, bool urlOnly,
-                        const QByteArray &context, bool zoomable, int graphId);
+                  const QByteArray &context, bool zoomable, int graphId);
 
-   int addSVGObject(const QByteArray &baseName, const QByteArray &figureName,
-                    const QByteArray &relPath);
+   int addSVGObject(const QByteArray &baseName, const QByteArray &figureName, const QByteArray &relPath);
    bool run();
    QByteArray file() const;
 
@@ -485,17 +483,18 @@ class DotManager
    void addRun(DotRunner *run);
 
    int  addMap(const QByteArray &file, const QByteArray &mapFile,
-               const QByteArray &relPath, bool urlOnly,
-               const QByteArray &context, const QByteArray &label);
+                  const QByteArray &relPath, bool urlOnly,
+                  const QByteArray &context, const QByteArray &label);
 
    int addFigure(const QByteArray &file, const QByteArray &baseName,
-                 const QByteArray &figureName, bool heightCheck);
+                  const QByteArray &figureName, bool heightCheck);
 
    int addSVGConversion(const QByteArray &file, const QByteArray &relPath,
-                        bool urlOnly, const QByteArray &context, bool zoomable, int graphId);
+                  bool urlOnly, const QByteArray &context, bool zoomable, int graphId);
 
-   int addSVGObject(const QByteArray &file, const QByteArray &baseName,
-                    const QByteArray &figureNAme, const QByteArray &relPath);
+   int addSVGObject(const QByteArray &file, const QByteArray &baseName, const QByteArray &figureNAme, 
+                  const QByteArray &relPath);
+
    bool run();
 
  private:

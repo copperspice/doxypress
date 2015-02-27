@@ -220,9 +220,9 @@ static EdgeProperties umlEdgeProps = {
 
 static QByteArray getDotFontName()
 {
-   static QByteArray dotFontName = Config_getString("DOT_FONTNAME");
+   static QString  dotFontName = Config::getString("dot-fontname");
+
    if (dotFontName.isEmpty()) {
-      //dotFontName="FreeSans.ttf";
       dotFontName = "Helvetica";
    }
    return dotFontName;
@@ -230,7 +230,7 @@ static QByteArray getDotFontName()
 
 static int getDotFontSize()
 {
-   static int dotFontSize = Config_getInt("DOT_FONTSIZE");
+   static int dotFontSize = Config::getInt("dot-fontsize");
    if (dotFontSize < 4) {
       dotFontSize = 4;
    }
@@ -239,13 +239,15 @@ static int getDotFontSize()
 
 static void writeGraphHeader(QTextStream &t, const QByteArray &title = QByteArray())
 {
-   static bool interactiveSVG = Config_getBool("INTERACTIVE_SVG");
+   static bool interactiveSVG = Config::getBool("interactive-svg");
+
    t << "digraph ";
    if (title.isEmpty()) {
       t << "\"Dot Graph\"";
    } else {
       t << "\"" << convertToXML(title) << "\"";
    }
+
    t << endl << "{" << endl;
    if (interactiveSVG) // insert a comment to force regeneration when this
       // option is toggled
@@ -419,23 +421,26 @@ static void resetReNumbering()
    s_newNumber.resize(s_max_newNumber);
 }
 
-static void setDotFontPath(const char *path)
+static void setDotFontPath(const QString &path)
 {
    assert(g_dotFontPath.isEmpty());
-   g_dotFontPath = portable_getenv("DOTFONTPATH");
-   QByteArray newFontPath = Config_getString("DOT_FONTPATH");
-   QByteArray spath = path;
 
-   if (!newFontPath.isEmpty() && !spath.isEmpty()) {
+   g_dotFontPath = portable_getenv("DOTFONTPATH");
+
+   QString newFontPath = Config_getString("dot-font-path");
+   QString spath = path;
+
+   if (! newFontPath.isEmpty() && ! spath.isEmpty()) {
       newFontPath.prepend(spath + portable_pathListSeparator());
 
-   } else if (newFontPath.isEmpty() && !spath.isEmpty()) {
+   } else if (newFontPath.isEmpty() && ! spath.isEmpty()) {
       newFontPath = path;
 
    } else {
       portable_unsetenv("DOTFONTPATH");
       return;
    }
+
    portable_setenv("DOTFONTPATH", newFontPath);
 }
 
@@ -489,19 +494,18 @@ static bool readBoundingBox(const char *fileName, int *width, int *height, bool 
 
 static bool writeVecGfxFigure(QTextStream &out, const QByteArray &baseName, const QByteArray &figureName)
 {
-   int width = 400, height = 550;
+   int width = 400;
+   int height = 550;
 
-   static bool usePdfLatex = Config_getBool("USE_PDFLATEX");
+   static bool usePdfLatex = Config::getBool("latex-pdf");
 
    if (usePdfLatex) {
-      if (!readBoundingBox(figureName + ".pdf", &width, &height, false)) {
-         //printf("writeVecGfxFigure()=0\n");
+      if (! readBoundingBox(figureName + ".pdf", &width, &height, false)) {         
          return false;
       }
 
    } else {
-      if (!readBoundingBox(figureName + ".eps", &width, &height, true)) {
-         //printf("writeVecGfxFigure()=0\n");
+      if (! readBoundingBox(figureName + ".eps", &width, &height, true)) {        
          return false;
       }
    }
@@ -530,7 +534,7 @@ static bool writeVecGfxFigure(QTextStream &out, const QByteArray &baseName, cons
        "\\end{center}\n"
        "\\end{figure}\n";
 
-   //printf("writeVecGfxFigure()=1\n");
+  
    return true;
 }
 
@@ -715,7 +719,7 @@ static bool checkAndUpdateMd5Signature(const QByteArray &baseName, const QByteAr
    return true;
 }
 
-static bool checkDeliverables(const QByteArray &file1, const QByteArray &file2 = QByteArray())
+static bool checkDeliverables(const QString &file1, const QString &file2 = QString())
 {
    bool file1Ok = true;
    bool file2Ok = true;
@@ -725,7 +729,7 @@ static bool checkDeliverables(const QByteArray &file1, const QByteArray &file2 =
       file1Ok = (fi.exists() && fi.size() > 0);
    }
 
-   if (!file2.isEmpty()) {
+   if (! file2.isEmpty()) {
       QFileInfo fi(file2);
       file2Ok = (fi.exists() && fi.size() > 0);
    }
@@ -1274,16 +1278,16 @@ bool DotManager::run()
    int i = 1;
    bool setPath = false;
 
-   if (Config_getBool("GENERATE_HTML")) {
-      setDotFontPath(Config_getString("HTML_OUTPUT"));
+   if (Config::getBool("generate-html")) {
+      setDotFontPath(Config::getString("html-output"));
       setPath = true;
 
-   } else if (Config_getBool("GENERATE_LATEX")) {
-      setDotFontPath(Config_getString("LATEX_OUTPUT"));
+   } else if (Config::getBool("generate-latex")) {
+      setDotFontPath(Config::getString("latex-output"));
       setPath = true;
 
-   } else if (Config_getBool("GENERATE_RTF")) {
-      setDotFontPath(Config_getString("RTF_OUTPUT"));
+   } else if (Config::getBool("generate-rtf")) {
+      setDotFontPath(Config::getString("rtf-output"));
       setPath = true;
    }
 
@@ -1782,7 +1786,8 @@ void DotNode::writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat format,
    }
    t << " [";
 
-   static bool umlLook = Config_getBool("UML_LOOK");
+   static bool umlLook = Config::getBool("uml-look");
+
    const EdgeProperties *eProps = umlLook ? &umlEdgeProps : &normalEdgeProps;
    QByteArray aStyle = eProps->arrowStyleMap[ei->m_color];
    bool umlUseArrow = aStyle == "odiamond";
@@ -2171,7 +2176,7 @@ const DotNode *DotNode::findDocNode() const
    return 0;
 }
 
-void DotGfxHierarchyTable::writeGraph(QTextStream &out, const char *path, const char *fileName) const
+void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, const QString &fileName) const
 {
    if (m_rootSubgraphs->count() == 0) {
       return;
@@ -2180,8 +2185,8 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const char *path, const 
    QDir d(path);
 
    // store the original directory
-   if (!d.exists()) {
-      err("Output dir %s does not exist!\n", path);
+   if (! d.exists()) {
+      err("Output dir %s does not exist\n", qPrintable(path));
       exit(1);
    }
 
@@ -2267,7 +2272,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const char *path, const 
                DotManager::instance()->addSVGConversion(absImgName.toUtf8(), QByteArray(), false, QByteArray(), false, 0);
             }
 
-            int mapId = DotManager::instance()->addSVGObject(fileName, baseName.toUtf8(), absImgName.toUtf8(), QByteArray());
+            int mapId = DotManager::instance()->addSVGObject(fileName.toUtf8(), baseName.toUtf8(), absImgName.toUtf8(), QByteArray());
             out << "<!-- SVG " << mapId << " -->" << endl;
          }
 
@@ -2275,9 +2280,8 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const char *path, const 
          out << "<img src=\"" << imgName << "\" border=\"0\" alt=\"\" usemap=\"#"
              << mapLabel << "\"/>" << endl;
 
-         if (regenerate || !insertMapFile(out, absMapName.toUtf8(), QByteArray(), mapLabel)) {
-            int mapId = DotManager::instance()->addMap(fileName, absMapName.toUtf8(), QByteArray(),
-                        false, QByteArray(), mapLabel);
+         if (regenerate || ! insertMapFile(out, absMapName.toUtf8(), QByteArray(), mapLabel)) {
+            int mapId = DotManager::instance()->addMap(fileName.toUtf8(), absMapName.toUtf8(), QByteArray(), false, QByteArray(), mapLabel);
 
             out << "<!-- MAP " << mapId << " -->" << endl;
          }
@@ -2469,7 +2473,7 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot,
    } else { // new class
       QByteArray displayName = className;
 
-      if (Config_getBool("HIDE_SCOPE_NAMES")) {
+      if (Config::getBool("hide-scope-names")) {
          displayName = stripScope(displayName);
       }
 
@@ -2481,13 +2485,8 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot,
          }
       }
       QByteArray tooltip = cd->briefDescriptionAsTooltip();
-      bn = new DotNode(m_curNodeNumber++,
-                       displayName,
-                       tooltip,
-                       tmp_url.data(),
-                       false,        // rootNode
-                       cd
-                      );
+      bn = new DotNode(m_curNodeNumber++, displayName, tooltip, tmp_url.data(), false, cd);
+
       if (base) {
          n->addChild(bn, prot, edgeStyle, label);
          bn->addParent(n);
@@ -2495,6 +2494,7 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot,
          bn->addChild(n, prot, edgeStyle, label);
          n->addParent(bn);
       }
+
       bn->setDistance(distance);
       m_usedNodes->insert(className, bn);
       //printf(" add new child node `%s' to %s hidden=%d url=%s\n",
@@ -2903,56 +2903,60 @@ QByteArray DotClassGraph::diskName() const
 }
 
 QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
-                                     const char *path, const char *fileName, const char *relPath, bool /*isTBRank*/,
+                                     const QString &path, const QString &fileName, const QString &relPath, bool /*isTBRank*/,
                                      bool generateImageMap, int graphId) const 
 {
    QDir d(path);
 
    // store the original directory
    if (! d.exists()) {
-      err("Output dir %s does not exist!\n", path);
+      err("Output dir %s does not exist\n", qPrintable(path));
       exit(1);
    }
 
-   static bool usePDFLatex = Config_getBool("USE_PDFLATEX");
+   static bool usePDFLatex = Config::getBool("latex-pdf");
 
-   QByteArray baseName;
-   QByteArray mapName;
+   QString baseName;
+   QString mapName;
 
    switch (m_graphType) {
       case DotNode::Collaboration:
          mapName = "coll_map";
          break;    
+
       case DotNode::Inheritance:
          mapName = "inherit_map";
          break;
+
       default:
          assert(0);
          break;
    }
 
-   baseName = convertNameToFile(diskName()).toUtf8();
+   baseName = convertNameToFile(diskName());
 
    // derive target file names from baseName
-   QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
-   QByteArray absBaseName = d.absolutePath().toUtf8() + "/" + baseName;
-   QByteArray absDotName  = absBaseName + ".dot";
-   QByteArray absMapName  = absBaseName + ".map";
-   QByteArray absPdfName  = absBaseName + ".pdf";
-   QByteArray absEpsName  = absBaseName + ".eps";
-   QByteArray absImgName  = absBaseName + "." + imgExt;
+   QBString imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+
+   QString absBaseName = d.absolutePath() + "/" + baseName;
+   QString absDotName  = absBaseName + ".dot";
+   QString absMapName  = absBaseName + ".map";
+   QString absPdfName  = absBaseName + ".pdf";
+   QString absEpsName  = absBaseName + ".eps";
+   QString absImgName  = absBaseName + "." + imgExt;
 
    bool regenerate = false;
 
    bool ok = false;
-   bool x  = updateDotGraph(m_startNode, m_graphType, absBaseName, graphFormat, m_lrRank,
+   bool x  = updateDotGraph(m_startNode, m_graphType, absBaseName.toUtf8(), graphFormat, m_lrRank,
                             m_graphType == DotNode::Inheritance, true, m_startNode->label() );    
 
    if (x)  {
       ok = true;
       
    } else { 
-      QByteArray arg1;
+      QString arg1;
+
       if (graphFormat == GOF_BITMAP) {
          arg1 = absImgName;
 
@@ -2963,7 +2967,7 @@ QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFo
          arg1 = absEpsName;
       }
 
-      QByteArray arg2;
+      QString arg2;
       if (graphFormat == GOF_BITMAP && generateImageMap) {
          arg2 = absMapName;
       }
@@ -2985,17 +2989,17 @@ QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFo
          QByteArray dotArgs;
          dotArgs.resize(maxCmdLine);
 
-         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().toUtf8(), true, absImgName);
+         DotRunner *dotRun = new DotRunner(absDotName.toUtf8(), d.absolutePath().toUtf8(), true, absImgName.toUtf8());
          dotRun->addJob(imgExt, absImgName);
 
          if (generateImageMap) {
-            dotRun->addJob(MAP_CMD, absMapName);
+            dotRun->addJob(MAP_CMD, absMapName.toUtf8());
          }
 
          DotManager::instance()->addRun(dotRun);
 
       } else if (graphFormat == GOF_EPS) { // run dot to create a .eps image
-         DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().toUtf8(), false);
+         DotRunner *dotRun = new DotRunner(absDotName.toUtf8(), d.absolutePath().toUtf8(), false);
 
          if (usePDFLatex) {
             dotRun->addJob("pdf", absPdfName);
@@ -3006,6 +3010,7 @@ QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFo
          DotManager::instance()->addRun(dotRun);
       }
    }
+
    Doxygen::indexList->addImageFile(baseName + "." + imgExt);
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
@@ -3040,24 +3045,31 @@ QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFo
 
    } else if (graphFormat == GOF_BITMAP && generateImageMap) { // produce HTML to include the image
       QByteArray mapLabel = escapeCharsInString(m_startNode->m_label, false) + "_" +
-                            escapeCharsInString(mapName, false);
+                            escapeCharsInString(mapName.toUtf8(), false);
 
       if (imgExt == "svg") { // add link to SVG file without map file
          out << "<div class=\"center\">";
-         if (regenerate || !writeSVGFigureLink(out, relPath, baseName, absImgName)) { // need to patch the links in the generated SVG file
+
+         if (regenerate || ! writeSVGFigureLink(out, relPath.toUtf8(), baseName, absImgName)) { 
+            // need to patch the links in the generated SVG file
+
             if (regenerate) {
-               DotManager::instance()->addSVGConversion(absImgName, relPath, false, QByteArray(), true, graphId);
+               DotManager::instance()->addSVGConversion(absImgName, relPath.toUtf8(), false, QByteArray(), true, graphId);
             }
-            int mapId = DotManager::instance()->addSVGObject(fileName, baseName, absImgName, relPath);
+
+            int mapId = DotManager::instance()->addSVGObject(fileName, baseName, absImgName, relPath.toUtf8());
             out << "<!-- SVG " << mapId << " -->" << endl;
          }
+
          out << "</div>" << endl;
 
       } else { // add link to bitmap file with image map
+
          out << "<div class=\"center\">";
          out << "<img src=\"" << relPath << baseName << "."
              << imgExt << "\" border=\"0\" usemap=\"#"
              << mapLabel << "\" alt=\"";
+
          switch (m_graphType) {
             case DotNode::Collaboration:
                out << "Collaboration graph";
@@ -3271,18 +3283,18 @@ QByteArray DotInclDepGraph::diskName() const
 }
 
 QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,                                                                  
-                                       const char *path, const char *fileName, const char *relPath, bool generateImageMap, int graphId) const
+                                       const QString &path, const QString &fileName, const QString &relPath, bool generateImageMap, int graphId) const
 {
    QDir d(path);
 
    // store the original directory
-   if (!d.exists()) {
-      err("Output dir %s does not exist!\n", path);
+   if (! d.exists()) {
+      err("Output dir %s does not exist\n", qPrintable(path));
       exit(1);
    }
    static bool usePDFLatex = Config_getBool("USE_PDFLATEX");
 
-   QByteArray baseName = m_diskName;
+   QString baseName = m_diskName;
 
    if (m_inverse) {
       baseName += "_dep";
@@ -3296,13 +3308,13 @@ QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graph
       mapName += "dep";
    }
 
-   QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
-   QByteArray absBaseName = d.absolutePath().toUtf8() + "/" + baseName;
-   QByteArray absDotName  = absBaseName + ".dot";
-   QByteArray absMapName  = absBaseName + ".map";
-   QByteArray absPdfName  = absBaseName + ".pdf";
-   QByteArray absEpsName  = absBaseName + ".eps";
-   QByteArray absImgName  = absBaseName + "." + imgExt;
+   QString imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+   QString absBaseName = d.absolutePath() + "/" + baseName;
+   QString absDotName  = absBaseName + ".dot";
+   QString absMapName  = absBaseName + ".map";
+   QString absPdfName  = absBaseName + ".pdf";
+   QString absEpsName  = absBaseName + ".eps";
+   QString absImgName  = absBaseName + "." + imgExt;
 
    bool regenerate = false;
    if (updateDotGraph(m_startNode, DotNode::Dependency, absBaseName, graphFormat, false, false,        
@@ -3435,7 +3447,7 @@ void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int dist
             } else {
                QByteArray name;
 
-               if (Config_getBool("HIDE_SCOPE_NAMES")) {
+               if (Config::getBool("hide-scope-names")) {
                   name  = rmd->getOuterScope() == m_scope ?
                           rmd->name() : rmd->qualifiedName();
                } else {
@@ -3515,7 +3527,7 @@ DotCallGraph::DotCallGraph(QSharedPointer<MemberDef> md, bool inverse)
 
    QByteArray name;
 
-   if (Config_getBool("HIDE_SCOPE_NAMES")) {
+   if (Config::getBool("hide-scope-names")) {
       name = md->name();
    } else {
       name = md->qualifiedName();
@@ -3549,29 +3561,29 @@ DotCallGraph::~DotCallGraph()
 }
 
 QByteArray DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
-                                    const char *path, const char *fileName, const char *relPath, bool generateImageMap, 
+                                    const QString &path, const QString &fileName, const QString &relPath, bool generateImageMap, 
                                     int graphId) const
 {
    QDir d(path);
 
    // store the original directory
    if (! d.exists()) {
-      err("Output dir %s does not exist!\n", path);
+      err("Output dir %s does not exist\n", qPrintable(path));
       exit(1);
    }
 
    static bool usePDFLatex = Config_getBool("USE_PDFLATEX");
 
-   QByteArray baseName = m_diskName + (m_inverse ? "_icgraph" : "_cgraph");
-   QByteArray mapName  = baseName;
+   QString baseName = m_diskName + (m_inverse ? "_icgraph" : "_cgraph");
+   QString mapName  = baseName;
 
-   QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
-   QByteArray absBaseName = d.absolutePath().toUtf8() + "/" + baseName;
-   QByteArray absDotName  = absBaseName + ".dot";
-   QByteArray absMapName  = absBaseName + ".map";
-   QByteArray absPdfName  = absBaseName + ".pdf";
-   QByteArray absEpsName  = absBaseName + ".eps";
-   QByteArray absImgName  = absBaseName + "." + imgExt;
+   QString imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+   QString absBaseName = d.absolutePath() + "/" + baseName;
+   QString absDotName  = absBaseName + ".dot";
+   QString absMapName  = absBaseName + ".map";
+   QString absPdfName  = absBaseName + ".pdf";
+   QString absEpsName  = absBaseName + ".eps";
+   QString absImgName  = absBaseName + "." + imgExt;
 
    bool regenerate = false;
    if (updateDotGraph(m_startNode, DotNode::CallGraph, absBaseName, graphFormat,
@@ -3688,13 +3700,13 @@ DotDirDeps::~DotDirDeps()
 }
 
 QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
-                  const char *path, const char *fileName, const char *relPath, bool generateImageMap, int graphId) const
+                  const QString &path, const QString &fileName, const QString &relPath, bool generateImageMap, int graphId) const
 {
    QDir d(path);
 
    // store the original directory
-   if (!d.exists()) {
-      err("Output dir %s does not exist!\n", path);
+   if (! d.exists()) {
+      err("Output dir %s does not exist\n", qPrintable(path));
       exit(1);
    }
 
@@ -3703,13 +3715,13 @@ QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphForma
    QByteArray baseName = m_dir->getOutputFileBase() + "_dep";
    QByteArray mapName = escapeCharsInString(baseName, false);
 
-   QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
-   QByteArray absBaseName = d.absolutePath().toUtf8() + "/" + baseName;
-   QByteArray absDotName  = absBaseName + ".dot";
-   QByteArray absMapName  = absBaseName + ".map";
-   QByteArray absPdfName  = absBaseName + ".pdf";
-   QByteArray absEpsName  = absBaseName + ".eps";
-   QByteArray absImgName  = absBaseName + "." + imgExt;
+   QString imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+   QString absBaseName = d.absolutePath() + "/" + baseName;
+   QString absDotName  = absBaseName + ".dot";
+   QString absMapName  = absBaseName + ".map";
+   QString absPdfName  = absBaseName + ".pdf";
+   QString absEpsName  = absBaseName + ".eps";
+   QString absImgName  = absBaseName + "." + imgExt;
 
    // compute md5 checksum of the graph were are about to generate
    QByteArray theGraph;
@@ -3729,7 +3741,7 @@ QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphForma
 
    } else {
 
-      QByteArray arg1;
+      QString arg1;
       if (graphFormat == GOF_BITMAP) {
          arg1 = absImgName; 
 
@@ -3741,7 +3753,7 @@ QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphForma
 
       }      
 
-      QByteArray arg2;
+      QString arg2;
       if (graphFormat == GOF_BITMAP && generateImageMap) {
          arg2 = absMapName;
       }
@@ -3861,7 +3873,7 @@ void generateGraphLegend(const char *path)
 
    // store the original directory
    if (! d.exists()) {
-      err("Output dir %s does not exist!\n", path);
+      err("Output dir %s does not exist\n", path);
       exit(1);
    }
 
@@ -3937,21 +3949,16 @@ void generateGraphLegend(const char *path)
    Doxygen::indexList->addImageFile(imgName);
 
    if (imgExt == "svg") {
-      DotManager::instance()->addSVGObject(
-         absBaseName + Config_getString("HTML_FILE_EXTENSION"),
-         "graph_legend",
-         absImgName, QByteArray());
+      DotManager::instance()->addSVGObject(absBaseName + Doxygen::htmlFileExtension.toUtf8(), "graph_legend", absImgName, QByteArray());
    }
-
 }
 
-void writeDotGraphFromFile(const char *inFile, const char *outDir,
-                           const char *outFile, GraphOutputFormat format)
+void writeDotGraphFromFile(const char *inFile, const char *outDir, const char *outFile, GraphOutputFormat format)
 {
    QDir d(outDir);
 
    if (!d.exists()) {
-      err("Output dir %s does not exist!\n", outDir);
+      err("Output dir %s does not exist\n", outDir);
       exit(1);
    }
 
@@ -4004,12 +4011,12 @@ void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QStri
    QDir d(outDir);
 
    if (! d.exists()) {
-      err("Output dir %s does not exist!\n", outDir.data());
+      err("Output dir %s does not exist\n", outDir.data());
       exit(1);
    }
 
    QString mapName = baseName + ".map";
-   QString imgExt  = Config_getEnum("DOT_IMAGE_FORMAT");
+   QString imgExt  = Config::getEnum("dot-image-format");
    QString imgName = baseName + "." + imgExt;
    QString absOutFile = d.absolutePath() + "/" + mapName;
 
@@ -4080,10 +4087,12 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
             // add node
             tmp_url = d->getReference() + "$" + d->getOutputFileBase();
             QByteArray tooltip = d->briefDescriptionAsTooltip();
-            nnode = new DotNode(m_curNodeId++, d->groupTitle(), tooltip, tmp_url );
+
+            nnode = new DotNode(m_curNodeId++, d->groupTitle(), tooltip, tmp_url);
             nnode->markAsVisible();
             m_usedNodes->insert(d->name(), nnode );
          }
+
          tmp_url = "";
          addEdge( nnode, m_rootNode, DotGroupCollaboration::thierarchy, tmp_url, tmp_url );
       }
@@ -4095,16 +4104,19 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
       for (auto def : *gd->getSubGroups()) {
          DotNode *nnode = m_usedNodes->value(def->name());
 
-         if ( !nnode ) {
+         if ( ! nnode ) {
             // add node
             tmp_url = def->getReference() + "$" + def->getOutputFileBase();
+
             QByteArray tooltip = def->briefDescriptionAsTooltip();
+
             nnode = new DotNode(m_curNodeId++, def->groupTitle(), tooltip, tmp_url );
             nnode->markAsVisible();
             m_usedNodes->insert(def->name(), nnode );
          }
+
          tmp_url = "";
-         addEdge( m_rootNode, nnode, DotGroupCollaboration::thierarchy, tmp_url, tmp_url );
+         addEdge( m_rootNode, nnode, DotGroupCollaboration::thierarchy, tmp_url, tmp_url);
       }
    }
 
@@ -4112,12 +4124,13 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
 
    // Add members
    addMemberList( gd->getMemberList(MemberListType_allMembersList) );
+   QByteArray htmlEntenstion = Doxygen::htmlFileExtension.toUtf8();
 
    // Add classes
    if ( gd->getClasses() && gd->getClasses()->count() ) {
 
       for (auto def : *gd->getClasses()) {
-         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxygen::htmlFileExtension;
+         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
 
          if (!def->anchor().isEmpty()) {
             tmp_url += "#" + def->anchor();
@@ -4129,7 +4142,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    // Add namespaces
    if ( gd->getNamespaces() && gd->getNamespaces()->count() ) {     
       for (auto def : *gd->getNamespaces()) {
-         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxygen::htmlFileExtension;
+         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tnamespace );
       }
    }
@@ -4137,7 +4150,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    // Add files
    if ( gd->getFiles() && gd->getFiles()->count() ) {     
       for (auto def : *gd->getFiles()) {
-         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxygen::htmlFileExtension;
+         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tfile );
       }
    }
@@ -4147,7 +4160,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
 
 
       for (auto def : *gd->getPages()) {
-         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxygen::htmlFileExtension;
+         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tpages );
       }
    }
@@ -4156,7 +4169,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    if ( gd->getDirs() && gd->getDirs()->count() ) {
 
       for (auto def : *gd->getDirs()) {
-         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxygen::htmlFileExtension;
+         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tdir );
       }
    }
@@ -4169,7 +4182,7 @@ void DotGroupCollaboration::addMemberList(QSharedPointer<MemberList> ml)
    }
   
    for (auto def : *ml) {
-      QByteArray tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxygen::htmlFileExtension
+      QByteArray tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8() +
                            + "#" + def->anchor();
 
       addCollaborationMember(def, tmp_url, DotGroupCollaboration::tmember );
@@ -4234,18 +4247,18 @@ void DotGroupCollaboration::addCollaborationMember(Definition *def, QByteArray &
 
 
 QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat graphFormat, 
-      EmbeddedOutputFormat textFormat, const char *path, const char *fileName, const char *relPath,
+      EmbeddedOutputFormat textFormat, const QString &path, const QString &fileName, const QString &relPath,
       bool writeImageMap, int graphId) const
 {
    QDir d(path);
 
    // store the original directory
    if (! d.exists()) {
-      err("Output directory %s does not exist\n", path);
+      err("Output directory %s does not exist\n", qPrintable(path));
       exit(1);
    }
 
-   static bool usePDFLatex = Config_getBool("USE_PDFLATEX");
+   static bool usePDFLatex = Config::getBool("latex-pdf");
 
    QByteArray theGraph;
    QTextStream md5stream(&theGraph);
@@ -4273,17 +4286,17 @@ QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat 
    QByteArray sigStr;
    sigStr = QCryptographicHash::hash(theGraph, QCryptographicHash::Md5).toHex();
   
-   QByteArray imgExt      = Config_getEnum("DOT_IMAGE_FORMAT");
-   QByteArray baseName    = m_diskName;
-   QByteArray imgName     = baseName + "." + imgExt;
-   QByteArray mapName     = baseName + ".map";
-   QByteArray absPath     = d.absolutePath().toUtf8();
-   QByteArray absBaseName = absPath + "/" + baseName;
-   QByteArray absDotName  = absBaseName + ".dot";
-   QByteArray absImgName  = absBaseName + "." + imgExt;
-   QByteArray absMapName  = absBaseName + ".map";
-   QByteArray absPdfName  = absBaseName + ".pdf";
-   QByteArray absEpsName  = absBaseName + ".eps";
+   QString imgExt      = Config_getEnum("DOT_IMAGE_FORMAT");
+   QString baseName    = m_diskName;
+   QString imgName     = baseName + "." + imgExt;
+   QString mapName     = baseName + ".map";
+   QString absPath     = d.absolutePath();
+   QString absBaseName = absPath + "/" + baseName;
+   QString absDotName  = absBaseName + ".dot";
+   QString absImgName  = absBaseName + "." + imgExt;
+   QString absMapName  = absBaseName + ".map";
+   QString absPdfName  = absBaseName + ".pdf";
+   QString absEpsName  = absBaseName + ".eps";
 
    bool regenerate = false;
    bool ok;
@@ -4295,7 +4308,7 @@ QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat 
 
    } else {
 
-      QByteArray arg1;
+      QString arg1;
       if (graphFormat == GOF_BITMAP) {
          arg1 = absImgName; 
 
@@ -4307,7 +4320,7 @@ QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat 
 
       }      
 
-      QByteArray arg2;
+      QString arg2;
       if (graphFormat == GOF_BITMAP) {
          arg2 = absMapName;
       }
@@ -4582,7 +4595,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
               << usedDir->shortName() << "\"";
 
             if (usedDir->isCluster()) {
-               if (! Config_getBool("DOT_TRANSPARENT")) {
+               if (! Config::getBool("dot-transparent")) {
                   t << " fillcolor=\"white\" style=\"filled\"";
                }
                t << " color=\"red\"";

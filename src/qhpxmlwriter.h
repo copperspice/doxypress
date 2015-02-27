@@ -34,21 +34,22 @@ class QhpXmlWriter{
    void setCompressionEnabled(bool enabled);
    void insert(QhpXmlWriter const &source);
    void dumpTo(QFile &file);
-   void open(char const *elementName, char const *const *attributes = 0);
-   void openClose(char const *elementName, char const *const *attributes = 0);
-   void openCloseContent(char const *elementName, char const *content);
-   void close(char const *elementName);
-   void declaration(char const *version, char const *encoding);
+
+   void open(const QString &elementName, const QMap<QString, QString> &attributes = QMap<QString, QString>());
+   void openClose(const QString &elementName, const QMap<QString, QString> &attributes = QMap<QString, QString>());
+   void openCloseContent(const QString &elementName, const QString &content);
+   void close(const QString &elementName);
+   void declaration(const char *version, const char *encoding);
 
    static char *dupEscaped(const char *source);
 
  private:
    void indent();
    void newLine();
-   void openPureHelper(char const *elementName, char const *const *attributes, bool close);
-   void openPure(char const *elementName,char const *const *attributes = 0);
-   void openClosePure(char const *elementName, char const *const *attributes = 0);
-   void closePure(char const *elementName);
+   void openPureHelper(const QString &elementName, const QMap<QString, QString> &attributes, bool close);
+   void openPure(const QString &elementName, const QMap<QString, QString> &attributes = QMap<QString, QString>());
+   void openClosePure(const QString &elementName, const QMap<QString, QString> &attributes = QMap<QString, QString>());
+   void closePure(const QString &elementName);
 
    QByteArray m_backend;
    QTextStream m_out;

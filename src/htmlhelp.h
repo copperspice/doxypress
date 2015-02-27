@@ -69,6 +69,7 @@ class HtmlHelp  : public IndexIntf
    //static HtmlHelp *getInstance();
    HtmlHelp();
    ~HtmlHelp();
+
    void initialize();
    void finalize();
    void incContentsDepth();
@@ -80,9 +81,9 @@ class HtmlHelp  : public IndexIntf
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
                      const char *title) override;
 
-   void addIndexFile(const char *name);
-   void addImageFile(const char *);
-   void addStyleSheetFile(const char *) {}
+   void addIndexFile(const QString &name) override;
+   void addImageFile(const QString &name) override;
+   void addStyleSheetFile(const QString &name) override {}
 
  private:
    friend class HtmlHelpIndex;
@@ -95,7 +96,7 @@ class HtmlHelp  : public IndexIntf
 
    QStringList indexFiles;
    QStringList imageFiles;
-   QHash<QString, void *> indexFileDict;
+   QSet<QString> indexFileDict;
 
    static HtmlHelp *theInstance;
 

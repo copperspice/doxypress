@@ -33,49 +33,29 @@
 #include <mandocvisitor.h>
 #include <language.h>
 
-static QByteArray getExtension()
+static QString getSubdir()
 {
-   /*
-    * [.][nuber][rest]
-    * in case of . missing, just ignore it
-    * in case number missing, just place a 3 in front of it
-    */
-   QByteArray ext = Config_getString("MAN_EXTENSION");
-   if (ext.isEmpty()) {
-      ext = "3";
-   } else {
-      if (ext.at(0) == '.') {
-         if (ext.length() == 1) {
-            ext = "3";
-         } else { // strip .
-            ext = ext.mid(1);
-         }
-      }
-      if (ext.at(0) < '0' || ext.at(0) > '9') {
-         ext.prepend("3");
-      }
+   QString dirName = Config::getString("man-subdir");
+  
+   if (dirName.isEmpty()) { 
+      dirName = "man" + Config::getString("man-extension");
    }
-   return ext;
-}
 
-static QByteArray getSubdir()
-{
-   QByteArray dir = Config_getString("MAN_SUBDIR");
-   if (dir.isEmpty()) {
-      dir = "man" + getExtension();
-   }
-   return dir;
+   return dirName;
 }
 
 ManGenerator::ManGenerator() : OutputGenerator()
 {
-   dir = Config_getString("MAN_OUTPUT") + "/" + getSubdir();
-   firstCol = true;
-   paragraph = true;
+   m_dir = Config::getString("man-output") + "/" + getSubdir();
+
    col = 0;
+
+   firstCol  = true;
+   paragraph = true;   
    upperCase = false;
+
    insideTabbing = false;
-   inHeader = false;
+   inHeader      = false;     
 }
 
 ManGenerator::~ManGenerator()
@@ -100,39 +80,48 @@ ManGenerator::~ManGenerator()
 
 void ManGenerator::init()
 {
-   QByteArray ext = getExtension();
-   QByteArray &manOutput = Config_getString("MAN_OUTPUT");
+   QString ext       = Config::getString("man-extension");  
+   QString manOutput = Config::getString("man-output");
 
    QDir d(manOutput);
-   if (!d.exists() && !d.mkdir(manOutput)) {
-      err("Could not create output directory %s\n", manOutput.data());
+
+   if (! d.exists() && ! d.mkdir(manOutput)) {
+      err("Could not create output directory %s\n", qPrintable(manOutput));
       exit(1);
    }
-   d.setPath(manOutput + "/" + getSubdir());
-   if (!d.exists() && !d.mkdir(manOutput + "/" + getSubdir())) {
-      err("Could not create output directory %s/%s\n", manOutput.data(), getSubdir().data());
+
+   QString subdir = getSubdir();
+   d.setPath(manOutput + "/" + subdir);
+  
+   if (! d.exists() && ! d.mkdir(manOutput + "/" + subdir)) {
+      err("Could not create output directory %s/%s\n", qPrintable(manOutput), qPrintable(subdir));
       exit(1);
    }
+
    createSubDirs(d);
 }
 
-static QByteArray buildFileName(const char *name)
-{
-   QByteArray fileName;
+static QString buildFileName(const char *name)
+{  
    if (name == 0) {
       return "noname";
    }
 
+   QString fname;
+
    const char *p = name;
    char c;
-   while ((c = *p++)) {
+
+   while (c = *p++) {
+
       switch (c) {
          case ':':
-            fileName += "_";
+            fname += "_";
             if (*p == ':') {
                p++;
             }
             break;
+
          case '<':
          case '>':
          case '&':
@@ -143,24 +132,26 @@ static QByteArray buildFileName(const char *name)
          case '%':
          case '+':
          case '/':
-            fileName += "_";
+            fname += "_";
             break;
+
          default:
-            fileName += c;
+            fname += c;
       }
    }
 
-   QByteArray manExtension = "." + getExtension();
-   if (fileName.right(manExtension.length()) != manExtension) {
-      fileName += manExtension;
+   QString manExtension = "." + Config::getString("man-extension");
+
+   if (fname.right(manExtension.length()) != manExtension) {
+      fname += manExtension;
    }
 
-   return fileName;
+   return fname;
 }
 
 void ManGenerator::startFile(const char *, const char *manName, const char *)
 {
-   startPlainFile( buildFileName( manName ) );
+   startPlainFile(buildFileName(manName));
    firstCol = true;
 }
 
@@ -172,38 +163,48 @@ void ManGenerator::endFile()
 
 void ManGenerator::endTitleHead(const char *, const char *name)
 {
-   m_textStream << ".TH \"" << name << "\" " << getExtension() << " \""
+   QString extension = Config::getString("man-extension");  
+
+   m_textStream << ".TH \"" << name << "\" " << extension << " \""
      << dateToString(false) << "\" \"";
 
-   if (!Config_getString("PROJECT_NUMBER").isEmpty()) {
-      m_textStream << "Version " << Config_getString("PROJECT_NUMBER") << "\" \"";
+   QString projectName = Config::getString("project-name");
+   QString projectVer  = Config::getString("project-version");
+
+   if (! projectVer.isEmpty()) {
+      m_textStream << "Version " << projectVer<< "\" \"";
    }
 
-   if (Config_getString("PROJECT_NAME").isEmpty()) {
+   if (projectName.isEmpty()) {
       m_textStream << "DoxyPress";
 
    } else {
-      m_textStream << Config_getString("PROJECT_NAME");
+      m_textStream << projectName;
+
    }
+
    m_textStream << "\" \\\" -*- nroff -*-" << endl;
    m_textStream << ".ad l" << endl;
    m_textStream << ".nh" << endl;
    m_textStream << ".SH NAME" << endl;
    m_textStream << name << " \\- ";
-   firstCol = false;
+
+   firstCol  = false;
    paragraph = true;
-   inHeader = true;
+   inHeader  = true;
 }
 
 void ManGenerator::newParagraph()
 {
    if (!paragraph) {
-      if (!firstCol) {
+      if (! firstCol) {
          m_textStream << endl;
       }
+
       m_textStream << ".PP" << endl;
       firstCol = true;
    }
+
    paragraph = true;
 }
 
@@ -213,9 +214,11 @@ void ManGenerator::startParagraph()
       if (!firstCol) {
          m_textStream << endl;
       }
+
       m_textStream << ".PP" << endl;
       firstCol = true;
    }
+
    paragraph = true;
 }
 
@@ -271,6 +274,7 @@ void ManGenerator::startGroupHeader(int)
    if (!firstCol) {
       m_textStream << endl;
    }
+
    m_textStream << ".SH \"";
    upperCase = true;
    firstCol = false;
@@ -347,7 +351,7 @@ void ManGenerator::codify(const QByteArray &str)
                break; // see  bug652277
 
             case '\t':
-               spacesToNextTabStop = Config_getInt("TAB_SIZE") - (col % Config_getInt("TAB_SIZE"));
+               spacesToNextTabStop = Config::getInt("tab-size") - (col %  Config::getInt("tab-size"));
 
                m_textStream << QString(spacesToNextTabStop, ' ');
                col += spacesToNextTabStop;
@@ -371,8 +375,8 @@ void ManGenerator::codify(const QByteArray &str)
                break;
          }
       }
-      //printf("%s",str);fflush(stdout);
    }
+
    paragraph = false;
 }
 
@@ -394,7 +398,7 @@ void ManGenerator::writeChar(char c)
          m_textStream << c;
          break;
    }
-   //printf("%c",c);fflush(stdout);
+
    paragraph = false;
 }
 
@@ -406,6 +410,7 @@ void ManGenerator::startDescList(SectionTypes)
       paragraph = true;
       col = 0;
    }
+
    paragraph = false;
    startBold();
 }
@@ -465,40 +470,37 @@ void ManGenerator::startMemberDoc(const char *, const char *, const char *, cons
       m_textStream << endl;
    }
    m_textStream << ".SS \"";
-   firstCol = false;
+   firstCol  = false;
    paragraph = false;
 }
 
-void ManGenerator::startDoxyAnchor(const char *, const char *manName,
-                                   const char *, const char *name,
-                                   const char *)
+void ManGenerator::startDoxyAnchor(const char *, const char *manName, const char *, const char *name, const char *)
 {
    // something to be done?
-   if ( !Config_getBool("MAN_LINKS") ) {
-      return; // no
+   if ( ! Config::getBool("man-links") ) {
+      return; 
    }
 
    // the name of the link file is derived from the name of the anchor:
    // - truncate after an (optional) ::
+
    QByteArray baseName = name;
    int i = baseName.lastIndexOf("::");
+
    if (i != -1) {
       baseName = baseName.right(baseName.length() - i - 2);
    }
-
-   //printf("Converting man link '%s'->'%s'->'%s'\n",
-   //       name,baseName.data(),buildFileName(baseName).data());
-
+   
    // - remove dangerous characters and append suffix, then add dir prefix
-   QByteArray fileName = dir + "/" + buildFileName( baseName );
-   QFile linkfile( fileName );
+   QString fname = m_dir + "/" + buildFileName(baseName);
+   QFile linkfile(fname);
 
-   // - only create file if it doesn't exist already
-   if ( !linkfile.open( QIODevice::ReadOnly ) ) {
+   // only create file if it does not exist
+   if (! linkfile.open( QIODevice::ReadOnly ) ) {
       if ( linkfile.open( QIODevice::WriteOnly ) ) {
          QTextStream linkstream;
-         linkstream.setDevice(&linkfile);
-         //linkstream.setEncoding(QTextStream::UnicodeUTF8);
+
+         linkstream.setDevice(&linkfile);       
          linkstream << ".so " << getSubdir() << "/" << buildFileName( manName ) << endl;
       }
    }
@@ -512,7 +514,7 @@ void ManGenerator::endMemberDoc(bool)
 
 void ManGenerator::startSubsection()
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
    m_textStream << ".SS \"";

@@ -47,7 +47,7 @@ int compareListValues(const BaseClassDef *item1, const BaseClassDef *item2)
 // ClassListIterator --> QListIterator<ClassDef *>
 int compareListValues(const ClassDef *item1, const ClassDef *item2)
 {
-   static bool b = Config_getBool("SORT_BY_SCOPE_NAME");
+   static bool b = Config::getBool("sort-by-scope-name");
 
    if (b) {
       return qstricmp(item1->name(), item2->name());
@@ -85,7 +85,7 @@ int compareListValues(const FileName *item1, const FileName *item2)
 {
    int retval;
 
-   if (Config_getBool("FULL_PATH_NAMES")) {
+   if (Config::getBool("full-path-names")) {
       retval = qstricmp(item1->fullName(), item2->fullName());
 
    } else {
@@ -110,7 +110,7 @@ int compareListValues(QSharedPointer<GroupDef> item1, QSharedPointer<GroupDef> i
 
 int compareListValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2)
 {
-   static bool sortConstructorsFirst = Config_getBool("SORT_MEMBERS_CTORS_1ST");
+   static bool sortConstructorsFirst = Config::getBool("sort-members-ctors-first");
 
    if (sortConstructorsFirst) {
       int ord1 = c1->isConstructor() ? 2 : (c1->isDestructor() ? 1 : 0);

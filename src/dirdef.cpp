@@ -33,7 +33,7 @@ static int g_dirCount = 0;
 
 DirDef::DirDef(const char *path) : Definition(path, 1, 1, path), visited(false)
 {
-   bool fullPathNames = Config_getBool("FULL_PATH_NAMES");
+   bool fullPathNames = Config::getBool("full-path-names");
    // get display name (stipping the paths mentioned in STRIP_FROM_PATH)
    // get short name (last part of path)
 
@@ -114,7 +114,7 @@ void DirDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
 {
    QSharedPointer<DirDef> self = sharedFrom(this);
 
-   if ((!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF")) || ! documentation().isEmpty()) {
+   if ((!briefDescription().isEmpty() && Config::getBool("repeat-brief")) || ! documentation().isEmpty()) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
       ol.writeRuler();
@@ -128,12 +128,12 @@ void DirDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
       ol.endGroupHeader();
 
       // repeat brief description
-      if (! briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF")) {
+      if (! briefDescription().isEmpty() && Config::getBool("repeat-brief")) {
          ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
 
       // separator between brief and details
-      if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF") && !documentation().isEmpty()) {
+      if (! briefDescription().isEmpty() && Config::getBool("repeat-brief") && ! documentation().isEmpty()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::RTF);
@@ -157,7 +157,7 @@ void DirDef::writeBriefDescription(OutputList &ol)
 {  
    QSharedPointer<DirDef> self = sharedFrom(this);
 
-   if (! briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+   if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), 
                                              briefDescription(), true, false);
 
@@ -169,9 +169,7 @@ void DirDef::writeBriefDescription(OutputList &ol)
          ol.writeString(" \n");
          ol.enable(OutputGenerator::RTF);
 
-         if (Config_getBool("REPEAT_BRIEF") ||
-               !documentation().isEmpty()
-            ) {
+         if (Config::getBool("repeat-brief") || !documentation().isEmpty()) {
             ol.disableAllBut(OutputGenerator::Html);
             ol.startTextLink(0, "details");
             ol.parseText(theTranslator->trMore());
@@ -191,7 +189,7 @@ void DirDef::writeBriefDescription(OutputList &ol)
 void DirDef::writeDirectoryGraph(OutputList &ol)
 {
    // write graph dependency graph
-   if (Config_getBool("DIRECTORY_GRAPH") && Config_getBool("HAVE_DOT")) {
+   if (Config::getBool("directory-graph") && Config::getBool("have-dot")) {
 
       QSharedPointer<DirDef> self = sharedFrom(this);
       DotDirDeps dirDep(self);
@@ -230,7 +228,7 @@ void DirDef::writeSubDirList(OutputList &ol)
          ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName().toUtf8());
          ol.endMemberItem();
 
-         if (!dd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+         if (!dd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
             ol.startMemberDescription(dd->getOutputFileBase());
 
             ol.generateDoc(briefFile(), briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription(),
@@ -287,7 +285,7 @@ void DirDef::writeFileList(OutputList &ol)
 
          ol.endMemberItem();
 
-         if (!fd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+         if (! fd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
             ol.startMemberDescription(fd->getOutputFileBase());
 
             ol.generateDoc(briefFile(), briefLine(), fd, QSharedPointer<MemberDef>(), fd->briefDescription(),
@@ -323,8 +321,8 @@ QByteArray DirDef::shortTitle() const
 
 bool DirDef::hasDetailedDescription() const
 {
-   static bool repeatBrief = Config_getBool("REPEAT_BRIEF");
-   return (!briefDescription().isEmpty() && repeatBrief) || !documentation().isEmpty();
+   static bool repeatBrief = Config::getBool("repeat-brief");
+   return (! briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty();
 }
 
 void DirDef::writeTagFile(QTextStream &tagFile)
@@ -372,7 +370,7 @@ void DirDef::writeDocumentation(OutputList &ol)
 {
    QSharedPointer<DirDef> self = sharedFrom(this);
 
-   static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+   static bool generateTreeView = Config::getBool("generate-treeview");
    ol.pushGeneratorState();
 
    QByteArray title = theTranslator->trDirReference(qPrintable(m_dispName));
@@ -638,12 +636,11 @@ QSharedPointer<DirDef> DirDef::createNewDir(const char *path)
    return dir;
 }
 
-bool DirDef::matchPath(const QByteArray &path, QStringList &list)
+bool DirDef::matchPath(const QString &path, const QStringList &list)
 {  
-   for (auto s : list) {
-      QByteArray prefix = s.toUtf8();
-
-      if (qstricmp(prefix.left(path.length()), path) == 0) { 
+   for (auto prefix : list) {
+          
+      if (prefix.startsWith(path, Qt::CaseInsensitive)) {      
          // case insensitive compare
          return true;
       }      
@@ -652,12 +649,10 @@ bool DirDef::matchPath(const QByteArray &path, QStringList &list)
    return false;
 }
 
-/*! strip part of \a path if it matches
- *  one of the paths in the Config_getList("STRIP_FROM_PATH") list
+/*! strip part of \a path if it matches  one of the paths in the list
  */
 QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QByteArray &path)
-{
-   //printf("DirDef::mergeDirectoryInTree(%s)\n",path.data());
+{   
    int p = 0;
    int i = 0;
 
@@ -666,7 +661,7 @@ QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QByteArray &path)
    while ((i = path.indexOf('/', p)) != -1) {
       QByteArray part = path.left(i + 1);
 
-      if (! matchPath(part, Config_getList("STRIP_FROM_PATH")) && (part != "/" && part != "//")) {
+      if (! matchPath(part, Config::getList("strip-from-path")) && (part != "/" && part != "//")) {
          dir = createNewDir(part);
       }
 
@@ -712,7 +707,7 @@ static void writePartialFilePath(OutputList &ol, QSharedPointer<const DirDef> ro
 
 void DirRelation::writeDocumentation(OutputList &ol)
 {
-   static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+   static bool generateTreeView = Config::getBool("generate-treeview");
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
@@ -920,7 +915,7 @@ void generateDirDocs(OutputList &ol)
       dir->writeDocumentation(ol);
    }
 
-   if (Config_getBool("DIRECTORY_GRAPH")) {    
+   if (Config::getBool("directory-graph")) {    
       for (auto item : Doxygen::dirRelations) { 
          item->writeDocumentation(ol);
       }

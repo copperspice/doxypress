@@ -99,8 +99,7 @@ void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const char *anch
    assert(! isSourceFile || ctx->definitionType() == Definition::TypeFile);
    
    QByteArray url = isSourceFile ? ctx.dynamicCast<FileDef>()->getSourceFileBase() : ctx->getOutputFileBase();
-
-   url += Config_getString("HTML_FILE_EXTENSION");
+   url += Doxygen::htmlFileExtension.toUtf8();
 
    QByteArray baseUrl = url;
 
@@ -519,9 +518,10 @@ static QByteArray definitionToName(QSharedPointer<Definition> ctx)
 
 void SearchIndexExternal::setCurrentDoc(QSharedPointer<Definition> ctx, const char *anchor, bool isSourceFile)
 {
-   QByteArray extId = stripPath(Config_getString("EXTERNAL_SEARCH_ID"));
+   QByteArray extId = stripPath(Config::getString("external-search-id").toUtf8());
+
    QByteArray baseName = isSourceFile ? ctx.dynamicCast<FileDef>()->getSourceFileBase() : ctx->getOutputFileBase();
-   QByteArray url = baseName + Doxygen::htmlFileExtension;
+   QByteArray url = baseName + Doxygen::htmlFileExtension.toUtf8();
 
    if (anchor) {
       url += QByteArray("#") + anchor;
@@ -674,7 +674,7 @@ class SearchIndexMap : public StringMap<QSharedPointer<SearchDefinitionList>>
 static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_SEARCH_INDICES],
                                    int symbolCount[NUM_SEARCH_INDICES], QSharedPointer<MemberDef> md)
 {
-   static bool hideFriendCompounds = Config_getBool("HIDE_FRIEND_COMPOUNDS");
+   static bool hideFriendCompounds = Config::getBool("hide-friend-compounds");
    bool isLinkable = md->isLinkable();
 
    QSharedPointer<ClassDef>     cd;
@@ -841,7 +841,7 @@ class SearchIndexCategoryMapping
 
 void writeJavascriptSearchIndex()
 {
-   if (! Config_getBool("GENERATE_HTML")) {
+   if (! Config::getBool("generate-html")) {
       return;
    }
 
@@ -967,7 +967,7 @@ void writeJavascriptSearchIndex()
    }
     
    // write index files
-   QByteArray searchDirName = Config_getString("HTML_OUTPUT") + "/search";
+   QString searchDirName = Config::getString("html-output") + "/search";
 
    for (int i = 0; i < NUM_SEARCH_INDICES; i++) { 
       // for each index    
@@ -1081,7 +1081,7 @@ void writeJavascriptSearchIndex()
                   }
                   ti << "',";
 
-                  static bool extLinksInWindow = Config_getBool("EXT_LINKS_IN_WINDOW");
+                  static bool extLinksInWindow = Config::getBool("external-links-in-window");
                   if (!extLinksInWindow || d->getReference().isEmpty()) {
                      ti << "1,";
                   } else {
@@ -1158,7 +1158,7 @@ void writeJavascriptSearchIndex()
                      }
                      ti << "',";
 
-                     static bool extLinksInWindow = Config_getBool("EXT_LINKS_IN_WINDOW");
+                     static bool extLinksInWindow = Config::getBool("external-links-in-window");
                      if (! extLinksInWindow || d->getReference().isEmpty()) {
                         ti << "1,";
                      } else {
@@ -1380,9 +1380,9 @@ void writeJavascriptSearchIndex()
 
 void initSearchIndexer()
 {
-   static bool searchEngine      = Config_getBool("SEARCHENGINE");
-   static bool serverBasedSearch = Config_getBool("SERVER_BASED_SEARCH");
-   static bool externalSearch    = Config_getBool("EXTERNAL_SEARCH");
+   static bool searchEngine      = Config::getBool("html-search");
+   static bool serverBasedSearch = Config::getBool("server-based-search");
+   static bool externalSearch    = Config::getBool("external-search");
 
    if (searchEngine && serverBasedSearch) {
       if (externalSearch) { // external tools produce search index and engine

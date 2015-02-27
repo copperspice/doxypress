@@ -97,21 +97,11 @@ static void format_warn(const char *file, int line, const char *text)
    }
 
    // substitute markers by actual values
-   QByteArray msgText =
-      substitute(
-         substitute(
-            substitute(
-               substitute(
-                  outputFormat,
-                  "$file", fileSubst
-               ),
-               "$text", textSubst
-            ),
-            "$line", lineSubst
-         ),
-         "$version", versionSubst
-      ) + '\n';
-
+   QByteArray msgText = substitute(outputFormat.toUtf8(), "$file", fileSubst);
+   msgText = substitute(msgText, "$text",    textSubst);
+   msgText = substitute(msgText, "$line",    lineSubst);
+   msgText = substitute(msgText, "$version", versionSubst) + "\n";
+   
    // print resulting message
    fwrite(msgText.data(), 1, msgText.length(), warnFile);
 }

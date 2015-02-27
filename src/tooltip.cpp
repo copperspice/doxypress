@@ -50,17 +50,19 @@ void TooltipManager::clearTooltips()
    m_tooltipInfo.clear();
 }
 
-static QByteArray escapeId(const char *s)
+static QByteArray escapeId(const QString &file)
 {
-   QByteArray res = s;
+   QByteArray res = file.toUtf8();
    char *p = res.data();
 
    while (*p) {
-      if (!isId(*p)) {
+      if (! isId(*p)) {
          *p = '_';
       }
+
       p++;
    }
+
    return res;
 }
 
