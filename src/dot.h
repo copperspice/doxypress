@@ -54,8 +54,8 @@ struct EdgeInfo {
 
    int m_color;
    int m_style;
-   QByteArray m_label;
-   QByteArray m_url;
+   QString m_label;
+   QString m_url;
    int m_labColor;
 };
 
@@ -66,7 +66,7 @@ class DotNode
    enum GraphType { Dependency, Inheritance, Collaboration, Hierarchy, CallGraph };
    enum TruncState { Unknown, Truncated, Untruncated };
 
-   DotNode(int n, const char *lab, const char *tip, const char *url,
+   DotNode(int n, const QString &label, const QString &tip, const QString &url,
            bool rootNode = false, QSharedPointer<ClassDef> cd = QSharedPointer<ClassDef>());
 
    ~DotNode();
@@ -89,7 +89,7 @@ class DotNode
    void writeDocbook(QTextStream &t, bool isClassGraph);
    void writeDEF(QTextStream &t);
 
-   QByteArray label() const {
+   QString label() const {
       return m_label;
    }
 
@@ -111,8 +111,7 @@ class DotNode
 
  private:
    void colorConnectedNodes(int curColor);
-   void writeBox(QTextStream &t, GraphType gt, GraphOutputFormat f,
-                 bool hasNonReachableChildren, bool reNumber = false);
+   void writeBox(QTextStream &t, GraphType gt, GraphOutputFormat f, bool hasNonReachableChildren, bool reNumber = false);
 
    void writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat f, DotNode *cn,
                    EdgeInfo *ei, bool topDown, bool pointBack = true, bool reNumber = false);
@@ -128,10 +127,10 @@ class DotNode
       m_truncated = b ? Truncated : Untruncated;
    }
 
-   int              m_number;
-   QByteArray       m_label;     //!< label text
-   QByteArray       m_tooltip;   //!< node's tooltip
-   QByteArray       m_url;       //!< url of the node (format: remote$local)
+   int           m_number;
+   QString       m_label;     //!< label text
+   QString       m_tooltip;   //!< node's tooltip
+   QString       m_url;       //!< url of the node (format: remote$local)
 
    QList<DotNode *>  *m_parents;   //!< list of parent nodes (incoming arrows)
    QList<DotNode *>  *m_children;  //!< list of child nodes (outgoing arrows)
@@ -155,14 +154,8 @@ class DotNode
    friend class DotCallGraph;
    friend class DotGroupCollaboration;
 
-   friend QByteArray computeMd5Signature(
-      DotNode *root, GraphType gt,
-      GraphOutputFormat f,
-      bool lrRank, bool renderParents,
-      bool backArrows,
-      const QByteArray &title,
-      QByteArray &graphStr
-   );
+   friend QByteArray computeMd5Signature(DotNode *root, GraphType gt, GraphOutputFormat f, bool lrRank, bool renderParents,
+                        bool backArrows, const QByteArray &title, QByteArray &graphStr);
 };
 
 inline int DotNode::findParent( DotNode *n )
@@ -210,7 +203,7 @@ class DotClassGraph
    void writeXML(QTextStream &t);
    void writeDocbook(QTextStream &t);
    void writeDEF(QTextStream &t);
-   QByteArray diskName() const;
+   QString diskName() const;
 
  private:
    void buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool base, int distance);
@@ -220,13 +213,13 @@ class DotClassGraph
    void addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, const char *label,
                  const char *usedName, const char *templSpec, bool base, int distance);
 
-   DotNode                    *m_startNode;
-   QHash<QString, DotNode *>  *m_usedNodes;
+   DotNode *m_startNode;
+   QHash<QString, DotNode *> *m_usedNodes;
 
-   static int         m_curNodeNumber;
+   static int m_curNodeNumber;
    DotNode::GraphType m_graphType;
-   QByteArray         m_diskName;
-   bool               m_lrRank;
+   QString m_diskName;
+   bool m_lrRank;
 };
 
 /** Representation of an include dependency graph */
@@ -241,7 +234,7 @@ class DotInclDepGraph
 
    bool isTrivial() const;
    bool isTooBig() const;
-   QByteArray diskName() const;
+   QString diskName() const;
    void writeXML(QTextStream &t);
    void writeDocbook(QTextStream &t);
 
@@ -254,9 +247,9 @@ class DotInclDepGraph
    DotNode                   *m_startNode;
    QHash<QString, DotNode *> *m_usedNodes;
 
-   static int      m_curNodeNumber;
-   QByteArray      m_diskName;
-   bool            m_inverse;
+   static int m_curNodeNumber;
+   QString m_diskName;
+   bool    m_inverse;
 };
 
 /** Representation of an call graph */
@@ -267,7 +260,7 @@ class DotCallGraph
    ~DotCallGraph();
 
    QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
-                         const QString  &path, const QString  &fileName, const QString  &relPath, 
+                         const QString  &path, const QString &fileName, const QString  &relPath, 
                          bool writeImageMap = true, int graphId = -1) const;
 
    void buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int distance);
@@ -282,8 +275,8 @@ class DotCallGraph
 
    QHash<QString, DotNode *> *m_usedNodes;
 
-   bool            m_inverse;
-   QByteArray      m_diskName;
+   bool    m_inverse;
+   QString m_diskName;
 
    QSharedPointer<Definition> m_scope;
 };
@@ -319,9 +312,10 @@ class DotGroupCollaboration
    class Link
    {
     public:
-      Link(const QByteArray lab, const QByteArray &u) : label(lab), url(u) {}
-      QByteArray label;
-      QByteArray url;
+      Link(const QString d1, const QString &d2) : label(d1), url(d2) {}
+
+      QString label;
+      QString url;
    };
 
    class Edge
@@ -350,25 +344,19 @@ class DotGroupCollaboration
    bool isTrivial() const;
 
  private :
-   void addCollaborationMember(Definition *def, QByteArray &url, EdgeType eType);
-
-   void addCollaborationMember(QSharedPointer<Definition> def, QByteArray &url, EdgeType eType)
-   {
-      addCollaborationMember(def.data(), url, eType);
-   }
-
+   void addCollaborationMember(QSharedPointer<Definition> def, const QString &url, EdgeType eType);
+ 
    void addMemberList(QSharedPointer<MemberList> ml);
-   void writeGraphHeader(QTextStream &t, const QByteArray &title) const;
+   void writeGraphHeader(QTextStream &t, const QString &title) const;
 
-   Edge *addEdge( DotNode *_pNStart, DotNode *_pNEnd, EdgeType _eType,
-                  const QByteArray &_label, const QByteArray &_url );
+   Edge *addEdge(DotNode *_pNStart, DotNode *_pNEnd, EdgeType _eType, const QString &_label, const QString &_url );
 
    DotNode        *m_rootNode;
    int             m_curNodeId;
 
    QHash<QString, DotNode *> *m_usedNodes;
 
-   QByteArray      m_diskName;
+   QString         m_diskName;
    QList<Edge *>   m_edges;
 };
 
@@ -378,19 +366,17 @@ class DotRunner
 {
  public:
    struct CleanupItem {
-      QByteArray path;
-      QByteArray file;
+      QString path;
+      QString file;
    };
 
    /** Creates a runner for a dot \a file. */
-   DotRunner(const QByteArray &file, const QByteArray &fontPath, bool checkResult,
-             const QByteArray &imageName = QByteArray());
+   DotRunner(const QString &file, const QString &fontPath, bool checkResult, const QString &imageName = QString());
 
    /** Adds an additional job to the run.
     *  Performing multiple jobs one file can be faster.
     */
-   void addJob(const char *format, const char *output);
-
+   void addJob(const QString &format, const QString &output);
    void addPostProcessing(const char *cmd, const char *args);
 
    void preventCleanUp() {
@@ -404,14 +390,17 @@ class DotRunner
    }
 
  private:
-   QList<QByteArray> m_jobs;
-   QByteArray m_postArgs;
-   QByteArray m_postCmd;
-   QByteArray m_file;
-   QByteArray m_path;
-   bool m_checkResult;
-   QByteArray m_imageName;
+   QList<QString> m_jobs;
+
+   QString m_imageName;
+   QString m_postArgs;
+   QString m_postCmd;
+   QString m_file;
+   QString m_path;
+
+   bool m_checkResult;   
    bool m_cleanUp;
+
    CleanupItem m_cleanupItem;
 };
 
@@ -420,32 +409,28 @@ class DotFilePatcher
 {
  public:
    struct Map {
-      QByteArray mapFile;
-      QByteArray relPath;
-      bool     urlOnly;
+      QString    mapFile;
+      QString    relPath;
+      bool       urlOnly;
       QByteArray context;
-      QByteArray label;
-      bool     zoomable;
-      int      graphId;
+      QString    label;
+      bool       zoomable;
+      int        graphId;
    };
 
-   DotFilePatcher(const char *patchFile);
-   int addMap(const QByteArray &mapFile, const QByteArray &relPath,
-                  bool urlOnly, const QByteArray &context, const QByteArray &label);
+   DotFilePatcher(const QString &patchFile);
 
-   int addFigure(const QByteArray &baseName,
-                  const QByteArray &figureName, bool heightCheck);
+   int addMap(const QString &mapFile, const QString &relPath, bool urlOnly, const QByteArray &context, const QString &label);
+   int addFigure(const QString &baseName, const QString &figureName, bool heightCheck);
+   int addSVGConversion(const QString &relPath, bool urlOnly, const QByteArray &context, bool zoomable, int graphId);
+   int addSVGObject(const QString &baseName, const QString &absImgName, const QString &relPath);
 
-   int addSVGConversion(const QByteArray &relPath, bool urlOnly,
-                  const QByteArray &context, bool zoomable, int graphId);
-
-   int addSVGObject(const QByteArray &baseName, const QByteArray &figureName, const QByteArray &relPath);
    bool run();
-   QByteArray file() const;
+   QString file() const;
 
  private:
    QList<Map> m_maps;
-   QByteArray m_patchFile;
+   QString m_patchFile;
 };
 
 /** Queue of dot jobs to run. */
@@ -482,18 +467,15 @@ class DotManager
    static DotManager *instance();
    void addRun(DotRunner *run);
 
-   int  addMap(const QByteArray &file, const QByteArray &mapFile,
-                  const QByteArray &relPath, bool urlOnly,
-                  const QByteArray &context, const QByteArray &label);
+   int  addMap(const QString &file, const QString &mapFile, const QString &relPath, bool urlOnly,
+                  const QByteArray &context, const QString &label);
 
-   int addFigure(const QByteArray &file, const QByteArray &baseName,
-                  const QByteArray &figureName, bool heightCheck);
+   int addFigure(const QString &file, const QString &baseName, const QString &figureName, bool heightCheck);
 
-   int addSVGConversion(const QByteArray &file, const QByteArray &relPath,
+   int addSVGConversion(const QString &file, const QString &relPath,
                   bool urlOnly, const QByteArray &context, bool zoomable, int graphId);
 
-   int addSVGObject(const QByteArray &file, const QByteArray &baseName, const QByteArray &figureNAme, 
-                  const QByteArray &relPath);
+   int addSVGObject(const QString &file, const QString &baseName, const QString &figureName, const QString &relPath);
 
    bool run();
 

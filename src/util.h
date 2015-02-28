@@ -231,7 +231,7 @@ int minClassDistance(QSharedPointer<const ClassDef> cd, QSharedPointer<const Cla
 Protection classInheritedProtectionLevel(QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef> bcd, 
                   Protection prot = Public, int level = 0);
 
-QString convertNameToFile(const char *name, bool allowDots = false, bool allowUnderscore = false);
+QString convertNameToFile(const QString &name, bool allowDots = false, bool allowUnderscore = false);
 
 void extractNamespaceName(const QByteArray &scopeName, QByteArray &className, QByteArray &namespaceName,
                   bool allowEmptyClass = false);
@@ -276,7 +276,7 @@ QSharedPointer<PageDef> addRelatedPage(const char *name, const QByteArray &ptitl
                   const char *fileName, int startLine, const QList<ListItemInfo> *sli, QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>(),
                   TagInfo *tagInfo = 0, SrcLangExt lang = SrcLangExt_Unknown );
 
-QByteArray escapeCharsInString(const char *name, bool allowDots, bool allowUnderscore = false);
+QByteArray escapeCharsInString(const QString &name, bool allowDots, bool allowUnderscore = false);
 
 void addGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d);
 
@@ -352,7 +352,7 @@ QByteArray filterTitle(const QByteArray &title);
 bool patternMatch(const QFileInfo &fi, const QStringList &patList);
 
 QByteArray externalLinkTarget();
-QByteArray externalRef(const QByteArray &relPath, const QByteArray &ref, bool href);
+QByteArray externalRef(const QString &relPath, const QByteArray &ref, bool href);
 int nextUtf8CharPosition(const QByteArray &utf8Str, int len, int startPos);
 const char *writeUtf8Char(QTextStream &t, const char *s);
 

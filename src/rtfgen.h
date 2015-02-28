@@ -331,7 +331,7 @@ class RTFGenerator : public OutputGenerator
    void setCurrentDoc(QSharedPointer<Definition> d, const char *, bool) override {}
    void addWord(const QString &word, bool hiPriority) override {}
 
-   static bool preProcessFileInplace(const QString &path, const char *name);
+   static bool preProcessFileInplace(const QString &path, const QString &name);
 
  private:
    RTFGenerator(const RTFGenerator &);

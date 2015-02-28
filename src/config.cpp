@@ -18,13 +18,11 @@
 #include <QDir>
 
 #include <config.h>
-//   #include <doxy_build_info.h>
 #include <doxy_setup.h>
 #include <doxy_globals.h>
 #include <language.h>
 #include <message.h>
 #include <pre.h>
-//   #include <portable.h>
 #include <util.h>
 
 bool Config::getBool(const QString name)
@@ -116,7 +114,7 @@ void Config::setList(const QString name, QStringList data)
 
 void Config::verify()
 {
-   printf("**  Adjust Project Configuration\n");   
+   printf("**  Verify Project Configuration\n");   
 
    //  Config::instance()->substituteEnvironmentVars();        // not used at this time (broom) 
 
@@ -152,6 +150,26 @@ void Config::verify()
    }
 
    iterString.value().value = outputDirectory;
+
+
+   // ** check include path
+   auto iterList = m_cfgList.find("include-path");
+   QStringList includePath = iterList.value().value;
+
+   for (auto s : includePath) {   
+      QFileInfo fi(s);
+
+      if (fi.exists()) {
+         addSearchDir(fi.absoluteFilePath());   
+
+      } else {
+         err("Warning: INCLUDE PATH `%s' does not exist\n", qPrintable(s));
+
+      }          
+   }
+
+   iterList.value().value = includePath;
+
 
    // ** 
    iterString = m_cfgString.find("layout-file");
@@ -201,59 +219,8 @@ void Config::verify()
    Doxygen::htmlFileExtension = htmlFileExtension;
 
 
-   // ** Save data to structers and variables   
-
-   // **   
-   Doxygen::parseSourcesNeeded = Config::getBool("dot-call") ||  Config::getBool("dot-called-by") ||
-                                 Config::getBool("ref-relation") || Config::getBool("ref-by-relation");
-   
-   Doxygen::markdownSupport    = Config::getBool("markdown");
-
-
-   // ** add predefined macro name to a dictionary
-   const QStringList expandAsDefinedList = Config::getList("expand-as-defined");
-
-   for (auto s : expandAsDefinedList) {
-      if (! Doxygen::expandAsDefinedDict.contains(s)) {
-         Doxygen::expandAsDefinedDict.insert(s);
-      }      
-   }
-
-   // ** Add custom extension mappings 
-   const QStringList extMaps = Config::getList("extension-mapping");
-  
-   for (auto mapStr : extMaps) { 
-      int i = mapStr.indexOf('=');
-
-      if (i != -1) {
-         QString extension = mapStr.left(i).trimmed().toLower();
-         QString language  = mapStr.mid(i + 1).trimmed().toLower();
-
-         if (! updateLanguageMapping(extension, language)) {
-            err("Unable to map file extension '%s' to '%s', verify the 'EXTENSION MAPPING' tag\n", qPrintable(extension), qPrintable(language));
-
-         } else {
-            msg("Adding custom extension mapping: .%s will be treated as language %s\n", qPrintable(extension), qPrintable(language));
-         }
-      }
-   } 
-
    // **
-   const QStringList includePath = Config::getList("include-path");
- 
-   for (auto s : includePath) { 
-      QFileInfo fi(s);
-      addSearchDir(fi.absoluteFilePath());      
-   }    
-
-   // read aliases and store them in a dictionary
-   readAliases();
-}
-
-void Config:: preVerify()
-{
-   // **
-   auto iterString = m_cfgString.find("warn-format");
+   iterString = m_cfgString.find("warn-format");
    QString warnFormat = iterString.value().value.trimmed();
 
    if (warnFormat.isEmpty()) {
@@ -322,10 +289,201 @@ void Config:: preVerify()
    iterEnum.value().value = paperType;
 
 
-/*
+
+   // ********** Save data to structers and variables   
+
+   // **   
+   Doxygen::parseSourcesNeeded = Config::getBool("dot-call") ||  Config::getBool("dot-called-by") ||
+                                 Config::getBool("ref-relation") || Config::getBool("ref-by-relation");
    
+   Doxygen::markdownSupport    = Config::getBool("markdown");
 
 
+   // ** check input
+   iterList = m_cfgList.find("input-source");
+   QStringList inputSource = iterList.value().value;
+
+   if (inputSource.count() == 0) {
+      // use current dir as the default
+      inputSource.append(QDir::currentPath());
+
+   } else {    
+
+      for (auto s : inputSource) {
+         QFileInfo fi(s);
+
+         if (! fi.exists()) {
+            err("Warning: 'INPUT SOURCE' `%s' does not exist\n", qPrintable(s));
+         }         
+      }
+   }
+
+   iterList.value().value = inputSource;
+
+
+   // **
+   if (Config::getBool("generate-treeview") && Config::getBool("generate-chm")) {
+      err("Warning: When enabling 'GENERATE CHM', 'GENERATE TREEVIEW' tag must be disabled\n");
+
+      auto iterBool = m_cfgBool.find("generate-treeeview");
+      bool data = iterBool.value().value;
+
+      iterBool.value().value = false;
+   }
+
+   // **
+   if (Config::getBool("html-search") && Config::getBool("generate-chm")) {
+      err("Warning: When enabling 'GENERATE CHM', HTML SEARCH' must be disabled\n");
+
+      auto iterBool = m_cfgBool.find("html-search");
+      bool data = iterBool.value().value;
+
+      iterBool.value().value = false;
+   }
+
+   // **
+   if (Config::getBool("inline-grouped-classes") && Config::getBool("separate-member-pages")) {
+      err("Error: When enabling 'INLINE GROUPED CLASSES', 'SEPARATE MEMBER PAGES' taga must be disabled\n");
+
+      auto iterBool = m_cfgBool.find("separate-member-pages");
+      bool data = iterBool.value().value;
+
+      iterBool.value().value = false;
+   }
+
+   // ** 
+   if (! Config::getBool("generate-html") && Config::getBool("generate-chm")) {
+      err("Warning: 'GENERATE CHM' requires 'GENERATE HTML'\n");
+   }
+
+
+/*
+   // **
+   if (Config::getBool("generate-qhp")) {
+
+      if (Config_getString("QHP_NAMESPACE").isEmpty()) {
+         err("Error: GENERATE_QHP=YES requires QHP_NAMESPACE to be set. Using 'org.doxypress.doc' as default.\n");
+
+         Config_getString("QHP_NAMESPACE") = "org.doxypress.doc";
+      }
+
+      if (Config_getString("QHP_VIRTUAL_FOLDER").isEmpty()) {
+         err("Error: GENERATE_QHP=YES requires QHP_VIRTUAL_FOLDER to be set. Using 'doc' as default\n");
+
+         Config_getString("QHP_VIRTUAL_FOLDER") = "doc";
+      }
+   }
+
+*/
+
+
+   // **
+   if (Config::getBool("optimize-java") && Config::getBool("inline-info")) {
+      err("Warning: Java does have an inline concept, setting 'INLINE INFO' to false\n");
+     
+      auto iterBool = m_cfgBool.find("inline-info");
+      bool data = iterBool.value().value;
+
+      iterBool.value().value = false;
+   }
+
+
+   // ** add predefined macro name to a dictionary
+   const QStringList expandAsDefinedList = Config::getList("expand-as-defined");
+
+   for (auto s : expandAsDefinedList) {
+      if (! Doxygen::expandAsDefinedDict.contains(s)) {
+         Doxygen::expandAsDefinedDict.insert(s);
+      }      
+   }
+
+   // ** Add custom extension mappings 
+   const QStringList extMaps = Config::getList("extension-mapping");
+  
+   for (auto mapStr : extMaps) { 
+      int i = mapStr.indexOf('=');
+
+      if (i != -1) {
+         QString extension = mapStr.left(i).trimmed().toLower();
+         QString language  = mapStr.mid(i + 1).trimmed().toLower();
+
+         if (! updateLanguageMapping(extension, language)) {
+            err("Unable to map file extension '%s' to '%s', verify the 'EXTENSION MAPPING' tag\n", qPrintable(extension), qPrintable(language));
+
+         } else {
+            msg("Adding custom extension mapping: .%s, will be treated as language %s\n", qPrintable(extension), qPrintable(language));
+         }
+      }
+   } 
+   
+   // read aliases and store them in a dictionary
+   readAliases();
+}
+
+void Config::preVerify()
+{
+   // ** 
+   auto iterString = m_cfgString.find("html-header");
+   QString headerFile = iterString.value().value;
+
+   if (! headerFile.isEmpty()) {
+      QFileInfo fi(headerFile);
+
+      if (! fi.exists()) {
+         err("Error: HTML HEADER file `%s' does not exist\n", qPrintable(headerFile));
+         exit(1);
+      }
+   }
+
+   // ** 
+   iterString = m_cfgString.find("html-footer");
+   QString footerFile = iterString.value().value;
+
+   if (! footerFile.isEmpty()) {
+      QFileInfo fi(footerFile);
+
+      if (! fi.exists()) {
+         err("Error: HTML FOOTER file `%s' does not exist\n", qPrintable(footerFile));
+         exit(1);
+      }
+   }
+
+   // **   
+   if (Config::getBool("use-mathjax")) {
+      iterString = m_cfgString.find("mathjax-codefile");   
+      QString mathJaxCodefile = iterString.value().value;
+
+      if (! mathJaxCodefile.isEmpty()) {
+         QFileInfo fi(mathJaxCodefile);
+
+         if (! fi.exists()) {
+            err("MATHJAX_CODEFILE file `%s' does not exist\n", qPrintable(mathJaxCodefile));
+            exit(1);
+         }
+      }
+   }
+
+   // **
+   iterString = m_cfgString.find("latex-header");
+   QString latexHeaderFile = iterString.value().value;
+
+   if (!latexHeaderFile.isEmpty()) {
+      QFileInfo fi(latexHeaderFile);
+
+      if (! fi.exists()) {
+         err("LATEX HEADER file `%s' does not exist\n", qPrintable(latexHeaderFile));
+         exit(1);
+      }
+   }
+
+}
+
+
+ 
+
+
+/*
+ 
    // ** expand the relative stripFromPath values
    auto iterList = m_cfgList.find("");
    QStringList stripFromPath = Config_getList("STRIP_FROM_PATH");
@@ -349,76 +507,10 @@ void Config:: preVerify()
    cleanUpPaths(stripFromIncPath);
 
    iterList.value().value = ?;
+*/
 
-
-   // ** see if HTML header is valid
-   iterString = m_cfgString.find("");
-   QByteArray &headerFile = Config_getString("HTML_HEADER");
-
-   if (! headerFile.isEmpty()) {
-
-      QFileInfo fi(headerFile);
-
-      if (! fi.exists()) {
-         err("Error: tag HTML_HEADER: header file `%s' does not exist\n", headerFile.data());
-         exit(1);
-      }
-   }
-
-   iterString.value().value = ?;
-
-
-   // ** Test to see if HTML footer is valid
-   iterString = m_cfgString.find("");
-   QByteArray &footerFile = Config_getString("HTML_FOOTER");
-
-   if (! footerFile.isEmpty()) {
-      QFileInfo fi(footerFile);
-      if (!fi.exists()) {
-         err("Error: tag HTML_FOOTER: footer file `%s' does not exist\n", footerFile.data());
-         exit(1);
-      }
-   }
-
-
-   // ** Test to see if MathJax code file is valid
-   iterString = m_cfgString.find("");
-
-   if (Config_getBool("USE_MATHJAX")) {
-      QByteArray &MathJaxCodefile = Config_getString("MATHJAX_CODEFILE");
-
-      if (!MathJaxCodefile.isEmpty()) {
-         QFileInfo fi(MathJaxCodefile);
-
-         if (!fi.exists()) {
-            err("Error: tag MATHJAX_CODEFILE file `%s' does not exist\n", MathJaxCodefile.data());
-            exit(1);
-         }
-      }
-   }
-
-   // Test to see if LaTeX header is valid
-   iterString = m_cfgString.find("");
-   QByteArray &latexHeaderFile = Config_getString("LATEX_HEADER");
-
-   if (!latexHeaderFile.isEmpty()) {
-      QFileInfo fi(latexHeaderFile);
-      if (!fi.exists()) {
-         err("Error: tag LATEX_HEADER: header file `%s' does not exist\n", latexHeaderFile.data());
-         exit(1);
-      }
-   }
-   // check include path
-   iterList = m_cfgList.find("");
-   QStringList includePath = Config_getList("INCLUDE_PATH");
-
-   for (auto s : includePath) {   
-      QFileInfo fi(s);
-
-      if (! fi.exists()) {
-         err("Warning: tag INCLUDE_PATH: include path `%s' does not exist\n", qPrintable(s));
-      }  
-   }
+  
+/*  
 
    // check aliases
    QStringList &aliasList = Config_getList("ALIASES");
@@ -436,24 +528,7 @@ void Config:: preVerify()
       }
       
    }
-
-   // **
-   if (Config::getBool("generate-treeview") && Config::getBool("generate-chm")) {
-      err("Error: When enabling 'GENERATE CHM' the 'GENERATE TREEVIEW' tag must be disabled\n");
-      Config::getBool("generate-treeview") = false;
-   }
-
-   if (Config::getBool("html-search") && Config::getBool("generate-chm")) {
-      err("Error: When enabling 'GENERATE CHM' the 'HTML SEARCH' must be disabled\n");
-      Config::getBool("html-search") = false;
-   }
-
-   // check if SEPARATE_MEMBER_PAGES and INLINE_GROUPED_CLASSES are both enabled
-   if (Config_getBool("SEPARATE_MEMBER_PAGES") && Config_getBool("INLINE_GROUPED_CLASSES")) {
-      err("Error: When enabling INLINE_GROUPED_CLASSES the SEPARATE_MEMBER_PAGES option should be disabled. I'll do it for you.\n");
-      Config_getBool("SEPARATE_MEMBER_PAGES") = FALSE;
-   }
-
+  
    // check dot image format
    iterEnum = m_cfgEnum.find("");
    QByteArray &dotImageFormat = Config_getEnum("DOT_IMAGE_FORMAT");
@@ -469,10 +544,10 @@ void Config:: preVerify()
    //  dotImageFormat = "png";
    //}
 
-   QByteArray &dotFontName = Config_getString("DOT_FONTNAME");
+   QString dotFontName = Config_getString("DOT_FONTNAME");
    if (dotFontName == "FreeSans" || dotFontName == "FreeSans.ttf") {
       err("Warning: doxygen no longer ships with the FreeSans font.\n"
-                 "You may want to clear or change DOT_FONTNAME.\n"
+                 "You may want to clear or change 'DOT FONTNAME'\n"
                  "Otherwise you run the risk that the wrong font is being used for dot generated graphs.\n");
    }
 
@@ -594,24 +669,7 @@ void Config:: preVerify()
       diaPath = "";
    }
 
-   // check input
-   QStringList inputSources = Config::getList("input-source")
-
-   if (inputSources.count() == 0) {
-      // use current dir as the default
-      inputSources.append(QDir::currentPath().toUtf8());
-
-   } else {    
-      for (auto s : inputSources) {
-         QFileInfo fi(s);
-
-         if (!fi.exists()) {
-            err("Warning: tag INPUT: input source `%s' does not exist\n", qPrintable(s));
-         }         
-      }
-   }
-
-   // add default pattern if needed
+    // add default pattern if needed
    QStringList &filePatternList = Config_getList("FILE_PATTERNS");
    if (filePatternList.isEmpty()) {
       filePatternList.append("*.c");
@@ -692,31 +750,7 @@ void Config:: preVerify()
       ) {
       err("Warning: No output formats selected! Set at least one of the main GENERATE_* options to YES.\n");
    }
-
-   // check HTMLHELP creation requirements
-   if (!Config_getBool("GENERATE_HTML") &&
-         Config_getBool("GENERATE_HTMLHELP")) {
-      err("Warning: GENERATE_HTMLHELP=YES requires GENERATE_HTML=YES.\n");
-   }
-
-   // check QHP creation requirements
-   if (Config_getBool("GENERATE_QHP")) {
-      if (Config_getString("QHP_NAMESPACE").isEmpty()) {
-         err("Error: GENERATE_QHP=YES requires QHP_NAMESPACE to be set. Using 'org.doxypress.doc' as default.\n");
-         Config_getString("QHP_NAMESPACE") = "org.doxypress.doc";
-      }
-
-      if (Config_getString("QHP_VIRTUAL_FOLDER").isEmpty()) {
-         err("Error: GENERATE_QHP=YES requires QHP_VIRTUAL_FOLDER to be set. Using 'doc' as default\n");
-         Config_getString("QHP_VIRTUAL_FOLDER") = "doc";
-      }
-   }
-
-   if (Config_getBool("OPTIMIZE_OUTPUT_JAVA") && Config_getBool("INLINE_INFO")) {
-      // don't show inline info for Java output, since Java has no inline
-      // concept.
-      Config_getBool("INLINE_INFO") = FALSE;
-   }
+ 
 
    int &depth = Config_getInt("MAX_DOT_GRAPH_DEPTH");
    if (depth == 0) {
@@ -768,16 +802,12 @@ void Config:: preVerify()
    
 
    checkFileName("GENERATE_TAGFILE");
-
 */
-
-}
 
 
 
 
 /*
-
 static void cleanUpPaths(QStringList &str)
 {
    for (auto &sfp : str) {  

@@ -19,6 +19,7 @@
 #define MESSAGE_H
 
 #include <QString>
+#include <QHash>
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -42,18 +43,21 @@ class Debug
                     Markdown     = 0x00000800,
                     FilterOutput = 0x00001000,
                     Lex          = 0x00002000
-                  };
+   };
 
    static void print(DebugMask mask, int prio, const char *fmt, ...);
    static int  setFlag(const QString &label);
-   static void clearFlag(const char *label);
+   static void clearFlag(const QString &label);
    static bool isFlagSet(DebugMask mask);
-   static void printFlags(void);
+   static void printFlags();
    static void setPriority(int p);
-
+  
  private:
-   static DebugMask curMask;
-   static int curPrio;
+   static int labelToEnum(const QString &data);
+
+   static QHash<QString, Debug::DebugMask> m_map;
+   static int curMask;
+   static int curPriority;
 };
 
 void err(const char *fmt, ...);

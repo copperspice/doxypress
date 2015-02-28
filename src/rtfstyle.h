@@ -75,7 +75,7 @@ struct StyleData {
 
 extern QHash<QString, StyleData> rtf_Style;
 
-void loadExtensions(const char *name);
-void loadStylesheet(const char *name, QHash<QString, StyleData> &dict);
+void loadExtensions(const QString &name);
+void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict);
 
 #endif

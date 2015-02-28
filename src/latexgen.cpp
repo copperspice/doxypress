@@ -78,7 +78,9 @@ static void writeLatexMakefile()
    // end insertion by KONNO Akihisa <konno@researchers.jp> 2002-03-05
    QTextStream t(&file);
 
-   if (!Config_getBool("USE_PDFLATEX")) { // use plain old latex
+   if (! Config::getBool("latex-pdf")) { 
+      // use plain old latex
+
       t << "all: refman.dvi" << endl
         << endl
         << "ps: refman.ps" << endl
@@ -175,7 +177,9 @@ static void writeMakeBat()
    t << "cd /D %~dp0\n\n";
    t << "del /s /f *.ps *.dvi *.aux *.toc *.idx *.ind *.ilg *.log *.out *.brf *.blg *.bbl refman.pdf\n\n";
 
-   if (!Config_getBool("USE_PDFLATEX")) { // use plain old latex
+   if (! Config::getBool("latex-pdf")) { 
+      // use plain old latex
+
       t << latex_command << " refman.tex\n";
       t << "echo ----\n";
       t << mkidx_command << " refman.idx\n";
@@ -421,7 +425,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    }
 
    // Hyperlinks
-   bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
+   bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
    if (pdfHyperlinks) {
       t_stream << "% Hyperlinks (required, but should be loaded last)\n"
@@ -461,7 +465,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    // Front matter
    t_stream << "% Titlepage & ToC\n";
 
-   bool usePDFLatex = Config_getBool("USE_PDFLATEX");
+   bool usePDFLatex = Config::getBool("latex-pdf");
    if (pdfHyperlinks && usePDFLatex) {
       // To avoid duplicate page anchors due to reuse of same numbers for
       // the index (be it as roman numbers)
@@ -511,8 +515,8 @@ static void writeDefaultHeaderPart3(QTextStream &t_stream)
    }
 
    t_stream << "\\pagenumbering{arabic}\n";
-   bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
-   bool usePDFLatex   = Config_getBool("USE_PDFLATEX");
+   bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   bool usePDFLatex   = Config::getBool("latex-pdf");
 
    if (pdfHyperlinks && usePDFLatex) {
       // re-enable anchors again
@@ -891,7 +895,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
          QByteArray indexName = "index";
          m_textStream << "}\n\\label{index}";
 
-         if (Config_getBool("PDF_HYPERLINKS")) {
+         if (Config::getBool("latex-hyper-pdf")) {
             m_textStream << "\\hypertarget{index}{}";
          }
          m_textStream << "\\input{" << indexName << "}\n";
@@ -1167,7 +1171,7 @@ void LatexGenerator::endIndexItem(const QByteArray &ref, const QByteArray &fn)
 
 void LatexGenerator::startHtmlLink(const QByteArray &url)
 {
-   if (Config_getBool("PDF_HYPERLINKS")) {
+   if (Config::getBool("latex-hyper-pdf")) {
       m_textStream << "\\href{";
       m_textStream << url;
       m_textStream << "}";
@@ -1183,8 +1187,7 @@ void LatexGenerator::endHtmlLink()
 
 //void LatexGenerator::writeMailLink(const char *url)
 //{
-//  if (Config_getBool("PDF_HYPERLINKS"))
-//  {
+//  if (Config::getBool("latex-hyper-pdf")) {  
 //    m_textStream << "\\href{mailto:";
 //    m_textStream << url;
 //    m_textStream << "}";
@@ -1243,7 +1246,7 @@ void LatexGenerator::endIndexValue(const char *name, bool)
 
 void LatexGenerator::startTextLink(const QByteArray &file, const QByteArray &anchor)
 {
-   if (! disableLinks && Config_getBool("PDF_HYPERLINKS")) {
+   if (! disableLinks && Config::getBool("latex-hyper-pdf")) {
       m_textStream << "\\hyperlink{";
 
       if (! file.isEmpty()) {
@@ -1268,7 +1271,7 @@ void LatexGenerator::endTextLink()
 
 void LatexGenerator::writeObjectLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, const QByteArray &text)
 {
-   if (! disableLinks && ref.isEmpty() && Config_getBool("PDF_HYPERLINKS")) {
+   if (! disableLinks && ref.isEmpty() && Config::getBool("latex-hyper-pdf")) {
       m_textStream << "\\hyperlink{";
 
       if (! file.isEmpty()) {
@@ -1316,8 +1319,8 @@ void LatexGenerator::endPageRef(const QByteArray &clname, const QByteArray &anch
 void LatexGenerator::writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
                                    const QByteArray &name, const QByteArray &)
 {
-   static bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
-   static bool usePDFLatex   = Config_getBool("USE_PDFLATEX");
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static bool usePDFLatex   = Config::getBool("latex-pdf");
    int l = qstrlen(name);
 
    if (col + l > 80) {
@@ -1353,8 +1356,8 @@ void LatexGenerator::writeCodeLink(const QByteArray &ref, const QByteArray &file
 
 void LatexGenerator::startTitleHead(const char *fileName)
 {
-   static bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
-   static bool usePDFLatex   = Config_getBool("USE_PDFLATEX");
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static bool usePDFLatex   = Config::getBool("latex-pdf");
 
    if (usePDFLatex && pdfHyperlinks && fileName) {
       m_textStream << "\\hypertarget{" << stripPath(fileName) << "}{}";
@@ -1477,7 +1480,7 @@ void LatexGenerator::startMemberDoc(const char *clname, const char *memname, con
 
    m_textStream << "\\" << levelLab[level];
 
-   //if (Config_getBool("PDF_HYPERLINKS") && memname)
+   //if (Config::getBool("latex-hyper-pdf") && memname)
    //{
    //  m_textStream << "[";
    //  escapeMakeIndexChars(this,t,memname);
@@ -1501,8 +1504,8 @@ void LatexGenerator::endMemberDoc(bool)
 
 void LatexGenerator::startDoxyAnchor(const char *fName, const char *, const char *anchor, const char *, const char *)
 {
-   static bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
-   static bool usePDFLatex   = Config_getBool("USE_PDFLATEX");
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static bool usePDFLatex   = Config::getBool("latex-pdf");
 
    if (usePDFLatex && pdfHyperlinks) {
       m_textStream << "\\hypertarget{";
@@ -1532,8 +1535,8 @@ void LatexGenerator::writeAnchor(const char *fName, const char *name)
 {   
    m_textStream << "\\label{" << name << "}" << endl;
 
-   static bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
-   static bool usePDFLatex   = Config_getBool("USE_PDFLATEX");
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static bool usePDFLatex   = Config::getBool("latex-pdf");
 
    if (usePDFLatex && pdfHyperlinks) {
       if (fName) {
@@ -1574,8 +1577,8 @@ void LatexGenerator::addIndexItem(const char *s1, const char *s2)
 
 void LatexGenerator::startSection(const char *lab, const char *, SectionInfo::SectionType type)
 {
-   static bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
-   static bool usePDFLatex   = Config_getBool("USE_PDFLATEX");
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static bool usePDFLatex   = Config::getBool("latex-pdf");
 
    if (usePDFLatex && pdfHyperlinks) {
       m_textStream << "\\hypertarget{" << stripPath(lab) << "}{}";
@@ -1650,7 +1653,7 @@ void LatexGenerator::codify(const QByteArray &text)
 
       int spacesToNextTabStop;
 
-      static int tabSize = Config_getInt("TAB_SIZE");
+      static int tabSize = Config::getInt("tab-size");
       const int maxLineLen = 108;
 
       QByteArray result; 

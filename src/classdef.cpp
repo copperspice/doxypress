@@ -72,7 +72,7 @@ ClassDef::ClassDef(const char *defFileName, int defLine, int defColumn, const ch
    m_memberGroupSDict    = 0;
    m_innerClasses        = 0;
 
-   m_subGrouping = Config_getBool("SUBGROUPING");
+   m_subGrouping = Config::getBool("subgrouping");
    m_templateInstances   = 0;
    m_variableInstances   = 0;   
    m_templBaseClassNames = 0;
@@ -83,7 +83,7 @@ ClassDef::ClassDef(const char *defFileName, int defLine, int defColumn, const ch
    m_membersMerged = false;  
    m_usedOnly      = false;
 
-   m_isSimple = Config_getBool("INLINE_SIMPLE_STRUCTS");
+   m_isSimple = Config::getBool("inline-simple-structs");
    
    m_taggedInnerClasses = 0;  
    m_spec = 0;
@@ -126,7 +126,7 @@ QString ClassDef::getMemberListFileName() const
 
 QString ClassDef::displayName(bool includeScope) const
 {
-   //static bool optimizeOutputForJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
+   // static bool optimizeOutputForJava = Config::getBool("optimize-java");
    SrcLangExt lang = getLanguage();
 
    QString n;
@@ -168,7 +168,7 @@ void ClassDef::insertBaseClass(QSharedPointer<ClassDef> cd, const char *n, Prote
 // inserts a derived/sub class in the inherited-by list
 void ClassDef::insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifier s, const char *t)
 {
-   static bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
+   static bool extractPrivate = Config::getBool("extract-private");
 
    if (! extractPrivate && cd->protection() == Private) {
       return;
@@ -427,7 +427,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
    }
 
    //::addClassMemberNameToIndex(md);
-   if (addToAllList && ! (Config_getBool("HIDE_FRIEND_COMPOUNDS") && md->isFriend() &&  (QByteArray(md->typeString()) == "friend class" || 
+   if (addToAllList && ! (Config::getBool("hide-friend-compounds") && md->isFriend() &&  (QByteArray(md->typeString()) == "friend class" || 
             QByteArray(md->typeString()) == "friend struct" || QByteArray(md->typeString()) == "friend union"))) {
       
       MemberInfo mi = MemberInfo(md, prot, md->virtualness(), false);
@@ -705,7 +705,7 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   static bool repeatBrief = Config_getBool("REPEAT_BRIEF");
+   static bool repeatBrief = Config::getBool("repeat-brief");
 
    ol.startTextBlock();
 
@@ -752,8 +752,9 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
 
 bool ClassDef::hasDetailedDescription() const
 {
-   static bool repeatBrief = Config_getBool("REPEAT_BRIEF");
-   static bool sourceBrowser = Config_getBool("SOURCE_BROWSER");
+   static bool repeatBrief   = Config::getBool("repeat-brief");
+   static bool sourceBrowser = Config::getBool("source-browser");
+
    return ((!briefDescription().isEmpty() && repeatBrief) ||
            !documentation().isEmpty() ||
            (sourceBrowser && getStartBodyLine() != -1 && getBodyDef()));
@@ -838,7 +839,7 @@ void ClassDef::showUsedFiles(OutputList &ol)
       ol.startItemListItem();
       QByteArray path = fd->getPath();
 
-      if (Config_getBool("FULL_PATH_NAMES")) {
+      if (Config::getBool("full-path-names")) {
          ol.docify(stripFromPath(path));
       }
 
@@ -915,7 +916,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
 
    bool renderDiagram = false;
 
-   if (Config::getBool("have-dot") && (Config_getBool("CLASS_DIAGRAMS") || Config_getBool("CLASS_GRAPH"))) {
+   if (Config::getBool("have-dot") && (Config::getBool("class-diagrams") || Config::getBool("class-graph"))) {
 
       // write class diagram using dot   
       DotClassGraph inheritanceGraph(self, DotNode::Inheritance);
@@ -930,7 +931,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
          renderDiagram = true;
       }
 
-   } else if (Config_getBool("CLASS_DIAGRAMS") && count > 0) {
+   } else if (Config::getBool("class-diagrams") && count > 0) {
       // write class diagram using build-in generator
   
       ClassDiagram diagram(self); // create a diagram of this class
@@ -1039,7 +1040,7 @@ void ClassDef::writeCollaborationGraph(OutputList &ol)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   if (Config::getBool("have-dot") /*&& Config_getBool("COLLABORATION_GRAPH")*/) {
+   if (Config::getBool("have-dot") /* && Config::getBool("collaboration-graph")*/) {
       DotClassGraph usageImplGraph(self, DotNode::Collaboration);
 
       if (!usageImplGraph.isTrivial()) {
@@ -1118,7 +1119,7 @@ void ClassDef::writeIncludeFiles(OutputList &ol)
 void ClassDef::writeAllMembersLink(OutputList &ol)
 {
    // write link to list of all members (HTML only)
-   if (m_allMemberNameInfoSDict && !Config_getBool("OPTIMIZE_OUTPUT_FOR_C") ) {
+   if (m_allMemberNameInfoSDict && ! Config::getBool("optimize-c") ) {
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
       ol.startParagraph();
@@ -1168,17 +1169,15 @@ void ClassDef::writeInlineClasses(OutputList &ol)
 
 void ClassDef::startMemberDocumentation(OutputList &ol)
 {
-   //printf("%s: ClassDef::startMemberDocumentation()\n",name().data());
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+   if (Config::getBool("separate-member-pages")) {
       ol.disable(OutputGenerator::Html);
       Doxygen::suppressDocWarnings = true;
    }
 }
 
 void ClassDef::endMemberDocumentation(OutputList &ol)
-{
-   //printf("%s: ClassDef::endMemberDocumentation()\n",name().data());
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+{ 
+   if (Config::getBool("separate-member-pages")) {
       ol.enable(OutputGenerator::Html);
       Doxygen::suppressDocWarnings = false;
    }
@@ -1186,14 +1185,12 @@ void ClassDef::endMemberDocumentation(OutputList &ol)
 
 void ClassDef::startMemberDeclarations(OutputList &ol)
 {
-   //printf("%s: ClassDef::startMemberDeclarations()\n",name().data());
    ol.startMemberSections();
 }
 
 void ClassDef::endMemberDeclarations(OutputList &ol)
 {
-   //printf("%s: ClassDef::endMemberDeclarations()\n",name().data());
-   static bool inlineInheritedMembers = Config_getBool("INLINE_INHERITED_MEMB");
+   static bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
 
    if (!inlineInheritedMembers && countAdditionalInheritedMembers() > 0) {
       ol.startMemberHeader("inherited");
@@ -1212,7 +1209,7 @@ void ClassDef::writeAuthorSection(OutputList &ol)
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config_getString("PROJECT_NAME")));
+   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name").toUtf8()));
    ol.popGeneratorState();
 }
 
@@ -1232,9 +1229,7 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
          ol.writeSummaryLink(QString(""), "nested-classes", ls->title(lang), first);
          first = false;
 
-      } else if (lde->kind() == LayoutDocEntry::ClassAllMembersLink && m_allMemberNameInfoSDict && 
-                 !Config_getBool("OPTIMIZE_OUTPUT_FOR_C") ) {
-
+      } else if (lde->kind() == LayoutDocEntry::ClassAllMembersLink && m_allMemberNameInfoSDict &&  ! Config::getBool("optimize-c") ) {
          ol.writeSummaryLink(getMemberListFileName(), "all-members-list", theTranslator->trListOfAllMembers(), first);
          first = false;
 
@@ -1258,7 +1253,7 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
 
 void ClassDef::writeTagFile(QTextStream &tagFile)
 {
-   if (!isLinkableInProject()) {
+   if (! isLinkableInProject()) {
       return;
    }
 
@@ -1271,7 +1266,7 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
 
    tagFile << ">" << endl;
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
-   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxygen::htmlFileExtension << "</filename>" << endl;
+   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxygen::htmlFileExtension.toUtf8() << "</filename>" << endl;
 
    if (!anchor().isEmpty()) {
       tagFile << "    <anchor>" << convertToXML(anchor()) << "</anchor>" << endl;
@@ -1292,7 +1287,8 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
          QSharedPointer<ClassDef> cd = ibcd->classDef;
 
          if (cd && cd->isLinkable()) {
-            if (!Config_getString("GENERATE_TAGFILE").isEmpty()) {
+
+            if (! Config::getString("generate_tagfile").isEmpty()) {
                tagFile << "    <base";
 
                if (ibcd->prot == Protected) {
@@ -1486,11 +1482,10 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
 
 void ClassDef::writeMoreLink(OutputList &ol, const QByteArray &anchor)
 {
-   // TODO: clean up this mess by moving it to
-   // the output generators...
-   static bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
-   static bool rtfHyperlinks = Config_getBool("RTF_HYPERLINKS");
-   static bool usePDFLatex   = Config_getBool("USE_PDFLATEX");
+   // TODO: clean up by moving it to the output generators
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static bool rtfHyperlinks = Config::getBool("rtf_hyperlinks");
+   static bool usePDFLatex   = Config::getBool("latex-pdf");
 
    // HTML only
    ol.pushGeneratorState();
@@ -1525,9 +1520,10 @@ void ClassDef::writeMoreLink(OutputList &ol, const QByteArray &anchor)
 
 bool ClassDef::visibleInParentsDeclList() const
 {
-   static bool extractPrivate      = Config_getBool("EXTRACT_PRIVATE");
-   static bool hideUndocClasses = Config_getBool("HIDE_UNDOC_CLASSES");
-   static bool extractLocalClasses = Config_getBool("EXTRACT_LOCAL_CLASSES");
+   static bool extractPrivate      = Config::getBool("extract-private");
+   static bool hideUndocClasses    = Config::getBool("hide-undoc-classes");
+   static bool extractLocalClasses = Config::getBool("extract-local-classes");
+
    bool linkable = isLinkable();
    return (!isAnonymous() && !isExtension() &&
            (protection() !=::Private || extractPrivate) &&
@@ -1539,7 +1535,7 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const char *hea
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   //static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+   // static bool fortranOpt = Config::getBool("optimize-fortran");
    SrcLangExt lang = getLanguage();
 
    if (visibleInParentsDeclList()) {
@@ -1582,7 +1578,8 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const char *hea
       ol.endMemberItem();
 
       // add the brief description if available
-      if (! briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+      if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+
          DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
                                                 briefDescription(), false, false, 0, true, false);
 
@@ -1789,7 +1786,7 @@ QByteArray ClassDef::title() const
       pageTitle = theTranslator->trSingletonReference(qPrintable(displayName()));
 
    } else {
-      if (Config_getBool("HIDE_COMPOUND_REFERENCE")) {
+      if (Config::getBool("hide-compound-reference")) {
          pageTitle = displayName().toUtf8();
 
       } else {
@@ -1805,8 +1802,8 @@ void ClassDef::writeDocumentation(OutputList &ol)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
-   //static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+   static bool generateTreeView = Config::getBool("generate-treeview");
+   // static bool fortranOpt = Config::getBool("optimize-fortran");
 
    QByteArray pageTitle = title();
 
@@ -1829,7 +1826,7 @@ void ClassDef::writeDocumentation(OutputList &ol)
    writeDocumentationContents(ol, pageTitle);
    endFileWithNavPath(self, ol);
 
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+   if (Config::getBool("separate-member-pages")) {
       writeMemberPages(ol);
    }
 }
@@ -1855,7 +1852,7 @@ void ClassDef::writeMemberPages(OutputList &ol)
 
 void ClassDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
 {
-   static bool createSubDirs = Config_getBool("CREATE_SUBDIRS");
+   static bool createSubDirs = Config::getBool("create-subdirs");
 
    ol.writeString("      <div class=\"navtab\">\n");
    ol.writeString("        <table>\n");
@@ -1880,7 +1877,7 @@ void ClassDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
                   if (createSubDirs) {
                      ol.writeString("../../");
                   }
-                  ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension + "#" + md->anchor());
+                  ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8() + "#" + md->anchor());
                   ol.writeString("\">");
                   ol.writeString(convertToHtml(md->name()));
                   ol.writeString("</a>");
@@ -1920,8 +1917,8 @@ void ClassDef::writeMemberList(OutputList &ol)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   static bool cOpt = Config_getBool("OPTIMIZE_OUTPUT_FOR_C");
-   static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+   static bool cOpt = Config::getBool("optimize-c");
+   static bool generateTreeView = Config::getBool("generate-treeview");
 
    if (m_allMemberNameInfoSDict == 0 || cOpt) {
       return;
@@ -1974,20 +1971,23 @@ void ClassDef::writeMemberList(OutputList &ol)
                // create a link to the documentation            
                QByteArray name = mi.ambiguityResolutionScope + md->name();
 
-               //ol.writeListItem();
                ol.writeString("  <tr");
                if ((idx & 1) == 0) {
                   ol.writeString(" class=\"even\"");
                }
+
                idx++;
                ol.writeString("><td class=\"entry\">");
+
                if (cd->isObjectiveC()) {
                   if (md->isObjCMethod()) {
+
                      if (md->isStatic()) {
                         ol.writeString("+&#160;</td><td>");
                      } else {
                         ol.writeString("-&#160;</td><td>");
                      }
+
                   } else {
                      ol.writeString("</td><td class=\"entry\">");
                   }
@@ -1996,34 +1996,33 @@ void ClassDef::writeMemberList(OutputList &ol)
                   ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), md->name()); 
 
                } else {
-                  //Definition *bd = md->getGroupDef();
-                  //if (bd==0) bd=cd;
-                  ol.writeObjectLink(md->getReference(),
-                                     md->getOutputFileBase(),
-                                     md->anchor(), name);
+                  ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), name);
 
-                  if ( md->isFunction() || md->isSignal() || md->isSlot() ||
-                        (md->isFriend() && md->argsString())) {
+                  if ( md->isFunction() || md->isSignal() || md->isSlot() || (md->isFriend() && md->argsString())) {
                      ol.docify(md->argsString());
+
                   } else if (md->isEnumerate()) {
                      ol.parseText(" " + theTranslator->trEnumName());
+
                   } else if (md->isEnumValue()) {
                      ol.parseText(" " + theTranslator->trEnumValue());
+
                   } else if (md->isTypedef()) {
                      ol.docify(" typedef");
+
                   } else if (md->isFriend() && !qstrcmp(md->typeString(), "friend class")) {
                      ol.docify(" class");
                   }
-                  //ol.writeString("\n");
+
                }
                ol.writeString("</td>");
                memberWritten = true;
-            } else if (!cd->isArtificial() &&
-                       !Config_getBool("HIDE_UNDOC_MEMBERS") &&
-                       (protectionLevelVisible(md->protection()) || md->isFriend())
-                      ) // no documentation,
-               // generate link to the class instead.
-            {
+
+            } else if (! cd->isArtificial() && ! Config::getBool("hide-undoc-members") &&
+                       (protectionLevelVisible(md->protection()) || md->isFriend()))  {
+
+               // no documentation, generate link to the class instead.
+            
                //ol.writeListItem();
                ol.writeString("  <tr bgcolor=\"#f0f0f0\"");
                if ((idx & 1) == 0) {
@@ -2278,9 +2277,9 @@ void ClassDef::writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bo
 /*! a link to this class is possible within this project */
 bool ClassDef::isLinkableInProject() const
 {
-   static bool extractLocal   = Config_getBool("EXTRACT_LOCAL_CLASSES");
-   static bool extractStatic  = Config_getBool("EXTRACT_STATIC");
-   static bool hideUndoc      = Config_getBool("HIDE_UNDOC_CLASSES");
+   static bool extractLocal   = Config::getBool("extract-local-classes");
+   static bool extractStatic  = Config::getBool("extract-static");
+   static bool hideUndoc      = Config::getBool("hide-undoc-classes");
 
    if (m_templateMaster) {
       return m_templateMaster->isLinkableInProject();
@@ -2303,9 +2302,9 @@ bool ClassDef::isLinkable() const
 /*! the class is visible in a class diagram, or class hierarchy */
 bool ClassDef::isVisibleInHierarchy()
 {
-   static bool allExternals     = Config_getBool("ALLEXTERNALS");
-   static bool hideUndocClasses = Config_getBool("HIDE_UNDOC_CLASSES");
-   static bool extractStatic    = Config_getBool("EXTRACT_STATIC");
+   static bool allExternals     = Config::getBool("all-externals");
+   static bool hideUndocClasses = Config::getBool("hide-undoc-classes");
+   static bool extractStatic    = Config::getBool("extract-static");
 
    bool retval =  (allExternals || hasNonReferenceSuperClass()); 
 
@@ -2421,7 +2420,7 @@ void ClassDef::mergeMembers()
       return;
    }
 
-   //static bool optimizeOutputForJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
+   // static bool optimizeOutputForJava = Config::getBool("optimize-java");
    
    SrcLangExt lang = getLanguage();
    QByteArray sep  = getLanguageSpecificSeparator(lang, true);
@@ -2429,7 +2428,7 @@ void ClassDef::mergeMembers()
 
    m_membersMerged = true;
   
-   bool inlineInheritedMembers = Config_getBool("INLINE_INHERITED_MEMB");
+   bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
 
    if (baseClasses()) {
       
@@ -2640,7 +2639,7 @@ void ClassDef::mergeMembers()
 void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
-   static bool extractLocalMethods = Config_getBool("EXTRACT_LOCAL_METHODS");
+   static bool extractLocalMethods = Config::getBool("extract-local-methods");
 
    bool makePrivate = category->isLocal();
    // in case extract local methods is not enabled we don't add the methods
@@ -2764,8 +2763,8 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
 
 void ClassDef::addUsedClass(QSharedPointer<ClassDef> cd, const char *accessName, Protection prot)
 {
-   static bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
-   static bool umlLook = Config_getBool("UML_LOOK");
+   static bool extractPrivate = Config::getBool("extract-private");
+   static bool umlLook = Config::getBool("uml-look");
 
    if (prot == Private && ! extractPrivate) {
       return;
@@ -2810,8 +2809,8 @@ void ClassDef::addUsedClass(QSharedPointer<ClassDef> cd, const char *accessName,
 
 void ClassDef::addUsedByClass(QSharedPointer<ClassDef> cd, const char *accessName, Protection prot)
 {
-   static bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
-   static bool umlLook = Config_getBool("UML_LOOK");
+   static bool extractPrivate = Config::getBool("extract-private");
+   static bool umlLook = Config::getBool("uml-look");
 
    if (prot == Private && ! extractPrivate) {
       return;
@@ -2903,8 +2902,8 @@ QByteArray ClassDef::compoundTypeString() const
 
 QByteArray ClassDef::getOutputFileBase() const
 {
-   static bool inlineGroupedClasses = Config_getBool("INLINE_GROUPED_CLASSES");
-   static bool inlineSimpleClasses  = Config_getBool("INLINE_SIMPLE_STRUCTS");
+   static bool inlineGroupedClasses = Config::getBool("inline-grouped-classes");
+   static bool inlineSimpleClasses  = Config::getBool("inline-simple-structs");
 
    if (! Doxygen::generatingXmlOutput) {
       QSharedPointer<Definition> scope;
@@ -3191,8 +3190,8 @@ void ClassDef::getTemplateParameterLists(QList<ArgumentList> &lists) const
 
 QByteArray ClassDef::qualifiedNameWithTemplateParameters(QList<ArgumentList> *actualParams, int *actualParamIndex) const
 {
-   //static bool optimizeOutputJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
-   static bool hideScopeNames = Config_getBool("HIDE_SCOPE_NAMES");
+   //static bool optimizeOutputJava = Config::getBool("optimize-java");
+   static bool hideScopeNames = Config::getBool("hide-scope-names");
 
    QByteArray scName;
    QSharedPointer<Definition> d = getOuterScope();
@@ -3385,7 +3384,7 @@ int ClassDef::countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef
       }
    }
 
-   static bool inlineInheritedMembers = Config_getBool("INLINE_INHERITED_MEMB");
+   static bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
 
    if (! inlineInheritedMembers) {
       // show inherited members as separate lists
@@ -3580,7 +3579,7 @@ void ClassDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const 
                              QSharedPointer<GroupDef>(), tt, st, false, showInline, inheritedFrom, lt);
    }
 
-   static bool inlineInheritedMembers = Config_getBool("INLINE_INHERITED_MEMB");
+   static bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
 
    if (! inlineInheritedMembers) { 
       // show inherited members as separate lists
@@ -3890,8 +3889,8 @@ QByteArray ClassDef::anchor() const
 
 bool ClassDef::isEmbeddedInOuterScope() const
 {
-   static bool inlineGroupedClasses = Config_getBool("INLINE_GROUPED_CLASSES");
-   static bool inlineSimpleClasses  = Config_getBool("INLINE_SIMPLE_STRUCTS");
+   static bool inlineGroupedClasses = Config::getBool("inline-grouped-classes");
+   static bool inlineSimpleClasses  = Config::getBool("inline-simple-structs");
 
    QSharedPointer<Definition> container = getOuterScope();
 

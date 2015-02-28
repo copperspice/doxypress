@@ -478,7 +478,8 @@ void FileDef::writeClassDeclarations(OutputList &ol, const QByteArray &title)
 void FileDef::writeInlineClasses(OutputList &ol)
 {
    // temporarily undo the disbling could be done by startMemberDocumentation()
-   // as a result of setting SEPARATE_MEMBER_PAGES to YES; see bug730512
+   // as a result of setting SEPARATE MEMBER PAGES to YES; see bug730512
+
    bool isEnabled = ol.isEnabled(OutputGenerator::Html);
    ol.enable(OutputGenerator::Html);
    
@@ -502,7 +503,7 @@ void FileDef::endMemberDeclarations(OutputList &ol)
 
 void FileDef::startMemberDocumentation(OutputList &ol)
 {
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+   if (Config::getBool("separate-member-pages")) {
       ol.disable(OutputGenerator::Html);
       Doxygen::suppressDocWarnings = true;
    }
@@ -510,7 +511,7 @@ void FileDef::startMemberDocumentation(OutputList &ol)
 
 void FileDef::endMemberDocumentation(OutputList &ol)
 {
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+   if (Config::getBool("separate-member-pages")) {
       ol.enable(OutputGenerator::Html);
       Doxygen::suppressDocWarnings = false;
    }
@@ -749,7 +750,7 @@ void FileDef::writeDocumentation(OutputList &ol)
   
    endFileWithNavPath(self, ol);
 
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+   if (Config::getBool("separate-member-pages")) {
       QSharedPointer<MemberList> ml = getMemberList(MemberListType_allMembersList);
 
       if (ml) {
@@ -800,7 +801,7 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
                if (createSubDirs) {
                   ol.writeString("../../");
                }
-               ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension + "#" + md->anchor());
+               ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8() + "#" + md->anchor());
                ol.writeString("\">");
                ol.writeString(convertToHtml(md->localName()));
                ol.writeString("</a>");

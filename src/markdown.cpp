@@ -1963,6 +1963,7 @@ static int writeCodeBlock(GrowBuf &out, const char *data, int size, int refInden
    //printf("writeCodeBlock: data={%s}\n",QByteArray(data).left(size).data());
    out.addStr("@verbatim\n");
    int emptyLines = 0;
+
    while (i < size) {
       // find end of this line
       end = i + 1;
@@ -1971,11 +1972,11 @@ static int writeCodeBlock(GrowBuf &out, const char *data, int size, int refInden
       }
       int j = i;
       int indent = 0;
+
       while (j < end && data[j] == ' ') {
          j++, indent++;
       }
-      //printf("j=%d end=%d indent=%d refIndent=%d tabSize=%d data={%s}\n",
-      //    j,end,indent,refIndent,Config_getInt("TAB_SIZE"),QByteArray(data+i).left(end-i-1).data());
+
       if (j == end - 1) { // empty line
          emptyLines++;
          i = end;

@@ -1942,13 +1942,15 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
 
    QTextStream t(&f);
    //t.setEncoding(QTextStream::UnicodeUTF8);
+
    writeXMLHeader(t);
    t << "  <compounddef id=\"" << pageName;
    t << "\" kind=\"" << kindName << "\">" << endl;
    t << "    <compoundname>" << convertToXML(pd->name())
      << "</compoundname>" << endl;
 
-   if (pd == Doxygen::mainPage) { // main page is special
+   if (pd == Doxygen::mainPage) { 
+      // main page is special
       QString title;
 
       if (! pd->title().isEmpty() && pd->title().toLower() != "notitle") {
@@ -1958,7 +1960,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
          title = Config::getString("project-name");
       }
 
-      t << "    <title>" << convertToXML(convertCharEntitiesToUTF8(title))
+      t << "    <title>" << convertToXML(convertCharEntitiesToUTF8(title.toUtf8()))
         << "</title>" << endl;
 
    } else {

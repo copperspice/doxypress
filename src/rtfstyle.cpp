@@ -530,15 +530,15 @@ bool StyleData::setStyle(const char *s, const char *styleName)
    return true;
 }
 
-void loadStylesheet(const char *name, QHash<QString, StyleData> &dict)
+void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
 {
    QFile file(name);
 
    if (! file.open(QIODevice::ReadOnly)) {
-      err("Can't open RTF style sheet file %s. Using defaults.\n", name);
+      err("Can't open RTF style sheet file %s. Using defaults.\n", qPrintable(name));
       return;
    }
-   msg("Loading RTF style sheet %s\n", name);
+   msg("Loading RTF style sheet %s\n", qPrintable(name));
 
    static const QRegExp seperator("[ \t]*=[ \t]*");
    uint lineNr = 1;
@@ -547,8 +547,7 @@ void loadStylesheet(const char *name, QHash<QString, StyleData> &dict)
    t.setCodec("UTF-8");
 
    while (! t.atEnd()) {
-      QByteArray s;       
-      s = t.readLine().trimmed().toUtf8();
+      QByteArray s = t.readLine().trimmed().toUtf8();
 
       if (s.isEmpty() || s.at(0) == '#') {
          continue;   // skip blanks & comments
@@ -562,7 +561,7 @@ void loadStylesheet(const char *name, QHash<QString, StyleData> &dict)
 
       if (sepStart <= 0) {
          // no valid assignment statement
-         warn(name, lineNr, "Assignment of style sheet name expected!\n");
+         warn(qPrintable(name), lineNr, "Assignment of style sheet name expected\n");
          continue;
       }
 
@@ -570,7 +569,7 @@ void loadStylesheet(const char *name, QHash<QString, StyleData> &dict)
 
       if (! dict.contains(key)) { 
          // not a valid style sheet name
-         warn(name, lineNr, "Invalid style sheet name %s ignored.\n", key.data());
+         warn(qPrintable(name), lineNr, "Invalid style sheet name %s ignored.\n", key.constData());
          continue;
       }
 
@@ -578,7 +577,7 @@ void loadStylesheet(const char *name, QHash<QString, StyleData> &dict)
       StyleData &styleData = dict.find(key).value();
 
       s += " "; 
-      styleData.setStyle(s.data() + sepStart + sepLength, key.data());
+      styleData.setStyle(s.constData() + sepStart + sepLength, key.constData());
 
       lineNr++;
    }
@@ -586,14 +585,15 @@ void loadStylesheet(const char *name, QHash<QString, StyleData> &dict)
 
 QHash<QString, StyleData> rtf_Style;
 
-void loadExtensions(const char *name)
+void loadExtensions(const QString &name)
 {
    QFile file(name);
+
    if (!file.open(QIODevice::ReadOnly)) {
-      err("Can not open RTF extensions file %s. Using defaults.\n", name);
+      err("Can not open RTF extensions file %s. Using defaults.\n", qPrintable(name));
       return;
    }
-   msg("Loading RTF extensions %s\n", name);
+   msg("Loading RTF extensions %s\n", qPrintable(name));
 
    static const QRegExp separator("[ \t]*=[ \t]*");
    uint lineNr = 1;
@@ -616,7 +616,7 @@ void loadExtensions(const char *name)
 
       if (sepStart <= 0) { 
          // no valid assignment statement
-         warn(name, lineNr, "Assignment of extension field expected!\n");
+         warn(qPrintable(name), lineNr, "Assignment of extension field expected\n");
          continue;
       }
 

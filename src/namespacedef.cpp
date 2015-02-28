@@ -51,7 +51,7 @@ NamespaceDef::NamespaceDef(const char *df, int dl, int dc, const char *name, con
    memberGroupSDict = new MemberGroupSDict;  
    visited = false;
 
-   m_subGrouping = Config_getBool("SUBGROUPING");
+   m_subGrouping = Config::getBool("subgrouping");
 
    if (type && ! strcmp("module", type)) {
       m_type = MODULE;
@@ -108,7 +108,7 @@ void NamespaceDef::insertUsedFile(QSharedPointer<FileDef> fd)
    }
 
    if (files.contains(fd)) {
-      if (Config_getBool("SORT_MEMBER_DOCS")) {
+      if (Config::getBool("sort-member-docs")) {
          files.inSort(fd);
 
       } else {
@@ -243,9 +243,9 @@ void NamespaceDef::computeAnchors()
 
 bool NamespaceDef::hasDetailedDescription() const
 {
-   static bool repeatBrief = Config_getBool("REPEAT_BRIEF");
-   return ((!briefDescription().isEmpty() && repeatBrief) ||
-           !documentation().isEmpty());
+   static bool repeatBrief = Config::getBool("repeat-brief");
+
+   return ((!briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty());
 }
 
 void NamespaceDef::writeTagFile(QTextStream &tagFile)
@@ -334,15 +334,15 @@ void NamespaceDef::writeDetailedDescription(OutputList &ol, const QByteArray &ti
       ol.endGroupHeader();
 
       ol.startTextBlock();
-      if (! briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF")) {
+      if (! briefDescription().isEmpty() && Config::getBool("repeat-brief")) {
          ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
 
-      if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF") && !documentation().isEmpty()) {
+      if (!briefDescription().isEmpty() && Config::getBool("repeat-brief") && !documentation().isEmpty()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::RTF);
-         //ol.newParagraph(); // FIXME:PARA
+         //ol.newParagraph();                // FIXME:PARA
          ol.enableAll();
          ol.disableAllBut(OutputGenerator::Man);
          ol.enable(OutputGenerator::Latex);
@@ -406,7 +406,7 @@ void NamespaceDef::endMemberDeclarations(OutputList &ol)
 
 void NamespaceDef::startMemberDocumentation(OutputList &ol)
 {
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+   if (Config::getBool("separate-member-pages")) {
       ol.disable(OutputGenerator::Html);
       Doxygen::suppressDocWarnings = true;
    }
@@ -414,7 +414,7 @@ void NamespaceDef::startMemberDocumentation(OutputList &ol)
 
 void NamespaceDef::endMemberDocumentation(OutputList &ol)
 {
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+   if (Config::getBool("separate-member-pages")) {
       ol.enable(OutputGenerator::Html);
       Doxygen::suppressDocWarnings = false;
    }
@@ -466,7 +466,7 @@ void NamespaceDef::writeAuthorSection(OutputList &ol)
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config_getString("PROJECT_NAME")));
+   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name").toUtf8()));
    ol.popGeneratorState();
 }
 
@@ -524,10 +524,10 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
 {
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
-   static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+   static bool generateTreeView = Config::getBool("generate-treeview");
 
-   //static bool outputJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
-   //static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+   // static bool outputJava = Config::getBool("optimize-java");
+   // static bool fortranOpt = Config::_getBool("optimize-fortran");
 
    QByteArray pageTitle = title();
    startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_NamespaceVisible, !generateTreeView);
@@ -651,7 +651,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
 
    endFileWithNavPath(self, ol);
 
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+   if (Config::getBool("separate-member-pages")) {
       QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
       if (allMemberList) {
@@ -680,7 +680,7 @@ void NamespaceDef::writeMemberPages(OutputList &ol)
 
 void NamespaceDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
 {
-   static bool createSubDirs = Config_getBool("CREATE_SUBDIRS");
+   static bool createSubDirs = Config::getBool("create-subdirs");
 
    ol.writeString("      <div class=\"navtab\">\n");
    ol.writeString("        <table>\n");
@@ -705,7 +705,7 @@ void NamespaceDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) c
                if (createSubDirs) {
                   ol.writeString("../../");
                }
-               ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension + "#" + md->anchor());
+               ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8() + "#" + md->anchor());
                ol.writeString("\">");
                ol.writeString(convertToHtml(md->localName()));
                ol.writeString("</a>");
@@ -782,7 +782,7 @@ void NamespaceDef::addListReferences()
 {
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
-   //bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+   // bool fortranOpt = Config::getBool("optimize-fortran");
    
    QList<ListItemInfo> *xrefItems = xrefListItems();
    addRefItem(xrefItems, qualifiedName(), 
@@ -907,8 +907,8 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title, bool co
    // write list of namespaces
    ol.startMemberHeader("namespaces");
 
-   //bool javaOpt    = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
-   //bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+   //bool javaOpt    = Config::getBool("optimize-java");
+   //bool fortranOpt = Config::getBool("optimize-fortran");
 
    ol.parseText(title);
    ol.endMemberHeader();
@@ -942,7 +942,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title, bool co
          ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), 0, name.toUtf8());
          ol.endMemberItem();
 
-         if (! nd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+         if (! nd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
 
             ol.startMemberDescription(nd->getOutputFileBase());
             ol.generateDoc(nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(), nd->briefDescription(), false, false, 0, true);
@@ -1023,7 +1023,7 @@ bool NamespaceDef::isLinkableInProject() const
       i += 2;
    }
 
-   static bool extractAnonNs = Config_getBool("EXTRACT_ANON_NSPACES");
+   static bool extractAnonNs = Config::getBool("extract-anon-namespaces");
 
    if (extractAnonNs && name().mid(i, 20) == "anonymous_namespace{") {                                          
       return true;

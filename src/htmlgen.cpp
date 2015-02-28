@@ -1417,7 +1417,7 @@ void HtmlGenerator::endClassDiagram(const ClassDiagram &d, const char *fname, co
    docify(name);
 
    m_textStream << "_map\">" << endl;
-   d.writeImage(m_textStream, m_dir.toUtf8(), m_relativePath, fname);
+   d.writeImage(m_textStream, m_dir, m_relativePath, fname);
 
    m_textStream << " </div>";
    endSectionContent(m_textStream);

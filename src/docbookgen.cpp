@@ -115,8 +115,9 @@ inline void writeDocbookCodeString(QTextStream &t, const char *s, int &col)
    while ((c = *s++)) {
       switch (c) {
          case '\t': {
-            static int tabSize = Config_getInt("TAB_SIZE");
+            static int tabSize = Config::getInt("tab-size");
             int spacesToNextTabStop = tabSize - (col % tabSize);
+
             col += spacesToNextTabStop;
             while (spacesToNextTabStop--) {
                t << "&#32;";
@@ -382,7 +383,7 @@ void writeDocbookCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
 
    DocbookCodeGenerator *docbookGen = new DocbookCodeGenerator(t);
 
-   pIntf->parseCode(*docbookGen, 0, fileToString(fd->getFilePath(), Config_getBool("FILTER_SOURCE_FILES")),
+   pIntf->parseCode(*docbookGen, 0, fileToString(fd->getFilePath(), Config::getBool("filter-source-files")),
                     langExt, false, 0, fd, -1, -1, false, QSharedPointer<MemberDef>(), true);
 
    docbookGen->finish();
@@ -391,23 +392,11 @@ void writeDocbookCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
 
 static QByteArray classOutputFileBase(QSharedPointer<ClassDef> cd)
 {
-   //static bool inlineGroupedClasses = Config_getBool("INLINE_GROUPED_CLASSES");
-   //if (inlineGroupedClasses && cd->partOfGroups()!=0)
-
    return cd->getOutputFileBase();
-
-   //else
-   //  return cd->getOutputFileBase();
 }
 
 static QByteArray memberOutputFileBase(QSharedPointer<MemberDef> md)
 {
-   //static bool inlineGroupedClasses = Config_getBool("INLINE_GROUPED_CLASSES");
-   //if (inlineGroupedClasses && md->getClassDef() && md->getClassDef()->partOfGroups()!=0)
-   //  return md->getClassDef()->getDocbookOutputFileBase();
-   //else
-   //  return md->getOutputFileBase();
-
    return md->getOutputFileBase();
 }
 
@@ -1177,7 +1166,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
    //Add the file Documentation info to index file
    ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
 
-   QByteArray outputDirectory = Config_getString("DOCBOOK_OUTPUT");
+   QByteArray outputDirectory = Config::getString("docbook-output");
 
    QByteArray fileName = outputDirectory + "/" + classOutputFileBase(cd) + ".xml";
    QByteArray relPath  = relativePathToRoot(fileName);

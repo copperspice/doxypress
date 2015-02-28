@@ -151,8 +151,8 @@ class TreeDiagram : public QList<DiagramRow *>
    void moveChildren(DiagramItem *root, int dx);
    void computeExtremes(uint *labelWidth, uint *xpos);
 
-   void drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap,uint baseRows, uint superRows, 
-                  uint cellWidth, uint cellHeight, QByteArray relPath = "", bool generateMap = true);
+   void drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap, uint baseRows, uint superRows, 
+                  uint cellWidth, uint cellHeight, QString relPath = "", bool generateMap = true);
 
    void drawConnectors(QTextStream &t, Image *image, bool doBase, bool bitmap,
                        uint baseRows, uint superRows, uint cellWidth, uint cellheight);
@@ -288,7 +288,7 @@ static void writeVectorBox(QTextStream &t, DiagramItem *di, float x, float y, bo
    }
 }
 
-static void writeMapArea(QTextStream &t, QSharedPointer<ClassDef> cd, QByteArray relPath, int x, int y, int w, int h)
+static void writeMapArea(QTextStream &t, QSharedPointer<ClassDef> cd, const QString &relPath, int x, int y, int w, int h)
 {
    if (cd->isLinkable()) {
       QByteArray ref = cd->getReference();
@@ -690,7 +690,7 @@ void TreeDiagram::computeExtremes(uint *maxLabelLen, uint *maxXPos)
 }
 
 void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap, uint baseRows, uint superRows,
-                            uint cellWidth, uint cellHeight, QByteArray relPath, bool generateMap) 
+                            uint cellWidth, uint cellHeight, QString relPath, bool generateMap) 
 {  
    int skip = 0;
 
@@ -774,7 +774,7 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
                bool hasDocs = di->getClassDef()->isLinkable();
                writeBitmapBox(di, image, x, y, cellWidth, cellHeight, firstRow, hasDocs, di->getChildren().count() > 0);
 
-               if (!firstRow && generateMap) {
+               if (! firstRow && generateMap) {
                   writeMapArea(t, di->getClassDef(), relPath, x, y, cellWidth, cellHeight);
                }
 
@@ -1462,9 +1462,9 @@ void ClassDiagram::writeFigure(QTextStream &output, const char *path, const char
    }
 }
 
-void ClassDiagram::writeImage(QTextStream &t, const char *path, const char *relPath, const char *fName, bool generateMap) const
+void ClassDiagram::writeImage(QTextStream &t, const QString &path, const QString &relPath, const QString &fName, bool generateMap) const
 {
-   uint baseRows = base->computeRows();
+   uint baseRows  = base->computeRows();
    uint superRows = super->computeRows();
    uint rows = baseRows + superRows - 1;
 
@@ -1488,12 +1488,10 @@ void ClassDiagram::writeImage(QTextStream &t, const char *path, const char *relP
    base->drawConnectors(t, &image, true, true, baseRows, superRows, cellWidth, cellHeight);
    super->drawConnectors(t, &image, false, true, baseRows, superRows, cellWidth, cellHeight);
 
-   QByteArray fileName = QByteArray(path) + "/" + fName + IMAGE_EXT;
-
+   QString fileName = path + "/" + fName + IMAGE_EXT;
    QFile f(fileName);
 
-   if (f.open(QIODevice::WriteOnly)) {
-         
+   if (f.open(QIODevice::WriteOnly)) {         
       QByteArray buffer =  image.convert();
 
       f.write(buffer);

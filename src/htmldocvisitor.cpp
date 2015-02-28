@@ -1283,7 +1283,7 @@ void HtmlDocVisitor::visitPre(DocSection *s)
    m_t << "<h" << s->level() << ">";
    m_t << "<a class=\"anchor\" id=\"" << s->anchor();
    m_t << "\"></a>" << endl;
-   filter(convertCharEntitiesToUTF8(s->title().data()));
+   filter(convertCharEntitiesToUTF8(s->title()));
    m_t << "</h" << s->level() << ">\n";
 }
 

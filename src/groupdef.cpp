@@ -69,7 +69,7 @@ GroupDef::GroupDef(const char *df, int dl, const char *na, const char *t, QStrin
    allMemberList = QMakeShared<MemberList>(MemberListType_allMembersList);
 
    visited = 0;   
-   m_subGrouping = Config_getBool("SUBGROUPING");
+   m_subGrouping = Config::getBool("subgrouping");
 }
 
 GroupDef::~GroupDef()
@@ -126,7 +126,7 @@ void GroupDef::findSectionsInDocumentation()
 
 void GroupDef::addFile(QSharedPointer<FileDef> def)
 {
-   static bool sortBriefDocs = Config_getBool("SORT_BRIEF_DOCS");
+   static bool sortBriefDocs = Config::getBool("sort-brief-docs");
 
    if (def->isHidden()) {
       return;
@@ -181,7 +181,7 @@ void GroupDef::addDir(QSharedPointer<DirDef> def)
       return;
    }
 
-   if (Config_getBool("SORT_BRIEF_DOCS")) {
+   if (Config::getBool("sort-brief-docs")) {
       dirList->inSort(def);
    } else {
       dirList->append(def);
@@ -630,7 +630,7 @@ void GroupDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
 {
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
-   if ((! briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF"))
+   if ((! briefDescription().isEmpty() && Config::getBool("repeat-brief"))
          || !documentation().isEmpty() || !inbodyDocumentation().isEmpty()) {
 
       if (pageDict->count() != countMembers()) { // not only pages -> classical layout
@@ -648,12 +648,12 @@ void GroupDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
       }
 
       // repeat brief description
-      if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF")) {
+      if (!briefDescription().isEmpty() && Config::getBool("repeat-brief")) {
          ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
 
       // write separator between brief and details
-      if (!briefDescription().isEmpty() && Config_getBool("REPEAT_BRIEF") && ! documentation().isEmpty()) {
+      if (!briefDescription().isEmpty() && Config::getBool("repeat-brief") && ! documentation().isEmpty()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::RTF);
@@ -681,7 +681,7 @@ void GroupDef::writeBriefDescription(OutputList &ol)
 {
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
-   if (! briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+   if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), 
                                              briefDescription(), true, false, 0, true, false);
 
@@ -693,7 +693,7 @@ void GroupDef::writeBriefDescription(OutputList &ol)
          ol.writeString(" \n");
          ol.enable(OutputGenerator::RTF);
 
-         if (Config_getBool("REPEAT_BRIEF") || ! documentation().isEmpty() ) {
+         if (Config::getBool("repeat-brief") || ! documentation().isEmpty() ) {
             ol.disableAllBut(OutputGenerator::Html);
             ol.startTextLink(0, "details");
             ol.parseText(theTranslator->trMore());
@@ -712,7 +712,7 @@ void GroupDef::writeGroupGraph(OutputList &ol)
 {
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
-   if (Config::getBool("have-dot") /*&& Config_getBool("GROUP_GRAPHS")*/ ) {
+   if (Config::getBool("have-dot") /*&& Config::getBool("group-graphs")*/ ) {
       DotGroupCollaboration graph(self);
 
       if (! graph.isTrivial()) {
@@ -747,7 +747,7 @@ void GroupDef::writeFiles(OutputList &ol, const QByteArray &title)
          ol.writeObjectLink(item->getReference(), item->getOutputFileBase(), 0, item->name());
          ol.endMemberItem();
 
-         if (! item->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+         if (! item->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
             ol.startMemberDescription(item->getOutputFileBase());
             ol.generateDoc(briefFile(), briefLine(), item, QSharedPointer<MemberDef>(), 
                            item->briefDescription(), false, false, 0, true, false);
@@ -785,7 +785,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QByteArray &title)
       ol.endMemberHeader();
       ol.startMemberList();
 
-      if (Config_getBool("SORT_GROUP_NAMES")) {
+      if (Config::getBool("sort-group-names")) {
          groupList->sort();
       }
 
@@ -798,7 +798,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QByteArray &title)
             ol.writeObjectLink(gd->getReference(), gd->getOutputFileBase(), 0, gd->groupTitle());
             ol.endMemberItem();
 
-            if (!gd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+            if (!gd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
                ol.startMemberDescription(gd->getOutputFileBase());
                ol.generateDoc(briefFile(), briefLine(), gd, QSharedPointer<MemberDef>(), gd->briefDescription(), 
                               false, false, 0, true, false);
@@ -830,7 +830,7 @@ void GroupDef::writeDirs(OutputList &ol, const QByteArray &title)
          ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName().toUtf8());
          ol.endMemberItem();
 
-         if (!dd->briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+         if (!dd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
             ol.startMemberDescription(dd->getOutputFileBase());
             ol.generateDoc(briefFile(), briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription(), 
                            false, false, 0, true, false);
@@ -901,9 +901,8 @@ void GroupDef::endMemberDeclarations(OutputList &ol)
 }
 
 void GroupDef::startMemberDocumentation(OutputList &ol)
-{
-   //printf("** GroupDef::startMemberDocumentation()\n");
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+{  
+   if (Config::getBool("separate-member-pages")) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
       Doxygen::suppressDocWarnings = true;
@@ -911,9 +910,8 @@ void GroupDef::startMemberDocumentation(OutputList &ol)
 }
 
 void GroupDef::endMemberDocumentation(OutputList &ol)
-{
-   //printf("** GroupDef::endMemberDocumentation()\n");
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+{   
+   if (Config::getBool("separate-member-pages")) {
       ol.popGeneratorState();
       Doxygen::suppressDocWarnings = false;
    }
@@ -927,7 +925,7 @@ void GroupDef::writeAuthorSection(OutputList &ol)
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config_getString("PROJECT_NAME")));
+   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project_name").toUtf8()));
    ol.popGeneratorState();
 }
 
@@ -992,7 +990,7 @@ void GroupDef::writeDocumentation(OutputList &ol)
 {
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
-   // static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+   // static bool generateTreeView = Config::getBool("generate-treeview");
 
    ol.pushGeneratorState();
    startFile(ol, getOutputFileBase(), name(), title, HLI_None);
@@ -1144,7 +1142,7 @@ void GroupDef::writeDocumentation(OutputList &ol)
 
    ol.popGeneratorState();
 
-   if (Config_getBool("SEPARATE_MEMBER_PAGES")) {
+   if (Config::getBool("separate-member-pages")) {
       allMemberList->sort();
       writeMemberPages(ol);
    }
@@ -1168,7 +1166,7 @@ void GroupDef::writeMemberPages(OutputList &ol)
 
 void GroupDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
 {
-   static bool createSubDirs = Config_getBool("CREATE_SUBDIRS");
+   static bool createSubDirs = Config::getBool("create-subdirs");
 
    ol.writeString("      <div class=\"navtab\">\n");
    ol.writeString("        <table>\n");
@@ -1191,7 +1189,7 @@ void GroupDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
                ol.writeString("../../");
             }
 
-            ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension + "#" + md->anchor());
+            ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8() + "#" + md->anchor());
             ol.writeString("\">");
             ol.writeString(convertToHtml(md->localName()));
             ol.writeString("</a>");
@@ -1474,6 +1472,6 @@ void GroupDef::updateLanguage(QSharedPointer<const Definition> d)
 
 bool GroupDef::hasDetailedDescription() const
 {
-   static bool repeatBrief = Config_getBool("REPEAT_BRIEF");
-   return ((!briefDescription().isEmpty() && repeatBrief) || !documentation().isEmpty());
+   static bool repeatBrief = Config::getBool("repeat-brief");
+   return ((! briefDescription().isEmpty() && repeatBrief) || !documentation().isEmpty());
 }

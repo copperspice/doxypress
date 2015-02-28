@@ -1319,7 +1319,7 @@ bool MemberDef::isBriefSectionVisible() const
 {
    static bool extractStatic       = Config::getBool("extract-static");
    static bool hideUndocMembers    = Config::getBool("hide-undoc-members");
-   static bool briefMemberDesc     = Config::getbool("brief-member-desc");
+   static bool briefMemberDesc     = Config::getBool("brief-member-desc");
    static bool repeatBrief         = Config::getBool("repeat-brief");
    static bool hideFriendCompounds = Config::getBool("hide-friend-compounds");
  
@@ -1885,9 +1885,9 @@ bool MemberDef::isDetailedSectionLinkable() const
 
 bool MemberDef::isDetailedSectionVisible(bool inGroup, bool inFile) const
 {
-   static bool separateMemPages = Config_getBool("SEPARATE_MEMBER_PAGES");
-   static bool inlineSimpleStructs = Config_getBool("INLINE_SIMPLE_STRUCTS");
-   static bool hideUndocMembers = Config_getBool("HIDE_UNDOC_MEMBERS");
+   static bool separateMemPages    = Config::getBool("separate-member-pages");
+   static bool inlineSimpleStructs = Config::getBool("inline-simple-structs");
+   static bool hideUndocMembers    = Config::getBool("hide-undoc-members");
 
    bool groupFilter = getGroupDef() == 0 || inGroup || separateMemPages;
    bool fileFilter  = getNamespaceDef() == 0 || !inFile;
@@ -2161,7 +2161,7 @@ void MemberDef::_writeCallGraph(OutputList &ol)
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
    // write call graph
-   if ((m_impl->hasCallGraph || Config_getBool("CALL_GRAPH"))
+   if ((m_impl->hasCallGraph || Config::getBool("dot_call"))
          && (isFunction() || isSlot() || isSignal()) && Config::getBool("have-dot")) {
 
       DotCallGraph callGraph(self, false);
@@ -2188,7 +2188,7 @@ void MemberDef::_writeCallerGraph(OutputList &ol)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
-   if ((m_impl->hasCallerGraph || Config_getBool("CALLER_GRAPH"))
+   if ((m_impl->hasCallerGraph || Config::getBool("dot_called_by"))
          && (isFunction() || isSlot() || isSignal()) && Config::getBool("have-dot")) {
 
       DotCallGraph callerGraph(self, true);
@@ -2246,7 +2246,7 @@ void MemberDef::_writeReimplements(OutputList &ol)
             } else {
                ol.writeObjectLink(bcd->getReference(), bcd->getOutputFileBase(), 0, bcd->displayName().toUtf8());
 
-               if (bcd->isLinkableInProject()/* && !Config_getBool("PDF_HYPERLINKS")*/ ) {
+               if (bcd->isLinkableInProject()/* && ! Config::getBool("latex-hyper-pdf")*/ ) {
                   writePageRef(ol, bcd->getOutputFileBase(), bcd->anchor());
                }
             }
@@ -2591,7 +2591,7 @@ QByteArray MemberDef::displayDefinition() const
 void MemberDef::_writeGroupInclude(OutputList &ol, bool inGroup)
 {
    // only write out the include file if this is not part of a class or file definition
-   static bool showGroupedMembInc = Config_getBool("SHOW_GROUPED_MEMB_INC");
+   static bool showGroupedMembInc = Config::getBool("show-grouped_members-inc");
 
    QSharedPointer<FileDef> fd = getFileDef();
    QByteArray nm;
@@ -2798,7 +2798,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
 
       QSharedPointer<ClassDef> cd = getClassDef();
 
-      if (!Config_getBool("HIDE_SCOPE_NAMES")) {
+      if (!Config::getBool("hide-scope-names")) {
          bool first = true;
 
          SrcLangExt lang = getLanguage();
@@ -3019,7 +3019,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    }
 
    /* write brief description */
-   if (!brief.isEmpty() && (Config_getBool("REPEAT_BRIEF") || !Config_getBool("BRIEF_MEMBER_DESC")) ) {
+   if (! brief.isEmpty() && (Config::getBool("repeat-brief") || ! Config::getBool("brief-member-desc")) ) {
       ol.startParagraph();
 
       ol.generateDoc(briefFile(), briefLine(), getOuterScope() ? getOuterScope() : container, self,
@@ -3038,7 +3038,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
                         inbodyDocumentation() + "\n", true, false);
       }
 
-   } else if (!brief.isEmpty() && (Config_getBool("REPEAT_BRIEF") || ! Config_getBool("BRIEF_MEMBER_DESC"))) {
+   } else if (!brief.isEmpty() && (Config::getBool("repeat-brief") || ! Config::getBool("brief-member-desc"))) {
 
       if (!inbodyDocumentation().isEmpty()) {
          ol.generateDoc(inbodyFile(), inbodyLine(), getOuterScope() ? getOuterScope() : container, self, 
@@ -3573,11 +3573,11 @@ void MemberDef::setInitializer(const char *initializer)
 
 void MemberDef::addListReference(QSharedPointer<Definition> d)
 {
-   static bool optimizeOutputForC = Config_getBool("OPTIMIZE_OUTPUT_FOR_C");
+   static bool optimizeOutputForC = Config::getBool("optimize-c");
 
-   //static bool hideScopeNames     = Config_getBool("HIDE_SCOPE_NAMES");
-   //static bool optimizeOutputJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
-   //static bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+   // static bool hideScopeNames     = Config::getBool("hide-scope-names");
+   // static bool optimizeOutputJava = Config::getBool("optimize-java");
+   // static bool fortranOpt         = Config::getBool("optimize-fortran");
 
    SrcLangExt lang = getLanguage();
 

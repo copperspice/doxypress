@@ -202,7 +202,7 @@ void LatexDocVisitor::visit(DocURL *u)
    if (m_hide) {
       return;
    }
-   if (Config_getBool("PDF_HYPERLINKS")) {
+   if (Config::getBool("latex-hyper-pdf")) {
       m_t << "\\href{";
       if (u->isEmail()) {
          m_t << "mailto:";
@@ -416,7 +416,7 @@ void LatexDocVisitor::visit(DocAnchor *anc)
       return;
    }
    m_t << "\\label{" << stripPath(anc->file()) << "_" << anc->anchor() << "}%" << endl;
-   if (!anc->file().isEmpty() && Config_getBool("PDF_HYPERLINKS")) {
+   if (!anc->file().isEmpty() && Config::getBool("latex-hyper-pdf")) {
       m_t << "\\hypertarget{" << stripPath(anc->file()) << "_" << anc->anchor()
           << "}{}%" << endl;
    }
@@ -811,11 +811,11 @@ void LatexDocVisitor::visitPre(DocSection *s)
    if (m_hide) {
       return;
    }
-   if (Config_getBool("PDF_HYPERLINKS")) {
+   if (Config::getBool("latex-hyper-pdf")) {
       m_t << "\\hypertarget{" << stripPath(s->file()) << "_" << s->anchor() << "}{}";
    }
    m_t << "\\" << getSectionName(s->level()) << "{";
-   filter(convertCharEntitiesToUTF8(s->title().data()));
+   filter(convertCharEntitiesToUTF8(s->title()));
    m_t << "}\\label{" << stripPath(s->file()) << "_" << s->anchor() << "}" << endl;
 }
 
@@ -1186,7 +1186,8 @@ void LatexDocVisitor::visitPre(DocHRef *href)
    if (m_hide) {
       return;
    }
-   if (Config_getBool("PDF_HYPERLINKS")) {
+
+   if (Config::getBool("latex-hyper-pdf")) {
       m_t << "\\href{";
       m_t << href->url();
       m_t << "}";
@@ -1385,7 +1386,7 @@ void LatexDocVisitor::visitPre(DocSecRefItem *ref)
    }
 
    m_t << "\\item \\contentsline{section}{";
-   static bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
    if (pdfHyperlinks) {
       m_t << "\\hyperlink{" << ref->file() << "_" << ref->anchor() << "}{" ;
@@ -1398,7 +1399,7 @@ void LatexDocVisitor::visitPost(DocSecRefItem *ref)
       return;
    }
 
-   static bool pdfHyperlinks = Config_getBool("PDF_HYPERLINKS");
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
    if (pdfHyperlinks) {
       m_t << "}";
@@ -1618,7 +1619,7 @@ void LatexDocVisitor::visitPre(DocXRefItem *x)
    m_t << "}" << endl;
    bool anonymousEnum = x->file() == "@";
    m_t << "\\item[";
-   if (Config_getBool("PDF_HYPERLINKS") && !anonymousEnum) {
+   if (Config::getBool("latex-hyper-pdf") && !anonymousEnum) {
       m_t << "\\hyperlink{" << stripPath(x->file()) << "_" << x->anchor() << "}{";
    } else {
       m_t << "{\\bf ";
@@ -1709,7 +1710,7 @@ void LatexDocVisitor::filter(const char *str)
 
 void LatexDocVisitor::startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor)
 {
-   if (ref.isEmpty() && Config_getBool("PDF_HYPERLINKS")) { 
+   if (ref.isEmpty() && Config::getBool("latex-hyper-pdf")) { 
       // internal PDF link
 
       if (ref.isEmpty()) {
@@ -1762,7 +1763,7 @@ void LatexDocVisitor::endLink(const QByteArray &ref, const QByteArray &file, con
 {
    m_t << "}";
 
-   if (ref.isEmpty() && !Config_getBool("PDF_HYPERLINKS")) {
+   if (ref.isEmpty() && ! Config::getBool("latex-hyper-pdf")) {
       m_t << "{";
       filter(theTranslator->trPageAbbreviation());
 
@@ -1820,7 +1821,7 @@ void LatexDocVisitor::startDotFile(const QByteArray &fileName, const QByteArray 
       m_t << "[width=\\textwidth,height=\\textheight/2,keepaspectratio=true]";
    }
    m_t << "{" << baseName;
-   //if (Config_getBool("USE_PDFLATEX"))
+   //if (Config::getBool("latex-pdf"))
    //{
    //  m_t << ".pdf";
    //}
@@ -1878,7 +1879,7 @@ void LatexDocVisitor::startMscFile(const QByteArray &fileName, const QByteArray 
       m_t << "[width=\\textwidth,height=\\textheight/2,keepaspectratio=true]";
    }
    m_t << "{" << baseName;
-   //if (Config_getBool("USE_PDFLATEX"))
+   //if (Config::getBool("latex-pdf"))
    //{
    //  m_t << ".pdf";
    //}
@@ -1958,7 +1959,7 @@ void LatexDocVisitor::startDiaFile(const QByteArray &fileName, const QByteArray 
 
    m_t << "{" << baseName;
 
-   //if (Config_getBool("USE_PDFLATEX"))
+   //if (Config::getBool("latex-pdf"))
    //{
    //  m_t << ".pdf";
    //}

@@ -22,61 +22,122 @@
 
 #include <config.h>
 #include <doxy_globals.h>
-#include <portable.h>
 #include <filedef.h>
 #include <message.h>
+#include <portable.h>
 #include <util.h>
 
-/** Helper struct representing a mapping from debug label to a debug ID */
-struct LabelMap {
-   const char *name;
-   Debug::DebugMask event;
-};
+// 
+int Debug::curMask     = 0;
+int Debug::curPriority = 0;
 
-/** Class representing a mapping from debug labels to debug IDs. */
-class LabelMapper
-{
- public:
-   LabelMapper();
- 
-   Debug::DebugMask *find(const char *s) const {
-      if (s == 0) {
-         return 0;
-      }
-      return m_map.value(s);
+QHash<QString, Debug::DebugMask> debugMap(); 
+QHash<QString, Debug::DebugMask> Debug::m_map = debugMap();
+
+
+QHash<QString, Debug::DebugMask> debugMap() 
+{     
+   QHash<QString, Debug::DebugMask> tempMap;
+
+   tempMap.insert("findmembers",  Debug::FindMembers  );  
+   tempMap.insert("functions",    Debug::Functions    );
+   tempMap.insert("variables",    Debug::Variables    );
+   tempMap.insert("preprocessor", Debug::Preprocessor );
+   tempMap.insert("classes",      Debug::Classes      );
+   tempMap.insert("commentcnv",   Debug::CommentCnv   );
+   tempMap.insert("commentscan",  Debug::CommentScan  );
+   tempMap.insert("validate",     Debug::Validate     );
+   tempMap.insert("printtree",    Debug::PrintTree    );
+   tempMap.insert("time",         Debug::Time         );
+   tempMap.insert("extcmd",       Debug::ExtCmd       );
+   tempMap.insert("markdown",     Debug::Markdown     );
+   tempMap.insert("filteroutput", Debug::FilterOutput );
+   tempMap.insert("lex",          Debug::Lex          );    
+
+   return tempMap;
+}
+
+int Debug::labelToEnum(const QString &data)
+{   
+   Debug::DebugMask type = m_map.value(data.toLower());
+
+   if (type) {
+      return type;
+
+   } else {
+      return 0;
    }
+}
 
- private:
-   QHash<QString, Debug::DebugMask *> m_map;
-};
+int Debug::setFlag(const QString &label)
+{
+   int retval = labelToEnum(label);
 
-Debug::DebugMask Debug::curMask = Debug::Quiet;
-int Debug::curPrio = 0;
+   curMask = curMask | retval;
 
+   return retval;
+}
+
+void Debug::clearFlag(const QString &label)
+{
+   curMask = curMask & ~labelToEnum(label);
+}
+
+void Debug::setPriority(int data)
+{
+   curPriority = data;
+}
+
+bool Debug::isFlagSet(DebugMask mask)
+{
+   return (curMask & mask) != 0;
+}
+
+void Debug::printFlags()
+{ 
+   for (auto item : m_map.keys())  {      
+      msg("\t%s\n", qPrintable(item));      
+   }   
+}
+  
+void Debug::print(DebugMask mask, int data, const char *fmt, ...)
+{
+   if (curMask & mask) { 
+      if (curPriority >= data) {
+         va_list args;
+         va_start(args, fmt);
+         vfprintf(stdout, fmt, args);
+         va_end(args);
+      }
+   }
+}
+
+
+
+// start of message output, next two are defined by the project configuration
 static QString outputFormat;
 static FILE *warnFile = stderr;
-static LabelMapper s_labelMapper;
 
-static const char *warning_str = "Warning: ";
+void initWarningFormat()
+{
+   outputFormat = Config::getString("warn-format");
 
-static LabelMap s_labels[] = {
-   { "findmembers",  Debug::FindMembers  },
-   { "functions",    Debug::Functions    },
-   { "variables",    Debug::Variables    },
-   { "preprocessor", Debug::Preprocessor },
-   { "classes",      Debug::Classes      },
-   { "commentcnv",   Debug::CommentCnv   },
-   { "commentscan",  Debug::CommentScan  },
-   { "validate",     Debug::Validate     },
-   { "printtree",    Debug::PrintTree    },
-   { "time",         Debug::Time         },
-   { "extcmd",       Debug::ExtCmd       },
-   { "markdown",     Debug::Markdown     },
-   { "filteroutput", Debug::FilterOutput },
-   { "lex",          Debug::Lex          },
-   { 0,             (Debug::DebugMask)0  }
-};
+   // if the user wants a line break, make it happen
+   outputFormat.replace("\\n", "\n");
+   outputFormat.replace("\\t", "\t");
 
+   QString logFN = Config::getString("warn-logfile");
+
+   if (! logFN.isEmpty()) {
+      warnFile = fopen(qPrintable(logFN), "w");
+   }
+
+   if (! warnFile) { 
+      // point to something valid
+      warnFile = stderr;
+   }
+}
+ 
 static void format_warn(const char *file, int line, const char *text)
 {
    QByteArray fileSubst = file == 0 ? "<unknown>" : file;
@@ -128,74 +189,7 @@ static void do_warn(const char *tag, const char *file, int line, const char *pre
    format_warn(file, line, text);
 }
 
-// ** 
-LabelMapper::LabelMapper() 
-{     
-   LabelMap *p = s_labels;
 
-   while (p->name) {
-      m_map.insert(p->name, new Debug::DebugMask(p->event));
-      p++;
-   }
-}
-
-// **
-void Debug::print(DebugMask mask, int prio, const char *fmt, ...)
-{
-   if ((curMask & mask) && prio <= curPrio) {
-      va_list args;
-      va_start(args, fmt);
-      vfprintf(stdout, fmt, args);
-      va_end(args);
-   }
-}
-
-static int labelToEnumValue(const QString &data)
-{
-   QByteArray label = data.toUtf8();
-   Debug::DebugMask *event = s_labelMapper.find(label.toLower());
-
-   if (event) {
-      return *event;
-
-   } else {
-      return 0;
-   }
-}
-
-int Debug::setFlag(const QString &label)
-{
-   int retVal = labelToEnumValue(label);
-   curMask = (DebugMask)(curMask | labelToEnumValue(label));
-
-   return retVal;
-}
-
-void Debug::clearFlag(const char *lab)
-{
-   curMask = (DebugMask)(curMask & ~labelToEnumValue(lab));
-}
-
-void Debug::setPriority(int p)
-{
-   curPrio = p;
-}
-
-bool Debug::isFlagSet(DebugMask mask)
-{
-   return (curMask & mask) != 0;
-}
-
-void Debug::printFlags(void)
-{
-   int i;
-
-   for (i = 0; i < (int)(sizeof(s_labels) / sizeof(*s_labels)); i++) {
-      if (s_labels[i].name) {
-         msg("\t%s\n", s_labels[i].name);
-      }
-   }   
-}
 
 // **
 void err(const char *fmt, ...)
@@ -212,6 +206,7 @@ void err(const char *fmt, ...)
 void msg(const char *fmt, ...)
 {
    if (! Config::getBool("quiet")) {
+
       if (Debug::isFlagSet(Debug::Time)) {
          printf("%.3f sec: ", ((double)Doxygen::runningTime.elapsed()) / 1000.0);
       }
@@ -224,28 +219,10 @@ void msg(const char *fmt, ...)
    }
 }
 
-void initWarningFormat()
-{
-   outputFormat = Config::getString("warn-format");
-
-   // if the user wants a line break, make it happen
-   outputFormat.replace("\\n", "\n");
-   outputFormat.replace("\\t", "\t");
-
-   QString logFN = Config::getString("warn-logfile");
-
-   if (! logFN.isEmpty()) {
-      warnFile = fopen(qPrintable(logFN), "w");
-   }
-
-   if (! warnFile) { 
-      // point to something valid
-      warnFile = stderr;
-   }
-}
-
 void warn(const char *file, int line, const char *fmt, ...)
 {
+   static const char *warning_str = "Warning: ";
+
    va_list args;
    va_start(args, fmt);
 
@@ -256,11 +233,14 @@ void warn(const char *file, int line, const char *fmt, ...)
 
 void va_warn(const char *file, int line, const char *fmt, va_list args)
 {
+   static const char *warning_str = "Warning: ";
    do_warn("WARNINGS", file, line, warning_str, fmt, args);
 }
 
 void warn_simple(const char *file, int line, const char *text)
 {
+   static const char *warning_str = "Warning: ";
+
    if (! Config::getBool("warnings")) {
       return;  
    }
@@ -270,6 +250,8 @@ void warn_simple(const char *file, int line, const char *text)
 
 void warn_undoc(const char *file, int line, const char *fmt, ...)
 {
+   static const char *warning_str = "Warning: ";
+
    va_list args;
    va_start(args, fmt);
 
@@ -280,6 +262,8 @@ void warn_undoc(const char *file, int line, const char *fmt, ...)
 
 void warn_doc_error(const char *file, int line, const char *fmt, ...)
 {
+   static const char *warning_str = "Warning: ";
+
    va_list args;
    va_start(args, fmt);
 
@@ -290,6 +274,8 @@ void warn_doc_error(const char *file, int line, const char *fmt, ...)
 
 void warn_doc_error(const char *file, int line, QString fmt_q, ...)
 {
+   static const char *warning_str = "Warning: ";
+
    QByteArray fmt = fmt_q.toLatin1();
 
    va_list args;
@@ -302,6 +288,8 @@ void warn_doc_error(const char *file, int line, QString fmt_q, ...)
 
 void warn_uncond(const char *fmt, ...)
 {
+   static const char *warning_str = "Warning: ";
+
    va_list args;
    va_start(args, fmt);
 
@@ -315,7 +303,7 @@ void printlex(int dbg, bool enter, const char *lexName, const char *fileName)
    const char *enter_txt    = "entering";
    const char *enter_txt_uc = "Entering";
 
-   if (!enter) {
+   if (! enter) {
       enter_txt    = "finished";
       enter_txt_uc = "Finished";
    }

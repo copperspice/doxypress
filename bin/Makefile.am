@@ -68,6 +68,7 @@ DoxyPress_SOURCES = \
    src/clangparser.cpp \
    src/classdef.cpp \
    src/classlist.cpp \
+   src/config.cpp    \
    src/config_json.cpp \
    src/cmdmapper.cpp \
    src/condparser.cpp \
@@ -140,7 +141,6 @@ DoxyPress_SOURCES = \
    src/xmldocvisitor.cpp  \
    src/xmlgen.cpp  \
 \
-   src/config.cpp    \
    src/portable.cpp  \
    src/ce_parse.cpp  \
 \

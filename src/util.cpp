@@ -307,7 +307,7 @@ void writePageRef(OutputDocInterface &od, const char *cn, const char *mn)
    od.disable(OutputGenerator::Html);
    od.disable(OutputGenerator::Man);
    
-   if (Config_getBool("PDF_HYPERLINKS")) {
+   if (Config::getBool("latex-hyper-pdf")) {
       od.disable(OutputGenerator::Latex);
    }
 
@@ -4907,7 +4907,7 @@ bool hasVisibleRoot(SortedList<BaseClassDef *> *bcl)
 }
 
 // note that this function is not reentrant due to the use of static growBuf!
-QByteArray escapeCharsInString(const char *name, bool allowDots, bool allowUnderscore)
+QByteArray escapeCharsInString(const QString &name, bool allowDots, bool allowUnderscore)
 {
    static bool caseSenseNames    = Config_getBool("CASE_SENSE_NAMES");
    static bool allowUnicodeNames = Config_getBool("ALLOW_UNICODE_NAMES");
@@ -4915,7 +4915,9 @@ QByteArray escapeCharsInString(const char *name, bool allowDots, bool allowUnder
 
    growBuf.clear();
    char c;
-   const char *p = name;
+
+   QByteArray tempName = name.toUtf8();
+   const char *p = tempName.constData();
 
    while ((c = *p++) != 0) {
       switch (c) {
@@ -5059,7 +5061,7 @@ QByteArray escapeCharsInString(const char *name, bool allowDots, bool allowUnder
  *  given its name, which could be a class name with template
  *  arguments, so special characters need to be escaped.
  */
-QString convertNameToFile(const char *name, bool allowDots, bool allowUnderscore)
+QString convertNameToFile(const QString &name, bool allowDots, bool allowUnderscore)
 {
    static bool shortNames    = Config_getBool("SHORT_NAMES");
    static bool createSubdirs = Config_getBool("CREATE_SUBDIRS");
@@ -6332,7 +6334,7 @@ void filterLatexString(QTextStream &t, const char *str, bool insideTabbing, bool
                t << "$\\sim$";
                break;
             case '[':
-               if (Config_getBool("PDF_HYPERLINKS") || insideItem) {
+               if (Config::getBool("latex-hyper-pdf") || insideItem) {
                   t << "\\mbox{[}";
                } else {
                   t << "[";
@@ -6342,7 +6344,7 @@ void filterLatexString(QTextStream &t, const char *str, bool insideTabbing, bool
                if (pc == '[') {
                   t << "$\\,$";
                }
-               if (Config_getBool("PDF_HYPERLINKS") || insideItem) {
+               if (Config::getBool("latex-hyper-pdf") || insideItem) {
                   t << "\\mbox{]}";
                } else {
                   t << "]";
@@ -6631,7 +6633,7 @@ bool updateLanguageMapping(const QString &extension, const QString &language)
 
    // found the language
    SrcLangExt parserId = p->parserId;
-   QBString extName = extension.toLower();
+   QString extName = extension.toLower();
 
    if (extName.isEmpty()) {
       return false;
@@ -6893,7 +6895,7 @@ QByteArray parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<M
    QByteArray s;
 
    if (doc.isEmpty()) {
-      return s.constData();
+      return s;
    }
 
    QTextStream t(&s);
@@ -6905,7 +6907,7 @@ QByteArray parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<M
    delete visitor;
    delete root;
 
-   QByteArray result = convertCharEntitiesToUTF8(s.data());
+   QByteArray result = convertCharEntitiesToUTF8(s);
    int i = 0;
    int charCnt = 0;
    int l = result.length();
@@ -6938,7 +6940,7 @@ QByteArray parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<M
       result = result.left(i) + "...";
    }
 
-   return result.data();
+   return result;
 }
 
 static QHash<QString, void *> aliasesProcessed;
@@ -7494,11 +7496,11 @@ QByteArray externalLinkTarget()
    }
 }
 
-QByteArray externalRef(const QByteArray &relPath, const QByteArray &ref, bool href)
+QByteArray externalRef(const QString &relPath, const QByteArray &ref, bool href)
 {
    QByteArray result;
 
-   if (!ref.isEmpty()) {
+   if (! ref.isEmpty()) {
       QByteArray dest = Doxygen::tagDestinationDict[ref];
 
       if (! dest.isEmpty()) {
@@ -7507,7 +7509,7 @@ QByteArray externalRef(const QByteArray &relPath, const QByteArray &ref, bool hr
 
          if (! relPath.isEmpty() && l > 0 && result.at(0) == '.') {
             // relative path -> prepend relPath.
-            result.prepend(relPath);
+            result.prepend(relPath.toUtf8());
          }
 
          if (!href) {
@@ -7518,15 +7520,16 @@ QByteArray externalRef(const QByteArray &relPath, const QByteArray &ref, bool hr
             result += '/';
          }
 
-         if (!href) {
+         if (! href) {
             result.append("\" ");
          }
       }
 
    } else {
-      result = relPath;
+      result = relPath.toUtf8();
 
    }
+
    return result;
 }
 
@@ -7797,7 +7800,8 @@ QByteArray stripIndentation(const QByteArray &s)
    int indent = 0;
    int minIndent = 1000000; // "infinite"
    bool searchIndent = true;
-   static int tabSize = Config_getInt("TAB_SIZE");
+   static int tabSize = Config::getInt("tab-size");
+
    while ((c = *p++)) {
       if      (c == '\t') {
          indent += tabSize - (indent % tabSize);

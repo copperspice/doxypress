@@ -166,11 +166,11 @@ void RTFGenerator::writeExtensionsFile(QFile &file)
 
 void RTFGenerator::init()
 {
-   QByteArray dir = Config_getString("RTF_OUTPUT");
+   QString dir = Config::getString("rtf-output");
    QDir d(dir);
 
-   if (! d.exists() && !d.mkdir(dir)) {
-      err("Could not create output directory %s\n", dir.data());
+   if (! d.exists() && ! d.mkdir(dir)) {
+      err("Could not create output directory %s\n", qPrintable(dir));
       exit(1);
    }
  
@@ -188,14 +188,16 @@ void RTFGenerator::init()
    }
 
    // overwrite some (or all) definitions from file
-   QByteArray &rtfStyleSheetFile = Config_getString("RTF_STYLESHEET_FILE");
-   if (!rtfStyleSheetFile.isEmpty()) {
+   QString rtfStyleSheetFile = Config::getString("rtf-stylesheet-file");
+
+   if (! rtfStyleSheetFile.isEmpty()) {
       loadStylesheet(rtfStyleSheetFile, rtf_Style);
    }
 
    // If user has defined an extension file, load its contents.
-   QByteArray &rtfExtensionsFile = Config_getString("RTF_EXTENSIONS_FILE");
-   if (!rtfExtensionsFile.isEmpty()) {
+   QString rtfExtensionsFile = Config::getString("rtf-extensions-file");
+
+   if (! rtfExtensionsFile.isEmpty()) {
       loadExtensions(rtfExtensionsFile);
    }
 
@@ -300,7 +302,7 @@ void RTFGenerator::beginRTFChapter()
 
    // if we are compact, no extra page breaks
 
-   if (Config_getBool("COMPACT_RTF")) {    
+   if (Config::getBool("rtf_compact")) {    
       m_textStream << "\\sect\\sbknone\n";
       rtfwriteRuler_thick();
 
@@ -319,8 +321,7 @@ void RTFGenerator::beginRTFSection()
 
    // if we are compact, no extra page breaks
 
-   if (Config_getBool("COMPACT_RTF")) {
-      
+   if (Config::getBool("rtf_compact")) {      
       m_textStream << "\\sect\\sbknone\n";
       rtfwriteRuler_emboss();
 
@@ -568,7 +569,7 @@ void RTFGenerator::startIndexSection(IndexSections is)
 
 void RTFGenerator::endIndexSection(IndexSections indexSec)
 {
-   bool fortranOpt = Config_getBool("OPTIMIZE_FOR_FORTRAN");
+   bool fortranOpt = Config::getBool("optimize-fortran");
  
    switch (indexSec) {
       case isTitlePageStart:
@@ -578,7 +579,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          {
             m_textStream << "}" << rtf_title;
          } else {
-            m_textStream << "}" << Config_getString("PROJECT_NAME");
+            m_textStream << "}" << Config::getString("project-name").toUtf8();
          }
          break;
 
@@ -625,7 +626,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
 
          m_textStream  << rtf_Style_Reset << rtf_Style["SubTitle"].reference << endl; // set to subtitle style
          m_textStream  << "{\\field\\fldedit {\\*\\fldinst AUTHOR \\\\*MERGEFORMAT}{\\fldrslt AUTHOR}}\\par" << endl;
-         m_textStream  << "Version " << Config_getString("PROJECT_NUMBER") << "\\par";
+         m_textStream  << "Version " << Config::getString("project-version").toUtf8() << "\\par";
 
          m_textStream  << "{\\field\\fldedit {\\*\\fldinst CREATEDATE \\\\*MERGEFORMAT}"
            "{\\fldrslt CREATEDATE}}\\par" << endl;
@@ -653,7 +654,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
             m_textStream  << "{\\tc \\v " << substitute(Doxygen::mainPage->title(), "%", "") << "}" << endl;
          }
          m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"";
-         //if (Config_getBool("GENERATE_TREEVIEW")) t << "main"; else t << "index";
+         //if (Config::getBool("generate-treeview")) t << "main"; else t << "index";
          m_textStream  << "index";
          m_textStream  << ".rtf\" \\\\*MERGEFORMAT}{\\fldrslt includedstuff}}\n";
          break;
@@ -1060,7 +1061,7 @@ void RTFGenerator::endIndexItem(const QByteArray &ref, const QByteArray &fn)
 void RTFGenerator::startHtmlLink(const QByteArray &url)
 {
 
-   if (Config_getBool("RTF_HYPERLINKS")) {
+   if (Config::getBool("rtf-hyperlinks")) {
       m_textStream << "{\\field {\\*\\fldinst { HYPERLINK \"";
       m_textStream << url;
       m_textStream << "\" }{}";
@@ -1073,7 +1074,7 @@ void RTFGenerator::startHtmlLink(const QByteArray &url)
 
 void RTFGenerator::endHtmlLink()
 {
-   if (Config_getBool("RTF_HYPERLINKS")) {
+  if (Config::getBool("rtf-hyperlinks")) {
       m_textStream << "}}}" << endl;
    } else {
       endTypewriter();
@@ -1096,7 +1097,7 @@ void RTFGenerator::writeStartAnnoItem(const char *, const QByteArray &f, const Q
       docify(path);
    }
 
-   if (! f.isEmpty() && Config_getBool("RTF_HYPERLINKS")) {
+   if (! f.isEmpty() && Config::getBool("rtf-hyperlinks")) {
       m_textStream << "{\\field {\\*\\fldinst { HYPERLINK  \\\\l \"";
       m_textStream << rtfFormatBmkStr(f);
       m_textStream << "\" }{}";
@@ -1196,7 +1197,7 @@ void RTFGenerator::endSubsubsection()
 
 void RTFGenerator::startTextLink(const QByteArray &f, const QByteArray &anchor)
 {
-   if (Config_getBool("RTF_HYPERLINKS")) {
+   if (Config::getBool("rtf-hyperlinks")) {
 
       QByteArray ref;
 
@@ -1218,14 +1219,14 @@ void RTFGenerator::startTextLink(const QByteArray &f, const QByteArray &anchor)
 
 void RTFGenerator::endTextLink()
 {
-   if (Config_getBool("RTF_HYPERLINKS")) {
+   if (Config::getBool("rtf-hyperlinks")) {
       m_textStream << "}}}" << endl;
    }
 }
 
 void RTFGenerator::writeObjectLink(const QByteArray &ref, const QByteArray &f, const QByteArray &anchor, const QByteArray &text)
 {
-   if (ref.isEmpty() && Config_getBool("RTF_HYPERLINKS")) {
+   if (ref.isEmpty() && Config::getBool("rtf-hyperlinks")) {
       QByteArray refName;
 
       if (! f.isEmpty()) {
@@ -1279,7 +1280,7 @@ void RTFGenerator::endPageRef(const QByteArray &clname, const QByteArray &anchor
 void RTFGenerator::writeCodeLink(const QByteArray &ref, const QByteArray &f, const QByteArray &anchor, 
                                  const QByteArray &name, const QByteArray &)
 {
-   if (ref.isEmpty() && Config_getBool("RTF_HYPERLINKS")) {
+   if (ref.isEmpty() && Config::getBool("rtf-hyperlinks")) {
       QByteArray refName;
 
       if (! f.isEmpty()) {
@@ -1335,7 +1336,7 @@ void RTFGenerator::startTitle()
 {
    DBG_RTF( << "{\\comment startTitle}" << endl)
 
-   if (Config_getBool("COMPACT_RTF")) {
+   if (Config::getBool("rtf_compact")) {
       beginRTFSection();
    } else {
       beginRTFChapter();
@@ -1658,7 +1659,7 @@ void RTFGenerator::codify(const QByteArray &str)
 
          switch (c) {
             case '\t':
-               spacesToNextTabStop = Config_getInt("TAB_SIZE") - (col % Config_getInt("TAB_SIZE"));
+               spacesToNextTabStop = Config::getInt("tab-size") - (col % Config::getInt("tab-size"));
                m_textStream << QString(spacesToNextTabStop, ' ');
 
                col += spacesToNextTabStop;
@@ -1840,7 +1841,7 @@ void RTFGenerator::endMemberList()
 //  {
 //    baseName=baseName.right(baseName.length()-i-1);
 //  }
-//  QByteArray outDir = Config_getString("RTF_OUTPUT");
+//  QByteArray outDir = Config::getString("rtf-output");
 //  writeDotGraphFromFile(name,outDir,baseName,BITMAP);
 //  newParagraph();
 //  m_textStream << "{" << endl;
@@ -2111,7 +2112,7 @@ static bool preProcessFile(QDir &d, QString &infName, QTextStream &t_stream, boo
    static QByteArray lineBuf;
    lineBuf.resize(maxLineLength);
 
-   // scan until find end of header this is EXTREEEEEEEMLY brittle.  
+   // scan until find end of header this is EXTREEEEEEEMLY brittle  
    // It works on OUR rtf files because the first line before the body
    // ALWAYS contains "{\comment begin body}"
 
@@ -2135,9 +2136,10 @@ static bool preProcessFile(QDir &d, QString &infName, QTextStream &t_stream, boo
          int startNamePos = lineBuf.indexOf('"', pos) + 1;
 
          int endNamePos = lineBuf.indexOf('"', startNamePos);
-         QByteArray fileName = lineBuf.mid(startNamePos, endNamePos - startNamePos);
+         QString fileName = lineBuf.mid(startNamePos, endNamePos - startNamePos);
 
          DBG_RTF(t_stream << "{\\comment begin include " << fileName << "}" << endl)
+
          if (! preProcessFile(d, fileName, t_stream, false)) {
             return false;
          }
@@ -2185,14 +2187,14 @@ void RTFGenerator::endDotGraph(const DotClassGraph &g)
 {
    newParagraph();
 
-   QByteArray fn =
-      g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config_getString("RTF_OUTPUT"), fileName, relPath, true, false);
+   QByteArray fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, true, false);
+   QByteArray imageFormat = Config::getEnum("dot-image-format").toUtf8();
 
    // display the file
    m_textStream << "{" << endl;
    m_textStream << rtf_Style_Reset << endl;
    m_textStream << "\\par\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_textStream << fn << "." << Config_getEnum("DOT_IMAGE_FORMAT");
+   m_textStream << fn << "." << imageFormat;
    m_textStream << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
    m_textStream << "}" << endl;
    newParagraph();
@@ -2209,14 +2211,14 @@ void RTFGenerator::endInclDepGraph(const DotInclDepGraph &g)
 {
    newParagraph();
 
-   QByteArray fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config_getString("RTF_OUTPUT"),
-                                fileName, relPath, false);
+   QByteArray fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
+   QByteArray imageFormat = Config::getEnum("dot-image-format").toUtf8();
 
    // display the file
    m_textStream << "{" << endl;
    m_textStream << rtf_Style_Reset << endl;
    m_textStream << "\\par\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_textStream << fn << "." << Config_getEnum("DOT_IMAGE_FORMAT");
+   m_textStream << fn << "." << imageFormat;
    m_textStream << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
    m_textStream << "}" << endl;
 
@@ -2240,14 +2242,14 @@ void RTFGenerator::endCallGraph(const DotCallGraph &g)
 {
    newParagraph();
 
-   QByteArray fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config_getString("RTF_OUTPUT"),
-                                fileName, relPath, false);
+   QByteArray fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
+   QByteArray imageFormat = Config::getEnum("dot-image-format").toUtf8();
 
    // display the file
    m_textStream << "{" << endl;
    m_textStream << rtf_Style_Reset << endl;
    m_textStream << "\\par\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_textStream << fn << "." << Config_getEnum("DOT_IMAGE_FORMAT");
+   m_textStream << fn << "." << imageFormat;
    m_textStream << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
    m_textStream << "}" << endl;
    DBG_RTF(m_textStream << "{\\comment (endCallGraph)}"    << endl)
@@ -2262,13 +2264,14 @@ void RTFGenerator::endDirDepGraph(const DotDirDeps &g)
 {
    newParagraph();
 
-   QByteArray fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), fileName, relPath, false);
+   QByteArray fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
+   QByteArray imageFormat = Config::getEnum("dot-image-format").toUtf8();
 
    // display the file
    m_textStream << "{" << endl;
    m_textStream << rtf_Style_Reset << endl;
    m_textStream << "\\par\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_textStream << fn << "." << Config_getEnum("DOT_IMAGE_FORMAT");
+   m_textStream << fn << "." << imageFormat;
    m_textStream << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
    m_textStream << "}" << endl;
 
@@ -2278,7 +2281,7 @@ void RTFGenerator::endDirDepGraph(const DotDirDeps &g)
 /** Tests the integrity of the result by counting brackets.
  *
  */
-void testRTFOutput(const char *name)
+void testRTFOutput(const QString &name)
 {
    int bcount = 0;
    int line   = 1;
@@ -2319,16 +2322,16 @@ void testRTFOutput(const char *name)
    }
 
 err:
-   err("RTF integrity test failed at line %d of %s due to a bracket mismatch.\n"
+   err("RTF integrity test failed at line %d of %s due to a bracket mismatch.\n"               // broom check 
        "       Please try to create a small code example that produces this error \n"
-       "       and send that to dimitri@stack.nl.\n", line, name);
+       "       and send that to dimitri@stack.nl.\n", line, qPrintable(name));
 }
 
 /**
  * This is an API to a VERY brittle RTF preprocessor that combines nested
  * RTF files.  This version replaces the infile with the new file
  */
-bool RTFGenerator::preProcessFileInplace(const QString &path, const char *name)
+bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &name)
 {
    QDir d(path);
 
@@ -2338,7 +2341,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const char *name)
       return false;
    }
 
-   QByteArray oldDir = QDir::currentPath().toUtf8();
+   QString oldDir = QDir::currentPath();
 
    // go to the html output directory (i.e. path)
    QDir::setCurrent(d.absolutePath());

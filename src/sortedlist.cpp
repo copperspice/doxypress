@@ -68,7 +68,7 @@ int compareListValues(QSharedPointer<DirDef> item1, QSharedPointer<DirDef> item2
 // DotNodeList --> SortedList<DotNode *>
 int compareListValues(const DotNode *item1, const DotNode *item2) 
 {
-   return qstricmp(item1->label(), item2->label());
+   return item1->label().compare(item2->label(), Qt::CaseInsensitive);
 }
 
 

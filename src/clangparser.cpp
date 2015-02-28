@@ -86,7 +86,7 @@ class ClangParser::Private
 
 static QByteArray detab(const QByteArray &s)
 {
-   static int tabSize = Config_getInt("TAB_SIZE");
+   static int tabSize = Config::getInt("tab-size");
    GrowBuf out;
    int size = s.length();
    const char *data = s.data();
