@@ -93,7 +93,7 @@ class TranslatorKorean : public Translator
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "필드 문서화";
       } else {
          return "멤버 데이타 문서화";
@@ -168,7 +168,7 @@ class TranslatorKorean : public Translator
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "데이타 구조";
       } else {
          return "클래스 목록";
@@ -182,7 +182,7 @@ class TranslatorKorean : public Translator
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "데이타 필드";
       } else {
          return "클래스 멤버";
@@ -191,7 +191,7 @@ class TranslatorKorean : public Translator
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "전역";
       } else {
          return "파일 멤버";
@@ -231,7 +231,7 @@ class TranslatorKorean : public Translator
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "다음은 데이타 구조들입니다. (간략한 설명만을 보여줍니다) :";
       } else {
          return "다음은 클래스, 구조체, 공용체 그리고 인터페이스들입니다. "
@@ -245,7 +245,7 @@ class TranslatorKorean : public Translator
       if (!extractAll) {
          result += "문서화된 ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "모든 구조체와 공용체의 필드들";
       } else {
          result += "모든 클래스 멤버들";
@@ -253,7 +253,7 @@ class TranslatorKorean : public Translator
       result += "의 목록입니다. ";
 
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "각 필드들은 해당 필드에 대한 구조체와 공용체의 "
                       "문서화 페이지의 링크를 가지고 있습니다. :";
          } else {
@@ -261,7 +261,7 @@ class TranslatorKorean : public Translator
                       "링크를 가지고 있습니다. :";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "각 필드들은 해당 필드가 속해 있는 구조체와 공용체에 "
                       "대한 링크를 가지고 있습니다. :";
          } else {
@@ -279,7 +279,7 @@ class TranslatorKorean : public Translator
          result += "문서화된  ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "모든 함수, 변수, 매크로, 열거형, 타입정의들";
       } else {
          result += "파일 멤버들";
@@ -335,7 +335,7 @@ class TranslatorKorean : public Translator
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "데이타 구조 색인";
       } else {
          return "클래스 색인";
@@ -360,7 +360,7 @@ class TranslatorKorean : public Translator
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "데이타 구조 문서화";
       } else {
          return "클래스 문서화";
@@ -474,7 +474,7 @@ class TranslatorKorean : public Translator
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "데이타 구조";
       } else {
          return "클래스";
@@ -914,7 +914,7 @@ class TranslatorKorean : public Translator
       return "Public 타입";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "데이타 필드";
       } else {
          return "Public 속성";
@@ -1019,7 +1019,7 @@ class TranslatorKorean : public Translator
          "};\n"
          "\\endcode\n"
          "다음과 같은 그래프가 출력될 것입니다. :"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "위 그래프의 박스들은 다음과 같은 의미를 가집니다. :\n"
          "<ul>\n"
@@ -1078,7 +1078,7 @@ class TranslatorKorean : public Translator
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "데이타 구조";
       } else {
          return "클래스";

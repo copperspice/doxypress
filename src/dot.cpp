@@ -1407,10 +1407,10 @@ static void deleteNodes(DotNode *node, StringMap<QSharedPointer<DotNode>> *skipN
    deletedNodes.clear(); // actually remove the nodes.
 }
 
-DotNode::DotNode(int n, const char *lab, const char *tip, const char *url, bool isRoot, QSharedPointer<ClassDef> cd)
-   : m_subgraphId(-1), m_number(n), m_label(lab), m_tooltip(tip), m_url(url), m_parents(0), m_children(0)
-   , m_edgeInfo(0), m_deleted(false), m_written(false), m_hasDoc(false), m_isRoot(isRoot), m_classDef(cd)
-   , m_visible(false), m_truncated(Unknown), m_distance(1000)
+DotNode::DotNode(int n, const QString &label, const QString &tip, const QString &url, bool isRoot, QSharedPointer<ClassDef> cd)
+   : m_subgraphId(-1), m_number(n), m_label(label), m_tooltip(tip), m_url(url), m_parents(0), m_children(0),
+     m_edgeInfo(0), m_deleted(false), m_written(false), m_hasDoc(false), m_isRoot(isRoot), m_classDef(cd),
+     m_visible(false), m_truncated(Unknown), m_distance(1000)
 {
 }
 
@@ -1503,29 +1503,35 @@ void DotNode::setDistance(int distance)
    }
 }
 
-static QByteArray convertLabel(const QByteArray &l)
+static QByteArray convertLabel(const QString &label)
 {
-   QByteArray result;
-   QByteArray bBefore("\\_/<({[: =-+@%#~?$"); // break before character set
-   QByteArray bAfter(">]),:;|");              // break after  character set
+   QByteArray result = "";
 
-   const char *p = l.data();
-
-   if (p == 0) {
+   if (label.isEmpty()) {
       return result;
    }
 
-   char c, pc = 0;
+   QByteArray bBefore("\\_/<({[: =-+@%#~?$"); // break before character set
+   QByteArray bAfter(">]),:;|");              // break after  character set
+
+   QByteArray tempLabel = label.toUtf8();
+   const char *p = tempLabel.constData();
+ 
+   char c;
+   char pc = 0;
    char cs[2];
+
    cs[1] = 0;
 
-   int len = l.length();
+   int len = tempLabel.length();
+
    int charsLeft = len;
    int sinceLast = 0;
-   int foldLen = 17; // ideal text length
+   int foldLen   = 17; // ideal text length
 
    while ((c = *p++)) {
       QByteArray replacement;
+
       switch (c) {
          case '\\':
             replacement = "\\\\";
@@ -1556,8 +1562,10 @@ static QByteArray convertLabel(const QByteArray &l)
             replacement = cs;
             break;
       }
+
       // Some heuristics to insert newlines to prevent too long
       // boxes and at the same time prevent ugly breaks
+
       if (c == '\n') {
          result += replacement;
          foldLen = (3 * foldLen + sinceLast + 2) / 4;
@@ -1582,37 +1590,28 @@ static QByteArray convertLabel(const QByteArray &l)
          result += replacement;
          sinceLast++;
       }
+
       charsLeft--;
       pc = c;
    }
+
    return result;
 }
 
 static QByteArray escapeTooltip(const QString &tooltip)
 {
-   QByteArray result;
-   const char *p = tooltip.data();
-
-   if (p == 0) {
-      return result;
+   if (tooltip.isEmpty()) {
+      return "";
    }
 
-   char c;
-   while ((c = *p++)) {
-      switch (c) {
-         case '"':
-            result += "\\\"";
-            break;
-         default:
-            result += c;
-            break;
-      }
-   }
+   QByteArray result = tooltip.toUtf8();
+   result.replace("\"", "\\\""); 
+
    return result;
 }
 
 static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberList> ml, QSharedPointer<ClassDef> scope,
-                               bool isStatic = false, const QHash<QString, void *> *skipNames = 0)
+                               bool isStatic = false, const QSet<QString> *skipNames = 0)
 {   
    if (ml) {
       int totalCount = 0;
@@ -1666,13 +1665,15 @@ static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberL
    }
 }
 
-static QByteArray stripProtectionPrefix(const QByteArray &s)
+static QString stripProtectionPrefix(const QString &s)
 {
-   if (!s.isEmpty() && (s[0] == '-' || s[0] == '+' || s[0] == '~' || s[0] == '#')) {
+   if (! s.isEmpty() && (s[0] == '-' || s[0] == '+' || s[0] == '~' || s[0] == '#')) {
       return s.mid(1);
+
    } else {
       return s;
    }
+
 }
 
 void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool hasNonReachableChildren, bool reNumber)
@@ -1684,9 +1685,8 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
    static bool umlLook = Config::getBool("uml-look");
 
    if (m_classDef && umlLook && (gt == Inheritance || gt == Collaboration)) {
-      // add names shown as relations to a dictionary, so we don't show
-      // them as attributes as well
-      QHash<QString, void *> arrowNames;
+      // add names shown as relations to a dictionary, so we do not show them as attributes as well
+      QSet<QString> arrowNames;
 
       if (m_edgeInfo) {
          // for each edge
@@ -1696,16 +1696,17 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
                int li = ei->m_label.indexOf('\n');
                int p = 0;
 
-               QByteArray lab;
+               QString label;
 
                while ((li = ei->m_label.indexOf('\n', p)) != -1) {
-                  lab = stripProtectionPrefix(ei->m_label.mid(p, li - p));
-                  arrowNames.insert(lab, (void *)0x8);
+                  label = stripProtectionPrefix(ei->m_label.mid(p, li - p));
+
+                  arrowNames.insert(label);
                   p = li + 1;
                }
 
-               lab = stripProtectionPrefix(ei->m_label.right(ei->m_label.length() - p));
-               arrowNames.insert(lab, (void *)0x8);
+               label = stripProtectionPrefix(ei->m_label.right(ei->m_label.length() - p));
+               arrowNames.insert(label);
             }
          }
       }
@@ -1727,6 +1728,7 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
          writeBoxMemberList(t, '-', m_classDef->getMemberList(MemberListType_priAttribs), m_classDef, false, &arrowNames);
          writeBoxMemberList(t, '-', m_classDef->getMemberList(MemberListType_priStaticAttribs), m_classDef, true, &arrowNames);
       }
+
       t << "|";
       writeBoxMemberList(t, '+', m_classDef->getMemberList(MemberListType_pubMethods), m_classDef);
       writeBoxMemberList(t, '+', m_classDef->getMemberList(MemberListType_pubStaticMethods), m_classDef, true);
@@ -1977,18 +1979,19 @@ void DotNode::writeDocbook(QTextStream &t, bool isClassGraph)
    t << "      <node id=\"" << m_number << "\">" << endl;
    t << "        <label>" << convertToXML(m_label) << "</label>" << endl;
  
-  if (! m_url.isEmpty()) {
-      QString url(m_url);
+   if (! m_url.isEmpty()) {
+      int index = m_url.indexOf("$");
 
-      char *refPtr = url.data();
-      char *urlPtr = strchr(url.data(), '$');
+      if (index != -1) {
+         QString refUrl = m_url.left(index - 1);
+         QString url    = m_url.mid(index + 1); 
 
-      if (urlPtr) {
-         *urlPtr++ = '\0';
-         t << "        <link refid=\"" << convertToXML(urlPtr) << "\"";
-         if (*refPtr != '\0') {
-            t << " external=\"" << convertToXML(refPtr) << "\"";
+         t << "        <link refid=\"" << convertToXML(url) << "\"";
+
+         if (! refUrl.isEmpty()) {
+            t << " external=\"" << convertToXML(refUrl) << "\"";
          }
+
          t << "/>" << endl;
       }
    }
@@ -2060,23 +2063,25 @@ void DotNode::writeDEF(QTextStream &t)
    t << nodePrefix << "id    = " << m_number << ';' << endl;
    t << nodePrefix << "label = '" << m_label << "';" << endl;
 
-   if (!m_url.isEmpty()) {
-      QByteArray url(m_url);
-      char *refPtr = url.data();
-      char *urlPtr = strchr(url.data(), '$');
+   if (! m_url.isEmpty()) {
+      int index = m_url.indexOf("$");
 
-      if (urlPtr) {
-         *urlPtr++ = '\0';
+      if (index != -1) {
+         QString refUrl = m_url.left(index - 1);
+         QString url    = m_url.mid(index + 1); 
+
          t << nodePrefix << "link = {" << endl << "  "
-           << nodePrefix << "link-id = '" << urlPtr << "';" << endl;
+           << nodePrefix << "link-id = '" << url << "';" << endl;
 
-         if (*refPtr != '\0') {
+         if (! refUrl.isEmpty()) {
             t << "  " << nodePrefix << "link-external = '"
-              << refPtr << "';" << endl;
+              << refUrl << "';" << endl;
          }
+
          t << "        };" << endl;
       }
    }
+
    if (m_children) { 
       auto edgeIter = m_edgeInfo->begin();
 
@@ -2837,11 +2842,10 @@ DotClassGraph::~DotClassGraph()
  *  The md5 checksum is returned as a 32 character ASCII string.
  */
 QByteArray computeMd5Signature(DotNode *root, DotNode::GraphType gt, GraphOutputFormat format, bool lrRank,
-                               bool renderParents, bool backArrows, const QByteArray &title, QByteArray &graphStr )
+                               bool renderParents, bool backArrows, const QString &title, QByteArray &graphStr )
 {
    bool reNumber = true;
-
-   //printf("computeMd5Signature\n");
+ 
    QByteArray buf;
 
    QTextStream md5stream(&buf);
@@ -2853,8 +2857,7 @@ QByteArray computeMd5Signature(DotNode *root, DotNode::GraphType gt, GraphOutput
 
    root->clearWriteFlag();
 
-   root->write(md5stream, gt, format, gt != DotNode::CallGraph && gt != DotNode::Dependency,
-               true, backArrows, reNumber);
+   root->write(md5stream, gt, format, gt != DotNode::CallGraph && gt != DotNode::Dependency, true, backArrows, reNumber);
 
    if (renderParents && root->m_parents) {
       for (auto pn : *root->m_parents) {
@@ -2906,9 +2909,9 @@ static bool updateDotGraph(DotNode *root, DotNode::GraphType gt, const QString &
    return checkAndUpdateMd5Signature(baseName, md5); // graph needs to be regenerated
 }
 
-QByteArray DotClassGraph::diskName() const
+QString DotClassGraph::diskName() const
 {
-   QByteArray result = m_diskName;
+   QString result = m_diskName;
 
    switch (m_graphType) {
       case DotNode::Collaboration:
@@ -2923,12 +2926,12 @@ QByteArray DotClassGraph::diskName() const
          assert(0);
          break;
    }
+
    return result;
 }
 
 QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
-                                     const QString &path, const QString &fileName, const QString &relPath, bool /*isTBRank*/,
-                                     bool generateImageMap, int graphId) const 
+                  const QString &path, const QString &fileName, const QString &relPath, bool, bool generateImageMap, int graphId) const 
 {
    QDir d(path);
 
@@ -3121,11 +3124,11 @@ QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFo
       }
    }
 
-   if (!regenerate) {
+   if (! regenerate) {
       removeDotGraph(absDotName);
    }
 
-   return baseName;
+   return baseName.toUtf8();
 }
 
 void DotClassGraph::writeXML(QTextStream &t)
@@ -3292,9 +3295,9 @@ DotInclDepGraph::~DotInclDepGraph()
    delete m_usedNodes;
 }
 
-QByteArray DotInclDepGraph::diskName() const
+QString DotInclDepGraph::diskName() const
 {
-   QByteArray result = m_diskName;
+   QString result = m_diskName;
 
    if (m_inverse) {
       result += "_dep";
@@ -3302,7 +3305,7 @@ QByteArray DotInclDepGraph::diskName() const
 
    result += "_incl";
 
-   return convertNameToFile(result).toUtf8();
+   return convertNameToFile(result);
 }
 
 QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,                                                                  
@@ -3427,11 +3430,11 @@ QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graph
          out << endl << "% FIG " << figId << endl;
       }
    }
-   if (!regenerate) {
+   if (! regenerate) {
       removeDotGraph(absDotName);
    }
 
-   return baseName;
+   return baseName.toUtf8();
 }
 
 bool DotInclDepGraph::isTrivial() const
@@ -4475,20 +4478,12 @@ QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat 
       removeDotGraph(absDotName);
    }
 
-   return baseName;
+   return baseName.toUtf8();
 }
 
-void DotGroupCollaboration::Edge::write( QTextStream &t ) const
+void DotGroupCollaboration::Edge::write(QTextStream &t) const
 {
-   const char *linkTypeColor[] = {
-      "darkorchid3"
-      , "orange"
-      , "blueviolet"
-      , "darkgreen"
-      , "firebrick4"
-      , "grey75"
-      , "midnightblue"
-   };
+   const char *linkTypeColor[] = { "darkorchid3", "orange", "blueviolet", "darkgreen", "firebrick4", "grey75", "midnightblue"};
 
    QByteArray arrowStyle = "dir=\"none\", style=\"dashed\"";
    t << "  Node" << pNStart->number();
@@ -4545,8 +4540,7 @@ bool DotGroupCollaboration::isTrivial() const
    return m_usedNodes->count() <= 1;
 }
 
-void DotGroupCollaboration::writeGraphHeader(QTextStream &t,
-      const QByteArray &title) const
+void DotGroupCollaboration::writeGraphHeader(QTextStream &t, const QString &title) const
 {
    t << "digraph ";
    if (title.isEmpty()) {

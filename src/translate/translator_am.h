@@ -71,7 +71,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Դաշտեր";
       } else {
          return "Անդամ տվյալներ";
@@ -149,7 +149,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Տվյալների կառուցվածք";
       } else {
          return "Դասերի ցուցակ";
@@ -163,7 +163,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Տվյալների դաշտեր";
       } else {
          return "Դասի անդամներ";
@@ -173,7 +173,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
    /*! This is put above each page as a link to all members of files. */
    /*??*/
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Գլոբալներ";
       } else {
          return "Ֆայլի անդամներ";
@@ -213,7 +213,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
 
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Տվյալների կառուցվածքը` կարճ բացատրություններով.";
       } else {
          return "Դասերը, կառուցվածքները, միավորումները "
@@ -227,7 +227,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
       if (!extractAll) {
          result += "փաստագրված ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "կառուցվածքների և միավորումների դաշտերի ";
       } else {
          result += "դասի անդամների ";
@@ -235,13 +235,13 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
       result += "ցուցակը`";
       result += " հղումներով դեպի ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "կառուցվածք/միավորում փաստագրությունները բոլոր անդամների համար.";
          } else {
             result += "դասի փաստագրությունը բոլոր անդամների համար.";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "կառուցվածքները/միավորումները, որոնց նրանք պատկանում են.";
          } else {
             result += "դասերը, որոնց նրանք պատկանում են.";
@@ -257,7 +257,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
          result += "փաստագրված ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "ֆունկցիաների, փոփոխականների, մակրո-հայտարարությունների, "
                    "համարակալումների և տիպի սահմանումների (typedef)";
       } else {
@@ -314,7 +314,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Տվյալների կառուցվածք";
       } else {
          return "Դասեր";
@@ -339,7 +339,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Տվյալների կառուցվածքներ";
       } else {
          return "Դասեր";
@@ -453,7 +453,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Տվյալների կառուցվածք";
       } else {
          return "Դասեր";
@@ -921,7 +921,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
       return "Բաց տիպեր";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Տվյալների դաշտեր";
       } else {
          return "Բաց ատրիբուտներ";
@@ -1034,7 +1034,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
          "};\n"
          "\\endcode\n"
          "Սրանով կստանանք հետևյալ գրաֆը."
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Այս գրաֆի ուղղանկյունները ունեն հետևյալ իմաստը.\n"
          "<ul>\n"
@@ -1096,7 +1096,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Տվյալների կառուցվածք";
       } else {
          return "Դասեր";
@@ -1157,7 +1157,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
     *  of the category.
     */
    virtual QByteArray trClass(bool first_capital, bool singular) {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          QByteArray result((first_capital ? "Տվյալների կառուցվածք" : "տվյալների կառուցվածք"));
          return result;
       } else {

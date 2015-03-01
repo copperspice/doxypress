@@ -123,7 +123,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
 
       portable_sysTimerStart();
 
-      if ((exitCode = portable_system("epstopdf", epstopdfArgs.toUtf8())) != 0) {
+      if ((exitCode = portable_system("epstopdf", epstopdfArgs)) != 0) {
          err("Problem running epstopdf, verify your TeX installation, exit code: %d\n", exitCode);
       }
 

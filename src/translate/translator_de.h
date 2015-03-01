@@ -147,7 +147,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datenstrukturen";
       } else {
          return "Auflistung der Klassen";
@@ -161,7 +161,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datenstruktur-Elemente";
       } else {
          return "Klassen-Elemente";
@@ -208,7 +208,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
 
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Hier folgt die Aufzählung aller Datenstrukturen "
                 "mit einer Kurzbeschreibung:";
       } else {
@@ -223,20 +223,20 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
       if (!extractAll) {
          result += "dokumentierten ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "Strukturen und Varianten";
       } else {
          result += "Klassenelemente";
       }
       result += " mit Verweisen auf ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "die Dokumentation zu jedem Element:";
          } else {
             result += "die Klassendokumentation zu jedem Element:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "die zugehörigen Elemente:";
          } else {
             result += "die zugehörigen Klassen:";
@@ -251,7 +251,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
       if (!extractAll) {
          result += "dokumentierten ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "Funktionen, Variablen, Makros, Aufzählungen und Typdefinitionen";
       } else {
          result += "Dateielemente";
@@ -305,7 +305,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datenstruktur-Verzeichnis";
       } else {
          return "Klassen-Verzeichnis";
@@ -330,7 +330,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datenstruktur-Dokumentation";
       } else {
          return "Klassen-Dokumentation";
@@ -444,7 +444,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datenstrukturen";
       } else {
          return "Klassen";
@@ -912,7 +912,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
    }
 
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datenfelder";
       } else {
          return "Öffentliche Attribute";
@@ -1032,7 +1032,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
          "};\n"
          "\\endcode\n"
          "Dies liefert den folgenden Graphen:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center></p>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center></p>\n"
          "<p>\n"
          "Die Rechtecke in obigem Graphen bedeuten:\n"
          "</p>\n"
@@ -1105,7 +1105,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datenstrukturen";
       } else {
          return "Klassen";

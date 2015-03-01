@@ -73,7 +73,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Τεκμηρίωση Πεδίων";
       } else {
          return "Τεκμηρίωση Δεδομένων Μελών";
@@ -148,7 +148,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Δομές Δεδομένων";
       } else {
          return "Λίστα Κλάσεων";
@@ -162,7 +162,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Μέλη Δομών Δεδομένων";
       } else {
          return "Μέλη Κλάσεων";
@@ -171,7 +171,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Καθολικοί ορισμοί";
       } else {
          return "Μέλη Αρχείων";
@@ -211,7 +211,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Ακολουθούνε οι δομές δεδομένων με σύντομες περιγραφές:";
       } else {
          return "Ακολουθούνε οι κλάσεις, δομές, "
@@ -225,20 +225,20 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
       if (!extractAll) {
          result += "τεκμηριωμένων ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "μελών δομών δεδομένων και ενώσεων ";
       } else {
          result += "κλάσεων";
       }
       result += " με συνδέσμους ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "στην τεκμηρίωση των δομών/ενώσεων για κάθε πεδίο:";
          } else {
             result += "στην τεκμηρίωση των κλάσεων για κάθε πεδίο:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "στις δομές/ενώσεις που ανήκουν:";
          } else {
             result += "στις κλάσεις που ανήκουν:";
@@ -254,7 +254,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
          result += "τεκμηριωμένων ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "συναρτήσεων, μεταβλητών, ορισμών, απαριθμήσεων, και ορισμών τύπων";
       } else {
          result += "μελών αρχείων";
@@ -309,7 +309,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Ευρετήριο δομών δεδομένων";
       } else {
          return "Συμπαγές Ευρετήριο";
@@ -334,7 +334,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Τεκμηρίωση Δομών Δεδομένων";
       } else {
          return "Τεκμηρίωση Κλάσεων";
@@ -448,7 +448,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Δομές Δεδομένων";
       } else {
          return "Κλάσεις";
@@ -890,7 +890,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
       return "Δημόσιοι Τυποι";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Πεδία Δεδομένων";
       } else {
          return "Δημόσια Χαρακτηριστικά";
@@ -997,7 +997,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
          "};\n"
          "\\endcode\n"
          "Αυτό οδηγεί στο επόμενο διάγραμμα:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center></p>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center></p>\n"
          "<p>\n"
          "Τα κουτιά στο παραπάνω διάγραμμα έχουν την ακόλουθη σημασία:\n"
          "</p>\n"
@@ -1063,7 +1063,7 @@ class TranslatorGreek : public TranslatorAdapter_1_8_4
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Δομές Δεδομένων";
       } else {
          return "Κλάσεις";

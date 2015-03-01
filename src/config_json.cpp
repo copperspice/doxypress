@@ -21,6 +21,7 @@
 #include <QJsonObject>
 
 #include <config.h>
+#include <message.h>
 
 QByteArray Config::json_ReadFile(QString fName)
 {        
@@ -41,24 +42,34 @@ QByteArray Config::json_ReadFile(QString fName)
 
 bool Config::parseConfig(QString fName)
 { 
-    bool retval;
+   printf("**  Read Project Configuration\n"); 
 
    load_Defaults();
-   retval = read_ProjectFile(fName);
 
-   return retval;
+   if (read_ProjectFile(fName)) {
+      return false;
+   }
+
+   printf("**  Verify Project Configuration\n"); 
+
+   if (preVerify()) {
+      return false;
+   }
+
+   // not used at this time (broom)
+   // Config::instance()->substituteEnvironmentVars();         
+
+   initWarningFormat();   
+   
+   if (verify()) {
+      return false;
+   }
+
+   return true;
 }
 
 void Config::load_Defaults()
-{ 
-
-//      QHash<QString, struc_CfgBool>   m_cfgBool;
-//      QHash<QString, struc_CfgInt>    m_cfgInt;  
-//      QHash<QString, struc_CfgEnum>   m_cfgEnum;
-//      QHash<QString, struc_CfgList>   m_cfgList; 
-//      QHash<QString, struc_CfgString> m_cfgString;
-
-  
+{  
    // tab 1
    m_cfgString.insert("project-name",        struc_CfgString { "My Project",   DEFAULT } );                                           
    m_cfgString.insert("project-brief",       struc_CfgString { "",             DEFAULT } );  
@@ -70,19 +81,15 @@ void Config::load_Defaults()
    m_cfgBool.insert("optimize-java",         struc_CfgBool   { false,          DEFAULT } );  
    m_cfgBool.insert("optimize-c",            struc_CfgBool   { false,          DEFAULT } );  
    m_cfgBool.insert("optimize-fortran",      struc_CfgBool   { false,          DEFAULT } );  
+   
+   // tab 2 - project
+   m_cfgString.insert("project-encoding",    struc_CfgString { "UTF-8",        DEFAULT } );       
+   m_cfgBool.insert("create-subdirs",        struc_CfgBool   { false,          DEFAULT } );  
+   m_cfgBool.insert("allow-unicode-names",   struc_CfgBool   { false,          DEFAULT } );    
+   m_cfgEnum.insert("output-language",       struc_CfgEnum   { "ENGLISH",      DEFAULT } );
 
 
 /*
-
-   //  ***
-   // tab 2 - project
-   m_ui->project_encoding->setText(                object.value("project-encoding").toString());
-   m_ui->create_subdirs_CB->setChecked(            object.value("create-subdirs").toBool());
-   m_ui->allow_unicode_names_CB->setChecked(       object.value("allow-unicode-names").toBool());
-
-   index = m_ui->output_language_CM->findText(     object.value("output-language").toString());
-   m_ui->output_language_CM->setCurrentIndex(index);
-
    m_ui->brief_member_desc_CB->setChecked(         object.value("brief-member-desc").toBool());
    m_ui->repeat_brief_CB->setChecked(              object.value("repeat-brief").toBool());
    m_ui->abbreviate_brief->setPlainText(           getDataList(object, "abbreviate-brief"));
@@ -272,23 +279,19 @@ void Config::load_Defaults()
 */
 
  
-
-/*
-   m_cfgBool.insert("generate-latex"         struc_CfgBool { object.value("generate-latex").toBool(),     DEFAULT } ); 
-   m_cfgBool.insert("latex-hyper-pdf"        struc_CfgBool { object.value("latex-hyper-pdf").toBool(),    DEFAULT } ); 
-   m_cfgBool.insert("latex-pdf"              struc_CfgBool { object.value("latex-pdf").toBool(),          DEFAULT } ); 
-   m_cfgBool.insert("latex-ps"               struc_CfgBool { object.value("latex-ps").toBool(),           DEFAULT } ); 
-   m_cfgBool.insert("generate-rtf"           struc_CfgBool { object.value("generate-rtf").toBool(),       DEFAULT } ); 
-   m_cfgBool.insert("generate-man"           struc_CfgBool { object.value("generate-man").toBool(),       DEFAULT } ); 
-   m_cfgBool.insert("generate-xml"           struc_CfgBool { object.value("generate-xml").toBool(),       DEFAULT } ); 
-   m_cfgBool.insert("generate-docbook"       struc_CfgBool { object.value("generate-docbook").toBool(),   DEFAULT } ); 
-*/
-
-
-   //  ***
+   // tab 3 ( appear on tab 1 and tab 3 )
+   m_cfgBool.insert("generate-html",         struc_CfgBool { true,              DEFAULT } );  
+   m_cfgBool.insert("generate-latex"         struc_CfgBool { false,             DEFAULT } );  
+   m_cfgBool.insert("latex-hyper-pdf"        struc_CfgBool { true,              DEFAULT } );  
+   m_cfgBool.insert("latex-pdf"              struc_CfgBool { true,              DEFAULT } );  
+   m_cfgBool.insert("latex-ps"               struc_CfgBool { false,             DEFAULT } );  
+   m_cfgBool.insert("generate-rtf"           struc_CfgBool { false,             DEFAULT } );   
+   m_cfgBool.insert("generate-man"           struc_CfgBool { false,             DEFAULT } );   
+   m_cfgBool.insert("generate-xml"           struc_CfgBool { false,             DEFAULT } );   
+   m_cfgBool.insert("generate-docbook"       struc_CfgBool { false,             DEFAULT } );  
+  
    // tab 3 - html
-   m_cfgBool.insert("generate-html",         struc_CfgBool { true,             DEFAULT } );  
-
+  
 
 /*
    m_ui->html_output->setText(                     object.value("html-output").toString());
@@ -404,10 +407,6 @@ void Config::load_Defaults()
 
 */
 
-
-   // final part
-//BROOM       getIcon("load");
-
 }
 
 
@@ -433,18 +432,16 @@ bool Config::read_ProjectFile(QString fName)
      
       if (key == "output-language" || key == "dot-image-format" || key == "mathjax-format" || key == "latex-paper-type")  { 
 
-/*       auto hashIter = m_cfgEnum.find(key);
+         auto hashIter = m_cfgEnum.find(key);
 
          if (hashIter != m_cfgEnum.end()) {
-            hashIter.value() = { iter.value().toEnum(), PROJECT };            
+            hashIter.value() = { iter.value().toString(), PROJECT };            
 
          }  else {
             fprintf(stderr, "Error: %s was not found in the project enum table\n", qPrintable(key) );
             isError = true;
 
          } 
-*/
-
       }
 
       if (iter.value().isBool()) {
@@ -460,8 +457,7 @@ bool Config::read_ProjectFile(QString fName)
          }
       } 
 
-/*
-      if (iter.value().isInteger()) {
+      if (iter.value().isDouble()) {
          auto hashIter = m_cfgInt.find(key);
 
          if (hashIter != m_cfgInt.end()) {
@@ -473,13 +469,27 @@ bool Config::read_ProjectFile(QString fName)
 
          }
       }
-*/
 
+      if (iter.value().isArray()) {
+         auto hashIter = m_cfgList.find(key);
 
+          if (hashIter != m_cfgList.end()) {
 
-//    if (iter.value().isList()) {
-//    }
+            QJsonArray temp = iter.value().toArray();
+            QStringList listData;
 
+            for (auto item : temp) {
+               listData.append(item.toString()); 
+            }   
+
+            hashIter.value() = { listData, PROJECT };
+
+         }  else {
+            fprintf(stderr, "Error: %s was not found in the project array table\n", qPrintable(key) );
+            isError = true;
+
+         }
+      } 
 
       if (iter.value().isString()) {
          auto hashIter = m_cfgString.find(key);
@@ -494,10 +504,8 @@ bool Config::read_ProjectFile(QString fName)
          }
       } 
    }
-
-   verify();
-
-   return ! isError;
+ 
+   return isError;
 }
 
 

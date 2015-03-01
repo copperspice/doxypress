@@ -69,7 +69,7 @@ class TranslatorSwedish : public Translator
    }
 
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Fält dokumentation";
       } else {
          return "Dokumentation av datamedlemmar";
@@ -130,7 +130,7 @@ class TranslatorSwedish : public Translator
    }
 
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datastrukturer";
       } else {
          return "Sammansatt klasslista";
@@ -142,7 +142,7 @@ class TranslatorSwedish : public Translator
    }
 
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Data fält";
       } else {
          return "Sammansatta klassmedlemmar";
@@ -150,7 +150,7 @@ class TranslatorSwedish : public Translator
    }
 
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globala symboler";
       } else {
          return "Filmedlemmar";
@@ -185,7 +185,7 @@ class TranslatorSwedish : public Translator
 
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Här följer datastrukturerna med korta beskrivningar:";
       } else {
          return "Här följer klasserna, strukterna, unionerna och "
@@ -199,20 +199,20 @@ class TranslatorSwedish : public Translator
       if (!extractAll) {
          result += "dokumenterade ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "struktur- och unions-fält";
       } else {
          result += "klassmedlemmar";
       }
       result += " med länkar till ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "struktur/unions-dokumentationen för varje fält:";
          } else {
             result += "klassdokumentationen för varje medlem:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += " strukturerna/unionerna de tillhör:";
          } else {
             result += "klasserna de tillhör:";
@@ -227,7 +227,7 @@ class TranslatorSwedish : public Translator
          result += "dokumenterade ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "funktioner, variabler, definitioner, enumerationer "
                    "och typdefinitioner";
       } else {
@@ -270,7 +270,7 @@ class TranslatorSwedish : public Translator
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Index över datastrukturer";
       } else {
          return "Index över sammensatta typer";
@@ -289,7 +289,7 @@ class TranslatorSwedish : public Translator
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dokumentation över datastrukturer";
       } else {
          return "Documentation över klasser";
@@ -356,7 +356,7 @@ class TranslatorSwedish : public Translator
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datastrukturer";
       } else {
          return "Sammansättning";
@@ -768,7 +768,7 @@ class TranslatorSwedish : public Translator
       return "Publika typer";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datafält";
       } else {
          return "Publika attribut";
@@ -877,7 +877,7 @@ class TranslatorSwedish : public Translator
          "\\endcode\n"
          "Om \\c MAX_DOT_GRAPH_HEIGHT är satt till 240 i konfigurationsfilen, "
          "kommer följande graf att generas:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Rektanglarna i den ovanstående grafen har följande betydelser:\n"
          "<ul>\n"
@@ -943,7 +943,7 @@ class TranslatorSwedish : public Translator
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datastrukturer";
       } else {
          return "Klasser";

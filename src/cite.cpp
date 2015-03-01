@@ -219,7 +219,7 @@ void CiteDict::generatePage() const
    portable_sysTimerStop();
 
    QString temp = "\"" + bib2xhtmlFile + "\" " + bibOutputFiles + " \"" + citeListFile + "\"";
-   int exitCode = portable_system("perl", qPrintable(temp)); 
+   int exitCode = portable_system("perl", temp); 
 
    if (exitCode != 0) {
       err("Problem running bibtex. Verify the command 'perl --version' works from the command line. Exit code: %d\n", exitCode);

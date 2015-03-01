@@ -86,7 +86,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Alan Dokümantasyonu";
       } else {
          return "Üye Veri Dokümantasyonu";
@@ -161,7 +161,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Veri Yapıları";
       } else {
          return "Sınıf Listesi";
@@ -175,7 +175,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Veri Alanları";
       } else {
          return "Sınıf Üyeleri";
@@ -184,7 +184,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globaller";
       } else {
          return "Dosya Üyeleri";
@@ -225,7 +225,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Kısa tanımlarıyla birlikte veri yapıları:";
       } else {
          return "Kısa tanımlarıyla sınıflar, yapılar (struct), "
@@ -239,20 +239,20 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
       if (!extractAll) {
          result += "dokümante edilmiş ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "yapı(struct) ve birleşim(union) yapılarını içerir";
       } else {
          result += "sınıf üyelerini içerir";
       }
       result += " ve ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "her alanı yapı(struct)/birleşim(union) dokümantasyonuna bağlar:";
          } else {
             result += "her üye için sınıf dokümantasyonuna bağlar:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "ait olduğu yapı(struct)/birleşime(union) bağlar:";
          } else {
             result += "ait olduğu sınıfa bağlar:";
@@ -268,7 +268,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
          result += "dokümante edilmiş ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "fonksiyonları, değişkenleri, makroları, enümerasyonları ve typedef\'leri içerir";
       } else {
          result += "dosya üyelerini içerir";
@@ -322,7 +322,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Veri Yapıları İndeksi";
       } else {
          return "Sınıf İndeksi";
@@ -347,7 +347,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Veri Yapıları Dokümantasyonu";
       } else {
          return "Sınıf Dokümantasyonu";
@@ -461,7 +461,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Veri Yapıları";
       } else {
          return "Sınıflar";
@@ -904,7 +904,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
       return "Public Tipler";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Veri Alanları";
       } else {
          return "Public Özellikler(attribute)";
@@ -1011,7 +1011,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
          "};\n"
          "\\endcode\n"
          "Bu kod aşağıdaki şemayı oluşturur:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Yukarıdaki şemadaki kutular aşağıda açıklanmıştır:\n"
          "<ul>\n"
@@ -1074,7 +1074,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Veri Yapıları";
       } else {
          return "Sınıflar";

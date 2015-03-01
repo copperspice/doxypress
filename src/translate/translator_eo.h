@@ -86,7 +86,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Kampa Dokumentado";
       } else {
          return "Dokumentado de la Membraj Datumoj";
@@ -161,7 +161,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datumstruktoroj";
       } else {
          return "Klasaro";
@@ -175,7 +175,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datumkampoj";
       } else {
          return "Klasaj membroj";
@@ -184,7 +184,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Mallokalaĵoj";
       } else {
          return "Dosieraj Membroj";
@@ -225,7 +225,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Jen datumstrukturoj kun mallongaj priskriboj:";
       } else {
          return "Jen la klasoj, strukturoj, kunigoj kaj interfacoj "
@@ -239,20 +239,20 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
       if (!extractAll) {
          result += "dokumentitaj ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "strukturaj kaj kunigaj kampoj";
       } else {
          result += "klasaj membroj";
       }
       result += " kun ligiloj al ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "la struktura/kuniga dokumentado por ĉiu kampo:";
          } else {
             result += "la klasa dokumentado por ĉiu membro:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "la strukturoj/kunigoj al kiuj ili apartenas:";
          } else {
             result += "la klasoj al kiuj ili apartenas:";
@@ -268,7 +268,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
          result += "dokumentitaj ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "funkcioj, variabloj, difinoj, enumeracioj kaj tipodifinoj";
       } else {
          result += "dosieraj membroj";
@@ -322,7 +322,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datumstruktura Indekso";
       } else {
          return "Klasa Indekso";
@@ -347,7 +347,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datumstruktura Dokumentado";
       } else {
          return "Klasa Dokumentado";
@@ -461,7 +461,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datumstrukturoj";
       } else {
          return "Klasoj";
@@ -902,7 +902,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
       return "Publikaj Tipoj";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datumkampoj";
       } else {
          return "Publikaj Atributoj";
@@ -1009,7 +1009,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
          "};\n"
          "\\endcode\n"
          "Tio ĉi liveros la sekvan diagramon:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "La skatoloj de la supra diagramo havas la sekvajn signifojn:\n"
          "<ul>\n"
@@ -1072,7 +1072,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datumstrukturoj";
       } else {
          return "Klasoj";

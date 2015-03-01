@@ -98,7 +98,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Kenttien dokumentaatio"; // "Field Documentation";
       } else {
          return "Jäsendatan dokumentaatio"; // "Member Data Documentation"
@@ -177,7 +177,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Tietueet"; // "Data Structures"
       } else {
          return "Luokkalista"; // "Class List"
@@ -191,7 +191,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Tietueen kentät"; // "Data Fields"
       } else {
          return "Luokan jäsenet"; // "Class Members"
@@ -200,7 +200,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globaalit"; // "Globals"
       } else {
          return "Tiedoston jäsenet"; // "File Members"
@@ -241,7 +241,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Tässä ovat tietueet lyhyen selitteen kanssa:"; // "Here are the data structures with brief descriptions:"
       } else {
          return "Tässä ovat luokat, tietueet ja " // "Here are the classes, structs and "
@@ -255,20 +255,20 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
       if (!extractAll) {
          result += "dokumentoiduista "; // "documented "
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "tietuiden ja yhdisteiden kentistä"; // "struct and union fields"
       } else {
          result += "luokkien jäsenistä"; // "class members"
       }
       result += " linkitettyinä "; // " with links to "
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "jokaisen kentän tietueen/yhdisteen dokumentaatioon:"; // "the struct/union documentation for each field:"
          } else {
             result += "jokaisen jäsenen luokkadokumentaatioon:"; // "the class documentation for each member:"
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "tietueisiin/yhdisteisiin, joihin ne kuuluvat:"; // "the structures/unions they belong to:"
          } else {
             result += "luokkiin, joihin ne kuuluvat"; //"the classes they belong to:"
@@ -284,7 +284,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
          result += "dokumentoiduista ";   // "documented "
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "funktioista, muuttujista, määrittelyistä, luettelotyypeistä ja tyyppimäärittelyistä"; // "functions, variables, defines, enums, and typedefs"
       } else {
          result += "tiedoston jäsenistä"; // "file members"
@@ -338,7 +338,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Tietueluettelo"; // "Data Structure Index"
       } else {
          return "Luokkaluettelo"; // "Class Index"
@@ -363,7 +363,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Tietueiden dokumentaatio"; // "Data Structure Documentation"
       } else {
          return "Luokkien dokumentaatio"; // "Class Documentation"
@@ -477,7 +477,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Tietueet"; // "Data Structures"
       } else {
          return "Luokat"; // "Classes"
@@ -923,7 +923,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
       return "Julkiset tyypit"; // "Public Types"
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Tietueen kentät"; // "Data Fields"
       } else {
          return "Julkiset attribuutit"; // "Public Attributes"
@@ -1063,7 +1063,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
       "Tuloksena on seuraavanlainen kaavio:"
       //"This will result in the following graph:"
       "<p><center><img alt=\"\" src=\"graph_legend."
-      +Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+      +Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
       "<p>\n"
       "Ylläolevassa kaaviossa laatikoilla on seuraavat merkitykset\n:"
       // "The boxes in the above graph have the following meaning:\n"
@@ -1145,7 +1145,7 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Tietueet"; // "Data Structures"
       } else {
          return "Luokat"; // "Classes"

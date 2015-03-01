@@ -108,7 +108,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Field مستندات";
       } else {
          return "مستندات متغيير های عضو";
@@ -183,7 +183,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "ساختار های داده ";
       } else {
          return "ليست کلاس ها ";
@@ -197,7 +197,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "فضاهای داده ها";
       } else {
          return "اعضاء کلاس ها";
@@ -206,7 +206,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globals";
       } else {
          return "اعضاء پرونده";
@@ -246,7 +246,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "ليست ساختارهای داده به همراه توضيحی کوتاه :";
       } else {
          return "ليست کلاس ها ، ساختارهای داده و ... به همراه توضيحات مختصر راجع به آنها :";
@@ -262,13 +262,13 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
          result += "همه ی اعضاء ";
       }
       result += " به همراه ارتباطشان با ";
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "ساختارهای داده ";
       } else {
          result += "كلاس ها ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "و مستندات ساختار داده برای هر عضو ";
       } else {
          result += "و مستندات کلاس برای هر عضو ";
@@ -330,7 +330,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "فهرست ساختار داده ها";
       } else {
          return "فهرست کلاس های";
@@ -355,7 +355,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "مستندات ساختار داده ها";
       } else {
          return "مستندات کلاس ها";
@@ -476,7 +476,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "ساختارهای داده";
       } else {
          return "کلاس ها";
@@ -914,7 +914,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
       return "های عمومی Type";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "فضاهای داده ها";
       } else {
          return "خواص (متغييرهای) عمومی";
@@ -1021,7 +1021,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
          "\\endcode\n"
          "If the \\c MAX_DOT_GRAPH_HEIGHT tag in the configuration file "
          "is set to 240 this will result in the following graph:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "The boxes in the above graph have the following meaning:\n"
          "<ul>\n"
@@ -1084,7 +1084,7 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "ساختار های داده";
       } else {
          return "كلاس ها";

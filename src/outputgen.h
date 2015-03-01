@@ -427,10 +427,10 @@ class OutputGenerator : public BaseOutputDocInterface
    virtual void writeGraphicalHierarchy(const DotGfxHierarchyTable &g) = 0;
    virtual void startQuickIndices() = 0;
    virtual void endQuickIndices() = 0;
-   virtual void writeSplitBar(const char *) = 0;
+   virtual void writeSplitBar(const QString &) = 0;
    virtual void writeNavigationPath(const char *) = 0;
    virtual void writeLogo() = 0;
-   virtual void writeQuickLinks(bool compact, HighlightedItem hli, const char *file) = 0;
+   virtual void writeQuickLinks(bool compact, HighlightedItem hli, const QString &file) = 0;
    virtual void writeSummaryLink(const QByteArray &file, const char *anchor, const char *title, bool first) = 0;
    virtual void startContents() = 0;
    virtual void endContents() = 0;

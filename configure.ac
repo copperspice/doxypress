@@ -41,6 +41,12 @@ AM_CONDITIONAL(OSTYPE_WIN, test "$OSTYPE" == WIN)
 AM_CONDITIONAL(OSTYPE_LINUX, test "$OSTYPE" == LINUX)
 AM_CONDITIONAL(OSTYPE_DARWIN, test "$OSTYPE" == DARWIN)
 
+echo
+echo "Checking System headers"
+
+AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=yes])
+AC_CHECK_FUNCS([fork getpid])
+
 # display 32-bit or 64-bit
 m4_pushdef([AS_MESSAGE_FD],[/dev/null]) 
 AC_CHECK_SIZEOF(size_t)

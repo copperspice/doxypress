@@ -1040,7 +1040,7 @@ void ClassDef::writeCollaborationGraph(OutputList &ol)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   if (Config::getBool("have-dot") /* && Config::getBool("collaboration-graph")*/) {
+   if (Config::getBool("have-dot") /* && Config::getBool("dot-collaboration")*/) {
       DotClassGraph usageImplGraph(self, DotNode::Collaboration);
 
       if (!usageImplGraph.isTrivial()) {
@@ -1484,7 +1484,7 @@ void ClassDef::writeMoreLink(OutputList &ol, const QByteArray &anchor)
 {
    // TODO: clean up by moving it to the output generators
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
-   static bool rtfHyperlinks = Config::getBool("rtf_hyperlinks");
+   static bool rtfHyperlinks = Config::getBool("rtf-hyperlinks");
    static bool usePDFLatex   = Config::getBool("latex-pdf");
 
    // HTML only

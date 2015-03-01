@@ -1222,7 +1222,7 @@ void generateOutput()
 
       portable_sysTimerStart();
 
-      if (portable_system(Config::getString("qthhelp-gen-path"), qPrintable(args), false)) {
+      if (portable_system(Config::getString("qthhelp-gen-path"), args, false)) {
          err("Failed to run qhelpgenerator on index.qhp\n");
       }
 

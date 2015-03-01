@@ -56,7 +56,7 @@ class TranslatorJapanese : public Translator
 
    /*! header that is put before the list of member functions. */
    virtual QByteArray trMemberFunctionDocumentation() {
-      if ( Config_getBool("OPTIMIZE_OUTPUT_JAVA")) {
+      if ( Config::getBool("optimize-java")) {
          return "メソッド詳解";
       } else {
          return "関数詳解";
@@ -65,7 +65,7 @@ class TranslatorJapanese : public Translator
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if ( Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if ( Config::getBool("optimize-c")) {
          return "フィールド詳解";
       } else {
          return "メンバ詳解";
@@ -142,7 +142,7 @@ class TranslatorJapanese : public Translator
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "データ構造";
       } else {
          return "クラス一覧";
@@ -156,7 +156,7 @@ class TranslatorJapanese : public Translator
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "データフィールド";
       } else {
          return "クラスメンバ";
@@ -165,7 +165,7 @@ class TranslatorJapanese : public Translator
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "大域各種";
       } else {
          return "ファイルメンバ";
@@ -208,7 +208,7 @@ class TranslatorJapanese : public Translator
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
       /* 概要がついているのは見ればわかるので省略 */
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "データ構造一覧です。";
       } else {
          return "クラス・構造体・共用体・インターフェースの一覧です。";
@@ -217,7 +217,7 @@ class TranslatorJapanese : public Translator
 
    /*! This is an introduction to the page with all class members. */
    virtual QByteArray trCompoundMembersDescription(bool extractAll) {
-      const bool forC = Config_getBool("OPTIMIZE_OUTPUT_FOR_C");
+      const bool forC = Config::getBool("optimize-c");
       QByteArray result;
       if (forC) {
          result = "構造体・共用体の";
@@ -256,7 +256,7 @@ class TranslatorJapanese : public Translator
    /*! This is an introduction to the page with all file members. */
    virtual QByteArray trFileMembersDescription(bool /*extractAll*/) {
       QByteArray result;
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "関数・変数・マクロ・列挙・型定義";
       } else {
          result += "ファイル直下のメンバ";
@@ -303,7 +303,7 @@ class TranslatorJapanese : public Translator
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "データ構造索引";
       } else {
          return "クラス索引";
@@ -328,7 +328,7 @@ class TranslatorJapanese : public Translator
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "データ構造詳解";
       } else {
          return "クラス詳解";
@@ -441,7 +441,7 @@ class TranslatorJapanese : public Translator
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "データ構造";
       } else {
          return "クラス";
@@ -867,7 +867,7 @@ class TranslatorJapanese : public Translator
       return "公開型";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "フィールド";
       } else {
          return "公開変数類";
@@ -972,7 +972,7 @@ class TranslatorJapanese : public Translator
          "\\c MAX_DOT_GRAPH_" /* わざわざちょん切っているのは doc/translator.py の検出回避のため */
          "HEIGHT タグに 200 を与えた設定ファイル"
          "を使うと、次のようなグラフとなります。"
-         "<p><center><img src=\"graph_legend." +Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." +Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "グラフ内の矩形は構造体やクラスを表しています。色の意味は次の通りです。\n"
          "<ul>\n"
@@ -1031,7 +1031,7 @@ class TranslatorJapanese : public Translator
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "データ構造";
       } else {
          return "クラス";

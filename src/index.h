@@ -279,12 +279,11 @@ inline void endTitle(OutputList &ol, const char *fileName, const QByteArray &nam
    endTitle(ol, fileName, name.constData());  
 }
 
-void startFile(OutputList &ol, const char *name, const char *manName,
-               const char *title, HighlightedItem hli = HLI_None,
-               bool additionalIndices = false, const char *altSidebarName = 0);
+void startFile(OutputList &ol, const QString &name, const QString &manName, const QString &title, 
+                  HighlightedItem hli = HLI_None, bool additionalIndices = false, const QString &altSidebarName = QString() );
 
 void endFile(OutputList &ol, bool skipNavIndex = false, bool skipEndContents = false,
-             const QByteArray &navPath = QByteArray());
+                  const QByteArray &navPath = QByteArray());
 
 void endFileWithNavPath(QSharedPointer<Definition> d, OutputList &ol);
 

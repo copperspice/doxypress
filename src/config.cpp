@@ -112,14 +112,79 @@ void Config::setList(const QString name, QStringList data)
    hashIter.value().value = data;
 }
 
-void Config::verify()
+bool Config::preVerify()
+{ 
+   bool isError = false;
+
+   // **
+   if (! Config::getBool("generate-html") && ! Config::getBool("generate-latex")       && ! Config::getBool("generate-man")  &&
+       ! Config::getBool("generate-perl") && ! Config::getBool("generate-xml")         && ! Config::getBool("generate-docbook") &&
+       ! Config::getBool("generate-autogen-def") && Config::getString("generate-tagfile").isEmpty() ) {
+
+      err("Error: No output format was selected, set at least one of the output formats in the project file\n");
+      isError = true;
+   }
+ 
+   // ** 
+   auto iterString = m_cfgString.find("html-header");
+   QString headerFile = iterString.value().value;
+
+   if (! headerFile.isEmpty()) {
+      QFileInfo fi(headerFile);
+
+      if (! fi.exists()) {
+         err("Error: HTML HEADER file `%s' does not exist\n", qPrintable(headerFile)); 
+         isError = true;
+      }
+   }
+
+   // ** 
+   iterString = m_cfgString.find("html-footer");
+   QString footerFile = iterString.value().value;
+
+   if (! footerFile.isEmpty()) {
+      QFileInfo fi(footerFile);
+
+      if (! fi.exists()) {
+         err("Error: HTML FOOTER file `%s' does not exist\n", qPrintable(footerFile));
+         isError = true;
+      }
+   }
+
+   // **   
+   if (Config::getBool("use-mathjax")) {
+      iterString = m_cfgString.find("mathjax-codefile");   
+      QString mathJaxCodefile = iterString.value().value;
+
+      if (! mathJaxCodefile.isEmpty()) {
+         QFileInfo fi(mathJaxCodefile);
+
+         if (! fi.exists()) {
+            err("MATHJAX_CODEFILE file `%s' does not exist\n", qPrintable(mathJaxCodefile));
+            isError = true;
+         }
+      }
+   }
+
+   // **
+   iterString = m_cfgString.find("latex-header");
+   QString latexHeaderFile = iterString.value().value;
+
+   if (!latexHeaderFile.isEmpty()) {
+      QFileInfo fi(latexHeaderFile);
+
+      if (! fi.exists()) {
+         err("LATEX HEADER file `%s' does not exist\n", qPrintable(latexHeaderFile));
+         isError = true;
+      }
+   }
+
+   return isError;
+}
+
+bool Config::verify()
 {
-   printf("**  Verify Project Configuration\n");   
-
-   //  Config::instance()->substituteEnvironmentVars();        // not used at this time (broom) 
-
-   preVerify();
-   initWarningFormat();
+   bool isError = false;
 
    // **
    auto iterString = m_cfgString.find("output-dir");
@@ -136,7 +201,7 @@ void Config::verify()
 
          if (! dir.mkdir(outputDirectory)) {
             err("Output directory `%s' does not exist and can not be created\n", qPrintable(outputDirectory));            
-            exit(1);
+            isError = true;
 
          } else {
             msg("Output directory `%s' was automatically created\n", qPrintable(outputDirectory));
@@ -228,15 +293,15 @@ void Config::verify()
 
    } else {
       if (warnFormat.indexOf("$file") == -1) {
-         err("Warning: warning format does not contain $file\n");
+         err("Warning: Warning format does not contain $file\n");
       }
 
       if (warnFormat.indexOf("$line") == -1) {
-         err("Warning: warning format does not contain $line\n");
+         err("Warning: Warning format does not contain $line\n");
       }
 
       if (warnFormat.indexOf("$text") == -1) {
-         err("Warning: warning format foes not contain $text\n");
+         err("Warning: Warning format foes not contain $text\n");
       }
    }
 
@@ -377,6 +442,36 @@ void Config::verify()
 */
 
 
+/*
+   // ** expand the relative stripFromPath values
+   auto iterList = m_cfgList.find("strip-from-path");
+   QStringList stripFromPath = iterList.value().value;
+
+   if ( stripFromPath.isEmpty() ) {       
+      stripFromPath.append(QDir::currentPath() + "/");
+
+   } else {
+      cleanUpPaths(stripFromPath);
+
+   }
+
+   iterList.value().value = stripFromPath;
+*/
+
+
+/*
+
+   // ** expand the relative stripFromPath values
+   iterList = m_cfgList.find("strip-from-inc-path");
+   QStringList stripFromIncPath = iterList.value().value;
+
+   cleanUpPaths(stripFromIncPath);
+
+   iterList.value().value = stripFromIncPath;
+*/
+
+
+
    // **
    if (Config::getBool("optimize-java") && Config::getBool("inline-info")) {
       err("Warning: Java does have an inline concept, setting 'INLINE INFO' to false\n");
@@ -418,134 +513,52 @@ void Config::verify()
    
    // read aliases and store them in a dictionary
    readAliases();
-}
 
-void Config::preVerify()
-{
-   // ** 
-   auto iterString = m_cfgString.find("html-header");
-   QString headerFile = iterString.value().value;
-
-   if (! headerFile.isEmpty()) {
-      QFileInfo fi(headerFile);
-
-      if (! fi.exists()) {
-         err("Error: HTML HEADER file `%s' does not exist\n", qPrintable(headerFile));
-         exit(1);
-      }
-   }
-
-   // ** 
-   iterString = m_cfgString.find("html-footer");
-   QString footerFile = iterString.value().value;
-
-   if (! footerFile.isEmpty()) {
-      QFileInfo fi(footerFile);
-
-      if (! fi.exists()) {
-         err("Error: HTML FOOTER file `%s' does not exist\n", qPrintable(footerFile));
-         exit(1);
-      }
-   }
-
-   // **   
-   if (Config::getBool("use-mathjax")) {
-      iterString = m_cfgString.find("mathjax-codefile");   
-      QString mathJaxCodefile = iterString.value().value;
-
-      if (! mathJaxCodefile.isEmpty()) {
-         QFileInfo fi(mathJaxCodefile);
-
-         if (! fi.exists()) {
-            err("MATHJAX_CODEFILE file `%s' does not exist\n", qPrintable(mathJaxCodefile));
-            exit(1);
-         }
-      }
-   }
-
-   // **
-   iterString = m_cfgString.find("latex-header");
-   QString latexHeaderFile = iterString.value().value;
-
-   if (!latexHeaderFile.isEmpty()) {
-      QFileInfo fi(latexHeaderFile);
-
-      if (! fi.exists()) {
-         err("LATEX HEADER file `%s' does not exist\n", qPrintable(latexHeaderFile));
-         exit(1);
-      }
-   }
-
+   return isError;
 }
 
 
- 
 
-
-/*
- 
-   // ** expand the relative stripFromPath values
-   auto iterList = m_cfgList.find("");
-   QStringList stripFromPath = Config_getList("STRIP_FROM_PATH");
-
-   if ( stripFromPath.isEmpty() ) { 
-      // by default use the current path
-      stripFromPath.append(QDir::currentPath().toUtf8() + "/");
-
-   } else {
-      cleanUpPaths(stripFromPath);
-
-   }
-
-   iterList.value().value = ?;
-
-
-   // ** expand the relative stripFromPath values
-   iterList = m_cfgList.find("");
-   QStringList stripFromIncPath = Config_getList("STRIP_FROM_INC_PATH");
-
-   cleanUpPaths(stripFromIncPath);
-
-   iterList.value().value = ?;
-*/
 
   
 /*  
-
    // check aliases
    QStringList &aliasList = Config_getList("ALIASES");
  
-   for (auto s: aliasList) {
+   for (auto alias: aliasList) {
       QRegExp re1("[a-z_A-Z][a-z_A-Z0-9]*[ \t]*=");         // alias without argument
       QRegExp re2("[a-z_A-Z][a-z_A-Z0-9]*\\{[0-9]*\\}[ \t]*="); // alias with argument
-
-      QByteArray alias = s.toUtf8();
+      
       alias = alias.trimmed();
 
       if (! (re1.indexIn(alias) == 0 || re2.indexIn(alias) == 0)) {
-         err("Error: Alias format: `%s' \nForma is invalid, use \"name=value\" or \"name{n}=value\", where n is the number of arguments\n\n",
-                    alias.data());
+         err("Error: Alias format: `%s' \n is invalid, use \"name=value\" or \"name{n}=value\", where n "
+                  "is the number of arguments\n\n", qPrintable(alias.));
       }
       
    }
   
-   // check dot image format
-   iterEnum = m_cfgEnum.find("");
-   QByteArray &dotImageFormat = Config_getEnum("DOT_IMAGE_FORMAT");
+   // ** check dot image format
+   iterEnum = m_cfgEnum.find("dot-image-format");
+   QString dotImageFormat = 
 
    dotImageFormat = dotImageFormat.trimmed();
+
    if (dotImageFormat.isEmpty()) {
       dotImageFormat = "png";
    }
 
-   //else if (dotImageFormat!="gif" && dotImageFormat!="png" && dotImageFormat!="jpg")
-   //{
-   //  err("Invalid value for DOT_IMAGE_FORMAT: `%s'. Using the default.\n",dotImageFormat.data());
-   //  dotImageFormat = "png";
-   //}
+   if (dotImageFormat!="gif" && dotImageFormat!="png" && dotImageFormat!="jpg") {
+      err("Invalid value for DOT_IMAGE_FORMAT: `%s'. Using the default.\n",dotImageFormat.data());
 
+      dotImageFormat = "png";
+   }
+
+   // **
    QString dotFontName = Config_getString("DOT_FONTNAME");
+
    if (dotFontName == "FreeSans" || dotFontName == "FreeSans.ttf") {
+
       err("Warning: doxygen no longer ships with the FreeSans font.\n"
                  "You may want to clear or change 'DOT FONTNAME'\n"
                  "Otherwise you run the risk that the wrong font is being used for dot generated graphs.\n");
@@ -557,31 +570,24 @@ void Config::preVerify()
    QByteArray &dotPath = Config_getString("DOT_PATH");
 
    if (! dotPath.isEmpty()) {
-
       QFileInfo fi(dotPath);
+
       if (fi.exists() && fi.isFile()) { // user specified path + exec
          dotPath = fi.absolutePath().toUtf8() + "/";
 
       } else {
          QFileInfo dp(dotPath + "/dot" + portable_commandExtension());
+
          if (!dp.exists() || !dp.isFile()) {
             err("Warning: the dot tool could not be found at %s\n", dotPath.data());
             dotPath = "";
+
          } else {
-            dotPath = dp.absolutePath().toUtf8() + "/";
+            dotPath = dp.absolutePath() + "/";
          }
       }
 
-#if defined(_WIN32) // convert slashes
-      uint i = 0, l = dotPath.length();
-
-      for (i = 0; i < l; i++) if (dotPath.at(i) == '/') {
-            dotPath[i] = '\\';
-         }
-#endif
-
-   } else { 
-      // make sure the string is empty but not null!
+   } else {      
       dotPath = "";
    }
 
@@ -598,17 +604,11 @@ void Config::preVerify()
          mscgenPath = "";
 
       } else {
-         mscgenPath = dp.absolutePath().toUtf8() + "/";
+         mscgenPath = dp.absolutePath() + "/";
 
-#if defined(_WIN32) // convert slashes
-         uint i = 0, l = mscgenPath.length();
-
-         for (i = 0; i < l; i++) if (mscgenPath.at(i) == '/') {
-               mscgenPath[i] = '\\';
-            }
-#endif
       }
-   } else { // make sure the string is empty but not null!
+
+   } else { 
       mscgenPath = "";
    }
 
@@ -621,17 +621,21 @@ void Config::preVerify()
       QFileInfo pu(plantumlJarPath);
 
       if (pu.exists() && pu.isDir()) { // PLANTUML_JAR_PATH is directory
-         QFileInfo jar(plantumlJarPath + portable_pathSeparator() + "plantuml.jar");
+         QFileInfo jar(plantumlJarPath + QDir::separator() + "plantuml.jar");
 
          if (jar.exists() && jar.isFile()) {
-            plantumlJarPath = jar.absolutePath().toUtf8() + portable_pathSeparator();
+            plantumlJarPath = jar.absolutePath() + QDir::separator();
+
          } else {
             err("Jar file plantuml.jar not found at location "
                        "specified via PLANTUML_JAR_PATH: '%s'\n", plantumlJarPath.data());
+
             plantumlJarPath = "";
          }
+
       } else if (pu.exists() && pu.isFile() && plantumlJarPath.right(4) == ".jar") { // PLANTUML_JAR_PATH is file
-         plantumlJarPath = pu.absolutePath().toUtf8() + portable_pathSeparator();
+         plantumlJarPath = pu.absolutePath() + QDir::separator() ;
+
       } else {
          err("path specified via PLANTUML_JAR_PATH does not exist or not a directory: %s\n",
                     plantumlJarPath.data());
@@ -644,32 +648,25 @@ void Config::preVerify()
    iterString = m_cfgString.find("");
    QString diaPath = Config_getString("DIA_PATH");
 
-   if (!diaPath.isEmpty()) {
+   if (! diaPath.isEmpty()) {
       QFileInfo dp(diaPath + "/dia" + portable_commandExtension());
 
-      if (!dp.exists() || !dp.isFile()) {
+      if (! dp.exists() || ! dp.isFile()) {
          err("Warning: dia could not be found at %s\n", diaPath.data());
          diaPath = "";
 
       } else {
-         diaPath = dp.absolutePath().toUtf8() + "/";
+         diaPath = dp.absolutePath() + "/";
 
-#if defined(_WIN32) // convert slashes
-         uint i = 0, l = diaPath.length();
-
-         for (i = 0; i < l; i++) {
-            if (diaPath.at(i) == '/') {
-               diaPath[i] = '\\';
-            }
-         }
-#endif
       }
 
-   } else { // make sure the string is empty but not null!
+   } else { 
       diaPath = "";
    }
 
-    // add default pattern if needed
+
+
+   // add default pattern if needed
    QStringList &filePatternList = Config_getList("FILE_PATTERNS");
    if (filePatternList.isEmpty()) {
       filePatternList.append("*.c");
@@ -737,40 +734,26 @@ void Config::preVerify()
       examplePatternList.append("*");
    }
 
-   // if no output format is enabled, warn the user
-   if (!Config_getBool("GENERATE_HTML")    &&
-         !Config_getBool("GENERATE_LATEX")   &&
-         !Config_getBool("GENERATE_MAN")     &&
-         !Config_getBool("GENERATE_RTF")     &&
-         !Config_getBool("GENERATE_XML")     &&
-         !Config_getBool("GENERATE_PERLMOD") &&
-         !Config_getBool("GENERATE_RTF")     &&
-         !Config_getBool("GENERATE_AUTOGEN_DEF") &&
-         Config_getString("GENERATE_TAGFILE").isEmpty()
-      ) {
-      err("Warning: No output formats selected! Set at least one of the main GENERATE_* options to YES.\n");
-   }
- 
 
    int &depth = Config_getInt("MAX_DOT_GRAPH_DEPTH");
    if (depth == 0) {
       depth = 1000;
    }
 
-   int &hue = Config_getInt("HTML_COLORSTYLE_HUE");
+   int hue = Config::getInt("html-colorstyle-hue");
    if (hue < 0) {
       hue = 0;
    } else if (hue >= 360) {
       hue = hue % 360;
    }
 
-   int &sat = Config_getInt("HTML_COLORSTYLE_SAT");
+   int sat = Config::getInt("html-colorstyle-sat");
    if (sat < 0) {
       sat = 0;
    } else if (sat > 255) {
       sat = 255;
    }
-   int &gamma = Config_getInt("HTML_COLORSTYLE_GAMMA");
+   int gamma = Config::getInt("html-colorstyle-gamma");
    if (gamma < 40) {
       gamma = 40;
    } else if (gamma > 240) {
@@ -800,7 +783,6 @@ void Config::preVerify()
       annotationFromBrief.append("the");
    }
    
-
    checkFileName("GENERATE_TAGFILE");
 */
 

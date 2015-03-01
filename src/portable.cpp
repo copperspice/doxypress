@@ -23,12 +23,14 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#if HAVE_WINDOWS_H
+#ifdef HAVE_WINDOWS_H
+
 #undef UNICODE
 #define _WIN32_DCOM
 #include <windows.h>
 
 #else
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -61,7 +63,7 @@ int portable_system(const QString &command, const QString &args, bool commandHas
    fullCmd += " " + args;
 
 
-#if HAVE_EXECVE
+#ifdef HAVE_FORK
   
    int pid;
    int status = 0;
@@ -107,25 +109,18 @@ int portable_system(const QString &command, const QString &args, bool commandHas
    // Windows
 
    if (commandHasConsole) {
-      return system(fullCmd);
+      return system(fullCmd.toUtf8());
 
    } else {               
       CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
-
-      QString commandw = QString::fromUtf8( command );
-      QString argsw    = QString::fromUtf8( args );
-
-      // gswin32 is a GUI api which will pop up a window and run
-      // asynchronously. To prevent both, we use ShellExecuteEx and
-      // WaitForSingleObject (thanks to Robert Golias for the code)
 
       SHELLEXECUTEINFOW sInfo = {
          sizeof(SHELLEXECUTEINFOW),   
          SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI,     // wait till the process is  done, do not display msg box if there is an error                                                       
          NULL,                       /* window handle */
          NULL,                       /* action to perform: open */
-         (LPCWSTR)commandw.utf16(),  /* file to execute */
-         (LPCWSTR)argsw.utf16(),     /* argument list */
+         (LPCWSTR)command.utf16(),   /* file to execute */
+         (LPCWSTR)args.utf16(),      /* argument list */
          NULL,                       /* use current working dir */
          SW_HIDE,                    /* minimize on start-up */
          0,                          /* application instance handle */
@@ -146,6 +141,7 @@ int portable_system(const QString &command, const QString &args, bool commandHas
 
          // get process exit code 
          DWORD exitCode;
+
          if (! GetExitCodeProcess(sInfo.hProcess, &exitCode)) {
             exitCode = -1;
          }
@@ -162,7 +158,7 @@ uint portable_pid()
 {
    uint pid;
 
-#if HAVE_GETPID
+#ifdef HAVE_GETPID
    pid = (uint)getpid();
 
 #else
@@ -179,7 +175,7 @@ void portable_setenv(const char *name, const QString &valueX)
 {  
    QByteArray value = valueX.toUtf8();
 
-#if HAVE_WINDOWS_H
+#ifdef HAVE_WINDOWS_H
    SetEnvironmentVariable(name, value.constData());
 
 #else
@@ -259,7 +255,7 @@ void portable_setenv(const char *name, const QString &valueX)
 void portable_unsetenv(const char *variable)
 {
 
-#if HAVE_WINDOWS_H
+#ifdef HAVE_WINDOWS_H
    SetEnvironmentVariable(variable, 0);
 
 #else
@@ -322,14 +318,9 @@ portable_off_t portable_ftell(FILE *f)
 #endif
 }
 
-char portable_pathSeparator()
-{
-   return QDir::separator().toUtf8();   
-}
-
 char portable_pathListSeparator()
 {
-#if Q_OS_WIN
+#ifdef Q_OS_WIN
    return ';';
 #else
    return ':';
@@ -338,7 +329,7 @@ char portable_pathListSeparator()
 
 const char *portable_commandExtension()
 {
-#if Q_OS_WIN
+#ifdef Q_OS_WIN
    return ".exe";
 #else
    return "";
@@ -373,7 +364,7 @@ double portable_getSysElapsedTime()
 
 void portable_sleep(int ms)
 {
-#if HAVE_WINDOWS_H
+#ifdef HAVE_WINDOWS_H
    Sleep(ms);
 #else
    usleep(1000 * ms);

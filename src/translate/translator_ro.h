@@ -86,7 +86,7 @@ class TranslatorRomanian : public Translator
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Documentaţia Câmpurilor";
       } else {
          return "Documentaţia Datelor Membre";
@@ -162,7 +162,7 @@ class TranslatorRomanian : public Translator
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Structuri de Date";
       } else {
          return "Lista Claselor";
@@ -177,7 +177,7 @@ class TranslatorRomanian : public Translator
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Câmpurile de Date";
       } else {
          return "Membrii Componenţi"; //cu articol hotarat
@@ -187,7 +187,7 @@ class TranslatorRomanian : public Translator
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globale";
       } else {
          return "Membrii din Fişier"; //cu articol hotarat
@@ -229,7 +229,7 @@ class TranslatorRomanian : public Translator
 
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Lista structurilor de date, cu scurte descrieri:";
       } else {
          return "Lista claselor, structurilor, uniunilor şi interfeţelor"
@@ -242,7 +242,7 @@ class TranslatorRomanian : public Translator
    virtual QByteArray trCompoundMembersDescription(bool extractAll) {
       QByteArray result = "Lista tuturor ";
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "câmpurilor ";
          if (!extractAll) {
             result += " documentate ";
@@ -257,13 +257,13 @@ class TranslatorRomanian : public Translator
       }
       result += ", cu legături către ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "documentaţia structurii/uniunii pentru fiecare câmp în parte:";
          } else {
             result += "documentaţia clasei pentru fiecare membru în parte:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "structurile/uniunile de care aparţin:";
          } else {
             result += "clasele de care aparţin:";
@@ -276,7 +276,7 @@ class TranslatorRomanian : public Translator
    /*! This is an introduction to the page with all file members. */
    virtual QByteArray trFileMembersDescription(bool extractAll) {
       QByteArray result = "Lista tuturor ";
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "funcţiilor, variabilelor, definiţiilor, enumerărilor şi definiţiilor de tip";
          if (!extractAll) {
             result += " documentate";
@@ -339,7 +339,7 @@ class TranslatorRomanian : public Translator
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Indexul Structurilor de Date";
       } else {
          return "Indexul Claselor";
@@ -365,7 +365,7 @@ class TranslatorRomanian : public Translator
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Documentaţia Structurilor de Date";
       } else {
          return "Documentaţia Claselor";
@@ -480,7 +480,7 @@ class TranslatorRomanian : public Translator
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Structuri de Date";
       } else {
          return "Membri";
@@ -925,7 +925,7 @@ class TranslatorRomanian : public Translator
       return "Tipuri Publice";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Câmpuri de Date";
       } else {
          return "Atribute Publice";
@@ -1032,7 +1032,7 @@ class TranslatorRomanian : public Translator
          "\\endcode\n"
          "Dacă tagul \\c MAX_DOT_GRAPH_HEIGHT din fişierul de configurare "
          "este setat la 200, acesta este graful rezultat:"
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Căsuţele din partea de sus au următoarea semnificaţie:\n"
          "<ul>\n"
@@ -1092,7 +1092,7 @@ class TranslatorRomanian : public Translator
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Structuri de Date";
       } else {
          return "Clase";

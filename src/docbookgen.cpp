@@ -1162,19 +1162,19 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
 
    msg("Generating Docbook output for class %s\n", cd->name().data());
 
-   QByteArray fileDocbook = cd->getOutputFileBase() + ".xml";
+   QString fileDocbook = cd->getOutputFileBase() + ".xml";
+
    //Add the file Documentation info to index file
    ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
 
-   QByteArray outputDirectory = Config::getString("docbook-output");
-
-   QByteArray fileName = outputDirectory + "/" + classOutputFileBase(cd) + ".xml";
-   QByteArray relPath  = relativePathToRoot(fileName);
+   QString outputDirectory = Config::getString("docbook-output");
+   QString fileName = outputDirectory + "/" + classOutputFileBase(cd) + ".xml";
+   QString relPath  = relativePathToRoot(fileName);
 
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+      err("Cannot open file %s for writing!\n", qPrintable(fileName));
       return;
    }
 
@@ -1222,16 +1222,16 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       }
    }
 
-   if (Config::getBool("have-dot") && (Config_getBool("CLASS_DIAGRAMS") || Config_getBool("CLASS_GRAPH"))) {
+   if (Config::getBool("have-dot") && (Config::getBool("class-diagrams") || Config::getBool("dot-class-graph"))) {
       t << "<para>Inheritance diagram for " << convertToXML(cd->name()) << "</para>" << endl;
       DotClassGraph inheritanceGraph(cd, DotNode::Inheritance);
-      inheritanceGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config_getString("DOCBOOK_OUTPUT"), fileName, relPath, true, false);
+      inheritanceGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config::getString("docbook-output"), fileName, relPath, true, false);
    }
 
-   if (Config::getBool("have-dot") && Config_getBool("COLLABORATION_GRAPH")) {
+   if (Config::getBool("have-dot") && Config::getBool("dot-collaboration")) {
       t << "<para>Collaboration diagram for " << convertToXML(cd->name()) << "</para>" << endl;
       DotClassGraph collaborationGraph(cd, DotNode::Collaboration);
-      collaborationGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config_getString("DOCBOOK_OUTPUT"), fileName, relPath, true, false);
+      collaborationGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config::getString("docbook-output"), fileName, relPath, true, false);
    }
 
    writeInnerClasses(cd->getClassSDict(), t);
@@ -1338,7 +1338,7 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
    //Add the file Documentation info to index file
    ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
 
-   QString outputDirectory = Config_getString("DOCBOOK_OUTPUT");
+   QString outputDirectory = Config::getString("docbook-output");
    QString fileName = outputDirectory + "/" + nd->getOutputFileBase() + ".xml";
 
    QFile f(fileName);
@@ -1416,17 +1416,18 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       return;   // skip external references
    }
 
-   QByteArray fileDocbook = fd->getOutputFileBase() + ".xml";
-   //Add the file Documentation info to index file
+   QString fileDocbook = fd->getOutputFileBase() + ".xml";
+ 
+  //Add the file Documentation info to index file
    ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
 
-   QByteArray outputDirectory = Config_getString("DOCBOOK_OUTPUT");
-   QByteArray fileName = outputDirectory + "/" + fd->getOutputFileBase() + ".xml";
-   QByteArray relPath = relativePathToRoot(fileName);
+   QString outputDirectory = Config::getString("docbook-output");
+   QString fileName = outputDirectory + "/" + fd->getOutputFileBase() + ".xml";
+   QString relPath = relativePathToRoot(fileName);
 
    QFile f(fileName);
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+      err("Cannot open file %s for writing!\n", qPrintable(fileName));
       return;
    }
 
@@ -1462,17 +1463,17 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
 
    if (Config::getBool("have-dot")) {
 
-      if (Config_getBool("INCLUDE_GRAPH")) {
+      if (Config::getBool("dot-include")) {
          t << "<para>Include dependency diagram for " << convertToXML(fd->name()) << "</para>" << endl;
          DotInclDepGraph idepGraph(fd, false);
-         idepGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config_getString("DOCBOOK_OUTPUT"), fileName, relPath, false);
+         idepGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config::getString("docbook-output"), fileName, relPath, false);
       }
 
-      if (Config_getBool("INCLUDED_BY_GRAPH")) {
+      if (Config::getBool("dot-included-by")) {
          t << "<para>Included by dependency diagram for " << convertToXML(fd->name()) << "</para>" << endl;
 
          DotInclDepGraph ibdepGraph(fd, true);
-         ibdepGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config_getString("DOCBOOK_OUTPUT"), fileName, relPath, false);
+         ibdepGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config::getString("docbook-output"), fileName, relPath, false);
       }
    }
 
@@ -1502,14 +1503,14 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    writeDocbookDocBlock(t, fd->briefFile(), fd->briefLine(), fd, QSharedPointer<MemberDef>(), fd->briefDescription());
    writeDocbookDocBlock(t, fd->docFile(), fd->docLine(), fd,  QSharedPointer<MemberDef>(), fd->documentation());
 
-   if (Config_getBool("FULL_PATH_NAMES")) {
+   if (Config::getBool("full-path-names")) {
       t << "    <para>Definition in file " << fd->getDefFileName() << "</para>" << endl;
    } else {
       t << "    <para>Definition in file " << stripPath(fd->getDefFileName()) << "</para>" << endl;
    }
    t << "    </simplesect>" << endl;
 
-   if (Config_getBool("DOCBOOK_PROGRAMLISTING")) {
+   if (Config::getBool("docbook-program-listing")) {
       t << "    <literallayout><computeroutput>" << endl;
       writeDocbookCodeBlock(t, fd);
       t << "    </computeroutput></literallayout>" << endl;
@@ -1537,18 +1538,19 @@ static void generateDocbookForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti
    }
 
    if (!gd->isASubGroup()) {
-      QByteArray fileDocbook = gd->getOutputFileBase() + ".xml";
+      QString fileDocbook = gd->getOutputFileBase() + ".xml";
+
       //Add the file Documentation info to index file
       ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
    }
 
-   QByteArray outputDirectory = Config_getString("DOCBOOK_OUTPUT");
-   QByteArray fileName = outputDirectory + "/" + gd->getOutputFileBase() + ".xml";
-   QByteArray relPath = relativePathToRoot(fileName);
+   QString outputDirectory = Config::getString("docbook-output");
+   QString fileName = outputDirectory + "/" + gd->getOutputFileBase() + ".xml";
+   QString relPath = relativePathToRoot(fileName);
 
    QFile f(fileName);
    if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+      err("Unable to open file %s for writing\n", qPrintable(fileName));
       return;
    }
 
@@ -1558,10 +1560,10 @@ static void generateDocbookForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti
 
    t << "    <title>" << convertToXML(gd->groupTitle()) << "</title>" << endl;
 
-   if (Config_getBool("GROUP_GRAPHS") && Config::getBool("have-dot")) {
+   if (Config::getBool("group-graphs") && Config::getBool("have-dot")) {
       t << "<para>Collaboration diagram for " << convertToXML(gd->groupTitle()) << "</para>" << endl;
       DotGroupCollaboration collaborationGraph(gd);
-      collaborationGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config_getString("DOCBOOK_OUTPUT"), fileName, relPath, false);
+      collaborationGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config::getString("docbook-output"), fileName, relPath, false);
    }
 
    if (! gd->briefDescription().isEmpty()) {
@@ -1605,7 +1607,6 @@ static void generateDocbookForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti
    writeInnerGroupFiles(gd->getSubGroups(), t);
 
    t << "</section>" << endl;
-
 }
 
 static void generateDocbookForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
@@ -1614,18 +1615,19 @@ static void generateDocbookForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
       return;   // skip external references
    }
 
-   QByteArray fileDocbook = dd->getOutputFileBase() + ".xml";
+   QString fileDocbook = dd->getOutputFileBase() + ".xml";
+
    //Add the file Documentation info to index file
    ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
 
-   QByteArray outputDirectory = Config_getString("DOCBOOK_OUTPUT");
-   QByteArray fileName = outputDirectory + "/" + dd->getOutputFileBase() + ".xml";
+   QString outputDirectory = Config::getString("docbook-output");
+   QString fileName = outputDirectory + "/" + dd->getOutputFileBase() + ".xml";
 
    QFile f(fileName);
    QByteArray relPath = relativePathToRoot(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+      err("Cannot open file %s for writing\n", qPrintable(fileName));
       return;
    }
 
@@ -1639,10 +1641,10 @@ static void generateDocbookForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    t << " Directory Reference";
    t << "</title>" << endl;
 
-   if (Config_getBool("DIRECTORY_GRAPH") && Config::getBool("have-dot")) {
+   if (Config::getBool("directory-graph") && Config::getBool("have-dot")) {
       t << "<para>Directory dependency diagram for " << convertToXML(dd->displayName()) << "</para>" << endl;
       DotDirDeps dirdepGraph(dd);
-      dirdepGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config_getString("DOCBOOK_OUTPUT"), fileName, relPath, false);
+      dirdepGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config::getString("docbook-output"), fileName, relPath, false);
    }
 
    writeInnerDirs(dd->subDirs(), t);
@@ -1670,37 +1672,44 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
       return;
    }
 
-   QByteArray pageName = pd->getOutputFileBase();
+   QString pageName = pd->getOutputFileBase();
+
    if (pd->getGroupDef()) {
-      pageName += (QByteArray)"_" + pd->name();
-   }
-   if (pageName == "index") {
-      pageName = "mainpage"; // to prevent overwriting the generated index page.
+      pageName += "_" + pd->name();
    }
 
-   QByteArray outputDirectory = Config_getString("DOCBOOK_OUTPUT");
-   QByteArray fileName = outputDirectory + "/" + pageName + ".xml";
+   if (pageName == "index") {
+      pageName = "mainpage"; // to prevent overwriting the generated index page
+   }
+
+   QString outputDirectory = Config::getString("docbook-output");
+   QString fileName = outputDirectory + "/" + pageName + ".xml";
+
    QFile f(fileName);
    if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+      err("Unable to open file %s for writing\n", qPrintable(fileName));
       return;
    }
 
    QTextStream t(&f);
    //t.setEncoding(QTextStream::UnicodeUTF8);
 
+   QByteArray pName = pageName.toUtf8();
+
    if (isExample) {
-      QByteArray fileDocbook = pageName + ".xml";
+      QByteArray fileDocbook = pName + ".xml";
       ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
    }
 
-   if (!pd->hasParentPage() && !isExample) {
-      QByteArray fileDocbook = pageName + ".xml";
+   if (! pd->hasParentPage() && !isExample) {
+      QByteArray fileDocbook = pName + ".xml";
+
       //Add the file Documentation info to index file
       ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
       writeDocbookHeaderMainpage(t);
+
    } else {
-      QByteArray pid = pageName + "_1" + pageName;
+      QByteArray pid = pName + "_1" + pName;
       writeDocbookHeader_ID(t, pid);
    }
 
@@ -1720,8 +1729,9 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
    }
    writeInnerPages(pd->getSubPages(), t);
 
-   if (!pd->hasParentPage() && !isExample) {
+   if (! pd->hasParentPage() && !isExample) {
       t << endl << "</chapter>" << endl;
+
    } else {
       t << endl << "</section>" << endl;
    }
@@ -1729,7 +1739,6 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
 
 void generateDocbook()
 {
-
    // + classes
    // + namespaces
    // + files
@@ -1737,10 +1746,10 @@ void generateDocbook()
    // + related pages
    // - examples
 
-   QByteArray outputDirectory = Config_getString("DOCBOOK_OUTPUT");
+   QString outputDirectory = Config::getString("docbook-output");
 
    if (outputDirectory.isEmpty()) {
-      outputDirectory = QDir::currentPath().toUtf8();
+      outputDirectory = QDir::currentPath();
 
    } else {
       QDir dir(outputDirectory);
@@ -1748,20 +1757,18 @@ void generateDocbook()
       if (!dir.exists()) {
          dir.setPath(QDir::currentPath());
 
-         if (!dir.mkdir(outputDirectory)) {
-            err("tag DOCBOOK_OUTPUT: Output directory `%s' does not "
-                "exist and cannot be created\n", outputDirectory.data());
+         if (! dir.mkdir(outputDirectory)) {
+            err("DOCBOOK Output directory `%s' does not exist and can not be created\n", qPrintable(outputDirectory));
             exit(1);
 
          } else {
-            msg("Notice: Output directory `%s' does not exist. "
-                "I have created it for you.\n", outputDirectory.data());
+            msg("DOCBOOK Output directory `%s' created\n", qPrintable(outputDirectory));
          }
 
          dir.cd(outputDirectory);
       }
 
-      outputDirectory = dir.absolutePath().toUtf8();
+      outputDirectory = dir.absolutePath();
    }
 
    QDir dir(outputDirectory);
@@ -1769,8 +1776,8 @@ void generateDocbook()
    if (! dir.exists()) {
       dir.setPath(QDir::currentPath());
 
-      if (!dir.mkdir(outputDirectory)) {
-         err("Cannot create directory %s\n", outputDirectory.data());
+      if (! dir.mkdir(outputDirectory)) {
+         err("Can not create directory %s\n", qPrintable(outputDirectory));
          return;
       }
    }
@@ -1778,14 +1785,14 @@ void generateDocbook()
    QDir docbookDir(outputDirectory);
    createSubDirs(docbookDir);
 
-   QByteArray fileName = outputDirectory + "/index.xml";
-   QByteArray dbk_projectName = Config_getString("PROJECT_NAME");
+   QString fileName = outputDirectory + "/index.xml";
+   QString dbk_projectName = Config::getString("project-name");
 
    QFile f(fileName);
    f.setFileName(fileName);
 
    if (!f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", fileName.data());
+      err("Unable to open file %s for writing\n", qPrintable(fileName));
       return;
    }
 
@@ -1871,7 +1878,7 @@ void generateDocbook()
 
    // ** FILE DOCUMENTATION
 
-   static bool showFiles = Config_getBool("SHOW_FILES");
+   static bool showFiles = Config::getBool("show-files");
    if (showFiles) {
     
       //File Documentation index header
@@ -1894,9 +1901,9 @@ void generateDocbook()
    }
 
    // DIRECTORY DOCUMENTATION
-   if (Config_getBool("DIRECTORY_GRAPH") && Config::getBool("have-dot")) {
+   if (Config::getBool("directory-graph") && Config::getBool("have-dot")) {
 
-      //Directory Documentation index header
+      // Directory Documentation index header
       if (! Doxygen::directories.isEmpty()) {
          t << "    <chapter>" << endl;
          t << "        <title>Directory Documentation</title>" << endl;

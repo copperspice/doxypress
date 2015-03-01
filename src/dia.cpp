@@ -27,9 +27,7 @@ static const int maxCmdLine = 40960;
 
 void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, DiaOutputFormat format)
 {
-   QString absOutFile = outDir;
-   absOutFile += portable_pathSeparator();
-   absOutFile += outFile;
+   QString absOutFile = outDir + QDir::separator() +outFile;
 
    // chdir to the output dir, so dot can find the font file.
    QString oldDir = QDir::currentPath();
@@ -82,7 +80,7 @@ void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const Q
    
          portable_sysTimerStart();
 
-         if (portable_system("epstopdf", epstopdfArgs.toLatin1()) != 0) {
+         if (portable_system("epstopdf", epstopdfArgs) != 0) {
             err("Problems running epstopdf. Check your TeX installation!\n");
          }
          portable_sysTimerStop();

@@ -155,7 +155,7 @@ class DotNode
    friend class DotGroupCollaboration;
 
    friend QByteArray computeMd5Signature(DotNode *root, GraphType gt, GraphOutputFormat f, bool lrRank, bool renderParents,
-                        bool backArrows, const QByteArray &title, QByteArray &graphStr);
+                        bool backArrows, const QString &title, QByteArray &graphStr);
 };
 
 inline int DotNode::findParent( DotNode *n )

@@ -226,7 +226,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
 
          QString name;
          QString baseName;       
-         QString tempStr = Config_getString("DOCBOOK_OUTPUT") + "/inline_dotgraph_";
+         QString tempStr = Config::getString("docbook-output") + "/inline_dotgraph_";
 
          QByteArray stext = s->text();
 
@@ -262,7 +262,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
 
          QString name;
          QString baseName;   
-         QString tempStr = Config_getString("DOCBOOK_OUTPUT") + "/inline_mscgraph_";
+         QString tempStr = Config::getString("docbook-output") + "/inline_mscgraph_";
 
          QByteArray stext = s->text();
 
@@ -296,10 +296,10 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
       }
       break;
       case DocVerbatim::PlantUML: {
-         static QByteArray docbookOutput = Config_getString("DOCBOOK_OUTPUT");
+         static QString docbookOutput = Config::getString("docbook-output");
 
-         QByteArray baseName = writePlantUMLSource(docbookOutput, s->exampleFile(), s->text());
-         QByteArray shortName = baseName;
+         QString baseName  = writePlantUMLSource(docbookOutput, s->exampleFile(), s->text());
+         QString shortName = baseName;
 
          int i;
 
@@ -997,7 +997,7 @@ void DocbookDocVisitor::visitPost(DocImage *img)
       }
 
       QFile inImage(m_file);
-      QFile outImage(Config_getString("DOCBOOK_OUTPUT") + "/" + baseName);
+      QFile outImage(Config::getString("docbook-output") + "/" + baseName);
 
       if (inImage.open(QIODevice::ReadOnly)) {
          if (outImage.open(QIODevice::WriteOnly)) {
@@ -1359,7 +1359,7 @@ void DocbookDocVisitor::writeMscFile(const QString &baseName)
       shortName = shortName.right(shortName.length() - i - 1);
    }
 
-   QString outDir = Config_getString("DOCBOOK_OUTPUT");
+   QString outDir = Config::getString("docbook-output");
    writeMscGraphFromFile(baseName + ".msc", outDir, shortName, MSC_BITMAP);
 
    m_t << "                <imagedata";
@@ -1377,7 +1377,7 @@ void DocbookDocVisitor::writePlantUMLFile(const QString &baseName)
       shortName = shortName.right(shortName.length() - i - 1);
    }
 
-   QString outDir = Config_getString("DOCBOOK_OUTPUT");
+   QString outDir = Config::getString("docbook-output");
    generatePlantUMLOutput(baseName, outDir, PUML_BITMAP);
 
    m_t << "                <imagedata";
@@ -1388,7 +1388,7 @@ void DocbookDocVisitor::writePlantUMLFile(const QString &baseName)
 
 void DocbookDocVisitor::startMscFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) {
@@ -1400,7 +1400,7 @@ void DocbookDocVisitor::startMscFile(const QByteArray &fileName, const QByteArra
    }
 
    baseName.prepend("msc_");
-   QByteArray outDir = Config_getString("DOCBOOK_OUTPUT");
+   QString outDir = Config::getString("docbook-output");
 
    writeMscGraphFromFile(fileName, outDir, baseName, MSC_BITMAP);
 
@@ -1459,7 +1459,7 @@ void DocbookDocVisitor::writeDiaFile(const QString &baseName)
       shortName = shortName.right(shortName.length() - i - 1);
    }
 
-   QString outDir = Config_getString("DOCBOOK_OUTPUT");
+   QString outDir = Config::getString("docbook-output");
    writeDiaGraphFromFile(baseName + ".dia", outDir, shortName, DIA_BITMAP);
 
    m_t << "                <imagedata";
@@ -1470,7 +1470,7 @@ void DocbookDocVisitor::writeDiaFile(const QString &baseName)
 void DocbookDocVisitor::startDiaFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height,
                                      bool hasCaption )
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) {
@@ -1482,7 +1482,8 @@ void DocbookDocVisitor::startDiaFile(const QByteArray &fileName, const QByteArra
    }
 
    baseName.prepend("dia_");
-   QByteArray outDir = Config_getString("DOCBOOK_OUTPUT");
+   QString outDir = Config::getString("docbook-output");
+
    writeDiaGraphFromFile(fileName, outDir, baseName, DIA_BITMAP);
    m_t << "<para>" << endl;
    m_t << "    <figure>" << endl;
@@ -1530,8 +1531,8 @@ void DocbookDocVisitor::writeDotFile(const QString &baseName)
       shortName = shortName.right(shortName.length() - i - 1);
    }
 
-   QString outDir = Config_getString("DOCBOOK_OUTPUT");
-   QString imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+   QString outDir = Config::getString("docbook-output");
+   QString imgExt = Config::getEnum("dot-image-format");
 
    writeDotGraphFromFile(baseName + ".dot", outDir, shortName, GOF_BITMAP);
 
@@ -1543,9 +1544,9 @@ void DocbookDocVisitor::writeDotFile(const QString &baseName)
    m_t << "</imagedata>" << endl;
 }
 
-void DocbookDocVisitor::startDotFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption )
+void DocbookDocVisitor::startDotFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) {
@@ -1557,8 +1558,9 @@ void DocbookDocVisitor::startDotFile(const QByteArray &fileName, const QByteArra
    }
 
    baseName.prepend("dot_");
-   QByteArray outDir = Config_getString("DOCBOOK_OUTPUT");
-   QByteArray imgExt = Config_getEnum("DOT_IMAGE_FORMAT");
+ 
+   QString outDir = Config::getString("docbook-output");
+   QString imgExt = Config::getEnum("dot-image-format");
 
    writeDotGraphFromFile(fileName, outDir, baseName, GOF_BITMAP);
 

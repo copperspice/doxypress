@@ -88,7 +88,7 @@ FileDef::FileDef(const char *p, const char *nm, const char *lref, const char *dn
    m_docname           = nm;
    m_dir               = QSharedPointer<DirDef>();
 
-   if (Config_getBool("full-path-names")) {
+   if (Config::getBool("full-path-names")) {
       m_docname.prepend(stripFromPath(m_path).toUtf8());
    }
 
@@ -305,7 +305,7 @@ void FileDef::writeBriefDescription(OutputList &ol)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   if (! briefDescription().isEmpty() && Config_getBool("BRIEF_MEMBER_DESC")) {
+   if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
                                              briefDescription(), true, false, 0, true, false);
 
@@ -317,7 +317,7 @@ void FileDef::writeBriefDescription(OutputList &ol)
          ol.writeString(" \n");
          ol.enable(OutputGenerator::RTF);
 
-         if (Config_getBool("REPEAT_BRIEF") || ! documentation().isEmpty()) {
+         if (Config::getBool("repeat-brief") || ! documentation().isEmpty()) {
             ol.disableAllBut(OutputGenerator::Html);
             ol.startTextLink(0, "details");
             ol.parseText(theTranslator->trMore());
@@ -407,7 +407,7 @@ void FileDef::writeIncludeGraph(OutputList &ol)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   if (Config::getBool("have-dot") /*&& Config_getBool("INCLUDE_GRAPH")*/) {
+   if (Config::getBool("have-dot") /*&& Config::getBool("dot-include")*/) {
      
       DotInclDepGraph incDepGraph(self, false);
 
@@ -430,12 +430,12 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   if (Config::getBool("have-dot") /*&& Config_getBool("INCLUDED_BY_GRAPH")*/) {      
+   if (Config::getBool("have-dot") /*&& Config::getBool("dot-included-by")*/) {      
       DotInclDepGraph incDepGraph(self, true);
 
       if (incDepGraph.isTooBig()) {
          warn_uncond("Included by graph for '%s' not generated, too many nodes. "
-                     " Consider increasing DOT_GRAPH_MAX_NODES.\n", name().constData());
+                     " Consider increasing 'DOT GRAPH MAX NODES'\n", name().constData());
 
       } else if (!incDepGraph.isTrivial()) {
          ol.startTextBlock();
@@ -537,7 +537,7 @@ void FileDef::writeAuthorSection(OutputList &ol)
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config_getString("PROJECT_NAME")));
+   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name").toUtf8()));
    ol.popGeneratorState();
 }
 
@@ -582,7 +582,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
 void FileDef::writeDocumentation(OutputList &ol)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
-   static bool generateTreeView = Config_getBool("GENERATE_TREEVIEW");
+   static bool generateTreeView = Config::getBool("generate-treeview");
 
    QByteArray versionTitle;
 
@@ -778,7 +778,7 @@ void FileDef::writeMemberPages(OutputList &ol)
 
 void FileDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
 {
-   static bool createSubDirs = Config_getBool("CREATE_SUBDIRS");
+   static bool createSubDirs = Config::getBool("create-subdirs");
 
    ol.writeString("      <div class=\"navtab\">\n");
    ol.writeString("        <table>\n");
@@ -820,9 +820,9 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   static bool generateTreeView  = Config_getBool("GENERATE_TREEVIEW");
-   static bool filterSourceFiles = Config_getBool("FILTER_SOURCE_FILES");
-   static bool latexSourceCode   = Config_getBool("LATEX_SOURCE_CODE");
+   static bool generateTreeView  = Config::getBool("generate-treeview");
+   static bool filterSourceFiles = Config::getBool("filter-source-files");
+   static bool latexSourceCode   = Config::getBool("latex-source-code");
 
    DevNullCodeDocInterface devNullIntf;
    QByteArray title = m_docname;
@@ -935,7 +935,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
 void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
-   static bool filterSourceFiles = Config_getBool("FILTER_SOURCE_FILES");
+   static bool filterSourceFiles = Config::getBool("filter-source-files");
 
    DevNullCodeDocInterface devNullIntf;  
 
@@ -1072,7 +1072,7 @@ void FileDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
 
 QByteArray FileDef::name() const
 {
-   if (Config_getBool("FULL_PATH_NAMES")) {
+   if (Config::getBool("full-path-names")) {
       return m_fileName;
    } else {
       return Definition::name();
@@ -1228,8 +1228,8 @@ bool FileDef::isIncluded(const QByteArray &name) const
 
 bool FileDef::generateSourceFile() const
 {
-   static bool sourceBrowser = Config_getBool("SOURCE_BROWSER");
-   static bool verbatimHeaders = Config_getBool("VERBATIM_HEADERS");
+   static bool sourceBrowser   = Config::getBool("source-browser");
+   static bool verbatimHeaders = Config::getBool("verbatim-headers");
 
    QByteArray extension = name().right(4);
 
@@ -1443,18 +1443,18 @@ bool FileDef::isDocumentationFile() const
 
 void FileDef::acquireFileVersion()
 {
-   QByteArray vercmd = Config_getString("FILE_VERSION_FILTER");
+   QString vercmd = Config::getString("file-version-filter");
 
    if (!vercmd.isEmpty() && !m_filePath.isEmpty() && m_filePath != "generated") {
       msg("Version of %s : ", m_filePath.data());
 
-      QByteArray cmd = vercmd + " \"" + m_filePath + "\"";
-      Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", cmd.data());
+      QString cmd = vercmd + " \"" + m_filePath + "\"";
+      Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", qPrintable(cmd));
 
-      FILE *f = popen(cmd, "r");
+      FILE *f = popen(qPrintable(cmd), "r");
 
       if (! f) {
-         err("could not execute %s\n", vercmd.data());
+         err("could not execute %s\n", qPrintable(vercmd));
          return;
       }
 
@@ -1556,7 +1556,7 @@ void FileDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const 
 
 bool FileDef::isLinkableInProject() const
 {
-   static bool showFiles = Config_getBool("SHOW_FILES");
+   static bool showFiles = Config::getBool("show-files");
    return hasDocumentation() && ! isReference() && showFiles;
 }
 

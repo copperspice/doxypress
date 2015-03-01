@@ -86,7 +86,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      //if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C"))
+      //if (Config::getBool("optimize-c"))
       {
          return "Документација на членови";
       }
@@ -160,7 +160,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Список на Структури";
       } else {
          return "Список на Класи";
@@ -174,7 +174,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Членови";
       } else {
          return "Членови на Класата";
@@ -183,7 +183,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Глобални Членови";
       } else {
          return "Членови на Датотеката";
@@ -223,7 +223,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Список на структури со кратки описи:";
       } else {
          return "Список на класи, структури, унии и интерфејси "
@@ -237,20 +237,20 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
       if (!extractAll) {
          result += "документирани ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "структури и унии";
       } else {
          result += "членови на класата";
       }
       result += " со врски до ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "документацијата за секој член на структурата/унијата:";
          } else {
             result += "документацијата на секој член на класата:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "структурите/униите на кои што припаѓаат:";
          } else {
             result += "класите на кои што припаѓаат:";
@@ -266,7 +266,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
          result += "документирани ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "функции, променливи, дефиниции, набројувања и дефиниции на тип";
       } else {
          result += "членови на датотеки";
@@ -320,7 +320,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Попис на Структури";
       } else {
          return "Попис на Класи";
@@ -345,7 +345,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Документација на Структури";
       } else {
          return "Документација на Класи";
@@ -459,7 +459,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Структури";
       } else {
          return "Класи";
@@ -901,7 +901,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
       return "Јавни Типови";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Членови";
       } else {
          return "Јавни Членови";
@@ -1009,7 +1009,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
          "\\endcode\n"
          "Ако вредноста на \\c MAX_DOT_GRAPH_HEIGHT во конфигурациската датотека "
          "е 240 тогаш примерот ќе го создаде следниов дијаграм:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Правоаголниците во дијаграмот погоре го имаат следново значење:\n"
          "<ul>\n"
@@ -1071,7 +1071,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Структури";
       } else {
          return "Класи";

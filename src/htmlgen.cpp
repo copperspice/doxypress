@@ -864,7 +864,7 @@ void HtmlGenerator::startFile(const char *name, const char *, const char *title)
 
    startPlainFile(fileName);
   
-   m_codeGen = QMakeShared<HtmlCodeGenerator> (m_textStream, m_relativePath);
+   m_codeGen = QMakeShared<HtmlCodeGenerator> (m_textStream, m_relativePath.toUtf8());
   
    //
    Doxygen::indexList->addIndexFile(fileName);
@@ -888,7 +888,7 @@ void HtmlGenerator::startFile(const char *name, const char *, const char *title)
    m_sectionCount = 0;
 }
 
-void HtmlGenerator::writeSearchInfo(QTextStream &t_stream, const QByteArray &relPath)
+void HtmlGenerator::writeSearchInfo(QTextStream &t_stream, const QString &relPath)
 {
    static bool searchEngine      = Config::getBool("html-search");
    static bool serverBasedSearch = Config::getBool("server-based-search");
@@ -2186,12 +2186,13 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QByteArray &relP
    }
 }
 
-static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, HighlightedItem hli, const char *file, 
-                                   const QByteArray &relPath)
+static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, HighlightedItem hli, 
+                  const QString &file, const QString &relPath)
 {
    LayoutNavEntry *root = LayoutDocManager::instance().rootNavEntry();
    LayoutNavEntry::Kind kind = (LayoutNavEntry::Kind) - 1;
    LayoutNavEntry::Kind altKind = (LayoutNavEntry::Kind) - 1; // fall back for the old layout file
+
    bool highlightParent = false;
 
    switch (hli) { 
@@ -2331,14 +2332,14 @@ QByteArray HtmlGenerator::writeSplitBarAsString(const char *name, const char *re
    return result;
 }
 
-void HtmlGenerator::writeSplitBar(const char *name)
+void HtmlGenerator::writeSplitBar(const QString &name)
 {
-   m_textStream << writeSplitBarAsString(name, m_relativePath);
+   m_textStream << writeSplitBarAsString(name, m_relativePath.toUtf8());
 }
 
 void HtmlGenerator::writeNavigationPath(const char *s)
 {
-   m_textStream << substitute(s, "$relpath^", m_relativePath);
+   m_textStream << substitute(s, "$relpath^", m_relativePath.toUtf8());
 }
 
 void HtmlGenerator::startContents()
@@ -2351,7 +2352,7 @@ void HtmlGenerator::endContents()
    m_textStream << "</div><!-- contents -->" << endl;
 }
 
-void HtmlGenerator::writeQuickLinks(bool compact, HighlightedItem hli, const char *file)
+void HtmlGenerator::writeQuickLinks(bool compact, HighlightedItem hli, const QString &file)
 {
    writeDefaultQuickLinks(m_textStream, compact, hli, file, m_relativePath);
 }
@@ -2417,7 +2418,7 @@ void HtmlGenerator::writeSearchPage()
       t_stream << "</script>\n";
 
       if (! Config::getBool("disable-index")) {
-         writeDefaultQuickLinks(t_stream, true, HLI_Search, 0, "");
+         writeDefaultQuickLinks(t_stream, true, HLI_Search, QString(), QString());
 
       } else {
          t_stream << "</div>" << endl;
@@ -2468,7 +2469,7 @@ void HtmlGenerator::writeExternalSearchPage()
       t_stream << "</script>\n";
 
       if (! Config::getBool("disable-index")) {
-         writeDefaultQuickLinks(t_stream, true, HLI_Search, 0, "");
+         writeDefaultQuickLinks(t_stream, true, HLI_Search, QString(), QString());
 
          t_stream << "            <input type=\"text\" id=\"MSearchField\" name=\"query\" value=\"\" size=\"20\" accesskey=\"S\""
                 "onfocus=\"searchBox.OnSearchFieldFocus(true)\" onblur=\"searchBox.OnSearchFieldFocus(false)\"/>\n";

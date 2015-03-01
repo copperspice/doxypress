@@ -65,7 +65,7 @@ class TranslatorSlovak : public Translator
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dokumentácia k položkám";
       } else {
          return "Dokumentácia k dátovým členom";
@@ -141,7 +141,7 @@ class TranslatorSlovak : public Translator
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dátové štruktúry";
       } else {
          return "Zoznam tried";
@@ -155,7 +155,7 @@ class TranslatorSlovak : public Translator
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dátové položky";
       } else {
          return "Zoznam členov tried";
@@ -164,7 +164,7 @@ class TranslatorSlovak : public Translator
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globálne symboly";
       } else {
          return "Symboly v súboroch";
@@ -204,7 +204,7 @@ class TranslatorSlovak : public Translator
 
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Nasledujúci zoznam obsahuje identifikáciu dátových "
                 "štruktúr a ich stručné popisy:";
       } else {
@@ -223,7 +223,7 @@ class TranslatorSlovak : public Translator
          result += "dokumentovaných ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "položiek štruktúr (struct) a unionov (union) ";
       } else {
          result += "členov tried ";
@@ -232,13 +232,13 @@ class TranslatorSlovak : public Translator
       result += "s odkazmi na ";
 
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "dokumentáciu štruktúr/unionov, ku ktorým prislúchajú:";
          } else {
             result += "dokumentáciu tried, ku ktorým prislúchajú:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "štruktúry/uniony, ku ktorým prislúchajú:";
          } else {
             result += "triedy, ku ktorým prislúchajú:";
@@ -255,7 +255,7 @@ class TranslatorSlovak : public Translator
          result += "dokumentovaných ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "funkcií, premenných, makier, enumerácií a definícií typov (typedef) "
                    "s odkazmi na ";
       } else {
@@ -314,7 +314,7 @@ class TranslatorSlovak : public Translator
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Register dátových štruktúr";
       } else {
          return "Register tried";
@@ -449,7 +449,7 @@ class TranslatorSlovak : public Translator
     *	the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dátové štruktúry";
       } else {
          return "Triedy";
@@ -904,7 +904,7 @@ class TranslatorSlovak : public Translator
       return "Verejné typy";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dátové položky";
       } else {
          return "Verejné atribúty";
@@ -1012,7 +1012,7 @@ class TranslatorSlovak : public Translator
          "};\n"
          "\\endcode\n"
          "K vyššie uvedenému bude vygenerovaný nasledujúci graf:"
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Bloky (tj. uzly) v uvedenom grafe majú nasledujúci význam:\n"
          "<ul>\n"

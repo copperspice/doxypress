@@ -77,9 +77,8 @@ class Config
 
       static void load_Defaults();
       static bool read_ProjectFile(QString fName);
-
-      static void verify();
-      static void preVerify();
+      static bool preVerify();
+      static bool verify();
 };
 
 #endif

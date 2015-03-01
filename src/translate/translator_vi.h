@@ -86,7 +86,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Thông tin về trường";
       } else {
          return "Thông tin về Member Data";
@@ -161,7 +161,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Cấu trúc cơ sở dữ liệu (Data Structures)";
       } else {
          return "Danh mục các Class";
@@ -175,7 +175,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Các trường dữ liệu";
       } else {
          return "Các thành viên của Class";
@@ -184,7 +184,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Toàn cục";
       } else {
          return "File thành viên";
@@ -225,7 +225,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Đây là cấu trúc cơ sở dữ liệu với mô tả tóm tắt:";
       } else {
          return "Đây là các classes, structs, "
@@ -239,20 +239,20 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
       if (!extractAll) {
          result += "(đã được mô tả) ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "struct và union fields";
       } else {
          result += "class members";
       }
       result += " cùng với các các liên kết đến ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "Thông tin về struct/union cho từng trường:";
          } else {
             result += "Thông tin về class cho từng thành viên:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "các structures/unions thuộc:";
          } else {
             result += "các lớp thuộc:";
@@ -268,7 +268,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
          result += "(đã được mô tat) ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "functions, variables, defines, enums, và typedefs";
       } else {
          result += "các file thành viên";
@@ -322,7 +322,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Index cấu trúc cơ sở dữ liệu";
       } else {
          return "Class Index";
@@ -347,7 +347,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Thông tin về cấu trúc cơ sở dữ liệu";
       } else {
          return "Thông tin về Class";
@@ -461,7 +461,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Cấu trúc cơ sở dữ liệu";
       } else {
          return "Classes";
@@ -898,7 +898,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
       return "Public Types";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "các trường đữ liệu";
       } else {
          return "Các thuộc tính Public";
@@ -1005,7 +1005,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
          "};\n"
          "\\endcode\n"
          "Kết quả trong biểu đồ sau đây:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Các hộp trong biểu đồ trên có ý nghĩa như sau:\n"
          "<ul>\n"
@@ -1068,7 +1068,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Cấu trúc dữ liệu";
       } else {
          return "Classes";

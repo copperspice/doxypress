@@ -83,7 +83,7 @@ class TranslatorFrench : public Translator
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Documentation des champs";
       } else {
          return "Documentation des données membres";
@@ -158,7 +158,7 @@ class TranslatorFrench : public Translator
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Structures de données";
       } else {
          return "Liste des classes";
@@ -172,7 +172,7 @@ class TranslatorFrench : public Translator
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Champs de donnée";
       } else {
          return "Membres de classe";
@@ -181,7 +181,7 @@ class TranslatorFrench : public Translator
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Variables globale";
       } else {
          return "Membres de fichier";
@@ -222,7 +222,7 @@ class TranslatorFrench : public Translator
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Liste des structures de données avec une brève description :";
       } else {
          return "Liste des classes, structures, "
@@ -233,7 +233,7 @@ class TranslatorFrench : public Translator
    /*! This is an introduction to the page with all class members. */
    virtual QByteArray trCompoundMembersDescription(bool extractAll) {
       QByteArray result = "Liste de tous les ";
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "champs de structure et d'union ";
       } else {
          result += "membres de classe ";
@@ -243,13 +243,13 @@ class TranslatorFrench : public Translator
       }
       result += "avec des liens vers ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "la documentation de structure/union de chaque champ :";
          } else {
             result += "la documentation de classe de chaque membre :";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "les structures/unions auxquelles ils appartiennent :";
          } else {
             result += "les classes auxquelles ils appartiennent :";
@@ -262,7 +262,7 @@ class TranslatorFrench : public Translator
    virtual QByteArray trFileMembersDescription(bool extractAll) {
       QByteArray result = "Liste ";
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "de toutes les fonctions, variables, macros, enumérations, et définitions de type ";
       } else {
          result += "de tous les membres de fichier ";
@@ -317,7 +317,7 @@ class TranslatorFrench : public Translator
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Index des structures de données";
       } else {
          return "Index des classes";
@@ -342,7 +342,7 @@ class TranslatorFrench : public Translator
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Documentation des structures de données";
       } else {
          return "Documentation des classes";
@@ -456,7 +456,7 @@ class TranslatorFrench : public Translator
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Structures de données";
       } else {
          return "Classes";
@@ -905,7 +905,7 @@ class TranslatorFrench : public Translator
       return "Types publics";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Champs de données";
       } else {
          return "Attributs publics";
@@ -1012,7 +1012,7 @@ class TranslatorFrench : public Translator
          "};\n"
          "\\endcode\n"
          "Cela aboutira au graphe suivant :"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center></p>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center></p>\n"
          "<p>\n"
          "Les rectangles du graphe ci-dessus ont la signification suivante :\n"
          "<ul>\n"
@@ -1075,7 +1075,7 @@ class TranslatorFrench : public Translator
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Structures de données";
       } else {
          return "Classes";

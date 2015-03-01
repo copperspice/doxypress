@@ -311,7 +311,7 @@ void writePageRef(OutputDocInterface &od, const char *cn, const char *mn)
       od.disable(OutputGenerator::Latex);
    }
 
-   if (Config_getBool("RTF_HYPERLINKS")) {
+   if (Config::getBool("rtf-hyperlinks")) {
       od.disable(OutputGenerator::RTF);
    }
 
@@ -336,7 +336,7 @@ QByteArray generateMarker(int id)
    return result;
 }
 
-static QString stripFromPath(const QString &path, QStringList &list)
+static QString stripFromPath(const QString &path, const QStringList &list)
 {
    // look at all the strings in the list and strip the longest match 
    QString retval = path;
@@ -357,19 +357,19 @@ static QString stripFromPath(const QString &path, QStringList &list)
 }
 
 /*! strip part of \a path if it matches
- *  one of the paths in the Config_getList("STRIP_FROM_PATH") list
+ *  one of the paths in the Config::getList("strip-from-path") list
  */
 QString stripFromPath(const QString &path)
 {
-   return stripFromPath(path, Config_getList("STRIP_FROM_PATH"));
+   return stripFromPath(path, Config::getList("strip-from-path"));
 }
 
 /*! strip part of \a path if it matches
- *  one of the paths in the Config_getList("INCLUDE_PATH") list
+ *  one of the paths in the Config::getList("include-path") list
  */
 QString stripFromIncludePath(const QString &path)
 {
-   return stripFromPath(path, Config_getList("STRIP_FROM_INC_PATH"));
+   return stripFromPath(path, Config::getList("strip-from-inc-path"));
 }
 
 /*! try to determine if \a name is a source or a header file name by looking
@@ -1610,7 +1610,7 @@ static const char virtualScope[] = { 'v', 'i', 'r', 't', 'u', 'a', 'l', ':' };
 // Note: this function is not reentrant due to the use of static buffer 
 QByteArray removeRedundantWhiteSpace(const QByteArray &s)
 {
-   static bool cliSupport = Config_getBool("CPP_CLI_SUPPORT");
+   static bool cliSupport = Config::getBool("cpp-cli-support");
   
    if (s.isEmpty()) {
       return s;
@@ -2282,8 +2282,8 @@ QString getFileFilter(const char *name, bool isSourceCode)
       return "";
    }
 
-   QStringList &filterSrcList = Config_getList("FILTER_SOURCE_PATTERNS");
-   QStringList &filterList    = Config_getList("FILTER_PATTERNS");
+   const QStringList filterSrcList = Config::getList("filter-source-patterns");
+   const QStringList filterList    = Config::getList("filter-patterns");
 
    QString filterName;
    bool found = false;
@@ -2300,7 +2300,7 @@ QString getFileFilter(const char *name, bool isSourceCode)
 
    if (! found) {
       // then use the generic input filter
-      return Config_getString("INPUT_FILTER");
+      return Config::getString("input-filter");
 
    } else {
       return filterName;
@@ -2311,17 +2311,17 @@ QByteArray transcodeCharacterStringToUTF8(const QByteArray &input)
 {
    bool error = false;
 
-   static QByteArray inputEncoding = Config_getString("INPUT_ENCODING");
-   const char *outputEncoding = "UTF-8";
+   static QString inputEncoding = Config::getString("input-encoding");
+   const QString outputEncoding = "UTF-8";
  
-   if (inputEncoding.isEmpty() || qstricmp(inputEncoding, outputEncoding) == 0) {
+   if (inputEncoding.isEmpty() || inputEncoding.compare(outputEncoding, Qt::CaseInsensitive) == 0) {
       return input;
    }
 
-   QTextCodec *temp = QTextCodec::codecForName(inputEncoding);
+   QTextCodec *temp = QTextCodec::codecForName(inputEncoding.toUtf8());
    
    if (! temp) {
-      err("Unsupported character conversion: '%s'->'%s'\n", inputEncoding.constData(), outputEncoding);
+      err("Unsupported character conversion: '%s'->'%s'\n", qPrintable(inputEncoding), qPrintable(outputEncoding));
       return input;
    }
 
@@ -2362,12 +2362,12 @@ QByteArray fileToString(const QString &name, bool filter, bool isSourceCode)
       QFileInfo fi(name);
 
       if (! fi.exists() || ! fi.isFile()) {
-         err("File `%s' not found\n", name);
+         err("File `%s' not found\n", qPrintable(name));
          return "";
       }
 
       BufStr buf(fi.size());
-      fileOpened = readInputFile(name, buf, filter, isSourceCode);
+      fileOpened = readInputFile(name.toUtf8(), buf, filter, isSourceCode);
 
       if (fileOpened) {
          int s = buf.size();
@@ -2382,7 +2382,7 @@ QByteArray fileToString(const QString &name, bool filter, bool isSourceCode)
    }
 
    if (! fileOpened) {
-      err("Unable to open file `%s' for reading\n", name);
+      err("Unable to open file `%s' for reading\n", qPrintable(name));
    }
 
    return "";
@@ -4384,13 +4384,13 @@ bool resolveRef(const char *scName, const char *name, bool inSeeBlock, QSharedPo
 
 QByteArray linkToText(SrcLangExt lang, const char *link, bool isFileName)
 {
-   //static bool optimizeOutputJava = Config_getBool("OPTIMIZE_OUTPUT_JAVA");
+   // static bool optimizeOutputJava = Config::getBool("optimize-java");
    QByteArray result = link;
 
    if (! result.isEmpty()) {
       // replace # by ::
-
       result = substitute(result, "#", "::");
+
       // replace . by ::
       if (! isFileName && result.indexOf('<') == -1) {
          result = substitute(result, ".", "::");
@@ -4806,13 +4806,13 @@ QString substituteKeywords(const QByteArray &s, const char *title, const char *p
    result = result.replace("$projectname",    projName);
    result = result.replace("$projectnumber",  projNum);
    result = result.replace("$projectbrief",   projBrief);
-   result = result.replace("$projectlogo",    stripPath(Config_getString("PROJECT_LOGO")));
+   result = result.replace("$projectlogo",    stripPath(Config::getString("project-logo")));
 
    return result;
 }
 
 /*! Returns the character index within \a name of the first prefix
- *  in Config_getList("IGNORE_PREFIX") that matches \a name at the left hand side,
+ *  in Config::getList("ignore-prefix") that matches \a name at the left hand side,
  *  or zero if no match was found
  */
 int getPrefixIndex(const QByteArray &name)
@@ -4821,7 +4821,7 @@ int getPrefixIndex(const QByteArray &name)
       return 0;
    }
 
-   static QStringList &sl = Config_getList("IGNORE_PREFIX");  
+   static const QStringList sl = Config::getList("ignore-prefix");  
 
    for (auto s : sl) { 
       QByteArray temp = s.toUtf8();
@@ -4909,8 +4909,8 @@ bool hasVisibleRoot(SortedList<BaseClassDef *> *bcl)
 // note that this function is not reentrant due to the use of static growBuf!
 QByteArray escapeCharsInString(const QString &name, bool allowDots, bool allowUnderscore)
 {
-   static bool caseSenseNames    = Config_getBool("CASE_SENSE_NAMES");
-   static bool allowUnicodeNames = Config_getBool("ALLOW_UNICODE_NAMES");
+   static bool caseSenseNames    = Config::getBool("case-sense-names");
+   static bool allowUnicodeNames = Config::getBool("allow-unicode-names");
    static GrowBuf growBuf;
 
    growBuf.clear();
@@ -5063,8 +5063,8 @@ QByteArray escapeCharsInString(const QString &name, bool allowDots, bool allowUn
  */
 QString convertNameToFile(const QString &name, bool allowDots, bool allowUnderscore)
 {
-   static bool shortNames    = Config_getBool("SHORT_NAMES");
-   static bool createSubdirs = Config_getBool("CREATE_SUBDIRS");
+   static bool shortNames    = Config::getBool("short-names");
+   static bool createSubdirs = Config::getBool("create-subdirs");
 
    QString result;
 
@@ -5176,22 +5176,18 @@ QByteArray relativePathToRoot(const QString &name)
 
 void createSubDirs(QDir &d)
 {
-   if (Config_getBool("CREATE_SUBDIRS")) {
+   if (Config::getBool("create-subdirs")) {
       // create 4096 subdirectories
 
       int l1;
       int l2;
 
       for (l1 = 0; l1 < 16; l1++) {
-         QString temp;
-         QString("d%1").arg(l1, 0, 16);
-
+         QString temp = QString("d%1").arg(l1, 0, 16);
          d.mkdir(temp);
 
          for (l2 = 0; l2 < 256; l2++) {
-            QString temp;
-            QString("d%1/d%2").arg(l1, 0, 16).arg(l2, 2, 16, QChar('0'));
-
+            QString temp = QString("d%1/d%2").arg(l1, 0, 16).arg(l2, 2, 16, QChar('0'));
             d.mkdir(temp);
          }
       }
@@ -6191,10 +6187,10 @@ void addRefItem(const QList<ListItemInfo> *sli, const char *key,
       for (auto lii : *sli) {   
          auto refList = Doxygen::xrefLists->find(lii.type);
 
-         if (refList != Doxygen::xrefLists->end() && ( (lii.type != "todo" || Config_getBool("GENERATE_TODOLIST")) &&
-                          (lii.type != "test"       || Config_getBool("GENERATE_TESTLIST")) &&
-                          (lii.type != "bug"        || Config_getBool("GENERATE_BUGLIST"))  &&
-                          (lii.type != "deprecated" || Config_getBool("GENERATE_DEPRECATEDLIST")) ) ) {
+         if (refList != Doxygen::xrefLists->end() && ( (lii.type != "todo" || Config::getBool("generate-todolist")) &&
+                          (lii.type != "test"       || Config::getBool("generate-testlist")) &&
+                          (lii.type != "bug"        || Config::getBool("generate-buglist"))  &&
+                          (lii.type != "deprecated" || Config::getBool("generate-deprecatedlist")) ) ) {
 
             // either not a built-in list or the list is enabled
             RefItem *item = refList->getRefItem(lii.itemId);
@@ -6441,9 +6437,10 @@ void replaceNamespaceAliases(QByteArray &scope, int i)
    }
 }
 
-QByteArray stripPath(const char *s)
+QByteArray stripPath(const QString &s)
 {
-   QByteArray result = s;
+   QString result = s;
+
    int i = result.lastIndexOf('/');
 
    if (i != -1) {
@@ -6456,7 +6453,7 @@ QByteArray stripPath(const char *s)
       result = result.mid(i + 1);
    }
 
-   return result;
+   return result.toUtf8();
 }
 
 /** returns \c true iff string \a s contains word \a w */
@@ -7405,8 +7402,7 @@ bool readInputFile(const char *fileName, BufStr &inBuf, bool filter, bool isSour
       // transcode according to the INPUT_ENCODING setting
       // do character transcoding if needed.
 
-      transcodeCharacterBuffer(fileName, inBuf, inBuf.curPos(), Config_getString("INPUT_ENCODING"), "UTF-8");
-
+      transcodeCharacterBuffer(fileName, inBuf, inBuf.curPos(), Config::getString("input-encoding").toUtf8(), "UTF-8");
    }
 
    //inBuf.addChar('\n'); /* to prevent problems under Windows ? */
@@ -7487,7 +7483,7 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList)
 
 QByteArray externalLinkTarget()
 {
-   static bool extLinksInWindow = Config_getBool("EXT_LINKS_IN_WINDOW");
+   static bool extLinksInWindow = Config::getBool("external-links-in-window");
 
    if (extLinksInWindow) {
       return "target=\"_blank\" ";
@@ -7534,13 +7530,13 @@ QByteArray externalRef(const QString &relPath, const QByteArray &ref, bool href)
 }
 
 /** Writes the intensity only bitmap representated by \a data as an image to
- *  directory \a dir using the colors defined by HTML_COLORSTYLE_*.
+ *  directory \a dir using the colors defined by html_colorstyle.
  */
 void writeColoredImgData(ColoredImgDataItem data)
 {
-   static int hue   = Config_getInt("HTML_COLORSTYLE_HUE");
-   static int sat   = Config_getInt("HTML_COLORSTYLE_SAT");
-   static int gamma = Config_getInt("HTML_COLORSTYLE_GAMMA");
+   static int hue   = Config::getInt("html-colorstyle-hue");
+   static int sat   = Config::getInt("html-colorstyle-sat");
+   static int gamma = Config::getInt("html-colorstyle-gamma");
   
    QString fileName = data.path + "/" + data.name;
 
@@ -7570,7 +7566,7 @@ void writeColoredImgData(ColoredImgDataItem data)
 /** Replaces any markers of the form \#\#AA in input string \a str
  *  by new markers of the form \#AABBCC, where \#AABBCC represents a
  *  valid color, based on the intensity represented by hex number AA
- *  and the current HTML_COLORSTYLE_* settings.
+ *  and the current html_colorstyle  settings.
  */
 QByteArray replaceColorMarkers(const char *str)
 {
@@ -7583,9 +7579,11 @@ QByteArray replaceColorMarkers(const char *str)
 
    static QRegExp re("##[0-9A-Fa-f][0-9A-Fa-f]");
    static const char hex[] = "0123456789ABCDEF";
-   static int hue   = Config_getInt("HTML_COLORSTYLE_HUE");
-   static int sat   = Config_getInt("HTML_COLORSTYLE_SAT");
-   static int gamma = Config_getInt("HTML_COLORSTYLE_GAMMA");
+
+   static int hue   = Config::getInt("html-colorstyle-hue");
+   static int sat   = Config::getInt("html-colorstyle-sat");
+   static int gamma = Config::getInt("html-colorstyle-gamma");
+
    int i, l, sl = s.length(), p = 0;
 
    while ((i = re.indexIn(s, p)) != -1) {
@@ -7781,8 +7779,8 @@ QByteArray correctURL(const QByteArray &url, const QByteArray &relPath)
 
 bool protectionLevelVisible(Protection prot)
 {
-   static bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
-   static bool extractPackage = Config_getBool("EXTRACT_PACKAGE");
+   static bool extractPrivate = Config::getBool("extract-private");
+   static bool extractPackage = Config::getBool("extract-package");
 
    return (prot != Private && prot != Package)  || (prot == Private && extractPrivate) || (prot == Package && extractPackage);
 }
@@ -7853,7 +7851,7 @@ QByteArray stripIndentation(const QByteArray &s)
 
 bool fileVisibleInIndex(QSharedPointer<FileDef> fd, bool &genSourceFile)
 {
-   static bool allExternals = Config_getBool("ALLEXTERNALS");
+   static bool allExternals = Config::getBool("all-externals");
    bool isDocFile = fd->isDocumentationFile();
    genSourceFile = !isDocFile && fd->generateSourceFile();
 
@@ -7862,10 +7860,10 @@ bool fileVisibleInIndex(QSharedPointer<FileDef> fd, bool &genSourceFile)
 
 void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDef> dst)
 {
-   static bool referencedByRelation = Config_getBool("REFERENCED_BY_RELATION");
-   static bool referencesRelation   = Config_getBool("REFERENCES_RELATION");
-   static bool callerGraph          = Config_getBool("CALLER_GRAPH");
-   static bool callGraph            = Config_getBool("CALL_GRAPH");
+   static bool referencedByRelation = Config::getBool("ref-by-relation");
+   static bool referencesRelation   = Config::getBool("ref-relation");
+   static bool callerGraph          = Config::getBool("dot-called-by");
+   static bool callGraph            = Config::getBool("dot-call");
    
    if (dst->isTypedef() || dst->isEnumerate()) {
       return;   // don't add types
@@ -8003,7 +8001,7 @@ bool namespaceHasVisibleChild(QSharedPointer<NamespaceDef> nd, bool includeClass
 
 bool classVisibleInIndex(QSharedPointer<ClassDef> cd)
 {
-   static bool allExternals = Config_getBool("ALLEXTERNALS");
+   static bool allExternals = Config::getBool("all-externals");
    return (allExternals && cd->isLinkable()) || cd->isLinkableInProject();
 }
 
@@ -8054,7 +8052,8 @@ QByteArray extractDirection(QString docs)
  */
 void convertProtectionLevel(MemberListType inListType, Protection inProt, int *outListType1, int *outListType2)
 {
-   static bool extractPrivate = Config_getBool("EXTRACT_PRIVATE");
+   static bool extractPrivate = Config::getBool("extract-private");
+
    // default representing 1-1 mapping
    *outListType1 = inListType;
    *outListType2 = -1;

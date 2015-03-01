@@ -1452,7 +1452,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const char *path, const char
 
       portable_sysTimerStart();
 
-      if (portable_system("epstopdf", epstopdfArgs.toLatin1()) != 0) {
+      if (portable_system("epstopdf", epstopdfArgs) != 0) {
          err("Problem running epstopdf. Verify your TeX installation\n");
          portable_sysTimerStop();
          return;

@@ -92,7 +92,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dokumentasi Variabel";
       } else {
          return "Dokumentasi Anggota: Data";
@@ -167,7 +167,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Struktur Data";
       } else {
          return "Daftar Kelas";
@@ -181,7 +181,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Variabel Data";
       } else {
          return "Daftar Anggota Kelas";
@@ -190,7 +190,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Daftar Definisi Global";
       } else {
          return "Daftar Anggota File";
@@ -231,7 +231,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Berikut ini daftar struktur data, dengan penjelasan singkat:";
       } else {
          return "Berikut ini daftar kelas, struct, union, dan interface, dengan penjelasan singkat:";
@@ -241,7 +241,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
    /*! This is an introduction to the page with all class members. */
    virtual QByteArray trCompoundMembersDescription(bool extractAll) {
       QByteArray result = "Berikut ini daftar seluruh ";
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "variabel anggota struct dan union";
       } else {
          result += "kelas";
@@ -251,13 +251,13 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
       }
       result += ", dengan tautan ke ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "dokumentasi struct/union untuk setiap variabel:";
          } else {
             result += "dokumentasi kelas untuk setiap anggota:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "struct/union yang memuatnya:";
          } else {
             result += "kelas yang memuatnya:";
@@ -270,7 +270,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
    virtual QByteArray trFileMembersDescription(bool extractAll) {
       QByteArray result = "Berikut ini daftar ";
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "fungsi, variabel, makro definisi, enumerasi, dan tipe";
       } else {
          result += "file";
@@ -327,7 +327,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Indeks Struktur Data";
       } else {
          return "Indeks Kelas";
@@ -352,7 +352,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dokumentasi Struktur Data";
       } else {
          return "Dokumentasi Kelas";
@@ -466,7 +466,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Struktur Data";
       } else {
          return "Kelas";
@@ -905,7 +905,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
       return "Tipe Publik";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Variabel Data";
       } else {
          return "Atribut Publik";
@@ -1014,7 +1014,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
          "\\endcode\n"
          "Apabila tag \\c MAX_DOT_GRAPH_HEIGHT di file konfigurasi "
          "diset ke 240 kode di atas akan menghasilkan bagan berikut:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Kotak-kotak pada bagan di atas mempunyai arti sebagai berikut:\n"
          "<ul>\n"
@@ -1074,7 +1074,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Struktur Data";
       } else {
          return "Daftar Kelas";

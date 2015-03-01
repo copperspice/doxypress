@@ -90,7 +90,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "توثيق الحقل";
       } else {
          return "توثيق البيان العضو";
@@ -165,7 +165,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "هياكل البيانات";
       } else {
          return "قائمة الفئات";
@@ -184,7 +184,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "حقول البيانات";
       } else {
          return "أعضاء الفئة";
@@ -193,7 +193,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "العوام";
       } else {
          return "أعضاء الملف";
@@ -234,7 +234,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "هذه هي هياكل البيانات مع وصف مختصر:";
       } else {
          return "هذه هي الفئات ، البناءات ،"
@@ -246,7 +246,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
    virtual QByteArray trCompoundMembersDescription(bool extractAll) {
       QByteArray result = "هذه قائمة بكل ";
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "حقول البناءات والإتحادات";
       } else {
          result += "أعضاء الفئة";
@@ -256,13 +256,13 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
       }
       result += " مع وصلات إلى ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "توثيق البناء/الإتحاد لكل حقل:";
          } else {
             result += "توثيق الفئة لكل عضو:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "البناءات/الإتحادات التي ينتمون إليها:";
          } else {
             result += "الفئات التي ينتمون إليها:";
@@ -278,7 +278,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
          result += "documented ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "functions, variables, defines, enums, and typedefs";
       } else {
          result += "file members";
@@ -345,7 +345,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "فهرس هيكل البيانات";
       } else {
          return "فهرس الفئة";
@@ -370,7 +370,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "فهرس هيكل البيانات";
       } else {
          return "فهرس الفئة";
@@ -491,7 +491,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "هياكل البيانات";
       } else {
          return "الفئات";
@@ -946,7 +946,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
       return "أنواع عامة";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "حقول بيانات";
       } else {
          return "صفات عامة";
@@ -1054,7 +1054,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
          "\\endcode\n"
          "If the \\c MAX_DOT_GRAPH_HEIGHT tag in the configuration file "
          "is set to 240 this will result in the following graph:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "The boxes in the above graph have the following meaning:\n"
          "<ul>\n"
@@ -1121,7 +1121,7 @@ class TranslatorArabic : public TranslatorAdapter_1_4_6
    }
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "هياكل البيانات";
       } else {
          return "فئات";

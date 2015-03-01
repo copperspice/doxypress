@@ -269,10 +269,10 @@ class ManGenerator : public OutputGenerator
    void endPageRef(const QByteArray &, const QByteArray &)override {}
    void startQuickIndices() {}
    void endQuickIndices() {}
-   void writeSplitBar(const char *) {}
+   void writeSplitBar(const QString &) override {}
    void writeNavigationPath(const char *) {}
    void writeLogo() {}
-   void writeQuickLinks(bool, HighlightedItem, const char *) {}
+   void writeQuickLinks(bool, HighlightedItem, const QString &) override {}
    void writeSummaryLink(const QByteArray &, const char *, const char *, bool) override {}
    void startContents() {}
    void endContents() {}

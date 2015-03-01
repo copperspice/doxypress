@@ -66,7 +66,7 @@ class TranslatorCzech : public Translator
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dokumentace k položkám";
       } else {
          return "Dokumentace k datovým členům";
@@ -142,7 +142,7 @@ class TranslatorCzech : public Translator
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datové struktury";
       } else {
          return "Seznam tříd";
@@ -156,7 +156,7 @@ class TranslatorCzech : public Translator
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datové položky";
       } else {
          return "Seznam členů tříd";
@@ -165,7 +165,7 @@ class TranslatorCzech : public Translator
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globální symboly";
       } else {
          return "Symboly v souborech";
@@ -205,7 +205,7 @@ class TranslatorCzech : public Translator
 
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Následující seznam obsahuje identifikace datových "
                 "struktur a jejich stručné popisy:";
       } else {
@@ -224,7 +224,7 @@ class TranslatorCzech : public Translator
          result += "dokumentovaných ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "položek struktur (struct) a unií (union) ";
       } else {
          result += "členů tříd ";
@@ -233,13 +233,13 @@ class TranslatorCzech : public Translator
       result += "s odkazy na ";
 
       if (extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "dokumentaci struktur/unií, ke kterým příslušejí:";
          } else {
             result += "dokumentaci tříd, ke kterým příslušejí:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "struktury/unie, ke kterým příslušejí:";
          } else {
             result += "třídy, ke kterým příslušejí:";
@@ -256,7 +256,7 @@ class TranslatorCzech : public Translator
          result += "dokumentovaných ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "funkcí, proměnných, maker, výčtů a definic typů (typedef) "
                    "s odkazy na ";
       } else {
@@ -314,7 +314,7 @@ class TranslatorCzech : public Translator
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Rejstřík datových struktur";
       } else {
          return "Rejstřík tříd";
@@ -339,7 +339,7 @@ class TranslatorCzech : public Translator
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dokumentace datových struktur";
       } else {
          return "Dokumentace tříd";
@@ -453,7 +453,7 @@ class TranslatorCzech : public Translator
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datové struktry";
       } else {
          return "Třídy";
@@ -909,7 +909,7 @@ class TranslatorCzech : public Translator
       return "Veřejné typy";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datové položky";
       } else {
          return "Veřejné atributy";
@@ -1018,7 +1018,7 @@ class TranslatorCzech : public Translator
          "};\n"
          "\\endcode\n"
          "K výše uvedenému bude vygenerován následující graf:"
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Bloky (tj. uzly) v uvedeném grafu mají následující význam:\n"
          "<ul>\n"

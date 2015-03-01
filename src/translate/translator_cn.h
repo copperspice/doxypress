@@ -91,7 +91,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "结构体成员变量说明";
       } else {
          return "类成员变量说明";
@@ -167,7 +167,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
 
    /*! This is put above each page as a link to the list of annotated class */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "结构体";
       } else {
          return "类列表";
@@ -181,7 +181,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "成员变量";
       } else {
          return "类成员";
@@ -190,7 +190,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
 
    /*! This is put above each page as a link to all member of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "全局定义";
       } else {
          return "文件成员";
@@ -225,7 +225,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
    }
 
    virtual QByteArray trCompoundListDescription() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "这里列出了所有结构体，并附带简要说明:";
       } else {
          return "这里列出了所有类、结构、联合以及接口定义等，并附带简要说明:";
@@ -237,20 +237,20 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
       if (!extractAll) {
          result += "文档化的";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "结构体和联合体的成员变量，并附带";
       } else {
          result += "类成员，并附带";
       }
       //result+=" with links to ";
       if (extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "结构体或联合的详细说明:";
          } else {
             result += "类的详细说明:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "结构或联合所属的文件:";
          } else {
             result += "类所属的文件:";
@@ -264,7 +264,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
       if (!extractAll) {
          result += "文档化的";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "函数,变量,宏,枚举和类型定义等,并附带";
       } else {
          result += "文件成员,并附带";
@@ -303,7 +303,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
    }
 
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "结构体索引";
       } else {
          return "类索引";
@@ -319,7 +319,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
    }
 
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "结构体说明";
       } else {
          return "类说明";
@@ -388,7 +388,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
    }
 
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "结构体";
       } else {
          return "类";
@@ -832,7 +832,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
    }
 
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "成员变量";
       } else {
          return "Public 属性";
@@ -948,7 +948,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
              "};\n"
              "\\endcode\n"
              "结果将会生成以下图:"
-             "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center></p>\n"
+             "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center></p>\n"
              "<p>\n"
              "上图中的矩形有如下意义:\n"
              "</p>\n"
@@ -1010,7 +1010,7 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "结构体";
       } else {
          return "类";

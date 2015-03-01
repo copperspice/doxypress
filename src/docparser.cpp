@@ -330,7 +330,7 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
 
          portable_sysTimerStart();
 
-         if (portable_system("epstopdf", qPrintable(epstopdfArgs)) != 0) {
+         if (portable_system("epstopdf", epstopdfArgs) != 0) {
             err("Problem running epstopdf, verify TeX installation\n");
          }
 
@@ -1664,7 +1664,8 @@ static void readTextFileByName(const QByteArray &file, QByteArray &text)
    const QStringList examplePathList = Config::getList("example-path");
    
    for (auto s : examplePathList) {
-      QString absFileName = s + portable_pathSeparator() + file;
+      QString absFileName = s +  QDir::separator() + file;
+
       QFileInfo fi(absFileName);
 
       if (fi.exists()) {

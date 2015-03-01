@@ -166,7 +166,8 @@ void RTFDocVisitor::visit(DocURL *u)
    }
 
    DBG_RTF("{\\comment RTFDocVisitor::visit(DocURL)}\n");
-   if (Config_getBool("RTF_HYPERLINKS")) {
+
+   if (Config::getBool("rtf-hyperlinks")) {
       m_t << "{\\field "
           "{\\*\\fldinst "
           "{ HYPERLINK \"";
@@ -199,6 +200,7 @@ void RTFDocVisitor::visit(DocLineBreak *)
    }
 
    DBG_RTF("{\\comment RTFDocVisitor::visit(DocLineBreak)}\n");
+
    m_t << "\\par" << endl;
    m_lastIsPara = true;
 }
@@ -341,7 +343,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
          static int dotindex = 1;
 
          QString fileName;     
-         fileName = QString("%1%2.dot").arg((Config_getString("RTF_OUTPUT") + "/inline_dotgraph_").constData()).arg(dotindex++);
+         fileName = QString("%1%2.dot").arg(Config::getString("rtf-output") + "/inline_dotgraph_").arg(dotindex++);
 
          QFile file(fileName);
          if (! file.open(QIODevice::WriteOnly)) {
@@ -355,7 +357,8 @@ void RTFDocVisitor::visit(DocVerbatim *s)
          writeDotFile(fileName);
 
          m_t << "} ";
-         if (Config_getBool("DOT_CLEANUP")) {
+
+         if (Config::getBool("dot-cleanup")) {
             file.remove();
          }
       }
@@ -365,7 +368,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
          static int mscindex = 1;
 
          QString baseName;
-         baseName = QString("%1%2.msc").arg((Config_getString("RTF_OUTPUT") + "/inline_mscgraph_").constData()).arg(mscindex++);
+         baseName = QString("%1%2.msc").arg(Config::getString("rtf-output") + "/inline_mscgraph_").arg(mscindex++);
                          
          QFile file(baseName);
          if (! file.open(QIODevice::WriteOnly)) {
@@ -384,14 +387,15 @@ void RTFDocVisitor::visit(DocVerbatim *s)
 
          m_t << "} ";
 
-         if (Config_getBool("DOT_CLEANUP")) {
+         if (Config::getBool("dot-cleanup")) {
             file.remove();
          }
       }
       break;
+
       case DocVerbatim::PlantUML: {
-         static QByteArray rtfOutput = Config_getString("RTF_OUTPUT");
-         QByteArray baseName = writePlantUMLSource(rtfOutput, s->exampleFile(), s->text());
+         static QString rtfOutput = Config::getString("rtf-output");
+         QString baseName = writePlantUMLSource(rtfOutput, s->exampleFile(), s->text());
 
          m_t << "\\par{\\qc "; // center picture
          writePlantUMLFile(baseName);
@@ -1138,7 +1142,8 @@ void RTFDocVisitor::visitPre(DocHRef *href)
       return;
    }
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHRef)}\n");
-   if (Config_getBool("RTF_HYPERLINKS")) {
+
+   if (Config::getBool("rtf-hyperlinks")) {
       m_t << "{\\field "
           "{\\*\\fldinst "
           "{ HYPERLINK \"" << href->url() << "\" "
@@ -1150,6 +1155,7 @@ void RTFDocVisitor::visitPre(DocHRef *href)
    } else {
       m_t << "{\\f2 ";
    }
+
    m_lastIsPara = false;
 }
 
@@ -1158,8 +1164,10 @@ void RTFDocVisitor::visitPost(DocHRef *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHRef)}\n");
-   if (Config_getBool("RTF_HYPERLINKS")) {
+
+   if (Config::getBool("rtf-hyperlinks")) {
       m_t <<     "}"
           "}"
           "}";
@@ -1363,7 +1371,7 @@ void RTFDocVisitor::visitPost(DocSecRefList *)
 //void RTFDocVisitor::visitPre(DocLanguage *l)
 //{
 //  DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocLanguage)}\n");
-//  QByteArray langId = Config_getEnum("OUTPUT_LANGUAGE");
+//  QByteArray langId = Config::getEnum("output-language");
 //  if (l->id().toLower()!=langId.lower())
 //  {
 //    pushEnabled();
@@ -1374,7 +1382,7 @@ void RTFDocVisitor::visitPost(DocSecRefList *)
 //void RTFDocVisitor::visitPost(DocLanguage *l)
 //{
 //  DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocLanguage)}\n");
-//  QByteArray langId = Config_getEnum("OUTPUT_LANGUAGE");
+//  QByteArray langId = Config::getEnum("output-language");
 //  if (l->id().toLower()!=langId.lower())
 //  {
 //    popEnabled();
@@ -1617,8 +1625,9 @@ void RTFDocVisitor::visitPre(DocXRefItem *x)
 
    m_t << "{" << rtf_Style["Heading5"].reference << endl;
 
-   if (Config_getBool("RTF_HYPERLINKS") && !anonymousEnum) {
+   if (Config::getBool("rtf-hyperlinks") && ! anonymousEnum) {
       QByteArray refName;
+
       if (!x->file().isEmpty()) {
          refName += x->file();
       }
@@ -1795,7 +1804,7 @@ void RTFDocVisitor::filter(const char *str, bool verbatim)
 
 void RTFDocVisitor::startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor)
 {
-   if (ref.isEmpty() && Config_getBool("RTF_HYPERLINKS")) {
+   if (ref.isEmpty() && Config::getBool("rtf-hyperlinks")) {
 
       QByteArray refName;
 
@@ -1824,7 +1833,7 @@ void RTFDocVisitor::startLink(const QByteArray &ref, const QByteArray &file, con
 
 void RTFDocVisitor::endLink(const QByteArray &ref)
 {
-   if (ref.isEmpty() && Config_getBool("RTF_HYPERLINKS")) {
+   if (ref.isEmpty() && Config::getBool("rtf-hyperlinks")) {
       m_t << "}}}";
    } else {
       m_t << "}";
@@ -1848,11 +1857,12 @@ void RTFDocVisitor::writeDotFile(const QString &fileName)
    QString baseName = fileName;
 
    int i;
+
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   QString outDir = Config_getString("RTF_OUTPUT");
+   QString outDir = Config::getString("rtf-output");
    writeDotGraphFromFile(fileName, outDir, baseName, GOF_BITMAP);
 
    if (!m_lastIsPara) {
@@ -1862,7 +1872,7 @@ void RTFDocVisitor::writeDotFile(const QString &fileName)
    m_t << "{" << endl;
    m_t << rtf_Style_Reset;
    m_t << "\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_t << baseName << "." << Config_getEnum("DOT_IMAGE_FORMAT");
+   m_t << baseName << "." << Config::getEnum("dot-image-format").toUtf8();
    m_t << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
    m_t << "}" << endl;
    m_lastIsPara = true;
@@ -1877,7 +1887,7 @@ void RTFDocVisitor::writeMscFile(const QString &fileName)
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   QString outDir = Config_getString("RTF_OUTPUT");
+   QString outDir = Config::getString("rtf-output");
    writeMscGraphFromFile(fileName, outDir, baseName, MSC_BITMAP);
 
    if (! m_lastIsPara) {
@@ -1902,7 +1912,7 @@ void RTFDocVisitor::writeDiaFile(const QString &fileName)
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   QString outDir = Config_getString("RTF_OUTPUT");
+   QString outDir = Config::getString("rtf-output");
    writeDiaGraphFromFile(fileName, outDir, baseName, DIA_BITMAP);
 
    if (!m_lastIsPara) {
@@ -1923,10 +1933,10 @@ void RTFDocVisitor::writePlantUMLFile(const QString &fileName)
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) {
-      baseName = baseName.right(baseName.length() - i - 1);
-   
-}
-   QString outDir = Config_getString("RTF_OUTPUT");
+      baseName = baseName.right(baseName.length() - i - 1);   
+   }
+
+   QString outDir = Config::getString("rtf-output");
    generatePlantUMLOutput(fileName, outDir, PUML_BITMAP);
 
    if (!m_lastIsPara) {

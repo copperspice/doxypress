@@ -88,7 +88,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Veld Dokumentasie";
       } else {
          return "Lede Data Dokumentasie";
@@ -163,7 +163,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Data Strukture";
       } else {
          return "Klas Lys";
@@ -177,7 +177,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Data Velde";
       } else {
          return "Klas Lede";
@@ -186,7 +186,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globals";
       } else {
          return "Leër Lede";
@@ -226,7 +226,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return " Data strukture met kort beskrywings:";
       } else {
          return "Klasse, structs, "
@@ -240,20 +240,20 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
       if (!extractAll) {
          result += "gedokumenteerde ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "struct en union velde";
       } else {
          result += "klas lede";
       }
       result += " met skakels na ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "die struct/union dokumentasie vir elke veld:";
          } else {
             result += "die klas dokumentasie vir elke lid:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "die structures/unions waaraan hulle behoort:";
          } else {
             result += "die klasse waaraan hulle behoort:";
@@ -269,7 +269,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
          result += "gedokumenteerde ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "funksies, veranderlikes, defines, enums, en typedefs";
       } else {
          result += "leër lede";
@@ -321,7 +321,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Data Strukture Indeks";
       } else {
          return "Klas Indeks";
@@ -346,7 +346,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Data Strukture Dokumentasie";
       } else {
          return "Klas Dokumentasie";
@@ -460,7 +460,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Data Strukture";
       } else {
          return "Klasse";
@@ -902,7 +902,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
       return "Publieke Tipes";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Data Velde";
       } else {
          return "Publieke Public Attributes";
@@ -1010,7 +1010,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
          "\\endcode\n"
          "As die \\c MAX_DOT_GRAPH_HEIGHT merker in die konfigurasie leër "
          "aan 240 gelyk gestel is, word die volgende diagram geproduseer:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Die reghoeke in die diagram het die volgende betekenis:\n"
          "<ul>\n"
@@ -1073,7 +1073,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Data Strukture";
       } else {
          return "Klasse";

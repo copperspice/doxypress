@@ -125,7 +125,7 @@ void FormulaList::generateBitmaps(const QString &path)
       }
       portable_sysTimerStart();
 
-      if (portable_system(latexCmd.toUtf8(), "_formulas.tex") != 0) {
+      if (portable_system(latexCmd, "_formulas.tex") != 0) {
          err("Problem running latex, verify your installation, _formulas.tex, and _formulas.log\n");
          formulaError = true;         
       }

@@ -76,7 +76,7 @@ class HtmlGenerator : public OutputGenerator
    static void writeHeaderFile(QFile &f);
    static void writeFooterFile(QFile &f);
    static void writeTabData();
-   static void writeSearchInfo(QTextStream &t, const QByteArray &relPath);
+   static void writeSearchInfo(QTextStream &t, const QString &relPath);
    static void writeSearchData(const QString &dir);
    static void writeSearchPage();
    static void writeExternalSearchPage();
@@ -445,10 +445,10 @@ class HtmlGenerator : public OutputGenerator
    void endPageRef(const QByteArray &, const QByteArray &) override {}
    void startQuickIndices() {}
    void endQuickIndices();
-   void writeSplitBar(const char *name);
+   void writeSplitBar(const QString &name);
    void writeNavigationPath(const char *s);
    void writeLogo();
-   void writeQuickLinks(bool compact, HighlightedItem hli, const char *file);
+   void writeQuickLinks(bool compact, HighlightedItem hli, const QString &file) override ;
    void writeSummaryLink(const QByteArray &file, const char *anchor, const char *title, bool first) override;
    void startContents();
    void endContents();
@@ -506,7 +506,7 @@ class HtmlGenerator : public OutputGenerator
  private:
    static void writePageFooter(QTextStream &t, const QByteArray &, const QByteArray &, const QByteArray &);
    QByteArray m_lastTitle; 
-   QByteArray m_relativePath;
+   QString m_relativePath;
 
    QString m_lastFile;
 

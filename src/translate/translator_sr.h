@@ -92,7 +92,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dokumentacija polja";
       } else {
          return "Dokumentacija atributa";
@@ -167,7 +167,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Spisak struktura";
       } else {
          return "Spisak klasa";
@@ -181,7 +181,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Sva polja struktura";
       } else {
          return "Svi članovi klasa";
@@ -190,7 +190,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      //if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C"))
+      //if (Config::getBool("optimize-c"))
       //{
       // return "Članovi datoteke"; // TODO: translate me
       //}
@@ -233,7 +233,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Spisak struktura sa kratkim opisima:";
       } else {
          return "Spisak klasa, struktura, unija i interfejsa sa kratkim opisima:";
@@ -246,20 +246,20 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
       if (!extractAll) {
          result += "dokumentovanih ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "članova struktura/unija";
       } else {
          result += "članova klasa";
       }
       result += " sa vezama ka ";
       if (extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "dokumentaciji svakog polja strukture/unije:";
          } else {
             result += "dokumentaciji svakog člana klase:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "strukturama/unijama kojima pripadaju:";
          } else {
             result += "klasama kojima pripadaju:";
@@ -275,7 +275,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
          result += "dokumentovanih ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "funkcija, promenljivih, makro zamena, nabrajanja i definicija tipa";
       } else {
          result += "članova";
@@ -329,7 +329,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Spisak struktura/unija";
       } else {
          return "Spisak klasa";
@@ -354,7 +354,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dokumentacija stuktura/unija";
       } else {
          return "Dokumentacija klasa";
@@ -468,7 +468,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Strukture i unije";
       } else {
          return "Klase, strukture i unije";
@@ -913,7 +913,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
       return "Javni tipovi";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Polja";
       } else {
          return "Javni članovi";
@@ -1022,7 +1022,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
          "\\endcode\n"
          "Ako je \\c MAX_DOT_GRAPH_HEIGHT tag u konfiguracionoj datoteci "
          "postavljen na \\c 200 graf izvođenja će izgledati ovako:"
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "Graf će biti odsečen ako ne stane unutar zadatih granica.\n"
          "<p>\n"
          "Pravougaonici imaju sledeća značenja:\n"
@@ -1084,7 +1084,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Strukture i unije";
       } else {
          return "Klase";

@@ -88,7 +88,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Lauko aprašymas";
       } else {
          return "Atributų Dokumentacija";
@@ -163,7 +163,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Duomenų Struktūros";
       } else {
          return "Klasės";
@@ -177,7 +177,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Duomenų Laukai";
       } else {
          return "Klasių Nariai";
@@ -186,7 +186,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globalūs Nariai";
       } else {
          return "Failų Nariai";
@@ -227,7 +227,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Duomenų struktūros su trumpais aprašymais:";
       } else {
          return "Klasės, struktūros, "
@@ -241,20 +241,20 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
       if (!extractAll) {
          result += "dokumentuotų ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "struktūrų ir sąjungų laukų sąrašas";
       } else {
          result += "klasių nariai";
       }
       result += " su ryšiais į ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "struktūrų/sąjungų kiekvieno lauko dokumentaciją:";
          } else {
             result += "klasės dokumentacija kiekvienam nariui:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "struktūros/sąjungos, kurios priklauso:";
          } else {
             result += "klasės, kurios priklauso:";
@@ -270,7 +270,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
          result += "dokumentuotų ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "funkcijų, kintamųjų, apibrėžimų, išvardinimų, ir tipų apibrėžimų";
       } else {
          result += "globalių narių";
@@ -324,7 +324,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Duomenų Struktūros Indeksas";
       } else {
          return "Klasės Indeksas";
@@ -349,7 +349,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Duomenų Struktūros Dokumentacija";
       } else {
          return "Klasės Dokumentacija";
@@ -463,7 +463,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Duomenų struktųros";
       } else {
          return "Klasės";
@@ -904,7 +904,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
       return "Vieši Tipai";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Duomenų Laukai";
       } else {
          return "Vieši Atributai";
@@ -1012,7 +1012,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
          "\\endcode\n"
          "If the \\c MAX_DOT_GRAPH_HEIGHT tag in the configuration file "
          "is set to 240 this will result in the following graph:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "The boxes in the above graph have the following meaning:\n"
          "<ul>\n"
@@ -1075,7 +1075,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Duomenų Struktūros";
       } else {
          return "Klasės";

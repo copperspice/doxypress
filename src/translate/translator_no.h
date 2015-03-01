@@ -85,7 +85,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Feltdokumentasjon";
       } else {
          return "Medlemsdata-dokumentasjon";
@@ -160,7 +160,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datastrukturer";
       } else {
          return "Klasseliste";
@@ -179,7 +179,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datafelt";
       } else {
          return "Klassemedlemmer";
@@ -188,7 +188,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globale";
       } else {
          return "Filmedlemmer";
@@ -229,7 +229,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Her er datastrukturene med korte beskrivelser:";
       } else {
          return "Her er klasser, struct'er, "
@@ -243,20 +243,20 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
       if (!extractAll) {
          result += "dokumenterte ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "struct- og unionfelter";
       } else {
          result += "klassemedlemmer";
       }
       result += " med koblinger til ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "struct/union dokumentasjon for hvert felt:";
          } else {
             result += "klassedokumentasjonen for hvert medlem:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "struct'ene/unionene de hører til:";
          } else {
             result += "klassene de hører til:";
@@ -271,7 +271,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
          result += "dokumenterte ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "funksjoner, variabler, definisjoner, enum'er, og typedef'er";
       } else {
          result += "filmedlemmer";
@@ -338,7 +338,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datastrukturindeks";
       } else {
          return "Klasseindeks";
@@ -363,7 +363,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datastrukturdokumentasjon";
       } else {
          return "Klassedokumentasjon";
@@ -484,7 +484,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datastrukturer";
       } else {
          return "Klasser";
@@ -940,7 +940,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
       return "Public typer";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datafelt";
       } else {
          return "Public attributter";
@@ -1045,7 +1045,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
          "\\endcode\n"
          "Hvis \\c MAX_DOT_GRAPH_HEIGHT er satt til 200 i "
          "konfigurasjonsfila vil dette resultere i følgende graf:"
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Boksene i grafen over betyr følgende:\n"
          "<ul>\n"
@@ -1108,7 +1108,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
    }
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datastrukturer";
       } else {
          return "Klasser";

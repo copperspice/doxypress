@@ -304,10 +304,8 @@ QByteArray relativePathToRoot(const QString &name);
 
 void createSubDirs(QDir &d);
 
-QByteArray stripPath(const char *s);
-
+QByteArray stripPath(const QString &s);
 bool containsWord(const QByteArray &s, const QByteArray &word);
-
 bool findAndRemoveWord(QByteArray &s, const QByteArray &word);
 
 QByteArray stripLeadingAndTrailingEmptyLines(const QByteArray &s, int &docLine);

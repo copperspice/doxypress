@@ -65,7 +65,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return  "Поля" ;
       } else {
          return  "Компонентні дані" ;
@@ -144,7 +144,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return  "Структури даних" ;
       } else {
          return  "Класи" ;
@@ -158,7 +158,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return  "Поля структур" ;
       } else {
          return  "Елементи класів" ;
@@ -206,7 +206,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
 
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return  "Структури даних з коротким описом." ;
       } else {
          return  "Класи, структури, об'єднання та інтерфейси  з коротким описом." ;
@@ -219,19 +219,19 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
       if (!extractAll) {
          result += "документоаних ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "елементів структур даних з посиланням на ";
       } else {
          result += "елементів класів даних з посиланням на ";
       }
       if (extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "документацію по структурі/об'єднанню кожного елементу.";
          } else {
             result += "документацію по класу кожного елементу.";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "відповідні структури";
          } else {
             result += "відповідні класи";
@@ -248,7 +248,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
          result += "документованих ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "функцій, змінних, макровизначень, "
                    "переліків і визначень типів";
       } else {
@@ -303,7 +303,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return  "Алфавітний покажчик структур даних" ;
       } else {
          return  "Алфавітний покажчик класів" ;
@@ -328,7 +328,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return  "Структури даних" ;
       } else {
          return  "Класи" ;
@@ -442,7 +442,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return  "Структури даних" ;
       } else {
          return  "Класи" ;
@@ -940,7 +940,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
       return "Загальнодоступні типи";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return  "Поля даних" ;
       } else {
          return  "Загальнодоступні атрибути" ;
@@ -1050,7 +1050,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
          "};\n"
          "\\endcode\n"
          "Таким чином, отримуємо наступний граф:"
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Прямокутники в цьому графі мають наступний зміст:\n"
          "<ul>\n"
@@ -1111,7 +1111,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return  "Структури даних" ;
       } else {
          return  "Класи" ;
@@ -1172,7 +1172,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
     *  of the category.
     */
    virtual QByteArray trClass(bool first_capital, bool singular) {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          QByteArray result((first_capital ? "Структури даних" : "структури даних"));
          return result;
       } else {

@@ -98,8 +98,8 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::writeStyleInfo, part);
    }
 
-   void startFile(const char *name, const char *manName, const char *title) {
-      forall(&OutputGenerator::startFile, name, manName, title);
+   void startFile(const QString &name, const QString &manName, const QString &title) {
+      forall(&OutputGenerator::startFile, name.toUtf8(), manName.toUtf8(), title.toUtf8());
    }
 
    void writeSearchInfo() {
@@ -558,7 +558,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endQuickIndices);
    }
 
-   void writeSplitBar(const char *name) {
+   void writeSplitBar(const QString &name) {
       forall(&OutputGenerator::writeSplitBar, name);
    }
 
@@ -568,7 +568,7 @@ class OutputList : public OutputDocInterface
    void writeLogo() {
       forall(&OutputGenerator::writeLogo);
    }
-   void writeQuickLinks(bool compact, HighlightedItem hli, const char *file) {
+   void writeQuickLinks(bool compact, HighlightedItem hli, const QString &file) {
       forall(&OutputGenerator::writeQuickLinks, compact, hli, file);
    }
 

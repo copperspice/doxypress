@@ -110,7 +110,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Documentació dels Camps";
       } else {
          return "Documentació de les Dades Membre";
@@ -185,7 +185,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Estructures de Dades";
       } else {
          return "Llista de Classes";
@@ -199,7 +199,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Camps de Dades";
       } else {
          return "Membres de Classes";
@@ -208,7 +208,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globals";
       } else {
          return "Membres de Fitxers";
@@ -249,7 +249,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Aquestes són les estructures de dades acompanyades amb breus descripcions:";
       } else {
          return "Aquestes són les classes, estructures, "
@@ -260,7 +260,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
    /*! This is an introduction to the page with all class members. */
    virtual QByteArray trCompoundMembersDescription(bool extractAll) {
       QByteArray result = "Aquesta és la llista de tots els ";
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "camps d'estructures i unions";
       } else {
          result += "membres de classe";
@@ -270,13 +270,13 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
       }
       result += " amb enllaços a ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "la documentació de l'estructura/unió per a cada camp:";
          } else {
             result += "la documentació de la classe per a cada membre:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "les estructures/unions a que pertanyen:";
          } else {
             result += "les classes a que pertanyen:";
@@ -287,7 +287,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
    /*! This is an introduction to the page with all file members. */
    virtual QByteArray trFileMembersDescription(bool extractAll) {
       QByteArray result = "Aquesta és la llista de ";
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "totes les funcions, variables, definicions, enumeracions, i definicions de tipus";
          if (!extractAll) {
             result += " documentades";
@@ -348,7 +348,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Índex d'Estructures de Dades";
       } else {
          return "Índex de Classes";
@@ -373,7 +373,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Documentació de les Estructures de Dades";
       } else {
          return "Documentació de les Classes";
@@ -487,7 +487,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Estructures de Dades";
       } else {
          return "Classes";
@@ -937,7 +937,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
       return "Tipus Públics";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Camps de Dades";
       } else {
          return "Atributs Públics";
@@ -1043,7 +1043,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
          "};\n"
          "\\endcode\n"
          "Resultarà el gràfic següent:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Les caixes del gràfic superior tenen aquesta interpretació:\n"
          "<ul>\n"
@@ -1101,7 +1101,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Estructures de Dades";
       } else {
          return "Classes";

@@ -86,7 +86,7 @@ class TranslatorChinesetraditional : public Translator
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "欄位說明文件";
       } else {
          return "資料成員說明文件";
@@ -161,7 +161,7 @@ class TranslatorChinesetraditional : public Translator
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "資料結構";
       } else {
          return "複合列表";
@@ -175,7 +175,7 @@ class TranslatorChinesetraditional : public Translator
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "資料欄位";
       } else {
          return "複合成員";
@@ -184,7 +184,7 @@ class TranslatorChinesetraditional : public Translator
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "全域資料";
       } else {
          return "檔案成員";
@@ -224,7 +224,7 @@ class TranslatorChinesetraditional : public Translator
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "這是附帶簡略說明的資料結構:";
       } else {
          return "這是附帶簡略說明的類別，結構，"
@@ -238,20 +238,20 @@ class TranslatorChinesetraditional : public Translator
       if (!extractAll) {
          result += "文件化過";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "結構及聯合型態欄位";
       } else {
          result += "類別成員";
       }
       result += ", 並且帶有連結至";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "每個欄位的結構/聯合型態說明文件:";
          } else {
             result += "每個成員的類別說明文件:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "這些結構/聯合型態所屬:";
          } else {
             result += "這些類別所屬:";
@@ -267,7 +267,7 @@ class TranslatorChinesetraditional : public Translator
          result += "文件化的";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "函式，變數，定義，列舉，及型態定義";
       } else {
          result += "檔案成員";
@@ -322,7 +322,7 @@ class TranslatorChinesetraditional : public Translator
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "資料結構索引";
       } else {
          return "複合索引";
@@ -347,7 +347,7 @@ class TranslatorChinesetraditional : public Translator
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "資料結構說明文件";
       } else {
          return "類別說明文件";
@@ -468,7 +468,7 @@ class TranslatorChinesetraditional : public Translator
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "資料結構";
       } else {
          return "複合項目";
@@ -905,7 +905,7 @@ class TranslatorChinesetraditional : public Translator
       return "公開型態";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "資料欄位";
       } else {
          return "公開屬性";
@@ -1013,7 +1013,7 @@ class TranslatorChinesetraditional : public Translator
          "\\endcode\n"
          "若在組態檔中的 \\c MAX_DOT_GRAPH_HEIGHT tag "
          "設為 240，將會產生下列的圖示:"
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "上圖中的各區塊意義如下:\n"
          "<ul>\n"
@@ -1076,7 +1076,7 @@ class TranslatorChinesetraditional : public Translator
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "資料結構";
       } else {
          return "類別";

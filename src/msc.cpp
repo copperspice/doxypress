@@ -98,10 +98,8 @@ static bool convertMapFile(QTextStream &t, const char *mapName, const QByteArray
 
 void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, MscOutputFormat format)
 {
-   QString absOutFile = outDir;
-   absOutFile += portable_pathSeparator();
-   absOutFile += outFile;
-
+   QString absOutFile = outDir + QDir::separator() + outFile; 
+ 
    // chdir to the output dir, so dot can find the font file.
    QString oldDir = QDir::currentPath();
 
@@ -159,7 +157,7 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
       epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(outFile).arg(outFile);
 
       portable_sysTimerStart();
-      if (portable_system("epstopdf", epstopdfArgs.toLatin1()) != 0) {
+      if (portable_system("epstopdf", epstopdfArgs) != 0) {
          err("Problem running epstopdf. Check your TeX installation\n");
       }
 

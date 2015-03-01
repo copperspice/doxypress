@@ -84,7 +84,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Lauka dokumentācija";
       } else {
          return "Elementa datu dokumentācija";
@@ -159,7 +159,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datu struktūras";
       } else {
          return "Klašu saraksts";
@@ -173,7 +173,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datu lauki";
       } else {
          return "Klases elementi";
@@ -182,7 +182,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globālie";
       } else {
          return "Faila elementi";
@@ -223,7 +223,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Šeit ir visas datu struktūras ar īsu aprakstu:";
       } else {
          return "Šeit ir visas klases, struktūras, "
@@ -237,20 +237,20 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
       if (!extractAll) {
          result += "dokumentēto ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "struktūru un apvienojumu lauku";
       } else {
          result += "klases elementu";
       }
       result += " saraksts ar saitēm uz ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "struktūru/apvienojumu dokumentāciju katram laukam:";
          } else {
             result += "klases dokumentāciju katram elementam:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "struktūrām/apvienojumiem, kam tie pieder:";
          } else {
             result += "klasēm, kam tie pieder:";
@@ -266,7 +266,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
          result += "dokumentēto ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "funkciju, mainīgo, definīciju, uzskaitījumliterāļu un typedefs";
       } else {
          result += "faila elementu";
@@ -320,7 +320,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datu struktūru indess";
       } else {
          return "Klašu indekss";
@@ -345,7 +345,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datu struktūras dokomentācija";
       } else {
          return "Klases dokumentācija";
@@ -459,7 +459,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datu struktūras";
       } else {
          return "Klases";
@@ -900,7 +900,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
       return "Publiskie tipi";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datu lauki";
       } else {
          return "Publiskie atribūti";
@@ -1007,7 +1007,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
          "};\n"
          "\\endcode\n"
          "This will result in the following graph:"
-         "<p><center><img alt=\"\" src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center></p>\n"
+         "<p><center><img alt=\"\" src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center></p>\n"
          "<p>\n"
          "The boxes in the above graph have the following meaning:\n"
          "</p>\n"
@@ -1073,7 +1073,7 @@ class TranslatorLatvian : public TranslatorAdapter_1_8_4
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Datu struktūras";
       } else {
          return "Klases";

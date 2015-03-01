@@ -65,7 +65,7 @@ class TranslatorRussian : public Translator
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Поля";
       } else {
          return "Данные класса";
@@ -144,7 +144,7 @@ class TranslatorRussian : public Translator
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Структуры данных";
       } else {
          return "Классы";
@@ -158,7 +158,7 @@ class TranslatorRussian : public Translator
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Поля структур";
       } else {
          return "Члены классов";
@@ -206,7 +206,7 @@ class TranslatorRussian : public Translator
 
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Структуры данных с их кратким описанием.";
       } else {
          return "Классы с их кратким описанием.";
@@ -219,19 +219,19 @@ class TranslatorRussian : public Translator
       if (!extractAll) {
          result += "документированных ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "членов структур данных со ссылками на ";
       } else {
          result += "членов классов со ссылками на ";
       }
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "документацию по структуре для каждого члена.";
          } else {
             result += "документацию по классу для каждого члена.";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "структуры";
          } else {
             result += "классы";
@@ -248,7 +248,7 @@ class TranslatorRussian : public Translator
          result += "документированных ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "функций, переменных, макроопределений, "
                    "перечислений и определений типов";
       } else {
@@ -304,7 +304,7 @@ class TranslatorRussian : public Translator
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Алфавитный указатель структур данных";
       } else {
          return "Алфавитный указатель классов";
@@ -329,7 +329,7 @@ class TranslatorRussian : public Translator
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Структуры данных";
       } else {
          return "Классы";
@@ -443,7 +443,7 @@ class TranslatorRussian : public Translator
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Структуры данных";
       } else {
          return "Классы";
@@ -948,7 +948,7 @@ class TranslatorRussian : public Translator
       return "Открытые типы";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Поля данных";
       } else {
          return "Открытые атрибуты";
@@ -1059,7 +1059,7 @@ class TranslatorRussian : public Translator
          "\\endcode\n"
          "Если \\c MAX_DOT_GRAPH_HEIGHT в конфигурационном файле "
          "установлен в 240, получится следующий граф:"
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Прямоугольники в этом графе имеют следующее значение:\n"
          "<ul>\n"
@@ -1123,7 +1123,7 @@ class TranslatorRussian : public Translator
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Структуры данных";
       } else {
          return "Классы";
@@ -1184,7 +1184,7 @@ class TranslatorRussian : public Translator
     *  of the category.
     */
    virtual QByteArray trClass(bool first_capital, bool singular) {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          QByteArray result((first_capital ? "Структуры данных" : "структуры данных"));
          return result;
       } else {

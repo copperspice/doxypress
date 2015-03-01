@@ -776,7 +776,7 @@ class TranslatorSlovene : public TranslatorAdapter_1_4_6
          "\\endcode\n"
          "If the \\c MAX_DOT_GRAPH_HEIGHT tag in the configuration file "
          "is set to 200 this will result in the following graph:"
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "The boxes in the above graph have the following meaning:\n"
          "<ul>\n"
@@ -841,7 +841,7 @@ class TranslatorSlovene : public TranslatorAdapter_1_4_6
    /*     } */
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Podatkovne strukture";
       } else {
          return "Razredi";

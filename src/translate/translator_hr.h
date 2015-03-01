@@ -89,7 +89,7 @@ class TranslatorCroatian : public TranslatorAdapter_1_8_2
       return "Stablo klasa";
    }
    QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Sve strukture";
       } else {
          return "Sve klase";
@@ -99,7 +99,7 @@ class TranslatorCroatian : public TranslatorAdapter_1_8_2
       return "Popis datoteka";
    }
    QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Svi članovi struktura";
       } else {
          return "Svi članovi klasa";
@@ -139,7 +139,7 @@ class TranslatorCroatian : public TranslatorAdapter_1_8_2
          result += "dokumentiranih ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "članova klasa s linkovima na ";
       } else {
          result += "članova struktura s linkovima na ";
@@ -148,7 +148,7 @@ class TranslatorCroatian : public TranslatorAdapter_1_8_2
       if (!extractAll) {
          result += "dokumentaciju svakog člana:";
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "dokumentaciju klase :";
          } else {
             result += "dokumentaciju strukture";
@@ -189,7 +189,7 @@ class TranslatorCroatian : public TranslatorAdapter_1_8_2
       return "Hijerarhijsko kazalo";
    }
    QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Kazalo struktura podataka";
       } else {
          return "Skupno kazalo ";
@@ -202,7 +202,7 @@ class TranslatorCroatian : public TranslatorAdapter_1_8_2
       return "Dokumentacija modula";
    }
    QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Dokumentacija struktura podataka";
       } else {
          return "Dokumentacija klasa";
@@ -750,7 +750,7 @@ class TranslatorCroatian : public TranslatorAdapter_1_8_2
          "};\n"
          "\\endcode\n"
          "To će rezultirati grafikonom:"
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Pravokutnici imaju slijedeće značenje:\n"
          "<ul>\n"

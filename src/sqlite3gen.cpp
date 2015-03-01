@@ -1208,7 +1208,7 @@ void generateSqlite3()
    // + examples
    // + main page
 
-   QString outputDirectory = Config_getString("output-dir");
+   QString outputDirectory = Config::getString("output-dir");
 
    QDir sqlite3Dir(outputDirectory);
    sqlite3 *db;

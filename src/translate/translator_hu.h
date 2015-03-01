@@ -98,7 +98,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
 
    /*! header that is put before the list of member attributes. */
    virtual QByteArray trMemberDataDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Adatmezők dokumentációja";
       } else {
          return "Adattagok dokumentációja";
@@ -170,7 +170,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to the list of annotated classes */
    virtual QByteArray trCompoundList() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Adatszerkezetek";
       } else {
          return "Osztálylista";
@@ -184,7 +184,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to all members of compounds. */
    virtual QByteArray trCompoundMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Adatmezők";
       } else {
          return "Osztálytagok";
@@ -193,7 +193,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
 
    /*! This is put above each page as a link to all members of files. */
    virtual QByteArray trFileMembers() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Globális elemek";
       } else {
          return "Fájlelemek";
@@ -234,7 +234,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
    /*! This is an introduction to the annotated compound list. */
    virtual QByteArray trCompoundListDescription() {
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Az összes adatszerkezet listája rövid leírásokkal:";
       } else {
          return "Az összes osztály, struktúra, unió és interfész "
@@ -248,20 +248,20 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
       if (!extractAll) {
          result += "dokumentált ";
       }
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "struktúra- és úniómező";
       } else {
          result += "osztálytag";
       }
       result += " listája, valamint hivatkozás ";
       if (!extractAll) {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "a megfelelő struktúra-/úniódokumentációra minden mezőnél:";
          } else {
             result += "a megfelelő osztálydokumentációra minden tagnál:";
          }
       } else {
-         if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+         if (Config::getBool("optimize-c")) {
             result += "a struktúrákra/úniókra, amikhez tartoznak:";
          } else {
             result += "az osztályokra, amikhez tartoznak:";
@@ -277,7 +277,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
          result += "dokumentált ";
       }
 
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          result += "függvény, változó, makródefiníció, enumeráció és típusdefiníció";
       } else {
          result += "fájlelem";
@@ -332,7 +332,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
     * annotated compound index.
     */
    virtual QByteArray trCompoundIndex() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Adatszerkezet-mutató";
       } else {
          return "Osztálymutató";
@@ -357,7 +357,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
     *  the documentation of all classes, structs and unions.
     */
    virtual QByteArray trClassDocumentation() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Adatszerkezetek dokumentációja";
       } else {
          return "Osztályok dokumentációja";
@@ -471,7 +471,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
     *  the list of links to documented compounds
     */
    virtual QByteArray trCompounds() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Adatszerkezetek";
       } else {
          return "Osztályok";
@@ -912,7 +912,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
       return "Publikus típusok";
    }
    virtual QByteArray trPublicAttribs() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Adatmezők";
       } else {
          return "Publikus attribútumok";
@@ -1018,7 +1018,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
          "\\endcode\n"
          "Ha a konfigurációs fájl \\c MAX_DOT_GRAPH_HEIGHT elemének értékét "
          "240-re állítjuk, az eredmény a következő ábra lesz:"
-         "<p><center><img src=\"graph_legend." + Config_getEnum("DOT_IMAGE_FORMAT") + "\"></center>\n"
+         "<p><center><img src=\"graph_legend." + Config::getEnum("dot-image-format").toUtf8() + "\"></center>\n"
          "<p>\n"
          "Az ábrán levő dobozok jelentése:\n"
          "<ul>\n"
@@ -1079,7 +1079,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
 
    /*! Used for Java classes in the summary section of Java packages */
    virtual QByteArray trClasses() {
-      if (Config_getBool("OPTIMIZE_OUTPUT_FOR_C")) {
+      if (Config::getBool("optimize-c")) {
          return "Adatszerkezetek";
       } else {
          return "Osztályok";

@@ -177,8 +177,8 @@ void ClangParser::determineInputFilesInSameTu(QStringList &files)
 void ClangParser::start(const char *fileName, QStringList &filesInTranslationUnit)
 {
    static bool clangAssistedParsing = Config::getBool("clang-parsing");
-   static QStringList &includePath  = Config_getList("INCLUDE_PATH");
-   static QStringList clangOptions  = Config_getList("CLANG_OPTIONS");
+   static QStringList &includePath  = Config::getList("include-path");
+   static QStringList clangOptions  = Config::getList("clang-options");
 
    if (! clangAssistedParsing) {
       return;
@@ -253,7 +253,7 @@ void ClangParser::start(const char *fileName, QStringList &filesInTranslationUni
    // provide the input and and its dependencies as unsaved files so we can
    // pass the filtered versions
    argv[argc++] = strdup(fileName);
-   static bool filterSourceFiles = Config_getBool("FILTER_SOURCE_FILES");
+   static bool filterSourceFiles = Config::getBool("filter-source-files");
  
    uint numUnsavedFiles = filesInTranslationUnit.count() + 1;
    p->numFiles = numUnsavedFiles;
@@ -632,7 +632,7 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol,
                                    Definition *d,
                                    const char *text)
 {
-   static bool sourceTooltips = Config_getBool("SOURCE_TOOLTIPS");
+   static bool sourceTooltips = Config::getBool("source-tooltips");
    TooltipManager::instance()->addTooltip(d);
    QByteArray ref  = d->getReference();
    QByteArray file = d->getOutputFileBase();
