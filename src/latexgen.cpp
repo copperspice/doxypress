@@ -62,18 +62,19 @@ static void writeLatexMakefile()
 {
    bool generateBib = ! Doxygen::citeDict->isEmpty();
 
-   QByteArray dir = Config::getString("latex-output");
-   QByteArray fileName = dir + "/Makefile";
+   QString dir = Config::getString("latex-output");
+   QString fileName = dir + "/Makefile";
+
    QFile file(fileName);
 
    if (! file.open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", fileName.data());
+      err("Could not open file %s for writing\n", qPrintable(fileName));
       exit(1);
    }
 
    // inserted by KONNO Akihisa <konno@researchers.jp> 2002-03-05
-   QByteArray latex_command = Config_getString("LATEX_CMD_NAME");
-   QByteArray mkidx_command = Config_getString("MAKEINDEX_CMD_NAME");
+   QString latex_command = Config::getString("latex-cmd-name");
+   QString mkidx_command = Config::getString("make-index-cmd-name");
 
    // end insertion by KONNO Akihisa <konno@researchers.jp> 2002-03-05
    QTextStream t(&file);
@@ -160,15 +161,17 @@ static void writeMakeBat()
 {
 
 #if defined(_MSC_VER)
-   QByteArray dir = Config_getString("LATEX_OUTPUT");
-   QByteArray fileName = dir + "/make.bat";
-   QByteArray latex_command = Config_getString("LATEX_CMD_NAME");
-   QByteArray mkidx_command = Config_getString("MAKEINDEX_CMD_NAME");
+   QString dir = Config::getString("latex-output");
+   QString fileName = dir + "/make.bat";
+   QString latex_command = Config::getString("latex-cmd-name");
+   QString mkidx_command = Config::getString("make_index_cmd_name");
+
    QFile file(fileName);
 
    bool generateBib = !Doxygen::citeDict->isEmpty();
-   if (!file.open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", fileName.data());
+
+   if (! file.open(QIODevice::WriteOnly)) {
+      err("Could not open file %s for writing\n", qPrintable(fileName));
       exit(1);
    }
 
@@ -243,11 +246,11 @@ static void writeMakeBat()
 
 void LatexGenerator::init()
 {
-   QByteArray dir = Config_getString("LATEX_OUTPUT");
+   QString dir = Config::getString("latex-output");
    QDir d(dir);
 
    if (! d.exists() && !d.mkdir(dir)) {
-      err("Could not create output directory %s\n", dir.data());
+      err("Could not create output directory %s\n", qPrintable(dir));
       exit(1);
    }
 
@@ -262,14 +265,14 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    // part 1
 
    // Handle batch mode
-   if (Config_getBool("LATEX_BATCHMODE")) {
+   if (Config::getBool("latex-batchmode")) {
       t_stream << "\\batchmode\n";
    }
 
    // Set document class depending on configuration
    QByteArray documentClass;
 
-   if (Config_getBool("COMPACT_LATEX")) {
+   if (Config::getBool("latex-compact")) {
       documentClass = "article";
    } else {
       documentClass = "book";
@@ -322,22 +325,13 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\\newcommand{\\+}{\\discretionary{\\mbox{\\scriptsize$\\hookleftarrow$}}{}{}}\n"
      "\n";
 
-   // Define page & text layout
-   QByteArray paperName;
-   QByteArray &paperType = Config_getEnum("PAPER_TYPE");
-
-   // "a4wide" package is obsolete (see bug 563698)
-
-   if (paperType == "a4wide") {
-      paperName = "a4";
-   } else {
-      paperName = paperType;
-   }
-
+   // Define page & text layout   
+   QString paperType = Config::getEnum("latex-paper-type");
+  
    t_stream << "% Page & text layout\n"
      "\\usepackage{geometry}\n"
      "\\geometry{%\n"
-     "  " << paperName << "paper,%\n"
+     "  " << paperType << "paper,%\n"
      "  top=2.5cm,%\n"
      "  bottom=2.5cm,%\n"
      "  left=2.5cm,%\n"
@@ -372,7 +366,8 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    // Headers & footers
    QByteArray genString;
    QTextStream tg(&genString);
-   filterLatexString(tg, theTranslator->trGeneratedAt(dateToString(true).toUtf8(), Config_getString("PROJECT_NAME")), false, false, false);
+
+   filterLatexString(tg, theTranslator->trGeneratedAt(dateToString(true).toUtf8(), Config::getString("project-name").toUtf8()), false, false, false);
 
    t_stream << "% Headers & footers\n"
      "\\usepackage{fancyhdr}\n"
@@ -391,7 +386,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\\fancyfoot[RO]{\\fancyplain{}{}}\n"
      "\\renewcommand{\\footrulewidth}{0.4pt}\n";
 
-   if (!Config_getBool("COMPACT_LATEX")) {
+   if (!Config::getBool("latex-compact")) {
       t_stream << "\\renewcommand{\\chaptermark}[1]{%\n"
         "  \\markboth{#1}{}%\n"
         "}\n";
@@ -412,7 +407,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\n";
 
    // User-specified packages
-   QStringList &extraPackages = Config_getList("EXTRA_PACKAGES");
+   const QStringList extraPackages = Config::getList("extra-packages");
   
    if (! extraPackages.isEmpty()) {     
       t_stream << "% Packages requested by user\n";     
@@ -503,7 +498,7 @@ static void writeDefaultHeaderPart3(QTextStream &t_stream)
      "\\end{center}\n"
      "\\end{titlepage}\n";
 
-   bool compactLatex = Config_getBool("COMPACT_LATEX");
+   bool compactLatex = Config::getBool("latex-compact");
    if (!compactLatex) {
       t_stream << "\\clearemptydoublepage\n";
    }
@@ -542,7 +537,7 @@ static void writeDefaultFooter(QTextStream &t)
    // Index
    QByteArray unit;
 
-   if (Config_getBool("COMPACT_LATEX")) {
+   if (Config::getBool("latex-compact")) {
       unit = "section";
    } else {
       unit = "chapter";
@@ -584,14 +579,17 @@ void LatexGenerator::writeStyleSheetFile(QFile &f)
    writeDefaultStyleSheet(t);
 }
 
-void LatexGenerator::startFile(const char *name, const char *, const char *)
+void LatexGenerator::startFile(const QString &name, const QString &, const QString &)
 {
+
 #if 0
-   setEncoding(Config_getString("LATEX_OUTPUT_ENCODING"));
+   setEncoding(Config::getString("latex-output-encoding"));
 #endif
-   QByteArray fileName = name;
+
+   QString fileName = name;
    relPath = relativePathToRoot(fileName);
    sourceFileName = stripPath(fileName);
+
    if (fileName.right(4) != ".tex" && fileName.right(4) != ".sty") {
       fileName += ".tex";
    }
@@ -614,18 +612,20 @@ void LatexGenerator::startProjectNumber()
    m_textStream << "\\\\[1ex]\\large ";
 }
 
-static QByteArray convertToLaTeX(const QByteArray &s)
+static QByteArray convertToLaTeX(const QString &s)
 {
    QByteArray result;
+
    QTextStream t(&result);
-   filterLatexString(t, s, false, false, false);
-   return result.data();
+   filterLatexString(t, s.toUtf8(), false, false, false);
+
+   return result;
 }
 
 void LatexGenerator::startIndexSection(IndexSections is)
 {
-   bool &compactLatex      = Config_getBool("COMPACT_LATEX");
-   QByteArray &latexHeader = Config_getString("LATEX_HEADER");
+   const bool compactLatex   = Config::getBool("latex-compact");
+   const QString latexHeader = Config::getString("latex-header");
 
    switch (is) {
       case isTitlePageStart:       
@@ -634,10 +634,8 @@ void LatexGenerator::startIndexSection(IndexSections is)
 
          } else {
             QByteArray header = fileToString(latexHeader);
-            m_textStream << substituteKeywords(header, "",
-                                    convertToLaTeX(Config_getString("PROJECT_NAME")),
-                                    convertToLaTeX(Config_getString("PROJECT_NUMBER")),
-                                    convertToLaTeX(Config_getString("PROJECT_BRIEF")));
+            m_textStream << substituteKeywords(header, "", convertToLaTeX(Config::getString("project-name")),
+                  convertToLaTeX(Config::getString("project-version")), convertToLaTeX(Config::getString("project-brief")));
          }
       
          break;
@@ -874,10 +872,10 @@ void LatexGenerator::startIndexSection(IndexSections is)
 
 void LatexGenerator::endIndexSection(IndexSections is)
 {
-   //static bool compactLatex    = Config_getBool("COMPACT_LATEX");
-   static bool sourceBrowser     = Config_getBool("SOURCE_BROWSER");
-   static QByteArray latexHeader = Config_getString("LATEX_HEADER");
-   static QByteArray latexFooter = Config_getString("LATEX_FOOTER");
+   //static bool compactLatex = Config::getBool("latex-compact");
+   static bool sourceBrowser  = Config::getBool("source-browser");
+   static QString latexHeader = Config::getString("latex-header");
+   static QString latexFooter = Config::getString("latex-footer");
 
    switch (is) {
       case isTitlePageStart:
@@ -891,7 +889,8 @@ void LatexGenerator::endIndexSection(IndexSections is)
 
       case isMainPage: 
       {
-         //QByteArray indexName=Config_getBool("GENERATE_TREEVIEW")?"main":"index";
+         // QString indexName = Config::getBool("generate-treeview")?"main":"index";
+
          QByteArray indexName = "index";
          m_textStream << "}\n\\label{index}";
 
@@ -1098,10 +1097,10 @@ void LatexGenerator::endIndexSection(IndexSections is)
             writeDefaultFooter(m_textStream);
          } else {
             QByteArray footer = fileToString(latexFooter);
-            m_textStream << substituteKeywords(footer, "",
-                                    convertToLaTeX(Config_getString("PROJECT_NAME")),
-                                    convertToLaTeX(Config_getString("PROJECT_NUMBER")),
-                                    convertToLaTeX(Config_getString("PROJECT_BRIEF")));
+            
+            m_textStream << substituteKeywords(footer, "", convertToLaTeX(Config::getString("project-name")),
+                  convertToLaTeX(Config::getString("project-version")), convertToLaTeX(Config::getString("project-brief")));
+
          }
          break;
    }
@@ -1169,7 +1168,7 @@ void LatexGenerator::endIndexItem(const QByteArray &ref, const QByteArray &fn)
 //}
 
 
-void LatexGenerator::startHtmlLink(const QByteArray &url)
+void LatexGenerator::startHtmlLink(const QString &url)
 {
    if (Config::getBool("latex-hyper-pdf")) {
       m_textStream << "\\href{";
@@ -1363,7 +1362,7 @@ void LatexGenerator::startTitleHead(const char *fileName)
       m_textStream << "\\hypertarget{" << stripPath(fileName) << "}{}";
    }
 
-   if (Config_getBool("COMPACT_LATEX")) {
+   if (Config::getBool("latex-compact")) {
       m_textStream << "\\subsection{";
    } else {
       m_textStream << "\\section{";
@@ -1387,7 +1386,7 @@ void LatexGenerator::endTitleHead(const char *fileName, const char *name)
 
 void LatexGenerator::startTitle()
 {
-   if (Config_getBool("COMPACT_LATEX")) {
+   if (Config::getBool("latex-compact")) {
       m_textStream << "\\subsection{";
    } else {
       m_textStream << "\\section{";
@@ -1396,7 +1395,7 @@ void LatexGenerator::startTitle()
 
 void LatexGenerator::startGroupHeader(int extraIndentLevel)
 {
-   if (Config_getBool("COMPACT_LATEX")) {
+   if (Config::getBool("latex-compact")) {
       extraIndentLevel++;
    }
 
@@ -1421,7 +1420,7 @@ void LatexGenerator::endGroupHeader(int)
 
 void LatexGenerator::startMemberHeader(const char *)
 {
-   if (Config_getBool("COMPACT_LATEX")) {
+   if (Config::getBool("latex-compact")) {
       m_textStream << "\\subsubsection*{";
    } else {
       m_textStream << "\\subsection*{";
@@ -1468,7 +1467,7 @@ void LatexGenerator::startMemberDoc(const char *clname, const char *memname, con
    }
 
    static const char *levelLab[] = { "subsubsection", "paragraph", "subparagraph", "subparagraph" };
-   static bool compactLatex = Config_getBool("COMPACT_LATEX");
+   static bool compactLatex = Config::getBool("latex-compact");
    int level = 0;
 
    if (showInline) {
@@ -1586,7 +1585,7 @@ void LatexGenerator::startSection(const char *lab, const char *, SectionInfo::Se
 
    m_textStream << "\\";
 
-   if (Config_getBool("COMPACT_LATEX")) {
+   if (Config::getBool("latex-compact")) {
       switch (type) {
          case SectionInfo::Page:
             m_textStream << "subsection";
@@ -1871,7 +1870,7 @@ void LatexGenerator::startMemberGroupHeader(bool hasHeader)
    m_textStream << "{\\bf ";
 
    // changed back to rev 756 due to bug 660501
-   //if (Config_getBool("COMPACT_LATEX"))
+   //if (Config::getBool("latex-compact"))
    //{
    //  m_textStream << "\\subparagraph*{";
    //}
@@ -1917,7 +1916,7 @@ void LatexGenerator::startDotGraph()
 
 void LatexGenerator::endDotGraph(const DotClassGraph &g)
 {
-   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config_getString("LATEX_OUTPUT"), m_fileName, relPath);
+   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config::getString("latex-output"), m_fileName, relPath);
 }
 
 void LatexGenerator::startInclDepGraph()
@@ -1926,7 +1925,7 @@ void LatexGenerator::startInclDepGraph()
 
 void LatexGenerator::endInclDepGraph(const DotInclDepGraph &g)
 {
-   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config_getString("LATEX_OUTPUT"), m_fileName, relPath);
+   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config::getString("latex-output"), m_fileName, relPath);
 }
 
 void LatexGenerator::startGroupCollaboration()
@@ -1935,7 +1934,7 @@ void LatexGenerator::startGroupCollaboration()
 
 void LatexGenerator::endGroupCollaboration(const DotGroupCollaboration &g)
 {
-   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config_getString("LATEX_OUTPUT"), m_fileName, relPath);
+   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config::getString("latex-output"), m_fileName, relPath);
 }
 
 void LatexGenerator::startCallGraph()
@@ -1944,7 +1943,7 @@ void LatexGenerator::startCallGraph()
 
 void LatexGenerator::endCallGraph(const DotCallGraph &g)
 {
-   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config_getString("LATEX_OUTPUT"), m_fileName, relPath);
+   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config::getString("latex-output"), m_fileName, relPath);
 }
 
 void LatexGenerator::startDirDepGraph()
@@ -1953,7 +1952,7 @@ void LatexGenerator::startDirDepGraph()
 
 void LatexGenerator::endDirDepGraph(const DotDirDeps &g)
 {
-   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config_getString("LATEX_OUTPUT"), m_fileName, relPath);
+   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config::getString("latex-output"), m_fileName, relPath);
 }
 
 void LatexGenerator::startDescription()
@@ -2296,7 +2295,7 @@ void LatexGenerator::endFontClass()
 
 void LatexGenerator::startInlineHeader()
 {
-   if (Config_getBool("COMPACT_LATEX")) {
+   if (Config::getBool("latex-compact")) {
       m_textStream << "\\paragraph*{";
    } else {
       m_textStream << "\\subsubsection*{";

@@ -106,7 +106,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::writeSearchInfo);
    }
 
-   void writeFooter(const char *navPath) {
+   void writeFooter(const QString &navPath) {
       forall(&OutputGenerator::writeFooter, navPath);
    }
 
@@ -233,7 +233,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endTextLink);
    }
 
-   void startHtmlLink(const QByteArray &url)  override{
+   void startHtmlLink(const QString &url)  override{
       forall(&OutputGenerator::startHtmlLink, url);
    }
 

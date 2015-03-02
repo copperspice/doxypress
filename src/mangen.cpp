@@ -101,15 +101,16 @@ void ManGenerator::init()
    createSubDirs(d);
 }
 
-static QString buildFileName(const char *name)
+static QString buildFileName(const QString &name)
 {  
-   if (name == 0) {
+   if (name.isEmpty()) {
       return "noname";
    }
 
    QString fname;
+   QByteArray temp = name.toUtf8();
 
-   const char *p = name;
+   const char *p = temp.constData();
    char c;
 
    while (c = *p++) {
@@ -149,7 +150,7 @@ static QString buildFileName(const char *name)
    return fname;
 }
 
-void ManGenerator::startFile(const char *, const char *manName, const char *)
+void ManGenerator::startFile(const QString &, const QString &manName, const QString &)
 {
    startPlainFile(buildFileName(manName));
    firstCol = true;
@@ -256,7 +257,7 @@ void ManGenerator::writeCodeLink(const QByteArray &, const QByteArray &, const Q
    docify(name);
 }
 
-void ManGenerator::startHtmlLink(const QByteArray &)
+void ManGenerator::startHtmlLink(const QString &)
 {
 }
 
@@ -484,7 +485,7 @@ void ManGenerator::startDoxyAnchor(const char *, const char *manName, const char
    // the name of the link file is derived from the name of the anchor:
    // - truncate after an (optional) ::
 
-   QByteArray baseName = name;
+   QString baseName = name;
    int i = baseName.lastIndexOf("::");
 
    if (i != -1) {
@@ -501,7 +502,7 @@ void ManGenerator::startDoxyAnchor(const char *, const char *manName, const char
          QTextStream linkstream;
 
          linkstream.setDevice(&linkfile);       
-         linkstream << ".so " << getSubdir() << "/" << buildFileName( manName ) << endl;
+         linkstream << ".so " << getSubdir() << "/" << buildFileName(manName) << endl;
       }
    }
    linkfile.close();

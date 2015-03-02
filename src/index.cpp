@@ -2509,9 +2509,11 @@ static void writeFileMemberIndexFiltered(OutputList &ol, FileMemberHighlight hl)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   QByteArray extension = Doxygen::htmlFileExtension;
+   QString extension = Doxygen::htmlFileExtension;
+
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::FileGlobals);
-   QByteArray title = lne ? lne->title() : theTranslator->trFileMembers();
+
+   QString title   = lne ? lne->title() : theTranslator->trFileMembers();
    bool addToIndex = lne == 0 || lne->visible();
 
    if (addToIndex) {
@@ -2530,13 +2532,13 @@ static void writeFileMemberIndexFiltered(OutputList &ol, FileMemberHighlight hl)
       QString fileName = getFmhlInfo(hl)->fname;
 
       if (multiPageIndex) {
-         if (!first) {
+         if (! first) {
             fileName += "_" + letterToLabel(page);
          }
 
-         QString cs = QChar(page);
+         const QString cs = QChar(page);
          if (addToIndex) {
-            Doxygen::indexList->addContentsItem(false, cs, 0, fileName, 0, false, true);
+            Doxygen::indexList->addContentsItem(false, cs, 0, fileName.toUtf8(), 0, false, true);
          }
       }
 
@@ -2550,8 +2552,8 @@ static void writeFileMemberIndexFiltered(OutputList &ol, FileMemberHighlight hl)
          startQuickIndexList(ol);
 
          // index item for all file member lists
-         startQuickIndexItem(ol,
-                             getFmhlInfo(0)->fname + Doxygen::htmlFileExtension, hl == FMHL_All, true, first);
+         startQuickIndexItem(ol, getFmhlInfo(0)->fname + Doxygen::htmlFileExtension.toUtf8(), hl == FMHL_All, true, first);
+
          ol.writeString(fixSpaces(getFmhlInfo(0)->title));
          endQuickIndexItem(ol);
 
@@ -2559,7 +2561,7 @@ static void writeFileMemberIndexFiltered(OutputList &ol, FileMemberHighlight hl)
          // index items for per category member lists
          for (i = 1; i < FMHL_Total; i++) {
             if (documentedFileMembers[i] > 0) {
-               startQuickIndexItem(ol, getFmhlInfo(i)->fname + Doxygen::htmlFileExtension, hl == i, true, first);
+               startQuickIndexItem(ol, getFmhlInfo(i)->fname + Doxygen::htmlFileExtension.toUtf8(), hl == i, true, first);
                ol.writeString(fixSpaces(getFmhlInfo(i)->title));
                endQuickIndexItem(ol);
             }
@@ -2653,8 +2655,6 @@ static const NmhlInfo *getNmhlInfo(int hl)
    return &nmhlInfo[hl];
 }
 
-//----------------------------------------------------------------------------
-
 static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHighlight hl)
 {
    if (documentedNamespaceMembers[hl] == 0) {
@@ -2694,13 +2694,13 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
       QString fileName = getNmhlInfo(hl)->fname;
 
       if (multiPageIndex) {
-         if (!first) {
+         if (! first) {
             fileName += "_" + letterToLabel(page);
          }
 
-         QString cs = QChar(page);
+         const QString cs = QChar(page);
          if (addToIndex) {
-            Doxygen::indexList->addContentsItem(false, cs, 0, fileName, 0, false, true);
+            Doxygen::indexList->addContentsItem(false, cs, 0, fileName.toUtf8(), 0, false, true);
          }
       }
       bool quickIndex = documentedNamespaceMembers[hl] > maxItemsBeforeQuickIndex;
@@ -2713,8 +2713,7 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
          startQuickIndexList(ol);
 
          // index item for all namespace member lists
-         startQuickIndexItem(ol,
-                             getNmhlInfo(0)->fname + Doxygen::htmlFileExtension, hl == NMHL_All, true, first);
+         startQuickIndexItem(ol, getNmhlInfo(0)->fname + Doxygen::htmlFileExtension.toUtf8(), hl == NMHL_All, true, first);
          ol.writeString(fixSpaces(getNmhlInfo(0)->title));
          endQuickIndexItem(ol);
 
@@ -2722,8 +2721,7 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
          // index items per category member lists
          for (i = 1; i < NMHL_Total; i++) {
             if (documentedNamespaceMembers[i] > 0) {
-               startQuickIndexItem(ol,
-                                   getNmhlInfo(i)->fname + Doxygen::htmlFileExtension, hl == i, true, first);
+               startQuickIndexItem(ol, getNmhlInfo(i)->fname + Doxygen::htmlFileExtension.toUtf8(), hl == i, true, first);
                ol.writeString(fixSpaces(getNmhlInfo(i)->title));
                endQuickIndexItem(ol);
             }
@@ -3020,24 +3018,26 @@ void writeGraphInfo(OutputList &ol)
 
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
+
    generateGraphLegend(Config::getString("html-output"));
 
    const bool stripCommentsStateRef = Config::getBool("strip-code-comments");
-   bool oldStripCommentsState = stripCommentsStateRef;
+   bool oldStripCommentsState       = stripCommentsStateRef;
 
-   const bool createSubdirs = Config::getBool("create-subdirs");
-   bool oldCreateSubdirs = createSubdirs;
+   const bool createSubdirs         = Config::getBool("create-subdirs");
+   bool oldCreateSubdirs            = createSubdirs;
 
-   // temporarily disable the stripping of comments for our own code example!
-   stripCommentsStateRef = false;
+   // temporarily disable the stripping of comments for our own code example
+   Config::setBool("strip-code-comments", false);
 
    // temporarily disable create subdirs for linking to our example
-   createSubdirs = false;
+   Config::setBool("create-subdirs", false);
 
    startFile(ol, "graph_legend", QString(), theTranslator->trLegendTitle());
 
    startTitle(ol, 0);
    ol.parseText(theTranslator->trLegendTitle());
+
    endTitle(ol, 0, 0);
    ol.startContents();
 
@@ -3046,16 +3046,15 @@ void writeGraphInfo(OutputList &ol)
    int e = legendDocs.indexOf("</center>");
 
    if (Config::getEnum("dot-image-format") == "svg" && s != -1 && e != -1) {
-      legendDocs = legendDocs.left(s + 8) + "[!-- SVG 0 --]\n" + legendDocs.mid(e);
-      //printf("legendDocs=%s\n",legendDocs.data());
+      legendDocs = legendDocs.left(s + 8) + "[!-- SVG 0 --]\n" + legendDocs.mid(e);    
    }
 
    QSharedPointer<FileDef> fd = QMakeShared<FileDef>("", "graph_legend");
    ol.generateDoc("graph_legend", 1, fd, QSharedPointer<MemberDef>(), legendDocs, false, false);
 
    // restore config settings
-   stripCommentsStateRef = oldStripCommentsState;
-   createSubdirs = oldCreateSubdirs;
+   Config::setBool("strip-code-comments", oldStripCommentsState);
+   Config::setBool("create-subdirs", oldCreateSubdirs);
 
    endFile(ol);
    ol.popGeneratorState();

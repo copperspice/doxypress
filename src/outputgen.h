@@ -196,7 +196,7 @@ class BaseOutputDocInterface : public CodeOutputInterface
    /*! Starts a (link to an) URL found in the documentation.
     *  \param url    The URL to link to.
     */
-   virtual void startHtmlLink(const QByteArray &url) = 0;
+   virtual void startHtmlLink(const QString &url) = 0;
 
    /*! Ends a link started by startHtmlLink().
     */
@@ -335,9 +335,9 @@ class OutputGenerator : public BaseOutputDocInterface
    virtual void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md) = 0;
   
    // structural output interface   
-   virtual void startFile(const char *name, const char *manName,const char *title) = 0;
+   virtual void startFile(const QString &name, const QString &manName, const QString &title) = 0;
    virtual void writeSearchInfo() = 0;
-   virtual void writeFooter(const char *navPath) = 0;
+   virtual void writeFooter(const QString &navPath) = 0;
    virtual void endFile() = 0;
    virtual void startIndexSection(IndexSections) = 0;
    virtual void endIndexSection(IndexSections) = 0;

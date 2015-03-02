@@ -345,7 +345,7 @@ void stackTrace();
 
 bool readInputFile(const char *fileName, BufStr &inBuf, bool filter = true, bool isSourceCode = false);
 
-QByteArray filterTitle(const QByteArray &title);
+QByteArray filterTitle(const QString &title);
 
 bool patternMatch(const QFileInfo &fi, const QStringList &patList);
 
@@ -371,7 +371,7 @@ QByteArray replaceColorMarkers(const char *str);
 bool copyFile(const QString &src, const QString &dest);
 QByteArray extractBlock(const QByteArray text, const QByteArray marker);
 
-QByteArray correctURL(const QByteArray &url, const QByteArray &relPath);
+QByteArray correctURL(const QString &url, const QString &relPath);
 
 QByteArray processMarkup(const QByteArray &s);
 

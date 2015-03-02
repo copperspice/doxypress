@@ -494,7 +494,7 @@ class DotManager
 
 
 /** Generated a graphs legend page */
-void generateGraphLegend(const char *path);
+void generateGraphLegend(const QString &path);
 
 void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, GraphOutputFormat format);
 

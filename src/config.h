@@ -28,15 +28,16 @@ class Config
    public:         
       Config() = delete;      
 
-      static bool parseConfig(QString fName);
+      static bool parseConfig(const QString &fName);
 
-      static bool getBool(const QString name);
-      static QString getEnum(const QString name);
-      static int getInt(const QString name);
-      static QStringList getList(const QString name);
-      static QString getString(const QString name);
+      static bool getBool(const QString &name);
+      static QString getEnum(const QString &name);
+      static int getInt(const QString &name);
+      static QStringList getList(const QString &name);
+      static QString getString(const QString &name);
 
-      static void setList(const QString name, QStringList data);
+      static void setBool(const QString &name, bool data);
+      static void setList(const QString &name, const QStringList &data);
 
    private:
       enum DataSource { DEFAULT, PROJECT }; 
@@ -52,8 +53,7 @@ class Config
       };
 
       struct struc_CfgEnum {
-         int index;
-         QString value;
+         QString value;      
          DataSource type;
       };
 
@@ -73,10 +73,10 @@ class Config
       static QHash<QString, struc_CfgList>   m_cfgList; 
       static QHash<QString, struc_CfgString> m_cfgString;
     
-      static QByteArray json_ReadFile(QString fName);
+      static QByteArray json_ReadFile(const QString &fName);
 
       static void load_Defaults();
-      static bool read_ProjectFile(QString fName);
+      static bool read_ProjectFile(const QString &fName);
       static bool preVerify();
       static bool verify();
 };

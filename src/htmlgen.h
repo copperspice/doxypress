@@ -80,8 +80,9 @@ class HtmlGenerator : public OutputGenerator
    static void writeSearchData(const QString &dir);
    static void writeSearchPage();
    static void writeExternalSearchPage();
-   static QByteArray writeLogoAsString(const char *path);
-   static QByteArray writeSplitBarAsString(const char *name, const char *relpath);
+
+   static QByteArray writeLogoAsString(const QString &path);
+   static QByteArray writeSplitBarAsString(const QString &name, const QString &relpath);
 
    void enable() {
       if (! genStack.isEmpty()) {
@@ -166,8 +167,8 @@ class HtmlGenerator : public OutputGenerator
 
    void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md) override;
 
-   void startFile(const char *name, const char *manName, const char *title);
-   void writeFooter(const char *navPath);
+   void startFile(const QString &name, const QString &manName, const QString &title) override;
+   void writeFooter(const QString &navPath);
    void endFile();
    void clearBuffer();
    void writeSearchInfo();
@@ -202,7 +203,7 @@ class HtmlGenerator : public OutputGenerator
    void startTextLink(const QByteArray &file, const QByteArray &anchor) override;
 
    void endTextLink();
-   void startHtmlLink(const QByteArray &url) override;
+   void startHtmlLink(const QString &url) override;
    void endHtmlLink();
  
    void startMemberSections();
@@ -504,10 +505,10 @@ class HtmlGenerator : public OutputGenerator
    void endLabels();
 
  private:
-   static void writePageFooter(QTextStream &t, const QByteArray &, const QByteArray &, const QByteArray &);
-   QByteArray m_lastTitle; 
-   QString m_relativePath;
+   static void writePageFooter(QTextStream &t, const QString &, const QString &, const QString &);
 
+   QString m_lastTitle; 
+   QString m_relativePath;
    QString m_lastFile;
 
    void docify(const QByteArray &text, bool inHtmlComment);

@@ -844,8 +844,8 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
 
    if (getDirDef()) {
 
-      startFile(ol, getSourceFileBase(), 0, pageTitle, HLI_FileVisible,
-                !generateTreeView, !isDocFile && genSourceFile ? QByteArray() : getOutputFileBase());
+      startFile(ol, getSourceFileBase(), QString(), pageTitle, HLI_FileVisible,
+                ! generateTreeView, !isDocFile && genSourceFile ? QByteArray() : getOutputFileBase());
 
       if (! generateTreeView) {
          getDirDef()->writeNavigationPath(ol);
@@ -855,8 +855,9 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       ol.parseText(name());
       endTitle(ol, getSourceFileBase(), title);
    } else {
-      startFile(ol, getSourceFileBase(), 0, pageTitle, HLI_FileVisible, false,
-                !isDocFile && genSourceFile ? QByteArray() : getOutputFileBase());
+      startFile(ol, getSourceFileBase(), QString(), pageTitle, HLI_FileVisible, false,
+                ! isDocFile && genSourceFile ? QByteArray() : getOutputFileBase());
+
       startTitle(ol, getSourceFileBase());
       ol.parseText(title);
       endTitle(ol, getSourceFileBase(), 0);

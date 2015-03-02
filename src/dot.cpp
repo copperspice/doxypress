@@ -3914,7 +3914,6 @@ bool DotDirDeps::isTrivial() const
    return m_dir->depGraphIsTrivial();
 }
 
-//-------------------------------------------------------------
 
 void generateGraphLegend(const QString &path)
 {

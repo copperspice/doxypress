@@ -75,7 +75,7 @@ static const char *secLabels[maxLevels] = { "section", "subsection", "subsubsect
 
 static const char *getSectionName(int level)
 {
-   static bool compactLatex = Config_getBool("COMPACT_LATEX");
+   static bool compactLatex = Config::getBool("latex-compact");
 
    int l = level;
 
@@ -341,7 +341,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Dot: {
          static int dotindex = 1;
 
-         QString latexOutput = Config_getString("LATEX_OUTPUT") + "/inline_dotgraph_";
+         QString latexOutput = Config::getString("latex-output") + "/inline_dotgraph_";
         
          QString fileName;
          fileName = QString("%1%2.dot").arg(latexOutput).arg(dotindex++);
@@ -362,7 +362,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
 
          m_t << "\\end{center}\n";
 
-         if (Config_getBool("DOT_CLEANUP")) {
+         if (Config::getBool("dot-cleanup")) {
             file.remove();
          }
       }
@@ -371,7 +371,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Msc: {
          static int mscindex = 1;
 
-         QString latexOutput = Config_getString("LATEX_OUTPUT") + "/inline_mscgraph_";
+         QString latexOutput = Config::getString("latex-output") + "/inline_mscgraph_";
 
          QByteArray baseName;
          baseName = QString("%1%2").arg(latexOutput).arg(mscindex++).toUtf8();
@@ -392,15 +392,15 @@ void LatexDocVisitor::visit(DocVerbatim *s)
          writeMscFile(baseName);
          m_t << "\\end{center}\n";
 
-         if (Config_getBool("DOT_CLEANUP")) {
+         if (Config::getBool("dot-cleanup")) {
             file.remove();
          }
       }
       break;
 
       case DocVerbatim::PlantUML: {
-         QByteArray latexOutput = Config_getString("LATEX_OUTPUT");
-         QByteArray baseName = writePlantUMLSource(latexOutput, s->exampleFile(), s->text());
+         QString latexOutput = Config::getString("latex-output");
+         QString baseName = writePlantUMLSource(latexOutput, s->exampleFile(), s->text());
 
          m_t << "\\begin{center}\n";
          writePlantUMLFile(baseName);
@@ -1789,7 +1789,7 @@ void LatexDocVisitor::popEnabled()
 
 void LatexDocVisitor::startDotFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) {
@@ -1801,8 +1801,8 @@ void LatexDocVisitor::startDotFile(const QByteArray &fileName, const QByteArray 
    }
 
    baseName.prepend("dot_");
-   QByteArray outDir = Config_getString("LATEX_OUTPUT");
-   QByteArray name = fileName;
+   QString outDir = Config::getString("latex-output");
+   QString name = fileName;
    writeDotGraphFromFile(name, outDir, baseName, GOF_EPS);
 
    if (hasCaption) {
@@ -1851,7 +1851,7 @@ void LatexDocVisitor::endDotFile(bool hasCaption)
 
 void LatexDocVisitor::startMscFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) {
@@ -1862,15 +1862,18 @@ void LatexDocVisitor::startMscFile(const QByteArray &fileName, const QByteArray 
    }
    baseName.prepend("msc_");
 
-   QByteArray outDir = Config_getString("LATEX_OUTPUT");
+   QString outDir = Config::getString("latex-output");
    writeMscGraphFromFile(fileName, outDir, baseName, MSC_EPS);
+
    if (hasCaption) {
       m_t << "\n\\begin{DoxyImage}\n";
    } else {
       m_t << "\n\\begin{DoxyImageNoCaption}\n"
           "  \\mbox{";
    }
+
    m_t << "\\includegraphics";
+
    if (!width.isEmpty()) {
       m_t << "[width=" << width << "]";
    } else if (!height.isEmpty()) {
@@ -1879,6 +1882,7 @@ void LatexDocVisitor::startMscFile(const QByteArray &fileName, const QByteArray 
       m_t << "[width=\\textwidth,height=\\textheight/2,keepaspectratio=true]";
    }
    m_t << "{" << baseName;
+
    //if (Config::getBool("latex-pdf"))
    //{
    //  m_t << ".pdf";
@@ -1910,13 +1914,16 @@ void LatexDocVisitor::endMscFile(bool hasCaption)
 
 void LatexDocVisitor::writeMscFile(const QByteArray &baseName)
 {
-   QByteArray shortName = baseName;
+   QString shortName = baseName;
    int i;
+
    if ((i = shortName.lastIndexOf('/')) != -1) {
       shortName = shortName.right(shortName.length() - i - 1);
    }
-   QByteArray outDir = Config_getString("LATEX_OUTPUT");
+
+   QString outDir = Config::getString("latex-output");
    writeMscGraphFromFile(baseName + ".msc", outDir, shortName, MSC_EPS);
+
    m_t << "\n\\begin{DoxyImageNoCaption}"
        "  \\mbox{\\includegraphics";
    m_t << "{" << shortName << "}";
@@ -1926,7 +1933,7 @@ void LatexDocVisitor::writeMscFile(const QByteArray &baseName)
 
 void LatexDocVisitor::startDiaFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption)
 {
-   QByteArray baseName = fileName;
+   QString baseName = fileName;
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) {
@@ -1937,7 +1944,7 @@ void LatexDocVisitor::startDiaFile(const QByteArray &fileName, const QByteArray 
    }
    baseName.prepend("dia_");
 
-   QByteArray outDir = Config_getString("LATEX_OUTPUT");
+   QString outDir = Config::getString("latex-output");
    writeDiaGraphFromFile(fileName, outDir, baseName, DIA_EPS);
 
    if (hasCaption) {
@@ -1990,14 +1997,14 @@ void LatexDocVisitor::endDiaFile(bool hasCaption)
 
 void LatexDocVisitor::writeDiaFile(const QByteArray &baseName)
 {
-   QByteArray shortName = baseName;
+   QString shortName = baseName;
    int i;
 
    if ((i = shortName.lastIndexOf('/')) != -1) {
       shortName = shortName.right(shortName.length() - i - 1);
    }
 
-   QByteArray outDir = Config_getString("LATEX_OUTPUT");
+   QString outDir = Config::getString("latex-output");
    writeDiaGraphFromFile(baseName + ".dia", outDir, shortName, DIA_EPS);
 
    m_t << "\n\\begin{DoxyImageNoCaption}"
@@ -2007,16 +2014,16 @@ void LatexDocVisitor::writeDiaFile(const QByteArray &baseName)
    m_t << "\\end{DoxyImageNoCaption}\n";
 }
 
-void LatexDocVisitor::writePlantUMLFile(const QByteArray &baseName)
+void LatexDocVisitor::writePlantUMLFile(const QString &baseName)
 {
-   QByteArray shortName = baseName;
+   QString shortName = baseName;            
    int i;
 
    if ((i = shortName.lastIndexOf('/')) != -1) {
       shortName = shortName.right(shortName.length() - i - 1);
    }
 
-   QByteArray outDir = Config_getString("LATEX_OUTPUT");
+   QString outDir = Config::getString("latex-output");
    generatePlantUMLOutput(baseName, outDir, PUML_EPS);
 
    m_t << "\n\\begin{DoxyImageNoCaption}"

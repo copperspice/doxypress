@@ -69,9 +69,9 @@ class ManGenerator : public OutputGenerator
    void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md);
 
    static void init();
-   void startFile(const char *name, const char *manName, const char *title);
+   void startFile(const QString &name, const QString &manName, const QString &title) override;
    void writeSearchInfo() {}
-   void writeFooter(const char *) {}
+   void writeFooter(const QString &) override {}
    void endFile();
    void clearBuffer();
 
@@ -123,7 +123,7 @@ class ManGenerator : public OutputGenerator
 
    void startTextLink(const QByteArray &, const QByteArray &) override {}
    void endTextLink() override{}
-   void startHtmlLink(const QByteArray &url) override;
+   void startHtmlLink(const QString &url) override;
    void endHtmlLink();
 
    void startTypewriter() {

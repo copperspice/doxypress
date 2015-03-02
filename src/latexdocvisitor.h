@@ -166,7 +166,7 @@ class LatexDocVisitor : public DocVisitor
    void startDiaFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
    void endDiaFile(bool hasCaption);
    void writeDiaFile(const QByteArray &fileName);
-   void writePlantUMLFile(const QByteArray &fileName);
+   void writePlantUMLFile(const QString &fileName);
 
    void pushEnabled();
    void popEnabled();

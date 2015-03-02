@@ -25,7 +25,7 @@
 #include <pre.h>
 #include <util.h>
 
-bool Config::getBool(const QString name)
+bool Config::getBool(const QString &name)
 {
    bool retval   = false;  
    auto hashIter = m_cfgBool.find(name);
@@ -41,7 +41,7 @@ bool Config::getBool(const QString name)
    return retval;
 }
 
-QString Config::getEnum(const QString name)
+QString Config::getEnum(const QString &name)
 {
    QString retval;   
    auto hashIter = m_cfgEnum.find(name);
@@ -57,7 +57,7 @@ QString Config::getEnum(const QString name)
    return retval;
 }
 
-int Config::getInt(const QString name)
+int Config::getInt(const QString &name)
 {
    int retval    = 0;   
    auto hashIter = m_cfgInt.find(name);
@@ -73,7 +73,7 @@ int Config::getInt(const QString name)
    return retval;
 }
 
-QStringList Config::getList(const QString name)
+QStringList Config::getList(const QString &name)
 {
    QStringList retval;
    auto hashIter = m_cfgList.find(name);
@@ -89,7 +89,7 @@ QStringList Config::getList(const QString name)
    return retval;
 }
 
-QString Config::getString(const QString name)
+QString Config::getString(const QString &name)
 {
    QString retval;
    auto hashIter = m_cfgString.find(name);
@@ -106,12 +106,19 @@ QString Config::getString(const QString name)
 }
 
 // update project data
-void Config::setList(const QString name, QStringList data)
+void Config::setBool(const QString &name, bool data)
+{
+   auto hashBool = m_cfgBool.find(name);     
+   hashBool.value().value = data;
+}
+
+void Config::setList(const QString &name, const QStringList &data)
 {
    auto hashIter = m_cfgList.find(name);     
    hashIter.value().value = data;
 }
 
+// **
 bool Config::preVerify()
 { 
    bool isError = false;
@@ -165,6 +172,7 @@ bool Config::preVerify()
          }
       }
    }
+ 
 
    // **
    iterString = m_cfgString.find("latex-header");
@@ -309,6 +317,17 @@ bool Config::verify()
 
 
    // **
+   auto iterEnum = m_cfgEnum.find("mathjax-format");   
+   QString mathJaxFormat  = iterEnum.value().value;
+  
+   if (! mathJaxFormat.isEmpty() && mathJaxFormat != "HTML-CSS" && mathJaxFormat != "NativeMML" && mathJaxFormat != "SVG") {
+      err("Error: Unsupported value for MATHJAX FORMAT, value should be HTML-CSS, NativeMML, or SVG\n");
+
+      iterEnum.value().value = "HTML-CSS";
+   }
+
+
+   // **
    iterString = m_cfgString.find("man-extension");
    QString manExtension = iterString.value().value;
 
@@ -337,7 +356,7 @@ bool Config::verify()
 
 
    // **
-   auto iterEnum = m_cfgEnum.find("latex-paper-type");
+   iterEnum = m_cfgEnum.find("latex-paper-type");
    QString paperType = iterEnum.value().value;
 
    paperType = paperType.toLower().trimmed();
@@ -346,7 +365,7 @@ bool Config::verify()
       paperType = "a4";
    }
 
-   if (paperType != "a4" && paperType != "a4wide" && paperType != "letter" && paperType != "legal" && paperType != "executive") {
+   if (paperType != "a4" && paperType != "letter" && paperType != "legal" && paperType != "executive") {
       err("Warning: : Unknown paper type %s specified, using a4\n", qPrintable(paperType));
       paperType = "a4";
    }
@@ -416,30 +435,35 @@ bool Config::verify()
       iterBool.value().value = false;
    }
 
+
    // ** 
    if (! Config::getBool("generate-html") && Config::getBool("generate-chm")) {
-      err("Warning: 'GENERATE CHM' requires 'GENERATE HTML'\n");
+      err("Warning: 'GENERATE CHM' requires 'GENERATE HTML' to be set\n");
    }
 
 
-/*
    // **
    if (Config::getBool("generate-qhp")) {
 
-      if (Config_getString("QHP_NAMESPACE").isEmpty()) {
-         err("Error: GENERATE_QHP=YES requires QHP_NAMESPACE to be set. Using 'org.doxypress.doc' as default.\n");
+      iterString = m_cfgString.find("qhp-namespace");
+      QString temp = iterString.value().value;
 
-         Config_getString("QHP_NAMESPACE") = "org.doxypress.doc";
+      if (temp.isEmpty()) {
+         err("Error: 'GENERATE QHP' is set, this requires 'QHP NAMESPACE' to use 'org.doxypress.doc' as a default\n");      
+
+         iterString.value().value = "org.doxypress.doc";
       }
 
-      if (Config_getString("QHP_VIRTUAL_FOLDER").isEmpty()) {
-         err("Error: GENERATE_QHP=YES requires QHP_VIRTUAL_FOLDER to be set. Using 'doc' as default\n");
+      iterString = m_cfgString.find("qhp-virtual-folder");
+      temp = iterString.value().value;
 
-         Config_getString("QHP_VIRTUAL_FOLDER") = "doc";
+      if (temp.isEmpty()) {
+         err("Error: 'GENERATE QHP' is set, this requires 'QHP VIRTUAL FOLDER' to us 'doc' as a default\n");      
+         
+         iterString.value().value = "doc";
       }
    }
 
-*/
 
 
 /*
@@ -457,6 +481,7 @@ bool Config::verify()
 
    iterList.value().value = stripFromPath;
 */
+
 
 
 /*
@@ -510,6 +535,39 @@ bool Config::verify()
          }
       }
    } 
+
+
+   // **
+   iterString = m_cfgString.find("plantuml-jar-path");
+   QString plantumlJarPath = iterString.value().value;
+
+   if (! plantumlJarPath.isEmpty()) {
+      QFileInfo file(plantumlJarPath);
+
+      if (file.exists() && file.isDir()) { 
+         // plantuml-jar-path is directory
+
+         QFileInfo jar(plantumlJarPath + QDir::separator() + "plantuml.jar");
+
+         if (jar.exists() && jar.isFile()) {
+            plantumlJarPath = jar.absolutePath() + QDir::separator();
+
+         } else {
+            err("PlantUml jar file 'plantuml.jar' was not found at the path specified by 'PLANTUML JAR PATH' '%s'\n", qPrintable(plantumlJarPath));
+            iterString.value().value = QString();
+         }
+
+      } else if (file.exists() && file.isFile() && plantumlJarPath.endsWith(".jar")) { 
+         // plantuml-jar-path is a file
+
+         plantumlJarPath = file.absolutePath() + QDir::separator() ;
+         iterString.value().value = plantumlJarPath;
+
+      } else {
+         err("'PLANTUML JAR PATH' does not exist and is not a directory: %s\n", qPrintable(plantumlJarPath));         
+         iterString.value().value = QString();
+      }
+   }
    
    // read aliases and store them in a dictionary
    readAliases();
@@ -610,37 +668,6 @@ bool Config::verify()
 
    } else { 
       mscgenPath = "";
-   }
-
-
-   // check plantuml path
-   iterString = m_cfgString.find("");
-   QString plantumlJarPath = Config_getString("PLANTUML_JAR_PATH");
-
-   if (!plantumlJarPath.isEmpty()) {
-      QFileInfo pu(plantumlJarPath);
-
-      if (pu.exists() && pu.isDir()) { // PLANTUML_JAR_PATH is directory
-         QFileInfo jar(plantumlJarPath + QDir::separator() + "plantuml.jar");
-
-         if (jar.exists() && jar.isFile()) {
-            plantumlJarPath = jar.absolutePath() + QDir::separator();
-
-         } else {
-            err("Jar file plantuml.jar not found at location "
-                       "specified via PLANTUML_JAR_PATH: '%s'\n", plantumlJarPath.data());
-
-            plantumlJarPath = "";
-         }
-
-      } else if (pu.exists() && pu.isFile() && plantumlJarPath.right(4) == ".jar") { // PLANTUML_JAR_PATH is file
-         plantumlJarPath = pu.absolutePath() + QDir::separator() ;
-
-      } else {
-         err("path specified via PLANTUML_JAR_PATH does not exist or not a directory: %s\n",
-                    plantumlJarPath.data());
-         plantumlJarPath = "";
-      }
    }
 
 
@@ -759,14 +786,7 @@ bool Config::verify()
    } else if (gamma > 240) {
       gamma = 240;
    }
-
-   QByteArray mathJaxFormat = Config_getEnum("MATHJAX_FORMAT");
-   if (!mathJaxFormat.isEmpty() && mathJaxFormat != "HTML-CSS" &&
-         mathJaxFormat != "NativeMML" && mathJaxFormat != "SVG") {
-      err("Error: Unsupported value for MATHJAX_FORMAT: Should be one of HTML-CSS, NativeMML, or SVG\n");
-      Config_getEnum("MATHJAX_FORMAT") = "HTML-CSS";
-   }
-
+ 
    // add default words if needed
    QStringList &annotationFromBrief = Config_getList("ABBREVIATE_BRIEF");
    if (annotationFromBrief.isEmpty()) {
@@ -782,10 +802,8 @@ bool Config::verify()
       annotationFromBrief.append("an");
       annotationFromBrief.append("the");
    }
-   
-   checkFileName("GENERATE_TAGFILE");
+     
 */
-
 
 
 
@@ -810,19 +828,6 @@ static void cleanUpPaths(QStringList &str)
             sfp = fi.absoluteFilePath() + "/";           
          }
       }      
-   }
-}
-
-void Config::checkFileName(const char *optionName)
-{
-   QByteArray &s = Config_getString(optionName);
-   QByteArray val = s.trimmed().toLower();
-
-   if ((val == "yes" || val == "true"  || val == "1" || val == "all") ||
-         (val == "no"  || val == "false" || val == "0" || val == "none")) {
-
-      err("Error: file name expected for option %s, got %s instead. Ignoring...\n", optionName, s.data());
-      s = ""; // note the use of &s above: this will change the option value!
    }
 }
 

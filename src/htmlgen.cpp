@@ -49,7 +49,7 @@ static QByteArray g_header;
 static QByteArray g_footer;
 static QByteArray g_mathjax_code;
 
-static void writeClientSearchBox(QTextStream &t, const char *relPath)
+static void writeClientSearchBox(QTextStream &t, const QString &relPath)
 {
    t << "        <div id=\"MSearchBox\" class=\"MSearchBoxInactive\">\n";
    t << "        <span class=\"left\">\n";
@@ -59,17 +59,19 @@ static void writeClientSearchBox(QTextStream &t, const char *relPath)
    t << "               alt=\"\"/>\n";
    t << "          <input type=\"text\" id=\"MSearchField\" value=\""
      << theTranslator->trSearch() << "\" accesskey=\"S\"\n";
+
    t << "               onfocus=\"searchBox.OnSearchFieldFocus(true)\" \n";
    t << "               onblur=\"searchBox.OnSearchFieldFocus(false)\" \n";
    t << "               onkeyup=\"searchBox.OnSearchFieldChange(event)\"/>\n";
    t << "          </span><span class=\"right\">\n";
    t << "            <a id=\"MSearchClose\" href=\"javascript:searchBox.CloseResultsWindow()\">"
      << "<img id=\"MSearchCloseImg\" border=\"0\" src=\"" << relPath << "search/close.png\" alt=\"\"/></a>\n";
+
    t << "          </span>\n";
    t << "        </div>\n";
 }
 
-static void writeServerSearchBox(QTextStream &t, const char *relPath, bool highlightSearch)
+static void writeServerSearchBox(QTextStream &t, const QString &relPath, bool highlightSearch)
 {
    static bool externalSearch = Config::getBool("external-search");
 
@@ -138,7 +140,7 @@ static QString selectBlock(const QString &s, const QString &name, bool enable)
    return result;
 }
 
-static QByteArray getSearchBox(bool serverSide, QByteArray relPath, bool highlightSearch)
+static QByteArray getSearchBox(bool serverSide, const QString &relPath, bool highlightSearch)
 {
    QByteArray result;
    QTextStream t(&result);
@@ -149,7 +151,7 @@ static QByteArray getSearchBox(bool serverSide, QByteArray relPath, bool highlig
       writeClientSearchBox(t, relPath);
    }
 
-   return QByteArray(result);
+   return result;
 }
 
 static QString removeEmptyLines(const QString &s)
@@ -177,8 +179,8 @@ static QString removeEmptyLines(const QString &s)
    return retval;
 }
 
-static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &title, const QByteArray &relPath,
-                                      const QByteArray &navPath = QByteArray())
+static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &title, 
+                  const QString &relPath= QString(), const QString &navPath = QString())
 {
    // Build CSS/Javascript tags depending on treeview, search engine settings  
 
@@ -847,11 +849,12 @@ void HtmlGenerator::writeHeaderFile(QFile &file)
 void HtmlGenerator::writeFooterFile(QFile &file)
 {
    QTextStream t(&file);
+
    t << "<!-- HTML footer for DoxyPress " << versionString << "-->" <<  endl;
    t << ResourceMgr::instance().getAsString("html/footer.html");
 }
 
-void HtmlGenerator::startFile(const char *name, const char *, const char *title)
+void HtmlGenerator::startFile(const QString &name, const QString &, const QString &title)
 {   
    QString fileName = name;
 
@@ -918,10 +921,10 @@ void HtmlGenerator::writeSearchInfo()
    writeSearchInfo(m_textStream, m_relativePath);
 }
 
-QByteArray HtmlGenerator::writeLogoAsString(const char *path)
+QByteArray HtmlGenerator::writeLogoAsString(const QString &path)
 {
-   static bool timeStamp = Config::getBool("html-timestamp");
-   QByteArray result;
+   static bool timeStamp = Config::getBool("html-timestamp");         // BROOM CHECK
+   QString result;
 
    if (timeStamp) {
       result += theTranslator->trGeneratedAt(dateToString(true).toUtf8(), Config::getString("project-name").toUtf8()); 
@@ -938,7 +941,7 @@ QByteArray HtmlGenerator::writeLogoAsString(const char *path)
    result += versionString;
    result += " ";
 
-   return result;
+   return result.toUtf8();
 }
 
 void HtmlGenerator::writeLogo()
@@ -946,13 +949,12 @@ void HtmlGenerator::writeLogo()
    m_textStream << writeLogoAsString(m_relativePath);
 }
 
-void HtmlGenerator::writePageFooter(QTextStream &t_stream, const QByteArray &lastTitle,
-                                    const QByteArray &relPath, const QByteArray &navPath)
+void HtmlGenerator::writePageFooter(QTextStream &t_stream, const QString &lastTitle, const QString &relPath, const QString &navPath)
 {
    t_stream << substituteHtmlKeywords(g_footer, convertToHtml(lastTitle), relPath, navPath);
 }
 
-void HtmlGenerator::writeFooter(const char *navPath)
+void HtmlGenerator::writeFooter(const QString &navPath)
 {
    writePageFooter(m_textStream, m_lastTitle, m_relativePath, navPath);
 }
@@ -1163,7 +1165,7 @@ void HtmlGenerator::endTextLink()
    m_textStream << "</a>";
 }
 
-void HtmlGenerator::startHtmlLink(const QByteArray &url)
+void HtmlGenerator::startHtmlLink(const QString &url)
 {
    static bool generateTreeView = Config::getBool("generate-treeview");
    m_textStream << "<a ";
@@ -1322,7 +1324,7 @@ void HtmlGenerator::writeChar(char c)
    docify(cs);
 }
 
-static void startSectionHeader(QTextStream &t_stream, const QByteArray &relPath, int sectionCount)
+static void startSectionHeader(QTextStream &t_stream, const QString &relPath, int sectionCount)
 { 
    static bool dynamicSections = Config::getBool("html-dynamic-sections");
 
@@ -1800,7 +1802,7 @@ void HtmlGenerator::endDotGraph(const DotClassGraph &g)
 
    if (generateLegend && ! umlLook) {
       m_textStream << "<center><span class=\"legend\">[";
-      startHtmlLink(m_relativePath + "graph_legend" + Doxygen::htmlFileExtension.toUtf8());
+      startHtmlLink(m_relativePath + "graph_legend" + Doxygen::htmlFileExtension);
 
       m_textStream << theTranslator->trLegend();
       endHtmlLink();
@@ -2012,7 +2014,7 @@ static void endQuickIndexList(QTextStream &t_stream, bool compact)
    }
 }
 
-static void startQuickIndexItem(QTextStream &t_stream, const QByteArray &l, bool hl, bool x, const QByteArray &relPath)
+static void startQuickIndexItem(QTextStream &t_stream, const QByteArray &l, bool hl, bool x, const QString &relPath)
 {
    t_stream << "      <li";
 
@@ -2088,7 +2090,7 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
    return false;
 }
 
-static void renderQuickLinksAsTree(QTextStream &t_stream, const QByteArray &relPath, LayoutNavEntry *root)
+static void renderQuickLinksAsTree(QTextStream &t_stream, const QString &relPath, LayoutNavEntry *root)
 {
    int count = 0;
 
@@ -2105,7 +2107,7 @@ static void renderQuickLinksAsTree(QTextStream &t_stream, const QByteArray &relP
          if (entry->visible() && quickLinkVisible(entry->kind())) {
             QByteArray url = entry->url();
 
-            t_stream<< "<li><a href=\"" << relPath << url << "\"><span>";
+            t_stream << "<li><a href=\"" << relPath << url << "\"><span>";
             t_stream << fixSpaces(entry->title());
             t_stream << "</span></a>\n";
 
@@ -2120,9 +2122,8 @@ static void renderQuickLinksAsTree(QTextStream &t_stream, const QByteArray &relP
 }
 
 
-static void renderQuickLinksAsTabs(QTextStream &t_stream, const QByteArray &relPath,
-                                   LayoutNavEntry *hlEntry, LayoutNavEntry::Kind kind,
-                                   bool highlightParent, bool highlightSearch)
+static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath, LayoutNavEntry *hlEntry, 
+                  LayoutNavEntry::Kind kind, bool highlightParent, bool highlightSearch)
 {
    if (hlEntry->parent()) { 
       // first draw the tabs for the parent of hlEntry
@@ -2130,7 +2131,7 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QByteArray &relP
    }
 
    if (hlEntry->parent() && hlEntry->parent()->children().count() > 0) { // draw tabs for row containing hlEntry
-      bool topLevel = hlEntry->parent()->parent() == 0;
+     bool topLevel = hlEntry->parent()->parent() == 0;
      int count = 0;    
 
       for (auto entry : hlEntry->parent()->children()) {  
@@ -2266,7 +2267,13 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
 
    if (compact) {
       // find highlighted index item
-      LayoutNavEntry *hlEntry = root->find(kind, kind == LayoutNavEntry::UserGroup ? file : 0);
+      QString temp;
+
+      if (kind == LayoutNavEntry::UserGroup) {
+         temp = file;
+      }
+
+      LayoutNavEntry *hlEntry = root->find(kind, temp);
 
       if (! hlEntry && altKind != (LayoutNavEntry::Kind) - 1) {
          hlEntry = root->find(altKind);
@@ -2303,15 +2310,15 @@ void HtmlGenerator::endQuickIndices()
    m_textStream << "</div><!-- top -->" << endl;
 }
 
-QByteArray HtmlGenerator::writeSplitBarAsString(const char *name, const char *relpath)
+QByteArray HtmlGenerator::writeSplitBarAsString(const QString &name, const QString &relpath)
 {
    static bool generateTreeView = Config::getBool("generate-treeview");
-   QByteArray result;
+   QString result;
 
    // write split bar
    if (generateTreeView) {
-      result = QByteArray(
-                  "<div id=\"side-nav\" class=\"ui-resizable side-nav-resizable\">\n"
+
+      result =    "<div id=\"side-nav\" class=\"ui-resizable side-nav-resizable\">\n"
                   "  <div id=\"nav-tree\">\n"
                   "    <div id=\"nav-tree-contents\">\n"
                   "      <div id=\"nav-sync\" class=\"sync\"></div>\n"
@@ -2322,19 +2329,16 @@ QByteArray HtmlGenerator::writeSplitBarAsString(const char *name, const char *re
                   "  </div>\n"
                   "</div>\n"
                   "<script type=\"text/javascript\">\n"
-                  "$(document).ready(function(){initNavTree('") +
-               QByteArray(name) + Doxygen::htmlFileExtension.toUtf8() + QByteArray("','") + relpath +
-               QByteArray("');});\n"
-                          "</script>\n"
-                          "<div id=\"doc-content\">\n");
+                  "$(document).ready(function(){initNavTree('" + name + Doxygen::htmlFileExtension + "','" + relpath +
+                  "');});\n</script>\n<div id=\"doc-content\">\n";
    }
 
-   return result;
+   return result.toUtf8();
 }
 
 void HtmlGenerator::writeSplitBar(const QString &name)
 {
-   m_textStream << writeSplitBarAsString(name, m_relativePath.toUtf8());
+   m_textStream << writeSplitBarAsString(name, m_relativePath);
 }
 
 void HtmlGenerator::writeNavigationPath(const char *s)
@@ -2408,7 +2412,7 @@ void HtmlGenerator::writeSearchPage()
    if (f.open(QIODevice::WriteOnly)) {
       QTextStream t_stream(&f);
 
-      t_stream << substituteHtmlKeywords(g_header, "Search", "");
+      t_stream << substituteHtmlKeywords(g_header, "Search");
 
       t_stream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress "
         << versionString << " -->" << endl;
@@ -2434,7 +2438,7 @@ void HtmlGenerator::writeSearchPage()
          t_stream << "</div><!-- doc-contents -->\n";        
       }
 
-      writePageFooter(t_stream, "Search", "", "");
+      writePageFooter(t_stream, "Search", QString(), QString());
    }
 
    QString scriptName = htmlOutput + "/search/search.js";
@@ -2459,7 +2463,7 @@ void HtmlGenerator::writeExternalSearchPage()
    if (f.open(QIODevice::WriteOnly)) {
       QTextStream t_stream(&f);
 
-      t_stream << substituteHtmlKeywords(g_header, "Search", "");
+      t_stream << substituteHtmlKeywords(g_header, "Search");
 
       t_stream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress "
         << versionString << " -->" << endl;
@@ -2486,7 +2490,7 @@ void HtmlGenerator::writeExternalSearchPage()
          t_stream << "</div>" << endl;
       }
 
-      t_stream << writeSplitBarAsString("search", "");
+      t_stream << writeSplitBarAsString("search", QString());
       t_stream << "<div class=\"header\">" << endl;
       t_stream << "  <div class=\"headertitle\">" << endl;
       t_stream << "    <div class=\"title\">" << theTranslator->trSearchResultsTitle() << "</div>" << endl;
@@ -2501,7 +2505,7 @@ void HtmlGenerator::writeExternalSearchPage()
          t_stream << "</div><!-- doc-contents -->" << endl;
       }
 
-      writePageFooter(t_stream, "Search", "", "");
+      writePageFooter(t_stream, "Search", QString(), QString());
 
    } else {
       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());

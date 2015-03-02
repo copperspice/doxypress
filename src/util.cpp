@@ -7420,9 +7420,9 @@ bool readInputFile(const char *fileName, BufStr &inBuf, bool filter, bool isSour
 }
 
 // Replace %word by word in title
-QByteArray filterTitle(const QByteArray &title)
+QByteArray filterTitle(const QString &title)
 {
-   QByteArray tf;
+   QString tf;
 
    static QRegExp re("%[A-Z_a-z]");
    int p = 0, i, l;
@@ -7438,7 +7438,7 @@ QByteArray filterTitle(const QByteArray &title)
 
    tf += title.right(title.length() - p);
 
-   return tf;
+   return tf.toUtf8();
 }
 
 // returns true if the name of the file represented by `fi' matches
@@ -7766,15 +7766,17 @@ QByteArray getLanguageSpecificSeparator(SrcLangExt lang, bool classScope)
 /** Corrects URL \a url according to the relative path \a relPath.
  *  Returns the corrected URL. For absolute URLs no correction will be done.
  */
-QByteArray correctURL(const QByteArray &url, const QByteArray &relPath)
+QByteArray correctURL(const QString &url, const QString &relPath)
 {
-   QByteArray result = url;
-   if (!relPath.isEmpty() &&
-         url.left(5) != "http:" && url.left(6) != "https:" &&
-         url.left(4) != "ftp:"  && url.left(5) != "file:") {
+   QString result = url;
+
+   if (! relPath.isEmpty() && ! url.startsWith("http:") && ! url.startsWith("https:") && 
+            ! url.startsWith("ftp:") && ! url.startsWith("file:")) {
+
       result.prepend(relPath);
    }
-   return result;
+
+   return result.toUtf8();
 }
 
 bool protectionLevelVisible(Protection prot)

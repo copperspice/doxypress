@@ -35,7 +35,7 @@
 #include <message.h>
 #include <util.h>
 
-#define ADD_OPTION(langId,text) "|"+QByteArray().setNum(langId)+"="+text
+#define ADD_OPTION(langId,text) "|" + QByteArray().setNum(langId)+"="+text
 
 #define COMPILE_FOR_1_OPTION(def,langId1,text1) \
   def+ADD_OPTION(langId1,text1)
@@ -67,7 +67,7 @@ static bool elemIsVisible(const QXmlAttributes &attrib, bool defVal = true)
    return visible != "no" && visible != "0";
 }
 
-LayoutNavEntry *LayoutNavEntry::find(LayoutNavEntry::Kind kind, const char *file) const
+LayoutNavEntry *LayoutNavEntry::find(LayoutNavEntry::Kind kind, const QString &file) const
 {
    LayoutNavEntry *result = 0;
   
@@ -81,7 +81,7 @@ LayoutNavEntry *LayoutNavEntry::find(LayoutNavEntry::Kind kind, const char *file
          return result;
       }
 
-      if (entry->kind() == kind && (file == 0 || entry->baseFile() == file)) {
+      if (entry->kind() == kind && (file.isEmpty() || entry->baseFile() == file)) {
          return entry;
       }
    }
@@ -827,6 +827,7 @@ class LayoutParser : public QXmlDefaultHandler
       static struct NavEntryMap {
          const char *typeStr;         // type attribute name in the XML file
          LayoutNavEntry::Kind kind;   // corresponding enum name
+
          QByteArray mainName;         // default title for an item if it has children
          QByteArray subName;          // optional name for an item if it is rendered as a child
          QByteArray intro;            // introduction text to be put on the index page

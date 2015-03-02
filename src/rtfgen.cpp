@@ -333,15 +333,17 @@ void RTFGenerator::beginRTFSection()
    m_textStream << rtf_Style["Heading2"].reference << "\n";
 }
 
-void RTFGenerator::startFile(const char *name, const char *, const char *)
+void RTFGenerator::startFile(const QString &name, const QString &, const QString &)
 {
-   //setEncoding(QByteArray().sprintf("CP%s",theTranslator->trRTFansicp()));
-   QByteArray fileName = name;
+   // setEncoding(QByteArray().sprintf("CP%s",theTranslator->trRTFansicp()));
+
+   QString fileName = name;
    relPath = relativePathToRoot(fileName);
 
-   if (fileName.right(4) != ".rtf" ) {
+   if (! fileName.endsWith(".rtf")) {
       fileName += ".rtf";
    }
+
    startPlainFile(fileName);
    beginRTFDocument();
 }
@@ -1058,7 +1060,7 @@ void RTFGenerator::endIndexItem(const QByteArray &ref, const QByteArray &fn)
 //  m_textStream << "}{\\pageref{" << text << "}}" << endl;
 //}
 
-void RTFGenerator::startHtmlLink(const QByteArray &url)
+void RTFGenerator::startHtmlLink(const QString &url)
 {
 
    if (Config::getBool("rtf-hyperlinks")) {
