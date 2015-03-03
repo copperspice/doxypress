@@ -568,6 +568,7 @@ void parseInput()
 
    } else if (layoutFileName != "doxy_layout.xml")  {
       warn_uncond("Unable to open layout file '%s' for reading\n", qPrintable(layoutFileName));
+
    }
 
    
@@ -1023,13 +1024,13 @@ void generateOutput()
    // what categories we find in this function.
 
    if (generateHtml && searchEngine) {
-      Doxy_Globals::g_stats.begin("Generating search indices\n");
+      Doxy_Globals::g_stats.begin("Generating search index\n");
       QString searchDirName = Config::getString("html-output") + "/search";
 
       QDir searchDir(searchDirName);
 
-      if (! searchDir.exists() && ! searchDir.mkdir(searchDirName)) {
-         err("Could not create search results directory '%s' $PWD='%s'\n", qPrintable(searchDirName), qPrintable(QDir::currentPath()));
+      if (! searchDir.exists() && ! QDir::current().mkpath(searchDirName)) {
+         err("Unable to create search directory '%s'\n", qPrintable(searchDirName));   
          exit(1);
       }
 
@@ -8968,30 +8969,7 @@ static QByteArray fixSlashes(QByteArray &s)
 
 void Doxy_Work::copyStyleSheet()
 {
-   QString htmlStyleSheet = Config::getString("html-stylesheet");
-
-   if (! htmlStyleSheet.isEmpty()) {
-      QFileInfo fi(htmlStyleSheet);
-
-      if (! fi.exists()) {
-         err("Style sheet '%s' specified by HTML STYLESHEET tag does not exist\n", qPrintable(htmlStyleSheet) );      
-         htmlStyleSheet = ""; 
-
-      } else if (fi.fileName() == "doxygen.css" || fi.fileName() == "tabs.css" || fi.fileName()=="navtree.css") {
-
-         err("Style sheet %s specified by HTML STYLESHEET is a predefined name in DoxyPress.Please use a "
-               "different name\n", qPrintable(htmlStyleSheet) ); 
-
-         htmlStyleSheet = "";     
-
-      } else {
-
-         QString destFileName = Config::getString("html-output") + "/" + fi.fileName();
-         copyFile(htmlStyleSheet, destFileName);
-      }
-   }
-
-   const QStringList htmlExtraStyleSheet = Config::getList("html-extra-stylesheet");
+   const QStringList htmlExtraStyleSheet = Config::getList("html-stylesheets");
 
    for (uint i = 0; i < htmlExtraStyleSheet.count(); ++i) {
 
@@ -9001,9 +8979,9 @@ void Doxy_Work::copyStyleSheet()
          QFileInfo fi(fileName);
 
          if (! fi.exists()) {
-            err("Style sheet '%s' specified by 'HTML EXTRA STYLESHEET' tag does not exist\n", qPrintable(fileName));
+            err("Style sheet '%s' specified by 'HTML STYLESHEETS' tag does not exist\n", qPrintable(fileName));
 
-         } else if (fi.fileName() == "doxygen.css" || fi.fileName() == "tabs.css" || fi.fileName()=="navtree.css") {
+         } else if (fi.fileName() == "doxy_style.css" || fi.fileName() == "tabs.css" || fi.fileName()=="navtree.css") {
             err("Style sheet %s specified by HTML_EXTRA_STYLESHEET is a built in stylesheet. Please use a "
                "different name\n", qPrintable(fileName));      
             
@@ -9251,11 +9229,11 @@ QString  Doxy_Work::resolveSymlink(QString  path)
 
    do {
 
-#ifdef WIN32
+#ifdef Q_OS_WIN
       // UNC path, skip server and share name
 
       if (sepPos == 0 && (result.left(2) == "//" || result.left(2) == "\\\\")) {
-         sepPos = result.find('/', 2);
+         sepPos = result.indexOf('/', 2);
       }
 
       if (sepPos != -1) {
@@ -9876,7 +9854,7 @@ void searchInputFiles()
 
    // **
    Doxy_Globals::g_stats.begin("Searching for example files\n");
-   const QStringList examplePathList = Config::getList("example-path");
+   const QStringList examplePathList = Config::getList("example-source");
 
    const QStringList tempList = Config::getList("example-patterns");
    bool exampleRecursive      = Config::getBool("example-recursive");

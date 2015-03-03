@@ -57,7 +57,7 @@ void OutputGenerator::endPlainFile()
 {
    m_textStream.setDevice(0);
 
-   delete m_filePtr;      // broom check
+   delete m_filePtr;
 
    m_filePtr  = nullptr;
    m_fileName = "";

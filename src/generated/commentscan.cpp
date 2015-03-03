@@ -4302,24 +4302,6 @@ YY_DECL {
    char *yy_cp, *yy_bp;
    int yy_act;
 
-
-   /* What can happen in while parsing a comment block:
-    *   commands (e.g. @page, or \page)
-    *   escaped commands (e.g. @@page or \\page).
-    *   formulas (e.g. \f$ \f[ \f{..)
-    *   directories (e.g. \doxygen\src\)
-    *   autolist end. (e.g. a dot on an otherwise empty line)
-    *   newlines.
-    *   end of brief description due to blank line.
-    *   end of brief description due to some command (@command, or <command>).
-    *   words and whitespace and other characters (#,?!, etc).
-    *   grouping commands (e.g. @{ and @})
-    *   language switch (e.g. \~english or \~).
-    *   mail address (e.g. dimitri@stack.nl).
-    *   quoted text, such as "foo@bar"
-    *   XML commands, <summary></summary><remarks></remarks>
-    */
-
    if ( !(yy_init) )
    {
       (yy_init) = 1;

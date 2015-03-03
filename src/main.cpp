@@ -34,15 +34,14 @@ int main(int argc, char **argv)
       QString value = argv[k];     
       argList.append(value);      
    }
-
-   initDoxyPress();  
-
-   //    
+     
    struct CommandLine cmdArgs;
-
    cmdArgs = parseCommandLine(argList);
 
    readConfiguration(cmdArgs);  
+
+   //
+   initDoxyPress();     
    parseInput();
    generateOutput();
 

@@ -51,14 +51,15 @@
 
 static bool elemIsVisible(const QXmlAttributes &attrib, bool defVal = true)
 {
-   QByteArray visible = attrib.value("visible").toUtf8();
+   QString visible = attrib.value("visible");
 
    if (visible.isEmpty()) {
       return defVal;
    }
 
    if (visible.at(0) == '$' && visible.length() > 1) {
-      QByteArray id = visible.mid(1);
+      // values are in uppercase in the layout file
+      QString id = visible.mid(1).toLower();
 
       bool value = Config::getBool(id); 
       return value;   

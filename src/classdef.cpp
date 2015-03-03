@@ -72,7 +72,7 @@ ClassDef::ClassDef(const char *defFileName, int defLine, int defColumn, const ch
    m_memberGroupSDict    = 0;
    m_innerClasses        = 0;
 
-   m_subGrouping = Config::getBool("subgrouping");
+   m_subGrouping = Config::getBool("allow-sub-grouping");
    m_templateInstances   = 0;
    m_variableInstances   = 0;   
    m_templBaseClassNames = 0;

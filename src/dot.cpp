@@ -4001,26 +4001,28 @@ void generateGraphLegend(const QString &path)
    }
 }
 
-void writeDotGraphFromFile(const char *inFile, const char *outDir, const char *outFile, GraphOutputFormat format)
+void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, GraphOutputFormat format)
 {
    QDir d(outDir);
 
-   if (!d.exists()) {
-      err("Output dir %s does not exist\n", outDir);
+   if (! d.exists()) {
+      err("Output directory %s does not exist\n", qPrintable(outDir));
       exit(1);
    }
 
    QString imgExt     = Config::getEnum("dot-image-format");;
-   QString imgName    = (QByteArray)outFile + "." + imgExt;
-   QString absImgName = d.absolutePath().toUtf8() + "/" + imgName;
-   QString absOutFile = d.absolutePath().toUtf8() + "/" + outFile;
+   QString imgName    = outFile + "." + imgExt;
+   QString absImgName = d.absolutePath() + "/" + imgName;
+   QString absOutFile = d.absolutePath() + "/" + outFile;
 
-   DotRunner dotRun(inFile, d.absolutePath().toUtf8(), false, absImgName);
+   DotRunner dotRun(inFile, d.absolutePath().toUtf8(), false, qPrintable(absImgName));
 
    if (format == GOF_BITMAP) {
       dotRun.addJob(imgExt, absImgName);
 
-   } else { // format==GOF_EPS
+   } else { 
+      // format==GOF_EPS
+
       if (Config::getBool("latex-pdf")) {
          dotRun.addJob("pdf", absOutFile + ".pdf");
 
@@ -4031,7 +4033,7 @@ void writeDotGraphFromFile(const char *inFile, const char *outDir, const char *o
    }
 
    dotRun.preventCleanUp();
-   if (!dotRun.run()) {
+   if (! dotRun.run()) {
       return;
    }
 
@@ -4091,7 +4093,7 @@ void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QStri
         << imgName << "\" border=\"0\" usemap=\"#" << mapName << "\"/>" << endl
         << "<map name=\"" << mapName << "\" id=\"" << mapName << "\">";
 
-      convertMapFile(t, absOutFile.toUtf8(), relPath.toUtf8(), true, context);
+      convertMapFile(t, absOutFile, relPath, true, context);
 
       t << "</map>" << endl;
    }

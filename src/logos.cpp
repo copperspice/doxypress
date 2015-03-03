@@ -1988,7 +1988,7 @@ void writeDoxFont(const QString &dir)
    f.close();
 }
 
-void removeDoxFont(const char *dir)
+void removeDoxFont(const QString &dir)
 {
    QDir d(dir);
    d.remove("FreeSans.ttf");

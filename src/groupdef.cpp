@@ -69,7 +69,7 @@ GroupDef::GroupDef(const char *df, int dl, const char *na, const char *t, QStrin
    allMemberList = QMakeShared<MemberList>(MemberListType_allMembersList);
 
    visited = 0;   
-   m_subGrouping = Config::getBool("subgrouping");
+   m_subGrouping = Config::getBool("allow-sub-grouping");
 }
 
 GroupDef::~GroupDef()

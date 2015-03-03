@@ -26865,7 +26865,7 @@ YY_DECL {
 
             {
                // highlight
-               /* font class is defined e.g. in doxygen.css */
+               /* font class is defined doxy_style.css */
                startFontClass("keyword");
                codifyLines(fortrancodeYYtext);
                endFontClass();
@@ -26882,7 +26882,7 @@ YY_DECL {
                      YY_FTN_REJECT;
                   }
                }
-               /* font class is defined e.g. in doxygen.css */
+               /* font class is defined doxy_style.css */
                startFontClass("keywordflow");
                codifyLines(fortrancodeYYtext);
                endFontClass();

@@ -1661,7 +1661,7 @@ static int internalValidatingParseDoc(DocNode *parent, QList<DocNode *> &childre
 
 static void readTextFileByName(const QByteArray &file, QByteArray &text)
 {
-   const QStringList examplePathList = Config::getList("example-path");
+   const QStringList examplePathList = Config::getList("example-source");
    
    for (auto s : examplePathList) {
       QString absFileName = s +  QDir::separator() + file;
@@ -7051,7 +7051,7 @@ void DocRoot::parse()
 
 /*
 if (s_fileName.endsWith("qml-color.dox")) {  
-   printf("\n BROOM    BEFORE call to docTokenizerYYlex()" ); 
+//   printf("\n BROOM    BEFORE call to docTokenizerYYlex()" ); 
 }
 */
 
@@ -7060,7 +7060,7 @@ if (s_fileName.endsWith("qml-color.dox")) {
 
 /*
 if (s_fileName.endsWith("qml-color.dox")) {  
-   printf("\n BROOM    AFTER call to docTokenizerYYlex()\n" ); 
+//   printf("\n BROOM    AFTER call to docTokenizerYYlex()\n" ); 
 }
 */
 

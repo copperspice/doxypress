@@ -51,7 +51,7 @@ NamespaceDef::NamespaceDef(const char *df, int dl, int dc, const char *name, con
    memberGroupSDict = new MemberGroupSDict;  
    visited = false;
 
-   m_subGrouping = Config::getBool("subgrouping");
+   m_subGrouping = Config::getBool("allow-sub-grouping");
 
    if (type && ! strcmp("module", type)) {
       m_type = MODULE;

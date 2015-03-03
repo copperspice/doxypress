@@ -96,7 +96,7 @@ bool Debug::isFlagSet(DebugMask mask)
 void Debug::printFlags()
 { 
    for (auto item : m_map.keys())  {      
-      msg("\t%s\n", qPrintable(item));      
+      printf("\t%s\n", qPrintable(item));      
    }   
 }
   
@@ -167,7 +167,7 @@ static void format_warn(const char *file, int line, const char *text)
    fwrite(msgText.data(), 1, msgText.length(), warnFile);
 }
 
-static void do_warn(const char *tag, const char *file, int line, const char *prefix, const char *fmt, va_list args)
+static void warn_internal(const char *tag, const char *file, int line, const char *prefix, const char *fmt, va_list args)
 {
    if (! Config::getBool(tag)) {
       // is this warning type disabled
@@ -206,17 +206,24 @@ void err(const char *fmt, ...)
 void msg(const char *fmt, ...)
 {
    if (! Config::getBool("quiet")) {
-
-      if (Debug::isFlagSet(Debug::Time)) {
-         printf("%.3f sec: ", ((double)Doxygen::runningTime.elapsed()) / 1000.0);
-      }
-
+    
       va_list args;
       va_start(args, fmt);
 
       vfprintf(stdout, fmt, args);
       va_end(args);
    }
+}
+
+void warnMsg(const char *fmt, ...)
+{
+   va_list args;
+   va_start(args, fmt);
+
+   QByteArray temp = "Warning: ";   
+   vfprintf(warnFile, (temp + fmt).constData(), args);
+
+   va_end(args);
 }
 
 void warn(const char *file, int line, const char *fmt, ...)
@@ -226,7 +233,7 @@ void warn(const char *file, int line, const char *fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   do_warn("WARNINGS", file, line, warning_str, fmt, args);
+   warn_internal("warnings", file, line, warning_str, fmt, args);
 
    va_end(args);
 }
@@ -234,7 +241,7 @@ void warn(const char *file, int line, const char *fmt, ...)
 void va_warn(const char *file, int line, const char *fmt, va_list args)
 {
    static const char *warning_str = "Warning: ";
-   do_warn("WARNINGS", file, line, warning_str, fmt, args);
+   warn_internal("warnings", file, line, warning_str, fmt, args);
 }
 
 void warn_simple(const char *file, int line, const char *text)
@@ -255,7 +262,7 @@ void warn_undoc(const char *file, int line, const char *fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   do_warn("WARN_IF_UNDOCUMENTED", file, line, warning_str, fmt, args);
+   warn_internal("warn-undoc", file, line, warning_str, fmt, args);
 
    va_end(args);
 }
@@ -267,7 +274,7 @@ void warn_doc_error(const char *file, int line, const char *fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   do_warn("WARN_IF_DOC_ERROR", file, line, warning_str, fmt, args);
+   warn_internal("warn-doc-error", file, line, warning_str, fmt, args);
 
    va_end(args);
 }
@@ -281,7 +288,7 @@ void warn_doc_error(const char *file, int line, QString fmt_q, ...)
    va_list args;
    va_start(args, fmt_q);
 
-   do_warn("WARN_IF_DOC_ERROR", file, line, warning_str, fmt.constData(), args);
+   warn_internal("warn-doc-error", file, line, warning_str, fmt.constData(), args);
 
    va_end(args);
 }

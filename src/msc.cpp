@@ -28,14 +28,14 @@
 
 static const int maxCmdLine = 40960;
 
-static bool convertMapFile(QTextStream &t, const char *mapName, const QByteArray relPath, const QByteArray &context)
+static bool convertMapFile(QTextStream &t, const QString &mapName, const QString &relPath, const QByteArray &context)
 {
    QFile f(mapName);
 
    if (! f.open(QIODevice::ReadOnly)) {
-      err("failed to open map file %s for inclusion in the docs\n"
-          "If you installed Graphviz/dot after a previous failing run, \n"
-          "try deleting the output directory and rerun doxygen.\n", mapName);
+      err("Unable to open map file %s\n"
+          "If Graphviz/dot was installed after a previous problem, delete the output directory " 
+          " and run DoxyPress again.\n", qPrintable(mapName) );
       return false;
    }
 
@@ -43,13 +43,15 @@ static bool convertMapFile(QTextStream &t, const char *mapName, const QByteArray
    char buf[maxLineLen];
    char url[maxLineLen];
    char ref[maxLineLen];
+
    int x1, y1, x2, y2;
 
-   while (!f.atEnd()) {
+   while (! f.atEnd()) {
       bool isRef = false;
       int numBytes = f.readLine(buf, maxLineLen);
+
       buf[numBytes - 1] = '\0';
-      //printf("ReadLine `%s'\n",buf);
+      
       if (qstrncmp(buf, "rect", 4) == 0) {
          // obtain the url and the coordinates in the order used by graphviz-1.5
          sscanf(buf, "rect %s %d,%d %d,%d", url, &x1, &y1, &x2, &y2);
@@ -167,22 +169,19 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
    QDir::setCurrent(oldDir);
 }
 
-QByteArray getMscImageMapFromFile(const QByteArray &inFile, const QByteArray &outDir,
-                                  const QByteArray &relPath, const QByteArray &context)
+QString getMscImageMapFromFile(const QString &inFile, const QString &outDir, const QString &relPath, const QByteArray &context)
 {
-   QByteArray outFile = inFile + ".map";
-
-   //printf("*** running:getMscImageMapFromFile \n");
-   // chdir to the output dir, so dot can find the font file.
-   QByteArray oldDir = QDir::currentPath().toUtf8();
+   QString outFile = inFile + ".map";
+   
+   // chdir to the output dir, so dot can find the font file
+   QString oldDir = QDir::currentPath().toUtf8();
 
    // go to the html output directory (i.e. path)
    QDir::setCurrent(outDir);
-   //printf("Going to dir %s\n",QDir::currentPath().data());
-
+  
    QString mscExe = Config::getString("mscgen-path") + "mscgen" + portable_commandExtension();
 
-   QByteArray mscArgs = "-T ismap -i \"";
+   QString mscArgs = "-T ismap -i \"";
    mscArgs += inFile;   
 
    mscArgs += "\" -o \"";
@@ -190,31 +189,34 @@ QByteArray getMscImageMapFromFile(const QByteArray &inFile, const QByteArray &ou
 
    int exitCode;
    portable_sysTimerStart();
+
    if ((exitCode = portable_system(mscExe, mscArgs, false)) != 0) {
       portable_sysTimerStop();
       QDir::setCurrent(oldDir);
       return "";
    }
+
    portable_sysTimerStop();
 
-   QByteArray result;
+   QString result;
    QTextStream tmpout(&result);
 
    convertMapFile(tmpout, outFile, relPath, context);
    QDir().remove(outFile);
 
    QDir::setCurrent(oldDir);
-   return result.data();
+
+   return result;
 }
 
-void writeMscImageMapFromFile(QTextStream &t, const QByteArray &inFile, const QByteArray &outDir,
-                              const QByteArray &relPath, const QByteArray &baseName, const QByteArray &context,
-                              MscOutputFormat format)
+void writeMscImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath, 
+                  const QString &baseName, const QByteArray &context, MscOutputFormat format)
 {
-   QByteArray mapName = baseName + ".map";
-   QByteArray mapFile = inFile + ".map";
+   QString mapName = baseName + ".map";
+   QString mapFile = inFile + ".map";
 
    t << "<img src=\"" << relPath << baseName << ".";
+
    switch (format) {
       case MSC_BITMAP:
          t << "png";
@@ -228,9 +230,11 @@ void writeMscImageMapFromFile(QTextStream &t, const QByteArray &inFile, const QB
       default:
          t << "unknown";
    }
+
    t << "\" alt=\""
      << baseName << "\" border=\"0\" usemap=\"#" << mapName << "\"/>" << endl;
-   QByteArray imap = getMscImageMapFromFile(inFile, outDir, relPath, context);
+
+   QString imap = getMscImageMapFromFile(inFile, outDir, relPath, context);
    t << "<map name=\"" << mapName << "\" id=\"" << mapName << "\">" << imap << "</map>" << endl;
 }
 

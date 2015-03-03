@@ -23,6 +23,12 @@
 #include <config.h>
 #include <message.h>
 
+QHash<QString, Config::struc_CfgBool>   Config::m_cfgBool;
+QHash<QString, Config::struc_CfgInt>    Config::m_cfgInt;  
+QHash<QString, Config::struc_CfgEnum>   Config::m_cfgEnum;
+QHash<QString, Config::struc_CfgList>   Config::m_cfgList; 
+QHash<QString, Config::struc_CfgString> Config::m_cfgString;
+
 QByteArray Config::json_ReadFile(const QString &fName)
 {        
    QByteArray data;
@@ -88,10 +94,6 @@ void Config::load_Defaults()
    m_cfgBool.insert("allow-unicode-names",       struc_CfgBool   { false,          DEFAULT } );    
    m_cfgEnum.insert("output-language",           struc_CfgEnum   { "ENGLISH",      DEFAULT } );
 
-
-
-   // *** (start) everything in this block is FALSE - get init values
-
    m_cfgBool.insert("brief-member-desc",         struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("repeat-brief",              struc_CfgBool   { false,          DEFAULT } );
    m_cfgList.insert("abbreviate-brief",          struc_CfgList   { QStringList(),  DEFAULT } );  
@@ -109,9 +111,9 @@ void Config::load_Defaults()
    m_cfgBool.insert("separate-member-pages",     struc_CfgBool   { false,          DEFAULT } );
 
    m_cfgInt.insert("tab-size",                   struc_CfgInt    { 0,              DEFAULT } );
-   m_cfgString.insert("aliases",                 struc_CfgString { QString(),      DEFAULT } ); 
-   m_cfgString.insert("tcl-subst",               struc_CfgString { QString(),      DEFAULT } );
-   m_cfgString.insert("extension-mapping",       struc_CfgString { QString(),      DEFAULT } );
+   m_cfgList.insert("aliases",                   struc_CfgList   { QStringList(),  DEFAULT } ); 
+   m_cfgList.insert("tcl-subst",                 struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("extension-mapping",         struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgBool.insert("markdown",                  struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("auto-link",                 struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("built-in-stl-support",      struc_CfgBool   { false,          DEFAULT } );
@@ -187,7 +189,7 @@ void Config::load_Defaults()
    m_cfgList.insert("exclude-patterns",          struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgList.insert("exclude-symbols",           struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgList.insert("example-source",            struc_CfgList   { QStringList(),   DEFAULT } );
-   m_cfgList.insert("example-pattens",           struc_CfgList   { QStringList(),   DEFAULT } );
+   m_cfgList.insert("example-patterns",          struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgBool.insert("example-recursive",         struc_CfgBool   { false,           DEFAULT } );
 
    m_cfgList.insert("image-path",                struc_CfgList   { QStringList(),   DEFAULT } );
@@ -196,6 +198,11 @@ void Config::load_Defaults()
    m_cfgBool.insert("filter-source-files",       struc_CfgBool   { false,           DEFAULT } );
    m_cfgList.insert("filter-source-patterns",    struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgString.insert("mdfile-mainpage",         struc_CfgString { QString(),       DEFAULT } );
+
+
+
+
+// BROOM  start here to READ
 
    // tab 2 -browser
    m_cfgBool.insert("source-browser",            struc_CfgBool   { false,          DEFAULT } );
@@ -224,69 +231,59 @@ void Config::load_Defaults()
    m_cfgBool.insert("perl-pretty",               struc_CfgBool   { false,          DEFAULT } );
    m_cfgString.insert("perlmod-prefix",          struc_CfgString { QString(),      DEFAULT } );
 
-
-
-/*
-
    // tab 2 - preprocess
-   m_ui->enable_preprocessing_CB->setChecked(      object.value("enable-preprocessing",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->macro_expansion_CB->setChecked(           object.value("macro-expansion",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->expand_only_predefined_CB->setChecked(    object.value("expand-only-predefined",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->search_includes_CB->setChecked(           object.value("search-includes",      stru_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("enable-preprocessing",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("macro-expansion",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("expand-only-predefined",    struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("search-includes",           struc_CfgBool   { false,          DEFAULT } );
 
-   m_ui->include_path->setPlainText(               getDataList(object,"include-path"));
-   m_ui->include_file_patterns->setPlainText(      getDataList(object,"include-file-patterns"));
-   m_ui->predefined_macros->setPlainText(          getDataList(object,"predefined-macros"));
-   m_ui->expand_as_defined->setPlainText(          getDataList(object,"expand-as-defined"));
-   m_ui->skip_function_macros_CB->setChecked(      object.value("skip-function-macros",      stru_CfgBool   { false,          DEFAULT } );
+   m_cfgList.insert("include-path",              struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("include-file-patterns",     struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("predefined-macros",         struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("expand-as-defined",         struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgBool.insert("skip-function-macros",      struc_CfgBool   { false,          DEFAULT } );
 
    // tab 2 - external
-   m_ui->tag_files->setPlainText(                  getDataList(object,"tag-files"));
-   m_ui->gen_tagfile->setText(                     object.value("generate-tagfile",             struc_CfgString { QString(),      DEFAULT } );
-   m_ui->all_externals_CB->setChecked(             object.value("all-externals",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->external_groups_CB->setChecked(           object.value("external-groups",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->external_pages_CB->setChecked(            object.value("external-pages",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->perl_path->setText(                       object.value("perl-path").toString());
+   m_cfgList.insert("tag-files",                 struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgString.insert("generate-tagfile",        struc_CfgString { QString(),      DEFAULT } );
+   m_cfgBool.insert("all-externals",             struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("external-groups",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("external-pages",            struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("perl-path",               struc_CfgString { QString(),      DEFAULT } );
 
    // tab 2 - dot
-   m_ui->class_diagrams_CB->setChecked(            object.value("class-diagrams",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->mscgen_path->setText(                     object.value("mscgen-path",             struc_CfgString { QString(),      DEFAULT } );
-   m_ui->dia_path->setText(                        object.value("dia-path",             struc_CfgString { QString(),      DEFAULT } );
-   m_ui->hide_undoc_relations_CB->setChecked(      object.value("hide-undoc-relations",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->have_dot_CB->setChecked(                  object.value("have-dot",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->dot_num_threads_SB->setValue(             object.value("dot-num-threads",          struc_CfgInt    { 0,              DEFAULT } );
-   m_ui->dot_font_name->setText(                   object.value("dot-font-name",             struc_CfgString { QString(),      DEFAULT } );
-   m_ui->dot_font_size_SB->setValue(               object.value("dot-font-size",          struc_CfgInt    { 0,              DEFAULT } );
-   m_ui->dot_font_path->setText(                   object.value("dot-font-path",             struc_CfgString { QString(),      DEFAULT } );
+   m_cfgBool.insert("class-diagrams",            struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("mscgen-path",             struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("dia-path",                struc_CfgString { QString(),      DEFAULT } );
+   m_cfgBool.insert("hide-undoc-relations",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("have-dot",                  struc_CfgBool   { false,          DEFAULT } );
+   m_cfgInt.insert("dot-num-threads",            struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgString.insert("dot-font-name",           struc_CfgString { QString(),      DEFAULT } );
+   m_cfgInt.insert("dot-font-size",              struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgString.insert("dot-font-path",           struc_CfgString { QString(),      DEFAULT } );
 
-   m_ui->group_graphs_CB->setChecked(              object.value("group-graphs",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->uml_look_CB->setChecked(                  object.value("uml-look",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->uml_limit_num_fields_SB->setValue(        object.value("uml-limit-num-fields",          struc_CfgInt    { 0,              DEFAULT } );
-   m_ui->template_relations_CB->setChecked(        object.value("template-relations",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->directory_graph_CB->setChecked(           object.value("directory-graph",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("group-graphs",              struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("uml-look",                  struc_CfgBool   { false,          DEFAULT } );
+   m_cfgInt.insert("uml-limit-num-fields",       struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgBool.insert("template-relations",        struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("directory-graph",           struc_CfgBool   { false,          DEFAULT } );
 
-   index = m_ui->dot_image_format_CM->findText(    object.value("dot-image-format",             struc_CfgString { QString(),      DEFAULT } );
-   m_ui->dot_image_format_CM->setCurrentIndex(index);
+   m_cfgEnum.insert("dot-image-format",          struc_CfgEnum   { "png",          DEFAULT } );
+   m_cfgBool.insert("interactive-svg",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("dot-path",                struc_CfgString { QString(),      DEFAULT } );
+   m_cfgList.insert("dot-file-dirs",             struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("msc-file-dirs",             struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("dia-file-dirs",             struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgString.insert("plantuml-jar-path",       struc_CfgString { QString(),      DEFAULT } );
 
-   m_ui->interactive_svg_CB->setChecked(           object.value("interactive_svg",      struc_CfgBool   { false,          DEFAULT } );
-   m_ui->dot_path->setText(                        object.value("dot-path").toString());
-   m_ui->dot_file_dirs->setPlainText(              getDataList(object, "dot-file_dirs"));
-   m_ui->msc_file_dirs->setPlainText(              getDataList(object, "msc-file_dirs"));
-   m_ui->dia_file_dirs->setPlainText(              getDataList(object, "dia-file_dirs"));
-   m_ui->plantuml_jar_path->setText(               object.value("plantuml-jar-path",             struc_CfgString { QString(),      DEFAULT } );
-
-   m_ui->dot_graph_max_nodes_SB->setValue(         object.value("dot-graph_max-nodes",          struc_CfgInt    { 0,              DEFAULT } );
-   m_ui->dot_graph_max_depth_SB->setValue(         object.value("dot-graph-max-depth",          struc_CfgInt    { 0,              DEFAULT } );
-   m_ui->dot_transparent_CB->setChecked(           object.value("dot-transparent",      struc_CfgBool   { false,          DEFAULT } );
-   m_ui->dot_multiple_targets_CB->setChecked(      object.value("dot-multiple-targets",      struc_CfgBool   { false,          DEFAULT } );
-   m_ui->gen_legend_CB->setChecked(                object.value("generate-legend",      struc_CfgBool   { false,          DEFAULT } );
-   m_ui->dot_cleanup_CB->setChecked(               object.value("dot-cleanup",      struc_CfgBool   { false,          DEFAULT } );
-*/
-
-   // ** end block - values ABOVE are not set 
+   m_cfgInt.insert("dot-graph-max-nodes",        struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgInt.insert("dot-graph-max-depth",        struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgBool.insert("dot-transparent",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("dot-multiple-targets",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("generate-legend",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("dot-cleanup",               struc_CfgBool   { false,          DEFAULT } );
 
 
- 
    // tab 3 ( appear on tab 1 and tab 3 )
    m_cfgBool.insert("generate-html",         struc_CfgBool { true,              DEFAULT } );  
    m_cfgBool.insert("generate-latex",        struc_CfgBool { false,             DEFAULT } );  
@@ -297,130 +294,123 @@ void Config::load_Defaults()
    m_cfgBool.insert("generate-man",          struc_CfgBool { false,             DEFAULT } );   
    m_cfgBool.insert("generate-xml",          struc_CfgBool { false,             DEFAULT } );   
    m_cfgBool.insert("generate-docbook",      struc_CfgBool { false,             DEFAULT } );  
-  
+
+   m_cfgBool.insert("dot-class-graph",       struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("dot-collaboration",     struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("dot-hierarchy",         struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("dot-include",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("dot-included-by",       struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("dot-call",              struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("dot-called-by",         struc_CfgBool   { false,          DEFAULT } );
+
+
    // tab 3 - html
-  
+   m_cfgString.insert("html-output",             struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("html-file-extension",     struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("html-header",             struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("html-footer",             struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgList.insert("html-stylesheets",          struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("html-extra-files",          struc_CfgList   { QStringList(),  DEFAULT } );
 
-/*
+   m_cfgInt.insert("html-colorstyle-hue",        struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgInt.insert("html-colorstyle-sat",        struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgInt.insert("html-colorstyle-gamma",      struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgBool.insert("html-timestamp",            struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("html-dynamic-sections",     struc_CfgBool   { false,          DEFAULT } );
+   m_cfgInt.insert("html-index-num-entries",     struc_CfgInt    { 0,              DEFAULT } );
 
-   // *** (start) everything in this block is FALSE - get init values
+   m_cfgBool.insert("disable-index",             struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("generate-treeview",         struc_CfgBool   { false,          DEFAULT } );
+   m_cfgInt.insert("enum-values-per-line",       struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgInt.insert("treeview-width",             struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgBool.insert("external-links-in-window",  struc_CfgBool   { false,          DEFAULT } );
 
+   m_cfgBool.insert("html-search",               struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("server-based-search",       struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("external-search",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("search-engine-url",       struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("search-data-file",        struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("search-external-id",      struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgList.insert("search-mappings",           struc_CfgList   { QStringList(),  DEFAULT } );
 
-   m_ui->html_output->setText(                     object.value("html-output").toString());
-   m_ui->html_file_extension->setText(             object.value("html-file-extension").toString());
-   m_ui->html_header->setText(                     object.value("html-header").toString());
-   m_ui->html_footer->setText(                     object.value("html-footer").toString());   
-   m_ui->html_extra_stylesheets->setPlainText(     getDataList(object, "html-extra-stylesheets"));
-   m_ui->html_extra_files->setPlainText(           getDataList(object, "html-extra-files"));
-
-   m_ui->html_colorstyle_hue->setValue(            object.value("html-colorstyle-hue",          struc_CfgInt    { 0,              DEFAULT } );
-   m_ui->html_colorstyle_sat->setValue(            object.value("html-colorstyle-sat",          struc_CfgInt    { 0,              DEFAULT } );
-   m_ui->html_colorstyle_gamma->setValue(          object.value("html-colorstyle-gamma",          struc_CfgInt    { 0,              DEFAULT } );
-
-   m_ui->html_timestamp_CB->setChecked(            object.value("html-timestamp",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->html_dynamic_sections_CB->setChecked(     object.value("html-dynamic-sections",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->html_index_num_entries_SB->setValue(      object.value("html-index-num-entries",          struc_CfgInt    { 0,              DEFAULT } );
-
-   m_ui->disable_index_CB->setChecked(             object.value("disable-index",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->gen_treeview_CB->setChecked(              object.value("generate-treeview",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->enum_values_per_line_SB->setValue(        object.value("enum-values-per-line",          struc_CfgInt    { 0,              DEFAULT } );
-   m_ui->treeview_width_SB->setValue(              object.value("treeview-width",          struc_CfgInt    { 0,              DEFAULT } );
-   m_ui->external_links_in_window_CB->setChecked(  object.value("external-links-in-window",      stru_CfgBool   { false,          DEFAULT } );
-
-   m_ui->server_based_search_CB->setChecked(       object.value("server-based-search",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->external_search_CB->setChecked(           object.value("external-search",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->search_engine_url->setText(               object.value("search-engine-url").toString());
-   m_ui->search_data_file->setText(                object.value("search-data-file").toString());
-   m_ui->search_external_id->setText(              object.value("search-external-id").toString());
-   m_ui->search_mappings->setPlainText(            getDataList(object, "search-mappings"));
-
-   m_ui->formula_fontsize_SB->setValue(            object.value("formula-fontsize",          struc_CfgInt    { 0,              DEFAULT } );
-   m_ui->formula_transparent_CB->setChecked(       object.value("formula-transparent",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->use_mathjax_CB->setChecked(               object.value("use_mathjax",      stru_CfgBool   { false,          DEFAULT } );
-
-   index = m_ui->mathjax_format_CM->findText(      object.value("mathjax-format").toString());
-   m_ui->mathjax_format_CM->setCurrentIndex(index);
-
-   m_ui->mathjax_relpath->setText(                 object.value("mathjax-relpath").toString());
-   m_ui->mathjax_extensions->setPlainText(         getDataList(object, "mathjax-extensions"));
-   m_ui->mathjax_codefile->setText(                object.value("mathjax-codefile").toString());
+   m_cfgInt.insert("formula-fontsize",           struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgBool.insert("formula-transparent",       struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("ghostscript",             struc_CfgString { QString(),      DEFAULT } );   
+   m_cfgBool.insert("use-mathjax",               struc_CfgBool   { false,          DEFAULT } );
+   m_cfgEnum.insert("mathjax-format",            struc_CfgEnum   { "",             DEFAULT } );
+   m_cfgString.insert("mathjax-relpath",         struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgList.insert("mathjax-extensions",        struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgString.insert("mathjax-codefile",        struc_CfgString { QString(),      DEFAULT } ); 
 
    // tab 3 - chm
-   m_ui->gen_chm_CB->setChecked(                   object.value("generate-chm",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->chm_file->setText(                        object.value("chm-file").toString());
-   m_ui->hhc_location->setText(                    object.value("hhc-location").toString());
-   m_ui->gen_chi_CB->setChecked(                   object.value("generate-chi",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->chm_index_encoding->setText(              object.value("chm-index-encoding").toString());
-   m_ui->binary_toc_CB->setChecked(                object.value("binary-toc",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->toc_expanded_CB->setChecked(              object.value("toc-expanded",      stru_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("generate-chm",              struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("chm-file",                struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("hhc-location",            struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgBool.insert("generate-chi",              struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("chm-index-encoding",      struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgBool.insert("binary-toc",                struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("toc-expanded",              struc_CfgBool   { false,          DEFAULT } );
 
    // tab 3 - docset
-   m_ui->gen_docset_CB->setChecked(                object.value("generate-docset",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->docset_feedname->setText(                 object.value("docset-feedname").toString());
-   m_ui->docset_bundle_id->setText(                object.value("docset-bundle-id").toString());
-   m_ui->docset_publisher_id->setText(             object.value("docset-publisher-id").toString());
-   m_ui->docset_publisher_name->setText(           object.value("docset-publisher-name").toString());
+   m_cfgBool.insert("generate-docset",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("docset-feedname",         struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("docset-bundle-id",        struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("docset-publisher-id",     struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("docset-publisher-name",   struc_CfgString { QString(),      DEFAULT } ); 
 
    // tab 3 - eclipse
-   m_ui->gen_eclipse_CB->setChecked(               object.value("generate-eclipse",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->eclipse_doc_id->setText(                  object.value("eclipse-doc-id").toString());
+   m_cfgBool.insert("generate-eclipse",          struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("eclipse-doc-id",          struc_CfgString { QString(),      DEFAULT } ); 
 
    // tab 3 - latex
-   m_ui->latex_output->setText(                    object.value("latex-output").toString());
-   m_ui->latex_cmd_name->setText(                  object.value("latex-cmd-name").toString());
-   m_ui->make_index_cmd_name->setText(             object.value("make-index-cmd-name").toString());
-   m_ui->latex_compact_CB->setChecked(             object.value("latex-compact",      stru_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("latex-output",            struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("latex-cmd-name",          struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("make-index-cmd-name",     struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgBool.insert("latex-compact",             struc_CfgBool   { false,          DEFAULT } );  
+   m_cfgEnum.insert("latex-paper-type",          struc_CfgEnum   { "",             DEFAULT } );
+   m_cfgList.insert("latex-extra-packages",      struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgString.insert("latex-header",            struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("latex-footer",            struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgList.insert("latex-extra-files",         struc_CfgList   { QStringList(),  DEFAULT } );
 
-   index = m_ui->latex_paper_type_CM->findText(    object.value("latex-paper-type").toString());
-   m_ui->latex_paper_type_CM->setCurrentIndex(index);
-
-   m_ui->latex_extra_packages->setPlainText(       getDataList(object, "latex-extra-packages"));
-   m_ui->latex_header->setText(                    object.value("latex-header").toString());
-   m_ui->latex_footer->setText(                    object.value("latex-footer").toString());
-   m_ui->latex_extra_files->setPlainText(          getDataList(object, "latex-extra-files"));
-
-   m_ui->latex_hyper_pdf_CB->setChecked(           object.value("latex-hyper-pdf",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->latex_pdf_CB->setChecked(                 object.value("latex-pdf",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->latex_batch_mode_CB->setChecked(          object.value("latex-batch-mode",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->latex_hide_indices_CB->setChecked(        object.value("latex-hide-indices",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->latex_source_code_CB->setChecked(         object.value("latex-source-code",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->latex_bib_style->setText(                 object.value("latex-bib-style").toString());
+   m_cfgBool.insert("latex-hyper-pdf",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("latex-pdf",                 struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("latex-batch-mode",          struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("latex-hide-indices",        struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("latex-source-code",         struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("latex-bib-style",         struc_CfgString { QString(),      DEFAULT } ); 
 
    // tab 3 - man
-   m_ui->man_output->setText(                      object.value("man-output").toString());
-   m_ui->man_extension->setText(                   object.value("man-extension").toString());
-   m_ui->man_subdir->setText(                      object.value("man-subdir").toString());
-   m_ui->man_links_CB->setChecked(                 object.value("man-links",      stru_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("man-output",              struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("man-extension",           struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("man-subdir",              struc_CfgString { QString(),      DEFAULT } );
+   m_cfgBool.insert("man-links",                 struc_CfgBool   { false,          DEFAULT } );
 
    // tab 3 - qt help
-   m_ui->gen_qthelp_CB->setChecked(                object.value("generate-qthelp",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->qch_file->setText(                        object.value("qch-file").toString());
-   m_ui->qhp_namespace->setText(                   object.value("qhp-namespace").toString());
-   m_ui->qhp_virtual_folder->setText(              object.value("qhp-virtual-folder").toString());
-   m_ui->qhp_cust_filter_name->setText(            object.value("qhp-cust-filter-name").toString());
-   m_ui->qhp_cust_filter_attrib->setText(          object.value("qhp-cust-attrib").toString());
-   m_ui->qhp_sect_filter_attrib->setText(          object.value("qhp-sect-attrib").toString());
-   m_ui->qthelp_gen_path->setText(                 object.value("qthelp-gen-path").toString());
+   m_cfgBool.insert("generate-qthelp",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("qch-file",                struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("qhp-namespace",           struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("qhp-virtual-folder",      struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("qhp-cust-filter-name",    struc_CfgString { QString(),      DEFAULT } );
+   m_cfgList.insert("qhp-cust-attrib",           struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("qhp-sect-attrib",           struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgString.insert("qthelp-gen-path",         struc_CfgString { QString(),      DEFAULT } );
 
    // tab 3 - rtf
-   m_ui->rtf_output->setText(                      object.value("rtf-output").toString());
-   m_ui->rtf_compact_CB->setChecked(               object.value("rtf-compact",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->rtf_hyperlinks_CB->setChecked(            object.value("rtf-hyperlinks",      stru_CfgBool   { false,          DEFAULT } );
-   m_ui->rtf_stylesheet->setText(                  object.value("rtf-stylesheet").toString());
-   m_ui->rtf_extension->setText(                   object.value("rtf-extension").toString());
+   m_cfgString.insert("rtf-output",              struc_CfgString { QString(),      DEFAULT } );
+   m_cfgBool.insert("rtf-compact",               struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("rtf-hyperlinks",            struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("rtf-stylesheet",          struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("rtf-extension",           struc_CfgString { QString(),      DEFAULT } );
 
    // tab 3 - xml
-   m_ui->xml_output->setText(                      object.value("xml-output").toString());
-   m_ui->xml_program_listing_CB->setChecked(       object.value("xml-program-listing",      stru_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("xml-output",              struc_CfgString { QString(),      DEFAULT } );
+   m_cfgBool.insert("xml-program-listing",       struc_CfgBool   { false,          DEFAULT } );
 
    // tab 3 - docbook     
-   m_ui->docbook_output->setText(                  object.value("docbook-output").toString());
-   m_ui->docbook_program_listing_CB->setChecked(   object.value("docbook-program-listing",      stru_CfgBool   { false,          DEFAULT } );
-
-*/
-
+   m_cfgString.insert("docbook-output",          struc_CfgString { QString(),      DEFAULT } );
+   m_cfgBool.insert("docbook-program-listing",   struc_CfgBool   { false,          DEFAULT } );
 }
-
 
 bool Config::read_ProjectFile(const QString &fName)
 {  
@@ -443,7 +433,6 @@ bool Config::read_ProjectFile(const QString &fName)
       QString key = iter.key();
      
       if (key == "output-language" || key == "dot-image-format" || key == "mathjax-format" || key == "latex-paper-type")  { 
-
          auto hashIter = m_cfgEnum.find(key);
 
          if (hashIter != m_cfgEnum.end()) {
@@ -454,6 +443,8 @@ bool Config::read_ProjectFile(const QString &fName)
             isError = true;
 
          } 
+
+         continue;
       }
 
       if (iter.value().isBool()) {
@@ -487,11 +478,15 @@ bool Config::read_ProjectFile(const QString &fName)
 
           if (hashIter != m_cfgList.end()) {
 
-            QJsonArray temp = iter.value().toArray();
+            QJsonArray jsonArray = iter.value().toArray();
             QStringList listData;
 
-            for (auto item : temp) {
-               listData.append(item.toString()); 
+            for (auto item : jsonArray) {
+               QString temp = item.toString();
+
+               if (! temp.isEmpty()) {                        
+                  listData.append(temp); 
+               }
             }   
 
             hashIter.value() = { listData, PROJECT };
@@ -516,7 +511,7 @@ bool Config::read_ProjectFile(const QString &fName)
          }
       } 
    }
- 
+
    return isError;
 }
 

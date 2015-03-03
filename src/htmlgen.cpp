@@ -203,33 +203,18 @@ static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &tit
    static QString mathJaxFormat  = Config::getEnum("mathjax-format");
    static bool disableIndex      = Config::getBool("disable-index");
 
-   static bool hasProjectName   = ! projectName.isEmpty();
-   static bool hasProjectNumber = ! projectVersion.isEmpty();
-   static bool hasProjectBrief  = ! projectBrief.isEmpty();
-   static bool hasProjectLogo   = ! Config::getString("project-logo").isEmpty();
+   static bool hasProjectName    = ! projectName.isEmpty();
+   static bool hasProjectVersion = ! projectVersion.isEmpty();
+   static bool hasProjectBrief   = ! projectBrief.isEmpty();
+   static bool hasProjectLogo    = ! Config::getString("project-logo").isEmpty();
 
    static bool titleArea = (hasProjectName || hasProjectBrief || hasProjectLogo || (disableIndex && searchEngine));
-
-
-   // BROOM CHECK - goes away ?
-   QString cssFile = Config::getString("html-stylesheet"); 
-
-   if (cssFile.isEmpty()) {
-      cssFile = "doxygen.css";
-
-   } else {
-      QFileInfo cssfi(cssFile);
-
-      if (cssfi.exists()) {
-         cssFile = cssfi.fileName().toUtf8();
-
-      } else {
-         cssFile = "doxygen.css";
-      }
-   }
+    
+   // always first
+   QString cssFile = "doxy_style.css"; 
 
    QByteArray extraCssText = "";
-   const QStringList extraCssFile = Config::getList("html-extra-stylesheet");
+   const QStringList extraCssFile = Config::getList("html-stylesheets");
 
    for (auto fileName : extraCssFile) {          
 
@@ -263,7 +248,7 @@ static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &tit
    if (searchEngine) {
       searchCssJs = "<link href=\"$relpath^search/search.css\" rel=\"stylesheet\" type=\"text/css\"/>\n";
 
-      if (!serverBasedSearch) {
+      if (! serverBasedSearch) {
          searchCssJs += "<script type=\"text/javascript\" src=\"$relpath^search/searchdata.js\"></script>\n";
       }
       searchCssJs += "<script type=\"text/javascript\" src=\"$relpath^search/search.js\"></script>\n";
@@ -337,25 +322,25 @@ static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &tit
    // additional HTML only keywords
    result = result.replace("$navpath",         navPath);
    result = result.replace("$stylesheet",      cssFile);
+   result = result.replace("$extrastylesheet", extraCssText);
    result = result.replace("$treeview",        treeViewCssJs);
    result = result.replace("$searchbox",       searchBox);
    result = result.replace("$search",          searchCssJs);
    result = result.replace("$mathjax",         mathJaxJs);
    result = result.replace("$generatedby",     generatedBy);
-   result = result.replace("$extrastylesheet", extraCssText);
 
    result = result.replace("$relpath$", relPath); //<-- obsolete: for backwards compatibility only
    result = result.replace("$relpath^", relPath); //<-- must be last
 
    // additional HTML only conditional blocks
-   result = selectBlock(result, "disable-index",     disableIndex);
-   result = selectBlock(result, "generate-treeview", treeView);
-   result = selectBlock(result, "searchengine",      searchEngine);
-   result = selectBlock(result, "titlearea",         titleArea);
-   result = selectBlock(result, "project-name",      hasProjectName);
-   result = selectBlock(result, "project-version",   hasProjectNumber);
-   result = selectBlock(result, "project-brief",     hasProjectBrief);
-   result = selectBlock(result, "project-logo",      hasProjectLogo);
+   result = selectBlock(result, "DISABLE_INDEX",     disableIndex);
+   result = selectBlock(result, "GENERATE_TREEVIEW", treeView);
+   result = selectBlock(result, "SEARCHENGINE",      searchEngine);
+   result = selectBlock(result, "TITLEAREA",         titleArea);
+   result = selectBlock(result, "PROJECT_NAME",      hasProjectName);
+   result = selectBlock(result, "PROJECT-VERSION",   hasProjectVersion);
+   result = selectBlock(result, "PROJECT_BRIEF",     hasProjectBrief);
+   result = selectBlock(result, "PROJECT_LOGO",      hasProjectLogo);
 
    result = removeEmptyLines(result);
 
@@ -835,7 +820,7 @@ void HtmlGenerator::writeSearchData(const QString &dir)
 void HtmlGenerator::writeStyleSheetFile(QFile &file)
 {
    QTextStream t(&file);
-   t << replaceColorMarkers(substitute(ResourceMgr::instance().getAsString("html/doxygen.css"), "$doxygenversion", versionString));
+   t << replaceColorMarkers(substitute(ResourceMgr::instance().getAsString("html/doxy_style.css"), "$doxygenversion", versionString));
 }
 
 void HtmlGenerator::writeHeaderFile(QFile &file)
@@ -923,7 +908,7 @@ void HtmlGenerator::writeSearchInfo()
 
 QByteArray HtmlGenerator::writeLogoAsString(const QString &path)
 {
-   static bool timeStamp = Config::getBool("html-timestamp");         // BROOM CHECK
+   static bool timeStamp = Config::getBool("html-timestamp");
    QString result;
 
    if (timeStamp) {
@@ -978,45 +963,21 @@ void HtmlGenerator::writeStyleInfo(int part)
 {   
    if (part == 0) {
 
-      QString htmlStyleSheet = Config::getString("html-stylesheet");      // broom check
+      QString htmlStyleSheet = "doxy_style.css";
 
       if (htmlStyleSheet.isEmpty()) {    
          // write default style sheet        
 
-         startPlainFile("doxygen.css");
-
-         // alternative, cooler looking titles
-         // m_textStream << "H1 { text-align: center; border-width: thin none thin none;" << endl;
-         // m_textStream << "     border-style : double; border-color : blue; padding-left : 1em; padding-right : 1em }" << endl;
-
-         QByteArray resData = ResourceMgr::instance().getAsString("html/doxygen.css");
+         startPlainFile("doxy_style.css");
+       
+         QByteArray resData = ResourceMgr::instance().getAsString("html/doxy_style.css");
          m_textStream << replaceColorMarkers(substitute(resData, "$doxygenversion", versionString));
 
          endPlainFile();
-         Doxygen::indexList->addStyleSheetFile("doxygen.css");
-
-      } else { 
-         // write user defined style sheet
-         
-         QFileInfo cssfi(htmlStyleSheet);
-
-         if (! cssfi.exists() || ! cssfi.isFile() || ! cssfi.isReadable()) {
-            err("Style sheet %s does not exist or is not readable", qPrintable(htmlStyleSheet));
-
-         } else {
-            // convert style sheet to string
-            QByteArray fileStr = fileToString(htmlStyleSheet);
-
-            // write the string into the output dir
-            startPlainFile(cssfi.fileName());
-
-            m_textStream << fileStr;
-            endPlainFile();
-         }
-         Doxygen::indexList->addStyleSheetFile(cssfi.fileName().toUtf8());
+         Doxygen::indexList->addStyleSheetFile("doxy_style.css");
       }
 
-      static const QStringList extraCssFile = Config::getList("html-extra-stylesheet");
+      static const QStringList extraCssFile = Config::getList("html-stylesheets");
 
       for (auto fileName : extraCssFile) {
          
@@ -1024,7 +985,7 @@ void HtmlGenerator::writeStyleInfo(int part)
             QFileInfo fi(fileName);
 
             if (fi.exists()) {
-               Doxygen::indexList->addStyleSheetFile(fi.fileName().toUtf8());
+               Doxygen::indexList->addStyleSheetFile(fi.fileName());
             }
          }
       }

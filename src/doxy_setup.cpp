@@ -85,6 +85,8 @@ enum Options {
 
 void initDoxyPress()
 {
+   printf("**  DoxyPress Initialization\n"); 
+
    const char *lang = portable_getenv("LC_ALL");
 
    if (lang) {
@@ -135,8 +137,7 @@ void initDoxyPress()
 
    Doxygen::namespaceSDict    = new NamespaceSDict();
    Doxygen::classSDict        = new ClassSDict();
-   Doxygen::hiddenClasses     = new ClassSDict();
-  
+   Doxygen::hiddenClasses     = new ClassSDict();  
    Doxygen::pageSDict         = new PageSDict();          // all doc pages
    Doxygen::exampleSDict      = new PageSDict();          // all examples
 
@@ -250,8 +251,7 @@ struct CommandLine parseCommandLine(QStringList argList)
                 
       switch (value) {
 
-         case INVALID:
-            msg("\n");
+         case INVALID:           
             err("Option %s is invalid\n", qPrintable(item));             
             exit(1);                  
        
@@ -416,7 +416,8 @@ struct CommandLine parseCommandLine(QStringList argList)
             break;
           
          case DOXY_VERSION:
-            msg("\nDoxyPress Version: %s\n", versionString);            
+            printf("\nDoxyPress Version: %s\n", versionString);   
+            printf("Email: doxypress@copperspice.org\n");         
             exit(0);
                   
          case OUTPUT_APP:
@@ -440,6 +441,7 @@ struct CommandLine parseCommandLine(QStringList argList)
 void readConfiguration(struct CommandLine cmdArgs)
 {      
    // Parse project file
+   printf("\nDoxyPress Version: %s\n\n", versionString);   
       
    if (cmdArgs.genLayout) {
       writeDefaultLayoutFile(cmdArgs.layoutName);      
@@ -474,7 +476,8 @@ void readConfiguration(struct CommandLine cmdArgs)
   
    // step 1 
    if (! Config::parseConfig(cmdArgs.configName) ) {
-      err("Unable to open or read project configuration file %s\n", qPrintable(cmdArgs.configName));
+      fprintf(stderr, "\n\nIssue parsing the Project Configuration.\nPlease submit a bug report to " 
+                  " the developers at doxypress@copperspice.org\n");
       exit(1);
    }
        
@@ -538,41 +541,42 @@ bool Doxy_Setup::openOutputFile(const QString &outFile, QFile &f)
 
 void Doxy_Setup::usage()
 {
-   msg("\n");
-   msg("DoxyPress: Version %s\n", versionString);
+   printf("\n");
+   printf("DoxyPress: Version %s\n", versionString);
+   printf("Email: doxypress@copperspice.org\n");  
 
-   msg("\n");
-   msg("Generate documentation using an existing configuration file:\n");   
-   msg("   [config file name]\n");
+   printf("\n");
+   printf("Generate documentation using an existing configuration file:\n");   
+   printf("   [config file name]\n");
    
-   msg("\n");
-   msg("Generate a layout file to configure the documentation:\n");
-   msg("   --l [layout file name]   Default file name is `doxy_layout.xml'\n");
+   printf("\n");
+   printf("Generate a layout file to configure the documentation:\n");
+   printf("   --l  [layout file name]   Default is `doxy_layout.xml'\n");
      
-   msg("\n");
-   msg("Generate a style sheet file for RTF, HTML or Latex:\n");
-   msg("   RTF:    --w  rtf-ext   [extensions file name]\n");
-   msg("   RTF:    --w  rtf-style [stylesheet file name]\n");
+   printf("\n");
+   printf("Generate a style sheet file for RTF, HTML or Latex:\n");
+   printf("   RTF:    --w  rtf-ext     [extensions file name]   Default is 'doxy_ext.rtf'\n");
+   printf("   RTF:    --w  rtf-style   [stylesheet file name]   Default is 'doxy_style.rtf'\n");
 
-   msg("\n");
-   msg("   HTML:   --w  html-head  [header file name] \n");
-   msg("   HTML:   --w  html-foot  [footer file name] \n");
-   msg("   HTML:   --w  html-style [styleSheet file name] \n");
+   printf("\n");
+   printf("   HTML:   --w  html-head   [header file name]       Default is 'doxy_header.html'\n");
+   printf("   HTML:   --w  html-foot   [footer file name]       Default is 'doxy_footer.html'\n");
+   printf("   HTML:   --w  html-style  [styleSheet file name]   Default is 'doxy_style.css'\n");
   
-   msg("\n");
-   msg("   LaTeX:  --w  latex-head  [header file name] \n");
-   msg("   LaTeX:  --w  latex-foot  [footer file name] \n");
-   msg("   LaTeX:  --w  latex-style [styleSheet file name] \n");
+   printf("\n");
+   printf("   LaTeX:  --w  latex-head  [header file name]       Default is 'doxy_header.latex'\n");
+   printf("   LaTeX:  --w  latex-foot  [footer file name]       Default is 'doxy_footer.latex'\n");
+   printf("   LaTeX:  --w  latex-style [styleSheet file name]   Default is 'doxy_style.latex'\n");
    
-   msg("\n");
-   msg("Other Options:\n");
-   msg("   --h  display usage\n");
-   msg("   --v  display version\n");
+   printf("\n");
+   printf("Other Options:\n");
+   printf("   --h  display usage\n");
+   printf("   --v  display version\n");
     
-   msg("\n");
-   msg("   --b  output for DoxyPressApp\n"); 
-   msg("   --m  dump symbol map\n");  
-   msg("   --d  <level> enable one or more debug levels\n");
+   printf("\n");
+   printf("   --b  output for DoxyPressApp\n"); 
+   printf("   --m  dump symbol map\n");  
+   printf("   --d  <level> enable one or more debug levels\n");
   
    Debug::printFlags();   
 }

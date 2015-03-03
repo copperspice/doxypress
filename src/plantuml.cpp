@@ -24,15 +24,17 @@
 
 static const int maxCmdLine = 40960;
 
-QByteArray writePlantUMLSource(const QByteArray &outDir, const QByteArray &fileName, const QByteArray &content)
+QByteArray writePlantUMLSource(const QString &outDir, const QString &fileName, const QByteArray &content)
 {
-   QByteArray baseName;
+   QString baseName;
    static int umlindex = 1;
 
-   if (fileName.isEmpty()) { // generate name
-      baseName = outDir + "/inline_umlgraph_" + QByteArray().setNum(umlindex++);
+   if (fileName.isEmpty()) { 
+      // generate name
+      baseName = outDir + "/inline_umlgraph_" + QString::number(umlindex++);
 
-   } else { // user specified name
+   } else { 
+      // user specified name
       baseName = fileName;
 
       int i = baseName.lastIndexOf('.');
@@ -44,17 +46,19 @@ QByteArray writePlantUMLSource(const QByteArray &outDir, const QByteArray &fileN
    }
 
    QFile file(baseName + ".pu");
-   if (!file.open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", baseName.data());
+
+   if (! file.open(QIODevice::WriteOnly)) {
+      err("Could not open file %s for writing\n", qPrintable(baseName));
    }
 
-   QByteArray text = "@startuml\n";
+   QString text = "@startuml\n";
    text += content;
    text += "@enduml\n";
-   file.write( text, text.length() );
+
+   file.write(text.toUtf8());
    file.close();
 
-   return baseName;
+   return baseName.toUtf8();
 }
 
 void generatePlantUMLOutput(const QString &baseName, const QString &outDir, PlantUMLOutputFormat format)

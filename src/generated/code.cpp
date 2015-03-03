@@ -10708,7 +10708,7 @@ static QByteArray g_forceTagReference;
 class VariableContext
 {
  public:
-   static const QSharedPointer<ClassDef> dummyContext;
+   static QSharedPointer<ClassDef> dummyContext();
 
    class Scope : public StringMap<QSharedPointer<ClassDef>>
    {
@@ -10761,6 +10761,12 @@ class VariableContext
    Scope        m_globalScope;
    QList<Scope *> m_scopes;
 };
+
+QSharedPointer<ClassDef> VariableContext::dummyContext()
+{
+   static QSharedPointer<ClassDef> dummyContext = QMakeShared<ClassDef>("", 0, 0, "dummyContext-code", ClassDef::Class);
+   return dummyContext;
+}
 
 void VariableContext::addVariable(const QByteArray &type, const QByteArray &name)
 {
@@ -10829,7 +10835,7 @@ void VariableContext::addVariable(const QByteArray &type, const QByteArray &name
          // TODO: make this work for namespaces as well!
       {
          DBG_CTX((stderr, "** addVariable: dummy context for '%s'\n", lname.data()));
-         scope->insert(lname, dummyContext);
+         scope->insert(lname, VariableContext::dummyContext());
 
       } else {
          DBG_CTX((stderr, "** addVariable: not adding variable!\n"));
@@ -10863,7 +10869,6 @@ void VariableContext::addVariable(const QByteArray &type, const QByteArray &name
 }
 
 static VariableContext g_theVarContext;
-const QSharedPointer<ClassDef> VariableContext::dummyContext = QMakeShared<ClassDef>("", 0, 0, "dummyContext-code", ClassDef::Class);
 
 class CallContext
 {
@@ -11296,7 +11301,8 @@ static QSharedPointer<MemberDef> setCallContextForVar(const QByteArray &name)
 
    if (mcd) { // local variable
       DBG_CTX((stderr, "local variable?\n"));
-      if (mcd != VariableContext::dummyContext) {
+
+      if (mcd != VariableContext::dummyContext()) {
          DBG_CTX((stderr, "local var `%s' mcd=%s\n", name.data(), mcd->name().data()));
          g_theCallContext.setScope(mcd);
       }
@@ -11524,7 +11530,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
       }
 
    } else {     
-      if (lcd != VariableContext::dummyContext) {        
+      if (lcd != VariableContext::dummyContext()) {        
          g_theCallContext.setScope(lcd);         
       }
 
@@ -11737,7 +11743,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QByteArray &varNam
    QSharedPointer<ClassDef> vcd = g_theVarContext.findVariable(varName);
 
    if (vcd) {
-      if (vcd != VariableContext::dummyContext) {
+      if (vcd != VariableContext::dummyContext()) {
         
          if (getLink(vcd->name(), memName, ol)) {
             //printf("Found result!\n");
@@ -12010,7 +12016,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
          } else { 
             // local variable
            
-            if (cd != VariableContext::dummyContext) {
+            if (cd != VariableContext::dummyContext()) {
                ctx->method = cd->getMemberByName(ctx->methodName);               
             }
          }
@@ -12124,7 +12130,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                         addDocCrossReference(g_currentMemberDef, ctx->objectVar);
                      }
 
-                  } else if (ctx->objectType && ctx->objectType != VariableContext::dummyContext &&
+                  } else if (ctx->objectType && ctx->objectType != VariableContext::dummyContext() &&
                              ctx->objectType->isLinkable() ) { 
 
                      // object is class name

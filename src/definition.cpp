@@ -151,10 +151,7 @@ static bool matchExcludedSymbols(const char *name)
 
    QByteArray symName = name;
 
-   for (auto item : exclSyms) { 
-
-      QString pat = item; 
-      QByteArray pattern = pat.toUtf8();
+   for (auto pattern : exclSyms) {          
 
       bool forceStart = false;
       bool forceEnd   = false;
@@ -170,19 +167,18 @@ static bool matchExcludedSymbols(const char *name)
 
       if (pattern.indexOf('*') != -1) { 
          // wildcard mode
-         QRegExp re(substitute(pattern, "*", ".*"), Qt::CaseSensitive);
+         QRegExp re(pattern.replace("*", ".*"), Qt::CaseSensitive);
 
-         int i, pl;
-         i  = re.indexIn(symName, 0);
-         pl = re.matchedLength();
+         int i  = re.indexIn(symName, 0);
+         int pl = re.matchedLength();   
 
          if (i != -1) { 
             // wildcard match
             int sl = symName.length();
 
             // check if it is a whole word match
-            if ((i == 0     || pattern.at(0) == '*'    || (!isId(symName.at(i - 1))  && !forceStart)) &&
-                  (i + pl == sl || pattern.at(i + pl) == '*' || (!isId(symName.at(i + pl)) && !forceEnd)) ) {             
+            if ((i == 0 || pattern.at(0) == '*' || (! isId(symName.at(i - 1))  && ! forceStart)) &&
+                  (i + pl == sl || pattern.at(i + pl) == '*' || (! isId(symName.at(i + pl)) && ! forceEnd)) ) {             
                return true;
             }
          }
@@ -197,7 +193,7 @@ static bool matchExcludedSymbols(const char *name)
             int sl = symName.length();
 
             // check if it is a whole word match
-            if ((i == 0  || (!isId(symName.at(i - 1))  && !forceStart)) && (i + pl == sl || (!isId(symName.at(i + pl)) && !forceEnd)) ) {               
+            if ((i == 0  || (! isId(symName.at(i - 1))  && ! forceStart)) && (i + pl == sl || (!isId(symName.at(i + pl)) && !forceEnd)) ) {               
                return true;
             }
          }

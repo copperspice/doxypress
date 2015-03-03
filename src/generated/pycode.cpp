@@ -1234,7 +1234,7 @@ static void adjustScopesAndSuites(unsigned indentLength);
 class PyVariableContext
 {
  public:
-   static QSharedPointer<ClassDef> dummyContext;
+   static QSharedPointer<ClassDef> dummyContext();
 
    class Scope : public StringMap<QSharedPointer<ClassDef>>
    {
@@ -1275,6 +1275,12 @@ class PyVariableContext
    QList<Scope *> m_scopes;
 };
 
+QSharedPointer<ClassDef> PyVariableContext::dummyContext()
+{  
+   static QSharedPointer<ClassDef> dummyContext = QMakeShared<ClassDef>("", 0, 0, "dummyContext-python", ClassDef::Class);    
+   return dummyContext;
+}
+
 void PyVariableContext::addVariable(const QByteArray &type, const QByteArray &name)
 {   
    QByteArray ltype = type.simplified();
@@ -1303,7 +1309,7 @@ void PyVariableContext::addVariable(const QByteArray &type, const QByteArray &na
          // is hidden to avoid FALSE links to global variables with the same name
          // TODO: make this work for namespaces as well
       
-         scope->insert(lname, dummyContext);
+         scope->insert(lname, PyVariableContext::dummyContext());
       }
    }
 }
@@ -1333,7 +1339,6 @@ QSharedPointer<ClassDef> PyVariableContext::findVariable(const QByteArray &name)
 }
 
 static PyVariableContext g_theVarContext;
-QSharedPointer<ClassDef> PyVariableContext::dummyContext = QMakeShared<ClassDef>("", 0, 0, "dummyContext-python", ClassDef::Class);     
 
 class PyCallContext
 {
@@ -1719,7 +1724,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
       }
 
    } else {
-      if (lcd != PyVariableContext::dummyContext) {
+      if (lcd != PyVariableContext::dummyContext()) {
          g_theCallContext.setClass(lcd);
       }
       

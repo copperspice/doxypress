@@ -1609,12 +1609,12 @@ static const char virtualScope[] = { 'v', 'i', 'r', 't', 'u', 'a', 'l', ':' };
 
 // Note: this function is not reentrant due to the use of static buffer 
 QByteArray removeRedundantWhiteSpace(const QByteArray &s)
-{
-   static bool cliSupport = Config::getBool("cpp-cli-support");
-  
+{ 
    if (s.isEmpty()) {
       return s;
    }
+
+   static bool cliSupport = Config::getBool("cpp-cli-support");
 
    static GrowBuf growBuf;  
    growBuf.clear();
@@ -4787,8 +4787,8 @@ QByteArray substitute(const QByteArray &origString, const QByteArray &oldWord, c
    return retval;
 }
 
-QString substituteKeywords(const QByteArray &s, const char *title, const char *projName, 
-                              const char *projNum, const char *projBrief)
+QString substituteKeywords(const QByteArray &s, const char *title, 
+                  const char *projName, const char *projVersion, const char *projBrief)
 {
    QString result = s;
 
@@ -4803,8 +4803,8 @@ QString substituteKeywords(const QByteArray &s, const char *title, const char *p
 
    result = result.replace("$doxygenversion", versionString);
 
-   result = result.replace("$projectname",    projName);
-   result = result.replace("$projectnumber",  projNum);
+   result = result.replace("$projectname",    projName);  
+   result = result.replace("$projectversion", projVersion);
    result = result.replace("$projectbrief",   projBrief);
    result = result.replace("$projectlogo",    stripPath(Config::getString("project-logo")));
 

@@ -4897,8 +4897,7 @@ YY_DECL {
             YY_DO_BEFORE_ACTION; /* set up preYYtext again */
             YY_RULE_SETUP
 
-            {
-               //printf("Pre.l: ifdef\n");
+            {               
                incrLevel();
                g_guardExpr.resize(0);
                BEGIN(DefinedExpr1);

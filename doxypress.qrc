@@ -10,7 +10,7 @@
         <file>resources/html/closed.luma</file>
         <file>resources/html/doc.luma</file>
         <file>resources/html/doxygen.bst</file>
-        <file>resources/html/doxygen.css</file>
+        <file>resources/html/doxy_style.css</file>
         <file>resources/html/doxygen.luma</file>
         <file>resources/html/dynsections.js</file>
         <file>resources/html/extsearch.js</file>

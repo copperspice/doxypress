@@ -62,6 +62,7 @@ class Debug
 
 void err(const char *fmt, ...);
 void msg(const char *fmt, ...);
+void warnMsg(const char *fmt, ...);
 
 void initWarningFormat();
 

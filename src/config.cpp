@@ -35,7 +35,7 @@ bool Config::getBool(const QString &name)
 
    } else { 
       fprintf(stderr, "Warning: %s was not retrieved from the project bool table\n", qPrintable(name) );
-   
+       
    }   
   
    return retval;
@@ -128,7 +128,7 @@ bool Config::preVerify()
        ! Config::getBool("generate-perl") && ! Config::getBool("generate-xml")         && ! Config::getBool("generate-docbook") &&
        ! Config::getBool("generate-autogen-def") && Config::getString("generate-tagfile").isEmpty() ) {
 
-      err("Error: No output format was selected, set at least one of the output formats in the project file\n");
+      err("No output format was selected, set at least one of the output formats in the project file\n");
       isError = true;
    }
  
@@ -140,7 +140,7 @@ bool Config::preVerify()
       QFileInfo fi(headerFile);
 
       if (! fi.exists()) {
-         err("Error: HTML HEADER file `%s' does not exist\n", qPrintable(headerFile)); 
+         err("HTML HEADER file `%s' does not exist\n", qPrintable(headerFile)); 
          isError = true;
       }
    }
@@ -153,7 +153,7 @@ bool Config::preVerify()
       QFileInfo fi(footerFile);
 
       if (! fi.exists()) {
-         err("Error: HTML FOOTER file `%s' does not exist\n", qPrintable(footerFile));
+         err("HTML FOOTER file `%s' does not exist\n", qPrintable(footerFile));
          isError = true;
       }
    }
@@ -236,7 +236,7 @@ bool Config::verify()
          addSearchDir(fi.absoluteFilePath());   
 
       } else {
-         err("Warning: INCLUDE PATH `%s' does not exist\n", qPrintable(s));
+         warnMsg("INCLUDE PATH `%s' does not exist\n", qPrintable(s));
 
       }          
    }
@@ -265,8 +265,8 @@ bool Config::verify()
    iterString.value().value = style;
 
    // **
-   iterString = m_cfgString.find("output-language");
-   QString outputLanguage = iterString.value().value;
+   auto iterEnum = m_cfgEnum.find("output-language");
+   QString outputLanguage = iterEnum.value().value;
 
    if (outputLanguage.isEmpty()) {
       outputLanguage = "English";
@@ -277,7 +277,7 @@ bool Config::verify()
       outputLanguage = "English";
    }
 
-   iterString.value().value = outputLanguage;
+   iterEnum.value().value = outputLanguage;
 
    
    // **
@@ -301,15 +301,15 @@ bool Config::verify()
 
    } else {
       if (warnFormat.indexOf("$file") == -1) {
-         err("Warning: Warning format does not contain $file\n");
+         warnMsg("WARN FORMAT does not contain $file\n");
       }
 
       if (warnFormat.indexOf("$line") == -1) {
-         err("Warning: Warning format does not contain $line\n");
+         warnMsg("WARN FORMAT does not contain $line\n");
       }
 
       if (warnFormat.indexOf("$text") == -1) {
-         err("Warning: Warning format foes not contain $text\n");
+         warnMsg("WARN FORMAT foes not contain $text\n");
       }
    }
 
@@ -317,7 +317,7 @@ bool Config::verify()
 
 
    // **
-   auto iterEnum = m_cfgEnum.find("mathjax-format");   
+   iterEnum = m_cfgEnum.find("mathjax-format");   
    QString mathJaxFormat  = iterEnum.value().value;
   
    if (! mathJaxFormat.isEmpty() && mathJaxFormat != "HTML-CSS" && mathJaxFormat != "NativeMML" && mathJaxFormat != "SVG") {
@@ -366,7 +366,7 @@ bool Config::verify()
    }
 
    if (paperType != "a4" && paperType != "letter" && paperType != "legal" && paperType != "executive") {
-      err("Warning: : Unknown paper type %s specified, using a4\n", qPrintable(paperType));
+      warnMsg("Unknown paper type %s specified, using a4\n", qPrintable(paperType));
       paperType = "a4";
    }
 
@@ -397,7 +397,7 @@ bool Config::verify()
          QFileInfo fi(s);
 
          if (! fi.exists()) {
-            err("Warning: 'INPUT SOURCE' `%s' does not exist\n", qPrintable(s));
+            warnMsg("INPUT SOURCE `%s' does not exist\n", qPrintable(s));
          }         
       }
    }
@@ -407,7 +407,7 @@ bool Config::verify()
 
    // **
    if (Config::getBool("generate-treeview") && Config::getBool("generate-chm")) {
-      err("Warning: When enabling 'GENERATE CHM', 'GENERATE TREEVIEW' tag must be disabled\n");
+      warnMsg("When enabling 'GENERATE CHM', 'GENERATE TREEVIEW' tag must be disabled\n");
 
       auto iterBool = m_cfgBool.find("generate-treeeview");
       bool data = iterBool.value().value;
@@ -417,7 +417,7 @@ bool Config::verify()
 
    // **
    if (Config::getBool("html-search") && Config::getBool("generate-chm")) {
-      err("Warning: When enabling 'GENERATE CHM', HTML SEARCH' must be disabled\n");
+      warnMsg("When enabling 'GENERATE CHM', HTML SEARCH' must be disabled\n");
 
       auto iterBool = m_cfgBool.find("html-search");
       bool data = iterBool.value().value;
@@ -438,18 +438,18 @@ bool Config::verify()
 
    // ** 
    if (! Config::getBool("generate-html") && Config::getBool("generate-chm")) {
-      err("Warning: 'GENERATE CHM' requires 'GENERATE HTML' to be set\n");
+      warnMsg("GENERATE CHM requires GENERATE HTML to be set\n");
    }
 
 
    // **
-   if (Config::getBool("generate-qhp")) {
+   if (Config::getBool("generate-qthelp")) {
 
       iterString = m_cfgString.find("qhp-namespace");
       QString temp = iterString.value().value;
 
       if (temp.isEmpty()) {
-         err("Error: 'GENERATE QHP' is set, this requires 'QHP NAMESPACE' to use 'org.doxypress.doc' as a default\n");      
+         err("When GENERATE Qt Help is set, QHP NAMESPACE can not be empty. Setting to the default value of 'org.doxypress.doc'\n");      
 
          iterString.value().value = "org.doxypress.doc";
       }
@@ -458,13 +458,11 @@ bool Config::verify()
       temp = iterString.value().value;
 
       if (temp.isEmpty()) {
-         err("Error: 'GENERATE QHP' is set, this requires 'QHP VIRTUAL FOLDER' to us 'doc' as a default\n");      
+         err("When GENERATE Qt HELP is set, QHP VIRTUAL FOLDER can not be empty. Setting to the defualt of doc'\n");      
          
          iterString.value().value = "doc";
       }
    }
-
-
 
 /*
    // ** expand the relative stripFromPath values
@@ -499,7 +497,7 @@ bool Config::verify()
 
    // **
    if (Config::getBool("optimize-java") && Config::getBool("inline-info")) {
-      err("Warning: Java does have an inline concept, setting 'INLINE INFO' to false\n");
+      warnMsg("Java does have an inline concept, setting INLINE INFO to false\n");
      
       auto iterBool = m_cfgBool.find("inline-info");
       bool data = iterBool.value().value;
@@ -528,10 +526,12 @@ bool Config::verify()
          QString language  = mapStr.mid(i + 1).trimmed().toLower();
 
          if (! updateLanguageMapping(extension, language)) {
-            err("Unable to map file extension '%s' to '%s', verify the 'EXTENSION MAPPING' tag\n", qPrintable(extension), qPrintable(language));
+            err("Unable to map file extension '%s' to '%s', verify the 'EXTENSION MAPPING' tag\n", 
+                  qPrintable(extension), qPrintable(language));
 
          } else {
-            msg("Adding custom extension mapping: .%s, will be treated as language %s\n", qPrintable(extension), qPrintable(language));
+            msg("Adding custom extension mapping: .%s, will be treated as language %s\n", 
+                  qPrintable(extension), qPrintable(language));
          }
       }
    } 
@@ -553,7 +553,9 @@ bool Config::verify()
             plantumlJarPath = jar.absolutePath() + QDir::separator();
 
          } else {
-            err("PlantUml jar file 'plantuml.jar' was not found at the path specified by 'PLANTUML JAR PATH' '%s'\n", qPrintable(plantumlJarPath));
+            err("PlantUml jar file 'plantuml.jar' was not found at the path specified by "
+                   "PLANTUML JAR PATH '%s'\n", qPrintable(plantumlJarPath));
+
             iterString.value().value = QString();
          }
 
@@ -657,8 +659,8 @@ bool Config::verify()
    if (!mscgenPath.isEmpty()) {
       QFileInfo dp(mscgenPath + "/mscgen" + portable_commandExtension());
 
-      if (!dp.exists() || !dp.isFile()) {
-         err("Warning: the mscgen tool could not be found at %s\n", mscgenPath.data());
+      if (! dp.exists() || !dp.isFile()) {
+         warnMsg("MSCGEN ool could not be found at %s\n", mscgenPath.data());
          mscgenPath = "";
 
       } else {
@@ -679,7 +681,7 @@ bool Config::verify()
       QFileInfo dp(diaPath + "/dia" + portable_commandExtension());
 
       if (! dp.exists() || ! dp.isFile()) {
-         err("Warning: dia could not be found at %s\n", diaPath.data());
+         warnMsg("DIA could not be found at %s\n", diaPath.data());
          diaPath = "";
 
       } else {

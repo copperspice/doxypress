@@ -75,14 +75,9 @@
 /* Copy the first part of user declarations.  */
 
 
-
 #include "cppvalue.h"
 #include "constexp.h"
 #include "message.h"
-
-#if defined(_MSC_VER)
-#define MSDOS
-#endif
 
 #define YYSTYPE CPPValue
 
@@ -91,15 +86,11 @@
 
 int constexpYYerror(const char *s)
 {
-  warn(g_constExpFileName,g_constExpLineNr,
-       "preprocessing issue while doing constant expression evaluation: %s",s);
+  warn(g_constExpFileName,g_constExpLineNr, "preprocessing issue while doing constant expression evaluation: %s",s);
   return 0;
 }
 
 int constexpYYlex();
-
-
-
 
 /* Enabling traces.  */
 #ifndef YYDEBUG

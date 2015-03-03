@@ -73,15 +73,15 @@ int compareListValues(const DotNode *item1, const DotNode *item2)
 
 
 // FileList 
-int compareListValues(QSharedPointer<FileDef> md1, QSharedPointer<FileDef> md2) 
+int compareListValues(QSharedPointer<FileDef> item1, QSharedPointer<FileDef> item2) 
 {
-   return qstricmp(md1->name(), md2->name());
+   return qstricmp(item1->name(), item2->name());
 }
 
 
 // FileNameList --> SortedList<FileName *>
 // FileNameListIterator -->  QListIterator<FileName *>
-int compareListValues(const FileName *item1, const FileName *item2)
+int compareListValues(QSharedPointer<FileName> item1, QSharedPointer<FileName> item2) 
 {
    int retval;
 

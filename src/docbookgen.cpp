@@ -671,11 +671,6 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             t << "                    <title>Enumerator:</title>" << endl;
             t << "                    <variablelist>" << endl;
 
-
-// BROOM    QListIterator<MemberDef> emli(*enumFields);
-//          MemberDef *emd;
-//          for (emli.toFirst(); (emd = emli.current()); ++emli) {
-
             for (auto emd : *enumFields) {
 
                t << "                        <varlistentry xml:id=\"";
