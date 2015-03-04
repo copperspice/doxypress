@@ -2411,7 +2411,7 @@ QString dateToString(bool includeTime)
    } 
 }
 
-static QString yearToString()
+QString yearToString()
 {
    const QDate &d = QDate::currentDate();
 
@@ -4787,30 +4787,6 @@ QByteArray substitute(const QByteArray &origString, const QByteArray &oldWord, c
    return retval;
 }
 
-QString substituteKeywords(const QByteArray &s, const char *title, 
-                  const char *projName, const char *projVersion, const char *projBrief)
-{
-   QString result = s;
-
-   if (title) {
-      result = result.replace("$title", title);
-   }
-
-   result = result.replace("$datetimeHHMM",   dateTimeHHMM());
-   result = result.replace("$datetime",       dateToString(true));
-   result = result.replace("$date",           dateToString(false));
-   result = result.replace("$year",           yearToString());
-
-   result = result.replace("$doxygenversion", versionString);
-
-   result = result.replace("$projectname",    projName);  
-   result = result.replace("$projectversion", projVersion);
-   result = result.replace("$projectbrief",   projBrief);
-   result = result.replace("$projectlogo",    stripPath(Config::getString("project-logo")));
-
-   return result;
-}
-
 /*! Returns the character index within \a name of the first prefix
  *  in Config::getList("ignore-prefix") that matches \a name at the left hand side,
  *  or zero if no match was found
@@ -6381,12 +6357,12 @@ QByteArray rtfFormatBmkStr(const char *name)
    // To overcome the 40-character tag limitation, we substitute a short arbitrary string for the name
    // supplied, and keep track of the correspondence between names and strings.
 
-   QByteArray key( name );
+   QByteArray key(name);
    auto tag = tagDict.find(key);
 
-   if (tag != tagDict.end()) {
-      // This particular name has not yet been added to the list. Add it, associating it with the
-      // next tag value, and increment the next tag
+   if (tag == tagDict.end()) {
+      // this particular name has not yet been added to the list. Add it now
+      // associate it with the next tag value, and increment the next tag
     
       tagDict.insert(key, nextTag);
       tag = tagDict.find(key);
@@ -6405,7 +6381,7 @@ QByteArray rtfFormatBmkStr(const char *name)
       }
    }
 
-   return *tag;
+   return tag.value();
 }
 
 QString stripExtension(QString fName)

@@ -47,7 +47,6 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
    QByteArray resData = getAsString(fName);     
    
    if (! resData.isEmpty()) {
-
       Resource::Type type =  Resource::Verbatim;
 
       if (fName.endsWith(".lum")) {

@@ -96,7 +96,7 @@ void Qhp::initialize()
       m_doc.open("customFilter", tagAttributes);
 
       //
-      QStringList customFilterAttributes = Config::getList("qhp-cust-filter-attrib");
+      QStringList customFilterAttributes = Config::getList("qhp-cust-attrib");
 
       for (int i = 0; i < customFilterAttributes.count(); i++) {
          m_doc.openCloseContent("filterAttribute", customFilterAttributes[i]);
@@ -108,11 +108,7 @@ void Qhp::initialize()
    m_doc.open("filterSection");
 
    // Add section attributes
-   QStringList sectionFilterAttributes = Config::getList("qhp-sect-filter-attrib");
-
-   if (! sectionFilterAttributes.contains("doxygen")) {            // BROOM - check doxygen string
-      sectionFilterAttributes << "doxygen";
-   }
+   QStringList sectionFilterAttributes = Config::getList("qhp-sect-attrib");
 
    for (int i = 0; i < sectionFilterAttributes.count(); i++) {
       m_doc.openCloseContent("filterAttribute", sectionFilterAttributes[i]);

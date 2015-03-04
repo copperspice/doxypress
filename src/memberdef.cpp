@@ -717,7 +717,7 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
    tspec   = false;
    cachedAnonymousType = QSharedPointer<ClassDef>();
 
-   maxInitLines  = Config::getInt("max-initializer-lines");
+   maxInitLines  = Config::getInt("max-init-lines");
    userInitLines = -1;
    docEnumValues = false;
 
@@ -990,7 +990,7 @@ bool MemberDef::hasExamples()
 QByteArray MemberDef::getOutputFileBase() const
 {
    static bool separateMemberPages = Config::getBool("separate-member-pages");
-   static bool inlineSimpleClasses = Config::getBool("inline-simple-structs");
+   static bool inlineSimpleClasses = Config::getBool("inline-simple-struct");
 
    QByteArray baseName;
  
@@ -1833,7 +1833,6 @@ bool MemberDef::isDetailedSectionLinkable() const
                   (m_impl->mtype == MemberType_EnumValue && !briefDescription().isEmpty()) ||
    
 
-
       // treat everything as documented
       // has detailed docs    
       // has inbody docs 
@@ -1886,7 +1885,7 @@ bool MemberDef::isDetailedSectionLinkable() const
 bool MemberDef::isDetailedSectionVisible(bool inGroup, bool inFile) const
 {
    static bool separateMemPages    = Config::getBool("separate-member-pages");
-   static bool inlineSimpleStructs = Config::getBool("inline-simple-structs");
+   static bool inlineSimpleStructs = Config::getBool("inline-simple-struct");
    static bool hideUndocMembers    = Config::getBool("hide-undoc-members");
 
    bool groupFilter = getGroupDef() == 0 || inGroup || separateMemPages;

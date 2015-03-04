@@ -22114,9 +22114,7 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
 
       rt->lang = language;
       current_root  = rt ;
-
-      msg("Parsing input file\n");
-   
+        
       initParser();
       groupEnterFile(yyFileName, yyLineNr);
 

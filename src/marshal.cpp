@@ -20,15 +20,9 @@
 #include <cassert>
 
 #include <arguments.h>
-#include <definition.h>
-#include <doxy_globals.h>
 #include <entry.h>
-#include <example.h>
 #include <groupdef.h>
 #include <marshal.h>
-#include <memberlist.h>
-#include <section.h>
-#include <stringmap.h>
 
 #define HEADER ('D'<<24)+('O'<<16)+('X'<<8)+'!'
 
@@ -189,32 +183,6 @@ void marshalBriefInfo(StorageIntf *s, BriefInfo *briefInfo)
       marshalInt(s, briefInfo->line);
       marshalQByteArray(s, briefInfo->file);
    }
-}
-
-void marshalMemberList(StorageIntf *s, MemberList *ml)
-{
-   printf("\n\n  BROOM  - Reached marshalMemberList()");
-
-/*
-   if (ml == 0) {
-      marshalUInt(s, NULL_LIST); 
-
-   } else {
-      marshalUInt(s, ml->count());
-      
-      uint count = 0;
-     
-      for (auto item : *ml) {
-         marshalObjPointer(s, item);
-         count++;
-      }
-
-      assert(count == ml->count());
-
-      ml->marshal(s);
-   }
-*/
-
 }
 
 void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
@@ -516,32 +484,6 @@ SortedList<GroupDef *> *unmarshalGroupList(StorageIntf *s)
    }
 
    return result;
-}
-
-MemberList *unmarshalMemberList(StorageIntf *s)
-{
-  printf("\n\n  BROOM  - Reached unmarshalMemberList()");
-
-/*
-   uint i;
-   uint count = unmarshalUInt(s);
-
-   if (count == NULL_LIST) {
-      return 0;
-   }
-
-   MemberList *result = new MemberList;
-   assert(count < 1000000);
-
-   for (i = 0; i < count; i++) {
-      MemberDef *md = (MemberDef *)unmarshalObjPointer(s);
-      result->append(md);
-   }
-
-   result->unmarshal(s);
-   return result;
-*/
-
 }
 
 QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)

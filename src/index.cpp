@@ -425,7 +425,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
                
                for (auto cd : *classes ) {
                   if (cd->isLinkable() && (cd->partOfGroups() == 0 || def->definitionType() == Definition::TypeGroup)) {
-                     static bool inlineSimpleStructs = Config::getBool("inline-simple-structs");
+                     static bool inlineSimpleStructs = Config::getBool("inline-simple-struct");
 
                      bool isNestedClass = def->definitionType() == Definition::TypeClass;
                      

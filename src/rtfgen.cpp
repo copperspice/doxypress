@@ -188,14 +188,14 @@ void RTFGenerator::init()
    }
 
    // overwrite some (or all) definitions from file
-   QString rtfStyleSheetFile = Config::getString("rtf-stylesheet-file");
+   QString rtfStyleSheetFile = Config::getString("rtf-stylesheet");
 
    if (! rtfStyleSheetFile.isEmpty()) {
       loadStylesheet(rtfStyleSheetFile, rtf_Style);
    }
 
    // If user has defined an extension file, load its contents.
-   QString rtfExtensionsFile = Config::getString("rtf-extensions-file");
+   QString rtfExtensionsFile = Config::getString("rtf-extension");
 
    if (! rtfExtensionsFile.isEmpty()) {
       loadExtensions(rtfExtensionsFile);
@@ -302,7 +302,7 @@ void RTFGenerator::beginRTFChapter()
 
    // if we are compact, no extra page breaks
 
-   if (Config::getBool("rtf_compact")) {    
+   if (Config::getBool("rtf-compact")) {    
       m_textStream << "\\sect\\sbknone\n";
       rtfwriteRuler_thick();
 
@@ -321,7 +321,7 @@ void RTFGenerator::beginRTFSection()
 
    // if we are compact, no extra page breaks
 
-   if (Config::getBool("rtf_compact")) {      
+   if (Config::getBool("rtf-compact")) {      
       m_textStream << "\\sect\\sbknone\n";
       rtfwriteRuler_emboss();
 
@@ -1338,7 +1338,7 @@ void RTFGenerator::startTitle()
 {
    DBG_RTF( << "{\\comment startTitle}" << endl)
 
-   if (Config::getBool("rtf_compact")) {
+   if (Config::getBool("rtf-compact")) {
       beginRTFSection();
    } else {
       beginRTFChapter();
@@ -1596,7 +1596,7 @@ void RTFGenerator::startSection(const char *, const char *title, SectionInfo::Se
    m_textStream << "}" << endl;
 }
 
-void RTFGenerator::endSection(const char *lab, SectionInfo::SectionType)
+void RTFGenerator::endSection(const char *label, SectionInfo::SectionType)
 {
    DBG_RTF(m_textStream << "{\\comment (endSection)}"    << endl)
 
@@ -1604,7 +1604,7 @@ void RTFGenerator::endSection(const char *lab, SectionInfo::SectionType)
    m_omitParagraph = false;
    newParagraph();
 
-   writeAnchor(0, lab);
+   writeAnchor(0, label);
    m_textStream << "}";
 }
 
@@ -1746,17 +1746,21 @@ void RTFGenerator::endMemberItem()
 void RTFGenerator::writeAnchor(const char *fileName, const char *name)
 {
    QByteArray anchor;
+
    if (fileName) {
       anchor += fileName;
    }
+
    if (fileName && name) {
       anchor += '_';
    }
+
    if (name) {
       anchor += name;
    }
 
    DBG_RTF(m_textStream << "{\\comment writeAnchor (" << anchor << ")}" << endl)
+
    m_textStream << "{\\bkmkstart " << rtfFormatBmkStr(anchor) << "}" << endl;
    m_textStream << "{\\bkmkend " << rtfFormatBmkStr(anchor) << "}" << endl;
 }

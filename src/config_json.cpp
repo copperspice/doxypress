@@ -94,12 +94,12 @@ void Config::load_Defaults()
    m_cfgBool.insert("allow-unicode-names",       struc_CfgBool   { false,          DEFAULT } );    
    m_cfgEnum.insert("output-language",           struc_CfgEnum   { "ENGLISH",      DEFAULT } );
 
-   m_cfgBool.insert("brief-member-desc",         struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("repeat-brief",              struc_CfgBool   { false,          DEFAULT } );
-   m_cfgList.insert("abbreviate-brief",          struc_CfgList   { QStringList(),  DEFAULT } );  
+   m_cfgBool.insert("brief-member-desc",         struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("repeat-brief",              struc_CfgBool   { true,           DEFAULT } );
+   m_cfgList.insert("abbreviate-brief",          struc_CfgList   { QStringList(),  DEFAULT } );     // broom - FIX 
    m_cfgBool.insert("always-detailed-sec",       struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("inline-inherited-member",   struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("full-path-names",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("full-path-names",           struc_CfgBool   { true,           DEFAULT } );
    m_cfgList.insert("strip-from-path",           struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("strip-from-inc-path",       struc_CfgList   { QStringList(),  DEFAULT } );
 
@@ -107,21 +107,21 @@ void Config::load_Defaults()
    m_cfgBool.insert("javadoc-auto-brief",        struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("qt-auto-brief",             struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("multiline-cpp-brief",       struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("inherit-docs",              struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("inherit-docs",              struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("separate-member-pages",     struc_CfgBool   { false,          DEFAULT } );
 
-   m_cfgInt.insert("tab-size",                   struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgInt.insert("tab-size",                   struc_CfgInt    { 4,              DEFAULT } );
    m_cfgList.insert("aliases",                   struc_CfgList   { QStringList(),  DEFAULT } ); 
    m_cfgList.insert("tcl-subst",                 struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("extension-mapping",         struc_CfgList   { QStringList(),  DEFAULT } );
-   m_cfgBool.insert("markdown",                  struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("auto-link",                 struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("markdown",                  struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("auto-link",                 struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("built-in-stl-support",      struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("cpp-cli-support",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("sip-support",               struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("idl-support",               struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("idl-support",               struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("dist-group-doc",            struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("allow-sub-grouping",        struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("allow-sub-grouping",        struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("inline-grouped-classes",    struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("inline-simple-struct",      struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("typedef-hides-struct",      struc_CfgBool   { false,          DEFAULT } );
@@ -132,7 +132,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("extract-private",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("extract-package",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("extract-static",            struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("extract-local-classes",     struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("extract-local-classes",     struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("extract-local-methods",     struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("extract-anon-namespaces",   struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("hide-undoc-members",        struc_CfgBool   { false,          DEFAULT } );
@@ -142,8 +142,8 @@ void Config::load_Defaults()
    m_cfgBool.insert("hide-scope-names",          struc_CfgBool   { false,          DEFAULT } );
 
    m_cfgBool.insert("internal-docs",             struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("case-sense-names",          struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("show-include-files",        struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("case-sense-names",          struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("show-include-files",        struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("show-grouped-members-inc",  struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("force-local-includes",      struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("inline-info",               struc_CfgBool   { false,          DEFAULT } );
@@ -155,33 +155,33 @@ void Config::load_Defaults()
    m_cfgBool.insert("sort-by-scope-name",        struc_CfgBool   { false,          DEFAULT } );
 
    m_cfgBool.insert("strict-proto-matching",     struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("generate-todo-list",        struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("generate-todo-list",        struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("generate-test-list",        struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("generate-bug-list",         struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("generate-deprecate-list",   struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("generate-bug-list",         struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("generate-deprecate-list",   struc_CfgBool   { true,           DEFAULT } );
 
    m_cfgList.insert("enabled-sections",          struc_CfgList   { QStringList(),  DEFAULT } ); 
-   m_cfgInt.insert("max-init-lines",             struc_CfgInt    { 0,              DEFAULT } );
-   m_cfgBool.insert("show-used-files",           struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("show-files",                struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("show-namespaces",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgInt.insert("max-init-lines",             struc_CfgInt    { 30,             DEFAULT } );
+   m_cfgBool.insert("show-used-files",           struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("show-files",                struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("show-namespaces",           struc_CfgBool   { true,           DEFAULT } );
    m_cfgString.insert("file-version-filter",     struc_CfgString { QString(),      DEFAULT } );
    m_cfgString.insert("layout-file",             struc_CfgString { QString(),      DEFAULT } );
    m_cfgList.insert("cite-bib-files",            struc_CfgList   { QStringList(),  DEFAULT } ); 
 
    // tab 2 - messages
    m_cfgBool.insert("quiet",                     struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("warnings",                  struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("warn-undoc",                struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("warn-doc-error",            struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("warnings",                  struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("warn-undoc",                struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("warn-doc-error",            struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("warn-undoc-parm",           struc_CfgBool   { false,          DEFAULT } );
-   m_cfgString.insert("warn-format",             struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("warn-format",             struc_CfgString { "$file:$line: $text", DEFAULT } );
    m_cfgString.insert("warn-logfile",            struc_CfgString { QString(),      DEFAULT } );
 
    // tab 2 -input
    m_cfgList.insert("input-source",              struc_CfgList   { QStringList(),   DEFAULT } );
-   m_cfgString.insert("input-encoding",          struc_CfgString { QString(),       DEFAULT } );
-   m_cfgList.insert("file-patterns",             struc_CfgList   { QStringList(),   DEFAULT } );
+   m_cfgString.insert("input-encoding",          struc_CfgString { "UTF-8",         DEFAULT } );
+   m_cfgList.insert("file-patterns",             struc_CfgList   { QStringList(),   DEFAULT } );   // broom - fix this
    m_cfgBool.insert("source-recursive",          struc_CfgBool   { false,           DEFAULT } );
 
    m_cfgList.insert("exclude-files",             struc_CfgList   { QStringList(),   DEFAULT } );
@@ -189,7 +189,7 @@ void Config::load_Defaults()
    m_cfgList.insert("exclude-patterns",          struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgList.insert("exclude-symbols",           struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgList.insert("example-source",            struc_CfgList   { QStringList(),   DEFAULT } );
-   m_cfgList.insert("example-patterns",          struc_CfgList   { QStringList(),   DEFAULT } );
+   m_cfgList.insert("example-patterns",          struc_CfgList   { QString("*"),    DEFAULT } );
    m_cfgBool.insert("example-recursive",         struc_CfgBool   { false,           DEFAULT } );
 
    m_cfgList.insert("image-path",                struc_CfgList   { QStringList(),   DEFAULT } );
@@ -200,73 +200,63 @@ void Config::load_Defaults()
    m_cfgString.insert("mdfile-mainpage",         struc_CfgString { QString(),       DEFAULT } );
 
 
-
-
-// BROOM  start here to READ
-
    // tab 2 -browser
    m_cfgBool.insert("source-browser",            struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("inline-sources",            struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("strip-code-comments",       struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("strip-code-comments",       struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("ref-by-relation",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("ref-relation",              struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("ref-link-source",           struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("source-tooltips",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("ref-link-source",           struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("source-tooltips",           struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("use-htags",                 struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("verbatim-headers",          struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("verbatim-headers",          struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("clang-parsing",             struc_CfgBool   { false,          DEFAULT } );
    m_cfgList.insert("clang-options",             struc_CfgList   { QStringList(),  DEFAULT } );
 
    // tab 2 -index
-   m_cfgBool.insert("alpha-index",               struc_CfgBool   { false,          DEFAULT } );
-   m_cfgInt.insert("cols-in-index",              struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgBool.insert("alpha-index",               struc_CfgBool   { true,           DEFAULT } );
+   m_cfgInt.insert("cols-in-index",              struc_CfgInt    { 5,              DEFAULT } );
    m_cfgList.insert("ignore-prefix",             struc_CfgList   { QStringList(),  DEFAULT } );
 
    // tab 2 - autogen
    m_cfgBool.insert("generate-autogen-def",      struc_CfgBool   { false,          DEFAULT } );
 
-   // tab 2 - perlmod         
-   m_cfgBool.insert("generate-perl",             struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("perl-latex",                struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("perl-pretty",               struc_CfgBool   { false,          DEFAULT } );
-   m_cfgString.insert("perlmod-prefix",          struc_CfgString { QString(),      DEFAULT } );
-
    // tab 2 - preprocess
-   m_cfgBool.insert("enable-preprocessing",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("enable-preprocessing",      struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("macro-expansion",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("expand-only-predefined",    struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("search-includes",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("search-includes",           struc_CfgBool   { true,           DEFAULT } );
 
    m_cfgList.insert("include-path",              struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("include-file-patterns",     struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("predefined-macros",         struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("expand-as-defined",         struc_CfgList   { QStringList(),  DEFAULT } );
-   m_cfgBool.insert("skip-function-macros",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("skip-function-macros",      struc_CfgBool   { true,           DEFAULT } );
 
    // tab 2 - external
    m_cfgList.insert("tag-files",                 struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgString.insert("generate-tagfile",        struc_CfgString { QString(),      DEFAULT } );
    m_cfgBool.insert("all-externals",             struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("external-groups",           struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("external-pages",            struc_CfgBool   { false,          DEFAULT } );
-   m_cfgString.insert("perl-path",               struc_CfgString { QString(),      DEFAULT } );
+   m_cfgBool.insert("external-groups",           struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("external-pages",            struc_CfgBool   { true,           DEFAULT } );
+   m_cfgString.insert("perl-path",               struc_CfgString { "/usr/bin/perl", DEFAULT } );
 
    // tab 2 - dot
-   m_cfgBool.insert("class-diagrams",            struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("class-diagrams",            struc_CfgBool   { true,           DEFAULT } );
    m_cfgString.insert("mscgen-path",             struc_CfgString { QString(),      DEFAULT } );
    m_cfgString.insert("dia-path",                struc_CfgString { QString(),      DEFAULT } );
-   m_cfgBool.insert("hide-undoc-relations",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("hide-undoc-relations",      struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("have-dot",                  struc_CfgBool   { false,          DEFAULT } );
    m_cfgInt.insert("dot-num-threads",            struc_CfgInt    { 0,              DEFAULT } );
-   m_cfgString.insert("dot-font-name",           struc_CfgString { QString(),      DEFAULT } );
-   m_cfgInt.insert("dot-font-size",              struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgString.insert("dot-font-name",           struc_CfgString { "Helvetica",    DEFAULT } );
+   m_cfgInt.insert("dot-font-size",              struc_CfgInt    { 10,             DEFAULT } );
    m_cfgString.insert("dot-font-path",           struc_CfgString { QString(),      DEFAULT } );
 
-   m_cfgBool.insert("group-graphs",              struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("group-graphs",              struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("uml-look",                  struc_CfgBool   { false,          DEFAULT } );
-   m_cfgInt.insert("uml-limit-num-fields",       struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgInt.insert("uml-limit-num-fields",       struc_CfgInt    { 10,             DEFAULT } );
    m_cfgBool.insert("template-relations",        struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("directory-graph",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("directory-graph",           struc_CfgBool   { true,           DEFAULT } );
 
    m_cfgEnum.insert("dot-image-format",          struc_CfgEnum   { "png",          DEFAULT } );
    m_cfgBool.insert("interactive-svg",           struc_CfgBool   { false,          DEFAULT } );
@@ -276,69 +266,66 @@ void Config::load_Defaults()
    m_cfgList.insert("dia-file-dirs",             struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgString.insert("plantuml-jar-path",       struc_CfgString { QString(),      DEFAULT } );
 
-   m_cfgInt.insert("dot-graph-max-nodes",        struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgInt.insert("dot-graph-max-nodes",        struc_CfgInt    { 50              DEFAULT } );
    m_cfgInt.insert("dot-graph-max-depth",        struc_CfgInt    { 0,              DEFAULT } );
    m_cfgBool.insert("dot-transparent",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("dot-multiple-targets",      struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("generate-legend",           struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("dot-cleanup",               struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("generate-legend",           struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("dot-cleanup",               struc_CfgBool   { true,           DEFAULT } );
 
 
    // tab 3 ( appear on tab 1 and tab 3 )
-   m_cfgBool.insert("generate-html",         struc_CfgBool { true,              DEFAULT } );  
-   m_cfgBool.insert("generate-latex",        struc_CfgBool { false,             DEFAULT } );  
-   m_cfgBool.insert("latex-hyper-pdf",       struc_CfgBool { true,              DEFAULT } );  
-   m_cfgBool.insert("latex-pdf",             struc_CfgBool { true,              DEFAULT } );  
-   m_cfgBool.insert("latex-ps",              struc_CfgBool { false,             DEFAULT } );  
-   m_cfgBool.insert("generate-rtf",          struc_CfgBool { false,             DEFAULT } );   
-   m_cfgBool.insert("generate-man",          struc_CfgBool { false,             DEFAULT } );   
-   m_cfgBool.insert("generate-xml",          struc_CfgBool { false,             DEFAULT } );   
-   m_cfgBool.insert("generate-docbook",      struc_CfgBool { false,             DEFAULT } );  
+   m_cfgBool.insert("generate-html",             struc_CfgBool   { true,           DEFAULT } );  
+   m_cfgBool.insert("generate-latex",            struc_CfgBool   { false,          DEFAULT } );   
+   m_cfgBool.insert("generate-rtf",              struc_CfgBool   { false,          DEFAULT } );   
+   m_cfgBool.insert("generate-man",              struc_CfgBool   { false,          DEFAULT } );   
+   m_cfgBool.insert("generate-xml",              struc_CfgBool   { false,          DEFAULT } );   
+   m_cfgBool.insert("generate-docbook",          struc_CfgBool   { false,          DEFAULT } );  
 
-   m_cfgBool.insert("dot-class-graph",       struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("dot-collaboration",     struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("dot-hierarchy",         struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("dot-include",           struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("dot-included-by",       struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("dot-call",              struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("dot-called-by",         struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("dot-class-graph",           struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("dot-collaboration",         struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("dot-hierarchy",             struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("dot-include",               struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("dot-included-by",           struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("dot-call",                  struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("dot-called-by",             struc_CfgBool   { false,          DEFAULT } );
 
 
    // tab 3 - html
-   m_cfgString.insert("html-output",             struc_CfgString { QString(),      DEFAULT } );
-   m_cfgString.insert("html-file-extension",     struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("html-output",             struc_CfgString { "html",         DEFAULT } );
+   m_cfgString.insert("html-file-extension",     struc_CfgString { ".html"         DEFAULT } );
    m_cfgString.insert("html-header",             struc_CfgString { QString(),      DEFAULT } );
    m_cfgString.insert("html-footer",             struc_CfgString { QString(),      DEFAULT } ); 
    m_cfgList.insert("html-stylesheets",          struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("html-extra-files",          struc_CfgList   { QStringList(),  DEFAULT } );
 
-   m_cfgInt.insert("html-colorstyle-hue",        struc_CfgInt    { 0,              DEFAULT } );
-   m_cfgInt.insert("html-colorstyle-sat",        struc_CfgInt    { 0,              DEFAULT } );
-   m_cfgInt.insert("html-colorstyle-gamma",      struc_CfgInt    { 0,              DEFAULT } );
-   m_cfgBool.insert("html-timestamp",            struc_CfgBool   { false,          DEFAULT } );
+   m_cfgInt.insert("html-colorstyle-hue",        struc_CfgInt    { 220,            DEFAULT } );
+   m_cfgInt.insert("html-colorstyle-sat",        struc_CfgInt    { 100,            DEFAULT } );
+   m_cfgInt.insert("html-colorstyle-gamma",      struc_CfgInt    { 80,             DEFAULT } );
+   m_cfgBool.insert("html-timestamp",            struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("html-dynamic-sections",     struc_CfgBool   { false,          DEFAULT } );
-   m_cfgInt.insert("html-index-num-entries",     struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgInt.insert("html-index-num-entries",     struc_CfgInt    { 100,            DEFAULT } );
 
    m_cfgBool.insert("disable-index",             struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("generate-treeview",         struc_CfgBool   { false,          DEFAULT } );
-   m_cfgInt.insert("enum-values-per-line",       struc_CfgInt    { 0,              DEFAULT } );
-   m_cfgInt.insert("treeview-width",             struc_CfgInt    { 0,              DEFAULT } );
+   m_cfgInt.insert("enum-values-per-line",       struc_CfgInt    { 4,              DEFAULT } );
+   m_cfgInt.insert("treeview-width",             struc_CfgInt    { 250,            DEFAULT } );
    m_cfgBool.insert("external-links-in-window",  struc_CfgBool   { false,          DEFAULT } );
 
-   m_cfgBool.insert("html-search",               struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("html-search",               struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("server-based-search",       struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("external-search",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgString.insert("search-engine-url",       struc_CfgString { QString(),      DEFAULT } ); 
-   m_cfgString.insert("search-data-file",        struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("search-data-file",        struc_CfgString { "searchdata.xml", DEFAULT } ); 
    m_cfgString.insert("search-external-id",      struc_CfgString { QString(),      DEFAULT } ); 
    m_cfgList.insert("search-mappings",           struc_CfgList   { QStringList(),  DEFAULT } );
 
-   m_cfgInt.insert("formula-fontsize",           struc_CfgInt    { 0,              DEFAULT } );
-   m_cfgBool.insert("formula-transparent",       struc_CfgBool   { false,          DEFAULT } );
+   m_cfgInt.insert("formula-fontsize",           struc_CfgInt    { 10,             DEFAULT } );
+   m_cfgBool.insert("formula-transparent",       struc_CfgBool   { true,           DEFAULT } );
    m_cfgString.insert("ghostscript",             struc_CfgString { QString(),      DEFAULT } );   
    m_cfgBool.insert("use-mathjax",               struc_CfgBool   { false,          DEFAULT } );
-   m_cfgEnum.insert("mathjax-format",            struc_CfgEnum   { "",             DEFAULT } );
-   m_cfgString.insert("mathjax-relpath",         struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgEnum.insert("mathjax-format",            struc_CfgEnum   { "HTML-CSS",     DEFAULT } );
+   m_cfgString.insert("mathjax-relpath",         struc_CfgString { "http://cdn.mathjax.com/mathjax/latest", DEFAULT } ); 
    m_cfgList.insert("mathjax-extensions",        struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgString.insert("mathjax-codefile",        struc_CfgString { QString(),      DEFAULT } ); 
 
@@ -351,65 +338,72 @@ void Config::load_Defaults()
    m_cfgBool.insert("binary-toc",                struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("toc-expanded",              struc_CfgBool   { false,          DEFAULT } );
 
+   // tab 3 - docbook     
+   m_cfgString.insert("docbook-output",          struc_CfgString { "docbooc",      DEFAULT } );
+   m_cfgBool.insert("docbook-program-listing",   struc_CfgBool   { false,          DEFAULT } );
+
    // tab 3 - docset
    m_cfgBool.insert("generate-docset",           struc_CfgBool   { false,          DEFAULT } );
-   m_cfgString.insert("docset-feedname",         struc_CfgString { QString(),      DEFAULT } ); 
-   m_cfgString.insert("docset-bundle-id",        struc_CfgString { QString(),      DEFAULT } ); 
-   m_cfgString.insert("docset-publisher-id",     struc_CfgString { QString(),      DEFAULT } ); 
-   m_cfgString.insert("docset-publisher-name",   struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("docset-feedname",         struc_CfgString { "DoxyPress generated docs", DEFAULT } ); 
+   m_cfgString.insert("docset-bundle-id",        struc_CfgString { "org.doxypress.Project",    DEFAULT } ); 
+   m_cfgString.insert("docset-publisher-id",     struc_CfgString { "org.doxypress.Publisher",  DEFAULT } ); 
+   m_cfgString.insert("docset-publisher-name",   struc_CfgString { "org.doxypress.Publisher",  DEFAULT } ); 
 
    // tab 3 - eclipse
    m_cfgBool.insert("generate-eclipse",          struc_CfgBool   { false,          DEFAULT } );
-   m_cfgString.insert("eclipse-doc-id",          struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("eclipse-doc-id",          struc_CfgString { "org.doxypress.Project",    DEFAULT } ); 
 
    // tab 3 - latex
-   m_cfgString.insert("latex-output",            struc_CfgString { QString(),      DEFAULT } ); 
-   m_cfgString.insert("latex-cmd-name",          struc_CfgString { QString(),      DEFAULT } ); 
-   m_cfgString.insert("make-index-cmd-name",     struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("latex-output",            struc_CfgString { "latex",        DEFAULT } ); 
+   m_cfgString.insert("latex-cmd-name",          struc_CfgString { "latex",        DEFAULT } ); 
+   m_cfgString.insert("make-index-cmd-name",     struc_CfgString { "makeindex",    DEFAULT } ); 
    m_cfgBool.insert("latex-compact",             struc_CfgBool   { false,          DEFAULT } );  
-   m_cfgEnum.insert("latex-paper-type",          struc_CfgEnum   { "",             DEFAULT } );
+   m_cfgEnum.insert("latex-paper-type",          struc_CfgEnum   { "a4",           DEFAULT } );
    m_cfgList.insert("latex-extra-packages",      struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgString.insert("latex-header",            struc_CfgString { QString(),      DEFAULT } ); 
    m_cfgString.insert("latex-footer",            struc_CfgString { QString(),      DEFAULT } ); 
    m_cfgList.insert("latex-extra-files",         struc_CfgList   { QStringList(),  DEFAULT } );
 
-   m_cfgBool.insert("latex-hyper-pdf",           struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("latex-pdf",                 struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("latex-hyper-pdf",           struc_CfgBool   { true,           DEFAULT } );  
+   m_cfgBool.insert("latex-pdf",                 struc_CfgBool   { true,           DEFAULT } );  
+   m_cfgBool.insert("latex-ps",                  struc_CfgBool   { false,          DEFAULT } );     
    m_cfgBool.insert("latex-batch-mode",          struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("latex-hide-indices",        struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("latex-source-code",         struc_CfgBool   { false,          DEFAULT } );
-   m_cfgString.insert("latex-bib-style",         struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgString.insert("latex-bib-style",         struc_CfgString { "plain",        DEFAULT } ); 
 
    // tab 3 - man
-   m_cfgString.insert("man-output",              struc_CfgString { QString(),      DEFAULT } );
-   m_cfgString.insert("man-extension",           struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("man-output",              struc_CfgString { "man",          DEFAULT } );
+   m_cfgString.insert("man-extension",           struc_CfgString { ".3",           DEFAULT } );
    m_cfgString.insert("man-subdir",              struc_CfgString { QString(),      DEFAULT } );
    m_cfgBool.insert("man-links",                 struc_CfgBool   { false,          DEFAULT } );
+
+   // tab 2 - perlmod         
+   m_cfgBool.insert("generate-perl",             struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("perl-latex",                struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("perl-pretty",               struc_CfgBool   { true,           DEFAULT } );
+   m_cfgString.insert("perl-prefix",             struc_CfgString { QString(),      DEFAULT } );
 
    // tab 3 - qt help
    m_cfgBool.insert("generate-qthelp",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgString.insert("qch-file",                struc_CfgString { QString(),      DEFAULT } );
-   m_cfgString.insert("qhp-namespace",           struc_CfgString { QString(),      DEFAULT } );
-   m_cfgString.insert("qhp-virtual-folder",      struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("qhp-namespace",           struc_CfgString { "org.doxypress.Project",  DEFAULT } );
+   m_cfgString.insert("qhp-virtual-folder",      struc_CfgString { "doc",          DEFAULT } );
    m_cfgString.insert("qhp-cust-filter-name",    struc_CfgString { QString(),      DEFAULT } );
    m_cfgList.insert("qhp-cust-attrib",           struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("qhp-sect-attrib",           struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgString.insert("qthelp-gen-path",         struc_CfgString { QString(),      DEFAULT } );
 
    // tab 3 - rtf
-   m_cfgString.insert("rtf-output",              struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("rtf-output",              struc_CfgString { "rtf",          DEFAULT } );
    m_cfgBool.insert("rtf-compact",               struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("rtf-hyperlinks",            struc_CfgBool   { false,          DEFAULT } );
    m_cfgString.insert("rtf-stylesheet",          struc_CfgString { QString(),      DEFAULT } );
    m_cfgString.insert("rtf-extension",           struc_CfgString { QString(),      DEFAULT } );
 
    // tab 3 - xml
-   m_cfgString.insert("xml-output",              struc_CfgString { QString(),      DEFAULT } );
-   m_cfgBool.insert("xml-program-listing",       struc_CfgBool   { false,          DEFAULT } );
-
-   // tab 3 - docbook     
-   m_cfgString.insert("docbook-output",          struc_CfgString { QString(),      DEFAULT } );
-   m_cfgBool.insert("docbook-program-listing",   struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("xml-output",              struc_CfgString { "xml",          DEFAULT } );
+   m_cfgBool.insert("xml-program-listing",       struc_CfgBool   { true,           DEFAULT } ); 
 }
 
 bool Config::read_ProjectFile(const QString &fName)
@@ -514,48 +508,3 @@ bool Config::read_ProjectFile(const QString &fName)
 
    return isError;
 }
-
-
-/*
-
-
-void Config::getLogo(const QString route)
-{
-
-   QString iconName;
-
-   if (route == "load") {
-      iconName = m_project_iconFN;
-
-   } else {
-      QString path = pathName(m_curFile);
-      iconName = QFileDialog::getOpenFileName(this, tr("Select Project Icon"), path);
-   }
-
-   if (iconName.isEmpty()) {
-      m_ui->project_icon->setText(tr("No Logo was selected"));
-
-   } else {
-      QFile fout(iconName);
-
-      if (! fout.exists()) {
-         m_ui->project_icon->setText(tr("Unable to find file: ") + iconName);
-
-      } else {
-         QPixmap pm(iconName);
-
-         if (! pm.isNull()) {
-            m_ui->project_icon->setPixmap(pm.scaledToHeight(55, Qt::SmoothTransformation));
-
-         } else {
-            m_ui->project_icon->setText(tr("No preview is available for: ") + iconName);
-         }
-      }
-
-      m_project_iconFN = iconName;
-   }
-
-}
-
-*/
-

@@ -83,7 +83,7 @@ ClassDef::ClassDef(const char *defFileName, int defLine, int defColumn, const ch
    m_membersMerged = false;  
    m_usedOnly      = false;
 
-   m_isSimple = Config::getBool("inline-simple-structs");
+   m_isSimple = Config::getBool("inline-simple-struct");
    
    m_taggedInnerClasses = 0;  
    m_spec = 0;
@@ -2903,7 +2903,7 @@ QByteArray ClassDef::compoundTypeString() const
 QByteArray ClassDef::getOutputFileBase() const
 {
    static bool inlineGroupedClasses = Config::getBool("inline-grouped-classes");
-   static bool inlineSimpleClasses  = Config::getBool("inline-simple-structs");
+   static bool inlineSimpleClasses  = Config::getBool("inline-simple-struct");
 
    if (! Doxygen::generatingXmlOutput) {
       QSharedPointer<Definition> scope;
@@ -3890,7 +3890,7 @@ QByteArray ClassDef::anchor() const
 bool ClassDef::isEmbeddedInOuterScope() const
 {
    static bool inlineGroupedClasses = Config::getBool("inline-grouped-classes");
-   static bool inlineSimpleClasses  = Config::getBool("inline-simple-structs");
+   static bool inlineSimpleClasses  = Config::getBool("inline-simple-struct");
 
    QSharedPointer<Definition> container = getOuterScope();
 

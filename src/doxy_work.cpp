@@ -266,7 +266,7 @@ namespace Doxy_Work{
 
    ClassDef::CompoundType convertToCompoundType(int section, uint64_t specifier);
 
-   void copyExtraFiles(const QString &filesOption, const QString &outputOption);
+   void copyExtraFiles(const QString &kind);
    void copyLogo();
    void copyStyleSheet();
 
@@ -441,7 +441,7 @@ using namespace Doxy_Work;
 
 void parseInput()
 {
-   printf("**  Parse input files\n");   
+   printf("Parse input files\n");   
 
    // Make sure the output directory exists
    QString outputDirectory = Config::getString("output-dir");
@@ -632,7 +632,7 @@ void parseInput()
       addSTLClasses(rootNav);
    }
 
-   Doxy_Globals::g_stats.begin("Parsing files\n");
+   Doxy_Globals::g_stats.begin("**  Parsing files\n");
    parseFiles(root, rootNav);
 
    Doxy_Globals::g_storage->close();
@@ -907,7 +907,7 @@ void parseInput()
 void generateOutput()
 {
    // Initialize output generators
-   printf("**  Generate Documention Output\n");   
+   printf("**  Generate Documentation Output\n");   
 
    // dump all symbols
    if (Doxy_Globals::g_dumpSymbolMap) {
@@ -921,6 +921,8 @@ void generateOutput()
    bool generateLatex = Config::getBool("generate-latex");
    bool generateMan   = Config::getBool("generate-man");
    bool generateRtf   = Config::getBool("generate-rtf");
+
+   const QString htmlOutput = Config::getString("html-output");
   
    Doxy_Globals::g_outputList = new OutputList(true);
 
@@ -957,11 +959,11 @@ void generateOutput()
 
       Doxygen::indexList->initialize();
       HtmlGenerator::writeTabData();
- 
-      // copy static stuff
+
+      // copy files
       copyStyleSheet(); 
       copyLogo();   
-      copyExtraFiles("html-extra-files", "html-output");
+      copyExtraFiles("html");
 
       FTVHelp::generateTreeViewImages();
    }
@@ -971,7 +973,7 @@ void generateOutput()
       LatexGenerator::init();
 
       // copy static stuff
-      copyExtraFiles("latex-extra-files", "latex-output");
+      copyExtraFiles("latex");
    }
 
    if (generateMan) {
@@ -985,22 +987,20 @@ void generateOutput()
    }
 
    if (Config::getBool("use-htags")) {
-      Htags::useHtags = true;
-      QString htmldir = Config::getString("html-output");
+      Htags::useHtags = true;      
 
-      if (! Htags::execute(htmldir)) {
+      if (! Htags::execute(htmlOutput)) {
          err("USE HTAGS is set, however htags(1) failed\n");
       }
-      if (! Htags::loadFilemap(htmldir)) {
+      if (! Htags::loadFilemap(htmlOutput)) {
          err("htags(1) ended normally but failed to load the filemap\n");
       }
    }
 
  
    // ** generate documentation
-
    if (generateHtml) {
-      writeDoxFont(Config::getString("html-output"));
+      writeDoxFont(htmlOutput);
    }
 
    if (generateLatex) {
@@ -1013,7 +1013,8 @@ void generateOutput()
 
    Doxy_Globals::g_stats.begin("Generating style sheet\n");
   
-   Doxy_Globals::g_outputList->writeStyleInfo(0); // write first part
+   // write first part
+   Doxy_Globals::g_outputList->writeStyleInfo(0); 
    Doxy_Globals::g_stats.end();
 
    static bool searchEngine      = Config::getBool("html-search");
@@ -1025,7 +1026,7 @@ void generateOutput()
 
    if (generateHtml && searchEngine) {
       Doxy_Globals::g_stats.begin("Generating search index\n");
-      QString searchDirName = Config::getString("html-output") + "/search";
+      QString searchDirName = htmlOutput + "/search";
 
       QDir searchDir(searchDirName);
 
@@ -1086,7 +1087,7 @@ void generateOutput()
 
    if (Doxygen::formulaList->count() > 0 && generateHtml && ! Config::getBool("use-mathjax")) {
       Doxy_Globals::g_stats.begin("Generating bitmaps for formulas in HTML\n");
-      Doxygen::formulaList->generateBitmaps(Config::getString("html-output"));
+      Doxygen::formulaList->generateBitmaps(htmlOutput);
       Doxy_Globals::g_stats.end();
    }
 
@@ -1104,7 +1105,7 @@ void generateOutput()
 
    if (Config::getBool("dot-cleanup")) {
       if (generateHtml) {
-         removeDoxFont(Config::getString("html-output"));
+         removeDoxFont(htmlOutput);
       }
       if (generateRtf) {
          removeDoxFont(Config::getString("rtf-output"));
@@ -1123,7 +1124,6 @@ void generateOutput()
    }
 
 /* unsupported feature (broom) 
-
    if (USE_SQLITE3) {
       Doxy_Globals::g_stats.begin("Generating SQLITE3 output\n");
       generateSqlite3();
@@ -1154,7 +1154,7 @@ void generateOutput()
       if (Doxygen::searchIndex->kind() == SearchIndexIntf::Internal) { // write own search index
 
          HtmlGenerator::writeSearchPage();
-         Doxygen::searchIndex->write(Config::getString("html-output") + "/search/search.idx");
+         Doxygen::searchIndex->write(htmlOutput + "/search/search.idx");
 
       } else { 
          // write data for external search index
@@ -1196,12 +1196,12 @@ void generateOutput()
 
       Doxy_Globals::g_stats.begin("Running html help compiler\n");
       QString oldDir = QDir::currentPath();
-      QDir::setCurrent(Config::getString("html-output"));
+      QDir::setCurrent(htmlOutput);
 
       portable_sysTimerStart();
 
       if (portable_system(Config::getString("hhc-location"), "index.hhp", false)) {
-         err("Failed to run html help compiler on index.hhp\n");
+         err("Failed to run HTML Help compiler on 'index.hhp'\n");
       }
 
       portable_sysTimerStop();
@@ -1219,12 +1219,12 @@ void generateOutput()
       QString("%1 -o \"%2\"").arg(qhpFileName).arg(qchFileName);
 
       QString const oldDir = QDir::currentPath();
-      QDir::setCurrent(Config::getString("html-output"));
+      QDir::setCurrent(htmlOutput);
 
       portable_sysTimerStart();
 
       if (portable_system(Config::getString("qthhelp-gen-path"), args, false)) {
-         err("Failed to run qhelpgenerator on index.qhp\n");
+         err("Failed to run qhelpgenerator on 'index.qhp'\n");
       }
 
       portable_sysTimerStop();
@@ -1241,12 +1241,12 @@ void generateOutput()
       Doxy_Globals::g_stats.print();
 
    } else {
-      msg("Finished.\n");
+      msg("Finished\n");
 
    }
 
    // all done, cleaning up and exit  
-   shutDownDoxypress();          
+   shutDownDoxypress();
    Doxy_Globals::g_programExit = true;
 }
 
@@ -8969,24 +8969,36 @@ static QByteArray fixSlashes(QByteArray &s)
 
 void Doxy_Work::copyStyleSheet()
 {
-   const QStringList htmlExtraStyleSheet = Config::getList("html-stylesheets");
+   const QString outputDir = Config::getString("html-output") + "/";
+   const QString cssFile   = ":/resources/html/doxy_style.css";
 
-   for (uint i = 0; i < htmlExtraStyleSheet.count(); ++i) {
+   QFileInfo fi(cssFile);
 
-      QString fileName(htmlExtraStyleSheet.at(i));
+   if (! fi.exists()) {
+      err("Default stylesheet file '%s' does not exist\n", qPrintable(cssFile));        
 
+   } else {
+      QString destFileName = outputDir + "doxy_style.css";
+      copyFile(cssFile, destFileName);
+   }
+ 
+   //
+   const QStringList htmlStyleSheet = Config::getList("html-stylesheets");
+
+   for (auto fileName : htmlStyleSheet) {
+      
       if (! fileName.isEmpty()) {
          QFileInfo fi(fileName);
 
          if (! fi.exists()) {
-            err("Style sheet '%s' specified by 'HTML STYLESHEETS' tag does not exist\n", qPrintable(fileName));
+            err("Style sheet '%s' specified in HTML STYLESHEETS does not exist\n", qPrintable(fileName));
 
-         } else if (fi.fileName() == "doxy_style.css" || fi.fileName() == "tabs.css" || fi.fileName()=="navtree.css") {
-            err("Style sheet %s specified by HTML_EXTRA_STYLESHEET is a built in stylesheet. Please use a "
+         } else if (fi.fileName() == "doxy_style.css" || fi.fileName() == "tabs.css" || fi.fileName() == "navtree.css") {
+            err("Style sheet %s specified by HTML STYLESHEETS is using built in stylesheet. Please use a "
                "different name\n", qPrintable(fileName));      
             
          } else {
-            QString destFileName = Config::getString("html-output") + "/" + fi.fileName();
+            QString destFileName = outputDir + fi.fileName();
             copyFile(fileName, destFileName);
          }
       }
@@ -9007,28 +9019,42 @@ void Doxy_Work::copyLogo()
          QString destFileName = Config::getString("html-output") + "/" + fi.fileName();
 
          copyFile(projectLogo, destFileName);
-         Doxygen::indexList->addImageFile(qPrintable(fi.fileName()));
+         Doxygen::indexList->addImageFile(fi.fileName());
       }
    }
 }
 
-void Doxy_Work::copyExtraFiles(const QString &filesOption, const QString &outputOption)
-{
-   const QStringList files = Config::getList(filesOption);
+void Doxy_Work::copyExtraFiles(const QString &kind)
+{  
+   QString outputDir;
+   QStringList extraFiles;
+
+   if (kind == "html") { 
+      outputDir  = Config::getString("html-output") + "/";     
+      extraFiles = Config::getList("html-extra-files");
+
+   } else {
+      outputDir  = Config::getString("latex-output") + "/";     
+      extraFiles = Config::getList("latex-extra-files");   
+   }
    
-   for (int i = 0; i < files.count(); ++i) {
-      QString fileName(files.at(i));
+   for (auto fileName : extraFiles) {    
 
       if (! fileName.isEmpty()) {
          QFileInfo fi(fileName);
 
          if (! fi.exists()) {
-            err("Extra file '%s' specified in %s does not exist\n", qPrintable(fileName), qPrintable(filesOption));
+
+            if (kind == "html") {
+               err("Extra file '%s' specified in HTML EXTRA FILES does not exist\n", qPrintable(fileName));
+            } else {
+                err("Extra file '%s' specified in LATEX EXTRA FILES does not exist\n", qPrintable(fileName));
+            }
 
          } else {
-            QString destFileName = Config::getString(outputOption) + "/" + fi.fileName();
+            QString destFileName = outputDir + fi.fileName();
 
-            Doxygen::indexList->addImageFile(fi.fileName().toUtf8());
+            Doxygen::indexList->addImageFile(fi.fileName());
             copyFile(fileName, destFileName);
          }
       }
@@ -9078,7 +9104,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
 
    if (Config::getBool("enable-preprocessing") && parser->needsPreprocessing(extension)) {
       BufStr inBuf(fi.size() + 4096);
-      msg("Preprocessing %s\n", fileName.constData());
+      msg("Processing %s\n", fileName.constData());
 
       readInputFile(fileName, inBuf);
       preprocessFile(fileName, inBuf, preBuf);
@@ -9944,7 +9970,7 @@ void searchInputFiles()
    Doxy_Globals::g_stats.end();
 
    Doxy_Globals::g_stats.begin("Searching for files to exclude\n");
-   const QStringList excludeList  = Config::getList("exclude");
+   const QStringList excludeList  = Config::getList("exclude-files");
    const QStringList filePatterns = Config::getList("file-patterns");
 
    for (auto s : excludeList) {   

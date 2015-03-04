@@ -2632,7 +2632,7 @@ bool PerlModGenerator::generateDoxyRules()
    }
 
    bool perlmodLatex = Config::getBool("perl-latex");
-   QString prefix = Config::getString("perlmod-prefix");
+   QString prefix = Config::getString("perl-prefix");
 
    QTextStream doxyRulesStream(&doxyRules);
    doxyRulesStream <<
@@ -2734,7 +2734,7 @@ bool PerlModGenerator::generateMakefile()
    }
 
    bool perlmodLatex = Config::getBool("perl-latex");
-   QString prefix = Config::getString("perlmod-prefix");
+   QString prefix = Config::getString("perl-prefix");
 
    QTextStream makefileStream(&makefile);
 

@@ -28,17 +28,14 @@
 
 class ArgumentList;
 class Entry;
-class MemberList;
 
 struct BaseInfo;
+struct BriefInfo;
 struct Grouping;
 struct SectionInfo;
 struct ListItemInfo;
-struct BriefInfo;
 
 #define NULL_LIST 0xffffffff
-
-//----- marshaling function: datatype -> byte stream --------------------
 
 void marshalInt(StorageIntf *s,         int v);
 void marshalUInt(StorageIntf *s,        uint v);
@@ -58,7 +55,6 @@ void marshalSectionInfoList(StorageIntf *s, QList<SectionInfo> *anchors);
 void marshalItemInfoList(StorageIntf *s,    QList<ListItemInfo> *sli);
 
 void marshalBriefInfo(StorageIntf *s,       BriefInfo *briefInfo);
-void marshalMemberList(StorageIntf *s,      MemberList *ml);
 void marshalEntry(StorageIntf *s,           QSharedPointer<Entry> e);
 void marshalEntryTree(StorageIntf *s,       QSharedPointer<Entry> e);
 
@@ -78,11 +74,10 @@ ArgumentList        *unmarshalArgumentList(StorageIntf *s);
 QList<ArgumentList> *unmarshalArgumentLists(StorageIntf *s);
 QList<BaseInfo>      unmarshalBaseInfoList(StorageIntf *s);
 QList<Grouping>     *unmarshalGroupingList(StorageIntf *s);
-QList<SectionInfo> *unmarshalSectionInfoList(StorageIntf *s);
+QList<SectionInfo>  *unmarshalSectionInfoList(StorageIntf *s);
 QList<ListItemInfo> *unmarshalItemInfoList(StorageIntf *s);
 
 BriefInfo           *unmarshalBriefInfo(StorageIntf *s);
-MemberList          *unmarshalMemberList(StorageIntf *s);
 
 QSharedPointer<Entry> unmarshalEntry(StorageIntf *s);
 QSharedPointer<Entry> unmarshalEntryTree(StorageIntf *s);

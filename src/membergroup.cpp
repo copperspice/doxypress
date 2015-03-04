@@ -289,50 +289,6 @@ void MemberGroup::findSectionsInDocumentation()
    memberList->findSectionsInDocumentation();
 }
 
-void MemberGroup::marshal(StorageIntf *s)
-{
-   printf("\n\n  BROOM  - Reached MemberGroup::marshall");
-   
-/*
-   marshalMemberList(s, memberList);
-   marshalObjPointer(s, inDeclSection.data()); // reference only
-   marshalInt(s, grpId);
-   marshalQByteArray(s, grpHeader);
-   marshalQByteArray(s, fileName);
-   marshalObjPointer(s, scope);
-   marshalQByteArray(s, doc);
-   marshalBool(s, inSameSection);
-   marshalInt(s, m_numDecMembers);
-   marshalInt(s, m_numDocMembers);
-   marshalObjPointer(s, m_parent);
-   marshalQByteArray(s, m_docFile);
-   marshalItemInfoList (Doxygen::symbolStorage, m_xrefListItems);
-*/
-
-}
-
-void MemberGroup::unmarshal(StorageIntf *s)
-{
-   printf("\n\n  BROOM  - Reached MemberGroup::unmarshall");
-
-/*
-   memberList      = unmarshalMemberList(s);
-   inDeclSection   = QSharedPointer<MemberList>((MemberList *)unmarshalObjPointer(s));
-   grpId           = unmarshalInt(s);
-   grpHeader       = unmarshalQByteArray(s);
-   fileName        = unmarshalQByteArray(s);
-   scope           = unmarshalObjPointer(s).dynamicCast<Definition>();
-   doc             = unmarshalQByteArray(s);
-   inSameSection   = unmarshalBool(s);
-   m_numDecMembers = unmarshalInt(s);
-   m_numDocMembers = unmarshalInt(s);
-   m_parent        = unmarshalObjPointer(s).dynamicCast<Definition>();
-   m_docFile       = unmarshalQByteArray(s);
-   m_xrefListItems = unmarshalItemInfoList (Doxygen::symbolStorage);
-*/
-
-}
-
 void MemberGroup::setRefItems(const QList<ListItemInfo> *sli)
 {
    if (sli) {

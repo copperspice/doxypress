@@ -109,9 +109,6 @@ class MemberGroup
 
    QByteArray anchor() const;
 
-   void marshal(StorageIntf *s);
-   void unmarshal(StorageIntf *s);
-
  private:
    QSharedPointer<MemberList> memberList;      // list of all members in the group
    QSharedPointer<MemberList> inDeclSection;

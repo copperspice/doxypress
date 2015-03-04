@@ -100,20 +100,23 @@ static void writeServerSearchBox(QTextStream &t, const QString &relPath, bool hi
 }
 
 /// Clear a text block \a s from \a begin to \a end markers
-QString clearBlock(const QString &s, const QString &begin, const QString &end)
+QString clearBlock(const QString &output, const QString &begin, const QString &end)
 {
-   QString retval = s;
+   QString retval = output;            
 
-   int beginPos = s.indexOf(begin);
-   int endPos   = s.indexOf(end, beginPos);
-
-   if (beginPos == -1 || endPos == -1 ) {
-      return retval;
-   }
+   while (true) {
+      int beginPos = retval.indexOf(begin);
+      int endPos   = retval.indexOf(end, beginPos);
    
-   int len = (endPos + end.length()) - beginPos;
+      if (beginPos == -1 || endPos == -1 ) {
+         break;
+      }
+   
+      int len = (endPos + end.length()) - beginPos;
+      retval.replace(beginPos, len, ""); 
+   }
 
-   return retval.replace(beginPos, len, "");     
+   return retval;     
 }
 
 static QString selectBlock(const QString &s, const QString &name, bool enable)
@@ -179,8 +182,8 @@ static QString removeEmptyLines(const QString &s)
    return retval;
 }
 
-static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &title, 
-                  const QString &relPath= QString(), const QString &navPath = QString())
+static QString substituteHtmlKeywords(const QByteArray &output, const QString &title, 
+                  const QString &relPath = QString(), const QString &navPath = QString())
 {
    // Build CSS/Javascript tags depending on treeview, search engine settings  
 
@@ -193,6 +196,7 @@ static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &tit
    static QString projectName    = Config::getString("project-name");
    static QString projectVersion = Config::getString("project-version");
    static QString projectBrief   = Config::getString("project-brief");
+   static QString projectLogo    = Config::getString("project-logo");
 
    static bool timeStamp         = Config::getBool("html-timestamp");
    static bool treeView          = Config::getBool("generate-treeview");
@@ -206,14 +210,14 @@ static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &tit
    static bool hasProjectName    = ! projectName.isEmpty();
    static bool hasProjectVersion = ! projectVersion.isEmpty();
    static bool hasProjectBrief   = ! projectBrief.isEmpty();
-   static bool hasProjectLogo    = ! Config::getString("project-logo").isEmpty();
+   static bool hasProjectLogo    = ! projectLogo.isEmpty();
 
    static bool titleArea = (hasProjectName || hasProjectBrief || hasProjectLogo || (disableIndex && searchEngine));
     
    // always first
    QString cssFile = "doxy_style.css"; 
 
-   QByteArray extraCssText = "";
+   QString extraCssText = "";
    const QStringList extraCssFile = Config::getList("html-stylesheets");
 
    for (auto fileName : extraCssFile) {          
@@ -264,14 +268,12 @@ static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &tit
                         "  });\n"
                         "</script>\n";
 
-         // OPENSEARCH_PROVIDER {
+         // OPENSEARCH_PROVIDER
          searchCssJs += "<link rel=\"search\" href=\"" + relPath +
                         "search_opensearch.php?v=opensearch.xml\" "
                         "type=\"application/opensearchdescription+xml\" title=\"" +
                         (hasProjectName ? projectName : QByteArray("DoxyPress")) +
-                        "\"/>";
-
-         // OPENSEARCH_PROVIDER }
+                        "\"/>";         
       }
       searchBox = getSearchBox(serverBasedSearch, relPath, false);
    }
@@ -294,8 +296,8 @@ static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &tit
 
       const QStringList mathJaxExtensions = Config::getList("mathjax-extensions");
      
-      for (auto s : mathJaxExtensions) {
-         mathJaxJs += ", \"" + s.toUtf8() + ".js\"";         
+      for (auto item : mathJaxExtensions) {
+         mathJaxJs += ", \"" + item + ".js\"";         
       }
 
       if (mathJaxFormat.isEmpty()) {
@@ -306,7 +308,7 @@ static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &tit
                    "    jax: [\"input/TeX\",\"output/" + mathJaxFormat + "\"],\n"
                    "});\n";
 
-      if (!g_mathjax_code.isEmpty()) {
+      if (! g_mathjax_code.isEmpty()) {
          mathJaxJs += g_mathjax_code;
          mathJaxJs += "\n";
       }
@@ -315,9 +317,24 @@ static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &tit
       mathJaxJs += "<script src=\"" + path + "MathJax.js\"></script>\n";
    }
 
+   QString result = output.constData();
+
    // first substitute generic keywords
-   QString result = substituteKeywords(s, title, convertToHtml(projectName.toUtf8()), convertToHtml(projectVersion.toUtf8()),
-                convertToHtml(projectBrief.toUtf8()));
+   if (! title.isEmpty()) {
+      result = result.replace("$title", convertToHtml(title));
+   }
+
+   result = result.replace("$datetimeHHMM",   dateTimeHHMM());
+   result = result.replace("$datetime",       dateToString(true));
+   result = result.replace("$date",           dateToString(false));
+   result = result.replace("$year",           yearToString());
+
+   result = result.replace("$doxygenversion", versionString);
+
+   result = result.replace("$projectname",    convertToHtml(projectName));  
+   result = result.replace("$projectversion", convertToHtml(projectVersion));
+   result = result.replace("$projectbrief",   convertToHtml(projectBrief));
+   result = result.replace("$projectlogo",    stripPath(projectLogo));
 
    // additional HTML only keywords
    result = result.replace("$navpath",         navPath);
@@ -338,7 +355,7 @@ static QString substituteHtmlKeywords(const QByteArray &s, const QByteArray &tit
    result = selectBlock(result, "SEARCHENGINE",      searchEngine);
    result = selectBlock(result, "TITLEAREA",         titleArea);
    result = selectBlock(result, "PROJECT_NAME",      hasProjectName);
-   result = selectBlock(result, "PROJECT-VERSION",   hasProjectVersion);
+   result = selectBlock(result, "PROJECT_VERSION",   hasProjectVersion);
    result = selectBlock(result, "PROJECT_BRIEF",     hasProjectBrief);
    result = selectBlock(result, "PROJECT_LOGO",      hasProjectLogo);
 
@@ -665,7 +682,7 @@ void HtmlGenerator::init()
 
    QDir d(dname);
 
-   if (! d.exists() && !d.mkdir(dname)) {
+   if (! d.exists() && ! d.mkdir(dname)) {
       err("Unable to create output directory %s\n", qPrintable(dname));      
       exit(1);
    }
@@ -678,7 +695,7 @@ void HtmlGenerator::init()
       g_header = ResourceMgr::instance().getAsString("html/header.html");
    }
 
-    QString htmlFooter = Config::getString("html-footer");
+   QString htmlFooter = Config::getString("html-footer");
 
    if (! htmlFooter.isEmpty()) {
       g_footer = fileToString(htmlFooter);      
@@ -858,7 +875,7 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
    Doxygen::indexList->addIndexFile(fileName);
 
    m_lastFile = fileName;
-   m_textStream << substituteHtmlKeywords(g_header, convertToHtml(filterTitle(title)), m_relativePath);
+   m_textStream << substituteHtmlKeywords(g_header, filterTitle(title), m_relativePath);
 
    m_textStream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress " << versionString << " -->" << endl;
    
@@ -936,7 +953,7 @@ void HtmlGenerator::writeLogo()
 
 void HtmlGenerator::writePageFooter(QTextStream &t_stream, const QString &lastTitle, const QString &relPath, const QString &navPath)
 {
-   t_stream << substituteHtmlKeywords(g_footer, convertToHtml(lastTitle), relPath, navPath);
+   t_stream << substituteHtmlKeywords(g_footer, lastTitle, relPath, navPath);
 }
 
 void HtmlGenerator::writeFooter(const QString &navPath)

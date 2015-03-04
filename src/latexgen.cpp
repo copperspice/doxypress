@@ -634,8 +634,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
 
          } else {
             QByteArray header = fileToString(latexHeader);
-            m_textStream << substituteKeywords(header, "", convertToLaTeX(Config::getString("project-name")),
-                  convertToLaTeX(Config::getString("project-version")), convertToLaTeX(Config::getString("project-brief")));
+            m_textStream << modifyKeywords(header);
          }
       
          break;
@@ -1095,15 +1094,38 @@ void LatexGenerator::endIndexSection(IndexSections is)
       case isEndIndex:
          if (latexFooter.isEmpty()) {
             writeDefaultFooter(m_textStream);
+
          } else {
-            QByteArray footer = fileToString(latexFooter);
-            
-            m_textStream << substituteKeywords(footer, "", convertToLaTeX(Config::getString("project-name")),
-                  convertToLaTeX(Config::getString("project-version")), convertToLaTeX(Config::getString("project-brief")));
+            QByteArray footer = fileToString(latexFooter);            
+            m_textStream << modifyKeywords(footer);
 
          }
          break;
    }
+}
+
+QString LatexGenerator::modifyKeywords(const QByteArray &output) 
+{
+   static QString projectName    = convertToLaTeX(Config::getString("project-name"));
+   static QString projectVersion = convertToLaTeX(Config::getString("project-version"));
+   static QString projectBrief   = convertToLaTeX(Config::getString("project-brief"));
+   static QString projectLogo    = Config::getString("project-logo");
+
+   QString result = output.constData();
+  
+   result = result.replace("$datetimeHHMM",   dateTimeHHMM());
+   result = result.replace("$datetime",       dateToString(true));
+   result = result.replace("$date",           dateToString(false));
+   result = result.replace("$year",           yearToString());
+
+   result = result.replace("$doxygenversion", versionString);
+
+   result = result.replace("$projectname",    projectName);  
+   result = result.replace("$projectversion", projectVersion);
+   result = result.replace("$projectbrief",   projectBrief);
+   result = result.replace("$projectlogo",    stripPath(projectLogo));
+
+   return result;
 }
 
 void LatexGenerator::writePageLink(const char *name, bool)

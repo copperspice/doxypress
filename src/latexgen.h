@@ -367,8 +367,11 @@ class LatexGenerator : public OutputGenerator
  private:
    LatexGenerator(const LatexGenerator &);
    LatexGenerator &operator=(const LatexGenerator &);
+
+   QString modifyKeywords(const QByteArray &s); 
    void escapeLabelName(const char *s);
    void escapeMakeIndexChars(const char *s);
+
    int col;
    bool insideTabbing;
    bool firstDescItem;

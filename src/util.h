@@ -115,62 +115,48 @@ class LetterToIndexMap : public LongMap<QSharedPointer<T>>
    }
 };
 
-QByteArray langToString(SrcLangExt lang);
+inline bool isId(int c)
+{
+   return c == '_' || c >= 128 || c < 0 || isalnum(c);
+}
+
+// **
+
+bool classVisibleInIndex(QSharedPointer<ClassDef> cd);
+bool classHasVisibleChildren(QSharedPointer<ClassDef> cd);
+
+QString dateToString(bool);
+QString dateTimeHHMM();
+QString yearToString();
+
+bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *args, QSharedPointer<MemberDef> &md,
+                  QSharedPointer<ClassDef> &cd, QSharedPointer<FileDef> &fd, QSharedPointer<NamespaceDef> &nd, 
+                  QSharedPointer<GroupDef> &gd, bool forceEmptyScope = false, QSharedPointer<FileDef> currentFile = QSharedPointer<FileDef>(), 
+                  bool checkCV = false, const char *forceTagFile  = 0);
+
+QString getFileFilter(const char *name, bool isSourceCode);
+QByteArray generateMarker(int id);
+int getPrefixIndex(const QByteArray &name);
+
+bool generateLink(OutputDocInterface &od, const char *, const char *, bool inSeeBlock, const char *);
+void generateFileRef(OutputDocInterface &od, const char *, const char *linkTxt = 0);
+
 QByteArray getLanguageSpecificSeparator(SrcLangExt lang, bool classScope = false);
+QByteArray getCanonicalTemplateSpec(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, const QByteArray &spec);
+
+QByteArray fileToString(const QString &name, bool filter = false, bool isSourceCode = false);
+
+QByteArray langToString(SrcLangExt lang);
 
 void linkifyText(const TextGeneratorIntf &ol, QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
                  QSharedPointer<Definition> self, const char *text, bool autoBreak = false, bool external = true,
                  bool keepSpaces = false,  int indentLevel = 0);
 
-void setAnchors(QSharedPointer<MemberList> ml);
-
-QByteArray fileToString(const QString &name, bool filter = false, bool isSourceCode = false);
-
-QString dateToString(bool);
-
-bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *args, QSharedPointer<MemberDef> &md,
-             QSharedPointer<ClassDef> &cd, QSharedPointer<FileDef> &fd, QSharedPointer<NamespaceDef> &nd, 
-             QSharedPointer<GroupDef> &gd, bool forceEmptyScope = false, QSharedPointer<FileDef> currentFile = QSharedPointer<FileDef>(), 
-             bool checkCV = false, const char *forceTagFile  = 0);
-
-
-QString getFileFilter(const char *name, bool isSourceCode);
-
-bool resolveRef(/* in */  const char *scName,
-                          /* in */  const char *name,
-                          /* in */  bool inSeeBlock,
-                          /* out */ QSharedPointer<Definition> *resContext,
-                          /* out */ QSharedPointer<MemberDef> *resMember,
-                          /* in */  bool lookForSpecializations = true,
-                          /* in */  QSharedPointer<FileDef> currentFile = QSharedPointer<FileDef>(),
-                          /* in */  bool checkScope = false
-               );
-
-bool resolveLink(/* in */  const char *scName,
-                           /* in */  const char *lr,
-                           /* in */  bool inSeeBlock,
-                           /* out */ QSharedPointer<Definition> *resContext,
-                           /* out */ QByteArray &resAnchor
-                );
-
-//bool generateRef(OutputDocInterface &od,const char *, const char *,bool inSeeBlock,const char * =0);
-
-bool generateLink(OutputDocInterface &od, const char *,
-                  const char *, bool inSeeBlock, const char *);
-
-void generateFileRef(OutputDocInterface &od, const char *, const char *linkTxt = 0);
-
-void writePageRef(OutputDocInterface &od, const char *cn, const char *mn);
-
-QByteArray getCanonicalTemplateSpec(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, const QByteArray &spec);
-
 bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef> srcFileScope, ArgumentList *srcAl,
-                     QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope, ArgumentList *dstAl, bool checkCV );
+                  QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope, ArgumentList *dstAl, bool checkCV );
 
 void mergeArguments(ArgumentList *, ArgumentList *, bool forceNameOverwrite = false);
-QByteArray substituteClassNames(const QByteArray &s);
-QByteArray substitute(const QByteArray &s, const QByteArray &src, const QByteArray &dst);
-QByteArray resolveDefines(const char *n);
+
 
 QSharedPointer<ClassDef> getClass(const char *key);
 
@@ -179,53 +165,47 @@ QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSha
                   bool mayBeHidden = false, QByteArray *pResolvedType = 0);
 
 QSharedPointer<NamespaceDef> getResolvedNamespace(const char *key);
-
 QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const char *n, bool &ambig);
 
 QByteArray showFileDefMatches(const FileNameDict *fnDict, const char *n);
 
 int guessSection(const char *name);
 
-inline bool isId(int c)
-{
-   return c == '_' || c >= 128 || c < 0 || isalnum(c);
-}
-
-QByteArray removeRedundantWhiteSpace(const QByteArray &s);
-
 QByteArray argListToString(ArgumentList *al, bool useCanonicalType = false, bool showDefVals = true);
-
 QByteArray tempArgListToString(const ArgumentList *al, SrcLangExt lang);
-
-QByteArray generateMarker(int id);
 
 void writeExample(OutputList &ol, ExampleSDict *el);
 
-QByteArray stripAnonymousNamespaceScope(const QByteArray &s);
-
-QString stripFromPath(const QString &path);
-QString stripFromIncludePath(const QString &path);
-
 bool rightScopeMatch(const QByteArray &scope, const QByteArray &name);
-
 bool leftScopeMatch(const QByteArray &scope, const QByteArray &name);
 
-QString substituteKeywords(const QByteArray &s, const char *title,
-                           const char *projName, const char *projNum, const char *projBrief);
 
-int getPrefixIndex(const QByteArray &name);
+bool resolveRef(const char *scName, const char *name, bool inSeeBlock, QSharedPointer<Definition> *resContext, 
+                  QSharedPointer<MemberDef> *resMember, bool lookForSpecializations = true, 
+                  QSharedPointer<FileDef> currentFile = QSharedPointer<FileDef>(), bool checkScope = false);
 
+bool resolveLink(const char *scName, const char *lr, bool inSeeBlock, QSharedPointer<Definition> *resContext, QByteArray &resAnchor);
+
+QByteArray removeRedundantWhiteSpace(const QByteArray &s);
 QByteArray removeAnonymousScopes(const QByteArray &s);
-
+QByteArray resolveDefines(const char *n);
 QByteArray replaceAnonymousScopes(const QByteArray &s, const char *replacement = 0);
+
+
+QByteArray stripAnonymousNamespaceScope(const QByteArray &s);
+QString stripFromPath(const QString &path);
+QString stripFromIncludePath(const QString &path);
+void setAnchors(QSharedPointer<MemberList> ml);
+
+QByteArray substituteClassNames(const QByteArray &s);
+QByteArray substitute(const QByteArray &s, const QByteArray &src, const QByteArray &dst);
 
 void initClassHierarchy(ClassSDict *cl);
 
 bool hasVisibleRoot(SortedList<BaseClassDef *> *bcl);
 
-bool classHasVisibleChildren(QSharedPointer<ClassDef> cd);
 bool namespaceHasVisibleChild(QSharedPointer<NamespaceDef> nd, bool includeClasses);
-bool classVisibleInIndex(QSharedPointer<ClassDef> cd);
+
 
 int minClassDistance(QSharedPointer<const ClassDef> cd, QSharedPointer<const ClassDef> bcd, int level = 0);
 Protection classInheritedProtectionLevel(QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef> bcd, 
@@ -352,8 +332,9 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList);
 QByteArray externalLinkTarget();
 QByteArray externalRef(const QString &relPath, const QByteArray &ref, bool href);
 int nextUtf8CharPosition(const QByteArray &utf8Str, int len, int startPos);
-const char *writeUtf8Char(QTextStream &t, const char *s);
 
+const char *writeUtf8Char(QTextStream &t, const char *s);
+void writePageRef(OutputDocInterface &od, const char *cn, const char *mn);
 
 /** Data associated with a HSV colored image. */
 struct ColoredImgDataItem {

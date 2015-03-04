@@ -21,8 +21,9 @@
 #include <cassert>
 #include <stdlib.h>
 
-#include <rtfstyle.h>
+#include <doxy_globals.h>
 #include <message.h>
+#include <rtfstyle.h>
 
 RTFListItemInfo rtf_listItemInfo[rtf_maxIndentLevels];
 
@@ -438,8 +439,10 @@ StyleData::StyleData()
 
 StyleData::~StyleData()
 {
-   delete[] reference;
-   delete[] definition;
+   if (! Doxy_Globals::g_programExit)  {
+      delete[] reference;
+      delete[] definition;
+   }
 }
 
 bool StyleData::setStyle(const char *s, const char *styleName)

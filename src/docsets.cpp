@@ -69,9 +69,9 @@ void DocSets::initialize()
       publisherName = "PublisherName";
    }
 
-   QString projectNumber = Config::getString("project-version");
-   if (projectNumber.isEmpty()) {
-      projectNumber = "ProjectVersion";
+   QString projectVersion = Config::getString("project-version");
+   if (projectVersion.isEmpty()) {
+      projectVersion = "ProjectVersion";
    }
 
    // -- write Makefile
@@ -149,7 +149,7 @@ void DocSets::initialize()
          "     <key>CFBundleIdentifier</key>\n"
          "     <string>" << bundleId << "</string>\n"
          "     <key>CFBundleVersion</key>\n"
-         "     <string>" << projectNumber << "</string>\n"
+         "     <string>" << projectVersion << "</string>\n"
          "     <key>DocSetFeedName</key>\n"
          "     <string>" << feedName << "</string>\n"
          "     <key>DocSetPublisherIdentifier</key>\n"

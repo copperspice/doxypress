@@ -85,7 +85,7 @@ enum Options {
 
 void initDoxyPress()
 {
-   printf("**  DoxyPress Initialization\n"); 
+   printf("Initialization\n"); 
 
    const char *lang = portable_getenv("LC_ALL");
 
@@ -197,7 +197,7 @@ void shutDownDoxypress()
 
    delete theTranslator;
    delete Doxy_Globals::g_outputList;
-  
+
    Mappers::freeMappers();
    codeFreeScanner();
    

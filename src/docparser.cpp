@@ -7047,22 +7047,7 @@ void DocRoot::parse()
 
    do {   
       bool divFound = false;
-
-
-/*
-if (s_fileName.endsWith("qml-color.dox")) {  
-//   printf("\n BROOM    BEFORE call to docTokenizerYYlex()" ); 
-}
-*/
-
       int tok = doctokenizerYYlex();
-
-
-/*
-if (s_fileName.endsWith("qml-color.dox")) {  
-//   printf("\n BROOM    AFTER call to docTokenizerYYlex()\n" ); 
-}
-*/
 
       if (tok == TK_HTMLTAG) {
 
@@ -7092,11 +7077,7 @@ if (s_fileName.endsWith("qml-color.dox")) {
             isFirst = false;
          }
 
-//   printf("\n BROOM  *** docRoot  -- BEFORE parse"); 
-
          retval = par->parse(true, tok);         
-
-//   printf("\n BROOM  *** docRoot  -- AFTER parse  %x \n", this); 
 
          // new code to test for a <div>
          if (! par->isEmpty()) {

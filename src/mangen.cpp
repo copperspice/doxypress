@@ -44,7 +44,8 @@ static QString getSubdir()
    return dirName;
 }
 
-ManGenerator::ManGenerator() : OutputGenerator()
+ManGenerator::ManGenerator() 
+   : OutputGenerator()
 {
    m_dir = Config::getString("man-output") + "/" + getSubdir();
 
@@ -55,7 +56,7 @@ ManGenerator::ManGenerator() : OutputGenerator()
    upperCase = false;
 
    insideTabbing = false;
-   inHeader      = false;     
+   inHeader      = false;
 }
 
 ManGenerator::~ManGenerator()
@@ -85,15 +86,15 @@ void ManGenerator::init()
 
    QDir d(manOutput);
 
-   if (! d.exists() && ! d.mkdir(manOutput)) {
+   if (! d.exists() && ! QDir::current().mkpath(manOutput)) {
       err("Could not create output directory %s\n", qPrintable(manOutput));
       exit(1);
    }
 
    QString subdir = getSubdir();
    d.setPath(manOutput + "/" + subdir);
-  
-   if (! d.exists() && ! d.mkdir(manOutput + "/" + subdir)) {
+ 
+   if (! d.exists() && ! QDir::current().mkpath(manOutput + "/" + subdir)) {
       err("Could not create output directory %s/%s\n", qPrintable(manOutput), qPrintable(subdir));
       exit(1);
    }
@@ -169,11 +170,11 @@ void ManGenerator::endTitleHead(const char *, const char *name)
    m_textStream << ".TH \"" << name << "\" " << extension << " \""
      << dateToString(false) << "\" \"";
 
-   QString projectName = Config::getString("project-name");
-   QString projectVer  = Config::getString("project-version");
+   QString projectName    = Config::getString("project-name");
+   QString projectVersion = Config::getString("project-version");
 
-   if (! projectVer.isEmpty()) {
-      m_textStream << "Version " << projectVer<< "\" \"";
+   if (! projectVersion.isEmpty()) {
+      m_textStream << "Version " << projectVersion<< "\" \"";
    }
 
    if (projectName.isEmpty()) {

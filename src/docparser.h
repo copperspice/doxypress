@@ -180,11 +180,6 @@ template<class T> class CompAccept
       v->visitPre(obj);
 
       for (auto n : m_children) {
-
-// failed on writeDoc()
-// printf("\n BROOM  *** validate parser doc  %x  ",  n );
-// printf("\n BROOM  *** validate parser doc  %s  ",  typeid(*n).name() );
-
          n->accept(v);
       }
 

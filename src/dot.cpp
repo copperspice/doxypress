@@ -2287,7 +2287,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
          removeDotGraph(absBaseName + ".dot");
       }
 
-      Doxygen::indexList->addImageFile(imgName.toUtf8());
+      Doxygen::indexList->addImageFile(imgName);
 
       // write image and map in a table row
       QByteArray mapLabel = escapeCharsInString(n->m_label, false);
