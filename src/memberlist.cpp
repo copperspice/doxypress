@@ -23,7 +23,6 @@
 #include <filedef.h>
 #include <groupdef.h>
 #include <language.h>
-#include <marshal.h>
 #include <memberlist.h>
 #include <membergroup.h>
 #include <message.h>
@@ -742,77 +741,6 @@ void MemberList::findSectionsInDocumentation()
          mg.findSectionsInDocumentation();
       }
    }
-}
-
-void MemberList::marshal(StorageIntf *s)
-{
-   printf("\n\n  BROOM  - Reached MemberList::marshall");
-
-/*
-   marshalInt(s, (int)m_listType);
-   marshalInt(s, m_varCnt);
-   marshalInt(s, m_funcCnt);
-   marshalInt(s, m_enumCnt);
-   marshalInt(s, m_enumValCnt);
-   marshalInt(s, m_typeCnt);
-   marshalInt(s, m_protoCnt);
-   marshalInt(s, m_defCnt);
-   marshalInt(s, m_friendCnt);
-   marshalInt(s, m_numDecMembers);
-   marshalInt(s, m_numDocMembers);
-   marshalBool(s, m_inGroup);
-   marshalBool(s, m_inFile);
-   
-   if (memberGroupList == 0) {
-      marshalUInt(s, NULL_LIST); // null pointer representation
-
-   } else {
-      marshalUInt(s, memberGroupList->count());
-      
-      for (auto mg : *memberGroupList) {   
-         mg.marshal(s);
-      }
-   }
-*/
-
-}
-
-void MemberList::unmarshal(StorageIntf *s)
-{
-   printf("\n\n  BROOM  - Reached MemberList::unmarshall");
-
-/*
-   m_listType       = (MemberListType)unmarshalInt(s);
-   m_varCnt         = unmarshalInt(s);
-   m_funcCnt        = unmarshalInt(s);
-   m_enumCnt        = unmarshalInt(s);
-   m_enumValCnt     = unmarshalInt(s);
-   m_typeCnt        = unmarshalInt(s);
-   m_protoCnt       = unmarshalInt(s);
-   m_defCnt         = unmarshalInt(s);
-   m_friendCnt      = unmarshalInt(s);
-   m_numDecMembers  = unmarshalInt(s);
-   m_numDocMembers  = unmarshalInt(s);
-   m_inGroup        = unmarshalBool(s);
-   m_inFile         = unmarshalBool(s);   
-   uint i, count     = unmarshalUInt(s);
-
-   if (count == NULL_LIST) { 
-      memberGroupList = 0;
-
-   } else { 
-      // add member groups
-      memberGroupList = new QList<MemberGroup>;
-
-      for (i = 0; i < count; i++) {
-         MemberGroup *mg = new MemberGroup;
-
-         mg->unmarshal(s);
-         memberGroupList->append(*mg);
-      }
-   }
-*/
-
 }
 
 QByteArray MemberList::listTypeAsString(MemberListType type)

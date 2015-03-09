@@ -112,7 +112,7 @@ void initDoxyPress()
    Doxygen::parserManager->registerParser("fortranfree",  new FortranLanguageScannerFree);
    Doxygen::parserManager->registerParser("fortranfixed", new FortranLanguageScannerFixed);
 
-// unsupported feature (broom) 
+// unsupported feature (broom, hold)
 // Doxygen::parserManager->registerParser("dbusxml",      new DBusXMLScanner);
 
    Doxygen::parserManager->registerParser("tcl",          new TclLanguageScanner);

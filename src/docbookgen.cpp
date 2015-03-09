@@ -1873,7 +1873,7 @@ void generateDocbook()
 
    // ** FILE DOCUMENTATION
 
-   static bool showFiles = Config::getBool("show-files");
+   static bool showFiles = Config::getBool("show-file-page");
    if (showFiles) {
     
       //File Documentation index header

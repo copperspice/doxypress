@@ -44,7 +44,7 @@ deploy : all
 
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
 
-#	rsync -W -a --modify-window=2  $(top_srcdir)/resources/diamond.ico $(deploydir)
+#	rsync -W -a --modify-window=2  $(top_srcdir)/resources/doxpress.ico $(deploydir)
 
 	rsync -W -a --modify-window=2  $(patsubst %,$(gccpath)/%.dll,$(gcclibs))  $(deploydir)
 	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%1-0.dll,$(cslibs))  $(deploydir)
@@ -73,7 +73,6 @@ DoxyPress_SOURCES = \
    src/cmdmapper.cpp \
    src/condparser.cpp \
    src/cppvalue.cpp \
-   src/defgen.cpp \
    src/definition.cpp \
    src/dia.cpp \
    src/diagram.cpp \

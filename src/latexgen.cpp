@@ -367,7 +367,17 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    QByteArray genString;
    QTextStream tg(&genString);
 
-   filterLatexString(tg, theTranslator->trGeneratedAt(dateToString(true).toUtf8(), Config::getString("project-name").toUtf8()), false, false, false);
+   QByteArray generatedBy;
+   static bool timeStamp = Config::getBool("latex-timestamp");
+
+   if (timeStamp) {
+      generatedBy = theTranslator->trGeneratedAt(dateToString(true).toUtf8(), Config::getString("project-name").toUtf8());
+
+   } else {
+      generatedBy = theTranslator->trGeneratedBy();
+   }
+
+   filterLatexString(tg, generatedBy, false, false, false);
 
    t_stream << "% Headers & footers\n"
      "\\usepackage{fancyhdr}\n"
@@ -492,6 +502,7 @@ static void writeDefaultHeaderPart3(QTextStream &t_stream)
 {
    // part 3
    // Finalize project number
+
    t_stream << " DoxyPress " << versionString << "}\\\\\n"
      "\\vspace*{0.5cm}\n"
      "{\\small " << dateToString(true) << "}\\\\\n"

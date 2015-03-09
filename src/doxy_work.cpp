@@ -34,7 +34,6 @@
 #include <dbusxmlscanner.h>
 #include <declinfo.h>
 #include <defargs.h>
-#include <defgen.h>
 #include <dirdef.h>
 #include <docbookgen.h>
 #include <docparser.h>
@@ -830,8 +829,8 @@ void parseInput()
    addMembersToMemberGroup();
    Doxy_Globals::g_stats.end();
 
-   if (Config::getBool("dist-group-doc")) {
-      Doxy_Globals::g_stats.begin("Distributing member group documentation\n");
+   if (Config::getBool("duplicate-docs")) {
+      Doxy_Globals::g_stats.begin("Duplicating member group documentation\n");
       distributeMemberGroupDocumentation();
       Doxy_Globals::g_stats.end();
    }
@@ -993,7 +992,7 @@ void generateOutput()
          err("USE HTAGS is set, however htags(1) failed\n");
       }
       if (! Htags::loadFilemap(htmlOutput)) {
-         err("htags(1) ended normally but failed to load the filemap\n");
+         err("htags(1) ended normally but failed to load the file map\n");
       }
    }
 
@@ -1123,7 +1122,7 @@ void generateOutput()
       Doxy_Globals::g_stats.end();
    }
 
-/* unsupported feature (broom) 
+/* unsupported feature (broom, hold)
    if (USE_SQLITE3) {
       Doxy_Globals::g_stats.begin("Generating SQLITE3 output\n");
       generateSqlite3();
@@ -1136,13 +1135,7 @@ void generateOutput()
       generateDocbook();
       Doxy_Globals::g_stats.end();
    }
-
-   if (Config::getBool("generate-autogen-def")) {
-      Doxy_Globals::g_stats.begin("Generating AutoGen DEF output\n");
-      generateDEF();
-      Doxy_Globals::g_stats.end();
-   }
-
+ 
    if (Config::getBool("generate-perl")) {
       Doxy_Globals::g_stats.begin("Generating Perl module output\n");
       generatePerlMod();
@@ -6641,9 +6634,10 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                      }
                   }
 
-                  static bool strictProtoMatching = Config::getBool("strict-proto-matching");
+                  static bool strictSigMatching = Config::getBool("strict-sig-matching");
 
-                  if (! strictProtoMatching) {
+                  if (! strictSigMatching) {
+
                      if (candidates == 1 && ucd && umd) {
                         // we did not find an actual match on argument lists, but there is only 1 member 
                         // with this name in the same scope, so that has to be the one

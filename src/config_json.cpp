@@ -62,7 +62,7 @@ bool Config::parseConfig(const QString &fName)
       return false;
    }
 
-   // not used at this time (broom)
+   // not used at this time (broom, hold)
    // Config::instance()->substituteEnvironmentVars();         
 
    initWarningFormat();   
@@ -96,7 +96,10 @@ void Config::load_Defaults()
 
    m_cfgBool.insert("brief-member-desc",         struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("repeat-brief",              struc_CfgBool   { true,           DEFAULT } );
-   m_cfgList.insert("abbreviate-brief",          struc_CfgList   { QStringList(),  DEFAULT } );     // broom - FIX 
+
+   const QStringList tempList1 = Config::getAbbreviateBrief();
+   m_cfgList.insert("abbreviate-brief",          struc_CfgList   { tempList1,      DEFAULT } );     
+
    m_cfgBool.insert("always-detailed-sec",       struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("inline-inherited-member",   struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("full-path-names",           struc_CfgBool   { true,           DEFAULT } );
@@ -113,14 +116,14 @@ void Config::load_Defaults()
    m_cfgInt.insert("tab-size",                   struc_CfgInt    { 4,              DEFAULT } );
    m_cfgList.insert("aliases",                   struc_CfgList   { QStringList(),  DEFAULT } ); 
    m_cfgList.insert("tcl-subst",                 struc_CfgList   { QStringList(),  DEFAULT } );
-   m_cfgList.insert("extension-mapping",         struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("language-mapping",          struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgBool.insert("markdown",                  struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("auto-link",                 struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("built-in-stl-support",      struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("cpp-cli-support",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("sip-support",               struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("idl-support",               struc_CfgBool   { true,           DEFAULT } );
-   m_cfgBool.insert("dist-group-doc",            struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("duplicate-docs",            struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("allow-sub-grouping",        struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("inline-grouped-classes",    struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("inline-simple-struct",      struc_CfgBool   { false,          DEFAULT } );
@@ -154,7 +157,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("sort-group-names",          struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("sort-by-scope-name",        struc_CfgBool   { false,          DEFAULT } );
 
-   m_cfgBool.insert("strict-proto-matching",     struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("strict-sig-matching",       struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("generate-todo-list",        struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("generate-test-list",        struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("generate-bug-list",         struc_CfgBool   { true,           DEFAULT } );
@@ -163,8 +166,8 @@ void Config::load_Defaults()
    m_cfgList.insert("enabled-sections",          struc_CfgList   { QStringList(),  DEFAULT } ); 
    m_cfgInt.insert("max-init-lines",             struc_CfgInt    { 30,             DEFAULT } );
    m_cfgBool.insert("show-used-files",           struc_CfgBool   { true,           DEFAULT } );
-   m_cfgBool.insert("show-files",                struc_CfgBool   { true,           DEFAULT } );
-   m_cfgBool.insert("show-namespaces",           struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("show-file-page",            struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("show-namespace-page",       struc_CfgBool   { true,           DEFAULT } );
    m_cfgString.insert("file-version-filter",     struc_CfgString { QString(),      DEFAULT } );
    m_cfgString.insert("layout-file",             struc_CfgString { QString(),      DEFAULT } );
    m_cfgList.insert("cite-bib-files",            struc_CfgList   { QStringList(),  DEFAULT } ); 
@@ -181,7 +184,10 @@ void Config::load_Defaults()
    // tab 2 -input
    m_cfgList.insert("input-source",              struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgString.insert("input-encoding",          struc_CfgString { "UTF-8",         DEFAULT } );
-   m_cfgList.insert("file-patterns",             struc_CfgList   { QStringList(),   DEFAULT } );   // broom - fix this
+
+   QStringList tempList2 = Config::getFilePatterns();
+   m_cfgList.insert("file-patterns",             struc_CfgList   { tempList2,       DEFAULT } );   
+
    m_cfgBool.insert("source-recursive",          struc_CfgBool   { false,           DEFAULT } );
 
    m_cfgList.insert("exclude-files",             struc_CfgList   { QStringList(),   DEFAULT } );
@@ -189,7 +195,11 @@ void Config::load_Defaults()
    m_cfgList.insert("exclude-patterns",          struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgList.insert("exclude-symbols",           struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgList.insert("example-source",            struc_CfgList   { QStringList(),   DEFAULT } );
-   m_cfgList.insert("example-patterns",          struc_CfgList   { QString("*"),    DEFAULT } );
+
+   QStringList temp;
+   temp.append("*");
+   m_cfgList.insert("example-patterns",          struc_CfgList   { temp,            DEFAULT } );
+
    m_cfgBool.insert("example-recursive",         struc_CfgBool   { false,           DEFAULT } );
 
    m_cfgList.insert("image-path",                struc_CfgList   { QStringList(),   DEFAULT } );
@@ -266,7 +276,7 @@ void Config::load_Defaults()
    m_cfgList.insert("dia-file-dirs",             struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgString.insert("plantuml-jar-path",       struc_CfgString { QString(),      DEFAULT } );
 
-   m_cfgInt.insert("dot-graph-max-nodes",        struc_CfgInt    { 50              DEFAULT } );
+   m_cfgInt.insert("dot-graph-max-nodes",        struc_CfgInt    { 50,             DEFAULT } );
    m_cfgInt.insert("dot-graph-max-depth",        struc_CfgInt    { 0,              DEFAULT } );
    m_cfgBool.insert("dot-transparent",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("dot-multiple-targets",      struc_CfgBool   { false,          DEFAULT } );
@@ -293,7 +303,7 @@ void Config::load_Defaults()
 
    // tab 3 - html
    m_cfgString.insert("html-output",             struc_CfgString { "html",         DEFAULT } );
-   m_cfgString.insert("html-file-extension",     struc_CfgString { ".html"         DEFAULT } );
+   m_cfgString.insert("html-file-extension",     struc_CfgString { ".html",        DEFAULT } );
    m_cfgString.insert("html-header",             struc_CfgString { QString(),      DEFAULT } );
    m_cfgString.insert("html-footer",             struc_CfgString { QString(),      DEFAULT } ); 
    m_cfgList.insert("html-stylesheets",          struc_CfgList   { QStringList(),  DEFAULT } );
@@ -364,6 +374,7 @@ void Config::load_Defaults()
    m_cfgString.insert("latex-footer",            struc_CfgString { QString(),      DEFAULT } ); 
    m_cfgList.insert("latex-extra-files",         struc_CfgList   { QStringList(),  DEFAULT } );
 
+   m_cfgBool.insert("latex-timestamp",           struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("latex-hyper-pdf",           struc_CfgBool   { true,           DEFAULT } );  
    m_cfgBool.insert("latex-pdf",                 struc_CfgBool   { true,           DEFAULT } );  
    m_cfgBool.insert("latex-ps",                  struc_CfgBool   { false,          DEFAULT } );     

@@ -68,7 +68,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    QString pumlExe  = "java";
    QString pumlArgs = "";
 
-   QStringList pumlIncludePathList;    // = Config::getList("plantuml-include-path");   // BROOM missing, not sure why
+   QStringList pumlIncludePathList;    // = Config::getList("plantuml-include-path");    // why is this out? (BROOM)
    
    if (! pumlIncludePathList.isEmpty()) {                   
       pumlArgs += "-Dplantuml.include.path=\"";

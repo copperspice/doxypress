@@ -80,6 +80,9 @@ class Config
       static bool read_ProjectFile(const QString &fName);
       static bool preVerify();
       static bool verify();
+
+      static QStringList getAbbreviateBrief();
+      static QStringList getFilePatterns();
 };
 
 #endif

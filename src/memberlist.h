@@ -148,9 +148,6 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>
       return memberGroupList;
    }
 
-   void marshal(StorageIntf *s);
-   void unmarshal(StorageIntf *s);
-
  private:
    int m_varCnt;
    int m_funcCnt;

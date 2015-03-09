@@ -1827,7 +1827,7 @@ bool MemberDef::isDetailedSectionLinkable() const
 
    // the member has details documentation for any of the following reasons
 
-   // code formated poorly - adjust here (broom) 
+   // modify poorly formated code  (broom) 
    bool docFilter = extractAll ||  ! documentation().isEmpty() ||  ! inbodyDocumentation().isEmpty() ||
                   (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) ||
                   (m_impl->mtype == MemberType_EnumValue && !briefDescription().isEmpty()) ||

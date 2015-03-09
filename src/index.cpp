@@ -1445,7 +1445,7 @@ static void writeAnnotatedClassList(OutputList &ol)
 {
    ol.startIndexList();
    
-   // broom - may need to alter the sort order for annotated.html
+   // BROOM Fix - may need to alter the sort order for annotated.html
 
    for (auto cd : *Doxygen::classSDict) {     
       ol.pushGeneratorState();
@@ -3699,7 +3699,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                break;
 
             case LayoutNavEntry::Namespaces: {
-               static bool showNamespaces = Config::getBool("show-namespaces");
+               static bool showNamespaces = Config::getBool("show-namespace-page");
 
                if (showNamespaces) {
                   if (documentedNamespaces > 0 && addToIndex) {
@@ -3718,7 +3718,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
             break;
 
             case LayoutNavEntry::NamespaceList: {
-               static bool showNamespaces = Config::getBool("show-namespaces");
+               static bool showNamespaces = Config::getBool("show-namespace-page");
                if (showNamespaces) {
                   msg("Generating namespace index\n");
                   writeNamespaceIndex(ol);
@@ -3771,7 +3771,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                break;
 
             case LayoutNavEntry::Files: {
-               static bool showFiles = Config::getBool("show-files");
+               static bool showFiles = Config::getBool("show-file-page");
                if (showFiles) {
                   if (documentedHtmlFiles > 0 && addToIndex) {
                      Doxygen::indexList->addContentsItem(true, lne->title(), 0, 0, 0);
@@ -3788,7 +3788,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
             }
             break;
             case LayoutNavEntry::FileList: {
-               static bool showFiles = Config::getBool("show-files");
+               static bool showFiles = Config::getBool("show-file-page");
                if (showFiles) {
                   msg("Generating file index\n");
                   writeFileIndex(ol);

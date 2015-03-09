@@ -1557,7 +1557,7 @@ void FileDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const 
 
 bool FileDef::isLinkableInProject() const
 {
-   static bool showFiles = Config::getBool("show-files");
+   static bool showFiles = Config::getBool("show-file-page");
    return hasDocumentation() && ! isReference() && showFiles;
 }
 

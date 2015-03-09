@@ -2025,8 +2025,8 @@ static QByteArray fixSpaces(const QByteArray &s)
 
 static bool quickLinkVisible(LayoutNavEntry::Kind kind)
 {
-   static bool showFiles      = Config::getBool("show-files");
-   static bool showNamespaces = Config::getBool("show-namespaces");
+   static bool showFiles      = Config::getBool("show-file-page");
+   static bool showNamespaces = Config::getBool("show-namespace-page");
 
    switch (kind) {
       case LayoutNavEntry::MainPage:
@@ -2507,18 +2507,17 @@ void HtmlGenerator::writeExternalSearchPage()
       bool first = true;
 
       // add search mappings
-      const QStringList extraSearchMappings = Config::getList("extra-search-mappings");
+      const QStringList searchMappings = Config::getList("search-mappings");
      
-      for (auto ml : extraSearchMappings) { 
-
-         QByteArray mapLine = ml.toUtf8();
+      for (auto mapLine : searchMappings) { 
+        
          int eqPos = mapLine.indexOf('=');
 
          if (eqPos != -1) { 
             // tag command contains a destination
 
-            QByteArray tagName = mapLine.left(eqPos).trimmed();
-            QByteArray destName = mapLine.right(mapLine.length() - eqPos - 1).trimmed();
+            QString tagName  = mapLine.left(eqPos).trimmed();
+            QString destName = mapLine.right(mapLine.length() - eqPos - 1).trimmed();
 
             if (! tagName.isEmpty()) {
                if (!first) {

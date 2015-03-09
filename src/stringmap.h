@@ -46,7 +46,7 @@ class StringMap
    StringMap(Qt::CaseSensitivity foo = Qt::CaseSensitive) {
 
       if (foo) {
-         // BROOM - add additional code here for case sensitive
+         // BROOM Fix - add additional code here for case sensitive
          // m_dict = QMap<QString, T>;
       } else { 
          // m_dict = QMap<QString, T>;
