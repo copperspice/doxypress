@@ -883,7 +883,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
 void LatexGenerator::endIndexSection(IndexSections is)
 {
    //static bool compactLatex = Config::getBool("latex-compact");
-   static bool sourceBrowser  = Config::getBool("source-browser");
+   static bool sourceBrowser  = Config::getBool("source-code");
    static QString latexHeader = Config::getString("latex-header");
    static QString latexFooter = Config::getString("latex-footer");
 

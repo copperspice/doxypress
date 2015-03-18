@@ -753,7 +753,7 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
 bool ClassDef::hasDetailedDescription() const
 {
    static bool repeatBrief   = Config::getBool("repeat-brief");
-   static bool sourceBrowser = Config::getBool("source-browser");
+   static bool sourceBrowser = Config::getBool("source-code");
 
    return ((!briefDescription().isEmpty() && repeatBrief) ||
            !documentation().isEmpty() ||

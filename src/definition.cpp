@@ -843,7 +843,7 @@ QByteArray Definition::getSourceFileBase() const
    assert(definitionType() != Definition::TypeFile); // file overloads this method
 
    QByteArray fn;
-   static bool sourceBrowser = Config::getBool("source-browser");
+   static bool sourceBrowser = Config::getBool("source-code");
 
    if (sourceBrowser && m_impl->body && m_impl->body->startLine != -1 && m_impl->body->fileDef) {
       fn = m_impl->body->fileDef->getSourceFileBase();
@@ -1020,7 +1020,7 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
 {
    QSharedPointer<Definition> self = sharedFrom(this);
 
-   static bool inlineSources = Config::getBool("inline-sources");
+   static bool inlineSources = Config::getBool("inline-source");
    ol.pushGeneratorState();
    
    if (inlineSources && hasSources()) {
@@ -1067,7 +1067,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
                                      const QByteArray &text, MemberSDict *members, bool /*funcOnly*/)
 {
    static bool latexSourceCode = Config::getBool("latex-source-code");
-   static bool sourceBrowser   = Config::getBool("source-browser");
+   static bool sourceBrowser   = Config::getBool("source-code");
    static bool refLinkSource   = Config::getBool("ref-link-source");
 
    ol.pushGeneratorState();
@@ -1187,16 +1187,15 @@ void Definition::writeSourceRefs(OutputList &ol, const char *scopeName)
 
 bool Definition::hasDocumentation() const
 {
-   static bool extractAll    = Config::getBool("extract-all");
-   // static bool sourceBrowser = Config::getBool("source-browser");
+   static bool extractAll = Config::getBool("extract-all");
+   // static bool sourceBrowser = Config::getBool("source-code");
 
    bool hasDocs = (m_impl->details    && !m_impl->details->doc.isEmpty())    || 
                   (m_impl->brief      && !m_impl->brief->doc.isEmpty())      ||
                   (m_impl->inbodyDocs && !m_impl->inbodyDocs->doc.isEmpty()) ||  extractAll; 
 
-      //||      // extract everything
-      //       (sourceBrowser && m_impl->body &&
-      //        m_impl->body->startLine!=-1 && m_impl->body->fileDef)
+      //  ||   // extract everything
+      //       (sourceBrowser && m_impl->body && m_impl->body->startLine!=-1 && m_impl->body->fileDef)
     
    return hasDocs;
 }

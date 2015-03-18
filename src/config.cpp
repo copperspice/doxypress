@@ -416,12 +416,12 @@ bool Config::verify()
    }
 
    // **
-   iterList = m_cfgList.find("file-patterns");
-   QStringList filePatterns = iterList.value().value;
+   iterList = m_cfgList.find("input-patterns");
+   QStringList inputPatterns = iterList.value().value;
 
-   if (filePatterns.isEmpty()) {
-      filePatterns = getFilePatterns();
-      iterList.value().value = filePatterns;   
+   if (inputPatterns.isEmpty()) {
+      inputPatterns = getFilePatterns();
+      iterList.value().value = inputPatterns;   
    }
 
 

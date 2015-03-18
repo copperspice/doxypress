@@ -186,7 +186,7 @@ void Config::load_Defaults()
    m_cfgString.insert("input-encoding",          struc_CfgString { "UTF-8",         DEFAULT } );
 
    QStringList tempList2 = Config::getFilePatterns();
-   m_cfgList.insert("file-patterns",             struc_CfgList   { tempList2,       DEFAULT } );   
+   m_cfgList.insert("input-patterns",            struc_CfgList   { tempList2,       DEFAULT } );   
 
    m_cfgBool.insert("source-recursive",          struc_CfgBool   { false,           DEFAULT } );
 
@@ -201,9 +201,8 @@ void Config::load_Defaults()
    m_cfgList.insert("example-patterns",          struc_CfgList   { temp,            DEFAULT } );
 
    m_cfgBool.insert("example-recursive",         struc_CfgBool   { false,           DEFAULT } );
-
    m_cfgList.insert("image-path",                struc_CfgList   { QStringList(),   DEFAULT } );
-   m_cfgString.insert("input-filter",            struc_CfgString { QString(),       DEFAULT } );
+   m_cfgString.insert("filter-program",          struc_CfgString { QString(),       DEFAULT } );
    m_cfgList.insert("filter-patterns",           struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgBool.insert("filter-source-files",       struc_CfgBool   { false,           DEFAULT } );
    m_cfgList.insert("filter-source-patterns",    struc_CfgList   { QStringList(),   DEFAULT } );
@@ -211,8 +210,8 @@ void Config::load_Defaults()
 
 
    // tab 2 -browser
-   m_cfgBool.insert("source-browser",            struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("inline-sources",            struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("source-code",               struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("inline-source",             struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("strip-code-comments",       struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("ref-by-relation",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("ref-relation",              struc_CfgBool   { false,          DEFAULT } );

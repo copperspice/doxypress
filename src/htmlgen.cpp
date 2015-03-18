@@ -731,7 +731,7 @@ void HtmlGenerator::init()
          QTextStream t(&f);
          t << resource.constData();
 
-         if (Config::getBool("source-browser") && Config::getBool("source-tooltips")) {
+         if (Config::getBool("source-code") && Config::getBool("source-tooltips")) {
             t << endl <<
               "$(document).ready(function() {\n"
               "  $('.code,.codeRef').each(function() {\n"

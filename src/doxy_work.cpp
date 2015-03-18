@@ -9853,7 +9853,7 @@ void searchInputFiles()
    QStringList includePatterns = Config::getList("include-file-patterns"); 
 
    if (includePatterns.isEmpty()) {
-      includePatterns = Config::getList("file-patterns");
+      includePatterns = Config::getList("input-patterns");
    }
 
    for (auto s : includePathList) {    
@@ -9958,14 +9958,13 @@ void searchInputFiles()
       data.fnDict      = *Doxygen::diaFileNameDict;
     
       readFileOrDirectory(s, data);
-
       *Doxygen::diaFileNameDict = data.fnDict;
    }
    Doxy_Globals::g_stats.end();
 
    Doxy_Globals::g_stats.begin("Searching for files to exclude\n");
    const QStringList excludeList  = Config::getList("exclude-files");
-   const QStringList filePatterns = Config::getList("file-patterns");
+   const QStringList filePatterns = Config::getList("input-patterns");
 
    for (auto s : excludeList) {   
       ReadDirArgs data;

@@ -140,7 +140,7 @@ void FileDef::findSectionsInDocumentation()
 bool FileDef::hasDetailedDescription() const
 {
    static bool repeatBrief   = Config::getBool("repeat-brief");
-   static bool sourceBrowser = Config::getBool("source-browser");
+   static bool sourceBrowser = Config::getBool("source-code");
 
    // avail empty section
 
@@ -275,7 +275,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
          ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
       }
       
-      if (Config::getBool("source-browser")) {
+      if (Config::getBool("source-code")) {
          //if Latex enabled and LATEX_SOURCE_CODE is not -> skip, bug_738548
 
          ol.pushGeneratorState();
@@ -1229,7 +1229,7 @@ bool FileDef::isIncluded(const QByteArray &name) const
 
 bool FileDef::generateSourceFile() const
 {
-   static bool sourceBrowser   = Config::getBool("source-browser");
+   static bool sourceBrowser   = Config::getBool("source-code");
    static bool verbatimHeaders = Config::getBool("verbatim-headers");
 
    QByteArray extension = name().right(4);

@@ -2300,7 +2300,7 @@ QString getFileFilter(const char *name, bool isSourceCode)
 
    if (! found) {
       // then use the generic input filter
-      return Config::getString("input-filter");
+      return Config::getString("filter-program");
 
    } else {
       return filterName;
