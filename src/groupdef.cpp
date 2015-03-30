@@ -183,6 +183,7 @@ void GroupDef::addDir(QSharedPointer<DirDef> def)
 
    if (Config::getBool("sort-brief-docs")) {
       dirList->inSort(def);
+
    } else {
       dirList->append(def);
    }
@@ -281,8 +282,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
 
       allMemberNameInfoSDict->insert(mni->memberName(), mni);
    }
-
-   //printf("Added member!\n");
+ 
    allMemberList->append(md);
 
    switch (md->memberType()) {
@@ -779,6 +779,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QByteArray &title)
          }
       }
    }
+
    if (count > 0) {
       ol.startMemberHeader("groups");
       ol.parseText(title);
@@ -798,7 +799,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QByteArray &title)
             ol.writeObjectLink(gd->getReference(), gd->getOutputFileBase(), 0, gd->groupTitle());
             ol.endMemberItem();
 
-            if (!gd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+            if (! gd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
                ol.startMemberDescription(gd->getOutputFileBase());
                ol.generateDoc(briefFile(), briefLine(), gd, QSharedPointer<MemberDef>(), gd->briefDescription(), 
                               false, false, 0, true, false);
@@ -925,7 +926,7 @@ void GroupDef::writeAuthorSection(OutputList &ol)
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project_name").toUtf8()));
+   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name").toUtf8()));
    ol.popGeneratorState();
 }
 
@@ -1404,9 +1405,25 @@ QSharedPointer<MemberList> GroupDef::createMemberList(MemberListType lt)
 }
 
 void GroupDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
-{  
+{ 
    QSharedPointer<MemberList> ml = createMemberList(lt);  
-   ml->append(md);
+
+   static bool sortBriefDocs  = Config::getBool("sort-brief-docs");
+   static bool sortMemberDocs = Config::getBool("sort-member-docs");
+
+   bool isSorted = false;
+
+   if (sortBriefDocs && (ml->listType() & MemberListType_declarationLists)) {
+      isSorted = true;
+   } else if (sortMemberDocs && (ml->listType() & MemberListType_documentationLists)) {
+      isSorted = true;
+   }
+
+   if (isSorted) {
+      ml->inSort(md);
+   } else {
+      ml->append(md);
+   } 
 }
 
 QSharedPointer<MemberList> GroupDef::getMemberList(MemberListType lt) 

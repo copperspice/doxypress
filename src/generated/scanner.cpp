@@ -16560,7 +16560,7 @@ YY_DECL {
                }
                
                if (!msName.isEmpty()) {                                
-                  static bool typedefHidesStruct = Config::getBool("typedef-hides-struct");
+                  static bool typedefHidesStruct = Config::getBool("use-typedef-name");
 
                   // case 1: typedef struct _S { ... } S_t;
                   // -> omit typedef and use S_t as the struct name

@@ -77,7 +77,7 @@
       <events title=""/>
     </memberdef>
     <allmemberslink visible="yes"/>
-    <usedfiles visible="$SHOW-FILES"/>
+    <usedfiles visible="$SHOW-FILE-PAGE"/>
     <authorsection visible="yes"/>
   </class>
 

@@ -3272,7 +3272,7 @@ static void writeGroupIndex(OutputList &ol)
    }
 
    ol.pushGeneratorState();
-   // 1.{
+
    ol.disable(OutputGenerator::Man);
 
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Modules);
@@ -3290,10 +3290,8 @@ static void writeGroupIndex(OutputList &ol)
    ol.parseText(lne ? lne->intro() : theTranslator->trModulesDescription());
    ol.endTextBlock();
 
-   // ---------------
-   // Normal group index for Latex/RTF
-   // ---------------
-   // 2.{
+  
+   // Normal group index for Latex/RTF  
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Html);
    Doxygen::indexList->disable();
@@ -3301,13 +3299,9 @@ static void writeGroupIndex(OutputList &ol)
    writeGroupHierarchy(ol, 0, false);
 
    Doxygen::indexList->enable();
-   ol.popGeneratorState();
-   // 2.}
-
-   // ---------------
-   // interactive group index for HTML
-   // ---------------
-   // 2.{
+   ol.popGeneratorState(); 
+   
+   // interactive group index for HTML 
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
@@ -3334,11 +3328,9 @@ static void writeGroupIndex(OutputList &ol)
       }
    }
    ol.popGeneratorState();
-   // 2.}
 
    endFile(ol);
    ol.popGeneratorState();
-   // 1.}
 }
 
 static void writeUserGroupStubPage(OutputList &ol, LayoutNavEntry *lne)

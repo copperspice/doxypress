@@ -2160,7 +2160,7 @@ void MemberDef::_writeCallGraph(OutputList &ol)
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
    // write call graph
-   if ((m_impl->hasCallGraph || Config::getBool("dot_call"))
+   if ((m_impl->hasCallGraph || Config::getBool("dot-call"))
          && (isFunction() || isSlot() || isSignal()) && Config::getBool("have-dot")) {
 
       DotCallGraph callGraph(self, false);
@@ -2187,7 +2187,7 @@ void MemberDef::_writeCallerGraph(OutputList &ol)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
-   if ((m_impl->hasCallerGraph || Config::getBool("dot_called_by"))
+   if ((m_impl->hasCallerGraph || Config::getBool("dot-called-by"))
          && (isFunction() || isSlot() || isSignal()) && Config::getBool("have-dot")) {
 
       DotCallGraph callerGraph(self, true);
@@ -2590,7 +2590,7 @@ QByteArray MemberDef::displayDefinition() const
 void MemberDef::_writeGroupInclude(OutputList &ol, bool inGroup)
 {
    // only write out the include file if this is not part of a class or file definition
-   static bool showGroupedMembInc = Config::getBool("show-grouped_members-inc");
+   static bool showGroupedMembInc = Config::getBool("show-grouped-members-inc");
 
    QSharedPointer<FileDef> fd = getFileDef();
    QByteArray nm;

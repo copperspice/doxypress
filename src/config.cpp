@@ -895,13 +895,13 @@ QStringList Config::getFilePatterns()
    list.append("*.hxx");
    list.append("*.hpp");
    list.append("*.h++");
+   list.append("*.idl");
    list.append("*.ii");
    list.append("*.ixx");
    list.append("*.ipp");
    list.append("*.i++");
    list.append("*.inc");
-   list.append("*.inl");
-   list.append("*.idl");
+   list.append("*.inl");  
    list.append("*.java");
    list.append("*.js");
    list.append("*.m");
@@ -910,6 +910,7 @@ QStringList Config::getFilePatterns()
    list.append("*.markdown");
    list.append("*.odl");
    list.append("*.php");
+   list.append("*.php3");
    list.append("*.php4");
    list.append("*.php5");
    list.append("*.phtml");
@@ -920,69 +921,3 @@ QStringList Config::getFilePatterns()
 
    return list;
 }
-
-
-// new?
-
-/*   
-      filePatternList.append("*.c");
-      filePatternList.append("*.cc");
-      filePatternList.append("*.cpp");
-      filePatternList.append("*.cxx");
-      filePatternList.append("*.cs");
-      filePatternList.append("*.c++");
-      //filePatternList.append("*.d");
-      filePatternList.append("*.java");
-      filePatternList.append("*.ii");
-      filePatternList.append("*.ixx");
-      filePatternList.append("*.ipp");
-      filePatternList.append("*.i++");
-      filePatternList.append("*.inl");
-      filePatternList.append("*.h");
-      filePatternList.append("*.hh");
-      filePatternList.append("*.hxx");
-      filePatternList.append("*.hpp");
-      filePatternList.append("*.h++");
-      filePatternList.append("*.idl");
-      filePatternList.append("*.odl");
-     
-      filePatternList.append("*.php");
-      filePatternList.append("*.php3");
-      filePatternList.append("*.inc");
-      filePatternList.append("*.m");
-      filePatternList.append("*.mm");
-      filePatternList.append("*.dox");
-      filePatternList.append("*.py");
-      filePatternList.append("*.f90");
-      filePatternList.append("*.f");
-      filePatternList.append("*.for");
-      filePatternList.append("*.tcl");
-      filePatternList.append("*.md");
-      filePatternList.append("*.markdown");
-
-      if (portable_fileSystemIsCaseSensitive() == Qt::CaseSensitive) {
-         // unix => case sensitive match => also include useful uppercase versions
-
-         filePatternList.append("*.C");
-         filePatternList.append("*.CC");
-         filePatternList.append("*.C++");
-         filePatternList.append("*.II");
-         filePatternList.append("*.I++");
-         filePatternList.append("*.H");
-         filePatternList.append("*.HH");
-         filePatternList.append("*.H++");
-         filePatternList.append("*.CS");
-         filePatternList.append("*.PHP");
-         filePatternList.append("*.PHP3");
-         filePatternList.append("*.M");
-         filePatternList.append("*.MM");
-         filePatternList.append("*.PY");
-         filePatternList.append("*.F90");
-         filePatternList.append("*.F");
-         filePatternList.append("*.TCL");
-         filePatternList.append("*.MD");
-         filePatternList.append("*.MARKDOWN");
-      }
-   }  
-     
-*/

@@ -110,7 +110,7 @@ int compareListValues(QSharedPointer<GroupDef> item1, QSharedPointer<GroupDef> i
 
 int compareListValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2)
 {
-   static bool sortConstructorsFirst = Config::getBool("sort-members-ctors-first");
+   static bool sortConstructorsFirst = Config::getBool("sort-constructors-first");
 
    if (sortConstructorsFirst) {
       int ord1 = c1->isConstructor() ? 2 : (c1->isDestructor() ? 1 : 0);

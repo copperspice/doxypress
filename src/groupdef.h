@@ -198,7 +198,7 @@ class GroupDef : public Definition
    PageSDict *exampleDict;              // list of examples in the group
 
    SortedList<QSharedPointer<DirDef>> *dirList;       // list of directories in the group
-   FileList *fileList;                  // list of files in the group
+   FileList *fileList;                                // list of files in the group
 
    SortedList<QSharedPointer<GroupDef>> *groupList;   // list of sub groups
   

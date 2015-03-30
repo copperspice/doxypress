@@ -107,7 +107,7 @@ void NamespaceDef::insertUsedFile(QSharedPointer<FileDef> fd)
       return;
    }
 
-   if (files.contains(fd)) {
+   if (! files.contains(fd)) {
       if (Config::getBool("sort-member-docs")) {
          files.inSort(fd);
 
@@ -975,7 +975,23 @@ void NamespaceDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> 
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
    QSharedPointer<MemberList> ml = createMemberList(lt);
-   ml->append(md);
+
+   static bool sortBriefDocs  = Config::getBool("sort-brief-docs");
+   static bool sortMemberDocs = Config::getBool("sort-member-docs");
+
+   bool isSorted = false;
+
+   if (sortBriefDocs && (ml->listType() & MemberListType_declarationLists)) {
+      isSorted = true;
+   } else if (sortMemberDocs && (ml->listType() & MemberListType_documentationLists)) {
+      isSorted = true;
+   }
+
+   if (isSorted) {
+      ml->inSort(md);
+   } else {
+      ml->append(md);
+   }
 
    if (ml->listType() & MemberListType_declarationLists) {
       md->setSectionList(self, ml);

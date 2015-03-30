@@ -217,13 +217,12 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
    {
       bool isSimple = false;
 
-      /********************************************/
-      /* insert member in the declaration section */
-      /********************************************/
       if (md->isRelated() && protectionLevelVisible(prot)) {
          addMemberToList(MemberListType_related, md, true);
+
       } else if (md->isFriend()) {
          addMemberToList(MemberListType_friends, md, true);
+
       } else {
          switch (md->memberType()) {
             case MemberType_Service:      // UNO IDL
@@ -1786,7 +1785,7 @@ QByteArray ClassDef::title() const
       pageTitle = theTranslator->trSingletonReference(qPrintable(displayName()));
 
    } else {
-      if (Config::getBool("hide-compound-reference")) {
+      if (Config::getBool("hide-compound-ref")) {
          pageTitle = displayName().toUtf8();
 
       } else {
@@ -3347,7 +3346,23 @@ void ClassDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md, 
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
    QSharedPointer<MemberList> ml = createMemberList(lt); 
-   ml->append(md);
+
+   static bool sortBriefDocs  = Config::getBool("sort-brief-docs");
+   static bool sortMemberDocs = Config::getBool("sort-member-docs");
+
+   bool isSorted = false;
+
+   if (isBrief && sortBriefDocs) {
+      isSorted = true;
+   } else if (! isBrief && sortMemberDocs) {
+      isSorted = true;
+   }
+
+   if (isSorted) {
+      ml->inSort(md);
+   } else {
+      ml->append(md);
+   }
 
    // for members in the declaration lists we set the section, needed for member grouping
    if ((ml->listType() & MemberListType_detailedLists) == 0) {

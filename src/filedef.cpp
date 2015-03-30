@@ -1512,7 +1512,23 @@ void FileDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
    QSharedPointer<FileDef> self = sharedFrom(this);
 
    QSharedPointer<MemberList> ml = createMemberList(lt);  
-   ml->append(md);
+
+   static bool sortBriefDocs  = Config::getBool("sort-brief-docs");
+   static bool sortMemberDocs = Config::getBool("sort-member-docs");
+
+   bool isSorted = false;
+
+   if (sortBriefDocs && (ml->listType() & MemberListType_declarationLists)) {
+      isSorted = true;
+   } else if (sortMemberDocs && (ml->listType() & MemberListType_documentationLists)) {
+      isSorted = true;
+   }
+
+   if (isSorted) {
+      ml->inSort(md);
+   } else {
+      ml->append(md);
+   }
 
    if (lt & MemberListType_documentationLists) {
       ml->setInFile(true);

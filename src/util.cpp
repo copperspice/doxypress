@@ -7418,7 +7418,7 @@ QByteArray filterTitle(const QString &title)
 }
 
 // returns true if the name of the file represented by `fi' matches
-// one of the file patterns in the `patList' list.
+// one of the file patterns in the `patList' list
 
 bool patternMatch(const QFileInfo &fi, const QStringList &patList)
 {
@@ -7427,14 +7427,14 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList)
    QString fn  = fi.fileName();
    QString fp  = fi.filePath();
    QString afp = fi.absoluteFilePath();
- 
+
    for (auto pattern : patList) {
 
       if (! pattern.isEmpty()) {
          int i = pattern.indexOf('=');
 
          if (i != -1) {
-            pattern = pattern.left(i);   // strip of the extension specific filter name
+            pattern = pattern.left(i);   // strip off the extension
          }
 
 #if defined(_WIN32) || defined(__MACOSX__) 
@@ -7445,7 +7445,11 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList)
          QRegExp re(pattern, Qt::CaseSensitive, QRegExp::Wildcard);    
 #endif
 
-         found = re.indexIn(fn) != -1 || re.indexIn(fp) != -1 || re.indexIn(afp) != -1;
+         // input-patterns
+         // possilbe issue if the pattern has something other than a wildcard for the name
+         // found = re.indexIn(fn) != -1 || re.indexIn(fp) != -1 || re.indexIn(afp) != -1;
+
+         found = re.exactMatch(fn) || re.exactMatch(fp) || re.exactMatch(afp);
 
          if (found) {
             break;

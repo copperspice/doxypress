@@ -100,8 +100,7 @@ void Config::load_Defaults()
    const QStringList tempList1 = Config::getAbbreviateBrief();
    m_cfgList.insert("abbreviate-brief",          struc_CfgList   { tempList1,      DEFAULT } );     
 
-   m_cfgBool.insert("always-detailed-sec",       struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("inline-inherited-member",   struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("always-detailed-sec",       struc_CfgBool   { false,          DEFAULT } );  
    m_cfgBool.insert("full-path-names",           struc_CfgBool   { true,           DEFAULT } );
    m_cfgList.insert("strip-from-path",           struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("strip-from-inc-path",       struc_CfgList   { QStringList(),  DEFAULT } );
@@ -124,10 +123,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("sip-support",               struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("idl-support",               struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("duplicate-docs",            struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("allow-sub-grouping",        struc_CfgBool   { true,           DEFAULT } );
-   m_cfgBool.insert("inline-grouped-classes",    struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("inline-simple-struct",      struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("typedef-hides-struct",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("allow-sub-grouping",        struc_CfgBool   { true,           DEFAULT } );  
    m_cfgInt.insert("lookup-cache-size",          struc_CfgInt    { 0,              DEFAULT } );
 
    // tab 2 - build
@@ -138,36 +134,44 @@ void Config::load_Defaults()
    m_cfgBool.insert("extract-local-classes",     struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("extract-local-methods",     struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("extract-anon-namespaces",   struc_CfgBool   { false,          DEFAULT } );
+
    m_cfgBool.insert("hide-undoc-members",        struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("hide-undoc-classes",        struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("hide-friend-compounds",     struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("hide-in-body-docs",         struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("hide-scope-names",          struc_CfgBool   { false,          DEFAULT } );
-
-   m_cfgBool.insert("internal-docs",             struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("case-sense-names",          struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("hide-compound-ref",         struc_CfgBool   { false,          DEFAULT } );
+ 
    m_cfgBool.insert("show-include-files",        struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("show-grouped-members-inc",  struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("force-local-includes",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("show-used-files",           struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("show-file-page",            struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("show-namespace-page",       struc_CfgBool   { true,           DEFAULT } );
+  
+   m_cfgBool.insert("inline-inherited-member",   struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("inline-info",               struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("inline-grouped-classes",    struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("inline-simple-struct",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("use-typedef-name",          struc_CfgBool   { false,          DEFAULT } );
 
    m_cfgBool.insert("sort-member-docs",          struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("sort-brief-docs",           struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("sort-members-ctors-first",  struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("sort-constructors-first",   struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("sort-group-names",          struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("sort-by-scope-name",        struc_CfgBool   { false,          DEFAULT } );
-
-   m_cfgBool.insert("strict-sig-matching",       struc_CfgBool   { false,          DEFAULT } );
+  
    m_cfgBool.insert("generate-todo-list",        struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("generate-test-list",        struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("generate-bug-list",         struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("generate-deprecate-list",   struc_CfgBool   { true,           DEFAULT } );
 
+   m_cfgBool.insert("internal-docs",             struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("case-sense-names",          struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("force-local-includes",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("strict-sig-matching",       struc_CfgBool   { false,          DEFAULT } );
+
    m_cfgList.insert("enabled-sections",          struc_CfgList   { QStringList(),  DEFAULT } ); 
-   m_cfgInt.insert("max-init-lines",             struc_CfgInt    { 30,             DEFAULT } );
-   m_cfgBool.insert("show-used-files",           struc_CfgBool   { true,           DEFAULT } );
-   m_cfgBool.insert("show-file-page",            struc_CfgBool   { true,           DEFAULT } );
-   m_cfgBool.insert("show-namespace-page",       struc_CfgBool   { true,           DEFAULT } );
+   m_cfgInt.insert("max-init-lines",             struc_CfgInt    { 30,             DEFAULT } );  
    m_cfgString.insert("file-version-filter",     struc_CfgString { QString(),      DEFAULT } );
    m_cfgString.insert("layout-file",             struc_CfgString { QString(),      DEFAULT } );
    m_cfgList.insert("cite-bib-files",            struc_CfgList   { QStringList(),  DEFAULT } ); 
@@ -177,7 +181,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("warnings",                  struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("warn-undoc",                struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("warn-doc-error",            struc_CfgBool   { true,           DEFAULT } );
-   m_cfgBool.insert("warn-undoc-parm",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("warn-undoc-param",          struc_CfgBool   { false,          DEFAULT } );
    m_cfgString.insert("warn-format",             struc_CfgString { "$file:$line: $text", DEFAULT } );
    m_cfgString.insert("warn-logfile",            struc_CfgString { QString(),      DEFAULT } );
 

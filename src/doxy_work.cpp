@@ -1090,6 +1090,12 @@ void generateOutput()
       Doxy_Globals::g_stats.end();
    }
 
+   if (Config::getBool("sort-group-names")) {      
+      // groupSDict -- always sorted   
+
+      // sort the sub groups 
+   }
+
    if (Doxy_Globals::g_outputList->count() > 0) {
       writeIndexHierarchy(*Doxy_Globals::g_outputList);
    }
@@ -1553,7 +1559,7 @@ void Doxy_Work::buildGroupListFiltered(QSharedPointer<EntryNav> rootNav, bool ad
       rootNav->loadEntry(Doxy_Globals::g_storage);
       QSharedPointer<Entry> root = rootNav->entry();
 
-      if ((root->groupDocType == Entry::GROUPDOC_NORMAL && !additional) ||
+      if ((root->groupDocType == Entry::GROUPDOC_NORMAL && ! additional) ||
             (root->groupDocType != Entry::GROUPDOC_NORMAL &&  additional)) {
 
          QSharedPointer<GroupDef> gd = Doxygen::groupSDict->find(root->name);
@@ -1585,8 +1591,9 @@ void Doxy_Work::buildGroupListFiltered(QSharedPointer<EntryNav> rootNav, bool ad
             }
 
             gd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
+
             // allow empty docs for group
-            gd->setDocumentation(!root->doc.isEmpty() ? root->doc : QByteArray(" "), root->docFile, root->docLine, false);
+            gd->setDocumentation(! root->doc.isEmpty() ? root->doc : QByteArray(" "), root->docFile, root->docLine, false);
             gd->setInbodyDocumentation( root->inbodyDocs, root->inbodyFile, root->inbodyLine );
             gd->addSectionsToDefinition(root->anchors);
 
@@ -3080,7 +3087,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
    QSharedPointer<FileDef> fd = rootNav->fileDef();
 
    // see if we have a typedef that should hide a struct or union
-   if (mtype == MemberType_Typedef && Config::getBool("typedef-hides-struct")) {
+   if (mtype == MemberType_Typedef && Config::getBool("use-typedef-name")) {
       QByteArray type = root->type;
 
       type = stripPrefix(type, "typedef ");
@@ -5918,7 +5925,7 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QByteAr
       // have docs for an undefined member
 
       if (root->type != "friend class" && root->type != "friend struct" &&
-            root->type != "friend union" && (! Config::getBool("typedef-hides-struct") || root->type.indexOf("typedef ") == -1)) {
+            root->type != "friend union" && (! Config::getBool("use-typedef-name") || root->type.indexOf("typedef ") == -1)) {
 
          warn(root->fileName, root->startLine, "documented symbol `%s' was not declared or defined", decl);
       }

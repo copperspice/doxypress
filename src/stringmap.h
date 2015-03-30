@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-/** Ordered dictionary of elements of type T.
+/** Ordered dictionary of elements of type T
  *  Internally uses a QMap<T>.
  */
 template<class T>
