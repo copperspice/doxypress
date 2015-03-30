@@ -1,0 +1,33 @@
+/*************************************************************************
+*                                                                         
+* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2014 Digia Plc                   
+* All rights reserved.                                                    
+*                                                                         
+*                                                                         
+* GNU Free Documentation License                                          
+* This file may be used under the terms of the GNU Free Documentation     
+* License version 1.3 as published by the Free Software Foundation        
+* and appearing in the file included in the packaging of this file.       
+*                                                                         
+*                                                                         
+*************************************************************************/
+
+/*!
+\page div-test  Div Test
+
+
+<div class="test-1">
+
+
+Dialogs can be  in which case the user is required to provide necessary information before work in the main window can
+continue, or Modeless dialogs do not prevent the user from interacting with any of the other windows in the application.
+
+Qt provides a set of dialogs for file, font, color-selection and more.
+
+
+</div>
+
+
+*/
+

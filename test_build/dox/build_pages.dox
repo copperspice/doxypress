@@ -1,0 +1,1169 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2014 Barbara Geller
+* All rights reserved.
+*
+*
+* GNU Free Documentation License
+* This file may be used under the terms of the GNU Free Documentation
+* License version 1.3 as published by the Free Software Foundation
+* and appearing in the file included in the packaging of this file.
+*
+*
+*************************************************************************/
+
+/*!
+\page build-overview Build Overview  
+
+<h3>CopperSpice Build Objectives</h3>
+
+A key objective for CopperSpice was to create a C++ library which used a standard build process. 
+CopperSpice uses Autoconf and Automake, which are part of the GNU Autotools system. 
+
+There are configuration options available when building CopperSpice. These options can be set
+by passing arguments to the configure script file.
+
+\anchor build-autotools
+
+<h3>Compiler</h3>
+
+For platform specific Compiler versions, refer to \ref supported-platforms.
+
+
+<h3>Autotools & Make</h3>
+
+Autotools is a suite of programming tools designed to assist in making source code packages
+portable to many Unix-like systems. The GNU build system uses Bourne-compatible shell scripts
+to assist the user in the configuration and build process.
+
+(1) &nbsp;&nbsp;Autoconf is a tool used for producing configure scripts for building, installing, and packaging
+software. This tool makes your packages portable by performing tests to discover system
+characteristics, before the package is compiled. Your source code can be modified to leverage platform
+specifics.
+ 
+The system on which you build, does not need to have Autoconf installed. Autoconf is needed only to generate
+the configure script, which is usually shipped with the software. We provide the configuration script with
+the CopperSpice source.
+
+CopperSpice uses Autoconf <b>version 2.67</b> or greater. <br><br>
+
+
+(2) &nbsp;&nbsp;Automake is a tool for generating a portable 'Makefile' of what to build. Automake substantially
+simplifies the process of describing the organization of a package and performs additional functions
+such as dependency tracking between source files.
+
+Automake is written in the Perl programming language and must be used with GNU Autoconf. On Windows, Perl is
+installed with Msys, or it can be downloaded separately.
+
+CopperSpice requires Automake <b>version 1.12.1</b> or greater.<br><br>
+
+\note{ Debian (Wheezy) installs Automake 1.11.6. To obtain version 1.12 download a newer version of GNU Automake
+and build manually. }
+
+<br>
+
+
+(3) &nbsp;&nbsp;We selected this make utility because it is available on all the currently supported CopperSpice
+development platforms. The GNU build system is widely used in many open source packages and is considered
+an industry standard tool.
+
+CopperSpice uses GNU Make <b>version 3.81</b> or greater. <br><br>
+
+For additional information about Autotools refer to the following links:<br><br>
+&nbsp;&nbsp; <a class="www-link" href="http://en.wikipedia.org/wiki/GNU_build_system">Autotools Wiki</a><br>
+&nbsp;&nbsp; <a class="www-link" href="http://www.gnu.org/software/autoconf/">Autoconf</a><br>
+&nbsp;&nbsp; <a class="www-link" href="http://www.gnu.org/software/automake/">Automake</a><br>
+&nbsp;&nbsp; <a class="www-link" href="http://www.gnu.org/software/make/">GNU Make</a>
+
+
+<h3>Basic Build Process</h3>
+
+The build process consists of three basic steps.
+
+
+<b>Step 1</b>&nbsp; Run \c autoreconf to generate the \c configure file and the \c Makefile.in file.
+
+This step is normally not required as the CopperSpice source distribution includes the generated files. 
+This step must be done if you modify the \c configure.ac file or the \c Makefile.am file.
+
+   \li Autoreconf uses \c configure.ac to generate \c configure
+   \li Autoreconf uses \c Makefile.am to create \c  Makefile.in
+<br>
+<br>
+
+<b>Step 2</b>&nbsp; Run \c configure
+
+   \li Configure uses the \c Makefile.in file to generate the actual \c Makefile
+<br>
+<br>
+
+<b>Step 3</b>&nbsp; Compile CopperSpice by running \c make
+
+   \li  Builds the CopperSpice libraries and is run any time the CopperSpice source is changed.
+<br>
+<br>
+
+When running GNU make there is a "-j N" parameter which can be passed to specify the number of cores make should use.
+Make will start multiple parallel jobs, which can speed up compiling considerably. There is no clear recommend value for N.
+We found the best value is the numbers of processor cores plus 1. 
+
+It is worth noting that using this parameter will alter the order source files are compiled. This may look a bit strange
+but it is normal and expected since multiple processes are running.
+
+<br>
+
+
+*/
+
+
+/*!
+\page build-from-source Files Included with Source
+
+In order to build the CopperSpice libraries from source, it may be necessary to install additional utilities. 
+The exact requirements depend on the platform your application will be run on.
+
+   \li Download and install the source code 
+       <a class="www-link" href="http://sourceforge.net/projects/copperspice/files/copperspice/source">CopperSpice Source</a>
+
+   \li Refer to the \ref supported-platforms for information about the compilers and utilities required to build CopperSpice     
+         
+<br>
+The following table details what is included in the CS source download.
+
+<TABLE>
+   <tr><th width="95">File Type</th>  <th width="225">Description</th>  <th width="300">Notes</th></tr>
+   <tr>
+      <td>*.cpp</td>
+      <td>Source Code</td>
+      <td>CopperSpice source code</td>
+   </tr>
+   <tr>
+      <td>*.c</td>
+      <td>Source Code, Usually 3rd Party</td>
+      <td>CopperSpice source code</td>
+   </tr>
+   <tr>
+      <td>*.mm</td>
+      <td>Source Code for OS X</td>
+      <td>CopperSpice source code</td>
+   </tr>
+   <tr>
+      <td>*.h</td>
+      <td>Headers</td>
+      <td>CopperSpice header files</td>
+   </tr>
+   <tr>
+      <td>configure</td>
+      <td>Shell Script</td>
+      <td>See Note A</td>
+   </tr>
+   <tr>
+      <td>configure.ac</td>
+      <td>Autoconf</td>
+      <td>See Note B</td>
+   </tr>   
+  <tr>
+      <td>Makefile.in</td>
+      <td>Autoconf, intermediate file</td>
+      <td>Used by configure to generate Makefile</td>
+   </tr>
+   <tr>
+      <td>Makefile.am</td>
+      <td>Automake</td>
+      <td>Used by Automake to generate Makefile.in</td>
+   </tr>    
+</TABLE>
+
+<br>
+<b>Note A:</b>  &nbsp;&nbsp;The \c configure file is a shell script and must be run in a Bourne shell interpreter. BASH is the
+most common shell for Windows development and is part of the MSYS utility. 
+
+
+<br>
+<b>Note B:</b>  &nbsp;&nbsp;This file is used by Autoconf to generate the \c configure script file. If \c configure.ac is
+changed, use Autoconf to regenerate the \c configure script.
+
+The file \c configure.ac will not need to be modified unless you are changing the version number.
+
+
+<h3>CS Build Settings</h3>
+
+   \li All CopperSpice libraries are built with debug off by default.
+ 
+   \li The build process for the Webkit library was divided into multiple parts. This was required because of
+   Makefile limitations on Windows. The libCsWebKit library was made by linking together the individual parts.
+
+<div class="cs_margin">
+   <ul>
+   <li><b>Windows</b>
+   <ul>
+
+      <li>Libtool has a file test to ensure included libraries are valid import libraries. This test causes issues
+      when linking uuid, dmoguids, and the strmiids libraries. These libraries are released with MingGW and not import
+      libraries. They are static libraries. <br><br>
+      The CS Makefile was modified to explicitly bypass the Libtool file test with these libraries. To avoid the test,
+      explicit link commands were added.</li>
+
+   </ul>
+   </li>
+
+   <li><b>OS X</b>
+   <ul>
+
+   <li>CopperSpice is unable to build on OS X using GCC 4.7 becasue Apple Clang was required for building CopperSpice.</li>
+
+   </ul>
+   </li>
+
+   </ul>
+</div>
+
+<br>
+
+*/
+
+
+
+/*!
+\page requirements-x11 Building for X11
+
+This information pertains to building CopperSpice for developing applications on X11. 
+
+
+<h3>Compiler</h3>
+
+Verify GCC 4.7.2 or greater is installed.
+
+
+<h3>Utilities</h3>
+
+Debian (Wheezy) installs Automake 1.11.6. To obtain version 1.12 download a newer version of GNU Automake and build
+manually. The installed version of GCC is 4.7.2. 
+
+Fedora 20 installs Automake 1.13.4 and GCC 4.8.2. No updates are required. 
+
+Ubuntu 14.04 installs Automake 1.14.1 and GCC 4.8.2. No updates are required.
+
+
+<h3>Building CS</h3>
+
+For a typical CopperSpice setup refer to the table below.
+
+<TABLE class="cs_table">
+   <tr> <th width="125">Description</th>  <th width="125">Folder Name</th>
+   </tr>       
+   <tr>
+      <td>CS source</td>
+      <td>cs</td>
+   </tr>
+   <tr>
+      <td>CS build</td>
+      <td>cs_build</td>
+   </tr>
+   <tr>
+      <td>CS install</td>
+      <td>cs_lib</td>
+   </tr>
+</TABLE>
+
+
+<b>(1)</b> &nbsp;&nbsp; This step only needs to be run if CopperSpice has been checked out from the Git repository
+or the configure.ac file or any Makefile.am files have been modified. Running this command unnecessarily will not do any harm. 
+This command is run from a terminal window in the CopperSpice source directory (cs folder).
+
+\code
+autoreconf -i
+\endcode
+<br>
+
+
+<b>(2)</b> &nbsp;&nbsp; To configure CopperSpice using the default options, run \c configure in the CopperSpice
+build folder. This syntax will leave the CopperSpice source untouched in the
+\c cs folder and put the CopperSpice build in \c cs_build folder during the make process.
+
+\code
+../cs/configure
+\endcode
+<br>
+
+
+The CopperSpice libraries can be installed to a unique folder leaving the source, build, and system library
+folders untouched. The value for \c &ndash;&ndash;prefix specifies the CopperSpice install path. 
+
+\code
+../cs/configure  --prefix $HOME/cs_lib
+\endcode
+<br>
+
+
+An alternative to typing the prior command repeatedly, is to create a file like \c config-cs in the build folder.
+This file can pass the prefix and any other required options to configure. The following is a sample of a 
+typical \c config-cs file.
+
+\code
+../cs/configure  CC=gcc-4.7  CXX=g++-4.7  --prefix $HOME/cs_lib
+\endcode
+<br>
+
+To run \c configure using the \c config-cs file, use the following command and syntax from the CopperSpice build directory (cs_build folder).
+
+\code
+./config-cs
+\endcode
+<br>
+
+\note{ If you want to override the CXXFLAGS, do not pass the changes to \c make on the command line. Instead, create a file like
+\c config-cs and pass the changes when running configure.}
+       
+\code
+make CXXFLAGS='-O2'      // does not do what you think
+\endcode
+<br>
+
+
+<b>(3)</b> &nbsp;&nbsp; To compile the CopperSpice libraries use the following syntax from your CopperSpice build directory (cs_build folder).
+This step is run every time CopperSpice source code is changed.
+
+\code
+make
+\endcode
+
+From the build folder run the following command to delete all of the object and intermediate files. The next time
+'make' is run every file will be compiled, since they were deleted.
+
+\code
+make clean
+\endcode
+<br>
+
+
+<b>(4)</b> &nbsp;&nbsp; To install the CopperSpice libraries and deploy to the location specified in 
+\c &ndash;&ndash;prefix, use the following syntax. This step is done every time CopperSpice is deployed.
+
+\code
+make install
+\endcode
+<br>
+
+
+<h3>Third Party Libraries</h3>
+
+In order to build CopperSpice on X11, the libraries in the following table must be installed. The version
+number shown in column four indicates the version CopperSpice was tested with.
+
+
+<h4>Debian (Wheezy)</h4>
+
+<TABLE>
+   <tr> <th width="120">Name</th> <th width="225">Package</th> <th width="115">Library</th>
+               <th width="230">Notes</th> <th width="65">Version</th>
+   </tr>
+   <tr>
+      <td>FreeType</td>
+     <td>libfreetype6-dev</td>
+      <td>libfreetype</td>
+      <td>Font rendering engine</td>
+      <td>2.4.9</td>
+   </tr>
+   <tr>
+      <td>Fontconfig</td>
+     <td>libfontconfig-dev</td>
+      <td>libfontconfig</td>
+      <td>Font configuration</td>
+      <td>2.9.0</td>
+   </tr>
+   <tr>
+     <td>glib</td>
+     <td>libglib2.0-dev</td>
+     <td>libglib-2.0</td>
+     <td>Common event loop handling</td>
+     <td>2.33.12</td>
+   </tr>
+   <tr>
+     <td>GStreamer</td>
+     <td>libgstreamer0.10-dev</td>
+     <td>libgst</td>
+     <td>Multimedia API</td>
+     <td>0.10.36</td>
+   </tr>
+   <tr>
+      <td>GStreamer Plugins</td>
+      <td>libgstreamer-plugins-base0.10-dev</td>
+      <td>libgstaudio-0.10</td>
+      <td>Multimedia API</td>
+      <td>0.10.36</td>
+   </tr>
+   <tr>
+     <td>ICE</td>
+     <td>libice-dev</td>
+     <td>libICE</td>
+     <td>Inter-Client Exchange</td>
+     <td>1.0.8</td>
+   </tr>  
+   <tr>
+      <td>Network Audio</td>
+      <td>libaudio-dev</td>
+      <td>libaudio</td>
+      <td>Audio library</td>
+      <td>1.9.3</td>
+   </tr>
+   <tr>
+     <td>OpenGL</td>
+     <td>libgl1-mesa-dev</td>
+     <td>libGL</td>
+     <td>3D Graphics API</td>
+     <td>8.0.5</td>
+   </tr>
+   <tr>
+      <td>pthread</td>
+      <td>libc6-dev</td>
+      <td>libpthread</td>
+      <td>Multithreading</td>
+      <td>2.13</td>
+   </tr>
+   <tr>
+      <td>SM</td>
+      <td>libsm-dev</td>
+      <td>libSM</td>
+      <td>X11 Session Management</td>
+      <td>1.2.1</td>
+   </tr>
+   <tr>
+      <td>Xcursor</td>
+      <td>libxcursor-dev</td>
+      <td>libXcursor</td>
+      <td>X11 Cursor Extension</td>
+      <td>1.1.13</td>   
+   </tr>
+   <tr>
+      <td>Xext</td>
+      <td>libxext-dev</td>
+      <td>libXext</td>
+      <td>X11 Extensions</td>
+      <td>1.3.1</td>
+   </tr>
+   <tr>
+      <td>Xfixes</td>
+      <td>libxfixes-dev</td>
+      <td>libXfixes</td>
+      <td>X11 Fixes Extension</td>
+      <td>5.0</td>
+   </tr>
+   <tr>
+      <td>Xi</td>
+      <td>libxi-dev</td>
+      <td>libXi</td>
+      <td>X11 Input Extensions</td>
+      <td>1.6.1</td>
+   </tr>
+   <tr>
+      <td>Xinerama</td>
+      <td>libxinerama-dev</td>
+      <td>libXinerama</td>
+      <td>Multi-monitor support</td>
+      <td>1.1.2</td>
+   </tr>   
+   <tr>
+      <td>Xrandr</td>
+      <td>libxrandr-dev</td>
+      <td>libXrandr</td>
+      <td>Resize and Rotate Extension</td>
+      <td>1.3.2</td>
+   </tr>
+   <tr>
+      <td>Xrender</td>
+      <td>libxrender-dev</td>
+      <td>libXrender</td>
+      <td>Rendering Extension (anti-aliasing)</td>
+      <td>0.9.7</td>
+   </tr>
+   <tr>
+      <td>X11</td>
+       <td>libx11-dev</td>
+      <td>libX11</td>
+      <td>X11 Client-Side library</td>
+      <td>1.5.0</td>
+   </tr>
+</TABLE>
+    
+
+<h4>Fedora 20</h4>
+
+<TABLE>
+   <tr> <th width="120">Name</th> <th width="225">Package</th> <th width="115">Library</th>
+               <th width="230">Notes</th> <th width="65">Version</th>
+   </tr>
+   <tr>
+      <td>FreeType</td>
+      <td>freetype-devel</td>
+      <td>libfreetype</td>
+      <td>Font rendering engine</td>
+      <td>2.5.0</td>
+   </tr>
+   <tr>
+      <td>Fontconfig</td>
+      <td>fontconfig-devel</td>
+      <td>libfontconfig</td>
+      <td>Font configuration</td>
+      <td>2.11.0</td>
+   </tr>
+   <tr>
+      <td>glib</td>
+      <td>glib2-devel</td>
+      <td>libglib-2.0</td>
+      <td>Common event loop handling</td>
+      <td>2.38.2</td>
+   </tr>
+   <tr>
+      <td>GStreamer</td>
+      <td>gstreamer-devel</td>
+      <td>libgst</td>
+      <td>Multimedia API</td>
+      <td>0.10.36</td>
+   </tr>
+   <tr>
+      <td>GStreamer Plugins</td>
+      <td>gstreamer-plugins-base-devel</td>
+      <td>libgstaudio-0.10</td>
+      <td>Multimedia API</td>
+      <td>0.10.36</td>
+   </tr>
+   <tr>
+      <td>ICE</td>
+      <td>libICE-devel</td>
+      <td>libICE</td>
+      <td>Inter-Client Exchange</td>
+      <td>1.0.8</td>
+   </tr>  
+   <tr>
+      <td>Network Audio</td>
+      <td>nas-devel</td>
+      <td>libaudio</td>
+      <td>Audio library</td>
+      <td>1.9.4</td>
+   </tr>
+   <tr>
+      <td>OpenGL</td>
+      <td>mesa-libGL-devel</td>
+      <td>libGL</td>
+      <td>3D Graphics API</td>
+      <td>10.1</td>
+   </tr>
+   <tr>
+      <td>pthread</td>
+      <td>glibc-devel</td>
+      <td>libpthread</td>
+      <td>Multithreading</td>
+      <td>2.18</td>
+   </tr>
+   <tr>
+      <td>SM</td>
+      <td>libSM-devel</td>
+      <td>libSM</td>
+      <td>X11 Session Management</td>
+      <td>1.2.1</td>
+   </tr>
+   <tr>
+      <td>Xcursor</td>
+      <td>libXcursor-devel</td>
+      <td>libXcursor</td>
+      <td>X11 Cursor Extension</td>
+      <td>1.1.14</td>   
+   </tr>
+   <tr>
+      <td>Xext</td>
+      <td>libXext-devel</td>
+      <td>libXext</td>
+      <td>X11 Extensions</td>
+      <td>1.3.2</td>
+   </tr>
+   <tr>
+      <td>Xfixes</td>
+      <td>libXfixes-devel</td>
+      <td>libXfixes</td>
+      <td>X11 Fixes Extension</td>
+      <td>5.0.1</td>
+   </tr>
+   <tr>
+      <td>Xi</td>
+      <td>libXi-devel</td>
+      <td>libXi</td>
+      <td>X11 Input Extensions</td>
+      <td>1.7.2</td>
+   </tr>
+   <tr>
+      <td>Xinerama</td>
+      <td>libXinerama-devel</td>
+      <td>libXinerama</td>
+      <td>Multi-monitor support</td>
+      <td>1.1.3</td>
+   </tr>   
+   <tr>
+      <td>Xrandr</td>
+      <td>libXrandr-devel</td>
+      <td>libXrandr</td>
+      <td>Resize and Rotate Extension</td>
+      <td>1.4.1</td>
+   </tr>
+   <tr>
+      <td>Xrender</td>
+      <td>libXrender-devel</td>
+      <td>libXrender</td>
+      <td>Rendering Extension (anti-aliasing)</td>
+      <td>0.9.8</td>
+   </tr> 
+   <tr>
+      <td>X11</td>
+       <td>libX11-devel</td>
+      <td>libX11</td>
+      <td>X11 Client-Side library</td>
+      <td>1.6.1</td>
+   </tr>
+</TABLE>
+
+
+<h4>Ubuntu 14.04</h4>
+
+<TABLE>
+   <tr> <th width="120">Name</th> <th width="225">Package</th> <th width="115">Library</th>
+               <th width="230">Notes</th> <th width="65">Version</th>
+   </tr>
+   <tr>
+      <td>FreeType</td>
+      <td>libfreetype6-dev</td>
+      <td>libfreetype</td>
+      <td>Font rendering engine</td>
+      <td>2.5.2</td>
+   </tr>
+   <tr>
+      <td>Fontconfig</td>
+      <td>libfontconfig1-dev</td>
+      <td>libfontconfig</td>
+      <td>Font configuration</td>
+      <td>2.11.0</td>
+   </tr>
+   <tr>
+      <td>glib</td>
+      <td>libglib2.0-dev</td>
+      <td>libglib-2.0</td>
+      <td>Common event loop handling</td>
+      <td>2.40.0</td>
+   </tr>
+   <tr>
+      <td>GStreamer</td>
+      <td>libgstreamer0.10-dev</td>
+      <td>libgstreamer-0.10</td>
+      <td>Multimedia API</td>
+      <td>0.10.36</td>
+   </tr>
+   <tr>
+      <td>GStreamer Plugins</td>
+      <td>libgstreamer-plugins-base0.10-dev</td>
+      <td>libgstaudio-0.10</td>
+      <td>Multimedia API</td>
+      <td>0.10.36</td>
+   </tr>
+   <tr>
+      <td>ICE</td>
+      <td>libice-dev</td>
+      <td>libICE</td>
+      <td>Inter-Client Exchange</td>
+      <td>1.0.8</td>
+   </tr>  
+   <tr>
+      <td>Network Audio</td>
+      <td>libaudio-dev</td>
+      <td>libaudio</td>
+      <td>Audio library</td>
+      <td>1.9.4</td>
+   </tr>
+   <tr>
+      <td>OpenGL</td>
+      <td>libgl1-mesa-dev</td>
+      <td>libGL</td>
+      <td>3D Graphics API</td>
+      <td>10.1.0</td>
+   </tr>
+   <tr>
+      <td>pthread</td>
+      <td>libc6-dev</td>
+      <td>libpthread</td>
+      <td>Multithreading</td>
+      <td>2.19</td>
+   </tr>
+   <tr>
+      <td>SM</td>
+      <td>libsm-dev</td>
+      <td>libSM</td>
+      <td>X11 Session Management</td>
+      <td>1.2.1</td>
+   </tr>
+   <tr>
+      <td>Xcursor</td>
+      <td>libxcursor-dev</td>
+      <td>libXcursor</td>
+      <td>X11 Cursor Extension</td>
+      <td>1.1.14</td>   
+   </tr>
+   <tr>
+      <td>Xext</td>
+      <td>libxext-dev</td>
+      <td>libXext</td>
+      <td>X11 Extensions</td>
+      <td>7.3.2</td>
+   </tr>
+   <tr>
+      <td>Xfixes</td>
+      <td>libxfixes-dev</td>
+      <td>libXfixes</td>
+      <td>X11 Fixes Extension</td>
+      <td>5.0.1</td>
+   </tr>
+   <tr>
+      <td>Xi</td>
+      <td>libxi-dev</td>
+      <td>libXi</td>
+      <td>X11 Input Extensions</td>
+      <td>1.7.1</td>
+   </tr>
+   <tr>
+      <td>Xinerama</td>
+      <td>libxinerama-dev</td>
+      <td>libXinerama</td>
+      <td>Multi-monitor support</td>
+      <td>1.1.3</td>
+   </tr>   
+   <tr>
+      <td>Xrandr</td>
+      <td>libxrandr-dev</td>
+      <td>libXrandr</td>
+      <td>Resize and Rotate Extension</td>
+      <td>1.4.2</td>
+   </tr>
+   <tr>
+      <td>Xrender</td>
+      <td>libxrender-dev</td>
+      <td>libXrender</td>
+      <td>Rendering Extension (anti-aliasing)</td>
+      <td>0.9.8</td>
+   </tr>
+   <tr>
+      <td>Xt</td>
+      <td>libxt6</td>
+      <td>libXt</td>
+      <td>Xt Intrinsics</td>
+      <td>1.1.4</td>
+   </tr>
+   <tr>
+      <td>X11</td>
+      <td>libx11-dev</td>
+      <td>libX11</td>
+      <td>X11 Client-Side library</td>
+      <td>1.6.2</td>
+   </tr>
+</TABLE>
+
+
+<h3>OpenGL Dependencies</h3>
+
+For additional information refer to <a class="www-link" href="http://www.opengl.org/">OpenGL</a>
+
+\if never
+The \c configure script will autodetect if OpenGL headers and libraries are installed on your system.
+If they are, the OpenGL module will be built.
+\endif
+
+
+
+<h3>Phonon Dependencies</h3>
+
+The CsPhonon library uses the GStreamer multimedia framework as the backend for audio and video playback
+on X11. The minimum required version of GStreamer is 0.10.
+
+To build CsPhonon you will need the GStreamer library, base plugins, and development files for your system.
+The package names for GStreamer vary between Linux distributions. Search for \c gstreamer or
+\c libgstreamer in your distribution's package repository to find suitable packages.
+
+<br>
+
+*/
+
+
+
+
+/*!
+\page requirements-win Building for Windows
+
+This information pertains to building CopperSpice for developing applications on Windows. CopperSpice and
+your applications are built using Autotools. In order to use Autotools several programs and utilities must be installed.
+
+\note{ Windows does not provide a Bourne shell as a standard component. In order to build CopperSpice this shell
+program is required to run the configure scripts. It will be installed as part of MSYS. }
+
+By default, MSYS uses your Windows path and adds an entry for the MSYS bin folder. If you want to change your 
+MSYS path, do not specify a drive letter in your path. The MSYS BASH utility treats the path where MSYS resides as 
+the 'root'. As an example, if MSYS was installed to C:\\Msys, the '/bin' in your MSYS path refers to C:\\Msys\\bin.
+
+One way to change your MSYS path is by altering your <tt>.bash_profile</tt> file. In the following line, '/bin' is the 
+MSYS\\bin folder.
+
+   export PATH=/bin:/c/MingW/bin:~/bin:/c/windows/system32
+
+Yes, this may seem odd and slightly awkward to Windows users, but this is a result of overlaying Unix file system 
+behavior in a Windows environment.
+
+
+
+<h3>Compiler</h3>
+
+Initial development of CopperSpice was done using version 4.7.2 of MinGW. In November 2013 all Windows platforms were upgraded
+to version 4.8.1 of MinGW. 
+
+There are several different versions of MinGW available. The posix version was selected instead of the win32 version, as
+the later does not support C++11 threads.
+
+<div class="cs_heading">
+   Version 4.7.2 released on February 11, 2013
+</div>
+
+MinGW 32-bit Version <b>x32-4.7.2-release-posix-sjlj-rev9.7z</b>&nbsp;&nbsp;
+<a class="www-link" href="http://sourceforge.net/projects/mingwbuilds/files/host-windows/releases/4.7.2/32-bit/threads-posix/sjlj/">
+MinGW 32</a>
+
+MinGW 64-bit Version <b>x64-4.7.2-release-posix-sjlj-rev9.7z</b>&nbsp;&nbsp;
+<a class="www-link" href="http://sourceforge.net/projects/mingwbuilds/files/host-windows/releases/4.7.2/64-bit/threads-posix/sjlj/">
+MinGW 64</a>
+
+<br>
+
+<div class="cs_heading">
+   Version 4.8.1 released on August 30, 2013
+</div>
+
+MinGW 32-bit Version <b>x32-4.8.1-release-posix-sjlj-rev5.7z</b>&nbsp;&nbsp;
+<a class="www-link" href="http://sourceforge.net/projects/mingwbuilds/files/host-windows/releases/4.8.1/32-bit/threads-posix/sjlj/">
+MinGW 32</a>
+
+
+MinGW 64-bit Version <b>x64-4.8.1-release-posix-sjlj-rev5.7z</b>&nbsp;&nbsp;
+<a class="www-link" href="http://sourceforge.net/projects/mingwbuilds/files/host-windows/releases/4.8.1/64-bit/threads-posix/sjlj/">
+MinGW 64</a>
+
+
+
+<h3>Utilities</h3>
+
+We recommend installing this version of MSYS, which provides GNU Make and other tools designed to work with the MinGW
+version of GCC. There is only one version of MSYS for 32-bit and 64-bit systems. 
+
+MSYS Version <b>msys+7za+wget+svn+git+mercurial+cvs-rev9.7z</b>
+<a class="www-link" href="http://sourceforge.net/projects/mingwbuilds/files/external-binary-packages/">MSYS</a>
+
+
+<h3>Building CS</h3>
+
+For a typical CopperSpice setup refer to the table below.
+
+<TABLE class="cs_table">
+   <tr><th width="125">Description</th>  <th width="125">Folder Name</th>
+   </tr>       
+   <tr>
+      <td>CS source</td>
+      <td>cs</td>
+   </tr>
+   <tr>
+      <td>CS build</td>
+      <td>cs_build</td>
+   </tr>
+   <tr>
+      <td>CS install</td>
+      <td>cs_lib</td>
+   </tr>
+</TABLE>
+
+
+<b>(1)</b> &nbsp;&nbsp; This step only needs to be run if CopperSpice has been checked out from the Git repository
+or the configure.ac file or any Makefile.am files have been modified. Running this command unnecessarily will not do any harm. 
+This command is run from the MSYS BASH prompt in the CopperSpice source directory (cs folder).
+
+\code
+autoreconf -i
+\endcode
+<br>
+
+\anchor config-script-win
+<b>(2)</b> &nbsp;&nbsp; To configure CopperSpice using the default options, run \c configure from the MSYS BASH
+command line in the CopperSpice build folder. This syntax will leave the CopperSpice source untouched in the
+\c cs folder and put the CopperSpice build in \c cs_build folder during the make process.
+
+\code
+../cs/configure
+\endcode
+<br>
+
+
+The CopperSpice libraries can be installed to a unique folder leaving the source, build, and MSYS folders untouched. 
+The value for \c &ndash;&ndash;prefix specifies the CopperSpice install path. 
+
+\code
+../cs/configure  --prefix /f/cs_lib
+\endcode
+<br>
+
+
+An alternative to typing the prior command repeatedly, is to create a file like \c config-cs in the build folder.
+This file can pass the prefix and any other required options to configure. The following is a sample of a 
+typical \c config-cs file.
+
+\code
+../cs/configure  CC=gcc-4.7  CXX=g++-4.7  --prefix /f/cs_lib
+\endcode
+<br>
+
+To run \c configure using the \c config-cs file, use the following command and syntax from the CopperSpice build directory (cs_build folder).
+
+\code
+./config-cs
+\endcode
+<br>
+
+
+\note{ If you want to override the CXXFLAGS, do not pass the changes to \c make on the command line. Instead, create a file like
+\c config-cs and pass the changes when running configure.}
+       
+\code
+make CXXFLAGS='-O2'      // does not do what you think
+\endcode
+<br>
+
+
+<b>(3)</b> &nbsp;&nbsp; To compile the CopperSpice library use the following syntax from your CopperSpice build directory (cs_build folder).
+This step is run every time CopperSpice source code is changed.
+
+\code
+make
+\endcode
+
+From the build folder run the following command to delete all of the object and intermediate files. The next time
+'make' is run every file will be compiled, since they were deleted.
+
+\code
+make clean
+\endcode
+<br>
+
+
+<b>(4)</b> &nbsp;&nbsp; To install the CopperSpice libraries and deploy to the location specified in \c &ndash;&ndash;prefix, 
+use the following syntax. This step is done every time CopperSpice is deployed.
+
+\code
+make install
+\endcode
+<br>
+
+*/
+
+
+
+
+/*!
+\page requirements-mac Building for OS X
+
+This information pertains to building CopperSpice for developing applications on OS X. To compile your
+applications with the CopperSpice libraries, these same utilities and compilers will be required.
+
+
+<h3>Xcode</h3>
+
+Xcode is an IDE that contains software development tools for OS X. The current version is 4.4 and is available for
+free at the App Store. There are several GNU tools in Xcode that are used for building CopperSpice. Xcode should be
+installed on your Mac OS X development computer. To download Xcode click on the following link
+<a class="www-link" href="https://developer.apple.com/xcode">Xcode</a>
+
+Starting around Xcode Version 4.3, some of required components are not automatically installed. After Xcode has been
+installed, the command line tools need to installed by hand. Follow the instructions for the version of Xcode
+installed on your system.
+
+  \li Xcode 4
+    <ul>    
+      <li> Start Xcode</li>
+      <li> Select the Xcode Menu from the menu bar, then click on Preferences</li>
+      <li> Select Downloads, Components tab</li>
+      <li> Click the Install button to the right of the 'Command Line Tools'</li>
+    </ul>  
+
+   \li XCode 5
+     <ul>
+       <li> Open a terminal window</li>
+       <li> <tt>sudo xcode-select &minus;&minus;install</tt></li>
+     </ul>
+
+
+\anchor cs_build_compiler
+<h3>Compiler & Autotools</h3>
+
+Xcode does not install Autotools, which is required to build CopperSpice and your applications. Use MacPorts or
+the equivalent to install Autotools. The required version information is listed in
+\ref build-autotools "Building CopperSpice - Autotools".
+
+An attempt was made to use GCC version 4.7 to compile CopperSpice on OS X 10.7. The Cocoa headers did not compile
+due to Apple's use of the proprietary 'blocks' extension. Switching to Clang was required and did not involve any
+changes to the makefiles.
+
+CopperSpice and applications built with CopperSpice require Apple Clang version 4.2 or newer.
+
+There are several package managers you can use to install Autotools and Clang. We selected MacPorts since it is
+widely used and provides ports for a variety of applications and utilities.
+
+MacPorts can be downloaded and installed from
+<a class="www-link" href="http://www.macports.org">MacPorts</a>
+
+The following is a guide for installing MacPorts
+<a class="www-link" href="http://guide.macports.org">MacPorts Guide</a>
+
+Using MacPorts install the ports listed below. MacPorts will automatically adjust your PATH for Automake and Autoconf.
+After Coreutils is installed you may need to add the PATH by hand, which is provided by MacPorts. The path should be
+/opt/local/libexec/gnubin.
+
+   \li sudo port install automake
+   \li sudo port install autoconf
+   \li sudo port install coreutils
+
+
+<h3>CoreUtils</h3>
+
+The CopperSpice Makefiles need to call \c 'install'. By default, the OS X version of \c install is from BSD, which
+is limited and does not work with the passed parameters we require. If you run 'make' and receive an error message
+indicating the following, then the current version of 'install' is incorrect.
+
+    /usr/bin/install: illegal option —D
+
+Installing Coreutils will add the GNU install program, which is an extended version of BSD install. This allowed us to use
+the same Makefile for all platforms. 
+
+The following instructions can be used to build a new version of the 'install' utility and bypass macports.
+
+\code {.py}
+cd ~/gnu/coreutils/coreutils-8.22
+arch=-arch x86_64
+
+./configure CFLAGS="$arch" LDFLAGS="$arch" CXXFLAGS="$arch"
+
+make CFLAGS="$arch" LDFLAGS="$arch" CXXFLAGS="$arch"
+#fails after compiling when linking chroot. Complains about libber.a
+
+cp src/version.a src/libver.a 
+make CFLAGS="$arch" LDFLAGS="$arch" CXXFLAGS="$arch"
+
+sudo make install
+sudo cp /usr/local/bin/install /usr/bin/install
+\endcode
+
+
+<h3>Building CS</h3>
+
+For a typical CopperSpice setup refer to the table below.
+
+<TABLE class="cs_table">
+   <tr><th width="125">Description</th>  <th width="125">Folder Name</th>
+   </tr>       
+   <tr>   
+      <td>CS source</td>
+      <td>cs</td>
+   </tr>
+   <tr>
+      <td>CS build</td>
+      <td>cs_build</td>
+   </tr>
+   <tr>
+      <td>CS install</td>
+      <td>cs_lib</td>
+   </tr>
+</TABLE>
+
+
+<b>(1)</b> &nbsp;&nbsp; This step only needs to be run if CopperSpice has been checked out from the Git repository
+or the configure.ac file or any Makefile.am files have been modified. Running this command unnecessarily will not do any harm. 
+This command is run from a Terminal window in the CopperSpice source directory (cs folder).
+
+\code
+autoreconf -i
+\endcode
+<br>
+
+
+<b>(2)</b> &nbsp;&nbsp; On OS X Clang is used to compile CopperSpice and your applications. To use Clang you will need
+to add the following environment variables.
+
+   \li CC=clang
+   \li CXX=clang++
+   \li OBJCXX=clang++
+
+The CopperSpice libraries can be installed to a unique folder leaving the source, build, and system library folders
+untouched. The value for \c &ndash;&ndash;prefix specifies the CopperSpice install path. 
+
+\code
+../cs/configure  --prefix $HOME/cs_lib
+\endcode
+<br>
+
+
+An alternative to typing the prior command repeatedly or adding the Clang values to your environment, is to create
+a file like \c config-cs in your CS build folder. This file can pass the prefix and any other required options to
+\c configure. The following is a sample of a typical \c config-cs file. 
+
+\code
+../cs/configure  CC=clang  CXX=clang++  OBJCXX=clang++  --prefix $HOME/cs_lib
+\endcode
+<br>
+
+To run \c configure using the \c config-cs file, use the following command and syntax from the CopperSpice build directory (cs_build folder).
+
+\code
+./config-cs
+\endcode
+<br>
+
+
+\note{ If you want to override the CXXFLAGS, do not pass the changes to \c make on the command line. Instead, create a file like
+\c config-cs and pass the changes when running configure.}
+       
+\code
+make CXXFLAGS='-O2'      // does not do what you think
+\endcode
+<br>
+
+
+<b>(3)</b> &nbsp;&nbsp; To compile the CopperSpice libraries use the following syntax from your CopperSpice
+build directory (cs_build folder). This step is run every time CopperSpice source code is changed.
+
+\code
+make
+\endcode
+
+From the build folder run the following command to delete all of the object and intermediate files. 
+The next time 'make' is run every file will be compiled, since they were deleted.
+
+\code
+make clean
+\endcode
+<br>
+
+
+<b>(4)</b> &nbsp;&nbsp; To install the CopperSpice libraries and deploy to the location specified in \c &ndash;&ndash;prefix, 
+use the following syntax. This step is done every time CopperSpice is deployed.
+
+\code
+make install
+\endcode
+<br>
+
+*/
+
+
+
+
+
+
+
+

@@ -1,0 +1,89 @@
+/*************************************************************************
+ * 
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
+ * All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation under the terms of the GNU General Public License version 2
+ * is hereby granted. No representations are made about the suitability of
+ * this software for any purpose. It is provided "as is" without express or
+ * implied warranty. See the GNU General Public License for more details.
+ *
+ * Documents produced by DoxyPress are derivative works derived from the
+ * input used in their production; they are not affected by this license.
+ *
+*************************************************************************/
+
+/*!
+\page main-changed Changes with DoxyPress
+
+<ul>  
+   <li>Default name for the HTML Header file was changed to doxy_header.html</li>  
+      <ul>
+         <li>The tag PROJECT_NUMBER has been changed to PROJECT_VERSION</li> 
+      </ul>   
+   <br>
+
+   <li>Default name for the HTML Footer file was changed to doxy_footer.html</li> 
+   <br><br>
+
+   <li>Default name for the HTML Stylesheet was changed to doxy_style.css</li>  
+      <ul> 
+         <li>The stylesheet 'doxy_style.css' is automatically included as the first css file</li>
+         <li>To override styles, add one or more custom css files and specifiy them in the project configuration
+             file under HTML STYLESHEETS</li>
+         <li>Do not include 'doxy_style.css' in HTML STYLESHEETS or your custom style sheets</li>         
+      </ul> 
+   </li>
+   <br>  
+
+   <li>Default name for the layout file was changed to doxy_layout.xml</li>  
+      <ul> 
+         <li>DoxyPress added several new sections to the layout format. If you were using a custom layoutfile we suggest generating
+             a new layout file and then make any required custom changes to the new file</li>
+
+         <li>The following are the tag names in the layout file which changed</li>
+      </ul>
+   </li>
+</ul>
+
+            
+<table>
+   <tr><th width="250">Old Value</th><th width="250">New Value</th></tr>
+   <tr>
+      <td>$ALPHABETICAL_INDEX</td>
+      <td>$ALPHA-INDEX</td>
+   </tr>
+   <tr>
+      <td>$SHOW_INCLUDE_FILES</td>
+      <td>$SHOW-INCLUDE-FILES</td>
+   </tr>
+   <tr>
+      <td>$CLASS_GRAPH</td>
+      <td>$DOT-CLASS-GRAPH</td>
+   </tr>
+   <tr>
+      <td>$COLLABORATION_GRAPH</td>
+      <td>$DOT-COLLABORATION</td>
+   </tr>
+   <tr>
+      <td>$SHOW_USED_FILES</td>
+      <td>$SHOW-USED-FILES</td>
+   </tr>
+   <tr>
+      <td>$INCLUDE_GRAPH</td>
+      <td>$DOT-INCLUDE</td>
+   </tr>
+   <tr>
+      <td>$INCLUDED_BY_GRAPH </td>
+      <td>$DOT-INCLUDED-BY</td>
+   </tr>  
+   <tr>
+      <td>$GROUP_GRAPHS</td>
+      <td>$GROUP-GRAPHS</td>
+   </tr>                         
+</table>               
+           
+
+
+*/

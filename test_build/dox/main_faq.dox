@@ -1,0 +1,39 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2014  Barbara Geller
+* All rights reserved.
+*
+*
+* GNU Free Documentation License
+* This file may be used under the terms of the GNU Free Documentation
+* License version 1.3 as published by the Free Software Foundation
+* and appearing in the file included in the packaging of this file.
+*
+*
+*************************************************************************/
+
+/*!
+\page main-faq FAQ
+
+The following information is a collection of Questions and Answers regarding the DoxyPress application.
+<br>
+
+<b><i>Question</i></b>:  &nbsp;Is there any history or meaning by the name DoxyPress?
+
+<b><i>Answer</i></b>:  &nbsp;Information goes here.   [ BROOM ]
+
+<hr>
+
+<b><i>Question</i></b>:  &nbsp;What has changed with html or css files in DoxyPress?
+
+<b><i>Answer</i></b>:  &nbsp;For detailed information about the changes refer to \ref main-changed.
+
+<hr>
+
+<b><i>Question</i></b>:  &nbsp;Where do I find additional information about the CopperSpice Gui libraray used in DoxyPress?
+
+<b><i>Answer</i></b>:  &nbsp;Check out our web site at <a class="www-link" href="http://www.copperspice.com">CopperSpice</a>
+
+<br>
+
+*/

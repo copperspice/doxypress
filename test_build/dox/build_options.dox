@@ -1,0 +1,129 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2014 Barbara Geller
+* Copyright (C) 2012 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+*
+*
+* GNU Free Documentation License
+* This file may be used under the terms of the GNU Free Documentation
+* License version 1.3 as published by the Free Software Foundation
+* and appearing in the file included in the packaging of this file.
+*
+*
+*************************************************************************/
+
+/**
+\page build-options CS Build Options
+
+To customize the CopperSpice library build refer to the following selections.
+
+   \li \subpage options-all
+   \li \subpage options-bundled
+  
+*/
+
+/**
+\page options-all Cross Platform
+
+<TABLE>
+   <tr> <th width="185">Option</th> <th width="400">Description</th> <th width="240">Notes</th></tr>
+   <tr>
+      <td>CFLAGS="-D<define>"</td>
+      <td>Add an explicit define to the preprocessor</td>
+      <td></td>
+   </tr>
+   <tr>
+     <td>CFLAGS="-I<path>"</td>
+     <td>Add an explicit include path</td>
+     <td></td>
+   </tr>
+   <tr>
+      <td>CXXFLAGS="-Os"</td>
+      <td>Turns debug OFF and optimizes for size</td>
+      <td>Debug is ON by default</td>
+   </tr>
+   <tr>
+      <td>CXXFLAGS="-DCS_Debug"</td>
+      <td>Turns additional CopperSpice debug messages ON</td>
+      <td>Debug messages are OFF by default</td>
+   </tr>
+   <tr>
+      <td>LDFLAGS="-L<path>"</td>
+     <td>Add an explicit library path</td>
+     <td></td>
+   </tr>
+   <tr>
+      <td>&ndash;&nbsp;&ndash;prefix &lt;path&gt;</td>
+      <td>\c Path is the folder where CopperSpice is installed</td>
+      <td>Default value is the current folder</td>
+   </tr>
+   <tr>
+     <td>&ndash;&nbsp;&ndash;target=&lt;spec&gt;</td>
+     <td>&lt;spec&gt; is the operating system your application will be run on</td>
+     <td>Defaults to your current architecture</td>
+   </tr>
+   <tr>
+     <td>&ndash;&nbsp;&ndash;host=&lt;spec&gt;</td>
+     <td>&lt;spec&gt; is the operating system your application will be compiled on</td>
+     <td>Defaults to your current architecture</td>
+   </tr>   
+   <tr>
+      <td>&ndash;&nbsp;&ndash;disable-webkit</td>
+      <td>Do not compile the WebKit library</td>
+      <td></td>
+   </tr>
+   <tr>
+     <td>&ndash;&nbsp;&ndash;help</td>
+     <td>Display help information</td>
+     <td></td>
+   </tr>
+</TABLE>
+<br>
+
+*/
+
+
+/**
+\page options-bundled Bundled Libraries
+<h4>Images</h4>
+
+The following image formats are built directly into the CopperSpice <b>CsGui</b> library.
+
+   \li bmp
+   \li gif
+   \li ico
+   \li jpeg
+   \li mng
+   \li png
+   \li pbm
+   \li pgm
+   \li ppm
+   \li tiff
+   \li xbm
+   \li xpm
+
+<h4>DBMS / SQLite</h4>
+
+The following SQL driver is built directly into the CopperSpice <b>CsSql</b> library.
+
+   \li QSQLITE
+
+<h4>Additional SQL Drivers</h4>
+
+The CopperSpice Makefiles will automatically detect client libraries installed on your computer. If
+configure detects a DBMS, the appropriate SQL drivers will be built. Refer to sql_drivers 
+"Building SQL Drivers" for more information.
+
+
+<h4>OpenSSL</h4>
+
+The CopperSpice Makefiles will automatically detect if OpenSSL is available on your computer. If
+configure detects OpenSSL, then support for SSL will be directly built into the CopperSpice
+<b>CsNetwork</b> library.
+
+<br>
+
+*/
+
+

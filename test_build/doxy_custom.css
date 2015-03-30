@@ -1,0 +1,149 @@
+/* Custom Styling for DoxyPress Test Suite */
+
+a.www-link {
+   font-weight: bold;
+   text-decoration: underline;
+   padding-left: 12px;
+   background: url("closed.png");
+   background-repeat: no-repeat;
+   background-position: left center;
+}
+
+div.list_page
+{   
+   margin-top: 35px;
+   margin-left: 30px;
+   margin-right: 50px;
+   margin-bottom: 30px;
+}
+
+h1, h2, h3, h4, h5, h6 { 
+   margin-top: 2em; 
+}
+
+h3 {
+   font-size: 110%;
+} 
+
+h4 {
+   font-size: 100%;
+} 
+
+.badref {
+   font-weight: bold;
+   color: purple;
+}
+
+/* table 1 */
+table.doxtable {
+	border-collapse:collapse;
+	margin-top: 18px;
+   margin-left: 15px;
+   margin-bottom: 4px;
+   margin-right: 15px;
+}
+
+table.doxtable td, table.doxtable th {
+	border: 1px solid #2D4068;
+	padding: 3px 7px 2px;
+}
+
+table.doxtable th {
+	background-color: #374F7F;
+	color: #FFFFFF;
+	font-size: 110%;
+	padding-bottom: 4px;
+	padding-top: 5px;
+}
+
+
+/* table 2 */
+table.generic
+{
+   margin-top: 20px;
+   margin-left: 30px;
+   margin-bottom: 60px;
+   font-size: 16px;
+   border-radius: 7px 7px 7px 7px;
+   border: 1px solid #E6E6E6;
+   border-collapse: collapse;  
+}
+
+table.generic th
+{
+   margin: 0px;
+   padding: 5px 15px 5px 10px;
+   background-color: #E1E1E1;
+   color: #333333;   
+}
+
+table.generic tr.odd, table.generic tr:not(.even)
+{   
+   color: #333333;
+   vertical-align: top;
+}
+
+table.generic tr.even
+{ 
+   color: #333333;
+   vertical-align: top;
+}
+
+table.generic td
+{
+   padding: 3px 40px 5px 10px;
+   vertical-align: top;
+}
+
+hr {
+   height: 0px;
+   border: none;
+   border-top: 1px solid #4A6AAA;
+   width: 70%;
+   margin-top: 20px;
+   margin-bottom: 20px;
+}
+
+div.cs_note1
+{
+   font-style:italic;  
+   margin-top:5px;
+   margin-left:-2px;
+   margin-bottom:20px;
+   padding-top:1px;
+   padding-bottom:1px;
+   padding-left: 5px;
+   border-left:4px solid;
+   border-color: #D0C000;
+}
+
+.cs_note2
+{
+   font-weight: bold;
+   font-style:italic;
+   padding-right:3px;
+}
+
+.cs_margin{
+	margin-right:5em;
+}
+
+.cs_heading {
+   background-color: #CCCCCC;
+   color: #000000;   
+   margin-right: 300px;
+	padding-left: 6px;
+	padding-bottom: 4px;
+   padding-top: 5px;
+}
+
+div.fragment {
+	padding: 4px;
+   padding-left: 6px;
+   padding-bottom: 6px;
+   margin-right: 18px;
+}
+
+div.contents {
+	margin-right: 16px;
+}
