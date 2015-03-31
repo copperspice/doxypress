@@ -13,8 +13,13 @@
 *                                                                         
 *************************************************************************/
 
-/*!
+/**
 \page table-test  Table Test (with blank rows) 
+
+The following table has blank rows in the source. This caused layout issues and has been resolved and works properly in DoxyPress. The blank rows are not visible
+in the table outoput as shown below.
+
+<br>
  
 <table class="generic"> 
    <tr><th width="225">System</th><th>Information</th></tr>

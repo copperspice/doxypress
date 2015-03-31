@@ -347,7 +347,7 @@ struct ColoredImgDataItem {
 };
 
 void writeColoredImgData(ColoredImgDataItem data);
-QByteArray replaceColorMarkers(const char *str);
+QByteArray replaceColorMarkers(const QByteArray &str);
 
 bool copyFile(const QString &src, const QString &dest);
 QByteArray extractBlock(const QByteArray text, const QByteArray marker);

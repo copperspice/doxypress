@@ -192,20 +192,10 @@
     "inline-source": false,
     "input-encoding": "UTF-8",
     "input-patterns": [
-        ""
+        "*.dox",
+        "*.h"
     ],
     "input-source": [
-        "Z:/DoxyPress/test_build/dox/main_build.dox",
-        "Z:/DoxyPress/test_build/dox/build_pages.dox",
-        "Z:/DoxyPress/test_build/dox/build_options.dox",
-        "Z:/DoxyPress/test_build/dox/build_supported_platforms.dox",
-        "Z:/DoxyPress/test_build/dox/main_changed.dox",
-        "Z:/DoxyPress/test_build/dox/main_faq.dox",
-        "Z:/DoxyPress/test_build/dox/test-dash.dox",
-        "Z:/DoxyPress/test_build/dox/test-div.dox",
-        "Z:/DoxyPress/test_build/dox/test-table.dox",
-        "Z:/DoxyPress/test_build/dox/test-makefile.dox",
-        "Z:/DoxyPress/test_build/dox/test-notes.dox",
         "Z:/DoxyPress/test_build/dox/"
     ],
     "interactive-svg": false,

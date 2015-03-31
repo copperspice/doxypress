@@ -69,6 +69,7 @@ CommandMap cmdMap[] = {
    { "note",          CMD_NOTE },
    { "p",             CMD_CODE },
    { "par",           CMD_PAR },
+   { "paragraph",     CMD_PARAGRAPH },
    { "param",         CMD_PARAM },
    { "post",          CMD_POST },
    { "pre",           CMD_PRE },
@@ -83,26 +84,26 @@ CommandMap cmdMap[] = {
    { "rtfonly",       CMD_RTFONLY },
    { "sa",            CMD_SA },
    { "secreflist",    CMD_SECREFLIST },
-   { "section",       CMD_SECTION },
+   { "section",       CMD_SECTION }, 
    { "snippet",       CMD_SNIPPET },
+   { "sortid",        CMD_SORTID },
    { "subpage",       CMD_SUBPAGE },
    { "subsection",    CMD_SUBSECTION },
-   { "subsubsection", CMD_SUBSUBSECTION },
-   { "paragraph",     CMD_PARAGRAPH },
+   { "subsubsection", CMD_SUBSUBSECTION }, 
    { "see",           CMD_SA },
    { "since",         CMD_SINCE },
    { "skip",          CMD_SKIP },
    { "skipline",      CMD_SKIPLINE },
-   { "xmlonly",       CMD_XMLONLY },
-   { "xrefitem",      CMD_XREFITEM },
    { "throw",         CMD_EXCEPTION },
-   { "until",         CMD_UNTIL },
-   { "verbatim",      CMD_VERBATIM },
-   { "verbinclude",   CMD_VERBINCLUDE },
-   { "version",       CMD_VERSION },
-   { "warning",       CMD_WARNING },
    { "throws",        CMD_EXCEPTION },
    { "tparam",        CMD_TPARAM },
+   { "until",         CMD_UNTIL },  
+   { "verbatim",      CMD_VERBATIM },
+   { "verbinclude",   CMD_VERBINCLUDE },
+   { "warning",       CMD_WARNING },
+   { "version",       CMD_VERSION },
+   { "xmlonly",       CMD_XMLONLY },
+   { "xrefitem",      CMD_XREFITEM },   
    { "\\",            CMD_BSLASH },
    { "@",             CMD_AT },
    { "<",             CMD_LESS },
@@ -139,8 +140,6 @@ CommandMap cmdMap[] = {
    { "_setscope",     CMD_SETSCOPE },
    { 0,               0 },
 };
-
-//----------------------------------------------------------------------------
 
 CommandMap htmlTagMap[] = {
    { "strong",     HTML_BOLD },
@@ -184,7 +183,7 @@ CommandMap htmlTagMap[] = {
    { "blockquote", HTML_BLOCKQUOTE },
 
    { "c",            XML_C },
-   // { "code",       XML_CODE },  <= ambiguous <code> is also a HTML tag
+// { "code",         XML_CODE },  <= ambiguous <code> is also a HTML tag
    { "description",  XML_DESCRIPTION },
    { "example",      XML_EXAMPLE },
    { "exception",    XML_EXCEPTION },
@@ -208,8 +207,6 @@ CommandMap htmlTagMap[] = {
    { "inheritdoc",   XML_INHERITDOC },
    { 0,              0 }
 };
-
-//----------------------------------------------------------------------------
 
 Mapper *Mappers::cmdMapper     = new Mapper(cmdMap, true);
 Mapper *Mappers::htmlTagMapper = new Mapper(htmlTagMap, false);

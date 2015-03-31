@@ -13,7 +13,6 @@
 *                                                                         
 *************************************************************************/
 
-
 /*!
 \defgroup qtcore
 
@@ -33,8 +32,8 @@ Some sample documentation for Implicit Sharing
 
 Detailed description related to Implicit Sharing
 
-
 */
+
 
 /*!
 \defgroup unicode-c
@@ -49,9 +48,6 @@ Detailed description related to Unicode.
 
 
 
-
-
-
 /*!
 \class QString 
 \brief The QString class provides a Unicode character string. 
@@ -62,25 +58,34 @@ Detailed description related to Unicode.
 
 The QString class provides a Unicode character string.
 
-QString stores a string of 16-bit QChars, where each QChar corresponds one Unicode 4.0 character. (Unicode characters with code values above 65535 are stored using surrogate pairs, i.e., two consecutive QChars.)
+QString stores a string of 16-bit QChars, where each QChar corresponds one Unicode 4.0 character. (Unicode characters with code values above 65535 
+are stored using surrogate pairs, i.e., two consecutive QChars.)
 
-<a href="unicode.html#unicode">Unicode</a> is an international standard that supports most of the writing systems in use today. It is a superset of US-ASCII (ANSI X3.4-1986) and Latin-1 (ISO 8859-1), and all the US-ASCII/Latin-1 characters are available at the same code positions.
+Unicode is an international standard that supports most of the writing systems in use today. It is a superset of US-ASCII (ANSI X3.4-1986) and 
+Latin-1 (ISO 8859-1), and all the US-ASCII/Latin-1 characters are available at the same code positions.
 
-Behind the scenes, QString uses <a href="implicit-sharing.html">implicit sharing</a> (copy-on-write) to reduce memory usage and to avoid the needless copying of data. This also helps reduce the inherent overhead of storing 16-bit characters instead of 8-bit characters.
+Behind the scenes, QString uses implicit sharing (copy-on-write) to reduce memory usage and to avoid the needless copying of data. This also helps
+reduce the inherent overhead of storing 16-bit characters instead of 8-bit characters.
 
-In addition to QString, Qt also provides the QByteArray class to store raw bytes and traditional 8-bit '\0'-terminated strings. For most purposes, QString is the class you want to use. It is used throughout the Qt API, and the Unicode support ensures that your applications will be easy to translate if you want to expand your application's market at some point. The two main cases where QByteArray is appropriate are when you need to store raw binary data, and when memory conservation is critical.
+In addition to QString, Qt also provides the QByteArray class to store raw bytes and traditional 8-bit '\0'-terminated strings. For most purposes, QString
+is the class you want to use. It is used throughout the Qt API, and the Unicode support ensures that your applications will be easy to translate if you want
+to expand your application's market at some point. The two main cases where QByteArray is appropriate are when you need to store raw binary data, and when
+memory conservation is critical.
 
-<a name="initializing-a-string"></a>
 <h3>Initializing a String</h3>
-One way to initialize a QString is simply to pass a <tt>const char *</tt> to its constructor. For example, the following code creates a QString of size 5 containing the data &quot;Hello&quot;:
+
+One way to initialize a QString is simply to pass a <tt>const char *</tt> to its constructor. For example, the following code creates a QString of size 5
+containing the data &quot;Hello&quot;:
 
 \code
     QString str = "Hello";
 \endcode
 
-QString converts the <tt>const char *</tt> data into Unicode using the fromAscii() function. By default, fromAscii() treats character above 128 as Latin-1 characters, but this can be changed by calling QTextCodec::setCodecForCStrings().
+QString converts the <tt>const char *</tt> data into Unicode using the fromAscii() function. By default, fromAscii() treats character above 128 as
+Latin-1 characters, but this can be changed by calling QTextCodec::setCodecForCStrings().
 
-In all of the QString functions that take <tt>const char *</tt> parameters, the <tt>const char *</tt> is interpreted as a classic C-style '\0'-terminated string. It is legal for the <tt>const char *</tt> parameter to be 0.
+In all of the QString functions that take <tt>const char *</tt> parameters, the <tt>const char *</tt> is interpreted as a classic C-style '\0'-terminated 
+string. It is legal for the <tt>const char *</tt> parameter to be 0.
 
 You can also provide string data as an array of QChars:
 
@@ -89,9 +94,12 @@ You can also provide string data as an array of QChars:
     QString str(data, 4);
 \endcode
 
-QString makes a deep copy of the QChar data, so you can modify it later without experiencing side effects. (If for performance reasons you don't want to take a deep copy of the character data, use QString::fromRawData() instead.)
+QString makes a deep copy of the QChar data, so you can modify it later without experiencing side effects. (If for performance reasons you do not want to
+take a deep copy of the character data, use QString::fromRawData() instead.)
 
-Another approach is to set the size of the string using resize() and to initialize the data character per character. QString uses 0-based indexes, just like C++ arrays. To access the character at a particular index position, you can use operator[](). On non-const strings, operator[]() returns a reference to a character that can be used on the left side of an assignment. For example:
+Another approach is to set the size of the string using resize() and to initialize the data character per character. QString uses 0-based indexes, just 
+like C++ arrays. To access the character at a particular index position, you can use operator[](). On non-const strings, operator[]() returns a reference
+to a character that can be used on the left side of an assignment. For example:
 
 \code
     QString str;
@@ -110,17 +118,20 @@ For read-only access, an alternative syntax is to use the at() function:
 
     for (int i = 0; i < str.size(); ++i) {
         if (str.at(i) >= QChar('a') &amp;&amp; str.at(i) <= QChar('f'))
-            <a href="qtglobal.html#qDebug">qDebug</a>() << "Found character in range [a-f]";
+            qDebug() << "Found character in range [a-f]";
     }
 \endcode
 
-The at() function can be faster than operator[](), because it never causes a <a href="implicit-sharing.html#deep-copy">deep copy</a> to occur. Alternatively, use the left(), right(), or mid() functions to extract several characters at a time.
+The at() function can be faster than operator[](), because it never causes a deep copy to occur. Alternatively, use the left(), right(), or mid()
+functions to extract several characters at a time.
 
 A QString can embed '\0' characters (QChar::Null). The size() function always returns the size of the whole string, including embedded '\0' characters.
 
-After a call to the resize() function, newly allocated characters have undefined values. To set all the characters in the string to a particular value, use the fill() function.
+After a call to the resize() function, newly allocated characters have undefined values. To set all the characters in the string to a particular value, 
+use the fill() function.
 
-QString provides dozens of overloads designed to simplify string usage. For example, if you want to compare a QString with a string literal, you can write code like this and it will work as expected:
+QString provides dozens of overloads designed to simplify string usage. For example, if you want to compare a QString with a string literal, you can
+write code like this and it will work as expected:
 
 \code
     QString str;
@@ -131,16 +142,19 @@ QString provides dozens of overloads designed to simplify string usage. For exam
     }
 \endcode
 
-You can also pass string literals to functions that take QStrings as arguments, invoking the QString(const char *) constructor. Similarly, you can pass a QString to a function that takes a <tt>const char *</tt> argument using the <a href="qtglobal.html#qPrintable">qPrintable</a>() macro which returns the given QString as a <tt>const char *</tt>. This is equivalent to calling &lt;QString&gt;.toLocal8Bit().constData().
+You can also pass string literals to functions that take QStrings as arguments, invoking the QString(const char *) constructor. Similarly, you can pass
+a QString to a function that takes a <tt>const char *</tt> argument using the qPrintable() macro which returns the given QString as a <tt>const char *</tt>. 
+This is equivalent to calling &lt;QString&gt;.toLocal8Bit().constData().
 
-<a name="manipulating-string-data"></a>
+
 <h3>Manipulating String Data</h3>
+
 QString provides the following basic functions for modifying the character data: append(), prepend(), insert(), replace(), and remove(). For example:
 
 \code
     QString str = "and";
-    str.prepend("rock ");     // str == "rock and"
-    str.append(" roll");        // str == "rock and roll"
+    str.prepend("rock ");         // str == "rock and"
+    str.append(" roll");          // str == "rock and roll"
     str.replace(5, 3, "&amp;");   // str == "rock &amp; roll"
 \endcode
 
@@ -157,7 +171,7 @@ If you want to find all occurrences of a particular character or substring in a 
     int j = 0;
 
     while ((j = str.indexOf("<b>", j)) != -1) {
-        <a href="qtglobal.html#qDebug">qDebug</a>() << "Found <b> tag at index position" << j;
+        qDebug() << "Found <b> tag at index position" << j;
         ++j;
     }
 \endcode
@@ -168,43 +182,53 @@ To get an upper- or lowercase version of a string use toUpper() or toLower().
 
 Lists of strings are handled by the QStringList class. You can split a string into a list of strings using the split() function, and join a list of strings into a single string with an optional separator using QStringList::join(). You can obtain a list of strings from a string list that contain a particular substring or that match a particular QRegExp using the QStringList::filter() function.
 
-<a name="querying-string-data"></a>
+
 <h3>Querying String Data</h3>
+
 If you want to see if a QString starts or ends with a particular substring use startsWith() or endsWith(). If you simply want to check whether a QString contains a particular character or substring, use the contains() function. If you want to find out how many times a particular character or substring occurs in the string, use count().
 
 QStrings can be compared using overloaded operators such as operator&lt;(), operator&lt;=(), operator==(), operator&gt;=(), and so on. Note that the comparison is based exclusively on the numeric Unicode values of the characters. It is very fast, but is not what a human would expect; the QString::localeAwareCompare() function is a better choice for sorting user-interface strings.
 
 To obtain a pointer to the actual character data, call data() or constData(). These functions return a pointer to the beginning of the QChar data. The pointer is guaranteed to remain valid until a non-const function is called on the QString.
 
-<a name="converting-between-8-bit-strings-and-unicode-strings"></a>
+
 <h3>Converting Between 8-Bit Strings and Unicode Strings</h3>
+
 QString provides the following four functions that return a <tt>const char *</tt> version of the string as QByteArray: toAscii(), toLatin1(), toUtf8(), and toLocal8Bit().
 
 <ul>
-<li>toAscii() returns an 8-bit string encoded using the codec specified by QTextCodec::codecForCStrings (by default, that is Latin 1).</li>
-<li>toLatin1() returns a Latin-1 (ISO 8859-1) encoded 8-bit string.</li>
-<li>toUtf8() returns a UTF-8 encoded 8-bit string. UTF-8 is a superset of US-ASCII (ANSI X3.4-1986) that supports the entire Unicode character set through multibyte sequences.</li>
-<li>toLocal8Bit() returns an 8-bit string using the system's local encoding.</li>
+   <li>toAscii() returns an 8-bit string encoded using the codec specified by QTextCodec::codecForCStrings (by default, that is Latin 1).</li>
+   <li>toLatin1() returns a Latin-1 (ISO 8859-1) encoded 8-bit string.</li>
+   <li>toUtf8() returns a UTF-8 encoded 8-bit string. UTF-8 is a superset of US-ASCII (ANSI X3.4-1986) that supports the entire Unicode character set through multibyte sequences.</li>
+   <li>toLocal8Bit() returns an 8-bit string using the system's local encoding.</li>
 </ul>
+
 To convert from one of these encodings, QString provides fromAscii(), fromLatin1(), fromUtf8(), and fromLocal8Bit(). Other encodings are supported through the QTextCodec class.
 
 As mentioned above, QString provides a lot of functions and operators that make it easy to interoperate with <tt>const char *</tt> strings. But this functionality is a double-edged sword: It makes QString more convenient to use if all strings are US-ASCII or Latin-1, but there is always the risk that an implicit conversion from or to <tt>const char *</tt> is done using the wrong 8-bit encoding. To minimize these risks, you can turn off these implicit conversions by defining the following two preprocessor symbols:
 
 <ul>
-<li><tt>QT_NO_CAST_FROM_ASCII</tt> disables automatic conversions from C string literals and pointers to Unicode.</li>
-<li><tt>QT_NO_CAST_TO_ASCII</tt> disables automatic conversion from QString to C strings.</li>
+   <li><tt>QT_NO_CAST_FROM_ASCII</tt> disables automatic conversions from C string literals and pointers to Unicode.</li>
+   <li><tt>QT_NO_CAST_TO_ASCII</tt> disables automatic conversion from QString to C strings.</li>
 </ul>
+
 You then need to explicitly call fromAscii(), fromLatin1(), fromUtf8(), or fromLocal8Bit() to construct a QString from an 8-bit string, or use the lightweight QLatin1String class, for example:
 
 \code
     QString url = QLatin1String("http://www.unicode.org/");
 \endcode
 
-Similarly, you must call toAscii(), toLatin1(), toUtf8(), or toLocal8Bit() explicitly to convert the QString to an 8-bit string. (Other encodings are supported through the QTextCodec class.)
+Similarly, you must call toAscii(), toLatin1(), toUtf8(), or toLocal8Bit() explicitly to convert the QString to an 8-bit string. 
+(Other encodings are supported through the QTextCodec class.)
 
 <table class="generic" width="100 %">
- <tr class="qt-style"><th >Note for C Programmers</th></tr>
-<tr valign="top" class="odd"><td >Due to C++'s type system and the fact that QString is <a href="implicit-sharing.html#implicitly-shared">implicitly shared</a>, QStrings may be treated like <tt>int</tt>s or other basic types. For example:\code
+
+<tr class="qt-style"><th >Note for C Programmers</th></tr>
+
+<tr valign="top" class="odd"><td >Due to C++'s type system and the fact that QString is implicitly shared, QStrings may be treated like <tt>int</tt>s or
+other basic types. 
+
+For example:\code
     QString Widget::boolToString(bool b)
     {
         QString result;
@@ -216,13 +240,18 @@ Similarly, you must call toAscii(), toLatin1(), toUtf8(), or toLocal8Bit() expli
     }
 \endcode
 
-The <tt>result</tt> variable, is a normal variable allocated on the stack. When <tt>return</tt> is called, and because we're returning by value, the copy constructor is called and a copy of the string is returned. No actual copying takes place thanks to the implicit sharing.
+The <tt>result</tt> variable, is a normal variable allocated on the stack. When <tt>return</tt> is called, and because we are returning by value, the copy
+constructor is called and a copy of the string is returned. No actual copying takes place thanks to the implicit sharing.
 
 </td></tr>
 </table>
-<a name="distinction-between-null-and-empty-strings"></a>
+
+
 <h3>Distinction Between Null and Empty Strings</h3>
-For historical reasons, QString distinguishes between a null string and an empty string. A <i>null</i> string is a string that is initialized using QString's default constructor or by passing (const char *)0 to the constructor. An <i>empty</i> string is any string with size 0. A null string is always empty, but an empty string isn't necessarily null:
+
+For historical reasons, QString distinguishes between a null string and an empty string. A <i>null</i> string is a string that is initialized using QString's
+default constructor or by passing (const char *)0 to the constructor. An <i>empty</i> string is any string with size 0. A null string is always empty, but an
+empty string is not necessarily null:
 
 \code
     QString().isNull();               // returns true
@@ -237,8 +266,9 @@ For historical reasons, QString distinguishes between a null string and an empty
 
 All functions except isNull() treat null strings the same as empty strings. For example, toAscii().constData() returns a pointer to a '\0' character for a null string (<i>not</i> a null pointer), and QString() compares equal to QString(&quot;&quot;). We recommend that you always use the isEmpty() function and avoid isNull().
 
-<a name="argument-formats"></a>
+
 <h3>Argument Formats</h3>
+
 In member functions where an argument <i>format</i> can be specified (e.g., arg(), number()), the argument <i>format</i> can be one of the following:
 
 <table class="generic">
@@ -249,10 +279,12 @@ In member functions where an argument <i>format</i> can be specified (e.g., arg(
 <tr valign="top" class="even"><td ><tt>g</tt></td><td >use <tt>e</tt> or <tt>f</tt> format, whichever is the most concise</td></tr>
 <tr valign="top" class="odd"><td ><tt>G</tt></td><td >use <tt>E</tt> or <tt>f</tt> format, whichever is the most concise</td></tr>
 </table>
+
 A <i>precision</i> is also specified with the argument <i>format</i>. For the 'e', 'E', and 'f' formats, the <i>precision</i> represents the number of digits <i>after</i> the decimal point. For the 'g' and 'G' formats, the <i>precision</i> represents the maximum number of significant digits (trailing zeroes are omitted).
 
-<a name="more-efficient-string-construction"></a>
+
 <h3>More Efficient String Construction</h3>
+
 Using the QString <tt>'+'</tt> operator, it is easy to construct a complex string from multiple substrings. You will often write code like this:
 
 \code
@@ -372,7 +404,8 @@ Constructs a copy of the Latin-1 string <i>str</i>.
 
 Constructs a copy of <i>other</i>.
 
-This operation takes <a href="containers.html#constant-time">constant time</a>, because QString is <a href="implicit-sharing.html#implicitly-shared">implicitly shared</a>. This makes returning a QString from a function very fast. If a shared instance is modified, it will be copied (copy-on-write), and that takes <a href="containers.html#linear-time">linear time</a>.
+This operation takes constant time, because QString is implicitly shared. This makes returning a QString from a function very fast. If a shared instance
+is modified, it will be copied (copy-on-write), and that takes linear time.
 
 <b>See also </b>operator=().
 
@@ -436,7 +469,8 @@ This is the same as using the insert() function:
     x.insert(x.size(), y);
 \endcode
 
-The append() function is typically very fast (<a href="containers.html#constant-time">constant time</a>), because QString preallocates extra space at the end of the string data so it can grow without reallocating the entire string each time.
+The append() function is typically very fast (constant time), because QString preallocates extra space at the end of the string data so it can grow
+without reallocating the entire string each time.
 
 <b>See also </b>operator+=(), prepend(), and insert().
 
@@ -838,7 +872,7 @@ The <i>position</i> must be a valid index position in the string (i.e., 0 &lt;= 
 /*!
 \fn iterator QString::begin ()
 
-Returns an <a href="containers.html#stl-style-iterators">STL-style iterator</a> pointing to the first character in the string.
+Returns an STL-style iterator pointing to the first character in the string.
 
 <b>See also </b>constBegin() and end().
 
@@ -907,14 +941,14 @@ Clears the contents of the string and makes it empty.
 
 Compares <i>s1</i> with <i>s2</i> and returns an integer less than, equal to, or greater than zero if <i>s1</i> is less than, equal to, or greater than <i>s2</i>.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a>, the comparison is case sensitive; otherwise the comparison is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive, the comparison is case sensitive; otherwise the comparison is case insensitive.
 
 Case sensitive comparison is based exclusively on the numeric Unicode values of the characters and is very fast, but is not what a human would expect. Consider sorting user-visible strings with localeAwareCompare().
 
 \code
-    int x = QString::compare("aUtO", "AuTo", <a href="qt.html">Qt</a>::CaseInsensitive);  // x == 0
-    int y = QString::compare("auto", "Car", <a href="qt.html">Qt</a>::CaseSensitive);     // y > 0
-    int z = QString::compare("auto", "Car", <a href="qt.html">Qt</a>::CaseInsensitive);   // z < 0
+    int x = QString::compare("aUtO", "AuTo", Qt::CaseInsensitive);  // x == 0
+    int y = QString::compare("auto", "Car",  Qt::CaseSensitive);     // y > 0
+    int z = QString::compare("auto", "Car",  Qt::CaseInsensitive);   // z < 0
 \endcode
 
 This function was introduced in Qt 4.2.
@@ -1024,7 +1058,7 @@ This function overloads compare().
 /*!
 \fn const_iterator QString::constBegin () const
 
-Returns a const <a href="containers.html#stl-style-iterators">STL-style iterator</a> pointing to the first character in the string.
+Returns a const STL-style iterator pointing to the first character in the string.
 
 <b>See also </b>begin() and constEnd().
 
@@ -1035,7 +1069,8 @@ Returns a const <a href="containers.html#stl-style-iterators">STL-style iterator
 /*!
 \fn const QChar * QString::constData () const
 
-Returns a pointer to the data stored in the QString. The pointer can be used to access the characters that compose the string. For convenience, the data is '\0'-terminated.
+Returns a pointer to the data stored in the QString. The pointer can be used to access the characters that compose the string. For convenience, 
+the data is '\0'-terminated.
 
 Note that the pointer remains valid only as long as the string is not modified.
 
@@ -1048,7 +1083,7 @@ Note that the pointer remains valid only as long as the string is not modified.
 /*!
 \fn const_iterator QString::constEnd () const
 
-Returns a const <a href="containers.html#stl-style-iterators">STL-style iterator</a> pointing to the imaginary item after the last item in the list.
+Returns a const STL-style iterator pointing to the imaginary item after the last item in the list.
 
 <b>See also </b>constBegin() and end().
 
@@ -1061,13 +1096,13 @@ Returns a const <a href="containers.html#stl-style-iterators">STL-style iterator
 
 Returns true if this string contains an occurrence of the string <i>str</i>; otherwise returns false.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 Example:
 
 \code
     QString str = "Peter Pan";
-    str.contains("peter", <a href="qt.html">Qt</a>::CaseInsensitive);    // returns true
+    str.contains("peter", Qt::CaseInsensitive);    // returns true
 \endcode
 
 <b>See also </b>indexOf() and count().
@@ -1081,7 +1116,7 @@ Example:
 
 Returns true if this string contains an occurrence of the string reference <i>str</i>; otherwise returns false.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 This function was introduced in Qt 4.8.
 
@@ -1133,7 +1168,7 @@ This function was introduced in Qt 4.5.
 
 Returns the number of (potentially overlapping) occurrences of the string <i>str</i> in this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 <b>See also </b>contains() and indexOf().
 
@@ -1159,7 +1194,7 @@ This function overloads count().
 
 Returns the number of (potentially overlapping) occurrences of the string reference <i>str</i> in this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 This function was introduced in Qt 4.8.
 
@@ -1201,20 +1236,23 @@ Same as size().
 /*!
 \fn QChar * QString::data ()
 
-Returns a pointer to the data stored in the QString. The pointer can be used to access and modify the characters that compose the string. For convenience, the data is '\0'-terminated.
+Returns a pointer to the data stored in the QString. The pointer can be used to access and modify the characters that compose the string. For convenience,
+the data is '\0'-terminated.
 
 Example:
 
 \code
     QString str = "Hello world";
     QChar *data = str.data();
+
     while (!data->isNull()) {
-        <a href="qtglobal.html#qDebug">qDebug</a>() << data->unicode();
+        qDebug() << data->unicode();
         ++data;
     }
 \endcode
 
-Note that the pointer remains valid only as long as the string is not modified by other means. For read-only access, constData() is faster because it never causes a <a href="implicit-sharing.html#deep-copy">deep copy</a> to occur.
+Note that the pointer remains valid only as long as the string is not modified by other means. For read-only access, constData() is faster because it never
+causes a deep copy to occur.
 
 <b>See also </b>constData() and operator[]().
 
@@ -1234,7 +1272,7 @@ This is an overloaded function.
 /*!
 \fn iterator QString::end ()
 
-Returns an <a href="containers.html#stl-style-iterators">STL-style iterator</a> pointing to the imaginary character after the last character in the string.
+Returns an STL-style iterator pointing to the imaginary character after the last character in the string.
 
 <b>See also </b>begin() and constEnd().
 
@@ -1256,7 +1294,7 @@ This function overloads end().
 
 Returns true if the string ends with <i>s</i>; otherwise returns false.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 \code
     QString str = "Bananas";
@@ -1277,7 +1315,7 @@ This function overloads endsWith().
 
 Returns true if the string ends with the string reference <i>s</i>; otherwise returns false.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 This function was introduced in Qt 4.8.
 
@@ -1482,7 +1520,8 @@ QString makes a deep copy of the Unicode data.
 /*!
 \fn QString QString::fromWCharArray ( const wchar_t * string, int size = -1 ) [static]
 
-Returns a copy of the <i>string</i>, where the encoding of <i>string</i> depends on the size of wchar. If wchar is 4 bytes, the <i>string</i> is interpreted as ucs-4, if wchar is 2 bytes it is interpreted as ucs-2.
+Returns a copy of the <i>string</i>, where the encoding of <i>string</i> depends on the size of wchar. If wchar is 4 bytes, the <i>string</i> is
+interpreted as ucs-4, if wchar is 2 bytes it is interpreted as ucs-2.
 
 If <i>size</i> is -1 (default), the <i>string</i> has to be 0 terminated.
 
@@ -1497,9 +1536,10 @@ This function was introduced in Qt 4.2.
 /*!
 \fn int QString::indexOf ( const QString & str, int from = 0, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
-Returns the index position of the first occurrence of the string <i>str</i> in this string, searching forward from index position <i>from</i>. Returns -1 if <i>str</i> is not found.
+Returns the index position of the first occurrence of the string <i>str</i> in this string, searching forward from index position <i>from</i>. 
+Returns -1 if <i>str</i> is not found.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 Example:
 
@@ -1523,9 +1563,10 @@ If <i>from</i> is -1, the search starts at the last character; if it is -2, at t
 /*!
 \fn int QString::indexOf ( const QLatin1String & str, int from = 0, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
-Returns the index position of the first occurrence of the string <i>str</i> in this string, searching forward from index position <i>from</i>. Returns -1 if <i>str</i> is not found.
+Returns the index position of the first occurrence of the string <i>str</i> in this string, searching forward from index position <i>from</i>. 
+Returns -1 if <i>str</i> is not found.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 Example:
 
@@ -1553,7 +1594,8 @@ This function was introduced in Qt 4.5.
 
 This function overloads indexOf().
 
-Returns the index position of the first occurrence of the character <i>ch</i> in the string, searching forward from index position <i>from</i>. Returns -1 if <i>ch</i> could not be found.
+Returns the index position of the first occurrence of the character <i>ch</i> in the string, searching forward from index position <i>from</i>. 
+Returns -1 if <i>ch</i> could not be found.
 
 
 */
@@ -1564,9 +1606,10 @@ Returns the index position of the first occurrence of the character <i>ch</i> in
 
 This function overloads indexOf().
 
-Returns the index position of the first occurrence of the string reference <i>str</i> in this string, searching forward from index position <i>from</i>. Returns -1 if <i>str</i> is not found.
+Returns the index position of the first occurrence of the string reference <i>str</i> in this string, searching forward from index position <i>from</i>. 
+Returns -1 if <i>str</i> is not found.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 This function was introduced in Qt 4.8.
 
@@ -1579,7 +1622,8 @@ This function was introduced in Qt 4.8.
 
 This function overloads indexOf().
 
-Returns the index position of the first match of the regular expression <i>rx</i> in the string, searching forward from index position <i>from</i>. Returns -1 if <i>rx</i> didn't match anywhere.
+Returns the index position of the first match of the regular expression <i>rx</i> in the string, searching forward from index position <i>from</i>. 
+Returns -1 if <i>rx</i> did not match anywhere.
 
 Example:
 
@@ -1597,7 +1641,8 @@ Example:
 
 This function overloads indexOf().
 
-Returns the index position of the first match of the regular expression <i>rx</i> in the string, searching forward from index position <i>from</i>. Returns -1 if <i>rx</i> didn't match anywhere.
+Returns the index position of the first match of the regular expression <i>rx</i> in the string, searching forward from index position <i>from</i>. 
+Returns -1 if <i>rx</i> did not match anywhere.
 
 If there is a match, the <i>rx</i> regular expression will contain the matched captures (see QRegExp::matchedLength, QRegExp::cap).
 
@@ -1701,7 +1746,8 @@ Example:
     QString("abc").isNull();        // returns false
 \endcode
 
-Qt makes a distinction between null strings and empty strings for historical reasons. For most applications, what matters is whether or not a string contains any data, and this can be determined using the isEmpty() function.
+Qt makes a distinction between null strings and empty strings for historical reasons. For most applications, what matters is whether or not a string
+contains any data, and this can be determined using the isEmpty() function.
 
 <b>See also </b>isEmpty().
 
@@ -1721,9 +1767,11 @@ Returns true if the string is read right to left.
 /*!
 \fn int QString::lastIndexOf ( const QString & str, int from = -1, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
-Returns the index position of the last occurrence of the string <i>str</i> in this string, searching backward from index position <i>from</i>. If <i>from</i> is -1 (default), the search starts at the last character; if <i>from</i> is -2, at the next to last character and so on. Returns -1 if <i>str</i> is not found.
+Returns the index position of the last occurrence of the string <i>str</i> in this string, searching backward from index position <i>from</i>. 
+If <i>from</i> is -1 (default), the search starts at the last character; if <i>from</i> is -2, at the next to last character and so on. Returns -1 if 
+<i>str</i> is not found.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 Example:
 
@@ -1747,9 +1795,11 @@ Example:
 
 This function overloads lastIndexOf().
 
-Returns the index position of the last occurrence of the string <i>str</i> in this string, searching backward from index position <i>from</i>. If <i>from</i> is -1 (default), the search starts at the last character; if <i>from</i> is -2, at the next to last character and so on. Returns -1 if <i>str</i> is not found.
+Returns the index position of the last occurrence of the string <i>str</i> in this string, searching backward from index position <i>from</i>.
+If <i>from</i> is -1 (default), the search starts at the last character; if <i>from</i> is -2, at the next to last character and so on. Returns -1
+if <i>str</i> is not found.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 Example:
 
@@ -1786,9 +1836,11 @@ Returns the index position of the last occurrence of the character <i>ch</i>, se
 
 This function overloads lastIndexOf().
 
-Returns the index position of the last occurrence of the string reference <i>str</i> in this string, searching backward from index position <i>from</i>. If <i>from</i> is -1 (default), the search starts at the last character; if <i>from</i> is -2, at the next to last character and so on. Returns -1 if <i>str</i> is not found.
+Returns the index position of the last occurrence of the string reference <i>str</i> in this string, searching backward from index position <i>from</i>. 
+If <i>from</i> is -1 (default), the search starts at the last character; if <i>from</i> is -2, at the next to last character and so on. Returns -1 if 
+<i>str</i> is not found.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 This function was introduced in Qt 4.8.
 
@@ -1803,7 +1855,8 @@ This function was introduced in Qt 4.8.
 
 This function overloads lastIndexOf().
 
-Returns the index position of the last match of the regular expression <i>rx</i> in the string, searching backward from index position <i>from</i>. Returns -1 if <i>rx</i> didn't match anywhere.
+Returns the index position of the last match of the regular expression <i>rx</i> in the string, searching backward from index position <i>from</i>. 
+Returns -1 if <i>rx</i> didn't match anywhere.
 
 Example:
 
@@ -1821,7 +1874,8 @@ Example:
 
 This function overloads lastIndexOf().
 
-Returns the index position of the last match of the regular expression <i>rx</i> in the string, searching backward from index position <i>from</i>. Returns -1 if <i>rx</i> didn't match anywhere.
+Returns the index position of the last match of the regular expression <i>rx</i> in the string, searching backward from index position <i>from</i>.
+Returns -1 if <i>rx</i> didn't match anywhere.
 
 If there is a match, the <i>rx</i> regular expression will contain the matched captures (see QRegExp::matchedLength, QRegExp::cap).
 
@@ -2253,13 +2307,13 @@ If the specified <i>position</i> index is within the string, but <i>position</i>
 
 Removes every occurrence of the character <i>ch</i> in this string, and returns a reference to this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 Example:
 
 \code
     QString t = "Ali Baba";
-    t.remove(QChar('a'), <a href="qt.html">Qt</a>::CaseInsensitive);
+    t.remove(QChar('a'), Qt::CaseSensitive);
     // t == "li Bb"
 \endcode
 
@@ -2276,7 +2330,7 @@ This is the same as <tt>replace(ch, &quot;&quot;, cs)</tt>.
 
 Removes every occurrence of the given <i>str</i> string in this string, and returns a reference to this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 This is the same as <tt>replace(str, &quot;&quot;, cs)</tt>.
 
@@ -2372,7 +2426,7 @@ This function overloads replace().
 
 Replaces every occurrence of the string <i>before</i> with the string <i>after</i> and returns a reference to this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 Example:
 
@@ -2403,7 +2457,7 @@ This function overloads replace().
 
 Replaces each occurrence in this string of the first <i>blen</i> characters of <i>before</i> with the first <i>alen</i> characters of <i>after</i> and returns a reference to this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 This function was introduced in Qt 4.5.
 
@@ -2418,7 +2472,7 @@ This function overloads replace().
 
 Replaces every occurrence of the character <i>ch</i> in the string with <i>after</i> and returns a reference to this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 
 */
@@ -2431,7 +2485,7 @@ This function overloads replace().
 
 Replaces every occurrence of the character <i>before</i> with the character <i>after</i> and returns a reference to this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 
 */
@@ -2444,7 +2498,7 @@ This function overloads replace().
 
 Replaces every occurrence of the string <i>before</i> with the string <i>after</i> and returns a reference to this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 <b>Note:</b> The text is not rescanned after a replacement.
 
@@ -2461,7 +2515,7 @@ This function overloads replace().
 
 Replaces every occurrence of the string <i>before</i> with the string <i>after</i> and returns a reference to this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 <b>Note:</b> The text is not rescanned after a replacement.
 
@@ -2478,7 +2532,7 @@ This function overloads replace().
 
 Replaces every occurrence of the string <i>before</i> with the string <i>after</i> and returns a reference to this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 <b>Note:</b> The text is not rescanned after a replacement.
 
@@ -2495,7 +2549,7 @@ This function overloads replace().
 
 Replaces every occurrence of the character <i>c</i> with the string <i>after</i> and returns a reference to this string.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 <b>Note:</b> The text is not rescanned after a replacement.
 
@@ -3039,7 +3093,8 @@ The format string supports most of the conversion specifiers provided by printf(
     // result == "pi = 3.14"
 \endcode
 
-For translations, especially if the strings contains more than one escape sequence, you should consider using the arg() function instead. This allows the order of the replacements to be controlled by the translator.
+For translations, especially if the strings contains more than one escape sequence, you should consider using the arg() function instead. This allows
+the order of the replacements to be controlled by the translator.
 
 <b>See also </b>arg().
 
@@ -3065,7 +3120,7 @@ The sole purpose of this function is to provide a means of fine tuning QString's
 
 Returns true if the string starts with <i>s</i>; otherwise returns false.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 \code
     QString str = "Bananas";
@@ -3106,7 +3161,7 @@ This is an overloaded function.
 
 Returns true if the string starts with the string reference <i>s</i>; otherwise returns false.
 
-If <i>cs</i> is <a href="qt.html#CaseSensitivity-enum">Qt::CaseSensitive</a> (default), the search is case sensitive; otherwise the search is case insensitive.
+If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
 This function was introduced in Qt 4.8.
 
@@ -3303,11 +3358,13 @@ Example:
 /*!
 \fn qlonglong QString::toLongLong ( bool * ok = 0, int base = 10 ) const
 
-Returns the string converted to a <tt>long long</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 if the conversion fails.
+Returns the string converted to a <tt>long long</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0
+if the conversion fails.
 
 If a conversion error occurs, *<i>ok</i> is set to false; otherwise *<i>ok</i> is set to true.
 
-If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with &quot;0&quot;, base 8 is used; otherwise, base 10 is used.
+If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with
+&quot;0&quot;, base 8 is used; otherwise, base 10 is used.
 
 Example:
 
@@ -3315,8 +3372,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    <a href="qtglobal.html#qint64-typedef">qint64</a> hex = str.toLongLong(&amp;ok, 16);      // hex == 255, ok == true
-    <a href="qtglobal.html#qint64-typedef">qint64</a> dec = str.toLongLong(&amp;ok, 10);      // dec == 0, ok == false
+    qint64 hex = str.toLongLong(&amp;ok, 16);      // hex == 255, ok == true
+    qint64 dec = str.toLongLong(&amp;ok, 10);      // dec == 0, ok == false
 \endcode
 
 <b>See also </b>number(), toULongLong(), and toInt().
@@ -3331,8 +3388,8 @@ Example:
 Returns a lowercase copy of the string.
 
 \code
-    QString str = "Qt by NOKIA";
-    str = str.toLower();        // str == "qt by nokia"
+    QString str = "CopperSpice";
+    str = str.toLower();        // str == "copperspice"
 \endcode
 
 The case conversion will always happen in the 'C' locale. For locale dependent case folding use QLocale::toLower()
@@ -3346,11 +3403,13 @@ The case conversion will always happen in the 'C' locale. For locale dependent c
 /*!
 \fn short QString::toShort ( bool * ok = 0, int base = 10 ) const
 
-Returns the string converted to a <tt>short</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 if the conversion fails.
+Returns the string converted to a <tt>short</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 if
+the conversion fails.
 
 If a conversion error occurs, *<i>ok</i> is set to false; otherwise *<i>ok</i> is set to true.
 
-If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with &quot;0&quot;, base 8 is used; otherwise, base 10 is used.
+If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with
+&quot;0&quot;, base 8 is used; otherwise, base 10 is used.
 
 Example:
 
@@ -3388,7 +3447,8 @@ This operator is only available if Qt is configured with STL compatibility enabl
 /*!
 \fn std::wstring QString::toStdWString () const
 
-Returns a std::wstring object with the data contained in this QString. The std::wstring is encoded in utf16 on platforms where wchar_t is 2 bytes wide (e.g. windows) and in ucs4 on platforms where wchar_t is 4 bytes wide (most Unix systems).
+Returns a std::wstring object with the data contained in this QString. The std::wstring is encoded in utf16 on platforms where wchar_t is 2 bytes
+wide (e.g. windows) and in ucs4 on platforms where wchar_t is 4 bytes wide (most Unix systems).
 
 This operator is mostly useful to pass a QString to a function that accepts a std::wstring object.
 
@@ -3403,11 +3463,13 @@ This operator is only available if Qt is configured with STL compatibility enabl
 /*!
 \fn uint QString::toUInt ( bool * ok = 0, int base = 10 ) const
 
-Returns the string converted to an <tt>unsigned int</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 if the conversion fails.
+Returns the string converted to an <tt>unsigned int</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0
+if the conversion fails.
 
 If a conversion error occurs, *<i>ok</i> is set to false; otherwise *<i>ok</i> is set to true.
 
-If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with &quot;0&quot;, base 8 is used; otherwise, base 10 is used.
+If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with
+&quot;0&quot;, base 8 is used; otherwise, base 10 is used.
 
 Example:
 
@@ -3415,8 +3477,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    <a href="qtglobal.html#uint-typedef">uint</a> hex = str.toUInt(&amp;ok, 16);     // hex == 255, ok == true
-    <a href="qtglobal.html#uint-typedef">uint</a> dec = str.toUInt(&amp;ok, 10);     // dec == 0, ok == false
+    uint hex = str.toUInt(&amp;ok, 16);     // hex == 255, ok == true
+    uint dec = str.toUInt(&amp;ok, 10);     // dec == 0,   ok == false
 \endcode
 
 <b>See also </b>number() and toInt().
@@ -3428,11 +3490,13 @@ Example:
 /*!
 \fn ulong QString::toULong ( bool * ok = 0, int base = 10 ) const
 
-Returns the string converted to an <tt>unsigned long</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 if the conversion fails.
+Returns the string converted to an <tt>unsigned long</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0
+if the conversion fails.
 
 If a conversion error occurs, *<i>ok</i> is set to false; otherwise *<i>ok</i> is set to true.
 
-If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with &quot;0&quot;, base 8 is used; otherwise, base 10 is used.
+If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with
+&quot;0&quot;, base 8 is used; otherwise, base 10 is used.
 
 Example:
 
@@ -3440,8 +3504,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    <a href="qtglobal.html#ulong-typedef">ulong</a> hex = str.toULong(&amp;ok, 16);   // hex == 255, ok == true
-    <a href="qtglobal.html#ulong-typedef">ulong</a> dec = str.toULong(&amp;ok, 10);   // dec == 0, ok == false
+    ulong hex = str.toULong(&amp;ok, 16);   // hex == 255, ok == true
+    ulong dec = str.toULong(&amp;ok, 10);   // dec == 0,   ok == false
 \endcode
 
 <b>See also </b>number().
@@ -3453,7 +3517,8 @@ Example:
 /*!
 \fn qulonglong QString::toULongLong ( bool * ok = 0, int base = 10 ) const
 
-Returns the string converted to an <tt>unsigned long long</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 if the conversion fails.
+Returns the string converted to an <tt>unsigned long long</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. 
+Returns 0 if the conversion fails.
 
 If a conversion error occurs, *<i>ok</i> is set to false; otherwise *<i>ok</i> is set to true.
 
@@ -3465,8 +3530,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    <a href="qtglobal.html#quint64-typedef">quint64</a> hex = str.toULongLong(&amp;ok, 16);    // hex == 255, ok == true
-    <a href="qtglobal.html#quint64-typedef">quint64</a> dec = str.toULongLong(&amp;ok, 10);    // dec == 0, ok == false
+    quint64 hex = str.toULongLong(&amp;ok, 16);    // hex == 255, ok == true
+    quint64 dec = str.toULongLong(&amp;ok, 10);    // dec == 0,   ok == false
 \endcode
 
 <b>See also </b>number() and toLongLong().
@@ -3478,11 +3543,13 @@ Example:
 /*!
 \fn ushort QString::toUShort ( bool * ok = 0, int base = 10 ) const
 
-Returns the string converted to an <tt>unsigned short</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 if the conversion fails.
+Returns the string converted to an <tt>unsigned short</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 
+if the conversion fails.
 
 If a conversion error occurs, *<i>ok</i> is set to false; otherwise *<i>ok</i> is set to true.
 
-If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with &quot;0&quot;, base 8 is used; otherwise, base 10 is used.
+If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with &quot;0&quot;,
+base 8 is used; otherwise, base 10 is used.
 
 Example:
 
@@ -3490,8 +3557,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    <a href="qtglobal.html#ushort-typedef">ushort</a> hex = str.toUShort(&amp;ok, 16);     // hex == 255, ok == true
-    <a href="qtglobal.html#ushort-typedef">ushort</a> dec = str.toUShort(&amp;ok, 10);     // dec == 0, ok == false
+    ushort hex = str.toUShort(&amp;ok, 16);     // hex == 255, ok == true
+    ushort dec = str.toUShort(&amp;ok, 10);     // dec == 0,   ok == false
 \endcode
 
 <b>See also </b>number() and toShort().
@@ -3690,7 +3757,8 @@ This function overloads operator!=().
 
 The <i>other</i> const char pointer is converted to a QString using the fromAscii() function.
 
-You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when you compile your applications. This can be useful if you want to ensure that all user-visible strings go through QObject::tr(), for example.
+You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when you compile your applications. This can be useful if you want to 
+ensure that all user-visible strings go through QObject::tr(), for example.
 
 
 */
@@ -3710,7 +3778,8 @@ Example:
     // x == "freedom"
 \endcode
 
-This operation is typically very fast (<a href="containers.html#constant-time">constant time</a>), because QString preallocates extra space at the end of the string data so it can grow without reallocating the entire string each time.
+This operation is typically very fast (constant time), because QString preallocates extra space at the 
+end of the string data so it can grow without reallocating the entire string each time.
 
 <b>See also </b>append() and prepend().
 
@@ -4170,6 +4239,7 @@ This enum describes the various normalized forms of Unicode text.
 <tr><td ><tt>QString::NormalizationForm_KD</tt></td><td ><tt>2</tt></td><td >Compatibility Decomposition</td></tr>
 <tr><td ><tt>QString::NormalizationForm_KC</tt></td><td ><tt>3</tt></td><td >Compatibility Decomposition followed by Canonical Composition</td></tr>
 </table>
+
 <b>See also </b>normalized() and <a href="http://www.unicode.org/reports/tr15/">Unicode Standard Annex #15</a>.
 
 
@@ -4185,6 +4255,7 @@ This enum specifies how the split() function should behave with respect to empty
 <tr><td ><tt>QString::KeepEmptyParts</tt></td><td ><tt>0</tt></td><td >If a field is empty, keep it in the result.</td></tr>
 <tr><td ><tt>QString::SkipEmptyParts</tt></td><td ><tt>1</tt></td><td >If a field is empty, don't include it in the result.</td></tr>
 </table>
+
 <b>See also </b>split().
 
 

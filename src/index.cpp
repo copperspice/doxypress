@@ -1443,9 +1443,7 @@ static int countAnnotatedClasses(int *cp)
 
 static void writeAnnotatedClassList(OutputList &ol)
 {
-   ol.startIndexList();
-   
-   // BROOM Fix - may need to alter the sort order for annotated.html
+   ol.startIndexList();     
 
    for (auto cd : *Doxygen::classSDict) {     
       ol.pushGeneratorState();
@@ -2628,8 +2626,6 @@ static void writeFileMemberIndex(OutputList &ol)
 
 }
 
-//----------------------------------------------------------------------------
-
 /** Helper class representing a namespace member in the navigation menu. */
 struct NmhlInfo {
    NmhlInfo(const char *fn, const char *t) : fname(fn), title(t) {}
@@ -3068,17 +3064,15 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
    // bool fortranOpt = Config::getBool("optimize-fortran");
    
    if (level > 20) {
-      warn(gd->getDefFileName(), gd->getDefLine(), "maximum nesting level exceeded for group %s: check for possible "
-         "recursive group relation!\n", gd->name().constData());
+      warn(gd->getDefFileName(), gd->getDefLine(), "Maximum nesting level exceeded for group %s: check for possible "
+         "recursive group relation\n", gd->name().constData());
 
       return;
    }
 
-   /* Some groups should appear twice under different parent-groups.
-    * That is why we should not check if it was visited
-    */
-   if (/*!gd->visited &&*/ (! gd->isASubGroup() || level > 0) && gd->isVisible() &&
-                           (! gd->isReference() || Config::getBool("external-groups")) ) {
+   // Some groups should appear twice under different parent-groups. Do not check if it was visted  
+   if ( (! gd->isASubGroup() || level > 0) && gd->isVisible() &&
+        (! gd->isReference() || Config::getBool("external-groups")) ) {
 
       // write group info
       bool hasSubGroups = gd->getSubGroups()->count() > 0;
@@ -3136,7 +3130,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
 
                   if (md->isVisible() && md->name().indexOf('@') == -1) {
                      Doxygen::indexList->addContentsItem(isDir, md->name(), md->getReference(), md->getOutputFileBase(), 
-                                                         md->anchor(), false, addToIndex, md);
+                           md->anchor(), false, addToIndex, md);
                   }
 
                   if (isDir) {
@@ -3145,7 +3139,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
                      for (auto emd : *enumList) {
                         if (emd->isVisible()) {
                            Doxygen::indexList->addContentsItem(false, emd->name(), emd->getReference(), emd->getOutputFileBase(),
-                                                               emd->anchor(), false, addToIndex, emd);
+                                 emd->anchor(), false, addToIndex, emd);
                         }
                      }
 
@@ -3154,10 +3148,11 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
                }
             }
 
+
          } else if (lde->kind() == LayoutDocEntry::GroupClasses && addToIndex) {
             
             for (auto cd : *gd->getClasses()) {
-                if (cd->isVisible() /*&& !nestedClassInSameGroup*/) {                
+                if (cd->isVisible()) {                
                   addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), addToIndex, true);                 
                }
             }
@@ -3167,30 +3162,32 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
             for (auto nd : *gd->getNamespaces()) {
                if (nd->isVisible()) {
                   Doxygen::indexList->addContentsItem(false, nd->localName(), nd->getReference(),
-                                                      nd->getOutputFileBase(), 0, false, false, nd);
+                        nd->getOutputFileBase(), 0, false, false, nd);
                }
             }
 
-         } else if (lde->kind() == LayoutDocEntry::GroupFiles && addToIndex) {
-           
+         } else if (lde->kind() == LayoutDocEntry::GroupFiles && addToIndex) {         
+
             for (auto fd : *gd->getFiles()) {
                if (fd->isVisible()) {
                   Doxygen::indexList->addContentsItem(false, fd->displayName(), fd->getReference(),
-                                                      fd->getOutputFileBase(), 0, false, false, fd);
+                        fd->getOutputFileBase(), 0, false, false, fd);
                }
             }
+
 
          } else if (lde->kind() == LayoutDocEntry::GroupDirs && addToIndex) {
          
             for (auto dd : *gd->getDirs()) {
                if (dd->isVisible()) {
                   Doxygen::indexList->addContentsItem(false, dd->shortName(), dd->getReference(), 
-                                                      dd->getOutputFileBase(), 0, false, false, dd);
+                        dd->getOutputFileBase(), 0, false, false, dd);
                }
             }
 
-         } else if (lde->kind() == LayoutDocEntry::GroupPageDocs && addToIndex) {
-       
+
+         } else if (lde->kind() == LayoutDocEntry::GroupPageDocs && addToIndex) {      
+
             for (auto pd : *gd->getPages()) {
                QSharedPointer<SectionInfo> si;
 
@@ -3205,10 +3202,10 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
                   gd->getOutputFileBase(), si ? si->label.data() : 0, hasSubPages || hasSections, true); 
       
                // addToNavIndex
-
                if (hasSections || hasSubPages) {
                   Doxygen::indexList->incContentsDepth();
                }
+
                if (hasSections) {
                   pd->addSectionsToIndex();
                }
@@ -3238,10 +3235,10 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
       if (addToIndex) {
          Doxygen::indexList->decContentsDepth();
       }
+
       if (ftv) {
          ftv->decContentsDepth();
-      }
-      //gd->visited=true;
+      }      
    }
 }
 
@@ -3255,7 +3252,7 @@ static void writeGroupHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
    startIndexHierarchy(ol, 0);
 
    for (auto gd : *Doxygen::groupSDict) {
-      writeGroupTreeNode(ol, gd, 0, ftv, addToIndex);
+      writeGroupTreeNode(ol, gd, 0, ftv, addToIndex);          
    }
 
    endIndexHierarchy(ol, 0);

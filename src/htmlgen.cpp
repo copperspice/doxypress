@@ -818,7 +818,7 @@ void HtmlGenerator::writeSearchData(const QString &dir)
 
          QTextStream t(&f);
          QByteArray searchCss = replaceColorMarkers(resData);
-         searchCss = substitute(searchCss, "$doxygenversion", versionString);
+         searchCss.replace("$doxygenversion", versionString);
 
          if (Config::getBool("disable-index")) {
             // move up the search box if there are no tabs
@@ -837,7 +837,18 @@ void HtmlGenerator::writeSearchData(const QString &dir)
 void HtmlGenerator::writeStyleSheetFile(QFile &file)
 {
    QTextStream t(&file);
-   t << replaceColorMarkers(substitute(ResourceMgr::instance().getAsString("html/doxy_style.css"), "$doxygenversion", versionString));
+ 
+   QByteArray resData = ResourceMgr::instance().getAsString("html/doxy_style.css");
+
+   if (resData.isEmpty()) { 
+      fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to " 
+              " the developers at doxypress@copperspice.org\n");        
+
+   } else {
+      resData.replace("$doxygenversion", versionString);
+      t << replaceColorMarkers(resData);
+
+   }
 }
 
 void HtmlGenerator::writeHeaderFile(QFile &file)
@@ -979,21 +990,25 @@ void HtmlGenerator::endProjectNumber()
 void HtmlGenerator::writeStyleInfo(int part)
 {   
    if (part == 0) {
+      // write default style sheet
+      startPlainFile("doxy_style.css");       
+      QByteArray resData = ResourceMgr::instance().getAsString("html/doxy_style.css");
 
-      QString htmlStyleSheet = "doxy_style.css";
+      if (resData.isEmpty()) { 
+         fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to " 
+               " the developers at doxypress@copperspice.org\n");        
 
-      if (htmlStyleSheet.isEmpty()) {    
-         // write default style sheet        
+      } else {
+         resData.replace("$doxygenversion", versionString);
+         m_textStream << replaceColorMarkers(resData);
 
-         startPlainFile("doxy_style.css");
-       
-         QByteArray resData = ResourceMgr::instance().getAsString("html/doxy_style.css");
-         m_textStream << replaceColorMarkers(substitute(resData, "$doxygenversion", versionString));
-
-         endPlainFile();
-         Doxygen::indexList->addStyleSheetFile("doxy_style.css");
       }
 
+      endPlainFile();
+
+      Doxygen::indexList->addStyleSheetFile("doxy_style.css");     
+
+      // part two
       static const QStringList extraCssFile = Config::getList("html-stylesheets");
 
       for (auto fileName : extraCssFile) {

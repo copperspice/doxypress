@@ -1677,6 +1677,7 @@ class DocPara : public CompAccept<DocPara>, public DocNode
    void handleCite();
    void handleRef(const QByteArray &cmdName);
    void handleSection(const QByteArray &cmdName);
+   void handleSortId();
    void handleInheritDoc();
  
    int handleStartCode();

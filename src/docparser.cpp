@@ -97,7 +97,7 @@ struct DocParserContext {
    bool hasReturnCommand;
 
    QSharedPointer<MemberDef> memberDef;
-   QHash<QString, void *>  paramsFound;
+   QHash<QString, void *> paramsFound;
 
    bool isExample;
    QByteArray   exampleName;
@@ -1399,6 +1399,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   doctokenizerYYsetStatePara();
                }
                break;
+
                case CMD_XMLONLY: {
                   doctokenizerYYsetStateXmlOnly();
                   tok = doctokenizerYYlex();
@@ -1409,6 +1410,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   doctokenizerYYsetStatePara();
                }
                break;
+
                case CMD_DBONLY: {
                   doctokenizerYYsetStateDbOnly();
                   tok = doctokenizerYYlex();
@@ -1419,11 +1421,13 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   doctokenizerYYsetStatePara();
                }
                break;
+
                case CMD_FORMULA: {
                   DocFormula *form = new DocFormula(parent, g_token->id);
                   children.append(form);
                }
                break;
+
                case CMD_ANCHOR: {
                   DocAnchor *anchor = handleAnchor(parent);
                   if (anchor) {
@@ -1431,6 +1435,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   }
                }
                break;
+              
                case CMD_INTERNALREF: {
                   DocInternalRef *ref = handleInternalRef(parent);
                   if (ref) {
@@ -1440,16 +1445,20 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   doctokenizerYYsetStatePara();
                }
                break;
+
                case CMD_SETSCOPE: {
                   QByteArray scope;
+
                   doctokenizerYYsetStateSetScope();
                   doctokenizerYYlex();
+
                   scope = g_token->name;
-                  s_context = scope;
-                  //printf("Found scope='%s'\n",scope.data());
+                  s_context = scope;  
+                
                   doctokenizerYYsetStatePara();
                }
                break;
+
                default:
                   return false;
             }
@@ -1687,7 +1696,7 @@ static void readTextFileByName(const QByteArray &file, QByteArray &text)
 
    } else {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included file %s is not found. "
-                     "Check your EXAMPLE_PATH", qPrint(file));
+                     "Check your EXAMPLE PATH", qPrint(file));
    }
 }
 
@@ -2879,7 +2888,7 @@ int DocHtmlHeader::parse()
                break;
             case TK_HTMLTAG: {
                int tagId = Mappers::htmlTagMapper->map(g_token->name);
-               if (tagId == HTML_H1 && g_token->endTag) { // found </h1> tag
+               if (tagId == HTML_H1 && g_token->endTag) {        // found </h1> tag
                   if (m_level != 1) {
                      warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h1>",
                                     m_level);
@@ -3103,10 +3112,12 @@ int DocIndexEntry::parse()
          case TK_WHITESPACE:
             m_entry += " ";
             break;
+
          case TK_WORD:
          case TK_LNKWORD:
             m_entry += g_token->name;
             break;
+
          case TK_SYMBOL: {
             DocSymbol::SymType s = DocSymbol::decodeSymbol(g_token->name);
             switch (s) {
@@ -3164,6 +3175,7 @@ int DocIndexEntry::parse()
             }
          }
          break;
+
          case TK_COMMAND:
             switch (Mappers::cmdMapper->map(g_token->name)) {
                case CMD_BSLASH:
@@ -3208,6 +3220,7 @@ int DocIndexEntry::parse()
                   break;
             }
             break;
+
          default:
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
                            tokToString(tok));
@@ -3242,10 +3255,12 @@ int DocHtmlCaption::parse()
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a <caption> tag",
                               qPrint(g_token->name));
                break;
+
             case TK_SYMBOL:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
                               qPrint(g_token->name));
                break;
+
             case TK_HTMLTAG: {
                int tagId = Mappers::htmlTagMapper->map(g_token->name);
                if (tagId == HTML_CAPTION && g_token->endTag) { // found </caption> tag
@@ -3257,9 +3272,9 @@ int DocHtmlCaption::parse()
                }
             }
             break;
+
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok));
+               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", tokToString(tok));
                break;
          }
       }
@@ -3819,7 +3834,7 @@ int DocHtmlDescTitle::parse()
 
    while ((tok = doctokenizerYYlex())) {
 
-      if (!defaultHandleToken(this, tok, m_children)) {
+      if (! defaultHandleToken(this, tok, m_children)) {
 
          switch (tok) {
 
@@ -3924,8 +3939,7 @@ int DocHtmlDescTitle::parse()
       }
    }
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while inside"
-                     " <dt> tag");
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while inside <dt> tag");
    }
 
 endtitle:
@@ -4945,10 +4959,10 @@ int DocPara::handleSimpleSection(DocSimpleSect::Type t, bool xmlContext)
    DocSimpleSect *ss = 0;
    bool needsSeparator = false;
 
-   if (!m_children.isEmpty() &&                           // previous element
-         m_children.last()->kind() == Kind_SimpleSect &&    // was a simple sect
-         ((DocSimpleSect *)m_children.last())->type() == t && // of same type
-         t != DocSimpleSect::User) {                        // but not user defined
+   if (!m_children.isEmpty() &&                                 // previous element
+         m_children.last()->kind() == Kind_SimpleSect &&        // was a simple sect
+         ((DocSimpleSect *)m_children.last())->type() == t &&   // of same type
+         t != DocSimpleSect::User) {                            // but not user defined
 
       // append to previous section
       ss = (DocSimpleSect *)m_children.last();
@@ -4963,6 +4977,7 @@ int DocPara::handleSimpleSection(DocSimpleSect::Type t, bool xmlContext)
 
    if (xmlContext) {
       return ss->parseXml();
+
    } else {
       rv = ss->parse(t == DocSimpleSect::User, needsSeparator);
    }
@@ -5021,6 +5036,35 @@ void DocPara::handleCite()
    g_token->sectionId = g_token->name;
    DocCite *cite = new DocCite(this, g_token->name, s_context);
    m_children.append(cite);
+  
+   doctokenizerYYsetStatePara();
+}
+
+void DocPara::handleSortId()
+{
+   // get the argument o
+   int tok = doctokenizerYYlex();
+
+   if (tok != TK_WHITESPACE) {
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "expected whitespace after %s command", qPrint("sortid"));
+      return;
+   }
+
+   tok = doctokenizerYYlex();
+
+   if (tok == 0) {
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "unexpected end of comment block while parsing the "
+                     "argument of command %s\n", qPrint("sortid"));
+      return;
+
+   } else if (tok != TK_WORD && tok != TK_LNKWORD) {
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "unexpected token %s as the argument of %s",
+                     tokToString(tok), qPrint("sortid"));
+      return;
+   }
+  
+   // save the sort id value       
+   s_scope->setSortId(g_token->name.toInt());
   
    doctokenizerYYsetStatePara();
 }
@@ -5448,7 +5492,6 @@ void DocPara::handleInheritDoc()
    }
 }
 
-
 int DocPara::handleCommand(const QByteArray &cmdName)
 {
    DBG(("handleCommand(%s)\n", qPrint(cmdName)));
@@ -5469,6 +5512,7 @@ int DocPara::handleCommand(const QByteArray &cmdName)
             m_children.append(new DocWhiteSpace(this, " "));
          }
          break;
+
       case CMD_BOLD:
          m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Bold, true));
          retval = handleStyleArgument(this, m_children, cmdName);
@@ -5705,7 +5749,7 @@ int DocPara::handleCommand(const QByteArray &cmdName)
          doctokenizerYYsetStatePlantUML();
          retval = doctokenizerYYlex();
          if (jarPath.isEmpty()) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "ignoring startuml command because PLANTUML_JAR_PATH is not set");
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "ignoring startuml command because PLANTUML JAR PATH is not set");
          } else {
             m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::PlantUML, false, g_token->sectionId));
          }
@@ -5786,6 +5830,7 @@ int DocPara::handleCommand(const QByteArray &cmdName)
          retval = block->parse();
       }
       break;
+
       case CMD_COPYDOC:   // fall through
       case CMD_COPYBRIEF: // fall through
       case CMD_COPYDETAILS:
@@ -5825,9 +5870,11 @@ int DocPara::handleCommand(const QByteArray &cmdName)
       case CMD_LINE:
          handleIncludeOperator(cmdName, DocIncOperator::Line);
          break;
+
       case CMD_IMAGE:
          handleImage(cmdName);
          break;
+
       case CMD_DOTFILE:
          handleDotFile(cmdName);
          break;
@@ -5835,15 +5882,19 @@ int DocPara::handleCommand(const QByteArray &cmdName)
       case CMD_MSCFILE:
          handleMscFile(cmdName);
          break;
+
       case CMD_DIAFILE:
          handleDiaFile(cmdName);
          break;
+
       case CMD_LINK:
          handleLink(cmdName, false);
          break;
+
       case CMD_JAVALINK:
          handleLink(cmdName, true);
          break;
+
       case CMD_CITE:
          handleCite();
          break;
@@ -5859,20 +5910,25 @@ int DocPara::handleCommand(const QByteArray &cmdName)
          list->parse();
       }
       break;
+
       case CMD_SECREFITEM:
          warn_doc_error(s_fileName, doctokenizerYYlineno, "unexpected command %s", qPrint(g_token->name));
          break;
+
       case CMD_ENDSECREFLIST:
          warn_doc_error(s_fileName, doctokenizerYYlineno, "unexpected command %s", qPrint(g_token->name));
          break;
+
       case CMD_FORMULA: {
          DocFormula *form = new DocFormula(this, g_token->id);
          m_children.append(form);
       }
       break;
+
       //case CMD_LANGSWITCH:
       //  retval = handleLanguageSwitch();
       //  break;
+
       case CMD_INTERNALREF:
          //warn_doc_error(s_fileName,doctokenizerYYlineno,"unexpected command %s",qPrint(g_token->name));
       {
@@ -5884,9 +5940,16 @@ int DocPara::handleCommand(const QByteArray &cmdName)
          doctokenizerYYsetStatePara();
       }
       break;
+
       case CMD_INHERITDOC:
          handleInheritDoc();
          break;
+
+      // added 03/30/2015
+      case CMD_SORTID: 
+         handleSortId();       
+         break;
+
       default:
          // we should not get here!
          assert(0);

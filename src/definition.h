@@ -274,6 +274,11 @@ class Definition : public DefinitionIntf
       return m_inputOrderId;
    }   
 
+   int getSortId() {
+      return m_sortId;
+   }   
+
+
    //-----------------------------------------------------------------------------------
    // ----  setters -----
    //-----------------------------------------------------------------------------------
@@ -326,6 +331,10 @@ class Definition : public DefinitionIntf
 
    void setInputOrderId(int id) {
       m_inputOrderId = id;
+   }   
+
+   void setSortId(int id) {
+      m_sortId = id;
    }   
 
 
@@ -389,6 +398,7 @@ class Definition : public DefinitionIntf
    int m_defColumn;
 
    int m_inputOrderId;
+   int m_sortId;
 };
 
 /** A list of Definition objects. */

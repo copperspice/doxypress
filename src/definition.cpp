@@ -233,6 +233,10 @@ Definition::Definition(const char *df, int dl, int dc, const char *name, const c
       addToMap(name);
    }
 
+   // id's used in ftvhelp
+   m_inputOrderId = -1;
+   m_sortId = -1;
+
    _setBriefDescription(b, df, dl);
    _setDocumentation(d, df, dl, true, false);
 

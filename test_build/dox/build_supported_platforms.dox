@@ -15,6 +15,7 @@
 
 /*!
 \page supported-platforms Supported Platforms
+\sortid 7
 
 CopperSpice is a cross-platform GUI library which runs on a variety of 32-bit and 64-bit platforms.
 
@@ -120,6 +121,7 @@ has been tested on the indicated platforms and the results are listed in the las
 
 /*!
 \page support-linuxX11 Support for X11
+\sortid 8
 
 CopperSpice is a comprehensive application and UI library for developing
 Linux/X11 applications that can also be deployed across many other
@@ -169,6 +171,7 @@ this version of CsGui, GTK must be present on the target system.
 
 /*!
 \page support-windows  Support for Windows
+\sortid 9
 
 CopperSpice is a comprehensive application and UI library for developing Windows
 applications that can also be deployed across many other desktop and
@@ -209,6 +212,7 @@ programmers to create, build, debug and run applications across all supported pl
 
 /*!
 \page support-mac Support for OS X
+\sortid 10
 
 CopperSpice is a comprehensive application and UI library for developing Mac
 applications that can also be deployed across many other desktop and
@@ -248,6 +252,7 @@ programmers to create, build, debug and run applications across all supported pl
 
 /*!
 \page support-android Support for Android
+\sortid 11
 
 We believe this platform is very important to the future of CopperSpice. Our desire is to focus
 heavily on natively supporting Android.
@@ -259,6 +264,7 @@ heavily on natively supporting Android.
 
 /*!
 \page support-embedded Support for Embedded
+\sortid 12
 
 Embedded Linux will be supported in CopperSpice based on user interest.
 

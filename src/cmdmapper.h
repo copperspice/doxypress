@@ -127,7 +127,8 @@ enum CommandType {
    CMD_MDASH        = 100,
    CMD_STARTUML     = 101,
    CMD_ENDUML       = 102,
-   CMD_SETSCOPE     = 103
+   CMD_SETSCOPE     = 103,
+   CMD_SORTID       = 104
 };
 
 enum HtmlTagType {

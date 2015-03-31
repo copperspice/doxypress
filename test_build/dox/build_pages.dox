@@ -14,6 +14,7 @@
 
 /*!
 \page build-overview Build Overview  
+\sortid 2
 
 <h3>CopperSpice Build Objectives</h3>
 
@@ -118,6 +119,8 @@ but it is normal and expected since multiple processes are running.
 
 /*!
 \page build-from-source Files Included with Source
+\sortid 3
+
 
 In order to build the CopperSpice libraries from source, it may be necessary to install additional utilities. 
 The exact requirements depend on the platform your application will be run on.
@@ -226,6 +229,8 @@ The file \c configure.ac will not need to be modified unless you are changing th
 
 /*!
 \page requirements-x11 Building for X11
+\sortid 13
+
 
 This information pertains to building CopperSpice for developing applications on X11. 
 
@@ -793,6 +798,7 @@ The package names for GStreamer vary between Linux distributions. Search for \c 
 
 /*!
 \page requirements-win Building for Windows
+\sortid 14
 
 This information pertains to building CopperSpice for developing applications on Windows. CopperSpice and
 your applications are built using Autotools. In order to use Autotools several programs and utilities must be installed.
@@ -968,6 +974,7 @@ make install
 
 /*!
 \page requirements-mac Building for OS X
+\sortid 15
 
 This information pertains to building CopperSpice for developing applications on OS X. To compile your
 applications with the CopperSpice libraries, these same utilities and compilers will be required.

@@ -593,17 +593,26 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
    return found;
 }
 
-// adjust for display output
+// adjust for display
 static void reSortNodes(QList<FTVNode *> &nodeList)
 {   
-   std::sort(nodeList.begin(), nodeList.end(), [](FTVNode *a, FTVNode *b) {  
-     
+   std::stable_sort(nodeList.begin(), nodeList.end(), [](FTVNode *a, FTVNode *b) {  
+   
       if (a->def == nullptr || b->def == nullptr) {
          // not a pageDef
          return a->index < b->index;
       }
 
-      return a->def->getInputOrderId() < b->def->getInputOrderId();
+      int sortId_A = a->def->getSortId();
+      int sortId_B = b->def->getSortId();
+
+      if (sortId_A != -1 && sortId_B != -1 && sortId_A != sortId_B)  {
+         return sortId_A < sortId_B;
+
+      } else  {     
+         return a->def->getInputOrderId() < b->def->getInputOrderId();
+      }
+
    } );
    
    int counter = 0;
@@ -611,13 +620,17 @@ static void reSortNodes(QList<FTVNode *> &nodeList)
    for (auto item : nodeList) {     
 
 
-if (item->file.contains("build-from-source") || item->file.contains("build-options") || item->file.contains("requirements-") ) {
-
+/*  BROOM - Test Code for sorting
+if (item->file.contains("build-from-source") || item->file.contains("build-options") || item->file.contains("requirements-") ||
+    item->file.contains("implicit") || item->file.contains("unicode") ) {
+      
       printf("\n  File: %-30s  Alpha: %-3d  ", item->file.constData(), item->index );
-      if (item->def) {
+      if (item->def) {         
          printf("  Our OrderId: %-3d",  item->def->getInputOrderId() );  
+         printf("  New sortId: %-3d",   item->def->getSortId() );  
       }   
 }
+*/ 
 
       item->index = counter;
       counter++;
@@ -627,7 +640,6 @@ if (item->file.contains("build-from-source") || item->file.contains("build-optio
          reSortNodes(children);
       }
    }
-
 }
 
 static void generateJSNavTree(QList<FTVNode *> &nodeList)

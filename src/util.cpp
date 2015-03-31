@@ -7548,53 +7548,46 @@ void writeColoredImgData(ColoredImgDataItem data)
  *  valid color, based on the intensity represented by hex number AA
  *  and the current html_colorstyle  settings.
  */
-QByteArray replaceColorMarkers(const char *str)
+QByteArray replaceColorMarkers(const QByteArray &str)
 {
-   QByteArray result;
-   QByteArray s = str;
-
-   if (s.isEmpty()) {
-      return result;
+   QString result = str;
+  
+   if (result.isEmpty()) {
+      return result.toUtf8();
    }
 
-   static QRegExp re("##[0-9A-Fa-f][0-9A-Fa-f]");
-   static const char hex[] = "0123456789ABCDEF";
-
+   static QRegExp re("##([0-9A-Fa-f][0-9A-Fa-f])");
+  
    static int hue   = Config::getInt("html-colorstyle-hue");
    static int sat   = Config::getInt("html-colorstyle-sat");
    static int gamma = Config::getInt("html-colorstyle-gamma");
+     
+   int startPos = 0;
+   int len = result.length();
 
-   int i, l, sl = s.length(), p = 0;
-
-   while ((i = re.indexIn(s, p)) != -1) {
-      l = re.matchedLength();
-
-      result += s.mid(p, i - p);
-      QByteArray lumStr = s.mid(i + 2, l - 2);
+   while (re.indexIn(result, startPos) != -1) {
+     
+      QString tempColor = re.cap(1);
+      int level = tempColor.toInt(nullptr, 16);
 
       double r, g, b;
       int red, green, blue;
-      int level = HEXTONUM(lumStr[0]) * 16 + HEXTONUM(lumStr[1]);
+      
       ColoredImage::hsl2rgb(hue / 360.0, sat / 255.0, pow(level / 255.0, gamma / 100.0), &r, &g, &b);
 
       red   = (int)(r * 255.0);
       green = (int)(g * 255.0);
       blue  = (int)(b * 255.0);
-      char colStr[8];
-      colStr[0] = '#';
-      colStr[1] = hex[red >> 4];
-      colStr[2] = hex[red & 0xf];
-      colStr[3] = hex[green >> 4];
-      colStr[4] = hex[green & 0xf];
-      colStr[5] = hex[blue >> 4];
-      colStr[6] = hex[blue & 0xf];
-      colStr[7] = 0;
-      //printf("replacing %s->%s (level=%d)\n",lumStr.data(),colStr,level);
-      result += colStr;
-      p = i + l;
+
+      QString colorStr = "#%1%2%3";     
+      colorStr = colorStr.arg(red, 2, 16, QChar('0')).arg(green, 2, 16, QChar('0')).arg(blue, 2, 16, QChar('0'));
+      result.replace(re.pos(0), re.matchedLength(), colorStr);
+
+      // 
+      startPos = re.pos(0) + colorStr.length();
    }
-   result += s.right(sl - p);
-   return result;
+   
+   return result.toUtf8();
 }
 
 /** Copies the contents of file with name \a src to the newly created

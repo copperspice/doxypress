@@ -9,14 +9,6 @@ a.www-link {
    background-position: left center;
 }
 
-div.list_page
-{   
-   margin-top: 35px;
-   margin-left: 30px;
-   margin-right: 50px;
-   margin-bottom: 30px;
-}
-
 h1, h2, h3, h4, h5, h6 { 
    margin-top: 2em; 
 }
@@ -29,10 +21,6 @@ h4 {
    font-size: 100%;
 } 
 
-.badref {
-   font-weight: bold;
-   color: purple;
-}
 
 /* table 1 */
 table.doxtable {
@@ -95,13 +83,20 @@ table.generic td
    vertical-align: top;
 }
 
-hr {
-   height: 0px;
-   border: none;
-   border-top: 1px solid #4A6AAA;
-   width: 70%;
-   margin-top: 20px;
-   margin-bottom: 20px;
+.badref {
+   font-weight: bold;
+   color: purple;
+}
+
+/* div */
+div.list_page
+{   
+   margin-top: 35px;
+   margin-left: 30px;
+   margin-right: 50px;
+   margin-bottom: 30px;
+   padding:5px;
+   border: 3px blue solid;
 }
 
 div.cs_note1
@@ -115,6 +110,26 @@ div.cs_note1
    padding-left: 5px;
    border-left:4px solid;
    border-color: #D0C000;
+}
+
+div.fragment {
+	padding: 4px;
+   padding-left: 6px;
+   padding-bottom: 6px;
+   margin-right: 18px;
+}
+
+div.contents {
+	margin-right: 16px;
+}
+
+hr {
+   height: 0px;
+   border: none;
+   border-top: 1px solid #4A6AAA;
+   width: 70%;
+   margin-top: 20px;
+   margin-bottom: 20px;
 }
 
 .cs_note2
@@ -137,13 +152,4 @@ div.cs_note1
    padding-top: 5px;
 }
 
-div.fragment {
-	padding: 4px;
-   padding-left: 6px;
-   padding-bottom: 6px;
-   margin-right: 18px;
-}
 
-div.contents {
-	margin-right: 16px;
-}

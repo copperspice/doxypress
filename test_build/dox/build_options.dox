@@ -15,6 +15,7 @@
 
 /**
 \page build-options CS Build Options
+\sortid 4
 
 To customize the CopperSpice library build refer to the following selections.
 
@@ -25,6 +26,7 @@ To customize the CopperSpice library build refer to the following selections.
 
 /**
 \page options-all Cross Platform
+\sortid 5
 
 <TABLE>
    <tr> <th width="185">Option</th> <th width="400">Description</th> <th width="240">Notes</th></tr>
@@ -86,6 +88,8 @@ To customize the CopperSpice library build refer to the following selections.
 
 /**
 \page options-bundled Bundled Libraries
+\sortid 6
+
 <h4>Images</h4>
 
 The following image formats are built directly into the CopperSpice <b>CsGui</b> library.

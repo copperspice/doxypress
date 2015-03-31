@@ -18,26 +18,27 @@
 \page main-changed Changes with DoxyPress
 
 <ul>  
-   <li>Default name for the HTML Header file was changed to doxy_header.html</li>  
+   <li>Default name for the HTML Header file was changed to doxy_header.html
       <ul>
-         <li>The tag PROJECT_NUMBER has been changed to PROJECT_VERSION</li> 
+         <li>The tag PROJECT NUMBER has been changed to PROJECT VERSION</li> 
       </ul>   
+   </li>  
    <br>
 
    <li>Default name for the HTML Footer file was changed to doxy_footer.html</li> 
    <br><br>
 
-   <li>Default name for the HTML Stylesheet was changed to doxy_style.css</li>  
+   <li>Default name for the HTML Stylesheet was changed to doxy_style.css 
       <ul> 
          <li>The stylesheet 'doxy_style.css' is automatically included as the first css file</li>
-         <li>To override styles, add one or more custom css files and specifiy them in the project configuration
+         <li>To override styles, add one or more custom css files and specify them in the project configuration
              file under HTML STYLESHEETS</li>
          <li>Do not include 'doxy_style.css' in HTML STYLESHEETS or your custom style sheets</li>         
       </ul> 
    </li>
    <br>  
 
-   <li>Default name for the layout file was changed to doxy_layout.xml</li>  
+   <li>Default name for the layout file was changed to doxy_layout.xml
       <ul> 
          <li>DoxyPress added several new sections to the layout format. If you were using a custom layoutfile we suggest generating
              a new layout file and then make any required custom changes to the new file</li>
@@ -45,6 +46,16 @@
          <li>The following are the tag names in the layout file which changed</li>
       </ul>
    </li>
+  <br> 
+
+  <li>How to sort pages in the Tree View
+     <ul>
+        <li>A new command has been added called \\sortid which takes one numeric parameter</li> 
+        <li>This command can be added to any \\page which requires overriding the default sort order</li>
+        <li>If this command is found DoxyPress will sort the pages based on the id number, otherwise pages will appear in the order they were processed</li>
+     </ul>   
+  </li>
+
 </ul>
 
             
@@ -84,6 +95,6 @@
    </tr>                         
 </table>               
            
-
+<br>
 
 */

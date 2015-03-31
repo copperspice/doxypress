@@ -16,7 +16,7 @@
 
 /*!
 \page main-build Building CopperSpice
-
+\sortid 1
 
 The build process for CopperSpice is slightly different depending on the platform it will be
 hosted on, or platform your CopperSpice application will be run on. 

@@ -16,14 +16,13 @@
 /*!
 \page div-test  Div Test
 
+<div class="list_page">
 
-<div class="test-1">
 
+The text on this page is located inside a &lt;div&gt; with a CSS class. DoxyPress has been enhanched to repsect the &lt;div&gt; structure according to standard HTML. The 
+text on this page will be shown in a blue box. 
 
-Dialogs can be  in which case the user is required to provide necessary information before work in the main window can
-continue, or Modeless dialogs do not prevent the user from interacting with any of the other windows in the application.
-
-Qt provides a set of dialogs for file, font, color-selection and more.
+The &lt;div&gt; is no longer closed and reopened for each paragraph.
 
 
 </div>

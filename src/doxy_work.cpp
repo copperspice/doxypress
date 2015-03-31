@@ -631,7 +631,7 @@ void parseInput()
       addSTLClasses(rootNav);
    }
 
-   Doxy_Globals::g_stats.begin("**  Parsing files\n");
+   Doxy_Globals::g_stats.begin("\n**  Parsing files\n");
    parseFiles(root, rootNav);
 
    Doxy_Globals::g_storage->close();
@@ -905,8 +905,8 @@ void parseInput()
 
 void generateOutput()
 {
-   // Initialize output generators
-   printf("**  Generate Documentation Output\n");   
+   // Initialize output generators  
+   printf("\n**  Generate Documentation Output\n");   
 
    // dump all symbols
    if (Doxy_Globals::g_dumpSymbolMap) {
