@@ -21,7 +21,7 @@
 
 The QList::iterator class provides an STL-style non-const iterator for QList and QQueue.
 
-QList features both <a href="containers.html#stl-style-iterators">STL-style iterators</a> and <a href="containers.html#java-style-iterators">Java-style iterators</a>. The STL-style iterators are more low-level and more cumbersome to use; on the other hand, they are slightly faster and, for developers who already know STL, have the advantage of familiarity.
+QList features both STL-style iterators and Java-style iterators. The STL-style iterators are more low-level and more cumbersome to use; on the other hand, they are slightly faster and, for developers who already know STL, have the advantage of familiarity.
 
 QList&lt;T&gt;::iterator allows you to iterate over a QList&lt;T&gt; (or QQueue&lt;T&gt;) and to modify the list item associated with the iterator. If you want to iterate over a const QList, use QList::const_iterator instead. It is generally good practice to use QList::const_iterator on a non-const QList as well, unless you need to change the QList through the iterator. Const iterators are slightly faster, and can improve code readability.
 
@@ -35,8 +35,9 @@ The default QList::iterator constructor creates an uninitialized iterator. You m
     list.append("December");
 
     QList<QString>::iterator i;
-    for (i = list.begin(); i != list.end(); ++i)
+    for (i = list.begin(); i != list.end(); ++i) {
         cout << *i << endl;
+    }
 \endcode
 
 Let's see a few examples of things we can do with a QList::iterator that we cannot do with a QList::const_iterator. Here's an example that increments every value stored in a QList&lt;int&gt; by 2:
@@ -47,17 +48,18 @@ Let's see a few examples of things we can do with a QList::iterator that we cann
         *i += 2;
 \endcode
 
-Most QList functions accept an integer index rather than an iterator. For that reason, iterators are rarely useful in connection with QList. One place where STL-style iterators do make sense is as arguments to <a href="qtalgorithms.html">generic algorithms</a>.
+Most QList functions accept an integer index rather than an iterator. For that reason, iterators are rarely useful in connection with QList. One place where STL-style iterators do make sense is as arguments to generic algorithms.
 
 For example, here's how to delete all the widgets stored in a QList&lt;QWidget *&gt;:
 
 \code
     QList<QWidget *> list;
     ...
-    <a href="qtalgorithms.html#qDeleteAll">qDeleteAll</a>(list.begin(), list.end());
+    qDeleteAll(list.begin(), list.end());
 \endcode
 
 Multiple iterators can be used on the same list. However, be aware that any non-const function call performed on the QList will render all existing iterators undefined. If you need to keep iterators over a long period of time, we recommend that you use QLinkedList rather than QList.
+
 <b>See also </b>QList::const_iterator and QMutableListIterator.
 */
 

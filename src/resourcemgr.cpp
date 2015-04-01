@@ -167,7 +167,8 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
                   t << substitute(resData, "$width", temp);         
 
                } else {
-                  t << substitute(resData, "$doxygenversion", versionString);
+                  t << substitute(resData, "$doxypressversion", versionString);
+                  t << substitute(resData, "$doxygenversion",   versionString);
                }
 
                return true;

@@ -262,8 +262,8 @@ class LayoutParser : public QXmlDefaultHandler
       // bool javaOpt    = Config::getBool("optimize-java");
 
       // start & end handlers
-      m_sHandler.insert("doxygenlayout",             new StartElementHandler(this, &LayoutParser::startLayout));
-      m_eHandler.insert("doxygenlayout",             new EndElementHandler(this, &LayoutParser::endLayout));
+      m_sHandler.insert("doxypress-layout",          new StartElementHandler(this, &LayoutParser::startLayout));
+      m_eHandler.insert("doxypress-layout",          new EndElementHandler(this, &LayoutParser::endLayout));
 
       // class layout handlers
       m_sHandler.insert("navindex",                  new StartElementHandler(this, &LayoutParser::startNavIndex));
@@ -1349,7 +1349,8 @@ void writeDefaultLayoutFile(const QString &fileName)
    QByteArray layoutData = getLayout_Default();
 
    QTextStream t(&f);
-   t << substitute(layoutData, "$doxygenversion", versionString);
+   t << substitute(layoutData, "$doxypressversion", versionString);
+   t << substitute(layoutData, "$doxygenversion",   versionString);
 }
 
 // Convert input to a title.

@@ -329,7 +329,8 @@ static QString substituteHtmlKeywords(const QByteArray &output, const QString &t
    result = result.replace("$date",           dateToString(false));
    result = result.replace("$year",           yearToString());
 
-   result = result.replace("$doxygenversion", versionString);
+   result = result.replace("$doxypressversion", versionString);
+   result = result.replace("$doxygenversion",   versionString);
 
    result = result.replace("$projectname",    convertToHtml(projectName));  
    result = result.replace("$projectversion", convertToHtml(projectVersion));
@@ -818,7 +819,9 @@ void HtmlGenerator::writeSearchData(const QString &dir)
 
          QTextStream t(&f);
          QByteArray searchCss = replaceColorMarkers(resData);
-         searchCss.replace("$doxygenversion", versionString);
+
+         searchCss.replace("$doxypressversion", versionString);
+         searchCss.replace("$doxygenversion",   versionString);
 
          if (Config::getBool("disable-index")) {
             // move up the search box if there are no tabs
@@ -845,7 +848,8 @@ void HtmlGenerator::writeStyleSheetFile(QFile &file)
               " the developers at doxypress@copperspice.org\n");        
 
    } else {
-      resData.replace("$doxygenversion", versionString);
+      resData.replace("$doxypressversion", versionString);
+      resData.replace("$doxygenversion",   versionString);
       t << replaceColorMarkers(resData);
 
    }
@@ -999,6 +1003,7 @@ void HtmlGenerator::writeStyleInfo(int part)
                " the developers at doxypress@copperspice.org\n");        
 
       } else {
+         resData.replace("$doxypressversion", versionString);
          resData.replace("$doxygenversion", versionString);
          m_textStream << replaceColorMarkers(resData);
 

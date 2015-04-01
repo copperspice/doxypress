@@ -24,27 +24,27 @@ in the table outoput as shown below.
 <table class="generic"> 
    <tr><th width="225">System</th><th>Information</th></tr>
  
-   <tr class="even">
+   <tr>
       <td>\ref  metaobjects-c  "Meta Object System"</td>
       <td>Overview of the Meta Object System and introspection</td>
    </tr> 
 
-   <tr class="even">
+   <tr>
       <td>\ref object-model-c "Object Model"</td>
       <td>Overview of the Object Model System</td>
    </tr> 
 
-   <tr class="even">
+   <tr>
       <td>\ref object-trees-c "Object Trees"</td>
       <td>Overview about the parent-child relationship and object ownership</td>
 
    </tr>  
-   <tr class="even">
+   <tr>
       <td>\ref  properties-c "Property System "</td>
       <td>Overview of the Property System</td>
    </tr> 
 
-   <tr class="even">
+   <tr>
       <td>\ref signals-slots-c "Signals & Slots"</td>
       <td>Overview of Signals and Slots</td>
    </tr>

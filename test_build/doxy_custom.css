@@ -1,14 +1,5 @@
 /* Custom Styling for DoxyPress Test Suite */
 
-a.www-link {
-   font-weight: bold;
-   text-decoration: underline;
-   padding-left: 12px;
-   background: url("closed.png");
-   background-repeat: no-repeat;
-   background-position: left center;
-}
-
 h1, h2, h3, h4, h5, h6 { 
    margin-top: 2em; 
 }
@@ -20,7 +11,6 @@ h3 {
 h4 {
    font-size: 100%;
 } 
-
 
 /* table 1 */
 table.doxtable {
@@ -52,9 +42,9 @@ table.generic
    margin-left: 30px;
    margin-bottom: 60px;
    font-size: 16px;
+   border-collapse: collapse;
    border-radius: 7px 7px 7px 7px;
-   border: 1px solid #E6E6E6;
-   border-collapse: collapse;  
+   border: 1px solid #C0C0C0;    
 }
 
 table.generic th
@@ -65,13 +55,7 @@ table.generic th
    color: #333333;   
 }
 
-table.generic tr.odd, table.generic tr:not(.even)
-{   
-   color: #333333;
-   vertical-align: top;
-}
-
-table.generic tr.even
+table.generic tr
 { 
    color: #333333;
    vertical-align: top;
@@ -80,15 +64,23 @@ table.generic tr.even
 table.generic td
 {
    padding: 3px 40px 5px 10px;
+   border: 1px solid #C0C0C0;
    vertical-align: top;
 }
 
-.badref {
-   font-weight: bold;
-   color: purple;
-}
 
 /* div */
+div.contents {
+	margin-right: 18px;
+}
+
+div.fragment {
+	padding: 4px;
+   padding-left: 6px;
+   padding-bottom: 6px;
+   margin-right: 18px;
+}
+
 div.list_page
 {   
    margin-top: 35px;
@@ -99,28 +91,25 @@ div.list_page
    border: 3px blue solid;
 }
 
-div.cs_note1
-{
-   font-style:italic;  
-   margin-top:5px;
-   margin-left:-2px;
-   margin-bottom:20px;
-   padding-top:1px;
-   padding-bottom:1px;
-   padding-left: 5px;
-   border-left:4px solid;
-   border-color: #D0C000;
+
+/* cs classes */
+.cs_heading {
+   background-color: #CCCCCC;
+   color: #000000;   
+   margin-right: 300px;
+	padding-left: 6px;
+	padding-bottom: 4px;
+   padding-top: 5px;
 }
 
-div.fragment {
-	padding: 4px;
-   padding-left: 6px;
-   padding-bottom: 6px;
-   margin-right: 18px;
+.cs_margin{
+	margin-right:5em;
 }
 
-div.contents {
-	margin-right: 16px;
+/* other */
+.badref {
+   font-weight: bold;
+   color: purple;
 }
 
 hr {
@@ -132,24 +121,11 @@ hr {
    margin-bottom: 20px;
 }
 
-.cs_note2
-{
+a.www-link {
    font-weight: bold;
-   font-style:italic;
-   padding-right:3px;
+   text-decoration: underline;
+   padding-left: 12px;
+   background: url("closed.png");
+   background-repeat: no-repeat;
+   background-position: left center;
 }
-
-.cs_margin{
-	margin-right:5em;
-}
-
-.cs_heading {
-   background-color: #CCCCCC;
-   color: #000000;   
-   margin-right: 300px;
-	padding-left: 6px;
-	padding-bottom: 4px;
-   padding-top: 5px;
-}
-
-

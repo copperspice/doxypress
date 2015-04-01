@@ -2380,12 +2380,9 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
  *  recursively. Later on we need to patch the member types so we keep
  *  track of the hierarchy of classes we create.
  */
-void Doxy_Work::processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef> tagParentCd, 
-                                      const QByteArray &prefix, int count)
+void Doxy_Work::processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> cd, 
+                  QSharedPointer<ClassDef>  tagParentCd, const QByteArray &prefix, int count)
 {
-   //printf("%d: processTagLessClasses %s\n",count,cd->name().data());
-   //printf("checking members for %s\n",cd->name().data());
-
    if (cd->getClassSDict()) {
       QSharedPointer<MemberList> ml = cd->getMemberList(MemberListType_pubAttribs);
 
@@ -5080,7 +5077,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
                    (rootNav->section() == Entry::EXPORTED_INTERFACE_SEC ||
                     rootNav->section() == Entry::INCLUDED_SERVICE_SEC))) {
 
-               // sadly isRecursiveBaseClass always true for UNO IDL ifc/svc members
+               // sadly isRecursiveBaseClass is always true for UNO IDL ifc/svc members
                // (i.e. this is needed for addInterfaceOrServiceToServiceOrSingleton)
 
             Debug::print(Debug::Classes, 0, "    class relation %s inherited/used by %s found (%s and %s) templSpec='%s'\n",
@@ -9414,8 +9411,7 @@ int Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
    const QFileInfoList list = dir.entryInfoList();
 
    for (auto &item : list) {
-
-      auto &cfi = const_cast<QFileInfo &>(item);
+      QFileInfo &cfi   = const_cast<QFileInfo &>(item);
 
       QString filePath = cfi.absoluteFilePath();
 
@@ -9433,7 +9429,7 @@ int Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
 
             if (excludeSymlink && cfi.isSymLink())  {
                continue;
-            }              
+            }  
 
             if (cfi.isFile()) {
 
@@ -9475,6 +9471,7 @@ int Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
                   if (data.isKillDict) {         
                      data.killDict.insert(filePath);                  
                   }     
+               }            
 
             } else if (cfi.isDir() && data.recursive) {
 
@@ -9487,9 +9484,7 @@ int Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
                }   
 
                cfi.setFile(filePath);
-               totalSize += readDir(cfi, data);
-
-               }
+               totalSize += readDir(cfi, data);               
             }
          }
       }
@@ -9847,12 +9842,12 @@ QString Doxy_Work::getQchFileName()
 
 void searchInputFiles()
 {     
-   // ** gather names of all files in the include path
+   // ** gather names for all files in the include path
    Doxy_Globals::g_stats.begin("Searching for include files\n");
 
    QSet<QString> local_excludeSet;
 
-   bool alwaysRecursive = Config::getBool("source-recursive");
+   bool sourceRecursive = Config::getBool("source-recursive");
    const QStringList includePathList = Config::getList("include-path");
    const QStringList excludePatterns = Config::getList("exclude-patterns");
 
@@ -9866,7 +9861,7 @@ void searchInputFiles()
    for (auto s : includePathList) {    
       ReadDirArgs data;
 
-      data.recursive          = alwaysRecursive;         
+      data.recursive          = sourceRecursive;         
       data.isFnDict           = true;
       data.fnDict             = *Doxygen::includeNameDict;
       data.patternList        = includePatterns;
@@ -9889,7 +9884,7 @@ void searchInputFiles()
    for (auto s : examplePathList) {     
       ReadDirArgs data;
 
-      data.recursive   = (alwaysRecursive || exampleRecursive);
+      data.recursive   = (sourceRecursive || exampleRecursive);
       data.isFnDict    = true;
       data.fnDict      = *Doxygen::exampleNameDict;
       data.patternList = tempList;
@@ -9897,7 +9892,6 @@ void searchInputFiles()
       readFileOrDirectory(s, data);
 
       *Doxygen::exampleNameDict = data.fnDict;
-
    }
    Doxy_Globals::g_stats.end();
 
@@ -9909,7 +9903,7 @@ void searchInputFiles()
    for (auto s : imagePathList) {
       ReadDirArgs data;
 
-      data.recursive   = alwaysRecursive;
+      data.recursive   = sourceRecursive;
       data.isFnDict    = true;
       data.fnDict      = *Doxygen::imageNameDict;
 
@@ -9926,7 +9920,7 @@ void searchInputFiles()
    for (auto s : dotFileList) {
       ReadDirArgs data;
 
-      data.recursive   = alwaysRecursive;
+      data.recursive   = sourceRecursive;
       data.isFnDict    = true;
       data.fnDict      = *Doxygen::dotFileNameDict;
 
@@ -9943,7 +9937,7 @@ void searchInputFiles()
    for (auto s : mscFileList) {
       ReadDirArgs data;
 
-      data.recursive   = alwaysRecursive;
+      data.recursive   = sourceRecursive;
       data.isFnDict    = true;
       data.fnDict      = *Doxygen::mscFileNameDict;
 
@@ -9960,7 +9954,7 @@ void searchInputFiles()
    for (auto s : diaFileList) {
       ReadDirArgs data;
 
-      data.recursive   = alwaysRecursive;
+      data.recursive   = sourceRecursive;
       data.isFnDict    = true;
       data.fnDict      = *Doxygen::diaFileNameDict;
     
@@ -9976,7 +9970,7 @@ void searchInputFiles()
    for (auto s : excludeList) {   
       ReadDirArgs data;
 
-      data.recursive       = alwaysRecursive;
+      data.recursive       = sourceRecursive;
       data.errorIfNotExist = false;
       data.patternList     = filePatterns;
       data.isPrepExclude   = true;

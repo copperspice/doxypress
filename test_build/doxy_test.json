@@ -196,7 +196,7 @@
         "*.h"
     ],
     "input-source": [
-        "Z:/DoxyPress/test_build/dox/"
+        "dox"
     ],
     "interactive-svg": false,
     "internal-docs": false,
@@ -250,7 +250,7 @@
     "optimize-cplus": true,
     "optimize-fortran": false,
     "optimize-java": false,
-    "output-dir": "",
+    "output-dir": "Z:/DoxyPress/test_build/",
     "output-language": "English",
     "perl-latex": false,
     "perl-path": "/usr/bin/perl",
@@ -337,7 +337,7 @@
     "verbatim-headers": false,
     "warn-doc-error": true,
     "warn-format": "$file:$line: $text",
-    "warn-logfile": "DoxyPress_Error.log",
+    "warn-logfile": "doxy_error.log",
     "warn-undoc": true,
     "warn-undoc-param": false,
     "warnings": true,

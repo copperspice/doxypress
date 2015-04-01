@@ -1,4 +1,4 @@
-var cookie_namespace = 'doxygen'; 
+var cookie_namespace = 'doxypress'; 
 var sidenav,navtree,content,header;
 
 function readCookie(cookie) 

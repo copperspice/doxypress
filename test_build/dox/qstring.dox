@@ -221,30 +221,6 @@ You then need to explicitly call fromAscii(), fromLatin1(), fromUtf8(), or fromL
 Similarly, you must call toAscii(), toLatin1(), toUtf8(), or toLocal8Bit() explicitly to convert the QString to an 8-bit string. 
 (Other encodings are supported through the QTextCodec class.)
 
-<table class="generic" width="100 %">
-
-<tr class="qt-style"><th >Note for C Programmers</th></tr>
-
-<tr valign="top" class="odd"><td >Due to C++'s type system and the fact that QString is implicitly shared, QStrings may be treated like <tt>int</tt>s or
-other basic types. 
-
-For example:\code
-    QString Widget::boolToString(bool b)
-    {
-        QString result;
-        if (b)
-            result = "True";
-        else
-            result = "False";
-        return result;
-    }
-\endcode
-
-The <tt>result</tt> variable, is a normal variable allocated on the stack. When <tt>return</tt> is called, and because we are returning by value, the copy
-constructor is called and a copy of the string is returned. No actual copying takes place thanks to the implicit sharing.
-
-</td></tr>
-</table>
 
 
 <h3>Distinction Between Null and Empty Strings</h3>
@@ -270,15 +246,6 @@ All functions except isNull() treat null strings the same as empty strings. For 
 <h3>Argument Formats</h3>
 
 In member functions where an argument <i>format</i> can be specified (e.g., arg(), number()), the argument <i>format</i> can be one of the following:
-
-<table class="generic">
-<tr class="qt-style"><th >Format</th><th >Meaning</th></tr>
-<tr valign="top" class="odd"><td ><tt>e</tt></td><td >format as [-]9.9e[+|-]999</td></tr>
-<tr valign="top" class="even"><td ><tt>E</tt></td><td >format as [-]9.9E[+|-]999</td></tr>
-<tr valign="top" class="odd"><td ><tt>f</tt></td><td >format as [-]9.9</td></tr>
-<tr valign="top" class="even"><td ><tt>g</tt></td><td >use <tt>e</tt> or <tt>f</tt> format, whichever is the most concise</td></tr>
-<tr valign="top" class="odd"><td ><tt>G</tt></td><td >use <tt>E</tt> or <tt>f</tt> format, whichever is the most concise</td></tr>
-</table>
 
 A <i>precision</i> is also specified with the argument <i>format</i>. For the 'e', 'E', and 'f' formats, the <i>precision</i> represents the number of digits <i>after</i> the decimal point. For the 'g' and 'G' formats, the <i>precision</i> represents the maximum number of significant digits (trailing zeroes are omitted).
 
@@ -4227,39 +4194,6 @@ Qt-style synonym for QString::iterator.
 
 */
 
-
-/*!
-\enum  QString::NormalizationForm
-
-This enum describes the various normalized forms of Unicode text.
-
-<table class="valuelist"><tr class="odd"><th >Constant</th><th >Value</th><th >Description</th></tr>
-<tr><td ><tt>QString::NormalizationForm_D</tt></td><td ><tt>0</tt></td><td >Canonical Decomposition</td></tr>
-<tr><td ><tt>QString::NormalizationForm_C</tt></td><td ><tt>1</tt></td><td >Canonical Decomposition followed by Canonical Composition</td></tr>
-<tr><td ><tt>QString::NormalizationForm_KD</tt></td><td ><tt>2</tt></td><td >Compatibility Decomposition</td></tr>
-<tr><td ><tt>QString::NormalizationForm_KC</tt></td><td ><tt>3</tt></td><td >Compatibility Decomposition followed by Canonical Composition</td></tr>
-</table>
-
-<b>See also </b>normalized() and <a href="http://www.unicode.org/reports/tr15/">Unicode Standard Annex #15</a>.
-
-
-*/
-
-
-/*!
-\enum  QString::SplitBehavior
-
-This enum specifies how the split() function should behave with respect to empty strings.
-
-<table class="valuelist"><tr class="odd"><th >Constant</th><th >Value</th><th >Description</th></tr>
-<tr><td ><tt>QString::KeepEmptyParts</tt></td><td ><tt>0</tt></td><td >If a field is empty, keep it in the result.</td></tr>
-<tr><td ><tt>QString::SkipEmptyParts</tt></td><td ><tt>1</tt></td><td >If a field is empty, don't include it in the result.</td></tr>
-</table>
-
-<b>See also </b>split().
-
-
-*/
 
 
 /*!

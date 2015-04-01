@@ -187,13 +187,12 @@ void Config::load_Defaults()
 
    // tab 2 -input
    m_cfgList.insert("input-source",              struc_CfgList   { QStringList(),   DEFAULT } );
-   m_cfgString.insert("input-encoding",          struc_CfgString { "UTF-8",         DEFAULT } );
-
+  
    QStringList tempList2 = Config::getFilePatterns();
    m_cfgList.insert("input-patterns",            struc_CfgList   { tempList2,       DEFAULT } );   
 
+   m_cfgString.insert("input-encoding",          struc_CfgString { "UTF-8",         DEFAULT } );
    m_cfgBool.insert("source-recursive",          struc_CfgBool   { false,           DEFAULT } );
-
    m_cfgList.insert("exclude-files",             struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgBool.insert("exclude-symlinks",          struc_CfgBool   { false,           DEFAULT } );
    m_cfgList.insert("exclude-patterns",          struc_CfgList   { QStringList(),   DEFAULT } );

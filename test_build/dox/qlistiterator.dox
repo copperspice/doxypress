@@ -21,7 +21,7 @@
 
 The QListIterator class provides a Java-style const iterator for QList and QQueue.
 
-QList has both <a href="containers.html#java-style-iterators">Java-style iterators</a> and <a href="containers.html#stl-style-iterators">STL-style iterators</a>. The Java-style iterators are more high-level and easier to use than the STL-style iterators; on the other hand, they are slightly less efficient.
+QList has both Java-style iterators and STL-style iterators. The Java-style iterators are more high-level and easier to use than the STL-style iterators; on the other hand, they are slightly less efficient.
 
 An alternative to using iterators is to use index positions. Most QList member functions take an index as their first parameter, making it possible to access, modify, and remove items without using iterators.
 
@@ -33,20 +33,23 @@ The QListIterator constructor takes a QList as argument. After construction, the
     QList<float> list;
     ...
     QListIterator<float> i(list);
-    while (i.hasNext())
-        <a href="qtglobal.html#qDebug">qDebug</a>() << i.next();
+
+    while (i.hasNext())  {
+        qDebug() << i.next();
+    }
 \endcode
 
 The next() function returns the next item in the list and advances the iterator. Unlike STL-style iterators, Java-style iterators point <i>between</i> items rather than directly <i>at</i> items. The first call to next() advances the iterator to the position between the first and second item, and returns the first item; the second call to next() advances the iterator to the position between the second and third item, and returns the second item; and so on.
 
-<p class="centerAlign"><img src="images/javaiterators1.png" alt="" />
-Here's how to iterate over the elements in reverse order:
+Here is how to iterate over the elements in reverse order:
 
 \code
     QListIterator<float> i(list);
     i.toBack();
-    while (i.hasPrevious())
-        <a href="qtglobal.html#qDebug">qDebug</a>() << i.previous();
+
+    while (i.hasPrevious()) {
+        qDebug() << i.previous();
+    }
 \endcode
 
 If you want to find all occurrences of a particular value, use findNext() or findPrevious() in a loop.

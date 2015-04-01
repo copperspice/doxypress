@@ -254,7 +254,7 @@ Ubuntu 14.04 installs Automake 1.14.1 and GCC 4.8.2. No updates are required.
 
 For a typical CopperSpice setup refer to the table below.
 
-<TABLE class="cs_table">
+<table class="generic">
    <tr> <th width="125">Description</th>  <th width="125">Folder Name</th>
    </tr>       
    <tr>
@@ -269,7 +269,7 @@ For a typical CopperSpice setup refer to the table below.
       <td>CS install</td>
       <td>cs_lib</td>
    </tr>
-</TABLE>
+</table>
 
 
 <b>(1)</b> &nbsp;&nbsp; This step only needs to be run if CopperSpice has been checked out from the Git repository
@@ -870,7 +870,7 @@ MSYS Version <b>msys+7za+wget+svn+git+mercurial+cvs-rev9.7z</b>
 
 For a typical CopperSpice setup refer to the table below.
 
-<TABLE class="cs_table">
+<table class="generic">
    <tr><th width="125">Description</th>  <th width="125">Folder Name</th>
    </tr>       
    <tr>
@@ -885,7 +885,7 @@ For a typical CopperSpice setup refer to the table below.
       <td>CS install</td>
       <td>cs_lib</td>
    </tr>
-</TABLE>
+</table>
 
 
 <b>(1)</b> &nbsp;&nbsp; This step only needs to be run if CopperSpice has been checked out from the Git repository
@@ -1071,7 +1071,7 @@ sudo cp /usr/local/bin/install /usr/bin/install
 
 For a typical CopperSpice setup refer to the table below.
 
-<TABLE class="cs_table">
+<table class="generic">
    <tr><th width="125">Description</th>  <th width="125">Folder Name</th>
    </tr>       
    <tr>   
@@ -1086,7 +1086,7 @@ For a typical CopperSpice setup refer to the table below.
       <td>CS install</td>
       <td>cs_lib</td>
    </tr>
-</TABLE>
+</table>
 
 
 <b>(1)</b> &nbsp;&nbsp; This step only needs to be run if CopperSpice has been checked out from the Git repository

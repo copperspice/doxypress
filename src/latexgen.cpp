@@ -1129,7 +1129,8 @@ QString LatexGenerator::modifyKeywords(const QByteArray &output)
    result = result.replace("$date",           dateToString(false));
    result = result.replace("$year",           yearToString());
 
-   result = result.replace("$doxygenversion", versionString);
+   result = result.replace("$doxypressversion", versionString);
+   result = result.replace("$doxygenversion",   versionString);
 
    result = result.replace("$projectname",    projectName);  
    result = result.replace("$projectversion", projectVersion);

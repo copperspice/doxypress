@@ -18,83 +18,91 @@
 \page main-changed Changes with DoxyPress
 
 <ul>  
-   <li>Default name for the HTML Header file was changed to doxy_header.html
+   <li>Default name for the <b>HTML Header</b> file was changed to doxy_header.html
       <ul>
          <li>The tag PROJECT NUMBER has been changed to PROJECT VERSION</li> 
       </ul>   
    </li>  
    <br>
 
-   <li>Default name for the HTML Footer file was changed to doxy_footer.html</li> 
+   <li>Default name for the <b>HTML Footer</b> file was changed to doxy_footer.html</li> 
    <br><br>
 
-   <li>Default name for the HTML Stylesheet was changed to doxy_style.css 
+
+   <li>Default name for the <b>HTML Stylesheet</b> was changed to doxy_style.css 
       <ul> 
-         <li>The stylesheet 'doxy_style.css' is automatically included as the first css file</li>
-         <li>To override styles, add one or more custom css files and specify them in the project configuration
+         <li>The stylesheet 'doxy_style.css' is automatically included as the first CSS file</li>
+         <li>To override styles, add one or more custom CSS files and specify them in the project configuration
              file under HTML STYLESHEETS</li>
          <li>Do not include 'doxy_style.css' in HTML STYLESHEETS or your custom style sheets</li>         
       </ul> 
    </li>
    <br>  
+ 
 
-   <li>Default name for the layout file was changed to doxy_layout.xml
+   <li>Default name for the <b>Page Layout</b> file was changed to doxy_layout.xml
       <ul> 
-         <li>DoxyPress added several new sections to the layout format. If you were using a custom layoutfile we suggest generating
+         <li>DoxyPress added several new sections to the layout format. If you were using a custom layout file we suggest generating
              a new layout file and then make any required custom changes to the new file</li>
 
-         <li>The following are the tag names in the layout file which changed</li>
+         <li>The following table shows the tag names in the layout file which were changed</li>
       </ul>
    </li>
-  <br> 
+  
+            
+   <table>
+      <tr><th width="250">Old Layout Values</th><th width="250">New Layout Values</th></tr>
+      <tr>
+         <td>$ALPHABETICAL_INDEX</td>
+         <td>$ALPHA-INDEX</td>
+      </tr>
+      <tr>
+         <td>$SHOW_INCLUDE_FILES</td>
+         <td>$SHOW-INCLUDE-FILES</td>
+      </tr>
+      <tr>
+         <td>$CLASS_GRAPH</td>
+         <td>$DOT-CLASS-GRAPH</td>
+      </tr>
+      <tr>
+         <td>$COLLABORATION_GRAPH</td>
+         <td>$DOT-COLLABORATION</td>
+      </tr>
+      <tr>
+         <td>$SHOW_USED_FILES</td>
+         <td>$SHOW-FILE-PAGE</td>
+      </tr>
+      <tr>
+         <td>$SHOW_INCLUDE_FILES</td>
+         <td>$SHOW-INCLUDE-FILES</td>
+      </tr>
+      <tr>
+         <td>$INCLUDE_GRAPH</td>
+         <td>$DOT-INCLUDE</td>
+      </tr>
+      <tr>
+         <td>$INCLUDED_BY_GRAPH </td>
+         <td>$DOT-INCLUDED-BY</td>
+      </tr>  
+      <tr>
+         <td>$GROUP_GRAPHS</td>
+         <td>$GROUP-GRAPHS</td>
+      </tr>                         
+   </table>               
+   <br>            
 
-  <li>How to sort pages in the Tree View
-     <ul>
-        <li>A new command has been added called \\sortid which takes one numeric parameter</li> 
-        <li>This command can be added to any \\page which requires overriding the default sort order</li>
-        <li>If this command is found DoxyPress will sort the pages based on the id number, otherwise pages will appear in the order they were processed</li>
-     </ul>   
-  </li>
+   <li>Sorting pages in the <b>Tree View</b>
+      <ul>
+         <li>A new command has been added called \\sortid which takes one numeric parameter</li> 
+         <li>This command can be added to any \\page which requires overriding the default sort order</li>
+         <li>If this command is found DoxyPress will sort the pages based on the id number, otherwise pages will appear
+             in the order they were processed</li>
+      </ul>   
+   </li>
+   <br> 
 
 </ul>
 
-            
-<table>
-   <tr><th width="250">Old Value</th><th width="250">New Value</th></tr>
-   <tr>
-      <td>$ALPHABETICAL_INDEX</td>
-      <td>$ALPHA-INDEX</td>
-   </tr>
-   <tr>
-      <td>$SHOW_INCLUDE_FILES</td>
-      <td>$SHOW-INCLUDE-FILES</td>
-   </tr>
-   <tr>
-      <td>$CLASS_GRAPH</td>
-      <td>$DOT-CLASS-GRAPH</td>
-   </tr>
-   <tr>
-      <td>$COLLABORATION_GRAPH</td>
-      <td>$DOT-COLLABORATION</td>
-   </tr>
-   <tr>
-      <td>$SHOW_USED_FILES</td>
-      <td>$SHOW-USED-FILES</td>
-   </tr>
-   <tr>
-      <td>$INCLUDE_GRAPH</td>
-      <td>$DOT-INCLUDE</td>
-   </tr>
-   <tr>
-      <td>$INCLUDED_BY_GRAPH </td>
-      <td>$DOT-INCLUDED-BY</td>
-   </tr>  
-   <tr>
-      <td>$GROUP_GRAPHS</td>
-      <td>$GROUP-GRAPHS</td>
-   </tr>                         
-</table>               
-           
 <br>
 
 */
