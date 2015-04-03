@@ -1,6 +1,7 @@
 <RCC>
-    <qresource prefix="/">
-        <file>resources/layout_default.xml</file>
+    <qresource prefix="/">        
+        <file>resources/doxypress.ico</file>
+        <file>resources/layout_default.xml</file> 
         <file>resources/html/arrowdown.luma</file>
         <file>resources/html/arrowright.luma</file>
         <file>resources/html/bc_s.luma</file>
@@ -11,7 +12,7 @@
         <file>resources/html/doc.luma</file>
         <file>resources/html/doxygen.bst</file>
         <file>resources/html/doxy_style.css</file>
-        <file>resources/html/doxygen.luma</file>
+        <file>resources/html/doxypress.luma</file>
         <file>resources/html/dynsections.js</file>
         <file>resources/html/extsearch.js</file>
         <file>resources/html/folderclosed.luma</file>
@@ -90,6 +91,6 @@
         <file>resources/html/tabs.css</file>
         <file>resources/latex/doxygen.sty</file>
         <file>resources/xml/compound.xsd</file>
-        <file>resources/xml/index.xsd</file>
+        <file>resources/xml/index.xsd</file> 
     </qresource>
 </RCC>

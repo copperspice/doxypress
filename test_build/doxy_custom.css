@@ -106,6 +106,26 @@ div.list_page
 	margin-right:5em;
 }
 
+.cs_note1
+{
+   font-style:italic;  
+   margin-top:5px;
+   margin-left:-2px;
+   margin-bottom:20px;
+   padding-top:7px;
+   padding-bottom:10px;
+   padding-left: 5px;
+   border-left:4px solid;
+   border-color: #D0C000;
+}
+
+.cs_note2
+{
+   font-weight: bold;
+   font-style:italic;
+   padding-right:3px;
+}
+
 /* other */
 .badref {
    font-weight: bold;

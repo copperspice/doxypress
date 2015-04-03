@@ -36,8 +36,8 @@ int main(int argc, char **argv)
    }
      
    struct CommandLine cmdArgs;
-   cmdArgs = parseCommandLine(argList);
 
+   cmdArgs = parseCommandLine(argList);
    readConfiguration(cmdArgs);  
 
    //

@@ -117,8 +117,7 @@ static QByteArray addTemplateNames(const QByteArray &s, const QByteArray &n, con
 //   ol.endMemberDoc(hasArgs=false);
 //
 
-static bool writeDefArgumentList(OutputList &ol, QSharedPointer<ClassDef> cd, const QByteArray & /*scopeName*/, 
-                                 QSharedPointer<MemberDef> md)
+static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md)
 {
    ArgumentList *defArgList = (md->isDocsForDefinition()) ? md->argumentList() : md->declArgumentList();
 
@@ -156,13 +155,16 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<ClassDef> cd, co
   
    ol.pushGeneratorState();
    //ol.disableAllBut(OutputGenerator::Html);
+
    bool htmlOn  = ol.isEnabled(OutputGenerator::Html);
    bool latexOn = ol.isEnabled(OutputGenerator::Latex);
+
    {
       // html and latex
       if (htmlOn) {
          ol.enable(OutputGenerator::Html);
       }
+
       if (latexOn) {
          ol.enable(OutputGenerator::Latex);
       }
@@ -170,9 +172,11 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<ClassDef> cd, co
       ol.endMemberDocName();
       ol.startParameterList(!md->isObjCMethod());
    }
+
    ol.enableAll();
    ol.disable(OutputGenerator::Html);
    ol.disable(OutputGenerator::Latex);
+
    {
       // other formats
       if (!md->isObjCMethod()) {
@@ -180,29 +184,29 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<ClassDef> cd, co
       }
       ol.endMemberDocName();
    }
-   ol.popGeneratorState();
-   //printf("===> name=%s isDefine=%d\n",md->name().data(),md->isDefine());
 
+   ol.popGeneratorState();
+  
    QByteArray cName;
-   if (cd) {
-      cName = cd->name();
+
+   if (scope) {
+      cName  = scope->name();
       int il = cName.indexOf('<');
       int ir = cName.lastIndexOf('>');
 
+      QSharedPointer<ClassDef> cd = scope.dynamicCast<ClassDef>();
+
       if (il != -1 && ir != -1 && ir > il) {
-         cName = cName.mid(il, ir - il + 1);
-         //printf("1. cName=%s\n",cName.data());
+         cName = cName.mid(il, ir - il + 1);           
 
-      } else if (cd->templateArguments()) {
-         cName = tempArgListToString(cd->templateArguments(), cd->getLanguage());
-         //printf("2. cName=%s\n",cName.data());
+      } else if (scope->definitionType() == Definition::TypeClass && cd->templateArguments()) {
+         cName = tempArgListToString(cd->templateArguments(), scope->getLanguage());  
 
-      } else { // no template specifier
+      } else { 
+         // no template specifier
          cName.resize(0);
       }
    }
-
-   //printf("~~~ %s cName=%s\n",md->name().data(),cName.data());
 
    bool first = true;
    bool paramTypeStarted = false;
@@ -234,14 +238,13 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<ClassDef> cd, co
       // use the following to put the function pointer type before the name
       bool hasFuncPtrType = false;
 
-      if (!a->attrib.isEmpty() && !md->isObjCMethod()) { // argument has an IDL attribute
+      if (! a->attrib.isEmpty() && !md->isObjCMethod()) { // argument has an IDL attribute
          ol.docify(a->attrib + " ");
       }
 
       if (hasFuncPtrType) { 
          // argument type is a function pointer
-         //printf("a->type=`%s' a->name=`%s'\n",a->type.data(),a->name.data());
-
+        
          QByteArray n = a->type.left(vp);
          if (hasFuncPtrType) {
             n = a->type.left(wp);
@@ -252,13 +255,14 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<ClassDef> cd, co
             n.append(")");
          }
 
-         if (!cName.isEmpty()) {
-            n = addTemplateNames(n, cd->name(), cName);
+         if (! cName.isEmpty()) {
+            n = addTemplateNames(n, scope->name(), cName);
          }
 
-         linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, n);
+         linkifyText(TextGeneratorOLImpl(ol), scope, md->getBodyDef(), md, n);
 
-      } else { // non-function pointer type
+      } else { 
+         // non-function pointer type
          QByteArray n = a->type;
 
          if (md->isObjCMethod()) {
@@ -268,12 +272,12 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<ClassDef> cd, co
 
          if (a->type != "...") {
             if (!cName.isEmpty()) {
-               n = addTemplateNames(n, cd->name(), cName);
+               n = addTemplateNames(n, scope->name(), cName);
             }
-            linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, n);
+            linkifyText(TextGeneratorOLImpl(ol), scope, md->getBodyDef(), md, n);
          }
       }
-      if (!isDefine) {
+      if (! isDefine) {
          if (paramTypeStarted) {
             ol.endParameterType();
             paramTypeStarted = false;
@@ -290,49 +294,61 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<ClassDef> cd, co
          //{
          //  ol.docify(" ");
          //}
+
          ol.disable(OutputGenerator::Latex);
          ol.disable(OutputGenerator::Html);
          ol.docify(" "); /* man page */
+
          if (htmlOn) {
             ol.enable(OutputGenerator::Html);
          }
+
          ol.disable(OutputGenerator::Man);
          ol.startEmphasis();
          ol.enable(OutputGenerator::Man);
+
          if (latexOn) {
             ol.enable(OutputGenerator::Latex);
          }
+
          if (a->name.isEmpty()) {
             ol.docify(a->type);
          } else {
             ol.docify(a->name);
          }
+
          ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::Latex);
          ol.endEmphasis();
          ol.enable(OutputGenerator::Man);
+
          if (latexOn) {
             ol.enable(OutputGenerator::Latex);
          }
       }
-      if (!a->array.isEmpty()) {
+
+      if (! a->array.isEmpty()) {
          ol.docify(a->array);
       }
-      if (hasFuncPtrType) // write the part of the argument type
-         // that comes after the name
-      {
-         linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(),
+
+      if (hasFuncPtrType)  {
+         // write the part of the argument type that comes after the name
+      
+         linkifyText(TextGeneratorOLImpl(ol), scope, md->getBodyDef(),
                      md, a->type.right(a->type.length() - vp));
       }
-      if (!a->defval.isEmpty()) { // write the default value
+
+      if (! a->defval.isEmpty()) { 
+         // write the default value
          QByteArray n = a->defval;
          if (!cName.isEmpty()) {
-            n = addTemplateNames(n, cd->name(), cName);
+            n = addTemplateNames(n, scope->name(), cName);
          }
+
          ol.docify(" = ");
 
          ol.startTypewriter();
-         linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, n, false, true, true);
+         linkifyText(TextGeneratorOLImpl(ol), scope, md->getBodyDef(), md, n, false, true, true);
          ol.endTypewriter();
       }
 
@@ -392,25 +408,23 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<ClassDef> cd, co
    }
    ol.endParameterName(true, defArgList->count() < 2, !md->isObjCMethod());
    ol.popGeneratorState();
+
    if (md->extraTypeChars()) {
       ol.docify(md->extraTypeChars());
    }
+
    if (defArgList->constSpecifier) {
       ol.docify(" const");
    }
+
    if (defArgList->volatileSpecifier) {
       ol.docify(" volatile");
    }
-   if (!defArgList->trailingReturnType.isEmpty()) {
-      linkifyText(TextGeneratorOLImpl(ol), // out
-                  cd,                      // scope
-                  md->getBodyDef(),        // fileScope
-                  md,                      // self
-                  defArgList->trailingReturnType, // text
-                  false                    // autoBreak
-                 );
 
+   if (!defArgList->trailingReturnType.isEmpty()) {
+      linkifyText(TextGeneratorOLImpl(ol), scope,  md->getBodyDef(), md, defArgList->trailingReturnType, false );
    }
+
    return true;
 }
 
@@ -2795,9 +2809,10 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       ol.startDoxyAnchor(cfname, cname, memAnchor, doxyName, doxyArgs);
       ol.startMemberDoc(ciname, name(), memAnchor, title, showInline);
 
-      QSharedPointer<ClassDef> cd = getClassDef();
+      QSharedPointer<ClassDef> cd     = getClassDef();
+      QSharedPointer<NamespaceDef> nd = getNamespaceDef();
 
-      if (!Config::getBool("hide-scope-names")) {
+      if (! Config::getBool("hide-scope-names")) {
          bool first = true;
 
          SrcLangExt lang = getLanguage();
@@ -2904,9 +2919,18 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       }
     
       linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), self, substitute(ldef, "::", sep));
-      hasParameterList = writeDefArgumentList(ol, cd, scopeName.toUtf8(), self);
+
+      QSharedPointer<Definition> scope = cd;
+
+      if (! scope) {
+         scope = nd;
+      }
+
+      hasParameterList = writeDefArgumentList(ol, scope, self);
      
-      if (hasOneLineInitializer()) { // add initializer
+      if (hasOneLineInitializer()) { 
+         // add initializer
+
          if (! isDefine()) {            
             ol.docify(" ");
 

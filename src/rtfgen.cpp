@@ -2329,7 +2329,7 @@ void testRTFOutput(const QString &name)
 
 err:
    err("RTF integrity check failed at line %d of %s due to a bracket mismatch.\n"              
-       "Please notify the developers of DoxyPress at doxypress@copperspice.org\n", line, qPrintable(name));
+       "Please notify the developers of DoxyPress at doxypress@copperspice.com\n", line, qPrintable(name));
 }
 
 /**

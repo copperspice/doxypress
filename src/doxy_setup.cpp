@@ -245,7 +245,6 @@ struct CommandLine parseCommandLine(QStringList argList)
       
       if (argMap.contains(item)) {
          value = argMap.value(item);
-
          ++iter;
       }
                 
@@ -400,7 +399,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             cmdArgs.debugLabel = getValue(iter, argList.end());
 
             if (cmdArgs.debugLabel.isEmpty() ) {
-               err("Option \"-d\" is missing a debug specifier.\n");                       
+               err("Option \"-d\" is missing a debug specifier\n");                       
                exit(1);
             }
            
@@ -417,12 +416,13 @@ struct CommandLine parseCommandLine(QStringList argList)
           
          case DOXY_VERSION:
             printf("\nDoxyPress Version: %s\n", versionString);   
-            printf("Email: doxypress@copperspice.org\n");         
+            printf("email: doxypress@copperspice.com\n");         
             exit(0);
                   
          case OUTPUT_APP:
             setvbuf(stdout, NULL, _IONBF, 0);
-
+            setvbuf(stderr, NULL, _IONBF, 0);
+   
             Doxygen::outputToApp = true;
             break;
 
@@ -462,7 +462,11 @@ void readConfiguration(struct CommandLine cmdArgs)
       }
      
       if (cmdArgs.configName.isEmpty()) {
-         err("No project configuration file name was specified and 'doxypress.json' was not found");          
+      
+         printf("Usage: doxypess [OPTIONS] [project file name]\n"); 
+         printf("doxypress --help for more information\n\n");
+
+         fprintf(stderr, "No project file was specified, default file 'doxypress.json' was not found\n");          
          exit(1);
       }        
    }  
@@ -470,14 +474,14 @@ void readConfiguration(struct CommandLine cmdArgs)
    QFileInfo fi(cmdArgs.configName);
 
    if (! fi.exists()) {  
-      err("Project configuration file %s was not found\n", qPrintable(cmdArgs.configName));      
+      err("Project file %s was not found\n", qPrintable(cmdArgs.configName));      
       exit(1);
    }
   
    // step 1 
    if (! Config::parseConfig(cmdArgs.configName) ) {
-      fprintf(stderr, "\n\nIssue parsing the Project Configuration.\nPlease submit a bug report to " 
-                  " the developers at doxypress@copperspice.org\n");
+      fprintf(stderr, "\n\nIssue parsing the project file.\nPlease submit a bug report to " 
+                  " the developers at doxypress@copperspice.com\n");
       exit(1);
    }
        
@@ -543,14 +547,13 @@ void Doxy_Setup::usage()
 {
    printf("\n");
    printf("DoxyPress: Version %s\n", versionString);
-   printf("Email: doxypress@copperspice.org\n");  
+   printf("email: doxypress@copperspice.com\n");  
 
-   printf("\n");
-   printf("Generate documentation using an existing configuration file:\n");   
-   printf("   [config file name]\n");
-   
-   printf("\n");
-   printf("Generate a layout file to configure the documentation:\n");
+   printf("\n"); 
+   printf("Usage: doxypess [OPTIONS] [project file name]\n"); 
+      
+   printf("\n\n");
+   printf("Generate default layout file to configure documentation:\n");
    printf("   --l  [layout file name]   Default is `doxy_layout.xml'\n");
      
    printf("\n");
@@ -577,6 +580,6 @@ void Doxy_Setup::usage()
    printf("   --b  output for DoxyPressApp\n"); 
    printf("   --m  dump symbol map\n");  
    printf("   --d  <level> enable one or more debug levels\n");
-  
-   Debug::printFlags();   
+
+   Debug::printFlags();  
 }

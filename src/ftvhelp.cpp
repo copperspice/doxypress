@@ -148,6 +148,14 @@ void FTVHelp::finalize()
  */
 void FTVHelp::incContentsDepth()
 {  
+   QList<FTVNode *> &nl = m_indentNodes[m_indent];
+
+/* broom - test code
+   if (nl.isEmpty()) { 
+      throw "FTVHelp: Incrementing depth without a parent";
+   }
+*/
+
    m_indent++;
    assert(m_indent < MAX_INDENT);
 }
@@ -163,16 +171,24 @@ void FTVHelp::decContentsDepth()
    if (m_indent > 0) {
       m_indent--;
 
-      QList<FTVNode *> *nl = &m_indentNodes[m_indent];
-      FTVNode *parent = nl->last();
+      QList<FTVNode *> &nl = m_indentNodes[m_indent];
 
-      if (parent) {
-         QList<FTVNode *> *children = &m_indentNodes[m_indent + 1];
+      // broom - test code
+      if (nl.isEmpty()) { 
+         // hold for right now
 
-         while (! children->isEmpty()) {
-            parent->children.append(children->takeAt(0));
+      } else {
+         FTVNode *parent = nl.last();
+   
+         if (parent) {
+            QList<FTVNode *> &children = m_indentNodes[m_indent + 1];
+   
+            while (! children.isEmpty()) {
+               parent->children.append(children.takeAt(0));
+            }
          }
       }
+
    }
 }
 
@@ -201,8 +217,14 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, 
    newNode->index = nl->count() - 1;
 
    if (m_indent > 0) {
-      QList<FTVNode *> *pnl = &m_indentNodes[m_indent - 1];
-      newNode->parent = pnl->last();
+      QList<FTVNode *> &pnl = m_indentNodes[m_indent - 1]; 
+
+      if (pnl.isEmpty()) {
+         // broom - test code, indent will fail
+                  
+      } else {    
+         newNode->parent = pnl.last();      
+      }
    }
 }
 

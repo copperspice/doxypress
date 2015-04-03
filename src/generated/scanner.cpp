@@ -18473,7 +18473,7 @@ YY_DECL {
 
             {
                warn(yyFileName, yyLineNr, "Found ';' while parsing initializer list "
-                  "(Doxygen could be confused by a macro call without a semicolon)");
+                  "(DoxyPress might be confused by a macro call without a semicolon)");
 
                BEGIN( FindMembers );
             }
@@ -18496,7 +18496,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (!insideCS)
+               if (! insideCS)
                {
                   REJECT;
                }

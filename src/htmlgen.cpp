@@ -763,20 +763,20 @@ void HtmlGenerator::writeTabData()
    ResourceMgr &mgr = ResourceMgr::instance();
 
    //writeColoredImgData(dname,colored_tab_data);
-   mgr.copyResourceAs("html/tab_a.lum",    dname, "tab_a.png");
-   mgr.copyResourceAs("html/tab_b.lum",    dname, "tab_b.png");
-   mgr.copyResourceAs("html/tab_h.lum",    dname, "tab_h.png");
-   mgr.copyResourceAs("html/tab_s.lum",    dname, "tab_s.png");
-   mgr.copyResourceAs("html/nav_h.lum",    dname, "nav_h.png");
-   mgr.copyResourceAs("html/nav_f.lum",    dname, "nav_f.png");
-   mgr.copyResourceAs("html/bc_s.luma",    dname, "bc_s.png");
-   mgr.copyResourceAs("html/doxygen.luma", dname, "doxygen.png");
-   mgr.copyResourceAs("html/closed.luma",  dname, "closed.png");
-   mgr.copyResourceAs("html/open.luma",    dname, "open.png");
-   mgr.copyResourceAs("html/bdwn.luma",    dname, "bdwn.png");
-   mgr.copyResourceAs("html/sync_on.luma", dname, "sync_on.png");
-   mgr.copyResourceAs("html/sync_off.luma",dname, "sync_off.png");    
-   mgr.copyResourceAs("html/nav_g.png",    dname, "nav_g.png");
+   mgr.copyResourceAs("html/tab_a.lum",      dname, "tab_a.png");
+   mgr.copyResourceAs("html/tab_b.lum",      dname, "tab_b.png");
+   mgr.copyResourceAs("html/tab_h.lum",      dname, "tab_h.png");
+   mgr.copyResourceAs("html/tab_s.lum",      dname, "tab_s.png");
+   mgr.copyResourceAs("html/nav_h.lum",      dname, "nav_h.png");
+   mgr.copyResourceAs("html/nav_f.lum",      dname, "nav_f.png");
+   mgr.copyResourceAs("html/bc_s.luma",      dname, "bc_s.png");
+   mgr.copyResourceAs("html/doxypress.luma", dname, "doxypress.png");
+   mgr.copyResourceAs("html/closed.luma",    dname, "closed.png");
+   mgr.copyResourceAs("html/open.luma",      dname, "open.png");
+   mgr.copyResourceAs("html/bdwn.luma",      dname, "bdwn.png");
+   mgr.copyResourceAs("html/sync_on.luma",   dname, "sync_on.png");
+   mgr.copyResourceAs("html/sync_off.luma",  dname, "sync_off.png");    
+   mgr.copyResourceAs("html/nav_g.png",      dname, "nav_g.png");
 }
 
 void HtmlGenerator::writeSearchData(const QString &dir)
@@ -845,7 +845,7 @@ void HtmlGenerator::writeStyleSheetFile(QFile &file)
 
    if (resData.isEmpty()) { 
       fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to " 
-              " the developers at doxypress@copperspice.org\n");        
+              " the developers at doxypress@copperspice.com\n");        
 
    } else {
       resData.replace("$doxypressversion", versionString);
@@ -1000,7 +1000,7 @@ void HtmlGenerator::writeStyleInfo(int part)
 
       if (resData.isEmpty()) { 
          fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to " 
-               " the developers at doxypress@copperspice.org\n");        
+               " the developers at doxypress@copperspice.com\n");        
 
       } else {
          resData.replace("$doxypressversion", versionString);

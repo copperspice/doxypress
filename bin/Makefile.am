@@ -44,7 +44,7 @@ deploy : all
 
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
 
-#	rsync -W -a --modify-window=2  $(top_srcdir)/resources/doxpress.ico $(deploydir)
+	rsync -W -a --modify-window=2  $(top_srcdir)/resources/doxypress.ico $(deploydir)
 
 	rsync -W -a --modify-window=2  $(patsubst %,$(gccpath)/%.dll,$(gcclibs))  $(deploydir)
 	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%1-0.dll,$(cslibs))  $(deploydir)
@@ -54,7 +54,11 @@ endif
 VPATH = ../
 
 # linking
-DoxyPress_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs)) -lole32
+DoxyPress_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
+
+if OSTYPE_WIN
+   DoxyPress_LDFLAGS+= -lole32
+endif
 
 
 DoxyPress_SOURCES = \

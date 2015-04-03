@@ -5344,13 +5344,24 @@ void TclLanguageScanner::parsePrototype(const char *text)
 static int yyread(char *buf, int max_size)
 {
    int c = 0;
-   *buf = '\0';
+   *buf  = '\0';
 
-   while ( c < max_size && tcl.input_string.at(tcl.input_position) ) {
-      *buf = tcl.input_string.at(tcl.input_position++) ;
+// BROOM 
+
+   int maxLen = tcl.input_string.length();
+
+/*
+   while (c < max_size && tcl.input_position < maxLen) {
+      *buf = tcl.input_string.at(tcl.input_position);
+
+      tcl.input_position++;
       c++;
       buf++;
    }
+
+   *buf = '\0';
+
+*/
 
    return c;
 }

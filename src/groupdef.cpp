@@ -468,27 +468,21 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
    }
 }
 
-bool GroupDef::containsGroup(QSharedPointer<const GroupDef> def)
+bool GroupDef::findGroup(QSharedPointer<const GroupDef> def) const
 {
    if (this == def) {
       return true;
 
-   } else if (groupList->contains(def)) {  
-      return true;
-
-   } else { 
-      // look for subgroups as well
-      SortedList<QSharedPointer<GroupDef>> *groups = partOfGroups();
-
-      if (groups) {         
-         for (auto gd : *groups) {
-            if (gd->containsGroup(def)) {
-               return true;
-            }
+   } else if (groupList) {       
+    
+      for (auto gd : *groupList) {
+         if (gd->findGroup(def)) {
+            return true;
          }
       }
    }
-   return false;
+
+   return false;   
 }
 
 void GroupDef::addGroup(QSharedPointer<GroupDef> def)
@@ -1251,11 +1245,11 @@ void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGr
          if (gd == subGroup) {
             warn(root->fileName, root->startLine, "Refusing to add group %s to itself", gd->name().constData());
 
-         } else if (gd->containsGroup(subGroup)) {
+         } else if (subGroup->findGroup(gd)) {
             warn(root->fileName, root->startLine, "Refusing to add group %s to group %s, since the latter is already a "
                  "subgroup of the former\n", subGroup->name().data(), gd->name().data());
 
-         } else {
+         } else if (! gd->findGroup(subGroup)) {
             gd->addGroup(subGroup);
             subGroup->makePartOfGroup(gd);
          }

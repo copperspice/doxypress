@@ -18,7 +18,7 @@
 \page brief-1-test Brief Description Test 1
 
 There is no defined brief description on this page. JAVADOC-AUTO-BRIEF is off and QT-AUTO_BRIEF is on. This text will be split and the first sentence will
-appear as the brief description. The opening marker for this \\page is /*!
+appear as the brief description. The opening marker for this \\page is \c /*!
 
 
 */
@@ -29,7 +29,7 @@ appear as the brief description. The opening marker for this \\page is /*!
 \page brief-2-test Brief Description Test 2
 
 There is no brief description on this page. JAVADOC-AUTO-BRIEF is off and QT-AUTO_BRIEF is on. This entire text will appear in the body of the page.
-since the opening marker for this \\page is /** 
+since the opening marker for this \\page is \c /** 
 
 
 */

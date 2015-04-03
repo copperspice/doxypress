@@ -1431,11 +1431,11 @@ QByteArray Definition::navigationPathAsString() const
    if (isLinkable()) {
       if (definitionType() == Definition::TypeGroup && ((const GroupDef *)this)->groupTitle()) {
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension + "\">" +
-                   ((const GroupDef *)this)->groupTitle() + "</a>";
+                   convertToHtml(((const GroupDef*)this)->groupTitle()) + "</a>";
 
       } else if (definitionType() == Definition::TypePage && !((const PageDef *)this)->title().isEmpty()) {
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension + "\">" +
-                   ((const PageDef *)this)->title() + "</a>";
+                   convertToHtml(((const PageDef*)this)->title()) + "</a>";
 
       } else if (definitionType() == Definition::TypeClass) {
          QByteArray name = locName;
@@ -1445,19 +1445,19 @@ QByteArray Definition::navigationPathAsString() const
          }
 
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension;
-         if (!anchor().isEmpty()) {
+         if (! anchor().isEmpty()) {
             result += "#" + anchor();
          }
 
-         result += "\">" + name + "</a>";
+         result+="\">" + convertToHtml(name) + "</a>";
 
       } else {
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension + "\">" +
-                   locName + "</a>";
+                   convertToHtml(locName) + "</a>";
       }
 
    } else {
-      result += "<b>" + locName + "</b>";
+      result+="<b>" + convertToHtml(locName) + "</b>";
    }
 
    result += "</li>";
