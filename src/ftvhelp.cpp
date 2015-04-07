@@ -631,6 +631,12 @@ static void reSortNodes(QList<FTVNode *> &nodeList)
       if (sortId_A != -1 && sortId_B != -1 && sortId_A != sortId_B)  {
          return sortId_A < sortId_B;
 
+      } else if (sortId_A == -1)  {
+         return false;
+
+      } else if (sortId_B == -1)  {
+         return true;                          
+
       } else  {     
          return a->def->getInputOrderId() < b->def->getInputOrderId();
       }
@@ -642,18 +648,20 @@ static void reSortNodes(QList<FTVNode *> &nodeList)
    for (auto item : nodeList) {     
 
 
-/*  BROOM - Test Code for sorting
-if (item->file.contains("build-from-source") || item->file.contains("build-options") || item->file.contains("requirements-") ||
-    item->file.contains("implicit") || item->file.contains("unicode") ) {
+/*  BROOM - Test Code for sorting  
+if  item->file.contains("build-from-source") || item->file.contains("build-options") || item->file.contains("requirements-") ||
+    item->file.contains("implicit") || item->file.contains("unicode") ||
+    item->file.contains("main-dev") || item->file.contains("sample-project") || item->file.contains("faq") ) {
+
       
       printf("\n  File: %-30s  Alpha: %-3d  ", item->file.constData(), item->index );
+
       if (item->def) {         
          printf("  Our OrderId: %-3d",  item->def->getInputOrderId() );  
          printf("  New sortId: %-3d",   item->def->getSortId() );  
       }   
 }
 */ 
-
       item->index = counter;
       counter++;
 

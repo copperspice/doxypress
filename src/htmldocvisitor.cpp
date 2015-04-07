@@ -1729,6 +1729,7 @@ void HtmlDocVisitor::visitPre(DocSecRefList *s)
    if (m_hide) {
       return;
    }
+
    forceEndParagraph(s);
    m_t << "<div class=\"multicol\">" << endl;
    m_t << "<ul>" << endl;
@@ -1739,6 +1740,7 @@ void HtmlDocVisitor::visitPost(DocSecRefList *s)
    if (m_hide) {
       return;
    }
+
    m_t << "</ul>" << endl;
    m_t << "</div>" << endl;
    forceStartParagraph(s);
@@ -1753,7 +1755,7 @@ void HtmlDocVisitor::visitPost(DocSecRefList *s)
 //    m_hide = true;
 //  }
 //}
-//
+
 //void HtmlDocVisitor::visitPost(DocLanguage *l)
 //{
 //  QString langId = Config::getEnum("output-language");

@@ -2198,11 +2198,13 @@ void DocSecRefList::parse()
          }
       } else if (tok == TK_WHITESPACE) {
          // ignore whitespace
+
       } else {
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s inside section reference list",
                         tokToString(tok));
          goto endsecreflist;
       }
+
       tok = doctokenizerYYlex();
    }
 

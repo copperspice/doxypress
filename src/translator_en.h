@@ -496,10 +496,12 @@ class TranslatorEnglish : public Translator
     */
    virtual QByteArray trGeneratedAt(const char *date, const char *projName) {
       QByteArray result = (QByteArray)"Generated on " + date;
+
       if (projName) {
          result += (QByteArray)" for " + projName;
       }
-      result += (QByteArray)" by";
+
+      result += " &nbsp; by";
       return result;
    }
 
