@@ -27,7 +27,7 @@
 #include <sortedlist.h>
 #include <types.h>
 
-class DefinitionImpl;
+class Definition_Private;
 class FileDef;
 class GroupDef;
 class MemberSDict;
@@ -388,7 +388,7 @@ class Definition : public DefinitionIntf
    void _setInbodyDocumentation(const char *d, const char *docFile, int docLine);
    bool _docsAlreadyAdded(const QByteArray &doc, QByteArray &sigList);
 
-   DefinitionImpl *m_impl; // internal structure holding all private data
+   Definition_Private *m_private; 
    QByteArray m_name;
 
    bool m_isSymbol;

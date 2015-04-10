@@ -73,7 +73,7 @@ static void writeClientSearchBox(QTextStream &t, const QString &relPath)
 
 static void writeServerSearchBox(QTextStream &t, const QString &relPath, bool highlightSearch)
 {
-   static bool externalSearch = Config::getBool("external-search");
+   static bool externalSearch = Config::getBool("search-external");
 
    t << "        <div id=\"MSearchBox\" class=\"MSearchBoxInactive\">\n";
    t << "          <div class=\"left\">\n";
@@ -201,7 +201,7 @@ static QString substituteHtmlKeywords(const QByteArray &output, const QString &t
    static bool timeStamp         = Config::getBool("html-timestamp");
    static bool treeView          = Config::getBool("generate-treeview");
    static bool searchEngine      = Config::getBool("html-search");
-   static bool serverBasedSearch = Config::getBool("server-based-search");
+   static bool serverBasedSearch = Config::getBool("search-server-based");
 
    static bool mathJax           = Config::getBool("use-mathjax");
    static QString mathJaxFormat  = Config::getEnum("mathjax-format");
@@ -781,7 +781,7 @@ void HtmlGenerator::writeTabData()
 
 void HtmlGenerator::writeSearchData(const QString &dir)
 {
-   static bool serverBasedSearch = Config::getBool("server-based-search");
+   static bool serverBasedSearch = Config::getBool("search-server-based");
   
    ResourceMgr &mgr = ResourceMgr::instance();
 
@@ -911,7 +911,7 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
 void HtmlGenerator::writeSearchInfo(QTextStream &t_stream, const QString &relPath)
 {
    static bool searchEngine      = Config::getBool("html-search");
-   static bool serverBasedSearch = Config::getBool("server-based-search");
+   static bool serverBasedSearch = Config::getBool("search-server-based");
 
    if (searchEngine && !serverBasedSearch) {
       (void)relPath;
@@ -2156,7 +2156,7 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath
 
          if (hlEntry->parent() == LayoutDocManager::instance().rootNavEntry()) { // first row is special as it contains the search box
             static bool searchEngine      = Config::getBool("html-search");
-            static bool serverBasedSearch = Config::getBool("server-based-search");
+            static bool serverBasedSearch = Config::getBool("search-server-based");
 
             if (searchEngine) {
                t_stream << "      <li>\n";
@@ -2521,7 +2521,7 @@ void HtmlGenerator::writeExternalSearchPage()
         << "\"" << theTranslator->trSearchResults(1) << "\","
         << "\"" << theTranslator->trSearchResults(2) << "\"];" << endl;
 
-      t_stream << "var serverUrl=\"" << Config::getString("searchengine-url") << "\";" << endl;
+      t_stream << "var serverUrl=\"" << Config::getString("search-external-url") << "\";" << endl;
       t_stream << "var tagMap = {" << endl;
 
       bool first = true;

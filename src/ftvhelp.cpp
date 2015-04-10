@@ -150,12 +150,6 @@ void FTVHelp::incContentsDepth()
 {  
    QList<FTVNode *> &nl = m_indentNodes[m_indent];
 
-/* broom - test code
-   if (nl.isEmpty()) { 
-      throw "FTVHelp: Incrementing depth without a parent";
-   }
-*/
-
    m_indent++;
    assert(m_indent < MAX_INDENT);
 }
@@ -172,20 +166,15 @@ void FTVHelp::decContentsDepth()
       m_indent--;
 
       QList<FTVNode *> &nl = m_indentNodes[m_indent];
+     
+      
+      FTVNode *parent = nl.last();
 
-      // broom - test code
-      if (nl.isEmpty()) { 
-         // hold for right now
+      if (parent) {
+         QList<FTVNode *> &children = m_indentNodes[m_indent + 1];
 
-      } else {
-         FTVNode *parent = nl.last();
-   
-         if (parent) {
-            QList<FTVNode *> &children = m_indentNodes[m_indent + 1];
-   
-            while (! children.isEmpty()) {
-               parent->children.append(children.takeAt(0));
-            }
+         while (! children.isEmpty()) {
+            parent->children.append(children.takeAt(0));
          }
       }
 
@@ -219,11 +208,19 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, 
    if (m_indent > 0) {
       QList<FTVNode *> &pnl = m_indentNodes[m_indent - 1]; 
 
-      if (pnl.isEmpty()) {
-         // broom - test code, indent will fail
-                  
-      } else {    
-         newNode->parent = pnl.last();      
+      if (def) {
+         // page, class, method, etc
+         newNode->parent = pnl.last();
+
+      } else {
+         // most likely a section, subsection
+         
+         if (pnl.isEmpty()) {
+            printf("\n  BroomCS  --  Parent is missing");            
+                     
+         } else {    
+            newNode->parent = pnl.last();      
+         }
       }
    }
 }
@@ -649,19 +646,21 @@ static void reSortNodes(QList<FTVNode *> &nodeList)
 
 
 /*  BROOM - Test Code for sorting  
-if  item->file.contains("build-from-source") || item->file.contains("build-options") || item->file.contains("requirements-") ||
-    item->file.contains("implicit") || item->file.contains("unicode") ||
-    item->file.contains("main-dev") || item->file.contains("sample-project") || item->file.contains("faq") ) {
+if  (item->file.contains("getting-started")) {
 
-      
-      printf("\n  File: %-30s  Alpha: %-3d  ", item->file.constData(), item->index );
+//    (item->file.contains("build-from-source") || item->file.contains("build-options") || item->file.contains("requirements-") ||
+//    item->file.contains("implicit") || item->file.contains("unicode") ||
+//    item->file.contains("main-dev") || item->file.contains("sample-project") || item->file.contains("faq") ) {
+     
+      printf("\n  BroomCS  File: %-20s   Name: %-20s   Alpha: %-3d", item->file.constData(), item->name.constData(), item->index );
 
       if (item->def) {         
          printf("  Our OrderId: %-3d",  item->def->getInputOrderId() );  
          printf("  New sortId: %-3d",   item->def->getSortId() );  
       }   
 }
-*/ 
+*/
+
       item->index = counter;
       counter++;
 

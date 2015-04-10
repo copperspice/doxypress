@@ -339,15 +339,20 @@ class DocAnchor : public DocNode
 {
  public:
    DocAnchor(DocNode *parent, const QByteArray &id, bool newAnchor);
-   Kind kind() const          {
+   void parse();
+
+   Kind kind() const {
       return Kind_Anchor;
    }
-   QByteArray anchor() const    {
+
+   QByteArray anchor() const {
       return m_anchor;
    }
-   QByteArray file() const      {
+
+   QByteArray file() const {
       return m_file;
    }
+
    void accept(DocVisitor *v) {
       v->visit(this);
    }
@@ -1205,7 +1210,7 @@ class DocRef : public CompAccept<DocRef>, public DocNode
    }
 
    bool hasLinkText() const {
-      return !m_children.isEmpty();
+      return ! m_children.isEmpty();
    }
 
    bool refToAnchor() const     {
@@ -1225,9 +1230,10 @@ class DocRef : public CompAccept<DocRef>, public DocNode
    }
 
  private:
-   bool      m_refToSection;
-   bool      m_refToAnchor;
-   bool      m_isSubPage;
+   bool m_refToSection;
+   bool m_refToAnchor;
+   bool m_isSubPage;
+
    QByteArray   m_file;
    QByteArray   m_relPath;
    QByteArray   m_ref;

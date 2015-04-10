@@ -27,6 +27,7 @@ CommandMap cmdMap[] = {
    { "a",             CMD_EMPHASIS },
    { "addindex",      CMD_ADDINDEX },
    { "anchor",        CMD_ANCHOR },
+   { "anchorname",    CMD_ANCHORNAME },
    { "arg",           CMD_LI },
    { "attention",     CMD_ATTENTION },
    { "author",        CMD_AUTHOR },

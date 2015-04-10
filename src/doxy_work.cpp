@@ -1017,7 +1017,7 @@ void generateOutput()
    Doxy_Globals::g_stats.end();
 
    static bool searchEngine      = Config::getBool("html-search");
-   static bool serverBasedSearch = Config::getBool("server-based-search");
+   static bool serverBasedSearch = Config::getBool("search-server-based");
 
    // generate search indices (need to do this before writing other HTML
    // pages as these contain a drop down menu with options depending on

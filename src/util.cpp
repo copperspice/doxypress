@@ -8035,8 +8035,7 @@ void convertProtectionLevel(MemberListType inListType, Protection inProt, int *o
 
    if (inProt == Public) {
       switch (inListType) // in the private section of the derived class,
-         // the private section of the base class should not
-         // be visible
+         // the private section of the base class should not be visible
       {
          case MemberListType_priMethods:
          case MemberListType_priStaticMethods:
@@ -8052,8 +8051,7 @@ void convertProtectionLevel(MemberListType inListType, Protection inProt, int *o
       }
    } else if (inProt == Protected) { // Protected inheritance
       switch (inListType) // in the protected section of the derived class,
-         // both the public and protected members are shown
-         // as protected
+         // both the public and protected members are shown as protected
       {
          case MemberListType_pubMethods:
          case MemberListType_pubStaticMethods:

@@ -277,6 +277,7 @@ void Config::load_Defaults()
    m_cfgList.insert("msc-file-dirs",             struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("dia-file-dirs",             struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgString.insert("plantuml-jar-path",       struc_CfgString { QString(),      DEFAULT } );
+   m_cfgList.insert("plantuml-inc-path",         struc_CfgList   { QStringList(),  DEFAULT } );
 
    m_cfgInt.insert("dot-graph-max-nodes",        struc_CfgInt    { 50,             DEFAULT } );
    m_cfgInt.insert("dot-graph-max-depth",        struc_CfgInt    { 0,              DEFAULT } );
@@ -325,9 +326,9 @@ void Config::load_Defaults()
    m_cfgBool.insert("external-links-in-window",  struc_CfgBool   { false,          DEFAULT } );
 
    m_cfgBool.insert("html-search",               struc_CfgBool   { true,           DEFAULT } );
-   m_cfgBool.insert("server-based-search",       struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("external-search",           struc_CfgBool   { false,          DEFAULT } );
-   m_cfgString.insert("search-engine-url",       struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgBool.insert("search-server-based",       struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("search-external",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgString.insert("search-external-url",     struc_CfgString { QString(),      DEFAULT } ); 
    m_cfgString.insert("search-data-file",        struc_CfgString { "searchdata.xml", DEFAULT } ); 
    m_cfgString.insert("search-external-id",      struc_CfgString { QString(),      DEFAULT } ); 
    m_cfgList.insert("search-mappings",           struc_CfgList   { QStringList(),  DEFAULT } );

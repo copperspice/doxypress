@@ -3375,7 +3375,7 @@ static DocCmdMap docCmdMap[] = {
    { "subsection",      &handleSection,          TRUE  },
    { "subsubsection",   &handleSection,          TRUE  },
    { "paragraph",       &handleSection,          TRUE  },
-   { "anchor",          &handleAnchor,           TRUE  },
+   { "anchor",          &handleAnchor,           TRUE  }, 
    { "verbatim",        &handleFormatBlock,      TRUE  },
    { "latexonly",       &handleFormatBlock,      FALSE },
    { "htmlonly",        &handleFormatBlock,      FALSE },
@@ -3831,10 +3831,7 @@ static QByteArray addFormula()
    return formLabel;
 }
 
-//-----------------------------------------------------------------------------
-
 static void checkFormula();
-//-----------------------------------------------------------------------------
 
 static SectionInfo::SectionType sectionLevelToType(int level)
 {
@@ -3873,13 +3870,10 @@ static void addSection()
    }
 }
 
-//-----------------------------------------------------------------------------
-
 static void addCite()
 {
    Doxygen::citeDict->insert(commentscanYYtext);
 }
-
 
 // strip trailing whitespace (excluding newlines) from string s
 static void stripTrailingWhiteSpace(QByteArray &s)
@@ -4052,7 +4046,7 @@ static void endBrief(bool addToOutput = TRUE)
 }
 
 static void handleGuard(const QByteArray &expr);
-/* ----------------------------------------------------------------- */
+
 #undef	YY_INPUT
 #define	YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
 
@@ -4062,12 +4056,14 @@ static int yyread(char *buf, int max_size)
 {
    prevPosition = inputPosition;
    int c = 0;
+
    while ( c < max_size && inputString[inputPosition] ) {
       *buf = inputString[inputPosition++] ;
-      //printf("%d (%c)\n",*buf,*buf);
+
       c++;
       buf++;
    }
+
    return c;
 }
 
@@ -5907,6 +5903,7 @@ YY_DECL {
                BEGIN( Comment );
             }
             YY_BREAK
+
          /* ----- handle arguments of the anchor command ------- */
          case 132:
             YY_RULE_SETUP
@@ -5914,8 +5911,8 @@ YY_DECL {
             {
                // found argument
                QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(commentscanYYtext);
-               if (si)
-               {
+
+               if (si) {
                   if (si->lineNr != -1) {
                      warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding anchor, (first occurrence: %s, line %d)", 
                            commentscanYYtext, si->fileName.data(), si->lineNr);
@@ -5923,9 +5920,10 @@ YY_DECL {
                      warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding anchor, (first occurrence: %s)", 
                            commentscanYYtext, si->fileName.data());
                   }
-               } else
-               {
+
+               } else {
                   si = QSharedPointer<SectionInfo>(new SectionInfo(yyFileName, yyLineNr, commentscanYYtext, 0, SectionInfo::Anchor, 0));
+
                   Doxygen::sectionDict->insert(commentscanYYtext, si);
                   current->anchors->append(*si);
                }
@@ -5934,6 +5932,7 @@ YY_DECL {
                BEGIN( Comment );
             }
             YY_BREAK
+
          case 133:
             /* rule 133 can match eol */
             YY_RULE_SETUP
@@ -5951,17 +5950,17 @@ YY_DECL {
                BEGIN( Comment );
             }
             YY_BREAK
+
          case 134:
             YY_RULE_SETUP
 
             {
                // invalid character for anchor label
-               warn(yyFileName, yyLineNr,
-               "Invalid or missing anchor label"
-                   );
+               warn(yyFileName, yyLineNr, "Invalid or missing anchor label" );
                BEGIN(Comment);
             }
             YY_BREAK
+
          /* ----- handle arguments of the preformatted block commands ------- */
          case 135:
             /* rule 135 can match eol */
@@ -6642,12 +6641,11 @@ YY_DECL {
 
             {
                // invalid character for anchor label
-               warn(yyFileName, yyLineNr,
-               "Invalid or missing name for \\inherit command"
-                   );
+               warn(yyFileName, yyLineNr, "Invalid or missing name for \\inherit command");
                BEGIN(Comment);
             }
             YY_BREAK
+
          /* ----- handle argument of extends and implements commands ------- */
          case 192:
             YY_RULE_SETUP
@@ -7826,10 +7824,6 @@ void commentscanYYfree (void *ptr )
 }
 
 #define YYTABLES_NAME "yytables"
-
-
-
-
 
 //----------------------------------------------------------------------------
 

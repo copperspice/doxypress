@@ -361,7 +361,6 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
    }
  
    if (hasMembers || numClasses > 0) {
-
       Doxygen::indexList->incContentsDepth();
  
       for (auto lde : LayoutDocManager::instance().docEntries(part)) { 
@@ -386,7 +385,8 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
                         Doxygen::indexList->addContentsItem(isDir, md->name(), md->getReference(), 
                                  md->getOutputFileBase(), md->anchor(), false, addToIndex, md);
 
-                     } else { // inherited member
+                     } else {
+                        // inherited member
                         Doxygen::indexList->addContentsItem(isDir, md->name(), def->getReference(), 
                                  def->getOutputFileBase(), md->anchor(), false, addToIndex, md);
                      }
@@ -442,8 +442,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
    }
 }
 
-/*! Generates HTML Help tree of classes */
-
+// Generates HTML Help tree of classes
 static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl, bool hideSuper, int level, FTVHelp *ftv, bool addToIndex)
 {
    if (bcl == 0) {
@@ -474,7 +473,7 @@ static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl
 
          ol.startIndexListItem();
         
-         bool hasChildren = !cd->visited && !hideSuper && classHasVisibleChildren(cd);
+         bool hasChildren = ! cd->visited && !hideSuper && classHasVisibleChildren(cd);
         
          if (cd->isLinkable()) {           
             ol.startIndexItem(cd->getReference(), cd->getOutputFileBase());
@@ -712,10 +711,14 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
          for (auto fd : *fn) {
             static bool fullPathNames = Config::getBool("full-path-names");
 
-            if (!fullPathNames || fd->getDirDef() == 0) { // top level file
-               bool doc, src;
+            if (!fullPathNames || fd->getDirDef() == 0) { 
+               // top level file
+               bool doc;
+               bool src;
+
                doc = fileVisibleInIndex(fd, src);
-               QByteArray reference, outputBase;
+               QByteArray reference;
+               QByteArray outputBase;
 
                if (doc) {
                   reference = fd->getReference();
@@ -751,11 +754,11 @@ static void writeClassTreeForList(OutputList &ol, ClassSDict *cl, bool &started,
 {
     for (auto cd : *cl) {
     
-      bool b;      
-      b = ! hasVisibleRoot(cd->baseClasses());     
+      bool b = ! hasVisibleRoot(cd->baseClasses());     
 
       if (b) { 
          //filter on root classes
+
          if (cd->isVisibleInHierarchy()) { // should it be visible
             if (!started) {
                startIndexHierarchy(ol, 0);
@@ -769,10 +772,7 @@ static void writeClassTreeForList(OutputList &ol, ClassSDict *cl, bool &started,
 
             bool hasChildren = ! cd->visited && classHasVisibleChildren(cd);
           
-            if (cd->isLinkable()) {
-               //printf("Writing class %s isLinkable()=%d isLinkableInProject()=%d cd->templateMaster()=%p\n",
-               //    cd->displayName().data(),cd->isLinkable(),cd->isLinkableInProject(),cd->templateMaster());
-
+            if (cd->isLinkable()) {            
                ol.startIndexItem(cd->getReference(), cd->getOutputFileBase());
                ol.parseText(cd->displayName());
                ol.endIndexItem(cd->getReference(), cd->getOutputFileBase());
@@ -907,6 +907,7 @@ static void writeHierarchicalIndex(OutputList &ol)
       ol.disable(OutputGenerator::Latex);
       ol.disable(OutputGenerator::RTF);
       ol.startParagraph();
+
       ol.startTextLink("inherits", 0);
       ol.parseText(theTranslator->trGotoGraphicalHierarchy());
       ol.endTextLink();
@@ -920,9 +921,8 @@ static void writeHierarchicalIndex(OutputList &ol)
 
    // ---------------
    // Static class hierarchy for Latex/RTF
-   // ---------------
    ol.pushGeneratorState();
-   //2.{
+   
    ol.disable(OutputGenerator::Html);
    Doxygen::indexList->disable();
 
@@ -930,13 +930,10 @@ static void writeHierarchicalIndex(OutputList &ol)
 
    Doxygen::indexList->enable();
    ol.popGeneratorState();
-   //2.}
-
+   
    // ---------------
-   // Dynamic class hierarchical index for HTML
-   // ---------------
-   ol.pushGeneratorState();
-   //2.{
+   // Dynamic class hierarchical index for HTML   
+   ol.pushGeneratorState(); 
    ol.disableAllBut(OutputGenerator::Html);
 
    {
@@ -961,12 +958,9 @@ static void writeHierarchicalIndex(OutputList &ol)
    }
 
    ol.popGeneratorState();
-   //2.}
-   // ------
-
+  
    endFile(ol);
    ol.popGeneratorState();
-   //1.}
 }
 
 static void writeGraphicalClassHierarchy(OutputList &ol)
@@ -1127,10 +1121,7 @@ static void writeFileIndex(OutputList &ol)
    ol.endTextBlock();
 
    // ---------------
-   // Flat file index
-   // ---------------
-
-   // 1. {
+   // Flat file index  
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Html);
 
@@ -1214,7 +1205,6 @@ static void writeFileIndex(OutputList &ol)
    ol.popGeneratorState();
 }
 
-//----------------------------------------------------------------------------
 static int countNamespaces()
 {
    int count = 0;
@@ -1226,8 +1216,6 @@ static int countNamespaces()
    }
    return count;
 }
-
-//----------------------------------------------------------------------------
 
 void writeClassTree(ClassSDict *clDict, FTVHelp *ftv, bool addToIndex, bool globalOnly)
 {
@@ -1347,8 +1335,7 @@ static void writeNamespaceIndex(OutputList &ol)
    bool first = true;
 
    // ---------------
-   // Linear namespace index for Latex/RTF
-   // ---------------
+   // Linear namespace index for Latex/RTF  
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Html);
 
@@ -1389,8 +1376,7 @@ static void writeNamespaceIndex(OutputList &ol)
    ol.popGeneratorState();
 
    // ---------------
-   // Hierarchical namespace index for HTML
-   // ---------------
+   // Hierarchical namespace index for HTML  
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
@@ -1415,8 +1401,7 @@ static void writeNamespaceIndex(OutputList &ol)
    }
 
    ol.popGeneratorState();
-   // ------
-
+ 
    endFile(ol);
    ol.popGeneratorState();
 }
@@ -1894,8 +1879,7 @@ static void writeAnnotatedIndex(OutputList &ol)
    ol.endTextBlock();
 
    // ---------------
-   // Linear class index for Latex/RTF
-   // ---------------
+   // Linear class index for Latex/RTF  
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Html);
    Doxygen::indexList->disable();
@@ -1907,8 +1891,7 @@ static void writeAnnotatedIndex(OutputList &ol)
    ol.popGeneratorState();
 
    // ---------------
-   // Hierarchical class index for HTML
-   // ---------------
+   // Hierarchical class index for HTML  
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
@@ -2389,8 +2372,8 @@ static void writeClassMemberIndexFiltered(OutputList &ol, ClassMemberHighlight h
          endQuickIndexItem(ol);
 
          int i;
-         // index items per category member lists
 
+         // index items per category member lists
          for (i = 1; i < CMHL_Total; i++) {
             if (documentedClassMembers[i] > 0) {
                startQuickIndexItem(ol, getCmhlInfo(i)->fname + Doxygen::htmlFileExtension.toUtf8(), hl == i, true, first);
@@ -2418,9 +2401,9 @@ static void writeClassMemberIndexFiltered(OutputList &ol, ClassMemberHighlight h
          ol.startTextBlock();
          ol.parseText(lne ? lne->intro() : theTranslator->trCompoundMembersDescription(Config::getBool("extract-all")));
          ol.endTextBlock();
+
       } else {
-         // hack to work around a mozilla bug, which refuses to switch to
-         // normal lists otherwise
+         // hack to work around a mozilla bug, which refuses to switch to,  normal lists otherwise
          ol.writeString("&#160;");
       }
 
@@ -2462,8 +2445,6 @@ static void writeClassMemberIndex(OutputList &ol)
    }
 
 }
-
-//----------------------------------------------------------------------------
 
 /** Helper class representing a file member in the navigation menu. */
 struct FmhlInfo {
@@ -2819,6 +2800,7 @@ static void writeExampleIndex(OutputList &ol)
 
       if (! pd->title().isEmpty()) {
          ol.writeObjectLink(0, n, 0, pd->title());
+
          if (addToIndex) {
             Doxygen::indexList->addContentsItem(false, filterTitle(pd->title()), pd->getReference(), n, 0, false, true, pd);
          }
@@ -2875,7 +2857,8 @@ static bool mainPageHasOwnTitle()
 static void writePages(QSharedPointer<PageDef> pd, FTVHelp *ftv)
 {
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Pages);
-   bool addToIndex = lne == 0 || lne->visible();
+
+   bool addToIndex = (lne == 0 || lne->visible());
 
    if (! addToIndex) {
       return;
@@ -2885,7 +2868,7 @@ static void writePages(QSharedPointer<PageDef> pd, FTVHelp *ftv)
    bool hasSections = pd->hasSections();
 
    if (pd->visibleInIndex()) {
-      QByteArray pageTitle;
+      QByteArray pageTitle;      
 
       if (pd->title().isEmpty()) {
          pageTitle = pd->name();
@@ -2895,8 +2878,7 @@ static void writePages(QSharedPointer<PageDef> pd, FTVHelp *ftv)
       }
 
       if (ftv) {         
-         ftv->addContentsItem(hasSubPages, pageTitle, pd->getReference(), pd->getOutputFileBase(),
-                  0, hasSubPages, true, pd);
+         ftv->addContentsItem(hasSubPages, pageTitle, pd->getReference(), pd->getOutputFileBase(), 0, hasSubPages, true, pd);
       }
 
       if (addToIndex && pd != Doxygen::mainPage) {
@@ -2921,7 +2903,7 @@ static void writePages(QSharedPointer<PageDef> pd, FTVHelp *ftv)
    PageSDict *subPages = pd->getSubPages();
 
    if (subPages) {    
-      for (auto subPage : *subPages ) {
+      for (auto subPage : *subPages) {
          writePages(subPage, ftv);
       }
    }

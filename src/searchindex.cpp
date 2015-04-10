@@ -1381,8 +1381,8 @@ void writeJavascriptSearchIndex()
 void initSearchIndexer()
 {
    static bool searchEngine      = Config::getBool("html-search");
-   static bool serverBasedSearch = Config::getBool("server-based-search");
-   static bool externalSearch    = Config::getBool("external-search");
+   static bool serverBasedSearch = Config::getBool("search-server-based");
+   static bool externalSearch    = Config::getBool("search-external");
 
    if (searchEngine && serverBasedSearch) {
       if (externalSearch) { // external tools produce search index and engine

@@ -63,12 +63,11 @@ QByteArray writePlantUMLSource(const QString &outDir, const QString &fileName, c
 
 void generatePlantUMLOutput(const QString &baseName, const QString &outDir, PlantUMLOutputFormat format)
 {
-   static QString plantumlJarPath = Config::getString("plantuml-jar-path");
+   static QString plantumlJarPath         = Config::getString("plantuml-jar-path"); 
+   static QStringList pumlIncludePathList = Config::getList("plantuml-inc-path");
 
    QString pumlExe  = "java";
    QString pumlArgs = "";
-
-   QStringList pumlIncludePathList;    // = Config::getList("plantuml-include-path");    // why is this out? (BROOM)
    
    if (! pumlIncludePathList.isEmpty()) {                   
       pumlArgs += "-Dplantuml.include.path=\"";

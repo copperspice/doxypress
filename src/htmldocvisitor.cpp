@@ -60,6 +60,7 @@ static QByteArray convertIndexWordToAnchor(const QString &word)
                c == '~'
             ) {
             result += c;
+
          } else {
             char enc[4];
             enc[0] = '%';
@@ -178,7 +179,6 @@ void HtmlDocVisitor::visit(DocWord *w)
 
 void HtmlDocVisitor::visit(DocLinkedWord *w)
 {
-
    if (m_hide) {
       return;
    }
@@ -524,6 +524,7 @@ void HtmlDocVisitor::visit(DocAnchor *anc)
    if (m_hide) {
       return;
    }
+
    m_t << "<a class=\"anchor\" id=\"" << anc->anchor() << "\"></a>";
 }
 
@@ -1681,12 +1682,14 @@ void HtmlDocVisitor::visitPre(DocRef *ref)
    if (m_hide) {
       return;
    }
-   if (!ref->file().isEmpty()) {
-      // when ref->isSubPage()==true we use ref->file() for HTML and
+
+   if (! ref->file().isEmpty()) {
+      // when ref->isSubPage() == true we use ref->file() for HTML and
       // ref->anchor() for LaTeX/RTF
       startLink(ref->ref(), ref->file(), ref->relPath(), ref->isSubPage() ? QByteArray() : ref->anchor());
    }
-   if (!ref->hasLinkText()) {
+
+   if (! ref->hasLinkText()) {
       filter(ref->targetTitle());
    }
 }
@@ -1696,10 +1699,10 @@ void HtmlDocVisitor::visitPost(DocRef *ref)
    if (m_hide) {
       return;
    }
-   if (!ref->file().isEmpty()) {
+
+   if (! ref->file().isEmpty()) {
       endLink();
-   }
-   //m_t << " ";
+   }   
 }
 
 void HtmlDocVisitor::visitPre(DocSecRefItem *ref)
@@ -1708,10 +1711,11 @@ void HtmlDocVisitor::visitPre(DocSecRefItem *ref)
       return;
    }
    QString refName = ref->file();
-   if (refName.right(Doxygen::htmlFileExtension.length()) !=
-         QString(Doxygen::htmlFileExtension)) {
+
+   if (refName.right(Doxygen::htmlFileExtension.length()) != QString(Doxygen::htmlFileExtension)) {
       refName += Doxygen::htmlFileExtension;
    }
+
    m_t << "<li><a href=\"" << refName << "#" << ref->anchor() << "\">";
 
 }
