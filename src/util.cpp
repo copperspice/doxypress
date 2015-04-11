@@ -6163,10 +6163,10 @@ void addRefItem(const QList<ListItemInfo> *sli, const char *key,
       for (auto lii : *sli) {   
          auto refList = Doxygen::xrefLists->find(lii.type);
 
-         if (refList != Doxygen::xrefLists->end() && ( (lii.type != "todo" || Config::getBool("generate-todolist")) &&
-                          (lii.type != "test"       || Config::getBool("generate-testlist")) &&
-                          (lii.type != "bug"        || Config::getBool("generate-buglist"))  &&
-                          (lii.type != "deprecated" || Config::getBool("generate-deprecatedlist")) ) ) {
+         if (refList != Doxygen::xrefLists->end() && ( (lii.type != "todo" || Config::getBool("generate-todo-list")) &&
+                          (lii.type != "test"       || Config::getBool("generate-test-list")) &&
+                          (lii.type != "bug"        || Config::getBool("generate-bug-list"))  &&
+                          (lii.type != "deprecated" || Config::getBool("generate-deprecate-list")) ) ) {
 
             // either not a built-in list or the list is enabled
             RefItem *item = refList->getRefItem(lii.itemId);

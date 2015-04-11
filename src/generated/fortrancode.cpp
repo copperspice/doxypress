@@ -25974,7 +25974,7 @@ class Scope
    QStringList useNames;                        //!< contains names of used modules
    QHash<QString, void *> localVars;            //!< contains names of local variables
 
-   Scope() {}      // Broom - localVars should be case insensitive
+   Scope() {}      // BroomCS - localVars should be case insensitive
 };
 
 static QByteArray  docBlock;                   //!< contents of all lines of a documentation block

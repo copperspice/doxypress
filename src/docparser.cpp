@@ -2080,7 +2080,7 @@ bool DocXRefItem::parse()
       if ( (m_key != "todo"       || Config::getBool("generate-todo-list")) &&
            (m_key != "test"       || Config::getBool("generate-test-list")) &&
            (m_key != "bug"        || Config::getBool("generate-bug-list"))  &&
-           (m_key != "deprecated" || Config::getBool("generate-deprecated-list")) ) {
+           (m_key != "deprecated" || Config::getBool("generate-deprecate-list")) ) {
 
          // either not a built-in list or the list is enabled
          RefItem *item = refList.getRefItem(m_id);

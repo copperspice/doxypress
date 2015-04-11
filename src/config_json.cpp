@@ -160,10 +160,10 @@ void Config::load_Defaults()
    m_cfgBool.insert("sort-group-names",          struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("sort-by-scope-name",        struc_CfgBool   { false,          DEFAULT } );
   
-   m_cfgBool.insert("generate-todo-list",        struc_CfgBool   { true,           DEFAULT } );
-   m_cfgBool.insert("generate-test-list",        struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("generate-bug-list",         struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("generate-deprecate-list",   struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("generate-todo-list",        struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("generate-test-list",        struc_CfgBool   { false,          DEFAULT } );   
 
    m_cfgBool.insert("internal-docs",             struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("case-sense-names",          struc_CfgBool   { true,           DEFAULT } );

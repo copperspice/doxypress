@@ -42,7 +42,7 @@ bool Htags::execute(const QString &htmldir)
    static bool quiet    = Config::getBool("quiet");
    static bool warnings = Config::getBool("warnings");
 
-   static QByteArray htagsOptions  = "";       // Config::getString("htags-options");  // why is this out? (BROOM)
+   static QByteArray htagsOptions  = "";       // Config::getString("htags-options");     // (BroomCS) 
 
    static QString projectName   = Config::getString("project-name");
    static QString projectNumber = Config::getString("project-version");
@@ -59,7 +59,7 @@ bool Htags::execute(const QString &htmldir)
          err("Unable to not find directory %s. Verify the value of the 'INPUT SOURCE' tag.\n", qPrintable(inputSource.first()) );
 
    } else {
-      err("If you use 'USE HTAGS' then 'INPUT SOURCE' should specify a single directory\n");
+      err("If you use 'USE HTAGS' then 'INPUT SOURCE' must specify a single directory\n");
       return false;
    }
 
@@ -67,7 +67,7 @@ bool Htags::execute(const QString &htmldir)
     * Construct command line for htags(1).
     */
    QByteArray commandLine = " -g -s -a -n ";
-   if (!quiet) {
+   if (! quiet) {
       commandLine += "-v ";
    }
 
@@ -75,7 +75,7 @@ bool Htags::execute(const QString &htmldir)
       commandLine += "-w ";
    }
 
-   if (!htagsOptions.isEmpty()) {
+   if (! htagsOptions.isEmpty()) {
       commandLine += ' ';
       commandLine += htagsOptions;
    }

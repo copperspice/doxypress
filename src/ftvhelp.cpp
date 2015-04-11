@@ -216,7 +216,7 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, 
          // most likely a section, subsection
          
          if (pnl.isEmpty()) {
-            printf("\n  BroomCS  --  Parent is missing");            
+            printf("\n  BroomCS  --  Parent is missing, please report to the Developers");            
                      
          } else {    
             newNode->parent = pnl.last();      
@@ -645,7 +645,7 @@ static void reSortNodes(QList<FTVNode *> &nodeList)
    for (auto item : nodeList) {     
 
 
-/*  BROOM - Test Code for sorting  
+/*  BROOM - Hold for sort test
 if  (item->file.contains("getting-started")) {
 
 //    (item->file.contains("build-from-source") || item->file.contains("build-options") || item->file.contains("requirements-") ||
