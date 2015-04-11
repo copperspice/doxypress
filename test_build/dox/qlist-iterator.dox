@@ -78,7 +78,7 @@ Functions like operator*() and operator++() should not be called on an uninitial
 
 
 /*!
-\fn iterator::iterator ( const iterator & other )
+\fn QList< T >::iterator::iterator ( const iterator & other )
 
 Constructs a copy of <i>other</i>.
 

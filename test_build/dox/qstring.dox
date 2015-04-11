@@ -14,7 +14,7 @@
 *************************************************************************/
 
 /*!
-\defgroup qtcore
+\defgroup qtcore QtCore
 
 Some sample documentation for QtCore.
 
@@ -24,7 +24,7 @@ Detailed description related to QtCore.
 
 
 /*!
-\defgroup implicit-sharing-c
+\defgroup implicit-sharing-c Implicit Sharing
 
 \ingroup qtcore
 
@@ -36,7 +36,7 @@ Detailed description related to Implicit Sharing
 
 
 /*!
-\defgroup unicode-c
+\defgroup unicode-c Unicode
 
 \ingroup qtcore
 
@@ -314,25 +314,14 @@ Constructs a null string. Null strings are also empty.
 /*!
 \fn QString::QString ( const QChar * unicode, int size )
 
-Constructs a string initialized with the first <i>size</i> characters of the QChar array <i>unicode</i>.
-
-QString makes a deep copy of the string data. The unicode data is copied as is and the Byte Order Mark is preserved if present.
-
-
-*/
-
-
-/*!
-\fn QString::QString ( const QChar * unicode )
-
 Constructs a string initialized with the characters of the QChar array <i>unicode</i>, which must be terminated with a 0.
 
 QString makes a deep copy of the string data. The unicode data is copied as is and the Byte Order Mark is preserved if present.
 
-This function was introduced in Qt 4.7.
-
 
 */
+
+
 
 
 /*!
@@ -2918,7 +2907,7 @@ Note that unlike fromUtf16(), this function does not consider BOMs and possibly 
 
 Returns a string that has whitespace removed from the start and the end, and that has each sequence of internal whitespace replaced with a single space.
 
-Whitespace means any character for which QChar::isSpace() returns true. This includes the ASCII characters '\t', '\n', '\v', '\f', '\r', and ' '.
+Whitespace means any character for which QChar::isSpace() returns true. This includes the ASCII characters '\\t', '\\n', '\\v', '\\f', '\\r', and ' '.
 
 Example:
 
@@ -3019,7 +3008,7 @@ Here's a similar example, but this time we use any sequence of non-word characte
     // list: [ "This", "time", "a", "normal", "English", "sentence" ]
 \endcode
 
-Here's a third example where we use a zero-length assertion, <b>\b</b> (word boundary), to split the string into an alternating sequence of non-word and word tokens:
+Here's a third example where we use a zero-length assertion, <b>\\b</b> (word boundary), to split the string into an alternating sequence of non-word and word tokens:
 
 \code
     str = "Now: this sentence fragment.";
@@ -3606,7 +3595,7 @@ This function was introduced in Qt 4.2.
 
 Returns a string that has whitespace removed from the start and the end.
 
-Whitespace means any character for which QChar::isSpace() returns true. This includes the ASCII characters '\t', '\n', '\v', '\f', '\r', and ' '.
+Whitespace means any character for which QChar::isSpace() returns true. This includes the ASCII characters '\\t', '\\n', '\\v', '\\f', '\\r', and ' '.
 
 Example:
 

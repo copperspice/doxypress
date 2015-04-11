@@ -5,3 +5,6 @@ SUBDIRS=. bin
 
 deploy:
 	$(MAKE) -C bin deploy
+
+dist-test-project:
+	$(MAKE) $(AM_MAKE_FLAGS) -C bin dist-test-project

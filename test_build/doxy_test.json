@@ -35,7 +35,7 @@
         ""
     ],
     "clang-parsing": false,
-    "class-diagrams": true,
+    "class-diagrams": false,
     "cols-in-index": 1,
     "cpp-cli-support": false,
     "create-subdirs": false,
@@ -63,7 +63,7 @@
     "dot-font-path": "",
     "dot-font-size": 4,
     "dot-graph-max-depth": 0,
-    "dot-graph-max-nodes": 0,
+    "dot-graph-max-nodes": 50,
     "dot-hierarchy": true,
     "dot-image-format": "png",
     "dot-include": true,
@@ -80,9 +80,9 @@
     ],
     "enum-values-per-line": 4,
     "example-patterns": [
-        ""
+        "*"
     ],
-    "example-recursive": true,
+    "example-recursive": false,
     "example-source": [
         ""
     ],
@@ -103,7 +103,6 @@
     "external-groups": true,
     "external-links-in-window": false,
     "external-pages": true,
-    "external-search": false,
     "extract-all": false,
     "extract-anon-namespaces": false,
     "extract-local-classes": true,
@@ -126,18 +125,18 @@
     "full-path-names": false,
     "generate-bug-list": true,
     "generate-chi": false,
-    "generate-chm": true,
+    "generate-chm": false,
     "generate-deprecate-list": true,
     "generate-docbook": false,
-    "generate-docset": true,
-    "generate-eclipse": true,
+    "generate-docset": false,
+    "generate-eclipse": false,
     "generate-html": true,
     "generate-latex": false,
     "generate-legend": true,
-    "generate-man": false,
+    "generate-man": true,
     "generate-perl": false,
-    "generate-qthelp": true,
-    "generate-rtf": false,
+    "generate-qthelp": false,
+    "generate-rtf": true,
     "generate-tagfile": "",
     "generate-test-list": true,
     "generate-todo-list": true,
@@ -162,7 +161,7 @@
         ""
     ],
     "html-file-extension": ".html",
-    "html-footer": "Z:/DoxyPress/test_build/doxy_footer.html",
+    "html-footer": "doxy_footer.html",
     "html-header": "",
     "html-index-num-entries": 100,
     "html-output": "html",
@@ -256,6 +255,9 @@
     "perl-path": "/usr/bin/perl",
     "perl-prefix": "",
     "perl-pretty": true,
+    "plantuml-inc-path": [
+        ""
+    ],
     "plantuml-jar-path": "",
     "predefined-macros": [
         "Q_PROPERTY:=public: Q_PROPERTY"
@@ -287,14 +289,15 @@
     "rtf-output": "rtf",
     "rtf-stylesheet": "",
     "search-data-file": "searchdata.xml",
-    "search-engine-url": "",
+    "search-external": false,
     "search-external-id": "",
+    "search-external-url": "",
     "search-includes": true,
     "search-mappings": [
         ""
     ],
+    "search-server-based": false,
     "separate-member-pages": false,
-    "server-based-search": false,
     "short-names": false,
     "show-file-page": false,
     "show-grouped-members-inc": false,
@@ -337,7 +340,7 @@
     "verbatim-headers": false,
     "warn-doc-error": true,
     "warn-format": "$file:$line: $text",
-    "warn-logfile": "doxy_error.log",
+    "warn-logfile": "Z:/DoxyPress/test_build/doxy_error.log",
     "warn-undoc": true,
     "warn-undoc-param": false,
     "warnings": true,

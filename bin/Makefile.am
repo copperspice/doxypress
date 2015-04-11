@@ -1,5 +1,8 @@
 include copperspice.am
 
+# dist
+distdir_custom=source_dist/dist/DoxyPress-$(VERSION)
+
 # path to gcc (windows)
 gccpath=/c/MingW/bin
 
@@ -19,23 +22,68 @@ if OSTYPE_DARWIN
 endif
 
 if OSTYPE_WIN
-   # disable console on window
-   # AM_CXXFLAGS+=-mwindows
-
    # location for 'make install'
    installdir=$(abs_top_builddir)/install
 endif
 
 # target app name
-bin_PROGRAMS = DoxyPress
+bin_PROGRAMS = doxypress
 
 # copy required CopperSpice and gcc files for deployment
 .PHONY: deploy
 
 if OSTYPE_LINUX
+deploy : all
+	mkdir -p $(deploydir)
+
+	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
+
+	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%1.so*,$(cslibs)) $(deploydir)
+	rsync -W -a $(top_srcdir)/resources/doxypress.png $(deploydir)
 endif
 
 if OSTYPE_DARWIN
+deployapp=$(deploydir)/$(bin_PROGRAMS).app/Contents
+
+deploy : all
+	mkdir -p $(deployapp)/Frameworks
+	mkdir -p $(deployapp)/MacOS
+	mkdir -p $(deployapp)/Resources
+
+	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deployapp)/MacOS
+
+	rm -f $(deployapp)/Info.plist
+	sed -e "s,@ICON@,doxypres.icns,g" \
+	    -e "s,@TYPEINFO@,????,g" \
+	    -e "s,@EXECUTABLE@,$(bin_PROGRAMS),g" \
+	    -e "s,com.yourcompany.,com.copperspice.,g" \
+	$(CS_HOME)/mac/Info.plist.app > $(deployapp)/Info.plist
+
+	rm -f $(deployapp)/PkgInfo
+	echo "APPL????" > $(deployapp)/PkgInfo
+
+	touch $(deployapp)/Resources/empty.lproj
+	cp -r $(CS_HOME)/mac/qt_menu.nib $(deployapp)/Resources
+
+	cp $(top_srcdir)/resources/doxypres.icns $(deployapp)/Resources
+	
+	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%1.0.dylib,$(cslibs)) $(deployapp)/Frameworks
+
+	for libname in $(patsubst %,libCs%1.0.dylib,$(cslibs)) ; do \
+	\
+	install_name_tool -change $(CS_HOME)/lib/$$libname \
+	@executable_path/../Frameworks/$$libname  $(deployapp)/MacOS/$(bin_PROGRAMS); \
+	\
+	for templib in $(patsubst %,libCs%1.0.dylib,$(cslibs)) ; do \
+	install_name_tool -change $(CS_HOME)/lib/$$templib \
+	@executable_path/../Frameworks/$$templib  $(deployapp)/Frameworks/$$libname \
+	; done \
+	\
+	; done
+
+   # generate dmg	
+	hdiutil create -ov -srcfolder $(deploydir) -format UDBZ -volname $(bin_PROGRAMS) ../$(bin_PROGRAMS).dmg
+	hdiutil internet-enable -yes ../$(bin_PROGRAMS).dmg
 endif
 
 if OSTYPE_WIN
@@ -54,18 +102,17 @@ endif
 VPATH = ../
 
 # linking
-DoxyPress_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
+doxypress_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
 
 if OSTYPE_WIN
-   DoxyPress_LDFLAGS+= -lole32
+   doxypress_LDFLAGS+= -lole32
 endif
 
 
-DoxyPress_SOURCES = \
+doxypress_SOURCES = \
    src/doxy_work.cpp \
    src/doxy_globals.cpp \
    src/doxy_setup.cpp \
-\
    src/a_define.cpp \
    src/arguments.cpp \
    src/cite.cpp \
@@ -143,10 +190,8 @@ DoxyPress_SOURCES = \
    src/rtfstyle.cpp  \
    src/xmldocvisitor.cpp  \
    src/xmlgen.cpp  \
-\
    src/portable.cpp  \
    src/ce_parse.cpp  \
-\
    src/generated/code.cpp  \
    src/generated/commentcnv.cpp  \
    src/generated/commentscan.cpp  \
@@ -171,4 +216,29 @@ RESOURCES = doxypress.qrc
 qrc_doxypress.cpp: doxypress.qrc   $(wildcard ../resources/*)
 
 # required to compile qrc
-nodist_DoxyPress_SOURCES=qrc_doxypress.cpp
+nodist_doxypress_SOURCES=qrc_doxypress.cpp
+
+# install
+if OSTYPE_LINUX
+endif
+
+if OSTYPE_DARWIN
+endif
+
+if OSTYPE_WIN
+endif
+
+# distribution
+distdir: $(DISTFILES)
+
+# distdir is a temp folder
+dist-hook:
+
+# create test_project zip file
+dist-test-project:
+	cd ..  ; \
+\
+	rm  -f   doxypress_test-project-$(VERSION).zip         ; \
+	zip -r   doxypress-test-project-$(VERSION).zip test_build/{dox,images,*.css,*.html,*.json,*.xml}
+
+

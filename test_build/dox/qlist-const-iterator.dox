@@ -70,7 +70,7 @@ Functions like operator*() and operator++() should not be called on an uninitial
 
 
 /*!
-\fn const_iterator::const_iterator ( const const_iterator & other )
+\fn QList< T >::const_iterator::const_iterator ( const const_iterator & other )
 
 Constructs a copy of <i>other</i>.
 
@@ -79,7 +79,7 @@ Constructs a copy of <i>other</i>.
 
 
 /*!
-\fn const_iterator::const_iterator ( const iterator & other )
+\fn QList< T >::const_iterator::const_iterator ( const iterator & other )
 
 Constructs a copy of <i>other</i>.
 
@@ -88,7 +88,7 @@ Constructs a copy of <i>other</i>.
 
 
 /*!
-\fn bool const_iterator::operator!= ( const const_iterator & other ) const
+\fn bool QList< T >::const_iterator::operator!= ( const const_iterator & other ) const
 
 Returns true if <i>other</i> points to a different item than this iterator; otherwise returns false.
 
