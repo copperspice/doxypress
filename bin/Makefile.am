@@ -38,8 +38,7 @@ deploy : all
 
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
 
-	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%1.so*,$(cslibs)) $(deploydir)
-	rsync -W -a $(top_srcdir)/resources/doxypress.png $(deploydir)
+	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%1.so*,$(cslibs)) $(deploydir)	
 endif
 
 if OSTYPE_DARWIN
@@ -53,7 +52,7 @@ deploy : all
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deployapp)/MacOS
 
 	rm -f $(deployapp)/Info.plist
-	sed -e "s,@ICON@,doxypres.icns,g" \
+	sed -e "s,@ICON@,doxypress.icns,g" \
 	    -e "s,@TYPEINFO@,????,g" \
 	    -e "s,@EXECUTABLE@,$(bin_PROGRAMS),g" \
 	    -e "s,com.yourcompany.,com.copperspice.,g" \
@@ -65,7 +64,7 @@ deploy : all
 	touch $(deployapp)/Resources/empty.lproj
 	cp -r $(CS_HOME)/mac/qt_menu.nib $(deployapp)/Resources
 
-	cp $(top_srcdir)/resources/doxypres.icns $(deployapp)/Resources
+	cp $(top_srcdir)/resources/doxypress.icns $(deployapp)/Resources
 	
 	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%1.0.dylib,$(cslibs)) $(deployapp)/Frameworks
 

@@ -416,7 +416,7 @@ struct CommandLine parseCommandLine(QStringList argList)
           
          case DOXY_VERSION:
             printf("\nDoxyPress Version: %s\n", versionString);   
-            printf("email: doxypress@copperspice.com\n");         
+            printf("email: info@copperspice.com\n");         
             exit(0);
                   
          case OUTPUT_APP:
@@ -463,7 +463,7 @@ void readConfiguration(struct CommandLine cmdArgs)
      
       if (cmdArgs.configName.isEmpty()) {
       
-         printf("Usage: doxypess [OPTIONS] [project file name]\n"); 
+         printf("Usage: doxypress [OPTIONS] [project file name]\n"); 
          printf("doxypress --help for more information\n\n");
 
          fprintf(stderr, "No project file was specified, default file 'doxypress.json' was not found\n");          
@@ -481,7 +481,8 @@ void readConfiguration(struct CommandLine cmdArgs)
    // step 1 
    if (! Config::parseConfig(cmdArgs.configName) ) {
       fprintf(stderr, "\n\nIssue parsing the project file.\nPlease submit a bug report to " 
-                  " the developers at doxypress@copperspice.com\n");
+                  " the developers at info@copperspice.com\n");
+
       exit(1);
    }
        
@@ -547,7 +548,7 @@ void Doxy_Setup::usage()
 {
    printf("\n");
    printf("DoxyPress: Version %s\n", versionString);
-   printf("email: doxypress@copperspice.com\n");  
+   printf("email: info@copperspice.com\n");  
 
    printf("\n"); 
    printf("Usage: doxypess [OPTIONS] [project file name]\n"); 

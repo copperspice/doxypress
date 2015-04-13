@@ -845,7 +845,7 @@ void HtmlGenerator::writeStyleSheetFile(QFile &file)
 
    if (resData.isEmpty()) { 
       fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to " 
-              " the developers at doxypress@copperspice.com\n");        
+              " the developers at info@copperspice.com\n");        
 
    } else {
       resData.replace("$doxypressversion", versionString);
@@ -1000,7 +1000,7 @@ void HtmlGenerator::writeStyleInfo(int part)
 
       if (resData.isEmpty()) { 
          fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to " 
-               " the developers at doxypress@copperspice.com\n");        
+               " the developers at info@copperspice.com\n");        
 
       } else {
          resData.replace("$doxypressversion", versionString);

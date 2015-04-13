@@ -137,7 +137,8 @@ bool Config::preVerify()
    // **
    if (! (Config::getBool("generate-html") || Config::getBool("generate-latex") || Config::getBool("generate-man") ||
           Config::getBool("generate-perl") || Config::getBool("generate-rtf")   || Config::getBool("generate-xml") ||
-          Config::getBool("generate-autogen-def") || Config::getBool("generate-docbook")) && Config::getString("generate-tagfile").isEmpty() ) {
+          Config::getBool("generate-autogen-def") || Config::getBool("generate-docbook")) && 
+          Config::getString("generate-tagfile").isEmpty() ) {
 
       err("No output format was selected, at least one output format must be set\n");
       isError = true;
