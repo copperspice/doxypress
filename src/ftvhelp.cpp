@@ -167,17 +167,20 @@ void FTVHelp::decContentsDepth()
 
       QList<FTVNode *> &nl = m_indentNodes[m_indent];
      
+      if (nl.isEmpty()) {
+         // subsection with no parent, resolve by not doing the else
       
-      FTVNode *parent = nl.last();
-
-      if (parent) {
-         QList<FTVNode *> &children = m_indentNodes[m_indent + 1];
-
-         while (! children.isEmpty()) {
-            parent->children.append(children.takeAt(0));
+      } else {   
+         FTVNode *parent = nl.last();
+   
+         if (parent) {
+            QList<FTVNode *> &children = m_indentNodes[m_indent + 1];
+   
+            while (! children.isEmpty()) {
+               parent->children.append(children.takeAt(0));
+            }
          }
       }
-
    }
 }
 
@@ -215,8 +218,9 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, 
       } else {
          // most likely a section, subsection
          
-         if (pnl.isEmpty()) {
-            printf("\n  BroomCS  --  Parent is missing, please report to the Developers");            
+         if (pnl.isEmpty()) { 
+            // must test for this condition in decContentsDepth()     
+            fprintf(stderr, "Error: Page (%s) contains a subsection (%s) with no parent section\n", file, qPrintable(name) );           
                      
          } else {    
             newNode->parent = pnl.last();      
@@ -229,12 +233,12 @@ static QByteArray node2URL(FTVNode *n, bool overruleFile = false, bool srcLink =
 {
    QByteArray url = n->file;
 
-   if (! url.isEmpty() && url.at(0) == '!') { // relative URL
-      // remove leading !
+   if (! url.isEmpty() && url.at(0) == '!') { 
+      // relative URL, remove leading !
       url = url.mid(1);
 
-   } else if ( !url.isEmpty() && url.at(0) == '^') { // absolute URL
-      // skip, keep ^ in the output
+   } else if ( !url.isEmpty() && url.at(0) == '^') { 
+      // absolute URL, skip, keep ^ in the output
 
    } else {
       // local file (with optional anchor)

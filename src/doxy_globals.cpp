@@ -97,8 +97,8 @@ bool             Doxygen::markdownSupport = true;
 int              Doxygen::subpageNestingLevel = 0;
 
 QString          Doxygen::htmlFileExtension;
-QString          Doxygen::objDBFileName;
-QString          Doxygen::entryDBFileName;
+QString          Doxygen::tempA_FName;
+QString          Doxygen::tempB_FName;
 QTime            Doxygen::runningTime;
 
 

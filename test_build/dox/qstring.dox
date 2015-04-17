@@ -494,7 +494,7 @@ Appends the character <i>ch</i> to this string.
 
 
 /*!
-\fn QString QString::arg ( const QString & a, int fieldWidth = 0, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( const QString & a, int fieldWidth = 0, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 Returns a copy of this string with the lowest numbered place marker replaced by string <i>a</i>, i.e., <tt>%1</tt>, <tt>%2</tt>, ..., <tt>%99</tt>.
 
@@ -618,7 +618,7 @@ This is the same as calling <tt>str.arg(a1).arg(a2).arg(a3).arg(a4).arg(a5).arg(
 
 
 /*!
-\fn QString QString::arg ( int a, int fieldWidth = 0, int base = 10, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( int a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
 
@@ -649,7 +649,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 
 
 /*!
-\fn QString QString::arg ( uint a, int fieldWidth = 0, int base = 10, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( uint a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
 
@@ -662,7 +662,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 
 
 /*!
-\fn QString QString::arg ( long a, int fieldWidth = 0, int base = 10, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( long a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
 
@@ -693,7 +693,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 
 
 /*!
-\fn QString QString::arg ( ulong a, int fieldWidth = 0, int base = 10, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( ulong a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
 
@@ -708,7 +708,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 
 
 /*!
-\fn QString QString::arg ( qlonglong a, int fieldWidth = 0, int base = 10, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( qlonglong a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
 
@@ -723,7 +723,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 
 
 /*!
-\fn QString QString::arg ( qulonglong a, int fieldWidth = 0, int base = 10, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( qulonglong a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
 
@@ -738,7 +738,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 
 
 /*!
-\fn QString QString::arg ( short a, int fieldWidth = 0, int base = 10, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( short a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
 
@@ -753,7 +753,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 
 
 /*!
-\fn QString QString::arg ( ushort a, int fieldWidth = 0, int base = 10, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( ushort a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
 
@@ -768,7 +768,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 
 
 /*!
-\fn QString QString::arg ( QChar a, int fieldWidth = 0, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( QChar a, int fieldWidth = 0, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
 
@@ -777,7 +777,7 @@ This function overloads arg().
 
 
 /*!
-\fn QString QString::arg ( char a, int fieldWidth = 0, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( char a, int fieldWidth = 0, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
 
@@ -788,7 +788,7 @@ The <i>a</i> argument is interpreted as a Latin-1 character.
 
 
 /*!
-\fn QString QString::arg ( double a, int fieldWidth = 0, char format = 'g', int precision = -1, const QChar & fillChar = QLatin1Char( ' ' ) ) const
+\fn QString QString::arg ( double a, int fieldWidth = 0, char format = 'g', int precision = -1, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
 
@@ -3674,7 +3674,8 @@ This method does not call the va_end macro, the caller is responsible to call va
 
 
 /*!
-\fn bool QString::operator!= ( const QString & other ) const
+\fn bool operator!= ( const QString & s1, const QString &s2 ) const
+\relates QString
 
 Returns true if this string is not equal to string <i>other</i>; otherwise returns false.
 

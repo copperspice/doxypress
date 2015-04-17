@@ -493,7 +493,7 @@ bool Config::read_ProjectFile(const QString &fName)
                QString temp = item.toString();
 
                if (! temp.isEmpty()) {                        
-                  listData.append(temp); 
+                  listData.append(temp.trimmed()); 
                }
             }   
 

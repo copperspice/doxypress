@@ -35,8 +35,8 @@ class QhpXmlWriter{
    void insert(QhpXmlWriter const &source);
    void dumpTo(QFile &file);
 
-   void open(const QString &elementName, const QMap<QString, QString> &attributes = QMap<QString, QString>());
-   void openClose(const QString &elementName, const QMap<QString, QString> &attributes = QMap<QString, QString>());
+   void open(const QString &elementName, const QMap<QString, QString> &attributes = (QMap<QString, QString>()));
+   void openClose(const QString &elementName, const QMap<QString, QString> &attributes = (QMap<QString, QString>()));
    void openCloseContent(const QString &elementName, const QString &content);
    void close(const QString &elementName);
    void declaration(const char *version, const char *encoding);
@@ -47,8 +47,8 @@ class QhpXmlWriter{
    void indent();
    void newLine();
    void openPureHelper(const QString &elementName, const QMap<QString, QString> &attributes, bool close);
-   void openPure(const QString &elementName, const QMap<QString, QString> &attributes = QMap<QString, QString>());
-   void openClosePure(const QString &elementName, const QMap<QString, QString> &attributes = QMap<QString, QString>());
+   void openPure(const QString &elementName, const QMap<QString, QString> &attributes = (QMap<QString, QString>()));
+   void openClosePure(const QString &elementName, const QMap<QString, QString> &attributes = (QMap<QString, QString>()));
    void closePure(const QString &elementName);
 
    QByteArray m_backend;

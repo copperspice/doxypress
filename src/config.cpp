@@ -395,7 +395,7 @@ bool Config::verify()
    } else {    
 
       for (auto item : inputSource) {
-         QFileInfo fi(item);
+         QFileInfo fi(item.trimmed());
 
          if (! fi.exists()) {
             warnMsg("INPUT SOURCE `%s' does not exist\n", qPrintable(item));
@@ -431,7 +431,7 @@ bool Config::verify()
    QStringList includePath = iterList.value().value;
 
    for (auto item : includePath) {   
-      QFileInfo fi(item);
+      QFileInfo fi(item.trimmed());
 
       if (fi.exists()) {
          addSearchDir(fi.absoluteFilePath());   
@@ -809,6 +809,7 @@ static void cleanUpPaths(QStringList &str)
       }
 
       item.replace("\\", "/");         
+      item = item.trimmed();
 
       if ((item.at(0) != '/' && (item.length() <= 2 || item.at(1) != ':')) || item.at(item.length() - 1) != '/' ) {
          QFileInfo fi(item);

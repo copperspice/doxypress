@@ -2101,15 +2101,15 @@ static void encodeForOutput(QTextStream &t_stream, const char *s)
 }
 
 /**
- * VERY brittle routine inline RTF's included by other RTF's.
+ * VERY brittle routine inline RTF's included by other RTF's
  * it is recursive and ugly.
  */
-static bool preProcessFile(QDir &d, QString &infName, QTextStream &t_stream, bool bIncludeHeader = true)
+static bool preProcessFile(QString &input_FName, QTextStream &t_stream, bool bIncludeHeader = true)
 {
-   QFile f(infName);
+   QFile f(input_FName);
 
    if (! f.open(QIODevice::ReadOnly)) {
-      err("Unable to open file %s, error: %d\n", qPrintable(infName), f.error());
+      err("Unable to open file for reading %s (rtf, preProcessA), error: %d  \n", qPrintable(input_FName), f.error());
       return false;
    }
 
@@ -2124,7 +2124,7 @@ static bool preProcessFile(QDir &d, QString &infName, QTextStream &t_stream, boo
 
    do {
       if (f.readLine(lineBuf.data(), maxLineLength) == -1) {
-         err("Read error in %s,  error: %d\n", qPrintable(infName), f.error());
+         err("Read error in %s, error: %d\n", qPrintable(input_FName), f.error());
          return false;
       }
 
@@ -2146,14 +2146,15 @@ static bool preProcessFile(QDir &d, QString &infName, QTextStream &t_stream, boo
 
          DBG_RTF(t_stream << "{\\comment begin include " << fileName << "}" << endl)
 
-         if (! preProcessFile(d, fileName, t_stream, false)) {
+         if (! preProcessFile(fileName, t_stream, false)) {
             return false;
          }
 
          DBG_RTF(t_stream << "{\\comment end include " << fileName << "}" << endl)
 
-      } else { // no INCLUDETEXT on this line
-         // elaborate hoopla to skip  the final "}" if we didn't include the headers
+      } else {
+         // no INCLUDETEXT on this line
+         // elaborate hoopla to skip  the final "}" if we did not include the headers
 
          if (! f.atEnd() || bIncludeHeader) {
             encodeForOutput(t_stream, lineBuf);
@@ -2179,7 +2180,7 @@ static bool preProcessFile(QDir &d, QString &infName, QTextStream &t_stream, boo
    f.close();
 
    // remove temporary file
-   d.remove(infName);
+   QFile::remove(input_FName);
 
    return true;
 }
@@ -2328,7 +2329,7 @@ void testRTFOutput(const QString &name)
    }
 
 err:
-   err("RTF integrity check failed at line %d of %s due to a bracket mismatch.\n"              
+   err("RTF integrity check failed at line %d of %s due to a bracket mismatch. "              
        "Please notify the developers of DoxyPress at info@copperspice.com\n", line, qPrintable(name));
 }
 
@@ -2339,44 +2340,56 @@ err:
 bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &name)
 {
    QDir d(path);
-
-   // store the original directory
+   
    if (! d.exists()) {      
       err("Output directory %s does not exist\n", qPrintable(path));
       return false;
    }
 
+   // save the original directory
    QString oldDir = QDir::currentPath();
 
-   // go to the html output directory (i.e. path)
-   QDir::setCurrent(d.absolutePath());
-   QDir thisDir;
+   // move to the html output directory 
+   QString outputDir = Config::getString("output-dir");
+   QString rtfDir;
 
-   QString combinedName = path + "/combined.rtf";
-   QString mainRTFName  = path + "/" + name;
+   if (d.isAbsolute()) {
+      rtfDir = path;
 
+   } else {
+      rtfDir = outputDir + "/" + path;
+
+   }
+
+   QDir::setCurrent(rtfDir);
+  
+   QString combinedName = rtfDir + "/combined.rtf";  
    QFile outf(combinedName);
 
    if (! outf.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(combinedName), outf.error());
+      err("Unable to open file for writing %s (rtf, preProcessB), error: %d\n", qPrintable(combinedName), outf.error());
       return false;
    }
-   QTextStream outt(&outf);
+   QTextStream outStream(&outf);
 
-   if (! preProcessFile(thisDir, mainRTFName, outt)) {
+   //
+   QString mainRTFName = rtfDir + "/" + name;
+
+   if (! preProcessFile(mainRTFName, outStream)) {
       // failed, remove the temp file
       outf.close();
 
-      thisDir.remove(combinedName);
-      QDir::setCurrent(oldDir);
+      QFile::remove(combinedName);
 
+      QDir::setCurrent(oldDir);
       return false;
    }
 
-   // everything worked, move the files
+   // everything worked, remove & rename files
    outf.close();
-   thisDir.remove(mainRTFName);
-   thisDir.rename(combinedName, mainRTFName);
+
+   QFile::remove(mainRTFName);
+   QFile::rename(combinedName, mainRTFName);
 
    testRTFOutput(mainRTFName);
 

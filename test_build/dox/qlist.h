@@ -126,30 +126,44 @@ class QList
          detach_helper();
       }
    }
+
    ~QList();
    QList<T> &operator=(const QList<T> &l);
+
+
+/*  BROOM -- rvalue reference
 
    inline QList &operator=(QList && other) {
       qSwap(d, other.d);
       return *this;
    }
+*/ 
 
    inline void swap(QList<T> &other) {
       qSwap(d, other.d);
    }
 
-   QList(std::initializer_list<T> args) : d( QListData::sharedNull() ) {
+   QList(std::initializer_list<T> args) 
+      : d( QListData::sharedNull() ) 
+   {
       qCopy(args.begin(), args.end(), std::back_inserter(*this));
    }
 
+
    bool operator==(const QList<T> &l) const;
+
+
    inline bool operator!=(const QList<T> &l) const {
       return !(*this == l);
    }
 
+   void clear();
+
    inline int size() const {
       return p.size();
    }
+
+
 
    inline void detach() {
       if (d->ref.isShared()) {
@@ -167,6 +181,7 @@ class QList
    inline bool isDetached() const {
       return ! d->ref.isShared();
    }
+
    inline void setSharable(bool sharable) {
       if (!sharable) {
          detach();
@@ -179,13 +194,15 @@ class QList
       return d == other.d;
    }
 
+//    was here isEmpty
+
    inline bool isEmpty() const {
       return p.isEmpty();
-   }
-
-   void clear();
+   }  
 
    const T &at(int i) const;
+
+
    const T &operator[](int i) const;
    T &operator[](int i);
 

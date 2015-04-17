@@ -14,7 +14,8 @@
     ],
     "aliases": [
         "badref=<span class='badref'>Bad Ref</span>",
-        "note{1}=<div class='cs_note1'><span class='cs_note2'>Note:</span>\\1</div>"
+        "note{1}=<div class='cs_note1'><span class='cs_note2'>Note:</span>\\1</div>",
+        "cs_docs_url{1}=<a class=\"docs-link\" href=\"http://www.copperspice.com/docs/cs_overview\\1\">"
     ],
     "all-externals": false,
     "allow-sub-grouping": true,
@@ -260,7 +261,7 @@
     ],
     "plantuml-jar-path": "",
     "predefined-macros": [
-        "Q_PROPERTY:=public: Q_PROPERTY"
+        "Q_PROPERTY:=public: Q_PROPERTY\n"
     ],
     "project-brief": "Sample files to test DoxyPress",
     "project-logo": "Z:/DoxyPress/test_build/images/cslogo-32.png",
@@ -341,7 +342,7 @@
     "warn-doc-error": true,
     "warn-format": "$file:$line: $text",
     "warn-logfile": "Z:/DoxyPress/test_build/doxy_error.log",
-    "warn-undoc": true,
+    "warn-undoc": false,
     "warn-undoc-param": false,
     "warnings": true,
     "xml-output": "xml",

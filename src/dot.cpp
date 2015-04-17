@@ -463,7 +463,9 @@ static bool readBoundingBox(const QString &fileName, int *width, int *height, bo
    QByteArray bb = isEps ? QByteArray("%%PageBoundingBox:") : QByteArray("/MediaBox [");
 
    QFile f(fileName);
+
    if (! f.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {     
+      err("Unable to open file for reading %s, error: %d\n", qPrintable(fileName), f.error());
       return false;
    }
 
@@ -552,6 +554,7 @@ static bool readSVGSize(const QString &fileName, int *width, int *height)
    QFile f(fileName);
 
    if (! f.open(QIODevice::ReadOnly)) {
+      err("Unable to open file for reading %s, error: %d\n", qPrintable(fileName), f.error());
       return false;
    }
 
@@ -930,7 +933,7 @@ bool DotFilePatcher::run()
    QString patchFile = m_patchFile;
 
    if (! QDir::current().rename(patchFile, tmpName)) {
-      err("Failed to rename file %s to %s!\n", qPrintable(m_patchFile), qPrintable(tmpName));
+      err("Unable to rename file %s to %s\n", qPrintable(m_patchFile), qPrintable(tmpName));
       return false;
    }
 
@@ -938,14 +941,15 @@ bool DotFilePatcher::run()
    QFile fo(patchFile);
 
    if (! fi.open(QIODevice::ReadOnly)) {
-      err("Unable to open file %s for patching\n", qPrintable(tmpName));
-      QDir::current().rename(tmpName, patchFile);
+      err("Unable to open file for updating %s, error: %d\n", qPrintable(tmpName), fi.error());
 
+      QDir::current().rename(tmpName, patchFile);
       return false;
    }
 
-   if (!fo.open(QIODevice::WriteOnly)) {
-      err("Unable to open file %s for patching!\n", qPrintable(m_patchFile));
+   if (! fo.open(QIODevice::WriteOnly)) {     
+      err("Unable to open file for updating %s, error: %d\n", qPrintable(m_patchFile), fo.error());
+
       QDir::current().rename(tmpName, patchFile);
       return false;
    }
@@ -1094,16 +1098,17 @@ bool DotFilePatcher::run()
       QFile fo(orgName);
 
       if (! fi.open(QIODevice::ReadOnly)) {
-         err("problem opening file %s for reading!\n", tmpName.data());
+         err("Unable to open file for reading %s, error: %d\n", qPrintable(tmpName), fi.error());       
          return false;
       }
 
       if (! fo.open(QIODevice::WriteOnly)) {
-         err("problem opening file %s for writing!\n", orgName.data());
+         err("Unable to open file for writing %s, error: %d\n", qPrintable(orgName), fi.error());
          return false;
       }
 
       QTextStream t(&fo);
+
       while (!fi.atEnd()) { // foreach line
          QByteArray line;
          line.resize(maxLineLen);
@@ -2269,7 +2274,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
          QString dotName = absBaseName + ".dot";
 
          QFile f(dotName);
-         if (!f.open(QIODevice::WriteOnly)) {
+         if (! f.open(QIODevice::WriteOnly)) {
             return;
          }
 
@@ -3815,10 +3820,11 @@ QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphForma
       regenerate = true;
 
       QFile f(absDotName);
-      if (!f.open(QIODevice::WriteOnly)) {
-         err("Cannot create file %s.dot for writing!\n", baseName.constData());
-      }
 
+      if (! f.open(QIODevice::WriteOnly)) {
+         err("Unable to open file for writing %s, error: %d\n", qPrintable(baseName), f.error());
+      }
+        
       QTextStream t(&f);
       t << theGraph.data();
       f.close();
@@ -3977,8 +3983,8 @@ void generateGraphLegend(const QString &path)
    if (checkAndUpdateMd5Signature(absBaseName, sigStr) || ! checkDeliverables(absImgName)) {
       QFile dotFile(absDotName);
 
-      if (! dotFile.open(QIODevice::WriteOnly)) {
-         err("Could not open file %s for writing\n", qPrintable(dotFile.fileName()) );
+      if (! dotFile.open(QIODevice::WriteOnly)) {     
+         err("Unable to open file for writing %s, error: %d\n", qPrintable(absDotName), dotFile.error());
          return;
       }
 

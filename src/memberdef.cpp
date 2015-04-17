@@ -824,6 +824,7 @@ MemberDef::MemberDef(const MemberDef &md)
 
 MemberDef &MemberDef::operator=(const MemberDef &)
 {
+   return *this;
 } 
 
 QSharedPointer<MemberDef> MemberDef::deepCopy() const

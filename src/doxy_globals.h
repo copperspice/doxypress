@@ -191,8 +191,8 @@ class Doxygen
 
    static QString htmlFileExtension;
 
-   static QString objDBFileName;
-   static QString entryDBFileName;
+   static QString tempA_FName;
+   static QString tempB_FName;
    
    static bool  suppressDocWarnings;
    static bool  outputToApp;

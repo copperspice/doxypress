@@ -144,12 +144,12 @@ void CiteDict::generatePage() const
    QFile f;
 
    QString outputDir = Config::getString("output-dir");
-
    QString citeListFile = outputDir + "/citelist.doc";
+
    f.setFileName(citeListFile);
 
    if ( ! f.open(QIODevice::WriteOnly)) {
-      err("could not open file %s for writing\n", qPrintable(citeListFile));
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(citeListFile), f.error());
    }
 
    QTextStream t(&f);
@@ -232,7 +232,7 @@ void CiteDict::generatePage() const
    f.setFileName(citeListFile);
 
    if (! f.open(QIODevice::ReadOnly)) {
-      err("could not open file %s for reading\n", qPrintable(citeListFile));
+     err("Unable to open file for reading %s, error: %d\n", qPrintable(citeListFile), f.error()); 
    }
 
    bool insideBib = false;

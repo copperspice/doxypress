@@ -6026,13 +6026,14 @@ YY_DECL {
                // end of a C-comment
                addOutput(commentscanYYtext);
                g_commentCount--;
-               if (g_commentCount < 0 && blockName != "verbatim")
-               {
-                  warn(yyFileName, yyLineNr,
-                  "found */ without matching /* while inside a \\%s block! Perhaps a missing \\end%s?\n", blockName.data(), blockName.data());
+
+               if (g_commentCount < 0 && blockName != "verbatim") {
+                  warn(yyFileName, yyLineNr, "Found */ without matching /* while inside a \\%s block. "
+                     "Perhaps there is a missing \\end%s?\n", blockName.data(), blockName.data());
                }
             }
             YY_BREAK
+
          case 141:
             YY_RULE_SETUP
 
@@ -6048,12 +6049,12 @@ YY_DECL {
                endTag = "enduml";
             }
             warn(yyFileName, yyLineNr,
-                 "reached end of comment while inside a @%s block; check for missing @%s tag!",
-                 blockName.data(), endTag.data()
-                );
+                 "Reached end of comment while inside a @%s block; check for missing @%s tag",
+                 blockName.data(), endTag.data() );
             yyterminate();
          }
          YY_BREAK
+
          /* ----- handle arguments of if/ifnot commands ------- */
          case 142:
             YY_RULE_SETUP
@@ -8550,8 +8551,6 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    return parseMore;
 }
 
-
-
 void groupEnterFile(const char *fileName, int)
 {
    g_autoGroupStack.clear();
@@ -8568,14 +8567,14 @@ void groupLeaveFile(const char *fileName, int line)
    g_memberGroupDocs.resize(0);
 
    if (!g_autoGroupStack.isEmpty()) {
-      warn(fileName, line, "end of file while inside a group\n");
+      warn(fileName, line, "End of file while inside a group\n");
    }
 }
 
 void groupEnterCompound(const char *fileName, int line, const char *name)
 {
    if (g_memberGroupId != DOX_NOGROUP) {
-      warn(fileName, line, "try to put compound %s inside a member group\n", name);
+      warn(fileName, line, "Try to put compound %s inside a member group\n", name);
    }
    g_memberGroupId = DOX_NOGROUP;
    g_memberGroupRelates.resize(0);

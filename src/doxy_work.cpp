@@ -468,14 +468,14 @@ void parseInput()
 
    uint pid = portable_pid();
 
-   Doxygen::objDBFileName = QString("doxygen_objdb_%1.tmp").arg(pid);
-   Doxygen::objDBFileName.prepend(outputDirectory + "/");
+   Doxygen::tempA_FName = QString("doxy_tempA_%1.tmp").arg(pid);
+   Doxygen::tempA_FName.prepend(outputDirectory + "/");
 
-   Doxygen::entryDBFileName = QString("doxygen_entrydb_%1.tmp").arg(pid);
-   Doxygen::entryDBFileName.prepend(outputDirectory + "/");
+   Doxygen::tempB_FName = QString("doxy_tempB_%1.tmp").arg(pid);
+   Doxygen::tempB_FName.prepend(outputDirectory + "/");
 
-   if (Doxygen::symbolStorage->open(Doxygen::objDBFileName) == -1) {
-      err("Failed to open temporary file %s\n", Doxygen::objDBFileName.data());
+   if (Doxygen::symbolStorage->open(Doxygen::tempA_FName) == -1) {
+      err("Unable to open temporary file %s\n", qPrintable(Doxygen::tempA_FName));
       exit(1);
    }
 
@@ -606,10 +606,10 @@ void parseInput()
 
    // Handle Tag Files
    Doxy_Globals::g_storage = new FileStorage;
-   Doxy_Globals::g_storage->setName(Doxygen::entryDBFileName);
+   Doxy_Globals::g_storage->setName(Doxygen::tempB_FName);
 
    if (! Doxy_Globals::g_storage->open(QIODevice::WriteOnly)) {
-      err("Failed to create temporary storage file %s\n", Doxygen::entryDBFileName.data());
+      err("Unable to create temporary file %s\n", qPrintable(Doxygen::tempB_FName));
       exit(1);
    }
 
@@ -644,7 +644,7 @@ void parseInput()
    pyscanFreeScanner();
 
    if (! Doxy_Globals::g_storage->open(QIODevice::ReadOnly)) {
-      err("Failed to open temporary storage file %s for reading", Doxygen::entryDBFileName.data());
+      err("Unable to open  temporary file %s\n", qPrintable(Doxygen::tempB_FName));
       exit(1);
    }
 
@@ -809,8 +809,11 @@ void parseInput()
    delete Doxy_Globals::g_storage;
    Doxy_Globals::g_storage = 0;
 
+
    QDir thisDir;
-   thisDir.remove(Doxygen::entryDBFileName);
+   if (! Doxygen::tempB_FName.isEmpty()) {
+      thisDir.remove(Doxygen::tempB_FName);
+   }
 
    Doxy_Globals::g_stats.begin("Determining which enums are documented\n");
    findDocumentedEnumValues();
@@ -1214,8 +1217,7 @@ void generateOutput()
       QString qhpFileName = Qhp::getQhpFileName();
       QString qchFileName = getQchFileName();
 
-      QString args;
-      QString("%1 -o \"%2\"").arg(qhpFileName).arg(qchFileName);
+      QString args = QString("%1 -o \"%2\"").arg(qhpFileName).arg(qchFileName);
 
       QString const oldDir = QDir::currentPath();
       QDir::setCurrent(htmlOutput);
@@ -6664,6 +6666,8 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                      warnMsg += "uniquely ";
                   }
 
+// BROOM, possible issue
+
                   warnMsg += "matching class member found for \n";
 
                   if (root->tArgLists) {
@@ -9731,12 +9735,12 @@ void Doxy_Work::stopDoxygen(int)
    QDir thisDir;
    msg("Cleaning up\n");
 
-   if (! Doxygen::entryDBFileName.isEmpty()) {
-      thisDir.remove(Doxygen::entryDBFileName);
+   if (! Doxygen::tempA_FName.isEmpty()) {
+      thisDir.remove(Doxygen::tempA_FName);
    }
 
-   if (!Doxygen::objDBFileName.isEmpty()) {
-      thisDir.remove(Doxygen::objDBFileName);
+   if (! Doxygen::tempB_FName.isEmpty()) {
+      thisDir.remove(Doxygen::tempB_FName);
    }
 
    killpg(0, SIGINT);

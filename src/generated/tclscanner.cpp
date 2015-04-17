@@ -790,18 +790,25 @@ char *tclscannerYYtext;
 #define TclCopyAndCollapse(size,src,dest) memcpy(dest,src,size); *(dest+size)=0
 
 /*
-   const char *list,            /* Points to the first byte of a string
-                                 * containing a Tcl list with zero or more
-                                 * elements (possibly in braces). 
-   int listLength,              /* Number of bytes in the list's string. 
-   const char **elementPtr,     /* Where to put address of first significant
-                                 * character in first element of list. 
-   const char **nextPtr,        /* Fill in with location of character just
-                                 * after all white space following end of
-                                 * argument (next arg or end of list). 
-   int *sizePtr,                /* If non-zero, fill in with size of element 
-   int *bracePtr                 * If non-zero, fill in with non-zero/zero to
-                                 * indicate that arg was/wasn't in braces. 
+   // Points to the first byte of a string containing a Tcl list with
+   // zero or more elements (possibly in braces). 
+   const char *list,            
+
+   // Number of bytes in the list's string. 
+   int listLength,              
+
+   // Where to put address of first significant character in first element of list. 
+   const char **elementPtr,     
+
+   // Fill in with location of character just after all white space 
+   // following end of argument (next arg or end of list). 
+   const char **nextPtr,        
+
+   // If non-zero, fill in with size of element 
+   int *sizePtr,                
+
+   // If non-zero, fill in with non-zero/zero to indicate that arg was/wasn't in braces. 
+   int *bracePtr                
 */
 
 int TclFindElement(const char *list, int listLength, const char **elementPtr,const char **nextPtr, int *sizePtr, int *bracePtr) 

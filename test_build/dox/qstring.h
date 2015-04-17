@@ -189,8 +189,10 @@ class Q_CORE_EXPORT QString
                QChar fillChar = QLatin1Char(' ')) const Q_REQUIRED_RESULT;
    QString arg(QChar a, int fieldWidth = 0,
                QChar fillChar = QLatin1Char(' ')) const Q_REQUIRED_RESULT;
+
    QString arg(const QString &a, int fieldWidth = 0,
                QChar fillChar = QLatin1Char(' ')) const Q_REQUIRED_RESULT;
+
    QString arg(const QString &a1, const QString &a2) const Q_REQUIRED_RESULT;
    QString arg(const QString &a1, const QString &a2, const QString &a3) const Q_REQUIRED_RESULT;
    QString arg(const QString &a1, const QString &a2, const QString &a3,
@@ -592,18 +594,6 @@ class Q_CORE_EXPORT QString
    inline bool operator==(const QByteArray &s) const;
    inline bool operator!=(const QByteArray &s) const;
 
-   inline bool operator<(const QByteArray &s) const {
-      return *this < QString::fromAscii(s);
-   }
-
-   inline bool operator>(const QByteArray &s) const {
-      return *this > QString::fromAscii(s);
-   }
-
-   inline bool operator<=(const QByteArray &s) const {
-      return *this <= QString::fromAscii(s);
-   }
-
    inline bool operator>=(const QByteArray &s) const {
       return *this >= QString::fromAscii(s);
    }
@@ -805,11 +795,6 @@ typedef QLatin1String QLatin1Literal;
 
 inline QString::QString(const QLatin1String &aLatin1) : d(fromLatin1_helper(aLatin1.latin1(), aLatin1.size()))
 { }
-
-inline int QString::length() const
-{
-   return d->size;
-}
 
 inline const QChar QString::at(int i) const
 {
@@ -1196,8 +1181,6 @@ class Q_CORE_EXPORT QCharRef
       return QChar(*this).row();
    }
 
-   inline void setCell(uchar cell);
-   inline void setRow(uchar row);
 
 #ifdef Q_COMPILER_MANGLES_RETURN_TYPE
    const char toAscii() const {
@@ -1225,16 +1208,6 @@ class Q_CORE_EXPORT QCharRef
       return s.data()[i].unicode();
    }
 };
-
-inline void QCharRef::setRow(uchar arow)
-{
-   QChar(*this).setRow(arow);
-}
-
-inline void QCharRef::setCell(uchar acell)
-{
-   QChar(*this).setCell(acell);
-}
 
 inline QString::QString() : d(Data::sharedNull()) {}
 inline QString::~QString()

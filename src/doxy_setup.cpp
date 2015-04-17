@@ -78,8 +78,7 @@ enum Options {
      DEBUG_DUMP, 
      DEBUG_SYMBOLS,
      HELP, 
-     OUTPUT_APP,
-     RTF_EXTENSIONS,            
+     OUTPUT_APP,                 
      DOXY_VERSION,      
 };
 
@@ -171,10 +170,12 @@ void shutDownDoxypress()
    finializeSearchIndexer();
    Doxygen::symbolStorage->close();
 
-   QDir thisDir;
-   thisDir.remove(Doxygen::objDBFileName);
+   QDir thisDir; 
 
-   //
+   if (! Doxygen::tempA_FName.isEmpty()) {
+      thisDir.remove(Doxygen::tempA_FName);
+   }
+   
    delete Doxygen::sectionDict;
    delete Doxygen::formulaNameDict;
    delete Doxygen::formulaDict;

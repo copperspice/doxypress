@@ -1169,7 +1169,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", qPrintable(fileName));
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
       return;
    }
 
@@ -1421,8 +1421,9 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    QString relPath = relativePathToRoot(fileName);
 
    QFile f(fileName);
+
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing!\n", qPrintable(fileName));
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 
@@ -1544,8 +1545,9 @@ static void generateDocbookForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti
    QString relPath = relativePathToRoot(fileName);
 
    QFile f(fileName);
-   if (!f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file %s for writing\n", qPrintable(fileName));
+
+   if (! f.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
       return;
    }
 
@@ -1622,7 +1624,7 @@ static void generateDocbookForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    QByteArray relPath = relativePathToRoot(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Cannot open file %s for writing\n", qPrintable(fileName));
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
       return;
    }
 
@@ -1681,8 +1683,9 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
    QString fileName = outputDirectory + "/" + pageName + ".xml";
 
    QFile f(fileName);
-   if (!f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file %s for writing\n", qPrintable(fileName));
+
+   if (! f.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
       return;
    }
 
@@ -1786,8 +1789,8 @@ void generateDocbook()
    QFile f(fileName);
    f.setFileName(fileName);
 
-   if (!f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file %s for writing\n", qPrintable(fileName));
+   if (! f.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
       return;
    }
 
