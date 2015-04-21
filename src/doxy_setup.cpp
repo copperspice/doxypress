@@ -36,7 +36,6 @@
 #include <filename.h>
 #include <filestorage.h>
 #include <formula.h>
-#include <fortranscanner.h>
 #include <groupdef.h>
 #include <htmlgen.h>
 #include <index.h>
@@ -47,17 +46,18 @@
 #include <membername.h>
 #include <namespacedef.h>
 #include <outputlist.h>
+#include <parser_cpp.h>
 #include <parser_file.h>
+#include <parser_fortran.h>
 #include <parser_make.h>
 #include <parser_py.h>
+#include <parser_tcl.h>
 #include <pagedef.h>
 #include <perlmodgen.h>
 #include <portable.h>
 #include <pre.h>
 #include <reflist.h>
 #include <rtfgen.h>
-#include <scanner.h>
-#include <tclscanner.h>
 #include <util.h>
 
 // globals
@@ -103,21 +103,19 @@ void initDoxyPress()
 
    Doxygen::parserManager = new ParserManager;
    Doxygen::parserManager->registerDefaultParser(new FileParser);
-   Doxygen::parserManager->registerParser("c", new CLanguageScanner);
 
-   Doxygen::parserManager->registerParser("python",       new PythonLanguageScanner);
+   Doxygen::parserManager->registerParser("c",            new CPPLanguageParser);
+   Doxygen::parserManager->registerParser("python",       new PythonLanguageParser);
+   Doxygen::parserManager->registerParser("fortran",      new FortranLanguageParser);
+   Doxygen::parserManager->registerParser("fortranfree",  new FortranLanguageParserFree);
+   Doxygen::parserManager->registerParser("fortranfixed", new FortranLanguageParserFixed);
 
-   Doxygen::parserManager->registerParser("fortran",      new FortranLanguageScanner);
-   Doxygen::parserManager->registerParser("fortranfree",  new FortranLanguageScannerFree);
-   Doxygen::parserManager->registerParser("fortranfixed", new FortranLanguageScannerFixed);
-
-// unsupported feature (broom, hold)
-// Doxygen::parserManager->registerParser("dbusxml",      new DBusXMLScanner);
-
-   Doxygen::parserManager->registerParser("tcl",          new TclLanguageScanner);
-
+   Doxygen::parserManager->registerParser("tcl",          new TclLanguageParser);
    Doxygen::parserManager->registerParser("md",           new MarkdownFileParser);
    Doxygen::parserManager->registerParser("make",         new MakeFileParser);
+  
+// unsupported feature (broom, hold)
+// Doxygen::parserManager->registerParser("dbusxml",      new DBusXMLScanner);
 
    // register any additional parsers here
    initDefaultExtensionMapping();

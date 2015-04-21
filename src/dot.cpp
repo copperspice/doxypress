@@ -2802,7 +2802,7 @@ DotClassGraph::DotClassGraph(QSharedPointer<ClassDef> cd, DotNode::GraphType t)
       buildGraph(cd, m_startNode, false, 1);
    }  
 
-   static int maxNodes = Config::getInt("dot-graph-max-depth-nodes");
+   static int maxNodes = Config::getInt("dot-graph-max-nodes");
 
    m_lrRank = determineVisibleNodes(m_startNode, maxNodes, t == DotNode::Inheritance);
    QList<DotNode *> openNodeQueue;

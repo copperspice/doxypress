@@ -6569,21 +6569,21 @@ g_lang2extMap[] = {
    //  language       parser           parser option
    { "idl",          "c",             SrcLangExt_IDL      },
    { "java",         "c",             SrcLangExt_Java     },
-   { "javascript",   "c",             SrcLangExt_JS       },
    { "csharp",       "c",             SrcLangExt_CSharp   },
    { "d",            "c",             SrcLangExt_D        },
    { "php",          "c",             SrcLangExt_PHP      },
    { "objective-c",  "c",             SrcLangExt_ObjC     },
    { "c",            "c",             SrcLangExt_Cpp      },
-   { "c++",          "c",             SrcLangExt_Cpp      },
-   { "python",       "python",        SrcLangExt_Python   },
+   { "c++",          "c",             SrcLangExt_Cpp      },  
    { "fortran",      "fortran",       SrcLangExt_Fortran  },
    { "fortranfree",  "fortranfree",   SrcLangExt_Fortran  },
-   { "fortranfixed", "fortranfixed",  SrcLangExt_Fortran  },  
-   { "dbusxml",      "dbusxml",       SrcLangExt_XML      },
-   { "tcl",          "tcl",           SrcLangExt_Tcl      },
+   { "fortranfixed", "fortranfixed",  SrcLangExt_Fortran  },
+   { "javascript",   "c",             SrcLangExt_JS       },
+   { "python",       "python",        SrcLangExt_Python   },    
    { "md",           "md",            SrcLangExt_Markdown },
    { "make",         "make",          SrcLangExt_Make     },
+   { "tcl",          "tcl",           SrcLangExt_Tcl      },
+   { "dbusxml",      "dbusxml",       SrcLangExt_XML      },
    { 0,              0,               (SrcLangExt)0       }
 };
 
@@ -6661,7 +6661,7 @@ void initDefaultExtensionMapping()
    updateLanguageMapping(".ddl",      "idl");
    updateLanguageMapping(".odl",      "idl");
    updateLanguageMapping(".java",     "java");
-   updateLanguageMapping(".as",       "javascript");
+   updateLanguageMapping(".as",       "javascript"); 
    updateLanguageMapping(".js",       "javascript");
    updateLanguageMapping(".cs",       "csharp");
    updateLanguageMapping(".d",        "d");
@@ -6681,8 +6681,8 @@ void initDefaultExtensionMapping()
    updateLanguageMapping(".md",       "md");
    updateLanguageMapping(".markdown", "md");
    updateLanguageMapping(".mk",       "make");
-
-   //updateLanguageMapping(".xml",   "dbusxml");
+  
+   // updateLanguageMapping(".xml",   "dbusxml");
 }
 
 SrcLangExt getLanguageFromFileName(const QByteArray fileName)

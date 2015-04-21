@@ -1,6 +1,7 @@
 /*************************************************************************
  *
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
+ * Copyright (C) 2010-2011 by Rene Zaumseil
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
  * All rights reserved.    
  *
@@ -10,39 +11,29 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
 
-#ifndef PARSER_PY_H
-#define PARSER_PY_H
+#ifndef PARSER_TCL_H
+#define PARSER_TCL_H
 
-#include <QByteArray>
-#include <QStringList>
-
-#include <types.h>
-
-#include <definition.h>
-#include <filedef.h>
-#include <memberdef.h>
-#include <outputgen.h>
 #include <parserintf.h>
 
-/** \brief Python Parser using state-based lexical scanning.
+/** \brief Tcl language parser using state-based lexical scanning.
  *
- * This is the Python language parser for doxyPress.
+ *  This is the Tcl language parser for doxyPress.
  */
-class PythonLanguageParser : public ParserInterface
+class TclLanguageParser : public ParserInterface
 {
  public:
-   virtual ~PythonLanguageParser() {}
+   virtual ~TclLanguageParser() {}
 
    void startTranslationUnit(const char *) {}
    void finishTranslationUnit() {}
-
-   void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
-                   bool sameTranslationUnit, QStringList &filesInSameTranslationUnit) override;
+   void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root, bool sameTranslationUnit,
+                   QStringList &filesInSameTranslationUnit) override;
 
    bool needsPreprocessing(const QByteArray &extension);
 
@@ -56,14 +47,5 @@ class PythonLanguageParser : public ParserInterface
    void resetCodeParserState();
    void parsePrototype(const char *text);
 };
-
-extern void parsePythonCode(CodeOutputInterface &, const char *, const QByteArray &,
-                            bool , const char *, QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
-                            QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
-                            bool collectXRefs);
-
-extern void resetPythonCodeParserState();
-
-void pyScanFreeParser();
 
 #endif

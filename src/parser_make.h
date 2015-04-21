@@ -25,7 +25,7 @@
 
 /** \brief Make Language parser using state-based lexical scanning.
  *
- * This is the Make language parser for doxygen.
+ * This is the Make language parser for doxyPress.
  */
 class MakeFileParser : public ParserInterface
 {

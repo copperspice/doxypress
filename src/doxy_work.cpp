@@ -46,7 +46,6 @@
 #include <filename.h>
 #include <filestorage.h>
 #include <formula.h>
-#include <fortranscanner.h>
 #include <ftvhelp.h>
 #include <groupdef.h>
 #include <htags.h>
@@ -65,8 +64,12 @@
 #include <objcache.h>
 #include <outputlist.h>
 #include <pagedef.h>
-#include <parser_py.h>
+#include <parser_cpp.h>
 #include <parser_file.h>
+#include <parser_fortran.h>
+#include <parser_make.h>
+#include <parser_py.h>
+#include <parser_tcl.h>
 #include <parserintf.h>
 #include <perlmodgen.h>
 #include <portable.h>
@@ -74,13 +77,11 @@
 #include <qhp.h>
 #include <reflist.h>
 #include <rtfgen.h>
-#include <scanner.h>
 #include <searchindex.h>
 #include <settings.h>
 #include <sqlite3gen.h>
 #include <store.h>
 #include <tagreader.h>
-#include <tclscanner.h>
 #include <util.h>
 #include <xmlgen.h>
 
@@ -640,8 +641,8 @@ void parseInput()
 
    // done with input scanning, free up the buffers used by flex (can be around 4MB)
    preFreeScanner();
-   scanFreeScanner();
-   pyscanFreeScanner();
+   CPPScanFreeParser();
+   pyScanFreeParser();
 
    if (! Doxy_Globals::g_storage->open(QIODevice::ReadOnly)) {
       err("Unable to open  temporary file %s\n", qPrintable(Doxygen::tempB_FName));

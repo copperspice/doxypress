@@ -428,6 +428,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          if (s->isBlock()) {
             forceEndParagraph(s);
          }
+
          m_t << s->text();
          if (s->isBlock()) {
             forceStartParagraph(s);
@@ -462,6 +463,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
 
          writeDotFile(fileName.toUtf8(), s->relPath(), s->context());
          m_t << "</div>" << endl;
+
          forceStartParagraph(s);
 
          if (Config::getBool("dot-cleanup")) {
@@ -565,11 +567,14 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          forceStartParagraph(inc);
       }
       break;
+
       case DocInclude::DontInclude:
          break;
+
       case DocInclude::HtmlInclude:
          m_t << inc->text();
          break;
+
       case DocInclude::LatexInclude:
          break;
 
@@ -649,7 +654,7 @@ void HtmlDocVisitor::visit(DocFormula *f)
       QByteArray text = f->text();
       bool closeInline = false;
 
-      if (!bDisplay && !text.isEmpty() && text.at(0) == '$' && text.at(text.length() - 1) == '$') {
+      if (!bDisplay && ! text.isEmpty() && text.at(0) == '$' && text.at(text.length() - 1) == '$') {
          closeInline = true;
          text = text.mid(1, text.length() - 2);
          m_t << "\\(";
@@ -717,18 +722,12 @@ void HtmlDocVisitor::visit(DocCite *cite)
    }
 }
 
-
-//--------------------------------------
-// visitor functions for compound nodes
-//--------------------------------------
-
-
 void HtmlDocVisitor::visitPre(DocAutoList *l)
 {
-   //printf("DocAutoList::visitPre\n");
    if (m_hide) {
       return;
    }
+
    forceEndParagraph(l);
    if (l->isEnumList()) {
       //
@@ -739,29 +738,34 @@ void HtmlDocVisitor::visitPre(DocAutoList *l)
       //       A.
       //         1. (repeat)...
       //
+
       m_t << "<ol type=\"" << types[l->depth() % NUM_HTML_LIST_TYPES] << "\">";
+
    } else {
       m_t << "<ul>";
    }
-   if (!l->isPreformatted()) {
+
+   if (! l->isPreformatted()) {
       m_t << "\n";
    }
 }
 
 void HtmlDocVisitor::visitPost(DocAutoList *l)
 {
-   //printf("DocAutoList::visitPost\n");
    if (m_hide) {
       return;
    }
+
    if (l->isEnumList()) {
       m_t << "</ol>";
    } else {
       m_t << "</ul>";
    }
+
    if (!l->isPreformatted()) {
       m_t << "\n";
    }
+
    forceStartParagraph(l);
 }
 
@@ -1215,6 +1219,7 @@ void HtmlDocVisitor::visitPost(DocSimpleSect *s)
    if (m_hide) {
       return;
    }
+
    m_t << "</dd></dl>\n";
    forceStartParagraph(s);
 }
@@ -1236,9 +1241,11 @@ void HtmlDocVisitor::visitPre(DocSimpleList *sl)
    if (m_hide) {
       return;
    }
+
    forceEndParagraph(sl);
    m_t << "<ul>";
-   if (!sl->isPreformatted()) {
+
+   if (! sl->isPreformatted()) {
       m_t << "\n";
    }
 
@@ -1280,11 +1287,15 @@ void HtmlDocVisitor::visitPre(DocSection *s)
    if (m_hide) {
       return;
    }
+
    forceEndParagraph(s);
+
    m_t << "<h" << s->level() << ">";
    m_t << "<a class=\"anchor\" id=\"" << s->anchor();
    m_t << "\"></a>" << endl;
+
    filter(convertCharEntitiesToUTF8(s->title()));
+
    m_t << "</h" << s->level() << ">\n";
 }
 
@@ -1298,11 +1309,14 @@ void HtmlDocVisitor::visitPre(DocHtmlList *s)
    if (m_hide) {
       return;
    }
+
    forceEndParagraph(s);
    if (s->type() == DocHtmlList::Ordered) {
       m_t << "<ol" << htmlAttribsToString(s->attribs()) << ">\n";
+
    } else {
       m_t << "<ul" << htmlAttribsToString(s->attribs()) << ">\n";
+
    }
 }
 
@@ -1346,6 +1360,7 @@ void HtmlDocVisitor::visitPre(DocHtmlDescList *dl)
    if (m_hide) {
       return;
    }
+
    forceEndParagraph(dl);
    m_t << "<dl" << htmlAttribsToString(dl->attribs()) << ">\n";
 }
@@ -1355,6 +1370,7 @@ void HtmlDocVisitor::visitPost(DocHtmlDescList *dl)
    if (m_hide) {
       return;
    }
+
    m_t << "</dl>\n";
    forceStartParagraph(dl);
 }
@@ -1364,6 +1380,7 @@ void HtmlDocVisitor::visitPre(DocHtmlDescTitle *dt)
    if (m_hide) {
       return;
    }
+
    m_t << "<dt" << htmlAttribsToString(dt->attribs()) << ">";
 }
 
@@ -1400,6 +1417,7 @@ void HtmlDocVisitor::visitPre(DocHtmlTable *t)
    forceEndParagraph(t);
 
    QString attrs = htmlAttribsToString(t->attribs());
+
    if (attrs.isEmpty()) {
       m_t << "<table class=\"doxtable\">\n";
    } else {
@@ -1493,8 +1511,7 @@ void HtmlDocVisitor::visitPre(DocInternal *)
    if (m_hide) {
       return;
    }
-   //forceEndParagraph(i);
-   //m_t << "<p><b>" << theTranslator->trForInternalUseOnly() << "</b></p>" << endl;
+ 
 }
 
 void HtmlDocVisitor::visitPost(DocInternal *)
@@ -1502,7 +1519,6 @@ void HtmlDocVisitor::visitPost(DocInternal *)
    if (m_hide) {
       return;
    }
-   //forceStartParagraph(i);
 }
 
 void HtmlDocVisitor::visitPre(DocHRef *href)
@@ -1510,8 +1526,10 @@ void HtmlDocVisitor::visitPre(DocHRef *href)
    if (m_hide) {
       return;
    }
+
    if (href->url().left(7) == "mailto:") {
       writeObfuscatedMailAddress(href->url().mid(7));
+
    } else {
       QByteArray url = correctURL(href->url(), href->relPath());
       m_t << "<a href=\"" << convertToXML(url)  << "\""
@@ -1532,8 +1550,9 @@ void HtmlDocVisitor::visitPre(DocHtmlHeader *header)
    if (m_hide) {
       return;
    }
+
    forceEndParagraph(header);
-   m_t << "<h" << header->level()
+   m_t << "<h" << header->level() 
        << htmlAttribsToString(header->attribs()) << ">";
 }
 
@@ -1542,6 +1561,7 @@ void HtmlDocVisitor::visitPost(DocHtmlHeader *header)
    if (m_hide) {
       return;
    }
+
    m_t << "</h" << header->level() << ">\n";
    forceStartParagraph(header);
 }
@@ -1549,30 +1569,41 @@ void HtmlDocVisitor::visitPost(DocHtmlHeader *header)
 void HtmlDocVisitor::visitPre(DocImage *img)
 {
    if (img->type() == DocImage::Html) {
-      forceEndParagraph(img);
-      if (m_hide) {
+      // CopperSpice: do not force    04/19/2015
+      // forceEndParagraph(img);
+     
+      if (m_hide) {         
          return;
       }
+
       QString baseName = img->name();
       int i;
+
       if ((i = baseName.lastIndexOf('/')) != -1 || (i = baseName.lastIndexOf('\\')) != -1) {
          baseName = baseName.right(baseName.length() - i - 1);
       }
+
       m_t << "<div class=\"image\">" << endl;
+
       QByteArray url = img->url();
+
       if (url.isEmpty()) {
          m_t << "<img src=\"" << img->relPath() << img->name() << "\" alt=\""
              << baseName << "\"" << htmlAttribsToString(img->attribs())
              << "/>" << endl;
+
       } else {
          m_t << "<img src=\"" << correctURL(url, img->relPath()) << "\" "
              << htmlAttribsToString(img->attribs())
              << "/>" << endl;
       }
+
       if (img->hasCaption()) {
          m_t << "<div class=\"caption\">" << endl;
       }
-   } else { // other format -> skip
+
+   } else { 
+      // other format -> skip
       pushEnabled();
       m_hide = true;
    }
@@ -1584,11 +1615,16 @@ void HtmlDocVisitor::visitPost(DocImage *img)
       if (m_hide) {
          return;
       }
+
       if (img->hasCaption()) {
          m_t << "</div>";
       }
+
       m_t << "</div>" << endl;
-      forceStartParagraph(img);
+
+      // CopperSpice: do not force    04/19/2015
+      // forceStartParagraph(img);
+
    } else { // other format
       popEnabled();
    }
@@ -1599,8 +1635,10 @@ void HtmlDocVisitor::visitPre(DocDotFile *df)
    if (m_hide) {
       return;
    }
+
    m_t << "<div class=\"dotgraph\">" << endl;
    writeDotFile(df->file(), df->relPath(), df->context());
+
    if (df->hasCaption()) {
       m_t << "<div class=\"caption\">" << endl;
    }
@@ -1776,6 +1814,7 @@ void HtmlDocVisitor::visitPre(DocParamSect *s)
    }
 
    forceEndParagraph(s);
+
    QByteArray className;
    QByteArray heading;
 
@@ -1784,18 +1823,22 @@ void HtmlDocVisitor::visitPre(DocParamSect *s)
          heading = theTranslator->trParameters();
          className = "params";
          break;
+
       case DocParamSect::RetVal:
          heading = theTranslator->trReturnValues();
          className = "retval";
          break;
+
       case DocParamSect::Exception:
          heading = theTranslator->trExceptions();
          className = "exception";
          break;
+
       case DocParamSect::TemplateParam:
          heading = theTranslator->trTemplateParameters();
          className = "tparams";
          break;
+
       default:
          assert(0);
    }
@@ -1814,6 +1857,7 @@ void HtmlDocVisitor::visitPost(DocParamSect *s)
    m_t << "  </table>" << endl;
    m_t << "  </dd>" << endl;
    m_t << "</dl>" << endl;
+
    forceStartParagraph(s);
 }
 
@@ -1981,9 +2025,11 @@ void HtmlDocVisitor::visitPre(DocHtmlBlockQuote *b)
    if (m_hide) {
       return;
    }
+
    forceEndParagraph(b);
 
    QString attrs = htmlAttribsToString(b->attribs());
+
    if (attrs.isEmpty()) {
       m_t << "<blockquote class=\"doxtable\">\n";
    } else {
@@ -1996,6 +2042,7 @@ void HtmlDocVisitor::visitPost(DocHtmlBlockQuote *b)
    if (m_hide) {
       return;
    }
+
    m_t << "</blockquote>" << endl;
    forceStartParagraph(b);
 }
@@ -2019,8 +2066,10 @@ void HtmlDocVisitor::filter(const char *str)
    if (str == 0) {
       return;
    }
+
    const char *p = str;
    char c;
+
    while (*p) {
       c = *p++;
       switch (c) {
@@ -2225,7 +2274,7 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
 
 
 /** Used for items found inside a paragraph, which due to XHTML restrictions
- *  have to be outside of the paragraph. This method will forcefully end
+ *  have to be outside of the paragraph. This method will force the end of 
  *  the current paragraph and forceStartParagraph() will restart it.
  */
 void HtmlDocVisitor::forceEndParagraph(DocNode *n)
@@ -2267,7 +2316,7 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
 }
 
 /** Used for items found inside a paragraph, which due to XHTML restrictions
- *  have to be outside of the paragraph. This method will forcefully start
+ *  have to be outside of the paragraph. This method will force the start of
  *  the paragraph, that was previously ended by forceEndParagraph().
  */
 void HtmlDocVisitor::forceStartParagraph(DocNode *n)

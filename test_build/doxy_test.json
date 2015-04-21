@@ -142,7 +142,7 @@
     "generate-test-list": true,
     "generate-todo-list": true,
     "generate-treeview": true,
-    "generate-xml": false,
+    "generate-xml": true,
     "ghostscript": "",
     "group-graphs": true,
     "have-dot": false,

@@ -2109,7 +2109,14 @@ static bool preProcessFile(QString &input_FName, QTextStream &t_stream, bool bIn
    QFile f(input_FName);
 
    if (! f.open(QIODevice::ReadOnly)) {
-      err("Unable to open file for reading %s (rtf, preProcessA), error: %d  \n", qPrintable(input_FName), f.error());
+
+      if (! f.exists())  {    
+         err("Unable to locate missing file '%s', contact the developers\n", qPrintable(input_FName));
+
+      } else {
+         err("Unable to open file for reading %s (rtf, preProcessA), error: %d  \n", qPrintable(input_FName), f.error());
+      }
+
       return false;
    }
 

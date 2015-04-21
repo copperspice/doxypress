@@ -3224,24 +3224,23 @@ char *commentscanYYtext;
 #include <ctype.h>
 #include <unistd.h>
 
-#include "scanner.h"
+#include "cite.h"
+#include "condparser.h"
+#include "config.h"
 #include "entry.h"
 #include <doxy_globals.h>
 #include "message.h"
-#include "config.h"
-#include "util.h"
 #include "index.h"
 #include "defargs.h"
 #include "language.h"
 #include "outputlist.h"
 #include "membergroup.h"
 #include "reflist.h"
+#include "parser_cpp.h"
 #include "parserintf.h"
-#include "cite.h"
 #include "markdown.h"
-#include "condparser.h"
 #include "formula.h"
-
+#include "util.h"
 
 #define YY_NO_INPUT 1
 
@@ -8734,17 +8733,3 @@ static void handleGuard(const QByteArray &expr)
       BEGIN( SkipGuardedSection );
    }
 }
-
-
-
-#if !defined(YY_FLEX_SUBMINOR_VERSION)
-//----------------------------------------------------------------------------
-extern "C" { // some bogus code to keep the compiler happy
-   void commentscanYYdummy()
-   {
-      yy_flex_realloc(0, 0);
-   }
-}
-#endif
-
-

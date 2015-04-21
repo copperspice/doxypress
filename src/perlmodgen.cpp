@@ -2425,7 +2425,7 @@ bool PerlModGenerator::createOutputDir(QDir &perlModDir)
    if (! dir.exists()) {
       dir.setPath(QDir::currentPath());
 
-      if (!dir.mkdir(outputDirectory)) {
+      if (! dir.mkdir(outputDirectory)) {
          err("Unable to create directory %s\n", outputDirectory.data());
          return false;
       }

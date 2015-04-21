@@ -1029,23 +1029,25 @@ void FileDef::insertMember(QSharedPointer<MemberDef> md)
          addMemberToList(MemberListType_decTypedefMembers, md);
          addMemberToList(MemberListType_docTypedefMembers, md);
          break;
+
       case MemberType_Enumeration:
          addMemberToList(MemberListType_decEnumMembers, md);
          addMemberToList(MemberListType_docEnumMembers, md);
          break;
+
       case MemberType_EnumValue:    // enum values are shown inside their enums
          break;
+
       case MemberType_Define:
          addMemberToList(MemberListType_decDefineMembers, md);
          addMemberToList(MemberListType_docDefineMembers, md);
          break;
+
       default:
-         err("FileDef::insertMembers(): "
-             "member `%s' with class scope `%s' inserted in file scope `%s'!\n",
-             md->name().data(),
-             md->getClassDef() ? md->getClassDef()->name().data() : "<global>",
-             name().data());
+         err("FileDef::insertMembers(): member `%s' with class scope `%s' inserted in file scope `%s'\n",
+             md->name().data(), md->getClassDef() ? md->getClassDef()->name().data() : "<global>", name().data());
    }
+
    //addMemberToGroup(md,groupId);
 }
 

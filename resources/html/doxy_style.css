@@ -664,7 +664,7 @@ span.mlabel {
    margin-right: 4px;
    padding: 2px 3px;
    border-radius: 3px;
-   font-size: 7pt;
+   font-size: 8pt;
    white-space: nowrap;
    vertical-align: middle;
 }
@@ -694,7 +694,8 @@ div.directory {
 .directory td.entry {
    white-space: nowrap;
    padding-right: 6px;
-   padding-top: 3px;
+   padding-top: 2px;
+   padding-bottom: 2px;
 }
 
 .directory td.entry a {
@@ -754,21 +755,22 @@ div.directory {
     font-family: Arial, Helvetica;
     font-weight: bold;
     font-size: 12px;
-    height: 14px;
-    width: 16px;
-    display: inline-block;
-    background-color: ##88;
+    margin-left: 4px;
+    margin-right: 4px;
+    display: inline-block;    
     color: white;
-    text-align: center;
-    border-radius: 4px;
-    margin-left: 2px;
-    margin-right: 2px;
+    text-align: top;
+    position: relative;
+    top: -3px;
 }
 
 .icona {
-   width: 24px;
-   height: 22px;
+   height: 15px;
+   margin-right: 6px;
    display: inline-block;
+   background-color: ##88;
+   border-radius: 4px;
+   vertical-align: -2px;
 }
 
 .iconfopen {
@@ -1131,6 +1133,7 @@ dl.section dd {
 .image
 {
    text-align: center;
+   display: inline-block;
 }
 
 .dotgraph

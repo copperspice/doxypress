@@ -199,12 +199,12 @@ doxypress_SOURCES = \
    src/generated/declinfo.cpp  \
    src/generated/doctokenizer.cpp \
    src/generated/fortrancode.cpp \
-   src/generated/fortranscanner.cpp \
+   src/generated/parser_cpp.cpp \
+   src/generated/parser_fortran.cpp \
+   src/generated/parser_py.cpp \
+   src/generated/parser_tcl.cpp \
    src/generated/pre.cpp \
-   src/generated/pycode.cpp  \
-   src/generated/pyscanner.cpp \
-   src/generated/scanner.cpp \
-   src/generated/tclscanner.cpp
+   src/generated/pycode.cpp
 
 # not currently using
 # src/dbusxmlscanner.cpp

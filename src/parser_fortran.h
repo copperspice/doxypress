@@ -10,39 +10,31 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
 
-#ifndef PARSER_PY_H
-#define PARSER_PY_H
+#ifndef FORTRAN_LANGUAGE_PARSER_H
+#define FORTRAN_LANGUAGE_PARSER_H
 
-#include <QByteArray>
-#include <QStringList>
-
-#include <types.h>
-
-#include <definition.h>
-#include <filedef.h>
-#include <memberdef.h>
-#include <outputgen.h>
 #include <parserintf.h>
 
-/** \brief Python Parser using state-based lexical scanning.
+/** \brief Fortran language parser using state-based lexical scanning.
  *
- * This is the Python language parser for doxyPress.
+ *  This is the Fortran language parser for doxyPress.
  */
-class PythonLanguageParser : public ParserInterface
+class FortranLanguageParser : public ParserInterface
 {
  public:
-   virtual ~PythonLanguageParser() {}
+   FortranLanguageParser(FortranFormat format = FortranFormat_Unknown) : m_format(format) { }
+   virtual ~FortranLanguageParser() {}
 
    void startTranslationUnit(const char *) {}
    void finishTranslationUnit() {}
 
-   void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
-                   bool sameTranslationUnit, QStringList &filesInSameTranslationUnit) override;
+   void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root, bool sameTranslationUnit,
+                   QStringList &filesInSameTranslationUnit) override;
 
    bool needsPreprocessing(const QByteArray &extension);
 
@@ -55,15 +47,21 @@ class PythonLanguageParser : public ParserInterface
 
    void resetCodeParserState();
    void parsePrototype(const char *text);
+
+ private:
+   FortranFormat m_format;
 };
 
-extern void parsePythonCode(CodeOutputInterface &, const char *, const QByteArray &,
-                            bool , const char *, QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
-                            QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
-                            bool collectXRefs);
+class FortranLanguageParserFree : public FortranLanguageParser
+{
+ public:
+   FortranLanguageParserFree() : FortranLanguageParser(FortranFormat_Free) { }
+};
 
-extern void resetPythonCodeParserState();
-
-void pyScanFreeParser();
+class FortranLanguageParserFixed : public FortranLanguageParser
+{
+ public:
+   FortranLanguageParserFixed() : FortranLanguageParser(FortranFormat_Fixed) { }
+};
 
 #endif
