@@ -15,7 +15,9 @@
  *
 *************************************************************************/
 
+#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -43,6 +45,12 @@ QByteArray Config::json_ReadFile(const QString &fName)
    data = file.readAll();
    file.close();
 
+   // set currentDir
+   QFileInfo temp(fName);
+
+   QString workingDir = temp.absolutePath();
+   QDir::setCurrent(workingDir);
+  
    return data;
 }
 

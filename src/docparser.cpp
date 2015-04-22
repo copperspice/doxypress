@@ -6452,8 +6452,8 @@ int DocPara::handleHtmlEndTag(const QByteArray &tagName)
          break;
 
       case HTML_OL:
-         if (!insideOL(this)) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "found </ol> tag without matching <ol>");
+         if (! insideOL(this)) {
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Found </ol> tag without matching <ol>");
          } else {
             retval = RetVal_EndList;
          }
@@ -6461,7 +6461,7 @@ int DocPara::handleHtmlEndTag(const QByteArray &tagName)
 
       case HTML_LI:
          if (!insideLI(this)) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "found </li> tag without matching <li>");
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Found </li> tag without matching <li>");
          } else {
             // ignore </li> tags
          }
@@ -6472,9 +6472,9 @@ int DocPara::handleHtmlEndTag(const QByteArray &tagName)
          break;
 
       //case HTML_PRE:
-      //  if (!insidePRE(this))
+      //  if (! insidePRE(this))
       //  {
-      //    warn_doc_error(s_fileName,doctokenizerYYlineno,"found </pre> tag without matching <pre>");
+      //    warn_doc_error(s_fileName,doctokenizerYYlineno,"Found </pre> tag without matching <pre>");
       //  }
       //  else
       //  {
@@ -6505,15 +6505,19 @@ int DocPara::handleHtmlEndTag(const QByteArray &tagName)
       case HTML_SUB:
          handleStyleLeave(this, m_children, DocStyleChange::Subscript, "sub");
          break;
+
       case HTML_SUP:
          handleStyleLeave(this, m_children, DocStyleChange::Superscript, "sup");
          break;
+
       case HTML_CENTER:
          handleStyleLeave(this, m_children, DocStyleChange::Center, "center");
          break;
+
       case HTML_SMALL:
          handleStyleLeave(this, m_children, DocStyleChange::Small, "small");
          break;
+
       case HTML_PRE:
          handleStyleLeave(this, m_children, DocStyleChange::Preformatted, "pre");
          setInsidePreformatted(false);
@@ -6590,6 +6594,7 @@ int DocPara::handleHtmlEndTag(const QByteArray &tagName)
       case XML_TERM:
          //m_children.append(new DocStyleChange(this,s_nodeStack.count(),DocStyleChange::Bold,false));
          break;
+
       case XML_SUMMARY:
       case XML_REMARKS:
       case XML_PARA:
@@ -6605,9 +6610,11 @@ int DocPara::handleHtmlEndTag(const QByteArray &tagName)
       case XML_INHERITDOC:
          retval = RetVal_CloseXml;
          break;
+
       case XML_C:
          handleStyleLeave(this, m_children, DocStyleChange::Code, "c");
          break;
+
       case XML_ITEM:
       case XML_LISTHEADER:
       case XML_INCLUDE:

@@ -18478,6 +18478,7 @@ YY_DECL {
          case 541:
             YY_RULE_SETUP
 
+            {                
                warn(yyFileName, yyLineNr, "Found a ';' while parsing an initializer list. "
                   "Some macros which are used without semicolons may not be parsed accurately.\n");
                   

@@ -980,9 +980,6 @@ void HtmlDocVisitor::visitPre(DocPara *p)
       return;
    }
 
-   //printf("DocPara::visitPre: parent of kind %d ",
-   //       p->parent() ? p->parent()->kind() : -1);
-
    bool needsTag = false;
    if (p && p->parent()) {
       switch (p->parent()->kind()) {
@@ -1050,8 +1047,7 @@ void HtmlDocVisitor::visitPre(DocPara *p)
    if (isFirst && isLast) {
       needsTag = false;
    }
-
-   //printf("  needsTag=%d\n",needsTag);
+  
    // write the paragraph tag (if needed)
    if (needsTag) {
       m_t << "<p" << contexts[t] << ">";

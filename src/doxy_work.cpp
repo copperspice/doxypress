@@ -918,6 +918,10 @@ void generateOutput()
       exit(0);
    }
 
+   // move to the output directory 
+   QString outputDir = Config::getString("output-dir");   
+   QDir::setCurrent(outputDir);
+
    initSearchIndexer();
 
    bool generateHtml  = Config::getBool("generate-html");

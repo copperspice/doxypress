@@ -684,7 +684,7 @@ void HtmlGenerator::init()
    QDir d(dname);
 
    if (! d.exists() && ! d.mkdir(dname)) {
-      err("Unable to create output directory %s\n", qPrintable(dname));      
+      err("HTML Generator: Unable to create output directory %s\n", qPrintable(dname));      
       exit(1);
    }
    

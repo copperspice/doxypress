@@ -2349,7 +2349,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
    QDir d(path);
    
    if (! d.exists()) {      
-      err("Output directory %s does not exist\n", qPrintable(path));
+      err("RTF Generator: Output directory %s does not exist\n", qPrintable(path));
       return false;
    }
 

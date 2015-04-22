@@ -196,7 +196,10 @@
         "*.h"
     ],
     "input-source": [
-        "dox"
+        "dox",
+        "line2",
+        "line 3",
+        "line4"
     ],
     "interactive-svg": false,
     "internal-docs": false,
