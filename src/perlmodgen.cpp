@@ -2409,7 +2409,7 @@ bool PerlModGenerator::createOutputFile(QFile &f, const char *s)
    f.setFileName(s);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Can not open file %s for writing!\n", s);
+      err("Unable to open file for writing %s, error: %d\n", s, f.error());    
       return false;
    }
 

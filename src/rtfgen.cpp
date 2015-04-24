@@ -2352,10 +2352,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
       err("RTF Generator: Output directory %s does not exist\n", qPrintable(path));
       return false;
    }
-
-   // save the original directory
-   QString oldDir = QDir::currentPath();
-
+  
    // move to the html output directory 
    QString outputDir = Config::getString("output-dir");
    QString rtfDir;
@@ -2368,6 +2365,9 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
 
    }
 
+    // save the original directory
+   QString oldDir = QDir::currentPath();
+
    QDir::setCurrent(rtfDir);
   
    QString combinedName = rtfDir + "/combined.rtf";  
@@ -2375,6 +2375,8 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
 
    if (! outf.open(QIODevice::WriteOnly)) {
       err("Unable to open file for writing %s (rtf, preProcessB), error: %d\n", qPrintable(combinedName), outf.error());
+
+      QDir::setCurrent(oldDir);
       return false;
    }
    QTextStream outStream(&outf);

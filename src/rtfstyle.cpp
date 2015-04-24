@@ -592,8 +592,8 @@ void loadExtensions(const QString &name)
 {
    QFile file(name);
 
-   if (!file.open(QIODevice::ReadOnly)) {
-      err("Can not open RTF extensions file %s. Using defaults.\n", qPrintable(name));
+   if (! file.open(QIODevice::ReadOnly)) {
+      err("Unable to open RTF extensions file %s, error: %d, Using defaut values\n", qPrintable(name), file.error());      
       return;
    }
    msg("Loading RTF extensions %s\n", qPrintable(name));

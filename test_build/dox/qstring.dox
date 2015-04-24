@@ -1291,7 +1291,7 @@ This function overloads endsWith().
 
 
 /*!
-\fn bool QString::endsWith ( const QChar & c, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
+\fn bool QString::endsWith ( QChar c, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns true if the string ends with <i>c</i>; otherwise returns false.
 
@@ -2974,7 +2974,7 @@ Example:
 
 
 /*!
-\fn QStringList QString::split ( const QChar & sep, SplitBehavior behavior = KeepEmptyParts, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
+\fn QStringList QString::split ( QChar sep, SplitBehavior behavior = KeepEmptyParts, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This is an overloaded function.
 
@@ -3100,7 +3100,7 @@ This function overloads startsWith().
 
 
 /*!
-\fn bool QString::startsWith ( const QChar & c, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
+\fn bool QString::startsWith ( QChar c, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads startsWith().
 

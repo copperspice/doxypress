@@ -646,6 +646,54 @@ bool Config::verify()
       iterEnum.value().value = "HTML-CSS";
    }
 
+   // ** docset
+   QString docset;
+
+   iterString = m_cfgString.find("project-name");
+   docset = iterString.value().value;
+
+   if (docset.isEmpty()) {
+      docset = "My Project";
+   }
+   iterString.value().value = docset;
+
+   // * 
+   iterString = m_cfgString.find("docset-bundle-id");
+   docset = iterString.value().value;
+
+   if (docset.isEmpty()) {
+      docset = "org.doxypress.Project";
+   }
+   iterString.value().value = docset;
+
+   // *
+   iterString = m_cfgString.find("docset-feedname");
+   docset = iterString.value().value;
+
+   if (docset.isEmpty()) {
+      docset = "DoxyPress generated docs";
+   }
+   iterString.value().value = docset;
+
+   // *
+   iterString = m_cfgString.find("docset-publisher-id");
+   docset = iterString.value().value;
+
+   if (docset.isEmpty()) {
+      docset = "org.doxypress.Publisher";
+   }
+   iterString.value().value = docset;
+
+   // *
+   iterString = m_cfgString.find("docset-publisher-name");
+   docset = iterString.value().value;
+
+   if (docset.isEmpty()) {
+      docset = "Publisher";
+   }
+   iterString.value().value = docset;
+
+
 
    // ** latex
    iterString = m_cfgString.find("latex-bib-style");

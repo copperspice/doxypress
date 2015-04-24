@@ -1205,17 +1205,16 @@ void ClassDiagram::writeFigure(QTextStream &output, const char *path, const char
           << fileName << "}" << endl;
    output << "\\end{center}\n"
           "\\end{figure}\n";
+  
 
-   //printf("writeFigure rows=%d cols=%d\n",rows,cols);
-
-   QByteArray epsBaseName = (QByteArray)path + "/" + fileName;
-   QByteArray epsName = epsBaseName + ".eps";
+   QString epsBaseName = QString(path) + "/" + QString(fileName);
+   QString epsName = epsBaseName + ".eps";
 
    QFile f1;
-   f1.setFileName(epsName.data());
+   f1.setFileName(epsName);
 
    if (! f1.open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", qPrintable(f1.fileName()));
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(epsName), f1.error());     
       exit(1);
    }
 
@@ -1448,7 +1447,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const char *path, const char
    if (Config::getBool("latex-pdf")) {
           
       QString epstopdfArgs;
-      epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(epsBaseName.data()).arg(epsBaseName.data());
+      epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(epsBaseName).arg(epsBaseName);
 
       portable_sysTimerStart();
 

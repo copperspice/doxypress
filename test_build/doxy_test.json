@@ -26,7 +26,7 @@
     "binary-toc": false,
     "brief-member-desc": false,
     "built-in-stl-support": false,
-    "case-sense-names": false,
+    "case-sense-names": true,
     "chm-file": "",
     "chm-index-encoding": "",
     "cite-bib-files": [
@@ -137,12 +137,12 @@
     "generate-man": true,
     "generate-perl": false,
     "generate-qthelp": false,
-    "generate-rtf": true,
+    "generate-rtf": false,
     "generate-tagfile": "",
     "generate-test-list": true,
     "generate-todo-list": true,
     "generate-treeview": true,
-    "generate-xml": true,
+    "generate-xml": false,
     "ghostscript": "",
     "group-graphs": true,
     "have-dot": false,
@@ -152,7 +152,7 @@
     "hide-in-body-docs": false,
     "hide-scope-names": false,
     "hide-undoc-classes": true,
-    "hide-undoc-members": false,
+    "hide-undoc-members": true,
     "hide-undoc-relations": true,
     "html-colorstyle-gamma": 80,
     "html-colorstyle-hue": 220,
@@ -196,10 +196,7 @@
         "*.h"
     ],
     "input-source": [
-        "dox",
-        "line2",
-        "line 3",
-        "line4"
+        "dox"
     ],
     "interactive-svg": false,
     "internal-docs": false,
@@ -253,7 +250,7 @@
     "optimize-cplus": true,
     "optimize-fortran": false,
     "optimize-java": false,
-    "output-dir": "Z:/DoxyPress/test_build/",
+    "output-dir": ".",
     "output-language": "English",
     "perl-latex": false,
     "perl-path": "/usr/bin/perl",
@@ -264,7 +261,8 @@
     ],
     "plantuml-jar-path": "",
     "predefined-macros": [
-        "Q_PROPERTY:=public: Q_PROPERTY\n"
+        "Q_PROPERTY:=public: Q_PROPERTY",
+        "Q_REQUIRED_RESULT=\n"
     ],
     "project-brief": "Sample files to test DoxyPress",
     "project-logo": "Z:/DoxyPress/test_build/images/cslogo-32.png",
@@ -344,7 +342,7 @@
     "verbatim-headers": false,
     "warn-doc-error": true,
     "warn-format": "$file:$line: $text",
-    "warn-logfile": "Z:/DoxyPress/test_build/doxy_error.log",
+    "warn-logfile": "doxy_error.log",
     "warn-undoc": false,
     "warn-undoc-param": false,
     "warnings": true,

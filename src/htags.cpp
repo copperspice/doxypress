@@ -93,7 +93,7 @@ bool Htags::execute(const QString &htmldir)
 
    commandLine += " \"" + htmldir.toUtf8() + "\"";
 
-   QByteArray oldDir = QDir::currentPath().toUtf8();
+   QString oldDir = QDir::currentPath();
    QDir::setCurrent(g_inputDir.absolutePath());
   
    portable_sysTimerStart();

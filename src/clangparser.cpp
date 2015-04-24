@@ -564,6 +564,7 @@ static void writeLineNumber(CodeOutputInterface &ol, FileDef *fd, uint line)
                             md->getOutputFileBase(),
                             md->anchor(),
                             line);
+
       } else { // link to compound
          g_currentMemberDef = 0;
          ol.writeLineNumber(d->getReference(),
@@ -581,8 +582,6 @@ static void writeLineNumber(CodeOutputInterface &ol, FileDef *fd, uint line)
       lineAnchor.sprintf("l%05d", line);
       ol.setCurrentDoc(fd, lineAnchor, true);
    }
-
-   //printf("writeLineNumber(%d) g_searchForBody=%d\n",line,g_searchForBody);
 }
 
 static void codifyLines(CodeOutputInterface &ol, FileDef *fd, const char *text,

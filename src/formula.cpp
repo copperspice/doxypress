@@ -51,19 +51,20 @@ int Formula::getId()
 void FormulaList::generateBitmaps(const QString &path)
 {
    int x1, y1, x2, y2;
-   QDir d(path);
 
    // store the original directory
+   QDir d(path);
+ 
    if (! d.exists()) {
       err("Output dir %s does not exist\n", qPrintable(path));
       exit(1);
    }
 
-   QByteArray oldDir = QDir::currentPath().toUtf8();
+   QString oldDir = QDir::currentPath();
 
-   // go to the html output directory (i.e. path)
+   // move to the image directory
    QDir::setCurrent(d.absolutePath());
-   QDir thisDir;
+   QDir thisDir = QDir::current();
 
    // generate a latex file containing one formula per page.
    QByteArray texName = "_formulas.tex";
@@ -379,7 +380,7 @@ void FormulaList::generateBitmaps(const QString &path)
       f.close();
    }
 
-   // reset the directory to the original location.
+   // reset the directory to the original location
    QDir::setCurrent(oldDir);
 }
 

@@ -29,13 +29,10 @@ void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const Q
 {
    QString absOutFile = outDir + QDir::separator() +outFile;
 
-   // chdir to the output dir, so dot can find the font file.
-   QString oldDir = QDir::currentPath();
-
-   // go to the html output directory (i.e. path)
+   // move to the output dir so dot can find the font file.
+   QString oldDir = QDir::currentPath();   
    QDir::setCurrent(outDir);
 
-   //printf("Going to dir %s\n",QDir::currentPath().data());
    QString diaExe = Config::getString("dia-path") + "dia" + portable_commandExtension();
 
    QString diaArgs;

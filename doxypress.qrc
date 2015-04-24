@@ -1,6 +1,5 @@
 <RCC>
-    <qresource prefix="/">        
-        <file>resources/doxypress.ico</file>
+    <qresource prefix="/">       
         <file>resources/layout_default.xml</file> 
         <file>resources/html/arrowdown.luma</file>
         <file>resources/html/arrowright.luma</file>

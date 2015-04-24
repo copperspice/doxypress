@@ -368,7 +368,7 @@ void Config::load_Defaults()
    m_cfgString.insert("docset-feedname",         struc_CfgString { "DoxyPress generated docs", DEFAULT } ); 
    m_cfgString.insert("docset-bundle-id",        struc_CfgString { "org.doxypress.Project",    DEFAULT } ); 
    m_cfgString.insert("docset-publisher-id",     struc_CfgString { "org.doxypress.Publisher",  DEFAULT } ); 
-   m_cfgString.insert("docset-publisher-name",   struc_CfgString { "org.doxypress.Publisher",  DEFAULT } ); 
+   m_cfgString.insert("docset-publisher-name",   struc_CfgString { "Publisher",  DEFAULT } ); 
 
    // tab 3 - eclipse
    m_cfgBool.insert("generate-eclipse",          struc_CfgBool   { false,          DEFAULT } );

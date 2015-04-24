@@ -43,45 +43,22 @@ DocSets::~DocSets()
 
 void DocSets::initialize()
 {
-   // -- get config options
+   // get config options
    QString projectName = Config::getString("project-name");
-   if (projectName.isEmpty()) {
-      projectName = "root";
-   }
-
    QString bundleId = Config::getString("docset-bundle-id");
-   if (bundleId.isEmpty()) {
-      bundleId = "org.doxypress.Project";
-   }
-
    QString feedName = Config::getString("docset-feedname");
-   if (feedName.isEmpty()) {
-      feedName = "FeedName";
-   }
-
    QString publisherId = Config::getString("docset-publisher-id");
-   if (publisherId.isEmpty()) {
-      publisherId = "PublisherId";
-   }
-
    QString publisherName = Config::getString("docset-publisher-name");
-   if (publisherName.isEmpty()) {
-      publisherName = "PublisherName";
-   }
-
    QString projectVersion = Config::getString("project-version");
-   if (projectVersion.isEmpty()) {
-      projectVersion = "ProjectVersion";
-   }
-
-   // -- write Makefile
+  
+   // write Makefile
    {
       QString mfName = Config::getString("html-output") + "/Makefile";
 
       QFile makefile(mfName);
 
       if (! makefile.open(QIODevice::WriteOnly)) {
-         err("Could not open file %s for writing\n", mfName.data());
+         err("Unable to open file for writing %s, error: %d\n", qPrintable(mfName), makefile.error());
          exit(1);
       }
 
@@ -127,14 +104,13 @@ void DocSets::initialize()
          "always:\n";
    }
 
-   // -- write Info.plist
+   // write Info.plist
    {
       QString plName = Config::getString("html-output") + "/Info.plist";
-
       QFile plist(plName);
 
       if (! plist.open(QIODevice::WriteOnly)) {
-         err("Could not open file %s for writing\n", qPrintable(plName));
+         err("Unable to open file for writing %s, error: %d\n", qPrintable(plName), plist.error());
          exit(1);
       }
       QTextStream ts(&plist);
@@ -165,12 +141,12 @@ void DocSets::initialize()
          "</plist>\n";
    }
 
-   // -- start Nodes.xml
+   // start Nodes.xml
    QString notes = Config::getString("html-output") + "/Nodes.xml";
    m_nf = new QFile(notes);
 
    if (! m_nf->open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", qPrintable(notes));
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(notes), m_nf->error());
       exit(1);
    }
 
@@ -193,8 +169,8 @@ void DocSets::initialize()
    QString tokens = Config::getString("html-output") + "/Tokens.xml";
    m_tf = new QFile(tokens);
   
-   if (!m_tf->open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", qPrintable(tokens));
+   if (! m_tf->open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(tokens), m_tf->error());
       exit(1);
    }
 

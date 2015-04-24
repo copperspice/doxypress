@@ -1067,13 +1067,13 @@ bool DotFilePatcher::run()
          if (n == 1 && mapId >= 0 && mapId < m_maps.count()) {
             Map map = m_maps[mapId];
 
-            if (!writeVecGfxFigure(t, map.label, map.mapFile)) {
-               err("problem writing FIG %d figure!\n", mapId);
+            if (! writeVecGfxFigure(t, map.label, map.mapFile)) {
+               err("Unable to writ FIG %d figure\n", mapId);
                return false;
             }
 
          } else { // error invalid map id!
-            err("Found invalid bounding FIG %d in file %s!\n", mapId, qPrintable(m_patchFile));
+            err("Found invalid bounding FIG %d in file %s\n", mapId, qPrintable(m_patchFile));
             t << line;
          }
 

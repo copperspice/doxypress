@@ -123,20 +123,18 @@ class Q_CORE_EXPORT QString
    QString &operator=(const QString &);
    inline QString &operator=(const QLatin1String &);
 
-   inline QString &operator=(QString && other) {
-      qSwap(d, other.d);
-      return *this;
-   }
-
    inline void swap(QString &other) {
       qSwap(d, other.d);
    }
+
    inline int size() const {
       return d->size;
    }
+
    inline int count() const {
       return d->size;
    }
+
    inline int length() const;
    inline bool isEmpty() const;
    void resize(int size);
@@ -166,6 +164,11 @@ class Q_CORE_EXPORT QString
    QCharRef operator[](int i);
    const QChar operator[](uint i) const;
    QCharRef operator[](uint i);
+
+   inline QString &operator=(QString && other) {
+      qSwap(d, other.d);
+      return *this;
+   }
 
    QString arg(qlonglong a, int fieldwidth = 0, int base = 10,
                QChar fillChar = QLatin1Char(' ')) const Q_REQUIRED_RESULT;
@@ -376,8 +379,10 @@ class Q_CORE_EXPORT QString
 
    QStringList split(const QString &sep, SplitBehavior behavior = KeepEmptyParts,
                      Qt::CaseSensitivity cs = Qt::CaseSensitive) const Q_REQUIRED_RESULT;
+
    QStringList split(QChar sep, SplitBehavior behavior = KeepEmptyParts,
                      Qt::CaseSensitivity cs = Qt::CaseSensitive) const Q_REQUIRED_RESULT;
+
 #ifndef QT_NO_REGEXP
    QStringList split(const QRegExp &sep, SplitBehavior behavior = KeepEmptyParts) const Q_REQUIRED_RESULT;
 #endif

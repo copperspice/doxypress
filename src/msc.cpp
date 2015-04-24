@@ -100,12 +100,10 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
 
 void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, MscOutputFormat format)
 {
-   QString absOutFile = outDir + QDir::separator() + outFile; 
+   QString absOutFile = outDir + "/" + outFile; 
  
-   // chdir to the output dir, so dot can find the font file.
-   QString oldDir = QDir::currentPath();
-
-   // go to the html output directory (i.e. path)
+   // move to output dir so dot can find the font file
+   QString oldDir = QDir::currentPath(); 
    QDir::setCurrent(outDir);
    
    QString mscExe = Config::getString("mscgen-path") + "mscgen" + portable_commandExtension();
@@ -160,7 +158,7 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
 
       portable_sysTimerStart();
       if (portable_system("epstopdf", epstopdfArgs) != 0) {
-         err("Problem running epstopdf. Check your TeX installation\n");
+         err("Problem running epstopdf. Verify your TeX installation\n");
       }
 
       portable_sysTimerStop();
@@ -171,39 +169,28 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
 
 QString getMscImageMapFromFile(const QString &inFile, const QString &outDir, const QString &relPath, const QByteArray &context)
 {
+   QString result;
+
    QString outFile = inFile + ".map";
    
-   // chdir to the output dir, so dot can find the font file
-   QString oldDir = QDir::currentPath().toUtf8();
-
-   // go to the html output directory (i.e. path)
+   // move to the output directory so dot can find the font file
+   QString oldDir = QDir::currentPath();
    QDir::setCurrent(outDir);
   
-   QString mscExe = Config::getString("mscgen-path") + "mscgen" + portable_commandExtension();
+   QString mscExe  = Config::getString("mscgen-path") + "mscgen" + portable_commandExtension();
+   QString mscArgs = "-T ismap -i \"" + inFile + "\" -o \"" + outFile + "\"";
 
-   QString mscArgs = "-T ismap -i \"";
-   mscArgs += inFile;   
-
-   mscArgs += "\" -o \"";
-   mscArgs += outFile + "\"";
-
-   int exitCode;
    portable_sysTimerStart();
-
-   if ((exitCode = portable_system(mscExe, mscArgs, false)) != 0) {
-      portable_sysTimerStop();
-      QDir::setCurrent(oldDir);
-      return "";
-   }
-
+   int exitCode = portable_system(mscExe, mscArgs, false);
    portable_sysTimerStop();
 
-   QString result;
-   QTextStream tmpout(&result);
-
-   convertMapFile(tmpout, outFile, relPath, context);
-   QDir().remove(outFile);
-
+   if (exitCode == 0) {         
+      QTextStream tmpout(&result);
+   
+      convertMapFile(tmpout, outFile, relPath, context);
+      QDir().remove(outFile); 
+   }
+  
    QDir::setCurrent(oldDir);
 
    return result;

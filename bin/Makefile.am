@@ -42,47 +42,6 @@ deploy : all
 endif
 
 if OSTYPE_DARWIN
-deployapp=$(deploydir)/$(bin_PROGRAMS).app/Contents
-
-deploy : all
-	mkdir -p $(deployapp)/Frameworks
-	mkdir -p $(deployapp)/MacOS
-	mkdir -p $(deployapp)/Resources
-
-	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deployapp)/MacOS
-
-	rm -f $(deployapp)/Info.plist
-	sed -e "s,@ICON@,doxypress.icns,g" \
-	    -e "s,@TYPEINFO@,????,g" \
-	    -e "s,@EXECUTABLE@,$(bin_PROGRAMS),g" \
-	    -e "s,com.yourcompany.,com.copperspice.,g" \
-	$(CS_HOME)/mac/Info.plist.app > $(deployapp)/Info.plist
-
-	rm -f $(deployapp)/PkgInfo
-	echo "APPL????" > $(deployapp)/PkgInfo
-
-	touch $(deployapp)/Resources/empty.lproj
-	cp -r $(CS_HOME)/mac/qt_menu.nib $(deployapp)/Resources
-
-	cp $(top_srcdir)/resources/doxypress.icns $(deployapp)/Resources
-	
-	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%1.0.dylib,$(cslibs)) $(deployapp)/Frameworks
-
-	for libname in $(patsubst %,libCs%1.0.dylib,$(cslibs)) ; do \
-	\
-	install_name_tool -change $(CS_HOME)/lib/$$libname \
-	@executable_path/../Frameworks/$$libname  $(deployapp)/MacOS/$(bin_PROGRAMS); \
-	\
-	for templib in $(patsubst %,libCs%1.0.dylib,$(cslibs)) ; do \
-	install_name_tool -change $(CS_HOME)/lib/$$templib \
-	@executable_path/../Frameworks/$$templib  $(deployapp)/Frameworks/$$libname \
-	; done \
-	\
-	; done
-
-   # generate dmg	
-	hdiutil create -ov -srcfolder $(deploydir) -format UDBZ -volname $(bin_PROGRAMS) ../$(bin_PROGRAMS).dmg
-	hdiutil internet-enable -yes ../$(bin_PROGRAMS).dmg
 endif
 
 if OSTYPE_WIN
@@ -90,9 +49,7 @@ deploy : all
 	mkdir -p $(deploydir)
 
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
-
-	rsync -W -a --modify-window=2  $(top_srcdir)/resources/doxypress.ico $(deploydir)
-
+	
 	rsync -W -a --modify-window=2  $(patsubst %,$(gccpath)/%.dll,$(gcclibs))  $(deploydir)
 	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%1-0.dll,$(cslibs))  $(deploydir)
 endif
@@ -217,21 +174,39 @@ qrc_doxypress.cpp: doxypress.qrc   $(wildcard ../resources/*)
 # required to compile qrc
 nodist_doxypress_SOURCES=qrc_doxypress.cpp
 
-# install
-if OSTYPE_LINUX
-endif
-
-if OSTYPE_DARWIN
-endif
-
-if OSTYPE_WIN
-endif
-
 # distribution
 distdir: $(DISTFILES)
 
+# distribution
+distdir: $(DISTFILES)
+	cd .. ; \
+	test -d "$(distdir_custom)" || mkdir -p "$(distdir_custom)" ; \
+	mkdir -p $(distdir_custom)/bin                              ; \
+	mkdir -p $(distdir_custom)/resources                        ; \
+\
+	for f in $(DIST_SOURCES)  ; do install -D $$f $(distdir_custom)/$$f ; done   ;\
+	for f in $(HEADERS)       ; do install -D $$f $(distdir_custom)/$$f ; done   ;\
+	for f in $(FORMS)         ; do install -D $$f $(distdir_custom)/$$f ; done   ;\
+\
+	cp doxypress.qrc                 $(distdir_custom)/                          ; \
+	cp bin/*.am                      $(distdir_custom)/bin/                      ; \
+	cp bin/Makefile.in               $(distdir_custom)/bin/                      ; \
+	cp -r resources/*                $(distdir_custom)/resources/                ;
+
+	$(MAKE) $(AM_MAKEFLAGS) dist-hook
+
 # distdir is a temp folder
 dist-hook:
+	cd ..  ; \
+\
+	cp -r bin/$(distdir)/../*   $(distdir_custom) ; \
+	cd $(distdir_custom)/..                       ; \
+\
+	rm  -f   ../DoxyPress-$(VERSION).zip         ; \
+	zip -r   ../DoxyPress-$(VERSION).zip .       ; \
+	rm  -f   ../DoxyPress-$(VERSION).tar.bz2     ; \
+	tar -cjf ../DoxyPress-$(VERSION).tar.bz2 .
+
 
 # create test_project zip file
 dist-test-project:
