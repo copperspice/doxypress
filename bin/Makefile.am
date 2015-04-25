@@ -104,7 +104,7 @@ doxypress_SOURCES = \
    src/image.cpp \
    src/index.cpp \
    src/language.cpp \
-   src/latexdocvisitor.cpp  \
+   src/latexdocvisitor.cpp \
    src/latexgen.cpp  \
    src/layout.cpp \
    src/lodepng.cpp \
@@ -162,6 +162,162 @@ doxypress_SOURCES = \
    src/generated/parser_tcl.cpp \
    src/generated/pre.cpp \
    src/generated/pycode.cpp
+
+noinst_HEADERS = \
+   src/a_define.h \
+   src/arguments.h \
+   src/bufstr.h \
+   src/ce_parse.h \
+   src/cite.h \
+   src/clangparser.h \
+   src/classdef.h \
+   src/classlist.h \
+   src/cmdmapper.h \
+   src/code.h \
+   src/commentcnv.h \
+   src/commentscan.h \
+   src/condparser.h \
+   src/config.h \
+   src/constexp.h \
+   src/cppvalue.h \
+   src/dbusxmlscanner.h \
+   src/declinfo.h \
+   src/defargs.h \
+   src/definition.h \
+   src/dia.h \
+   src/diagram.h \
+   src/dirdef.h \
+   src/docbookgen.h \
+   src/docbookvisitor.h \
+   src/docparser.h \
+   src/docsets.h \
+   src/doctokenizer.h \
+   src/docvisitor.h \
+   src/dot.h \
+   src/doxy_build_info.h \
+   src/doxy_globals.h \
+   src/doxy_setup.h \
+   src/doxy_shared.h \
+   src/eclipsehelp.h \
+   src/entry.h \
+   src/example.h \
+   src/filedef.h \
+   src/filelist.h \
+   src/filename.h \
+   src/filestorage.h \
+   src/formula.h \
+   src/fortrancode.h \
+   src/ftvhelp.h \
+   src/groupdef.h \
+   src/growbuf.h \
+   src/htags.h \
+   src/htmlattrib.h \
+   src/htmldocvisitor.h \
+   src/htmlentity.h \
+   src/htmlgen.h \
+   src/htmlhelp.h \
+   src/image.h \
+   src/index.h \
+   src/language.h \
+   src/latexdocvisitor.h \
+   src/latexgen.h \
+   src/layout.h \
+   src/lodepng.h \
+   src/logos.h \
+   src/mandocvisitor.h \
+   src/mangen.h \
+   src/markdown.h \
+   src/marshal.h \
+   src/memberdef.h \
+   src/membergroup.h \
+   src/memberlist.h \
+   src/membername.h \
+   src/message.h \
+   src/msc.h \
+   src/namespacedef.h \
+   src/objcache.h \
+   src/outputgen.h \
+   src/outputlist.h \
+   src/pagedef.h \
+   src/parser_cpp.h \
+   src/parser_file.h \
+   src/parser_fortran.h \
+   src/parser_make.h \
+   src/parser_py.h \
+   src/parser_tcl.h \
+   src/parserintf.h \
+   src/perlmodgen.h \
+   src/plantuml.h \
+   src/portable.h \
+   src/pre.h \
+   src/printdocvisitor.h \
+   src/qhp.h \
+   src/qhpxmlwriter.h \
+   src/reflist.h \
+   src/resourcemgr.h \
+   src/rtfdocvisitor.h \
+   src/rtfgen.h \
+   src/rtfstyle.h \
+   src/searchindex.h \
+   src/section.h \
+   src/settings.h \
+   src/sortedlist.h \
+   src/sqlite3gen.h \
+   src/store.h \
+   src/stringmap.h \
+   src/tagreader.h \
+   src/textdocvisitor.h \
+   src/tooltip.h \
+   src/translator.h \
+   src/translator_en.h \
+   src/types.h \
+   src/util.h \
+   src/xmldocvisitor.h \
+   src/xmlgen.h
+
+noinst_HEADERS += \
+   src/translate/translator_adapter.h \
+   src/translate/translator_am.h \
+   src/translate/translator_ar.h \
+   src/translate/translator_br.h \
+   src/translate/translator_ca.h \
+   src/translate/translator_cn.h \
+   src/translate/translator_cz.h \
+   src/translate/translator_de.h \
+   src/translate/translator_dk.h \
+   src/translate/translator_eo.h \
+   src/translate/translator_es.h \
+   src/translate/translator_fa.h \
+   src/translate/translator_fi.h \
+   src/translate/translator_fr.h \
+   src/translate/translator_gr.h \
+   src/translate/translator_hr.h \
+   src/translate/translator_hu.h \
+   src/translate/translator_id.h \
+   src/translate/translator_it.h \
+   src/translate/translator_je.h \
+   src/translate/translator_jp.h \
+   src/translate/translator_ke.h \
+   src/translate/translator_kr.h \
+   src/translate/translator_lt.h \
+   src/translate/translator_lv.h \
+   src/translate/translator_mk.h \
+   src/translate/translator_nl.h \
+   src/translate/translator_no.h \
+   src/translate/translator_pl.h \
+   src/translate/translator_pt.h \
+   src/translate/translator_ro.h \
+   src/translate/translator_ru.h \
+   src/translate/translator_sc.h \
+   src/translate/translator_si.h \
+   src/translate/translator_sk.h \
+   src/translate/translator_sr.h \
+   src/translate/translator_sv.h \
+   src/translate/translator_tr.h \
+   src/translate/translator_tw.h \
+   src/translate/translator_ua.h \
+   src/translate/translator_vi.h \
+   src/translate/translator_za.h
 
 # not currently using
 # src/dbusxmlscanner.cpp
