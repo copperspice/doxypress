@@ -1641,14 +1641,13 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
          csp = 0;
       }
 
-      // search for "virtual"
-      if (vsp < 8 && c == virtualScope[vsp] && // character matches substring "virtual"
-            (vsp > 0 ||                     // if it is the first character
-             i == 0  ||                     // the previous may not be a digit
-             ! isId(s.at(i - 1)) ) ) {
+      // search for "virtual"      
+      if (vsp < 8 && c == virtualScope[vsp] && (vsp > 0 || i == 0  || ! isId(s.at(i - 1)) ) ) {
+         // character matches substring "virtual", it is the first character, the previous may not be a digit
          vsp++;
 
-      } else { // reset counter
+      } else { 
+         // reset counter
          vsp = 0;
 
       }
@@ -1694,8 +1693,8 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
          growBuf.addChar(' ');
 
       } else if (i > 0 && c == '>' && 
-                 (isId(s.at(i - 1)) || isspace((uchar)s.at(i - 1)) || s.at(i - 1) == '*' || s.at(i - 1) == '&') &&          
-                 (i < 8 || !findOperator(s, i)) ) {
+                 (isId(s.at(i - 1)) || isspace((uchar)s.at(i - 1)) || s.at(i - 1) == '*'
+                      || s.at(i - 1) == '&' || s.at(i-1)=='.') && (i < 8 || !findOperator(s, i)) ) {
 
          // prev char is an id char or space
          growBuf.addChar(' ');
@@ -2175,6 +2174,11 @@ QByteArray tempArgListToString(const ArgumentList *al, SrcLangExt lang)
      
         if (i > 0) {
             result += a.type.right(a.type.length() - i - 1);
+
+            if (a->type.find("...")! = -1)   {
+               result+="...";
+            }
+
          } else { 
             // nothing found -> take whole name
             result += a.type;

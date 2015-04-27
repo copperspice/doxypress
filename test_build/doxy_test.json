@@ -262,7 +262,9 @@
     "plantuml-jar-path": "",
     "predefined-macros": [
         "Q_PROPERTY:=public: Q_PROPERTY",
-        "Q_REQUIRED_RESULT=\n"
+        "Q_REQUIRED_RESULT=",
+        "Q_INLINE_TEMPLATE=",
+        "Q_CORE_EXPORT=\n"
     ],
     "project-brief": "Sample files to test DoxyPress",
     "project-logo": "Z:/DoxyPress/test_build/images/cslogo-32.png",

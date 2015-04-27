@@ -1600,26 +1600,28 @@ YY_DECL {
                         // and need to correct it to avoid seeing a nameless parameter
                         // "struct A" as a parameter with type "struct" and name "A".
                         int sv = 0;
-                        if      (a->type.left(6) == "const ") {
+
+                        if (a->type.left(6) == "const ") {
                            sv = 6;
+
                         } else if (a->type.left(9) == "volatile ") {
                            sv = 9;
+
                         }
 
-                        if (a->type.mid(sv) == "struct"    ||
-                              a->type.mid(sv) == "union"     ||
-                              a->type.mid(sv) == "class"     ||
-                              a->type.mid(sv) == "typename"  ||
-                              a->type == "const"             ||
-                              a->type == "volatile"
-                           ) {
+                        if (a->type.mid(sv,6) == "struct" || a->type.mid(sv,5) == "union" ||
+                            a->type.mid(sv,5) == "class"  || a->type.mid(sv,8) == "typename" ||
+                            a->type == "const" || a->type == "volatile") {
+
                            a->type = a->type + " " + a->name;
                            a->name.resize(0);
                         }
-                        //printf(" --> a->type='%s'\n",a->type.data());
+
+
                      } else { // assume only the type was specified, try to determine name later
                         a->type = removeRedundantWhiteSpace(g_curArgTypeName);
                      }
+
                      if (!a->type.isEmpty() && a->type.at(0) == '$') { // typeless PHP name?
                         a->name = a->type;
                         a->type = "";

@@ -2198,7 +2198,6 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
       // see if the class is found inside a namespace
       cd->insertUsedFile(fd);
 
-
       // add class to the list
       Doxygen::classSDict->insert(fullName, cd);
 

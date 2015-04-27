@@ -186,22 +186,21 @@ class QList
       if (!sharable) {
          detach();
       }
+
       if ( d != QListData::sharedNull() ) {
          d->sharable = sharable;
       }
    }
+
    inline bool isSharedWith(const QList<T> &other) const {
       return d == other.d;
    }
-
-//    was here isEmpty
 
    inline bool isEmpty() const {
       return p.isEmpty();
    }  
 
    const T &at(int i) const;
-
 
    const T &operator[](int i) const;
    T &operator[](int i);
@@ -215,9 +214,11 @@ class QList
    void removeAt(int i);
    int removeAll(const T &t);
    bool removeOne(const T &t);
+
    T takeAt(int i);
    T takeFirst();
    T takeLast();
+
    void move(int from, int to);
    void swap(int i, int j);
    int indexOf(const T &t, int from = 0) const;
@@ -496,18 +497,23 @@ class QList
    inline const T &front() const {
       return first();
    }
+
    inline T &back() {
       return last();
    }
+
    inline const T &back() const {
       return last();
    }
+
    inline void pop_front() {
       removeFirst();
    }
+
    inline void pop_back() {
       removeLast();
    }
+
    inline bool empty() const {
       return isEmpty();
    }
