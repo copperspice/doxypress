@@ -5461,6 +5461,8 @@ void Doxy_Work::findUsedTemplateInstances()
          rootNav->loadEntry(Doxy_Globals::g_storage);
 
          findUsedClassesForClass(rootNav, cd, cd, cd, true);
+         cd->addTypeConstraints();
+
          rootNav->releaseEntry();
       }
    }
@@ -6765,6 +6767,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                md->enableCallGraph(root->callGraph);
                md->enableCallerGraph(root->callerGraph);
                md->setDocumentation(root->doc, root->docFile, root->docLine);
+               md->setBriefDescription(root->brief,root->briefFile,root->briefLine);
                md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
                md->setDocsForDefinition(!root->proto);
                md->setPrototype(root->proto);
@@ -6849,6 +6852,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                doc += root->doc;
 
                md->setDocumentation(doc, root->docFile, root->docLine);
+               md->setBriefDescription(root->brief,root->briefFile,root->briefLine);
                md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
                md->setDocsForDefinition(!root->proto);
                md->setPrototype(root->proto);
@@ -7053,6 +7057,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                md->enableCallGraph(root->callGraph);
                md->enableCallerGraph(root->callerGraph);
                md->setDocumentation(root->doc, root->docFile, root->docLine);
+               md->setBriefDescription(root->brief,root->briefFile,root->briefLine);
                md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
                md->setDocsForDefinition(!root->proto);
                md->setPrototype(root->proto);
@@ -9122,7 +9127,8 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
    }
 
    if (preBuf.data() && preBuf.curPos() > 0 && *(preBuf.data() + preBuf.curPos() - 1) != '\n') {
-      preBuf.addChar('\n'); // add extra newline to help parser
+      // add extra newline to help parser
+      preBuf.addChar('\n'); 
    }
    
    BufStr convBuf(preBuf.curPos() + 1024);
@@ -9141,6 +9147,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
 
    // store the Entry tree in a file and create an index to navigate/load entries
    root->createNavigationIndex(rootNav, Doxy_Globals::g_storage, fd, root);
+
 }
 
 //! parse the list of input files

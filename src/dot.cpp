@@ -163,7 +163,8 @@ static const char *normalEdgeColorMap[] = {
    "firebrick4",    // Private
    "darkorchid3",   // "use" relation
    "grey75",        // Undocumented
-   "orange"         // template relation
+   "orange",        // template relation
+   "orange"         // type constraint
 };
 
 static const char *normalArrowStyleMap[] = {
@@ -186,7 +187,8 @@ static const char *umlEdgeColorMap[] = {
    "firebrick4",    // Private
    "grey25",        // "use" relation
    "grey75",        // Undocumented
-   "orange"         // template relation
+   "orange",        // template relation
+   "orange"         // type constraint
 };
 
 static const char *umlArrowStyleMap[] = {
@@ -1426,7 +1428,7 @@ DotNode::~DotNode()
    delete m_edgeInfo;
 }
 
-void DotNode::addChild(DotNode *n, int edgeColor, int edgeStyle, const char *edgeLab, const char *edgeURL, int edgeLabCol )
+void DotNode::addChild(DotNode *n, int edgeColor, int edgeStyle, const QString &edgeLab, const char *edgeURL, int edgeLabCol )
 {
    if (m_children == 0) {
       m_children = new QList<DotNode *>;
@@ -1927,21 +1929,31 @@ void DotNode::writeXML(QTextStream &t, bool isClassGraph)
 
          if (isClassGraph) {
             switch (edgeInfo->m_color) {
+
                case EdgeInfo::Blue:
                   t << "public-inheritance";
                   break;
+
                case EdgeInfo::Green:
                   t << "protected-inheritance";
                   break;
+
                case EdgeInfo::Red:
                   t << "private-inheritance";
                   break;
+
                case EdgeInfo::Purple:
                   t << "usage";
                   break;
+
                case EdgeInfo::Orange:
                   t << "template-instance";
                   break;
+
+               case EdgeInfo::Orange2:
+                  t << "type-constraint";
+                  break;
+
                case EdgeInfo::Grey:
                   assert(0);
                   break;
@@ -2014,26 +2026,37 @@ void DotNode::writeDocbook(QTextStream &t, bool isClassGraph)
                case EdgeInfo::Blue:
                   t << "public-inheritance";
                   break;
+
                case EdgeInfo::Green:
                   t << "protected-inheritance";
                   break;
+
                case EdgeInfo::Red:
                   t << "private-inheritance";
                   break;
+
                case EdgeInfo::Purple:
                   t << "usage";
                   break;
                case EdgeInfo::Orange:
                   t << "template-instance";
                   break;
+
+               case EdgeInfo::Orange2:
+                  t << "type-constraint";
+                  break;
+
                case EdgeInfo::Grey:
                   assert(0);
                   break;
             }
+
          } else { // include graph
             t << "include";
          }
+
          t << "\">" << endl;
+
          if (!edgeInfo->m_label.isEmpty()) {
             int p = 0;
             int ni;
@@ -2101,18 +2124,27 @@ void DotNode::writeDEF(QTextStream &t)
             case EdgeInfo::Blue:
                t << "public-inheritance";
                break;
+
             case EdgeInfo::Green:
                t << "protected-inheritance";
                break;
+
             case EdgeInfo::Red:
                t << "private-inheritance";
                break;
+
             case EdgeInfo::Purple:
                t << "usage";
                break;
+
             case EdgeInfo::Orange:
                t << "template-instance";
                break;
+
+            case EdgeInfo::Orange2:
+               t << "type-constraint";
+               break;
+
             case EdgeInfo::Grey:
                assert(0);
                break;
@@ -2468,23 +2500,26 @@ DotGfxHierarchyTable::~DotGfxHierarchyTable()
    delete m_rootSubgraphs;
 }
 
-void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot,
-                             const char *label, const char *usedName, const char *templSpec, bool base, int distance)
+void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, const QString &label, 
+                             const char *usedName, const char *templSpec, bool base, int distance)
 {
-   if (Config::getBool("hide-undoc-classes") && !cd->isLinkable()) {
+   if (Config::getBool("hide-undoc-classes") && ! cd->isLinkable()) {
       return;
    }
-
-   int edgeStyle = (label || prot == EdgeInfo::Orange) ? EdgeInfo::Dashed : EdgeInfo::Solid;
+  
+   int edgeStyle = (! label.isEmpty() || prot==EdgeInfo::Orange || prot==EdgeInfo::Orange2) ? EdgeInfo::Dashed : EdgeInfo::Solid;
    QByteArray className;
 
-   if (usedName) { // name is a typedef
+   if (usedName) { 
+      // name is a typedef
       className = usedName;
 
-   } else if (templSpec) { // name has a template part
+   } else if (templSpec) { 
+      // name has a template part
       className = insertTemplateSpecifierInScope(cd->name(), templSpec);
 
-   } else { // just a normal name
+   } else { 
+      // just a normal name
       className = cd->displayName().toUtf8();
    }
 
@@ -2529,9 +2564,7 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot,
 
       bn->setDistance(distance);
       m_usedNodes->insert(className, bn);
-      //printf(" add new child node `%s' to %s hidden=%d url=%s\n",
-      //    className.data(),n->m_label.data(),cd->isHidden(),tmp_url.data());
-
+     
       buildGraph(cd, bn, base, distance + 1);
    }
 }
@@ -2684,13 +2717,14 @@ bool DotClassGraph::determineVisibleNodes(DotNode *rootNode, int maxNodes, bool 
 void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool base, int distance)
 {   
    // ---- Add inheritance relations
+   static bool templateRelations = Config::getBool("template-relations");
+
    if (m_graphType == DotNode::Inheritance || m_graphType == DotNode::Collaboration) {
       SortedList<BaseClassDef *> *bcl = base ? cd->baseClasses() : cd->subClasses();
 
       if (bcl) {       
          for (auto bcd : *bcl) {            
-            addClass(bcd->classDef, n, bcd->prot, 0, bcd->usedName,
-                     bcd->templSpecifiers, base, distance);
+            addClass(bcd->classDef, n, bcd->prot, "", bcd->usedName, bcd->templSpecifiers, base, distance);
          }
       }
    }
@@ -2735,9 +2769,45 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
       }
    }
 
-   // ---- Add template instantiation relations
-   static bool templateRelations = Config::getBool("template-relations");
 
+   if (templateRelations && base) {
+      QHash<QString, QSharedPointer<ConstraintClassDef>> dict = cd->templateTypeConstraints();
+     
+      for (auto ccd : dict) { 
+         QString label;
+         QString s;
+
+         bool first    = true;
+         int count     = 0;
+         int maxLabels = 10;
+
+         for (auto s : ccd->m_accessors)  {
+
+            if (count >= maxLabels) {
+               break;
+            }
+
+            if (first) {
+               label = s;
+               first = false;
+
+            } else {
+               label += "\n" + s;
+            }
+
+         }
+
+         if (count == maxLabels) {
+            label += "\n...";
+         }
+         
+         addClass(ccd->classDef, n, EdgeInfo::Orange2, label, 0, 0, true, distance);            
+         ++count;
+      }
+     
+   }
+
+   // ---- Add template instantiation relations
    if (templateRelations) {
 
       if (base) { 
@@ -2750,21 +2820,22 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
             for (auto templInstance : *templMaster->getTemplateInstances()) {                
 
                if (templInstance == cd) { 
-                  addClass(templMaster, n, EdgeInfo::Orange, qPrintable(iter.key()), 0, 0, true, distance);
+                  addClass(templMaster, n, EdgeInfo::Orange, iter.key(), 0, 0, true, distance);
                }
 
                ++iter;
             }
          }
 
-      } else { // template relations for super classes
+      } else { 
+         // template relations for super classes
          QHash<QString, QSharedPointer<ClassDef>> *templInstances = cd->getTemplateInstances();
 
          if (templInstances) {
             auto iter = templInstances->begin();
 
             for (auto templInstance : *templInstances) { 
-               addClass(templInstance, n, EdgeInfo::Orange, qPrintable(iter.key()), 0, 0, false, distance);
+               addClass(templInstance, n, EdgeInfo::Orange, iter.key(), 0, 0, false, distance);
 
                ++iter;
             }

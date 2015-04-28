@@ -46,7 +46,7 @@ enum EmbeddedOutputFormat { EOF_Html, EOF_LaTeX, EOF_Rtf, EOF_DocBook };
 
 /** Attributes of an edge of a dot graph */
 struct EdgeInfo {
-   enum Colors { Blue = 0, Green = 1, Red = 2, Purple = 3, Grey = 4, Orange = 5 };
+   enum Colors { Blue = 0, Green = 1, Red = 2, Purple = 3, Grey = 4, Orange = 5, Orange2 = 6 };
    enum Styles { Solid = 0, Dashed = 1 };
 
    EdgeInfo() : m_color(0), m_style(0), m_labColor(0) {}
@@ -72,7 +72,7 @@ class DotNode
    ~DotNode();
 
    void addChild(DotNode *n, int edgeColor = EdgeInfo::Purple, int edgeStyle = EdgeInfo::Solid,
-                 const char *edgeLab = 0, const char *edgeURL = 0, int edgeLabCol = -1 );
+                 const QString &edgeLab = QString(), const char *edgeURL = 0, int edgeLabCol = -1);
 
    void addParent(DotNode *n);
    void deleteNode(SortedList<DotNode *> &deletedList, StringMap<QSharedPointer<DotNode>> *skipNodes = 0);
@@ -210,7 +210,7 @@ class DotClassGraph
    bool determineVisibleNodes(DotNode *rootNode, int maxNodes, bool includeParents);
    void determineTruncatedNodes(QList<DotNode *> &queue, bool includeParents);
 
-   void addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, const char *label,
+   void addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, const QString &label,
                  const char *usedName, const char *templSpec, bool base, int distance);
 
    DotNode *m_startNode;

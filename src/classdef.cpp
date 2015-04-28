@@ -37,9 +37,9 @@
 #include <util.h>
 
 // constructs a new class definition
-ClassDef::ClassDef(const char *defFileName, int defLine, int defColumn, const char *nm, CompoundType ct,
+ClassDef::ClassDef(const char *defFileName, int defLine, int defColumn, const QByteArray &x_name, CompoundType ct,
                    const char *lref, QString fName, bool isSymbol, bool isJavaEnum)
-   : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(nm), 0, 0, isSymbol)
+   : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(x_name), 0, 0, isSymbol)
 {
    visited = false;
    setReference(lref);
@@ -2147,12 +2147,83 @@ bool ClassDef::addExample(const char *anchor, const char *nameStr, const char *f
 bool ClassDef::hasExamples() const
 {
    bool result = false;
+
    if (m_exampleSDict) {
       result = m_exampleSDict->count() > 0;
    }
    return result;
 }
 
+void ClassDef::addTypeConstraint(const QString &typeConstraint, const QString &type)
+{
+   QSharedPointer<ClassDef> self = sharedFrom(this);
+
+   static bool hideUndocRelation = Config::getBool("hide-undoc-relations");
+   
+   if (typeConstraint.isEmpty() || type.isEmpty()) {
+      return;
+   }
+
+   QSharedPointer<ClassDef> cd = getResolvedClass(self, getFileDef(), qPrintable(typeConstraint));
+
+   if (cd == nullptr && ! hideUndocRelation) {
+      cd = QMakeShared<ClassDef>(getDefFileName(), getDefLine(), getDefColumn(), typeConstraint.toUtf8(), ClassDef::Class);
+      cd->setUsedOnly(true);
+      cd->setLanguage(getLanguage());
+
+      Doxygen::hiddenClasses->insert(typeConstraint, cd);
+   }
+  
+   if (cd != nullptr) {        
+      QSharedPointer<ConstraintClassDef> ccd = m_constraintClassDict.value(typeConstraint);
+   
+      if (ccd == nullptr) {
+         ccd = QMakeShared<ConstraintClassDef>(cd);
+         m_constraintClassDict.insert(typeConstraint, ccd);
+      }
+      
+      ccd->addAccessor(type); 
+   }
+}
+
+// Java Type Constrains: A<T extends C & I>
+void ClassDef::addTypeConstraints()
+{   
+   for (auto a : m_tempArgs) {
+   
+      if (! a.typeConstraint.isEmpty()) {
+         QString typeConstraint;
+         int index = 0;
+         int p = 0;
+
+         while ((index = a.typeConstraint.indexOf('&', p)) != -1) { 
+            // typeConstraint="A &I" for C<T extends A & I> 
+         
+            typeConstraint = a.typeConstraint.mid(p, index - p).trimmed();
+            addTypeConstraint(typeConstraint, a.type);
+            p = index + 1;
+         }
+   
+         typeConstraint = a.typeConstraint.right(a.typeConstraint.length() - p).trimmed();
+         addTypeConstraint(typeConstraint, a.type);
+      }
+   }
+
+}
+
+// C# Type Constraints: D<T> where T : C, I
+void ClassDef::setTypeConstraints(ArgumentList *al)
+{
+   if (al == 0) {
+      return;
+   }
+  
+   m_typeConstraints = ArgumentList();
+  
+   for (auto a : *al) {
+      m_typeConstraints.append(a);
+   }
+}
 
 void ClassDef::setTemplateArguments(ArgumentList *al)
 {
@@ -2164,19 +2235,6 @@ void ClassDef::setTemplateArguments(ArgumentList *al)
 
    for (auto a : *al) {
       m_tempArgs.append(a);
-   }
-}
-
-void ClassDef::setTypeConstraints(ArgumentList *al)
-{
-   if (al == 0) {
-      return;
-   }
-  
-   m_typeConstraints = ArgumentList();
-  
-   for (auto a : *al) {
-      m_typeConstraints.append(a);
    }
 }
 
@@ -3748,6 +3806,11 @@ UsesClassDict *ClassDef::usedByImplementationClasses() const
 UsesClassDict *ClassDef::usedInterfaceClasses() const
 {
    return m_usesIntfClassDict;
+}
+
+QHash<QString, QSharedPointer<ConstraintClassDef>> ClassDef::templateTypeConstraints() const
+{
+   return m_constraintClassDict;
 }
 
 bool ClassDef::isTemplateArgument() const

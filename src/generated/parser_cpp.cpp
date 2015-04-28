@@ -15958,9 +15958,10 @@ YY_DECL {
 
             {
                // spaces, *, or other stuff
-               //idlProp+=scannerYYtext;
+               // idlProp+=scannerYYtext;
             }
             YY_BREAK
+
          case 353:
             YY_RULE_SETUP
 
@@ -15972,6 +15973,7 @@ YY_DECL {
                }
             }
             YY_BREAK
+
          case 354:
             YY_RULE_SETUP
 
@@ -16044,6 +16046,7 @@ YY_DECL {
                }
             }
             YY_BREAK
+
          case 363:
             YY_RULE_SETUP
 
@@ -16052,11 +16055,13 @@ YY_DECL {
                sharpCount++;
             }
             YY_BREAK
+
          case 364:
             /* rule 364 can match eol */
             YY_RULE_SETUP
 
             {
+               current->type += ' ';
                lineCount();
             }
             YY_BREAK

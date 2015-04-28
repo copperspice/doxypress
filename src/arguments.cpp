@@ -58,6 +58,7 @@ ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
       a.array   = unmarshalQByteArray(s);
       a.defval  = unmarshalQByteArray(s);
       a.docs    = unmarshalQByteArray(s);
+      a.typeConstraint = unmarshalQByteArray(s);
 
       result->append(a);
    }
@@ -89,6 +90,7 @@ void ArgumentList::marshal(StorageIntf *s, ArgumentList *argList)
             marshalQByteArray(s, item.array);
             marshalQByteArray(s, item.defval);
             marshalQByteArray(s, item.docs);
+            marshalQByteArray(s, item.typeConstraint);
          }
       }
 

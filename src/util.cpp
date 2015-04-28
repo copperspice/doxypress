@@ -1629,11 +1629,8 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
       c = s.at(i);
 
       // search for "const"
-      if (csp < 6 && c == constScope[csp] && // character matches substring "const"
-            (csp > 0 ||                   // if it is the first character
-             i == 0  ||                   // the previous may not be a digit
-             ! isId(s.at(i - 1))) ) {
-
+      if (csp < 6 && c == constScope[csp] && (csp > 0 || i == 0  || ! isId(s.at(i - 1))) ) {
+         // character matches substring "const", if it is the first character, the previous may not be a digit
          csp++;
 
       } else { 
@@ -1684,7 +1681,7 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
             continue;
          }
 
-
+      // current char is a <
       } else if (i < len - 2 && c == '<' && 
                  (isId(s.at(i + 1)) || isspace((uchar)s.at(i + 1))) && (i < 8 || !findOperator(s, i)) ) {
 
@@ -1692,6 +1689,7 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
          growBuf.addChar('<');
          growBuf.addChar(' ');
 
+      // current char is a >
       } else if (i > 0 && c == '>' && 
                  (isId(s.at(i - 1)) || isspace((uchar)s.at(i - 1)) || s.at(i - 1) == '*'
                       || s.at(i - 1) == '&' || s.at(i-1)=='.') && (i < 8 || !findOperator(s, i)) ) {
@@ -1700,8 +1698,8 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
          growBuf.addChar(' ');
          growBuf.addChar('>');
 
-      } else if (i > 0 && c == ',' && ! isspace((uchar)s.at(i - 1))
-                 && ((i < len - 1 && (isId(s.at(i + 1)) || s.at(i + 1) == '[')) 
+      } else if (i > 0 && c == ',' && ! isspace((uchar)s.at(i - 1)) &&
+                  ((i < len - 1 && (isId(s.at(i + 1)) || s.at(i + 1) == '[')) 
                      || (i < len - 2 && s.at(i + 1) == '$' && isId(s.at(i + 2))) 
                      || (i < len - 3 && s.at(i + 1) == '&' && s.at(i + 2) == '$' && isId(s.at(i + 3))))) { 
 
@@ -1709,12 +1707,16 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
          growBuf.addChar(',');
          growBuf.addChar(' ');
 
-      } else if (i > 0 && ( (s.at(i - 1) == ')' && isId(c)) || (c == '\''  && s.at(i - 1) == ' ')) ) {
-         growBuf.addChar(' ');
-         growBuf.addChar(c);
+     } else if (i > 0 && ( (s.at(i - 1) == ')' && isId(c))  || (c == '\'' && s.at(i -1) == ' ')  ||
+                  (i > 1 && s.at(i - 2) == ' ' && s.at(i - 1) ==' ') )) {
+
+       growBuf.addChar(' ');
+       growBuf.addChar(c);
+     
 
       } else if (c == 't' && csp == 5  &&  i < len -1  &&  ! (isId(s.at(i + 1)) ||
                    s.at(i + 1) == ')' || s.at(i + 1) == ',' ) )  {
+
          // prevent const ::A from being converted to const::A
       
          growBuf.addChar('t');
@@ -2151,10 +2153,12 @@ QByteArray tempArgListToString(const ArgumentList *al, SrcLangExt lang)
       if (! a.name.isEmpty()) { 
          // add template argument name
 
-         if (a.type.left(4) == "out") { // C# covariance
+         if (a.type.left(4) == "out") { 
+            // C# covariance
             result += "out ";
 
-         } else if (a.type.left(3) == "in") { // C# contravariance
+         } else if (a.type.left(3) == "in") {
+            // C# contravariance
             result += "in ";
          }
      
@@ -2172,17 +2176,25 @@ QByteArray tempArgListToString(const ArgumentList *al, SrcLangExt lang)
             i--;
          }
      
-        if (i > 0) {
+         if (i > 0) {
             result += a.type.right(a.type.length() - i - 1);
 
-            if (a->type.find("...")! = -1)   {
-               result+="...";
+            if (a.type.contains("..."))   {
+               result += "...";
             }
 
          } else { 
             // nothing found -> take whole name
             result += a.type;
          }
+      }
+
+
+      if (! a.typeConstraint.isEmpty() && lang == SrcLangExt_Java) {
+         // TODO: now Java specific, C# has where...
+    
+         result += " extends "; 
+         result += a.typeConstraint;
       }
  
       if (nextItem != al->end()) {

@@ -436,15 +436,24 @@ static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, QSharedP
             linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), a.type);
             t << "</type>" << endl;
          }
+
          if (! a.name.isEmpty()) {
             t << indentStr <<  "    <declname>" << a.name << "</declname>" << endl;
             t << indentStr <<  "    <defname>" << a.name << "</defname>" << endl;
          }
+
          if (! a.defval.isEmpty()) {
             t << indentStr << "    <defval>";
             linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), a.defval);
             t << "</defval>" << endl;
          }
+
+         if (! a.typeConstraint.isEmpty()) {
+           t << indentStr << "    <typeconstraint>";
+           linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), a.typeConstraint);
+           t << "</typeconstraint>" << endl;
+         }
+
          t << indentStr << "  </param>" << endl;
       }
       t << indentStr << "</templateparamlist>" << endl;

@@ -34,6 +34,7 @@
 #include <namespacedef.h>
 #include <outputlist.h>
 
+class ConstraintClassDef;
 class ClassDict;
 class FileDef;
 class PackageDef;
@@ -85,7 +86,7 @@ class ClassDef : public Definition
     *                    I didn't add this to CompoundType to avoid having
     *                    to adapt all translators.
     */
-   ClassDef(const char *fileName, int startLine, int startColumn, const char *name, CompoundType ct,
+   ClassDef(const char *fileName, int startLine, int startColumn, const QByteArray &name, CompoundType ct,
             const char *ref = 0, QString fName = QString(), bool isSymbol = true, bool isJavaEnum = false);
   
    /** Destroys a compound definition. */
@@ -218,10 +219,10 @@ class ClassDef : public Definition
    IncludeInfo *includeInfo() const;
 
    UsesClassDict *usedImplementationClasses() const;
-
    UsesClassDict *usedByImplementationClasses() const;
-
    UsesClassDict *usedInterfaceClasses() const;
+
+   QHash<QString, QSharedPointer<ConstraintClassDef>> templateTypeConstraints() const;
 
    bool isTemplateArgument() const;
 
@@ -361,6 +362,7 @@ class ClassDef : public Definition
    void findSectionsInDocumentation();
    void addMembersToMemberGroup();
    void addListReferences();
+   void addTypeConstraints();
    void computeAnchors();
    void mergeMembers();
    void distributeMemberGroupDocumentation();
@@ -442,6 +444,8 @@ class ClassDef : public Definition
 
    void getTitleForMemberListType(MemberListType type, QByteArray &title, QByteArray &subtitle);
    QByteArray includeStatement() const;
+
+   void addTypeConstraint(const QString &typeConstraint, const QString &type);
   
    /*! file name that forms the base for the output file containing the
     *  class documentation. For compatibility with Qt (e.g. links via tag
@@ -495,8 +499,7 @@ class ClassDef : public Definition
     */
    Protection m_prot;
 
-   /*! The inner classes contained in this class. Will be 0 if there are
-    *  no inner classes.
+   /*! The inner classes contained in this class. Will be 0 if there are  no inner classes.
     */
    ClassSDict *m_innerClasses;
 
@@ -504,6 +507,8 @@ class ClassDef : public Definition
    UsesClassDict *m_usesImplClassDict;
    UsesClassDict *m_usedByImplClassDict;
    UsesClassDict *m_usesIntfClassDict;
+
+   QHash<QString, QSharedPointer<ConstraintClassDef>> m_constraintClassDict;
 
    /*! Template instances that exists of this class, the key in the
     *  dictionary is the template argument list.
@@ -657,6 +662,29 @@ struct BaseClassDef {
 
    /** Template arguments used for the base class */
    QByteArray templSpecifiers;
+};
+
+
+/** Class that contains information about a type constraint relations.
+ */
+struct ConstraintClassDef
+{
+   ConstraintClassDef(QSharedPointer<ClassDef> cd) 
+      : classDef(cd) {}
+
+   void addAccessor(const QString &s)  {
+      if (! m_accessors.contains(s)) {
+         m_accessors.insert(s);
+      }
+   }
+
+  /** Class definition that this relation uses. */
+  QSharedPointer<ClassDef> classDef;
+
+  /** Dictionary of member types names that form the edge labels of the
+   *  constraint relation.
+   */
+  QSet<QString> m_accessors;
 };
 
 #endif

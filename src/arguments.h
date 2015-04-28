@@ -39,6 +39,7 @@ struct Argument {
       defval  = a.defval;
       docs    = a.docs;
       array   = a.array;
+      typeConstraint = a.typeConstraint;
    }
 
    /*! Assignment of an argument (does a deep copy of all strings) */
@@ -50,23 +51,26 @@ struct Argument {
          defval = a.defval;
          docs   = a.docs;
          array  = a.array;
+         typeConstraint = a.typeConstraint;
       }
       return *this;
    }
+
    /*! return true if this argument is documentation and the argument has a
     *  non empty name.
     */
    bool hasDocumentation() const {
-      return !name.isEmpty() && !docs.isEmpty();
+      return ! name.isEmpty() && ! docs.isEmpty();
    }
 
-   QByteArray attrib;   /*!< Argument's attribute (IDL only) */
-   QByteArray type;     /*!< Argument's type */
-   QByteArray canType;  /*!< Cached value of canonical type (after type resolution). Empty initially. */
-   QByteArray name;     /*!< Argument's name (may be empty) */
-   QByteArray array;    /*!< Argument's array specifier (may be empty) */
-   QByteArray defval;   /*!< Argument's default value (may be empty) */
-   QByteArray docs;     /*!< Argument's documentation (may be empty) */
+   QByteArray attrib;          /*!< Argument's attribute (IDL only) */
+   QByteArray type;            /*!< Argument's type */
+   QByteArray canType;         /*!< Cached value of canonical type (after type resolution). Empty initially. */
+   QByteArray name;            /*!< Argument's name (may be empty) */
+   QByteArray array;           /*!< Argument's array specifier (may be empty) */
+   QByteArray defval;          /*!< Argument's default value (may be empty) */
+   QByteArray docs;            /*!< Argument's documentation (may be empty) */
+   QByteArray typeConstraint;  /*!< Used for Java generics: <T extends C> */
 };
 
 /*! \brief This class represents an function or template argument list.
