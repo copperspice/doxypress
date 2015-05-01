@@ -854,6 +854,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       startTitle(ol, getSourceFileBase());
       ol.parseText(name());
       endTitle(ol, getSourceFileBase(), title);
+
    } else {
       startFile(ol, getSourceFileBase(), QString(), pageTitle, HLI_FileVisible, false,
                 ! isDocFile && genSourceFile ? QByteArray() : getOutputFileBase());
@@ -877,45 +878,47 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       }
    }
 
-   (void)sameTu;
-   (void)filesInSameTu;
+//   (void)sameTu;
+//   (void)filesInSameTu;
 
-#if USE_LIBCLANG
-   static bool clangAssistedParsing = Config::getBool("clang-parsing");
+// #if USE_LIBCLANG
+   static bool clangAssistedParsing = true;      // Config::getBool("clang-parsing");
 
    if (clangAssistedParsing && (getLanguage() == SrcLangExt_Cpp || getLanguage() == SrcLangExt_ObjC)) {
 
       ol.startCodeFragment();
 
-      if (!sameTu) {
-         ClangParser::instance()->start(absoluteFilePath(), filesInSameTu);
+      if (! sameTu) {
+         ClangParser::instance()->start(getFilePath(), filesInSameTu);
+
       } else {
          ClangParser::instance()->switchToFile(getFilePath());
       }
 
       ClangParser::instance()->writeSources(ol, this);
       ol.endCodeFragment();
+
    } else
-#endif
+
+// #endif
 
    {
       ParserInterface *pIntf = Doxygen::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
       ol.startCodeFragment();
 
-      bool needs2PassParsing = 
-         Doxygen::parseSourcesNeeded &&                // we need to parse (filtered) sources for cross-references
-         !filterSourceFiles &&                         // but user wants to show sources as-is
-         !getFileFilter(getFilePath(), true).isEmpty(); // and there is a filter used while parsing
+      bool needs2PassParsing = Doxygen::parseSourcesNeeded && ! filterSourceFiles &&                         
+                  ! getFileFilter(getFilePath(), true).isEmpty(); 
+
+      // need to parse (filtered) sources for cross-references, however the user wants to show sources as-is
+      // and there is a filter used while parsing
 
       if (needs2PassParsing) {
          // parse code for cross-references only (see bug707641)
-         pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), true, true), 
-                          getLanguage(), false, 0, self);
+         pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), true, true), getLanguage(), false, 0, self);
       }
 
-      pIntf->parseCode(ol, 0,
-                       fileToString(getFilePath(), filterSourceFiles, true),
+      pIntf->parseCode(ol, 0, fileToString(getFilePath(), filterSourceFiles, true),
                        getLanguage(),      // lang
                        false,              // isExampleBlock
                        0,                  // exampleName
@@ -940,13 +943,14 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
 
    DevNullCodeDocInterface devNullIntf;  
 
-#if USE_LIBCLANG
-   static bool clangAssistedParsing = Config::getBool("clang-parsing");
+// #if USE_LIBCLANG
+   static bool clangAssistedParsing = true;      // Config::getBool("clang-parsing");
 
    if (clangAssistedParsing && (getLanguage() == SrcLangExt_Cpp || getLanguage() == SrcLangExt_ObjC)) {
 
-      if (!sameTu) {
+      if (! sameTu) {
          ClangParser::instance()->start(getFilePath(), filesInSameTu);
+
       } else {
          ClangParser::instance()->switchToFile(getFilePath());
       }
@@ -955,7 +959,7 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
 
    } else
 
-#endif
+// #endif
 
    {
       ParserInterface *pIntf = Doxygen::parserManager->getParser(getDefFileExtension());

@@ -54,8 +54,7 @@
 
 struct FindFileCacheElem {
    FindFileCacheElem(QSharedPointer<FileDef> fd, bool ambig) 
-      : fileDef(fd), isAmbig(ambig) 
-   {}
+      : fileDef(fd), isAmbig(ambig) {}
 
    QSharedPointer<FileDef> fileDef;
    bool isAmbig;
@@ -76,8 +75,9 @@ const int MAX_STACK_SIZE = 1000;
 
 static QHash<QString, QSharedPointer<MemberDef>>   s_resolvedTypedefs;
 static QHash<QString, QSharedPointer<Definition>>  s_visitedNamespaces;
-static QCache<QString, FindFileCacheElem>          s_findFileDefCache;
 static QHash<QString, int>                         s_extLookup;
+
+static QCache<QPair<const FileNameDict *, QString>, FindFileCacheElem> s_findFileDefCache;
 
 // forward declaration
 static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
@@ -4665,103 +4665,96 @@ QByteArray substituteClassNames(const QByteArray &s)
 }
 #endif
 
-/** Cache element for the file name to FileDef mapping cache. */
-QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const char *n, bool &ambig)
+/** Cache element for the file name to FileDef mapping cache */
+QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &name, bool &ambig)
 {
    ambig = false;
 
-   if (n == 0) {
+   if (name.isEmpty()) {
       return QSharedPointer<FileDef>();
    }
 
-   const int maxAddrSize = 20;
-   char addr[maxAddrSize];
-
-   qsnprintf(addr, maxAddrSize, "%p:", fnDict);
-
-   QByteArray key = addr;
-   key += n;
-
-   FindFileCacheElem *cachedResult = s_findFileDefCache.object(key);
+   // set up the key
+   QPair<const FileNameDict *, QString> key(fnDict, name);
+      
+   FindFileCacheElem *cachedResult = s_findFileDefCache[key];
    
    if (cachedResult) {
-      ambig = cachedResult->isAmbig;
-      
+      ambig = cachedResult->isAmbig;      
       return cachedResult->fileDef;
-
-   } else {
-      cachedResult = new FindFileCacheElem(QSharedPointer<FileDef>(), false);
    }
-
-   QByteArray name = QDir::cleanPath(n).toUtf8();
+   
+   cachedResult = new FindFileCacheElem(QSharedPointer<FileDef>(), false);
+   
+   QString fName = QDir::cleanPath(name);
    QString path;
 
-   int slashPos;
-
-   FileName *fn;
-   if (name.isEmpty()) {
-      goto exit;
-   }
-
-   slashPos = qMax(name.lastIndexOf('/'), name.lastIndexOf('\\'));
-
-   if (slashPos != -1) {
-      path = name.left(slashPos + 1);
-      name = name.right(name.length() - slashPos - 1);      
-   }
-
-   if (name.isEmpty()) {
-      goto exit;
-   }
-
-   //
-   fn = (*fnDict)[name].data();
-
-   if (fn) {      
-      if (fn->count() == 1) {
-         QSharedPointer<FileDef> fd = fn->first();
+   do {
+     
+      if (fName.isEmpty()) {
+         break;
+      }
+   
+      int slashPos = qMax(fName.lastIndexOf('/'), fName.lastIndexOf('\\'));
+   
+      if (slashPos != -1) {
+         path  = fName.left(slashPos + 1);
+         fName = fName.right(fName.length() - slashPos - 1);      
+      }
+   
+      if (fName.isEmpty()) {
+         break;
+      }
+   
+      // returns a FileList data type
+      FileName *fn = (*fnDict)[fName].data();
+   
+      if (fn) {      
+         if (fn->count() == 1) {
+            QSharedPointer<FileDef> fd = fn->first();
 
 #if defined(_WIN32) || defined(__MACOSX__) 
-         // Windows or MacOSX
-         bool isSamePath = fd->getPath().right(path.length()).toLower() == path.toLower();
+            // Windows or MacOSX
+            bool isSamePath = fd->getPath().right(path.length()).toLower() == path.toLower();
 #else 
-         // Unix
-         bool isSamePath = fd->getPath().right(path.length()) == path;
+            // Unix
+            bool isSamePath = fd->getPath().right(path.length()) == path;
 #endif
 
-         if (path.isEmpty() || isSamePath) {
-            cachedResult->fileDef = fd;
-            s_findFileDefCache.insert(key, cachedResult);
-           
-            return fd;
-         }
+            if (path.isEmpty() || isSamePath) {
+               cachedResult->fileDef = fd;
 
-      } else { // file name alone is ambiguous
-         int count = 0;
-       
-         QSharedPointer<FileDef> lastMatch = QSharedPointer<FileDef>();
-         QString pathStripped = stripFromIncludePath(path);
-         
-         for (auto fd : *fn) {
-            QString fdStripPath = stripFromIncludePath(fd->getPath());
-
-            if (path.isEmpty() || fdStripPath.right(pathStripped.length()) == pathStripped) {
-               count++;
-               lastMatch = fd;
+               s_findFileDefCache.insert(key, cachedResult);              
+               return fd;
             }
-         }
-         
-         ambig = (count > 1);
-         cachedResult->isAmbig = ambig;
-         cachedResult->fileDef = lastMatch;
-
-         s_findFileDefCache.insert(key, cachedResult);
-
-         return lastMatch;
-      }   
-   }
-
-exit:   
+   
+         } else {
+            // file name alone is ambiguous
+            int count = 0;
+          
+            QSharedPointer<FileDef> lastMatch;
+            QString pathStripped = stripFromIncludePath(path);
+            
+            for (auto fd : *fn) {
+               QString fdStripPath = stripFromIncludePath(fd->getPath());
+   
+               if (path.isEmpty() || fdStripPath.right(pathStripped.length()) == pathStripped) {
+                  count++;
+                  lastMatch = fd;
+               }
+            }
+            
+            ambig = (count > 1);
+            cachedResult->isAmbig = ambig;
+            cachedResult->fileDef = lastMatch;
+   
+            s_findFileDefCache.insert(key, cachedResult);   
+            return lastMatch;
+         }   
+      }     
+ 
+   } while (false);
+   
    s_findFileDefCache.insert(key, cachedResult);
   
    return QSharedPointer<FileDef>();
@@ -7236,7 +7229,7 @@ QByteArray expandAlias(const QByteArray &aliasName, const QByteArray &aliasValue
 
 void writeTypeConstraints(OutputList &ol, QSharedPointer<Definition> d, ArgumentList *al)
 {
-   if (al == 0) {
+   if (al == nullptr || al->isEmpty() ) {
       return;
    }
 

@@ -64,20 +64,17 @@ class ClangParser
    void writeSources(CodeOutputInterface &ol, FileDef *fd);
 
  private:
-   void linkIdentifier(CodeOutputInterface &ol, FileDef *fd,
-                       uint &line, uint &column,
-                       const char *text, int tokenIndex);
-   void linkMacro(CodeOutputInterface &ol, FileDef *fd,
-                  uint &line, uint &column,
-                  const char *text);
-   void linkInclude(CodeOutputInterface &ol, FileDef *fd,
-                    uint &line, uint &column,
-                    const char *text);
+   void linkIdentifier(CodeOutputInterface &ol, FileDef *fd, uint &line, uint &column, const char *text, int tokenIndex);
+   void linkMacro(CodeOutputInterface &ol, FileDef *fd, uint &line, uint &column, const char *text);
+   void linkInclude(CodeOutputInterface &ol, FileDef *fd, uint &line, uint &column, const char *text);
    void determineInputFilesInSameTu(QStringList &filesInTranslationUnit);
+
    class Private;
    Private *p;
+
    ClangParser();
    virtual ~ClangParser();
+
    static ClangParser *s_instance;
 };
 

@@ -22,6 +22,17 @@ if OSTYPE_DARWIN
 endif
 
 if OSTYPE_WIN
+   # path to clang
+   clang_path=../clang_lib
+
+   clang_dll=$(clang_path)/bin/libclang.dll
+   clang_hdr=$(clang_path)/include
+   clang_lib=$(clang_path)/lib/libclang.dll.a
+
+   clang_link="-L $(clang_path)/lib -lclang"
+
+   AM_CXXFLAGS+=-I$(clang_hdr)
+
    # location for 'make install'
    installdir=$(abs_top_builddir)/install
 endif
@@ -49,21 +60,21 @@ deploy : all
 	mkdir -p $(deploydir)
 
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
-	
+
 	rsync -W -a --modify-window=2  $(patsubst %,$(gccpath)/%.dll,$(gcclibs))  $(deploydir)
 	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%1-0.dll,$(cslibs))  $(deploydir)
+	rsync -W -a --modify-window=2  $(clang_dll)  $(deploydir)
 endif
 
 # search path for source
 VPATH = ../
 
 # linking
-doxypress_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs))
+doxypress_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs)) $(clang_link)
 
 if OSTYPE_WIN
    doxypress_LDFLAGS+= -lole32
 endif
-
 
 doxypress_SOURCES = \
    src/doxy_work.cpp \
@@ -329,9 +340,6 @@ qrc_doxypress.cpp: doxypress.qrc   $(wildcard ../resources/*)
 
 # required to compile qrc
 nodist_doxypress_SOURCES=qrc_doxypress.cpp
-
-# distribution
-distdir: $(DISTFILES)
 
 # distribution
 distdir: $(DISTFILES)

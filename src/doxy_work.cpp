@@ -8001,8 +8001,8 @@ void Doxy_Work::generateFileSources()
 {
    if (Doxygen::inputNameList->count() > 0) {
 
-#if USE_LIBCLANG
-      static bool clangAssistedParsing = Config::getBool("clang-parsing");
+// #if USE_LIBCLANG
+      static bool clangAssistedParsing = true;      // Config::getBool("clang-parsing");
 
       if (clangAssistedParsing) {
 
@@ -8011,7 +8011,7 @@ void Doxy_Work::generateFileSources()
                     
          for (auto fn : *Doxygen::inputNameList) {
             for (auto fd : *fn) {
-               filesToProcess.insert(fd->absoluteFilePath());
+               filesToProcess.insert(fd->getFilePath());
             }
          }
 
@@ -8025,47 +8025,49 @@ void Doxy_Work::generateFileSources()
                   fd->getAllIncludeFilesRecursively(filesInSameTu);
                   fd->startParsing();
 
-                  if (fd->generateSourceFile()) { // sources need to be shown in the output
-                     msg("Generating code for file %s\n", fd->docName().data());
+                  if (fd->generateSourceFile()) { 
+                     // source needs to be shown in the output
+
+                     msg("Generating code for file %s\n", fd->docName().constData());
                      fd->writeSource(*Doxy_Globals::g_outputList, false, filesInSameTu);
 
-                  } else if (!fd->isReference() && Doxygen::parseSourcesNeeded) {
+                  } else if (! fd->isReference() && Doxygen::parseSourcesNeeded) {
                      // we needed to parse the sources even if we do not show them
                   
-                     msg("Parsing code for file %s\n", fd->docName().data());
+                     msg("Parsing code for file %s\n", fd->docName().constData());
                      fd->parseSource(false, filesInSameTu);
                   }
 
-                  char *incFile = filesInSameTu.first();
+                  for (QString incFile : filesInSameTu) {
 
-                  while (incFile && filesToProcess.find(incFile)) {
-                     if (fd->absoluteFilePath() != incFile && ! processedFiles.find(incFile)) {
+                     if (fd->getFilePath() != incFile && ! processedFiles.contains(incFile)) {
                         QStringList moreFiles;
                         bool ambig;
 
-                        QSharedPointer<FileDef>ifd = findFileDef(Doxygen::inputNameDict, incFile, ambig);
+                        QSharedPointer<FileDef> ifd = findFileDef(Doxygen::inputNameDict, incFile, ambig);
 
-                        if (ifd && !ifd->isReference()) {
-                           if (ifd->generateSourceFile()) { // sources need to be shown in the output
-                              msg(" Generating code for file %s\n", ifd->docName().data());
+                        if (ifd && ! ifd->isReference()) {
+
+                           if (ifd->generateSourceFile()) { 
+                              // source needs to be shown in the output
+
+                              msg("Generating code for file %s\n", ifd->docName().constData());
                               ifd->writeSource(*Doxy_Globals::g_outputList, true, moreFiles);
 
-                           } else if (!ifd->isReference() && Doxygen::parseSourcesNeeded)  {
-                              // we needed to parse the sources even if we do not show them
+                           } else if (Doxygen::parseSourcesNeeded)  {
+                              // need to parse the sources even if we do not show them
                            
-                              msg(" Parsing code for file %s\n", ifd->docName().data());
+                              msg("Parsing code for file %s\n", ifd->docName().constData());
                               ifd->parseSource(true, moreFiles);
                            }
 
                            processedFiles.insert(incFile);
                         }
-                     }
-
-                     incFile = filesInSameTu.next();
+                     }                     
                   }
 
                   fd->finishParsing();
-                  g_processedFiles.insert(fd->absoluteFilePath());
+                  processedFiles.insert(fd->getFilePath());
                }
             }
          }
@@ -8074,28 +8076,32 @@ void Doxy_Work::generateFileSources()
          for (auto fn : *Doxygen::inputNameList) {         
 
             for (auto fd : *fn) {
-               if (! g_processedFiles.find(fd->absoluteFilePath())) { 
-                  // not yet processed
+               if (! processedFiles.contains(fd->getFilePath())) { 
+                 
                   QStringList filesInSameTu;
-
                   fd->startParsing();
 
-                  if (fd->generateSourceFile()) { // sources need to be shown in the output
-                     msg("Generating code for file %s\n", fd->docName().data());
+                  if (fd->generateSourceFile()) { 
+                     // source needs to be shown in the output
+
+                     msg("Generating code for file %s\n", fd->docName().constData());
                      fd->writeSource(*Doxy_Globals::g_outputList, false, filesInSameTu);
 
-                  } else if (!fd->isReference() && Doxygen::parseSourcesNeeded)
-                     // we needed to parse the sources even if we do not show them
-                  {
-                     msg("Parsing code for file %s\n", fd->docName().data());
+                  } else if (! fd->isReference() && Doxygen::parseSourcesNeeded)  {
+                     // needed to parse the source even if we do not show them
+                  
+                     msg("Parsing code for file %s\n", fd->docName().constData());
                      fd->parseSource(false, filesInSameTu);
                   }
+
                   fd->finishParsing();
                }
             }
          }
+
       } else
-#endif
+
+//   #endif
 
       {
          for (auto fn : *Doxygen::inputNameList) {
@@ -8104,12 +8110,14 @@ void Doxy_Work::generateFileSources()
                QStringList filesInSameTu;
                fd->startParsing();
 
-               if (fd->generateSourceFile()) { // sources need to be shown in the output
+               if (fd->generateSourceFile()) {
+                  // source needs to be shown in the output
+
                   msg("Generating code for file %s\n", fd->docName().data());
                   fd->writeSource(*Doxy_Globals::g_outputList, false, filesInSameTu);
 
-               } else if (!fd->isReference() && Doxygen::parseSourcesNeeded) {
-                  // we needed to parse the sources even if we do not show them
+               } else if (! fd->isReference() && Doxygen::parseSourcesNeeded) {
+                  // parse the sources even if we do not show them
                
                   msg("Parsing code for file %s\n", fd->docName().data());
                   fd->parseSource(false, filesInSameTu);
@@ -9095,11 +9103,15 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
                   QSharedPointer<FileDef> fd, QByteArray fileName, bool sameTu, QStringList &filesInSameTu)
 {
 
+/*
 #if USE_LIBCLANG
    static bool clangAssistedParsing = Config::getBool("clang-parsing");
 #else
    static bool clangAssistedParsing = false;
 #endif
+*/
+
+   static bool clangAssistedParsing = true;      // Config::getBool("clang-parsing");
    
    QByteArray extension;
    int ei = fileName.lastIndexOf('.');
@@ -9138,7 +9150,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
 
    convBuf.addChar('\0');
 
-   if (clangAssistedParsing && !sameTu) {
+   if (clangAssistedParsing && ! sameTu) {
       fd->getAllIncludeFilesRecursively(filesInSameTu);
    }
 
@@ -9347,8 +9359,8 @@ void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const char *tl)
       // tag command contains a destination
       fileName = tagLine.left(eqPos).trimmed();
       destName = tagLine.right(tagLine.length() - eqPos - 1).trimmed();
-      QFileInfo fi(fileName);
 
+      QFileInfo fi(fileName);
       Doxygen::tagDestinationDict.insert(fi.absoluteFilePath().toUtf8(), destName);
 
    } else {
@@ -9527,7 +9539,7 @@ int Doxy_Work::readFileOrDirectory(const QString &fn, ReadDirArgs &data)
    QFileInfo fi(fileName);
    int totalSize = 0;
 
-   QString dirPath  = fi.absolutePath();
+   QString dirPath  = fi.absoluteFilePath();
    QString filePath = fi.absoluteFilePath();
    QString name     = fi.fileName();
    

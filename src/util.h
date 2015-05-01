@@ -165,7 +165,7 @@ QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSha
                   bool mayBeHidden = false, QByteArray *pResolvedType = 0);
 
 QSharedPointer<NamespaceDef> getResolvedNamespace(const char *key);
-QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const char *n, bool &ambig);
+QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &name, bool &ambig);
 
 QByteArray showFileDefMatches(const FileNameDict *fnDict, const char *n);
 
