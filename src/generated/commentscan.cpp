@@ -3236,11 +3236,11 @@ char *commentscanYYtext;
 #include "outputlist.h"
 #include "membergroup.h"
 #include "reflist.h"
-#include "parser_cpp.h"
-#include "parserintf.h"
-#include "markdown.h"
-#include "formula.h"
-#include "util.h"
+#include <parser_cstyle.h>
+#include <parserintf.h>
+#include <markdown.h>
+#include <formula.h>
+#include <util.h>
 
 #define YY_NO_INPUT 1
 

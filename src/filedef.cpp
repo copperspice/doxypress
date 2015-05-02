@@ -16,7 +16,6 @@
 *************************************************************************/
 
 #include <config.h>
-#include <clangparser.h>
 #include <classlist.h>
 #include <classdef.h>
 #include <dirdef.h>
@@ -36,6 +35,7 @@
 #include <memberlist.h>
 #include <namespacedef.h>
 #include <outputlist.h>
+#include <parser_clang.h>
 #include <parserintf.h>
 #include <portable.h>
 #include <searchindex.h>
@@ -878,9 +878,6 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       }
    }
 
-//   (void)sameTu;
-//   (void)filesInSameTu;
-
 // #if USE_LIBCLANG
    static bool clangAssistedParsing = true;      // Config::getBool("clang-parsing");
 
@@ -894,8 +891,8 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       } else {
          ClangParser::instance()->switchToFile(getFilePath());
       }
-
-      ClangParser::instance()->writeSources(ol, this);
+ 
+      ClangParser::instance()->writeSources(ol, self); 
       ol.endCodeFragment();
 
    } else
@@ -955,7 +952,7 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
          ClangParser::instance()->switchToFile(getFilePath());
       }
 
-      ClangParser::instance()->writeSources(devNullIntf, this);
+      ClangParser::instance()->writeSources(devNullIntf, self);
 
    } else
 

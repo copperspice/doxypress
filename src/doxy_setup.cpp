@@ -46,7 +46,7 @@
 #include <membername.h>
 #include <namespacedef.h>
 #include <outputlist.h>
-#include <parser_cpp.h>
+#include <parser_cstyle.h>
 #include <parser_file.h>
 #include <parser_fortran.h>
 #include <parser_make.h>

@@ -64,7 +64,7 @@
 #include <objcache.h>
 #include <outputlist.h>
 #include <pagedef.h>
-#include <parser_cpp.h>
+#include <parser_cstyle.h>
 #include <parser_file.h>
 #include <parser_fortran.h>
 #include <parser_make.h>
@@ -79,7 +79,6 @@
 #include <rtfgen.h>
 #include <searchindex.h>
 #include <settings.h>
-#include <sqlite3gen.h>
 #include <store.h>
 #include <tagreader.h>
 #include <util.h>
@@ -522,14 +521,6 @@ void parseInput()
    if (generateMan) {
       manOutput = createOutputDirectory(outputDirectory, "man-output", "/man");
    }
-
-   // QString sqlOutput;
-   // bool generateSql = Config::getBool("generate-sqlite3");
-   //
-   // if (generateSql) {
-   //   sqlOutput = createOutputDirectory(outputDirectory,"sqlite3-output","/sqlite3");
-   // }    
-
 
    if (Config::getBool("have-dot")) {
       QString curFontPath = Config::getString("dot-font-path");
@@ -1135,14 +1126,6 @@ void generateOutput()
       Doxygen::generatingXmlOutput = false;
       Doxy_Globals::g_stats.end();
    }
-
-/* unsupported feature (broom, hold)
-   if (USE_SQLITE3) {
-      Doxy_Globals::g_stats.begin("Generating SQLITE3 output\n");
-      generateSqlite3();
-      Doxy_Globals::g_stats.end();
-   }
-*/
 
    if (Config::getBool("generate-docbook")) {
       Doxy_Globals::g_stats.begin("Generating Docbook output\n");

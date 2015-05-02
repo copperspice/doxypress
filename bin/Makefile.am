@@ -27,9 +27,9 @@ if OSTYPE_WIN
 
    clang_dll=$(clang_path)/bin/libclang.dll
    clang_hdr=$(clang_path)/include
-   clang_lib=$(clang_path)/lib/libclang.dll.a
+   clang_lib=$(clang_path)/lib/liblibclang.dll.a
 
-   clang_link="-L $(clang_path)/lib -lclang"
+   clang_link=-L$(clang_path)/lib -llibclang
 
    AM_CXXFLAGS+=-I$(clang_hdr)
 
@@ -83,7 +83,6 @@ doxypress_SOURCES = \
    src/a_define.cpp \
    src/arguments.cpp \
    src/cite.cpp \
-   src/clangparser.cpp \
    src/classdef.cpp \
    src/classlist.cpp \
    src/config.cpp    \
@@ -135,6 +134,7 @@ doxypress_SOURCES = \
    src/objcache.cpp \
    src/outputgen.cpp \
    src/outputlist.cpp \
+   src/parser_clang.cpp \
    src/parser_file.cpp \
    src/parser_make.cpp \
    src/pagedef.cpp \
@@ -146,7 +146,6 @@ doxypress_SOURCES = \
    src/resourcemgr.cpp \
    src/sortedlist.cpp \
    src/searchindex.cpp \
-   src/sqlite3gen.cpp \
    src/store.cpp \
    src/tagreader.cpp \
    src/textdocvisitor.cpp \
@@ -167,7 +166,7 @@ doxypress_SOURCES = \
    src/generated/declinfo.cpp  \
    src/generated/doctokenizer.cpp \
    src/generated/fortrancode.cpp \
-   src/generated/parser_cpp.cpp \
+   src/generated/parser_cstyle.cpp \
    src/generated/parser_fortran.cpp \
    src/generated/parser_py.cpp \
    src/generated/parser_tcl.cpp \
@@ -180,7 +179,6 @@ noinst_HEADERS = \
    src/bufstr.h \
    src/ce_parse.h \
    src/cite.h \
-   src/clangparser.h \
    src/classdef.h \
    src/classlist.h \
    src/cmdmapper.h \
@@ -250,7 +248,8 @@ noinst_HEADERS = \
    src/outputgen.h \
    src/outputlist.h \
    src/pagedef.h \
-   src/parser_cpp.h \
+   src/parser_clang.h \
+   src/parser_cstyle.h \
    src/parser_file.h \
    src/parser_fortran.h \
    src/parser_make.h \
@@ -273,7 +272,6 @@ noinst_HEADERS = \
    src/section.h \
    src/settings.h \
    src/sortedlist.h \
-   src/sqlite3gen.h \
    src/store.h \
    src/stringmap.h \
    src/tagreader.h \

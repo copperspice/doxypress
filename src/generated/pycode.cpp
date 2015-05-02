@@ -1165,7 +1165,7 @@ char *pycodeYYtext;
 #include <message.h>
 #include <namespacedef.h>
 #include <outputlist.h>
-#include <parser_cpp.h>
+#include <parser_cstyle.h>
 #include <parser_py.h>
 #include <searchindex.h>
 #include <tooltip.h>

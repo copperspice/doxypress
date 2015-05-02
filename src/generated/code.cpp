@@ -11046,18 +11046,20 @@ static void startCodeLine()
                                     g_currentMemberDef->anchor(), g_yyLineNr);
 
             setCurrentDoc(lineAnchor);
+
          } else if (d->isLinkableInProject()) {
-            g_code->writeLineNumber(d->getReference(),
-                                    d->getOutputFileBase(),
-                                    0, g_yyLineNr);
+            g_code->writeLineNumber(d->getReference(), d->getOutputFileBase(),0, g_yyLineNr);
             setCurrentDoc(lineAnchor);
          }
+
       } else {
          g_code->writeLineNumber(0, 0, 0, g_yyLineNr);
       }
    }
+
    DBG_CTX((stderr, "startCodeLine(%d)\n", g_yyLineNr));
    g_code->startCodeLine(g_sourceFileDef && g_lineNumbers);
+
    if (g_currentFontClass) {
       g_code->startFontClass(g_currentFontClass);
    }
