@@ -189,7 +189,6 @@ noinst_HEADERS = \
    src/config.h \
    src/constexp.h \
    src/cppvalue.h \
-   src/dbusxmlscanner.h \
    src/declinfo.h \
    src/defargs.h \
    src/definition.h \

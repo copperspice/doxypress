@@ -4,7 +4,7 @@
   <navindex>
     <tab type="mainpage" visible="yes" title=""/>
     <tab type="pages" visible="yes" title="Overview" intro=""/>  
-    <tab type="user" url="http://www.sourceforge.net/p/copperspice/discussion-copperspice" title="Support" intro=""  />
+    <tab type="user" url="http://forum.copperspice.com/index.php" title="Support" intro=""  />
     <tab type="modules" visible="yes" title="" intro=""/>
     <tab type="namespaces" visible="yes" title="">
       <tab type="namespacelist" visible="yes" title="" intro=""/>

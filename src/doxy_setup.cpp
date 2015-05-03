@@ -113,10 +113,7 @@ void initDoxyPress()
    Doxygen::parserManager->registerParser("tcl",          new TclLanguageParser);
    Doxygen::parserManager->registerParser("md",           new MarkdownFileParser);
    Doxygen::parserManager->registerParser("make",         new MakeFileParser);
-  
-// unsupported feature (broom, hold)
-// Doxygen::parserManager->registerParser("dbusxml",      new DBusXMLScanner);
-
+ 
    // register any additional parsers here
    initDefaultExtensionMapping();
 

@@ -7396,11 +7396,13 @@ bool readInputFile(const char *fileName, BufStr &inBuf, bool filter, bool isSour
    size = inBuf.curPos() - start;
    int newSize = filterCRLF(inBuf.data() + start, size);
   
-   if (newSize != size) { // we removed chars
+   if (newSize != size) { 
+      // we removed chars
       inBuf.shrink(newSize); // resize the array      
    }
 
    inBuf.addChar(0);
+
    return true;
 }
 

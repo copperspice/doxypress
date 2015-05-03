@@ -21,6 +21,7 @@
 #include <QHash>
 #include <QStringList>
 
+#include <doxy_globals.h>
 #include <types.h>
 
 class Entry;
@@ -66,7 +67,7 @@ class ParserInterface
     *              found in the same translation unit (used for libclang)
     */
    virtual void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry>root,
-                           bool sameTranslationUnit, QStringList &filesInSameTranslationUnit) = 0;
+                           enum ParserMode mode, QStringList &includeFiles) = 0;
 
    /** Returns true if the language identified by \a extension needs
     *  the C preprocessor to be run before feed the result to the input
@@ -120,8 +121,6 @@ class ParserInterface
    virtual void parsePrototype(const char *text) = 0;
 
 };
-
-//-----------------------------------------------------------------------------
 
 /** \brief Manages programming language parsers.
  *

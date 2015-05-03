@@ -2506,7 +2506,7 @@ QByteArray markdownFileNameToId(const QByteArray &fileName)
 }
 
 void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
-                                    bool /*sameTranslationUnit*/, QStringList & /*filesInSameTranslationUnit*/)
+                                    enum ParserMode mode, QStringList &includedFiles)
 {
    QSharedPointer<Entry> current = QMakeShared<Entry>();
 

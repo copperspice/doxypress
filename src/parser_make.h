@@ -36,7 +36,7 @@ class MakeFileParser : public ParserInterface
       void finishTranslationUnit()  override {}
    
       void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
-                      bool sameTranslationUnit, QStringList &filesInSameTranslationUnit) override ;
+                      enum ParserMode mode, QStringList &includeFiles) override;
    
       bool needsPreprocessing(const QByteArray &extension);
 

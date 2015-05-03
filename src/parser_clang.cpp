@@ -42,10 +42,10 @@
 static QSharedPointer<Definition> g_currentDefinition;
 static QSharedPointer<MemberDef>  g_currentMemberDef;
 
-static uint        g_currentLine       = 0;
-static bool        g_searchForBody     = false;
-static bool        g_insideBody        = false;
-static uint        g_bracketCount      = 0;
+static uint g_currentLine       = 0;
+static bool g_searchForBody     = false;
+static bool g_insideBody        = false;
+static uint g_bracketCount      = 0;
 
 ClangParser *ClangParser::instance()
 {
@@ -175,12 +175,12 @@ static void inclusionVisitor(CXFile includedFile, CXSourceLocation * , unsigned,
  *  within the current translation unit.
  *  @param[in,out] files The list of files to filter.
  */
-void ClangParser::determineInputFilesInSameTu(QStringList &files)
+void ClangParser::determineInputFiles(QStringList &files)
 {
    // put the files in this translation unit in a dictionary
    QSet<QString> incFound;
 
-   clang_getInclusions(p->tu, inclusionVisitor, (CXClientData)&incFound);
+   clang_getInclusions(p->tu, inclusionVisitor, (CXClientData) &incFound);
 
    // create a new filtered file list
    QStringList resultIncludes;
@@ -195,7 +195,7 @@ void ClangParser::determineInputFilesInSameTu(QStringList &files)
    files = resultIncludes;
 }
 
-void ClangParser::start(const char *fileName, QStringList &filesInTranslationUnit)
+void ClangParser::start(const char *fileName, QStringList &includeFiles)
 {
    static QStringList includePath   = Config::getList("include-path");
  
@@ -285,25 +285,20 @@ void ClangParser::start(const char *fileName, QStringList &filesInTranslationUni
 
    argv[argc++] = strdup(fileName);
  
-   uint numUnsavedFiles = filesInTranslationUnit.count() + 1;
+   uint numUnsavedFiles = includeFiles.count() + 1;
 
    p->numFiles = numUnsavedFiles;
-   p->sources = new QByteArray[numUnsavedFiles];
-   p->ufs     = new CXUnsavedFile[numUnsavedFiles];
+   p->sources  = new QByteArray[numUnsavedFiles];
+   p->ufs      = new CXUnsavedFile[numUnsavedFiles];
 
    p->sources[0]      = detab(fileToString(fileName, filterSourceFiles, true));
-
    p->ufs[0].Filename = strdup(fileName);
    p->ufs[0].Contents = p->sources[0].constData();
    p->ufs[0].Length   = p->sources[0].length();
 
    //  
    uint i = 1;
-   for (auto item : filesInTranslationUnit) { 
-
-      if (i >= numUnsavedFiles) {
-         break;
-      }
+   for (auto item : includeFiles) {       
 
       p->fileMapping.insert(item, i);
 
@@ -315,33 +310,69 @@ void ClangParser::start(const char *fileName, QStringList &filesInTranslationUni
       i++;
    }
 
+// CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, 0, argv, argc, p->ufs, numUnsavedFiles, 
+//                  CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
+
+
+
+
    // let libclang do the actual parsing
-   p->tu = clang_parseTranslationUnit(p->index, 0, argv, argc, p->ufs, numUnsavedFiles,
-                                      CXTranslationUnit_DetailedPreprocessingRecord);
+   CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, 0, argv, argc, 0, 0, 
+                  CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
+
+
+
+printf("\n  BROOM   Error Code: %d \n", errorCode);
+
+
+
    // free arguments
    for (int i = 0; i < argc; ++i) {
       free(argv[i]);
    }
-
    free(argv);
+
+
 
    if (p->tu) {
       // filter out any includes not found by the clang parser
-      determineInputFilesInSameTu(filesInTranslationUnit);
+      determineInputFiles(includeFiles);
 
-      // show any warnings that the compiler produced
-      for (uint i = 0, n = clang_getNumDiagnostics(p->tu); i != n; ++i) {
+      // show any warnings the compiler produced
+      uint n = clang_getNumDiagnostics(p->tu);
+
+
+printf("\n  BROOM  A 2 %d", n);
+
+      CXString boo = clang_getTranslationUnitSpelling(p->tu);
+
+printf("\n BROOM  my nane is %s", clang_getCString(boo));
+
+
+
+      for (uint i = 0; i != n; ++i) {
+
+printf("\n  BROOM  B 1" );
+
          CXDiagnostic diag = clang_getDiagnostic(p->tu, i);
-         CXString string   = clang_formatDiagnostic(diag,clang_defaultDiagnosticDisplayOptions());
+         CXString string   = clang_formatDiagnostic(diag, clang_defaultDiagnosticDisplayOptions());
+
+
+printf("\n  BROOM  B 2" );
+
 
          err("%s [clang]\n", clang_getCString(string));
          clang_disposeString(string);
+
          clang_disposeDiagnostic(diag);
       }
+
+printf("\n  BROOM  A 3" );
 
       // create a source range for the given file
       QFileInfo fi(fileName);
       CXFile f = clang_getFile(p->tu, fileName);
+
       CXSourceLocation fileBegin = clang_getLocationForOffset(p->tu, f, 0);
       CXSourceLocation fileEnd   = clang_getLocationForOffset(p->tu, f, p->ufs[0].Length);
       CXSourceRange    fileRange = clang_getRange(fileBegin, fileEnd);

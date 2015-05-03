@@ -12127,12 +12127,13 @@ YY_DECL {
                   current->type = "id";
                }
                current->name = scannerYYtext;
-               if (insideCpp || insideObjC)
-               {
+
+               if (insideCpp || insideObjC) {
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
             }
             YY_BREAK
+
          case 50:
             YY_RULE_SETUP
 
@@ -14038,8 +14039,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (insideCpp || insideObjC)
-               {
+               if (insideCpp || insideObjC) {
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
 
@@ -14467,8 +14467,7 @@ YY_DECL {
 
             {
                //printf("Define `%s' without args\n",scannerYYtext);
-               if (insideCpp || insideObjC)
-               {
+               if (insideCpp || insideObjC) {
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
                current->bodyLine = yyLineNr;
@@ -18872,29 +18871,29 @@ YY_DECL {
                initEntry();
             }
             YY_BREAK
+
          case 572:
             /* rule 572 can match eol */
             YY_RULE_SETUP
 
             {
                current->name = scannerYYtext ;
-               if (insideCpp || insideObjC)
-               {
+               if (insideCpp || insideObjC) {
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
                lineCount();
-               if (current->spec & Entry::Protocol)
-               {
+
+               if (current->spec & Entry::Protocol) {
                   current->name += "-p";
                }
-               if ((current->spec & Entry::Protocol) ||
-               current->section == Entry::OBJCIMPL_SEC)
-               {
+
+               if ((current->spec & Entry::Protocol) || current->section == Entry::OBJCIMPL_SEC) {
                   unput('{'); // fake start of body
                }
                BEGIN( ClassVar );
             }
             YY_BREAK
+
          case 573:
             /* rule 573 can match eol */
             YY_RULE_SETUP
@@ -22091,7 +22090,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 }
 
 static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<Entry> rt, 
-                      bool sameTranslationUnit, QStringList &filesInSameTranslationUnit)
+                      enum ParserMode mode, QStringList &includedFiles)
 {
    initParser();
 
@@ -22117,15 +22116,17 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
       bool processWithClang = insideCpp || insideObjC;
 
       if (processWithClang) {
-         if (! sameTranslationUnit) { // new file
-            ClangParser::instance()->start(fileName, filesInSameTranslationUnit);
+         if (mode == ParserMode::SOURCE_FILE) {
+            // new file
+            ClangParser::instance()->start(fileName, includedFiles);
+
          } else {
             ClangParser::instance()->switchToFile(fileName);
          }
       }
 
       rt->lang = language;
-      current_root  = rt ;
+      current_root = rt ;
         
       initParser();
       groupEnterFile(yyFileName, yyLineNr);
@@ -22246,13 +22247,13 @@ void CPPLanguageParser::finishTranslationUnit()
 }
 
 void CPPLanguageParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
-                                  bool sameTranslationUnit, QStringList &filesInSameTranslationUnit)
+                                   enum ParserMode mode, QStringList &includedFiles)
 {
    g_thisParser = this;
 
    printlex(scannerYY_flex_debug, TRUE, __FILE__, fileName);
 
-   ::parseMain(fileName, fileBuf, root, sameTranslationUnit, filesInSameTranslationUnit);
+   ::parseMain(fileName, fileBuf, root, mode, includedFiles);
 
    printlex(scannerYY_flex_debug, FALSE, __FILE__, fileName);
 }

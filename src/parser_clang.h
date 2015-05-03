@@ -67,7 +67,7 @@ class ClangParser
    void linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const char *text, int tokenIndex);
    void linkMacro(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const char *text);
    void linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const char *text);
-   void determineInputFilesInSameTu(QStringList &filesInTranslationUnit);
+   void determineInputFiles(QStringList &includeFiles);
 
    class Private;
    Private *p;

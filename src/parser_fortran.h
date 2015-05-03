@@ -33,8 +33,8 @@ class FortranLanguageParser : public ParserInterface
    void startTranslationUnit(const char *) {}
    void finishTranslationUnit() {}
 
-   void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root, bool sameTranslationUnit,
-                   QStringList &filesInSameTranslationUnit) override;
+   void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root, 
+                  enum ParserMode mode, QStringList &includeFiles) override;
 
    bool needsPreprocessing(const QByteArray &extension);
 

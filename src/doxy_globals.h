@@ -43,6 +43,11 @@
 
 class ParserManager;
 
+enum ParserMode {
+   SOURCE_FILE,
+   INCLUDE_FILE
+};
+
 struct LookupInfo {
    LookupInfo() {}
 
@@ -56,7 +61,6 @@ struct LookupInfo {
    QByteArray   templSpec;
    QByteArray   resolvedType;
 };
-
 
 class StringDict : public QHash<QString, QByteArray>
 {
@@ -127,7 +131,7 @@ class Doxygen
 {
  public:
    static QSharedPointer<PageDef>       mainPage;
-   static QSharedPointer<NamespaceDef> globalScope;
+   static QSharedPointer<NamespaceDef>  globalScope;
  
    static CiteDict                 *citeDict;
 

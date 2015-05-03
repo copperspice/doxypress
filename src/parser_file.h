@@ -27,7 +27,8 @@ class FileParser : public ParserInterface
    virtual ~FileParser() {}
    void startTranslationUnit(const char *) {}
    void finishTranslationUnit() {}
-   void parseInput(const char *, const char *, QSharedPointer<Entry>, bool, QStringList &) override {}
+   void parseInput(const char *, const char *, QSharedPointer<Entry>, 
+                  enum ParserMode mode, QStringList &includeFiles) override {};
 
    bool needsPreprocessing(const QByteArray &) {
       return false;

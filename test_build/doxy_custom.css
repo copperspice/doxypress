@@ -149,3 +149,27 @@ a.www-link {
    background-repeat: no-repeat;
    background-position: left center;
 }
+
+
+/* footer  */
+div.navpath {  
+   line-height: 100%;
+   float:bottom;
+}
+
+.navpath li
+{  
+   background-image:none;
+   background-repeat:no-repeat;
+   background-position:right;
+}
+
+.navpath li.footer-l
+{
+   float:left;
+}
+
+.navpath li.footer-r
+{
+   float:right;
+}

@@ -4779,16 +4779,13 @@ void pyScanFreeParser()
 }
 
 void PythonLanguageParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
-                                      bool /*sameTranslationUnit*/, QStringList & /*filesInSameTranslationUnit*/)
+                                      enum ParserMode mode, QStringList &includedFiles)
 {
    g_thisParser = this;
 
    printlex(pyscannerYY_flex_debug, TRUE, __FILE__, fileName);
    ::parseMain(fileName, fileBuf, root);
    printlex(pyscannerYY_flex_debug, FALSE, __FILE__, fileName);
-
-   // print the AST for debugging purposes
-   // printAST(global_root);
 }
 
 bool PythonLanguageParser::needsPreprocessing(const QByteArray &)

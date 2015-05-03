@@ -31,7 +31,6 @@
 #include <config.h>
 #include <commentcnv.h>
 #include <config.h>
-#include <dbusxmlscanner.h>
 #include <declinfo.h>
 #include <defargs.h>
 #include <dirdef.h>
@@ -376,7 +375,7 @@ namespace Doxy_Work{
    void organizeSubGroups(QSharedPointer<EntryNav> rootNav);
 
    void parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav, 
-                  QSharedPointer<FileDef> fd, QByteArray fileName, bool sameTu, QStringList &filesInSameTu);
+                  QSharedPointer<FileDef> fd, QByteArray fileName, enum ParserMode mode, QStringList &filesInSameTu);
 
    void parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav);
    void parseInput();
@@ -9083,11 +9082,11 @@ static ParserInterface *getParserForFile(const char *fn)
 }
 
 void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav, 
-                  QSharedPointer<FileDef> fd, QByteArray fileName, bool sameTu, QStringList &filesInSameTu)
+                  QSharedPointer<FileDef> fd, QByteArray fileName, enum ParserMode mode, QStringList &includedFiles)
 {
 
 /*
-#if USE_LIBCLANG
+// #if USE_LIBCLANG
    static bool clangAssistedParsing = Config::getBool("clang-parsing");
 #else
    static bool clangAssistedParsing = false;
@@ -9133,12 +9132,12 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
 
    convBuf.addChar('\0');
 
-   if (clangAssistedParsing && ! sameTu) {
-      fd->getAllIncludeFilesRecursively(filesInSameTu);
+   if (clangAssistedParsing && mode == ParserMode::SOURCE_FILE) {
+      fd->getAllIncludeFilesRecursively(includedFiles);
    }
 
    // use language parser to parse the file
-   parser->parseInput(fileName, convBuf.data(), root, sameTu, filesInSameTu);
+   parser->parseInput(fileName, convBuf.data(), root, mode, includedFiles);
 
    // store the Entry tree in a file and create an index to navigate/load entries
    root->createNavigationIndex(rootNav, Doxy_Globals::g_storage, fd, root);
@@ -9149,8 +9148,8 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
 void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav)
 {
 
-#if USE_LIBCLANG
-   static bool clangParsing = Config::getBool("clang-parsing");
+// #if USE_LIBCLANG
+   static bool clangParsing =  true;         // Config::getBool("clang-parsing");  
 
    if (clangParsing) {
       QSet<QString> processedFiles;      
@@ -9170,29 +9169,27 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
 
          if (fd->isSource() && ! fd->isReference()) { 
             // this is a source file
-            QStringList filesInSameTu;
+            QStringList includedFiles;
 
             ParserInterface *parser = getParserForFile(s.toUtf8());
             parser->startTranslationUnit(s.toUtf8());
-            parseFile(parser, root, rootNav, fd, qPrintable(s), false, filesInSameTu);
+            parseFile(parser, root, rootNav, fd, qPrintable(s), ParserMode::SOURCE_FILE, includedFiles);
            
-            // process any include files in the same translation unit first. 
-            // When libclang is used this is much more efficient.
-          
-            for (auto incFile : filesInSameTu) {
+            // process any include files in the the current source file
+            for (auto file : includedFiles) {
 
-               if (! filesToProcess.contains(incFile)) {
+               if (! filesToProcess.contains(file)) {
                   break;
                }
 
-               if (incFile == s && ! processedFiles.contains(incFile)) {
-                  QSharedPointer<FileDef> ifd = findFileDef(Doxygen::inputNameDict, qPrintable(incFile), ambig);
+               if (file == s && ! processedFiles.contains(file)) {
+                  QSharedPointer<FileDef> ifd = findFileDef(Doxygen::inputNameDict, qPrintable(file), ambig);
 
                   if (ifd && ! ifd->isReference()) {
                      QStringList moreFiles;
                      
-                     parseFile(parser, root, rootNav, ifd, qPrintable(incFile), true, moreFiles);
-                     processedFiles.insert(incFile);
+                     parseFile(parser, root, rootNav, ifd, qPrintable(file), ParserMode::INCLUDE_FILE, moreFiles);
+                     processedFiles.insert(file);
                   }
                }               
             }
@@ -9208,7 +9205,7 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
          if (! processedFiles.contains(s)) { 
             // not yet processed
             bool ambig;
-            QStringList filesInSameTu;
+            QStringList includedFiles;
 
             QSharedPointer<FileDef> fd = findFileDef(Doxygen::inputNameDict, s.toUtf8(), ambig);
             assert(fd != 0);
@@ -9216,7 +9213,7 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
             ParserInterface *parser = getParserForFile(s.toUtf8());
             parser->startTranslationUnit(s.toUtf8());
 
-            parseFile(parser, root, rootNav, fd, s.toUtf8(), false, filesInSameTu);
+            parseFile(parser, root, rootNav, fd, s.toUtf8(), ParserMode::SOURCE_FILE, includedFiles);
             parser->finishTranslationUnit();
 
             processedFiles.insert(s);
@@ -9226,13 +9223,13 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
    } else 
       // normal pocessing
 
-#endif
+//  #endif
 
    {     
       for (auto s : Doxy_Globals::g_inputFiles) { 
 
          bool ambig;
-         QStringList filesInSameTu;
+         QStringList includedFiles;
 
          QSharedPointer<FileDef> fd = findFileDef(Doxygen::inputNameDict, s.toUtf8(), ambig);
          assert(fd != 0);
@@ -9240,7 +9237,7 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
          ParserInterface *parser = getParserForFile(s.toUtf8());
          parser->startTranslationUnit(s.toUtf8());
 
-         parseFile(parser, root, rootNav, fd, s.toUtf8(), false, filesInSameTu);
+         parseFile(parser, root, rootNav, fd, s.toUtf8(), ParserMode::SOURCE_FILE, includedFiles);
 
       }
    }

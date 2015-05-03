@@ -1,0 +1,93 @@
+/*************************************************************************
+*                                                                         
+* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim                                                       
+* All rights reserved.                                                    
+*                                                                         
+*                                                                         
+* GNU Free Documentation License                                          
+* This file may be used under the terms of the GNU Free Documentation     
+* License version 1.3 as published by the Free Software Foundation        
+* and appearing in the file included in the packaging of this file.       
+*                                                                         
+*                                                                         
+*************************************************************************/
+
+/*!
+\group qt-namespace  Qt Namespace
+\brief The Qt namespace contains miscellaneous identifiers used throughout the Qt library. 
+
+The Qt namespace contains miscellaneous identifiers used throughout the other libraries.
+
+<b>See also </b>QGraphicsAnchorLayout.
+
+*/
+
+
+/*!
+\fn QString Qt::convertFromPlainText ( const QString & plain, WhiteSpaceMode mode = WhiteSpacePre )
+\ingroup qt-namespace
+
+Converts the plain text string <i>plain</i> to an HTML-formatted paragraph while preserving most of its look.
+
+<i>mode</i> defines how whitespace is handled.
+
+This function is defined in the <tt>&lt;QTextDocument&gt;</tt> header file.
+
+<b>See also </b>escape() and mightBeRichText().
+
+*/
+
+
+/*!
+\typedef Qt::Alignment
+\ingroup qt-namespace
+
+Refer to Qt::AlignmentFlag for documentation.
+<div></div>
+
+*/
+
+
+/*!
+\enum  Qt::AlignmentFlag
+\ingroup qt-namespace
+
+This enum type is used to describe alignment. It contains horizontal and vertical flags that can be combined to produce the required effect.
+
+The Qt::TextElideMode enum can also be used in many situations to fine-tune the appearance of aligned text.
+
+The horizontal flags are:
+
+<table class="valuelist">
+   <tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+   <tr><td><tt>Qt::AlignLeft</tt></td>
+   <td><tt>0x0001</tt></td>
+   <td>Aligns with the left edge.</td></tr>
+
+   <tr><td><tt>Qt::AlignRight</tt></td>
+   <td><tt>0x0002</tt></td>
+   <td>Aligns with the right edge.</td></tr>
+
+   <tr><td><tt>Qt::AlignHCenter</tt></td>
+   <td><tt>0x0004</tt></td>
+   <td>Centers horizontally in the available space.</td></tr>
+
+   <tr><td><tt>Qt::AlignJustify</tt></td>
+   <td><tt>0x0008</tt></td>
+   <td>Justifies the text in the available space.</td></tr>
+</table>
+
+*/
+
+
+/*!
+\typedef Qt::HANDLE
+\ingroup qt-namespace
+
+Platform-specific handle type for system objects. This is equivalent to <tt>void *</tt> on Mac OS X and embedded Linux, and to <tt>unsigned long</tt> on X11. On Windows it is the DWORD returned by the Win32 function getCurrentThreadId().
+
+<b>Warning:</b> Using this type is not portable.
+
+*/
+
+
