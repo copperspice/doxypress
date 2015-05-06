@@ -111,7 +111,7 @@ class TranslatorItalian : public TranslatorAdapter_1_8_2
     *  parameter s is name of the project name.
     */
    QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Generato automaticamente da Doxygen";
+      QByteArray result = "Generato automaticamente da DoxyPress";
       if (s) {
          result += (QByteArray)" per " + s;
       }
@@ -977,14 +977,14 @@ class TranslatorItalian : public TranslatorAdapter_1_8_2
    /*! page explaining how the dot graph's should be interpreted */
    virtual QByteArray trLegendDocs() {
       return
-         "Questa pagina spiega come interpretare i grafi generati da doxygen.<p>\n"
+         "Questa pagina spiega come interpretare i grafi generati da DoxyPress.<p>\n"
          "Si consideri l'esempio seguente:\n"
          "\\code\n"
          "/*! Classe invisibile per troncamento */\n"
          "class Invisible { };\n\n"
          "/*! Classe tronca, la relazione di ereditarietà è nascosta */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Classe non documentata con i commenti speciali di doxygen*/\n"
+         "/* Classe non documentata con i commenti speciali di DoxyPress*/\n"
          "class Undocumented { };\n\n"
          "/*! Classe estesa mediante ereditarietà pubblica */\n"
          "class PublicBase : public Truncated { };\n\n"

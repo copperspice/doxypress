@@ -26,18 +26,12 @@
 #ifndef QSTRING_H
 #define QSTRING_H
 
-#include <QtCore/qchar.h>
-#include <QtCore/qbytearray.h>
-#include <QtCore/qrefcount.h>
-#include <QtCore/qnamespace.h>
+#include <qchar.h>
+#include <qbytearray.h>
+#include <qrefcount.h>
+#include <qnamespace.h>
 
 #include <string>
-
-#ifndef QT_NO_STL_WCHAR
-// workaround for some headers that have no typedef std::wstring
-typedef std::basic_string<wchar_t> QStdWString;
-#endif 
-
 #include <stdarg.h>
 
 #ifdef truncate

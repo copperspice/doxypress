@@ -111,7 +111,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Ավտոմատ ստեղծված է ելքային կոդից, Doxygen-ի միջոցով, ";
+      QByteArray result = "Ավտոմատ ստեղծված է ելքային կոդից, DoxyPress-ի միջոցով, ";
       if (s) {
          result += s + (QByteArray)" համար:";
       }
@@ -1003,7 +1003,7 @@ class TranslatorArmenian : public TranslatorAdapter_1_8_0
     */
    virtual QByteArray trLegendDocs() {
       return
-         "Այս էջը նկարագրում է, թե ինչպես մեկնաբանել doxygen-ի ստեղծած գրաֆները:<p>\n"
+         "Այս էջը նկարագրում է, թե ինչպես մեկնաբանել DoxyPress-ի ստեղծած գրաֆները:<p>\n"
          "Դիտարկենք հետևյալ օրինակը.\n"
          "\\code\n"
          "/*! Կրճատման հետևանքով անտեսանելի դաս */\n"

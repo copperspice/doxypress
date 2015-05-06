@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -275,7 +275,7 @@ QByteArray stripAnonymousNamespaceScope(const QByteArray &s)
 
    while ((i = getScopeFragment(s, p, &l)) != -1) {   
 
-      if (Doxygen::namespaceSDict->find(s.left(i + l)) != 0) {
+      if (Doxy_Globals::namespaceSDict->find(s.left(i + l)) != 0) {
 
          if (s.at(i) != '@') {
             if (! newScope.isEmpty()) {
@@ -479,10 +479,10 @@ QByteArray resolveTypeDef(QSharedPointer<Definition> context, const QByteArray &
          MemberNameSDict *mnd = 0;
 
          if (resScope->definitionType() == Definition::TypeClass) {
-            mnd = Doxygen::memberNameSDict;
+            mnd = Doxy_Globals::memberNameSDict;
 
          } else {
-            mnd = Doxygen::functionNameSDict;
+            mnd = Doxy_Globals::functionNameSDict;
          }
 
          QSharedPointer<MemberName> mn = mnd->find(resName);
@@ -540,7 +540,7 @@ QSharedPointer<ClassDef> getClass(const char *n)
    }
 
    QByteArray name = n;
-   QSharedPointer<ClassDef> result = Doxygen::classSDict->find(name);
+   QSharedPointer<ClassDef> result = Doxy_Globals::classSDict->find(name);
   
    return result;
 }
@@ -551,7 +551,7 @@ QSharedPointer<NamespaceDef> getResolvedNamespace(const char *name)
       return QSharedPointer<NamespaceDef>();
    }
 
-   QByteArray subst = Doxygen::namespaceAliasDict[name];
+   QByteArray subst = Doxy_Globals::namespaceAliasDict[name];
 
    if (! subst.isEmpty()) {
       int count = 0; 
@@ -559,7 +559,7 @@ QSharedPointer<NamespaceDef> getResolvedNamespace(const char *name)
       // recursion detection guard
       QByteArray newSubst;
 
-      while ( ! (newSubst = Doxygen::namespaceAliasDict[subst]).isEmpty() && count < 10) {
+      while ( ! (newSubst = Doxy_Globals::namespaceAliasDict[subst]).isEmpty() && count < 10) {
          subst = newSubst;
          count++;
       }
@@ -568,10 +568,10 @@ QSharedPointer<NamespaceDef> getResolvedNamespace(const char *name)
          warn_uncond("possible recursive namespace alias detected for %s!\n", name);
       }
 
-      return Doxygen::namespaceSDict->find(subst.constData());
+      return Doxy_Globals::namespaceSDict->find(subst.constData());
 
    } else {
-      return Doxygen::namespaceSDict->find(name);
+      return Doxy_Globals::namespaceSDict->find(name);
    }
 }
 
@@ -727,9 +727,9 @@ static QByteArray substTypedef(QSharedPointer<Definition> scope, QSharedPointer<
    }
 
    // lookup scope fragment in the symbol map
-   auto di = Doxygen::symbolMap().find(symbolName);
+   auto di = Doxy_Globals::symbolMap().find(symbolName);
 
-   if (di == Doxygen::symbolMap().end()) {
+   if (di == Doxy_Globals::symbolMap().end()) {
       // could not find any matching symbols
       return "";   
    }
@@ -738,7 +738,7 @@ static QByteArray substTypedef(QSharedPointer<Definition> scope, QSharedPointer<
 
    QSharedPointer<MemberDef> bestMatch;
 
-   while (di != Doxygen::symbolMap().end() && di.key() == symbolName)  {      
+   while (di != Doxy_Globals::symbolMap().end() && di.key() == symbolName)  {      
       // search for the best match, only look at members 
 
       QSharedPointer<Definition> self = sharedFrom(di.value());
@@ -1039,7 +1039,7 @@ int isAccessibleFrom(QSharedPointer<Definition> scope, QSharedPointer<FileDef> f
 
       // this is preferred over nested class in this class
   
-   } else if (scope == Doxygen::globalScope) {
+   } else if (scope == Doxy_Globals::globalScope) {
 
       if (fileScope) {
          StringMap<QSharedPointer<Definition>> *cl = fileScope->getUsedClasses();
@@ -1182,7 +1182,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointe
          }
 
          // repeat for the parent scope
-         if (scope != Doxygen::globalScope) {
+         if (scope != Doxy_Globals::globalScope) {
             i = isAccessibleFromWithExpScope(scope->getOuterScope(), fileScope, item, explicitScopePart);
          }
          
@@ -1202,7 +1202,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointe
          }
       }
 
-      if (scope == Doxygen::globalScope) {
+      if (scope == Doxy_Globals::globalScope) {
          if (fileScope) {
             NamespaceSDict *nl = fileScope->getUsedNamespaces();
             if (accessibleViaUsingNamespace(nl, fileScope, item, explicitScopePart)) {
@@ -1271,7 +1271,7 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
 
                } else if (distance == minDistance && fileScope && bestMatch && fileScope->getUsedNamespaces() && 
                           d->getOuterScope()->definitionType() == Definition::TypeNamespace &&
-                          bestMatch->getOuterScope() == Doxygen::globalScope) {
+                          bestMatch->getOuterScope() == Doxy_Globals::globalScope) {
 
                   // in case the distance is equal it could be that a class X
                   // is defined in a namespace and in the global scope. When searched
@@ -1407,9 +1407,9 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
 
    // the -g (for C# generics) and -p (for ObjC protocols) 
 
-   if (! Doxygen::symbolMap().contains(name)) {    
+   if (! Doxy_Globals::symbolMap().contains(name)) {    
    
-      if (! Doxygen::symbolMap().contains(name + "-p")) {    
+      if (! Doxy_Globals::symbolMap().contains(name + "-p")) {    
          return QSharedPointer<ClassDef>();           
       }
    }
@@ -1448,7 +1448,7 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
       key += "+" + fileScope->name();
    }
   
-   LookupInfo *pval = Doxygen::lookupCache->object(key);
+   LookupInfo *pval = Doxy_Globals::lookupCache->object(key);
    
    if (pval) {
     
@@ -1468,7 +1468,7 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
 
    } else {
       // not found, we already add a 0 to avoid the possibility of endless recursion.   
-      Doxygen::lookupCache->insert(key, new LookupInfo);
+      Doxy_Globals::lookupCache->insert(key, new LookupInfo);
    }
 
    QSharedPointer<ClassDef> bestMatch;
@@ -1482,9 +1482,9 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
    // not a unique name         
    int count = 0;
 
-   auto di = Doxygen::symbolMap().find(name);
+   auto di = Doxy_Globals::symbolMap().find(name);
            
-   while (di != Doxygen::symbolMap().end() && di.key() == name)  { 
+   while (di != Doxy_Globals::symbolMap().end() && di.key() == name)  { 
 
       QSharedPointer<Definition> self = sharedFrom(di.value());
            
@@ -1507,7 +1507,7 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
       *pResolvedType = bestResolvedType;
    }
 
-   pval = Doxygen::lookupCache->object(key);
+   pval = Doxy_Globals::lookupCache->object(key);
 
    if (pval) {
       pval->classDef     = bestMatch;
@@ -1516,7 +1516,7 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
       pval->resolvedType = bestResolvedType;
 
    } else {
-      Doxygen::lookupCache->insert(key, new LookupInfo(bestMatch, bestTypedef, bestTemplSpec, bestResolvedType));
+      Doxy_Globals::lookupCache->insert(key, new LookupInfo(bestMatch, bestTypedef, bestTemplSpec, bestResolvedType));
 
    }
   
@@ -1535,7 +1535,7 @@ QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSha
 
    if (scope == 0 || (scope->definitionType() != Definition::TypeClass && scope->definitionType() != Definition::TypeNamespace ) ||
             (scope->getLanguage() == SrcLangExt_Java && QByteArray(n).indexOf("::") != -1) ) {
-      scope = Doxygen::globalScope;
+      scope = Doxy_Globals::globalScope;
    }
   
    QSharedPointer<ClassDef>result;
@@ -2735,7 +2735,7 @@ static void trimNamespaceScope(QByteArray &t1, QByteArray &t2, const QByteArray 
                fullScope += "::";
             }
             fullScope += scope;
-            if (!fullScope.isEmpty() && Doxygen::namespaceSDict[fullScope] != 0) { // scope is a namespace
+            if (!fullScope.isEmpty() && Doxy_Globals::namespaceSDict[fullScope] != 0) { // scope is a namespace
                t1 = t1.right(t1.length() - i1 - 2);
                return;
             }
@@ -2756,7 +2756,7 @@ static void trimNamespaceScope(QByteArray &t1, QByteArray &t2, const QByteArray 
                fullScope += "::";
             }
             fullScope += scope;
-            if (!fullScope.isEmpty() && Doxygen::namespaceSDict[fullScope] != 0) { // scope is a namespace
+            if (!fullScope.isEmpty() && Doxy_Globals::namespaceSDict[fullScope] != 0) { // scope is a namespace
                t2 = t2.right(t2.length() - i2 - 2);
                return;
             }
@@ -3288,10 +3288,12 @@ static QByteArray getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QS
             } else { // use template type
                result = cd->qualifiedNameWithTemplateParameters();
             }
+
             // template class, so remove the template part (it is part of the class name)
             *tSpec = "";
+
          } else if (ts.isEmpty() && !templSpec.isEmpty() && cd && !cd->isTemplate() && tSpec) {
-            // obscure case, where a class is used as a template, but doxygen think it is
+            // obscure case where a class is used as a template, but DoxyPress thinks it is
             // not (could happen when loading the class from a tag file).
             *tSpec = "";
          }
@@ -3659,7 +3661,7 @@ static void findMembersWithSpecificName(MemberName *mn, const char *args, bool c
             stringToArgumentList(args, argList);
 
             match = matchArguments2(md->getOuterScope(), fd, mdAl, 
-                       Doxygen::globalScope, fd, argList,checkCV);
+                       Doxy_Globals::globalScope, fd, argList,checkCV);
 
             delete argList;
             argList = 0;
@@ -3745,7 +3747,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
       scopeName.resize(0);
    }
 
-   QSharedPointer<MemberName> mn = Doxygen::memberNameSDict->find(mName);
+   QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict->find(mName);
  
    if ((!forceEmptyScope || scopeName.isEmpty()) && mn && !(scopeName.isEmpty() && mScope.isEmpty())) {
       // this was changed for bug638856, forceEmptyScope => empty scopeName
@@ -3762,7 +3764,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
          }
 
          QSharedPointer<MemberDef> tmd;
-         QSharedPointer<ClassDef> fcd = getResolvedClass(Doxygen::globalScope, QSharedPointer<FileDef>(), className, &tmd);
+         QSharedPointer<ClassDef> fcd = getResolvedClass(Doxy_Globals::globalScope, QSharedPointer<FileDef>(), className, &tmd);
         
          // todo: fill in correct fileScope
          if (fcd &&  fcd->isLinkable() ) {
@@ -3907,7 +3909,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
          ArgumentList *mmdAl = item->argumentList();
 
          if (matchArguments2(item->getOuterScope(), item->getFileDef(), mmdAl,
-                             Doxygen::globalScope, item->getFileDef(), argList, checkCV)) {
+                             Doxy_Globals::globalScope, item->getFileDef(), argList, checkCV)) {
             break;
          }
 
@@ -3934,7 +3936,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
    }
 
    // maybe an namespace, file or group member ?   
-   if ((mn = Doxygen::functionNameSDict->find(mName))) { 
+   if ((mn = Doxy_Globals::functionNameSDict->find(mName))) { 
       // name is known      
       QSharedPointer<NamespaceDef> fnd;
       int scopeOffset = scopeName.length();
@@ -3949,7 +3951,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
             namespaceName = mScope;
          }
          
-         if (! namespaceName.isEmpty() && (fnd = Doxygen::namespaceSDict->find(namespaceName)) && fnd->isLinkable()) {
+         if (! namespaceName.isEmpty() && (fnd = Doxy_Globals::namespaceSDict->find(namespaceName)) && fnd->isLinkable()) {
             
             bool found = false;
            
@@ -4198,7 +4200,7 @@ static bool getScopeDefs(const char *docScope, const char *scope, QSharedPointer
       if (((cd = getClass(fullName)) || (cd = getClass(fullName + "-p")) ) && cd->isLinkable()) {
          return true; 
 
-      } else if ((nd = Doxygen::namespaceSDict->find(fullName)) && nd->isLinkable()) {
+      } else if ((nd = Doxy_Globals::namespaceSDict->find(fullName)) && nd->isLinkable()) {
          return true; 
       }
 
@@ -4328,7 +4330,7 @@ bool resolveRef(const char *scName, const char *name, bool inSeeBlock, QSharedPo
    // check if nameStr is a member or global   
    if (getDefs(scopeStr, nameStr, argsStr, md, cd, fd, nd, gd, explicitScope, currentFile, true))  {
       
-      if (checkScope && md && md->getOuterScope() == Doxygen::globalScope &&
+      if (checkScope && md && md->getOuterScope() == Doxy_Globals::globalScope &&
             ! md->isStrongEnumValue() && (!scopeStr.isEmpty() || nameStr.indexOf("::") > 0)) {
 
          // we did find a member, but it is a global one while we were explicitly
@@ -4367,7 +4369,7 @@ bool resolveRef(const char *scName, const char *name, bool inSeeBlock, QSharedPo
       //    md->name().data(),md,md->anchor().data(),md->isLinkable(),(*resContext)->name().data());
       return true;
 
-   } else if (inSeeBlock && !nameStr.isEmpty() && (gd = Doxygen::groupSDict->find(nameStr))) {
+   } else if (inSeeBlock && !nameStr.isEmpty() && (gd = Doxy_Globals::groupSDict->find(nameStr))) {
       // group link
       *resContext = gd;
       return true;
@@ -4377,7 +4379,7 @@ bool resolveRef(const char *scName, const char *name, bool inSeeBlock, QSharedPo
 
       bool ambig;
 
-      fd = findFileDef(Doxygen::inputNameDict, tsName, ambig);
+      fd = findFileDef(Doxy_Globals::inputNameDict, tsName, ambig);
 
       if (fd && !ambig) {
          *resContext = fd;
@@ -4506,13 +4508,13 @@ bool resolveLink(const char *scName, const char *lr, bool xx, QSharedPointer<Def
    if (linkRef.isEmpty()) { // no reference name!
       return false;
 
-   } else if (pd = Doxygen::pageSDict->find(linkRef)) { 
+   } else if (pd = Doxy_Globals::pageSDict->find(linkRef)) { 
       // link to a page
       QSharedPointer<GroupDef> gd = pd->getGroupDef();
 
       if (gd) {
          if (! pd->name().isEmpty()) {
-            si = Doxygen::sectionDict->find(pd->name()).data();
+            si = Doxy_Globals::sectionDict->find(pd->name()).data();
          }
 
          *resContext = gd;
@@ -4526,20 +4528,20 @@ bool resolveLink(const char *scName, const char *lr, bool xx, QSharedPointer<Def
 
       return true;
 
-   } else if (si = Doxygen::sectionDict->find(linkRef).data()) {
+   } else if (si = Doxy_Globals::sectionDict->find(linkRef).data()) {
       *resContext = si->definition;
       resAnchor = si->label;
       return true;
 
-   } else if (pd = Doxygen::exampleSDict->find(linkRef)) { // link to an example
+   } else if (pd = Doxy_Globals::exampleSDict->find(linkRef)) { // link to an example
       *resContext = pd;
       return true;
 
-   } else if (gd = Doxygen::groupSDict->find(linkRef)) { // link to a group
+   } else if (gd = Doxy_Globals::groupSDict->find(linkRef)) { // link to a group
       *resContext = gd;
       return true;
 
-   } else if ((fd = findFileDef(Doxygen::inputNameDict, linkRef, ambig)) && fd->isLinkable()) {
+   } else if ((fd = findFileDef(Doxy_Globals::inputNameDict, linkRef, ambig)) && fd->isLinkable()) {
       // file link 
       *resContext = fd;
       return true;
@@ -4556,11 +4558,11 @@ bool resolveLink(const char *scName, const char *lr, bool xx, QSharedPointer<Def
 
    }
   
-   else if ((nd = Doxygen::namespaceSDict->find(linkRef))) {
+   else if ((nd = Doxy_Globals::namespaceSDict->find(linkRef))) {
       *resContext = nd;
       return true;
 
-   } else if ((dir = Doxygen::directories.find(QFileInfo(linkRef).absoluteFilePath().toUtf8() + "/")) && dir->isLinkable()) { 
+   } else if ((dir = Doxy_Globals::directories.find(QFileInfo(linkRef).absoluteFilePath().toUtf8() + "/")) && dir->isLinkable()) { 
       // TODO: make this location independent like filedefs
 
       *resContext = dir;
@@ -4629,7 +4631,7 @@ void generateFileRef(OutputDocInterface &od, const char *name, const char *text)
    QSharedPointer<FileDef> fd;
    bool ambig;
 
-   if ((fd = findFileDef(Doxygen::inputNameDict, name, ambig)) &&
+   if ((fd = findFileDef(Doxy_Globals::inputNameDict, name, ambig)) &&
          fd->isLinkable())
       // link to documented input file
    {
@@ -5096,16 +5098,16 @@ QString convertNameToFile(const QString &name, bool allowDots, bool allowUndersc
       // old algorithm, has the problem that after regeneration the
       // output can be located in a different dir.
 
-      if (Doxygen::htmlDirMap == 0) {
-         Doxygen::htmlDirMap = new QHash<QString, int>();         
+      if (Doxy_Globals::htmlDirMap == 0) {
+         Doxy_Globals::htmlDirMap = new QHash<QString, int>();         
       }
 
       static int curDirNum = 0;
-      int *dirNum = Doxygen::htmlDirMap->find(result);
+      int *dirNum = Doxy_Globals::htmlDirMap->find(result);
 
       if (dirNum == 0) { 
          // new name
-         Doxygen::htmlDirMap->insert(result, new int(curDirNum));
+         Doxy_Globals::htmlDirMap->insert(result, new int(curDirNum));
          l1Dir = (curDirNum) & 0xf;        // bits 0-3
          l2Dir = (curDirNum >> 4) & 0xff;  // bits 4-11
          curDirNum++;
@@ -5556,7 +5558,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
                int groupId = fmd->getMemberGroupId();
 
                if (groupId != -1) {
-                  QSharedPointer<MemberGroupInfo> info = Doxygen::memGrpInfoDict[groupId];
+                  QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict[groupId];
                  
                   if (info) {
                      if (*ppMemberGroupSDict == 0) {
@@ -5581,7 +5583,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
       int groupId = md->getMemberGroupId();
 
       if (groupId != -1) {
-         QSharedPointer<MemberGroupInfo> info = Doxygen::memGrpInfoDict[groupId];
+         QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict[groupId];
 
          if (info) {
 
@@ -6090,7 +6092,7 @@ QSharedPointer<PageDef> addRelatedPage(const char *name, const QByteArray &ptitl
 
    QSharedPointer<PageDef> pd;
 
-   if ((pd = Doxygen::pageSDict->find(name)) && ! tagInfo) {
+   if ((pd = Doxy_Globals::pageSDict->find(name)) && ! tagInfo) {
       // append documentation block to the page
       pd->setDocumentation(doc, fileName, startLine);
 
@@ -6101,8 +6103,8 @@ QSharedPointer<PageDef> addRelatedPage(const char *name, const QByteArray &ptitl
       if (baseName.right(4) == ".tex") {
          baseName = baseName.left(baseName.length() - 4);
 
-      } else if (baseName.right(Doxygen::htmlFileExtension.length()) == Doxygen::htmlFileExtension) {
-         baseName = baseName.left(baseName.length() - Doxygen::htmlFileExtension.length());
+      } else if (baseName.right(Doxy_Globals::htmlFileExtension.length()) == Doxy_Globals::htmlFileExtension) {
+         baseName = baseName.left(baseName.length() - Doxy_Globals::htmlFileExtension.length());
       }
 
       QByteArray title = ptitle.trimmed();
@@ -6123,7 +6125,7 @@ QSharedPointer<PageDef> addRelatedPage(const char *name, const QByteArray &ptitl
       pd->setInputOrderId(id);
       id++;
       
-      Doxygen::pageSDict->insert(baseName, pd);
+      Doxy_Globals::pageSDict->insert(baseName, pd);
 
       if (gd) {
          gd->addPage(pd);
@@ -6141,7 +6143,7 @@ QSharedPointer<PageDef> addRelatedPage(const char *name, const QByteArray &ptitl
 
          }
 
-         QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(pd->name());
+         QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(pd->name());
 
          if (si) {
             if (si->lineNr != -1) {
@@ -6155,7 +6157,7 @@ QSharedPointer<PageDef> addRelatedPage(const char *name, const QByteArray &ptitl
 
          } else {
             si = QSharedPointer<SectionInfo>(new SectionInfo(file, -1, pd->name(), pd->title(), SectionInfo::Page, 0, pd->getReference()));           
-            Doxygen::sectionDict->insert(pd->name(), si);
+            Doxy_Globals::sectionDict->insert(pd->name(), si);
          }
       }
    }
@@ -6170,9 +6172,9 @@ void addRefItem(const QList<ListItemInfo> *sli, const char *key,
       // check for @ to skip anonymous stuff (see bug427012)
     
       for (auto lii : *sli) {   
-         auto refList = Doxygen::xrefLists->find(lii.type);
+         auto refList = Doxy_Globals::xrefLists->find(lii.type);
 
-         if (refList != Doxygen::xrefLists->end() && ( (lii.type != "todo" || Config::getBool("generate-todo-list")) &&
+         if (refList != Doxy_Globals::xrefLists->end() && ( (lii.type != "todo" || Config::getBool("generate-todo-list")) &&
                           (lii.type != "test"       || Config::getBool("generate-test-list")) &&
                           (lii.type != "bug"        || Config::getBool("generate-bug-list"))  &&
                           (lii.type != "deprecated" || Config::getBool("generate-deprecate-list")) ) ) {
@@ -6397,8 +6399,8 @@ QString stripExtension(QString fName)
 {
    QString result = fName;
 
-   if (result.right(Doxygen::htmlFileExtension.length()) == Doxygen::htmlFileExtension) {
-      result = result.left(result.length() - Doxygen::htmlFileExtension.length());
+   if (result.right(Doxy_Globals::htmlFileExtension.length()) == Doxy_Globals::htmlFileExtension) {
+      result = result.left(result.length() - Doxy_Globals::htmlFileExtension.length());
    }
 
    return result;
@@ -6409,7 +6411,7 @@ void replaceNamespaceAliases(QByteArray &scope, int i)
 {
    while (i > 0) {
       QByteArray ns = scope.left(i);
-      QByteArray s  = Doxygen::namespaceAliasDict[ns];
+      QByteArray s  = Doxy_Globals::namespaceAliasDict[ns];
 
       if (! s.isEmpty()) {
          scope = s + scope.right(scope.length() - i);
@@ -6554,14 +6556,14 @@ void stringToSearchIndex(const QByteArray &docBaseUrl, const QByteArray &title,
    static bool searchEngine = Config::getBool("html-search")
 
    if (searchEngine) {
-      Doxygen::searchIndex->setCurrentDoc(title, docBaseUrl, anchor);
+      Doxy_Globals::searchIndex->setCurrentDoc(title, docBaseUrl, anchor);
       static QRegExp wordPattern("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
       int i, p = 0, l;
 
       while ((i = wordPattern.indexIn(str, p)) != -1) {
          l = wordPattern.matchedLength();
 
-         Doxygen::searchIndex->addWord(str.mid(i, l), priority);
+         Doxy_Globals::searchIndex->addWord(str.mid(i, l), priority);
          p = i + l;
       }
    }
@@ -6632,7 +6634,7 @@ bool updateLanguageMapping(const QString &extension, const QString &language)
    
    s_extLookup.insert(extName, parserId);
 
-   if (! Doxygen::parserManager->registerExtension(extName, p->parserName)) {
+   if (! Doxy_Globals::parserManager->registerExtension(extName, p->parserName)) {
 
       msg("Unable to assign extension %-4s (%-7s) for %-7s language, currently unsupported\n",
           qPrintable(extName), p->parserName, qPrintable(language));
@@ -6720,7 +6722,7 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
 {
    if (scope == 0 || (scope->definitionType() != Definition::TypeClass && 
           scope->definitionType() != Definition::TypeNamespace) ) {
-      scope = Doxygen::globalScope;
+      scope = Doxy_Globals::globalScope;
    }
 
    QByteArray name = n;
@@ -6730,9 +6732,9 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
       return QSharedPointer<MemberDef>();   
    }
 
-   auto di = Doxygen::symbolMap().find(name);
+   auto di = Doxy_Globals::symbolMap().find(name);
 
-   if (di == Doxygen::symbolMap().end()) {
+   if (di == Doxy_Globals::symbolMap().end()) {
       // could not find any matching symbols
       return QSharedPointer<MemberDef>();   
    }
@@ -6752,7 +6754,7 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
    QSharedPointer<MemberDef> bestMatch = QSharedPointer<MemberDef> (); 
    
    // find the closest matching definition   
-   while (di != Doxygen::symbolMap().end() && di.key() == name)  {      
+   while (di != Doxy_Globals::symbolMap().end() && di.key() == name)  {      
       // search for the best match, only look at members 
 
       QSharedPointer<Definition> self = sharedFrom(di.value());
@@ -7097,14 +7099,14 @@ static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
          cmd = cmd + QString("{%1}").arg(numArgs);    // alias name + {n}
       }
 
-      QByteArray aliasText = Doxygen::aliasDict.value(cmd);
+      QByteArray aliasText = Doxy_Globals::aliasDict.value(cmd);
 
 
       if (numArgs > 1 &&  aliasText.isEmpty()) {
          // in case there is no command with numArgs parameters, but there is a command with 1 parameter
          // we also accept all text as the argument of that command (so you do not have to escape commas)
 
-         aliasText = Doxygen::aliasDict.value(cmdNoArgs + "{1}");
+         aliasText = Doxy_Globals::aliasDict.value(cmdNoArgs + "{1}");
 
          if (! aliasText.isEmpty()) {
             cmd = cmdNoArgs + "{1}";
@@ -7488,7 +7490,7 @@ QByteArray externalRef(const QString &relPath, const QByteArray &ref, bool href)
    QByteArray result;
 
    if (! ref.isEmpty()) {
-      QByteArray dest = Doxygen::tagDestinationDict[ref];
+      QByteArray dest = Doxy_Globals::tagDestinationDict[ref];
 
       if (! dest.isEmpty()) {
          result = dest;
@@ -7500,7 +7502,7 @@ QByteArray externalRef(const QString &relPath, const QByteArray &ref, bool href)
          }
 
          if (!href) {
-            result.prepend("doxygen=\"" + ref + ":");
+            result.prepend("doxypress=\"" + ref + ":");
          }
 
          if (l > 0 && result.at(l - 1) != '/') {
@@ -7550,7 +7552,7 @@ void writeColoredImgData(ColoredImgDataItem data)
    }
 
    const char *temp = strdup(qPrintable(data.name));
-   Doxygen::indexList->addImageFile(temp);
+   Doxy_Globals::indexList->addImageFile(temp);
    
 }
 
@@ -8184,15 +8186,15 @@ void convertProtectionLevel(MemberListType inListType, Protection inProt, int *o
 
 bool mainPageHasTitle()
 {
-   if (Doxygen::mainPage == 0) {
+   if (Doxy_Globals::mainPage == 0) {
       return false;
    }
   
-   if (Doxygen::mainPage->title().isEmpty()) {
+   if (Doxy_Globals::mainPage->title().isEmpty()) {
       return false;
    }
 
-   if (Doxygen::mainPage->title().toLower() == "notitle") {
+   if (Doxy_Globals::mainPage->title().toLower() == "notitle") {
       return false;
    }
 

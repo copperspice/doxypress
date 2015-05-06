@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -314,7 +314,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
          m_t << "{" << endl;
          m_t << "\\par" << endl;
          m_t << rtf_Style_Reset << getStyle("CodeExample");
-         Doxygen::parserManager->getParser(lang)
+         Doxy_Globals::parserManager->getParser(lang)
          ->parseCode(m_ci, s->context(), s->text(), langExt,
                      s->isExample(), s->exampleFile());
          //m_t << "\\par" << endl;
@@ -450,7 +450,7 @@ void RTFDocVisitor::visit(DocInclude *inc)
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8(), cfi.fileName().toUtf8());
 
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd);
 
          m_t << "\\par";
@@ -461,7 +461,7 @@ void RTFDocVisitor::visit(DocInclude *inc)
          m_t << "{" << endl;
          m_t << "\\par" << endl;
          m_t << rtf_Style_Reset << getStyle("CodeExample");
-         Doxygen::parserManager->getParser(inc->extension())
+         Doxy_Globals::parserManager->getParser(inc->extension())
          ->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(),
                      inc->exampleFile());
@@ -488,7 +488,7 @@ void RTFDocVisitor::visit(DocInclude *inc)
             m_t << "\\par" << endl;
          }
          m_t << rtf_Style_Reset << getStyle("CodeExample");
-         Doxygen::parserManager->getParser(inc->extension())
+         Doxy_Globals::parserManager->getParser(inc->extension())
          ->parseCode(m_ci,
                      inc->context(),
                      extractBlock(inc->text(), inc->blockId()),
@@ -520,7 +520,7 @@ void RTFDocVisitor::visit(DocIncOperator *op)
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (!m_hide) {
-         Doxygen::parserManager->getParser(m_langExt)
+         Doxy_Globals::parserManager->getParser(m_langExt)
          ->parseCode(m_ci, op->context(), op->text(), langExt,
                      op->isExample(), op->exampleFile());
       }

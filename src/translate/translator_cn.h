@@ -917,14 +917,14 @@ class TranslatorChinese : public TranslatorAdapter_1_8_2
 
    /*! page explaining how the dot graph's should be interpreted */
    virtual QByteArray trLegendDocs() {
-      return "本页将向您解释如何理解由"CN_SPC"doxygen"CN_SPC"生成的图.<p>\n"
+      return "本页将向您解释如何理解由"CN_SPC"DoxyPress"CN_SPC"生成的图.<p>\n"
              "考虑如下例子:\n"
              "\\code\n"
              "/*! 由于截断而使 Invisible 不可见 */\n"
              "class Invisible { };\n\n"
              "/*! Truncated 的继承关系将被隐藏 */\n"
              "class Truncated : public Invisible { };\n\n"
-             "/* 没有被doxygen文档化的类 */\n"
+             "/* 没有被DoxyPress文档化的类 */\n"
              "class Undocumented { };\n\n"
              "/*! public 继承关系的类 */\n"
              "class PublicBase : public Truncated { };\n\n"

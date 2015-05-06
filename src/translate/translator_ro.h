@@ -123,7 +123,7 @@ class TranslatorRomanian : public Translator
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Generat automat de Doxygen";
+      QByteArray result = "Generat automat de DoxyPress";
       if (s) {
          result += (QByteArray)" pentru " + s;
       }
@@ -1000,14 +1000,14 @@ class TranslatorRomanian : public Translator
    virtual QByteArray trLegendDocs() {
       return
          "Această pagină arată modul în care trebuie să interpretaţi "
-         "grafurile generate de doxygen.<p>\n"
+         "grafurile generate de DoxyPress.<p>\n"
          "Consideraţi următorul exemplu:\n"
          "\\code\n"
          "/*! Clasă invizibilă, tăiată din cauza depăşirii spaţiului */\n"
          "class Invisible { };\n\n"
          "/*! Altă clasă tăiată, relaţia de moştenire este ascunsă */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Clasă necomentată în stil doxygen */\n"
+         "/* Clasă necomentată în stil DoxyPress */\n"
          "class Undocumented { };\n\n"
          "/*! Clasă care este moştenită în mod public */\n"
          "class PublicBase : public Truncated { };\n\n"

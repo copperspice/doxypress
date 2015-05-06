@@ -1,45 +1,21 @@
+/*************************************************************************
+ *
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
+ * All rights reserved.    
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation under the terms of the GNU General Public License version 2
+ * is hereby granted. No representations are made about the suitability of
+ * this software for any purpose. It is provided "as is" without express or
+ * implied warranty. See the GNU General Public License for more details.
+ *
+ * Documents produced by DoxyPress are derivative works derived from the
+ * input used in their production; they are not affected by this license.
+ *
+*************************************************************************/
+
 /* A Bison parser, made by GNU Bison 2.4.2.  */
-
-/* Skeleton implementation for Bison's Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989-1990, 2000-2006, 2009-2010 Free Software
-   Foundation, Inc.
-   
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-   
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-   
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
-
-/* As a special exception, you may create a larger work that contains
-   part or all of the Bison parser skeleton and distribute that work
-   under terms of your choice, so long as that work isn't itself a
-   parser generator using the skeleton or a modified version thereof
-   as a parser skeleton.  Alternatively, if you modify or redistribute
-   the parser skeleton itself, you may (at your option) remove this
-   special exception, which will cause the skeleton and the resulting
-   Bison output files to be licensed under the GNU General Public
-   License without this special exception.
-   
-   This special exception was added by the Free Software Foundation in
-   version 2.2 of Bison.  */
-
-/* C LALR(1) parser skeleton written by Richard Stallman, by
-   simplifying the original so-called "semantic" parser.  */
-
-/* All symbols defined below should begin with yy or YY, to avoid
-   infringing on user name space.  This should be done even for local
-   variables, as they might otherwise be expanded by user macros.
-   There are some unavoidable exceptions within include files to
-   define necessary library symbols; they are noted "INFRINGES ON
-   USER NAME SPACE" below.  */
 
 /* Identify Bison output.  */
 #define YYBISON 1
@@ -70,10 +46,6 @@
 #define yychar          constexpYYchar
 #define yydebug         constexpYYdebug
 #define yynerrs         constexpYYnerrs
-
-
-/* Copy the first part of user declarations.  */
-
 
 #include "cppvalue.h"
 #include "constexp.h"
@@ -149,19 +121,12 @@ int constexpYYlex();
    };
 #endif
 
-
-
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef int YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
-
-
-/* Copy the second part of user declarations.  */
-
-
 
 #ifdef short
 # undef short
@@ -331,8 +296,7 @@ union yyalloc
 /* The size of the maximum gap between one aligned stack and the next.  */
 # define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
 
-/* The size of an array large to enough to hold all stacks, each with
-   N elements.  */
+/* The size of an array large to enough to hold all stacks, each with N elements.  */
 # define YYSTACK_BYTES(N) \
      ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE)) \
       + YYSTACK_GAP_MAXIMUM)
@@ -377,7 +341,6 @@ union yyalloc
 #define YYFINAL  31
 /* YYLAST -- Last index in YYTABLE.  */
 #define YYLAST   63
-
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  32
 /* YYNNTS -- Number of nonterminals.  */
@@ -386,7 +349,6 @@ union yyalloc
 #define YYNRULES  44
 /* YYNRULES -- Number of states.  */
 #define YYNSTATES  73
-
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   286
@@ -887,8 +849,6 @@ int yydebug;
 # define YYMAXDEPTH 10000
 #endif
 
-
-
 #if YYERROR_VERBOSE
 
 # ifndef yystrlen
@@ -1015,15 +975,6 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
       char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
       int yyx;
 
-# if 0
-      /* This is so xgettext sees the translatable formats that are
-	 constructed on the fly.  */
-      YY_("syntax error, unexpected %s");
-      YY_("syntax error, unexpected %s, expecting %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s or %s");
-      YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s");
-# endif
       char *yyfmt;
       char const *yyf;
       static char const yyunexpected[] = "syntax error, unexpected %s";
@@ -1098,11 +1049,6 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
     }
 }
 #endif /* YYERROR_VERBOSE */
-
-
-/*-----------------------------------------------.
-| Release the memory associated to this symbol.  |
-`-----------------------------------------------*/
 
 /*ARGSUSED*/
 #if (defined __STDC__ || defined __C99__FUNC__ \
@@ -1156,12 +1102,6 @@ YYSTYPE yylval;
 /* Number of syntax errors so far.  */
 int yynerrs;
 
-
-
-/*-------------------------.
-| yyparse or yypush_parse.  |
-`-------------------------*/
-
 #ifdef YYPARSE_PARAM
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
@@ -1184,7 +1124,6 @@ yyparse ()
 #endif
 #endif
 {
-
 
     int yystate;
     /* Number of tokens to shift before error messages enabled.  */
@@ -1929,8 +1868,4 @@ yyreturn:
   /* Make sure YYID is used.  */
   return YYID (yyresult);
 }
-
-
-
-
 

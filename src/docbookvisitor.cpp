@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -10,11 +10,10 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
-
 #include <QFileInfo>
 
 #include <config.h>
@@ -196,7 +195,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
    switch (s->type()) {
       case DocVerbatim::Code: // fall though
          m_t << "<literallayout><computeroutput>";
-         Doxygen::parserManager->getParser(m_langExt)
+         Doxy_Globals::parserManager->getParser(m_langExt)
          ->parseCode(m_ci, s->context(), s->text(), langExt,
                      s->isExample(), s->exampleFile());
          m_t << "</computeroutput></literallayout>";
@@ -346,7 +345,7 @@ void DocbookDocVisitor::visit(DocInclude *inc)
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8(), cfi.fileName().toUtf8());
 
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
                   inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd);
 
          m_t << "</computeroutput></literallayout>";
@@ -355,7 +354,7 @@ void DocbookDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Include:
          m_t << "<literallayout><computeroutput>";
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
                   inc->text(),langExt, inc->isExample(), inc->exampleFile());
 
          m_t << "</computeroutput></literallayout>";
@@ -375,7 +374,7 @@ void DocbookDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Snippet:
          m_t << "<literallayout><computeroutput>";
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
                   extractBlock(inc->text(), inc->blockId()), langExt, inc->isExample(), inc->exampleFile() );
 
          m_t << "</computeroutput></literallayout>";
@@ -398,7 +397,7 @@ void DocbookDocVisitor::visit(DocIncOperator *op)
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (!m_hide) {
-         Doxygen::parserManager->getParser(m_langExt)
+         Doxy_Globals::parserManager->getParser(m_langExt)
          ->parseCode(m_ci, op->context(),
                      op->text(), langExt, op->isExample(),
                      op->exampleFile());
@@ -990,7 +989,7 @@ void DocbookDocVisitor::visitPost(DocImage *img)
       QByteArray m_file;
       bool ambig;
 
-      QSharedPointer<FileDef> fd = findFileDef(Doxygen::imageNameDict, baseName, ambig);
+      QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::imageNameDict, baseName, ambig);
 
       if (fd) {
          m_file = fd->getFilePath();

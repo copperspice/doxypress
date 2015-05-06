@@ -114,7 +114,7 @@ class TranslatorPolish : public TranslatorAdapter_1_8_2
     *  parameter s is name of the project name.
     */
    QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Wygenerowano automatycznie z kodu źródłowego programem Doxygen";
+      QByteArray result = "Wygenerowano automatycznie z kodu źródłowego programem DoxyPress";
       if (s) {
          result += (QByteArray)" dla " + s;
       }
@@ -998,14 +998,14 @@ class TranslatorPolish : public TranslatorAdapter_1_8_2
    QByteArray trLegendDocs() {
       return
          "Ta strona wyjaśnia jak interpretować wykresy, które są wygenerowane "
-         "przez doxygen.<p>\n"
+         "przez DoxyPress.<p>\n"
          "Rozważ następujący przykład:\n"
          "\\code\n"
          "/*! Klasa Niewidzialna z powodu okrojenia */\n"
          "class Niewidzialna { };\n\n"
          "/*! Klasa Okrojona, relacja dziedziczenia jest ukryta */\n"
          "class Okrojona : public Niewidzialna { };\n\n"
-         "/* Klasa nie udokumentowana komentarzami doxygen */\n"
+         "/* Klasa nie udokumentowana komentarzami DoxyPress */\n"
          "class Nieudokumentowana { };\n\n"
          "/*! Klasa, która jest dziedziczona publicznie */\n"
          "class PublicznaBaza : public Okrojona { };\n\n"

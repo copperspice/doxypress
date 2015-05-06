@@ -135,8 +135,8 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = (QByteArray)"Automaattisesti luotu Doxygenilla "
-                          "lähdekoodista projektille " + s; // "Generated automatically by Doxygen" ... "for" ... "from the sourcecode"
+      QByteArray result = (QByteArray)"Automaattisesti luotu DoxyPress "
+                          "lähdekoodista projektille " + s; // "Generated automatically by DoxyPress" ... "for" ... "from the sourcecode"
       //if (s) result+=(QByteArray)" voor "+s;
       // tässä on ongelma, kuinka taivuttaa parametria, esim. "Jcad"+"in"; "IFC2VRML konversio"+"n"
       // mutta ratkaistaan ongelma kätevästi kaksoispisteellä -> "Jcad:n" / "IFC2VRML konversio:n"
@@ -1001,9 +1001,9 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
     */
    virtual QByteArray trLegendDocs() {
       return
-         "Tämä sivu selittää, kuinka doxygenin luomia kaavioita tulkitaan.<p>\n"
+         "Tämä sivu selittää, kuinka DoxyPress luomia kaavioita tulkitaan.<p>\n"
          // "This page explains how to interpret the graphs that are generated "
-         // "by doxygen.<p>\n"
+         // "by DoxyPress.<p>\n"
          "Ajattele seuraavaa esimerkkiä:\n"
          // "Consider the following example:\n"
          "\\code\n"
@@ -1015,8 +1015,8 @@ class TranslatorFinnish : public TranslatorAdapter_1_6_0
          // "/*! Truncated class, inheritance relation is hidden */\n"
          "class Katkaistu : public Nakymaton { };\n\n"
          // "class Truncated : public Invisible { };\n\n"
-         "/* Luokkaa ei ole dokumentoitu doxygen-kommenteilla */\n"
-         // "/* Class not documented with doxygen comments */\n"
+         "/* Luokkaa ei ole dokumentoitu DoxyPress-kommenteilla */\n"
+         // "/* Class not documented with DoxyPress comments */\n"
          "class Dokumentoimaton { };\n\n"
          // "class Undocumented { };\n\n"
          "/*! Julkista periyttämistä käyttäen periytetty luokka */\n"

@@ -109,7 +109,7 @@
     "extract-local-classes": true,
     "extract-local-methods": false,
     "extract-package": false,
-    "extract-private": false,
+    "extract-private": true,
     "extract-static": false,
     "file-version-filter": "",
     "filter-patterns": [
@@ -315,7 +315,7 @@
     "sort-constructors-first": true,
     "sort-group-names": true,
     "sort-member-docs": true,
-    "source-code": true,
+    "source-code": false,
     "source-recursive": true,
     "source-tooltips": true,
     "strict-sig-matching": false,

@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -37,7 +37,7 @@ Entry::Entry()
    section  = Entry::EMPTY_SEC;
        
    groups    = new QList<Grouping>; 
-   anchors   = new QList<SectionInfo>;    // Doxygen::sectionDict takes ownership of the items
+   anchors   = new QList<SectionInfo>;    // Doxy_globals::sectionDict takes ownership of the items
        
    tArgLists  = 0;
    mGrpId     = -1;

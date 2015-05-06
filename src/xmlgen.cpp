@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -192,7 +192,7 @@ inline void writeXMLCodeString(QTextStream &t, const char *s, int &col)
 static void writeXMLHeader(QTextStream &t)
 {
    t << "<?xml version='1.0' encoding='UTF-8' standalone='no'?>" << endl;;
-   t << "<doxygen xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ";
+   t << "<doxypress xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ";
    t << "xsi:noNamespaceSchemaLocation=\"compound.xsd\" ";
    t << "version=\"" << versionString << "\">" << endl;
 }
@@ -220,12 +220,12 @@ static void writeCombineScript()
      "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"1.0\">\n"
      "  <xsl:output method=\"xml\" version=\"1.0\" indent=\"no\" standalone=\"yes\" />\n"
      "  <xsl:template match=\"/\">\n"
-     "    <doxygen version=\"{doxygenindex/@version}\">\n"
+     "    <doxypress version=\"{doxypressindex/@version}\">\n"
      "      <!-- Load all doxgen generated xml files -->\n"
-     "      <xsl:for-each select=\"doxygenindex/compound\">\n"
-     "        <xsl:copy-of select=\"document( concat( @refid, '.xml' ) )/doxygen/*\" />\n"
+     "      <xsl:for-each select=\"doxypressindex/compound\">\n"
+     "        <xsl:copy-of select=\"document( concat( @refid, '.xml' ) )/doxypress/*\" />\n"
      "      </xsl:for-each>\n"
-     "    </doxygen>\n"
+     "    </doxypress>\n"
      "  </xsl:template>\n"
      "</xsl:stylesheet>\n";
 }
@@ -504,7 +504,7 @@ static void writeXMLDocBlock(QTextStream &t, const QByteArray &fileName, int lin
 
 void writeXMLCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
 {
-   ParserInterface *pIntf = Doxygen::parserManager->getParser(fd->getDefFileExtension());
+   ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(fd->getDefFileExtension());
    SrcLangExt langExt = getLanguageFromFileName(fd->getDefFileExtension());
    pIntf->resetCodeParserState();
 
@@ -1621,7 +1621,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
    t << "/>" << endl;
    writeListOfAllMembers(cd, t);
    t << "  </compounddef>" << endl;
-   t << "</doxygen>" << endl;
+   t << "</doxypress>" << endl;
 
    ti << "  </compound>" << endl;
 }
@@ -1694,7 +1694,7 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
      << nd->getDefLine() << "\"" << " column=\""
      << nd->getDefColumn() << "\"/>" << endl ;
    t << "  </compounddef>" << endl;
-   t << "</doxygen>" << endl;
+   t << "</doxypress>" << endl;
 
    ti << "  </compound>" << endl;
 }
@@ -1825,7 +1825,7 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    }
    t << "    <location file=\"" << fd->getDefFileName() << "\"/>" << endl;
    t << "  </compounddef>" << endl;
-   t << "</doxygen>" << endl;
+   t << "</doxypress>" << endl;
 
    ti << "  </compound>" << endl;
 }
@@ -1898,7 +1898,7 @@ static void generateXMLForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti)
    writeXMLDocBlock(t, gd->docFile(), gd->docLine(), gd, QSharedPointer<MemberDef>(), gd->documentation());
    t << "    </detaileddescription>" << endl;
    t << "  </compounddef>" << endl;
-   t << "</doxygen>" << endl;
+   t << "</doxypress>" << endl;
 
    ti << "  </compound>" << endl;
 }
@@ -1941,7 +1941,7 @@ static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    t << "    </detaileddescription>" << endl;
    t << "    <location file=\"" << dd->name() << "\"/>" << endl;
    t << "  </compounddef>" << endl;
-   t << "</doxygen>" << endl;
+   t << "</doxypress>" << endl;
 
    ti << "  </compound>" << endl;
 }
@@ -1989,12 +1989,12 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    t << "    <compoundname>" << convertToXML(pd->name())
      << "</compoundname>" << endl;
 
-   if (pd == Doxygen::mainPage) { 
+   if (pd == Doxy_Globals::mainPage) { 
       // main page is special
       QString title;
 
       if (! pd->title().isEmpty() && pd->title().toLower() != "notitle") {
-         title = filterTitle(convertCharEntitiesToUTF8(Doxygen::mainPage->title()));
+         title = filterTitle(convertCharEntitiesToUTF8(Doxy_Globals::mainPage->title()));
 
       } else {
          title = Config::getString("project-name");
@@ -2004,7 +2004,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
         << "</title>" << endl;
 
    } else {
-      QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(pd->name());
+      QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(pd->name());
 
       if (si) {
          t << "    <title>" << convertToXML(convertCharEntitiesToUTF8(filterTitle(si->title)))
@@ -2024,7 +2024,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    t << "    </detaileddescription>" << endl;
 
    t << "  </compounddef>" << endl;
-   t << "</doxygen>" << endl;
+   t << "</doxypress>" << endl;
 
    ti << "  </compound>" << endl;
 }
@@ -2099,54 +2099,54 @@ void generateXML()
 
    // write index header
    t << "<?xml version='1.0' encoding='UTF-8' standalone='no'?>" << endl;;
-   t << "<doxygenindex xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ";
+   t << "<doxypressindex xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ";
    t << "xsi:noNamespaceSchemaLocation=\"index.xsd\" ";
    t << "version=\"" << versionString << "\">" << endl;
 
        
-   for (auto cd : *Doxygen::classSDict) {
+   for (auto cd : *Doxy_Globals::classSDict) {
        generateXMLForClass(cd, t);
    }
    
-   for (auto nd : *Doxygen::namespaceSDict) {
+   for (auto nd : *Doxy_Globals::namespaceSDict) {
       msg("Generating XML output for namespace %s\n", nd->name().data());
       generateXMLForNamespace(nd, t);
    }
  
-   for (auto fn : *Doxygen::inputNameList) {     
+   for (auto fn : *Doxy_Globals::inputNameList) {     
       for (auto fd : *fn) {
          msg("Generating XML output for file %s\n", fd->name().data());
          generateXMLForFile(fd, t);
       }
    }
  
-   for (auto gd : *Doxygen::groupSDict) {
+   for (auto gd : *Doxy_Globals::groupSDict) {
       msg("Generating XML output for group %s\n", gd->name().data());
       generateXMLForGroup(gd, t);
    } 
 
-   for (auto pd : *Doxygen::pageSDict) {
+   for (auto pd : *Doxy_Globals::pageSDict) {
       msg("Generating XML output for page %s\n", pd->name().data());
       generateXMLForPage(pd, t, false);
    }
     
-   for (auto dir : Doxygen::directories) {
+   for (auto dir : Doxy_Globals::directories) {
       msg("Generate XML output for dir %s\n", dir->name().data());
       generateXMLForDir(dir, t);
    }
     
-   for (auto pd : *Doxygen::exampleSDict) {
+   for (auto pd : *Doxy_Globals::exampleSDict) {
       msg("Generating XML output for example %s\n", pd->name().data());
       generateXMLForPage(pd, t, true);
    }
    
-   if (Doxygen::mainPage) {
+   if (Doxy_Globals::mainPage) {
       msg("Generating XML output for the main page\n");
-      generateXMLForPage(Doxygen::mainPage, t, false);
+      generateXMLForPage(Doxy_Globals::mainPage, t, false);
    }
 
    //t << "  </compoundlist>" << endl;
-   t << "</doxygenindex>" << endl;
+   t << "</doxypressindex>" << endl;
 
    writeCombineScript();
 }

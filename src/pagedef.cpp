@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -98,7 +98,7 @@ void PageDef::addInnerCompound(QSharedPointer<Definition> d)
 
       d->setOuterScope(self);
 
-      if (this == Doxygen::mainPage) {
+      if (this == Doxy_Globals::mainPage) {
          pd->setNestingLevel(m_nestingLevel);
 
       } else {
@@ -118,7 +118,7 @@ void PageDef::writeTagFile(QTextStream &tagFile)
    bool found = (name() == "citelist");
    
    if (! found ) {      
-      for (auto item : *Doxygen::xrefLists) {         
+      for (auto item : *Doxy_Globals::xrefLists) {         
    
          if (item.listName() == name()) {
             found = true;
@@ -158,7 +158,7 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    if (m_nestingLevel > 0) {
       //&& // a sub page
-      //(Doxygen::mainPage==0 || getOuterScope()!=Doxygen::mainPage) // and not a subpage of the mainpage
+      //(Doxy_Globals::mainPage==0 || getOuterScope()!=Doxy_Globals::mainPage) // and not a subpage of the mainpage
      
       // do not generate sub page output for RTF and LaTeX, as these are
       // part of their parent page
@@ -180,13 +180,13 @@ void PageDef::writeDocumentation(OutputList &ol)
    //2.}
 
    if (! generateTreeView) {
-      if (getOuterScope() != Doxygen::globalScope && ! Config::getBool("disable-index")) {
+      if (getOuterScope() != Doxy_Globals::globalScope && ! Config::getBool("disable-index")) {
          getOuterScope()->writeNavigationPath(ol);
       }
       ol.endQuickIndices();
    }
 
-   QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(name());
+   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(name());
 
    // save old generator state and write title only to Man generator
    ol.pushGeneratorState();
@@ -229,7 +229,7 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    writePageDocumentation(ol);
 
-   if (generateTreeView && getOuterScope() != Doxygen::globalScope && ! Config::getBool("disable-index")) {
+   if (generateTreeView && getOuterScope() != Doxy_Globals::globalScope && ! Config::getBool("disable-index")) {
       ol.endContents();
       endFileWithNavPath(getOuterScope(), ol);
 
@@ -240,16 +240,16 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.popGeneratorState();
    //1.}
 
-   Doxygen::indexList->addIndexItem(self, QSharedPointer<MemberDef>(), 0, filterTitle(title()));
+   Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>(), 0, filterTitle(title()));
 }
  
 void PageDef::writePageDocumentation(OutputList &ol)
 {
    QSharedPointer<PageDef> self = sharedFrom(this);
-   bool markdownEnabled = Doxygen::markdownSupport;
+   bool markdownEnabled = Doxy_Globals::markdownSupport;
 
    if (getLanguage() == SrcLangExt_Markdown) {
-      Doxygen::markdownSupport = true;
+      Doxy_Globals::markdownSupport = true;
    }
 
    ol.startTextBlock();
@@ -259,7 +259,7 @@ void PageDef::writePageDocumentation(OutputList &ol)
 
    ol.endTextBlock();
 
-   Doxygen::markdownSupport = markdownEnabled;
+   Doxy_Globals::markdownSupport = markdownEnabled;
 
    if (hasSubPages()) {
       // for printed documentation we write subpages as section's of the parent page.
@@ -299,9 +299,9 @@ void PageDef::writePageDocumentation(OutputList &ol)
          ol.parseText(title);
          ol.endSection(subPage->name(), sectionType);
 
-         Doxygen::subpageNestingLevel++;
+         Doxy_Globals::subpageNestingLevel++;
          subPage->writePageDocumentation(ol);
-         Doxygen::subpageNestingLevel--;
+         Doxy_Globals::subpageNestingLevel--;
       }
 
       ol.popGeneratorState();

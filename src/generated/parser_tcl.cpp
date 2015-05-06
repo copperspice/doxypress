@@ -1,8 +1,8 @@
 /*************************************************************************
  *
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
- * All rights reserved.
+ * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -3908,13 +3908,13 @@ static void tcl_codify_link(QByteArray name)
    if (init == 0) {
       init = 1;
 
-      for (auto mn : *Doxygen::memberNameSDict) { 
+      for (auto mn : *Doxy_Globals::memberNameSDict) { 
          for (auto md : *mn) {
             fn.insert(md->qualifiedName(), md);
          }
       }
 
-      for (auto mn : *Doxygen::functionNameSDict) {
+      for (auto mn : *Doxy_Globals::functionNameSDict) {
          for (auto md : *mn) {
             fn.insert(md->qualifiedName(), md);
          }

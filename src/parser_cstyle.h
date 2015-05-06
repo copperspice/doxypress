@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -22,7 +22,7 @@
 
 /** \brief C-like language parser using state-based lexical scanning.
  *
- *  This is the language parser for doxyPress.  
+ *  This is the language parser for DoxyPress.  
  *  It supports C++ and various languages which are closely related to C++,
  *  such as C, C#, Objective-C, Java, PHP, and IDL.
  */

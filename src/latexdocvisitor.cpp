@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
- * All rights reserved.    
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -83,7 +83,7 @@ static const char *getSectionName(int level)
       l++;
    }
 
-   if (Doxygen::insideMainPage) {
+   if (Doxy_Globals::insideMainPage) {
       l--;
    }
 
@@ -314,7 +314,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
    switch (s->type()) {
       case DocVerbatim::Code: {
          m_t << "\n\\begin{DoxyCode}\n";
-         Doxygen::parserManager->getParser(lang)
+         Doxy_Globals::parserManager->getParser(lang)
          ->parseCode(m_ci, s->context(), s->text(), langExt,
                      s->isExample(), s->exampleFile());
          m_t << "\\end{DoxyCode}\n";
@@ -437,7 +437,7 @@ void LatexDocVisitor::visit(DocInclude *inc)
          QFileInfo cfi(inc->file());
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8(), cfi.fileName().toUtf8());
 
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd);
 
          m_t << "\\end{DoxyCodeInclude}" << endl;
@@ -446,7 +446,7 @@ void LatexDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Include:
          m_t << "\n\\begin{DoxyCodeInclude}\n";
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(), 
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(), 
                      langExt, inc->isExample(),inc->exampleFile());
 
          m_t << "\\end{DoxyCodeInclude}\n";
@@ -466,7 +466,7 @@ void LatexDocVisitor::visit(DocInclude *inc)
          break;
       case DocInclude::Snippet: {
          m_t << "\n\\begin{DoxyCodeInclude}\n";
-         Doxygen::parserManager->getParser(inc->extension())
+         Doxy_Globals::parserManager->getParser(inc->extension())
          ->parseCode(m_ci,
                      inc->context(),
                      extractBlock(inc->text(), inc->blockId()),
@@ -495,7 +495,7 @@ void LatexDocVisitor::visit(DocIncOperator *op)
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (!m_hide) {
-         Doxygen::parserManager->getParser(m_langExt)
+         Doxy_Globals::parserManager->getParser(m_langExt)
          ->parseCode(m_ci, op->context(), op->text(), langExt,
                      op->isExample(), op->exampleFile());
       }
@@ -1733,14 +1733,14 @@ void LatexDocVisitor::startLink(const QByteArray &ref, const QByteArray &file, c
          QByteArray dest;
          m_t << "\\href{";
 
-         dest = Doxygen::tagDestinationDict[ref];
+         dest = Doxy_Globals::tagDestinationDict[ref];
 
          if (! dest.isEmpty() ) {
             m_t << dest << "/";
          }
 
          if (! file.isEmpty()) {
-            m_t << file << Doxygen::htmlFileExtension;
+            m_t << file << Doxy_Globals::htmlFileExtension;
          }
 
          if (! anchor.isEmpty()) {

@@ -66,7 +66,7 @@ class TranslatorCroatian : public TranslatorAdapter_1_8_2
       return ", uključujući naslijeđene članove.";
    }
    QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "napravljeno automatski Doxygen-om";
+      QByteArray result = "napravljeno automatski DoxyPress";
       if (s) {
          result += (QByteArray)" za " + s;
       }
@@ -719,7 +719,7 @@ class TranslatorCroatian : public TranslatorAdapter_1_8_2
    virtual QByteArray trLegendDocs() {
       return
          "Ova stranica objašnjava kako interpretirati grafikone koje je generirao "
-         "doxygen.<p>\n"
+         "DoxyPress.<p>\n"
          "Na primjer:\n"
          "\\code\n"
          "/*! Nevidljiva klasa (neće stati na graf date visine) */\n"

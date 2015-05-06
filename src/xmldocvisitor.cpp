@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -198,7 +198,7 @@ void XmlDocVisitor::visit(DocVerbatim *s)
    switch (s->type()) {
       case DocVerbatim::Code: // fall though
          m_t << "<programlisting>";
-         Doxygen::parserManager->getParser(lang)
+         Doxy_Globals::parserManager->getParser(lang)
          ->parseCode(m_ci, s->context(), s->text(), langExt,
                      s->isExample(), s->exampleFile());
          m_t << "</programlisting>";
@@ -277,7 +277,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8(), cfi.fileName().toUtf8());
 
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd); 
 
          m_t << "</programlisting>";
@@ -287,7 +287,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
       case DocInclude::Include:
          m_t << "<programlisting>";
 
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(),
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(),
                      langExt, inc->isExample(), inc->exampleFile());
 
          m_t << "</programlisting>";
@@ -316,7 +316,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Snippet:
          m_t << "<programlisting>";
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
                      langExt, inc->isExample(), inc->exampleFile() );
          m_t << "</programlisting>";
          break;
@@ -338,7 +338,7 @@ void XmlDocVisitor::visit(DocIncOperator *op)
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (!m_hide) {
-         Doxygen::parserManager->getParser(m_langExt)
+         Doxy_Globals::parserManager->getParser(m_langExt)
          ->parseCode(m_ci, op->context(),
                      op->text(), langExt, op->isExample(),
                      op->exampleFile());

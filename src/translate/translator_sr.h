@@ -128,7 +128,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Napravljeno automatski korišćenjem alata Doxygen";
+      QByteArray result = "Napravljeno automatski korišćenjem alata DoxyPress";
       if ( s ) {
          result += (QByteArray)" za projekat " + s;
       }
@@ -990,14 +990,14 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
    virtual QByteArray trLegendDocs() {
       return
          "Ova stranica objašnjava kako tumačiti grafikone koje je napravio "
-         "doxygen.<p>\n"
+         "DoxyPress.<p>\n"
          "Na primer:\n"
          "\\code\n"
          "/*! Klasa nevidljiva zbog trenutnih ograničenja */\n"
          "class Invisible { };\n\n"
          "/*! Klasa kojoj se ne vidi način izvođenja */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Klasa bez doxygen komentara */\n"
+         "/* Klasa bez DoxyPress komentara */\n"
          "class Undocumented { };\n\n"
          "/*! Klasa izvedena iz osnovne klase javnim izvođenjem */\n"
          "class PublicBase : public Truncated { };\n\n"
@@ -1029,7 +1029,7 @@ class TranslatorSerbian : public TranslatorAdapter_1_6_0
          "<ul>\n"
          "<li>Puni sivi predstavlja strukturu ili klasu za koju je graf napravljen.\n"
          "<li>Sa crnom ivicom predstavlja dokumentovanu strukturu ili klasu.\n"
-         "<li>Sa sivom ivicom predstavlja strukturu ili klasu bez doxygen komentara.\n"
+         "<li>Sa sivom ivicom predstavlja strukturu ili klasu bez DoxyPress komentara.\n"
          "<li>Sa crvenom ivicom predstavlja dokumentovanu strukturu ili klasu\n"
          "za koju nisu prikazani svi relevantni grafovi.\n"
          "</ul>"

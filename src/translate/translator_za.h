@@ -124,7 +124,7 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Automaties gegenereer deur Doxygen";
+      QByteArray result = "Automaties gegenereer deur DoxyPress";
       if (s) {
          result += (QByteArray)" vir " + s;
       }
@@ -978,14 +978,14 @@ class TranslatorAfrikaans : public TranslatorAdapter_1_6_0
    virtual QByteArray trLegendDocs() {
       return
          "Hierdie bladsy beskryf die diagram konvensies wat gebruik word "
-         "deur doxygen.<p>\n"
+         "deur DoxyPress.<p>\n"
          "in hierdie voorbeeld:\n"
          "\\code\n"
          "/*! Onsigbare klas weens afkorting */\n"
          "class Invisible { };\n\n"
          "/*! Afgekorte klas, afgeleide verwantskap word versteek */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Ongedokumenteerde Klas, geen doxygen kommentaar nie */\n"
+         "/* Ongedokumenteerde Klas, geen DoxyPress kommentaar nie */\n"
          "class Undocumented{ };\n\n"
          "/*! 'n Klas wat afgelei is met 'n publieke verwantskap */\n"
          "class PublicBase : public Truncated { };\n\n"

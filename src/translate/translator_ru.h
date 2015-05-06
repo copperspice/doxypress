@@ -105,7 +105,7 @@ class TranslatorRussian : public Translator
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Автоматически создано Doxygen";
+      QByteArray result = "Автоматически создано DoxyPress";
       if (s) {
          result += QByteArray(" для ") + s;
       }

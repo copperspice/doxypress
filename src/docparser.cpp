@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -26,31 +26,31 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include <doxy_globals.h>
-#include <util.h>
-#include <pagedef.h>
+#include <arguments.h>
+#include <classlist.h>
+#include <cite.h>
+#include <config.h>
+#include <cmdmapper.h>
 #include <docparser.h>
 #include <doctokenizer.h>
-#include <cmdmapper.h>
-#include <printdocvisitor.h>
+#include <doxy_globals.h>
+#include <filedef.h>
+#include <formula.h>
+#include <groupdef.h>
+#include <growbuf.h>
+#include <htmlentity.h>
+#include <language.h>
+#include <markdown.h>
+#include <memberdef.h>
 #include <message.h>
+#include <namespacedef.h>
+#include <pagedef.h>
+#include <portable.h>
+#include <printdocvisitor.h>
+#include <reflist.h>
 #include <section.h>
 #include <searchindex.h>
-#include <language.h>
-#include <portable.h>
-#include <cite.h>
-#include <arguments.h>
-#include <groupdef.h>
-#include <classlist.h>
-#include <filedef.h>
-#include <memberdef.h>
-#include <namespacedef.h>
-#include <reflist.h>
-#include <formula.h>
-#include <config.h>
-#include <growbuf.h>
-#include <markdown.h>
-#include <htmlentity.h>
+#include <util.h>
 
 // debug off
 #define DBG(x) do {} while(0)
@@ -233,7 +233,7 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
 
    QSharedPointer<FileDef> fd;
  
-   if ((fd = findFileDef(Doxygen::imageNameDict, fileName, ambig))) {
+   if ((fd = findFileDef(Doxy_Globals::imageNameDict, fileName, ambig))) {
       QByteArray inputFile = fd->getFilePath();
       QFile inImage(inputFile);
 
@@ -303,7 +303,7 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
                delete[] buffer;
 
                if (type == DocImage::Html) {
-                  Doxygen::indexList->addImageFile(result);
+                  Doxy_Globals::indexList->addImageFile(result);
                }
 
             } else {
@@ -343,7 +343,7 @@ static QByteArray findAndCopyImage(const char *fileName, DocImage::Type type)
       text = QString("Image file name %1 is ambiguous.\n").arg(fileName);
 
       text += "Possible candidates:\n";
-      text += showFileDefMatches(Doxygen::imageNameDict, fileName);
+      text += showFileDefMatches(Doxy_Globals::imageNameDict, fileName);
 
       warn_doc_error(s_fileName, doctokenizerYYlineno, text);
 
@@ -607,7 +607,7 @@ static void detectNoDocumentedParams()
 static QByteArray stripKnownExtensions(const char *text)
 {
    QByteArray result  = text;
-   QByteArray htmlExt = Doxygen::htmlFileExtension.toUtf8();
+   QByteArray htmlExt = Doxy_Globals::htmlFileExtension.toUtf8();
 
    if (result.endsWith(".tex")) {
       result = result.left(result.length() - 4);
@@ -749,7 +749,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QByteArray command
       }
 
       // try class, namespace, group, page, file reference
-      cd = Doxygen::classSDict->find(fullName);
+      cd = Doxy_Globals::classSDict->find(fullName);
 
       if (cd) {          
          doc     = cd->documentation();
@@ -759,7 +759,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QByteArray command
          return retval;
       }
 
-      nd = Doxygen::namespaceSDict->find(fullName);
+      nd = Doxy_Globals::namespaceSDict->find(fullName);
 
       if (nd) {          
          doc    = nd->documentation();
@@ -769,7 +769,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QByteArray command
          return retval;
       }
 
-      gd = Doxygen::groupSDict->find(cmdArg);
+      gd = Doxy_Globals::groupSDict->find(cmdArg);
 
       if (gd) {          
          doc    = gd->documentation();
@@ -779,7 +779,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QByteArray command
          return retval;
       }
 
-      pd = Doxygen::pageSDict->find(cmdArg);
+      pd = Doxy_Globals::pageSDict->find(cmdArg);
 
       if (pd) {         
          doc    = pd->documentation();
@@ -790,7 +790,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QByteArray command
       }
 
       bool ambig;
-      fd = findFileDef(Doxygen::inputNameDict, cmdArg, ambig);
+      fd = findFileDef(Doxy_Globals::inputNameDict, cmdArg, ambig);
 
       if (fd && ! ambig) {         
          doc    = fd->documentation();
@@ -1073,7 +1073,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children)
    bool ambig;
    int len = g_token->name.length();
  
-   QSharedPointer<FileDef> fd = findFileDef(Doxygen::inputNameDict, s_fileName, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s_fileName, ambig);
 
    if (! s_insideHtmlLink && (resolveRef(s_context, g_token->name, s_inSeeBlock, &compound, &member, true, fd, true)
           || (! s_context.isEmpty() &&  resolveRef("", g_token->name, s_inSeeBlock, &compound, 
@@ -1254,7 +1254,7 @@ static void handleAnchorName(DocNode *parent)
    QByteArray title = g_token->name;
    title = title.mid(1, title.length()-2);
    
-   QSharedPointer<SectionInfo> sec = Doxygen::sectionDict->find(id);
+   QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict->find(id);
 
    if (sec) {        
       sec->title = title;
@@ -1746,12 +1746,12 @@ static void readTextFileByName(const QByteArray &file, QByteArray &text)
    bool ambig;
    QSharedPointer<FileDef> fd;
 
-   if ((fd = findFileDef(Doxygen::exampleNameDict, file, ambig))) {
+   if ((fd = findFileDef(Doxy_Globals::exampleNameDict, file, ambig))) {
       text = fileToString(fd->getFilePath(), Config::getBool("filter-source-files"));
 
    } else if (ambig) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included file name %s is ambiguous"
-                     "Possible candidates:\n%s", qPrint(file), qPrint(showFileDefMatches(Doxygen::exampleNameDict, file)));
+                     "Possible candidates:\n%s", qPrint(file), qPrint(showFileDefMatches(Doxy_Globals::exampleNameDict, file)));
 
    } else {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included file %s is not found. "
@@ -1764,8 +1764,8 @@ DocWord::DocWord(DocNode *parent, const QByteArray &word)
 {
    m_parent = parent;
  
-   if (Doxygen::searchIndex && ! s_searchUrl.isEmpty()) {
-      Doxygen::searchIndex->addWord(word, false);
+   if (Doxy_Globals::searchIndex && ! s_searchUrl.isEmpty()) {
+      Doxy_Globals::searchIndex->addWord(word, false);
    }
 }
 
@@ -1775,8 +1775,8 @@ DocLinkedWord::DocLinkedWord(DocNode *parent, const QByteArray &word, const QByt
 {
    m_parent = parent;
    
-   if (Doxygen::searchIndex && !s_searchUrl.isEmpty()) {
-      Doxygen::searchIndex->addWord(word, false);
+   if (Doxy_Globals::searchIndex && !s_searchUrl.isEmpty()) {
+      Doxy_Globals::searchIndex->addWord(word, false);
    }
 }
 
@@ -1793,7 +1793,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QByteArray &id, bool newAnchor)
       m_anchor = id;
 
    } else if (id.left(CiteConsts::anchorPrefix.length()) == CiteConsts::anchorPrefix) {
-      CiteInfo *cite = Doxygen::citeDict->find(id.mid(CiteConsts::anchorPrefix.length()));
+      CiteInfo *cite = Doxy_Globals::citeDict->find(id.mid(CiteConsts::anchorPrefix.length()));
 
       if (cite) {
          m_file   = convertNameToFile(CiteConsts::fileName, false, true).toUtf8();
@@ -1808,7 +1808,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QByteArray &id, bool newAnchor)
 
    } else { 
       // found \anchor label
-      QSharedPointer<SectionInfo> sec = Doxygen::sectionDict->find(id);
+      QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict->find(id);
 
       if (sec) {        
          m_file   = sec->fileName;
@@ -2002,11 +2002,11 @@ void DocCopy::parse(QList<DocNode *> &children)
          s_scope = def;
 
          if (def->definitionType() == Definition::TypeMember && def->getOuterScope()) {
-            if (def->getOuterScope() != Doxygen::globalScope) {
+            if (def->getOuterScope() != Doxy_Globals::globalScope) {
                s_context = def->getOuterScope()->name();
             }
 
-         } else if (def != Doxygen::globalScope) {
+         } else if (def != Doxy_Globals::globalScope) {
             s_context = def->name();
 
          }
@@ -2073,9 +2073,9 @@ bool DocXRefItem::parse()
 {
    QByteArray listName;
 
-   if (Doxygen::xrefLists->contains(m_key)) {
+   if (Doxy_Globals::xrefLists->contains(m_key)) {
 
-      auto &refList = (*Doxygen::xrefLists)[m_key];
+      auto &refList = (*Doxy_Globals::xrefLists)[m_key];
      
       if ( (m_key != "todo"       || Config::getBool("generate-todo-list")) &&
            (m_key != "test"       || Config::getBool("generate-test-list")) &&
@@ -2120,9 +2120,9 @@ DocFormula::DocFormula(DocNode *parent, int id)
    QString formCmd;
    formCmd = QString("\\form#%1").arg(id);
 
-   auto formula = Doxygen::formulaNameDict->find(formCmd);
+   auto formula = Doxy_Globals::formulaNameDict->find(formCmd);
 
-   if (formula != Doxygen::formulaNameDict->end()) {
+   if (formula != Doxy_Globals::formulaNameDict->end()) {
       m_id = formula->getId();   
       m_name = QString("form_%1").arg(m_id).toUtf8();
 
@@ -2193,7 +2193,7 @@ void DocSecRefItem::parse()
    QSharedPointer<SectionInfo> sec;
 
    if (!m_target.isEmpty()) {
-      sec = Doxygen::sectionDict->find(m_target);
+      sec = Doxy_Globals::sectionDict->find(m_target);
 
       if (sec) {
          m_file   = sec->fileName;
@@ -2340,10 +2340,10 @@ DocRef::DocRef(DocNode *parent, const QByteArray &target, const QByteArray &cont
 
    m_relPath = s_relPath;
 
-   QSharedPointer<SectionInfo> sec = Doxygen::sectionDict->find(target);
+   QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict->find(target);
 
    if (sec == 0 && lang == SrcLangExt_Markdown) { // lookup as markdown file
-      sec = Doxygen::sectionDict->find(markdownFileNameToId(target));
+      sec = Doxy_Globals::sectionDict->find(markdownFileNameToId(target));
    }
 
    if (sec) { 
@@ -2351,7 +2351,7 @@ DocRef::DocRef(DocNode *parent, const QByteArray &target, const QByteArray &cont
       QSharedPointer<PageDef> pd;
 
       if (sec->type == SectionInfo::Page) {
-         pd = Doxygen::pageSDict->find(target);
+         pd = Doxy_Globals::pageSDict->find(target);
       }
 
       m_text = sec->title;
@@ -2493,7 +2493,7 @@ DocCite::DocCite(DocNode *parent, const QByteArray &target, const QByteArray &)
    assert(! target.isEmpty());
 
    m_relPath = s_relPath;
-   CiteInfo *cite = Doxygen::citeDict->find(target);
+   CiteInfo *cite = Doxy_Globals::citeDict->find(target);
 
    if (numBibFiles > 0 && cite && !cite->text.isEmpty()) {
       // ref to citation
@@ -2688,10 +2688,10 @@ void DocDotFile::parse()
    handlePendingStyleCommands(this, m_children);
 
    bool ambig;
-   QSharedPointer<FileDef> fd = findFileDef(Doxygen::dotFileNameDict, m_name, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::dotFileNameDict, m_name, ambig);
 
    if (fd == 0 && m_name.right(4) != ".dot") { // try with .dot extension as well
-      fd = findFileDef(Doxygen::dotFileNameDict, m_name + ".dot", ambig);
+      fd = findFileDef(Doxy_Globals::dotFileNameDict, m_name + ".dot", ambig);
    }
 
    if (fd) {
@@ -2700,7 +2700,7 @@ void DocDotFile::parse()
    } else if (ambig) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included dot file name %s is ambiguous.\n"
                      "Possible candidates:\n%s", qPrint(m_name),
-                     qPrint(showFileDefMatches(Doxygen::exampleNameDict, m_name))
+                     qPrint(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name))
                     );
    } else {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included dot file %s is not found "
@@ -2765,10 +2765,10 @@ void DocMscFile::parse()
    handlePendingStyleCommands(this, m_children);
 
    bool ambig;
-   QSharedPointer<FileDef> fd = findFileDef(Doxygen::mscFileNameDict, m_name, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::mscFileNameDict, m_name, ambig);
 
    if (fd == 0 && m_name.right(4) != ".msc") { // try with .msc extension as well
-      fd = findFileDef(Doxygen::mscFileNameDict, m_name + ".msc", ambig);
+      fd = findFileDef(Doxy_Globals::mscFileNameDict, m_name + ".msc", ambig);
    }
 
    if (fd) {
@@ -2777,7 +2777,7 @@ void DocMscFile::parse()
    } else if (ambig) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included msc file name %s is ambiguous.\n"
                      "Possible candidates:\n%s", qPrint(m_name),
-                     qPrint(showFileDefMatches(Doxygen::exampleNameDict, m_name)));
+                     qPrint(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name)));
 
    } else {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included msc file %s is not found "
@@ -2843,10 +2843,10 @@ void DocDiaFile::parse()
    handlePendingStyleCommands(this, m_children);
 
    bool ambig;
-   QSharedPointer<FileDef> fd = findFileDef(Doxygen::diaFileNameDict, m_name, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::diaFileNameDict, m_name, ambig);
 
    if (fd == 0 && m_name.right(4) != ".dia") { // try with .dia extension as well
-      fd = findFileDef(Doxygen::diaFileNameDict, m_name + ".dia", ambig);
+      fd = findFileDef(Doxy_Globals::diaFileNameDict, m_name + ".dia", ambig);
    }
 
    if (fd) {
@@ -2855,7 +2855,7 @@ void DocDiaFile::parse()
    } else if (ambig) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included dia file name %s is ambiguous.\n"
                      "Possible candidates:\n%s", qPrint(m_name),
-                     qPrint(showFileDefMatches(Doxygen::exampleNameDict, m_name)));
+                     qPrint(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name)));
 
    } else {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included dia file %s is not found "
@@ -3138,7 +3138,7 @@ int DocInternal::parse(int level)
           (level == 3 && retval == RetVal_Subsubsection) ||
           (level == 4 && retval == RetVal_Paragraph)) {
 
-      DocSection *s = new DocSection(this, qMin(level + Doxygen::subpageNestingLevel, 5), g_token->sectionId);
+      DocSection *s = new DocSection(this, qMin(level + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
       m_children.append(s);
 
       retval = s->parse();
@@ -5557,7 +5557,7 @@ void DocPara::handleInheritDoc()
          docParserPushContext();
          s_scope = reMd->getOuterScope();
 
-         if (s_scope != Doxygen::globalScope) {
+         if (s_scope != Doxy_Globals::globalScope) {
             s_context = s_scope->name();
          }
 
@@ -5902,7 +5902,7 @@ int DocPara::handleCommand(const QByteArray &cmdName)
       case CMD_ADDINDEX: {
          QSharedPointer<Definition> temp;
 
-         if (s_scope != Doxygen::globalScope) {
+         if (s_scope != Doxy_Globals::globalScope) {
             temp = s_scope;
          } else {
             temp = QSharedPointer<Definition>();
@@ -6991,7 +6991,7 @@ int DocSection::parse()
    QSharedPointer<SectionInfo> sec;
 
    if (! m_id.isEmpty()) {
-      sec = Doxygen::sectionDict->find(m_id);
+      sec = Doxy_Globals::sectionDict->find(m_id);
 
       if (sec) {
          m_file   = sec->fileName;
@@ -7057,40 +7057,40 @@ int DocSection::parse()
       lastPar->markLast();
    }
    
-   if (retval == RetVal_Subsection && m_level == Doxygen::subpageNestingLevel + 1) {
+   if (retval == RetVal_Subsection && m_level == Doxy_Globals::subpageNestingLevel + 1) {
       // then parse any number of nested sections
 
       while (retval == RetVal_Subsection) { // more sections follow
-         //SectionInfo *sec=Doxygen::sectionDict[g_token->sectionId];
+         //SectionInfo *sec=Doxy_Globals::sectionDict[g_token->sectionId];
 
-         DocSection *s = new DocSection(this, qMin(2 + Doxygen::subpageNestingLevel, 5), g_token->sectionId);
+         DocSection *s = new DocSection(this, qMin(2 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
          m_children.append(s);
          retval = s->parse();
       }
 
-   } else if (retval == RetVal_Subsubsection && m_level == Doxygen::subpageNestingLevel + 2) {
+   } else if (retval == RetVal_Subsubsection && m_level == Doxy_Globals::subpageNestingLevel + 2) {
       // then parse any number of nested sections
 
       while (retval == RetVal_Subsubsection) { // more sections follow
-         //SectionInfo *sec=Doxygen::sectionDict[g_token->sectionId];
+         //SectionInfo *sec=Doxy_Globals::sectionDict[g_token->sectionId];
 
-         DocSection *s = new DocSection(this, qMin(3 + Doxygen::subpageNestingLevel, 5), g_token->sectionId);
+         DocSection *s = new DocSection(this, qMin(3 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
          m_children.append(s);
          retval = s->parse();
       }
-   } else if (retval == RetVal_Paragraph && m_level == qMin(5, Doxygen::subpageNestingLevel + 3)) {
+   } else if (retval == RetVal_Paragraph && m_level == qMin(5, Doxy_Globals::subpageNestingLevel + 3)) {
       // then parse any number of nested sections
 
       while (retval == RetVal_Paragraph) { // more sections follow
-         //SectionInfo *sec=Doxygen::sectionDict[g_token->sectionId];
+         //SectionInfo *sec=Doxy_Globals::sectionDict[g_token->sectionId];
 
-         DocSection *s = new DocSection(this, qMin(4 + Doxygen::subpageNestingLevel, 5), g_token->sectionId);
+         DocSection *s = new DocSection(this, qMin(4 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
          m_children.append(s);
          retval = s->parse();
       }
 
-   } else if ((m_level <= 1 + Doxygen::subpageNestingLevel && retval == RetVal_Subsubsection) ||
-              (m_level <= 2 + Doxygen::subpageNestingLevel && retval == RetVal_Paragraph)
+   } else if ((m_level <= 1 + Doxy_Globals::subpageNestingLevel && retval == RetVal_Subsubsection) ||
+              (m_level <= 2 + Doxy_Globals::subpageNestingLevel && retval == RetVal_Paragraph)
              ) {
       int level = (retval == RetVal_Subsubsection) ? 3 : 4;
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected %s "
@@ -7303,10 +7303,10 @@ void DocRoot::parse()
    
    // then parse any number of level1 sections
    while (retval == RetVal_Section) {
-      QSharedPointer<SectionInfo> sec = Doxygen::sectionDict->find(g_token->sectionId);
+      QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict->find(g_token->sectionId);
 
       if (sec) {
-         DocSection *s = new DocSection(this, qMin(1 + Doxygen::subpageNestingLevel, 5), g_token->sectionId);
+         DocSection *s = new DocSection(this, qMin(1 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
          m_children.append(s);
          retval = s->parse();
 
@@ -7486,7 +7486,7 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<
    // bool fortranOpt = Config::getBool("optimize-fortran");
    docParserPushContext();
 
-   if (ctx && ctx != Doxygen::globalScope && (ctx->definitionType() == Definition::TypeClass ||
+   if (ctx && ctx != Doxy_Globals::globalScope && (ctx->definitionType() == Definition::TypeClass ||
           ctx->definitionType() == Definition::TypeNamespace)) {
 
       s_context = ctx->name();
@@ -7494,14 +7494,14 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<
    } else if (ctx && ctx->definitionType() == Definition::TypePage) {
       QSharedPointer<Definition> scope = ctx.dynamicCast<PageDef>()->getPageScope();
 
-      if (scope && scope != Doxygen::globalScope) {
+      if (scope && scope != Doxy_Globals::globalScope) {
          s_context = scope->name();
       }
 
    } else if (ctx && ctx->definitionType() == Definition::TypeGroup) {
       QSharedPointer<Definition> scope = ctx.dynamicCast<GroupDef>()->getGroupScope();
 
-      if (scope && scope != Doxygen::globalScope) {
+      if (scope && scope != Doxy_Globals::globalScope) {
          s_context = scope->name();
       }
 
@@ -7511,30 +7511,30 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<
 
    s_scope = ctx;
 
-   if (indexWords && Doxygen::searchIndex) {
+   if (indexWords && Doxy_Globals::searchIndex) {
       if (md) {
          s_searchUrl = md->getOutputFileBase();
-         Doxygen::searchIndex->setCurrentDoc(md, md->anchor(), false);
+         Doxy_Globals::searchIndex->setCurrentDoc(md, md->anchor(), false);
 
       } else if (ctx) {
          s_searchUrl = ctx->getOutputFileBase();
-         Doxygen::searchIndex->setCurrentDoc(ctx, ctx->anchor(), false);
+         Doxy_Globals::searchIndex->setCurrentDoc(ctx, ctx->anchor(), false);
 
       }
    }
 
 
 #if 0
-   if (indexWords && md && Doxygen::searchIndex) {
+   if (indexWords && md && Doxy_Globals::searchIndex) {
       s_searchUrl = md->getOutputFileBase();
-      Doxygen::searchIndex->setCurrentDoc(
+      Doxy_Globals::searchIndex->setCurrentDoc(
          (md->getLanguage() == SrcLangExt_Fortran ?
           theTranslator->trSubprogram(true, true) :
           theTranslator->trMember(true, true)) + " " + md->qualifiedName(),
          s_searchUrl,
          md->anchor());
 
-   } else if (indexWords && ctx && Doxygen::searchIndex) {
+   } else if (indexWords && ctx && Doxy_Globals::searchIndex) {
       s_searchUrl = ctx->getOutputFileBase();
       QByteArray name = ctx->qualifiedName();
 
@@ -7583,7 +7583,7 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<
          default:
             break;
       }
-      Doxygen::searchIndex->setCurrentDoc(name, s_searchUrl);
+      Doxy_Globals::searchIndex->setCurrentDoc(name, s_searchUrl);
    }
 #endif
 

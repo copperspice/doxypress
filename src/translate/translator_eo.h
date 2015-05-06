@@ -122,7 +122,7 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Generita aŭtomate de Doxygen";
+      QByteArray result = "Generita aŭtomate de DoxyPress";
       if (s) {
          result += (QByteArray)" por " + s;
       }
@@ -978,14 +978,14 @@ class TranslatorEsperanto : public TranslatorAdapter_1_8_4
    virtual QByteArray trLegendDocs() {
       return
          "Tiu ĉi paĝo klarigas kiel interpreti la diagramojn generitajn "
-         "de doxygen.<p>\n"
+         "de DoxyPress.<p>\n"
          "Konsideru la sekvan ekzemplon:\n"
          "\\code\n"
          "/*! Nevidebla klaso pro trunkado */\n"
          "class Invisible { };\n\n"
          "/*! Trunkita klaso, hereda rilato kaŝiĝas */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Klaso ne dokumentita per komentoj de doxygen */\n"
+         "/* Klaso ne dokumentita per komentoj de DoxyPress */\n"
          "class Undocumented { };\n\n"
          "/*! Klaso de kiu herediĝas per publika heredado */\n"
          "class PublicBase : public Truncated { };\n\n"

@@ -146,7 +146,7 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Generat automàticament per Doxygen";
+      QByteArray result = "Generat automàticament per DoxyPress";
       if (s) {
          result += (QByteArray)" per a " + s;
       }
@@ -1012,14 +1012,14 @@ class TranslatorCatalan : public TranslatorAdapter_1_8_0
     */
    virtual QByteArray trLegendDocs() {
       return
-         "Aquesta pàgina explica com s'interpreten els gràfics generats per doxygen.<p>\n"
+         "Aquesta pàgina explica com s'interpreten els gràfics generats per DoxyPress.<p>\n"
          "Considera aquest exemple:\n"
          "\\code\n"
          "/*! Classe invisible per culpa del retall */\n"
          "class Invisible { };\n\n"
          "/*! Classe truncada, l'herència està amagada */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Classe no documentada amb comentaris doxygen */\n"
+         "/* Classe no documentada amb comentaris DoxyPress */\n"
          "class Undocumented { };\n\n"
          "/*! Classe heredada amb herència pública */\n"
          "class PublicBase : public Truncated { };\n\n"

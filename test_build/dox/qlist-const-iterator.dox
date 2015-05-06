@@ -14,18 +14,19 @@
 *************************************************************************/
 
 /*!
-\class const_iterator 
+\class QList::const_iterator 
 \brief The QList::const_iterator class provides an STL-style const iterator for QList and QQueue. 
 
-\ingroup qtcore
+The QList::const_iterator class provides an STL-style const iterator for QList and %QQueue.
 
-The QList::const_iterator class provides an STL-style const iterator for QList and QQueue.
+%QList provides both STL-style iterators and Java-style iterators. The STL-style iterators are more low-level and more cumbersome to use; on the 
+other hand, they are slightly faster and, for developers who already know STL, have the advantage of familiarity.
 
-QList provides both STL-style iterators and Java-style iterators. The STL-style iterators are more low-level and more cumbersome to use; on the other hand, they are slightly faster and, for developers who already know STL, have the advantage of familiarity.
+QList<T>::const_iterator allows you to iterate over QList<T> or QQueue<T>. If you want to modify the %QList as you iterate over it, use
+QList::iterator instead. It is generally good practice to use QList::const_iterator on a non-const %QList as well, unless you need to change the
+%QList through the iterator. Const iterators are slightly faster, and can improve code readability.
 
-QList&lt;T&gt;::const_iterator allows you to iterate over a QList&lt;T&gt; (or a QQueue&lt;T&gt;). If you want to modify the QList as you iterate over it, use QList::iterator instead. It is generally good practice to use QList::const_iterator on a non-const QList as well, unless you need to change the QList through the iterator. Const iterators are slightly faster, and can improve code readability.
-
-The default QList::const_iterator constructor creates an uninitialized iterator. You must initialize it using a QList function like QList::constBegin(), QList::constEnd(), or QList::insert() before you can start iterating. Here's a typical loop that prints all the items stored in a list:
+The default QList::const_iterator constructor creates an uninitialized iterator. You must initialize it using a %QList function like QList::constBegin(), QList::constEnd(), or QList::insert() before you can start iterating. Here's a typical loop that prints all the items stored in a list:
 
 \code
     QList<QString> list;
@@ -40,9 +41,10 @@ The default QList::const_iterator constructor creates an uninitialized iterator.
     }
 \endcode
 
-Most QList functions accept an integer index rather than an iterator. For that reason, iterators are rarely useful in connection with QList. One place where STL-style iterators do make sense is as arguments to generic algorithms.
+Most QList functions accept an integer index rather than an iterator. For that reason, iterators are rarely useful in connection with QList. One
+place where STL-style iterators do make sense is as arguments to generic algorithms.
 
-For example, here's how to delete all the widgets stored in a QList&lt;QWidget *&gt;:
+For example, here's how to delete all the widgets stored in a QList<QWidget*>:
 
 \code
     QList<QWidget *> list;
@@ -50,14 +52,14 @@ For example, here's how to delete all the widgets stored in a QList&lt;QWidget *
     qDeleteAll(list.constBegin(), list.constEnd());
 \endcode
 
-Multiple iterators can be used on the same list. However, be aware that any non-const function call performed on the QList will render all existing iterators undefined. If you need to keep iterators over a long period of time, we recommend that you use QLinkedList rather than QList.
+Multiple iterators can be used on the same list. However, be aware that any non-const function call performed on the QList will render all existing
+iterators undefined. If you need to keep iterators over a long period of time, we recommend that you use QLinkedList rather than QList.
 
-<b>See also </b>QList::iterator and QListIterator.
 */
 
 
-/*!
-\fn const_iterator::const_iterator ()
+/**
+\fn QList< T >const_iterator::const_iterator ()
 
 Constructs an uninitialized iterator.
 
@@ -69,16 +71,15 @@ Functions like operator*() and operator++() should not be called on an uninitial
 */
 
 
-/*!
+/**
 \fn QList< T >::const_iterator::const_iterator ( const const_iterator & other )
 
 Constructs a copy of <i>other</i>.
 
-
 */
 
 
-/*!
+/**
 \fn QList< T >::const_iterator::const_iterator ( const iterator & other )
 
 Constructs a copy of <i>other</i>.
@@ -87,10 +88,10 @@ Constructs a copy of <i>other</i>.
 */
 
 
-/*!
+/**
 \fn bool QList< T >::const_iterator::operator!= ( const const_iterator & other ) const
 
-Returns true if <i>other</i> points to a different item than this iterator; otherwise returns false.
+Returns true if <i>other</i> points to a different item than this iterator, otherwise returns false.
 
 <b>See also </b>operator==().
 
@@ -98,8 +99,8 @@ Returns true if <i>other</i> points to a different item than this iterator; othe
 */
 
 
-/*!
-\fn const T & const_iterator::operator* () const
+/**
+\fn const T & QList< T >const_iterator::operator* () const
 
 Returns the current item.
 
@@ -109,8 +110,8 @@ Returns the current item.
 */
 
 
-/*!
-\fn const_iterator const_iterator::operator+ ( int j ) const
+/**
+\fn const_iterator QList< T >const_iterator::operator+ ( int j ) const
 
 Returns an iterator to the item at <i>j</i> positions forward from this iterator. (If <i>j</i> is negative, the iterator goes backward.)
 
@@ -120,8 +121,8 @@ Returns an iterator to the item at <i>j</i> positions forward from this iterator
 */
 
 
-/*!
-\fn const_iterator & const_iterator::operator++ ()
+/**
+\fn const_iterator & QList< T >const_iterator::operator++ ()
 
 The prefix ++ operator (<tt>++it</tt>) advances the iterator to the next item in the list and returns an iterator to the new current item.
 
@@ -133,8 +134,8 @@ Calling this function on QList::end() leads to undefined results.
 */
 
 
-/*!
-\fn const_iterator const_iterator::operator++ ( int )
+/**
+\fn const_iterator QList< T >const_iterator::operator++ ( int )
 
 This is an overloaded function.
 
@@ -144,7 +145,7 @@ The postfix ++ operator (<tt>it++</tt>) advances the iterator to the next item i
 */
 
 
-/*!
+/**
 \fn const_iterator & const_iterator::operator+= ( int j )
 
 Advances the iterator by <i>j</i> items. (If <i>j</i> is negative, the iterator goes backward.)
@@ -155,18 +156,17 @@ Advances the iterator by <i>j</i> items. (If <i>j</i> is negative, the iterator 
 */
 
 
-/*!
+/**
 \fn const_iterator const_iterator::operator- ( int j ) const
 
 Returns an iterator to the item at <i>j</i> positions backward from this iterator. (If <i>j</i> is negative, the iterator goes forward.)
 
 <b>See also </b>operator+() and operator-=().
 
-
 */
 
 
-/*!
+/**
 \fn int const_iterator::operator- ( const_iterator other ) const
 
 Returns the number of items between the item pointed to by <i>other</i> and the item pointed to by this iterator.
@@ -175,7 +175,7 @@ Returns the number of items between the item pointed to by <i>other</i> and the 
 */
 
 
-/*!
+/**
 \fn const_iterator & const_iterator::operator-- ()
 
 The prefix -- operator (<tt>--it</tt>) makes the preceding item current and returns an iterator to the new current item.
@@ -188,7 +188,7 @@ Calling this function on QList::begin() leads to undefined results.
 */
 
 
-/*!
+/**
 \fn const_iterator const_iterator::operator-- ( int )
 
 This is an overloaded function.
@@ -199,7 +199,7 @@ The postfix -- operator (<tt>it--</tt>) makes the preceding item current and ret
 */
 
 
-/*!
+/**
 \fn const_iterator & const_iterator::operator-= ( int j )
 
 Makes the iterator go back by <i>j</i> items. (If <i>j</i> is negative, the iterator goes forward.)
@@ -210,7 +210,7 @@ Makes the iterator go back by <i>j</i> items. (If <i>j</i> is negative, the iter
 */
 
 
-/*!
+/**
 \fn const T * const_iterator::operator-> () const
 
 Returns a pointer to the current item.
@@ -221,16 +221,15 @@ Returns a pointer to the current item.
 */
 
 
-/*!
+/**
 \fn bool const_iterator::operator< ( const const_iterator & other ) const
 
 Returns true if the item pointed to by this iterator is less than the item pointed to by the <i>other</i> iterator.
 
-
 */
 
 
-/*!
+/**
 \fn bool const_iterator::operator<= ( const const_iterator & other ) const
 
 Returns true if the item pointed to by this iterator is less than or equal to the item pointed to by the <i>other</i> iterator.
@@ -239,18 +238,17 @@ Returns true if the item pointed to by this iterator is less than or equal to th
 */
 
 
-/*!
+/**
 \fn bool const_iterator::operator== ( const const_iterator & other ) const
 
 Returns true if <i>other</i> points to the same item as this iterator; otherwise returns false.
 
 <b>See also </b>operator!=().
 
-
 */
 
 
-/*!
+/**
 \fn bool const_iterator::operator> ( const const_iterator & other ) const
 
 Returns true if the item pointed to by this iterator is greater than the item pointed to by the <i>other</i> iterator.
@@ -259,7 +257,7 @@ Returns true if the item pointed to by this iterator is greater than the item po
 */
 
 
-/*!
+/**
 \fn bool const_iterator::operator>= ( const const_iterator & other ) const
 
 Returns true if the item pointed to by this iterator is greater than or equal to the item pointed to by the <i>other</i> iterator.
@@ -268,7 +266,7 @@ Returns true if the item pointed to by this iterator is greater than or equal to
 */
 
 
-/*!
+/**
 \fn const T & const_iterator::operator[] ( int j ) const
 
 Returns the item at position *this + <i>j</i>.
@@ -277,11 +275,10 @@ This function is provided to make QList iterators behave like C++ pointers.
 
 <b>See also </b>operator+().
 
-
 */
 
 
-/*!
+/**
 \typedef const_iterator::iterator_category
 
 A synonym for <i>std::random_access_iterator_tag</i> indicating this iterator is a random access iterator.

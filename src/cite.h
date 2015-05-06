@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -15,8 +15,8 @@
  *
 *************************************************************************/
 
-#ifndef CITEDB_H
-#define CITEDB_H
+#ifndef CITE_H
+#define CITE_H
 
 #include <QHash>
 #include <QTextStream>

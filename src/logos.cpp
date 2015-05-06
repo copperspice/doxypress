@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -1938,39 +1938,6 @@ unsigned char FreeSans_ttf[] = {
    0x00, 0xb7, 0x00, 0x44, 0x00, 0xb9, 0x00, 0xb9, 0x00, 0x47, 0x00, 0x00
 };
 unsigned int FreeSans_ttf_len = 22932;
-
-#if 0
-void writeLogo(const QString &dir)
-{
-   QString fileName = dir + "/doxygen.png";
-   QFile f(fileName);
-
-   if (f.open(QIODevice::WriteOnly)) {
-      f.write((char *)doxygen_png_data, doxygen_png_len);
-
-   } else {
-       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
-
-   }
-
-   f.close();
-}
-
-void writeSearchButton(const QString &dir)
-{
-   QString fileName = dir + "/search.png";
-   QFile f(fileName);
-
-   if (f.open(QIODevice::WriteOnly)) {
-      f.write((char *)search_png, search_png_len);
-
-   } else {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
-   }
-
-   f.close();
-}
-#endif
 
 void writeDoxFont(const QString &dir)
 {

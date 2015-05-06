@@ -121,7 +121,7 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Автоматски создадено од Doxygen";
+      QByteArray result = "Автоматски создадено од DoxyPress";
       if (s) {
          result += (QByteArray)" за " + s;
       }
@@ -977,14 +977,14 @@ class TranslatorMacedonian : public TranslatorAdapter_1_6_0
    virtual QByteArray trLegendDocs() {
       return
          "Оваа страна објаснува како да ги толкувате дијаграмите создадени"
-         " од doxygen.<p>\n"
+         " од DoxyPress.<p>\n"
          "На пример:\n"
          "\\code\n"
          "/*! Невидлива класа заради ограничувања на дијаграмот */\n"
          "class Invisible { };\n\n"
          "/*! Одсечена класа, врската на наследување е скриена */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Класата не е документирана со doxygen коментари */\n"
+         "/* Класата не е документирана со DoxyPress коментари */\n"
          "class Undocumented { };\n\n"
          "/*! Класа која е наследена со јавно наследување */\n"
          "class PublicBase : public Truncated { };\n\n"

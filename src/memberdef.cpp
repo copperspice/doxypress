@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -1338,7 +1338,7 @@ bool MemberDef::isBriefSectionVisible() const
    static bool repeatBrief         = Config::getBool("repeat-brief");
    static bool hideFriendCompounds = Config::getBool("hide-friend-compounds");
  
-   QSharedPointer<MemberGroupInfo> info = Doxygen::memGrpInfoDict[m_impl->grpId];
+   QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict[m_impl->grpId];
 
    bool hasDocs = hasDocumentation() || (m_impl->grpId != -1 && !(info->doc.isEmpty() && info->header.isEmpty()));
 
@@ -1640,7 +1640,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
       // do not add to index
 
    } else {     
-      Doxygen::indexList->addIndexItem(d, self);
+      Doxy_Globals::indexList->addIndexItem(d, self);
 
    }
 
@@ -1872,7 +1872,7 @@ bool MemberDef::isDetailedSectionLinkable() const
       (m_impl->defArgList != 0 && m_impl->defArgList->hasDocumentation()) ||
 
       // is an attribute or property - need to display tag
-      (m_impl->memSpec & (Entry::Attribute | Entry::Property)) || Doxygen::userComments;
+      (m_impl->memSpec & (Entry::Attribute | Entry::Property)) || Doxy_Globals::userComments;
 
 
    // this is not a global static or global statics should be extracted
@@ -2457,7 +2457,7 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
                ol.addIndexItem(fmd->name(), ciname);
                ol.addIndexItem(ciname, fmd->name());
               
-               Doxygen::indexList->addIndexItem(container, fmd);
+               Doxy_Globals::indexList->addIndexItem(container, fmd);
 
                //ol.writeListItem();
                ol.startDescTableTitle();
@@ -2983,6 +2983,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    ol.pushGeneratorState();
    ol.disableAll();
    ol.enable(OutputGenerator::Html);
+
    if (htmlEndLabelTable) {
       ol.writeString("  </td>\n");
       ol.writeString("  <td class=\"mlabels-right\">\n");
@@ -3012,7 +3013,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
 
    /* write multi-line initializer (if any) */
    if (hasMultiLineInitializer()) {
-            ol.startBold();
+      ol.startBold();
 
       if (m_impl->mtype == MemberType_Define) {
          ol.parseText(theTranslator->trDefineValue());
@@ -3021,7 +3022,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       }
 
       ol.endBold();
-      ParserInterface *pIntf = Doxygen::parserManager->getParser(getDefFileExtension());
+      ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
       ol.startCodeFragment();
 
@@ -3057,7 +3058,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       ol.generateDoc(docFile(), docLine(), getOuterScope() ? getOuterScope() : container, self, detailed + "\n", true, false);
       
 
-      if (!inbodyDocumentation().isEmpty()) {
+      if (! inbodyDocumentation().isEmpty()) {
          ol.generateDoc(inbodyFile(), inbodyLine(), getOuterScope() ? getOuterScope() : container, self, 
                         inbodyDocumentation() + "\n", true, false);
       }
@@ -3104,7 +3105,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    _writeCallGraph(ol);
    _writeCallerGraph(ol);
 
-   if (Doxygen::userComments) {
+   if (Doxy_Globals::userComments) {
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
 
@@ -3123,7 +3124,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    ol.popGeneratorState();
 
    if (! Config::getBool("extract-all") && Config::getBool("warn-undoc") &&
-         Config::getBool("warn-undoc-param") && ! Doxygen::suppressDocWarnings) {
+         Config::getBool("warn-undoc-param") && ! Doxy_Globals::suppressDocWarnings) {
 
       if (!hasDocumentedParams()) {
          warn_doc_error(docFile(), docLine(), "parameters of member %s are not (all) documented",
@@ -3637,7 +3638,7 @@ void MemberDef::addListReference(QSharedPointer<Definition> d)
          memName = "[" + pd->name() + " " + name() + "]";
 
       } else {
-         if (pd != Doxygen::globalScope) {
+         if (pd != Doxy_Globals::globalScope) {
             memName.prepend(pdName + sep);
          }
 
@@ -3776,7 +3777,7 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
       tagFile << "      <type>" << convertToXML(typeString()) << "</type>" << endl;
    }
    tagFile << "      <name>" << convertToXML(name()) << "</name>" << endl;
-   tagFile << "      <anchorfile>" << convertToXML(getOutputFileBase() + Doxygen::htmlFileExtension) << "</anchorfile>" << endl;
+   tagFile << "      <anchorfile>" << convertToXML(getOutputFileBase() + Doxy_Globals::htmlFileExtension) << "</anchorfile>" << endl;
    tagFile << "      <anchor>" << convertToXML(anchor()) << "</anchor>" << endl;
 
    QByteArray idStr = id();
@@ -3792,7 +3793,7 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
       if (fmdl) {
          for (auto fmd : *fmdl) {
             if (!fmd->isReference()) {
-               tagFile << "      <enumvalue file=\"" << convertToXML(getOutputFileBase() + Doxygen::htmlFileExtension);
+               tagFile << "      <enumvalue file=\"" << convertToXML(getOutputFileBase() + Doxy_Globals::htmlFileExtension);
                tagFile << "\" anchor=\"" << convertToXML(fmd->anchor());
                QByteArray idStr = fmd->id();
                if (!idStr.isEmpty()) {
@@ -4067,7 +4068,7 @@ void MemberDef::enableCallGraph(bool e)
 {
    m_impl->hasCallGraph = e;
    if (e) {
-      Doxygen::parseSourcesNeeded = true;
+      Doxy_Globals::parseSourcesNeeded = true;
    }
 }
 
@@ -4075,7 +4076,7 @@ void MemberDef::enableCallerGraph(bool e)
 {
    m_impl->hasCallerGraph = e;
    if (e) {
-      Doxygen::parseSourcesNeeded = true;
+      Doxy_Globals::parseSourcesNeeded = true;
    }
 }
 
@@ -5044,19 +5045,19 @@ void MemberDef::_addToSearchIndex()
    // write search index info
   QSharedPointer<MemberDef> self = sharedFrom(this);
 
-   if (Doxygen::searchIndex && isLinkableInProject()) {
-      Doxygen::searchIndex->setCurrentDoc(self, anchor(), false);
+   if (Doxy_Globals::searchIndex && isLinkableInProject()) {
+      Doxy_Globals::searchIndex->setCurrentDoc(self, anchor(), false);
       QByteArray ln = localName(), qn = qualifiedName();
-      Doxygen::searchIndex->addWord(ln, true);
+      Doxy_Globals::searchIndex->addWord(ln, true);
 
       if (ln != qn) {
-         Doxygen::searchIndex->addWord(qn, true);
+         Doxy_Globals::searchIndex->addWord(qn, true);
 
          if (getClassDef()) {
-            Doxygen::searchIndex->addWord(getClassDef()->displayName(), true);
+            Doxy_Globals::searchIndex->addWord(getClassDef()->displayName(), true);
 
          } else if (getNamespaceDef()) {
-            Doxygen::searchIndex->addWord(getNamespaceDef()->displayName(), true);
+            Doxy_Globals::searchIndex->addWord(getNamespaceDef()->displayName(), true);
          }
       }
    }

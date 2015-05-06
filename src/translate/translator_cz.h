@@ -102,7 +102,7 @@ class TranslatorCzech : public Translator
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result("Generováno automaticky programem Doxygen "
+      QByteArray result("Generováno automaticky programem DoxyPress "
                         "ze zdrojových textů");
       if (s) {
          result += QByteArray(" projektu ") + s;
@@ -983,7 +983,7 @@ class TranslatorCzech : public Translator
    virtual QByteArray trLegendDocs() {
       return
          "Zde naleznete vysvětlení, jak mají být interpretovány grafy, "
-         "které byly generovány programem doxygen.<p>\n"
+         "které byly generovány programem DoxyPress.<p>\n"
          "Uvažujte následující příklad:\n"
          "\\code\n"
          "/*! Neviditelná třída, která se v grafu nezobrazuje, protože "
@@ -992,7 +992,7 @@ class TranslatorCzech : public Translator
          "/*! Třída, u které došlo k ořezání grafu. Vztah dědičnosti "
          "je skryt. */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Třída, která není dokumentována komentáři programu doxygen. */\n"
+         "/* Třída, která není dokumentována komentáři programu DoxyPress. */\n"
          "class Undocumented { };\n\n"
          "/*! Bázová třída děděná veřejně (public inheritance). */\n"
          "class PublicBase : public Truncated { };\n\n"

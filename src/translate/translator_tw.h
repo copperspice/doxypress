@@ -122,7 +122,7 @@ class TranslatorChinesetraditional : public Translator
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "本文件由Doxygen";
+      QByteArray result = "本文件由DoxyPress";
       if (s) {
          result += (QByteArray)" 自 " + s;
       }
@@ -980,7 +980,7 @@ class TranslatorChinesetraditional : public Translator
     */
    virtual QByteArray trLegendDocs() {
       return
-         "本頁解釋如何解譯這些由doxygen所產生的圖示 "
+         "本頁解釋如何解譯這些由DoxyPress所產生的圖示 "
          ".<p>\n"
          "請看下面範例:\n"
          "\\code\n"
@@ -988,7 +988,7 @@ class TranslatorChinesetraditional : public Translator
          "class Invisible { };\n\n"
          "/*! 截斷的類別, 繼承關係被隱藏 */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* 未經過doxygen註解處理過的類別 */\n"
+         "/* 未經過DoxyPress註解處理過的類別 */\n"
          "class Undocumented { };\n\n"
          "/*! 經過公開(Public)繼承的類別 */\n"
          "class PublicBase : public Truncated { };\n\n"

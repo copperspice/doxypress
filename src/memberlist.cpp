@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -30,7 +30,8 @@
 #include <outputlist.h>
 #include <util.h>
 
-MemberList::MemberList() : m_listType(MemberListType_pubMethods)
+MemberList::MemberList() 
+   : m_listType(MemberListType_pubMethods)
 {
    memberGroupList = 0;
    m_varCnt = 0;
@@ -48,7 +49,8 @@ MemberList::MemberList() : m_listType(MemberListType_pubMethods)
    m_inFile    = false;  
 }
 
-MemberList::MemberList(MemberListType lt) : m_listType(lt)
+MemberList::MemberList(MemberListType lt) 
+   : m_listType(lt)
 {
    memberGroupList = 0;
    m_varCnt = 0;
@@ -464,14 +466,13 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
  *  @param nd non-null if this list is part of namespace documentation.
  *  @param fd non-null if this list is part of file documentation.
  *  @param gd non-null if this list is part of group documentation.
- *  @param title Title to use for the member list.
- *  @param subtitle Sub title to use for the member list.
- *  @param showEnumValues Obsolete, always set to false.
- *  @param showInline if set to true if title is rendered differently
- *  @param inheritedFrom if not 0, the list is shown inside the
- *         given class as inherited members, parameter cd points to the
- *         class containing the members.
- *  @param lt Type of list that is inherited from.
+ *  @param title           Title to use for the member list.
+ *  @param subtitle        Sub title to use for the member list.
+ *  @param showEnumValues  Obsolete, always set to false.
+ *  @param showInline      if set to true if title is rendered differently
+ *  @param inheritedFrom   if not 0, the list is shown inside the given class as inherited members
+ *         parameter cd points to the class containing the members.
+ *  @param lt              Type of list that is inherited from
  */
 void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, const char *title, const char *subtitle, 
@@ -486,15 +487,14 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
    if (ctx == 0 && nd) {
       ctx = nd;
    }
+
    if (ctx == 0 && gd) {
       ctx = gd;
    }
+
    if (ctx == 0 && fd) {
       ctx = fd;
    }
-
-   //printf("%p: MemberList::writeDeclaration(title=`%s',subtitle=`%s')=%d inheritedFrom=%p\n",
-   //       this,title,subtitle,numDecMembers(),inheritedFrom);
 
    int num = numDecMembers();
    if (inheritedFrom) {
@@ -542,17 +542,10 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
          }
       }
    }
-   if (num > 0) {
-      // TODO: Two things need to be worked out for proper VHDL output:
-      // 1. Signals and types under the group need to be
-      //    formatted to associate them with the group somehow
-      //    indentation, or at the very least, extra space after
-      //    the group is done
-      // 2. This might need to be repeated below for memberGroupLists
 
+   if (num > 0) {     
       writePlainDeclarations(ol, cd, nd, fd, gd, inheritedFrom, inheritId);      
-
-      //printf("memberGroupList=%p\n",memberGroupList);
+     
       if (memberGroupList) {
 
          for (auto mg : *memberGroupList) {   
@@ -560,7 +553,6 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
             bool hasHeader = ! mg.header().isEmpty() && mg.header() != "[NOHEADER]";
 
             if (inheritId.isEmpty()) {
-               //printf("mg->header=%s hasHeader=%d\n",mg->header().data(),hasHeader);
 
                ol.startMemberGroupHeader(hasHeader);
 
@@ -571,7 +563,6 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
                ol.endMemberGroupHeader();
 
                if (! mg.documentation().isEmpty()) {
-                  //printf("Member group has docs!\n");
                   ol.startMemberGroupDocs();
                   ol.generateDoc("[generated]", -1, ctx, QSharedPointer<MemberDef>(), mg.documentation() + "\n", false, false);
                   ol.endMemberGroupDocs();

@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -132,7 +132,7 @@ void Definition_Private::init(const char *df, const char *n)
    sourceRefByDict = 0;
    sourceRefsDict  = 0;
    sectionDict     = 0,
-   outerScope      = Doxygen::globalScope;
+   outerScope      = Doxy_Globals::globalScope;
    partOfGroups    = 0;
    xrefListItems   = 0;
    hidden          = false;
@@ -213,7 +213,7 @@ void Definition::addToMap(const QByteArray &name)
    }
 
    if (! symbolName.isEmpty()) {                       
-      Doxygen::symbolMap().insertMulti(symbolName, this);         
+      Doxy_Globals::symbolMap().insertMulti(symbolName, this);         
       this->setSymbolName(symbolName);
    }
 }
@@ -329,12 +329,12 @@ Definition::~Definition()
    }
 
    if (! Doxy_Globals::g_programExit)  {
-      auto di = Doxygen::symbolMap().find(m_symbolName);
+      auto di = Doxy_Globals::symbolMap().find(m_symbolName);
    
-      while (di != Doxygen::symbolMap().end() && di.key() == m_symbolName)  {      
+      while (di != Doxy_Globals::symbolMap().end() && di.key() == m_symbolName)  {      
    
          if (di.value() == this) {
-            di = Doxygen::symbolMap().erase(di);
+            di = Doxy_Globals::symbolMap().erase(di);
    
          }  else {
             ++di;
@@ -361,7 +361,7 @@ void Definition::setId(const char *id)
    }
   
    m_private->id = id; 
-   Doxygen::clangUsrMap.insert(id, self);
+   Doxy_Globals::clangUsrMap.insert(id, self);
 }
 
 QByteArray Definition::id() const
@@ -379,11 +379,11 @@ void Definition::addSectionsToDefinition(QList<SectionInfo> *anchorList)
 
    for (auto si : *anchorList) {   
     
-      QSharedPointer<SectionInfo> gsi (Doxygen::sectionDict->find(si.label));
+      QSharedPointer<SectionInfo> gsi (Doxy_Globals::sectionDict->find(si.label));
       
       if (! gsi) {
          gsi = QMakeShared<SectionInfo>(si);
-         Doxygen::sectionDict->insert(si.label, gsi);
+         Doxy_Globals::sectionDict->insert(si.label, gsi);
       }
 
       if (m_private->sectionDict == 0) {
@@ -430,12 +430,12 @@ void Definition::addSectionsToIndex()
 
          if (nextLevel > level) {
             for (i = level; i < nextLevel; i++) {
-               Doxygen::indexList->incContentsDepth();
+               Doxy_Globals::indexList->incContentsDepth();
             }
 
          } else if (nextLevel < level) {
             for (i = nextLevel; i < level; i++) {
-               Doxygen::indexList->decContentsDepth();
+               Doxy_Globals::indexList->decContentsDepth();
             }
          }
 
@@ -445,13 +445,13 @@ void Definition::addSectionsToIndex()
             title = si->label;
          }
 
-         Doxygen::indexList->addContentsItem(true, title, getReference(), getOutputFileBase(), si->label, false, true);
+         Doxy_Globals::indexList->addContentsItem(true, title, getReference(), getOutputFileBase(), si->label, false, true);
          level = nextLevel;
       }
    }
 
    while (level > 1) {
-      Doxygen::indexList->decContentsDepth();
+      Doxy_Globals::indexList->decContentsDepth();
       level--;
    }
 }
@@ -1037,7 +1037,7 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
 
       if (readCodeFragment(m_private->body->fileDef->getFilePath(), actualStart, actualEnd, codeFragment) ) {
 
-         ParserInterface *pIntf = Doxygen::parserManager->getParser(m_private->defFileExt);
+         ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(m_private->defFileExt);
          pIntf->resetCodeParserState();
         
          QSharedPointer<MemberDef> thisMd;
@@ -1383,7 +1383,7 @@ QByteArray Definition::pathFragment() const
 {
    QByteArray result;
 
-   if (m_private->outerScope && m_private->outerScope != Doxygen::globalScope) {
+   if (m_private->outerScope && m_private->outerScope != Doxy_Globals::globalScope) {
       result = m_private->outerScope->pathFragment();
    }
 
@@ -1421,7 +1421,7 @@ QByteArray Definition::navigationPathAsString() const
 
    QByteArray locName = localName();
 
-   if (outerScope && outerScope != Doxygen::globalScope) {
+   if (outerScope && outerScope != Doxy_Globals::globalScope) {
       result += outerScope->navigationPathAsString();
 
    } else if (definitionType() == Definition::TypeFile && ((const FileDef *)this)->getDirDef()) {
@@ -1433,11 +1433,11 @@ QByteArray Definition::navigationPathAsString() const
 
    if (isLinkable()) {
       if (definitionType() == Definition::TypeGroup && ((const GroupDef *)this)->groupTitle()) {
-         result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension + "\">" +
+         result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension + "\">" +
                    convertToHtml(((const GroupDef*)this)->groupTitle()) + "</a>";
 
       } else if (definitionType() == Definition::TypePage && !((const PageDef *)this)->title().isEmpty()) {
-         result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension + "\">" +
+         result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension + "\">" +
                    convertToHtml(((const PageDef*)this)->title()) + "</a>";
 
       } else if (definitionType() == Definition::TypeClass) {
@@ -1447,7 +1447,7 @@ QByteArray Definition::navigationPathAsString() const
             name = name.left(name.length() - 2);
          }
 
-         result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension;
+         result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension;
          if (! anchor().isEmpty()) {
             result += "#" + anchor();
          }
@@ -1455,7 +1455,7 @@ QByteArray Definition::navigationPathAsString() const
          result+="\">" + convertToHtml(name) + "</a>";
 
       } else {
-         result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxygen::htmlFileExtension + "\">" +
+         result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension + "\">" +
                    convertToHtml(locName) + "</a>";
       }
 

@@ -1,7 +1,7 @@
 /*************************************************************************
  *
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
  * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -588,7 +588,7 @@ bool Config::verify()
    }
 
    iterString.value().value   = htmlFileExtension;
-   Doxygen::htmlFileExtension = htmlFileExtension;
+   Doxy_Globals::htmlFileExtension = htmlFileExtension;
 
 
    // **
@@ -824,10 +824,10 @@ bool Config::verify()
 
    // ********** Save data to structers and variables   
   
-   Doxygen::parseSourcesNeeded = Config::getBool("dot-call") ||  Config::getBool("dot-called-by") ||
+   Doxy_Globals::parseSourcesNeeded = Config::getBool("dot-call") ||  Config::getBool("dot-called-by") ||
                                  Config::getBool("ref-relation") || Config::getBool("ref-by-relation");
    
-   Doxygen::markdownSupport    = Config::getBool("markdown");
+   Doxy_Globals::markdownSupport    = Config::getBool("markdown");
 
 
    // ** 
@@ -836,8 +836,8 @@ bool Config::verify()
    for (auto item : expandAsDefinedList) {
       // add predefined macro names to dictionary
 
-      if (! Doxygen::expandAsDefinedDict.contains(item)) {         
-         Doxygen::expandAsDefinedDict.insert(item);
+      if (! Doxy_Globals::expandAsDefinedDict.contains(item)) {         
+         Doxy_Globals::expandAsDefinedDict.insert(item);
       }      
 
    }  

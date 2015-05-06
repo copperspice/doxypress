@@ -123,7 +123,7 @@ class TranslatorDanish : public TranslatorAdapter_1_8_0
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Automatisk genereret af Doxygen";
+      QByteArray result = "Automatisk genereret af DoxyPress";
       if (s) {
          result += (QByteArray)" for " + s;
       }
@@ -995,14 +995,14 @@ class TranslatorDanish : public TranslatorAdapter_1_8_0
    virtual QByteArray trLegendDocs() { //TODO
       return
          "Denne side forklarer, hvordan man skal fortolke de grafer, "
-         "der genereres af doxygen.<p>\n"
+         "der genereres af DoxyPress.<p>\n"
          "Tag følgende eksempel:\n"
          "\\code\n"
          "/*! Klasse der er usynlig pg.a. beskæring */\n"
          "class Invisible { };\n\n"
          "/*! Beskåret klasse: nedarvningsrelation er skjult */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Klasse der ikke er dokumenteret med doxygen-kommentarer */\n"
+         "/* Klasse der ikke er dokumenteret med DoxyPress-kommentarer */\n"
          "class Undocumented { };\n\n"
          "/*! Klasse der nedarves fra offentligt */\n"
          "class PublicBase : public Truncated { };\n\n"

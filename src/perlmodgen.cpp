@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
- * All rights reserved.    
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -2340,7 +2340,7 @@ void PerlModGenerator::generatePerlModForPage(QSharedPointer<PageDef> pd)
 
    m_output.openHash().addFieldQuotedString("name", pd->name());
 
-   QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(pd->name());
+   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(pd->name());
    if (si) {
       m_output.addFieldQuotedString("title4", filterTitle(si->title));
    }
@@ -2365,19 +2365,19 @@ bool PerlModGenerator::generatePerlModOutput()
    m_output.add("$doxydocs=").openHash();
 
    m_output.openList("classes");  
-   for (auto cd : *Doxygen::classSDict) {
+   for (auto cd : *Doxy_Globals::classSDict) {
       generatePerlModForClass(cd);
    }
    m_output.closeList();
 
    m_output.openList("namespaces");  
-   for (auto nd : *Doxygen::namespaceSDict) {
+   for (auto nd : *Doxy_Globals::namespaceSDict) {
       generatePerlModForNamespace(nd);
    }
    m_output.closeList();
 
    m_output.openList("files");
-   for (auto fn : *Doxygen::inputNameList) {
+   for (auto fn : *Doxy_Globals::inputNameList) {
       for (auto fd : *fn)  {
          generatePerlModForFile(fd);
       }
@@ -2385,18 +2385,18 @@ bool PerlModGenerator::generatePerlModOutput()
    m_output.closeList();
 
    m_output.openList("groups");
-   for (auto gd : *Doxygen::groupSDict) {
+   for (auto gd : *Doxy_Globals::groupSDict) {
       generatePerlModForGroup(gd);
    }
    m_output.closeList();
 
    m_output.openList("pages");  
-   for (auto pd : *Doxygen::pageSDict) {
+   for (auto pd : *Doxy_Globals::pageSDict) {
       generatePerlModForPage(pd);
    }
 
-   if (Doxygen::mainPage) {
-      generatePerlModForPage(Doxygen::mainPage);
+   if (Doxy_Globals::mainPage) {
+      generatePerlModForPage(Doxy_Globals::mainPage);
    }
    m_output.closeList();
 
@@ -2692,7 +2692,7 @@ bool PerlModGenerator::generateDoxyRules()
    doxyRulesStream <<
                    ": \\\n"
                    "\t$(" << prefix << "DOXYFILE)\n"
-                   "\tcd $(" << prefix << "DOXY_EXEC_PATH) ; doxygen \"$<\"\n";
+                   "\tcd $(" << prefix << "DOXY_EXEC_PATH) ; doxypress \"$<\"\n";
 
    if (perlmodLatex) {
       doxyRulesStream <<

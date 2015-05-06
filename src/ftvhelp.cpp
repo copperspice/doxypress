@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -253,7 +253,7 @@ static QByteArray node2URL(FTVNode *n, bool overruleFile = false, bool srcLink =
          }
       }
 
-      url += Doxygen::htmlFileExtension;
+      url += Doxy_Globals::htmlFileExtension;
       if (!n->anchor.isEmpty()) {
          url += "#" + n->anchor;
       }
@@ -420,7 +420,7 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
 
          if (srcRef) {
             t << "<a href=\"" << srcRef->getSourceFileBase()
-              << Doxygen::htmlFileExtension
+              << Doxy_Globals::htmlFileExtension
               << "\">";
          }
 
@@ -692,9 +692,9 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
       QString projName = Config::getString("project-name");
 
       if (projName.isEmpty()) {
-         if (Doxygen::mainPage && !Doxygen::mainPage->title().isEmpty()) { 
+         if (Doxy_Globals::mainPage && !Doxy_Globals::mainPage->title().isEmpty()) { 
             // Use title of main page as root
-            t << "\"" << convertToJSString(Doxygen::mainPage->title()) << "\", ";
+            t << "\"" << convertToJSString(Doxy_Globals::mainPage->title()) << "\", ";
 
          } else { 
             // Use default section title as root
@@ -707,13 +707,13 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
          t << "\"" << convertToJSString(projName) << "\", ";
       }
 
-      t << "\"index" << Doxygen::htmlFileExtension << "\", ";
+      t << "\"index" << Doxy_Globals::htmlFileExtension << "\", ";
 
       // add special entry for index page
-      navIndex.inSort(new NavIndexEntry("index" + Doxygen::htmlFileExtension.toUtf8(), ""));
+      navIndex.inSort(new NavIndexEntry("index" + Doxy_Globals::htmlFileExtension.toUtf8(), ""));
 
       // related page index, written as a child of index.html
-      navIndex.inSort(new NavIndexEntry("pages" + Doxygen::htmlFileExtension.toUtf8(), ""));
+      navIndex.inSort(new NavIndexEntry("pages" + Doxy_Globals::htmlFileExtension.toUtf8(), ""));
 
       // adjust for display output     
       reSortNodes(nodeList);

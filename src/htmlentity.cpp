@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -18,10 +18,10 @@
 #include <htmlentity.h>
 #include <message.h>
 
-//! Number of doxygen commands mapped as if it were HTML entities
+//! number of commands mapped as if it were HTML entities
 static const int g_numberHtmlMappedCmds = 11;
 
-//! @brief Structure defining all HTML4 entities, doxygen extensions and doxygen commands representing special symbols.
+//! @brief Structure defining all HTML4 entities, DoxyPress extensions and commands representing special symbols.
 //! @details In case an entity does not exist a NULL is given for the entity. The first column contains the symbolic code
 //!          for the entity, see also doxparser.h The second column contains the name of the enitity (without the starting \& and
 //!          ending ;)
@@ -297,11 +297,11 @@ static struct htmlEntityInfo g_htmlEntities[] = {
    { SYM(rsaquo),   "\xe2\x80\xba", "&rsaquo;",   "<rsaquo/>",            "&#8250;",       "\\guilsinglright{}",     NULL,     "\\'9B",       { NULL,         DocSymbol::Perl_unknown }},
    { SYM(euro),     "\xe2\x82\xac", "&euro;",     "<euro/>",              "&#8364;",       "\\texteuro{}",           NULL,     "\\'80",       { NULL,         DocSymbol::Perl_unknown }},
 
-   // doxygen extension to the HTML4 table of HTML entities
+   // DoxyPress extension to the HTML4 table of HTML entities
    { SYM(tm),       "\xe2\x84\xa2", "&trade;",    "<trademark/>",         "&#8482;",       "\\texttrademark{}",      "(TM)",   "\\'99",       { "trademark",  DocSymbol::Perl_symbol  }},
    { SYM(apos),     "'",            "'",          "'",                    "&apos;",        "\\textquotesingle{}",    "'",      "'",           { "\\\'",       DocSymbol::Perl_string  }},
 
-   // doxygen commands represented as HTML entities
+   // DoxyPress commands represented as HTML entities
    { SYM(BSlash),   "\\",           "\\",         "\\",                   "\\",            "\\textbackslash{}",      "\\\\",   "\\\\",        { "\\\\",       DocSymbol::Perl_string  }},
    { SYM(At),       "@",            "@",          "@",                    "@",             "@",                      "@",      "@",           { "@",          DocSymbol::Perl_char    }},
    { SYM(Less),     "<",            "&lt;",       "&lt;",                 "&lt;",          "<",                      "<",      "<",           { "<",          DocSymbol::Perl_char    }},

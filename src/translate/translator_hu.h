@@ -131,7 +131,7 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
    }
 
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Ezt a dokumentációt a Doxygen készítette ";
+      QByteArray result = "Ezt a dokumentációt a DoxyPress készítette ";
       if (s) {
          result += (QByteArray)" a" + zed(s[0]) + s + (QByteArray)" projekthez";
       }
@@ -986,14 +986,14 @@ class TranslatorHungarian : public TranslatorAdapter_1_4_6
    virtual QByteArray trLegendDocs() {
       return
          "Ez az oldal elmagyarázza hogyan kell értelmezni a "
-         "doxygen által készített ábrákat.<p>\n"
+         "DoxyPress által készített ábrákat.<p>\n"
          "Vegyük a következő példát:\n"
          "\\code\n"
          "/*! Vágás miatt nem látható osztály */\n"
          "class Invisible { };\n\n"
          "/*! Levágott osztály, származása rejtett */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Doxygen kommentekkel nem dokumentált osztály */\n"
+         "/* DoxyPress kommentekkel nem dokumentált osztály */\n"
          "class Undocumented { };\n\n"
          "/*! Publikus származtatásal levezetett osztály */\n"
          "class PublicBase : public Truncated { };\n\n"

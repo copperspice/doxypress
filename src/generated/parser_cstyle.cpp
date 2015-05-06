@@ -1,8 +1,8 @@
 /*************************************************************************
  *
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
- * All rights reserved.
+ * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -10950,7 +10950,7 @@ static bool checkForKnRstyleC()
    }
   
    for (auto a : current->argList) {
-      // in K&R style argument do not have a type, but doxygen expects a type
+      // in K&R style argument do not have a type, but DoxyPress expects a type
       // so it will think the argument has no name
       if (a.type.isEmpty() || ! a.name.isEmpty()) {
          return FALSE;
@@ -13334,7 +13334,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {                      
-               Doxygen::namespaceAliasDict.insert(aliasName, scannerYYtext);             
+               Doxy_Globals::namespaceAliasDict.insert(aliasName, scannerYYtext);             
             }
             YY_BREAK
          case 136:
@@ -13395,7 +13395,7 @@ YY_DECL {
             {
                //printf("PHP: adding use as relation: %s->%s\n",scannerYYtext,aliasName.data());
 
-               Doxygen::namespaceAliasDict.insert(scannerYYtext, 
+               Doxy_Globals::namespaceAliasDict.insert(scannerYYtext, 
                      removeRedundantWhiteSpace(substitute(aliasName, "\\", "::")));
 
                aliasName.resize(0);
@@ -14054,6 +14054,7 @@ YY_DECL {
 
                   if (insideIDL) {
                      BEGIN(NextSemi);
+
                   } else { // insideJava or insideD
                      BEGIN(JavaImport);
                   }
@@ -14464,9 +14465,7 @@ YY_DECL {
            */
          case 228:
             YY_RULE_SETUP
-
-            {
-               //printf("Define `%s' without args\n",scannerYYtext);
+            {              
                if (insideCpp || insideObjC) {
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
@@ -14475,6 +14474,7 @@ YY_DECL {
                BEGIN(DefineEnd);
             }
             YY_BREAK
+
          case 229:
             /* rule 229 can match eol */
             YY_RULE_SETUP
@@ -14505,12 +14505,14 @@ YY_DECL {
                current->fileName   = yyFileName;
                current->startLine  = yyLineNr;
                current->startColumn = yyColNr;
+
                current->type.resize(0);
                current->type       = "const";
 
                QByteArray init = current->initializer.data();
                init = init.simplified();
                init = init.left(init.length() - 1);
+
                current->initializer = init;
                current->name       = current->name.trimmed();
                current->section    = Entry::VARIABLE_SEC;
@@ -16164,7 +16166,7 @@ YY_DECL {
                   // add to the scope of the enum
                   current_root->addSubEntry(current, current_root);
 
-                  if (!insideCS && !insideJava && !(current_root->spec & Entry::Strong))
+                  if (! insideCS && ! insideJava && !(current_root->spec & Entry::Strong))
                      // for C# and Java 1.5+ enum values always have to be explicitly qualified,
                      // same for C++11 style enums (enum class Name {})
                   {
@@ -16445,10 +16447,11 @@ YY_DECL {
                prependScope();
                current->args = current->args.simplified();
                current->type = current->type.simplified();
+
                //printf("Adding compound %s %s %s\n",current->type.data(),current->name.data(),current->args.data());
                current_root->addSubEntry( current, current_root ) ;
 
-               if (!firstTypedefEntry)
+               if (! firstTypedefEntry)
                {
                   firstTypedefEntry = current;
                }
@@ -21965,17 +21968,17 @@ static void handleParametersCommentBlocks(ArgumentList *al)
                    FALSE,
                    protection,
                    position,
-                   needsEntry
-                )
-               ) {
-            //printf("handleParametersCommentBlock position=%d [%s]\n",position,doc.data()+position);
+                   needsEntry ) ) {
+           
             if (needsEntry) {
                newEntry();
             }
          }
+
          if (needsEntry) {
             newEntry();
          }
+
          a.docs = current->doc;
 
          // restore context
@@ -22054,7 +22057,8 @@ static void parseCompounds(QSharedPointer<Entry> rt)
                current->protection = protection = Private;
             }
 
-         } else if (ce->section == Entry::ENUM_SEC ) { // enum
+         } else if (ce->section == Entry::ENUM_SEC ) { 
+            // enum
             current->protection = protection = ce->protection;
 
          } else if (! ce->name.isEmpty() && ce->name.at(ni) == '@') { 

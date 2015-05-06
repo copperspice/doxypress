@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -208,7 +208,7 @@ class Mapper
    bool m_cs;
 };
 
-/** Class representing a namespace for the doxygen and HTML command mappers. */
+/** Class representing a namespace for the HTML command mappers. */
 struct Mappers {
    static void freeMappers();
    static Mapper *cmdMapper;

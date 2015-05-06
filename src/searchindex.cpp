@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -99,7 +99,7 @@ void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const char *anch
    assert(! isSourceFile || ctx->definitionType() == Definition::TypeFile);
    
    QByteArray url = isSourceFile ? ctx.dynamicCast<FileDef>()->getSourceFileBase() : ctx->getOutputFileBase();
-   url += Doxygen::htmlFileExtension.toUtf8();
+   url += Doxy_Globals::htmlFileExtension.toUtf8();
 
    QByteArray baseUrl = url;
 
@@ -521,7 +521,7 @@ void SearchIndexExternal::setCurrentDoc(QSharedPointer<Definition> ctx, const ch
    QByteArray extId = stripPath(Config::getString("external-search-id").toUtf8());
 
    QByteArray baseName = isSourceFile ? ctx.dynamicCast<FileDef>()->getSourceFileBase() : ctx->getOutputFileBase();
-   QByteArray url = baseName + Doxygen::htmlFileExtension.toUtf8();
+   QByteArray url = baseName + Doxy_Globals::htmlFileExtension.toUtf8();
 
    if (anchor) {
       url += QByteArray("#") + anchor;
@@ -846,7 +846,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index classes
-   for (auto cd : *Doxygen::classSDict) {
+   for (auto cd : *Doxy_Globals::classSDict) {
 
       uint letter = getUtf8CodeToLower(cd->localName(), 0);
 
@@ -860,7 +860,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index namespaces  
-   for (auto nd : *Doxygen::namespaceSDict) {
+   for (auto nd : *Doxy_Globals::namespaceSDict) {
       uint letter = getUtf8CodeToLower(nd->name(), 0);
 
       if (nd->isLinkable() && isId(letter)) {
@@ -873,7 +873,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index files 
-   for (auto fn : *Doxygen::inputNameList) {
+   for (auto fn : *Doxy_Globals::inputNameList) {
      
       for (auto fd : *fn) { 
          uint letter = getUtf8CodeToLower(fd->name(), 0);
@@ -889,7 +889,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index class members, for each member name
-   for (auto mn : *Doxygen::memberNameSDict) {
+   for (auto mn : *Doxy_Globals::memberNameSDict) {
      
       // for each member definition
       for (auto md : *mn) {  
@@ -899,7 +899,7 @@ void writeJavascriptSearchIndex()
 
 
    // index file/namespace members, for each member name          
-   for (auto mn : *Doxygen::functionNameSDict) {
+   for (auto mn : *Doxy_Globals::functionNameSDict) {
 
       // for each member definition         
       for (auto md : *mn) { 
@@ -908,7 +908,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index groups
-   for (auto gd : *Doxygen::groupSDict) {
+   for (auto gd : *Doxy_Globals::groupSDict) {
 
       if (gd->isLinkable()) {
          QByteArray title = gd->groupTitle();
@@ -931,7 +931,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index pages 
-   for (auto pd : *Doxygen::pageSDict) {
+   for (auto pd : *Doxy_Globals::pageSDict) {
 
       if (pd->isLinkable()) {
          QByteArray title = pd->title();
@@ -950,16 +950,16 @@ void writeJavascriptSearchIndex()
       }
    }
 
-   if (Doxygen::mainPage) {
-      QByteArray title = Doxygen::mainPage->title();
+   if (Doxy_Globals::mainPage) {
+      QByteArray title = Doxy_Globals::mainPage->title();
 
       if (! title.isEmpty()) {
          uchar charCode = title.at(0);
          uint letter = charCode < 128 ? tolower(charCode) : charCode;
 
          if (isId(letter)) {
-            g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, Doxygen::mainPage);
-            g_searchIndexSymbols[SEARCH_INDEX_PAGES].insertElement(letter, Doxygen::mainPage);
+            g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, Doxy_Globals::mainPage);
+            g_searchIndexSymbols[SEARCH_INDEX_PAGES].insertElement(letter, Doxy_Globals::mainPage);
             g_searchIndexCount[SEARCH_INDEX_ALL]++;
             g_searchIndexCount[SEARCH_INDEX_PAGES]++;
          }
@@ -1075,7 +1075,7 @@ void writeJavascriptSearchIndex()
                   QByteArray anchor = d->anchor();
 
                   ti << "'" << externalRef("../", d->getReference(), true)
-                     << d->getOutputFileBase() << Doxygen::htmlFileExtension;
+                     << d->getOutputFileBase() << Doxy_Globals::htmlFileExtension;
                   if (!anchor.isEmpty()) {
                      ti << "#" << anchor;
                   }
@@ -1088,7 +1088,7 @@ void writeJavascriptSearchIndex()
                      ti << "0,";
                   }
 
-                  if (d->getOuterScope() != Doxygen::globalScope) {
+                  if (d->getOuterScope() != Doxy_Globals::globalScope) {
                      ti << "'" << convertToXML(d->getOuterScope()->name()) << "'";
 
                   } else if (md) {
@@ -1151,7 +1151,7 @@ void writeJavascriptSearchIndex()
                         ti << "],[";
                      }
                      ti << "'" << externalRef("../", d->getReference(), true)
-                        << d->getOutputFileBase() << Doxygen::htmlFileExtension;
+                        << d->getOutputFileBase() << Doxy_Globals::htmlFileExtension;
 
                      if (!anchor.isEmpty()) {
                         ti << "#" << anchor;
@@ -1196,7 +1196,7 @@ void writeJavascriptSearchIndex()
                         name  = convertToXML(d.dynamicCast<NamespaceDef>()->displayName());
                         found = true;
 
-                     } else if (scope == 0 || scope == Doxygen::globalScope) { 
+                     } else if (scope == 0 || scope == Doxy_Globals::globalScope) { 
                         // in global scope
 
                         if (md) {
@@ -1375,7 +1375,7 @@ void writeJavascriptSearchIndex()
       }
    }
 
-   Doxygen::indexList->addStyleSheetFile("search/search.js");
+   Doxy_Globals::indexList->addStyleSheetFile("search/search.js");
 }
 
 void initSearchIndexer()
@@ -1386,20 +1386,20 @@ void initSearchIndexer()
 
    if (searchEngine && serverBasedSearch) {
       if (externalSearch) { // external tools produce search index and engine
-         Doxygen::searchIndex = new SearchIndexExternal;
+         Doxy_Globals::searchIndex = new SearchIndexExternal;
 
       } else {
-         // doxygen produces search index and engine
-         Doxygen::searchIndex = new SearchIndex;
+         // DoxyPress produces search index and engine
+         Doxy_Globals::searchIndex = new SearchIndex;
       }
 
    } else { 
       // no search engine or pure javascript based search function
-      Doxygen::searchIndex = 0;
+      Doxy_Globals::searchIndex = 0;
    }
 }
 
 void finializeSearchIndexer()
 {
-   delete Doxygen::searchIndex;
+   delete Doxy_Globals::searchIndex;
 }

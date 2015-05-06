@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -836,8 +836,8 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
       bool ambig;
       QSharedPointer<FileDef> fd;
 
-      if (link.indexOf("@ref ") != -1 || link.indexOf("\\ref ") != -1 || (fd = findFileDef(Doxygen::imageNameDict, link, ambig)))
-         // assume doxygen symbol link or local image link
+      if (link.indexOf("@ref ") != -1 || link.indexOf("\\ref ") != -1 || (fd = findFileDef(Doxy_Globals::imageNameDict, link, ambig)))
+         // assume DoxyPress symbol link or local image link
 
       {
          out.addStr("@image html ");
@@ -873,7 +873,7 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
       int lp = -1;
 
       if ((lp = link.indexOf("@ref ")) != -1 || (lp = link.indexOf("\\ref ")) != -1 || lang == SrcLangExt_Markdown)
-         // assume doxygen symbol link
+         // assume DoxyPress symbol link
       {
          if (lp == -1) { // link to markdown page
             out.addStr("@ref ");
@@ -1861,7 +1861,7 @@ void writeOneLineHeaderOrRuler(GrowBuf &out, const char *data, int size)
          out.addStr(header);
          out.addStr("\n");
 
-         QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(id);
+         QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(id);
 
          if (si) {
             if (si->lineNr != -1) {
@@ -1880,7 +1880,7 @@ void writeOneLineHeaderOrRuler(GrowBuf &out, const char *data, int size)
                g_current->anchors->append(*(si.data()));
             }
 
-            Doxygen::sectionDict->insert(id, si);
+            Doxy_Globals::sectionDict->insert(id, si);
          }
 
       } else {
@@ -2228,7 +2228,7 @@ static QByteArray processBlocks(const QByteArray &s, int indent)
                   out.addStr(header);
                   out.addStr("\n\n");
 
-                  QSharedPointer<SectionInfo> si (Doxygen::sectionDict->find(id));
+                  QSharedPointer<SectionInfo> si (Doxy_Globals::sectionDict->find(id));
 
                   if (si) {
                      if (si->lineNr != -1) {
@@ -2248,7 +2248,7 @@ static QByteArray processBlocks(const QByteArray &s, int indent)
                         g_current->anchors->append(*si); 
                      }
 
-                     Doxygen::sectionDict->insert(id, si);
+                     Doxy_Globals::sectionDict->insert(id, si);
                   }
 
                } else {
@@ -2550,8 +2550,8 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, Q
    int position = 0;
 
    // even without markdown support enabled, we still parse markdown files as such
-   bool markdownEnabled = Doxygen::markdownSupport;
-   Doxygen::markdownSupport = true;
+   bool markdownEnabled = Doxy_Globals::markdownSupport;
+   Doxy_Globals::markdownSupport = true;
 
    bool needsEntry = false;
    Protection prot = Public;
@@ -2580,7 +2580,7 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, Q
    }
 
    // restore setting
-   Doxygen::markdownSupport = markdownEnabled; 
+   Doxy_Globals::markdownSupport = markdownEnabled; 
 }
 
 void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input,
@@ -2588,7 +2588,7 @@ void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const char 
                                    int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
                                    bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
-   ParserInterface *pIntf = Doxygen::parserManager->getParser("*.cpp");
+   ParserInterface *pIntf = Doxy_Globals::parserManager->getParser("*.cpp");
 
    if (pIntf != this) {
       pIntf->parseCode(codeOutIntf, scopeName, input, lang, isExampleBlock, exampleName,
@@ -2599,7 +2599,7 @@ void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const char 
 
 void MarkdownFileParser::resetCodeParserState()
 {
-   ParserInterface *pIntf = Doxygen::parserManager->getParser("*.cpp");
+   ParserInterface *pIntf = Doxy_Globals::parserManager->getParser("*.cpp");
 
    if (pIntf != this) {
       pIntf->resetCodeParserState();
@@ -2608,7 +2608,7 @@ void MarkdownFileParser::resetCodeParserState()
 
 void MarkdownFileParser::parsePrototype(const char *text)
 {
-   ParserInterface *pIntf = Doxygen::parserManager->getParser("*.cpp");
+   ParserInterface *pIntf = Doxy_Globals::parserManager->getParser("*.cpp");
 
    if (pIntf != this) {
       pIntf->parsePrototype(text);

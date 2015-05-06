@@ -75,7 +75,7 @@ class TranslatorSlovene : public TranslatorAdapter_1_4_6
       return ", vključujoč dedovane metode in atribute.";
    }
    QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "zgenerirano z Doxygen-om";
+      QByteArray result = "zgenerirano z DoxyPress";
       if (s) {
          result += (QByteArray)" za " + s;
       }
@@ -744,14 +744,14 @@ class TranslatorSlovene : public TranslatorAdapter_1_4_6
    virtual QByteArray trLegendDocs() {
       return
          "Tekoča stran pojasnjuje način interpretacije grafov, ki jih izriše "
-         "doxygen.<p>\n"
+         "DoxyPress.<p>\n"
          "Poglejmo si naslednji primer:\n"
          "\\code\n"
          "/*! Nevide razred zaradi rezanja */\n"
          "class Invisible { };\n\n"
          "/*! Odrezan razred, dedovalna relacija je skrita */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* razred, ki ni opisan z doxygen komentarji */\n"
+         "/* razred, ki ni opisan z DoxyPress komentarji */\n"
          "class Undocumented { };\n\n"
          "/*! Razred, ki ga dedujemo s pomočjo javnega dedovanja */\n"
          "class PublicBase : public Truncated { };\n\n"

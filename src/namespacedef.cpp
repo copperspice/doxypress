@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -252,7 +252,7 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
 {
    tagFile << "  <compound kind=\"namespace\">" << endl;
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
-   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxygen::htmlFileExtension << "</filename>" << endl;
+   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>" << endl;
 
    QByteArray idStr = id();
    if (!idStr.isEmpty()) {
@@ -408,7 +408,7 @@ void NamespaceDef::startMemberDocumentation(OutputList &ol)
 {
    if (Config::getBool("separate-member-pages")) {
       ol.disable(OutputGenerator::Html);
-      Doxygen::suppressDocWarnings = true;
+      Doxy_Globals::suppressDocWarnings = true;
    }
 }
 
@@ -416,7 +416,7 @@ void NamespaceDef::endMemberDocumentation(OutputList &ol)
 {
    if (Config::getBool("separate-member-pages")) {
       ol.enable(OutputGenerator::Html);
-      Doxygen::suppressDocWarnings = false;
+      Doxy_Globals::suppressDocWarnings = false;
    }
 }
 
@@ -533,7 +533,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
    startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_NamespaceVisible, !generateTreeView);
 
    if (! generateTreeView) {
-      if (getOuterScope() != Doxygen::globalScope) {
+      if (getOuterScope() != Doxy_Globals::globalScope) {
          writeNavigationPath(ol);
       }
       ol.endQuickIndices();
@@ -546,12 +546,12 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
    endTitle(ol, getOutputFileBase(), displayName());
    ol.startContents();
 
-   if (Doxygen::searchIndex) {
-      Doxygen::searchIndex->setCurrentDoc(self, anchor(), false);
-      Doxygen::searchIndex->addWord(localName(), true);
+   if (Doxy_Globals::searchIndex) {
+      Doxy_Globals::searchIndex->setCurrentDoc(self, anchor(), false);
+      Doxy_Globals::searchIndex->addWord(localName(), true);
    }
 
-   Doxygen::indexList->addIndexItem(self, QSharedPointer<MemberDef>());
+   Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>());
 
    //---------------------------------------- start flexible part -------------------------------
 
@@ -705,7 +705,7 @@ void NamespaceDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) c
                if (createSubDirs) {
                   ol.writeString("../../");
                }
-               ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8() + "#" + md->anchor());
+               ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8() + "#" + md->anchor());
                ol.writeString("\">");
                ol.writeString(convertToHtml(md->localName()));
                ol.writeString("</a>");

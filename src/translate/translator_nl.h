@@ -75,7 +75,7 @@ class TranslatorDutch : public Translator
       return ", inclusief alle overge&euml;rfde members.";
    }
    QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Automatisch gegenereerd door Doxygen";
+      QByteArray result = "Automatisch gegenereerd door DoxyPress";
       if (s) {
          result += (QByteArray)" voor " + s;
       }
@@ -719,7 +719,7 @@ class TranslatorDutch : public Translator
    /*! page explaining how the dot graph's should be interpreted */
    QByteArray trLegendDocs() {
       return
-         "Deze pagina legt uit hoe de grafen die gegenereerd worden door doxygen "
+         "Deze pagina legt uit hoe de grafen die gegenereerd worden door DoxyPress "
          "ge&iuml;nterpreteerd dienen te worden.<p>\n"
          "Beschouw het volgende voorbeeld:\n"
          "\\code\n"
@@ -727,7 +727,7 @@ class TranslatorDutch : public Translator
          "class Invisible { };\n\n"
          "/*! Afgekapte klasse, overervingsrelatie is verborgen */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Klasse is niet gedocumenteerd met doxygen commentaar */\n"
+         "/* Klasse is niet gedocumenteerd met DoxyPress commentaar */\n"
          "class Undocumented { };\n\n"
          "/*! Klasse met public inheritance */\n"
          "class PublicBase : public Truncated { };\n\n"

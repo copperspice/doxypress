@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -226,8 +226,7 @@ class Definition : public DefinitionIntf
 
    /*! If this definition was imported via a tag file, this function
     *  returns the tagfile for the external project. This can be
-    *  translated into an external link target via
-    *  Doxygen::tagDestinationDict
+    *  translated into an external link target via Doxy_Globals::tagDestinationDict
     */
    virtual QByteArray getReference() const;
 
@@ -363,8 +362,7 @@ class Definition : public DefinitionIntf
 
    QByteArray pathFragment() const;
 
-   /*! Writes the documentation anchors of the definition to
-    *  the Doxygen::tagFile stream.
+   /*! Writes the documentation anchors of the definition to yhe Doxy_Globals::tagFile stream.
     */
    void writeDocAnchorsToTagFile(QTextStream &);
    void setLocalName(const QString &name);

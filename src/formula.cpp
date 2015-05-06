@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -107,7 +107,7 @@ void FormulaList::generateBitmaps(const QString &path)
             pagesToGenerate.append(page);
          }
 
-         Doxygen::indexList->addImageFile(strdup(qPrintable(resultName)));
+         Doxy_Globals::indexList->addImageFile(strdup(qPrintable(resultName)));
          page++;
       }
 

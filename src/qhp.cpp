@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
- * Copyright (C) 2008 by Sebastian Pipping.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2008 by Sebastian Pipping.
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -39,7 +39,7 @@ static QByteArray makeFileName(const char *withoutExtension)
          result = result.mid(1);
 
       } else { // add specified HTML extension
-         result += Doxygen::htmlFileExtension;
+         result += Doxy_Globals::htmlFileExtension;
       }
    }
    return result;
@@ -118,7 +118,7 @@ void Qhp::initialize()
 
    // Add extra root node
    QString fullProjectName = getFullProjectName();
-   QString indexFile       = "index" + Doxygen::htmlFileExtension;
+   QString indexFile       = "index" + Doxy_Globals::htmlFileExtension;
  
    QMap<QString, QString> attributes;
    attributes.insert("title", fullProjectName);

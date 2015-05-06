@@ -1,8 +1,8 @@
 /*************************************************************************
  *
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
- * All rights reserved.
+ * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -26096,21 +26096,21 @@ static void startFontClass(const char *s)
 
 static void setCurrentDoc(const QByteArray &anchor)
 {
-   if (Doxygen::searchIndex) {
+   if (Doxy_Globals::searchIndex) {
 
       if (g_searchCtx) {
-         Doxygen::searchIndex->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), FALSE);
+         Doxy_Globals::searchIndex->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), FALSE);
 
       } else {
-         Doxygen::searchIndex->setCurrentDoc(g_sourceFileDef, anchor, TRUE);
+         Doxy_Globals::searchIndex->setCurrentDoc(g_sourceFileDef, anchor, TRUE);
       }
    }
 }
 
 static void addToSearchIndex(const char *text)
 {
-   if (Doxygen::searchIndex) {
-      Doxygen::searchIndex->addWord(text, FALSE);
+   if (Doxy_Globals::searchIndex) {
+      Doxy_Globals::searchIndex->addWord(text, FALSE);
    }
 }
 
@@ -26263,16 +26263,16 @@ static bool getFortranTypeDefs(const QByteArray &tname, const QByteArray &module
    }  
 
    // search for type
-   if ((cd = Doxygen::classSDict->find(tname))) {      
+   if ((cd = Doxy_Globals::classSDict->find(tname))) {      
       return TRUE;
 
-   } else if (! moduleName.isEmpty() && (cd = Doxygen::classSDict->find(moduleName + "::" + tname))) {      
+   } else if (! moduleName.isEmpty() && (cd = Doxy_Globals::classSDict->find(moduleName + "::" + tname))) {      
       return TRUE;
 
    } else {   
 
       for (auto use : *usedict)  { 
-         cd = Doxygen::classSDict->find(use->module + "::" + tname);
+         cd = Doxy_Globals::classSDict->find(use->module + "::" + tname);
 
          if (cd) {            
             return TRUE;
@@ -26306,10 +26306,10 @@ static bool getFortranDefs(const QByteArray &memberName, const QByteArray &modul
    }
 
    // search for function
-   QSharedPointer<MemberName> mn = Doxygen::functionNameSDict->find(memberName);
+   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict->find(memberName);
 
    if (! mn) {
-      mn = Doxygen::memberNameSDict->find(memberName);
+      mn = Doxy_Globals::memberNameSDict->find(memberName);
    }
 
    if (mn) { 
@@ -26379,7 +26379,7 @@ static bool getLink(UseSDict *usedict, const char *memberText, CodeOutputInterfa
 
       QSharedPointer<Definition> d;
 
-      if (md->getOuterScope() == Doxygen::globalScope) {
+      if (md->getOuterScope() == Doxy_Globals::globalScope) {
          d = md->getBodyDef();
 
       } else {
@@ -26865,7 +26865,7 @@ YY_DECL {
 
             {
                // highlight
-               /* font class is defined doxy_style.css */
+               /* font class is defined doxypress.css */
                startFontClass("keyword");
                codifyLines(fortrancodeYYtext);
                endFontClass();
@@ -26882,7 +26882,7 @@ YY_DECL {
                      YY_FTN_REJECT;
                   }
                }
-               /* font class is defined doxy_style.css */
+               /* font class is defined doxypress.css */
                startFontClass("keywordflow");
                codifyLines(fortrancodeYYtext);
                endFontClass();

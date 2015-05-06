@@ -108,7 +108,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Automatisch erzeugt von Doxygen";
+      QByteArray result = "Automatisch erzeugt von DoxyPress";
       if (s) {
          result += (QByteArray)" für " + s;
       }
@@ -1000,7 +1000,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
     */
    virtual QByteArray trLegendDocs() {
       return
-         "Diese Seite erklärt die Interpretation der von doxygen "
+         "Diese Seite erklärt die Interpretation der von DoxyPress "
          "erzeugten Graphen.<p>\n"
          "Beispiel:\n"
          "\\code\n"
@@ -1008,7 +1008,7 @@ class TranslatorGerman : public TranslatorAdapter_1_8_4
          "class Invisible { };\n\n"
          "/*! Klasse verkürzt dargestellt, Vererbungsbeziehung ist versteckt */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Nicht mit doxygen-Kommentaren dokumentierte Klasse */\n"
+         "/* Nicht mit DoxyPress-Kommentaren dokumentierte Klasse */\n"
          "class Undocumented { };\n\n"
          "/*! Mithilfe öffentlicher Vererbung vererbte Klasse */\n"
          "class PublicBase : public Truncated { };\n\n"

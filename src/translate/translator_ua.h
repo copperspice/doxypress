@@ -105,7 +105,7 @@ class TranslatorUkrainian : public TranslatorAdapter_1_8_4
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Автоматично створено за допомогою Doxygen";
+      QByteArray result = "Автоматично створено за допомогою DoxyPress";
       if (s) {
          result += QByteArray(" для ") + s;
       }

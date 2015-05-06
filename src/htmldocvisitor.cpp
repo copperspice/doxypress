@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -406,7 +406,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          forceEndParagraph(s);
          m_t << PREFRAG_START;
 
-         Doxygen::parserManager->getParser(lang)->parseCode(m_ci, s->context(), s->text(),
+         Doxy_Globals::parserManager->getParser(lang)->parseCode(m_ci, s->context(), s->text(),
                      langExt, s->isExample(), s->exampleFile(), QSharedPointer<FileDef>(), 
                      -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
 
@@ -544,7 +544,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          forceEndParagraph(inc);
          m_t << PREFRAG_START;
 
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(),                                     
                      QSharedPointer<FileDef>(), -1, -1, true, QSharedPointer<MemberDef>(), false, m_ctx);
 
@@ -559,7 +559,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8(), cfi.fileName().toUtf8());
 
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(),
                      fd, -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
 
@@ -590,7 +590,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          forceEndParagraph(inc);
          m_t << PREFRAG_START;
 
-         Doxygen::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      extractBlock(inc->text(), inc->blockId()), langExt, inc->isExample(), inc->exampleFile(),
                      QSharedPointer<FileDef>(), -1, -1, true, QSharedPointer<MemberDef>(), true, m_ctx);
 
@@ -617,7 +617,7 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
       popEnabled();
 
       if (!m_hide) {
-         Doxygen::parserManager->getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
+         Doxy_Globals::parserManager->getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
             langExt, op->isExample(), op->exampleFile(),
             QSharedPointer<FileDef>(), -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
       }
@@ -695,7 +695,7 @@ void HtmlDocVisitor::visit(DocIndexEntry *e)
 
    m_t << "<a name=\"" << anchor << "\"></a>";
    
-   Doxygen::indexList->addIndexItem(e->scope(), e->member(), anchor, e->entry());
+   Doxy_Globals::indexList->addIndexItem(e->scope(), e->member(), anchor, e->entry());
 }
 
 void HtmlDocVisitor::visit(DocSimpleSectSep *)
@@ -1746,8 +1746,8 @@ void HtmlDocVisitor::visitPre(DocSecRefItem *ref)
    }
    QString refName = ref->file();
 
-   if (refName.right(Doxygen::htmlFileExtension.length()) != QString(Doxygen::htmlFileExtension)) {
-      refName += Doxygen::htmlFileExtension;
+   if (refName.right(Doxy_Globals::htmlFileExtension.length()) != QString(Doxy_Globals::htmlFileExtension)) {
+      refName += Doxy_Globals::htmlFileExtension;
    }
 
    m_t << "<li><a href=\"" << refName << "#" << ref->anchor() << "\">";
@@ -1954,7 +1954,7 @@ void HtmlDocVisitor::visitPre(DocXRefItem *x)
 
    if (! anonymousEnum) {
       m_t << "<dl class=\"" << x->key() << "\"><dt><b><a class=\"el\" href=\""
-          << x->relPath() << x->file() << Doxygen::htmlFileExtension
+          << x->relPath() << x->file() << Doxy_Globals::htmlFileExtension
           << "#" << x->anchor() << "\">";
 
    } else {
@@ -2140,7 +2140,7 @@ void HtmlDocVisitor::startLink(const QByteArray &ref, const QByteArray &file,
    m_t << "href=\"";
    m_t << externalRef(relPath, ref, true);
    if (!file.isEmpty()) {
-      m_t << file << Doxygen::htmlFileExtension;
+      m_t << file << Doxy_Globals::htmlFileExtension;
    }
    if (!anchor.isEmpty()) {
       m_t << "#" << anchor;

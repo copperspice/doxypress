@@ -40,10 +40,7 @@
 #include <new>
 #include <limits.h>
 #include <string.h>
-
-#ifdef Q_CC_CLANG
 #include <sstream>
-#endif
 
 QT_BEGIN_NAMESPACE
 
@@ -64,9 +61,9 @@ struct Q_CORE_EXPORT QListData {
 
    Data *detach(int alloc);
    Data *detach_grow(int *i, int n);
-   Data *detach();  // remove in 5.0
-   Data *detach2(); // remove in 5.0
-   Data *detach3(); // remove in 5.0
+   Data *detach(); 
+   Data *detach2(); 
+   Data *detach3();
    void realloc(int alloc);
 
    static Data *sharedNull();
@@ -106,8 +103,7 @@ class QList
    struct Node {
       void *v;
       Q_INLINE_TEMPLATE T &t() {
-         return *reinterpret_cast<T *>(QTypeInfo<T>::isLarge || QTypeInfo<T>::isStatic
-                                       ? v : this);
+         return *reinterpret_cast<T *>(QTypeInfo<T>::isLarge || QTypeInfo<T>::isStatic ? v : this);
       }
 
    };
@@ -163,16 +159,13 @@ class QList
       return p.size();
    }
 
-
-
    inline void detach() {
       if (d->ref.isShared()) {
          detach_helper();
       }
    }
 
-   inline void detachShared() {
-      // The "this->" qualification is needed for GCCE.
+   inline void detachShared() {      
       if (d->ref.isShared() && this->d != QListData::sharedNull()) {
          detach_helper();
       }

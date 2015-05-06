@@ -1,0 +1,131 @@
+/*************************************************************************
+*                                                                         
+* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim                                                         
+* All rights reserved.                                                    
+*                                                                         
+*                                                                         
+* GNU Free Documentation License                                          
+* This file may be used under the terms of the GNU Free Documentation     
+* License version 1.3 as published by the Free Software Foundation        
+* and appearing in the file included in the packaging of this file.       
+*                                                                         
+*                                                                         
+*************************************************************************/
+
+/*!
+\class Ginger
+\brief Test class to review how to document
+
+Ginger is a test class to review how documentation is generated in DoxyPress.
+
+*/
+
+
+/**
+\fn Ginger::Ginger ()
+
+Constructs an empty class.
+
+
+*/
+
+
+/**
+\fn double Ginger::getAmount ()
+
+Returns the amount of Ginger.
+
+*/
+
+
+/**
+\fn void Ginger::setAmount (double amt)
+
+Sets the amount of Ginger to use.
+
+
+*/
+
+
+/**
+\fn bool Ginger::isChopped ()
+
+Indicates if the ginger should be chopped.
+
+*/
+
+
+/**
+\fn bool Ginger::isGrated ()
+
+Indicates if the ginger should be grated.
+
+
+*/
+
+
+/*!
+\fn bool Ginger::isSpice ()
+
+Documentation for a public static method. 
+
+Ginger is a spice so this method will always return true.
+
+*/
+
+
+
+/*!
+\fn bool Ginger::isPowder ()
+
+Documentation for an inline public method. 
+
+Powdered ginger should only be used for making a marinade like Turkey Jerky.
+
+*/
+
+
+
+/**
+\fn QString Ginger::someProtected ()
+
+Documentation for a protected method.
+
+
+*/
+
+
+/**
+\fn QString Ginger::somePrivate ()
+
+Documentation for a private method.
+
+
+*/
+
+
+/*!
+\enum Ginger::Brands
+
+An enum listing the different varieties of Ginger.
+
+The possible values are:
+
+   \li Chinese
+   \li Jamaican
+   \li Thai
+   \li Yellow
+
+*/
+
+
+/**
+\typedef Ginger::AmountType
+
+AmountType is a typedef for double. 
+
+
+*/
+
+
+

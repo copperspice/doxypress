@@ -121,7 +121,7 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Generert automatisk av Doxygen";
+      QByteArray result = "Generert automatisk av DoxyPress";
       if (s) {
          result += (QByteArray)" for " + s;
       }
@@ -1013,14 +1013,14 @@ class TranslatorNorwegian : public TranslatorAdapter_1_4_6
    /*! page explaining how the dot graph's should be interpreted */
    virtual QByteArray trLegendDocs() {
       return
-         "Denne siden forklarer hvordan man tolker grafene doxygen genererer.<p>\n"
+         "Denne siden forklarer hvordan man tolker grafene DoxyPress genererer.<p>\n"
          "Vi baserer oss på følgende eksempel:\n"
          "\\code\n"
          "/*! Usynlig klasse pga. trunkasjon */\n"
          "class Invisible { };\n\n"
          "/*! Trunkert klasse, arve-relasjon er skjult */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Klasse som ikke er dokumentert med doxygen-kommentarer */"
+         "/* Klasse som ikke er dokumentert med DoxyPress-kommentarer */"
          "class Undocumented { };\n\n"
          "/*! Klasse med public-arv */\n"
          "class PublicBase : public Truncated { };\n\n"

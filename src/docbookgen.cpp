@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -377,7 +377,7 @@ static void writeDocbookDocBlock(QTextStream &t, const QByteArray &fileName, int
 
 void writeDocbookCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
 {
-   ParserInterface *pIntf = Doxygen::parserManager->getParser(fd->getDefFileExtension());
+   ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(fd->getDefFileExtension());
    SrcLangExt langExt = getLanguageFromFileName(fd->getDefFileExtension());
    pIntf->resetCodeParserState();
 
@@ -1711,7 +1711,7 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
       writeDocbookHeader_ID(t, pid);
    }
 
-   QSharedPointer<SectionInfo> si = Doxygen::sectionDict->find(pd->name());
+   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(pd->name());
 
    if (si) {
       t << "    <title>" << convertToXML(si->title) << "</title>" << endl;
@@ -1807,31 +1807,31 @@ void generateDocbook()
    // NAMESPACE DOCUMENTATION 
    //Namespace Documentation index header
 
-   if (! Doxygen::namespaceSDict->isEmpty()) {
+   if (! Doxy_Globals::namespaceSDict->isEmpty()) {
       t << "    <chapter>" << endl;
       t << "        <title>Namespace Documentation</title>" << endl;
    }
 
-   for (auto nd : *Doxygen::namespaceSDict)  {
+   for (auto nd : *Doxy_Globals::namespaceSDict)  {
       msg("Generating Docbook output for namespace %s\n", nd->name().data());
       generateDocbookForNamespace(nd, t);
    }
 
    //Namespace Documentation index footer
-   if (! Doxygen::namespaceSDict->isEmpty()) {
+   if (! Doxy_Globals::namespaceSDict->isEmpty()) {
       t << "    </chapter>" << endl;
    }
 
    /** MAINPAGE DOCUMENTATION **/
 
-   if (Doxygen::mainPage) {
+   if (Doxy_Globals::mainPage) {
       msg("Generating Docbook output for the main page\n");
-      generateDocbookForPage(Doxygen::mainPage, t, false);
+      generateDocbookForPage(Doxy_Globals::mainPage, t, false);
    }
 
    // PAGE DOCUMENTATION
       
-   for (auto pd : *Doxygen::pageSDict) {
+   for (auto pd : *Doxy_Globals::pageSDict) {
       msg("Generating Docbook output for page %s\n", pd->name().data());
       generateDocbookForPage(pd, t, false);      
    }
@@ -1840,18 +1840,18 @@ void generateDocbook()
 
 
    // Module group Documentation index header
-   if (! Doxygen::groupSDict->isEmpty()) {
+   if (! Doxy_Globals::groupSDict->isEmpty()) {
       t << "    <chapter>" << endl;
       t << "        <title>Module Documentation</title>" << endl;
    }
 
-   for (auto gd : *Doxygen::groupSDict) {
+   for (auto gd : *Doxy_Globals::groupSDict) {
       msg("Generating Docbook output for group %s\n", gd->name().data());
       generateDocbookForGroup(gd, t);
    }
 
    // Module group Documentation index footer
-   if (! Doxygen::groupSDict->isEmpty()) {
+   if (! Doxy_Globals::groupSDict->isEmpty()) {
       t << "    </chapter>" << endl;
    }
 
@@ -1859,17 +1859,17 @@ void generateDocbook()
 
    {
       // Class Documentation index header
-      if (! Doxygen::classSDict->isEmpty()) {
+      if (! Doxy_Globals::classSDict->isEmpty()) {
          t << "    <chapter>" << endl;
          t << "        <title>Class Documentation</title>" << endl;
       }
 
-      for (auto cd : *Doxygen::classSDict) {
+      for (auto cd : *Doxy_Globals::classSDict) {
          generateDocbookForClass(cd, t);
       }
 
       // Class Documentation index footer
-      if (! Doxygen::classSDict->isEmpty()) {
+      if (! Doxy_Globals::classSDict->isEmpty()) {
          t << "    </chapter>" << endl;
       }
    }
@@ -1880,12 +1880,12 @@ void generateDocbook()
    if (showFiles) {
     
       //File Documentation index header
-      if (! Doxygen::inputNameList->isEmpty()) {
+      if (! Doxy_Globals::inputNameList->isEmpty()) {
          t << "    <chapter>" << endl;
          t << "        <title>File Documentation</title>" << endl;
       }
     
-      for (auto fn : *Doxygen::inputNameList) {        
+      for (auto fn : *Doxy_Globals::inputNameList) {        
          for (auto fd : *fn) {
             msg("Generating Docbook output for file %s\n", fd->name().data());
             generateDocbookForFile(fd, t);
@@ -1893,7 +1893,7 @@ void generateDocbook()
       }
 
       //File Documentation index footer
-       if (! Doxygen::inputNameList->isEmpty()) {
+       if (! Doxy_Globals::inputNameList->isEmpty()) {
          t << "    </chapter>" << endl;
       }
    }
@@ -1902,18 +1902,18 @@ void generateDocbook()
    if (Config::getBool("directory-graph") && Config::getBool("have-dot")) {
 
       // Directory Documentation index header
-      if (! Doxygen::directories.isEmpty()) {
+      if (! Doxy_Globals::directories.isEmpty()) {
          t << "    <chapter>" << endl;
          t << "        <title>Directory Documentation</title>" << endl;
       }
       
-      for (auto dir : Doxygen::directories) {
+      for (auto dir : Doxy_Globals::directories) {
          msg("Generate Docbook output for dir %s\n", dir->name().data());
          generateDocbookForDir(dir, t);
       }
 
       //Module group Documentation index footer
-      if (! Doxygen::directories.isEmpty()) {
+      if (! Doxy_Globals::directories.isEmpty()) {
          t << "    </chapter>" << endl;
       }
    }
@@ -1922,18 +1922,18 @@ void generateDocbook()
 
    {      
       //Example Page Documentation index header
-      if (! Doxygen::exampleSDict->isEmpty()) {
+      if (! Doxy_Globals::exampleSDict->isEmpty()) {
          t << "    <chapter>" << endl;
          t << "        <title>Example Documentation</title>" << endl;
       }
     
-      for (auto pd : *Doxygen::exampleSDict) {
+      for (auto pd : *Doxy_Globals::exampleSDict) {
          msg("Generating Docbook output for example %s\n", pd->name().data());
          generateDocbookForPage(pd, t, true);
       }
 
       //Example Page Documentation index footer
-       if (! Doxygen::exampleSDict->isEmpty()) {
+       if (! Doxy_Globals::exampleSDict->isEmpty()) {
          t << "    </chapter>" << endl;
       }
    }

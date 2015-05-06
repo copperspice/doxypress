@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -27,7 +27,6 @@
 #include <portable.h>
 #include <util.h>
 
-// 
 int Debug::curMask     = 0;
 int Debug::curPriority = 0;
 
@@ -150,7 +149,7 @@ static void format_warn(const char *file, int line, const char *text)
 
    if (file) { // get version from file name
       bool ambig;
-      QSharedPointer<FileDef> fd = findFileDef(Doxygen::inputNameDict, file, ambig);
+      QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, file, ambig);
 
       if (fd) {
          versionSubst = fd->getVersion();

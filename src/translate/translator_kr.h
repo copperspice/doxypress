@@ -133,7 +133,7 @@ class TranslatorKorean : public Translator
       if (s) {
          result += s + (QByteArray)"를 위해 ";
       }
-      result += "Doxygen에 의해 자동으로 생성됨.";
+      result += "DoxyPress에 의해 자동으로 생성됨.";
       return result;
    }
 
@@ -988,14 +988,14 @@ class TranslatorKorean : public Translator
     */
    virtual QByteArray trLegendDocs() {
       return
-         "이 페이지는 doxygen에 의해 생성된 그래프들을 이해하는 방법을 설명합니다.<p>\n"
+         "이 페이지는 DoxyPress에 의해 생성된 그래프들을 이해하는 방법을 설명합니다.<p>\n"
          "다음의 예제를 참고하십시오.:\n"
          "\\code\n"
          "/*! 생략되었기 때문에 보이지 않는 클래스 */\n"
          "class Invisible { };\n\n"
          "/*! Truncated 클래스, 상속관계가 숨겨짐 */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* doxygen 주석에 의해서 문서화되지 않는 클래스 */\n"
+         "/* DoxyPress 주석에 의해서 문서화되지 않는 클래스 */\n"
          "class Undocumented { };\n\n"
          "/*! public 상속을 통해서 상속된 클래스 */\n"
          "class PublicBase : public Truncated { };\n\n"

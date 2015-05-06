@@ -122,7 +122,7 @@ class TranslatorSerbianCyrillic : public TranslatorAdapter_1_6_0
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Аутоматски направљено помоћу Doxygen-а";
+      QByteArray result = "Аутоматски направљено помоћу DoxyPress";
       if (s) {
          result += (QByteArray)" за " + s;
       }
@@ -1005,14 +1005,14 @@ class TranslatorSerbianCyrillic : public TranslatorAdapter_1_6_0
    virtual QByteArray trLegendDocs() {
       return
          "Ова страница објашњава како тумачити графове који су направљени "
-         "doxygen-ом.<p>\n"
+         "DoxyPress<p>\n"
          "Размотримо следећи пример:\n"
          "\\code\n"
          "/*! Невидљива класа због одсецања */\n"
          "class Invisible { };\n\n"
          "/*! Одсечена класа, веза наслеђивања је скривена */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Класа која није документована doxygen коментарима */\n"
+         "/* Класа која није документована DoxyPress коментарима */\n"
          "class Undocumented { };\n\n"
          "/*! Класа која је наслеђена јавним наслеђивањем */\n"
          "class PublicBase : public Truncated { };\n\n"

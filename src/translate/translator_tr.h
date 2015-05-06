@@ -122,7 +122,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Doxygen tarafından";
+      QByteArray result = "DoxyPress tarafından";
       if (s) {
          result += s + (QByteArray)" için ";
       }
@@ -979,7 +979,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
     */
    virtual QByteArray trLegendDocs() {
       return
-         "Bu dosya doxygen tarafından üretilen grafiklerin nasıl anlaşılacağını "
+         "Bu dosya DoxyPress tarafından üretilen grafiklerin nasıl anlaşılacağını "
          "açıklar.<p>\n"
          "Aşağıdaki örneğe bakalım:\n"
          "\\code\n"
@@ -987,7 +987,7 @@ class TranslatorTurkish : public TranslatorAdapter_1_7_5
          "class Invisible { };\n\n"
          "/*! Sadeleşmiş sınıf, kalıtım ilişkisi gizli */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Doxygen yorumlarıyla dokümante edilmemiş sınıf */\n"
+         "/* DoxyPress yorumlarıyla dokümante edilmemiş sınıf */\n"
          "class Undocumented { };\n\n"
          "/*! Public kalıtımla türetilen sınıf */\n"
          "class PublicBase : public Truncated { };\n\n"

@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -80,7 +80,7 @@ static void writeServerSearchBox(QTextStream &t, const QString &relPath, bool hi
    t << "            <form id=\"FSearchBox\" action=\"" << relPath;
 
    if (externalSearch) {
-      t << "search" << Doxygen::htmlFileExtension;
+      t << "search" << Doxy_Globals::htmlFileExtension;
    } else {
       t << "search.php";
    }
@@ -215,7 +215,7 @@ static QString substituteHtmlKeywords(const QByteArray &output, const QString &t
    static bool titleArea = (hasProjectName || hasProjectBrief || hasProjectLogo || (disableIndex && searchEngine));
     
    // always first
-   QString cssFile = "doxy_style.css"; 
+   QString cssFile = "doxypress.css"; 
 
    QString extraCssText = "";
    const QStringList extraCssFile = Config::getList("html-stylesheets");
@@ -330,7 +330,7 @@ static QString substituteHtmlKeywords(const QByteArray &output, const QString &t
    result = result.replace("$year",           yearToString());
 
    result = result.replace("$doxypressversion", versionString);
-   result = result.replace("$doxygenversion",   versionString);
+   result = result.replace("$doxygenversion",   versionString);      // ok
 
    result = result.replace("$projectname",    convertToHtml(projectName));  
    result = result.replace("$projectversion", convertToHtml(projectVersion));
@@ -539,7 +539,7 @@ void HtmlCodeGenerator::_writeCodeLink(const QByteArray &className, const QByteA
    m_streamX << externalRef(m_relPath, ref, true);
 
    if (! f.isEmpty()) {
-      m_streamX << f << Doxygen::htmlFileExtension;
+      m_streamX << f << Doxy_Globals::htmlFileExtension;
    }
 
    if (! anchor.isEmpty()) {
@@ -568,7 +568,7 @@ void HtmlCodeGenerator::writeTooltip(const char *id, const DocLinkInfo &docInfo,
    if (! docInfo.url.isEmpty()) {
       m_streamX << "<a href=\"";
       m_streamX << externalRef(m_relPath, docInfo.ref, true);
-      m_streamX << docInfo.url << Doxygen::htmlFileExtension;
+      m_streamX << docInfo.url << Doxy_Globals::htmlFileExtension;
 
       if (!docInfo.anchor.isEmpty()) {
          m_streamX << "#" << docInfo.anchor;
@@ -602,7 +602,7 @@ void HtmlCodeGenerator::writeTooltip(const char *id, const DocLinkInfo &docInfo,
       if (!defInfo.url.isEmpty()) {
          m_streamX << "<a href=\"";
          m_streamX << externalRef(m_relPath, defInfo.ref, true);
-         m_streamX << defInfo.url << Doxygen::htmlFileExtension;
+         m_streamX << defInfo.url << Doxy_Globals::htmlFileExtension;
          if (!defInfo.anchor.isEmpty()) {
             m_streamX << "#" << defInfo.anchor;
          }
@@ -621,7 +621,7 @@ void HtmlCodeGenerator::writeTooltip(const char *id, const DocLinkInfo &docInfo,
       if (!declInfo.url.isEmpty()) {
          m_streamX << "<a href=\"";
          m_streamX << externalRef(m_relPath, declInfo.ref, true);
-         m_streamX << declInfo.url << Doxygen::htmlFileExtension;
+         m_streamX << declInfo.url << Doxy_Globals::htmlFileExtension;
          if (!declInfo.anchor.isEmpty()) {
             m_streamX << "#" << declInfo.anchor;
          }
@@ -757,7 +757,7 @@ void HtmlGenerator::init()
 /// Additional initialization after indices have been created
 void HtmlGenerator::writeTabData()
 {
-   Doxygen::indexList->addStyleSheetFile("tabs.css");
+   Doxy_Globals::indexList->addStyleSheetFile("tabs.css");
    QString dname = Config::getString("html-output");
 
    ResourceMgr &mgr = ResourceMgr::instance();
@@ -786,24 +786,24 @@ void HtmlGenerator::writeSearchData(const QString &dir)
    ResourceMgr &mgr = ResourceMgr::instance();
 
    mgr.copyResourceAs("html/search_l.png", dir, "search_l.png");
-   Doxygen::indexList->addImageFile("search/search_l.png");
+   Doxy_Globals::indexList->addImageFile("search/search_l.png");
 
    mgr.copyResourceAs("html/search_m.png", dir, "search_m.png");
-   Doxygen::indexList->addImageFile("search/search_m.png");
+   Doxy_Globals::indexList->addImageFile("search/search_m.png");
 
    mgr.copyResourceAs("html/search_r.png", dir, "search_r.png");
-   Doxygen::indexList->addImageFile("search/search_r.png");
+   Doxy_Globals::indexList->addImageFile("search/search_r.png");
 
    if (serverBasedSearch) {
       mgr.copyResourceAs("html/mag.png", dir, "mag.png");
-      Doxygen::indexList->addImageFile("search/mag.png");
+      Doxy_Globals::indexList->addImageFile("search/mag.png");
 
    } else {
       mgr.copyResourceAs("html/close.png", dir, "close.png");
-      Doxygen::indexList->addImageFile("search/close.png");
+      Doxy_Globals::indexList->addImageFile("search/close.png");
 
       mgr.copyResourceAs("html/mag_sel.png", dir, "mag_sel.png");
-      Doxygen::indexList->addImageFile("search/mag_sel.png");
+      Doxy_Globals::indexList->addImageFile("search/mag_sel.png");
    }
 
    QString outputName = Config::getString("html-output") + "/search";
@@ -821,7 +821,7 @@ void HtmlGenerator::writeSearchData(const QString &dir)
          QByteArray searchCss = replaceColorMarkers(resData);
 
          searchCss.replace("$doxypressversion", versionString);
-         searchCss.replace("$doxygenversion",   versionString);
+         searchCss.replace("$doxygenversion",   versionString);         // ok
 
          if (Config::getBool("disable-index")) {
             // move up the search box if there are no tabs
@@ -829,7 +829,7 @@ void HtmlGenerator::writeSearchData(const QString &dir)
          }
 
          t << searchCss;
-         Doxygen::indexList->addStyleSheetFile("search/search.css");
+         Doxy_Globals::indexList->addStyleSheetFile("search/search.css");
       }
 
    } else {
@@ -841,7 +841,7 @@ void HtmlGenerator::writeStyleSheetFile(QFile &file)
 {
    QTextStream t(&file);
  
-   QByteArray resData = ResourceMgr::instance().getAsString("html/doxy_style.css");
+   QByteArray resData = ResourceMgr::instance().getAsString("html/doxypress.css");
 
    if (resData.isEmpty()) { 
       fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to " 
@@ -849,7 +849,7 @@ void HtmlGenerator::writeStyleSheetFile(QFile &file)
 
    } else {
       resData.replace("$doxypressversion", versionString);
-      resData.replace("$doxygenversion",   versionString);
+      resData.replace("$doxygenversion",   versionString);         // ok
       t << replaceColorMarkers(resData);
 
    }
@@ -878,8 +878,8 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
    m_lastTitle    = title;
    m_relativePath = relativePathToRoot(fileName);
 
-   if (fileName.right(Doxygen::htmlFileExtension.length()) != Doxygen::htmlFileExtension) {
-      fileName += Doxygen::htmlFileExtension;
+   if (fileName.right(Doxy_Globals::htmlFileExtension.length()) != Doxy_Globals::htmlFileExtension) {
+      fileName += Doxy_Globals::htmlFileExtension;
    }
 
    startPlainFile(fileName);
@@ -887,7 +887,7 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
    m_codeGen = QMakeShared<HtmlCodeGenerator> (m_textStream, m_relativePath.toUtf8());
   
    //
-   Doxygen::indexList->addIndexFile(fileName);
+   Doxy_Globals::indexList->addIndexFile(fileName);
 
    m_lastFile = fileName;
    m_textStream << substituteHtmlKeywords(g_header, filterTitle(title), m_relativePath);
@@ -950,11 +950,10 @@ QByteArray HtmlGenerator::writeLogoAsString(const QString &path)
       result += theTranslator->trGeneratedBy();
    }
 
-   result += "&#160;\n<a href=\"http://www.doxygen.org/index.html\">\n"
-             "<img class=\"footer\" src=\"";
-
+   result += "&#160;\n<a href=\"http://www.copperspice.com/documentation-doxypress.html\">";
+   result += "<img class=\"footer\" src=\"";
    result += path;
-   result += "doxygen.png\" alt=\"doxygen\"/></a> ";
+   result += "doxypress.png\" alt=\"DoxyPress\"/></a>";
    result += versionString;
    result += " ";
 
@@ -995,8 +994,8 @@ void HtmlGenerator::writeStyleInfo(int part)
 {   
    if (part == 0) {
       // write default style sheet
-      startPlainFile("doxy_style.css");       
-      QByteArray resData = ResourceMgr::instance().getAsString("html/doxy_style.css");
+      startPlainFile("doxypress.css");       
+      QByteArray resData = ResourceMgr::instance().getAsString("html/doxypress.css");
 
       if (resData.isEmpty()) { 
          fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to " 
@@ -1004,14 +1003,14 @@ void HtmlGenerator::writeStyleInfo(int part)
 
       } else {
          resData.replace("$doxypressversion", versionString);
-         resData.replace("$doxygenversion", versionString);
+         resData.replace("$doxygenversion", versionString);            // ok
          m_textStream << replaceColorMarkers(resData);
 
       }
 
       endPlainFile();
 
-      Doxygen::indexList->addStyleSheetFile("doxy_style.css");     
+      Doxy_Globals::indexList->addStyleSheetFile("doxypress.css");     
 
       // part two
       static const QStringList extraCssFile = Config::getList("html-stylesheets");
@@ -1022,7 +1021,7 @@ void HtmlGenerator::writeStyleInfo(int part)
             QFileInfo fi(fileName);
 
             if (fi.exists()) {
-               Doxygen::indexList->addStyleSheetFile(fi.fileName());
+               Doxy_Globals::indexList->addStyleSheetFile(fi.fileName());
             }
          }
       }
@@ -1084,7 +1083,7 @@ void HtmlGenerator::startIndexItem(const QByteArray &ref, const QByteArray &f)
       m_textStream << externalRef(m_relativePath, ref, true);
 
       if (! f.isEmpty()) {
-         m_textStream << f << Doxygen::htmlFileExtension << "\">";
+         m_textStream << f << Doxy_Globals::htmlFileExtension << "\">";
       }
 
    } else {
@@ -1110,7 +1109,7 @@ void HtmlGenerator::writeStartAnnoItem(const char *, const QByteArray &f, const 
       docify(path);
    }
 
-   m_textStream << "<a class=\"el\" href=\"" << f << Doxygen::htmlFileExtension << "\">";
+   m_textStream << "<a class=\"el\" href=\"" << f << Doxy_Globals::htmlFileExtension << "\">";
    docify(name);
 
    m_textStream << "</a> ";
@@ -1130,7 +1129,7 @@ void HtmlGenerator::writeObjectLink(const QByteArray &ref, const QByteArray &f, 
    m_textStream << externalRef(m_relativePath, ref, true);
 
    if (! f.isEmpty()) {
-      m_textStream << f << Doxygen::htmlFileExtension;
+      m_textStream << f << Doxy_Globals::htmlFileExtension;
    }
 
    if (! anchor.isEmpty()) {
@@ -1148,7 +1147,7 @@ void HtmlGenerator::startTextLink(const QByteArray &f, const QByteArray &anchor)
    m_textStream << "<a href=\"";
 
    if (! f.isEmpty()) {
-      m_textStream << m_relativePath << f << Doxygen::htmlFileExtension;
+      m_textStream << m_relativePath << f << Doxy_Globals::htmlFileExtension;
    }
 
    if (! anchor.isEmpty()) {
@@ -1800,7 +1799,7 @@ void HtmlGenerator::endDotGraph(const DotClassGraph &g)
 
    if (generateLegend && ! umlLook) {
       m_textStream << "<center><span class=\"legend\">[";
-      startHtmlLink(m_relativePath + "graph_legend" + Doxygen::htmlFileExtension);
+      startHtmlLink(m_relativePath + "graph_legend" + Doxy_Globals::htmlFileExtension);
 
       m_textStream << theTranslator->trLegend();
       endHtmlLink();
@@ -1919,14 +1918,11 @@ void HtmlGenerator::endMemberGroup(bool)
 
 void HtmlGenerator::startIndent()
 {
-   DBG_HTML(m_textStream << "<!-- startIndent -->" << endl;)
-
    m_textStream << "<div class=\"memdoc\">\n";
 }
 
 void HtmlGenerator::endIndent()
-{
-   DBG_HTML(m_textStream << "<!-- endIndent -->" << endl;)
+{ 
    m_textStream << endl << "</div>" << endl << "</div>" << endl;
 }
 
@@ -2083,7 +2079,7 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
          return documentedFileMembers[FMHL_All] > 0;
       //case LayoutNavEntry::Dirs:             return documentedDirs>0;
       case LayoutNavEntry::Examples:
-         return Doxygen::exampleSDict->count() > 0;
+         return Doxy_Globals::exampleSDict->count() > 0;
    }
    return false;
 }
@@ -2327,7 +2323,7 @@ QByteArray HtmlGenerator::writeSplitBarAsString(const QString &name, const QStri
                   "  </div>\n"
                   "</div>\n"
                   "<script type=\"text/javascript\">\n"
-                  "$(document).ready(function(){initNavTree('" + name + Doxygen::htmlFileExtension + "','" + relpath +
+                  "$(document).ready(function(){initNavTree('" + name + Doxy_Globals::htmlFileExtension + "','" + relpath +
                   "');});\n</script>\n<div id=\"doc-content\">\n";
    }
 
@@ -2454,7 +2450,7 @@ void HtmlGenerator::writeSearchPage()
 void HtmlGenerator::writeExternalSearchPage()
 {
    static bool generateTreeView = Config::getBool("generate-treeview");
-   QString fileName = Config::getString("html-output") + "/search" + Doxygen::htmlFileExtension;
+   QString fileName = Config::getString("html-output") + "/search" + Doxy_Globals::htmlFileExtension;
 
    QFile f(fileName);
 
@@ -2749,7 +2745,7 @@ void HtmlGenerator::writeInheritedSectionTitle(const char *id, const QByteArray 
       classLink += m_relativePath;
    }
 
-   classLink += file + Doxygen::htmlFileExtension.toUtf8() + a;
+   classLink += file + Doxy_Globals::htmlFileExtension.toUtf8() + a;
    classLink += QByteArray("\">") + convertToHtml(name, false) + "</a>";
 
    m_textStream << "<tr class=\"inherit_header " << id << "\">"
@@ -2772,7 +2768,7 @@ void HtmlGenerator::writeSummaryLink(const QByteArray &file, const char *anchor,
 
    if (! file.isEmpty()) {
       m_textStream << m_relativePath << file;
-      m_textStream << Doxygen::htmlFileExtension;
+      m_textStream << Doxy_Globals::htmlFileExtension;
 
    } else {
       m_textStream << "#";
@@ -2797,15 +2793,15 @@ void HtmlGenerator::endMemberDeclaration(const char *anchor, const  QByteArray &
 
 void HtmlGenerator::setCurrentDoc(QSharedPointer<Definition> context, const char *anchor, bool isSourceFile)
 {
-   if (Doxygen::searchIndex) {
-      Doxygen::searchIndex->setCurrentDoc(context, anchor, isSourceFile);
+   if (Doxy_Globals::searchIndex) {
+      Doxy_Globals::searchIndex->setCurrentDoc(context, anchor, isSourceFile);
    }
 }
 
 void HtmlGenerator::addWord(const QString &word, bool hiPriority)
 {
-   if (Doxygen::searchIndex) {
-      Doxygen::searchIndex->addWord(word, hiPriority);
+   if (Doxy_Globals::searchIndex) {
+      Doxy_Globals::searchIndex->addWord(word, hiPriority);
    }
 }
 

@@ -269,7 +269,6 @@ noinst_HEADERS = \
    src/rtfstyle.h \
    src/searchindex.h \
    src/section.h \
-   src/settings.h \
    src/sortedlist.h \
    src/store.h \
    src/stringmap.h \

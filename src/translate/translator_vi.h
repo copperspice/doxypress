@@ -122,7 +122,7 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Được tạo ra bởi Doxygen";
+      QByteArray result = "Được tạo ra bởi DoxyPress";
       if (s) {
          result += (QByteArray)" cho " + s;
       }
@@ -974,14 +974,14 @@ class TranslatorVietnamese : public TranslatorAdapter_1_6_0
    virtual QByteArray trLegendDocs() {
       return
          "Trang này giải nghĩa các biểu đồ được biên soạn bởi "
-         " doxygen.<p>\n"
+         " DoxyPress.<p>\n"
          "Hãy xem xét các ví dụ sau:\n"
          "\\code\n"
          "/*! Các lướp không thấy được bởi sự cắt ngắn */\n"
          "Lớp không nhìn thấy class { };\n\n"
          "/*! class bị cắt, quan hệ kế thừa bị ẩn */\n"
          "class bị cắt : bị ẩn toàn cục { };\n\n"
-         "/* Class không được mô tả với các chú giải doxygen */\n"
+         "/* Class không được mô tả với các chú giải DoxyPress */\n"
          "class không được mô tả { };\n\n"
          "/*! Class được kế thừa sử dụng các kế thừa public */\n"
          "class PublicBase : public Truncated { };\n\n"

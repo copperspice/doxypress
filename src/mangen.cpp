@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -16,7 +16,7 @@
 *************************************************************************/
 
 /* http://www.cubic.org/source/archive/fileform/txt/man/ has some
-   nice introductions to groff and man pages. */
+   introductions to groff and man pages. */
 
 #include <QDir>
 #include <QTextStream>

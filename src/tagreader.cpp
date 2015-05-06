@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -253,7 +253,7 @@ class TagDirInfo
  *
  *  Reads an XML-structured tagfile and builds up the structure in
  *  memory. The method buildLists() is used to transfer/translate
- *  the structures to the doxygen engine.
+ *  the structures to the DoxyPress engine.
  */
 class TagFileParser : public QXmlDefaultHandler
 {
@@ -1197,10 +1197,10 @@ void TagFileParser::dump()
 void TagFileParser::addDocAnchors(QSharedPointer<Entry> e, const TagAnchorInfoList &list)
 {   
    for (auto ta : list) {
-      if (Doxygen::sectionDict->find(ta.label) == 0) {
+      if (Doxy_Globals::sectionDict->find(ta.label) == 0) {
          
          QSharedPointer<SectionInfo> si (new SectionInfo(ta.fileName, -1, ta.label, ta.title, SectionInfo::Anchor, 0, m_tagName));
-         Doxygen::sectionDict->insert(ta.label, si);
+         Doxy_Globals::sectionDict->insert(ta.label, si);
 
          e->anchors->append(*si);
 
@@ -1447,7 +1447,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       
       QSharedPointer<FileDef> fd = QMakeShared<FileDef>(m_tagName + ":" + tfi.path, tfi.name, m_tagName, tfi.filename);
      
-      QSharedPointer<FileName> mn (Doxygen::inputNameDict->find(tfi.name));
+      QSharedPointer<FileName> mn (Doxy_Globals::inputNameDict->find(tfi.name));
 
       if (mn) {
          mn->append(fd);
@@ -1456,8 +1456,8 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
          mn = QSharedPointer<FileName> (new FileName(fullName, tfi.name));
          mn->append(fd);
 
-         Doxygen::inputNameList->inSort(mn);
-         Doxygen::inputNameDict->insert(tfi.name, mn);
+         Doxy_Globals::inputNameList->inSort(mn);
+         Doxy_Globals::inputNameDict->insert(tfi.name, mn);
       }
 
       buildMemberList(fe, tfi.members);
@@ -1544,7 +1544,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
 void TagFileParser::addIncludes()
 { 
    for (auto tfi : m_tagFileFiles) {      
-      QSharedPointer<FileName> fn (Doxygen::inputNameDict->find(tfi.name));
+      QSharedPointer<FileName> fn (Doxy_Globals::inputNameDict->find(tfi.name));
 
       if (fn) {
                  
@@ -1553,7 +1553,7 @@ void TagFileParser::addIncludes()
                             
                for (auto item : tfi.includes) {
                
-                  QSharedPointer<FileName> ifn (Doxygen::inputNameDict->find(item.name));
+                  QSharedPointer<FileName> ifn (Doxy_Globals::inputNameDict->find(item.name));
                   assert(ifn != 0);
 
                   if (ifn) {                   

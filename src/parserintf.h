@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -32,9 +32,8 @@ class Definition;
 
 /** \brief Abstract interface for programming language parsers.
  *
- *  By implementing the methods of this interface one can add
- *  a new language parser to doxygen. The parser can make use of the
- *  comment block parser to parse the contents of special comment blocks.
+ *  By implementing the methods of this interface you can add a new language parser to DoxyPress. 
+ *  The parser can make use of the comment block parser to parse the contents of special comment blocks.
  */
 class ParserInterface
 {

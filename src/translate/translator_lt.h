@@ -124,7 +124,7 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Automatiškai sugeneruota Doxygen įrankiu";
+      QByteArray result = "Automatiškai sugeneruota DoxyPress įrankiu";
       if (s) {
          result += (QByteArray)" " + s;
       }
@@ -980,14 +980,14 @@ class TranslatorLithuanian : public TranslatorAdapter_1_4_6
    virtual QByteArray trLegendDocs() {
       return
          "Šis puslapis paaiškina, kaip interpretuoti sugeneruotus grafus "
-         "su Doxygen įrankiu.<p>\n"
+         "su DoxyPress įrankiu.<p>\n"
          "Panagrinėkite pavyzdį:\n"
          "\\kodo pradžia\n"
          "/*! Invisible class because of truncation */\n"
          "class Invisible { };\n\n"
          "/*! Truncated class, inheritance relation is hidden */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Class not documented with doxygen comments */\n"
+         "/* Class not documented with DoxyPress comments */\n"
          "class Undocumented { };\n\n"
          "/*! Class that is inherited using public inheritance */\n"
          "class PublicBase : public Truncated { };\n\n"

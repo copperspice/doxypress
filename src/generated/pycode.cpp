@@ -1,8 +1,8 @@
 /*************************************************************************
  *
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
- * All rights reserved.
+ * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -1429,19 +1429,19 @@ static int countLines()
 
 static void setCurrentDoc(const QByteArray &anchor)
 {
-   if (Doxygen::searchIndex) {
+   if (Doxy_Globals::searchIndex) {
       if (g_searchCtx) {
-         Doxygen::searchIndex->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), FALSE);
+         Doxy_Globals::searchIndex->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), FALSE);
       } else {
-         Doxygen::searchIndex->setCurrentDoc(g_sourceFileDef, anchor, TRUE);
+         Doxy_Globals::searchIndex->setCurrentDoc(g_sourceFileDef, anchor, TRUE);
       }
    }
 }
 
 static void addToSearchIndex(const char *text)
 {
-   if (Doxygen::searchIndex) {
-      Doxygen::searchIndex->addWord(text, FALSE);
+   if (Doxy_Globals::searchIndex) {
+      Doxy_Globals::searchIndex->addWord(text, FALSE);
    }
 }
 
@@ -1629,7 +1629,7 @@ static bool getLinkInScope(const QByteArray &c, const QByteArray &m,  const char
       
       QSharedPointer<Definition> d;
 
-      if (md->getOuterScope() == Doxygen::globalScope) {
+      if (md->getOuterScope() == Doxy_Globals::globalScope) {
          d = md->getBodyDef() ;
       } else {
          d = md->getOuterScope();
@@ -1738,7 +1738,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
       if (md) {
          QSharedPointer<Definition> d;
 
-         if (md->getOuterScope() == Doxygen::globalScope) { 
+         if (md->getOuterScope() == Doxy_Globals::globalScope) { 
             d = md->getBodyDef();
          } else {
             d = md->getOuterScope();
@@ -1774,7 +1774,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
 
                QSharedPointer<Definition> d;
 
-               if (md->getOuterScope() == Doxygen::globalScope) { 
+               if (md->getOuterScope() == Doxy_Globals::globalScope) { 
                   d = md->getBodyDef();
                } else {
                   d = md->getOuterScope();
@@ -1804,7 +1804,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, char *clName, boo
 
                   QSharedPointer<Definition> d;
 
-                  if (md->getOuterScope() == Doxygen::globalScope) {
+                  if (md->getOuterScope() == Doxy_Globals::globalScope) {
                      d = md->getBodyDef();
 
                   } else {
@@ -1898,9 +1898,9 @@ static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> s
 static void findMemberLink(CodeOutputInterface &ol, char *symName)
 {   
    if (g_currentDefinition) { 
-      auto di = Doxygen::symbolMap().find(symName);
+      auto di = Doxy_Globals::symbolMap().find(symName);
 
-      while (di != Doxygen::symbolMap().end() && di.key() == symName) {      
+      while (di != Doxy_Globals::symbolMap().end() && di.key() == symName) {      
          QSharedPointer<Definition> self = sharedFrom(di.value());          
           
          if (findMemberLink(ol, self, symName)) {
@@ -3969,16 +3969,5 @@ void parsePythonCode(CodeOutputInterface &od, const char * /*className*/,
    printlex(pycodeYY_flex_debug, FALSE, __FILE__, fd ? fd->fileName().data() : NULL);   
 }
 
-
-#if !defined(YY_FLEX_SUBMINOR_VERSION)
-extern "C" { // some bogus code to keep the compiler happy
-   void pycodeYYdummy()
-   {
-      yy_flex_realloc(0, 0);
-   }
-}
-#elif YY_FLEX_SUBMINOR_VERSION<33
-#error "You seem to be using a version of flex newer than 2.5.4. These are currently incompatible with 2.5.4, and do NOT work with doxygen! Please use version 2.5.4 or expect things to be parsed wrongly! A bug report has been submitted (#732132)."
-#endif
 
 

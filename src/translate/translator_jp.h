@@ -103,7 +103,7 @@ class TranslatorJapanese : public Translator
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Doxygen により";
+      QByteArray result = "DoxyPress により";
       if (s) {
          result = (QByteArray)" " + s + "の";
       }
@@ -939,14 +939,14 @@ class TranslatorJapanese : public Translator
    /*! page explaining how the dot graph's should be interpreted */
    virtual QByteArray trLegendDocs() {
       return
-         "Doxygen が生成したグラフを読み方について。<p>\n"
+         "DoxyPress が生成したグラフを読み方について。<p>\n"
          "次のコード例をご覧ください。\n"
          "\\code\n"
          "/*! 全体の大きさの関係で見えなくなるクラスです。 */\n"
          "class Invisible { };\n\n"
          "/*! 表示を切り捨てられたクラス(Invisibleクラスの分が見えません) */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Doxygen 用のコメントコードがないクラス */\n"
+         "/* DoxyPress 用のコメントコードがないクラス */\n"
          "class Undocumented { };\n\n"
          "/*! 公開継承されているクラス */\n"
          "class PublicBase : public Truncated { };\n\n"

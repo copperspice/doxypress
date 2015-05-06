@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -513,7 +513,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
    tagFile << "  <compound kind=\"group\">" << endl;
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
    tagFile << "    <title>" << convertToXML(title) << "</title>" << endl;
-   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxygen::htmlFileExtension << "</filename>" << endl;
+   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>" << endl;
  
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {
       switch (lde->kind()) {
@@ -856,7 +856,7 @@ void GroupDef::writePageDocumentation(OutputList &ol)
       if (! pd->isReference()) {
          QSharedPointer<SectionInfo> si;
 
-         if (! pd->title().isEmpty() && ! pd->name().isEmpty() && (si = Doxygen::sectionDict->find(pd->name())) != 0) {
+         if (! pd->title().isEmpty() && ! pd->name().isEmpty() && (si = Doxy_Globals::sectionDict->find(pd->name())) != 0) {
             ol.startSection(si->label, si->title, SectionInfo::Subsection);
             ol.docify(si->title);
             ol.endSection(si->label, SectionInfo::Subsection);
@@ -900,7 +900,7 @@ void GroupDef::startMemberDocumentation(OutputList &ol)
    if (Config::getBool("separate-member-pages")) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
-      Doxygen::suppressDocWarnings = true;
+      Doxy_Globals::suppressDocWarnings = true;
    }
 }
 
@@ -908,7 +908,7 @@ void GroupDef::endMemberDocumentation(OutputList &ol)
 {   
    if (Config::getBool("separate-member-pages")) {
       ol.popGeneratorState();
-      Doxygen::suppressDocWarnings = false;
+      Doxy_Globals::suppressDocWarnings = false;
    }
 }
 
@@ -1010,8 +1010,8 @@ void GroupDef::writeDocumentation(OutputList &ol)
    ol.endHeaderSection();
    ol.startContents();
 
-   if (Doxygen::searchIndex) {
-      Doxygen::searchIndex->setCurrentDoc(self, anchor(), false);
+   if (Doxy_Globals::searchIndex) {
+      Doxy_Globals::searchIndex->setCurrentDoc(self, anchor(), false);
       static QRegExp we("[a-zA-Z_][-a-zA-Z_0-9]*");
       int i = 0, p = 0, l = 0;
 
@@ -1019,12 +1019,12 @@ void GroupDef::writeDocumentation(OutputList &ol)
          // foreach word in the title
          l = we.matchedLength();
    
-         Doxygen::searchIndex->addWord(title.mid(i, l), true);
+         Doxy_Globals::searchIndex->addWord(title.mid(i, l), true);
          p = i + l;
       }
    }
 
-   Doxygen::indexList->addIndexItem(self, QSharedPointer<MemberDef>(), 0, title);
+   Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>(), 0, title);
 
    //---------------------------------------- start flexible part -------------------------------
 
@@ -1184,7 +1184,7 @@ void GroupDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
                ol.writeString("../../");
             }
 
-            ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8() + "#" + md->anchor());
+            ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8() + "#" + md->anchor());
             ol.writeString("\">");
             ol.writeString(convertToHtml(md->localName()));
             ol.writeString("</a>");
@@ -1202,7 +1202,7 @@ void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd)
     for (auto g : *root->groups) {
       QSharedPointer<GroupDef> gd;
 
-      if (! g.groupname.isEmpty() && (gd = Doxygen::groupSDict->find(g.groupname))) {
+      if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
          if (gd->addClass(cd)) {
             cd->makePartOfGroup(gd);
          }
@@ -1215,7 +1215,7 @@ void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDe
    for (auto g : *root->groups) {
       QSharedPointer<GroupDef> gd;
 
-      if (! g.groupname.isEmpty() && (gd = Doxygen::groupSDict->find(g.groupname))) {
+      if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
          if (gd->addNamespace(nd)) {
             nd->makePartOfGroup(gd);
          }       
@@ -1228,7 +1228,7 @@ void addDirToGroups(QSharedPointer<Entry> root, QSharedPointer<DirDef> dd)
    for (auto g : *root->groups) {
        QSharedPointer<GroupDef> gd;
 
-      if (! g.groupname.isEmpty() && (gd = Doxygen::groupSDict->find(g.groupname))) {
+      if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
          gd->addDir(dd);
          dd->makePartOfGroup(gd);
       }
@@ -1240,7 +1240,7 @@ void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGr
    for (auto g : *root->groups) {
       QSharedPointer<GroupDef> gd;
 
-      if (! g.groupname.isEmpty() && (gd = Doxygen::groupSDict->find(g.groupname))) {
+      if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
 
          if (gd == subGroup) {
             warn(root->fileName, root->startLine, "Refusing to add group %s to itself", gd->name().constData());
@@ -1268,7 +1268,7 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
    for (auto g : *root->groups) {
       QSharedPointer<GroupDef> gd;
 
-      if (! g.groupname.isEmpty() && (gd = Doxygen::groupSDict->find(g.groupname)) && g.pri >= pri) {
+      if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname)) && g.pri >= pri) {
 
          if (fgd && gd != fgd && g.pri == pri) {
             warn(root->fileName.data(), root->startLine, "Member %s found in multiple %s groups! "
@@ -1344,7 +1344,7 @@ void addExampleToGroups(Entry *root, QSharedPointer<PageDef> eg)
    for (auto g : *root->groups) {
       QSharedPointer<GroupDef> gd;
 
-      if (! g.groupname.isEmpty() && (gd = Doxygen::groupSDict->find(g.groupname))) {
+      if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
          gd->addExample(eg);
          eg->makePartOfGroup(gd);        
       }

@@ -18,12 +18,6 @@
 #ifndef TRANSLATOR_ID_H
 #define TRANSLATOR_ID_H
 
-/*
- * Translasi berikut didasarkan pada versi translator_en.h dalam
- * Doxygen 1.7.5.1.
- *
- * Penterjemah: Adhi Hargo <cadmus_sw at yahoo.com>
- */
 class TranslatorIndonesian : public TranslatorAdapter_1_8_0
 {
  public:
@@ -128,7 +122,7 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Dibangkitkan secara otomatis oleh Doxygen";
+      QByteArray result = "Dibangkitkan secara otomatis oleh DoxyPress";
       if (s) {
          result += (QByteArray)" untuk " + s;
       }
@@ -982,14 +976,14 @@ class TranslatorIndonesian : public TranslatorAdapter_1_8_0
    virtual QByteArray trLegendDocs() {
       return
          "Halaman ini berisi keterangan cara membaca bagan yang dibangkitkan "
-         "oleh doxygen.<p>\n"
+         "oleh DoxyPress.<p>\n"
          "Contoh:\n"
          "\\code\n"
          "/*! Invisible class because of truncation */\n"
          "class Invisible { };\n\n"
          "/*! Truncated class, inheritance relation is hidden */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Class not documented with doxygen comments */\n"
+         "/* Class not documented with DoxyPress comments */\n"
          "class Undocumented { };\n\n"
          "/*! Class that is inherited using public inheritance */\n"
          "class PublicBase : public Truncated { };\n\n"

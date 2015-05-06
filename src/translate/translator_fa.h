@@ -989,14 +989,14 @@ class TranslatorPersian : public TranslatorAdapter_1_7_5
    virtual QByteArray trLegendDocs() {
       return
          "This page explains how to interpret the graphs that are generated "
-         "by doxygen.<p>\n"
+         "by DoxyPress.<p>\n"
          "Consider the following example:\n"
          "\\code\n"
          "/*! Invisible class because of truncation */\n"
          "class Invisible { };\n\n"
          "/*! Truncated class, inheritance relation is hidden */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Class not documented with doxygen comments */\n"
+         "/* Class not documented with DoxyPress comments */\n"
          "class Undocumented { };\n\n"
          "/*! Class that is inherited using public inheritance */\n"
          "class PublicBase : public Truncated { };\n\n"

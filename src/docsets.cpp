@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -15,13 +15,13 @@
  *
 *************************************************************************/
 
+#include <classdef.h>
+#include <config.h>
 #include <docsets.h>
 #include <doxy_globals.h>
-#include <config.h>
-#include <message.h>
 #include <groupdef.h>
-#include <classdef.h>
 #include <filedef.h>
+#include <message.h>
 #include <memberdef.h>
 #include <namespacedef.h>
 #include <util.h>
@@ -134,9 +134,9 @@ void DocSets::initialize()
          "     <string>" << publisherName << "</string>\n"
          // markers for Dash
          "     <key>DashDocSetFamily</key>\n"
-         "     <string>doxy</string>\n"
+         "     <string>DoxyPress</string>\n"
          "     <key>DocSetPlatformFamily</key>\n"
-         "     <string>doxygen</string>\n"
+         "     <string>DoxyPress</string>\n"
          "</dict>\n"
          "</plist>\n";
    }
@@ -159,7 +159,7 @@ void DocSets::initialize()
    m_nts << "  <TOC>" << endl;
    m_nts << "    <Node>" << endl;
    m_nts << "      <Name>Root</Name>" << endl;
-   m_nts << "      <Path>" << indexName << Doxygen::htmlFileExtension << "</Path>" << endl;
+   m_nts << "      <Path>" << indexName << Doxy_Globals::htmlFileExtension << "</Path>" << endl;
    m_nts << "      <Subnodes>" << endl;
    m_dc = 1;
 
@@ -254,8 +254,10 @@ void DocSets::addContentsItem(bool isDir, const QString &name, const char *ref, 
 
          if (file && file[0] == '!') { // user specified file
             m_nts << convertToXML(&file[1]);
-         } else if (file) { // doxygen generated file
-            m_nts << file << Doxygen::htmlFileExtension;
+
+         } else if (file) { 
+            // generated file
+            m_nts << file << Doxy_Globals::htmlFileExtension;
          }
 
          m_nts << "</Path>" << endl;
@@ -564,7 +566,7 @@ void DocSets::writeToken(QTextStream &t, QSharedPointer<Definition> d, const QBy
 
    t << "    </TokenIdentifier>" << endl;
    t << "    <Path>" << d->getOutputFileBase()
-     << Doxygen::htmlFileExtension << "</Path>" << endl;
+     << Doxy_Globals::htmlFileExtension << "</Path>" << endl;
 
    if (anchor) {
       t << "    <Anchor>" << anchor << "</Anchor>" << endl;

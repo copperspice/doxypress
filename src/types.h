@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -88,7 +88,7 @@ struct Grouping {
    Grouping( const char *gn, GroupPri_t p ) : groupname(gn), pri(p) {}
    Grouping( const Grouping &g ) : groupname(g.groupname), pri(g.pri) {}
    QByteArray groupname;   //!< name of the group
-   GroupPri_t pri;       //!< priority of this definition
+   GroupPri_t pri;         //!< priority of this definition
 
 };
 
@@ -181,6 +181,7 @@ enum MemberListType {
 
    // this one is for the summary section on the class page
    MemberListType_interfaces              = 70,
+
    // this one is for the detailed section on the class page
    MemberListType_interfaceMembers        = 71 + MemberListType_detailedLists,
    MemberListType_services                = 72,

@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -97,7 +97,7 @@ QByteArray LayoutNavEntry::url() const
    if ((kind() != LayoutNavEntry::User && kind() != LayoutNavEntry::UserGroup) || 
          (kind() == LayoutNavEntry::UserGroup && url.left(9) == "usergroup")) {
 
-      url += Doxygen::htmlFileExtension;
+      url += Doxy_Globals::htmlFileExtension;
 
    } else if (url.left(5) == "@ref " || url.left(5) == "\\ref ") {
       QSharedPointer<Definition> d;
@@ -108,7 +108,7 @@ QByteArray LayoutNavEntry::url() const
       if (resolveLink(0, url.mid(5).trimmed(), true, &d, anchor)) {
 
          if (d && d->isLinkable()) {
-            url = d->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8();
+            url = d->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8();
 
             if (! anchor.isEmpty()) {
                url += "#" + anchor;
@@ -1350,7 +1350,7 @@ void writeDefaultLayoutFile(const QString &fileName)
 
    QTextStream t(&f);
    t << substitute(layoutData, "$doxypressversion", versionString);
-   t << substitute(layoutData, "$doxygenversion",   versionString);
+   t << substitute(layoutData, "$doxygenversion",   versionString);         // ok
 }
 
 // Convert input to a title.

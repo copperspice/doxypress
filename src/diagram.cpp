@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -300,7 +300,7 @@ static void writeMapArea(QTextStream &t, QSharedPointer<ClassDef> cd, const QStr
 
       t << "href=\"";
       t << externalRef(relPath, ref, true);
-      t << cd->getOutputFileBase() << Doxygen::htmlFileExtension;
+      t << cd->getOutputFileBase() << Doxy_Globals::htmlFileExtension;
 
       if (!cd->anchor().isEmpty()) {
          t << "#" << cd->anchor();
@@ -1127,7 +1127,7 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
 
 void clearVisitFlags()
 {   
-   for (auto cd : *Doxygen::classSDict) {
+   for (auto cd : *Doxy_Globals::classSDict) {
       cd->visited = false;
    }
 }
@@ -1224,7 +1224,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const char *path, const char
 
    t << "%!PS-Adobe-2.0 EPSF-2.0\n";
    t << "%%Title: ClassName\n";
-   t << "%%Creator: Doxygen\n";
+   t << "%%Creator: DoxyPress\n";
    t << "%%CreationDate: Time\n";
    t << "%%For: \n";
    t << "%Magnification: 1.00\n";
@@ -1501,7 +1501,7 @@ void ClassDiagram::writeImage(QTextStream &t, const QString &path, const QString
 
    }            
 
-   Doxygen::indexList->addImageFile(fileName);
+   Doxy_Globals::indexList->addImageFile(fileName);
 
    if (generateMap) {
       t << "</map>" << endl;

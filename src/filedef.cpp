@@ -39,7 +39,6 @@
 #include <parserintf.h>
 #include <portable.h>
 #include <searchindex.h>
-#include <settings.h>
 #include <util.h>
 
 /** Class implementing CodeOutputInterface by throwing away everything. */
@@ -371,8 +370,8 @@ void FileDef::writeIncludeFiles(OutputList &ol)
             ol.enableAll();
             ol.disableAllBut(OutputGenerator::Html);
 
-            // Here we use the include file name as it appears in the file.
-            // we could also we the name as it is used within doxygen,
+            // use the include file name as it appears in the file
+            // we could also we the name as it is used within doxypress
             // then we should have used fd->docName() instead of ii->includeName
             if (fd && fd->isLinkable()) {
                ol.writeObjectLink(fd->getReference(),  
@@ -505,7 +504,7 @@ void FileDef::startMemberDocumentation(OutputList &ol)
 {
    if (Config::getBool("separate-member-pages")) {
       ol.disable(OutputGenerator::Html);
-      Doxygen::suppressDocWarnings = true;
+      Doxy_Globals::suppressDocWarnings = true;
    }
 }
 
@@ -513,7 +512,7 @@ void FileDef::endMemberDocumentation(OutputList &ol)
 {
    if (Config::getBool("separate-member-pages")) {
       ol.enable(OutputGenerator::Html);
-      Doxygen::suppressDocWarnings = false;
+      Doxy_Globals::suppressDocWarnings = false;
    }
 }
 
@@ -636,9 +635,9 @@ void FileDef::writeDocumentation(OutputList &ol)
       ol.enableAll();
    }
 
-   if (Doxygen::searchIndex) {
-      Doxygen::searchIndex->setCurrentDoc(self, anchor(), false);
-      Doxygen::searchIndex->addWord(localName(), true);
+   if (Doxy_Globals::searchIndex) {
+      Doxy_Globals::searchIndex->setCurrentDoc(self, anchor(), false);
+      Doxy_Globals::searchIndex->addWord(localName(), true);
    }
 
    //---------------------------------------- start flexible part -------------------------------
@@ -801,7 +800,7 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
                if (createSubDirs) {
                   ol.writeString("../../");
                }
-               ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8() + "#" + md->anchor());
+               ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8() + "#" + md->anchor());
                ol.writeString("\">");
                ol.writeString(convertToHtml(md->localName()));
                ol.writeString("</a>");
@@ -900,11 +899,11 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
 // #endif
 
    {
-      ParserInterface *pIntf = Doxygen::parserManager->getParser(getDefFileExtension());
+      ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
       ol.startCodeFragment();
 
-      bool needs2PassParsing = Doxygen::parseSourcesNeeded && ! filterSourceFiles &&                         
+      bool needs2PassParsing = Doxy_Globals::parseSourcesNeeded && ! filterSourceFiles &&                         
                   ! getFileFilter(getFilePath(), true).isEmpty(); 
 
       // need to parse (filtered) sources for cross-references, however the user wants to show sources as-is
@@ -959,7 +958,7 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
 // #endif
 
    {
-      ParserInterface *pIntf = Doxygen::parserManager->getParser(getDefFileExtension());
+      ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
       pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), filterSourceFiles, true), getLanguage(), false, 0, self);
    }
@@ -1383,7 +1382,7 @@ static void addDirsAsGroups(Directory *root, QSharedPointer<GroupDef> parent, in
          gd->makePartOfGroup(parent);
 
       } else {
-         Doxygen::groupSDict->insert(root->path(), gd);
+         Doxy_Globals::groupSDict->insert(root->path(), gd);
       }
    }
   
@@ -1399,7 +1398,7 @@ void generateFileTree()
    Directory *root = new Directory(0, "root");
    root->setLast(true);
   
-   for (auto fn : *Doxygen::inputNameList ) {    
+   for (auto fn : *Doxy_Globals::inputNameList ) {    
       for (auto fd :*fn) { 
          mergeFileDef(root, fd);
       }

@@ -119,7 +119,7 @@ class TranslatorFrench : public Translator
     *  parameter s is name of the project name.
     */
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Généré automatiquement par Doxygen";
+      QByteArray result = "Généré automatiquement par DoxyPress";
       if (s) {
          result += (QByteArray)" pour " + s;
       }
@@ -981,14 +981,14 @@ class TranslatorFrench : public Translator
    virtual QByteArray trLegendDocs() {
       return
          "Cette page explique comment interpréter les graphes générés "
-         "par doxygen.<p>\n"
+         "par DoxyPress.<p>\n"
          "Considérez l'exemple suivant :\n"
          "\\code\n"
          "/*! Classe invisible à cause d'une troncature */\n"
          "class Invisible { };\n\n"
          "/*! Classe tronquée, la relation d'héritage est masquée */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/*! Classe non documentée avec des commentaires Doxygen */\n"
+         "/*! Classe non documentée avec des commentaires DoxyPress */\n"
          "class Undocumented { };\n\n"
          "/*! Classe dérivée par héritage public */\n"
          "class PublicBase : public Truncated { };\n\n"

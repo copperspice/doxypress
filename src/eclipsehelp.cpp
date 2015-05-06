@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -87,7 +87,7 @@ void EclipseHelp::initialize()
 
    m_tocstream << "<toc label=\"" << convertToXML(title)
                << "\" topic=\"" << convertToXML(m_pathprefix)
-               << "index" << Doxygen::htmlFileExtension << "\">" << endl;
+               << "index" << Doxy_Globals::htmlFileExtension << "\">" << endl;
    ++ m_depth;
 }
 
@@ -119,7 +119,7 @@ void EclipseHelp::finalize()
 
       QTextStream t(&pluginFile);
       t << "<plugin name=\""  << docId << "\" id=\"" << docId << "\"" << endl;
-      t << "        version=\"1.0.0\" provider-name=\"Doxygen\">" << endl;
+      t << "        version=\"1.0.0\" provider-name=\"DoxyPress\">" << endl;
       t << "  <extension point=\"org.eclipse.help.toc\">" << endl;
       t << "    <toc file=\"toc.xml\" primary=\"true\" />" << endl;
       t << "  </extension>" << endl;
@@ -189,7 +189,7 @@ void EclipseHelp::addContentsItem(bool, const QString &name, const char *, const
             indent();
             m_tocstream << "<topic label=\"" << convertToXML(name) << "\"";
             m_tocstream << " href=\"" << convertToXML(m_pathprefix)
-                        << file << Doxygen::htmlFileExtension;
+                        << file << Doxy_Globals::htmlFileExtension;
             if (anchor) {
                m_tocstream << "#" << anchor;
             }

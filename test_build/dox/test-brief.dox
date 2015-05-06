@@ -17,9 +17,11 @@
 /*!
 \page brief-1-test Brief Description Test 1
 
-There is no defined brief description on this page. JAVADOC-AUTO-BRIEF is off and QT-AUTO_BRIEF is on. This text will be split and the first sentence will
-appear as the brief description. The opening marker for this \\page is \c /&zwnj;*!
+There is no defined brief description on this page. The tag for "JAVADOC-AUTO-BRIEF" is <b>off</b> and "QT-AUTO_BRIEF" is <b>on</b>. The text for this "\\page" 
+will be split and the first sentence will appear as the brief description. The remaining text will be considered as the body. The opening marker for 
+this \\page" is \c /&zwnj;*!
 
+This same behavior will happen for an documented entity such as "\\fn" or "\\enum".
 
 */
 
@@ -28,8 +30,9 @@ appear as the brief description. The opening marker for this \\page is \c /&zwnj
 /**
 \page brief-2-test Brief Description Test 2
 
-There is no brief description on this page. JAVADOC-AUTO-BRIEF is off and QT-AUTO_BRIEF is on. This entire text will appear in the body of the page.
-since the opening marker for this \\page is \c /&zwnj;** 
+There is no brief description on this page. JThe tag for "JAVADOC-AUTO-BRIEF" is <b>off</b> and "QT-AUTO_BRIEF" is <b>on</b>. This entire text will 
+appear in the body of the page since the opening marker for this \\page" is \c /&zwnj;** 
 
+This same behavior will happen for an documented entity such as "\\fn" or "\\enum".
 
 */

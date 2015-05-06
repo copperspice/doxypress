@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -30,6 +30,7 @@
 #include <cmdmapper.h>
 #include <code.h>
 #include <config.h>
+#include <doxy_globals.h>
 #include <doxy_setup.h>
 #include <doxy_build_info.h>
 #include <entry.h>
@@ -59,9 +60,6 @@
 #include <reflist.h>
 #include <rtfgen.h>
 #include <util.h>
-
-// globals
-#include <doxy_globals.h>
 
 namespace Doxy_Setup {
    QString getValue(QStringList::iterator &iter, QStringList::iterator end);   
@@ -98,21 +96,21 @@ void initDoxyPress()
 
    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
-   Doxygen::runningTime.start();
+   Doxy_Globals::runningTime.start();
    initPreprocessor();
 
-   Doxygen::parserManager = new ParserManager;
-   Doxygen::parserManager->registerDefaultParser(new FileParser);
+   Doxy_Globals::parserManager = new ParserManager;
+   Doxy_Globals::parserManager->registerDefaultParser(new FileParser);
 
-   Doxygen::parserManager->registerParser("c",            new CPPLanguageParser);
-   Doxygen::parserManager->registerParser("python",       new PythonLanguageParser);
-   Doxygen::parserManager->registerParser("fortran",      new FortranLanguageParser);
-   Doxygen::parserManager->registerParser("fortranfree",  new FortranLanguageParserFree);
-   Doxygen::parserManager->registerParser("fortranfixed", new FortranLanguageParserFixed);
+   Doxy_Globals::parserManager->registerParser("c",            new CPPLanguageParser);
+   Doxy_Globals::parserManager->registerParser("python",       new PythonLanguageParser);
+   Doxy_Globals::parserManager->registerParser("fortran",      new FortranLanguageParser);
+   Doxy_Globals::parserManager->registerParser("fortranfree",  new FortranLanguageParserFree);
+   Doxy_Globals::parserManager->registerParser("fortranfixed", new FortranLanguageParserFixed);
 
-   Doxygen::parserManager->registerParser("tcl",          new TclLanguageParser);
-   Doxygen::parserManager->registerParser("md",           new MarkdownFileParser);
-   Doxygen::parserManager->registerParser("make",         new MakeFileParser);
+   Doxy_Globals::parserManager->registerParser("tcl",          new TclLanguageParser);
+   Doxy_Globals::parserManager->registerParser("md",           new MarkdownFileParser);
+   Doxy_Globals::parserManager->registerParser("make",         new MakeFileParser);
  
    // register any additional parsers here
    initDefaultExtensionMapping();
@@ -121,34 +119,34 @@ void initDoxyPress()
    initNamespaceMemberIndices();
    initFileMemberIndices();
  
-   Doxygen::inputNameList     = new SortedList<QSharedPointer<FileName>>;
+   Doxy_Globals::inputNameList     = new SortedList<QSharedPointer<FileName>>;
 
-   Doxygen::memberNameSDict   = new MemberNameSDict();
-   Doxygen::functionNameSDict = new MemberNameSDict();
-   Doxygen::groupSDict        = new GroupSDict();
+   Doxy_Globals::memberNameSDict   = new MemberNameSDict();
+   Doxy_Globals::functionNameSDict = new MemberNameSDict();
+   Doxy_Globals::groupSDict        = new GroupSDict();
 
-   Doxygen::globalScope       = QMakeShared<NamespaceDef>("<globalScope>", 1, 1, "<globalScope>");
+   Doxy_Globals::globalScope       = QMakeShared<NamespaceDef>("<globalScope>", 1, 1, "<globalScope>");
 
-   Doxygen::namespaceSDict    = new NamespaceSDict();
-   Doxygen::classSDict        = new ClassSDict();
-   Doxygen::hiddenClasses     = new ClassSDict();  
-   Doxygen::pageSDict         = new PageSDict();          // all doc pages
-   Doxygen::exampleSDict      = new PageSDict();          // all examples
+   Doxy_Globals::namespaceSDict    = new NamespaceSDict();
+   Doxy_Globals::classSDict        = new ClassSDict();
+   Doxy_Globals::hiddenClasses     = new ClassSDict();  
+   Doxy_Globals::pageSDict         = new PageSDict();          // all doc pages
+   Doxy_Globals::exampleSDict      = new PageSDict();          // all examples
 
-   Doxygen::inputNameDict     = new FileNameDict();
-   Doxygen::includeNameDict   = new FileNameDict();
-   Doxygen::exampleNameDict   = new FileNameDict();
-   Doxygen::imageNameDict     = new FileNameDict();
-   Doxygen::dotFileNameDict   = new FileNameDict();
-   Doxygen::mscFileNameDict   = new FileNameDict();
-   Doxygen::diaFileNameDict   = new FileNameDict();
-   Doxygen::citeDict          = new CiteDict();
-   Doxygen::genericsDict      = new GenericsSDict;
-   Doxygen::indexList         = new IndexList;
-   Doxygen::formulaList       = new FormulaList;
-   Doxygen::formulaDict       = new FormulaDict();
-   Doxygen::formulaNameDict   = new FormulaDict();
-   Doxygen::sectionDict       = new SectionDict();
+   Doxy_Globals::inputNameDict     = new FileNameDict();
+   Doxy_Globals::includeNameDict   = new FileNameDict();
+   Doxy_Globals::exampleNameDict   = new FileNameDict();
+   Doxy_Globals::imageNameDict     = new FileNameDict();
+   Doxy_Globals::dotFileNameDict   = new FileNameDict();
+   Doxy_Globals::mscFileNameDict   = new FileNameDict();
+   Doxy_Globals::diaFileNameDict   = new FileNameDict();
+   Doxy_Globals::citeDict          = new CiteDict();
+   Doxy_Globals::genericsDict      = new GenericsSDict;
+   Doxy_Globals::indexList         = new IndexList;
+   Doxy_Globals::formulaList       = new FormulaList;
+   Doxy_Globals::formulaDict       = new FormulaDict();
+   Doxy_Globals::formulaNameDict   = new FormulaDict();
+   Doxy_Globals::sectionDict       = new SectionDict();
 
    // Initialize global constants
    Doxy_Globals::g_compoundKeywordDict.insert("template class");
@@ -163,31 +161,31 @@ void initDoxyPress()
 void shutDownDoxypress()
 {
    finializeSearchIndexer();
-   Doxygen::symbolStorage->close();
+   Doxy_Globals::symbolStorage->close();
 
    QDir thisDir; 
 
-   if (! Doxygen::tempA_FName.isEmpty()) {
-      thisDir.remove(Doxygen::tempA_FName);
+   if (! Doxy_Globals::tempA_FName.isEmpty()) {
+      thisDir.remove(Doxy_Globals::tempA_FName);
    }
    
-   delete Doxygen::sectionDict;
-   delete Doxygen::formulaNameDict;
-   delete Doxygen::formulaDict;
-   delete Doxygen::formulaList;
-   delete Doxygen::indexList;
-   delete Doxygen::genericsDict;
-   delete Doxygen::inputNameDict;
-   delete Doxygen::includeNameDict;
-   delete Doxygen::exampleNameDict;
-   delete Doxygen::imageNameDict;
-   delete Doxygen::dotFileNameDict;
-   delete Doxygen::mscFileNameDict;
-   delete Doxygen::diaFileNameDict;  
-   delete Doxygen::pageSDict;
-   delete Doxygen::exampleSDict;  
-   delete Doxygen::xrefLists;
-   delete Doxygen::parserManager;
+   delete Doxy_Globals::sectionDict;
+   delete Doxy_Globals::formulaNameDict;
+   delete Doxy_Globals::formulaDict;
+   delete Doxy_Globals::formulaList;
+   delete Doxy_Globals::indexList;
+   delete Doxy_Globals::genericsDict;
+   delete Doxy_Globals::inputNameDict;
+   delete Doxy_Globals::includeNameDict;
+   delete Doxy_Globals::exampleNameDict;
+   delete Doxy_Globals::imageNameDict;
+   delete Doxy_Globals::dotFileNameDict;
+   delete Doxy_Globals::mscFileNameDict;
+   delete Doxy_Globals::diaFileNameDict;  
+   delete Doxy_Globals::pageSDict;
+   delete Doxy_Globals::exampleSDict;  
+   delete Doxy_Globals::xrefLists;
+   delete Doxy_Globals::parserManager;
    
    removePreProcessor();
 
@@ -197,15 +195,15 @@ void shutDownDoxypress()
    Mappers::freeMappers();
    codeFreeScanner();
    
-   delete Doxygen::inputNameList;
-   delete Doxygen::memberNameSDict;
-   delete Doxygen::functionNameSDict;
-   delete Doxygen::groupSDict;
-   delete Doxygen::classSDict;
-   delete Doxygen::hiddenClasses;
-   delete Doxygen::namespaceSDict;   
+   delete Doxy_Globals::inputNameList;
+   delete Doxy_Globals::memberNameSDict;
+   delete Doxy_Globals::functionNameSDict;
+   delete Doxy_Globals::groupSDict;
+   delete Doxy_Globals::classSDict;
+   delete Doxy_Globals::hiddenClasses;
+   delete Doxy_Globals::namespaceSDict;   
 
-   delete Doxygen::symbolStorage;
+   delete Doxy_Globals::symbolStorage;
 }
 
 // **
@@ -330,7 +328,7 @@ struct CommandLine parseCommandLine(QStringList argList)
               cmdArgs.htmlStyle = getValue(iter, argList.end());
 
               if (cmdArgs.htmlStyle.isEmpty()) {
-                 cmdArgs.htmlStyle = "doxy_style.css";
+                 cmdArgs.htmlStyle = "doxypress.css";
               }
 
                QFile f;
@@ -372,7 +370,7 @@ struct CommandLine parseCommandLine(QStringList argList)
               cmdArgs.latexStyle = getValue(iter, argList.end());
 
                if (cmdArgs.latexStyle.isEmpty()) {
-                  cmdArgs.latexStyle= "doxy_style.latex";
+                  cmdArgs.latexStyle= "doxypress.sty";
                }
 
               QFile f;
@@ -419,7 +417,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             setvbuf(stdout, NULL, _IONBF, 0);
             setvbuf(stderr, NULL, _IONBF, 0);
    
-            Doxygen::outputToApp = true;
+            Doxy_Globals::outputToApp = true;
             break;
 
          case HELP:       
@@ -561,12 +559,12 @@ void Doxy_Setup::usage()
    printf("\n");
    printf("   HTML:   --w  html-head   [header file name]       Default is 'doxy_header.html'\n");
    printf("   HTML:   --w  html-foot   [footer file name]       Default is 'doxy_footer.html'\n");
-   printf("   HTML:   --w  html-style  [styleSheet file name]   Default is 'doxy_style.css'\n");
+   printf("   HTML:   --w  html-style  [styleSheet file name]   Default is 'doxypress.css'\n");
   
    printf("\n");
    printf("   LaTeX:  --w  latex-head  [header file name]       Default is 'doxy_header.latex'\n");
    printf("   LaTeX:  --w  latex-foot  [footer file name]       Default is 'doxy_footer.latex'\n");
-   printf("   LaTeX:  --w  latex-style [styleSheet file name]   Default is 'doxy_style.latex'\n");
+   printf("   LaTeX:  --w  latex-style [styleSheet file name]   Default is 'doxypress.sty'\n");
    
    printf("\n");
    printf("Other Options:\n");

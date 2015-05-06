@@ -14,47 +14,8 @@
 *************************************************************************/
 
 /*!
-\defgroup qtcore QtCore
-
-Some sample documentation for QtCore.
-
-Detailed description related to QtCore.
-
-*/
-
-
-/*!
-\defgroup implicit-sharing-c Implicit Sharing
-
-\ingroup qtcore
-
-Some sample documentation for Implicit Sharing
-
-Detailed description related to Implicit Sharing
-
-*/
-
-
-/*!
-\defgroup unicode-c Unicode
-
-\ingroup qtcore
-
-Some sample documentation for Unicode.
-
-Detailed description related to Unicode.
-
-*/
-
-
-
-/*!
 \class QString 
 \brief The QString class provides a Unicode character string. 
-
-\ingroup implicit-sharing-c
-\ingroup qtcore
-\ingroup unicode-c
 
 The QString class provides a Unicode character string.
 
@@ -117,7 +78,7 @@ For read-only access, an alternative syntax is to use the at() function:
     QString str;
 
     for (int i = 0; i < str.size(); ++i) {
-        if (str.at(i) >= QChar('a') &amp;&amp; str.at(i) <= QChar('f'))
+        if (str.at(i) >= QChar('a') && str.at(i) <= QChar('f'))
             qDebug() << "Found character in range [a-f]";
     }
 \endcode
@@ -255,13 +216,13 @@ A <i>precision</i> is also specified with the argument <i>format</i>. For the 'e
 Using the QString <tt>'+'</tt> operator, it is easy to construct a complex string from multiple substrings. You will often write code like this:
 
 \code
-        QString foo;
-        QString type = "long";
+   QString foo;
+   QString type = "long";
 
-        foo->setText(QLatin1String("vector<") + type + QLatin1String(">::iterator"));
+   foo->setText(QLatin1String("vector<") + type + QLatin1String(">::iterator"));
 
-        if (foo.startsWith("(" + type + ") 0x"))
-            ...
+   if (foo.startsWith("(" + type + ") 0x"))
+      ...
 \endcode
 
 There is nothing wrong with either of these string constructions, but there are a few hidden inefficiencies. Beginning with Qt 4.6, you can eliminate them.
@@ -284,7 +245,8 @@ There are three ways you can access this improved method of string construction.
         #include <QStringBuilder>
 
         QString hello("hello");
-        QStringRef el(&amp;hello, 2, 3);
+        QStringRef el(&hello, 2, 3);
+
         QLatin1String world("world");
         QString message =  hello % el % world % QChar('!');
 \endcode
@@ -300,7 +262,7 @@ and the <tt>'+'</tt> will automatically be performed as the <tt>QStringBuilder</
 */
 
 
-/*!
+/**
 \fn QString::QString ()
 
 Constructs a null string. Null strings are also empty.
@@ -311,51 +273,45 @@ Constructs a null string. Null strings are also empty.
 */
 
 
-/*!
+/**
 \fn QString::QString ( const QChar * unicode, int size )
 
 Constructs a string initialized with the characters of the QChar array <i>unicode</i>, which must be terminated with a 0.
 
 QString makes a deep copy of the string data. The unicode data is copied as is and the Byte Order Mark is preserved if present.
 
-
 */
 
 
-
-
-/*!
+/**
 \fn QString::QString ( QChar ch )
 
 Constructs a string of size 1 containing the character <i>ch</i>.
 
-
 */
 
 
-/*!
+/**
 \fn QString::QString ( int size, QChar ch )
 
 Constructs a string of the given <i>size</i> with every character set to <i>ch</i>.
 
 <b>See also </b>fill().
 
-
 */
 
 
-/*!
+/**
 \fn QString::QString ( const QLatin1String & str )
 
 Constructs a copy of the Latin-1 string <i>str</i>.
 
 <b>See also </b>fromLatin1().
 
-
 */
 
 
-/*!
+/**
 \fn QString::QString ( const QString & other )
 
 Constructs a copy of <i>other</i>.
@@ -365,11 +321,10 @@ is modified, it will be copied (copy-on-write), and that takes linear time.
 
 <b>See also </b>operator=().
 
-
 */
 
 
-/*!
+/**
 \fn QString::QString ( const char * str )
 
 Constructs a string initialized with the 8-bit string <i>str</i>. The given const char pointer is converted to Unicode using the fromAscii() function.
@@ -382,7 +337,7 @@ You can disable this constructor by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when
 */
 
 
-/*!
+/**
 \fn QString::QString ( const QByteArray & ba )
 
 Constructs a string initialized with the byte array <i>ba</i>. The given byte array is converted to Unicode using fromAscii(). Stops copying at the first 0 character, otherwise copies the entire byte array.
@@ -395,7 +350,7 @@ You can disable this constructor by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when
 */
 
 
-/*!
+/**
 \fn QString::~QString ()
 
 Destroys the string.
@@ -404,7 +359,7 @@ Destroys the string.
 */
 
 
-/*!
+/**
 \fn QString & QString::append ( const QString & str )
 
 Appends the string <i>str</i> onto the end of this string.
@@ -434,7 +389,7 @@ without reallocating the entire string each time.
 */
 
 
-/*!
+/**
 \fn QString & QString::append ( const QStringRef & reference )
 
 Appends the given string <i>reference</i> to this string and returns the result.
@@ -573,7 +528,7 @@ This is the same as calling <tt>str.arg(a1).arg(a2).arg(a3).arg(a4).arg(a5)</tt>
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( const QString & a1, const QString & a2, const QString & a3, const QString & a4, const QString & a5, const QString & a6 ) const
 
 This function overloads arg().
@@ -584,7 +539,7 @@ This is the same as calling <tt>str.arg(a1).arg(a2).arg(a3).arg(a4).arg(a5).arg(
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( const QString & a1, const QString & a2, const QString & a3, const QString & a4, const QString & a5, const QString & a6, const QString & a7 ) const
 
 This function overloads arg().
@@ -595,7 +550,7 @@ This is the same as calling <tt>str.arg(a1).arg(a2).arg(a3).arg(a4).arg(a5).arg(
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( const QString & a1, const QString & a2, const QString & a3, const QString & a4, const QString & a5, const QString & a6, const QString & a7, const QString & a8 ) const
 
 This function overloads arg().
@@ -606,7 +561,7 @@ This is the same as calling <tt>str.arg(a1).arg(a2).arg(a3).arg(a4).arg(a5).arg(
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( const QString & a1, const QString & a2, const QString & a3, const QString & a4, const QString & a5, const QString & a6, const QString & a7, const QString & a8, const QString & a9 ) const
 
 This function overloads arg().
@@ -617,7 +572,7 @@ This is the same as calling <tt>str.arg(a1).arg(a2).arg(a3).arg(a4).arg(a5).arg(
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( int a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
@@ -648,7 +603,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( uint a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
@@ -661,7 +616,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( long a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
@@ -692,7 +647,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( ulong a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
@@ -707,7 +662,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( qlonglong a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
@@ -722,7 +677,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( qulonglong a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
@@ -737,7 +692,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( short a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
@@ -752,7 +707,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( ushort a, int fieldWidth = 0, int base = 10, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
@@ -767,7 +722,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), the locale's zero is used. F
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( QChar a, int fieldWidth = 0, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
@@ -776,7 +731,7 @@ This function overloads arg().
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( char a, int fieldWidth = 0, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
@@ -787,7 +742,7 @@ The <i>a</i> argument is interpreted as a Latin-1 character.
 */
 
 
-/*!
+/**
 \fn QString QString::arg ( double a, int fieldWidth = 0, char format = 'g', int precision = -1, QChar fillChar = QLatin1Char( ' ' ) ) const
 
 This function overloads arg().
@@ -812,7 +767,7 @@ If <i>fillChar</i> is '0' (the number 0, ASCII 48), this function will use the l
 */
 
 
-/*!
+/**
 \fn const QChar QString::at ( int position ) const
 
 Returns the character at the given index <i>position</i> in the string.
@@ -825,7 +780,7 @@ The <i>position</i> must be a valid index position in the string (i.e., 0 &lt;= 
 */
 
 
-/*!
+/**
 \fn iterator QString::begin ()
 
 Returns an STL-style iterator pointing to the first character in the string.
@@ -836,7 +791,7 @@ Returns an STL-style iterator pointing to the first character in the string.
 */
 
 
-/*!
+/**
 \fn const_iterator QString::begin () const
 
 This function overloads begin().
@@ -845,7 +800,7 @@ This function overloads begin().
 */
 
 
-/*!
+/**
 \fn int QString::capacity () const
 
 Returns the maximum number of characters that can be stored in the string without forcing a reallocation.
@@ -858,7 +813,7 @@ The sole purpose of this function is to provide a means of fine tuning QString's
 */
 
 
-/*!
+/**
 \fn void QString::chop ( int n )
 
 Removes <i>n</i> characters from the end of the string.
@@ -881,7 +836,7 @@ If you want to remove characters from the <i>beginning</i> of the string, use re
 */
 
 
-/*!
+/**
 \fn void QString::clear ()
 
 Clears the contents of the string and makes it empty.
@@ -892,7 +847,7 @@ Clears the contents of the string and makes it empty.
 */
 
 
-/*!
+/**
 \fn int QString::compare ( const QString & s1, const QString & s2, Qt::CaseSensitivity cs ) [static]
 
 Compares <i>s1</i> with <i>s2</i> and returns an integer less than, equal to, or greater than zero if <i>s1</i> is less than, equal to, or greater than <i>s2</i>.
@@ -915,7 +870,7 @@ This function was introduced in Qt 4.2.
 */
 
 
-/*!
+/**
 \fn int QString::compare ( const QString & s1, const QString & s2 ) [static]
 
 This function overloads compare().
@@ -926,7 +881,7 @@ Performs a case sensitive compare of <i>s1</i> and <i>s2</i>.
 */
 
 
-/*!
+/**
 \fn int QString::compare ( const QString & s1, const QLatin1String & s2, Qt::CaseSensitivity cs = Qt::CaseSensitive ) [static]
 
 This function overloads compare().
@@ -939,7 +894,7 @@ This function was introduced in Qt 4.2.
 */
 
 
-/*!
+/**
 \fn int QString::compare ( const QLatin1String & s1, const QString & s2, Qt::CaseSensitivity cs = Qt::CaseSensitive ) [static]
 
 This function overloads compare().
@@ -952,7 +907,7 @@ This function was introduced in Qt 4.2.
 */
 
 
-/*!
+/**
 \fn int QString::compare ( const QString & other ) const
 
 This function overloads compare().
@@ -965,7 +920,7 @@ Equivalent to <tt>compare(*this, other)</tt>.
 */
 
 
-/*!
+/**
 \fn int QString::compare ( const QString & other, Qt::CaseSensitivity cs ) const
 
 This function overloads compare().
@@ -978,7 +933,7 @@ This function was introduced in Qt 4.2.
 */
 
 
-/*!
+/**
 \fn int QString::compare ( const QLatin1String & other, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads compare().
@@ -991,7 +946,7 @@ This function was introduced in Qt 4.2.
 */
 
 
-/*!
+/**
 \fn int QString::compare ( const QStringRef & ref, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads compare().
@@ -1002,7 +957,7 @@ Compares the string reference, <i>ref</i>, with the string and returns an intege
 */
 
 
-/*!
+/**
 \fn int QString::compare ( const QString & s1, const QStringRef & s2, Qt::CaseSensitivity cs = Qt::CaseSensitive ) [static]
 
 This function overloads compare().
@@ -1011,7 +966,7 @@ This function overloads compare().
 */
 
 
-/*!
+/**
 \fn const_iterator QString::constBegin () const
 
 Returns a const STL-style iterator pointing to the first character in the string.
@@ -1022,7 +977,7 @@ Returns a const STL-style iterator pointing to the first character in the string
 */
 
 
-/*!
+/**
 \fn const QChar * QString::constData () const
 
 Returns a pointer to the data stored in the QString. The pointer can be used to access the characters that compose the string. For convenience, 
@@ -1036,7 +991,7 @@ Note that the pointer remains valid only as long as the string is not modified.
 */
 
 
-/*!
+/**
 \fn const_iterator QString::constEnd () const
 
 Returns a const STL-style iterator pointing to the imaginary item after the last item in the list.
@@ -1047,7 +1002,7 @@ Returns a const STL-style iterator pointing to the imaginary item after the last
 */
 
 
-/*!
+/**
 \fn bool QString::contains ( const QString & str, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns true if this string contains an occurrence of the string <i>str</i>; otherwise returns false.
@@ -1067,7 +1022,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn bool QString::contains ( const QStringRef & str, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns true if this string contains an occurrence of the string reference <i>str</i>; otherwise returns false.
@@ -1082,7 +1037,7 @@ This function was introduced in Qt 4.8.
 */
 
 
-/*!
+/**
 \fn bool QString::contains ( QChar ch, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads contains().
@@ -1093,7 +1048,7 @@ Returns true if this string contains an occurrence of the character <i>ch</i>; o
 */
 
 
-/*!
+/**
 \fn bool QString::contains ( const QRegExp & rx ) const
 
 This function overloads contains().
@@ -1104,7 +1059,7 @@ Returns true if the regular expression <i>rx</i> matches somewhere in this strin
 */
 
 
-/*!
+/**
 \fn bool QString::contains ( QRegExp & rx ) const
 
 This function overloads contains().
@@ -1119,7 +1074,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn int QString::count ( const QString & str, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns the number of (potentially overlapping) occurrences of the string <i>str</i> in this string.
@@ -1132,7 +1087,7 @@ If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; other
 */
 
 
-/*!
+/**
 \fn int QString::count ( QChar ch, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads count().
@@ -1143,7 +1098,7 @@ Returns the number of occurrences of character <i>ch</i> in the string.
 */
 
 
-/*!
+/**
 \fn int QString::count ( const QStringRef & str, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads count().
@@ -1160,7 +1115,7 @@ This function was introduced in Qt 4.8.
 */
 
 
-/*!
+/**
 \fn int QString::count ( const QRegExp & rx ) const
 
 This function overloads count().
@@ -1178,7 +1133,7 @@ This function counts overlapping matches, so in the example below, there are fou
 */
 
 
-/*!
+/**
 \fn int QString::count () const
 
 This function overloads count().
@@ -1189,7 +1144,7 @@ Same as size().
 */
 
 
-/*!
+/**
 \fn QChar * QString::data ()
 
 Returns a pointer to the data stored in the QString. The pointer can be used to access and modify the characters that compose the string. For convenience,
@@ -1216,7 +1171,7 @@ causes a deep copy to occur.
 */
 
 
-/*!
+/**
 \fn const QChar * QString::data () const
 
 This is an overloaded function.
@@ -1225,7 +1180,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn iterator QString::end ()
 
 Returns an STL-style iterator pointing to the imaginary character after the last character in the string.
@@ -1236,7 +1191,7 @@ Returns an STL-style iterator pointing to the imaginary character after the last
 */
 
 
-/*!
+/**
 \fn const_iterator QString::end () const
 
 This function overloads end().
@@ -1245,7 +1200,7 @@ This function overloads end().
 */
 
 
-/*!
+/**
 \fn bool QString::endsWith ( const QString & s, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns true if the string ends with <i>s</i>; otherwise returns false.
@@ -1264,7 +1219,7 @@ If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; other
 */
 
 
-/*!
+/**
 \fn bool QString::endsWith ( const QStringRef & s, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads endsWith().
@@ -1281,7 +1236,7 @@ This function was introduced in Qt 4.8.
 */
 
 
-/*!
+/**
 \fn bool QString::endsWith ( const QLatin1String & s, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads endsWith().
@@ -1290,7 +1245,7 @@ This function overloads endsWith().
 */
 
 
-/*!
+/**
 \fn bool QString::endsWith ( QChar c, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns true if the string ends with <i>c</i>; otherwise returns false.
@@ -1301,7 +1256,7 @@ This function overloads endsWith().
 */
 
 
-/*!
+/**
 \fn QString & QString::fill ( QChar ch, int size = -1 )
 
 Sets every character in the string to character <i>ch</i>. If <i>size</i> is different from -1 (default), the string is resized to <i>size</i> beforehand.
@@ -1323,7 +1278,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn QString QString::fromAscii ( const char * str, int size = -1 ) [static]
 
 Returns a QString initialized with the first <i>size</i> characters from the string <i>str</i>.
@@ -1338,7 +1293,7 @@ Note that, despite the name, this function actually uses the codec defined by QT
 */
 
 
-/*!
+/**
 \fn QString QString::fromLatin1 ( const char * str, int size = -1 ) [static]
 
 Returns a QString initialized with the first <i>size</i> characters of the Latin-1 string <i>str</i>.
@@ -1351,7 +1306,7 @@ If <i>size</i> is -1 (default), it is taken to be qstrlen(<i>str</i>).
 */
 
 
-/*!
+/**
 \fn QString QString::fromLocal8Bit ( const char * str, int size = -1 ) [static]
 
 Returns a QString initialized with the first <i>size</i> characters of the 8-bit string <i>str</i>.
@@ -1366,7 +1321,7 @@ QTextCodec::codecForLocale() is used to perform the conversion.
 */
 
 
-/*!
+/**
 \fn QString QString::fromRawData ( const QChar * unicode, int size ) [static]
 
 Constructs a QString that uses the first <i>size</i> Unicode characters in the array <i>unicode</i>. The data in <i>unicode</i> is <i>not</i> copied. The caller must be able to guarantee that <i>unicode</i> will not be deleted or modified as long as the QString (or an unmodified copy of it) exists.
@@ -1396,7 +1351,7 @@ Here's an example of how we can use a QRegExp on raw data in memory without requ
 */
 
 
-/*!
+/**
 \fn QString QString::fromStdString ( const std::string & str ) [static]
 
 Returns a copy of the <i>str</i> string. The given string is converted to Unicode using the fromAscii() function.
@@ -1409,7 +1364,7 @@ This constructor is only available if Qt is configured with STL compatibility en
 */
 
 
-/*!
+/**
 \fn QString QString::fromStdWString ( const std::wstring & str ) [static]
 
 Returns a copy of the <i>str</i> string. The given string is assumed to be encoded in utf16 if the size of wchar_t is 2 bytes (e.g. on windows) and ucs4 if the size of wchar_t is 4 bytes (most Unix systems).
@@ -1422,7 +1377,7 @@ This method is only available if Qt is configured with STL compatibility enabled
 */
 
 
-/*!
+/**
 \fn QString QString::fromUcs4 ( const uint * unicode, int size = -1 ) [static]
 
 Returns a QString initialized with the first <i>size</i> characters of the Unicode string <i>unicode</i> (ISO-10646-UCS-4 encoded).
@@ -1437,7 +1392,7 @@ This function was introduced in Qt 4.2.
 */
 
 
-/*!
+/**
 \fn QString QString::fromUtf8 ( const char * str, int size = -1 ) [static]
 
 Returns a QString initialized with the first <i>size</i> bytes of the UTF-8 string <i>str</i>.
@@ -1454,7 +1409,7 @@ Non-characters are codepoints that the Unicode standard reserves and must not be
 */
 
 
-/*!
+/**
 \fn QString QString::fromUtf16 ( const ushort * unicode, int size = -1 ) [static]
 
 Returns a QString initialized with the first <i>size</i> characters of the Unicode string <i>unicode</i> (ISO-10646-UTF-16 encoded).
@@ -1473,7 +1428,7 @@ QString makes a deep copy of the Unicode data.
 */
 
 
-/*!
+/**
 \fn QString QString::fromWCharArray ( const wchar_t * string, int size = -1 ) [static]
 
 Returns a copy of the <i>string</i>, where the encoding of <i>string</i> depends on the size of wchar. If wchar is 4 bytes, the <i>string</i> is
@@ -1489,7 +1444,7 @@ This function was introduced in Qt 4.2.
 */
 
 
-/*!
+/**
 \fn int QString::indexOf ( const QString & str, int from = 0, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns the index position of the first occurrence of the string <i>str</i> in this string, searching forward from index position <i>from</i>. 
@@ -1516,7 +1471,7 @@ If <i>from</i> is -1, the search starts at the last character; if it is -2, at t
 */
 
 
-/*!
+/**
 \fn int QString::indexOf ( const QLatin1String & str, int from = 0, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns the index position of the first occurrence of the string <i>str</i> in this string, searching forward from index position <i>from</i>. 
@@ -1545,7 +1500,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn int QString::indexOf ( QChar ch, int from = 0, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads indexOf().
@@ -1557,7 +1512,7 @@ Returns -1 if <i>ch</i> could not be found.
 */
 
 
-/*!
+/**
 \fn int QString::indexOf ( const QStringRef & str, int from = 0, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads indexOf().
@@ -1573,7 +1528,7 @@ This function was introduced in Qt 4.8.
 */
 
 
-/*!
+/**
 \fn int QString::indexOf ( const QRegExp & rx, int from = 0 ) const
 
 This function overloads indexOf().
@@ -1592,7 +1547,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn int QString::indexOf ( QRegExp & rx, int from = 0 ) const
 
 This function overloads indexOf().
@@ -1615,7 +1570,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn QString & QString::insert ( int position, const QString & str )
 
 Inserts the string <i>str</i> at the given index <i>position</i> and returns a reference to this string.
@@ -1636,7 +1591,7 @@ If the given <i>position</i> is greater than size(), the array is first extended
 */
 
 
-/*!
+/**
 \fn QString & QString::insert ( int position, const QLatin1String & str )
 
 This function overloads insert().
@@ -1647,7 +1602,7 @@ Inserts the Latin-1 string <i>str</i> at the given index <i>position</i>.
 */
 
 
-/*!
+/**
 \fn QString & QString::insert ( int position, const QChar * unicode, int size )
 
 This function overloads insert().
@@ -1658,7 +1613,7 @@ Inserts the first <i>size</i> characters of the QChar array <i>unicode</i> at th
 */
 
 
-/*!
+/**
 \fn QString & QString::insert ( int position, QChar ch )
 
 This function overloads insert().
@@ -1669,7 +1624,7 @@ Inserts <i>ch</i> at the given index <i>position</i> in the string.
 */
 
 
-/*!
+/**
 \fn bool QString::isEmpty () const
 
 Returns true if the string has no characters; otherwise returns false.
@@ -1689,7 +1644,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn bool QString::isNull () const
 
 Returns true if this string is null; otherwise returns false.
@@ -1711,7 +1666,7 @@ contains any data, and this can be determined using the isEmpty() function.
 */
 
 
-/*!
+/**
 \fn bool QString::isRightToLeft () const
 
 Returns true if the string is read right to left.
@@ -1720,7 +1675,7 @@ Returns true if the string is read right to left.
 */
 
 
-/*!
+/**
 \fn int QString::lastIndexOf ( const QString & str, int from = -1, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns the index position of the last occurrence of the string <i>str</i> in this string, searching backward from index position <i>from</i>. 
@@ -1746,7 +1701,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn int QString::lastIndexOf ( const QLatin1String & str, int from = -1, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads lastIndexOf().
@@ -1776,7 +1731,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn int QString::lastIndexOf ( QChar ch, int from = -1, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads lastIndexOf().
@@ -1787,7 +1742,7 @@ Returns the index position of the last occurrence of the character <i>ch</i>, se
 */
 
 
-/*!
+/**
 \fn int QString::lastIndexOf ( const QStringRef & str, int from = -1, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads lastIndexOf().
@@ -1806,7 +1761,7 @@ This function was introduced in Qt 4.8.
 */
 
 
-/*!
+/**
 \fn int QString::lastIndexOf ( const QRegExp & rx, int from = -1 ) const
 
 This function overloads lastIndexOf().
@@ -1825,7 +1780,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn int QString::lastIndexOf ( QRegExp & rx, int from = -1 ) const
 
 This function overloads lastIndexOf().
@@ -1848,7 +1803,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn QString QString::left ( int n ) const
 
 Returns a substring that contains the <i>n</i> leftmost characters of the string.
@@ -1866,7 +1821,7 @@ The entire string is returned if <i>n</i> is greater than size() or less than ze
 */
 
 
-/*!
+/**
 \fn QString QString::leftJustified ( int width, QChar fill = QLatin1Char( ' ' ), bool truncate = false ) const
 
 Returns a string of size <i>width</i> that contains this string padded by the <i>fill</i> character.
@@ -1891,7 +1846,7 @@ If <i>truncate</i> is true and the size() of the string is more than <i>width</i
 */
 
 
-/*!
+/**
 \fn QStringRef QString::leftRef ( int n ) const
 
 Returns a substring reference to the <i>n</i> leftmost characters of the string.
@@ -1911,7 +1866,7 @@ This function was introduced in Qt 4.4.
 */
 
 
-/*!
+/**
 \fn int QString::length () const
 
 Returns the number of characters in this string. Equivalent to size().
@@ -1922,7 +1877,7 @@ Returns the number of characters in this string. Equivalent to size().
 */
 
 
-/*!
+/**
 \fn int QString::localeAwareCompare ( const QString & s1, const QString & s2 ) [static]
 
 Compares <i>s1</i> with <i>s2</i> and returns an integer less than, equal to, or greater than zero if <i>s1</i> is less than, equal to, or greater than <i>s2</i>.
@@ -1937,7 +1892,7 @@ On Mac OS X since Qt 4.3, this function compares according the &quot;Order for s
 */
 
 
-/*!
+/**
 \fn int QString::localeAwareCompare ( const QStringRef & other ) const
 
 This function overloads localeAwareCompare().
@@ -1954,7 +1909,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn int QString::localeAwareCompare ( const QString & s1, const QStringRef & s2 ) [static]
 
 This function overloads localeAwareCompare().
@@ -1969,7 +1924,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn int QString::localeAwareCompare ( const QString & other ) const
 
 This function overloads localeAwareCompare().
@@ -1984,7 +1939,7 @@ Same as <tt>localeAwareCompare(*this, other)</tt>.
 */
 
 
-/*!
+/**
 \fn QString QString::mid ( int position, int n = -1 ) const
 
 Returns a string that contains <i>n</i> characters of this string, starting at the specified <i>position</i> index.
@@ -2005,7 +1960,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn QStringRef QString::midRef ( int position, int n = -1 ) const
 
 Returns a substring reference to <i>n</i> characters of this string, starting at the specified <i>position</i>.
@@ -2030,7 +1985,7 @@ This function was introduced in Qt 4.4.
 */
 
 
-/*!
+/**
 \fn QString QString::normalized ( NormalizationForm mode ) const
 
 Returns the string in the given Unicode normalization <i>mode</i>.
@@ -2039,7 +1994,7 @@ Returns the string in the given Unicode normalization <i>mode</i>.
 */
 
 
-/*!
+/**
 \fn QString QString::normalized ( NormalizationForm mode, QChar::UnicodeVersion version ) const
 
 This is an overloaded function.
@@ -2050,7 +2005,7 @@ Returns the string in the given Unicode normalization <i>mode</i>, according to 
 */
 
 
-/*!
+/**
 \fn QString QString::number ( long n, int base = 10 ) [static]
 
 Returns a string equivalent of the number <i>n</i> according to the specified <i>base</i>.
@@ -2069,7 +2024,7 @@ The base is 10 by default and must be between 2 and 36. For bases other than 10,
 */
 
 
-/*!
+/**
 \fn QString QString::number ( double n, char format = 'g', int precision = 6 ) [static]
 
 Returns a string equivalent of the number <i>n</i>, formatted according to the specified <i>format</i> and <i>precision</i>. See Argument Formats for details.
@@ -2082,7 +2037,7 @@ Unlike QLocale::toString(), this function does not honor the user's locale setti
 */
 
 
-/*!
+/**
 \fn QString QString::number ( ulong n, int base = 10 ) [static]
 
 This is an overloaded function.
@@ -2091,7 +2046,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString QString::number ( int n, int base = 10 ) [static]
 
 This is an overloaded function.
@@ -2100,7 +2055,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString QString::number ( uint n, int base = 10 ) [static]
 
 This is an overloaded function.
@@ -2109,7 +2064,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString QString::number ( qlonglong n, int base = 10 ) [static]
 
 This is an overloaded function.
@@ -2118,7 +2073,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString QString::number ( qulonglong n, int base = 10 ) [static]
 
 This is an overloaded function.
@@ -2127,7 +2082,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString & QString::prepend ( const QString & str )
 
 Prepends the string <i>str</i> to the beginning of this string and returns a reference to this string.
@@ -2147,7 +2102,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn QString & QString::prepend ( const QLatin1String & str )
 
 This function overloads prepend().
@@ -2158,7 +2113,7 @@ Prepends the Latin-1 string <i>str</i> to this string.
 */
 
 
-/*!
+/**
 \fn QString & QString::prepend ( const QByteArray & ba )
 
 This function overloads prepend().
@@ -2171,7 +2126,7 @@ You can disable this function by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn QString & QString::prepend ( const char * str )
 
 This function overloads prepend().
@@ -2184,7 +2139,7 @@ You can disable this function by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn QString & QString::prepend ( QChar ch )
 
 This function overloads prepend().
@@ -2195,7 +2150,7 @@ Prepends the character <i>ch</i> to this string.
 */
 
 
-/*!
+/**
 \fn void QString::push_back ( const QString & other )
 
 This function is provided for STL compatibility, appending the given <i>other</i> string onto the end of this string. It is equivalent to <tt>append(other)</tt>.
@@ -2206,7 +2161,7 @@ This function is provided for STL compatibility, appending the given <i>other</i
 */
 
 
-/*!
+/**
 \fn void QString::push_back ( QChar ch )
 
 This is an overloaded function.
@@ -2217,7 +2172,7 @@ Appends the given <i>ch</i> character onto the end of this string.
 */
 
 
-/*!
+/**
 \fn void QString::push_front ( const QString & other )
 
 This function is provided for STL compatibility, prepending the given <i>other</i> string to the beginning of this string. It is equivalent to <tt>prepend(other)</tt>.
@@ -2228,7 +2183,7 @@ This function is provided for STL compatibility, prepending the given <i>other</
 */
 
 
-/*!
+/**
 \fn void QString::push_front ( QChar ch )
 
 This is an overloaded function.
@@ -2239,7 +2194,7 @@ Prepends the given <i>ch</i> character to the beginning of this string.
 */
 
 
-/*!
+/**
 \fn QString & QString::remove ( int position, int n )
 
 Removes <i>n</i> characters from the string, starting at the given <i>position</i> index, and returns a reference to the string.
@@ -2258,7 +2213,7 @@ If the specified <i>position</i> index is within the string, but <i>position</i>
 */
 
 
-/*!
+/**
 \fn QString & QString::remove ( QChar ch, Qt::CaseSensitivity cs = Qt::CaseSensitive )
 
 Removes every occurrence of the character <i>ch</i> in this string, and returns a reference to this string.
@@ -2281,7 +2236,7 @@ This is the same as <tt>replace(ch, &quot;&quot;, cs)</tt>.
 */
 
 
-/*!
+/**
 \fn QString & QString::remove ( const QString & str, Qt::CaseSensitivity cs = Qt::CaseSensitive )
 
 Removes every occurrence of the given <i>str</i> string in this string, and returns a reference to this string.
@@ -2296,7 +2251,7 @@ This is the same as <tt>replace(str, &quot;&quot;, cs)</tt>.
 */
 
 
-/*!
+/**
 \fn QString & QString::remove ( const QRegExp & rx )
 
 Removes every occurrence of the regular expression <i>rx</i> in the string, and returns a reference to the string. For example:
@@ -2313,7 +2268,7 @@ Removes every occurrence of the regular expression <i>rx</i> in the string, and 
 */
 
 
-/*!
+/**
 \fn QString QString::repeated ( int times ) const
 
 Returns a copy of this string repeated the specified number of <i>times</i>.
@@ -2333,7 +2288,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( int position, int n, const QString & after )
 
 Replaces <i>n</i> characters beginning at index <i>position</i> with the string <i>after</i> and returns a reference to this string.
@@ -2353,7 +2308,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( int position, int n, const QChar * unicode, int size )
 
 This function overloads replace().
@@ -2364,7 +2319,7 @@ Replaces <i>n</i> characters beginning at index <i>position</i> with the first <
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( int position, int n, QChar after )
 
 This function overloads replace().
@@ -2375,7 +2330,7 @@ Replaces <i>n</i> characters beginning at index <i>position</i> with the charact
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( const QString & before, const QString & after, Qt::CaseSensitivity cs = Qt::CaseSensitive )
 
 This function overloads replace().
@@ -2406,7 +2361,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( const QChar * before, int blen, const QChar * after, int alen, Qt::CaseSensitivity cs = Qt::CaseSensitive )
 
 This function overloads replace().
@@ -2421,7 +2376,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( QChar ch, const QString & after, Qt::CaseSensitivity cs = Qt::CaseSensitive )
 
 This function overloads replace().
@@ -2434,7 +2389,7 @@ If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; other
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( QChar before, QChar after, Qt::CaseSensitivity cs = Qt::CaseSensitive )
 
 This function overloads replace().
@@ -2447,7 +2402,7 @@ If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; other
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( const QLatin1String & before, const QLatin1String & after, Qt::CaseSensitivity cs = Qt::CaseSensitive )
 
 This function overloads replace().
@@ -2464,7 +2419,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( const QLatin1String & before, const QString & after, Qt::CaseSensitivity cs = Qt::CaseSensitive )
 
 This function overloads replace().
@@ -2481,7 +2436,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( const QString & before, const QLatin1String & after, Qt::CaseSensitivity cs = Qt::CaseSensitive )
 
 This function overloads replace().
@@ -2498,7 +2453,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( QChar c, const QLatin1String & after, Qt::CaseSensitivity cs = Qt::CaseSensitive )
 
 This function overloads replace().
@@ -2515,7 +2470,7 @@ This function was introduced in Qt 4.5.
 */
 
 
-/*!
+/**
 \fn QString & QString::replace ( const QRegExp & rx, const QString & after )
 
 This function overloads replace().
@@ -2542,7 +2497,7 @@ For regular expressions containing capturing parentheses, occurrences of <b>\1</
 */
 
 
-/*!
+/**
 \fn void QString::reserve ( int size )
 
 Attempts to allocate memory for at least <i>size</i> characters. If you know in advance how large the string will be, you can call this function, and if you resize the string often you are likely to get better performance. If <i>size</i> is an underestimate, the worst that will happen is that the QString will be a bit slower.
@@ -2571,7 +2526,7 @@ This function is useful for code that needs to build up a long string and wants 
 */
 
 
-/*!
+/**
 \fn void QString::resize ( int size )
 
 Sets the size of the string to <i>size</i> characters.
@@ -2615,7 +2570,7 @@ If <i>size</i> is negative, it is equivalent to passing zero.
 */
 
 
-/*!
+/**
 \fn QString QString::right ( int n ) const
 
 Returns a substring that contains the <i>n</i> rightmost characters of the string.
@@ -2633,7 +2588,7 @@ The entire string is returned if <i>n</i> is greater than size() or less than ze
 */
 
 
-/*!
+/**
 \fn QString QString::rightJustified ( int width, QChar fill = QLatin1Char( ' ' ), bool truncate = false ) const
 
 Returns a string of size() <i>width</i> that contains the <i>fill</i> character followed by the string. For example:
@@ -2658,7 +2613,7 @@ If <i>truncate</i> is true and the size() of the string is more than <i>width</i
 */
 
 
-/*!
+/**
 \fn QStringRef QString::rightRef ( int n ) const
 
 Returns a substring reference to the <i>n</i> rightmost characters of the string.
@@ -2678,7 +2633,7 @@ This function was introduced in Qt 4.4.
 */
 
 
-/*!
+/**
 \fn QString QString::section ( QChar sep, int start, int end = -1, SectionFlags flags = SectionDefault ) const
 
 This function returns a section of the string.
@@ -2711,7 +2666,7 @@ If <i>start</i> or <i>end</i> is negative, we count fields from the right of the
 */
 
 
-/*!
+/**
 \fn QString QString::section ( const QString & sep, int start, int end = -1, SectionFlags flags = SectionDefault ) const
 
 This function overloads section().
@@ -2730,7 +2685,7 @@ This function overloads section().
 */
 
 
-/*!
+/**
 \fn QString QString::section ( const QRegExp & reg, int start, int end = -1, SectionFlags flags = SectionDefault ) const
 
 This function overloads section().
@@ -2752,7 +2707,7 @@ This string is treated as a sequence of fields separated by the regular expressi
 */
 
 
-/*!
+/**
 \fn QString & QString::setNum ( int n, int base = 10 )
 
 Sets the string to the printed value of <i>n</i> in the specified <i>base</i>, and returns a reference to the string.
@@ -2770,7 +2725,7 @@ The formatting always uses QLocale::C, i.e., English/UnitedStates. To get a loca
 */
 
 
-/*!
+/**
 \fn QString & QString::setNum ( uint n, int base = 10 )
 
 This is an overloaded function.
@@ -2779,7 +2734,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString & QString::setNum ( long n, int base = 10 )
 
 This is an overloaded function.
@@ -2788,7 +2743,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString & QString::setNum ( ulong n, int base = 10 )
 
 This is an overloaded function.
@@ -2797,7 +2752,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString & QString::setNum ( qlonglong n, int base = 10 )
 
 This is an overloaded function.
@@ -2806,7 +2761,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString & QString::setNum ( qulonglong n, int base = 10 )
 
 This is an overloaded function.
@@ -2815,7 +2770,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString & QString::setNum ( short n, int base = 10 )
 
 This is an overloaded function.
@@ -2824,7 +2779,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString & QString::setNum ( ushort n, int base = 10 )
 
 This is an overloaded function.
@@ -2833,7 +2788,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QString & QString::setNum ( double n, char format = 'g', int precision = 6 )
 
 This is an overloaded function.
@@ -2848,7 +2803,7 @@ Unlike QLocale::toString(), this function doesn't honor the user's locale settin
 */
 
 
-/*!
+/**
 \fn QString & QString::setNum ( float n, char format = 'g', int precision = 6 )
 
 This is an overloaded function.
@@ -2859,7 +2814,7 @@ Sets the string to the printed value of <i>n</i>, formatted according to the giv
 */
 
 
-/*!
+/**
 \fn QString & QString::setRawData ( const QChar * unicode, int size )
 
 Resets the QString to use the first <i>size</i> Unicode characters in the array <i>unicode</i>. The data in <i>unicode</i> is <i>not</i> copied. The caller must be able to guarantee that <i>unicode</i> will not be deleted or modified as long as the QString (or an unmodified copy of it) exists.
@@ -2874,7 +2829,7 @@ This function was introduced in Qt 4.7.
 */
 
 
-/*!
+/**
 \fn QString & QString::setUnicode ( const QChar * unicode, int size )
 
 Resizes the string to <i>size</i> characters and copies <i>unicode</i> into the string.
@@ -2887,7 +2842,7 @@ If <i>unicode</i> is 0, nothing is copied, but the string is still resized to <i
 */
 
 
-/*!
+/**
 \fn QString & QString::setUtf16 ( const ushort * unicode, int size )
 
 Resizes the string to <i>size</i> characters and copies <i>unicode</i> into the string.
@@ -2902,7 +2857,7 @@ Note that unlike fromUtf16(), this function does not consider BOMs and possibly 
 */
 
 
-/*!
+/**
 \fn QString QString::simplified () const
 
 Returns a string that has whitespace removed from the start and the end, and that has each sequence of internal whitespace replaced with a single space.
@@ -2923,7 +2878,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn int QString::size () const
 
 Returns the number of characters in this string.
@@ -2946,7 +2901,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn QStringList QString::split ( const QString & sep, SplitBehavior behavior = KeepEmptyParts, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Splits the string into substrings wherever <i>sep</i> occurs, and returns the list of those strings. If <i>sep</i> does not match anywhere in the string, split() returns a single-element list containing this string.
@@ -2973,7 +2928,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn QStringList QString::split ( QChar sep, SplitBehavior behavior = KeepEmptyParts, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This is an overloaded function.
@@ -2982,7 +2937,7 @@ This is an overloaded function.
 */
 
 
-/*!
+/**
 \fn QStringList QString::split ( const QRegExp & rx, SplitBehavior behavior = KeepEmptyParts ) const
 
 This is an overloaded function.
@@ -3022,7 +2977,7 @@ Here's a third example where we use a zero-length assertion, <b>\\b</b> (word bo
 */
 
 
-/*!
+/**
 \fn QString & QString::sprintf ( const char * cformat, ... )
 
 Safely builds a formatted string from the format string <i>cformat</i> and an arbitrary list of arguments.
@@ -3058,7 +3013,7 @@ the order of the replacements to be controlled by the translator.
 */
 
 
-/*!
+/**
 \fn void QString::squeeze ()
 
 Releases any memory not required to store the character data.
@@ -3071,7 +3026,7 @@ The sole purpose of this function is to provide a means of fine tuning QString's
 */
 
 
-/*!
+/**
 \fn bool QString::startsWith ( const QString & s, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns true if the string starts with <i>s</i>; otherwise returns false.
@@ -3090,7 +3045,7 @@ If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; other
 */
 
 
-/*!
+/**
 \fn bool QString::startsWith ( const QLatin1String & s, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads startsWith().
@@ -3099,7 +3054,7 @@ This function overloads startsWith().
 */
 
 
-/*!
+/**
 \fn bool QString::startsWith ( QChar c, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads startsWith().
@@ -3110,7 +3065,7 @@ Returns true if the string starts with <i>c</i>; otherwise returns false.
 */
 
 
-/*!
+/**
 \fn bool QString::startsWith ( const QStringRef & s, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This is an overloaded function.
@@ -3127,7 +3082,7 @@ This function was introduced in Qt 4.8.
 */
 
 
-/*!
+/**
 \fn void QString::swap ( QString & other )
 
 Swaps string <i>other</i> with this string. This operation is very fast and never fails.
@@ -3138,7 +3093,7 @@ This function was introduced in Qt 4.8.
 */
 
 
-/*!
+/**
 \fn QByteArray QString::toAscii () const
 
 Returns an 8-bit representation of the string as a QByteArray.
@@ -3153,7 +3108,7 @@ Note that, despite the name, this function does not necessarily return an US-ASC
 */
 
 
-/*!
+/**
 \fn QString QString::toCaseFolded () const
 
 Returns the case folded equivalent of the string. For most Unicode characters this is the same as toLower().
@@ -3162,7 +3117,7 @@ Returns the case folded equivalent of the string. For most Unicode characters th
 */
 
 
-/*!
+/**
 \fn double QString::toDouble ( bool * ok = 0 ) const
 
 Returns the string converted to a <tt>double</tt> value.
@@ -3210,7 +3165,7 @@ Due to the ambiguity between the decimal point and thousands group separator in 
 */
 
 
-/*!
+/**
 \fn float QString::toFloat ( bool * ok = 0 ) const
 
 Returns the string converted to a <tt>float</tt> value.
@@ -3234,7 +3189,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn int QString::toInt ( bool * ok = 0, int base = 10 ) const
 
 Returns the string converted to an <tt>int</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 if the conversion fails.
@@ -3258,7 +3213,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn QByteArray QString::toLatin1 () const
 
 Returns a Latin-1 representation of the string as a QByteArray.
@@ -3271,7 +3226,7 @@ The returned byte array is undefined if the string contains non-Latin1 character
 */
 
 
-/*!
+/**
 \fn QByteArray QString::toLocal8Bit () const
 
 Returns the local 8-bit representation of the string as a QByteArray. The returned byte array is undefined if the string contains characters not supported by the local 8-bit encoding.
@@ -3286,7 +3241,7 @@ If this string contains any characters that cannot be encoded in the locale, the
 */
 
 
-/*!
+/**
 \fn long QString::toLong ( bool * ok = 0, int base = 10 ) const
 
 Returns the string converted to a <tt>long</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 if the conversion fails.
@@ -3311,7 +3266,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn qlonglong QString::toLongLong ( bool * ok = 0, int base = 10 ) const
 
 Returns the string converted to a <tt>long long</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0
@@ -3338,7 +3293,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn QString QString::toLower () const
 
 Returns a lowercase copy of the string.
@@ -3356,7 +3311,7 @@ The case conversion will always happen in the 'C' locale. For locale dependent c
 */
 
 
-/*!
+/**
 \fn short QString::toShort ( bool * ok = 0, int base = 10 ) const
 
 Returns the string converted to a <tt>short</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 if
@@ -3383,7 +3338,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn std::string QString::toStdString () const
 
 Returns a std::string object with the data contained in this QString. The Unicode data is converted into 8-bit characters using the toAscii() function.
@@ -3400,7 +3355,7 @@ This operator is only available if Qt is configured with STL compatibility enabl
 */
 
 
-/*!
+/**
 \fn std::wstring QString::toStdWString () const
 
 Returns a std::wstring object with the data contained in this QString. The std::wstring is encoded in utf16 on platforms where wchar_t is 2 bytes
@@ -3416,7 +3371,7 @@ This operator is only available if Qt is configured with STL compatibility enabl
 */
 
 
-/*!
+/**
 \fn uint QString::toUInt ( bool * ok = 0, int base = 10 ) const
 
 Returns the string converted to an <tt>unsigned int</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0
@@ -3443,7 +3398,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn ulong QString::toULong ( bool * ok = 0, int base = 10 ) const
 
 Returns the string converted to an <tt>unsigned long</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0
@@ -3470,7 +3425,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn qulonglong QString::toULongLong ( bool * ok = 0, int base = 10 ) const
 
 Returns the string converted to an <tt>unsigned long long</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. 
@@ -3496,7 +3451,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn ushort QString::toUShort ( bool * ok = 0, int base = 10 ) const
 
 Returns the string converted to an <tt>unsigned short</tt> using base <i>base</i>, which is 10 by default and must be between 2 and 36, or 0. Returns 0 
@@ -3523,7 +3478,7 @@ Example:
 */
 
 
-/*!
+/**
 \fn QVector<uint> QString::toUcs4 () const
 
 Returns a UCS-4/UTF-32 representation of the string as a QVector&lt;uint&gt;.
@@ -3538,7 +3493,7 @@ This function was introduced in Qt 4.2.
 */
 
 
-/*!
+/**
 \fn QString QString::toUpper () const
 
 Returns an uppercase copy of the string.
@@ -3556,7 +3511,7 @@ The case conversion will always happen in the 'C' locale. For locale dependent c
 */
 
 
-/*!
+/**
 \fn QByteArray QString::toUtf8 () const
 
 Returns a UTF-8 representation of the string as a QByteArray.
@@ -3571,7 +3526,7 @@ However, in the Unicode range, there are certain codepoints that are not conside
 */
 
 
-/*!
+/**
 \fn int QString::toWCharArray ( wchar_t * array ) const
 
 Fills the <i>array</i> with the data contained in this QString object. The array is encoded in utf16 on platforms where wchar_t is 2 bytes wide (e.g. windows) and in ucs4 on platforms where wchar_t is 4 bytes wide (most Unix systems).
@@ -3590,7 +3545,7 @@ This function was introduced in Qt 4.2.
 */
 
 
-/*!
+/**
 \fn QString QString::trimmed () const
 
 Returns a string that has whitespace removed from the start and the end.
@@ -3613,7 +3568,7 @@ Unlike simplified(), trimmed() leaves internal whitespace alone.
 */
 
 
-/*!
+/**
 \fn void QString::truncate ( int position )
 
 Truncates the string at the given <i>position</i> index.
@@ -3636,7 +3591,7 @@ If <i>position</i> is negative, it is equivalent to passing zero.
 */
 
 
-/*!
+/**
 \fn const QChar * QString::unicode () const
 
 Returns a '\0'-terminated Unicode representation of the string. The result remains valid until the string is modified.
@@ -3647,7 +3602,7 @@ Returns a '\0'-terminated Unicode representation of the string. The result remai
 */
 
 
-/*!
+/**
 \fn const ushort * QString::utf16 () const
 
 Returns the QString as a '\0'-terminated array of unsigned shorts. The result remains valid until the string is modified.
@@ -3660,7 +3615,7 @@ The returned string is in host byte order.
 */
 
 
-/*!
+/**
 \fn QString & QString::vsprintf ( const char * cformat, va_list ap )
 
 Equivalent method to sprintf(), but takes a va_list <i>ap</i> instead a list of variable arguments. See the sprintf() documentation for an explanation of <i>cformat</i>.
@@ -3673,7 +3628,7 @@ This method does not call the va_end macro, the caller is responsible to call va
 */
 
 
-/*!
+/**
 \fn bool operator!= ( const QString & s1, const QString &s2 ) const
 \relates QString
 
@@ -3685,7 +3640,7 @@ The comparison is based exclusively on the numeric Unicode values of the charact
 */
 
 
-/*!
+/**
 \fn bool QString::operator!= ( const QLatin1String & other ) const
 
 This function overloads operator!=().
@@ -3694,7 +3649,7 @@ This function overloads operator!=().
 */
 
 
-/*!
+/**
 \fn bool QString::operator!= ( const QByteArray & other ) const
 
 This function overloads operator!=().
@@ -3707,7 +3662,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn bool QString::operator!= ( const char * other ) const
 
 This function overloads operator!=().
@@ -3721,7 +3676,7 @@ ensure that all user-visible strings go through QObject::tr(), for example.
 */
 
 
-/*!
+/**
 \fn QString & QString::operator+= ( const QString & other )
 
 Appends the string <i>other</i> onto the end of this string and returns a reference to this string.
@@ -3744,7 +3699,7 @@ end of the string data so it can grow without reallocating the entire string eac
 */
 
 
-/*!
+/**
 \fn QString & QString::operator+= ( const QLatin1String & str )
 
 This function overloads operator+=().
@@ -3755,7 +3710,7 @@ Appends the Latin-1 string <i>str</i> to this string.
 */
 
 
-/*!
+/**
 \fn QString & QString::operator+= ( const QByteArray & ba )
 
 This function overloads operator+=().
@@ -3768,7 +3723,7 @@ You can disable this function by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn QString & QString::operator+= ( const char * str )
 
 This function overloads operator+=().
@@ -3781,7 +3736,7 @@ You can disable this function by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn QString & QString::operator+= ( const QStringRef & str )
 
 This function overloads operator+=().
@@ -3792,7 +3747,7 @@ Appends the string section referenced by <i>str</i> to this string.
 */
 
 
-/*!
+/**
 \fn QString & QString::operator+= ( char ch )
 
 This function overloads operator+=().
@@ -3805,7 +3760,7 @@ You can disable this function by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn QString & QString::operator+= ( QChar ch )
 
 This function overloads operator+=().
@@ -3816,7 +3771,7 @@ Appends the character <i>ch</i> to the string.
 */
 
 
-/*!
+/**
 \fn bool QString::operator< ( const QString & other ) const
 
 Returns true if this string is lexically less than string <i>other</i>; otherwise returns false.
@@ -3827,7 +3782,7 @@ The comparison is based exclusively on the numeric Unicode values of the charact
 */
 
 
-/*!
+/**
 \fn bool QString::operator< ( const QLatin1String & other ) const
 
 This function overloads operator&lt;().
@@ -3836,7 +3791,7 @@ This function overloads operator&lt;().
 */
 
 
-/*!
+/**
 \fn bool QString::operator< ( const QByteArray & other ) const
 
 This function overloads operator&lt;().
@@ -3849,7 +3804,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn bool QString::operator< ( const char * other ) const
 
 This function overloads operator&lt;().
@@ -3862,7 +3817,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn bool QString::operator<= ( const QString & other ) const
 
 Returns true if this string is lexically less than or equal to string <i>other</i>; otherwise returns false.
@@ -3873,7 +3828,7 @@ The comparison is based exclusively on the numeric Unicode values of the charact
 */
 
 
-/*!
+/**
 \fn bool QString::operator<= ( const QLatin1String & other ) const
 
 This function overloads operator&lt;=().
@@ -3882,7 +3837,7 @@ This function overloads operator&lt;=().
 */
 
 
-/*!
+/**
 \fn bool QString::operator<= ( const QByteArray & other ) const
 
 This function overloads operator&lt;=().
@@ -3895,7 +3850,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn bool QString::operator<= ( const char * other ) const
 
 This function overloads operator&lt;=().
@@ -3908,7 +3863,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn QString & QString::operator= ( const QString & other )
 
 Assigns <i>other</i> to this string and returns a reference to this string.
@@ -3917,7 +3872,7 @@ Assigns <i>other</i> to this string and returns a reference to this string.
 */
 
 
-/*!
+/**
 \fn QString & QString::operator= ( const QLatin1String & str )
 
 This function overloads operator=().
@@ -3928,7 +3883,7 @@ Assigns the Latin-1 string <i>str</i> to this string.
 */
 
 
-/*!
+/**
 \fn QString & QString::operator= ( const QByteArray & ba )
 
 This function overloads operator=().
@@ -3941,7 +3896,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn QString & QString::operator= ( const char * str )
 
 This function overloads operator=().
@@ -3954,7 +3909,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn QString & QString::operator= ( char ch )
 
 This function overloads operator=().
@@ -3967,7 +3922,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn QString & QString::operator= ( QChar ch )
 
 This function overloads operator=().
@@ -3978,7 +3933,7 @@ Sets the string to contain the single character <i>ch</i>.
 */
 
 
-/*!
+/**
 \fn bool QString::operator== ( const QString & other ) const
 
 Returns true if string <i>other</i> is equal to this string; otherwise returns false.
@@ -3989,7 +3944,7 @@ The comparison is based exclusively on the numeric Unicode values of the charact
 */
 
 
-/*!
+/**
 \fn bool QString::operator== ( const QLatin1String & other ) const
 
 This function overloads operator==().
@@ -3998,7 +3953,7 @@ This function overloads operator==().
 */
 
 
-/*!
+/**
 \fn bool QString::operator== ( const QByteArray & other ) const
 
 This function overloads operator==().
@@ -4011,7 +3966,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn bool QString::operator== ( const char * other ) const
 
 This function overloads operator==().
@@ -4024,7 +3979,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn bool QString::operator> ( const QString & other ) const
 
 Returns true if this string is lexically greater than string <i>other</i>; otherwise returns false.
@@ -4035,7 +3990,7 @@ The comparison is based exclusively on the numeric Unicode values of the charact
 */
 
 
-/*!
+/**
 \fn bool QString::operator> ( const QLatin1String & other ) const
 
 This function overloads operator&gt;().
@@ -4044,7 +3999,7 @@ This function overloads operator&gt;().
 */
 
 
-/*!
+/**
 \fn bool QString::operator> ( const QByteArray & other ) const
 
 This function overloads operator&gt;().
@@ -4057,7 +4012,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn bool QString::operator> ( const char * other ) const
 
 This function overloads operator&gt;().
@@ -4070,7 +4025,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn bool QString::operator>= ( const QString & other ) const
 
 Returns true if this string is lexically greater than or equal to string <i>other</i>; otherwise returns false.
@@ -4081,7 +4036,7 @@ The comparison is based exclusively on the numeric Unicode values of the charact
 */
 
 
-/*!
+/**
 \fn bool QString::operator>= ( const QLatin1String & other ) const
 
 This function overloads operator&gt;=().
@@ -4090,7 +4045,7 @@ This function overloads operator&gt;=().
 */
 
 
-/*!
+/**
 \fn bool QString::operator>= ( const QByteArray & other ) const
 
 This function overloads operator&gt;=().
@@ -4103,7 +4058,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn bool QString::operator>= ( const char * other ) const
 
 This function overloads operator&gt;=().
@@ -4116,7 +4071,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 */
 
 
-/*!
+/**
 \fn QCharRef QString::operator[] ( int position )
 
 Returns the character at the specified <i>position</i> in the string as a modifiable reference.
@@ -4138,7 +4093,7 @@ The return value is of type QCharRef, a helper class for QString. When you get a
 */
 
 
-/*!
+/**
 \fn const QChar QString::operator[] ( int position ) const
 
 This function overloads operator[]().
@@ -4147,7 +4102,7 @@ This function overloads operator[]().
 */
 
 
-/*!
+/**
 \fn QCharRef QString::operator[] ( uint position )
 
 This function overloads operator[]().
@@ -4158,7 +4113,7 @@ Returns the character at the specified <i>position</i> in the string as a modifi
 */
 
 
-/*!
+/**
 \fn const QChar QString::operator[] ( uint position ) const
 
 This function overloads operator[]().
@@ -4167,7 +4122,7 @@ This function overloads operator[]().
 */
 
 
-/*!
+/**
 \typedef QString::ConstIterator
 
 Qt-style synonym for QString::const_iterator.
@@ -4176,7 +4131,7 @@ Qt-style synonym for QString::const_iterator.
 */
 
 
-/*!
+/**
 \typedef QString::Iterator
 
 Qt-style synonym for QString::iterator.
@@ -4186,7 +4141,7 @@ Qt-style synonym for QString::iterator.
 
 
 
-/*!
+/**
 \typedef QString::const_iterator
 
 The QString::const_iterator typedef provides an STL-style const iterator for QString.
@@ -4197,7 +4152,7 @@ The QString::const_iterator typedef provides an STL-style const iterator for QSt
 */
 
 
-/*!
+/**
 \typedef QString::const_reference
 
 The QString::const_reference typedef provides an STL-style const reference for QString.
@@ -4208,7 +4163,7 @@ This typedef was introduced in Qt 4.8.
 */
 
 
-/*!
+/**
 \typedef QString::iterator
 
 The QString::iterator typedef provides an STL-style non-const iterator for QString.
@@ -4219,7 +4174,7 @@ The QString::iterator typedef provides an STL-style non-const iterator for QStri
 */
 
 
-/*!
+/**
 \typedef QString::reference
 
 The QString::const_reference typedef provides an STL-style reference for QString.
@@ -4230,7 +4185,7 @@ This typedef was introduced in Qt 4.8.
 */
 
 
-/*!
+/**
 \typedef QString::value_type
 
 The QString::const_reference typedef provides an STL-style value type for QString.

@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
- * Copyright (C) 1997-2014 by Parker Waechter 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Parker Waechter
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -460,7 +460,7 @@ void RTFGenerator::startIndexSection(IndexSections is)
          //Module Documentation       
          bool found = false;
         
-         for (auto gd : *Doxygen::groupSDict)  {
+         for (auto gd : *Doxy_Globals::groupSDict)  {
 
             if (found) { 
                break;
@@ -479,7 +479,7 @@ void RTFGenerator::startIndexSection(IndexSections is)
          //Directory Documentation       
          bool found = false;
       
-         for (auto dd : Doxygen::directories)  {
+         for (auto dd : Doxy_Globals::directories)  {
 
             if (found) { 
                break;
@@ -497,7 +497,7 @@ void RTFGenerator::startIndexSection(IndexSections is)
          // Namespace Documentation       
          bool found = false;
        
-         for (auto nd : *Doxygen::namespaceSDict)  {
+         for (auto nd : *Doxy_Globals::namespaceSDict)  {
 
             if (found) { 
                break;
@@ -515,7 +515,7 @@ void RTFGenerator::startIndexSection(IndexSections is)
          //Compound Documentation          
          bool found = false;
        
-         for (auto cd : *Doxygen::classSDict)  {
+         for (auto cd : *Doxy_Globals::classSDict)  {
 
             if (found) { 
                break;
@@ -533,7 +533,7 @@ void RTFGenerator::startIndexSection(IndexSections is)
          //File Documentation
          bool isFirst = true;
        
-         for (auto fn : *Doxygen::inputNameList)  {
+         for (auto fn : *Doxy_Globals::inputNameList)  {
            
             for (auto fd : *fn)  {
                if (fd->isLinkableInProject()) {
@@ -650,10 +650,10 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
       case isMainPage:
          m_textStream  << "\\par " << rtf_Style_Reset << endl;
 
-         if (!Doxygen::mainPage || Doxygen::mainPage->title().isEmpty()) {
+         if (!Doxy_Globals::mainPage || Doxy_Globals::mainPage->title().isEmpty()) {
             m_textStream  << "{\\tc \\v " << theTranslator->trMainPage() << "}" << endl;
          } else {
-            m_textStream  << "{\\tc \\v " << substitute(Doxygen::mainPage->title(), "%", "") << "}" << endl;
+            m_textStream  << "{\\tc \\v " << substitute(Doxy_Globals::mainPage->title(), "%", "") << "}" << endl;
          }
          m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"";
          //if (Config::getBool("generate-treeview")) t << "main"; else t << "index";
@@ -715,7 +715,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
       case isModuleDocumentation: {         
          m_textStream  << "{\\tc \\v " << theTranslator->trModuleDocumentation() << "}" << endl;
       
-         for (auto gd :*Doxygen::groupSDict) {
+         for (auto gd :*Doxy_Globals::groupSDict) {
             if (!gd->isReference()) {
                m_textStream  << "\\par " << rtf_Style_Reset << endl;
                m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"";
@@ -731,7 +731,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
        {    
          m_textStream  << "{\\tc \\v " << theTranslator->trDirDocumentation() << "}" << endl;
 
-         for (auto dd :Doxygen::directories) {
+         for (auto dd :Doxy_Globals::directories) {
             if (dd->isLinkableInProject()) {
                m_textStream  << "\\par " << rtf_Style_Reset << endl;
                m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"";
@@ -745,9 +745,9 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
       case isNamespaceDocumentation: {       
          bool found = false;
 
-         auto iter = Doxygen::namespaceSDict->begin();
+         auto iter = Doxy_Globals::namespaceSDict->begin();
         
-         for (auto nd :*Doxygen::namespaceSDict) {
+         for (auto nd :*Doxy_Globals::namespaceSDict) {
             if (found) {
                break;
             }
@@ -763,7 +763,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
             ++iter;
          }
 
-         while (iter !=  Doxygen::namespaceSDict->end()) {
+         while (iter !=  Doxy_Globals::namespaceSDict->end()) {
 
             if ((*iter)->isLinkableInProject()) {
                m_textStream  << "\\par " << rtf_Style_Reset << endl;
@@ -788,7 +788,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
             m_textStream  << "{\\tc \\v " << theTranslator->trClassDocumentation() << "}" << endl;
          }
         
-         for (auto cd :*Doxygen::classSDict) {
+         for (auto cd :*Doxy_Globals::classSDict) {
             if (found) {
                break;
             }
@@ -802,7 +802,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
             }
          }
 
-         for (auto cd :*Doxygen::classSDict) {          
+         for (auto cd :*Doxy_Globals::classSDict) {          
             if (cd->isLinkableInProject() && cd->templateMaster() == 0 && !cd->isEmbeddedInOuterScope() ) {
                m_textStream  << "\\par " << rtf_Style_Reset << endl;
                beginRTFSection();
@@ -819,7 +819,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
 
          m_textStream  << "{\\tc \\v " << theTranslator->trFileDocumentation() << "}" << endl;
        
-         for (auto fn :*Doxygen::inputNameList) {  
+         for (auto fn :*Doxy_Globals::inputNameList) {  
             for (auto fd :*fn) {  
                if (fd->isLinkableInProject()) {
                   if (isFirst) {
@@ -845,9 +845,9 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          //t << "}\n";
          m_textStream  << "{\\tc \\v " << theTranslator->trExampleDocumentation() << "}" << endl;
       
-         auto iter1 = Doxygen::exampleSDict->begin();
+         auto iter1 = Doxy_Globals::exampleSDict->begin();
 
-         if (iter1 != Doxygen::exampleSDict->end()) {
+         if (iter1 != Doxy_Globals::exampleSDict->end()) {
             m_textStream  << "\\par " << rtf_Style_Reset << endl;
 
             m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"";
@@ -856,7 +856,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
        
             ++iter1;  
    
-            for (auto iter2 = iter1; iter2 != Doxygen::exampleSDict->end(); ++iter2) {  
+            for (auto iter2 = iter1; iter2 != Doxy_Globals::exampleSDict->end(); ++iter2) {  
    
                m_textStream  << "\\par " << rtf_Style_Reset << endl;
                beginRTFSection();
@@ -874,7 +874,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          //#error "fix me in the same way as the latex index..."
          //t << "{\\tc \\v " << theTranslator->trPageDocumentation() << "}"<< endl;
          //t << "}"<< endl;
-         //PageSDict::Iterator pdi(*Doxygen::pageSDict);
+         //PageSDict::Iterator pdi(*Doxy_Globals::pageSDict);
          //PageDef *pd=pdi.toFirst();
          //bool first=true;
          //for (pdi.toFirst();(pd=pdi.current());++pdi)

@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -129,7 +129,7 @@ void HtmlHelpIndex::addItem(const char *level1, const char *level2, const char *
 
 static QByteArray field2URL(QSharedPointer<IndexField> f, bool checkReversed)
 {
-   QByteArray result = f->url + Doxygen::htmlFileExtension.toUtf8();
+   QByteArray result = f->url + Doxy_Globals::htmlFileExtension.toUtf8();
 
    if (! f->anchor.isEmpty() && (!checkReversed || f->reversed)) {
       result += "#" + f->anchor;
@@ -477,7 +477,7 @@ void HtmlHelp::createProjectFile()
    if (f.open(QIODevice::WriteOnly)) {
       QTextStream t(&f);
 
-      QByteArray indexName = "index" + Doxygen::htmlFileExtension.toUtf8();
+      QByteArray indexName = "index" + Doxy_Globals::htmlFileExtension.toUtf8();
 
       t << "[OPTIONS]\n";
       if (! Config::getString("chm-file").isEmpty()) {
@@ -658,7 +658,7 @@ void HtmlHelp::addContentsItem(bool isDir, const QString &name, const char *ref,
 
       } else {
          cts << "<param name=\"Local\" value=\"";
-         cts << file << Doxygen::htmlFileExtension;
+         cts << file << Doxy_Globals::htmlFileExtension;
          if (anchor) {
             cts << "#" << anchor;
          }

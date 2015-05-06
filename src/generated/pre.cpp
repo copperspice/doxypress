@@ -1,8 +1,8 @@
 /*************************************************************************
  *
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
- * All rights reserved.
+ * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -2862,12 +2862,12 @@ static void setFileName(const char *name)
    QFileInfo fi(name);
 
    g_yyFileName = fi.absoluteFilePath().toUtf8();
-   g_yyFileDef  = findFileDef(Doxygen::inputNameDict, g_yyFileName, ambig);
+   g_yyFileDef  = findFileDef(Doxy_Globals::inputNameDict, g_yyFileName, ambig);
 
    if (g_yyFileDef == 0) // if this is not an input file check if it is an
       // include file
    {
-      g_yyFileDef = findFileDef(Doxygen::includeNameDict, g_yyFileName, ambig);
+      g_yyFileDef = findFileDef(Doxy_Globals::includeNameDict, g_yyFileName, ambig);
    }
 
    if (g_yyFileDef && g_yyFileDef->isReference()) {
@@ -3771,7 +3771,7 @@ A_Define *newDefine()
    def->columnNr   = g_yyColNr;
    def->varArgs    = g_defVarArgs;
    
-   if (! def->name.isEmpty() && Doxygen::expandAsDefinedDict.contains(def->name)) {
+   if (! def->name.isEmpty() && Doxy_Globals::expandAsDefinedDict.contains(def->name)) {
       def->isPredefined = TRUE;
    }
 
@@ -3784,7 +3784,7 @@ void addDefine()
       return;   // do not add this define as it is inside a
    }
    // conditional section (cond command) that is disabled.
-   if (!Doxygen::gatherDefines) {
+   if (! Doxy_Globals::gatherDefines) {
       return;
    }
   
@@ -3820,11 +3820,11 @@ void addDefine()
    md->setFileDef(g_inputFileDef);
    md->setDefinition("#define " + g_defName);
 
-   QSharedPointer<MemberName> mn = Doxygen::functionNameSDict->find(g_defName);
+   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict->find(g_defName);
 
    if (! mn) {
       mn = QSharedPointer<MemberName>(new MemberName(g_defName));
-      Doxygen::functionNameSDict->insert(g_defName, mn);
+      Doxy_Globals::functionNameSDict->insert(g_defName, mn);
    }
 
    mn->append(md);
@@ -3939,7 +3939,7 @@ static void readIncludeFile(const QByteArray &inc)
             bool ambig;
 
             // change to absolute name for bug 641336
-            QSharedPointer<FileDef> incFd = findFileDef(Doxygen::inputNameDict, absIncFileName, ambig);
+            QSharedPointer<FileDef> incFd = findFileDef(Doxy_Globals::inputNameDict, absIncFileName, ambig);
 
             QSharedPointer<FileDef> temp;
             if (ambig) {
@@ -3990,7 +3990,7 @@ static void readIncludeFile(const QByteArray &inc)
             bool ambig;
             
             // change to absolute name for bug 641336
-            QSharedPointer<FileDef> fd = findFileDef(Doxygen::inputNameDict, absIncFileName, ambig);
+            QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, absIncFileName, ambig);
          
             // add include dependency to the file in which the #include was found
             oldFileDef->addIncludeDependency(ambig ? QSharedPointer<FileDef>() : fd, incFileName, localInclude, g_isImported, FALSE);

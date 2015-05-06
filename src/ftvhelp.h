@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -15,13 +15,11 @@
  *
 *************************************************************************/
 
-/*************************************************************************
- * ftvhelp.h,v 1.0 2000/09/06 16:09:00
- *
- * Kenney Wong <kwong@ea.com>
- *
+/*
+ * ftvhelp.h,v 1.0 2000/09/06 16:09:00 
+ * Kenney Wong <kwong@ea.com> 
  * Folder Tree View for offline help on browsers that do not support HTML Help
- */
+*/ 
 
 #ifndef FTVHELP_H
 #define FTVHELP_H

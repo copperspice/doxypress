@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -305,7 +305,7 @@ static QByteArray replaceRef(const QByteArray &buf, const QString relPath, bool 
 
             if (! df->file().isEmpty()) {
                result += df->file();
-               result += Doxygen::htmlFileExtension;
+               result += Doxy_Globals::htmlFileExtension;
             }
 
             if (! df->anchor().isEmpty()) {
@@ -1785,10 +1785,10 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
          int anchorPos = m_url.lastIndexOf('#');
 
          if (anchorPos == -1) {
-            t << ",URL=\"" << m_url << Doxygen::htmlFileExtension.toUtf8() << "\"";
+            t << ",URL=\"" << m_url << Doxy_Globals::htmlFileExtension.toUtf8() << "\"";
 
          } else {
-            t << ",URL=\"" << m_url.left(anchorPos) << Doxygen::htmlFileExtension.toUtf8()
+            t << ",URL=\"" << m_url.left(anchorPos) << Doxy_Globals::htmlFileExtension.toUtf8()
               << m_url.right(m_url.length() - anchorPos) << "\"";
          }
       }
@@ -2324,7 +2324,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
          removeDotGraph(absBaseName + ".dot");
       }
 
-      Doxygen::indexList->addImageFile(imgName);
+      Doxy_Globals::indexList->addImageFile(imgName);
 
       // write image and map in a table row
       QByteArray mapLabel = escapeCharsInString(n->m_label, false);
@@ -2443,10 +2443,10 @@ DotGfxHierarchyTable::DotGfxHierarchyTable()
    m_rootSubgraphs = new SortedList<DotNode *>;
 
    // build a graph with each class as a node and the inheritance relations as edges
-   initClassHierarchy(Doxygen::classSDict);
-   initClassHierarchy(Doxygen::hiddenClasses);
-   addClassList(Doxygen::classSDict);
-   addClassList(Doxygen::hiddenClasses);
+   initClassHierarchy(Doxy_Globals::classSDict);
+   initClassHierarchy(Doxy_Globals::hiddenClasses);
+   addClassList(Doxy_Globals::classSDict);
+   addClassList(Doxy_Globals::hiddenClasses);
 
    // m_usedNodes now contains all nodes in the graph
 
@@ -3113,7 +3113,7 @@ QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFo
       }
    }
 
-   Doxygen::indexList->addImageFile(baseName + "." + imgExt);
+   Doxy_Globals::indexList->addImageFile(baseName + "." + imgExt);
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
@@ -3451,7 +3451,7 @@ QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graph
          DotManager::instance()->addRun(dotRun);
       }
    }
-   Doxygen::indexList->addImageFile(baseName + "." + imgExt);
+   Doxy_Globals::indexList->addImageFile(baseName + "." + imgExt);
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
@@ -3736,7 +3736,7 @@ QByteArray DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
 
       }
    }
-   Doxygen::indexList->addImageFile(baseName + "." + imgExt);
+   Doxy_Globals::indexList->addImageFile(baseName + "." + imgExt);
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
@@ -3925,7 +3925,7 @@ QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphForma
          DotManager::instance()->addRun(dotRun);
       }
    }
-   Doxygen::indexList->addImageFile(baseName + "." + imgExt);
+   Doxy_Globals::indexList->addImageFile(baseName + "." + imgExt);
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
@@ -4011,19 +4011,19 @@ void generateGraphLegend(const QString &path)
    md5stream << "  Node10 -> Node9 [dir=\"back\",color=\"midnightblue\",fontsize=\"" << FONTSIZE << "\",style=\"solid\",fontname=\"" << FONTNAME <<
              "\"];\n";
    md5stream << "  Node10 [shape=\"box\",label=\"PublicBase\",fontsize=\"" << FONTSIZE << "\",height=0.2,width=0.4,fontname=\"" << FONTNAME <<
-             "\",color=\"black\",URL=\"$classPublicBase" << Doxygen::htmlFileExtension << "\"];\n";
+             "\",color=\"black\",URL=\"$classPublicBase" << Doxy_Globals::htmlFileExtension << "\"];\n";
    md5stream << "  Node11 -> Node10 [dir=\"back\",color=\"midnightblue\",fontsize=\"" << FONTSIZE << "\",style=\"solid\",fontname=\"" << FONTNAME <<
              "\"];\n";
    md5stream << "  Node11 [shape=\"box\",label=\"Truncated\",fontsize=\"" << FONTSIZE << "\",height=0.2,width=0.4,fontname=\"" << FONTNAME <<
-             "\",color=\"red\",URL=\"$classTruncated" << Doxygen::htmlFileExtension << "\"];\n";
+             "\",color=\"red\",URL=\"$classTruncated" << Doxy_Globals::htmlFileExtension << "\"];\n";
    md5stream << "  Node13 -> Node9 [dir=\"back\",color=\"darkgreen\",fontsize=\"" << FONTSIZE << "\",style=\"solid\",fontname=\"" << FONTNAME <<
              "\"];\n";
    md5stream << "  Node13 [shape=\"box\",label=\"ProtectedBase\",fontsize=\"" << FONTSIZE << "\",height=0.2,width=0.4,fontname=\"" << FONTNAME <<
-             "\",color=\"black\",URL=\"$classProtectedBase" << Doxygen::htmlFileExtension << "\"];\n";
+             "\",color=\"black\",URL=\"$classProtectedBase" << Doxy_Globals::htmlFileExtension << "\"];\n";
    md5stream << "  Node14 -> Node9 [dir=\"back\",color=\"firebrick4\",fontsize=\"" << FONTSIZE << "\",style=\"solid\",fontname=\"" << FONTNAME <<
              "\"];\n";
    md5stream << "  Node14 [shape=\"box\",label=\"PrivateBase\",fontsize=\"" << FONTSIZE << "\",height=0.2,width=0.4,fontname=\"" << FONTNAME <<
-             "\",color=\"black\",URL=\"$classPrivateBase" << Doxygen::htmlFileExtension << "\"];\n";
+             "\",color=\"black\",URL=\"$classPrivateBase" << Doxy_Globals::htmlFileExtension << "\"];\n";
    md5stream << "  Node15 -> Node9 [dir=\"back\",color=\"midnightblue\",fontsize=\"" << FONTSIZE << "\",style=\"solid\",fontname=\"" << FONTNAME <<
              "\"];\n";
    md5stream << "  Node15 [shape=\"box\",label=\"Undocumented\",fontsize=\"" << FONTSIZE << "\",height=0.2,width=0.4,fontname=\"" << FONTNAME <<
@@ -4031,15 +4031,15 @@ void generateGraphLegend(const QString &path)
    md5stream << "  Node16 -> Node9 [dir=\"back\",color=\"midnightblue\",fontsize=\"" << FONTSIZE << "\",style=\"solid\",fontname=\"" << FONTNAME <<
              "\"];\n";
    md5stream << "  Node16 [shape=\"box\",label=\"Templ< int >\",fontsize=\"" << FONTSIZE << "\",height=0.2,width=0.4,fontname=\"" << FONTNAME <<
-             "\",color=\"black\",URL=\"$classTempl" << Doxygen::htmlFileExtension << "\"];\n";
+             "\",color=\"black\",URL=\"$classTempl" << Doxy_Globals::htmlFileExtension << "\"];\n";
    md5stream << "  Node17 -> Node16 [dir=\"back\",color=\"orange\",fontsize=\"" << FONTSIZE << "\",style=\"dashed\",label=\"< int >\",fontname=\"" <<
              FONTNAME << "\"];\n";
    md5stream << "  Node17 [shape=\"box\",label=\"Templ< T >\",fontsize=\"" << FONTSIZE << "\",height=0.2,width=0.4,fontname=\"" << FONTNAME <<
-             "\",color=\"black\",URL=\"$classTempl" << Doxygen::htmlFileExtension << "\"];\n";
+             "\",color=\"black\",URL=\"$classTempl" << Doxy_Globals::htmlFileExtension << "\"];\n";
    md5stream << "  Node18 -> Node9 [dir=\"back\",color=\"darkorchid3\",fontsize=\"" << FONTSIZE <<
              "\",style=\"dashed\",label=\"m_usedClass\",fontname=\"" << FONTNAME << "\"];\n";
    md5stream << "  Node18 [shape=\"box\",label=\"Used\",fontsize=\"" << FONTSIZE << "\",height=0.2,width=0.4,fontname=\"" << FONTNAME <<
-             "\",color=\"black\",URL=\"$classUsed" << Doxygen::htmlFileExtension << "\"];\n";
+             "\",color=\"black\",URL=\"$classUsed" << Doxy_Globals::htmlFileExtension << "\"];\n";
    writeGraphFooter(md5stream);
 
    QByteArray sigStr;
@@ -4071,10 +4071,10 @@ void generateGraphLegend(const QString &path)
    } else {
       removeDotGraph(absDotName);
    }
-   Doxygen::indexList->addImageFile(imgName);
+   Doxy_Globals::indexList->addImageFile(imgName);
 
    if (imgExt == "svg") {
-      DotManager::instance()->addSVGObject(absBaseName + Doxygen::htmlFileExtension.toUtf8(), "graph_legend", absImgName, QByteArray());
+      DotManager::instance()->addSVGObject(absBaseName + Doxy_Globals::htmlFileExtension.toUtf8(), "graph_legend", absImgName, QByteArray());
    }
 }
 
@@ -4118,7 +4118,7 @@ void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const Q
       checkDotResult(absImgName);
    }
 
-   Doxygen::indexList->addImageFile(imgName);
+   Doxy_Globals::indexList->addImageFile(imgName);
 
 }
 
@@ -4250,7 +4250,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
 
    // Add members
    addMemberList( gd->getMemberList(MemberListType_allMembersList) );
-   QByteArray htmlEntenstion = Doxygen::htmlFileExtension.toUtf8();
+   QByteArray htmlEntenstion = Doxy_Globals::htmlFileExtension.toUtf8();
 
    // Add classes
    if ( gd->getClasses() && gd->getClasses()->count() ) {
@@ -4308,7 +4308,7 @@ void DotGroupCollaboration::addMemberList(QSharedPointer<MemberList> ml)
    }
   
    for (auto def : *ml) {
-      QByteArray tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8() +
+      QByteArray tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8() +
                            + "#" + def->anchor();
 
       addCollaborationMember(def, tmp_url, DotGroupCollaboration::tmember );
@@ -4660,14 +4660,14 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
       t << "    graph [ bgcolor=\"#ddddee\", pencolor=\"black\", label=\""
         << dd->parent()->shortName()
         << "\" fontname=\"" << FONTNAME << "\", fontsize=\"" << FONTSIZE << "\", URL=\"";
-      t << dd->parent()->getOutputFileBase() << Doxygen::htmlFileExtension;
+      t << dd->parent()->getOutputFileBase() << Doxy_Globals::htmlFileExtension;
       t << "\"]\n";
    }
 
    if (dd->isCluster()) {
       t << "  subgraph cluster" << dd->getOutputFileBase() << " {\n";
       t << "    graph [ bgcolor=\"#eeeeff\", pencolor=\"black\", label=\"\""
-        << " URL=\"" << dd->getOutputFileBase() << Doxygen::htmlFileExtension
+        << " URL=\"" << dd->getOutputFileBase() << Doxy_Globals::htmlFileExtension
         << "\"];\n";
       t << "    " << dd->getOutputFileBase() << " [shape=plaintext label=\""
         << dd->shortName() << "\"];\n";
@@ -4685,7 +4685,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
 
          t << " fillcolor=\"white\" style=\"filled\"";
          t << " URL=\"" << sdir->getOutputFileBase()
-           << Doxygen::htmlFileExtension << "\"";
+           << Doxy_Globals::htmlFileExtension << "\"";
          t << "];\n";
 
          dirsInGraph.insert(sdir->getOutputFileBase(), sdir);
@@ -4696,7 +4696,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
       t << "  " << dd->getOutputFileBase() << " [shape=box, label=\""
         << dd->shortName() << "\", style=\"filled\", fillcolor=\"#eeeeff\","
         << " pencolor=\"black\", URL=\"" << dd->getOutputFileBase()
-        << Doxygen::htmlFileExtension << "\"];\n";
+        << Doxy_Globals::htmlFileExtension << "\"];\n";
    }
 
    if (dd->parent()) {
@@ -4726,7 +4726,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
             }
 
             t << " URL=\"" << usedDir->getOutputFileBase()
-              << Doxygen::htmlFileExtension << "\"];\n";
+              << Doxy_Globals::htmlFileExtension << "\"];\n";
 
             dirsInGraph.insert(usedDir->getOutputFileBase(), usedDir);
             break;
@@ -4752,9 +4752,9 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
             QString relationName;
             relationName = QString("dir_%1_%2").arg(dir->dirCount(), 6, 10, QChar('0')).arg(usedDir->dirCount(), 6, 10, QChar('0'));
 
-            if (Doxygen::dirRelations.find(relationName) == 0) {
+            if (Doxy_Globals::dirRelations.find(relationName) == 0) {
                // new relation
-               Doxygen::dirRelations.insert(relationName, QSharedPointer<DirRelation>(new DirRelation(relationName.toUtf8(), dir, udir)));
+               Doxy_Globals::dirRelations.insert(relationName, QSharedPointer<DirRelation>(new DirRelation(relationName.toUtf8(), dir, udir)));
             }
 
             int nrefs = udir->filePairs().count();
@@ -4763,7 +4763,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
               << usedDir->getOutputFileBase();
 
             t << " [headlabel=\"" << nrefs << "\", labeldistance=1.5";
-            t << " headhref=\"" << relationName << Doxygen::htmlFileExtension
+            t << " headhref=\"" << relationName << Doxy_Globals::htmlFileExtension
               << "\"];\n";
          }
       }

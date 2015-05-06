@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -228,15 +228,19 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
             case MemberType_Service:      // UNO IDL
                addMemberToList(MemberListType_services, md, true);
                break;
+
             case MemberType_Interface:    // UNO IDL
                addMemberToList(MemberListType_interfaces, md, true);
                break;
+
             case MemberType_Signal:       // Qt specific
                addMemberToList(MemberListType_signals, md, true);
                break;
+
             case MemberType_DCOP:         // KDE2 specific
                addMemberToList(MemberListType_dcopMethods, md, true);
                break;
+
             case MemberType_Property:
                addMemberToList(MemberListType_properties, md, true);
                break;
@@ -376,18 +380,22 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                   addMemberToList(MemberListType_functionMembers, md, false);
                }
                break;
+
             default: // any of the other members
                if (protectionLevelVisible(prot)) {
                   switch (md->memberType()) {
                      case MemberType_Typedef:
                         addMemberToList(MemberListType_typedefMembers, md, false);
                         break;
+
                      case MemberType_Enumeration:
                         addMemberToList(MemberListType_enumMembers, md, false);
                         break;
+
                      case MemberType_EnumValue:
                         addMemberToList(MemberListType_enumValMembers, md, false);
                         break;
+
                      case MemberType_Function:
                         if (md->isConstructor() || md->isDestructor()) {
                            QSharedPointer<MemberList> ml = createMemberList(MemberListType_constructors);
@@ -1170,7 +1178,7 @@ void ClassDef::startMemberDocumentation(OutputList &ol)
 {
    if (Config::getBool("separate-member-pages")) {
       ol.disable(OutputGenerator::Html);
-      Doxygen::suppressDocWarnings = true;
+      Doxy_Globals::suppressDocWarnings = true;
    }
 }
 
@@ -1178,7 +1186,7 @@ void ClassDef::endMemberDocumentation(OutputList &ol)
 { 
    if (Config::getBool("separate-member-pages")) {
       ol.enable(OutputGenerator::Html);
-      Doxygen::suppressDocWarnings = false;
+      Doxy_Globals::suppressDocWarnings = false;
    }
 }
 
@@ -1243,7 +1251,7 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
       }
    }
   
-   if (!first) {
+   if (! first) {
       ol.writeString("  </div>\n");
    }
 
@@ -1265,7 +1273,7 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
 
    tagFile << ">" << endl;
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
-   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxygen::htmlFileExtension.toUtf8() << "</filename>" << endl;
+   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension.toUtf8() << "</filename>" << endl;
 
    if (!anchor().isEmpty()) {
       tagFile << "    <anchor>" << convertToXML(anchor()) << "</anchor>" << endl;
@@ -1643,11 +1651,11 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QByteArray & /*p
    pageType += compoundTypeString();
    toupper(pageType.at(1));
   
-   Doxygen::indexList->addIndexItem(self, QSharedPointer<MemberDef>());
+   Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>());
 
-   if (Doxygen::searchIndex) {
-      Doxygen::searchIndex->setCurrentDoc(self, anchor(), false);
-      Doxygen::searchIndex->addWord(localName(), true);
+   if (Doxy_Globals::searchIndex) {
+      Doxy_Globals::searchIndex->setCurrentDoc(self, anchor(), false);
+      Doxy_Globals::searchIndex->addWord(localName(), true);
    }
 
    bool exampleFlag = hasExamples();
@@ -1809,7 +1817,7 @@ void ClassDef::writeDocumentation(OutputList &ol)
    startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_ClassVisible, ! generateTreeView);
 
    if (! generateTreeView) {
-      if (getOuterScope() != Doxygen::globalScope) {
+      if (getOuterScope() != Doxy_Globals::globalScope) {
          writeNavigationPath(ol);
       }
       ol.endQuickIndices();
@@ -1876,7 +1884,7 @@ void ClassDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
                   if (createSubDirs) {
                      ol.writeString("../../");
                   }
-                  ol.writeString(md->getOutputFileBase() + Doxygen::htmlFileExtension.toUtf8() + "#" + md->anchor());
+                  ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8() + "#" + md->anchor());
                   ol.writeString("\">");
                   ol.writeString(convertToHtml(md->name()));
                   ol.writeString("</a>");
@@ -1933,7 +1941,7 @@ void ClassDef::writeMemberList(OutputList &ol)
              HLI_ClassVisible, !generateTreeView, getOutputFileBase());
 
    if (!generateTreeView) {
-      if (getOuterScope() != Doxygen::globalScope) {
+      if (getOuterScope() != Doxy_Globals::globalScope) {
          writeNavigationPath(ol);
       }
       ol.endQuickIndices();
@@ -2020,9 +2028,8 @@ void ClassDef::writeMemberList(OutputList &ol)
             } else if (! cd->isArtificial() && ! Config::getBool("hide-undoc-members") &&
                        (protectionLevelVisible(md->protection()) || md->isFriend()))  {
 
-               // no documentation, generate link to the class instead.
-            
-               //ol.writeListItem();
+               // no documentation, generate link to the class instead
+           
                ol.writeString("  <tr bgcolor=\"#f0f0f0\"");
                if ((idx & 1) == 0) {
                   ol.writeString(" class=\"even\"");
@@ -2047,17 +2054,21 @@ void ClassDef::writeMemberList(OutputList &ol)
                ol.docify(md->name());
                ol.endBold();
 
-               if (!md->isObjCMethod()) {
+               if (! md->isObjCMethod()) {
                   if ( md->isFunction() || md->isSignal() || md->isSlot() ) {
                      ol.docify(md->argsString());
+
                   } else if (md->isEnumerate()) {
                      ol.parseText(" " + theTranslator->trEnumName());
+
                   } else if (md->isEnumValue()) {
                      ol.parseText(" " + theTranslator->trEnumValue());
+
                   } else if (md->isTypedef()) {
                      ol.docify(" typedef");
                   }
                }
+
                ol.writeString(" (");
                ol.parseText(theTranslator->trDefinedIn() + " ");
 
@@ -2092,22 +2103,22 @@ void ClassDef::writeMemberList(OutputList &ol)
             md->getLabels(sl, self);   
 
             // not needed           
-            sl.removeOne("inherited");
-                                
-
-            if (sl.count() > 0) {       
-               ol.writeString("<span class=\"mlabels\">");   
-              
-               for (auto s : sl)  {                  
-                  ol.writeString("<span class=\"mlabel\">");                               
-                  ol.docify(s);                                  
-                  ol.writeString("</span>");                 
-               }
-
-               ol.writeString("</span>");
-            }
+            sl.removeOne("inherited");                                
 
             if (memberWritten) {
+
+               if (sl.count() > 0) {       
+                  ol.writeString("<span class=\"mlabels\">");   
+                 
+                  for (auto s : sl)  {                  
+                     ol.writeString("<span class=\"mlabel\">");                               
+                     ol.docify(s);                                  
+                     ol.writeString("</span>");                 
+                  }
+   
+                  ol.writeString("</span>");
+               }
+            
                ol.writeString("</td>");
                ol.writeString("</tr>\n");
             }
@@ -2171,7 +2182,7 @@ void ClassDef::addTypeConstraint(const QString &typeConstraint, const QString &t
       cd->setUsedOnly(true);
       cd->setLanguage(getLanguage());
 
-      Doxygen::hiddenClasses->insert(typeConstraint, cd);
+      Doxy_Globals::hiddenClasses->insert(typeConstraint, cd);
    }
   
    if (cd != nullptr) {        
@@ -2789,14 +2800,14 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
                   QSharedPointer<MemberName> mn;
                   QByteArray name = newMd->name();
 
-                  if ((mn = Doxygen::memberNameSDict->find(name))) {
+                  if ((mn = Doxy_Globals::memberNameSDict->find(name))) {
                      mn->append(newMd);
 
                   } else {
                      mn = QSharedPointer<MemberName> (new MemberName(newMd->name()));
                      mn->append(newMd);
 
-                     Doxygen::memberNameSDict->insert(name, mn);
+                     Doxy_Globals::memberNameSDict->insert(name, mn);
                   }
 
                   newMd->setCategory(category);
@@ -2962,7 +2973,7 @@ QByteArray ClassDef::getOutputFileBase() const
    static bool inlineGroupedClasses = Config::getBool("inline-grouped-classes");
    static bool inlineSimpleClasses  = Config::getBool("inline-simple-struct");
 
-   if (! Doxygen::generatingXmlOutput) {
+   if (! Doxy_Globals::generatingXmlOutput) {
       QSharedPointer<Definition> scope;
 
       if (inlineGroupedClasses && partOfGroups() != 0) {
@@ -2983,7 +2994,7 @@ QByteArray ClassDef::getOutputFileBase() const
 
       } else if (inlineSimpleClasses && m_isSimple && (scope = getOuterScope())) {
 
-         if (scope == Doxygen::globalScope && getFileDef() && getFileDef()->isLinkableInProject()) { 
+         if (scope == Doxy_Globals::globalScope && getFileDef() && getFileDef()->isLinkableInProject()) { 
             // simple struct embedded in file
             return getFileDef()->getOutputFileBase();
 
@@ -3199,11 +3210,11 @@ void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const c
 
          insertMember(imd);
         
-         QSharedPointer<MemberName> mn = Doxygen::memberNameSDict->find(imd->name());
+         QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict->find(imd->name());
 
          if (! mn) {
             mn = QSharedPointer<MemberName> (new MemberName(imd->name()));
-            Doxygen::memberNameSDict->insert(imd->name(), mn);
+            Doxy_Globals::memberNameSDict->insert(imd->name(), mn);
          }
 
          mn->append(imd);
@@ -3381,7 +3392,7 @@ QSharedPointer<MemberList> ClassDef::createMemberList(MemberListType lt)
       }
    }
 
-   // not found, create a new member list
+   // no memberList was found, create a new memberList
    QSharedPointer<MemberList> ml (new MemberList(lt));
    m_memberLists.append(ml);
 
@@ -3948,7 +3959,7 @@ QByteArray ClassDef::anchor() const
 {
    QByteArray anc;
 
-   if (isEmbeddedInOuterScope() && !Doxygen::generatingXmlOutput) {
+   if (isEmbeddedInOuterScope() && !Doxy_Globals::generatingXmlOutput) {
       if (m_templateMaster) {
          // point to the template of which this class is an instance
          anc = m_templateMaster->getOutputFileBase();
@@ -3973,7 +3984,7 @@ bool ClassDef::isEmbeddedInOuterScope() const
    QSharedPointer<Definition> container = getOuterScope();
 
    bool containerLinkable = container &&
-      ( (container == Doxygen::globalScope && getFileDef() && getFileDef()->isLinkableInProject()) || container->isLinkableInProject() );
+      ( (container == Doxy_Globals::globalScope && getFileDef() && getFileDef()->isLinkableInProject()) || container->isLinkableInProject() );
 
    // inline because of INLINE_GROUPED_CLASSES=YES ?
    bool b1 = (inlineGroupedClasses && partOfGroups() != 0); // a grouped class

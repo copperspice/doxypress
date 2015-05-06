@@ -1,8 +1,8 @@
 /*************************************************************************
  *
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
- * All rights reserved.
+ * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -10969,7 +10969,7 @@ static void popScope()
 
 static void setCurrentDoc(const QByteArray &anchor)
 {
-   if (Doxygen::searchIndex) {
+   if (Doxy_Globals::searchIndex) {
       if (g_searchCtx) {
          g_code->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), FALSE);
       } else {
@@ -10980,7 +10980,7 @@ static void setCurrentDoc(const QByteArray &anchor)
 
 static void addToSearchIndex(const char *text)
 {
-   if (Doxygen::searchIndex) {
+   if (Doxy_Globals::searchIndex) {
       g_code->addWord(text, FALSE);
    }
 }
@@ -11195,7 +11195,7 @@ static void addParmType()
 static void addUsingDirective(const char *name)
 {
    if (g_sourceFileDef && name) {
-      QSharedPointer<NamespaceDef> nd = Doxygen::namespaceSDict->find(name);
+      QSharedPointer<NamespaceDef> nd = Doxy_Globals::namespaceSDict->find(name);
 
       if (nd) {
          g_sourceFileDef->addUsingDirective(nd);
@@ -11332,7 +11332,7 @@ static QSharedPointer<MemberDef> setCallContextForVar(const QByteArray &name)
    }
 
    // look for a global member
-   if ((mn = Doxygen::functionNameSDict->find(name))) {
+   if ((mn = Doxy_Globals::functionNameSDict->find(name))) {
      
       if (mn->count() == 1) { // global defined only once
          QSharedPointer<MemberDef> md( mn->first());
@@ -11409,7 +11409,7 @@ static bool getLinkInScope(const QByteArray &c, const QByteArray &m, const char 
 
       QSharedPointer<Definition> d;
 
-      if (md->getOuterScope() == Doxygen::globalScope) {
+      if (md->getOuterScope() == Doxy_Globals::globalScope) {
          d = md->getFileDef();
 
       } else {
@@ -11562,7 +11562,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
       if (md) {    
          QSharedPointer<Definition> d;
 
-         if (md->getOuterScope() == Doxygen::globalScope) {
+         if (md->getOuterScope() == Doxy_Globals::globalScope) {
             d = md->getFileDef();
 
          } else {
@@ -11667,7 +11667,7 @@ static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Memb
 
    QSharedPointer<Definition> xd;
 
-   if (xmd->getOuterScope() == Doxygen::globalScope) {
+   if (xmd->getOuterScope() == Doxy_Globals::globalScope) {
       xd = xmd->getFileDef();
 
    } else {
@@ -11768,7 +11768,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QByteArray &varNam
 
       if (vcd && vcd->isLinkable()) {
  
-         QSharedPointer<MemberName> vmn = Doxygen::memberNameSDict->find(varName);
+         QSharedPointer<MemberName> vmn = Doxy_Globals::memberNameSDict->find(varName);
 
          if (vmn == 0) {
             int vi;
@@ -11779,7 +11779,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QByteArray &varNam
                QSharedPointer<ClassDef> jcd = getClass(vn.left(vi));
 
                vn = vn.right(vn.length() - vi - 2);
-               vmn = Doxygen::memberNameSDict->find(vn);
+               vmn = Doxy_Globals::memberNameSDict->find(vn);
                
                if (vmn) {
                 
@@ -12177,7 +12177,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                      if (QByteArray(ictx->method->typeString()) == "id") {
                         // see if the method name is unique, if so we link to it
 
-                        QSharedPointer<MemberName> mn = Doxygen::memberNameSDict->find(ctx->methodName);
+                        QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict->find(ctx->methodName);
 
                         //printf("mn->count=%d ictx->method=%s ctx->methodName=%s\n",
                         //    mn==0?-1:(int)mn->count(),
@@ -12843,7 +12843,7 @@ YY_DECL {
                bool ambig;
                bool found = FALSE;               
 
-               QSharedPointer<FileDef> fd = findFileDef(Doxygen::inputNameDict, codeYYtext, ambig);
+               QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, codeYYtext, ambig);
                
                if (fd && fd->isLinkable())
                {
@@ -12851,7 +12851,7 @@ YY_DECL {
                      QByteArray name = QDir::cleanPath(codeYYtext).toUtf8();
 
                      if (! name.isEmpty() && g_sourceFileDef) {
-                        QSharedPointer<FileName> fn = Doxygen::inputNameDict->find(name);
+                        QSharedPointer<FileName> fn = Doxy_Globals::inputNameDict->find(name);
 
                         if (fn) {                          
                            // for each include name                        
@@ -14368,7 +14368,7 @@ YY_DECL {
                      scope.prepend(g_classScope + "::");
                   }
 
-                  QSharedPointer<ClassDef> cd = getResolvedClass(Doxygen::globalScope, g_sourceFileDef, scope);
+                  QSharedPointer<ClassDef> cd = getResolvedClass(Doxy_Globals::globalScope, g_sourceFileDef, scope);
                   if (cd) {
                      setClassScope(cd->name());
                      g_scopeStack.push(SCOPEBLOCK);

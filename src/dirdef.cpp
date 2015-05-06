@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -330,7 +330,7 @@ void DirDef::writeTagFile(QTextStream &tagFile)
    tagFile << "  <compound kind=\"dir\">" << endl;
    tagFile << "    <name>" << convertToXML(displayName()) << "</name>" << endl;
    tagFile << "    <path>" << convertToXML(name()) << "</path>" << endl;
-   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxygen::htmlFileExtension << "</filename>" << endl;
+   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>" << endl;
 
    QListIterator<LayoutDocEntry *> element(LayoutDocManager::instance().docEntries(LayoutDocManager::Directory));
    LayoutDocEntry *lde;  
@@ -624,13 +624,13 @@ QSharedPointer<FilePair> UsedDir::findFilePair(const char *name)
 QSharedPointer<DirDef> DirDef::createNewDir(const char *path)
 {
    assert(path != 0);
-   QSharedPointer<DirDef> dir = Doxygen::directories.find(path);
+   QSharedPointer<DirDef> dir = Doxy_Globals::directories.find(path);
 
    if (dir) { 
       // new dir
     
       dir = QMakeShared<DirDef>(path);
-      Doxygen::directories.insert(path, dir);
+      Doxy_Globals::directories.insert(path, dir);
    }
 
    return dir;
@@ -772,9 +772,9 @@ static void computeCommonDirPrefix()
    QByteArray path;
    QSharedPointer<DirDef> dir;
 
-   DirSDict::Iterator sdi(Doxygen::directories);
+   DirSDict::Iterator sdi(Doxy_Globals::directories);
 
-   if (Doxygen::directories.count() > 0) { 
+   if (Doxy_Globals::directories.count() > 0) { 
       // we have at least one dir, start will full path of first dir
       sdi.toFirst();
 
@@ -834,7 +834,7 @@ static void computeCommonDirPrefix()
                count++;
             }
 
-            if (count == Doxygen::directories.count()) {
+            if (count == Doxy_Globals::directories.count()) {
                // path matches for all directories -> found the common prefix            
                done = true;
             }
@@ -853,14 +853,14 @@ static void computeCommonDirPrefix()
 void buildDirectories()
 {
    // for each input file  
-   for (auto fn : *Doxygen::inputNameList) {   
+   for (auto fn : *Doxy_Globals::inputNameList) {   
     
       for (auto fd : *fn) {  
          
          if (fd->getReference().isEmpty() && !fd->isDocumentationFile()) {
             QSharedPointer<DirDef> dir;
 
-            if ((dir = Doxygen::directories.find(fd->getPath())) == 0) { 
+            if ((dir = Doxy_Globals::directories.find(fd->getPath())) == 0) { 
                // new directory
                dir = DirDef::mergeDirectoryInTree(fd->getPath());
             }
@@ -877,14 +877,14 @@ void buildDirectories()
    
    // compute relations between directories => introduce container dirs.
  
-   for (auto dir : Doxygen::directories) {  
+   for (auto dir : Doxy_Globals::directories) {  
       // printf("New dir %s\n",dir->displayName().data());
 
       QByteArray name = dir->name();
       int i = name.lastIndexOf('/', name.length() - 2);
 
       if (i > 0) {
-         QSharedPointer<DirDef> parent = Doxygen::directories.find(name.left(i + 1));
+         QSharedPointer<DirDef> parent = Doxy_Globals::directories.find(name.left(i + 1));
         
          if (parent) {                       
             parent->addSubDir(dir);
@@ -898,25 +898,25 @@ void buildDirectories()
 void computeDirDependencies()
 {
    // compute nesting level for each directory
-   for (auto dir : Doxygen::directories) {  
+   for (auto dir : Doxy_Globals::directories) {  
       dir->setLevel();
    }
 
    // compute uses dependencies between directories
-   for (auto dir : Doxygen::directories) { 
-      //printf("computeDependencies for %s: #dirs=%d\n",dir->name().data(),Doxygen::directories.count());
+   for (auto dir : Doxy_Globals::directories) { 
+      //printf("computeDependencies for %s: #dirs=%d\n",dir->name().data(),Doxy_Globals::directories.count());
       dir->computeDependencies();
    }
 }
 
 void generateDirDocs(OutputList &ol)
 {
-   for (auto dir : Doxygen::directories) { 
+   for (auto dir : Doxy_Globals::directories) { 
       dir->writeDocumentation(ol);
    }
 
    if (Config::getBool("directory-graph")) {    
-      for (auto item : Doxygen::dirRelations) { 
+      for (auto item : Doxy_Globals::dirRelations) { 
          item->writeDocumentation(ol);
       }
    }

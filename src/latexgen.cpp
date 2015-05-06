@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
- * All rights reserved.    
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -10,7 +10,7 @@
  * this software for any purpose. It is provided "as is" without express or
  * implied warranty. See the GNU General Public License for more details.
  *
- * Documents produced by Doxygen are derivative works derived from the
+ * Documents produced by DoxyPress are derivative works derived from the
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
@@ -60,7 +60,7 @@ LatexGenerator::~LatexGenerator()
 
 static void writeLatexMakefile()
 {
-   bool generateBib = ! Doxygen::citeDict->isEmpty();
+   bool generateBib = ! Doxy_Globals::citeDict->isEmpty();
 
    QString dir = Config::getString("latex-output");
    QString fileName = dir + "/Makefile";
@@ -97,7 +97,7 @@ static void writeLatexMakefile()
         << endl;
       t << "refman.pdf: refman.ps" << endl;
       t << "\tps2pdf refman.ps refman.pdf" << endl << endl;
-      t << "refman.dvi: clean refman.tex doxygen.sty" << endl
+      t << "refman.dvi: clean refman.tex doxypress.sty" << endl
         << "\techo \"Running latex...\"" << endl
         << "\t" << latex_command << " refman.tex" << endl
         << "\techo \"Running makeindex...\"" << endl
@@ -168,7 +168,7 @@ static void writeMakeBat()
 
    QFile file(fileName);
 
-   bool generateBib = !Doxygen::citeDict->isEmpty();
+   bool generateBib = !Doxy_Globals::citeDict->isEmpty();
 
    if (! file.open(QIODevice::WriteOnly)) {
       err("Could not open file %s for writing\n", qPrintable(fileName));
@@ -282,10 +282,10 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\n";
 
    // Load required packages
-   t_stream << "% Packages required by doxygen\n"
+   t_stream << "% Packages required by DoxyPress\n"
      "\\usepackage{fixltx2e}\n" // for \textsubscript
      "\\usepackage{calc}\n"
-     "\\usepackage{doxygen}\n"
+     "\\usepackage{doxypress}\n"
      "\\usepackage{graphicx}\n"
      "\\usepackage[utf8]{inputenc}\n"
      "\\usepackage{makeidx}\n"
@@ -390,8 +390,8 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\\fancyhead[RO]{\\fancyplain{}{\\bfseries\\thepage}}\n"
      "\\fancyfoot[LE]{\\fancyplain{}{}}\n"
      "\\fancyfoot[CE]{\\fancyplain{}{}}\n"
-     "\\fancyfoot[RE]{\\fancyplain{}{\\bfseries\\scriptsize " << genString << " Doxygen }}\n"
-     "\\fancyfoot[LO]{\\fancyplain{}{\\bfseries\\scriptsize " << genString << " Doxygen }}\n"
+     "\\fancyfoot[RE]{\\fancyplain{}{\\bfseries\\scriptsize " << genString << " DoxyPress }}\n"
+     "\\fancyfoot[LO]{\\fancyplain{}{\\bfseries\\scriptsize " << genString << " DoxyPress }}\n"
      "\\fancyfoot[CO]{\\fancyplain{}{}}\n"
      "\\fancyfoot[RO]{\\fancyplain{}{}}\n"
      "\\renewcommand{\\footrulewidth}{0.4pt}\n";
@@ -534,7 +534,7 @@ static void writeDefaultHeaderPart3(QTextStream &t_stream)
 
 static void writeDefaultStyleSheet(QTextStream &t)
 {
-   t << ResourceMgr::instance().getAsString("latex/doxygen.sty");
+   t << ResourceMgr::instance().getAsString("latex/doxypress.sty");
 }
 
 static void writeDefaultFooter(QTextStream &t)
@@ -543,7 +543,7 @@ static void writeDefaultFooter(QTextStream &t)
      "\n";
 
    // Bibliography
-   Doxygen::citeDict->writeLatexBibliography(t);
+   Doxy_Globals::citeDict->writeLatexBibliography(t);
 
    // Index
    QByteArray unit;
@@ -740,7 +740,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
       {
          bool found = false;        
 
-         for (auto gd : *Doxygen::groupSDict) {
+         for (auto gd : *Doxy_Globals::groupSDict) {
             if (found) {
                break;
             }
@@ -763,7 +763,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
       {         
          bool found = false;
 
-         for (auto dd : Doxygen::directories) {
+         for (auto dd : Doxy_Globals::directories) {
             if (found) {
                break;
             }
@@ -785,7 +785,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
       {        
          bool found = false;
 
-         for (auto nd : *Doxygen::namespaceSDict) {
+         for (auto nd : *Doxy_Globals::namespaceSDict) {
             if (found) {
                break;
             }
@@ -807,7 +807,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
       {        
          bool found = false;
        
-         for (auto cd : *Doxygen::classSDict) {
+         for (auto cd : *Doxy_Globals::classSDict) {
             if (found) {
                break;
             }
@@ -829,7 +829,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
       {
          bool isFirst = true;
       
-         for (auto fn : *Doxygen::inputNameList) {           
+         for (auto fn : *Doxy_Globals::inputNameList) {           
 
             for (auto fd : *fn) { 
 
@@ -937,7 +937,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       {        
          bool found = false;
 
-         for (auto gd : *Doxygen::groupSDict) {           
+         for (auto gd : *Doxy_Globals::groupSDict) {           
 
             if (! gd->isReference()) {
                if (! found) {
@@ -957,7 +957,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       {         
          bool found = false;
          
-         for (auto dd : Doxygen::directories) {
+         for (auto dd : Doxy_Globals::directories) {
  
             if (dd->isLinkableInProject())  {
                if (! found) {
@@ -977,7 +977,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       {
          bool found = false;
 
-         for (auto nd : *Doxygen::namespaceSDict) {
+         for (auto nd : *Doxy_Globals::namespaceSDict) {
         
             if (nd->isLinkableInProject()) {
 
@@ -998,7 +998,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       {
          bool found = false;
 
-         for (auto cd : *Doxygen::classSDict) {
+         for (auto cd : *Doxy_Globals::classSDict) {
          
             if (cd->isLinkableInProject() && cd->templateMaster() == 0 && ! cd->isEmbeddedInOuterScope()) {
 
@@ -1018,7 +1018,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       case isFileDocumentation: {
          bool isFirst = true;
         
-         for (auto fn : *Doxygen::inputNameList) {
+         for (auto fn : *Doxy_Globals::inputNameList) {
 
             for (auto fd : *fn) {
          
@@ -1051,7 +1051,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
 
          bool isFirst = true;          
 
-         for (auto pd : *Doxygen::exampleSDict) {
+         for (auto pd : *Doxy_Globals::exampleSDict) {
 
             if (isFirst) {
                m_textStream << "\\input{" << pd->getOutputFileBase() << "}\n";
@@ -1070,7 +1070,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
 
 
 #if 0
-         PageSDict::Iterator pdi(*Doxygen::pageSDict);
+         PageSDict::Iterator pdi(*Doxy_Globals::pageSDict);
          PageDef *pd = pdi.toFirst();
          bool first = true;
 
@@ -1130,7 +1130,7 @@ QString LatexGenerator::modifyKeywords(const QByteArray &output)
    result = result.replace("$year",           yearToString());
 
    result = result.replace("$doxypressversion", versionString);
-   result = result.replace("$doxygenversion",   versionString);
+   result = result.replace("$doxygenversion",   versionString);         // ok
 
    result = result.replace("$projectname",    projectName);  
    result = result.replace("$projectversion", projectVersion);
@@ -1153,7 +1153,7 @@ void LatexGenerator::writeStyleInfo(int part)
       return;
    }
 
-   startPlainFile("doxygen.sty");
+   startPlainFile("doxypress.sty");
    writeDefaultStyleSheet(m_textStream);
    endPlainFile();
 }

@@ -97,7 +97,7 @@ class TranslatorSwedish : public Translator
    }
 
    virtual QByteArray trGeneratedAutomatically(const char *s) {
-      QByteArray result = "Automatiskt skapad av Doxygen";
+      QByteArray result = "Automatiskt skapad av DoxyPress";
       if (s) {
          result += (QByteArray)" för " + s;
       }
@@ -844,7 +844,7 @@ class TranslatorSwedish : public Translator
     */
    virtual QByteArray trLegendDocs() {
       return
-         "Den här sidan förklarar hur man ska tolka de grafer som doxygen "
+         "Den här sidan förklarar hur man ska tolka de grafer som DoxyPress "
          "genererar.<p>\n"
          "Tag följande exempel:\n"
          "\\code\n"
@@ -852,7 +852,7 @@ class TranslatorSwedish : public Translator
          "class Invisible { };\n\n"
          "/*! Stympad klass, ärvningsrelationen är dold */\n"
          "class Truncated : public Invisible { };\n\n"
-         "/* Klass utan doxygen-kommentarer */\n"
+         "/* Klass utan DoxyPress-kommentarer */\n"
          "class Undocumented { };\n\n"
          "/*! Klass som ärvs med publikt arv */\n"
          "class PublicBase : public Truncated { };\n\n"

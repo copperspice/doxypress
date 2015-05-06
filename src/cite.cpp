@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -140,7 +140,7 @@ void CiteDict::generatePage() const
       return;
    }
 
-   // 1. generate file with markers and citations to output-dir
+   // generate file with markers and citations to output-dir
    QFile f;
 
    QString outputDir = Config::getString("output-dir");
@@ -166,18 +166,17 @@ void CiteDict::generatePage() const
    t << "<!-- END BIBLIOGRAPHY -->" << endl;
    f.close();
 
-   // 2. generate bib2xhtml
+   // generate bib2xhtml
    QString bib2xhtmlFile  = outputDir + "/bib2xhtml.pl";
    ResourceMgr::instance().copyResourceAs("html/bib2xhtml.pl", outputDir, "bib2xhtml.pl");
 
-   // 3. generate doxygen.bst
-   QString doxygenBstFile = outputDir + "/doxygen.bst";
-   ResourceMgr::instance().copyResourceAs("html/doxygen.bst", outputDir, "doxygen.bst");
+   // generate bst
+   QString doxy_BstFile = outputDir + "/doxypress.bst";
+   ResourceMgr::instance().copyResourceAs("html/doxypress.bst", outputDir, "doxypress.bst");
 
-   // 4. for all formats we just copy the bib files to as special output directory
-   //    so bibtex can find them without path (bibtex doesn't support paths or
-   //    filenames with spaces!)
-   //    Strictly not required when only latex is generated
+   // for all formats we just copy the bib files to as special output directory
+   // so bibtex can find them without path (bibtex doesn't support paths or
+   // filenames with spaces) Strictly not required when only latex is generated
 
    const QStringList citeDataList = Config::getList("cite-bib-files");
 
@@ -326,7 +325,7 @@ void CiteDict::generatePage() const
 
    // 9. Remove temporary files
    thisDir.remove(citeListFile);
-   thisDir.remove(doxygenBstFile);
+   thisDir.remove(doxy_BstFile);
    thisDir.remove(bib2xhtmlFile);
 
    // we might try to remove too many files as empty files didn't get a coresponding new file

@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -34,7 +34,6 @@
 #include <outputgen.h>
 #include <parser_clang.h>
 #include <qfileinfo.h>
-#include <settings.h>
 #include <stringmap.h>
 #include <tooltip.h>
 #include <util.h>
@@ -213,11 +212,11 @@ void ClangParser::start(const char *fileName, QStringList &includeFiles)
    p->curLine  = 1;
    p->curToken = 0;
 
-   char **argv = (char **)malloc(sizeof(char *) * (4 + Doxygen::inputPaths.count() + includePath.count() + clangOptions.count()));
+   char **argv = (char **)malloc(sizeof(char *) * (4 + Doxy_Globals::inputPaths.count() + includePath.count() + clangOptions.count()));
    int argc = 0;
 
    // add include paths for input files  
-   for (auto item : Doxygen::inputPaths) { 
+   for (auto item : Doxy_Globals::inputPaths) { 
       QString inc = "-I" + item;
       argv[argc] = strdup(inc.toUtf8());  
 
@@ -314,16 +313,12 @@ void ClangParser::start(const char *fileName, QStringList &includeFiles)
 //                  CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
 
 
-
-
    // let libclang do the actual parsing
    CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, 0, argv, argc, 0, 0, 
                   CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
 
 
-
-printf("\n  BROOM   Error Code: %d \n", errorCode);
-
+printf("    (BROOM)   Error Code: %d\n", errorCode);
 
 
    // free arguments
@@ -684,7 +679,7 @@ static void writeLineNumber(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
    }
 
    // set search page target
-   if (Doxygen::searchIndex) {          
+   if (Doxy_Globals::searchIndex) {          
       QString lineAnchor = QString("l%1").arg(line, 5, 10, QChar('0'));
 
       ol.setCurrentDoc(fd, lineAnchor.toUtf8(), true);
@@ -798,7 +793,7 @@ void ClangParser::linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> f
    QSharedPointer<FileDef> ifd;
 
    if (! incName.isEmpty()) {     
-      QSharedPointer<FileName> fn = Doxygen::inputNameDict->find(incName);
+      QSharedPointer<FileName> fn = Doxy_Globals::inputNameDict->find(incName);
 
       if (fn) {
          bool found = false;
@@ -827,7 +822,7 @@ void ClangParser::linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> f
 
 void ClangParser::linkMacro(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const char *text)
 {
-   QSharedPointer<MemberName> mn = Doxygen::functionNameSDict->find(text);
+   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict->find(text);
   
    if (mn) {
 
@@ -869,7 +864,7 @@ void ClangParser::linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef
    QSharedPointer<Definition> d;
 
    if (usrStr) {
-      d = Doxygen::clangUsrMap.value(usrStr);
+      d = Doxy_Globals::clangUsrMap.value(usrStr);
    }
    
    if (d && d->isLinkable()) {
@@ -1039,7 +1034,7 @@ void ClangParser::writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> 
 
                      linkIdentifier(ol, fd, line, column, s, i);
 
-                     if (Doxygen::searchIndex) {
+                     if (Doxy_Globals::searchIndex) {
                         ol.addWord(s, false);
                      }
 

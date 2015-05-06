@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -1210,12 +1210,14 @@ static void addLengthDistance(uivector *values, size_t length, size_t distance)
 #if USE_BRUTE_FORCE_ENCODING
 #define encodeLZ77 encodeLZ77_brute
 /*the "brute force" version of the encodeLZ7 algorithm, not used anymore, kept here for reference*/
+
 static unsigned encodeLZ77_brute(uivector *out, const unsigned char *in, size_t size, unsigned windowSize)
 {
    size_t pos;
    /*using pointer instead of vector for input makes it faster when NOT using optimization when compiling; no influence if optimization is used*/
+
    for (pos = 0; pos < size; pos++) {
-      /*Phase 1: doxygen images often have long runs of the same color, try to find them*/
+      /*Phase 1: doxypress images often have long runs of the same color, try to find them*/
       const int minLength = 4; // Minimum length for a run to make sense
 
       if (pos < size - minLength * 4) {

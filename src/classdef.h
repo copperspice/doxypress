@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -78,7 +78,7 @@ class ClassDef : public Definition
     *  \param ref       the tag file from which this compound is extracted
     *                   or 0 if the compound doesn't come from a tag file
     *  \param fName     the file name as found in the tag file.
-    *                   This overwrites the file that doxygen normally
+    *                   This overwrites the file DoxyPress normally
     *                   generates based on the compound type & name.
     *  \param isSymbol  If true this class name is added as a publicly
     *                   visible (and referencable) symbol.
