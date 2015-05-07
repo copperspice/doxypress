@@ -372,7 +372,7 @@ dist-hook:
 dist-test-project:
 	cd ..  ; \
 \
-	rm  -f   doxypress_test-project-$(VERSION).zip         ; \
-	zip -r   doxypress-test-project-$(VERSION).zip test_build/{dox,images,*.css,*.html,*.json,*.xml}
+	rm  -f   DoxyPress-Test-Project-$(VERSION).zip         ; \
+	zip -r   DoxyPress-Test-Project-$(VERSION).zip test_build/{dox,images,*.css,*.html,*.json,*.xml}
 
 

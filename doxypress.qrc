@@ -9,8 +9,8 @@
         <file>resources/html/close.png</file>
         <file>resources/html/closed.luma</file>
         <file>resources/html/doc.luma</file>
-        <file>resources/html/doxygen.bst</file>
-        <file>resources/html/doxy_style.css</file>
+        <file>resources/html/doxypress.bst</file>
+        <file>resources/html/doxypress.css</file>
         <file>resources/html/doxypress.luma</file>
         <file>resources/html/dynsections.js</file>
         <file>resources/html/extsearch.js</file>
@@ -88,7 +88,7 @@
         <file>resources/html/tab_h.lum</file>
         <file>resources/html/tab_s.lum</file>
         <file>resources/html/tabs.css</file>
-        <file>resources/latex/doxygen.sty</file>
+        <file>resources/latex/doxypress.sty</file>
         <file>resources/xml/compound.xsd</file>
         <file>resources/xml/index.xsd</file> 
     </qresource>
