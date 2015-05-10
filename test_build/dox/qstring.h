@@ -34,10 +34,6 @@
 #include <string>
 #include <stdarg.h>
 
-#ifdef truncate
-#error qstring.h must be included before any header file that defines truncate
-#endif
-
 QT_BEGIN_NAMESPACE
 
 class QCharRef;
@@ -159,7 +155,7 @@ class Q_CORE_EXPORT QString
    const QChar operator[](uint i) const;
    QCharRef operator[](uint i);
 
-   inline QString &operator=(QString && other) {
+   inline QString & operator=(QString && other) {         
       qSwap(d, other.d);
       return *this;
    }
@@ -300,6 +296,7 @@ class Q_CORE_EXPORT QString
       return insert(i, s.constData(), s.length());
    }
    QString &insert(int i, const QLatin1String &s);
+
    QString &append(QChar c);
    QString &append(const QString &s);
    QString &append(const QStringRef &s);
@@ -598,7 +595,7 @@ class Q_CORE_EXPORT QString
    }
 
    typedef QChar *iterator;
-   typedef const QChar *const_iterator;
+   typedef const QChar *const_iterator;  
    typedef iterator Iterator;
    typedef const_iterator ConstIterator;
 
@@ -637,17 +634,7 @@ class Q_CORE_EXPORT QString
 #ifndef QT_NO_STL_WCHAR
    static inline QString fromStdWString(const QStdWString &s);
    inline QStdWString toStdWString() const;
-#endif
-
-   // compatibility
-   struct Null { };
-   static const Null null;
-   inline QString(const Null &): d(Data::sharedNull()) {}
-
-   inline QString &operator=(const Null &) {
-      *this = QString();
-      return *this;
-   }
+#endif 
 
    inline bool isNull() const {
       return d == Data::sharedNull();
@@ -686,7 +673,22 @@ class Q_CORE_EXPORT QString
    friend inline bool qStringComparisonHelper(const QStringRef &s1, const char *s2);
 
  public:
+
+   // compatibility
+   struct Null { };
+   static const Null null;
+
+   inline QString(const Null &) 
+      : d(Data::sharedNull()) {}
+
+   inline QString &operator=(const Null &) {
+      *this = QString();
+      return *this;
+   }
+
+   //
    typedef Data *DataPtr;
+
    inline DataPtr &data_ptr() {
       return d;
    }
@@ -1483,75 +1485,6 @@ inline bool QString::operator!=(const QByteArray &s) const
    return !qStringComparisonHelper(*this, s);
 }
 
-inline bool QByteArray::operator==(const QString &s) const
-{
-   return qStringComparisonHelper(s, *this);
-}
-
-inline bool QByteArray::operator!=(const QString &s) const
-{
-   return !qStringComparisonHelper(s, *this);
-}
-
-inline bool QByteArray::operator<(const QString &s) const
-{
-   return QString::fromAscii(constData(), size()) < s;
-}
-
-inline bool QByteArray::operator>(const QString &s) const
-{
-   return QString::fromAscii(constData(), size()) > s;
-}
-
-inline bool QByteArray::operator<=(const QString &s) const
-{
-   return QString::fromAscii(constData(), size()) <= s;
-}
-
-inline bool QByteArray::operator>=(const QString &s) const
-{
-   return QString::fromAscii(constData(), size()) >= s;
-}
-
-inline QByteArray &QByteArray::append(const QString &s)
-{
-   return append(s.toAscii());
-}
-
-inline QByteArray &QByteArray::insert(int i, const QString &s)
-{
-   return insert(i, s.toAscii());
-}
-
-inline QByteArray &QByteArray::replace(char c, const QString &after)
-{
-   return replace(c, after.toAscii());
-}
-
-inline QByteArray &QByteArray::replace(const QString &before, const char *after)
-{
-   return replace(before.toAscii(), after);
-}
-
-inline QByteArray &QByteArray::replace(const QString &before, const QByteArray &after)
-{
-   return replace(before.toAscii(), after);
-}
-
-inline QByteArray &QByteArray::operator+=(const QString &s)
-{
-   return operator+=(s.toAscii());
-}
-
-inline int QByteArray::indexOf(const QString &s, int from) const
-{
-   return indexOf(s.toAscii(), from);
-}
-
-inline int QByteArray::lastIndexOf(const QString &s, int from) const
-{
-   return lastIndexOf(s.toAscii(), from);
-}
 
 #if ! defined(QT_USE_FAST_OPERATOR_PLUS) && !defined(QT_USE_QSTRINGBUILDER)
 inline const QString operator+(const QString &s1, const QString &s2)
@@ -1793,12 +1726,6 @@ inline QStringRef &QStringRef::operator=(const QString *aString)
    return *this;
 }
 
-inline QStringRef::QStringRef(const QString *aString, int aPosition, int aSize)
-   : m_string(aString), m_position(aPosition), m_size(aSize) {}
-
-inline QStringRef::QStringRef(const QString *aString)
-   : m_string(aString), m_position(0), m_size(aString ? aString->size() : 0) {}
-
 Q_CORE_EXPORT bool operator==(const QStringRef &s1, const QStringRef &s2);
 inline bool operator!=(const QStringRef &s1, const QStringRef &s2)
 {
@@ -1888,36 +1815,6 @@ inline int QString::compare(const QString &s1, const QStringRef &s2, Qt::CaseSen
    return QString::compare_helper(s1.constData(), s1.length(), s2.constData(), s2.length(), cs);
 }
 
-inline int QStringRef::compare(const QString &s, Qt::CaseSensitivity cs) const
-{
-   return QString::compare_helper(constData(), length(), s.constData(), s.length(), cs);
-}
-
-inline int QStringRef::compare(const QStringRef &s, Qt::CaseSensitivity cs) const
-{
-   return QString::compare_helper(constData(), length(), s.constData(), s.length(), cs);
-}
-
-inline int QStringRef::compare(QLatin1String s, Qt::CaseSensitivity cs) const
-{
-   return QString::compare_helper(constData(), length(), s, cs);
-}
-
-inline int QStringRef::compare(const QStringRef &s1, const QString &s2, Qt::CaseSensitivity cs)
-{
-   return QString::compare_helper(s1.constData(), s1.length(), s2.constData(), s2.length(), cs);
-}
-
-inline int QStringRef::compare(const QStringRef &s1, const QStringRef &s2, Qt::CaseSensitivity cs)
-{
-   return QString::compare_helper(s1.constData(), s1.length(), s2.constData(), s2.length(), cs);
-}
-
-inline int QStringRef::compare(const QStringRef &s1, QLatin1String s2, Qt::CaseSensitivity cs)
-{
-   return QString::compare_helper(s1.constData(), s1.length(), s2, cs);
-}
-
 inline int QString::localeAwareCompare(const QStringRef &s) const
 {
    return localeAwareCompare_helper(constData(), length(), s.constData(), s.length());
@@ -1928,50 +1825,6 @@ inline int QString::localeAwareCompare(const QString &s1, const QStringRef &s2)
    return localeAwareCompare_helper(s1.constData(), s1.length(), s2.constData(), s2.length());
 }
 
-inline int QStringRef::localeAwareCompare(const QString &s) const
-{
-   return QString::localeAwareCompare_helper(constData(), length(), s.constData(), s.length());
-}
-
-inline int QStringRef::localeAwareCompare(const QStringRef &s) const
-{
-   return QString::localeAwareCompare_helper(constData(), length(), s.constData(), s.length());
-}
-
-inline int QStringRef::localeAwareCompare(const QStringRef &s1, const QString &s2)
-{
-   return QString::localeAwareCompare_helper(s1.constData(), s1.length(), s2.constData(), s2.length());
-}
-
-inline int QStringRef::localeAwareCompare(const QStringRef &s1, const QStringRef &s2)
-{
-   return QString::localeAwareCompare_helper(s1.constData(), s1.length(), s2.constData(), s2.length());
-}
-
-inline QBool QStringRef::contains(const QString &s, Qt::CaseSensitivity cs) const
-{
-   return QBool(indexOf(s, 0, cs) != -1);
-}
-
-inline QBool QStringRef::contains(QLatin1String s, Qt::CaseSensitivity cs) const
-{
-   return QBool(indexOf(s, 0, cs) != -1);
-}
-
-inline QBool QStringRef::contains(QChar c, Qt::CaseSensitivity cs) const
-{
-   return QBool(indexOf(c, 0, cs) != -1);
-}
-
-inline QBool QStringRef::contains(const QStringRef &s, Qt::CaseSensitivity cs) const
-{
-   return QBool(indexOf(s, 0, cs) != -1);
-}
-
-inline QString Qt::escape(const QString &plain)
-{
-   return plain.toHtmlEscaped();
-}
 
 QT_END_NAMESPACE
 
@@ -1979,4 +1832,4 @@ QT_END_NAMESPACE
 #include <qstringbuilder.h>
 #endif
 
-#endif // QSTRING_H
+#endif

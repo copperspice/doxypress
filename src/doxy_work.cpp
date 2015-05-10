@@ -3090,7 +3090,8 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
          type = stripPrefix(type, "union ");
 
          static QRegExp re("[a-z_A-Z][a-z_A-Z0-9]*");
-         int l, s;
+         int l;
+         int s;
 
          s = re.indexIn(type, 0);
          l = re.matchedLength();
@@ -3269,21 +3270,20 @@ int Doxy_Work::findFunctionPtr(const QByteArray &type, int lang, int *pLength)
       return -1;   // Fortran does not have function pointers
    }
 
-   static const QRegExp re("([^)]*[\\*\\^][^)]*)");
+   static const QRegExp re("\\([^)]*[\\*\\^][^)]*\\)");
 
-   int i = -1, l;
+   int i  = -1;
+   int len;
    int bb = type.indexOf('<');
    int be = type.lastIndexOf('>');
 
-   if (! type.isEmpty() && (i = re.indexIn(type, 0)) != -1 && // contains (...*...)
-         type.indexOf("operator") == -1 && (type.indexOf(")(") == -1 || type.indexOf("typedef ") != -1) &&
-         ! (bb < i && i < be) ) {
-
-      // bug665855: avoid treating "typedef A<void (T*)> type" as a function pointer
-      l = re.matchedLength();
+   if (! type.isEmpty() && (i = re.indexIn(type, 0)) != -1 && type.indexOf("operator") == -1 && 
+                  (type.indexOf(")(") == -1 || type.indexOf("typedef ") != -1) && ! (bb < i && i < be) ) {
+      
+      len = re.matchedLength();
 
       if (pLength) {
-         *pLength = l;
+         *pLength = len;
       }
 
       return i;
@@ -3462,8 +3462,7 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
          (root->name.indexOf('*') != -1 || root->name.indexOf('&') != -1)) {
 
       // recover from parse error caused by redundant braces
-      // like in "int *(var[10]);", which is parsed as
-      // type="" name="int *" args="(var[10])"
+      // like in "int *(var[10]);", which is parsed as -->  type="" name="int *" args="(var[10])"
 
       root->type = root->name;
       static const QRegExp reName("[a-z_A-Z][a-z_A-Z0-9]*");
@@ -3512,7 +3511,7 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
    while ((p->section() & Entry::SCOPE_MASK)) {
       QByteArray scopeName = p->name();
 
-      if (!scopeName.isEmpty()) {
+      if (! scopeName.isEmpty()) {
          scope.prepend(scopeName);
          break;
       }
@@ -3533,9 +3532,10 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
    QByteArray annScopePrefix = scope.left(scope.length() - classScope.length());
 
    if (root->name.lastIndexOf("::") != -1) {
-      if (root->type == "friend class" || root->type == "friend struct" ||
-            root->type == "friend union") {
+
+      if (root->type == "friend class" || root->type == "friend struct" || root->type == "friend union") {
          cd = getClass(scope);
+
          if (cd) {
             addVariableToClass(rootNav,  // entry
                                cd,    // class to add member to
@@ -3619,7 +3619,7 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
          }
 
          if (name.at(0) != '@') {
-            if (!pScope.isEmpty() && (pcd = getClass(pScope))) {
+            if (! pScope.isEmpty() && (pcd = getClass(pScope))) {
                md = addVariableToClass(rootNav, // entry
                                        pcd,   // class to add member to
                                        mtype, // member type
@@ -3664,7 +3664,7 @@ void Doxy_Work::buildTypedefList(QSharedPointer<EntryNav> rootNav)
    if (! rootNav->name().isEmpty() && rootNav->section() == Entry::VARIABLE_SEC &&
          rootNav->type().indexOf("typedef ") != -1) {
 
-      // its a typedef
+      // it is a typedef
       addVariable(rootNav);
    }
 
@@ -3680,17 +3680,35 @@ void Doxy_Work::buildTypedefList(QSharedPointer<EntryNav> rootNav)
 void Doxy_Work::buildVarList(QSharedPointer<EntryNav> rootNav)
 {
    int isFuncPtr = -1;
+   bool isVar    = false;
 
-   if (! rootNav->name().isEmpty() &&
-        (rootNav->type().isEmpty() || ! Doxy_Globals::g_compoundKeywordDict.contains(rootNav->type())) &&
-          ( (rootNav->section() == Entry::VARIABLE_SEC) || (rootNav->section() == Entry::FUNCTION_SEC &&
-            (isFuncPtr = findFunctionPtr(rootNav->type(), rootNav->lang())) != -1) ||
-            (rootNav->section() == Entry::FUNCTION_SEC && isVarWithConstructor(rootNav) ) ) )  {
+   if (! rootNav->name().isEmpty() ) {
+     
+      if (rootNav->type().isEmpty() || ! Doxy_Globals::g_compoundKeywordDict.contains(rootNav->type())) {
+                    
+         if (rootNav->section() == Entry::VARIABLE_SEC) { 
+            isVar = true;  
+    
+         } else if (rootNav->section() == Entry::FUNCTION_SEC) {        
+            isFuncPtr = findFunctionPtr(rootNav->type(), rootNav->lang()); 
+   
+            if (isFuncPtr != -1) {
+               // might be a function pointer variable 
+               isVar = true;
 
+            } else if (isVarWithConstructor(rootNav)) {
+               // class variable initialized by constructor 
+               isVar = true;  
+            }
+         }      
+      }
+   }
+
+   if (isVar) {
       // documented variable
       addVariable(rootNav, isFuncPtr);
    }
-
+   
    for (auto &e : rootNav->children() ) {
       if (e->section() != Entry::ENUM_SEC) {
          buildVarList(e);
@@ -3860,7 +3878,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointe
    }
 
 
-if (name.contains("fake") ||  name.contains("isChopped")) {
+if (name.contains("fake") || name.contains("isChopped")) {
 
    printf("\n BROOM  ----->  AddMethodToClass --> %s  <--", name.constData() );
   
@@ -6676,8 +6694,6 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                   if (noMatchCount > 1) {
                      warnMsg += "uniquely ";
                   }
-
-// BROOM, possible issue
 
                   warnMsg += "matching class member found for \n";
 

@@ -28,10 +28,8 @@ Latin-1 (ISO 8859-1), and all the US-ASCII/Latin-1 characters are available at t
 Behind the scenes, QString uses implicit sharing (copy-on-write) to reduce memory usage and to avoid the needless copying of data. This also helps
 reduce the inherent overhead of storing 16-bit characters instead of 8-bit characters.
 
-In addition to QString, Qt also provides the QByteArray class to store raw bytes and traditional 8-bit '\0'-terminated strings. For most purposes, QString
-is the class you want to use. It is used throughout the Qt API, and the Unicode support ensures that your applications will be easy to translate if you want
-to expand your application's market at some point. The two main cases where QByteArray is appropriate are when you need to store raw binary data, and when
-memory conservation is critical.
+In addition to QString, Qt also provides the QByteArray class to store raw bytes and traditional 8-bit '\0'-terminated strings. For most purposes, QString is the class you want to use. It is used throughout the Qt API, and the Unicode support ensures that your applications will be easy to translate if you want to expand your application's market at some point. The two main cases where QByteArray is appropriate are when you need to store raw binary data, and when memory conservation is critical.
+
 
 <h3>Initializing a String</h3>
 
@@ -55,12 +53,12 @@ You can also provide string data as an array of QChars:
     QString str(data, 4);
 \endcode
 
-QString makes a deep copy of the QChar data, so you can modify it later without experiencing side effects. (If for performance reasons you do not want to
-take a deep copy of the character data, use QString::fromRawData() instead.)
+QString makes a deep copy of the QChar data, so you can modify it later without experiencing side effects. (If for performance reasons you
+do not want to take a deep copy of the character data, use QString::fromRawData() instead.)
 
-Another approach is to set the size of the string using resize() and to initialize the data character per character. QString uses 0-based indexes, just 
-like C++ arrays. To access the character at a particular index position, you can use operator[](). On non-const strings, operator[]() returns a reference
-to a character that can be used on the left side of an assignment. For example:
+Another approach is to set the size of the string using resize() and to initialize the data character per character. QString uses 0-based
+indexes, just  like C++ arrays. To access the character at a particular index position, you can use operator[](). On non-const strings, 
+operator[]() returns a reference to a character that can be used on the left side of an assignment. For example:
 
 \code
     QString str;
@@ -78,8 +76,9 @@ For read-only access, an alternative syntax is to use the at() function:
     QString str;
 
     for (int i = 0; i < str.size(); ++i) {
-        if (str.at(i) >= QChar('a') && str.at(i) <= QChar('f'))
+        if (str.at(i) >= QChar('a') && str.at(i) <= QChar('f')) {
             qDebug() << "Found character in range [a-f]";
+        }
     }
 \endcode
 
@@ -97,15 +96,14 @@ write code like this and it will work as expected:
 \code
     QString str;
 
-    if (str == "auto" || str == "extern"
-            || str == "static" || str == "register") {
+    if (str == "auto" || str == "extern" || str == "static" || str == "register") {
         // ...
     }
 \endcode
 
-You can also pass string literals to functions that take QStrings as arguments, invoking the QString(const char *) constructor. Similarly, you can pass
-a QString to a function that takes a <tt>const char *</tt> argument using the qPrintable() macro which returns the given QString as a <tt>const char *</tt>. 
-This is equivalent to calling &lt;QString&gt;.toLocal8Bit().constData().
+You can also pass string literals to functions that take QStrings as arguments, invoking the QString(const char *) constructor. Similarly,
+you can pass a QString to a function that takes a <tt>const char *</tt> argument using the qPrintable() macro which returns the given
+QString as a <tt>const char *</tt>. This is equivalent to calling &lt;QString&gt;.toLocal8Bit().constData().
 
 
 <h3>Manipulating String Data</h3>
@@ -158,9 +156,11 @@ To obtain a pointer to the actual character data, call data() or constData(). Th
 QString provides the following four functions that return a <tt>const char *</tt> version of the string as QByteArray: toAscii(), toLatin1(), toUtf8(), and toLocal8Bit().
 
 <ul>
-   <li>toAscii() returns an 8-bit string encoded using the codec specified by QTextCodec::codecForCStrings (by default, that is Latin 1).</li>
+   <li>toAscii() returns an 8-bit string encoded using the codec specified by QTextCodec::codecForCStrings (by default, that
+       is Latin 1).</li>
    <li>toLatin1() returns a Latin-1 (ISO 8859-1) encoded 8-bit string.</li>
-   <li>toUtf8() returns a UTF-8 encoded 8-bit string. UTF-8 is a superset of US-ASCII (ANSI X3.4-1986) that supports the entire Unicode character set through multibyte sequences.</li>
+   <li>toUtf8() returns a UTF-8 encoded 8-bit string. UTF-8 is a superset of US-ASCII (ANSI X3.4-1986) that supports the entire 
+       Unicode character set through multibyte sequences.</li>
    <li>toLocal8Bit() returns an 8-bit string using the system's local encoding.</li>
 </ul>
 
@@ -186,9 +186,9 @@ Similarly, you must call toAscii(), toLatin1(), toUtf8(), or toLocal8Bit() expli
 
 <h3>Distinction Between Null and Empty Strings</h3>
 
-For historical reasons, QString distinguishes between a null string and an empty string. A <i>null</i> string is a string that is initialized using QString's
-default constructor or by passing (const char *)0 to the constructor. An <i>empty</i> string is any string with size 0. A null string is always empty, but an
-empty string is not necessarily null:
+For historical reasons, QString distinguishes between a null string and an empty string. A <i>null</i> string is a string that is initialized
+using QString's default constructor or by passing (const char *)0 to the constructor. An <i>empty</i> string is any string with size 0. A
+null string is always empty, but an empty string is not necessarily null:
 
 \code
     QString().isNull();               // returns true
@@ -227,7 +227,8 @@ Using the QString <tt>'+'</tt> operator, it is easy to construct a complex strin
 
 There is nothing wrong with either of these string constructions, but there are a few hidden inefficiencies. Beginning with Qt 4.6, you can eliminate them.
 
-First, multiple uses of the <tt>'+'</tt> operator usually means multiple memory allocations. When concatenating <i>n</i> substrings, where <i>n &gt; 2</i>, there can be as many as <i>n - 1</i> calls to the memory allocator.
+First, multiple uses of the <tt>'+'</tt> operator usually means multiple memory allocations. When concatenating <i>n</i> substrings, where 
+<i>n &gt; 2</i>, there can be as many as <i>n - 1</i> calls to the memory allocator.
 
 Second, QLatin1String does not store its length internally but calls qstrlen() when it needs to know its length.
 
@@ -251,13 +252,6 @@ There are three ways you can access this improved method of string construction.
         QString message =  hello % el % world % QChar('!');
 \endcode
 
-A more global approach which is the most convenient but not entirely source compatible, is to this define in your .pro file:
-
-\code
-        DEFINES *= QT_USE_QSTRINGBUILDER
-\endcode
-
-and the <tt>'+'</tt> will automatically be performed as the <tt>QStringBuilder</tt> <tt>'%'</tt> everywhere.
 <b>See also </b>fromRawData(), QChar, QLatin1String, QByteArray, and QStringRef.
 */
 
@@ -268,7 +262,6 @@ and the <tt>'+'</tt> will automatically be performed as the <tt>QStringBuilder</
 Constructs a null string. Null strings are also empty.
 
 <b>See also </b>isEmpty().
-
 
 */
 
@@ -316,8 +309,7 @@ Constructs a copy of the Latin-1 string <i>str</i>.
 
 Constructs a copy of <i>other</i>.
 
-This operation takes constant time, because QString is implicitly shared. This makes returning a QString from a function very fast. If a shared instance
-is modified, it will be copied (copy-on-write), and that takes linear time.
+This operation takes constant time, because QString is implicitly shared. This makes returning a QString from a function very fast. If a shared instance is modified, it will be copied (copy-on-write), and that takes linear time.
 
 <b>See also </b>operator=().
 
@@ -412,7 +404,7 @@ Appends the Latin-1 string <i>str</i> to this string.
 
 
 /*!
-\fn QString & QString::append ( const QByteArray & ba )
+\fn QString & QString::append ( const QByteArray & ba ) 
 
 This function overloads append().
 
@@ -3676,8 +3668,9 @@ ensure that all user-visible strings go through QObject::tr(), for example.
 */
 
 
+
 /**
-\fn QString & QString::operator+= ( const QString & other )
+\fn QString &QString::operator=(const QString &other)
 
 Appends the string <i>other</i> onto the end of this string and returns a reference to this string.
 
@@ -3772,7 +3765,8 @@ Appends the character <i>ch</i> to the string.
 
 
 /**
-\fn bool QString::operator< ( const QString & other ) const
+\fn bool operator< ( const QString & s1, const QString & s2 )
+\relates QString
 
 Returns true if this string is lexically less than string <i>other</i>; otherwise returns false.
 
@@ -3792,7 +3786,7 @@ This function overloads operator&lt;().
 
 
 /**
-\fn bool QString::operator< ( const QByteArray & other ) const
+\fn bool operator< ( const QByteArray & other ) const
 
 This function overloads operator&lt;().
 
@@ -3818,7 +3812,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 
 
 /**
-\fn bool QString::operator<= ( const QString & other ) const
+\fn bool operator<= ( const QString & other ) const
 
 Returns true if this string is lexically less than or equal to string <i>other</i>; otherwise returns false.
 
@@ -3838,7 +3832,7 @@ This function overloads operator&lt;=().
 
 
 /**
-\fn bool QString::operator<= ( const QByteArray & other ) const
+\fn bool operator<= ( const QByteArray & other ) const
 
 This function overloads operator&lt;=().
 
@@ -3934,7 +3928,7 @@ Sets the string to contain the single character <i>ch</i>.
 
 
 /**
-\fn bool QString::operator== ( const QString & other ) const
+\fn bool operator== ( const QString & other ) const
 
 Returns true if string <i>other</i> is equal to this string; otherwise returns false.
 
@@ -3980,7 +3974,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 
 
 /**
-\fn bool QString::operator> ( const QString & other ) const
+\fn bool operator> ( const QString & other ) const
 
 Returns true if this string is lexically greater than string <i>other</i>; otherwise returns false.
 
@@ -4000,7 +3994,7 @@ This function overloads operator&gt;().
 
 
 /**
-\fn bool QString::operator> ( const QByteArray & other ) const
+\fn bool operator> ( const QByteArray & other ) const
 
 This function overloads operator&gt;().
 
@@ -4026,7 +4020,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 
 
 /**
-\fn bool QString::operator>= ( const QString & other ) const
+\fn bool operator>= ( const QString & other ) const
 
 Returns true if this string is lexically greater than or equal to string <i>other</i>; otherwise returns false.
 

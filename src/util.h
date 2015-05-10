@@ -117,7 +117,21 @@ class LetterToIndexMap : public LongMap<QSharedPointer<T>>
 
 inline bool isId(int c)
 {
-   return c == '_' || c >= 128 || c < 0 || isalnum(c);
+   if (c == '_') {
+      return true;
+
+   } else if (c >= 128) {
+      return true;
+
+   } else if (c < 0) { 
+      return true;
+      
+   } else if (isalnum(c)) {
+      return true;
+   
+   }
+
+   return false;
 }
 
 // **

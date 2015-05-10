@@ -10578,14 +10578,14 @@ static int              lastCSConstraint;
 static int              lastHereDocContext;
 static int              lastDefineContext;
 static int              lastAlignAsContext;
-static Protection          protection;
-static Protection          baseProt;
+static Protection       protection;
+static Protection       baseProt;
 static int              sharpCount   = 0 ;
 static int              roundCount   = 0 ;
 static int              curlyCount   = 0 ;
 static int              squareCount  = 0 ;
 static int              padCount     = 0 ;
-static QByteArray       slString;
+
 
 static QSharedPointer<Entry> current_root;
 static QSharedPointer<Entry> global_root;
@@ -10620,7 +10620,6 @@ static QByteArray       aliasName;
 static QByteArray       baseName;
 static QByteArray      *specName;
 static QByteArray       formulaText;
-static QByteArray       formulaEnd;
 static bool             useOverrideCommands = FALSE;
 
 static SrcLangExt       language;
@@ -10662,50 +10661,37 @@ static QByteArray         *pSkipVerbString;
 static QStack<Grouping *> autoGroupStack;
 
 static bool             insideFormula;
-static bool            insideTryBlock = FALSE;
+static bool             insideTryBlock = FALSE;
 static bool             insideCode;
 static bool             needsSemi;
 
-//static int              depthIf;
-static int             initBracketCount;
-static QByteArray         memberGroupRelates;
-static QByteArray         memberGroupInside;
-static QByteArray         xrefItemKey;
-static QByteArray         xrefItemTitle;
-static QByteArray         xrefListTitle;
+//static int            depthIf;
+static int              initBracketCount;
 
-static QByteArray         g_skipBlockName;
-static QByteArray         oldStyleArgType;
-static QByteArray         docBackup;
-static QByteArray         briefBackup;
+static QByteArray       oldStyleArgType;
+static QByteArray       docBackup;
+static QByteArray       briefBackup;
 
 static int              docBlockContext;
-static QByteArray         docBlock;
-static QByteArray         docBlockName;
+static QByteArray       docBlock;
+static QByteArray       docBlockName;
 static bool             docBlockInBody;
 static bool             docBlockAutoBrief;
 static char             docBlockTerm;
 
-static QByteArray         idlAttr;
-static QByteArray         idlProp;
+static QByteArray       idlAttr;
+static QByteArray       idlProp;
 
 static bool             g_lexInit = FALSE;
 static bool             externC;
 
-static QByteArray         g_delimiter;
+static QByteArray       g_delimiter;
 
 static int              g_column;
 
 static int              g_fencedSize = 0;
 static bool             g_nestedComment = 0;
 
-//-----------------------------------------------------------------------------
-
-// forward declarations
-//static void handleGroupStartCommand(const char *header);
-//static void handleGroupEndCommand();
-
-//-----------------------------------------------------------------------------
 
 static void initParser()
 {
@@ -10830,7 +10816,7 @@ static void addType(QSharedPointer<Entry> ce)
 {
    uint tl = ce->type.length();
 
-   if ( tl > 0 && ! current->name.isEmpty() && ce->type.at(tl - 1) != '.') {
+   if ( tl > 0 && ! ce->name.isEmpty() && ce->type.at(tl - 1) != '.') {
       ce->type += ' ' ;
    }
 
@@ -10838,11 +10824,11 @@ static void addType(QSharedPointer<Entry> ce)
    ce->name.resize(0) ;
    tl = ce->type.length();
 
-   if ( tl > 0 && !current->args.isEmpty() && ce->type.at(tl - 1) != '.') {
-      current->type += ' ' ;
+   if ( tl > 0 && ! ce->args.isEmpty() && ce->type.at(tl - 1) != '.') {
+      ce->type += ' ' ;
    }
 
-   ce->type += current->args ;
+   ce->type += ce->args ;
    ce->args.resize(0) ;
    ce->argList.clear();
 }
@@ -10878,7 +10864,7 @@ static bool nameIsOperator(QByteArray &name)
    if (i == 0) { 
      int len = name.length();
    
-      if (len > 8 && ! isId(name.at(8))) {
+     if (len == 8 || ! isId(name.at(8))) {
          // case operator ::X
          return TRUE;  
       }
@@ -10887,7 +10873,7 @@ static bool nameIsOperator(QByteArray &name)
    if (i > 0) {
       int len = name.length();
 
-      if ( (len > (i + 8))  &&  ! isId(name.at(i - 1)) && ! isId(name.at(i + 8))) {
+      if ( (len == (i + 8)) || (! isId(name.at(i - 1)) && ! isId(name.at(i + 8)))  ) {
          // case X::operator
          return TRUE;  
       }
@@ -10959,14 +10945,13 @@ static bool checkForKnRstyleC()
    return TRUE;
 }
 
-//-----------------------------------------------------------------------------
-
 static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
 {
    int si = current->args.length();
 
-   if (oldStyleArgType.isEmpty()) { // new argument
-      static QRegExp re("([^)]*)");
+   if (oldStyleArgType.isEmpty()) { 
+      // new argument
+      static QRegExp re("\\([^)]*\\)");
 
       int bi1 = re.lastIndexIn(current->args);
       int bi2 = bi1 != -1 ? re.lastIndexIn(current->args, bi1 - 1) : -1;
@@ -12143,8 +12128,7 @@ YY_DECL {
 
                Argument temp;
                current->argList.append(temp);
-
-               Argument *a = &current->argList.last();               
+                          
                BEGIN( ObjCParams );
             }
             YY_BREAK
@@ -13532,6 +13516,7 @@ YY_DECL {
                BEGIN(FindMembers);
             }
             YY_BREAK
+
          case 149:
             /* rule 149 can match eol */
             YY_RULE_SETUP
@@ -14500,14 +14485,13 @@ YY_DECL {
          case 230:
             YY_RULE_SETUP
 
-            {
-               //printf("End define\n");
-               current->fileName   = yyFileName;
-               current->startLine  = yyLineNr;
+            {               
+               current->fileName    = yyFileName;
+               current->startLine   = yyLineNr;
                current->startColumn = yyColNr;
 
                current->type.resize(0);
-               current->type       = "const";
+               current->type        = "const";
 
                QByteArray init = current->initializer.data();
                init = init.simplified();
@@ -14816,8 +14800,7 @@ YY_DECL {
          case 248:
             YY_RULE_SETUP
 
-            {
-               //printf(">> initializer `%s' <<\n",current->initializer.data());
+            {              
                if (*scannerYYtext == ';' && (current_root->spec & Entry::Enum))
                {
                   current->fileName   = yyFileName;
@@ -15623,43 +15606,47 @@ YY_DECL {
                current->args += ' ';
             }
             YY_BREAK
+
          case 328:
             YY_RULE_SETUP
 
             {
                QByteArray oldType = current->type;
-               if (current->bodyLine == -1)
-               {
+
+               if (current->bodyLine == -1) {
                   current->bodyLine = yyLineNr;
                }
-               if ( insidePHP && current->type.left(3) == "var" )
-               {
+
+               if ( insidePHP && current->type.left(3) == "var" ) {
                   current->type = current->type.mid(3);
                }
-               if (isTypedef && current->type.left(8) != "typedef ")
-               {
+
+               if (isTypedef && current->type.left(8) != "typedef ") {
                   current->type.prepend("typedef ");
                }
+
                bool needNewCurrent = FALSE;
-               if (!current->name.isEmpty() && current->section != Entry::ENUM_SEC)
-               {
+
+               if (! current->name.isEmpty() && current->section != Entry::ENUM_SEC) {
                   current->type = current->type.simplified();
                   current->args = removeRedundantWhiteSpace(current->args);
                   current->name = current->name.trimmed();
-                  if (current->section == Entry::CLASS_SEC) { // remove spec for "struct Bla bla;"
+
+                  if (current->section == Entry::CLASS_SEC) { 
+                     // remove spec for "struct Bla bla;"
                      current->spec = 0;
                   }
-                  current->section = Entry::VARIABLE_SEC ;
-                  current->fileName = yyFileName;
-                  current->startLine = yyBegLineNr;
+
+                  current->section     = Entry::VARIABLE_SEC ;
+                  current->fileName    = yyFileName;
+                  current->startLine   = yyBegLineNr;
                   current->startColumn = yyBegColNr;
                   current_root->addSubEntry(current, current_root) ;
 
                   needNewCurrent = TRUE;
                }
 
-               if ( *scannerYYtext == ',')
-               {
+               if ( *scannerYYtext == ',') {
                   bool stat = current->stat;
 
                   if (needNewCurrent) {
@@ -15931,6 +15918,7 @@ YY_DECL {
                // the parameter name for the property - just skip.
             }
             YY_BREAK
+
          case 351:
             YY_RULE_SETUP
 
@@ -16111,7 +16099,7 @@ YY_DECL {
             {
                if (insideJava)  // last enum field in Java class
                {
-                  if (!current->name.isEmpty()) {
+                  if (! current->name.isEmpty()) {
                      current->fileName   = yyFileName;
                      current->startLine  = yyLineNr;
                      current->startColumn = yyColNr;
@@ -16149,20 +16137,21 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               //printf("adding `%s' `%s' `%s' to enum `%s' (mGrpId=%d)\n",
-               //     current->type.data(), current->name.data(),
-               //     current->args.data(), current_root->name.data(),current->mGrpId);
-               if (!current->name.isEmpty())
+              
+               if (! current->name.isEmpty())
                {
-                  current->fileName   = yyFileName;
-                  current->startLine  = yyLineNr;
+                  current->fileName    = yyFileName;
+                  current->startLine   = yyLineNr;
                   current->startColumn = yyColNr;
+
                   if (!(current_root->spec & Entry::Enum)) {
                      current->type       = "@"; // enum marker
                   }
+
                   current->args       = current->args.simplified();
                   current->name       = current->name.trimmed();
                   current->section    = Entry::VARIABLE_SEC;
+
                   // add to the scope of the enum
                   current_root->addSubEntry(current, current_root);
 
@@ -16385,14 +16374,13 @@ YY_DECL {
                         {
                            static QRegExp re("@[0-9]+$");
 
-                           if (!isTypedef && memspecEntry && re.indexIn(memspecEntry->name) == -1)
-
-                            // not typedef or anonymous type (see bug691071)
-                           {
+                           if (!isTypedef && memspecEntry && re.indexIn(memspecEntry->name) == -1) {
+                              // not typedef or anonymous type (see bug691071)                           
                               // enabled the next two lines for bug 623424
                               current->doc.resize(0);
                               current->brief.resize(0);
                            }
+
                            BEGIN( MemberSpec ) ;
                         }
                      }
@@ -16573,7 +16561,7 @@ YY_DECL {
                   }
                }
                
-               if (!msName.isEmpty()) {                                
+               if (! msName.isEmpty()) {                                
                   static bool typedefHidesStruct = Config::getBool("use-typedef-name");
 
                   // case 1: typedef struct _S { ... } S_t;
@@ -16583,7 +16571,9 @@ YY_DECL {
                          current->section == Entry::ENUM_SEC ) && msType.trimmed().isEmpty() && memspecEntry) {
                      memspecEntry->name = msName;
 
-                  } else { // case 2: create a typedef field
+                  } else { 
+                     // case 2: create a typedef field
+
                      QSharedPointer<Entry> varEntry = QMakeShared<Entry>();
 
                      varEntry->lang = language;
@@ -18105,71 +18095,75 @@ YY_DECL {
                }
             }
             YY_BREAK
+
          case 521:
             YY_RULE_SETUP
 
             {
                current->name = current->name.simplified();
                current->type = current->type.simplified();
+
                current->args = removeRedundantWhiteSpace(current->args);
                // was: current->args.simplified();
-               current->fileName = yyFileName;
-               current->startLine = yyBegLineNr;
+
+               current->fileName    = yyFileName;
+               current->startLine   = yyBegLineNr;
                current->startColumn = yyBegColNr;
 
-               static QRegExp re("([^)]*[*&][^)]*)"); // (...*...)
-               if (*scannerYYtext != ';' || (current_root->section & Entry::COMPOUND_MASK) )
-               {
+               static QRegExp re("\\([^)]*[*&][^)]*\\)");       // (...*...)
+
+               if (*scannerYYtext != ';' || (current_root->section & Entry::COMPOUND_MASK) ) {
                   int tempArg = current->name.indexOf('<');
+
                   int ts = current->type.indexOf('<');
                   int te = current->type.lastIndexOf('>');
-
                   int ti = re.indexIn(current->type, 0);
+                              
+                  bool isFunction = ti == -1 || (ts != -1 && ts < te && ts < ti && ti < te); 
 
-                  // bug677315: A<int(void *, char *)> get(); is not a function pointer
-                  bool isFunction = ti == -1 || // not a (...*...) pattern
-                  (ts != -1 && ts < te && ts < ti && ti < te); // (...*...) is part of a template argument list
+                  // not a (...*...) pattern
+                  // (...*...) is part of a template argument list
 
-                  //printf("type=%s ts=%d te=%d ti=%d isFunction=%d\n",
-                  //    current->type.data(),ts,te,ti,isFunction);
                   QByteArray tempName;
+
                   if (tempArg == -1) {
                      tempName = current->name;
+
                   } else {
                      tempName = current->name.left(tempArg);
                   }
-                  if (!current->type.isEmpty() &&
-                        (!isFunction || current->type.left(8) == "typedef ")) {
-                     //printf("Scanner.l: found in class variable: `%s' `%s' `%s'\n", current->type.data(),current->name.data(),current->args.data());
-                     if (isTypedef && current->type.left(8) != "typedef ") {
-                        current->type.prepend("typedef ");
-                     }
-                     current->section = Entry::VARIABLE_SEC ;
-                  } else {
-                     //printf("Scanner.l: found in class function: `%s' `%s' `%s'\n", current->type.data(),current->name.data(),current->args.data());
-                     current->section = Entry::FUNCTION_SEC ;
-                     current->proto = *scannerYYtext == ';';
-                  }
-               } else // a global function prototype or function variable
-               {
-                  //printf("Scanner.l: prototype? type=`%s' name=`%s' args=`%s'\n",current->type.data(),current->name.data(),current->args.data());
-                  if (! current->type.isEmpty() &&
-                     (re.indexIn(current->type, 0) != -1 || current->type.left(8) == "typedef "))
-                  {
+
+                  if (! current->type.isEmpty() && (! isFunction || current->type.left(8) == "typedef ")) {
+                    
                      if (isTypedef && current->type.left(8) != "typedef ") {
                         current->type.prepend("typedef ");
                      }
 
-                     //printf("Scanner.l: found function variable!\n");
+                     current->section = Entry::VARIABLE_SEC ;
+
+                  } else {                    
+                     current->section = Entry::FUNCTION_SEC ;
+                     current->proto = *scannerYYtext == ';';
+                  }
+
+               } else  {
+                  // a global function prototype or function variable
+              
+                  if (! current->type.isEmpty() &&  (re.indexIn(current->type, 0) != -1 || current->type.left(8) == "typedef ")) {
+                  
+                     if (isTypedef && current->type.left(8) != "typedef ") {
+                        current->type.prepend("typedef ");
+                     }
+
                      current->section = Entry::VARIABLE_SEC;
-                  } else
-                  {
-                     //printf("Scanner.l: found prototype\n");
+
+                  } else {
                      current->section = Entry::FUNCTION_SEC;
                      current->proto = TRUE;
                   }
                }
-               //printf("Adding entry `%s'\n",current->name.data());
+
+
                if ( insidePHP)
                {
                   if (findAndRemoveWord(current->type, "final")) {
@@ -18225,12 +18219,14 @@ YY_DECL {
                      //addToBody(scannerYYtext);
                      curlyCount = 0;
                      BEGIN( SkipCurly ) ;
-                  } else
-                  {
+
+                  } else {
+
                      if (previous->section != Entry::VARIABLE_SEC)
                      {
                         previous->bodyLine = -1;   // a function/member declaration
                      }
+
                      BEGIN( FindMembers ) ;
                   }
                }
@@ -18994,28 +18990,26 @@ YY_DECL {
 
                   lastCSConstraint = YY_START;
                   BEGIN( CSConstraintName );
-               } else if (insideCli &&  qstrcmp(scannerYYtext, "abstract") == 0)
-               {
+               } else if (insideCli &&  qstrcmp(scannerYYtext, "abstract") == 0) {
                   current->spec |= Entry::Abstract;
-               } else if (insideCli &&  qstrcmp(scannerYYtext, "sealed") == 0)
-               {
+
+               } else if (insideCli &&  qstrcmp(scannerYYtext, "sealed") == 0) {
                   current->spec |= Entry::Sealed;
-               } else if (qstrcmp(scannerYYtext, "final") == 0)
-               {
+
+               } else if (qstrcmp(scannerYYtext, "final") == 0) {
                   current->spec |= Entry::Final;
-               } else
-               {
-                  if (current->section == Entry::ENUM_SEC)
-                  {
+
+               } else {
+                  if (current->section == Entry::ENUM_SEC) {
                      // found "enum a b" -> variable
                      current->section = Entry::VARIABLE_SEC ;
                   }
+
                   current->type += ' ' ;
                   current->type += current->name ;
                   current->name = scannerYYtext ;
 
-                  if (nameIsOperator(current->name))
-                  {
+                  if (nameIsOperator(current->name)) {
                      BEGIN( Operator );
                   }
                }
@@ -19225,19 +19219,20 @@ YY_DECL {
 
             {
                unput(*scannerYYtext);
-               if (isTypedef) // typedef of a class, put typedef keyword back
+               if (isTypedef) // typedef of a class, put typedef keyword back 
                {
                   current->type.prepend("typedef");
                }
-               if ((scannerYYtext[0] == '*' || scannerYYtext[0] == '&') &&
-               current->section == Entry::ENUM_SEC)
-               {
+
+               if ((scannerYYtext[0] == '*' || scannerYYtext[0] == '&') && current->section == Entry::ENUM_SEC) {
                   // found "enum a *b" -> variable
                   current->section = Entry::VARIABLE_SEC ;
                }
+
                BEGIN( FindMembers );
             }
             YY_BREAK
+
          case 596:
             /* rule 596 can match eol */
             *yy_cp = (yy_hold_char); /* undo effects of setting up scannerYYtext */

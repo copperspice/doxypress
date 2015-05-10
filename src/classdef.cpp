@@ -294,7 +294,10 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                            break;
                      }
                   }
-               } else { // not static
+
+               } else { 
+                  // not static
+
                   if (md->isVariable()) {
                      switch (prot) {
                         case Protected:
@@ -311,6 +314,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                            addMemberToList(MemberListType_priAttribs, md, true);
                            break;
                      }
+
                   } else if (md->isTypedef() || md->isEnumerate() || md->isEnumValue()) {
                      switch (prot) {
                         case Protected:
@@ -327,7 +331,10 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                            addMemberToList(MemberListType_priTypes, md, true);
                            break;
                      }
-                  } else { // member function
+
+                  } else { 
+                     // member function
+
                      switch (prot) {
                         case Protected:
                            addMemberToList(MemberListType_proMethods, md, true);

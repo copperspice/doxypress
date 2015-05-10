@@ -100,8 +100,8 @@ Documentation for a protected method.
 
 Documentation for a private method.
 
-
 */
+
 
 
 /*!
@@ -124,8 +124,12 @@ The possible values are:
 
 AmountType is a typedef for double. 
 
-
 */
 
 
+/**
+\fn QList<int> Ginger::takesRValue(QString && dataA);
 
+Documenting a method with an rvalue reference parameter.
+
+*/

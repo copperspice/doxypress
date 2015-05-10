@@ -27,12 +27,14 @@ class Ginger {
       bool isGrated();
       bool isChopped();
 
+      QList<int> takesRValue(QString && dataA);
+   
       inline bool isPowder() {
          return false;
       }
 
       static bool isSpice();
-
+    
    protected:
       QString someProtected();         
                           

@@ -42,9 +42,9 @@ struct BaseInfo {
    BaseInfo(const char *n, Protection p, Specifier v) :
       name(n), prot(p), virt(v) {}
 
-   QByteArray   name; //!< the name of the base class
-   Protection prot; //!< inheritance type
-   Specifier  virt; //!< virtualness
+   QByteArray   name;    //!< the name of the base class
+   Protection prot;      //!< inheritance type
+   Specifier  virt;      //!< virtualness
 };
 
 /** This struct is used to capture the tag file information
