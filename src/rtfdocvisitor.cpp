@@ -29,7 +29,7 @@
 #include <msc.h>
 #include <message.h>
 #include <outputgen.h>
-#include <parserintf.h>
+#include <parser_base.h>
 #include <plantuml.h>
 #include <rtfstyle.h>
 #include <rtfdocvisitor.h>

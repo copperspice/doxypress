@@ -89,7 +89,7 @@ bool MakeFileParser::needsPreprocessing(const QByteArray &)
 }
 
 void MakeFileParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
-                                enum ParserMode mode, QStringList &includedFiles) 
+                                enum ParserMode mode, QStringList &includedFiles, bool useClang) 
 {
 }
 

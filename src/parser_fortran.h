@@ -18,7 +18,7 @@
 #ifndef FORTRAN_LANGUAGE_PARSER_H
 #define FORTRAN_LANGUAGE_PARSER_H
 
-#include <parserintf.h>
+#include <parser_base.h>
 
 /** \brief Fortran language parser using state-based lexical scanning.
  *
@@ -34,7 +34,7 @@ class FortranLanguageParser : public ParserInterface
    void finishTranslationUnit() {}
 
    void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root, 
-                  enum ParserMode mode, QStringList &includeFiles) override;
+                  enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
    bool needsPreprocessing(const QByteArray &extension);
 

@@ -1,6 +1,6 @@
 /*************************************************************************
 *                                                                         
-* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim                                                         
+* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim                                                       
 * All rights reserved.                                                    
 *                                                                         
 *                                                                         
@@ -12,37 +12,13 @@
 *                                                                         
 *************************************************************************/
 
-#include "QList.h"
-#include "QString.h"
+#ifndef QGLOBAL_H
+#define QGLOBAL_H
 
-class Ginger {
+#define QT_BEGIN_NAMESPACE
 
-   public:
-      Ginger();
+#define Q_CORE_EXPORT
+#define Q_INLINE_TEMPLATE   inline
+#define Q_REQUIRED_RESULT
 
-      enum Brands { Chinese, Jamaican, Thai, Yellow }; 
-
-      using AmountType = double;
-
-      void setAmount(double amt);   
-      double getAmount();     
-
-      bool isGrated();
-      bool isChopped();
-
-      QList<int> takesRValue(QString && dataA);
-   
-      inline bool isPowder() {
-         return false;
-      }
-
-      static bool isSpice();
-    
-   protected:
-      QString someProtected();         
-                          
-   private:
-      QString somePrivate();    
-
-      double m_amount;      
-};
+#endif

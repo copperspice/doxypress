@@ -43,7 +43,7 @@
 #include <namespacedef.h>
 #include <outputgen.h>
 #include <pagedef.h>
-#include <parserintf.h>
+#include <parser_base.h>
 #include <resourcemgr.h>
 #include <section.h>
 #include <util.h>

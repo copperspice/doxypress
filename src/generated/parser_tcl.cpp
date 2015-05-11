@@ -5209,7 +5209,7 @@ static void tcl_parse(const QByteArray ns, const QByteArray cls)
 
 //! Parse text file and build up entry tree.
 void TclLanguageParser::parseInput(const char *fileName, const char *input, QSharedPointer<Entry> root,
-                 enum ParserMode mode, QStringList &includedFiles)
+                 enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    QFile  myFile;
    tcl_inf("%s\n", fileName);

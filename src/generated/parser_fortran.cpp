@@ -60655,7 +60655,7 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
 }
 
 void FortranLanguageParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
-                  enum ParserMode mode, QStringList &includedFiles)
+                  enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    g_thisParser = this;
 

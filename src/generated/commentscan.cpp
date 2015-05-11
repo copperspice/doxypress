@@ -3227,8 +3227,9 @@ char *commentscanYYtext;
 #include "cite.h"
 #include "condparser.h"
 #include "config.h"
-#include "entry.h"
 #include <doxy_globals.h>
+#include <entry.h>
+#include <formula.h>
 #include "message.h"
 #include "index.h"
 #include "defargs.h"
@@ -3236,10 +3237,9 @@ char *commentscanYYtext;
 #include "outputlist.h"
 #include "membergroup.h"
 #include "reflist.h"
+#include <parser_base.h>
 #include <parser_cstyle.h>
-#include <parserintf.h>
-#include <markdown.h>
-#include <formula.h>
+#include <parser_md.h>
 #include <util.h>
 
 #define YY_NO_INPUT 1

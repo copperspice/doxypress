@@ -43,7 +43,6 @@
 #include <language.h>
 #include <latexgen.h>
 #include <layout.h>
-#include <markdown.h>
 #include <membername.h>
 #include <namespacedef.h>
 #include <outputlist.h>
@@ -51,6 +50,7 @@
 #include <parser_file.h>
 #include <parser_fortran.h>
 #include <parser_make.h>
+#include <parser_md.h>
 #include <parser_py.h>
 #include <parser_tcl.h>
 #include <pagedef.h>

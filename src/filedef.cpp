@@ -35,8 +35,8 @@
 #include <memberlist.h>
 #include <namespacedef.h>
 #include <outputlist.h>
+#include <parser_base.h>
 #include <parser_clang.h>
-#include <parserintf.h>
 #include <portable.h>
 #include <searchindex.h>
 #include <util.h>
@@ -638,9 +638,7 @@ void FileDef::writeDocumentation(OutputList &ol)
    if (Doxy_Globals::searchIndex) {
       Doxy_Globals::searchIndex->setCurrentDoc(self, anchor(), false);
       Doxy_Globals::searchIndex->addWord(localName(), true);
-   }
-
-   //---------------------------------------- start flexible part -------------------------------
+   } 
 
    SrcLangExt lang = getLanguage();    
 
@@ -877,10 +875,11 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       }
    }
 
-// #if USE_LIBCLANG
-   static bool clangAssistedParsing = true;      // Config::getBool("clang-parsing");
+   // user specified  
+   static bool clangParsing = Config::getBool("clang-parsing");
+   auto srcLang = getLanguage();
 
-   if (clangAssistedParsing && (getLanguage() == SrcLangExt_Cpp || getLanguage() == SrcLangExt_ObjC)) {
+   if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {
 
       ol.startCodeFragment();
 
@@ -894,11 +893,9 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       ClangParser::instance()->writeSources(ol, self); 
       ol.endCodeFragment();
 
-   } else
-
-// #endif
-
-   {
+   } else  {
+      // use lex and not clang
+   
       ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
       ol.startCodeFragment();
@@ -915,7 +912,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       }
 
       pIntf->parseCode(ol, 0, fileToString(getFilePath(), filterSourceFiles, true),
-                       getLanguage(),      // lang
+                       srcLang,            // lang
                        false,              // isExampleBlock
                        0,                  // exampleName
                        self,               // fileDef
@@ -939,11 +936,11 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
 
    DevNullCodeDocInterface devNullIntf;  
 
-// #if USE_LIBCLANG
-   static bool clangAssistedParsing = true;      // Config::getBool("clang-parsing");
+   static bool clangParsing = Config::getBool("clang-parsing");
+   auto srcLang = getLanguage();
 
-   if (clangAssistedParsing && (getLanguage() == SrcLangExt_Cpp || getLanguage() == SrcLangExt_ObjC)) {
-
+   if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {
+ 
       if (! sameTu) {
          ClangParser::instance()->start(getFilePath(), filesInSameTu);
 
@@ -953,14 +950,12 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
 
       ClangParser::instance()->writeSources(devNullIntf, self);
 
-   } else
-
-// #endif
-
-   {
+   } else {
+      // use lex and not clang         
+   
       ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
-      pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), filterSourceFiles, true), getLanguage(), false, 0, self);
+      pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), filterSourceFiles, true), srcLang, false, 0, self);
    }
 }
 

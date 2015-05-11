@@ -37,7 +37,7 @@
 #include <pagedef.h>
 #include <section.h>
 #include <htags.h>
-#include <parserintf.h>
+#include <parser_base.h>
 #include <filedef.h>
 #include <dirdef.h>
 

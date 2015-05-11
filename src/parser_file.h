@@ -18,7 +18,7 @@
 #ifndef PARSER_FILE_H
 #define PARSER_FILE_H
 
-#include <parserintf.h>
+#include <parser_base.h>
 
 /** @brief General file parser */
 class FileParser : public ParserInterface
@@ -28,7 +28,7 @@ class FileParser : public ParserInterface
    void startTranslationUnit(const char *) {}
    void finishTranslationUnit() {}
    void parseInput(const char *, const char *, QSharedPointer<Entry>, 
-                  enum ParserMode mode, QStringList &includeFiles) override {};
+                  enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override {};
 
    bool needsPreprocessing(const QByteArray &) {
       return false;

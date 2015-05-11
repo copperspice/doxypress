@@ -3,11 +3,14 @@ include copperspice.am
 # dist
 distdir_custom=source_dist/dist/DoxyPress-$(VERSION)
 
+
 # path to gcc (windows)
 gccpath=/c/MingW/bin
 
 # list of gcc libraries (windows)
 gcclibs=libgcc_s_sjlj-1  libstdc++-6  libwinpthread-1
+
+
 
 # list of CopperSpice libraries
 cslibs=Core Xml
@@ -58,12 +61,11 @@ endif
 if OSTYPE_WIN
 deploy : all
 	mkdir -p $(deploydir)
-
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
 
 	rsync -W -a --modify-window=2  $(patsubst %,$(gccpath)/%.dll,$(gcclibs))  $(deploydir)
-	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%1-0.dll,$(cslibs))  $(deploydir)
 	rsync -W -a --modify-window=2  $(clang_dll)  $(deploydir)
+	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%1-0.dll,$(cslibs))  $(deploydir)
 endif
 
 # search path for source
@@ -122,7 +124,6 @@ doxypress_SOURCES = \
    src/main.cpp \
    src/mandocvisitor.cpp \
    src/mangen.cpp \
-   src/markdown.cpp \
    src/marshal.cpp \
    src/memberdef.cpp \
    src/membergroup.cpp \
@@ -137,6 +138,7 @@ doxypress_SOURCES = \
    src/parser_clang.cpp \
    src/parser_file.cpp \
    src/parser_make.cpp \
+   src/parser_md.cpp \
    src/pagedef.cpp \
    src/perlmodgen.cpp \
    src/plantuml.cpp \
@@ -234,7 +236,6 @@ noinst_HEADERS = \
    src/logos.h \
    src/mandocvisitor.h \
    src/mangen.h \
-   src/markdown.h \
    src/marshal.h \
    src/memberdef.h \
    src/membergroup.h \
@@ -247,14 +248,15 @@ noinst_HEADERS = \
    src/outputgen.h \
    src/outputlist.h \
    src/pagedef.h \
+   src/parser_base.h \
    src/parser_clang.h \
    src/parser_cstyle.h \
    src/parser_file.h \
    src/parser_fortran.h \
    src/parser_make.h \
+   src/parser_md.h \
    src/parser_py.h \
    src/parser_tcl.h \
-   src/parserintf.h \
    src/perlmodgen.h \
    src/plantuml.h \
    src/portable.h \

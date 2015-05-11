@@ -1,46 +1,31 @@
-/***********************************************************************
-*
-* Copyright (c) 2012-2014 Barbara Geller
-* Copyright (c) 2012-2014 Ansel Sermersheim
-* Copyright (c) 2012-2014 Digia Plc and/or its subsidiary(-ies).
-* Copyright (c) 2008-2012 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-*
-* This file is part of CopperSpice.
-*
-* CopperSpice is free software: you can redistribute it and/or
-* modify it under the terms of the GNU Lesser General Public License
-* version 2.1 as published by the Free Software Foundation.
-*
-* CopperSpice is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public
-* License along with CopperSpice.  If not, see
-* <http://www.gnu.org/licenses/>.
-*
-***********************************************************************/
+/*************************************************************************
+*                                                                         
+* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim                                                       
+* All rights reserved.                                                    
+*                                                                         
+*                                                                         
+* GNU Free Documentation License                                          
+* This file may be used under the terms of the GNU Free Documentation     
+* License version 1.3 as published by the Free Software Foundation        
+* and appearing in the file included in the packaging of this file.       
+*                                                                         
+*                                                                         
+*************************************************************************/
 
 #ifndef QLIST_H
 #define QLIST_H
 
-#include <qalgorithms.h>
-#include <qiterator.h>
-#include <qrefcount.h>
+#include "QGlobal.h"
 
-#include <iterator>
-#include <list>
-#include <iterator>
-#include <initializer_list>
-
-#include <exception>
-#include <stdexcept>
-#include <new>
-#include <limits.h>
-#include <string.h>
-#include <sstream>
+//   #include <exception>
+//   #include <limits.h>
+//   #include <list>
+//   #include <initializer_list>
+#include "C:/MingW/lib/gcc/i686-w64-mingw32/4.7.2/include/c++/iterator"
+//   #include <new>
+//   #include <stdexcept>
+//   #include <string.h>
+//   #include <sstream>
 
 QT_BEGIN_NAMESPACE
 
@@ -51,8 +36,8 @@ template <typename T>
 class QSet;
 
 struct Q_CORE_EXPORT QListData {
-   struct Data {
-      QtPrivate::RefCount ref;
+
+   struct Data {      
       int alloc, begin, end;
       uint sharable : 1;
       void *array[1];

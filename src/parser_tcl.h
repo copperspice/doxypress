@@ -19,7 +19,7 @@
 #ifndef PARSER_TCL_H
 #define PARSER_TCL_H
 
-#include <parserintf.h>
+#include <parser_base.h>
 
 /** \brief Tcl language parser using state-based lexical scanning.
  *
@@ -33,7 +33,7 @@ class TclLanguageParser : public ParserInterface
    void startTranslationUnit(const char *) {}
    void finishTranslationUnit() {}
    void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root, 
-                  enum ParserMode mode, QStringList &includeFiles) override;
+                  enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
    bool needsPreprocessing(const QByteArray &extension);
 

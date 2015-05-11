@@ -14,6 +14,7 @@
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
+
 #include <cite.h>
 #include <classlist.h>
 #include <dirdef.h>
@@ -25,7 +26,7 @@
 #include <membergroup.h>
 #include <membername.h>
 #include <namespacedef.h>
-#include <parserintf.h>
+#include <parser_base.h>
 #include <pagedef.h>
 #include <section.h>
 #include <searchindex.h>

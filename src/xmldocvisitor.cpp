@@ -26,7 +26,7 @@
 #include <language.h>
 #include <message.h>
 #include <outputgen.h>
-#include <parserintf.h>
+#include <parser_base.h>
 #include <util.h>
 #include <xmlgen.h>
 #include <xmldocvisitor.h>

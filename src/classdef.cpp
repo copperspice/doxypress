@@ -88,7 +88,7 @@ ClassDef::ClassDef(const char *defFileName, int defLine, int defColumn, const QB
    m_taggedInnerClasses = 0;  
    m_spec = 0;
 
-   // can not use getLanguage at this point,setLanguage() has not been called
+   // can not use getLanguage at this point, setLanguage() has not been called
    SrcLangExt lang = getLanguageFromFileName(defFileName);
 
    if ((lang == SrcLangExt_Cpp || lang == SrcLangExt_ObjC) && guessSection(defFileName) == Entry::SOURCE_SEC) {

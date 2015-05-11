@@ -27,7 +27,7 @@
 #include <mandocvisitor.h>
 #include <message.h>
 #include <outputgen.h>
-#include <parserintf.h>
+#include <parser_base.h>
 #include <util.h>
 
 ManDocVisitor::ManDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt)

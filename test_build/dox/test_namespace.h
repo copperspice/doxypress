@@ -15,9 +15,7 @@
 #ifndef TEST_NAMESPACE_H
 #define TEST_NAMESPACE_H
 
-#include <qglobal.h>
-
-class QString;
+#include "QString.h"
 class QTextCodec;
 
 class Test

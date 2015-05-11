@@ -46,7 +46,7 @@
 #include <namespacedef.h>
 #include <membername.h>
 #include <portable.h>
-#include <parserintf.h>
+#include <parser_base.h>
 #include <reflist.h>
 #include <searchindex.h>
 #include <textdocvisitor.h>

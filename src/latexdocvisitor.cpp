@@ -31,7 +31,7 @@
 #include <message.h>
 #include <msc.h>
 #include <outputgen.h>
-#include <parserintf.h>
+#include <parser_base.h>
 #include <plantuml.h>
 #include <util.h>
 

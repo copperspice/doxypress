@@ -196,17 +196,9 @@ void ClangParser::determineInputFiles(QStringList &files)
 
 void ClangParser::start(const char *fileName, QStringList &includeFiles)
 {
-   static QStringList includePath   = Config::getList("include-path");
- 
-   static bool clangAssistedParsing = true;      // Config::getBool("clang-parsing");
+   static QStringList includePath   = Config::getList("include-path");    
    static QStringList clangOptions  = Config::getList("clang-options");
 
-/*
-   if (! clangAssistedParsing) {
-      return;
-   }
-*/
-  
    p->fileName = fileName;
    p->index    = clang_createIndex(0, 0);
    p->curLine  = 1;
@@ -312,11 +304,9 @@ void ClangParser::start(const char *fileName, QStringList &includeFiles)
 // CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, 0, argv, argc, p->ufs, numUnsavedFiles, 
 //                  CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
 
-
    // let libclang do the actual parsing
    CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, 0, argv, argc, 0, 0, 
                   CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
-
 
 printf("    (BROOM)   Error Code: %d\n", errorCode);
 
@@ -327,8 +317,6 @@ printf("    (BROOM)   Error Code: %d\n", errorCode);
    }
    free(argv);
 
-
-
    if (p->tu) {
       // filter out any includes not found by the clang parser
       determineInputFiles(includeFiles);
@@ -337,32 +325,19 @@ printf("    (BROOM)   Error Code: %d\n", errorCode);
       uint n = clang_getNumDiagnostics(p->tu);
 
 
-printf("\n  BROOM  A 2 %d", n);
-
-      CXString boo = clang_getTranslationUnitSpelling(p->tu);
-
-printf("\n BROOM  my nane is %s", clang_getCString(boo));
-
+printf("\n  BROOM  Number of Warnings: %d", n);
 
 
       for (uint i = 0; i != n; ++i) {
 
-printf("\n  BROOM  B 1" );
-
          CXDiagnostic diag = clang_getDiagnostic(p->tu, i);
          CXString string   = clang_formatDiagnostic(diag, clang_defaultDiagnosticDisplayOptions());
 
-
-printf("\n  BROOM  B 2" );
-
-
-         err("%s [clang]\n", clang_getCString(string));
+         err("Clang parser warning -- %s\n", clang_getCString(string));
          clang_disposeString(string);
 
          clang_disposeDiagnostic(diag);
       }
-
-printf("\n  BROOM  A 3" );
 
       // create a source range for the given file
       QFileInfo fi(fileName);
@@ -384,7 +359,7 @@ printf("\n  BROOM  A 3" );
       p->numTokens = 0;
       p->cursors   = 0;
 
-      err("Clang: Failed to parse translation unit %s\n", fileName);
+      err("Clang failed to parse translation unit -- %s\n", fileName);
    }
 }
 
@@ -427,15 +402,6 @@ void ClangParser::switchToFile(const char *fileName)
 
 void ClangParser::finish()
 {
-
-/*
-   static bool clangAssistedParsing = Config::getBool("clang-parsing");
-
-   if (! clangAssistedParsing) {
-      return;
-   }
-*/
-
    if (p->tu) {
 
       delete[] p->cursors;
@@ -468,10 +434,12 @@ int ClangParser::Private::getCurrentTokenLine()
    if (numTokens == 0) {
       return 1;
    }
+
    // guard against filters that reduce the number of lines
    if (curToken >= numTokens) {
       curToken = numTokens - 1;
    }
+
    CXSourceLocation start = clang_getTokenLocation(tu, tokens[curToken]);
    clang_getSpellingLocation(start, 0, &l, &c, 0);
    return l;
@@ -484,14 +452,6 @@ QByteArray ClangParser::lookup(uint line, const char *symbol)
    if (symbol == 0) {
       return result;
    }
-
-/*
-   static bool clangAssistedParsing = Config::getBool("clang-parsing");
-   if (!clangAssistedParsing) {
-      return result;
-   }
-*/
-
 
    int sl = strlen(symbol);
    uint l = p->getCurrentTokenLine();

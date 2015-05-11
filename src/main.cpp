@@ -19,7 +19,6 @@
 
 #include <doxy_setup.h>
 
-
 /*! \file
  *  \brief Main entry point for DoxyPress
  *
@@ -42,7 +41,7 @@ int main(int argc, char **argv)
 
    //
    initDoxyPress();     
-   parseInput();
+   processFiles();
    generateOutput();
 
    return 0;

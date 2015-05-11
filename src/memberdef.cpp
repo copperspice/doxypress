@@ -38,7 +38,7 @@
 #include <membergroup.h>
 #include <groupdef.h>
 #include <searchindex.h>
-#include <parserintf.h>
+#include <parser_base.h>
 #include <marshal.h>
 #include <objcache.h>
 #include <arguments.h>
@@ -229,8 +229,8 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          }
       }
 
-      QRegExp re(")(");
-      QRegExp res("(.*\\*");
+      QRegExp re("\\)\\(");
+      QRegExp res("\\(.*\\*");
 
       int vp = re.indexIn(a->type);
       int wp = res.indexIn(a->type);

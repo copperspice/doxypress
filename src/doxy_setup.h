@@ -53,8 +53,10 @@ void checkConfiguration();
 void adjustConfiguration();
 
 void searchInputFiles();      
-void parseInput();
+
+void processFiles();
 void generateOutput();
+
 void readAliases();
 void readFormulaRepository();
 void shutDownDoxypress();

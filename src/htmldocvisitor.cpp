@@ -26,13 +26,13 @@
 #include <message.h>
 #include <config.h>
 #include <htmlgen.h>
-#include <parserintf.h>
 #include <msc.h>
 #include <dia.h>
 #include <util.h>
 #include <filedef.h>
 #include <memberdef.h>
 #include <htmlentity.h>
+#include <parser_base.h>
 #include <plantuml.h>
 
 static const int NUM_HTML_LIST_TYPES = 4;

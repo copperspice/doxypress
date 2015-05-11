@@ -40,11 +40,11 @@
 #include <growbuf.h>
 #include <htmlentity.h>
 #include <language.h>
-#include <markdown.h>
 #include <memberdef.h>
 #include <message.h>
 #include <namespacedef.h>
 #include <pagedef.h>
+#include <parser_md.h>
 #include <portable.h>
 #include <printdocvisitor.h>
 #include <reflist.h>

@@ -10633,8 +10633,10 @@ static bool             insideCli   = FALSE;       //!< processing C++/CLI code?
 static bool             insideJS    = FALSE;       //!< processing JavaScript code?
 static bool             insideCpp   = TRUE;        //!< processing C/C++ code
 
-static bool             insideCppQuote = FALSE;
-static bool             insideProtocolList = FALSE;
+static bool             insideCppQuote     = false;
+static bool             insideProtocolList = false;
+
+static bool             s_clangParser = false; 
 
 static int              argRoundCount;
 static int              argSharpCount;
@@ -10664,8 +10666,6 @@ static bool             insideFormula;
 static bool             insideTryBlock = FALSE;
 static bool             insideCode;
 static bool             needsSemi;
-
-//static int            depthIf;
 static int              initBracketCount;
 
 static QByteArray       oldStyleArgType;
@@ -10688,7 +10688,6 @@ static bool             externC;
 static QByteArray       g_delimiter;
 
 static int              g_column;
-
 static int              g_fencedSize = 0;
 static bool             g_nestedComment = 0;
 
@@ -12113,7 +12112,7 @@ YY_DECL {
                }
                current->name = scannerYYtext;
 
-               if (insideCpp || insideObjC) {
+               if (s_clangParser) {
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
             }
@@ -14024,7 +14023,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (insideCpp || insideObjC) {
+               if (s_clangParser) {
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
 
@@ -14451,9 +14450,10 @@ YY_DECL {
          case 228:
             YY_RULE_SETUP
             {              
-               if (insideCpp || insideObjC) {
+               if (s_clangParser) {
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
+
                current->bodyLine = yyLineNr;
                current->name = scannerYYtext;
                BEGIN(DefineEnd);
@@ -16063,10 +16063,10 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (insideCpp || insideObjC)
-               {
+               if (s_clangParser) {               
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
+
                current->bodyLine = yyLineNr;
                current->name     = scannerYYtext;
             }
@@ -18877,9 +18877,11 @@ YY_DECL {
 
             {
                current->name = scannerYYtext ;
-               if (insideCpp || insideObjC) {
+
+               if (s_clangParser) {
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
+
                lineCount();
 
                if (current->spec & Entry::Protocol) {
@@ -18966,22 +18968,24 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (insideCpp || insideObjC)
-               {
+               if (s_clangParser) {
                   current->id = ClangParser::instance()->lookup(yyLineNr, scannerYYtext);
                }
+
                if (insideIDL && qstrcmp(scannerYYtext, "switch") == 0)
                {
                   // Corba IDL style union
                   roundCount = 0;
                   BEGIN(SkipUnionSwitch);
-               } else if ((insideJava || insidePHP || insideJS) && (qstrcmp(scannerYYtext, "implements") == 0 || qstrcmp(scannerYYtext, "extends") == 0))
-               {
+
+               } else if ((insideJava || insidePHP || insideJS) && 
+                     (qstrcmp(scannerYYtext, "implements") == 0 || qstrcmp(scannerYYtext, "extends") == 0))  {
                   current->type.resize(0);
                   baseProt = Public;
                   baseVirt = Normal;
                   baseName.resize(0);
                   BEGIN( BasesProt ) ;
+
                } else if (insideCS && qstrcmp(scannerYYtext, "where") == 0) // C# type contraint
 
                {                 
@@ -22089,7 +22093,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 }
 
 static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<Entry> rt, 
-                      enum ParserMode mode, QStringList &includedFiles)
+                      enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    initParser();
 
@@ -22112,16 +22116,21 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
       yyFileName = fileName;
 
       setContext();
-      bool processWithClang = insideCpp || insideObjC;
 
-      if (processWithClang) {
+      if (useClang && (insideCpp || insideObjC) ) {
+         // user wants clang for parsing
+         s_clangParser = true;         
+                
          if (mode == ParserMode::SOURCE_FILE) {
             // new file
             ClangParser::instance()->start(fileName, includedFiles);
 
          } else {
             ClangParser::instance()->switchToFile(fileName);
-         }
+         }  
+       
+      } else  {
+         s_clangParser = false;
       }
 
       rt->lang = language;
@@ -22172,7 +22181,6 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
       inputFile.close();
 
       anonNSCount++;
-
    }
 }
 
@@ -22183,7 +22191,7 @@ static void parsePrototype(const QByteArray &text)
       return;
    }
 
-   if (!current) { 
+   if (! current) { 
       // nothing to store (see bug683516)
       return;
    }
@@ -22218,10 +22226,9 @@ static void parsePrototype(const QByteArray &text)
    YY_BUFFER_STATE tmpState = YY_CURRENT_BUFFER;
    scannerYY_switch_to_buffer(orgState);
    scannerYY_delete_buffer(tmpState);
-   inputString = orgInputString;
-   inputPosition = orgInputPosition;
 
-   //printf("**** parsePrototype end\n");
+   inputString   = orgInputString;
+   inputPosition = orgInputPosition;
 }
 
 void CPPScanFreeParser()
@@ -22238,21 +22245,19 @@ void CPPLanguageParser::startTranslationUnit(const char *)
 }
 
 void CPPLanguageParser::finishTranslationUnit()
-{
-   bool processWithClang = insideCpp || insideObjC;
-   if (processWithClang) {
-      ClangParser::instance()->finish();
-   }
+{  
+   // only called when clangParser is true
+   ClangParser::instance()->finish();   
 }
 
 void CPPLanguageParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
-                                   enum ParserMode mode, QStringList &includedFiles)
+                                   enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    g_thisParser = this;
 
    printlex(scannerYY_flex_debug, TRUE, __FILE__, fileName);
 
-   ::parseMain(fileName, fileBuf, root, mode, includedFiles);
+   ::parseMain(fileName, fileBuf, root, mode, includedFiles, useClang);
 
    printlex(scannerYY_flex_debug, FALSE, __FILE__, fileName);
 }

@@ -56,20 +56,20 @@
 #include <layout.h>
 #include <logos.h>
 #include <mangen.h>
-#include <markdown.h>
 #include <membername.h>
 #include <msc.h>
 #include <namespacedef.h>
 #include <objcache.h>
 #include <outputlist.h>
 #include <pagedef.h>
+#include <parser_base.h>
 #include <parser_cstyle.h>
 #include <parser_file.h>
 #include <parser_fortran.h>
 #include <parser_make.h>
+#include <parser_md.h>
 #include <parser_py.h>
 #include <parser_tcl.h>
-#include <parserintf.h>
 #include <perlmodgen.h>
 #include <portable.h>
 #include <pre.h>
@@ -380,8 +380,8 @@ namespace Doxy_Work{
                   QSharedPointer<FileDef> fd, QByteArray fileName, enum ParserMode mode, QStringList &filesInSameTu);
 
    void parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav);
-   void parseInput();
 
+   void processFiles();
    void processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef>tagParentCd, 
                   const QByteArray &prefix, int count);
 
@@ -439,7 +439,7 @@ using namespace Doxy_Work;
 
 // ** next two functions are the two core functions
 
-void parseInput()
+void processFiles()
 {
    printf("Parse input files\n");   
 
@@ -3853,7 +3853,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointe
    QSharedPointer<FileDef> fd = rootNav->fileDef();
 
    int l;
-   static QRegExp re("([a-z_A-Z0-9: ]*[ &*]+[ ]*");
+   static QRegExp re("\\([a-z_A-Z0-9: ]*[ &*]+[ ]*");
    int ts = root->type.indexOf('<');
    int te = root->type.lastIndexOf('>');
 
@@ -4072,7 +4072,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
             }
          }
 
-         static QRegExp re("([a-z_A-Z0-9: ]*[ &*]+[ ]*");
+         static QRegExp re("\\([a-z_A-Z0-9: ]*[ &*]+[ ]*");
 
          int ts = root->type.indexOf('<');
          int te = root->type.lastIndexOf('>');
@@ -8023,11 +8023,10 @@ void Doxy_Work::generateFileSources()
 {
    if (Doxy_Globals::inputNameList->count() > 0) {
 
-// #if USE_LIBCLANG
-      static bool clangAssistedParsing = true;      // Config::getBool("clang-parsing");
+      // user specified 
+      static bool clangParsing = Config::getBool("clang-parsing");
 
-      if (clangAssistedParsing) {
-
+      if (clangParsing) {     
          QSet<QString> processedFiles;         
          QSet<QString> filesToProcess;
                     
@@ -8042,25 +8041,25 @@ void Doxy_Work::generateFileSources()
            
             for (auto fd : *fn) {
                if (fd->isSource() && ! fd->isReference()) {
-                  QStringList filesInSameTu;
+                  QStringList includeFiles;
 
-                  fd->getAllIncludeFilesRecursively(filesInSameTu);
+                  fd->getAllIncludeFilesRecursively(includeFiles);
                   fd->startParsing();
 
                   if (fd->generateSourceFile()) { 
                      // source needs to be shown in the output
 
                      msg("Generating code for file %s\n", fd->docName().constData());
-                     fd->writeSource(*Doxy_Globals::g_outputList, false, filesInSameTu);
+                     fd->writeSource(*Doxy_Globals::g_outputList, false, includeFiles);
 
                   } else if (! fd->isReference() && Doxy_Globals::parseSourcesNeeded) {
                      // we needed to parse the sources even if we do not show them
                   
                      msg("Parsing code for file %s\n", fd->docName().constData());
-                     fd->parseSource(false, filesInSameTu);
+                     fd->parseSource(false, includeFiles);
                   }
 
-                  for (QString incFile : filesInSameTu) {
+                  for (QString incFile : includeFiles) {
 
                      if (fd->getFilePath() != incFile && ! processedFiles.contains(incFile)) {
                         QStringList moreFiles;
@@ -8077,7 +8076,7 @@ void Doxy_Work::generateFileSources()
                               ifd->writeSource(*Doxy_Globals::g_outputList, true, moreFiles);
 
                            } else if (Doxy_Globals::parseSourcesNeeded)  {
-                              // need to parse the sources even if we do not show them
+                              // need to parse the sources even if we do not show it
                            
                               msg("Parsing code for file %s\n", ifd->docName().constData());
                               ifd->parseSource(true, moreFiles);
@@ -8100,20 +8099,20 @@ void Doxy_Work::generateFileSources()
             for (auto fd : *fn) {
                if (! processedFiles.contains(fd->getFilePath())) { 
                  
-                  QStringList filesInSameTu;
+                  QStringList includeFiles;
                   fd->startParsing();
 
                   if (fd->generateSourceFile()) { 
                      // source needs to be shown in the output
 
                      msg("Generating code for file %s\n", fd->docName().constData());
-                     fd->writeSource(*Doxy_Globals::g_outputList, false, filesInSameTu);
+                     fd->writeSource(*Doxy_Globals::g_outputList, false, includeFiles);
 
                   } else if (! fd->isReference() && Doxy_Globals::parseSourcesNeeded)  {
-                     // needed to parse the source even if we do not show them
+                     // needed to parse the source even if we do not show it
                   
                      msg("Parsing code for file %s\n", fd->docName().constData());
-                     fd->parseSource(false, filesInSameTu);
+                     fd->parseSource(false, includeFiles);
                   }
 
                   fd->finishParsing();
@@ -8121,28 +8120,26 @@ void Doxy_Work::generateFileSources()
             }
          }
 
-      } else
-
-//   #endif
-
-      {
+      } else {
+         // use lex and not clang
+      
          for (auto fn : *Doxy_Globals::inputNameList) {
 
            for (auto fd : *fn) {
-               QStringList filesInSameTu;
+               QStringList includeFiles;
                fd->startParsing();
 
                if (fd->generateSourceFile()) {
                   // source needs to be shown in the output
 
                   msg("Generating code for file %s\n", fd->docName().data());
-                  fd->writeSource(*Doxy_Globals::g_outputList, false, filesInSameTu);
+                  fd->writeSource(*Doxy_Globals::g_outputList, false, includeFiles);
 
                } else if (! fd->isReference() && Doxy_Globals::parseSourcesNeeded) {
-                  // parse the sources even if we do not show them
+                  // parse the sources even if we do not show it
                
                   msg("Parsing code for file %s\n", fd->docName().data());
-                  fd->parseSource(false, filesInSameTu);
+                  fd->parseSource(false, includeFiles);
                }
 
                fd->finishParsing();
@@ -9124,17 +9121,10 @@ static ParserInterface *getParserForFile(const char *fn)
 void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav, 
                   QSharedPointer<FileDef> fd, QByteArray fileName, enum ParserMode mode, QStringList &includedFiles)
 {
-
-/*
-// #if USE_LIBCLANG
-   static bool clangAssistedParsing = Config::getBool("clang-parsing");
-#else
-   static bool clangAssistedParsing = false;
-#endif
-*/
-
-   static bool clangAssistedParsing = true;      // Config::getBool("clang-parsing");
-   
+   // user specified 
+   static bool clangParsing = Config::getBool("clang-parsing");
+   auto srcLang = fd->getLanguage(); 
+     
    QByteArray extension;
    int ei = fileName.lastIndexOf('.');
 
@@ -9165,33 +9155,36 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
       preBuf.addChar('\n'); 
    }
    
-   BufStr convBuf(preBuf.curPos() + 1024);
-
    // convert multi-line C++ comments to C style comments
+   BufStr convBuf(preBuf.curPos() + 1024);  
    convertCppComments(&preBuf, &convBuf, fileName);
+   convBuf.addChar('\0');   
 
-   convBuf.addChar('\0');
-
-   if (clangAssistedParsing && mode == ParserMode::SOURCE_FILE) {
+   if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {   
       fd->getAllIncludeFilesRecursively(includedFiles);
-   }
 
-   // use language parser to parse the file
-   parser->parseInput(fileName, convBuf.data(), root, mode, includedFiles);
+// BROOM -- change this to use only clang and not lex
+      
+      // use language parser to parse the file  
+      parser->parseInput(fileName, convBuf.data(), root, mode, includedFiles, true);
+
+   } else { 
+      // use lex parser
+      parser->parseInput(fileName, convBuf.data(), root, mode, includedFiles, false);
+
+   }
 
    // store the Entry tree in a file and create an index to navigate/load entries
    root->createNavigationIndex(rootNav, Doxy_Globals::g_storage, fd, root);
-
 }
 
-//! parse the list of input files
+// parse the list of input files
 void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav)
 {
-
-// #if USE_LIBCLANG
-   static bool clangParsing =  true;         // Config::getBool("clang-parsing");  
-
-   if (clangParsing) {
+   // user specified 
+   static bool clangParsing = Config::getBool("clang-parsing"); 
+ 
+   if (clangParsing) {   
       QSet<QString> processedFiles;      
       QSet<QString> filesToProcess;
       
@@ -9199,8 +9192,7 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
          filesToProcess.insert(s);
       }
 
-      // process source files (and their include dependencies)
-     
+      // process source files (and their include dependencies)     
       for (auto s : Doxy_Globals::g_inputFiles) { 
          bool ambig;
 
@@ -9260,12 +9252,9 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
          }
       }
 
-   } else 
-      // normal pocessing
-
-//  #endif
-
-   {     
+   } else  {
+      // use lex and not clang
+        
       for (auto s : Doxy_Globals::g_inputFiles) { 
 
          bool ambig;

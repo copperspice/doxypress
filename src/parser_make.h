@@ -21,7 +21,7 @@
 #include <QByteArray>
 #include <QStringList>
 
-#include <parserintf.h>
+#include <parser_base.h>
 
 /** \brief Make Language parser using state-based lexical scanning.
  *
@@ -36,7 +36,7 @@ class MakeFileParser : public ParserInterface
       void finishTranslationUnit()  override {}
    
       void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
-                      enum ParserMode mode, QStringList &includeFiles) override;
+                      enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
    
       bool needsPreprocessing(const QByteArray &extension);
 
