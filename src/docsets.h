@@ -83,7 +83,7 @@ class DocSets  : public IndexIntf
    QVector<bool> m_firstNode;
 
    StringMap<QSharedPointer<NodeDef>> m_nodes;
-   StringMap<void *> m_scopes;
+   QSet<QString> m_scopes;
 };
 
 #endif 

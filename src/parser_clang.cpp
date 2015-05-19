@@ -196,15 +196,15 @@ void ClangParser::determineInputFiles(QStringList &files)
 
 void ClangParser::start(const char *fileName, QStringList &includeFiles)
 {
-   static QStringList includePath   = Config::getList("include-path");    
-   static QStringList clangOptions  = Config::getList("clang-options");
+   static QStringList includePath = Config::getList("include-path");    
+   static QStringList clangFlags  = Config::getList("clang-flags");
 
    p->fileName = fileName;
    p->index    = clang_createIndex(0, 0);
    p->curLine  = 1;
    p->curToken = 0;
 
-   char **argv = (char **)malloc(sizeof(char *) * (4 + Doxy_Globals::inputPaths.count() + includePath.count() + clangOptions.count()));
+   char **argv = (char **)malloc(sizeof(char *) * (4 + Doxy_Globals::inputPaths.count() + includePath.count() + clangFlags.count()));
    int argc = 0;
 
    // add include paths for input files  
@@ -222,8 +222,8 @@ void ClangParser::start(const char *fileName, QStringList &includeFiles)
    }
 
    // user specified options
-   for (uint i = 0; i < clangOptions.count(); i++) {
-      argv[argc++] = strdup(clangOptions.at(i).toUtf8());
+   for (uint i = 0; i < clangFlags.count(); i++) {
+      argv[argc++] = strdup(clangFlags.at(i).toUtf8());
    }
 
    // extra options
@@ -301,15 +301,9 @@ void ClangParser::start(const char *fileName, QStringList &includeFiles)
       i++;
    }
 
-// CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, 0, argv, argc, p->ufs, numUnsavedFiles, 
-//                  CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
-
    // let libclang do the actual parsing
    CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, 0, argv, argc, 0, 0, 
                   CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
-
-printf("    (BROOM)   Error Code: %d\n", errorCode);
-
 
    // free arguments
    for (int i = 0; i < argc; ++i) {
@@ -324,12 +318,7 @@ printf("    (BROOM)   Error Code: %d\n", errorCode);
       // show any warnings the compiler produced
       uint n = clang_getNumDiagnostics(p->tu);
 
-
-printf("\n  BROOM  Number of Warnings: %d", n);
-
-
       for (uint i = 0; i != n; ++i) {
-
          CXDiagnostic diag = clang_getDiagnostic(p->tu, i);
          CXString string   = clang_formatDiagnostic(diag, clang_defaultDiagnosticDisplayOptions());
 

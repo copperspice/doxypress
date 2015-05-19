@@ -182,6 +182,7 @@ class MemberDict : public QHash<QString, MemberDef>
 class MemberSDict : public StringMap<QSharedPointer<MemberDef>>
 {
  public:
+   // CopperSpice - can add isCase
    MemberSDict() : StringMap<QSharedPointer<MemberDef>>() {}
    virtual ~MemberSDict() {}
 

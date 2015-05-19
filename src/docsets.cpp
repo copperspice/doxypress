@@ -531,9 +531,9 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
          type = "ns";
       }
 
-      if (m_scopes.find(context->getOutputFileBase()) == 0) {
+      if (! m_scopes.contains(context->getOutputFileBase())) {
          writeToken(m_tts, context, type, lang, scope, 0, decl);
-         m_scopes.insert(context->getOutputFileBase(), (void *)0x8);
+         m_scopes.insert(context->getOutputFileBase());
       }
    }
 }

@@ -1574,15 +1574,15 @@ bool FileDef::isLinkableInProject() const
    return hasDocumentation() && ! isReference() && showFiles;
 }
 
-static void getAllIncludeFilesRecursively(QHash<QString, void *> *filesVisited, QSharedPointer<const FileDef> fd, QStringList &incFiles)
+static void getAllIncludeFilesRecursively(QSet<QString> &filesVisited, QSharedPointer<const FileDef> fd, QStringList &incFiles)
 {
    if (fd->includeFileList()) {
 
       for (auto item : *fd->includeFileList() ) {   
-         if (item.fileDef && ! item.fileDef->isReference() && ! filesVisited->contains(item.fileDef->getFilePath())) {
+         if (item.fileDef && ! item.fileDef->isReference() && ! filesVisited.contains(item.fileDef->getFilePath())) {
 
             incFiles.append(item.fileDef->getFilePath());
-            filesVisited->insert(item.fileDef->getFilePath(), (void *)0x8);
+            filesVisited.insert(item.fileDef->getFilePath());
 
             getAllIncludeFilesRecursively(filesVisited, item.fileDef, incFiles);
          }
@@ -1594,8 +1594,8 @@ void FileDef::getAllIncludeFilesRecursively(QStringList &incFiles) const
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   QHash<QString, void *> includes;
-   ::getAllIncludeFilesRecursively(&includes, self, incFiles);
+   QSet<QString> includes;
+   ::getAllIncludeFilesRecursively(includes, self, incFiles);
 }
 
 QByteArray FileDef::title() const

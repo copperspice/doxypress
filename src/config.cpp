@@ -971,3 +971,14 @@ QStringList Config::getFilePatterns()
 
    return list;
 }
+
+Qt::CaseSensitivity Config::getCase(const QString &name)
+{
+   Qt::CaseSensitivity isCase = Qt::CaseInsensitive;
+
+   if (Config::getBool(name)) {
+      isCase = Qt::CaseSensitive;
+   }
+
+   return isCase;
+}

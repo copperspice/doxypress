@@ -635,13 +635,12 @@ class SearchDefinitionList : public QList<QSharedPointer<Definition>>
 class SearchIndexMap : public StringMap<QSharedPointer<SearchDefinitionList>>
 {
  public:   
-   SearchIndexMap(uint letter) : StringMap<QSharedPointer<SearchDefinitionList>>(Qt::CaseInsensitive), m_letter(letter)
-   {      
-   }
+   SearchIndexMap(uint letter) 
+      : StringMap<QSharedPointer<SearchDefinitionList>>(Qt::CaseInsensitive), m_letter(letter)
+   { }
 
    ~SearchIndexMap()
-   {
-   }
+   { }
 
    void insertDef(QSharedPointer<Definition> d) {
 

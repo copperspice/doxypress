@@ -30,8 +30,21 @@
 template<class T>
 class StringMap
 {
+
  private:  
-   QMap<QString, T> m_dict;
+   class Compare { 
+      public:
+         Compare(Qt::CaseSensitivity isCase) : m_isCase(isCase) { }
+
+         bool operator()(const QString &a, const QString &b) const {
+            return a.compare(b, m_isCase) < 0;        
+         }    
+
+      private:
+         Qt::CaseSensitivity m_isCase;  
+   };
+
+   QMap<QString, T, Compare> m_dict;
    
  public:
    /*! Create an ordered dictionary.   
@@ -39,19 +52,12 @@ class StringMap
     *         in a case sensitive way.
     */
 
-   using iterator = typename QMap<QString, T>::iterator;
-   using const_iterator = typename QMap<QString, T>::const_iterator;
-   
-   StringMap(Qt::CaseSensitivity foo = Qt::CaseSensitive) {
+   using iterator = typename QMap<QString, T, Compare>::iterator;
+   using const_iterator = typename QMap<QString, T, Compare>::const_iterator;
 
-      if (foo) {
-         // BroomCS - add additional code for case sensitive
-         // m_dict = QMap<QString, T>;
-      } else { 
-         // m_dict = QMap<QString, T>;
-      }    
+   StringMap(Qt::CaseSensitivity isCase = Qt::CaseSensitive) : m_dict(isCase) {     
    }
-
+   
    /*! Destroys the dictionary */
    virtual ~StringMap() {            
    }

@@ -430,6 +430,7 @@ hr.footer {
 table.memberdecls {
    border-spacing: 0px;
    padding: 0px;
+   margin-bottom: 15px;
 }
 
 .memberdecls td, .fieldtable tr {
@@ -672,7 +673,7 @@ span.mlabel {
 
 /* @end */
 
-/* these are for tree view inside a (index) page */
+/* these are for a tree view inside a (index) page */
 
 div.directory {
    margin: 10px 0px;
@@ -681,32 +682,32 @@ div.directory {
    width: 100%;
 }
 
-.directory table {
+div.directory table {
    border-collapse:collapse;
 }
 
-.directory td {
+div.directory td {
    margin: 0px;
    padding: 0px;
    vertical-align: top;
 }
 
-.directory td.entry {
+div.directory td.entry {
    white-space: nowrap;
    padding-right: 6px;
    padding-top: 2px;
    padding-bottom: 2px;
 }
 
-.directory td.entry a {
+div.directory td.entry a {
    outline:none;
 }
 
-.directory td.entry a img {
+div.directory td.entry a img {
    border: none;
 }
 
-.directory td.desc {
+div.directory td.desc {
    width: 100%;
    padding-left: 6px;
    padding-right: 6px;
@@ -714,23 +715,23 @@ div.directory {
    border-left: 1px solid rgba(0,0,0,0.05);
 }
 
-.directory tr.even {
+div.directory tr.even {
    padding-left: 6px;
    background-color: ##F8;
 }
 
-.directory img {
+div.directory img {
    vertical-align: -30%;
 }
 
-.directory .levels {
+div.directory .levels {
    white-space: nowrap;
    width: 100%;
    text-align: right;
    font-size: 9pt;
 }
 
-.directory .levels span {
+div.directory .levels span {
    cursor: pointer;
    padding-left: 2px;
    padding-right: 2px;
@@ -806,9 +807,36 @@ div.directory {
    display: inline-block;
 }
 
+/* table showing all members  */ 
 table.directory {
    font: 400 14px/22px Roboto,sans-serif;
 }
+
+table.directory td {
+   margin: 0px;
+   padding: 0px;
+   vertical-align: top;
+}
+
+table.directory td.entry {  
+   padding-right: 6px;
+   padding-top: 2px;
+   padding-bottom: 2px;
+}
+
+table.directory td.entry a {
+   outline:none;
+}
+
+table.directory td.entry a img {
+   border: none;
+}
+
+table.directory tr.even {
+   padding-left: 6px;
+   background-color: ##F8;
+}
+
 
 /* @end */
 

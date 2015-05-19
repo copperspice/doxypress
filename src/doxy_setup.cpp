@@ -128,7 +128,8 @@ void initDoxyPress()
    Doxy_Globals::globalScope       = QMakeShared<NamespaceDef>("<globalScope>", 1, 1, "<globalScope>");
 
    Doxy_Globals::namespaceSDict    = new NamespaceSDict();
-   Doxy_Globals::classSDict        = new ClassSDict();
+   Doxy_Globals::classSDict        = new ClassSDict(Config::getCase("sort-classes-case-sensitive"));
+
    Doxy_Globals::hiddenClasses     = new ClassSDict();  
    Doxy_Globals::pageSDict         = new PageSDict();          // all doc pages
    Doxy_Globals::exampleSDict      = new PageSDict();          // all examples
@@ -434,7 +435,7 @@ struct CommandLine parseCommandLine(QStringList argList)
 
 void readConfiguration(struct CommandLine cmdArgs)
 {      
-   // Parse project file
+   // parse project file
    printf("\nDoxyPress Version: %s\n\n", versionString);   
       
    if (cmdArgs.genLayout) {
@@ -475,7 +476,7 @@ void readConfiguration(struct CommandLine cmdArgs)
    // step 1 
    if (! Config::parseConfig(cmdArgs.configName) ) {
       fprintf(stderr, "\n\nIssue parsing the project file.\nPlease submit a bug report to " 
-                  " the developers at info@copperspice.com\n");
+                  "the developers at info@copperspice.com\n");
 
       exit(1);
    }

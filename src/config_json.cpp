@@ -167,6 +167,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("sort-constructors-first",   struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("sort-group-names",          struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("sort-by-scope-name",        struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("sort-class-case-sensitive", struc_CfgBool   { true,           DEFAULT } ); //   BROOM - FIX - WRONG
   
    m_cfgBool.insert("generate-bug-list",         struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("generate-deprecate-list",   struc_CfgBool   { true,           DEFAULT } );
@@ -231,7 +232,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("use-htags",                 struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("verbatim-headers",          struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("clang-parsing",             struc_CfgBool   { false,          DEFAULT } );
-   m_cfgList.insert("clang-options",             struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("clang-flags",               struc_CfgList   { QStringList(),  DEFAULT } );
 
    // tab 2 -index
    m_cfgBool.insert("alpha-index",               struc_CfgBool   { true,           DEFAULT } );

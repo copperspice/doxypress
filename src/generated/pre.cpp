@@ -2606,13 +2606,14 @@ class DefineManager
        *  @param fileName The name of the include file
        */
       void addInclude(const char *fileName) {
-         m_includedFiles.insert(fileName, (void *)0x8);
+         m_includedFiles.insert(fileName);
       }
-      void collectDefines(DefineDict *dict, QHash<QString, void *> &includeStack);
+
+      void collectDefines(DefineDict *dict, QSet<QString> &includeStack);
 
     private:
       DefineDict m_defines;
-      QHash<QString, void *> m_includedFiles;
+      QSet<QString> m_includedFiles;
    };
 
  public:
@@ -2653,6 +2654,7 @@ class DefineManager
       //printf("DefineManager::endContext()\n");
       m_contextDefines.clear();
    }
+
    /** Add an included file to the current context.
     *  If the file has been pre-processed already, all defines are added
     *  to the context.
@@ -2662,15 +2664,17 @@ class DefineManager
       if (fileName == 0) {
          return;
       }
-      //printf("DefineManager::addFileToContext(%s)\n",fileName);
+
       DefinesPerFile *dpf = m_fileMap.value(fileName);
+
       if (dpf == 0) {
-         //printf("New file!\n");
+         //printf("New file\n");
          dpf = new DefinesPerFile;
          m_fileMap.insert(fileName, dpf);
+
       } else {
-         //printf("existing file!\n");
-         QHash<QString, void *> includeStack;
+         //printf("existing file\n");
+         QSet<QString> includeStack;
          dpf->collectDefines(&m_contextDefines, includeStack);
       }
    }
@@ -2737,9 +2741,11 @@ class DefineManager
       if (fileName == 0) {
          return;
       }
+
       DefinesPerFile *dpf = m_fileMap.value(fileName);
+
       if (dpf) {
-         QHash<QString, void *> includeStack;
+         QSet<QString> includeStack;
          dpf->collectDefines(dict, includeStack);
       }
    }
@@ -2774,17 +2780,16 @@ DefineManager *DefineManager::theInstance = 0;
  *  @param includeStack The stack of includes, used to stop recursion in
  *         case there is a cyclic include dependency.
  */
-void DefineManager::DefinesPerFile::collectDefines(
-   DefineDict *dict, QHash<QString, void *> &includeStack)
+void DefineManager::DefinesPerFile::collectDefines(DefineDict *dict, QSet<QString> &includeStack)
 { 
    {        
-      for (auto di = m_includedFiles.begin(); di != m_includedFiles.end(); ++di) {
-         QByteArray incFile = di.key().toUtf8();
+      for (auto di : m_includedFiles) {
+         QByteArray incFile = di.toUtf8();
          
          DefinesPerFile *dpf = DefineManager::instance().find(incFile);
 
          if (dpf && ! includeStack.contains(incFile)) {          
-            includeStack.insert(incFile, (void *)0x8);
+            includeStack.insert(incFile);
             dpf->collectDefines(dict, includeStack);
          }
       }
@@ -2794,12 +2799,12 @@ void DefineManager::DefinesPerFile::collectDefines(
       for (auto def : m_defines)  {
          A_Define *d = dict->value(def->name);
 
-         if (d != 0) { // redefine
+         if (d != 0) { 
+            // redefine
             dict->remove(d->name);
          }
 
          dict->insert(def->name, def);
-         //printf("  adding define %s\n",def->name.data());
       }
    }
 }
@@ -2913,7 +2918,7 @@ static void setCaseDone(bool value)
    g_levelGuard[g_level - 1] = value;
 }
 
-static QHash<QString, void *> g_allIncludes;
+static QSet<QString> g_allIncludes;
 
 static FileState *checkAndOpenFile(const QByteArray &fileName, bool &alreadyIncluded)
 {
@@ -2939,7 +2944,7 @@ static FileState *checkAndOpenFile(const QByteArray &fileName, bool &alreadyIncl
             return 0;
          }
 
-         g_allIncludes.insert(absName, (void *)0x8);
+         g_allIncludes.insert(absName);
       }
 
       // check include stack for absName

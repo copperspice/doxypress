@@ -97,7 +97,7 @@ struct DocParserContext {
    bool hasReturnCommand;
 
    QSharedPointer<MemberDef> memberDef;
-   QHash<QString, void *> paramsFound;
+   QSet<QString> paramsFound;
 
    bool isExample;
    QByteArray   exampleName;
@@ -129,7 +129,7 @@ static QByteArray              s_relPath;
 
 static bool                    s_hasParamCommand;
 static bool                    s_hasReturnCommand;
-static QHash<QString, void *>  s_paramsFound;
+static QSet<QString>           s_paramsFound;
 
 static QSharedPointer<MemberDef> s_memberDef;
 
@@ -412,7 +412,7 @@ static void checkArgumentName(const QByteArray &name, bool isParam)
          }
 
          if (aName == argName) {
-            s_paramsFound.insert(aName, (void *)(0x8));
+            s_paramsFound.insert(aName);
             found = true;
             break;
          }
@@ -1996,7 +1996,7 @@ void DocCopy::parse(QList<DocNode *> &children)
          bool  hasParamCommand  = s_hasParamCommand;
          bool  hasReturnCommand = s_hasReturnCommand;
 
-         QHash<QString, void *>  paramsFound  = s_paramsFound;
+         QSet<QString> paramsFound  = s_paramsFound;
  
          docParserPushContext(false);
          s_scope = def;
@@ -2025,10 +2025,8 @@ void DocCopy::parse(QList<DocNode *> &children)
 
             hasParamCommand  = hasParamCommand  || s_hasParamCommand;
             hasReturnCommand = hasReturnCommand || s_hasReturnCommand;
-                                 
-            for (auto iter = s_paramsFound.begin(); iter != s_paramsFound.end(); ++iter) { 
-               paramsFound.insert(iter.key(), iter.value());
-            }
+                                            
+            paramsFound.unite(s_paramsFound);
          }
 
          if (m_copyDetails) {
@@ -2038,9 +2036,7 @@ void DocCopy::parse(QList<DocNode *> &children)
             hasParamCommand  = hasParamCommand  || s_hasParamCommand;
             hasReturnCommand = hasReturnCommand || s_hasReturnCommand;            
 
-            for (auto iter = s_paramsFound.begin(); iter != s_paramsFound.end(); ++iter) { 
-               paramsFound.insert(iter.key(), iter.value());
-            }
+            paramsFound.unite(s_paramsFound);
          }
 
          s_copyStack.removeOne(def);
@@ -2053,7 +2049,8 @@ void DocCopy::parse(QList<DocNode *> &children)
          s_hasReturnCommand = hasReturnCommand;
          s_paramsFound      = paramsFound;
 
-      } else { // oops, recursion
+      } else { 
+         // oops, recursion
          warn_doc_error(s_fileName, doctokenizerYYlineno, "recursive call chain of \\copydoc commands detected at %d\n",
                         doctokenizerYYlineno);
       }

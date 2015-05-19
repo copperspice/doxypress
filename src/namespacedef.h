@@ -40,6 +40,7 @@ class OutputList;
 class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
 {
  public:
+   // CopperSpice - can add isCase
    NamespaceSDict() : StringMap<QSharedPointer<NamespaceDef>>() {}
    ~NamespaceSDict() {}
 

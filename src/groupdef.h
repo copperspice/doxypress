@@ -218,6 +218,7 @@ class GroupDef : public Definition
 class GroupSDict : public StringMap<QSharedPointer<GroupDef>>
 {
  public:
+   // CopperSpice - can add isCase
    GroupSDict() : StringMap<QSharedPointer<GroupDef>>() {}
    virtual ~GroupSDict() {}
 

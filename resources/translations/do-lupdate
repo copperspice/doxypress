@@ -1,0 +1,4 @@
+# leave obsolete
+../../deploy/lupdate  ../../src/*.cpp    ../../src/*.h   -ts doxypress_en.ts -ts doxypress_fr.ts -ts doxypress_de.ts -ts doxypress_es.ts
+
+ 

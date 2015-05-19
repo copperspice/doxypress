@@ -36,6 +36,7 @@ struct Example {
 class ExampleSDict : public StringMap<QSharedPointer<Example>>
 {
  public:
+   // CopperSpice - can add isCase
    ExampleSDict() : StringMap<QSharedPointer<Example>>() {}
    ~ExampleSDict() {}
 

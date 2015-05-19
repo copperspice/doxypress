@@ -76,6 +76,7 @@ class TextGeneratorOLImpl : public TextGeneratorIntf
 {
  public:
    virtual ~TextGeneratorOLImpl() {}
+
    TextGeneratorOLImpl(OutputDocInterface &od);
    void writeString(const char *s, bool keepSpaces) const;
    void writeBreak(int indent) const;
@@ -96,16 +97,15 @@ class LetterToIndexMap : public LongMap<QSharedPointer<T>>
    template<class E>
    void insertElement(uint letter, E elem) {
 
-      if (! this->contains(letter)) {      
-         QSharedPointer<T> data (new T(letter));
-         this->insert(letter, data);
-
-         data->insertDef(elem);
-
-      }  else  {
+      if (this->contains(letter)) {      
          auto data = this->find(letter);
          data->insertDef(elem);
 
+      } else {    
+         QSharedPointer<T> data (new T(letter));
+
+         this->insert(letter, data);
+         data->insertDef(elem);
       }     
    }
 

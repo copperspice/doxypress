@@ -39,6 +39,8 @@ class Config
       static void setBool(const QString &name, bool data);
       static void setList(const QString &name, const QStringList &data);
 
+      static Qt::CaseSensitivity getCase(const QString &name);
+
       enum DataSource { DEFAULT, PROJECT }; 
 
       struct struc_CfgBool {
@@ -66,8 +68,7 @@ class Config
          DataSource type;
       };
 
-   private:    
- 
+   private:     
       static QHash<QString, struc_CfgBool>   m_cfgBool;
       static QHash<QString, struc_CfgInt>    m_cfgInt;  
       static QHash<QString, struc_CfgEnum>   m_cfgEnum;

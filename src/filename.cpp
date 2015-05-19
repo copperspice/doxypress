@@ -130,19 +130,3 @@ int FileName::compareListValues(const FileDef *f1, const FileDef *f2) const
 FileNameIterator::FileNameIterator(const FileName &fname) : QListIterator<QSharedPointer<FileDef>>(fname)
 {
 }
-
-// ** 
-static Qt::CaseSensitivity getCaseSenseNames()
-{
-   if (Config::getBool("case-sense-names")) {
-      return Qt::CaseSensitive;
-   } else {
-      return Qt::CaseInsensitive;
-   }   
-}
-
-// **
-FileNameDict::FileNameDict() : StringMap<QSharedPointer<FileName>>(getCaseSenseNames())
-{
-}
-

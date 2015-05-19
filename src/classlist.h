@@ -37,7 +37,10 @@ class ClassDict : public QHash<QString, ClassDef>
 class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
 {
  public:
-   ClassSDict() : StringMap<QSharedPointer<ClassDef>>() {}
+   ClassSDict(Qt::CaseSensitivity isCase = Qt::CaseSensitive) 
+      : StringMap<QSharedPointer<ClassDef>>(isCase)
+   {}
+
    ~ClassSDict() {}
 
    void writeDeclaration(OutputList &ol, const ClassDef::CompoundType *filter = 0,

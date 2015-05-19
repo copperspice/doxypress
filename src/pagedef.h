@@ -109,6 +109,7 @@ class PageDef : public Definition
 class PageSDict : public StringMap<QSharedPointer<PageDef>>
 {
  public:
+   // CopperSpice - can add isCase
    PageSDict() : StringMap<QSharedPointer<PageDef>>() {}
    virtual ~PageSDict() {}
 

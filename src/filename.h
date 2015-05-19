@@ -21,6 +21,7 @@
 #include <QHash>
 #include <QList>
 
+#include <config.h>
 #include <filedef.h>
 
 /** Class representing all files with a certain base name */
@@ -54,11 +55,15 @@ class FileNameIterator : public QListIterator<QSharedPointer<FileDef> >
    FileNameIterator(const FileName &list);
 };
 
-/** Unsorted dictionary of FileName objects. */
+/** map of FileName objects. */
 class FileNameDict : public StringMap<QSharedPointer<FileName>>
 {
+
  public:
-   FileNameDict();
+   FileNameDict()
+      : StringMap<QSharedPointer<FileName>>(Config::getCase("case-sense-names"))
+   { }
+
    ~FileNameDict() {}
 };
 

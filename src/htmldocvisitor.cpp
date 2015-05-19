@@ -215,52 +215,32 @@ void HtmlDocVisitor::visit(DocSymbol *s)
    }
 }
 
-void HtmlDocVisitor::writeObfuscatedMailAddress(const QByteArray &url)
-{
-   m_t << "<a href=\"#\" onclick=\"location.href='mai'+'lto:'";
-   uint i;
-   int size = 3;
-
-   for (i = 0; i < url.length();) {
-      m_t << "+'" << url.mid(i, size) << "'";
-      i += size;
-      if (size == 3) {
-         size = 2;
-      } else {
-         size = 3;
-      }
-   }
-   m_t << "; return false;\">";
-}
-
 void HtmlDocVisitor::visit(DocURL *u)
 {
    if (m_hide) {
       return;
    }
 
-   if (u->isEmail()) { // mail address
-      QByteArray url = u->url();
-      writeObfuscatedMailAddress(url);
-      uint size = 5, i;
+   if (u->isEmail()) { 
+      // mail address with no mailto
 
-      for (i = 0; i < url.length();) {
-         filter(url.mid(i, size));
-         if (i < url.length() - size) {
-            m_t << "<span style=\"display: none;\">.nosp@m.</span>";
-         }
-         i += size;
-         if (size == 5) {
-            size = 4;
-         } else {
-            size = 5;
-         }
-      }
+      QByteArray url = "mailto:" + u->url();
+      m_t << "<a href=\"" << convertToXML(url) << "\"" << ">" ;
+      filter(u->url());
       m_t << "</a>";
 
-   } else { // web address
-      m_t << "<a href=\"";
-      m_t << u->url() << "\">";
+printf("BROOM  Email Addr (no mailto)  %s \n", url.constData() );
+
+
+   } else { 
+      // web address defined with no <a>
+
+
+QByteArray url = u->url();
+printf("BROOM URL in plain text: %s\n", url.constData() );
+
+
+      m_t << "<a href=\"" << u->url() << "\">";
       filter(u->url());
       m_t << "</a>";
    }
@@ -1321,12 +1301,14 @@ void HtmlDocVisitor::visitPost(DocHtmlList *s)
    if (m_hide) {
       return;
    }
+
    if (s->type() == DocHtmlList::Ordered) {
       m_t << "</ol>";
    } else {
       m_t << "</ul>";
    }
-   if (!s->isPreformatted()) {
+
+   if (! s->isPreformatted()) {
       m_t << "\n";
    }
    forceStartParagraph(s);
@@ -1337,8 +1319,10 @@ void HtmlDocVisitor::visitPre(DocHtmlListItem *i)
    if (m_hide) {
       return;
    }
+
    m_t << "<li" << htmlAttribsToString(i->attribs()) << ">";
-   if (!i->isPreformatted()) {
+
+   if (! i->isPreformatted()) {
       m_t << "\n";
    }
 }
@@ -1524,12 +1508,12 @@ void HtmlDocVisitor::visitPre(DocHRef *href)
    }
 
    if (href->url().left(7) == "mailto:") {
-      writeObfuscatedMailAddress(href->url().mid(7));
+      QByteArray url = href->url();
+      m_t << "<a href=\"" << convertToXML(url) << "\"" << htmlAttribsToString(href->attribs()) << ">";
 
    } else {
       QByteArray url = correctURL(href->url(), href->relPath());
-      m_t << "<a href=\"" << convertToXML(url)  << "\""
-          << htmlAttribsToString(href->attribs()) << ">";
+      m_t << "<a href=\"" << convertToXML(url) << "\"" << htmlAttribsToString(href->attribs()) << ">";
    }
 }
 
@@ -2068,6 +2052,7 @@ void HtmlDocVisitor::filter(const char *str)
 
    while (*p) {
       c = *p++;
+
       switch (c) {
          case '<':
             m_t << "&lt;";

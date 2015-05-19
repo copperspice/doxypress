@@ -50,6 +50,7 @@ class MemberNameIterator : public QListIterator<QSharedPointer<MemberDef>>
 class MemberNameSDict : public StringMap<QSharedPointer<MemberName>>
 {
  public:
+   // CopperSpice - can add isCase   
    MemberNameSDict() : StringMap<QSharedPointer<MemberName>>() {}
    ~MemberNameSDict() {}
 
@@ -104,6 +105,7 @@ class MemberNameInfoIterator : public QListIterator<MemberInfo>
 class MemberNameInfoSDict : public StringMap<QSharedPointer<MemberNameInfo>>
 {
  public:
+   // CopperSpice - can add isCase
    MemberNameInfoSDict() : StringMap<QSharedPointer<MemberNameInfo>>() {}
    ~MemberNameInfoSDict() {}
 

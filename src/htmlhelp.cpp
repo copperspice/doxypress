@@ -47,6 +47,7 @@ struct IndexField {
 class IndexFieldSDict : public StringMap<QSharedPointer<IndexField>>
 {
  public:
+   // CopperSpice - can add isCase
    IndexFieldSDict() : StringMap<QSharedPointer<IndexField>>() {}
    ~IndexFieldSDict() {}
 
@@ -296,8 +297,7 @@ HtmlHelp::~HtmlHelp()
 static QHash<QString, QByteArray *> s_languageDict;         
 
 /*! This will create a contents file (index.hhc) and a index file (index.hhk)
- *  and write the header of those files.
- *  It also creates a project file (index.hhp)
+ *  and write the header of those files. Also creates a project file (index.hhp)
  *  \sa finalize()
  */
 void HtmlHelp::initialize()
@@ -453,24 +453,24 @@ void HtmlHelp::initialize()
    s_languageDict.insert("serbian-cyrillic", new QByteArray("0xC1A Serbian (Serbia, Cyrillic)"));
 }
 
-
 static QByteArray getLanguageString()
 {
-   if (!theTranslator->idLanguage().isEmpty()) {
+   if (! theTranslator->idLanguage().isEmpty()) {
       QByteArray *s = s_languageDict[theTranslator->idLanguage()];
+
       if (s) {
          return *s;
       }
    }
+
    // default language
    return "0x409 English (United States)";
 }
 
-
-
 void HtmlHelp::createProjectFile()
 {
-   /* Write the project file */
+   // Write the project file
+
    QString fName = Config::getString("html-output") + "/index.hhp";
    QFile f(fName);
 

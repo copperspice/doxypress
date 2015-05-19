@@ -167,6 +167,7 @@ class FilePair
 class FilePairDict : public StringMap<QSharedPointer<FilePair>>
 {
  public:
+   // CopperSpice - can add isCase 
    FilePairDict() : StringMap<QSharedPointer<FilePair>>() {}
 
  private:
@@ -233,6 +234,7 @@ class DirRelation
 class DirSDict : public StringMap<QSharedPointer<DirDef>>
 {
  public:
+   // CopperSpice - can add isCase
    DirSDict() : StringMap<QSharedPointer<DirDef>>() {}
 
    int compareMapValues(const QSharedPointer<DirDef> &item1, const QSharedPointer<DirDef> &item2) const override {

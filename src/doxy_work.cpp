@@ -199,7 +199,7 @@ static STLInfo g_stlinfo[] = {
 
 namespace Doxy_Work{
 
-   // BROOM
+   // BROOM - fake ginger
    void do_fake_ginger(QSharedPointer<EntryNav> rootNav);
 
    void addClassToContext(QSharedPointer<EntryNav> rootNav);
@@ -207,7 +207,7 @@ namespace Doxy_Work{
 
    void addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileDef> ifd, QSharedPointer<Entry> root);
    void addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<EntryNav> rootNav, QSharedPointer<ClassDef> cd, 
-                                                  QByteArray const &rname);
+                  QByteArray const &rname);
 
    void addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<ClassDef> cd, const QByteArray &rname, bool isFriend);
 
@@ -215,10 +215,10 @@ namespace Doxy_Work{
    void addMembersToMemberGroup();
 
    void addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<MemberDef> md, const char *funcDecl,
-                      ArgumentList *al, bool over_load, NamespaceSDict *nl = 0);
+                  ArgumentList *al, bool over_load, NamespaceSDict *nl = 0);
 
    void addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<MemberDef> md, const char *funcDecl, ArgumentList *al,
-                             bool over_load, NamespaceSDict *);
+                  bool over_load, NamespaceSDict *);
 
    void addPageToContext(QSharedPointer<PageDef> pd, QSharedPointer<EntryNav> rootNav);
    void addListReferences();
@@ -543,7 +543,7 @@ void processFiles()
       }
    }
   
-   // Handle layout file
+   // handle layout file
    LayoutDocManager::instance().init();
  
    QString layoutFileName = Config::getString("layout-file");
@@ -562,7 +562,6 @@ void processFiles()
       warn_uncond("Unable to open layout file '%s' for reading\n", qPrintable(layoutFileName));
 
    }
-
    
    // prevent search in the output directories
    QStringList exclPatterns = Config::getList("exclude-patterns");
@@ -672,7 +671,6 @@ void processFiles()
    do_fake_ginger(rootNav);
 
 
-
    Doxy_Globals::g_stats.begin("Associating documentation with classes\n");
    buildClassDocList(rootNav);
 
@@ -702,10 +700,8 @@ void processFiles()
    findEnums(rootNav);
    Doxy_Globals::g_stats.end();
 
-   // Since buildVarList calls isVarWithConstructor
-   // and this calls getResolvedClass we need to process
-   // typedefs first so the relations between classes via typedefs
-   // are properly resolved. See bug 536385 for an example.
+   // Since buildVarList calls isVarWithConstructor and this calls getResolvedClass we need to process typedefs
+   // first so the relations between classes via typedefs are properly resolved. See bug 536385 for an example.
 
    Doxy_Globals::g_stats.begin("Searching for documented typedefs\n");
    buildTypedefList(rootNav);
@@ -713,6 +709,7 @@ void processFiles()
 
    Doxy_Globals::g_stats.begin("Searching for members imported via using declarations\n");
    findUsingDeclImports(rootNav);
+
    // this should be after buildTypedefList in order to properly import used typedefs
    findUsingDeclarations(rootNav);
    Doxy_Globals::g_stats.end();
@@ -725,10 +722,12 @@ void processFiles()
    buildVarList(rootNav);
    Doxy_Globals::g_stats.end();
 
+   // UNO IDL
    Doxy_Globals::g_stats.begin("Building interface member list\n");
-   buildInterfaceAndServiceList(rootNav);                   // UNO IDL
+   buildInterfaceAndServiceList(rootNav);                  
 
-   Doxy_Globals::g_stats.begin("Building member list\n");   // using class info only !
+   // using class info only
+   Doxy_Globals::g_stats.begin("Building member list\n");   
    buildFunctionList(rootNav);
    Doxy_Globals::g_stats.end();
 
@@ -809,7 +808,7 @@ void processFiles()
    delete Doxy_Globals::g_storage;
    Doxy_Globals::g_storage = 0;
 
-
+   //
    QDir thisDir;
    if (! Doxy_Globals::tempB_FName.isEmpty()) {
       thisDir.remove(Doxy_Globals::tempB_FName);

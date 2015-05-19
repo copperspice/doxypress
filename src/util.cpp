@@ -77,6 +77,8 @@ static QHash<QString, QSharedPointer<MemberDef>>   s_resolvedTypedefs;
 static QHash<QString, QSharedPointer<Definition>>  s_visitedNamespaces;
 static QHash<QString, int>                         s_extLookup;
 
+static QSet<QString> s_aliasesProcessed;
+
 static QCache<QPair<const FileNameDict *, QString>, FindFileCacheElem> s_findFileDefCache;
 
 // forward declaration
@@ -888,7 +890,7 @@ bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QS
 bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item,
                                  const QByteArray &explicitScopePart = "")
 {
-   static QHash<QString, void *> visitedDict;
+   static QSet<QString> visitedDict;
 
    if (nl) { 
       // check used namespaces for the class 
@@ -911,7 +913,7 @@ bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<FileDe
          QByteArray key = und->name();
 
          if (! visitedDict.contains(key)) {
-            visitedDict.insert(key, (void *)0x08);
+            visitedDict.insert(key);
 
             if (accessibleViaUsingNamespace(&(und->getUsedNamespaces()), fileScope, item, explicitScopePart)) {             
                return true;
@@ -6927,15 +6929,13 @@ QByteArray parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<M
    return result;
 }
 
-static QHash<QString, void *> aliasesProcessed;
-
 static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion = false);
 
 struct Marker {
    Marker(int p, int n, int s) : pos(p), number(n), size(s) {}
-   int pos; // position in the string
-   int number; // argument number
-   int size; // size of the marker
+   int pos;        // position in the string
+   int number;     // argument number
+   int size;       // size of the marker
 };
 
 /** For a string \a s that starts with a command name, returns the character
@@ -7109,16 +7109,16 @@ static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
          aliasText = Doxy_Globals::aliasDict.value(cmdNoArgs + "{1}");
 
          if (! aliasText.isEmpty()) {
-            cmd = cmdNoArgs + "{1}";
+            cmd  = cmdNoArgs + "{1}";
             args = escapeCommas(args);    // everything is seen as one argument
          }
       }
      
-      if ((allowRecursion || ! aliasesProcessed.contains(cmd)) && ! aliasText.isEmpty()) { 
+      if ((allowRecursion || ! s_aliasesProcessed.contains(cmd)) && ! aliasText.isEmpty()) { 
          // expand the alias
          
          if (! allowRecursion) {
-            aliasesProcessed.insert(cmd, (void *)0x8);
+            s_aliasesProcessed.insert(cmd);
          }
 
          QByteArray val = aliasText;
@@ -7127,8 +7127,8 @@ static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
          }
 
          result += expandAliasRec(val);
-         if (!allowRecursion) {
-            aliasesProcessed.remove(cmd);
+         if (! allowRecursion) {
+            s_aliasesProcessed.remove(cmd);
          }
 
          p = i + len;
@@ -7209,7 +7209,7 @@ QByteArray resolveAliasCmd(const QByteArray aliasCmd)
 {
    QByteArray result;
 
-   aliasesProcessed.clear(); 
+   s_aliasesProcessed.clear(); 
    result = expandAliasRec(aliasCmd);
    
    return result;
@@ -7218,10 +7218,10 @@ QByteArray resolveAliasCmd(const QByteArray aliasCmd)
 QByteArray expandAlias(const QByteArray &aliasName, const QByteArray &aliasValue)
 {
    QByteArray result;
-   aliasesProcessed.clear();
+   s_aliasesProcessed.clear();
 
    // avoid expanding this command recursively
-   aliasesProcessed.insert(aliasName, (void *)0x8);
+   s_aliasesProcessed.insert(aliasName);
 
    // expand embedded commands   
    result = expandAliasRec(aliasValue);

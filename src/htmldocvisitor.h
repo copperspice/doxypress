@@ -140,8 +140,7 @@ class HtmlDocVisitor : public DocVisitor
    //--------------------------------------
    // helper functions
    //--------------------------------------
-
-   void writeObfuscatedMailAddress(const QByteArray &url);
+  
    void filter(const char *str);
    void filterQuotedCdataAttr(const char *str);
 

@@ -61,8 +61,8 @@ template <class T>
 void SortedList<T>::inSort(const T &data)
 {
    typename QList<T>::iterator location;   
-   location = std::lower_bound(this->begin(), this->end(), data, [](const T &temp1, const T &temp2)
-                  { return compareListValues(temp1, temp2) < 0; } );
+   location = std::lower_bound(this->begin(), this->end(), data, 
+         [](const T &temp1, const T &temp2){ return compareListValues(temp1, temp2) < 0; } );
 
    this->insert(location, data);  
 }
