@@ -4898,7 +4898,7 @@ bool hasVisibleRoot(SortedList<BaseClassDef *> *bcl)
 // note that this function is not reentrant due to the use of static growBuf!
 QByteArray escapeCharsInString(const QString &name, bool allowDots, bool allowUnderscore)
 {
-   static bool caseSenseNames    = Config::getBool("case-sense-names");
+   static bool caseSenseNames    = Config::getBool("case-sensitive-fname");
    static bool allowUnicodeNames = Config::getBool("allow-unicode-names");
    static GrowBuf growBuf;
 
@@ -8222,3 +8222,23 @@ QByteArray stripPrefix(QByteArray input, const char *prefix)
 
    return retval;
 }
+
+Protection getProtection(const char *visibility)
+{
+   Protection retval; 
+
+   if (stricmp(visibility, "public") == 0) {
+      retval = Public;
+
+   } else if (stricmp(visibility, "protected") == 0) {
+      retval = Protected;
+
+   } else if (stricmp(visibility, "private") == 0) {
+      retval = Private; 
+
+   } 
+
+   return retval;
+}
+
+

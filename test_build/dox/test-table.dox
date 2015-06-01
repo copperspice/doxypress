@@ -14,7 +14,7 @@
 *************************************************************************/
 
 /**
-\page table-test  Table Test (with blank rows) 
+\page table-test  Table Test (blank rows) 
 
 The following table has blank rows in the source. This caused layout issues and has been resolved and works properly in DoxyPress. The blank rows are not visible
 in the table outoput as shown below.
@@ -25,27 +25,27 @@ in the table outoput as shown below.
    <tr><th width="225">System</th><th>Information</th></tr>
  
    <tr>
-      <td>\ref  metaobjects-c  "Meta Object System"</td>
+      <td>\subpage metaobjects-c  "Meta Object System"</td>
       <td>Overview of the Meta Object System and introspection</td>
    </tr> 
 
    <tr>
-      <td>\ref object-model-c "Object Model"</td>
+      <td>\subpage object-model-c "Object Model"</td>
       <td>Overview of the Object Model System</td>
    </tr> 
 
    <tr>
-      <td>\ref object-trees-c "Object Trees"</td>
+      <td>\subpage object-trees-c</td>
       <td>Overview about the parent-child relationship and object ownership</td>
 
    </tr>  
    <tr>
-      <td>\ref  properties-c "Property System "</td>
+      <td>\subpage  properties-c</td>
       <td>Overview of the Property System</td>
    </tr> 
 
    <tr>
-      <td>\ref signals-slots-c "Signals & Slots"</td>
+      <td>\subpage signals-slots-c</td>
       <td>Overview of Signals and Slots</td>
    </tr>
 </table>
@@ -54,44 +54,44 @@ in the table outoput as shown below.
 
 
 /**  
-\page metaobjects-c
+\page metaobjects-c Meta Object System
 
-Documentation goes here. . . 
-
-*/
-
-
-/**  
-\page object-model-c
-
-Documentation goes here. . . 
-
+Meta object system documentation goes here <b>. . .</b> 
 
 */
 
 
 /**  
-\page object-trees-c
+\page object-model-c  Object Model
 
-Documentation goes here. . . 
+Object model documentation goes here <b>. . .</b> 
 
 
 */
 
 
 /**  
-\page properties-c
+\page object-trees-c Object Trees
 
-Documentation goes here. . . 
+Documentation goes here <b>. . .</b>  
 
 
 */
 
 
 /**  
-\page signals-slots-c
+\page properties-c Property System
 
-Documentation goes here. . . 
+Documentation goes here <b>. . .</b>  
+
+
+*/
+
+
+/**  
+\page signals-slots-c Signals & Slots
+ 
+Signals & Slots documentation goes here<b>. . .</b> 
 
 
 */

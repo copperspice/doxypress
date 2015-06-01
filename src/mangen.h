@@ -22,6 +22,7 @@
 #include <QFile>
 #include <QString>
 
+#include <language.h>
 #include <outputgen.h>
 
 /** Generator for Man page output. */
@@ -284,11 +285,11 @@ class ManGenerator : public OutputGenerator
       }
    }
 
-   void startDescTable(const char *t) {
-      startSimpleSect(EnumValues, 0, 0, t);
+   void startEnumTable() {
+      startSimpleSect(EnumValues, 0, 0, theTranslator->trEnumerationValues());
       startDescForItem();
    }
-   void endDescTable() {
+   void endEnumTable() {
       endDescForItem();
       endSimpleSect();
    }

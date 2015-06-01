@@ -391,5 +391,7 @@ bool mainPageHasTitle();
 QString stripPrefix(QString input, const char *prefix); 
 QByteArray stripPrefix(QByteArray input, const char *prefix);
 
+Protection getProtection(const char *visibility);
+
 #endif
 

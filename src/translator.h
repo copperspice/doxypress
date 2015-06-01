@@ -20,6 +20,29 @@
 
 #include <classdef.h>
 
+/*!
+ When defining a translator class for the new language, follow
+ the description in the documentation.  One of the steps says
+ that you should copy the translator_en.h (this) file to your
+ translator_xx.h new file.  Your new language should use the
+ Translator class as the base class.  This means that you need to
+ implement exactly the same (pure virtual) methods as the
+ TranslatorEnglish does.  Because of this, it is a good idea to
+ start with the copy of TranslatorEnglish and replace the strings
+ one by one.
+
+ It is not necessary to include "translator.h" or
+ "translator_adapter.h" here.  The files are included in the
+ language.cpp correctly.  Not including any of the mentioned
+ files frees the maintainer from thinking about whether the
+ first, the second, or both files should be included or not, and
+ why.  This holds namely for localized translators because their
+ base class is changed occasionaly to adapter classes when the
+ Translator class changes the interface, or back to the
+ Translator class (by the local maintainer) when the localized
+ translator is made up-to-date again.
+*/
+
 /** Abstract base class for all translatable text fragments. */
 class Translator
 {
@@ -138,26 +161,32 @@ class Translator
    virtual QByteArray trFileReference(const char *fileName) = 0;
    virtual QByteArray trNamespaceReference(const char *namespaceName) = 0;
 
-   virtual QByteArray trPublicMembers() = 0;
-   virtual QByteArray trPublicSlots() = 0;
-   virtual QByteArray trSignals() = 0;
-   virtual QByteArray trStaticPublicMembers() = 0;
+   virtual QByteArray trPublicMembers() = 0;  
    virtual QByteArray trProtectedMembers() = 0;
-   virtual QByteArray trProtectedSlots() = 0;
-   virtual QByteArray trStaticProtectedMembers() = 0;
-   virtual QByteArray trPrivateMembers() = 0;
+   virtual QByteArray trPrivateMembers() = 0;    
+ 
+   virtual QByteArray trPublicSignals() = 0;
+   virtual QByteArray trProtectedSignals() = 0;
+   virtual QByteArray trPrivateSignals() = 0;
+
+   virtual QByteArray trPublicSlots() = 0;
+   virtual QByteArray trProtectedSlots() = 0;  
    virtual QByteArray trPrivateSlots() = 0;
+   
+   virtual QByteArray trStaticPublicMembers() = 0;
+   virtual QByteArray trStaticProtectedMembers() = 0;
    virtual QByteArray trStaticPrivateMembers() = 0;
+
    virtual QByteArray trWriteList(int numEntries) = 0;
    virtual QByteArray trInheritsList(int numEntries) = 0;
    virtual QByteArray trInheritedByList(int numEntries) = 0;
    virtual QByteArray trReimplementedFromList(int numEntries) = 0;
    virtual QByteArray trReimplementedInList(int numEntries) = 0;
+
    virtual QByteArray trNamespaceMembers() = 0;
    virtual QByteArray trNamespaceMemberDescription(bool extractAll) = 0;
    virtual QByteArray trNamespaceIndex() = 0;
    virtual QByteArray trNamespaceDocumentation() = 0;
-
    virtual QByteArray trNamespaces() = 0;
   
    virtual QByteArray trGeneratedFromFiles(ClassDef::CompoundType compType, bool single) = 0;

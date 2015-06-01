@@ -8050,7 +8050,7 @@ static bool handleBug(const QByteArray &)
 static bool handleDeprecated(const QByteArray &)
 {
    // mark item for isDeprcated()
-   current->spec |= Entry::Deprecated;
+   current->m_specFlags.spec |= Entry::Deprecated;
 
    newXRefKind = XRef_Deprecated;
    setOutput(OutputXRef);

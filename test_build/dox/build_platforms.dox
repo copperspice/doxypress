@@ -1,0 +1,231 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2014 Barbara Geller
+* Copyright (C) 2012 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+*
+*
+* GNU Free Documentation License
+* This file may be used under the terms of the GNU Free Documentation
+* License version 1.3 as published by the Free Software Foundation
+* and appearing in the file included in the packaging of this file.
+*
+*
+*************************************************************************/
+
+/*!
+\page supported-platforms Supported Platforms
+\sortid 7
+
+CopperSpice is a cross-platform GUI library which runs on a variety of 32-bit and 64-bit platforms.
+
+
+<h4>Available Platforms</h4>
+
+   \li \subpage support-linuxX11
+   \li \subpage support-windows
+   \li \subpage support-mac
+
+<h4>Pending Platforms</h4>
+
+   \li \subpage support-android
+   \li \subpage support-embedded
+
+
+<h3>Platforms</h3>
+
+CopperSpice (CS) has been built on the following platforms using the listed compiler. The KitchenSink (KS) demo
+has been tested on the indicated platforms and the results are listed in the last column.
+
+<TABLE>
+   <tr><th width="145">Platform</th> <th width="145">Compilers</th> <th width="110">CopperSpice</th> <th width="300">Notes</th></tr>
+   <tr>
+      <td>Debian (Wheezy)</td>     
+      <td>GCC 4.7.2</td>
+      <td>CS built</td>
+      <td></td>
+   </tr>
+   <tr>
+      <td>Fedora 20</td>      
+      <td>GCC 4.8.2</td>
+      <td>CS built</td>
+      <td></td>
+   </tr>   
+   <tr>
+      <td>Ubuntu 14.04</td>     
+      <td>GCC 4.8.2</td>
+      <td>CS built</td>
+      <td></td>
+   </tr>
+   <tr>
+      <td>&nbsp;&nbsp; - - - - - - - - - - </td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>      
+      <td>&nbsp;</td>
+   </tr>
+   <tr>
+      <td>Windows XP (SP3)</td>      
+      <td>GCC 4.7.2 (MinGW)</td>
+      <td>CS built</td>
+       <td>CsWebKit built on Vista 64-bit for 32-bit</td>
+   </tr>
+   <tr>
+      <td>Windows Vista</td>      
+      <td>GCC 4.7.2 (MinGW)</td>
+      <td>CS built</td>
+      <td>Build configuration for 32-bit Windows</td>
+   </tr> 
+   <tr>
+      <td>Windows 7 64-bit</td>     
+      <td>GCC 4.7.2 (MinGW)</td>
+      <td>CS built</td>
+      <td></td>
+   </tr>
+   <tr>
+      <td>Windows 7 64-bit</td>     
+      <td>GCC 4.8.1 (MinGW)</td>
+      <td>CS built</td>
+      <td></td>
+   </tr>    
+   <tr>
+      <td>Windows 8 64-bit</td>     
+      <td>GCC 4.8.1 (MinGW)</td>
+      <td>CS built</td>
+      <td></td>
+   </tr>     
+   <tr>
+      <td>&nbsp;&nbsp; - - - - - - - - - - </td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+   </tr>
+   <tr>
+      <td>Mac OS X 10.7</td>
+      <td>Apple Clang 4.2</td>
+      <td>CS built</td>
+      <td></td>
+   </tr>  
+   <tr>
+      <td>Mac OS X 10.9</td>
+      <td>Apple Clang 5.1</td>
+      <td>CS built</td>
+      <td></td>
+   </tr>  
+</TABLE>
+
+<br>
+
+
+*/
+
+
+/*!
+\page support-linuxX11 Support for X11
+\sortid 8
+
+CopperSpice is a comprehensive application and UI library for developing
+Linux/X11 applications that can also be deployed across many other
+desktop and embedded operating systems without rewriting the source code.
+Use the code from one single code-base and rebuild for all for all supported platforms.
+
+
+<h3>Class Library</h3>
+
+The class library includes all the functionality needed to build advanced GUI applications.
+
+  \li Complete set of customizable UI controls/widgets
+  \li 3D graphics support with OpenGL
+  \li Powerful multi-threading features
+  \li 2D graphics canvas capable of handling millions of items
+  \li Integrated Phonon multimedia framework
+  \li WebKit integration
+  \li Networking, XML, and database functionality
+  \li ECMA standard scripting engine
+
+
+<h3>GTK Support</h3>
+
+The binary CopperSpice libraries have GTK support turned off.
+
+If you want support for GTK you must build the CopperSpice libraries from source
+on a machine that has GTK development libraries installed. When GTK is detected at
+compile time, support will nr added to CsGui. At run time of an application linked with
+this version of CsGui, GTK must be present on the target system.
+
+*/
+
+
+/*!
+\page support-windows  Support for Windows
+\sortid 9
+
+CopperSpice is a comprehensive application and UI library for developing Windows
+applications that can also be deployed across many other desktop and
+embedded operating systems without rewriting the source code. Use the
+code from one single code-base and rebuild for all supported platforms.
+
+
+<h3>Class Library</h3>
+
+The class libraries include all the functionality needed to build advanced GUI applications.
+
+  \li Complete set of customizable UI controls/widgets
+  \li 3D graphics support with OpenGL
+  \li Powerful multi-threading features
+  \li 2D graphics canvas capable of handling millions of items
+  \li Integrated Phonon multimedia framework
+  \li WebKit integration
+  \li Networking, XML, and database functionality
+  \li ECMA standard scripting engine
+
+*/
+
+
+
+/*!
+\page support-mac Support for OS X
+\sortid 10
+
+CopperSpice is a comprehensive application and UI library for developing Mac
+applications that can also be deployed across many other desktop and
+embedded operating systems without rewriting the source code. Use the
+code from one single code-base and rebuild for all supported platforms.
+
+<h3>Class Library</h3>
+
+The class libraries include all the functionality needed to build advanced GUI applications.
+
+  \li Complete set of customizable UI controls/widgets
+  \li 3D graphics support with OpenGL
+  \li Powerful multi-threading features
+  \li 2D graphics canvas capable of handling millions of items
+  \li Integrated Phonon multimedia framework
+  \li WebKit integration
+  \li Networking, XML, and database functionality
+  \li ECMA standard scripting engine
+
+
+*/
+
+
+
+/*!
+\page support-android Support for Android
+\sortid 11
+
+We believe this platform is very important to the future of CopperSpice. Our desire is to focus
+heavily on natively supporting Android.
+
+*/
+
+
+
+
+/*!
+\page support-embedded Support for Embedded
+\sortid 12
+
+Embedded Linux will be supported in CopperSpice based on user interest.
+
+*/
+

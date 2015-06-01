@@ -85,8 +85,8 @@ ClassDef::ClassDef(const char *defFileName, int defLine, int defColumn, const QB
 
    m_isSimple = Config::getBool("inline-simple-struct");
    
-   m_taggedInnerClasses = 0;  
-   m_spec = 0;
+   m_taggedInnerClasses = 0; 
+   m_spec = Entry::SpecifierFlags{};  
 
    // can not use getLanguage at this point, setLanguage() has not been called
    SrcLangExt lang = getLanguageFromFileName(defFileName);
@@ -211,227 +211,242 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
    if (md->isHidden()) {
       return;
    }
+    
+   bool isSimple = false;
 
-   if (1 /*!isReference()*/) // changed to 1 for showing members of external
-      // classes when HAVE_DOT and UML_LOOK are enabled.
-   {
-      bool isSimple = false;
+   if (md->isRelated() && protectionLevelVisible(prot)) {
+      addMemberToList(MemberListType_related, md, true);
 
-      if (md->isRelated() && protectionLevelVisible(prot)) {
-         addMemberToList(MemberListType_related, md, true);
+   } else if (md->isFriend()) {
+      addMemberToList(MemberListType_friends, md, true);
 
-      } else if (md->isFriend()) {
-         addMemberToList(MemberListType_friends, md, true);
+   } else {
+      switch (md->memberType()) {
+         case MemberType_Service:      // UNO IDL
+            addMemberToList(MemberListType_services, md, true);
+            break;
 
-      } else {
-         switch (md->memberType()) {
-            case MemberType_Service:      // UNO IDL
-               addMemberToList(MemberListType_services, md, true);
-               break;
+         case MemberType_Interface:    // UNO IDL
+            addMemberToList(MemberListType_interfaces, md, true);
+            break;
 
-            case MemberType_Interface:    // UNO IDL
-               addMemberToList(MemberListType_interfaces, md, true);
-               break;
+         case MemberType_DCOP:         // KDE2 specific
+            addMemberToList(MemberListType_dcopMethods, md, true);
+            break;
 
-            case MemberType_Signal:       // Qt specific
-               addMemberToList(MemberListType_signals, md, true);
-               break;
+         case MemberType_Property:
+            addMemberToList(MemberListType_properties, md, true);
+            break;
 
-            case MemberType_DCOP:         // KDE2 specific
-               addMemberToList(MemberListType_dcopMethods, md, true);
-               break;
+         case MemberType_Event:
+            addMemberToList(MemberListType_events, md, true);
+            break;
 
-            case MemberType_Property:
-               addMemberToList(MemberListType_properties, md, true);
-               break;
-            case MemberType_Event:
-               addMemberToList(MemberListType_events, md, true);
-               break;
-            case MemberType_Slot:         // Qt specific
-               switch (prot) {
-                  case Protected:
-                  case Package:           // slots in packages are not possible!
-                     addMemberToList(MemberListType_proSlots, md, true);
-                     break;
-                  case Public:
-                     addMemberToList(MemberListType_pubSlots, md, true);
-                     break;
-                  case Private:
-                     addMemberToList(MemberListType_priSlots, md, true);
-                     break;
+         case MemberType_Signal:       // Qt and CS specific                        
+            switch (prot) {
+               case Public:
+                  addMemberToList(MemberListType_pubSignals, md, true);
+                  break;
+
+               case Protected:
+               case Package:           // signals in packages are not possible       
+                  addMemberToList(MemberListType_proSignals, md, true);
+                  break;
+              
+               case Private:
+                  addMemberToList(MemberListType_priSignals, md, true);
+                  break;
+            }
+            break;
+
+         case MemberType_Slot:         // Qt and CS specific
+            switch (prot) {
+               case Public:
+                  addMemberToList(MemberListType_pubSlots, md, true);
+                  break;
+
+               case Protected:
+               case Package:           // slots in packages are not possible
+                  addMemberToList(MemberListType_proSlots, md, true);
+                  break;
+             
+               case Private:
+                  addMemberToList(MemberListType_priSlots, md, true);
+                  break;
+            }
+            break;
+
+         default: // any of the other members
+            if (md->isStatic()) {
+               if (md->isVariable()) {
+                  switch (prot) {
+                     case Protected:
+                        addMemberToList(MemberListType_proStaticAttribs, md, true);
+                        break;
+                     case Package:
+                        addMemberToList(MemberListType_pacStaticAttribs, md, true);
+                        break;
+                     case Public:
+                        addMemberToList(MemberListType_pubStaticAttribs, md, true);
+                        break;
+                     case Private:
+                        addMemberToList(MemberListType_priStaticAttribs, md, true);
+                        break;
+                  }
+               } else { // function
+                  switch (prot) {
+                     case Protected:
+                        addMemberToList(MemberListType_proStaticMethods, md, true);
+                        break;
+                     case Package:
+                        addMemberToList(MemberListType_pacStaticMethods, md, true);
+                        break;
+                     case Public:
+                        addMemberToList(MemberListType_pubStaticMethods, md, true);
+                        break;
+                     case Private:
+                        addMemberToList(MemberListType_priStaticMethods, md, true);
+                        break;
+                  }
                }
-               break;
-            default: // any of the other members
-               if (md->isStatic()) {
-                  if (md->isVariable()) {
-                     switch (prot) {
-                        case Protected:
-                           addMemberToList(MemberListType_proStaticAttribs, md, true);
-                           break;
-                        case Package:
-                           addMemberToList(MemberListType_pacStaticAttribs, md, true);
-                           break;
-                        case Public:
-                           addMemberToList(MemberListType_pubStaticAttribs, md, true);
-                           break;
-                        case Private:
-                           addMemberToList(MemberListType_priStaticAttribs, md, true);
-                           break;
-                     }
-                  } else { // function
-                     switch (prot) {
-                        case Protected:
-                           addMemberToList(MemberListType_proStaticMethods, md, true);
-                           break;
-                        case Package:
-                           addMemberToList(MemberListType_pacStaticMethods, md, true);
-                           break;
-                        case Public:
-                           addMemberToList(MemberListType_pubStaticMethods, md, true);
-                           break;
-                        case Private:
-                           addMemberToList(MemberListType_priStaticMethods, md, true);
-                           break;
-                     }
+
+            } else { 
+               // not static
+
+               if (md->isVariable()) {
+                  switch (prot) {
+                     case Protected:
+                        addMemberToList(MemberListType_proAttribs, md, true);
+                        break;
+                     case Package:
+                        addMemberToList(MemberListType_pacAttribs, md, true);
+                        break;
+                     case Public:
+                        addMemberToList(MemberListType_pubAttribs, md, true);
+                        isSimple = !md->isFunctionPtr();
+                        break;
+                     case Private:
+                        addMemberToList(MemberListType_priAttribs, md, true);
+                        break;
+                  }
+
+               } else if (md->isTypedef() || md->isEnumerate() || md->isEnumValue()) {
+                  switch (prot) {
+                     case Protected:
+                        addMemberToList(MemberListType_proTypes, md, true);
+                        break;
+                     case Package:
+                        addMemberToList(MemberListType_pacTypes, md, true);
+                        break;
+                     case Public:
+                        addMemberToList(MemberListType_pubTypes, md, true);
+                        isSimple = QByteArray(md->typeString()).indexOf(")(") == -1;
+                        break;
+                     case Private:
+                        addMemberToList(MemberListType_priTypes, md, true);
+                        break;
                   }
 
                } else { 
-                  // not static
+                  // member function
 
-                  if (md->isVariable()) {
-                     switch (prot) {
-                        case Protected:
-                           addMemberToList(MemberListType_proAttribs, md, true);
-                           break;
-                        case Package:
-                           addMemberToList(MemberListType_pacAttribs, md, true);
-                           break;
-                        case Public:
-                           addMemberToList(MemberListType_pubAttribs, md, true);
-                           isSimple = !md->isFunctionPtr();
-                           break;
-                        case Private:
-                           addMemberToList(MemberListType_priAttribs, md, true);
-                           break;
-                     }
-
-                  } else if (md->isTypedef() || md->isEnumerate() || md->isEnumValue()) {
-                     switch (prot) {
-                        case Protected:
-                           addMemberToList(MemberListType_proTypes, md, true);
-                           break;
-                        case Package:
-                           addMemberToList(MemberListType_pacTypes, md, true);
-                           break;
-                        case Public:
-                           addMemberToList(MemberListType_pubTypes, md, true);
-                           isSimple = QByteArray(md->typeString()).indexOf(")(") == -1;
-                           break;
-                        case Private:
-                           addMemberToList(MemberListType_priTypes, md, true);
-                           break;
-                     }
-
-                  } else { 
-                     // member function
-
-                     switch (prot) {
-                        case Protected:
-                           addMemberToList(MemberListType_proMethods, md, true);
-                           break;
-                        case Package:
-                           addMemberToList(MemberListType_pacMethods, md, true);
-                           break;
-                        case Public:
-                           addMemberToList(MemberListType_pubMethods, md, true);
-                           break;
-                        case Private:
-                           addMemberToList(MemberListType_priMethods, md, true);
-                           break;
-                     }
+                  switch (prot) {
+                     case Protected:
+                        addMemberToList(MemberListType_proMethods, md, true);
+                        break;
+                     case Package:
+                        addMemberToList(MemberListType_pacMethods, md, true);
+                        break;
+                     case Public:
+                        addMemberToList(MemberListType_pubMethods, md, true);
+                        break;
+                     case Private:
+                        addMemberToList(MemberListType_priMethods, md, true);
+                        break;
                   }
                }
-               break;
-         }
+            }
+            break;
       }
+   } 
 
-      if (!isSimple) { // not a simple field -> not a simple struct
-         m_isSimple = false;
-      }
-      
-      // insert member in the detailed documentation section      
-
-      if ((md->isRelated() && protectionLevelVisible(prot)) || md->isFriend()) {
-         addMemberToList(MemberListType_relatedMembers, md, false);
-
-      } else {
-         switch (md->memberType()) {
-            case MemberType_Service: // UNO IDL
-               addMemberToList(MemberListType_serviceMembers, md, false);
-               break;
-            case MemberType_Interface: // UNO IDL
-               addMemberToList(MemberListType_interfaceMembers, md, false);
-               break;
-            case MemberType_Property:
-               addMemberToList(MemberListType_propertyMembers, md, false);
-               break;
-            case MemberType_Event:
-               addMemberToList(MemberListType_eventMembers, md, false);
-               break;
-            case MemberType_Signal: // fall through
-            case MemberType_DCOP:
-               addMemberToList(MemberListType_functionMembers, md, false);
-               break;
-            case MemberType_Slot:
-               if (protectionLevelVisible(prot)) {
-                  addMemberToList(MemberListType_functionMembers, md, false);
-               }
-               break;
-
-            default: // any of the other members
-               if (protectionLevelVisible(prot)) {
-                  switch (md->memberType()) {
-                     case MemberType_Typedef:
-                        addMemberToList(MemberListType_typedefMembers, md, false);
-                        break;
-
-                     case MemberType_Enumeration:
-                        addMemberToList(MemberListType_enumMembers, md, false);
-                        break;
-
-                     case MemberType_EnumValue:
-                        addMemberToList(MemberListType_enumValMembers, md, false);
-                        break;
-
-                     case MemberType_Function:
-                        if (md->isConstructor() || md->isDestructor()) {
-                           QSharedPointer<MemberList> ml = createMemberList(MemberListType_constructors);
-                           ml->append(md);
-
-                        } else {
-                           addMemberToList(MemberListType_functionMembers, md, false);
-                        }
-
-                        break;
-                     case MemberType_Variable:
-                        addMemberToList(MemberListType_variableMembers, md, false);
-                        break;
-                     default:
-                        err("Unexpected member type %d found!\n", md->memberType());
-                  }
-               }
-               break;
-         }
-      }
-
-      
-      // insert member in the appropriate member group
- 
-      // Note: this must be done AFTER inserting the member in the regular groups
-      //addMemberToGroup(md,groupId);
-
+   if (!isSimple) { // not a simple field -> not a simple struct
+      m_isSimple = false;
    }
+   
+   // insert member in the detailed documentation section      
 
+   if ((md->isRelated() && protectionLevelVisible(prot)) || md->isFriend()) {
+      addMemberToList(MemberListType_relatedMembers, md, false);
+
+   } else {
+      switch (md->memberType()) {
+         case MemberType_Service: // UNO IDL
+            addMemberToList(MemberListType_serviceMembers, md, false);
+            break;
+
+         case MemberType_Interface: // UNO IDL
+            addMemberToList(MemberListType_interfaceMembers, md, false);
+            break;
+
+         case MemberType_Property:
+            addMemberToList(MemberListType_propertyMembers, md, false);
+            break;
+
+         case MemberType_Event:
+            addMemberToList(MemberListType_eventMembers, md, false);
+            break;
+
+         case MemberType_Signal: // fall through
+         case MemberType_DCOP:
+            addMemberToList(MemberListType_functionMembers, md, false);
+            break;
+
+         case MemberType_Slot:
+            if (protectionLevelVisible(prot)) {
+               addMemberToList(MemberListType_functionMembers, md, false);
+            }
+            break;
+
+         default: // any of the other members
+            if (protectionLevelVisible(prot)) {
+               switch (md->memberType()) {
+                  case MemberType_Typedef:
+                     addMemberToList(MemberListType_typedefMembers, md, false);
+                     break;
+
+                  case MemberType_Enumeration:
+                     addMemberToList(MemberListType_enumMembers, md, false);
+                     break;
+
+                  case MemberType_EnumValue:
+                     addMemberToList(MemberListType_enumValMembers, md, false);
+                     break;
+
+                  case MemberType_Function:
+                     if (md->isConstructor() || md->isDestructor()) {
+                        QSharedPointer<MemberList> ml = createMemberList(MemberListType_constructors);
+                        ml->append(md);
+
+                     } else {
+                        addMemberToList(MemberListType_functionMembers, md, false);
+                     }
+
+                     break;
+                  case MemberType_Variable:
+                     addMemberToList(MemberListType_variableMembers, md, false);
+                     break;
+                  default:
+                     err("Unexpected member type %d found!\n", md->memberType());
+               }
+            }
+            break;
+      }
+   }
+      
+   // insert member in the appropriate member group 
+   // do this ONLY AFTER inserting the member in the regular groups, addMemberToGroup(md,groupId);
+   
    if (md->virtualness() == Pure) {
       m_isAbstract = true;
    }
@@ -3838,27 +3853,27 @@ bool ClassDef::isTemplateArgument() const
 
 bool ClassDef::isAbstract() const
 {
-   return m_isAbstract || (m_spec & Entry::Abstract);
+   return m_isAbstract || (m_spec.spec & Entry::Abstract);
 }
 
 bool ClassDef::isFinal() const
 {
-   return m_spec & Entry::Final;
+   return m_spec.m_isFinal;
 }
 
 bool ClassDef::isSealed() const
 {
-   return m_spec & Entry::Sealed;
+   return m_spec.spec & Entry::Sealed;
 }
 
 bool ClassDef::isPublished() const
 {
-   return m_spec & Entry::Published;
+   return m_spec.spec & Entry::Published;
 }
 
 bool ClassDef::isForwardDeclared() const
 {
-   return m_spec & Entry::ForwardDecl;
+   return m_spec.spec & Entry::ForwardDecl;
 }
 
 bool ClassDef::isObjectiveC() const
@@ -4043,7 +4058,7 @@ bool ClassDef::isGeneric() const
    return m_isGeneric;
 }
 
-void ClassDef::setClassSpecifier(uint64_t spec)
+void ClassDef::setClassSpecifier(Entry::SpecifierFlags spec)
 {
    m_spec = spec;
 }

@@ -61,7 +61,7 @@ class FileNameDict : public StringMap<QSharedPointer<FileName>>
 
  public:
    FileNameDict()
-      : StringMap<QSharedPointer<FileName>>(Config::getCase("case-sense-names"))
+      : StringMap<QSharedPointer<FileName>>(Config::getCase("case-sensitive-fname"))
    { }
 
    ~FileNameDict() {}

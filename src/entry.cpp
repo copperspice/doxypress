@@ -62,7 +62,7 @@ Entry::Entry(const Entry &e)
    tagInfo     = e.tagInfo;
    protection  = e.protection;
    mtype       = e.mtype;
-   spec        = e.spec;
+   m_specFlags = e.m_specFlags;
    initLines   = e.initLines;
    stat        = e.stat;
    explicitExternal = e.explicitExternal;
@@ -92,8 +92,17 @@ Entry::Entry(const Entry &e)
    inbodyFile  = e.inbodyFile;
    relates     = e.relates;
    relatesType = e.relatesType;
-   read        = e.read;
-   write       = e.write;
+
+   m_read       = e.m_read;
+   m_write      = e.m_write;
+   m_reset      = e.m_reset;
+   m_notify     = e.m_notify;
+   m_revision   = e.m_revision;
+   m_designable = e.m_designable;
+   m_scriptable = e.m_scriptable;
+   m_stored     = e.m_stored;
+   m_user       = e.m_user;   
+
    inside      = e.inside;
    exception   = e.exception;   
    bodyLine    = e.bodyLine;
@@ -216,7 +225,9 @@ void Entry::reset()
    stat    = false;
    proto   = false;
    explicitExternal = false;
-   spec  = 0;
+  
+   m_specFlags = Entry::SpecifierFlags{};
+
    lang = SrcLangExt_Unknown;
    hidden = false;
    artificial = false;
@@ -336,20 +347,18 @@ bool EntryNav::loadEntry(FileStorage *storage)
       return true;
    }
 
-   if (m_offset == -1) {
-      //printf("offset not set!\n");
+   if (m_offset == -1) {      
       return false;
    }
    
-   if (! storage->seek(m_offset)) {
-      //printf("seek failed!\n");
+   if (! storage->seek(m_offset)) {      
       return false;
    }
   
    m_info = unmarshalEntry(storage);
-   m_info->name = m_name;
-   m_info->type = m_type;
 
+   m_info->name    = m_name;
+   m_info->type    = m_type;
    m_info->section = m_section;
 
    return true;
@@ -357,9 +366,9 @@ bool EntryNav::loadEntry(FileStorage *storage)
 
 bool EntryNav::saveEntry(QSharedPointer<Entry> e, FileStorage *storage)
 {
-   m_offset = storage->pos();
-   
+   m_offset = storage->pos();   
    marshalEntry(storage, e);
+
    return true;
 }
 

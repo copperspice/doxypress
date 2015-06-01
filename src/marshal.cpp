@@ -46,10 +46,9 @@ void marshalUInt(StorageIntf *s, uint v)
    s->write((const char *)b, 4);
 }
 
-void marshalUInt64(StorageIntf *s, uint64_t v)
+void marshalFlags(StorageIntf *s, Entry::SpecifierFlags v)
 {
-   marshalUInt(s, uint(v >> 32));
-   marshalUInt(s, uint(v & 0xFFFFFFFF));
+   marshalQByteArray(s, v.toQByteArray());  
 }
 
 void marshalBool(StorageIntf *s, bool b)
@@ -190,18 +189,18 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalUInt(s, HEADER);
    marshalQByteArray(s, e->name);
    marshalQByteArray(s, e->type);
-   marshalInt(s, e->section);
-   marshalInt(s, (int)e->protection);
-   marshalInt(s, (int)e->mtype);
-   marshalUInt64(s, e->spec);
-   marshalInt(s, e->initLines);
-   marshalBool(s, e->stat);
-   marshalBool(s, e->explicitExternal);
-   marshalBool(s, e->proto);
-   marshalBool(s, e->subGrouping);
-   marshalBool(s, e->callGraph);
-   marshalBool(s, e->callerGraph);
-   marshalInt(s, (int)e->virt);
+   marshalInt(s,   e->section);
+   marshalInt(s,   (int)e->protection);
+   marshalInt(s,   (int)e->mtype);
+   marshalFlags(s, e->m_specFlags);
+   marshalInt(s,   e->initLines);
+   marshalBool(s,  e->stat);
+   marshalBool(s,  e->explicitExternal);
+   marshalBool(s,  e->proto);
+   marshalBool(s,  e->subGrouping);
+   marshalBool(s,  e->callGraph);
+   marshalBool(s,  e->callerGraph);
+   marshalInt(s,  (int)e->virt);
 
    marshalQByteArray(s, e->args);
    marshalQByteArray(s, e->bitfields);
@@ -225,8 +224,12 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalQByteArray(s, e->inbodyFile);
    marshalQByteArray(s, e->relates);
    marshalInt(s, e->relatesType);
-   marshalQByteArray(s, e->read);
-   marshalQByteArray(s, e->write);
+
+   marshalQByteArray(s, e->m_read);
+   marshalQByteArray(s, e->m_write);
+   marshalQByteArray(s, e->m_reset);
+   marshalQByteArray(s, e->m_notify);
+
    marshalQByteArray(s, e->inside);
    marshalQByteArray(s, e->exception);
    marshalArgumentList(s, e->typeConstr);
@@ -277,10 +280,11 @@ uint unmarshalUInt(StorageIntf *s)
    return result;
 }
 
-uint64_t unmarshalUInt64(StorageIntf *s)
+Entry::SpecifierFlags unmarshalFlags(StorageIntf *s)
 {
-   uint64_t result = uint64_t(unmarshalUInt(s)) << 32;
-   result |= unmarshalUInt(s);
+   QByteArray temp = unmarshalQByteArray(s);  
+   Entry::SpecifierFlags result = Entry::SpecifierFlags::fromQByteArray(temp);
+  
    return result;
 }
 
@@ -498,7 +502,7 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->section          = unmarshalInt(s);
    e->protection       = (Protection)unmarshalInt(s);
    e->mtype            = (MethodTypes)unmarshalInt(s);
-   e->spec             = unmarshalUInt64(s);
+   e->m_specFlags      = unmarshalFlags(s);
    e->initLines        = unmarshalInt(s);
    e->stat             = unmarshalBool(s);
    e->explicitExternal = unmarshalBool(s);
@@ -529,8 +533,12 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->inbodyFile       = unmarshalQByteArray(s);
    e->relates          = unmarshalQByteArray(s);
    e->relatesType      = (RelatesType)unmarshalInt(s);
-   e->read             = unmarshalQByteArray(s);
-   e->write            = unmarshalQByteArray(s);
+
+   e->m_read           = unmarshalQByteArray(s);
+   e->m_write          = unmarshalQByteArray(s);
+   e->m_reset          = unmarshalQByteArray(s);
+   e->m_notify         = unmarshalQByteArray(s);
+
    e->inside           = unmarshalQByteArray(s);
    e->exception        = unmarshalQByteArray(s);      
    e->typeConstr       = *unmarshalArgumentList(s);      // CopperSpice -check for memory leak

@@ -131,7 +131,7 @@ class Entry
    static const uint64_t Protocol        = (1ULL << 8);
    static const uint64_t Category        = (1ULL << 9);
    static const uint64_t SealedClass     = (1ULL << 10);
-   static const uint64_t AbstractClass   = (1ULL << 11);
+  
    static const uint64_t Enum            = (1ULL << 12); // for Java-style enums
    static const uint64_t Service         = (1ULL << 13); // UNO IDL
    static const uint64_t Singleton       = (1ULL << 14); // UNO IDL
@@ -143,14 +143,12 @@ class Entry
    static const uint64_t ProtectedGettable   = (1ULL << 21); // C# protected getter
    static const uint64_t PrivateSettable     = (1ULL << 22); // C# private setter
    static const uint64_t ProtectedSettable   = (1ULL << 23); // C# protected setter
-   static const uint64_t Inline          = (1ULL << 24);
-   static const uint64_t Explicit        = (1ULL << 25);
-   static const uint64_t Mutable         = (1ULL << 26);
-   static const uint64_t Settable        = (1ULL << 27);
-   static const uint64_t Gettable        = (1ULL << 28);
-   static const uint64_t Readable        = (1ULL << 29);
-   static const uint64_t Writable        = (1ULL << 30);
-   static const uint64_t Final           = (1ULL << 31);
+   static const uint64_t Inline              = (1ULL << 24);
+   static const uint64_t Explicit            = (1ULL << 25);
+   static const uint64_t Mutable             = (1ULL << 26);
+   static const uint64_t Settable            = (1ULL << 27);
+   static const uint64_t Gettable            = (1ULL << 28);
+  
    static const uint64_t Abstract        = (1ULL << 32);
    static const uint64_t Addable         = (1ULL << 33);
    static const uint64_t Removable       = (1ULL << 34);
@@ -164,7 +162,7 @@ class Entry
    static const uint64_t NonAtomic       = (1ULL << 42);
    static const uint64_t Copy            = (1ULL << 43);
    static const uint64_t Retain          = (1ULL << 44);
-   static const uint64_t Assign          = (1ULL << 45);
+   
    static const uint64_t Strong          = (1ULL << 46);
    static const uint64_t Weak            = (1ULL << 47);
    static const uint64_t Unretained      = (1ULL << 48);
@@ -183,6 +181,75 @@ class Entry
    static const uint64_t MaybeDefault    = (1ULL << 61); // on UNO IDL property
    static const uint64_t MaybeAmbiguous  = (1ULL << 62); // on UNO IDL property
    static const uint64_t Published       = (1ULL << 63); // UNO IDL keyword
+
+   struct SpecifierFlags {
+
+      SpecifierFlags() {
+         // ensures this struc has no virtual methods
+         static_assert(std::is_standard_layout<SpecifierFlags>::value == true, "Struct SpecifierFlags can not have virutal methods");
+
+         memset(this, 0, sizeof(SpecifierFlags));
+      } 
+
+      SpecifierFlags & operator|=(const SpecifierFlags &other) {
+         // old ones
+         this->spec |= other.spec;
+
+         // new ones
+         this->m_isAbstractClass |= other.m_isAbstractClass;
+
+         this->m_isReadable   |= other.m_isReadable;
+         this->m_isWritable   |= other.m_isWritable;
+         this->m_isReset      |= other.m_isReset;       
+         this->m_isNotify     |= other.m_isNotify;
+         this->m_isRevision   |= other.m_isRevision;
+         this->m_isDesignable |= other.m_isDesignable;
+         this->m_isScriptable |= other.m_isScriptable;
+         this->m_isStored     |= other.m_isStored;
+         this->m_isUser       |= other.m_isUser;
+         this->m_isConstant   |= other.m_isConstant;
+         this->m_isFinal      |= other.m_isFinal;
+         this->m_isAssign     |= other.m_isAssign;
+      }
+
+      QByteArray toQByteArray() const {
+
+         QByteArray retval; 
+         retval.resize(sizeof(SpecifierFlags));
+
+         memcpy(retval.data(), this, sizeof(SpecifierFlags));
+       
+         return retval;
+      }
+
+      static SpecifierFlags fromQByteArray(const QByteArray &data)  {
+
+         SpecifierFlags retval;
+         memcpy(&retval, data.constData(), sizeof(SpecifierFlags));
+
+         return retval;
+      }
+
+      // old flags, move to new data type
+      uint64_t spec;            // !< class/member specifiers
+
+      // class specifiers
+      int m_isAbstractClass    : 1;
+
+      // member specifiers 
+      int m_isReadable         : 1;    
+      int m_isWritable         : 1;
+      int m_isReset            : 1;
+      int m_isNotify           : 1;
+      int m_isRevision         : 1;
+      int m_isDesignable       : 1;
+      int m_isScriptable       : 1;
+      int m_isStored           : 1;
+      int m_isUser             : 1;
+      int m_isConstant         : 1;
+      int m_isFinal            : 1;
+      int m_isAssign           : 1;
+   };
 
    enum GroupDocType {
       GROUPDOC_NORMAL,        //!< defgroup
@@ -230,7 +297,6 @@ class Entry
     */
    void reset();
  
-
  public:
    // identification
     
@@ -241,11 +307,11 @@ class Entry
    RelatesType  relatesType; //!< how relates is handled
    Specifier    virt;        //!< virtualness of the entry
    Protection   protection;  //!< class protection
-   MethodTypes  mtype;       //!< signal, slot, (dcop) method, or property?
+   MethodTypes  mtype;       //!< signal, slot, (dcop) method, or property
    GroupDocType groupDocType;
-   SrcLangExt   lang;        //!< programming language in which this entry was found
- 
-   uint64_t spec;            //!< class/member specifiers
+   SrcLangExt   lang;        //!< programming language in which this entry was found 
+   
+   SpecifierFlags m_specFlags; 
 
    int  section;             //!< entry type (see Sections);
    int  initLines;           //!< define/variable initializer lines to show
@@ -286,8 +352,19 @@ class Entry
    QByteArray   inbodyDocs;  //!< documentation inside the body of a function 
    QByteArray   inbodyFile;  //!< file in which the body doc was found
    QByteArray   relates;     //!< related class (doc block)
-   QByteArray   read;        //!< property read accessor
-   QByteArray   write;       //!< property write accessor
+
+   QByteArray   m_read;        //!< property read 
+   QByteArray   m_write;       //!< property write
+
+   // copperspice - additional properties
+   QByteArray   m_reset;
+   QByteArray   m_notify;
+   QByteArray   m_revision;
+   QByteArray   m_designable;
+   QByteArray   m_scriptable;
+   QByteArray   m_stored;
+   QByteArray   m_user;   
+
    QByteArray   inside;      //!< name of the class in which documents are found
    QByteArray   exception;   //!< throw specification
    QByteArray	 fileName;    //!< file this entry was extracted from

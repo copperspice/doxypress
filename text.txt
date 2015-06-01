@@ -1,0 +1,13 @@
+
+
+if ( yy_act == 179 || yy_act == 180 ) {
+   printf("\n  BROOM  we found the rules for: %d", yy_act);
+} 
+
+
+current->m_isReadable = true;
+current->m_isWritable = true;
+current->m_isAssign   = true;
+
+
+current->m_   = true;

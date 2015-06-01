@@ -874,9 +874,9 @@ table.doxtable th {
    padding-top: 5px;
 }
 
-table.fieldtable {
-   /*width: 100%;*/
-   margin-bottom: 10px;
+table.fieldtable {  
+   margin-left: 10px;
+   margin-bottom: 15px;
    border: 1px solid ##B4;
    border-spacing: 0px;
    -moz-border-radius: 4px;

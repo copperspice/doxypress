@@ -1,0 +1,229 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2014 Barbara Geller
+* All rights reserved.
+*
+*
+* GNU Free Documentation License
+* This file may be used under the terms of the GNU Free Documentation
+* License version 1.3 as published by the Free Software Foundation
+* and appearing in the file included in the packaging of this file.
+*
+*
+*************************************************************************/
+
+/*!
+\page build-overview Build Overview  
+\sortid 2
+
+<h3>CopperSpice Build Objectives</h3>
+
+A key objective for CopperSpice was to create a C++ library which used a standard build process. 
+CopperSpice uses Autoconf and Automake, which are part of the GNU Autotools system. 
+
+There are configuration options available when building CopperSpice. These options can be set
+by passing arguments to the configure script file.
+
+\anchor build-autotools
+
+
+<h3>Compiler</h3>
+
+For platform specific Compiler versions, refer to \ref supported-platforms.
+
+
+<h3>Autotools & Make</h3>
+
+Autotools is a suite of programming tools designed to assist in making source code packages
+portable to many Unix-like systems. The GNU build system uses Bourne-compatible shell scripts
+to assist the user in the configuration and build process.
+
+(1) &nbsp;&nbsp;Autoconf is a tool used for producing configure scripts for building, installing, and packaging
+software. This tool makes your packages portable by performing tests to discover system
+characteristics, before the package is compiled. Your source code can be modified to leverage platform
+specifics.
+ 
+The system on which you build, does not need to have Autoconf installed. Autoconf is needed only to generate
+the configure script, which is usually shipped with the software. We provide the configuration script with
+the CopperSpice source.
+
+CopperSpice uses Autoconf <b>version 2.67</b> or greater. <br><br>
+
+
+(2) &nbsp;&nbsp;Automake is a tool for generating a portable 'Makefile' of what to build. Automake substantially
+simplifies the process of describing the organization of a package and performs additional functions
+such as dependency tracking between source files.
+
+Automake is written in the Perl programming language and must be used with GNU Autoconf. On Windows, Perl is
+installed with Msys, or it can be downloaded separately.
+
+CopperSpice requires Automake <b>version 1.12.1</b> or greater.<br><br>
+
+\note{ Debian (Wheezy) installs Automake 1.11.6. To obtain version 1.12 download a newer version of GNU Automake
+and build manually. }
+
+<br>
+
+
+(3) &nbsp;&nbsp;We selected this make utility because it is available on all the currently supported CopperSpice
+development platforms. The GNU build system is widely used in many open source packages and is considered
+an industry standard tool.
+
+CopperSpice uses GNU Make <b>version 3.81</b> or greater. <br><br>
+
+For additional information about Autotools refer to the following links:<br><br>
+&nbsp;&nbsp; <a class="www-link" href="http://en.wikipedia.org/wiki/GNU_build_system">Autotools Wiki</a><br>
+&nbsp;&nbsp; <a class="www-link" href="http://www.gnu.org/software/autoconf/">Autoconf</a><br>
+&nbsp;&nbsp; <a class="www-link" href="http://www.gnu.org/software/automake/">Automake</a><br>
+&nbsp;&nbsp; <a class="www-link" href="http://www.gnu.org/software/make/">GNU Make</a>
+
+
+<h3>Basic Build Process</h3>
+
+The build process consists of three basic steps.
+
+
+<b>Step 1</b>&nbsp; Run \c autoreconf to generate the \c configure file and the \c Makefile.in file.
+
+This step is normally not required as the CopperSpice source distribution includes the generated files. 
+This step must be done if you modify the \c configure.ac file or the \c Makefile.am file.
+
+   \li Autoreconf uses \c configure.ac to generate \c configure
+   \li Autoreconf uses \c Makefile.am to create \c  Makefile.in
+<br>
+<br>
+
+<b>Step 2</b>&nbsp; Run \c configure
+
+   \li Configure uses the \c Makefile.in file to generate the actual \c Makefile
+<br>
+<br>
+
+<b>Step 3</b>&nbsp; Compile CopperSpice by running \c make
+
+   \li  Builds the CopperSpice libraries and is run any time the CopperSpice source is changed.
+<br>
+<br>
+
+When running GNU make there is a "-j N" parameter which can be passed to specify the number of cores make should use.
+Make will start multiple parallel jobs, which can speed up compiling considerably. There is no clear recommend value for N.
+We found the best value is the numbers of processor cores plus 1. 
+
+It is worth noting that using this parameter will alter the order source files are compiled. This may look a bit strange
+but it is normal and expected since multiple processes are running.
+
+<br>
+
+
+*/
+
+
+/*!
+\page build-from-source Files Included with Source
+\sortid 3
+
+
+In order to build the CopperSpice libraries from source, it may be necessary to install additional utilities. 
+The exact requirements depend on the platform your application will be run on.
+
+   \li Download and install the source code 
+       <a class="www-link" href="http://sourceforge.net/projects/copperspice/files/copperspice/source">CopperSpice Source</a>
+
+   \li Refer to the \ref supported-platforms for information about the compilers and utilities required to build CopperSpice     
+         
+<br>
+The following table details what is included in the CS source download.
+
+<TABLE>
+   <tr><th width="95">File Type</th>  <th width="225">Description</th>  <th width="300">Notes</th></tr>
+   <tr>
+      <td>*.cpp</td>
+      <td>Source Code</td>
+      <td>CopperSpice source code</td>
+   </tr>
+   <tr>
+      <td>*.c</td>
+      <td>Source Code, Usually 3rd Party</td>
+      <td>CopperSpice source code</td>
+   </tr>
+   <tr>
+      <td>*.mm</td>
+      <td>Source Code for OS X</td>
+      <td>CopperSpice source code</td>
+   </tr>
+   <tr>
+      <td>*.h</td>
+      <td>Headers</td>
+      <td>CopperSpice header files</td>
+   </tr>
+   <tr>
+      <td>configure</td>
+      <td>Shell Script</td>
+      <td>See Note A</td>
+   </tr>
+   <tr>
+      <td>configure.ac</td>
+      <td>Autoconf</td>
+      <td>See Note B</td>
+   </tr>   
+  <tr>
+      <td>Makefile.in</td>
+      <td>Autoconf, intermediate file</td>
+      <td>Used by configure to generate Makefile</td>
+   </tr>
+   <tr>
+      <td>Makefile.am</td>
+      <td>Automake</td>
+      <td>Used by Automake to generate Makefile.in</td>
+   </tr>    
+</TABLE>
+
+<br>
+<b>Note A:</b>  &nbsp;&nbsp;The \c configure file is a shell script and must be run in a Bourne shell interpreter. BASH is the
+most common shell for Windows development and is part of the MSYS utility. 
+
+
+<br>
+<b>Note B:</b>  &nbsp;&nbsp;This file is used by Autoconf to generate the \c configure script file. If \c configure.ac is
+changed, use Autoconf to regenerate the \c configure script.
+
+The file \c configure.ac will not need to be modified unless you are changing the version number.
+
+
+<h3>CS Build Settings</h3>
+
+   \li All CopperSpice libraries are built with debug off by default.
+ 
+   \li The build process for the Webkit library was divided into multiple parts. This was required because of
+   Makefile limitations on Windows. The libCsWebKit library was made by linking together the individual parts.
+
+<div class="cs_margin">
+   <ul>
+   <li><b>Windows</b>
+   <ul>
+
+      <li>Libtool has a file test to ensure included libraries are valid import libraries. This test causes issues
+      when linking uuid, dmoguids, and the strmiids libraries. These libraries are released with MingGW and not import
+      libraries. They are static libraries. <br><br>
+      The CS Makefile was modified to explicitly bypass the Libtool file test with these libraries. To avoid the test,
+      explicit link commands were added.</li>
+
+   </ul>
+   </li>
+
+   <li><b>OS X</b>
+   <ul>
+
+   <li>CopperSpice is unable to build on OS X using GCC 4.7 becasue Apple Clang was required for building CopperSpice.</li>
+
+   </ul>
+   </li>
+
+   </ul>
+</div>
+
+<br>
+
+*/
+
+

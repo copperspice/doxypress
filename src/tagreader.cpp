@@ -1225,7 +1225,7 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
       }
 
       if (tmi.enumValues.count() > 0) {
-         me->spec |= Entry::Strong;        
+         me->m_specFlags.spec |= Entry::Strong;        
 
          for (auto evi : tmi.enumValues) {
             QSharedPointer<Entry> ev = QMakeShared<Entry>();
@@ -1348,39 +1348,39 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
             break;
 
          case TagClassInfo::Struct:
-            ce->spec = Entry::Struct;
+            ce->m_specFlags.spec = Entry::Struct;
             break;
 
          case TagClassInfo::Union:
-            ce->spec = Entry::Union;
+            ce->m_specFlags.spec = Entry::Union;
             break;
 
          case TagClassInfo::Interface:
-            ce->spec = Entry::Interface;
+            ce->m_specFlags.spec = Entry::Interface;
             break;
 
          case TagClassInfo::Enum:
-            ce->spec = Entry::Enum;
+            ce->m_specFlags.spec = Entry::Enum;
             break;
 
          case TagClassInfo::Exception:
-            ce->spec = Entry::Exception;
+            ce->m_specFlags.spec = Entry::Exception;
             break;
 
          case TagClassInfo::Protocol:
-            ce->spec = Entry::Protocol;
+            ce->m_specFlags.spec = Entry::Protocol;
             break;
 
          case TagClassInfo::Category:
-            ce->spec = Entry::Category;
+            ce->m_specFlags.spec = Entry::Category;
             break;
 
          case TagClassInfo::Service:
-            ce->spec = Entry::Service;
+            ce->m_specFlags.spec = Entry::Service;
             break;
 
          case TagClassInfo::Singleton:
-            ce->spec = Entry::Singleton;
+            ce->m_specFlags.spec = Entry::Singleton;
             break;
       }
 

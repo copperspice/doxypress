@@ -16,7 +16,7 @@
 \class Ginger
 \brief Test class to review how to document
 
-Ginger is a test class to review how documentation is generated in DoxyPress.
+Ginger is a test class to review how documentation is generated in DoxyPress for CopperSpice specific syntax.
 
 */
 
@@ -24,16 +24,24 @@ Ginger is a test class to review how documentation is generated in DoxyPress.
 /**
 \fn Ginger::Ginger ()
 
-Constructs an empty class.
-
+Constructs an empty Ginger class.
 
 */
 
 
 /**
+\fn Ginger::~Ginger ()
+
+Destructor for Ginger.
+
+*/
+
+
+
+/**
 \fn double Ginger::getAmount ()
 
-Returns the amount of Ginger.
+Returns the amount of ginger used in a recipe.
 
 */
 
@@ -41,7 +49,7 @@ Returns the amount of Ginger.
 /**
 \fn void Ginger::setAmount (double amt)
 
-Sets the amount of Ginger to use.
+Sets the amount of ginger to use in a recipe.
 
 
 */
@@ -50,7 +58,7 @@ Sets the amount of Ginger to use.
 /**
 \fn bool Ginger::isChopped ()
 
-Indicates if the ginger should be chopped.
+Indicates if the ginger should be chopped. This only pertains to fresh ginger.
 
 */
 
@@ -58,7 +66,7 @@ Indicates if the ginger should be chopped.
 /**
 \fn bool Ginger::isGrated ()
 
-Indicates if the ginger should be grated.
+Indicates if the ginger should be grated. This only pertains to fresh ginger.
 
 
 */
@@ -80,7 +88,7 @@ Ginger is a spice so this method will always return true.
 
 Documentation for an inline public method. 
 
-Powdered ginger should only be used for making a marinade like Turkey Jerky.
+Powdered ginger should only be used for making a marinade like a Turkey Jerky recipe.
 
 */
 
@@ -103,18 +111,175 @@ Documentation for a private method.
 */
 
 
+/**
+\fn QList<int> Ginger::takesRValue(QString && dataA);
+
+Documenting a method with an rvalue reference parameter.
+
+*/
+
+
+/**
+\fn QString Ginger::getTitle()
+
+This method is documentation for getTitle which is used in a property.
+
+*/
+
+/**
+\fn void Ginger::setTitle()
+
+This method is documentation for setTitle which is used in a property.
+
+*/
+
+
+/**
+\fn void Ginger::resetTitle()
+
+This method is documentation for resetTitle which is used in a property.
+
+*/
+
+
+/**
+\fn Ginger::getFavorite ()
+
+The getFavorite documentation is used with with retrieving a value in a property.
+
+*/
+
+/**
+\fn Ginger::setFavorite ()
+
+The settFavorite documentation is used with with setting a value in a property.
+
+
+*/
+
+/**
+\fn Ginger::isScriptTitle ()
+
+The isScriptTitle documentation is connected to a property.
+
+*/
+
+
+/**
+\fn Ginger::ready ()
+
+The ready method is a signal in Ginger. 
+
+*/
+
+
+/**
+\fn void Ginger::titleChanged (QString title)
+
+The titleChanged method is a signal in Ginger. 
+
+*/
+
+
+/**
+\fn void Ginger::newTitle (QString)
+
+The titleChanged method is a public slot in Ginger. 
+
+*/
+
+/**
+\fn void Ginger::someProtectedSlot ()
+
+The someProtectedSlot method is a protected slot in Ginger. 
+
+*/
+
+/**
+\fn void Ginger::somePrivateSlot (int)
+
+The somePrivateSlot titleChanged method is a private slot in Ginger. 
+
+*/
+
+
+/**
+\fn void Ginger::test_A( Ginger **var_r )
+
+This is a private signal in Ginger.
+
+*/
+
+
+/**
+\fn void Ginger::test_B(int var_s[] )
+
+This is a protected signal in Ginger.
+
+*/
+
+
+/**
+\fn void Ginger::test_C(bool b)
+
+This is a private signal in Ginger.
+
+*/
+
+
 
 /*!
 \enum Ginger::Brands
 
 An enum listing the different varieties of Ginger.
 
+*/
+
+/**
+\var Ginger::Brands Ginger::Chinese
+
+0
+
+*/
+
+
+/**
+\var Ginger::Brands Ginger::Jamaican
+
+1
+
+*/
+
+
+/**
+\var Ginger::Brands Ginger::Thai
+
+2
+
+*/
+
+
+/**
+\var Ginger::Brands Ginger::Yellow
+
+3
+
+*/
+
+
+
+/*!
+\enum Ginger::Spices
+
+An enum list of different Spices. 
+
 The possible values are:
 
-   \li Chinese
-   \li Jamaican
-   \li Thai
-   \li Yellow
+   \li mint
+   \li basil
+   \li Salt
+   \li Pepper 
+   \li cloves
 
 */
 
@@ -128,8 +293,25 @@ AmountType is a typedef for double.
 
 
 /**
-\fn QList<int> Ginger::takesRValue(QString && dataA);
+\property marker Ginger::title_Qt
 
-Documenting a method with an rvalue reference parameter.
+Property documentation for title.   ( Qt )
+
+*/
+
+
+/**
+\property QString Ginger::title
+
+Property documentation for title.
+
+*/
+
+
+/**
+\property Spices Ginger::favorite
+
+Property documentation for favorite.
+
 
 */

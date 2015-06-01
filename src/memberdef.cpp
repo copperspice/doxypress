@@ -31,7 +31,6 @@
 #include <language.h>
 #include <memberdef.h>
 #include <membername.h>
-#include <entry.h>
 #include <message.h>
 #include <outputlist.h>
 #include <example.h>
@@ -341,7 +340,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       if (! a->defval.isEmpty()) { 
          // write the default value
          QByteArray n = a->defval;
-         if (!cName.isEmpty()) {
+         if (! cName.isEmpty()) {
             n = addTemplateNames(n, scope->name(), cName);
          }
 
@@ -431,8 +430,8 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<MemberDef> md, 
                                    QByteArray const &exception)
 {
-   // this is ordinary exception spec - there must be a '('
-   //printf("exception='%s'\n",exception.data());
+   // this is an ordinary exception spec - there must be a '('
+   // printf("exception='%s'\n",exception.data());
    int index = exception.indexOf('(');
 
    if (index != -1) {
@@ -552,25 +551,38 @@ class MemberDefImpl
 
    QSharedPointer<ClassDef> accessorClass;     // class that this member accesses (for anonymous types)
 
-   QByteArray args;             // function arguments/variable array specifiers
-   QByteArray def;              // member definition in code (fully qualified name)
-   QByteArray anc;              // HTML anchor name
+   QByteArray args;            // function arguments/variable array specifiers
+   QByteArray def;             // member definition in code (fully qualified name)
+   QByteArray anc;             // HTML anchor name
 
-   Specifier virt;              // normal/virtual/pure virtual
-   Protection prot;             // protection type [Public/Protected/Private]
+   Specifier virt;             // normal/virtual/pure virtual
+   Protection prot;            // protection type [Public/Protected/Private]
 
    QByteArray decl;            // member declaration in class
 
    QByteArray bitfields;       // struct member bitfields
-   QByteArray read;            // property read accessor
-   QByteArray write;           // property write accessor
+
+   // properties
+   QByteArray m_read;           
+   QByteArray m_write;
+
+   // copperspice - additional properties
+   QByteArray   m_reset;
+   QByteArray   m_notify;
+   QByteArray   m_revision;
+   QByteArray   m_designable;
+   QByteArray   m_scriptable;
+   QByteArray   m_stored;
+   QByteArray   m_user;   
+
    QByteArray exception;       // exceptions that can be thrown
    QByteArray initializer;     // initializer
    QByteArray extraTypeChars;  // extra type info found after the argument list
    QByteArray enumBaseType;    // base type of the enum (C++11)
    int initLines;              // number of lines in the initializer
 
-   uint64_t  memSpec;          // The specifiers present for this member
+   Entry::SpecifierFlags memSpec;  // The specifiers present for this member
+
    MemberType mtype;           // returns the kind of member
    int maxInitLines;           // when the initializer will be displayed
    int userInitLines;          // result of explicit \hideinitializer or \showinitializer
@@ -712,23 +724,23 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
    }
 
    memberGroup = 0;
-   virt = v;
-   prot = p;
-   related = r;
-   stat = s;
-   mtype = mt;
-   exception = e;
-   proto = false;
-   annScope = false;
-   memSpec = 0;
-   
-   annUsed = false;
+   virt        = v;
+   prot        = p;
+   related     = r;
+   stat        = s;
+   mtype       = mt;
+   exception   = e;
+   proto       = false;
+   annScope    = false;
+   annUsed     = false;
 
+   memSpec     = Entry::SpecifierFlags{};  
    annEnumType = QSharedPointer<MemberDef>();
    groupAlias  = QSharedPointer<MemberDef>();
 
    explExt = false;
    tspec   = false;
+
    cachedAnonymousType = QSharedPointer<ClassDef>();
 
    maxInitLines  = Config::getInt("max-init-lines");
@@ -1842,7 +1854,7 @@ bool MemberDef::isDetailedSectionLinkable() const
 
    // the member has details documentation for any of the following reasons
 
-   // modify poorly formated code  (broom, hold) 
+   // modify poorly formated code  (broom, resolve soon) 
    bool docFilter = extractAll ||  ! documentation().isEmpty() ||  ! inbodyDocumentation().isEmpty() ||
                   (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) ||
                   (m_impl->mtype == MemberType_EnumValue && !briefDescription().isEmpty()) ||
@@ -1856,7 +1868,7 @@ bool MemberDef::isDetailedSectionLinkable() const
       // is documented enum value
       
       // has brief description that is part of the detailed description
-      (!briefDescription().isEmpty() &&           // has brief docs
+      (! briefDescription().isEmpty() &&           // has brief docs
        (alwaysDetailedSec &&                      // they are visible in
         (repeatBrief ||                           // detailed section or
          !briefMemberDesc                         // they are explicitly not
@@ -1872,7 +1884,7 @@ bool MemberDef::isDetailedSectionLinkable() const
       (m_impl->defArgList != 0 && m_impl->defArgList->hasDocumentation()) ||
 
       // is an attribute or property - need to display tag
-      (m_impl->memSpec & (Entry::Attribute | Entry::Property)) || Doxy_Globals::userComments;
+      (m_impl->memSpec.spec & (Entry::Attribute | Entry::Property)) || Doxy_Globals::userComments;
 
 
    // this is not a global static or global statics should be extracted
@@ -2007,6 +2019,14 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
 
          if (isWritable()) {
             sl.append("write");
+         }
+
+         if (isNotify()) {
+           sl.append("notify");
+         }
+
+         if (isReset()) {
+           sl.append("reset");
          }
 
          if (isFinal()) {
@@ -2160,7 +2180,7 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
          }
       }
 
-      if (m_impl->classDef && container->definitionType() == TypeClass && m_impl->classDef != container && !isRelated()) {
+      if (m_impl->classDef && container->definitionType() == TypeClass && m_impl->classDef != container && ! isRelated()) {
          sl.append("inherited");
       }
    
@@ -2449,9 +2469,7 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
            
             if (fmd->isLinkable()) {
                if (first) {
-                  //ol.startSimpleSect(BaseOutputDocInterface::EnumValues,0,0,theTranslator->trEnumerationValues()+": ");
-                  //ol.startDescForItem();
-                  ol.startDescTable(theTranslator->trEnumerationValues());
+                  ol.startEnumTable();
                }
 
                ol.addIndexItem(fmd->name(), ciname);
@@ -2496,8 +2514,8 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
          }
       }
 
-      if (!first) {         
-         ol.endDescTable();        
+      if (! first) {         
+         ol.endEnumTable();        
       }
    }
 }
@@ -2710,11 +2728,9 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    }
 
    QByteArray doxyArgs = argsString();
-
-   QByteArray ldef  = definition();
-   QByteArray title = name();
+   QByteArray ldef     = definition();     
+   QByteArray title    = name();
  
-
    if (isEnumerate() && ! title.isEmpty() ) {
      
       if (title.at(0) == '@') {
@@ -2743,6 +2759,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    ol.pushGeneratorState();
 
    bool htmlEndLabelTable = false;
+
    QStringList sl;
    getLabels(sl, container);
 
@@ -2773,7 +2790,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
 
       if (! found) { 
          // anonymous compound
-         //printf("Anonymous compound `%s'\n",cname.data());
+         // printf("Anonymous compound `%s'\n",cname.data());
 
          ol.startDoxyAnchor(cfname, cname, memAnchor, doxyName, doxyArgs);
          ol.startMemberDoc(ciname, name(), memAnchor, name(), showInline);
@@ -2822,7 +2839,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
             // definition has explicit template parameter declarations          
             for (auto tal : *m_impl->defTmpArgLists) {
                if (tal.count() > 0) {
-                  if (!first) {
+                  if (! first) {
                      ol.docify(" ");
                   }
 
@@ -2918,11 +2935,10 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
             ldef.prepend("- ");
          }
       }
-    
+   
       linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), self, substitute(ldef, "::", sep));
 
       QSharedPointer<Definition> scope = cd;
-
       if (! scope) {
          scope = nd;
       }
@@ -2947,10 +2963,11 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       if (excpString()) { 
          // add exception list
          writeExceptionList(ol, cd, self);
-         hasParameterList = true; // call endParameterList below
+         hasParameterList = true;             // call endParameterList below
       }
    }
 
+   // all outputs other than HTML
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Html);
 
@@ -2960,12 +2977,11 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       auto nextItem = sl.begin();
 
       for (auto s : sl) {   
-         ++nextItem;
-          
+         ++nextItem;          
          ol.writeLabel(qPrintable(s), nextItem != sl.end());        
       }
 
-      ol.endLabels();
+      ol.endLabels(); 
    }
 
    ol.popGeneratorState();
@@ -2984,16 +3000,66 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    ol.disableAll();
    ol.enable(OutputGenerator::Html);
 
+   QList<QPair<QString, QString>> showProperties;
+
    if (htmlEndLabelTable) {
       ol.writeString("  </td>\n");
       ol.writeString("  <td class=\"mlabels-right\">\n");
       ol.startLabels();
 
       auto nextItem = sl.begin();
-
-      for (auto s : sl) {   
-         ++nextItem;
           
+      for (auto s : sl) {      
+         QPair<QString, QString> temp;
+         temp.first = s;
+
+         if (s == "read")  { 
+            temp.second = getPropertyRead();
+            showProperties.append(temp);  
+           
+         } else if (s == "write") {
+            temp.second = getPropertyWrite();
+            showProperties.append(temp);   
+    
+         } else if (s == "reset") {
+            temp.second = getPropertyReset();
+            showProperties.append(temp);
+
+         } else if (s == "notify") {
+            temp.second = getPropertyNotify();
+            showProperties.append(temp);         
+
+         } else if (s == "revision") {
+            temp.second = "";
+            showProperties.append(temp);
+         
+         } else if (s == "designable") {
+            temp.second = "";
+            showProperties.append(temp);
+         
+         } else if (s == "scriptable") {
+            temp.second = "";
+            showProperties.append(temp);
+
+         } else if (s == "stored") {
+            temp.second = "";
+            showProperties.append(temp);
+
+         } else if (s == "user") {
+            temp.second = "";
+            showProperties.append(temp);
+
+         } else if (s == "constant") {
+            temp.second = "true";
+            showProperties.append(temp);
+
+         } else if (s == "final") {
+            temp.second = "true";
+            showProperties.append(temp);
+
+         }                                   
+        
+         ++nextItem;          
          ol.writeLabel(qPrintable(s), nextItem != sl.end());        
       }
 
@@ -3002,10 +3068,10 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       ol.writeString("  </tr>\n");
       ol.writeString("</table>\n");
    }
-   ol.writeString("</div>");
+   ol.writeString("</div>");   
    ol.popGeneratorState();
 
-
+   //
    ol.endDoxyAnchor(cfname, memAnchor);
    ol.startIndent();
 
@@ -3063,9 +3129,9 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
                         inbodyDocumentation() + "\n", true, false);
       }
 
-   } else if (!brief.isEmpty() && (Config::getBool("repeat-brief") || ! Config::getBool("brief-member-desc"))) {
+   } else if (! brief.isEmpty() && (Config::getBool("repeat-brief") || ! Config::getBool("brief-member-desc"))) {
 
-      if (!inbodyDocumentation().isEmpty()) {
+      if (! inbodyDocumentation().isEmpty()) {
          ol.generateDoc(inbodyFile(), inbodyLine(), getOuterScope() ? getOuterScope() : container, self, 
                         inbodyDocumentation() + "\n", true, false);
       }
@@ -3089,19 +3155,47 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
          true,         // indexWords
          false         // isExample
       );
-
    }
 
+   // HTML only, write a property table
+   ol.pushGeneratorState();
+   ol.disableAll();
+   ol.enable(OutputGenerator::Html);
+
+   if (showProperties.size() > 0 ) {
+      ol.writeString("<table class=\"fieldtable\">\n");
+      ol.writeString("  <tr><th>" + theTranslator->trProperties() + "</th><th>" + theTranslator->trClassMethods() + "</th></tr>\n");                       
+      
+      for (auto iter = showProperties.begin(); iter != showProperties.end(); ++iter) {  
+
+         QPair<QString, QString> temp = *iter;     
+ 
+         ol.writeString("  <tr><td>\n");   
+
+         ol.writeString(temp.first.toUtf8());
+         ol.writeString("  </td><td>\n");   
+      
+         ol.writeString(temp.second.toUtf8());
+         ol.writeString("  </td></tr>\n");
+      }
+         
+      ol.writeString("</table>\n");
+   }  
+   ol.popGeneratorState();
+
+   //
    _writeEnumValues(ol, container, cfname, ciname, cname);
    _writeReimplements(ol);
    _writeReimplementedBy(ol);
    _writeCategoryRelation(ol);
    _writeExamples(ol);
    _writeTypeConstraints(ol);
+
    writeSourceDef(ol, cname);
    writeSourceRefs(ol, cname);
    writeSourceReffedBy(ol, cname);
    writeInlineCode(ol, cname);
+
    _writeCallGraph(ol);
    _writeCallerGraph(ol);
 
@@ -4177,6 +4271,12 @@ const char *MemberDef::declaration() const
 
 const char *MemberDef::definition() const
 {
+
+// broom
+//if (m_impl->def.contains("title_Qt"))  {
+//   printf("\n  BROOM    (definition)  %s \n\n", m_impl->def.constData() );
+//}
+
    return m_impl->def;
 }
 
@@ -4215,7 +4315,7 @@ int MemberDef::initializerLines() const
    return m_impl->initLines;
 }
 
-uint64_t MemberDef::getMemberSpecifiers() const
+Entry::SpecifierFlags MemberDef::getMemberSpecifiers() const
 {
    return m_impl->memSpec;
 }
@@ -4235,14 +4335,24 @@ QSharedPointer<NamespaceDef> MemberDef::getNamespaceDef() const
    return m_impl->nspace;
 }
 
-const char *MemberDef::getReadAccessor() const
+const QByteArray & MemberDef::getPropertyRead() const
 {
-   return m_impl->read;
+   return m_impl->m_read;
 }
 
-const char *MemberDef::getWriteAccessor() const
+const QByteArray & MemberDef::getPropertyWrite() const
 {
-   return m_impl->write;
+   return m_impl->m_write;
+}
+
+const QByteArray &MemberDef::getPropertyReset() const
+{
+   return m_impl->m_reset;
+}
+
+const QByteArray & MemberDef::getPropertyNotify() const
+{
+   return m_impl->m_notify;
 }
 
 QSharedPointer<GroupDef> MemberDef::getGroupDef() const
@@ -4362,231 +4472,238 @@ bool MemberDef::isStatic() const
 
 bool MemberDef::isInline() const
 {
-   return (m_impl->memSpec & Entry::Inline) != 0;
+   return (m_impl->memSpec.spec & Entry::Inline) != 0;
 }
 
 bool MemberDef::isExplicit() const
 {
-   return (m_impl->memSpec & Entry::Explicit) != 0;
+   return (m_impl->memSpec.spec & Entry::Explicit) != 0;
 }
 
 bool MemberDef::isDeprecated() const
 {
-   return (m_impl->memSpec & Entry::Deprecated) != 0;
+   return (m_impl->memSpec.spec & Entry::Deprecated) != 0;
 }
 
 bool MemberDef::isMutable() const
 {
-   return (m_impl->memSpec & Entry::Mutable) != 0;
+   return (m_impl->memSpec.spec & Entry::Mutable) != 0;
 }
 
 bool MemberDef::isGettable() const
 {
-   return (m_impl->memSpec & Entry::Gettable) != 0;
+   return (m_impl->memSpec.spec & Entry::Gettable) != 0;
 }
 
 bool MemberDef::isPrivateGettable() const
 {
-   return (m_impl->memSpec & Entry::PrivateGettable) != 0;
+   return (m_impl->memSpec.spec & Entry::PrivateGettable) != 0;
 }
 
 bool MemberDef::isProtectedGettable() const
 {
-   return (m_impl->memSpec & Entry::ProtectedGettable) != 0;
+   return (m_impl->memSpec.spec & Entry::ProtectedGettable) != 0;
 }
 
 bool MemberDef::isSettable() const
 {
-   return (m_impl->memSpec & Entry::Settable) != 0;
+   return (m_impl->memSpec.spec & Entry::Settable) != 0;
 }
 
 bool MemberDef::isPrivateSettable() const
 {
-   return (m_impl->memSpec & Entry::PrivateSettable) != 0;
+   return (m_impl->memSpec.spec & Entry::PrivateSettable) != 0;
 }
 
 bool MemberDef::isProtectedSettable() const
 {
-   return (m_impl->memSpec & Entry::ProtectedSettable) != 0;
+   return (m_impl->memSpec.spec & Entry::ProtectedSettable) != 0;
 }
 
 bool MemberDef::isAddable() const
 {
-   return (m_impl->memSpec & Entry::Addable) != 0;
+   return (m_impl->memSpec.spec & Entry::Addable) != 0;
 }
 
 bool MemberDef::isRemovable() const
 {
-   return (m_impl->memSpec & Entry::Removable) != 0;
+   return (m_impl->memSpec.spec & Entry::Removable) != 0;
 }
 
 bool MemberDef::isRaisable() const
 {
-   return (m_impl->memSpec & Entry::Raisable) != 0;
+   return (m_impl->memSpec.spec & Entry::Raisable) != 0;
 }
 
 bool MemberDef::isReadable() const
 {
-   return (m_impl->memSpec & Entry::Readable) != 0;
+   return m_impl->memSpec.m_isReadable;
 }
 
 bool MemberDef::isWritable() const
 {
-   return (m_impl->memSpec & Entry::Writable) != 0;
+   return m_impl->memSpec.m_isWritable;
+}
+
+bool MemberDef::isNotify() const
+{
+   return m_impl->memSpec.m_isNotify;
+}
+
+bool MemberDef::isReset() const
+{
+   return m_impl->memSpec.m_isReset;
 }
 
 bool MemberDef::isFinal() const
 {
-   return (m_impl->memSpec & Entry::Final) != 0;
+   return m_impl->memSpec.m_isFinal;
 }
 
 bool MemberDef::isNew() const
 {
-   return (m_impl->memSpec & Entry::New) != 0;
+   return (m_impl->memSpec.spec & Entry::New) != 0;
 }
 
 bool MemberDef::isSealed() const
 {
-   return (m_impl->memSpec & Entry::Sealed) != 0;
+   return (m_impl->memSpec.spec & Entry::Sealed) != 0;
 }
 
 bool MemberDef::isOverride() const
 {
-   return (m_impl->memSpec & Entry::Override) != 0;
+   return (m_impl->memSpec.spec & Entry::Override) != 0;
 }
 
 bool MemberDef::isInitonly() const
 {
-   return (m_impl->memSpec & Entry::Initonly) != 0;
+   return (m_impl->memSpec.spec & Entry::Initonly) != 0;
 }
 
 bool MemberDef::isAbstract() const
 {
-   return (m_impl->memSpec & Entry::Abstract) != 0;
+   return (m_impl->memSpec.spec & Entry::Abstract) != 0;
 }
 
 bool MemberDef::isOptional() const
 {
-   return (m_impl->memSpec & Entry::Optional) != 0;
+   return (m_impl->memSpec.spec & Entry::Optional) != 0;
 }
 
 bool MemberDef::isRequired() const
 {
-   return (m_impl->memSpec & Entry::Required) != 0;
+   return (m_impl->memSpec.spec & Entry::Required) != 0;
 }
 
 bool MemberDef::isNonAtomic() const
 {
-   return (m_impl->memSpec & Entry::NonAtomic) != 0;
+   return (m_impl->memSpec.spec & Entry::NonAtomic) != 0;
 }
 
 bool MemberDef::isCopy() const
 {
-   return (m_impl->memSpec & Entry::Copy) != 0;
+   return (m_impl->memSpec.spec & Entry::Copy) != 0;
 }
 
 bool MemberDef::isAssign() const
 {
-   return (m_impl->memSpec & Entry::Assign) != 0;
+   return m_impl->memSpec.m_isAssign;
 }
 
 bool MemberDef::isRetain() const
 {
-   return (m_impl->memSpec & Entry::Retain) != 0;
+   return (m_impl->memSpec.spec & Entry::Retain) != 0;
 }
 
 bool MemberDef::isWeak() const
 {
-   return (m_impl->memSpec & Entry::Weak) != 0;
+   return (m_impl->memSpec.spec & Entry::Weak) != 0;
 }
 
 bool MemberDef::isStrong() const
 {
-   return (m_impl->memSpec & Entry::Strong) != 0;
+   return (m_impl->memSpec.spec & Entry::Strong) != 0;
 }
 
 bool MemberDef::isStrongEnumValue() const
-{
-   return m_impl->mtype == MemberType_EnumValue &&
-          m_impl->enumScope &&
-          m_impl->enumScope->isStrong();
+{ 
+   return m_impl->mtype == MemberType_EnumValue && m_impl->enumScope && m_impl->enumScope->isStrong();
 }
 
 bool MemberDef::isUnretained() const
 {
-   return (m_impl->memSpec & Entry::Unretained) != 0;
+   return (m_impl->memSpec.spec & Entry::Unretained) != 0;
 }
 
 bool MemberDef::isAlias() const
 {
-   return (m_impl->memSpec & Entry::Alias) != 0;
+   return (m_impl->memSpec.spec & Entry::Alias) != 0;
 }
 
 bool MemberDef::isDefault() const
 {
-   return (m_impl->memSpec & Entry::Default) != 0;
+   return (m_impl->memSpec.spec & Entry::Default) != 0;
 }
 
 bool MemberDef::isDelete() const
 {
-   return (m_impl->memSpec & Entry::Delete) != 0;
+   return (m_impl->memSpec.spec & Entry::Delete) != 0;
 }
 
 bool MemberDef::isNoExcept() const
 {
-   return (m_impl->memSpec & Entry::NoExcept) != 0;
+   return (m_impl->memSpec.spec & Entry::NoExcept) != 0;
 }
 
 bool MemberDef::isAttribute() const
 {
-   return (m_impl->memSpec & Entry::Attribute) != 0;
+   return (m_impl->memSpec.spec & Entry::Attribute) != 0;
 }
 
 bool MemberDef::isUNOProperty() const
 {
-   return (m_impl->memSpec & Entry::Property) != 0;
+   return (m_impl->memSpec.spec & Entry::Property) != 0;
 }
 
 bool MemberDef::isReadonly() const
 {
-   return (m_impl->memSpec & Entry::Readonly) != 0;
+   return (m_impl->memSpec.spec & Entry::Readonly) != 0;
 }
 
 bool MemberDef::isBound() const
 {
-   return (m_impl->memSpec & Entry::Bound) != 0;
+   return (m_impl->memSpec.spec & Entry::Bound) != 0;
 }
 
 bool MemberDef::isConstrained() const
 {
-   return (m_impl->memSpec & Entry::Constrained) != 0;
+   return (m_impl->memSpec.spec & Entry::Constrained) != 0;
 }
 
 bool MemberDef::isTransient() const
 {
-   return (m_impl->memSpec & Entry::Transient) != 0;
+   return (m_impl->memSpec.spec & Entry::Transient) != 0;
 }
 
 bool MemberDef::isMaybeVoid() const
 {
-   return (m_impl->memSpec & Entry::MaybeVoid) != 0;
+   return (m_impl->memSpec.spec & Entry::MaybeVoid) != 0;
 }
 
 bool MemberDef::isMaybeDefault() const
 {
-   return (m_impl->memSpec & Entry::MaybeDefault) != 0;
+   return (m_impl->memSpec.spec & Entry::MaybeDefault) != 0;
 }
 
 bool MemberDef::isMaybeAmbiguous() const
 {
-   return (m_impl->memSpec & Entry::MaybeAmbiguous) != 0;
+   return (m_impl->memSpec.spec & Entry::MaybeAmbiguous) != 0;
 }
 
 bool MemberDef::isPublished() const
 {
-   return (m_impl->memSpec & Entry::Published) != 0;
+   return (m_impl->memSpec.spec & Entry::Published) != 0;
 }
-
 
 bool MemberDef::isImplementation() const
 {
@@ -4738,8 +4855,7 @@ QByteArray MemberDef::getCachedTypedefTemplSpec() const
 }
 
 QByteArray MemberDef::getCachedResolvedTypedef() const
-{
-   //printf("MemberDef::getCachedResolvedTypedef()=%s m_impl=%p\n",m_impl->cachedResolvedType.data(),m_impl);
+{  
    return m_impl->cachedResolvedType;
 }
 
@@ -4772,6 +4888,12 @@ void MemberDef::setMemberType(MemberType t)
 void MemberDef::setDefinition(const char *d)
 {
    m_impl->def = d;
+
+// broom
+//if (m_impl->def.contains("title_Qt"))  {
+//   printf("\n  BROOM    (setDefinition)  %s \n\n", m_impl->def.constData() );
+//}
+
 }
 
 void MemberDef::setFileDef(QSharedPointer<FileDef> fd)
@@ -4788,14 +4910,14 @@ void MemberDef::setProtection(Protection p)
    m_isLinkableCached = 0;
 }
 
-void MemberDef::setMemberSpecifiers(uint64_t s)
+void MemberDef::setMemberSpecifiers(Entry::SpecifierFlags spec)
 {
-   m_impl->memSpec = s;
+   m_impl->memSpec = spec;
 }
 
-void MemberDef::mergeMemberSpecifiers(uint64_t s)
+void MemberDef::mergeMemberSpecifiers(Entry::SpecifierFlags spec)
 {
-   m_impl->memSpec |= s;
+   m_impl->memSpec|= spec;
 }
 
 void MemberDef::setBitfields(const char *s)
@@ -4815,14 +4937,24 @@ void MemberDef::setExplicitExternal(bool b)
    m_impl->explExt = b;
 }
 
-void MemberDef::setReadAccessor(const char *r)
+void MemberDef::setPropertyRead(const char *data)
 {
-   m_impl->read = r;
+   m_impl->m_read = data;
 }
 
-void MemberDef::setWriteAccessor(const char *w)
+void MemberDef::setPropertyWrite(const char *data)
 {
-   m_impl->write = w;
+   m_impl->m_write = data;
+}
+
+void MemberDef::setPropertyReset(const char *data)
+{
+   m_impl->m_reset = data;
+}
+
+void MemberDef::setPropertyNotify(const char *data)
+{
+   m_impl->m_notify = data;
 }
 
 void MemberDef::setTemplateSpecialization(bool b)
@@ -5087,8 +5219,7 @@ static void transferArgumentDocumentation(ArgumentList *decAl, ArgumentList *def
 }
 
 void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPointer<MemberDef> mdef)
-{
-   //printf("mdec=%s isPrototype()=%d\n",mdec->name().data(),mdec->isPrototype());
+{   
    if (
       (mdef->isFunction() && !mdef->isStatic() && !mdef->isPrototype()) ||
       (mdef->isVariable() && !mdef->isExternal() && !mdef->isStatic()) ) {
@@ -5107,8 +5238,10 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
          /* copy documentation between function definition and declaration */
          if (!mdec->briefDescription().isEmpty()) {
             mdef->setBriefDescription(mdec->briefDescription(), mdec->briefFile(), mdec->briefLine());
+
          } else if (!mdef->briefDescription().isEmpty()) {
             mdec->setBriefDescription(mdef->briefDescription(), mdef->briefFile(), mdef->briefLine());
+
          }
 
          if (!mdef->documentation().isEmpty()) {

@@ -32,13 +32,16 @@
     <memberdecl>
       <nestedclasses visible="yes" title=""/>
       <publictypes title=""/>
-      <publicslots title=""/>
-      <signals title=""/>
+      <services title=""/>
+      <interfaces title=""/>     
+      <publicsignals title=""/>
+      <publicslots title=""/>     
       <publicmethods title=""/>
       <publicstaticmethods title=""/>
       <publicattributes title=""/>
       <publicstaticattributes title=""/>
       <protectedtypes title=""/>
+      <protectedsignals title=""/>
       <protectedslots title=""/>
       <protectedmethods title=""/>
       <protectedstaticmethods title=""/>
@@ -52,6 +55,7 @@
       <properties title=""/>
       <events title=""/>
       <privatetypes title=""/>
+      <privatesignals title=""/>
       <privateslots title=""/>
       <privatemethods title=""/>
       <privatestaticmethods title=""/>
@@ -66,6 +70,8 @@
       <inlineclasses title=""/>
       <typedefs title=""/>
       <enums title=""/>
+      <services title=""/>
+      <interfaces title=""/>
       <constructors title=""/>
       <functions title=""/>
       <related title=""/>
@@ -83,6 +89,7 @@
     <briefdescription visible="yes"/>
     <memberdecl>
       <nestednamespaces visible="yes" title=""/>
+      <constantgroups visible="yes" title=""/>
       <classes visible="yes" title=""/>
       <typedefs title=""/>
       <enums title=""/>
@@ -111,6 +118,7 @@
     <memberdecl>
       <classes visible="yes" title=""/>
       <namespaces visible="yes" title=""/>
+      <constantgroups visible="yes" title=""/>
       <defines title=""/>
       <typedefs title=""/>
       <enums title=""/>
@@ -146,7 +154,9 @@
       <enumvalues title=""/>
       <functions title=""/>
       <variables title=""/>
-      <signals title=""/>
+      <publicsignals title=""/>
+      <protectedsignals title=""/>
+      <privatesignals title=""/>
       <publicslots title=""/>
       <protectedslots title=""/>
       <privateslots title=""/>
@@ -165,7 +175,9 @@
       <enumvalues title=""/>
       <functions title=""/>
       <variables title=""/>
-      <signals title=""/>
+      <publicsignals title=""/>
+      <protectedsignals title=""/>
+      <privatesignals title=""/>
       <publicslots title=""/>
       <protectedslots title=""/>
       <privateslots title=""/>

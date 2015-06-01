@@ -288,12 +288,13 @@ class LatexGenerator : public OutputGenerator
    void endContents() {}
    void writeNonBreakableSpace(int);
 
-   void startDescTable(const char *title) {
-      startSimpleSect(EnumValues, 0, 0, title);
+   void startEnumTable() {
+      startSimpleSect(EnumValues, 0, 0, theTranslator->trEnumerationValues());
       startDescForItem();
       m_textStream << "\\begin{description}" << endl;
    }
-   void endDescTable() {
+
+   void endEnumTable() {
       m_textStream << "\\end{description}" << endl;
       endDescForItem();
       endSimpleSect();

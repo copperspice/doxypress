@@ -128,7 +128,7 @@ void initDoxyPress()
    Doxy_Globals::globalScope       = QMakeShared<NamespaceDef>("<globalScope>", 1, 1, "<globalScope>");
 
    Doxy_Globals::namespaceSDict    = new NamespaceSDict();
-   Doxy_Globals::classSDict        = new ClassSDict(Config::getCase("sort-classes-case-sensitive"));
+   Doxy_Globals::classSDict        = new ClassSDict(Config::getCase("sort-class-case-sensitive"));
 
    Doxy_Globals::hiddenClasses     = new ClassSDict();  
    Doxy_Globals::pageSDict         = new PageSDict();          // all doc pages

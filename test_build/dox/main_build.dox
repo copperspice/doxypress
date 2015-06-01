@@ -28,11 +28,4 @@ The following sections detail the required build tools and the necessary steps t
   \li \subpage build-options
   \li \subpage supported-platforms   
 
-
-For platform specific information refer to the following documentation.
-
-   \li \subpage requirements-x11
-   \li \subpage requirements-win
-   \li \subpage requirements-mac
-   
 */

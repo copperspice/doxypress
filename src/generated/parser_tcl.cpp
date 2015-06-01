@@ -4773,13 +4773,16 @@ static void tcl_command(int what, const char *text)
       tcl_command_OTHER();
       goto command_end;
    }
+
    // remove leading "::" and apply TCL_SUBST
    if (myStr.left(2) == "::") {
       myStr = myStr.mid(2);
    }
+
    if (tcl.config_subst.contains(myStr)) {
       myStr = tcl.config_subst[myStr].toUtf8();
    }
+
    if (myStr == "private") {
       tcl.protection = Private;
       myLevel = 1;
@@ -4790,6 +4793,7 @@ static void tcl_command(int what, const char *text)
       tcl.protection = Public;
       myLevel = 1;
    }
+
    if (myLevel) {
       tcl_codify_cmd("keyword", 0);
       tcl_codify_cmd(NULL, 1);

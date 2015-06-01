@@ -260,8 +260,8 @@ class RTFGenerator : public OutputGenerator
    void endContents() {}
    void writeNonBreakableSpace(int);
 
-   void startDescTable(const char *title);
-   void endDescTable();
+   void startEnumTable();
+   void endEnumTable();
    void startDescTableTitle();
    void endDescTableTitle();
    void startDescTableData();

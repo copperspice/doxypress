@@ -32,15 +32,16 @@
       <nestedclasses visible="yes" title=""/>
       <publictypes title=""/>
       <services title=""/>
-      <interfaces title=""/>
+      <interfaces title=""/>     
+      <publicsignals title=""/>
       <publicslots title=""/>
-      <signals title=""/>
       <publicmethods title=""/>
       <publicstaticmethods title=""/>
       <publicattributes title=""/>
       <publicstaticattributes title=""/>
       <protectedtypes title=""/>
-      <protectedslots title=""/>
+      <protectedsignals title=""/>
+      <protectedslots title=""/>      
       <protectedmethods title=""/>
       <protectedstaticmethods title=""/>
       <protectedattributes title=""/>
@@ -53,7 +54,8 @@
       <properties title=""/>
       <events title=""/>
       <privatetypes title=""/>
-      <privateslots title=""/>
+      <privatesignals title=""/>
+      <privateslots title=""/>      
       <privatemethods title=""/>
       <privatestaticmethods title=""/>
       <privateattributes title=""/>
@@ -151,7 +153,9 @@
       <enumvalues title=""/>
       <functions title=""/>
       <variables title=""/>
-      <signals title=""/>
+      <publicsignals title=""/>
+      <protectedsignals title=""/>
+      <privatesignals title=""/>
       <publicslots title=""/>
       <protectedslots title=""/>
       <privateslots title=""/>
@@ -169,8 +173,10 @@
       <enums title=""/>
       <enumvalues title=""/>
       <functions title=""/>
-      <variables title=""/>
-      <signals title=""/>
+      <variables title=""/>    
+      <publicsignals title=""/>
+      <protectedsignals title=""/>
+      <privatesignals title=""/>
       <publicslots title=""/>
       <protectedslots title=""/>
       <privateslots title=""/>

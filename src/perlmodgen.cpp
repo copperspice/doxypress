@@ -2047,8 +2047,8 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
    generatePerlModSection(cd, cd->getMemberList(MemberListType_pubTypes),         "public_typedefs");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_pubMethods),       "public_methods");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_pubAttribs),       "public_members");
-   generatePerlModSection(cd, cd->getMemberList(MemberListType_pubSlots),         "public_slots");
-   generatePerlModSection(cd, cd->getMemberList(MemberListType_signals),          "signals");
+   generatePerlModSection(cd, cd->getMemberList(MemberListType_pubSignals),       "public-signals");
+   generatePerlModSection(cd, cd->getMemberList(MemberListType_pubSlots),         "public_slots");  
    generatePerlModSection(cd, cd->getMemberList(MemberListType_dcopMethods),      "dcop_methods");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_properties),       "properties");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_pubStaticMethods), "public_static_methods");
@@ -2056,12 +2056,14 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
    generatePerlModSection(cd, cd->getMemberList(MemberListType_proTypes),         "protected_typedefs");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_proMethods),       "protected_methods");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_proAttribs),       "protected_members");
+   generatePerlModSection(cd, cd->getMemberList(MemberListType_proSignals),       "protected-signals");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_proSlots),         "protected_slots");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_proStaticMethods), "protected_static_methods");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_proStaticAttribs), "protected_static_members");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_priTypes),         "private_typedefs");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_priMethods),       "private_methods");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_priAttribs),       "private_members");
+   generatePerlModSection(cd, cd->getMemberList(MemberListType_priSignals),       "private-signals");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_priSlots),         "private_slots");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_priStaticMethods), "private_static_methods");
    generatePerlModSection(cd, cd->getMemberList(MemberListType_priStaticAttribs), "private_static_members");

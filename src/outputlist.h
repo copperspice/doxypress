@@ -583,18 +583,23 @@ class OutputList : public OutputDocInterface
    void startContents() {
       forall(&OutputGenerator::startContents);
    }
+
    void endContents() {
       forall(&OutputGenerator::endContents);
    }
+
    void writeNonBreakableSpace(int num) {
       forall(&OutputGenerator::writeNonBreakableSpace, num);
    }
-   void startDescTable(const char *title) {
-      forall(&OutputGenerator::startDescTable, title);
+
+   void startEnumTable() {
+      forall(&OutputGenerator::startEnumTable);
    }
-   void endDescTable() {
-      forall(&OutputGenerator::endDescTable);
+
+   void endEnumTable() {
+      forall(&OutputGenerator::endEnumTable);
    }
+
    void startDescTableTitle() {
       forall(&OutputGenerator::startDescTableTitle);
    }
@@ -649,18 +654,23 @@ class OutputList : public OutputDocInterface
    void lastIndexPage() {
       forall(&OutputGenerator::lastIndexPage);
    }
+
    void startMemberDocPrefixItem() {
       forall(&OutputGenerator::startMemberDocPrefixItem);
    }
+
    void endMemberDocPrefixItem() {
       forall(&OutputGenerator::endMemberDocPrefixItem);
    }
+
    void startMemberDocName(bool align) {
       forall(&OutputGenerator::startMemberDocName, align);
    }
+
    void endMemberDocName() {
       forall(&OutputGenerator::endMemberDocName);
    }
+
    void startParameterType(bool first, const char *key) {
       forall(&OutputGenerator::startParameterType, first, key);
    }

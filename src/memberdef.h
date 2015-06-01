@@ -27,6 +27,7 @@
 #include <types.h>
 
 #include <definition.h>
+#include <entry.h>
 
 class ClassDef;
 class NamespaceDef;
@@ -59,11 +60,7 @@ class MemberDef : public Definition
    // move this member into a different scope
    QSharedPointer<MemberDef> deepCopy() const;
    void moveTo(QSharedPointer<Definition> scope);
-
-   //-----------------------------------------------------------------------------------
-   // ----  getters -----
-   //-----------------------------------------------------------------------------------
-
+  
    // link id
    QByteArray getOutputFileBase() const;
    QByteArray getReference() const;
@@ -78,7 +75,7 @@ class MemberDef : public Definition
    const char *extraTypeChars() const;
    const QByteArray &initializer() const;
    int initializerLines() const;
-   uint64_t getMemberSpecifiers() const;
+   Entry::SpecifierFlags getMemberSpecifiers() const;
 
    QSharedPointer<MemberList> getSectionList(QSharedPointer<Definition> d) const;
    QByteArray    displayDefinition() const;
@@ -89,12 +86,16 @@ class MemberDef : public Definition
    QSharedPointer<NamespaceDef> getNamespaceDef() const;
    QSharedPointer<ClassDef> accessorClass() const;
 
-   // grabbing the property read/write accessor names
-   const char *getReadAccessor() const;
-   const char *getWriteAccessor() const;
+   // property get
+   const QByteArray &getPropertyRead() const;
+   const QByteArray &getPropertyWrite() const;
+
+   // copperspice - additional properties
+   const QByteArray &getPropertyReset() const;
+   const QByteArray &getPropertyNotify() const;
 
    // querying the grouping definition
-    QSharedPointer<GroupDef> getGroupDef() const;
+   QSharedPointer<GroupDef> getGroupDef() const;
    Grouping::GroupPri_t getGroupPri() const;
    const char *getGroupFileName() const;
    int getGroupStartLine() const;
@@ -108,7 +109,7 @@ class MemberDef : public Definition
    MemberType memberType() const;
    QByteArray   memberTypeName() const;
 
-   // getter methods
+   // get methods
    bool isSignal() const;
    bool isSlot() const;
    bool isVariable() const;
@@ -137,6 +138,8 @@ class MemberDef : public Definition
    bool isProtectedSettable() const;
    bool isReadable() const;
    bool isWritable() const;
+   bool isNotify() const;
+   bool isReset() const;
    bool isAddable() const;
    bool isRemovable() const;
    bool isRaisable() const;
@@ -184,7 +187,7 @@ class MemberDef : public Definition
    bool showInCallGraph() const;
    bool isStrongEnumValue() const;
 
-   // derived getters
+   // derived get methods
    bool isFriendToHide() const;
    bool isNotFriend() const;
    bool isFunctionOrSignalSlot() const;
@@ -269,19 +272,14 @@ class MemberDef : public Definition
    QByteArray briefDescription(bool abbr = false) const;
    QByteArray fieldType() const;
 
-
-   //-----------------------------------------------------------------------------------
-   // ----  setters -----
-   //-----------------------------------------------------------------------------------
-
    // set functions
    void setMemberType(MemberType t);
    void setDefinition(const char *d);
    void setFileDef(QSharedPointer<FileDef> fd);
    void setAnchor();
    void setProtection(Protection p);
-   void setMemberSpecifiers(uint64_t s);
-   void mergeMemberSpecifiers(uint64_t s);
+   void setMemberSpecifiers(Entry::SpecifierFlags s);
+   void mergeMemberSpecifiers(Entry::SpecifierFlags s);
    void setInitializer(const char *i);
    void setBitfields(const char *s);
    void setMaxInitLines(int lines);
@@ -293,8 +291,15 @@ class MemberDef : public Definition
                     QSharedPointer<MemberDef> member = QSharedPointer<MemberDef>());
 
    void setExplicitExternal(bool b);
-   void setReadAccessor(const char *r);
-   void setWriteAccessor(const char *w);
+
+   // property set
+   void setPropertyRead(const char *data);
+   void setPropertyWrite(const char *data);
+
+   // copperspice - additional properties
+   void setPropertyReset(const char *data);
+   void setPropertyNotify(const char *data);
+
    void setTemplateSpecialization(bool b);
 
    void makeRelated();
@@ -375,11 +380,7 @@ class MemberDef : public Definition
    void setInbodyDocumentation(const char *d, const char *inbodyFile, int inbodyLine);
 
    void setHidden(bool b);
-
-   //-----------------------------------------------------------------------------------
-   // --- actions ----
-   //-----------------------------------------------------------------------------------
-
+   
    // output generation
    void writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
@@ -392,8 +393,7 @@ class MemberDef : public Definition
    void writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> container);
 
    void writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassDef> cd, 
-                             QSharedPointer<NamespaceDef> nd, QSharedPointer<FileDef> fd, 
-                             QSharedPointer<GroupDef> gd);
+                  QSharedPointer<NamespaceDef> nd, QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd);
 
    void writeTagFile(QTextStream &);
    void warnIfUndocumented();

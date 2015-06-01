@@ -26,7 +26,7 @@
     "binary-toc": false,
     "brief-member-desc": false,
     "built-in-stl-support": false,
-    "case-sense-names": true,
+    "case-sensitive-fname": false,
     "chm-file": "",
     "chm-index-encoding": "",
     "cite-bib-files": [
@@ -261,7 +261,7 @@
     ],
     "plantuml-jar-path": "",
     "predefined-macros": [
-        "Q_PROPERTY:=public: Q_PROPERTY\n"
+        ""
     ],
     "project-brief": "Sample files to test DoxyPress",
     "project-logo": "images/cslogo-32.png",
@@ -306,9 +306,10 @@
     "show-namespace-page": false,
     "show-used-files": false,
     "sip-support": false,
-    "skip-function-macros": true,
+    "skip-function-macros": false,
     "sort-brief-docs": true,
     "sort-by-scope-name": false,
+    "sort-class-case-sensitive": false,
     "sort-constructors-first": true,
     "sort-group-names": true,
     "sort-member-docs": true,

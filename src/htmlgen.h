@@ -23,6 +23,7 @@
 #include <QString>
 #include <QTextStream>
 
+#include <language.h>
 #include <outputgen.h>
 
 #define PREFRAG_START   "<div class=\"fragment\">"
@@ -379,13 +380,24 @@ class HtmlGenerator : public OutputGenerator
       m_textStream << "</small>" << endl;
    }
 
-   void startDescTable(const char *title)   
+   void startEnumTable()   
    {
-      m_textStream << "<table class=\"fieldtable\">" << endl
-        << "<tr><th colspan=\"2\">" << title << "</th></tr>";
+      QByteArray title = theTranslator->trEnumerationValues();
+
+      if (title.contains('^')) {  
+         QList<QByteArray> temp = title.split('^');         
+
+         m_textStream << "<table class=\"fieldtable\">" << endl
+           << "<tr><th>" << temp[0] << "</th><th>" << temp[1] << "</th></tr>";
+
+      } else   {
+          m_textStream << "<table class=\"fieldtable\">" << endl
+          << "<tr><th colspan=\"2\">" << title << "</th></tr>";
+
+      }
    }
 
-   void endDescTable() {
+   void endEnumTable() {
       m_textStream << "</table>" << endl;
    }
 

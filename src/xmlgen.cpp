@@ -67,7 +67,7 @@ class XmlSectionMapper : public QHash<long, const char *>
       insert(MemberListType_pubMethods, "public-func");
       insert(MemberListType_pubAttribs, "public-attrib");
       insert(MemberListType_pubSlots, "public-slot");
-      insert(MemberListType_signals, "signal");
+      insert(MemberListType_pubSignals, "public-signal");
       insert(MemberListType_dcopMethods, "dcop-func");
       insert(MemberListType_properties, "property");
       insert(MemberListType_events, "event");
@@ -79,6 +79,7 @@ class XmlSectionMapper : public QHash<long, const char *>
       insert(MemberListType_proMethods, "protected-func");
       insert(MemberListType_proAttribs, "protected-attrib");
       insert(MemberListType_proSlots, "protected-slot");
+      insert(MemberListType_proSignals, "protected-signal");
       insert(MemberListType_proStaticMethods, "protected-static-func");
       insert(MemberListType_proStaticAttribs, "protected-static-attrib");
       insert(MemberListType_pacTypes, "package-type");
@@ -90,6 +91,7 @@ class XmlSectionMapper : public QHash<long, const char *>
       insert(MemberListType_priMethods, "private-func");
       insert(MemberListType_priAttribs, "private-attrib");
       insert(MemberListType_priSlots, "private-slot");
+      insert(MemberListType_priSignals, "private-signal");
       insert(MemberListType_priStaticMethods, "private-static-func");
       insert(MemberListType_priStaticAttribs, "private-static-attrib");
       insert(MemberListType_friends, "friend");
@@ -950,13 +952,15 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    t << "        <name>" << convertToXML(md->name()) << "</name>" << endl;
 
 
+// BROOM - update here 
+
    if (md->memberType() == MemberType_Property) {
       if (md->isReadable()) {
-         t << "        <read>" << convertToXML(md->getReadAccessor()) << "</read>" << endl;
+         t << "        <read>" << convertToXML(md->getPropertyRead()) << "</read>" << endl;
       }
 
       if (md->isWritable()) {
-         t << "        <write>" << convertToXML(md->getWriteAccessor()) << "</write>" << endl;
+         t << "        <write>" << convertToXML(md->getPropertyWrite()) << "</write>" << endl;
       }
    }
 

@@ -18,35 +18,10 @@
 #ifndef TRANSLATOR_EN_H
 #define TRANSLATOR_EN_H
 
-/*!
- When defining a translator class for the new language, follow
- the description in the documentation.  One of the steps says
- that you should copy the translator_en.h (this) file to your
- translator_xx.h new file.  Your new language should use the
- Translator class as the base class.  This means that you need to
- implement exactly the same (pure virtual) methods as the
- TranslatorEnglish does.  Because of this, it is a good idea to
- start with the copy of TranslatorEnglish and replace the strings
- one by one.
-
- It is not necessary to include "translator.h" or
- "translator_adapter.h" here.  The files are included in the
- language.cpp correctly.  Not including any of the mentioned
- files frees the maintainer from thinking about whether the
- first, the second, or both files should be included or not, and
- why.  This holds namely for localized translators because their
- base class is changed occasionaly to adapter classes when the
- Translator class changes the interface, or back to the
- Translator class (by the local maintainer) when the localized
- translator is made up-to-date again.
-*/
-
 class TranslatorEnglish : public Translator
 {
  public:
-
-   // --- Language control methods -------------------
-
+  
    /*! Used for identification of the language. The identification
     * should not be translated. It should be replaced by the name
     * of the language in English using lower-case characters only
@@ -442,7 +417,7 @@ class TranslatorEnglish : public Translator
     *  list of (global) variables
     */
    virtual QByteArray trEnumerationValues() {
-      return "Enum Values";
+      return "Enum^Value";
    }
 
    /*! This is used in the documentation of a file before the list of
@@ -637,17 +612,25 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trPublicMembers() {
       return "Public Member Functions";
    }
-   virtual QByteArray trPublicSlots() {
-      return "Public Slots";
+  
+   virtual QByteArray trPublicSignals() {
+      return "Public Signals";
    }
-   virtual QByteArray trSignals() {
-      return "Signals";
+   virtual QByteArray trProtectedSignals() {
+      return "Protected Signals";
    }
+   virtual QByteArray trPrivateSignals() {
+      return "Private Signals";
+   }
+
    virtual QByteArray trStaticPublicMembers() {
       return "Static Public Member Functions";
    }
    virtual QByteArray trProtectedMembers() {
       return "Protected Member Functions";
+   }
+   virtual QByteArray trPublicSlots() {
+      return "Public Slots";
    }
    virtual QByteArray trProtectedSlots() {
       return "Protected Slots";
@@ -1302,10 +1285,6 @@ class TranslatorEnglish : public Translator
       return "Deprecated List";
    }
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.18
-   //////////////////////////////////////////////////////////////////////////
-
    /*! Used as a header for declaration section of the events found in
     * a C# program
     */
@@ -1316,10 +1295,6 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trEventDocumentation() {
       return "Event Documentation";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.3
-   //////////////////////////////////////////////////////////////////////////
 
    /*! Used as a heading for a list of Java class types with package scope.
     */

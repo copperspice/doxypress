@@ -25,6 +25,7 @@
 
 #include <arguments.h>
 #include <definition.h>
+#include <entry.h>
 #include <example.h>
 #include <groupdef.h>
 #include <memberdef.h>
@@ -343,7 +344,7 @@ class ClassDef : public Definition
    void setIsStatic(bool b);
    void setCompoundType(CompoundType t);
    void setClassName(const char *name);
-   void setClassSpecifier(uint64_t spec);
+   void setClassSpecifier(Entry::SpecifierFlags spec);
 
    void setTemplateArguments(ArgumentList *al);
    void setTemplateBaseClassNames(QHash<QString, int> *templateNames);
@@ -577,7 +578,7 @@ class ClassDef : public Definition
    bool m_isGeneric;
    bool m_isAnonymous;
 
-   uint64_t m_spec;
+   Entry::SpecifierFlags m_spec;
 };
 
 /** Class that contains information about a usage relation.

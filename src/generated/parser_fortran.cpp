@@ -56473,8 +56473,8 @@ char *fortranscannerYYtext;
 #include "commentscan.h"
 #include "fortrancode.h"
 #include <parser_fortran.h>
-#include "pre.h"
-#include "util.h"
+#include <pre.h>
+#include <util.h>
 
 // Toggle for some debugging info
 //#define DBG_CTX(x) fprintf x
@@ -57484,7 +57484,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current->spec |= Entry::AbstractClass;
+               current->m_specFlags.m_isAbstractClass = true;              
             }
             YY_BREAK
          case 42:
@@ -57524,9 +57524,9 @@ YY_DECL {
 
             { /* type name found */
                current->section = Entry::CLASS_SEC;
-               current->spec |= Entry::Struct;
-               current->name = fortranscannerYYtext;
-               current->fileName = yyFileName;
+               current->m_specFlags.spec |= Entry::Struct;
+               current->name      = fortranscannerYYtext;
+               current->fileName  = yyFileName;
                current->bodyLine  = yyLineNr;
 
                /* if type is part of a module, mod name is necessary for output */
@@ -57556,7 +57556,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current->spec |= Entry::Final;
+               current->m_specFlags.m_isFinal = true;
                current->type = QByteArray(fortranscannerYYtext).simplified();
             }
             YY_BREAK
@@ -60361,8 +60361,8 @@ static void addInterface(QByteArray name, InterfaceType type)
    }
 
    current->section = Entry::CLASS_SEC; // was Entry::INTERFACE_SEC;
-   current->spec = Entry::Interface;
-   current->name = name;
+   current->m_specFlags.spec = Entry::Interface;
+   current->name    = name;
 
    switch (type) {
       case IF_ABSTRACT:

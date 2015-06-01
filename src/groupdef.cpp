@@ -327,7 +327,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          break;
 
       case MemberType_Define:
-         if (!docOnly) {
+         if (! docOnly) {
             addMemberToList(MemberListType_decDefineMembers, md);
          }
 
@@ -335,26 +335,40 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          break;
 
       case MemberType_Signal:
-         if (!docOnly) {
-            addMemberToList(MemberListType_decSignalMembers, md);
-         }
+         if (md->protection() == Public) {               // (md->protection().isEmpty() ||    BROOM-ansel
+            if (! docOnly) {
+               addMemberToList(MemberListType_decPubSignalMembers, md);
+            }   
+            addMemberToList(MemberListType_docPubSignalMembers, md);
 
-         addMemberToList(MemberListType_docSignalMembers, md);
+         } else if (md->protection() == Protected) {
+            if (! docOnly) {
+               addMemberToList(MemberListType_decProSignalMembers, md);
+            }   
+            addMemberToList(MemberListType_docProSignalMembers, md);
+
+         } else if (md->protection() == Private) {
+            if (! docOnly) {
+               addMemberToList(MemberListType_decPriSignalMembers, md);
+            }   
+            addMemberToList(MemberListType_docPriSignalMembers, md);
+
+         }
          break;
 
       case MemberType_Slot:
          if (md->protection() == Public) {
-            if (!docOnly) {
+            if (! docOnly) {
                addMemberToList(MemberListType_decPubSlotMembers, md);
             }
-
             addMemberToList(MemberListType_docPubSlotMembers, md);
 
          } else if (md->protection() == Protected) {
-            if (!docOnly) {
+            if (! docOnly) {
                addMemberToList(MemberListType_decProSlotMembers, md);
             }
             addMemberToList(MemberListType_docProSlotMembers, md);
+
          } else {
             if (!docOnly) {
                addMemberToList(MemberListType_decPriSlotMembers, md);
@@ -362,30 +376,32 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
             addMemberToList(MemberListType_docPriSlotMembers, md);
          }
          break;
+
       case MemberType_Event:
-         if (!docOnly) {
+         if (! docOnly) {
             addMemberToList(MemberListType_decEventMembers, md);
          }
          addMemberToList(MemberListType_docEventMembers, md);
          break;
+
       case MemberType_Property:
-         if (!docOnly) {
+         if (! docOnly) {
             addMemberToList(MemberListType_decPropMembers, md);
          }
          addMemberToList(MemberListType_docPropMembers, md);
          break;
+
       case MemberType_Friend:
          if (!docOnly) {
             addMemberToList(MemberListType_decFriendMembers, md);
          }
          addMemberToList(MemberListType_docFriendMembers, md);
          break;
+
       default:
-         err("GroupDef::insertMembers(): "
-             "member `%s' (typeid=%d) with scope `%s' inserted in group scope `%s'!\n",
+         err("GroupDef::insertMembers(): member `%s' (typeid=%d) with scope `%s' inserted in group scope `%s'\n",
              md->name().data(), md->memberType(),
-             md->getClassDef() ? md->getClassDef()->name().data() : "",
-             name().data());
+             md->getClassDef() ? md->getClassDef()->name().data() : "", name().data());
    }
    return true;
 }
@@ -414,42 +430,63 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
             removeMemberFromList(MemberListType_decVarMembers, md);
             removeMemberFromList(MemberListType_docVarMembers, md);
             break;
+
          case MemberType_Function:
             removeMemberFromList(MemberListType_decFuncMembers, md);
             removeMemberFromList(MemberListType_docFuncMembers, md);
             break;
+
          case MemberType_Typedef:
             removeMemberFromList(MemberListType_decTypedefMembers, md);
             removeMemberFromList(MemberListType_docTypedefMembers, md);
             break;
+
          case MemberType_Enumeration:
             removeMemberFromList(MemberListType_decEnumMembers, md);
             removeMemberFromList(MemberListType_docEnumMembers, md);
             break;
+
          case MemberType_EnumValue:
             removeMemberFromList(MemberListType_decEnumValMembers, md);
             removeMemberFromList(MemberListType_docEnumValMembers, md);
             break;
+
          case MemberType_Define:
             removeMemberFromList(MemberListType_decDefineMembers, md);
             removeMemberFromList(MemberListType_docDefineMembers, md);
             break;
+
          case MemberType_Signal:
-            removeMemberFromList(MemberListType_decSignalMembers, md);
-            removeMemberFromList(MemberListType_docSignalMembers, md);
+            if (md->protection() == Public) {
+               removeMemberFromList(MemberListType_decPubSignalMembers, md);
+               removeMemberFromList(MemberListType_docPubSignalMembers, md);
+
+            } else if (md->protection() == Protected) {
+               removeMemberFromList(MemberListType_decProSignalMembers, md);
+               removeMemberFromList(MemberListType_docProSignalMembers, md);
+
+            } else {
+               removeMemberFromList(MemberListType_decPriSignalMembers, md);
+               removeMemberFromList(MemberListType_docPriSignalMembers, md);
+            }
             break;
+           
+           
          case MemberType_Slot:
             if (md->protection() == Public) {
                removeMemberFromList(MemberListType_decPubSlotMembers, md);
                removeMemberFromList(MemberListType_docPubSlotMembers, md);
+
             } else if (md->protection() == Protected) {
                removeMemberFromList(MemberListType_decProSlotMembers, md);
                removeMemberFromList(MemberListType_docProSlotMembers, md);
+
             } else {
                removeMemberFromList(MemberListType_decPriSlotMembers, md);
                removeMemberFromList(MemberListType_docPriSlotMembers, md);
             }
             break;
+
          case MemberType_Event:
             removeMemberFromList(MemberListType_decEventMembers, md);
             removeMemberFromList(MemberListType_docEventMembers, md);

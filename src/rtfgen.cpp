@@ -1863,25 +1863,19 @@ void RTFGenerator::endMemberList()
 //  // not yet implemented
 //}
 //
-void RTFGenerator::startDescTable(const char *title)
-{
-   DBG_RTF(m_textStream << "{\\comment (startDescTable) }"    << endl)
-   startSimpleSect(EnumValues, 0, 0, title);
-   startDescForItem();
 
-   //m_textStream << "{" << endl;
-   //incrementIndentLevel();
-   //m_textStream << rtf_Style_Reset << rtf_CList_DepthStyle();
+void RTFGenerator::startEnumTable()
+{   
+   startSimpleSect(EnumValues, 0, 0, theTranslator->trEnumerationValues());
+   startDescForItem();
 }
 
-void RTFGenerator::endDescTable()
+void RTFGenerator::endEnumTable()
 {
-   //decrementIndentLevel();
    DBG_RTF(m_textStream << "{\\comment (endDescTable)}"      << endl)
+
    endDescForItem();
    endSimpleSect();
-   //m_textStream << "}" << endl;
-   //m_textStream << rtf_Style_Reset << styleStack.top();
 }
 
 void RTFGenerator::startDescTableTitle()

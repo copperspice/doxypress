@@ -137,6 +137,7 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
             case MemberType_Property:
                m_varCnt++, m_numDecMembers++;
                break;
+
             // apparently necessary to get this to show up in declarations section?
             case MemberType_Interface:   // fall through
             case MemberType_Service:     // fall through
@@ -148,6 +149,7 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
                   m_funcCnt++, m_numDecMembers++;
                }
                break;
+
             case MemberType_Enumeration:
                m_enumCnt++, m_numDecMembers++;
                break;
@@ -753,12 +755,20 @@ QByteArray MemberList::listTypeAsString(MemberListType type)
          return "pac-static-methods";
       case MemberListType_priStaticMethods:
          return "pri-static-methods";
+
+      case MemberListType_pubSignals:
+         return "pub-signals";
+      case MemberListType_proSignals:
+         return "pro-signals";
+      case MemberListType_priSignals:
+         return "pri-signals";
       case MemberListType_pubSlots:
          return "pub-slots";
       case MemberListType_proSlots:
          return "pro-slots";
       case MemberListType_priSlots:
          return "pri-slots";
+
       case MemberListType_pubAttribs:
          return "pub-attribs";
       case MemberListType_proAttribs:
@@ -784,9 +794,7 @@ QByteArray MemberList::listTypeAsString(MemberListType type)
       case MemberListType_priTypes:
          return "pri-types";
       case MemberListType_related:
-         return "related";
-      case MemberListType_signals:
-         return "signals";
+         return "related";  
       case MemberListType_friends:
          return "friends";
       case MemberListType_dcopMethods:
@@ -813,14 +821,20 @@ QByteArray MemberList::listTypeAsString(MemberListType type)
          return "var-members";
       case MemberListType_decEnumValMembers:
          return "enumval-members";
+
+      case MemberListType_decPubSignalMembers:
+         return "pub-signal-members";
+      case MemberListType_decProSignalMembers:
+         return "pro-signal-members";
+      case MemberListType_decPriSignalMembers:
+         return "pri-signal-members";
       case MemberListType_decPubSlotMembers:
          return "pub-slot-members";
       case MemberListType_decProSlotMembers:
          return "pro-slot-members";
       case MemberListType_decPriSlotMembers:
          return "pri-slot-members";
-      case MemberListType_decSignalMembers:
-         return "signal-members";
+
       case MemberListType_decEventMembers:
          return "event-members";
       case MemberListType_decFriendMembers:

@@ -130,7 +130,7 @@ QByteArray LayoutNavEntry::url() const
 class LayoutParser : public QXmlDefaultHandler
 {
  private:
-   class StartElementHandler
+   class StartElementHandler 
    {
     typedef void (LayoutParser::*Handler)(const QXmlAttributes &attrib);
 
@@ -192,19 +192,19 @@ class LayoutParser : public QXmlDefaultHandler
 
    class StartElementHandlerMember : public StartElementHandler
    {
-      typedef void (LayoutParser::*Handler)(const QXmlAttributes &attrib, MemberListType type, const QByteArray &title,
+     typedef void (LayoutParser::*Handler)(const QXmlAttributes &attrib, MemberListType type, const QByteArray &title,
                                             const QByteArray &subtitle);
-    public:
-      StartElementHandlerMember(LayoutParser *parent, Handler h, MemberListType type,
+     public:
+       StartElementHandlerMember(LayoutParser *parent, Handler h, MemberListType type,
                                 const QByteArray &tl, const QByteArray &ss = QByteArray() )
 
          : m_parent(parent), m_handler(h), m_type(type), m_title(tl), m_subscript(ss) {}
 
-      void operator()(const QXmlAttributes &attrib) {
-         (m_parent->*m_handler)(attrib, m_type, m_title, m_subscript);
+       void operator()(const QXmlAttributes &attrib) {
+          (m_parent->*m_handler)(attrib, m_type, m_title, m_subscript);
       }
 
-    private:
+     private:
       LayoutParser *m_parent;
       Handler m_handler;
       MemberListType m_type;
@@ -217,7 +217,7 @@ class LayoutParser : public QXmlDefaultHandler
 
      typedef void (LayoutParser::*Handler)(LayoutNavEntry::Kind kind, const QXmlAttributes &attrib, const QByteArray &title);
 
-      public:
+     public:
         StartElementHandlerNavEntry(LayoutParser *parent, LayoutNavEntry::Kind kind, Handler h, const QByteArray &tl )
            : m_parent(parent), m_kind(kind), m_handler(h), m_title(tl) {}
 
@@ -235,14 +235,15 @@ class LayoutParser : public QXmlDefaultHandler
    class EndElementHandler
    {
 
-    typedef void (LayoutParser::*Handler)();
+     typedef void (LayoutParser::*Handler)();
 
-    public:
+     public:
       EndElementHandler(LayoutParser *parent, Handler h) : m_parent(parent), m_handler(h) {}
       void operator()() {
          (m_parent->*m_handler)();
       }
-    private:
+
+     private:
       LayoutParser *m_parent;
       Handler m_handler;
    };
@@ -303,24 +304,24 @@ class LayoutParser : public QXmlDefaultHandler
       m_sHandler.insert("class/memberdecl/membergroups",  new StartElementHandlerKind(
                this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("class/memberdecl/nestedclasses", new StartElementHandlerSection(
+      m_sHandler.insert("class/memberdecl/nestedclasses",  new StartElementHandlerSection(
                this, LayoutDocEntry::ClassNestedClasses, &LayoutParser::startSectionEntry,
                COMPILE_FOR_1_OPTION(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes())));
 
-      m_sHandler.insert("class/memberdecl/services",      new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/services",       new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_services, theTranslator->trServices()));
 
-      m_sHandler.insert("class/memberdecl/interfaces",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/interfaces",     new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_interfaces, theTranslator->trInterfaces()));
 
-      m_sHandler.insert("class/memberdecl/publictypes",   new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publictypes",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubTypes, theTranslator->trPublicTypes()));
 
-      m_sHandler.insert("class/memberdecl/publicslots",   new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicslots",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubSlots, theTranslator->trPublicSlots()));
 
-      m_sHandler.insert("class/memberdecl/signals",       new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
-               MemberListType_signals, theTranslator->trSignals()));
+      m_sHandler.insert("class/memberdecl/publicsignals",  new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+               MemberListType_pubSignals, theTranslator->trPublicSignals()));
 
       m_sHandler.insert("class/memberdecl/publicmethods", new StartElementHandlerMember(
                this, &LayoutParser::startMemberDeclEntry, MemberListType_pubMethods, 
@@ -341,6 +342,9 @@ class LayoutParser : public QXmlDefaultHandler
 
       m_sHandler.insert("class/memberdecl/protectedslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proSlots, theTranslator->trProtectedSlots()));
+
+     m_sHandler.insert("class/memberdecl/protectedsignals",  new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+               MemberListType_proSignals, theTranslator->trProtectedSignals()));
 
       m_sHandler.insert("class/memberdecl/protectedmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proMethods, theTranslator->trProtectedMembers()));
@@ -380,6 +384,9 @@ class LayoutParser : public QXmlDefaultHandler
 
       m_sHandler.insert("class/memberdecl/privateslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_priSlots, theTranslator->trPrivateSlots()));
+
+      m_sHandler.insert("class/memberdecl/privatesignals",  new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+               MemberListType_priSignals, theTranslator->trPrivateSignals()));
 
       m_sHandler.insert("class/memberdecl/privatemethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_priMethods, theTranslator->trPrivateMembers()));
@@ -639,8 +646,15 @@ class LayoutParser : public QXmlDefaultHandler
       m_sHandler.insert("group/memberdecl/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decVarMembers, theTranslator->trVariables()));
 
-      m_sHandler.insert("group/memberdecl/signals", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
-               MemberListType_decSignalMembers, theTranslator->trSignals()));
+
+      m_sHandler.insert("group/memberdecl/publicsignals", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+               MemberListType_decPubSignalMembers, theTranslator->trPublicSignals()));
+
+     m_sHandler.insert("group/memberdecl/protectedsignals", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+               MemberListType_decProSignalMembers, theTranslator->trProtectedSignals()));
+
+     m_sHandler.insert("group/memberdecl/privatesignals", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+               MemberListType_decPriSignalMembers, theTranslator->trPrivateSignals()));    
 
       m_sHandler.insert("group/memberdecl/publicslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decPubSlotMembers, theTranslator->trPublicSlots()));
@@ -650,6 +664,7 @@ class LayoutParser : public QXmlDefaultHandler
 
       m_sHandler.insert("group/memberdecl/privateslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decPriSlotMembers, theTranslator->trPrivateSlots()));
+
 
       m_sHandler.insert("group/memberdecl/events", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decEventMembers, theTranslator->trEvents()));
@@ -661,7 +676,7 @@ class LayoutParser : public QXmlDefaultHandler
                MemberListType_decFriendMembers, theTranslator->trFriends()));
 
       m_eHandler.insert("group/memberdecl", new EndElementHandler(this, &LayoutParser::endMemberDecl));
-      m_sHandler.insert("group/memberdef", new StartElementHandler(this, &LayoutParser::startMemberDef));
+      m_sHandler.insert("group/memberdef",  new StartElementHandler(this, &LayoutParser::startMemberDef));
       m_sHandler.insert("group/memberdef/pagedocs", new StartElementHandlerKind(this, LayoutDocEntry::GroupPageDocs,
                &LayoutParser::startSimpleEntry));
 
@@ -685,23 +700,30 @@ class LayoutParser : public QXmlDefaultHandler
                MemberListType_docFuncMembers, COMPILE_FOR_1_OPTION( theTranslator->trFunctionDocumentation(),
                SrcLangExt_Fortran, theTranslator->trSubprogramDocumentation() )));
 
-      m_sHandler.insert("group/memberdef/variables",
-               new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("group/memberdef/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docVarMembers, theTranslator->trVariableDocumentation()));
-      m_sHandler.insert("group/memberdef/signals",
-               new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docSignalMembers, theTranslator->trSignals()));
-      m_sHandler.insert("group/memberdef/publicslots",
-               new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+
+
+      m_sHandler.insert("group/memberdef/publicsignals",   new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                              MemberListType_docPubSignalMembers, theTranslator->trPublicSignals()));
+
+      m_sHandler.insert("group/memberdef/protectedsignals", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                              MemberListType_docProSignalMembers, theTranslator->trProtectedSignals()));
+
+      m_sHandler.insert("group/memberdef/privatesignals",   new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+                              MemberListType_docPriSignalMembers, theTranslator->trPrivateSignals()));
+
+      m_sHandler.insert("group/memberdef/publicslots",    new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docPubSlotMembers, theTranslator->trPublicSlots()));
-      m_sHandler.insert("group/memberdef/protectedslots",
-               new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+
+      m_sHandler.insert("group/memberdef/protectedslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docProSlotMembers, theTranslator->trProtectedSlots()));
-      m_sHandler.insert("group/memberdef/privateslots",
-               new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+
+      m_sHandler.insert("group/memberdef/privateslots",   new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                               MemberListType_docPriSlotMembers, theTranslator->trPrivateSlots()));
-      m_sHandler.insert("group/memberdef/events",
-               new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+
+
+      m_sHandler.insert("group/memberdef/events", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                MemberListType_docEventMembers, theTranslator->trEvents()));
 
       m_sHandler.insert("group/memberdef/properties", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
@@ -1154,7 +1176,7 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    // reimplemented from QXmlDefaultHandler
-   bool startElement( const QString &, const QString &, const QString &name, const QXmlAttributes &attrib ) {
+   bool startElement(const QString &, const QString &, const QString &name, const QXmlAttributes &attrib ) {
       
       QByteArray temp = m_scope + name.toUtf8();
       
@@ -1164,7 +1186,7 @@ class LayoutParser : public QXmlDefaultHandler
          (*handler)(attrib);             
     
       } else {
-         err("Unexpected start tag `%s' found in scope='%s'\n", name.data(), m_scope.data());
+         err("XML tag: '%s' was found in scope: '%s', unable to process project layout file\n", qPrintable(name), m_scope.constData());
 
       }
 
