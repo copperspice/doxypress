@@ -1710,7 +1710,7 @@ QByteArray removeRedundantWhiteSpace(const QByteArray &s)
          growBuf.addChar(' ');
 
      } else if (i > 0 && ( (s.at(i - 1) == ')' && isId(c))  || (c == '\'' && s.at(i -1) == ' ')  ||
-                  (i > 1 && s.at(i - 2) == ' ' && s.at(i - 1) ==' ') )) {
+                  (i > 1 && s.at(i - 2) == ' ' && s.at(i - 1) == ' ') )) {
 
        growBuf.addChar(' ');
        growBuf.addChar(c);

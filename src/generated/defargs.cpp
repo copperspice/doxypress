@@ -414,42 +414,42 @@ struct yy_trans_info {
 
 static yyconst flex_int16_t yy_acclist[333] =
     {   0,
-        2,    2,   61,   55,   60,   54,   60,   55,   60,    1,
-       55,   60,   36,   55,   60,   29,   36,   55,   60,   36,
-       55,   60,   36,   55,   60,   36,   55,   60,   36,   55,
-       60,   36,   55,   60,   36,   55,   60,   38,   55,   60,
-       16,   38,   55,   60,   17,   18,   38,   55,   60,   38,
-       55,   60,   37,   38,   55,   60,   17,   38,   55,   60,
-       23,   38,   55,   60,   24,   38,   55,   60,   21,   38,
-       55,   60,   22,   38,   55,   60,   25,   38,   55,   60,
-       26,   38,   55,   60,   34,   55,   60,    2,   34,   55,
-       60,   34,   55,   60,   15,   34,   55,   60,   32,   34,
+        2,    2,   61,   59,   60,   58,   60,   59,   60,    1,
+       59,   60,   37,   59,   60,   29,   37,   59,   60,   37,
+       59,   60,   37,   59,   60,   37,   59,   60,   37,   59,
+       60,   37,   59,   60,   37,   59,   60,   39,   59,   60,
+       16,   39,   59,   60,   17,   18,   39,   59,   60,   39,
+       59,   60,   38,   39,   59,   60,   17,   39,   59,   60,
+       23,   39,   59,   60,   24,   39,   59,   60,   21,   39,
+       59,   60,   22,   39,   59,   60,   25,   39,   59,   60,
+       26,   39,   59,   60,   35,   59,   60,    2,   35,   59,
+       60,   35,   59,   60,   15,   35,   59,   60,   32,   35,
 
-       55,   60,   34,   55,   60,   34,   55,   60,   15,   34,
-       55,   60,   30,   34,   55,   60,   32,   34,   55,   60,
-       33,   34,   55,   60,   34,   55,   60,   33,   34,   55,
-       60,   15,   34,   55,   60,    8,   36,   55,   60,   36,
-       55,   60,   15,   36,   55,   60,   32,   36,   55,   60,
-       15,   36,   55,   60,   32,   36,   55,   60,   36,   55,
-       60,   36,   55,   60,   36,   55,   60,   13,   34,   55,
-       60,   10,   33,   34,   55,   60,   10,   33,   34,   55,
-       60,   55,   60,   55,   60,   55,   60,   55,   60,   55,
-       60,   47,   52,   55,   60,   51,   54,   60,   52,   55,
+       59,   60,   35,   59,   60,   35,   59,   60,   15,   35,
+       59,   60,   30,   35,   59,   60,   32,   35,   59,   60,
+       34,   35,   59,   60,   35,   59,   60,   34,   35,   59,
+       60,   15,   35,   59,   60,    8,   37,   59,   60,   37,
+       59,   60,   15,   37,   59,   60,   32,   37,   59,   60,
+       15,   37,   59,   60,   32,   37,   59,   60,   37,   59,
+       60,   37,   59,   60,   37,   59,   60,   13,   35,   59,
+       60,   10,   34,   35,   59,   60,   10,   34,   35,   59,
+       60,   59,   60,   59,   60,   59,   60,   59,   60,   59,
+       60,   51,   56,   59,   60,   55,   58,   60,   56,   59,
 
-       60,   47,   52,   55,   60,   48,   55,   60,   50,   54,
-       60,   48,   55,   60,   55,   58,   60,   54,   59,   60,
-       55,   57,   58,   60,   55,   58,   60,   44,   55,   60,
-       44,   55,   60,   45,   54,   60,   44,   55,   60,   44,
-       55,   60,   35,   27,   28,   18,   17,   37,   19,   20,
-        2,   33,16393,   14,   33,    3,   33,   11,   12,   10,
-       33,   10,   33,   42,   41,   47,   49,   47,   48,   48,
-       48,   53,   28,   17,   17,16393, 8201,   33,    6,    6,
-        7,   10,   33,   46,   47,   53,   48,   53,   53,   28,
-     8201,   33,    5,    4,    5,   10,   33,   47,   53,   48,
+       60,   51,   56,   59,   60,   52,   59,   60,   54,   58,
+       60,   52,   59,   60,   41,   59,   60,   42,   58,   60,
+       40,   41,   59,   60,   41,   59,   60,   48,   59,   60,
+       48,   59,   60,   49,   58,   60,   48,   59,   60,   48,
+       59,   60,   36,   27,   28,   18,   17,   38,   19,   20,
+        2,   34,16393,   14,   34,    3,   34,   11,   12,   10,
+       34,   10,   34,   46,   45,   51,   53,   51,   52,   52,
+       52,   57,   28,   17,   17,16393, 8201,   34,    6,    6,
+        7,   10,   34,   50,   51,   57,   52,   57,   57,   28,
+     8201,   34,    5,    4,    5,   10,   34,   51,   57,   52,
 
-       53,   28,   31,   33,    4,   10,   33,   39,   28,   33,
-       10,   33,   43,   28,   33,   56,   10,   33,   56,   43,
-       28,   40,   28,   28,   28,   28,   28,   28,   28,   28,
+       57,   28,   31,   34,    4,   10,   34,   43,   28,   34,
+       10,   34,   47,   28,   33,   34,   10,   33,   34,   47,
+       28,   44,   28,   28,   28,   28,   28,   28,   28,   28,
        28,   28
     } ;
 
@@ -890,9 +890,8 @@ char *defargsYYtext;
 #include <message.h>
 #include <util.h>
 
-#define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
-
+#define YY_NO_UNISTD_H 1
 
 //    state variables
 static const char      *g_inputString;
@@ -1197,7 +1196,7 @@ YY_DECL {
          yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
          *(yy_state_ptr)++ = yy_current_state;
          ++yy_cp;
-      } while ( yy_base[yy_current_state] != 922 );
+      } while ( yy_base[yy_current_state] != 262 );
 
    yy_find_action:
       yy_current_state = *--(yy_state_ptr);
@@ -1597,7 +1596,6 @@ YY_DECL {
                      a->attrib = g_curArgAttrib;
                    
                      a->typeConstraint = g_curTypeConstraint.trimmed();
-
                      a->array.resize(0);
 
                      if (i == l - 1 && g_curArgTypeName.at(i) == ')') { // function argument
@@ -1685,7 +1683,16 @@ YY_DECL {
             }
             YY_BREAK
 
-         case 33:
+        case 33:
+           YY_RULE_SETUP  
+           {
+               g_curTypeConstraint.resize(0);
+               g_lastExtendsContext=YY_START;
+               BEGIN(ReadTypeConstraint);
+            }
+            YY_BREAK
+
+         case 34:
             YY_RULE_SETUP
 
             {
@@ -1699,28 +1706,32 @@ YY_DECL {
                g_curArgTypeName += name;
             }
             YY_BREAK
-         case 34:
+
+         case 35:
             YY_RULE_SETUP
 
             {
                g_curArgTypeName += *defargsYYtext;
             }
             YY_BREAK
-         case 35:
+
+         case 36:
             YY_RULE_SETUP
 
             {
                g_curArgDefValue += defargsYYtext;
             }
             YY_BREAK
-         case 36:
+
+         case 37:
             YY_RULE_SETUP
 
             {
                g_curArgDefValue += *defargsYYtext;
             }
             YY_BREAK
-         case 37:
+
+         case 38:
             YY_RULE_SETUP
 
             {
@@ -1728,28 +1739,55 @@ YY_DECL {
                *g_copyArgValue += name;
             }
             YY_BREAK
-         case 38:
+
+         case 39:
             YY_RULE_SETUP
 
             {
                *g_copyArgValue += *defargsYYtext;
             }
             YY_BREAK
-         case 39:
+
+         case 40:
+            YY_RULE_SETUP
+            {
+               unput(*defargsYYtext);
+               BEGIN(g_lastExtendsContext);
+            }
+            YY_BREAK
+
+         case 41:
+            YY_RULE_SETUP
+            {
+               g_curTypeConstraint += defargsYYtext;
+            }
+            YY_BREAK
+
+         case 42:
+            /* rule 42 can match eol */
+            YY_RULE_SETUP
+            {
+               g_curTypeConstraint += ' ';
+            }
+            YY_BREAK
+
+         case 43:
             YY_RULE_SETUP
 
             {
                g_argList->constSpecifier = TRUE;
             }
             YY_BREAK
-         case 40:
+
+         case 44:
             YY_RULE_SETUP
 
             {
                g_argList->volatileSpecifier = TRUE;
             }
             YY_BREAK
-         case 41:
+
+         case 45:
             YY_RULE_SETUP
 
             {
@@ -1757,7 +1795,8 @@ YY_DECL {
                BEGIN(FuncQual);
             }
             YY_BREAK
-         case 42:
+
+         case 46:
             YY_RULE_SETUP
 
             {
@@ -1766,7 +1805,8 @@ YY_DECL {
                BEGIN(TrailingReturn);
             }
             YY_BREAK
-         case 43:
+
+         case 47:
             *yy_cp = (yy_hold_char); /* undo effects of setting up defargsYYtext */
             (yy_c_buf_p) = yy_cp = yy_bp + 1;
             YY_DO_BEFORE_ACTION; /* set up defargsYYtext again */
@@ -1777,14 +1817,14 @@ YY_DECL {
                BEGIN(FuncQual);
             }
             YY_BREAK
-         case 44:
+         case 48:
             YY_RULE_SETUP
 
             {
                g_argList->trailingReturnType += defargsYYtext;
             }
             YY_BREAK
-         case 45:
+         case 49:
             /* rule 45 can match eol */
             YY_RULE_SETUP
 
@@ -1792,7 +1832,7 @@ YY_DECL {
                g_argList->trailingReturnType += defargsYYtext;
             }
             YY_BREAK
-         case 46:
+         case 50:
             /* rule 46 can match eol */
             YY_RULE_SETUP
 
@@ -1802,21 +1842,21 @@ YY_DECL {
                g_extraTypeChars = defargsYYtext;
             }
             YY_BREAK
-         case 47:
+         case 51:
             YY_RULE_SETUP
 
             {
                g_curArgDocs += defargsYYtext;
             }
             YY_BREAK
-         case 48:
+         case 52:
             YY_RULE_SETUP
 
             {
                g_curArgDocs += defargsYYtext;
             }
             YY_BREAK
-         case 49:
+         case 53:
             YY_RULE_SETUP
 
             {
@@ -1827,7 +1867,7 @@ YY_DECL {
                BEGIN(g_lastDocContext);
             }
             YY_BREAK
-         case 50:
+         case 54:
             /* rule 50 can match eol */
             YY_RULE_SETUP
 
@@ -1839,22 +1879,22 @@ YY_DECL {
                BEGIN(g_lastDocContext);
             }
             YY_BREAK
-         case 51:
-            /* rule 51 can match eol */
+         case 55:
+            /* rule 55 can match eol */
             YY_RULE_SETUP
 
             {
                g_curArgDocs += *defargsYYtext;
             }
             YY_BREAK
-         case 52:
+         case 56:
             YY_RULE_SETUP
 
             {
                g_curArgDocs += *defargsYYtext;
             }
             YY_BREAK
-         case 53:
+         case 57:
             YY_RULE_SETUP
 
             {
@@ -1868,47 +1908,15 @@ YY_DECL {
             }
             YY_BREAK
 
-         case 54:
-            /* rule 54 can match eol */
-            YY_RULE_SETUP
-
-
-            YY_BREAK
-
-         case 55:
-            YY_RULE_SETUP
-
-
-            YY_BREAK
-      
-         // type constraint
-         case 56:
-            {
-               g_curTypeConstraint.resize(0);
-               g_lastExtendsContext=YY_START;
-               BEGIN(ReadTypeConstraint);
-            }
-            YY_BREAK
-
-         case 57:
-            {
-               unput(*yytext);
-               BEGIN(g_lastExtendsContext);
-            }
-            YY_BREAK
-
          case 58:
-            {
-               g_curTypeConstraint+=yytext;
-            }
+            /* rule 58 can match eol */
+            YY_RULE_SETUP
             YY_BREAK
 
          case 59:
-            {
-               g_curTypeConstraint+=' ';
-            }
-            YY_BREAK
-
+            YY_RULE_SETUP
+            YY_BREAK     
+         
          case 60:
             YY_RULE_SETUP
 
@@ -1929,6 +1937,7 @@ YY_DECL {
          case YY_STATE_EOF(FuncQual):
          case YY_STATE_EOF(ReadDocBlock):
          case YY_STATE_EOF(ReadDocLine):
+         case YY_STATE_EOF(ReadTypeConstraint):
          case YY_STATE_EOF(TrailingReturn):
             yyterminate();
 
@@ -2180,7 +2189,7 @@ static yy_state_type yy_get_previous_state (void)
       register YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
       while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state ) {
          yy_current_state = (int) yy_def[yy_current_state];
-         if ( yy_current_state >= 243 ) {
+         if ( yy_current_state >= 263 ) {
             yy_c = yy_meta[(unsigned int) yy_c];
          }
       }
@@ -2203,12 +2212,12 @@ static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state )
    register YY_CHAR yy_c = 1;
    while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state ) {
       yy_current_state = (int) yy_def[yy_current_state];
-      if ( yy_current_state >= 243 ) {
+      if ( yy_current_state >= 263 ) {
          yy_c = yy_meta[(unsigned int) yy_c];
       }
    }
    yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-   yy_is_jam = (yy_current_state == 242);
+   yy_is_jam = (yy_current_state == 262);
    if ( ! yy_is_jam ) {
       *(yy_state_ptr)++ = yy_current_state;
    }
@@ -2445,9 +2454,7 @@ void defargsYY_delete_buffer (YY_BUFFER_STATE  b )
    defargsYYfree((void *) b  );
 }
 
-#ifndef __cplusplus
-extern int isatty (int );
-#endif /* __cplusplus */
+
 
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
@@ -2472,7 +2479,7 @@ static void defargsYY_init_buffer  (YY_BUFFER_STATE  b, FILE *file )
       b->yy_bs_column = 0;
    }
 
-   b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+        b->yy_is_interactive = 0;
 
    errno = oerrno;
 }

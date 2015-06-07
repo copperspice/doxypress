@@ -1482,36 +1482,54 @@ static bool isFencedCodeBlock(const char *data, int size, int refIndent,
    int i = 0;
    int indent = 0;
    int startTildes = 0;
+
    while (i < size && data[i] == ' ') {
       indent++, i++;
    }
+
    if (indent >= refIndent + 4) {
       return false;   // part of code block
    }
-   while (i < size && data[i] == '~') {
-      startTildes++, i++;
+
+   char tildaChar = '~';
+
+   if (i < size && data[i] == '`') {
+      tildaChar = '`';
    }
+
+   while (i < size && data[i] == tildaChar) {
+      startTildes++;
+      i++;
+   }
+
    if (startTildes < 3) {
       return false;   // not enough tildes
    }
+
    if (i < size && data[i] == '{') {
       i++;   // skip over optional {
    }
+
    int startLang = i;
    while (i < size && (data[i] != '\n' && data[i] != '}' && data[i] != ' ')) {
       i++;
    }
+
    convertStringFragment(lang, data + startLang, i - startLang);
    while (i < size && data[i] != '\n') {
       i++;   // proceed to the end of the line
    }
+
    start = i;
+
    while (i < size) {
-      if (data[i] == '~') {
+      if (data[i] == tildaChar) {
          end = i - 1;
          int endTildes = 0;
-         while (i < size && data[i] == '~') {
-            endTildes++, i++;
+
+         while (i < size && data[i] == tildaChar) {
+            endTildes++;
+            i++;
          }
          while (i < size && data[i] == ' ') {
             i++;
