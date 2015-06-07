@@ -820,8 +820,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QByteArray command
 static int handleStyleArgument(DocNode *parent, QList<DocNode *> &children, const QByteArray &cmdName)
 {
    DBG(("handleStyleArgument(%s)\n", qPrint(cmdName)));
-
-   QByteArray tokenName = g_token->name;
+   
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
@@ -1147,8 +1146,6 @@ static void handleParameterType(DocNode *parent, QList<DocNode *> &children, con
    QByteArray name = g_token->name;
    int p = 0;
    int i;
-
-   QByteArray type;
 
    while ((i = paramTypes.indexOf('|', p)) != -1) {
       g_token->name = paramTypes.mid(p, i - p);
@@ -2067,9 +2064,7 @@ DocXRefItem::DocXRefItem(DocNode *parent, int id, const char *key) :
 }
 
 bool DocXRefItem::parse()
-{
-   QByteArray listName;
-
+{   
    if (Doxy_Globals::xrefLists->contains(m_key)) {
 
       auto &refList = (*Doxy_Globals::xrefLists)[m_key];
@@ -2485,7 +2480,6 @@ DocCite::DocCite(DocNode *parent, const QByteArray &target, const QByteArray &)
    static uint numBibFiles = Config::getList("cite-bib-files").count();
 
    m_parent = parent;
-   QByteArray anchor;
 
    assert(! target.isEmpty());
 

@@ -1531,8 +1531,8 @@ void DocbookDocVisitor::writeDotFile(const QString &baseName)
    }
 
    QString outDir = Config::getString("docbook-output");
-   QString imgExt = Config::getEnum("dot-image-format");
-
+   QString imgExt = Config::getEnum("dot-image-format");      // goes away when the visitPreStart comes in
+  
    writeDotGraphFromFile(baseName + ".dot", outDir, shortName, GOF_BITMAP);
 
    m_t << "                <imagedata";

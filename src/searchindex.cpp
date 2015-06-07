@@ -347,6 +347,7 @@ void SearchIndex::write(const QString &fileName)
          indexOffsets[i] = 0;
       }
    }
+
    int padding = size;
    size = (size + 3) & ~3; // round up to 4 byte boundary
    padding = size - padding;
@@ -1041,9 +1042,7 @@ void writeJavascriptSearchIndex()
          
             for (auto dl : *sl) { 
                QSharedPointer<Definition> d = dl->first();
-
-               QByteArray id = d->localName();
-
+               
                if (! firstEntry) {
                   ti << "," << endl;
                }

@@ -3386,9 +3386,7 @@ void tclscannerYYfree (void *ptr )
 // @return created new scan context.
 static tcl_scan *tcl_scan_start(char type, QString content, QByteArray ns, QSharedPointer<Entry> entry_cl, QSharedPointer<Entry> entry_fn)
 {
-   tcl_scan *myScan = tcl.scan.at(0);
-
-   QByteArray myName;
+   tcl_scan *myScan = tcl.scan.at(0);   
    tcl_inf("line=%d type=%d '%s'\n", tcl.line_body0, type, qPrintable(content));
 
    myScan->line1 = tclscannerYYlineno;
@@ -4531,7 +4529,9 @@ static void tcl_command_NAMESPACE()
 //! Handle \c itcl::class statements.
 static void tcl_command_ITCL_CLASS()
 {   
-   QByteArray myNs, myName, myStr;
+   QByteArray myNs;
+   QByteArray myName;
+
    QSharedPointer<Entry> myEntryCl;
 
    tcl_scan *myScan = tcl.scan.at(0);
@@ -4565,8 +4565,7 @@ static void tcl_command_ITCL_CLASS()
 static void tcl_command_OO_CLASS()
 {
    QByteArray myNs;
-   QByteArray myName; 
-   QByteArray myStr; 
+   QByteArray myName;
 
    QSharedPointer<Entry> myEntryCl;
    tcl_scan *myScan = tcl.scan.at(0);

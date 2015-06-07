@@ -1155,8 +1155,7 @@ void FileDef::addIncludedUsingDirectives()
    }
 
    visited = true;
-   NamespaceList nl;
-
+  
    if (! m_includeList.isEmpty()) { 
       // file contains #includes
             
@@ -1351,8 +1350,7 @@ static Directory *findDirNode(Directory *root, const QByteArray &name)
 }
 
 static void mergeFileDef(Directory *root, QSharedPointer<FileDef> fd)
-{
-   QByteArray rootPath = root->name();
+{  
    QByteArray filePath = fd->getFilePath();
  
    Directory *dirNode = findDirNode(root, filePath);

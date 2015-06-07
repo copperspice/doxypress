@@ -56574,7 +56574,6 @@ static QList<QSharedPointer<Entry>>  moduleProcedures;       // list of all inte
 
 // module procedures
 static QByteArray        docBlock;
-static QByteArray        docBlockName;
 static bool              docBlockInBody = FALSE;
 static bool              docBlockJavaStyle;
 

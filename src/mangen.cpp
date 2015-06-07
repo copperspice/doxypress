@@ -80,8 +80,7 @@ ManGenerator::~ManGenerator()
 //}
 
 void ManGenerator::init()
-{
-   QString ext       = Config::getString("man-extension");  
+{  
    QString manOutput = Config::getString("man-output");
 
    QDir d(manOutput);

@@ -1239,7 +1239,6 @@ static Specifier    	virt;
 
 static int              docBlockContext;
 static QByteArray       docBlock;
-static QByteArray       docBlockName;
 static bool             docBlockInBody;
 static bool             docBlockJavaStyle;
 static bool             docBrief;
@@ -1253,8 +1252,6 @@ static int              g_indent = 0;
 static int              g_curIndent = 0;
 
 static QHash<QString, QByteArray *>  g_packageNameCache;
-
-static QByteArray       g_packageScope;
 
 static char             g_atomStart;
 static char             g_atomEnd;
@@ -2646,9 +2643,8 @@ YY_DECL {
 
             {
                // default value
-               // TODO: this rule is too simple, need to be able to
-               // match things like =")" as well!
-               QByteArray defVal = &pyscannerYYtext[1];
+               // TODO: this rule is too simple, need to be able to match things like =")"
+              
                g_defVal.resize(0);
                g_braceCount = 0;
                BEGIN(FunctionParamDefVal);

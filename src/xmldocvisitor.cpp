@@ -31,14 +31,72 @@
 #include <xmlgen.h>
 #include <xmldocvisitor.h>
 
+static void visitCaption(XmlDocVisitor *parent, QList<DocNode *> children)
+{   
+   for (auto &n : children) {
+      n->accept(parent);
+   } 
+}
+
+static void visitPreStart(QTextStream &t, const char *cmd, const bool doCaption, XmlDocVisitor *parent,
+                  QList<DocNode *> children, const QByteArray &name, bool writeType, DocImage::Type type, 
+                  const QByteArray &width, const QByteArray &height)
+{
+   t << "<" << cmd;
+
+   if (writeType) {
+      t << " type=\"";
+
+      switch(type)     {
+         case DocImage::Html:
+            t << "html"; 
+            break;
+         case DocImage::Latex:
+            t << "latex"; 
+            break;
+         case DocImage::Rtf:   
+            t << "rtf"; 
+            break;
+         case DocImage::DocBook: 
+            t << "docbook"; 
+            break;
+      }
+
+      t << "\"";
+   }
+
+   if (! name.isEmpty()) {
+    t << " name=\"" << name << "\"";
+   }
+
+   if (! width.isEmpty()) {
+    t << " width=\"" << convertToXML(width) << "\"";
+
+   } else if (!height.isEmpty()) {
+    t << " height=\"" << convertToXML(height) << "\"";
+
+   }
+
+   if (doCaption) {
+      t << " caption=\"";
+      visitCaption(parent, children);
+      t << "\"";
+   }
+
+   t << ">";
+}
+
+static void visitPostEnd(QTextStream &t, const char *cmd)
+{
+   t << "</" << cmd << ">" << endl;
+}
+
 XmlDocVisitor::XmlDocVisitor(QTextStream &t, CodeOutputInterface &ci)
    : DocVisitor(DocVisitor_XML), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false)
 {
 }
 
-//--------------------------------------
 // visitor functions for leaf nodes
-//--------------------------------------
 
 void XmlDocVisitor::visit(DocWord *w)
 {

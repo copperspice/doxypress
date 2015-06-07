@@ -2738,8 +2738,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
 
    QByteArray cname   = container->name();
    QByteArray cfname  = getOutputFileBase();
-   QByteArray cfiname = container->getOutputFileBase();
-
+ 
    // get member name
    QByteArray doxyName = name();
 

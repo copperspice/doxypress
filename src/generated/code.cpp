@@ -11773,8 +11773,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QByteArray &varNam
          if (vmn == 0) {
             int vi;
             QByteArray vn = varName;
-            QByteArray scope;
-
+           
             if ((vi = vn.lastIndexOf("::")) != -1 || (vi = vn.lastIndexOf('.')) != -1) { // explicit scope A::b(), probably static member
                QSharedPointer<ClassDef> jcd = getClass(vn.left(vi));
 

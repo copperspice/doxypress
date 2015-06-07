@@ -237,7 +237,7 @@ span.lineno a:hover {
    background-color: #C8C8C8;
 }
 
-div.ah {
+div.ah, span.ah {
    background-color: black;
    font-weight: bold;
    color: #ffffff;
@@ -1134,6 +1134,11 @@ dl.section dd {
    border: 0px none;
 }
 
+#projectalign
+{
+        vertical-align: middle;
+}
+
 #projectname
 {
    font: 300% Tahoma, Arial,sans-serif;
@@ -1182,6 +1187,11 @@ dl.section dd {
 .diagraph
 {
    text-align: center;
+}
+
+.caption
+{
+	font-weight: bold;
 }
 
 div.zoom

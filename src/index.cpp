@@ -1450,8 +1450,7 @@ static void writeAnnotatedClassList(OutputList &ol)
          ol.disable(OutputGenerator::RTF);
       }    
 
-      if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
-         QByteArray type = cd->compoundTypeString();
+      if (cd->isLinkableInProject() && cd->templateMaster() == 0) {         
          ol.startIndexKey();
         
          ol.writeObjectLink(0, cd->getOutputFileBase(), cd->anchor(), cd->displayName().toUtf8());

@@ -1061,11 +1061,11 @@ void HtmlDocVisitor::visitPost(DocPara *p)
             needsTag = false;
       }
    }
-
-   QByteArray context;
+  
    // if the last element of a paragraph is something that should be outside of
    // the paragraph (<ul>,<dl>,<table>) then that will already have ended the
    // paragraph and we don't need to do it here
+
    int nodeIndex = p->children().count() - 1;
 
    if (p && nodeIndex >= 0) {

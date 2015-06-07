@@ -154,8 +154,6 @@ static const char svgZoomFooter[] =
    "</svg>\n"
    ;
 
-static const int maxCmdLine = 40960;
-
 /*! mapping from protection levels to color names */
 static const char *normalEdgeColorMap[] = {
    "midnightblue",  // Public
@@ -3088,9 +3086,7 @@ QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFo
 
       if (graphFormat == GOF_BITMAP) {
          // run dot to create a bitmap image
-         QByteArray dotArgs;
-         dotArgs.resize(maxCmdLine);
-
+         
          DotRunner *dotRun = new DotRunner(absDotName.toUtf8(), d.absolutePath().toUtf8(), true, absImgName.toUtf8());
          dotRun->addJob(imgExt, absImgName);
 
@@ -3427,8 +3423,6 @@ QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graph
       regenerate = true;
       if (graphFormat == GOF_BITMAP) {
          // run dot to create a bitmap image
-         QByteArray dotArgs;
-         dotArgs.resize(maxCmdLine);
 
          DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().toUtf8(), true, absImgName);
          dotRun->addJob(imgExt, absImgName);
@@ -3711,8 +3705,6 @@ QByteArray DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
 
       if (graphFormat == GOF_BITMAP) {
          // run dot to create a bitmap image
-         QByteArray dotArgs;
-         dotArgs.resize(maxCmdLine);
 
          DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().toUtf8(), true, absImgName);
          dotRun->addJob(imgExt, absImgName);
@@ -3902,9 +3894,7 @@ QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphForma
 
       if (graphFormat == GOF_BITMAP) {
          // run dot to create a bitmap image
-         QByteArray dotArgs;
-         dotArgs.resize(maxCmdLine);
-
+        
          DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().toUtf8(), true, absImgName);
          dotRun->addJob(imgExt, absImgName);
 
@@ -4416,7 +4406,6 @@ QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat 
    QString imgExt      = Config::getEnum("dot-image-format");
    QString baseName    = m_diskName;
    QString imgName     = baseName + "." + imgExt;
-   QString mapName     = baseName + ".map";
    QString absPath     = d.absolutePath();
    QString absBaseName = absPath + "/" + baseName;
    QString absDotName  = absBaseName + ".dot";
@@ -4473,10 +4462,9 @@ QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat 
          dotfile.close();
       }
 
-      if (graphFormat == GOF_BITMAP) { // run dot to create a bitmap image
-         QByteArray dotArgs;
-         dotArgs.resize(maxCmdLine);
-
+      if (graphFormat == GOF_BITMAP) { 
+         // run dot to create a bitmap image
+       
          DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath().toUtf8(), false);
 
          dotRun->addJob(imgExt, absImgName);

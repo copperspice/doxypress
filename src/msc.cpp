@@ -201,8 +201,7 @@ void writeMscImageMapFromFile(QTextStream &t, const QString &inFile, const QStri
                   const QString &baseName, const QByteArray &context, MscOutputFormat format)
 {
    QString mapName = baseName + ".map";
-   QString mapFile = inFile + ".map";
-
+  
    t << "<img src=\"" << relPath << baseName << ".";
 
    switch (format) {

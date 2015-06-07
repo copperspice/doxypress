@@ -663,12 +663,14 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
       }
       i++;
    }
+
    if (i >= size) {
       return 0;   // premature end of comment -> no link
    }
+
    contentEnd = i;
    convertStringFragment(content, data + contentStart, contentEnd - contentStart);
-   //printf("processLink: content={%s}\n",content.data());
+  
    if (!isImageLink && content.isEmpty()) {
       return 0;   // no link text
    }
@@ -824,8 +826,7 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
    } else {
       return 0;
    }
-
-   static QRegExp re("^[@\\]ref ");
+  
    if (isToc) { 
       // special case for [TOC]
       if (g_current) {

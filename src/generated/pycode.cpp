@@ -1210,7 +1210,6 @@ static int           g_paramParens;
 
 static bool          g_exampleBlock;
 static QByteArray    g_exampleName;
-static QByteArray    g_exampleFile;
 
 static QByteArray    g_type;
 static QByteArray    g_name;

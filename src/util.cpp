@@ -3225,10 +3225,10 @@ static QByteArray getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QS
                   const QByteArray &word, QByteArray *tSpec, int count = 0)
 {
    if (count > 10) {
-      return word;   // oops recursion
+      return word;   // recursion
    }
 
-   QByteArray symName, scope, result, templSpec, tmpName;
+   QByteArray symName, result, templSpec, tmpName;
  
    if (tSpec && !tSpec->isEmpty()) {
       templSpec = stripDeclKeywords(getCanonicalTemplateSpec(d, fs, *tSpec));
@@ -3751,7 +3751,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
 
    QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict->find(mName);
  
-   if ((!forceEmptyScope || scopeName.isEmpty()) && mn && !(scopeName.isEmpty() && mScope.isEmpty())) {
+   if ((! forceEmptyScope || scopeName.isEmpty()) && mn && !(scopeName.isEmpty() && mScope.isEmpty())) {
       // this was changed for bug638856, forceEmptyScope => empty scopeName
      
       int scopeOffset = scopeName.length();
@@ -3906,8 +3906,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
          if (! args) {
             break;
          }
-
-         QByteArray className = item->getClassDef()->name();
+         
          ArgumentList *mmdAl = item->argumentList();
 
          if (matchArguments2(item->getOuterScope(), item->getFileDef(), mmdAl,

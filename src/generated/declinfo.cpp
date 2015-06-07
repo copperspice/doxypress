@@ -655,26 +655,21 @@ char *declinfoYYtext;
 
 #define YY_NO_INPUT 1
 
-/* -----------------------------------------------------------------
- *
- *	statics
- */
-
 static const char *inputString;
-static int	    inputPosition;
-static QByteArray      scope;
-static QByteArray      className;
-static QByteArray      classTempList;
-static QByteArray      funcTempList;
-static QByteArray      type;
-static QByteArray      name;
-static QByteArray      args;
-static QByteArray      tmpType;
-static int          sharpCount;
-static bool         classTempListFound;
-static bool         funcTempListFound;
-static QByteArray      exceptionString;
-static bool          insideObjC;
+static int	       inputPosition;
+static QByteArray  scope;
+static QByteArray  className;
+static QByteArray  classTempList;
+static QByteArray  funcTempList;
+static QByteArray  type;
+static QByteArray  name;
+static QByteArray  args;
+
+static int         sharpCount;
+static bool        classTempListFound;
+static bool        funcTempListFound;
+static QByteArray  exceptionString;
+static bool        insideObjC;
 
 static void addType()
 {

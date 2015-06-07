@@ -1538,8 +1538,7 @@ void PerlModDocVisitor::visitPost(DocParBlock *)
 
 
 static void addTemplateArgumentList(ArgumentList *al, PerlModOutput &output, const char *)
-{
-   QByteArray indentStr;
+{   
    if (!al) {
       return;
    }

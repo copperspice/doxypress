@@ -61,9 +61,6 @@ void CiteDict::writeLatexBibliography(QTextStream &t)
    t << "\\bibliographystyle{" << style << "}\n" "\\bibliography{";
    const QStringList citeDataList = Config::getList("cite-bib-files");
 
-   // value not used
-   // QString latexOutputDir = Config::getString("latex-output") + "/";
-
    int i = 0;
 
    for (auto bibdata : citeDataList) {

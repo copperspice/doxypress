@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include <arguments.h>
 #include <bufstr.h>
@@ -5901,8 +5900,6 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QByteAr
 
             Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() attempting to add member %s to scope %s\n",
                          md->name().constData(), namespaceName.constData());
-
-            QByteArray nsName = nd ? nd->name().constData() : "";
 
             QSharedPointer<NamespaceDef> rnd;
 

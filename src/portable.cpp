@@ -169,7 +169,11 @@ uint portable_pid()
    return pid;
 }
 
-static char **last_environ;
+#if defined(_WIN32) && ! defined(__CYGWIN__)
+   // nothing
+#else
+   static char **last_environ;
+#endif
 
 void portable_setenv(const char *name, const QString &valueX)
 {  
