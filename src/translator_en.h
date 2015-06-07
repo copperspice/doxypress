@@ -21,13 +21,7 @@
 class TranslatorEnglish : public Translator
 {
  public:
-  
-   /*! Used for identification of the language. The identification
-    * should not be translated. It should be replaced by the name
-    * of the language in English using lower-case characters only
-    * (e.g. "czech", "japanese", "russian", etc.). It should be equal to
-    * the identification used in language.cpp.
-    */
+   
    virtual QByteArray idLanguage() {
       return "english";
    }
@@ -213,9 +207,11 @@ class TranslatorEnglish : public Translator
    /*! This is an introduction to the list with all files. */
    virtual QByteArray trFileListDescription(bool extractAll) {
       QByteArray result = "Here is a list of all ";
-      if (!extractAll) {
+
+      if (! extractAll) {
          result += "documented ";
       }
+
       result += "files with brief descriptions:";
       return result;
    }
@@ -417,7 +413,7 @@ class TranslatorEnglish : public Translator
     *  list of (global) variables
     */
    virtual QByteArray trEnumerationValues() {
-      return "Enum^Value";
+      return "Enum Values";
    }
 
    /*! This is used in the documentation of a file before the list of
@@ -660,8 +656,8 @@ class TranslatorEnglish : public Translator
          result += generateMarker(i); // generate marker for entry i in the list
          // (order is left to right)
 
-         if (i != numEntries - 1) { // not the last entry, so we need a separator
-            if (i < numEntries - 2) { // not the fore last entry
+         if (i != numEntries - 1) {    // not the last entry, so we need a separator
+            if (i < numEntries - 2) {  // not the fore last entry
                result += ", ";
             } else {            // the fore last entry
                result += ", and ";
@@ -732,20 +728,12 @@ class TranslatorEnglish : public Translator
       return "Namespace Documentation";
    }
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-990522
-   //////////////////////////////////////////////////////////////////////////
-
    /*! This is used in the documentation before the list of all
     *  namespaces in a file.
     */
    virtual QByteArray trNamespaces() {
       return "Namespaces";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-990728
-   //////////////////////////////////////////////////////////////////////////
 
    /*! This is put at the bottom of a class documentation page and is
     *  followed by a list of files that were used to generate the page.
@@ -788,10 +776,6 @@ class TranslatorEnglish : public Translator
       return result;
    }
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-990901
-   //////////////////////////////////////////////////////////////////////////
-
    /*! This is used as the heading text for the retval command. */
    virtual QByteArray trReturnValues() {
       return "Return values";
@@ -809,54 +793,49 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trPageAbbreviation() {
       return "p.";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-991003
-   //////////////////////////////////////////////////////////////////////////
-
+ 
    virtual QByteArray trDefinedAtLineInSourceFile() {
       return "Definition at line @0 of file @1.";
    }
+
    virtual QByteArray trDefinedInSourceFile() {
       return "Definition in file @0.";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 0.49-991205
-   //////////////////////////////////////////////////////////////////////////
 
    virtual QByteArray trDeprecated() {
       return "Deprecated";
    }
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.0.0
-   //////////////////////////////////////////////////////////////////////////
-
    /*! this text is put before a collaboration diagram */
    virtual QByteArray trCollaborationDiagram(const char *clName) {
       return (QByteArray)"Collaboration diagram for " + clName + ":";
    }
+
    /*! this text is put before an include dependency graph */
    virtual QByteArray trInclDepGraph(const char *fName) {
       return (QByteArray)"Include dependency graph for " + fName + ":";
    }
+
    /*! header that is put before the list of constructor/destructors. */
    virtual QByteArray trConstructorDocumentation() {
       return "Constructor & Destructor Documentation";
    }
+
    /*! Used in the file documentation to point to the corresponding sources. */
    virtual QByteArray trGotoSourceCode() {
       return "Go to the source code of this file.";
    }
+
    /*! Used in the file sources to point to the corresponding documentation. */
    virtual QByteArray trGotoDocumentation() {
       return "Go to the documentation of this file.";
    }
+
    /*! Text for the \\pre command */
    virtual QByteArray trPrecondition() {
       return "Precondition";
    }
+
    /*! Text for the \\post command */
    virtual QByteArray trPostcondition() {
       return "Postcondition";
@@ -865,6 +844,7 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trInvariant() {
       return "Invariant";
    }
+
    /*! Text shown before a multi-line variable/enum initialization */
    virtual QByteArray trInitialValue() {
       return "Initial value:";
@@ -873,22 +853,22 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trCode() {
       return "code";
    }
+
    virtual QByteArray trGraphicalHierarchy() {
       return "Graphical Class Hierarchy";
    }
+
    virtual QByteArray trGotoGraphicalHierarchy() {
       return "Go to the graphical class hierarchy";
    }
+
    virtual QByteArray trGotoTextualHierarchy() {
       return "Go to the textual class hierarchy";
    }
+
    virtual QByteArray trPageIndex() {
       return "Page Index";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.1.0
-   //////////////////////////////////////////////////////////////////////////
 
    virtual QByteArray trNote() {
       return "Note";
@@ -896,6 +876,7 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trPublicTypes() {
       return "Public Types";
    }
+
    virtual QByteArray trPublicAttribs() {
       if (Config::getBool("optimize-c")) {
          return "Data Fields";
@@ -903,54 +884,57 @@ class TranslatorEnglish : public Translator
          return "Public Attributes";
       }
    }
+
    virtual QByteArray trStaticPublicAttribs() {
       return "Static Public Attributes";
    }
+
    virtual QByteArray trProtectedTypes() {
       return "Protected Types";
    }
+
    virtual QByteArray trProtectedAttribs() {
       return "Protected Attributes";
    }
+
    virtual QByteArray trStaticProtectedAttribs() {
       return "Static Protected Attributes";
    }
+
    virtual QByteArray trPrivateTypes() {
       return "Private Types";
    }
+
    virtual QByteArray trPrivateAttribs() {
       return "Private Attributes";
    }
+
    virtual QByteArray trStaticPrivateAttribs() {
       return "Static Private Attributes";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.1.3
-   //////////////////////////////////////////////////////////////////////////
 
    /*! Used as a marker that is put before a \\todo item */
    virtual QByteArray trTodo() {
       return "Todo";
    }
+
    /*! Used as the header of the todo list */
    virtual QByteArray trTodoList() {
       return "Todo List";
    }
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.1.4
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trReferencedBy() {
       return "Referenced by";
    }
+
    virtual QByteArray trRemarks() {
       return "Remarks";
    }
+
    virtual QByteArray trAttention() {
       return "Attention";
    }
+
    virtual QByteArray trInclByDepGraph() {
       return "This graph shows which files directly or "
              "indirectly include this file:";
@@ -1039,6 +1023,7 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trTest() {
       return "Test";
    }
+
    /*! Used as the header of the test list */
    virtual QByteArray trTestList() {
       return "Test List";
@@ -1048,6 +1033,7 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trProperties() {
       return "Properties";
    }
+
    /*! Used as a section header for IDL property documentation */
    virtual QByteArray trPropertyDocumentation() {
       return "Property Documentation";
@@ -1061,22 +1047,27 @@ class TranslatorEnglish : public Translator
          return "Classes";
       }
    }
+
    /*! Used as the title of a Java package */
    virtual QByteArray trPackage(const char *name) {
       return (QByteArray)"Package " + name;
    }
+
    /*! Title of the package index page */
    virtual QByteArray trPackageList() {
       return "Package List";
    }
+
    /*! The description of the package index page */
    virtual QByteArray trPackageListDescription() {
       return "Here are the packages with brief descriptions (if available):";
    }
+
    /*! The link name in the Quick links header for each page */
    virtual QByteArray trPackages() {
       return "Packages";
    }
+
    /*! Text shown before a multi-line define */
    virtual QByteArray trDefineValue() {
       return "Value:";
@@ -1086,15 +1077,12 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trBug() {
       return "Bug";
    }
+
    /*! Used as the header of the bug list */
    virtual QByteArray trBugList() {
       return "Bug List";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.6
-   //////////////////////////////////////////////////////////////////////////
-
+  
    /*! Used as ansicpg for RTF file
     *
     * The following table shows the correlation of Charset name, Charset Value and
@@ -1215,39 +1203,27 @@ class TranslatorEnglish : public Translator
     */
    virtual QByteArray trGlobal(bool first_capital, bool singular) {
       QByteArray result((first_capital ? "Global" : "global"));
-      if (!singular) {
+      if (! singular) {
          result += "s";
       }
       return result;
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.7
-   //////////////////////////////////////////////////////////////////////////
 
    /*! This text is generated when the \\author command is used and
     *  for the author section in man pages. */
    virtual QByteArray trAuthor(bool first_capital, bool singular) {
       QByteArray result((first_capital ? "Author" : "author"));
-      if (!singular) {
+      if (! singular) {
          result += "s";
       }
       return result;
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.11
-   //////////////////////////////////////////////////////////////////////////
 
    /*! This text is put before the list of members referenced by a member
     */
    virtual QByteArray trReferences() {
       return "References";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.13
-   //////////////////////////////////////////////////////////////////////////
 
    /*! used in member documentation blocks to produce a list of
     *  members that are implemented by this one.
@@ -1263,21 +1239,13 @@ class TranslatorEnglish : public Translator
       return "Implemented in " + trWriteList(numEntries) + ".";
    }
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.16
-   //////////////////////////////////////////////////////////////////////////
-
    /*! used in RTF documentation as a heading for the Table
     *  of Contents.
     */
    virtual QByteArray trRTFTableOfContents() {
       return "Table of Contents";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.17
-   //////////////////////////////////////////////////////////////////////////
-
+  
    /*! Used as the header of the list of item that have been
     *  flagged deprecated
     */
@@ -1368,20 +1336,13 @@ class TranslatorEnglish : public Translator
       return "Matches:";
    }
 
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.3.8
-   //////////////////////////////////////////////////////////////////////////
 
    /*! This is used in HTML as the title of page with source code for file filename
     */
    virtual QByteArray trSourceFile(QByteArray &filename) {
       return filename + " Source File";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.3.9
-   //////////////////////////////////////////////////////////////////////////
-
+ 
    /*! This is used as the name of the chapter containing the directory
     *  hierarchy.
     */
@@ -1432,11 +1393,7 @@ class TranslatorEnglish : public Translator
       }
       return result;
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.4.1
-   //////////////////////////////////////////////////////////////////////////
-
+ 
    /*! This text is added to the documentation when the \\overload command
     *  is used for a overloaded function.
     */
@@ -1445,10 +1402,7 @@ class TranslatorEnglish : public Translator
              "provided for convenience. It differs from the above "
              "function only in what argument(s) it accepts.";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.4.6
-   //////////////////////////////////////////////////////////////////////////
+  
 
    /*! This is used to introduce a caller (or called-by) graph */
    virtual QByteArray trCallerGraph() {
@@ -1461,10 +1415,6 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trEnumerationValueDocumentation() {
       return "Enumerator Documentation";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.5.4 (mainly for Fortran)
-   //////////////////////////////////////////////////////////////////////////
 
    /*! header that is put before the list of member subprograms (Fortran). */
    virtual QByteArray trMemberFunctionDocumentationFortran() {
@@ -1703,11 +1653,7 @@ class TranslatorEnglish : public Translator
    virtual QByteArray trTypeConstraints() {
       return "Type Constraints";
    }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.6.0 (mainly for the new search engine)
-   //////////////////////////////////////////////////////////////////////////
-
+   
    /*! directory relation for \a name */
    virtual QByteArray trDirRelation(const char *name) {
       return QByteArray(name) + " Relation";
@@ -1731,11 +1677,7 @@ class TranslatorEnglish : public Translator
    /*! Text shown when no search results are found */
    virtual QByteArray trNoMatches() {
       return "No Matches";
-   }
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.6.3 (missing items for the directory pages)
-   //////////////////////////////////////////////////////////////////////////
+   } 
 
    /*! when clicking a directory dependency label, a page with a
     *  table is shown. The heading for the first column mentions the

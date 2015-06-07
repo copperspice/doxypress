@@ -569,11 +569,6 @@ class MemberDefImpl
    // copperspice - additional properties
    QByteArray   m_reset;
    QByteArray   m_notify;
-   QByteArray   m_revision;
-   QByteArray   m_designable;
-   QByteArray   m_scriptable;
-   QByteArray   m_stored;
-   QByteArray   m_user;   
 
    QByteArray exception;       // exceptions that can be thrown
    QByteArray initializer;     // initializer
@@ -646,7 +641,7 @@ class MemberDefImpl
 
    bool stat;                // is it a static function?
    bool proto;               // is it a prototype;
-   bool docEnumValues;       // is an enum with documented enum values.
+   bool docEnumValues;       // is an enum with documented enum values
    bool annScope;            // member is part of an annoymous scope
    bool annUsed;
    bool hasCallGraph;
@@ -1087,15 +1082,19 @@ QByteArray MemberDef::getReference() const
 QByteArray MemberDef::anchor() const
 {
    QByteArray result = m_impl->anc;
+
    if (m_impl->groupAlias) {
       return m_impl->groupAlias->anchor();
    }
+
    if (m_impl->templateMaster) {
       return m_impl->templateMaster->anchor();
    }
+
    if (m_impl->enumScope && m_impl->enumScope != this) { // avoid recursion for C#'s public enum E { E, F }
       result.prepend(m_impl->enumScope->anchor());
    }
+
    if (m_impl->group) {
       if (m_impl->groupMember) {
          result = m_impl->groupMember->anchor();
@@ -2020,13 +2019,37 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
          if (isWritable()) {
             sl.append("write");
          }
-
+         
          if (isNotify()) {
            sl.append("notify");
          }
 
          if (isReset()) {
            sl.append("reset");
+         }
+
+         if (isRevision()) {
+           sl.append("revision");
+         }
+
+         if (isDesignable()) {
+           sl.append("designable");
+         }
+
+         if (isScriptable()) {
+           sl.append("scriptable");
+         }
+
+         if (isStored()) {
+           sl.append("stored");
+         }
+
+         if (isUser()) {
+           sl.append("user");
+         }
+
+         if (isConstant()) {
+           sl.append("constant");
          }
 
          if (isFinal()) {
@@ -2457,8 +2480,7 @@ void MemberDef::_writeTypeConstraints(OutputList &ol)
 
 void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> container, const QByteArray &cfname, 
                                  const QByteArray &ciname, const QByteArray &cname)
-{
-   // For enum, we also write the documented enum values
+{ 
    if (isEnumerate()) {
       bool first = true;
       QSharedPointer<MemberList> fmdl = enumFieldList();
@@ -2468,8 +2490,13 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
          for (auto fmd : *fmdl) {
            
             if (fmd->isLinkable()) {
+               // for enums which have documentation, show the enum value name & the documentation
+               // enum value is documented as a "\var"
+
                if (first) {
                   ol.startEnumTable();
+
+                 first = false;
                }
 
                ol.addIndexItem(fmd->name(), ciname);
@@ -2477,36 +2504,30 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
               
                Doxy_Globals::indexList->addIndexItem(container, fmd);
 
-               //ol.writeListItem();
                ol.startDescTableTitle();
-               ol.startDoxyAnchor(cfname, cname, fmd->anchor(), fmd->name(), fmd->argsString());
-               first = false;
 
-               //ol.startEmphasis();
+               ol.startDoxyAnchor(cfname, cname, fmd->anchor(), fmd->name(), fmd->argsString());             
                ol.docify(fmd->name());
-
-               //ol.endEmphasis();
+               
                ol.disableAllBut(OutputGenerator::Man);
                ol.writeString(" ");
                ol.enableAll();
+
                ol.endDoxyAnchor(cfname, fmd->anchor());
                ol.endDescTableTitle();
 
-               //ol.newParagraph();
                ol.startDescTableData();
 
-               bool hasBrief = !fmd->briefDescription().isEmpty();
-               bool hasDetails = !fmd->documentation().isEmpty();
+               bool hasBrief   = ! fmd->briefDescription().isEmpty();
+               bool hasDetails = ! fmd->documentation().isEmpty();
 
                if (hasBrief) {
-                  ol.generateDoc(fmd->briefFile(), fmd->briefLine(), 
-                                 getOuterScope() ? getOuterScope() : container,
+                  ol.generateDoc(fmd->briefFile(), fmd->briefLine(), getOuterScope() ? getOuterScope() : container,
                                  fmd, fmd->briefDescription(), true, false);
                }
               
                if (hasDetails) {
-                  ol.generateDoc(fmd->docFile(), fmd->docLine(),
-                                 getOuterScope() ? getOuterScope() : container,
+                  ol.generateDoc(fmd->docFile(), fmd->docLine(), getOuterScope() ? getOuterScope() : container,
                                  fmd, fmd->documentation() + "\n", true, false);
                }
                ol.endDescTableData();
@@ -2672,11 +2693,11 @@ void MemberDef::_writeGroupInclude(OutputList &ol, bool inGroup)
  *  all active output formats.
  */
 void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *scName, QSharedPointer<Definition> container,
-                                   bool inGroup, bool showEnumValues, bool showInline )
+                                   bool inGroup, bool showEnumValues, bool showInline)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
-   // if this member is in a group find the real scope name.
+   // if this member is in a group find the real scope name
    bool hasParameterList = false;
    bool inFile = container->definitionType() == Definition::TypeFile;
    bool hasDocs = isDetailedSectionVisible(inGroup, inFile);
@@ -2685,7 +2706,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       return;
    }
 
-   if (isEnumValue() && !showEnumValues) {
+   if (isEnumValue() && ! showEnumValues) {
       return;
    }
 
@@ -2871,7 +2892,9 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
                }
             }
 
-            if (m_impl->tArgList && lang == SrcLangExt_Cpp) { // function template prefix
+            if (m_impl->tArgList && lang == SrcLangExt_Cpp) { 
+               // function template prefix
+
                ol.startMemberDocPrefixItem();
                writeTemplatePrefix(ol, m_impl->tArgList);
                ol.endMemberDocPrefixItem();
@@ -3007,60 +3030,54 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       ol.writeString("  <td class=\"mlabels-right\">\n");
       ol.startLabels();
 
-      auto nextItem = sl.begin();
-          
+      auto nextItem  = sl.begin();
+              
       for (auto s : sl) {      
+         bool isProperty = false;
+
          QPair<QString, QString> temp;
-         temp.first = s;
+         temp.first  = s;
+         temp.second = "";         
 
          if (s == "read")  { 
             temp.second = getPropertyRead();
-            showProperties.append(temp);  
+            isProperty  = true; 
            
          } else if (s == "write") {
             temp.second = getPropertyWrite();
-            showProperties.append(temp);   
+            isProperty  = true;    
     
          } else if (s == "reset") {
             temp.second = getPropertyReset();
-            showProperties.append(temp);
+            isProperty  = true; 
 
          } else if (s == "notify") {
             temp.second = getPropertyNotify();
-            showProperties.append(temp);         
+            isProperty  = true;         
 
-         } else if (s == "revision") {
-            temp.second = "";
-            showProperties.append(temp);
+         } else if (s == "revision") {            
+            isProperty  = true; 
          
-         } else if (s == "designable") {
-            temp.second = "";
-            showProperties.append(temp);
+         } else if (s == "designable" || s == "scriptable" || s == "stored" || s == "user") {   
+            isProperty  = true; 
          
-         } else if (s == "scriptable") {
-            temp.second = "";
-            showProperties.append(temp);
-
-         } else if (s == "stored") {
-            temp.second = "";
-            showProperties.append(temp);
-
-         } else if (s == "user") {
-            temp.second = "";
-            showProperties.append(temp);
-
          } else if (s == "constant") {
-            temp.second = "true";
-            showProperties.append(temp);
+            isProperty  = true; 
 
          } else if (s == "final") {
-            temp.second = "true";
-            showProperties.append(temp);
+            isProperty  = true; 
 
          }                                   
         
          ++nextItem;          
-         ol.writeLabel(qPrintable(s), nextItem != sl.end());        
+
+         if (isProperty) {
+            showProperties.append(temp);
+           
+         } else {
+            ol.writeLabel(qPrintable(s), nextItem != sl.end());                    
+
+         }       
       }
 
       ol.endLabels();
@@ -4005,11 +4022,14 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
       n = n.right(n.length() - i - 2);   // strip scope (TODO: is this needed?)
    }
 
-   if (n[0] != '@') { // not an anonymous enum
+   if (n[0] != '@') { 
+      // not an anonymous enum
+
       if (isLinkableInProject() || hasDocumentedEnumValues()) {
          //_writeTagData(compoundType);
          _addToSearchIndex();
          writeLink(typeDecl, cd, nd, fd, gd);
+
       } else {
          typeDecl.startBold();
          typeDecl.docify(n);
@@ -4017,6 +4037,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
       }
       typeDecl.writeChar(' ');
    }
+
    if (!m_impl->enumBaseType.isEmpty()) {
       typeDecl.writeChar(':');
       typeDecl.writeChar(' ');
@@ -4056,11 +4077,13 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
                   fmd->_addToSearchIndex();
                   fmd->writeLink(typeDecl, cd, nd, fd, gd);
 
-               } else { // no docs for this enum value
+               } else { 
+                  // no docs for this enum value
                   typeDecl.startBold();
                   typeDecl.docify(fmd->name());
                   typeDecl.endBold();
                }
+
                if (fmd->hasOneLineInitializer()) { // enum value has initializer
                   //typeDecl.writeString(" = ");
                   typeDecl.writeString(" ");
@@ -4271,12 +4294,6 @@ const char *MemberDef::declaration() const
 
 const char *MemberDef::definition() const
 {
-
-// broom
-//if (m_impl->def.contains("title_Qt"))  {
-//   printf("\n  BROOM    (definition)  %s \n\n", m_impl->def.constData() );
-//}
-
    return m_impl->def;
 }
 
@@ -4553,6 +4570,36 @@ bool MemberDef::isNotify() const
 bool MemberDef::isReset() const
 {
    return m_impl->memSpec.m_isReset;
+}
+
+bool MemberDef::isRevision() const
+{
+   return m_impl->memSpec.m_isRevision;
+}
+
+bool MemberDef::isDesignable() const
+{
+   return m_impl->memSpec.m_isDesignable;
+}
+
+bool MemberDef::isScriptable() const
+{
+   return m_impl->memSpec.m_isScriptable;
+}
+
+bool MemberDef::isStored() const
+{
+   return m_impl->memSpec.m_isStored;
+}
+
+bool MemberDef::isUser() const
+{
+   return m_impl->memSpec.m_isUser;
+}
+
+bool MemberDef::isConstant() const
+{
+   return m_impl->memSpec.m_isConstant;
 }
 
 bool MemberDef::isFinal() const
@@ -4888,12 +4935,6 @@ void MemberDef::setMemberType(MemberType t)
 void MemberDef::setDefinition(const char *d)
 {
    m_impl->def = d;
-
-// broom
-//if (m_impl->def.contains("title_Qt"))  {
-//   printf("\n  BROOM    (setDefinition)  %s \n\n", m_impl->def.constData() );
-//}
-
 }
 
 void MemberDef::setFileDef(QSharedPointer<FileDef> fd)

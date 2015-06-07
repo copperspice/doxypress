@@ -229,10 +229,10 @@ void Entry::reset()
    m_specFlags = Entry::SpecifierFlags{};
 
    lang = SrcLangExt_Unknown;
-   hidden = false;
-   artificial = false;
-   subGrouping = true;
-   protection = Public;
+   hidden       = false;
+   artificial   = false;
+   subGrouping  = true;
+   protection   = Public;
    groupDocType = GROUPDOC_NORMAL;
    id.resize(0);
 

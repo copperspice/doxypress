@@ -1049,12 +1049,12 @@ void GroupDef::writeDocumentation(OutputList &ol)
 
    if (Doxy_Globals::searchIndex) {
       Doxy_Globals::searchIndex->setCurrentDoc(self, anchor(), false);
-      static QRegExp we("[a-zA-Z_][-a-zA-Z_0-9]*");
+      static QRegExp re("[a-zA-Z_][-a-zA-Z_0-9]*");
       int i = 0, p = 0, l = 0;
 
-      while ((i = we.indexIn(title, p)) != -1) { 
+      while ((i = re.indexIn(title, p)) != -1) { 
          // foreach word in the title
-         l = we.matchedLength();
+         l = re.matchedLength();
    
          Doxy_Globals::searchIndex->addWord(title.mid(i, l), true);
          p = i + l;

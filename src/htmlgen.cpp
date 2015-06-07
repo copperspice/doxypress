@@ -2642,6 +2642,7 @@ void HtmlGenerator::endTitleHead(const char *, const char *)
 
 void HtmlGenerator::endHeaderSection()
 {
+   m_textStream << "  <div class=\"clear-floats\"></div>\n";  
    m_textStream << "</div><!--header-->" << endl;
 }
 
@@ -2762,6 +2763,7 @@ void HtmlGenerator::writeSummaryLink(const QByteArray &file, const char *anchor,
 
    } else {
       m_textStream << " &#124;\n";
+
    }
 
    m_textStream << "<a href=\"";

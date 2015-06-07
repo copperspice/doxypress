@@ -33,7 +33,6 @@ int Debug::curPriority = 0;
 QHash<QString, Debug::DebugMask> debugMap(); 
 QHash<QString, Debug::DebugMask> Debug::m_map = debugMap();
 
-
 QHash<QString, Debug::DebugMask> debugMap() 
 {     
    QHash<QString, Debug::DebugMask> tempMap;
@@ -44,13 +43,13 @@ QHash<QString, Debug::DebugMask> debugMap()
    tempMap.insert("preprocessor", Debug::Preprocessor );
    tempMap.insert("classes",      Debug::Classes      );
    tempMap.insert("commentcnv",   Debug::CommentCnv   );
-   tempMap.insert("commentscan",  Debug::CommentScan  );
+   tempMap.insert("commentscan",  Debug::CommentScan  ); 
    tempMap.insert("validate",     Debug::Validate     );
    tempMap.insert("printtree",    Debug::PrintTree    );
    tempMap.insert("time",         Debug::Time         );
    tempMap.insert("extcmd",       Debug::ExtCmd       );
    tempMap.insert("markdown",     Debug::Markdown     );
-   tempMap.insert("filteroutput", Debug::FilterOutput );
+   tempMap.insert("filteroutput", Debug::FilterOutput );  
    tempMap.insert("lex",          Debug::Lex          );    
 
    return tempMap;
@@ -94,7 +93,10 @@ bool Debug::isFlagSet(DebugMask mask)
 
 void Debug::printFlags()
 { 
-   for (auto item : m_map.keys())  {      
+   QList<QString> list = m_map.keys();
+   std::sort(list.begin(), list.end());
+
+   for (auto item : list)  {      
       printf("\t%s\n", qPrintable(item));      
    }   
 }

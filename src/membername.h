@@ -39,14 +39,14 @@ class MemberName : public QList<QSharedPointer<MemberDef>>
    QByteArray name;
 };
 
-/** Iterator for MemberDef objects in a MemberName list. */
+/** Iterator for MemberDef objects in a MemberName list */
 class MemberNameIterator : public QListIterator<QSharedPointer<MemberDef>>
 {
  public:
    MemberNameIterator( const MemberName &list);
 };
 
-/** Sorted dictionary of MemberName objects. */
+/** Sorted dictionary of MemberName objects */
 class MemberNameSDict : public StringMap<QSharedPointer<MemberName>>
 {
  public:

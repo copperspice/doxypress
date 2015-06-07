@@ -23,27 +23,26 @@ class Ginger : public CSObject
    CS_OBJECT(Ginger)    
    
    CS_ENUM(Spices) 
+
    // title is type QString
-     CS_PROPERTY_READ(title,       getTitle)
-     CS_PROPERTY_WRITE(title,      setTitle)
-     CS_PROPERTY_RESET(title,      resetTitle)
-     CS_PROPERTY_NOTIFY(title,     titleChanged)
-    
-   // not documented at this time
-//   CS_PROPERTY_REVISION(title,   31415)
-//   CS_PROPERTY_DESIGNABLE(title, true)
-//   CS_PROPERTY_SCRIPTABLE(title, isScriptTitle()   )
-//   CS_PROPERTY_STORED(title,     m_title.isEmpty() )
-//   CS_PROPERTY_USER(title,       10 > 100)
-//   CS_PROPERTY_CONSTANT(title)
-//   CS_PROPERTY_FINAL(title)
+   CS_PROPERTY_READ(title,        getTitle)
+   CS_PROPERTY_WRITE(title,       setTitle)
+   CS_PROPERTY_RESET(title,       resetTitle)
+   CS_PROPERTY_NOTIFY(title,      titleChanged)     
+   CS_PROPERTY_REVISION(title,    31415)
+   CS_PROPERTY_DESIGNABLE(title,  true)
+   CS_PROPERTY_SCRIPTABLE(title,  isScriptTitle()   )
+   CS_PROPERTY_STORED(title,      m_title.isEmpty() )
+   CS_PROPERTY_USER(title,        10 > 100)
+   CS_PROPERTY_CONSTANT(title)
+   CS_PROPERTY_FINAL(title)
     
    // favorite is type enum Spices
    CS_PROPERTY_READ(favorite,   getFavorite)
    CS_PROPERTY_WRITE(favorite,  setFavorite)
    CS_PROPERTY_NOTIFY(favorite, ready)
            
-   // test goes out (1)
+   // testing Qt
    Q_OBJECT  
    Q_ENUM(Spices)      
    Q_PROPERTY(QString title_Qt  READ getTitle  WRITE setTitle)
@@ -51,14 +50,14 @@ class Ginger : public CSObject
    public:
       Ginger();
       ~Ginger();
-
-      // registration is only reguired if the enum is used in a proptery or a signal
-      // CS_REGISTER_ENUM( enum Spices { mint, basil, Salt, Pepper =100, cloves }; )
+     
       enum Spices { mint, basil, Salt, Pepper =100, cloves };
-
       enum Brands { Chinese, Jamaican, Thai, Yellow }; 
 
-      // test goes out (2)
+      // registration is only reguired if the enum is used in a proptery or a signal
+      CS_REGISTER_ENUM( enum Shapes { square, triangle, circle, trapezoid, diamond=0x10 }; )
+
+      // testing Qt
       enum Spice_Qt { Allspice, Mace }; 
 
       using AmountType = double;
@@ -115,7 +114,11 @@ class Ginger : public CSObject
 
       CS_SLOT_1(Protected, void someProtectedSlot() )
       CS_SLOT_2(someProtectedSlot) 
-                            
+
+      CS_SLOT_1(Protected, void test_D(int data[][42], void (*ptr)(int,QString *)))
+      CS_SLOT_OVERLOAD(test_D,(int [][42], void (*)(int,QString *)))
+
+
    private:
       QString somePrivate();  
       double m_amount;      
@@ -137,5 +140,16 @@ class Ginger : public CSObject
 };
 
 Q_DECLARE_METATYPE(Ginger::Spices)
+Q_DECLARE_TYPEINFO(QString, Q_MOVABLE_TYPE)
+Q_DECLARE_SHARED(QString)
+Q_DECLARE_OPERATORS_FOR_FLAGS(QString::SectionFlags)
+
+class Lemongrass : public CSObject
+{
+   public:
+      int howMuch;
+      QString otherNames;
+
+}
 
 #endif

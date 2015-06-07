@@ -447,7 +447,7 @@ StyleData::~StyleData()
 
 bool StyleData::setStyle(const char *s, const char *styleName)
 {
-   static const QRegExp subgroup("^{[^}]*}\\s*");
+   static const QRegExp subgroup("^\\{[^}]*\\}\\s*");
    static const QRegExp any_clause("^\\\\[a-z][a-z0-9-]*\\s*");
 
    int len = 0;     // length of a particular RTF formatting control

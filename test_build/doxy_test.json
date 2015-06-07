@@ -224,7 +224,7 @@
     "latex-ps": true,
     "latex-source-code": false,
     "latex-timestamp": false,
-    "layout-file": "",
+    "layout-file": "doxy_layout.xml",
     "lookup-cache-size": 0,
     "macro-expansion": true,
     "make-index-cmd-name": "makeindex",
@@ -239,7 +239,7 @@
     ],
     "mathjax-format": "HTML-CSS",
     "mathjax-relpath": "http://cdn.mathjax.org/mathjax/latest",
-    "max-init-lines": 0,
+    "max-init-lines": 1,
     "mdfile-mainpage": "",
     "msc-file-dirs": [
         ""
@@ -261,7 +261,10 @@
     ],
     "plantuml-jar-path": "",
     "predefined-macros": [
-        ""
+        "Q_REQUIRED_RESULT=",
+        "Q_CORE_EXPORT=",
+        "Q_INLINE_TEMPLATE=",
+        "Q_OUTOFLINE_TEMPLATE="
     ],
     "project-brief": "Sample files to test DoxyPress",
     "project-logo": "images/cslogo-32.png",

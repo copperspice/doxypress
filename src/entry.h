@@ -188,6 +188,7 @@ class Entry
          // ensures this struc has no virtual methods
          static_assert(std::is_standard_layout<SpecifierFlags>::value == true, "Struct SpecifierFlags can not have virutal methods");
 
+         // set ever bit field to zero or false
          memset(this, 0, sizeof(SpecifierFlags));
       } 
 
@@ -209,6 +210,7 @@ class Entry
          this->m_isUser       |= other.m_isUser;
          this->m_isConstant   |= other.m_isConstant;
          this->m_isFinal      |= other.m_isFinal;
+
          this->m_isAssign     |= other.m_isAssign;
       }
 
@@ -248,6 +250,7 @@ class Entry
       int m_isUser             : 1;
       int m_isConstant         : 1;
       int m_isFinal            : 1;
+
       int m_isAssign           : 1;
    };
 

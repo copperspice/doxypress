@@ -995,7 +995,7 @@ Returns a const STL-style iterator pointing to the imaginary item after the last
 
 
 /**
-\fn bool QString::contains ( const QString & str, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
+\fn QBool QString::contains ( const QString & str, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns true if this string contains an occurrence of the string <i>str</i>; otherwise returns false.
 
@@ -1015,7 +1015,7 @@ Example:
 
 
 /**
-\fn bool QString::contains ( const QStringRef & str, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
+\fn QBool QString::contains ( const QStringRef & str, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 Returns true if this string contains an occurrence of the string reference <i>str</i>; otherwise returns false.
 
@@ -1030,7 +1030,7 @@ This function was introduced in Qt 4.8.
 
 
 /**
-\fn bool QString::contains ( QChar ch, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
+\fn QBool QString::contains ( QChar ch, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
 
 This function overloads contains().
 
@@ -1041,7 +1041,7 @@ Returns true if this string contains an occurrence of the character <i>ch</i>; o
 
 
 /**
-\fn bool QString::contains ( const QRegExp & rx ) const
+\fn QBool QString::contains ( const QRegExp & rx ) const
 
 This function overloads contains().
 
@@ -1052,7 +1052,7 @@ Returns true if the regular expression <i>rx</i> matches somewhere in this strin
 
 
 /**
-\fn bool QString::contains ( QRegExp & rx ) const
+\fn QBool QString::contains ( QRegExp & rx ) const
 
 This function overloads contains().
 

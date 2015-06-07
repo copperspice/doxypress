@@ -70,7 +70,7 @@ class StringMap
       return m_dict.begin();      
    }  
 
-   /*! Clears the dictionary.  
+   /*! Clears the dictionary 
     */
    void clear() {
       m_dict.clear();
@@ -100,7 +100,7 @@ class StringMap
    }  
 
    T find(const char *key) {
-       auto item = m_dict.find(key);
+      auto item = m_dict.find(key);
 
       if (item == m_dict.end()) {   
          return T();

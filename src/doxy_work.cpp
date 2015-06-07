@@ -808,7 +808,7 @@ void processFiles()
    //
    QDir thisDir;
    if (! Doxy_Globals::tempB_FName.isEmpty()) {
-// BROOOOOOOMMMMMM  broom      thisDir.remove(Doxy_Globals::tempB_FName);
+      thisDir.remove(Doxy_Globals::tempB_FName);
    }
 
    Doxy_Globals::g_stats.begin("Determining which enums are documented\n");
@@ -2090,7 +2090,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
    QSharedPointer<FileDef> fd = rootNav->fileDef();
 
    QByteArray scName;
-   if (rootNav->parent()->section()&Entry::SCOPE_MASK) {
+   if (rootNav->parent()->section() & Entry::SCOPE_MASK) {
       scName = rootNav->parent()->name();
    }
 
@@ -2147,8 +2147,6 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
       QByteArray refFileName;
       TagInfo *tagInfo = rootNav->tagInfo();
 
-      int i;
-
       if (tagInfo) {
          tagName     = tagInfo->tagName;
          refFileName = tagInfo->fileName;
@@ -2162,6 +2160,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
       }
 
       ArgumentList tArgList;
+      int i;
 
       if ((root->lang == SrcLangExt_CSharp || root->lang == SrcLangExt_Java) && (i = fullName.indexOf('<')) != -1) {
          // a Java/C# generic class looks like a C++ specialization, split the name and template arguments here
@@ -2180,7 +2179,8 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
       Debug::print(Debug::Classes, 0, "  New class `%s' (sec=0x%08x)! #tArgLists=%d tagInfo=%p\n",
                    fullName.data(), sec, root->tArgLists ? (int)root->tArgLists->count() : -1, tagInfo);
 
-      cd->setDocumentation(root->doc, root->docFile, root->docLine); // copy docs to definition
+      // copy docs to definition
+      cd->setDocumentation(root->doc, root->docFile, root->docLine);
       cd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
       cd->setLanguage(root->lang);
       cd->setId(root->id);
@@ -2397,6 +2397,7 @@ void Doxy_Work::processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPo
       if (ml) {
 
          for (auto md : *ml) {
+            // return type
             QByteArray type = md->typeString();
 
             if (type.indexOf("::@") != -1) {
@@ -3007,7 +3008,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
                cd->reclassifyMember(md, MemberType_Property);
 
             } else if (root->mtype == Property) { 
-               // copperspice has multiple property elements, update md 
+               // copperspice has multiple property elements, update memberDef
 
                if (! root->m_read.isEmpty()) { 
                   md->setPropertyRead(root->m_read);
@@ -3723,6 +3724,7 @@ void Doxy_Work::buildVarList(QSharedPointer<EntryNav> rootNav)
             } else if (isVarWithConstructor(rootNav)) {
                // class variable initialized by constructor 
                isVar = true;  
+
             }
          }      
       }
@@ -5855,8 +5857,8 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QByteAr
 {
    QSharedPointer<Entry> root = rootNav->entry();
 
-   Debug::print(Debug::FindMembers, 0, "2. findGlobalMember(namespace=%s,type=%s,name=%s,tempArg=%s,decl=%s)\n",
-                namespaceName.data(), type, name, tempArg, decl);
+   Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() namespace= %s   type= %s   name= %s   tempArg= %s   decl= %s\n",
+                namespaceName.constData(), type, name, tempArg, decl);
 
    QByteArray n = name;
 
@@ -5877,7 +5879,7 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QByteAr
    if (mn) {
       // function name defined
 
-      Debug::print(Debug::FindMembers, 0, "3. Found symbol scope\n");
+      Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() found symbol scope\n");
       bool found = false;
 
       for (auto md : *mn) {
@@ -5897,10 +5899,10 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QByteAr
          if ((namespaceName.isEmpty() && nd == 0) || (nd && nd->name() == namespaceName) || viaUsingDirective) { 
             // not in a namespace, or in the same namespace, memeber in "using' namespace
 
-            Debug::print(Debug::FindMembers, 0, "4. Try to add member `%s' to scope `%s'\n",
-                         md->name().data(), namespaceName.data());
+            Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() attempting to add member %s to scope %s\n",
+                         md->name().constData(), namespaceName.constData());
 
-            QByteArray nsName = nd ? nd->name().data() : "";
+            QByteArray nsName = nd ? nd->name().constData() : "";
 
             QSharedPointer<NamespaceDef> rnd;
 
@@ -5945,7 +5947,7 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QByteAr
             }
 
             if (matching) { // add docs to the member
-               Debug::print(Debug::FindMembers, 0, "5. Match found\n");
+               Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() match found\n");
                addMemberDocs(rootNav, md, decl, &root->argList, false);
                found = true;
             }
@@ -6179,7 +6181,6 @@ void Doxy_Work::substituteTemplatesInArgList(const QList<ArgumentList> &srcTempA
    dst->volatileSpecifier  = src->volatileSpecifier;
    dst->pureSpecifier      = src->pureSpecifier;
    dst->trailingReturnType = substituteTemplatesInString(srcTempArgLists, dstTempArgLists, funcTempArgs, src->trailingReturnType);
-
 }
 
 /*! This function tries to find a member (in a documented class/file/namespace)
@@ -6195,9 +6196,9 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
 {
    QSharedPointer<Entry> root = rootNav->entry();
 
-   Debug::print(Debug::FindMembers, 0, "findMember(root=%p,funcDecl=`%s',related=`%s',overload=%d,"
-                "isFunc=%d mGrpId=%d tArgList=%p (#=%d) spec=%lld lang=%x\n",
-                root.data(), funcDecl.data(), root->relates.data(), overloaded, isFunc, root->mGrpId,
+   Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [start] root= %p   funcDecl= %s   related= %s\n"
+                "  overload= %d   isFunc= %d   mGrpId= %d   tArgList= %p (# of tArgs= %d)  spec= %lld   lang= %x\n",
+                root.data(), funcDecl.constData(), root->relates.constData(), overloaded, isFunc, root->mGrpId,
                 root->tArgLists, root->tArgLists ? root->tArgLists->count() : 0, root->m_specFlags, root->lang);
 
    QByteArray scopeName;
@@ -6214,12 +6215,6 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
    bool isMemberOf = false;
    bool isFriend   = false;
    bool done;
-
-
-if (funcDecl.contains("title_Qt"))  {
-   printf("\n  BROOM   (6220, start of find member)  TYPE %s \n", funcDecl.constData() ); 
-}
-
 
    do {
       done = true;
@@ -6298,7 +6293,7 @@ if (funcDecl.contains("title_Qt"))  {
       isRelated = true;
       isMemberOf = (root->relatesType == MemberOf);
 
-      if (getClass(root->relates) == 0 && !scopeName.isEmpty()) {
+      if (getClass(root->relates) == 0 && ! scopeName.isEmpty()) {
          scopeName = mergeScopes(scopeName, root->relates);
       } else {
          scopeName = root->relates;
@@ -6322,7 +6317,8 @@ if (funcDecl.contains("title_Qt"))  {
          scopeName = mergeScopes(rootNav->parent()->name(), scopeName);
       }
 
-   } else { // see if we can prefix a namespace or class that is used from the file
+   } else {
+      // see if we can prefix a namespace or class that is used from the file
       QSharedPointer<FileDef> fd = rootNav->fileDef();
 
       if (fd) {
@@ -6345,10 +6341,9 @@ if (funcDecl.contains("title_Qt"))  {
    scopeName = stripTemplateSpecifiersFromScope(removeRedundantWhiteSpace(scopeName), false, &funcSpec);
 
    // funcSpec contains the last template specifiers of the given scope.
-   // If this method does not have any template arguments or they are
-   // empty while funcSpec is not empty we assume this is a
-   // specialization of a method. If not, we clear the funcSpec and treat
-   // this as a normal method of a template class.
+   // If this method does not have any template arguments or they are empty 
+   // while funcSpec is not empty we assume this is a specialization of a method. 
+   // If not, we clear the funcSpec and treat this as a normal method of a template class.
 
    if (! (root->tArgLists && root->tArgLists->count() > 0 && root->tArgLists->first().count() == 0) ) {
       funcSpec.resize(0);
@@ -6369,7 +6364,7 @@ if (funcDecl.contains("title_Qt"))  {
       if (className.isEmpty()) {
          scopeName = namespaceName;
 
-      } else if (!root->relates.isEmpty() || !getClass(className)) { 
+      } else if (! root->relates.isEmpty() || !getClass(className)) { 
          // relates command with explicit scopem, class name only exists in a namespace
          scopeName = namespaceName + "::" + className;
 
@@ -6377,7 +6372,7 @@ if (funcDecl.contains("title_Qt"))  {
          scopeName = className;
       }
 
-   } else if (!className.isEmpty()) {
+   } else if (! className.isEmpty()) {
       scopeName = className;
    }
 
@@ -6393,19 +6388,22 @@ if (funcDecl.contains("title_Qt"))  {
       }
    }
 
-   // rebuild the function declaration (needed to get the scope right).
-   if (! scopeName.isEmpty() && !isRelated && !isFriend && ! Config::getBool("hide-scope-names")) {
-      if (!funcType.isEmpty()) {
-         if (isFunc) { // a function -> we use argList for the arguments
+   // rebuild the function declaration (needed to get the scope right)
+   if (! scopeName.isEmpty() && !isRelated && ! isFriend && ! Config::getBool("hide-scope-names")) {
+      if (! funcType.isEmpty()) {
+         if (isFunc) { 
+            // a function -> we use argList for the arguments
             funcDecl = funcType + " " + tempScopeName + "::" + funcName + funcTempList;
          } else {
             funcDecl = funcType + " " + tempScopeName + "::" + funcName + funcArgs;
          }
 
       } else {
-         if (isFunc) { // a function => we use argList for the arguments
+         if (isFunc) { 
+            // a function => we use argList for the arguments
             funcDecl = tempScopeName + "::" + funcName + funcTempList;
-         } else { // variable => add `argument' list
+         } else { 
+            // variable => add `argument' list
             funcDecl = tempScopeName + "::" + funcName + funcArgs;
          }
       }
@@ -6414,10 +6412,12 @@ if (funcDecl.contains("title_Qt"))  {
       // build declaration without scope
 
       if (!funcType.isEmpty()) { // but with a type
-         if (isFunc) { // function => omit argument list
+         if (isFunc) { 
+            // function => omit argument list
             funcDecl = funcType + " " + funcName + funcTempList;
 
-         } else { // variable => add `argument' list
+         } else { 
+            // variable => add `argument' list
             funcDecl = funcType + " " + funcName + funcArgs;
          }
 
@@ -6434,37 +6434,28 @@ if (funcDecl.contains("title_Qt"))  {
       return;   // ignore explicit template instantiations
    }
 
-   Debug::print(Debug::FindMembers, 0,
-                "findMember() Parse results:\n"
-                "  namespaceName=`%s'\n"
-                "  className=`%s`\n"
-                "  funcType=`%s'\n"
-                "  funcSpec=`%s'\n"
-                "  funcName=`%s'\n"
-                "  funcArgs=`%s'\n"
-                "  funcTempList=`%s'\n"
-                "  funcDecl=`%s'\n"
-                "  related=`%s'\n"
-                "  exceptions=`%s'\n"
-                "  isRelated=%d\n"
-                "  isMemberOf=%d\n"
-                "  isFriend=%d\n"
-                "  isFunc=%d\n\n",
-                namespaceName.data(), className.data(),
-                funcType.data(), funcSpec.data(), funcName.data(), funcArgs.data(), funcTempList.data(),
-                funcDecl.data(), root->relates.data(), exceptions.data(), isRelated, isMemberOf, isFriend, isFunc );
+   Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [parsed] namespaceName= %s   className= %s\n"
+                "  funcType= %s   funcSpec= %s   funcName= %s   funcArgs= %s\n"
+                "  funcTempList= %s   funcDecl= %s   related= %s   exceptions= %s\n"
+                "  isRelated= %d   isMemberOf= %d   isFriend= %d   isFunc= %d\n",
+                namespaceName.constData(), className.constData(),
+                funcType.constData(), funcSpec.constData(), funcName.constData(), funcArgs.constData(), funcTempList.constData(),
+                funcDecl.constData(), root->relates.constData(), exceptions.constData(), isRelated, isMemberOf, isFriend, isFunc );
 
    QSharedPointer<MemberName> mn;
 
+
    if (! funcName.isEmpty()) {
       // function name is valid
-      Debug::print(Debug::FindMembers, 0, "1. funcName=`%s'\n", funcName.data());
+      Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [1] funcName= %s\n", funcName.constData());
 
-      if (funcName.left(9) == "operator ") { // strip class scope from cast operator
+      if (funcName.startsWith("operator ")) { 
+         // strip class scope from cast operator
          funcName = substitute(funcName, className + "::", "");
       }
 
-      if (!funcTempList.isEmpty()) { // try with member specialization
+      if (!funcTempList.isEmpty()) { 
+         // try with member specialization
          mn = Doxy_Globals::memberNameSDict->find(funcName + funcTempList);
       }
 
@@ -6473,8 +6464,9 @@ if (funcDecl.contains("title_Qt"))  {
          mn = Doxy_Globals::memberNameSDict->find(funcName);
       }
 
-      if (!isRelated && mn) { // function name already found
-         Debug::print(Debug::FindMembers, 0, "2. member name exists (%d members with this name)\n", mn->count());
+      if (! isRelated && mn) { 
+         // function name already found
+         Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [2] member name exists (%d members with this name)\n", mn->count());
 
          if (! className.isEmpty()) { 
             // class name is valid
@@ -6493,10 +6485,10 @@ if (funcDecl.contains("title_Qt"))  {
                   }
 
                   QSharedPointer<ClassDef> cd = md->getClassDef();
-                  Debug::print(Debug::FindMembers, 0, "3. member definition found, "
-                               "scope needed=`%s' scope=`%s' args=`%s' fileName=%s\n",
-                               scopeName.data(), cd ? cd->name().data() : "<none>",
-                               md->argsString(), root->fileName.data());
+                  Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() member definition: \n"
+                               "   scope needed= %s   scope= %s   args= %s   fileName= %s\n",
+                               scopeName.constData(), cd ? cd->name().constData() : "none", 
+                               md->argsString(), root->fileName.constData());
 
                   QSharedPointer<FileDef> fd = rootNav->fileDef();
                   QSharedPointer<NamespaceDef> nd;
@@ -6515,7 +6507,7 @@ if (funcDecl.contains("title_Qt"))  {
                   if (cd && tcd == cd) { 
                      // member's classes match
 
-                     Debug::print(Debug::FindMembers, 0, "4. class definition %s found\n", cd->name().data());
+                     Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [4] class definition: %s\n", cd->name().constData());
 
                      // get the template parameter lists found at the member declaration
                      QList<ArgumentList> declTemplArgs;
@@ -6559,20 +6551,28 @@ if (funcDecl.contains("title_Qt"))  {
 
                      }
 
-                     Debug::print(Debug::FindMembers, 0, "5. matching `%s'<=>`%s' className=%s namespaceName=%s\n",
-                                  argListToString(argList, true).data(), argListToString(&root->argList, true).data(),
-                                  className.data(), namespaceName.data());
+                     Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [5] matching %s with %s   className= %s   namespaceName= %s\n",
+                                  argListToString(argList, true).constData(), argListToString(&root->argList, true).constData(),
+                                  className.constData(), namespaceName.constData());
+                    
+                     bool matching = md->isVariable() || md->isTypedef();
 
-                     bool matching = md->isVariable() || md->isTypedef() || // needed for function pointers
-                        (mdAl == 0 && root->argList.count() == 0) ||
-                        matchArguments2(md->getClassDef(), md->getFileDef(), argList, cd, fd, &root->argList, true);
-
-                     if (md->getLanguage() == SrcLangExt_ObjC && md->isVariable() && (root->section & Entry::FUNCTION_SEC)) {
-                        matching = false; // do not match methods and attributes with the same name
+                     if (! matching && (mdAl == 0 && root->argList.count() == 0)) {
+                        matching = true;
                      }
 
-                     // for template member we also need to check the return type
+                     if (! matching && matchArguments2(md->getClassDef(), md->getFileDef(), argList, cd, fd, &root->argList, true)) {
+                        matching = true;
+                     }
+
+                     if (md->getLanguage() == SrcLangExt_ObjC && md->isVariable() && (root->section & Entry::FUNCTION_SEC)) {
+                        // do not match methods and attributes with the same name
+                        matching = false; 
+                     }
+
+                     // for template member check the return type
                      if (md->templateArguments() != 0 && root->tArgLists != 0) {
+                        // return type from the source
                         QByteArray memType = md->typeString();
 
                         // see bug700696
@@ -6581,38 +6581,54 @@ if (funcDecl.contains("title_Qt"))  {
                         // see bug700693 & bug732594
                         funcType = substitute(stripTemplateSpecifiersFromScope(funcType, true), className + "::", ""); 
 
-                        Debug::print(Debug::FindMembers, 0, "5b. Comparing return types '%s'<->'%s' #args %d<->%d\n",
-                                     md->typeString(), funcType.data(),
+                        Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [6] comparing return types %s with %s"
+                                     "#args %d with %d\n", md->typeString(), funcType.constData(),
                                      md->templateArguments()->count(), root->tArgLists->last().count());
 
-                        if (md->templateArguments()->count() != root->tArgLists->last().count() || qstrcmp(memType, funcType)) {
+                        if (md->templateArguments()->count() != root->tArgLists->last().count() || memType != funcType) {
                            matching = false;
+                        }
+
+                     } else if (matching && ! (md->isVariable() || md->isTypedef() || md->isEnumValue()) ) {
+                        // compare the return types
+
+                        // value from the source
+                        QByteArray memType = md->typeString();
+
+                        memType  = stripPrefix(memType, "static "); 
+                        memType  = stripPrefix(memType, "virtual "); 
+
+                        funcType = substitute(stripTemplateSpecifiersFromScope(funcType, true), className + "::", ""); 
+
+                        if (memType != funcType) {  
+                           warn(root->fileName.constData(), root->startLine, "Return types do not agree for member: %s\n"
+                                "   return type: %s   return type: %s\n",     
+                                funcName.constData(), memType.constData(), funcType.constData() );
                         }
                      }
 
-                     bool rootIsUserDoc    = (root->section & Entry::MEMBERDOC_SEC) != 0;
-                     bool classIsTemplate  = scopeIsTemplate(md->getClassDef());
-                     bool mdIsTemplate     = md->templateArguments() != 0;
+                     bool rootIsUserDoc       = (root->section & Entry::MEMBERDOC_SEC) != 0;
+                     bool classIsTemplate     = scopeIsTemplate(md->getClassDef());
+                     bool mdIsTemplate        = md->templateArguments() != 0;
                      bool classOrMdIsTemplate = mdIsTemplate || classIsTemplate;
-                     bool rootIsTemplate   = root->tArgLists != 0;
+                     bool rootIsTemplate      = root->tArgLists != 0;
 
-                     if (! rootIsUserDoc && // don't check out-of-line @fn references, see bug722457
-                           (mdIsTemplate || rootIsTemplate) && // either md or root is a template
-                           ((classOrMdIsTemplate && !rootIsTemplate) || (!classOrMdIsTemplate && rootIsTemplate))) {
+                     if (! rootIsUserDoc &&                      // do not check out-of-line @fn references, see bug722457
+                           (mdIsTemplate || rootIsTemplate) &&    // either md or root is a template
+                           ((classOrMdIsTemplate && !rootIsTemplate) || (! classOrMdIsTemplate && rootIsTemplate))) {
 
                         // Method with template return type does not match method without return type
                         // even if the parameters are the same. See also bug709052
 
-                        Debug::print(Debug::FindMembers, 0, "5b. Comparing return types: template v.s. non-template\n");
+                        Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [7] comparing return types: template with non-template\n");
                         matching = false;
-                     }
-
-                     Debug::print(Debug::FindMembers, 0, "6. match results of matchArguments2 = %d\n", matching);
+                     }                     
 
                      if (substDone) { 
                         // found a new argument list
 
-                        if (matching) { // replace member's argument list
+                        if (matching) { 
+                           // replace member's argument list
                            md->setDefinitionTemplateParameterLists(root->tArgLists);
                            md->setArgumentList(argList); // new owner of the list => no delete
 
@@ -6620,12 +6636,11 @@ if (funcDecl.contains("title_Qt"))  {
                            // no match
 
                            if (! funcTempList.isEmpty() && isSpecialization(declTemplArgs, *defTemplArgs)) {
-                              // check if we are dealing with a partial template
-                              // specialization. In this case we add it to the class
-                              // even though the member arguments do not match.
+                              // check if we are dealing with a partial template specialization. 
+                              // In this case we add it to the class even though the member arguments do not match.
 
                               // TODO: copy other aspects?
-                              root->protection = md->protection(); // copy protection level
+                              root->protection = md->protection(); 
                               addMethodToClass(rootNav, cd, md->name(), isFriend);
 
                               return;
@@ -6642,9 +6657,7 @@ if (funcDecl.contains("title_Qt"))  {
                      }
 
                   } else if (cd && cd != tcd) {
-                     // we did find a class with the same name as cd
-                     // but in a different namespace
-
+                     // found a class with the same name as cd, but in a different namespace
                      noMatchCount++;
                   }
 
@@ -6654,7 +6667,7 @@ if (funcDecl.contains("title_Qt"))  {
                   goto localObjCMethod;
                }
 
-               if (count == 0 && !(isFriend && funcType == "class")) {
+               if (count == 0 && ! (isFriend && funcType == "class")) {
                   int candidates = 0;
 
                   QSharedPointer<ClassDef> ecd = QSharedPointer<ClassDef>();
@@ -6682,15 +6695,16 @@ if (funcDecl.contains("title_Qt"))  {
                               ucd = ecd = ccd;
                               umd = emd = cmd;
 
-                              Debug::print(Debug::FindMembers, 0, "7. new candidate className=%s scope=%s args=%s exact match\n",
-                                           className.data(), ccd->name().data(), md->argsString());
+                              Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [8] className= %s   scope= %s\n"
+                                 "  args= %s [Exact Match]\n", className.constData(), ccd->name().constData(), md->argsString());
 
                            } else {
                               // arguments do not match, but member name and scope do -> remember
                               ucd = ccd;
                               umd = cmd;
-                              Debug::print(Debug::FindMembers, 0, "7. new candidate className=%s scope=%s args=%s no match\n",
-                                           className.data(), ccd->name().data(), md->argsString());
+
+                              Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [9] className= %s scope= %s args= %s [No Match]\n",
+                                           className.constData(), ccd->name().constData(), md->argsString());
                            }
 
                            candidates++;
@@ -6705,11 +6719,6 @@ if (funcDecl.contains("title_Qt"))  {
                      if (candidates == 1 && ucd && umd) {
                         // did not find a full signature match on arguments, there is only one  member 
                         // with this name in this same scope, use the mtype for the .h file
-
-
-if (funcDecl.contains("title_Qt"))  {
-   printf("\n  BROOM   Look for marker, what is TYPE %s \n", (funcDecl).constData() );
-}
 
                         addMemberDocs(rootNav, umd, funcDecl, 0, overloaded, 0);
                         return;
@@ -6932,13 +6941,13 @@ if (funcDecl.contains("title_Qt"))  {
                   fullFuncDecl += argListToString(&root->argList, true);
                }
 
-               warn(root->fileName, root->startLine, "Cannot determine class for function\n%s",fullFuncDecl.data());
+               warn(root->fileName, root->startLine, "Can not determine class for function\n%s", fullFuncDecl.data());
             }
          }
 
       } else if (isRelated && !  root->relates.isEmpty()) {
-         Debug::print(Debug::FindMembers, 0, "2. related function\n"
-                      "  scopeName=%s className=%s\n", scopeName.data(), className.data());
+         Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [10] related function"
+                      "   scopeName= %s   className= %s\n", scopeName.constData(), className.constData());
 
          if (className.isEmpty()) {
             className = root->relates;
@@ -7150,12 +7159,12 @@ if (funcDecl.contains("title_Qt"))  {
                   }
 
                   warn(root->fileName, root->startLine, 
-                       "Cannot determine file/namespace for relatedalso function\n%s", fullFuncDecl.data());
+                       "Can not determine file/namespace for relatedalso function\n%s", fullFuncDecl.data());
                }
             }
 
          } else {
-            warn_undoc(root->fileName, root->startLine, "class `%s' for related function `%s' is not "
+            warn_undoc(root->fileName, root->startLine, "Class `%s' for related function `%s' is not "
                        "documented.", className.data(), funcName.data());
          }
 
@@ -7165,8 +7174,8 @@ if (funcDecl.contains("title_Qt"))  {
          QSharedPointer<ClassDef> cd;
 
          if (Config::getBool("extract-local-methods") && (cd = getClass(scopeName))) {
-            Debug::print(Debug::FindMembers, 0, "4. Local objective C method %s\n"
-                         "  scopeName=%s className=%s\n", root->name.data(), scopeName.data(), className.data());
+            Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [11]  method %s"
+                         "   scopeName= %s   className= %s\n", root->name.constData(), scopeName.constData(), className.constData());
             
             QSharedPointer<MemberDef>md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn,
                funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->stat, Member,
@@ -7238,17 +7247,12 @@ void Doxy_Work::filterMemberDocumentation(QSharedPointer<EntryNav> rootNav)
    int i = -1;
    int l;
 
-   Debug::print(Debug::FindMembers, 0, "filterMemberDocumentation(): root->type=`%s' root->inside=`%s' root->name=`%s'" 
-                "root->args=`%s' section=%x root->m_specFlags=%lld root->mGrpId=%d\n", 
-                root->type.data(), root->inside.data(), root->name.data(), root->args.data(), root->section, root->m_specFlags.spec, root->mGrpId);
+   Debug::print(Debug::FindMembers, 0, "\nDebug: filterMemberDocumentation(): root->type= %s  root->inside= %s   root->name= %s\n"
+                "   root->args= %s   section= %x   root->m_specFlags= %lld  root->mGrpId= %d\n", 
+                root->type.constData(), root->inside.constData(), root->name.constData(), root->args.constData(), 
+                root->section, root->m_specFlags.spec, root->mGrpId);
    
    bool isFunc = true;
-
-
-if (root->name.contains("title_Qt"))  {
-   printf("\n  BROOM   (7249, filterMemberDocs) SIGNATURE  %s \n", (root->type + " y " + root->name).constData() );
-}
-
 
    if (root->relatesType == Duplicate && ! root->relates.isEmpty()) {
       QByteArray tmp = root->relates;
@@ -7318,30 +7322,12 @@ if (root->name.contains("title_Qt"))  {
 void Doxy_Work::findMemberDocumentation(QSharedPointer<EntryNav> rootNav)
 {
 
-
-// BROOM 
-if (rootNav->section() == Entry::VARIABLE_SEC) { 
-   QSharedPointer<Entry> rootX = rootNav->entry();
-
-//   if (rootX->name.contains("title_Qt"))  {
-//      printf("\n  BROOM   (BOO) SIGNATURE  %s \n", (rootX->type + " y " + rootX->name).constData() );
-//   }
-}
-
-
    if (rootNav->section() == Entry::MEMBERDOC_SEC || rootNav->section() == Entry::OVERLOADDOC_SEC ||
          rootNav->section() == Entry::FUNCTION_SEC || rootNav->section() == Entry::VARIABLE_SEC ||
          rootNav->section() == Entry::VARIABLEDOC_SEC || rootNav->section() == Entry::DEFINE_SEC ||
          rootNav->section() == Entry::INCLUDED_SERVICE_SEC || rootNav->section() == Entry::EXPORTED_INTERFACE_SEC ) {
 
       rootNav->loadEntry(Doxy_Globals::g_storage);
-
-
-QSharedPointer<Entry> rootY = rootNav->entry();
-if (rootY->name.contains("title_Qt"))  {
-   printf("\n  BROOM   (7342, findMemberDocumentation)  SIGNATURE  %s \n", (rootY->type + " z " + rootY->name).constData() );
-}
-
 
       filterMemberDocumentation(rootNav);
       rootNav->releaseEntry();
@@ -7586,7 +7572,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
       QSharedPointer<FileDef>  fd = QSharedPointer<FileDef>();
 
       QSharedPointer<NamespaceDef> nd;
-      MemberNameSDict *mnsd = 0;
+      MemberNameSDict *mnsd = nullptr;
 
       bool isGlobal;
       bool isRelated = false;
@@ -7596,7 +7582,9 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
       QByteArray name;
       QByteArray scope;
 
-      if ((i = root->name.lastIndexOf("::")) != -1) { // scope is specified
+      if ((i = root->name.lastIndexOf("::")) != -1) { 
+         // scope is specified
+
          scope = root->name.left(i); // extract scope
          name  = root->name.right(root->name.length() - i - 2); // extract name
 
@@ -7607,7 +7595,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
       } else { 
          // no scope, check the scope in which the docs where found
 
-         if (( rootNav->parent()->section() & Entry::SCOPE_MASK ) && !rootNav->parent()->name().isEmpty()) {
+         if (( rootNav->parent()->section() & Entry::SCOPE_MASK ) && ! rootNav->parent()->name().isEmpty()) {
             // found enum docs inside a compound
             scope = rootNav->parent()->name();
 
@@ -7619,7 +7607,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
          name = root->name;
       }
 
-      if (!root->relates.isEmpty()) {
+      if (! root->relates.isEmpty()) {
          // related member, prefix user specified scope
          isRelated = true;
 
@@ -7636,12 +7624,13 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
       }
 
       if (cd && ! name.isEmpty()) { 
-         // found a enum inside a compound        
+         // found an enum inside a compound        
          fd   = QSharedPointer<FileDef>();
          mnsd = Doxy_Globals::memberNameSDict;
          isGlobal = false;
 
-      } else if (nd && !nd->name().isEmpty() && nd->name().at(0) != '@') { // found enum inside namespace         
+      } else if (nd && !nd->name().isEmpty() && nd->name().at(0) != '@') { 
+         // found enum inside namespace         
          mnsd = Doxy_Globals::functionNameSDict;
          isGlobal = true;
 
@@ -7658,25 +7647,22 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 
          // for all members with this name
          if (mn) {          
+
             for (auto md : *mn) {
                // for each enum in this list
 
                if (md->isEnumerate()) {
                   
-                  for (auto &item : rootNav->children() ) {
-                     auto e = item;
-         
+                  for (auto &e : rootNav->children() ) {                     
                      SrcLangExt sle;
 
                      if ( (sle = rootNav->lang()) == SrcLangExt_CSharp || sle == SrcLangExt_Java ||
-                        sle == SrcLangExt_XML || (root->m_specFlags.spec & Entry::Strong) ) {
+                              sle == SrcLangExt_XML || (root->m_specFlags.spec & Entry::Strong) ) {
 
-                        // Unlike classic C/C++ enums, for C++11, C# & Java enum
-                        // values are only visible inside the enum scope, so we must create
-                        // them here and only add them to the enum
+                        // Unlike classic C/C++ enums, C++11, C# & Java enum values are only
+                        // visible inside the enum scope, must create them here and only add them to the enum
 
                         e->loadEntry(Doxy_Globals::g_storage);
-
                         QSharedPointer<Entry> root = e->entry();
 
                         QByteArray qualifiedName = substitute(rootNav->name(),"::",".");
@@ -7720,6 +7706,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                            fmd->setExplicitExternal(root->explicitExternal);
                            fmd->setRefItems(root->sli);
                            fmd->setAnchor();
+
                            md->insertEnumField(fmd);
                            fmd->setEnumScope(md, true);
 
@@ -7737,21 +7724,36 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 
                         e->releaseEntry();
 
-                     } else {
-                        //printf("e->name=%s isRelated=%d\n",e->name().data(),isRelated);
-                        QSharedPointer<MemberName> fmn;
-                        MemberNameSDict *emnsd = isRelated ? Doxy_Globals::functionNameSDict : mnsd;
+                     } else {                       
+                        // c++ 
 
-                        if (! e->name().isEmpty() && (fmn = (*emnsd)[e->name()])) {
-                           // get list of members with the same name as the field
-                                                  
+                        QSharedPointer<MemberName> fmn;
+                        MemberNameSDict *enumDict;
+
+                        if (isRelated) {
+                           enumDict = Doxy_Globals::functionNameSDict;
+                        } else {
+                           enumDict = mnsd;
+                        }
+
+                        QByteArray valueName = e->name();                          
+
+                        if (! valueName.isEmpty()) { 
+                           fmn = enumDict->find(valueName);
+                        }
+
+                        if (fmn) {
+                           // get a list of members with the same name as the enum field
+                                                        
                            for (auto fmd : *fmn) {   
-                              if (fmd->isEnumValue() && fmd->getOuterScope() == md->getOuterScope()) { // in same scope
+                              if (fmd->isEnumValue() && fmd->getOuterScope() == md->getOuterScope()) { 
+                                 // in same scope
                                 
-                                 if (nd && !nd->name().isEmpty() && nd->name().at(0) != '@') {
+                                 if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
                                     QSharedPointer<NamespaceDef> fnd = fmd->getNamespaceDef();
 
-                                    if (fnd == nd) { // enum value is inside a namespace
+                                    if (fnd == nd) { 
+                                       // enum value is inside a namespace
                                        md->insertEnumField(fmd);
                                        fmd->setEnumScope(md);
                                     }
@@ -7766,9 +7768,8 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                                     }
 
                                  } else if (isRelated && cd)  {
-                                    // reparent enum value to
-                                    // match the enum's scope
-                                 
+                                    // reparent enum value to match the enum's scope
+                              
                                     md->insertEnumField(fmd);          // add field def to list
                                     fmd->setEnumScope(md);             // cross ref with enum name
                                     fmd->setEnumClassScope(cd);        // cross ref with enum name
@@ -7781,9 +7782,9 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 
                                     if (fcd == cd) { 
                                        // enum value is inside a class
-                                     
+                               
                                        md->insertEnumField(fmd);  // add field def to list
-                                       fmd->setEnumScope(md);    // cross ref with enum name
+                                       fmd->setEnumScope(md);     // cross ref with enum name
                                     }
                                  }
                               }
@@ -7819,7 +7820,8 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
          name = root->name.right(root->name.length() - i - 2); // extract name
          scope = root->name.left(i); // extract scope
         
-      } else { // just the name
+      } else { 
+         // just the name
          name = root->name;
       }
 
@@ -9225,7 +9227,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
    if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {   
       fd->getAllIncludeFilesRecursively(includedFiles);
 
-// BROOM -- change this to use clang and not lex
+      // Broom -- change this to use clang and not lex
       
       // use language parser to parse the file  
       parser->parseInput(fileName, convBuf.data(), root, mode, includedFiles, true);

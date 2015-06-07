@@ -20,29 +20,6 @@
 
 #include <classdef.h>
 
-/*!
- When defining a translator class for the new language, follow
- the description in the documentation.  One of the steps says
- that you should copy the translator_en.h (this) file to your
- translator_xx.h new file.  Your new language should use the
- Translator class as the base class.  This means that you need to
- implement exactly the same (pure virtual) methods as the
- TranslatorEnglish does.  Because of this, it is a good idea to
- start with the copy of TranslatorEnglish and replace the strings
- one by one.
-
- It is not necessary to include "translator.h" or
- "translator_adapter.h" here.  The files are included in the
- language.cpp correctly.  Not including any of the mentioned
- files frees the maintainer from thinking about whether the
- first, the second, or both files should be included or not, and
- why.  This holds namely for localized translators because their
- base class is changed occasionaly to adapter classes when the
- Translator class changes the interface, or back to the
- Translator class (by the local maintainer) when the localized
- translator is made up-to-date again.
-*/
-
 /** Abstract base class for all translatable text fragments. */
 class Translator
 {
@@ -55,13 +32,9 @@ class Translator
    virtual QByteArray updateNeededMessage() {
       return "";
    }
+
    virtual ~Translator() {}
-
-   // Please, have a look at comments inside the translator_en.h file
-   // to learn the meaning of the following methods.  The translator_en.h
-   // file contains the TranslatorEnglish implementation, which is
-   // always up-to-date (by definition).
-
+ 
    // --- Language control methods -------------------
 
    virtual QByteArray idLanguage() = 0;
@@ -92,7 +65,10 @@ class Translator
    virtual QByteArray trCompoundList() = 0;
    virtual QByteArray trFileList() = 0;
 
-   //virtual QByteArray trHeaderFiles() = 0;
+   // virtual QByteArray trHeaderFiles() = 0;
+   // virtual QByteArray trHeaderFilesDescription() = 0;
+   // virtual QByteArray trNoDescriptionAvailable() = 0;
+
    virtual QByteArray trCompoundMembers() = 0;
    virtual QByteArray trFileMembers() = 0;
    virtual QByteArray trRelatedPages() = 0;
@@ -102,13 +78,11 @@ class Translator
    virtual QByteArray trFileListDescription(bool extractAll) = 0;
    virtual QByteArray trCompoundListDescription() = 0;
    virtual QByteArray trCompoundMembersDescription(bool extractAll) = 0;
-   virtual QByteArray trFileMembersDescription(bool extractAll) = 0;
-   //virtual QByteArray trHeaderFilesDescription() = 0;
+   virtual QByteArray trFileMembersDescription(bool extractAll) = 0;   
    virtual QByteArray trExamplesDescription() = 0;
    virtual QByteArray trRelatedPagesDescription() = 0;
    virtual QByteArray trModulesDescription() = 0;
-   //virtual QByteArray trNoDescriptionAvailable() = 0;
-
+   
    // index titles (the project name is prepended for these)
 
    virtual QByteArray trDocumentation() = 0;
@@ -123,26 +97,29 @@ class Translator
    virtual QByteArray trPageDocumentation() = 0;
    virtual QByteArray trReferenceManual() = 0;
    virtual QByteArray trDefines() = 0;
-   //virtual QByteArray trFuncProtos() = 0;
+  
    virtual QByteArray trTypedefs() = 0;
    virtual QByteArray trEnumerations() = 0;
    virtual QByteArray trFunctions() = 0;
    virtual QByteArray trVariables() = 0;
    virtual QByteArray trEnumerationValues() = 0;
-   virtual QByteArray trDefineDocumentation() = 0;
-   //virtual QByteArray trFunctionPrototypeDocumentation() = 0;
+   virtual QByteArray trDefineDocumentation() = 0; 
    virtual QByteArray trTypedefDocumentation() = 0;
    virtual QByteArray trEnumerationTypeDocumentation() = 0;
    virtual QByteArray trFunctionDocumentation() = 0;
    virtual QByteArray trVariableDocumentation() = 0;
    virtual QByteArray trCompounds() = 0;
    virtual QByteArray trGeneratedAt(const char *date, const char *projName) = 0;
-   //virtual QByteArray trWrittenBy() = 0;
+
+   // virtual QByteArray trFuncProtos() = 0;
+   // virtual QByteArray trFunctionPrototypeDocumentation() = 0;
+   // virtual QByteArray trWrittenBy() = 0;
+   // virtual QByteArray trReimplementedForInternalReasons() = 0;
+   // virtual QByteArray trBugsAndLimitations() = 0;
+
    virtual QByteArray trClassDiagram(const char *clName) = 0;
-   virtual QByteArray trForInternalUseOnly() = 0;
-   //virtual QByteArray trReimplementedForInternalReasons() = 0;
-   virtual QByteArray trWarning() = 0;
-   //virtual QByteArray trBugsAndLimitations() = 0;
+   virtual QByteArray trForInternalUseOnly() = 0;  
+   virtual QByteArray trWarning() = 0;   
    virtual QByteArray trVersion() = 0;
    virtual QByteArray trDate() = 0;
    virtual QByteArray trReturns() = 0;
@@ -150,11 +127,9 @@ class Translator
    virtual QByteArray trParameters() = 0;
    virtual QByteArray trExceptions() = 0;
    virtual QByteArray trGeneratedBy() = 0;
-
    virtual QByteArray trNamespaceList() = 0;
    virtual QByteArray trNamespaceListDescription(bool extractAll) = 0;
-   virtual QByteArray trFriends() = 0;
- 
+   virtual QByteArray trFriends() = 0; 
    virtual QByteArray trRelatedFunctionDocumentation() = 0;
    virtual QByteArray trCompoundReference(const char *clName, ClassDef::CompoundType compType, bool isTemplate) = 0;
 
@@ -189,17 +164,13 @@ class Translator
    virtual QByteArray trNamespaceDocumentation() = 0;
    virtual QByteArray trNamespaces() = 0;
   
-   virtual QByteArray trGeneratedFromFiles(ClassDef::CompoundType compType, bool single) = 0;
-  
+   virtual QByteArray trGeneratedFromFiles(ClassDef::CompoundType compType, bool single) = 0;  
    virtual QByteArray trReturnValues() = 0;
    virtual QByteArray trMainPage() = 0;
-   virtual QByteArray trPageAbbreviation() = 0;
-   
+   virtual QByteArray trPageAbbreviation() = 0;   
    virtual QByteArray trDefinedAtLineInSourceFile() = 0;
    virtual QByteArray trDefinedInSourceFile() = 0;
-
-   virtual QByteArray trDeprecated() = 0;
- 
+   virtual QByteArray trDeprecated() = 0; 
    virtual QByteArray trCollaborationDiagram(const char *clName) = 0;
    virtual QByteArray trInclDepGraph(const char *fName) = 0;
    virtual QByteArray trConstructorDocumentation() = 0;
@@ -247,16 +218,15 @@ class Translator
    virtual QByteArray trPropertyDocumentation() = 0;
 
    virtual QByteArray trClasses() = 0;
-
-
    virtual QByteArray trPackage(const char *name) = 0;
 
    virtual QByteArray trPackageList() = 0;
    virtual QByteArray trPackageListDescription() = 0;
    virtual QByteArray trPackages() = 0;
-   //virtual QByteArray trPackageDocumentation() = 0;
-   virtual QByteArray trDefineValue() = 0;
 
+   // virtual QByteArray trPackageDocumentation() = 0;
+
+   virtual QByteArray trDefineValue() = 0;
    virtual QByteArray trBug() = 0;
    virtual QByteArray trBugList() = 0;
 
@@ -326,107 +296,42 @@ class Translator
    virtual QByteArray trGroup(bool first_capital, bool singular) = 0;
    virtual QByteArray trPage(bool first_capital, bool singular) = 0;
    virtual QByteArray trMember(bool first_capital, bool singular) = 0;
-   //virtual QByteArray trField(bool first_capital, bool singular) = 0;
+
+   // virtual QByteArray trField(bool first_capital, bool singular) = 0;
+
    virtual QByteArray trGlobal(bool first_capital, bool singular) = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.7
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trAuthor(bool first_capital, bool singular) = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.11
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trReferences() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.13
-   //////////////////////////////////////////////////////////////////////////
 
    virtual QByteArray trImplementedFromList(int numEntries) = 0;
    virtual QByteArray trImplementedInList(int numEntries) = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.16
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trRTFTableOfContents() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.17
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trDeprecatedList() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.2.18
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trEvents() = 0;
-   virtual QByteArray trEventDocumentation() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.3
-   //////////////////////////////////////////////////////////////////////////
-
+   virtual QByteArray trEventDocumentation() = 0; 
    virtual QByteArray trPackageTypes() = 0;
    virtual QByteArray trPackageMembers() = 0;
    virtual QByteArray trStaticPackageMembers() = 0;
    virtual QByteArray trPackageAttribs() = 0;
-   virtual QByteArray trStaticPackageAttribs() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.3.1
-   //////////////////////////////////////////////////////////////////////////
-
+   virtual QByteArray trStaticPackageAttribs() = 0; 
    virtual QByteArray trAll() = 0;
    virtual QByteArray trCallGraph() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.3.3
-   //////////////////////////////////////////////////////////////////////////
-
+  
    //virtual QByteArray trSearchForIndex() = 0;
+
    virtual QByteArray trSearchResultsTitle() = 0;
    virtual QByteArray trSearchResults(int numDocuments) = 0;
    virtual QByteArray trSearchMatches() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.3.8
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trSourceFile(QByteArray &filename) = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.3.9
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trDirIndex() = 0;
    virtual QByteArray trDirDocumentation() = 0;
    virtual QByteArray trDirectories() = 0;
    virtual QByteArray trDirDescription() = 0;
    virtual QByteArray trDirReference(const char *dirName) = 0;
-   virtual QByteArray trDir(bool first_capital, bool singular) = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.4.1
-   //////////////////////////////////////////////////////////////////////////
-
+   virtual QByteArray trDir(bool first_capital, bool singular) = 0;  
    virtual QByteArray trOverloadText() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.4.6
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trCallerGraph() = 0;
    virtual QByteArray trEnumerationValueDocumentation() = 0;
-
-   //////////////////////////////////////////////////////////////////////////
-   // new since 1.5.4
-   //////////////////////////////////////////////////////////////////////////
-
    virtual QByteArray trMemberFunctionDocumentationFortran() = 0;
    virtual QByteArray trCompoundListFortran() = 0;
    virtual QByteArray trCompoundMembersFortran() = 0;
@@ -439,16 +344,16 @@ class Translator
    virtual QByteArray trDataTypes() = 0;
    virtual QByteArray trModulesList() = 0;
    virtual QByteArray trModulesListDescription(bool extractAll) = 0;
+
    virtual QByteArray trCompoundReferenceFortran(const char *clName,
-         ClassDef::CompoundType compType,
-         bool isTemplate) = 0;
+         ClassDef::CompoundType compType, bool isTemplate) = 0;
+
    virtual QByteArray trModuleReference(const char *namespaceName) = 0;
    virtual QByteArray trModulesMembers() = 0;
    virtual QByteArray trModulesMemberDescription(bool extractAll) = 0;
    virtual QByteArray trModulesIndex() = 0;
    virtual QByteArray trModule(bool first_capital, bool singular) = 0;
-   virtual QByteArray trGeneratedFromFilesFortran(ClassDef::CompoundType compType,
-         bool single) = 0;
+   virtual QByteArray trGeneratedFromFilesFortran(ClassDef::CompoundType compType, bool single) = 0;
    virtual QByteArray trType(bool first_capital, bool singular) = 0;
    virtual QByteArray trSubprogram(bool first_capital, bool singular) = 0;
    virtual QByteArray trTypeConstraints() = 0;

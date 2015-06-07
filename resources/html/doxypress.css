@@ -44,7 +44,7 @@ h3.groupheader {
    font-size: 100%;
 }
 
-h1, h2, h3, h4, h5, h6 {  
+h1, h2, h3, h4, h5, h6 {
    -webkit-transition: text-shadow 0.5s linear;
    -moz-transition: text-shadow 0.5s linear;
    -ms-transition: text-shadow 0.5s linear;
@@ -89,7 +89,7 @@ dt {
 /* multi column - \secreflist */
 div.multicol {
    -moz-column-gap: 1em;
-   -webkit-column-gap: 1em;  
+   -webkit-column-gap: 1em;
    -moz-column-count: 3;
    -webkit-column-count: 3;
 }
@@ -152,11 +152,11 @@ a.elRef {
 }
 
 a.code, a.code:visited, a.line, a.line:visited {
-   color: #4665A2; 
+   color: #4665A2;
 }
 
 a.codeRef, a.codeRef:visited, a.lineRef, a.lineRef:visited {
-   color: #4665A2; 
+   color: #4665A2;
 }
 
 /* @end */
@@ -298,7 +298,7 @@ p.formulaDsp {
 }
 
 img.formulaDsp {
-   
+
 }
 
 img.formulaInl {
@@ -356,20 +356,20 @@ span.charliteral {
    color: #008080
 }
 
-span.vhdldigit { 
-   color: #ff00ff 
+span.vhdldigit {
+   color: #ff00ff
 }
 
-span.vhdlchar { 
-   color: #000000 
+span.vhdlchar {
+   color: #000000
 }
 
-span.vhdlkeyword { 
-   color: #700070 
+span.vhdlkeyword {
+   color: #700070
 }
 
-span.vhdllogic { 
-   color: #ff0000 
+span.vhdllogic {
+   color: #ff0000
 }
 
 blockquote {
@@ -564,9 +564,9 @@ table.memberdecls {
 }
 
 .memdoc, dl.reflist dd {
-   border-bottom: 1px solid ##B4;      
-   border-left: 1px solid ##B4;      
-   border-right: 1px solid ##B4; 
+   border-bottom: 1px solid ##B4;
+   border-left: 1px solid ##B4;
+   border-right: 1px solid ##B4;
    padding: 6px 10px 2px 10px;
    background-color: ##FC;
    border-top-width: 0;
@@ -618,18 +618,18 @@ dl.reflist dd {
 .params, .retval, .exception, .tparams {
    margin-left: 0px;
    padding-left: 0px;
-}       
+}
 
 .params .paramname, .retval .paramname {
    font-weight: bold;
    vertical-align: top;
 }
-        
+
 .params .paramtype {
    font-style: italic;
    vertical-align: top;
-}       
-        
+}
+
 .params .paramdir {
    font-family: "courier new",courier,monospace;
    vertical-align: top;
@@ -758,7 +758,7 @@ div.directory .levels span {
     font-size: 12px;
     margin-left: 4px;
     margin-right: 4px;
-    display: inline-block;    
+    display: inline-block;
     color: white;
     text-align: top;
     position: relative;
@@ -807,7 +807,7 @@ div.directory .levels span {
    display: inline-block;
 }
 
-/* table showing all members  */ 
+/* table showing all members  */
 table.directory {
    font: 400 14px/22px Roboto,sans-serif;
 }
@@ -818,7 +818,7 @@ table.directory td {
    vertical-align: top;
 }
 
-table.directory td.entry {  
+table.directory td.entry {
    padding-right: 6px;
    padding-top: 2px;
    padding-bottom: 2px;
@@ -841,7 +841,7 @@ table.directory tr.even {
 /* @end */
 
 div.dynheader {
-        margin-top: 8px;
+    margin-top: 8px;
    -webkit-touch-callout: none;
    -webkit-user-select: none;
    -khtml-user-select: none;
@@ -874,7 +874,7 @@ table.doxtable th {
    padding-top: 5px;
 }
 
-table.fieldtable {  
+table.fieldtable {
    margin-left: 10px;
    margin-bottom: 15px;
    border: 1px solid ##B4;
@@ -903,13 +903,13 @@ table.fieldtable {
 }
 
 .fieldtable td.fielddoc {
-   border-bottom: 1px solid ##B4;   
+   border-bottom: 1px solid ##B4;
 }
 
 .fieldtable td.fielddoc p:first-child {
    margin-top: 0px;
-}       
-        
+}
+
 .fieldtable td.fielddoc p:last-child {
    margin-bottom: 2px;
 }
@@ -983,7 +983,7 @@ table.fieldtable {
    color: ##30;
    font-family: 'Lucida Grande',Geneva,Helvetica,Arial,sans-serif;
    text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.9);
-   text-decoration: none;        
+   text-decoration: none;
 }
 
 .navpath li.navelem a:hover
@@ -1011,7 +1011,7 @@ div.summary
    padding-right: 5px;
    width: 50%;
    text-align: right;
-}       
+}
 
 div.summary a
 {
@@ -1042,6 +1042,11 @@ div.header
 div.headertitle
 {
    padding: 5px 5px 5px 10px;
+}
+
+div.clear-floats
+{
+   clear: both;
 }
 
 dl
@@ -1123,19 +1128,19 @@ dl.section dd {
    vertical-align: bottom;
    border-collapse: separate;
 }
- 
+
 #projectlogo img
-{ 
+{
    border: 0px none;
 }
- 
+
 #projectname
 {
    font: 300% Tahoma, Arial,sans-serif;
    margin: 0px;
    padding: 2px 0px;
 }
-    
+
 #projectbrief
 {
    font: 120% Tahoma, Arial,sans-serif;
@@ -1231,7 +1236,7 @@ div.toc ul {
    list-style: none outside none;
    border: medium none;
    padding: 0px;
-}       
+}
 
 div.toc li.level1 {
    margin-left: 0px;
@@ -1333,7 +1338,7 @@ tr.heading h2 {
 #powerTip.ne:after, #powerTip.ne:before,
 #powerTip.se:after, #powerTip.se:before,
 #powerTip.nw:after, #powerTip.nw:before,
-#powerTip.sw:after, #powerTip.sw:before 
+#powerTip.sw:after, #powerTip.sw:before
 {
    border: solid transparent;
    content: " ";
@@ -1345,7 +1350,7 @@ tr.heading h2 {
 #powerTip.n:after,  #powerTip.s:after,
 #powerTip.w:after,  #powerTip.e:after,
 #powerTip.nw:after, #powerTip.ne:after,
-#powerTip.sw:after, #powerTip.se:after 
+#powerTip.sw:after, #powerTip.se:after
 {
    border-color: rgba(255, 255, 255, 0);
 }
@@ -1353,7 +1358,7 @@ tr.heading h2 {
 #powerTip.n:before,  #powerTip.s:before,
 #powerTip.w:before,  #powerTip.e:before,
 #powerTip.nw:before, #powerTip.ne:before,
-#powerTip.sw:before, #powerTip.se:before 
+#powerTip.sw:before, #powerTip.se:before
 {
    border-color: rgba(128, 128, 128, 0);
 }

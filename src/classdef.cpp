@@ -277,6 +277,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
             break;
 
          default: // any of the other members
+
             if (md->isStatic()) {
                if (md->isVariable()) {
                   switch (prot) {
@@ -293,7 +294,10 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                         addMemberToList(MemberListType_priStaticAttribs, md, true);
                         break;
                   }
-               } else { // function
+
+               } else { 
+                  // function
+
                   switch (prot) {
                      case Protected:
                         addMemberToList(MemberListType_proStaticMethods, md, true);
@@ -318,30 +322,37 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                      case Protected:
                         addMemberToList(MemberListType_proAttribs, md, true);
                         break;
+
                      case Package:
                         addMemberToList(MemberListType_pacAttribs, md, true);
                         break;
+
                      case Public:
                         addMemberToList(MemberListType_pubAttribs, md, true);
-                        isSimple = !md->isFunctionPtr();
+                        isSimple = ! md->isFunctionPtr();
                         break;
+
                      case Private:
                         addMemberToList(MemberListType_priAttribs, md, true);
                         break;
                   }
 
                } else if (md->isTypedef() || md->isEnumerate() || md->isEnumValue()) {
+
                   switch (prot) {
                      case Protected:
                         addMemberToList(MemberListType_proTypes, md, true);
                         break;
+
                      case Package:
                         addMemberToList(MemberListType_pacTypes, md, true);
                         break;
+
                      case Public:
                         addMemberToList(MemberListType_pubTypes, md, true);
                         isSimple = QByteArray(md->typeString()).indexOf(")(") == -1;
                         break;
+
                      case Private:
                         addMemberToList(MemberListType_priTypes, md, true);
                         break;
@@ -370,7 +381,8 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
       }
    } 
 
-   if (!isSimple) { // not a simple field -> not a simple struct
+   if (! isSimple) {
+      // not a simple field -> not a simple struct
       m_isSimple = false;
    }
    
@@ -381,11 +393,11 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
 
    } else {
       switch (md->memberType()) {
-         case MemberType_Service: // UNO IDL
+         case MemberType_Service:      // UNO IDL
             addMemberToList(MemberListType_serviceMembers, md, false);
             break;
 
-         case MemberType_Interface: // UNO IDL
+         case MemberType_Interface:    // UNO IDL
             addMemberToList(MemberListType_interfaceMembers, md, false);
             break;
 
@@ -397,9 +409,15 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
             addMemberToList(MemberListType_eventMembers, md, false);
             break;
 
-         case MemberType_Signal: // fall through
+
          case MemberType_DCOP:
             addMemberToList(MemberListType_functionMembers, md, false);
+            break;
+
+         case MemberType_Signal:      
+            if (protectionLevelVisible(prot)) {
+               addMemberToList(MemberListType_functionMembers, md, false);
+            }
             break;
 
          case MemberType_Slot:
@@ -408,7 +426,9 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
             }
             break;
 
-         default: // any of the other members
+         default: 
+            // any of the other members
+
             if (protectionLevelVisible(prot)) {
                switch (md->memberType()) {
                   case MemberType_Typedef:
@@ -433,9 +453,11 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                      }
 
                      break;
+
                   case MemberType_Variable:
                      addMemberToList(MemberListType_variableMembers, md, false);
                      break;
+
                   default:
                      err("Unexpected member type %d found!\n", md->memberType());
                }
@@ -2696,7 +2718,7 @@ void ClassDef::mergeMembers()
                            }
 
                            if (inlineInheritedMembers) {
-                              if (!isStandardFunc(mi.memberDef)) {                                 
+                              if (! isStandardFunc(mi.memberDef)) {                                 
                                  internalInsertMember(mi.memberDef, prot, false);
                               }
                            }

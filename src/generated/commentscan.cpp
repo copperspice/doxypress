@@ -8669,12 +8669,10 @@ void closeGroup(QSharedPointer<Entry> e, const char *fileName, int, bool foundIn
 
 void initGroupInfo(QSharedPointer<Entry> e)
 {
-   //printf("==> initGroup(id=%d,related=%s,e=%p)\n",g_memberGroupId,
-   //       g_memberGroupRelates.data(),e);
-   e->mGrpId     = g_memberGroupId;
-   e->relates    = g_memberGroupRelates;
+   e->mGrpId  = g_memberGroupId;
+   e->relates = g_memberGroupRelates;
 
-   if (!g_autoGroupStack.isEmpty()) {     
+   if (! g_autoGroupStack.isEmpty()) {     
       e->groups->append(*g_autoGroupStack.top());
    }
 }

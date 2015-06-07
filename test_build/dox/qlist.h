@@ -17,15 +17,9 @@
 
 #include "QGlobal.h"
 
-//   #include <exception>
-//   #include <limits.h>
-//   #include <list>
-//   #include <initializer_list>
-#include "C:/MingW/lib/gcc/i686-w64-mingw32/4.7.2/include/c++/iterator"
-//   #include <new>
-//   #include <stdexcept>
-//   #include <string.h>
-//   #include <sstream>
+//  resolve when clang is turned on
+//  #include "C:/MingW/lib/gcc/i686-w64-mingw32/4.7.2/include/c++/iterator"
+
 
 QT_BEGIN_NAMESPACE
 
@@ -112,13 +106,10 @@ class QList
    QList<T> &operator=(const QList<T> &l);
 
 
-/*  BROOM -- rvalue reference
-
    inline QList &operator=(QList && other) {
       qSwap(d, other.d);
       return *this;
    }
-*/ 
 
    inline void swap(QList<T> &other) {
       qSwap(d, other.d);
@@ -246,6 +237,7 @@ class QList
       inline bool operator>=(const iterator &other) const {
          return i >= other.i;
       }
+
 #ifndef QT_STRICT_ITERATORS
       inline bool operator==(const const_iterator &o) const {
          return i == o.i;
@@ -266,6 +258,7 @@ class QList
          return i >= other.i;
       }
 #endif
+
       inline iterator &operator++() {
          ++i;
          return *this;
@@ -1137,8 +1130,7 @@ Q_OUTOFLINE_TEMPLATE bool QList<T>::removeOne(const T &_t)
 }
 
 template <typename T>
-Q_OUTOFLINE_TEMPLATE typename QList<T>::iterator QList<T>::erase(typename QList<T>::iterator afirst,
-      typename QList<T>::iterator alast)
+Q_OUTOFLINE_TEMPLATE typename QList<T>::iterator QList<T>::erase(iterator afirst, iterator alast)
 {
    for (Node *n = afirst.i; n < alast.i; ++n) {
       node_destruct(n);

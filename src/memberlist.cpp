@@ -218,9 +218,7 @@ void MemberList::countDocMembers(bool countEnumValues)
          mg.countDocMembers();
          m_numDocMembers += mg.numDocMembers();
       }
-   }
-
-   //printf("MemberList::countDocMembers()=%d memberGroupList=%p\n",m_numDocMembers,memberGroupList);
+   }   
 }
 
 bool MemberList::declVisible() const
@@ -591,7 +589,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
 void MemberList::writeDocumentation(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container,
                                     const char *title, bool showEnumValues, bool showInline)
 {
-   countDocMembers(showEnumValues);
+   countDocMembers(showEnumValues); 
 
    if (numDocMembers() == 0) {
       return;

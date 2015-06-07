@@ -1865,7 +1865,7 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
                   bool keepSpaces, int indentLevel)
 {
    static QRegExp regExp("[a-z_A-Z\\x80-\\xFF][~!a-z_A-Z0-9$\\\\.:\\x80-\\xFF]*");
-   static QRegExp regExpSplit("(?!:),");
+   static QRegExp regExpSplit(",");
 
    QByteArray txtStr = text;
    int strLen = txtStr.length();
@@ -1882,7 +1882,7 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
 
    // read a word from the text string
    while ((newIndex = regExp.indexIn(txtStr, index)) != -1 && (newIndex == 0 ||
-             !(txtStr.at(newIndex - 1) >= '0' && txtStr.at(newIndex - 1) <= '9')) ) {
+             ! (txtStr.at(newIndex - 1) >= '0' && txtStr.at(newIndex - 1) <= '9')) ) {
 
       // avoid matching part of hex numbers
       // add non-word part to the result

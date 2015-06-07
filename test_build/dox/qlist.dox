@@ -301,7 +301,7 @@ Returns a const STL-style iterator> pointing to the imaginary item after the las
 
 
 /**
-\fn bool QList::contains ( const T & value ) const
+\fn QBool QList::contains ( const T & value ) const
 
 Returns true if the list contains an occurrence of <i>value</i>; otherwise returns false.
 
@@ -378,7 +378,7 @@ This function was introduced in Qt 4.5.
 
 
 /**
-\fn iterator QList::erase ( iterator pos )
+\fn QList<T>::iterator QList::erase ( iterator pos )
 
 Removes the item associated with the iterator <i>pos</i> from the list, and returns an iterator to the next item in the list (which may be end()).
 
@@ -389,7 +389,7 @@ Removes the item associated with the iterator <i>pos</i> from the list, and retu
 
 
 /**
-\fn iterator QList::erase ( iterator begin, iterator end )
+\fn QList<T>::iterator QList::erase ( iterator begin, iterator end )
 
 This is an overloaded function.
 
@@ -550,7 +550,7 @@ Example:
 
 
 /**
-\fn iterator QList::insert ( iterator before, const T & value )
+\fn QList<T>::iterator QList::insert ( iterator before, const T & value )
 
 This is an overloaded function.
 

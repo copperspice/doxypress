@@ -381,7 +381,7 @@ static void checkArgumentName(const QByteArray &name, bool isParam)
       return;  
    }
 
-   static QRegExp re("$?[a-zA-Z0-9_\\x80-\\xFF]+\\.*");
+   static QRegExp re("\\$?[a-zA-Z0-9_\\x80-\\xFF]+\\.*");
    int p = 0;
    int i = 0;
    int l;

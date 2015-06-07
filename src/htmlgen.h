@@ -382,19 +382,12 @@ class HtmlGenerator : public OutputGenerator
 
    void startEnumTable()   
    {
-      QByteArray title = theTranslator->trEnumerationValues();
+      QByteArray title1 = theTranslator->trEnumerationValues();
+      QByteArray title2 = theTranslator->trDocumentation();
+        
+      m_textStream << "<table class=\"fieldtable\">" << endl
+           << "<tr><th>" << title1 << "</th><th>" << title2 << "</th></tr>";
 
-      if (title.contains('^')) {  
-         QList<QByteArray> temp = title.split('^');         
-
-         m_textStream << "<table class=\"fieldtable\">" << endl
-           << "<tr><th>" << temp[0] << "</th><th>" << temp[1] << "</th></tr>";
-
-      } else   {
-          m_textStream << "<table class=\"fieldtable\">" << endl
-          << "<tr><th colspan=\"2\">" << title << "</th></tr>";
-
-      }
    }
 
    void endEnumTable() {

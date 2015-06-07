@@ -136,14 +136,22 @@ class MemberDef : public Definition
    bool isSettable() const;
    bool isPrivateSettable() const;
    bool isProtectedSettable() const;
+
    bool isReadable() const;
    bool isWritable() const;
    bool isNotify() const;
    bool isReset() const;
+   bool isRevision() const;
+   bool isDesignable() const;
+   bool isScriptable() const;
+   bool isStored() const;
+   bool isUser() const;
+   bool isConstant() const;
+   bool isFinal() const;
+ 
    bool isAddable() const;
    bool isRemovable() const;
-   bool isRaisable() const;
-   bool isFinal() const;
+   bool isRaisable() const;   
    bool isAbstract() const;
    bool isOverride() const;
    bool isInitonly() const;

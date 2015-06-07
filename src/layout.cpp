@@ -945,7 +945,7 @@ class LayoutParser : public QXmlDefaultHandler
             fortranOpt ? theTranslator->trCompoundMembersFortran() : theTranslator->trCompoundMembers(),
             QByteArray(),
             fortranOpt ? theTranslator->trCompoundMembersDescriptionFortran(extractAll) : theTranslator->trCompoundMembersDescription(extractAll),
-            "functions"
+            "functions_all"
          },
          {
             "files",

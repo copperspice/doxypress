@@ -1003,7 +1003,6 @@ inline QString QString::fromWCharArray(const wchar_t *string, int size)
           : fromUcs4((uint *)string, size);
 }
 
-
 class Q_CORE_EXPORT QCharRef
 {
    QString &s;
@@ -1566,15 +1565,14 @@ inline QString QString::fromStdWString(const QStdWString &s)
 # endif
 
 
-#if !defined(QT_NO_DATASTREAM)
+#if ! defined(QT_NO_DATASTREAM)
 Q_CORE_EXPORT QDataStream &operator<<(QDataStream &, const QString &);
 Q_CORE_EXPORT QDataStream &operator>>(QDataStream &, QString &);
 #endif
 
-Q_DECLARE_TYPEINFO(QString, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(QString, Q_MOVABLE_TYPE)
 Q_DECLARE_SHARED(QString)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QString::SectionFlags)
-
 
 class Q_CORE_EXPORT QStringRef
 {

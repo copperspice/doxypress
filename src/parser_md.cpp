@@ -1330,8 +1330,7 @@ static int isHRuler(const char *data, int size)
 }
 
 static QByteArray extractTitleId(QByteArray &title)
-{
-   //static QRegExp r1("^[a-z_A-Z][a-z_A-Z0-9\\-]*:");
+{   
    static QRegExp r2("\\{#[a-z_A-Z][a-z_A-Z0-9\\-]*\\}");
 
    int l = 0;
@@ -1343,11 +1342,9 @@ static QByteArray extractTitleId(QByteArray &title)
       QByteArray id = title.mid(i + 2, l - 3);
       title = title.left(i);
 
-      //printf("found id='%s' title='%s'\n",id.data(),title.data());
       return id;
    }
-
-   //printf("no id found in title '%s'\n",title.data());
+  
    return "";
 }
 

@@ -150,7 +150,7 @@ The getFavorite documentation is used with with retrieving a value in a property
 */
 
 /**
-\fn Ginger::setFavorite ()
+\fn void Ginger::setFavorite ()
 
 The settFavorite documentation is used with with setting a value in a property.
 
@@ -166,7 +166,7 @@ The isScriptTitle documentation is connected to a property.
 
 
 /**
-\fn Ginger::ready ()
+\fn void Ginger::ready ()
 
 The ready method is a signal in Ginger. 
 
@@ -227,8 +227,15 @@ This is a private signal in Ginger.
 */
 
 
+/** 
+\fn void Ginger::test_D(int data[][42], void (*ptr)(int,QString *))
 
-/*!
+This is a protectred signal in Ginger.
+
+*/
+
+
+/**
 \enum Ginger::Brands
 
 An enum listing the different varieties of Ginger.
@@ -238,7 +245,7 @@ An enum listing the different varieties of Ginger.
 /**
 \var Ginger::Brands Ginger::Chinese
 
-0
+Considered to be the true ginger.
 
 */
 
@@ -246,7 +253,7 @@ An enum listing the different varieties of Ginger.
 /**
 \var Ginger::Brands Ginger::Jamaican
 
-1
+This is the standard type of ginger found in most grocery stores.
 
 */
 
@@ -254,7 +261,7 @@ An enum listing the different varieties of Ginger.
 /**
 \var Ginger::Brands Ginger::Thai
 
-2
+This ginger is also referred to as galangal or blue ginger.
 
 */
 
@@ -262,7 +269,7 @@ An enum listing the different varieties of Ginger.
 /**
 \var Ginger::Brands Ginger::Yellow
 
-3
+This is another name for Jamaican ginger.
 
 */
 
@@ -285,6 +292,15 @@ The possible values are:
 
 
 /**
+\enum Ginger::Shapes
+
+An enum list of different Shapes. 
+
+*/
+
+
+
+/**
 \typedef Ginger::AmountType
 
 AmountType is a typedef for double. 
@@ -293,7 +309,7 @@ AmountType is a typedef for double.
 
 
 /**
-\property marker Ginger::title_Qt
+\property QNoSuchType Ginger::title_Qt
 
 Property documentation for title.   ( Qt )
 
@@ -315,3 +331,23 @@ Property documentation for favorite.
 
 
 */
+
+
+/*!
+\class Lemongrass
+\brief Test class
+
+Lemongrass is a test class to ensure two classes in one file can be documented. This class appears after several macros.
+
+*/
+
+
+/** 
+\var Lemongrass::howMuch
+
+Documentation for a public variable
+
+*/
+
+
+

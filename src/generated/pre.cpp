@@ -3148,9 +3148,11 @@ static QByteArray stringize(const QByteArray &s)
  */
 static void processConcatOperators(QByteArray &expr)
 {
-   //printf("processConcatOperators: in=`%s'\n",expr.data());
    QRegExp r("[ \\t\\n]*##[ \\t\\n]*");
-   int l, n, i = 0;
+   int l;
+   int n;
+   int i = 0;
+
    if (expr.isEmpty()) {
       return;
    }
