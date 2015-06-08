@@ -3481,8 +3481,8 @@ void MemberDef::warnIfUndocumented()
 
    static bool extractAll = Config::getBool("extract-all");
  
-   if ((!hasUserDocumentation() && !extractAll) && !isFriendClass() && name().indexOf('@') == -1 && d && d->name().indexOf('@') == -1 &&
-         protectionLevelVisible(m_impl->prot) && !isReference() ) {
+   if ((! hasUserDocumentation() && ! extractAll) && !isFriendClass() && name().indexOf('@') == -1 && d && d->name().indexOf('@') == -1 &&
+         protectionLevelVisible(m_impl->prot) && ! isReference() && ! isDeleted() ) {
 
       warn_undoc(getDefFileName(), getDefLine(), "Member %s%s (%s) of %s %s is not documented.",
                  qPrint(name()), qPrint(argsString()), qPrint(memberTypeName()), t, qPrint(d->name()));
@@ -3510,11 +3510,16 @@ bool MemberDef::isDocumentedFriendClass() const
    return (isFriendClass() && (fcd = getClass(baseName)) && fcd->isLinkable());
 }
 
+bool MemberDef::isDeleted() const
+{
+   return m_impl->defArgList && m_impl->defArgList->isDeleted;
+}
+
 bool MemberDef::hasDocumentation() const
 {
    return Definition::hasDocumentation() ||
           (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) || // has enum values
-          (m_impl->defArgList != 0 && m_impl->defArgList->hasDocumentation()); // has doc arguments
+          (m_impl->defArgList != 0 && m_impl->defArgList->hasDocumentation());  // has doc arguments
 }
 
 #if 0

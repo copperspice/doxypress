@@ -67,6 +67,7 @@ ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
    result->volatileSpecifier  = unmarshalBool(s);
    result->pureSpecifier      = unmarshalBool(s);
    result->trailingReturnType = unmarshalQByteArray(s);
+   result->isDeleted          = unmarshalBool(s);
 
    return result;
 }
@@ -98,6 +99,7 @@ void ArgumentList::marshal(StorageIntf *s, ArgumentList *argList)
       marshalBool(s, argList->volatileSpecifier);
       marshalBool(s, argList->pureSpecifier);
       marshalQByteArray(s, argList->trailingReturnType);
+      marshalBool(s,argList->isDeleted);
    }
 }
 

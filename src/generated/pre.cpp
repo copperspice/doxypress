@@ -2565,7 +2565,6 @@ char *preYYtext;
 //#define DBG_CTX(x) fprintf x
 #define DBG_CTX(x) do { } while(0)
 
-
 struct CondCtx {
    CondCtx(int line, QByteArray id, bool b)
       : lineNr(line), sectionId(id), skip(b) {}
@@ -2639,11 +2638,13 @@ class DefineManager
       }
       return *theInstance;
    }
+
    /** Deletes the singleton */
    static void deleteInstance() {
       delete theInstance;
       theInstance = 0;
    }
+
    /** Starts a context in which defines are collected.
     *  Called at the start of a new file that is preprocessed.
     *  @param fileName the name of the file to process.
@@ -2654,6 +2655,7 @@ class DefineManager
       if (fileName == 0) {
          return;
       }
+
       DefinesPerFile *dpf = m_fileMap.value(fileName);
       if (dpf == 0) {
          //printf("New file!\n");
@@ -2661,6 +2663,7 @@ class DefineManager
          m_fileMap.insert(fileName, dpf);
       }
    }
+
    /** Ends the context started with startContext() freeing any
     *  defines collected within in this context.
     */
@@ -2825,20 +2828,21 @@ void DefineManager::DefinesPerFile::collectDefines(DefineDict *dict, QSet<QStrin
 
 static int                      g_yyLineNr   = 1;
 static int                      g_yyMLines   = 1;
-static int                      g_yyColNr   = 1;
+static int                      g_yyColNr    = 1;
 static QByteArray               g_yyFileName;
 static QSharedPointer<FileDef>  g_yyFileDef;
 static QSharedPointer<FileDef>  g_inputFileDef;
-static int                      g_ifcount    = 0;
-static QStringList             *g_pathList = 0;
+static int                      g_ifcount   = 0;
+static QStringList             *g_pathList  = 0;
 static QStack<FileState *>      g_includeStack;
 static QHash<QString, int *>   *g_argDict;
-static int                      g_defArgs = -1;
-static QByteArray               g_defName;
-static QByteArray               g_defText;
-static QByteArray               g_defLitText;
-static QByteArray               g_defArgsStr;
-static QByteArray               g_defExtraSpacing;
+static int                      g_defArgs   = -1;
+
+static QByteArray         g_defName;
+static QByteArray         g_defText;
+static QByteArray         g_defLitText;
+static QByteArray         g_defArgsStr;
+static QByteArray         g_defExtraSpacing;
 static bool               g_defVarArgs;
 static int                g_level;
 static int                g_lastCContext;
@@ -2857,10 +2861,10 @@ static QByteArray         g_lastGuardName;
 static QByteArray         g_incName;
 static QByteArray         g_guardExpr;
 static int                g_curlyCount;
-static bool               g_nospaces; // add extra spaces during macro expansion
+static bool               g_nospaces;          // add extra spaces during macro expansion
 
-static bool               g_macroExpansion; // from the configuration
-static bool               g_expandOnlyPredef; // from the configuration
+static bool               g_macroExpansion;    // from the configuration
+static bool               g_expandOnlyPredef;  // from the configuration
 static int                g_commentCount;
 static bool               g_insideComment;
 static bool               g_isImported;
@@ -2871,7 +2875,7 @@ static QStack<CondCtx *>  g_condStack;
 static bool               g_insideCS; // C# has simpler preprocessor
 static bool               g_isSource;
 
-static bool               g_lexInit = FALSE;
+static bool               g_lexInit   = FALSE;
 static int                g_fenceSize = 0;
 static bool               g_ccomment;
 
@@ -2902,25 +2906,22 @@ static void incrLevel()
    g_level++;
    g_levelGuard.resize(g_level);
    g_levelGuard[g_level - 1] = 0;
-
-   //printf("%s line %d: incrLevel %d\n",g_yyFileName.data(),g_yyLineNr,g_level);
 }
 
 static void decrLevel()
-{
-   //printf("%s line %d: decrLevel %d\n",g_yyFileName.data(),g_yyLineNr,g_level);
+{   
    if (g_level > 0) {
       g_level--;
       g_levelGuard.resize(g_level);
    } else {
-      warn(g_yyFileName, g_yyLineNr, "More #endif's than #if's found.\n");
+      warn(g_yyFileName, g_yyLineNr, "More #endif's than #if's found\n");
    }
 }
 
 static bool otherCaseDone()
 {
    if (g_level == 0) {
-      warn(g_yyFileName, g_yyLineNr, "Found an #else without a preceding #if.\n");
+      warn(g_yyFileName, g_yyLineNr, "Found an #else without a preceding #if\n");
       return TRUE;
    } else {
       return g_levelGuard[g_level - 1];
@@ -3082,6 +3083,7 @@ static QByteArray extractTrailingComment(const char *s)
             }
          }
          break;
+
          // whitespace or line-continuation
          case ' ':
          case '\t':
@@ -3094,6 +3096,7 @@ static QByteArray extractTrailingComment(const char *s)
       }
       i--;
    }
+
    return "";
 }
 
@@ -3107,8 +3110,9 @@ static QByteArray stringize(const QByteArray &s)
    QByteArray result;
    uint i = 0;
    bool inString = FALSE;
-   bool inChar = FALSE;
+   bool inChar   = FALSE;
    char c, pc;
+
    while (i < s.length()) {
       if (!inString && !inChar) {
          while (i < s.length() && !inString && !inChar) {
@@ -3151,7 +3155,7 @@ static QByteArray stringize(const QByteArray &s)
          }
       }
    }
-   //printf("stringize `%s'->`%s'\n",s.data(),result.data());
+   
    return result;
 }
 
@@ -3173,27 +3177,28 @@ static void processConcatOperators(QByteArray &expr)
 
    while ((n = r.indexIn(expr, i)) != -1) {
       l = r.matchedLength();
-
-      //printf("Match: `%s'\n",expr.data()+i);
+     
       if (n + l + 1 < (int)expr.length() && expr.at(n + l) == '@' && expr.at(n + l + 1) == '-') {
          // remove no-rescan marker after ID
          l += 2;
       }
-      //printf("found `%s'\n",expr.mid(n,l).data());
+
       // remove the ## operator and the surrounding whitespace
-      expr = expr.left(n) + expr.right(expr.length() - n - l);
+      expr  = expr.left(n) + expr.right(expr.length() - n - l);
       int k = n - 1;
+
       while (k >= 0 && isId(expr.at(k))) {
          k--;
       }
+
       if (k > 0 && expr.at(k) == '-' && expr.at(k - 1) == '@') {
          // remove no-rescan marker before ID
          expr = expr.left(k - 1) + expr.right(expr.length() - k - 1);
          n -= 2;
       }
+
       i = n;
-   }
-   //printf("processConcatOperators: out=`%s'\n",expr.data());
+   }   
 }
 
 static void yyunput (int c, char *buf_ptr  );
@@ -3888,7 +3893,9 @@ static void readIncludeFile(const QByteArray &inc)
       i++;
    }
 
-   if (s < inc.length() && i > s) { // valid include file name found
+   if (s < inc.length() && i > s) { 
+      // valid include file name found
+
       // extract include path+name
       QByteArray incFileName = inc.mid(s, i - s).trimmed();
 
@@ -3903,7 +3910,6 @@ static void readIncludeFile(const QByteArray &inc)
       QSharedPointer<FileDef> oldFileDef = g_yyFileDef;
       int oldLineNr = g_yyLineNr;
     
-
       // absIncFileName avoids difficulties for incFileName starting with "../" (bug 641336)
       QByteArray absIncFileName = incFileName;
       {
@@ -3997,7 +4003,6 @@ static void readIncludeFile(const QByteArray &inc)
          lineStr = QString("# 1 \"%1\" 1\n").arg(QString(g_yyFileName)).toUtf8();
 
          outputArray(lineStr.data(), lineStr.length());
-
 
          DBG_CTX((stderr, "Switching to include file %s\n", incFileName.data()));
          g_expectGuard = TRUE;
@@ -4118,8 +4123,6 @@ static char resolveTrigraph(char c)
    return '?';
 }
 
-/* ----------------------------------------------------------------- */
-
 #undef  YY_INPUT
 #define YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
 
@@ -4133,9 +4136,6 @@ static int yyread(char *buf, int max_size)
 
    return bytesToCopy;
 }
-
-/* ----------------------------------------------------------------- */
-
 
 #define INITIAL 0
 #define Start 1
@@ -4389,8 +4389,7 @@ YY_DECL {
 
       if ( ! YY_CURRENT_BUFFER ) {
          preYYensure_buffer_stack ();
-         YY_CURRENT_BUFFER_LVALUE =
-            preYY_create_buffer(preYYin, YY_BUF_SIZE );
+         YY_CURRENT_BUFFER_LVALUE = preYY_create_buffer(preYYin, YY_BUF_SIZE );
       }
 
       preYY_load_buffer_state( );
@@ -4417,8 +4416,10 @@ YY_DECL {
    yy_match:
       do {
          register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
+
          while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state ) {
             yy_current_state = (int) yy_def[yy_current_state];
+
             if ( yy_current_state >= 1316 ) {
                yy_c = yy_meta[(unsigned int) yy_c];
             }
@@ -4426,11 +4427,12 @@ YY_DECL {
          yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
          *(yy_state_ptr)++ = yy_current_state;
          ++yy_cp;
-      } while ( yy_base[yy_current_state] != 1315 );
+      } while ( yy_base[yy_current_state] != 6333 );
 
    yy_find_action:
       yy_current_state = *--(yy_state_ptr);
       (yy_lp) = yy_accept[yy_current_state];
+
    find_rule: /* we branch to this label when backing up */
       for ( ; ; ) { /* until we find what rule we matched */
          if ( (yy_lp) && (yy_lp) < yy_accept[yy_current_state + 1] ) {
@@ -5844,6 +5846,7 @@ YY_DECL {
                }
             }
             YY_BREAK
+
          case 127:
             YY_RULE_SETUP
 
@@ -5905,19 +5908,22 @@ YY_DECL {
 
          case 131:
             YY_RULE_SETUP
-
             { }
             YY_BREAK
 
          case 132:
             YY_RULE_SETUP
-            { g_ccomment = FALSE; }
+            { 
+               g_ccomment = FALSE; 
+            }
             YY_BREAK
 
          case 133:
             YY_RULE_SETUP
 
-            { g_ccomment = TRUE; }
+            { 
+               g_ccomment = TRUE; 
+            }
             YY_BREAK
 
          case 134:
@@ -6013,8 +6019,6 @@ YY_DECL {
             }
             YY_BREAK
 
-
-
          case 140:
             YY_RULE_SETUP
 
@@ -6047,6 +6051,7 @@ YY_DECL {
                outputChar(*preYYtext);
             }
             YY_BREAK
+
          case 144:
             YY_RULE_SETUP
 
@@ -6441,21 +6446,21 @@ YY_DECL {
                DBG_CTX((stderr, "End of include file\n"));
                
                if (g_includeStack.isEmpty()) {
-                  DBG_CTX((stderr, "Terminating scanner!\n"));
+                  DBG_CTX((stderr, "Terminating scanner\n"));
                   yyterminate();
    
                } else {
                   FileState *fs = g_includeStack.pop();
-   
-                  //fileDefineCache->merge(g_yyFileName,fs->fileName);
+  
                   YY_BUFFER_STATE oldBuf = YY_CURRENT_BUFFER;
                   preYY_switch_to_buffer(fs->bufState );
                   preYY_delete_buffer(oldBuf );
                   g_yyLineNr    = fs->lineNr;
-                  //preYYin = fs->oldYYin;
+
                   g_inputBuf    = fs->oldFileBuf;
                   g_inputBufPos = fs->oldFileBufPos;
                   setFileName(fs->fileName);
+
                   DBG_CTX((stderr, "######## FileName %s\n", g_yyFileName.data()));
    
                   // Deal with file changes due to
@@ -7621,16 +7626,15 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
 
    uint orgOffset = output.curPos();
    
-
    g_macroExpansion   = Config::getBool("macro-expansion");
    g_expandOnlyPredef = Config::getBool("expand-only-predefined");
 
-   g_skip = FALSE;
-   g_curlyCount = 0;
-   g_nospaces = FALSE;
-   g_inputBuf = &input;
+   g_skip        = FALSE;
+   g_curlyCount  = 0;
+   g_nospaces    = FALSE;
+   g_inputBuf    = &input;
    g_inputBufPos = 0;
-   g_outputBuf = &output;
+   g_outputBuf   = &output;
 
    g_includeStack.clear();
    g_expandedDict->clear();
@@ -7713,7 +7717,7 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
             // add define definition to the dictionary of defines for this file
             QByteArray dname = ds.left(i_obrace);
             if (!dname.isEmpty()) {
-               A_Define *def = new A_Define;
+               A_Define *def     = new A_Define;
                def->name         = dname;
                def->definition   = definition;
                def->nargs        = count;
@@ -7724,22 +7728,25 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
                DefineManager::instance().addDefine(g_yyFileName, def);
             }
 
-            //printf("#define `%s' `%s' #nargs=%d\n",
-            //  def->name.data(),def->definition.data(),def->nargs);
          } else if ((i_obrace == -1 || i_obrace > i_equals) &&
                     (i_cbrace == -1 || i_cbrace > i_equals) &&
-                    !ds.isEmpty() && (int)ds.length() > i_equals
-                   ) { // predefined non-function macro definition
+                    !ds.isEmpty() && (int)ds.length() > i_equals)  {
+
+            // predefined non-function macro definition
             //printf("predefined normal macro '%s'\n",defStr);
+
             A_Define *def = new A_Define;
+
             if (i_equals == -1) { // simple define without argument
                def->name = ds;
                def->definition = "1"; // substitute occurrences by 1 (true)
+
             } else { // simple define with argument
                int ine = i_equals - (nonRecursive ? 1 : 0);
                def->name = ds.left(ine);
                def->definition = ds.right(ds.length() - i_equals - 1);
             }
+
             if (!def->name.isEmpty()) {
                def->nargs = -1;
                def->isPredefined = TRUE;
@@ -7747,15 +7754,13 @@ void preprocessFile(const char *fileName, BufStr &input, BufStr &output)
                def->fileDef      = g_yyFileDef;
                def->fileName     = fileName;
                DefineManager::instance().addDefine(g_yyFileName, def);
+
             } else {
                delete def;
             }
-
-            //printf("#define `%s' `%s' #nargs=%d\n",
-            //  def->name.data(),def->definition.data(),def->nargs);
+            
          }
       }
-      //firstTime=FALSE;
    }
 
    g_yyLineNr = 1;

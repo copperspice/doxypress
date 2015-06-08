@@ -83,7 +83,7 @@ class ArgumentList : public QList<Argument>
 {
  public:
    /*! Creates an empty argument list */
-   ArgumentList() : constSpecifier(false), volatileSpecifier(false), pureSpecifier(false) 
+   ArgumentList() : constSpecifier(false), volatileSpecifier(false), pureSpecifier(false), isDeleted(false) 
    {
    }
 
@@ -105,7 +105,9 @@ class ArgumentList : public QList<Argument>
    /*! C++11 style Trailing return type? */
    QByteArray trailingReturnType;
 
-   /*! C++11 defaulted method */
+   /*! method with =delete */
+   bool isDeleted;
+   
    static ArgumentList *unmarshal(StorageIntf *s);
    static void marshal(StorageIntf *s, ArgumentList *argList);
 };

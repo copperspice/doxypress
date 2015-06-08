@@ -1236,6 +1236,8 @@ YY_DECL {
 
       do_action:  /* This label is used only to access EOF actions. */
 
+printf("\n  BROOM -  show me some action");
+
       switch ( yy_act ) {
          /* beginning of action switch */
          case 1:

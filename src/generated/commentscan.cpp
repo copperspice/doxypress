@@ -8647,11 +8647,14 @@ void closeGroup(QSharedPointer<Entry> e, const char *fileName, int, bool foundIn
          info->docFile = fileName;
       }
 
-      g_memberGroupId = DOX_NOGROUP;
+      g_memberGroupId = DOX_NOGROUP;  
       g_memberGroupRelates.resize(0);
       g_memberGroupDocs.resize(0);
-      e->mGrpId = DOX_NOGROUP;
-
+      
+      if (! foundInline) {
+         e->mGrpId = DOX_NOGROUP;
+      }
+      
   
    } else if (!g_autoGroupStack.isEmpty()) { // end of auto group
       Grouping *grp = g_autoGroupStack.pop();

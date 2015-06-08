@@ -206,6 +206,7 @@ class MemberDef : public Definition
    bool isLinkable() const;
 
    bool hasDocumentation() const override;
+   bool isDeleted() const;
   
    bool isBriefSectionVisible() const;
    bool isDetailedSectionVisible(bool inGroup, bool inFile) const;
