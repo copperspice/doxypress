@@ -19,8 +19,27 @@
 #define LANGUAGE_H
 
 #include <translator.h>
+#include <translator_cs.h>
 
-extern Translator *theTranslator;
-bool setTranslator(const QString &languageName);
+// using the CS i18n system
+extern Translator_Cs translator_Cs;
+extern Translator *theTranslator;      // can be removed when theTranslator is changed to CsTrans
+
+void loadTranslationFile();
+QString getLanguage();
+
+/*! Generate a place holder for a position in a list. Used for
+ *  translators to be able to specify different elements orders
+ *  depending on whether text flows from left to right or visa versa.
+ */
+inline QByteArray generateMarker(int id)
+{
+   QByteArray retval;
+
+   retval.setNum(id);
+   retval.prepend('@');
+
+   return retval;
+}
 
 #endif

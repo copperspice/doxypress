@@ -13,7 +13,7 @@ gcclibs=libgcc_s_sjlj-1  libstdc++-6  libwinpthread-1
 
 
 # list of CopperSpice libraries
-cslibs=Core Xml
+cslibs=Core Xml Gui
 
 # location of includes
 AM_CXXFLAGS+=-I../src
@@ -115,7 +115,6 @@ doxypress_SOURCES = \
    src/htmlhelp.cpp \
    src/image.cpp \
    src/index.cpp \
-   src/language.cpp \
    src/latexdocvisitor.cpp \
    src/latexgen.cpp  \
    src/layout.cpp \
@@ -278,63 +277,61 @@ noinst_HEADERS = \
    src/textdocvisitor.h \
    src/tooltip.h \
    src/translator.h \
-   src/translator_en.h \
+   src/translator_cs.h \
    src/types.h \
    src/util.h \
    src/xmldocvisitor.h \
    src/xmlgen.h
 
-noinst_HEADERS += \
-   src/translate/translator_adapter.h \
-   src/translate/translator_am.h \
-   src/translate/translator_ar.h \
-   src/translate/translator_br.h \
-   src/translate/translator_ca.h \
-   src/translate/translator_cn.h \
-   src/translate/translator_cz.h \
-   src/translate/translator_de.h \
-   src/translate/translator_dk.h \
-   src/translate/translator_eo.h \
-   src/translate/translator_es.h \
-   src/translate/translator_fa.h \
-   src/translate/translator_fi.h \
-   src/translate/translator_fr.h \
-   src/translate/translator_gr.h \
-   src/translate/translator_hr.h \
-   src/translate/translator_hu.h \
-   src/translate/translator_id.h \
-   src/translate/translator_it.h \
-   src/translate/translator_je.h \
-   src/translate/translator_jp.h \
-   src/translate/translator_ke.h \
-   src/translate/translator_kr.h \
-   src/translate/translator_lt.h \
-   src/translate/translator_lv.h \
-   src/translate/translator_mk.h \
-   src/translate/translator_nl.h \
-   src/translate/translator_no.h \
-   src/translate/translator_pl.h \
-   src/translate/translator_pt.h \
-   src/translate/translator_ro.h \
-   src/translate/translator_ru.h \
-   src/translate/translator_sc.h \
-   src/translate/translator_si.h \
-   src/translate/translator_sk.h \
-   src/translate/translator_sr.h \
-   src/translate/translator_sv.h \
-   src/translate/translator_tr.h \
-   src/translate/translator_tw.h \
-   src/translate/translator_ua.h \
-   src/translate/translator_vi.h \
-   src/translate/translator_za.h
 
-# not currently using
-# src/dbusxmlscanner.cpp
+TRANSLATIONS =  \
+    resources/translation/doxy_en.ts \
+    resources/translation/doxy_af.ts \
+    resources/translation/doxy_ar.ts \
+    resources/translation/doxy_am.ts \
+    resources/translation/doxy_pt_br.ts \
+    resources/translation/doxy_ca.ts \
+    resources/translation/doxy_zh.ts \
+    resources/translation/doxy_zh_tw.ts \
+    resources/translation/doxy_hr.ts \
+    resources/translation/doxy_cz.ts \
+    resources/translation/doxy_da.ts \
+    resources/translation/doxy_nl.ts \
+    resources/translation/doxy_eo.ts \
+    resources/translation/doxy_fa.ts \
+    resources/translation/doxy_fi.ts \
+    resources/translation/doxy_fr.ts \
+    resources/translation/doxy_de.ts \
+    resources/translation/doxy_el.ts \
+    resources/translation/doxy_hu.ts \
+    resources/translation/doxy_it.ts \
+    resources/translation/doxy_id.ts \
+    resources/translation/doxy_ja.ts \
+    resources/translation/doxy_ja_en.ts \
+    resources/translation/doxy_ko.ts \
+    resources/translation/doxy_ko_en.ts \
+    resources/translation/doxy_lv.ts \
+    resources/translation/doxy_lt.ts \
+    resources/translation/doxy_mt.ts \
+    resources/translation/doxy_nb.ts \
+    resources/translation/doxy_pl.ts \
+    resources/translation/doxy_pt.ts \
+    resources/translation/doxy_ro.ts \
+    resources/translation/doxy_ru.ts \
+    resources/translation/doxy_sr.ts \
+    resources/translation/doxy_sr_cyrillic.ts \
+    resources/translation/doxy_sk.ts \
+    resources/translation/doxy_sl.ts \
+    resources/translation/doxy_es.ts \
+    resources/translation/doxy_sv.ts \
+    resources/translation/doxy_tr.ts \
+    resources/translation/doxy_uk.ts \
+    resources/translation/doxy_vi.ts
 
 RESOURCES = doxypress.qrc
 
 # use wilcard to obtain just the dependency list
-qrc_doxypress.cpp: doxypress.qrc   $(wildcard ../resources/*)
+qrc_doxypress.cpp: doxypress.qrc   $(shell find ../resources -type f)
 
 # required to compile qrc
 nodist_doxypress_SOURCES=qrc_doxypress.cpp

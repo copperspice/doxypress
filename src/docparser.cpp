@@ -1052,13 +1052,13 @@ static void handleUnclosedStyleCommands()
    }
 }
 
-static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children)
+static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool ignoreAutoLinkFlag = FALSE)
 {
    QByteArray name = linkToText(SrcLangExt_Unknown, g_token->name, true);
  
    static bool autolinkSupport = Config::getBool("auto-link");
 
-   if (! autolinkSupport) { 
+   if (! autolinkSupport && ! ignoreAutoLinkFlag) { 
       // no autolinking so add as normal word
       children.append(new DocWord(parent, name));
       return;
@@ -1118,7 +1118,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children)
       // special case: where matching Foo: fails to be an Obj-C reference, but Foo itself might be linkable
       g_token->name = g_token->name.left(len - 1);
 
-      handleLinkedWord(parent, children);
+      handleLinkedWord(parent, children, ignoreAutoLinkFlag);
       children.append(new DocWord(parent, ":"));
 
    } else if (! s_insideHtmlLink && (cd = getClass(g_token->name + "-p"))) {
@@ -6336,9 +6336,9 @@ int DocPara::handleHtmlStartTag(const QByteArray &tagName, const HtmlAttribList 
                // <see cref="..."/> style
 
                bool inSeeBlock = s_inSeeBlock;
-               g_token->name = cref;
-               s_inSeeBlock = true;
-               handleLinkedWord(this, m_children);
+               g_token->name   = cref;
+               s_inSeeBlock    = true;
+               handleLinkedWord(this, m_children, true);
 
                s_inSeeBlock = inSeeBlock;
 

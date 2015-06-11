@@ -34,13 +34,8 @@ class Translator
    }
 
    virtual ~Translator() {}
- 
-   // --- Language control methods -------------------
-
-   virtual QByteArray idLanguage() = 0;
+    
    virtual QByteArray latexLanguageSupportCommand() = 0;
-
-   // --- Language translation methods -------------------
 
    virtual QByteArray trRelatedFunctions() = 0;
    virtual QByteArray trRelatedSubscript() = 0;

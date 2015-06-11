@@ -810,7 +810,6 @@ class LayoutParser : public QXmlDefaultHandler
          userTitle = title;
       }
 
-      //printf("memberdef: %s\n",userTitle.data());
       if (m_part != -1 /*&& isVisible*/) {
          LayoutDocManager::instance().addEntry((LayoutDocManager::LayoutPart)m_part, new LayoutDocEntryMemberDef(type, userTitle));
       }
@@ -840,23 +839,23 @@ class LayoutParser : public QXmlDefaultHandler
       }
    }
 
+   struct NavEntryMap {
+         const char *typeStr;         // type attribute name in the XML file
+         LayoutNavEntry::Kind kind;   // corresponding enum name
+         QByteArray mainName;         // default title for an item if it has children
+         QByteArray subName;          // optional name for an item if it is rendered as a child
+         QByteArray intro;            // introduction text to be put on the index page
+         QByteArray baseFile;         // base name of the file containing the index page
+   };
+
    void startNavEntry(const QXmlAttributes &attrib) {
       static bool javaOpt    = Config::getBool("optimize-java");
       static bool fortranOpt = Config::getBool("optimize-fortran");
      
       static bool hasGraphicalHierarchy = Config::getBool("have-dot") && Config::getBool("dot-hierarchy");
-      static bool extractAll = Config::getBool("extract-all");
+      static bool extractAll = Config::getBool("extract-all");    
 
-      static struct NavEntryMap {
-         const char *typeStr;         // type attribute name in the XML file
-         LayoutNavEntry::Kind kind;   // corresponding enum name
-
-         QByteArray mainName;         // default title for an item if it has children
-         QByteArray subName;          // optional name for an item if it is rendered as a child
-         QByteArray intro;            // introduction text to be put on the index page
-         QByteArray baseFile;         // base name of the file containing the index page
-
-      } mapping[] = {
+      static NavEntryMap mapping[] = {
          {
             "mainpage",
             LayoutNavEntry::MainPage,
@@ -1011,6 +1010,7 @@ class LayoutParser : public QXmlDefaultHandler
             QByteArray()
          }
       };
+
       LayoutNavEntry::Kind kind;
 
       // find type in the table
@@ -1027,10 +1027,12 @@ class LayoutParser : public QXmlDefaultHandler
 
       if (mapping[i].typeStr == 0) {
          if (type.isEmpty()) {
-            err("an entry tag within a navindex has no type attribute! Check your layout file!\n");
+            err("An entry tag within a navindex has no type attribute, verify your layout file\n");
+
          } else {
-            err("the type '%s' is not supported for the entry tag within a navindex! Check your layout file!\n", type.data());
+            err("The type '%s' is not supported for the entry tag within a navindex,  verify your layout file\n", type.data());
          }
+
          m_invalidEntry = true;
          return;
       }
@@ -1040,16 +1042,20 @@ class LayoutParser : public QXmlDefaultHandler
 
       bool isVisible = elemIsVisible(attrib);
 
-      if (title.isEmpty()) { // use default title
+      if (title.isEmpty()) { 
          title = mapping[i].mainName; // use title for main row
+
          if (m_rootNav != LayoutDocManager::instance().rootNavEntry() && !mapping[i].subName.isEmpty()) {
             title = mapping[i].subName; // if this is a child of another row, use the subName if available
-            // this is mainly done to get compatible naming with older versions.
+            // this is mainly done to get compatible naming with older versions
          }
       }
 
+
       QByteArray intro = attrib.value("intro").toUtf8();
-      if (intro.isEmpty()) { // use default intro text
+
+      if (intro.isEmpty()) { 
+         // use default intro text
          intro = mapping[i].intro;
       }
 

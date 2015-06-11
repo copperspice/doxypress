@@ -294,7 +294,7 @@ HtmlHelp::~HtmlHelp()
    delete index;
 }
 
-static QHash<QString, QByteArray *> s_languageDict;         
+static QHash<QString, QByteArray> s_languageDict;         
 
 /*! This will create a contents file (index.hhc) and a index file (index.hhk)
  *  and write the header of those files. Also creates a project file (index.hhp)
@@ -352,124 +352,72 @@ void HtmlHelp::initialize()
        "</OBJECT>\n"
        "<UL>\n";
 
-   /* language codes for Html help
-      0x405 Czech
-      0x406 Danish
-      0x413 Dutch
-      0xC09 English (Australia)
-      0x809 English (Britain)
-      0x1009 English (Canada)
-      0x1809 English (Ireland)
-      0x1409 English (New Zealand)
-      0x1C09 English (South Africa)
-      0x409 English (United States)
-      0x40B Finnish
-      0x40C French
-      0x407 German
-      0x408 Greece
-      0x40E Hungarian
-      0x410 Italian
-      0x814 Norwegian
-      0x415 Polish
-      0x816 Portuguese(Portugal)
-      0x416 Portuguese(Brazil)
-      0x419 Russian
-      0x80A Spanish(Mexico)
-      0xC0A Spanish(Modern Sort)
-      0x40A Spanish(Traditional Sort)
-      0x41D Swedish
-      0x41F Turkey
-      0x411 Japanese
-      0x412 Korean
-      0x804 Chinese (PRC)
-      0x404 Chinese (Taiwan)
-
-      New LCIDs:
-    0x421 Indonesian
-    0x41A Croatian
-    0x418 Romanian
-    0x424 Slovenian
-    0x41B Slovak
-    0x422 Ukrainian
-    0x81A Serbian (Serbia, Latin)
-    0x403 Catalan
-    0x426 Latvian
-    0x427 Lithuanian
-    0x436 Afrikaans
-    0x42A Vietnamese
-    0x429 Persian (Iran)
-    0xC01 Arabic (Egypt) - I don't know which version of arabic is used inside translator_ar.h ,
-      so I have chosen Egypt at random
-
-   */
- 
+   // language codes for Html help 
    s_languageDict.clear();
-   s_languageDict.insert("czech",       new QByteArray("0x405 Czech"));
-   s_languageDict.insert("danish",      new QByteArray("0x406 Danish"));
-   s_languageDict.insert("dutch",       new QByteArray("0x413 Dutch"));
-   s_languageDict.insert("finnish",     new QByteArray("0x40B Finnish"));
-   s_languageDict.insert("french",      new QByteArray("0x40C French"));
-   s_languageDict.insert("german",      new QByteArray("0x407 German"));
-   s_languageDict.insert("greek",       new QByteArray("0x408 Greece"));
-   s_languageDict.insert("hungarian",   new QByteArray("0x40E Hungarian"));
-   s_languageDict.insert("italian",     new QByteArray("0x410 Italian"));
-   s_languageDict.insert("norwegian",   new QByteArray("0x814 Norwegian"));
-   s_languageDict.insert("polish",      new QByteArray("0x415 Polish"));
-   s_languageDict.insert("portuguese",  new QByteArray("0x816 Portuguese(Portugal)"));
-   s_languageDict.insert("brazilian",   new QByteArray("0x416 Portuguese(Brazil)"));
-   s_languageDict.insert("russian",     new QByteArray("0x419 Russian"));
-   s_languageDict.insert("spanish",     new QByteArray("0x40A Spanish(Traditional Sort)"));
-   s_languageDict.insert("swedish",     new QByteArray("0x41D Swedish"));
-   s_languageDict.insert("turkish",     new QByteArray("0x41F Turkey"));
-   s_languageDict.insert("japanese",    new QByteArray("0x411 Japanese"));
-   s_languageDict.insert("japanese-en", new QByteArray("0x411 Japanese"));
-   s_languageDict.insert("korean",      new QByteArray("0x412 Korean"));
-   s_languageDict.insert("korean-en",   new QByteArray("0x412 Korean"));
-   s_languageDict.insert("chinese",     new QByteArray("0x804 Chinese (PRC)"));
-   s_languageDict.insert("chinese-traditional", new QByteArray("0x404 Chinese (Taiwan)"));
 
-   // new LCIDs
-   s_languageDict.insert("indonesian",  new QByteArray("0x412 Indonesian"));
-   s_languageDict.insert("croatian",    new QByteArray("0x41A Croatian"));
-   s_languageDict.insert("romanian",    new QByteArray("0x418 Romanian"));
-   s_languageDict.insert("slovene",     new QByteArray("0x424 Slovenian"));
-   s_languageDict.insert("slovak",      new QByteArray("0x41B Slovak"));
-   s_languageDict.insert("ukrainian",   new QByteArray("0x422 Ukrainian"));
-   s_languageDict.insert("serbian",     new QByteArray("0x81A Serbian (Serbia, Latin)"));
-   s_languageDict.insert("catalan",     new QByteArray("0x403 Catalan"));
-   s_languageDict.insert("lithuanian",  new QByteArray("0x427 Lithuanian"));
-   s_languageDict.insert("afrikaans",   new QByteArray("0x436 Afrikaans"));
-   s_languageDict.insert("vietnamese",  new QByteArray("0x42A Vietnamese"));
-   s_languageDict.insert("persian",     new QByteArray("0x429 Persian (Iran)"));
-   s_languageDict.insert("arabic",      new QByteArray("0xC01 Arabic (Egypt)"));
-   s_languageDict.insert("latvian",     new QByteArray("0x426 Latvian"));
-   s_languageDict.insert("macedonian",  new QByteArray("0x042f Macedonian (Former Yugoslav Republic of Macedonia)"));
-   s_languageDict.insert("armenian",    new QByteArray("0x42b Armenian"));
-
-   //Code for Esperanto should be as shown below but the htmlhelp compiler 1.3 does not support this
-   // (and no newer version is available).
-   //So do a fallback to the default language (see getLanguageString())
-   //s_languageDict.insert("esperanto",   new QByteArray("0x48f Esperanto"));
-   s_languageDict.insert("serbian-cyrillic", new QByteArray("0xC1A Serbian (Serbia, Cyrillic)"));
+   s_languageDict.insert("afrikaans",           QByteArray("0x436 Afrikaans"));
+   s_languageDict.insert("arabic",              QByteArray("0xC01 Arabic (Egypt)"));
+   s_languageDict.insert("armenian",            QByteArray("0x42b Armenian"));
+   s_languageDict.insert("brazilian",           QByteArray("0x416 Portuguese (Brazil)"));
+   s_languageDict.insert("catalan",             QByteArray("0x403 Catalan"));
+   s_languageDict.insert("chinese",             QByteArray("0x804 Chinese (PRC)"));
+   s_languageDict.insert("chinese-traditional", QByteArray("0x404 Chinese (Taiwan)"));
+   s_languageDict.insert("croatian",            QByteArray("0x41A Croatian"));
+   s_languageDict.insert("czech",               QByteArray("0x405 Czech"));
+   s_languageDict.insert("danish",              QByteArray("0x406 Danish"));
+   s_languageDict.insert("dutch",               QByteArray("0x413 Dutch"));
+   s_languageDict.insert("english",             QByteArray("0x409 English"));
+// s_languageDict.insert("esperanto",           QByteArray("?? Esperanto"));   // 0x48f
+   s_languageDict.insert("farsi (persian)",     QByteArray("0x429 Farsi"));
+   s_languageDict.insert("finnish",             QByteArray("0x40B Finnish"));
+   s_languageDict.insert("french",              QByteArray("0x40C French"));
+   s_languageDict.insert("german",              QByteArray("0x407 German"));
+   s_languageDict.insert("greek",               QByteArray("0x408 Greece"));
+   s_languageDict.insert("hungarian",           QByteArray("0x40E Hungarian"));
+   s_languageDict.insert("indonesian",          QByteArray("0x412 Indonesian"));
+   s_languageDict.insert("italian",             QByteArray("0x410 Italian"));
+   s_languageDict.insert("japanese",            QByteArray("0x411 Japanese"));
+   s_languageDict.insert("japanese-en",         QByteArray("0x411 Japanese"));
+   s_languageDict.insert("korean",              QByteArray("0x412 Korean"));
+   s_languageDict.insert("korean-en",           QByteArray("0x412 Korean"));
+   s_languageDict.insert("latvian",             QByteArray("0x426 Latvian"));
+   s_languageDict.insert("lithuanian",          QByteArray("0x427 Lithuanian"));
+   s_languageDict.insert("macedonian",          QByteArray("0x042f Macedonian"));
+   s_languageDict.insert("norwegian",           QByteArray("0x814 Norwegian"));  
+   s_languageDict.insert("polish",              QByteArray("0x415 Polish"));
+   s_languageDict.insert("portuguese",          QByteArray("0x816 Portuguese (Portugal)"));   
+   s_languageDict.insert("romanian",            QByteArray("0x418 Romanian"));
+   s_languageDict.insert("russian",             QByteArray("0x419 Russian"));
+   s_languageDict.insert("serbian",             QByteArray("0x81A Serbian (Serbia, Latin)"));
+   s_languageDict.insert("serbian-cyrillic",    QByteArray("0xC1A Serbian (Serbia, Cyrillic)"));
+   s_languageDict.insert("slovenian",           QByteArray("0x424 Slovenian"));
+   s_languageDict.insert("slovak",              QByteArray("0x41B Slovak"));
+   s_languageDict.insert("spanish",             QByteArray("0x40A Spanish (Traditional Sort)"));
+   s_languageDict.insert("swedish",             QByteArray("0x41D Swedish"));
+   s_languageDict.insert("turkish",             QByteArray("0x41F Turkey"));
+   s_languageDict.insert("ukrainian",           QByteArray("0x422 Ukrainian"));
+   s_languageDict.insert("vietnamese",          QByteArray("0x42A Vietnamese"));
+        
+   // Esperanto should be as shown but the htmlhelp compiler 1.3 does not support it
+   // fallback to the default language of English   
 }
 
 static QByteArray getLanguageString()
 {
-   if (! theTranslator->idLanguage().isEmpty()) {
-      QByteArray *s = s_languageDict[theTranslator->idLanguage()];
+   static QString outputLanguage = Config::getEnum("output-language").toLower();   
+        
+   QByteArray retval = s_languageDict[outputLanguage];
 
-      if (s) {
-         return *s;
-      }
-   }
-
-   // default language
-   return "0x409 English (United States)";
+   if (retval.isEmpty()) {
+      return "0x409 English";
+   } else {   
+      return retval;
+   }      
 }
 
 void HtmlHelp::createProjectFile()
 {
-   // Write the project file
+   // Write the project file for html Help
 
    QString fName = Config::getString("html-output") + "/index.hhp";
    QFile f(fName);

@@ -3692,7 +3692,7 @@ void convertCppComments(BufStr *inBuf, BufStr *outBuf, const char *fileName)
 
    commentcnvYYlex();
 
-   while (!g_condStack.isEmpty()) {
+   while (! g_condStack.isEmpty()) {
       CondCtx *ctx = g_condStack.pop();
       QByteArray sectionInfo = " ";
 
@@ -3704,7 +3704,7 @@ void convertCppComments(BufStr *inBuf, BufStr *outBuf, const char *fileName)
            "a corresponding \\endcond command", sectionInfo.constData());
    }
 
-   if (g_nestingCount > 0 || (YY_START == CComment && g_lang != SrcLangExt_Markdown)) {
+   if (g_nestingCount > 0 && g_lang != SrcLangExt_Markdown) {
       QByteArray tmp = "(probable line reference: ";
 
       bool first = TRUE;

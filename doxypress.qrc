@@ -89,6 +89,48 @@
         <file>resources/html/tab_s.lum</file>
         <file>resources/html/tabs.css</file>
         <file>resources/latex/doxypress.sty</file>
+        <file>resources/translation/doxy_en.qm</file>
+        <file>resources/translation/doxy_af.qm</file>
+        <file>resources/translation/doxy_ar.qm</file>    
+        <file>resources/translation/doxy_am.qm</file>
+        <file>resources/translation/doxy_pt_br.qm</file>
+        <file>resources/translation/doxy_ca.qm</file>
+        <file>resources/translation/doxy_zh.qm</file>
+        <file>resources/translation/doxy_zh_tw.qm</file>
+        <file>resources/translation/doxy_hr.qm</file>
+        <file>resources/translation/doxy_cz.qm</file>
+        <file>resources/translation/doxy_da.qm</file>
+        <file>resources/translation/doxy_nl.qm</file>
+        <file>resources/translation/doxy_eo.qm</file>
+        <file>resources/translation/doxy_fa.qm</file>
+        <file>resources/translation/doxy_fi.qm</file>
+        <file>resources/translation/doxy_fr.qm</file>
+        <file>resources/translation/doxy_de.qm</file>
+        <file>resources/translation/doxy_el.qm</file>
+        <file>resources/translation/doxy_hu.qm</file>
+        <file>resources/translation/doxy_it.qm</file>
+        <file>resources/translation/doxy_id.qm</file>
+        <file>resources/translation/doxy_ja.qm</file>
+        <file>resources/translation/doxy_ja_en.qm</file>
+        <file>resources/translation/doxy_ko.qm</file>
+        <file>resources/translation/doxy_ko_en.qm</file>
+        <file>resources/translation/doxy_lv.qm</file>
+        <file>resources/translation/doxy_lt.qm</file>
+        <file>resources/translation/doxy_mt.qm</file>
+        <file>resources/translation/doxy_nb.qm</file>
+        <file>resources/translation/doxy_pl.qm</file>
+        <file>resources/translation/doxy_pt.qm</file>
+        <file>resources/translation/doxy_ro.qm</file>
+        <file>resources/translation/doxy_ru.qm</file>
+        <file>resources/translation/doxy_sr.qm</file>    
+        <file>resources/translation/doxy_sr_cyrillic.qm</file>
+        <file>resources/translation/doxy_sk.qm</file>
+        <file>resources/translation/doxy_sl.qm</file>
+        <file>resources/translation/doxy_es.qm</file>
+        <file>resources/translation/doxy_sv.qm</file>
+        <file>resources/translation/doxy_tr.qm</file>
+        <file>resources/translation/doxy_uk.qm</file>
+        <file>resources/translation/doxy_vi.qm</file>
         <file>resources/xml/compound.xsd</file>
         <file>resources/xml/index.xsd</file> 
     </qresource>

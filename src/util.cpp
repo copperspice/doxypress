@@ -324,20 +324,6 @@ void writePageRef(OutputDocInterface &od, const char *cn, const char *mn)
    od.popGeneratorState();
 }
 
-/*! Generate a place holder for a position in a list. Used for
- *  translators to be able to specify different elements orders
- *  depending on whether text flows from left to right or visa versa.
- */
-QByteArray generateMarker(int id)
-{
-   const int maxMarkerStrLen = 20;
-   char result[maxMarkerStrLen];
-
-   qsnprintf(result, maxMarkerStrLen, "@%d", id);
-
-   return result;
-}
-
 static QString stripFromPath(const QString &path, const QStringList &list)
 {
    // look at all the strings in the list and strip the longest match 
@@ -6246,7 +6232,11 @@ void filterLatexString(QTextStream &t, const char *str, bool insideTabbing, bool
    if (str == 0) {
       return;
    }
+
    const unsigned char *p = (const unsigned char *)str;
+   const unsigned char *q;
+
+   int cnt;
    unsigned char c;
    unsigned char pc = '\0';
 
@@ -6270,6 +6260,7 @@ void filterLatexString(QTextStream &t, const char *str, bool insideTabbing, bool
             default:
                t << (char)c;
          }
+
       } else {
          switch (c) {
             case '#':
@@ -6278,20 +6269,49 @@ void filterLatexString(QTextStream &t, const char *str, bool insideTabbing, bool
             case '$':
                t << "\\$";
                break;
+
             case '%':
                t << "\\%";
                break;
+
             case '^':
                t << "$^\\wedge$";
                break;
-            case '&':
-               t << "\\&";
+
+            case '&':              
+               // migiht be a special symbol
+
+               q   = p;
+               cnt = 2;    // we have to count & and ; as well
+               while (*q && *q != ';') {
+                  cnt++;
+                  q++;
+               }
+
+               if (*q == ';')  {
+                  --p; // we need & as well
+                  DocSymbol::SymType res = HtmlEntityMapper::instance()->name2sym(QByteArray((char *)p).left(cnt));
+
+                  if (res == DocSymbol::Sym_Unknown) {
+                     p++;
+                     t << "\\&";
+
+                  } else {
+                     t << HtmlEntityMapper::instance()->latex(res);
+                     p = q;
+                  }
+
+               } else {
+                  t << "\\&";
+               }
                break;
+
             case '*':
                t << "$\\ast$";
                break;
+
             case '_':
-               if (!insideTabbing) {
+               if (! insideTabbing) {
                   t << "\\+";
                }
                t << "\\_";
@@ -8226,13 +8246,13 @@ Protection getProtection(const char *visibility)
 {
    Protection retval; 
 
-   if (stricmp(visibility, "public") == 0) {
+   if (qstricmp(visibility, "public") == 0) {
       retval = Public;
 
-   } else if (stricmp(visibility, "protected") == 0) {
+   } else if (qstricmp(visibility, "protected") == 0) {
       retval = Protected;
 
-   } else if (stricmp(visibility, "private") == 0) {
+   } else if (qstricmp(visibility, "private") == 0) {
       retval = Private; 
 
    } 

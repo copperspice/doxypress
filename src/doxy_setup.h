@@ -18,6 +18,7 @@
 #ifndef DOXY_SETUP_H
 #define DOXY_SETUP_H
 
+#include <QString>
 #include <QStringList>
 
 struct CommandLine {

@@ -1,0 +1,6 @@
+flex -PpreYY -t pre.l   > pre.cpp
+flex -PdefargsYY -t defargs.l   > defargs.cpp
+flex -PscannerYY -t scanner.l  > parser_cstyle.cpp
+
+
+

@@ -1712,42 +1712,23 @@ void LatexDocVisitor::startLink(const QByteArray &ref, const QByteArray &file, c
 {
    if (ref.isEmpty() && Config::getBool("latex-hyper-pdf")) { 
       // internal PDF link
+  
+      m_t << "\\hyperlink{";
 
-      if (ref.isEmpty()) {
-         m_t << "\\hyperlink{";
-
-         if (!file.isEmpty()) {
-            m_t << stripPath(file);
-         }
-
-         if (!file.isEmpty() && !anchor.isEmpty()) {
-            m_t << "_";
-         }
-
-         if (!anchor.isEmpty()) {
-            m_t << anchor;
-         }
-         m_t << "}{";
-
-      } else {
-         QByteArray dest;
-         m_t << "\\href{";
-
-         dest = Doxy_Globals::tagDestinationDict[ref];
-
-         if (! dest.isEmpty() ) {
-            m_t << dest << "/";
-         }
-
-         if (! file.isEmpty()) {
-            m_t << file << Doxy_Globals::htmlFileExtension;
-         }
-
-         if (! anchor.isEmpty()) {
-            m_t << "#" << anchor;
-         }
-         m_t << "}{";
+      if (! file.isEmpty()) {
+         m_t << stripPath(file);
       }
+
+      if (! file.isEmpty() && ! anchor.isEmpty()) {
+         m_t << "_";
+      }
+
+      if (!anchor.isEmpty()) {
+         m_t << anchor;
+      }
+
+      m_t << "}{";
+     
 
    } else if (ref.isEmpty()) { 
       // internal non-PDF link

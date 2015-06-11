@@ -254,11 +254,7 @@ bool Config::verify()
    QString outputLanguage = iterEnum.value().value;
 
    if (outputLanguage.isEmpty()) {
-      outputLanguage = "English";
-   }
-
-   if (! setTranslator(outputLanguage)) {
-      warn_uncond("Output language %s not supported, using English\n", qPrintable(outputLanguage));
+      warn_uncond("Output language %s was not specified, using English\n", qPrintable(outputLanguage));      
       outputLanguage = "English";
    }
 

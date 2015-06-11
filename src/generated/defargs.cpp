@@ -1196,7 +1196,7 @@ YY_DECL {
          yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
          *(yy_state_ptr)++ = yy_current_state;
          ++yy_cp;
-      } while ( yy_base[yy_current_state] != 262 );
+      } while ( yy_base[yy_current_state] != 922 );
 
    yy_find_action:
       yy_current_state = *--(yy_state_ptr);
@@ -1235,8 +1235,6 @@ YY_DECL {
       YY_DO_BEFORE_ACTION;
 
       do_action:  /* This label is used only to access EOF actions. */
-
-printf("\n  BROOM -  show me some action");
 
       switch ( yy_act ) {
          /* beginning of action switch */

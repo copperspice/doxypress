@@ -251,7 +251,7 @@
     "optimize-fortran": false,
     "optimize-java": false,
     "output-dir": ".",
-    "output-language": "English",
+    "output-language": "German",
     "perl-latex": false,
     "perl-path": "/usr/bin/perl",
     "perl-prefix": "",

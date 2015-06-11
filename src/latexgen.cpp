@@ -462,9 +462,13 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\n"
      "\\begin{document}\n";
 
-   if (theTranslator->idLanguage() == "greek") {
+   // not sure why only the one language is set
+   static QString outputLanguage = Config::getEnum("output-language").toLower();   
+
+   if (outputLanguage == "greek") {
       t_stream << "\\selectlanguage{greek}\n";
    }
+
    t_stream << "\n";
 
    // Front matter

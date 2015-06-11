@@ -149,7 +149,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const char *arg
                   bool checkCV = false, const char *forceTagFile  = 0);
 
 QString getFileFilter(const char *name, bool isSourceCode);
-QByteArray generateMarker(int id);
+
 int getPrefixIndex(const QByteArray &name);
 
 bool generateLink(OutputDocInterface &od, const char *, const char *, bool inSeeBlock, const char *);

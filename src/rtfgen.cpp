@@ -2123,14 +2123,14 @@ static bool preProcessFile(QString &input_FName, QTextStream &t_stream, bool bIn
    // It works on OUR rtf files because the first line before the body
    // ALWAYS contains "{\comment begin body}"
 
-   do {
+   do {     
       if (f.readLine(lineBuf.data(), maxLineLength) == -1) {
          err("Read error in %s, error: %d\n", qPrintable(input_FName), f.error());
          return false;
       }
 
       if (bIncludeHeader) {
-         encodeForOutput(t_stream, lineBuf.data());
+         encodeForOutput(t_stream, lineBuf.constData());
       }
 
    } while (lineBuf.indexOf("\\comment begin body") == -1);

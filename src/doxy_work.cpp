@@ -6592,9 +6592,13 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QByteArray funcDecl
                         // value from the source
                         QByteArray memType = md->typeString();
 
+                        if (memType == "virtual") { 
+                           memType = "";
+                        }
+
                         memType  = stripPrefix(memType, "static "); 
                         memType  = stripPrefix(memType, "virtual "); 
-
+                       
                         funcType = substitute(stripTemplateSpecifiersFromScope(funcType, true), className + "::", ""); 
 
                         if (memType != funcType) {  
