@@ -480,7 +480,7 @@ void readConfiguration(struct CommandLine cmdArgs)
       exit(1);
    }
        
-   // Perlmod wants to know the path to the config file
+   // Perlmod wants to know the path to the project file
    QFileInfo configFileInfo(cmdArgs.configName);
    setPerlModDoxyfile(qPrintable(configFileInfo.absoluteFilePath()));  
 }

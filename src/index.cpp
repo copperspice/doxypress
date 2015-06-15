@@ -2444,7 +2444,7 @@ static void writeClassMemberIndex(OutputList &ol)
    bool addToIndex = lne == 0 || lne->visible();
 
    if (documentedClassMembers[CMHL_All] > 0 && addToIndex) {
-      Doxy_Globals::indexList->addContentsItem(true, lne ? lne->title() : theTranslator->trCompoundMembers(), 0, "functions", 0);
+      Doxy_Globals::indexList->addContentsItem(true, lne ? lne->title() : theTranslator->trCompoundMembers(), 0, "functions_all", 0);
       Doxy_Globals::indexList->incContentsDepth();
    }
 

@@ -15,19 +15,19 @@
 
 /*!
 \class QList::iterator 
-\brief The QList::iterator class provides an STL-style non-const iterator for QList and QQueue. 
+\brief The QList::iterator class provides an STL-style non-const iterator for %QList and %QQueue. 
 
-The QList::iterator class provides an STL-style non-const iterator for QList and QQueue.
+The %QList::iterator class provides an STL-style non-const iterator for %QList and %QQueue.
 
-QList features both STL-style iterators and Java-style iterators. The STL-style iterators are more low-level and more cumbersome to use; on the
+QList features both STL-style iterators and Java-style iterators. The STL-style iterators are more low-level and more cumbersome to use, on the
 other hand, they are slightly faster and, for developers who already know STL, have the advantage of familiarity.
 
-QList<T>;::iterator allows you to iterate over a QList<T> (or QQueue<T>) and to modify the list item associated with the iterator. If you want
-to iterate over a const QList, use QList::const_iterator instead. It is generally good practice to use QList::const_iterator on a non-const QList
+QList<T>::iterator allows you to iterate over a QList<T> (or QQueue<T>) and to modify the list item associated with the iterator. If you want
+to iterate over a const %QList, use QList::const_iterator instead. It is generally good practice to use QList::const_iterator on a non-const %QList
 as well, unless you need to change the QList through the iterator. Const iterators are slightly faster, and can improve code readability.
 
-The default QList::iterator constructor creates an uninitialized iterator. You must initialize it using a QList function like QList::begin(),
-QList::end(), or QList::insert() before you can start iterating. Here's a typical loop that prints all the items stored in a list:
+The default QList::iterator constructor creates an uninitialized iterator. You must initialize it using a %QList function like QList::begin(),
+QList::end(), or QList::insert() before you can start iterating. Here is a typical loop that prints all the items stored in a list:
 
 \code
     QList<QString> list;

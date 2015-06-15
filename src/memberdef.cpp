@@ -1354,11 +1354,11 @@ bool MemberDef::isBriefSectionVisible() const
    bool hasDocs = hasDocumentation() || (m_impl->grpId != -1 && !(info->doc.isEmpty() && info->header.isEmpty()));
 
    // only include static members with file/namespace scope if
-   // explicitly enabled in the config file
+   // explicitly enabled in the project file
    bool visibleIfStatic = ! (getClassDef() == 0 && isStatic() && ! extractStatic );
 
    // only include members is the are documented or
-   // HIDE_UNDOC_MEMBERS is NO in the config file
+   // HIDE_UNDOC_MEMBERS is NO in the project file
    bool visibleIfDocumented = (!hideUndocMembers || hasDocs || isDocumentedFriendClass() );
 
    // hide members with no detailed description and brief descriptions
@@ -3355,21 +3355,24 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
 
    QByteArray ts = fieldType();
 
-   if (cd) // cd points to an anonymous struct pointed to by this member
+   if (cd)  {
+      // cd points to an anonymous struct pointed to by this member
       // so we add a link to it from the type column.
-   {
+   
       int i = 0;
       const char *prefixes[] = { "struct ", "union ", "class ", 0 };
       const char **p = prefixes;
 
       while (*p) {
          int l = qstrlen(*p);
+
          if (ts.left(l) == *p) {
             ol.writeString(*p);
             i = l;
          }
          p++;
       }
+
       ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), ts.mid(i));
 
    } else { 

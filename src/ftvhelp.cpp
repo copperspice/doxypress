@@ -801,8 +801,8 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
          t << endl << "];" << endl;
       }
 
-      t << endl << "var SYNCONMSG = '"  << theTranslator->trPanelSynchronisationTooltip(false) << "';";
-      t << endl << "var SYNCOFFMSG = '" << theTranslator->trPanelSynchronisationTooltip(true)  << "';";
+      t << endl << "var SYNCONMSG = '"  << theTranslator->trPanelSyncTooltip(false) << "';";
+      t << endl << "var SYNCOFFMSG = '" << theTranslator->trPanelSyncTooltip(true)  << "';";
    }
 
    ResourceMgr::instance().copyResourceAs("html/navtree.js", htmlOutput, "navtree.js");

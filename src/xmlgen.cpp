@@ -263,13 +263,14 @@ class TextGeneratorXMLImpl : public TextGeneratorIntf
 {
  public:
    TextGeneratorXMLImpl(QTextStream &t): m_t(t) {}
-   void writeString(const char *s, bool /*keepSpaces*/) const {
+
+   void writeString(const char *s, bool) const override {
       writeXMLString(m_t, s);
    }
 
-   void writeBreak(int) const {}
+   void writeBreak(int) const override {}
 
-   void writeLink(const char *extRef, const char *file, const char *anchor, const char *text) const {
+   void writeLink(const QByteArray &extRef, const QByteArray &file, const QByteArray &anchor, const QByteArray &text) const override {
       writeXMLLink(m_t, extRef, file, anchor, text, 0);
    }
 

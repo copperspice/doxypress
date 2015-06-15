@@ -32,7 +32,12 @@
     <memberdecl>
       <nestedclasses visible="yes" title=""/>
       <publictypes title=""/>
-      <services title=""/>
+  
+      <typedefs title=""/>
+      <enums title=""/>
+      <enumvalues title=""/>
+
+      <services title=""/>/
       <interfaces title=""/>     
       <publicsignals title=""/>
       <publicslots title=""/>     

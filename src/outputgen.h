@@ -510,7 +510,7 @@ class OutputDocInterface : public BaseOutputDocInterface
    virtual void disableAllBut(OutputGenerator::OutputType o) = 0;
 
    /*! Enables all output formats as far as they have been enabled in
-    *  the config file. (useful for OutputList only)
+    *  the project file. (useful for OutputList only)
     */
    virtual void enableAll() = 0;
 

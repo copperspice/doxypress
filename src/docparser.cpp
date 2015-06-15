@@ -1074,11 +1074,13 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
  
    QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s_fileName, ambig);
 
-   if (! s_insideHtmlLink && (resolveRef(s_context, g_token->name, s_inSeeBlock, &compound, &member, true, fd, true)
-          || (! s_context.isEmpty() &&  resolveRef("", g_token->name, s_inSeeBlock, &compound, 
-              &member, false, QSharedPointer<FileDef>(), true)) )) {
+   if (! s_insideHtmlLink && (resolveRef(s_context, g_token->name, s_inSeeBlock, &compound, &member, true, fd, true) ||
+             (! s_context.isEmpty() && 
+                resolveRef("", g_token->name, s_inSeeBlock, &compound, &member, false, QSharedPointer<FileDef>(), true)) )) {
 
-     if (member && member->isLinkable()) { 
+      // tried once with s_context and again with "" looking for a global scope
+
+      if (member && member->isLinkable()) { 
 
          if (member->isObjCMethod()) {
             bool localLink = s_memberDef ? member->getClassDef() == s_memberDef->getClassDef() : false;
@@ -1115,7 +1117,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
       }
 
    } else if (! s_insideHtmlLink && len > 1 && g_token->name.at(len - 1) == ':') {
-      // special case: where matching Foo: fails to be an Obj-C reference, but Foo itself might be linkable
+      // special case where matching Foo: fails to be an Obj-C reference, but Foo itself might be linkable
       g_token->name = g_token->name.left(len - 1);
 
       handleLinkedWord(parent, children, ignoreAutoLinkFlag);

@@ -883,6 +883,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
 
    if (! fn.isEmpty()) {
       QByteArray refText = theTranslator->trDefinedAtLineInSourceFile();
+
       int lineMarkerPos = refText.indexOf("@0");
       int fileMarkerPos = refText.indexOf("@1");
 
@@ -991,8 +992,9 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             ol.parseText(refText.right(refText.length() - lineMarkerPos - 2));
          }
          ol.endParagraph();
+
       } else {
-         err("Error: Translation has invalid markers in trDefinedInSourceFile()\n");
+         err("Error: Invalid translation markers in 'trDefinedAtLineInSourceFile'\n");
       }
    }
    ol.popGeneratorState();

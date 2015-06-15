@@ -2490,8 +2490,8 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
       }
 
       QByteArray fullName = stripAnonymousNamespaceScope(fName);
-      if (! fullName.isEmpty()) {
 
+      if (! fullName.isEmpty()) {
          QSharedPointer<NamespaceDef> nd;
 
          if ((nd = Doxy_Globals::namespaceSDict->find(fullName))) {
@@ -2507,7 +2507,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
             }
 
             // file definition containing the namespace nd
-             QSharedPointer<FileDef> fd = rootNav->fileDef();
+            QSharedPointer<FileDef> fd = rootNav->fileDef();
 
             // insert the namespace in the file definition
             if (fd) {
@@ -2517,7 +2517,9 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
             addNamespaceToGroups(root, nd);
             nd->setRefItems(root->sli);
 
-         } else { // fresh namespace
+         } else { 
+            // new namespace
+
             QByteArray tagName;
             QByteArray tagFileName;
 
@@ -3171,12 +3173,13 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
             // normal member
             def = root->type + " " + nd->name() + sep + name + root->args;
          }
+
       } else {
          def = nd->name() + sep + name + root->args;
       }
 
    } else {
-      if (!root->type.isEmpty() && ! root->name.isEmpty()) {
+      if (! root->type.isEmpty() && ! root->name.isEmpty()) {
          if (name.at(0) == '@') { 
             // dummy variable representing anonymous union
             def = root->type;
@@ -3217,16 +3220,14 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
             bool isPHPArray = md->getLanguage() == SrcLangExt_PHP &&
                               md->argsString() != root->args && root->args.indexOf('[') != -1;
 
-            bool staticsInDifferentFiles =
-               root->stat && md->isStatic() &&
-               root->fileName != md->getDefFileName();
+            bool staticsInDifferentFiles = root->stat && md->isStatic() && root->fileName != md->getDefFileName();
 
-            if (md->getFileDef() && ! isPHPArray && // not a php array
-                  !staticsInDifferentFiles) {
-
+            if (md->getFileDef() && ! isPHPArray && ! staticsInDifferentFiles) {
+               // not a php array
                // not a php array variable
             
                Debug::print(Debug::Variables, 0, "    variable already found: scope=%s\n", md->getOuterScope()->name().data());
+
                addMemberDocs(rootNav, md, def, 0, false);
                md->setRefItems(root->sli);
 
@@ -3268,7 +3269,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
    addMemberToGroups(root, md);
 
    md->setRefItems(root->sli);
-   if (nd && !nd->name().isEmpty() && nd->name().at(0) != '@') {
+   if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
       md->setNamespace(nd);
       nd->insertMember(md);
    }

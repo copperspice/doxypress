@@ -317,7 +317,7 @@ class Translator
    virtual QByteArray trSearchResultsTitle() = 0;
    virtual QByteArray trSearchResults(int numDocuments) = 0;
    virtual QByteArray trSearchMatches() = 0;
-   virtual QByteArray trSourceFile(QByteArray &filename) = 0;
+   virtual QByteArray trSourceFile(const QString &filename) = 0;
    virtual QByteArray trDirIndex() = 0;
    virtual QByteArray trDirDocumentation() = 0;
    virtual QByteArray trDirectories() = 0;
@@ -369,13 +369,13 @@ class Translator
 
    virtual QByteArray trDetailLevel() = 0;
    virtual QByteArray trTemplateParameters() = 0;
-   virtual QByteArray trAndMore(const QByteArray &number) = 0;
+   virtual QByteArray trAndMore(const QString &number) = 0;
    virtual QByteArray trEnumGeneratedFromFiles(bool single) = 0;
    virtual QByteArray trEnumReference(const char *name) = 0;
    virtual QByteArray trInheritedFrom(const char *members, const char *what) = 0;
    virtual QByteArray trAdditionalInheritedMembers() = 0;
 
-   virtual QByteArray trPanelSynchronisationTooltip(bool enable) = 0;
+   virtual QByteArray trPanelSyncTooltip(bool enable) = 0;
    virtual QByteArray trProvidedByCategory() = 0;
    virtual QByteArray trExtendsClass() = 0;
    virtual QByteArray trClassMethods() = 0;

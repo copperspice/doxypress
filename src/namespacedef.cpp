@@ -224,11 +224,9 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
          break;
 
       default:
-         err("NamespaceDef::insertMembers(): "
-             "member `%s' with class scope `%s' inserted in namespace scope `%s'!\n",
-             md->name().data(),
-             md->getClassDef() ? md->getClassDef()->name().data() : "",
-             name().data());
+         err("NamespaceDef::insertMembers(): member %s with class scope %s inserted in namespace scope `%s'\n",
+             md->name().constData(), md->getClassDef() ? md->getClassDef()->name().constData() : "",
+             name().constData());
    }
 }
 
@@ -544,6 +542,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
    addGroupListToTitle(ol, self);
    addNamespaceAttributes(ol);
    endTitle(ol, getOutputFileBase(), displayName());
+
    ol.startContents();
 
    if (Doxy_Globals::searchIndex) {
@@ -553,66 +552,79 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
 
    Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>());
 
-   //---------------------------------------- start flexible part -------------------------------
-
+   // 
    SrcLangExt lang = getLanguage();
   
-   for (auto lde :LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
+   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
+
       switch (lde->kind()) {
          case LayoutDocEntry::BriefDesc:
             writeBriefDescription(ol);
             break;
+
          case LayoutDocEntry::MemberDeclStart:
             startMemberDeclarations(ol);
             break;
+
          case LayoutDocEntry::NamespaceClasses: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeClassDeclarations(ol, ls->title(lang));
          }
          break;
+
          case LayoutDocEntry::NamespaceNestedNamespaces: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeNamespaceDeclarations(ol, ls->title(lang), false);
          }
          break;
+
          case LayoutDocEntry::NamespaceNestedConstantGroups: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeNamespaceDeclarations(ol, ls->title(lang), true);
          }
          break;
+
          case LayoutDocEntry::MemberGroups:
             writeMemberGroups(ol);
             break;
+
          case LayoutDocEntry::MemberDecl: {
             LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
             writeMemberDeclarations(ol, lmd->type, lmd->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberDeclEnd:
             endMemberDeclarations(ol);
             break;
+
          case LayoutDocEntry::DetailedDesc: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeDetailedDescription(ol, ls->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberDefStart:
             startMemberDocumentation(ol);
             break;
          case LayoutDocEntry::NamespaceInlineClasses:
             writeInlineClasses(ol);
             break;
+
          case LayoutDocEntry::MemberDef: {
             LayoutDocEntryMemberDef *lmd = (LayoutDocEntryMemberDef *)lde;
             writeMemberDocumentation(ol, lmd->type, lmd->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberDefEnd:
             endMemberDocumentation(ol);
             break;
+
          case LayoutDocEntry::AuthorSection:
             writeAuthorSection(ol);
             break;
+
          case LayoutDocEntry::ClassIncludes:
          case LayoutDocEntry::ClassInheritanceGraph:
          case LayoutDocEntry::ClassNestedClasses:
@@ -644,8 +656,6 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
             break;
       }
    }
-
-   //---------------------------------------- end flexible part -------------------------------
 
    ol.endContents();
 
@@ -973,8 +983,7 @@ QSharedPointer<MemberList> NamespaceDef::createMemberList(MemberListType lt)
 void NamespaceDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 {  
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
-
-   QSharedPointer<MemberList> ml = createMemberList(lt);
+   QSharedPointer<MemberList> ml     = createMemberList(lt);
 
    static bool sortBriefDocs  = Config::getBool("sort-brief-docs");
    static bool sortMemberDocs = Config::getBool("sort-member-docs");
@@ -983,12 +992,15 @@ void NamespaceDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> 
 
    if (sortBriefDocs && (ml->listType() & MemberListType_declarationLists)) {
       isSorted = true;
+
    } else if (sortMemberDocs && (ml->listType() & MemberListType_documentationLists)) {
       isSorted = true;
+
    }
 
    if (isSorted) {
       ml->inSort(md);
+
    } else {
       ml->append(md);
    }
@@ -1001,6 +1013,7 @@ void NamespaceDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> 
 QSharedPointer<MemberList> NamespaceDef::getMemberList(MemberListType lt) const
 {
    for (auto ml : m_memberLists) {
+
       if (ml->listType() == lt) {
          return ml;
       }
@@ -1012,7 +1025,7 @@ QSharedPointer<MemberList> NamespaceDef::getMemberList(MemberListType lt) const
 void NamespaceDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title)
 {
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
-   QSharedPointer<MemberList> ml = getMemberList(lt);
+   QSharedPointer<MemberList> ml     = getMemberList(lt);
 
    if (ml) {
       ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), self, QSharedPointer<FileDef>(), QSharedPointer<GroupDef>(), title, 0);
@@ -1045,8 +1058,8 @@ bool NamespaceDef::isLinkableInProject() const
       return true;
    }
 
-   return !name().isEmpty() && name().at(i) != '@' &&  (hasDocumentation() || getLanguage() == SrcLangExt_CSharp) && 
-          !isReference() && !isHidden() && ! isArtificial();      
+   return ! name().isEmpty() && name().at(i) != '@' &&  (hasDocumentation() || getLanguage() == SrcLangExt_CSharp) && 
+          ! isReference() && !isHidden() && ! isArtificial();      
 }
 
 bool NamespaceDef::isLinkable() const

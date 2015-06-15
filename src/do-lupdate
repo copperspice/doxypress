@@ -1,4 +1,4 @@
-# leave obsolete
+# to remove obsolete   -no-obsolete 
 
 ../deploy/lupdate  translator_cs.h -ts ../resources/translation/doxy_en.ts  \
  ../resources/translation/doxy_af.ts  \

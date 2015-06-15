@@ -12,13 +12,13 @@
 *                                                                         
 *************************************************************************/
 
-#ifndef TEST_NAMESPACE_H
-#define TEST_NAMESPACE_H
+#ifndef MYSPACE_H
+#define MYSPACE_H
 
 #include "QString.h"
 class QTextCodec;
 
-class Test
+class MySpace
 {
 
  public:  
