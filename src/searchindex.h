@@ -101,7 +101,7 @@ class SearchIndex : public SearchIndexIntf
  private:
    void addWord(const QString &word, bool hiPrio, bool recurse);
 
-   QHash<QString, IndexWord *>  m_words;         // merge these two containers (broom, hold)
+   QHash<QString, IndexWord *>  m_words;         // merge these two containers (broom -- on hold)
    QVector<QList<IndexWord *>>  m_index;
 
    QHash<QString,int> m_url2IdMap;

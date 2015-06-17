@@ -25974,13 +25974,13 @@ class Scope
    QStringList useNames;                        //!< contains names of used modules
    QHash<QString, void *> localVars;            //!< contains names of local variables
 
-   Scope() {}      // BroomCS - localVars should be case insensitive
+   Scope() {}      // broom -- on hold localVars should be case insensitive
 };
 
-static QByteArray  docBlock;                   //!< contents of all lines of a documentation block
-static QByteArray  currentModule = 0;          //!< name of the current enclosing module
-static UseSDict  *useMembers = new UseSDict;   //!< info about used modules
-static UseEntry  *useEntry = 0;                //!< current use statement info
+static QByteArray  docBlock;                     //!< contents of all lines of a documentation block
+static QByteArray  currentModule = 0;            //!< name of the current enclosing module
+static UseSDict    *useMembers = new UseSDict;   //!< info about used modules
+static UseEntry    *useEntry = 0;                //!< current use statement info
 static QList<Scope *> scopeStack;
 
 // static QStringList *currentUseNames= new QStringList; //! contains names of used modules of current program unit

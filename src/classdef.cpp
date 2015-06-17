@@ -641,10 +641,8 @@ void ClassDef::setIncludeFile(QSharedPointer<FileDef> fd, const char *includeNam
 //  return 0;
 //}
 
-static void searchTemplateSpecs(/*in*/  QSharedPointer<Definition> d,
-                                /*out*/ QList<ArgumentList> &result,
-                                /*out*/ QByteArray &name,
-                                /*in*/  SrcLangExt lang)
+static void searchTemplateSpecs(QSharedPointer<Definition> d, QList<ArgumentList> &result,
+                                QByteArray &name, SrcLangExt lang)
 {
    if (d->definitionType() == Definition::TypeClass) {
 
@@ -1324,7 +1322,7 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
    }
 
    QByteArray idStr = id();
-   if (!idStr.isEmpty()) {
+   if (! idStr.isEmpty()) {
       tagFile << "    <clangid>" << convertToXML(idStr) << "</clangid>" << endl;
    }
 
@@ -1840,11 +1838,21 @@ QByteArray ClassDef::title() const
       if (Config::getBool("hide-compound-ref")) {
          pageTitle = displayName().toUtf8();
 
-      } else {
-         pageTitle = theTranslator->trCompoundReference(qPrintable(displayName()),
-                     m_compType == Interface && getLanguage() == SrcLangExt_ObjC ? Class : m_compType, ! m_tempArgs.isEmpty() );
+      } else {         
+         ClassDef::CompoundType compType;
+    
+         if (m_compType == Interface && getLanguage() == SrcLangExt_ObjC)  { 
+            compType = ClassDef::Class;
+
+         } else  { 
+            compType = m_compType;
+
+         } 
+
+         pageTitle = theTranslator->trCompoundReference(qPrintable(displayName()), compType, ! m_tempArgs.isEmpty() );
       }
    }
+
    return pageTitle;
 }
 
@@ -2293,7 +2301,7 @@ void ClassDef::setTemplateArguments(ArgumentList *al)
    }
 }
 
-/*! Returns \c true iff this class or a class inheriting from this class
+/*! Returns \c true if this class or a class inheriting from this class
  *  is \e not defined in an external tag file.
  */
 bool ClassDef::hasNonReferenceSuperClass()
@@ -3813,6 +3821,7 @@ ArgumentList *ClassDef::templateArguments()
 {
    if (m_tempArgs.isEmpty())  {
       return 0;
+
    } else { 
       return &m_tempArgs;
    }

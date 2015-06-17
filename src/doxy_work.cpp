@@ -198,7 +198,7 @@ static STLInfo g_stlinfo[] = {
 
 namespace Doxy_Work{
 
-   // BROOM - fake ginger
+   // broom -- on hold, test ginger
    void do_fake_ginger(QSharedPointer<EntryNav> rootNav);
 
    void addClassToContext(QSharedPointer<EntryNav> rootNav);
@@ -663,7 +663,7 @@ void processFiles()
    Doxy_Globals::g_stats.end();
 
 
-   // BROOM - fake ginger class
+   // broom -- on hold, test ginger
    do_fake_ginger(rootNav);
 
 
@@ -1242,31 +1242,31 @@ void generateOutput()
 }
 
 // ** other
-ArgumentList getTemplateArgumentsFromName( const QByteArray &name, const QList<ArgumentList> *tArgLists)
+ArgumentList getTemplateArgumentsFromName(const QByteArray &name, const QList<ArgumentList> *tArgLists)
 {
    ArgumentList retval = ArgumentList();
 
    if (! tArgLists) {
       return retval;
    }
- 
+
    // for each scope fragment, check if it is a template and advance through the list if so.
-   int k;
+   int index;
    int p = 0;
 
    auto item = tArgLists->begin();
 
    while (true) {
-      k = name.indexOf("::", p);
+      index = name.indexOf("::", p);
 
-      if (k == -1) {
+      if (index == -1) { 
          break;
       }
        
-      QSharedPointer<NamespaceDef> nd (Doxy_Globals::namespaceSDict->find(name.left(k)));
+      QSharedPointer<NamespaceDef> nd (Doxy_Globals::namespaceSDict->find(name.left(index)));
 
-      if (! nd) {
-         QSharedPointer<ClassDef> cd = getClass(name.left(k));
+      if (nd == nullptr) {
+         QSharedPointer<ClassDef> cd = getClass(name.left(index));
 
          if (cd) {
             if (cd->templateArguments()) {
@@ -1279,7 +1279,7 @@ ArgumentList getTemplateArgumentsFromName( const QByteArray &name, const QList<A
          }
       }
 
-      p = k + 2;
+      p = index + 2;
    }
 
    if (item != tArgLists->end()) {
@@ -2124,9 +2124,11 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
          cd->setBodyDef(fd);
       }
 
-      if (cd->templateArguments() == 0 || (cd->isForwardDeclared() && (root->m_specFlags.spec & Entry::ForwardDecl) == 0)) {
-         // this happens if a template class declared with @class is found
-         // before the actual definition or if a forward declaration has different template parameter names
+      if (root->tArgLists != nullptr && 
+                  (cd->templateArguments() == 0 || (cd->isForwardDeclared() && (root->m_specFlags.spec & Entry::ForwardDecl) == 0)) ) {
+
+         // happens if a template class is declared before the actual definition or 
+         // if a forward declaration has different template parameter names
 
          ArgumentList tArgList = getTemplateArgumentsFromName(cd->name(), root->tArgLists);
          cd->setTemplateArguments(&tArgList);
@@ -2188,7 +2190,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
       cd->setClassSpecifier(root->m_specFlags);
 
       cd->setTypeConstraints(&root->typeConstr);
-      cd->setTemplateArguments(&tArgList);     
+      cd->setTemplateArguments(&tArgList);   
 
       cd->setProtection(root->protection); 
       cd->setIsStatic(root->stat);
@@ -3906,7 +3908,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointe
 /*  clang testing
 if (name.contains("fake") || name.contains("isChopped")) {
 
-   printf("\n BROOM  ----->  AddMethodToClass --> %s  <--", name.constData() );  
+   printf("\n broom -- on hold,  AddMethodToClass --> %s  <--", name.constData() );  
    printf("\n      Type: %s", root->type.constData() );
    printf("\n      Args: %s", root->args.constData() );  
 
@@ -4874,7 +4876,7 @@ void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
 
       if (templateNames == 0) {
          templateNames = getTemplateArgumentsInName(formalArgs, bi.name);
-         delTempNames = true;
+         delTempNames  = true;
       }
 
       BaseInfo tbi(bi.name, bi.prot, bi.virt);
@@ -5485,7 +5487,6 @@ void Doxy_Work::findInheritedTemplateInstances()
 
       if (cd = getClass(bName)) {
          rootNav->loadEntry(Doxy_Globals::g_storage);
-
          findBaseClassesForClass(rootNav, cd, cd, cd, TemplateInstances, false);
          rootNav->releaseEntry();
       }
@@ -9229,7 +9230,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
    if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {   
       fd->getAllIncludeFilesRecursively(includedFiles);
 
-      // Broom -- change this to use clang and not lex
+      // broom -- on hold, change this to use clang and not lex
       
       // use language parser to parse the file  
       parser->parseInput(fileName, convBuf.data(), root, mode, includedFiles, true);

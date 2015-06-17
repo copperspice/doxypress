@@ -70,7 +70,7 @@ bool Config::parseConfig(const QString &fName)
       return false;
    }
 
-   // not used at this time (broom, hold)
+   // not used at this time
    // Config::instance()->substituteEnvironmentVars();         
 
    initWarningFormat();   

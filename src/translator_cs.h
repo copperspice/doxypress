@@ -571,7 +571,6 @@ class Translator_Cs : public Translator
       
       switch (compType) {
          case ClassDef::Class:            
-
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Class Template Reference").arg(clName).toUtf8();
             } else {
@@ -580,7 +579,6 @@ class Translator_Cs : public Translator
             break;
 
          case ClassDef::Struct:
-
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Struct Template Reference").arg(clName).toUtf8();
             } else {
@@ -589,7 +587,6 @@ class Translator_Cs : public Translator
             break;
 
          case ClassDef::Union:
-
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Union Template Reference").arg(clName).toUtf8();
             } else {

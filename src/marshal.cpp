@@ -205,7 +205,7 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalQByteArray(s, e->args);
    marshalQByteArray(s, e->bitfields);
 
-   marshalArgumentList(s, e->argList);
+   marshalArgumentList(s,  e->argList);
    marshalArgumentLists(s, e->tArgLists);
 
    marshalQString(s, e->program);
@@ -338,14 +338,13 @@ QList<ArgumentList> *unmarshalArgumentLists(StorageIntf *s)
       return 0; 
    }
 
-   QList<ArgumentList> *result = new QList<ArgumentList>;
-   
+   QList<ArgumentList> *result = new QList<ArgumentList>;  
    assert(count < 1000000);
    
-   for (i = 0; i < count; i++) {
+   for (i = 0; i < count; i++) { 
       result->append(*unmarshalArgumentList(s));
    }
-
+ 
    return result;
 }
 
@@ -515,7 +514,7 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->bitfields        = unmarshalQByteArray(s);
   
    e->argList          = *unmarshalArgumentList(s);      // CopperSpice - check for memory leak
-   e->tArgLists        = unmarshalArgumentLists(s);
+   e->tArgLists        = unmarshalArgumentLists(s);     
 
    e->program          = unmarshalQByteArray(s);
    e->initializer      = unmarshalQByteArray(s);

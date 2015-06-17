@@ -953,7 +953,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    t << "        <name>" << convertToXML(md->name()) << "</name>" << endl;
 
 
-// BROOM - update here 
+// broom -- on hold
 
    if (md->memberType() == MemberType_Property) {
       if (md->isReadable()) {

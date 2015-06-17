@@ -42,7 +42,7 @@ bool Htags::execute(const QString &htmldir)
    static bool quiet    = Config::getBool("quiet");
    static bool warnings = Config::getBool("warnings");
 
-   static QByteArray htagsOptions  = "";       // Config::getString("htags-options");     // (BroomCS) 
+   static QByteArray htagsOptions  = "";       // Config::getString("htags-options");
 
    static QString projectName   = Config::getString("project-name");
    static QString projectNumber = Config::getString("project-version");

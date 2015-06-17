@@ -649,14 +649,14 @@ static void reSortNodes(QList<FTVNode *> &nodeList)
    for (auto item : nodeList) {     
 
 
-/*  BROOM - Hold for sort test
+/*  broom -- on hold, sort test
 if  (item->file.contains("getting-started")) {
 
 //    (item->file.contains("build-from-source") || item->file.contains("build-options") || item->file.contains("requirements-") ||
 //    item->file.contains("implicit") || item->file.contains("unicode") ||
 //    item->file.contains("main-dev") || item->file.contains("sample-project") || item->file.contains("faq") ) {
      
-      printf("\n  BroomCS  File: %-20s   Name: %-20s   Alpha: %-3d", item->file.constData(), item->name.constData(), item->index );
+      printf("\n  file: %-20s   Name: %-20s   Alpha: %-3d", item->file.constData(), item->name.constData(), item->index );
 
       if (item->def) {         
          printf("  Our OrderId: %-3d",  item->def->getInputOrderId() );  

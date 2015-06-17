@@ -1,0 +1,88 @@
+/*************************************************************************
+*                                                                         
+* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim              
+* Copyright (C) 2014 Digia Plc                                            
+* All rights reserved.                                                    
+*                                                                         
+*                                                                         
+* GNU Free Documentation License                                          
+* This file may be used under the terms of the GNU Free Documentation     
+* License version 1.3 as published by the Free Software Foundation        
+* and appearing in the file included in the packaging of this file.       
+*                                                                         
+*                                                                         
+*************************************************************************/
+
+/* test code to force a foward declaration  */
+template <class Key456, class T456> class QMap;
+
+
+/*!
+\class QMap
+\brief The QMap class is a template class that provides a skip-list-based dictionary. 
+
+The %QMap class is a template class that provides a skip-list-based dictionary.
+
+QMap&lt;Key, T&gt; is one of of the generic container classes. It stores (key, value) pairs and provides fast lookup of the value associated with a key.
+
+%QMap and %QHash provide very similar functionality. The differences are:
+
+<ul>
+   <li>QHash provides faster lookups than %QMap.</li>
+   <li>When iterating over a QHash the items are arbitrarily ordered. The %QMap items are always sorted by key.</li>
+   <li>The key type of a QHash must provide operator==() and a global qHash(Key) function. The key type of a %QMap must provide operator&lt;() specifying a total order.</li>
+</ul>
+
+Here is an example of QMap with QString keys and int> values:
+
+\code
+    QMap<QString, int> map;
+\endcode
+
+To insert a (key, value) pair into the map, you can use operator[]():
+
+\code
+    map["one"]   = 1;
+    map["three"] = 3;
+    map["seven"] = 7;
+\endcode
+
+
+*/
+
+
+/*!
+\fn QMap::QMap ()
+
+Constructs an empty map.
+
+<b>See also </b>clear().
+
+
+*/
+
+
+/*!
+\fn QMap::QMap ( const QMap<Key, T> & other )
+
+Constructs a copy of <i>other</i>.
+
+This operation occurs in constant time, because QMap is implicitly shared. This makes returning a QMap from a function very fast. If a shared instance is modified, it will be copied (copy-on-write), and this takes linear time.
+
+<b>See also </b>operator=().
+
+
+*/
+
+
+/*!
+\fn QMap::~QMap ()
+
+Destroys the map. References to the values in the map, and all iterators over this map, become invalid.
+
+
+*/
+
+
+
+

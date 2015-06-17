@@ -230,15 +230,16 @@ void HtmlDocVisitor::visit(DocURL *u)
       m_t << "</a>";
 
 
-printf("BROOM  Email Addr (no mailto)  %s \n", url.constData() );
+// broom -- on hold
+// printf("(broom) Email Addr (no mailto)  %s \n", url.constData() );
 
 
    } else { 
       // web address defined with no <a>
 
-
-QByteArray url = u->url();
-printf("BROOM URL in plain text: %s\n", url.constData() );
+// broom -- on hold,
+// QByteArray url = u->url();
+// printf("(broom) URL in plain text: %s\n", url.constData() );
 
 
       m_t << "<a href=\"" << u->url() << "\">";

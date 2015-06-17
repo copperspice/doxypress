@@ -335,7 +335,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          break;
 
       case MemberType_Signal:
-         if (md->protection() == Public) {               // (md->protection().isEmpty() ||    BROOM-ansel
+         if (md->protection() == Public) { 
             if (! docOnly) {
                addMemberToList(MemberListType_decPubSignalMembers, md);
             }   

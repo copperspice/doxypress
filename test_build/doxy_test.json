@@ -48,9 +48,9 @@
     "disable-index": false,
     "docbook-output": "docbook",
     "docbook-program-listing": false,
-    "docset-bundle-id": "org.doxygen.Project",
-    "docset-feedname": "Doxygen generated docs",
-    "docset-publisher-id": "org.doxygen.Publisher",
+    "docset-bundle-id": "org.doxypress.Project",
+    "docset-feedname": "DoxyPress generated docs",
+    "docset-publisher-id": "org.doxypress.Publisher",
     "docset-publisher-name": "Publisher",
     "dot-call": false,
     "dot-called-by": false,
@@ -74,7 +74,7 @@
     "dot-path": "",
     "dot-transparent": false,
     "duplicate-docs": false,
-    "eclipse-doc-id": "org.doxygen.Project",
+    "eclipse-doc-id": "org.doxypress.Project",
     "enable-preprocessing": true,
     "enabled-sections": [
         ""
@@ -267,16 +267,16 @@
         "Q_OUTOFLINE_TEMPLATE=",
         "CORE_CS_ENUM=CS_ENUM"
     ],
-    "project-brief": "Sample files to test DoxyPress",
+    "project-brief": "Sample files to test the functionality of DoxyPress",
     "project-logo": "images/cslogo-32.png",
     "project-name": "DoxyPress Test Suite",
-    "project-version": "1.0.0",
+    "project-version": "1.0.1",
     "qch-file": "",
     "qhp-cust-attrib": [
         ""
     ],
     "qhp-cust-filter-name": "",
-    "qhp-namespace": "org.doxygen.Project",
+    "qhp-namespace": "org.doxypress.Project",
     "qhp-sect-attrib": [
         ""
     ],

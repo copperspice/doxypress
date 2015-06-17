@@ -1853,7 +1853,7 @@ bool MemberDef::isDetailedSectionLinkable() const
 
    // the member has details documentation for any of the following reasons
 
-   // modify poorly formated code  (broom, resolve soon) 
+   // modify poorly formated code  (broom -- on hold,) 
    bool docFilter = extractAll ||  ! documentation().isEmpty() ||  ! inbodyDocumentation().isEmpty() ||
                   (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) ||
                   (m_impl->mtype == MemberType_EnumValue && !briefDescription().isEmpty()) ||

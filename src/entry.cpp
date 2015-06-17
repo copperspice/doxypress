@@ -381,6 +381,6 @@ void EntryNav::releaseEntry()
 
 void EntryNav::setEntry(QSharedPointer<Entry> e)
 {
-   m_info = e;  
+   m_info   = e;  
    m_noLoad = true;
 }

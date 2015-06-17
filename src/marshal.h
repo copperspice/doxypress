@@ -37,17 +37,18 @@ struct ListItemInfo;
 
 #define NULL_LIST 0xffffffff
 
-void marshalInt(StorageIntf *s,         int v);
-void marshalUInt(StorageIntf *s,        uint v);
-void marshalUInt64(StorageIntf *s,      uint64_t v);
-void marshalBool(StorageIntf *s,        bool b);
-void marshalObjPointer(StorageIntf *s,  void *obj);
+void marshalInt(StorageIntf *s,             int v);
+void marshalUInt(StorageIntf *s,            uint v);
+void marshalUInt64(StorageIntf *s,          uint64_t v);
+void marshalBool(StorageIntf *s,            bool b);
+void marshalObjPointer(StorageIntf *s,      void *obj);
 
 void marshalQByteArray(StorageIntf *s,      const QByteArray &str);
 void marshalQString(StorageIntf *s,         const QString &str);
 
 void marshalArgumentList(StorageIntf *s,    ArgumentList argList);
-void marshalArgumentLists(StorageIntf *s,   QList<ArgumentList> *argLists);
+void marshalArgumentLists(StorageIntf *s,   QList<ArgumentList> *argLists)'
+
 void marshalBaseInfoList(StorageIntf *s,    QList<BaseInfo> *baseList);
 void marshalGroupingList(StorageIntf *s,    QList<Grouping> *groups);
 
@@ -58,8 +59,6 @@ void marshalBriefInfo(StorageIntf *s,       BriefInfo *briefInfo);
 void marshalEntry(StorageIntf *s,           QSharedPointer<Entry> e);
 void marshalEntryTree(StorageIntf *s,       QSharedPointer<Entry> e);
 
-
-// ** unmarshaling functions
 int                  unmarshalInt(StorageIntf *s);
 uint                 unmarshalUInt(StorageIntf *s);
 uint64_t             unmarshalUInt64(StorageIntf *s);
@@ -70,8 +69,8 @@ QByteArray           unmarshalQByteArray(StorageIntf *s);
 QByteArray           unmarshalQGString(StorageIntf *s);
 
 ArgumentList        *unmarshalArgumentList(StorageIntf *s);
-
 QList<ArgumentList> *unmarshalArgumentLists(StorageIntf *s);
+
 QList<BaseInfo>      unmarshalBaseInfoList(StorageIntf *s);
 QList<Grouping>     *unmarshalGroupingList(StorageIntf *s);
 QList<SectionInfo>  *unmarshalSectionInfoList(StorageIntf *s);

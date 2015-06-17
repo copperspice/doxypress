@@ -159,8 +159,6 @@ Construct a list from the std::initializer_list specified by <i>args</i>.
 
 This constructor is only enabled if the compiler supports C++0x
 
-This function was introduced in Qt 4.8.
-
 
 */
 
