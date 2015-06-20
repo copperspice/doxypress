@@ -202,11 +202,14 @@ void MemberList::countDocMembers(bool countEnumValues)
    if (m_numDocMembers != -1) {
       return;   // used cached value
    }
+
    m_numDocMembers = 0;
   
    for (auto md : *this) {
-      if (md->isDetailedSectionVisible(m_inGroup, m_inFile)) {
+
+      if (md->isDetailedSectionVisible(m_inGroup, m_inFile)) {       
          // do not count enum values, since they do not produce entries of their own
+
          if (countEnumValues || md->memberType() != MemberType_EnumValue) {
             m_numDocMembers++;
          }

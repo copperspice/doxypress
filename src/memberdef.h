@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim documentation().
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -276,7 +276,7 @@ class MemberDef : public Definition
 
    const ArgumentList *typeConstraints() const;
 
-   // overrules
+   //
    QByteArray documentation() const;
    QByteArray briefDescription(bool abbr = false) const;
    QByteArray fieldType() const;

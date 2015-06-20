@@ -15,7 +15,7 @@
  *
 *************************************************************************/
 
-#include <QApplication>
+#include <QCoreApplication>
 #include <QByteArray>
 #include <QTranslator>
 
@@ -45,9 +45,8 @@ int main(int argc, char **argv)
    readConfiguration(cmdArgs);    
    initDoxyPress(); 
 
-   // set up for translations                     BROOM - fix when cs issue is resolved
-   // QCoreApplication myApp(argc, argv);         
-   QApplication myApp(argc, argv);  
+   // set up for translations
+   QCoreApplication myApp(argc, argv);   
    loadTranslationFile();
     
    processFiles();

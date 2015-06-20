@@ -1,0 +1,147 @@
+/*************************************************************************
+*                                                                         
+* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim                                                       
+* All rights reserved.                                                    
+*                                                                         
+*                                                                         
+* GNU Free Documentation License                                          
+* This file may be used under the terms of the GNU Free Documentation     
+* License version 1.3 as published by the Free Software Foundation        
+* and appearing in the file included in the packaging of this file.       
+*                                                                         
+*                                                                         
+*************************************************************************/
+
+/*!
+\class MySpace
+
+\brief This namespace contains miscellaneous identifiers used throughout the library. 
+
+MySpace is a namespace which contains miscellaneous identifiers used throughout other libraries.
+
+*/
+
+
+
+/*!
+\fn QString MySpace::convertFromPlainText ( const QString & plain, WhiteSpaceMode mode = WhiteSpacePre )
+
+Converts the plain text string <i>plain</i> to an HTML-formatted paragraph while preserving most of its look.
+
+<i>mode</i> defines how whitespace is handled.
+
+This function is defined in the <tt>&lt;QTextDocument&gt;</tt> header file.
+
+<b>See also </b>escape() and mightBeRichText().
+
+*/
+
+
+/*!
+\fn QString MySpace::escape ( const QString & plain )
+
+Converts the plain text string <i>plain</i> to a HTML string with HTML metacharacters <tt>&lt;</tt>, <tt>&gt;</tt>, <tt>&amp;</tt>,
+and <tt>&quot;</tt> replaced by HTML entities.
+
+Example:
+
+\code
+    QString plain = "#include <QtCore>"
+    QString html = Qt::escape(plain);
+    // html == "#include &<QtCore&amp>"
+\endcode
+
+This function is defined in the <tt>&lt;QTextDocument&gt;</tt> header file.
+
+<b>See also </b>convertFromPlainText() and mightBeRichText().
+
+*/
+
+
+/*!
+\fn bool MySpace::mightBeRichText ( const QString & text )
+
+Returns true if the string <i>text</i> is likely to be rich text; otherwise returns false.
+
+This function uses a fast and therefore simple heuristic. It mainly checks whether there is something that looks like a tag before the first
+line break. Although the result may be correct for common cases, there is no guarantee.
+
+This function is defined in the <tt>&lt;QTextDocument&gt;</tt> header file.
+
+*/
+
+
+
+/**
+\typedef MySpace::Alignment
+
+Refer to Test::AlignmentFlag for documentation.
+
+*/
+
+
+/**
+\enum  MySpace::AlignmentFlag
+
+This enum type is used to describe alignment. It contains horizontal and vertical flags that can be combined to produce the required effect.
+
+The Test::TextElideMode enum can also be used in many situations to fine-tune the appearance of aligned text.
+
+*/
+
+
+/**
+\enum  MySpace::ArrowType
+
+Arrow type:
+
+<table class="generic">
+   <tr><th>Constant</th><th>Value</th></tr>
+   <tr>
+      <td><tt>Test::NoArrow</tt></td>
+      <td><tt>0</tt></td></tr>
+   <tr>
+      <td><tt>Test::UpArrow</tt></td>
+      <td><tt>1</tt></td></tr>
+   <tr>
+      <td><tt>Test::DownArrow</tt></td>
+      <td><tt>2</tt></td></tr>
+   <tr>
+      <td><tt>Test::LeftArrow</tt></td>
+      <td><tt>3</tt></td></tr>
+   <tr>
+      <td><tt>Test::RightArrow</tt></td>
+      <td><tt>4</tt></td></tr>
+</table>
+
+*/
+
+/**
+\enum  MySpace::BGMode
+
+Background mode:
+
+<table class="generic"><tr>
+   <th >Constant</th><th>Value</th></tr>
+   <tr>
+      <td><tt>Test::TransparentMode</tt></td>
+      <td><tt>0</tt></td></tr>
+   <tr>
+      <td><tt>Test::OpaqueMode</tt></td>
+      <td><tt>1</tt></td></tr>
+</table>
+
+*/
+
+
+/*!
+\typedef MySpace::HANDLE
+
+Platform-specific handle type for system objects. This is equivalent to <tt>void *</tt> on Mac OS X and embedded Linux, and to
+<tt>unsigned long</tt> on X11. On Windows it is the DWORD returned by the Win32 function getCurrentThreadId().
+
+<b>Warning:</b> Using this type is not portable.
+
+*/
+
+

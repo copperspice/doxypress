@@ -3276,7 +3276,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
       nd->insertMember(md);
    }
 
-   // add member to the file we do this even if we have already inserted it into the namespace.
+   // add member to the file, this is done even if already inserted it into the namespace
    if (fd) {
       md->setFileDef(fd);
       fd->insertMember(md);
@@ -3905,10 +3905,10 @@ void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointe
       name = name.right(name.length() - 2);
    }
 
-/*  clang testing
+/*  Broom, clang testing
 if (name.contains("fake") || name.contains("isChopped")) {
 
-   printf("\n broom -- on hold,  AddMethodToClass --> %s  <--", name.constData() );  
+   printf("\n AddMethodToClass --> %s  <--", name.constData() );  
    printf("\n      Type: %s", root->type.constData() );
    printf("\n      Args: %s", root->args.constData() );  
 
@@ -4371,8 +4371,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
                }
 
                if (fd) {
-                  // add member to the file (we do this even if we have already
-                  // inserted it into the namespace)
+                  // add member to the file, done even if we have already inserted it into the namespace
                   md->setFileDef(fd);
                   fd->insertMember(md);
                }
@@ -4398,7 +4397,6 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
                
                   rootNav->changeSection(Entry::EMPTY_SEC); 
                   // Otherwise we have finished with this entry
-
                }
 
             } else {
@@ -7369,7 +7367,7 @@ void Doxy_Work::findObjCMethodDefinitions(QSharedPointer<EntryNav> rootNav)
    }
 }
 
-// find and add the enumeration to their classes, namespaces or files
+// find and add the enumeration to their classes, namespaces, or files
 void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::ENUM_SEC) {
@@ -7384,7 +7382,7 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
       MemberNameSDict *mnsd = 0;
 
       bool isGlobal;
-      bool isRelated = false;
+      bool isRelated  = false;
       bool isMemberOf = false;
 
       int i;
@@ -7421,7 +7419,7 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
          name = root->name;
       }
 
-      if (!root->relates.isEmpty()) {
+      if (! root->relates.isEmpty()) {
          // related member, prefix user specified scope
 
          isRelated = true;
@@ -7439,16 +7437,22 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
          }
       }
 
-      if (cd && ! name.isEmpty()) { // found a enum inside a compound        
+      if (cd && ! name.isEmpty()) { 
+         // found a enum inside a compound        
+
          fd   = QSharedPointer<FileDef>();
          mnsd = Doxy_Globals::memberNameSDict;
          isGlobal = false;
 
-      } else if (nd && !nd->name().isEmpty() && nd->name().at(0) != '@') { // found enum inside namespace
+      } else if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') { 
+         // found enum inside namespace
+
          mnsd = Doxy_Globals::functionNameSDict;
          isGlobal = true;
 
-      } else { // found a global enum
+      } else { 
+         // found a global enum
+
          fd = rootNav->fileDef();
          mnsd = Doxy_Globals::functionNameSDict;
          isGlobal = true;
@@ -7466,10 +7470,10 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
          md->setLanguage(root->lang);
          md->setId(root->id);
 
-         if (!isGlobal) {
-            md->setMemberClass(cd);
-         } else {
+         if (isGlobal) {      
             md->setFileDef(fd);
+         } else {
+            md->setMemberClass(cd);            
          }
 
          md->setBodySegment(root->bodyLine, root->endBodyLine);
@@ -7542,12 +7546,13 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
          QSharedPointer<MemberName> mn;
 
          if ((mn = (*mnsd)[name])) {
-            // this is used if the same enum is in multiple namespaces/classes
+            // same enum was found in multiple namespaces/classes
             mn->append(md);
 
          } else {
             // new enum name
             mn = QSharedPointer<MemberName>(new MemberName(name));
+
             mn->append(md);
             mnsd->insert(name, mn);           
          }
@@ -7810,7 +7815,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 // find the documentation blocks for the enumerations
 void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
 {
-   if (rootNav->section() == Entry::ENUMDOC_SEC && !rootNav->name().isEmpty() && rootNav->name().at(0) != '@') {
+   if (rootNav->section() == Entry::ENUMDOC_SEC && ! rootNav->name().isEmpty() && rootNav->name().at(0) != '@') {
       // skip anonymous enums
       rootNav->loadEntry(Doxy_Globals::g_storage);
       QSharedPointer<Entry> root = rootNav->entry();
@@ -7820,7 +7825,7 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
       QByteArray scope;
 
       if ((i = root->name.lastIndexOf("::")) != -1) { // scope is specified as part of the name
-         name = root->name.right(root->name.length() - i - 2); // extract name
+         name  = root->name.right(root->name.length() - i - 2); // extract name
          scope = root->name.left(i); // extract scope
         
       } else { 
@@ -7830,7 +7835,7 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
 
       if (( rootNav->parent()->section() & Entry::SCOPE_MASK ) && !rootNav->parent()->name().isEmpty()) { 
          // found enum docs inside a compound
-         if (!scope.isEmpty()) {
+         if (! scope.isEmpty()) {
             scope.prepend("::");
          }
 
@@ -7839,7 +7844,7 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
 
       QSharedPointer<ClassDef> cd = getClass(scope);
 
-      if (!name.isEmpty()) {
+      if (! name.isEmpty()) {
          bool found = false;
 
          if (cd) {            
@@ -7853,11 +7858,12 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
                   }
 
                   QSharedPointer<ClassDef> cd = md->getClassDef();
+
                   if (cd && cd->name() == className && md->isEnumerate()) {
                      // documentation outside a compound overrides the documentation inside it
                      
                      md->setDocumentation(root->doc, root->docFile, root->docLine);
-                     md->setDocsForDefinition(!root->proto);
+                     md->setDocsForDefinition(! root->proto);
                      
                      // brief descriptions inside a compound override the documentation outside it                     
                      md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
@@ -7887,18 +7893,28 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
                
             }
 
-         } else { // enum outside class            
+         } else { 
+            // enum outside class, most likley in a namaspace            
+
             QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict->find(name);
 
             if (mn) {              
                for (auto md : *mn) {
+
                   if (found) {    
                      break; 
                   }    
 
+                  // ensure our MemberDef is the correct namespce
+                  QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
+
+                  if (nd && nd->name() != scope)  {
+                     continue;
+                  }
+
                   if (md->isEnumerate()) {
                      md->setDocumentation(root->doc, root->docFile, root->docLine);
-                     md->setDocsForDefinition(!root->proto);
+                     md->setDocsForDefinition(! root->proto);
                      md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
                      md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
                      md->addSectionsToDefinition(root->anchors);
@@ -7928,8 +7944,7 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
    RECURSE_ENTRYTREE(findEnumDocumentation, rootNav);
 }
 
-// search for each enum (member or function) in mnl if it has documented
-// enum values.
+// search for each enum (member or function) in mnl if it has documented enum values
 void Doxy_Work::findDEV(const MemberNameSDict &mnsd)
 {
    // for each member name

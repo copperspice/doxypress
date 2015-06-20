@@ -254,15 +254,15 @@ Definition::Definition(const Definition &d)
    m_private  = new Definition_Private;
    *m_private = *d.m_private;
 
-   m_private->sectionDict = 0;
+   m_private->sectionDict     = 0;
    m_private->sourceRefByDict = 0;
-   m_private->sourceRefsDict = 0;
-   m_private->partOfGroups = 0;
-   m_private->xrefListItems = 0;
-   m_private->brief = 0;
-   m_private->details = 0;
-   m_private->body = 0;
-   m_private->inbodyDocs = 0;
+   m_private->sourceRefsDict  = 0;
+   m_private->partOfGroups    = 0;
+   m_private->xrefListItems   = 0;
+   m_private->brief           = 0;
+   m_private->details         = 0;
+   m_private->body            = 0;
+   m_private->inbodyDocs      = 0;
 
    if (d.m_private->sectionDict) {
       m_private->sectionDict = new SectionDict();
@@ -500,38 +500,45 @@ bool Definition::_docsAlreadyAdded(const QByteArray &doc, QByteArray &sigList)
    }
 }
 
-void Definition::_setDocumentation(const char *d, const char *docFile, int docLine,
+void Definition::_setDocumentation(const QByteArray  &tDoc, const QByteArray &docFile, int docLine,
                                    bool stripWhiteSpace, bool atTop)
 {
-   if (d == 0) {
+
+   QByteArray doc = tDoc;
+
+   if (doc.isEmpty()) {
       return;
    }
 
-   QByteArray doc = d;
-
    if (stripWhiteSpace) {
       doc = stripLeadingAndTrailingEmptyLines(doc, docLine);
-   } else { // don't strip whitespace
-      doc = d;
    }
 
-   if (!_docsAlreadyAdded(doc, m_private->docSignatures)) {
+   if (! _docsAlreadyAdded(doc, m_private->docSignatures)) {
      
       if (m_private->details == 0) {
          m_private->details = new DocInfo;
       }
 
-      if (m_private->details->doc.isEmpty()) { // fresh detailed description
+      if (m_private->details->doc.isEmpty()) { 
+         // fresh detailed description
          m_private->details->doc = doc;
-      } else if (atTop) { // another detailed description, append it to the start
+       
+      } else if (atTop) { 
+         // another detailed description, append it to the start
          m_private->details->doc = doc + "\n\n" + m_private->details->doc;
-      } else { // another detailed description, append it to the end
+
+      } else { 
+         // another detailed description, append it to the end
          m_private->details->doc += "\n\n" + doc;
+
       }
 
-      if (docLine != -1) { // store location if valid
+      if (docLine != -1) { 
+         // store location if valid
          m_private->details->file = docFile;
          m_private->details->line = docLine;
+
       } else {
          m_private->details->file = docFile;
          m_private->details->line = 1;
@@ -544,6 +551,7 @@ void Definition::setDocumentation(const char *d, const char *docFile, int docLin
    if (d == 0) {
       return;
    }
+
    _setDocumentation(d, docFile, docLine, stripWhiteSpace, false);
 }
 

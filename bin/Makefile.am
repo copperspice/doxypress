@@ -13,7 +13,7 @@ gcclibs=libgcc_s_sjlj-1  libstdc++-6  libwinpthread-1
 
 
 # list of CopperSpice libraries
-cslibs=Core Xml Gui
+cslibs=Core Xml
 
 # location of includes
 AM_CXXFLAGS+=-I../src

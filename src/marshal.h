@@ -47,7 +47,7 @@ void marshalQByteArray(StorageIntf *s,      const QByteArray &str);
 void marshalQString(StorageIntf *s,         const QString &str);
 
 void marshalArgumentList(StorageIntf *s,    ArgumentList argList);
-void marshalArgumentLists(StorageIntf *s,   QList<ArgumentList> *argLists)'
+void marshalArgumentLists(StorageIntf *s,   QList<ArgumentList> *argLists);
 
 void marshalBaseInfoList(StorageIntf *s,    QList<BaseInfo> *baseList);
 void marshalGroupingList(StorageIntf *s,    QList<Grouping> *groups);

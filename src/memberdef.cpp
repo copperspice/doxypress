@@ -528,8 +528,8 @@ class MemberDefImpl
              Protection p, Specifier v, bool s, Relationship r,
              MemberType mt, const ArgumentList *tal, const ArgumentList *al );
 
-   QSharedPointer<ClassDef> classDef;         // member of or related to
-   QSharedPointer<FileDef>  fileDef;          // member of file definition
+   QSharedPointer<ClassDef>     classDef;     // member of or related to
+   QSharedPointer<FileDef>      fileDef;      // member of file definition
    QSharedPointer<NamespaceDef> nspace;       // the namespace this member is in.
    QSharedPointer<MemberDef>    enumScope;    // the enclosing scope, if this is an enum field
    QSharedPointer<MemberDef>    annEnumType;  // the anonymous enum that is the type of this member
@@ -1284,8 +1284,10 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
 
    if (getClassDef() != 0) {
       cname = getClassDef()->name();
+
    } else if (getNamespaceDef() != 0) {
       cname = getNamespaceDef()->name();
+
    }
 
    QByteArray ltype(m_impl->type); 
@@ -1338,7 +1340,7 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
    return annoClassDef;
 }
 
-/*! This methods returns true iff the brief section (also known as
+/*! This methods returns true if the brief section (also known as
  *  declaration section) is visible in the documentation.
  */
 bool MemberDef::isBriefSectionVisible() const
@@ -1361,8 +1363,7 @@ bool MemberDef::isBriefSectionVisible() const
    // HIDE_UNDOC_MEMBERS is NO in the project file
    bool visibleIfDocumented = (!hideUndocMembers || hasDocs || isDocumentedFriendClass() );
 
-   // hide members with no detailed description and brief descriptions
-   // explicitly disabled.
+   // hide members with no detailed description and brief descriptions explicitly disabled.
    bool visibleIfEnabled = !(hideUndocMembers && documentation().isEmpty() && !briefMemberDesc && !repeatBrief );
 
    // Hide friend (class|struct|union) declarations if HIDE_FRIEND_COMPOUNDS is true
@@ -1844,66 +1845,50 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
 bool MemberDef::isDetailedSectionLinkable() const
 {
-   static bool extractAll        = Config::getBool("extract-all");
-   static bool alwaysDetailedSec = Config::getBool("always-detailed-sec");
-   static bool repeatBrief       = Config::getBool("repeat-brief");
-   static bool briefMemberDesc   = Config::getBool("brief-member-desc");
-   static bool hideUndocMembers  = Config::getBool("hide-undoc-members");
-   static bool extractStatic     = Config::getBool("extract-static");
+   static const bool extractAll         = Config::getBool("extract-all");
+   static const bool extractStatic      = Config::getBool("extract-static");
+   static const bool alwaysDetailedSec  = Config::getBool("always-detailed-sec");
+   static const bool repeatBrief        = Config::getBool("repeat-brief");
+   static const bool briefMemberDesc    = Config::getBool("brief-member-desc");
+   static const bool hideUndocMembers   = Config::getBool("hide-undoc-members");   
+   static const bool hideFriendCompound = Config::getBool("hide-friend-compounds");
 
-   // the member has details documentation for any of the following reasons
+   // the member has details documentation for any of the following reasons   
 
-   // modify poorly formated code  (broom -- on hold,) 
-   bool docFilter = extractAll ||  ! documentation().isEmpty() ||  ! inbodyDocumentation().isEmpty() ||
-                  (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) ||
-                  (m_impl->mtype == MemberType_EnumValue && !briefDescription().isEmpty()) ||
-   
+   bool docFilter = ( extractAll || ! documentation().isEmpty() || ! inbodyDocumentation().isEmpty() );
 
-      // treat everything as documented
-      // has detailed docs    
-      // has inbody docs 
-      // is an enum with values that are documented
+   docFilter = ( docFilter ||  (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) );
+   docFilter = ( docFilter ||  (m_impl->mtype == MemberType_EnumValue && ! briefDescription().isEmpty() ) );
 
-      // is documented enum value
-      
-      // has brief description that is part of the detailed description
-      (! briefDescription().isEmpty() &&           // has brief docs
-       (alwaysDetailedSec &&                      // they are visible in
-        (repeatBrief ||                           // detailed section or
-         !briefMemberDesc                         // they are explicitly not
-        )                                         // shown in brief section
-       )
-      ) ||
+   // has brief docs, visible in detailed section or they are explicitly not shown in brief section
+   bool temp_a = (! briefDescription().isEmpty() && (alwaysDetailedSec && (repeatBrief || ! briefMemberDesc) ) ); 
+   bool temp_b = (hasMultiLineInitializer() && ! hideUndocMembers);
 
-      // has a multi-line initialization block
-      //(initLine s> 0 && initLines < maxInitLines) ||
-      (hasMultiLineInitializer() && !hideUndocMembers) ||
+   // has one or more documented arguments
+   bool temp_c = ( m_impl->defArgList != 0 && m_impl->defArgList->hasDocumentation() );
 
-      // has one or more documented arguments
-      (m_impl->defArgList != 0 && m_impl->defArgList->hasDocumentation()) ||
+   // is an attribute or property - need to display tag
+   bool temp_d = (m_impl->memSpec.spec & (Entry::Attribute | Entry::Property)); 
 
-      // is an attribute or property - need to display tag
-      (m_impl->memSpec.spec & (Entry::Attribute | Entry::Property)) || Doxy_Globals::userComments;
+   docFilter = ( docFilter || temp_a || temp_b || temp_c || temp_d ||  Doxy_Globals::userComments); 
+  
 
+   // not a global static or global statics should be extracted
+   bool staticFilter = getClassDef() != 0 || ! isStatic() || extractStatic;
 
-   // this is not a global static or global statics should be extracted
-   bool staticFilter = getClassDef() != 0 || !isStatic() || extractStatic;
-
-   // only include members that are non-private unless extract_private is
-   // set to YES or the member is part of a   group
+   // only include members which are non-private unless extract_private is set or the member is part of a group
    bool privateFilter = protectionLevelVisible(protection()) || m_impl->mtype == MemberType_Friend;
 
-   // member is part of an anonymous scope that is the type of
-   // another member in the list.
-   //
-   //bool inAnonymousScope = !briefDescription().isEmpty() && annUsed;
 
-   // hide friend (class|struct|union) member if HIDE_FRIEND_COMPOUNDS is set
-  
-   bool friendCompoundFilter = !(Config::getBool("hide-friend-compounds") && isFriend() &&
-                  (m_impl->type == "friend class" || m_impl->type == "friend struct" || m_impl->type == "friend union") );
+   // (not used ) member is part of an anonymous scope that is the type of another member in the list   
+   // bool inAnonymousScope = ! briefDescription().isEmpty() && annUsed;
 
-   bool result = ((docFilter && staticFilter && privateFilter && friendCompoundFilter && !isHidden()));
+
+   // Step E: hide friend (class|struct|union) member if HIDE_FRIEND_COMPOUNDS is set       
+   bool temp_e = (m_impl->type == "friend class" || m_impl->type == "friend struct" || m_impl->type == "friend union");
+   bool friendCompoundFilter = ( ! hideFriendCompound || ! isFriend() || ! temp_d );       
+
+   bool result = ( docFilter && staticFilter && privateFilter && friendCompoundFilter && ! isHidden() );
   
    return result;
 }
@@ -1915,9 +1900,9 @@ bool MemberDef::isDetailedSectionVisible(bool inGroup, bool inFile) const
    static bool hideUndocMembers    = Config::getBool("hide-undoc-members");
 
    bool groupFilter = getGroupDef() == 0 || inGroup || separateMemPages;
-   bool fileFilter  = getNamespaceDef() == 0 || !inFile;
+   bool fileFilter  = getNamespaceDef() == 0 || ! inFile;
 
-   bool simpleFilter = (hasBriefDescription() || !hideUndocMembers) && inlineSimpleStructs &&
+   bool simpleFilter = (hasBriefDescription() || ! hideUndocMembers) && inlineSimpleStructs &&
                        getClassDef() != 0 && getClassDef()->isSimple();
 
    bool visible = isDetailedSectionLinkable() && groupFilter && fileFilter && ! isReference();

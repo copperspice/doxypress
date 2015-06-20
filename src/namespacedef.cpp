@@ -192,7 +192,7 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
    }
   
    m_allMembersDict->insert(md->localName(), md);
-  
+ 
    switch (md->memberType()) {
 
       case MemberType_Variable:
@@ -225,8 +225,7 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
 
       default:
          err("NamespaceDef::insertMembers(): member %s with class scope %s inserted in namespace scope `%s'\n",
-             md->name().constData(), md->getClassDef() ? md->getClassDef()->name().constData() : "",
-             name().constData());
+             md->name().constData(), md->getClassDef() ? md->getClassDef()->name().constData() : "", name().constData());
    }
 }
 
@@ -521,7 +520,6 @@ void NamespaceDef::addNamespaceAttributes(OutputList &ol)
 void NamespaceDef::writeDocumentation(OutputList &ol)
 {
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
-
    static bool generateTreeView = Config::getBool("generate-treeview");
 
    // static bool outputJava = Config::getBool("optimize-java");
