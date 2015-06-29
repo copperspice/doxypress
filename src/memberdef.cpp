@@ -2479,9 +2479,9 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
                // enum value is documented as a "\var"
 
                if (first) {
+                  // table for enum values
                   ol.startEnumTable();
-
-                 first = false;
+                  first = false;
                }
 
                ol.addIndexItem(fmd->name(), ciname);
@@ -3161,9 +3161,10 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    // HTML only, write a property table
    ol.pushGeneratorState();
    ol.disableAll();
-   ol.enable(OutputGenerator::Html);
+   ol.enable(OutputGenerator::Html); 
 
    if (showProperties.size() > 0 ) {
+      // start table for properties
       ol.writeString("<table class=\"fieldtable\">\n");
       ol.writeString("  <tr><th>" + theTranslator->trProperties() + "</th><th>" + theTranslator->trClassMethods() + "</th></tr>\n");                       
       
@@ -3171,10 +3172,10 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
 
          QPair<QString, QString> temp = *iter;     
  
-         ol.writeString("  <tr><td>\n");   
+         ol.writeString("  <tr><td class=\"fieldname\">");   
 
          ol.writeString(temp.first.toUtf8());
-         ol.writeString("  </td><td>\n");   
+         ol.writeString("  </td><td class=\"fielddoc\">");   
       
          ol.writeString(temp.second.toUtf8());
          ol.writeString("  </td></tr>\n");

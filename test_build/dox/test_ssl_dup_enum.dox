@@ -15,7 +15,7 @@
 
 /*!
 \namespace QSsl_DupEnum
-\brief The %QSsl_DupEnum namespace declares enums common to all SSL classes in %CsNetwork. 
+\brief The QSsl_DupEnum namespace declares enums common to all SSL classes in %CsNetwork. 
 
 There is an enum in this namespace with the same name as one found in the QSsl namespace.
 
@@ -25,7 +25,7 @@ There is an enum in this namespace with the same name as one found in the QSsl n
 /**
 \enum QSsl_DupEnum::KeyType
 
-Start of text for %KeyType in %QSsl_DupEnum
+Start of text for %KeyType in QSsl_DupEnum
 
 This enum name is used in in QSsl and QSsl_Duplicate namespaces. 
 
@@ -45,7 +45,7 @@ Describes the two types of keys QSslKey supports.
    </tr>
 </table>
 
-End of text for %KeyType in %QSsl_DupEnum
+End of text for %KeyType in QSsl_DupEnum
 
 */
 

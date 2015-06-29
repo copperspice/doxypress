@@ -21,16 +21,16 @@ template <class Key456, class T456> class QMap;
 \class QMap
 \brief The QMap class is a template class that provides a skip-list-based dictionary. 
 
-The %QMap class is a template class that provides a skip-list-based dictionary.
+The QMap class is a template class that provides a skip-list-based dictionary.
 
-QMap&lt;Key, T&gt; is one of of the generic container classes. It stores (key, value) pairs and provides fast lookup of the value associated with a key.
+QMap<Key, T> is one of of the generic container classes. It stores (key, value) pairs and provides fast lookup of the value associated with a key.
 
-%QMap and %QHash provide very similar functionality. The differences are:
+QMap and %QHash provide very similar functionality. The differences are:
 
 <ul>
-   <li>QHash provides faster lookups than %QMap.</li>
-   <li>When iterating over a QHash the items are arbitrarily ordered. The %QMap items are always sorted by key.</li>
-   <li>The key type of a QHash must provide operator==() and a global qHash(Key) function. The key type of a %QMap must provide operator&lt;() specifying a total order.</li>
+   <li>QHash provides faster lookups than QMap.</li>
+   <li>When iterating over a QHash the items are arbitrarily ordered. The QMap items are always sorted by key.</li>
+   <li>The key type of a QHash must provide operator==() and a global qHash(Key) function. The key type of a QMap must provide operator&lt;() specifying a total order.</li>
 </ul>
 
 Here is an example of QMap with QString keys and int> values:

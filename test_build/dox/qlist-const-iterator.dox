@@ -15,9 +15,9 @@
 
 /*!
 \class QList::const_iterator 
-\brief The QList::const_iterator class provides an STL-style const iterator for QList and QQueue. 
+\brief The QList::const_iterator class provides an STL-style const iterator for %QList and QQueue. 
 
-The QList::const_iterator class provides an STL-style const iterator for QList and %QQueue.
+The QList::const_iterator class provides an STL-style const iterator for %QList and %QQueue.
 
 %QList provides both STL-style iterators and Java-style iterators. The STL-style iterators are more low-level and more cumbersome to use; on the 
 other hand, they are slightly faster and, for developers who already know STL, have the advantage of familiarity.
@@ -104,7 +104,7 @@ Returns true if <i>other</i> points to a different item than this iterator, othe
 
 Returns the current item.
 
-<b>See also </b>operator-&gt;().
+<b>See also </b>operator->().
 
 
 */

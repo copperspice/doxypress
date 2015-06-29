@@ -17,33 +17,32 @@
 \class QString 
 \brief The QString class provides a Unicode character string. 
 
-The %QString class provides a Unicode character string.
+The QString class provides a Unicode character string.
 
-%QString stores a string of 16-bit QChars, where each QChar corresponds one Unicode 4.0 character. (Unicode characters with code values above 65535 
+QString stores a string of 16-bit QChars, where each QChar corresponds one Unicode 4.0 character. (Unicode characters with code values above 65535 
 are stored using surrogate pairs, i.e., two consecutive QChars.)
 
 Unicode is an international standard that supports most of the writing systems in use today. It is a superset of US-ASCII (ANSI X3.4-1986) and 
 Latin-1 (ISO 8859-1), and all the US-ASCII/Latin-1 characters are available at the same code positions.
 
-Behind the scenes, %QString uses implicit sharing (copy-on-write) to reduce memory usage and to avoid the needless copying of data. This also helps
+Behind the scenes, QString uses implicit sharing (copy-on-write) to reduce memory usage and to avoid the needless copying of data. This also helps
 reduce the inherent overhead of storing 16-bit characters instead of 8-bit characters.
 
-In addition to %QString, CS also provides the QByteArray class to store raw bytes and traditional 8-bit '\0'-terminated strings. For most purposes, %QString is the class you want to use. It is used throughout the Qt API, and the Unicode support ensures that your applications will be easy to translate if you want to expand your application's market at some point. The two main cases where QByteArray is appropriate are when you need to store raw binary data, and when memory conservation is critical.
+In addition to QString, CS also provides the QByteArray class to store raw bytes and traditional 8-bit '\0'-terminated strings. For most purposes, QString is the class you want to use. It is used throughout the Qt API, and the Unicode support ensures that your applications will be easy to translate if you want to expand your application's market at some point. The two main cases where QByteArray is appropriate are when you need to store raw binary data, and when memory conservation is critical.
 
 
 <h3>Initializing a String</h3>
 
-One way to initialize a %QString is simply to pass a <tt>const char *</tt> to its constructor. For example, the following code creates a QString of size 5
-containing the data &quot;Hello&quot;:
+One way to initialize a QString is simply to pass a <tt>const char *</tt> to its constructor. For example, the following code creates a QString of size 5 containing the data &quot;Hello&quot;:
 
 \code
     QString str = "Hello";
 \endcode
 
-%QString converts the <tt>const char *</tt> data into Unicode using the fromAscii() function. By default, fromAscii() treats character above 128 as
+QString converts the <tt>const char *</tt> data into Unicode using the fromAscii() function. By default, fromAscii() treats character above 128 as
 Latin-1 characters, but this can be changed by calling QTextCodec::setCodecForCStrings().
 
-In all of the %QString functions that take <tt>const char *</tt> parameters, the <tt>const char *</tt> is interpreted as a classic C-style '\0'-terminated 
+In all of the QString functions that take <tt>const char *</tt> parameters, the <tt>const char *</tt> is interpreted as a classic C-style '\0'-terminated 
 string. It is legal for the <tt>const char *</tt> parameter to be 0.
 
 You can also provide string data as an array of QChars:
@@ -56,7 +55,7 @@ You can also provide string data as an array of QChars:
 QString makes a deep copy of the QChar data, so you can modify it later without experiencing side effects. (If for performance reasons you
 do not want to take a deep copy of the character data, use QString::fromRawData() instead.)
 
-Another approach is to set the size of the string using resize() and to initialize the data character per character. %QString uses 0-based
+Another approach is to set the size of the string using resize() and to initialize the data character per character. QString uses 0-based
 indexes, just  like C++ arrays. To access the character at a particular index position, you can use operator[](). On non-const strings, 
 operator[]() returns a reference to a character that can be used on the left side of an assignment. For example:
 
@@ -146,7 +145,7 @@ Lists of strings are handled by the QStringList class. You can split a string in
 
 If you want to see if a QString starts or ends with a particular substring use startsWith() or endsWith(). If you simply want to check whether a QString contains a particular character or substring, use the contains() function. If you want to find out how many times a particular character or substring occurs in the string, use count().
 
-QStrings can be compared using overloaded operators such as operator&lt;(), operator&lt;=(), operator==(), operator&gt;=(), and so on. Note that the comparison is based exclusively on the numeric Unicode values of the characters. It is very fast, but is not what a human would expect; the QString::localeAwareCompare() function is a better choice for sorting user-interface strings.
+QStrings can be compared using overloaded operators such as operator<(), operator<=(), operator==(), operator>=(), and so on. Note that the comparison is based exclusively on the numeric Unicode values of the characters. It is very fast, but is not what a human would expect; the QString::localeAwareCompare() function is a better choice for sorting user-interface strings.
 
 To obtain a pointer to the actual character data, call data() or constData(). These functions return a pointer to the beginning of the QChar data. The pointer is guaranteed to remain valid until a non-const function is called on the QString.
 
@@ -404,9 +403,6 @@ without reallocating the entire string each time.
 
 Appends the given string <i>reference</i> to this string and returns the result.
 
-This function was introduced in Qt 4.4.
-
-
 */
 
 
@@ -595,15 +591,11 @@ The '%' can be followed by an 'L', in which case the sequence is replaced with a
 
 \code
     QString str;
-    str = QString("Decimal 63 is %1 in hexadecimal")
-            .arg(63, 0, 16);
+    str = QString("Decimal 63 is %1 in hexadecimal").arg(63, 0, 16);
     // str == "Decimal 63 is 3f in hexadecimal"
 
     QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
-    str = QString("%1 %L2 %L3")
-            .arg(12345)
-            .arg(12345)
-            .arg(12345, 0, 16);
+    str = QString("%1 %L2 %L3").arg(12345).arg(12345).arg(12345, 0, 16);
     // str == "12345 12,345 3039"
 \endcode
 
@@ -639,15 +631,11 @@ The '%' can be followed by an 'L', in which case the sequence is replaced with a
 
 \code
     QString str;
-    str = QString("Decimal 63 is %1 in hexadecimal")
-            .arg(63, 0, 16);
+    str = QString("Decimal 63 is %1 in hexadecimal").arg(63, 0, 16);
     // str == "Decimal 63 is 3f in hexadecimal"
 
     QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
-    str = QString("%1 %L2 %L3")
-            .arg(12345)
-            .arg(12345)
-            .arg(12345, 0, 16);
+    str = QString("%1 %L2 %L3").arg(12345).arg(12345).arg(12345, 0, 16);
     // str == "12345 12,345 3039"
 \endcode
 
@@ -872,8 +860,6 @@ Case sensitive comparison is based exclusively on the numeric Unicode values of 
     int z = QString::compare("auto", "Car",  Qt::CaseInsensitive);   // z < 0
 \endcode
 
-This function was introduced in Qt 4.2.
-
 <b>See also </b>operator==(), operator&lt;(), and operator&gt;().
 
 
@@ -898,9 +884,6 @@ This function overloads compare().
 
 Performs a comparison of <i>s1</i> and <i>s2</i>, using the case sensitivity setting <i>cs</i>.
 
-This function was introduced in Qt 4.2.
-
-
 */
 
 
@@ -910,9 +893,6 @@ This function was introduced in Qt 4.2.
 This function overloads compare().
 
 Performs a comparison of <i>s1</i> and <i>s2</i>, using the case sensitivity setting <i>cs</i>.
-
-This function was introduced in Qt 4.2.
-
 
 */
 
@@ -937,9 +917,6 @@ This function overloads compare().
 
 Same as compare(*this, <i>other</i>, <i>cs</i>).
 
-This function was introduced in Qt 4.2.
-
-
 */
 
 
@@ -949,9 +926,6 @@ This function was introduced in Qt 4.2.
 This function overloads compare().
 
 Same as compare(*this, <i>other</i>, <i>cs</i>).
-
-This function was introduced in Qt 4.2.
-
 
 */
 
@@ -1039,8 +1013,6 @@ Returns true if this string contains an occurrence of the string reference <i>st
 
 If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
-This function was introduced in Qt 4.8.
-
 <b>See also </b>indexOf() and count().
 
 
@@ -1078,9 +1050,6 @@ Returns true if the regular expression <i>rx</i> matches somewhere in this strin
 
 If there is a match, the <i>rx</i> regular expression will contain the matched captures (see QRegExp::matchedLength, QRegExp::cap).
 
-This function was introduced in Qt 4.5.
-
-
 */
 
 
@@ -1116,8 +1085,6 @@ This function overloads count().
 Returns the number of (potentially overlapping) occurrences of the string reference <i>str</i> in this string.
 
 If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
-
-This function was introduced in Qt 4.8.
 
 <b>See also </b>contains() and indexOf().
 
@@ -1237,8 +1204,6 @@ This function overloads endsWith().
 Returns true if the string ends with the string reference <i>s</i>; otherwise returns false.
 
 If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
-
-This function was introduced in Qt 4.8.
 
 <b>See also </b>startsWith().
 
@@ -1394,8 +1359,6 @@ Returns a QString initialized with the first <i>size</i> characters of the Unico
 
 If <i>size</i> is -1 (default), <i>unicode</i> must be terminated with a 0.
 
-This function was introduced in Qt 4.2.
-
 <b>See also </b>toUcs4(), fromUtf16(), utf16(), setUtf16(), and fromWCharArray().
 
 
@@ -1445,8 +1408,6 @@ Returns a copy of the <i>string</i>, where the encoding of <i>string</i> depends
 interpreted as ucs-4, if wchar is 2 bytes it is interpreted as ucs-2.
 
 If <i>size</i> is -1 (default), the <i>string</i> has to be 0 terminated.
-
-This function was introduced in Qt 4.2.
 
 <b>See also </b>fromUtf16(), fromLatin1(), fromLocal8Bit(), fromUtf8(), fromUcs4(), and fromStdWString().
 
@@ -1502,8 +1463,6 @@ Example:
 
 If <i>from</i> is -1, the search starts at the last character; if it is -2, at the next to last character and so on.
 
-This function was introduced in Qt 4.5.
-
 <b>See also </b>lastIndexOf(), contains(), and count().
 
 
@@ -1531,9 +1490,6 @@ Returns the index position of the first occurrence of the string reference <i>st
 Returns -1 if <i>str</i> is not found.
 
 If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
-
-This function was introduced in Qt 4.8.
-
 
 */
 
@@ -1573,9 +1529,6 @@ Example:
     QString str = "the minimum";
     str.indexOf(QRegExp("m[aeiou]"), 0);       // returns 4
 \endcode
-
-This function was introduced in Qt 4.5.
-
 
 */
 
@@ -1733,8 +1686,6 @@ Example:
     x.lastIndexOf(y, 1);        // returns -1
 \endcode
 
-This function was introduced in Qt 4.5.
-
 <b>See also </b>indexOf(), contains(), and count().
 
 
@@ -1762,8 +1713,6 @@ If <i>from</i> is -1 (default), the search starts at the last character; if <i>f
 <i>str</i> is not found.
 
 If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
-
-This function was introduced in Qt 4.8.
 
 <b>See also </b>indexOf(), contains(), and count().
 
@@ -1806,9 +1755,6 @@ Example:
     QString str = "the minimum";
     str.lastIndexOf(QRegExp("m[aeiou]"));      // returns 8
 \endcode
-
-This function was introduced in Qt 4.5.
-
 
 */
 
@@ -1868,10 +1814,7 @@ If <i>n</i> is greater than size() or less than zero, a reference to the entire 
     QStringRef y = x.leftRef(4);        // y == "Pine"
 \endcode
 
-This function was introduced in Qt 4.4.
-
 <b>See also </b>left(), rightRef(), midRef(), and startsWith().
-
 
 */
 
@@ -1912,8 +1855,6 @@ Compares this string with the <i>other</i> string and returns an integer less th
 The comparison is performed in a locale- and also platform-dependent manner. Use this function to present sorted lists of strings to the user.
 
 Same as <tt>localeAwareCompare(*this, other)</tt>.
-
-This function was introduced in Qt 4.5.
 
 
 */
@@ -3010,12 +2951,11 @@ The format string supports most of the conversion specifiers provided by printf(
 
 \code
     QString result;
-    QTextStream(&amp;result) << "pi = " << 3.14;
+    QTextStream(&result) << "pi = " << 3.14;
     // result == "pi = 3.14"
 \endcode
 
-For translations, especially if the strings contains more than one escape sequence, you should consider using the arg() function instead. This allows
-the order of the replacements to be controlled by the translator.
+For translations, especially if the strings contains more than one escape sequence, you should consider using the arg() function instead. This allows the order of the replacements to be controlled by the translator.
 
 <b>See also </b>arg().
 
@@ -3084,8 +3024,6 @@ Returns true if the string starts with the string reference <i>s</i>; otherwise 
 
 If <i>cs</i> is Qt::CaseSensitive (default), the search is case sensitive; otherwise the search is case insensitive.
 
-This function was introduced in Qt 4.8.
-
 <b>See also </b>endsWith().
 
 
@@ -3147,26 +3085,26 @@ Various string formats for floating point numbers can be converted to double val
     bool ok;
     double d;
 
-    d = QString( "1234.56e-02" ).toDouble(&amp;ok); // ok == true, d == 12.3456
+    d = QString( "1234.56e-02" ).toDouble(&ok); // ok == true, d == 12.3456
 \endcode
 
 This function tries to interpret the string according to the current locale. The current locale is determined from the system at application startup and can be changed by calling QLocale::setDefault(). If the string cannot be interpreted according to the current locale, this function falls back on the &quot;C&quot; locale.
 
 \code
     QLocale::setDefault(QLocale::C);
-    d = QString( "1234,56" ).toDouble(&amp;ok); // ok == false
-    d = QString( "1234.56" ).toDouble(&amp;ok); // ok == true, d == 1234.56
+    d = QString( "1234,56" ).toDouble(&ok); // ok == false
+    d = QString( "1234.56" ).toDouble(&ok); // ok == true, d == 1234.56
 
     QLocale::setDefault(QLocale::German);
-    d = QString( "1234,56" ).toDouble(&amp;ok); // ok == true, d == 1234.56
-    d = QString( "1234.56" ).toDouble(&amp;ok); // ok == true, d == 1234.56
+    d = QString( "1234,56" ).toDouble(&ok); // ok == true, d == 1234.56
+    d = QString( "1234.56" ).toDouble(&ok); // ok == true, d == 1234.56
 \endcode
 
 Due to the ambiguity between the decimal point and thousands group separator in various locales, this function does not handle thousands group separators. If you need to convert such numbers, see QLocale::toDouble().
 
 \code
     QLocale::setDefault(QLocale::C);
-    d = QString( "1234,56" ).toDouble(&amp;ok); // ok == false
+    d = QString( "1234,56" ).toDouble(&ok); // ok == false
 \endcode
 
 <b>See also </b>number(), QLocale::setDefault(), QLocale::toDouble(), and trimmed().
@@ -3190,7 +3128,7 @@ Example:
 
     bool ok;
     QString str2 = "R2D2";
-    str2.toFloat(&amp;ok);          // returns 0.0, sets ok to false
+    str2.toFloat(&ok);          // returns 0.0, sets ok to false
 \endcode
 
 <b>See also </b>number(), toDouble(), and toInt().
@@ -3213,8 +3151,8 @@ Example:
 \code
     QString str = "FF";
     bool ok;
-    int hex = str.toInt(&amp;ok, 16);       // hex == 255, ok == true
-    int dec = str.toInt(&amp;ok, 10);       // dec == 0, ok == false
+    int hex = str.toInt(&ok, 16);       // hex == 255, ok == true
+    int dec = str.toInt(&ok, 10);       // dec == 0, ok == false
 \endcode
 
 <b>See also </b>number(), toUInt(), and toDouble().
@@ -3266,8 +3204,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    long hex = str.toLong(&amp;ok, 16);     // hex == 255, ok == true
-    long dec = str.toLong(&amp;ok, 10);     // dec == 0, ok == false
+    long hex = str.toLong(&ok, 16);     // hex == 255, ok == true
+    long dec = str.toLong(&ok, 10);     // dec == 0, ok == false
 \endcode
 
 <b>See also </b>number(), toULong(), and toInt().
@@ -3293,8 +3231,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    qint64 hex = str.toLongLong(&amp;ok, 16);      // hex == 255, ok == true
-    qint64 dec = str.toLongLong(&amp;ok, 10);      // dec == 0, ok == false
+    qint64 hex = str.toLongLong(&ok, 16);      // hex == 255, ok == true
+    qint64 dec = str.toLongLong(&ok, 10);      // dec == 0, ok == false
 \endcode
 
 <b>See also </b>number(), toULongLong(), and toInt().
@@ -3338,8 +3276,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    short hex = str.toShort(&amp;ok, 16);   // hex == 255, ok == true
-    short dec = str.toShort(&amp;ok, 10);   // dec == 0, ok == false
+    short hex = str.toShort(&ok, 16);   // hex == 255, ok == true
+    short dec = str.toShort(&ok, 10);   // dec == 0, ok == false
 \endcode
 
 <b>See also </b>number(), toUShort(), and toInt().
@@ -3398,8 +3336,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    uint hex = str.toUInt(&amp;ok, 16);     // hex == 255, ok == true
-    uint dec = str.toUInt(&amp;ok, 10);     // dec == 0,   ok == false
+    uint hex = str.toUInt(&ok, 16);     // hex == 255, ok == true
+    uint dec = str.toUInt(&ok, 10);     // dec == 0,   ok == false
 \endcode
 
 <b>See also </b>number() and toInt().
@@ -3425,8 +3363,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    ulong hex = str.toULong(&amp;ok, 16);   // hex == 255, ok == true
-    ulong dec = str.toULong(&amp;ok, 10);   // dec == 0,   ok == false
+    ulong hex = str.toULong(&ok, 16);   // hex == 255, ok == true
+    ulong dec = str.toULong(&ok, 10);   // dec == 0,   ok == false
 \endcode
 
 <b>See also </b>number().
@@ -3451,8 +3389,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    quint64 hex = str.toULongLong(&amp;ok, 16);    // hex == 255, ok == true
-    quint64 dec = str.toULongLong(&amp;ok, 10);    // dec == 0,   ok == false
+    quint64 hex = str.toULongLong(&ok, 16);    // hex == 255, ok == true
+    quint64 dec = str.toULongLong(&ok, 10);    // dec == 0,   ok == false
 \endcode
 
 <b>See also </b>number() and toLongLong().
@@ -3469,8 +3407,7 @@ if the conversion fails.
 
 If a conversion error occurs, *<i>ok</i> is set to false; otherwise *<i>ok</i> is set to true.
 
-If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with &quot;0&quot;,
-base 8 is used; otherwise, base 10 is used.
+If <i>base</i> is 0, the C language convention is used: If the string begins with &quot;0x&quot;, base 16 is used; if the string begins with &quot;0&quot;, base 8 is used; otherwise, base 10 is used.
 
 Example:
 
@@ -3478,8 +3415,8 @@ Example:
     QString str = "FF";
     bool ok;
 
-    ushort hex = str.toUShort(&amp;ok, 16);     // hex == 255, ok == true
-    ushort dec = str.toUShort(&amp;ok, 10);     // dec == 0,   ok == false
+    ushort hex = str.toUShort(&ok, 16);     // hex == 255, ok == true
+    ushort dec = str.toUShort(&ok, 10);     // dec == 0,   ok == false
 \endcode
 
 <b>See also </b>number() and toShort().
@@ -4073,7 +4010,7 @@ You can disable this operator by defining <tt>QT_NO_CAST_FROM_ASCII</tt> when yo
 /**
 \fn bool QString::operator>= ( const char * other ) const
 
-This function overloads operator&gt;=().
+This function overloads operator>=().
 
 The <i>other</i> const char pointer is converted to a QString using the fromAscii() function.
 
@@ -4093,11 +4030,12 @@ Example:
 \code
     QString str;
 
-    if (str[0] == QChar('?'))
+    if (str[0] == QChar('?')) {
         str[0] = QChar('_');
+    }  
 \endcode
 
-The return value is of type QCharRef, a helper class for QString. When you get an object of type QCharRef, you can use it as if it were a QChar &amp;. If you assign to it, the assignment will apply to the character in the QString from which you got the reference.
+The return value is of type QCharRef, a helper class for QString. When you get an object of type QCharRef, you can use it as if it were a QChar &. If you assign to it, the assignment will apply to the character in the QString from which you got the reference.
 
 <b>See also </b>at().
 

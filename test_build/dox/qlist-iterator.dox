@@ -17,7 +17,7 @@
 \class QList::iterator 
 \brief The QList::iterator class provides an STL-style non-const iterator for %QList and %QQueue. 
 
-The %QList::iterator class provides an STL-style non-const iterator for %QList and %QQueue.
+The QList::iterator class provides an STL-style non-const iterator for %QList and %QQueue.
 
 QList features both STL-style iterators and Java-style iterators. The STL-style iterators are more low-level and more cumbersome to use, on the
 other hand, they are slightly faster and, for developers who already know STL, have the advantage of familiarity.
@@ -116,8 +116,9 @@ Returns a modifiable reference to the current item.
 You can change the value of an item by using operator*() on the left side of an assignment, for example:
 
 \code
-    if (*it == "Hello")
+    if (*it == "Hello") {
         *it = "Bonjour";
+    }  
 \endcode
 
 <b>See also </b>operator->().

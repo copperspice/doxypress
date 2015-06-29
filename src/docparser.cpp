@@ -1099,10 +1099,17 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
 
          } else if (compound->definitionType() == Definition::TypeGroup) {
             name = compound.dynamicCast<GroupDef>()->groupTitle();
+
          }
 
-         children.append(new DocLinkedWord(parent, name, compound->getReference(), compound->getOutputFileBase(),
+         if ( s_context == g_token->name ) { 
+            // do not add a link to myself
+            children.append(new DocWord(parent, name));
+      
+         } else {
+            children.append(new DocLinkedWord(parent, name, compound->getReference(), compound->getOutputFileBase(),
                                            anchor, compound->briefDescriptionAsTooltip() ) );
+         }
 
       } else if (compound->definitionType() == Definition::TypeFile && compound.dynamicCast<FileDef>()->generateSourceFile() ) { 
 
