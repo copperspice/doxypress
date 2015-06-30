@@ -299,54 +299,62 @@ class LayoutParser : public QXmlDefaultHandler
       m_sHandler.insert("class/usedfiles",           new StartElementHandlerKind(
                this, LayoutDocEntry::ClassUsedFiles, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("class/memberdecl",          new StartElementHandler(this, &LayoutParser::startMemberDecl));
-
-      m_sHandler.insert("class/memberdecl/membergroups",  new StartElementHandlerKind(
-               this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
-
-      m_sHandler.insert("class/memberdecl/nestedclasses",  new StartElementHandlerSection(
-               this, LayoutDocEntry::ClassNestedClasses, &LayoutParser::startSectionEntry,
+      m_sHandler.insert("class/memberdecl",                   new StartElementHandler(this, &LayoutParser::startMemberDecl));
+         
+      m_sHandler.insert("class/memberdecl/nestedclasses",     new StartElementHandlerSection(this, LayoutDocEntry::ClassNestedClasses,
+               &LayoutParser::startSectionEntry, 
                COMPILE_FOR_1_OPTION(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes())));
-
-      m_sHandler.insert("class/memberdecl/services",       new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+     
+      m_sHandler.insert("class/memberdecl/services",          new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_services, theTranslator->trServices()));
 
-      m_sHandler.insert("class/memberdecl/interfaces",     new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/interfaces",        new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_interfaces, theTranslator->trInterfaces()));
 
-      m_sHandler.insert("class/memberdecl/publictypes",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+
+      m_sHandler.insert("class/memberdecl/publictypedefs",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+               MemberListType_pubTypedefs, theTranslator->trPublicTypedefs()));
+      
+      m_sHandler.insert("class/memberdecl/protectedtypedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+               MemberListType_proTypedefs, theTranslator->trProtectedTypedefs()));
+
+      m_sHandler.insert("class/memberdecl/privatetypedefs",   new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+               MemberListType_priTypedefs, theTranslator->trPrivateTypedefs()));
+
+
+      m_sHandler.insert("class/memberdecl/publictypes",       new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubTypes, theTranslator->trPublicTypes()));
 
-      m_sHandler.insert("class/memberdecl/publicslots",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicslots",       new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubSlots, theTranslator->trPublicSlots()));
 
-      m_sHandler.insert("class/memberdecl/publicsignals",  new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicsignals",     new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubSignals, theTranslator->trPublicSignals()));
 
-      m_sHandler.insert("class/memberdecl/publicmethods", new StartElementHandlerMember(
-               this, &LayoutParser::startMemberDeclEntry, MemberListType_pubMethods, 
+      m_sHandler.insert("class/memberdecl/publicmethods",     new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry, 
+               MemberListType_pubMethods, 
                COMPILE_FOR_1_OPTION(theTranslator->trPublicMembers(), SrcLangExt_ObjC, theTranslator->trInstanceMethods())));
 
-      m_sHandler.insert("class/memberdecl/publicstaticmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicstaticmethods",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubStaticMethods, COMPILE_FOR_1_OPTION( theTranslator->trStaticPublicMembers(),
                SrcLangExt_ObjC, theTranslator->trClassMethods() )));
 
-      m_sHandler.insert("class/memberdecl/publicattributes",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicattributes",       new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubAttribs, theTranslator->trPublicAttribs()));
 
       m_sHandler.insert("class/memberdecl/publicstaticattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubStaticAttribs, theTranslator->trStaticPublicAttribs()));
 
-      m_sHandler.insert("class/memberdecl/protectedtypes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedtypes",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proTypes, theTranslator->trProtectedTypes()));
 
-      m_sHandler.insert("class/memberdecl/protectedslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedslots",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proSlots, theTranslator->trProtectedSlots()));
 
-     m_sHandler.insert("class/memberdecl/protectedsignals",  new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+     m_sHandler.insert("class/memberdecl/protectedsignals",   new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proSignals, theTranslator->trProtectedSignals()));
 
-      m_sHandler.insert("class/memberdecl/protectedmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedmethods",  new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proMethods, theTranslator->trProtectedMembers()));
 
       m_sHandler.insert("class/memberdecl/protectedstaticmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
@@ -406,7 +414,11 @@ class LayoutParser : public QXmlDefaultHandler
       m_sHandler.insert("class/memberdecl/related", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_related, theTranslator->trRelatedFunctions(), theTranslator->trRelatedSubscript()));
 
+      m_sHandler.insert("class/memberdecl/membergroups",  new StartElementHandlerKind(
+               this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
+
       m_eHandler.insert("class/memberdecl", new EndElementHandler(this, &LayoutParser::endMemberDecl));
+
       m_sHandler.insert("class/memberdef",  new StartElementHandler(this, &LayoutParser::startMemberDef));
 
       m_sHandler.insert("class/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::ClassInlineClasses, 

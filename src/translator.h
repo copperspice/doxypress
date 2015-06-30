@@ -54,15 +54,15 @@ class Translator
    virtual QByteArray trEnumValue() = 0;
    virtual QByteArray trDefinedIn() = 0;
 
+   virtual QByteArray trPublicTypedefs() = 0;   
+   virtual QByteArray trProtectedTypedefs() = 0;
+   virtual QByteArray trPrivateTypedefs() = 0;  
+
    // quick reference sections
    virtual QByteArray trModules() = 0;
    virtual QByteArray trClassHierarchy() = 0;
    virtual QByteArray trCompoundList() = 0;
    virtual QByteArray trFileList() = 0;
-
-   // virtual QByteArray trHeaderFiles() = 0;
-   // virtual QByteArray trHeaderFilesDescription() = 0;
-   // virtual QByteArray trNoDescriptionAvailable() = 0;
 
    virtual QByteArray trCompoundMembers() = 0;
    virtual QByteArray trFileMembers() = 0;
@@ -105,12 +105,6 @@ class Translator
    virtual QByteArray trVariableDocumentation() = 0;
    virtual QByteArray trCompounds() = 0;
    virtual QByteArray trGeneratedAt(const char *date, const char *projName) = 0;
-
-   // virtual QByteArray trFuncProtos() = 0;
-   // virtual QByteArray trFunctionPrototypeDocumentation() = 0;
-   // virtual QByteArray trWrittenBy() = 0;
-   // virtual QByteArray trReimplementedForInternalReasons() = 0;
-   // virtual QByteArray trBugsAndLimitations() = 0;
 
    virtual QByteArray trClassDiagram(const char *clName) = 0;
    virtual QByteArray trForInternalUseOnly() = 0;  

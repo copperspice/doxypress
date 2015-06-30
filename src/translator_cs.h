@@ -392,6 +392,18 @@ class Translator_Cs : public Translator
       return QCoreApplication::translate("doxy-text", "Macros").toUtf8();
    }
 
+   virtual QByteArray trPublicTypedefs() {
+      return QCoreApplication::translate("doxy-text", "Public Typedefs").toUtf8();
+   }
+
+   virtual QByteArray trProtectedTypedefs() {
+      return QCoreApplication::translate("doxy-text", "Protected Typedefs").toUtf8();
+   }
+
+   virtual QByteArray trPrivateTypedefs() {
+      return QCoreApplication::translate("doxy-text", "Private Typedefs").toUtf8();
+   }
+
    /*! This is used in the documentation of a file as a header before the list of typedefs
     */
    virtual QByteArray trTypedefs() {

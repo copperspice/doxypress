@@ -11,7 +11,7 @@
     </tab>
     <tab type="classes" visible="yes" title="">
       <tab type="classlist" visible="yes" title="" intro=""/>
-      <tab type="classindex" visible="$ALPHA-INDEX" title=""/> 
+      <tab type="classindex" visible="$ALPHA-INDEX" title=""/>
       <tab type="hierarchy" visible="yes" title="" intro=""/>
       <tab type="classmembers" visible="yes" title="" intro=""/>
     </tab>
@@ -19,7 +19,7 @@
       <tab type="filelist" visible="yes" title="" intro=""/>
       <tab type="globals" visible="yes" title="" intro=""/>
     </tab>
-    <tab type="examples" visible="yes" title="" intro=""/>  
+    <tab type="examples" visible="yes" title="" intro=""/>
   </navindex>
 
   <!-- Layout definition for a class page -->
@@ -30,18 +30,20 @@
     <collaborationgraph visible="$DOT-COLLABORATION"/>
     <memberdecl>
       <nestedclasses visible="yes" title=""/>
-      <publictypes title=""/>
       <services title=""/>
-      <interfaces title=""/>     
+      <interfaces title=""/>
+      <publictypedefs title=""/>
+      <publictypes title=""/>
       <publicsignals title=""/>
       <publicslots title=""/>
       <publicmethods title=""/>
       <publicstaticmethods title=""/>
       <publicattributes title=""/>
       <publicstaticattributes title=""/>
+      <protectedtypedefs title=""/>
       <protectedtypes title=""/>
       <protectedsignals title=""/>
-      <protectedslots title=""/>      
+      <protectedslots title=""/>
       <protectedmethods title=""/>
       <protectedstaticmethods title=""/>
       <protectedattributes title=""/>
@@ -53,9 +55,10 @@
       <packagestaticattributes title=""/>
       <properties title=""/>
       <events title=""/>
+      <privatetypedefs title=""/>
       <privatetypes title=""/>
       <privatesignals title=""/>
-      <privateslots title=""/>      
+      <privateslots title=""/>
       <privatemethods title=""/>
       <privatestaticmethods title=""/>
       <privateattributes title=""/>
@@ -173,7 +176,7 @@
       <enums title=""/>
       <enumvalues title=""/>
       <functions title=""/>
-      <variables title=""/>    
+      <variables title=""/>
       <publicsignals title=""/>
       <protectedsignals title=""/>
       <privatesignals title=""/>

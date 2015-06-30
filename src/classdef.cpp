@@ -337,7 +337,29 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                         break;
                   }
 
-               } else if (md->isTypedef() || md->isEnumerate() || md->isEnumValue()) {
+               } else if (md->isTypedef()) {
+
+                  switch (prot) {
+                     case Protected:
+                        addMemberToList(MemberListType_proTypedefs, md, true);
+                        break;
+
+//                     case Package:
+//                        addMemberToList(MemberListType_pacTypes, md, true);
+//                        break;
+
+                     case Public:
+                        addMemberToList(MemberListType_pubTypedefs, md, true);
+                        isSimple = QByteArray(md->typeString()).indexOf(")(") == -1;
+                        break;
+
+                     case Private:
+                        addMemberToList(MemberListType_priTypedefs, md, true);
+                        break;
+                  }
+
+
+               } else if (md->isEnumerate() || md->isEnumValue()) {
 
                   switch (prot) {
                      case Protected:
@@ -357,6 +379,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                         addMemberToList(MemberListType_priTypes, md, true);
                         break;
                   }
+
 
                } else { 
                   // member function

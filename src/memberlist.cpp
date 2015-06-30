@@ -794,20 +794,31 @@ QByteArray MemberList::listTypeAsString(MemberListType type)
          return "pac-types";
       case MemberListType_priTypes:
          return "pri-types";
+
+      case MemberListType_pubTypedefs:
+         return "typedefs";
+      case MemberListType_proTypedefs:
+         return "typedefs";
+      case MemberListType_priTypedefs:
+         return "typedefs";
+      
+      case MemberListType_services:
+         return "services";
+      case MemberListType_interfaces:
+         return "interfaces";
+
       case MemberListType_related:
          return "related";  
       case MemberListType_friends:
          return "friends";
+
       case MemberListType_dcopMethods:
          return "dcop-methods";
       case MemberListType_properties:
          return "properties";
       case MemberListType_events:
          return "events";
-      case MemberListType_interfaces:
-         return "interfaces";
-      case MemberListType_services:
-         return "services";
+         
       case MemberListType_decDefineMembers:
          return "define-members";
       case MemberListType_decProtoMembers:
