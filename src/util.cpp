@@ -3530,7 +3530,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const QByteArra
    if (! memberName.startsWith("operator ") && (im = memberName.lastIndexOf("::")) != -1 &&
          im < (int)memberName.length() - 2) {
 
-         // treat operator conversion methods as a special case, not A::
+      // treat operator conversion methods as a special case, not A::
 
       mScope = memberName.left(im);
       mName  = memberName.right(memberName.length() - im - 2);
@@ -3738,28 +3738,30 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const QByteArra
    }
 
    // maybe a namespace, file or group member ?   
-   if ((mn = Doxy_Globals::functionNameSDict->find(mName))) { 
+   mn = Doxy_Globals::functionNameSDict->find(mName);
+
+   if (mn) { 
       // name is known      
       QSharedPointer<NamespaceDef> fnd;
       int scopeOffset = scopeName.length();
 
+
       do {
          QByteArray namespaceName = scopeName.left(scopeOffset);
 
-         if (! namespaceName.isEmpty() && !mScope.isEmpty()) {
+         if (! namespaceName.isEmpty() && ! mScope.isEmpty()) {
             namespaceName += "::" + mScope;
 
          } else if (! mScope.isEmpty()) {
             namespaceName = mScope;
          }
          
-         if (! namespaceName.isEmpty() && (fnd = Doxy_Globals::namespaceSDict->find(namespaceName)) && fnd->isLinkable()) {
-            
+         if (! namespaceName.isEmpty() && (fnd = Doxy_Globals::namespaceSDict->find(namespaceName)) && fnd->isLinkable()) {           
             bool found = false;
            
             for (auto mmd : *mn) {
 
-               if ( found) {
+               if (found) {
                   break;
                }
                
@@ -3782,10 +3784,11 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const QByteArra
 
                } else if (mmd->getNamespaceDef() == fnd) {
                   // namespace is found
+
                   bool match = true;
                   ArgumentList *argList = 0;
 
-                  if (args == "()") {
+                  if (! args.isEmpty() && args != "()") {
                      argList = new ArgumentList;
                      ArgumentList *mmdAl = mmd->argumentList();
 
@@ -3884,6 +3887,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const QByteArra
          }
 
       } while (scopeOffset >= 0);
+
 
       // no scope, global function
       {
@@ -4121,7 +4125,6 @@ bool resolveRef(const QByteArray &scName, const QByteArray &tsName, bool inSeeBl
    QSharedPointer<FileDef>      fd;
    QSharedPointer<NamespaceDef> nd;
    QSharedPointer<GroupDef>     gd;
-
 
    // check if nameStr is a member or global   
    if (getDefs(scopeStr, nameStr, argsStr, md, cd, fd, nd, gd, explicitScope, currentFile, true))  {

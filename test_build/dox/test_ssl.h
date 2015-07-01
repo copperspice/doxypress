@@ -29,6 +29,7 @@ namespace QSsl {
       Dsa
    };
 
+   void someFunction(QString data);
 };
 
 QT_END_NAMESPACE

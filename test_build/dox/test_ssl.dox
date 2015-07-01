@@ -57,3 +57,12 @@ Describes the different key algorithms supported by QSslKey.
 </table>
 
 */
+
+
+/**
+\fn QSsl::someFunction (QString data)
+
+This is a function inside a namespace.
+
+
+*/

@@ -339,13 +339,17 @@ Property documentation for favorite.
 
 Lemongrass is a test class to ensure two classes in one file can be documented. This class appears after several macros.
 
+
+Does the link from the QSSsl namespace work correct?   QSsl::someFunction()
+
+
 */
 
 
 /** 
 \var Lemongrass::howMuch
 
-Documentation for a public variable
+Documentation for a public variable.
 
 */
 
