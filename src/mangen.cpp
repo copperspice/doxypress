@@ -211,7 +211,7 @@ void ManGenerator::newParagraph()
 
 void ManGenerator::startParagraph()
 {
-   if (!paragraph) {
+   if (! paragraph) {
       if (!firstCol) {
          m_textStream << endl;
       }
@@ -227,7 +227,7 @@ void ManGenerator::endParagraph()
 {
 }
 
-void ManGenerator::writeString(const char *text)
+void ManGenerator::writeString(const QString &text)
 {
    docify(text);
 }
@@ -304,27 +304,34 @@ void ManGenerator::endMemberHeader()
    paragraph = false;
 }
 
-void ManGenerator::docify(const QByteArray &str)
+void ManGenerator::docify(const QString &text)
 {
-   if (! str.isEmpty()) {
-      const char *p = str.constData();
+   if (! text.isEmpty()) {
+
+      // BROOM - ansel
+      const char *p = text.toUtf8();            // .constData();
+
       char c = 0;
 
       while ((c = *p++)) {
          switch (c) {
             case '.':
                m_textStream << "\\&.";
-               break; // see  bug652277
+               break; 
+
             case '\\':
                m_textStream << "\\\\";
                col++;
                break;
+
             case '\n':
                m_textStream << "\n";
                col = 0;
                break;
+
             case '\"':
                c = '\''; // no break!
+
             default:
                m_textStream << c;
                col++;
@@ -726,7 +733,7 @@ void ManGenerator::endSection(const char *, SectionInfo::SectionType type)
    }
 }
 
-void ManGenerator::startSimpleSect(SectionTypes, const QByteArray &, const char *, const char *title)
+void ManGenerator::startSimpleSect(SectionTypes, const QByteArray &, const char *, const QString &title)
 {
    if (! firstCol) {
       m_textStream << endl << ".PP" << endl;

@@ -274,7 +274,7 @@ QByteArray fixSpaces(const QByteArray &s)
    return substitute(s, " ", "&#160;");
 }
 
-void startTitle(OutputList &ol, const char *fileName, Definition *def)
+void startTitle(OutputList &ol, const QString &fileName, Definition *def)
 {
    ol.startHeaderSection();
    if (def) {
@@ -285,7 +285,7 @@ void startTitle(OutputList &ol, const char *fileName, Definition *def)
    ol.disable(OutputGenerator::Man);
 }
 
-void endTitle(OutputList &ol, const char *fileName, const char *name)
+void endTitle(OutputList &ol, const QString &fileName, const QString &name)
 {
    ol.popGeneratorState();
    ol.endTitleHead(fileName, name);
@@ -2277,12 +2277,12 @@ static void writeQuickMemberIndex(OutputList &ol, const LetterToIndexMap<MemberI
 
 /** Helper class representing a class member in the navigation menu. */
 struct CmhlInfo {
-   CmhlInfo(const char *fn, const char *t) 
+   CmhlInfo(const QString &fn, const QString &t) 
       : fname(fn), title(t), link(t) { }
 
-   const char *fname;
-   QByteArray title;
-   QByteArray link;
+   QString fname;         
+   QString title;
+   QString link;
 };
 
 static CmhlInfo *getCmhlInfo(int hl)
@@ -2494,10 +2494,10 @@ static void writeClassMemberIndex(OutputList &ol)
 
 /** Helper class representing a file member in the navigation menu. */
 struct FmhlInfo {
-   FmhlInfo(const char *fn, const char *t) : fname(fn), title(t) {}
+   FmhlInfo(const QString &fn, const QString &t) : fname(fn), title(t) {}
 
-   const char *fname;
-   QByteArray title;
+   QString fname;      
+   QString title;
 };
 
 static const FmhlInfo *getFmhlInfo(int hl)
@@ -2649,9 +2649,10 @@ static void writeFileMemberIndex(OutputList &ol)
 
 /** Helper class representing a namespace member in the navigation menu. */
 struct NmhlInfo {
-   NmhlInfo(const char *fn, const char *t) : fname(fn), title(t) {}
-   const char *fname;
-   QByteArray title;
+   NmhlInfo(const QString &fn, const QString &t) : fname(fn), title(t) {}
+
+   QString fname; 
+   QString title;
 };
 
 static const NmhlInfo *getNmhlInfo(int hl)

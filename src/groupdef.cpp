@@ -89,13 +89,13 @@ GroupDef::~GroupDef()
 void GroupDef::setGroupTitle( const char *t )
 {
    if ( t && qstrlen(t) ) {
-      title = t;
+      m_title  = t;
       titleSet = true;
 
    } else {
-      title = name();
-      title[0] = toupper(title[0]);
-      titleSet = false;
+      m_title    = name();
+      m_title[0] = m_title[0].toUpper();
+      titleSet   = false;
    }
 }
 
@@ -149,7 +149,7 @@ bool GroupDef::addClass(QSharedPointer<ClassDef> cd)
    }
 
    updateLanguage(cd);
-   QByteArray qn = cd->qualifiedName();  
+   QString qn = cd->qualifiedName();  
 
    if (classSDict->find(qn) == 0) {          
       classSDict->insert(qn, cd); 
@@ -997,7 +997,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
             label = "dirs";
          }
 
-         ol.writeSummaryLink(QString(""), label, ls->title(lang), first);
+         ol.writeSummaryLink("", label, ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
@@ -1006,7 +1006,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
          QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
-            ol.writeSummaryLink(QString(""), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+            ol.writeSummaryLink("", MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }

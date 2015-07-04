@@ -77,19 +77,19 @@ class RTFGenerator : public OutputGenerator
 
    void startIndexSection(IndexSections);
    void endIndexSection(IndexSections);
-   void writePageLink(const char *, bool);
+   void writePageLink(const QString &, bool) override;
    void startProjectNumber();
    void endProjectNumber();
    void writeStyleInfo(int part);
-   void startTitleHead(const char *);
+   void startTitleHead(const QString &) override;
    void startTitle();
-   void endTitleHead(const char *, const char *name);
+   void endTitleHead(const QString &, const QString &name) override;
    void endTitle() {}
 
    void newParagraph();
    void startParagraph();
    void endParagraph();
-   void writeString(const char *text);
+   void writeString(const QString &text);
    void startIndexListItem();
    void endIndexListItem();
    void startIndexList();
@@ -97,25 +97,25 @@ class RTFGenerator : public OutputGenerator
    void startIndexKey();
    void endIndexKey();
    void startIndexValue(bool);
-   void endIndexValue(const char *, bool);
+   void endIndexValue(const QString &, bool) override;
    void startItemList();
    void endItemList();
 
-   void startIndexItem(const QByteArray &ref, const QByteArray &file) override;
-   void endIndexItem(const QByteArray &ref, const QByteArray &file) override;
+   void startIndexItem(const QString &ref, const QString &file) override;
+   void endIndexItem(const QString &ref, const QString &file) override;
 
-   void docify(const QByteArray &text) override;
-   void codify(const QByteArray &text) override;
+   void docify(const QString &text) override;
+   void codify(const QString &text) override;
 
-   void writeObjectLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, const QByteArray &name) override;
+   void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) override;
 
-   void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
-                      const QByteArray &name, const QByteArray &tooltip) override;  
+   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor, 
+                      const QString &name, const QString &tooltip) override;  
 
-   void writeTooltip(const char *, const DocLinkInfo &, const QByteArray &, const QByteArray &, 
+   void writeTooltip(const QString &, const DocLinkInfo &, const QString &, const QString &, 
                      const SourceLinkInfo &, const SourceLinkInfo & ) override {}
 
-   void startTextLink(const QByteArray &f, const QByteArray &anchor) override;
+   void startTextLink(const QString &f, const QString &anchor) override;
    void endTextLink();
    void startHtmlLink(const QString &url) override;
    void endHtmlLink();
@@ -123,12 +123,14 @@ class RTFGenerator : public OutputGenerator
    void startTypewriter() {
       m_textStream << "{\\f2 ";
    }
+
    void endTypewriter()   {
       m_textStream << "}";
    }
+
    void startGroupHeader(int);
    void endGroupHeader(int);
-   //void writeListItem();
+  
    void startItemListItem();
    void endItemListItem();
 
@@ -136,12 +138,15 @@ class RTFGenerator : public OutputGenerator
    void endMemberSections() {}
    void startHeaderSection() {}
    void endHeaderSection() {}
-   void startMemberHeader(const char *) {
+
+   void startMemberHeader(const QString &) override {
       startGroupHeader(false);
    }
+
    void endMemberHeader() {
       endGroupHeader(false);
    }
+
    void startMemberSubtitle();
    void endMemberSubtitle();
    void startMemberDocList() {}
@@ -152,20 +157,20 @@ class RTFGenerator : public OutputGenerator
    void endInlineHeader();
    void startAnonTypeScope(int) {}
    void endAnonTypeScope(int) {}
-   void startMemberItem(const char *, int, const QByteArray &) override;
+   void startMemberItem(const QString &, int, const QString &) override;
    void endMemberItem();
    void startMemberTemplateParams() {}
-   void endMemberTemplateParams(const char *, const QByteArray &) override {}
+   void endMemberTemplateParams(const QString &, const QString &) override {}
    void insertMemberAlign(bool) {}
 
    void writeRuler() {
       rtfwriteRuler_thin();
    }
 
-   void writeAnchor(const char *fileName, const char *name);
+   void writeAnchor(const QString &fileName, const QString &name) override;
    void startCodeFragment();
    void endCodeFragment();
-   void writeLineNumber(const char *, const QByteArray &, const char *, int l) override {
+   void writeLineNumber(const QString &, const QString &, const QString &, int l) override {
       m_textStream << l << " ";
    }
    void startCodeLine(bool) {
@@ -191,19 +196,18 @@ class RTFGenerator : public OutputGenerator
    void startDescItem();
    void endDescItem();
 
-   void lineBreak(const QByteArray &style = 0) override;
+   void lineBreak(const QString &style = 0) override;
 
-   void startMemberDoc(const char *, const char *, const char *, const char *, bool);
+   void startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool) override;
    void endMemberDoc(bool);
-   void startDoxyAnchor(const char *, const char *, const char *, const char *, const char *);
-   void endDoxyAnchor(const char *, const char *);
+   void startDoxyAnchor(const QString &, const QString &, const QString &, const QString &, const QString &) override;
+   void endDoxyAnchor(const QString &, const QString &) override;
    void writeChar(char c);
 
    void writeLatexSpacing() {};      
- // { m_textStream << "\\hspace{0.3cm}"; }
-
-   void writeStartAnnoItem(const char *type, const QByteArray &file, const QByteArray &path, const char *name) override;
-   void writeEndAnnoItem(const char *name) override;
+   
+   void writeStartAnnoItem(const QString &type, const QString &file, const QString &path, const QString &name) override;
+   void writeEndAnnoItem(const QString &name) override;
 
    void startSubsection();
    void endSubsection();
@@ -222,40 +226,40 @@ class RTFGenerator : public OutputGenerator
       m_textStream << "}";
    }
 
-   void startMemberDescription(const char *, const QByteArray &);
+   void startMemberDescription(const QString &, const QString &) override;
    void endMemberDescription();
    void startMemberDeclaration() {}
-   void endMemberDeclaration(const char *, const QByteArray &) {}
+   void endMemberDeclaration(const QString &, const QString &) override {}
 
-   void writeInheritedSectionTitle(const char *, const QByteArray &, const char *,
-                                   const char *, const char *, const char *) override {}
+   void writeInheritedSectionTitle(const QString &, const QString &, const QString &,
+                                   const QString &, const QString &, const QString &) override {}
 
    void startDescList(SectionTypes);
-   void startSimpleSect(SectionTypes, const QByteArray &, const char *, const char *) override;
+   void startSimpleSect(SectionTypes, const QString &, const QString &, const QString &) override;
    void endSimpleSect();
-   void startParamList(ParamListTypes, const char *);
+   void startParamList(ParamListTypes, const QString &) override;
    void endParamList();
 
    //void writeDescItem();
    void startDescForItem();
    void endDescForItem();
-   void startSection(const char *, const char *, SectionInfo::SectionType);
-   void endSection(const char *, SectionInfo::SectionType);
-   void addIndexItem(const char *, const char *);
+   void startSection(const QString &, const QString &, SectionInfo::SectionType) override;
+   void endSection(const QString &, SectionInfo::SectionType) override;
+   void addIndexItem(const QString &, const QString &) override;
    void startIndent();
    void endIndent();
    void writeSynopsis()     {}
    void startClassDiagram();
-   void endClassDiagram(const ClassDiagram &, const char *filename, const char *name);
+   void endClassDiagram(const ClassDiagram &, const QString &filename, const QString &name) override ;
    void startPageRef();
-   void endPageRef(const QByteArray &, const QByteArray &) override;
+   void endPageRef(const QString &, const QString &) override;
    void startQuickIndices() {}
    void endQuickIndices() {}
    void writeSplitBar(const QString &) override {}
-   void writeNavigationPath(const char *) {}
+   void writeNavigationPath(const QString &) override {}
    void writeLogo() {}
    void writeQuickLinks(bool, HighlightedItem, const QString &) override {}
-   void writeSummaryLink(const QByteArray &, const char *, const char *, bool) override {}
+   void writeSummaryLink(const QString &, const QString &, const QString &, bool) override {}
    void startContents() {}
    void endContents() {}
    void writeNonBreakableSpace(int);
@@ -294,15 +298,15 @@ class RTFGenerator : public OutputGenerator
    void endMemberDocPrefixItem() {}
    void startMemberDocName(bool) {}
    void endMemberDocName() {}
-   void startParameterType(bool, const QByteArray &) override;
+   void startParameterType(bool, const QString &) override;
    void endParameterType();
    void startParameterName(bool) {}
    void endParameterName(bool, bool, bool) {}
    void startParameterList(bool) {}
    void endParameterList() {}
-   void exceptionEntry(const QByteArray &, bool) override ;
+   void exceptionEntry(const QString &, bool) override ;
 
-   void startConstraintList(const char *);
+   void startConstraintList(const QString &) override;
    void startConstraintParam();
    void endConstraintParam();
    void startConstraintType();
@@ -321,14 +325,14 @@ class RTFGenerator : public OutputGenerator
    void endInlineMemberDoc();
 
    void startLabels();
-   void writeLabel(const char *l, bool isLast);
+   void writeLabel(const QString &l, bool isLast) override;
    void endLabels();
 
-   void startFontClass(const char *) {}
+   void startFontClass(const QString &) override {}
    void endFontClass() {}
 
-   void writeCodeAnchor(const char *) {}
-   void setCurrentDoc(QSharedPointer<Definition> d, const char *, bool) override {}
+   void writeCodeAnchor(const QString &) override {}
+   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
    void addWord(const QString &word, bool hiPriority) override {}
 
    static bool preProcessFileInplace(const QString &path, const QString &name);
@@ -347,10 +351,11 @@ class RTFGenerator : public OutputGenerator
    void decrementIndentLevel();
    int  col;
 
-   bool m_bstartedBody;  // has startbody been called yet?
-   int  m_listLevel; // // RTF does not really have a addative indent...manually set list level.
-   bool m_omitParagraph; // should a the next paragraph command be ignored?
-   int  m_numCols; // number of columns in a table
+   bool m_bstartedBody;     // has startbody been called yet?
+   int  m_listLevel;        // RTF does not really have a addative indent...manually set list level.
+   bool m_omitParagraph;    // should a the next paragraph command be ignored?
+   int  m_numCols;          // number of columns in a table
+
    QByteArray relPath;
 
    void beginRTFDocument();
@@ -360,9 +365,7 @@ class RTFGenerator : public OutputGenerator
    void rtfwriteRuler_emboss();
    void rtfwriteRuler_thick();
    void rtfwriteRuler_thin();
-   void writeRTFReference(const char *label);
-
-   //char *getMultiByte(int c);
+   void writeRTFReference(const QString &label);
 };
 
 #endif

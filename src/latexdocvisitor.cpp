@@ -624,19 +624,23 @@ void LatexDocVisitor::visitPre(DocSimpleSect *s)
    if (m_hide) {
       return;
    }
+
    switch (s->type()) {
       case DocSimpleSect::See:
          m_t << "\\begin{DoxySeeAlso}{";
          filter(theTranslator->trSeeAlso());
          break;
+
       case DocSimpleSect::Return:
          m_t << "\\begin{DoxyReturn}{";
          filter(theTranslator->trReturns());
          break;
+
       case DocSimpleSect::Author:
          m_t << "\\begin{DoxyAuthor}{";
          filter(theTranslator->trAuthor(true, true));
          break;
+
       case DocSimpleSect::Authors:
          m_t << "\\begin{DoxyAuthor}{";
          filter(theTranslator->trAuthor(true, false));
@@ -1703,7 +1707,7 @@ void LatexDocVisitor::visitPost(DocParBlock *)
    }
 }
 
-void LatexDocVisitor::filter(const char *str)
+void LatexDocVisitor::filter(const QString &str)
 {
    filterLatexString(m_t, str, m_insideTabbing, m_insidePre, m_insideItem);
 }

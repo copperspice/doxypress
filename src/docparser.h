@@ -19,7 +19,6 @@
 #define DOCPARSER_H
 
 #include <QList>
-#include <QByteArray>
 
 #include <stdio.h>
 
@@ -204,9 +203,9 @@ template<class T> class CompAccept
 class DocWord : public DocNode
 {
  public:
-   DocWord(DocNode *parent, const QByteArray &word);
+   DocWord(DocNode *parent, const QString &word);
 
-   QByteArray word() const {
+   QString word() const {
       return m_word;
    }
 
@@ -219,7 +218,7 @@ class DocWord : public DocNode
    }
 
  private:
-   QByteArray  m_word;
+   QString m_word;
 };
 
 /** Node representing a word that can be linked to something
@@ -227,11 +226,10 @@ class DocWord : public DocNode
 class DocLinkedWord : public DocNode
 {
  public:
-   DocLinkedWord(DocNode *parent, const QByteArray &word,
-                 const QByteArray &ref, const QByteArray &file,
-                 const QByteArray &anchor, const QByteArray &tooltip);
+   DocLinkedWord(DocNode *parent, const QString &word, const QString &ref, const QString &file,
+                 const QString &anchor, const QString &tooltip);
 
-   QByteArray word() const       {
+   QString word() const       {
       return m_word;
    }
 
@@ -239,19 +237,19 @@ class DocLinkedWord : public DocNode
       return Kind_LinkedWord;
    }
 
-   QByteArray file() const       {
+   QString file() const       {
       return m_file;
    }
-   QByteArray relPath() const    {
+   QString relPath() const    {
       return m_relPath;
    }
-   QByteArray ref() const        {
+   QString ref() const        {
       return m_ref;
    }
-   QByteArray anchor() const     {
+   QString anchor() const     {
       return m_anchor;
    }
-   QByteArray tooltip() const    {
+   QString tooltip() const    {
       return m_tooltip;
    }
 
@@ -260,24 +258,24 @@ class DocLinkedWord : public DocNode
    }
 
  private:
-   QByteArray  m_word;
-   QByteArray  m_ref;
-   QByteArray  m_file;
-   QByteArray  m_relPath;
-   QByteArray  m_anchor;
-   QByteArray  m_tooltip;
+   QString  m_word;
+   QString  m_ref;
+   QString  m_file;
+   QString  m_relPath;
+   QString  m_anchor;
+   QString  m_tooltip;
 };
 
 /** Node representing an URL (or email address) */
 class DocURL : public DocNode
 {
  public:
-   DocURL(DocNode *parent, const QByteArray &url, bool isEmail) :
+   DocURL(DocNode *parent, const QString &url, bool isEmail) :
       m_url(url), m_isEmail(isEmail) {
       m_parent = parent;
    }
 
-   QByteArray url() const {
+   QString url() const {
       return m_url;
    }
 
@@ -294,7 +292,7 @@ class DocURL : public DocNode
    }
 
  private:
-   QByteArray  m_url;
+   QString m_url;
    bool m_isEmail;
 };
 
@@ -338,18 +336,18 @@ class DocHorRuler : public DocNode
 class DocAnchor : public DocNode
 {
  public:
-   DocAnchor(DocNode *parent, const QByteArray &id, bool newAnchor);
+   DocAnchor(DocNode *parent, const QString &id, bool newAnchor);
    void parse();
 
    Kind kind() const {
       return Kind_Anchor;
    }
 
-   QByteArray anchor() const {
+   QString anchor() const {
       return m_anchor;
    }
 
-   QByteArray file() const {
+   QString file() const {
       return m_file;
    }
 
@@ -358,31 +356,31 @@ class DocAnchor : public DocNode
    }
 
  private:
-   QByteArray  m_anchor;
-   QByteArray  m_file;
+   QString m_anchor;
+   QString m_file;
 };
 
 /** Node representing a citation of some bibliographic reference */
 class DocCite : public DocNode
 {
  public:
-   DocCite(DocNode *parent, const QByteArray &target, const QByteArray &context);
+   DocCite(DocNode *parent, const QString &target, const QString &context);
    Kind kind() const            {
       return Kind_Ref;
    }
-   QByteArray file() const        {
+   QString file() const        {
       return m_file;
    }
-   QByteArray relPath() const     {
+   QString relPath() const     {
       return m_relPath;
    }
-   QByteArray ref() const         {
+   QString ref() const         {
       return m_ref;
    }
-   QByteArray anchor() const      {
+   QString anchor() const      {
       return m_anchor;
    }
-   QByteArray text() const        {
+   QString text() const        {
       return m_text;
    }
    void accept(DocVisitor *v) {
@@ -390,11 +388,11 @@ class DocCite : public DocNode
    }
 
  private:
-   QByteArray   m_file;
-   QByteArray   m_relPath;
-   QByteArray   m_ref;
-   QByteArray   m_anchor;
-   QByteArray   m_text;
+   QString   m_file;
+   QString   m_relPath;
+   QString   m_ref;
+   QString   m_anchor;
+   QString   m_text;
 };
 
 
@@ -540,7 +538,7 @@ class DocSymbol : public DocNode
    void accept(DocVisitor *v) {
       v->visit(this);
    }
-   static SymType decodeSymbol(const QByteArray &symName);
+   static SymType decodeSymbol(const QString &symName);
 
  private:
    SymType  m_symbol;
@@ -550,7 +548,7 @@ class DocSymbol : public DocNode
 class DocWhiteSpace : public DocNode
 {
  public:
-   DocWhiteSpace(DocNode *parent, const QByteArray &chars) 
+   DocWhiteSpace(DocNode *parent, const QString &chars) 
       : m_chars(chars) {
       m_parent = parent;
    }
@@ -559,7 +557,7 @@ class DocWhiteSpace : public DocNode
       return Kind_WhiteSpace;
    }
 
-   QByteArray chars() const      {
+   QString chars() const      {
       return m_chars;
    }
 
@@ -568,7 +566,7 @@ class DocWhiteSpace : public DocNode
    }
 
  private:
-   QByteArray  m_chars;
+   QString  m_chars;
 };
 
 /** Node representing a verbatim, unparsed text fragment */
@@ -577,9 +575,8 @@ class DocVerbatim : public DocNode
  public:
    enum Type { Code, HtmlOnly, ManOnly, LatexOnly, RtfOnly, XmlOnly, Verbatim, Dot, Msc, DocbookOnly, PlantUML};
 
-   DocVerbatim(DocNode *parent, const QByteArray &context,
-               const QByteArray &text, Type t, bool isExample,
-               const QByteArray &exampleFile, bool isBlock = false, const QByteArray &lang = QByteArray());
+   DocVerbatim(DocNode *parent, const QString &context,const QString &text, Type t, bool isExample,
+               const QString &exampleFile, bool isBlock = false, const QString &lang = QString());
 
    Kind kind() const {
       return Kind_Verbatim;
@@ -589,11 +586,11 @@ class DocVerbatim : public DocNode
       return m_type;
    }
 
-   QByteArray text() const {
+   QString text() const {
       return m_text;
    }
 
-   QByteArray context() const {
+   QString context() const {
       return m_context;
    }
 
@@ -605,15 +602,15 @@ class DocVerbatim : public DocNode
       return m_isExample;
    }
 
-   QByteArray exampleFile() const {
+   QString exampleFile() const {
       return m_exampleFile;
    }
 
-   QByteArray relPath() const {
+   QString relPath() const {
       return m_relPath;
    }
 
-   QByteArray language() const {
+   QString language() const {
       return m_lang;
    }
 
@@ -622,14 +619,14 @@ class DocVerbatim : public DocNode
    }
 
  private:
-   QByteArray  m_context;
-   QByteArray  m_text;
-   Type        m_type;
-   bool        m_isExample;
-   QByteArray  m_exampleFile;
-   QByteArray  m_relPath;
-   QByteArray  m_lang;
-   bool        m_isBlock;
+   QString  m_context;
+   QString  m_text;
+   Type     m_type;
+   bool     m_isExample;
+   QString  m_exampleFile;
+   QString  m_relPath;
+   QString  m_lang;
+   bool     m_isBlock;
 };
 
 
@@ -638,13 +635,10 @@ class DocInclude : public DocNode
 {
  public:
    enum Type { Include, DontInclude, VerbInclude, HtmlInclude, LatexInclude, IncWithLines, Snippet };
-   DocInclude(DocNode *parent, const QByteArray &file,
-              const QByteArray context, Type t,
-              bool isExample, const QByteArray exampleFile,
-              const QByteArray blockId) :
-      m_file(file), m_context(context), m_type(t),
-      m_isExample(isExample), m_exampleFile(exampleFile),
-      m_blockId(blockId) {
+   DocInclude(DocNode *parent, const QString &file, const QString context, Type t,
+              bool isExample, const QString exampleFile, const QString blockId) 
+      : m_file(file), m_context(context), m_type(t), m_isExample(isExample), m_exampleFile(exampleFile), m_blockId(blockId) { 
+
       m_parent = parent;
    }
 
@@ -652,11 +646,11 @@ class DocInclude : public DocNode
       return Kind_Include;
    }
 
-   QByteArray file() const        {
+   QString file() const        {
       return m_file;
    }
 
-   QByteArray extension() const   {
+   QString extension() const   {
       int i = m_file.lastIndexOf('.');
 
       if (i != -1) {
@@ -670,15 +664,15 @@ class DocInclude : public DocNode
       return m_type;
    }
 
-   QByteArray text() const        {
+   QString text() const        {
       return m_text;
    }
 
-   QByteArray context() const     {
+   QString context() const     {
       return m_context;
    }
 
-   QByteArray blockId() const     {
+   QString blockId() const     {
       return m_blockId;
    }
 
@@ -686,7 +680,7 @@ class DocInclude : public DocNode
       return m_isExample;
    }
 
-   QByteArray exampleFile() const {
+   QString exampleFile() const {
       return m_exampleFile;
    }
 
@@ -697,13 +691,13 @@ class DocInclude : public DocNode
    void parse();
 
  private:
-   QByteArray  m_file;
-   QByteArray  m_context;
-   QByteArray  m_text;
-   Type      m_type;
-   bool      m_isExample;
-   QByteArray  m_exampleFile;
-   QByteArray  m_blockId;
+   QString  m_file;
+   QString  m_context;
+   QString  m_text;
+   Type     m_type;
+   bool     m_isExample;
+   QString  m_exampleFile;
+   QString  m_blockId;
 };
 
 /** Node representing a include/dontinclude operator block */
@@ -711,26 +705,27 @@ class DocIncOperator : public DocNode
 {
  public:
    enum Type { Line, SkipLine, Skip, Until };
-   DocIncOperator(DocNode *parent, Type t, const QByteArray &pat,
-                  const QByteArray &context, bool isExample, const QByteArray &exampleFile) :
-      m_type(t), m_pattern(pat), m_context(context),
-      m_isFirst(false), m_isLast(false),
-      m_isExample(isExample), m_exampleFile(exampleFile) {
+   DocIncOperator(DocNode *parent, Type t, const QString &pat, const QString &context, bool isExample, 
+                  const QString &exampleFile) 
+      : m_type(t), m_pattern(pat), m_context(context), m_isFirst(false), m_isLast(false), 
+        m_isExample(isExample), m_exampleFile(exampleFile) {
+
       m_parent = parent;
    }
+
    Kind kind() const           {
       return Kind_IncOperator;
    }
    Type type() const           {
       return m_type;
    }
-   QByteArray text() const        {
+   QString text() const        {
       return m_text;
    }
-   QByteArray pattern() const     {
+   QString pattern() const     {
       return m_pattern;
    }
-   QByteArray context() const     {
+   QString context() const     {
       return m_context;
    }
    void accept(DocVisitor *v)  {
@@ -751,20 +746,20 @@ class DocIncOperator : public DocNode
    bool isExample() const      {
       return m_isExample;
    }
-   QByteArray exampleFile() const {
+   QString exampleFile() const {
       return m_exampleFile;
    }
    void parse();
 
  private:
    Type     m_type;
-   QByteArray  m_text;
-   QByteArray  m_pattern;
-   QByteArray  m_context;
+   QString  m_text;
+   QString  m_pattern;
+   QString  m_context;
    bool     m_isFirst;
    bool     m_isLast;
    bool     m_isExample;
-   QByteArray  m_exampleFile;
+   QString  m_exampleFile;
 };
 
 /** Node representing an item of a cross-referenced list */
@@ -775,13 +770,13 @@ class DocFormula : public DocNode
    Kind kind() const          {
       return Kind_Formula;
    }
-   QByteArray name() const       {
+   QString name() const       {
       return m_name;
    }
-   QByteArray text() const       {
+   QString text() const       {
       return m_text;
    }
-   QByteArray relPath() const    {
+   QString relPath() const    {
       return m_relPath;
    }
    int id() const             {
@@ -795,9 +790,9 @@ class DocFormula : public DocNode
    }
 
  private:
-   QByteArray  m_name;
-   QByteArray  m_text;
-   QByteArray  m_relPath;
+   QString  m_name;
+   QString  m_text;
+   QString  m_relPath;
    int m_id;
 };
 
@@ -824,7 +819,7 @@ class DocIndexEntry : public DocNode
       return m_member;
    }
 
-   QByteArray entry() const        {
+   QString entry() const        {
       return m_entry;
    }
    void accept(DocVisitor *v)   {
@@ -832,7 +827,7 @@ class DocIndexEntry : public DocNode
    }
 
  private:
-   QByteArray m_entry;
+   QString m_entry;
 
    QSharedPointer<Definition> m_scope;
    QSharedPointer<MemberDef>  m_member;
@@ -842,7 +837,7 @@ class DocIndexEntry : public DocNode
 class DocCopy : public DocNode
 {
  public:
-   DocCopy(DocNode *parent, const QByteArray &link, bool copyBrief, bool copyDetails)
+   DocCopy(DocNode *parent, const QString &link, bool copyBrief, bool copyDetails)
       : m_link(link), m_copyBrief(copyBrief), m_copyDetails(copyDetails) {
       m_parent = parent;
    }
@@ -851,7 +846,7 @@ class DocCopy : public DocNode
       return Kind_Copy;
    }
 
-   QByteArray link() const       {
+   QString link() const       {
       return m_link;
    }
 
@@ -862,7 +857,7 @@ class DocCopy : public DocNode
    void parse(QList<DocNode *> &children);
 
  private:
-   QByteArray  m_link;
+   QString  m_link;
    bool     m_copyBrief;
    bool     m_copyDetails;
 };
@@ -926,7 +921,7 @@ class DocTitle : public CompAccept<DocTitle>, public DocNode
       m_parent = parent;
    }
    void parse();
-   void parseFromString(const QByteArray &title);
+   void parseFromString(const QString &title);
    Kind kind() const          {
       return Kind_Title;
    }
@@ -945,19 +940,19 @@ class DocXRefItem : public CompAccept<DocXRefItem>, public DocNode
    Kind kind() const          {
       return Kind_XRefItem;
    }
-   QByteArray file() const       {
+   QString file() const       {
       return m_file;
    }
-   QByteArray anchor() const     {
+   QString anchor() const     {
       return m_anchor;
    }
-   QByteArray title() const      {
+   QString title() const      {
       return m_title;
    }
-   QByteArray relPath() const    {
+   QString relPath() const    {
       return m_relPath;
    }
-   QByteArray key() const        {
+   QString key() const        {
       return m_key;
    }
    void accept(DocVisitor *v) {
@@ -967,11 +962,11 @@ class DocXRefItem : public CompAccept<DocXRefItem>, public DocNode
 
  private:
    int      m_id;
-   QByteArray  m_key;
-   QByteArray  m_file;
-   QByteArray  m_anchor;
-   QByteArray  m_title;
-   QByteArray  m_relPath;
+   QString  m_key;
+   QString  m_file;
+   QString  m_anchor;
+   QString  m_title;
+   QString  m_relPath;
 };
 
 /** Node representing an image */
@@ -979,30 +974,30 @@ class DocImage : public CompAccept<DocImage>, public DocNode
 {
  public:
    enum Type { Html, Latex, Rtf, DocBook };
-   DocImage(DocNode *parent, const HtmlAttribList &attribs,
-            const QByteArray &name, Type t, const QByteArray &url = QByteArray());
+
+   DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString &name, Type t, const QString &url = QString());
    Kind kind() const           {
       return Kind_Image;
    }
    Type type() const           {
       return m_type;
    }
-   QByteArray name() const       {
+   QString name() const       {
       return m_name;
    }
    bool hasCaption() const     {
       return !m_children.isEmpty();
    }
-   QByteArray width() const      {
+   QString width() const      {
       return m_width;
    }
-   QByteArray height() const     {
+   QString height() const     {
       return m_height;
    }
-   QByteArray relPath() const    {
+   QString relPath() const    {
       return m_relPath;
    }
-   QByteArray url() const        {
+   QString url() const        {
       return m_url;
    }
    const HtmlAttribList &attribs() const {
@@ -1015,159 +1010,163 @@ class DocImage : public CompAccept<DocImage>, public DocNode
 
  private:
    HtmlAttribList m_attribs;
-   QByteArray  m_name;
+   QString  m_name;
    Type     m_type;
-   QByteArray  m_width;
-   QByteArray  m_height;
-   QByteArray  m_relPath;
-   QByteArray  m_url;
+   QString  m_width;
+   QString  m_height;
+   QString  m_relPath;
+   QString  m_url;
 };
 
 /** Node representing a dot file */
 class DocDotFile : public CompAccept<DocDotFile>, public DocNode
 {
  public:
-   DocDotFile(DocNode *parent, const QByteArray &name, const QByteArray &context);
+   DocDotFile(DocNode *parent, const QString &name, const QString &context);
    void parse();
+
    Kind kind() const          {
       return Kind_DotFile;
    }
-   QByteArray name() const       {
+   QString name() const       {
       return m_name;
    }
-   QByteArray file() const       {
+   QString file() const       {
       return m_file;
    }
-   QByteArray relPath() const    {
+   QString relPath() const    {
       return m_relPath;
    }
    bool hasCaption() const    {
       return !m_children.isEmpty();
    }
-   QByteArray width() const      {
+   QString width() const      {
       return m_width;
    }
-   QByteArray height() const     {
+   QString height() const     {
       return m_height;
    }
-   QByteArray context() const    {
+   QString context() const    {
       return m_context;
    }
    void accept(DocVisitor *v) {
       CompAccept<DocDotFile>::accept(this, v);
    }
  private:
-   QByteArray  m_name;
-   QByteArray  m_file;
-   QByteArray  m_relPath;
-   QByteArray  m_width;
-   QByteArray  m_height;
-   QByteArray  m_context;
+   QString  m_name;
+   QString  m_file;
+   QString  m_relPath;
+   QString  m_width;
+   QString  m_height;
+   QString  m_context;
 };
 
 /** Node representing a msc file */
 class DocMscFile : public CompAccept<DocMscFile>, public DocNode
 {
  public:
-   DocMscFile(DocNode *parent, const QByteArray &name, const QByteArray &context);
+   DocMscFile(DocNode *parent, const QString &name, const QString &context);
    void parse();
+
    Kind kind() const          {
       return Kind_MscFile;
    }
-   QByteArray name() const      {
+   QString name() const      {
       return m_name;
    }
-   QByteArray file() const      {
+   QString file() const      {
       return m_file;
    }
-   QByteArray relPath() const   {
+   QString relPath() const   {
       return m_relPath;
    }
    bool hasCaption() const    {
       return !m_children.isEmpty();
    }
-   QByteArray width() const     {
+   QString width() const     {
       return m_width;
    }
-   QByteArray height() const    {
+   QString height() const    {
       return m_height;
    }
-   QByteArray context() const   {
+   QString context() const   {
       return m_context;
    }
    void accept(DocVisitor *v) {
       CompAccept<DocMscFile>::accept(this, v);
    }
+
  private:
-   QByteArray  m_name;
-   QByteArray  m_file;
-   QByteArray  m_relPath;
-   QByteArray  m_width;
-   QByteArray  m_height;
-   QByteArray  m_context;
+   QString  m_name;
+   QString  m_file;
+   QString  m_relPath;
+   QString  m_width;
+   QString  m_height;
+   QString  m_context;
 };
 
 /** Node representing a dia file */
 class DocDiaFile : public CompAccept<DocDiaFile>, public DocNode
 {
  public:
-   DocDiaFile(DocNode *parent, const QByteArray &name, const QByteArray &context);
+   DocDiaFile(DocNode *parent, const QString &name, const QString &context);
    void parse();
    Kind kind() const          {
       return Kind_DiaFile;
    }
-   QByteArray name() const      {
+   QString name() const      {
       return m_name;
    }
-   QByteArray file() const      {
+   QString file() const      {
       return m_file;
    }
-   QByteArray relPath() const   {
+   QString relPath() const   {
       return m_relPath;
    }
    bool hasCaption() const    {
       return !m_children.isEmpty();
    }
-   QByteArray width() const     {
+   QString width() const     {
       return m_width;
    }
-   QByteArray height() const    {
+   QString height() const    {
       return m_height;
    }
-   QByteArray context() const   {
+   QString context() const   {
       return m_context;
    }
    void accept(DocVisitor *v) {
       CompAccept<DocDiaFile>::accept(this, v);
    }
  private:
-   QByteArray  m_name;
-   QByteArray  m_file;
-   QByteArray  m_relPath;
-   QByteArray  m_width;
-   QByteArray  m_height;
-   QByteArray  m_context;
+   QString  m_name;
+   QString  m_file;
+   QString  m_relPath;
+   QString  m_width;
+   QString  m_height;
+   QString  m_context;
 };
 
 /** Node representing a link to some item */
 class DocLink : public CompAccept<DocLink>, public DocNode
 {
  public:
-   DocLink(DocNode *parent, const QByteArray &target);
-   QByteArray parse(bool, bool isXmlLink = false);
+   DocLink(DocNode *parent, const QString &target);
+   QString parse(bool, bool isXmlLink = false);
+
    Kind kind() const          {
       return Kind_Link;
    }
-   QByteArray file() const       {
+   QString file() const       {
       return m_file;
    }
-   QByteArray relPath() const    {
+   QString relPath() const    {
       return m_relPath;
    }
-   QByteArray ref() const        {
+   QString ref() const        {
       return m_ref;
    }
-   QByteArray anchor() const     {
+   QString anchor() const     {
       return m_anchor;
    }
    void accept(DocVisitor *v) {
@@ -1175,39 +1174,39 @@ class DocLink : public CompAccept<DocLink>, public DocNode
    }
 
  private:
-   QByteArray  m_file;
-   QByteArray  m_relPath;
-   QByteArray  m_ref;
-   QByteArray  m_anchor;
-   QByteArray  m_refText;
+   QString  m_file;
+   QString  m_relPath;
+   QString  m_ref;
+   QString  m_anchor;
+   QString  m_refText;
 };
 
 /** Node representing a reference to some item */
 class DocRef : public CompAccept<DocRef>, public DocNode
 {
  public:
-   DocRef(DocNode *parent, const QByteArray &target, const QByteArray &context);
+   DocRef(DocNode *parent, const QString &target, const QString &context);
    void parse();
 
    Kind kind() const {
       return Kind_Ref;
    }
 
-   QByteArray file() const{
+   QString file() const{
       return m_file;
    }
 
-   QByteArray relPath() const {
+   QString relPath() const {
       return m_relPath;
    }
-   QByteArray ref() const {
+   QString ref() const {
       return m_ref;
    }
-   QByteArray anchor() const {
+   QString anchor() const {
       return m_anchor;
    }
 
-   QByteArray targetTitle() const {
+   QString targetTitle() const {
       return m_text;
    }
 
@@ -1236,29 +1235,29 @@ class DocRef : public CompAccept<DocRef>, public DocNode
    bool m_refToAnchor;
    bool m_isSubPage;
 
-   QByteArray   m_file;
-   QByteArray   m_relPath;
-   QByteArray   m_ref;
-   QByteArray   m_anchor;
-   QByteArray   m_text;
+   QString   m_file;
+   QString   m_relPath;
+   QString   m_ref;
+   QString   m_anchor;
+   QString   m_text;
 };
 
 /** Node representing an internal reference to some item */
 class DocInternalRef : public CompAccept<DocInternalRef>, public DocNode
 {
  public:
-   DocInternalRef(DocNode *parent, const QByteArray &target);
+   DocInternalRef(DocNode *parent, const QString &target);
    void parse();
    Kind kind() const            {
       return Kind_Ref;
    }
-   QByteArray file() const         {
+   QString file() const         {
       return m_file;
    }
-   QByteArray relPath() const      {
+   QString relPath() const      {
       return m_relPath;
    }
-   QByteArray anchor() const       {
+   QString anchor() const       {
       return m_anchor;
    }
    void accept(DocVisitor *v)   {
@@ -1266,25 +1265,25 @@ class DocInternalRef : public CompAccept<DocInternalRef>, public DocNode
    }
 
  private:
-   QByteArray   m_file;
-   QByteArray   m_relPath;
-   QByteArray   m_anchor;
+   QString   m_file;
+   QString   m_relPath;
+   QString   m_anchor;
 };
 
 /** Node representing a Hypertext reference */
 class DocHRef : public CompAccept<DocHRef>, public DocNode
 {
  public:
-   DocHRef(DocNode *parent, const HtmlAttribList &attribs, const QByteArray &url,
-           const QByteArray &relPath) :
-      m_attribs(attribs), m_url(url), m_relPath(relPath) {
+   DocHRef(DocNode *parent, const HtmlAttribList &attribs, const QString &url, const QString &relPath) 
+      : m_attribs(attribs), m_url(url), m_relPath(relPath) {
       m_parent = parent;
    }
+
    int parse();
-   QByteArray url() const        {
+   QString url() const        {
       return m_url;
    }
-   QByteArray relPath() const    {
+   QString relPath() const    {
       return m_relPath;
    }
    Kind kind() const           {
@@ -1299,8 +1298,8 @@ class DocHRef : public CompAccept<DocHRef>, public DocNode
 
  private:
    HtmlAttribList m_attribs;
-   QByteArray   m_url;
-   QByteArray   m_relPath;
+   QString   m_url;
+   QString   m_relPath;
 };
 
 /** Node Html heading */
@@ -1380,8 +1379,8 @@ class DocHtmlDescList : public CompAccept<DocHtmlDescList>, public DocNode
 class DocSection : public CompAccept<DocSection>, public DocNode
 {
  public:
-   DocSection(DocNode *parent, int level, const QByteArray &id) :
-      m_level(level), m_id(id) {
+   DocSection(DocNode *parent, int level, const QString &id) 
+      : m_level(level), m_id(id) {
       m_parent = parent;
    }
    Kind kind() const          {
@@ -1390,16 +1389,16 @@ class DocSection : public CompAccept<DocSection>, public DocNode
    int level() const          {
       return m_level;
    }
-   QByteArray title() const      {
+   QString title() const      {
       return m_title;
    }
-   QByteArray anchor() const     {
+   QString anchor() const     {
       return m_anchor;
    }
-   QByteArray id() const         {
+   QString id() const         {
       return m_id;
    }
-   QByteArray file() const       {
+   QString file() const       {
       return m_file;
    }
    void accept(DocVisitor *v) {
@@ -1409,30 +1408,30 @@ class DocSection : public CompAccept<DocSection>, public DocNode
 
  private:
    int      m_level;
-   QByteArray  m_id;
-   QByteArray  m_title;
-   QByteArray  m_anchor;
-   QByteArray  m_file;
+   QString  m_id;
+   QString  m_title;
+   QString  m_anchor;
+   QString  m_file;
 };
 
 /** Node representing a reference to a section */
 class DocSecRefItem : public CompAccept<DocSecRefItem>, public DocNode
 {
  public:
-   DocSecRefItem(DocNode *parent, const QByteArray &target) :
+   DocSecRefItem(DocNode *parent, const QString &target) :
       m_target(target) {
       m_parent = parent;
    }
    Kind kind() const          {
       return Kind_SecRefItem;
    }
-   QByteArray target() const     {
+   QString target() const     {
       return m_target;
    }
-   QByteArray file() const       {
+   QString file() const       {
       return m_file;
    }
-   QByteArray anchor() const     {
+   QString anchor() const     {
       return m_anchor;
    }
    void accept(DocVisitor *v) {
@@ -1441,9 +1440,9 @@ class DocSecRefItem : public CompAccept<DocSecRefItem>, public DocNode
    void parse();
 
  private:
-   QByteArray  m_target;
-   QByteArray  m_file;
-   QByteArray  m_anchor;
+   QString  m_target;
+   QString  m_file;
+   QString  m_anchor;
 };
 
 /** Node representing a list of section references */
@@ -1564,12 +1563,12 @@ class DocSimpleSect : public CompAccept<DocSimpleSect>, public DocNode
    Type type() const       {
       return m_type;
    }
-   QByteArray typeString() const;
+   QString typeString() const;
    void accept(DocVisitor *v);
    int parse(bool userTitle, bool needsSeparator);
    int parseRcs();
    int parseXml();
-   void appendLinkWord(const QByteArray &word);
+   void appendLinkWord(const QString &word);
 
  private:
    Type            m_type;
@@ -1611,7 +1610,7 @@ class DocParamSect : public CompAccept<DocParamSect>, public DocNode
       : m_type(t), m_hasInOutSpecifier(false), m_hasTypeSpecifier(false) {
       m_parent = parent;
    }
-   int parse(const QByteArray &cmdName, bool xmlContext, Direction d);
+   int parse(const QString &cmdName, bool xmlContext, Direction d);
    Kind kind() const          {
       return Kind_ParamSect;
    }
@@ -1669,32 +1668,32 @@ class DocPara : public CompAccept<DocPara>, public DocNode
       return m_isLast;
    }
 
-   int handleCommand(const QByteArray &cmdName);
-   int handleHtmlStartTag(const QByteArray &tagName, const HtmlAttribList &tagHtmlAttribs);
-   int handleHtmlEndTag(const QByteArray &tagName);
+   int handleCommand(const QString &cmdName);
+   int handleHtmlStartTag(const QString &tagName, const HtmlAttribList &tagHtmlAttribs);
+   int handleHtmlEndTag(const QString &tagName);
    int handleSimpleSection(DocSimpleSect::Type t, bool xmlContext = false);
    int handleXRefItem();
-   int handleParamSection(const QByteArray &cmdName, DocParamSect::Type t, bool xmlContext, int direction);
-   void handleIncludeOperator(const QByteArray &cmdName, DocIncOperator::Type t);
-   void handleImage(const QByteArray &cmdName);
-   void handleDotFile(const QByteArray &cmdName);
-   void handleMscFile(const QByteArray &cmdName);
-   void handleDiaFile(const QByteArray &cmdName);
-   void handleInclude(const QByteArray &cmdName, DocInclude::Type t);
-   void handleLink(const QByteArray &cmdName, bool isJavaLink);
+   int handleParamSection(const QString &cmdName, DocParamSect::Type t, bool xmlContext, int direction);
+   void handleIncludeOperator(const QString &cmdName, DocIncOperator::Type t);
+   void handleImage(const QString &cmdName);
+   void handleDotFile(const QString &cmdName);
+   void handleMscFile(const QString &cmdName);
+   void handleDiaFile(const QString &cmdName);
+   void handleInclude(const QString &cmdName, DocInclude::Type t);
+   void handleLink(const QString &cmdName, bool isJavaLink);
    void handleCite();
-   void handleRef(const QByteArray &cmdName);
-   void handleSection(const QByteArray &cmdName);
+   void handleRef(const QString &cmdName);
+   void handleSection(const QString &cmdName);
    void handleSortId();
    void handleInheritDoc();
  
    int handleStartCode();
    int handleHtmlHeader(const HtmlAttribList &tagHtmlAttribs, int level);
 
-   bool injectToken(int tok, const QByteArray &tokText);
+   bool injectToken(int tok, const QString &tokText);
 
  private:
-   QByteArray  m_sectionId;
+   QString  m_sectionId;
    bool m_isFirst;
    bool m_isLast;
 };
@@ -1757,8 +1756,8 @@ class DocParamList : public DocNode
       v->visitPost(this);
    }
 
-   int parse(const QByteArray &cmdName);
-   int parseXml(const QByteArray &paramName);
+   int parse(const QString &cmdName);
+   int parseXml(const QString &paramName);
 
  private:
    QList<DocPara>          m_paragraphs;

@@ -68,9 +68,9 @@ class TextGeneratorIntf
  public:
    virtual ~TextGeneratorIntf() {}
 
-   virtual void writeString(const char *, bool) const = 0;
+   virtual void writeString(const QString &, bool) const = 0;
    virtual void writeBreak(int indent) const = 0;
-   virtual void writeLink(const QByteArray &extRef, const QByteArray &file, const QByteArray &anchor, const QByteArray &text) const = 0;
+   virtual void writeLink(const QString &extRef, const QString &file, const QString &anchor, const QString &text) const = 0;
 };
 
 /** Implements TextGeneratorIntf for an OutputDocInterface stream. */
@@ -80,9 +80,9 @@ class TextGeneratorOLImpl : public TextGeneratorIntf
    TextGeneratorOLImpl(OutputDocInterface &od);
    virtual ~TextGeneratorOLImpl() {}
   
-   void writeString(const char *s, bool keepSpaces) const override;
+   void writeString(const QString &text, bool keepSpaces) const override;
    void writeBreak(int indent) const override;
-   void writeLink(const QByteArray &extRef, const QByteArray &file, const QByteArray &anchor, const QByteArray &text) const override;
+   void writeLink(const QString &extRef, const QString &file, const QString &anchor, const QString &text) const override;
 
   private:
    OutputDocInterface &m_od;
@@ -176,13 +176,13 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
 void mergeArguments(ArgumentList *, ArgumentList *, bool forceNameOverwrite = false);
 
 
-QSharedPointer<ClassDef> getClass(const QByteArray &key);
+QSharedPointer<ClassDef> getClass(const QString &key);
 
-QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QByteArray &key, 
+QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QString &key, 
                   QSharedPointer<MemberDef> *pTypeDef = 0, QByteArray *pTemplSpec = 0, bool mayBeUnlinkable = false, 
                   bool mayBeHidden = false, QByteArray *pResolvedType = 0);
 
-QSharedPointer<NamespaceDef> getResolvedNamespace(const QByteArray &key);
+QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &key);
 QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &name, bool &ambig);
 
 QByteArray showFileDefMatches(const FileNameDict *fnDict, const QByteArray &xName);
@@ -190,33 +190,32 @@ QByteArray showFileDefMatches(const FileNameDict *fnDict, const QByteArray &xNam
 int guessSection(const QByteArray &name);
 
 QByteArray argListToString(ArgumentList *al, bool useCanonicalType = false, bool showDefVals = true);
-QByteArray tempArgListToString(const ArgumentList *al, SrcLangExt lang);
+QString tempArgListToString(const ArgumentList *al, SrcLangExt lang);
 
 void writeExample(OutputList &ol, ExampleSDict *el);
 
-bool rightScopeMatch(const QByteArray &scope, const QByteArray &name);
-bool leftScopeMatch(const QByteArray &scope, const QByteArray &name);
+bool rightScopeMatch(const QString &scope, const QString &name);
+bool leftScopeMatch(const QString&scope, const QString &name);
 
 
 bool resolveRef(const QByteArray &scName, const QByteArray &tsname, bool inSeeBlock, QSharedPointer<Definition> *resContext, 
                   QSharedPointer<MemberDef> *resMember, bool lookForSpecializations = true, 
                   QSharedPointer<FileDef> currentFile = QSharedPointer<FileDef>(), bool checkScope = false);
 
-bool resolveLink(const QByteArray &scName, const QByteArray &linkRef, bool inSeeBlock, QSharedPointer<Definition> *resContext, QByteArray &resAnchor);
+bool resolveLink(const QString &scName, const QString &linkRef, bool inSeeBlock, QSharedPointer<Definition> *resContext, QString &resAnchor);
 
-QByteArray removeRedundantWhiteSpace(const QByteArray &s);
+QString removeRedundantWhiteSpace(const QString &s);
 QByteArray removeAnonymousScopes(const QByteArray &s);
 QByteArray resolveDefines(const char *n);
 QByteArray replaceAnonymousScopes(const QByteArray &s, const QByteArray &replacement = QByteArray() );
 
-
-QByteArray stripAnonymousNamespaceScope(const QByteArray &s);
+QString stripAnonymousNamespaceScope(const QString &s);
 QString stripFromPath(const QString &path);
 QString stripFromIncludePath(const QString &path);
 void setAnchors(QSharedPointer<MemberList> ml);
 
 QByteArray substituteClassNames(const QByteArray &s);
-QByteArray substitute(const QByteArray &s, const QByteArray &src, const QByteArray &dst);
+QString substitute(const QString &s, const QString &src, const QString &dst);
 
 void initClassHierarchy(ClassSDict *cl);
 
@@ -231,12 +230,11 @@ Protection classInheritedProtectionLevel(QSharedPointer<ClassDef> cd, QSharedPoi
 
 QString convertNameToFile(const QString &name, bool allowDots = false, bool allowUnderscore = false);
 
-void extractNamespaceName(const QByteArray &scopeName, QByteArray &className, QByteArray &namespaceName,
-                  bool allowEmptyClass = false);
+void extractNamespaceName(const QString &scopeName, QString &className, QString &namespaceName, bool allowEmptyClass = false);
 
-QByteArray insertTemplateSpecifierInScope(const QByteArray &scope, const QByteArray &templ);
+QString insertTemplateSpecifierInScope(const QString &scope, const QString &templ);
 
-QByteArray stripScope(const QByteArray &name);
+QString stripScope(const QString &name);
 
 QByteArray convertToHtml(const QString &s, bool keepEntities = true);
 QByteArray convertToXML(const QString &s);
@@ -255,22 +253,21 @@ QByteArray substituteTemplateArgumentsInString(const QByteArray &name, ArgumentL
 
 QList<ArgumentList> *copyArgumentLists(const QList<ArgumentList> *srcLists);
 
-QByteArray stripTemplateSpecifiersFromScope(const QByteArray &fullName, bool parentOnly = true,
-                  QByteArray *lastScopeStripped = 0);
+QString stripTemplateSpecifiersFromScope(const QString &fullName, bool parentOnly = true, QString *lastScopeStripped = 0);
 
 QByteArray resolveTypeDef(QSharedPointer<Definition> d, const QByteArray &name, 
                   QSharedPointer<Definition> *typedefContext = nullptr);
 
-QByteArray mergeScopes(const QByteArray &leftScope, const QByteArray &rightScope);
+QString mergeScopes(const QString &leftScope, const QString &rightScope);
 
-int getScopeFragment(const QByteArray &s, int p, int *l);
+int getScopeFragment(const QString &s, int p, int *l);
 
 int filterCRLF(char *buf, int len);
 
-void addRefItem(const QList<ListItemInfo> *sli, const QByteArray &key, const QByteArray &prefix, 
-                  const QByteArray &name, const QByteArray &title, const QByteArray &args, QSharedPointer<Definition> scope);
+void addRefItem(const QList<ListItemInfo> *sli, const QString &key, const QString &prefix, 
+                  const QString &name, const QString &title, const QString &args, QSharedPointer<Definition> scope);
 
-QSharedPointer<PageDef> addRelatedPage(const QByteArray &name, const QByteArray &ptitle, const QByteArray &doc, QList<SectionInfo> *anchors,
+QSharedPointer<PageDef> addRelatedPage(const QByteArray &name, const QString &ptitle, const QByteArray &doc, QList<SectionInfo> *anchors,
                   const QByteArray &fileName, int startLine, const QList<ListItemInfo> *sli, 
                   QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>(),
                   TagInfo *tagInfo = 0, SrcLangExt lang = SrcLangExt_Unknown );
@@ -279,10 +276,10 @@ QByteArray escapeCharsInString(const QString &name, bool allowDots, bool allowUn
 
 void addGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d);
 
-void filterLatexString(QTextStream &t, const QByteArray &str, bool insideTabbing = false,
+void filterLatexString(QTextStream &t, const QString &str, bool insideTabbing = false,
                   bool insidePre = false, bool insideItem = false);
 
-QByteArray rtfFormatBmkStr(const QByteArray &name);
+QString rtfFormatBmkStr(const QString &name);
 
 QByteArray linkToText(SrcLangExt lang, const QByteArray &link, bool isFileName);
 
@@ -310,7 +307,7 @@ bool findAndRemoveWord(QByteArray &s, const QByteArray &word);
 QByteArray stripLeadingAndTrailingEmptyLines(const QByteArray &s, int &docLine);
 
 bool updateLanguageMapping(const QString &extension, const QString &parser);
-SrcLangExt getLanguageFromFileName(const QByteArray fileName);
+SrcLangExt getLanguageFromFileName(const QString &fileName);
 void initDefaultExtensionMapping();
 
 QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QByteArray &name);
@@ -383,9 +380,9 @@ bool fileVisibleInIndex(QSharedPointer<FileDef> fd, bool &genSourceFile);
 
 void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDef> dst);
 
-uint getUtf8Code( const QByteArray &s, int idx );
-uint getUtf8CodeToLower( const QByteArray &s, int idx );
-uint getUtf8CodeToUpper( const QByteArray &s, int idx );
+uint getUtf8Code( const QString &s, int idx );
+uint getUtf8CodeToLower( const QString &s, int idx );
+uint getUtf8CodeToUpper( const QString &s, int idx );
 
 QByteArray extractDirection(QString docs);
 

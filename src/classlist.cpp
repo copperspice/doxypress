@@ -29,9 +29,10 @@ static int compItems(const QSharedPointer<ClassDef> &c1, const QSharedPointer<Cl
    static bool b = Config::getBool("sort-by-scope-name");
 
    if (b) {
-      return qstricmp(c1->name(), c2->name());
+      return c1->name().compare(c2->name(), Qt::CaseInsensitive);
+
    } else {
-      return qstricmp(c1->className(), c2->className());
+      return c1->className().compare(c2->className(), Qt::CaseInsensitive);      
    }
 }
 
@@ -64,7 +65,7 @@ bool ClassSDict::declVisible(const ClassDef::CompoundType *filter) const
    return false;
 }
 
-void ClassSDict::writeDeclaration(OutputList &ol, const ClassDef::CompoundType *filter, const char *header, bool localNames)
+void ClassSDict::writeDeclaration(OutputList &ol, const ClassDef::CompoundType *filter, const QString &header, bool localNames)
 {
    static bool extractPrivate = Config::getBool("extract-private");
 

@@ -54,18 +54,18 @@ class GroupDef : public Definition
       return TypeGroup;
    }
 
-   QByteArray getOutputFileBase() const;
+   QString getOutputFileBase() const;
 
-   QByteArray anchor() const {
-      return QByteArray();
+   QString anchor() const  override {
+      return "";
    }
 
    QString displayName(bool = true) const override {
-      return hasGroupTitle() ? title : Definition::name();
+      return hasGroupTitle() ? m_title : Definition::name();
    }
 
-   const char *groupTitle() const {
-      return title;
+   QString groupTitle() const {
+      return m_title;
    }
 
    void setGroupTitle( const char *newtitle );
@@ -189,7 +189,7 @@ class GroupDef : public Definition
 
    void updateLanguage(QSharedPointer<const Definition> d);
 
-   QByteArray title;                    // title of the group
+   QString m_title;                     // title of the group
    bool titleSet;                       // true if title is not the same as the name
    QString fileName;                    // base name of the generated file
    
@@ -224,7 +224,7 @@ class GroupSDict : public StringMap<QSharedPointer<GroupDef>>
 
  private:
    int compareMapValues(const QSharedPointer<GroupDef> &item1, const QSharedPointer<GroupDef> &item2) const override {
-      return qstrcmp(item1->groupTitle(), item2->groupTitle());
+      return item1->groupTitle().compare(item2->groupTitle());
    }
 };
 

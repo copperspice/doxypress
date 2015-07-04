@@ -48,7 +48,7 @@ ClassDef::ClassDef(const char *defFileName, int defLine, int defColumn, const QB
    m_isJavaEnum = isJavaEnum;
 
    QByteArray tname = name();   
-   const QByteArray ctStr = compoundTypeString();
+   const QString ctStr = compoundTypeString();
 
    if (! fName.isEmpty()) {
       m_fileName = stripExtension(fName);
@@ -137,10 +137,10 @@ QString ClassDef::displayName(bool includeScope) const
       n = className();
    }
 
-   QByteArray sep = getLanguageSpecificSeparator(lang);
+   QString sep = getLanguageSpecificSeparator(lang);
 
    if (sep != "::") {
-      n = substitute(n.toUtf8(), "::", sep);
+      n = substitute(n, "::", sep);
    }
 
    if (m_compType == ClassDef::Protocol && n.right(2) == "-p") {
@@ -665,7 +665,7 @@ void ClassDef::setIncludeFile(QSharedPointer<FileDef> fd, const char *includeNam
 //}
 
 static void searchTemplateSpecs(QSharedPointer<Definition> d, QList<ArgumentList> &result,
-                                QByteArray &name, SrcLangExt lang)
+                                QString &name, SrcLangExt lang)
 {
    if (d->definitionType() == Definition::TypeClass) {
 
@@ -679,7 +679,7 @@ static void searchTemplateSpecs(QSharedPointer<Definition> d, QList<ArgumentList
          name += "::";
       }
 
-      QByteArray clName = d->localName();
+      QString clName = d->localName();
 
       if (clName.right(2) == "-p") {
          clName = clName.left(clName.length() - 2);
@@ -701,10 +701,10 @@ static void searchTemplateSpecs(QSharedPointer<Definition> d, QList<ArgumentList
    }
 }
 
-static void writeTemplateSpec(OutputList &ol, QSharedPointer<Definition> d, const QByteArray &type, SrcLangExt lang)
+static void writeTemplateSpec(OutputList &ol, QSharedPointer<Definition> d, const QString &type, SrcLangExt lang)
 {
    QList<ArgumentList> specs;
-   QByteArray name;
+   QString name;
 
    searchTemplateSpecs(d, specs, name, lang);
 
@@ -833,8 +833,8 @@ bool ClassDef::hasDetailedDescription() const
 }
 
 // write the detailed description for this class
-void ClassDef::writeDetailedDescription(OutputList &ol, const QByteArray &/*pageType*/, bool exampleFlag,
-                                        const QByteArray &title, const QByteArray &anchor)
+void ClassDef::writeDetailedDescription(OutputList &ol, const QString &, bool exampleFlag,
+                                        const QString &title, const QString &anchor)
 {
    if (hasDetailedDescription() || exampleFlag) {
       ol.pushGeneratorState();
@@ -844,7 +844,7 @@ void ClassDef::writeDetailedDescription(OutputList &ol, const QByteArray &/*page
 
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
-      ol.writeAnchor(0, anchor.isEmpty() ? QByteArray("details") : anchor);
+      ol.writeAnchor(0, anchor.isEmpty() ? QString("details") : anchor);
       ol.popGeneratorState();
 
       if (!anchor.isEmpty()) {
@@ -860,20 +860,20 @@ void ClassDef::writeDetailedDescription(OutputList &ol, const QByteArray &/*page
       ol.endGroupHeader();
 
       writeDetailedDocumentationBody(ol);
+
    } else {
       //writeTemplateSpec(ol,this,pageType);
    }
 }
 
-QByteArray ClassDef::generatedFromFiles() const
+QString ClassDef::generatedFromFiles() const
 {
-   QByteArray result;
+   QString result;
    SrcLangExt lang = getLanguage();
 
    if (lang == SrcLangExt_Fortran) {
-      result = theTranslator->trGeneratedFromFilesFortran(
-                  getLanguage() == SrcLangExt_ObjC && m_compType == Interface ? Class : m_compType,
-                  m_files.count() == 1);
+      result = theTranslator->trGeneratedFromFilesFortran(getLanguage() == SrcLangExt_ObjC && 
+                  m_compType == Interface ? Class : m_compType, m_files.count() == 1);
 
    } else if (isJavaEnum()) {
       result = theTranslator->trEnumGeneratedFromFiles(m_files.count() == 1);
@@ -1025,7 +1025,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
    if (m_parents && m_parents->count() > 0) {
       ol.startParagraph();
      
-      QByteArray inheritLine = theTranslator->trInheritsList(m_parents->count());
+      QString inheritLine = theTranslator->trInheritsList(m_parents->count());
       QRegExp marker("@[0-9]+");
       int index = 0, newIndex, matchLen;
 
@@ -1045,7 +1045,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
 
             // use the class name but with the template arguments as given
             // in the inheritance relation
-            QByteArray displayName = insertTemplateSpecifierInScope(cd->displayName().toUtf8(), bcd->templSpecifiers);
+            QString displayName = insertTemplateSpecifierInScope(cd->displayName().toUtf8(), bcd->templSpecifiers);
 
             if (cd->isLinkable()) {
                ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), displayName);
@@ -1066,7 +1066,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
    // write subclasses
    if (m_inheritedBy && m_inheritedBy->count() > 0) {
       ol.startParagraph();
-      QByteArray inheritLine = theTranslator->trInheritedByList(m_inheritedBy->count());
+      QString inheritLine = theTranslator->trInheritedByList(m_inheritedBy->count());
       QRegExp marker("@[0-9]+");
 
       int index = 0;
@@ -1147,7 +1147,7 @@ void ClassDef::writeIncludeFiles(OutputList &ol)
       QByteArray nm = m_incInfo->includeName.isEmpty() ? (m_incInfo->fileDef 
             ? m_incInfo->fileDef->docName().data() : "" ) : m_incInfo->includeName.data();
 
-      if (!nm.isEmpty()) {
+      if (! nm.isEmpty()) {
          ol.startParagraph();
          ol.startTypewriter();
          ol.docify(includeStatement());
@@ -1224,7 +1224,7 @@ void ClassDef::writeMemberGroups(OutputList &ol, bool showInline)
    }
 }
 
-void ClassDef::writeNestedClasses(OutputList &ol, const QByteArray &title)
+void ClassDef::writeNestedClasses(OutputList &ol, const QString &title)
 {
    // nested classes
    if (m_innerClasses) {
@@ -1298,7 +1298,7 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
 
       if (lde->kind() == LayoutDocEntry::ClassNestedClasses && m_innerClasses  && m_innerClasses->declVisible()) {
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
-         ol.writeSummaryLink(QString(""), "nested-classes", ls->title(lang), first);
+         ol.writeSummaryLink("", "nested-classes", ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::ClassAllMembersLink && m_allMemberNameInfoSDict &&  ! Config::getBool("optimize-c") ) {
@@ -1310,7 +1310,7 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
          QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
-            ol.writeSummaryLink(QString(""), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+            ol.writeSummaryLink("", MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }
@@ -1432,7 +1432,7 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
    ol.addIndexItem(name(), 0);
  
    // part 1: anchor and title
-   QByteArray s = compoundTypeString() + " " + name();
+   QString s = compoundTypeString() + " " + name();
 
    // part 1a
    ol.pushGeneratorState();
@@ -1509,7 +1509,7 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
          }
          break;
          case LayoutDocEntry::MemberGroups:
-            if (!isSimple) {
+            if (! isSimple) {
                writeMemberGroups(ol, true);
             }
             break;
@@ -1552,7 +1552,7 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
    ol.popGeneratorState();
 }
 
-void ClassDef::writeMoreLink(OutputList &ol, const QByteArray &anchor)
+void ClassDef::writeMoreLink(OutputList &ol, const QString &anchor)
 {
    // TODO: clean up by moving it to the output generators
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
@@ -1603,7 +1603,7 @@ bool ClassDef::visibleInParentsDeclList() const
           );
 }
 
-void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const char *header, bool localNames)
+void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &header, bool localNames)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
@@ -1616,11 +1616,12 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const char *hea
          // first class
          ol.startMemberHeader("nested-classes");
 
-         if (header) {
+         if (! header.isEmpty()) {
             ol.parseText(header);
 
          } else {
             ol.parseText(lang == SrcLangExt_Fortran ? theTranslator->trDataTypes() : theTranslator->trCompounds());
+
          }
 
          ol.endMemberHeader();
@@ -1631,8 +1632,8 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const char *hea
       ol.startMemberDeclaration();
       ol.startMemberItem(anchor(), false);
 
-      QByteArray ctype = compoundTypeString();
-      QByteArray cname = displayName(! localNames).toUtf8();
+      QString ctype = compoundTypeString();
+      QString cname = displayName(! localNames);
 
       ol.writeString(ctype);
       ol.writeString(" ");
@@ -1706,15 +1707,13 @@ void ClassDef::addClassAttributes(OutputList &ol)
    ol.popGeneratorState();
 }
 
-void ClassDef::writeDocumentationContents(OutputList &ol, const QByteArray & /*pageTitle*/)
+void ClassDef::writeDocumentationContents(OutputList &ol, const QString &pageTitle)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
    ol.startContents();
 
-   QByteArray pageType = " ";
-   pageType += compoundTypeString();
-   toupper(pageType.at(1));
+   QString pageType = " " + compoundTypeString();
   
    Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>());
 
@@ -1840,9 +1839,9 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QByteArray & /*p
    ol.endContents();
 }
 
-QByteArray ClassDef::title() const
+QString ClassDef::title() const
 {
-   QByteArray pageTitle;
+   QString pageTitle;
    SrcLangExt lang = getLanguage();
 
    if (lang == SrcLangExt_Fortran) {
@@ -1887,8 +1886,7 @@ void ClassDef::writeDocumentation(OutputList &ol)
    static bool generateTreeView = Config::getBool("generate-treeview");
    // static bool fortranOpt = Config::getBool("optimize-fortran");
 
-   QByteArray pageTitle = title();
-
+   QString pageTitle = title();
    startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_ClassVisible, ! generateTreeView);
 
    if (! generateTreeView) {
@@ -1904,7 +1902,7 @@ void ClassDef::writeDocumentation(OutputList &ol)
    addClassAttributes(ol);
    addGroupListToTitle(ol, self);
 
-   endTitle(ol, getOutputFileBase(), qPrintable(displayName()));
+   endTitle(ol, getOutputFileBase(), displayName());
    writeDocumentationContents(ol, pageTitle);
    endFileWithNavPath(self, ol);
 
@@ -2993,7 +2991,7 @@ void ClassDef::addUsedByClass(QSharedPointer<ClassDef> cd, const char *accessNam
    ucd->addAccessor(acc);
 }
 
-QByteArray ClassDef::compoundTypeString() const
+QString ClassDef::compoundTypeString() const
 {
    if (getLanguage() == SrcLangExt_Fortran) {
 
@@ -3043,7 +3041,7 @@ QByteArray ClassDef::compoundTypeString() const
    }
 }
 
-QByteArray ClassDef::getOutputFileBase() const
+QString ClassDef::getOutputFileBase() const
 {
    static bool inlineGroupedClasses = Config::getBool("inline-grouped-classes");
    static bool inlineSimpleClasses  = Config::getBool("inline-simple-struct");
@@ -3086,11 +3084,11 @@ QByteArray ClassDef::getOutputFileBase() const
 
    } else if (isReference()) {
       // point to the external location
-      return m_fileName.toUtf8();
+      return m_fileName;
 
    } else {
       // normal locally defined class
-      return convertNameToFile(m_fileName.toUtf8()).toUtf8();
+      return convertNameToFile(m_fileName);
    }
 }
 
@@ -3162,11 +3160,11 @@ void ClassDef::addInnerCompound(QSharedPointer<Definition> d)
    }
 }
 
-QSharedPointer<Definition> ClassDef::findInnerCompound(const char *name)
+QSharedPointer<Definition> ClassDef::findInnerCompound(const QString &name)
 {
    QSharedPointer<Definition> result;
 
-   if (name == 0) {
+   if (name.isEmpty()) {
       return result;
    }
 
@@ -3191,7 +3189,7 @@ QSharedPointer<ClassDef> ClassDef::insertTemplateInstance(const QByteArray &file
 
    if (templateClass == m_templateInstances->end()) {
       Debug::print(Debug::Classes, 0, "      New template instance class `%s'`%s'\n", name().data(), templSpec.data());
-      QByteArray tcname = removeRedundantWhiteSpace(localName() + templSpec);
+      QString tcname = removeRedundantWhiteSpace(localName() + templSpec);
 
       QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>(fileName, startLine, startColumn, tcname, ClassDef::Class); 
 
@@ -3220,7 +3218,7 @@ QSharedPointer<ClassDef> ClassDef::getVariableInstance(const char *templSpec)
 
    if (templateClass == m_variableInstances->end()) {
       Debug::print(Debug::Classes, 0, "      New template variable instance class `%s'`%s'\n", qPrint(name()), qPrint(templSpec));
-      QByteArray tcname = removeRedundantWhiteSpace(name() + templSpec);
+      QString tcname = removeRedundantWhiteSpace(name() + templSpec);
 
       QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>("<code>", 1, 1, tcname, ClassDef::Class, nullptr, "", false);
 
@@ -3331,12 +3329,12 @@ void ClassDef::getTemplateParameterLists(QList<ArgumentList> &lists) const
    }
 }
 
-QByteArray ClassDef::qualifiedNameWithTemplateParameters(QList<ArgumentList> *actualParams, int *actualParamIndex) const
+QString ClassDef::qualifiedNameWithTemplateParameters(QList<ArgumentList> *actualParams, int *actualParamIndex) const
 {
    //static bool optimizeOutputJava = Config::getBool("optimize-java");
    static bool hideScopeNames = Config::getBool("hide-scope-names");
 
-   QByteArray scName;
+   QString scName;
    QSharedPointer<Definition> d = getOuterScope();
 
    if (d) {
@@ -3350,7 +3348,7 @@ QByteArray ClassDef::qualifiedNameWithTemplateParameters(QList<ArgumentList> *ac
    }
 
    SrcLangExt lang = getLanguage();
-   QByteArray scopeSeparator = getLanguageSpecificSeparator(lang);
+   QString scopeSeparator = getLanguageSpecificSeparator(lang);
 
    if (!scName.isEmpty()) {
       scName += scopeSeparator;
@@ -3358,7 +3356,7 @@ QByteArray ClassDef::qualifiedNameWithTemplateParameters(QList<ArgumentList> *ac
 
    bool isSpecialization = localName().indexOf('<') != -1;
 
-   QByteArray clName = className();
+   QString clName = className();
 
    scName += clName;
    ArgumentList al;
@@ -3383,7 +3381,7 @@ QByteArray ClassDef::qualifiedNameWithTemplateParameters(QList<ArgumentList> *ac
    return scName;
 }
 
-QByteArray ClassDef::className() const
+QString ClassDef::className() const
 {
    if (m_className.isEmpty()) {
       return localName();
@@ -3392,7 +3390,7 @@ QByteArray ClassDef::className() const
    }
 };
 
-void ClassDef::setClassName(const char *name)
+void ClassDef::setClassName(const QString &name)
 {
    m_className = name;
 }
@@ -3402,7 +3400,7 @@ void ClassDef::addListReferences()
    QSharedPointer<ClassDef> self = sharedFrom(this);
    SrcLangExt lang = getLanguage();
 
-   if (!isLinkableInProject()) {
+   if (! isLinkableInProject()) {
       return;
    }
 
@@ -3410,9 +3408,8 @@ void ClassDef::addListReferences()
 
    addRefItem(xrefItems, qualifiedName(), 
                  lang == SrcLangExt_Fortran ? theTranslator->trType(true, true) : theTranslator->trClass(true, true),
-                 getOutputFileBase(), qPrintable(displayName()), 0, self);
+                 getOutputFileBase(), displayName(), 0, self);
    
-
    if (m_memberGroupSDict) {     
       for (auto mg : *m_memberGroupSDict) {   
          mg->addListReferences(self);
@@ -3587,14 +3584,14 @@ int ClassDef::countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDe
    return inhCount;
 }
 
-void ClassDef::getTitleForMemberListType(MemberListType type,
-      QByteArray &title, QByteArray &subtitle)
+void ClassDef::getTitleForMemberListType(MemberListType type, QString &title, QString &subtitle)
 {
    SrcLangExt lang = getLanguage();
   
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class) ) {  
       if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
+
          if (lmd->type == type) {
             title = lmd->title(lang);
             subtitle = lmd->subtitle(lang);
@@ -3603,7 +3600,7 @@ void ClassDef::getTitleForMemberListType(MemberListType type,
       }
    }
 
-   title = "";
+   title    = "";
    subtitle = "";
 }
 
@@ -3714,8 +3711,8 @@ void ClassDef::writeInheritedMemberDeclarations(OutputList &ol, MemberListType l
    ol.popGeneratorState();
 }
 
-void ClassDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title,
-                                       const char *subTitle, bool showInline, QSharedPointer<ClassDef> inheritedFrom, int lt2,
+void ClassDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title,
+                                       const QString &subTitle, bool showInline, QSharedPointer<ClassDef> inheritedFrom, int lt2,
                                        bool invert, bool showAlways, QHash<void *, void *> *visitedClasses)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
@@ -3763,7 +3760,7 @@ void ClassDef::addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSh
    }
 }
 
-void ClassDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title, bool showInline)
+void ClassDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title, bool showInline)
 { 
    QSharedPointer<ClassDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
@@ -4031,9 +4028,9 @@ void ClassDef::reclassifyMember(QSharedPointer<MemberDef> md, MemberType t)
    insertMember(md);
 }
 
-QByteArray ClassDef::anchor() const
+QString ClassDef::anchor() const
 {
-   QByteArray anc;
+   QString anc;
 
    if (isEmbeddedInOuterScope() && !Doxy_Globals::generatingXmlOutput) {
       if (m_templateMaster) {
@@ -4046,7 +4043,7 @@ QByteArray ClassDef::anchor() const
 
       } else {
          // normal locally defined class
-         anc = convertNameToFile(m_fileName.toUtf8()).toUtf8();
+         anc = convertNameToFile(m_fileName);
       }
    }
    return anc;

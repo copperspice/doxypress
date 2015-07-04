@@ -87,8 +87,8 @@ class ClassDef : public Definition
     *                    I didn't add this to CompoundType to avoid having
     *                    to adapt all translators.
     */
-   ClassDef(const char *fileName, int startLine, int startColumn, const QByteArray &name, CompoundType ct,
-            const char *ref = 0, QString fName = QString(), bool isSymbol = true, bool isJavaEnum = false);
+   ClassDef(const char *fileName, int startLine, int startColumn, const QString &name, CompoundType ct,
+            const QString &ref = QString(), QString fName = QString(), bool isSymbol = true, bool isJavaEnum = false);
   
    /** Destroys a compound definition. */
    ~ClassDef();
@@ -99,7 +99,7 @@ class ClassDef : public Definition
    }
 
    /** Returns the unique base name (without extension) of the class's file on disk */
-   QByteArray getOutputFileBase() const;
+   QString getOutputFileBase() const;
    QString getInstanceOutputFileBase() const;
    QByteArray getFileBase() const;
 
@@ -131,7 +131,7 @@ class ClassDef : public Definition
    CompoundType compoundType() const;
 
    /** Returns the type of compound as a string */
-   QByteArray compoundTypeString() const;
+   QString compoundTypeString() const;
 
    /** Returns the list of base classes from which this class directly
     *  inherits.
@@ -231,7 +231,7 @@ class ClassDef : public Definition
     *  available, or 0 otherwise.
     *  @param name The name of the nested compound
     */
-   virtual QSharedPointer<Definition> findInnerCompound(const char *name) override;
+   virtual QSharedPointer<Definition> findInnerCompound(const QString &name) override;
 
    /** Returns the template parameter lists that form the template
     *  declaration of this class.
@@ -242,7 +242,7 @@ class ClassDef : public Definition
     */
    void getTemplateParameterLists(QList<ArgumentList> &lists) const;
 
-   QByteArray qualifiedNameWithTemplateParameters(QList<ArgumentList> *actualParams = 0, int *actualParamIndex = 0) const;
+   QString qualifiedNameWithTemplateParameters(QList<ArgumentList> *actualParams = 0, int *actualParamIndex = 0) const;
 
    /** Returns true if there is at least one pure virtual member in this
     *  class.
@@ -276,7 +276,7 @@ class ClassDef : public Definition
    /** Returns the name of the class including outer classes, but not
     *  including namespaces.
     */
-   QByteArray className() const;
+   QString className() const;
 
    /** Returns the members in the list identified by \a lt */
    QSharedPointer<MemberList> getMemberList(MemberListType lt);
@@ -293,7 +293,7 @@ class ClassDef : public Definition
 
    bool isUsedOnly() const;
 
-   QByteArray anchor() const;
+   QString anchor() const;
    bool isEmbeddedInOuterScope() const;
 
    bool isSimple() const;
@@ -308,9 +308,9 @@ class ClassDef : public Definition
    bool isGeneric() const;
    bool isAnonymous() const;
    const ClassSDict *innerClasses() const;
-   QByteArray title() const;
+   QString title() const;
 
-   QByteArray generatedFromFiles() const;
+   QString generatedFromFiles() const;
    const FileList &usedFiles() const;
 
    const ArgumentList *typeConstraints() const;
@@ -343,7 +343,7 @@ class ClassDef : public Definition
    void addUsedByClass(QSharedPointer<ClassDef> cd, const char *accessName, Protection prot);
    void setIsStatic(bool b);
    void setCompoundType(CompoundType t);
-   void setClassName(const char *name);
+   void setClassName(const QString &name);
    void setClassSpecifier(Entry::SpecifierFlags spec);
 
    void setTemplateArguments(ArgumentList *al);
@@ -379,7 +379,7 @@ class ClassDef : public Definition
    void writeSummaryLinks(OutputList &ol);
    void reclassifyMember(QSharedPointer<MemberDef> md, MemberType t);
    void writeInlineDocumentation(OutputList &ol);
-   void writeDeclarationLink(OutputList &ol, bool &found, const char *header, bool localNames);
+   void writeDeclarationLink(OutputList &ol, bool &found, const QString &header, bool localNames);
    void removeMemberFromLists(QSharedPointer<MemberDef> md);
    void addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, const QByteArray &inheritId);
    int countMembersIncludingGrouped(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool additional);
@@ -394,7 +394,7 @@ class ClassDef : public Definition
    void showUsedFiles(OutputList &ol);
 
  private:
-   void writeDocumentationContents(OutputList &ol, const QByteArray &pageTitle);
+   void writeDocumentationContents(OutputList &ol, const QString  &pageTitle);
    void internalInsertMember(QSharedPointer<MemberDef> md, Protection prot, bool addToAllList);
    void addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md, bool isBrief);
 
@@ -405,33 +405,33 @@ class ClassDef : public Definition
                   bool invert, bool showAlways,
                   QHash<void *, void *> *visitedClasses);
 
-   void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title,
-                  const char *subTitle = 0, bool showInline = false,
+   void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title,
+                  const QString &subTitle = 0, bool showInline = false,
                   QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), int lt2 = -1, bool invert = false,
                   bool showAlways = false, QHash<void *, void *> *visitedClasses = 0);
 
-   void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title, bool showInline = false);
+   void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title, bool showInline = false);
    void writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt);
    void writePlainMemberDeclaration(OutputList &ol, MemberListType lt, bool inGroup, QSharedPointer<ClassDef> inheritedFrom, 
                   const char *inheritId);
 
    void writeBriefDescription(OutputList &ol, bool exampleFlag);
-   void writeDetailedDescription(OutputList &ol, const QByteArray &pageType, bool exampleFlag,
-                  const QByteArray &title, const QByteArray &anchor = QByteArray());
+   void writeDetailedDescription(OutputList &ol, const QString &pageType, bool exampleFlag,
+                  const QString &title, const QString &anchor = QString());
 
    void writeIncludeFiles(OutputList &ol);
    //void writeAllMembersLink(OutputList &ol);
    void writeInheritanceGraph(OutputList &ol);
    void writeCollaborationGraph(OutputList &ol);
    void writeMemberGroups(OutputList &ol, bool showInline = false);
-   void writeNestedClasses(OutputList &ol, const QByteArray &title);
+   void writeNestedClasses(OutputList &ol, const QString &title);
    void writeInlineClasses(OutputList &ol);
    void startMemberDeclarations(OutputList &ol);
    void endMemberDeclarations(OutputList &ol);
    void startMemberDocumentation(OutputList &ol);
    void endMemberDocumentation(OutputList &ol);
    void writeAuthorSection(OutputList &ol);
-   void writeMoreLink(OutputList &ol, const QByteArray &anchor);
+   void writeMoreLink(OutputList &ol, const QString &anchor);
    void writeDetailedDocumentationBody(OutputList &ol);
 
    int countAdditionalInheritedMembers();
@@ -443,7 +443,7 @@ class ClassDef : public Definition
    int countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool invert, bool showAlways,
                                 QHash<void *, void *> *visitedClasses);
 
-   void getTitleForMemberListType(MemberListType type, QByteArray &title, QByteArray &subtitle);
+   void getTitleForMemberListType(MemberListType type, QString &title, QString &subtitle);
    QByteArray includeStatement() const;
 
    void addTypeConstraint(const QString &typeConstraint, const QString &type);
@@ -528,7 +528,7 @@ class ClassDef : public Definition
    QSharedPointer<ClassDef> m_templateMaster;
 
    /*! local class name which could be a typedef'ed alias name. */
-   QByteArray m_className;
+   QString m_className;
 
    /*! If this class is a Objective-C category, then this points to the
     *  class which is extended.

@@ -1797,8 +1797,8 @@ void HtmlDocVisitor::visitPre(DocParamSect *s)
 
    forceEndParagraph(s);
 
-   QByteArray className;
-   QByteArray heading;
+   QString className;
+   QString heading;
 
    switch (s->type()) {
       case DocParamSect::Param:
@@ -1836,6 +1836,7 @@ void HtmlDocVisitor::visitPost(DocParamSect *s)
    if (m_hide) {
       return;
    }
+
    m_t << "  </table>" << endl;
    m_t << "  </dd>" << endl;
    m_t << "</dl>" << endl;
@@ -2043,9 +2044,9 @@ void HtmlDocVisitor::visitPost(DocParBlock *)
    }
 }
 
-void HtmlDocVisitor::filter(const char *str)
+void HtmlDocVisitor::filter(const QString &str)
 {
-   if (str == 0) {
+   if (str.isEmpty()) {
       return;
    }
 

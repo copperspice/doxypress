@@ -33,7 +33,7 @@ class Qhp : public IndexIntf
    void incContentsDepth();
    void decContentsDepth();
 
-   void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
+   void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
                   bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) override;
 
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, 
@@ -43,7 +43,7 @@ class Qhp : public IndexIntf
    void addImageFile(const QString &name) override;
    void addStyleSheetFile(const QString &name) override;
   
-   static QByteArray getQhpFileName();
+   static QString getQhpFileName();
 
  private:
    void handlePrevSection();

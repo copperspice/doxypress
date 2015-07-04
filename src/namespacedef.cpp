@@ -484,7 +484,7 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
          QByteArray label = lde->kind() == LayoutDocEntry::NamespaceClasses ? "nested-classes" : "namespaces";
 
-         ol.writeSummaryLink(QString(""), label, ls->title(lang), first);
+         ol.writeSummaryLink("", label, ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
@@ -492,7 +492,7 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
          QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
-            ol.writeSummaryLink(QString(""), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+            ol.writeSummaryLink("", MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }
@@ -767,9 +767,9 @@ QByteArray NamespaceDef::getOutputFileBase() const
    }
 }
 
-QSharedPointer<Definition> NamespaceDef::findInnerCompound(const char *n)
+QSharedPointer<Definition> NamespaceDef::findInnerCompound(const QString &n)
 {
-   if (n == 0) {
+   if (n.isEmpty()) {
       return QSharedPointer<Definition>();
    }
 
@@ -935,7 +935,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title, bool co
          ol.startMemberDeclaration();
          ol.startMemberItem(nd->getOutputFileBase(), 0);
 
-         QByteArray ct = nd->compoundTypeString();
+         QString ct = nd->compoundTypeString();
          ol.docify(ct);
          ol.docify(" ");
          ol.insertMemberAlign();
@@ -1102,7 +1102,7 @@ QByteArray NamespaceDef::title() const
    return pageTitle;
 }
 
-QByteArray NamespaceDef::compoundTypeString() const
+QString NamespaceDef::compoundTypeString() const
 {
    SrcLangExt lang = getLanguage();
 
@@ -1118,11 +1118,11 @@ QByteArray NamespaceDef::compoundTypeString() const
          return "module";
 
       } else if (isConstantGroup()) {
-
          return "constants";
-      } else if (isLibrary()) {
 
+      } else if (isLibrary()) {
          return "library";
+
       } else {
          err("Internal inconsistency: namespace in IDL not module, library or constant group\n");
       }

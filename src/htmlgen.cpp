@@ -187,11 +187,11 @@ static QString substituteHtmlKeywords(const QByteArray &output, const QString &t
 {
    // Build CSS/Javascript tags depending on treeview, search engine settings  
 
-   QByteArray generatedBy;
-   QByteArray treeViewCssJs;
-   QByteArray searchCssJs;
-   QByteArray searchBox;
-   QByteArray mathJaxJs;
+   QString generatedBy;
+   QString treeViewCssJs;
+   QString searchCssJs;
+   QString searchBox;
+   QString mathJaxJs;
    
    static QString projectName    = Config::getString("project-name");
    static QString projectVersion = Config::getString("project-version");
@@ -232,7 +232,7 @@ static QString substituteHtmlKeywords(const QByteArray &output, const QString &t
    }
 
    if (timeStamp) {
-      generatedBy = theTranslator->trGeneratedAt(dateToString(true).toUtf8(), convertToHtml(projectName.toUtf8()));
+      generatedBy = theTranslator->trGeneratedAt(dateToString(true), convertToHtml(projectName));
 
    } else {
       generatedBy = theTranslator->trGeneratedBy();
@@ -456,10 +456,13 @@ void HtmlCodeGenerator::codify(const QByteArray &str)
    }
 }
 
-void HtmlCodeGenerator::docify(const QByteArray &str)
+void HtmlCodeGenerator::docify(const QString &text)
 {
-   if (! str.isEmpty()) {
-      const char *p = str.constData();
+   if (! text.isEmpty()) {
+
+      // BROOM - ansel
+      const char *p = text.toUtf8();   
+
       char c;
 
       while (*p) {
@@ -944,7 +947,7 @@ QByteArray HtmlGenerator::writeLogoAsString(const QString &path)
    QString result;
 
    if (timeStamp) {
-      result += theTranslator->trGeneratedAt(dateToString(true).toUtf8(), Config::getString("project-name").toUtf8()); 
+      result += theTranslator->trGeneratedAt(dateToString(true), Config::getString("project-name")); 
 
    } else {
       result += theTranslator->trGeneratedBy();
@@ -1052,7 +1055,7 @@ void HtmlGenerator::endParagraph()
    m_textStream << "</p>" << endl;
 }
 
-void HtmlGenerator::writeString(const char *text)
+void HtmlGenerator::writeString(const QString &text)
 {
    m_textStream << text;
 }
@@ -1261,19 +1264,23 @@ void HtmlGenerator::endSection(const char *, SectionInfo::SectionType type)
    }
 }
 
-void HtmlGenerator::docify(const QByteArray &str)
+void HtmlGenerator::docify(const QString &text)
 {
-   docify(str, false);
+   docify(text, false);
 }
 
-void HtmlGenerator::docify(const QByteArray &str, bool inHtmlComment)
+void HtmlGenerator::docify(const QString &text, bool inHtmlComment)
 {
-   if (! str.isEmpty()) {
-      const char *p = str.constData();
+   if (! text.isEmpty()) {
+
+      // BROOM - ansel
+      const char *p = text.toUtf8();  
+
       char c;
 
       while (*p) {
          c = *p++;
+
          switch (c) {
             case '<':
                m_textStream << "&lt;";
@@ -1937,7 +1944,7 @@ void HtmlGenerator::writeNonBreakableSpace(int n)
    }
 }
 
-void HtmlGenerator::startSimpleSect(SectionTypes, const QByteArray &filename, const char *anchor, const char *title)
+void HtmlGenerator::startSimpleSect(SectionTypes, const QString &filename, const QString &anchor, const QString &title)
 {
    m_textStream << "<dl><dt><b>";
 
@@ -2034,7 +2041,7 @@ static void endQuickIndexItem(QTextStream &t_stream, const QByteArray &l)
    t_stream << "</li>\n";
 }
 
-static QByteArray fixSpaces(const QByteArray &s)
+static QString fixSpaces(const QString &s)
 {
    return substitute(s, " ", "&#160;");
 }
@@ -2756,7 +2763,7 @@ void HtmlGenerator::writeInheritedSectionTitle(const char *id, const QByteArray 
      << "</td></tr>" << endl;
 }
 
-void HtmlGenerator::writeSummaryLink(const QByteArray &file, const char *anchor, const char *title, bool first)
+void HtmlGenerator::writeSummaryLink(const QString &file, const QString &anchor, const QString &title, bool first)
 {
    if (first) {
       m_textStream << "  <div class=\"summary\">\n";

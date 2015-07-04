@@ -30,7 +30,7 @@ class Image
    void setPixel(int x, int y, uchar val);
    uchar getPixel(int x, int y) const;
    void writeChar(int x, int y, char c, uchar fg);
-   void writeString(int x, int y, const char *s, uchar fg);
+   void writeString(int x, int y, const QString &text, uchar fg);
    void drawHorzLine(int y, int xs, int xe, uchar colIndex, uint mask);
    void drawHorzArrow(int y, int xs, int xe, uchar colIndex, uint mask);
    void drawVertLine(int x, int ys, int ye, uchar colIndex, uint mask);
@@ -39,8 +39,6 @@ class Image
    void fillRect(int x, int y, int width, int height, uchar colIndex, uint mask);
 
    QByteArray convert(int mode = 0);
-
-   friend uint stringLength(const char *s);
 
    uint getWidth() const {
       return width;
@@ -54,7 +52,7 @@ class Image
       return data;
    }
 
-   static uint stringLength(const char *s);
+   static uint stringLength(const QString &s);
 
  private:
    int width;

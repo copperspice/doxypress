@@ -42,8 +42,8 @@ class DiagramItem
    DiagramItem(DiagramItem *p, int number, QSharedPointer<ClassDef> cd, Protection prot, Specifier virt, const char *ts);
    ~DiagramItem();
 
-   QByteArray label() const;
-   QByteArray fileName() const;
+   QString label() const;
+   QString fileName() const;
 
    DiagramItem *parentItem() {
       return parent;
@@ -98,7 +98,8 @@ class DiagramItem
    QList<DiagramItem *> children;
    DiagramItem *parent;
 
-   int x, y;
+   int x;
+   int y;
    int num;
 
    Protection prot;
@@ -256,7 +257,7 @@ static Protection getMinProtectionLevel(QList<DiagramItem *> &dil)
 
 static void writeBitmapBox(DiagramItem *di, Image *image, int x, int y, int w, int h, bool firstRow, bool hasDocs, bool children = false)
 {
-   int colFill = hasDocs ? (firstRow ? 0 : 2) : 7;
+   int colFill   = hasDocs ? (firstRow ? 0 : 2) : 7;
    int colBorder = (firstRow || !hasDocs) ? 1 : 3;
 
    int l = Image::stringLength(di->label());
@@ -340,15 +341,15 @@ DiagramItem::~DiagramItem()
 {
 }
 
-QByteArray DiagramItem::label() const
+QString DiagramItem::label() const
 {
-   QByteArray result;
+   QString result;
 
    if (! templSpec.isEmpty()) {
       // we use classDef->name() here and not diplayName() in order
       // to get the name used in the inheritance relation.
 
-      QByteArray n = classDef->name();
+      QString n = classDef->name();
       if (/*n.right(2)=="-g" ||*/ n.right(2) == "-p") {
          n = n.left(n.length() - 2);
       }
@@ -365,7 +366,7 @@ QByteArray DiagramItem::label() const
    return result;
 }
 
-QByteArray DiagramItem::fileName() const
+QString DiagramItem::fileName() const
 {
    return classDef->getOutputFileBase();
 }

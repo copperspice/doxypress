@@ -139,21 +139,13 @@ class XmlDocVisitor : public DocVisitor
 
  private:
 
-   //--------------------------------------
-   // helper functions
-   //--------------------------------------
-
-   void filter(const char *str);
-   void startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor);
+   void filter(const QString &str);
+   void startLink(const QString &ref, const QString &file, const QString &anchor);
    void endLink();
 
    void pushEnabled();
    void popEnabled();
-
-   //--------------------------------------
-   // state variables
-   //--------------------------------------
-
+  
    QTextStream &m_t;
    CodeOutputInterface &m_ci;
 
@@ -161,7 +153,7 @@ class XmlDocVisitor : public DocVisitor
    bool m_hide;
 
    QStack<bool> m_enabled;
-   QByteArray m_langExt;
+   QString m_langExt;
 };
 
 #endif

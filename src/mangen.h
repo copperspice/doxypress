@@ -78,19 +78,19 @@ class ManGenerator : public OutputGenerator
 
    void startIndexSection(IndexSections) {}
    void endIndexSection(IndexSections) {}
-   void writePageLink(const char *, bool) {}
+   void writePageLink(const QString &, bool) override {}
    void startProjectNumber() {}
    void endProjectNumber() {}
    void writeStyleInfo(int) {}
-   void startTitleHead(const char *) {}
-   void endTitleHead(const char *, const char *);
+   void startTitleHead(const QString &) override {}
+   void endTitleHead(const QString &, const QString &) override;
    void startTitle();
    void endTitle();
 
    void newParagraph();
    void startParagraph();
    void endParagraph();
-   void writeString(const char *text);
+   void writeString(const QString &text);
    void startIndexListItem() {}
    void endIndexListItem() {}
    void startIndexList() {}
@@ -102,27 +102,27 @@ class ManGenerator : public OutputGenerator
    void startIndexKey() {}
    void endIndexKey()   {}
    void startIndexValue(bool) {}
-   void endIndexValue(const char *, bool)   {}
+   void endIndexValue(const QString &, bool)  override {}
    void startItemList()  {}
 
    void endItemList()    {
       newParagraph();
    }
 
-   void startIndexItem(const QByteArray &ref, const QByteArray &file) override;
-   void endIndexItem(const QByteArray &ref, const QByteArray &file) override;
+   void startIndexItem(const QString &ref, const QString &file) override;
+   void endIndexItem(const QString &ref, const QString &file) override;
 
-   void docify(const QByteArray &text) override;
-   void codify(const QByteArray &text) override;
+   void docify(const QString &text) override;
+   void codify(const QString &text) override;
 
-   void writeObjectLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, const QByteArray &name) override;
-   void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
-                      const QByteArray &name, const QByteArray &tooltip) override;
+   void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) override;
+   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor, 
+                      const QString &name, const QString &tooltip) override;
 
-   void writeTooltip(const char *, const DocLinkInfo &, const QByteArray &, const QByteArray &, const SourceLinkInfo &,
+   void writeTooltip(const QString &, const DocLinkInfo &, const QString &, const QString &, const SourceLinkInfo &,
                      const SourceLinkInfo &) override {}
 
-   void startTextLink(const QByteArray &, const QByteArray &) override {}
+   void startTextLink(const QString &, const QString &) override {}
    void endTextLink() override{}
    void startHtmlLink(const QString &url) override;
    void endHtmlLink();
@@ -141,7 +141,7 @@ class ManGenerator : public OutputGenerator
    void endMemberSections() {}
    void startHeaderSection() {}
    void endHeaderSection();
-   void startMemberHeader(const char *);
+   void startMemberHeader(const QString &) override;
    void endMemberHeader();
    void insertMemberAlign(bool) {}
    void startMemberSubtitle() {}
@@ -158,10 +158,10 @@ class ManGenerator : public OutputGenerator
    void endInlineHeader();
    void startAnonTypeScope(int);
    void endAnonTypeScope(int);
-   void startMemberItem(const char *, int, const QByteArray &) override;
+   void startMemberItem(const QString &, int, const QString &) override;
    void endMemberItem();
    void startMemberTemplateParams() {}
-   void endMemberTemplateParams(const char *, const QByteArray &) override {}
+   void endMemberTemplateParams(const QString &, const QString &) override {}
 
    void startMemberGroupHeader(bool);
    void endMemberGroupHeader();
@@ -171,10 +171,10 @@ class ManGenerator : public OutputGenerator
    void endMemberGroup(bool);
 
    void writeRuler()    {}
-   void writeAnchor(const char *, const char *) {}
+   void writeAnchor(const QString &, const QString &) override {}
    void startCodeFragment();
    void endCodeFragment();
-   void writeLineNumber(const char *, const QByteArray &, const char *, int l) override {
+   void writeLineNumber(const QString &, const QString &, const QString &, int l) override {
       m_textStream << l << " ";
    }
    void startCodeLine(bool) {}
@@ -203,20 +203,20 @@ class ManGenerator : public OutputGenerator
    void startDescItem();
    void endDescItem();
 
-   void lineBreak(const QByteArray &) override {
+   void lineBreak(const QString &) override {
       m_textStream << "\n.br" << endl;
    }
 
    void writeChar(char c);
-   void startMemberDoc(const char *, const char *, const char *, const char *, bool);
+   void startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool) override;
    void endMemberDoc(bool);
-   void startDoxyAnchor(const char *, const char *, const char *, const char *, const char *);
-   void endDoxyAnchor(const char *, const char *) {}
+   void startDoxyAnchor(const QString &, const QString &, const QString &, const QString &, const QString &) override;
+   void endDoxyAnchor(const QString &, const QString &) override {}
    void writeLatexSpacing() {}
 
-   void writeStartAnnoItem(const char *type, const QByteArray &file, const QByteArray &path, const char *name) override;
+   void writeStartAnnoItem(const QString &type, const QString &file, const QString &path, const QString &name) override;
 
-   void writeEndAnnoItem(const char *) {
+   void writeEndAnnoItem(const QString &) override {
       m_textStream << endl;
       firstCol = true;
    }
@@ -230,7 +230,7 @@ class ManGenerator : public OutputGenerator
    void startSmall()         {}
    void endSmall()           {}
 
-   void startMemberDescription(const char *, const QByteArray &) {
+   void startMemberDescription(const QString &, const QString &) override {
       m_textStream << "\n.RI \"\\fI";
       firstCol = false;
    }
@@ -241,40 +241,39 @@ class ManGenerator : public OutputGenerator
    }
 
    void startMemberDeclaration() {}
-   void endMemberDeclaration(const char *, const QByteArray &) {}
-   void writeInheritedSectionTitle(const char *, const QByteArray &, const char *, const char *, const char *, 
-                                   const char *) override 
-   {}
+   void endMemberDeclaration(const QString &, const QString &) override {}
+
+   void writeInheritedSectionTitle(const QString &, const QString &, const QString &, const QString &, 
+                  const QString &, const QString &) override {}
 
    void startDescList(SectionTypes);
-   void endDescList() 
-   {}
+   void endDescList() {}
 
-   void startSimpleSect(SectionTypes, const QByteArray &, const char *, const char *) override;
+   void startSimpleSect(SectionTypes, const QString &, const QString &, const QString &) override;
    void endSimpleSect();
-   void startParamList(ParamListTypes, const char *title);
+   void startParamList(ParamListTypes, const QString &title) override;
    void endParamList();
 
    //void writeDescItem();
    void startDescForItem();
    void endDescForItem();
-   void startSection(const char *, const char *, SectionInfo::SectionType);
-   void endSection(const char *, SectionInfo::SectionType);
-   void addIndexItem(const char *, const char *) {}
+   void startSection(const QString &, const QString &, SectionInfo::SectionType) override;
+   void endSection(const QString &, SectionInfo::SectionType) override;
+   void addIndexItem(const QString &, const QString &)  override {}
    void startIndent()        {}
    void endIndent()          {}
    void writeSynopsis();
    void startClassDiagram() {}
-   void endClassDiagram(const ClassDiagram &, const char *, const char *) {}
+   void endClassDiagram(const ClassDiagram &, const QString &, const QString &) override {}
    void startPageRef() {}
-   void endPageRef(const QByteArray &, const QByteArray &)override {}
+   void endPageRef(const QString &, const QString &) override {}
    void startQuickIndices() {}
    void endQuickIndices() {}
    void writeSplitBar(const QString &) override {}
-   void writeNavigationPath(const char *) {}
+   void writeNavigationPath(const QString &) override {}
    void writeLogo() {}
    void writeQuickLinks(bool, HighlightedItem, const QString &) override {}
-   void writeSummaryLink(const QByteArray &, const char *, const char *, bool) override {}
+   void writeSummaryLink(const QString &, const QString &, const QString &, bool) override {}
    void startContents() {}
    void endContents() {}
 
@@ -329,18 +328,18 @@ class ManGenerator : public OutputGenerator
    void endMemberDocPrefixItem() {}
    void startMemberDocName(bool) {}
    void endMemberDocName() {}
-   void startParameterType(bool, const QByteArray &) override {}
+   void startParameterType(bool, const QString &) override {}
    void endParameterType() {}
    void startParameterName(bool) {}
    void endParameterName(bool, bool, bool) {}
    void startParameterList(bool) {}
    void endParameterList() {}
-   void exceptionEntry(const QByteArray &, bool) override {}
+   void exceptionEntry(const QString &, bool) override {}
 
-   void startFontClass(const char *) {}
+   void startFontClass(const QString &) override {}
    void endFontClass() {}
 
-   void startConstraintList(const char *);
+   void startConstraintList(const QString &) override;
    void startConstraintParam();
    void endConstraintParam();
    void startConstraintType();
@@ -359,14 +358,13 @@ class ManGenerator : public OutputGenerator
    void endInlineMemberDoc();
 
    void startLabels();
-   void writeLabel(const char *l, bool isLast);
+   void writeLabel(const QString &l, bool isLast) override;
    void endLabels();
 
-   void writeCodeAnchor(const char *) {}
+   void writeCodeAnchor(const QString &) override {}
 
-   void setCurrentDoc(QSharedPointer<Definition> d, const char *, bool) override {}
-   void addWord(const QString &word, bool hiPriority) override
-   {}
+   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
+   void addWord(const QString &word, bool hiPriority) override {}
 
  private:
    bool firstCol;

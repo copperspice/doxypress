@@ -182,8 +182,8 @@ class ParserManager
     *  If there is no parser explicitly registered for the supplied extension,
     *  the interface to the default parser will be returned.
     */
-   ParserInterface *getParser(const char *extension) {
-      QByteArray ext = QByteArray(extension).toLower();
+   ParserInterface *getParser(const QString &extension) {
+      QString ext = extension.toLower();
 
       if (ext.isEmpty()) {
          ext = ".no_extension";
@@ -200,8 +200,7 @@ class ParserManager
 
       } else {
          return m_defaultParser;
-      }
-      
+      }      
    }
 
  private:

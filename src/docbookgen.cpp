@@ -105,9 +105,9 @@ class DocbookSectionMapper : public QHash<long, QByteArray>
 static DocbookSectionMapper g_docbookSectionMapper;
 
 
-inline void writeDocbookString(QTextStream &t, const char *s)
+inline void writeDocbookString(QTextStream &t, const QString &text)
 {
-   t << convertToXML(s);
+   t << convertToXML(text);
 }
 
 inline void writeDocbookCodeString(QTextStream &t, const char *s, int &col)
@@ -188,13 +188,13 @@ class TextGeneratorDocbookImpl : public TextGeneratorIntf
  public:
    TextGeneratorDocbookImpl(QTextStream &t): m_t(t) {}
 
-   void writeString(const char *s, bool) const override {
-      writeDocbookString(m_t, s);
+   void writeString(const QString &text, bool) const override {
+      writeDocbookString(m_t, text);
    }
 
    void writeBreak(int) const override {}
 
-   void writeLink(const QByteArray &extRef, const QByteArray &file, const QByteArray &anchor, const QByteArray &text) const override  {
+   void writeLink(const QString &extRef, const QString &file, const QString &anchor, const QString &text) const override  {
       writeDocbookLink(m_t, extRef, file, anchor, text, 0);
    }
 

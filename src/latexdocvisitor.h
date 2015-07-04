@@ -152,7 +152,7 @@ class LatexDocVisitor : public DocVisitor
    // helper functions
    //--------------------------------------
 
-   void filter(const char *str);
+   void filter(const QString &str);
    void startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor);
    void endLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor);
    QByteArray escapeMakeIndexChars(const char *s);

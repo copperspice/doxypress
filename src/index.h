@@ -36,7 +36,7 @@ class IndexIntf
    virtual void finalize() = 0;
    virtual void incContentsDepth() = 0;
    virtual void decContentsDepth() = 0;
-   virtual void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor, 
+   virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString  &file, const QString  &anchor, 
                                 bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) = 0;
 
    virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
@@ -114,7 +114,7 @@ class IndexList : public IndexIntf
       }
    }
 
-   void addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor, 
+   void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
                         bool separateIndex = false, bool addToNavIndex = false, 
                         QSharedPointer<Definition> def = QSharedPointer<Definition>()) override {
 
@@ -266,18 +266,8 @@ extern int documentedDirs;
 extern int documentedHtmlFiles;
 extern int documentedPages;
 
-void startTitle(OutputList &ol, const char *fileName, Definition *def = 0);
-void endTitle(OutputList &ol, const char *fileName, const char *name);
-
-inline void endTitle(OutputList &ol, const char *fileName, const QString &name)
-{
-   endTitle(ol, fileName, qPrintable(name));  
-}
-
-inline void endTitle(OutputList &ol, const char *fileName, const QByteArray &name)
-{
-   endTitle(ol, fileName, name.constData());  
-}
+void startTitle(OutputList &ol, const QString &fileName, Definition *def = 0);
+void endTitle(OutputList &ol, const QString &fileName, const QString &name);
 
 void startFile(OutputList &ol, const QString &name, const QString &manName, const QString &title, 
                   HighlightedItem hli = HLI_None, bool additionalIndices = false, const QString &altSidebarName = QString() );

@@ -47,8 +47,8 @@ struct TagInfo;
 class MemberDef : public Definition
 {
  public:
-   MemberDef(const char *defFileName, int defLine, int defColumn, const char *type, const char *name, 
-             const char *args, const char *excp, Protection prot, Specifier virt, bool stat,
+   MemberDef(const char *defFileName, int defLine, int defColumn, const QString &type, const QString &name, 
+             const QString &args, const QString &excp, Protection prot, Specifier virt, bool stat,
              Relationship related, MemberType t, const ArgumentList *tal, const ArgumentList *al);
 
    ~MemberDef();
@@ -62,9 +62,9 @@ class MemberDef : public Definition
    void moveTo(QSharedPointer<Definition> scope);
   
    // link id
-   QByteArray getOutputFileBase() const;
+   QString getOutputFileBase() const override;
    QByteArray getReference() const;
-   QByteArray anchor() const;
+   QString anchor() const override;
 
    const char *declaration() const;
    const char *definition() const;
@@ -100,7 +100,7 @@ class MemberDef : public Definition
    const char *getGroupFileName() const;
    int getGroupStartLine() const;
    bool getGroupHasDocs() const;
-   QByteArray qualifiedName() const;
+   QString qualifiedName() const;
    QByteArray objCMethodName(bool localLink, bool showStatic) const;
 
    // direct kind info
@@ -347,7 +347,7 @@ class MemberDef : public Definition
    void setDefinitionTemplateParameterLists(QList<ArgumentList> *lists);
    void setTypeConstraints(ArgumentList *al);
    void setType(const char *t);
-   void setAccessorType(QSharedPointer<ClassDef> cd, const char *t);
+   void setAccessorType(QSharedPointer<ClassDef> cd, const QString &t);
 
    // namespace related members
    void setNamespace(QSharedPointer<NamespaceDef> nd);

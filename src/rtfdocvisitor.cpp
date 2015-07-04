@@ -69,8 +69,7 @@ RTFDocVisitor::RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char
 
 QByteArray RTFDocVisitor::getStyle(const char *name)
 {
-   QString n;
-   n = QString("%1%2").arg(name).arg(m_indentLevel);
+   QString n = QString("%1%2").arg(name).arg(m_indentLevel);
 
    auto sd = rtf_Style.find(n);
    

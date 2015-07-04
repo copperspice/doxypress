@@ -1,5 +1,5 @@
 /**
- * The code below is based on SVGPan Library 1.2 and was modified for doxygen
+ * The code below is based on SVGPan Library 1.2 and was modified for DoxyPress
  * to support both zooming and panning via the mouse and via embedded bottons.
  *
  * This code is licensed under the following BSD license:

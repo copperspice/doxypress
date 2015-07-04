@@ -102,7 +102,7 @@ struct DocParserContext {
    bool isExample;
    QByteArray   exampleName;
    SectionDict *sectionDict;
-   QByteArray   searchUrl;
+   QString  searchUrl;
 
    QByteArray  includeFileText;
 
@@ -136,7 +136,7 @@ static QSharedPointer<MemberDef> s_memberDef;
 static bool                    s_isExample;
 static QByteArray              s_exampleName;
 static SectionDict            *s_sectionDict;
-static QByteArray              s_searchUrl;
+static QString                 s_searchUrl;
 
 static QByteArray              s_includeFileText;
 static uint                    s_includeFileOffset;
@@ -492,8 +492,8 @@ static void checkUndocumentedParams()
          if (found) {
             bool first = true;
 
-            QByteArray errMsg = "The following parameters of " + QByteArray(s_memberDef->qualifiedName()) +
-               QByteArray(argListToString(al)) + " are not documented:\n";
+            QString errMsg = "The following parameters of " + s_memberDef->qualifiedName() +
+                  argListToString(al) + " are not documented:\n";
 
             for (auto a : *al) { 
                QByteArray argName = s_memberDef->isDefine() ? a.type : a.name;
@@ -1054,7 +1054,7 @@ static void handleUnclosedStyleCommands()
 
 static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool ignoreAutoLinkFlag = FALSE)
 {
-   QByteArray name = linkToText(SrcLangExt_Unknown, g_token->name, true);
+   QString name = linkToText(SrcLangExt_Unknown, g_token->name, true);
  
    static bool autolinkSupport = Config::getBool("auto-link");
 
@@ -1092,7 +1092,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
 
       } else if (compound->isLinkable()) { 
          // compound link
-         QByteArray anchor = compound->anchor();
+         QString anchor = compound->anchor();
 
          if (compound->definitionType() == Definition::TypeFile) {
             name = g_token->name;
@@ -1872,10 +1872,10 @@ void DocInclude::parse()
          // only generate the warning once
          int count;
 
-         if (! m_blockId.isEmpty() && (count = m_text.count(m_blockId.data())) != 2) {
+         if (! m_blockId.isEmpty() && (count = m_text.count(m_blockId)) != 2) {
 
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "block marked with %s for \\snippet should appear twice in file %s, found it %d times\n",
-                           m_blockId.data(), m_file.data(), count);
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "block marked with %s for \\snippet should appear twice "
+                "in file %s, found it %d times\n", m_blockId.data(), m_file.data(), count);
          }
          break;
    }
@@ -7536,10 +7536,11 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<
 
    } else if (indexWords && ctx && Doxy_Globals::searchIndex) {
       s_searchUrl = ctx->getOutputFileBase();
-      QByteArray name = ctx->qualifiedName();
+      QString name = ctx->qualifiedName();
 
       SrcLangExt lang = ctx->getLanguage();
       QByteArray sep = getLanguageSpecificSeparator(lang);
+
       if (sep != "::") {
          name = substitute(name, "::", sep);
       }

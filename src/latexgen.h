@@ -76,13 +76,13 @@ class LatexGenerator : public OutputGenerator
 
    void startIndexSection(IndexSections);
    void endIndexSection(IndexSections);
-   void writePageLink(const char *, bool);
+   void writePageLink(const QString &, bool) override;
    void startProjectNumber();
    void endProjectNumber() {}
    void writeStyleInfo(int part);
-   void startTitleHead(const char *);
+   void startTitleHead(const QString &) override;
    void startTitle();
-   void endTitleHead(const char *, const char *name);
+   void endTitleHead(const QString &, const QString &name) override;
    void endTitle()   {
       m_textStream << "}";
    }
@@ -90,7 +90,7 @@ class LatexGenerator : public OutputGenerator
    void newParagraph();
    void startParagraph();
    void endParagraph();
-   void writeString(const char *text);
+   void writeString(const QString &text);
    void startIndexListItem() {}
    void endIndexListItem() {}
    void startIndexList() {
@@ -102,7 +102,7 @@ class LatexGenerator : public OutputGenerator
    void startIndexKey();
    void endIndexKey();
    void startIndexValue(bool);
-   void endIndexValue(const char *, bool);
+   void endIndexValue(const QString &, bool) override;
 
    void startItemList()  {
       m_textStream << "\\begin{DoxyCompactItemize}" << endl;
@@ -112,21 +112,21 @@ class LatexGenerator : public OutputGenerator
       m_textStream << "\\end{DoxyCompactItemize}"   << endl;
    }
 
-   void startIndexItem(const QByteArray &ref, const QByteArray &file) override;
-   void endIndexItem(const QByteArray &ref, const QByteArray &file) override;
+   void startIndexItem(const QString &ref, const QString &file) override;
+   void endIndexItem(const QString &ref, const QString &file) override;
 
-   void docify(const QByteArray &text) override;
-   void codify(const QByteArray &text) override;
+   void docify(const QString &text) override;
+   void codify(const QString &text) override;
 
-   void writeObjectLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, const QByteArray &name) override;
+   void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) override;
 
-   void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
-                      const QByteArray &name, const QByteArray &tooltip) override;
+   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor, 
+                      const QString &name, const QString &tooltip) override;
 
-   void writeTooltip(const char *, const DocLinkInfo &, const QByteArray &, const QByteArray &, const SourceLinkInfo &, 
+   void writeTooltip(const QString &, const DocLinkInfo &, const QString &, const QString &, const SourceLinkInfo &, 
                      const SourceLinkInfo & ) override {}
 
-   void startTextLink(const QByteArray &, const QByteArray &) override;
+   void startTextLink(const QString &, const QString &) override;
    void endTextLink();
    void startHtmlLink(const QString &url) override;
    void endHtmlLink();
@@ -148,7 +148,7 @@ class LatexGenerator : public OutputGenerator
    void endMemberSections() {}
    void startHeaderSection() {}
    void endHeaderSection() {}
-   void startMemberHeader(const char *);
+   void startMemberHeader(const QString &) override;
    void endMemberHeader();
    void startMemberSubtitle() {}
    void endMemberSubtitle() {}
@@ -160,10 +160,10 @@ class LatexGenerator : public OutputGenerator
    void endInlineHeader();
    void startAnonTypeScope(int);
    void endAnonTypeScope(int);
-   void startMemberItem(const char *, int, const QByteArray &) override;
+   void startMemberItem(const QString &, int, const QString &) override;
    void endMemberItem();
    void startMemberTemplateParams();
-   void endMemberTemplateParams(const char *, const QByteArray &) override;
+   void endMemberTemplateParams(const QString &, const QString &) override;
 
    void startMemberGroupHeader(bool);
    void endMemberGroupHeader();
@@ -178,10 +178,10 @@ class LatexGenerator : public OutputGenerator
       m_textStream << endl << endl;
    }
 
-   void writeAnchor(const char *fileName, const char *name);
+   void writeAnchor(const QString &fileName, const QString &name) override;
    void startCodeFragment();
    void endCodeFragment();
-   void writeLineNumber(const char *, const QByteArray &, const char *, int l) override;
+   void writeLineNumber(const QString &, const QString &, const QString &, int l) override;
    void startCodeLine(bool hasLineNumbers);
    void endCodeLine();
 
@@ -202,19 +202,19 @@ class LatexGenerator : public OutputGenerator
    void startDescItem();
    void endDescItem();
 
-   void lineBreak(const QByteArray &style = 0) override ;
-   void startMemberDoc(const char *, const char *, const char *, const char *, bool);
+   void lineBreak(const QString &style = 0) override ;
+   void startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool) override;
    void endMemberDoc(bool);
-   void startDoxyAnchor(const char *, const char *, const char *, const char *, const char *);
-   void endDoxyAnchor(const char *, const char *);
+   void startDoxyAnchor(const QString &, const QString &, const QString &, const QString &, const QString &) override;
+   void endDoxyAnchor(const QString &, const QString &) override;
    void writeChar(char c);
 
    void writeLatexSpacing() {
       m_textStream << "\\hspace{0.3cm}";
    }
 
-   void writeStartAnnoItem(const char *type, const QByteArray &file, const QByteArray &path, const char *name) override;
-   void writeEndAnnoItem(const char *name) override;
+   void writeStartAnnoItem(const QString &type, const QString &file, const QString &path, const QString &name) override;
+   void writeEndAnnoItem(const QString &name) override;
 
    void startSubsection() {
       m_textStream << "\\subsection*{";
@@ -240,14 +240,14 @@ class LatexGenerator : public OutputGenerator
    void endSmall()         {
       m_textStream << "\\normalsize ";
    }
-   void startMemberDescription(const char *, const QByteArray &) override;
+   void startMemberDescription(const QString &, const QString &) override;
    void endMemberDescription();
    void startMemberDeclaration() {}
 
-   void endMemberDeclaration(const char *, const QByteArray &) override {}
+   void endMemberDeclaration(const QString &, const QString &) override {}
 
-   void writeInheritedSectionTitle(const char *, const QByteArray &, const char *,
-                                   const char *, const char *, const char *) override {}
+   void writeInheritedSectionTitle(const QString &, const QString &, const QString &,
+                                   const QString &, const QString &, const QString &) override {}
 
    void startDescList(SectionTypes)     {
       m_textStream << "\\begin{Desc}\n\\item[";
@@ -257,9 +257,9 @@ class LatexGenerator : public OutputGenerator
       m_textStream << "\\end{Desc}" << endl;
    }
 
-   void startSimpleSect(SectionTypes, const QByteArray &, const char *, const char *) override;
+   void startSimpleSect(SectionTypes, const QString &, const QString &, const QString &) override;
    void endSimpleSect();
-   void startParamList(ParamListTypes, const char *title);
+   void startParamList(ParamListTypes, const QString &title) override;
    void endParamList();
 
    void startDescForItem()     {
@@ -267,23 +267,23 @@ class LatexGenerator : public OutputGenerator
    }
 
    void endDescForItem()       {}
-   void startSection(const char *, const char *, SectionInfo::SectionType);
-   void endSection(const char *, SectionInfo::SectionType);
-   void addIndexItem(const char *, const char *);
-   void startIndent()       {}
-   void endIndent()         {}
-   void writeSynopsis()     {}
+   void startSection(const QString &, const QString &, SectionInfo::SectionType) override;
+   void endSection(const QString &, SectionInfo::SectionType) override;
+   void addIndexItem(const QString &, const QString &) override;
+   void startIndent() {}
+   void endIndent()   {}
+   void writeSynopsis() {}
    void startClassDiagram();
-   void endClassDiagram(const ClassDiagram &, const char *, const char *);
+   void endClassDiagram(const ClassDiagram &, const QString &, const QString &) override;
    void startPageRef();
-   void endPageRef(const QByteArray &, const QByteArray &) override ;
+   void endPageRef(const QString &, const QString &) override ;
    void startQuickIndices() {}
    void endQuickIndices() {}
    void writeSplitBar(const QString &) override {}
-   void writeNavigationPath(const char *) {}
+   void writeNavigationPath(const QString &) override {}
    void writeLogo() {}
    void writeQuickLinks(bool, HighlightedItem, const QString &) override {}
-   void writeSummaryLink(const QByteArray &, const char *, const char *, bool) override {}
+   void writeSummaryLink(const QString &, const QString &, const QString &, bool) override {}
    void startContents() {}
    void endContents() {}
    void writeNonBreakableSpace(int);
@@ -328,15 +328,15 @@ class LatexGenerator : public OutputGenerator
    void endMemberDocPrefixItem() {}
    void startMemberDocName(bool) {}
    void endMemberDocName() {}
-   void startParameterType(bool, const QByteArray &) override ; 
+   void startParameterType(bool, const QString &) override ; 
    void endParameterType();
    void startParameterName(bool);
    void endParameterName(bool, bool, bool);
    void startParameterList(bool) override;
    void endParameterList();
-   void exceptionEntry(const QByteArray &, bool) override;
+   void exceptionEntry(const QString &, bool) override;
 
-   void startConstraintList(const char *);
+   void startConstraintList(const QString &) override;
    void startConstraintParam();
    void endConstraintParam();
    void startConstraintType();
@@ -355,14 +355,14 @@ class LatexGenerator : public OutputGenerator
    void endInlineMemberDoc();
 
    void startLabels();
-   void writeLabel(const char *l, bool isLast);
+   void writeLabel(const QString &l, bool isLast) override;
    void endLabels();
 
-   void startFontClass(const char *); // {}
-   void endFontClass(); // {}
+   void startFontClass(const QString &) override;
+   void endFontClass(); 
 
-   void writeCodeAnchor(const char *) {}
-   void setCurrentDoc(QSharedPointer<Definition> d, const char *, bool) override {}
+   void writeCodeAnchor(const QString &) override {}
+   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
    void addWord(const QString &word, bool hiPriority) override {}
 
  private:

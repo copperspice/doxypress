@@ -97,17 +97,17 @@ void DirDef::addFile(QSharedPointer<FileDef> fd)
    fd->setDirDef(self);
 }
 
-static QByteArray encodeDirName(const QByteArray &anchor)
+static QString encodeDirName(const QString &anchor)
 { 
-   QByteArray sigStr;
+   QString sigStr;
    sigStr = QCryptographicHash::hash(anchor, QCryptographicHash::Md5).toHex();
 
    return sigStr;  
 }
 
-QByteArray DirDef::getOutputFileBase() const
+QString DirDef::getOutputFileBase() const
 {
-   return "dir_" + encodeDirName(m_diskName.toUtf8() );
+   return "dir_" + encodeDirName(m_diskName);
 }
 
 void DirDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
@@ -314,7 +314,7 @@ void DirDef::endMemberDeclarations(OutputList &ol)
    ol.endMemberSections();
 }
 
-QByteArray DirDef::shortTitle() const
+QString DirDef::shortTitle() const
 {
    return theTranslator->trDirReference(qPrintable(m_shortName));
 }
@@ -373,7 +373,7 @@ void DirDef::writeDocumentation(OutputList &ol)
    static bool generateTreeView = Config::getBool("generate-treeview");
    ol.pushGeneratorState();
 
-   QByteArray title = theTranslator->trDirReference(qPrintable(m_dispName));
+   QString title = theTranslator->trDirReference(qPrintable(m_dispName));
    startFile(ol, getOutputFileBase(), name(), title, HLI_None, !generateTreeView);
 
    if (!generateTreeView) {
@@ -711,13 +711,13 @@ void DirRelation::writeDocumentation(OutputList &ol)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   QByteArray shortTitle = theTranslator->trDirRelation( qPrintable(m_src->shortName() + " &rarr; " + m_dst->dir()->shortName()) );
-   QByteArray title = theTranslator->trDirRelation( qPrintable(m_src->displayName() + " -> " + m_dst->dir()->shortName()) );
+   QString shortTitle = theTranslator->trDirRelation( qPrintable(m_src->shortName() + " &rarr; " + m_dst->dir()->shortName()) );
+   QString title = theTranslator->trDirRelation( qPrintable(m_src->displayName() + " -> " + m_dst->dir()->shortName()) );
 
    startFile(ol, getOutputFileBase(), getOutputFileBase(), 
              title, HLI_None, !generateTreeView, m_src->getOutputFileBase());
 
-   if (!generateTreeView) {
+   if (! generateTreeView) {
       // write navigation path
       m_src->writeNavigationPath(ol);
       ol.endQuickIndices();

@@ -2536,7 +2536,7 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, 
       bn->setDistance(distance);      
 
    } else { // new class
-      QByteArray displayName = className;
+      QString displayName = className;
 
       if (Config::getBool("hide-scope-names")) {
          displayName = stripScope(displayName);
@@ -3399,7 +3399,7 @@ QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graph
    }
 
    baseName += "_incl";
-   baseName = convertNameToFile(baseName).toUtf8();
+   baseName = convertNameToFile(baseName);
 
    QByteArray mapName = escapeCharsInString(m_startNode->m_label, false);
    if (m_inverse) {

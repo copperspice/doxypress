@@ -56,7 +56,7 @@ class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
 class NamespaceDef : public Definition
 {
  public:
-   NamespaceDef(const char *defFileName, int defLine, int defColumn, const char *name, const char *ref = 0,
+   NamespaceDef(const char *defFileName, int defLine, int defColumn, const QString &name, const char *ref = 0,
                 QString refFile = QString(), const char *type = 0, bool isPublished = false);
 
    ~NamespaceDef();
@@ -65,10 +65,10 @@ class NamespaceDef : public Definition
       return TypeNamespace;
    }
 
-   QByteArray getOutputFileBase() const;
+   QString getOutputFileBase() const override;
 
-   QByteArray anchor() const {
-      return QByteArray();
+   QString anchor() const override {
+      return "";
    }
 
    void insertUsedFile(QSharedPointer<FileDef> fd);
@@ -117,7 +117,7 @@ class NamespaceDef : public Definition
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
  
-   virtual QSharedPointer<Definition> findInnerCompound(const char *name) override;
+   virtual QSharedPointer<Definition> findInnerCompound(const QString &name) override;
 
    virtual void addInnerCompound(QSharedPointer<Definition> d) override;
 
@@ -150,8 +150,8 @@ class NamespaceDef : public Definition
       return namespaceSDict;
    }
 
-   QByteArray title() const;
-   QByteArray compoundTypeString() const;
+   QString title() const;
+   QString compoundTypeString() const;
 
    bool visited;
 

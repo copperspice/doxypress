@@ -137,7 +137,7 @@
     "generate-man": true,
     "generate-perl": false,
     "generate-qthelp": false,
-    "generate-rtf": false,
+    "generate-rtf": true,
     "generate-tagfile": "",
     "generate-test-list": true,
     "generate-todo-list": true,

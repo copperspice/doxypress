@@ -81,19 +81,19 @@ struct LayoutDocEntrySimple : LayoutDocEntry {
 };
 
 struct LayoutDocEntrySection: public LayoutDocEntrySimple {
-   LayoutDocEntrySection(Kind k, const QByteArray &tl) 
+   LayoutDocEntrySection(Kind k, const QString &tl) 
       : LayoutDocEntrySimple(k), m_title(tl) {}
 
-   QByteArray title(SrcLangExt lang) const;
+   QString title(SrcLangExt lang) const;
 
  private:
-   QByteArray m_title;
+   QString m_title;
 };
 
 /** @brief Represents of a member declaration list with configurable title and subtitle. */
 struct LayoutDocEntryMemberDecl: public LayoutDocEntry {
 
-   LayoutDocEntryMemberDecl(MemberListType tp, const QByteArray &tl, const QByteArray &ss)
+   LayoutDocEntryMemberDecl(MemberListType tp, const QString &tl, const QString &ss)
       : type(tp), m_title(tl), m_subscript(ss) 
    {}
 
@@ -102,17 +102,17 @@ struct LayoutDocEntryMemberDecl: public LayoutDocEntry {
    }
 
    MemberListType type;
-   QByteArray title(SrcLangExt lang) const;
-   QByteArray subtitle(SrcLangExt lang) const;
+   QString title(SrcLangExt lang) const;
+   QString subtitle(SrcLangExt lang) const;
 
  private:
-   QByteArray m_title;
-   QByteArray m_subscript;
+   QString m_title;
+   QString m_subscript;
 };
 
 /** @brief Represents of a member definition list with configurable title. */
 struct LayoutDocEntryMemberDef: public LayoutDocEntry {
-   LayoutDocEntryMemberDef(MemberListType tp, const QByteArray &tl)
+   LayoutDocEntryMemberDef(MemberListType tp, const QString &tl)
       : type(tp), m_title(tl) 
    {}
 
@@ -121,10 +121,10 @@ struct LayoutDocEntryMemberDef: public LayoutDocEntry {
    }
 
    MemberListType type;
-   QByteArray title(SrcLangExt lang) const;
+   QString title(SrcLangExt lang) const;
 
  private:
-   QByteArray m_title;
+   QString m_title;
 };
 
 /** @brief Base class for the layout of a navigation item at the top of the HTML pages. */
@@ -151,8 +151,8 @@ struct LayoutNavEntry {
       UserGroup
    };
 
-   LayoutNavEntry(LayoutNavEntry *parent, Kind k, bool vs, const QByteArray &bf,
-                  const QByteArray &tl, const QByteArray &intro, bool prepend = false)
+   LayoutNavEntry(LayoutNavEntry *parent, Kind k, bool vs, const QString &bf,
+                  const QString &tl, const QString &intro, bool prepend = false)
       : m_parent(parent), m_kind(k), m_visible(vs), m_baseFile(bf), m_title(tl), m_intro(intro) {
      
       if (parent) {
@@ -172,19 +172,19 @@ struct LayoutNavEntry {
       return m_kind;
    }
 
-   QByteArray baseFile() const {
+   QString baseFile() const {
       return m_baseFile;
    }
 
-   QByteArray title() const {
+   QString title() const {
       return m_title;
    }
 
-   QByteArray intro() const {
+   QString intro() const {
       return m_intro;
    }
 
-   QByteArray url() const;
+   QString url() const;
    bool visible()  {
       return m_visible;
    }
@@ -213,9 +213,9 @@ struct LayoutNavEntry {
    Kind m_kind;
    bool m_visible;
 
-   QByteArray m_baseFile;
-   QByteArray m_title;
-   QByteArray m_intro;
+   QString m_baseFile;
+   QString m_title;
+   QString m_intro;
 
    QList<LayoutNavEntry *> m_children;
 

@@ -111,7 +111,7 @@ void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const char *anch
       baseUrl = url;
    }
 
-   QByteArray name = ctx->qualifiedName();
+   QString name = ctx->qualifiedName();
 
    if (ctx->definitionType() == Definition::TypeMember) {
       QSharedPointer<MemberDef> md = ctx.dynamicCast<MemberDef>();
@@ -127,7 +127,7 @@ void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const char *anch
       // compound type
       SrcLangExt lang = ctx->getLanguage();
 
-      QByteArray sep = getLanguageSpecificSeparator(lang);
+      QString sep = getLanguageSpecificSeparator(lang);
 
       if (sep != "::") {
          name = substitute(name, "::", sep);
@@ -152,10 +152,13 @@ void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const char *anch
          break;
 
          case Definition::TypeNamespace: {
+
             if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
                name = theTranslator->trPackage(name);
+
             } else if (lang == SrcLangExt_Fortran) {
                name.prepend(theTranslator->trModule(true, true) + " ");
+
             } else {
                name.prepend(theTranslator->trNamespace(true, true) + " ");
             }
@@ -836,7 +839,8 @@ class SearchIndexCategoryMapping
       categoryLabel[SEARCH_INDEX_GROUPS]     = theTranslator->trGroup(true, false);
       categoryLabel[SEARCH_INDEX_PAGES]      = theTranslator->trPage(true, false);
    }
-   QByteArray categoryLabel[NUM_SEARCH_INDICES];
+
+   QString categoryLabel[NUM_SEARCH_INDICES];
 };
 
 void writeJavascriptSearchIndex()

@@ -94,15 +94,11 @@ class Definition : public DefinitionIntf
 {
  public:
   
-   Definition(
-      const char *defFileName, int defLine, int defColumn,
-      const char *name, const char *b = 0, const char *d = 0,
-      bool isSymbol = true);
+   Definition(const QString &defFileName, int defLine, int defColumn, const QString &name, 
+      const QString &b = QString(), const QString &d = QString(), bool isSymbol = true);
  
    virtual ~Definition();
 
-   // ----  getters 
-  
    /*! Returns the name of the definition */
    const QByteArray &name() const {
       return m_name;
@@ -112,11 +108,11 @@ class Definition : public DefinitionIntf
    virtual QString displayName(bool includeScope = true) const = 0;
 
    /*! Returns the local name without any scope qualifiers. */
-   QByteArray localName() const;
+   QString localName() const;
 
    /*! Returns the fully qualified name of this definition
     */
-   virtual QByteArray qualifiedName() const;
+   virtual QString qualifiedName() const;
 
    /*! Returns the name of this definition as it appears in the symbol map.
     */
@@ -125,10 +121,10 @@ class Definition : public DefinitionIntf
    /*! Returns the base file name (without extension) of this definition.
     *  as it is referenced to/written to disk.
     */
-   virtual QByteArray getOutputFileBase() const = 0;
+   virtual QString getOutputFileBase() const = 0;
 
    /*! Returns the anchor within a page where this item can be found */
-   virtual QByteArray anchor() const = 0;
+   virtual QString anchor() const = 0;
 
    /*! Returns the name of the source listing of this definition. */
    virtual QByteArray getSourceFileBase() const;
@@ -255,7 +251,7 @@ class Definition : public DefinitionIntf
 
    QList<ListItemInfo> *xrefListItems() const;
 
-   virtual QSharedPointer<Definition> findInnerCompound(const char *name);
+   virtual QSharedPointer<Definition> findInnerCompound(const QString &name);
    virtual QSharedPointer<Definition> getOuterScope() const;
 
    MemberSDict *getReferencesMembers() const;
@@ -336,23 +332,16 @@ class Definition : public DefinitionIntf
       m_sortId = id;
    }   
 
-
-   //-----------------------------------------------------------------------------------
-   // --- actions ----
-   //-----------------------------------------------------------------------------------
-
-   QString convertNameToFile(const char *name, bool allowDots = false) const;
+   QString convertNameToFile(const QString &name, bool allowDots = false) const;
 
    void writeSourceDef(OutputList &ol, const char *scopeName);
    void writeInlineCode(OutputList &ol, const char *scopeName);
    void writeSourceRefs(OutputList &ol, const char *scopeName);
    void writeSourceReffedBy(OutputList &ol, const char *scopeName);
    void makePartOfGroup(QSharedPointer<GroupDef> gd);
-
-   //void writePathFragment(OutputList &ol) const;
-
+   
    void writeNavigationPath(OutputList &ol) const;
-   QByteArray navigationPathAsString() const;
+   QString navigationPathAsString() const;
 
    virtual void writeQuickMemberLinks(OutputList &, QSharedPointer<MemberDef> md) const 
    {}
@@ -360,7 +349,7 @@ class Definition : public DefinitionIntf
    virtual void writeSummaryLinks(OutputList &) 
    {}
 
-   QByteArray pathFragment() const;
+   QString pathFragment() const;
 
    /*! Writes the documentation anchors of the definition to yhe Doxy_Globals::tagFile stream.
     */
@@ -379,7 +368,7 @@ class Definition : public DefinitionIntf
    void setSymbolName(const QByteArray &name);
 
    int  _getXRefListId(const char *listName) const;
-   void _writeSourceRefList(OutputList &ol, const char *scopeName,const QByteArray &text, MemberSDict *members, bool);
+   void _writeSourceRefList(OutputList &ol, const char *scopeName,const QString &text, MemberSDict *members, bool);
 
    void _setBriefDescription(const char *b, const char *briefFile, int briefLine);
    void _setDocumentation(const QByteArray &doc, const QByteArray &docFile, int docLine, bool stripWhiteSpace, bool atTop);

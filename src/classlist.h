@@ -44,7 +44,7 @@ class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
    ~ClassSDict() {}
 
    void writeDeclaration(OutputList &ol, const ClassDef::CompoundType *filter = 0,
-                         const char *header = 0, bool localNames = false);
+                         const QString &header = 0, bool localNames = false);
 
    void writeDocumentation(OutputList &ol, Definition *container = 0);
    bool declVisible(const ClassDef::CompoundType *filter = 0) const;

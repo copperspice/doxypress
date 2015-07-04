@@ -1420,6 +1420,18 @@ The arrows have the following meaning:
         <source>, and </source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Public Typedefs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Protected Typedefs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Private Typedefs</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>latexSupport</name>

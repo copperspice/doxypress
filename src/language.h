@@ -32,9 +32,9 @@ QString getLanguage();
  *  translators to be able to specify different elements orders
  *  depending on whether text flows from left to right or visa versa.
  */
-inline QByteArray generateMarker(int id)
+inline QString generateMarker(int id)
 {
-   QByteArray retval;
+   QString retval;
 
    retval.setNum(id);
    retval.prepend('@');

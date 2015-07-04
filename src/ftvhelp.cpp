@@ -231,7 +231,7 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, 
 
 static QByteArray node2URL(FTVNode *n, bool overruleFile = false, bool srcLink = false)
 {
-   QByteArray url = n->file;
+   QString url = n->file;
 
    if (! url.isEmpty() && url.at(0) == '!') { 
       // relative URL, remove leading !
@@ -501,9 +501,9 @@ static void generateJSLink(QTextStream &t, FTVNode *n)
    }
 }
 
-static QByteArray convertFileId2Var(const QByteArray &fileId)
+static QString convertFileId2Var(const QString  &fileId)
 {
-   QByteArray varId = fileId;
+   QString  varId = fileId;
    int i = varId.lastIndexOf('/');
 
    if (i >= 0) {

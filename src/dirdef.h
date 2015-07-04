@@ -43,9 +43,9 @@ class DirDef : public Definition
       return TypeDir;
    }
 
-   QByteArray getOutputFileBase() const;
-   QByteArray anchor() const {
-      return QByteArray();
+   QString getOutputFileBase() const;
+   QString anchor() const {
+      return "";
    }
 
    bool isLinkableInProject() const;
@@ -93,7 +93,7 @@ class DirDef : public Definition
 
    bool isParentOf(QSharedPointer<DirDef> dir) const;
    bool depGraphIsTrivial() const;
-   QByteArray shortTitle() const;
+   QString shortTitle() const;
    bool hasDetailedDescription() const;
 
    // generate output
@@ -219,12 +219,12 @@ class DirRelation
    }
 
    void writeDocumentation(OutputList &ol);
-   QByteArray getOutputFileBase() const {
+   QString getOutputFileBase() const {
       return m_name;
    }
 
  private:
-   QByteArray m_name;
+   QString m_name;
    QSharedPointer<DirDef> m_src;
    UsedDir *m_dst;
 };

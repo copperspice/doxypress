@@ -294,9 +294,13 @@ void Image::writeChar(int x, int y, char c, uchar fg)
    }
 }
 
-void Image::writeString(int x, int y, const char *s, uchar fg)
+void Image::writeString(int x, int y, const QString &text, uchar fg)
 {
-   if (s) {
+   if (! text.isEmpty()) {
+
+      QByteArray tmp = text.toUtf8();
+      const char *s  = tmp.constData();    
+
       char c;
 
       while ((c = *s++)) {
@@ -306,11 +310,15 @@ void Image::writeString(int x, int y, const char *s, uchar fg)
    }
 }
 
-uint Image::stringLength(const char *s)
+uint Image::stringLength(const QString &text)
 {
    int w = 0;
 
-   if (s) {
+   if (! text.isEmpty()) {
+      
+      QByteArray tmp = text.toUtf8();
+      const char *s  = tmp.constData();  
+
       char c;
 
       while ((c = *s++)) {

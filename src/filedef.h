@@ -91,12 +91,12 @@ class FileDef : public Definition
       return m_fileName;
    }
 
-   QByteArray getOutputFileBase() const {
-      return convertNameToFile(m_diskName).toUtf8();
+   QString getOutputFileBase() const override {
+      return convertNameToFile(m_diskName);
    }
 
-   QByteArray anchor() const {
-      return QByteArray();
+   QString anchor() const override {
+      return "";
    }
 
    QByteArray getFileBase() const {
@@ -134,7 +134,7 @@ class FileDef : public Definition
    }
 
    /*! Returns version of this file. */
-   QByteArray getVersion() const {
+   QString getVersion() const {
       return m_fileVersion;
    }
 
@@ -201,9 +201,9 @@ class FileDef : public Definition
       return &m_classSDict;
    }
 
-   QByteArray title() const;
+   QString title() const;
    bool hasDetailedDescription() const;
-   QByteArray fileVersion() const;
+   QString fileVersion() const;
 
    bool subGrouping() const {
       return m_subGrouping;
@@ -300,7 +300,7 @@ class FileDef : public Definition
    QHash<long, QSharedPointer<MemberDef>>  m_srcMemberDict;
 
    bool               m_isSource;
-   QByteArray         m_fileVersion;
+   QString            m_fileVersion;
    PackageDef        *m_package;
 
    QSharedPointer<DirDef> m_dir;

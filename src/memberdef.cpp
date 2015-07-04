@@ -2213,7 +2213,7 @@ void MemberDef::_writeCallGraph(OutputList &ol)
                      "DOT_GRAPH_MAX_NODES.\n", qPrint(qualifiedName()));
 
       } else if (! callGraph.isTrivial()) {
-         msg("Generating call graph for function %s\n", qPrint(qualifiedName()));
+         msg("Generating call graph for function %s\n", qPrintable(qualifiedName()));
 
          ol.disable(OutputGenerator::Man);
          ol.startParagraph();
@@ -2237,10 +2237,10 @@ void MemberDef::_writeCallerGraph(OutputList &ol)
 
       if (callerGraph.isTooBig()) {
          warn_uncond("Caller graph for '%s' not generated, too many nodes. " 
-                     "Consider increasing DOT_GRAPH_MAX_NODES.\n", qPrint(qualifiedName()));
+                     "Consider increasing DOT_GRAPH_MAX_NODES.\n", qPrintable(qualifiedName()));
 
       } else if (!callerGraph.isTrivial() && !callerGraph.isTooBig()) {
-         msg("Generating caller graph for function %s\n", qPrint(qualifiedName()));
+         msg("Generating caller graph for function %s\n", qPrintable(qualifiedName()));
 
          ol.disable(OutputGenerator::Man);
          ol.startParagraph();
@@ -2260,9 +2260,10 @@ void MemberDef::_writeReimplements(OutputList &ol)
 
    if (bmd && (bcd = bmd->getClassDef())) {
       // write class that contains a member that is reimplemented by this one
+
       if (bcd->isLinkable()) {
          ol.startParagraph();
-         QByteArray reimplFromLine;
+         QString reimplFromLine;
 
          if (bmd->virtualness() != Pure && bcd->compoundType() != ClassDef::Interface) {
             reimplFromLine = theTranslator->trReimplementedFromList(1);
@@ -2337,7 +2338,7 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
          // write the list of classes that overwrite this member
          ol.startParagraph();
 
-         QByteArray reimplInLine;
+         QString reimplInLine;
          if (m_impl->virt == Pure || (m_impl->classDef && m_impl->classDef->compoundType() == ClassDef::Interface)) {
             reimplInLine = theTranslator->trImplementedInList(count);
          } else {
@@ -2399,11 +2400,11 @@ void MemberDef::_writeCategoryRelation(OutputList &ol)
       //    m_impl->classDef->name().data(),
       //    m_impl->classDef->categoryOf() ? m_impl->classDef->categoryOf()->name().data() : "<none>"
       //    );
-      QByteArray text;
-      QByteArray ref;
-      QByteArray file;
-      QByteArray anc;
 
+      QString text;
+      QString ref;
+      QString file;
+      QString anc;
       QString name;
 
       int i = -1;
@@ -3222,9 +3223,9 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    if (! Config::getBool("extract-all") && Config::getBool("warn-undoc") &&
          Config::getBool("warn-undoc-param") && ! Doxy_Globals::suppressDocWarnings) {
 
-      if (!hasDocumentedParams()) {
+      if (! hasDocumentedParams()) {
          warn_doc_error(docFile(), docLine(), "parameters of member %s are not (all) documented",
-                        qPrint(qualifiedName()));
+                        qPrintable(qualifiedName()));
       }
 
       if (!hasDocumentedReturnType() && isFunction() && hasDocumentation()) {
@@ -3715,7 +3716,7 @@ void MemberDef::addListReference(QSharedPointer<Definition> d)
       return;
    }
 
-   QByteArray memLabel;
+   QString memLabel;
 
    if (optimizeOutputForC) {
       memLabel = theTranslator->trGlobal(true, true);
@@ -3727,14 +3728,14 @@ void MemberDef::addListReference(QSharedPointer<Definition> d)
       memLabel = theTranslator->trMember(true, true);
    }
 
-   QByteArray memName = name();
+   QString memName = name();
    QSharedPointer<Definition> pd = getOuterScope();
 
-   QByteArray pdName = pd->definitionType() == Definition::TypeClass ?
-                       pd.dynamicCast<ClassDef>()->displayName().toUtf8() : pd->name();
+   QString pdName = pd->definitionType() == Definition::TypeClass ?
+                       pd.dynamicCast<ClassDef>()->displayName() : pd->name();
 
-   QByteArray sep = getLanguageSpecificSeparator(lang, true);
-   QByteArray memArgs;
+   QString sep = getLanguageSpecificSeparator(lang, true);
+   QString memArgs;
 
    if (!isRelated() ) {
 
@@ -4156,7 +4157,7 @@ void MemberDef::setType(const char *t)
    m_impl->type = t;
 }
 
-void MemberDef::setAccessorType(QSharedPointer<ClassDef> cd, const char *t)
+void MemberDef::setAccessorType(QSharedPointer<ClassDef> cd, const QString &t)
 {
    m_impl->accessorClass = cd;
    m_impl->accessorType = t;

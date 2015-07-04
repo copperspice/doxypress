@@ -107,14 +107,18 @@ class XmlSectionMapper : public QHash<long, const char *>
 
 static XmlSectionMapper g_xmlSectionMapper;
 
-inline void writeXMLString(QTextStream &t, const char *s)
+inline void writeXMLString(QTextStream &t, const QString &text)
 {
-   t << convertToXML(s);
+   t << convertToXML(text);
 }
 
-inline void writeXMLCodeString(QTextStream &t, const char *s, int &col)
+inline void writeXMLCodeString(QTextStream &t, const QString &text, int &col)
 {
+   QByteArray tmp = text.toUtf8();
+   const char *s  = tmp.constData();
+
    char c;
+
    while (c = *s++) {
 
       switch (c) {
@@ -233,26 +237,30 @@ static void writeCombineScript()
 }
 
 
-void writeXMLLink(QTextStream &t, const char *extRef, const char *compoundId,
-                  const char *anchorId, const char *text, const char *tooltip)
+void writeXMLLink(QTextStream &t, const QString &extRef, const QString &compoundId,
+                  const QString &anchorId, const QString &text, const QString &tooltip)
 {
    t << "<ref refid=\"" << compoundId;
-   if (anchorId) {
+   if (! anchorId.isEmpty()) {
       t << "_1" << anchorId;
    }
+
    t << "\" kindref=\"";
-   if (anchorId) {
+   if (! anchorId.isEmpty()) {
       t << "member";
    } else {
       t << "compound";
    }
+
    t << "\"";
-   if (extRef) {
+   if (! extRef.isEmpty()) {
       t << " external=\"" << extRef << "\"";
    }
-   if (tooltip) {
+
+   if (! tooltip.isEmpty()) {
       t << " tooltip=\"" << convertToXML(tooltip) << "\"";
    }
+
    t << ">";
    writeXMLString(t, text);
    t << "</ref>";
@@ -264,13 +272,13 @@ class TextGeneratorXMLImpl : public TextGeneratorIntf
  public:
    TextGeneratorXMLImpl(QTextStream &t): m_t(t) {}
 
-   void writeString(const char *s, bool) const override {
-      writeXMLString(m_t, s);
+   void writeString(const QString &text, bool) const override {
+      writeXMLString(m_t, text);
    }
 
    void writeBreak(int) const override {}
 
-   void writeLink(const QByteArray &extRef, const QByteArray &file, const QByteArray &anchor, const QByteArray &text) const override {
+   void writeLink(const QString &extRef, const QString &file, const QString &anchor, const QString &text) const override {
       writeXMLLink(m_t, extRef, file, anchor, text, 0);
    }
 
@@ -291,7 +299,7 @@ class XMLCodeGenerator : public CodeOutputInterface
    virtual ~XMLCodeGenerator() 
    { }
 
-   void codify(const QByteArray &text) override {
+   void codify(const QString &text) override {
       XML_DB(("(codify \"%s\")\n", text));
 
       if (m_insideCodeLine && !m_insideSpecialHL && m_normalHLNeedStartTag) {
@@ -302,8 +310,8 @@ class XMLCodeGenerator : public CodeOutputInterface
       writeXMLCodeString(m_t, text, m_col);
    }
 
-   void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
-                      const QByteArray &name, const QByteArray &tooltip) override {
+   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor, 
+                      const QString &name, const QString &tooltip) override {
 
       XML_DB(("(writeCodeLink)\n"));
 
@@ -313,11 +321,11 @@ class XMLCodeGenerator : public CodeOutputInterface
       }
 
       writeXMLLink(m_t, ref, file, anchor, name, tooltip);
-      m_col += qstrlen(name);
+      m_col += name.length();
    }
 
-   void writeTooltip(const char *, const DocLinkInfo &, const QByteArray &,
-                     const QByteArray &, const SourceLinkInfo &, const SourceLinkInfo &) override {
+   void writeTooltip(const QString &, const DocLinkInfo &, const QString &,
+                     const QString &, const SourceLinkInfo &, const SourceLinkInfo &) override {
       XML_DB(("(writeToolTip)\n"));
    }
 
@@ -358,7 +366,7 @@ class XMLCodeGenerator : public CodeOutputInterface
       m_insideCodeLine = false;
    }
 
-   void startFontClass(const char *colorClass) {
+   void startFontClass(const QString &colorClass) override {
       XML_DB(("(startFontClass)\n"));
       if (m_insideCodeLine && !m_insideSpecialHL && !m_normalHLNeedStartTag) {
          m_t << "</highlight>";
@@ -374,10 +382,11 @@ class XMLCodeGenerator : public CodeOutputInterface
       m_insideSpecialHL = false;
    }
 
-   void writeCodeAnchor(const char *) {
+   void writeCodeAnchor(const QString &) override {
       XML_DB(("(writeCodeAnchor)\n"));
    }
-   void writeLineNumber(const char *extRef, const QByteArray &compId, const char *anchorId, int l) override {
+
+   void writeLineNumber(const QString &extRef, const QString &compId, const QString &anchorId, int l) override {
       XML_DB(("(writeLineNumber)\n"));
 
       // we remember the information provided here to use it at the <codeline> start tag
@@ -387,19 +396,19 @@ class XMLCodeGenerator : public CodeOutputInterface
       if (! compId.isEmpty()) {
          m_refId = compId;
 
-         if (anchorId) {
-            m_refId += (QByteArray)"_1" + anchorId;
+         if (! anchorId.isEmpty()) {
+            m_refId += "_1" + anchorId;
          }
 
          m_isMemberRef = anchorId != 0;
 
-         if (extRef) {
+         if (! extRef.isEmpty()) {
             m_external = extRef;
          }
       }
    }
 
-   void setCurrentDoc(QSharedPointer<Definition> d, const char *, bool)  override {}
+   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool)  override {}
    void addWord(const QString &, bool) override {}
 
    void finish() {
@@ -410,8 +419,8 @@ class XMLCodeGenerator : public CodeOutputInterface
 
  private:
    QTextStream &m_t;
-   QByteArray m_refId;
-   QByteArray m_external;
+   QString m_refId;
+   QString m_external;
 
    int m_lineNumber;
    bool m_isMemberRef;
@@ -569,12 +578,12 @@ static void stripQualifiers(QByteArray &typeStr)
    }
 }
 
-static QByteArray classOutputFileBase(QSharedPointer<ClassDef> cd)
+static QString classOutputFileBase(QSharedPointer<ClassDef> cd)
 { 
    return cd->getOutputFileBase();   
 }
 
-static QByteArray memberOutputFileBase(QSharedPointer<MemberDef> md)
+static QString memberOutputFileBase(QSharedPointer<MemberDef> md)
 {
    return md->getOutputFileBase();
 }
@@ -1963,10 +1972,11 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
       return;
    }
 
-   QByteArray pageName = pd->getOutputFileBase();
+   QString pageName = pd->getOutputFileBase();
    if (pd->getGroupDef()) {
-      pageName += (QByteArray)"_" + pd->name();
+      pageName += "_" + pd->name();
    }
+
    if (pageName == "index") {
       pageName = "indexpage";   // to prevent overwriting the generated index page.
    }

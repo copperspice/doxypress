@@ -1219,21 +1219,29 @@ void ManDocVisitor::visitPost(DocParBlock *)
 {
 }
 
-void ManDocVisitor::filter(const char *str)
+void ManDocVisitor::filter(constQString &str)
 {
-   if (str) {
-      const char *p = str;
+   if (! str.isEmpty()) {
+
+      // BROOM - ansel
+      const char *p = str.toUtf8();  
+
       char c = 0;
+
       while ((c = *p++)) {
+
          switch (c) {
             case '.':
                m_t << "\\&.";
                break; // see  bug652277
+
             case '\\':
                m_t << "\\\\";
                break;
+
             case '"':
                c = '\''; // fall through
+
             default:
                m_t << c;
                break;

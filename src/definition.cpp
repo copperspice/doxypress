@@ -69,10 +69,10 @@ class Definition_Private
    QByteArray   briefSignatures;
    QByteArray   docSignatures;
 
-   QByteArray localName;      // local (unqualified) name of the definition
+   QString localName;      // local (unqualified) name of the definition
    
-   QByteArray qualifiedName;
-   QByteArray ref;   // reference to external documentation
+   QString qualifiedName;
+   QByteArray ref;         // reference to external documentation
 
    bool hidden;
    bool isArtificial;
@@ -116,9 +116,9 @@ void Definition_Private::init(const char *df, const char *n)
       defFileExt = defFileName.mid(lastDot);
    }
 
-   QByteArray name = n;
-   if (name != "<globalScope>") {
-      //extractNamespaceName(m_name,m_localName,ns);
+   QString name = n;
+
+   if (name != "<globalScope>") {     
       localName = stripScope(n);
 
    } else {
@@ -439,7 +439,7 @@ void Definition::addSectionsToIndex()
             }
          }
 
-         QByteArray title = si->title;
+         QString title = si->title;
 
          if (title.isEmpty()) {
             title = si->label;
@@ -687,7 +687,7 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
       return false;   // not a valid file name
    }
 
-   QByteArray filter = getFileFilter(fileName, true).toUtf8();
+   QString filter = getFileFilter(fileName, true);
 
    FILE *f = 0;
    bool usePipe = !filter.isEmpty() && filterSourceFiles;
@@ -700,10 +700,8 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
 
    } else { 
       // use filter
-      QByteArray cmd = filter + " \"" + fileName + "\"";
-      Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", cmd.data());
-
-      f = popen(cmd, "r");
+      QString cmd = filter + " \"" + fileName + "\"";    
+      f = popen(cmd.toUtf8(), "r");
    }
 
    bool found = lang == SrcLangExt_Tcl | lang == SrcLangExt_Python || lang == SrcLangExt_Fortran;
@@ -711,8 +709,8 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
    // for TCL, Python, and Fortran no bracket search is possible
 
    if (f) {
-      int c = 0;
-      int col = 0;
+      int c      = 0;
+      int col    = 0;
       int lineNr = 1;
 
       // skip until the startLine has reached
@@ -890,7 +888,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
    QByteArray fn = getSourceFileBase();
 
    if (! fn.isEmpty()) {
-      QByteArray refText = theTranslator->trDefinedAtLineInSourceFile();
+      QString refText = theTranslator->trDefinedAtLineInSourceFile();
 
       int lineMarkerPos = refText.indexOf("@0");
       int fileMarkerPos = refText.indexOf("@1");
@@ -979,7 +977,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
             ol.pushGeneratorState();
             ol.disable(OutputGenerator::RTF);
             ol.disable(OutputGenerator::Man);
-            if (!latexSourceCode) {
+            if (! latexSourceCode) {
                ol.disable(OutputGenerator::Latex);
             }
             ol.disableAllBut(OutputGenerator::Html);
@@ -1081,7 +1079,7 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
  *  definition is used.
  */
 void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
-                                     const QByteArray &text, MemberSDict *members, bool /*funcOnly*/)
+                                     const QString &text, MemberSDict *members, bool /*funcOnly*/)
 {
    static bool latexSourceCode = Config::getBool("latex-source-code");
    static bool sourceBrowser   = Config::getBool("source-code");
@@ -1095,7 +1093,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
       ol.parseText(text);
       ol.docify(" ");
 
-      QByteArray ldefLine = theTranslator->trWriteList(members->count());
+      QString ldefLine = theTranslator->trWriteList(members->count());
 
       QRegExp marker("@[0-9]+");
       int index = 0, newIndex, matchLen;
@@ -1270,7 +1268,7 @@ void Definition::addSourceReferences(QSharedPointer<MemberDef> md)
    }
 }
 
-QByteArray Definition::qualifiedName() const
+QString Definition::qualifiedName() const
 {
    if (! m_private->qualifiedName.isEmpty()) {     
       return m_private->qualifiedName;
@@ -1314,7 +1312,7 @@ void Definition::setOuterScope(QSharedPointer<Definition> d)
    m_private->hidden = m_private->hidden || d->isHidden();
 }
 
-QByteArray Definition::localName() const
+QString Definition::localName() const
 {
    return m_private->localName;
 }
@@ -1378,7 +1376,7 @@ QList<ListItemInfo> *Definition::xrefListItems() const
    return m_private->xrefListItems;
 }
 
-QString Definition::convertNameToFile(const char *name, bool allowDots) const
+QString Definition::convertNameToFile(const QString &name, bool allowDots) const
 {
    if (! m_private->ref.isEmpty()) {
       return name;
@@ -1389,23 +1387,23 @@ QString Definition::convertNameToFile(const char *name, bool allowDots) const
    }
 }
 
-QByteArray Definition::pathFragment() const
+QString Definition::pathFragment() const
 {
-   QByteArray result;
+   QString result;
 
    if (m_private->outerScope && m_private->outerScope != Doxy_Globals::globalScope) {
       result = m_private->outerScope->pathFragment();
    }
 
    if (isLinkable()) {
-      if (!result.isEmpty()) {
+      if (! result.isEmpty()) {
          result += "/";
       }
 
-      if (definitionType() == Definition::TypeGroup && ((const GroupDef *)this)->groupTitle()) {
+      if (definitionType() == Definition::TypeGroup && ! ((const GroupDef *)this)->groupTitle().isEmpty()) {
          result += ((const GroupDef *)this)->groupTitle();
 
-      } else if (definitionType() == Definition::TypePage && !((const PageDef *)this)->title().isEmpty()) {
+      } else if (definitionType() == Definition::TypePage && ! ((const PageDef *)this)->title().isEmpty()) {
          result += ((const PageDef *)this)->title();
 
       } else {
@@ -1424,12 +1422,12 @@ QByteArray Definition::pathFragment() const
 /*! Returns the string used in the footer for $navpath when
  *  GENERATE_TREEVIEW is enabled
  */
-QByteArray Definition::navigationPathAsString() const
+QString Definition::navigationPathAsString() const
 {
-   QByteArray result;
+   QString result;
    QSharedPointer<Definition> outerScope = getOuterScope();
 
-   QByteArray locName = localName();
+   QString locName = localName();
 
    if (outerScope && outerScope != Doxy_Globals::globalScope) {
       result += outerScope->navigationPathAsString();
@@ -1442,16 +1440,16 @@ QByteArray Definition::navigationPathAsString() const
    result += "<li class=\"navelem\">";
 
    if (isLinkable()) {
-      if (definitionType() == Definition::TypeGroup && ((const GroupDef *)this)->groupTitle()) {
+      if (definitionType() == Definition::TypeGroup && ! ((const GroupDef *)this)->groupTitle().isEmpty()) {
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension + "\">" +
                    convertToHtml(((const GroupDef*)this)->groupTitle()) + "</a>";
 
-      } else if (definitionType() == Definition::TypePage && !((const PageDef *)this)->title().isEmpty()) {
+      } else if (definitionType() == Definition::TypePage && ! ((const PageDef *)this)->title().isEmpty()) {
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension + "\">" +
                    convertToHtml(((const PageDef*)this)->title()) + "</a>";
 
       } else if (definitionType() == Definition::TypeClass) {
-         QByteArray name = locName;
+         QString name = locName;
 
          if (name.right(2) == "-p" /*|| name.right(2)=="-g"*/) {
             name = name.left(name.length() - 2);
@@ -1474,6 +1472,7 @@ QByteArray Definition::navigationPathAsString() const
    }
 
    result += "</li>";
+
    return result;
 }
 
@@ -1483,7 +1482,7 @@ void Definition::writeNavigationPath(OutputList &ol) const
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   QByteArray navPath;
+   QString navPath;
    navPath += "<div id=\"nav-path\" class=\"navpath\">\n"
               "  <ul>\n";
    navPath += navigationPathAsString();
@@ -1771,7 +1770,7 @@ SortedList<QSharedPointer<GroupDef>> *Definition::partOfGroups() const
    return m_private->partOfGroups;
 }
 
-QSharedPointer<Definition> Definition::findInnerCompound(const char *)
+QSharedPointer<Definition> Definition::findInnerCompound(const QString &)
 {
    return QSharedPointer<Definition>();
 }

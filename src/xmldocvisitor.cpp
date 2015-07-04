@@ -251,11 +251,14 @@ void XmlDocVisitor::visit(DocVerbatim *s)
    if (m_hide) {
       return;
    }
-   QByteArray lang = m_langExt;
-   if (!s->language().isEmpty()) { // explicit language setting
+
+   QString lang = m_langExt;
+   if (! s->language().isEmpty()) { // explicit language setting
       lang = s->language();
    }
+
    SrcLangExt langExt = getLanguageFromFileName(lang);
+
    switch (s->type()) {
       case DocVerbatim::Code: // fall though
          m_t << "<programlisting>";
@@ -386,8 +389,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
 
 void XmlDocVisitor::visit(DocIncOperator *op)
 {
-   //printf("DocIncOperator: type=%d first=%d, last=%d text=`%s'\n",
-   //    op->type(),op->isFirst(),op->isLast(),op->text().data());
+
    if (op->isFirst()) {
       if (!m_hide) {
          m_t << "<programlisting>";
@@ -395,14 +397,14 @@ void XmlDocVisitor::visit(DocIncOperator *op)
       pushEnabled();
       m_hide = true;
    }
+
    SrcLangExt langExt = getLanguageFromFileName(m_langExt);
+
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (!m_hide) {
-         Doxy_Globals::parserManager->getParser(m_langExt)
-         ->parseCode(m_ci, op->context(),
-                     op->text(), langExt, op->isExample(),
-                     op->exampleFile());
+         Doxy_Globals::parserManager->getParser(m_langExt)->parseCode(m_ci, op->context(),
+                     op->text(), langExt, op->isExample(), op->exampleFile());
       }
       pushEnabled();
       m_hide = true;

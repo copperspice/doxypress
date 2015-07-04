@@ -58,22 +58,14 @@ class OutputList : public OutputDocInterface
 
 
    //  OutputDocInterface implementation
-   bool generateDoc(const char *fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md, 
-                    const QByteArray &docStr,bool indexWords, bool isExample, const char *exampleName = 0,
+   bool generateDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md, 
+                    const QString &docStr,bool indexWords, bool isExample, const QString &exampleName = 0,
                     bool singleLine = false, bool linkFromIndex = false);
 
    void writeDoc(DocRoot *root, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md);
 
-   bool parseText(const QByteArray &textStr);
-
-   bool parseText(const QString &textStr)  {
-      return parseText(textStr.toUtf8());
-   }
-
-   bool parseText(const char *textStr)  {
-      return parseText(QByteArray(textStr));
-   }
-
+   bool parseText(const QString &textStr);
+  
    void startIndexSection(IndexSections is) {
       forall(&OutputGenerator::startIndexSection, is);
    }
@@ -82,7 +74,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endIndexSection, is);
    }
 
-   void writePageLink(const char *name, bool first) {
+   void writePageLink(const QString &name, bool first) {
       forall(&OutputGenerator::writePageLink, name, first);
    }
 
@@ -114,11 +106,11 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endFile);
    }
 
-   void startTitleHead(const char *fileName) {
+   void startTitleHead(const QString &fileName) {
       forall(&OutputGenerator::startTitleHead, fileName);
    }
 
-   void endTitleHead(const char *fileName, const char *name) {
+   void endTitleHead(const QString &fileName, const QString &name) {
       forall(&OutputGenerator::endTitleHead, fileName, name);
    }
 
@@ -130,8 +122,8 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endTitle);
    }
 
-   //void newParagraph()
-   //{ forall(&OutputGenerator::newParagraph); }
+   // void newParagraph()
+   //    { forall(&OutputGenerator::newParagraph); }
 
    void startParagraph() {
       forall(&OutputGenerator::startParagraph);
@@ -141,7 +133,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endParagraph);
    }
 
-   void writeString(const char *text) {
+   void writeString(const QString &text) {
       forall(&OutputGenerator::writeString, text);
    }
 
@@ -173,7 +165,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::startIndexValue, b);
    }
 
-   void endIndexValue(const char *name, bool b) {
+   void endIndexValue(const QString &name, bool b) {
       forall(&OutputGenerator::endIndexValue, name, b);
    }
 
@@ -185,47 +177,38 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endItemList);
    }
 
-   void startIndexItem(const char *ref, const char *file) {
+   void startIndexItem(const QString &ref, const QString &file) {
       forall(&OutputGenerator::startIndexItem, ref, file);
    }
 
-   void endIndexItem(const char *ref, const char *file) {
+   void endIndexItem(const QString &ref, const QString &file) {
       forall(&OutputGenerator::endIndexItem, ref, file);
    }
 
-
-   void docify(const QByteArray &s)  override {
-      forall(&OutputGenerator::docify, s);
-   }
-
-   void docify(const char *s)   {
-      docify(QByteArray(s));
-   } 
-
-   void docify(const QString &s)   {
-      docify(s.toUtf8());
+   void docify(const QString &text)  override {
+      forall(&OutputGenerator::docify, text);
    }
  
-   void codify(const QByteArray &s)  override {
+   void codify(const QString &s)  override {
       forall(&OutputGenerator::codify, s);
    } 
 
-   void writeObjectLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, const QByteArray &name) override {
-      forall(&OutputGenerator::writeObjectLink, ref, file, anchor, name.constData());
+   void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) override {
+      forall(&OutputGenerator::writeObjectLink, ref, file, anchor, name);
    }
 
-   void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, const QByteArray &name,
-                      const QByteArray &tooltip)  override
+   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor, const QString &name,
+                      const QString &tooltip)  override
    {
       forall(&OutputGenerator::writeCodeLink, ref, file, anchor, name, tooltip);
    }
 
-   void writeTooltip(const char *id, const DocLinkInfo &docInfo, const QByteArray &decl, const QByteArray &desc, 
+   void writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl, const QString &desc, 
                      const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo)  override {
       forall(&OutputGenerator::writeTooltip, id, docInfo, decl, desc, defInfo, declInfo);
    }
 
-   void startTextLink(const QByteArray &file, const QByteArray &anchor)  override{
+   void startTextLink(const QString &file, const QString &anchor)  override{
       forall(&OutputGenerator::startTextLink, file, anchor);
    }
 
@@ -241,11 +224,11 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endHtmlLink);
    }
 
-   void writeStartAnnoItem(const char *type, const char *file, const char *path, const char *name) {
+   void writeStartAnnoItem(const QString &type, const QString &file, const QString &path, const QString &name) {
       forall(&OutputGenerator::writeStartAnnoItem, type, file, path, name);
    }
 
-   void writeEndAnnoItem(const char *name) {
+   void writeEndAnnoItem(const QString &name) {
       forall(&OutputGenerator::writeEndAnnoItem, name);
    }
 
@@ -287,7 +270,7 @@ class OutputList : public OutputDocInterface
    void endHeaderSection() {
       forall(&OutputGenerator::endHeaderSection);
    }
-   void startMemberHeader(const char *anchor) {
+   void startMemberHeader(const QString &anchor) {
       forall(&OutputGenerator::startMemberHeader, anchor);
    }
    void endMemberHeader() {
@@ -323,7 +306,7 @@ class OutputList : public OutputDocInterface
    void endAnonTypeScope(int i1) {
       forall(&OutputGenerator::endAnonTypeScope, i1);
    }
-   void startMemberItem(const char *anchor, int i1, const QByteArray &id = 0) {
+   void startMemberItem(const QString &anchor, int i1, const QString &id = 0) {
       forall(&OutputGenerator::startMemberItem, anchor, i1, id);
    }
    void endMemberItem() {
@@ -332,7 +315,7 @@ class OutputList : public OutputDocInterface
    void startMemberTemplateParams() {
       forall(&OutputGenerator::startMemberTemplateParams);
    }
-   void endMemberTemplateParams(const char *anchor, const QByteArray &inheritId) {
+   void endMemberTemplateParams(const QString &anchor, const QString &inheritId) {
       forall(&OutputGenerator::endMemberTemplateParams, anchor, inheritId);
    }
    void startMemberGroupHeader(bool b) {
@@ -362,7 +345,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::writeRuler);
    }
  
-  void writeAnchor(const char *fileName, const char *name) {
+  void writeAnchor(const QString &fileName, const QString &name) {
       forall(&OutputGenerator::writeAnchor, fileName, name);
    }
 
@@ -382,7 +365,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endCodeLine);
    }
 
-   void writeLineNumber(const char *ref, const QByteArray &file, const char *anchor, int lineNumber) {
+   void writeLineNumber(const QString &ref, const QString &file, const QString &anchor, int lineNumber) {
       forall(&OutputGenerator::writeLineNumber, ref, file, anchor, lineNumber);
    }
 
@@ -398,19 +381,19 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::writeChar, c);
    }
 
-   void startMemberDoc(const char *clName, const char *memName,
-                       const char *anchor, const char *title, bool showInline) {
+   void startMemberDoc(const QString &clName, const QString &memName,
+                       const QString &anchor, const QString &title, bool showInline) {
       forall(&OutputGenerator::startMemberDoc, clName, memName, anchor, title, showInline);
    }
    void endMemberDoc(bool hasArgs) {
       forall(&OutputGenerator::endMemberDoc, hasArgs);
    }
-   void startDoxyAnchor(const char *fName, const char *manName,
-                        const char *anchor, const char *name,
-                        const char *args) {
+   void startDoxyAnchor(const QString &fName, const QString &manName,
+                        const QString &anchor, const QString &name,
+                        const QString &args) {
       forall(&OutputGenerator::startDoxyAnchor, fName, manName, anchor, name, args);
    }
-   void endDoxyAnchor(const char *fn, const char *anchor) {
+   void endDoxyAnchor(const QString &fn, const QString &anchor) {
       forall(&OutputGenerator::endDoxyAnchor, fn, anchor);
    }
    void writeLatexSpacing() {
@@ -461,7 +444,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endSmall);
    }
 
-   void lineBreak(const QByteArray &style = 0)  override {
+   void lineBreak(const QString &style = 0)  override {
       forall(&OutputGenerator::lineBreak, style);
    }
 
@@ -473,7 +456,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endBold);
    }
 
-   void startMemberDescription(const char *anchor, const char *inheritId = 0) {
+   void startMemberDescription(const QString &anchor, const QString &inheritId = 0) {
       forall(&OutputGenerator::startMemberDescription, anchor, inheritId);
    }
 
@@ -485,16 +468,16 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::startMemberDeclaration);
    }
 
-   void endMemberDeclaration(const char *anchor, const char *inheritId) {
+   void endMemberDeclaration(const QString &anchor, const QString &inheritId) {
       forall(&OutputGenerator::endMemberDeclaration, anchor, inheritId);
    }
 
-   void writeInheritedSectionTitle(const char *id,   const char *ref, const char *file, const char *anchor,
-                                   const char *title, const char *name) {
+   void writeInheritedSectionTitle(const QString &id,   const QString &ref, const QString &file, const QString &anchor,
+                                   const QString &title, const QString &name) {
       forall(&OutputGenerator::writeInheritedSectionTitle, id, ref, file, anchor, title, name);
    }
 
-   void startSimpleSect(SectionTypes t, const QByteArray &file, const char *anchor, const char *title) override {
+   void startSimpleSect(SectionTypes t, const QString &file, const QString &anchor, const QString &title) override {
       forall(&OutputGenerator::startSimpleSect, t, file, anchor, title);
    }
 
@@ -502,7 +485,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endSimpleSect);
    }
 
-   void startParamList(ParamListTypes t, const char *title) {
+   void startParamList(ParamListTypes t, const QString &title) {
       forall(&OutputGenerator::startParamList, t, title);
    }
 
@@ -518,15 +501,15 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endIndent);
    }
 
-   void startSection(const char *lab, const char *title, SectionInfo::SectionType t) {
+   void startSection(const QString &lab, const QString &title, SectionInfo::SectionType t) {
       forall(&OutputGenerator::startSection, lab, title, t);
    }
 
-   void endSection(const char *lab, SectionInfo::SectionType t) {
+   void endSection(const QString &lab, SectionInfo::SectionType t) {
       forall(&OutputGenerator::endSection, lab, t);
    }
 
-   void addIndexItem(const char *s1, const char *s2) {
+   void addIndexItem(const QString &s1, const QString &s2) {
       forall(&OutputGenerator::addIndexItem, s1, s2);
    }
 
@@ -538,7 +521,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::startClassDiagram);
    }
 
-   void endClassDiagram(const ClassDiagram &d, const char *f, const char *n) {
+   void endClassDiagram(const ClassDiagram &d, const QString &f, const QString &n) {
       forall(&OutputGenerator::endClassDiagram, d, f, n);
    }
 
@@ -546,7 +529,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::startPageRef);
    }
 
-   void endPageRef(const QByteArray &c, const QByteArray &a) override {
+   void endPageRef(const QString &c, const QString &a) override {
       forall(&OutputGenerator::endPageRef, c, a);
    }
 
@@ -562,22 +545,19 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::writeSplitBar, name);
    }
 
-   void writeNavigationPath(const char *s) {
+   void writeNavigationPath(const QString &s) {
       forall(&OutputGenerator::writeNavigationPath, s);
    }
    void writeLogo() {
       forall(&OutputGenerator::writeLogo);
    }
+
    void writeQuickLinks(bool compact, HighlightedItem hli, const QString &file) {
       forall(&OutputGenerator::writeQuickLinks, compact, hli, file);
    }
 
-   void writeSummaryLink(const char *file, const char *anchor, const char *title, bool first) {
+   void writeSummaryLink(const QString &file, const QString &anchor, const QString &title, bool first) {
       forall(&OutputGenerator::writeSummaryLink, file, anchor, title, first);
-   }
-
-   void writeSummaryLink(const QString &file, const char *anchor, const QByteArray &title, bool first) {
-      forall(&OutputGenerator::writeSummaryLink, qPrintable(file), anchor, title.constData(), first);
    }
 
    void startContents() {
@@ -671,7 +651,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endMemberDocName);
    }
 
-   void startParameterType(bool first, const char *key) {
+   void startParameterType(bool first, const QString &key) {
       forall(&OutputGenerator::startParameterType, first, key);
    }
    void endParameterType() {
@@ -689,11 +669,11 @@ class OutputList : public OutputDocInterface
    void endParameterList() {
       forall(&OutputGenerator::endParameterList);
    }
-   void exceptionEntry(const char *prefix, bool closeBracket) {
+   void exceptionEntry(const QString &prefix, bool closeBracket) {
       forall(&OutputGenerator::exceptionEntry, prefix, closeBracket);
    }
 
-   void startConstraintList(const char *header) {
+   void startConstraintList(const QString &header) {
       forall(&OutputGenerator::startConstraintList, header);
    }
    void startConstraintParam() {
@@ -747,7 +727,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::startLabels);
    }
 
-   void writeLabel(const char *l, bool isLast) {
+   void writeLabel(const QString &l, bool isLast) {
       forall(&OutputGenerator::writeLabel, l, isLast);
    }
 
@@ -755,16 +735,16 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endLabels);
    }
 
-   void startFontClass(const char *c) {
+   void startFontClass(const QString &c) {
       forall(&OutputGenerator::startFontClass, c);
    }
    void endFontClass() {
       forall(&OutputGenerator::endFontClass);
    }
-   void writeCodeAnchor(const char *name) {
+   void writeCodeAnchor(const QString &name) {
       forall(&OutputGenerator::writeCodeAnchor, name);
    }
-   void setCurrentDoc(QSharedPointer<Definition> context, const char *anchor, bool isSourceFile) override {
+   void setCurrentDoc(QSharedPointer<Definition> context, const QString &anchor, bool isSourceFile) override {
       forall(&OutputGenerator::setCurrentDoc, context, anchor, isSourceFile);
    }
 

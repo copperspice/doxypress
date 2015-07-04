@@ -134,7 +134,7 @@ class DocbookDocVisitor : public DocVisitor
 
  private:
 
-   void filter(const char *str);
+   void filter(const QString &str);
    void startLink(const QByteArray &file, const QByteArray &anchor);
    void endLink();
    void pushEnabled();

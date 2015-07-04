@@ -283,7 +283,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
          }
 
          ol.startParagraph();
-         QByteArray refText = theTranslator->trDefinedInSourceFile();
+         QString refText = theTranslator->trDefinedInSourceFile();
          int fileMarkerPos = refText.indexOf("@0");
 
          if (fileMarkerPos != -1) { // should always pass this.
@@ -555,7 +555,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
 
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
          QByteArray label = lde->kind() == LayoutDocEntry::FileClasses ? "nested-classes" : "namespaces";
-         ol.writeSummaryLink(QString(""), label, ls->title(lang), first);
+         ol.writeSummaryLink("", label, ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
@@ -563,7 +563,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
          QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
-            ol.writeSummaryLink(QString(""), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+            ol.writeSummaryLink("", MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }
@@ -583,14 +583,14 @@ void FileDef::writeDocumentation(OutputList &ol)
    QSharedPointer<FileDef> self = sharedFrom(this);
    static bool generateTreeView = Config::getBool("generate-treeview");
 
-   QByteArray versionTitle;
+   QString versionTitle;
 
    if (! m_fileVersion.isEmpty()) {
       versionTitle = ("(" + m_fileVersion + ")");
    }
 
-   QByteArray title = m_docname + versionTitle;
-   QByteArray pageTitle = theTranslator->trFileReference(m_docname);
+   QString title     = m_docname + versionTitle;
+   QString pageTitle = theTranslator->trFileReference(m_docname);
 
    if (getDirDef()) {
       startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_FileVisible, !generateTreeView);
@@ -600,7 +600,7 @@ void FileDef::writeDocumentation(OutputList &ol)
          ol.endQuickIndices();
       }
 
-      QByteArray pageTitleShort = theTranslator->trFileReference(name());
+      QString pageTitleShort = theTranslator->trFileReference(name());
       startTitle(ol, getOutputFileBase(), this);
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
@@ -828,11 +828,11 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       title += (" (" + m_fileVersion + ")");
    }
 
-   QByteArray pageTitle = theTranslator->trSourceFile(title);
+   QString pageTitle = theTranslator->trSourceFile(title);
    ol.disable(OutputGenerator::Man);
    ol.disable(OutputGenerator::RTF);
 
-   if (!latexSourceCode) {
+   if (! latexSourceCode) {
       ol.disable(OutputGenerator::Latex);
    }
 
@@ -1596,12 +1596,12 @@ void FileDef::getAllIncludeFilesRecursively(QStringList &incFiles) const
    ::getAllIncludeFilesRecursively(includes, self, incFiles);
 }
 
-QByteArray FileDef::title() const
+QString FileDef::title() const
 {
    return theTranslator->trFileReference(name());
 }
 
-QByteArray FileDef::fileVersion() const
+QString FileDef::fileVersion() const
 {
    return m_fileVersion;
 }

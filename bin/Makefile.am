@@ -158,21 +158,22 @@ doxypress_SOURCES = \
    src/xmldocvisitor.cpp  \
    src/xmlgen.cpp  \
    src/portable.cpp  \
-   src/ce_parse.cpp  \
-   src/generated/code.cpp  \
-   src/generated/commentcnv.cpp  \
-   src/generated/commentscan.cpp  \
-   src/generated/constexp.cpp \
-   src/generated/defargs.cpp \
-   src/generated/declinfo.cpp  \
-   src/generated/doctokenizer.cpp \
-   src/generated/fortrancode.cpp \
-   src/generated/parser_cstyle.cpp \
-   src/generated/parser_fortran.cpp \
-   src/generated/parser_py.cpp \
-   src/generated/parser_tcl.cpp \
-   src/generated/pre.cpp \
-   src/generated/pycode.cpp
+   src/ce_parse.cpp
+
+#   src/generated/code.cpp  \
+#   src/generated/commentcnv.cpp  \
+#   src/generated/commentscan.cpp  \
+#   src/generated/constexp.cpp \
+#   src/generated/defargs.cpp \
+#   src/generated/declinfo.cpp  \
+#   src/generated/doctokenizer.cpp \
+#   src/generated/fortrancode.cpp \
+#   src/generated/parser_cstyle.cpp \
+#   src/generated/parser_fortran.cpp \
+#   src/generated/parser_py.cpp \
+#   src/generated/parser_tcl.cpp \
+#   src/generated/pre.cpp \
+#   src/generated/pycode.cpp
 
 noinst_HEADERS = \
    src/a_define.h \

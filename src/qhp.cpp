@@ -183,11 +183,11 @@ void Qhp::decContentsDepth()
    m_sectionLevel--;
 }
 
-void Qhp::addContentsItem(bool, const QString &name, const char *, const char *file,
-                          const char *anchor, bool , bool , QSharedPointer<Definition>)
+void Qhp::addContentsItem(bool, const QString &name, const QString &, const QString &file,
+                          const QString &anchor, bool, bool , QSharedPointer<Definition>)
 {
    // Backup difference before modification
-   QByteArray f = file;
+   QString f = file;
 
    if (! f.isEmpty() && f.at(0) == '^') {
       return;   // absolute URL not supported
@@ -228,8 +228,8 @@ void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Member
          return;   
       }
 
-      QByteArray cfname  = md->getOutputFileBase();
-      QByteArray cfiname = context->getOutputFileBase();
+      QString cfname  = md->getOutputFileBase();
+      QString cfiname = context->getOutputFileBase();
 
       QString level1  = context->name();
       QString level2;
@@ -240,8 +240,8 @@ void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Member
          level2 = md->name();
       }
 
-      QByteArray contRef = separateMemberPages ? cfname : cfiname;
-      QByteArray anchor  = sectionAnchor ? QByteArray(sectionAnchor) : md->anchor();
+      QString contRef = separateMemberPages ? cfname : cfiname;
+      QString anchor  = sectionAnchor ? QByteArray(sectionAnchor) : md->anchor();
 
       QString ref = makeRef(contRef, anchor);
       QString id  = level1 + "::" + level2;
@@ -285,7 +285,7 @@ void Qhp::addIndexFile(const QString &name)
    addFile(name);
 }
 
-QByteArray Qhp::getQhpFileName()
+QString Qhp::getQhpFileName()
 {
    return "index.qhp";
 }

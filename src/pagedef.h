@@ -51,10 +51,10 @@ class PageDef : public Definition
    }
 
    // functions to get a uniform interface with Definitions
-   QByteArray getOutputFileBase() const;
+   QString getOutputFileBase() const override;
 
-   QByteArray anchor() const {
-      return QByteArray();
+   QString anchor() const  override{
+      return "";
    }
 
    void findSectionsInDocumentation();

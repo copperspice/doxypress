@@ -1319,7 +1319,7 @@ void DocbookDocVisitor::visitPost(DocParBlock *)
 {
 }
 
-void DocbookDocVisitor::filter(const char *str)
+void DocbookDocVisitor::filter(const QString &str)
 {
    m_t << convertToXML(str);
 }

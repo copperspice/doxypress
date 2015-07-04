@@ -76,7 +76,7 @@ class SearchIndexIntf
 
    virtual ~SearchIndexIntf() {}
 
-   virtual void setCurrentDoc(QSharedPointer<Definition> ctx, const char *anchor, bool isSourceFile) = 0;
+   virtual void setCurrentDoc(QSharedPointer<Definition> ctx, const QString &anchor, bool isSourceFile) = 0;
    virtual void addWord(const QString &word, bool hiPriority) = 0;
    virtual void write(const QString &file) = 0;
 
@@ -94,7 +94,7 @@ class SearchIndex : public SearchIndexIntf
    SearchIndex();
    ~SearchIndex();
 
-   void setCurrentDoc(QSharedPointer<Definition> ctx, const char *anchor, bool isSourceFile) override;
+   void setCurrentDoc(QSharedPointer<Definition> ctx, const QString &anchor, bool isSourceFile) override;
    void addWord(const QString &word, bool hiPriority) override;
    void write(const QString &file) override;
 
@@ -118,7 +118,7 @@ class SearchIndexExternal : public SearchIndexIntf
  public:
    SearchIndexExternal();
    ~SearchIndexExternal();
-   void setCurrentDoc(QSharedPointer<Definition> ctx, const char *anchor, bool isSourceFile) override;
+   void setCurrentDoc(QSharedPointer<Definition> ctx, const QString &anchor, bool isSourceFile) override;
    void addWord(const QString &word, bool hiPriority) override;
    void write(const QString &file) override;
 

@@ -2929,7 +2929,7 @@ void defargsYYfree (void *ptr )
  *              for complex types are written to
  */
 
-void stringToArgumentList(const char *argsString, ArgumentList *al, QByteArray *extraTypeChars)
+void stringToArgumentList(const QString &argsString, ArgumentList *al, QString *extraTypeChars)
 {
    if (al == 0) {
       return;

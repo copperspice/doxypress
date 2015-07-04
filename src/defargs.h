@@ -22,6 +22,6 @@
 
 class ArgumentList;
 
-extern void stringToArgumentList(const char *argsString, ArgumentList *argList, QByteArray *extraTypeChars = 0);
+extern void stringToArgumentList(const QString &argsString, ArgumentList *argList, QString *extraTypeChars = 0);
 
 #endif
