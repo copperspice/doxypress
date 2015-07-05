@@ -218,7 +218,7 @@ static EdgeProperties umlEdgeProps = {
    umlEdgeColorMap, umlArrowStyleMap, umlEdgeStyleMap
 };
 
-static QByteArray getDotFontName()
+static QString getDotFontName()
 {
    static QString dotFontName = Config::getString("dot-fontname");
 
@@ -273,11 +273,11 @@ static void writeGraphFooter(QTextStream &t)
    t << "}" << endl;
 }
 
-static QByteArray replaceRef(const QByteArray &buf, const QString relPath, bool urlOnly, const QByteArray &context, 
+static QString replaceRef(const QString &buf, const QString relPath, bool urlOnly, const QString &context, 
                   const QString &target = QString())
 {
    // search for href="...", store ... part in link
-   QByteArray href = "href";
+   QString href = "href";
    
    int len = 6;
    int indexS = buf.indexOf("href=\""), indexE;
@@ -290,7 +290,7 @@ static QByteArray replaceRef(const QByteArray &buf, const QString relPath, bool 
    }
 
    if (indexS >= 0 && (indexE = buf.indexOf('"', indexS + len)) != -1) {
-      QByteArray link = buf.mid(indexS + len, indexE - indexS - len);
+      QString link = buf.mid(indexS + len, indexE - indexS - len);
       QString result;
 
       if (urlOnly) { // for user defined dot graphs
@@ -321,8 +321,8 @@ static QByteArray replaceRef(const QByteArray &buf, const QString relPath, bool 
          int marker = link.indexOf('$');
 
          if (marker != -1) {
-            QByteArray ref = link.left(marker);
-            QByteArray url = link.mid(marker + 1);
+            QString ref = link.left(marker);
+            QString url = link.mid(marker + 1);
             if (!ref.isEmpty()) {
                result = externalLinkTarget() + externalRef(relPath, ref, false);
             }
@@ -339,8 +339,8 @@ static QByteArray replaceRef(const QByteArray &buf, const QString relPath, bool 
          result += " target=\"" + target + "\"";
       }
 
-      QByteArray leftPart  = buf.left(indexS);
-      QByteArray rightPart = buf.mid(indexE + 1);
+      QString leftPart  = buf.left(indexS);
+      QString rightPart = buf.mid(indexE + 1);
 
       return leftPart + result.toUtf8() + rightPart;
 
@@ -361,7 +361,7 @@ static QByteArray replaceRef(const QByteArray &buf, const QString relPath, bool 
  *  \returns true if successful.
  */
 static bool convertMapFile(QTextStream &t, const QString &mapName, const QString &relPath, bool urlOnly = false,
-                           const QByteArray &context = QByteArray())
+                           const QString &context = QString())
 {
    QFile f(mapName);
 
@@ -460,7 +460,7 @@ static void unsetDotFontPath()
 
 static bool readBoundingBox(const QString &fileName, int *width, int *height, bool isEps)
 {
-   QByteArray bb = isEps ? QByteArray("%%PageBoundingBox:") : QByteArray("/MediaBox [");
+   QString bb = isEps ? "%%PageBoundingBox:" : "/MediaBox [";
 
    QFile f(fileName);
 
@@ -680,7 +680,7 @@ static bool insertMapFile(QTextStream &out, const QString &mapFile, const QStrin
    if (fi.exists() && fi.size() > 0) { 
       // reuse existing map file
 
-      QByteArray tmpstr;
+      QString tmpstr;
       QTextStream tmpout(&tmpstr);
 
       convertMapFile(tmpout, mapFile, relPath);
@@ -712,7 +712,7 @@ static void removeDotGraph(const QString &dotName)
  *  file does not exist or its contents are not equal to \a md5,
  *  a new .md5 is generated with the \a md5 string as contents.
  */
-static bool checkAndUpdateMd5Signature(const QString &baseName, const QByteArray &md5)
+static bool checkAndUpdateMd5Signature(const QString &baseName, const QString &md5)
 {
    QFile f(baseName + ".md5");
 
@@ -846,7 +846,7 @@ QString DotFilePatcher::file() const
    return m_patchFile;
 }
 
-int DotFilePatcher::addMap(const QString &mapFile, const QString &relPath, bool urlOnly, const QByteArray &context, const QString &label)
+int DotFilePatcher::addMap(const QString &mapFile, const QString &relPath, bool urlOnly, const QString &context, const QString &label)
 {
    int id = m_maps.count();
 
@@ -880,7 +880,7 @@ int DotFilePatcher::addFigure(const QString &baseName, const QString &figureName
    return id;
 }
 
-int DotFilePatcher::addSVGConversion(const QString &relPath, bool urlOnly, const QByteArray &context, bool zoomable, int graphId)
+int DotFilePatcher::addSVGConversion(const QString &relPath, bool urlOnly, const QString &context, bool zoomable, int graphId)
 {
    int id = m_maps.count();
    Map map;
@@ -964,7 +964,7 @@ bool DotFilePatcher::run()
    bool foundSize = false;
 
    while (! fi.atEnd()) { // foreach line
-      QByteArray line;
+      QString line;
       line.resize(maxLineLen);
 
       int numBytes = fi.readLine(line.data(), maxLineLen);
@@ -1109,8 +1109,8 @@ bool DotFilePatcher::run()
 
       QTextStream t(&fo);
 
-      while (!fi.atEnd()) { // foreach line
-         QByteArray line;
+      while (! fi.atEnd()) { // foreach line
+         QString line;
          line.resize(maxLineLen);
 
          int numBytes = fi.readLine(line.data(), maxLineLen);
@@ -1233,7 +1233,7 @@ void DotManager::addRun(DotRunner *run)
 }
 
 int DotManager::addMap(const QString &file, const QString &mapFile,
-                       const QString &relPath, bool urlOnly, const QByteArray &context, const QString &label)
+                       const QString &relPath, bool urlOnly, const QString &context, const QString &label)
 {
    QSharedPointer<DotFilePatcher> map = m_dotMaps.find(file);
 
@@ -1258,7 +1258,7 @@ int DotManager::addFigure(const QString &file, const QString &baseName, const QS
 }
 
 int DotManager::addSVGConversion(const QString &file, const QString &relPath,
-                                 bool urlOnly, const QByteArray &context, bool zoomable,int graphId)
+                                 bool urlOnly, const QString &context, bool zoomable,int graphId)
 {
    QSharedPointer<DotFilePatcher> map = m_dotMaps.find(file);
 
@@ -1508,16 +1508,16 @@ void DotNode::setDistance(int distance)
    }
 }
 
-static QByteArray convertLabel(const QString &label)
+static QString convertLabel(const QString &label)
 {
-   QByteArray result = "";
+   QString result = "";
 
    if (label.isEmpty()) {
       return result;
    }
 
-   QByteArray bBefore("\\_/<({[: =-+@%#~?$"); // break before character set
-   QByteArray bAfter(">]),:;|");              // break after  character set
+   QString bBefore("\\_/<({[: =-+@%#~?$"); // break before character set
+   QString bAfter(">]),:;|");              // break after  character set
 
    QByteArray tempLabel = label.toUtf8();
    const char *p = tempLabel.constData();
@@ -1603,13 +1603,13 @@ static QByteArray convertLabel(const QString &label)
    return result;
 }
 
-static QByteArray escapeTooltip(const QString &tooltip)
+static QString escapeTooltip(const QString &tooltip)
 {
    if (tooltip.isEmpty()) {
       return "";
    }
 
-   QByteArray result = tooltip.toUtf8();
+   QString result = tooltip;
    result.replace("\"", "\\\""); 
 
    return result;
@@ -1817,7 +1817,7 @@ void DotNode::writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat format,
    static bool umlLook = Config::getBool("uml-look");
 
    const EdgeProperties *eProps = umlLook ? &umlEdgeProps : &normalEdgeProps;
-   QByteArray aStyle = eProps->arrowStyleMap[ei->m_color];
+   QString aStyle = eProps->arrowStyleMap[ei->m_color];
    bool umlUseArrow = aStyle == "odiamond";
 
    if (pointBack && !umlUseArrow) {
@@ -2271,7 +2271,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
       QString absBaseName = d.absolutePath() + "/" + baseName;
 
       // compute md5 checksum of the graph were are about to generate
-      QByteArray theGraph;
+      QString theGraph;
 
       QTextStream md5stream(&theGraph);
       writeGraphHeader(md5stream, theTranslator->trGraphicalHierarchy());
@@ -2292,7 +2292,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
       writeGraphFooter(md5stream);
       resetReNumbering();
 
-      QByteArray sigStr;
+      QString sigStr;
       sigStr = QCryptographicHash::hash(theGraph, QCryptographicHash::Md5).toHex();
   
       bool regenerate = false;
@@ -2325,16 +2325,16 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
       Doxy_Globals::indexList->addImageFile(imgName);
 
       // write image and map in a table row
-      QByteArray mapLabel = escapeCharsInString(n->m_label, false);
+      QString mapLabel = escapeCharsInString(n->m_label, false);
       out << "<tr><td>";
 
       if (imgExt == "svg") { // vector graphics
          if (regenerate || ! writeSVGFigureLink(out, QString(), baseName, absImgName)) {
             if (regenerate) {
-               DotManager::instance()->addSVGConversion(absImgName.toUtf8(), QByteArray(), false, QByteArray(), false, 0);
+               DotManager::instance()->addSVGConversion(absImgName, QString(), false, QString(), false, 0);
             }
 
-            int mapId = DotManager::instance()->addSVGObject(fileName.toUtf8(), baseName.toUtf8(), absImgName.toUtf8(), QByteArray());
+            int mapId = DotManager::instance()->addSVGObject(fileName, baseName, absImgName, QString());
             out << "<!-- SVG " << mapId << " -->" << endl;
          }
 
@@ -2342,8 +2342,8 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
          out << "<img src=\"" << imgName << "\" border=\"0\" alt=\"\" usemap=\"#"
              << mapLabel << "\"/>" << endl;
 
-         if (regenerate || ! insertMapFile(out, absMapName.toUtf8(), QByteArray(), mapLabel)) {
-            int mapId = DotManager::instance()->addMap(fileName.toUtf8(), absMapName.toUtf8(), QByteArray(), false, QByteArray(), mapLabel);
+         if (regenerate || ! insertMapFile(out, absMapName.toUtf8(), QString(), mapLabel)) {
+            int mapId = DotManager::instance()->addMap(fileName.toUtf8(), absMapName.toUtf8(), QString(), false, QString(), mapLabel);
 
             out << "<!-- MAP " << mapId << " -->" << endl;
          }
@@ -2373,7 +2373,7 @@ void DotGfxHierarchyTable::addHierarchy(DotNode *n, QSharedPointer<ClassDef> cd,
                }
           
             } else {
-               QByteArray tmp_url = "";
+               QString tmp_url = "";
 
                if (bClass->isLinkable() && !bClass->isHidden()) {
                   tmp_url = bClass->getReference() + "$" + bClass->getOutputFileBase();
@@ -2382,7 +2382,7 @@ void DotGfxHierarchyTable::addHierarchy(DotNode *n, QSharedPointer<ClassDef> cd,
                   }
                }
 
-               QByteArray tooltip = bClass->briefDescriptionAsTooltip();
+               QString tooltip = bClass->briefDescriptionAsTooltip();
                bn = new DotNode(m_curNodeNumber++, qPrintable(bClass->displayName()), tooltip, tmp_url.data() );
                n->addChild(bn, bcd->prot);
                bn->addParent(n);
@@ -2407,7 +2407,7 @@ void DotGfxHierarchyTable::addClassList(ClassSDict *cl)
 
       if (! hasVisibleRoot(cd->baseClasses()) && cd->isVisibleInHierarchy() ) { 
          // root node in the forest
-         QByteArray tmp_url = "";
+         QString tmp_url = "";
 
          if (cd->isLinkable() && !cd->isHidden()) {
             tmp_url = cd->getReference() + "$" + cd->getOutputFileBase();
@@ -2417,7 +2417,7 @@ void DotGfxHierarchyTable::addClassList(ClassSDict *cl)
             }
          }
          
-         QByteArray tooltip = cd->briefDescriptionAsTooltip();
+         QString tooltip = cd->briefDescriptionAsTooltip();
          DotNode *n = new DotNode(m_curNodeNumber++, qPrintable(cd->displayName()), tooltip, tmp_url.data());
         
          m_usedNodes->insert(cd->name(), n);
@@ -2506,7 +2506,7 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, 
    }
   
    int edgeStyle = (! label.isEmpty() || prot==EdgeInfo::Orange || prot==EdgeInfo::Orange2) ? EdgeInfo::Dashed : EdgeInfo::Solid;
-   QByteArray className;
+   QString className;
 
    if (usedName) { 
       // name is a typedef
@@ -2542,14 +2542,14 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, 
          displayName = stripScope(displayName);
       }
 
-      QByteArray tmp_url;
+      QString tmp_url;
       if (cd->isLinkable() && !cd->isHidden()) {
          tmp_url = cd->getReference() + "$" + cd->getOutputFileBase();
          if (!cd->anchor().isEmpty()) {
             tmp_url += "#" + cd->anchor();
          }
       }
-      QByteArray tooltip = cd->briefDescriptionAsTooltip();
+      QString tooltip = cd->briefDescriptionAsTooltip();
       bn = new DotNode(m_curNodeNumber++, displayName, tooltip, tmp_url.data(), false, cd);
 
       if (base) {
@@ -2735,7 +2735,7 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
       if (dict) {
         
          for (auto ucd : *dict) {
-            QByteArray label;
+            QString label;
                      
             bool first    = true;
             int count     = 0;
@@ -2752,7 +2752,7 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
                   first = false;
 
                } else {
-                  label += QByteArray("\n") + s;
+                  label += "\n" + s;
                }
 
                ++count;
@@ -2846,7 +2846,7 @@ DotClassGraph::DotClassGraph(QSharedPointer<ClassDef> cd, DotNode::GraphType t)
 {
    m_graphType = t;
 
-   QByteArray tmp_url = "";
+   QString tmp_url = "";
 
    if (cd->isLinkable() && !cd->isHidden()) {
       tmp_url = cd->getReference() + "$" + cd->getOutputFileBase();
@@ -2855,8 +2855,8 @@ DotClassGraph::DotClassGraph(QSharedPointer<ClassDef> cd, DotNode::GraphType t)
       }
    }
 
-   QByteArray className = cd->displayName().toUtf8();
-   QByteArray tooltip   = cd->briefDescriptionAsTooltip();
+   QString className = cd->displayName();
+   QString tooltip   = cd->briefDescriptionAsTooltip();
 
    // is a root node
    m_startNode = new DotNode(m_curNodeNumber++, className, tooltip, tmp_url.data(), true, cd);
@@ -2915,8 +2915,8 @@ DotClassGraph::~DotClassGraph()
 /*! Computes a 16 byte md5 checksum for a given dot graph.
  *  The md5 checksum is returned as a 32 character ASCII string.
  */
-QByteArray computeMd5Signature(DotNode *root, DotNode::GraphType gt, GraphOutputFormat format, bool lrRank,
-                               bool renderParents, bool backArrows, const QString &title, QByteArray &graphStr )
+QString computeMd5Signature(DotNode *root, DotNode::GraphType gt, GraphOutputFormat format, bool lrRank,
+                               bool renderParents, bool backArrows, const QString &title, QString &graphStr )
 {
    bool reNumber = true;
  
@@ -2954,7 +2954,7 @@ QByteArray computeMd5Signature(DotNode *root, DotNode::GraphType gt, GraphOutput
 
    writeGraphFooter(md5stream);
 
-   QByteArray sigStr;
+   QString sigStr;
    sigStr = QCryptographicHash::hash(buf, QCryptographicHash::Md5).toHex();
   
    if (reNumber) {
@@ -2969,10 +2969,10 @@ QByteArray computeMd5Signature(DotNode *root, DotNode::GraphType gt, GraphOutput
 static bool updateDotGraph(DotNode *root, DotNode::GraphType gt, const QString &baseName, GraphOutputFormat format,
                            bool lrRank, bool renderParents, bool backArrows, const QString &title = QString() )
 {
-   QByteArray theGraph;
+   QString theGraph;
 
    // TODO: write graph to theGraph, then compute md5 checksum
-   QByteArray md5 = computeMd5Signature( root, gt, format, lrRank, renderParents, backArrows, title, theGraph);
+   QString md5 = computeMd5Signature( root, gt, format, lrRank, renderParents, backArrows, title, theGraph);
    QFile f(baseName + ".dot");
 
    if (f.open(QIODevice::WriteOnly)) {
@@ -3004,7 +3004,7 @@ QString DotClassGraph::diskName() const
    return result;
 }
 
-QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
+QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
                   const QString &path, const QString &fileName, const QString &relPath, bool, bool generateImageMap, int graphId) const 
 {
    QDir d(path);
@@ -3142,7 +3142,7 @@ QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFo
       out << "</para>" << endl;
 
    } else if (graphFormat == GOF_BITMAP && generateImageMap) { // produce HTML to include the image
-      QByteArray mapLabel = escapeCharsInString(m_startNode->m_label, false) + "_" +
+      QString mapLabel = escapeCharsInString(m_startNode->m_label, false) + "_" +
                             escapeCharsInString(mapName.toUtf8(), false);
 
       if (imgExt == "svg") { // add link to SVG file without map file
@@ -3152,7 +3152,7 @@ QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFo
             // need to patch the links in the generated SVG file
 
             if (regenerate) {
-               DotManager::instance()->addSVGConversion(absImgName, relPath.toUtf8(), false, QByteArray(), true, graphId);
+               DotManager::instance()->addSVGConversion(absImgName, relPath.toUtf8(), false, QString(), true, graphId);
             }
 
             int mapId = DotManager::instance()->addSVGObject(fileName, baseName, absImgName, relPath.toUtf8());
@@ -3184,7 +3184,7 @@ QByteArray DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFo
          out << "</div>" << endl;
          if (regenerate || !insertMapFile(out, absMapName, relPath, mapLabel)) {
             int mapId = DotManager::instance()->addMap(fileName, absMapName, relPath,
-                        false, QByteArray(), mapLabel);
+                        false, QString(), mapLabel);
             out << "<!-- MAP " << mapId << " -->" << endl;
          }
       }
@@ -3232,7 +3232,7 @@ void DotInclDepGraph::buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int dis
     
       for (auto ii : *includeFiles) {
          QSharedPointer<FileDef> bfd = ii.fileDef;
-         QByteArray in  = ii.includeName;
+         QString in  = ii.includeName;
  
          bool doc = true, src = false;
 
@@ -3243,7 +3243,7 @@ void DotInclDepGraph::buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int dis
          }
 
          if (doc || src || ! Config::getBool("hide-undoc-relations")) {
-            QByteArray url = "";
+            QString url = "";
 
             if (bfd) {
                url = bfd->getOutputFileBase();
@@ -3261,11 +3261,11 @@ void DotInclDepGraph::buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int dis
                bn->setDistance(distance);
 
             } else {
-               QByteArray tmp_url;
-               QByteArray tooltip;
+               QString tmp_url;
+               QString tooltip;
 
                if (bfd) {
-                  tmp_url = doc || src ? bfd->getReference() + "$" + url : QByteArray();
+                  tmp_url = doc || src ? bfd->getReference() + "$" + url : QString();
                   tooltip = bfd->briefDescriptionAsTooltip();
                }
                bn = new DotNode(m_curNodeNumber++, ii.includeName, tooltip, tmp_url, false, QSharedPointer<ClassDef>());
@@ -3337,7 +3337,7 @@ DotInclDepGraph::DotInclDepGraph(QSharedPointer<FileDef> fd, bool inverse)
 
    m_diskName  = fd->getFileBase();
 
-   QByteArray tmp_url = fd->getReference() + "$" + fd->getFileBase();
+   QString tmp_url = fd->getReference() + "$" + fd->getFileBase();
 
    // root node
    m_startNode = new DotNode(m_curNodeNumber++, fd->docName(), "", tmp_url.constData(),  true );
@@ -3380,7 +3380,7 @@ QString DotInclDepGraph::diskName() const
    return convertNameToFile(result);
 }
 
-QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,                                                                  
+QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,                                                                  
                                        const QString &path, const QString &fileName, const QString &relPath, bool generateImageMap, int graphId) const
 {
    QDir d(path);
@@ -3401,7 +3401,7 @@ QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graph
    baseName += "_incl";
    baseName = convertNameToFile(baseName);
 
-   QByteArray mapName = escapeCharsInString(m_startNode->m_label, false);
+   QString mapName = escapeCharsInString(m_startNode->m_label, false);
    if (m_inverse) {
       mapName += "dep";
    }
@@ -3472,7 +3472,7 @@ QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graph
             // need to patch the links in the generated SVG file
 
             if (regenerate) {
-               DotManager::instance()->addSVGConversion(absImgName, relPath, false, QByteArray(), true, graphId);
+               DotManager::instance()->addSVGConversion(absImgName, relPath, false, QString(), true, graphId);
             }
 
             int mapId = DotManager::instance()->addSVGObject(fileName, baseName, absImgName, relPath);
@@ -3488,7 +3488,7 @@ QByteArray DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graph
 
          if (regenerate || !insertMapFile(out, absMapName, relPath, mapName)) {
             int mapId = DotManager::instance()->addMap(fileName, absMapName, relPath,
-                        false, QByteArray(), mapName);
+                        false, QString(), mapName);
 
             out << "<!-- MAP " << mapId << " -->" << endl;
          }
@@ -3541,7 +3541,7 @@ void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int dist
      
       for (auto rmd : *refs) {
          if (rmd->showInCallGraph()) {
-            QByteArray uniqueId;
+            QString uniqueId;
 
             uniqueId = rmd->getReference() + "$" + rmd->getOutputFileBase() + "#" + rmd->anchor();
             DotNode *bn  = m_usedNodes->value(uniqueId);
@@ -3552,7 +3552,7 @@ void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int dist
                bn->setDistance(distance);
 
             } else {
-               QByteArray name;
+               QString name;
 
                if (Config::getBool("hide-scope-names")) {
                   name  = rmd->getOuterScope() == m_scope ?
@@ -3561,7 +3561,7 @@ void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int dist
                   name = rmd->qualifiedName();
                }
 
-               QByteArray tooltip = rmd->briefDescriptionAsTooltip();
+               QString tooltip = rmd->briefDescriptionAsTooltip();
                bn = new DotNode(
                   m_curNodeNumber++,
                   linkToText(rmd->getLanguage(), name, false),
@@ -3629,10 +3629,10 @@ DotCallGraph::DotCallGraph(QSharedPointer<MemberDef> md, bool inverse)
    m_diskName = md->getOutputFileBase() + "_" + md->anchor();
    m_scope    = md->getOuterScope();
 
-   QByteArray uniqueId;
+   QString uniqueId;
    uniqueId = md->getReference() + "$" + md->getOutputFileBase() + "#" + md->anchor();
 
-   QByteArray name;
+   QString name;
 
    if (Config::getBool("hide-scope-names")) {
       name = md->name();
@@ -3667,7 +3667,7 @@ DotCallGraph::~DotCallGraph()
    delete m_usedNodes;
 }
 
-QByteArray DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
+QString DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
                   const QString &path, const QString &fileName, const QString &relPath, bool generateImageMap, int graphId) const
 {
    QDir d(path);
@@ -3753,7 +3753,7 @@ QByteArray DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
             // need to patch the links in the generated SVG file
 
             if (regenerate) {
-               DotManager::instance()->addSVGConversion(absImgName, relPath, false, QByteArray(), true, graphId);
+               DotManager::instance()->addSVGConversion(absImgName, relPath, false, QString(), true, graphId);
             }
 
             int mapId = DotManager::instance()->addSVGObject(fileName, baseName, absImgName, relPath);
@@ -3771,7 +3771,7 @@ QByteArray DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
 
          if (regenerate || !insertMapFile(out, absMapName, relPath, mapName)) {
             int mapId = DotManager::instance()->addMap(fileName, absMapName, relPath,
-                        false, QByteArray(), mapName);
+                        false, QString(), mapName);
             out << "<!-- MAP " << mapId << " -->" << endl;
          }
       }
@@ -3809,7 +3809,7 @@ DotDirDeps::~DotDirDeps()
 {
 }
 
-QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
+QString DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
                   const QString &path, const QString &fileName, const QString &relPath, bool generateImageMap, int graphId) const
 {
    QDir d(path);
@@ -3822,8 +3822,8 @@ QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphForma
 
    static bool usePDFLatex = Config::getBool("latex-pdf");
 
-   QByteArray baseName = m_dir->getOutputFileBase() + "_dep";
-   QByteArray mapName  = escapeCharsInString(baseName, false);
+   QString baseName = m_dir->getOutputFileBase() + "_dep";
+   QString mapName  = escapeCharsInString(baseName, false);
 
    QString imgExt      = Config::getEnum("dot-image-format");
    QString absBaseName = d.absolutePath() + "/" + baseName;
@@ -3834,11 +3834,11 @@ QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphForma
    QString absImgName  = absBaseName + "." + imgExt;
 
    // compute md5 checksum of the graph were are about to generate
-   QByteArray theGraph;
+   QString theGraph;
    QTextStream md5stream(&theGraph);
    m_dir->writeDepGraph(md5stream);
 
-   QByteArray sigStr;
+   QString sigStr;
    sigStr = QCryptographicHash::hash(theGraph, QCryptographicHash::Md5).toHex();
 
    bool regenerate = false;
@@ -3941,7 +3941,7 @@ QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphForma
             // need to patch the links in the generated SVG file
 
             if (regenerate) {
-               DotManager::instance()->addSVGConversion(absImgName, relPath, false, QByteArray(), true, graphId);
+               DotManager::instance()->addSVGConversion(absImgName, relPath, false, QString(), true, graphId);
             }
 
             int mapId = DotManager::instance()->addSVGObject(fileName, baseName, absImgName, relPath);
@@ -3959,7 +3959,7 @@ QByteArray DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphForma
 
          if (regenerate || !insertMapFile(out, absMapName, relPath, mapName)) {
             int mapId = DotManager::instance()->addMap(fileName, absMapName, relPath,
-                        true, QByteArray(), mapName);
+                        true, QString(), mapName);
             out << "<!-- MAP " << mapId << " -->" << endl;
          }
       }
@@ -3992,7 +3992,7 @@ void generateGraphLegend(const QString &path)
       exit(1);
    }
 
-   QByteArray theGraph;
+   QString theGraph;
    QTextStream md5stream(&theGraph);
    writeGraphHeader(md5stream, theTranslator->trLegendTitle());
 
@@ -4032,7 +4032,7 @@ void generateGraphLegend(const QString &path)
              "\",color=\"black\",URL=\"$classUsed" << Doxy_Globals::htmlFileExtension << "\"];\n";
    writeGraphFooter(md5stream);
 
-   QByteArray sigStr;
+   QString sigStr;
    sigStr = QCryptographicHash::hash(theGraph, QCryptographicHash::Md5).toHex();
 
    QString absBaseName = path + "/graph_legend";
@@ -4064,7 +4064,7 @@ void generateGraphLegend(const QString &path)
    Doxy_Globals::indexList->addImageFile(imgName);
 
    if (imgExt == "svg") {
-      DotManager::instance()->addSVGObject(absBaseName + Doxy_Globals::htmlFileExtension.toUtf8(), "graph_legend", absImgName, QByteArray());
+      DotManager::instance()->addSVGObject(absBaseName + Doxy_Globals::htmlFileExtension.toUtf8(), "graph_legend", absImgName, QString());
    }
 }
 
@@ -4123,7 +4123,7 @@ void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const Q
  *  \param graphId a unique id for this graph, use for dynamic sections
  */
 void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath, 
-                  const QString &baseName, const QByteArray &context, int graphId)
+                  const QString &baseName, const QString &context, int graphId)
 {
    QDir d(outDir);
 
@@ -4171,7 +4171,7 @@ void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QStri
 DotGroupCollaboration::DotGroupCollaboration(QSharedPointer<GroupDef> gd)
 {
    m_curNodeId = 0;
-   QByteArray tmp_url = gd->getReference() + "$" + gd->getOutputFileBase();
+   QString tmp_url = gd->getReference() + "$" + gd->getOutputFileBase();
 
    m_usedNodes = new QHash<QString, DotNode *>;
 
@@ -4202,7 +4202,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
          if ( !nnode ) {
             // add node
             tmp_url = d->getReference() + "$" + d->getOutputFileBase();
-            QByteArray tooltip = d->briefDescriptionAsTooltip();
+            QString tooltip = d->briefDescriptionAsTooltip();
 
             nnode = new DotNode(m_curNodeId++, d->groupTitle(), tooltip, tmp_url);
             nnode->markAsVisible();
@@ -4224,7 +4224,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
             // add node
             tmp_url = def->getReference() + "$" + def->getOutputFileBase();
 
-            QByteArray tooltip = def->briefDescriptionAsTooltip();
+            QString tooltip = def->briefDescriptionAsTooltip();
 
             nnode = new DotNode(m_curNodeId++, def->groupTitle(), tooltip, tmp_url);
             nnode->markAsVisible();
@@ -4240,7 +4240,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
 
    // Add members
    addMemberList( gd->getMemberList(MemberListType_allMembersList) );
-   QByteArray htmlEntenstion = Doxy_Globals::htmlFileExtension.toUtf8();
+   QString htmlEntenstion = Doxy_Globals::htmlFileExtension.toUtf8();
 
    // Add classes
    if ( gd->getClasses() && gd->getClasses()->count() ) {
@@ -4298,7 +4298,7 @@ void DotGroupCollaboration::addMemberList(QSharedPointer<MemberList> ml)
    }
   
    for (auto def : *ml) {
-      QByteArray tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8() +
+      QString tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8() +
                            + "#" + def->anchor();
 
       addCollaborationMember(def, tmp_url, DotGroupCollaboration::tmember );
@@ -4339,7 +4339,7 @@ void DotGroupCollaboration::addCollaborationMember(QSharedPointer<Definition> de
       return;
    }
   
-   QByteArray tmp_str;
+   QString tmp_str;
 
    for (auto d : *def->partOfGroups()) {
       DotNode *nnode = m_usedNodes->value(d->name());
@@ -4363,7 +4363,7 @@ void DotGroupCollaboration::addCollaborationMember(QSharedPointer<Definition> de
 }
 
 
-QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat graphFormat, 
+QString DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat graphFormat, 
       EmbeddedOutputFormat textFormat, const QString &path, const QString &fileName, const QString &relPath,
       bool writeImageMap, int graphId) const
 {
@@ -4377,7 +4377,7 @@ QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat 
 
    static bool usePDFLatex = Config::getBool("latex-pdf");
 
-   QByteArray theGraph;
+   QString theGraph;
    QTextStream md5stream(&theGraph);
 
    writeGraphHeader(md5stream, m_rootNode->label());
@@ -4400,7 +4400,7 @@ QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat 
    writeGraphFooter(md5stream);
    resetReNumbering();
 
-   QByteArray sigStr;
+   QString sigStr;
    sigStr = QCryptographicHash::hash(theGraph, QCryptographicHash::Md5).toHex();
   
    QString imgExt      = Config::getEnum("dot-image-format");
@@ -4502,7 +4502,7 @@ QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat 
       t << "</para>" << endl;
 
    } else if (graphFormat == GOF_BITMAP && writeImageMap) {
-      QByteArray mapLabel = escapeCharsInString(baseName, false);
+      QString mapLabel = escapeCharsInString(baseName, false);
       t << "<center><table><tr><td>";
 
       if (imgExt == "svg") {
@@ -4512,7 +4512,7 @@ QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat 
             // need to patch the links in the generated SVG file
 
             if (regenerate) {
-               DotManager::instance()->addSVGConversion(absImgName, relPath, false, QByteArray(), true, graphId);
+               DotManager::instance()->addSVGConversion(absImgName, relPath, false, QString(), true, graphId);
             }
 
             int mapId = DotManager::instance()->addSVGObject(fileName, baseName, absImgName, relPath);
@@ -4527,7 +4527,7 @@ QByteArray DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat 
            << mapLabel << "\"/>" << endl;
          if (regenerate || !insertMapFile(t, absMapName, relPath, mapLabel)) {
             int mapId = DotManager::instance()->addMap(fileName, absMapName, relPath,
-                        false, QByteArray(), mapLabel);
+                        false, QString(), mapLabel);
             t << "<!-- MAP " << mapId << " -->" << endl;
          }
       }
@@ -4551,7 +4551,7 @@ void DotGroupCollaboration::Edge::write(QTextStream &t) const
 {
    const char *linkTypeColor[] = { "darkorchid3", "orange", "blueviolet", "darkgreen", "firebrick4", "grey75", "midnightblue"};
 
-   QByteArray arrowStyle = "dir=\"none\", style=\"dashed\"";
+   QString arrowStyle = "dir=\"none\", style=\"dashed\"";
    t << "  Node" << pNStart->number();
    t << "->";
    t << "Node" << pNEnd->number();

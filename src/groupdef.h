@@ -47,7 +47,7 @@ class PageDef;
 class GroupDef : public Definition
 {
  public:
-   GroupDef(const char *fileName, int line, const char *name, const char *title, QString refFileName = QString());
+   GroupDef(const QString &fileName, int line, const QString &name, const QString &title, QString refFileName = QString());
    ~GroupDef();
 
    DefType definitionType() const {
@@ -68,7 +68,7 @@ class GroupDef : public Definition
       return m_title;
    }
 
-   void setGroupTitle( const char *newtitle );
+   void setGroupTitle(const QString &newtitle);
 
    bool hasGroupTitle( ) const {
       return titleSet;

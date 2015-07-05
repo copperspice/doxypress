@@ -107,7 +107,7 @@ void marshalBaseInfoList(StorageIntf *s, QList<BaseInfo> *baseList)
       marshalUInt(s, baseList->count());
       
       for (auto bi : *baseList) {
-         marshalQByteArray(s, bi.name);
+         marshalQString(s, bi.name);
          marshalInt(s, (int)bi.prot);
          marshalInt(s, (int)bi.virt);
       }
@@ -123,7 +123,7 @@ void marshalGroupingList(StorageIntf *s, QList<Grouping> *groups)
       marshalUInt(s, groups->count());
      
       for (auto g : *groups) {
-         marshalQByteArray(s, g.groupname);
+         marshalQString(s, g.groupname);
          marshalInt(s, (int)g.pri);
       }
    }
@@ -138,11 +138,11 @@ void marshalSectionInfoList(StorageIntf *s, QList<SectionInfo> *anchors)
       marshalUInt(s, anchors->count());
   
       for (auto si : *anchors) {
-         marshalQByteArray(s, si.label);
-         marshalQByteArray(s, si.title);
-         marshalQByteArray(s, si.ref);
+         marshalQString(s, si.label);
+         marshalQString(s, si.title);
+         marshalQString(s, si.ref);
          marshalInt(s, (int)si.type);
-         marshalQByteArray(s, si.fileName);
+         marshalQString(s, si.fileName);
          marshalInt(s, si.lineNr);
          marshalInt(s, si.level);
       }
@@ -177,18 +177,19 @@ void marshalBriefInfo(StorageIntf *s, BriefInfo *briefInfo)
 
    } else {
       marshalUInt(s, 1);
-      marshalQByteArray(s, briefInfo->doc);
-      marshalQByteArray(s, briefInfo->tooltip);
+      marshalQString(s, briefInfo->doc);
+      marshalQString(s, briefInfo->tooltip);
       marshalInt(s, briefInfo->line);
-      marshalQByteArray(s, briefInfo->file);
+      marshalQString(s, briefInfo->file);
    }
 }
 
 void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
 {
    marshalUInt(s, HEADER);
-   marshalQByteArray(s, e->name);
-   marshalQByteArray(s, e->type);
+
+   marshalQString(s, e->name);
+   marshalQString(s, e->type);
    marshalInt(s,   e->section);
    marshalInt(s,   (int)e->protection);
    marshalInt(s,   (int)e->mtype);
@@ -201,9 +202,8 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalBool(s,  e->callGraph);
    marshalBool(s,  e->callerGraph);
    marshalInt(s,  (int)e->virt);
-
-   marshalQByteArray(s, e->args);
-   marshalQByteArray(s, e->bitfields);
+   marshalQString(s, e->args);
+   marshalQString(s, e->bitfields);
 
    marshalArgumentList(s,  e->argList);
    marshalArgumentLists(s, e->tArgLists);
@@ -211,27 +211,27 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalQString(s, e->program);
    marshalQString(s, e->initializer);
 
-   marshalQByteArray(s, e->includeFile);
-   marshalQByteArray(s, e->includeName);
-   marshalQByteArray(s, e->doc);
+   marshalQString(s, e->includeFile);
+   marshalQString(s, e->includeName);
+   marshalQString(s, e->doc);
    marshalInt(s, e->docLine);
-   marshalQByteArray(s, e->docFile);
-   marshalQByteArray(s, e->brief);
+   marshalQString(s, e->docFile);
+   marshalQString(s, e->brief);
    marshalInt(s, e->briefLine);
-   marshalQByteArray(s, e->briefFile);
-   marshalQByteArray(s, e->inbodyDocs);
+   marshalQString(s, e->briefFile);
+   marshalQString(s, e->inbodyDocs);
    marshalInt(s, e->inbodyLine);
-   marshalQByteArray(s, e->inbodyFile);
-   marshalQByteArray(s, e->relates);
+   marshalQString(s, e->inbodyFile);
+   marshalQString(s, e->relates);
    marshalInt(s, e->relatesType);
 
-   marshalQByteArray(s, e->m_read);
-   marshalQByteArray(s, e->m_write);
-   marshalQByteArray(s, e->m_reset);
-   marshalQByteArray(s, e->m_notify);
+   marshalQString(s, e->m_read);
+   marshalQString(s, e->m_write);
+   marshalQString(s, e->m_reset);
+   marshalQString(s, e->m_notify);
 
-   marshalQByteArray(s, e->inside);
-   marshalQByteArray(s, e->exception);
+   marshalQString(s, e->inside);
+   marshalQString(s, e->exception);
    marshalArgumentList(s, e->typeConstr);
    marshalInt(s, e->bodyLine);
    marshalInt(s, e->endBodyLine);
@@ -248,7 +248,7 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalBool(s, e->hidden);
    marshalBool(s, e->artificial);
    marshalInt(s, (int)e->groupDocType);
-   marshalQByteArray(s, e->id);
+   marshalQString(s, e->id);
 }
 
 void marshalEntryTree(StorageIntf *s, QSharedPointer<Entry> e)
@@ -321,7 +321,7 @@ QString unmarshalQString(StorageIntf *s)
       s->read(result.data(), len);
    }
    
-   return result;
+   return QString::fromUtf8(result);
 }
 
 ArgumentList *unmarshalArgumentList(StorageIntf *s)
@@ -361,7 +361,7 @@ QList<BaseInfo> unmarshalBaseInfoList(StorageIntf *s)
    assert(count < 1000000);
 
    for (i = 0; i < count; i++) {
-      QByteArray name   = unmarshalQByteArray(s);
+      QString name    = unmarshalQString(s);
 
       Protection prot = (Protection)unmarshalInt(s);
       Specifier virt  = (Specifier)unmarshalInt(s);
@@ -385,7 +385,7 @@ QList<Grouping> *unmarshalGroupingList(StorageIntf *s)
    assert(count < 1000000);
 
    for (i = 0; i < count; i++) {
-      QByteArray name = unmarshalQByteArray(s);
+      QString name = unmarshalQString(s);
       Grouping::GroupPri_t prio = (Grouping::GroupPri_t)unmarshalInt(s);
 
       result->append(Grouping(name, prio));
@@ -407,13 +407,13 @@ QList<SectionInfo> *unmarshalSectionInfoList(StorageIntf *s)
    assert(count < 1000000);
 
    for (i = 0; i < count; i++) {
-      QByteArray label = unmarshalQByteArray(s);
-      QByteArray title = unmarshalQByteArray(s);
-      QByteArray ref   = unmarshalQByteArray(s);
+      QString label = unmarshalQString(s);
+      QString title = unmarshalQString(s);
+      QString ref   = unmarshalQString(s);
 
       SectionInfo::SectionType type = (SectionInfo::SectionType)unmarshalInt(s);
 
-      QByteArray fileName = unmarshalQByteArray(s);
+      QString fileName = unmarshalQString(s);
 
       int lineNr = unmarshalInt(s);
       int level  = unmarshalInt(s);
@@ -461,10 +461,11 @@ BriefInfo *unmarshalBriefInfo(StorageIntf *s)
    }
 
    BriefInfo *result = new BriefInfo;
-   result->doc     = unmarshalQByteArray(s);
-   result->tooltip = unmarshalQByteArray(s);
+   result->doc     = unmarshalQString(s);
+   result->tooltip = unmarshalQString(s);
    result->line    = unmarshalInt(s);
-   result->file    = unmarshalQByteArray(s);
+   result->file    = unmarshalQString(s);
+
    return result;
 }
 
@@ -496,8 +497,8 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    uint header = unmarshalUInt(s);
    assert(header == HEADER);
 
-   e->name             = unmarshalQByteArray(s);
-   e->type             = unmarshalQByteArray(s);
+   e->name             = unmarshalQString(s);
+   e->type             = unmarshalString(s);
    e->section          = unmarshalInt(s);
    e->protection       = (Protection)unmarshalInt(s);
    e->mtype            = (MethodTypes)unmarshalInt(s);
@@ -510,36 +511,36 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->callGraph        = unmarshalBool(s);
    e->callerGraph      = unmarshalBool(s);
    e->virt             = (Specifier)unmarshalInt(s);
-   e->args             = unmarshalQByteArray(s);
-   e->bitfields        = unmarshalQByteArray(s);
+   e->args             = unmarshalQString(s);
+   e->bitfields        = unmarshalQString(s);
   
    e->argList          = *unmarshalArgumentList(s);      // CopperSpice - check for memory leak
    e->tArgLists        = unmarshalArgumentLists(s);     
 
-   e->program          = unmarshalQByteArray(s);
-   e->initializer      = unmarshalQByteArray(s);
+   e->program          = unmarshalQString(s);
+   e->initializer      = unmarshalQString(s);
 
-   e->includeFile      = unmarshalQByteArray(s);
-   e->includeName      = unmarshalQByteArray(s);
-   e->doc              = unmarshalQByteArray(s);
+   e->includeFile      = unmarshalQString(s);
+   e->includeName      = unmarshalQString(s);
+   e->doc              = unmarshalQString(s);
    e->docLine          = unmarshalInt(s);
-   e->docFile          = unmarshalQByteArray(s);
-   e->brief            = unmarshalQByteArray(s);
+   e->docFile          = unmarshalQString(s);
+   e->brief            = unmarshalQString(s);
    e->briefLine        = unmarshalInt(s);
-   e->briefFile        = unmarshalQByteArray(s);
-   e->inbodyDocs       = unmarshalQByteArray(s);
+   e->briefFile        = unmarshalQString(s);
+   e->inbodyDocs       = unmarshalQString(s);
    e->inbodyLine       = unmarshalInt(s);
-   e->inbodyFile       = unmarshalQByteArray(s);
-   e->relates          = unmarshalQByteArray(s);
+   e->inbodyFile       = unmarshalQString(s);
+   e->relates          = unmarshalQString(s);
    e->relatesType      = (RelatesType)unmarshalInt(s);
 
-   e->m_read           = unmarshalQByteArray(s);
-   e->m_write          = unmarshalQByteArray(s);
-   e->m_reset          = unmarshalQByteArray(s);
-   e->m_notify         = unmarshalQByteArray(s);
+   e->m_read           = unmarshalQString(s);
+   e->m_write          = unmarshalQString(s);
+   e->m_reset          = unmarshalQString(s);
+   e->m_notify         = unmarshalQString(s);
 
-   e->inside           = unmarshalQByteArray(s);
-   e->exception        = unmarshalQByteArray(s);      
+   e->inside           = unmarshalQString(s);
+   e->exception        = unmarshalQString(s);      
    e->typeConstr       = *unmarshalArgumentList(s);      // CopperSpice -check for memory leak
    e->bodyLine         = unmarshalInt(s);
    e->endBodyLine      = unmarshalInt(s);
@@ -560,7 +561,7 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->hidden           = unmarshalBool(s);
    e->artificial       = unmarshalBool(s);
    e->groupDocType     = (Entry::GroupDocType)unmarshalInt(s);
-   e->id               = unmarshalQByteArray(s);
+   e->id               = unmarshalQString(s);
 
    return e;
 }

@@ -27,16 +27,16 @@
 class MemberName : public QList<QSharedPointer<MemberDef>>
 {
  public:
-   MemberName(const char *name);
+   MemberName(const QString &name);
    ~MemberName();
 
-   const char *memberName() const {
+   QString memberName() const {
       return name;
    }
 
  private:
    int compareValues(QSharedPointer<const MemberDef> item1, QSharedPointer<const MemberDef> item2) const;
-   QByteArray name;
+   QString name;
 };
 
 /** Iterator for MemberDef objects in a MemberName list */
@@ -70,9 +70,9 @@ struct MemberInfo {
    Protection prot;
    Specifier  virt;
 
-   bool         inherited;
-   QByteArray   scopePath;
-   QByteArray   ambiguityResolutionScope;
+   bool     inherited;
+   QString  scopePath;
+   QString  ambiguityResolutionScope;
 
    QSharedPointer<ClassDef> ambigClass;
 };
@@ -81,16 +81,16 @@ struct MemberInfo {
 class MemberNameInfo : public QList<MemberInfo>
 {
  public:
-   MemberNameInfo(const char *name);
+   MemberNameInfo(const QString &name);
    ~MemberNameInfo() {}
 
-   const char *memberName() const {
+   QString memberName() const {
       return name;
    }
 
  private:
    int compareValues(QSharedPointer<const MemberInfo> item1, QSharedPointer<const MemberInfo> item2) const;
-   QByteArray name;
+   QString name;
 };
 
 /** Iterator for MemberInfo objects in a MemberNameInfo list. */
@@ -111,7 +111,7 @@ class MemberNameInfoSDict : public StringMap<QSharedPointer<MemberNameInfo>>
 
  private:
    int compareMapValues(const QSharedPointer<MemberNameInfo> &item1, const QSharedPointer<MemberNameInfo> &item2) const override {
-      return qstricmp(item1->memberName(), item2->memberName());
+      return item1->memberName().compare(item2->memberName(), Qt::CaseInsensitive );
    }
 };
 

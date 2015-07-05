@@ -22,6 +22,6 @@
 
 #include <stdio.h>
 
-extern void parseFuncDecl(const QByteArray &decl, bool objC, QByteArray &clName, QByteArray &type,
-                  QByteArray &name, QByteArray &args, QByteArray &funcTempList, QByteArray &exceptions);
+extern void parseFuncDecl(const QString &decl, bool objC, QString &clName, QString &type,
+                  QString &name, QString &args, QString &funcTempList, QString &exceptions);
 #endif

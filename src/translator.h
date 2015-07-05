@@ -96,7 +96,7 @@ class Translator
    virtual QString trCompounds() = 0;
    virtual QString trGeneratedAt(const QString &date, const QString &projName) = 0;
 
-   virtual QString trClassDiagram(const char *clName) = 0;
+   virtual QString trClassDiagram(const QString &clName) = 0;
    virtual QString trForInternalUseOnly() = 0;  
    virtual QString trWarning() = 0;   
    virtual QString trVersion() = 0;
@@ -110,10 +110,10 @@ class Translator
    virtual QString trNamespaceListDescription(bool extractAll) = 0;
    virtual QString trFriends() = 0; 
    virtual QString trRelatedFunctionDocumentation() = 0;
-   virtual QString trCompoundReference(const char *clName, ClassDef::CompoundType compType, bool isTemplate) = 0;
+   virtual QString trCompoundReference(const QString &clName, ClassDef::CompoundType compType, bool isTemplate) = 0;
 
-   virtual QString trFileReference(const char *fileName) = 0;
-   virtual QString trNamespaceReference(const char *namespaceName) = 0;
+   virtual QString trFileReference(const QString &fileName) = 0;
+   virtual QString trNamespaceReference(const QString &namespaceName) = 0;
 
    virtual QString trPublicMembers() = 0;  
    virtual QString trProtectedMembers() = 0;
@@ -150,8 +150,8 @@ class Translator
    virtual QString trDefinedAtLineInSourceFile() = 0;
    virtual QString trDefinedInSourceFile() = 0;
    virtual QString trDeprecated() = 0; 
-   virtual QString trCollaborationDiagram(const char *clName) = 0;
-   virtual QString trInclDepGraph(const char *fName) = 0;
+   virtual QString trCollaborationDiagram(const QString &clName) = 0;
+   virtual QString trInclDepGraph(const QString &fName) = 0;
    virtual QString trConstructorDocumentation() = 0;
    virtual QString trGotoSourceCode() = 0;
    virtual QString trGotoDocumentation() = 0;
@@ -197,7 +197,7 @@ class Translator
    virtual QString trPropertyDocumentation() = 0;
 
    virtual QString trClasses() = 0;
-   virtual QString trPackage(const char *name) = 0;
+   virtual QString trPackage(const QString &name) = 0;
 
    virtual QString trPackageList() = 0;
    virtual QString trPackageListDescription() = 0;
@@ -298,7 +298,7 @@ class Translator
    virtual QString trDirDocumentation() = 0;
    virtual QString trDirectories() = 0;
    virtual QString trDirDescription() = 0;
-   virtual QString trDirReference(const char *dirName) = 0;
+   virtual QString trDirReference(const QString &dirName) = 0;
    virtual QString trDir(bool first_capital, bool singular) = 0;  
    virtual QString trOverloadText() = 0;
    virtual QString trCallerGraph() = 0;
@@ -316,10 +316,10 @@ class Translator
    virtual QString trModulesList() = 0;
    virtual QString trModulesListDescription(bool extractAll) = 0;
 
-   virtual QString trCompoundReferenceFortran(const char *clName, ClassDef::CompoundType 
+   virtual QString trCompoundReferenceFortran(const QString &clName, ClassDef::CompoundType 
                   compType, bool isTemplate) = 0;
 
-   virtual QString trModuleReference(const char *namespaceName) = 0;
+   virtual QString trModuleReference(const QString &namespaceName) = 0;
    virtual QString trModulesMembers() = 0;
    virtual QString trModulesMemberDescription(bool extractAll) = 0;
    virtual QString trModulesIndex() = 0;
@@ -329,25 +329,25 @@ class Translator
    virtual QString trSubprogram(bool first_capital, bool singular) = 0;
    virtual QString trTypeConstraints() = 0;
 
-   virtual QString trDirRelation(const char *name) = 0;
+   virtual QString trDirRelation(const QString &name) = 0;
    virtual QString trLoading() = 0;
    virtual QString trGlobalNamespace() = 0;
    virtual QString trSearching() = 0;
    virtual QString trNoMatches() = 0;
     
-   virtual QString trFileIn(const char *name) = 0;
-   virtual QString trIncludesFileIn(const char *name) = 0;
+   virtual QString trFileIn(const QString &name) = 0;
+   virtual QString trIncludesFileIn(const QString &name) = 0;
  
    virtual QString trCiteReferences() = 0;
    virtual QString trCopyright() = 0;
-   virtual QString trDirDepGraph(const char *name) = 0;
+   virtual QString trDirDepGraph(const QString &name) = 0;
 
    virtual QString trDetailLevel() = 0;
    virtual QString trTemplateParameters() = 0;
    virtual QString trAndMore(const QString &number) = 0;
    virtual QString trEnumGeneratedFromFiles(bool single) = 0;
-   virtual QString trEnumReference(const char *name) = 0;
-   virtual QString trInheritedFrom(const char *members, const char *what) = 0;
+   virtual QString trEnumReference(const QString &name) = 0;
+   virtual QString trInheritedFrom(const QString &members, const QString &what) = 0;
    virtual QString trAdditionalInheritedMembers() = 0;
 
    virtual QString trPanelSyncTooltip(bool enable) = 0;
@@ -361,9 +361,9 @@ class Translator
    virtual QString trInterfaces() = 0;
    virtual QString trServices() = 0;
    virtual QString trConstantGroups() = 0;
-   virtual QString trConstantGroupReference(const char *namespaceName) = 0;
-   virtual QString trServiceReference(const char *sName) = 0;
-   virtual QString trSingletonReference(const char *sName) = 0;
+   virtual QString trConstantGroupReference(const QString &namespaceName) = 0;
+   virtual QString trServiceReference(const QString &sName) = 0;
+   virtual QString trSingletonReference(const QString &sName) = 0;
    virtual QString trServiceGeneratedFromFiles(bool single) = 0;
    virtual QString trSingletonGeneratedFromFiles(bool single) = 0;
 };

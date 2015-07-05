@@ -68,7 +68,7 @@ class MemberGroup
    void writeTagFile(QTextStream &);
 
    void addGroupedInheritedMembers(OutputList &ol, QSharedPointer<ClassDef> cd, MemberListType lt,
-                                   QSharedPointer<ClassDef> inheritedFrom, const QByteArray &inheritId);
+                                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
    const QByteArray &documentation() const {
       return doc;

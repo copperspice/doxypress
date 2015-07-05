@@ -18,7 +18,7 @@
 #ifndef ENTRY_H
 #define ENTRY_H
 
-#include <QByteArray>
+#include <QString>
 #include <QFile>
 #include <QList>
 
@@ -39,10 +39,10 @@ struct ListItemInfo;
 struct BaseInfo {
    /*! Creates an object representing an inheritance relation */
 
-   BaseInfo(const char *n, Protection p, Specifier v) :
-      name(n), prot(p), virt(v) {}
+   BaseInfo(const QString &n, Protection p, Specifier v) 
+      : name(n), prot(p), virt(v) {}
 
-   QByteArray   name;    //!< the name of the base class
+   QString    name;      //!< the name of the base class
    Protection prot;      //!< inheritance type
    Specifier  virt;      //!< virtualness
 };
@@ -51,9 +51,9 @@ struct BaseInfo {
  *  for an Entry.
  */
 struct TagInfo {
-   QByteArray tagName;
-   QByteArray fileName;
-   QByteArray anchor;
+   QString tagName;
+   QString fileName;
+   QString anchor;
 };
 
 /** Represents an unstructured piece of information, about an
@@ -340,43 +340,43 @@ class Entry
    QList<SectionInfo>  *anchors;      //!< list of anchors defined in this entry
    QList<ListItemInfo> *sli;          //!< special lists (test/todo/bug/deprecated/..) this entry is in
 
-   QByteArray	 type;        //!< member type
-   QByteArray	 name;        //!< member name
-   QByteArray   args;        //!< member argument string
-   QByteArray   bitfields;   //!< member's bit fields  
-   QByteArray	 program;     //!< the program text
-   QByteArray   initializer; //!< initial value (for variables)
-   QByteArray   includeFile; //!< include file (2 arg of \\class, must be unique)
-   QByteArray   includeName; //!< include name (3 arg of \\class)
-   QByteArray   doc;         //!< documentation block (partly parsed)
-   QByteArray   docFile;     //!< file in which the documentation was found
-   QByteArray   brief;       //!< brief description (doc block)  
-   QByteArray   briefFile;   //!< file in which the brief desc. was found
-   QByteArray   inbodyDocs;  //!< documentation inside the body of a function 
-   QByteArray   inbodyFile;  //!< file in which the body doc was found
-   QByteArray   relates;     //!< related class (doc block)
+   QString	 type;        //!< member type
+   QString	 name;        //!< member name
+   QString   args;        //!< member argument string
+   QString   bitfields;   //!< member's bit fields  
+   QString	 program;     //!< the program text
+   QString   initializer; //!< initial value (for variables)
+   QString   includeFile; //!< include file (2 arg of \\class, must be unique)
+   QString   includeName; //!< include name (3 arg of \\class)
+   QString   doc;         //!< documentation block (partly parsed)
+   QString   docFile;     //!< file in which the documentation was found
+   QString   brief;       //!< brief description (doc block)  
+   QString   briefFile;   //!< file in which the brief desc. was found
+   QString   inbodyDocs;  //!< documentation inside the body of a function 
+   QString   inbodyFile;  //!< file in which the body doc was found
+   QString   relates;     //!< related class (doc block)
 
-   QByteArray   m_read;        //!< property read 
-   QByteArray   m_write;       //!< property write
+   QString   m_read;        //!< property read 
+   QString   m_write;       //!< property write
 
    // copperspice - additional properties
-   QByteArray   m_reset;
-   QByteArray   m_notify;
-   QByteArray   m_revision;
-   QByteArray   m_designable;
-   QByteArray   m_scriptable;
-   QByteArray   m_stored;
-   QByteArray   m_user;   
+   QString   m_reset;
+   QString   m_notify;
+   QString   m_revision;
+   QString   m_designable;
+   QString   m_scriptable;
+   QString   m_stored;
+   QString   m_user;   
 
-   QByteArray   inside;      //!< name of the class in which documents are found
-   QByteArray   exception;   //!< throw specification
-   QByteArray	 fileName;    //!< file this entry was extracted from
-   QByteArray   id;          //!< libclang id   
+   QString   inside;       //!< name of the class in which documents are found
+   QString   exception;    //!< throw specification
+   QString	 fileName;     //!< file this entry was extracted from
+   QString   id;           //!< libclang id   
       
-   bool        hidden;       //!< does this represent an entity that is hidden from the output
-   bool        artificial;   //!< Artificially introduced item
+   bool      hidden;       //!< does this represent an entity that is hidden from the output
+   bool      artificial;   //!< Artificially introduced item
 
-   static int  num;          //!< counts the total number of entries
+   static int  num;        //!< counts the total number of entries
 
    /// return the command name used to define GROUPDOC_SEC
    const char *groupDocCmd() const {
@@ -454,11 +454,11 @@ class EntryNav
       return m_lang;
    }
 
-   const QByteArray &type() const {
+   const QString &type() const {
       return m_type;
    }
 
-   const QByteArray &name() const {
+   const QString &name() const {
       return m_name;
    }
 
@@ -487,12 +487,13 @@ class EntryNav
 
    // identification
    int          m_section;     //!< entry type (see Sections);
-   QByteArray	 m_type;        //!< member type
-   QByteArray   m_name;        //!< member name
-   TagInfo     *m_tagInfo;     //!< tag file info
-   QSharedPointer<FileDef>     m_fileDef;
+   QString	    m_type;        //!< member type
+   QString      m_name;        //!< member name
+
+   TagInfo     *m_tagInfo;     //!< tag file info   
    SrcLangExt   m_lang;        //!< programming language in which this entry was found
 
+   QSharedPointer<FileDef> m_fileDef;
    QSharedPointer<Entry> m_info;
 
    int64_t      m_offset;

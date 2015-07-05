@@ -28,14 +28,14 @@
 class FileName : public FileList
 {
  public:
-   FileName(const char *fn, const char *name);
+   FileName(const QString &fn, const QString &name);
    ~FileName();
 
-   const char *fileName() const {
+   QString fileName() const {
       return name;
    }
 
-   const char *fullName() const {
+   QString fullName() const {
       return fName;
    }
 
@@ -44,8 +44,8 @@ class FileName : public FileList
  private:
    int compareListValues(const FileDef *item1, const FileDef *item2) const;
 
-   QByteArray name;
-   QByteArray fName;
+   QString name;
+   QString fName;
 };
 
 /** Iterator for FileDef objects in a FileName list. */

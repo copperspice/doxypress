@@ -339,7 +339,7 @@ static void generateBriefDoc(QTextStream &t, QSharedPointer<Definition> def)
   
    if (! brief.isEmpty()) {
       DocNode *root = validatingParseDoc(def->briefFile(), def->briefLine(),
-                                         def, QSharedPointer<MemberDef>(), brief, false, false, 0, true, true);
+                                         def, QSharedPointer<MemberDef>(), brief, false, false, "", true, true);
 
       QByteArray relPath = relativePathToRoot(def->getOutputFileBase());
 

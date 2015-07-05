@@ -19,8 +19,7 @@
 #include <filename.h>
 #include <util.h>
 
-
-FileName::FileName(const char *fn, const char *n) : FileList()
+FileName::FileName(const QString &fn, const QString &n) : FileList()
 {   
    fName = fn;
    name  = n;
@@ -113,7 +112,7 @@ void FileName::generateDiskNames()
       for (auto item : *this) {   
         
          if (! item->isReference()) {
-            QByteArray prefix = item->m_path.right(item->m_path.length() - j - 1);
+            QString prefix = item->m_path.right(item->m_path.length() - j - 1);
             item->setName(prefix + name);
            
             item->m_diskName = prefix + name;
@@ -124,7 +123,7 @@ void FileName::generateDiskNames()
 
 int FileName::compareListValues(const FileDef *f1, const FileDef *f2) const
 {
-   return qstricmp(f1->fileName(), f2->fileName());
+   return f1->fileName().compare(f2->fileName(), Qt:CaseInsensitive);
 }
 
 FileNameIterator::FileNameIterator(const FileName &fname) : QListIterator<QSharedPointer<FileDef>>(fname)

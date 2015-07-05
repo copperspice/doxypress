@@ -48,20 +48,10 @@
 #include <section.h>
 #include <util.h>
 
-// no debug info
-#define Docbook_DB(x) do {} while(0)
-
-// debug to stdout
-// #define Docbook_DB(x) printf x
-
-// debug inside output
-// #define Docbook_DB(x) QByteArray __t;__t.sprintf x;m_t << __t
-
-
-class DocbookSectionMapper : public QHash<long, QByteArray>
+class DocbookSectionMapper : public QHash<long, QString>
 {
  public:
-   DocbookSectionMapper() : QHash<long, QByteArray>() {
+   DocbookSectionMapper() : QHash<long, QString>() {
       insert(MemberListType_pubTypes,    "public-type");
       insert(MemberListType_pubMethods,  "public-func");
       insert(MemberListType_pubAttribs,  "public-attrib");
@@ -110,12 +100,11 @@ inline void writeDocbookString(QTextStream &t, const QString &text)
    t << convertToXML(text);
 }
 
-inline void writeDocbookCodeString(QTextStream &t, const char *s, int &col)
-{
-   char c;
+inline void writeDocbookCodeString(QTextStream &t, const QString &s, int &col)
+{   
+   for (auto c : s) {
 
-   while ((c = *s++)) {
-      switch (c) {
+      switch (c.unicode()) {
          case '\t': {
             static int tabSize = Config::getInt("tab-size");
             int spacesToNextTabStop = tabSize - (col % tabSize);
@@ -164,19 +153,20 @@ static void writeDocbookHeaderMainpage(QTextStream &t)
    t << "<chapter xmlns=\"http://docbook.org/ns/docbook\" version=\"5.0\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">" << endl;
 }
 
-static void writeDocbookHeader_ID(QTextStream &t, QByteArray id)
+static void writeDocbookHeader_ID(QTextStream &t, QString id)
 {
    t << "<?xml version='1.0' encoding='UTF-8' standalone='no'?>" << endl;;
    t << "<section xmlns=\"http://docbook.org/ns/docbook\" version=\"5.0\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xml:id=\"" << id << "\">" << endl;
 }
 
-void writeDocbookLink(QTextStream &t, const char * /*extRef*/, const char *compoundId,
-                      const char *anchorId, const char *text, const char * /*tooltip*/)
+void writeDocbookLink(QTextStream &t, const QString &compoundId, const QString &anchorId, const QString &text )
 {
    t << "<link linkend=\"" << compoundId;
-   if (anchorId) {
+
+   if (! anchorId.isEmpty()) {
       t << "_1" << anchorId;
    }
+
    t << "\"";
    t << ">";
    writeDocbookString(t, text);
@@ -195,7 +185,7 @@ class TextGeneratorDocbookImpl : public TextGeneratorIntf
    void writeBreak(int) const override {}
 
    void writeLink(const QString &extRef, const QString &file, const QString &anchor, const QString &text) const override  {
-      writeDocbookLink(m_t, extRef, file, anchor, text, 0);
+      writeDocbookLink(m_t, file, anchor, text);
    }
 
  private:
@@ -210,26 +200,23 @@ class DocbookCodeGenerator : public CodeOutputInterface
 
    virtual ~DocbookCodeGenerator() {}
 
-   void codify(const QByteArray &text)  override {
-      Docbook_DB(("(codify \"%s\")\n", text));
+   void codify(const QString &text)  override {      
       writeDocbookCodeString(m_t, text, m_col);
    }
 
-   void writeCodeLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
-                  const QByteArray &name, const QByteArray &tooltip) override {
-      Docbook_DB(("(writeCodeLink)\n"));
-      writeDocbookLink(m_t, ref, file, anchor, name, tooltip);
-      m_col += strlen(name);
+   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor, 
+                  const QString &name, const QString &tooltip) override {
+
+      writeDocbookLink(m_t, file, anchor, name);
+      m_col += name.length();
    }
 
-   void writeTooltip(const char *, const DocLinkInfo &, const QByteArray &,
-                     const QByteArray &, const SourceLinkInfo &, const SourceLinkInfo &) override {
-      Docbook_DB(("(writeToolTip)\n"));
+   void writeTooltip(const QString &, const DocLinkInfo &, const QString &,
+                     const QString &, const SourceLinkInfo &, const SourceLinkInfo &) override {
    }
 
    void startCodeLine(bool) {
-      Docbook_DB(("(startCodeLine)\n"));
-
+      
       if (m_lineNumber != -1) {
          if (!m_refId.isEmpty()) {
             m_t << "<link linkend=\"" << m_refId << "\">";
@@ -245,31 +232,26 @@ class DocbookCodeGenerator : public CodeOutputInterface
 
    void endCodeLine() {
       m_t << endl;
-      Docbook_DB(("(endCodeLine)\n"));
       m_lineNumber = -1;
       m_refId.resize(0);
       m_external.resize(0);
       m_insideCodeLine = false;
    }
 
-   void startFontClass(const char *colorClass) {
-      Docbook_DB(("(startFontClass)\n"));
+   void startFontClass(const QString &colorClass)  override {      
       m_t << "<emphasis class=\"" << colorClass << "\">";
       m_insideSpecialHL = true;
    }
 
    void endFontClass() {
-      Docbook_DB(("(endFontClass)\n"));
       m_t << "</emphasis>"; // non DocBook
       m_insideSpecialHL = false;
    }
 
-   void writeCodeAnchor(const char *) {
-      Docbook_DB("(writeCodeAnchor)\n");
+   void writeCodeAnchor(const QString &) override {      
    }
 
-   void writeLineNumber(const char *extRef, const QByteArray &compId, const char *anchorId, int l) override {
-      Docbook_DB("(writeLineNumber)\n");
+   void writeLineNumber(const QString &extRef, const QString &compId, const QString &anchorId, int l) override {
 
       // we remember the information provided here to use it
       // at the <codeline> start tag.
@@ -279,16 +261,17 @@ class DocbookCodeGenerator : public CodeOutputInterface
       if (! compId.isEmpty()) {
          m_refId = compId;
 
-         if (anchorId) {
-            m_refId += (QByteArray)"_1" + anchorId;
+         if (! anchorId.isEmpty()) {
+            m_refId += "_1" + anchorId;
          }
-         if (extRef) {
+
+         if (! extRef.isEmpty()) {
             m_external = extRef;
          }
       }
    }
 
-   void setCurrentDoc(QSharedPointer<Definition> def, const char *, bool) override {
+   void setCurrentDoc(QSharedPointer<Definition> def, const QString &, bool) override {
    }
 
    void addWord(const QString &, bool) override {
@@ -302,8 +285,8 @@ class DocbookCodeGenerator : public CodeOutputInterface
 
  private:
    QTextStream &m_t;
-   QByteArray m_refId;
-   QByteArray m_external;
+   QString m_refId;
+   QString m_external;
 
    int m_lineNumber;
    int m_col;
@@ -314,7 +297,7 @@ class DocbookCodeGenerator : public CodeOutputInterface
 static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, QSharedPointer<Definition> scope, 
                   QSharedPointer<FileDef> fileScope, int indent)
 {
-   QByteArray indentStr;
+   QString indentStr;
    indentStr.fill(' ', indent);
 
    if (al) {
@@ -352,10 +335,10 @@ static void writeTemplateList(QSharedPointer<ClassDef> cd, QTextStream &t)
    writeTemplateArgumentList(cd->templateArguments(), t, cd, QSharedPointer<FileDef>(), 4);
 }
 
-static void writeDocbookDocBlock(QTextStream &t, const QByteArray &fileName, int lineNr, QSharedPointer<Definition> scope, 
-                  QSharedPointer<MemberDef> md, const QByteArray &text)
+static void writeDocbookDocBlock(QTextStream &t, const QString &fileName, int lineNr, QSharedPointer<Definition> scope, 
+                  QSharedPointer<MemberDef> md, const QString &text)
 {
-   QByteArray stext = text.trimmed();
+   QString stext = text.trimmed();
    if (stext.isEmpty()) {
       return;
    }
@@ -393,12 +376,12 @@ void writeDocbookCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
    delete docbookGen;
 }
 
-static QByteArray classOutputFileBase(QSharedPointer<ClassDef> cd)
+static QString classOutputFileBase(QSharedPointer<ClassDef> cd)
 {
    return cd->getOutputFileBase();
 }
 
-static QByteArray memberOutputFileBase(QSharedPointer<MemberDef> md)
+static QString memberOutputFileBase(QSharedPointer<MemberDef> md)
 {
    return md->getOutputFileBase();
 }
@@ -434,7 +417,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
    // group members are only visible in their group
    //if (def->definitionType()!=Definition::TypeGroup && md->getGroupDef()) return;
 
-   QByteArray memType;
+   QString memType;
 
    switch (md->memberType()) {
       case MemberType_Define:
@@ -481,7 +464,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
          break;
    }
 
-   QByteArray scopeName;
+   QString scopeName;
 
    if (md->getClassDef()) {
       scopeName = md->getClassDef()->name();
@@ -823,8 +806,8 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
    }
 }
 
-static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t, QSharedPointer<MemberList> ml, const char *kind,
-                                   bool detailed = false, const char *header = 0, const char *documentation = 0)
+static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t, QSharedPointer<MemberList> ml, const QString &kind,
+                                   bool detailed = false, const QString &header = QString(), const QString &documentation = QString())
 {
    if (ml == 0) {
       return;
@@ -917,14 +900,15 @@ static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t,
 
    } else {
       t << "        <simplesect>" << endl;
-      if (header) {
+
+      if (! header.isEmpty()) {
          t << "            <title>" << convertToXML(header) << "</title>" << endl;
       } else {
          t << "            <title>" << title << "</title>" << endl;
       }
    }
 
-   if (documentation) {
+   if (! documentation.isEmpty()) {
       t << "      <description>";
       writeDocbookDocBlock(t, d->docFile(), d->docLine(), d, QSharedPointer<MemberDef>(), documentation);
       t << "</description>" << endl;
@@ -964,7 +948,7 @@ static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t,
 static void writeInnerClasses(const ClassSDict *cl, QTextStream &t)
 {
    if (cl) {
-      QByteArray title = "Classes";
+      QString title = "Classes";
    
       if (! cl->isEmpty()) { 
             t << "        <simplesect>" << endl;
@@ -996,7 +980,7 @@ static void writeInnerClasses(const ClassSDict *cl, QTextStream &t)
 static void writeInnerNamespaces(const NamespaceSDict *nl, QTextStream &t)
 {
    if (nl) {     
-      QByteArray title = "Namespaces";
+      QString title = "Namespaces";
 
       if (! nl->isEmpty()) {
          t << "        <simplesect>" << endl;
@@ -1028,7 +1012,7 @@ static void writeInnerNamespaces(const NamespaceSDict *nl, QTextStream &t)
 static void writeInnerFiles(const FileList *fl, QTextStream &t)
 {
    if (fl) {
-      QByteArray title = "Files";
+      QString title = "Files";
 
       if (! fl->isEmpty()) {
          t << "        <simplesect>" << endl;
@@ -1090,7 +1074,7 @@ static void writeInnerGroups(const SortedList<QSharedPointer<GroupDef>> *gl, QTe
 
 static void writeInnerDirs(const SortedList<QSharedPointer<DirDef>> dl, QTextStream &t)
 { 
-   QByteArray title = "Directories";
+   QString title = "Directories";
 
    if (! dl.isEmpty()) {
       t << "        <simplesect>" << endl;
@@ -1189,7 +1173,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
    IncludeInfo *ii = cd->includeInfo();
 
    if (ii) {
-      QByteArray nm = ii->includeName;
+      QString nm = ii->includeName;
 
       if (nm.isEmpty() && ii->fileDef) {
          nm = ii->fileDef->docName();
@@ -1624,7 +1608,7 @@ static void generateDocbookForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    QString fileName = outputDirectory + "/" + dd->getOutputFileBase() + ".xml";
 
    QFile f(fileName);
-   QByteArray relPath = relativePathToRoot(fileName);
+   QString relPath = relativePathToRoot(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
@@ -1693,24 +1677,23 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
    }
 
    QTextStream t(&f);
-   //t.setEncoding(QTextStream::UnicodeUTF8);
-
-   QByteArray pName = pageName.toUtf8();
+   
+   QString pName = pageName;
 
    if (isExample) {
-      QByteArray fileDocbook = pName + ".xml";
+      QString fileDocbook = pName + ".xml";
       ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
    }
 
    if (! pd->hasParentPage() && !isExample) {
-      QByteArray fileDocbook = pName + ".xml";
+      QString fileDocbook = pName + ".xml";
 
       //Add the file Documentation info to index file
       ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
       writeDocbookHeaderMainpage(t);
 
    } else {
-      QByteArray pid = pName + "_1" + pName;
+      QString pid = pName + "_1" + pName;
       writeDocbookHeader_ID(t, pid);
    }
 

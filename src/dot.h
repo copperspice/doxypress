@@ -154,8 +154,8 @@ class DotNode
    friend class DotCallGraph;
    friend class DotGroupCollaboration;
 
-   friend QByteArray computeMd5Signature(DotNode *root, GraphType gt, GraphOutputFormat f, bool lrRank, bool renderParents,
-                        bool backArrows, const QString &title, QByteArray &graphStr);
+   friend QString computeMd5Signature(DotNode *root, GraphType gt, GraphOutputFormat f, bool lrRank, bool renderParents,
+                        bool backArrows, const QString &title, QString &graphStr);
 };
 
 inline int DotNode::findParent( DotNode *n )
@@ -196,7 +196,7 @@ class DotClassGraph
    bool isTrivial() const;
    bool isTooBig() const;
 
-   QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
+   QString writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const QString &path, const QString &fileName, const QString &relPath,
                          bool TBRank = true, bool imageMap = true, int graphId = -1) const;
 
@@ -228,7 +228,7 @@ class DotInclDepGraph
  public:
    DotInclDepGraph(QSharedPointer<FileDef> fd, bool inverse);
    ~DotInclDepGraph();
-   QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
+   QString writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const QString &path, const QString &fileName, const QString &relPath,
                          bool writeImageMap = true, int graphId = -1) const;
 
@@ -259,7 +259,7 @@ class DotCallGraph
    DotCallGraph(QSharedPointer<MemberDef> md, bool inverse);
    ~DotCallGraph();
 
-   QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
+   QString writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const QString  &path, const QString &fileName, const QString  &relPath, 
                          bool writeImageMap = true, int graphId = -1) const;
 
@@ -289,7 +289,7 @@ class DotDirDeps
    ~DotDirDeps();
 
    bool isTrivial() const;
-   QByteArray writeGraph(QTextStream &out, GraphOutputFormat gf, EmbeddedOutputFormat ef, const QString  &path,
+   QString writeGraph(QTextStream &out, GraphOutputFormat gf, EmbeddedOutputFormat ef, const QString  &path,
                          const QString &fileName, const QString  &relPath, bool writeImageMap = true, int graphId = -1) const;
  private:
    QSharedPointer<DirDef> m_dir;
@@ -336,7 +336,7 @@ class DotGroupCollaboration
 
    DotGroupCollaboration(QSharedPointer<GroupDef> gd);
    ~DotGroupCollaboration();
-   QByteArray writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
+   QString writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const QString &path, const QString &fileName, const QString &relPath,
                          bool writeImageMap = true, int graphId = -1) const;
 
@@ -412,7 +412,7 @@ class DotFilePatcher
       QString    mapFile;
       QString    relPath;
       bool       urlOnly;
-      QByteArray context;
+      QString context;
       QString    label;
       bool       zoomable;
       int        graphId;
@@ -420,9 +420,9 @@ class DotFilePatcher
 
    DotFilePatcher(const QString &patchFile);
 
-   int addMap(const QString &mapFile, const QString &relPath, bool urlOnly, const QByteArray &context, const QString &label);
+   int addMap(const QString &mapFile, const QString &relPath, bool urlOnly, const QString &context, const QString &label);
    int addFigure(const QString &baseName, const QString &figureName, bool heightCheck);
-   int addSVGConversion(const QString &relPath, bool urlOnly, const QByteArray &context, bool zoomable, int graphId);
+   int addSVGConversion(const QString &relPath, bool urlOnly, const QString &context, bool zoomable, int graphId);
    int addSVGObject(const QString &baseName, const QString &absImgName, const QString &relPath);
 
    bool run();
@@ -468,12 +468,12 @@ class DotManager
    void addRun(DotRunner *run);
 
    int  addMap(const QString &file, const QString &mapFile, const QString &relPath, bool urlOnly,
-                  const QByteArray &context, const QString &label);
+                  const QString &context, const QString &label);
 
    int addFigure(const QString &file, const QString &baseName, const QString &figureName, bool heightCheck);
 
    int addSVGConversion(const QString &file, const QString &relPath,
-                  bool urlOnly, const QByteArray &context, bool zoomable, int graphId);
+                  bool urlOnly, const QString &context, bool zoomable, int graphId);
 
    int addSVGObject(const QString &file, const QString &baseName, const QString &figureName, const QString &relPath);
 
@@ -499,7 +499,7 @@ void generateGraphLegend(const QString &path);
 void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, GraphOutputFormat format);
 
 void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath, 
-                  const QString &baseName, const QByteArray &context, int graphId = -1);
+                  const QString &baseName, const QString &context, int graphId = -1);
 
 void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd);
 

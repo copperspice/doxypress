@@ -31,7 +31,7 @@ class HtmlEntityMapper
  public:
    static HtmlEntityMapper *instance();
    static void deleteInstance();
-   DocSymbol::SymType name2sym(const QByteArray &symName) const;
+   DocSymbol::SymType name2sym(const QString &symName) const;
    const char *utf8(DocSymbol::SymType symb, bool useInPrintf = false) const;
    const char *html(DocSymbol::SymType symb, bool useInPrintf = false) const;
    const char *xml(DocSymbol::SymType symb) const;

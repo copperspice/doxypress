@@ -30,8 +30,8 @@
 #include <outputlist.h>
 #include <util.h>
 
-NamespaceDef::NamespaceDef(const char *df, int dl, int dc, const char *name, const char *lref, QString fName, 
-                           const char *type, bool isPublished) 
+NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &name, const QString &lref, QString fName, 
+                           const QString &type, bool isPublished) 
    : Definition(df, dl, dc, name), m_isPublished(isPublished)
 {
    if (! fName.isEmpty()) {
@@ -361,7 +361,7 @@ void NamespaceDef::writeBriefDescription(OutputList &ol)
 
    if (hasBriefDescription()) {
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
-                                             briefDescription(), true, false, 0, true, false);
+                                             briefDescription(), true, false, "", true, false);
 
       if (rootNode && !rootNode->isEmpty()) {
          ol.startParagraph();

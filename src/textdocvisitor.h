@@ -32,10 +32,7 @@ class TextDocVisitor : public DocVisitor
  public:
    TextDocVisitor(QTextStream &t) : DocVisitor(DocVisitor_Text), m_t(t) {}
 
-   //--------------------------------------
-   // visitor functions for leaf nodes
-   //--------------------------------------
-
+   // visitor functions for leaf nodes   
    void visit(DocWord *w) {
       filter(w->word());
    }
@@ -44,17 +41,17 @@ class TextDocVisitor : public DocVisitor
       filter(w->word());
    }
 
-   void visit(DocWhiteSpace *)   {
+   void visit(DocWhiteSpace *) {
       m_t << " ";
    }
 
    void visit(DocSymbol *);
 
-   void visit(DocURL *u)         {
+   void visit(DocURL *u) {
       filter(u->url());
    }
 
-   void visit(DocLineBreak *)    {
+   void visit(DocLineBreak *) {
       m_t << " ";
    }
 
@@ -73,10 +70,8 @@ class TextDocVisitor : public DocVisitor
    void visit(DocSimpleSectSep *) {}
    void visit(DocCite *)         {}
 
-   //--------------------------------------
-   // visitor functions for compound nodes
-   //--------------------------------------
-
+   
+   // visitor functions for compound nodes  
    void visitPre(DocAutoList *) {}
    void visitPost(DocAutoList *) {}
    void visitPre(DocAutoListItem *) {}

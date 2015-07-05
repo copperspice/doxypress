@@ -83,9 +83,9 @@ void MakeFileParser::endFontClass()
    }
 }
 
-bool MakeFileParser::needsPreprocessing(const QByteArray &)
+bool MakeFileParser::needsPreprocessing(const QString &)
 {
-   return FALSE;
+   return false;
 }
 
 void MakeFileParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,

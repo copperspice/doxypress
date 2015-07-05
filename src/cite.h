@@ -23,15 +23,15 @@
 
 /// String constants for citations
 struct CiteConsts {
-   static const QByteArray fileName;
-   static const QByteArray anchorPrefix;
+   static const QString fileName;
+   static const QString anchorPrefix;
 };
 
 /// Citation-related data.
 struct CiteInfo {
-   CiteInfo(const char *label_, const char *text_ = 0, const char *fullText_ = 0,
-            const char *ref_ = 0) :
-      label(label_), text(text_), fullText(fullText_), ref(ref_) {
+   CiteInfo(const  QString & t_label, const QString &t_text = QString(), const  QString &t_fullText = QString(), 
+                  const QString &t_ref = QString() )
+      : label(t_label), text(t_text), fullText(t_fullText), ref(t_ref) {
    }
 
    CiteInfo(const CiteInfo &o) {
@@ -41,11 +41,10 @@ struct CiteInfo {
       ref      = o.ref;
    }
 
-   QByteArray label;
-   QByteArray text;
-   QByteArray fullText;
-   QByteArray ref;
-
+   QString label;
+   QString text;
+   QString fullText;
+   QString ref;
 };
 
 /**
@@ -63,10 +62,10 @@ class CiteDict
    //    void resolve();
 
    /** Insert a citation identified by \a label into the database */
-   void insert(const char *label);
+   void insert(const QString &label);
 
    /** Return the citation info for a given \a label */
-   CiteInfo *find(const char *label) const;
+   CiteInfo *find(const QString &label) const;
 
    /** Generate the citations page */
    void generatePage() const;
@@ -86,7 +85,7 @@ class CiteDict
 
  private:  
    QHash<QString, CiteInfo> m_entries;
-   QByteArray m_baseFileName;
+   QString m_baseFileName;
 };
 
 #endif

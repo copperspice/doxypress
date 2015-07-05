@@ -28,7 +28,7 @@
 #include <reflist.h>
 #include <util.h>
 
-PageDef::PageDef(const char *f, int l, const char *n, const char *d, const char *t)
+PageDef::PageDef(const QString &f, int l, const QString &n, const QString &d, const QString &t)
    : Definition(f, l, 1, n), m_title(t)
 {
    setDocumentation(d, f, l);
@@ -62,7 +62,7 @@ QSharedPointer<GroupDef> PageDef::getGroupDef() const
    }
 }
 
-QByteArray PageDef::getOutputFileBase() const
+QString PageDef::getOutputFileBase() const
 {
    if (getGroupDef()) {
       return getGroupDef()->getOutputFileBase();
@@ -73,7 +73,7 @@ QByteArray PageDef::getOutputFileBase() const
    }
 }
 
-void PageDef::setFileName(const char *name, bool dontEscape)
+void PageDef::setFileName(const QString &name, bool dontEscape)
 {
    static bool shortNames = Config::getBool("short-names");
 
@@ -147,8 +147,8 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    static bool generateTreeView = Config::getBool("generate-treeview");
    
-   QByteArray pageName;
-   QByteArray manPageName;
+   QString pageName;
+   QString manPageName;
 
    pageName    = escapeCharsInString(name(), false, true);
    manPageName = escapeCharsInString(name(), true, true);

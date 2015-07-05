@@ -62,10 +62,10 @@ struct LookupInfo {
    QByteArray   resolvedType;
 };
 
-class StringDict : public QHash<QString, QByteArray>
+class StringDict : public QHash<QString, QString>
 {
  public:
-   StringDict() : QHash<QString, QByteArray>() 
+   StringDict() : QHash<QString, QString>() 
    {}
 
    virtual ~StringDict()

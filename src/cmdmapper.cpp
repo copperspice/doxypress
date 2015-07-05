@@ -222,9 +222,9 @@ Mapper::Mapper(const CommandMap *cm, bool caseSensitive) : m_cs(caseSensitive)
    }
 }
 
-int Mapper::map(const char *n)
+int Mapper::map(const QString &n)
 {
-   QByteArray name = n;
+   QString name = n;
 
    if (! m_cs) {
       name = name.toLower();

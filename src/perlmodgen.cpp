@@ -1593,7 +1593,7 @@ static void addPerlModDocBlock(PerlModOutput &output, const char *name, const QB
       output.addField(name).add("{}");
 
    } else {
-      DocNode *root = validatingParseDoc(fileName, lineNr, scope, md, stext, false, 0);
+      DocNode *root = validatingParseDoc(fileName, lineNr, scope, md, stext, false, "");
       output.openHash(name);
 
       PerlModDocVisitor *visitor = new PerlModDocVisitor(output);

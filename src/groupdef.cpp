@@ -42,7 +42,7 @@
 #include <searchindex.h>
 #include <util.h>
 
-GroupDef::GroupDef(const char *df, int dl, const char *na, const char *t, QString refFileName) 
+GroupDef::GroupDef(const QString &df, int dl, const QString &na, const QString &t, QString refFileName) 
                   : Definition(df, dl, 1, na)
 {   
    classSDict     = new ClassSDict();   
@@ -86,9 +86,9 @@ GroupDef::~GroupDef()
    delete memberGroupSDict; 
 }
 
-void GroupDef::setGroupTitle( const char *t )
+void GroupDef::setGroupTitle(const QString &t)
 {
-   if ( t && qstrlen(t) ) {
+   if ( ! t.isEmpty() ) {
       m_title  = t;
       titleSet = true;
 
@@ -714,7 +714,7 @@ void GroupDef::writeBriefDescription(OutputList &ol)
 
    if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), 
-                                             briefDescription(), true, false, 0, true, false);
+                                             briefDescription(), true, false, "", true, false);
 
       if (rootNode && !rootNode->isEmpty()) {
          ol.startParagraph();

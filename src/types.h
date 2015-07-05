@@ -18,8 +18,6 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include <QByteArray>
-
 /** @file
  *  @brief This file contains a number of basic enums and types.
  */
@@ -85,15 +83,16 @@ struct Grouping {
       return "???";
    }
 
-   Grouping( const char *gn, GroupPri_t p ) : groupname(gn), pri(p) {}
+   Grouping( const QString &gn, GroupPri_t p ) : groupname(gn), pri(p) {}
    Grouping( const Grouping &g ) : groupname(g.groupname), pri(g.pri) {}
-   QByteArray groupname;   //!< name of the group
+
+   QString groupname;   //!< name of the group
    GroupPri_t pri;         //!< priority of this definition
 
 };
 
 struct ListItemInfo {
-   QByteArray type;
+   QString type;
    int itemId;
 };
 

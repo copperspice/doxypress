@@ -18,7 +18,6 @@
 #ifndef DOCBOOKDOCVISITOR_H
 #define DOCBOOKDOCVISITOR_H
 
-#include <QByteArray>
 #include <QStack>
 #include <QTextStream>
 
@@ -135,17 +134,17 @@ class DocbookDocVisitor : public DocVisitor
  private:
 
    void filter(const QString &str);
-   void startLink(const QByteArray &file, const QByteArray &anchor);
+   void startLink(const QString &file, const QString &anchor);
    void endLink();
    void pushEnabled();
    void popEnabled();
-   void startMscFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
+   void startMscFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endMscFile(bool hasCaption);
   
-   void startDiaFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
+   void startDiaFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endDiaFile(bool hasCaption);
   
-   void startDotFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
+   void startDotFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endDotFile(bool hasCaption);
 
    void writeDotFile(const QString &fileName);
@@ -158,7 +157,7 @@ class DocbookDocVisitor : public DocVisitor
    bool m_insidePre;
    bool m_hide;
    QStack<bool> m_enabled;
-   QByteArray m_langExt;
+   QString m_langExt;
 };
 
 #endif

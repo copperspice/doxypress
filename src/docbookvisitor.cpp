@@ -39,10 +39,7 @@ DocbookDocVisitor::DocbookDocVisitor(QTextStream &t, CodeOutputInterface &ci)
 {
 }
 
-//--------------------------------------
 // visitor functions for leaf nodes
-//--------------------------------------
-
 void DocbookDocVisitor::visit(DocWord *w)
 {
    if (m_hide) {
@@ -56,6 +53,7 @@ void DocbookDocVisitor::visit(DocLinkedWord *w)
    if (m_hide) {
       return;
    }
+
    startLink(w->file(), w->anchor());
    filter(w->word());
    endLink();
@@ -227,7 +225,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          QString baseName;       
          QString tempStr = Config::getString("docbook-output") + "/inline_dotgraph_";
 
-         QByteArray stext = s->text();
+         QString stext = s->text();
 
          m_t << "<para>" << endl;
 
@@ -240,7 +238,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
             err("Could not open file %s.msc for writing\n", baseName.data());
          }
 
-         file.write( stext, stext.length() );
+         file.write( stext.toUtf8() );
          file.close();
 
          m_t << "    <figure>" << endl;
@@ -263,7 +261,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          QString baseName;   
          QString tempStr = Config::getString("docbook-output") + "/inline_mscgraph_";
 
-         QByteArray stext = s->text();
+         QString stext = s->text();
 
          m_t << "<para>" << endl;
          
@@ -276,10 +274,10 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
             err("Could not open file %s.msc for writing\n", baseName.data());
          }
 
-         QByteArray text = "msc {";
+         QString text = "msc {";
          text += stext;
          text += "}";
-         file.write( text, text.length() );
+         file.write( text.toUtf8() );
          file.close();
 
          m_t << "    <figure>" << endl;
@@ -447,7 +445,7 @@ void DocbookDocVisitor::visit(DocCite *cite)
    if (m_hide) {
       return;
    }
-   if (!cite->file().isEmpty()) {
+   if (! cite->file().isEmpty()) {
       startLink(cite->file(), cite->anchor());
    }
    filter(cite->text());
@@ -954,12 +952,12 @@ void DocbookDocVisitor::visitPost(DocImage *img)
          return;
       }
 
-      QByteArray typevar;
+      QString typevar;
       m_t << "</title>" << endl;
       m_t << "    <mediaobject>" << endl;
       m_t << "        <imageobject>" << endl;
 
-      QByteArray baseName = img->name();
+      QString baseName = img->name();
       int i;
 
       if ((i = baseName.lastIndexOf('/')) != -1 || (i = baseName.lastIndexOf('\\')) != -1) {
@@ -986,7 +984,7 @@ void DocbookDocVisitor::visitPost(DocImage *img)
       m_t << "    </figure>" << endl;
       // copy the image to the output dir
 
-      QByteArray m_file;
+      QString m_file;
       bool ambig;
 
       QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::imageNameDict, baseName, ambig);
@@ -1324,7 +1322,7 @@ void DocbookDocVisitor::filter(const QString &str)
    m_t << convertToXML(str);
 }
 
-void DocbookDocVisitor::startLink(const QByteArray &file, const QByteArray &anchor)
+void DocbookDocVisitor::startLink(const QString &file, const QString &anchor)
 {
    m_t << "<link linkend=\"" << file;
    if (!anchor.isEmpty()) {
@@ -1385,7 +1383,7 @@ void DocbookDocVisitor::writePlantUMLFile(const QString &baseName)
    m_t << "</imagedata>" << endl;
 }
 
-void DocbookDocVisitor::startMscFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption)
+void DocbookDocVisitor::startMscFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
 {
    QString baseName = fileName;
    int i;
@@ -1466,7 +1464,7 @@ void DocbookDocVisitor::writeDiaFile(const QString &baseName)
    m_t << "</imagedata>" << endl;
 }
 
-void DocbookDocVisitor::startDiaFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height,
+void DocbookDocVisitor::startDiaFile(const QString &fileName, const QString &width, const QString &height,
                                      bool hasCaption )
 {
    QString baseName = fileName;
@@ -1543,7 +1541,7 @@ void DocbookDocVisitor::writeDotFile(const QString &baseName)
    m_t << "</imagedata>" << endl;
 }
 
-void DocbookDocVisitor::startDotFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption)
+void DocbookDocVisitor::startDotFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
 {
    QString baseName = fileName;
    int i;

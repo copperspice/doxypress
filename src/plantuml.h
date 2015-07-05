@@ -29,7 +29,7 @@ enum PlantUMLOutputFormat { PUML_BITMAP, PUML_EPS, PUML_SVG };
  *  @param[in] content  the contents of the PlantUML file.
  *  @returns The name of the generated file.
  */
-QByteArray writePlantUMLSource(const QString &outDir, const QString &fileName, const QByteArray &content);
+QString writePlantUMLSource(const QString &outDir, const QString &fileName, const QString &content);
 
 /** Convert a PlantUML file to an image.
  *  @param[in] baseName the name of the generated file (as returned by writePlantUMLSource())

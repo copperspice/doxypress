@@ -50,7 +50,7 @@ class Definition_Private
    Definition_Private();
    ~Definition_Private();
 
-   void init(const char *df, const char *n);
+   void init(const QString &df, const QString &n);
 
    SectionDict *sectionDict;                          // dictionary of all sections
    QList<QSharedPointer <SectionInfo>> sectionList;   // list of sections, definiton order
@@ -66,13 +66,13 @@ class Definition_Private
    BriefInfo *brief;      // not exported
    BodyInfo  *body;       // not exported
 
-   QByteArray   briefSignatures;
-   QByteArray   docSignatures;
+   QString briefSignatures;
+   QString docSignatures;
 
    QString localName;      // local (unqualified) name of the definition
    
    QString qualifiedName;
-   QByteArray ref;         // reference to external documentation
+   QString ref;            // reference to external documentation
 
    bool hidden;
    bool isArtificial;
@@ -80,12 +80,12 @@ class Definition_Private
    QSharedPointer<Definition> outerScope;  
 
    // where the item was found
-   QByteArray defFileName;
-   QByteArray defFileExt;
+   QString defFileName;
+   QString defFileExt;
 
    SrcLangExt lang;
 
-   QByteArray id; // clang unique id
+   QString id; // clang unique id
 };
 
 Definition_Private::Definition_Private()
@@ -107,7 +107,7 @@ Definition_Private::~Definition_Private()
    delete inbodyDocs;
 }
 
-void Definition_Private::init(const char *df, const char *n)
+void Definition_Private::init(const QString &df, const QString &n)
 {
    defFileName = df;
    int lastDot = defFileName.lastIndexOf('.');
@@ -140,7 +140,7 @@ void Definition_Private::init(const char *df, const char *n)
    lang            = SrcLangExt_Unknown;
 }
 
-static bool matchExcludedSymbols(const char *name)
+static bool matchExcludedSymbols(const QString &name)
 {
    static const QStringList exclSyms = Config::getList("exclude-symbols");
 
@@ -149,7 +149,7 @@ static bool matchExcludedSymbols(const char *name)
       return false;   
    }
 
-   QByteArray symName = name;
+   QString symName = name;
 
    for (auto pattern : exclSyms) {          
 
@@ -177,8 +177,8 @@ static bool matchExcludedSymbols(const char *name)
             int sl = symName.length();
 
             // check if it is a whole word match
-            if ((i == 0 || pattern.at(0) == '*' || (! isId(symName.at(i - 1))  && ! forceStart)) &&
-                  (i + pl == sl || pattern.at(i + pl) == '*' || (! isId(symName.at(i + pl)) && ! forceEnd)) ) {             
+            if ((i == 0 || pattern.at(0) == '*' || (! isId(symName.at(i - 1).unicode())  && ! forceStart)) &&
+                  (i + pl == sl || pattern.at(i + pl) == '*' || (! isId(symName.at(i + pl).unicode()) && ! forceEnd)) ) {      
                return true;
             }
          }
@@ -193,7 +193,8 @@ static bool matchExcludedSymbols(const char *name)
             int sl = symName.length();
 
             // check if it is a whole word match
-            if ((i == 0  || (! isId(symName.at(i - 1))  && ! forceStart)) && (i + pl == sl || (!isId(symName.at(i + pl)) && !forceEnd)) ) {               
+            if ((i == 0  || (! isId(symName.at(i - 1).unicode())  && ! forceStart)) && (i + pl == sl || 
+                     (! isId(symName.at(i + pl).unicode()) && ! forceEnd)) ) {               
                return true;
             }
          }
@@ -203,9 +204,9 @@ static bool matchExcludedSymbols(const char *name)
    return false;
 }
 
-void Definition::addToMap(const QByteArray &name)
+void Definition::addToMap(const QString &name)
 {   
-   QByteArray symbolName = name;
+   QString symbolName = name;
    int index = computeQualifiedIndex(symbolName);
 
    if (index != -1) {
@@ -218,7 +219,7 @@ void Definition::addToMap(const QByteArray &name)
    }
 }
 
-Definition::Definition(const char *df, int dl, int dc, const char *name, const char *b, const char *d, bool isSymbol)
+Definition::Definition(const QString &df, int dl, int dc, const QString &name, const QString &b, const QString &d, bool isSymbol)
 {
    m_name      = name;
    m_defLine   = dl;
@@ -344,19 +345,20 @@ Definition::~Definition()
    }
 }
 
-void Definition::setName(const char *name)
+void Definition::setName(const QString &name)
 {
-   if (name == 0) {
+   if (name.isEmpty()) {
       return;
    }
+
    m_name = name;
 }
 
-void Definition::setId(const char *id)
+void Definition::setId(const QString &id)
 {
    QSharedPointer<Definition> self = sharedFrom(this);
 
-   if (id == 0) {
+   if (id.isEmpty()) {
       return;
    }
   
@@ -364,7 +366,7 @@ void Definition::setId(const char *id)
    Doxy_Globals::clangUsrMap.insert(id, self);
 }
 
-QByteArray Definition::id() const
+QString Definition::id() const
 {
    return m_private->id;
 }
@@ -479,15 +481,15 @@ void Definition::writeDocAnchorsToTagFile(QTextStream &tagFile)
    
 }
 
-bool Definition::_docsAlreadyAdded(const QByteArray &doc, QByteArray &sigList)
+bool Definition::_docsAlreadyAdded(const QString &doc, QString &sigList)
 {  
    // to avoid mismatches due to differences in indenting, we first remove
    // double whitespaces...
 
-   QByteArray docStr = doc.simplified();
+   QString docStr = doc.simplified();
 
-   QByteArray sigStr;
-   sigStr = QCryptographicHash::hash(docStr, QCryptographicHash::Md5).toHex();  
+   QString sigStr;
+   sigStr = QCryptographicHash::hash(docStr.toUtf8(), QCryptographicHash::Md5).toHex();  
 
    if (sigList.indexOf(sigStr) == -1) { 
       // new docs, add signature to prevent re-adding it
@@ -500,11 +502,10 @@ bool Definition::_docsAlreadyAdded(const QByteArray &doc, QByteArray &sigList)
    }
 }
 
-void Definition::_setDocumentation(const QByteArray  &tDoc, const QByteArray &docFile, int docLine,
+void Definition::_setDocumentation(const QString &tDoc, const QString &docFile, int docLine, 
                                    bool stripWhiteSpace, bool atTop)
 {
-
-   QByteArray doc = tDoc;
+   QString doc = tDoc;
 
    if (doc.isEmpty()) {
       return;
@@ -546,53 +547,31 @@ void Definition::_setDocumentation(const QByteArray  &tDoc, const QByteArray &do
    }
 }
 
-void Definition::setDocumentation(const char *d, const char *docFile, int docLine, bool stripWhiteSpace)
+void Definition::setDocumentation(const QString &d, const QString &docFile, int docLine, bool stripWhiteSpace)
 {
-   if (d == 0) {
+   if (d.isEmpty()) {
       return;
    }
 
    _setDocumentation(d, docFile, docLine, stripWhiteSpace, false);
 }
 
-#define uni_isupper(c) (QChar(c).category()==QChar::Letter_Uppercase)
-
-// do a UTF-8 aware search for the last real character and return true
-// if that is a multibyte one.
-static bool lastCharIsMultibyte(const QByteArray &s)
-{
-   int l = s.length();
-   int p = 0;
-   int pp = -1;
-
-   while ((p = nextUtf8CharPosition(s, l, p)) < l) {
-      pp = p;
-   }
-
-   if (pp == -1 || ((uchar)s[pp]) < 0x80) {
-      return false;
-   }
-
-   return true;
-}
-
-void Definition::_setBriefDescription(const char *b, const char *briefFile, int briefLine)
+void Definition::_setBriefDescription(const QString &b, const QString &briefFile, int briefLine)
 {
    static QString outputLanguage = Config::getEnum("output-language");
    static bool needsDot = (outputLanguage != "Japanese" && outputLanguage != "Chinese" && outputLanguage != "Korean");
 
-   QByteArray brief = b;
-   brief = brief.trimmed();
-
+   QString brief = b.trimmed();
+  
    if (brief.isEmpty()) {
       return;
    }
-
-   int bl = brief.length();
-
-   if (bl > 0 && needsDot) { 
+  
+   if (needsDot) { 
       // add punctuation if needed
-      int c = brief.at(bl - 1);
+
+      int len = brief.length();
+      int c   = brief.at(len - 1).unicode();
 
       switch (c) {
          case '.':
@@ -604,16 +583,17 @@ void Definition::_setBriefDescription(const char *b, const char *briefFile, int 
             break;
 
          default:
-            if (uni_isupper(brief.at(0)) && ! lastCharIsMultibyte(brief)) {
+            // may need to test for multi-byte char at end
+            if ( brief.at(0).isUpper()) {
                brief += '.';
             }
             break;
       }
    }
 
-   if (!_docsAlreadyAdded(brief, m_private->briefSignatures)) {
+   if (! _docsAlreadyAdded(brief, m_private->briefSignatures)) {
 
-      if (m_private->brief && !m_private->brief->doc.isEmpty()) {         
+      if (m_private->brief && ! m_private->brief->doc.isEmpty()) {         
          _setDocumentation(brief, briefFile, briefLine, false, true);
 
       } else {
@@ -631,72 +611,75 @@ void Definition::_setBriefDescription(const char *b, const char *briefFile, int 
             m_private->brief->file = briefFile;
             m_private->brief->line = 1;
          }
-      }
-   } else {
-      //printf("do nothing!\n");
+      }  
    }
 }
 
-void Definition::setBriefDescription(const char *b, const char *briefFile, int briefLine)
+void Definition::setBriefDescription(const QString &b, const QString &briefFile, int briefLine)
 {
-   if (b == 0) {
+   if (b.isEmpty()) {
       return;
    }
    _setBriefDescription(b, briefFile, briefLine);
 }
 
-void Definition::_setInbodyDocumentation(const char *doc, const char *inbodyFile, int inbodyLine)
+void Definition::_setInbodyDocumentation(const QString &doc, const QString &inbodyFile, int inbodyLine)
 {
-   if (m_private->inbodyDocs == 0) {
+   if (m_private->inbodyDocs) {
       m_private->inbodyDocs = new DocInfo;
    }
-   if (m_private->inbodyDocs->doc.isEmpty()) { // fresh inbody docs
+
+   if (m_private->inbodyDocs->doc.isEmpty()) { 
+      // fresh inbody docs
       m_private->inbodyDocs->doc  = doc;
       m_private->inbodyDocs->file = inbodyFile;
       m_private->inbodyDocs->line = inbodyLine;
-   } else { // another inbody documentation fragment, append this to the end
-      m_private->inbodyDocs->doc += QByteArray("\n\n") + doc;
+
+   } else { 
+      // another inbody documentation fragment, append this to the end
+      m_private->inbodyDocs->doc += "\n\n" + doc;
    }
 }
 
-void Definition::setInbodyDocumentation(const char *d, const char *inbodyFile, int inbodyLine)
+void Definition::setInbodyDocumentation(const QString &d, const QString &inbodyFile, int inbodyLine)
 {
-   if (d == 0) {
+   if (d.isEmpty()) {
       return;
    }
+
    _setInbodyDocumentation(d, inbodyFile, inbodyLine);
 }
 
 /*! Reads a fragment of code from file \a fileName starting at
  * line \a startLine and ending at line \a endLine (inclusive). The fragment is
- * stored in \a result. If false is returned the code fragment could not be
- * found.
+ * stored in \a result. If false is returned the code fragment could not be found
  *
  * The file is scanned for a opening bracket ('{') from \a startLine onward
  * The line actually containing the bracket is returned via startLine.
  * The file is scanned for a closing bracket ('}') from \a endLine backward.
  * The line actually containing the bracket is returned via endLine.
- * Note that for VHDL code the bracket search is not done.
  */
-bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteArray &result)
+bool readCodeFragment(const QString &fileName, int &startLine, int &endLine, QString &result)
 {
    static bool filterSourceFiles = Config::getBool("filter-source-files");
    static int tabSize = Config::getInt("tab-size");
    
-   if (fileName == 0 || fileName[0] == 0) {
+   if (fileName.isEmpty()) {
       return false;   // not a valid file name
    }
+
+   QByteArray tempResult;
 
    QString filter = getFileFilter(fileName, true);
 
    FILE *f = 0;
-   bool usePipe = !filter.isEmpty() && filterSourceFiles;
+   bool usePipe = ! filter.isEmpty() && filterSourceFiles;
 
    SrcLangExt lang = getLanguageFromFileName(fileName);
 
    if (! usePipe) { 
       // no filter given or wanted
-      f = fopen(fileName, "r");
+      f = fopen(fileName.toUtf8(), "r");
 
    } else { 
       // use filter
@@ -728,7 +711,7 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
          // skip until the opening bracket or lonely : is found
          char cn = 0;
 
-         while (lineNr <= endLine && ! feof(f) && !found) {
+         while (lineNr <= endLine && ! feof(f) && ! found) {
             int pc = 0;
 
             while ((c = fgetc(f)) != '{' && c != ':' && c != EOF) {
@@ -782,24 +765,26 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
          }
          
          if (found) {
-            // For code with more than one line,
-            // fill the line with spaces until we are at the right column
-            // so that the opening brace lines up with the closing brace
+            // For code with more than one line, fill the line with spaces until we are 
+            // at the right column so that the opening brace lines up with the closing brace
+
             if (endLine != startLine) {
-               QByteArray spaces;
+               QString spaces;
                spaces.fill(' ', col);
-               result += spaces;
+
+               tempResult += spaces;
             }
 
             // copy until end of line            
             if (c) {
-               result += c;
+               tempResult += c;
             }
 
             startLine = lineNr;
 
             if (c == ':') {
-               result += cn;
+               tempResult += cn;
+
                if (cn == '\n') {
                   lineNr++;
                }
@@ -807,6 +792,7 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
 
             const int maxLineLength = 4096;
             char lineStr[maxLineLength];
+
             do {               
                int size_read;
 
@@ -821,41 +807,45 @@ bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteA
                      size_read = -1;
                      lineStr[0] = '\0';
                   }
-                  result += lineStr;
+                  tempResult += lineStr;
                } while (size_read == (maxLineLength - 1));
 
                lineNr++;
+
             } while (lineNr <= endLine && !feof(f));
 
             // strip stuff after closing bracket
-            int newLineIndex = result.lastIndexOf('\n');
-            int braceIndex   = result.lastIndexOf('}');
+            int newLineIndex = tempResult.lastIndexOf('\n');
+            int braceIndex   = tempResult.lastIndexOf('}');
 
             if (braceIndex > newLineIndex) {
-               result.truncate(braceIndex + 1);
+               tempResult.truncate(braceIndex + 1);
             }
 
             endLine = lineNr - 1;
          }
       }
+
       if (usePipe) {
          pclose(f);
          Debug::print(Debug::FilterOutput, 0, "Filter output\n");
-         Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", result.data());
+         Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", tempResult.constData());
+
       } else {
          fclose(f);
       }
    }
-   result = transcodeCharacterStringToUTF8(result);
-   //fprintf(stderr,"readCodeFragement(%d-%d)=%s\n",startLine,endLine,result.data());
+
+   result = transcodeToQString(tempResult);
+   
    return found;
 }
 
-QByteArray Definition::getSourceFileBase() const
+QString Definition::getSourceFileBase() const
 {
    assert(definitionType() != Definition::TypeFile); // file overloads this method
 
-   QByteArray fn;
+   QString fn;
    static bool sourceBrowser = Config::getBool("source-code");
 
    if (sourceBrowser && m_private->body && m_private->body->startLine != -1 && m_private->body->fileDef) {
@@ -865,10 +855,11 @@ QByteArray Definition::getSourceFileBase() const
    return fn;
 }
 
-QByteArray Definition::getSourceAnchor() const
+QString Definition::getSourceAnchor() const
 {
    const int maxAnchorStrLen = 20;
    char anchorStr[maxAnchorStrLen];
+
    if (m_private->body && m_private->body->startLine != -1) {
       if (Htags::useHtags) {
          qsnprintf(anchorStr, maxAnchorStrLen, "L%d", m_private->body->startLine);
@@ -876,16 +867,17 @@ QByteArray Definition::getSourceAnchor() const
          qsnprintf(anchorStr, maxAnchorStrLen, "l%05d", m_private->body->startLine);
       }
    }
+
    return anchorStr;
 }
 
 /*! Write a reference to the source code defining this definition */
-void Definition::writeSourceDef(OutputList &ol, const char *)
+void Definition::writeSourceDef(OutputList &ol, const QString &)
 {
    static bool latexSourceCode = Config::getBool("latex-source-code");
    ol.pushGeneratorState();
   
-   QByteArray fn = getSourceFileBase();
+   QString fn = getSourceFileBase();
 
    if (! fn.isEmpty()) {
       QString refText = theTranslator->trDefinedAtLineInSourceFile();
@@ -898,7 +890,7 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
          QString lineStr;
          lineStr = QString("%1").arg(m_private->body->startLine);
 
-         QByteArray anchorStr = getSourceAnchor();
+         QString anchorStr = getSourceAnchor();
          ol.startParagraph();
 
          if (lineMarkerPos < fileMarkerPos) { // line marker before file marker
@@ -1007,11 +999,11 @@ void Definition::writeSourceDef(OutputList &ol, const char *)
 }
 
 void Definition::setBodySegment(int bls, int ble)
-{
-   //printf("setBodySegment(%d,%d) for %s\n",bls,ble,name().data());
+{   
    if (m_private->body == 0) {
       m_private->body = new BodyInfo;
    }
+
    m_private->body->startLine = bls;
    m_private->body->endLine = ble;
 }
@@ -1031,7 +1023,7 @@ bool Definition::hasSources() const
 }
 
 /*! Write code of this definition into the documentation */
-void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
+void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
 {
    QSharedPointer<Definition> self = sharedFrom(this);
 
@@ -1039,7 +1031,7 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
    ol.pushGeneratorState();
    
    if (inlineSources && hasSources()) {
-      QByteArray codeFragment;
+      QString codeFragment;
 
       int actualStart = m_private->body->startLine, actualEnd = m_private->body->endLine;
 
@@ -1078,8 +1070,8 @@ void Definition::writeInlineCode(OutputList &ol, const char *scopeName)
 /*! Write a reference to the source code fragments in which this
  *  definition is used.
  */
-void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
-                                     const QString &text, MemberSDict *members, bool /*funcOnly*/)
+void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
+                                     const QString &text, MemberSDict *members, bool)
 {
    static bool latexSourceCode = Config::getBool("latex-source-code");
    static bool sourceBrowser   = Config::getBool("source-code");
@@ -1110,10 +1102,10 @@ void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
          QSharedPointer<MemberDef> md = iter.value();
 
          if (md) {
-            QByteArray scope = md->getScopeString();
-            QByteArray name  = md->name();
+            QString scope = md->getScopeString();
+            QString name  = md->name();
            
-            if (!scope.isEmpty() && scope != scopeName) {
+            if (! scope.isEmpty() && scope != scopeName) {
                name.prepend(scope + getLanguageSpecificSeparator(m_private->lang));
             }
 
@@ -1150,6 +1142,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
                }
                ol.docify(name);
                ol.popGeneratorState();
+
             } else if (md->isLinkable() /*&& d && d->isLinkable()*/) {
                // for HTML write a real link
                ol.pushGeneratorState();
@@ -1160,9 +1153,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
                   ol.disable(OutputGenerator::Latex);
                }
 
-               ol.writeObjectLink(md->getReference(),
-                                  md->getOutputFileBase(),
-                                  md->anchor(), name);
+               ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), name);
                ol.popGeneratorState();
 
                // for the other output formats just mention the name
@@ -1173,6 +1164,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
                }
                ol.docify(name);
                ol.popGeneratorState();
+
             } else {
                ol.docify(name);
             }
@@ -1183,17 +1175,18 @@ void Definition::_writeSourceRefList(OutputList &ol, const char *scopeName,
       ol.writeString(".");
       ol.endParagraph();
    }
+
    ol.popGeneratorState();
 }
 
-void Definition::writeSourceReffedBy(OutputList &ol, const char *scopeName)
+void Definition::writeSourceReffedBy(OutputList &ol, const QString &scopeName)
 {
    if (Config::getBool("ref-by-relation")) {
       _writeSourceRefList(ol, scopeName, theTranslator->trReferencedBy(), m_private->sourceRefByDict, false);
    }
 }
 
-void Definition::writeSourceRefs(OutputList &ol, const char *scopeName)
+void Definition::writeSourceRefs(OutputList &ol, const QString &scopeName)
 {
    if (Config::getBool("ref-relation")) {
       _writeSourceRefList(ol, scopeName, theTranslator->trReferences(), m_private->sourceRefsDict, true);
@@ -1228,8 +1221,8 @@ bool Definition::hasUserDocumentation() const
 void Definition::addSourceReferencedBy(QSharedPointer<MemberDef> md)
 {
    if (md) {
-      QByteArray name  = md->name();
-      QByteArray scope = md->getScopeString();
+      QString name  = md->name();
+      QString scope = md->getScopeString();
 
       if (!scope.isEmpty()) {
          name.prepend(scope + "::");
@@ -1247,12 +1240,12 @@ void Definition::addSourceReferencedBy(QSharedPointer<MemberDef> md)
 
 void Definition::addSourceReferences(QSharedPointer<MemberDef> md)
 {
-   QByteArray name  = md->name();
-   QByteArray scope = md->getScopeString();
+   QString name  = md->name();
+   QString scope = md->getScopeString();
 
    if (md) {
-      QByteArray name  = md->name();
-      QByteArray scope = md->getScopeString();
+      QString name  = md->name();
+      QString scope = md->getScopeString();
 
       if (!scope.isEmpty()) {
          name.prepend(scope + "::");
@@ -1342,7 +1335,6 @@ void Definition::setRefItems(const QList<ListItemInfo> *sli)
 
 void Definition::mergeRefItems(QSharedPointer<Definition> d)
 {
-   //printf("%s::mergeRefItems()\n",name().data());
    QList<ListItemInfo> *xrefList = d->xrefListItems();
 
    if (xrefList != 0) {
@@ -1359,11 +1351,11 @@ void Definition::mergeRefItems(QSharedPointer<Definition> d)
    }
 }
 
-int Definition::_getXRefListId(const char *listName) const
+int Definition::_getXRefListId(const QString &listName) const
 {
    if (m_private->xrefListItems) {     
       for (auto lii : *m_private->xrefListItems) {  
-         if (qstrcmp(lii.type, listName) == 0) {
+         if (lii.type == listName) {
             return lii.itemId;
          }
       }
@@ -1508,10 +1500,8 @@ void Definition::writeToc(OutputList &ol)
    ol.writeString("</h3>\n");
    ol.writeString("<ul>");
   
-   int level = 1;
-   int l;
-   char cs[2];
-   cs[1] = '\0';
+   int level = 1;   
+   QString cs;
 
    bool inLi[5] = { false, false, false, false };   
 
@@ -1524,12 +1514,12 @@ void Definition::writeToc(OutputList &ol)
          int nextLevel = si->type;
 
          if (nextLevel > level) {
-            for (l = level; l < nextLevel; l++) {
+            for (int l = level; l < nextLevel; l++) {
                ol.writeString("<ul>");
             }
 
          } else if (nextLevel < level) {
-            for (l = level; l > nextLevel; l--) {
+            for (int l = level; l > nextLevel; l--) {
                if (inLi[l]) {
                   ol.writeString("</li>\n");
                }
@@ -1539,18 +1529,20 @@ void Definition::writeToc(OutputList &ol)
             }
          }
 
-         cs[0] = '0' + nextLevel;
+         cs = QString::number(nextLevel);
+
          if (inLi[nextLevel]) {
             ol.writeString("</li>\n");
          }
      
-         QByteArray titleDoc = convertToHtml(si->title);
-         ol.writeString("<li class=\"level" + QByteArray(cs) + "\"><a href=\"#" + si->label + "\">" + (si->title.isEmpty() ? si->label:titleDoc) + "</a>");
+         QString titleDoc = convertToHtml(si->title);
+         ol.writeString("<li class=\"level" + cs + "\"><a href=\"#" + si->label + "\">" + (si->title.isEmpty() ? si->label : titleDoc) + "</a>");
    
          inLi[nextLevel] = true;
          level = nextLevel;
       }
    }
+
    while (level > 1) {
       if (inLi[level]) {
          ol.writeString("</li>\n");
@@ -1571,14 +1563,14 @@ void Definition::writeToc(OutputList &ol)
    ol.popGeneratorState();
 }
 
-QByteArray Definition::symbolName() const
+QString Definition::symbolName() const
 {
    return m_symbolName;
 }
 
-QByteArray Definition::documentation() const
+QString Definition::documentation() const
 {
-   return m_private->details ? m_private->details->doc : QByteArray("");
+   return m_private->details ? m_private->details->doc : "";
 }
 
 int Definition::docLine() const
@@ -1586,13 +1578,13 @@ int Definition::docLine() const
    return m_private->details ? m_private->details->line : 1;
 }
 
-QByteArray Definition::docFile() const
+QString Definition::docFile() const
 {
-   return m_private->details ? m_private->details->file : QByteArray("<" + m_name + ">");
+   return m_private->details ? m_private->details->file : "<" + m_name + ">";
 }
 
 // strips w from s if s starts with w
-static bool stripWord(QByteArray &s, QByteArray w)
+static bool stripWord(QString &s, QString w)
 {
    bool success = false;
 
@@ -1605,20 +1597,20 @@ static bool stripWord(QByteArray &s, QByteArray w)
 }
 
 // some quasi intelligent brief description abbreviator :^)
-QByteArray abbreviate(const char *s, const char *name)
+QString abbreviate(const QString &s, const QString &name)
 {
-   QByteArray scopelessName = name;
+   QString scopelessName = name;
    int i = scopelessName.lastIndexOf("::");
 
    if (i != -1) {
       scopelessName = scopelessName.mid(i + 2);
    }
 
-   QByteArray result = s;
+   QString result = s;
    result = result.trimmed();
 
    // strip trailing .
-   if (!result.isEmpty() && result.at(result.length() - 1) == '.') {
+   if (! result.isEmpty() && result.at(result.length() - 1) == '.') {
       result = result.left(result.length() - 1);
    }
 
@@ -1631,27 +1623,23 @@ QByteArray abbreviate(const char *s, const char *name)
       // replace $name with entity name
       s += " ";
 
-      stripWord(result, s.toUtf8());      
+      stripWord(result, s);      
    }
 
    // capitalize first word
-   if (! result.isEmpty()) {
-      int c = result[0];
-      if (c >= 'a' && c <= 'z') {
-         c += 'A' - 'a';
-      }
-
-      result[0] = c;
+   if (! result.isEmpty()) {  
+      result[0] = result[0].toUpper();
    }
+
    return result;
 }
 
-QByteArray Definition::briefDescription(bool abbr) const
+QString Definition::briefDescription(bool abbr) const
 {
-   return m_private->brief ? (abbr ? abbreviate(m_private->brief->doc, displayName().toUtf8()) : m_private->brief->doc) : QByteArray("");
+   return m_private->brief ? (abbr ? abbreviate(m_private->brief->doc, displayName().toUtf8()) : m_private->brief->doc) : "";
 }
 
-QByteArray Definition::briefDescriptionAsTooltip() const
+QString Definition::briefDescriptionAsTooltip() const
 {
    QSharedPointer<Definition> self = sharedFrom(this);
 
@@ -1682,7 +1670,7 @@ QByteArray Definition::briefDescriptionAsTooltip() const
       return m_private->brief->tooltip;
    }
 
-   return QByteArray("");
+   return "";
 }
 
 int Definition::briefLine() const
@@ -1690,14 +1678,14 @@ int Definition::briefLine() const
    return m_private->brief ? m_private->brief->line : 1;
 }
 
-QByteArray Definition::briefFile() const
+QString Definition::briefFile() const
 {
-   return m_private->brief ? m_private->brief->file : QByteArray("<" + m_name + ">");
+   return m_private->brief ? m_private->brief->file : "<" + m_name + ">";
 }
 
-QByteArray Definition::inbodyDocumentation() const
+QString Definition::inbodyDocumentation() const
 {
-   return m_private->inbodyDocs ? m_private->inbodyDocs->doc : QByteArray("");
+   return m_private->inbodyDocs ? m_private->inbodyDocs->doc : "";
 }
 
 int Definition::inbodyLine() const
@@ -1705,17 +1693,17 @@ int Definition::inbodyLine() const
    return m_private->inbodyDocs ? m_private->inbodyDocs->line : 1;
 }
 
-QByteArray Definition::inbodyFile() const
+QString Definition::inbodyFile() const
 {
-   return m_private->inbodyDocs ? m_private->inbodyDocs->file : QByteArray("<" + m_name + ">");
+   return m_private->inbodyDocs ? m_private->inbodyDocs->file : "<" + m_name + ">";
 }
 
-QByteArray Definition::getDefFileName() const
+QString Definition::getDefFileName() const
 {
    return m_private->defFileName;
 }
 
-QByteArray Definition::getDefFileExtension() const
+QString Definition::getDefFileExtension() const
 {
    return m_private->defFileExt;
 }
@@ -1740,7 +1728,7 @@ bool Definition::isArtificial() const
    return m_private->isArtificial;
 }
 
-QByteArray Definition::getReference() const
+QString Definition::getReference() const
 {
    return m_private->ref;
 }
@@ -1790,7 +1778,7 @@ MemberSDict *Definition::getReferencedByMembers() const
    return m_private->sourceRefByDict;
 }
 
-void Definition::setReference(const char *r)
+void Definition::setReference(const QString &r)
 {
    m_private->ref = r;
 }
@@ -1820,7 +1808,7 @@ void Definition::setLanguage(SrcLangExt lang)
    m_private->lang = lang;
 }
 
-void Definition::setSymbolName(const QByteArray &name)
+void Definition::setSymbolName(const QString &name)
 {
    m_symbolName = name;
 }

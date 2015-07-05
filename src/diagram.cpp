@@ -15,7 +15,6 @@
  *
 *************************************************************************/
 
-#include <QByteArray>
 #include <QFile>
 #include <QList>
 
@@ -39,7 +38,7 @@
 class DiagramItem
 {
  public:
-   DiagramItem(DiagramItem *p, int number, QSharedPointer<ClassDef> cd, Protection prot, Specifier virt, const char *ts);
+   DiagramItem(DiagramItem *p, int number, QSharedPointer<ClassDef> cd, Protection prot, Specifier virt, const QString &ts);
    ~DiagramItem();
 
    QString label() const;
@@ -105,7 +104,7 @@ class DiagramItem
    Protection prot;
    Specifier virt;
 
-   QByteArray templSpec;
+   QString templSpec;
    bool inList;
    QSharedPointer<ClassDef> classDef;
 };
@@ -119,7 +118,8 @@ class DiagramRow : public QList<DiagramItem *>
       level = l;      
    }
 
-   void insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, bool doBases, Protection prot, Specifier virt, const char *ts);
+   void insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, bool doBases, Protection prot, 
+                  Specifier virt, const QString &ts);
 
    uint number() {
       return level;
@@ -203,7 +203,7 @@ static uint protToColor(Protection p)
    return 0;
 }
 
-static QByteArray protToString(Protection p)
+static QString protToString(Protection p)
 {
    switch (p) {
       case Public:
@@ -292,10 +292,10 @@ static void writeVectorBox(QTextStream &t, DiagramItem *di, float x, float y, bo
 static void writeMapArea(QTextStream &t, QSharedPointer<ClassDef> cd, const QString &relPath, int x, int y, int w, int h)
 {
    if (cd->isLinkable()) {
-      QByteArray ref = cd->getReference();
+      QString ref = cd->getReference();
 
       t << "<area ";
-      if (!ref.isEmpty()) {
+      if (! ref.isEmpty()) {
          t << externalLinkTarget() << externalRef(relPath, ref, false);
       }
 
@@ -309,9 +309,9 @@ static void writeMapArea(QTextStream &t, QSharedPointer<ClassDef> cd, const QStr
 
       t << "\" ";
 
-      QByteArray tooltip = cd->briefDescriptionAsTooltip();
+      QString tooltip = cd->briefDescriptionAsTooltip();
 
-      if (!tooltip.isEmpty()) {
+      if (! tooltip.isEmpty()) {
          t << "title=\"" << tooltip << "\" ";
       }
 
@@ -321,7 +321,7 @@ static void writeMapArea(QTextStream &t, QSharedPointer<ClassDef> cd, const QStr
    }
 }
 
-DiagramItem::DiagramItem(DiagramItem *p, int number, QSharedPointer<ClassDef> cd, Protection pr, Specifier vi, const char *ts)
+DiagramItem::DiagramItem(DiagramItem *p, int number, QSharedPointer<ClassDef> cd, Protection pr, Specifier vi, const QString &ts)
 {
    parent = p;
    x = 0;
@@ -356,7 +356,7 @@ QString DiagramItem::label() const
       result = insertTemplateSpecifierInScope(n, templSpec);
 
    } else {
-      result = classDef->displayName().toUtf8();
+      result = classDef->displayName();
    }
 
    if (Config::getBool("hide-scope-names")) {
@@ -408,7 +408,8 @@ void DiagramItem::addChild(DiagramItem *di)
    children.append(di);
 }
 
-void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, bool doBases, Protection prot, Specifier virt, const char *ts)
+void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, bool doBases, Protection prot, 
+                  Specifier virt, const QString &ts)
 {
    // the visit check does not work in case of multiple inheritance of the same class
    // if (cd->visited) return; 
@@ -452,8 +453,8 @@ void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, b
       for (auto bcd : *bcl) { 
          QSharedPointer<ClassDef> ccd = bcd->classDef;
 
-         if (ccd && ccd->isVisibleInHierarchy() /*&& !ccd->visited*/) {
-            row->insertClass(di, ccd, doBases, bcd->prot, doBases ? bcd->virt : Normal, doBases ? bcd->templSpecifiers.data() : "");
+         if (ccd && ccd->isVisibleInHierarchy()) {
+            row->insertClass(di, ccd, doBases, bcd->prot, doBases ? bcd->virt : Normal, doBases ? bcd->templSpecifiers : QString("") );
          }
       }
    }
@@ -466,7 +467,7 @@ TreeDiagram::TreeDiagram(QSharedPointer<ClassDef> root, bool doBases)
    DiagramRow *row = new DiagramRow(this, 0);
    append(row);
 
-   row->insertClass(0, root, doBases, Public, Normal, 0);
+   row->insertClass(0, root, doBases, Public, Normal, QString(""));
 }
 
 TreeDiagram::~TreeDiagram()
@@ -1492,7 +1493,7 @@ void ClassDiagram::writeImage(QTextStream &t, const QString &path, const QString
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {         
-      QByteArray buffer =  image.convert();
+      QByteArray buffer = image.convert();
 
       f.write(buffer);
       f.close();

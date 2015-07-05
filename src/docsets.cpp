@@ -44,11 +44,11 @@ DocSets::~DocSets()
 void DocSets::initialize()
 {
    // get config options
-   QString projectName = Config::getString("project-name");
-   QString bundleId = Config::getString("docset-bundle-id");
-   QString feedName = Config::getString("docset-feedname");
-   QString publisherId = Config::getString("docset-publisher-id");
-   QString publisherName = Config::getString("docset-publisher-name");
+   QString projectName    = Config::getString("project-name");
+   QString bundleId       = Config::getString("docset-bundle-id");
+   QString feedName       = Config::getString("docset-feedname");
+   QString publisherId    = Config::getString("docset-publisher-id");
+   QString publisherName  = Config::getString("docset-publisher-name");
    QString projectVersion = Config::getString("project-version");
   
    // write Makefile
@@ -151,7 +151,7 @@ void DocSets::initialize()
    }
 
    // QString indexName = Config::getBool("generate-treeview") ? "main" : "index";
-   QByteArray indexName = "index";
+   QString indexName = "index";
 
    m_nts.setDevice(m_nf);
    m_nts << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
@@ -200,9 +200,9 @@ void DocSets::finalize()
    m_tf = 0;
 }
 
-QByteArray DocSets::indent()
+QString DocSets::indent()
 {
-   QByteArray result;
+   QString result;
    result.fill(' ', (m_dc + 2) * 2);
    return result;
 }
@@ -231,10 +231,10 @@ void DocSets::decContentsDepth()
    //printf("DocSets::decContentsDepth() m_dc=%d\n",m_dc);
 }
 
-void DocSets::addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
+void DocSets::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
                               bool , bool, QSharedPointer<Definition>)
 {    
-   if (ref == 0) {
+   if (! ref.isEmpty()) {
 
       if (! m_firstNode.at(m_dc - 1)) {
          m_nts << indent() << " </Node>" << endl;
@@ -245,30 +245,33 @@ void DocSets::addContentsItem(bool isDir, const QString &name, const char *ref, 
       m_nts << indent() << " <Node>" << endl;
       m_nts << indent() << "  <Name>" << convertToXML(name) << "</Name>" << endl;
 
-      if (file && file[0] == '^') { // URL marker
-         m_nts << indent() << "  <URL>" << convertToXML(&file[1])
+      if (! file.isEmpty() && file[0] == '^') { 
+         // URL marker
+         m_nts << indent() << "  <URL>" << convertToXML(file.mid(1) )
                << "</URL>" << endl;
 
-      } else { // relative file
+      } else { 
+         // relative file
          m_nts << indent() << "  <Path>";
 
-         if (file && file[0] == '!') { // user specified file
-            m_nts << convertToXML(&file[1]);
+         if (! file.isEmpty() && file[0] == '!') { 
+            // user specified file
+            m_nts << convertToXML(file.mid(1));
 
-         } else if (file) { 
+         } else if (! file.isEmpty()) { 
             // generated file
             m_nts << file << Doxy_Globals::htmlFileExtension;
          }
 
          m_nts << "</Path>" << endl;
-         if (file && anchor) {
+         if (! file.isEmpty() && ! anchor.isEmpty()) {
             m_nts << indent() << "  <Anchor>" << anchor << "</Anchor>" << endl;
          }
       }
    }
 }
 
-void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *, const char *)
+void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &, const QString &)
 {
    if (md == 0 && context == 0) {
       return;
@@ -288,12 +291,12 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
       }
    }
 
-   QByteArray scope;
-   QByteArray type;
-   QByteArray decl;
+   QString scope;
+   QString type;
+   QString decl;
 
    // determine language
-   QByteArray lang;
+   QString lang;
    SrcLangExt langExt = SrcLangExt_Cpp;
 
    if (md) {
@@ -517,12 +520,16 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
             decl = ii->includeName;
 
             if (decl.isEmpty()) {
+               // very odd code
 
                if (ii->local) {
-                  decl = QByteArray("");
+                  decl = QString("");
+
                } else {
-                  decl = QByteArray();
-               }   
+
+                  decl = QString();
+               }              
+ 
             }
          }
 
@@ -532,19 +539,19 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
       }
 
       if (! m_scopes.contains(context->getOutputFileBase())) {
-         writeToken(m_tts, context, type, lang, scope, 0, decl);
+         writeToken(m_tts, context, type, lang, scope, "", decl);
          m_scopes.insert(context->getOutputFileBase());
       }
    }
 }
 
-void DocSets::writeToken(QTextStream &t, QSharedPointer<Definition> d, const QByteArray &type, const QByteArray &lang,
-                         const char *scope, const char *anchor, const QByteArray &decl) 
+void DocSets::writeToken(QTextStream &t, QSharedPointer<Definition> d, const QString &type, const QString &lang,
+                         const QString &scope, const QString &anchor, const QString &decl) 
 {
    t << "  <Token>" << endl;
    t << "    <TokenIdentifier>" << endl;
 
-   QByteArray name = d->name();
+   QString name = d->name();
 
    if (name.right(2) == "-p") {
       name = name.left(name.length() - 2);
@@ -552,15 +559,15 @@ void DocSets::writeToken(QTextStream &t, QSharedPointer<Definition> d, const QBy
 
    t << "      <Name>" << convertToXML(name) << "</Name>" << endl;
 
-   if (!lang.isEmpty()) {
+   if (! lang.isEmpty()) {
       t << "      <APILanguage>" << lang << "</APILanguage>" << endl;
    }
 
-   if (!type.isEmpty()) {
+   if (! type.isEmpty()) {
       t << "      <Type>" << type << "</Type>" << endl;
    }
 
-   if (scope) {
+   if (! scope.isEmpty()) {
       t << "      <Scope>" << convertToXML(scope) << "</Scope>" << endl;
    }
 
@@ -568,13 +575,13 @@ void DocSets::writeToken(QTextStream &t, QSharedPointer<Definition> d, const QBy
    t << "    <Path>" << d->getOutputFileBase()
      << Doxy_Globals::htmlFileExtension << "</Path>" << endl;
 
-   if (anchor) {
+   if (! anchor.isEmpty()) {
       t << "    <Anchor>" << anchor << "</Anchor>" << endl;
    }
 
-   QByteArray tooltip = d->briefDescriptionAsTooltip();
+   QString tooltip = d->briefDescriptionAsTooltip();
 
-   if (!tooltip.isEmpty()) {
+   if (! tooltip.isEmpty()) {
       t << "    <Abstract>" << convertToXML(tooltip) << "</Abstract>" << endl;
    }
 

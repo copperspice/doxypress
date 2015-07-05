@@ -37,9 +37,9 @@ void finializeSearchIndexer();
 //------- server side search index ----------------------
 
 struct URL {
-   URL(const char *n, const char *u) : name(n), url(u) {}
-   QByteArray name;
-   QByteArray url;
+   URL(const QString &n, const QString &u) : name(n), url(u) {}
+   QString name;
+   QString url;
 };
 
 struct URLInfo {
@@ -51,19 +51,19 @@ struct URLInfo {
 class IndexWord
 {
  public:
-   IndexWord(const char *word);
+   IndexWord(const QString &word);
    void addUrlIndex(int, bool);
 
    const QHash<long, QSharedPointer<URLInfo>> &urls() const {
       return m_urls;
    }
 
-   QByteArray word() const {
+   QString word() const {
       return m_word;
    }
 
  private:
-   QByteArray m_word;
+   QString m_word;
    QHash<long, QSharedPointer<URLInfo>> m_urls;
 };
 

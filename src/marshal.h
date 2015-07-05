@@ -59,24 +59,24 @@ void marshalBriefInfo(StorageIntf *s,       BriefInfo *briefInfo);
 void marshalEntry(StorageIntf *s,           QSharedPointer<Entry> e);
 void marshalEntryTree(StorageIntf *s,       QSharedPointer<Entry> e);
 
-int                  unmarshalInt(StorageIntf *s);
-uint                 unmarshalUInt(StorageIntf *s);
-uint64_t             unmarshalUInt64(StorageIntf *s);
-bool                 unmarshalBool(StorageIntf *s);
-void                *unmarshalObjPointer(StorageIntf *s);
+int                   unmarshalInt(StorageIntf *s);
+uint                  unmarshalUInt(StorageIntf *s);
+uint64_t              unmarshalUInt64(StorageIntf *s);
+bool                  unmarshalBool(StorageIntf *s);
+void                 *unmarshalObjPointer(StorageIntf *s);
 
-QByteArray           unmarshalQByteArray(StorageIntf *s);
-QByteArray           unmarshalQGString(StorageIntf *s);
+QByteArray            unmarshalQByteArray(StorageIntf *s);
+QString               unmarshalQString(StorageIntf *s);
 
-ArgumentList        *unmarshalArgumentList(StorageIntf *s);
-QList<ArgumentList> *unmarshalArgumentLists(StorageIntf *s);
+ArgumentList         *unmarshalArgumentList(StorageIntf *s);
+QList<ArgumentList>  *unmarshalArgumentLists(StorageIntf *s);
 
-QList<BaseInfo>      unmarshalBaseInfoList(StorageIntf *s);
-QList<Grouping>     *unmarshalGroupingList(StorageIntf *s);
-QList<SectionInfo>  *unmarshalSectionInfoList(StorageIntf *s);
-QList<ListItemInfo> *unmarshalItemInfoList(StorageIntf *s);
+QList<BaseInfo>       unmarshalBaseInfoList(StorageIntf *s);
+QList<Grouping>      *unmarshalGroupingList(StorageIntf *s);
+QList<SectionInfo>   *unmarshalSectionInfoList(StorageIntf *s);
+QList<ListItemInfo>  *unmarshalItemInfoList(StorageIntf *s);
 
-BriefInfo           *unmarshalBriefInfo(StorageIntf *s);
+BriefInfo            *unmarshalBriefInfo(StorageIntf *s);
 
 QSharedPointer<Entry> unmarshalEntry(StorageIntf *s);
 QSharedPointer<Entry> unmarshalEntryTree(StorageIntf *s);

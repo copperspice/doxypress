@@ -26,7 +26,6 @@
 #ifndef ECLIPSEHELP_H
 #define ECLIPSEHELP_H
 
-#include <QByteArray>
 #include <QFile>
 #include <QString>
 #include <QTextStream>
@@ -54,8 +53,8 @@ class EclipseHelp : public IndexIntf
                                 const QString &anchor, bool separateIndex, bool addToNavIndex, 
                                 QSharedPointer<Definition> def) override;
   
-   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
-                     const char *title) override;
+   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
+                     const QString &title) override;
 
    virtual void addIndexFile(const QString &name) override;
    virtual void addImageFile(const QString &name) override;
@@ -68,7 +67,7 @@ class EclipseHelp : public IndexIntf
 
    QFile *m_tocfile;
    QTextStream m_tocstream;
-   QByteArray m_pathprefix;
+   QString m_pathprefix;
 
    /* -- avoid copying */
    EclipseHelp(const EclipseHelp &);
@@ -80,4 +79,4 @@ class EclipseHelp : public IndexIntf
    void openedTag();
 };
 
-#endif /* ECLIPSEHELP_H */
+#endif

@@ -37,7 +37,7 @@ class Qhp : public IndexIntf
                   bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) override;
 
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, 
-                  const char *sectionAnchor, const char *title) override;
+                  const QString &sectionAnchor, const QString &title) override;
 
    void addIndexFile(const QString &name) override;
    void addImageFile(const QString &name) override;
@@ -48,7 +48,7 @@ class Qhp : public IndexIntf
  private:
    void handlePrevSection();
    void clearPrevSection();
-   void setPrevSection(const QString &title, const char *basename, const char *anchor, int level);
+   void setPrevSection(const QString &title, const QString &basename, const QString &anchor, int level);
    void addFile(const QString &fileName);
 
    static QString getFullProjectName();
@@ -59,8 +59,8 @@ class Qhp : public IndexIntf
    QhpXmlWriter m_files;
 
    QString m_prevSectionTitle;
-   QByteArray m_prevSectionBaseName;
-   QByteArray m_prevSectionAnchor;
+   QString m_prevSectionBaseName;
+   QString m_prevSectionAnchor;
 
    int m_prevSectionLevel;
    int m_sectionLevel;

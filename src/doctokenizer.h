@@ -18,7 +18,6 @@
 #ifndef DOCTOKENIZER_H
 #define DOCTOKENIZER_H
 
-#include <QByteArray>
 #include <QList>
 
 #include <stdio.h>
@@ -73,10 +72,10 @@ struct TokenInfo {
    char unknownChar;
 
    // command token
-   QByteArray name;
+   QString name;
 
    // command text (RCS tag)
-   QByteArray text;
+   QString text;
 
    // comment blocks
 
@@ -85,14 +84,14 @@ struct TokenInfo {
    int indent;
 
    // sections
-   QByteArray sectionId;
+   QString sectionId;
 
    // simple section
-   QByteArray simpleSectName;
-   QByteArray simpleSectText;
+   QString simpleSectName;
+   QString simpleSectText;
 
    // verbatim fragment
-   QByteArray verb;
+   QString verb;
 
    // xrefitem
    int id;
@@ -103,7 +102,7 @@ struct TokenInfo {
    bool emptyTag;
 
    // whitespace
-   QByteArray chars;
+   QString chars;
 
    // url
    bool isEMailAddr;
@@ -122,8 +121,8 @@ extern FILE *doctokenizerYYin;
 const char *tokToString(int token);
 
 // operations on the scanner
-void doctokenizerYYFindSections(const char *input, QSharedPointer<Definition> d, MemberGroup *mg, const char *fileName);
-void doctokenizerYYinit(const char *input, const char *fileName);
+void doctokenizerYYFindSections(const QString &input, QSharedPointer<Definition> d, MemberGroup *mg, const QString &fileName);
+void doctokenizerYYinit(const QString &input, const QString &fileName);
 void doctokenizerYYcleanup();
 void doctokenizerYYpushContext();
 bool doctokenizerYYpopContext();
@@ -154,7 +153,7 @@ void doctokenizerYYsetStateText();
 void doctokenizerYYsetStateSkipTitle();
 void doctokenizerYYsetStateAnchor();
 void doctokenizerYYsetInsidePre(bool b);
-void doctokenizerYYpushBackHtmlTag(const char *tag);
+void doctokenizerYYpushBackHtmlTag(const QString &tag);
 void doctokenizerYYsetStateSnippet();
 void doctokenizerYYstartAutoList();
 void doctokenizerYYendAutoList();

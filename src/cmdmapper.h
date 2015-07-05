@@ -201,7 +201,7 @@ class Mapper
  public:   
    Mapper(const CommandMap *cm, bool caseSensitive);
 
-   int map(const char *n);
+   int map(const QString &n);
 
  private:
    QHash<QString, int> m_map;

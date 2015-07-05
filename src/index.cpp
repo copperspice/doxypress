@@ -269,7 +269,7 @@ static void endQuickIndexItem(OutputList &ol)
 
 // don't make this static as it is called from a template function and some
 // old compilers don't support calls to static functions from a template.
-QByteArray fixSpaces(const QByteArray &s)
+QString fixSpaces(const QString &s)
 {
    return substitute(s, " ", "&#160;");
 }
@@ -317,7 +317,7 @@ void startFile(OutputList &ol, const QString &name, const QString &manName, cons
    ol.writeSearchInfo();
 }
 
-void endFile(OutputList &ol, bool skipNavIndex, bool skipEndContents, const QByteArray &navPath)
+void endFile(OutputList &ol, bool skipNavIndex, bool skipEndContents, const QString &navPath)
 {
    static bool generateTreeView = Config::getBool("generate-treeview");
    ol.pushGeneratorState();
@@ -342,7 +342,7 @@ void endFileWithNavPath(QSharedPointer<Definition> d, OutputList &ol)
 {
    static bool generateTreeView = Config::getBool("generate-treeview");
 
-   QByteArray navPath;
+   QString navPath;
 
    if (generateTreeView) {
       ol.pushGeneratorState();
@@ -356,7 +356,7 @@ void endFileWithNavPath(QSharedPointer<Definition> d, OutputList &ol)
 }
 
 template<class T>
-void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part, const QString &name, const QByteArray &anchor,
+void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part, const QString &name, const QString &anchor,
                        bool addToIndex = true, bool preventSeparateIndex = false)
 {
    bool hasMembers = def->getMemberLists().count() > 0 || def->getMemberGroupSDict() != 0;
@@ -648,8 +648,8 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
 
             doc = fileVisibleInIndex(fd, src);  
 
-            QByteArray reference;
-            QByteArray outputBase;
+            QString reference;
+            QString outputBase;
 
             if (doc) {
                reference  = fd->getReference();
@@ -683,7 +683,7 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
             doc = fileVisibleInIndex(fd, src);
 
             if (doc) {
-               addMembersToIndex(fd, LayoutDocManager::File, fd->displayName(), QByteArray(), true);
+               addMembersToIndex(fd, LayoutDocManager::File, fd->displayName(), QString(), true);
 
             } else if (src) {
                Doxy_Globals::indexList->addContentsItem(false, convertToHtml(fd->name(), true), 0, fd->getSourceFileBase(), 0, false, true, fd);
@@ -733,8 +733,8 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
                bool src;
 
                doc = fileVisibleInIndex(fd, src);
-               QByteArray reference;
-               QByteArray outputBase;
+               QString reference;
+               QString outputBase;
 
                if (doc) {
                   reference = fd->getReference();
@@ -747,7 +747,7 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
 
                if (addToIndex) {
                   if (doc) {
-                     addMembersToIndex(fd, LayoutDocManager::File, fd->displayName(), QByteArray(), true);
+                     addMembersToIndex(fd, LayoutDocManager::File, fd->displayName(), QString(), true);
 
                   } else if (src) {
                      Doxy_Globals::indexList->addContentsItem(false, convertToHtml(fd->name(), true), 0,
@@ -960,7 +960,7 @@ static void writeHierarchicalIndex(OutputList &ol)
       FTVHelp *ftv = new FTVHelp(false);
       writeClassHierarchy(ol, ftv, addToIndex);
 
-      QByteArray outStr;
+      QString outStr;
       QTextStream t(&outStr);
 
       ftv->generateTreeViewInline(t);
@@ -1146,7 +1146,7 @@ static void writeFileIndex(OutputList &ol)
       for (auto fn : *Doxy_Globals::inputNameList ) {
          
          for (auto fd : *fn) {
-            QByteArray path = fd->getPath();
+            QString path = fd->getPath();
 
             if (path.isEmpty()) {
                path = "[external]";
@@ -1199,7 +1199,7 @@ static void writeFileIndex(OutputList &ol)
 
    FTVHelp *ftv = new FTVHelp(false);
    writeDirHierarchy(ol, ftv, addToIndex);
-   QByteArray outStr;
+   QString outStr;
 
    QTextStream t(&outStr);
    ftv->generateTreeViewInline(t);
@@ -1279,8 +1279,8 @@ static void writeNamespaceTree(NamespaceSDict *nsDict, FTVHelp *ftv, bool rootOn
             bool hasChildren = namespaceHasVisibleChild(nd, showClasses);
             bool isLinkable  = nd->isLinkableInProject();
 
-            QByteArray ref;
-            QByteArray file;
+            QString ref;
+            QString file;
 
             if (isLinkable) {
                ref  = nd->getReference();
@@ -1291,7 +1291,7 @@ static void writeNamespaceTree(NamespaceSDict *nsDict, FTVHelp *ftv, bool rootOn
                ftv->addContentsItem(hasChildren, nd->localName(), ref, file, 0, false, true, nd);
 
                if (addToIndex) {
-                  Doxy_Globals::indexList->addContentsItem(hasChildren, nd->localName(), ref, file, QByteArray(),
+                  Doxy_Globals::indexList->addContentsItem(hasChildren, nd->localName(), ref, file, QString(),
                                                       hasChildren && ! file.isEmpty(), addToIndex, nd);
                }
 
@@ -1401,7 +1401,7 @@ static void writeNamespaceIndex(OutputList &ol)
       FTVHelp *ftv = new FTVHelp(false);
       writeNamespaceTree(Doxy_Globals::namespaceSDict, ftv, true, false, addToIndex);
 
-      QByteArray outStr;
+      QString outStr;
       QTextStream t(&outStr);
       ftv->generateTreeViewInline(t);
       ol.writeString(outStr);
@@ -1478,7 +1478,7 @@ static void writeAnnotatedClassList(OutputList &ol)
    ol.endIndexList();
 }
 
-static QByteArray letterToLabel(uint startLetter)
+static QString letterToLabel(uint startLetter)
 {
    char s[11]; // max 0x12345678 + '\0'
 
@@ -1534,8 +1534,8 @@ class PrefixIgnoreClassList : public SortedList<QSharedPointer<ClassDef>>
 
  private:
    static bool compareListValues(const QSharedPointer<ClassDef> c1, const QSharedPointer<ClassDef> c2) {
-      QByteArray n1 = c1->className();
-      QByteArray n2 = c2->className();
+      QString n1 = c1->className();
+      QString n2 = c2->className();
 
       int i = qstricmp (n1.data() + getPrefixIndex(n1), n2.data() + getPrefixIndex(n2));
 
@@ -1616,7 +1616,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
    }
   
    // write quick link index (row of letters)
-   QByteArray alphaLinks = "<div class=\"qindex\">";
+   QString alphaLinks = "<div class=\"qindex\">";
  
    for (auto pLetter : indexLettersUsed) {
       if (headerItems) {
@@ -1624,10 +1624,10 @@ static void writeAlphabeticalClassList(OutputList &ol)
       }
 
       headerItems++;
-      QByteArray li = letterToLabel(pLetter);
-      QByteArray ls = QString(QChar(pLetter)).toUtf8();
+      QString li = letterToLabel(pLetter);
+      QString ls = QChar(pLetter);
 
-      alphaLinks += (QByteArray)"<a class=\"qindex\" href=\"#letter_" + li + "\">" + ls + "</a>";
+      alphaLinks += "<a class=\"qindex\" href=\"#letter_" + li + "\">" + ls + "</a>";
    }
 
    alphaLinks += "</div>\n";
@@ -1734,7 +1734,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
             if (cell->row() == i) {
 
                if (cell->letter() != 0) {
-                  QByteArray s = letterToLabel(cell->letter());
+                  QString s = letterToLabel(cell->letter());
 
                   ol.writeString("<td rowspan=\"2\" valign=\"bottom\">");
                   ol.writeString("<a name=\"letter_");
@@ -1756,13 +1756,13 @@ static void writeAlphabeticalClassList(OutputList &ol)
                   QSharedPointer<ClassDef> cd = cell->classDef();
 
                   ol.writeString("<td valign=\"top\">");
-                  QByteArray namesp, cname;                   
+                  QString namesp, cname;                   
 
                   extractNamespaceName(cd->name(), cname, namesp);
-                  QByteArray nsDispName;
+                  QString nsDispName;
                   SrcLangExt lang = cd->getLanguage();
 
-                  QByteArray sep = getLanguageSpecificSeparator(lang);
+                  QString sep = getLanguageSpecificSeparator(lang);
 
                   if (sep != "::") {
                      nsDispName = substitute(namesp, "::", sep);
@@ -1905,7 +1905,7 @@ static void writeAnnotatedIndex(OutputList &ol)
       writeNamespaceTree(Doxy_Globals::namespaceSDict, ftv, true, true, addToIndex);
       writeClassTree(Doxy_Globals::classSDict, ftv, addToIndex, true);
 
-      QByteArray outStr;
+      QString outStr;
       QTextStream t(&outStr);
 
       ftv->generateTreeViewInline(t);
@@ -1976,7 +1976,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
       &writeNamespaceLinkForMember
    };
 
-   QByteArray prevName;
+   QString prevName;
    QString prevDefName;
 
    bool firstEntry   = true;
@@ -1998,10 +1998,10 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
 
          bool isFunc = ! md->isObjCMethod() && (md->isFunction() || md->isSlot() || md->isSignal());
 
-         QByteArray name = md->name();
+         QString name = md->name();
          int startIndex  = getPrefixIndex(name);
 
-         if (QByteArray(name.data() + startIndex) != prevName) { 
+         if ((name + startIndex) != prevName) { 
             // new entry
 
             if ((prevName.isEmpty() || tolower(name.at(startIndex)) != tolower(prevName.at(0))) && useSections) { 
@@ -2014,10 +2014,11 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
                   ol.endItemList();
                }
 
-               QByteArray cs = letterToLabel(ml->letter());
-               QByteArray cl = QString(QChar(ml->letter())).toUtf8();
-               QByteArray anchor = (QByteArray)"index_" + cs;
-               QByteArray title  = (QByteArray)"- " + cl + " -";
+               QString cs = letterToLabel(ml->letter());
+               QString cl = QChar(ml->letter());
+
+               QString anchor = "index_" + cs;
+               QString title  = "- " + cl + " -";
 
                ol.startSection(anchor, title, SectionInfo::Subsection);
                ol.docify(title);
@@ -2090,15 +2091,15 @@ void addClassMemberNameToIndex(MemberDef *md)
    QSharedPointer<ClassDef> cd;
 
    if (md->isLinkableInProject() && (cd = md->getClassDef())  && cd->isLinkableInProject() && cd->templateMaster() == 0) {
-      QByteArray n = md->name();
+      QString n = md->name();
 
       int index   = getPrefixIndex(n);
       uint letter = getUtf8CodeToLower(n, index);
 
       if (! n.isEmpty()) {
 
-         bool isFriendToHide = hideFriendCompounds && (QByteArray(md->typeString()) == "friend class" ||
-                                QByteArray(md->typeString()) == "friend struct" || QByteArray(md->typeString()) == "friend union");
+         bool isFriendToHide = hideFriendCompounds && (md->typeString() == "friend class" ||
+                                md->typeString() == "friend struct" || md->typeString() == "friend union");
 
          if (!(md->isFriend() && isFriendToHide) && (!md->isEnumValue() || (md->getEnumScope() && !md->getEnumScope()->isStrong()))) {
             g_memberIndexLetterUsed[CMHL_All].insertElement(letter, md);
@@ -2156,7 +2157,7 @@ void addNamespaceMemberNameToIndex(MemberDef *md)
    QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
 
    if (nd && nd->isLinkableInProject() && md->isLinkableInProject()) {
-      QByteArray n = md->name();
+      QString n = md->name();
       int index   = getPrefixIndex(n);
       uint letter = getUtf8CodeToLower(n, index);
 
@@ -2205,7 +2206,7 @@ void addFileMemberNameToIndex(MemberDef *md)
    QSharedPointer<FileDef> fd = md->getFileDef();
 
    if (fd && fd->isLinkableInProject() && md->isLinkableInProject()) {
-      QByteArray n = md->name();
+      QString n = md->name();
 
       int index   = getPrefixIndex(n);
       uint letter = getUtf8CodeToLower(n, index);
@@ -2246,18 +2247,18 @@ void addFileMemberNameToIndex(MemberDef *md)
 }
 
 static void writeQuickMemberIndex(OutputList &ol, const LetterToIndexMap<MemberIndexList> &charUsed, uint page,
-                                  QByteArray fullName, bool multiPage)
+                                  QString fullName, bool multiPage)
 {
    startQuickIndexList(ol, true);
 
    for (auto ml : charUsed) { 
       uint i = ml->letter();
 
-      QByteArray is = letterToLabel(i);
-      QByteArray ci = QString(QChar(i)).toUtf8();
+      QString is = letterToLabel(i);
+      QString ci = QChar(i);
 
-      QByteArray anchor;
-      QByteArray extension = Doxy_Globals::htmlFileExtension.toUtf8();
+      QString anchor;
+      QString extension = Doxy_Globals::htmlFileExtension;
 
       if (multiPage) {
          anchor = fullName + "_" + letterToLabel(i) + extension + "#index_";
@@ -2687,10 +2688,10 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   QByteArray extension = Doxy_Globals::htmlFileExtension.toUtf8();
+   QString extension = Doxy_Globals::htmlFileExtension;
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::NamespaceMembers);
 
-   QByteArray title = lne ? lne->title() : theTranslator->trNamespaceMembers();
+   QString title = lne ? lne->title() : theTranslator->trNamespaceMembers();
    bool addToIndex = lne == 0 || lne->visible();
 
    if (addToIndex) {
@@ -2834,7 +2835,7 @@ static void writeExampleIndex(OutputList &ol)
  
    for (auto pd : *Doxy_Globals::exampleSDict) {
       ol.startItemListItem();
-      QByteArray n = pd->getOutputFileBase();
+      QString n = pd->getOutputFileBase();
 
       if (! pd->title().isEmpty()) {
          ol.writeObjectLink(0, n, 0, pd->title());
@@ -2906,7 +2907,7 @@ static void writePages(QSharedPointer<PageDef> pd, FTVHelp *ftv)
    bool hasSections = pd->hasSections();
 
    if (pd->visibleInIndex()) {
-      QByteArray pageTitle;      
+      QString pageTitle;      
 
       if (pd->title().isEmpty()) {
          pageTitle = pd->name();
@@ -2987,7 +2988,7 @@ static void writePageIndex(OutputList &ol)
       }
    }
 
-   QByteArray outStr;
+   QString outStr;
 
    QTextStream t(&outStr);
    ftv->generateTreeViewInline(t);
@@ -3057,7 +3058,7 @@ void writeGraphInfo(OutputList &ol)
    endTitle(ol, 0, 0);
    ol.startContents();
 
-   QByteArray legendDocs = theTranslator->trLegendDocs();
+   QString legendDocs = theTranslator->trLegendDocs();
    int s = legendDocs.indexOf("<center>");
    int e = legendDocs.indexOf("</center>");
 
@@ -3331,7 +3332,7 @@ static void writeGroupIndex(OutputList &ol)
       FTVHelp *ftv = new FTVHelp(false);
       writeGroupHierarchy(ol, ftv, addToIndex);
 
-      QByteArray outStr;
+      QString outStr;
 
       QTextStream t(&outStr);
       ftv->generateTreeViewInline(t);
@@ -3552,7 +3553,7 @@ static void writeIndex(OutputList &ol)
                ol.disable(OutputGenerator::Latex);
             }
 
-            QByteArray title = pd->title();
+            QString title = pd->title();
             if (title.isEmpty()) {
                title = pd->name();
             }
@@ -3818,10 +3819,10 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
             case LayoutNavEntry::User: {
                // prepend a ! or ^ marker to the URL to avoid tampering with it
 
-               QByteArray url = correctURL(lne->url(), "!"); // add ! to relative URL
+               QString url = correctURL(lne->url(), "!"); // add ! to relative URL
                bool isRelative = url.at(0) == '!';
 
-               if (!url.isEmpty() && !isRelative) { // absolute URL
+               if (! url.isEmpty() && !isRelative) { // absolute URL
                   url.prepend("^"); // prepend ^ to absolute URL
                }
 
@@ -3830,10 +3831,12 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
             }
 
             break;
+
             case LayoutNavEntry::UserGroup:
                if (addToIndex) {
-                  QByteArray url = correctURL(lne->url(), "!"); // add ! to relative URL
-                  if (!url.isEmpty()) {
+                  QString url = correctURL(lne->url(), "!"); // add ! to relative URL
+
+                  if (! url.isEmpty()) {
                      if (url == "![none]") {
                         Doxy_Globals::indexList->addContentsItem(true, lne->title(), 0, 0, 0, false, false);
                      } else {

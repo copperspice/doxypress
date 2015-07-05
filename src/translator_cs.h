@@ -495,7 +495,7 @@ class Translator_Cs : public Translator
    }
 
    /*! this text is put before a class diagram */
-   virtual QString trClassDiagram(const char *clName) {
+   virtual QString trClassDiagram(const QString &clName) {
       return QCoreApplication::translate("doxy-text", "Inheritance diagram for %1:").arg(clName);
    }
 
@@ -576,7 +576,7 @@ class Translator_Cs : public Translator
    }  
 
    /*! used as the title of the HTML page of a class/struct/union */
-   virtual QString trCompoundReference(const char *clName, ClassDef::CompoundType compType, bool isTemplate) {                                                                                
+   virtual QString trCompoundReference(const QString &clName, ClassDef::CompoundType compType, bool isTemplate) {                                                                                
       QString result;
       
       switch (compType) {
@@ -649,12 +649,12 @@ class Translator_Cs : public Translator
    }
 
    /*! used as the title of the HTML page of a file */
-   virtual QString trFileReference(const char *fileName) {
+   virtual QString trFileReference(const QString &fileName) {
       return QCoreApplication::translate("doxy-text", "%1 File Reference").arg(fileName);
    }
 
    /*! used as the title of the HTML page of a namespace */
-   virtual QString trNamespaceReference(const char *name) {   
+   virtual QString trNamespaceReference(const QString &name) {   
       return QCoreApplication::translate("doxy-text", "%1 Namespace Reference").arg(name);
    }
 
@@ -917,12 +917,12 @@ class Translator_Cs : public Translator
    }
 
    /*! this text is put before a collaboration diagram */
-   virtual QString trCollaborationDiagram(const char *clName) {
+   virtual QString trCollaborationDiagram(const QString &clName) {
       return QCoreApplication::translate("doxy-text", "Collaboration diagram for %1:").arg(clName);
    }
 
    /*! this text is put before an include dependency graph */
-   virtual QString trInclDepGraph(const char *fName) {
+   virtual QString trInclDepGraph(const QString &fName) {
       return QCoreApplication::translate("doxy-text", "Include dependency graph for %1:").arg(fName);
    }  
 
@@ -1162,7 +1162,7 @@ class Translator_Cs : public Translator
    }
 
    /*! Used as the title of a Java package */
-   virtual QString trPackage(const char *name) {      
+   virtual QString trPackage(const QString &name) {      
       return QCoreApplication::translate("doxy-text", "Package %1").arg(name);
    }
 
@@ -1585,7 +1585,7 @@ class Translator_Cs : public Translator
    /*! This returns the title of a directory page. The name of the
     *  directory is passed via \a dirName.
     */
-   virtual QString trDirReference(const char *dirName) {    
+   virtual QString trDirReference(const QString &dirName) {    
       return QCoreApplication::translate("doxy-text", "%1 Directory Reference").arg(dirName);
    }
 
@@ -1716,7 +1716,7 @@ class Translator_Cs : public Translator
    }
 
    /*! used as the title of the HTML page of a module/type (Fortran) */
-   virtual QString trCompoundReferenceFortran(const char *clName, ClassDef::CompoundType compType,bool isTemplate) {
+   virtual QString trCompoundReferenceFortran(const QString &clName, ClassDef::CompoundType compType,bool isTemplate) {
       QString result;            
 
       switch (compType) {
@@ -1788,7 +1788,7 @@ class Translator_Cs : public Translator
       return result;
    }
    /*! used as the title of the HTML page of a module (Fortran) */
-   virtual QString trModuleReference(const char *namespaceName) {      
+   virtual QString trModuleReference(const QString &namespaceName) {      
       return QCoreApplication::translate("doxy-text", "%1 Module Reference").arg(namespaceName);
    }
 
@@ -1974,7 +1974,7 @@ class Translator_Cs : public Translator
    }
    
    /*! directory relation for \a name */
-   virtual QString trDirRelation(const char *name) {
+   virtual QString trDirRelation(const QString &name) {
       return QCoreApplication::translate("doxy-text", "%1 Relation").arg(name);
    }
 
@@ -2002,7 +2002,7 @@ class Translator_Cs : public Translator
     *  table is shown. The heading for the first column mentions the
     *  source file that has a relation to another file.
     */
-   virtual QString trFileIn(const char *name) {      
+   virtual QString trFileIn(const QString &name) {      
       return QCoreApplication::translate("doxy-text", "File in %1").arg(name);
    }
 
@@ -2010,7 +2010,7 @@ class Translator_Cs : public Translator
     *  table is shown. The heading for the second column mentions the
     *  destination file that is included.
     */
-   virtual QString trIncludesFileIn(const char *name) {     
+   virtual QString trIncludesFileIn(const QString &name) {     
       return QCoreApplication::translate("doxy-text", "Includes file in %1").arg(name);
    }
    
@@ -2025,7 +2025,7 @@ class Translator_Cs : public Translator
    }
 
    /*! Header for the graph showing the directory dependencies */
-   virtual QString trDirDepGraph(const char *name) {
+   virtual QString trDirDepGraph(const QString &name) {
       return QCoreApplication::translate("doxy-text", "Directory dependency graph for %1:").arg(name);
    }
   
@@ -2056,12 +2056,12 @@ class Translator_Cs : public Translator
    }
 
    /*! Header of a Java enum page (Java enums are represented as classes). */
-   virtual QString trEnumReference(const char *name) {      
+   virtual QString trEnumReference(const QString &name) {      
       return QCoreApplication::translate("doxy-text", "%1 Enum Reference").arg(name);
    }
 
    /*! Used for a section containing inherited members */
-   virtual QString trInheritedFrom(const char *members, const char *what) {    
+   virtual QString trInheritedFrom(const QString &members, const QString &what) {    
       return QCoreApplication::translate("doxy-text", "%1 inherited from %2").arg(members).arg(what);
    }
 
@@ -2143,17 +2143,17 @@ class Translator_Cs : public Translator
    }
 
    /** UNO IDL constant groups */
-   virtual QString trConstantGroupReference(const char *namespaceName) {
+   virtual QString trConstantGroupReference(const QString &namespaceName) {
       return QCoreApplication::translate("doxy-text", "%1 Constant Group Reference").arg(namespaceName);
    }
 
    /** UNO IDL service page title */
-   virtual QString trServiceReference(const char *sName) {
+   virtual QString trServiceReference(const QString &sName) {
       return QCoreApplication::translate("doxy-text", "%1 Service Reference").arg(sName);
    }
 
    /** UNO IDL singleton page title */
-   virtual QString trSingletonReference(const char *sName) {
+   virtual QString trSingletonReference(const QString &sName) {
       return QCoreApplication::translate("doxy-text", "%1 Singleton Reference").arg(sName);
    }
 

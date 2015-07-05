@@ -119,7 +119,7 @@ QString LayoutNavEntry::url() const
 
       if (! found) {
          QString temp = Config::getString("layout-file");
-         msg("Explicit link request to '%s' in layout file '%s' could not be resolved\n", qPrint(url.mid(5)), qPrintable(temp));
+         msg("Explicit link request to '%s' in layout file '%s' could not be resolved\n", qPrintable(url.mid(5)), qPrintable(temp));
       }
    }
   

@@ -122,7 +122,7 @@ void ClassSDict::writeDocumentation(OutputList &ol, Definition *container)
    }
 }
 
-void GenericsSDict::insert(const QByteArray &key, QSharedPointer<ClassDef> cd)
+void GenericsSDict::insert(const QString &key, QSharedPointer<ClassDef> cd)
 {
    int i = key.indexOf('<');
 
@@ -156,7 +156,7 @@ void GenericsSDict::insert(const QByteArray &key, QSharedPointer<ClassDef> cd)
    }
 }
 
-QSharedPointer<ClassDef> GenericsSDict::find(const QByteArray &key)
+QSharedPointer<ClassDef> GenericsSDict::find(const QString &key)
 {
    int i = key.indexOf('<');
 

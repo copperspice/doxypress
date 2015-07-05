@@ -51,14 +51,14 @@ ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
    for (i = 0; i < count; i++) {
       Argument a;
 
-      a.attrib  = unmarshalQByteArray(s);
-      a.type    = unmarshalQByteArray(s);
-      a.canType = unmarshalQByteArray(s);
-      a.name    = unmarshalQByteArray(s);
-      a.array   = unmarshalQByteArray(s);
-      a.defval  = unmarshalQByteArray(s);
-      a.docs    = unmarshalQByteArray(s);
-      a.typeConstraint = unmarshalQByteArray(s);
+      a.attrib  = unmarshalQString(s);
+      a.type    = unmarshalQString(s);
+      a.canType = unmarshalQString(s);
+      a.name    = unmarshalQString(s);
+      a.array   = unmarshalQString(s);
+      a.defval  = unmarshalQString(s);
+      a.docs    = unmarshalQString(s);
+      a.typeConstraint = unmarshalQString(s);
 
       result->append(a);
    }
@@ -66,7 +66,7 @@ ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
    result->constSpecifier     = unmarshalBool(s);
    result->volatileSpecifier  = unmarshalBool(s);
    result->pureSpecifier      = unmarshalBool(s);
-   result->trailingReturnType = unmarshalQByteArray(s);
+   result->trailingReturnType = unmarshalQString(s);
    result->isDeleted          = unmarshalBool(s);
 
    return result;
@@ -84,21 +84,21 @@ void ArgumentList::marshal(StorageIntf *s, ArgumentList *argList)
 
          for (auto item : *argList)  {
 
-            marshalQByteArray(s, item.attrib);
-            marshalQByteArray(s, item.type);
-            marshalQByteArray(s, item.canType);
-            marshalQByteArray(s, item.name);
-            marshalQByteArray(s, item.array);
-            marshalQByteArray(s, item.defval);
-            marshalQByteArray(s, item.docs);
-            marshalQByteArray(s, item.typeConstraint);
+            marshalQString(s, item.attrib);
+            marshalQString(s, item.type);
+            marshalQString(s, item.canType);
+            marshalQString(s, item.name);
+            marshalQString(s, item.array);
+            marshalQString(s, item.defval);
+            marshalQString(s, item.docs);
+            marshalQString(s, item.typeConstraint);
          }
       }
 
       marshalBool(s, argList->constSpecifier);
       marshalBool(s, argList->volatileSpecifier);
       marshalBool(s, argList->pureSpecifier);
-      marshalQByteArray(s, argList->trailingReturnType);
+      marshalQString(s, argList->trailingReturnType);
       marshalBool(s,argList->isDeleted);
    }
 }

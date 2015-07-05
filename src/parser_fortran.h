@@ -33,13 +33,13 @@ class FortranLanguageParser : public ParserInterface
    void startTranslationUnit(const char *) {}
    void finishTranslationUnit() {}
 
-   void parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root, 
+   void parseInput(const QString &fileName, const char *fileBuf, QSharedPointer<Entry> root, 
                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
-   bool needsPreprocessing(const QByteArray &extension);
+   bool needsPreprocessing(const QString &extension);
 
-   void parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input, SrcLangExt lang,
-                  bool isExampleBlock, const char *exampleName = 0, 
+   void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
+                  bool isExampleBlock, const QString &exampleName = QString(), 
                   QSharedPointer<FileDef> fileDef = QSharedPointer<FileDef>(),
                   int startLine = -1, int endLine = -1, bool inlineFragment = false,
                   QSharedPointer<MemberDef> memberDef = QSharedPointer<MemberDef>(), bool showLineNumbers = true,

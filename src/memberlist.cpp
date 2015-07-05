@@ -384,7 +384,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                   if (! md->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
 
                      DocRoot *rootNode = validatingParseDoc(md->briefFile(), md->briefLine(),
-                                            cd, md, md->briefDescription(), true, false, 0, true, false);
+                                            cd, md, md->briefDescription(), true, false, "", true, false);
 
                      if (rootNode && !rootNode->isEmpty()) {
                         ol.startMemberDescription(md->anchor());
@@ -478,7 +478,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
  *  @param lt              Type of list that is inherited from
  */
 void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
-                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, const char *title, const char *subtitle, 
+                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, const QString &title, const QString &subtitle, 
                   bool showEnumValues, bool showInline, QSharedPointer<ClassDef> inheritedFrom, MemberListType lt)
 {   
    QByteArray inheritId;
@@ -589,8 +589,8 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
    
 }
 
-void MemberList::writeDocumentation(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container,
-                                    const char *title, bool showEnumValues, bool showInline)
+void MemberList::writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container,
+                                    const QString &title, bool showEnumValues, bool showInline)
 {
    countDocMembers(showEnumValues); 
 
@@ -598,7 +598,7 @@ void MemberList::writeDocumentation(OutputList &ol, const char *scopeName, QShar
       return;
    }
 
-   if (title) {
+   if (! title.isEmpty()) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
       ol.writeRuler();

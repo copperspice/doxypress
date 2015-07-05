@@ -20,7 +20,7 @@
 #include <util.h>
 #include <filedef.h>
 
-MemberName::MemberName(const char *n) : QList<QSharedPointer<MemberDef>>()
+MemberName::MemberName(const QString &n) : QList<QSharedPointer<MemberDef>>()
 {
    name = n;
 }
@@ -38,17 +38,17 @@ int MemberName::compareValues(QSharedPointer<const MemberDef> m1, QSharedPointer
    QSharedPointer<FileDef> f2 = m2->getFileDef();
 
    if (c1 && c2) {
-      return qstrcmp(c1->name(), c2->name());
+      return c1->name().compare(c2->name());
 
    } else if (f1 && f2) {
-      return qstrcmp(f1->name(), f2->name());
+      return f1->name().compare(f2->name());
 
    } else {
       return 0;
    }
 }
 
-MemberNameInfo::MemberNameInfo(const char *n) : QList<MemberInfo>()
+MemberNameInfo::MemberNameInfo(const QString &n) : QList<MemberInfo>()
 {
    name = n;
 }
@@ -62,10 +62,10 @@ int MemberNameInfo::compareValues(QSharedPointer<const MemberInfo> m1, QSharedPo
    QSharedPointer<FileDef> f2 = m2->memberDef->getFileDef();
 
    if (c1 && c2) {
-      return qstrcmp(c1->name(), c2->name());
+      return c1->name().compare(c2->name());
 
    } else if (f1 && f2) {
-      return qstrcmp(f1->name(), f2->name());
+      return f1->name().compare(f2->name());
 
    } else {
       return 0;

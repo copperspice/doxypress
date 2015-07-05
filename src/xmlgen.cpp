@@ -434,7 +434,7 @@ class XMLCodeGenerator : public CodeOutputInterface
 static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, QSharedPointer<Definition> scope, 
                                       QSharedPointer<FileDef> fileScope, int indent)
 {
-   QByteArray indentStr;
+   QString indentStr;
    indentStr.fill(' ', indent);
 
    if (al) {
@@ -487,10 +487,10 @@ static void writeTemplateList(QSharedPointer<ClassDef> cd, QTextStream &t)
    writeTemplateArgumentList(cd->templateArguments(), t, cd, QSharedPointer<FileDef>(), 4);
 }
 
-static void writeXMLDocBlock(QTextStream &t, const QByteArray &fileName, int lineNr,
-                             QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md, const QByteArray &text)
+static void writeXMLDocBlock(QTextStream &t, const QString &fileName, int lineNr,
+                             QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md, const QString &text)
 {
-   QByteArray stext = text.trimmed();
+   QString stext = text.trimmed();
 
    if (stext.isEmpty()) {
       return;
@@ -530,10 +530,10 @@ void writeXMLCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
 }
 
 static void writeMemberReference(QTextStream &t, QSharedPointer<Definition> def, 
-                                 QSharedPointer<MemberDef> rmd, const char *tagName)
+                                 QSharedPointer<MemberDef> rmd, const QString &tagName)
 {
-   QByteArray scope = rmd->getScopeString();
-   QByteArray name  = rmd->name();
+   QString scope = rmd->getScopeString();
+   QString name  = rmd->name();
 
    if (!scope.isEmpty() && scope != def->name()) {
       name.prepend(scope + getLanguageSpecificSeparator(rmd->getLanguage()));
@@ -553,7 +553,7 @@ static void writeMemberReference(QTextStream &t, QSharedPointer<Definition> def,
    t << ">" << convertToXML(name) << "</" << tagName << ">" << endl;
 }
 
-static void stripQualifiers(QByteArray &typeStr)
+static void stripQualifiers(QString &typeStr)
 {
    bool done = false;
 
@@ -616,7 +616,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    // group members are only visible in their group
    // if (def->definitionType()!=Definition::TypeGroup && md->getGroupDef()) return;
 
-   QByteArray memType;
+   QString memType;
    bool isFunc = false;
 
    switch (md->memberType()) {
@@ -673,9 +673,10 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       << "_1" << md->anchor() << "\" kind=\"" << memType << "\"><name>"
       << convertToXML(md->name()) << "</name></member>" << endl;
 
-   QByteArray scopeName;
+   QString scopeName;
    if (md->getClassDef()) {
       scopeName = md->getClassDef()->name();
+
    } else if (md->getNamespaceDef()) {
       scopeName = md->getNamespaceDef()->name();
    }
@@ -948,7 +949,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          writeMemberTemplateLists(md, t);
       }
 
-      QByteArray typeStr = md->typeString(); //replaceAnonymousScopes(md->typeString());
+      QString typeStr = md->typeString(); //replaceAnonymousScopes(md->typeString());
       stripQualifiers(typeStr);
 
       t << "        <type>";
@@ -974,8 +975,8 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       }
    }
 
-   if (md->memberType() == MemberType_Variable && md->bitfieldString()) {
-      QByteArray bitfield = md->bitfieldString();
+   if (md->memberType() == MemberType_Variable && ! md->bitfieldString().isEmpty() ) {
+      QString bitfield = md->bitfieldString();
 
       if (bitfield.size() > 0 &&  bitfield.at(0) == ':') {
          bitfield = bitfield.mid(1);
@@ -1058,7 +1059,8 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          }
       }
 
-   } else if (md->memberType() == MemberType_Define && md->argsString()) { // define
+   } else if (md->memberType() == MemberType_Define && ! md->argsString().isEmpty() ) { 
+      // define
 
       if (md->argumentList()->count() == 0) // special case for "foo()" to
          // disguish it from "foo".
@@ -1079,7 +1081,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       t << "</initializer>" << endl;
    }
 
-   if (md->excpString()) {
+   if (! md->excpString().isEmpty() ) {
       t << "        <exceptions>";
       linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, md->excpString());
       t << "</exceptions>" << endl;
@@ -1558,7 +1560,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
    IncludeInfo *ii = cd->includeInfo();
 
    if (ii) {
-      QByteArray nm = ii->includeName;
+      QString nm = ii->includeName;
 
       if (nm.isEmpty() && ii->fileDef) {
          nm = ii->fileDef->docName();
@@ -2009,20 +2011,20 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
       QString title;
 
       if (! pd->title().isEmpty() && pd->title().toLower() != "notitle") {
-         title = filterTitle(convertCharEntitiesToUTF8(Doxy_Globals::mainPage->title()));
+         title = filterTitle(convertCharEntities(Doxy_Globals::mainPage->title()));
 
       } else {
          title = Config::getString("project-name");
       }
 
-      t << "    <title>" << convertToXML(convertCharEntitiesToUTF8(title.toUtf8()))
+      t << "    <title>" << convertToXML(convertCharEntities(title))
         << "</title>" << endl;
 
    } else {
       QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(pd->name());
 
       if (si) {
-         t << "    <title>" << convertToXML(convertCharEntitiesToUTF8(filterTitle(si->title)))
+         t << "    <title>" << convertToXML(convertCharEntities(filterTitle(si->title)))
            << "</title>" << endl;
       }
    }
@@ -2070,7 +2072,7 @@ void generateXML()
 
    // write compound.xsd, but replace special marker with the entities
    QByteArray compound_xsd = ResourceMgr::instance().getAsString("xml/compound.xsd");
-   const char *startLine = compound_xsd.data();
+   const char *startLine = compound_xsd.constData();
 
    while (*startLine) {
       // find end of the line

@@ -19,7 +19,7 @@
 #define ARGUMENTS_H
 
 #include <QList>
-#include <QByteArray>
+#include <QString>
 
 class StorageIntf;
 
@@ -63,14 +63,14 @@ struct Argument {
       return ! name.isEmpty() && ! docs.isEmpty();
    }
 
-   QByteArray attrib;          /*!< Argument's attribute (IDL only) */
-   QByteArray type;            /*!< Argument's type */
-   QByteArray canType;         /*!< Cached value of canonical type (after type resolution). Empty initially. */
-   QByteArray name;            /*!< Argument's name (may be empty) */
-   QByteArray array;           /*!< Argument's array specifier (may be empty) */
-   QByteArray defval;          /*!< Argument's default value (may be empty) */
-   QByteArray docs;            /*!< Argument's documentation (may be empty) */
-   QByteArray typeConstraint;  /*!< Used for Java generics: <T extends C> */
+   QString attrib;          /*!< Argument's attribute (IDL only) */
+   QString type;            /*!< Argument's type */
+   QString canType;         /*!< Cached value of canonical type (after type resolution). Empty initially. */
+   QString name;            /*!< Argument's name (may be empty) */
+   QString array;           /*!< Argument's array specifier (may be empty) */
+   QString defval;          /*!< Argument's default value (may be empty) */
+   QString docs;            /*!< Argument's documentation (may be empty) */
+   QString typeConstraint;  /*!< Used for Java generics: <T extends C> */
 };
 
 /*! \brief This class represents an function or template argument list.
@@ -103,7 +103,7 @@ class ArgumentList : public QList<Argument>
    bool pureSpecifier;
 
    /*! C++11 style Trailing return type? */
-   QByteArray trailingReturnType;
+   QString trailingReturnType;
 
    /*! method with =delete */
    bool isDeleted;

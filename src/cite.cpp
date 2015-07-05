@@ -26,10 +26,10 @@
 #include <language.h>
 #include <resourcemgr.h>
 
-const QByteArray CiteConsts::fileName("citelist");
-const QByteArray CiteConsts::anchorPrefix("CITEREF_");
-const QByteArray bibTmpFile("bibTmpFile_");
-const QByteArray bibTmpDir("bibTmpDir/");
+const QString CiteConsts::fileName("citelist");
+const QString CiteConsts::anchorPrefix("CITEREF_");
+const QString bibTmpFile("bibTmpFile_");
+const QString bibTmpDir("bibTmpDir/");
 
 CiteDict::CiteDict() : m_entries()
 {  
@@ -43,7 +43,7 @@ void CiteDict::writeLatexBibliography(QTextStream &t)
 
    QString style = Config::getString("latex-bib-style");
  
-   QByteArray unit;
+   QString unit;
    if (Config::getBool("latex-compact")) {
       unit = "section";
    } else {
@@ -65,7 +65,7 @@ void CiteDict::writeLatexBibliography(QTextStream &t)
 
    for (auto bibdata : citeDataList) {
 
-      QByteArray bibFile = bibdata.toLatin1();
+      QString bibFile = bibdata;
 
       // file can now have multiple dots
       if (! bibFile.isEmpty() && bibFile.right(4) != ".bib") {
@@ -94,14 +94,14 @@ void CiteDict::writeLatexBibliography(QTextStream &t)
    t << "\n";
 }
 
-void CiteDict::insert(const char *label)
+void CiteDict::insert(const QString &label)
 {
    m_entries.insert(label, CiteInfo(label));
 }
 
-CiteInfo *CiteDict::find(const char *label) const
+CiteInfo *CiteDict::find(const QString &label) const
 {
-   if (label)  {
+   if (! label.isEmpty())  {
 
       QHash<QString, CiteInfo>::const_iterator entry = m_entries.find(label);
 
@@ -233,10 +233,10 @@ void CiteDict::generatePage() const
 
    bool insideBib = false;
 
-   QByteArray doc;
+   QString doc;
    QFileInfo fi(citeListFile);
 
-   QByteArray input;
+   QString input;
    input = f.readAll();
 
    f.close();
@@ -247,7 +247,7 @@ void CiteDict::generatePage() const
    // printf("input=[%s]\n",input.data());
 
    while ((s = input.indexOf('\n', p)) != -1) {
-      QByteArray line = input.mid(p, s - p);
+      QString line = input.mid(p, s - p);
     
       p = s + 1;
 
@@ -269,8 +269,8 @@ void CiteDict::generatePage() const
          int k = line.indexOf("]</a>");
 
          if (j != -1 && k != -1) {
-            QByteArray label  = line.mid(i + 17, j - i - 17);
-            QByteArray number = line.mid(j + 2, k - j - 1);
+            QString label  = line.mid(i + 17, j - i - 17);
+            QString number = line.mid(j + 2, k - j - 1);
 
             CiteInfo *ci = this->find(label);
             

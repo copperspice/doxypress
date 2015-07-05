@@ -70,7 +70,6 @@ int Debug::labelToEnum(const QString &data)
 int Debug::setFlag(const QString &label)
 {
    int retval = labelToEnum(label);
-
    curMask = curMask | retval;
 
    return retval;
@@ -139,17 +138,19 @@ void initWarningFormat()
    }
 }
  
-static void format_warn(const char *file, int line, const char *text)
+static void format_warn(const QString &file, int line, const QString &text)
 {
-   QByteArray fileSubst = file == 0 ? "<unknown>" : file;
-   QByteArray lineSubst;
+   QString fileSubst = file == 0 ? "<unknown>" : file;
+   QString lineSubst;
 
    lineSubst.setNum(line);
 
-   QByteArray textSubst = text;
-   QByteArray versionSubst;
+   QString textSubst = text;
+   QString versionSubst;
 
-   if (file) { // get version from file name
+   if (! file.isEmpty()) { 
+      // get version from file name
+
       bool ambig;
       QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, file, ambig);
 
@@ -159,7 +160,7 @@ static void format_warn(const char *file, int line, const char *text)
    }
 
    // substitute markers by actual values
-   QByteArray msgText = substitute(outputFormat.toUtf8(), "$file", fileSubst);
+   QString msgText = substitute(outputFormat, "$file", fileSubst);
    msgText = substitute(msgText, "$text",    textSubst);
    msgText = substitute(msgText, "$line",    lineSubst);
    msgText = substitute(msgText, "$version", versionSubst) + "\n";
@@ -168,7 +169,7 @@ static void format_warn(const char *file, int line, const char *text)
    fwrite(msgText.data(), 1, msgText.length(), warnFile);
 }
 
-static void warn_internal(const char *tag, const char *file, int line, const char *prefix, const char *fmt, va_list args)
+static void warn_internal(const QString &tag, const QString &file, int line, const QString &prefix, const QString &fmt, va_list args)
 {
    if (! Config::getBool(tag)) {
       // is this warning type disabled
@@ -179,12 +180,12 @@ static void warn_internal(const char *tag, const char *file, int line, const cha
    char text[bufSize];
    int l = 0;
 
-   if (prefix) {
-      qstrncpy(text, prefix, bufSize);
+   if (! prefix.isEmpty()) {
+      qstrncpy(text, prefix.toUtf8().constData(), bufSize);
       l = strlen(prefix);
    }
 
-   vsnprintf(text + l, bufSize - l, fmt, args);
+   vsnprintf(text + l, bufSize - l, fmt.toUtf8().constData(), args);
 
    text[bufSize - 1] = '\0';
    format_warn(file, line, text);
@@ -198,118 +199,99 @@ void err(const char *fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   QByteArray temp = "Error: ";   
-   vfprintf(warnFile, (temp + fmt).constData(), args);
+   QString temp = "Error: ";   
+   vfprintf(warnFile, (temp + fmt).toUtf8().constData(), args);
 
    va_end(args);
 }
 
-void msg(const char *fmt, ...)
+void msg(const QString &fmt, ...)
 {
    if (! Config::getBool("quiet")) {
     
       va_list args;
       va_start(args, fmt);
 
-      vfprintf(stdout, fmt, args);
+      vfprintf(stdout, fmt.toUtf8().constData(), args);
       va_end(args);
    }
 }
 
-void warnMsg(const char *fmt, ...)
+void warnMsg(const QString &fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
 
-   QByteArray temp = "Warning: ";   
-   vfprintf(warnFile, (temp + fmt).constData(), args);
+   static const QString temp = "Warning: ";      
+   vfprintf(warnFile, (temp + fmt).toUtf8().constData(), args);
 
    va_end(args);
 }
 
-void warn(const char *file, int line, const char *fmt, ...)
+void warn(const QString &file, int line, const QString &fmt, ...)
 {
-   static const char *warning_str = "Warning: ";
-
    va_list args;
    va_start(args, fmt);
 
+   static const QString warning_str = "Warning: ";
    warn_internal("warnings", file, line, warning_str, fmt, args);
 
    va_end(args);
 }
 
-void va_warn(const char *file, int line, const char *fmt, va_list args)
+void va_warn(const QString &file, int line, const QSring &fmt, va_list args)
 {
-   static const char *warning_str = "Warning: ";
+   static const QString warning_str = "Warning: ";
    warn_internal("warnings", file, line, warning_str, fmt, args);
 }
 
-void warn_simple(const char *file, int line, const char *text)
-{
-   static const char *warning_str = "Warning: ";
-
+void warn_simple(const QString &file, int line, const QString &text)
+{  
    if (! Config::getBool("warnings")) {
       return;  
    }
 
-   format_warn(file, line, QByteArray(warning_str) + text);
+   static const QString warning_str = "Warning: ";
+   format_warn(file, line, warning_str + text);
 }
 
-void warn_undoc(const char *file, int line, const char *fmt, ...)
-{
-   static const char *warning_str = "Warning: ";
-
+void warn_undoc(const QString &file, int line, const QString &fmt, ...)
+{   
    va_list args;
    va_start(args, fmt);
 
+   static const QString warning_str = "Warning: ";
    warn_internal("warn-undoc", file, line, warning_str, fmt, args);
 
    va_end(args);
 }
 
-void warn_doc_error(const char *file, int line, const char *fmt, ...)
-{
-   static const char *warning_str = "Warning: ";
-
+void warn_doc_error(const QString &file, int line, const QString &fmt, ...)
+{   
    va_list args;
    va_start(args, fmt);
 
+   static QString warning_str = "Warning: ";
    warn_internal("warn-doc-error", file, line, warning_str, fmt, args);
 
    va_end(args);
 }
 
-void warn_doc_error(const char *file, int line, QString fmt_q, ...)
-{
-   static const char *warning_str = "Warning: ";
-
-   QByteArray fmt = fmt_q.toLatin1();
-
-   va_list args;
-   va_start(args, fmt_q);
-
-   warn_internal("warn-doc-error", file, line, warning_str, fmt.constData(), args);
-
-   va_end(args);
-}
-
-void warn_uncond(const char *fmt, ...)
-{
-   static const char *warning_str = "Warning: ";
-
+void warn_uncond(const QString &fmt, ...)
+{   
    va_list args;
    va_start(args, fmt);
 
-   vfprintf(warnFile, (QByteArray(warning_str) + fmt).data(), args);
+   static const Qstring warning_str = "Warning: ";
+   vfprintf(warnFile, (warning_str + fmt).toUtf8().constData(), args);
 
    va_end(args);
 }
 
-void printlex(int dbg, bool enter, const char *lexName, const char *fileName)
+void printlex(int dbg, bool enter, const QString &lexName, const QString &fileName)
 {
-   const char *enter_txt    = "entering";
-   const char *enter_txt_uc = "Entering";
+   QString enter_txt    = "entering";
+   QString enter_txt_uc = "Entering";
 
    if (! enter) {
       enter_txt    = "finished";
@@ -317,17 +299,18 @@ void printlex(int dbg, bool enter, const char *lexName, const char *fileName)
    }
 
    if (dbg) {
-      if (fileName) {
-         fprintf(stderr, "--%s lexical analyzer: %s (for: %s)\n", enter_txt, lexName, fileName);
+
+      if (! fileName.isEmpty()) {
+         fprintf(stderr, "--%s lexical analyzer: %s (for: %s)\n", enter_txt, lexName.toUtf8().constData(), fileName.toUtf8().constData());
       } else {
-         fprintf(stderr, "--%s lexical analyzer: %s\n", enter_txt, lexName);
+         fprintf(stderr, "--%s lexical analyzer: %s\n", enter_txt, lexName.toUtf8().constData());
       }
 
    } else {
-      if (fileName) {
-         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s (for: %s)\n", enter_txt_uc, lexName, fileName);
+       if (! fileName.isEmpty()) {
+         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s (for: %s)\n", enter_txt_uc, lexName.toUtf8().constData(), fileName.toUtf8().constData());
       } else {
-         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s\n", enter_txt_uc, lexName);
+         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s\n", enter_txt_uc, lexName.toUtf8().constData());
       }
    }
 }

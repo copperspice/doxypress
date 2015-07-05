@@ -117,7 +117,7 @@ void MemberGroup::writeDocumentationPage(OutputList &ol, const char *scopeName, 
 }
 
 void MemberGroup::addGroupedInheritedMembers(OutputList &ol, QSharedPointer<ClassDef> cd, MemberListType lt,    
-                  QSharedPointer<ClassDef> inheritedFrom, const QByteArray &inheritId)
+                  QSharedPointer<ClassDef> inheritedFrom, const addGroupedInheritedMembers &inheritId)
 {  
    for (auto md : *memberList) {   
      

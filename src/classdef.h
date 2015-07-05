@@ -87,8 +87,8 @@ class ClassDef : public Definition
     *                    I didn't add this to CompoundType to avoid having
     *                    to adapt all translators.
     */
-   ClassDef(const char *fileName, int startLine, int startColumn, const QString &name, CompoundType ct,
-            const QString &ref = QString(), QString fName = QString(), bool isSymbol = true, bool isJavaEnum = false);
+   ClassDef(const QString &fileName, int startLine, int startColumn, const QString &name, CompoundType ct,
+            const QString &ref = QString(), const QString &fName = QString(), bool isSymbol = true, bool isJavaEnum = false);
   
    /** Destroys a compound definition. */
    ~ClassDef();
@@ -101,13 +101,13 @@ class ClassDef : public Definition
    /** Returns the unique base name (without extension) of the class's file on disk */
    QString getOutputFileBase() const;
    QString getInstanceOutputFileBase() const;
-   QByteArray getFileBase() const;
+   QString getFileBase() const;
 
    /** Returns the base name for the source code file */
-   QByteArray getSourceFileBase() const;
+   QString getSourceFileBase() const override;
 
    /** If this class originated from a tagfile, this will return the tag file reference */
-   QByteArray getReference() const;
+   QString getReference() const override;
 
    /** Returns true if this class is imported via a tag file */
    bool isReference() const;
@@ -186,7 +186,7 @@ class ClassDef : public Definition
    /** Returns the Java package this class is in or 0 if not applicable.
     */
 
-   QSharedPointer<MemberDef> getMemberByName(const QByteArray &) const;
+   QSharedPointer<MemberDef> getMemberByName(const QString &) const;
 
    /** Returns true iff \a bcd is a direct or indirect base class of this
     *  class. This function will recusively traverse all branches of the
@@ -319,8 +319,8 @@ class ClassDef : public Definition
    QString getMemberListFileName() const;
    bool subGrouping() const;
 
-   void insertBaseClass(QSharedPointer<ClassDef> cd, const char *name, Protection p, Specifier s, const char *t = 0);
-   void insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifier s, const char *t = 0);
+   void insertBaseClass(QSharedPointer<ClassDef> cd, const QString &name, Protection p, Specifier s, const QString &t = QString() );
+   void insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifier s, const QString &t = QString() );
    void setIncludeFile(QSharedPointer<FileDef> fd, const char *incName, bool local, bool force);
    void insertMember(QSharedPointer<MemberDef> );
    void insertUsedFile(QSharedPointer<FileDef> fd);
@@ -331,16 +331,16 @@ class ClassDef : public Definition
    void setSubGrouping(bool enabled);
    void setProtection(Protection p);
 
-   void setGroupDefForAllMembers(QSharedPointer<GroupDef> g, Grouping::GroupPri_t pri, const QByteArray &fileName, 
+   void setGroupDefForAllMembers(QSharedPointer<GroupDef> g, Grouping::GroupPri_t pri, const QString &fileName, 
                   int startLine, bool hasDocs);
 
    void addInnerCompound(QSharedPointer<Definition> d) override; 
 
-   QSharedPointer<ClassDef> insertTemplateInstance(const QByteArray &fileName, int startLine, int startColumn,
-                  const QByteArray &templSpec, bool &freshInstance);
+   QSharedPointer<ClassDef> insertTemplateInstance(const QString &fileName, int startLine, int startColumn,
+                  const QString &templSpec, bool &freshInstance);
 
-   void addUsedClass(QSharedPointer<ClassDef> cd, const char *accessName, Protection prot);
-   void addUsedByClass(QSharedPointer<ClassDef> cd, const char *accessName, Protection prot);
+   void addUsedClass(QSharedPointer<ClassDef> cd, const QString &accessName, Protection prot);
+   void addUsedByClass(QSharedPointer<ClassDef> cd, const QString &accessName, Protection prot);
    void setIsStatic(bool b);
    void setCompoundType(CompoundType t);
    void setClassName(const QString &name);
@@ -357,7 +357,7 @@ class ClassDef : public Definition
 
    void addTaggedInnerClass(QSharedPointer<ClassDef> cd);
    void setTagLessReference(QSharedPointer<ClassDef> cd);
-   void setName(const char *name);
+   void setName(const QString &name);
 
    // actions
    void findSectionsInDocumentation();
@@ -381,7 +381,7 @@ class ClassDef : public Definition
    void writeInlineDocumentation(OutputList &ol);
    void writeDeclarationLink(OutputList &ol, bool &found, const QString &header, bool localNames);
    void removeMemberFromLists(QSharedPointer<MemberDef> md);
-   void addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, const QByteArray &inheritId);
+   void addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
    int countMembersIncludingGrouped(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool additional);
    int countInheritanceNodes();
    void writeTagFile(QTextStream &);
@@ -401,9 +401,8 @@ class ClassDef : public Definition
    QSharedPointer<MemberList> createMemberList(MemberListType lt);
 
    void writeInheritedMemberDeclarations(OutputList &ol, MemberListType lt, int lt2,
-                  const QByteArray &title, QSharedPointer<ClassDef> inheritedFrom,
-                  bool invert, bool showAlways,
-                  QHash<void *, void *> *visitedClasses);
+                  const QString &title, QSharedPointer<ClassDef> inheritedFrom,
+                  bool invert, bool showAlways, QHash<void *, void *> *visitedClasses);
 
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title,
                   const QString &subTitle = 0, bool showInline = false,
@@ -444,7 +443,7 @@ class ClassDef : public Definition
                                 QHash<void *, void *> *visitedClasses);
 
    void getTitleForMemberListType(MemberListType type, QString &title, QString &subtitle);
-   QByteArray includeStatement() const;
+   QString includeStatement() const;
 
    void addTypeConstraint(const QString &typeConstraint, const QString &type);
   
@@ -593,7 +592,7 @@ class UsesClassDef
    ~UsesClassDef() 
    { }
 
-   void addAccessor(const char *s) {
+   void addAccessor(const QString &s) {
       if (m_accessors.contains(s)) {
          m_accessors.insert(s);        
       }
@@ -639,8 +638,8 @@ class UsesClassDictIterator : public QHashIterator<QString, UsesClassDef>
 /** Class that contains information about an inheritance relation
  */
 struct BaseClassDef {
-   BaseClassDef(QSharedPointer<ClassDef> cd, const char *n, Protection p, Specifier v, const char *t) :
-      classDef(cd), usedName(n), prot(p), virt(v), templSpecifiers(t)
+   BaseClassDef(QSharedPointer<ClassDef> cd, const QString &n, Protection p, Specifier v, const QString &t) 
+      : classDef(cd), usedName(n), prot(p), virt(v), templSpecifiers(t)
    {}
 
    /** Class definition which this relation inherits from. */
@@ -649,7 +648,7 @@ struct BaseClassDef {
    /** name used in the inheritance list
     * (may be a typedef name instead of the class name)
     */
-   QByteArray usedName;
+   QString usedName;
 
    /** Protection level of the inheritance relation:
     *  Public, Protected, or Private
@@ -662,7 +661,7 @@ struct BaseClassDef {
    Specifier virt;
 
    /** Template arguments used for the base class */
-   QByteArray templSpecifiers;
+   QString templSpecifiers;
 };
 
 

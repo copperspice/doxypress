@@ -20,7 +20,7 @@
 
 class BufStr;
 
-extern void convertCppComments(BufStr *inBuf, BufStr *outBuf, const char *fileName);
+extern void convertCppComments(BufStr *inBuf, BufStr *outBuf, const QString &fileName);
 
 #endif
 

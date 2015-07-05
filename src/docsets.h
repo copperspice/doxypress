@@ -45,31 +45,31 @@ class DocSets  : public IndexIntf
    void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
                         bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) override;
 
-   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
-                     const char *title);
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
+                     const QString &title);
 
    void addIndexFile(const QString &name) override {}
    void addImageFile(const QString &name) override {}
    void addStyleSheetFile(const QString &name) override {}
 
  private:
-   void writeToken(QTextStream &t, QSharedPointer<Definition> d, const QByteArray &type, const QByteArray &lang,
-                   const char *scope = 0, const char *anchor = 0, const QByteArray &decl = QByteArray() ); 
+   void writeToken(QTextStream &t, QSharedPointer<Definition> d, const QString &type, const QString &lang,
+                   const QString &scope = QString(), const QString &anchor = QString(), const QString &decl = QString() ); 
 
    struct NodeDef {
-      NodeDef(bool d, const QByteArray &n, const QByteArray &r, const QByteArray &f, const QByteArray &a, int i) :
+      NodeDef(bool d, const QString &n, const QString &r, const QString &f, const QString &a, int i) :
          isDir(d), name(n), ref(r), file(f), anchor(a), id(i)
       {}
 
       bool isDir;
-      QByteArray name;
-      QByteArray ref;
-      QByteArray file;
-      QByteArray anchor;
+      QString name;
+      QString ref;
+      QString file;
+      QString anchor;
       int id;
    };
 
-   QByteArray indent();
+   QString indent();
 
    QFile *m_nf;
    QFile *m_tf;

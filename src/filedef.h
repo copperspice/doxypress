@@ -18,7 +18,6 @@
 #ifndef FILEDEF_H
 #define FILEDEF_H
 
-#include <QByteArray>
 #include <QList>
 #include <QHash>
 #include <QTextStream>
@@ -52,7 +51,7 @@ struct IncludeInfo {
 
    QSharedPointer<FileDef> fileDef;
 
-   QByteArray includeName;
+   QString includeName;
    bool local;
    bool imported;
    bool indirect;
@@ -73,7 +72,7 @@ class FileDef : public Definition
  public:
    //enum FileType { Source, Header, Unknown };
 
-   FileDef(const char *p, const char *n, const char *ref = 0, const char *dn = 0);
+   FileDef(const QString &p, const QString &n, const QString &ref = QString(), const QString &dn = QString());
    ~FileDef();
 
    DefType definitionType() const {
@@ -81,13 +80,13 @@ class FileDef : public Definition
    }
 
    /*! Returns the unique file name (this may include part of the path). */
-   QByteArray name() const;
+   QString name() const;
 
    QString displayName(bool = true) const override {
       return name();
    }
 
-   QByteArray fileName() const {
+   QString fileName() const {
       return m_fileName;
    }
 
@@ -99,22 +98,22 @@ class FileDef : public Definition
       return "";
    }
 
-   QByteArray getFileBase() const {
+   QString getFileBase() const {
       return m_diskName;
    }
 
-   QByteArray getSourceFileBase() const;
+   QString getSourceFileBase() const override;
 
    /*! Returns the name of the verbatim copy of this file (if any). */
-   QByteArray includeName() const;
+   QString includeName() const;
 
    /*! Returns the absolute path including the file name. */
-   QByteArray getFilePath() const {
+   QString getFilePath() const {
       return m_filePath;
    }
 
    /*! Returns the name as it is used in the documentation */
-   const QByteArray &docName() const {
+   const QString &docName() const {
       return m_docname;
    }
 
@@ -129,7 +128,7 @@ class FileDef : public Definition
    QSharedPointer<MemberDef> getSourceMember(int lineNr) const;
 
    /*! Returns the absolute path of this file. */
-   QByteArray getPath() const {
+   QString getPath() const {
       return m_path;
    }
 
@@ -144,7 +143,7 @@ class FileDef : public Definition
       return isLinkableInProject() || isReference();
    }
 
-   bool isIncluded(const QByteArray &name) const;
+   bool isIncluded(const QString &name) const;
 
    PackageDef *packageDef() const {
       return m_package;
@@ -264,22 +263,22 @@ class FileDef : public Definition
    QSharedPointer<MemberList> createMemberList(MemberListType lt);
 
    void addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md);
-   void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title);
-   void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title);
+   void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title);
+   void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title);
    void writeIncludeFiles(OutputList &ol);
    void writeIncludeGraph(OutputList &ol);
    void writeIncludedByGraph(OutputList &ol);
    void writeMemberGroups(OutputList &ol);
    void writeAuthorSection(OutputList &ol);
    void writeSourceLink(OutputList &ol);
-   void writeNamespaceDeclarations(OutputList &ol, const QByteArray &title, bool isConstantGroup);
-   void writeClassDeclarations(OutputList &ol, const QByteArray &title);
+   void writeNamespaceDeclarations(OutputList &ol, const QString &title, bool isConstantGroup);
+   void writeClassDeclarations(OutputList &ol, const QString &title);
    void writeInlineClasses(OutputList &ol);
    void startMemberDeclarations(OutputList &ol);
    void endMemberDeclarations(OutputList &ol);
    void startMemberDocumentation(OutputList &ol);
    void endMemberDocumentation(OutputList &ol);
-   void writeDetailedDescription(OutputList &ol, const QByteArray &title);
+   void writeDetailedDescription(OutputList &ol, const QString &title);
    void writeBriefDescription(OutputList &ol);
 
    QHash<QString, IncludeInfo>   m_includeDict;
@@ -290,11 +289,11 @@ class FileDef : public Definition
 
    StringMap<QSharedPointer<Definition>>  m_usingDeclList;
 
-   QByteArray         m_path;
-   QByteArray         m_filePath;
-   QByteArray         m_diskName;
-   QByteArray         m_fileName;
-   QByteArray         m_docname;
+   QString m_path;
+   QString m_filePath;
+   QString m_diskName;
+   QString m_fileName;
+   QString m_docname;
 
    QHash<long, QSharedPointer<Definition>> m_srcDefDict;
    QHash<long, QSharedPointer<MemberDef>>  m_srcMemberDict;
@@ -325,7 +324,7 @@ class DirEntry
       : m_parent(parent), m_name(fd->name()), m_kind(File), m_fd(fd),m_isLast(false) 
    { }
 
-   DirEntry(DirEntry *parent, QByteArray name)
+   DirEntry(DirEntry *parent, QString name)
       : m_parent(parent), m_name(name), m_kind(Dir), m_fd(0), m_isLast(false) { }
 
    virtual ~DirEntry() { }
@@ -350,17 +349,17 @@ class DirEntry
       return m_parent;
    }
 
-   QByteArray name() const  {
+   QString name() const  {
       return m_name;
    }
 
-   QByteArray path() const  {
+   QString path() const  {
       return parent() ? parent()->path() + "/" + name() : name();
    }
 
  protected:
    DirEntry *m_parent;
-   QByteArray m_name;
+   QString m_name;
 
  private:
    EntryKind m_kind;
@@ -372,7 +371,7 @@ class DirEntry
 class Directory : public DirEntry
 {
  public:
-   Directory(Directory *parent, const QByteArray &name)
+   Directory(Directory *parent, const QString &name)
       : DirEntry(parent, name)
    {      
    }
@@ -388,7 +387,7 @@ class Directory : public DirEntry
       return m_children;
    }
 
-   void rename(const QByteArray &name) {
+   void rename(const QString &name) {
       m_name = name;
    }
 

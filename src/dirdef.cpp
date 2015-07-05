@@ -31,9 +31,10 @@
 
 static int g_dirCount = 0;
 
-DirDef::DirDef(const char *path) : Definition(path, 1, 1, path), visited(false)
+DirDef::DirDef(const QString &path) : Definition(path, 1, 1, path), visited(false)
 {
    bool fullPathNames = Config::getBool("full-path-names");
+
    // get display name (stipping the paths mentioned in STRIP_FROM_PATH)
    // get short name (last part of path)
 
@@ -100,7 +101,7 @@ void DirDef::addFile(QSharedPointer<FileDef> fd)
 static QString encodeDirName(const QString &anchor)
 { 
    QString sigStr;
-   sigStr = QCryptographicHash::hash(anchor, QCryptographicHash::Md5).toHex();
+   sigStr = QCryptographicHash::hash(anchor.toUtf8(), QCryptographicHash::Md5).toHex();
 
    return sigStr;  
 }
@@ -110,7 +111,7 @@ QString DirDef::getOutputFileBase() const
    return "dir_" + encodeDirName(m_diskName);
 }
 
-void DirDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
+void DirDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
    QSharedPointer<DirDef> self = sharedFrom(this);
 
@@ -591,8 +592,9 @@ bool DirDef::depGraphIsTrivial() const
 
 int FilePairDict::compareMapValues(const QSharedPointer<FilePair> &left, const QSharedPointer<FilePair> &right) const
 {
-   int orderHi = qstricmp(left->source()->name(), right->source()->name());
-   int orderLo = qstricmp(left->destination()->name(), right->destination()->name());
+   int orderHi = left->source()->name().compare(right->source()->name(), Qt::CaseInsensitive );
+   int orderLo = left->destination()->name().compare(right->destination()->name(), Qt::CaseInsensitive );
+
    return orderHi == 0 ? orderLo : orderHi;
 }
 
@@ -610,9 +612,9 @@ void UsedDir::addFileDep(QSharedPointer<FileDef> srcFd, QSharedPointer<FileDef> 
    m_filePairs.insert(srcFd->getOutputFileBase() + dstFd->getOutputFileBase(), QMakeShared<FilePair>(srcFd, dstFd));
 }
 
-QSharedPointer<FilePair> UsedDir::findFilePair(const char *name)
+QSharedPointer<FilePair> UsedDir::findFilePair(const QString &name)
 {
-   QByteArray n = name;
+   QString n = name;
 
    if (n.isEmpty()) {
       return QSharedPointer<FilePair>(); 
@@ -621,9 +623,10 @@ QSharedPointer<FilePair> UsedDir::findFilePair(const char *name)
    }
 }
 
-QSharedPointer<DirDef> DirDef::createNewDir(const char *path)
+QSharedPointer<DirDef> DirDef::createNewDir(const QString &path)
 {
-   assert(path != 0);
+   assert(! path.isEmpty());
+
    QSharedPointer<DirDef> dir = Doxy_Globals::directories.find(path);
 
    if (dir) { 
@@ -651,7 +654,7 @@ bool DirDef::matchPath(const QString &path, const QStringList &list)
 
 /*! strip part of \a path if it matches  one of the paths in the list
  */
-QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QByteArray &path)
+QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QString &path)
 {   
    int p = 0;
    int i = 0;
@@ -659,7 +662,7 @@ QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QByteArray &path)
    QSharedPointer<DirDef> dir;
 
    while ((i = path.indexOf('/', p)) != -1) {
-      QByteArray part = path.left(i + 1);
+      QString part = path.left(i + 1);
 
       if (! matchPath(part, Config::getList("strip-from-path")) && (part != "/" && part != "//")) {
          dir = createNewDir(part);
@@ -769,7 +772,7 @@ void DirRelation::writeDocumentation(OutputList &ol)
  */
 static void computeCommonDirPrefix()
 {
-   QByteArray path;
+   QString path;
    QSharedPointer<DirDef> dir;
 
    DirSDict::Iterator sdi(Doxy_Globals::directories);
@@ -795,11 +798,12 @@ static void computeCommonDirPrefix()
             int count = 0;
 
             for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {
-               QByteArray dirName = dir->name();
+               QString dirName = dir->name();
 
                if (dirName.length() > path.length()) {
 
-                  if (qstrncmp(dirName, path, l) != 0) { 
+                  if (! dirName.startsWith(path)) { 
+
                      // dirName does not start with path
                      int i = path.lastIndexOf('/', l - 2);
 
@@ -843,7 +847,7 @@ static void computeCommonDirPrefix()
    }
    
    for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {   
-      QByteArray diskName = dir->name().right(dir->name().length() - path.length());
+      QString diskName = dir->name().right(dir->name().length() - path.length());
       dir->setDiskName(diskName);
 
       //  printf("set disk name: %s -> %s\n",dir->name().data(),diskName.data());
@@ -880,7 +884,7 @@ void buildDirectories()
    for (auto dir : Doxy_Globals::directories) {  
       // printf("New dir %s\n",dir->displayName().data());
 
-      QByteArray name = dir->name();
+      QString name = dir->name();
       int i = name.lastIndexOf('/', name.length() - 2);
 
       if (i > 0) {

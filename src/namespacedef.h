@@ -56,8 +56,8 @@ class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
 class NamespaceDef : public Definition
 {
  public:
-   NamespaceDef(const char *defFileName, int defLine, int defColumn, const QString &name, const char *ref = 0,
-                QString refFile = QString(), const char *type = 0, bool isPublished = false);
+   NamespaceDef(const QString &defFileName, int defLine, int defColumn, const QString &name, const QString &ref = QString(),
+                QString refFile = QString(), const QString &type = QString(), bool isPublished = false);
 
    ~NamespaceDef();
 
@@ -96,7 +96,7 @@ class NamespaceDef : public Definition
 
    void combineUsingRelations();
    QString displayName(bool = true) const override;
-   QByteArray localName() const;
+   QString localName() const;
 
    bool isConstantGroup() const {
       return CONSTANT_GROUP == m_type;
@@ -202,8 +202,8 @@ class NamespaceList : public QList<NamespaceDef>
  public:
    ~NamespaceList() {}
 
-   int compareValues(const NamespaceDef *nd1, const NamespaceDef *nd2) const {
-      return qstricmp(nd1->name(), nd2->name());
+   int compareValues(const NamespaceDef *nd1, const NamespaceDef *nd2) const {  
+      return nd1->name().compare(nd2->name(), Qt::CaseInsensitive);
    }
 };
 

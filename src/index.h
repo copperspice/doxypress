@@ -36,11 +36,11 @@ class IndexIntf
    virtual void finalize() = 0;
    virtual void incContentsDepth() = 0;
    virtual void decContentsDepth() = 0;
-   virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString  &file, const QString  &anchor, 
+   virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString  &anchor, 
                                 bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) = 0;
 
-   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, 
-                             const char *title) = 0;
+   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
+                             const QString &title) = 0;
 
    virtual void addIndexFile(const QString &name) = 0;
    virtual void addImageFile(const QString &name) = 0;
@@ -125,8 +125,8 @@ class IndexList : public IndexIntf
       }
    }
 
-   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor = 0, 
-                     const char *title = 0) {   
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor = QString(), 
+                     const QString &title = QString() ) {   
       if (m_enabled) {
          for (auto item : m_intfs) {
             item->addIndexItem(context, md, sectionAnchor, title);    

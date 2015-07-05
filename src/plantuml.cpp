@@ -24,7 +24,7 @@
 
 static const int maxCmdLine = 40960;
 
-QByteArray writePlantUMLSource(const QString &outDir, const QString &fileName, const QByteArray &content)
+QString writePlantUMLSource(const QString &outDir, const QString &fileName, const QString &content)
 {
    QString baseName;
    static int umlindex = 1;
@@ -58,7 +58,7 @@ QByteArray writePlantUMLSource(const QString &outDir, const QString &fileName, c
    file.write(text.toUtf8());
    file.close();
 
-   return baseName.toUtf8();
+   return baseName;
 }
 
 void generatePlantUMLOutput(const QString &baseName, const QString &outDir, PlantUMLOutputFormat format)
@@ -80,7 +80,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    pumlArgs += outDir;
    pumlArgs += "\" ";
 
-   QByteArray extension;
+   QString extension;
 
    switch (format) {
       case PUML_BITMAP:

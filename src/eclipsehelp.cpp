@@ -166,14 +166,15 @@ void EclipseHelp::decContentsDepth()
  * @param addToNavIndex not used.
  * @param def not used.
  */
-void EclipseHelp::addContentsItem(bool, const QString &name, const char *, const char *file, const char *anchor,
+void EclipseHelp::addContentsItem(bool, const QString &name, const QString &, const QString &file, const QString &anchor,
                   bool, bool, QSharedPointer<Definition>)
 {
    // -- write the topic tag
    closedTag();
 
-   if (file) {
-      switch (file[0]) { // check for special markers (user defined URLs)
+   if (! file.isEmpty() ) {
+
+      switch (file[0].unicode()) { // check for special markers (user defined URLs)
          case '^':
             // URL not supported by eclipse toc.xml
             break;
@@ -181,7 +182,7 @@ void EclipseHelp::addContentsItem(bool, const QString &name, const char *, const
          case '!':
             indent();
             m_tocstream << "<topic label=\"" << convertToXML(name) << "\"";
-            m_tocstream << " href=\"" << convertToXML(m_pathprefix) << &file[1] << "\"";
+            m_tocstream << " href=\"" << convertToXML(m_pathprefix) << file.mid(1) << "\"";
             m_endtag = true;
             break;
 
@@ -190,13 +191,16 @@ void EclipseHelp::addContentsItem(bool, const QString &name, const char *, const
             m_tocstream << "<topic label=\"" << convertToXML(name) << "\"";
             m_tocstream << " href=\"" << convertToXML(m_pathprefix)
                         << file << Doxy_Globals::htmlFileExtension;
-            if (anchor) {
+
+            if (! anchor.isEmpty()) {
                m_tocstream << "#" << anchor;
             }
+
             m_tocstream << "\"";
             m_endtag = true;
             break;
       }
+
    } else {
       indent();
       m_tocstream << "<topic label=\"" << convertToXML(name) << "\"";
@@ -204,7 +208,7 @@ void EclipseHelp::addContentsItem(bool, const QString &name, const char *, const
    }
 }
 
-void EclipseHelp::addIndexItem(QSharedPointer<Definition> d, QSharedPointer<MemberDef> md, const char * , const char *)
+void EclipseHelp::addIndexItem(QSharedPointer<Definition> d, QSharedPointer<MemberDef> md, const QString &, const QString &)
 {
 }
 

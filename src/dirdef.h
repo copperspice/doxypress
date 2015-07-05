@@ -35,7 +35,7 @@ class UsedDir;
 class DirDef : public Definition
 {
  public:
-   DirDef(const char *path);
+   DirDef(const QString &path);
    virtual ~DirDef();
 
    // accessors
@@ -101,17 +101,17 @@ class DirDef : public Definition
    void writeDepGraph(QTextStream &t);
    void writeTagFile(QTextStream &t);
 
-   static QSharedPointer<DirDef> mergeDirectoryInTree(const QByteArray &path);
+   static QSharedPointer<DirDef> mergeDirectoryInTree(const QString &path);
    bool visited;
 
-   void setDiskName(const QByteArray &name) {
+   void setDiskName(const QString &name) {
       m_diskName = name;
    }
 
  private:
    friend void computeDirDependencies();
 
-   void writeDetailedDescription(OutputList &ol, const QByteArray &title);
+   void writeDetailedDescription(OutputList &ol, const QString &title);
    void writeBriefDescription(OutputList &ol);
    void writeDirectoryGraph(OutputList &ol);
    void writeSubDirList(OutputList &ol);
@@ -121,7 +121,7 @@ class DirDef : public Definition
 
    void setLevel();
 
-   static QSharedPointer<DirDef> createNewDir(const char *path);
+   static QSharedPointer<DirDef> createNewDir(const QString &path);
    static bool matchPath(const QString &path, const QStringList &list);
    void addUsesDependency(QSharedPointer<DirDef> dir, QSharedPointer<FileDef> srcFd, QSharedPointer<FileDef> dstFd, bool inherited);
    void computeDependencies();
@@ -182,7 +182,7 @@ class UsedDir
    virtual ~UsedDir();
 
    void addFileDep(QSharedPointer<FileDef> srcFd, QSharedPointer<FileDef> dstFd);
-   QSharedPointer<FilePair> findFilePair(const char *name);
+   QSharedPointer<FilePair> findFilePair(const QString &name);
 
    const FilePairDict &filePairs() const {
       return m_filePairs;
@@ -206,7 +206,7 @@ class UsedDir
 class DirRelation
 {
  public:
-   DirRelation(const QByteArray &name, QSharedPointer<DirDef> src, UsedDir *dst)
+   DirRelation(const QString &name, QSharedPointer<DirDef> src, UsedDir *dst)
       : m_name(name), m_src(src), m_dst(dst)
    {}
 

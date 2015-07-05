@@ -102,7 +102,7 @@ int compareListValues(QSharedPointer<FileName> item1, QSharedPointer<FileName> i
 
 int compareListValues(QSharedPointer<GroupDef> item1, QSharedPointer<GroupDef> item2) 
 {
-   return qstrcmp(item1->groupTitle(), item2->groupTitle());
+   return item1->groupTitle().compare(item2->groupTitle());
 }
 
 
@@ -137,7 +137,7 @@ int compareListValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2
 // sort list based on url
 int compareListValues(const NavIndexEntry *item1, const NavIndexEntry *item2)
 {  
-   return qstrcmp(item1->url, item2->url);  
+   return item1->url.compare(item2->url);  
 }
 
 

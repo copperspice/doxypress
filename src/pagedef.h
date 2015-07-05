@@ -30,11 +30,11 @@ class OutputList;
 class PageDef : public Definition
 {
  public:
-   PageDef(const char *f, int l, const char *n, const char *d, const char *t);
+   PageDef(const QString &f, int l, const QString &n, const QString &d, const QString &t);
    ~PageDef();
 
    // setters
-   void setFileName(const char *name, bool dontEscape);
+   void setFileName(const QString &name, bool dontEscape);
    void setShowToc(bool b);
 
    // getters
@@ -58,7 +58,7 @@ class PageDef : public Definition
    }
 
    void findSectionsInDocumentation();
-   QByteArray title() const {
+   QString title() const {
       return m_title;
    }
 
@@ -97,8 +97,10 @@ class PageDef : public Definition
  private:
    void setNestingLevel(int l);
    void writePageDocumentation(OutputList &ol);
-   QByteArray m_fileName;
-   QByteArray m_title;
+
+   QString m_fileName;
+   QString m_title;
+
    PageSDict *m_subPageDict;                 // list of pages in the group
    QSharedPointer<Definition> m_pageScope;
    int m_nestingLevel;
@@ -115,7 +117,7 @@ class PageSDict : public StringMap<QSharedPointer<PageDef>>
 
  private:
    int compareMapValues(const QSharedPointer<PageDef> &i1, const QSharedPointer<PageDef> &i2) const override {
-      return qstricmp(i1->name(), i2->name());
+      return i1->name().compare(i2->name(), Qt::CaseInsensitive);
    }
 };
 

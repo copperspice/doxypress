@@ -49,9 +49,9 @@
  *  @returns         Root node of the abstract syntax tree. Ownership of the
  *                   pointer is handed over to the caller.
  */
-DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<Definition> context, 
-                  QSharedPointer<MemberDef> md, const char *input, bool indexWords, bool isExample, 
-                  const char *exampleName = 0, bool singleLine = false, bool linkFromIndex = false);
+DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPointer<Definition> context, 
+                  QSharedPointer<MemberDef> md, const QString &input, bool indexWords, bool isExample, 
+                  const QString &exampleName = QString(), bool singleLine = false, bool linkFromIndex = false);
 
 /*! Main entry point for parsing simple text fragments. These
  *  fragments are limited to words, whitespace and symbols.
@@ -59,7 +59,7 @@ DocRoot *validatingParseDoc(const char *fileName, int startLine, QSharedPointer<
 DocText *validatingParseText(const char *input);
 
 /*! Searches for section and anchor commands in the input */
-void docFindSections(const char *input, QSharedPointer<Definition> d, MemberGroup *m, const char *fileName);
+void docFindSections(const QString &input, QSharedPointer<Definition> d, MemberGroup *m, const QString &fileName);
 
 /** Abstract node interface with type information. */
 class DocNode
@@ -936,7 +936,8 @@ class DocTitle : public CompAccept<DocTitle>, public DocNode
 class DocXRefItem : public CompAccept<DocXRefItem>, public DocNode
 {
  public:
-   DocXRefItem(DocNode *parent, int id, const char *key);
+   DocXRefItem(DocNode *parent, int id, const QString &key);
+
    Kind kind() const          {
       return Kind_XRefItem;
    }

@@ -68,10 +68,10 @@ class DevNullCodeDocInterface : public CodeOutputInterface
     \a nm the file name, and \a lref is an HTML anchor name if the
     file was read from a tag file or 0 otherwise
 */
-FileDef::FileDef(const char *p, const char *nm, const char *lref, const char *dn)
-   : Definition((QByteArray)p + nm, 1, 1, nm)
+FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, constQString &dn)
+   : Definition(p + nm, 1, 1, nm)
 {
-   m_path = p;
+   m_path     = p;
    m_filePath = m_path + nm;
    m_fileName = nm;
    m_diskName = dn;
@@ -306,7 +306,7 @@ void FileDef::writeBriefDescription(OutputList &ol)
 
    if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
-                                             briefDescription(), true, false, 0, true, false);
+                                             briefDescription(), true, false, "", true, false);
 
       if (rootNode && !rootNode->isEmpty()) {
          ol.startParagraph();

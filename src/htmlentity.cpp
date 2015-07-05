@@ -460,7 +460,7 @@ const DocSymbol::PerlSymb *HtmlEntityMapper::perl(DocSymbol::SymType symb) const
  * @return the code for the requested HTML entity name,
  *         in case the requested HTML item does not exist `DocSymbol::Sym_unknown` is returned.
  */
-DocSymbol::SymType HtmlEntityMapper::name2sym(const QByteArray &symName) const
+DocSymbol::SymType HtmlEntityMapper::name2sym(const QString &symName) const
 {
    auto item = m_name2sym->find(symName);
   

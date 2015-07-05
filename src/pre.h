@@ -23,7 +23,7 @@ class BufStr;
 void initPreprocessor();
 void removePreProcessor();
 void addSearchDir(const QString &dir);
-void preprocessFile(const char *fileName, BufStr &input, BufStr &output);
+void preprocessFile(const QString &fileName, BufStr &input, BufStr &output);
 void preFreeScanner();
 
 #endif

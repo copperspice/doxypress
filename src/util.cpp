@@ -184,9 +184,9 @@ const int maxInheritanceDepth = 100000;
    "bla @1"              => "bla"
 \endverbatim
  */
-QByteArray removeAnonymousScopes(const QByteArray &s)
+QString removeAnonymousScopes(const QString &s)
 {
-   QByteArray result;
+   QString result;
 
    if (s.isEmpty()) {
       return result;
@@ -366,9 +366,9 @@ QString stripFromIncludePath(const QString &path)
 /*! try to determine if \a name is a source or a header file name by looking
  * at the extension. A number of variations are allowed in both upper and lower case 
  */
-int guessSection(const QByteArray &name)
+int guessSection(const QString &name)
 {
-   QByteArray n = name.toLower();
+   QString n = name.toLower();
 
    // source
    if (n.right(2) == ".c"    || 
@@ -406,10 +406,10 @@ int guessSection(const QByteArray &name)
    return 0;
 }
 
-QByteArray resolveTypeDef(QSharedPointer<Definition> context, const QByteArray &qualifiedName, 
+QString resolveTypeDef(QSharedPointer<Definition> context, const QString &qualifiedName, 
                           QSharedPointer<Definition> *typedefContext)
 {
-   QByteArray result;
+   QString result;
 
    if (qualifiedName.isEmpty()) {     
       return result;
@@ -421,8 +421,8 @@ QByteArray resolveTypeDef(QSharedPointer<Definition> context, const QByteArray &
    }
 
    // see if the qualified name has a scope part
-   int scopeIndex = qualifiedName.lastIndexOf("::");
-   QByteArray resName = qualifiedName;
+   int scopeIndex  = qualifiedName.lastIndexOf("::");
+   QString resName = qualifiedName;
 
    if (scopeIndex != -1) { // strip scope part for the name
       resName = qualifiedName.right(qualifiedName.length() - scopeIndex - 2);
@@ -440,7 +440,7 @@ QByteArray resolveTypeDef(QSharedPointer<Definition> context, const QByteArray &
 
       if (scopeIndex != -1) {
          // split-off scope part
-         QByteArray resScopeName = qualifiedName.left(scopeIndex);
+         QString resScopeName = qualifiedName.left(scopeIndex);
          
          // look-up scope in context
          int is;
@@ -448,8 +448,8 @@ QByteArray resolveTypeDef(QSharedPointer<Definition> context, const QByteArray &
          int l;
 
          while ((is = getScopeFragment(resScopeName, ps, &l)) != -1) {
-            QByteArray qualScopePart = resScopeName.mid(is, l);
-            QByteArray tmp = resolveTypeDef(mContext, qualScopePart);
+            QString qualScopePart = resScopeName.mid(is, l);
+            QString tmp = resolveTypeDef(mContext, qualScopePart);
 
             if (! tmp.isEmpty()) {
                qualScopePart = tmp;
@@ -502,7 +502,7 @@ QByteArray resolveTypeDef(QSharedPointer<Definition> context, const QByteArray &
    if (md) {
 
       result = md->typeString();
-      QByteArray args = md->argsString();
+      QString args = md->argsString();
 
       if (args.indexOf(")(") != -1) { 
          // typedef of a function/member pointer
@@ -601,7 +601,7 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<FileDef> fileScope, QS
    s_resolvedTypedefs.insert(qname, md); 
 
    QSharedPointer<ClassDef> typeClass = md->getClassDef();
-   QByteArray type = md->typeString();
+   QString type = md->typeString();
 
    // get the "value" of the typedef
    if (typeClass && typeClass->isTemplate() && actTemplParams && actTemplParams->count() > 0) { 
@@ -1210,7 +1210,7 @@ done:
    return result;
 }
 
-int computeQualifiedIndex(const QByteArray &name)
+int computeQualifiedIndex(const QString &name)
 {
    int i = name.indexOf('<');
 
@@ -1512,8 +1512,8 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
  * Loops through scope and each of its parent scopes looking for a
  * match against the input name.
  */
-QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QByteArray &key, 
-                     QSharedPointer<MemberDef> *pTypeDef, QByteArray *pTemplSpec, bool mayBeUnlinkable, bool mayBeHidden, QByteArray *pResolvedType)
+QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QString &key, 
+                     QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, bool mayBeUnlinkable, bool mayBeHidden, QString *pResolvedType)
 {  
    s_resolvedTypedefs.clear();
 
@@ -1843,7 +1843,7 @@ bool leftScopeMatch(const QString &scope, const QString &name)
 }
 
 void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-                  QSharedPointer<Definition> self, const QByteArray &text, bool autoBreak, bool external, 
+                  QSharedPointer<Definition> self, const QString &text, bool autoBreak, bool external, 
                   bool keepSpaces, int indentLevel)
 {  
    int strLen = text.length();
@@ -1882,7 +1882,7 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
       
       if (strLen > 35 && floatingIndex > 30 && autoBreak) { 
          // try to insert a split point
-         QByteArray splitText = text.mid(skipIndex, newIndex - skipIndex);
+         QString splitText = text.mid(skipIndex, newIndex - skipIndex);
          int splitLength = splitText.length();
          int offset = 1;
 
@@ -1919,8 +1919,8 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
       }
 
       // get word from string
-      QByteArray word      = text.mid(newIndex, matchLen);
-      QByteArray matchWord = substitute(substitute(word, "\\", "::"), ".", "::");
+      QString word      = text.mid(newIndex, matchLen);
+      QString matchWord = substitute(substitute(word, "\\", "::"), ".", "::");
 
       bool found = false;
 
@@ -1967,7 +1967,7 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
          }
 
          int m = matchWord.lastIndexOf("::");
-         QByteArray scopeName;
+         QString scopeName;
 
          if (scope && (scope->definitionType() == Definition::TypeClass ||
              scope->definitionType() == Definition::TypeNamespace) ) {
@@ -2234,7 +2234,7 @@ int filterCRLF(char *buf, int len)
    return dest;                 // length of the valid part of the buf
 }
 
-static QString getFilterFromList(const QByteArray &name, const QStringList &filterList, bool &found)
+static QString getFilterFromList(const QString &name, const QStringList &filterList, bool &found)
 {
    found = false;
 
@@ -2304,25 +2304,22 @@ QString getFileFilter(const QByteArray &name, bool isSourceCode)
    }
 }
 
-QByteArray transcodeCharacterStringToUTF8(const QByteArray &input)
-{
-   bool error = false;
-
+QString transcodeToQString(const QByteArray &input)
+{  
    static QString inputEncoding = Config::getString("input-encoding");
-   const QString outputEncoding = "UTF-8";
- 
-   if (inputEncoding.isEmpty() || inputEncoding.compare(outputEncoding, Qt::CaseInsensitive) == 0) {
-      return input;
+   
+   if (inputEncoding.isEmpty()) {
+      inputEncoding = "UTF-8";
    }
 
    QTextCodec *temp = QTextCodec::codecForName(inputEncoding.toUtf8());
    
    if (! temp) {
-      err("Unsupported character conversion: '%s'->'%s'\n", qPrintable(inputEncoding), qPrintable(outputEncoding));
+      err("Unsupported character encoding: '%s'\n", qPrintable(inputEncoding));
       return input;
    }
 
-   return temp->toUnicode(input).toUtf8();   
+   return temp->toUnicode(input);   
 }
 
 /*! reads a file with name \a name and returns it as a string. If \a filter
@@ -2364,7 +2361,7 @@ QByteArray fileToString(const QString &name, bool filter, bool isSourceCode)
       }
 
       BufStr buf(fi.size());
-      fileOpened = readInputFile(name.toUtf8(), buf, filter, isSourceCode);
+      fileOpened = readInputFile(name, buf, filter, isSourceCode);
 
       if (fileOpened) {
          int s = buf.size();
@@ -3496,10 +3493,10 @@ static void findMembersWithSpecificName(MemberName *mn, const QByteArray &args, 
  *   - if `fd' is non zero, the member was found in the global namespace of
  *     file fd.
  */
-bool getDefs(const QByteArray &scName, const QByteArray &mbName, const QByteArray &args, QSharedPointer<MemberDef> &md,
+bool getDefs(const QString &scName, const QString &mbName, const QString &args, QSharedPointer<MemberDef> &md,
              QSharedPointer<ClassDef> &cd, QSharedPointer<FileDef> &fd, QSharedPointer<NamespaceDef> &nd, 
              QSharedPointer<GroupDef> &gd, bool forceEmptyScope, QSharedPointer<FileDef> currentFile, 
-             bool checkCV, const QByteArray &forceTagFile )
+             bool checkCV, const QString &forceTagFile )
 {
    fd = QSharedPointer<FileDef>();
    md = QSharedPointer<MemberDef>();
@@ -3511,8 +3508,8 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const QByteArra
       return false;   
    }
 
-   QByteArray scopeName  = scName;
-   QByteArray memberName = mbName;
+   QString scopeName  = scName;
+   QString memberName = mbName;
 
    scopeName  = substitute(scopeName, "\\", "::");  // for PHP
    memberName = substitute(memberName, "\\", "::"); // for PHP
@@ -3529,8 +3526,8 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const QByteArra
       pm = im + 2;
    }
  
-   QByteArray mName = memberName;
-   QByteArray mScope;
+   QString mName = memberName;
+   QString mScope;
 
    if (! memberName.startsWith("operator ") && (im = memberName.lastIndexOf("::")) != -1 &&
          im < (int)memberName.length() - 2) {
@@ -3554,7 +3551,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const QByteArra
       int scopeOffset = scopeName.length();
 
       do {
-         QByteArray className = scopeName.left(scopeOffset);
+         QString className = scopeName.left(scopeOffset);
 
          if (! className.isEmpty() && !mScope.isEmpty()) {
             className += "::" + mScope;
@@ -3752,7 +3749,7 @@ bool getDefs(const QByteArray &scName, const QByteArray &mbName, const QByteArra
 
 
       do {
-         QByteArray namespaceName = scopeName.left(scopeOffset);
+         QString namespaceName = scopeName.left(scopeOffset);
 
          if (! namespaceName.isEmpty() && ! mScope.isEmpty()) {
             namespaceName += "::" + mScope;
@@ -4040,11 +4037,11 @@ static bool isLowerCase(const QByteArray &str)
 /*! Returns an object given its name and context
  *  @post return value true implies *resContext!=0 or *resMember!=0
  */
-bool resolveRef(const QByteArray &scName, const QByteArray &tsName, bool inSeeBlock, QSharedPointer<Definition> *resContext,
+bool resolveRef(const QString &scName, const QString &tsName, bool inSeeBlock, QSharedPointer<Definition> *resContext,
                 QSharedPointer<MemberDef> *resMember, bool lookForSpecialization, QSharedPointer<FileDef> currentFile,
                 bool checkScope)
 {  
-   QByteArray fullName = substitute(tsName, "#", "::");
+   QString fullName = substitute(tsName, "#", "::");
 
    if (fullName.indexOf("anonymous_namespace{") == -1) {
       fullName = removeRedundantWhiteSpace(substitute(fullName, ".", "::"));
@@ -4095,13 +4092,13 @@ bool resolveRef(const QByteArray &scName, const QByteArray &tsName, bool inSeeBl
    }
 
    // extract userscope + name
-   QByteArray nameStr = fullName.left(endNamePos);
+   QString nameStr = fullName.left(endNamePos);
    if (explicitScope) {
       nameStr = nameStr.mid(2);
    }
 
    // extract arguments
-   QByteArray argsStr;
+   QString argsStr;
    if (bracePos != -1) {
       argsStr = fullName.right(fullName.length() - bracePos);
    }
@@ -4123,7 +4120,7 @@ bool resolveRef(const QByteArray &scName, const QByteArray &tsName, bool inSeeBl
       }
    }
 
-   QByteArray scopeStr = scName;
+   QString scopeStr = scName;
 
    QSharedPointer<MemberDef>    md;
    QSharedPointer<ClassDef>     cd;
@@ -4206,10 +4203,10 @@ bool resolveRef(const QByteArray &scName, const QByteArray &tsName, bool inSeeBl
    return false;
 }
 
-QByteArray linkToText(SrcLangExt lang, const QByteArray &link, bool isFileName)
+QString linkToText(SrcLangExt lang, const QString &link, bool isFileName)
 {
    // static bool optimizeOutputJava = Config::getBool("optimize-java");
-   QByteArray result = link;
+   QString result = link;
 
    if (! result.isEmpty()) {
       // replace # by ::
@@ -4225,7 +4222,7 @@ QByteArray linkToText(SrcLangExt lang, const QByteArray &link, bool isFileName)
          result = result.right(result.length() - 2);
       }
 
-      QByteArray sep = getLanguageSpecificSeparator(lang);
+      QString sep = getLanguageSpecificSeparator(lang);
 
       if (sep != "::") {
          result = substitute(result, "::", sep);
@@ -4315,7 +4312,7 @@ bool resolveLink(const QString &scName, const QString &linkRef, bool xx, QShared
       *resContext = nd;
       return true;
 
-   } else if ((dir = Doxy_Globals::directories.find(QFileInfo(linkRef).absoluteFilePath().toUtf8() + "/")) && dir->isLinkable()) { 
+   } else if ((dir = Doxy_Globals::directories.find(QFileInfo(linkRef).absoluteFilePath() + "/")) && dir->isLinkable()) { 
       // TODO: make this location independent like filedefs
 
       *resContext = dir;
@@ -4339,12 +4336,12 @@ bool resolveLink(const QString &scName, const QString &linkRef, bool xx, QShared
 // This link has the text 'lt' (if not 0), otherwise `lr' is used as a
 // basis for the link's text returns true if a link could be generated.
 
-bool generateLink(OutputDocInterface &od, const QByteArray &clName, const QByteArray &lr, bool inSeeBlock, const QByteArray &lt)
+bool generateLink(OutputDocInterface &od, const QString &clName, const QString &lr, bool inSeeBlock, const QString &lt)
 {   
    QSharedPointer<Definition> compound;  
  
-   QByteArray anchor;
-   QByteArray linkText = linkToText(SrcLangExt_Unknown, lt, false);
+   QString anchor;
+   QString linkText = linkToText(SrcLangExt_Unknown, lt, false);
   
    if (resolveLink(clName, lr, inSeeBlock, &compound, anchor)) {
 
@@ -4378,9 +4375,9 @@ bool generateLink(OutputDocInterface &od, const QByteArray &clName, const QByteA
    }
 }
 
-void generateFileRef(OutputDocInterface &od, const QByteArray &name, const QByteArray &text)
+void generateFileRef(OutputDocInterface &od, const QString &name, const QString &text)
 {   
-   QByteArray linkText = text;  
+   QString linkText = text;  
 
    if (linkText.isEmpty()) {
       linkText = name;
@@ -4494,11 +4491,11 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
    return QSharedPointer<FileDef>();
 }
 
-QByteArray showFileDefMatches(const FileNameDict *fnDict, const QByteArray &xName)
+QString showFileDefMatches(const FileNameDict *fnDict, const QString &xName)
 {
-   QByteArray result;
-   QByteArray path;
-   QByteArray name = xName;
+   QString result;
+   QString path;
+   QString name = xName;
 
    int slashPos = qMax(name.lastIndexOf('/'), name.lastIndexOf('\\'));
 
@@ -4507,8 +4504,8 @@ QByteArray showFileDefMatches(const FileNameDict *fnDict, const QByteArray &xNam
       name = name.right(name.length() - slashPos - 1);
    }
 
-   FileName *fn;
-   fn = (*fnDict)[name].data();  
+   QSharedPointer<FileName> fn;
+   fn = (*fnDict)[name];  
 
    if (fn) { 
       for (auto fd : *fn) {
@@ -4534,29 +4531,19 @@ QString substitute(const QString &origString, const QString &oldWord, const QStr
  *  in Config::getList("ignore-prefix") that matches \a name at the left hand side,
  *  or zero if no match was found
  */
-int getPrefixIndex(const QByteArray &name)
+int getPrefixIndex(const QString &name)
 {
    if (name.isEmpty()) {
       return 0;
    }
 
-   static const QStringList sl = Config::getList("ignore-prefix");  
+   static const QStringList slist = Config::getList("ignore-prefix");  
 
-   for (auto s : sl) { 
-      QByteArray temp = s.toUtf8();
-        
-      const char *ps = temp.constData();
-      const char *pd = name.constData();
+   for (auto s : slist) { 
 
-      int i = 0;
-
-      while (*ps != 0 && *pd != 0 && *ps == *pd) {
-         ps++, pd++, i++;
+      if (name.startsWith(s) && name != s)  {
+         return s.length();
       }
-
-      if (*ps == 0 && *pd != 0) {
-         return i;
-      }      
    }
 
    return 0;
@@ -4818,7 +4805,7 @@ QString convertNameToFile(const QString &name, bool allowDots, bool allowUndersc
          // prevent names that cannot be created
          // third algorithm based on MD5 hash
       
-         QByteArray sigStr;
+         QString sigStr;
          sigStr = QCryptographicHash::hash(result.toUtf8(), QCryptographicHash::Md5).toHex();  
 
          result = result.left(128 - 32) + sigStr;
@@ -4863,7 +4850,7 @@ QString convertNameToFile(const QString &name, bool allowDots, bool allowUndersc
 #elif MAP_ALGO == ALGO_MD5
       // third algorithm based on MD5 hash
  
-      QByteArray sigStr;
+      QString sigStr;
       sigStr = QCryptographicHash::hash(result.toUtf8(), QCryptographicHash::Md5);  
 
       l1Dir = sigStr[14] & 0xf;
@@ -5078,37 +5065,33 @@ QString stripScope(const QString &name)
 
 
 /*! Converts a string to an XML-encoded string */
-QByteArray convertToXML(const QString &s)
+QString convertToXML(const QString &s)
 {
-   static GrowBuf growBuf;
-   growBuf.clear();
-
-   if (s == 0) {
-      return "";
+   QString retval;
+   
+   if (s.isEmpty()) {
+      return retval;
    }
 
-   QByteArray temp = s.toUtf8();
-   const char *p   = temp.constData();
-   char c;
+   for (auto c : s) {
 
-   while ((c = *p++)) {
-
-      switch (c) {
+      switch (c.unicode()) {
          case '<':
-            growBuf.addStr("&lt;");
+            retval += "&lt;";
             break;
          case '>':
-            growBuf.addStr("&gt;");
+            retval += "&gt;";
             break;
          case '&':
-            growBuf.addStr("&amp;");
+            retval += "&amp;";
             break;
          case '\'':
-            growBuf.addStr("&apos;");
+            retval += "&apos;";
             break;
          case '"':
-            growBuf.addStr("&quot;");
+            retval += "&quot;";
             break;
+
          case  1:
          case  2:
          case  3:
@@ -5141,18 +5124,19 @@ QByteArray convertToXML(const QString &s)
             break; // skip invalid XML characters (see http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char)
 
          default:
-            growBuf.addChar(c);
+            retval += c;
             break;
       }
    }
-
-   growBuf.addChar(0);
-   return growBuf.get();
+   
+   return retval;
 }
 
 /*! Converts a string to a HTML-encoded string */
-QByteArray convertToHtml(const QString &s, bool keepEntities)
+QString convertToHtml(const QString &s, bool keepEntities)
 {
+   // BROOM - adjust like the one above
+
    static GrowBuf growBuf;
    growBuf.clear();
 
@@ -5213,23 +5197,23 @@ QByteArray convertToHtml(const QString &s, bool keepEntities)
    return growBuf.get();
 }
 
-QByteArray convertToJSString(const QString &s)
+QString convertToJSString(const QString &s)
 {
    if (s.isEmpty()) {
       return "";
    }
 
-   QByteArray retval = s.toUtf8(); 
+   QString retval = s; 
 
    retval.replace("\"", "\\\"");
    retval.replace("\'", "\\\'");
          
-   return convertCharEntitiesToUTF8(retval);
+   return convertCharEntities(retval);
 }
 
-QByteArray convertCharEntitiesToUTF8(const QByteArray &s)
+QString convertCharEntities(const QString &s)
 {
-   QByteArray result;
+   QString result;
    static QRegExp entityPat("&[a-zA-Z]+[0-9]*;");
 
    if (s.length() == 0) {
@@ -5247,7 +5231,7 @@ QByteArray convertCharEntitiesToUTF8(const QByteArray &s)
          growBuf.addStr(s.mid(i, p - i));
       }
 
-      QByteArray entity = s.mid(p, l);
+      QString entity = s.mid(p, l);
       DocSymbol::SymType symType = HtmlEntityMapper::instance()->name2sym(entity);
       const char *code = 0;
 
@@ -5357,7 +5341,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
  *  class \a name and a template argument list \a templSpec. If -1 is returned
  *  there are no more matches.
  */
-int extractClassNameFromType(const QByteArray &type, int &pos, QByteArray &name, QByteArray &templSpec, SrcLangExt lang)
+int extractClassNameFromType(const QString &type, int &pos, QString &name, QString &templSpec, SrcLangExt lang)
 {
    static const QRegExp re_norm("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9:\\x80-\\xFF]*");
    static const QRegExp re_ftn("[a-z_A-Z\\x80-\\xFF][()=_a-z_A-Z0-9:\\x80-\\xFF]*");
@@ -5453,7 +5437,7 @@ int extractClassNameFromType(const QByteArray &type, int &pos, QByteArray &name,
    return -1;
 }
 
-QByteArray normalizeNonTemplateArgumentsInString(const QByteArray &name, QSharedPointer<Definition> context, 
+QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointer<Definition> context, 
                   const ArgumentList *formalArgs)
 {
    // skip until <
@@ -5464,7 +5448,7 @@ QByteArray normalizeNonTemplateArgumentsInString(const QByteArray &name, QShared
    }
 
    p++;
-   QByteArray result = name.left(p);
+   QString result = name.left(p);
 
    static QRegExp re("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
    int l, i;
@@ -5518,13 +5502,13 @@ QByteArray normalizeNonTemplateArgumentsInString(const QByteArray &name, QShared
  *  is returned as a string. The argument \a name is used to
  *  prevent recursive substitution.
  */
-QByteArray substituteTemplateArgumentsInString(const QByteArray &name, ArgumentList *formalArgs, ArgumentList *actualArgs)
+QString substituteTemplateArgumentsInString(const QString &name, ArgumentList *formalArgs, ArgumentList *actualArgs)
 {  
    if (formalArgs == 0) {
       return name;
    }
 
-   QByteArray result;
+   QString result;
 
    static QRegExp re("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
    int p = 0, l, i;
@@ -5535,7 +5519,7 @@ QByteArray substituteTemplateArgumentsInString(const QByteArray &name, ArgumentL
       l = re.matchedLength();
 
       result += name.mid(p, i - p);
-      QByteArray n = name.mid(i, l);
+      QString n = name.mid(i, l);
  
       // if n is a template argument, then we substitute it
       // for its template instance argument.
@@ -5827,7 +5811,7 @@ int getScopeFragment(const QString &s, int p, int *l)
    return p;
 }
 
-QSharedPointer<PageDef> addRelatedPage(const QByteArray &name, const QString &ptitle, const QByteArray &doc, QList<SectionInfo> *,
+QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitle, const QString &doc, QList<SectionInfo> *,
                   const QString &fileName, int startLine, const QList<ListItemInfo> *sli, QSharedPointer<GroupDef> gd, 
                   TagInfo *tagInfo, SrcLangExt lang)
 {
@@ -5841,7 +5825,7 @@ QSharedPointer<PageDef> addRelatedPage(const QByteArray &name, const QString &pt
 
    } else { 
       // new page
-      QByteArray baseName = name;
+      QString baseName = name;
 
       if (baseName.right(4) == ".tex") {
          baseName = baseName.left(baseName.length() - 4);
@@ -5850,7 +5834,7 @@ QSharedPointer<PageDef> addRelatedPage(const QByteArray &name, const QString &pt
          baseName = baseName.left(baseName.length() - Doxy_Globals::htmlFileExtension.length());
       }
 
-      QByteArray title = ptitle.trimmed();
+      QString title = ptitle.trimmed();
       pd = QMakeShared<PageDef>(fileName, startLine, baseName, doc, title);
 
       pd->setRefItems(sli);
@@ -5876,7 +5860,7 @@ QSharedPointer<PageDef> addRelatedPage(const QByteArray &name, const QString &pt
 
       if (! pd->title().isEmpty()) {
          // a page name is a label as well
-         QByteArray file;
+         QString file;
 
          if (gd) {
             file = gd->getOutputFileBase();
@@ -5990,13 +5974,12 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
    }
 
    QByteArray tmp = text.toUtf8(); 
-   const unsigned char *p = (const unsigned char *)tmp.constData();   
-
-   const unsigned char *q;
-
-   int cnt;
-   unsigned char c;
-   unsigned char pc = '\0';
+   const char *p  = tmp.constData();   
+  
+   int cnt;   
+   
+   char c;
+   char pc = '\0';
 
    while (*p) {
       c = *p++;
@@ -6006,20 +5989,25 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
             case '\\':
                t << "\\(\\backslash\\)";
                break;
+
             case '{':
                t << "\\{";
                break;
+
             case '}':
                t << "\\}";
                break;
+
             case '_':
                t << "\\_";
                break;
+
             default:
-               t << (char)c;
+               t << c;
          }
 
       } else {
+
          switch (c) {
             case '#':
                t << "\\#";
@@ -6039,16 +6027,23 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
             case '&':              
                // migiht be a special symbol
 
-               q   = p;
-               cnt = 2;    // we have to count & and ; as well
-               while (*q && *q != ';') {
+               const char *ptr2;
+
+               ptr2 = p;
+               cnt  = 2;  
+
+               // we have to count & and ; as well
+               while (*ptr2 && *ptr2 != ';') {
                   cnt++;
-                  q++;
+                  ptr2++;
                }
 
-               if (*q == ';')  {
-                  --p; // we need & as well
-                  DocSymbol::SymType res = HtmlEntityMapper::instance()->name2sym(QByteArray((char *)p).left(cnt));
+               if (*ptr2 == ';')  {
+                  // we need & as well
+                  --p; 
+
+                  QString tmp = QByteArray(p, cnt);  
+                  DocSymbol::SymType res = HtmlEntityMapper::instance()->name2sym(tmp);
 
                   if (res == DocSymbol::Sym_Unknown) {
                      p++;
@@ -6056,11 +6051,12 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
 
                   } else {
                      t << HtmlEntityMapper::instance()->latex(res);
-                     p = q;
+                     p = ptr2;
                   }
 
                } else {
                   t << "\\&";
+
                }
                break;
 
@@ -6073,28 +6069,36 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                   t << "\\+";
                }
                t << "\\_";
+
                if (!insideTabbing) {
                   t << "\\+";
                }
                break;
+
             case '{':
                t << "\\{";
                break;
+
             case '}':
                t << "\\}";
                break;
+
             case '<':
                t << "$<$";
                break;
+
             case '>':
                t << "$>$";
                break;
+
             case '|':
                t << "$\\vert$";
                break;
+
             case '~':
                t << "$\\sim$";
                break;
+
             case '[':
                if (Config::getBool("latex-hyper-pdf") || insideItem) {
                   t << "\\mbox{[}";
@@ -6102,39 +6106,46 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                   t << "[";
                }
                break;
+
             case ']':
                if (pc == '[') {
                   t << "$\\,$";
                }
+
                if (Config::getBool("latex-hyper-pdf") || insideItem) {
                   t << "\\mbox{]}";
                } else {
                   t << "]";
                }
                break;
+
             case '-':
                t << "-\\/";
                break;
+
             case '\\':
                t << "\\textbackslash{}";
                break;
+
             case '"':
                t << "\\char`\\\"{}";
                break;
+
             case '\'':
                t << "\\textquotesingle{}";
                break;
 
-            default:
-               //if (!insideTabbing && forceBreaks && c!=' ' && *p!=' ')
-               if (!insideTabbing &&
-                     ((c >= 'A' && c <= 'Z' && pc != ' ' && pc != '\0') || (c == ':' && pc != ':') || (pc == '.' && isId(c)))
-                  ) {
-                  t << "\\+";
+            default:               
+
+               if (! insideTabbing) {
+                  if ( (c >= 'A' && c <= 'Z' && pc != ' ' && pc != '\0') || (c == ':' && pc != ':') || (pc == '.' && isId(c)) ) {                   
+                     t << "\\+";
+                  }
                }
-               t << (char)c;
+               t << c;
          }
       }
+
       pc = c;
    }
 }
@@ -6185,11 +6196,11 @@ QString stripExtension(QString fName)
 }
 
 
-void replaceNamespaceAliases(QByteArray &scope, int i)
+void replaceNamespaceAliases(QString &scope, int i)
 {
    while (i > 0) {
-      QByteArray ns = scope.left(i);
-      QByteArray s  = Doxy_Globals::namespaceAliasDict[ns];
+      QString ns = scope.left(i);
+      QString s  = Doxy_Globals::namespaceAliasDict[ns];
 
       if (! s.isEmpty()) {
          scope = s + scope.right(scope.length() - i);
@@ -6202,7 +6213,7 @@ void replaceNamespaceAliases(QByteArray &scope, int i)
    }
 }
 
-QByteArray stripPath(const QString &s)
+QString stripPath(const QString &s)
 {
    QString result = s;
 
@@ -6218,11 +6229,11 @@ QByteArray stripPath(const QString &s)
       result = result.mid(i + 1);
    }
 
-   return result.toUtf8();
+   return result;
 }
 
 /** returns \c true iff string \a s contains word \a w */
-bool containsWord(const QByteArray &s, const QByteArray &word)
+bool containsWord(const QString &s, const QString &word)
 {
    static QRegExp wordExp("[a-z_A-Z\\x80-\\xFF]+");
    int p = 0, i, l;
@@ -6240,7 +6251,7 @@ bool containsWord(const QByteArray &s, const QByteArray &word)
    return false;
 }
 
-bool findAndRemoveWord(QByteArray &s, const QByteArray &word)
+bool findAndRemoveWord(QString &s, const QString &word)
 {
    static QRegExp wordExp("[a-z_A-Z\\x80-\\xFF]+");
    int p = 0, i, l;
@@ -6274,36 +6285,54 @@ bool findAndRemoveWord(QByteArray &s, const QByteArray &word)
  *         from the start.
  *  @returns The stripped string.
  */
-QByteArray stripLeadingAndTrailingEmptyLines(const QByteArray &s, int &docLine)
-{
-   const char *p = s.data();
-   if (p == 0) {
-      return 0;
+QString stripLeadingAndTrailingEmptyLines(const QString &s, int &docLine)
+{  
+   if (s.isEmpty()) {
+      return "";
    }
 
+   const QChar *p = s.constData();
+
    // search for leading empty lines
-   int i = 0, li = -1, l = s.length();
-   char c;
-   while ((c = *p++)) {
+   int i  = 0;
+   int li = -1;
+   int l  = s.length();
+
+   QChar c;
+
+   while ((c = *p++).unicode()) {
+
       if (c == ' ' || c == '\t' || c == '\r') {
          i++;
+
       } else if (c == '\n') {
-         i++, li = i, docLine++;
+         i++;
+         li = i;
+         docLine++;
+
       } else {
          break;
+
       }
    }
 
    // search for trailing empty lines
-   int b = l - 1, bi = -1;
-   p = s.data() + b;
+   int b  = l - 1
+   int bi = -1;
+
+   p = s.constData() + b;
+
    while (b >= 0) {
       c = *p;
       p--;
+
       if (c == ' ' || c == '\t' || c == '\r') {
          b--;
+
       } else if (c == '\n') {
-         bi = b, b--;
+         bi = b;
+         b--;
+
       } else {
          break;
       }
@@ -6318,12 +6347,16 @@ QByteArray stripLeadingAndTrailingEmptyLines(const QByteArray &s, int &docLine)
    if (bi == -1) {
       bi = l;
    }
+
    if (li == -1) {
       li = 0;
    }
+
    if (bi <= li) {
-      return 0;   // only empty lines
+      // only empty lines
+      return "";  
    }
+
    return s.mid(li, bi - li);
 }
 
@@ -6533,7 +6566,7 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
 }
 
 /*! Returns true iff the given name string appears to be a typedef in scope. */
-bool checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QByteArray &name)
+bool checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QString &name)
 {
    QSharedPointer<MemberDef> bestMatch = getMemberFromSymbol(scope, fileScope, name);
 
@@ -6627,61 +6660,54 @@ int nextUtf8CharPosition(const QByteArray &utf8Str, int len, int startPos)
    return startPos + bytes;
 }
 
-QByteArray parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md,
-                              const QByteArray &doc, const QByteArray &fileName, int lineNr)
+QString parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md,
+                  const QString &doc, const QString &fileName, int lineNr)
 {
-   QByteArray s;
+   QString s;
 
    if (doc.isEmpty()) {
       return s;
    }
 
-   QTextStream t(&s);
-   DocNode *root = validatingParseDoc(fileName, lineNr, scope, md, doc, false, false);
-
-   TextDocVisitor *visitor = new TextDocVisitor(t);
-   root->accept(visitor);
-
-   delete visitor;
-   delete root;
-
-   QByteArray result = convertCharEntitiesToUTF8(s);
-   int i = 0;
-   int charCnt = 0;
-   int l = result.length();
-
-   bool addEllipsis = false;
-
-   while ((i = nextUtf8CharPosition(result, l, i)) < l) {
-      charCnt++;
-      if (charCnt >= 80) {
-         break;
-      }
+   {
+      QTextStream t_stream(&s);
+      DocNode *root = validatingParseDoc(fileName, lineNr, scope, md, doc, false, false);
+   
+      TextDocVisitor *visitor = new TextDocVisitor(t_stream);
+      root->accept(visitor);
+   
+      delete visitor;
+      delete root;
    }
 
-   if (charCnt >= 80) { 
+   QString result = convertCharEntities(s);
+  
+   int len = result.length();
+   int count = len;
+
+   if (count >= 80) { 
       // try to truncate the string
 
-      while ((i = nextUtf8CharPosition(result, l, i)) < l && charCnt < 100) {
-         charCnt++;
+      for (count = 80; count < 100; ++count)  {
 
-         if (result.at(i) >= 0 && isspace(result.at(i))) {
-            addEllipsis = true;
+         if (count == len) { 
+            break;
+         }
 
-         } else if (result.at(i) == ',' || result.at(i) == '.' || result.at(i) == '?') {
+         if (result.at(count) == ',' || result.at(count) == '.' || result.at(count) == '?') {           
             break;
          }
       }
    }
 
-   if (addEllipsis || charCnt == 100) {
-      result = result.left(i) + "...";
+   if (count < len) {
+      result = result.left(count) + "...";
    }
 
    return result;
 }
 
-static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion = false);
+static QString expandAliasRec(const QString &s, bool allowRecursion = false);
 
 struct Marker {
    Marker(int p, int n, int s) : pos(p), number(n), size(s) {}
@@ -6828,12 +6854,12 @@ static QByteArray escapeCommas(const QByteArray &s)
    return retval;
 }
 
-static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
+static QString expandAliasRec(const QString s, bool allowRecursion)
 {
-   QByteArray result;
+   QString result;
    static QRegExp cmdPat("[\\\\@][a-z_A-Z][a-z_A-Z0-9]*");
 
-   QByteArray value = s;
+   QString value = s;
 
    int i;
    int len;
@@ -6843,7 +6869,7 @@ static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
       len = cmdPat.matchedLength();
       result += value.mid(p, i - p);
 
-      QByteArray args = extractAliasArgs(value, i + len);
+      QString args = extractAliasArgs(value, i + len);
 
       bool hasArgs = ! args.isEmpty();            // found directly after command
       int argsLen  =   args.length();
@@ -6859,8 +6885,7 @@ static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
          cmd = cmd + QString("{%1}").arg(numArgs);    // alias name + {n}
       }
 
-      QByteArray aliasText = Doxy_Globals::aliasDict.value(cmd);
-
+      QString aliasText = Doxy_Globals::aliasDict.value(cmd);
 
       if (numArgs > 1 &&  aliasText.isEmpty()) {
          // in case there is no command with numArgs parameters, but there is a command with 1 parameter
@@ -6881,7 +6906,7 @@ static QByteArray expandAliasRec(const QByteArray s, bool allowRecursion)
             s_aliasesProcessed.insert(cmd);
          }
 
-         QByteArray val = aliasText;
+         QString val = aliasText;
          if (hasArgs) {
             val = replaceAliasArguments(val, args);            
          }
@@ -6965,9 +6990,9 @@ QByteArray extractAliasArgs(const QByteArray &args, int pos)
    return "";
 }
 
-QByteArray resolveAliasCmd(const QByteArray aliasCmd)
+QString resolveAliasCmd(const QString &aliasCmd)
 {
-   QByteArray result;
+   QString result;
 
    s_aliasesProcessed.clear(); 
    result = expandAliasRec(aliasCmd);
@@ -6975,9 +7000,9 @@ QByteArray resolveAliasCmd(const QByteArray aliasCmd)
    return result;
 }
 
-QByteArray expandAlias(const QByteArray &aliasName, const QByteArray &aliasValue)
+QString expandAlias(const QString &aliasName, const QString &aliasValue)
 {
-   QByteArray result;
+   QString result;
    s_aliasesProcessed.clear();
 
    // avoid expanding this command recursively
@@ -7078,7 +7103,7 @@ static int transcodeCharacterBuffer(const QByteArray &fileName, BufStr &srcBuf, 
 }
 
 //! read a file name \a fileName and optionally filter and transcode it
-bool readInputFile(const QByteArray &fileName, BufStr &inBuf, bool filter, bool isSourceCode)
+bool readInputFile(const QString &fileName, BufStr &inBuf, bool filter, bool isSourceCode)
 {
    // try to open file
    int size = 0;
@@ -7149,7 +7174,7 @@ bool readInputFile(const QByteArray &fileName, BufStr &inBuf, bool filter, bool 
       // transcode according to the INPUT_ENCODING setting
       // do character transcoding if needed.
 
-      transcodeCharacterBuffer(fileName, inBuf, inBuf.curPos(), Config::getString("input-encoding").toUtf8(), "UTF-8");
+      transcodeCharacterBuffer(fileName, inBuf, inBuf.curPos(), Config::getString("input-encoding"), "UTF-8");
    }
 
    //inBuf.addChar('\n'); /* to prevent problems under Windows ? */
@@ -7169,7 +7194,7 @@ bool readInputFile(const QByteArray &fileName, BufStr &inBuf, bool filter, bool 
 }
 
 // Replace %word by word in title
-QByteArray filterTitle(const QString &title)
+QString filterTitle(const QString &title)
 {
    QString tf;
 
@@ -7187,7 +7212,7 @@ QByteArray filterTitle(const QString &title)
 
    tf += title.right(title.length() - p);
 
-   return tf.toUtf8();
+   return tf;
 }
 
 // returns true if the name of the file represented by `fi' matches
@@ -7234,23 +7259,24 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList)
    return found;
 }
 
-QByteArray externalLinkTarget()
+QString externalLinkTarget()
 {
    static bool extLinksInWindow = Config::getBool("external-links-in-window");
 
    if (extLinksInWindow) {
       return "target=\"_blank\" ";
+
    } else {
       return "";
    }
 }
 
-QByteArray externalRef(const QString &relPath, const QByteArray &ref, bool href)
+QString externalRef(const QString &relPath, const QString &ref, bool href)
 {
-   QByteArray result;
+   QString result;
 
    if (! ref.isEmpty()) {
-      QByteArray dest = Doxy_Globals::tagDestinationDict[ref];
+      QString dest = Doxy_Globals::tagDestinationDict[ref];
 
       if (! dest.isEmpty()) {
          result = dest;
@@ -7258,10 +7284,10 @@ QByteArray externalRef(const QString &relPath, const QByteArray &ref, bool href)
 
          if (! relPath.isEmpty() && l > 0 && result.at(0) == '.') {
             // relative path -> prepend relPath.
-            result.prepend(relPath.toUtf8());
+            result.prepend(relPath);
          }
 
-         if (!href) {
+         if (! href) {
             result.prepend("doxypress=\"" + ref + ":");
          }
 
@@ -7275,7 +7301,7 @@ QByteArray externalRef(const QString &relPath, const QByteArray &ref, bool href)
       }
 
    } else {
-      result = relPath.toUtf8();
+      result = relPath;
 
    }
 
@@ -7319,12 +7345,12 @@ void writeColoredImgData(ColoredImgDataItem data)
  *  valid color, based on the intensity represented by hex number AA
  *  and the current html_colorstyle  settings.
  */
-QByteArray replaceColorMarkers(const QByteArray &str)
+QString replaceColorMarkers(const QString &str)
 {
    QString result = str;
   
    if (result.isEmpty()) {
-      return result.toUtf8();
+      return result;
    }
 
    static QRegExp re("##([0-9A-Fa-f][0-9A-Fa-f])");
@@ -7358,7 +7384,7 @@ QByteArray replaceColorMarkers(const QByteArray &str)
       startPos = re.pos(0) + colorStr.length();
    }
    
-   return result.toUtf8();
+   return result;
 }
 
 /** Copies the contents of file with name \a src to the newly created
@@ -7513,7 +7539,7 @@ QByteArray getLanguageSpecificSeparator(SrcLangExt lang, bool classScope)
 /** Corrects URL \a url according to the relative path \a relPath.
  *  Returns the corrected URL. For absolute URLs no correction will be done.
  */
-QByteArray correctURL(const QString &url, const QString &relPath)
+QString correctURL(const QString &url, const QString &relPath)
 {
    QString result = url;
 
@@ -7523,7 +7549,7 @@ QByteArray correctURL(const QString &url, const QString &relPath)
       result.prepend(relPath);
    }
 
-   return result.toUtf8();
+   return result;
 }
 
 bool protectionLevelVisible(Protection prot)
@@ -7534,30 +7560,33 @@ bool protectionLevelVisible(Protection prot)
    return (prot != Private && prot != Package)  || (prot == Private && extractPrivate) || (prot == Package && extractPackage);
 }
 
-QByteArray stripIndentation(const QByteArray &s)
+QString stripIndentation(const QString &s)
 {
    if (s.isEmpty()) {
       return s; 
    }
 
    // compute minimum indentation over all lines
-   const char *p = s.data();
-   char c;
+      
    int indent    = 0;
-   int minIndent = 1000000; // "infinite"
+   int minIndent = 1000000;       // "infinite"
    bool searchIndent = true;
 
    static int tabSize = Config::getInt("tab-size");
 
-   while ((c = *p++)) {
-      if      (c == '\t') {
+   for (auto c : s) {
+      if (c == '\t') {
          indent += tabSize - (indent % tabSize);
+
       } else if (c == '\n') {
          indent = 0, searchIndent = true;
+
       } else if (c == ' ') {
          indent++;
+
       } else if (searchIndent) {
          searchIndent = false;
+
          if (indent < minIndent) {
             minIndent = indent;
          }
@@ -7570,33 +7599,35 @@ QByteArray stripIndentation(const QByteArray &s)
    }
 
    // remove minimum indentation for each line
-   QByteArray result;
-   p = s.data();
+   QString result;   
    indent = 0;
 
-   while ((c = *p++)) {
+   for (auto c : s) {
       if (c == '\n') { // start of new line
          indent = 0;
          result += c;
+
       } else if (indent < minIndent) { // skip until we reach minIndent
          if (c == '\t') {
             int newIndent = indent + tabSize - (indent % tabSize);
             int i = newIndent;
+
             while (i > minIndent) { // if a tab crosses the minIndent boundary fill the rest with spaces
                result += ' ';
                i--;
             }
             indent = newIndent;
+
          } else { // space
             indent++;
          }
+
       } else { // copy anything until the end of the line
          result += c;
       }
    }
 
-   result += '\0';
-   return result.data();
+   return result;
 }
 
 bool fileVisibleInIndex(QSharedPointer<FileDef> fd, bool &genSourceFile)

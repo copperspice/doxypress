@@ -45,7 +45,7 @@ class Debug
                     Lex          = 0x00002000
    };
 
-   static void print(DebugMask mask, int prio, const char *fmt, ...);
+   static void print(DebugMask mask, int prio, const QString &fmt, ...);
    static int  setFlag(const QString &label);
    static void clearFlag(const QString &label);
    static bool isFlagSet(DebugMask mask);
@@ -60,33 +60,20 @@ class Debug
    static int curPriority;
 };
 
-void err(const char *fmt, ...);
-void msg(const char *fmt, ...);
-void warnMsg(const char *fmt, ...);
+void err(const QString &fmt, ...);
+void msg(const QString &fmt, ...);
+void warnMsg(const QString &fmt, ...);
 
 void initWarningFormat();
 
-void printlex(int dbg, bool enter, const char *lexName, const char *fileName);
+void printlex(int dbg, bool enter, const QString &lexName, const QString &fileName);
 
-void warn(const char *file, int line, const char *fmt, ...);
-void warn_simple(const char *file, int line, const char *text);
-void warn_undoc(const char *file, int line, const char *fmt, ...);
+void warn(const QString &file, int line, const QString &fmt, ...);
+void warn_simple(const QString &file, int line, const QString &text);
+void warn_undoc(const QString &file, int line, const QString &fmt, ...);
+void warn_doc_error(const QString &file, int line, const QString &fmt, ...);
 
-void warn_doc_error(const char *file, int line, const char *fmt, ...);
-void warn_doc_error(const char *file, int line, QString fmt_q, ...);
-
-void warn_uncond(const char *fmt, ...);
-void va_warn(const char *file, int line, const char *fmt, va_list args);
-
-inline const char *qPrint(const char *s)
-{
-  if (s) {
-   return s;
-
-  } else {
-   return "";
-
-  }
-}
+void warn_uncond(const QString &fmt, ...);
+void va_warn(const QString &file, int line, const QString &fmt, va_list args);
 
 #endif

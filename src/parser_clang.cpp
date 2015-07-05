@@ -836,23 +836,23 @@ void ClangParser::linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef
 static void detectFunctionBody(const char *s)
 {
  
-   if (g_searchForBody && (qstrcmp(s, ":") == 0 || qstrcmp(s, "{") == 0)) { 
+   if (g_searchForBody && (s == ":" || s == "{")) { 
       // start of 'body' (: is for constructor)
       g_searchForBody = false;
       g_insideBody    = true;
 
-   } else if (g_searchForBody && qstrcmp(s, ";") == 0) { 
+   } else if (g_searchForBody && s == ";") { 
       // declaration only
       g_searchForBody = false;
       g_insideBody    = false;
    }
 
-   if (g_insideBody && qstrcmp(s, "{") == 0) { 
+   if (g_insideBody && s == "{") { 
       // increase scoping level
       g_bracketCount++;
    }
 
-   if (g_insideBody && qstrcmp(s, "}") == 0) { 
+   if (g_insideBody && s == "}") { 
       // decrease scoping level
       g_bracketCount--;
 

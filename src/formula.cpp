@@ -31,7 +31,7 @@
 #include <portable.h>
 #include <util.h>
 
-Formula::Formula(const char *text)
+Formula::Formula(const QString &text)
 {
    static int count = 0;
    number = count++;
@@ -66,7 +66,7 @@ void FormulaList::generateBitmaps(const QString &path)
    QDir thisDir = QDir::current();
 
    // generate a latex file containing one formula per page.
-   QByteArray texName = "_formulas.tex";
+   QString texName = "_formulas.tex";
    QList<int> pagesToGenerate;
      
    QFile f(texName);
@@ -159,7 +159,7 @@ void FormulaList::generateBitmaps(const QString &path)
          QFileInfo fi(formBase + ".eps");
  
          if (fi.exists()) {
-            QByteArray eps = fileToString(formBase + ".eps");
+            QString eps = fileToString(formBase + ".eps");
             int i = eps.indexOf("%%BoundingBox:");
 
             if (i != -1) {
@@ -231,7 +231,7 @@ void FormulaList::generateBitmaps(const QString &path)
          // we read the generated image again, to obtain the pixel data.
          if (f.open(QIODevice::ReadOnly)) {
             QTextStream t(&f);
-            QByteArray s;
+            QString s;
 
             if (! t.atEnd()) {
                s = t.readLine().toUtf8();
@@ -325,7 +325,7 @@ void FormulaList::generateBitmaps(const QString &path)
                if (f.open(QIODevice::WriteOnly)) {
                
                   // parameter 1 is used as a temporary hack to select the right color palette
-                  QByteArray buffer = dstImage.convert(1);
+                  QString buffer = dstImage.convert(1);
  
                   f.write(buffer);
                   f.close();

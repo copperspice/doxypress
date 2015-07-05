@@ -25,16 +25,17 @@
 class Formula
 {
  public:
-   Formula(const char *text);
+   Formula(const QString &text);
    ~Formula();
+
    int getId();
-   QByteArray getFormulaText() const {
+   QString getFormulaText() const {
       return form;
    }
 
  private:
    int number;
-   QByteArray form;
+   QString form;
 };
 
 /** A list of Formula objects. */

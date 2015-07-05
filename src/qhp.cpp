@@ -30,9 +30,9 @@
 #include <groupdef.h>
 #include <filedef.h>
 
-static QByteArray makeFileName(const char *withoutExtension)
+static QString makeFileName(const QString &withoutExtension)
 {
-   QByteArray result = withoutExtension;
+   QString result = withoutExtension;
 
    if (! result.isEmpty()) {
       if (result.at(0) == '!') { // relative URL -> strip marker
@@ -45,14 +45,14 @@ static QByteArray makeFileName(const char *withoutExtension)
    return result;
 }
 
-static QByteArray makeRef(const char *withoutExtension, const char *anchor)
+static QString makeRef(const QString &withoutExtension, const QString &anchor)
 {
    if (!withoutExtension) {
       return QByteArray();
    }
 
-   QByteArray result = makeFileName(withoutExtension);
-   if (!anchor) {
+   QString result = makeFileName(withoutExtension);
+   if (! anchor) {
       return result;
    }
 
@@ -205,7 +205,7 @@ void Qhp::addContentsItem(bool, const QString &name, const QString &, const QStr
 }
 
 void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md,
-                       const char *sectionAnchor, const char *word)
+                       const QString &sectionAnchor, const QString &word)
 {
    if (md) { 
       // member
@@ -314,7 +314,7 @@ void Qhp::handlePrevSection()
 
    // skip "Main Page" as our extra root is pointing to that
    if (! ((m_prevSectionLevel == 1) && (m_prevSectionTitle == getFullProjectName()))) {
-      QByteArray finalRef = makeRef(m_prevSectionBaseName, m_prevSectionAnchor);
+      QString finalRef = makeRef(m_prevSectionBaseName, m_prevSectionAnchor);
    
       QMap<QString, QString> attributes;
       attributes.insert("title", m_prevSectionTitle);

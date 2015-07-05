@@ -39,17 +39,17 @@ struct SectionInfo;
 
 /** Data associated with a detailed description. */
 struct DocInfo {
-   QByteArray doc;
+   QString doc;
    int line;
-   QByteArray file;
+   QString file;
 };
 
 /** Data associated with a brief description. */
 struct BriefInfo {
-   QByteArray doc;
-   QByteArray tooltip;
+   QString doc;
+   QString tooltip;
    int line;
-   QByteArray file;
+   QString file;
 };
 
 /** Data associated with description found in the body. */
@@ -100,7 +100,7 @@ class Definition : public DefinitionIntf
    virtual ~Definition();
 
    /*! Returns the name of the definition */
-   const QByteArray &name() const {
+   const QString &name() const {
       return m_name;
    }
 
@@ -116,7 +116,7 @@ class Definition : public DefinitionIntf
 
    /*! Returns the name of this definition as it appears in the symbol map.
     */
-   QByteArray symbolName() const;
+   QString symbolName() const;
 
    /*! Returns the base file name (without extension) of this definition.
     *  as it is referenced to/written to disk.
@@ -127,13 +127,13 @@ class Definition : public DefinitionIntf
    virtual QString anchor() const = 0;
 
    /*! Returns the name of the source listing of this definition. */
-   virtual QByteArray getSourceFileBase() const;
+   virtual QString getSourceFileBase() const;
 
    /*! Returns the anchor of the source listing of this definition. */
-   virtual QByteArray getSourceAnchor() const;
+   virtual QString getSourceAnchor() const;
 
    /*! Returns the detailed description of this definition */
-   virtual QByteArray documentation() const;
+   virtual QString documentation() const;
 
    /*! Returns the line number at which the detailed documentation was found. */
    int docLine() const;
@@ -141,24 +141,24 @@ class Definition : public DefinitionIntf
    /*! Returns the file in which the detailed documentation block was found.
     *  This can differ from getDefFileName().
     */
-   QByteArray docFile() const;
+   QString docFile() const;
 
    /*! Returns the brief description of this definition. This can include commands. */
-   virtual QByteArray briefDescription(bool abbreviate = false) const;
+   virtual QString briefDescription(bool abbreviate = false) const;
 
    /*! Returns a plain text version of the brief description suitable for use
     *  as a tool tip.
     */
-   QByteArray briefDescriptionAsTooltip()  const;
+   QString briefDescriptionAsTooltip()  const;
 
    /*! Returns the line number at which the brief description was found. */
    int briefLine() const;
 
    /*! Returns the documentation found inside the body of a member */
-   QByteArray inbodyDocumentation() const;
+   QString inbodyDocumentation() const;
 
    /*! Returns the file in which the in body documentation was found */
-   QByteArray inbodyFile() const;
+   QString inbodyFile() const;
 
    /*! Returns the line at which the first in body documentation
        part was found */
@@ -167,13 +167,13 @@ class Definition : public DefinitionIntf
    /*! Returns the file in which the brief description was found.
     *  This can differ from getDefFileName().
     */
-   QByteArray briefFile() const;
+   QString briefFile() const;
 
    /*! returns the file in which this definition was found */
-   QByteArray getDefFileName() const;
+   QString getDefFileName() const;
 
    /*! returns the extension of the file in which this definition was found */
-   QByteArray getDefFileExtension() const;
+   QString getDefFileExtension() const;
 
    /*! returns the line number at which the definition was found */
    int getDefLine() const {
@@ -224,7 +224,7 @@ class Definition : public DefinitionIntf
     *  returns the tagfile for the external project. This can be
     *  translated into an external link target via Doxy_Globals::tagDestinationDict
     */
-   virtual QByteArray getReference() const;
+   virtual QString getReference() const;
 
    /*! Returns true if this definition is imported via a tag file. */
    virtual bool isReference() const;
@@ -263,7 +263,7 @@ class Definition : public DefinitionIntf
    /** returns true if this class has a brief description */
    bool hasBriefDescription() const;
 
-   QByteArray id() const;
+   QString id() const;
 
    int getInputOrderId() {
       return m_inputOrderId;
@@ -273,33 +273,28 @@ class Definition : public DefinitionIntf
       return m_sortId;
    }   
 
-
-   //-----------------------------------------------------------------------------------
-   // ----  setters -----
-   //-----------------------------------------------------------------------------------
-
    /*! Sets a new \a name for the definition */
-   virtual void setName(const char *name);
+   virtual void setName(const QString &name);
 
    /*! Sets a unique id for the symbol. Used for libclang integration. */
-   void setId(const char *name);
+   void setId(const QString &name);
 
    /*! Sets the documentation of this definition to \a d. */
-   virtual void setDocumentation(const char *d, const char *docFile, int docLine, bool stripWhiteSpace = true);
+   virtual void setDocumentation(const QString &d, const QString &docFile, int docLine, bool stripWhiteSpace = true);
 
    /*! Sets the brief description of this definition to \a b.
     *  A dot is added to the sentence if not available.
     */
-   virtual void setBriefDescription(const char *b, const char *briefFile, int briefLine);
+   virtual void setBriefDescription(const QString &b, const QString &briefFile, int briefLine);
 
    /*! Set the documentation that was found inside the body of an item.
     *  If there was already some documentation set, the new documentation
     *  will be appended.
     */
-   virtual void setInbodyDocumentation(const char *d, const char *docFile, int docLine);
+   virtual void setInbodyDocumentation(const QString &d, const QString &docFile, int docLine);
 
    /*! Sets the tag file id via which this definition was imported. */
-   void setReference(const char *r);
+   void setReference(const QString &r);
 
    /*! Add the list of anchors that mark the sections that are found in the
     * documentation.
@@ -334,10 +329,10 @@ class Definition : public DefinitionIntf
 
    QString convertNameToFile(const QString &name, bool allowDots = false) const;
 
-   void writeSourceDef(OutputList &ol, const char *scopeName);
-   void writeInlineCode(OutputList &ol, const char *scopeName);
-   void writeSourceRefs(OutputList &ol, const char *scopeName);
-   void writeSourceReffedBy(OutputList &ol, const char *scopeName);
+   void writeSourceDef(OutputList &ol, const QString &scopeName);
+   void writeInlineCode(OutputList &ol, const QString &scopeName);
+   void writeSourceRefs(OutputList &ol, const QString &scopeName);
+   void writeSourceReffedBy(OutputList &ol, const QString &scopeName);
    void makePartOfGroup(QSharedPointer<GroupDef> gd);
    
    void writeNavigationPath(OutputList &ol) const;
@@ -363,24 +358,24 @@ class Definition : public DefinitionIntf
    Definition(const Definition &d);
 
  private:
-   void addToMap(const QByteArray &name);
+   void addToMap(const QString &name);
  
-   void setSymbolName(const QByteArray &name);
+   void setSymbolName(const QString &name);
 
-   int  _getXRefListId(const char *listName) const;
-   void _writeSourceRefList(OutputList &ol, const char *scopeName,const QString &text, MemberSDict *members, bool);
+   int  _getXRefListId(const QString &listName) const;
+   void _writeSourceRefList(OutputList &ol, const QString &scopeName,const QString &text, MemberSDict *members, bool);
 
-   void _setBriefDescription(const char *b, const char *briefFile, int briefLine);
-   void _setDocumentation(const QByteArray &doc, const QByteArray &docFile, int docLine, bool stripWhiteSpace, bool atTop);
-   void _setInbodyDocumentation(const char *d, const char *docFile, int docLine);
-   bool _docsAlreadyAdded(const QByteArray &doc, QByteArray &sigList);
+   void _setBriefDescription(const QString &b, const QString &briefFile, int briefLine);
+   void _setDocumentation(const QString &doc, const QString &docFile, int docLine, bool stripWhiteSpace, bool atTop);
+   void _setInbodyDocumentation(const QString &d, const QString &docFile, int docLine);
+   bool _docsAlreadyAdded(const QString &doc, QString &sigList);
 
    Definition_Private *m_private; 
-   QByteArray m_name;
+   QString m_name;
 
    bool m_isSymbol;
 
-   QByteArray m_symbolName;
+   QString m_symbolName;
    int m_defLine;
    int m_defColumn;
 
@@ -399,7 +394,7 @@ class DefinitionList : public QList<QSharedPointer<Definition>>, public Definiti
    }
 
    int compareValues(const QSharedPointer<Definition> &item1, const QSharedPointer<Definition> &item2) const {
-      return qstricmp(item1->name(), item2->name());
+      return item1->name().compare(item2->name(), Qt::CaseInsensitive);
    }
 
 };
@@ -420,6 +415,6 @@ class DefinitionListIterator : public QListIterator<QSharedPointer<Definition>>
  *  via \a result. The function returns true if successful and false
  *  in case of an error.
  */
-bool readCodeFragment(const char *fileName, int &startLine, int &endLine, QByteArray &result);
+bool readCodeFragment(const QString &fileName, int &startLine, int &endLine, QString &result);
 
 #endif

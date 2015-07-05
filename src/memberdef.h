@@ -47,7 +47,7 @@ struct TagInfo;
 class MemberDef : public Definition
 {
  public:
-   MemberDef(const char *defFileName, int defLine, int defColumn, const QString &type, const QString &name, 
+   MemberDef(const QString &defFileName, int defLine, int defColumn, const QString &type, const QString &name, 
              const QString &args, const QString &excp, Protection prot, Specifier virt, bool stat,
              Relationship related, MemberType t, const ArgumentList *tal, const ArgumentList *al);
 
@@ -63,22 +63,23 @@ class MemberDef : public Definition
   
    // link id
    QString getOutputFileBase() const override;
-   QByteArray getReference() const;
+   QString getReference() const;
    QString anchor() const override;
 
-   const char *declaration() const;
-   const char *definition() const;
-   const char *typeString() const;
-   const char *argsString() const;
-   const char *excpString() const;
-   const char *bitfieldString() const;
-   const char *extraTypeChars() const;
-   const QByteArray &initializer() const;
+   QString declaration() const;
+   QString definition() const;
+   QString typeString() const;
+   QString argsString() const;
+   QString excpString() const;
+   QString bitfieldString() const;
+   QString extraTypeChars() const;
+   QString initializer() const;
+
    int initializerLines() const;
    Entry::SpecifierFlags getMemberSpecifiers() const;
 
    QSharedPointer<MemberList> getSectionList(QSharedPointer<Definition> d) const;
-   QByteArray    displayDefinition() const;
+   QString displayDefinition() const;
 
    // scope query members
    QSharedPointer<ClassDef> getClassDef() const;
@@ -87,12 +88,12 @@ class MemberDef : public Definition
    QSharedPointer<ClassDef> accessorClass() const;
 
    // property get
-   const QByteArray &getPropertyRead() const;
-   const QByteArray &getPropertyWrite() const;
+   QString getPropertyRead() const;
+   QString getPropertyWrite() const;
 
    // copperspice - additional properties
-   const QByteArray &getPropertyReset() const;
-   const QByteArray &getPropertyNotify() const;
+   QString getPropertyReset() const;
+   QString getPropertyNotify() const;
 
    // querying the grouping definition
    QSharedPointer<GroupDef> getGroupDef() const;
@@ -101,13 +102,13 @@ class MemberDef : public Definition
    int getGroupStartLine() const;
    bool getGroupHasDocs() const;
    QString qualifiedName() const;
-   QByteArray objCMethodName(bool localLink, bool showStatic) const;
+   QString objCMethodName(bool localLink, bool showStatic) const;
 
    // direct kind info
    Protection protection() const;
    Specifier virtualness(int count = 0) const;
    MemberType memberType() const;
-   QByteArray   memberTypeName() const;
+   QString memberTypeName() const;
 
    // get methods
    bool isSignal() const;
@@ -226,8 +227,8 @@ class MemberDef : public Definition
    QSharedPointer<MemberDef> getEnumScope() const;
    QSharedPointer<MemberList> enumFieldList() const;
 
-   void setEnumBaseType(const QByteArray &type);
-   QByteArray enumBaseType() const;
+   void setEnumBaseType(const QString &type);
+   QString enumBaseType() const;
 
    bool hasExamples();
    ExampleSDict *getExamples() const;
@@ -253,14 +254,14 @@ class MemberDef : public Definition
    bool visibleMemberGroup(bool hideNoHeader);
 
    QSharedPointer<MemberDef> templateMaster() const;
-   QByteArray getScopeString() const;
+   QString getScopeString() const;
    QSharedPointer<ClassDef> getClassDefOfAnonymousType();
 
    // cached typedef functions
    bool isTypedefValCached() const;
    QSharedPointer<ClassDef> getCachedTypedefVal() const;
-   QByteArray getCachedTypedefTemplSpec() const;
-   QByteArray getCachedResolvedTypedef() const;
+   QString getCachedTypedefTemplSpec() const;
+   QString getCachedResolvedTypedef() const;
 
    QSharedPointer<MemberDef> memberDefinition() const;
    QSharedPointer<MemberDef> memberDeclaration() const;
@@ -271,43 +272,43 @@ class MemberDef : public Definition
    QSharedPointer<MemberDef> categoryRelation() const;
 
    QString displayName(bool = true) const override;
-   QByteArray getDeclType() const;
+   QString getDeclType() const;
    void getLabels(QStringList &sl, QSharedPointer<Definition> container) const;
 
    const ArgumentList *typeConstraints() const;
 
    //
-   QByteArray documentation() const;
-   QByteArray briefDescription(bool abbr = false) const;
-   QByteArray fieldType() const;
+   QString documentation() const;
+   QString briefDescription(bool abbr = false) const;
+   QString fieldType() const;
 
    // set functions
    void setMemberType(MemberType t);
-   void setDefinition(const char *d);
+   void setDefinition(const QString &d);
    void setFileDef(QSharedPointer<FileDef> fd);
    void setAnchor();
    void setProtection(Protection p);
    void setMemberSpecifiers(Entry::SpecifierFlags s);
    void mergeMemberSpecifiers(Entry::SpecifierFlags s);
-   void setInitializer(const char *i);
-   void setBitfields(const char *s);
+   void setInitializer(const QString &i);
+   void setBitfields(const QString &s);
    void setMaxInitLines(int lines);
    void setMemberClass(QSharedPointer<ClassDef> cd);
    void setSectionList(QSharedPointer<Definition> d, QSharedPointer<MemberList> sl);
 
    void setGroupDef(QSharedPointer<GroupDef> gd, Grouping::GroupPri_t pri,
-                    const QByteArray &fileName, int startLine, bool hasDocs, 
+                    const QString &fileName, int startLine, bool hasDocs, 
                     QSharedPointer<MemberDef> member = QSharedPointer<MemberDef>());
 
    void setExplicitExternal(bool b);
 
    // property set
-   void setPropertyRead(const char *data);
-   void setPropertyWrite(const char *data);
+   void setPropertyRead(const QString &data);
+   void setPropertyWrite(const QString &data);
 
    // copperspice - additional properties
-   void setPropertyReset(const char *data);
-   void setPropertyNotify(const char *data);
+   void setPropertyReset(const QString &data);
+   void setPropertyNotify(const QString &data);
 
    void setTemplateSpecialization(bool b);
 
@@ -317,14 +318,11 @@ class MemberDef : public Definition
    void setHasDocumentedReturnType(bool b);
    void setInheritsDocsFrom(QSharedPointer<MemberDef> md);
    void setTagInfo(TagInfo *i);
-   void setArgsString(const char *as);
+   void setArgsString(const QString &as);
 
    // relation to other members
    void setReimplements(QSharedPointer<MemberDef> md);
    void insertReimplementedBy(QSharedPointer<MemberDef> md);
-
-   // in-body documentation
-   //void setInbodyDocumentation(const char *docs,const char *file,int line);
 
    void setRelatedAlso(QSharedPointer<ClassDef> cd);
 
@@ -369,7 +367,7 @@ class MemberDef : public Definition
    void setDocsForDefinition(bool b);
    void setGroupAlias(QSharedPointer<MemberDef> md);
 
-   void cacheTypedefVal(QSharedPointer<ClassDef> val, const QByteArray &templSpec, const QByteArray &resolvedType);
+   void cacheTypedefVal(QSharedPointer<ClassDef> val, const QString &templSpec, const QString &resolvedType);
    void invalidateTypedefValCache();
 
    void invalidateCachedArgumentTypes();
@@ -384,9 +382,9 @@ class MemberDef : public Definition
    void setCategory(QSharedPointer<ClassDef> cd);
    void setCategoryRelation(QSharedPointer<MemberDef> md);
 
-   void setDocumentation(const char *d, const char *docFile, int docLine, bool stripWhiteSpace = true);
-   void setBriefDescription(const char *b, const char *briefFile, int briefLine);
-   void setInbodyDocumentation(const char *d, const char *inbodyFile, int inbodyLine);
+   void setDocumentation(const QString &d, const QString &docFile, int docLine, bool stripWhiteSpace = true);
+   void setBriefDescription(const QString &b, const QString &briefFile, int briefLine);
+   void setInbodyDocumentation(const QString &d, const QString &inbodyFile, int inbodyLine);
 
    void setHidden(bool b);
    
@@ -439,7 +437,7 @@ class MemberDef : public Definition
    void _writeTypeConstraints(OutputList &ol);
 
    void _writeEnumValues(OutputList &ol, QSharedPointer<Definition> container,
-                         const QByteArray &cfname, const QByteArray &ciname, const QByteArray &cname);
+                         const QString &cfname, const QString &ciname, const QString &cname);
 
    void _writeCategoryRelation(OutputList &ol);
    void _writeTagData(const DefType);

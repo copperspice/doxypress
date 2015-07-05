@@ -108,12 +108,12 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>
 
    void writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
-                  const char *title, const char *subtitle,
+                  const QString &title, const QString &subtitle,
                   bool showEnumValues = false, bool showInline = false,
                   QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), 
                   MemberListType lt = MemberListType_pubMethods);
 
-   void writeDocumentation(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container, const char *title, 
+   void writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container, const QString &title, 
                   bool showEnumValues = false, bool showInline = false);
 
    void writeSimpleDocumentation(OutputList &ol, QSharedPointer<Definition> container);   

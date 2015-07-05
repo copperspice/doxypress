@@ -32,8 +32,7 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
 {
    QFile f(mapName);
 
-   if (! f.open(QIODevice::ReadOnly)) {
-      err("Unable to open map file %s\n"
+   if (! f.open(QIODevice::ReadOnly)) { err("Unable to open map file %s\n" 
           "If Graphviz/dot was installed after a previous problem, delete the output directory " 
           " and run DoxyPress again.\n", qPrintable(mapName) );
       return false;
@@ -56,7 +55,7 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
          // obtain the url and the coordinates in the order used by graphviz-1.5
          sscanf(buf, "rect %s %d,%d %d,%d", url, &x1, &y1, &x2, &y2);
 
-         if (qstrcmp(url, "\\ref") == 0 || qstrcmp(url, "@ref") == 0) {
+         if (url == "\\ref" || url == "@ref") {
             isRef = true;
             sscanf(buf, "rect %s %s %d,%d %d,%d", ref, url, &x1, &y1, &x2, &y2);
          }

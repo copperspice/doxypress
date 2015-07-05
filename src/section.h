@@ -32,7 +32,7 @@ struct SectionInfo {
                       Anchor        = 5
                     };
 
-   SectionInfo(const QString &f, const int lin, const char *l, const char *t, SectionType st, int lev, const char *r = 0) 
+   SectionInfo(const QString &f, const int lin, const  QString &l, const  QString &t, SectionType st, int lev, const  QString &r = QString()) 
       : label(l), title(t), type(st), ref(r), fileName(f), lineNr(lin), generated(false), level(lev) 
    { }
 
@@ -51,10 +51,10 @@ struct SectionInfo {
 
    ~SectionInfo() {}
 
-   QByteArray label;
-   QByteArray title;
+   QString label;
+   QString title;
    SectionType type;
-   QByteArray ref;
+   QString ref;
 
    QSharedPointer<Definition> definition;
 
