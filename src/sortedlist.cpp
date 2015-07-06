@@ -38,7 +38,7 @@ int compareListValues(const BaseClassDef *item1, const BaseClassDef *item2)
       return false;
 
    } else {
-      return qstricmp(c1->name(), c2->name());
+      return c1->name().compare(c2->name(), Qt::CaseInsensitive);
    }
 }
 
@@ -49,11 +49,11 @@ int compareListValues(const ClassDef *item1, const ClassDef *item2)
 {
    static bool b = Config::getBool("sort-by-scope-name");
 
-   if (b) {
-      return qstricmp(item1->name(), item2->name());
+   if (b) {   
+      return item1->name().compare(item2->name(), Qt::CaseInsensitive);
 
    } else {
-      return qstricmp(item1->className(), item2->className());
+      return item1->className().compare(item2->className(), Qt::CaseInsensitive);
 
    }
 }
@@ -75,9 +75,8 @@ int compareListValues(const DotNode *item1, const DotNode *item2)
 // FileList 
 int compareListValues(QSharedPointer<FileDef> item1, QSharedPointer<FileDef> item2) 
 {
-   return qstricmp(item1->name(), item2->name());
+   return item1->name().compare(item2->name(), Qt::CaseInsensitive);
 }
-
 
 // FileNameList --> SortedList<FileName *>
 // FileNameListIterator -->  QListIterator<FileName *>
@@ -85,11 +84,11 @@ int compareListValues(QSharedPointer<FileName> item1, QSharedPointer<FileName> i
 {
    int retval;
 
-   if (Config::getBool("full-path-names")) {
-      retval = qstricmp(item1->fullName(), item2->fullName());
+   if (Config::getBool("full-path-names")) {    
+      retval = item1->fullName().compare(item2->fullName(), Qt::CaseInsensitive);
 
    } else {
-      retval = qstricmp(item1->fileName(), item2->fileName());
+      retval = item1->fileName().compare(item2->fileName(), Qt::CaseInsensitive);
 
    }
 
@@ -124,8 +123,8 @@ int compareListValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2
 
       }
    }
-
-   int cmp = qstricmp(c1->name(), c2->name());
+   
+   int cmp = c1->name().compare(c2->name(), Qt::CaseInsensitive );
 
    return cmp != 0 ? cmp : c1->getDefLine() - c2->getDefLine();
 }
@@ -145,5 +144,5 @@ int compareListValues(const NavIndexEntry *item1, const NavIndexEntry *item2)
 
 int compareListValues(const FileList *item1, const FileList *item2) 
 {
-   return qstricmp(item1->path(), item2->path());
+   return item1->path().compare(item2->path(), Qt::CaseInsensitive );   // BROOM CHECK
 }

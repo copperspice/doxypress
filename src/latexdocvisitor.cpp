@@ -35,38 +35,36 @@
 #include <plantuml.h>
 #include <util.h>
 
-static QByteArray escapeLabelName(const char *s)
+static QString escapeLabelName(const QString &str)
 {
-   QByteArray result;
-   const char *p = s;
-   char c;
+   QString result;
 
-   if (p) {
-      while ((c = *p++)) {
-         switch (c) {
-            case '%':
-               result += "\\%";
-               break;
-            case '|':
-               result += "\\texttt{\"|}";
-               break;
-            case '!':
-               result += "\"!";
-               break;
-            case '{':
-               result += "\\lcurly{}";
-               break;
-            case '}':
-               result += "\\rcurly{}";
-               break;
-            case '~':
-               result += "````~";
-               break; // to get it a bit better in index together with other special characters
-            default:
-               result += c;
-         }
+   for (auto c : str) {
+
+      switch (c.unicode()) {
+         case '%':
+            result += "\\%";
+            break;
+         case '|':
+            result += "\\texttt{\"|}";
+            break;
+         case '!':
+            result += "\"!";
+            break;
+         case '{':
+            result += "\\lcurly{}";
+            break;
+         case '}':
+            result += "\\rcurly{}";
+            break;
+         case '~':
+            result += "````~";
+            break; // to get it a bit better in index together with other special characters
+         default:
+            result += c;
       }
    }
+
    return result;
 }
 
@@ -90,56 +88,55 @@ static const char *getSectionName(int level)
    return secLabels[qMin(maxLevels - 1, l)];
 }
 
-QByteArray LatexDocVisitor::escapeMakeIndexChars(const char *s)
+QString LatexDocVisitor::escapeMakeIndexChars(const QString &str)
 {
-   QByteArray result;
+   QString result;
 
-   const char *p = s;
+   for (auto c : str ) {
 
-   char str[2];
-   str[1] = 0;
+      switch (c.unicode()) {
+         case '!':
+            m_t << "\"!";
+            break;
 
-   char c;
+         case '"':
+            m_t << "\"\"";
+            break;
 
-   if (p) {
-      while ((c = *p++)) {
-         switch (c) {
-            case '!':
-               m_t << "\"!";
-               break;
-            case '"':
-               m_t << "\"\"";
-               break;
-            case '@':
-               m_t << "\"@";
-               break;
-            case '|':
-               m_t << "\\texttt{\"|}";
-               break;
-            case '[':
-               m_t << "[";
-               break;
-            case ']':
-               m_t << "]";
-               break;
-            case '{':
-               m_t << "\\lcurly{}";
-               break;
-            case '}':
-               m_t << "\\rcurly{}";
-               break;
-            default:
-               str[0] = c;
-               filter(str);
-               break;
-         }
+         case '@':
+            m_t << "\"@";
+            break;
+
+         case '|':
+            m_t << "\\texttt{\"|}";
+            break;
+
+         case '[':
+            m_t << "[";
+            break;
+
+         case ']':
+            m_t << "]";
+            break;
+
+         case '{':
+            m_t << "\\lcurly{}";
+            break;
+
+         case '}':
+            m_t << "\\rcurly{}";
+            break;
+
+         default:            
+            filter(c);
+            break;
       }
    }
+
    return result;
 }
 
-
-LatexDocVisitor::LatexDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt, bool insideTabbing)
+LatexDocVisitor::LatexDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt, bool insideTabbing)
    : DocVisitor(DocVisitor_Latex), m_t(t), m_ci(ci), m_insidePre(false), m_insideItem(false), m_hide(false), m_insideTabbing(insideTabbing),
      m_insideTable(false), m_langExt(langExt), m_currentColumn(0), m_inRowspan(false), m_inColspan(false)
 {
@@ -306,10 +303,12 @@ void LatexDocVisitor::visit(DocVerbatim *s)
    if (m_hide) {
       return;
    }
-   QByteArray lang = m_langExt;
-   if (!s->language().isEmpty()) { // explicit language setting
+
+   QString lang = m_langExt;
+   if (! s->language().isEmpty()) { // explicit language setting
       lang = s->language();
    }
+
    SrcLangExt langExt = getLanguageFromFileName(lang);
    switch (s->type()) {
       case DocVerbatim::Code: {
@@ -341,10 +340,8 @@ void LatexDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Dot: {
          static int dotindex = 1;
 
-         QString latexOutput = Config::getString("latex-output") + "/inline_dotgraph_";
-        
-         QString fileName;
-         fileName = QString("%1%2.dot").arg(latexOutput).arg(dotindex++);
+         QString latexOutput = Config::getString("latex-output") + "/inline_dotgraph_";        
+         QString fileName = QString("%1%2.dot").arg(latexOutput).arg(dotindex++);
 
          QFile file(fileName);
 
@@ -352,7 +349,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
             err("Could not open file %s for writing\n", qPrintable(fileName));
          }
 
-         file.write( s->text(), s->text().length() );
+         file.write( s->text().toUtf8() );
          file.close();
 
          m_t << "\\begin{center}\n";
@@ -372,20 +369,18 @@ void LatexDocVisitor::visit(DocVerbatim *s)
          static int mscindex = 1;
 
          QString latexOutput = Config::getString("latex-output") + "/inline_mscgraph_";
-
-         QByteArray baseName;
-         baseName = QString("%1%2").arg(latexOutput).arg(mscindex++).toUtf8();
+         QString baseName = QString("%1%2").arg(latexOutput).arg(mscindex++);
 
          QFile file(baseName + ".msc");
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s.msc for writing\n", baseName.constData());
+            err("Could not open file %s.msc for writing\n", qPrintable(baseName));
          }
 
-         QByteArray text = "msc {";
+         QString text = "msc {";
          text += s->text();
          text += "}";
 
-         file.write( text, text.length() );
+         file.write( text.toUtf8() );
          file.close();
 
          m_t << "\\begin{center}\n";
@@ -543,7 +538,7 @@ void LatexDocVisitor::visit(DocCite *cite)
    }
    if (!cite->file().isEmpty()) {
       //startLink(cite->ref(),cite->file(),cite->anchor());
-      QByteArray anchor = cite->anchor();
+      QString anchor = cite->anchor();
       anchor = anchor.mid(CiteConsts::anchorPrefix.length()); // strip prefix
       m_t << "\\cite{" << anchor << "}";
    } else {
@@ -819,7 +814,7 @@ void LatexDocVisitor::visitPre(DocSection *s)
       m_t << "\\hypertarget{" << stripPath(s->file()) << "_" << s->anchor() << "}{}";
    }
    m_t << "\\" << getSectionName(s->level()) << "{";
-   filter(convertCharEntitiesToUTF8(s->title()));
+   filter(convertCharEntities(s->title()));
    m_t << "}\\label{" << stripPath(s->file()) << "_" << s->anchor() << "}" << endl;
 }
 
@@ -880,7 +875,9 @@ void LatexDocVisitor::visitPre(DocHtmlDescList *dl)
    if (m_hide) {
       return;
    }
-   QByteArray val = dl->attribs().find("class");
+
+   QString val = dl->attribs().find("class");
+
    if (val == "reflist") {
       m_t << "\n\\begin{DoxyRefList}";
    } else {
@@ -893,7 +890,7 @@ void LatexDocVisitor::visitPost(DocHtmlDescList *dl)
    if (m_hide) {
       return;
    }
-   QByteArray val = dl->attribs().find("class");
+   QString val = dl->attribs().find("class");
    if (val == "reflist") {
       m_t << "\n\\end{DoxyRefList}";
    } else {
@@ -1237,7 +1234,7 @@ void LatexDocVisitor::visitPre(DocImage *img)
              "  \\mbox{";
       }
 
-      QByteArray gfxName = img->name();
+      QString gfxName = img->name();
       if (gfxName.right(4) == ".eps" || gfxName.right(4) == ".pdf") {
          gfxName = gfxName.left(gfxName.length() - 4);
       }
@@ -1712,7 +1709,7 @@ void LatexDocVisitor::filter(const QString &str)
    filterLatexString(m_t, str, m_insideTabbing, m_insidePre, m_insideItem);
 }
 
-void LatexDocVisitor::startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor)
+void LatexDocVisitor::startLink(const QString &ref, const QString &file, const QString &anchor)
 {
    if (ref.isEmpty() && Config::getBool("latex-hyper-pdf")) { 
       // internal PDF link
@@ -1744,7 +1741,7 @@ void LatexDocVisitor::startLink(const QByteArray &ref, const QByteArray &file, c
    }
 }
 
-void LatexDocVisitor::endLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor)
+void LatexDocVisitor::endLink(const QString &ref, const QString &file, const QString &anchor)
 {
    m_t << "}";
 
@@ -1772,7 +1769,7 @@ void LatexDocVisitor::popEnabled()
    m_hide = v;   
 }
 
-void LatexDocVisitor::startDotFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption)
+void LatexDocVisitor::startDotFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
 {
    QString baseName = fileName;
    int i;
@@ -1834,7 +1831,7 @@ void LatexDocVisitor::endDotFile(bool hasCaption)
    }
 }
 
-void LatexDocVisitor::startMscFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption)
+void LatexDocVisitor::startMscFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
 {
    QString baseName = fileName;
    int i;
@@ -1896,8 +1893,7 @@ void LatexDocVisitor::endMscFile(bool hasCaption)
    }
 }
 
-
-void LatexDocVisitor::writeMscFile(const QByteArray &baseName)
+void LatexDocVisitor::writeMscFile(const QString &baseName)
 {
    QString shortName = baseName;
    int i;
@@ -1916,7 +1912,7 @@ void LatexDocVisitor::writeMscFile(const QByteArray &baseName)
    m_t << "\\end{DoxyImageNoCaption}\n";
 }
 
-void LatexDocVisitor::startDiaFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption)
+void LatexDocVisitor::startDiaFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
 {
    QString baseName = fileName;
    int i;
@@ -1980,7 +1976,7 @@ void LatexDocVisitor::endDiaFile(bool hasCaption)
 }
 
 
-void LatexDocVisitor::writeDiaFile(const QByteArray &baseName)
+void LatexDocVisitor::writeDiaFile(const QString &baseName)
 {
    QString shortName = baseName;
    int i;

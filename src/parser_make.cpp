@@ -20,12 +20,12 @@
 #include <parser_make.h>
 
 static CodeOutputInterface     *g_code;
-static const char              *g_currentFontClass;
+static QString                 g_currentFontClass;
 static QSharedPointer<FileDef> g_sourceFileDef;
 static int                     g_yyLineNr;
 
-void MakeFileParser::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input, 
-         SrcLangExt xx, bool isExampleBlock, const char *exampleName, QSharedPointer<FileDef> fileDef, int startLine, int endLine, 
+void MakeFileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, 
+         SrcLangExt xx, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef, int startLine, int endLine, 
          bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers, 
          QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
@@ -37,25 +37,23 @@ void MakeFileParser::parseCode(CodeOutputInterface &codeOutIntf, const char *sco
    g_code = &codeOutIntf;  
    g_sourceFileDef = fileDef;
 
-   g_currentFontClass = 0;
+   g_currentFontClass = "";
    g_yyLineNr = 1;
 
    QStringList lines = QString(input).split("\n");
      
    for (auto s : lines ) { 
       this->startCodeLine();
-      g_code->codify(s.toUtf8());
+      g_code->codify(s);
       this->endCodeLine();
    } 
 }
-
-//  **
 
 void MakeFileParser::startCodeLine()
 {    
    g_code->writeLineNumber(0, 0, 0, g_yyLineNr);
 
-   if (g_currentFontClass) {
+   if (! g_currentFontClass.isEmpty()) {
       g_code->startFontClass(g_currentFontClass);
    }
 
@@ -68,7 +66,7 @@ void MakeFileParser::endCodeLine()
    g_code->endCodeLine();
 }
 
-void MakeFileParser::startFontClass(const char *s)
+void MakeFileParser::startFontClass(const QString &s)
 {
    endFontClass();
    g_code->startFontClass(s);
@@ -77,9 +75,9 @@ void MakeFileParser::startFontClass(const char *s)
 
 void MakeFileParser::endFontClass()
 {
-   if (g_currentFontClass) {
+   if (! g_currentFontClass.isEmpty()) {
       g_code->endFontClass();
-      g_currentFontClass = 0;
+      g_currentFontClass = "";
    }
 }
 
@@ -88,16 +86,15 @@ bool MakeFileParser::needsPreprocessing(const QString &)
    return false;
 }
 
-void MakeFileParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
+void MakeFileParser::parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                                 enum ParserMode mode, QStringList &includedFiles, bool useClang) 
 {
 }
 
-void MakeFileParser::parsePrototype(const char *text) 
+void MakeFileParser::parsePrototype(const QString &text) 
 {
 }
 
 void MakeFileParser::resetCodeParserState()
 {
 }
-

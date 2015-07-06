@@ -30,13 +30,13 @@ class FortranLanguageParser : public ParserInterface
    FortranLanguageParser(FortranFormat format = FortranFormat_Unknown) : m_format(format) { }
    virtual ~FortranLanguageParser() {}
 
-   void startTranslationUnit(const char *) {}
+   void startTranslationUnit(const QString &) override {}
    void finishTranslationUnit() {}
 
-   void parseInput(const QString &fileName, const char *fileBuf, QSharedPointer<Entry> root, 
+   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root, 
                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
-   bool needsPreprocessing(const QString &extension);
+   bool needsPreprocessing(const QString &extension) override;
 
    void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
                   bool isExampleBlock, const QString &exampleName = QString(), 
@@ -46,7 +46,7 @@ class FortranLanguageParser : public ParserInterface
                   QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override ;
 
    void resetCodeParserState();
-   void parsePrototype(const char *text);
+   void parsePrototype(const QString &text) override;
 
  private:
    FortranFormat m_format;

@@ -18,7 +18,6 @@
 #ifndef MANDOCVISITOR_H
 #define MANDOCVISITOR_H
 
-#include <QByteArray>
 #include <QStack>
 #include <QTextStream>
 
@@ -29,12 +28,10 @@ class CodeOutputInterface;
 class ManDocVisitor : public DocVisitor
 {
  public:
-   ManDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt);
+   ManDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt);
 
-   //--------------------------------------
    // visitor functions for leaf nodes
-   //--------------------------------------
-
+   
    void visit(DocWord *);
    void visit(DocLinkedWord *);
    void visit(DocWhiteSpace *);
@@ -136,19 +133,10 @@ class ManDocVisitor : public DocVisitor
    void visitPost(DocParBlock *);
 
  private:
-
-   //--------------------------------------
-   // helper functions
-   //--------------------------------------
-
-   void filter(const char *str);
+   void filter(const QString &str);
 
    void pushEnabled();
    void popEnabled();
-
-   //--------------------------------------
-   // state variables
-   //--------------------------------------
 
    QTextStream &m_t;
    CodeOutputInterface &m_ci;
@@ -157,7 +145,7 @@ class ManDocVisitor : public DocVisitor
    bool m_firstCol;
    int  m_indent;
    QStack<bool> m_enabled;
-   QByteArray m_langExt;
+   QString m_langExt;
 };
 
 #endif

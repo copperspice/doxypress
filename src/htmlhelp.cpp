@@ -36,8 +36,8 @@
 /** Class representing a field in the HTML help index. */
 struct IndexField {
    QString name;
-   QByteArray url;
-   QByteArray anchor;
+   QString url;
+   QString anchor;
 
    bool link;
    bool reversed;
@@ -66,7 +66,7 @@ class HtmlHelpIndex
    HtmlHelpIndex(HtmlHelp *help);
    ~HtmlHelpIndex();
 
-   void addItem(const char *first, const char *second, const char *url, const char *anchor, bool hasLink, bool reversed);
+   void addItem(const QString &first, const QString &second, const QString &url, const QString &anchor, bool hasLink, bool reversed);
    void writeFields(QTextStream &t);
 
  private:
@@ -99,13 +99,13 @@ HtmlHelpIndex::~HtmlHelpIndex()
  *  \param reversed true if level1 is the member name and level2 the compound
  *         name.
  */
-void HtmlHelpIndex::addItem(const char *level1, const char *level2, const char *url, const char *anchor, 
+void HtmlHelpIndex::addItem(const QString &level1, const QString &level2, const QString &url, const QString &anchor, 
                             bool hasLink, bool reversed)
 {
    QString key = level1;
 
-   if (level2) {
-      key += (QString)"?" + level2;
+   if (! level2.isEmpty()) {
+      key += "?" + level2;
    }
 
    if (key.indexOf(QRegExp("@[0-9]+")) != -1) { 
@@ -128,9 +128,9 @@ void HtmlHelpIndex::addItem(const char *level1, const char *level2, const char *
    }
 }
 
-static QByteArray field2URL(QSharedPointer<IndexField> f, bool checkReversed)
+static QString field2URL(QSharedPointer<IndexField> f, bool checkReversed)
 {
-   QByteArray result = f->url + Doxy_Globals::htmlFileExtension.toUtf8();
+   QString result = f->url + Doxy_Globals::htmlFileExtension;
 
    if (! f->anchor.isEmpty() && (!checkReversed || f->reversed)) {
       result += "#" + f->anchor;
@@ -294,7 +294,7 @@ HtmlHelp::~HtmlHelp()
    delete index;
 }
 
-static QHash<QString, QByteArray> s_languageDict;         
+static QHash<QString, QString> s_languageDict;         
 
 /*! This will create a contents file (index.hhc) and a index file (index.hhk)
  *  and write the header of those files. Also creates a project file (index.hhp)
@@ -355,58 +355,58 @@ void HtmlHelp::initialize()
    // language codes for Html help 
    s_languageDict.clear();
 
-   s_languageDict.insert("afrikaans",           QByteArray("0x436 Afrikaans"));
-   s_languageDict.insert("arabic",              QByteArray("0xC01 Arabic (Egypt)"));
-   s_languageDict.insert("armenian",            QByteArray("0x42b Armenian"));
-   s_languageDict.insert("brazilian",           QByteArray("0x416 Portuguese (Brazil)"));
-   s_languageDict.insert("catalan",             QByteArray("0x403 Catalan"));
-   s_languageDict.insert("chinese",             QByteArray("0x804 Chinese (PRC)"));
-   s_languageDict.insert("chinese-traditional", QByteArray("0x404 Chinese (Taiwan)"));
-   s_languageDict.insert("croatian",            QByteArray("0x41A Croatian"));
-   s_languageDict.insert("czech",               QByteArray("0x405 Czech"));
-   s_languageDict.insert("danish",              QByteArray("0x406 Danish"));
-   s_languageDict.insert("dutch",               QByteArray("0x413 Dutch"));
-   s_languageDict.insert("english",             QByteArray("0x409 English"));
-// s_languageDict.insert("esperanto",           QByteArray("?? Esperanto"));   // 0x48f
-   s_languageDict.insert("farsi (persian)",     QByteArray("0x429 Farsi"));
-   s_languageDict.insert("finnish",             QByteArray("0x40B Finnish"));
-   s_languageDict.insert("french",              QByteArray("0x40C French"));
-   s_languageDict.insert("german",              QByteArray("0x407 German"));
-   s_languageDict.insert("greek",               QByteArray("0x408 Greece"));
-   s_languageDict.insert("hungarian",           QByteArray("0x40E Hungarian"));
-   s_languageDict.insert("indonesian",          QByteArray("0x412 Indonesian"));
-   s_languageDict.insert("italian",             QByteArray("0x410 Italian"));
-   s_languageDict.insert("japanese",            QByteArray("0x411 Japanese"));
-   s_languageDict.insert("japanese-en",         QByteArray("0x411 Japanese"));
-   s_languageDict.insert("korean",              QByteArray("0x412 Korean"));
-   s_languageDict.insert("korean-en",           QByteArray("0x412 Korean"));
-   s_languageDict.insert("latvian",             QByteArray("0x426 Latvian"));
-   s_languageDict.insert("lithuanian",          QByteArray("0x427 Lithuanian"));
-   s_languageDict.insert("macedonian",          QByteArray("0x042f Macedonian"));
-   s_languageDict.insert("norwegian",           QByteArray("0x814 Norwegian"));  
-   s_languageDict.insert("polish",              QByteArray("0x415 Polish"));
-   s_languageDict.insert("portuguese",          QByteArray("0x816 Portuguese (Portugal)"));   
-   s_languageDict.insert("romanian",            QByteArray("0x418 Romanian"));
-   s_languageDict.insert("russian",             QByteArray("0x419 Russian"));
-   s_languageDict.insert("serbian",             QByteArray("0x81A Serbian (Serbia, Latin)"));
-   s_languageDict.insert("serbian-cyrillic",    QByteArray("0xC1A Serbian (Serbia, Cyrillic)"));
-   s_languageDict.insert("slovenian",           QByteArray("0x424 Slovenian"));
-   s_languageDict.insert("slovak",              QByteArray("0x41B Slovak"));
-   s_languageDict.insert("spanish",             QByteArray("0x40A Spanish (Traditional Sort)"));
-   s_languageDict.insert("swedish",             QByteArray("0x41D Swedish"));
-   s_languageDict.insert("turkish",             QByteArray("0x41F Turkey"));
-   s_languageDict.insert("ukrainian",           QByteArray("0x422 Ukrainian"));
-   s_languageDict.insert("vietnamese",          QByteArray("0x42A Vietnamese"));
+   s_languageDict.insert("afrikaans",           "0x436 Afrikaans");
+   s_languageDict.insert("arabic",              "0xC01 Arabic (Egypt)");
+   s_languageDict.insert("armenian",            "0x42b Armenian");
+   s_languageDict.insert("brazilian",           "0x416 Portuguese (Brazil)");
+   s_languageDict.insert("catalan",             "0x403 Catalan");
+   s_languageDict.insert("chinese",             "0x804 Chinese (PRC)");
+   s_languageDict.insert("chinese-traditional", "0x404 Chinese (Taiwan)");
+   s_languageDict.insert("croatian",            "0x41A Croatian");
+   s_languageDict.insert("czech",               "0x405 Czech");
+   s_languageDict.insert("danish",              "0x406 Danish");
+   s_languageDict.insert("dutch",               "0x413 Dutch");
+   s_languageDict.insert("english",             "0x409 English");
+// s_languageDict.insert("esperanto",           "?? Esperanto");   // 0x48f
+   s_languageDict.insert("farsi (persian)",     "0x429 Farsi");
+   s_languageDict.insert("finnish",             "0x40B Finnish");
+   s_languageDict.insert("french",              "0x40C French");
+   s_languageDict.insert("german",              "0x407 German");
+   s_languageDict.insert("greek",               "0x408 Greece");
+   s_languageDict.insert("hungarian",           "0x40E Hungarian");
+   s_languageDict.insert("indonesian",          "0x412 Indonesian");
+   s_languageDict.insert("italian",             "0x410 Italian");
+   s_languageDict.insert("japanese",            "0x411 Japanese");
+   s_languageDict.insert("japanese-en",         "0x411 Japanese");
+   s_languageDict.insert("korean",              "0x412 Korean");
+   s_languageDict.insert("korean-en",           "0x412 Korean");
+   s_languageDict.insert("latvian",             "0x426 Latvian");
+   s_languageDict.insert("lithuanian",          "0x427 Lithuanian");
+   s_languageDict.insert("macedonian",          "0x042f Macedonian");
+   s_languageDict.insert("norwegian",           "0x814 Norwegian");  
+   s_languageDict.insert("polish",              "0x415 Polish");
+   s_languageDict.insert("portuguese",          "0x816 Portuguese (Portugal)");   
+   s_languageDict.insert("romanian",            "0x418 Romanian");
+   s_languageDict.insert("russian",             "0x419 Russian");
+   s_languageDict.insert("serbian",             "0x81A Serbian (Serbia, Latin)");
+   s_languageDict.insert("serbian-cyrillic",    "0xC1A Serbian (Serbia, Cyrillic)");
+   s_languageDict.insert("slovenian",           "0x424 Slovenian");
+   s_languageDict.insert("slovak",              "0x41B Slovak");
+   s_languageDict.insert("spanish",             "0x40A Spanish (Traditional Sort)");
+   s_languageDict.insert("swedish",             "0x41D Swedish");
+   s_languageDict.insert("turkish",             "0x41F Turkey");
+   s_languageDict.insert("ukrainian",           "0x422 Ukrainian");
+   s_languageDict.insert("vietnamese",          "0x42A Vietnamese");
         
    // Esperanto should be as shown but the htmlhelp compiler 1.3 does not support it
    // fallback to the default language of English   
 }
 
-static QByteArray getLanguageString()
+static QString getLanguageString()
 {
    static QString outputLanguage = Config::getEnum("output-language").toLower();   
         
-   QByteArray retval = s_languageDict[outputLanguage];
+   QString retval = s_languageDict[outputLanguage];
 
    if (retval.isEmpty()) {
       return "0x409 English";
@@ -425,7 +425,7 @@ void HtmlHelp::createProjectFile()
    if (f.open(QIODevice::WriteOnly)) {
       QTextStream t(&f);
 
-      QByteArray indexName = "index" + Doxy_Globals::htmlFileExtension.toUtf8();
+      QString indexName = "index" + Doxy_Globals::htmlFileExtension;
 
       t << "[OPTIONS]\n";
       if (! Config::getString("chm-file").isEmpty()) {
@@ -560,7 +560,7 @@ void HtmlHelp::decContentsDepth()
    --dc;
 }
 
-QByteArray HtmlHelp::recode(const QString &s)
+QString HtmlHelp::recode(const QString &s)
 {
    return m_toNewCodec->fromUnicode(s);
 }
@@ -575,7 +575,7 @@ QByteArray HtmlHelp::recode(const QString &s)
  *  \param addToNavIndex not used.
  *  \param def not used.
  */
-void HtmlHelp::addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor, 
+void HtmlHelp::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
             bool seperateIndex, bool addToNavIndex, QSharedPointer<Definition> def)
 {
    // If we're using a binary toc then folders cannot have links.
@@ -592,8 +592,12 @@ void HtmlHelp::addContentsItem(bool isDir, const QString &name, const char *ref,
    cts << "<LI><OBJECT type=\"text/sitemap\">";
    cts << "<param name=\"Name\" value=\"" << convertToHtml(recode(name), true) << "\">";
 
-   if (file) {    // made file optional param - KPW
-      if (file && (file[0] == '!' || file[0] == '^')) { // special markers for user defined URLs
+   if (! file.isEmpty()) {  
+      // made file optional param
+
+      if ( (file[0] == '!' || file[0] == '^')) { 
+         // special markers for user defined URLs
+
          cts << "<param name=\"";
          if (file[0] == '^') {
             cts << "URL";
@@ -602,12 +606,13 @@ void HtmlHelp::addContentsItem(bool isDir, const QString &name, const char *ref,
          }
 
          cts << "\" value=\"";
-         cts << &file[1];
+         cts << file.mid(1);
 
       } else {
          cts << "<param name=\"Local\" value=\"";
          cts << file << Doxy_Globals::htmlFileExtension;
-         if (anchor) {
+
+         if (! anchor.isEmpty()) {
             cts << "#" << anchor;
          }
       }
@@ -616,7 +621,7 @@ void HtmlHelp::addContentsItem(bool isDir, const QString &name, const char *ref,
 
    cts << "<param name=\"ImageNumber\" value=\"";
 
-   if (isDir) { // added - KPW
+   if (isDir) { 
       cts << (int)BOOK_CLOSED ;
    } else {
       cts << (int)TEXT;
@@ -627,12 +632,14 @@ void HtmlHelp::addContentsItem(bool isDir, const QString &name, const char *ref,
 }
 
 
-void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const char *sectionAnchor, const char *word)
+void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, const QString &word)
 {
    if (md) {
       static bool separateMemberPages = Config::getBool("separate-member-pages");
 
-      if (context == 0) { // global member
+      if (context == 0) { 
+         // global member
+
          if (md->getGroupDef()) {
             context = md->getGroupDef();
 
@@ -645,25 +652,40 @@ void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<M
          return;   // should not happen
       }
 
-      QByteArray cfname  = md->getOutputFileBase();
-      QByteArray cfiname = context->getOutputFileBase();
-      QByteArray level1  = context->name();
-      QByteArray level2  = md->name();
-      QByteArray contRef = separateMemberPages ? cfname : cfiname;
-      QByteArray memRef  = cfname;
-      QByteArray anchor  = sectionAnchor ? QByteArray(sectionAnchor) : md->anchor();
+      QString cfname  = md->getOutputFileBase();
+      QString cfiname = context->getOutputFileBase();
+      QString level1  = context->name();
+      QString level2  = md->name();
+      QString contRef = separateMemberPages ? cfname : cfiname;
+      QString memRef  = cfname;
+
+      QString anchor; 
+
+      if (sectionAnchor.isEmpty()) {
+         anchor = md->anchor();
+      } else {
+         anchor = sectionAnchor;
+      }
+
       index->addItem(level1, level2, contRef, anchor, true, false);
       index->addItem(level2, level1, memRef, anchor, true, true);
 
    } else if (context) {
-      QByteArray level1  = word ? QByteArray(word) : context->name();
+      QString level1;
+
+      if (word.isEmpty()) {
+         level1 = context->name();
+      } else {
+         level1 = word;
+      }
+
       index->addItem(level1, 0, context->getOutputFileBase(), sectionAnchor, true, false);
    }
 }
 
 void HtmlHelp::addImageFile(const QString &fileName)
 {
-   if (!imageFiles.contains(fileName)) {
+   if (! imageFiles.contains(fileName)) {
       imageFiles.append(fileName);
    }
 }

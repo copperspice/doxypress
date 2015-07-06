@@ -18,8 +18,8 @@
 #include <parser_file.h>
 #include <outputgen.h>
 
-void FileParser::parseCode(CodeOutputInterface &codeOutIntf, const char *, const QByteArray &input,
-                  SrcLangExt, bool, const char *,  QSharedPointer<FileDef> fd, int startLine, int endLine,
+void FileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &, const QString &input,
+                  SrcLangExt, bool, const QString &,  QSharedPointer<FileDef> fd, int startLine, int endLine,
                   bool, QSharedPointer<MemberDef> md, bool showLineNumbers, QSharedPointer<Definition> context, bool)
 {
    int lineNr = startLine != -1 ? startLine : 1;
@@ -33,7 +33,7 @@ void FileParser::parseCode(CodeOutputInterface &codeOutIntf, const char *, const
          j++;
       }
 
-      QByteArray lineStr = input.mid(i, j - i);
+      QString lineStr = input.mid(i, j - i);
       codeOutIntf.startCodeLine(showLineNumbers);
 
       if (showLineNumbers) {

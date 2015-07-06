@@ -45,7 +45,7 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>
       return m_listType;
    }
 
-   static QByteArray listTypeAsString(MemberListType type);
+   static QString listTypeAsString(MemberListType type);
 
    void append(QSharedPointer<MemberDef> md);
    void insert(uint index, QSharedPointer<MemberDef> md); 
@@ -104,7 +104,7 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>
 
    void writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
-                  QSharedPointer<ClassDef> inheritedFrom, const char *inheritId);
+                  QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
    void writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
@@ -117,17 +117,7 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>
                   bool showEnumValues = false, bool showInline = false);
 
    void writeSimpleDocumentation(OutputList &ol, QSharedPointer<Definition> container);   
-   void writeDocumentationPage(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container);
-
-   void writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container)
-   {
-      writeDocumentationPage(ol, qPrintable(scopeName), container);
-   }
-
-   void writeDocumentationPage(OutputList &ol, const QByteArray &scopeName, QSharedPointer<Definition> container)
-   {
-      writeDocumentationPage(ol, scopeName.constData(), container);
-   }
+   void writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container);
 
    void writeTagFile(QTextStream &);
    bool declVisible() const;

@@ -51,15 +51,15 @@ enum ParserMode {
 struct LookupInfo {
    LookupInfo() {}
 
-   LookupInfo(QSharedPointer<ClassDef> cd, QSharedPointer<MemberDef> td, QByteArray ts, QByteArray rt)
+   LookupInfo(QSharedPointer<ClassDef> cd, QSharedPointer<MemberDef> td, QString ts, QString rt)
       : classDef(cd), typeDef(td), templSpec(ts), resolvedType(rt)
    {}
 
    QSharedPointer<ClassDef>  classDef;
    QSharedPointer<MemberDef> typeDef;
 
-   QByteArray   templSpec;
-   QByteArray   resolvedType;
+   QString templSpec;
+   QString resolvedType;
 };
 
 class StringDict : public QHash<QString, QString>

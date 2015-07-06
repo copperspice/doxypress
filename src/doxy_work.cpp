@@ -1964,8 +1964,7 @@ QSharedPointer<Definition> Doxy_Work::findScopeFromQualifiedName(QSharedPointer<
                // for a nested class A::I in used namespace N, we get
                // N::A::I while looking for A, so we should compare
                // resultScope->name() against scope.left(i2+l2)
-               //printf("  -> result=%s scope=%s\n",resultScope->name().data(),scope.data());
-
+              
                if (rightScopeMatch(resultScope->name(), scope.left(i2 + l2))) {
                   break;
                }
@@ -2110,11 +2109,11 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
    QSharedPointer<ClassDef> cd = getClass(qualifiedName);
 
    Debug::print(Debug::Classes, 0, "  Found class with name %s (qualifiedName=%s -> cd=%p)\n",
-                cd ? cd->name().data() : root->name.data(), qualifiedName.data(), cd.data());
+                cd ? qPrintable(cd->name()) : qPrintable(root->name), qPrintable(qualifiedName), cd.data() );
 
    if (cd) {
       fullName = cd->name();
-      Debug::print(Debug::Classes, 0, "  Existing class %s\n", cd->name().data());
+      Debug::print(Debug::Classes, 0, "  Existing class %s\n", qPrintable(cd->name()) );
 
       cd->setDocumentation(root->doc, root->docFile, root->docLine);
       cd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
@@ -2304,7 +2303,7 @@ void Doxy_Work::resolveClassNestingRelations()
             d->addInnerCompound(cd);
             cd->setOuterScope(d);
 
-            warn(cd->getDefFileName(), cd->getDefLine(), "Internal inconsistency: scope for class %s not found", name.data());
+            warn(cd->getDefFileName(), cd->getDefLine(), "Internal inconsistency: scope for class %s not found", qPrintable(name));
          }
       }
    }
@@ -2349,7 +2348,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
          item->addClass(cd);
       }
    }
-   //printf("** adding class %s based on %s\n",fullName.data(),templ->name().data());
+   
    Doxy_Globals::classSDict->insert(fullName, QSharedPointer<ClassDef> (cd) );
 
    QSharedPointer<MemberList> ml = templ->getMemberList(MemberListType_pubAttribs);
@@ -2818,12 +2817,10 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
                          usingCd->name().data(), nd ? nd->name().data() : fd->name().data());
          }
 
-         if (nd) {
-            //printf("Inside namespace %s\n",nd->name().data());
+         if (nd) {           
             nd->addUsingDeclaration(usingCd);
 
          } else if (fd) {
-            //printf("Inside file %s\n",fd->name().data());
             fd->addUsingDeclaration(usingCd);
          }
       }
@@ -2843,8 +2840,7 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<EntryNav> rootNav)
 
       QSharedPointer<ClassDef> cd = getClass(fullName);
 
-      if (cd) {
-         //printf("found class %s\n",cd->name().data());
+      if (cd) {         
          int i = rootNav->name().indexOf("::");
 
          if (i != -1) {
@@ -4977,7 +4973,7 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
       }
 
       //Debug::print(Debug::Classes,0,"    Template instance %s : \n",instanceClass->name().data());
-      //ArgumentList *tl = templateClass->templateArguments();
+
    } else {
       Debug::print(Debug::Classes, 0, "      instance already exists\n");
    }
@@ -5315,7 +5311,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
 
                   } else {
                      warn(root->fileName, root->startLine, "Detected potential recursive class relation "
-                          "between class %s and base class %s!", cd->name().data(), baseClass->name().data() );
+                          "between class %s and base class %s!", qPrintable(cd->name()), qPrintable(baseClass->name()) );
                   }
                }
 
@@ -5400,7 +5396,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
          } else {
             if (mode != TemplateInstances) {
                warn(root->fileName, root->startLine, "Detected potential recursive class relation "
-                    "between class %s and base class %s\n", root->name.data(), baseClassName.data());
+                    "between class %s and base class %s\n", qPrintable(root->name), qPrintable(baseClassName));
             }
 
             // for mode==TemplateInstance this case is quite common and
@@ -5723,7 +5719,7 @@ void Doxy_Work::addListReferences()
       QString name = dd->getOutputFileBase();
       QList<ListItemInfo> *xrefItems = dd->xrefListItems();
 
-      addRefItem(xrefItems, name, theTranslator->trDir(true, true), name, dd->displayName().toUtf8(), 0, QSharedPointer<Definition>());
+      addRefItem(xrefItems, name, theTranslator->trDir(true, true), name, dd->displayName(), 0, QSharedPointer<Definition>());
    }
 }
 
@@ -9203,7 +9199,7 @@ void Doxy_Work::copyExtraFiles(const QString &kind)
    }
 }
 
-static ParserInterface *getParserForFile(const char *fn)
+static ParserInterface *getParserForFile(const QString &fn)
 {
    QString fileName = fn;
    QString extension;
@@ -9219,7 +9215,7 @@ static ParserInterface *getParserForFile(const char *fn)
       extension = ".no_extension";
    }
 
-   return Doxy_Globals::parserManager->getParser(qPrintable(extension));
+   return Doxy_Globals::parserManager->getParser(extension);
 }
 
 void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav, 
@@ -9300,16 +9296,16 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
       for (auto s : Doxy_Globals::g_inputFiles) { 
          bool ambig;
 
-         QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s.toUtf8(), ambig);
+         QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s, ambig);
          assert(fd != 0);
 
          if (fd->isSource() && ! fd->isReference()) { 
             // this is a source file
             QStringList includedFiles;
 
-            ParserInterface *parser = getParserForFile(s.toUtf8());
-            parser->startTranslationUnit(s.toUtf8());
-            parseFile(parser, root, rootNav, fd, qPrintable(s), ParserMode::SOURCE_FILE, includedFiles);
+            ParserInterface *parser = getParserForFile(s);
+            parser->startTranslationUnit(s);
+            parseFile(parser, root, rootNav, fd, s, ParserMode::SOURCE_FILE, includedFiles);
            
             // process any include files in the the current source file
             for (auto file : includedFiles) {
@@ -9343,13 +9339,13 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
             bool ambig;
             QStringList includedFiles;
 
-            QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s.toUtf8(), ambig);
+            QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s, ambig);
             assert(fd != 0);
 
-            ParserInterface *parser = getParserForFile(s.toUtf8());
-            parser->startTranslationUnit(s.toUtf8());
+            ParserInterface *parser = getParserForFile(s);
+            parser->startTranslationUnit(s);
 
-            parseFile(parser, root, rootNav, fd, s.toUtf8(), ParserMode::SOURCE_FILE, includedFiles);
+            parseFile(parser, root, rootNav, fd, s, ParserMode::SOURCE_FILE, includedFiles);
             parser->finishTranslationUnit();
 
             processedFiles.insert(s);
@@ -9364,13 +9360,13 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
          bool ambig;
          QStringList includedFiles;
 
-         QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s.toUtf8(), ambig);
+         QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s, ambig);
          assert(fd != 0);
 
-         ParserInterface *parser = getParserForFile(s.toUtf8());
-         parser->startTranslationUnit(s.toUtf8());
+         ParserInterface *parser = getParserForFile(s);
+         parser->startTranslationUnit(s);
 
-         parseFile(parser, root, rootNav, fd, s.toUtf8(), ParserMode::SOURCE_FILE, includedFiles);
+         parseFile(parser, root, rootNav, fd, s, ParserMode::SOURCE_FILE, includedFiles);
 
       }
    }
@@ -9428,7 +9424,7 @@ QString  Doxy_Work::resolveSymlink(QString  path)
                target += result.mid(sepPos);
             }
 
-            result = QDir::cleanPath(target).toUtf8();
+            result = QDir::cleanPath(target);
             sepPos = 0;
 
             if (known.contains(result)) {
@@ -9474,7 +9470,7 @@ void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const char *tl)
       destName = tagLine.right(tagLine.length() - eqPos - 1).trimmed();
 
       QFileInfo fi(fileName);
-      Doxy_Globals::tagDestinationDict.insert(fi.absoluteFilePath().toUtf8(), destName);
+      Doxy_Globals::tagDestinationDict.insert(fi.absoluteFilePath(), destName);
 
    } else {
       fileName = tagLine;
@@ -9488,12 +9484,12 @@ void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const char *tl)
    }
 
    if (!destName.isEmpty()) {
-      msg("Reading tag file `%s', location `%s'\n", fileName.data(), destName.data());
+      msg("Reading tag file `%s', location `%s'\n", qPrintable(fileName), qPrintable(destName));
    } else {
-      msg("Reading tag file `%s'\n", fileName.data());
+      msg("Reading tag file `%s'\n", qPrintable(fileName));
    }
 
-   parseTagFile(root, fi.absoluteFilePath().toUtf8());
+   parseTagFile(root, fi.absoluteFilePath());
 }
 
 QString Doxy_Work::createOutputDirectory(const QString &baseDirName, const QString &formatDirOption, const QString &defaultDirName)
@@ -9579,17 +9575,17 @@ int Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
                if (testA && testB && ! data.killDict.contains(filePath) ) {
                            
                   totalSize += cfi.size() + filePath.length() + 4;
-                  QString name = cfi.fileName().toUtf8();
+                  QString name = cfi.fileName();
       
                   if (data.isFnDict) {
-                     QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8() + "/", name);
+                     QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path() + "/", name);
                      QSharedPointer<FileName> fn;
       
                      if (! name.isEmpty() && (fn = data.fnDict[name])) {
                         fn->append(fd);
       
                      } else {
-                        fn = QMakeShared<FileName>(filePath.toUtf8(), name);
+                        fn = QMakeShared<FileName>(filePath, name);
                         fn->append(fd);
       
                         if (data.isFnList) {
@@ -9724,7 +9720,7 @@ void readFormulaRepository()
       QString line;
 
       while (! t.atEnd()) {
-         line = t.readLine().toUtf8();
+         line = t.readLine();
          int se = line.indexOf(':'); // find name and text separator
 
          if (se == -1) {
@@ -9748,7 +9744,7 @@ void readFormulaRepository()
 void Doxy_Work::expandAliases()
 {
    for (auto iter = Doxy_Globals::aliasDict.begin(); iter != Doxy_Globals::aliasDict.end(); ++iter) {
-      *iter = expandAlias(iter.key().toUtf8(), *iter);
+      *iter = expandAlias(iter.key(), *iter);
    }
 }
 
@@ -9802,7 +9798,7 @@ void readAliases()
 
             if (! name.isEmpty()) {
                // insert or update with the new alias
-               Doxy_Globals::aliasDict[name] = value.toUtf8();
+               Doxy_Globals::aliasDict[name] = value;
             }
          }
       }
@@ -10131,7 +10127,7 @@ void searchInputFiles()
    QStringList inputList = Config::getList("input-source");
 
    for (auto s : inputList) {
-      QString path = s.toUtf8();
+      QString path = s;
       uint len = path.length();
 
       if (len > 0) {

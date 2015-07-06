@@ -50,17 +50,15 @@ void TooltipManager::clearTooltips()
    m_tooltipInfo.clear();
 }
 
-static QByteArray escapeId(const QString &file)
+static QString escapeId(const QString &file)
 {
-   QByteArray res = file.toUtf8();
-   char *p = res.data();
+   QString res = file;
 
-   while (*p) {
-      if (! isId(*p)) {
-         *p = '_';
-      }
-
-      p++;
+   for (auto &c : res) {
+ 
+      if (! isId(c.unicode())) {
+         c = '_';
+      }     
    }
 
    return res;
@@ -73,7 +71,7 @@ void TooltipManager::addTooltip(QSharedPointer<Definition> d)
       return;
    }
 
-   QByteArray id = d->getOutputFileBase();
+   QString id = d->getOutputFileBase();
    int i = id.lastIndexOf('/');
 
    if (i != -1) {
@@ -82,7 +80,7 @@ void TooltipManager::addTooltip(QSharedPointer<Definition> d)
 
    id += escapeId(Doxy_Globals::htmlFileExtension);
 
-   QByteArray anc = d->anchor();
+   QString anc = d->anchor();
    if (! anc.isEmpty()) {
       id += "_" + anc;
    }
@@ -114,7 +112,7 @@ void TooltipManager::writeTooltips(CodeOutputInterface &ol)
       }
 
       SourceLinkInfo declInfo; 
-      QByteArray decl;
+      QString decl;
 
       if (item->definitionType() == Definition::TypeMember) {
          QSharedPointer<MemberDef> md = item.dynamicCast<MemberDef>();

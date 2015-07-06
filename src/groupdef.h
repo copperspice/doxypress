@@ -18,7 +18,6 @@
 #ifndef GROUPDEF_H
 #define GROUPDEF_H
 
-#include <QByteArray>
 #include <QString>
 #include <QSharedPointer>
 #include <QTextStream>
@@ -166,18 +165,18 @@ class GroupDef : public Definition
    QSharedPointer<MemberList> createMemberList(MemberListType lt);
 
    void addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md);
-   void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title);
-   void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title);
+   void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title);
+   void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title);
    void removeMemberFromList(MemberListType lt, QSharedPointer<MemberDef> md);
    void writeGroupGraph(OutputList &ol);
-   void writeFiles(OutputList &ol, const QByteArray &title);
-   void writeNamespaces(OutputList &ol, const QByteArray &title);
-   void writeNestedGroups(OutputList &ol, const QByteArray &title);
-   void writeDirs(OutputList &ol, const QByteArray &title);
-   void writeClasses(OutputList &ol, const QByteArray &title);
+   void writeFiles(OutputList &ol, const QString &title);
+   void writeNamespaces(OutputList &ol, const QString &title);
+   void writeNestedGroups(OutputList &ol, const QString &title);
+   void writeDirs(OutputList &ol, const QString &title);
+   void writeClasses(OutputList &ol, const QString &title);
    void writeInlineClasses(OutputList &ol);
    void writePageDocumentation(OutputList &ol);
-   void writeDetailedDescription(OutputList &ol, const QByteArray &title);
+   void writeDetailedDescription(OutputList &ol, const QString &title);
    void writeBriefDescription(OutputList &ol);
    void writeMemberGroups(OutputList &ol);
    void startMemberDeclarations(OutputList &ol);

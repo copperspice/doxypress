@@ -16,6 +16,7 @@
 *************************************************************************/
 
 #include <qglobal.h>
+
 #include <QRegExp>
 
 #include <stdio.h>
@@ -38,6 +39,7 @@
 #include <groupdef.h>
 #include <searchindex.h>
 #include <parser_base.h>
+
 #include <marshal.h>
 #include <objcache.h>
 #include <arguments.h>
@@ -48,7 +50,7 @@
 
 int MemberDef::s_indentLevel = 0;
 
-static QString addTemplateNames(const QString  &s, const QString  &n, const QString  &t)
+static QString addTemplateNames(const QString &s, const QString  &n, const QString  &t)
 {
    QString result;
    QString clRealName = n;
@@ -69,7 +71,7 @@ static QString addTemplateNames(const QString  &s, const QString  &n, const QStr
       result += s.mid(p, i - p);
       uint j = clRealName.length() + i;
 
-      if (s.length() == j || (s.at(j) != '<' && ! isId(s.at(j)))) {
+      if (s.length() == j || (s.at(j) != '<' && ! isId(s.at(j).unicode() ))) {
          result += clRealName + t;
       } else {
          result += clRealName;
@@ -408,7 +410,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
    ol.endParameterName(true, defArgList->count() < 2, !md->isObjCMethod());
    ol.popGeneratorState();
 
-   if (md->extraTypeChars()) {
+   if (! md->extraTypeChars().isEmpty() ) {
       ol.docify(md->extraTypeChars());
    }
 
@@ -524,9 +526,8 @@ class MemberDefImpl
    MemberDefImpl();
    ~MemberDefImpl();
 
-   void init(Definition *def, const char *t, const char *a, const char *e,
-             Protection p, Specifier v, bool s, Relationship r,
-             MemberType mt, const ArgumentList *tal, const ArgumentList *al );
+   void init(Definition *def, const QString &t, const QString &a, const QString &e, Protection p, 
+              Specifier v, bool s, Relationship r, MemberType mt, const ArgumentList *tal, const ArgumentList *al);
 
    QSharedPointer<ClassDef>     classDef;     // member of or related to
    QSharedPointer<FileDef>      fileDef;      // member of file definition
@@ -676,7 +677,7 @@ MemberDefImpl::~MemberDefImpl()
    delete declArgList;
 }
 
-void MemberDefImpl::init(Definition *def, const char *t, const char *a, const char *e, Protection p, 
+void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, const QString &e, Protection p, 
                          Specifier v, bool s,  Relationship r, MemberType mt, const ArgumentList *tal, const ArgumentList *al )
 {    
    redefines     = QSharedPointer<MemberDef>();
@@ -692,10 +693,10 @@ void MemberDefImpl::init(Definition *def, const char *t, const char *a, const ch
    exampleSDict = 0;
      
    livesInsideEnum = false;
-   defTmpArgLists = 0;
-   hasCallGraph = false;
-   hasCallerGraph = false;
-   initLines = 0;
+   defTmpArgLists  = 0;
+   hasCallGraph    = false;
+   hasCallerGraph  = false;
+   initLines       = 0;
    type = t;
 
    if (mt == MemberType_Typedef) {     
@@ -1053,7 +1054,7 @@ QString MemberDef::getOutputFileBase() const
 
 QString MemberDef::getReference() const
 {
-   QStringref = Definition::getReference();
+   QString ref = Definition::getReference();
 
    if (! ref.isEmpty()) {
       return ref;
@@ -1165,7 +1166,7 @@ void MemberDef::setDocumentation(const QString &d, const QString &docFile, int d
    m_isLinkableCached = 0;
 }
 
-void MemberDef::setBriefDescription(const QString &b, constQString &briefFile, int briefLine)
+void MemberDef::setBriefDescription(const QString &b, const QString &briefFile, int briefLine)
 {
    Definition::setBriefDescription(b, briefFile, briefLine);
    m_isLinkableCached = 0;
@@ -1251,10 +1252,10 @@ void MemberDef::writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPo
          // but its container is
          QSharedPointer<GroupDef> enumValGroup = getEnumScope()->getGroupDef();
 
-         ol.writeObjectLink(enumValGroup->getReference(), enumValGroup->getOutputFileBase(), anchor(), n.toUtf8());
+         ol.writeObjectLink(enumValGroup->getReference(), enumValGroup->getOutputFileBase(), anchor(), n);
 
       } else {
-         ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), n.toUtf8());
+         ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), n);
       }
 
    } else { 
@@ -1301,7 +1302,7 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
       int il = i - 1, ir = i + l;
 
       // extract anonymous scope
-      while (il >= 0 && (isId(ltype.at(il)) || ltype.at(il) == ':' || ltype.at(il) == '@')) {
+      while (il >= 0 && (isId(ltype.at(il).unicode() ) || ltype.at(il) == ':' || ltype.at(il) == '@')) {
          il--;
       }
 
@@ -1310,14 +1311,14 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
       } else if (il < 0) {
          il = 0;
       }
-      while (ir < (int)ltype.length() && (isId(ltype.at(ir)) || ltype.at(ir) == ':' || ltype.at(ir) == '@')) {
+      while (ir < (int)ltype.length() && (isId(ltype.at(ir).unicode() ) || ltype.at(ir) == ':' || ltype.at(ir) == '@')) {
          ir++;
       }
 
       QString annName = ltype.mid(il, ir - il);
 
       // if inside a class or namespace try to prepend the scope name
-      if (!cname.isEmpty() && annName.left(cname.length() + 2) != cname + "::") {
+      if (! cname.isEmpty() && annName.left(cname.length() + 2) != cname + "::") {
          QString ts = stripAnonymousNamespaceScope(cname + "::" + annName);
          annoClassDef = getClass(ts);
       }
@@ -1411,7 +1412,7 @@ QString MemberDef::getDeclType() const
 
 void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool inGroup, 
-                  QSharedPointer<ClassDef> inheritedFrom, const char *inheritId)
+                  QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
 {  
    // hide enum value, since they appear already as part of the enum, unless they are explicitly grouped
 
@@ -1464,7 +1465,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
          QString doxyName = name();
 
          if (!cname.isEmpty()) {
-            doxyName.prepend( (cdname + getLanguageSpecificSeparator(getLanguage())).toUtf8() );
+            doxyName.prepend( (cdname + getLanguageSpecificSeparator(getLanguage())) );
          }
          ol.startDoxyAnchor(cfname, cname, anchor(), doxyName, doxyArgs);
       }
@@ -1591,7 +1592,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    }
 
    // *** write name
-   if (!name().isEmpty() && name().at(0) != '@') { 
+   if (! name().isEmpty() && name().at(0) != '@') { 
 
       // hide anonymous stuff      
       if (! (name().isEmpty() || name().at(0) == '@') && (hasDocumentation() || isReference()) && 
@@ -1651,9 +1652,9 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    }
 
    // *** write arguments
-   if (argsString() && !isObjCMethod()) {
+   if (! argsString().isEmpty() && ! isObjCMethod()) {
 
-      if (!i sDefine() && ! isTypedef()) {
+      if (! isDefine() && ! isTypedef()) {
          ol.writeString(" ");
       }
 
@@ -1674,13 +1675,14 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    }
 
    // *** write exceptions
-   if (excpString()) {
+   if (!  excpString().isEmpty() ) {
       ol.writeString(" ");
       ol.docify(excpString());
    }
 
    // *** write bitfields
-   if (!m_impl->bitfields.isEmpty()) { // add bitfields
+   if (! m_impl->bitfields.isEmpty()) { 
+      // add bitfields
       linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, m_impl->bitfields);
 
    } else if (hasOneLineInitializer() ) { 
@@ -2283,16 +2285,16 @@ void MemberDef::_writeReimplements(OutputList &ol)
 
             if (bmd->isLinkable()) { // replace marker with link
               
-               ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bcd->displayName().toUtf8());
+               ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bcd->displayName());
           
                if ( bmd->isLinkableInProject() ) {
                   writePageRef(ol, bmd->getOutputFileBase(), bmd->anchor());
                }
 
             } else {
-               ol.writeObjectLink(bcd->getReference(), bcd->getOutputFileBase(), 0, bcd->displayName().toUtf8());
+               ol.writeObjectLink(bcd->getReference(), bcd->getOutputFileBase(), 0, bcd->displayName());
 
-               if (bcd->isLinkableInProject()/* && ! Config::getBool("latex-hyper-pdf")*/ ) {
+               if ( bcd->isLinkableInProject() ) {
                   writePageRef(ol, bcd->getOutputFileBase(), bcd->anchor());
                }
             }
@@ -2376,7 +2378,7 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
             if (ok && bcd && bmd) { 
                // write link for marker
                
-               ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bcd->displayName().toUtf8());
+               ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bcd->displayName());
 
                if (bmd->isLinkableInProject() ) {
                   writePageRef(ol, bmd->getOutputFileBase(), bmd->anchor());
@@ -2439,7 +2441,7 @@ void MemberDef::_writeCategoryRelation(OutputList &ol)
       if (i != -1 && !name.isEmpty()) {
          ol.startParagraph();
          ol.parseText(text.left(i));
-         ol.writeObjectLink(ref, file, anc, name.toUtf8());
+         ol.writeObjectLink(ref, file, anc, name);
          ol.parseText(text.mid(i + 2));
          ol.endParagraph();
       }
@@ -2605,11 +2607,11 @@ QString MemberDef::displayDefinition() const
       l = ldef.length();
       //printf("start >%s<\n",ldef.data());
       i = l - 1;
-      while (i >= 0 && (isId(ldef.at(i)) || ldef.at(i) == ':')) {
+      while (i >= 0 && (isId(ldef.at(i).unicode()) || ldef.at(i) == ':')) {
          i--;
       }
 
-      while (i >= 0 && isspace((uchar)ldef.at(i))) {
+      while (i >= 0 &&  ldef.at(i).isSpace() ) {
          i--;
       }
 
@@ -2618,7 +2620,7 @@ QString MemberDef::displayDefinition() const
          QString tmp("(" + ldef.left(i + 1) + ")" + ldef.mid(i + 1));
          ldef = tmp;
       }
-      //printf("end   >%s< i=%d\n",ldef.data(),i);
+
       if (isStatic()) {
          ldef.prepend("+ ");
       } else {
@@ -2681,7 +2683,7 @@ void MemberDef::_writeGroupInclude(OutputList &ol, bool inGroup)
 /*! Writes the "detailed documentation" section of this member to
  *  all active output formats.
  */
-void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *scName, QSharedPointer<Definition> container,
+void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString &scName, QSharedPointer<Definition> container,
                                    bool inGroup, bool showEnumValues, bool showInline)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
@@ -2725,15 +2727,15 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       memAnchor.prepend("file_");
    }
 
-   QByteArray cname   = container->name();
-   QByteArray cfname  = getOutputFileBase();
+   QString cname   = container->name();
+   QString cfname  = getOutputFileBase();
  
    // get member name
-   QByteArray doxyName = name();
+   QString doxyName = name();
 
    // prepend scope if there is any. TODO: make this optional for C only docs
    if (! scopeName.isEmpty()) {
-      doxyName.prepend((scopeName + sep).toUtf8());
+      doxyName.prepend((scopeName + sep));
    }
 
    QString doxyArgs = argsString();
@@ -2926,17 +2928,17 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
          int l = ldef.length();         
          int i = l - 1;
 
-         while (i >= 0 && (isId(ldef.at(i)) || ldef.at(i) == ':')) {
+         while (i >= 0 && (isId(ldef.at(i).unicode() ) || ldef.at(i) == ':')) {
             i--;
          }
 
-         while (i >= 0 && isspace((uchar)ldef.at(i))) {
+         while (i >= 0 && ldef.at(i).isSpace() ) {
             i--;
          }
 
          if (i > 0) {
             // insert braches around the type
-            QByteArray tmp("(" + ldef.left(i + 1) + ")" + ldef.mid(i + 1));
+            QString tmp("(" + ldef.left(i + 1) + ")" + ldef.mid(i + 1));
             ldef = tmp;
          }
         
@@ -2962,7 +2964,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
          if (! isDefine()) {            
             ol.docify(" ");
 
-            QByteArray init = m_impl->initializer.simplified();
+            QString init = m_impl->initializer.simplified();
             linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), self, init);
 
          } else {
@@ -2971,7 +2973,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
          }
       }
 
-      if (excpString()) { 
+      if (! excpString().isEmpty() ) { 
          // add exception list
          writeExceptionList(ol, cd, self);
          hasParameterList = true;             // call endParameterList below
@@ -3103,8 +3105,8 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       ol.endCodeFragment();
    }
 
-   QByteArray brief      = briefDescription();
-   QByteArray detailed   = documentation();
+   QString brief    = briefDescription();
+   QString detailed = documentation();
 
    ArgumentList *docArgList = m_impl->defArgList;
 
@@ -3143,12 +3145,12 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
    }
 
    if (docArgList != 0 && docArgList->hasDocumentation()) {
-      QByteArray paramDocs;
+      QString paramDocs;
      
       // convert the parameter documentation into a list of @param commands      
       for (auto a : *docArgList) {
          if (a.hasDocumentation()) {
-            QByteArray direction = extractDirection(a.docs);
+            QString direction = extractDirection(a.docs);
             paramDocs += "@param" + direction + " " + a.name + " " + a.docs;
          }
       }
@@ -3178,10 +3180,10 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
  
          ol.writeString("  <tr><td class=\"fieldname\">");   
 
-         ol.writeString(temp.first.toUtf8());
+         ol.writeString(temp.first);
          ol.writeString("  </td><td class=\"fielddoc\">");   
       
-         ol.writeString(temp.second.toUtf8());
+         ol.writeString(temp.second);
          ol.writeString("  </td></tr>\n");
       }
          
@@ -3209,7 +3211,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
 
-      QByteArray cmd = "<? $root=$_SERVER['DOCUMENT_ROOT']; "
+      QString cmd = "<? $root=$_SERVER['DOCUMENT_ROOT']; "
                        "passthru(\"$root/doxynotes --lookup " +
                        getOutputFileBase() + ":" + anchor() + "\") ?>";
 
@@ -3240,9 +3242,9 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const char *s
 
 // strip scope and field name from the type
 // example: "struct N::S.v.c" will become "struct v"
-static QByteArray simplifyTypeForTable(const QByteArray &s)
+static QString simplifyTypeForTable(const QString &s)
 {
-   QByteArray ts = removeAnonymousScopes(s);
+   QString ts = removeAnonymousScopes(s);
    if (ts.right(2) == "::") {
       ts = ts.left(ts.length() - 2);
    }
@@ -3276,12 +3278,14 @@ static QByteArray simplifyTypeForTable(const QByteArray &s)
  *  @param[out] start The string position where the class definition name was found.
  *  @param[out] length The length of the class definition's name.
  */
-static Definition *getClassFromType(Definition *scope, const QByteArray &type, SrcLangExt lang, int &start, int &length)
+static Definition *getClassFromType(Definition *scope, const QString &type, SrcLangExt lang, int &start, int &length)
 {
    int pos = 0;
    int i;
-   QByteArray name;
-   QByteArray templSpec;
+
+   QString name;
+   QString templSpec;
+
    while ((i = extractClassNameFromType(type, pos, name, templSpec, lang)) != -1) {
       ClassDef *cd = 0;
       MemberDef *md = 0;
@@ -3307,9 +3311,9 @@ static Definition *getClassFromType(Definition *scope, const QByteArray &type, S
 }
 #endif
 
-QByteArray MemberDef::fieldType() const
+QString MemberDef::fieldType() const
 {
-   QByteArray type = m_impl->accessorType;
+   QString type = m_impl->accessorType;
    if (type.isEmpty()) {
       type = m_impl->type;
    }
@@ -3325,11 +3329,11 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
    QSharedPointer<MemberDef> self = sharedFrom(this);   
    QSharedPointer<Definition> scope  = getOuterScope();
 
-   QByteArray doxyName  = name();
-   QByteArray doxyArgs  = argsString();
-   QByteArray memAnchor = anchor();
-   QByteArray cfname    = getOutputFileBase();
-   QByteArray cname;
+   QString doxyName  = name();
+   QString doxyArgs  = argsString();
+   QString memAnchor = anchor();
+   QString cfname    = getOutputFileBase();
+   QString cname;
 
    if (scope) {
       cname   = scope->name();
@@ -3343,7 +3347,7 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
    ol.startInlineMemberType();
    ol.startDoxyAnchor(cfname, cname, memAnchor, doxyName, doxyArgs);
 
-   QByteArray ts = fieldType();
+   QString ts = fieldType();
 
    if (cd)  {
       // cd points to an anonymous struct pointed to by this member
@@ -3381,7 +3385,7 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
    ol.startInlineMemberName();
    ol.docify(doxyName);
 
-   if (isVariable() && argsString() && !isObjCMethod()) {
+   if (isVariable() && ! argsString().isEmpty() && ! isObjCMethod()) {
       linkifyText(TextGeneratorOLImpl(ol), getOuterScope(), getBodyDef(), self, argsString());
    }
 
@@ -3392,8 +3396,8 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
 
    ol.startInlineMemberDoc();
 
-   QByteArray brief           = briefDescription();
-   QByteArray detailed        = documentation();
+   QString brief           = briefDescription();
+   QString detailed        = documentation();
 
    /* write brief description */
    if (!brief.isEmpty()) {
@@ -3411,7 +3415,7 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
    ol.endInlineMemberDoc();
 }
 
-QByteArray MemberDef::memberTypeName() const
+QString MemberDef::memberTypeName() const
 {
    switch (m_impl->mtype) {
       case MemberType_Define:
@@ -3493,7 +3497,7 @@ bool MemberDef::isDocumentedFriendClass() const
 {
    QSharedPointer<ClassDef> fcd;
 
-   QByteArray baseName = name();
+   QString baseName = name();
    int i = baseName.indexOf('<');
 
    if (i != -1) {
@@ -3534,7 +3538,7 @@ bool MemberDef::visibleMemberGroup(bool hideNoHeader)
    return m_impl->memberGroup != 0 && (!hideNoHeader || m_impl->memberGroup->header() != "[NOHEADER]");
 }
 
-QByteArray MemberDef::getScopeString() const
+QString MemberDef::getScopeString() const
 {
    QString result;
 
@@ -3546,13 +3550,13 @@ QByteArray MemberDef::getScopeString() const
 
    }
 
-   return result.toUtf8();
+   return result;
 }
 
 #if 0
-static QByteArray escapeAnchor(const QByteArray &anchor)
+static QString escapeAnchor(const QString &anchor)
 {
-   QByteArray result;
+   QString result;
 
    int l = anchor.length(), i;
 
@@ -3575,7 +3579,7 @@ static QByteArray escapeAnchor(const QByteArray &anchor)
 
 void MemberDef::setAnchor()
 {
-   QByteArray memAnchor = name();
+   QString memAnchor = name();
    if (!m_impl->args.isEmpty()) {
       memAnchor += m_impl->args;
    }
@@ -3595,13 +3599,13 @@ void MemberDef::setAnchor()
    }
 
    // convert to md5 hash
-   QByteArray sigStr;
-   sigStr = QCryptographicHash::hash(memAnchor, QCryptographicHash::Md5).toHex();
+   QString sigStr;
+   sigStr = QCryptographicHash::hash(memAnchor.toUtf8(), QCryptographicHash::Md5).toHex();
 
    m_impl->anc = "a" + sigStr;
 }
 
-void MemberDef::setGroupDef(QSharedPointer<GroupDef> gd, Grouping::GroupPri_t pri, const QByteArray &fileName, 
+void MemberDef::setGroupDef(QSharedPointer<GroupDef> gd, Grouping::GroupPri_t pri, const QString &fileName, 
                             int startLine, bool hasDocs, QSharedPointer<MemberDef> member)
 {   
    m_impl->group = gd;
@@ -3659,7 +3663,7 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(ArgumentList *
       actualArgList->trailingReturnType = substituteTemplateArgumentsInString(actualArgList->trailingReturnType, formalArgs, actualArgs);
    }
 
-   QByteArray methodName = name();
+   QString methodName = name();
    if (methodName.left(9) == "operator ") { 
       // conversion operator
       methodName = substituteTemplateArgumentsInString(methodName, formalArgs, actualArgs);
@@ -3697,7 +3701,7 @@ void MemberDef::setInitializer(const QString &initializer)
    int l = m_impl->initializer.length();
    int p = l - 1;
 
-   while (p >= 0 && isspace((uchar)m_impl->initializer.at(p))) {
+   while (p >= 0 && m_impl->initializer.at(p).isSpace() ) {
       p--;
    }
 
@@ -3892,8 +3896,8 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
    tagFile << "      <anchorfile>" << convertToXML(getOutputFileBase() + Doxy_Globals::htmlFileExtension) << "</anchorfile>" << endl;
    tagFile << "      <anchor>" << convertToXML(anchor()) << "</anchor>" << endl;
 
-   QByteArray idStr = id();
-   if (!idStr.isEmpty()) {
+   QString idStr = id();
+   if (! idStr.isEmpty()) {
       tagFile << "      <clangid>" << convertToXML(idStr) << "</clangid>" << endl;
    }
 
@@ -3907,10 +3911,12 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
             if (!fmd->isReference()) {
                tagFile << "      <enumvalue file=\"" << convertToXML(getOutputFileBase() + Doxy_Globals::htmlFileExtension);
                tagFile << "\" anchor=\"" << convertToXML(fmd->anchor());
-               QByteArray idStr = fmd->id();
+
+               QString idStr = fmd->id();
                if (!idStr.isEmpty()) {
                   tagFile << "\" clangid=\"" << convertToXML(idStr);
                }
+
                tagFile  << "\">" << convertToXML(fmd->name()) << "</enumvalue>" << endl;
             }
          }
@@ -3939,7 +3945,7 @@ void MemberDef::_computeIsConstructor()
          return;
 
       } else { // for other languages
-         QByteArray locName = m_impl->classDef->localName();
+         QString locName = m_impl->classDef->localName();
          int i = locName.indexOf('<');
          if (i == -1) { // not a template class
             m_isConstructorCached = name() == locName ? 2 : 1;
@@ -4017,7 +4023,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
       return;
    }
 
-   QByteArray n = name();
+   QString n = name();
    int i = n.lastIndexOf("::");
    if (i != -1) {
       n = n.right(n.length() - i - 2);   // strip scope (TODO: is this needed?)
@@ -4234,10 +4240,11 @@ bool MemberDef::isObjCProperty() const
    return false;
 }
 
-QByteArray MemberDef::qualifiedName() const
+QString MemberDef::qualifiedName() const
 {
    if (isObjCMethod()) {
-      QByteArray qm;
+      QString qm;
+
       if (isStatic()) {
          qm = "+";
       } else {
@@ -4265,7 +4272,7 @@ void MemberDef::setTagInfo(TagInfo *ti)
       m_impl->anc = ti->anchor;
       setReference(ti->tagName);
 
-      m_impl->explicitOutputFileBase = stripExtension(ti->fileName).toUtf8();
+      m_impl->explicitOutputFileBase = stripExtension(ti->fileName);
    }
 }
 
@@ -4326,7 +4333,7 @@ QString MemberDef::bitfieldString() const
    return m_impl->bitfields;
 }
 
-Qstring MemberDef::initializer() const
+QString MemberDef::initializer() const
 {
    return m_impl->initializer;
 }
@@ -4356,22 +4363,22 @@ QSharedPointer<NamespaceDef> MemberDef::getNamespaceDef() const
    return m_impl->nspace;
 }
 
-const QByteArray & MemberDef::getPropertyRead() const
+QString MemberDef::getPropertyRead() const
 {
    return m_impl->m_read;
 }
 
-const QByteArray & MemberDef::getPropertyWrite() const
+QString MemberDef::getPropertyWrite() const
 {
    return m_impl->m_write;
 }
 
-const QByteArray &MemberDef::getPropertyReset() const
+QString MemberDef::getPropertyReset() const
 {
    return m_impl->m_reset;
 }
 
-const QByteArray & MemberDef::getPropertyNotify() const
+QString MemberDef::getPropertyNotify() const
 {
    return m_impl->m_notify;
 }
@@ -4386,7 +4393,7 @@ Grouping::GroupPri_t MemberDef::getGroupPri() const
    return m_impl->grouppri;
 }
 
-const char *MemberDef::getGroupFileName() const
+QString MemberDef::getGroupFileName() const
 {
    return m_impl->groupFileName;
 }
@@ -4448,7 +4455,7 @@ bool MemberDef::isFunction() const
 
 bool MemberDef::isFunctionPtr() const
 {
-   return m_impl->mtype == MemberType_Variable && QByteArray(argsString()).indexOf(")(") != -1;
+   return m_impl->mtype == MemberType_Variable && argsString().indexOf(")(") != -1;
 }
 
 bool MemberDef::isDefine() const
@@ -4900,12 +4907,12 @@ QSharedPointer<ClassDef> MemberDef::getCachedTypedefVal() const
    return m_impl->cachedTypedefValue;
 }
 
-QByteArray MemberDef::getCachedTypedefTemplSpec() const
+QString MemberDef::getCachedTypedefTemplSpec() const
 {
    return m_impl->cachedTypedefTemplSpec;
 }
 
-QByteArray MemberDef::getCachedResolvedTypedef() const
+QString MemberDef::getCachedResolvedTypedef() const
 {  
    return m_impl->cachedResolvedType;
 }
@@ -4967,7 +4974,7 @@ void MemberDef::mergeMemberSpecifiers(Entry::SpecifierFlags spec)
 
 void MemberDef::setBitfields(const QString &s)
 {
-   m_impl->bitfields = QByteArray(s).simplified();
+   m_impl->bitfields = s.simplified();
 }
 
 void MemberDef::setMaxInitLines(int lines)
@@ -5142,18 +5149,18 @@ void MemberDef::setCategoryRelation(QSharedPointer<MemberDef> md)
    m_impl->categoryRelation = md;
 }
 
-void MemberDef::setEnumBaseType(const QByteArray &type)
+void MemberDef::setEnumBaseType(const QString &type)
 {
    m_impl->enumBaseType = type;
 }
 
-QByteArray MemberDef::enumBaseType() const
+QString MemberDef::enumBaseType() const
 {
    return m_impl->enumBaseType;
 }
 
 
-void MemberDef::cacheTypedefVal(QSharedPointer<ClassDef> val, const QByteArray &templSpec, const QByteArray &resolvedType)
+void MemberDef::cacheTypedefVal(QSharedPointer<ClassDef> val, const QString &templSpec, const QString &resolvedType)
 {
    m_impl->isTypedefValCached = true;
    m_impl->cachedTypedefValue = val;
@@ -5224,7 +5231,7 @@ void MemberDef::_addToSearchIndex()
 
    if (Doxy_Globals::searchIndex && isLinkableInProject()) {
       Doxy_Globals::searchIndex->setCurrentDoc(self, anchor(), false);
-      QByteArray ln = localName(), qn = qualifiedName();
+      QString ln = localName(), qn = qualifiedName();
       Doxy_Globals::searchIndex->addWord(ln, true);
 
       if (ln != qn) {
@@ -5369,7 +5376,7 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
    }
 }
 
-QByteArray MemberDef::briefDescription(bool abbr) const
+QString MemberDef::briefDescription(bool abbr) const
 {
    if (m_impl->templateMaster) {
       return m_impl->templateMaster->briefDescription(abbr);
@@ -5378,7 +5385,7 @@ QByteArray MemberDef::briefDescription(bool abbr) const
    }
 }
 
-QByteArray MemberDef::documentation() const
+QString MemberDef::documentation() const
 {
    if (m_impl->templateMaster) {
       return m_impl->templateMaster->documentation();

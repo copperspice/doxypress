@@ -32,9 +32,9 @@
 class HtmlCodeGenerator : public CodeOutputInterface
 {
  public:
-   HtmlCodeGenerator(QTextStream &t, const QByteArray &relPath);
+   HtmlCodeGenerator(QTextStream &t, const QString &relPath);
 
-   void setRelativePath(const QByteArray &path);
+   void setRelativePath(const QString &path);
    void codify(const QString &text) override;
 
    void writeCodeLink(const QString &ref, const QString &file, const QString &anchor, 
@@ -54,15 +54,15 @@ class HtmlCodeGenerator : public CodeOutputInterface
    void addWord(const QString &name, bool) override {}
 
  private:
-   void _writeCodeLink(const QByteArray &className, const QByteArray &ref, const QByteArray &file, const QByteArray &anchor, 
-                       const QByteArray &name, const QByteArray &tooltip);
+   void _writeCodeLink(const QString &className, const QString &ref, const QString &file, 
+                  const QString &anchor, const QString &name, const QString &tooltip);
 
    void docify(const QString &text);
 
    QTextStream &m_streamX;  
 
    int m_col;  
-   QByteArray m_relPath;
+   QString m_relPath;
 };
 
 /** Generator for HTML output */
@@ -82,8 +82,8 @@ class HtmlGenerator : public OutputGenerator
    static void writeSearchPage();
    static void writeExternalSearchPage();
 
-   static QByteArray writeLogoAsString(const QString &path);
-   static QByteArray writeSplitBarAsString(const QString &name, const QString &relpath);
+   static QString writeLogoAsString(const QString &path);
+   static QString writeSplitBarAsString(const QString &name, const QString &relpath);
 
    void enable() {
       if (! genStack.isEmpty()) {

@@ -24,30 +24,25 @@
 
 void TextDocVisitor::visit(DocSymbol *s)
 {
-   const char *res = HtmlEntityMapper::instance()->html(s->symbol());
+   const QString res = HtmlEntityMapper::instance()->html(s->symbol());
 
-   if (res) {
+   if (! res.isEmpty()) {
       m_t << res;
 
    } else {
-      err("text: non supported HTML-entity found: %s\n", HtmlEntityMapper::instance()->html(s->symbol(), true));
+      err("text: Non supported HTML-entity found: %s\n", HtmlEntityMapper::instance()->html(s->symbol(), true));
 
    }
 }
 
-void TextDocVisitor::filter(const char *str)
+void TextDocVisitor::filter(const QString &str)
 {
-   if (str == 0) {
+   if (str.isEmpty()) {
       return;
    }
 
-   const char *p = str;
-   char c;
-
-   while (*p) {
-      c = *p++;
-
-      switch (c) {
+   for (auto c : str) { 
+      switch (c.unicode()) {
          case '\n':
             m_t << " ";
             break;

@@ -35,7 +35,7 @@ MemberGroup::MemberGroup()
 {
 }
 
-MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const char *hdr, const char *d, const char *docFile)
+MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const QString &hdr, const QString &d, const QString &docFile)
    : m_parent(parent)
 {   
    memberList      = QMakeShared<MemberList>(MemberListType_memberGroup);
@@ -89,7 +89,7 @@ void MemberGroup::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd,
                   QSharedPointer<NamespaceDef> nd, QSharedPointer<FileDef> fd, 
                   QSharedPointer<GroupDef> gd, bool showInline)
 {  
-   QByteArray ldoc = doc;
+   QString ldoc = doc;
 
    if (! ldoc.isEmpty()) {
       ldoc.prepend("<a name=\"" + anchor() + "\" id=\"" + anchor() + "\"></a>");
@@ -100,24 +100,24 @@ void MemberGroup::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd,
 
 void MemberGroup::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, 
-                  QSharedPointer<ClassDef> inheritedFrom, const char *inheritId )
+                  QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId )
 {  
    memberList->writePlainDeclarations(ol, cd, nd, fd, gd, inheritedFrom, inheritId);
 }
 
-void MemberGroup::writeDocumentation(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container, 
+void MemberGroup::writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container, 
                   bool showEnumValues, bool showInline)
 {
    memberList->writeDocumentation(ol, scopeName, container, 0, showEnumValues, showInline);
 }
 
-void MemberGroup::writeDocumentationPage(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container)
+void MemberGroup::writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container)
 {
    memberList->writeDocumentationPage(ol, scopeName, container);
 }
 
 void MemberGroup::addGroupedInheritedMembers(OutputList &ol, QSharedPointer<ClassDef> cd, MemberListType lt,    
-                  QSharedPointer<ClassDef> inheritedFrom, const addGroupedInheritedMembers &inheritId)
+                  QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
 {  
    for (auto md : *memberList) {   
      
@@ -259,16 +259,16 @@ void MemberGroup::setInGroup(bool b)
    memberList->setInGroup(b);
 }
 
-QByteArray MemberGroup::anchor() const
+QString MemberGroup::anchor() const
 {     
-   QByteArray locHeader = grpHeader;
+   QString locHeader = grpHeader;
 
    if (locHeader.isEmpty()) {
       locHeader = "[NOHEADER]";
    }
 
-   QByteArray sigStr;
-   sigStr = QCryptographicHash::hash(locHeader, QCryptographicHash::Md5).toHex();
+   QString sigStr;
+   sigStr = QCryptographicHash::hash(locHeader.toUtf8(), QCryptographicHash::Md5).toHex();
 
    return "amgrp" + sigStr;
 }
@@ -278,7 +278,7 @@ void MemberGroup::addListReferences(QSharedPointer<Definition> def)
    memberList->addListReferences(def);
 
    if (m_xrefListItems && def) {
-      QByteArray name = def->getOutputFileBase() + "#" + anchor();
+      QString name = def->getOutputFileBase() + "#" + anchor();
       addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, 0, def);
    }
 }

@@ -18,7 +18,6 @@
 #ifndef LATEXDOCVISITOR_H
 #define LATEXDOCVISITOR_H
 
-#include <QByteArray>
 #include <QList>
 #include <QStack>
 #include <QTextStream>
@@ -30,11 +29,9 @@ class CodeOutputInterface;
 class LatexDocVisitor : public DocVisitor
 {
  public:
-   LatexDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt, bool insideTabbing);
+   LatexDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt, bool insideTabbing);
 
-   //--------------------------------------
    // visitor functions for leaf nodes
-   //--------------------------------------
 
    void visit(DocWord *);
    void visit(DocLinkedWord *);
@@ -148,24 +145,20 @@ class LatexDocVisitor : public DocVisitor
 
    typedef QList<ActiveRowSpan> RowSpanList;
 
-   //--------------------------------------
-   // helper functions
-   //--------------------------------------
-
    void filter(const QString &str);
-   void startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor);
-   void endLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor);
-   QByteArray escapeMakeIndexChars(const char *s);
-   void startDotFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
+   void startLink(const QString &ref, const QString &file, const QString &anchor);
+   void endLink(const QString &ref, const QString &file, const QString &anchor);
+   QString escapeMakeIndexChars(const QString &s);
+   void startDotFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endDotFile(bool hasCaption);
 
-   void startMscFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
+   void startMscFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endMscFile(bool hasCaption);
-   void writeMscFile(const QByteArray &fileName);
+   void writeMscFile(const QString &fileName);
 
-   void startDiaFile(const QByteArray &fileName, const QByteArray &width, const QByteArray &height, bool hasCaption);
+   void startDiaFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endDiaFile(bool hasCaption);
-   void writeDiaFile(const QByteArray &fileName);
+   void writeDiaFile(const QString &fileName);
    void writePlantUMLFile(const QString &fileName);
 
    void pushEnabled();
@@ -181,7 +174,7 @@ class LatexDocVisitor : public DocVisitor
    int  m_numCols;
 
    QStack<bool> m_enabled;
-   QByteArray m_langExt;
+   QString m_langExt;
    RowSpanList m_rowSpans;
 
    int m_currentColumn;

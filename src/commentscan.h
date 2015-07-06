@@ -61,8 +61,8 @@ class ParserInterface;
  *         where to proceed parsing. false indicates no further processing is
  *         needed.
  */
-bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, const QByteArray &comment,
-                       const QByteArray &fileName, int  &lineNr, bool isBrief, bool isJavaDocStyle,
+bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, const QString &comment,
+                       const QString &fileName, int  &lineNr, bool isBrief, bool isJavaDocStyle,
                        bool isInbody, Protection &prot, int &position, bool &newEntryNeeded);
 
 void groupEnterFile(const char *file, int line);

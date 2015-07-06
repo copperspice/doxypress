@@ -7346,7 +7346,7 @@ void DocRoot::parse()
    DBG(("DocRoot::parse() end\n"));
 }
 
-static QString extractCopyDocId(const char *data, uint &j, uint len)
+static QString extractCopyDocId(const QString &data, uint &j, uint len)
 {
    uint s = j;
    uint e = j;
@@ -7358,8 +7358,9 @@ static QString extractCopyDocId(const char *data, uint &j, uint len)
    bool found = false;
 
    while (j < len && !found) {
-      if (!insideSQuote && !insideDQuote) {
-         switch (data[j]) {
+
+      if (! insideSQuote && !insideDQuote) {
+         switch (data[j].unicode() ) {
             case '(':
                round++;
                break;
@@ -7378,6 +7379,7 @@ static QString extractCopyDocId(const char *data, uint &j, uint len)
                found = (round == 0);
                break;
          }
+
       } else if (insideSQuote) { // look for single quote end
          if (data[j] == '\'' && (j == 0 || data[j] != '\\')) {
             insideSQuote = false;
@@ -7393,35 +7395,34 @@ static QString extractCopyDocId(const char *data, uint &j, uint len)
       }
    }
 
-   if (qstrncmp(data + j, " const", 6) == 0) {
+   if (data.mid(j).startsWith(" const") ) {
       j += 6;
 
-   } else if (qstrncmp(data + j, " volatile", 9) == 0) {
+   } else if ( data.mid(j).startsWith(" volatile") ) {
       j += 9;
    }
 
    e = j;
+
    QString id;
-   id.resize(e - s + 1);
-
+   
    if (e > s) {
-      memcpy(id.data(), data + s, e - s);
+      id = data.mid(s, e - s);
    }
-
-   id[e - s] = '\0';
    
    return id;
 }
 
-static uint isCopyBriefOrDetailsCmd(const char *data, uint i, uint len, bool &brief)
+static uint isCopyBriefOrDetailsCmd(const QString &data, uint i, uint len, bool &brief)
 {
    int j = 0;
 
    if (i == 0 || (data[i - 1] != '@' && data[i - 1] != '\\')) { // not an escaped command
-      if (i + 10 < len && qstrncmp(data + i + 1, "copybrief", 9) == 0) { // @copybrief or \copybrief
+      if (i + 10 < len && data.mid(i + 1).startsWith("copybrief") ) { // @copybrief or \copybrief
          j = i + 10;
          brief = true;
-      } else if (i + 12 < len && qstrncmp(data + i + 1, "copydetails", 11) == 0) { // @copydetails or \copydetails
+
+      } else if (i + 12 < len && data.mid(i + 1).startsWith("copydetails") ) { // @copydetails or \copydetails
          j = i + 12;
          brief = false;
       }
@@ -7431,14 +7432,11 @@ static uint isCopyBriefOrDetailsCmd(const char *data, uint i, uint len, bool &br
 
 static QString processCopyDoc(const QString &data, uint &len)
 {   
-
-   // BROOM - fix me
-
-   GrowBuf buf;
+   QString retval;
    uint i = 0;
 
    while (i < len) {
-      char c = data[i];
+      QChar c = data[i];
 
       if (c == '@' || c == '\\') { // look for a command
          bool isBrief = true;
@@ -7464,11 +7462,11 @@ static QString processCopyDoc(const QString &data, uint &len)
 
                   if (isBrief) {
                      uint l = brief.length();
-                     buf.addStr(processCopyDoc(brief, l));
+                     retval += processCopyDoc(brief, l);
 
                   } else {
                      uint l = doc.length();
-                     buf.addStr(processCopyDoc(doc, l));
+                     retval += processCopyDoc(doc, l);
                   }
 
                   s_copyStack.removeOne(def);
@@ -7487,20 +7485,19 @@ static QString processCopyDoc(const QString &data, uint &len)
             i = j;
 
          } else {
-            buf.addChar(c);
+            retval += c;
             i++;
          }
 
       } else { // not a command, just copy
-         buf.addChar(c);
+         retval += c;
          i++;
       }
    }
 
-   len = buf.getPos();
-   buf.addChar(0);
+   len = retval.length();
 
-   return buf.get();
+   return retval;
 }
 
 DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md, 
@@ -7680,7 +7677,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    return root;
 }
 
-DocText *validatingParseText(const char *input)
+DocText *validatingParseText(const QString &input)
 {
    // store parser state so we can re-enter this function if needed
    docParserPushContext();
@@ -7711,7 +7708,7 @@ DocText *validatingParseText(const char *input)
 
    DocText *txt = new DocText;
 
-   if (input) {
+   if (! input.isEmpty()) {
       doctokenizerYYlineno = 1;
       doctokenizerYYinit(input, s_fileName);
 

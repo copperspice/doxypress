@@ -44,7 +44,7 @@ class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
    NamespaceSDict() : StringMap<QSharedPointer<NamespaceDef>>() {}
    ~NamespaceSDict() {}
 
-   void writeDeclaration(OutputList &ol, const char *title, bool isConstantGroup = false, bool localName = false);
+   void writeDeclaration(OutputList &ol, const QString &title, bool isConstantGroup = false, bool localName = false);
    bool declVisible() const;
 
  private:
@@ -133,7 +133,7 @@ class NamespaceDef : public Definition
       return m_memberLists;
    }
 
-   QSharedPointer<MemberDef> getMemberByName(const QByteArray &) const;
+   QSharedPointer<MemberDef> getMemberByName(const QString &) const;
 
    /*! Returns the user defined member groups */
    MemberGroupSDict *getMemberGroupSDict() const {
@@ -159,15 +159,15 @@ class NamespaceDef : public Definition
    QSharedPointer<MemberList> createMemberList(MemberListType lt);
 
    void addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md);
-   void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title);
-   void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title);
-   void writeDetailedDescription(OutputList &ol, const QByteArray &title);
+   void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title);
+   void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title);
+   void writeDetailedDescription(OutputList &ol, const QString &title);
    void writeBriefDescription(OutputList &ol);
    void startMemberDeclarations(OutputList &ol);
    void endMemberDeclarations(OutputList &ol);
-   void writeClassDeclarations(OutputList &ol, const QByteArray &title);
+   void writeClassDeclarations(OutputList &ol, const QString &title);
    void writeInlineClasses(OutputList &ol);
-   void writeNamespaceDeclarations(OutputList &ol, const QByteArray &title, bool isConstantGroup = false);
+   void writeNamespaceDeclarations(OutputList &ol, const QString &title, bool isConstantGroup = false);
    void writeMemberGroups(OutputList &ol);
    void writeAuthorSection(OutputList &ol);
    void startMemberDocumentation(OutputList &ol);
@@ -184,16 +184,15 @@ class NamespaceDef : public Definition
    StringMap<QSharedPointer<Definition>>   m_usingDeclMap;
    StringMap<QSharedPointer<Definition>>  *m_innerCompounds;
 
-   NamespaceSDict        m_usingDirMap;
-   NamespaceSDict       *namespaceSDict;
-   MemberSDict          *m_allMembersDict;
-   MemberGroupSDict     *memberGroupSDict;
-   ClassSDict           *classSDict;
+   NamespaceSDict    m_usingDirMap;
+   NamespaceSDict    *namespaceSDict;
+   MemberSDict       *m_allMembersDict;
+   MemberGroupSDict  *memberGroupSDict;
+   ClassSDict        *classSDict;
   
    QList<QSharedPointer<MemberList>> m_memberLists;
  
-   enum { NAMESPACE, MODULE, CONSTANT_GROUP, LIBRARY } m_type;
-   
+   enum { NAMESPACE, MODULE, CONSTANT_GROUP, LIBRARY } m_type;   
 };
 
 /** A list of NamespaceDef objects. */

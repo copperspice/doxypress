@@ -98,7 +98,7 @@ class MemberDef : public Definition
    // querying the grouping definition
    QSharedPointer<GroupDef> getGroupDef() const;
    Grouping::GroupPri_t getGroupPri() const;
-   const char *getGroupFileName() const;
+   QString getGroupFileName() const;
    int getGroupStartLine() const;
    bool getGroupHasDocs() const;
    QString qualifiedName() const;
@@ -392,9 +392,9 @@ class MemberDef : public Definition
    void writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
                  bool inGroup, QSharedPointer<ClassDef> inheritFrom = QSharedPointer<ClassDef>(), 
-                 const char *inheritId = 0);
+                 const QString &inheritId = 0);
 
-   void writeDocumentation(MemberList *ml, OutputList &ol, const char *scopeName, QSharedPointer<Definition> container,
+   void writeDocumentation(MemberList *ml, OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container,
                  bool inGroup, bool showEnumValues = false, bool showInline = false);
 
    void writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> container);

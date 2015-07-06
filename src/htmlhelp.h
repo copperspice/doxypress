@@ -100,7 +100,7 @@ class HtmlHelp  : public IndexIntf
 
    static HtmlHelp *theInstance;
 
-   QByteArray recode(const QString &s);
+   QString recode(const QString &s);
 
    QTextCodec *m_toNewCodec;
 };

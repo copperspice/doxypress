@@ -25,12 +25,13 @@ class FileParser : public ParserInterface
 {
  public:
    virtual ~FileParser() {}
-   void startTranslationUnit(const char *) {}
-   void finishTranslationUnit() {}
-   void parseInput(const QString &, const char *, QSharedPointer<Entry>, 
+   void startTranslationUnit(const QString &) override {}
+   void finishTranslationUnit() override {}
+
+   void parseInput(const QString &, const QString &, QSharedPointer<Entry>, 
                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override {};
 
-   bool needsPreprocessing(const QString &) {
+   bool needsPreprocessing(const QString &) override {
       return false;
    }
 
@@ -42,7 +43,7 @@ class FileParser : public ParserInterface
                   QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override;
 
    void resetCodeParserState() {}
-   void parsePrototype(const char *) {}
+   void parsePrototype(const QString &) {}
 };
 
 

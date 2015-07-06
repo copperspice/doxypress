@@ -18,7 +18,6 @@
 #ifndef HTMLDOCVISITOR_H
 #define HTMLDOCVISITOR_H
 
-#include <QByteArray>
 #include <QStack>
 #include <QTextStream>
 
@@ -34,10 +33,8 @@ class HtmlDocVisitor : public DocVisitor
 {
  public:
    HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, QSharedPointer<Definition> ctx);
-
-   //--------------------------------------
+  
    // visitor functions for leaf nodes
-   //--------------------------------------
 
    void visit(DocWord *);
    void visit(DocLinkedWord *);
@@ -55,10 +52,8 @@ class HtmlDocVisitor : public DocVisitor
    void visit(DocIndexEntry *);
    void visit(DocSimpleSectSep *);
    void visit(DocCite *);
-
-   //--------------------------------------
+  
    // visitor functions for compound nodes
-   //--------------------------------------
 
    void visitPre(DocAutoList *);
    void visitPost(DocAutoList *);
@@ -135,35 +130,26 @@ class HtmlDocVisitor : public DocVisitor
    void visitPre(DocParBlock *);
    void visitPost(DocParBlock *);
 
- private:
-
-   //--------------------------------------
-   // helper functions
-   //--------------------------------------
-  
+ private:    
    void filter(const QString &str);
-   void filterQuotedCdataAttr(const char *str);
+   void filterQuotedCdataAttr(const QString &str);
 
-   void startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &relPath, const QByteArray &anchor,
-                  const QByteArray &tooltip = "");
+   void startLink(const QString &ref, const QString &file, const QString &relPath, const QString &anchor,
+                  const QString &tooltip = "");
 
    void endLink();
 
-   void writeDotFile(const QString &fileName, const QString &relPath, const QByteArray &context);
-   void writeMscFile(const QString &fileName, const QString &relPath, const QByteArray &context);
-   void writeDiaFile(const QString &fileName, const QString &relPath, const QByteArray &context);
-   void writePlantUMLFile(const QString &fileName, const QString &relPath, const QByteArray &context);
+   void writeDotFile(const QString &fileName, const QString &relPath, const QString &context);
+   void writeMscFile(const QString &fileName, const QString &relPath, const QString &context);
+   void writeDiaFile(const QString &fileName, const QString &relPath, const QString &context);
+   void writePlantUMLFile(const QString &fileName, const QString &relPath, const QString &context);
 
    void pushEnabled();
    void popEnabled();
 
    void forceEndParagraph(DocNode *n);
    void forceStartParagraph(DocNode *n);
-
-   //--------------------------------------
-   // state variables
-   //--------------------------------------
-
+ 
    QTextStream &m_t;
    CodeOutputInterface &m_ci;
    bool m_insidePre;
@@ -171,7 +157,7 @@ class HtmlDocVisitor : public DocVisitor
    QStack<bool> m_enabled;
 
    QSharedPointer<Definition> m_ctx;
-   QByteArray m_langExt;
+   QString m_langExt;
 };
 
 #endif

@@ -290,7 +290,7 @@ void PageDef::writePageDocumentation(OutputList &ol)
                break;
          }
 
-         QByteArray title = subPage->title();
+         QString title = subPage->title();
          if (title.isEmpty()) {
             title = subPage->name();
          }

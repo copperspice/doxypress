@@ -31,13 +31,13 @@ class CPPLanguageParser : public ParserInterface
  public:
    virtual ~CPPLanguageParser() {}
 
-   void startTranslationUnit(const char *fileName);
-   void finishTranslationUnit();
+   void startTranslationUnit(const QString &fileName) override;
+   void finishTranslationUnit() override;
 
-   void parseInput(const QString &fileName, const char *fileBuf, QSharedPointer<Entry> root,
+   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                    enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
-   bool needsPreprocessing(const QString &extension);
+   bool needsPreprocessing(const QString &extension) override;
 
    void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
                   bool isExampleBlock, const QString &exampleName = QString(), 
@@ -47,7 +47,7 @@ class CPPLanguageParser : public ParserInterface
                   QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override ;
 
    void resetCodeParserState();
-   void parsePrototype(const char *text);
+   void parsePrototype(const QString &text) override;
 };
 
 void CPPScanFreeParser();

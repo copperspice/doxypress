@@ -31,7 +31,7 @@ class ClassDiagram
    ClassDiagram(QSharedPointer<ClassDef> root);
    ~ClassDiagram();
 
-   void writeFigure(QTextStream &t, const char *path, const char *file) const;
+   void writeFigure(QTextStream &t, const QString &path, const QString &file) const;
    void writeImage(QTextStream &t, const QString &path, const QString &relPath, const QString &file, bool generateMap = true) const;
 
  private:

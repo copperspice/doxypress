@@ -18,7 +18,6 @@
 #ifndef CLANGPARSER_H
 #define CLANGPARSER_H
 
-#include <QByteArray>
 #include <QStringList>
 
 class CodeOutputInterface;
@@ -39,13 +38,13 @@ class ClangParser
     *                 only including the onces that were actually found
     *                 during parsing.
     */
-   void start(const char *fileName, QStringList &filesInTranslationUnit);
+   void start(const QString &fileName, QStringList &filesInTranslationUnit);
 
    /** Switches to another file within the translation unit started
     *  with start().
     *  @param[in] fileName The name of the file to switch to.
     */
-   void switchToFile(const char *fileName);
+   void switchToFile(const QString &fileName);
 
    /** Finishes parsing a translation unit. Free any resources that
     *  were needed for parsing.
@@ -55,7 +54,7 @@ class ClangParser
    /** Looks for \a symbol which should be found at \a line and
     *  returns a clang unique reference to the symbol.
     */
-   QByteArray lookup(uint line, const char *symbol);
+   QString lookup(uint line, const QString &symbol);
 
    /** writes the syntax highlighted source code for a file
     *  @param[out] ol The output generator list to write to.
@@ -64,9 +63,9 @@ class ClangParser
    void writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> fd);
 
  private:
-   void linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const char *text, int tokenIndex);
-   void linkMacro(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const char *text);
-   void linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const char *text);
+   void linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const QString &text, int tokenIndex);
+   void linkMacro(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const QString &text);
+   void linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const QString &text);
    void determineInputFiles(QStringList &includeFiles);
 
    class Private;

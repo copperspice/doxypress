@@ -69,7 +69,6 @@ class TextDocVisitor : public DocVisitor
    void visit(DocIndexEntry *)   {}
    void visit(DocSimpleSectSep *) {}
    void visit(DocCite *)         {}
-
    
    // visitor functions for compound nodes  
    void visitPre(DocAutoList *) {}
@@ -150,8 +149,7 @@ class TextDocVisitor : public DocVisitor
 
  private:
 
-   void filter(const char *str);
-
+   void filter(const QString &str);
    QTextStream &m_t;
 };
 

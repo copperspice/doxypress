@@ -388,11 +388,12 @@ class OutputList : public OutputDocInterface
    void endMemberDoc(bool hasArgs) {
       forall(&OutputGenerator::endMemberDoc, hasArgs);
    }
+
    void startDoxyAnchor(const QString &fName, const QString &manName,
-                        const QString &anchor, const QString &name,
-                        const QString &args) {
+                        const QString &anchor, const QString &name, const QString &args) {
       forall(&OutputGenerator::startDoxyAnchor, fName, manName, anchor, name, args);
    }
+
    void endDoxyAnchor(const QString &fn, const QString &anchor) {
       forall(&OutputGenerator::endDoxyAnchor, fn, anchor);
    }

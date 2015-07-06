@@ -39,8 +39,8 @@ static void visitCaption(XmlDocVisitor *parent, QList<DocNode *> children)
 }
 
 static void visitPreStart(QTextStream &t, const char *cmd, const bool doCaption, XmlDocVisitor *parent,
-                  QList<DocNode *> children, const QByteArray &name, bool writeType, DocImage::Type type, 
-                  const QByteArray &width, const QByteArray &height)
+                  QList<DocNode *> children, const QString &name, bool writeType, DocImage::Type type, 
+                  const QString &width, const QString &height)
 {
    t << "<" << cmd;
 
@@ -339,7 +339,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
          m_t << "<programlisting>";
 
          QFileInfo cfi( inc->file() );
-         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8(), cfi.fileName().toUtf8());
+         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
 
          Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd); 
@@ -667,7 +667,7 @@ void XmlDocVisitor::visitPre(DocSection *s)
    }
    m_t << "\">" << endl;
    m_t << "<title>";
-   filter(convertCharEntitiesToUTF8(s->title()));
+   filter(convertCharEntities(s->title()));
    m_t << "</title>" << endl;
 }
 
@@ -907,7 +907,7 @@ void XmlDocVisitor::visitPre(DocImage *img)
    }
    m_t << "\"";
 
-   QByteArray baseName = img->name();
+   QString baseName = img->name();
 
    int i;
    if ((i = baseName.lastIndexOf('/')) != -1 || (i = baseName.lastIndexOf('\\')) != -1) {
@@ -1021,7 +1021,7 @@ void XmlDocVisitor::visitPre(DocRef *ref)
       return;
    }
    if (!ref->file().isEmpty()) {
-      startLink(ref->ref(), ref->file(), ref->isSubPage() ? QByteArray() : ref->anchor());
+      startLink(ref->ref(), ref->file(), ref->isSubPage() ? QString() : ref->anchor());
    }
    if (!ref->hasLinkText()) {
       filter(ref->targetTitle());
@@ -1283,12 +1283,12 @@ void XmlDocVisitor::visitPost(DocParBlock *)
 }
 
 
-void XmlDocVisitor::filter(const char *str)
+void XmlDocVisitor::filter(const QString &str)
 {
    m_t << convertToXML(str);
 }
 
-void XmlDocVisitor::startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor)
+void XmlDocVisitor::startLink(const QString &ref, const QString &file, const QString &anchor)
 {
    //printf("XmlDocVisitor: file=%s anchor=%s\n",file.data(),anchor.data());
    m_t << "<ref refid=\"" << file;

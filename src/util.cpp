@@ -83,10 +83,10 @@ static QCache<QPair<const FileNameDict *, QString>, FindFileCacheElem> s_findFil
 
 // forward declaration
 static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-                  const QString &n, QSharedPointer<MemberDef> *pTypeDef, QByteArray *pTemplSpec, QByteArray *pResolvedType );
+                  const QString &n, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType );
 
 int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-               QSharedPointer<Definition> item, const QByteArray &explicitScopePart);
+               QSharedPointer<Definition> item, const QString &explicitScopePart);
 
 // ** selects one of the name to sub-dir mapping algorithms that is used
 // to select a sub directory when CREATE_SUBDIRS is set to YES.
@@ -124,6 +124,8 @@ void TextGeneratorOLImpl::writeString(const QString &text, bool keepSpaces) cons
    if (text.isEmpty()) {
       return;
    }   
+
+// broom - fix me
 
    QByteArray tmp = text.toUtf8();
    const char *s  = tmp.constData();    
@@ -233,9 +235,9 @@ QString removeAnonymousScopes(const QString &s)
 }
 
 // replace anonymous scopes with __anonymous__ or replacement if provided
-QByteArray replaceAnonymousScopes(const QByteArray &s, const QByteArray &replacement)
+QString replaceAnonymousScopes(const QString &s, const QString&replacement)
 {
-   QByteArray result;
+   QString result;
 
    if (s.isEmpty()) {
       return result;
@@ -273,7 +275,7 @@ QString stripAnonymousNamespaceScope(const QString &s)
    int p = 0;
    int l;
 
-   QByteArray newScope;
+   QString newScope;
 
    int sl = s.length();
 
@@ -305,7 +307,7 @@ QString stripAnonymousNamespaceScope(const QString &s)
    return newScope;
 }
 
-void writePageRef(OutputDocInterface &od, const char *cn, const char *mn)
+void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn)
 {
    od.pushGeneratorState();
 
@@ -555,10 +557,10 @@ QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &name)
       }
 
       if (count == 10) {
-         warn_uncond("possible recursive namespace alias detected for %s!\n", name.constData());
+         warn_uncond("Possible recursive namespace alias detected for %s\n", qPrintable(name) );
       }
 
-      return Doxy_Globals::namespaceSDict->find(subst.constData());
+      return Doxy_Globals::namespaceSDict->find(subst);
 
    } else {
       return Doxy_Globals::namespaceSDict->find(name);
@@ -574,7 +576,7 @@ QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &name)
  *  Example: typedef int T; will return 0, since "int" is not a class.
  */
 QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<FileDef> fileScope, QSharedPointer<MemberDef> md,  
-                  QSharedPointer<MemberDef> *pMemType, QByteArray *pTemplSpec, QByteArray *pResolvedType, 
+                  QSharedPointer<MemberDef> *pMemType, QString *pTemplSpec, QString *pResolvedType, 
                   ArgumentList *actTemplParams)
 {
    bool isCached = md->isTypedefValCached(); // value already cached
@@ -592,7 +594,7 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<FileDef> fileScope, QS
       return md->getCachedTypedefVal();
    }
   
-   QByteArray qname = md->qualifiedName();
+   QString qname = md->qualifiedName();
    if (s_resolvedTypedefs.contains(qname)) {
       return QSharedPointer<ClassDef>();   // typedef already done
    }
@@ -608,7 +610,7 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<FileDef> fileScope, QS
       type = substituteTemplateArgumentsInString(type, typeClass->templateArguments(), actTemplParams);
    }
 
-   QByteArray typedefValue = type;
+   QString typedefValue = type;
    int tl = type.length();
    int ip = tl - 1; // remove * and & at the end
 
@@ -695,7 +697,7 @@ done:
       // this check is needed to prevent that temporary classes that are
       // introduced while parsing code fragments are being cached here.
          
-      md->cacheTypedefVal(result, pTemplSpec ? *pTemplSpec : QByteArray(), pResolvedType ? *pResolvedType : QByteArray() );
+      md->cacheTypedefVal(result, pTemplSpec ? *pTemplSpec : QString(), pResolvedType ? *pResolvedType : QString() );
    }
 
    // remove from the trace list
@@ -707,10 +709,10 @@ done:
 /*! Substitutes a simple unqualified \a name within \a scope. Returns the
  *  value of the typedef or \a name if no typedef was found.
  */
-static QByteArray substTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QByteArray &symbolName, 
+static QString substTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QString &symbolName, 
                                QSharedPointer<MemberDef> *pTypeDef = nullptr)
 {
-   QByteArray result = symbolName;
+   QString result = symbolName;
 
    if (symbolName.isEmpty()) {
       return result;
@@ -765,7 +767,7 @@ static QByteArray substTypedef(QSharedPointer<Definition> scope, QSharedPointer<
    return result;
 }
 
-static QSharedPointer<Definition> endOfPathIsUsedClass(StringMap<QSharedPointer<Definition>> &cl, const QByteArray &localName)
+static QSharedPointer<Definition> endOfPathIsUsedClass(StringMap<QSharedPointer<Definition>> &cl, const QString &localName)
 {
    for (auto cd : cl) {
       if (cd->localName() == localName) {
@@ -781,7 +783,7 @@ static QSharedPointer<Definition> endOfPathIsUsedClass(StringMap<QSharedPointer<
  *  searched. If found the scope definition is returned, otherwise 0
  *  is returned.
  */
-static QSharedPointer<Definition> followPath(QSharedPointer<Definition> start, QSharedPointer<FileDef> fileScope, const QByteArray &path)
+static QSharedPointer<Definition> followPath(QSharedPointer<Definition> start, QSharedPointer<FileDef> fileScope, const QString &path)
 {
    int is;
    int ps;
@@ -796,7 +798,7 @@ static QSharedPointer<Definition> followPath(QSharedPointer<Definition> start, Q
       // try to resolve the part if it is a typedef
       QSharedPointer<MemberDef> typeDef;
 
-      QByteArray qualScopePart = substTypedef(current, fileScope, path.mid(is, l), &typeDef);
+      QString qualScopePart = substTypedef(current, fileScope, path.mid(is, l), &typeDef);
       
       if (typeDef) {
          QSharedPointer<ClassDef> type = newResolveTypedef(fileScope, typeDef);
@@ -848,7 +850,7 @@ static QSharedPointer<Definition> followPath(QSharedPointer<Definition> start, Q
 }
 
 bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QSharedPointer<FileDef> fileScope,
-                             QSharedPointer<Definition> item, const QByteArray &explicitScopePart = "" )
+                             QSharedPointer<Definition> item, const QString &explicitScopePart = "" )
 {
    if (cl) { 
       // see if the class was imported via a using statement    
@@ -875,8 +877,8 @@ bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QS
    return false;
 }
 
-bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item,
-                                 const QByteArray &explicitScopePart = "")
+static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item,
+                                 const QString &explicitScopePart = "")
 {
    static QSet<QString> visitedDict;
 
@@ -898,7 +900,7 @@ bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<FileDe
             return true;
          }
 
-         QByteArray key = und->name();
+         QString key = und->name();
 
          if (! visitedDict.contains(key)) {
             visitedDict.insert(key);
@@ -935,7 +937,7 @@ class AccessStack
    }
 
    void push(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item, 
-            const QByteArray &expScope) {
+            const QString &expScope) {
 
       if (m_index < MAX_STACK_SIZE) {
          m_elements[m_index].scope     = scope;
@@ -962,8 +964,9 @@ class AccessStack
       }
       return false;
    }
+
    bool find(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item, 
-             const QByteArray &expScope) {
+             const QString &expScope) {
 
       int i = 0;
 
@@ -983,7 +986,7 @@ class AccessStack
       QSharedPointer<FileDef>     fileScope;
       QSharedPointer<Definition>  item;
 
-      QByteArray expScope;
+      QString expScope;
    };
 
    int m_index;
@@ -1096,7 +1099,7 @@ done:
  *   thus the result is 1.
  */
 int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
-                                 QSharedPointer<Definition> item, const QByteArray &explicitScopePart)
+                                 QSharedPointer<Definition> item, const QString &explicitScopePart)
 {
    if (explicitScopePart.isEmpty()) {
       // handle degenerate case where there is no explicit scope
@@ -1109,7 +1112,8 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointe
    }
    accessStack.push(scope, fileScope, item, explicitScopePart);
 
-   int result = 0; // assume we found it
+   // assume we found it
+   int result = 0; 
 
    QSharedPointer<Definition> newScope = followPath(scope, fileScope, explicitScopePart);
 
@@ -1218,9 +1222,9 @@ int computeQualifiedIndex(const QString &name)
 }
 
 static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> d, 
-                              const QByteArray &explicitScopePart, ArgumentList *actTemplParams, int &minDistance, 
+                              const QString &explicitScopePart, ArgumentList *actTemplParams, int &minDistance, 
                               QSharedPointer<ClassDef> &bestMatch, QSharedPointer<MemberDef> &bestTypedef,
-                              QByteArray &bestTemplSpec, QByteArray &bestResolvedType)
+                              QString &bestTemplSpec, QString &bestResolvedType)
 {
    // only look at classes and members which are enums or typedefs
 
@@ -1282,7 +1286,7 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
             
             if (md->isTypedef()) { 
                // d is a typedef
-               QByteArray args = md->argsString();
+               QString args = md->argsString();
 
                if (args.isEmpty()) {
                   // do not expand "typedef t a[4];"                  
@@ -1293,8 +1297,8 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
                   // that symbol is hidden by this one.
 
                   if (distance < minDistance) {
-                     QByteArray spec;
-                     QByteArray type;
+                     QString spec;
+                     QString type;
 
                      minDistance = distance;
 
@@ -1337,9 +1341,9 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
 
             } else if (md->isEnumerate()) {
                if (distance < minDistance) {
-                  minDistance = distance;
-                  bestMatch   = QSharedPointer<ClassDef>();
-                  bestTypedef = md;
+                  minDistance   = distance;
+                  bestMatch     = QSharedPointer<ClassDef>();
+                  bestTypedef   = md;
                   bestTemplSpec = "";
                   bestResolvedType = md->qualifiedName();
                }
@@ -1360,7 +1364,7 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
  * resolving typedefs.
  */
 static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-                  const QString &nType, QSharedPointer<MemberDef> *pTypeDef, QByteArray *pTemplSpec, QByteArray *pResolvedType )
+                  const QString &nType, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType )
 {
    QString name;
    QString explicitScopePart;
@@ -1541,7 +1545,7 @@ QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSha
    return result;
 }
 
-static bool findOperator(const QByteArray &s, int i)
+static bool findOperator(const QString &s, int i)
 {
    int b = s.lastIndexOf("operator", i);
  
@@ -1555,7 +1559,7 @@ static bool findOperator(const QByteArray &s, int i)
       // check if there are only spaces in between
       // the operator and the >
    
-      if (! isspace((uchar)s.at(b))) {
+      if (! s.at(b).isSpace() ) {
          return false;
       }
 
@@ -1565,9 +1569,10 @@ static bool findOperator(const QByteArray &s, int i)
    return true;
 }
 
-static bool findOperator2(const QByteArray &s, int i)
+static bool findOperator2(const QString &s, int i)
 {
    int b = s.lastIndexOf("operator", i);
+
    if (b == -1) {
       return false;   // not found
    }
@@ -1578,7 +1583,7 @@ static bool findOperator2(const QByteArray &s, int i)
       // check if there are only non-ascii
       // characters in front of the operator
    
-      if (isId((uchar)s.at(b))) {
+      if ( isId( s.at(b)) ) {
          return false;
       }
 
@@ -1592,28 +1597,27 @@ static const char constScope[]   = { 'c', 'o', 'n', 's', 't', ':' };
 static const char virtualScope[] = { 'v', 'i', 'r', 't', 'u', 'a', 'l', ':' };
 
 // Note: this function is not reentrant due to the use of static buffer 
-QString removeRedundantWhiteSpace(const QString &s)
+QString removeRedundantWhiteSpace(const QString &str)
 { 
-   if (s.isEmpty()) {
-      return s;
+   if (str.isEmpty()) {
+      return str;
    }
 
    static bool cliSupport = Config::getBool("cpp-cli-support");
 
-   static GrowBuf growBuf;  
-   growBuf.clear();
+   QString retval;
 
-   uint i;
-   uint len = s.length();
+   uint len = str.length();
    uint csp = 0;
    uint vsp = 0;
-   char c;
 
-   for (i = 0; i < len; i++) {
-      c = s.at(i);
+   QChar c;
+
+   for (uint i = 0; i < len; i++) {
+      c = str.at(i);
 
       // search for "const"
-      if (csp < 6 && c == constScope[csp] && (csp > 0 || i == 0  || ! isId(s.at(i - 1))) ) {
+      if (csp < 6 && c == constScope[csp] && (csp > 0 || i == 0  || ! isId(str.at(i - 1))) ) {
          // character matches substring "const", if it is the first character, the previous may not be a digit
          csp++;
 
@@ -1623,7 +1627,7 @@ QString removeRedundantWhiteSpace(const QString &s)
       }
 
       // search for "virtual"      
-      if (vsp < 8 && c == virtualScope[vsp] && (vsp > 0 || i == 0  || ! isId(s.at(i - 1)) ) ) {
+      if (vsp < 8 && c == virtualScope[vsp] && (vsp > 0 || i == 0  || ! isId(str.at(i - 1))) ) {
          // character matches substring "virtual", it is the first character, the previous may not be a digit
          vsp++;
 
@@ -1638,15 +1642,15 @@ QString removeRedundantWhiteSpace(const QString &s)
          bool isDone = false;
 
          i++;
-         growBuf.addChar(c);        
+         retval += c;        
 
          while (i < len) {
-            char cc = s.at(i);
-            growBuf.addChar(cc);
+            QChar cc = str.at(i);
+            retval += cc; 
 
             if (cc == '\\') { 
                // escaped character
-               growBuf.addChar(s.at(i + 1));
+               retval += str.at(i + 1);
                i += 2;
 
             } else if (cc == '"') { 
@@ -1667,46 +1671,45 @@ QString removeRedundantWhiteSpace(const QString &s)
 
       // current char is a <
       } else if (i < len - 2 && c == '<' && 
-                 (isId(s.at(i + 1)) || isspace((uchar)s.at(i + 1))) && (i < 8 || !findOperator(s, i)) ) {
+                 (isId(str.at(i + 1)) || str.at(i + 1).isSpace()) && (i < 8 || ! findOperator(str, i)) ) {
 
          // string in front is not "operator"
-         growBuf.addChar('<');
-         growBuf.addChar(' ');
+         retval += '<';
+         retval += ' ';
 
       // current char is a >
       } else if (i > 0 && c == '>' && 
-                 (isId(s.at(i - 1)) || isspace((uchar)s.at(i - 1)) || s.at(i - 1) == '*'
-                      || s.at(i - 1) == '&' || s.at(i-1)=='.') && (i < 8 || !findOperator(s, i)) ) {
+                 (isId(str.at(i - 1)) || str.at(i - 1).isSpace() || str.at(i - 1) == '*'
+                      || str.at(i - 1) == '&' || str.at(i-1)=='.') && (i < 8 || ! findOperator(str, i)) ) {
 
          // prev char is an id char or space
-         growBuf.addChar(' ');
-         growBuf.addChar('>');
+         retval += ' ';
+         retval += '>';
 
-      } else if (i > 0 && c == ',' && ! isspace((uchar)s.at(i - 1)) &&
-                  ((i < len - 1 && (isId(s.at(i + 1)) || s.at(i + 1) == '[')) 
-                     || (i < len - 2 && s.at(i + 1) == '$' && isId(s.at(i + 2))) 
-                     || (i < len - 3 && s.at(i + 1) == '&' && s.at(i + 2) == '$' && isId(s.at(i + 3))))) { 
+      } else if (i > 0 && c == ',' && ! str.at(i - 1).isSpace() &&
+                  ((i < len - 1 && (isId(str.at(i + 1)) || str.at(i + 1) == '[')) 
+                     || (i < len - 2 && str.at(i + 1) == '$' && isId(str.at(i + 2))) 
+                     || (i < len - 3 && str.at(i + 1) == '&' && str.at(i + 2) == '$' && isId(str.at(i + 3))))) { 
 
          // for PHP
-         growBuf.addChar(',');
-         growBuf.addChar(' ');
+         retval += ',';
+         retval += ' ';
 
-     } else if (i > 0 && ( (s.at(i - 1) == ')' && isId(c))  || (c == '\'' && s.at(i -1) == ' ')  ||
-                  (i > 1 && s.at(i - 2) == ' ' && s.at(i - 1) == ' ') )) {
+     } else if (i > 0 && ( (str.at(i - 1) == ')' && isId(c))  || (c == '\'' && str.at(i -1) == ' ')  ||
+                  (i > 1 && str.at(i - 2) == ' ' && str.at(i - 1) == ' ') )) {
 
-       growBuf.addChar(' ');
-       growBuf.addChar(c);
+       retval += ' ';
+       retval += c;
      
-
-      } else if (c == 't' && csp == 5  &&  i < len -1  &&  ! (isId(s.at(i + 1)) ||
-                   s.at(i + 1) == ')' || s.at(i + 1) == ',' ) )  {
+      } else if (c == 't' && csp == 5  &&  i < len -1  &&  ! (isId(str.at(i + 1)) ||
+                   str.at(i + 1) == ')' || str.at(i + 1) == ',' ) )  {
 
          // prevent const ::A from being converted to const::A
       
-         growBuf.addChar('t');
-         growBuf.addChar(' ');
+         retval += 't';
+         retval += ' ';
 
-         if (s.at(i + 1) == ' ') {
+         if (str.at(i + 1) == ' ') {
             i++;
          }
 
@@ -1715,19 +1718,17 @@ QString removeRedundantWhiteSpace(const QString &s)
       } else if (c == ':' && csp == 6)  {
          // replace const::A by const ::A
       
-         growBuf.addChar(' ');
-         growBuf.addChar(':');
+         retval += ' ';
+         retval += ':';
          csp = 0;
 
-      } else if (c == 'l' && vsp == 7 && i < len -1 && 
-                     !(isId(s.at(i + 1)) || s.at(i + 1) == ')' || s.at(i + 1) == ',')  ) {
-
+      } else if (c == 'l' && vsp == 7 && i < len -1 && ! (isId(str.at(i + 1)) || str.at(i + 1) == ')' || str.at(i + 1) == ',')  ) {
          // prevent virtual ::A from being converted to virtual::A
       
-         growBuf.addChar('l');
-         growBuf.addChar(' ');
+         retval += 'l';
+         retval += ' ';
 
-         if (s.at(i + 1) == ' ') {
+         if (str.at(i + 1) == ' ') {
             i++;
          }
 
@@ -1736,17 +1737,17 @@ QString removeRedundantWhiteSpace(const QString &s)
       } else if (c == ':' && vsp == 8)  {
          // replace virtual::A by virtual ::A
       
-         growBuf.addChar(' ');
-         growBuf.addChar(':');
+         retval += ' ';
+         retval += ':';
 
          vsp = 0;
 
-      } else if (! isspace((uchar)c) || 
+      } else if (! c.isSpace()) || 
                  ( i > 0 && i < len - 1 &&   
-                   (isId(s.at(i - 1)) || s.at(i - 1) == ')' || s.at(i - 1) == ',' || s.at(i - 1) == '>' || s.at(i - 1) == ']') &&
-                   (isId(s.at(i + 1)) ||
-                    (i < len - 2 && s.at(i + 1) == '$' && isId(s.at(i + 2))) ||
-                    (i < len - 3 && s.at(i + 1) == '&' && s.at(i + 2) == '$' && isId(s.at(i + 3))) ) ) ) {
+                   (isId(str.at(i - 1)) || s.at(i - 1) == ')' || str.at(i - 1) == ',' || str.at(i - 1) == '>' || str.at(i - 1) == ']') &&
+                   (isId(str.at(i + 1)) ||
+                    (i < len - 2 && str.at(i + 1) == '$' && isId(str.at(i + 2))) ||
+                    (i < len - 3 && str.at(i + 1) == '&' && str.at(i + 2) == '$' && isId(str.at(i + 3))) ) ) ) {
 
          if (c == '\t') {
             c = ' ';
@@ -1757,38 +1758,36 @@ QString removeRedundantWhiteSpace(const QString &s)
             uint rl = growBuf.getPos();
 
             if ((rl > 0 && (isId(growBuf.at(rl - 1)) || growBuf.at(rl - 1) == '>')) &&
-                  ((c != '*' && c != '&') || !findOperator2(s, i)) ) {
+                  ((c != '*' && c != '&') || !findOperator2(str, i)) ) {
 
                // avoid splitting operator* and operator->* and operator&
-               growBuf.addChar(' ');
+               retval += ' ';
             }
 
          } else if (c == '-') {
             uint rl = growBuf.getPos();
 
-            if (rl > 0 && growBuf.at(rl - 1) == ')' && i < len - 1 && s.at(i + 1) == '>') { 
+            if (rl > 0 && growBuf.at(rl - 1) == ')' && i < len - 1 && s.trat(i + 1) == '>') { 
                // trailing return type ')->' => ') ->'
-               growBuf.addChar(' ');
+               retval += ' ';
             }
          }
 
          growBuf.addChar(c);
-         if (cliSupport && (c == '^' || c == '%') && i > 1 && isId(s.at(i - 1)) && !findOperator(s, i) ) {
-            growBuf.addChar(' '); // C++/CLI: Type^ name and Type% name
+         if (cliSupport && (c == '^' || c == '%') && i > 1 && isId(str.at(i - 1)) && ! findOperator(str, i) ) {
+            retval +=  ' ';          // C++/CLI: Type^ name and Type% name
          }
       }
    }
-
-   growBuf.addChar(0);
   
-   return growBuf.get();
+   return retval;
 }
 
 /**
  * Returns the position in the string where a function parameter list
  * begins, or -1 if one is not found.
  */
-int findParameterList(const QByteArray &name)
+int findParameterList(const QString &name)
 {
    int pos = -1;
    int templateDepth = 0;
@@ -1797,28 +1796,36 @@ int findParameterList(const QByteArray &name)
       if (templateDepth > 0) {
          int nextOpenPos = name.lastIndexOf('>', pos);
          int nextClosePos = name.lastIndexOf('<', pos);
+
          if (nextOpenPos != -1 && nextOpenPos > nextClosePos) {
             ++templateDepth;
             pos = nextOpenPos - 1;
+
          } else if (nextClosePos != -1) {
             --templateDepth;
             pos = nextClosePos - 1;
+
          } else { // more >'s than <'s, see bug701295
             return -1;
          }
+
       } else {
          int lastAnglePos = name.lastIndexOf('>', pos);
          int bracePos = name.lastIndexOf('(', pos);
+
          if (lastAnglePos != -1 && lastAnglePos > bracePos) {
             ++templateDepth;
             pos = lastAnglePos - 1;
+
          } else {
             int bp = bracePos > 0 ? name.lastIndexOf('(', bracePos - 1) : -1;
             // bp test is to allow foo(int(&)[10]), but we need to make an exception for operator()
             return bp == -1 || (bp >= 8 && name.mid(bp - 8, 10) == "operator()") ? bracePos : bp;
          }
       }
+
    } while (pos != -1);
+
    return -1;
 }
 
@@ -2004,7 +2011,7 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
 
 void writeExample(OutputList &ol, ExampleSDict *ed)
 {
-   QByteArray exampleLine = theTranslator->trWriteList(ed->count());
+   QString exampleLine = theTranslator->trWriteList(ed->count());
 
    //bool latexEnabled = ol.isEnabled(OutputGenerator::Latex);
    //bool manEnabled   = ol.isEnabled(OutputGenerator::Man);
@@ -2051,9 +2058,9 @@ void writeExample(OutputList &ol, ExampleSDict *ed)
    ol.writeString(".");
 }
 
-QByteArray argListToString(ArgumentList *al, bool useCanonicalType, bool showDefVals)
+QString argListToString(ArgumentList *al, bool useCanonicalType, bool showDefVals)
 {
-   QByteArray result;
+   QString result;
 
    if (al == nullptr) {
       return result;
@@ -2066,8 +2073,8 @@ QByteArray argListToString(ArgumentList *al, bool useCanonicalType, bool showDef
    for (auto a : *al)  {
       ++nextItem;
 
-      QByteArray type1 = (useCanonicalType && ! a.canType.isEmpty()) ? a.canType : a.type;
-      QByteArray type2;
+      QString type1 = (useCanonicalType && ! a.canType.isEmpty()) ? a.canType : a.type;
+      QString type2;
 
       // deal with function pointers
       int i = type1.indexOf(")("); 
@@ -2119,7 +2126,7 @@ QByteArray argListToString(ArgumentList *al, bool useCanonicalType, bool showDef
 
 QString tempArgListToString(const ArgumentList *al, SrcLangExt lang)
 {
-   QQString  result;
+   QString  result;
 
    if (al == nullptr) {
       return result;
@@ -2627,16 +2634,18 @@ static int findScopePattern(const QByteArray &pattern, const QByteArray &s, int 
    return -1;
 }
 
-static QByteArray trimScope(const QByteArray &name, const QByteArray &s)
+static QString trimScope(const QString &name, const QString &s)
 {
    int scopeOffset = name.length();
-   QByteArray result = s;
+   QString result = s;
 
    do { // for each scope
-      QByteArray tmp;
-      QByteArray scope = name.left(scopeOffset) + "::";
+      QString tmp;
+      QString scope = name.left(scopeOffset) + "::";
       
-      int i, p = 0, l;
+      int i;
+      int p = 0;
+      int l;
 
       while ((i = findScopePattern(scope, result, p, &l)) != -1) { // for each occurrence
          tmp += result.mid(p, i - p); // add part before pattern
@@ -2647,13 +2656,14 @@ static QByteArray trimScope(const QByteArray &name, const QByteArray &s)
 
       scopeOffset = name.lastIndexOf("::", scopeOffset - 1);
       result = tmp;
+
    } while (scopeOffset > 0);
    
    return result;
 }
 #endif
 
-void trimBaseClassScope(SortedList<BaseClassDef *> *bcl, QByteArray &s, int level = 0)
+void trimBaseClassScope(SortedList<BaseClassDef *> *bcl, QString &s, int level = 0)
 { 
    for (auto bcd : *bcl) {
       QSharedPointer<ClassDef> cd = bcd->classDef;
@@ -2671,17 +2681,15 @@ void trimBaseClassScope(SortedList<BaseClassDef *> *bcl, QByteArray &s, int leve
       }
    }
 }
-
-
-
-static void stripIrrelevantString(QByteArray &target, const QByteArray &str)
+static void stripIrrelevantString(QString &target, const QString &str)
 {
    if (target == str) {
       target.resize(0);
       return;
    }
 
-   int i, p = 0;
+   int i;
+   int p = 0;
    int l = str.length();
    bool changed = false;
 
@@ -2715,12 +2723,8 @@ static void stripIrrelevantString(QByteArray &target, const QByteArray &str)
    }
 }
 
-/*! According to the C++ spec and Ivan Vecerina:
-
-  Parameter declarations  that differ only in the presence or absence
-  of const and/or volatile are equivalent.
-
-  So the following example, show what is stripped by this routine
+/*!
+  The following example shows what is stripped by this routine
   for const. The same is done for volatile.
 
   \code
@@ -2730,15 +2734,15 @@ static void stripIrrelevantString(QByteArray &target, const QByteArray &str)
   const T* param    ->   const T* param   // const needed
   \endcode
  */
-void stripIrrelevantConstVolatile(QByteArray &s)
+void stripIrrelevantConstVolatile(QString &s)
 {
    stripIrrelevantString(s, "const");
    stripIrrelevantString(s, "volatile");
 }
 
 #ifndef NEWMATCH
-static bool matchArgument(const Argument *srcA, const Argument *dstA, const QByteArray &className,
-                          const QByteArray &namespaceName, NamespaceSDict *usingNamespaces, 
+static bool matchArgument(const Argument *srcA, const Argument *dstA, const QString &className,
+                          const QString &namespaceName, NamespaceSDict *usingNamespaces, 
                           StringMap<QSharedPointer<Definition>> *usingClasses)
 {
    // TODO: resolve any typedefs names that are part of srcA->type
@@ -2746,10 +2750,10 @@ static bool matchArgument(const Argument *srcA, const Argument *dstA, const QByt
    //       and usingNamespaces and usingClass to determine which typedefs
    //       are in-scope, so it will not be very efficient :-(
 
-   QByteArray srcAType = trimTemplateSpecifiers(namespaceName, className, srcA->type);
-   QByteArray dstAType = trimTemplateSpecifiers(namespaceName, className, dstA->type);
-   QByteArray srcAName = srcA->name.trimmed();
-   QByteArray dstAName = dstA->name.trimmed();
+   QString srcAType = trimTemplateSpecifiers(namespaceName, className, srcA->type);
+   QString dstAType = trimTemplateSpecifiers(namespaceName, className, dstA->type);
+   QString srcAName = srcA->name.trimmed();
+   QString dstAName = dstA->name.trimmed();
 
    srcAType = stripPrefix(srcAType, "class ");
    dstAType = stripPrefix(dstAType, "class ");
@@ -2791,8 +2795,7 @@ static bool matchArgument(const Argument *srcA, const Argument *dstA, const QByt
 
    srcAType = removeRedundantWhiteSpace(srcAType);
    dstAType = removeRedundantWhiteSpace(dstAType);
-   
-
+  
    if (srcA->array != dstA->array) { 
       // nomatch for char[] against char
       DOX_NOMATCH
@@ -2967,7 +2970,7 @@ static bool matchArgument(const Argument *srcA, const Argument *dstA, const QByt
 }
 #endif
 
-static QByteArray stripDeclKeywords(const QByteArray &s)
+static QString stripDeclKeywords(const QString &s)
 {
    int i = s.indexOf(" class ");
    if (i != -1) {
@@ -2993,17 +2996,17 @@ static QByteArray stripDeclKeywords(const QByteArray &s)
 }
 
 // forward decl for circular dependencies
-static QByteArray extractCanonicalType(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, QByteArray type);
+static QString extractCanonicalType(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, QString type);
 
-QByteArray getCanonicalTemplateSpec(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, const QByteArray &spec)
+QString getCanonicalTemplateSpec(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, const QString &spec)
 {
-   QByteArray templSpec = spec.trimmed();
+   QString templSpec = spec.trimmed();
 
    if (templSpec.startsWith("<")) {
       templSpec = "< " + extractCanonicalType(d, fs, templSpec.right(templSpec.length() - 1).trimmed());
    }
 
-   QByteArray resolvedType = resolveTypeDef(d, templSpec);
+   QString resolvedType = resolveTypeDef(d, templSpec);
 
    if (! resolvedType.isEmpty()) { // not known as a typedef either
       templSpec = resolvedType;
@@ -3120,7 +3123,7 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
    return result;
 }
 
-static QByteArray extractCanonicalType(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, QByteArray type)
+static QString extractCanonicalType(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, QString type)
 {
    type = type.trimmed();
 
@@ -3137,9 +3140,13 @@ static QByteArray extractCanonicalType(QSharedPointer<Definition> d, QSharedPoin
    type = removeRedundantWhiteSpace(type);
 
   
-   QByteArray canType;
-   QByteArray templSpec, word;
-   int i, p = 0, pp = 0;
+   QString canType;
+   QString templSpec;
+   QString word;
+
+   int i;
+   int p = 0;
+   int pp = 0;
 
    while ((i = extractClassNameFromType(type, p, word, templSpec)) != -1) {
       // foreach identifier in the type
@@ -3148,7 +3155,7 @@ static QByteArray extractCanonicalType(QSharedPointer<Definition> d, QSharedPoin
          canType += type.mid(pp, i - pp);
       }
 
-      QByteArray ct = getCanonicalTypeForIdentifier(d, fs, word, &templSpec);
+      QString ct = getCanonicalTypeForIdentifier(d, fs, word, &templSpec);
 
       // in case the ct is empty it means that "word" represents scope "d"
       // and this does not need to be added to the canonical
@@ -5896,7 +5903,7 @@ void addRefItem(const QList<ListItemInfo> *sli, const QString &key, const QStrin
                   const QString &name, const QString &title, const QString &args, QSharedPointer<Definition> scope)
 {   
    if (sli && ! key.isEmpty() && ! key.startsWith("@")) {  
-      // check for @ to skip anonymous stuff (see bug427012)
+      // check for @ to skip anonymous stuff 
     
       for (auto lii : *sli) {   
          auto refList = Doxy_Globals::xrefLists->find(lii.type);
@@ -6291,6 +6298,9 @@ QString stripLeadingAndTrailingEmptyLines(const QString &s, int &docLine)
       return "";
    }
 
+
+// broom fix me
+
    const QChar *p = s.constData();
 
    // search for leading empty lines
@@ -6317,7 +6327,7 @@ QString stripLeadingAndTrailingEmptyLines(const QString &s, int &docLine)
    }
 
    // search for trailing empty lines
-   int b  = l - 1
+   int b  = l - 1;
    int bi = -1;
 
    p = s.constData() + b;
@@ -6756,12 +6766,13 @@ static int findEndOfCommand(const QByteArray &str)
  *  with the corresponding values found in the comma separated argument
  *  list \a argList and the returns the result after recursive alias expansion.
  */
-static QByteArray replaceAliasArguments(const QByteArray &aliasValue, const QByteArray &argList)
+static QString replaceAliasArguments(const QString &aliasValue, const QString &argList)
 {
    // first make a list of arguments from the comma separated argument list
-   QList<QByteArray> args;
+   QList<QString> args;
    
-   int i, l = (int)argList.length();
+   int i;
+   int l = (int)argList.length();
    int s = 0;
 
    for (i = 0; i < l; i++) {
@@ -6822,7 +6833,7 @@ static QByteArray replaceAliasArguments(const QByteArray &aliasValue, const QByt
    }
 
    // then we replace the markers with the corresponding arguments in one pass
-   QByteArray result;
+   QString result;
    int p = 0;
 
    for (auto m : markerList) {   
@@ -6933,7 +6944,7 @@ static QString expandAliasRec(const QString s, bool allowRecursion)
    return result;
 }
 
-int countAliasArguments(const QByteArray argList)
+int countAliasArguments(const QString argList)
 {
    int count = 1;
    int len   = argList.length();
@@ -6953,7 +6964,7 @@ int countAliasArguments(const QByteArray argList)
    return count;
 }
 
-QByteArray extractAliasArgs(const QByteArray &args, int pos)
+QString extractAliasArgs(const QString &args, int pos)
 {
    int i;
    int bc = 0;
@@ -7069,9 +7080,11 @@ void stackTrace()
 #endif
 }
 
-static int transcodeCharacterBuffer(const QByteArray &fileName, BufStr &srcBuf, int size,
+static int transcodeCharacterBuffer(const QString &fileName, BufStr &srcBuf, int size,
                                     const char *inputEncoding, const char *outputEncoding)
 {
+   // broom - fix me
+
    if (inputEncoding == 0 || outputEncoding == 0) {
       return size;
    }

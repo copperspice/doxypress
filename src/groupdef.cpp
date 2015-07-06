@@ -400,8 +400,8 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
 
       default:
          err("GroupDef::insertMembers(): member `%s' (typeid=%d) with scope `%s' inserted in group scope `%s'\n",
-             md->name().data(), md->memberType(),
-             md->getClassDef() ? md->getClassDef()->name().data() : "", name().data());
+             qPrintable(md->name()), qPrintable(md->memberType()), 
+             md->getClassDef() ? qPrintable(md->getClassDef()->name()) : "", qPrintable(name()) );
    }
    return true;
 }
@@ -549,7 +549,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
 {
    tagFile << "  <compound kind=\"group\">" << endl;
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
-   tagFile << "    <title>" << convertToXML(title) << "</title>" << endl;
+   tagFile << "    <title>" << convertToXML(m_title) << "</title>" << endl;
    tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>" << endl;
  
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {
@@ -597,7 +597,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
          {
             if (pageDict) {              
                for (auto item : *pageDict)  {
-                  QByteArray pageName = item->getOutputFileBase();
+                  QString pageName = item->getOutputFileBase();
 
                   if (item->isLinkableInProject()) {
                      tagFile << "    <page>" << convertToXML(pageName) << "</page>" << endl;
@@ -657,7 +657,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
    tagFile << "  </compound>" << endl;
 }
 
-void GroupDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
+void GroupDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
@@ -752,7 +752,7 @@ void GroupDef::writeGroupGraph(OutputList &ol)
          ol.disable(OutputGenerator::Man);
          //ol.startParagraph();
          ol.startGroupCollaboration();
-         ol.parseText(theTranslator->trCollaborationDiagram(title));
+         ol.parseText(theTranslator->trCollaborationDiagram(m_title));
          ol.endGroupCollaboration(graph);
          //ol.endParagraph();
          ol.popGeneratorState();
@@ -760,7 +760,7 @@ void GroupDef::writeGroupGraph(OutputList &ol)
    }
 }
 
-void GroupDef::writeFiles(OutputList &ol, const QByteArray &title)
+void GroupDef::writeFiles(OutputList &ol, const QString &title)
 {
    // write list of files
    if (fileList->count() > 0) {
@@ -792,13 +792,13 @@ void GroupDef::writeFiles(OutputList &ol, const QByteArray &title)
    }
 }
 
-void GroupDef::writeNamespaces(OutputList &ol, const QByteArray &title)
+void GroupDef::writeNamespaces(OutputList &ol, const QString &title)
 {
    // write list of namespaces
    namespaceSDict->writeDeclaration(ol, title);
 }
 
-void GroupDef::writeNestedGroups(OutputList &ol, const QByteArray &title)
+void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
 {
    // write list of groups
    int count = 0;
@@ -844,7 +844,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QByteArray &title)
    }
 }
 
-void GroupDef::writeDirs(OutputList &ol, const QByteArray &title)
+void GroupDef::writeDirs(OutputList &ol, const QString &title)
 {
    // write list of directories
    if (dirList->count() > 0) {
@@ -876,7 +876,7 @@ void GroupDef::writeDirs(OutputList &ol, const QByteArray &title)
    }
 }
 
-void GroupDef::writeClasses(OutputList &ol, const QByteArray &title)
+void GroupDef::writeClasses(OutputList &ol, const QString &title)
 {
    // write list of classes
    classSDict->writeDeclaration(ol, 0, title, false);
@@ -979,7 +979,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
 
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
 
-         QByteArray label;
+         QString label;
 
          if (lde->kind() == LayoutDocEntry::GroupClasses) {
             label = "nested-classes";
@@ -1025,24 +1025,24 @@ void GroupDef::writeDocumentation(OutputList &ol)
    // static bool generateTreeView = Config::getBool("generate-treeview");
 
    ol.pushGeneratorState();
-   startFile(ol, getOutputFileBase(), name(), title, HLI_None);
+   startFile(ol, getOutputFileBase(), name(), m_title, HLI_None);
 
    ol.startHeaderSection();
    writeSummaryLinks(ol);
    ol.startTitleHead(getOutputFileBase());
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Man);
-   ol.parseText(title);
+   ol.parseText(m_title);
    ol.popGeneratorState();
    addGroupListToTitle(ol, self);
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Man);
-   ol.endTitleHead(getOutputFileBase(), title);
+   ol.endTitleHead(getOutputFileBase(), m_title);
    ol.popGeneratorState();
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Man);
    ol.endTitleHead(getOutputFileBase(), name());
-   ol.parseText(title);
+   ol.parseText(m_title);
    ol.popGeneratorState();
    ol.endHeaderSection();
    ol.startContents();
@@ -1052,16 +1052,16 @@ void GroupDef::writeDocumentation(OutputList &ol)
       static QRegExp re("[a-zA-Z_][-a-zA-Z_0-9]*");
       int i = 0, p = 0, l = 0;
 
-      while ((i = re.indexIn(title, p)) != -1) { 
+      while ((i = re.indexIn(m_title, p)) != -1) { 
          // foreach word in the title
          l = re.matchedLength();
    
-         Doxy_Globals::searchIndex->addWord(title.mid(i, l), true);
+         Doxy_Globals::searchIndex->addWord(m_title.mid(i, l), true);
          p = i + l;
       }
    }
 
-   Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>(), 0, title);
+   Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>(), 0, m_title);
 
    //---------------------------------------- start flexible part -------------------------------
 
@@ -1221,7 +1221,7 @@ void GroupDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
                ol.writeString("../../");
             }
 
-            ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8() + "#" + md->anchor());
+            ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension + "#" + md->anchor());
             ol.writeString("\">");
             ol.writeString(convertToHtml(md->localName()));
             ol.writeString("</a>");
@@ -1308,9 +1308,9 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname)) && g.pri >= pri) {
 
          if (fgd && gd != fgd && g.pri == pri) {
-            warn(root->fileName.data(), root->startLine, "Member %s found in multiple %s groups! "
+            warn(root->fileName, root->startLine, "Member %s found in multiple %s groups. "
                  "The member will be put in group %s, and not in group %s", 
-                 md->name().data(), Grouping::getGroupPriName( pri ), gd->name().data(), fgd->name().data() );
+                 qPrintable(md->name()), Grouping::getGroupPriName(pri), qPrintable(gd->name()), qPrintable(fgd->name()) );
          }
 
          fgd = gd;
@@ -1388,7 +1388,7 @@ void addExampleToGroups(Entry *root, QSharedPointer<PageDef> eg)
    }
 }
 
-QByteArray GroupDef::getOutputFileBase() const
+QString GroupDef::getOutputFileBase() const
 {
    if (isReference()) {
       return fileName.toUtf8();
@@ -1468,7 +1468,7 @@ QSharedPointer<MemberList> GroupDef::getMemberList(MemberListType lt)
    return QSharedPointer<MemberList>();
 }
 
-void GroupDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title)
+void GroupDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title)
 {   
    QSharedPointer<GroupDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
@@ -1479,7 +1479,7 @@ void GroupDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const 
    }
 }
 
-void GroupDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title)
+void GroupDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title)
 {
    QSharedPointer<GroupDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);

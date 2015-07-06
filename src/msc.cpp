@@ -28,7 +28,7 @@
 
 static const int maxCmdLine = 40960;
 
-static bool convertMapFile(QTextStream &t, const QString &mapName, const QString &relPath, const QByteArray &context)
+static bool convertMapFile(QTextStream &t, const QString &mapName, const QString &relPath, const QString &context)
 {
    QFile f(mapName);
 
@@ -108,8 +108,8 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
    
    QString mscExe = Config::getString("mscgen-path") + "mscgen" + portable_commandExtension();
 
-   QByteArray mscArgs;
-   QByteArray extension;
+   QString mscArgs;
+   QString extension;
 
    switch (format) {
       case MSC_BITMAP:
@@ -167,7 +167,7 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
    QDir::setCurrent(oldDir);
 }
 
-QString getMscImageMapFromFile(const QString &inFile, const QString &outDir, const QString &relPath, const QByteArray &context)
+QString getMscImageMapFromFile(const QString &inFile, const QString &outDir, const QString &relPath, const QString &context)
 {
    QString result;
 
@@ -197,7 +197,7 @@ QString getMscImageMapFromFile(const QString &inFile, const QString &outDir, con
 }
 
 void writeMscImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath, 
-                  const QString &baseName, const QByteArray &context, MscOutputFormat format)
+                  const QString &baseName, const QString &context, MscOutputFormat format)
 {
    QString mapName = baseName + ".map";
   

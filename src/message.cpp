@@ -100,18 +100,17 @@ void Debug::printFlags()
    }   
 }
   
-void Debug::print(DebugMask mask, int data, const char *fmt, ...)
+void Debug::print(DebugMask mask, int data, const QString &fmt, ...)
 {
    if (curMask & mask) { 
       if (curPriority >= data) {
          va_list args;
          va_start(args, fmt);
-         vfprintf(stdout, fmt, args);
+         vfprintf(stdout, fmt.toUtf8().constData(), args);
          va_end(args);
       }
    }
 }
-
 
 
 // start of message output, next two are defined by the project configuration
@@ -177,24 +176,26 @@ static void warn_internal(const QString &tag, const QString &file, int line, con
    }
 
    const int bufSize = 40960;
-   char text[bufSize];
-   int l = 0;
+
+   QByteArray text;
+   text.resize(bufSize);
+
+   int len = 0;
 
    if (! prefix.isEmpty()) {
-      qstrncpy(text, prefix.toUtf8().constData(), bufSize);
-      l = strlen(prefix);
+      qstrncpy(text.data(), prefix.toUtf8().constData(), bufSize);
+      len = prefix.length();
    }
 
-   vsnprintf(text + l, bufSize - l, fmt.toUtf8().constData(), args);
+   vsnprintf(text.data() + len, bufSize - len, fmt.toUtf8().constData(), args);
 
-   text[bufSize - 1] = '\0';
+   text.resize(bufSize - 1);
    format_warn(file, line, text);
 }
 
 
-
 // **
-void err(const char *fmt, ...)
+void err(const QString &fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
@@ -239,7 +240,7 @@ void warn(const QString &file, int line, const QString &fmt, ...)
    va_end(args);
 }
 
-void va_warn(const QString &file, int line, const QSring &fmt, va_list args)
+void va_warn(const QString &file, int line, const QString &fmt, va_list args)
 {
    static const QString warning_str = "Warning: ";
    warn_internal("warnings", file, line, warning_str, fmt, args);
@@ -282,7 +283,7 @@ void warn_uncond(const QString &fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   static const Qstring warning_str = "Warning: ";
+   static const QString warning_str = "Warning: ";
    vfprintf(warnFile, (warning_str + fmt).toUtf8().constData(), args);
 
    va_end(args);
@@ -301,16 +302,18 @@ void printlex(int dbg, bool enter, const QString &lexName, const QString &fileNa
    if (dbg) {
 
       if (! fileName.isEmpty()) {
-         fprintf(stderr, "--%s lexical analyzer: %s (for: %s)\n", enter_txt, lexName.toUtf8().constData(), fileName.toUtf8().constData());
+         fprintf(stderr, "--%s lexical analyzer: %s (for: %s)\n", qPrintable(enter_txt), lexName.toUtf8().constData(), 
+                  fileName.toUtf8().constData());
       } else {
-         fprintf(stderr, "--%s lexical analyzer: %s\n", enter_txt, lexName.toUtf8().constData());
+         fprintf(stderr, "--%s lexical analyzer: %s\n", qPrintable(enter_txt), lexName.toUtf8().constData());
       }
 
    } else {
        if (! fileName.isEmpty()) {
-         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s (for: %s)\n", enter_txt_uc, lexName.toUtf8().constData(), fileName.toUtf8().constData());
+         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s (for: %s)\n", qPrintable(enter_txt_uc), 
+                  lexName.toUtf8().constData(), fileName.toUtf8().constData());
       } else {
-         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s\n", enter_txt_uc, lexName.toUtf8().constData());
+         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s\n", qPrintable(enter_txt_uc), lexName.toUtf8().constData());
       }
    }
 }

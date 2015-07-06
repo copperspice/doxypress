@@ -79,7 +79,15 @@ MemberNameIterator::MemberNameIterator(const MemberName &mnlist)
 }
 
 int MemberNameSDict::compareMapValues(const QSharedPointer<MemberName> &n1, const QSharedPointer<MemberName> &n2) const
-{
-   return qstricmp(n1->memberName() + getPrefixIndex(n1->memberName()), n2->memberName() + getPrefixIndex(n2->memberName()) );
+{ 
+   QString name1 = n1->memberName();
+   QString name2 = n2->memberName();
+
+   QString tmp1 = name1.mid( getPrefixIndex(name1) );
+   QString tmp2 = name2.mid( getPrefixIndex(name2) );
+     
+   int i = tmp1.compare(tmp2, Qt::CaseInsensitive);
+
+   return i;
 }
 

@@ -377,6 +377,7 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
 
    while (! f.atEnd()) { 
       // foreach line
+
       QByteArray buf;
       buf.resize(maxLineLen);
 
@@ -460,7 +461,13 @@ static void unsetDotFontPath()
 
 static bool readBoundingBox(const QString &fileName, int *width, int *height, bool isEps)
 {
-   QString bb = isEps ? "%%PageBoundingBox:" : "/MediaBox [";
+   QString bb;
+
+   if (isEps) {
+      bb = "%%PageBoundingBox:";
+   } else {
+      bb = "/MediaBox [";
+   }
 
    QFile f(fileName);
 
@@ -470,23 +477,27 @@ static bool readBoundingBox(const QString &fileName, int *width, int *height, bo
    }
 
    const int maxLineLen = 1024;
-   char buf[maxLineLen];
+   
+   QByteArray buf;
+   buf.resize(maxLineLen);
 
    while (! f.atEnd()) {
-      int numBytes = f.readLine(buf, maxLineLen - 1);
+      int numBytes = f.readLine(buf.data(), maxLineLen - 1);
 
       if (numBytes > 0) {
-         buf[numBytes] = '\0';
-         const char *p = strstr(buf, bb);
+         buf.resize(numBytes);
 
-         if (p) { 
+         int p = buf.indexOf(bb);
+         
+         if (p != -1) { 
             // found PageBoundingBox or /MediaBox string
             int x;
             int y;
 
-            if (sscanf(p + bb.length(), "%d %d %d %d", &x, &y, width, height) != 4) {    
+            if ( sscanf(buf.constData() + (p + bb.length() ), "%d %d %d %d", &x, &y, width, height) != 4) {    
                return false;
             }
+
             return true;
          }
 
@@ -559,18 +570,21 @@ static bool readSVGSize(const QString &fileName, int *width, int *height)
    }
 
    const int maxLineLen = 4096;
-   char buf[maxLineLen];
+  
+   QByteArray buf;
+   buf.resize(maxLineLen);
 
-   while (!f.atEnd() && !found) {
-      int numBytes = f.readLine(buf, maxLineLen - 1); // read line
+   while (! f.atEnd() && !found) {
+      int numBytes = f.readLine(buf.data(), maxLineLen - 1); 
 
       if (numBytes > 0) {
-         buf[numBytes] = '\0';
+         buf.resize(numBytes);
 
          if (qstrncmp(buf, "<!--zoomable ", 13) == 0) {
-            *width = -1;
+
+            *width  = -1;
             *height = -1;
-            sscanf(buf, "<!--zoomable %d", height);
+            sscanf(buf.constData(), "<!--zoomable %d", height);
             
             found = true;
 
@@ -732,7 +746,7 @@ static bool checkAndUpdateMd5Signature(const QString &baseName, const QString &m
 
    // create checksum file
    if (f.open(QIODevice::WriteOnly)) {
-      f.write(md5.data());
+      f.write(md5.toUtf8());
       f.close();
    }
 
@@ -957,14 +971,17 @@ bool DotFilePatcher::run()
    QTextStream t(&fo);
    const int maxLineLen = 100 * 1024;
    int lineNr = 1;
-   int width, height;
+   int width;
+   int height;
 
-   bool insideHeader = false;
+   bool insideHeader   = false;
    bool replacedHeader = false;
-   bool foundSize = false;
+   bool foundSize      = false;
 
-   while (! fi.atEnd()) { // foreach line
-      QString line;
+   while (! fi.atEnd()) { 
+      // foreach line
+
+      QByteArray line;
       line.resize(maxLineLen);
 
       int numBytes = fi.readLine(line.data(), maxLineLen);
@@ -979,10 +996,10 @@ bool DotFilePatcher::run()
       if (isSVGFile) {
          if (interactiveSVG) {
 
-            if (line.indexOf("<svg") != -1 && !replacedHeader) {
+            if (line.indexOf("<svg") != -1 && ! replacedHeader) {
                int count;
 
-               count = sscanf(line.data(), "<svg width=\"%dpt\" height=\"%dpt\"", &width, &height);
+               count = sscanf(line.constData(), "<svg width=\"%dpt\" height=\"%dpt\"", &width, &height);
                
                foundSize = count == 2 && (width > 500 || height > 450);
                if (foundSize) {
@@ -1009,7 +1026,7 @@ bool DotFilePatcher::run()
             }
          }
 
-         if (!insideHeader || !foundSize) {
+         if (! insideHeader || ! foundSize) {
             // copy SVG and replace refs, 
             // unless we are inside the header of the SVG.
             // Then we replace it with another header.
@@ -1036,7 +1053,7 @@ bool DotFilePatcher::run()
                t << line.mid(e + 3);
             }
 
-         } else { // error invalid map id!
+         } else { 
             err("Found invalid SVG id in file %s!\n", qPrintable(m_patchFile));
             t << line.mid(i);
          }
@@ -1061,9 +1078,7 @@ bool DotFilePatcher::run()
       } else if ((i = line.indexOf("% FIG")) != -1) {
          int mapId = -1;
          int n = sscanf(line.data() + i + 2, "FIG %d", &mapId);
-
-         //printf("line='%s' n=%d\n",line.data()+i,n);
-
+      
          if (n == 1 && mapId >= 0 && mapId < m_maps.count()) {
             Map map = m_maps[mapId];
 
@@ -1110,10 +1125,11 @@ bool DotFilePatcher::run()
       QTextStream t(&fo);
 
       while (! fi.atEnd()) { // foreach line
-         QString line;
+         QByteArray line;
          line.resize(maxLineLen);
 
          int numBytes = fi.readLine(line.data(), maxLineLen);
+
          if (numBytes <= 0) {
             break;
          }
@@ -2293,7 +2309,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
       resetReNumbering();
 
       QString sigStr;
-      sigStr = QCryptographicHash::hash(theGraph, QCryptographicHash::Md5).toHex();
+      sigStr = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
   
       bool regenerate = false;
 
@@ -2383,7 +2399,7 @@ void DotGfxHierarchyTable::addHierarchy(DotNode *n, QSharedPointer<ClassDef> cd,
                }
 
                QString tooltip = bClass->briefDescriptionAsTooltip();
-               bn = new DotNode(m_curNodeNumber++, qPrintable(bClass->displayName()), tooltip, tmp_url.data() );
+               bn = new DotNode(m_curNodeNumber++, bClass->displayName(), tooltip, tmp_url);
                n->addChild(bn, bcd->prot);
                bn->addParent(n);
 
@@ -2418,7 +2434,7 @@ void DotGfxHierarchyTable::addClassList(ClassSDict *cl)
          }
          
          QString tooltip = cd->briefDescriptionAsTooltip();
-         DotNode *n = new DotNode(m_curNodeNumber++, qPrintable(cd->displayName()), tooltip, tmp_url.data());
+         DotNode *n = new DotNode(m_curNodeNumber++, cd->displayName(), tooltip, tmp_url);
         
          m_usedNodes->insert(cd->name(), n);
          m_rootNodes->insert(0, n);
@@ -2499,7 +2515,7 @@ DotGfxHierarchyTable::~DotGfxHierarchyTable()
 }
 
 void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, const QString &label, 
-                             const char *usedName, const char *templSpec, bool base, int distance)
+                             const QString &usedName, const QString &templSpec, bool base, int distance)
 {
    if (Config::getBool("hide-undoc-classes") && ! cd->isLinkable()) {
       return;
@@ -2508,11 +2524,11 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, 
    int edgeStyle = (! label.isEmpty() || prot==EdgeInfo::Orange || prot==EdgeInfo::Orange2) ? EdgeInfo::Dashed : EdgeInfo::Solid;
    QString className;
 
-   if (usedName) { 
+   if (! usedName.isEmpty()) { 
       // name is a typedef
       className = usedName;
 
-   } else if (templSpec) { 
+   } else if (! templSpec.isEmpty()) { 
       // name has a template part
       className = insertTemplateSpecifierInScope(cd->name(), templSpec);
 
@@ -2523,7 +2539,9 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, 
 
    DotNode *bn = m_usedNodes->value(className);
 
-   if (bn) { // class already inserted
+   if (bn) { 
+      // class already inserted
+
       if (base) {
          n->addChild(bn, prot, edgeStyle, label);
          bn->addParent(n);
@@ -2535,7 +2553,9 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, 
 
       bn->setDistance(distance);      
 
-   } else { // new class
+   } else { 
+      // new class
+
       QString displayName = className;
 
       if (Config::getBool("hide-scope-names")) {
@@ -2550,7 +2570,7 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, 
          }
       }
       QString tooltip = cd->briefDescriptionAsTooltip();
-      bn = new DotNode(m_curNodeNumber++, displayName, tooltip, tmp_url.data(), false, cd);
+      bn = new DotNode(m_curNodeNumber++, displayName, tooltip, tmp_url, false, cd);
 
       if (base) {
          n->addChild(bn, prot, edgeStyle, label);
@@ -2859,7 +2879,7 @@ DotClassGraph::DotClassGraph(QSharedPointer<ClassDef> cd, DotNode::GraphType t)
    QString tooltip   = cd->briefDescriptionAsTooltip();
 
    // is a root node
-   m_startNode = new DotNode(m_curNodeNumber++, className, tooltip, tmp_url.data(), true, cd);
+   m_startNode = new DotNode(m_curNodeNumber++, className, tooltip, tmp_url, true, cd);
 
    m_startNode->setDistance(0);
    m_usedNodes = new QHash<QString, DotNode *>;
@@ -3340,7 +3360,7 @@ DotInclDepGraph::DotInclDepGraph(QSharedPointer<FileDef> fd, bool inverse)
    QString tmp_url = fd->getReference() + "$" + fd->getFileBase();
 
    // root node
-   m_startNode = new DotNode(m_curNodeNumber++, fd->docName(), "", tmp_url.constData(),  true );
+   m_startNode = new DotNode(m_curNodeNumber++, fd->docName(), "", tmp_url,  true );
    m_startNode->setDistance(0);
 
    m_usedNodes = new QHash<QString, DotNode *>;
@@ -3555,20 +3575,13 @@ void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int dist
                QString name;
 
                if (Config::getBool("hide-scope-names")) {
-                  name  = rmd->getOuterScope() == m_scope ?
-                          rmd->name() : rmd->qualifiedName();
+                  name  = rmd->getOuterScope() == m_scope ? rmd->name() : rmd->qualifiedName();
                } else {
                   name = rmd->qualifiedName();
                }
 
                QString tooltip = rmd->briefDescriptionAsTooltip();
-               bn = new DotNode(
-                  m_curNodeNumber++,
-                  linkToText(rmd->getLanguage(), name, false),
-                  tooltip,
-                  uniqueId,
-                  0 //distance
-               );
+               bn = new DotNode(m_curNodeNumber++, linkToText(rmd->getLanguage(), name, false), tooltip, uniqueId, false);
                n->addChild(bn, 0, 0, 0);
                bn->addParent(n);
                bn->setDistance(distance);
@@ -3640,8 +3653,7 @@ DotCallGraph::DotCallGraph(QSharedPointer<MemberDef> md, bool inverse)
       name = md->qualifiedName();
    }
 
-   m_startNode = new DotNode(m_curNodeNumber++, linkToText(md->getLanguage(), name, false),
-                             "", uniqueId.data(), true );
+   m_startNode = new DotNode(m_curNodeNumber++, linkToText(md->getLanguage(), name, false), "", uniqueId, true);
 
    m_startNode->setDistance(0);
    m_usedNodes = new QHash<QString, DotNode *>;
@@ -3839,7 +3851,7 @@ QString DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, 
    m_dir->writeDepGraph(md5stream);
 
    QString sigStr;
-   sigStr = QCryptographicHash::hash(theGraph, QCryptographicHash::Md5).toHex();
+   sigStr = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
 
    bool regenerate = false;
 
@@ -4033,7 +4045,7 @@ void generateGraphLegend(const QString &path)
    writeGraphFooter(md5stream);
 
    QString sigStr;
-   sigStr = QCryptographicHash::hash(theGraph, QCryptographicHash::Md5).toHex();
+   sigStr = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
 
    QString absBaseName = path + "/graph_legend";
    QString absDotName  = absBaseName + ".dot";
@@ -4175,7 +4187,7 @@ DotGroupCollaboration::DotGroupCollaboration(QSharedPointer<GroupDef> gd)
 
    m_usedNodes = new QHash<QString, DotNode *>;
 
-   m_rootNode = new DotNode(m_curNodeId++, gd->groupTitle(), "", tmp_url, true );
+   m_rootNode = new DotNode(m_curNodeId++, gd->groupTitle(), "", tmp_url, true);
    m_rootNode->markAsVisible();
    m_usedNodes->insert(gd->name(), m_rootNode ); 
    m_diskName = gd->getOutputFileBase();
@@ -4351,7 +4363,7 @@ void DotGroupCollaboration::addCollaborationMember(QSharedPointer<Definition> de
 
             QString tooltip = d->briefDescriptionAsTooltip();
 
-            nnode = new DotNode(m_curNodeId++, d->groupTitle(), tooltip, tmp_str );
+            nnode = new DotNode(m_curNodeId++, d->groupTitle(), tooltip, tmp_str);
             nnode->markAsVisible();
             m_usedNodes->insert(d->name(), nnode );
          }
@@ -4401,7 +4413,7 @@ QString DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat gra
    resetReNumbering();
 
    QString sigStr;
-   sigStr = QCryptographicHash::hash(theGraph, QCryptographicHash::Md5).toHex();
+   sigStr = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
   
    QString imgExt      = Config::getEnum("dot-image-format");
    QString baseName    = m_diskName;

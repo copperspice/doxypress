@@ -43,11 +43,11 @@ class MemberGroup
 {
  public:
    MemberGroup();
-   MemberGroup(QSharedPointer<Definition> parent, int id, const char *header, const char *docs, const char *docFile);
+   MemberGroup(QSharedPointer<Definition> parent, int id, const QString &header, const QString &docs, const QString &docFile);
 
    ~MemberGroup();
 
-   QByteArray header() const {
+   QString header() const {
       return grpHeader;
    }
 
@@ -58,19 +58,19 @@ class MemberGroup
    void setAnchors();
    void writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
-                  QSharedPointer<ClassDef> inheritedFrom, const char *inheritId);
+                  QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
    void writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool showInline = false);
 
-   void writeDocumentation(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container, bool showEnumValues, bool showInline);
-   void writeDocumentationPage(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container);
+   void writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container, bool showEnumValues, bool showInline);
+   void writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container);
    void writeTagFile(QTextStream &);
 
    void addGroupedInheritedMembers(OutputList &ol, QSharedPointer<ClassDef> cd, MemberListType lt,
                                    QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
-   const QByteArray &documentation() const {
+   QString documentation() const {
       return doc;
    }
 
@@ -107,17 +107,17 @@ class MemberGroup
       return m_parent;
    }
 
-   QByteArray anchor() const;
+   QString anchor() const;
 
  private:
    QSharedPointer<MemberList> memberList;      // list of all members in the group
    QSharedPointer<MemberList> inDeclSection;
 
    int grpId;
-   QByteArray grpHeader;
-   QByteArray fileName;           // base name of the generated file
-   QByteArray doc;
-   QByteArray m_docFile;
+   QString grpHeader;
+   QString fileName;           // base name of the generated file
+   QString doc;
+   QString m_docFile;
 
    QSharedPointer<Definition> scope;
    QSharedPointer<Definition> m_parent;
@@ -154,10 +154,10 @@ struct MemberGroupInfo {
 
    void setRefItems(const QList<ListItemInfo> *sli);
 
-   QByteArray header;
-   QByteArray doc;
-   QByteArray docFile;
-   QByteArray compoundName;
+   QString header;
+   QString doc;
+   QString docFile;
+   QString compoundName;
 
    QList<ListItemInfo> *m_sli;
 };

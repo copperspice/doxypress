@@ -56,7 +56,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
 /*! Main entry point for parsing simple text fragments. These
  *  fragments are limited to words, whitespace and symbols.
  */
-DocText *validatingParseText(const char *input);
+DocText *validatingParseText(const QString &input);
 
 /*! Searches for section and anchor commands in the input */
 void docFindSections(const QString &input, QSharedPointer<Definition> d, MemberGroup *m, const QString &fileName);

@@ -17,16 +17,16 @@
 
 #include <stdio.h>
 
+#include <definition.h>
 #include <reflist.h>
 #include <util.h>
-#include <definition.h>
 
 /*! Create a list of items that are cross referenced with documentation blocks
  *  @param listName String representing the name of the list.
  *  @param pageTitle String representing the title of the list page.
  *  @param secTitle String representing the title of the section.
  */
-RefList::RefList(const char *listName, const char *pageTitle, const char *secTitle)
+RefList::RefList(const QString &listName, const QString &pageTitle, const QString &secTitle)
    : m_dictIterator(m_dict)
 {      
    m_id = 0;
@@ -100,22 +100,22 @@ RefItem *RefList::getNextRefItem()
 }
 
 /*! Returns the name of the list as set in the constructor. */
-QByteArray RefList::listName() const
+QString RefList::listName() const
 {
    return m_listName;
 }
 
-QByteArray RefList::pageTitle() const
+QString RefList::pageTitle() const
 {
    return m_pageTitle;
 }
 
-QByteArray RefList::sectionTitle() const
+QString RefList::sectionTitle() const
 {
    return m_secTitle;
 }
 
-void RefList::insertIntoList(const char *key, RefItem *item)
+void RefList::insertIntoList(const QString &key, RefItem *item)
 {     
    bool found = m_itemMap.contains(key);
 
@@ -136,7 +136,7 @@ void RefList::generatePage()
       return;
    }
 
-   QMap<QByteArray, QList<RefItem>> titleMap;
+   QMap<QString, QList<RefItem>> titleMap;
 
    for (auto list : m_itemMap) {
       RefItem &item = list.first();     
@@ -144,7 +144,7 @@ void RefList::generatePage()
    }
 
    //
-   QByteArray doc;
+   QString doc;
    doc += "<dl class=\"reflist\">";
 
    for (auto list : titleMap) {

@@ -24,7 +24,6 @@
 #ifndef FTVHELP_H
 #define FTVHELP_H
 
-#include <QByteArray>
 #include <QList>
 #include <QString>
 #include <QTextStream>
@@ -64,7 +63,7 @@ class FTVHelp : public IndexIntf
  private:
    void generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index);
   
-   QByteArray generateIndentLabel(FTVNode *n, int level);
+   QString generateIndentLabel(FTVNode *n, int level);
    void generateIndent(QTextStream &t, FTVNode *n, bool opened);
    void generateLink(QTextStream &t, FTVNode *n);
    
@@ -75,12 +74,12 @@ class FTVHelp : public IndexIntf
 };
 
 struct NavIndexEntry {
-   NavIndexEntry(const QByteArray &u, const QByteArray &p) 
+   NavIndexEntry(const QString &u, const QString &p) 
       : url(u), path(p)
    {}
 
-   QByteArray url;
-   QByteArray path;
+   QString url;
+   QString path;
 };
 
 #endif

@@ -38,35 +38,33 @@
 static const int NUM_HTML_LIST_TYPES = 4;
 static const char types[][NUM_HTML_LIST_TYPES] = {"1", "a", "i", "A"};
 
-static QByteArray convertIndexWordToAnchor(const QString &word)
+static QString convertIndexWordToAnchor(const QString &word)
 {
    static char hex[] = "0123456789abcdef";
 
-   QByteArray result;
+   QString result;
 
-   QByteArray temp = word.toUtf8();
-   const char *str = temp.data();
+   QByteArray tmp  = word.toUtf8();
+   const char *str = tmp.constData();
 
    unsigned char c;
 
    if (str) {
       while ((c = *str++)) {
-         if ((c >= 'a' && c <= 'z') || // ALPHA
-               (c >= 'A' && c <= 'A') || // ALPHA
-               (c >= '0' && c <= '9') || // DIGIT
-               c == '-' ||
-               c == '.' ||
-               c == '_' ||
-               c == '~'
-            ) {
+
+         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'A') || (c >= '0' && c <= '9') || 
+               c == '-' || c == '.' || c == '_' || c == '~') { 
+
             result += c;
 
          } else {
             char enc[4];
+
             enc[0] = '%';
             enc[1] = hex[(c & 0xf0) >> 4];
             enc[2] = hex[c & 0xf];
             enc[3] = 0;
+
             result += enc;
          }
       }
@@ -164,10 +162,7 @@ HtmlDocVisitor::HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, QSharedP
    }
 }
 
-//--------------------------------------
 // visitor functions for leaf nodes
-//--------------------------------------
-
 void HtmlDocVisitor::visit(DocWord *w)
 {
    if (m_hide) {
@@ -224,23 +219,14 @@ void HtmlDocVisitor::visit(DocURL *u)
    if (u->isEmail()) { 
       // mail address with no mailto
 
-      QByteArray url = "mailto:" + u->url();
+      QString url = "mailto:" + u->url();
+
       m_t << "<a href=\"" << convertToXML(url) << "\"" << ">" ;
       filter(u->url());
       m_t << "</a>";
 
-
-// broom -- on hold
-// printf("(broom) Email Addr (no mailto)  %s \n", url.constData() );
-
-
    } else { 
       // web address defined with no <a>
-
-// broom -- on hold,
-// QByteArray url = u->url();
-// printf("(broom) URL in plain text: %s\n", url.constData() );
-
 
       m_t << "<a href=\"" << u->url() << "\">";
       filter(u->url());
@@ -373,7 +359,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
       return;
    }
 
-   QByteArray lang = m_langExt;
+   QString lang = m_langExt;
 
    if (! s->language().isEmpty()) { 
       // explicit language setting
@@ -437,7 +423,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
             err("Could not open file %s for writing\n", fileName.data());
          }
 
-         file.write( s->text(), s->text().length() );
+         file.write(s->text().toUtf8());
          file.close();
 
          forceEndParagraph(s);
@@ -468,16 +454,16 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
             err("Could not open file %s.msc for writing\n", baseName.data());
          }
 
-         QByteArray text = "msc {";
+         QString text = "msc {";
          text += s->text();
          text += "}";
 
-         file.write( text, text.length() );
+         file.write( text.toUtf8() );
          file.close();
 
          m_t << "<div align=\"center\">" << endl;
 
-         writeMscFile((baseName + ".msc").toUtf8(), s->relPath(), s->context());
+         writeMscFile(baseName + ".msc", s->relPath(), s->context());
          if (Config::getBool("dot-cleanup")) {
             file.remove();
          }
@@ -492,7 +478,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          forceEndParagraph(s);
 
          static QString htmlOutput = Config::getString("html-output");
-         QByteArray baseName = writePlantUMLSource(htmlOutput, s->exampleFile(), s->text());
+         QString baseName = writePlantUMLSource(htmlOutput, s->exampleFile(), s->text());
 
          m_t << "<div align=\"center\">" << endl;
          writePlantUMLFile(baseName, s->relPath(), s->context());
@@ -539,7 +525,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          m_t << PREFRAG_START;
 
          QFileInfo cfi( inc->file() );
-         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8(), cfi.fileName().toUtf8());
+         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
 
          Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(),
@@ -633,7 +619,7 @@ void HtmlDocVisitor::visit(DocFormula *f)
    }
 
    if (Config::getBool("use-mathjax")) {
-      QByteArray text = f->text();
+      QString text = f->text();
       bool closeInline = false;
 
       if (!bDisplay && ! text.isEmpty() && text.at(0) == '$' && text.at(text.length() - 1) == '$') {
@@ -669,7 +655,7 @@ void HtmlDocVisitor::visit(DocFormula *f)
 
 void HtmlDocVisitor::visit(DocIndexEntry *e)
 {
-   QByteArray anchor = convertIndexWordToAnchor(e->entry());
+   QString anchor = convertIndexWordToAnchor(e->entry());
 
    if (e->member()) {
       anchor.prepend(e->member()->anchor() + "_");
@@ -1272,7 +1258,7 @@ void HtmlDocVisitor::visitPre(DocSection *s)
    m_t << "<a class=\"anchor\" id=\"" << s->anchor();
    m_t << "\"></a>" << endl;
 
-   filter(convertCharEntitiesToUTF8(s->title()));
+   filter(convertCharEntities(s->title()));
 
    m_t << "</h" << s->level() << ">\n";
 }
@@ -1510,11 +1496,11 @@ void HtmlDocVisitor::visitPre(DocHRef *href)
    }
 
    if (href->url().left(7) == "mailto:") {
-      QByteArray url = href->url();
+      QString url = href->url();
       m_t << "<a href=\"" << convertToXML(url) << "\"" << htmlAttribsToString(href->attribs()) << ">";
 
    } else {
-      QByteArray url = correctURL(href->url(), href->relPath());
+      QString url = correctURL(href->url(), href->relPath());
       m_t << "<a href=\"" << convertToXML(url) << "\"" << htmlAttribsToString(href->attribs()) << ">";
    }
 }
@@ -1567,7 +1553,7 @@ void HtmlDocVisitor::visitPre(DocImage *img)
 
       m_t << "<div class=\"image\">" << endl;
 
-      QByteArray url = img->url();
+      QString url = img->url();
 
       if (url.isEmpty()) {
          m_t << "<img src=\"" << img->relPath() << img->name() << "\" alt=\""
@@ -1706,7 +1692,7 @@ void HtmlDocVisitor::visitPre(DocRef *ref)
    if (! ref->file().isEmpty()) {
       // when ref->isSubPage() == true we use ref->file() for HTML and
       // ref->anchor() for LaTeX/RTF
-      startLink(ref->ref(), ref->file(), ref->relPath(), ref->isSubPage() ? QByteArray() : ref->anchor());
+      startLink(ref->ref(), ref->file(), ref->relPath(), ref->isSubPage() ? QString() : ref->anchor());
    }
 
    if (! ref->hasLinkText()) {
@@ -2050,22 +2036,21 @@ void HtmlDocVisitor::filter(const QString &str)
       return;
    }
 
-   const char *p = str;
-   char c;
+   for (auto c : str) {
 
-   while (*p) {
-      c = *p++;
-
-      switch (c) {
+      switch (c.unicode()) {
          case '<':
             m_t << "&lt;";
             break;
+
          case '>':
             m_t << "&gt;";
             break;
+
          case '&':
             m_t << "&amp;";
             break;
+
          default:
             m_t << c;
       }
@@ -2074,22 +2059,23 @@ void HtmlDocVisitor::filter(const QString &str)
 
 /// Escape basic entities to produce a valid CDATA attribute value,
 /// assume that the outer quoting will be using the double quote &quot;
-void HtmlDocVisitor::filterQuotedCdataAttr(const char *str)
+void HtmlDocVisitor::filterQuotedCdataAttr(const QString &str)
 {
-   if (str == 0) {
+   if (str.isEmpty()) {
       return;
    }
-   const char *p = str;
-   char c;
-   while (*p) {
-      c = *p++;
-      switch (c) {
+
+   for (auto c : str) {
+
+      switch (c.unicode()) {
          case '&':
             m_t << "&amp;";
             break;
+
          case '"':
             m_t << "&quot;";
             break;
+
          // For SGML compliance, and given the SGML declaration for HTML syntax,
          // it's enough to replace these two, provided that the declaration
          // for the HTML version we generate (and as supported by the browser)
@@ -2107,24 +2093,24 @@ void HtmlDocVisitor::filterQuotedCdataAttr(const char *str)
          // Also, some brousers will (wrongly) not process the entity references
          // inside the attribute value and show the &...; form instead,
          // so we won't create entites unless necessary to minimize clutter there.
-         // --vassilii
+       
          default:
             m_t << c;
       }
    }
 }
 
-void HtmlDocVisitor::startLink(const QByteArray &ref, const QByteArray &file,
-                               const QByteArray &relPath, const QByteArray &anchor,
-                               const QByteArray &tooltip)
+void HtmlDocVisitor::startLink(const QString &ref, const QString &file, const QString &relPath, 
+                  const QString &anchor, const QString &tooltip)
 {
-   //printf("HtmlDocVisitor: file=%s anchor=%s\n",file.data(),anchor.data());
    if (!ref.isEmpty()) { // link to entity imported via tag file
       m_t << "<a class=\"elRef\" ";
       m_t << externalLinkTarget() << externalRef(relPath, ref, false);
+
    } else { // local link
       m_t << "<a class=\"el\" ";
    }
+
    m_t << "href=\"";
    m_t << externalRef(relPath, ref, true);
    if (!file.isEmpty()) {
@@ -2156,7 +2142,7 @@ void HtmlDocVisitor::popEnabled()
    m_hide = v;   
 }
 
-void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, const QByteArray &context)
+void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, const QString &context)
 {
    QString baseName = fn;
    int i;
@@ -2176,7 +2162,7 @@ void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, con
    writeDotImageMapFromFile(m_t, fn, outDir, relPath, baseName, context);
 }
 
-void HtmlDocVisitor::writeMscFile(const QString &fileName, const QString &relPath, const QByteArray &context)
+void HtmlDocVisitor::writeMscFile(const QString &fileName, const QString &relPath, const QString &context)
 {
    QString baseName = fileName;
    int i;
@@ -2206,7 +2192,7 @@ void HtmlDocVisitor::writeMscFile(const QString &fileName, const QString &relPat
    writeMscImageMapFromFile(m_t, fileName, outDir, relPath, baseName, context, mscFormat);
 }
 
-void HtmlDocVisitor::writeDiaFile(const QString &fileName, const QString &relPath, const QByteArray &)
+void HtmlDocVisitor::writeDiaFile(const QString &fileName, const QString &relPath, const QString &)
 {
    QString baseName = fileName;
    int i;
@@ -2227,7 +2213,7 @@ void HtmlDocVisitor::writeDiaFile(const QString &fileName, const QString &relPat
    m_t << "<img src=\"" << relPath << baseName << ".png" << "\" />" << endl;
 }
 
-void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &relPath, const QByteArray &)
+void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &relPath, const QString &)
 {
    QString baseName = fileName;
    int i;

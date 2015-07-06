@@ -158,7 +158,7 @@ void marshalItemInfoList(StorageIntf *s, QList<ListItemInfo> *sli)
       marshalUInt(s, sli->count());
    
       for (auto item : *sli) {
-         marshalQByteArray(s, item.type);
+         marshalQString(s, item.type);
          marshalInt(s, item.itemId);
       }
    }
@@ -241,7 +241,7 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
 
    marshalGroupingList(s, e->groups);
    marshalSectionInfoList(s, e->anchors);
-   marshalQByteArray(s, e->fileName);
+   marshalQString(s, e->fileName);
    marshalInt(s, e->startLine);
    marshalItemInfoList(s, e->sli);
    marshalInt(s, (int)e->lang);
@@ -437,7 +437,7 @@ QList<ListItemInfo> *unmarshalItemInfoList(StorageIntf *s)
 
    for (i = 0; i < count; i++) {
       ListItemInfo lii;
-      lii.type   = unmarshalQByteArray(s);
+      lii.type   = unmarshalQString(s);
       lii.itemId = unmarshalInt(s);
 
       result->append(lii);
@@ -498,7 +498,7 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    assert(header == HEADER);
 
    e->name             = unmarshalQString(s);
-   e->type             = unmarshalString(s);
+   e->type             = unmarshalQString(s);
    e->section          = unmarshalInt(s);
    e->protection       = (Protection)unmarshalInt(s);
    e->mtype            = (MethodTypes)unmarshalInt(s);
@@ -554,7 +554,7 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    delete e->anchors;
    e->anchors          = unmarshalSectionInfoList(s);
 
-   e->fileName         = unmarshalQByteArray(s);
+   e->fileName         = unmarshalQString(s);
    e->startLine        = unmarshalInt(s);
    e->sli              = unmarshalItemInfoList(s);
    e->lang             = (SrcLangExt)unmarshalInt(s);

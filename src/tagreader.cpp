@@ -48,13 +48,13 @@
 class TagAnchorInfo
 {
  public:
-   TagAnchorInfo(const QByteArray &f, const QByteArray &l, const QByteArray &t = QByteArray())
+   TagAnchorInfo(const QString &f, const QString &l, const QString &t = QString())
       : label(l), fileName(f), title(t) 
    {}
 
-   QByteArray label;
-   QByteArray fileName;
-   QByteArray title;
+   QString label;
+   QString fileName;
+   QString title;
 };
 
 /** List of TagAnchorInfo objects. */
@@ -72,10 +72,10 @@ class TagAnchorInfoList : public QList<TagAnchorInfo>
 class TagEnumValueInfo
 {
  public:
-   QByteArray name;
-   QByteArray file;
-   QByteArray anchor;
-   QByteArray clangid;
+   QString name;
+   QString file;
+   QString anchor;
+   QString clangid;
 };
 
 /** Container for member specific info that can be read from a tagfile */
@@ -86,13 +86,13 @@ class TagMemberInfo
    {    
    }
 
-   QByteArray type;
-   QByteArray name;
-   QByteArray anchorFile;
-   QByteArray anchor;
-   QByteArray arglist;
-   QByteArray kind;
-   QByteArray clangId;
+   QString type;
+   QString name;
+   QString anchorFile;
+   QString anchor;
+   QString arglist;
+   QString kind;
+   QString clangId;
 
    TagAnchorInfoList docAnchors;
    Protection prot;
@@ -120,13 +120,13 @@ class TagClassInfo
       delete templateArguments;
    }
 
-   QByteArray name;
-   QByteArray filename;
-   QByteArray clangId;
+   QString name;
+   QString filename;
+   QString clangId;
    TagAnchorInfoList docAnchors;
    QList<BaseInfo> *bases;
    QList<TagMemberInfo> members;
-   QList<QByteArray> *templateArguments;
+   QList<QString> *templateArguments;
    QStringList classList;
    Kind kind;
    bool isObjC;
@@ -140,9 +140,9 @@ class TagNamespaceInfo
    {
    }
 
-   QByteArray name;
-   QByteArray filename;
-   QByteArray clangId;
+   QString name;
+   QString filename;
+   QString clangId;
    QStringList classList;
    QStringList namespaceList;
 
@@ -159,8 +159,8 @@ class TagPackageInfo
    {      
    }
 
-   QByteArray name;
-   QByteArray filename;
+   QString name;
+   QString filename;
 
    TagAnchorInfoList docAnchors;
    QList<TagMemberInfo> members;
@@ -172,9 +172,9 @@ class TagPackageInfo
 class TagIncludeInfo
 {
  public:
-   QByteArray id;
-   QByteArray name;
-   QByteArray text;
+   QString id;
+   QString name;
+   QString text;
 
    bool isLocal;
    bool isImported;
@@ -188,9 +188,9 @@ class TagFileInfo
    {
    }
 
-   QByteArray name;
-   QByteArray path;
-   QByteArray filename;
+   QString name;
+   QString path;
+   QString filename;
 
    TagAnchorInfoList docAnchors;
 
@@ -210,9 +210,9 @@ class TagGroupInfo
    {
    }
 
-   QByteArray name;
-   QByteArray title;
-   QByteArray filename;
+   QString name;
+   QString title;
+   QString filename;
 
    TagAnchorInfoList docAnchors;
 
@@ -230,9 +230,9 @@ class TagGroupInfo
 class TagPageInfo
 {
  public:
-   QByteArray name;
-   QByteArray title;
-   QByteArray filename;
+   QString name;
+   QString title;
+   QString filename;
 
    TagAnchorInfoList docAnchors;
 };
@@ -241,9 +241,9 @@ class TagPageInfo
 class TagDirInfo
 {
  public:
-   QByteArray name;
-   QByteArray filename;
-   QByteArray path;
+   QString name;
+   QString filename;
+   QString path;
    QStringList subdirList;
    QStringList fileList;
    TagAnchorInfoList docAnchors;
@@ -304,7 +304,7 @@ class TagFileParser : public QXmlDefaultHandler
    };
 
  public:
-   TagFileParser(const char *tagName) : m_startElementHandlers(), m_endElementHandlers(),m_tagName(tagName) {    
+   TagFileParser(const QString &tagName) : m_startElementHandlers(), m_endElementHandlers(), m_tagName(tagName) {    
       m_curClass = 0;
       m_curFile = 0;
       m_curNamespace = 0;
@@ -461,11 +461,11 @@ class TagFileParser : public QXmlDefaultHandler
 
    void startMember( const QXmlAttributes &attrib) {
       m_curMember = new TagMemberInfo;
-      m_curMember->kind = attrib.value("kind").toUtf8();
+      m_curMember->kind = attrib.value("kind");
 
-      QByteArray protStr   = attrib.value("protection").toUtf8();
-      QByteArray virtStr   = attrib.value("virtualness").toUtf8();
-      QByteArray staticStr = attrib.value("static").toUtf8();
+      QString protStr   = attrib.value("protection");
+      QString virtStr   = attrib.value("virtualness");
+      QString staticStr = attrib.value("static");
 
       if (protStr == "protected") {
          m_curMember->prot = Protected;
@@ -773,10 +773,10 @@ class TagFileParser : public QXmlDefaultHandler
    void endTemplateArg() {
       if (m_state == InClass && m_curClass) {
          if (m_curClass->templateArguments == 0) {
-            m_curClass->templateArguments = new QList<QByteArray>;            
+            m_curClass->templateArguments = new QList<QString>;            
          }
 
-         m_curClass->templateArguments->append(QByteArray(m_curString));
+         m_curClass->templateArguments->append(m_curString);
 
       } else {
          warn("Unexpected tag `templarg' found\n");
@@ -987,7 +987,7 @@ class TagFileParser : public QXmlDefaultHandler
       return true;
    }
 
-   bool characters ( const QString &ch ) {
+   bool characters (const QString &ch) {
       m_curString += ch.toUtf8();
       return true;
    }
@@ -1011,27 +1011,27 @@ class TagFileParser : public QXmlDefaultHandler
    QHash<QString, StartElementHandler>  m_startElementHandlers;
    QHash<QString, EndElementHandler>    m_endElementHandlers;
 
-   TagClassInfo              *m_curClass;
-   TagFileInfo               *m_curFile;
-   TagNamespaceInfo          *m_curNamespace;
-   TagPackageInfo            *m_curPackage;
-   TagGroupInfo              *m_curGroup;
-   TagPageInfo               *m_curPage;
-   TagDirInfo                *m_curDir;
-   TagMemberInfo             *m_curMember;
-   TagEnumValueInfo          *m_curEnumValue;
-   TagIncludeInfo            *m_curIncludes;
+   TagClassInfo          *m_curClass;
+   TagFileInfo           *m_curFile;
+   TagNamespaceInfo      *m_curNamespace;
+   TagPackageInfo        *m_curPackage;
+   TagGroupInfo          *m_curGroup;
+   TagPageInfo           *m_curPage;
+   TagDirInfo            *m_curDir;
+   TagMemberInfo         *m_curMember;
+   TagEnumValueInfo      *m_curEnumValue;
+   TagIncludeInfo        *m_curIncludes;
 
-   QByteArray                 m_curString;
-   QByteArray                 m_tagName;
-   QByteArray                 m_fileName;
-   QByteArray                 m_title;
-   State                      m_state;
+   QString               m_curString;
+   QString               m_tagName;
+   QString               m_fileName;
+   QString               m_title;
+   State                 m_state;
 
-   QStack<State>              m_stateStack;
+   QStack<State>         m_stateStack;
 
-   QXmlLocator               *m_locator;
-   QByteArray                 m_inputFileName;
+   QXmlLocator           *m_locator;
+   QString               m_inputFileName;
 };
 
 /** Error handler for the XML tag file parser.
@@ -1205,7 +1205,8 @@ void TagFileParser::addDocAnchors(QSharedPointer<Entry> e, const TagAnchorInfoLi
          e->anchors->append(*si);
 
       } else {
-         warn("Duplicate anchor %s found\n", ta.label.data());
+         warn("Duplicate anchor %s found\n", qPrintable(ta.label));
+
       }
    }
 }
@@ -1221,7 +1222,7 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
 
       if (! me->args.isEmpty()) {
          me->argList = ArgumentList();
-         stringToArgumentList(me->args.constData(), &(me->argList));
+         stringToArgumentList(me->args, &(me->argList));
       }
 
       if (tmi.enumValues.count() > 0) {
@@ -1321,13 +1322,16 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
    }
 }
 
-static QByteArray stripPath(const QByteArray &s)
+static QString stripPath_tag(const QString &s)
 {
    int i = s.lastIndexOf('/');
+
    if (i != -1) {
       return s.right(s.length() - i - 1);
+
    } else {
       return s;
+
    }
 }
 
@@ -1442,7 +1446,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ti->fileName = tfi.filename;
       fe->tagInfo  = ti;
 
-      QByteArray fullName = m_tagName + ":" + tfi.path + stripPath(tfi.name);
+      QString fullName = m_tagName + ":" + tfi.path + stripPath_tag(tfi.name);
       fe->fileName = fullName;
       
       QSharedPointer<FileDef> fd = QMakeShared<FileDef>(m_tagName + ":" + tfi.path, tfi.name, m_tagName, tfi.filename);
@@ -1549,7 +1553,7 @@ void TagFileParser::addIncludes()
       if (fn) {
                  
          for (auto fd : *fn) {
-            if (fd->getPath() == QByteArray(m_tagName + ":" + tfi.path)) {
+            if (fd->getPath() == (m_tagName + ":" + tfi.path)) {
                             
                for (auto item : tfi.includes) {
                
@@ -1558,7 +1562,7 @@ void TagFileParser::addIncludes()
 
                   if (ifn) {                   
                      for (auto ifd : *ifn) {
-                        if (ifd->getOutputFileBase() == QByteArray(item.id)) {
+                        if (ifd->getOutputFileBase() == item.id) {
                            fd->addIncludeDependency(ifd, item.text, item.isLocal, item.isImported, false);
                         }
                      }
@@ -1571,7 +1575,7 @@ void TagFileParser::addIncludes()
    }
 }
 
-void parseTagFile(QSharedPointer<Entry> root, const char *fullName)
+void parseTagFile(QSharedPointer<Entry> root, const QString &fullName)
 {
    QFileInfo fi(fullName);
 

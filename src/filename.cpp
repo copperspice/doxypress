@@ -73,7 +73,7 @@ void FileName::generateDiskNames()
        
          if (fd) {     
             // init for safety
-            char letter = '\0';
+            QChar letter = '\0';
 
             if ( fd->m_path.length() > i) {
                letter = fd->m_path.at(i);
@@ -123,7 +123,7 @@ void FileName::generateDiskNames()
 
 int FileName::compareListValues(const FileDef *f1, const FileDef *f2) const
 {
-   return f1->fileName().compare(f2->fileName(), Qt:CaseInsensitive);
+   return f1->fileName().compare(f2->fileName(), Qt::CaseInsensitive);
 }
 
 FileNameIterator::FileNameIterator(const FileName &fname) : QListIterator<QSharedPointer<FileDef>>(fname)

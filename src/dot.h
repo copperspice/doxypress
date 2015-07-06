@@ -211,7 +211,7 @@ class DotClassGraph
    void determineTruncatedNodes(QList<DotNode *> &queue, bool includeParents);
 
    void addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, const QString &label,
-                 const char *usedName, const char *templSpec, bool base, int distance);
+                 const QString &usedName, const QString &templSpec, bool base, int distance);
 
    DotNode *m_startNode;
    QHash<QString, DotNode *> *m_usedNodes;

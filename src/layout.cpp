@@ -35,18 +35,17 @@
 #include <util.h>
 
 static QString buildMultiTitle(const QString & titleA, enum SrcLangExt langId, const QString & titleB) {
-   return titleA + "|" + QString::number(langId) + "=" titleB;
+   return titleA + "|" + QString::number(langId) + "=" + titleB;
 }
 
-template<class Ts>
+template<class ...Ts>
 static QString buildMultiTitle(const QString &titleA, enum SrcLangExt langId, const QString & titleB, Ts... Vs ) {
 
-   QString retval = titleA + "|" + QString::number(langId) + "=" titleB;
+   QString retval = titleA + "|" + QString::number(langId) + "=" + titleB;
    retval = buildMultiTitle(retval, Vs...);
 
    return retval;   
 }
-
 
 static bool elemIsVisible(const QXmlAttributes &attrib, bool defVal = true)
 {
@@ -302,8 +301,7 @@ class LayoutParser : public QXmlDefaultHandler
          
       m_sHandler.insert("class/memberdecl/nestedclasses",     new StartElementHandlerSection(this, LayoutDocEntry::ClassNestedClasses,
                &LayoutParser::startSectionEntry, 
-               buildMultiTitle(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes()) ); 
-
+               buildMultiTitle(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes())) ); 
      
       m_sHandler.insert("class/memberdecl/services",          new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_services, theTranslator->trServices()));

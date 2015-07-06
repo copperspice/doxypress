@@ -28,7 +28,6 @@
 #include <commentcnv.h>
 #include <doxy_globals.h>
 #include <entry.h>
-#include <growbuf.h>
 #include <message.h>
 #include <parser_md.h>
 #include <section.h>
@@ -54,18 +53,18 @@
    data[i]=='@')
 
 struct LinkRef {
-   LinkRef(const QByteArray &l, const QByteArray &t) : link(l), title(t) {}
-   QByteArray link;
-   QByteArray title;
+   LinkRef(const QString &l, const QString &t) : link(l), title(t) {}
+   QString link;
+   QString title;
 };
 
 enum Alignment { AlignNone, AlignLeft, AlignCenter, AlignRight };
 
 static QHash<QString, LinkRef> g_linkRefs;
 
-static Entry         *g_current;
-static QByteArray     g_fileName;
-static int            g_lineNr;
+static Entry      *g_current;
+static QString     g_fileName;
+static int         g_lineNr;
 
 // In case a markdown page starts with a level1 header, that header is used
 // as a title of the page, in effect making it a level0 header, so the
@@ -76,55 +75,44 @@ static int            g_lineNr;
 
 const int codeBlockIndent = 4;
 
-static void processInline(GrowBuf &out, const char *data, int size);
+static void processInline(QString &out, const QString &processText, int size);
 
 
 // escape characters that have a special meaning later on
-static QByteArray escapeSpecialChars(const QByteArray &s)
+static QString escapeSpecialChars(const QString &text)
 {
-   if (s.isEmpty()) {
+   if (text.isEmpty()) {
       return "";
    }
 
-   GrowBuf growBuf;
-   const char *p = s;
-   char c;
+   QString retval;   
 
-   while ((c = *p++)) {
-      switch (c) {
+   for (auto c : text) {
+
+      switch (c.unicode()) {
          case '<':
-            growBuf.addStr("\\<");
+            retval += "\\<";
             break;
 
          case '>':
-            growBuf.addStr("\\>");
+            retval += "\\>";
             break;
 
          case '\\':
-            growBuf.addStr("\\\\");
+            retval += "\\\\";
             break;
 
          case '@':
-            growBuf.addStr("\\@");
+            retval += "\\@";
             break;
 
          default:
-            growBuf.addChar(c);
+            retval += c;
             break;
       }
    }
 
-   growBuf.addChar(0);
-   return growBuf.get();
-}
-
-static void convertStringFragment(QByteArray &result, const char *data, int size)
-{
-   if (size < 0) {
-      size = 0;
-   }
-
-   result = QByteArray(data, size);    
+   return retval;
 }
 
 /** helper function to convert presence of left and/or right alignment markers
@@ -165,13 +153,15 @@ static Alignment markersToAlignment(bool leftMarker, bool rightMarker)
 // \rtfonly..\endrtfonly
 // \manonly..\endmanonly
 
-static QByteArray isBlockCommand(const char *data, int offset, int size)
+static QString isBlockCommand(const QString &data, int offset, int size)
 {
+   QString retval = "";
+
    bool openBracket = offset > 0 && data[-1] == '{';
-   bool isEscaped = offset > 0 && (data[-1] == '\\' || data[-1] == '@');
+   bool isEscaped   = offset > 0 && (data[-1] == '\\' || data[-1] == '@');
 
    if (isEscaped) {
-      return QByteArray();
+      return retval;
    }
 
    int end = 1;
@@ -181,11 +171,10 @@ static QByteArray isBlockCommand(const char *data, int offset, int size)
    }
 
    if (end == 1) {
-      return QByteArray();
+      return retval;
    }
 
-   QByteArray blockName;
-   convertStringFragment(blockName, data + 1, end - 1);
+   QString blockName = data.mid(1, end - 1);       
 
    if (blockName == "code" && openBracket) {
       return "}";
@@ -219,18 +208,18 @@ static QByteArray isBlockCommand(const char *data, int offset, int size)
       }
    }
 
-   return QByteArray();
+   return retval;
 }
 
 /** looks for the next emph char, skipping other constructs, and
  *  stopping when either it is found, or we are at the end of a paragraph.
  */
-static int findEmphasisChar(const char *data, int size, char c, int c_size)
+static int findEmphasisChar(const QString &data, int size, char c, int c_size)
 {
    int i = 1;
 
    while (i < size) {
-      while (i < size && data[i] != c    && data[i] != '`' &&
+      while (i < size && data[i] != c && data[i] != '`' &&
              data[i] != '\\' && data[i] != '@' &&
              data[i] != '\n') {
          i++;
@@ -277,27 +266,31 @@ static int findEmphasisChar(const char *data, int size, char c, int c_size)
             }
             i++;
          }
+
       } else if (data[i] == '@' || data[i] == '\\') {
          // skip over blocks that should not be processed
-         QByteArray endBlockName = isBlockCommand(data + i, i, size - i);
+         QString endBlockName = isBlockCommand(data + i, i, size - i);
 
-         if (!endBlockName.isEmpty()) {
+         if (! endBlockName.isEmpty()) {
             i++;
             int l = endBlockName.length();
 
             while (i < size - l) {
-               if ((data[i] == '\\' || data[i] == '@') && // command
-                     data[i - 1] != '\\' && data[i - 1] != '@') { // not escaped
-                  if (qstrncmp(&data[i + 1], endBlockName, l) == 0) {
+               if ((data[i] == '\\' || data[i] == '@') && data[i - 1] != '\\' && data[i - 1] != '@') { 
+
+                  if (data.mid(i + 1).startsWith(endBlockName)) { 
                      break;
                   }
                }
                i++;
             }
+
          } else if (i < size - 1 && isIdChar(i + 1)) { // @cmd, stop processing, see bug 690385
             return 0;
+
          } else {
             i++;
+
          }
 
       } else if (data[i] == '\n') { // end * or _ at paragraph boundary
@@ -319,7 +312,7 @@ static int findEmphasisChar(const char *data, int size, char c, int c_size)
 }
 
 /** process single emphasis */
-static int processEmphasis1(GrowBuf &out, const char *data, int size, char c)
+static int processEmphasis1(QString &out, const QString &data, int size, char c)
 {
    int i = 0, len;
 
@@ -358,7 +351,7 @@ static int processEmphasis1(GrowBuf &out, const char *data, int size, char c)
 }
 
 /** process double emphasis */
-static int processEmphasis2(GrowBuf &out, const char *data, int size, char c)
+static int processEmphasis2(QString &out, const QString &data, int size, char c)
 {
    int i = 0, len;
 
@@ -387,7 +380,7 @@ static int processEmphasis2(GrowBuf &out, const char *data, int size, char c)
 /** Parsing tripple emphasis
  *  Finds the first closing tag, and delegates to the other emph
  */
-static int processEmphasis3(GrowBuf &out, const char *data, int size, char c)
+static int processEmphasis3(QString &out, const QString &data, int size, char c)
 {
    int i = 0, len;
 
@@ -434,10 +427,8 @@ static int processEmphasis3(GrowBuf &out, const char *data, int size, char c)
 }
 
 /** Process ndash and mdashes */
-static int processNmdash(GrowBuf &out, const char *data, int off, int size)
-{
-   // precondition: data[0]=='-'
-
+static int processNmdash(QString &out, const QString &data, int off, int size)
+{ 
    int i     = 1;
    int count = 1;
 
@@ -472,7 +463,7 @@ static int processNmdash(GrowBuf &out, const char *data, int off, int size)
 }
 
 /** Process quoted section "...", can contain one embedded newline */
-static int processQuoted(GrowBuf &out, const char *data, int, int size)
+static int processQuoted(QString &out, const QString &data, int, int size)
 {
    int i  = 1;
    int nl = 0;
@@ -496,7 +487,7 @@ static int processQuoted(GrowBuf &out, const char *data, int, int size)
 /** Process an HTML tag. Note that <pre>..</pre> are treated specially, in
  *  the sense that all code inside is written unprocessed
  */
-static int processHtmlTag(GrowBuf &out, const char *data, int offset, int size)
+static int processHtmlTag(QString &out, const QString &data, int offset, int size)
 {
    if (offset > 0 && data[-1] == '\\') {
       return 0;   // escaped <
@@ -511,8 +502,7 @@ static int processHtmlTag(GrowBuf &out, const char *data, int offset, int size)
       i++, l++;
    }
 
-   QByteArray tagName;
-   convertStringFragment(tagName, data + 1, i - 1);
+   QString tagName = data.mid(1, i - 1);   
 
    if (tagName.toLower() == "pre") { 
       bool insideStr = false;
@@ -587,7 +577,7 @@ static int processHtmlTag(GrowBuf &out, const char *data, int offset, int size)
    return 0;
 }
 
-static int processEmphasis(GrowBuf &out, const char *data, int offset, int size)
+static int processEmphasis(QString &out, const QString &data, int offset, int size)
 {
    if ((offset > 0 && !isOpenEmphChar(-1)) || // invalid char before * or _
          (size > 1 && data[0] != data[1] && !isIdChar(1)) || // invalid char after * or _
@@ -622,11 +612,11 @@ static int processEmphasis(GrowBuf &out, const char *data, int offset, int size)
    return 0;
 }
 
-static int processLink(GrowBuf &out, const char *data, int, int size)
+static int processLink(QString &out, const QString &data, int, int size)
 {
-   QByteArray content;
-   QByteArray link;
-   QByteArray title;
+   QString content;
+   QString link;
+   QString title;
 
    int contentStart, contentEnd, linkStart, titleStart, titleEnd;
    bool isImageLink = false;
@@ -668,10 +658,10 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
       return 0;   // premature end of comment -> no link
    }
 
-   contentEnd = i;
-   convertStringFragment(content, data + contentStart, contentEnd - contentStart);
+   contentEnd = i;   
+   content = data.mid(contentStart, contentEnd - contentStart);   
   
-   if (!isImageLink && content.isEmpty()) {
+   if (! isImageLink && content.isEmpty()) {
       return 0;   // no link text
    }
    i++; // skip over ]
@@ -694,11 +684,14 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
       while (i < size && data[i] == ' ') {
          i++;
       }
+
       if (i < size && data[i] == '<') {
          i++;
       }
+
       linkStart = i;
       nl = 0;
+
       while (i < size && data[i] != '\'' && data[i] != '"' && data[i] != ')') {
          if (data[i] == '\n') {
             nl++;
@@ -708,13 +701,14 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
          }
          i++;
       }
+
       if (i >= size || data[i] == '\n') {
          return 0;
       }
-      convertStringFragment(link, data + linkStart, i - linkStart);
-      link = link.trimmed();
 
-      //printf("processLink: link={%s}\n",link.data());
+      link = data.mid(linkStart, i - linkStart);      
+      link = link.trimmed();
+      
       if (link.isEmpty()) {
          return 0;
       }
@@ -749,9 +743,11 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
          while (titleEnd > titleStart && data[titleEnd] == ' ') {
             titleEnd--;
          }
-         if (data[titleEnd] == c) { // found it
-            convertStringFragment(title, data + titleStart, titleEnd - titleStart);
-            //printf("processLink: title={%s}\n",title.data());
+
+         if (data[titleEnd] == c) { 
+            // found it
+            title = data.mid(titleStart, titleEnd - titleStart);   
+
          } else {
             return 0;
          }
@@ -779,9 +775,8 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
          return 0;
       }
 
-      // extract link
-      convertStringFragment(link, data + linkStart, i - linkStart);
-     
+      // extract link    
+      link = data.mid(linkStart, i - linkStart);        
       link = link.trimmed();
 
       if (link.isEmpty()) { 
@@ -914,7 +909,7 @@ static int processLink(GrowBuf &out, const char *data, int, int size)
 }
 
 /** '`' parsing a code span (assuming codespan != 0) */
-static int processCodeSpan(GrowBuf &out, const char *data, int /*offset*/, int size)
+static int processCodeSpan(QString &out, const QString &data, int /*offset*/, int size)
 {
    int end, nb = 0, i, f_begin, f_end;
 
@@ -962,14 +957,15 @@ static int processCodeSpan(GrowBuf &out, const char *data, int /*offset*/, int s
          i++;
       }
    }
-   //printf("found code span '%s'\n",QByteArray(data+f_begin).left(f_end-f_begin).data());
 
    /* real code span */
    if (f_begin < f_end) {
-      QByteArray codeFragment;
-      convertStringFragment(codeFragment, data + f_begin, f_end - f_begin);
+
+      QString codeFragment = data.mid(f_begin, f_end - f_begin);      
       out.addStr("<tt>");
+
       //out.addStr(convertToHtml(codeFragment,true));
+
       out.addStr(escapeSpecialChars(codeFragment));
       out.addStr("</tt>");
    }
@@ -977,11 +973,11 @@ static int processCodeSpan(GrowBuf &out, const char *data, int /*offset*/, int s
 }
 
 
-static int processSpecialCommand(GrowBuf &out, const char *data, int offset, int size)
+static int processSpecialCommand(QString &out, const QString &data, int offset, int size)
 {
    int i = 1;
 
-   QByteArray endBlockName = isBlockCommand(data, offset, size);
+   QString endBlockName = isBlockCommand(data, offset, size);
 
    if (! endBlockName.isEmpty()) {
       int l = endBlockName.length();
@@ -1025,12 +1021,16 @@ static int processSpecialCommand(GrowBuf &out, const char *data, int offset, int
    return 0;
 }
 
-static void processInline(GrowBuf &out, const char *data, int size)
+static void processInline(QString &out, const QString &processText, int size)
 {
-   int i = 0;
+   int i     = 0;
    int index = 0;
 
+
+// BROOM - fix me
+
    QSet<char> keys;
+
    keys.insert('_');   // processEmphasis
    keys.insert('*');   // processEmphasis
    keys.insert('`');   // processCodeSpan
@@ -1046,14 +1046,14 @@ static void processInline(GrowBuf &out, const char *data, int size)
     
       while (index < size)  {  
 
-         if (keys.contains(data[index])) { 
+         if (keys.contains(processText[index])) { 
             break;         
          }        
 
          index++;
       }
    
-      out.addStr(data + i, index - i);
+      out.addStr(processText + i, index - i);
 
       if (index >= size) {
          break;
@@ -1061,46 +1061,46 @@ static void processInline(GrowBuf &out, const char *data, int size)
 
       int skipCount;
 
-      switch (data[index]) {
+      switch (processText[index]) {
 
          case '_':
-            skipCount = processEmphasis(out, data + index, index, size - index);
+            skipCount = processEmphasis(out, processText + index, index, size - index);
             break;
 
          case '*':
-            skipCount = processEmphasis(out, data + index, index, size - index);
+            skipCount = processEmphasis(out, processText + index, index, size - index);
             break;
 
          case '`':
-            skipCount = processCodeSpan(out, data + index, index, size - index);
+            skipCount = processCodeSpan(out, processText + index, index, size - index);
             break;
 
          case '\\':
-            skipCount = processSpecialCommand(out, data + index, index, size - index);
+            skipCount = processSpecialCommand(out, processText + index, index, size - index);
             break;
 
          case '@':
-            skipCount = processSpecialCommand(out, data + index, index, size - index);
+            skipCount = processSpecialCommand(out, processText + index, index, size - index);
             break;
 
          case '[':
-            skipCount = processLink(out, data + index, index, size - index);
+            skipCount = processLink(out, processText + index, index, size - index);
             break;
 
          case '!':
-            skipCount = processLink(out, data + index, index, size - index);
+            skipCount = processLink(out, processText + index, index, size - index);
             break;
 
          case '<':
-            skipCount = processHtmlTag(out, data + index, index, size - index);
+            skipCount = processHtmlTag(out, processText + index, index, size - index);
             break;
 
          case '-':
-            skipCount = processNmdash(out, data + index, index, size - index);
+            skipCount = processNmdash(out, processText + index, index, size - index);
             break;
 
          case '"':
-            skipCount = processQuoted(out, data + index, index, size - index);
+            skipCount = processQuoted(out, processText + index, index, size - index);
             break;
 
       }
@@ -1175,18 +1175,19 @@ static bool isBlockQuote(const char *data, int size, int indent)
 }
 
 /** returns end of the link ref if this is indeed a link reference. */
-static int isLinkRef(const char *data, int size,
-                     QByteArray &refid, QByteArray &link, QByteArray &title)
+static int isLinkRef(const QString &data, int size, QString &refid, QString &link, QString &title)
 {
-   //printf("isLinkRef data={%s}\n",data);
    // format: start with [some text]:
+
    int i = 0;
    while (i < size && data[i] == ' ') {
       i++;
    }
+
    if (i >= size || data[i] != '[') {
       return 0;
    }
+
    i++;
    int refIdStart = i;
    while (i < size && data[i] != '\n' && data[i] != ']') {
@@ -1195,11 +1196,13 @@ static int isLinkRef(const char *data, int size,
    if (i >= size || data[i] != ']') {
       return 0;
    }
-   convertStringFragment(refid, data + refIdStart, i - refIdStart);
+
+   refid = data.mid(refIdStart, i - refIdStart); 
+
    if (refid.isEmpty()) {
       return 0;
    }
-   //printf("  isLinkRef: found refid='%s'\n",refid.data());
+
    i++;
    if (i >= size || data[i] != ':') {
       return 0;
@@ -1231,18 +1234,20 @@ static int isLinkRef(const char *data, int size,
    if (i < size && data[i] == '>') {
       i++;
    }
+
    if (linkStart == linkEnd) {
       return 0;   // empty link
    }
-   convertStringFragment(link, data + linkStart, linkEnd - linkStart);
-   //printf("  isLinkRef: found link='%s'\n",link.data());
+
+   link = data.mid(linkStart, linkEnd - linkStart); 
+
    if (link == "@ref" || link == "\\ref") {
       int argStart = i;
       while (i < size && data[i] != '\n' && data[i] != '"') {
          i++;
       }
-      QByteArray refArg;
-      convertStringFragment(refArg, data + argStart, i - argStart);
+
+      QString refArg = data.mid(argStart, i - argStart); 
       link += refArg;
    }
 
@@ -1284,21 +1289,22 @@ static int isLinkRef(const char *data, int size,
       while (end > titleStart && data[end] != c) {
          end--;
       }
+
       if (end > titleStart) {
-         convertStringFragment(title, data + titleStart, end - titleStart);
+         title = data.mid(titleStart, end - titleStart); 
       }
-      //printf("  title found: '%s'\n",title.data());
+
    }
    while (i < size && data[i] == ' ') {
       i++;
    }
-   //printf("end of isLinkRef: i=%d size=%d data[i]='%c' eol=%d\n",
-   //    i,size,data[i],eol);
+
    if      (i >= size) {
       return i;   // end of buffer while ref id was found
    } else if (eol) {
       return eol;   // end of line while ref id was found
    }
+
    return 0;                            // invalid link ref
 }
 
@@ -1330,7 +1336,7 @@ static int isHRuler(const char *data, int size)
    return n >= 3; // at least 3 characters needed for a hruler
 }
 
-static QByteArray extractTitleId(QByteArray &title)
+static QString extractTitleId(QString &title)
 {   
    static QRegExp r2("\\{#[a-z_A-Z][a-z_A-Z0-9\\-]*\\}");
 
@@ -1340,7 +1346,7 @@ static QByteArray extractTitleId(QByteArray &title)
 
    if (i != -1 && title.mid(i + l).trimmed().isEmpty()) { 
       // found {#id} style id
-      QByteArray id = title.mid(i + 2, l - 3);
+      QString id = title.mid(i + 2, l - 3);
       title = title.left(i);
 
       return id;
@@ -1350,10 +1356,12 @@ static QByteArray extractTitleId(QByteArray &title)
 }
 
 
-static int isAtxHeader(const char *data, int size, QByteArray &header, QByteArray &id)
+static int isAtxHeader(const QString &data, int size, QString &header, QString &id)
 {
-   int i = 0, end;
-   int level = 0, blanks = 0;
+   int i = 0;
+   int end;
+   int level = 0;
+   int blanks = 0;
 
    // find start of header text and determine heading level
    while (i < size && data[i] == ' ') {
@@ -1382,9 +1390,10 @@ static int isAtxHeader(const char *data, int size, QByteArray &header, QByteArra
    }
 
    // store result
-   convertStringFragment(header, data + i, end - i);
+   header = data.mid(i, end - i); 
    id = extractTitleId(header);
-   if (!id.isEmpty()) { // strip #'s between title and id
+
+   if (! id.isEmpty()) { // strip #'s between title and id
       i = header.length() - 1;
       while (i >= 0 && (header.at(i) == '#' || header.at(i) == ' ')) {
          i--;
@@ -1470,12 +1479,11 @@ static int computeIndentExcludingListMarkers(const char *data, int size)
       }
       indent++, i++;
    }
-   //printf("{%s}->%d\n",QByteArray(data).left(size).data(),indent);
+
    return indent;
 }
 
-static bool isFencedCodeBlock(const char *data, int size, int refIndent,
-                              QByteArray &lang, int &start, int &end, int &offset)
+static bool isFencedCodeBlock(const QString &data, int size, int refIndent, QString &lang, int &start, int &end, int &offset)
 {
    // rules: at least 3 ~~~, end of the block same amount of ~~~'s, otherwise
    // return false
@@ -1515,7 +1523,7 @@ static bool isFencedCodeBlock(const char *data, int size, int refIndent,
       i++;
    }
 
-   convertStringFragment(lang, data + startLang, i - startLang);
+   lang = data.mid(startLang, i - startLang); 
    while (i < size && data[i] != '\n') {
       i++;   // proceed to the end of the line
    }
@@ -1682,6 +1690,7 @@ static bool isTableBlock(const char *data, int size)
    int cc1;
    int ret = findTableColumns(data + i, size - i, start, end, cc1);
    int j = i + start;
+
    // separator line should consist of |, - and : and spaces only
    while (j <= end + i) {
       if (data[j] != ':' && data[j] != '-' && data[j] != '|' && data[j] != ' ') {
@@ -1698,11 +1707,10 @@ static bool isTableBlock(const char *data, int size)
    int cc2;
    findTableColumns(data + i, size - i, start, end, cc2);
 
-   //printf("isTableBlock: %d\n",cc1==cc2);
    return cc1 == cc2;
 }
 
-static int writeTableBlock(GrowBuf &out, const char *data, int size)
+static int writeTableBlock(QString &out, const QString &data, int size)
 {
    int i = 0, j, k;
    int columns, start, end, cc;
@@ -1835,12 +1843,12 @@ static int writeTableBlock(GrowBuf &out, const char *data, int size)
    return i;
 }
 
-void writeOneLineHeaderOrRuler(GrowBuf &out, const char *data, int size)
+void writeOneLineHeaderOrRuler(QString &out, const QString &data, int size)
 {
    int level;
 
-   QByteArray header;
-   QByteArray id;
+   QString header;
+   QString id;
 
    if (isHRuler(data, size)) {
       out.addStr("<hr>\n");
@@ -1917,7 +1925,7 @@ void writeOneLineHeaderOrRuler(GrowBuf &out, const char *data, int size)
    }
 }
 
-static int writeBlockQuote(GrowBuf &out, const char *data, int size)
+static int writeBlockQuote(QString &out, const QString &data, int size)
 {
    int l;
    int i = 0;
@@ -1930,9 +1938,11 @@ static int writeBlockQuote(GrowBuf &out, const char *data, int size)
       while (end <= size && data[end - 1] != '\n') {
          end++;
       }
+
       int j = i;
       int level = 0;
       int indent = i;
+
       // compute the quoting level
       while (j < end && (data[j] == ' ' || data[j] == '>')) {
          if (data[j] == '>') {
@@ -1973,10 +1983,11 @@ static int writeBlockQuote(GrowBuf &out, const char *data, int size)
    return i;
 }
 
-static int writeCodeBlock(GrowBuf &out, const char *data, int size, int refIndent)
+static int writeCodeBlock(QString &out, const QString &data, int size, int refIndent)
 {
-   int i = 0, end;
-   //printf("writeCodeBlock: data={%s}\n",QByteArray(data).left(size).data());
+   int i = 0;
+   int end;
+
    out.addStr("@verbatim\n");
    int emptyLines = 0;
 
@@ -2021,11 +2032,12 @@ static int writeCodeBlock(GrowBuf &out, const char *data, int size, int refInden
 
 // start searching for the end of the line start at offset \a i
 // keeping track of possible blocks that need to to skipped.
-static void findEndOfLine(GrowBuf &out, const char *data, int size, int &pi, int &i, int &end)
+static void findEndOfLine(QString &out, const QString &data, int size, int &pi, int &i, int &end)
 {
    // find end of the line
    int nb = 0;
    end = i + 1;
+
    while (end <= size && data[end - 1] != '\n') {
       // while looking for the end of the line we might encounter a block
       // that needs to be passed unprocessed.
@@ -2035,22 +2047,25 @@ static void findEndOfLine(GrowBuf &out, const char *data, int size, int &pi, int
 
          // not escaped
          
-         QByteArray endBlockName = isBlockCommand(data + end - 1, end - 1, size - (end - 1));
+         QString endBlockName = isBlockCommand(data + end - 1, end - 1, size - (end - 1));
          end++;
 
          if (!endBlockName.isEmpty()) {
             int l = endBlockName.length();
+
             for (; end < size - l - 1; end++) { // search for end of block marker
-               if ((data[end] == '\\' || data[end] == '@') &&
-                     data[end - 1] != '\\' && data[end - 1] != '@'
-                  ) {
+
+               if ((data[end] == '\\' || data[end] == '@') && data[end - 1] != '\\' && data[end - 1] != '@') {
+
                   if (qstrncmp(&data[end + 1], endBlockName, l) == 0) {
-                     if (pi != -1) { // output previous line if available
-                        //printf("feol out={%s}\n",QByteArray(data+pi).left(i-pi).data());
+
+                     if (pi != -1) {    
+                        // output previous line if available
                         out.addStr(data + pi, i - pi);
                      }
+
                      // found end marker, skip over this block
-                     //printf("feol.block out={%s}\n",QByteArray(data+i).left(end+l+1-i).data());
+
                      out.addStr(data + i, end + l + 1 - i);
                      pi = -1;
                      i = end + l + 1; // continue after block
@@ -2060,6 +2075,7 @@ static void findEndOfLine(GrowBuf &out, const char *data, int size, int &pi, int
                }
             }
          }
+
       } else if (nb == 0 && data[end - 1] == '<' && end < size - 6 &&
                  (end <= 1 || (data[end - 2] != '\\' && data[end - 2] != '@')) ) {
 
@@ -2106,10 +2122,9 @@ static void findEndOfLine(GrowBuf &out, const char *data, int size, int &pi, int
    }   
 }
 
-static void writeFencedCodeBlock(GrowBuf &out, const char *data, const char *lng,
-                                 int blockStart, int blockEnd)
+static void writeFencedCodeBlock(QString &out, const QString &data, const char *lng, int blockStart, int blockEnd)
 {
-   QByteArray lang = lng;
+   QString lang = lng;
 
    if (!lang.isEmpty() && lang.at(0) == '.') {
       lang = lang.mid(1);
@@ -2125,9 +2140,9 @@ static void writeFencedCodeBlock(GrowBuf &out, const char *data, const char *lng
    out.addStr("@endcode");
 }
 
-static QByteArray processQuotations(const QByteArray &s, int refIndent)
+static QString processQuotations(const QString &s, int refIndent)
 {
-   GrowBuf out;
+   QString out;
 
    const char *data = s.data();
    int size = s.length();
@@ -2135,7 +2150,11 @@ static QByteArray processQuotations(const QByteArray &s, int refIndent)
    int i = 0, end = 0, pi = -1;
    int blockStart, blockEnd, blockOffset;
 
-   QByteArray lang;
+   QString lang;
+
+
+// broom - fix me
+
 
    while (i < size) {
       findEndOfLine(out, data, size, pi, i, end);
@@ -2156,10 +2175,10 @@ static QByteArray processQuotations(const QByteArray &s, int refIndent)
             continue;
 
          } else {
-            //printf("quote out={%s}\n",QByteArray(data+pi).left(i-pi).data());
             out.addStr(data + pi, i - pi);
          }
       }
+
       pi = i;
       i = end;
    }
@@ -2174,20 +2193,24 @@ static QByteArray processQuotations(const QByteArray &s, int refIndent)
 
    out.addChar(0);
 
-   //printf("Process quotations\n---- input ----\n%s\n---- output ----\n%s\n------------\n",
-   //    s.data(),out.get());
-
    return out.get();
 }
 
-static QByteArray processBlocks(const QByteArray &s, int indent)
+static QString processBlocks(const QString &s, int indent)
 {
-   GrowBuf out;
+   QString out;
+
    const char *data = s.data();
    int size = s.length();
    int i = 0, end = 0, pi = -1, ref, level;
-   QByteArray id, link, title;
+
+   QString id
+   QString link;
+   QString title;
+
    int blockIndent = indent;
+
+// broom - fix me
 
    // get indent for the first line
    end = i + 1;
@@ -2223,7 +2246,7 @@ static QByteArray processBlocks(const QByteArray &s, int indent)
       if (pi != -1) {
          int blockStart, blockEnd, blockOffset;
 
-         QByteArray lang;
+         QString lang;
          blockIndent = indent;
          
          if ((level = isHeaderline(data + i, size - i)) > 0) {            
@@ -2232,8 +2255,10 @@ static QByteArray processBlocks(const QByteArray &s, int indent)
                pi++;
             }
 
-            QByteArray header, id;
-            convertStringFragment(header, data + pi, i - pi - 1);
+            QString header;
+            QString id;
+
+            header = data.mid(pi, i -  pi - 1); 
             id = extractTitleId(header);
 
             if (! header.isEmpty()) {
@@ -2339,15 +2364,18 @@ static QByteArray processBlocks(const QByteArray &s, int indent)
    return out.get();
 }
 
-static QByteArray extractPageTitle(QByteArray &docs, QByteArray &id)
+static QString extractPageTitle(QString &docs, QString &id)
 {
    int ln = 0;
-   // first first non-empty line
 
-   QByteArray title;
+   // first non-empty line
+   QString title;
+
    const char *data = docs.data();
    int i = 0;
    int size = docs.size();
+
+// broom - fix me
 
    while (i < size && (data[i] == ' ' || data[i] == '\n')) {
       if (data[i] == '\n') {
@@ -2377,9 +2405,9 @@ static QByteArray extractPageTitle(QByteArray &docs, QByteArray &id)
       }
 
       if (isHeaderline(data + end1, size - end1)) {
-         convertStringFragment(title, data + i, end1 - i - 1);
+         title = data.mid(i, end1 -i - 1); 
 
-         QByteArray lns;
+         QString lns;
          lns.fill('\n', ln);
          docs = lns + docs.mid(end2);
          id = extractTitleId(title);
@@ -2395,11 +2423,11 @@ static QByteArray extractPageTitle(QByteArray &docs, QByteArray &id)
    return title;
 }
 
-static QByteArray detab(const QByteArray &s, int &refIndent)
+static QString detab(const QString &s, int &refIndent)
 {
    static int tabSize = Config::getInt("tab-size");
 
-   GrowBuf out;
+   QString out;
 
    int size = s.length();
    const char *data = s.data();
@@ -2465,25 +2493,23 @@ static QByteArray detab(const QByteArray &s, int &refIndent)
    return out.get();
 }
 
-QByteArray processMarkdown(const QByteArray &fileName, const int lineNr, Entry *e, const QByteArray &input)
+QString processMarkdown(const QString &fileName, const int lineNr, Entry *e, const QString &input)
 {  
    g_linkRefs.clear();
 
    g_current  = e;
    g_fileName = fileName;
    g_lineNr   = lineNr;
-
-   static GrowBuf out;
-
+ 
    if (input.isEmpty()) {
       return input;
    }
-
-   out.clear();
+  
+   QString out; 
    int refIndent;
 
    // for replace tabs by spaces
-   QByteArray s = detab(input, refIndent);
+   QString s = detab(input, refIndent);
 
    //printf("======== DeTab =========\n---- output -----\n%s\n---------\n",s.data());
    // then process quotation blocks (as these may contain other blocks)
@@ -2505,23 +2531,21 @@ QByteArray processMarkdown(const QByteArray &fileName, const int lineNr, Entry *
    return out.get();
 }
 
-//---------------------------------------------------------------------------
-
-QByteArray markdownFileNameToId(const QByteArray &fileName)
+QString markdownFileNameToId(const QString &fileName)
 {
-   QByteArray baseFn  = stripFromPath(QFileInfo(fileName).absoluteFilePath().toUtf8()).toUtf8();
+   QString baseFn  = stripFromPath(QFileInfo(fileName).absoluteFilePath());
 
    int i = baseFn.lastIndexOf('.');
    if (i != -1) {
       baseFn = baseFn.left(i);
    }
 
-   QByteArray baseName = substitute(substitute(baseFn, " ", "_"), "/", "_");
+   QString baseName = substitute(substitute(baseFn, " ", "_"), "/", "_");
 
    return "md_" + baseName;
 }
 
-void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
+void MarkdownFileParser::parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                                     enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    QSharedPointer<Entry> current = QMakeShared<Entry>();
@@ -2531,11 +2555,11 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, Q
    current->docFile  = fileName;
    current->docLine  = 1;
 
-   QByteArray docs = fileBuf;
-   QByteArray id;
-   QByteArray title   = extractPageTitle(docs, id).trimmed();
-   QByteArray titleFn = QFileInfo(fileName).baseName().toUtf8();
-   QByteArray fn      = QFileInfo(fileName).fileName().toUtf8();
+   QString docs = fileBuf;
+   QString id;
+   QString title   = extractPageTitle(docs, id).trimmed();
+   QString titleFn = QFileInfo(fileName).baseName().toUtf8();
+   QString fn      = QFileInfo(fileName).fileName().toUtf8();
 
    static QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
 
@@ -2581,7 +2605,7 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, Q
              needsEntry)) {
 
       if (needsEntry) {
-         QByteArray docFile = current->docFile;
+         QString docFile = current->docFile;
          root->addSubEntry(current, root);
 
          current = QMakeShared<Entry>();
@@ -2599,8 +2623,8 @@ void MarkdownFileParser::parseInput(const char *fileName, const char *fileBuf, Q
    Doxy_Globals::markdownSupport = markdownEnabled; 
 }
 
-void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input,
-                                   SrcLangExt lang, bool isExampleBlock, const char *exampleName, QSharedPointer<FileDef> fileDef,
+void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
+                                   SrcLangExt lang, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef,
                                    int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
                                    bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
@@ -2622,7 +2646,7 @@ void MarkdownFileParser::resetCodeParserState()
    }
 }
 
-void MarkdownFileParser::parsePrototype(const char *text)
+void MarkdownFileParser::parsePrototype(const QString &text)
 {
    ParserInterface *pIntf = Doxy_Globals::parserManager->getParser("*.cpp");
 

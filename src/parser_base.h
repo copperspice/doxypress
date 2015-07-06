@@ -47,7 +47,7 @@ class ParserInterface
     *  sameTranslationUnit set to true. After that
     *  finishTranslationUnit() is called.
     */
-   virtual void startTranslationUnit(const char *fileName) = 0;
+   virtual void startTranslationUnit(const QString &fileName) = 0;
 
    /** Called after all files in a translation unit have been
     *  processed.
@@ -65,7 +65,7 @@ class ParserInterface
     *  @param[in,out] filesInSameTranslationUnit other files expected to be
     *              found in the same translation unit (used for libclang)
     */
-   virtual void parseInput(const QString &fileName, const char *fileBuf, QSharedPointer<Entry>root,
+   virtual void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry>root,
                            enum ParserMode mode, QStringList &includeFiles, bool useClang = false) = 0;
 
    /** Returns true if the language identified by \a extension needs
@@ -117,7 +117,7 @@ class ParserInterface
     *  in the Entry node that corresponds with the node for which the
     *  comment block parser was invoked.
     */
-   virtual void parsePrototype(const char *text) = 0;
+   virtual void parsePrototype(const QString &text) = 0;
 
 };
 

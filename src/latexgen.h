@@ -369,16 +369,18 @@ class LatexGenerator : public OutputGenerator
    LatexGenerator(const LatexGenerator &);
    LatexGenerator &operator=(const LatexGenerator &);
 
-   QString modifyKeywords(const QByteArray &s); 
-   void escapeLabelName(const char *s);
-   void escapeMakeIndexChars(const char *s);
+   QString modifyKeywords(const QString &s); 
+   void escapeLabelName(const QString &s);
+   void escapeMakeIndexChars(const QString &s);
 
    int col;
    bool insideTabbing;
    bool firstDescItem;
    bool disableLinks;
-   QByteArray relPath;
-   QByteArray sourceFileName;
+
+   QString m_relPath;
+   QString m_sourceFileName;
+
    int m_indent;
    bool templateMemberItem;
    bool m_prettyCode;

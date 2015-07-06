@@ -18,7 +18,6 @@
 #ifndef PARSER_MAKE_H
 #define PARSER_MAKE_H
 
-#include <QByteArray>
 #include <QStringList>
 
 #include <parser_base.h>
@@ -32,10 +31,10 @@ class MakeFileParser : public ParserInterface
    public:
       virtual ~MakeFileParser() {}
    
-      void startTranslationUnit(const char *)  override {}
+      void startTranslationUnit(const QString &) override {}
       void finishTranslationUnit()  override {}
    
-      void parseInput(const QString &fileName, const char *fileBuf, QSharedPointer<Entry> root,
+      void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                       enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
    
       bool needsPreprocessing(const QString &extension);
@@ -48,17 +47,17 @@ class MakeFileParser : public ParserInterface
                   QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override ;
      
       void resetCodeParserState() override ;
-      void parsePrototype(const char *text) override;
+      void parsePrototype(const QString &text) override;
 
    private: 
         void endCodeLine();
         void startCodeLine();
         void endFontClass();
-        void startFontClass(const char *s);
+        void startFontClass(const QString &s);
 };
 
-extern void parseMakeCode(CodeOutputInterface &, const char *, const QByteArray &,
-                          bool , const char *, FileDef *fd, int startLine, int endLine, bool inlineFragment,
+extern void parseMakeCode(CodeOutputInterface &, const QString &, const QString &,
+                          bool, const QString &, FileDef *fd, int startLine, int endLine, bool inlineFragment,
                           MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx, bool collectXRefs);
 
 

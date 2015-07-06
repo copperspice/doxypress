@@ -241,8 +241,8 @@ class FileDef : public Definition
 
    bool generateSourceFile() const;
   
-   void addIncludeDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported, bool indirect);
-   void addIncludedByDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported);
+   void addIncludeDependency(QSharedPointer<FileDef> fd, const QString &incName, bool local, bool imported, bool indirect);
+   void addIncludedByDependency(QSharedPointer<FileDef> fd, const QString &incName, bool local, bool imported);
 
    void addMembersToMemberGroup();
    void distributeMemberGroupDocumentation();

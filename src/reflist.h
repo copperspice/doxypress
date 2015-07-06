@@ -31,12 +31,12 @@ struct RefItem {
    RefItem() : scope(0) 
    {}
 
-   QByteArray text;           //!< text of the item.
-   QByteArray listAnchor;     //!< anchor in the list
-   QByteArray prefix;         //!< type prefix for the name  
-   QByteArray name;           //!< name of the entity containing the reference
-   QByteArray title;          //!< display name of the entity
-   QByteArray args;           //!< optional arguments for the entity (if function)
+   QString text;           //!< text of the item.
+   QString listAnchor;     //!< anchor in the list
+   QString prefix;         //!< type prefix for the name  
+   QString name;           //!< name of the entity containing the reference
+   QString title;          //!< display name of the entity
+   QString args;           //!< optional arguments for the entity (if function)
 
    QSharedPointer<Definition> scope;         //!< scope to use for references.  
 };
@@ -60,28 +60,28 @@ class RefList
    RefItem *getFirstRefItem();
    RefItem *getNextRefItem();
 
-   QByteArray listName() const;
-   QByteArray pageTitle() const;
-   QByteArray sectionTitle() const;
+   QString listName() const;
+   QString pageTitle() const;
+   QString sectionTitle() const;
 
-   RefList(const char *listName, const char *pageTitle, const char *secTitle);
+   RefList(const QString &listName, const QString &pageTitle, const QString &secTitle);
 
    RefList() : m_dictIterator(m_dict)
    {};
 
    ~RefList();  
 
-   void insertIntoList(const char *key, RefItem *item);
+   void insertIntoList(const QString &key, RefItem *item);
    void generatePage();
 
  private:
    int m_id;
 
-   QByteArray m_listName;
-   QByteArray m_pageTitle;
-   QByteArray m_secTitle;  
+   QString m_listName;
+   QString m_pageTitle;
+   QString m_secTitle;  
 
-   QMap<QByteArray, QList<RefItem>> m_itemMap;
+   QMap<QString, QList<RefItem>> m_itemMap;
   
    QHash<long, RefItem *> m_dict;
    QHashIterator<long, RefItem *> m_dictIterator;

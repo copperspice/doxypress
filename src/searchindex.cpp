@@ -199,46 +199,24 @@ void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const QString &a
 
 static int charsToIndex(const QString &word)
 {
-   if (word.isEmpty()) {
+   if (word.length() < 2) {
       return -1;
    }
-
-   // Fast string hashing algorithm
-   //register ushort h=0;
-   //const char *k = word;
-   //ushort mask=0xfc00;
-   //while ( *k )
-   //{
-   //  h = (h&mask)^(h<<6)^(*k++);
-   //}
-   //return h;
-
-
-// BROOM - fix me
-
-
-   // Simple hashing that allows for substring searching
-   uint c1 = ((uchar *)word)[0];
-
-   if (c1 == 0) {
-      return -1;
-   }
-
-   uint c2 = ((uchar *)word)[1];
-   if (c2 == 0) {
-      return -1;
-   }
-
+ 
+   // hashing that allows for substring searching
+   uint c1 = word[0].unicode(); 
+   uint c2 = word[1].unicode();
+   
    return c1 * 256 + c2;
 }
 
 void SearchIndex::addWord(const QString &word, bool hiPriority, bool recurse)
 {
-   static QRegExp nextPart("[_a-z:][A-Z]");
-
    if (word.isEmpty()) {
       return;
    }
+
+   static QRegExp nextPart("[_a-z:][A-Z]");
 
    QString wStr = word.toLower();   
    IndexWord *w = m_words.value(wStr);
@@ -293,15 +271,10 @@ static void writeInt(QFile &f, int index)
    f.putChar(((uint)index) & 0xff);
 }
 
-static void writeString(QFile &f, const char *s)
-{
-   const char *p = s;
-
-   while (*p) {
-      f.putChar(*p++);
-   }
-
-   f.putChar(0);
+static void writeString(QFile &file, const QString &str)
+{  
+   file.write(str.toUtf8());
+   file.putChar(0);
 }
 
 void SearchIndex::write(const QString &fileName)
@@ -781,28 +754,19 @@ static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_
 }
 
 // see also function convertToId() in search.js, which should match in behaviour
-static QString searchId(const QString &s)
-{
-   int c;
-   uint i;
-
+static QString searchId(const QString &str)
+{  
    QString result;
 
-   // BROOM - fix me
+   for ( auto c : str) {          
 
-   for (i = 0; i < s.length(); i++) {
-      c = s.at(i);
+      if (c.isLetterOrNumber()) { 
+         // simply alpha numerical character
+         result += c.toLower();
 
-      if (c > 0x7f || c < 0) { // part of multibyte character
-         result += (char)c;
-
-      } else if (isalnum(c)) { // simply alpha numerical character
-         result += (char)tolower(c);
-
-      } else { // other 'unprintable' characters
-         char val[4];
-         sprintf(val, "_%02x", (uchar)c);
-         result += val;
+      } else { 
+         // other 'unprintable' characters                
+         result += QString("_%1").arg(c.unicode(), 2, 16, QChar('0') );
       }
    }
 
@@ -933,8 +897,8 @@ void writeJavascriptSearchIndex()
          if (! title.isEmpty()) { 
             // TODO: able searching for all word in the title
 
-            uchar charCode = title.at(0);
-            uint letter = charCode < 128 ? tolower(charCode) : charCode;
+            QChar charCode = title.at(0);
+            uint letter = charCode.toLower().unicode();
 
             if (isId(letter)) {
                g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, gd);
@@ -954,8 +918,8 @@ void writeJavascriptSearchIndex()
          QString title = pd->title();
 
          if (! title.isEmpty()) {
-            uchar charCode = title.at(0);
-            uint letter = charCode < 128 ? tolower(charCode) : charCode;
+            QChar charCode = title.at(0);
+            uint letter = charCode.toLower().unicode();
 
             if (isId(letter)) {
                g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, pd);
@@ -971,8 +935,8 @@ void writeJavascriptSearchIndex()
       QString title = Doxy_Globals::mainPage->title();
 
       if (! title.isEmpty()) {
-         uchar charCode = title.at(0);
-         uint letter = charCode < 128 ? tolower(charCode) : charCode;
+         QChar charCode = title.at(0);
+         uint letter = charCode.toLower().unicode();
 
          if (isId(letter)) {
             g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, Doxy_Globals::mainPage);
@@ -992,8 +956,7 @@ void writeJavascriptSearchIndex()
       
       for (auto sl : g_searchIndexSymbols[i]) {   
          // for each letter
-         QString baseName;
-         baseName = QString("%1_%2").arg(g_searchIndexName[i]).arg(p);
+         QString baseName = QString("%1_%2").arg(g_searchIndexName[i]).arg(p);
 
          QString fileName     = searchDirName + "/" + baseName + ".html";
          QString dataFileName = searchDirName + "/" + baseName + ".js";

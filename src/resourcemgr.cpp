@@ -159,15 +159,16 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
             if (f.open(QIODevice::WriteOnly)) {
               
                QTextStream t(&f);
-               resData = replaceColorMarkers(resData);
+               QString data = replaceColorMarkers(resData);
 
                if (fName == "navtree.css") {
-                  QByteArray temp = QByteArray().setNum(Config::getInt("treeview-width")) + "px";
-                  t << substitute(resData, "$width", temp);         
+                  QString temp = QString::number(Config::getInt("treeview-width")) + "px";
+                  t << substitute(data, "$width", temp);         
 
                } else {
-                  t << substitute(resData, "$doxypressversion", versionString);
-                  t << substitute(resData, "$doxygenversion",   versionString);        // ok
+                  t << substitute(data, "$doxypressversion", versionString);
+                  t << substitute(data, "$doxygenversion",   versionString);        // ok
+
                }
 
                return true;

@@ -1185,7 +1185,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 }
 
 static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QTextStream &t, QSharedPointer<MemberList> ml, 
-                               const char *kind, const char *header = 0, const char *documentation = 0)
+                               const QString &kind, const QString &header = QString(), const QString &documentation = QString() )
 {
    if (ml == 0) {
       return;
@@ -1208,11 +1208,11 @@ static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QT
 
    t << "      <sectiondef kind=\"" << kind << "\">" << endl;
 
-   if (header) {
+   if (! header.isEmpty()) {
       t << "      <header>" << convertToXML(header) << "</header>" << endl;
    }
 
-   if (documentation) {
+   if (! documentation.isEmpty() ) {
       t << "      <description>";
       writeXMLDocBlock(t, d->docFile(), d->docLine(), d, QSharedPointer<MemberDef>(), documentation);
       t << "</description>" << endl;
@@ -2073,6 +2073,8 @@ void generateXML()
    // write compound.xsd, but replace special marker with the entities
    QByteArray compound_xsd = ResourceMgr::instance().getAsString("xml/compound.xsd");
    const char *startLine = compound_xsd.constData();
+
+// broom check
 
    while (*startLine) {
       // find end of the line

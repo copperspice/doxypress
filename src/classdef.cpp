@@ -148,7 +148,7 @@ QString ClassDef::displayName(bool includeScope) const
    }
 
    if (n.indexOf('@') != -1) {
-      return removeAnonymousScopes(n.toUtf8());
+      return removeAnonymousScopes(n);
    } else {
       return n;
    }
@@ -1045,7 +1045,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
 
             // use the class name but with the template arguments as given
             // in the inheritance relation
-            QString displayName = insertTemplateSpecifierInScope(cd->displayName().toUtf8(), bcd->templSpecifiers);
+            QString displayName = insertTemplateSpecifierInScope(cd->displayName(), bcd->templSpecifiers);
 
             if (cd->isLinkable()) {
                ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), displayName);
@@ -1089,7 +1089,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
             QSharedPointer<ClassDef> cd = bcd->classDef;
 
             if (cd->isLinkable()) {
-               ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), cd->displayName().toUtf8());
+               ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), cd->displayName());
             } else {
                ol.docify(cd->displayName());
             }
@@ -1283,7 +1283,7 @@ void ClassDef::writeAuthorSection(OutputList &ol)
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name").toUtf8()));
+   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name")));
    ol.popGeneratorState();
 }
 
@@ -1340,7 +1340,7 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
 
    tagFile << ">" << endl;
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
-   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension.toUtf8() << "</filename>" << endl;
+   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>" << endl;
 
    if (!anchor().isEmpty()) {
       tagFile << "    <anchor>" << convertToXML(anchor()) << "</anchor>" << endl;
@@ -1860,7 +1860,7 @@ QString ClassDef::title() const
 
    } else {
       if (Config::getBool("hide-compound-ref")) {
-         pageTitle = displayName().toUtf8();
+         pageTitle = displayName();
 
       } else {         
          ClassDef::CompoundType compType;
@@ -1959,7 +1959,7 @@ void ClassDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
                   if (createSubDirs) {
                      ol.writeString("../../");
                   }
-                  ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8() + "#" + md->anchor());
+                  ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension + "#" + md->anchor());
                   ol.writeString("\">");
                   ol.writeString(convertToHtml(md->name()));
                   ol.writeString("</a>");
@@ -2023,13 +2023,13 @@ void ClassDef::writeMemberList(OutputList &ol)
    }
 
    startTitle(ol, 0);
-   ol.parseText((displayName() + " " + theTranslator->trMemberList()).toUtf8());
+   ol.parseText((displayName() + " " + theTranslator->trMemberList()));
    endTitle(ol, 0, 0);
 
    ol.startContents();
    ol.startParagraph();
    ol.parseText(theTranslator->trThisIsTheListOfAllMembers());
-   ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), displayName().toUtf8());
+   ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), displayName());
    ol.parseText(theTranslator->trIncludingInheritedMembers());
    ol.endParagraph();
  
@@ -2168,7 +2168,7 @@ void ClassDef::writeMemberList(OutputList &ol)
                ol.writeString("<td class=\"entry\">");
 
                ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(),
-                                  md->category() ? md->category()->displayName().toUtf8() : cd->displayName().toUtf8());
+                                  md->category() ? md->category()->displayName() : cd->displayName());
 
                ol.writeString("</td>");
                ol.writeString("<td class=\"entry\">");
@@ -2253,7 +2253,7 @@ void ClassDef::addTypeConstraint(const QString &typeConstraint, const QString &t
    QSharedPointer<ClassDef> cd = getResolvedClass(self, getFileDef(), typeConstraint);
 
    if (cd == nullptr && ! hideUndocRelation) {
-      cd = QMakeShared<ClassDef>(getDefFileName(), getDefLine(), getDefColumn(), typeConstraint.toUtf8(), ClassDef::Class);
+      cd = QMakeShared<ClassDef>(getDefFileName(), getDefLine(), getDefColumn(), typeConstraint, ClassDef::Class);
       cd->setUsedOnly(true);
       cd->setLanguage(getLanguage());
 
@@ -2377,18 +2377,18 @@ bool ClassDef::hasNonReferenceSuperClass()
  *  definition of an anonymous struct, union or class.
  */
 void ClassDef::writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bool inGroup, 
-                  QSharedPointer<ClassDef> inheritedFrom, const char *inheritId)
+                  QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
 {   
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
    ol.docify(compoundTypeString());
    QString cn = displayName(false);
 
-   if (!cn.isEmpty()) {
+   if (! cn.isEmpty()) {
       ol.docify(" ");
 
       if (md && isLinkable()) {
-         ol.writeObjectLink(0, 0, md->anchor(), cn.toUtf8());
+         ol.writeObjectLink(0, 0, md->anchor(), cn);
 
       } else {
          ol.startBold();
@@ -3783,7 +3783,7 @@ void ClassDef::writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt)
 }
 
 void ClassDef::writePlainMemberDeclaration(OutputList &ol, MemberListType lt, bool inGroup,
-                                           QSharedPointer<ClassDef> inheritedFrom, const char *inheritId)
+                                           QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
@@ -4041,7 +4041,7 @@ QString ClassDef::anchor() const
 
       } else if (isReference()) {
          // point to the external location
-         anc = m_fileName.toUtf8();
+         anc = m_fileName;
 
       } else {
          // normal locally defined class

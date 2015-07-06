@@ -53,14 +53,13 @@ class PerlModOutputStream
 
    PerlModOutputStream(QTextStream *t = 0) : m_t(t) { }
 
-   void add(char c);
-   void add(const char *s);
-   void add(QByteArray &s);
+   void add(QChar c);
+   void add(const QString &s);   
    void add(int n);
    void add(unsigned int n);
 };
 
-void PerlModOutputStream::add(char c)
+void PerlModOutputStream::add(QChar c)
 {
    if (m_t != 0) {
       (*m_t) << c;
@@ -69,16 +68,7 @@ void PerlModOutputStream::add(char c)
    }
 }
 
-void PerlModOutputStream::add(const char *s)
-{
-   if (m_t != 0) {
-      (*m_t) << s;
-   } else {
-      m_s += s;
-   }
-}
-
-void PerlModOutputStream::add(QByteArray &s)
+void PerlModOutputStream::add(const QString &s)
 {
    if (m_t != 0) {
       (*m_t) << s;
@@ -126,7 +116,8 @@ class PerlModOutput
       iopenSave();
       return *this;
    }
-   inline PerlModOutput &closeSave(QByteArray &s) {
+
+   inline PerlModOutput &closeSave(QString &s) {
       icloseSave(s);
       return *this;
    }
@@ -141,28 +132,27 @@ class PerlModOutput
       return *this;
    }
 
-   inline PerlModOutput &add(char c) {
+   inline PerlModOutput &add(QChar c) {
       m_stream->add(c);
       return *this;
    }
-   inline PerlModOutput &add(const char *s) {
+
+   inline PerlModOutput &add(const QString &s) {
       m_stream->add(s);
       return *this;
    }
-   inline PerlModOutput &add(QByteArray &s) {
-      m_stream->add(s);
-      return *this;
-   }
+ 
    inline PerlModOutput &add(int n) {
       m_stream->add(n);
       return *this;
    }
+
    inline PerlModOutput &add(unsigned int n) {
       m_stream->add(n);
       return *this;
    }
 
-   PerlModOutput &addQuoted(const char *s) {
+   PerlModOutput &addQuoted(const QString &s) {
       iaddQuoted(s);
       return *this;
    }
@@ -175,7 +165,7 @@ class PerlModOutput
       return *this;
    }
 
-   inline PerlModOutput &open(char c, const char *s = 0) {
+   inline PerlModOutput &open(QChar c, const QString &s = QString()) {
       iopen(c, s);
       return *this;
    }
@@ -184,30 +174,36 @@ class PerlModOutput
       return *this;
    }
 
-   inline PerlModOutput &addField(const char *s) {
+   inline PerlModOutput &addField(const QString &s) {
       iaddField(s);
       return *this;
    }
-   inline PerlModOutput &addFieldQuotedChar(const char *field, char content) {
+
+   inline PerlModOutput &addFieldQuotedChar(const QString &field, QChar content) {
       iaddFieldQuotedChar(field, content);
       return *this;
    }
-   inline PerlModOutput &addFieldQuotedString(const char *field, const char *content) {
+
+   inline PerlModOutput &addFieldQuotedString(const QString &field, const QString &content) {
       iaddFieldQuotedString(field, content);
       return *this;
    }
-   inline PerlModOutput &addFieldBoolean(const char *field, bool content) {
+
+   inline PerlModOutput &addFieldBoolean(const QString &field, bool content) {
       return addFieldQuotedString(field, content ? "yes" : "no");
    }
-   inline PerlModOutput &openList(const char *s = 0) {
+
+   inline PerlModOutput &openList(const QString &s = QString()) {
       open('[', s);
       return *this;
    }
+
    inline PerlModOutput &closeList() {
       close(']');
       return *this;
    }
-   inline PerlModOutput &openHash(const char *s = 0 ) {
+
+   inline PerlModOutput &openHash(const QString &s = QString() ) {
       open('{', s);
       return *this;
    }
@@ -217,20 +213,19 @@ class PerlModOutput
    }
 
  protected:
-
    void iopenSave();
-   void icloseSave(QByteArray &);
+   void icloseSave(QString &);
 
    void incIndent();
    void decIndent();
 
-   void iaddQuoted(const char *);
-   void iaddFieldQuotedChar(const char *, char);
-   void iaddFieldQuotedString(const char *, const char *);
-   void iaddField(const char *);
+   void iaddQuoted(const QString &);
+   void iaddFieldQuotedChar(const QString &, QChar);
+   void iaddFieldQuotedString(const QString &, const QString &);
+   void iaddField(const QString &);
 
-   void iopen(char, const char *);
-   void iclose(char);
+   void iopen(QChar, const QString &);
+   void iclose(QChar);
 
  private:
    PerlModOutputStream *m_stream;
@@ -247,7 +242,7 @@ void PerlModOutput::iopenSave()
    m_stream = new PerlModOutputStream();
 }
 
-void PerlModOutput::icloseSave(QByteArray &s)
+void PerlModOutput::icloseSave(QString &s)
 {
    s = m_stream->m_s;
    delete m_stream;
@@ -274,65 +269,72 @@ void PerlModOutput::decIndent()
    }
 }
 
-void PerlModOutput::iaddQuoted(const char *s)
-{
-   char c;
-   while ((c = *s++) != 0) {
+void PerlModOutput::iaddQuoted(const QString &str)
+{ 
+   for (auto c : str ) { 
+
       if ((c == '\'') || (c == '\\')) {
          m_stream->add('\\');
       }
+
       m_stream->add(c);
    }
 }
 
-void PerlModOutput::iaddField(const char *s)
+void PerlModOutput::iaddField(const QString &str)
 {
    continueBlock();
-   m_stream->add(s);
+   m_stream->add(str);
    m_stream->add(m_pretty ? " => " : "=>");
 }
 
-void PerlModOutput::iaddFieldQuotedChar(const char *field, char content)
+void PerlModOutput::iaddFieldQuotedChar(const QString &field, QChar content)
 {
    iaddField(field);
    m_stream->add('\'');
+
    if ((content == '\'') || (content == '\\')) {
       m_stream->add('\\');
    }
+
    m_stream->add(content);
    m_stream->add('\'');
 }
 
-void PerlModOutput::iaddFieldQuotedString(const char *field, const char *content)
+void PerlModOutput::iaddFieldQuotedString(const QString &field, const QString &content)
 {
-   if (content == 0) {
+   if (content.isEmpty()) {
       return;
    }
+
    iaddField(field);
    m_stream->add('\'');
    iaddQuoted(content);
    m_stream->add('\'');
 }
 
-void PerlModOutput::iopen(char c, const char *s)
+void PerlModOutput::iopen(QChar c, const QString &s)
 {
    if (s != 0) {
       iaddField(s);
    } else {
       continueBlock();
    }
+
    m_stream->add(c);
    incIndent();
    m_blockstart = true;
 }
 
-void PerlModOutput::iclose(char c)
+void PerlModOutput::iclose(QChar c)
 {
    decIndent();
    indent();
+
    if (c != 0) {
       m_stream->add(c);
    }
+
    m_blockstart = false;
 }
 
@@ -450,33 +452,24 @@ class PerlModDocVisitor : public DocVisitor
    void visitPost(DocParBlock *);
 
  private:
-
-   //--------------------------------------
-   // helper functions
-   //--------------------------------------
-
-   void addLink(const QByteArray &ref, const QByteArray &file,
-                const QByteArray &anchor);
+  
+   void addLink(const QString &ref, const QString &file, const QString &anchor);
 
    void enterText();
    void leaveText();
 
-   void openItem(const char *);
+   void openItem(const QString &);
    void closeItem();
-   void singleItem(const char *);
-   void openSubBlock(const char * = 0);
+   void singleItem(const QString &);
+   void openSubBlock(const QString & = QString());
    void closeSubBlock();
    void openOther();
    void closeOther();
 
-   //--------------------------------------
-   // state variables
-   //--------------------------------------
-
    PerlModOutput &m_output;
    bool m_textmode;
    bool m_textblockstart;
-   QByteArray m_other;
+   QString m_other;
 };
 
 PerlModDocVisitor::PerlModDocVisitor(PerlModOutput &output)
@@ -492,16 +485,17 @@ void PerlModDocVisitor::finish()
    .add(m_other);
 }
 
-void PerlModDocVisitor::addLink(const QByteArray &, const QByteArray &file, const QByteArray &anchor)
+void PerlModDocVisitor::addLink(const QString &, const QString &file, const QString &anchor)
 {
-   QByteArray link = file;
+   QString link = file;
+
    if (!anchor.isEmpty()) {
       (link += "_1") += anchor;
    }
    m_output.addFieldQuotedString("link", link);
 }
 
-void PerlModDocVisitor::openItem(const char *name)
+void PerlModDocVisitor::openItem(const QString &name)
 {
    leaveText();
    m_output.openHash().addFieldQuotedString("type", name);
@@ -534,13 +528,13 @@ void PerlModDocVisitor::leaveText()
    .closeHash();
 }
 
-void PerlModDocVisitor::singleItem(const char *name)
+void PerlModDocVisitor::singleItem(const QString &name)
 {
    openItem(name);
    closeItem();
 }
 
-void PerlModDocVisitor::openSubBlock(const char *s)
+void PerlModDocVisitor::openSubBlock(const QString &s)
 {
    leaveText();
    m_output.openList(s);
@@ -568,7 +562,7 @@ void PerlModDocVisitor::closeOther()
    // Using a secondary text stream will corrupt the perl file. Instead of
    // printing doc => [ data => [] ], it will print doc => [] data => [].
    /*
-   QByteArray other;
+   QString other;
    leaveText();
    m_output.closeSave(other);
    m_other += other;
@@ -766,7 +760,7 @@ void PerlModDocVisitor::visit(DocVerbatim *s)
 
 void PerlModDocVisitor::visit(DocAnchor *anc)
 {
-   QByteArray anchor = anc->file() + "_1" + anc->anchor();
+   QString anchor = anc->file() + "_1" + anc->anchor();
    openItem("anchor");
    m_output.addFieldQuotedString("id", anchor);
    closeItem();
@@ -836,7 +830,8 @@ void PerlModDocVisitor::visit(DocIncOperator *)
 void PerlModDocVisitor::visit(DocFormula *f)
 {
    openItem("formula");
-   QByteArray id;
+
+   QString id;
    id += f->id();
    m_output.addFieldQuotedString("id", id).addFieldQuotedString("content", f->text());
    closeItem();
@@ -1030,7 +1025,7 @@ void PerlModDocVisitor::visitPost(DocSimpleListItem *)
 
 void PerlModDocVisitor::visitPre(DocSection *s)
 {
-   QByteArray sect = QString("sect%1").arg(s->level()).toUtf8();
+   QString sect = QString("sect%1").arg(s->level());
 
    openItem(sect);
    openSubBlock("content");
@@ -1249,7 +1244,7 @@ void PerlModDocVisitor::visitPre(DocImage *)
    }
    m_output.add("\"");
 
-   QByteArray baseName = img->name();
+   QString baseName = img->name();
    int i;
    if ((i = baseName.lastIndexOf('/')) != -1 || (i = baseName.lastIndexOf('\\')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
@@ -1431,7 +1426,7 @@ void PerlModDocVisitor::visitPre(DocParamList *pl)
    m_output.openHash().openList("parameters");
   
    for (auto param : pl->parameters()) {
-      QByteArray s;
+      QString s;
 
       if (param->kind() == DocNode::Kind_Word) {
          s = ((DocWord *)param)->word();
@@ -1537,9 +1532,9 @@ void PerlModDocVisitor::visitPost(DocParBlock *)
 }
 
 
-static void addTemplateArgumentList(ArgumentList *al, PerlModOutput &output, const char *)
+static void addTemplateArgumentList(ArgumentList *al, PerlModOutput &output)
 {   
-   if (!al) {
+   if (! al) {
       return;
    }
 
@@ -1566,28 +1561,15 @@ static void addTemplateArgumentList(ArgumentList *al, PerlModOutput &output, con
    output.closeList();
 }
 
-#if 0
-static void addMemberTemplateLists(MemberDef *md, PerlModOutput &output)
-{
-   ClassDef *cd = md->getClassDef();
-   const char *cname = cd ? cd->name().data() : 0;
-
-   if (md->templateArguments()) { 
-      // function template prefix
-      addTemplateArgumentList(md->templateArguments(), output, cname);
-   }
-}
-#endif
-
 static void addTemplateList(QSharedPointer<ClassDef> cd, PerlModOutput &output)
 {
-   addTemplateArgumentList(cd->templateArguments(), output, cd->name());
+   addTemplateArgumentList(cd->templateArguments(), output);
 }
 
-static void addPerlModDocBlock(PerlModOutput &output, const char *name, const QByteArray &fileName, int lineNr,
-                               QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md, const QByteArray &text)
+static void addPerlModDocBlock(PerlModOutput &output, const QString &name, const QString &fileName, int lineNr,
+                               QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md, const QString &text)
 {
-   QByteArray stext = text.trimmed();
+   QString stext = text.trimmed();
 
    if (stext.isEmpty()) {
       output.addField(name).add("{}");
@@ -1634,10 +1616,10 @@ static const char *getVirtualnessName(Specifier virt)
    return 0;
 }
 
-static QByteArray pathDoxyfile;
-static QByteArray pathDoxyExec;
+static QString pathDoxyfile;
+static QString pathDoxyExec;
 
-void setPerlModDoxyfile(const QByteArray &qs)
+void setPerlModDoxyfile(const QString &qs)
 {
    pathDoxyfile = qs;
    pathDoxyExec = QDir::currentPath().toUtf8();
@@ -1649,23 +1631,26 @@ class PerlModGenerator
 
    PerlModOutput m_output;
 
-   QByteArray pathDoxyStructurePM;
-   QByteArray pathDoxyDocsTex;
-   QByteArray pathDoxyFormatTex;
-   QByteArray pathDoxyLatexTex;
-   QByteArray pathDoxyLatexDVI;
-   QByteArray pathDoxyLatexPDF;
-   QByteArray pathDoxyStructureTex;
-   QByteArray pathDoxyDocsPM;
-   QByteArray pathDoxyLatexPL;
-   QByteArray pathDoxyLatexStructurePL;
-   QByteArray pathDoxyRules;
-   QByteArray pathMakefile;
+   QString pathDoxyStructurePM;
+   QString pathDoxyDocsTex;
+   QString pathDoxyFormatTex;
+   QString pathDoxyLatexTex;
+   QString pathDoxyLatexDVI;
+   QString pathDoxyLatexPDF;
+   QString pathDoxyStructureTex;
+   QString pathDoxyDocsPM;
+   QString pathDoxyLatexPL;
+   QString pathDoxyLatexStructurePL;
+   QString pathDoxyRules;
+   QString pathMakefile;
 
    inline PerlModGenerator(bool pretty) : m_output(pretty) { }
 
    void generatePerlModForMember(QSharedPointer<MemberDef> md, QSharedPointer<Definition> def);
-   void generatePerlModSection(QSharedPointer<Definition> def, QSharedPointer<MemberList> ml, const char *name, const char *header = 0);
+
+   void generatePerlModSection(QSharedPointer<Definition> def, QSharedPointer<MemberList> ml, 
+                  const QString &name, const QString &header = QString());
+
    void addListOfAllMembers(QSharedPointer<ClassDef> cd);
    void generatePerlModForClass(QSharedPointer<ClassDef> cd);
    void generatePerlModForNamespace(QSharedPointer<NamespaceDef> nd);
@@ -1673,7 +1658,7 @@ class PerlModGenerator
    void generatePerlModForGroup(QSharedPointer<GroupDef> gd);
    void generatePerlModForPage(QSharedPointer<PageDef> pd);
 
-   bool createOutputFile(QFile &f, const char *s);
+   bool createOutputFile(QFile &f, const QString &s);
    bool createOutputDir(QDir &perlModDir);
    bool generateDoxyLatexTex();
    bool generateDoxyFormatTex();
@@ -1702,8 +1687,9 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
    // - template arguments
    //     (templateArguments(), definitionTemplateParameterLists())
 
-   QByteArray memType;
+   QString memType;
    bool isFunc = false;
+
    switch (md->memberType()) {
       case MemberType_Define:
          memType = "define";
@@ -1841,7 +1827,7 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
       m_output.addFieldQuotedString("initializer", md->initializer());
    }
 
-   if (md->excpString()) {
+   if (! md->excpString().isEmpty() ) {
       m_output.addFieldQuotedString("exceptions", md->excpString());
    }
 
@@ -1889,7 +1875,8 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
    m_output.closeHash();
 }
 
-void PerlModGenerator::generatePerlModSection(QSharedPointer<Definition> d, QSharedPointer<MemberList> ml, const char *name, const char *header)
+void PerlModGenerator::generatePerlModSection(QSharedPointer<Definition> d, QSharedPointer<MemberList> ml, 
+         const QString &name, const QString &header)
 {
    if (ml == 0) {
       return;   // empty list
@@ -1897,7 +1884,7 @@ void PerlModGenerator::generatePerlModSection(QSharedPointer<Definition> d, QSha
 
    m_output.openHash(name);
 
-   if (header) {
+   if (! header.isEmpty()) {
       m_output.addFieldQuotedString("header", header);
    }
 
@@ -2017,7 +2004,7 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
    IncludeInfo *ii = cd->includeInfo();
 
    if (ii) {
-      QByteArray nm = ii->includeName;
+      QString nm = ii->includeName;
 
       if (nm.isEmpty() && ii->fileDef) {
          nm = ii->fileDef->docName();
@@ -2025,11 +2012,6 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
 
       if (!nm.isEmpty()) {
          m_output.openHash("includes");
-#if 0
-         if (ii->fileDef && !ii->fileDef->isReference()) { // TODO: support external references
-            t << " id=\"" << ii->fileDef->getOutputFileBase() << "\"";
-         }
-#endif
          m_output.addFieldBoolean("local", ii->local).addFieldQuotedString("name", nm).closeHash();
       }
    }
@@ -2405,12 +2387,12 @@ bool PerlModGenerator::generatePerlModOutput()
    return true;
 }
 
-bool PerlModGenerator::createOutputFile(QFile &f, const char *s)
+bool PerlModGenerator::createOutputFile(QFile &f, const QString &s)
 {
    f.setFileName(s);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", s, f.error());    
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(s), f.error());    
       return false;
    }
 
@@ -3123,7 +3105,7 @@ void PerlModGenerator::generate()
 
    bool perlmodLatex = Config::getBool("perl-latex");
 
-   QByteArray perlModAbsPath = perlModDir.absolutePath().toUtf8();
+   QString perlModAbsPath = perlModDir.absolutePath();
    pathDoxyDocsPM      = perlModAbsPath + "/DoxyDocs.pm";
    pathDoxyStructurePM = perlModAbsPath + "/DoxyStructure.pm";
    pathMakefile        = perlModAbsPath + "/Makefile";

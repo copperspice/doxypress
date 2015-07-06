@@ -38,7 +38,7 @@
 // #define DBG_RTF(x) m_t << x
 #define DBG_RTF(x) do {} while(0)
 
-static QByteArray align(DocHtmlCell *cell)
+static QString align(DocHtmlCell *cell)
 {
    HtmlAttribList attrs = cell->attribs();
    uint i;
@@ -61,13 +61,13 @@ static QByteArray align(DocHtmlCell *cell)
    return "";
 }
 
-RTFDocVisitor::RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt)
+RTFDocVisitor::RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt)
    : DocVisitor(DocVisitor_RTF), m_t(t), m_ci(ci), m_insidePre(false),
      m_hide(false), m_indentLevel(0), m_lastIsPara(false), m_langExt(langExt)
 {
 }
 
-QByteArray RTFDocVisitor::getStyle(const char *name)
+QString RTFDocVisitor::getStyle(const QString &name)
 {
    QString n = QString("%1%2").arg(name).arg(m_indentLevel);
 
@@ -94,10 +94,7 @@ void RTFDocVisitor::decIndentLevel()
    }
 }
 
-//--------------------------------------
 // visitor functions for leaf nodes
-//--------------------------------------
-
 void RTFDocVisitor::visit(DocWord *w)
 {
    if (m_hide) {
@@ -147,10 +144,15 @@ void RTFDocVisitor::visit(DocSymbol *s)
    }
 
    DBG_RTF("{\\comment RTFDocVisitor::visit(DocSymbol)}\n");
-   const char *res = HtmlEntityMapper::instance()->rtf(s->symbol());
+   const QString res = HtmlEntityMapper::instance()->rtf(s->symbol());
 
-   if (res) {
+
+// brooom check
+
+
+   if (! res.isEmpty()) {
       m_t << res;
+
    } else {
       err("RTF: non supported HTML-entity found: %s\n", HtmlEntityMapper::instance()->html(s->symbol(), true));
    }
@@ -301,7 +303,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
    }
 
    DBG_RTF("{\\comment RTFDocVisitor::visit(DocVerbatim)}\n");
-   QByteArray lang = m_langExt;
+   QString lang = m_langExt;
 
    if (! s->language().isEmpty()) { // explicit language setting
       lang = s->language();
@@ -349,7 +351,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
             err("Could not open file %s for writing\n", fileName.data());
          }
 
-         file.write( s->text(), s->text().length() );
+         file.write( s->text().toUtf8() );
          file.close();
 
          m_t << "\\par{\\qc "; // center picture
@@ -366,19 +368,18 @@ void RTFDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Msc: {
          static int mscindex = 1;
 
-         QString baseName;
-         baseName = QString("%1%2.msc").arg(Config::getString("rtf-output") + "/inline_mscgraph_").arg(mscindex++);
+         QString baseName = QString("%1%2.msc").arg(Config::getString("rtf-output") + "/inline_mscgraph_").arg(mscindex++);
                          
          QFile file(baseName);
          if (! file.open(QIODevice::WriteOnly)) {
             err("Unable to open file for writing %s, error: %d\n", qPrintable(baseName), file.error());
          }
 
-         QByteArray text = "msc {";
+         QString text = "msc {";
          text += s->text();
          text += "}";
 
-         file.write( text, text.length() );
+         file.write( text.toUtf8() );
          file.close();
 
          m_t << "\\par{\\qc "; // center picture
@@ -413,8 +414,8 @@ void RTFDocVisitor::visit(DocAnchor *anc)
 
    DBG_RTF("{\\comment RTFDocVisitor::visit(DocAnchor)}\n");
 
-   QByteArray anchor;
-   if (!anc->file().isEmpty()) {
+   QString anchor;
+   if (! anc->file().isEmpty()) {
       anchor += anc->file();
    }
 
@@ -871,7 +872,7 @@ void RTFDocVisitor::visitPre(DocSection *s)
    m_t << "{{" // start section
        << rtf_Style_Reset;
 
-   QByteArray heading;
+   QString heading;
    int level = qMin(s->level() + 1, 4);
 
    heading = QString("Heading%1").arg(level).toUtf8();
@@ -1185,7 +1186,7 @@ void RTFDocVisitor::visitPre(DocHtmlHeader *header)
    m_t << "{" // start section
        << rtf_Style_Reset;
 
-   QByteArray heading;
+   QString heading;
    int level = qMin(header->level() + 2, 4);
    heading = QString("Heading%1").arg(level).toUtf8();
 
@@ -1393,6 +1394,7 @@ void RTFDocVisitor::visitPre(DocParamSect *s)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocParamSect)}\n");
    m_t << "{"; // start param list
    if (!m_lastIsPara) {
@@ -1625,7 +1627,7 @@ void RTFDocVisitor::visitPre(DocXRefItem *x)
    m_t << "{" << rtf_Style["Heading5"].reference << endl;
 
    if (Config::getBool("rtf-hyperlinks") && ! anonymousEnum) {
-      QByteArray refName;
+      QString refName;
 
       if (!x->file().isEmpty()) {
          refName += x->file();
@@ -1767,45 +1769,46 @@ void RTFDocVisitor::visitPost(DocParBlock *)
    }
 }
 
-void RTFDocVisitor::filter(const char *str, bool verbatim)
+void RTFDocVisitor::filter(const QString &str, bool verbatim)
 {
-   if (str) {
-      const unsigned char *p = (const unsigned char *)str;
-      unsigned char c;
-      
-      while (*p) {         
-         c = *p++;
+   if (str.isEmpty()) {
+      return;
+   }
 
-         switch (c) {
-            case '{':
-               m_t << "\\{";
-               break;
-            case '}':
-               m_t << "\\}";
-               break;
-            case '\\':
-               m_t << "\\\\";
-               break;
-            case '\n':
-               if (verbatim) {
-                  m_t << "\\par" << endl;
-               } else {
-                  m_t << '\n';
-               }
-               break;
-            default:
-               m_t << (char)c;
-         }
+   for (auto c : str) {   
+      switch (c.unicode()) {
+         case '{':
+            m_t << "\\{";
+            break;
+
+         case '}':
+            m_t << "\\}";
+            break;
+
+         case '\\':
+            m_t << "\\\\";
+            break;
+
+         case '\n':
+            if (verbatim) {
+               m_t << "\\par" << endl;
+            } else {
+               m_t << '\n';
+            }
+            break;
+
+         default:
+            m_t << c;        
          
       }
    }
 }
 
-void RTFDocVisitor::startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor)
+void RTFDocVisitor::startLink(const QString &ref, const QString &file, const QString &anchor)
 {
    if (ref.isEmpty() && Config::getBool("rtf-hyperlinks")) {
 
-      QByteArray refName;
+      QString refName;
 
       if (! file.isEmpty()) {
          refName += file;
@@ -1830,7 +1833,7 @@ void RTFDocVisitor::startLink(const QByteArray &ref, const QByteArray &file, con
    m_lastIsPara = false;
 }
 
-void RTFDocVisitor::endLink(const QByteArray &ref)
+void RTFDocVisitor::endLink(const QString &ref)
 {
    if (ref.isEmpty() && Config::getBool("rtf-hyperlinks")) {
       m_t << "}}}";

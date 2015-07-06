@@ -53,18 +53,24 @@ NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &nam
 
    m_subGrouping = Config::getBool("allow-sub-grouping");
 
-   if (type && ! strcmp("module", type)) {
-      m_type = MODULE;
 
-   } else if (type && ! strcmp("constants", type)) {
-      m_type = CONSTANT_GROUP;
+// broom check with orig
 
-   } else if (type && ! strcmp("library", type)) {
-      m_type = LIBRARY;
-
-   } else {
+   if (type.isEmpty() ) {
       m_type = NAMESPACE;
 
+   } else  {
+
+      if (type != "module") {
+         m_type = MODULE;
+
+      } else if (type != "constants") {
+         m_type = CONSTANT_GROUP;
+
+      } else if (type != "library") {
+         m_type = LIBRARY;
+
+      }      
    }
 }
 
@@ -225,7 +231,7 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
 
       default:
          err("NamespaceDef::insertMembers(): member %s with class scope %s inserted in namespace scope `%s'\n",
-             md->name().constData(), md->getClassDef() ? md->getClassDef()->name().constData() : "", name().constData());
+             qPrintable(md->name()), md->getClassDef() ? qPrintable(md->getClassDef()->name()) : "", qPrintable(name()) );
    }
 }
 
@@ -251,8 +257,8 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
    tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>" << endl;
 
-   QByteArray idStr = id();
-   if (!idStr.isEmpty()) {
+   QString idStr = id();
+   if (! idStr.isEmpty()) {
       tagFile << "    <clangid>" << convertToXML(idStr) << "</clangid>" << endl;
    }
    
@@ -313,7 +319,7 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
    tagFile << "  </compound>" << endl;
 }
 
-void NamespaceDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
+void NamespaceDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
   QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
@@ -417,7 +423,7 @@ void NamespaceDef::endMemberDocumentation(OutputList &ol)
    }
 }
 
-void NamespaceDef::writeClassDeclarations(OutputList &ol, const QByteArray &title)
+void NamespaceDef::writeClassDeclarations(OutputList &ol, const QString &title)
 {
    if (classSDict) {
       classSDict->writeDeclaration(ol, 0, title, true);
@@ -431,7 +437,7 @@ void NamespaceDef::writeInlineClasses(OutputList &ol)
    }
 }
 
-void NamespaceDef::writeNamespaceDeclarations(OutputList &ol, const QByteArray &title,
+void NamespaceDef::writeNamespaceDeclarations(OutputList &ol, const QString &title,
       bool const isConstantGroup)
 {
    if (namespaceSDict) {
@@ -482,7 +488,7 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
             (lde->kind() == LayoutDocEntry::NamespaceNestedNamespaces && namespaceSDict && namespaceSDict->declVisible())) {
 
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
-         QByteArray label = lde->kind() == LayoutDocEntry::NamespaceClasses ? "nested-classes" : "namespaces";
+         QString label = lde->kind() == LayoutDocEntry::NamespaceClasses ? "nested-classes" : "namespaces";
 
          ol.writeSummaryLink("", label, ls->title(lang), first);
          first = false;
@@ -525,7 +531,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
    // static bool outputJava = Config::getBool("optimize-java");
    // static bool fortranOpt = Config::_getBool("optimize-fortran");
 
-   QByteArray pageTitle = title();
+   QString pageTitle = title();
    startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_NamespaceVisible, !generateTreeView);
 
    if (! generateTreeView) {
@@ -757,7 +763,7 @@ void NamespaceDef::addUsingDeclaration(QSharedPointer<Definition> d)
    }
 }
 
-QByteArray NamespaceDef::getOutputFileBase() const
+QString NamespaceDef::getOutputFileBase() const
 {
    if (isReference()) {
       return fileName.toUtf8();
@@ -813,7 +819,7 @@ QString NamespaceDef::displayName(bool includeScope) const
    QString result = includeScope ? name() : localName();
 
    SrcLangExt lang = getLanguage();
-   QByteArray sep  = getLanguageSpecificSeparator(lang);
+   QString sep = getLanguageSpecificSeparator(lang);
 
    if (sep != "::") {
       result = substitute(result.toUtf8(), "::", sep);
@@ -822,9 +828,9 @@ QString NamespaceDef::displayName(bool includeScope) const
    return result;
 }
 
-QByteArray NamespaceDef::localName() const
+QString NamespaceDef::localName() const
 {
-   QByteArray result = name();
+   QString result = name();
    int i = result.lastIndexOf("::");
 
    if (i != -1) {
@@ -861,7 +867,7 @@ void NamespaceDef::combineUsingRelations()
 
 int NamespaceSDict::compareMapValues(const QSharedPointer<NamespaceDef> &item1, const QSharedPointer<NamespaceDef> &item2) const
 {
-   return qstricmp(item1->name(), item2->name());
+   return item1->name().compare(item2->name(), Qt::CaseInsensitive);
 }
 
 bool NamespaceSDict::declVisible() const
@@ -875,7 +881,7 @@ bool NamespaceSDict::declVisible() const
    return false;
 }
 
-void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title, bool const isConstantGroup, bool localName)
+void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool const isConstantGroup, bool localName)
 {
    if (count() == 0) {
       return;   // no namespaces in the list
@@ -898,10 +904,13 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const char *title, bool co
                break;
             }
 
-         } else if (!isConstantGroup) { // ensure we only get extra section in IDL
+         } else if (!isConstantGroup) { 
+            // ensure we only get extra section in IDL
+
             if (nd->isConstantGroup()) {
                err("Internal inconsistency: constant group but not IDL?\n");
             }
+
             found = true;
             break;
          }
@@ -1020,7 +1029,7 @@ QSharedPointer<MemberList> NamespaceDef::getMemberList(MemberListType lt) const
    return QSharedPointer<MemberList>();
 }
 
-void NamespaceDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title)
+void NamespaceDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title)
 {
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml     = getMemberList(lt);
@@ -1030,7 +1039,7 @@ void NamespaceDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, co
    }
 }
 
-void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title)
+void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title)
 {
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
@@ -1065,7 +1074,7 @@ bool NamespaceDef::isLinkable() const
    return isLinkableInProject() || isReference();
 }
 
-QSharedPointer<MemberDef> NamespaceDef::getMemberByName(const QByteArray &n) const
+QSharedPointer<MemberDef> NamespaceDef::getMemberByName(const QString &n) const
 {
    QSharedPointer<MemberDef> md;
 
@@ -1076,26 +1085,26 @@ QSharedPointer<MemberDef> NamespaceDef::getMemberByName(const QByteArray &n) con
    return md;
 }
 
-QByteArray NamespaceDef::title() const
+QString NamespaceDef::title() const
 {
    SrcLangExt lang = getLanguage();
-   QByteArray pageTitle;
+   QString pageTitle;
 
-   QByteArray tempDisplay = displayName().toUtf8();
+   QString tempDisplay = displayName();
 
    if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
-      pageTitle = theTranslator->trPackage(tempDisplay.constData());
+      pageTitle = theTranslator->trPackage(tempDisplay);
 
    } else if (lang == SrcLangExt_Fortran) {
-      pageTitle = theTranslator->trModuleReference(tempDisplay.constData());
+      pageTitle = theTranslator->trModuleReference(tempDisplay);
 
    } else if (lang == SrcLangExt_IDL) {
 
-      pageTitle = isConstantGroup() ? theTranslator->trConstantGroupReference(tempDisplay.constData())
-                  : theTranslator->trModuleReference(tempDisplay.constData());
+      pageTitle = isConstantGroup() ? theTranslator->trConstantGroupReference(tempDisplay)
+                  : theTranslator->trModuleReference(tempDisplay);
 
    } else {
-      pageTitle = theTranslator->trNamespaceReference(tempDisplay.constData());
+      pageTitle = theTranslator->trNamespaceReference(tempDisplay);
 
    }
 

@@ -45,22 +45,22 @@
 class DevNullCodeDocInterface : public CodeOutputInterface
 {
  public:
-   virtual void codify(const QByteArray &) override {}
+   virtual void codify(const QString &) override {}
 
-   virtual void writeCodeLink(const QByteArray &, const QByteArray &, const QByteArray &, 
-                              const QByteArray &, const QByteArray &) override  {}
+   virtual void writeCodeLink(const QString &, const QString &, const QString &, 
+                              const QString &, const QString &) override  {}
 
-   virtual void writeTooltip(const char *, const DocLinkInfo &, const QByteArray &,
-                             const QByteArray &, const SourceLinkInfo &, const SourceLinkInfo & ) override {}
+   virtual void writeTooltip(const QString &, const DocLinkInfo &, const QString &,
+                             const QString &, const SourceLinkInfo &, const SourceLinkInfo & ) override {}
 
-   virtual void writeLineNumber(const char *, const QByteArray &, const char *, int)  override {}
+   virtual void writeLineNumber(const QString &, const QString &, const QString &, int)  override {}
    virtual void startCodeLine(bool) {}
    virtual void endCodeLine() {}
-   virtual void startFontClass(const char *) {}
+   virtual void startFontClass(const QString &) override {}
    virtual void endFontClass() {}
-   virtual void writeCodeAnchor(const char *) {}
-   virtual void linkableSymbol(int, const char *, Definition *, Definition *) {}
-   virtual void setCurrentDoc(QSharedPointer<Definition> d, const char *, bool) override {}
+   virtual void writeCodeAnchor(const QString &) override {}
+   virtual void linkableSymbol(int, QString &, Definition *, Definition *) {}
+   virtual void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
    virtual void addWord(const QString &, bool) override {}
 };
 
@@ -68,7 +68,7 @@ class DevNullCodeDocInterface : public CodeOutputInterface
     \a nm the file name, and \a lref is an HTML anchor name if the
     file was read from a tag file or 0 otherwise
 */
-FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, constQString &dn)
+FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, const QString &dn)
    : Definition(p + nm, 1, 1, nm)
 {
    m_path     = p;
@@ -235,7 +235,7 @@ void FileDef::writeTagFile(QTextStream &tagFile)
    tagFile << "  </compound>" << endl;
 }
 
-void FileDef::writeDetailedDescription(OutputList &ol, const QByteArray &title)
+void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
@@ -462,13 +462,13 @@ void FileDef::writeSourceLink(OutputList &ol)
    }
 }
 
-void FileDef::writeNamespaceDeclarations(OutputList &ol, const QByteArray &title, bool const isConstantGroup)
+void FileDef::writeNamespaceDeclarations(OutputList &ol, const QString &title, bool isConstantGroup)
 {
    // write list of namespaces 
    m_namespaceSDict.writeDeclaration(ol, title, isConstantGroup);   
 }
 
-void FileDef::writeClassDeclarations(OutputList &ol, const QByteArray &title)
+void FileDef::writeClassDeclarations(OutputList &ol, const QString &title)
 {
    // write list of classes  
    m_classSDict.writeDeclaration(ol, 0, title, false);   
@@ -554,7 +554,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
             (lde->kind() == LayoutDocEntry::FileNamespaces && m_namespaceSDict.declVisible()) ) {
 
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
-         QByteArray label = lde->kind() == LayoutDocEntry::FileClasses ? "nested-classes" : "namespaces";
+         QString label = lde->kind() == LayoutDocEntry::FileClasses ? "nested-classes" : "namespaces";
          ol.writeSummaryLink("", label, ls->title(lang), first);
          first = false;
 
@@ -798,7 +798,7 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
                if (createSubDirs) {
                   ol.writeString("../../");
                }
-               ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8() + "#" + md->anchor());
+               ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension + "#" + md->anchor());
                ol.writeString("\">");
                ol.writeString(convertToHtml(md->localName()));
                ol.writeString("</a>");
@@ -822,7 +822,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    static bool latexSourceCode   = Config::getBool("latex-source-code");
 
    DevNullCodeDocInterface devNullIntf;
-   QByteArray title = m_docname;
+   QString title = m_docname;
 
    if (!m_fileVersion.isEmpty()) {
       title += (" (" + m_fileVersion + ")");
@@ -842,7 +842,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    if (getDirDef()) {
 
       startFile(ol, getSourceFileBase(), QString(), pageTitle, HLI_FileVisible,
-                ! generateTreeView, !isDocFile && genSourceFile ? QByteArray() : getOutputFileBase());
+                ! generateTreeView, !isDocFile && genSourceFile ? QString() : getOutputFileBase());
 
       if (! generateTreeView) {
          getDirDef()->writeNavigationPath(ol);
@@ -854,7 +854,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
 
    } else {
       startFile(ol, getSourceFileBase(), QString(), pageTitle, HLI_FileVisible, false,
-                ! isDocFile && genSourceFile ? QByteArray() : getOutputFileBase());
+                ! isDocFile && genSourceFile ? QString() : getOutputFileBase());
 
       startTitle(ol, getSourceFileBase());
       ol.parseText(title);
@@ -1039,11 +1039,18 @@ void FileDef::insertMember(QSharedPointer<MemberDef> md)
          break;
 
       default:
-         err("FileDef::insertMembers(): member `%s' with class scope `%s' inserted in file scope `%s'\n",
-             md->name().data(), md->getClassDef() ? md->getClassDef()->name().data() : "<global>", name().data());
+
+         if (  md->getClassDef() ) {
+           err("FileDef::insertMembers(): member `%s' with class scope `%s' inserted in file scope `%s'\n",
+             qPrintable(md->name()), qPrintable(md->getClassDef()->name()), qPrintable(name()) );
+
+         } else  { 
+
+           err("FileDef::insertMembers(): member `%s' with class scope `%s' inserted in file scope `%s'\n",
+             qPrintable(md->name()), "<global>", qPrintable(name()) );
+         }
    }
 
-   //addMemberToGroup(md,groupId);
 }
 
 /*! Adds compound definition \a cd to the list of all compounds of this file */
@@ -1068,7 +1075,7 @@ void FileDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
    }
 }
 
-QByteArray FileDef::name() const
+QString FileDef::name() const
 {
    if (Config::getBool("full-path-names")) {
       return m_fileName;
@@ -1123,12 +1130,12 @@ void FileDef::addUsingDeclaration(QSharedPointer<Definition> d)
    }
 }
 
-void FileDef::addIncludeDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported, bool indirect)
+void FileDef::addIncludeDependency(QSharedPointer<FileDef> fd, const QString &incName, bool local, bool imported, bool indirect)
 {
-   QByteArray iName;
+   QString iName;
 
    if (fd) {
-      iName = fd->getFilePath().data();
+      iName = fd->getFilePath();
 
    } else {
       iName = incName;
@@ -1196,9 +1203,9 @@ void FileDef::addIncludedUsingDirectives()
    }   
 }
 
-void FileDef::addIncludedByDependency(QSharedPointer<FileDef> fd, const char *incName, bool local, bool imported)
+void FileDef::addIncludedByDependency(QSharedPointer<FileDef> fd, const QString &incName, bool local, bool imported)
 {
-   QByteArray iName = fd ? fd->getFilePath().data() : incName;
+   QString iName = fd ? fd->getFilePath() : incName;
 
    if (! iName.isEmpty() && ! m_includedByDict.contains(iName)) {
      
@@ -1214,7 +1221,7 @@ void FileDef::addIncludedByDependency(QSharedPointer<FileDef> fd, const char *in
    }
 }
 
-bool FileDef::isIncluded(const QByteArray &name) const
+bool FileDef::isIncluded(const QString &name) const
 {
    if (name.isEmpty()) {
       return false;
@@ -1228,7 +1235,7 @@ bool FileDef::generateSourceFile() const
    static bool sourceBrowser   = Config::getBool("source-code");
    static bool verbatimHeaders = Config::getBool("verbatim-headers");
 
-   QByteArray extension = name().right(4);
+   QString extension = name().right(4);
 
    return ! isReference() && (sourceBrowser || (verbatimHeaders && guessSection(name()) == Entry::HEADER_SEC) ) &&
           extension != ".doc" && extension != ".txt" && extension != ".dox" && extension != ".md" && name().right(9) != ".markdown";
@@ -1254,7 +1261,7 @@ void FileDef::addListReferences()
    }
 }
 
-static int findMatchingPart(const QByteArray &path, const QByteArray dir)
+static int findMatchingPart(const QString &path, const QString dir)
 {
    int si1;
    int pos1 = 0;
@@ -1280,14 +1287,14 @@ static int findMatchingPart(const QByteArray &path, const QByteArray dir)
    return 0;
 }
 
-static Directory *findDirNode(Directory *root, const QByteArray &name)
+static Directory *findDirNode(Directory *root, const QString &name)
 {  
    for (auto de : root->children()) {
 
       if (de->kind() == DirEntry::Dir) {
          Directory *dir = (Directory *)de;
 
-         QByteArray dirName = dir->name();
+         QString dirName = dir->name();
          int sp = findMatchingPart(name, dirName);
 
          if (sp > 0) { 
@@ -1298,9 +1305,9 @@ static Directory *findDirNode(Directory *root, const QByteArray &name)
                return findDirNode(dir, name.mid(dirName.length() + 1));
 
             } else { // partial match => we need to split the path into three parts
-               QByteArray baseName     = dirName.left(sp);
-               QByteArray oldBranchName = dirName.mid(sp + 1);
-               QByteArray newBranchName = name.mid(sp + 1);
+               QString baseName      = dirName.left(sp);
+               QString oldBranchName = dirName.mid(sp + 1);
+               QString newBranchName = name.mid(sp + 1);
 
                // strip file name from path
                int newIndex = newBranchName.lastIndexOf('/');
@@ -1337,7 +1344,7 @@ static Directory *findDirNode(Directory *root, const QByteArray &name)
       return root; // put the file under the root node.
 
    } else { // need to create a subdir
-      QByteArray baseName = name.left(si);
+      QString baseName = name.left(si);
 
       Directory *newBranch = new Directory(root, baseName);
       if (!root->children().isEmpty()) {
@@ -1351,7 +1358,7 @@ static Directory *findDirNode(Directory *root, const QByteArray &name)
 
 static void mergeFileDef(Directory *root, QSharedPointer<FileDef> fd)
 {  
-   QByteArray filePath = fd->getFilePath();
+   QString filePath = fd->getFilePath();
  
    Directory *dirNode = findDirNode(root, filePath);
 
@@ -1441,7 +1448,7 @@ void FileDef::acquireFileVersion()
 {
    QString vercmd = Config::getString("file-version-filter");
 
-   if (!vercmd.isEmpty() && !m_filePath.isEmpty() && m_filePath != "generated") {
+   if (! vercmd.isEmpty() && !m_filePath.isEmpty() && m_filePath != "generated") {
       msg("Version of %s : ", m_filePath.data());
 
       QString cmd = vercmd + " \"" + m_filePath + "\"";
@@ -1455,25 +1462,29 @@ void FileDef::acquireFileVersion()
       }
 
       const int bufSize = 1024;
-      char buf[bufSize];
-      int numRead = (int)fread(buf, 1, bufSize - 1, f);
+
+      QByteArray buf;
+      buf.resize(bufSize);
+
+      int numRead = (int)fread(buf.data(), 1, bufSize - 1, f);
       pclose(f);
 
       if (numRead > 0 && numRead < bufSize) {
-         buf[numRead] = '\0';
+         buf.resize(numRead);
+
          m_fileVersion = QByteArray(buf, numRead).trimmed();
 
-         if (!m_fileVersion.isEmpty()) {
-            msg("%s\n", m_fileVersion.data());
+         if (! m_fileVersion.isEmpty()) {
+            msg("%s\n", qPrintable(m_fileVersion));
             return;
          }
       }
 
-      msg("no version available\n");
+      msg("No version available\n");
    }
 }
 
-QByteArray FileDef::getSourceFileBase() const
+QString FileDef::getSourceFileBase() const
 {
    if (Htags::useHtags) {
       return Htags::path2URL(m_filePath);
@@ -1483,7 +1494,7 @@ QByteArray FileDef::getSourceFileBase() const
 }
 
 /*! Returns the name of the verbatim copy of this file (if any). */
-QByteArray FileDef::includeName() const
+QString FileDef::includeName() const
 {
    return getSourceFileBase();
 }
@@ -1545,7 +1556,7 @@ QSharedPointer<MemberList> FileDef::getMemberList(MemberListType lt) const
    return QSharedPointer<MemberList>();
 }
 
-void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QByteArray &title)
+void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title)
 { 
    QSharedPointer<FileDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
@@ -1556,7 +1567,7 @@ void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const Q
    }
 }
 
-void FileDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QByteArray &title)
+void FileDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);

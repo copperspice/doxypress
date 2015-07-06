@@ -45,11 +45,11 @@
 
 #define DBG_RTF(x)
 
-static QByteArray dateToRTFDateString()
+static QString dateToRTFDateString()
 {
    const QDateTime &d = QDateTime::currentDateTime();
 
-   QByteArray result;
+   QString result;
 
    result = QString("\\yr%1\\mo%2\\dy%3\\hr%4\\min%5\\sec%6").
                   arg(d.date().year()).arg(d.date().month()).arg(d.date().day()).
@@ -204,10 +204,10 @@ void RTFGenerator::init()
    createSubDirs(d);
 }
 
-static QByteArray makeIndexName(const char *s, int i)
+static QString makeIndexName(const QString &s, int i)
 {
-   QByteArray result = s;
-   result += (char)(i + '0');
+   QString result = s;
+   result += QString::number(i);
 
    return result;
 }
@@ -1624,38 +1624,28 @@ void RTFGenerator::endSection(const QString &label, SectionInfo::SectionType)
 
 void RTFGenerator::docify(const QString &text)
 {
-   if (! text.isEmpty()) {
+   for (auto c : text) {           
 
-      QByteArray tmp = text.toUtf8();
-      const char *p = tmp.constData();
+      switch (c.unicode()) {
+         case '{':
+            m_textStream << "\\{";
+            break;
 
-      char c;
-     
-      while (*p) {        
-         c = *p++;
+         case '}':
+            m_textStream << "\\}";
+            break;
 
-         switch (c) {
-            case '{':
-               m_textStream << "\\{";
-               break;
+         case '\\':
+            m_textStream << "\\\\";
+            break;
 
-            case '}':
-               m_textStream << "\\}";
-               break;
-
-            case '\\':
-               m_textStream << "\\\\";
-               break;
-
-            default: {
-               // see if we can insert an hyphenation hint
-              
-               m_textStream << c;
-            }
+         default: {
+            // see if we can insert an hyphenation hint              
+            m_textStream << c;
          }
-         
-         m_omitParagraph = false;
       }
+      
+      m_omitParagraph = false;
    }
 }
 
@@ -1663,54 +1653,44 @@ void RTFGenerator::codify(const QString &str)
 {
    // note that RTF does not have a "verbatim", so "\n" means
    // nothing... add a "newParagraph()";
-
    // static char spaces[]="        ";
 
-   if (! str.isEmpty()) {
-
-      QByteArray tmp = str.toUtf8();
-      const char *p  = tmp.constData();
-
-      char c;
+   for (auto c : str ) {  
       int spacesToNextTabStop;
 
-      while (*p) {
-         c = *p++;
+      switch (c.unicode()) {
+         case '\t':
+            spacesToNextTabStop = Config::getInt("tab-size") - (col % Config::getInt("tab-size"));
+            m_textStream << QString(spacesToNextTabStop, ' ');
 
-         switch (c) {
-            case '\t':
-               spacesToNextTabStop = Config::getInt("tab-size") - (col % Config::getInt("tab-size"));
-               m_textStream << QString(spacesToNextTabStop, ' ');
+            col += spacesToNextTabStop;
+            break;
 
-               col += spacesToNextTabStop;
-               break;
+         case '\n':
+            newParagraph();
+            m_textStream << '\n';
+            col = 0;
+            break;
 
-            case '\n':
-               newParagraph();
-               m_textStream << '\n';
-               col = 0;
-               break;
+         case '{':
+            m_textStream << "\\{";
+            col++;
+            break;
 
-            case '{':
-               m_textStream << "\\{";
-               col++;
-               break;
+         case '}':
+            m_textStream << "\\}";
+            col++;
+            break;
 
-            case '}':
-               m_textStream << "\\}";
-               col++;
-               break;
+         case '\\':
+            m_textStream << "\\\\";
+            col++;
+            break;
 
-            case '\\':
-               m_textStream << "\\\\";
-               col++;
-               break;
-
-            default:
-               p = writeUtf8Char(m_textStream , p - 1);
-               col++;
-               break;
-         }
+         default:
+            m_textStream << c;
+            col++;
+            break;         
       }
    }
 }
@@ -1946,42 +1926,42 @@ void RTFGenerator::decrementIndentLevel()
 }
 
 // a style for list formatted with "list continue" style
-const char *RTFGenerator::rtf_CList_DepthStyle()
+QString RTFGenerator::rtf_CList_DepthStyle()
 {
-   QByteArray n = makeIndexName("ListContinue", m_listLevel);
+   QString n = makeIndexName("ListContinue", m_listLevel);
    return rtf_Style[n].reference;
 }
 
 // a style for list formatted as a "latext style" table of contents
-const char *RTFGenerator::rtf_LCList_DepthStyle()
+QString RTFGenerator::rtf_LCList_DepthStyle()
 {
-   QByteArray n = makeIndexName("LatexTOC", m_listLevel);
+   QString n = makeIndexName("LatexTOC", m_listLevel);
    return rtf_Style[n].reference;
 }
 
 // a style for list formatted as a "bullet" style
-const char *RTFGenerator::rtf_BList_DepthStyle()
+QString RTFGenerator::rtf_BList_DepthStyle()
 {
-   QByteArray n = makeIndexName("ListBullet", m_listLevel);
+   QString n = makeIndexName("ListBullet", m_listLevel);
    return rtf_Style[n].reference;
 }
 
 // a style for list formatted as a "enumeration" style
-const char *RTFGenerator::rtf_EList_DepthStyle()
+QString RTFGenerator::rtf_EList_DepthStyle()
 {
-   QByteArray n = makeIndexName("ListEnum", m_listLevel);
+   QString n = makeIndexName("ListEnum", m_listLevel);
    return rtf_Style[n].reference;
 }
 
-const char *RTFGenerator::rtf_DList_DepthStyle()
+QString RTFGenerator::rtf_DList_DepthStyle()
 {
-   QByteArray n = makeIndexName("DescContinue", m_listLevel);
+   QString n = makeIndexName("DescContinue", m_listLevel);
    return rtf_Style[n].reference;
 }
 
-const char *RTFGenerator::rtf_Code_DepthStyle()
+QString RTFGenerator::rtf_Code_DepthStyle()
 {
-   QByteArray n = makeIndexName("CodeExample", m_listLevel);
+   QString n = makeIndexName("CodeExample", m_listLevel);
    return rtf_Style[n].reference;
 }
 
@@ -2072,25 +2052,23 @@ bool isLeadBytes(int c)
 
 
 // note: function is not reentrant!
-static void encodeForOutput(QTextStream &t_stream, const char *s)
+static void encodeForOutput(QTextStream &t_stream, const QString &text)
 {
-   if (s == 0) {
+   if (text.isEmpty()) {
       return;
    }
       
    static QByteArray enc;
    QString outputEncoding = QString("CP%1").arg(theTranslator->trRTFansicp());
-
-   //
-   QTextCodec *inCodec  = QTextCodec::codecForName("UTF-8");
+      
    QTextCodec *outCodec = QTextCodec::codecForName(outputEncoding.toUtf8());
   
-   if (! inCodec || ! outCodec) {
+   if (! outCodec) {
       err("Unsupported character conversion: '%s': %s\n", qPrintable(outputEncoding), strerror(errno));
       exit(1);
    }
 
-   QString temp = inCodec->toUnicode(s);
+   QString temp = text;
    enc = outCodec->fromUnicode(temp);
   
    uint i;
@@ -2104,7 +2082,7 @@ static void encodeForOutput(QTextStream &t_stream, const char *s)
          sprintf(esc, "\\'%X", c);       // escape sequence for SBCS and DBCS(1st&2nd bytes).
          t_stream << esc;
 
-         if (!multiByte) {
+         if (! multiByte) {
             multiByte = isLeadBytes(c);  // It may be DBCS Codepages.
 
          } else {
@@ -2220,8 +2198,8 @@ void RTFGenerator::endDotGraph(const DotClassGraph &g)
 {
    newParagraph();
 
-   QByteArray fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, true, false);
-   QByteArray imageFormat = Config::getEnum("dot-image-format").toUtf8();
+   QString fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, true, false);
+   QString imageFormat = Config::getEnum("dot-image-format");
 
    // display the file
    m_textStream << "{" << endl;
@@ -2244,8 +2222,8 @@ void RTFGenerator::endInclDepGraph(const DotInclDepGraph &g)
 {
    newParagraph();
 
-   QByteArray fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
-   QByteArray imageFormat = Config::getEnum("dot-image-format").toUtf8();
+   QString fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
+   QString imageFormat = Config::getEnum("dot-image-format");
 
    // display the file
    m_textStream << "{" << endl;
@@ -2275,8 +2253,8 @@ void RTFGenerator::endCallGraph(const DotCallGraph &g)
 {
    newParagraph();
 
-   QByteArray fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
-   QByteArray imageFormat = Config::getEnum("dot-image-format").toUtf8();
+   QString fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
+   QString imageFormat = Config::getEnum("dot-image-format");
 
    // display the file
    m_textStream << "{" << endl;
@@ -2297,8 +2275,8 @@ void RTFGenerator::endDirDepGraph(const DotDirDeps &g)
 {
    newParagraph();
 
-   QByteArray fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
-   QByteArray imageFormat = Config::getEnum("dot-image-format").toUtf8();
+   QString fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
+   QString imageFormat = Config::getEnum("dot-image-format");
 
    // display the file
    m_textStream << "{" << endl;
@@ -2560,9 +2538,10 @@ void RTFGenerator::exceptionEntry(const QString &prefix, bool closeBracket)
 
 void RTFGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
-   RTFDocVisitor *visitor = new RTFDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QByteArray(""));
+   RTFDocVisitor *visitor = new RTFDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QString(""));
    n->accept(visitor);
    delete visitor;
+
    m_omitParagraph = true;
 }
 

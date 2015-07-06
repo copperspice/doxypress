@@ -30,21 +30,20 @@
 #include <parser_base.h>
 #include <util.h>
 
-ManDocVisitor::ManDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt)
+ManDocVisitor::ManDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt)
    : DocVisitor(DocVisitor_Man), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false), m_firstCol(false),
      m_indent(0), m_langExt(langExt)
 {
 }
 
-//--------------------------------------
 // visitor functions for leaf nodes
-//--------------------------------------
 
 void ManDocVisitor::visit(DocWord *w)
 {
    if (m_hide) {
       return;
    }
+
    filter(w->word());
    m_firstCol = false;
 }
@@ -124,6 +123,7 @@ void ManDocVisitor::visit(DocStyleChange *s)
    if (m_hide) {
       return;
    }
+
    switch (s->style()) {
       case DocStyleChange::Bold:
          if (s->enable()) {
@@ -201,7 +201,9 @@ void ManDocVisitor::visit(DocVerbatim *s)
    if (m_hide) {
       return;
    }
-   QByteArray lang = m_langExt;
+
+   QString lang = m_langExt;
+
    if (!s->language().isEmpty()) { // explicit language setting
       lang = s->language();
    }
@@ -317,7 +319,7 @@ void ManDocVisitor::visit(DocInclude *inc)
          break;
 
       case DocInclude::VerbInclude:
-         if (!m_firstCol) {
+         if (! m_firstCol) {
             m_t << endl;
          }
          m_t << ".PP" << endl;
@@ -431,10 +433,7 @@ void ManDocVisitor::visit(DocCite *cite)
    m_t << "\\fP";
 }
 
-
-//--------------------------------------
 // visitor functions for compound nodes
-//--------------------------------------
 
 void ManDocVisitor::visitPre(DocAutoList *)
 {
@@ -458,7 +457,8 @@ void ManDocVisitor::visitPre(DocAutoListItem *li)
    if (m_hide) {
       return;
    }
-   QByteArray ws;
+
+   QString ws;
    ws.fill(' ', m_indent - 2);
    if (!m_firstCol) {
       m_t << endl;
@@ -491,7 +491,8 @@ void ManDocVisitor::visitPost(DocPara *p)
    if (m_hide) {
       return;
    }
-   if (!p->isLast() &&            // omit <p> for last paragraph
+
+   if (! p->isLast() &&            // omit <p> for last paragraph
          !(p->parent() &&           // and for parameter sections
            p->parent()->kind() == DocNode::Kind_ParamSect
           )
@@ -635,11 +636,14 @@ void ManDocVisitor::visitPre(DocSimpleListItem *)
    if (m_hide) {
       return;
    }
-   QByteArray ws;
+
+   QString ws;
    ws.fill(' ', m_indent - 2);
+
    if (!m_firstCol) {
       m_t << endl;
    }
+
    m_t << ".IP \"" << ws << "\\(bu\" " << m_indent << endl;
    m_firstCol = true;
 }
@@ -708,17 +712,21 @@ void ManDocVisitor::visitPre(DocHtmlListItem *li)
    if (m_hide) {
       return;
    }
-   QByteArray ws;
+
+   QString ws;
    ws.fill(' ', m_indent - 2);
    if (!m_firstCol) {
       m_t << endl;
    }
+
    m_t << ".IP \"" << ws;
+
    if (((DocHtmlList *)li->parent())->type() == DocHtmlList::Ordered) {
       m_t << li->itemNumber() << ".\" " << m_indent + 2;
    } else { // bullet list
       m_t << "\\(bu\" " << m_indent;
    }
+
    m_t << endl;
    m_firstCol = true;
 }
@@ -963,11 +971,14 @@ void ManDocVisitor::visitPre(DocSecRefItem *)
    if (m_hide) {
       return;
    }
-   QByteArray ws;
+
+   QString ws;
    ws.fill(' ', m_indent - 2);
+
    if (!m_firstCol) {
       m_t << endl;
    }
+
    m_t << ".IP \"" << ws << "\\(bu\" " << m_indent << endl;
    m_firstCol = true;
 }
@@ -977,6 +988,7 @@ void ManDocVisitor::visitPost(DocSecRefItem *)
    if (m_hide) {
       return;
    }
+
    m_t << endl;
    m_firstCol = true;
 }
@@ -1219,18 +1231,13 @@ void ManDocVisitor::visitPost(DocParBlock *)
 {
 }
 
-void ManDocVisitor::filter(constQString &str)
+void ManDocVisitor::filter(const QString &str)
 {
    if (! str.isEmpty()) {
 
-      // BROOM - ansel
-      const char *p = str.toUtf8();  
-
-      char c = 0;
-
-      while ((c = *p++)) {
-
-         switch (c) {
+     for (auto c : str) {  
+  
+         switch (c.unicode()) {
             case '.':
                m_t << "\\&.";
                break; // see  bug652277

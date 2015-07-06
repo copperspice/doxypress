@@ -373,7 +373,7 @@ class ClassDef : public Definition
    void writeMemberList(OutputList &ol);
 
    void writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bool inGroup, 
-                  QSharedPointer<ClassDef> inheritedFrom, const char *inheritId);
+                  QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
    void writeQuickMemberLinks(OutputList &ol, MemberDef *md) const;
    void writeSummaryLinks(OutputList &ol);
@@ -412,7 +412,7 @@ class ClassDef : public Definition
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title, bool showInline = false);
    void writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt);
    void writePlainMemberDeclaration(OutputList &ol, MemberListType lt, bool inGroup, QSharedPointer<ClassDef> inheritedFrom, 
-                  const char *inheritId);
+                  const QString &inheritId);
 
    void writeBriefDescription(OutputList &ol, bool exampleFlag);
    void writeDetailedDescription(OutputList &ol, const QString &pageType, bool exampleFlag,

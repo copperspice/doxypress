@@ -73,7 +73,6 @@ class RTFGenerator : public OutputGenerator
    void writeFooter(const QString &) override {}
    void endFile();
    void clearBuffer();
-   //void postProcess(QByteArray &);
 
    void startIndexSection(IndexSections);
    void endIndexSection(IndexSections);
@@ -341,12 +340,12 @@ class RTFGenerator : public OutputGenerator
    RTFGenerator(const RTFGenerator &);
    RTFGenerator &operator=(const RTFGenerator &);
 
-   const char *rtf_BList_DepthStyle();
-   const char *rtf_CList_DepthStyle();
-   const char *rtf_EList_DepthStyle();
-   const char *rtf_LCList_DepthStyle();
-   const char *rtf_DList_DepthStyle();
-   const char *rtf_Code_DepthStyle();
+   QString rtf_BList_DepthStyle();
+   QString rtf_CList_DepthStyle();
+   QString rtf_EList_DepthStyle();
+   QString rtf_LCList_DepthStyle();
+   QString rtf_DList_DepthStyle();
+   QString rtf_Code_DepthStyle();
    void incrementIndentLevel();
    void decrementIndentLevel();
    int  col;
@@ -356,7 +355,7 @@ class RTFGenerator : public OutputGenerator
    bool m_omitParagraph;    // should a the next paragraph command be ignored?
    int  m_numCols;          // number of columns in a table
 
-   QByteArray relPath;
+   QString relPath;
 
    void beginRTFDocument();
    void beginRTFChapter();

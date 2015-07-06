@@ -163,10 +163,10 @@ void FormulaList::generateBitmaps(const QString &path)
             int i = eps.indexOf("%%BoundingBox:");
 
             if (i != -1) {
-               sscanf(eps.data() + i, "%%%%BoundingBox:%d %d %d %d", &x1, &y1, &x2, &y2);
+               sscanf(eps.toUtf8().constData() + i, "%%%%BoundingBox:%d %d %d %d", &x1, &y1, &x2, &y2);
 
             } else {
-               err("Could not extract bounding box!\n");
+               err("Could not extract bounding box\n");
             }
          }
 
@@ -228,13 +228,13 @@ void FormulaList::generateBitmaps(const QString &path)
 
          uint imageX = 0, imageY = 0;
          
-         // we read the generated image again, to obtain the pixel data.
+         // read the generated image again, to obtain the pixel data.
          if (f.open(QIODevice::ReadOnly)) {
             QTextStream t(&f);
             QString s;
 
             if (! t.atEnd()) {
-               s = t.readLine().toUtf8();
+               s = t.readLine();
             }
 
             if (s.length() < 2 || s.left(2) != "P6") {
@@ -245,7 +245,7 @@ void FormulaList::generateBitmaps(const QString &path)
                // # excluding the first line of the file.
              
                while (! t.atEnd()) {            
-                  s = t.readLine().toUtf8();
+                  s = t.readLine();
                   
                   if (s.isEmpty()) {
                      break;
@@ -256,7 +256,7 @@ void FormulaList::generateBitmaps(const QString &path)
                   }
                }
 
-               sscanf(s, "%d %d", &imageX, &imageY);
+               sscanf(s.toUtf8().constData(), "%d %d", &imageX, &imageY);
             }
 
             if (imageX > 0 && imageY > 0) {
@@ -272,6 +272,7 @@ void FormulaList::generateBitmaps(const QString &path)
                for (i = 0; i < imageX * imageY; i++) {
                   *ps++ = (data[i * 3] == 0 ? 1 : 0);
                }
+
                // apply a simple box filter to the image
                static int filterMask[] = {1, 2, 1, 2, 8, 2, 1, 2, 1};
                for (y = 0; y < srcImage.getHeight(); y++) {
@@ -317,15 +318,14 @@ void FormulaList::generateBitmaps(const QString &path)
                }
 
                // save the result as a bitmap
-               QString fileName;
-               fileName = QString("form_%1.png").arg(pageNum);                          
+               QString fileName = QString("form_%1.png").arg(pageNum);                          
               
                QFile f(fileName);
 
                if (f.open(QIODevice::WriteOnly)) {
                
                   // parameter 1 is used as a temporary hack to select the right color palette
-                  QString buffer = dstImage.convert(1);
+                  QByteArray buffer = dstImage.convert(1);
  
                   f.write(buffer);
                   f.close();

@@ -119,18 +119,15 @@ class LetterToIndexMap : public LongMap<QSharedPointer<T>>
    }
 };
 
-inline bool isId(int c)
+inline bool isId(QChar c)
 {
    if (c == '_') {
       return true;
 
    } else if (c >= 128) {
       return true;
-
-   } else if (c < 0) { 
-      return true;
       
-   } else if (isalnum(c)) {
+   } else if ( c.isLetterOrNumber() ) {
       return true;
    
    }
@@ -138,7 +135,6 @@ inline bool isId(int c)
    return false;
 }
 
-// **
 
 bool classVisibleInIndex(QSharedPointer<ClassDef> cd);
 bool classHasVisibleChildren(QSharedPointer<ClassDef> cd);
@@ -154,7 +150,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
 
 QString getFileFilter(const QString &name, bool isSourceCode);
 
-int getPrefixIndex(const QByteArray &name);
+int getPrefixIndex(const QString &name);
 
 bool generateLink(OutputDocInterface &od, const QString &clName, const QString &lr, bool inSeeBlock, const QString &lt);
 void generateFileRef(OutputDocInterface &od, const QString &name, const QString &text = QString() );
@@ -189,7 +185,7 @@ QString showFileDefMatches(const FileNameDict *fnDict, const QString &xName);
 
 int guessSection(const QString &name);
 
-QByteArray argListToString(ArgumentList *al, bool useCanonicalType = false, bool showDefVals = true);
+QString argListToString(ArgumentList *al, bool useCanonicalType = false, bool showDefVals = true);
 QString tempArgListToString(const ArgumentList *al, SrcLangExt lang);
 
 void writeExample(OutputList &ol, ExampleSDict *el);
@@ -205,8 +201,7 @@ bool resolveLink(const QString &scName, const QString &linkRef, bool inSeeBlock,
 
 QString removeRedundantWhiteSpace(const QString &s);
 QString removeAnonymousScopes(const QString &s);
-QByteArray resolveDefines(const char *n);
-QByteArray replaceAnonymousScopes(const QByteArray &s, const QByteArray &replacement = QByteArray() );
+QString replaceAnonymousScopes(const QString &s, const QString &replacement = QString() );
 
 QString stripAnonymousNamespaceScope(const QString &s);
 QString stripFromPath(const QString &path);
@@ -287,7 +282,7 @@ void replaceNamespaceAliases(QString &scope, int i);
 int isAccessibleFrom(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item);
 
 int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-                  QSharedPointer<Definition> item, const QByteArray &explicitScopePart);
+                  QSharedPointer<Definition> item, const QString &explicitScopePart);
 
 int computeQualifiedIndex(const QString &name);
 
@@ -311,17 +306,16 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
 bool checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,const QString &name);
 
 QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<FileDef> fileScope, QSharedPointer<MemberDef> md, 
-                  QSharedPointer<MemberDef> *pMemType = 0, QByteArray *pTemplSpec = 0, QByteArray *pResolvedType = 0, 
+                  QSharedPointer<MemberDef> *pMemType = 0, QString *pTemplSpec = nullptr, QString *pResolvedType = nullptr, 
                   ArgumentList *actTemplParams = 0);
 
 QString parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<MemberDef> member, 
                   const QString &doc, const QString &fileName, int lineNr);
 
-QString transcodeToQString(const QByteArray &input);
+QString transcodeToQString(const QString &input);
+QString extractAliasArgs(const QString &args, int pos);
 
-QByteArray extractAliasArgs(const QByteArray &args, int pos);
-
-int countAliasArguments(const QByteArray argList);
+int countAliasArguments(const QString argList);
 
 QString resolveAliasCmd(const QString &aliasCmd);
 QString expandAlias(const QString &aliasName, const QString &aliasValue);
@@ -342,8 +336,8 @@ QString externalLinkTarget();
 QString externalRef(const QString &relPath, const QString &ref, bool href);
 int nextUtf8CharPosition(const QByteArray &utf8Str, int len, int startPos);
 
-const char *writeUtf8Char(QTextStream &t, const char *s);
-void writePageRef(OutputDocInterface &od, const char *cn, const char *mn);
+const char *writeUtf8Char(QTextStream &t, const QString &s);
+void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn);
 
 /** Data associated with a HSV colored image. */
 struct ColoredImgDataItem {
@@ -356,7 +350,7 @@ struct ColoredImgDataItem {
 };
 
 void writeColoredImgData(ColoredImgDataItem data);
-QByteArray replaceColorMarkers(const QByteArray &str);
+QString replaceColorMarkers(const QString &str);
 
 bool copyFile(const QString &src, const QString &dest);
 QString extractBlock(const QString &text, const QString &marker);

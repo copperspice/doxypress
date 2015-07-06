@@ -18,7 +18,6 @@
 #ifndef MANGEN_H
 #define MANGEN_H
 
-#include <QByteArray>
 #include <QFile>
 #include <QString>
 

@@ -31,13 +31,13 @@ class MarkdownFileParser : public ParserInterface
    virtual ~MarkdownFileParser()
    {}
 
-   void startTranslationUnit(const char *) {}
+   void startTranslationUnit(const QString &) override {}
    void finishTranslationUnit() {}
 
-   void parseInput(const QString &fileName, const char *fileBuf, QSharedPointer<Entry>root, 
+   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry>root, 
                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
-   bool needsPreprocessing(const QString &) {
+   bool needsPreprocessing(const QString &) override {
       return false;
    }
   
@@ -49,7 +49,7 @@ class MarkdownFileParser : public ParserInterface
                   QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override ;
 
    void resetCodeParserState();
-   void parsePrototype(const char *text);
+   void parsePrototype(const QString &text) override;
 };
 
 #endif

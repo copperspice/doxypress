@@ -18,7 +18,6 @@
 #ifndef RTFDOCVISITOR_H
 #define RTFDOCVISITOR_H
 
-#include <QByteArray>
 #include <QStack>
 #include <QTextStream>
 
@@ -30,11 +29,9 @@ class CodeOutputInterface;
 class RTFDocVisitor : public DocVisitor
 {
  public:
-   RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const char *langExt);
-
-   //--------------------------------------
+   RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt);
+  
    // visitor functions for leaf nodes
-   //--------------------------------------
 
    void visit(DocWord *);
    void visit(DocLinkedWord *);
@@ -53,10 +50,9 @@ class RTFDocVisitor : public DocVisitor
    void visit(DocSimpleSectSep *);
    void visit(DocCite *);
 
-   //--------------------------------------
-   // visitor functions for compound nodes
-   //--------------------------------------
 
+   // visitor functions for compound nodes
+ 
    void visitPre(DocAutoList *);
    void visitPost(DocAutoList *);
    void visitPre(DocAutoListItem *);
@@ -136,11 +132,11 @@ class RTFDocVisitor : public DocVisitor
 
  private:
 
-   void filter(const char *str, bool verbatim = false);
-   void startLink(const QByteArray &ref, const QByteArray &file, const QByteArray &anchor);
-   void endLink(const QByteArray &ref);
+   void filter(const QString &str, bool verbatim = false);
+   void startLink(const QString &ref, const QString &file, const QString &anchor);
+   void endLink(const QString &ref);
 
-   QByteArray getStyle(const char *name);
+   QString getStyle(const QString &name);
    void incIndentLevel();
    void decIndentLevel();
 
@@ -151,10 +147,6 @@ class RTFDocVisitor : public DocVisitor
    void writeDiaFile(const QString &fileName);
    void writePlantUMLFile(const QString &fileName);
 
-   //--------------------------------------
-   // state variables
-   //--------------------------------------
-
    QTextStream &m_t;
    CodeOutputInterface &m_ci;
    bool m_insidePre;
@@ -162,7 +154,7 @@ class RTFDocVisitor : public DocVisitor
    int m_indentLevel;
    QStack<bool> m_enabled;
    bool m_lastIsPara;
-   QByteArray m_langExt;
+   QString m_langExt;
 };
 
 #endif

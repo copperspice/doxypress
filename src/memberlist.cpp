@@ -165,7 +165,7 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
             //case MemberType_Prototype:   m_protoCnt++,m_numDecMembers++; break;
 
             case MemberType_Define:
-               if (Config::getBool("extract-all") || md->argsString() || !md->initializer().isEmpty() || md->hasDocumentation()) {
+               if (Config::getBool("extract-all") || ! md->argsString().isEmpty() || ! md->initializer().isEmpty() || md->hasDocumentation()) {
                   m_defCnt++, m_numDecMembers++;
                }
                break;
@@ -248,7 +248,7 @@ bool MemberList::declVisible() const
             case MemberType_Enumeration: {
                int enumVars = 0;
 
-               QByteArray name(md->name());
+               QString name(md->name());
 
                int i = name.lastIndexOf("::");
 
@@ -260,7 +260,7 @@ bool MemberList::declVisible() const
                   // anonymous enum => append variables
 
                   for (auto vmd : *this) {                  
-                     QByteArray vtype = vmd->typeString();
+                     QString vtype = vmd->typeString();
 
                      if (vtype.contains(name)) {
                         enumVars++;
@@ -294,7 +294,7 @@ bool MemberList::declVisible() const
 
 void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, QSharedPointer<ClassDef> inheritedFrom, 
-                  const char *inheritId )
+                  const QString &inheritId )
 {
    countDecMembers();
 
@@ -335,7 +335,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
             case MemberType_Enumeration: {
                int enumVars = 0;
              
-               QByteArray name(md->name());
+               QString name(md->name());
                int i = name.lastIndexOf("::");
 
                if (i != -1) {
@@ -345,7 +345,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                if (name[0] == '@') { // anonymous enum => append variables
                  
                   for (auto vmd : *this) {    
-                     QByteArray vtype = vmd->typeString();
+                     QString vtype = vmd->typeString();
 
                      if (vtype.contains(name)) {
                         enumVars++;
@@ -369,7 +369,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
 
                   bool detailsLinkable = md->isDetailedSectionLinkable();
                   if (!detailsLinkable) {
-                     ol.startDoxyAnchor(md->getOutputFileBase(), 0, md->anchor(), md->name(), QByteArray());
+                     ol.startDoxyAnchor(md->getOutputFileBase(), 0, md->anchor(), md->name(), QString());
                   }
 
                   ol.writeString("enum ");
@@ -481,7 +481,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, const QString &title, const QString &subtitle, 
                   bool showEnumValues, bool showInline, QSharedPointer<ClassDef> inheritedFrom, MemberListType lt)
 {   
-   QByteArray inheritId;
+   QString inheritId;
 
    countDecMembers(false, gd); // count members shown in this section
 
@@ -508,7 +508,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
          inheritId = substitute(listTypeAsString(lt), "-", "_") + "_" + stripPath(cd->getOutputFileBase());
 
-         if (title) {
+         if (! title.isEmpty()) {
             ol.writeInheritedSectionTitle(inheritId, cd->getReference(), cd->getOutputFileBase(), 
                                           cd->anchor(), title, qPrintable(cd->displayName()) );
          }
@@ -518,7 +518,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
    } else if (num > 0) {
 
-      if (title) {
+      if (! title.isEmpty()) {
 
          if (showInline) {
             ol.startInlineHeader();
@@ -534,8 +534,9 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
             ol.endMemberHeader();
          }
       }
-      if (subtitle) {
-         QByteArray st = subtitle;
+
+      if (! subtitle.isEmpty()) {
+         QString st = subtitle;
          st = st.trimmed();
 
          if (!st.isEmpty()) {
@@ -641,14 +642,14 @@ void MemberList::writeSimpleDocumentation(OutputList &ol, QSharedPointer<Definit
 }
 
 // separate member pages
-void MemberList::writeDocumentationPage(OutputList &ol, const char *scopeName, QSharedPointer<Definition> container)
+void MemberList::writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container)
 {
    static bool generateTreeView = Config::getBool("generate-treeview");
   
    for (auto md : *this) {    
       if (md->isDetailedSectionLinkable()) {
-         QByteArray diskName = md->getOutputFileBase();
-         QByteArray title = md->qualifiedName();
+         QString diskName = md->getOutputFileBase();
+         QString title = md->qualifiedName();
 
          startFile(ol, diskName, md->name(), title, HLI_None, !generateTreeView, diskName);
          if (!generateTreeView) {
@@ -737,7 +738,7 @@ void MemberList::findSectionsInDocumentation()
    }
 }
 
-QByteArray MemberList::listTypeAsString(MemberListType type)
+QString MemberList::listTypeAsString(MemberListType type)
 {
    switch (type) {
       case MemberListType_pubMethods:
@@ -860,6 +861,7 @@ QByteArray MemberList::listTypeAsString(MemberListType type)
       default:
          break;
    }
+
    return "";
 }
 
@@ -878,7 +880,7 @@ void MemberList::writeTagFile(QTextStream &tagFile)
 
 int MemberSDict::compareMapValues(const QSharedPointer<MemberDef> &c1, const QSharedPointer<MemberDef> &c2) const
 {
-   int cmp = qstricmp(c1->name(), c2->name());
+   int cmp = c1->name().compare(c2->name(), Qt::CaseInsensitive);
 
    if (cmp) {
       return cmp;

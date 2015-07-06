@@ -35,28 +35,34 @@ static QString makeFileName(const QString &withoutExtension)
    QString result = withoutExtension;
 
    if (! result.isEmpty()) {
-      if (result.at(0) == '!') { // relative URL -> strip marker
+      if (result.at(0) == '!') { 
+         // relative URL -> strip marker
          result = result.mid(1);
 
-      } else { // add specified HTML extension
+      } else { 
+         // add specified HTML extension
          result += Doxy_Globals::htmlFileExtension;
       }
    }
+
    return result;
 }
 
 static QString makeRef(const QString &withoutExtension, const QString &anchor)
 {
-   if (!withoutExtension) {
-      return QByteArray();
+   QString retval;
+
+   if (! withoutExtension.isEmpty()) {
+      return retval;
    }
 
-   QString result = makeFileName(withoutExtension);
-   if (! anchor) {
-      return result;
+   retval = makeFileName(withoutExtension);
+
+   if (! anchor.isEmpty()) {
+      return retval;
    }
 
-   return result + "#" + anchor;
+   return retval + "#" + anchor;
 }
 
 Qhp::Qhp() : m_prevSectionLevel(0), m_sectionLevel(0), m_skipMainPageSection(false)
@@ -184,7 +190,7 @@ void Qhp::decContentsDepth()
 }
 
 void Qhp::addContentsItem(bool, const QString &name, const QString &, const QString &file,
-                          const QString &anchor, bool, bool , QSharedPointer<Definition>)
+                          const QString &anchor, bool, bool, QSharedPointer<Definition>)
 {
    // Backup difference before modification
    QString f = file;
@@ -234,14 +240,30 @@ void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Member
       QString level1  = context->name();
       QString level2;
 
-      if (word) {
-         level2 = word;
-      } else {
+      if (word.isEmpty()) {
          level2 = md->name();
+
+      } else {
+         level2 = word;         
       }
 
-      QString contRef = separateMemberPages ? cfname : cfiname;
-      QString anchor  = sectionAnchor ? QByteArray(sectionAnchor) : md->anchor();
+      QString contRef;
+
+      if (separateMemberPages) { 
+         contRef = cfname;
+      } else {
+         contRef = cfiname;
+      }
+
+      QString anchor;
+
+      if (! sectionAnchor.isEmpty()) {
+         anchor = sectionAnchor;
+
+      } else {
+         anchor =md->anchor();
+
+      }
 
       QString ref = makeRef(contRef, anchor);
       QString id  = level1 + "::" + level2;
@@ -257,11 +279,10 @@ void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Member
       // container
       // <keyword name="Foo" id="Foo" ref="doc.html#Foo"/>
 
-      QByteArray contRef = context->getOutputFileBase();
-     
+      QString contRef = context->getOutputFileBase();     
       QString level1;
 
-      if (word) {
+      if (! word.isEmpty()) {
          level1 = word;
 
       } else {
@@ -336,7 +357,7 @@ void Qhp::handlePrevSection()
    clearPrevSection();
 }
 
-void Qhp::setPrevSection(const QString &title, const char *basename, const char *anchor, int level)
+void Qhp::setPrevSection(const QString &title, const QString &basename, const QString &anchor, int level)
 {
    m_prevSectionTitle    = title;
    m_prevSectionBaseName = basename;

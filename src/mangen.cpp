@@ -108,16 +108,16 @@ static QString buildFileName(const QString &name)
    }
 
    QString fname;
-   QByteArray temp = name.toUtf8();
+   
+   const QChar *p  = name.constData();
+   QChar c;
 
-   const char *p = temp.constData();
-   char c;
+   while ((c = *p++)  != 0) {
 
-   while (c = *p++) {
-
-      switch (c) {
+      switch (c.unicode()) {
          case ':':
             fname += "_";
+
             if (*p == ':') {
                p++;
             }
@@ -162,7 +162,7 @@ void ManGenerator::endFile()
    endPlainFile();
 }
 
-void ManGenerator::endTitleHead(const char *, const char *name)
+void ManGenerator::endTitleHead(const QString &, const QString &name)
 {
    QString extension = Config::getString("man-extension");  
 
@@ -232,27 +232,27 @@ void ManGenerator::writeString(const QString &text)
    docify(text);
 }
 
-void ManGenerator::startIndexItem(const QByteArray &, const QByteArray &)
+void ManGenerator::startIndexItem(const QString &, const QString &)
 {
 }
 
-void ManGenerator::endIndexItem(const QByteArray &, const QByteArray &)
+void ManGenerator::endIndexItem(const QString &, const QString &)
 {
 }
 
-void ManGenerator::writeStartAnnoItem(const char *, const QByteArray &, const QByteArray &, const char *)
+void ManGenerator::writeStartAnnoItem(const QString &, const QString &, const QString &, const QString &)
 {
 }
 
-void ManGenerator::writeObjectLink(const QByteArray &, const QByteArray &, const QByteArray &, const QByteArray &name)
+void ManGenerator::writeObjectLink(const QString &, const QString &, const QString &, const QString &name)
 {
    startBold();
    docify(name);
    endBold();
 }
 
-void ManGenerator::writeCodeLink(const QByteArray &, const QByteArray &, const QByteArray &, 
-                                 const QByteArray &name, const QByteArray &)
+void ManGenerator::writeCodeLink(const QString &, const QString &, const QString &, 
+                                 const QString &name, const QString &)
 {
    docify(name);
 }
@@ -265,7 +265,7 @@ void ManGenerator::endHtmlLink()
 {
 }
 
-//void ManGenerator::writeMailLink(const char *url)
+//void ManGenerator::writeMailLink(const QString &url)
 //{
 //  docify(url);
 //}
@@ -289,7 +289,7 @@ void ManGenerator::endGroupHeader(int)
    upperCase = false;
 }
 
-void ManGenerator::startMemberHeader(const char *)
+void ManGenerator::startMemberHeader(const QString &)
 {
    if (!firstCol) {
       m_textStream << endl;
@@ -306,82 +306,83 @@ void ManGenerator::endMemberHeader()
 
 void ManGenerator::docify(const QString &text)
 {
-   if (! text.isEmpty()) {
-
-      // BROOM - ansel
-      const char *p = text.toUtf8();            // .constData();
-
-      char c = 0;
-
-      while ((c = *p++)) {
-         switch (c) {
-            case '.':
-               m_textStream << "\\&.";
-               break; 
-
-            case '\\':
-               m_textStream << "\\\\";
-               col++;
-               break;
-
-            case '\n':
-               m_textStream << "\n";
-               col = 0;
-               break;
-
-            case '\"':
-               c = '\''; // no break!
-
-            default:
-               m_textStream << c;
-               col++;
-               break;
-         }
-      }
-      firstCol = (c == '\n');
-      
+   if (text.isEmpty()) {
+      return;
    }
+
+   for (auto c : text) {
+      
+      switch (c.unicode()) {
+         case '.':
+            m_textStream << "\\&.";
+            break; 
+
+         case '\\':
+            m_textStream << "\\\\";
+            col++;
+            break;
+
+         case '\n':
+            m_textStream << "\n";
+            col = 0;
+            break;
+
+         case '\"':
+            c = '\''; // no break is correct
+
+         default:
+            m_textStream << c;
+            col++;
+            break;
+      }
+   
+      firstCol = (c == '\n');      
+   }
+
    paragraph = false;
 }
 
-void ManGenerator::codify(const QByteArray &str)
+void ManGenerator::codify(const QString &str)
 {   
-   if (! str.isEmpty()) {
-      const char *p = str.constData();
-      char c;
-      int spacesToNextTabStop;
+   if (str.isEmpty()) {
+      return;
+   }
 
-      while (*p) {
-         c = *p++;
-         switch (c) {
-            case '.':
-               m_textStream << "\\&.";
-               break; // see  bug652277
+   int spacesToNextTabStop;
 
-            case '\t':
-               spacesToNextTabStop = Config::getInt("tab-size") - (col %  Config::getInt("tab-size"));
+   for (auto c : str) { 
+   
+      switch (c.unicode()) {
+         case '.':
+            m_textStream << "\\&.";
+            break; 
 
-               m_textStream << QString(spacesToNextTabStop, ' ');
-               col += spacesToNextTabStop;
+         case '\t':
+            spacesToNextTabStop = Config::getInt("tab-size") - (col %  Config::getInt("tab-size"));
 
-               break;
+            m_textStream << QString(spacesToNextTabStop, ' ');
+            col += spacesToNextTabStop;
 
-            case '\n':
-               m_textStream << "\n";
-               firstCol = true;
-               col = 0;
-               break;
-            case '\\':
-               m_textStream << "\\";
-               col++;
-               break;
-            case '\"':  // no break!
-            default:
-               p = writeUtf8Char(m_textStream, p - 1);
-               firstCol = false;
-               col++;
-               break;
-         }
+            break;
+
+         case '\n':
+            m_textStream << "\n";
+            firstCol = true;
+            col = 0;
+            break;
+
+         case '\\':
+            m_textStream << "\\";
+            col++;
+            break;
+
+         case '\"':  // no break is correct
+
+         default:
+            m_textStream << c;
+            firstCol = false;
+            col++;
+            break;         
       }
    }
 
@@ -472,7 +473,7 @@ void ManGenerator::endCodeFragment()
    col = 0;
 }
 
-void ManGenerator::startMemberDoc(const char *, const char *, const char *, const char *, bool)
+void ManGenerator::startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool)
 {
    if (!firstCol) {
       m_textStream << endl;
@@ -482,7 +483,7 @@ void ManGenerator::startMemberDoc(const char *, const char *, const char *, cons
    paragraph = false;
 }
 
-void ManGenerator::startDoxyAnchor(const char *, const char *manName, const char *, const char *name, const char *)
+void ManGenerator::startDoxyAnchor(const QString &, const QString &manName, const QString &, const QString &name, const QString &)
 {
    // something to be done?
    if ( ! Config::getBool("man-links") ) {
@@ -614,7 +615,7 @@ void ManGenerator::endAnonTypeScope(int indentLevel)
    }
 }
 
-void ManGenerator::startMemberItem(const char *, int, const QByteArray &)
+void ManGenerator::startMemberItem(const QString &, int, const QString &)
 {
    if (firstCol && !insideTabbing) {
       m_textStream << ".in +1c\n";
@@ -675,7 +676,7 @@ void ManGenerator::endMemberGroup(bool)
    firstCol = false;
 }
 
-void ManGenerator::startSection(const char *, const char *, SectionInfo::SectionType type)
+void ManGenerator::startSection(const QString &, const QString &, SectionInfo::SectionType type)
 {
    if ( !inHeader ) {
       switch (type) {
@@ -701,7 +702,7 @@ void ManGenerator::startSection(const char *, const char *, SectionInfo::Section
    }
 }
 
-void ManGenerator::endSection(const char *, SectionInfo::SectionType type)
+void ManGenerator::endSection(const QString &, SectionInfo::SectionType type)
 {
    if (! inHeader ) {
       switch (type) {
@@ -733,7 +734,7 @@ void ManGenerator::endSection(const char *, SectionInfo::SectionType type)
    }
 }
 
-void ManGenerator::startSimpleSect(SectionTypes, const QByteArray &, const char *, const QString &title)
+void ManGenerator::startSimpleSect(SectionTypes, const QString &, const QString &, const QString &title)
 {
    if (! firstCol) {
       m_textStream << endl << ".PP" << endl;
@@ -753,7 +754,7 @@ void ManGenerator::endSimpleSect()
 {
 }
 
-void ManGenerator::startParamList(ParamListTypes, const char *title)
+void ManGenerator::startParamList(ParamListTypes, const QString &title)
 {
    if (!firstCol) {
       m_textStream << endl << ".PP" << endl;
@@ -774,14 +775,14 @@ void ManGenerator::endParamList()
 
 void ManGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
-   ManDocVisitor *visitor = new ManDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QByteArray(""));
+   ManDocVisitor *visitor = new ManDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QString(""));
    n->accept(visitor);
    delete visitor;
    firstCol = false;
    paragraph = false;
 }
 
-void ManGenerator::startConstraintList(const char *header)
+void ManGenerator::startConstraintList(const QString &header)
 {
    if (!firstCol) {
       m_textStream << endl << ".PP" << endl;
@@ -906,7 +907,7 @@ void ManGenerator::startLabels()
 {
 }
 
-void ManGenerator::writeLabel(const char *l, bool isLast)
+void ManGenerator::writeLabel(const QString &l, bool isLast)
 {
    m_textStream << "\\fC [" << l << "]\\fP";
    if (!isLast) {

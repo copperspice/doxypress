@@ -31,18 +31,18 @@ class FileList : public SortedList<QSharedPointer<FileDef>>
    FileList() : m_pathName("tmp")
    {}
 
-   FileList(const char *path) : m_pathName(path) 
+   FileList(const QString &path) : m_pathName(path) 
    {}
 
    ~FileList() 
    {}
 
-   QByteArray path() const {
+   QString path() const {
       return m_pathName;
    }
 
  private:  
-   QByteArray m_pathName;
+   QString m_pathName;
 };
 
 

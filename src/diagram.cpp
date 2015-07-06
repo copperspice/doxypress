@@ -1169,7 +1169,7 @@ ClassDiagram::~ClassDiagram()
    delete super;
 }
 
-void ClassDiagram::writeFigure(QTextStream &output, const char *path, const char *fileName) const
+void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const QString &fileName) const
 {
    uint baseRows = base->computeRows();
    uint superRows = super->computeRows();
@@ -1208,7 +1208,6 @@ void ClassDiagram::writeFigure(QTextStream &output, const char *path, const char
    output << "\\end{center}\n"
           "\\end{figure}\n";
   
-
    QString epsBaseName = QString(path) + "/" + QString(fileName);
    QString epsName = epsBaseName + ".eps";
 

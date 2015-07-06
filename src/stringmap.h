@@ -146,7 +146,7 @@ class StringMap
    }
 
    /*! Remove an item from the dictionary */
-   bool remove(const char *key) { 
+   bool remove(const QString &key) { 
       return m_dict.remove(key); 
    }
 

@@ -41,8 +41,8 @@
 static int folderId = 1;
 
 struct FTVNode {
-   FTVNode(bool dir, const char *r, const char *f, const char *a,
-           const char *n, bool sepIndex, bool navIndex, QSharedPointer<Definition> df)
+   FTVNode(bool dir, const QString &r, const QString &f, const QString &a, const QString &n, bool sepIndex, 
+                  bool navIndex, QSharedPointer<Definition> df)
       : isLast(true), isDir(dir), ref(r), file(f), anchor(a), name(n), index(0),
         parent(0), separateIndex(sepIndex), addToNavIndex(navIndex), def(df) 
    {       
@@ -54,10 +54,10 @@ struct FTVNode {
    bool isLast;
    bool isDir;
 
-   QByteArray ref;
-   QByteArray file;
-   QByteArray anchor;
-   QByteArray name;
+   QString ref;
+   QString file;
+   QString anchor;
+   QString name;
 
    int index;
    QList<FTVNode *> children;
@@ -194,12 +194,12 @@ void FTVHelp::decContentsDepth()
  *  \param addToNavIndex add this entry to the quick navigation index
  *  \param def Definition corresponding to this entry
  */
-void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, const char *file, const char *anchor,
+void FTVHelp::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
                               bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def)
 {
    QList<FTVNode *> *nl = &m_indentNodes[m_indent];
 
-   FTVNode *newNode = new FTVNode(isDir, ref, file, anchor, qPrintable(name), separateIndex, addToNavIndex, def);
+   FTVNode *newNode = new FTVNode(isDir, ref, file, anchor, name, separateIndex, addToNavIndex, def);
    
    if (! nl->isEmpty()) {
       nl->last()->isLast = false;
@@ -220,7 +220,7 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, 
          
          if (pnl.isEmpty()) { 
             // must test for this condition in decContentsDepth()     
-            fprintf(stderr, "Error: Page (%s) contains a subsection (%s) with no parent section\n", file, qPrintable(name) );           
+            fprintf(stderr, "Error: Page (%s) contains a subsection (%s) with no parent section\n", qPrintable(file), qPrintable(name) );           
                      
          } else {    
             newNode->parent = pnl.last();      
@@ -229,7 +229,7 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const char *ref, 
    }
 }
 
-static QByteArray node2URL(FTVNode *n, bool overruleFile = false, bool srcLink = false)
+static QString node2URL(FTVNode *n, bool overruleFile = false, bool srcLink = false)
 {
    QString url = n->file;
 
@@ -254,22 +254,23 @@ static QByteArray node2URL(FTVNode *n, bool overruleFile = false, bool srcLink =
       }
 
       url += Doxy_Globals::htmlFileExtension;
-      if (!n->anchor.isEmpty()) {
+      if ( !n->anchor.isEmpty()) {
          url += "#" + n->anchor;
       }
    }
    return url;
 }
 
-QByteArray FTVHelp::generateIndentLabel(FTVNode *n, int level)
+QString FTVHelp::generateIndentLabel(FTVNode *n, int level)
 {
-   QByteArray result;
+   QString result;
 
    if (n->parent) {
       result = generateIndentLabel(n->parent, level + 1);
    }
 
-   result += QByteArray().setNum(n->index) + "_";
+   result += QString::number(n->index) + "_";
+
    return result;
 }
 
@@ -284,7 +285,7 @@ void FTVHelp::generateIndent(QTextStream &t, FTVNode *n, bool opened)
    }
 
    if (n->isDir) {
-      QByteArray dir = opened ? "&#9660;" : "&#9658;";
+      QString dir = opened ? "&#9660;" : "&#9658;";
       t << "<span style=\"width:" << (indent * 16) << "px;display:inline-block;\">&#160;</span>"
         << "<span id=\"arr_" << generateIndentLabel(n, 0) << "\" class=\"arrow\" ";
       t << "onclick=\"toggleFolder('" << generateIndentLabel(n, 0) << "')\"";
@@ -335,13 +336,13 @@ void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
 
 static void generateBriefDoc(QTextStream &t, QSharedPointer<Definition> def)
 {
-   QByteArray brief = def->briefDescription(true);
+   QString brief = def->briefDescription(true);
   
    if (! brief.isEmpty()) {
       DocNode *root = validatingParseDoc(def->briefFile(), def->briefLine(),
                                          def, QSharedPointer<MemberDef>(), brief, false, false, "", true, true);
 
-      QByteArray relPath = relativePathToRoot(def->getOutputFileBase());
+      QString relPath = relativePathToRoot(def->getOutputFileBase());
 
       HtmlCodeGenerator htmlGen(t, relPath);
       HtmlDocVisitor *visitor = new HtmlDocVisitor(t, htmlGen, def);
@@ -456,15 +457,15 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
    }
 }
 
-static QByteArray pathToNode(FTVNode *leaf, FTVNode *n)
+static QString pathToNode(FTVNode *leaf, FTVNode *n)
 {
-   QByteArray result;
+   QString result;
 
    if (n->parent) {
       result += pathToNode(leaf, n->parent);
    }
 
-   result += QByteArray().setNum(n->index);
+   result += QString::number(n->index);
 
    if (leaf != n) {
       result += ",";
@@ -517,7 +518,7 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
 {
    static QString htmlOutput = Config::getString("html-output");
 
-   QByteArray indentStr;
+   QString indentStr;
    indentStr.fill(' ', level * 2);
 
    bool found = false;
@@ -570,7 +571,7 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
 
          if (n->children.count() > 0) { 
             // write children to separate file for dynamic loading
-            QByteArray fileId = n->file;
+            QString fileId = n->file;
 
             if (! n->anchor.isEmpty()) {
                fileId += "_" + n->anchor;
@@ -785,7 +786,7 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
 
                subIndex++;
 
-               fsidx.setFileName(htmlOutput + "/navtreeindex" + QByteArray().setNum(subIndex) + ".js");
+               fsidx.setFileName(htmlOutput + "/navtreeindex" + QString::number(subIndex) + ".js");
 
                if (! fsidx.open(QIODevice::WriteOnly)) {
                   break;
