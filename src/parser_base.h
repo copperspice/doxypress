@@ -149,7 +149,7 @@ class ParserManager
     *  @param[in] parser    The parser that is to be used for the
     *                       given name.
     */
-   void registerParser(const char *name, ParserInterface *parser) {
+   void registerParser(const QString &name, ParserInterface *parser) {
       m_parsers.insert(name, parser);
    }
 

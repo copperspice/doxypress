@@ -10577,8 +10577,8 @@ char *codeYYtext;
 #include "tooltip.h"
 
 
-// Toggle for some debugging info
-//#define DBG_CTX(x) fprintf x
+//  Toggle for some debugging info
+//  #define DBG_CTX(x) fprintf x
 #define DBG_CTX(x) do { } while(0)
 
 #define YY_NEVER_INTERACTIVE 1
@@ -10587,17 +10587,16 @@ char *codeYYtext;
 #define SCOPEBLOCK    2
 #define INNERBLOCK    3
 
-
 static CodeOutputInterface *g_code;
 
 static ClassSDict   *g_codeClassSDict = 0;
-static QByteArray    g_curClassName;
+static QString       g_curClassName;
 static QStringList   g_curClassBases;
 
-static QByteArray    g_parmType;
-static QByteArray    g_parmName;
+static QString       g_parmType;
+static QString       g_parmName;
 
-static const char   *g_inputString;     //!< the code fragment as text
+static QString       g_inputString;     //!< the code fragment as text
 static int	         g_inputPosition;   //!< read offset during parsing
 static int           g_inputLines;      //!< number of line in the code fragment
 static int	         g_yyLineNr;        //!< current line number
@@ -10605,15 +10604,15 @@ static int	         g_yyColNr;         //!< current column number
 static bool          g_needsTermination;
 
 static bool          g_exampleBlock;
-static QByteArray    g_exampleName;
-static QByteArray    g_exampleFile;
+static QString       g_exampleName;
+static QString       g_exampleFile;
 
 static bool          g_insideTemplate = FALSE;
-static QByteArray    g_type;
-static QByteArray    g_name;
-static QByteArray    g_args;
-static QByteArray    g_classScope;
-static QByteArray    g_realScope;
+static QString       g_type;
+static QString       g_name;
+static QString       g_args;
+static QString       g_classScope;
+static QString       g_realScope;
 
 static QStack<int>   g_scopeStack;     
 static int           g_anchorCount;
@@ -10626,13 +10625,13 @@ static QSharedPointer<Definition>  g_currentDefinition;
 static QSharedPointer<MemberDef>   g_currentMemberDef;
 
 static bool          g_includeCodeFragment;
-static const char   *g_currentFontClass;
+static QString       g_currentFontClass;
 static bool          g_searchingForBody;
 static bool          g_insideBody;
 static int           g_bodyCurlyCount;
-static QByteArray    g_saveName;
-static QByteArray    g_saveType;
-static QByteArray    g_delimiter;
+static QString       g_saveName;
+static QString       g_saveType;
+static QString       g_delimiter;
 
 static int	     g_bracketCount = 0;
 static int	     g_curlyCount   = 0;
@@ -10666,9 +10665,9 @@ static bool      g_collectXRefs;
 struct ObjCCallCtx {
    int id;
 
-   QByteArray methodName;
-   QByteArray objectTypeOrName;
-   QByteArray format;
+   QString methodName;
+   QString objectTypeOrName;
+   QString format;
 
    QSharedPointer<ClassDef> objectType;
    QSharedPointer<MemberDef> objectVar;
@@ -10687,18 +10686,15 @@ static int g_currentWordId = 0;
 
 static QStack<ObjCCallCtx *>      g_contextStack;
 static QHash<long, ObjCCallCtx *> g_contextDict;
-static QHash<long, QByteArray *>  g_nameDict;
-static QHash<long, QByteArray *>  g_objectDict;
-static QHash<long, QByteArray *>  g_wordDict;
+static QHash<long, QString *>     g_nameDict;
+static QHash<long, QString *>     g_objectDict;
+static QHash<long, QString *>     g_wordDict;
 static int g_braceCount = 0;
 
 static void saveObjCContext();
 static void restoreObjCContext();
 
-static QByteArray g_forceTagReference;
-
-
-//-------------------------------------------------------------------
+static QString g_forceTagReference;
 
 /*! Represents a stack of variable to class mappings as found in the
  *  code. Each scope is enclosed in pushScope() and popScope() calls.
@@ -10750,8 +10746,8 @@ class VariableContext
       m_scopes.clear();
    }
 
-   void addVariable(const QByteArray &type, const QByteArray &name);
-   QSharedPointer<ClassDef> findVariable(const QByteArray &name);
+   void addVariable(const QString &type, const QString &name);
+   QSharedPointer<ClassDef> findVariable(const QString &name);
 
    int count() const {
       return m_scopes.count();
@@ -10768,11 +10764,11 @@ QSharedPointer<ClassDef> VariableContext::dummyContext()
    return dummyContext;
 }
 
-void VariableContext::addVariable(const QByteArray &type, const QByteArray &name)
+void VariableContext::addVariable(const QString &type, const QString &name)
 {
    //printf("VariableContext::addVariable(%s,%s)\n",type.data(),name.data());
-   QByteArray ltype = type.simplified();
-   QByteArray lname = name.simplified();
+   QString ltype = type.simplified();
+   QString lname = name.simplified();
 
    if (ltype.left(7) == "struct ") {
       ltype = ltype.right(ltype.length() - 7);
@@ -10804,10 +10800,10 @@ void VariableContext::addVariable(const QByteArray &type, const QByteArray &name
 
    } else if ((i = ltype.indexOf('<')) != -1) {
       // probably a template class
-      QByteArray typeName(ltype.left(i));
+      QString typeName(ltype.left(i));
 
       QSharedPointer<ClassDef> newDef;
-      QByteArray templateArgs(ltype.right(ltype.length() - i));
+      QString templateArgs(ltype.right(ltype.length() - i));
 
       if (
          ( // look for class definitions inside the code block
@@ -10843,14 +10839,14 @@ void VariableContext::addVariable(const QByteArray &type, const QByteArray &name
    }
 }
 
- QSharedPointer<ClassDef> VariableContext::findVariable(const QByteArray &name)
+ QSharedPointer<ClassDef> VariableContext::findVariable(const QString &name)
 {
    if (name.isEmpty()) {
       return QSharedPointer<ClassDef>();
    }
 
    QSharedPointer<ClassDef> result; 
-   QByteArray key = name;
+   QString key = name;
 
    // search from inner to outer scope
    for (auto scope : m_scopes) {
@@ -10876,8 +10872,8 @@ class CallContext
    struct Ctx {
       Ctx() : name(g_name), type(g_type), d(0) {}
 
-      QByteArray name;
-      QByteArray type;
+      QString name;
+      QString type;
       QSharedPointer<Definition> d;
    };
 
@@ -10941,7 +10937,7 @@ class CallContext
 static CallContext g_theCallContext;
 
 /*! add class/namespace name s to the scope */
-static void pushScope(const char *s)
+static void pushScope(const QString &s)
 {
    g_classScopeLengthStack.push(new int(g_classScope.length()));
 
@@ -10967,7 +10963,7 @@ static void popScope()
    }   
 }
 
-static void setCurrentDoc(const QByteArray &anchor)
+static void setCurrentDoc(const QString &anchor)
 {
    if (Doxy_Globals::searchIndex) {
       if (g_searchCtx) {
@@ -10978,16 +10974,17 @@ static void setCurrentDoc(const QByteArray &anchor)
    }
 }
 
-static void addToSearchIndex(const char *text)
+static void addToSearchIndex(const QString &text)
 {
    if (Doxy_Globals::searchIndex) {
       g_code->addWord(text, FALSE);
    }
 }
 
-static void setClassScope(const QByteArray &name)
+static void setClassScope(const QString &name)
 {
-   QByteArray n = name;
+   QString n = name;
+
    n = n.simplified();
    int ts = n.indexOf('<'); // start of template
    int te = n.lastIndexOf('>'); // end of template
@@ -11037,8 +11034,7 @@ static void startCodeLine()
          //printf("Real scope: `%s'\n",g_realScope.data());
          g_bodyCurlyCount = 0;
 
-         QByteArray lineAnchor;
-         lineAnchor = QString("l%1").arg(g_yyLineNr, 5, 10, QChar('0')).toUtf8();
+         QString lineAnchor = QString("l%1").arg(g_yyLineNr, 5, 10, QChar('0'));
 
          if (g_currentMemberDef) {
             g_code->writeLineNumber(g_currentMemberDef->getReference(),
@@ -11060,14 +11056,13 @@ static void startCodeLine()
    DBG_CTX((stderr, "startCodeLine(%d)\n", g_yyLineNr));
    g_code->startCodeLine(g_sourceFileDef && g_lineNumbers);
 
-   if (g_currentFontClass) {
+   if (! g_currentFontClass.isEmpty()) {
       g_code->startFontClass(g_currentFontClass);
    }
 }
 
-
 static void endFontClass();
-static void startFontClass(const char *s);
+static void startFontClass(const QString &s);
 
 static void endCodeLine()
 {
@@ -11078,7 +11073,7 @@ static void endCodeLine()
 
 static void nextCodeLine()
 {
-   const char *fc = g_currentFontClass;
+   QString fc = g_currentFontClass;
    endCodeLine();
    if (g_yyLineNr < g_inputLines) {
       g_currentFontClass = fc;
@@ -11089,33 +11084,30 @@ static void nextCodeLine()
 /*! write a code fragment `text' that may span multiple lines, inserting
  * line numbers for each line.
  */
-static void codifyLines(const char *text)
-{
-   //printf("codifyLines(%d,\"%s\")\n",g_yyLineNr,text);
-   const char *p = text, *sp = p;
-   char c;
-   bool done = FALSE;
+static void codifyLines(const QString &text)
+{  
+   QString tmp;
 
-   while (!done) {
-      sp = p;
-      while ((c = *p++) && c != '\n') {
-         g_yyColNr++;
-      }
+   for (auto c : text) { 
+   
       if (c == '\n') {
-         g_yyLineNr++;
+         g_yyLineNr++;       
          g_yyColNr = 1;
-         //*(p-1)='\0';
-         int l = (int)(p - sp - 1);
-         char *tmp = (char *)malloc(l + 1);
-         memcpy(tmp, sp, l);
-         tmp[l] = '\0';
+
          g_code->codify(tmp);
-         free(tmp);
          nextCodeLine();
+
+         tmp = "";
+
       } else {
-         g_code->codify(sp);
-         done = TRUE;
+         tmp += c;
+         g_yyColNr++;
+
       }
+   }
+
+   if (! tmp.isEmpty() )  {
+      g_code->codify(tmp);
    }
 }
 
@@ -11123,42 +11115,42 @@ static void codifyLines(const char *text)
  * line numbers for each line. If \a text contains newlines, the link will be
  * split into multiple links with the same destination, one for each line.
  */
-static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d, const char *text)
+static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d, const QString &text)
 {
    static bool sourceTooltips = Config::getBool("source-tooltips");
 
    TooltipManager::instance()->addTooltip(d);
 
-   QByteArray ref  = d->getReference();
-   QByteArray file = d->getOutputFileBase();
-   QByteArray anchor = d->anchor();
-   QByteArray tooltip;
+   QString ref  = d->getReference();
+   QString file = d->getOutputFileBase();
+   QString anchor = d->anchor();
+   QString tooltip;
 
    if (! sourceTooltips) { // fall back to simple "title" tooltips
       tooltip = d->briefDescriptionAsTooltip();
    }
 
-   bool done = FALSE;
-   char *p = (char *)text;
+   QString tmp;
 
-   while (!done) {
-      char *sp = p;
-      char c;
+   for (auto c : text) {      
 
-      while ((c = *p++) && c != '\n') { }
       if (c == '\n') {
          g_yyLineNr++;
-         *(p - 1) = '\0';
-         //printf("writeCodeLink(%s,%s,%s,%s)\n",ref,file,anchor,sp);
-         ol.writeCodeLink(ref, file, anchor, sp, tooltip);
+                 
+         ol.writeCodeLink(ref, file, anchor, tmp, tooltip);
          nextCodeLine();
 
-      } else {
-         //printf("writeCodeLink(%s,%s,%s,%s)\n",ref,file,anchor,sp);
-         ol.writeCodeLink(ref, file, anchor, sp, tooltip);
-         done = TRUE;
+         tmp = "";
+
+      } else {  
+         tmp += c;                
+       
       }
    }
+
+   if ( ! tmp.isEmpty() ) {
+      ol.writeCodeLink(ref, file, anchor, tmp, tooltip);
+   }  
 }
 
 static void addType()
@@ -11205,7 +11197,7 @@ static void addUsingDirective(const char *name)
 
 static void setParameterList(QSharedPointer<MemberDef> md)
 {
-   g_classScope = md->getClassDef() ? md->getClassDef()->name().data() : "";
+   g_classScope = md->getClassDef() ? md->getClassDef()->name() : "";
    ArgumentList *al = md->argumentList();
 
    if (al == 0) {
@@ -11233,15 +11225,15 @@ static void setParameterList(QSharedPointer<MemberDef> md)
    }
 }
 
-static QSharedPointer<ClassDef> stripClassName(const char *s, QSharedPointer<Definition> d = g_currentDefinition)
+static QSharedPointer<ClassDef> stripClassName(const QString &s, QSharedPointer<Definition> d = g_currentDefinition)
 {
    int pos = 0;
-   QByteArray type = s;
-   QByteArray className;
-   QByteArray templSpec;
+   QString type = s;
+   QString className;
+   QString templSpec;
 
    while (extractClassNameFromType(type, pos, className, templSpec) != -1) {
-      QByteArray clName = className + templSpec;
+      QString clName = className + templSpec;
       QSharedPointer<ClassDef> cd;
 
       if (!g_classScope.isEmpty()) {
@@ -11260,18 +11252,18 @@ static QSharedPointer<ClassDef> stripClassName(const char *s, QSharedPointer<Def
    return QSharedPointer<ClassDef>();
 }
 
-static QSharedPointer<MemberDef> setCallContextForVar(const QByteArray &name)
+static QSharedPointer<MemberDef> setCallContextForVar(const QString &name)
 {
    if (name.isEmpty()) {
       return QSharedPointer<MemberDef>();
    }
 
-   DBG_CTX((stderr, "setCallContextForVar(%s) g_classScope=%s\n", name.data(), g_classScope.data()));
+   DBG_CTX((stderr, "setCallContextForVar(%s) g_classScope=%s\n", qPrintable(name), qPrintable(g_classScope)));
 
    int scopeEnd = name.lastIndexOf("::");
    if (scopeEnd != -1) { // name with explicit scope
-      QByteArray scope   = name.left(scopeEnd);
-      QByteArray locName = name.right(name.length() - scopeEnd - 2);
+      QString scope   = name.left(scopeEnd);
+      QString locName = name.right(name.length() - scopeEnd - 2);
       
       QSharedPointer<ClassDef> mcd = getClass(scope);
 
@@ -11382,8 +11374,8 @@ static void updateCallContextForSmartPointer()
    }
 }
 
-static bool getLinkInScope(const QByteArray &c, const QByteArray &m, const char *memberText, 
-                           CodeOutputInterface &ol, const char *text, bool varOnly = FALSE)
+static bool getLinkInScope(const QString &c, const QString &m, const QString  memberText, 
+                           CodeOutputInterface &ol, const QString &text, bool varOnly = FALSE)
 {
    QSharedPointer<MemberDef>    md;
    QSharedPointer<ClassDef>     cd;
@@ -11398,8 +11390,7 @@ static bool getLinkInScope(const QByteArray &c, const QByteArray &m, const char 
      
       if (g_exampleBlock) {
 
-         QByteArray anchor;
-         anchor = QString("a%1").arg(g_anchorCount).toUtf8();
+         QString anchor = QString("a%1").arg(g_anchorCount);
         
          if (md->addExample(anchor, g_exampleName, g_exampleFile)) {
             ol.writeCodeAnchor(anchor);
@@ -11428,8 +11419,9 @@ static bool getLinkInScope(const QByteArray &c, const QByteArray &m, const char 
             addDocCrossReference(g_currentMemberDef, md);
          }
 
-         writeMultiLineCodeLink(ol, md, text ? text : memberText);
-         addToSearchIndex(text ? text : memberText);
+         writeMultiLineCodeLink(ol, md, ! text.isEmpty() ? text : memberText);
+         addToSearchIndex(! text.isEmpty() ? text : memberText);
+
          return true;
       }
    }
@@ -11437,14 +11429,14 @@ static bool getLinkInScope(const QByteArray &c, const QByteArray &m, const char 
    return false;
 }
 
-static bool getLink(const char *className, const char *memberName, CodeOutputInterface &ol, 
-                    const char *text = 0, bool varOnly = FALSE)
+static bool getLink(const QString &className, const QString &memberName, CodeOutputInterface &ol, 
+                    const QString &text = QString(), bool varOnly = FALSE)
 {  
-   QByteArray m = removeRedundantWhiteSpace(memberName);
-   QByteArray c = className;
+   QString m = removeRedundantWhiteSpace(memberName);
+   QString c = className;
 
-   if (!getLinkInScope(c, m, memberName, ol, text, varOnly)) {
-      if (!g_curClassName.isEmpty()) {
+   if (! getLinkInScope(c, m, memberName, ol, text, varOnly)) {
+      if (! g_curClassName.isEmpty()) {
          if (!c.isEmpty()) {
             c.prepend("::");
          }
@@ -11470,7 +11462,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
       clName++;
    }
 
-   QByteArray className = clName;
+   QString className = clName;
    if (className.isEmpty()) {
       return;
    }
@@ -11504,7 +11496,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
                md ? md->name().constData() : "<none>"));
 
       if (cd == 0 && md == 0 && (i = className.indexOf('<')) != -1) {
-         QByteArray bareName = className.left(i); 
+         QString bareName = className.left(i); 
          DBG_CTX((stderr, "bareName=%s\n", bareName.data()));
 
          if (bareName != className) {
@@ -11545,9 +11537,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
       DBG_CTX((stderr, "is linkable class %s\n", clName));
 
       if (g_exampleBlock) {
-
-         QByteArray anchor;
-         anchor = QString("_a%1").arg(g_anchorCount).toUtf8();
+         QString anchor = QString("_a%1").arg(g_anchorCount);
          
          if (cd->addExample(anchor, g_exampleName, g_exampleFile)) {
             ol.writeCodeAnchor(anchor);
@@ -11607,7 +11597,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
                      g_currentDefinition ? g_currentDefinition->name().data() : "<none>", md->isLinkable()));
 
             if (md->isLinkable()) {
-               QByteArray text;
+               QString text;
 
                if (!g_forceTagReference.isEmpty()) { // explicit reference to symbol in tag file
                   text = g_forceTagReference;
@@ -11651,8 +11641,7 @@ static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Memb
 
    if (g_exampleBlock) {
 
-      QByteArray anchor;
-      anchor = QString("a%1").arg(g_anchorCount).toUtf8();
+      QString anchor = QString("a%1").arg(g_anchorCount);
      
       if (xmd->addExample(anchor, g_exampleName, g_exampleFile)) {
          ol.writeCodeAnchor(anchor);
@@ -11735,7 +11724,7 @@ static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Defi
    return FALSE;
 }
 
-static void generateMemberLink(CodeOutputInterface &ol, const QByteArray &varName, char *memName)
+static void generateMemberLink(CodeOutputInterface &ol, const QString &varName, QString &memName)
 {
    if (varName.isEmpty()) {
       return;
@@ -11772,7 +11761,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QByteArray &varNam
 
          if (vmn == 0) {
             int vi;
-            QByteArray vn = varName;
+            QString vn = varName;
            
             if ((vi = vn.lastIndexOf("::")) != -1 || (vi = vn.lastIndexOf('.')) != -1) { // explicit scope A::b(), probably static member
                QSharedPointer<ClassDef> jcd = getClass(vn.left(vi));
@@ -11823,7 +11812,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QByteArray &varNam
 
 static void generatePHPVariableLink(CodeOutputInterface &ol, const char *varName)
 {
-   QByteArray name = varName + 7; // strip $this->
+   QString name = varName + 7; // strip $this->
    name.prepend("$");
    
    if (! getLink(g_classScope, name, ol, varName)) {
@@ -11835,12 +11824,12 @@ static void generateFunctionLink(CodeOutputInterface &ol, const char *funcName)
 {  
    QSharedPointer<ClassDef> ccd;
 
-   QByteArray locScope = g_classScope;
-   QByteArray locFunc = removeRedundantWhiteSpace(funcName);
-   QByteArray funcScope;
-   QByteArray funcWithScope = locFunc;
-   QByteArray funcWithFullScope = locFunc;
-   QByteArray fullScope = locScope;
+   QString locScope = g_classScope;
+   QString locFunc = removeRedundantWhiteSpace(funcName);
+   QString funcScope;
+   QString funcWithScope = locFunc;
+   QString funcWithFullScope = locFunc;
+   QString fullScope = locScope;
 
    DBG_CTX((stdout, "*** locScope=%s locFunc=%s\n", locScope.data(), locFunc.data()));
 
@@ -11931,23 +11920,28 @@ exit:
 /*! counts the number of lines in the input */
 static int countLines()
 {
-   const char *p = g_inputString;
-   char c;
    int count = 1;
 
-   while ((c = *p)) {
+   if (g_inputString.isEmpty() ) {
+      return count;
+   }
+
+   const QChar *p = g_inputString.constData();
+   QChar c;
+   
+   while ((c = *p) != 0) {
       p++ ;
+
       if (c == '\n') {
          count++;
       }
    }
 
-   if (p > g_inputString && *(p - 1) != '\n') {
+   if (*(p - 1) != '\n') {
       // last line does not end with a \n, so we add an extra
-      // line and explicitly terminate the line after parsing.
-
+      // line and explicitly terminate the line after parsing
       count++;
-      g_needsTermination = TRUE;
+      g_needsTermination = true;
    }
 
    return count;
@@ -11955,13 +11949,13 @@ static int countLines()
 
 static void endFontClass()
 {
-   if (g_currentFontClass) {
+   if (! g_currentFontClass.isEmpty()) {
       g_code->endFontClass();
-      g_currentFontClass = 0;
+      g_currentFontClass = "";
    }
 }
 
-static void startFontClass(const char *s)
+static void startFontClass(const QString &s)
 {
    endFontClass();
    g_code->startFontClass(s);
@@ -12034,7 +12028,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
          } else { // name fragment or reference to a nested call
             if (nc == 'n') { // name fragment
                nc = *p++;
-               QByteArray refIdStr;
+               QString refIdStr;
 
                while (nc != 0 && isdigit(nc)) {
                   refIdStr += nc;
@@ -12043,7 +12037,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
                p--;
                int refId = refIdStr.toInt();
-               QByteArray *pName = g_nameDict.value(refId);
+               QString *pName = g_nameDict.value(refId);
 
                if (pName) {
                   if (ctx->method && ctx->method->isLinkable()) {
@@ -12063,7 +12057,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
             } else if (nc == 'o') { // reference to potential object name
                nc = *p++;
-               QByteArray refIdStr;
+               QString refIdStr;
 
                while (nc != 0 && isdigit(nc)) {
                   refIdStr += nc;
@@ -12072,7 +12066,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
                p--;
                int refId = refIdStr.toInt();
-               QByteArray *pObject = g_objectDict.value(refId);
+               QString *pObject = g_objectDict.value(refId);
 
                if (pObject) {
                   if (*pObject == "self") {
@@ -12157,7 +12151,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
             } else if (nc == 'c') { // reference to nested call
                nc = *p++;
-               QByteArray refIdStr;
+               QString refIdStr;
 
                while (nc != 0 && isdigit(nc)) {
                   refIdStr += nc;
@@ -12173,7 +12167,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                   if (ictx->method) { // link to nested call successfully
                      // get the ClassDef representing the method's return type
 
-                     if (QByteArray(ictx->method->typeString()) == "id") {
+                     if (QString(ictx->method->typeString()) == "id") {
                         // see if the method name is unique, if so we link to it
 
                         QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict->find(ctx->methodName);
@@ -12202,7 +12196,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
             } else if (nc == 'w') { // some word
                nc = *p++;
-               QByteArray refIdStr;
+               QString refIdStr;
 
                while (nc != 0 && isdigit(nc)) {
                   refIdStr += nc;
@@ -12211,7 +12205,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
                p--;
                int refId = refIdStr.toInt();
-               QByteArray *pWord = g_wordDict.value(refId);
+               QString *pWord = g_wordDict.value(refId);
 
                if (pWord) {
                   codifyLines(pWord->data());
@@ -12235,33 +12229,29 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 // Replaces an Objective-C method name fragment s by a marker of the form
 // $n12, the number (12) can later be used as a key for obtaining the name
 // fragment, from g_nameDict
-static QByteArray escapeName(const char *s)
+static QString escapeName(const QString &s)
 {
-   QByteArray result;   
-   result = QString("$n%1").arg(g_currentNameId).toUtf8();
+   QString result = QString("$n%1").arg(g_currentNameId);
 
-   g_nameDict.insert(g_currentNameId, new QByteArray(s));
+   g_nameDict.insert(g_currentNameId, new QString(s));
    g_currentNameId++;
    return result;
 }
 
-static QByteArray escapeObject(const char *s)
+static QString escapeObject(const QString &s)
 {
-   QByteArray result;
-   result = QString("$o%1").arg(g_currentObjId).toUtf8();
+   QString result = QString("$o%1").arg(g_currentObjId);
 
-   g_objectDict.insert(g_currentObjId, new QByteArray(s));
+   g_objectDict.insert(g_currentObjId, new QString(s));
    g_currentObjId++;
    return result;
 }
 
-static QByteArray escapeWord(const char *s)
+static QString escapeWord(const QString &s)
 {
-   QByteArray result;
-   result = QString("$w%d").arg(g_currentWordId).toUtf8();
+   QString result = result = QString("$w%d").arg(g_currentWordId);
 
-
-   g_wordDict.insert(g_currentWordId, new QByteArray(s));
+   g_wordDict.insert(g_currentWordId, new QString(s));
    g_currentWordId++;
    return result;
 }
@@ -12270,13 +12260,29 @@ static QByteArray escapeWord(const char *s)
 #define	YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
 
 static int yyread(char *buf, int max_size)
-{
+{  
    int c = 0;
-   while ( c < max_size && g_inputString[g_inputPosition] ) {
-      *buf = g_inputString[g_inputPosition++] ;
-      c++;
-      buf++;
+
+   while (g_inputString[g_inputPosition] != 0) {
+
+      QString tmp1    = g_inputString.at(g_inputPosition);
+      QByteArray tmp2 = tmp1.toUtf8();
+
+      if (c + tmp2.length() >= max_size)  {
+         // buffer is full
+         break;
+      }
+
+      c += tmp2.length();     
+   
+      for (auto letters : tmp2) {
+         *buf = letters;
+          buf++;
+      }
+
+      g_inputPosition++;     
    }
+
    return c;
 }
 
@@ -12847,7 +12853,7 @@ YY_DECL {
                if (fd && fd->isLinkable())
                {
                   if (ambig) { // multiple input files match the name
-                     QByteArray name = QDir::cleanPath(codeYYtext).toUtf8();
+                     QString name = QDir::cleanPath(codeYYtext);
 
                      if (! name.isEmpty() && g_sourceFileDef) {
                         QSharedPointer<FileName> fn = Doxy_Globals::inputNameDict->find(name);
@@ -12876,7 +12882,7 @@ YY_DECL {
                   g_code->codify(codeYYtext);
                }
                char c = yyinput();
-               QByteArray text;
+               QString text;
                text += c;
                g_code->codify(text);
                endFontClass();
@@ -13430,7 +13436,7 @@ YY_DECL {
             YY_RULE_SETUP {
                startFontClass("keyword");
                codifyLines(codeYYtext);
-               if (QByteArray(codeYYtext) == "typedef")
+               if (QString(codeYYtext) == "typedef")
                {
                   addType();
                   g_name += codeYYtext;
@@ -13638,8 +13644,8 @@ YY_DECL {
             /* rule 92 can match eol */
             YY_RULE_SETUP {
                // A<T> *pt;
-               int i = QByteArray(codeYYtext).indexOf('<');
-               QByteArray kw = QByteArray(codeYYtext).left(i).trimmed();
+               int i = QString(codeYYtext).indexOf('<');
+               QString kw = QString(codeYYtext).left(i).trimmed();
                if (kw.right(5) == "_cast" && YY_START == Body)
                {
                   REJECT;
@@ -13684,7 +13690,7 @@ YY_DECL {
                {
                   e--;
                }
-               QByteArray varname = ((QByteArray)codeYYtext).mid(s, e - s + 1);
+               QString varname = QString(codeYYtext).mid(s, e - s + 1);
                addType();
                g_name = varname;
             }
@@ -13704,7 +13710,7 @@ YY_DECL {
          case 97:
             /* rule 97 can match eol */
             YY_RULE_SETUP {
-               QByteArray text = codeYYtext;
+               QString text = codeYYtext;
                int i = text.indexOf('R');
                g_code->codify(text.left(i + 1));
                startFontClass("stringliteral");
@@ -13772,7 +13778,7 @@ YY_DECL {
             /* rule 106 can match eol */
             YY_RULE_SETUP {
                g_code->codify(codeYYtext);
-               QByteArray delimiter = codeYYtext + 1;
+               QString delimiter = codeYYtext + 1;
                delimiter = delimiter.left(delimiter.length() - 1);
                if (delimiter == g_delimiter)
                {
@@ -14362,7 +14368,7 @@ YY_DECL {
                DBG_CTX((stderr, "g_name=%s\n", g_name.data()));
                if (index != -1)
                {
-                  QByteArray scope = g_name.left(index);
+                  QString scope = g_name.left(index);
                   if (!g_classScope.isEmpty()) {
                      scope.prepend(g_classScope + "::");
                   }
@@ -14385,7 +14391,7 @@ YY_DECL {
                   g_scopeStack.push(INNERBLOCK);
                }
                codeYYtext[codeYYleng - 1] = '\0';
-               QByteArray cv(codeYYtext);
+               QString cv(codeYYtext);
                if (!cv.trimmed().isEmpty())
                {
                   startFontClass("keyword");
@@ -14542,7 +14548,7 @@ YY_DECL {
                {
                   e--;
                }
-               g_name = ((QByteArray)codeYYtext).mid(s, e - s + 1);
+               g_name = QString(codeYYtext).mid(s, e - s + 1);
                BEGIN( MemberCall2 );
             }
             YY_BREAK
@@ -14641,13 +14647,13 @@ YY_DECL {
             (yy_c_buf_p) = yy_cp -= 1;
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
             YY_RULE_SETUP {
-               g_yyLineNr += QByteArray(codeYYtext).count('\n');
+               g_yyLineNr += QString(codeYYtext).count('\n');
             }
             YY_BREAK
          case 186:
             /* rule 186 can match eol */
             YY_RULE_SETUP {
-               g_yyLineNr += QByteArray(codeYYtext).count('\n');
+               g_yyLineNr += QString(codeYYtext).count('\n');
                nextCodeLine();
                if (g_lastSpecialCContext == SkipCxxComment)
                {
@@ -14701,7 +14707,7 @@ YY_DECL {
 
                if (Config::getBool("strip-code-comments"))
                {
-                  g_yyLineNr += ((QByteArray)codeYYtext).count('\n');
+                  g_yyLineNr += QString(codeYYtext).count('\n');
                   nextCodeLine();
                } else
                {
@@ -14999,7 +15005,7 @@ YY_DECL {
             YY_BREAK
          /*
          <*>([ \t\n]*"\n"){2,}			{ // combine multiple blank lines
-           					  //QByteArray sepLine=codeYYtext;
+           					  //QString sepLine=codeYYtext;
            					  //g_code->codify("\n\n");
            					  //g_yyLineNr+=sepLine.contains('\n');
            					  //char sepLine[3]="\n\n";
@@ -16034,14 +16040,10 @@ void codeYYfree (void *ptr )
 
 #define YYTABLES_NAME "yytables"
 
-
-/*@ ----------------------------------------------------------------------------
- */
-
 static void saveObjCContext()
 {
    if (g_currentCtx) {
-      g_currentCtx->format += QString("$c%1").arg(g_currentCtxId).toUtf8();
+      g_currentCtx->format += QString("$c%1").arg(g_currentCtxId);
 
       if (g_braceCount == 0 && YY_START == ObjCCall) {
          g_currentCtx->objectTypeOrName = g_currentCtx->format.mid(1);        
@@ -16086,8 +16088,8 @@ void resetCCodeParserState()
    g_anchorCount = 0;
 }
 
-void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray &s,
-                SrcLangExt lang, bool exBlock, const char *exName, QSharedPointer<FileDef> fd,
+void parseCCode(CodeOutputInterface &od, const QString &className, const QString &s,
+                SrcLangExt lang, bool exBlock, const QString &exName, QSharedPointer<FileDef> fd,
                 int startLine, int endLine, bool inlineFragment,
                 QSharedPointer<MemberDef> memberDef, bool showLineNumbers, 
                 QSharedPointer<Definition> searchCtx, bool collectXRefs)
@@ -16107,7 +16109,7 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
    g_code = &od;
    g_inputString   = s;
    g_inputPosition = 0;
-   g_currentFontClass = 0;
+   g_currentFontClass = "";
    g_needsTermination = FALSE;
    g_searchCtx = searchCtx;
    g_collectXRefs = collectXRefs;
@@ -16144,7 +16146,7 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
 
    if (fd == 0) {
       // create a dummy filedef for the example
-      g_sourceFileDef  = QMakeShared<FileDef>("", (exName ? exName : "generated"));
+      g_sourceFileDef  = QMakeShared<FileDef>("", (! exName.isEmpty() ? qPrintable(exName) : "generated"));
       cleanupSourceDef = TRUE;
    }
    g_insideObjC = lang == SrcLangExt_ObjC;
@@ -16164,7 +16166,7 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
    g_bracketCount = 0;
 
    if (! g_exampleName.isEmpty()) {
-      g_exampleFile = convertNameToFile(g_exampleName + "-example", FALSE, TRUE).toUtf8();      
+      g_exampleFile = convertNameToFile(g_exampleName + "-example", FALSE, TRUE);      
    }
 
    g_includeCodeFragment = inlineFragment;
@@ -16201,7 +16203,7 @@ void parseCCode(CodeOutputInterface &od, const char *className, const QByteArray
       g_sourceFileDef = QSharedPointer<FileDef>();
    }
 
-   printlex(codeYY_flex_debug, FALSE, __FILE__, fd ? fd->fileName().data() : NULL);
+   printlex(codeYY_flex_debug, FALSE, __FILE__, fd ? qPrintable(fd->fileName()) : "");
 
    return;
 }

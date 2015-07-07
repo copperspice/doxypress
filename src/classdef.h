@@ -289,7 +289,7 @@ class ClassDef : public Definition
 
    QHash<QString, int> *getTemplateBaseClassNames() const;
 
-   QSharedPointer<ClassDef> getVariableInstance(const char *templSpec);
+   QSharedPointer<ClassDef> getVariableInstance(const QString &templSpec);
 
    bool isUsedOnly() const;
 
@@ -298,7 +298,7 @@ class ClassDef : public Definition
 
    bool isSimple() const;
 
-   const SortedList<QSharedPointer<ClassDef>>   *taggedInnerClasses() const;
+   const SortedList<QSharedPointer<ClassDef>>  *taggedInnerClasses() const;
    QSharedPointer<ClassDef> tagLessReference() const;
 
    QSharedPointer<MemberDef> isSmartPointer() const;
@@ -324,7 +324,7 @@ class ClassDef : public Definition
    void setIncludeFile(QSharedPointer<FileDef> fd, const char *incName, bool local, bool force);
    void insertMember(QSharedPointer<MemberDef> );
    void insertUsedFile(QSharedPointer<FileDef> fd);
-   bool addExample(const char *anchor, const char *name, const char *file);
+   bool addExample(const QString &anchor, const QString &name, const QString &file);
    void mergeCategory(QSharedPointer<ClassDef> category);
    void setNamespace(QSharedPointer<NamespaceDef> nd);
    void setFileDef(QSharedPointer<FileDef> fd);
@@ -350,7 +350,7 @@ class ClassDef : public Definition
    void setTemplateBaseClassNames(QHash<QString, int> *templateNames);
    void setTemplateMaster(QSharedPointer<ClassDef> tm);
    void setTypeConstraints(ArgumentList *al);
-   void addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const char *templSpec);
+   void addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const QString &templSpec);
    void makeTemplateArgument(bool b = true);
    void setCategoryOf(QSharedPointer<ClassDef> cd);
    void setUsedOnly(bool b);

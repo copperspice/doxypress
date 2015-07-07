@@ -25951,7 +25951,7 @@ int yy_end       = 1;
 class UseEntry
 {
  public:
-   QByteArray module;       // just for debug
+   QString module;          // just for debug
    QStringList onlyNames;   /* entries of the ONLY-part */
 };
 
@@ -25977,22 +25977,22 @@ class Scope
    Scope() {}      // broom -- on hold localVars should be case insensitive
 };
 
-static QByteArray  docBlock;                     //!< contents of all lines of a documentation block
-static QByteArray  currentModule = 0;            //!< name of the current enclosing module
+static QString     docBlock;                     //!< contents of all lines of a documentation block
+static QString     currentModule = 0;            //!< name of the current enclosing module
 static UseSDict    *useMembers = new UseSDict;   //!< info about used modules
 static UseEntry    *useEntry = 0;                //!< current use statement info
 static QList<Scope *> scopeStack;
 
 // static QStringList *currentUseNames= new QStringList; //! contains names of used modules of current program unit
-static QByteArray str = "";                    //!> contents of fortran string
+static QString str = "";                    //!> contents of fortran string
 
 static CodeOutputInterface *g_code;
 
 // TODO: is this still needed? 
-static QByteArray    g_parmType;
-static QByteArray    g_parmName;
+static QString      g_parmType;
+static QString      g_parmName;
 
-static const char   *g_inputString;     //!< the code fragment as text
+static QString       g_inputString;     //!< the code fragment as text
 static int	         g_inputPosition;   //!< read offset during parsing
 static int           g_inputLines;      //!< number of line in the code fragment
 static int	         g_yyLineNr;        //!< current line number
@@ -26002,10 +26002,10 @@ static bool          g_collectXRefs;
 static bool          g_isFixedForm;
 
 static bool          g_insideBody;      //!< inside subprog/program body? => create links
-static const char   *g_currentFontClass;
+static QString       g_currentFontClass;
 
 static bool          g_exampleBlock;
-static QByteArray    g_exampleName;
+static QString       g_exampleName;
 static QString       g_exampleFile;
 
 static QSharedPointer<Definition> g_searchCtx;
@@ -26014,7 +26014,6 @@ static QSharedPointer<Definition> g_currentDefinition;
 static QSharedPointer<MemberDef>  g_currentMemberDef;
 
 static bool          g_includeCodeFragment;
-
 static char          stringStartSymbol; // single or double quote
 
 // count in variable declaration to filter out declared from referenced names
@@ -26081,20 +26080,20 @@ static bool recognizeFixedForm(const char *contents, FortranFormat format)
 
 static void endFontClass()
 {
-   if (g_currentFontClass) {
+   if (! g_currentFontClass.isEmpty()) {
       g_code->endFontClass();
-      g_currentFontClass = 0;
+      g_currentFontClass = "";
    }
 }
 
-static void startFontClass(const char *s)
+static void startFontClass(const QString &s)
 {
    endFontClass();
    g_code->startFontClass(s);
    g_currentFontClass = s;
 }
 
-static void setCurrentDoc(const QByteArray &anchor)
+static void setCurrentDoc(const QString &anchor)
 {
    if (Doxy_Globals::searchIndex) {
 
@@ -26107,7 +26106,7 @@ static void setCurrentDoc(const QByteArray &anchor)
    }
 }
 
-static void addToSearchIndex(const char *text)
+static void addToSearchIndex(const QString &text)
 {
    if (Doxy_Globals::searchIndex) {
       Doxy_Globals::searchIndex->addWord(text, FALSE);
@@ -26132,8 +26131,8 @@ static void startCodeLine()
          g_parmType.resize(0);
          g_parmName.resize(0);
 
-         QByteArray lineAnchor;
-         lineAnchor = QString("l%1").arg(g_yyLineNr, 5, QChar('0')).toUtf8();
+         QString lineAnchor;
+         lineAnchor = QString("l%1").arg(g_yyLineNr, 5, QChar('0'));
 
          if (g_currentMemberDef) {
             g_code->writeLineNumber(g_currentMemberDef->getReference(), g_currentMemberDef->getOutputFileBase(),
@@ -26151,7 +26150,8 @@ static void startCodeLine()
       }
    }
    g_code->startCodeLine(g_sourceFileDef);
-   if (g_currentFontClass) {
+
+   if (! g_currentFontClass.isEmpty()) {
       g_code->startFontClass(g_currentFontClass);
    }
 }
@@ -26167,84 +26167,85 @@ static void endCodeLine()
 /*! write a code fragment `text' that may span multiple lines, inserting
  * line numbers for each line.
  */
-static void codifyLines(char *text)
+static void codifyLines(const QString &text)
 {   
-   char *p = text, *sp = p;
-   char c;
-   bool done = FALSE;
-   const char   *tmp_currentFontClass = g_currentFontClass;
+   QString tmp;
+   QString tmp_currentFontClass = g_currentFontClass;
 
-   while (!done) {
-      sp = p;
-      while ((c = *p++) && c != '\n') { }
-
+   for (auto c : text) { 
+   
       if (c == '\n') {
-         g_yyLineNr++;
-         *(p - 1) = '\0';
-         g_code->codify(sp);
+         g_yyLineNr++;       
+
+         g_code->codify(tmp);
          endCodeLine();
+
          if (g_yyLineNr < g_inputLines) {
             startCodeLine();
          }
-         if (tmp_currentFontClass) {
+
+         if (! tmp_currentFontClass.isEmpty()) {
             startFontClass(tmp_currentFontClass);
-         }
+         }      
+
+         tmp = "";
+
       } else {
-         g_code->codify(sp);
-         done = TRUE;
+         tmp += c;
+
       }
    }
+
+   if (! tmp.isEmpty() )  {
+      g_code->codify(tmp);
+   }    
 }
 
-static void codifyLines(QByteArray str)
-{
-   char *tmp = (char *) malloc(str.length() + 1);
-   strcpy(tmp, str);
-   codifyLines(tmp);
-   free(tmp);
-}
 
 /*! writes a link to a fragment \a text that may span multiple lines, inserting
  * line numbers for each line. If \a text contains newlines, the link will be
  * split into multiple links with the same destination, one for each line.
  */
-static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d, const char *text)
+static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d, const QString &text)
 {
    static bool sourceTooltips = Config::getBool("source-tooltips");
    TooltipManager::instance()->addTooltip(d);
 
-   QByteArray ref    = d->getReference();
-   QByteArray file   = d->getOutputFileBase();
-   QByteArray anchor = d->anchor();
-   QByteArray tooltip;
+   QString ref    = d->getReference();
+   QString file   = d->getOutputFileBase();
+   QString anchor = d->anchor();
+   QString tooltip;
 
-   if (!sourceTooltips) { 
+   if (! sourceTooltips) { 
       // fall back to simple "title" tooltips
       tooltip = d->briefDescriptionAsTooltip();
    }
 
-   bool done = FALSE;
-   char *p = (char *)text;
+   QString tmp;
 
-   while (!done) {
-      char *sp = p;
-      char c;
-      while ((c = *p++) && c != '\n') { }
+   for (auto c : text) {      
+
       if (c == '\n') {
          g_yyLineNr++;
-         *(p - 1) = '\0';
-         //printf("writeCodeLink(%s,%s,%s,%s)\n",ref,file,anchor,sp);
-         ol.writeCodeLink(ref, file, anchor, sp, tooltip);
+                 
+         ol.writeCodeLink(ref, file, anchor, tmp, tooltip);
          endCodeLine();
+
          if (g_yyLineNr < g_inputLines) {
             startCodeLine();
          }
-      } else {
-         //printf("writeCodeLink(%s,%s,%s,%s)\n",ref,file,anchor,sp);
-         ol.writeCodeLink(ref, file, anchor, sp, tooltip);
-         done = TRUE;
+
+         tmp = "";
+
+      } else {  
+         tmp += c;                
+       
       }
    }
+
+   if ( ! tmp.isEmpty() ) {
+      ol.writeCodeLink(ref, file, anchor, tmp, tooltip);
+   }  
 }
 
 /**
@@ -26255,7 +26256,7 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Defin
   @param useDict dictionary of data of USE-statement
   @returns true, if type is found
 */
-static bool getFortranTypeDefs(const QByteArray &tname, const QByteArray &moduleName,
+static bool getFortranTypeDefs(const QString &tname, const QString &moduleName,
                                QSharedPointer<ClassDef> &cd, UseSDict *usedict = 0)
 {
    if (tname.isEmpty()) {
@@ -26291,7 +26292,7 @@ static bool getFortranTypeDefs(const QByteArray &tname, const QByteArray &module
   @param usedict array of data of USE-statement
   @returns true, if found
 */
-static bool getFortranDefs(const QByteArray &memberName, const QByteArray &moduleName,
+static bool getFortranDefs(const QString &memberName, const QString &moduleName,
                            QSharedPointer<MemberDef> &md, UseSDict *usedict = 0)
 {
    if (memberName.isEmpty()) {
@@ -26334,7 +26335,7 @@ static bool getFortranDefs(const QByteArray &memberName, const QByteArray &modul
 
             } else {
                // else search in used modules
-               QByteArray moduleName = nspace->name();
+               QString moduleName = nspace->name();
                UseEntry *ue = usedict->find(moduleName);
 
                if (ue) {
@@ -26347,7 +26348,7 @@ static bool getFortranDefs(const QByteArray &memberName, const QByteArray &modul
                   } else {
 
                      for ( QStringList::Iterator it = only.begin(); it != only.end(); ++it) {
-                        if (memberName == (*it).toUtf8()) {
+                        if (memberName == (*it) ) {
                            // found in ONLY-part of use list
                            return TRUE; 
                         }
@@ -26373,7 +26374,7 @@ static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd, const cha
 static bool getLink(UseSDict *usedict, const char *memberText, CodeOutputInterface &ol, const char *text)
 {
    QSharedPointer<MemberDef> md;
-   QByteArray memberName = removeRedundantWhiteSpace(memberText);
+   QString memberName = removeRedundantWhiteSpace(memberText);
 
    if (getFortranDefs(memberName, currentModule, md, usedict) && md->isLinkable()) {
 
@@ -26404,11 +26405,11 @@ static bool getLink(UseSDict *usedict, const char *memberText, CodeOutputInterfa
 }
 
 
-static void generateLink(CodeOutputInterface &ol, char *lname)
+static void generateLink(CodeOutputInterface &ol, QString &lname)
 {
    QSharedPointer<ClassDef> cd;
 
-   QByteArray tmp = lname;
+   QString tmp = lname;
    tmp = removeRedundantWhiteSpace(tmp.toLower());
 
    // check if lowercase lname is a linkable type or interface
@@ -26436,25 +26437,34 @@ static void generateLink(CodeOutputInterface &ol, char *lname)
    }
 }
 
+
 /*! counts the number of lines in the input */
 static int countLines()
 {
-   const char *p = g_inputString;
-   char c;
    int count = 1;
 
-   while ((c = *p)) {
+   if (g_inputString.isEmpty() ) {
+      return count;
+   }
+
+   const QChar *p = g_inputString.constData();
+   QChar c;
+   
+   while ((c = *p) != 0) {
       p++ ;
+
       if (c == '\n') {
          count++;
       }
    }
-   if (p > g_inputString && *(p - 1) != '\n') {
+
+   if (*(p - 1) != '\n') {
       // last line does not end with a \n, so we add an extra
-      // line and explicitly terminate the line after parsing.
-      count++,
-            g_needsTermination = TRUE;
+      // line and explicitly terminate the line after parsing
+      count++;
+      g_needsTermination = true;
    }
+
    return count;
 }
 
@@ -26480,20 +26490,20 @@ static void endScope()
    scopeStack.removeLast();
 
    for (auto it : scope->useNames ) {
-      useMembers->remove(it.toUtf8());
+      useMembers->remove(it);
    }
 
    delete scope;
 }
 
-static void addUse(const QByteArray &moduleName)
+static void addUse(const QString &moduleName)
 {
    if (! scopeStack.isEmpty()) {
       scopeStack.last()->useNames.append(moduleName);
    }
 }
 
-static void addLocalVar(const QByteArray &varName)
+static void addLocalVar(const QString &varName)
 {
    if (! scopeStack.isEmpty()) {
       scopeStack.last()->localVars.insert(varName, (void *)1);
@@ -26506,11 +26516,27 @@ static void addLocalVar(const QByteArray &varName)
 static int yyread(char *buf, int max_size)
 {
    int c = 0;
-   while ( c < max_size && g_inputString[g_inputPosition] ) {
-      *buf = g_inputString[g_inputPosition++] ;
-      c++;
-      buf++;
+
+   while (g_inputString[g_inputPosition] != 0) {
+
+      QString tmp1    = g_inputString.at(g_inputPosition);
+      QByteArray tmp2 = tmp1.toUtf8();
+
+      if (c + tmp2.length() >= max_size)  {
+         // buffer is full
+         break;
+      }
+
+      c += tmp2.length();     
+   
+      for (auto letters : tmp2) {
+         *buf = letters;
+          buf++;
+      }
+
+      g_inputPosition++;     
    }
+
    return c;
 }
 
@@ -26949,7 +26975,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QByteArray tmp = fortrancodeYYtext;
+               QString tmp = fortrancodeYYtext;
                tmp = tmp.toLower();
                g_insideBody = TRUE;
                generateLink(*g_code, fortrancodeYYtext);
@@ -27405,7 +27431,7 @@ YY_DECL {
 
                if (Config::getBool("strip-code-comments"))
                {
-                  g_yyLineNr += QByteArray(docBlock).count('\n');
+                  g_yyLineNr += QString(docBlock).count('\n');
                   g_yyLineNr += 1;
 
                   endCodeLine();
@@ -28664,7 +28690,7 @@ void fortrancodeYYfree (void *ptr )
 
 void resetFortranCodeParserState() {}
 
-void parseFortranCode(CodeOutputInterface &od, const char *className, const QByteArray &s,
+void parseFortranCode(CodeOutputInterface &od, const char *className, const QString &s,
                   bool exBlock, const char *exName, QSharedPointer<FileDef> fd, int startLine, 
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool, 
                   QSharedPointer<Definition> searchCtx, bool collectXRefs, FortranFormat format)
@@ -28680,7 +28706,7 @@ void parseFortranCode(CodeOutputInterface &od, const char *className, const QByt
    g_inputString   = s;
    g_inputPosition = 0;
    g_isFixedForm   = recognizeFixedForm((const char *)s, format);
-   g_currentFontClass = 0;
+   g_currentFontClass = "";
    g_needsTermination = FALSE;
 
    g_searchCtx    = searchCtx;

@@ -290,7 +290,7 @@ void Entry::createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage 
    createSubtreeIndex(rootNav, storage, fd, self);
 }
 
-void Entry::addSpecialListItem(const char *listName, int itemId)
+void Entry::addSpecialListItem(const QString &listName, int itemId)
 {
    if (sli == 0) {
       sli = new QList<ListItemInfo>;      

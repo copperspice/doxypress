@@ -894,18 +894,18 @@ char *defargsYYtext;
 #define YY_NO_UNISTD_H 1
 
 //    state variables
-static const char      *g_inputString;
+static QString          g_inputString;
 static int              g_inputPosition;
 static ArgumentList    *g_argList;
-static QByteArray      *g_copyArgValue;
-static QByteArray       g_curArgTypeName;
-static QByteArray       g_curArgDefValue;
-static QByteArray       g_curArgName;
-static QByteArray       g_curArgDocs;
-static QByteArray       g_curArgAttrib;
-static QByteArray       g_curArgArray;
-static QByteArray       g_curTypeConstraint;
-static QByteArray       g_extraTypeChars;
+static QString         *g_copyArgValue;
+static QString          g_curArgTypeName;
+static QString          g_curArgDefValue;
+static QString          g_curArgName;
+static QString          g_curArgDocs;
+static QString          g_curArgAttrib;
+static QString          g_curArgArray;
+static QString          g_curTypeConstraint;
+static QString          g_extraTypeChars;
 static int              g_argRoundCount;
 static int              g_argSharpCount;
 static int              g_argCurlyCount;
@@ -913,19 +913,33 @@ static int              g_readArgContext;
 static int              g_lastDocContext;
 static int              g_lastDocChar;
 static int              g_lastExtendsContext;
-static QByteArray       g_delimiter;
+static QString          g_delimiter;
 
 #undef   YY_INPUT
-#define  YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
+#define  YY_INPUT(buf,result,max_size) result = yyread(buf,max_size);
 
 static int yyread(char *buf, int max_size)
 {
    int c = 0;
 
-   while ( c < max_size && g_inputString[g_inputPosition] ) {
-      *buf = g_inputString[g_inputPosition++] ;
-      c++;
-      buf++;
+   while (g_inputString[g_inputPosition] != 0) {
+
+      QString tmp1    = g_inputString.at(g_inputPosition);
+      QByteArray tmp2 = tmp1.toUtf8();
+
+      if (c + tmp2.length() >= max_size)  {
+         // buffer is full
+         break;
+      }
+
+      c += tmp2.length();     
+   
+      for (auto letters : tmp2) {
+         *buf = letters;
+          buf++;
+      }
+
+      g_inputPosition++;     
    }
 
    return c;
@@ -1285,13 +1299,16 @@ YY_DECL {
 
             {
                g_curArgDefValue += defargsYYtext;
-               QByteArray text = defargsYYtext;
+
+               QString text = defargsYYtext;
                int i = text.indexOf('"');
+
                g_delimiter = defargsYYtext + i + 1;
                g_delimiter = g_delimiter.left(g_delimiter.length() - 1);
                BEGIN( CopyRawString );
             }
             YY_BREAK
+
          case 8:
             YY_RULE_SETUP
 
@@ -1529,7 +1546,8 @@ YY_DECL {
 
             {
                g_curArgDefValue += defargsYYtext;
-               QByteArray delimiter = defargsYYtext + 1;
+               QString delimiter = defargsYYtext + 1;
+
                delimiter = delimiter.left(delimiter.length() - 1);
                if (delimiter == g_delimiter)
                {
@@ -1558,7 +1576,7 @@ YY_DECL {
             {
                g_lastDocContext = YY_START;
                g_lastDocChar = *defargsYYtext;
-               QByteArray text = defargsYYtext;
+               QString text = defargsYYtext;
 
                if (text.indexOf("//") != -1)
                {
@@ -1584,7 +1602,7 @@ YY_DECL {
 
                   if (l > 0)  {                  
                      int i = l - 1;
-                     while (i >= 0 && (isspace((uchar)g_curArgTypeName.at(i)) || g_curArgTypeName.at(i) == '.')) {
+                     while (i >= 0 && (g_curArgTypeName.at(i).isSpace() || g_curArgTypeName.at(i) == '.')) {
                         i--;
                      }
 
@@ -1696,7 +1714,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QByteArray name = defargsYYtext; //resolveDefines(defargsYYtext);
+               QString name = defargsYYtext; //resolveDefines(defargsYYtext);
                if (YY_START == ReadFuncArgType && g_curArgArray == "[]") // Java style array
                {
                   g_curArgTypeName += " []";
@@ -1735,7 +1753,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QByteArray name = defargsYYtext; //resolveDefines(defargsYYtext);
+               QString name = defargsYYtext; //resolveDefines(defargsYYtext);
                *g_copyArgValue += name;
             }
             YY_BREAK
@@ -2935,7 +2953,7 @@ void stringToArgumentList(const QString &argsString, ArgumentList *al, QString *
       return;
    }
 
-   if (argsString == 0) {
+   if (! argsString.isEmpty()) {
       return;
    }
 
@@ -2947,13 +2965,14 @@ void stringToArgumentList(const QString &argsString, ArgumentList *al, QString *
    g_curArgArray.resize(0);
    g_curTypeConstraint.resize(0);
    g_extraTypeChars.resize(0);
+
    g_argRoundCount = 0;
    g_argSharpCount = 0;
    g_argCurlyCount = 0;
-   g_lastDocChar = 0;
-
+   g_lastDocChar   = 0;
    g_inputString   = argsString;
    g_inputPosition = 0;
+
    g_curArgTypeName.resize(0);
    g_curArgDefValue.resize(0);
    g_curArgName.resize(0);

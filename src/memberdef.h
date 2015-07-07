@@ -334,7 +334,7 @@ class MemberDef : public Definition
    void setAnonymousEnumType(QSharedPointer<MemberDef> md);
 
    // example related members
-   bool addExample(const char *anchor, const char *name, const char *file);
+   bool addExample(const QString &anchor, const QString &name, const QString &file);
 
    // prototype related members
    void setPrototype(bool p);

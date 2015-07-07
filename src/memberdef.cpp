@@ -975,7 +975,7 @@ void MemberDef::insertEnumField(QSharedPointer<MemberDef> md)
    m_impl->enumFields->append(md);
 }
 
-bool MemberDef::addExample(const char *anchor, const char *nameStr, const char *file)
+bool MemberDef::addExample(const QString &anchor, const QString &nameStr, const QString &file)
 {
    if (m_impl->exampleSDict == 0) {
       m_impl->exampleSDict = new ExampleSDict;
@@ -985,8 +985,8 @@ bool MemberDef::addExample(const char *anchor, const char *nameStr, const char *
 
       QSharedPointer<Example> e (new Example);
       e->anchor = anchor;
-      e->name = nameStr;
-      e->file = file;
+      e->name   = nameStr;
+      e->file   = file;
 
       m_impl->exampleSDict->insert(nameStr, e);
 

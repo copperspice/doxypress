@@ -15,52 +15,35 @@
  *
 *************************************************************************/
 
+#include <QString>
+
 #include <stdlib.h>
 #include <cppvalue.h>
 #include <constexp.h>
 
 CPPValue parseOctal()
 {
-   long val = 0;
-   for (const char *p = g_strToken.data(); *p != 0; p++) {
-      if (*p >= '0' && *p <= '7') {
-         val = val * 8 + *p - '0';
-      }
-   }
+   long val = g_strToken.toLong(nullptr, 8);  
    return CPPValue(val);
 }
 
 CPPValue parseDecimal()
 {
-   long val = 0;
-   for (const char *p = g_strToken.data(); *p != 0; p++) {
-      if (*p >= '0' && *p <= '9') {
-         val = val * 10 + *p - '0';
-      }
-   }
+   long val = g_strToken.toLong(nullptr, 10);
    return CPPValue(val);
 }
 
 CPPValue parseHexadecimal()
 {
-   long val = 0;
-   for (const char *p = g_strToken.data(); *p != 0; p++) {
-      if      (*p >= '0' && *p <= '9') {
-         val = val * 16 + *p - '0';
-      } else if (*p >= 'a' && *p <= 'f') {
-         val = val * 16 + *p - 'a' + 10;
-      } else if (*p >= 'A' && *p <= 'F') {
-         val = val * 16 + *p - 'A' + 10;
-      }
-   }
-   //printf("parseHexadecimal %s->%x\n",g_strToken.data(),val);
+   long val = g_strToken.toLong(nullptr, 16);   
    return CPPValue(val);
 }
 
 CPPValue parseCharacter() // does not work for '\n' and the alike
 {
    if (g_strToken[1] == '\\') {
-      switch (g_strToken[2]) {
+
+      switch (g_strToken[2].unicode()) {
          case 'n':
             return CPPValue((long)'\n');
          case 't':
@@ -83,6 +66,7 @@ CPPValue parseCharacter() // does not work for '\n' and the alike
             return CPPValue((long)'\'');
          case '"':
             return CPPValue((long)'"');
+
          case '0':  // fall through
          case '1':  // fall through
          case '2':  // fall through
@@ -92,18 +76,22 @@ CPPValue parseCharacter() // does not work for '\n' and the alike
          case '6':  // fall through
          case '7':  // fall through
             return parseOctal();
+
          case 'x':
          case 'X':
             return parseHexadecimal();
+
          default:
-            printf("Invalid escape sequence %s found!\n", g_strToken.data());
+            printf("Invalid escape sequence %s found\n", qPrintable(g_strToken));
             return CPPValue(0L);
       }
    }
-   return CPPValue((long)g_strToken[1]);
+
+   return CPPValue(static_cast<long>(g_strToken[1].unicode()));
 }
 
 CPPValue parseFloat()
 {
-   return CPPValue(atof(g_strToken));
+   double val = g_strToken.toDouble();
+   return CPPValue(val);
 }

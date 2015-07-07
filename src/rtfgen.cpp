@@ -2098,7 +2098,7 @@ static void encodeForOutput(QTextStream &t_stream, const QString &text)
 /**
  * Very brittle routine inline RTF's included by other RTF's it is recursive and ugly
  */
-static bool preProcessFile(QString &input_FName, QTextStream &t_stream, bool bIncludeHeader = true)
+static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool bIncludeHeader = true)
 {
    QFile f(input_FName);
 
@@ -2150,7 +2150,7 @@ static bool preProcessFile(QString &input_FName, QTextStream &t_stream, bool bIn
 printf("\n BROOM - RECURSIVE, process file -->  %s \nBUFFER = %s ", qPrintable(fileName), lineBuf.constData()  );
 
 
-         if (! preProcessFile(fileName, t_stream, false)) {
+         if (! preProcessFile_RTF(fileName, t_stream, false)) {
             return false;
          }
 
@@ -2386,7 +2386,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
    //
    QString mainRTFName = rtfDir + "/" + name;
 
-   if (! preProcessFile(mainRTFName, outStream)) {
+   if (! preProcessFile_RTF(mainRTFName, outStream)) {
       // failed, remove the temp file
       outf.close();
 

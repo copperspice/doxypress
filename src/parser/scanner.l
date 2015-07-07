@@ -35,7 +35,7 @@
 #define YY_NEVER_INTERACTIVE 1
 
 static ParserInterface *g_thisParser;
-static const char *     inputString;
+static QString          inputString;
 static int              inputPosition;
 static QFile            inputFile;
 static int              lastContext;
@@ -82,24 +82,24 @@ static int yyBegColNr   = yyColNr ;
 static int anonCount    = 0 ;
 static int anonNSCount  = 0 ;
 
-static QByteArray       yyFileName;
+static QString          yyFileName;
 static MethodTypes      mtype;
 static bool             gstat;
 static bool             removeSlashes;
 static Specifier        virt;
 static Specifier        baseVirt;
 
-static QByteArray       msType, msName, msArgs;
+static QString          msType, msName, msArgs;
 static bool             isTypedef;
 static int              tmpDocType;
-static QByteArray       sectionLabel;
-static QByteArray       sectionTitle;
-static QByteArray       funcPtrType;
-static QByteArray       templateStr;
-static QByteArray       aliasName;
-static QByteArray       baseName;
-static QByteArray      *specName;
-static QByteArray       formulaText;
+static QString          sectionLabel;
+static QString          sectionTitle;
+static QString          funcPtrType;
+static QString          templateStr;
+static QString          aliasName;
+static QString          baseName;
+static QString         *specName;
+static QString          formulaText;
 static bool             useOverrideCommands = FALSE;
 
 static SrcLangExt       language;
@@ -124,22 +124,22 @@ static int              currentArgumentContext;
 static int              lastCopyArgStringContext;
 static int              lastCopyArgContext;
 
-static QByteArray         *copyArgString;
-static QByteArray         fullArgString;
-static ArgumentList       *currentArgumentList;
-static char               lastCopyArgChar;
+static QString          *copyArgString;
+static QString          fullArgString;
+static ArgumentList     *currentArgumentList;
+static char             lastCopyArgChar;
 
-static QByteArray         *pCopyQuotedString;
-static QByteArray         *pCopyRoundString;
-static QByteArray         *pCopyCurlyString;
-static QByteArray         *pCopyRawString;
+static QString          *pCopyQuotedString;
+static QString          *pCopyRoundString;
+static QString          *pCopyCurlyString;
+static QString          *pCopyRawString;
 
-static QByteArray         *pCopyCurlyGString;
-static QByteArray         *pCopyRoundGString;
-static QByteArray         *pCopyQuotedGString;
-static QByteArray         *pCopyHereDocGString;
-static QByteArray         *pCopyRawGString;
-static QByteArray         *pSkipVerbString;
+static QString          *pCopyCurlyGString;
+static QString          *pCopyRoundGString;
+static QString          *pCopyQuotedGString;
+static QString          *pCopyHereDocGString;
+static QString          *pCopyRawGString;
+static QString          *pSkipVerbString;
 static QStack<Grouping *>  autoGroupStack;
 
 static bool             insideFormula;
@@ -148,25 +148,25 @@ static bool             insideCode;
 static bool             needsSemi;
 static int              initBracketCount;
 
-static QByteArray       oldStyleArgType;
-static QByteArray       docBackup;
-static QByteArray       briefBackup;
+static QString          oldStyleArgType;
+static QString          docBackup;
+static QString          briefBackup;
 
 static int              docBlockContext;
-static QByteArray       docBlock;
-static QByteArray       docBlockName;
+static QString          docBlock;
+static QString          docBlockName;
 static bool             docBlockInBody;
 static bool             docBlockAutoBrief;
 static char             docBlockTerm;
 
-static QByteArray       idlAttr;
-static QByteArray       idlProp;
+static QString          idlAttr;
+static QString          idlProp;
 static bool             odlProp;
 
 static bool             g_lexInit = FALSE;
 static bool             externC;
 
-static QByteArray       g_delimiter;
+static QString          g_delimiter;
 
 static int              g_column;
 static int              g_fencedSize = 0;
@@ -257,16 +257,18 @@ static void lineCount()
 {
   static int tabSize = Config::getInt("tab-size");
   const char *p;
-  for (p = yytext ; *p ; ++p )
-  {
+
+  for (p = yytext ; *p ; ++p ) {
     if (*p=='\n')
     {
       yyLineNr++,g_column=0,yyColNr=1;
     }
+
     else if (*p=='\t')
     {
       g_column+=tabSize - (g_column%tabSize);
     }
+
     else
     {
       g_column++,yyColNr++;
@@ -274,19 +276,19 @@ static void lineCount()
   }
 }
 
-static inline int computeIndent(const char *s,int startIndent)
+static inline int computeIndent(const char *s, int startIndent)
 {
   int col=startIndent;
   static int tabSize = Config::getInt("tab-size");
-  const char *p=s;
+  const char *p = s;
   char c;
-  while ((c=*p++))
 
-  {
-    if (c=='\t') col+=tabSize-(col%tabSize);
+  while ((c=*p++))   {
+    if (c=='\t') col += tabSize-(col%tabSize);
     else if (c=='\n') col=0;
     else col++;
   }
+
   return col;
 }
 
@@ -313,24 +315,26 @@ static void addType(QSharedPointer<Entry> current)
 }
 
 
-static QByteArray stripQuotes(const char *s)
-{
-  QByteArray name;
-  if (s==0 || *s==0) return name;
-  name=s;
+static QString stripQuotes(const QString &s)
+{ 
+   QString name = s;
 
-  if (name.at(0)=='"' && name.at(name.length()-1)=='"')
-  {
-    name=name.mid(1,name.length()-2);
-  }
-  return name;
+   if (s.isEmpty()) {
+      return name;
+   }
+
+   if (name.startsWith('\"') && name.endsWith('\"')) {
+     name = name.mid(1, name.length()-2);
+   }
+
+   return name;
 }
 
 static void startCommentBlock(bool);
-static void handleCommentBlock(const QByteArray &doc,bool brief);
+static void handleCommentBlock(const QString &doc, bool brief);
 static void handleParametersCommentBlocks(ArgumentList *al);
 
-static bool nameIsOperator(QByteArray &name)
+static bool nameIsOperator(QString &name)
 {
    int i = name.indexOf("operator");
 
@@ -363,7 +367,7 @@ static bool nameIsOperator(QByteArray &name)
 
 static void setContext()
 {
-  QByteArray fileName = yyFileName;
+  QString fileName = yyFileName;
 
   language     = getLanguageFromFileName(fileName);
   insideIDL    = language==SrcLangExt_IDL;
@@ -375,8 +379,7 @@ static void setContext()
   insideJS     = language==SrcLangExt_JS;
   insideCpp    = language==SrcLangExt_Cpp;
 
-  if ( insidePHP )
-  {
+  if ( insidePHP ) {
     useOverrideCommands = TRUE;
   }
 }
@@ -400,7 +403,7 @@ static void prependScope()
 /*! Returns TRUE iff the current entry could be a K&R style C function */
 static bool checkForKnRstyleC()
 {
-   if (((QByteArray)yyFileName).right(2).toLower() != ".c") {
+   if (QString(yyFileName).right(2).toLower() != ".c") {
       return FALSE;   // must be a C file
    }
 
@@ -419,7 +422,7 @@ static bool checkForKnRstyleC()
   return TRUE;
 }
 
-static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
+static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
 {
    int si = current->args.length();
 
@@ -429,7 +432,7 @@ static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
 
       int bi1 = re.lastIndexIn(current->args);
       int bi2 = bi1 != -1 ? re.lastIndexIn(current->args, bi1 - 1) : -1;
-      char c;
+      QChar c;
 
       if (bi1 != -1 && bi2 != -1) { // found something like "int (*func)(int arg)"
          int s = bi2 + 1;
@@ -437,9 +440,10 @@ static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
 
          int i = s;
 
-         while (i < si && ((c = current->args.at(i)) == '*' || isspace((uchar)c))) {
+         while (i < si && ((c = current->args.at(i)) == '*' || c.isSpace() )) {
             i++;
          }
+
          oldStyleArgType += current->args.mid(s, i - s);
          s = i;
 
@@ -454,26 +458,31 @@ static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
          int s = bi1;
          oldStyleArgType = current->args.left(s);
          s++;
+
          int i = s + 1;
-         while (i < si && ((c = current->args.at(i)) == '*' || isspace((uchar)c))) {
+         while (i < si && ((c = current->args.at(i)) == '*' || c.isSpace() )) {
             i++;
          }
+
          oldStyleArgType += current->args.mid(s, i - s);
          s = i;
          while (i < si && isId(current->args.at(i))) {
             i++;
          }
          oldStyleArgName = current->args.mid(s, i - s);
+
       } else { // normal "int *var"
          int l = si, i = l - 1, j;
-         char c;
+         QChar c;
+
          // look for start of name in "type *name"
          while (i >= 0 && isId(current->args.at(i))) {
             i--;
          }
+
          j = i + 1;
          // look for start of *'s
-         while (i >= 0 && ((c = current->args.at(i)) == '*' || isspace((uchar)c))) {
+         while (i >= 0 && ((c = current->args.at(i)) == '*' || c.isSpace() )) {
             i--;
          }
          i++;
@@ -488,9 +497,9 @@ static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
 
    } else { // continuation like *arg2 in "int *args,*arg2"
       int l = si, j = 0;
-      char c;
+      QChar c;
 
-      while (j < l && ((c = current->args.at(j)) == '*' || isspace((uchar)c))) {
+      while (j < l && ((c = current->args.at(j)) == '*' || c.isSpace() )) {
          j++;
       }
 
@@ -509,14 +518,14 @@ static void splitKnRArg(QByteArray &oldStyleArgPtr, QByteArray &oldStyleArgName)
  *  function the type is found \e after the argument list, so this routine
  *  in needed to fix up.
  */
-static void addKnRArgInfo(const QByteArray &type, const QByteArray &name,
-                          const QByteArray &brief, const QByteArray &docs)
+static void addKnRArgInfo(const QString &type, const QString &name, const QString &brief, const QString &docs)
 {
    for (auto a : current->argList) {
       if (a.type == name) {
          a.type = type.trimmed();
 
-         if (a.type.left(9) == "register ") { // strip keyword
+         if (a.type.left(9) == "register ") { 
+            // strip keyword
             a.type = a.type.mid(9);
          }
 
@@ -551,15 +560,29 @@ void fixArgumentListForJavaScript(ArgumentList *al)
 #undef   YY_INPUT
 #define  YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
 
-static int yyread(char *buf,int max_size)
+static int yyread(char *buf, int max_size)
 {
-    int c=0;
-    while( c < max_size && inputString[inputPosition] )
-    {
-      *buf = inputString[inputPosition++] ;
-      c++; buf++;
-    }
-    return c;
+   int c = 0;
+
+   while (inputString[inputPosition] != 0) {
+
+      QString tmp1    = inputString.at(inputPosition);
+      QByteArray tmp2 = tmp1.toUtf8();
+
+      if (c + tmp2.length() >= max_size)  {
+         // buffer is full
+         break;
+      }
+
+      c += tmp2.length();     
+   
+      for (auto letters : tmp2) {
+         *buf = letters;
+          buf++;
+      }
+
+      inputPosition++;     
+   }
 }
 
 %}
@@ -1139,7 +1162,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                     BEGIN( ObjCMethod );
                   }
 <ObjCParams>({ID})?":"        { // Keyword of parameter
-                 QByteArray keyw = yytext;
+                 QString keyw = yytext;
+
                  keyw=keyw.left(keyw.length()-1); // strip :
                  if (keyw.isEmpty())
                  {
@@ -1154,12 +1178,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                    current->argList.last().type="id";
                  }
                  Argument a;
-                 a.attrib=(QByteArray)"["+keyw+"]";
+                 a.attrib=(QString)"["+keyw+"]";
                  current->argList.append(a);
                   }
 <ObjCParams>{ID}{BN}*         { // name of parameter
                     lineCount();
-                    current->argList.last().name=QByteArray(yytext).trimmed();
+                    current->argList.last().name = QString(yytext).trimmed();
                   }
 <ObjCParams>","{BN}*"..."     { // name of parameter
                  lineCount();
@@ -1196,7 +1220,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                                           }
                }
 <ObjCParamType>[^()]*         {
-                       current->argList.last().type+=QByteArray(yytext).trimmed();
+                       current->argList.last().type += QString(yytext).trimmed();
                   }
 <ObjCMethod,ObjCParams>";"       { // end of method declaration
                  if (! current->argList.isEmpty() && current->argList.last().type.isEmpty())
@@ -1453,7 +1477,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                  else
                  {
                    addType( current ) ;
-                   current->name = QByteArray(yytext).trimmed();
+                   current->name = QString(yytext).trimmed();
                  }
                }
 <FindMembers>{B}*"library"{BN}+     {
@@ -1472,7 +1496,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                  else
                  {
                    addType( current ) ;
-                   current->name = QByteArray(yytext).trimmed();
+                   current->name = QString(yytext).trimmed();
                  }
                }
 <FindMembers>{B}*"constants"{BN}+   {  // UNO IDL constant group
@@ -1491,7 +1515,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                  else
                  {
                    addType( current ) ;
-                   current->name = QByteArray(yytext).trimmed();
+                   current->name = QString(yytext).trimmed();
                  }
                }
 <FindMembers>{BN}*("service"){BN}+     { // UNO IDL service
@@ -1513,7 +1537,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                  else // TODO is addType right? just copy/pasted
                  {
                    addType( current ) ;
-                   current->name = QByteArray(yytext).trimmed();
+                   current->name = QString(yytext).trimmed();
                  }
                }
 <FindMembers>{BN}*("singleton"){BN}+   { // UNO IDL singleton
@@ -1533,7 +1557,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                  else // TODO is addType right? just copy/pasted
                  {
                    addType( current ) ;
-                   current->name = QByteArray(yytext).trimmed();
+                   current->name = QString(yytext).trimmed();
                  }
                }
 <FindMembers>{BN}*((("disp")?"interface")|"valuetype"){BN}+    { // M$/Corba/UNO IDL/Java interface
@@ -1556,7 +1580,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                  else
                  {
                    addType( current ) ;
-                   current->name = QByteArray(yytext).trimmed();
+                   current->name = QString(yytext).trimmed();
                  }
                   }
 <FindMembers>{B}*"@implementation"{BN}+   { // Objective-C class implementation
@@ -1624,7 +1648,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 <FindMembers>"@class" | // for Objective C class declarations
 <FindMembers>{B}*{TYPEDEFPREFIX}"class{" |
 <FindMembers>{B}*{TYPEDEFPREFIX}"class"{BN}+ {
-                                          QByteArray decl = yytext;
+                                          QString decl = yytext;
                  isTypedef=decl.indexOf("typedef")!=-1;
                                           bool isConst=decl.indexOf("const")!=-1;
                                           bool isVolatile=decl.indexOf("volatile")!=-1;
@@ -1729,7 +1753,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                   }
 <FindMembers>{B}*{TYPEDEFPREFIX}"struct{" |
 <FindMembers>{B}*{TYPEDEFPREFIX}"struct"/{BN}+ {
-                 QByteArray decl = yytext;
+                 QString decl = yytext;
                  isTypedef=decl.indexOf("typedef")!=-1;
                  bool isConst=decl.indexOf("const")!=-1;
                  bool isVolatile=decl.indexOf("volatile")!=-1;
@@ -1805,7 +1829,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                   }
 <FindMembers>{B}*{TYPEDEFPREFIX}"union{" |
 <FindMembers>{B}*{TYPEDEFPREFIX}"union"{BN}+ {
-                    QByteArray decl=yytext;
+                    QString decl=yytext;
                     isTypedef=decl.indexOf("typedef")!=-1;
                     bool isConst=decl.indexOf("const")!=-1;
                     bool isVolatile=decl.indexOf("volatile")!=-1;
@@ -1833,7 +1857,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                }
 <FindMembers>{B}*{TYPEDEFPREFIX}{IDLATTR}?"enum"({BN}+("class"|"struct"))?"{" |
 <FindMembers>{B}*{TYPEDEFPREFIX}{IDLATTR}?"enum"({BN}+("class"|"struct"))?{BN}+ { // for IDL: typedef [something] enum
-                 QByteArray text = yytext;
+                 QString text = yytext;
                  isTypedef = text.indexOf("typedef")!=-1;
 
                  bool isStrongEnum = text.indexOf("struct") != -1 || text.indexOf("class") != -1 || insideCSharp;
@@ -1911,18 +1935,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                  BEGIN( NSAliasArg );
             }
 <NSAliasArg>({ID}"::")*{ID}      {
-                 //if (current_root->name.isEmpty())
-                 //{
                      // TODO: namespace aliases are now treated as global entities
                      // while they should be aware of the scope they are in
-                     Doxy_Globals::namespaceAliasDict.insert(aliasName, yytext);
-                 //}
-                 //else
-                 //{
-                 //  Doxy_Globals::namespaceAliasDict.insert(current_root->name+"::"+aliasName,
-                 //  new QByteArray(current_root->name+"::"+yytext));
-                 //}
+                     Doxy_Globals::namespaceAliasDict.insert(aliasName, yytext);                
             }
+
 <NSAliasArg>";"            {
                     BEGIN( FindMembers );
                   }
@@ -1970,7 +1987,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                   }
 <JavaImport>({ID}{BN}*"."{BN}*)+"*"    { // package import => add as a using directive
                     lineCount();
-                    QByteArray scope=yytext;
+                    QString scope=yytext;
                  current->name=removeRedundantWhiteSpace(
 substitute(scope.left(scope.length()-1),".","::"));
 
@@ -1983,7 +2000,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                   }
 <JavaImport>({ID}{BN}*"."{BN}*)+{ID}   { // class import => add as a using declaration
                                           lineCount();
-                    QByteArray scope=yytext;
+                    QString scope=yytext;
                  current->name=removeRedundantWhiteSpace(substitute(scope,".","::"));
                  current->fileName = yyFileName;
                  if (insideD)
@@ -2052,7 +2069,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  docBlockInBody    = FALSE;
                  docBlockAutoBrief = ( yytext[yyleng-2]=='*' && Config::getBool("javadoc-auto-brief") ) ||
                                      ( yytext[yyleng-2]=='!' && Config::getBool("qt-auto-brief") );
-                                          QByteArray indent;
+                                          QString indent;
                                           indent.fill(' ',computeIndent(yytext,g_column));
                                           docBlock=indent;
                     lineCount();
@@ -2094,7 +2111,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                   }
 <Using>";"           { BEGIN(FindMembers); }
 <FindMembers>{SCOPENAME}{BN}*"<>"   { // guided template decl
-                 QByteArray n=yytext;
+                 QString n=yytext;
                  addType( current );
                  current->name=n.left(n.length()-2);
                }
@@ -2116,7 +2133,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  sharpCount=0;
                  roundCount=0;
                  lineCount();
-                 current->name+=((QByteArray)yytext).trimmed();
+                 current->name += QString(yytext).trimmed();
                  // current->memberSpec.resize(0);
                  // currentTemplateSpec = &current->memberSpec;
                  if (nameIsOperator(current->name))
@@ -2579,7 +2596,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                         current->name = current->name.mid(6);
                      }
 
-                     QByteArray tmp = yytext;
+                     QString tmp = yytext;
 
                      if (nameIsOperator(tmp)) {
                         // BEGIN(Operator);    BROOM - resolve later on
@@ -2801,7 +2818,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                   current->name=current->name.mid(6);
                      }
                    }
-                   QByteArray tmp=yytext;
+                   QString tmp=yytext;
                    if (nameIsOperator(tmp)) {
                      BEGIN(Operator);
                    } else {
@@ -2982,9 +2999,9 @@ substitute(scope.left(scope.length()-1),".","::"));
                  current->type.resize(0);
                  current->type       = "const";
 
-                 QByteArray init = current->initializer.data();
-                    init = init.simplified();
-                    init = init.left(init.length()-1);
+                 QString init = current->initializer;
+                 init = init.simplified();
+                 init = init.left(init.length()-1);
 
                  current->initializer = init;
                     current->name       = current->name.trimmed();
@@ -3047,7 +3064,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  docBlockAutoBrief = ( yytext[yyleng-2]=='*' && Config::getBool("javadoc-auto-brief") ) ||
                                      ( yytext[yyleng-2]=='!' && Config::getBool("qt-auto-brief")  );
 
-                 QByteArray indent;
+                 QString indent;
                  indent.fill(' ',computeIndent(yytext,g_column));
                  docBlock=indent;
 
@@ -3076,7 +3093,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  docBlockAutoBrief = ( yytext[yyleng-2]=='*' && Config::getBool("javadoc-auto-brief") ) ||
                                      ( yytext[yyleng-2]=='!' && Config::getBool("qt-auto-brief")  );
 
-                                          QByteArray indent;
+                                          QString indent;
                                           indent.fill(' ',computeIndent(yytext,g_column));
                                           docBlock=indent;
                     lineCount();
@@ -3108,7 +3125,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  docBlockInBody    = FALSE;
                  docBlockAutoBrief = ( yytext[yyleng-2]=='*' && Config::getBool("javadoc-auto-brief") ) ||
                                      ( yytext[yyleng-2]=='!' && Config::getBool("qt-auto-brief") );
-                                          QByteArray indent;
+                                          QString indent;
                                           indent.fill(' ',computeIndent(yytext,g_column));
                                           docBlock=indent;
                     lineCount();
@@ -3128,7 +3145,7 @@ substitute(scope.left(scope.length()-1),".","::"));
 
 <FindMembers,FindFields>("//"([!/]?){B}*{CMD}"{")|("/*"([!*]?){B}*{CMD}"{")   {
                     //handleGroupStartCommand(current->name);
-                                          if (previous && previous->section==Entry::GROUPDOC_SEC)
+                    if (previous && previous->section == Entry::GROUPDOC_SEC)
                  {
                    // link open command to the group defined in the previous entry
                    openGroup(previous,yyFileName,yyLineNr);
@@ -3252,7 +3269,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                                           }
                                           else
                                           {
-                                            QByteArray text=yytext;
+                                            QString text=yytext;
                                             current->initializer+=text;
                                             int i=text.indexOf('"');
                                             g_delimiter = yytext+i+1;
@@ -3265,7 +3282,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                                         }
 <RawGString>{RAWEND}                    {
                                           *pCopyRawGString+=yytext;
-                                          QByteArray delimiter = yytext+1;
+                                          QString delimiter = yytext+1;
                                           delimiter=delimiter.left(delimiter.length()-1);
                                           if (delimiter==g_delimiter)
                                           {
@@ -3285,7 +3302,7 @@ substitute(scope.left(scope.length()-1),".","::"));
 <RawString>{RAWEND}                     {
                                           *pCopyRawString+=yytext;
                     fullArgString+=yytext;
-                                          QByteArray delimiter = yytext+1;
+                                          QString delimiter = yytext+1;
                                           delimiter=delimiter.left(delimiter.length()-1);
                                           if (delimiter==g_delimiter)
                                           {
@@ -3600,7 +3617,7 @@ substitute(scope.left(scope.length()-1),".","::"));
 <GCopyCurly>^"#"{B}+[0-9]+{B}+"\""[^\"\n]+"\""{B}+"1"{B}*\n? { // start of included file marker
                                         }
 <GCopyCurly>^"#"{B}+[0-9]+{B}+"\""[^\"\n]+"\""{B}+"2"{B}*\n? { // end of included file marker
-                 QByteArray line = QByteArray(yytext);
+                 QString line = QString(yytext);
                  int s = line.indexOf(' ');
                  int e = line.indexOf('"',s);
                  yyLineNr = line.mid(s,e-s).toInt();
@@ -3689,7 +3706,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                     current->args+=' ';
                   }
 <FindMembers>[;,]       {
-                 QByteArray oldType = current->type;
+                 QString oldType = current->type;
                  if (current->bodyLine==-1)
                  {
                    current->bodyLine = yyLineNr;
@@ -4133,8 +4150,8 @@ substitute(scope.left(scope.length()-1),".","::"));
                  else
                  {
                    current->endBodyLine = yyLineNr;
-                   QByteArray &cn = current->name;
-                   QByteArray rn = current_root->name;
+                   QString &cn = current->name;
+                   QString rn = current_root->name;
 
                    if (!cn.isEmpty() && !rn.isEmpty())
                    {
@@ -4207,8 +4224,8 @@ substitute(scope.left(scope.length()-1),".","::"));
                  {
                    isTypedef = TRUE;
                    current->endBodyLine = yyLineNr;
-                   QByteArray &cn = current->name;
-                   QByteArray rn = current_root->name;
+                   QString &cn = current->name;
+                   QString rn = current_root->name;
                    if (!cn.isEmpty() && !rn.isEmpty())
                    {
                      prependScope();
@@ -4261,14 +4278,14 @@ substitute(scope.left(scope.length()-1),".","::"));
                     lineCount();
                     int i=0,l=(int)yyleng,j;
                  while (i<l && (!isId(yytext[i]))) i++;
-                 msName = QByteArray(yytext).right(l-i).trimmed();
+                 msName = QString(yytext).right(l-i).trimmed();
                  j=msName.indexOf("[");
                  if (j!=-1)
                  {
                    msArgs=msName.right(msName.length()-j);
                    msName=msName.left(j);
                  }
-                 msType=QByteArray(yytext).left(i);
+                 msType=QString(yytext).left(i);
 
                  // handle *pName in: typedef { ... } name, *pName;
                  if (firstTypedefEntry)
@@ -4378,7 +4395,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                      varEntry->doc = current->doc;
                      varEntry->brief = current->brief;
                      varEntry->mGrpId = current->mGrpId;
-                                              varEntry->initializer = current->initializer;
+                     varEntry->initializer = current->initializer;
 
                      // deep copy group list
                      for (auto g : *current->groups) {
@@ -4499,11 +4516,11 @@ substitute(scope.left(scope.length()-1),".","::"));
                  lineCount();
                   }
 <FuncPtrOperator>\n        {
-                                          lineCount();
+                    lineCount();
                     current->name += *yytext;
                   }
 <FuncPtrOperator>"("          {
-                    unput(*yytext);
+                 unput(*yytext);
                  BEGIN( EndFuncPtr );
                                         }
 <FuncPtrOperator>.         {
@@ -4511,17 +4528,17 @@ substitute(scope.left(scope.length()-1),".","::"));
                   }
 <EndFuncPtr>")"{BN}*/";"      { // a variable with extra braces
                  lineCount();
-                 current->type+=funcPtrType.data()+1;
+                 current->type += funcPtrType.mid(1);
                  BEGIN(FindMembers);
                   }
 <EndFuncPtr>")"{BN}*/"("      { // a function pointer
                  lineCount();
-                 current->type+=funcPtrType+")";
+                 current->type += funcPtrType + ")";
                  BEGIN(FindMembers);
                   }
 <EndFuncPtr>")"{BN}*/"["      { // an array of variables
                     lineCount();
-                 current->type+=funcPtrType.data();
+                 current->type += funcPtrType;
                  current->args += ")";
                  BEGIN(FindMembers);
                   }
@@ -4557,16 +4574,16 @@ substitute(scope.left(scope.length()-1),".","::"));
                   }
 <FuncFuncEnd>")"{BN}*"("      {
                     lineCount();
-                 current->type+=funcPtrType+")(";
+                 current->type += funcPtrType + ")(";
                  BEGIN(FuncFuncType);
                   }
 <FuncFuncEnd>")"{BN}*/[;{]       {
                     lineCount();
-                 current->type+=funcPtrType.data()+1;
+                 current->type += funcPtrType.mid(1);
                     BEGIN(Function);
                   }
 <FuncFuncEnd>")"{BN}*/"["     { // function returning a pointer to an array
-                                          lineCount();
+                 lineCount();
                  current->type+=funcPtrType;
                  current->args+=")";
                  BEGIN(FuncFuncArray);
@@ -4765,7 +4782,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                    // for functions we interpret a comment
                    // as documentation for the last argument
                    lastCopyArgChar=*yytext;
-                   QByteArray text=&yytext[1];
+                   QString text=&yytext[1];
                    text=text.trimmed();
                    lastCommentInArgContext=YY_START;
                    fullArgString+=text;
@@ -5149,10 +5166,10 @@ substitute(scope.left(scope.length()-1),".","::"));
                  }
                   }
 <OldStyleArgs>[,;]         {
-                    QByteArray oldStyleArgPtr;
-                    QByteArray oldStyleArgName;
+                    QString oldStyleArgPtr;
+                    QString oldStyleArgName;
                  splitKnRArg(oldStyleArgPtr,oldStyleArgName);
-                 QByteArray doc,brief;
+                 QString doc,brief;
                  if (current->doc!=docBackup)
                  {
                                             doc=current->doc;
@@ -5264,7 +5281,7 @@ substitute(scope.left(scope.length()-1),".","::"));
 
                    bool isFunction = (ti == -1) || (ts != -1 && ts < te && ts < ti && ti < te); 
 
-                   QByteArray tempName;
+                   QString tempName;
                    if (tempArg == -1) {
                       tempName = current->name; 
 
@@ -5708,7 +5725,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                                             current->name = yytext;
                                             current->name=current->name.left(current->name.length()-1).trimmed();
                                             //printf("template class declaration for %s!\n",current->name.data());
-                   QByteArray rn = current_root->name;
+                   QString rn = current_root->name;
                    //printf("cn=`%s' rn=`%s' isTypedef=%d\n",cn.data(),rn.data(),isTypedef);
                    if (!current->name.isEmpty() && !rn.isEmpty())
                    {
@@ -5968,7 +5985,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                                           }
                                           else // new type constraint for same parameter
                                           {
-                  QByteArray name = current->typeConstr.last().name;
+                  QString name = current->typeConstr.last().name;
                   current->typeConstr.append(Argument());
                   current->typeConstr.last().name = name;
                   current->typeConstr.last().type = yytext;
@@ -6146,7 +6163,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  else // PHP base class of the form \Ns\Cl or Ns\Cl
                  {
                    lineCount();
-                   QByteArray bn=yytext;
+                   QString bn=yytext;
                    bn = substitute(bn,"\\","::");
                    baseName += bn;
                    current->args += ' ';
@@ -6155,7 +6172,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                                         }
 <Bases>("::")?{BN}*({ID}{BN}*"::"{BN}*)*{ID}    {
                   lineCount();
-                  QByteArray baseScope = yytext;
+                  QString baseScope = yytext;
                   if (insideCSharp && baseScope.trimmed()=="where")
                  {
                    // type contraint for a class
@@ -6174,7 +6191,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  }
                }
 <Bases>{BN}*{ID}("."{ID})*       { // Java style class
-                    QByteArray name = substitute(yytext,".","::");
+                    QString name = substitute(yytext,".","::");
                  baseName += name;
                  current->args += ' ';
                  current->args += name;
@@ -6399,7 +6416,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  docBlockInBody    = YY_START==SkipCurly;
                  docBlockAutoBrief = Config::getBool("qt-auto-brief");
 
-                                          QByteArray indent;
+                                          QString indent;
                                           indent.fill(' ',computeIndent(yytext,g_column));
                                           docBlock=indent;
 
@@ -6427,7 +6444,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                                           static bool javadocAutoBrief = Config::getBool("javadoc-auto-brief");
                  docBlockAutoBrief = javadocAutoBrief;
 
-                                          QByteArray indent;
+                                          QString indent;
                                           indent.fill(' ',computeIndent(yytext,g_column));
                                           docBlock=indent;
 
@@ -6450,7 +6467,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  docBlockInBody    = YY_START==SkipCurly;
                  docBlockAutoBrief = FALSE;
 
-                                          QByteArray indent;
+                                          QString indent;
                                           indent.fill(' ',computeIndent(yytext,g_column));
                                           docBlock=indent;
 
@@ -6467,7 +6484,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  docBlockContext   = YY_START;
                  docBlockInBody    = YY_START==SkipCurly;
                  docBlockAutoBrief = FALSE;
-                                          QByteArray indent;
+                                          QString indent;
                                           indent.fill(' ',computeIndent(yytext,g_column));
                                           docBlock=indent;
                  startCommentBlock(current->brief.isEmpty());
@@ -6583,29 +6600,29 @@ substitute(scope.left(scope.length()-1),".","::"));
                                            lineCount();
                                         }
 <DocLine>{B}*"///"[/]+{B}*/"\n"     { // ignore marker line (see bug700345)
-                 handleCommentBlock(docBlock.data(),current->brief.isEmpty());
+                 handleCommentBlock(docBlock, current->brief.isEmpty());
                  BEGIN( docBlockContext );
                   }
 <DocLine>[^\n]*/"\n"          { // whole line
                     docBlock+=yytext;
-                 handleCommentBlock(docBlock.data(),current->brief.isEmpty());
+                 handleCommentBlock(docBlock, current->brief.isEmpty());
                  BEGIN( docBlockContext );
                   }
 
  /* ---- Comments blocks ------ */
 
 <DocBlock>"*"*"*/"         { // end of comment block
-                         handleCommentBlock(docBlock.data(),FALSE);
+                         handleCommentBlock(docBlock, FALSE);
                  BEGIN(docBlockContext);
                   }
 <DocBlock>^{B}*"*"+/[^/]      {
 
-                                          QByteArray indent;
+                                          QString indent;
                                           indent.fill(' ',computeIndent(yytext,g_column));
                                           docBlock+=indent;
                   }
 <DocBlock>^{B}*("//")?{B}*"*"+/[^//a-z_A-Z0-9*]    { // start of a comment line
-                                          QByteArray indent;
+                                          QString indent;
                                           indent.fill(' ',computeIndent(yytext,g_column));
                                           docBlock+=indent;
                   }
@@ -6725,7 +6742,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  }
                                           else
                                           {
-                                            QByteArray indent;
+                                            QString indent;
                                             indent.fill(' ',computeIndent(yytext,0));
                                             docBlock+=indent;
                                           }
@@ -6733,7 +6750,7 @@ substitute(scope.left(scope.length()-1),".","::"));
 <DocCopyBlock>^{B}*"*"+/{BN}+"*"{BN}*  { // start of a comment line with two *'s
                     if (docBlockName=="code")
                                           {
-                                            QByteArray indent;
+                                            QString indent;
                                             indent.fill(' ',computeIndent(yytext,0));
                                             docBlock+=indent;
                                           }
@@ -6745,7 +6762,7 @@ substitute(scope.left(scope.length()-1),".","::"));
 <DocCopyBlock>^{B}*"*"+/({ID}|"(")  { // Assume *var or *(... is part of source code (see bug723516)
                  if (docBlockName=="code")
                                           {
-                                            QByteArray indent;
+                                            QString indent;
                                             indent.fill(' ',computeIndent(yytext,-1));
                                             docBlock+=indent+"*";
                                           }
@@ -6757,7 +6774,7 @@ substitute(scope.left(scope.length()-1),".","::"));
 <DocCopyBlock>^{B}*"*"+/{BN}*       { // start of a comment line with one *
                     if (docBlockName=="code")
                                           {
-                                            QByteArray indent;
+                                            QString indent;
                                             if (g_nestedComment) // keep * it is part of the code
                                             {
                                               indent.fill(' ',computeIndent(yytext,-1));
@@ -6830,7 +6847,7 @@ substitute(scope.left(scope.length()-1),".","::"));
                  BEGIN( ReadFuncArgType ) ;
                   }
 <Prototype>"("({ID}"::")*({B}*[&*])+   {
-                    current->type+=current->name + QByteArray(yytext);
+                    current->type+=current->name + QString(yytext);
                  current->name.resize(0);
                     BEGIN( PrototypePtr );
                   }
@@ -6974,7 +6991,7 @@ static void newEntry()
    initEntry();
 }
 
-static void handleCommentBlock(const QByteArray &doc,bool brief)
+static void handleCommentBlock(const QString &doc,bool brief)
 {
    static bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
 
@@ -7017,7 +7034,7 @@ static void handleCommentBlock(const QByteArray &doc,bool brief)
   {
     if (needsEntry)
     {
-      QByteArray docFile = current->docFile;
+      QString docFile = current->docFile;
       newEntry();
       current->docFile = docFile;
       current->docLine = lineNr;
@@ -7044,8 +7061,8 @@ static void handleParametersCommentBlocks(ArgumentList *al)
          bool needsEntry;
 
          // save context
-         QByteArray orgDoc   = current->doc;
-         QByteArray orgBrief = current->brief;
+         QString orgDoc   = current->doc;
+         QString orgBrief = current->brief;
          int orgDocLine    = current->docLine;
          int orgBriefLine  = current->briefLine;
 
@@ -7188,7 +7205,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
    }
 }
 
-static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<Entry> rt,
+static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> rt,
                       enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    initParser();
@@ -7279,21 +7296,21 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
    } 
 }
 
-static void parsePrototype(const QByteArray &text)
+static void parsePrototype(const QString &text)
 {
-  if (text.isEmpty())
-  {
+  if (text.isEmpty()) {
     warn(yyFileName,yyLineNr,"Empty prototype found");
     return;
   }
 
-  if (!current) // nothing to store (see bug683516)
-  {
+  if (! current) { 
+    // nothing to store  
     return;
   }
 
-  const char *orgInputString;
+  QString orgInputString;
   int orgInputPosition;
+
   YY_BUFFER_STATE orgState;
 
   // save scanner state
@@ -7336,22 +7353,23 @@ void CPPScanFreeParser()
 #endif
 }
 
-void CPPLanguageParser::startTranslationUnit(const char *)
+void CPPLanguageParser::startTranslationUnit(const QString &)
 {
 }
 
 void CPPLanguageParser::finishTranslationUnit()
 {
   bool processWithClang = insideCpp || insideObjC;
+
   if (processWithClang)
   {
     ClangParser::instance()->finish();
   }
 }
 
-void CPPLanguageParser::parseInput(const char *fileName, const char *fileBuf,
-                                  QSharedPointer<Entry> root, enum ParserMode mode,
-                                  QStringList & filesInSameTranslationUnit, bool useClang)
+void CPPLanguageParser::parseInput(const QString &fileName, const QString &fileBuf,
+                  QSharedPointer<Entry> root, enum ParserMode mode,
+                  QStringList & filesInSameTranslationUnit, bool useClang)
 {
   g_thisParser = this;
 
@@ -7362,27 +7380,18 @@ void CPPLanguageParser::parseInput(const char *fileName, const char *fileBuf,
   printlex(yy_flex_debug, FALSE, __FILE__, fileName);
 }
 
-void CPPLanguageParser::parseCode(CodeOutputInterface &codeOutIntf,
-                   const char * scopeName, const QByteArray &input,
-                   SrcLangExt lang, bool isExampleBlock,
-                   const char * exampleName,
-                   QSharedPointer<FileDef> fileDef,
-                   int startLine,
-                   int endLine,
-                   bool inlineFragment,
-                   QSharedPointer<MemberDef> memberDef,
-                   bool showLineNumbers,
-                   QSharedPointer<Definition> searchCtx,
-                   bool collectXRefs )
+void CPPLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
+                  SrcLangExt lang, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef,
+                  int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
+                  bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
-  ::parseCCode(codeOutIntf,scopeName,input,lang,isExampleBlock,exampleName,
-               fileDef,startLine,endLine,inlineFragment,memberDef,
-          showLineNumbers,searchCtx,collectXRefs);
+  ::parseCCode(codeOutIntf,scopeName, input,lang,isExampleBlock,exampleName, fileDef,startLine, endLine,
+                  inlineFragment,memberDef, showLineNumbers,searchCtx,collectXRefs);
 }
 
-bool CPPLanguageParser::needsPreprocessing(const QByteArray &extension)
+bool CPPLanguageParser::needsPreprocessing(const QString &extension)
 {
-  QByteArray fe=extension.toLower();
+  QString fe=extension.toLower();
   SrcLangExt lang = getLanguageFromFileName(extension);
 
   return (SrcLangExt_Cpp == lang) ||
@@ -7396,7 +7405,7 @@ void CPPLanguageParser::resetCodeParserState()
   ::resetCCodeParserState();
 }
 
-void CPPLanguageParser::parsePrototype(const char *text)
+void CPPLanguageParser::parsePrototype(const QString &text)
 {
   ::parsePrototype(text);
 }

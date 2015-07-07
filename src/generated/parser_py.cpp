@@ -1220,7 +1220,7 @@ char *pyscannerYYtext;
 #define YY_NO_INPUT 1
 
 static ParserInterface *g_thisParser;
-static const char      *inputString;
+static QString          inputString;
 static int		         inputPosition;
 static QFile            inputFile;
 
@@ -1232,13 +1232,13 @@ static QSharedPointer<Entry> previous;
 static QSharedPointer<Entry> bodyEntry;
 
 static int		      yyLineNr = 1 ;
-static QByteArray		yyFileName;
+static QString 		yyFileName;
 static MethodTypes 	mtype;
 static bool    		gstat;
 static Specifier    	virt;
 
 static int              docBlockContext;
-static QByteArray       docBlock;
+static QString          docBlock;
 static bool             docBlockInBody;
 static bool             docBlockJavaStyle;
 static bool             docBrief;
@@ -1247,19 +1247,19 @@ static bool             docBlockSpecial;
 static bool             g_doubleQuote;
 static bool             g_specialBlock;
 static int              g_stringContext;
-static QByteArray       *g_copyString;
+static QString         *g_copyString;
 static int              g_indent = 0;
 static int              g_curIndent = 0;
 
-static QHash<QString, QByteArray *>  g_packageNameCache;
+static QHash<QString, QString *>  g_packageNameCache;
 
 static char             g_atomStart;
 static char             g_atomEnd;
 static int              g_atomCount;
 
-static QByteArray       g_moduleScope;
-static QByteArray       g_packageName;
-static QByteArray       g_defVal;
+static QString          g_moduleScope;
+static QString          g_packageName;
+static QString          g_defVal;
 
 static int              g_braceCount;
 
@@ -1341,9 +1341,9 @@ static inline int computeIndent(const char *s)
    return col;
 }
 
-static QByteArray findPackageScopeFromPath(const QByteArray &path)
+static QString findPackageScopeFromPath(const QString &path)
 {
-   QByteArray *pScope = g_packageNameCache.value(path);
+   QString *pScope = g_packageNameCache.value(path);
 
    if (pScope) {
       return *pScope;
@@ -1355,14 +1355,14 @@ static QByteArray findPackageScopeFromPath(const QByteArray &path)
       int i = path.lastIndexOf('/');
 
       if (i != -1) {
-         QByteArray scope = findPackageScopeFromPath(path.left(i));
+         QString scope = findPackageScopeFromPath(path.left(i));
 
          if (!scope.isEmpty()) {
             scope += "::";
          }
 
          scope += path.mid(i + 1);
-         g_packageNameCache.insert(path, new QByteArray(scope));
+         g_packageNameCache.insert(path, new QString(scope));
          return scope;
       }
    }
@@ -1370,9 +1370,9 @@ static QByteArray findPackageScopeFromPath(const QByteArray &path)
    return "";
 }
 
-static QByteArray findPackageScope(const char *fileName)
+static QString findPackageScope(const QString &fileName)
 {
-   if (fileName == 0) {
+   if (! fileName.isEmpty()) {
       return "";
    }
 
@@ -1416,12 +1416,14 @@ static void addType( Entry *current )
    current->argList->clear();
 }
 
-static QByteArray stripQuotes(const char *s)
+static QString stripQuotes(const QString &s)
 {
-   QByteArray name;
-   if (s == 0 || *s == 0) {
+   QString name;
+
+   if (s.isEmpty()) {
       return name;
    }
+
    name = s;
    if (name.at(0) == '"' && name.at(name.length() - 1) == '"') {
       name = name.mid(1, name.length() - 2);
@@ -1450,7 +1452,7 @@ static void appendDocBlock() {
 }
 */
 
-static void handleCommentBlock(const QByteArray &doc, bool brief)
+static void handleCommentBlock(const QString &doc, bool brief)
 {
    //printf("handleCommentBlock(doc=[%s] brief=%d docBlockInBody=%d docBlockJavaStyle=%d\n",
    //    doc.data(),brief,docBlockInBody,docBlockJavaStyle);
@@ -1569,44 +1571,42 @@ static void searchFoundClass()
 #define	YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
 
 static int yyread(char *buf, int max_size)
-{
+{  
    int c = 0;
-   while ( c < max_size && inputString[inputPosition] ) {
-      *buf = inputString[inputPosition++] ;
-      //printf("%d (%c)\n",*buf,*buf);
-      c++;
-      buf++;
+
+   while (inputString[inputPosition] != 0) {
+
+      QString tmp1    = inputString.at(inputPosition);
+      QByteArray tmp2 = tmp1.toUtf8();
+
+      if (c + tmp2.length() >= max_size)  {
+         // buffer is full
+         break;
+      }
+
+      c += tmp2.length();     
+   
+      for (auto letters : tmp2) {
+         *buf = letters;
+          buf++;
+      }
+
+      inputPosition++;     
    }
+
    return c;
 }
 
 /* start command character */
 /* Main start state */
-
-
 /* Mid-comment states */
 /* %x FuncDoubleComment */
 /* %x ClassDoubleComment */
-
-
-
 /* Function states */
-
-
-
 /* Class states */
-
-
-
 /* Variable states */
-
-
 /* String states */
-
-
 /* import */
-
-
 
 #define INITIAL 0
 #define Search 1
@@ -2000,7 +2000,7 @@ YY_DECL {
                // property
                current->section   = Entry::VARIABLE_SEC;
                current->mtype     = Property;
-               current->name      = QByteArray(pyscannerYYtext).trimmed();
+               current->name      = QString(pyscannerYYtext).trimmed();
                current->fileName  = yyFileName;
                current->startLine = yyLineNr;
                current->bodyLine  = yyLineNr;
@@ -2016,7 +2016,7 @@ YY_DECL {
                // variable
                g_indent = computeIndent(pyscannerYYtext);
                current->section   = Entry::VARIABLE_SEC;
-               current->name      = QByteArray(pyscannerYYtext).trimmed();
+               current->name      = QString(pyscannerYYtext).trimmed();
                current->fileName  = yyFileName;
                current->startLine = yyLineNr;
                current->bodyLine  = yyLineNr;
@@ -2182,7 +2182,7 @@ YY_DECL {
 
             {
                // import all
-               QByteArray item = g_packageName;
+               QString item = g_packageName;
                current->name = removeRedundantWhiteSpace(substitute(item, ".", "::"));
                current->fileName = yyFileName;
                //printf("Adding using directive: found:%s:%d name=%s\n",yyFileName.data(),yyLineNr,current->name.data());
@@ -2198,7 +2198,7 @@ YY_DECL {
          case 29:
             YY_RULE_SETUP
             {
-               QByteArray item = g_packageName + "." + QByteArray(pyscannerYYtext);
+               QString item = g_packageName + "." + QString(pyscannerYYtext);
 
                current->name = removeRedundantWhiteSpace(substitute(item, ".", "::"));
                current->fileName = yyFileName;
@@ -2216,7 +2216,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QByteArray item = g_packageName + "." + QByteArray(pyscannerYYtext);
+               QString item = g_packageName + "." + QString(pyscannerYYtext);
                current->name = removeRedundantWhiteSpace(substitute(item, ".", "::"));
                current->fileName = yyFileName;
 
@@ -2633,7 +2633,7 @@ YY_DECL {
                lineCount();
               
                current->argList.append( Argument() );
-               current->argList.last().name = QByteArray(pyscannerYYtext).trimmed();
+               current->argList.last().name = QString(pyscannerYYtext).trimmed();
                current->argList.last().type = "";
             }
             YY_BREAK
@@ -3290,7 +3290,7 @@ YY_DECL {
                if (g_doubleQuote == (pyscannerYYtext[0] == '"'))
                {
                   if (g_specialBlock) { // expecting a docstring
-                     QByteArray actualDoc = docBlock;
+                     QString actualDoc = docBlock;
                      if (!docBlockSpecial) { // legacy unformatted docstring
                         actualDoc.prepend("\\verbatim ");
                         actualDoc.append("\\endverbatim ");
@@ -3298,7 +3298,7 @@ YY_DECL {
                      //printf("-------> current=%p bodyEntry=%p\n",current,bodyEntry);
                      handleCommentBlock(actualDoc, FALSE);
                   } else if (g_packageCommentAllowed) { // expecting module docs
-                     QByteArray actualDoc = docBlock;
+                     QString actualDoc = docBlock;
                      if (!docBlockSpecial) { // legacy unformatted docstring
                         actualDoc.prepend("\\verbatim ");
                         actualDoc.append("\\endverbatim ");
@@ -4647,7 +4647,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
    }
 }
 
-static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<Entry> rt)
+static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> rt)
 {
    initParser();
 
@@ -4674,7 +4674,7 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
       QFileInfo fi(fileName);
       g_moduleScope = findPackageScope(fileName);
 
-      QByteArray baseName = fi.baseName().toUtf8();
+      QString baseName = fi.baseName();
 
       if (baseName != "__init__") { // package initializer file is not a package itself
          if (!g_moduleScope.isEmpty()) {
@@ -4719,7 +4719,7 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
    }
 }
 
-static void parsePrototype(const QByteArray &text)
+static void parsePrototype(const QString &text)
 {
    //printf("**** parsePrototype(%s) begin\n",text.data());
    if (text.isEmpty()) {
@@ -4730,7 +4730,7 @@ static void parsePrototype(const QByteArray &text)
    g_specialBlock = FALSE;
    g_packageCommentAllowed = FALSE;
 
-   const char *orgInputString;
+   QString orgInputString;
    int orgInputPosition;
    YY_BUFFER_STATE orgState;
 
@@ -4774,7 +4774,7 @@ void pyScanFreeParser()
 #endif
 }
 
-void PythonLanguageParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
+void PythonLanguageParser::parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                                       enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    g_thisParser = this;
@@ -4784,14 +4784,14 @@ void PythonLanguageParser::parseInput(const char *fileName, const char *fileBuf,
    printlex(pyscannerYY_flex_debug, FALSE, __FILE__, fileName);
 }
 
-bool PythonLanguageParser::needsPreprocessing(const QByteArray &)
+bool PythonLanguageParser::needsPreprocessing(const QString &)
 {
    return FALSE;
 }
 
-void PythonLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName,
-                                     const QByteArray &input, SrcLangExt /*lang*/, bool isExampleBlock,
-                                     const char *exampleName, QSharedPointer<FileDef> fileDef, int startLine,
+void PythonLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName,
+                                     const QString &input, SrcLangExt, bool isExampleBlock,
+                                     const QString &exampleName, QSharedPointer<FileDef> fileDef, int startLine,
                                      int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
                                      bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
@@ -4800,7 +4800,7 @@ void PythonLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const cha
                      showLineNumbers, searchCtx, collectXRefs);
 }
 
-void PythonLanguageParser::parsePrototype(const char *text)
+void PythonLanguageParser::parsePrototype(const QString &text)
 {
    ::parsePrototype(text);
 }

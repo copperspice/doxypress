@@ -34,13 +34,13 @@ class A_Define
 
    bool hasDocumentation();
 
-   QByteArray name;
-   QByteArray definition;
-   QByteArray fileName;
-   QByteArray doc;
-   QByteArray brief;
-   QByteArray args;
-   QByteArray anchor;
+   QString name;
+   QString definition;
+   QString fileName;
+   QString doc;
+   QString brief;
+   QString args;
+   QString anchor;
 
    QSharedPointer<FileDef> fileDef;
 
@@ -63,7 +63,7 @@ class DefineList : public QList<A_Define>
 
  private:
    int compareValues(const A_Define *d1, const A_Define *d2) const {
-      return qstricmp(d1->name, d2->name);
+      return d1->name.compare(d2->name, Qt::CaseInsensitive);
    }
 };
 
@@ -71,22 +71,22 @@ class DefineList : public QList<A_Define>
 class DefineName : public QList<A_Define>
 {
  public:
-   DefineName(const char *n) : QList<A_Define>() {
+   DefineName(const QString &n) : QList<A_Define>() {
       name = n;
    }
 
    ~DefineName() {}
 
-   const char *nameString() const {
+   const QString &nameString() const {
       return name;
    }
 
  private:
    int compareValues(const A_Define *d1, const A_Define *d2) const {
-      return qstricmp(d1->name, d2->name);
+      return d1->name.compare(d2->name, Qt::CaseInsensitive);   
    }
 
-   QByteArray name;
+   QString name;
 };
 
 /** A list of DefineName objects. */
@@ -98,7 +98,7 @@ class DefineNameList : public QList<DefineName>
 
  private:
    int compareValues(const DefineName *n1, const DefineName *n2) const {
-      return qstricmp(n1->nameString(), n2->nameString());
+      return n1->nameString().compare(n2->nameString(), Qt::CaseInsensitive);
    }
 };
 

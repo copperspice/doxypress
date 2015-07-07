@@ -22,12 +22,12 @@
 
 #include <cppvalue.h>
 
-extern bool parseconstexp(const char *fileName, int line, const QByteArray &s);
+extern bool parseconstexp(const QString &fileName, int line, const QString &s);
 extern int constexpYYparse();
 extern int constexpYYdebug;
-extern QByteArray g_strToken;
+extern QString  g_strToken;
 extern CPPValue g_resultValue;
-extern QByteArray g_constExpFileName;
-extern int g_constExpLineNr;
+extern QString  g_constExpFileName;
+extern int      g_constExpLineNr;
 
 #endif

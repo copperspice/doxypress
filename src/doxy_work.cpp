@@ -5785,7 +5785,7 @@ void Doxy_Work::addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<M
    if (overload) { 
       // the \overload keyword was used
 
-      QString doc = getOverloadDocs();
+      QString doc = theTranslator->trOverloadText();
       if (! root->doc.isEmpty()) {
          doc += "<p>";
          doc += root->doc;
@@ -6927,7 +6927,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                md->enableCallGraph(root->callGraph);
                md->enableCallerGraph(root->callerGraph);
 
-               QString doc = getOverloadDocs();
+               QString doc = theTranslator->trOverloadText();
                doc += "<p>";
                doc += root->doc;
 
@@ -9235,30 +9235,29 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
    }
  
    QFileInfo fi(fileName);
-   BufStr preBuf(fi.size() + 4096);
+   QString preBuf;
 
    if (Config::getBool("enable-preprocessing") && parser->needsPreprocessing(extension)) {
-      BufStr inBuf(fi.size() + 4096);
-      msg("Processing %s\n", fileName.constData());
+      QString inBuf;
+      msg("Processing %s\n", qPrintable(fileName));
 
       readInputFile(fileName, inBuf);
-      preprocessFile(fileName, inBuf, preBuf);
+      preBuf = preprocessFile(fileName, inBuf);
 
    } else { 
       // no preprocessing
-      msg("Reading %s\n", fileName.constData());
+      msg("Reading %s\n", qPrintable(fileName));
       readInputFile(fileName, preBuf);
    }
 
-   if (preBuf.data() && preBuf.curPos() > 0 && *(preBuf.data() + preBuf.curPos() - 1) != '\n') {
+   if (! preBuf.endsWith("\n")) {
       // add extra newline to help parser
-      preBuf.addChar('\n'); 
+      preBuf += '\n'; 
    }
    
    // convert multi-line C++ comments to C style comments
-   BufStr convBuf(preBuf.curPos() + 1024);  
-   convertCppComments(&preBuf, &convBuf, fileName);
-   convBuf.addChar('\0');   
+   QString convBuf; 
+   convBuf = convertCppComments(preBuf, fileName);
 
    if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {   
       fd->getAllIncludeFilesRecursively(includedFiles);
@@ -9266,11 +9265,11 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
       // broom -- on hold, change this to use clang and not lex
       
       // use language parser to parse the file  
-      parser->parseInput(fileName, convBuf.data(), root, mode, includedFiles, true);
+      parser->parseInput(fileName, convBuf, root, mode, includedFiles, true);
 
    } else { 
       // use lex parser
-      parser->parseInput(fileName, convBuf.data(), root, mode, includedFiles, false);
+      parser->parseInput(fileName, convBuf, root, mode, includedFiles, false);
 
    }
 

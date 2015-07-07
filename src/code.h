@@ -28,9 +28,9 @@ class FileDef;
 class MemberDef;
 class Definition;
 
-void parseCCode(CodeOutputInterface &, const char *, const QByteArray &, SrcLangExt lang, bool isExample, 
-                const char *exName, QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
-                QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,bool collectXRefs);
+void parseCCode(CodeOutputInterface &, const QString &, const QString &, SrcLangExt lang, bool isExample, 
+                const QString &exName, QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
+                QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs);
 
 void resetCCodeParserState();
 void codeFreeScanner();

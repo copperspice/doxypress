@@ -267,7 +267,7 @@ class Entry
    /*! Returns the static size of the Entry (so excluding any dynamic memory) */
    int getSize();
 
-   void addSpecialListItem(const char *listName, int index);
+   void addSpecialListItem(const QString &listName, int index);
    void createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage *storage, QSharedPointer<FileDef> fd, 
                               QSharedPointer<Entry> self);
 

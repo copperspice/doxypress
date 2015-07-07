@@ -27,9 +27,9 @@ class MemberName;
 
 /** Data associated with an example. */
 struct Example {
-   QByteArray anchor;
-   QByteArray name;
-   QByteArray file;
+   QString anchor;
+   QString name;
+   QString file;
 };
 
 /** A sorted dictionary of Example objects. */
@@ -42,7 +42,7 @@ class ExampleSDict : public StringMap<QSharedPointer<Example>>
 
  private:
    int compareMapValues(const QSharedPointer<Example> &item1, const QSharedPointer<Example> &item2) const override {
-      return qstricmp(item1->name, item2->name);
+      return item1->name.compare(item2->name, Qt::CaseInsensitive);
    }
 };
 

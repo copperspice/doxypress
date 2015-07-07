@@ -2209,7 +2209,7 @@ void ClassDef::writeMemberList(OutputList &ol)
 
 
 // add a reference to an example
-bool ClassDef::addExample(const char *anchor, const char *nameStr, const char *file)
+bool ClassDef::addExample(const QString &anchor, const QString &nameStr, const QString &file)
 {
    if (m_exampleSDict == 0) {
       m_exampleSDict = new ExampleSDict;      
@@ -3208,7 +3208,7 @@ QSharedPointer<ClassDef> ClassDef::insertTemplateInstance(const QString &fileNam
    return *templateClass;
 }
 
-QSharedPointer<ClassDef> ClassDef::getVariableInstance(const char *templSpec)
+QSharedPointer<ClassDef> ClassDef::getVariableInstance(const QString &templSpec)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
@@ -3257,7 +3257,7 @@ QHash<QString, int> *ClassDef::getTemplateBaseClassNames() const
    return m_templBaseClassNames;
 }
 
-void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const char *templSpec)
+void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const QString &templSpec)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 

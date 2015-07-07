@@ -559,13 +559,13 @@ char *constexpYYtext;
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
 
-QByteArray    g_strToken;
-CPPValue    g_resultValue;
-int         g_constExpLineNr;
-QByteArray    g_constExpFileName;
+QString    g_strToken;
+CPPValue   g_resultValue;
+int        g_constExpLineNr;
+QString    g_constExpFileName;
 
-static const char *g_inputString;
-static int         g_inputPosition;
+static QString  g_inputString;
+static int      g_inputPosition;
 
 #undef  YY_INPUT
 #define YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
@@ -573,15 +573,27 @@ static int         g_inputPosition;
 static int yyread(char *buf, int max_size)
 {
    int c = 0;
-   while ( c < max_size && g_inputString[g_inputPosition] ) {
-      *buf = g_inputString[g_inputPosition++] ;
-      c++;
-      buf++;
+
+   while (g_inputString[g_inputPosition] != 0) {
+
+      QString tmp1    = g_inputString.at(g_inputPosition);
+      QByteArray tmp2 = tmp1.toUtf8();
+
+      if (c + tmp2.length() >= max_size)  {
+         // buffer is full
+         break;
+      }
+
+      c += tmp2.length();     
+   
+      for (auto letters : tmp2) {
+         *buf = letters;
+          buf++;
+      }
+
+      g_inputPosition++;     
    }
-   return c;
 }
-
-
 
 #define INITIAL 0
 
@@ -1988,7 +2000,7 @@ void *constexpYYalloc (yy_size_t  size )
    return (void *) malloc( size );
 }
 
-void *constexpYYrealloc  (void *ptr, yy_size_t  size )
+void *constexpYYrealloc(void *ptr, yy_size_t  size )
 {
    /* The cast to (char *) in the following accommodates both
     * implementations that use char* generic pointers, and those
@@ -2007,21 +2019,18 @@ void constexpYYfree (void *ptr )
 
 #define YYTABLES_NAME "yytables"
 
-
-
-
-
-bool parseconstexp(const char *fileName, int lineNr, const QByteArray &s)
+bool parseconstexp(const QString &fileName, int lineNr, const QString &s)
 {
    printlex(constexpYY_flex_debug, TRUE, __FILE__, fileName);
-   //printf("Expression: `%s'\n",s.data());
+
    g_constExpFileName = fileName;
    g_constExpLineNr = lineNr;
-   g_inputString = s;
-   g_inputPosition = 0;
+   g_inputString    = s;
+   g_inputPosition  = 0;
+
    constexpYYrestart( constexpYYin );
    constexpYYparse();
-   //printf("Result: %ld\n",(long)g_resultValue);
+
    printlex(constexpYY_flex_debug, FALSE, __FILE__, fileName);
    return (long)g_resultValue != 0;
 }

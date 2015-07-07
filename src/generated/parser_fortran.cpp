@@ -56493,12 +56493,14 @@ struct SymbolModifiers {
    enum Direction {NONE_D, IN, OUT, INOUT};
 
    //!< This is only used with function return value.
-   QByteArray type, returnName;
+   QString type;
+   QString returnName;
+
    Protection protection;
    Direction direction;
    bool optional;
    bool protect;
-   QByteArray dimension;
+   QString dimension;
    bool allocatable;
    bool external;
    bool intrinsic;
@@ -56512,7 +56514,7 @@ struct SymbolModifiers {
    bool pass;
    bool contiguous;
    bool volat; /* volatile is a reserverd name */
-   QByteArray passVar;
+   QString passVar;
 
    SymbolModifiers() : type(), returnName(), protection(NONE_P), direction(NONE_D),
       optional(FALSE), protect(FALSE), dimension(), allocatable(FALSE),
@@ -56521,7 +56523,7 @@ struct SymbolModifiers {
       nopass(FALSE), pass(FALSE), contiguous(FALSE), volat(FALSE), passVar() {}
 
    SymbolModifiers &operator|=(const SymbolModifiers &mdfs);
-   SymbolModifiers &operator|=(QByteArray mdfrString);
+   SymbolModifiers &operator|=(QString mdfrString);
 };
 
 //ostream& operator<<(ostream& out, const SymbolModifiers& mdfs);
@@ -56535,11 +56537,11 @@ static const char *directionParam[] = {
 
 
 static ParserInterface *g_thisParser;
-static const char      *inputString;
+static QString          inputString;
 static int		         inputPosition;
 static bool             isFixedForm;
-static QByteArray       inputStringPrepass; ///< Input string for prepass of line cont. '&'
-static QByteArray       inputStringSemi; ///< Input string after command separetor ';'
+static QString          inputStringPrepass; ///< Input string for prepass of line cont. '&'
+static QString          inputStringSemi; ///< Input string after command separetor ';'
 static unsigned int     inputPositionPrepass;
 static int              lineCountPrepass = 0;
 
@@ -56547,8 +56549,8 @@ static QList<QSharedPointer<Entry>>  subrCurrent;
 
 struct CommentInPrepass {
    int column;
-   QByteArray str;
-   CommentInPrepass(int column, QByteArray str) : column(column), str(str) {}
+   QString str;
+   CommentInPrepass(int column, QString str) : column(column), str(str) {}
 };
 static QList<CommentInPrepass *>  comments;
 
@@ -56557,7 +56559,7 @@ int include_stack_ptr = 0;
 int include_stack_cnt = 0;
 
 static QFile         inputFile;
-static QByteArray		yyFileName;
+static QString  		yyFileName;
 
 static int		      yyLineNr = 1 ;
 static int		      yyColNr  = 0 ;
@@ -56573,7 +56575,7 @@ static ScanVar v_type  = V_IGNORE;    // type of parsed variable
 static QList<QSharedPointer<Entry>>  moduleProcedures;       // list of all interfaces which contain unresolved
 
 // module procedures
-static QByteArray        docBlock;
+static QString          docBlock;
 static bool              docBlockInBody = FALSE;
 static bool              docBlockJavaStyle;
 
@@ -56581,15 +56583,15 @@ static MethodTypes 	    mtype;
 static bool    		    gstat;
 static Specifier 	       virt;
 
-static QByteArray        debugStr;
-static QByteArray        result; // function result
+static QString           debugStr;
+static QString           result; // function result
 static Argument         *parameter; // element of parameter list
-static QByteArray        argType;  // fortran type of an argument of a parameter list
-static QByteArray        argName;  // last identifier name in variable list
-static QByteArray        initializer;  // initial value of a variable
+static QString           argType;  // fortran type of an argument of a parameter list
+static QString           argName;  // last identifier name in variable list
+static QString           initializer;  // initial value of a variable
 static int               initializerArrayScope;  // number if nested array scopes in initializer
 static int               initializerScope;  // number if nested function calls in initializer
-static QByteArray        useModuleName;  // name of module in the use statement
+static QString           useModuleName;  // name of module in the use statement
 static Protection        defaultProtection;
 static Protection        typeProtection;
 static int               typeMode = false;
@@ -56603,32 +56605,30 @@ static bool              parsingPrototype = FALSE; // see parsePrototype()
 static SymbolModifiers currentModifiers;
 
 //! Holds program scope->symbol name->symbol modifiers.
-static QMap<QSharedPointer<Entry>, QMap<QByteArray, SymbolModifiers>> modifiers;
+static QMap<QSharedPointer<Entry>, QMap<QString, SymbolModifiers>> modifiers;
 
 static int yyread(char *buf, int max_size);
 static void startCommentBlock(bool);
-static void handleCommentBlock(const QByteArray &doc, bool brief);
-static void subrHandleCommentBlock(const QByteArray &doc, bool brief);
+static void handleCommentBlock(const QString &doc, bool brief);
+static void subrHandleCommentBlock(const QString &doc, bool brief);
 static void addCurrentEntry(int case_insens);
-static void addModule(const char *name, bool isModule = FALSE);
-static void addSubprogram(const char *text);
-static void addInterface(QByteArray name, InterfaceType type);
-static Argument *getParameter(const QByteArray &name);
+static void addModule(const QString &name, bool isModule = FALSE);
+static void addSubprogram(const QString &text);
+static void addInterface(const QString &name, InterfaceType type);
+static Argument *getParameter(const QString &name);
 static void scanner_abort();
 
 static void startScope(QSharedPointer<Entry> scope);
 static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot = FALSE);
 
-//static bool isTypeName(QByteArray name);
 static void resolveModuleProcedures(QList<QSharedPointer<Entry>> &moduleProcedures, QSharedPointer<Entry> current_root);
-static int getAmpersandAtTheStart(const char *buf, int length);
-static int getAmpOrExclAtTheEnd(const char *buf, int length);
+static int getAmpersandAtTheStart(const  QString &buf, int length);
+static int getAmpOrExclAtTheEnd(const  QString &buf, int length);
 static void truncatePrepass(int index);
-static void pushBuffer(QByteArray &buffer);
+static void pushBuffer(const QString &buffer);
 static void popBuffer();
 
-//static void extractPrefix(QByteArray& text);
-static QByteArray extractFromParens(const QByteArray name);
+static QString extractFromParens(const QString &name);
 static CommentInPrepass *locatePrepassComment(int from, int to);
 static void updateVariablePrepassComment(int from, int to);
 static void newLine();
@@ -57005,11 +57005,11 @@ YY_DECL {
 
                      // Only take input after initial ampersand
                      inputStringPrepass += (const char *)(fortranscannerYYtext + (indexStart + 1));
-
-                     //printf("BUFFER:%s\n", (const char*)inputStringPrepass);
+                     
                      pushBuffer(inputStringPrepass);
                      yyColNr = 0;
                      yy_pop_state();
+
                   } else { // simple line
                      yyColNr = 0;
                      REJECT;
@@ -57203,7 +57203,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current->name = useModuleName + "::" + QByteArray(fortranscannerYYtext);
+               current->name = useModuleName + "::" + QString(fortranscannerYYtext);
                current->fileName = yyFileName;
                current->section = Entry::USINGDECL_SEC;
 
@@ -57260,7 +57260,7 @@ YY_DECL {
                yy_push_state(InterfaceBody);
 
                // extract generic name
-               QByteArray name = QByteArray(fortranscannerYYtext).trimmed();
+               QString name = QString(fortranscannerYYtext).trimmed();
                name = name.right(name.length() - 9).trimmed().toLower();
                addInterface(name, ifType);
                startScope(last_entry);
@@ -57491,7 +57491,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QByteArray basename = extractFromParens(fortranscannerYYtext);
+               QString basename = extractFromParens(fortranscannerYYtext);
                current->extends.append(BaseInfo(basename, Public, Normal));
             }
             YY_BREAK
@@ -57548,7 +57548,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current->type = QByteArray(fortranscannerYYtext).simplified();
+               current->type = QString(fortranscannerYYtext).simplified();
             }
             YY_BREAK
          case 48:
@@ -57556,14 +57556,14 @@ YY_DECL {
 
             {
                current->m_specFlags.m_isFinal = true;
-               current->type = QByteArray(fortranscannerYYtext).simplified();
+               current->type = QString(fortranscannerYYtext).simplified();
             }
             YY_BREAK
          case 49:
             YY_RULE_SETUP
 
             {
-               current->type = QByteArray(fortranscannerYYtext).simplified();
+               current->type = QString(fortranscannerYYtext).simplified();
             }
             YY_BREAK
          case 50:
@@ -57577,7 +57577,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               currentModifiers |= QByteArray(fortranscannerYYtext);
+               currentModifiers |= QString(fortranscannerYYtext);
             }
             YY_BREAK
          case 52:
@@ -57590,7 +57590,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QByteArray name = fortranscannerYYtext;
+               QString name = fortranscannerYYtext;
 
                modifiers[current_root][name.toLower()] |= currentModifiers;
 
@@ -57682,7 +57682,7 @@ YY_DECL {
                   addModule(NULL);
                   yy_push_state(ModuleBody); //anon program
                }
-               argType = QByteArray(fortranscannerYYtext).simplified().toLower();
+               argType = QString(fortranscannerYYtext).simplified().toLower();
                yy_push_state(AttributeList);
             }
             YY_BREAK
@@ -57700,9 +57700,9 @@ YY_DECL {
                   addModule(NULL);
                   yy_push_state(ModuleBody); //anon program
                }
-               QByteArray tmp = fortranscannerYYtext;
+               QString tmp = fortranscannerYYtext;
                currentModifiers |= tmp.trimmed();
-               argType = QByteArray(fortranscannerYYtext).simplified().toLower();
+               argType = QString(fortranscannerYYtext).simplified().toLower();
                yy_push_state(AttributeList);
             }
             YY_BREAK
@@ -57716,7 +57716,7 @@ YY_DECL {
             {
                /* attribute statement starts */
                DBG_CTX((stderr, "5=========> Attribute statement: %s\n", fortranscannerYYtext));
-               QByteArray tmp = fortranscannerYYtext;
+               QString tmp = fortranscannerYYtext;
                currentModifiers |= tmp.trimmed();
                argType = "";
                yy_push_state(YY_START);
@@ -57764,7 +57764,7 @@ YY_DECL {
                   REJECT;
                } else
                {
-                  QByteArray tmp = fortranscannerYYtext;
+                  QString tmp = fortranscannerYYtext;
                   tmp = tmp.left(tmp.length() - 1);
                   yyColNr -= 1;
                   unput(fortranscannerYYtext[(int)fortranscannerYYleng - 1]);
@@ -57800,8 +57800,8 @@ YY_DECL {
 
             { /* parse variable declaration */
                //cout << "5=========> got variable: " << argType << "::" << fortranscannerYYtext << endl;
-               /* work around for bug in QByteArray.replace (QByteArray works) */
-               QByteArray name = fortranscannerYYtext;
+               /* work around for bug in QString.replace (QString works) */
+               QString name = fortranscannerYYtext;
                name = name.toLower();
                /* remember attributes for the symbol */
                modifiers[current_root][name.toLower()] |= currentModifiers;
@@ -57843,44 +57843,56 @@ YY_DECL {
                            (modifiers[current_root->parent()][current_root->name.toLower()].returnName.toLower() == argName.toLower())) {
 
                         int strt = current_root->type.indexOf("function");
-                        QByteArray lft;
-                        QByteArray rght;
+
+                        QString lft;
+                        QString rght;
 
                         if (strt != -1) {
                            lft = "";
                            rght = "";
+
                            if (strt != 0) {
                               lft = current_root->type.left(strt).trimmed();
                            }
-                           if ((current_root->type.length() - strt - strlen("function")) != 0) {
-                              rght = current_root->type.right(current_root->type.length() - strt - strlen("function")).trimmed();
+
+                           int lenFunc = QString("function").lenth();
+
+                           if ((current_root->type.length() - strt - lenFunc) != 0) {
+                              rght = current_root->type.right(current_root->type.length() - strt - lenFunc).trimmed();
                            }
+
                            current_root->type = lft;
+
                            if (rght.length() > 0) {
                               if (current_root->type.length() > 0) {
                                  current_root->type += " ";
                               }
                               current_root->type += rght;
                            }
+
                            if (argType.trimmed().length() > 0) {
                               if (current_root->type.length() > 0) {
                                  current_root->type += " ";
                               }
                               current_root->type += argType.trimmed();
                            }
+
                            if (current_root->type.length() > 0) {
                               current_root->type += " ";
                            }
                            current_root->type += "function";
+
                         } else {
                            current_root->type += " " + argType.trimmed();
                         }
+
                         current_root->type = current_root->type.trimmed();
                         modifiers[current_root][name.toLower()].type = current_root->type;
                      } else {
                         modifiers[current_root][name.toLower()].type = argType;
                      }
                   }
+
                   // any accumulated doc for argument should be emptied,
                   // because it is handled other way and this doc can be
                   // unexpectedly passed to the next member.
@@ -57894,8 +57906,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* dimension of the previous entry. */
-               QByteArray name(argName);
-               QByteArray attr("dimension");
+               QString name(argName);
+               QString attr("dimension");
                attr += fortranscannerYYtext;
                modifiers[current_root][name.toLower()] |= attr;
             }
@@ -57938,11 +57950,14 @@ YY_DECL {
                currentModifiers = SymbolModifiers();
                yy_pop_state(); // end variable declaration list
                docBlock.resize(0);
-               inputStringSemi = (const char *)(QByteArray(" \n") + QByteArray(fortranscannerYYtext + 1)).data();
+
+               inputStringSemi = " \n" + QString(fortranscannerYYtext + 1);
+
                yyLineNr--;
                pushBuffer(inputStringSemi);
             }
             YY_BREAK
+
          case 78:
             /* rule 78 can match eol */
             YY_RULE_SETUP
@@ -57960,7 +57975,7 @@ YY_DECL {
                {
                   REJECT;   // ";" ignored in regular comments
                }
-               inputStringSemi = (const char *)(QByteArray(" \n") + QByteArray(fortranscannerYYtext + 1)).data();
+               inputStringSemi = " \n" + QString(fortranscannerYYtext + 1);
                yyLineNr--;
                pushBuffer(inputStringSemi);
             }
@@ -58061,7 +58076,7 @@ YY_DECL {
                }
 
                // TYPE_SPEC is for old function style function result
-               result = QByteArray(fortranscannerYYtext).trimmed().toLower();
+               result = QString(fortranscannerYYtext).trimmed().toLower();
                current->type = result;
                yy_push_state(SubprogPrefix);
             }
@@ -58090,7 +58105,7 @@ YY_DECL {
                   startScope(last_entry);
                }
 
-               result = QByteArray(fortranscannerYYtext).trimmed();
+               result = QString(fortranscannerYYtext).trimmed();
                addSubprogram(result);
                yy_push_state(Subprog);
             }
@@ -58109,7 +58124,7 @@ YY_DECL {
 
                if (ifType == IF_ABSTRACT || ifType == IF_SPECIFIC) {
 
-                  QByteArray temp = "\\$interface\\$";
+                  QString temp = "\\$interface\\$";
                   current_root->name.replace(temp, fortranscannerYYtext);
                }
 
@@ -58156,7 +58171,7 @@ YY_DECL {
 
             {
                //current->type not yet available
-               QByteArray param = fortranscannerYYtext;
+               QString param = fortranscannerYYtext;
 
                current->args += param;
 
@@ -58334,7 +58349,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current->name = QByteArray(fortranscannerYYtext).toLower();
+               current->name = QString(fortranscannerYYtext).toLower();
                current->name.trimmed();
                BEGIN(PrototypeArgs);
             }
@@ -58352,7 +58367,7 @@ YY_DECL {
                current->args += fortranscannerYYtext;
 
                Argument a;
-               a.name = QByteArray(fortranscannerYYtext).toLower();
+               a.name = QString(fortranscannerYYtext).toLower();
                current->argList.append(a);
             }
             YY_BREAK
@@ -59476,33 +59491,6 @@ void fortranscannerYYfree (void *ptr )
 
 #define YYTABLES_NAME "yytables"
 
-
-
-
-//----------------------------------------------------------------------------
-
-#if 0
-static void extractPrefix(QByteArray &text)
-{
-   int prefixIndex = 0;
-   int curIndex = 0;
-   bool cont = TRUE;
-   const char *pre[] = {"RECURSIVE", "IMPURE", "PURE", "ELEMENTAL"};
-
-   while (cont) {
-      cont = FALSE;
-
-      for (unsigned int i = 0; i < 4; i++) {
-         if ((prefixIndex = text.indexOf(pre[i], curIndex, FALSE)) == 0) {
-            text.remove(0, strlen(pre[i]));
-            text.trimmed();
-            cont = TRUE;
-         }
-      }
-   }
-}
-#endif
-
 static void newLine()
 {
    yyLineNr++;
@@ -59620,6 +59608,7 @@ static int getAmpOrExclAtTheEnd(const char *buf, int length)
 void truncatePrepass(int index)
 {
    int length = inputStringPrepass.length();
+
    for (int i = index + 1; i < length; i++) {
       if (inputStringPrepass[i] == '!' && i < length - 1 && inputStringPrepass[i + 1] == '<') { // save comment
          struct CommentInPrepass *c = new CommentInPrepass(index, inputStringPrepass.right(length - i - 2));
@@ -59631,9 +59620,9 @@ void truncatePrepass(int index)
 
 // simplified way to know if this is fixed form
 // duplicate in fortrancode.l
-static bool recognizeFixedForm(const char *contents, FortranFormat format)
+static bool recognizeFixedForm(const QString &contents, FortranFormat format)
 {
-   int column = 0;
+   int column    = 0;
    bool skipLine = FALSE;
 
    if (format == FortranFormat_Fixed) {
@@ -59643,10 +59632,10 @@ static bool recognizeFixedForm(const char *contents, FortranFormat format)
       return FALSE;
    }
 
-   for (int i = 0;; i++) {
+   for (int i = 0; true; i++) {
       column++;
 
-      switch (contents[i]) {
+      switch (contents[i].unicode()) {
          case '\n':
             column = 0;
             skipLine = FALSE;
@@ -59699,12 +59688,13 @@ static void insertCharacter(char *contents, int length, int pos, char c)
 }
 
 /* change comments and bring line continuation character to previous line */
-static const char *prepassFixedForm(const char *contents)
+static const char *prepassFixedForm(const QString &contents)
 {
    int column = 0;
    int prevLineLength = 0;
    int prevLineAmpOrExclIndex = -1;
    bool emptyLabel = TRUE;
+
    int newContentsSize = strlen(contents) + 3; // \000, \n (when necessary) and one spare character (to avoid reallocation)
    char *newContents = (char *)malloc(newContentsSize);
 
@@ -59782,17 +59772,18 @@ static const char *prepassFixedForm(const char *contents)
    return newContents;
 }
 
-static void pushBuffer(QByteArray &buffer)
+static void pushBuffer(QString &buffer)
 {
    if (include_stack_cnt <= include_stack_ptr) {
       include_stack_cnt++;
       include_stack = (YY_BUFFER_STATE *)realloc(include_stack, include_stack_cnt * sizeof(YY_BUFFER_STATE));
    }
+
    include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
    fortranscannerYY_switch_to_buffer(fortranscannerYY_scan_string(buffer));
 
-   DBG_CTX((stderr, "--PUSH--%s", (const char *)buffer));
-   buffer = NULL;
+   DBG_CTX((stderr, "--PUSH--%s", qPrintable(buffer)));
+   buffer = "";
 }
 
 static void popBuffer()
@@ -59842,9 +59833,9 @@ void resolveModuleProcedures(QList<QSharedPointer<Entry>> &moduleProcedures, QSh
 
 
 /*! Extracts string which resides within parentheses of provided string. */
-static QByteArray extractFromParens(const QByteArray name)
+static QString extractFromParens(const QString &name)
 {
-   QByteArray extracted = name;
+   QString extracted = name;
    int start = extracted.indexOf("(");
 
    if (start != -1) {
@@ -59897,7 +59888,7 @@ SymbolModifiers &SymbolModifiers::operator|=(const SymbolModifiers &mdfs)
 }
 
 /*! Extracts  and adds passed modifier to these modifiers.*/
-SymbolModifiers &SymbolModifiers::operator|=(QByteArray mdfString)
+SymbolModifiers &SymbolModifiers::operator|=(QString mdfString)
 {
    mdfString = mdfString.toLower();
    SymbolModifiers newMdf;
@@ -59906,7 +59897,8 @@ SymbolModifiers &SymbolModifiers::operator|=(QByteArray mdfString)
       newMdf.dimension = mdfString;
 
    } else if (mdfString.contains("intent")) {
-      QByteArray tmp = extractFromParens(mdfString);
+      QString tmp = extractFromParens(mdfString);
+
       bool isin = tmp.contains("in");
       bool isout = tmp.contains("out");
 
@@ -59964,9 +59956,9 @@ SymbolModifiers &SymbolModifiers::operator|=(QByteArray mdfString)
 }
 
 /*! Find argument with given name in \a subprog entry. */
-static Argument *findArgument(QSharedPointer<Entry> subprog, QByteArray name, bool byTypeName = FALSE)
+static Argument *findArgument(QSharedPointer<Entry> subprog, QString name, bool byTypeName = FALSE)
 {
-   QByteArray cname(name.toLower());
+   QString cname(name.toLower());
 
    for (unsigned int i = 0; i < subprog->argList.count(); i++) {
       Argument &arg = subprog->argList[i];
@@ -59980,7 +59972,7 @@ static Argument *findArgument(QSharedPointer<Entry> subprog, QByteArray name, bo
 }
 
 /*! Apply modifiers stored in \a mdfs to the \a typeName string. */
-static QByteArray applyModifiers(QByteArray typeName, SymbolModifiers &mdfs)
+static QString applyModifiers(QString typeName, SymbolModifiers &mdfs)
 {
    if (!mdfs.dimension.isNull()) {
       if (!typeName.isEmpty()) {
@@ -60111,14 +60103,14 @@ static QByteArray applyModifiers(QByteArray typeName, SymbolModifiers &mdfs)
 /*! Apply modifiers stored in \a mdfs to the \a arg argument. */
 static void applyModifiers(Argument *arg, SymbolModifiers &mdfs)
 {
-   QByteArray tmp = arg->type;
+   QString tmp = arg->type;
    arg->type = applyModifiers(tmp, mdfs);
 }
 
 /*! Apply modifiers stored in \a mdfs to the \a ent entry. */
 static void applyModifiers(QSharedPointer<Entry> ent, SymbolModifiers &mdfs)
 {
-   QByteArray tmp = ent->type;
+   QString tmp = ent->type;
    ent->type = applyModifiers(tmp, mdfs);
 
    if (mdfs.protection == SymbolModifiers::PUBLIC) {
@@ -60138,7 +60130,7 @@ static void startScope(QSharedPointer<Entry> scope)
    /* start substructure */
    current_root = scope; 
 
-   QMap<QByteArray, SymbolModifiers> mdfMap;
+   QMap<QString, SymbolModifiers> mdfMap;
    modifiers.insert(scope, mdfMap);
 }
 
@@ -60157,12 +60149,12 @@ static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
    }
 
    // update variables or subprogram arguments with modifiers
-   QMap<QByteArray, SymbolModifiers> &mdfsMap = modifiers[scope];
+   QMap<QString, SymbolModifiers> &mdfsMap = modifiers[scope];
 
    if (scope->section == Entry::FUNCTION_SEC) {
       // iterate all symbol modifiers of the scope
 
-      for (QMap<QByteArray, SymbolModifiers>::Iterator it = mdfsMap.begin(); it != mdfsMap.end(); it++) {      
+      for (QMap<QString, SymbolModifiers>::Iterator it = mdfsMap.begin(); it != mdfsMap.end(); it++) {      
          Argument *arg = findArgument(scope, it.key());
 
          if (arg) {
@@ -60171,7 +60163,7 @@ static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
       }
 
       // find return type for function    
-      QByteArray returnName = modifiers[current_root][scope->name.toLower()].returnName.toLower();
+      QString returnName = modifiers[current_root][scope->name.toLower()].returnName.toLower();
 
       if (modifiers[scope].contains(returnName)) {
          scope->type = modifiers[scope][returnName].type;       // returning type works
@@ -60245,14 +60237,29 @@ static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
 }
 
 static int yyread(char *buf, int max_size)
-{
+{ 
    int c = 0;
 
-   while ( c < max_size && inputString[inputPosition] ) {
-      *buf = inputString[inputPosition++] ;
-      c++;
-      buf++;
+   while (inputString[inputPosition] != 0) {
+
+      QString tmp1    = inputString.at(inputPosition);
+      QByteArray tmp2 = tmp1.toUtf8();
+
+      if (c + tmp2.length() >= max_size)  {
+         // buffer is full
+         break;
+      }
+
+      c += tmp2.length();     
+   
+      for (auto letters : tmp2) {
+         *buf = letters;
+          buf++;
+      }
+
+      inputPosition++;     
    }
+
    return c;
 }
 
@@ -60309,7 +60316,7 @@ static void addModule(const char *name, bool isModule)
    if (name != NULL) {
       current->name = name;
    } else {
-      QByteArray fname = yyFileName;
+      QString fname = yyFileName;
 
       int index = max(fname.lastIndexOf('/'), fname.lastIndexOf('\\'));
       fname = fname.right(fname.length() - index - 1);
@@ -60333,7 +60340,7 @@ static void addSubprogram(const char *text)
    subrCurrent.prepend(current);
    current->section = Entry::FUNCTION_SEC ;
 
-   QByteArray subtype = text;
+   QString subtype = text;
    subtype = subtype.toLower().trimmed();
    functionLine = (subtype.indexOf("function") != -1);
 
@@ -60352,7 +60359,7 @@ static void addSubprogram(const char *text)
  * \note Code was brought to this procedure from the parser,
  * because there was/is idea to use it in several parts of the parser.
  */
-static void addInterface(QByteArray name, InterfaceType type)
+static void addInterface(QString name, InterfaceType type)
 {
    if (YY_START == Start) {
       addModule(NULL);
@@ -60391,7 +60398,7 @@ static void addInterface(QByteArray name, InterfaceType type)
 
 /*! Get the argument \a name.
  */
-static Argument *getParameter(const QByteArray &name)
+static Argument *getParameter(const QString &name)
 {  
    Argument *ret = 0;
  
@@ -60416,7 +60423,7 @@ static void startCommentBlock(bool brief)
    }
 }
 
-static void handleCommentBlock(const QByteArray &doc, bool brief)
+static void handleCommentBlock(const QString &doc, bool brief)
 {
    bool needsEntry = FALSE;
    static bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
@@ -60460,9 +60467,9 @@ static void handleCommentBlock(const QByteArray &doc, bool brief)
 
 
 /// Handle parameter description as defined after the declaration of the parameter
-static void subrHandleCommentBlock(const QByteArray &doc, bool brief)
+static void subrHandleCommentBlock(const QString &doc, bool brief)
 {
-   QByteArray loc_doc;
+   QString loc_doc;
    loc_doc = doc.trimmed();
 
    QSharedPointer<Entry> tmp_entry = current;
@@ -60500,14 +60507,14 @@ static void subrHandleCommentBlock(const QByteArray &doc, bool brief)
             return;
          }
 
-         handleCommentBlock(QByteArray("\n\n@param ") + directionParam[SymbolModifiers::IN] + " " + argName + " " + loc_doc, brief);
+         handleCommentBlock(QString("\n\n@param ") + directionParam[SymbolModifiers::IN] + " " + argName + " " + loc_doc, brief);
 
       } else {
          // something different specified, give warning and leave error.
          warn(yyFileName, yyLineNr, "Routine: " + current->name + current->args +
               " inconsistency between intent attribute and documentation for parameter: " + argName);
 
-         handleCommentBlock(QByteArray("\n\n@param ") + directionParam[dir1] + " " +
+         handleCommentBlock(QString("\n\n@param ") + directionParam[dir1] + " " +
                             argName + " " + loc_doc, brief);
       }
    }
@@ -60525,14 +60532,14 @@ static void subrHandleCommentBlock(const QByteArray &doc, bool brief)
             return;
          }
 
-         handleCommentBlock(QByteArray("\n\n@param ") + directionParam[SymbolModifiers::OUT] + " " +
+         handleCommentBlock(QString("\n\n@param ") + directionParam[SymbolModifiers::OUT] + " " +
                             argName + " " + loc_doc, brief);
 
       } else {
          warn(yyFileName, yyLineNr, "Routine: " + current->name + current->args +
               " inconsistency between intent attribute and documentation for parameter: " + argName);
 
-         handleCommentBlock(QByteArray("\n\n@param ") + directionParam[dir1] + " " +
+         handleCommentBlock(QString("\n\n@param ") + directionParam[dir1] + " " +
                             argName + " " + loc_doc, brief);
       }
    }
@@ -60548,37 +60555,38 @@ static void subrHandleCommentBlock(const QByteArray &doc, bool brief)
             return;
          }
 
-         handleCommentBlock(QByteArray("\n\n@param ") + directionParam[SymbolModifiers::INOUT] + " " +
+         handleCommentBlock(QString("\n\n@param ") + directionParam[SymbolModifiers::INOUT] + " " +
                             argName + " " + loc_doc, brief);
       } else {
          warn(yyFileName, yyLineNr, "Routine: " + current->name + current->args +
               " inconsistency between intent attribute and documentation for parameter: " + argName);
-         handleCommentBlock(QByteArray("\n\n@param ") + directionParam[dir1] + " " +
+         handleCommentBlock(QString("\n\n@param ") + directionParam[dir1] + " " +
                             argName + " " + loc_doc, brief);
       }
    }
+
    // analogous to the [in] case; here no direction specified
    else {
       if (loc_doc.isEmpty() || (loc_doc.toLower() == argName.toLower())) {
          current = tmp_entry;
          return;
       }
-      handleCommentBlock(QByteArray("\n\n@param ") + directionParam[dir1] + " " + argName + " " + loc_doc, brief);
+      handleCommentBlock(QString("\n\n@param ") + directionParam[dir1] + " " + argName + " " + loc_doc, brief);
    }
 
    // reset current back to the part inside the routine
    current = tmp_entry;
 }
 
-static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<Entry> &rt, FortranFormat format)
+static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> &rt, FortranFormat format)
 {
    char *tmpBuf = NULL;
    initParser();
 
-   defaultProtection = Public;
-   inputString = fileBuf;
-   inputPosition = 0;
-   inputStringPrepass = NULL;
+   defaultProtection    = Public;
+   inputString          = fileBuf;
+   inputPosition        = 0;
+   inputStringPrepass   = "";
    inputPositionPrepass = 0;
 
    //anonCount     = 0;  // don't reset per file
@@ -60594,21 +60602,21 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
       isFixedForm = recognizeFixedForm(fileBuf, format);
 
       if (isFixedForm) {
-         msg("Prepassing fixed form of %s\n", fileName);        
+         msg("Prepassing fixed form of %s\n", qPrintable(fileName));        
          inputString = prepassFixedForm(fileBuf);
 
       } else if (inputString[strlen(fileBuf) - 1] != '\n') {
          tmpBuf = (char *)malloc(strlen(fileBuf) + 2);
          strcpy(tmpBuf, fileBuf);
 
-         tmpBuf[strlen(fileBuf)] = '\n';
+         tmpBuf[strlen(fileBuf)]     = '\n';
          tmpBuf[strlen(fileBuf) + 1] = '\000';
          inputString = tmpBuf;
       }
 
       yyLineNr = 1 ;
       yyFileName = fileName;
-      msg("Parsing file %s\n", yyFileName.data());
+      msg("Parsing file %s\n", qPrintable(yyFileName));
 
       startScope(rt); // implies current_root = rt
       initParser();
@@ -60642,31 +60650,30 @@ static void parseMain(const char *fileName, const char *fileBuf, QSharedPointer<
 
       if (tmpBuf) {
          free((char *)tmpBuf);
-         inputString = NULL;
+         inputString = "";
       }
+
       if (isFixedForm) {
          free((char *)inputString);
-         inputString = NULL;
+         inputString = "";
       }
 
       inputFile.close();
    }
 }
 
-void FortranLanguageParser::parseInput(const char *fileName, const char *fileBuf, QSharedPointer<Entry> root,
+void FortranLanguageParser::parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                   enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    g_thisParser = this;
 
    printlex(fortranscannerYY_flex_debug, TRUE, __FILE__, fileName);
-
    ::parseMain(fileName, fileBuf, root, m_format);
-
    printlex(fortranscannerYY_flex_debug, FALSE, __FILE__, fileName);
 }
 
-void FortranLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input,
-                  SrcLangExt /*lang*/, bool isExampleBlock, const char *exampleName, QSharedPointer<FileDef> fileDef,
+void FortranLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
+                  SrcLangExt, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef,
                   int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, 
                   bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs)
 {
@@ -60674,7 +60681,7 @@ void FortranLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const ch
                   inlineFragment, memberDef, showLineNumbers, searchCtx, collectXRefs, m_format);
 }
 
-bool FortranLanguageParser::needsPreprocessing(const QByteArray &extension)
+bool FortranLanguageParser::needsPreprocessing(const QString &extension)
 {
    return extension != extension.toLower(); // use preprocessor only for upper case extensions
 }
@@ -60683,9 +60690,9 @@ void FortranLanguageParser::resetCodeParserState()
    ::resetFortranCodeParserState();
 }
 
-void FortranLanguageParser::parsePrototype(const char *text)
+void FortranLanguageParser::parsePrototype(const QString &text)
 {
-   QByteArray buffer = QByteArray(text);
+   QString buffer = text;
 
    pushBuffer(buffer);
    parsingPrototype = TRUE;

@@ -1052,16 +1052,15 @@ char *commentcnvYYtext;
 
 #define YY_NO_INPUT 1
 
-#define ADDCHAR(c)    g_outBuf->addChar(c)
-#define ADDARRAY(a,s) g_outBuf->addArray(a,s)
+#define ADDCHAR(c)     g_outBuf += c
 
 struct CondCtx {
-   CondCtx(int line, QByteArray id, bool b)
+   CondCtx(int line, const QString &id, bool b)
       : lineNr(line), sectionId(id), skip(b) 
    {}
 
    int lineNr;
-   QByteArray sectionId;
+   QString sectionId;
    bool skip;
 };
 
@@ -1073,21 +1072,22 @@ struct CommentCtx {
    int lineNr;
 };
 
-static BufStr *g_inBuf;
-static BufStr *g_outBuf;
+static QString  g_inBuf;
+static QString  g_outBuf;
+
 static int      g_inBufPos;
 static int      g_col;
 static int      g_blockHeadCol;
 static bool     g_mlBrief;
 static int      g_readLineCtx;
 static bool     g_skip;
-static QByteArray g_fileName;
+static QString  g_fileName;
 static int      g_lineNr;
 static int      g_condCtx;
 
 static QStack<CondCtx *>     g_condStack;
 static QStack<CommentCtx *>  g_commentStack;
-static QByteArray            g_blockName;
+static QString               g_blockName;
 
 static int      g_lastCommentContext;
 static bool     g_inSpecialComment;
@@ -1097,7 +1097,7 @@ static int      g_charContext;
 static int      g_javaBlock;
 static bool     g_specialComment;
 
-static QByteArray g_aliasString;
+static QString  g_aliasString;
 static int      g_blockCount;
 static bool     g_lastEscaped;
 static int      g_lastBlockContext;
@@ -1107,21 +1107,26 @@ static int      g_nestingCount;
 static SrcLangExt g_lang;
 static bool       isFixedForm; // For Fortran
 
-static void replaceCommentMarker(const char *s, int len)
+static void replaceCommentMarker(const QString &s, int len)
 {
-   const char *p = s;
-   char c;
+   const QChar *p   = s.constData();
+   const QChar *ptr = p;
+   QChar c;
+
    // copy leading blanks
-   while ((c = *p) && (c == ' ' || c == '\t' || c == '\n')) {
+   while ((c = *p) != 0 && (c == ' ' || c == '\t' || c == '\n')) {
       ADDCHAR(c);
       g_lineNr += c == '\n';
       p++;
    }
+
    // replace start of comment marker by blanks and the last character by a *
    int blanks = 0;
-   while ((c = *p) && (c == '/' || c == '!' || c == '#')) {
+
+   while ((c = *p) != 0 && (c == '/' || c == '!' || c == '#')) {
       blanks++;
       p++;
+
       if (*p == '<') { // comment-after-item marker
          blanks++;
          p++;
@@ -1140,8 +1145,9 @@ static void replaceCommentMarker(const char *s, int len)
       }
       ADDCHAR(' ');
    }
+
    // copy comment line to output
-   ADDARRAY(p, len - (int)(p - s));
+   g_outBuf += QString(p, len - (p - ptr) );
 }
 
 static inline int computeIndent(const char *s)
@@ -1163,26 +1169,28 @@ static inline int computeIndent(const char *s)
    return col;
 }
 
-static inline void copyToOutput(const char *s, int len)
+static inline void copyToOutput(const QString &s, int len)
 {
    int i;
+
    if (g_skip) { 
       // only add newlines
 
       for (i = 0; i < len; i++) {
          if (s[i] == '\n') {
             ADDCHAR('\n');
-            //fprintf(stderr,"---> skip %d\n",g_lineNr);
+           
             g_lineNr++;
          }
       }
 
    } else if (len > 0) {
-      ADDARRAY(s, len);
+      g_outBuf += s.mid(0, len);
+
       static int tabSize = Config::getInt("tab-size");
 
       for (i = 0; i < len; i++) {
-         switch (s[i]) {
+         switch (s[i].unicode()) {
             case '\n':
                g_col = 0;
                //fprintf(stderr,"---> copy %d\n",g_lineNr);
@@ -1199,13 +1207,14 @@ static inline void copyToOutput(const char *s, int len)
    }
 }
 
-static void startCondSection(const char *sectId)
+static void startCondSection(const QString &sectId)
 {
-   //printf("startCondSection: skip=%d stack=%d\n",g_skip,g_condStack.count());
    CondParser prs;
    bool expResult = prs.parse(g_fileName, g_lineNr, sectId);
+
    g_condStack.push(new CondCtx(g_lineNr, sectId, g_skip));
-   if (!expResult) { // not enabled
+
+   if (! expResult) { // not enabled
       g_skip = TRUE;
    }
 }
@@ -1225,9 +1234,9 @@ static void endCondSection()
 /** copies string \a s with length \a len to the output, while
  *  replacing any alias commands found in the string.
  */
-static void replaceAliases(const char *s)
+static void replaceAliases(const QString &s)
 {
-   QByteArray result = resolveAliasCmd(s);
+   QString result = resolveAliasCmd(s);
    copyToOutput(result, result.length());
 }
 
@@ -1237,15 +1246,32 @@ static void replaceAliases(const char *s)
 
 static int yyread(char *buf, int max_size)
 {
-   int bytesInBuf = g_inBuf->curPos() - g_inBufPos;
-   int bytesToCopy = qMin(max_size, bytesInBuf);
-   memcpy(buf, g_inBuf->data() + g_inBufPos, bytesToCopy);
-   g_inBufPos += bytesToCopy;
-   return bytesToCopy;
+   int c = 0;
+
+   while (g_inBuf[g_inBufPos] != 0) {
+
+      QString tmp1    = g_inBuf.at(g_inBufPos);
+      QByteArray tmp2 = tmp1.toUtf8();
+
+      if (c + tmp2.length() >= max_size)  {
+         // buffer is full
+         break;
+      }
+
+      c += tmp2.length();     
+   
+      for (auto letters : tmp2) {
+         *buf = letters;
+          buf++;
+      }
+
+      g_inBufPos++;     
+   }
+
+   return c;
 }
 
 void replaceComment(int offset);
-
 
 #define INITIAL 0
 #define Scan 1
@@ -3604,15 +3630,15 @@ void replaceComment(int offset)
 
 // simplified way to know if this is fixed form
 // duplicate in fortrancode.l
-static bool recognizeFixedForm(const char *contents)
+static bool recognizeFixedForm(const QString &contents)
 {
    int column = 0;
    bool skipLine = FALSE;
 
-   for (int i = 0;; i++) {
+   for (int i = 0; true; i++) {
       column++;
 
-      switch (contents[i]) {
+      switch (contents[i].unicode()) {
          case '\n':
             column = 0;
             skipLine = FALSE;
@@ -3657,10 +3683,11 @@ static bool recognizeFixedForm(const char *contents)
  *  -# It replaces aliases with their definition (see ALIASES)
  *  -# It handles conditional sections (cond...endcond blocks)
  */
-void convertCppComments(BufStr *inBuf, BufStr *outBuf, const char *fileName)
-{   
+QString convertCppComments(const QString &inBuf, const QString &fileName)
+{  
    g_inBuf    = inBuf;
-   g_outBuf   = outBuf;
+   g_outBuf   = "";
+
    g_inBufPos = 0;
    g_col      = 0;
 
@@ -3668,17 +3695,19 @@ void convertCppComments(BufStr *inBuf, BufStr *outBuf, const char *fileName)
 
    g_skip     = FALSE;
    g_fileName = fileName;
-   g_lang = getLanguageFromFileName(fileName);
+   g_lang     = getLanguageFromFileName(fileName);
+    g_lineNr  = 1;
+
    g_pythonDocString = FALSE;
-   g_lineNr   = 1;
+   
    g_condStack.clear();
    g_commentStack.clear();
 
-   printlex(commentcnvYY_flex_debug, TRUE, __FILE__, fileName);
+   printlex(commentcnvYY_flex_debug, TRUE, __FILE__, qPrintable(fileName));
    isFixedForm = FALSE;
 
    if (g_lang == SrcLangExt_Fortran) {
-      isFixedForm = recognizeFixedForm(inBuf->data());
+      isFixedForm = recognizeFixedForm(inBuf);
    }
 
    if (g_lang == SrcLangExt_Markdown) {
@@ -3694,18 +3723,18 @@ void convertCppComments(BufStr *inBuf, BufStr *outBuf, const char *fileName)
 
    while (! g_condStack.isEmpty()) {
       CondCtx *ctx = g_condStack.pop();
-      QByteArray sectionInfo = " ";
+      QString sectionInfo = " ";
 
       if (ctx->sectionId != " ") {
-         sectionInfo = QString(" with label %1 ").arg(ctx->sectionId.constData()).toUtf8();
+         sectionInfo = QString(" with label %1 ").arg(ctx->sectionId);
       }
 
       warn(g_fileName, ctx->lineNr, "Conditional section %s does not have "
-           "a corresponding \\endcond command", sectionInfo.constData());
+           "a corresponding \\endcond command", qPrintable(sectionInfo));
    }
 
    if (g_nestingCount > 0 && g_lang != SrcLangExt_Markdown) {
-      QByteArray tmp = "(probable line reference: ";
+      QString tmp = "(probable line reference: ";
 
       bool first = TRUE;
 
@@ -3715,27 +3744,28 @@ void convertCppComments(BufStr *inBuf, BufStr *outBuf, const char *fileName)
             tmp += ", ";
          }
 
-         tmp += QByteArray().setNum(ctx->lineNr);
+         tmp += QString::number(ctx->lineNr);
          first = FALSE;
          delete ctx;
       }
 
       tmp += ")";
       warn(g_fileName, g_lineNr, "Reached end of file while still inside a (nested) comment. "
-           "Nesting level %d %s", g_nestingCount + 1, tmp.data()); // add one for "normal" expected end of comment
+           "Nesting level %d %s", g_nestingCount + 1, qPrintable(tmp) );    // add one for "normal" expected end of comment
    }
 
    g_commentStack.clear();
-   if (Debug::isFlagSet(Debug::CommentCnv)) {
-      g_outBuf->at(g_outBuf->curPos()) = '\0';
-      msg("-------------\n%s\n-------------\n", g_outBuf->data());
+
+   if (Debug::isFlagSet(Debug::CommentCnv)) {     
+      msg("-------------\n%s\n-------------\n", qPrintable(g_outBuf));
    }
 
-   printlex(commentcnvYY_flex_debug, FALSE, __FILE__, fileName);
+   printlex(commentcnvYY_flex_debug, FALSE, __FILE__, qPrintable(fileName) );
+
+   return g_outBuf;
 }
 
 
-//----------------------------------------------------------------------------
 #if !defined(YY_FLEX_SUBMINOR_VERSION)
 extern "C" { // some bogus code to keep the compiler happy
    void commentcnvYYdummy()

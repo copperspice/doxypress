@@ -655,21 +655,21 @@ char *declinfoYYtext;
 
 #define YY_NO_INPUT 1
 
-static const char *inputString;
-static int	       inputPosition;
-static QByteArray  scope;
-static QByteArray  className;
-static QByteArray  classTempList;
-static QByteArray  funcTempList;
-static QByteArray  type;
-static QByteArray  name;
-static QByteArray  args;
+static QString  inputString;
+static int	    inputPosition;
+static QString  scope;
+static QString  className;
+static QString  classTempList;
+static QString  funcTempList;
+static QString  type;
+static QString  name;
+static QString  args;
 
-static int         sharpCount;
-static bool        classTempListFound;
-static bool        funcTempListFound;
-static QByteArray  exceptionString;
-static bool        insideObjC;
+static int      sharpCount;
+static bool     classTempListFound;
+static bool     funcTempListFound;
+static QString  exceptionString;
+static bool     insideObjC;
 
 static void addType()
 {
@@ -706,20 +706,32 @@ static void addTypeName()
 
 #define YY_NEVER_INTERACTIVE 1
 
-/* -----------------------------------------------------------------
- */
 #undef	YY_INPUT
 #define	YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
 
 static int yyread(char *buf, int max_size)
-{
+{  
    int c = 0;
-   while ( c < max_size && inputString[inputPosition] ) {
-      *buf = inputString[inputPosition++] ;
-      c++;
-      buf++;
+
+   while (inputString[inputPosition] != 0) {
+
+      QString tmp1    = inputString.at(inputPosition);
+      QByteArray tmp2 = tmp1.toUtf8();
+
+      if (c + tmp2.length() >= max_size)  {
+         // buffer is full
+         break;
+      }
+
+      c += tmp2.length();     
+   
+      for (auto letters : tmp2) {
+         *buf = letters;
+          buf++;
+      }
+
+      inputPosition++;     
    }
-   return c;
 }
 
 #define INITIAL 0
@@ -1103,7 +1115,7 @@ YY_DECL {
 
             {
                addType();
-               QByteArray text = declinfoYYtext;
+               QString text = declinfoYYtext;
                type += text.trimmed();
             }
             YY_BREAK
@@ -2209,14 +2221,8 @@ void declinfoYYfree (void *ptr )
 #define YYTABLES_NAME "yytables"
 
 
-
-
-
-/*@ ----------------------------------------------------------------------------
- */
-
-void parseFuncDecl(const QByteArray &decl, bool objC, QByteArray &cl, QByteArray &t,
-                   QByteArray &n, QByteArray &a, QByteArray &ftl, QByteArray &exc)
+void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
+                   QString &n, QString &a, QString &ftl, QString &exc)
 {
    printlex(declinfoYY_flex_debug, TRUE, __FILE__, NULL);
 
@@ -2300,46 +2306,7 @@ void parseFuncDecl(const QByteArray &decl, bool objC, QByteArray &cl, QByteArray
    return;
 }
 
-//extern "C" { // some bogus code to keep the compiler happy
-//  int  declinfoYYwrap() { return 1 ; }
-//  void declinfoYYdummy() { yy_flex_realloc(0,0); }
-//}
-
-#if 0
-void dumpDecl(const char *s)
-{
-   QByteArray className;
-   QByteArray classTNames;
-   QByteArray type;
-   QByteArray name;
-   QByteArray args;
-   QByteArray funcTNames;
-   msg("-----------------------------------------\n");
-   parseFuncDecl(s, className, classTNames, type, name, args, funcTNames);
-   msg("type=`%s' class=`%s' classTempl=`%s' name=`%s' "
-       "funcTemplateNames=`%s' args=`%s'\n",
-       type.data(), className.data(), classTNames.data(),
-       name.data(), funcTNames.data(), args.data()
-      );
-}
-
-// some test code
-int main()
-{
-   dumpDecl("A < T > :: Value * A < T > :: getValue < S > ( const A < T > & a )");
-   dumpDecl("const A<T>::Value* A<T>::getValue<S>(const A<T>&a)");
-   dumpDecl("func()");
-   dumpDecl("friend void bla<>()");
-   dumpDecl("name< T > :: operator () (int bla)");
-   dumpDecl("name< T > :: operator << (int bla)");
-   dumpDecl("name< T > :: operator << <> (int bla)");
-   dumpDecl("className::func()");
-   dumpDecl("void ( * Name < T > :: bla ) ( int, char * )");
-}
-#endif
-
 #if !defined(YY_FLEX_SUBMINOR_VERSION)
-//----------------------------------------------------------------------------
 extern "C" { // some bogus code to keep the compiler happy
    void declinfoYYdummy()
    {

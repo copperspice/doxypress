@@ -38,13 +38,13 @@
  * - On error, an error message is returned.
  * - On success, the result of the expression is either "1" or "0".
  */
-bool CondParser::parse(const char *fileName, int lineNr, const char *expr)
+bool CondParser::parse(const QString &fileName, int lineNr, const QString &expr)
 {
    m_expr      = expr;
    m_tokenType = NOTHING;
 
    // initialize all variables
-   m_e = m_expr;    // let m_e point to the start of the expression
+   m_e = m_expr.constData();    // let m_e point to the start of the expression
 
    bool answer = false;
    getToken();
@@ -58,7 +58,7 @@ bool CondParser::parse(const char *fileName, int lineNr, const char *expr)
    }
 
    if (! m_err.isEmpty()) {
-      warn(fileName, lineNr, "problem evaluating expression '%s': %s", expr, m_err.data());
+      warn(fileName, lineNr, "problem evaluating expression '%s': %s", qPrintable(expr), qPrintable(m_err));
    }
 
    return answer;
@@ -69,7 +69,7 @@ bool CondParser::parse(const char *fileName, int lineNr, const char *expr)
  * checks if the given char c is a delimeter
  * minus is checked apart, can be unary minus
  */
-static bool isDelimiter(const char c)
+static bool isDelimiter(const QChar c)
 {
    return c == '&' || c == '|' || c == '!';
 }
@@ -77,12 +77,12 @@ static bool isDelimiter(const char c)
 /**
  * checks if the given char c is a letter or underscore
  */
-static bool isAlpha(const char c)
+static bool isAlpha(const QChar c)
 {
    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_';
 }
 
-static bool isAlphaNum(const char c)
+static bool isAlphaNum(const QChar c)
 {
    return isAlpha(c) || (c >= '0' && c <= '9');
 }
@@ -91,7 +91,7 @@ static bool isAlphaNum(const char c)
  * returns the id of the given operator
  * returns -1 if the operator is not recognized
  */
-int CondParser::getOperatorId(const QByteArray &opName)
+int CondParser::getOperatorId(const QString &opName)
 {
    // level 2
    if (opName == "&&") {
@@ -143,6 +143,7 @@ void CondParser::getToken()
    // check for operators (delimeters)
    if (isDelimiter(*m_e)) {
       m_tokenType = DELIMITER;
+
       while (isDelimiter(*m_e)) {
          m_token += *m_e++;
       }
@@ -160,10 +161,13 @@ void CondParser::getToken()
 
    // something unknown is found, wrong characters -> a syntax error
    m_tokenType = UNKNOWN;
-   while (*m_e) {
+
+   while (*m_e != 0) {
       m_token += *m_e++;
    }
-   m_err = QByteArray("Syntax error in part '") + m_token + "'";
+
+   m_err = "Syntax error in part '" + m_token + "'";
+
    return;
 }
 
@@ -230,6 +234,7 @@ bool CondParser::parseLevel3()
 bool CondParser::parseVar()
 {
    bool ans = 0;
+
    switch (m_tokenType) {
       case VARIABLE:
          // this is a variable
@@ -271,7 +276,7 @@ bool CondParser::evalOperator(int opId, bool lhs, bool rhs)
 /**
  * evaluate a variable
  */
-bool CondParser::evalVariable(const char *varName)
+bool CondParser::evalVariable(const QString &varName)
 {
    if (Config::getList("enabled-sections").indexOf(varName) == -1) {
       return false;

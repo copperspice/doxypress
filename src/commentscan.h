@@ -62,15 +62,15 @@ class ParserInterface;
  *         needed.
  */
 bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, const QString &comment,
-                       const QString &fileName, int  &lineNr, bool isBrief, bool isJavaDocStyle,
+                       const QString &fileName, int &lineNr, bool isBrief, bool isJavaDocStyle,
                        bool isInbody, Protection &prot, int &position, bool &newEntryNeeded);
 
-void groupEnterFile(const char *file, int line);
-void groupLeaveFile(const char *file, int line);
-void groupLeaveCompound(const char *file, int line, const char *name);
-void groupEnterCompound(const char *file, int line, const char *name);
-void openGroup(QSharedPointer<Entry> e, const char *file, int line);
-void closeGroup(QSharedPointer<Entry> e, const char *file, int line, bool foundInline = false);
+void groupEnterFile(const QString &file, int line);
+void groupLeaveFile(const QString &file, int line);
+void groupLeaveCompound(const QString &file, int line, const QString &name);
+void groupEnterCompound(const QString &file, int line, const QString &name);
+void openGroup(QSharedPointer<Entry> e, const QString &file, int line);
+void closeGroup(QSharedPointer<Entry> e, const QString &file, int line, bool foundInline = false);
 void initGroupInfo(QSharedPointer<Entry> e);
 
 

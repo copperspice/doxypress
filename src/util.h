@@ -158,7 +158,7 @@ void generateFileRef(OutputDocInterface &od, const QString &name, const QString 
 QByteArray getLanguageSpecificSeparator(SrcLangExt lang, bool classScope = false);
 QByteArray getCanonicalTemplateSpec(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, const QByteArray &spec);
 
-QByteArray fileToString(const QString &name, bool filter = false, bool isSourceCode = false);
+QString fileToString(const QString &name, bool filter = false, bool isSourceCode = false);
 
 QByteArray langToString(SrcLangExt lang);
 
@@ -234,8 +234,6 @@ QString convertToHtml(const QString &s, bool keepEntities = true);
 QString convertToXML(const QString &s);
 QString convertToJSString(const QString &s);
 
-QByteArray getOverloadDocs();
-
 void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **ppMemberGroupSDict, QSharedPointer<Definition> context);
 
 int extractClassNameFromType(const QString &type, int &pos, QString &name, QString &templSpec, SrcLangExt = SrcLangExt_Unknown);
@@ -254,7 +252,7 @@ QString mergeScopes(const QString &leftScope, const QString &rightScope);
 
 int getScopeFragment(const QString &s, int p, int *l);
 
-int filterCRLF(char *buf, int len);
+int filterCRLF(QString &buf);
 
 void addRefItem(const QList<ListItemInfo> *sli, const QString &key, const QString &prefix, 
                   const QString &name, const QString &title, const QString &args, QSharedPointer<Definition> scope);
@@ -264,7 +262,7 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
                   QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>(),
                   TagInfo *tagInfo = 0, SrcLangExt lang = SrcLangExt_Unknown );
 
-QByteArray escapeCharsInString(const QString &name, bool allowDots, bool allowUnderscore = false);
+QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnderscore = false);
 
 void addGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d);
 
@@ -315,7 +313,7 @@ QString parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<Memb
 QString transcodeToQString(const QString &input);
 QString extractAliasArgs(const QString &args, int pos);
 
-int countAliasArguments(const QString argList);
+int countAliasArguments(const QString &argList);
 
 QString resolveAliasCmd(const QString &aliasCmd);
 QString expandAlias(const QString &aliasName, const QString &aliasValue);
@@ -326,7 +324,7 @@ QString convertCharEntities(const QString &s);
 
 void stackTrace();
 
-bool readInputFile(const QString &fileName, BufStr &inBuf, bool filter = true, bool isSourceCode = false);
+bool readInputFile(const QString &fileName, QString &inBuf, bool filter = true, bool isSourceCode = false);
 
 QString filterTitle(const QString &title);
 

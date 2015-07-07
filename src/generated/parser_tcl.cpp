@@ -42,6 +42,7 @@
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
 #define YY_FLEX_SUBMINOR_VERSION 35
+
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -811,7 +812,7 @@ char *tclscannerYYtext;
    int *bracePtr                
 */
 
-int TclFindElement(const char *list, int listLength, const char **elementPtr,const char **nextPtr, int *sizePtr, int *bracePtr) 
+int TclFindElement(const QString &list, int listLength, const char **elementPtr, const char **nextPtr, int *sizePtr, int *bracePtr) 
 {
    const char *p = list;
    const char *elemStart;        /* Points to first byte of first element. */
@@ -963,6 +964,7 @@ done:
    }
    *elementPtr = elemStart;
    *nextPtr = p;
+
    if (sizePtr != 0) {
       *sizePtr = size;
    }
@@ -1069,7 +1071,7 @@ void tcl_split_list(QString &str, QStringList &list)
       str = str.mid(1, str.length() - 2);
    }
 
-   if (Tcl_SplitList(str.toUtf8(), &argc, &argv) != TCL_OK) {
+   if (Tcl_SplitList(str, &argc, &argv) != TCL_OK) {
       list.append(str);
 
    } else {
@@ -1087,7 +1089,7 @@ typedef struct {
    int line0; // start line of scan context
    int line1; // end line of scan context
    YY_BUFFER_STATE buffer_state; // value of scan context
-   QByteArray ns; // current namespace
+   QString ns; // current namespace
 
    QSharedPointer<Entry> entry_fn;      // if set contains the current proc/method/constructor/destructor
    QSharedPointer<Entry> entry_cl;      // if set contain the current class
@@ -1099,17 +1101,17 @@ typedef struct {
 
 // Structure containing all internal global variables.
 static struct {
-   CodeOutputInterface *code;  // if set then we are codifying the file
+   CodeOutputInterface *code;   // if set then we are codifying the file
 
-   int code_line; // current line of code
-   int code_linenumbers; // if true create line numbers in code
-   const char *code_font; // used font to codify
-   bool config_autobrief; // value of configuration option
+   int code_line;               // current line of code
+   int code_linenumbers;        // if true create line numbers in code
+   QString code_font;           // used font to codify
+   bool config_autobrief;       // value of configuration option
 
    QMap<QString, QString> config_subst; // map of configuration option values
-   QByteArray input_string;       // file contents
+   QString input_string;       // file contents
    int input_position;            // position in file
-   QByteArray file_name;          // name of used file
+   QString file_name;          // name of used file
    ParserInterface *this_parser;  // myself
 
    int command;          // true if command was found
@@ -1124,12 +1126,12 @@ static struct {
    int line_body0;       // start line of body
    int line_body1;       // end line of body
 
-   QByteArray string_command;          // contain current command
-   QByteArray string_commentline;      // contain current comment after command
-   QByteArray string_commentcodify;    // current comment string used in codifying
-   QByteArray string_comment;          // contain current comment
-   QByteArray string_last;             // contain last read word or part of word
-   QByteArray string;                  // temporary string value
+   QString string_command;          // contain current command
+   QString string_commentline;      // contain current comment after command
+   QString string_commentcodify;    // current comment string used in codifying
+   QString string_comment;          // contain current comment
+   QString string_last;             // contain last read word or part of word
+   QString string;                  // temporary string value
 
    QSharedPointer<Entry>  entry_main;       // top level entry
    QSharedPointer<Entry>  entry_file;       // entry of current file
@@ -1152,11 +1154,13 @@ static struct {
 
 // scanner functions
 static int yyread(char *buf, int max_size);
-static tcl_scan *tcl_scan_start(char type, QString content, QByteArray ns, QSharedPointer<Entry> entry_cls, QSharedPointer<Entry> entry_fn);
+static tcl_scan *tcl_scan_start(char type, const QString  &content, const QString &ns, 
+                  QSharedPointer<Entry> entry_cls, QSharedPointer<Entry> entry_fn);
+
 static void tcl_scan_end();
-static void tcl_comment(int what, const char *text);
-static void tcl_word(int what, const char *text);
-static void tcl_command(int what, const char *text);
+static void tcl_comment(int what, const QString  &text);
+static void tcl_word(int what, const QString  &text);
+static void tcl_command(int what, const QString  &text);
 
 // helper functions
 
@@ -1197,22 +1201,27 @@ void tcl_protection(QSharedPointer<Entry> entry)
 
 //! Check name.
 // @return 'ns' and 'name' of given current 'ns0' and 'name0'
-static void tcl_name(const QByteArray &ns0, const QByteArray &name0, QByteArray &ns, QByteArray &name)
+static void tcl_name(const QString &ns0, const QString &name0, QString &ns, QString &name)
 {
-   QByteArray myNm;
+   QString myNm;
    int myStart;
 
-   if (qstrncmp(name0.data(), "::", 2) == 0) {
+   if (name0.startsWith("::")) {
       myNm = name0.mid(2);
+
    } else if (ns0.length() && ns0 != " ") {
       myNm = ns0 + "::" + name0;
+
    } else {
       myNm = name0;
    }
+
    myStart = myNm.lastIndexOf("::");
+
    if (myStart == -1) {
       ns = "";
       name = myNm;
+
    } else {
       ns = myNm.mid(0, myStart);
       name = myNm.mid(myStart + 2);
@@ -1221,7 +1230,7 @@ static void tcl_name(const QByteArray &ns0, const QByteArray &name0, QByteArray 
 
 //! Check name. Strip namespace qualifiers from name0 if inside inlined code segment.
 // @return 'ns' and 'name' of given current 'ns0' and 'name0'
-static void tcl_name_SnippetAware(const QByteArray &ns0, const QByteArray &name0, QByteArray &ns, QByteArray &name)
+static void tcl_name_SnippetAware(const QString &ns0, const QString &name0, QString &ns, QString &name)
 {
    // If we are inside an inlined code snippet then ns0
    // already containes the complete namespace path.
@@ -1237,7 +1246,7 @@ static void tcl_name_SnippetAware(const QByteArray &ns0, const QByteArray &name0
 
 // Check and return namespace entry.
 // @return namespace entry
-QSharedPointer<Entry> tcl_entry_namespace(const QByteArray ns)
+QSharedPointer<Entry> tcl_entry_namespace(const QString ns)
 {
    QSharedPointer<Entry> myEntry;
 
@@ -1263,7 +1272,7 @@ QSharedPointer<Entry> tcl_entry_namespace(const QByteArray ns)
 
 // Check and return class entry.
 // @return class entry
-QSharedPointer<Entry> tcl_entry_class(const QByteArray cl)
+QSharedPointer<Entry> tcl_entry_class(const QString cl)
 {
    QSharedPointer<Entry> myEntry;
 
@@ -1288,7 +1297,7 @@ QSharedPointer<Entry> tcl_entry_class(const QByteArray cl)
 
 //! Check for keywords.
 // @return 1 if keyword and 0 otherwise
-static int tcl_keyword(QByteArray str)
+static int tcl_keyword(QString str)
 {
    static QStringList myList;
    static int myInit = 1;
@@ -1362,44 +1371,35 @@ static void tcl_font_end()
       return;
    }
 
-   if (tcl.code_font) {
+   if (! tcl.code_font.isEmpty()) {
       tcl.code->endFontClass();
-      tcl.code_font = NULL;
+      tcl.code_font = "";
    }
 }
 
 //! Codify 'str' with special font class 's'.
-static void tcl_codify(const char *s, char *str)
+static void tcl_codify(const QString &s, const QString &str)
 {
-   if (! tcl.code || ! str) {
+   if (! tcl.code || str.isEmpty() ) {
       return;
    }
 
-   if (s && qstrcmp(s, "NULL") != 0) {
+   if (s != "NULL") {
       tcl_font_end();
       tcl.code->startFontClass(s);
       tcl.code_font = s;
    }
   
-   char *p = str, *sp = p;
-   char c;
+   QString tmp;
 
-   bool done = FALSE;
-
-   while (!done) {
-      sp = p;
-
-      while ((c = *p++) && c != '\n') {
-         // no code
-      }
+   for (auto c : str) {      
 
       if (c == '\n') {
          tcl.code_line++;
-         *(p - 1) = '\0';
+         
+         tcl.code->codify(tmp);
 
-         tcl.code->codify(sp);
-
-         if (tcl.code_font) {
+         if (! tcl.code_font.isEmpty()) {
             tcl.code->endFontClass();
          }
 
@@ -1410,31 +1410,28 @@ static void tcl_codify(const char *s, char *str)
             tcl.code->writeLineNumber(0, 0, 0, tcl.code_line);
          }
 
-         if (tcl.code_font) {
+         if (! tcl.code_font.isEmpty()) {
             tcl.code->startFontClass(tcl.code_font);
          }
 
+         tmp = "";
+
       } else {
-         tcl.code->codify(sp);
-         done = TRUE;
+         tmp += c;
+        
       }
    }
+
+   if ( ! tmp.isEmpty() ) {
+      tcl.code->codify(tmp);
+   }  
 
    tcl_font_end();
 }
 
-//! Codify 'str' with special font class 's'.
-static void tcl_codify(const char *s, const QByteArray &str)
+static void tcl_codify_cmd(const QString &s, int i)
 {
-   if (! tcl.code) {
-      return;
-   }
-   tcl_codify(s, str.data());
-}
-
-static void tcl_codify_cmd(const char *s, int i)
-{
-   tcl_codify(s, tcl.list_commandwords.at(i).toUtf8() );
+   tcl_codify(s, tcl.list_commandwords.at(i) );
 }
 
 //! codify a string token
@@ -1443,7 +1440,7 @@ static void tcl_codify_cmd(const char *s, int i)
 // Starts a new scan context if needed (*myScan==0 and type == "script").
 // Returns NULL or the created scan context.
 //
-static tcl_scan *tcl_codify_token(tcl_scan *myScan, const QByteArray type, const QByteArray string)
+static tcl_scan *tcl_codify_token(tcl_scan *myScan, const QString type, const QString &string)
 {
    if (myScan != NULL) {
 
@@ -1454,21 +1451,19 @@ static tcl_scan *tcl_codify_token(tcl_scan *myScan, const QByteArray type, const
       }
 
    } else {
-      if (qstrcmp(type, "script") == 0) {
+      if (type == "script") {
          myScan = tcl.scan.at(0);
          myScan = tcl_scan_start('?', string, myScan->ns, myScan->entry_cl, myScan->entry_fn);
 
       } else {
-         tcl_codify((const char *)type, string);
+         tcl_codify(type, string);
       }
    }
    return myScan;
 }
 
-//-----------------------------------------------------------------------------
 #undef  YY_INPUT
 #define YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
-//-----------------------------------------------------------------------------
 
 #define INITIAL 0
 #define ERROR 1
@@ -1793,7 +1788,7 @@ YY_DECL {
          {
             if (tcl.scan.count() < 1) {
                // error               
-               tcl_err("Tcl parser stack empty! Parser error in file '%s'.\n", tcl.file_name.data());
+               tcl_err("Tcl parser stack empty! Parser error in file '%s'.\n", qPrintable(tcl.file_name) );
                yyterminate();
 
             } else if (tcl.scan.count() == 1) {
@@ -1855,10 +1850,10 @@ YY_DECL {
 
             {               
                tcl_codify("comment", tclscannerYYtext);
-               QByteArray t = tclscannerYYtext;
+               QString t = tclscannerYYtext;
                t = t.mid(2, t.length() - 3);
                t.append("\n");
-               tcl_comment(1, t.data());
+               tcl_comment(1, t);
                yy_push_state(COMMENT_NL);
             }
             YY_BREAK
@@ -1876,7 +1871,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QByteArray t = tclscannerYYtext;
+               QString t = tclscannerYYtext;
                tcl_codify("comment", t.left(7));
                tcl_comment(2, "\n@code\n");
                yyless(7);
@@ -1888,7 +1883,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {              
-               QByteArray t = tclscannerYYtext;
+               QString t = tclscannerYYtext;
                tcl_codify("comment", t.left(11));
                tcl_comment(2, "\n@verbatim\n");
                yyless(11);
@@ -1901,10 +1896,10 @@ YY_DECL {
 
             {
                tcl_codify("comment", tclscannerYYtext);
-               QByteArray t = tclscannerYYtext;
+               QString t = tclscannerYYtext;
                t = t.mid(1, t.length() - 3);
                t.append("\n");
-               tcl_comment(2, t.data());
+               tcl_comment(2, t);
                yy_push_state(COMMENT_NL);
             }
             YY_BREAK
@@ -1921,11 +1916,11 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QByteArray t = tclscannerYYtext;
+               QString t = tclscannerYYtext;
                t = t.mid(0, t.length() - 1);
-               tcl_codify("comment", t.data());
+               tcl_codify("comment", t);
                t = t.mid(1, t.length());
-               tcl_comment(-2, t.data());
+               tcl_comment(-2, t);
                unput(0x1A);
             }
             YY_BREAK
@@ -1951,9 +1946,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QByteArray t = tclscannerYYtext;
+               QString t = tclscannerYYtext;
                t = t.left(t.length() - 10);
-               tcl_comment(2, t.data());
+               tcl_comment(2, t);
                tcl_comment(2, "\n@endcode\n");
                yy_pop_state();
                yyless(0);
@@ -1980,9 +1975,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-                QByteArray t = tclscannerYYtext;
+                QString t = tclscannerYYtext;
                t = t.left(t.length() - 14);
-               tcl_comment(2, t.data());
+               tcl_comment(2, t);
                tcl_comment(2, "\n@endverbatim\n");
                yy_pop_state();
                yyless(0);
@@ -2052,7 +2047,7 @@ YY_DECL {
 
             {
                tcl.string_commentcodify += tclscannerYYtext;
-               QByteArray t = tclscannerYYtext;
+               QString t = tclscannerYYtext;
                t = t.mid(2, t.length() - 4);
                t.append("\n");
                tcl.string_commentline += t;
@@ -2081,7 +2076,7 @@ YY_DECL {
                   tcl.entry_current->briefFile = tcl.file_name;
                }
                yyless(0);
-               tcl_command(-1, tcl.string_commentcodify.data());
+               tcl_command(-1, tcl.string_commentcodify);
                tcl.string_commentline = "";
                tcl.string_commentcodify = "";
             }
@@ -2092,7 +2087,7 @@ YY_DECL {
 
             {
                tcl.string_commentcodify += tclscannerYYtext;
-               QByteArray t = tclscannerYYtext;
+               QString t = tclscannerYYtext;
                t = t.left(t.length() - 3);
                t.append("\n");
                tcl.string_commentline += t;
@@ -2112,7 +2107,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QByteArray t = tclscannerYYtext;
+               QString t = tclscannerYYtext;
                t = t.left(t.length() - 1);
                tcl.string_commentcodify += t;
                tcl.string_commentline += t;
@@ -3378,14 +3373,12 @@ void tclscannerYYfree (void *ptr )
 
 #define YYTABLES_NAME "yytables"
 
-
-
-
-
 //! Start new scan context for given 'content'.
 // @return created new scan context.
-static tcl_scan *tcl_scan_start(char type, QString content, QByteArray ns, QSharedPointer<Entry> entry_cl, QSharedPointer<Entry> entry_fn)
+static tcl_scan *tcl_scan_start(char type, const QString &content_t, const QString &ns, QSharedPointer<Entry> entry_cl, QSharedPointer<Entry> entry_fn)
 {
+   QString content = content_t;
+
    tcl_scan *myScan = tcl.scan.at(0);   
    tcl_inf("line=%d type=%d '%s'\n", tcl.line_body0, type, qPrintable(content));
 
@@ -3416,6 +3409,7 @@ static tcl_scan *tcl_scan_start(char type, QString content, QByteArray ns, QShar
             myScan->type[0] = '[';
          }
    }
+
    if (myScan->type[0] != ' ') {
       tcl_codify(NULL, &myScan->type[0]);
       content = content.mid(1, content.length() - 2);
@@ -3426,7 +3420,7 @@ static tcl_scan *tcl_scan_start(char type, QString content, QByteArray ns, QShar
    myScan->entry_cl = entry_cl;
    myScan->entry_fn = entry_fn;
    myScan->entry_scan = tcl.entry_current;
-   myScan->buffer_state = tclscannerYY_scan_string(content.toUtf8());
+   myScan->buffer_state = tclscannerYY_scan_string(content);
    myScan->line0 = tcl.line_body0;
    myScan->line1 = tcl.line_body1;
    myScan->after.clear();
@@ -3463,7 +3457,7 @@ static void tcl_scan_end()
          myStart = i;
          break;
       }
-      tcl_codify(myScan->after[i].toUtf8(), myScan->after[i + 1].toUtf8());
+      tcl_codify(myScan->after[i], myScan->after[i + 1]);
    }
    tclscannerYY_delete_buffer(myScan->buffer_state);
    yy_pop_state();
@@ -3512,7 +3506,7 @@ static void tcl_word(int what, const char *text)
       case 1:// all other chars
          if (myWhite) {
             // {x}y "x"y
-            tcl_err("expected word separator: %s\n", text);
+            tcl_err("expected word separator: %s\n", qPrintable(text));
             return;
          }
          if (myLevel == 0) {
@@ -3526,7 +3520,7 @@ static void tcl_word(int what, const char *text)
             myWord = ' ';
             yy_pop_state();
             yyless(0);
-            tcl_inf("(\\\n) ?%s?\n", tcl.string_last.data());
+            tcl_inf("(\\\n) ?%s?\n", qPrintable(tcl.string_last));
             return;
          }
          switch (myList[myLevel - 1]) {
@@ -3539,7 +3533,7 @@ static void tcl_word(int what, const char *text)
                   myWord = ' ';
                   yy_pop_state();
                   yyless(0);
-                  tcl_inf("(\\\n) ?%s?\n", tcl.string_last.data());
+                  tcl_inf("(\\\n) ?%s?\n", qPrintable(tcl.string_last));
                   return;
                }
                break;
@@ -3643,7 +3637,7 @@ static void tcl_word(int what, const char *text)
             myWord = ' ';
             yy_pop_state();
             yyless(0);
-            tcl_inf("(%d) ?%s?\n", what, tcl.string_last.data());
+            tcl_inf("(%d) ?%s?\n", what, qPrintable(tcl.string_last));
             return;
          }
          switch (myList[myLevel - 1]) {
@@ -3656,7 +3650,7 @@ static void tcl_word(int what, const char *text)
                   myWord = ' ';
                   yy_pop_state();
                   yyless(0);
-                  tcl_inf("(.%d) ?%s?\n", what, tcl.string_last.data());
+                  tcl_inf("(.%d) ?%s?\n", what, qPrintable(tcl.string_last));
                   return;
                } else {
                   myLevel--;
@@ -3670,7 +3664,7 @@ static void tcl_word(int what, const char *text)
             myWord = ' ';
             yy_pop_state();
             yyless(0);
-            tcl_inf("(%d) ?%s?\n", what, tcl.string_last.data());
+            tcl_inf("(%d) ?%s?\n", what, qPrintable(tcl.string_last));
             return;
          }
          if (myLevel != 1 || myList[0] != '.') {
@@ -3679,7 +3673,7 @@ static void tcl_word(int what, const char *text)
          myWord = ' ';
          yy_pop_state();
          yyless(0);
-         tcl_inf("(.%d) ?%s?\n", what, tcl.string_last.data());
+         tcl_inf("(.%d) ?%s?\n", what, qPrintable(tcl.string_last));
          return;
          myWhite = 0;
          break;
@@ -3691,23 +3685,27 @@ static void tcl_word(int what, const char *text)
 }
 
 //! Handling of comment parsing.
-static void tcl_comment(int what, const char *text)
+static void tcl_comment(int what, const QString  &text)
 {
    if (what == 0) {
       // begin of comment
+
       if (tcl.comment) {
          tcl_err("comment in comment\n");
          return;
       }
+
       yy_push_state(COMMENT);
-      tcl_inf("<- %s\n", text);
+      tcl_inf("<- %s\n", qPrintable(text));
       tcl.string_comment = "";
       tcl.comment = 0;
+
    } else if (what == 1) {
       // start new comment
       if (tcl.comment) {
          tcl_comment(99, ""); // inbody
       }
+
       tcl.string_comment = text;
       tcl.comment = 1;
 
@@ -3722,10 +3720,12 @@ static void tcl_comment(int what, const char *text)
       if (tcl.comment) {
          tcl.string_last = tcl.string_comment;
          tcl_comment(100 + what, "");
+
       } else {
          tcl.string_last = "";
-         tcl_inf("-> %s\n", (const char *)tcl.string_comment);
+         tcl_inf("-> %s\n", qPrintable(tcl.string_comment));
       }
+
       yy_pop_state();
       tcl.string_comment = "";
       tcl.comment = 0;
@@ -3734,34 +3734,29 @@ static void tcl_comment(int what, const char *text)
       // 98=new 99=inbody
 
       if (tcl.this_parser && tcl.string_comment.length()) {
-         tcl_inf("-> %s\n", (const char *)tcl.string_comment);
-         int myPos = 0;
+         tcl_inf("-> %s\n", qPrintable(tcl.string_comment));
+         int myPos  = 0;
          bool myNew = 0;
          int myLine = tcl.line_comment;
 
-         BufStr myI(1024);
-         BufStr myO(1024);
+         QString myIn;
+         QString myDoc;
          Protection myProt = tcl.protection;
 
          // resolve ALIASES
-         myI.addArray("/*!", 3);
-         myI.addArray(tcl.string_comment.data(), tcl.string_comment.length());
-         myI.addArray("*/", 2);
+         myIn += "/*!";
+         myIn += tcl.string_comment;
+         myIn += "*/";
 
-         convertCppComments(&myI, &myO, tcl.file_name);
-
-         myO.dropFromStart(3);
-         myO.shrink(myO.curPos() - 2);
-         myO.addChar('\0');
-
-         QByteArray myDoc = myO.data();
-
+         myDoc = convertCppComments(myIn, tcl.file_name);
+         myDoc = myDoc.mid(3);
+        
          if (what == 99) {
             // inbody comment file or namespace or class or proc/method
             int myPos0;
             int myLine0;
 
-             QSharedPointer<Entry> myEntry0 = QMakeShared<Entry>(); // used to test parsing
+            QSharedPointer<Entry> myEntry0 = QMakeShared<Entry>(); // used to test parsing
 
             QSharedPointer<Entry> myEntry;
             QSharedPointer<Entry> myEntry1;
@@ -3872,17 +3867,17 @@ static void tcl_command_ArgList(QString &arglist)
       tcl_split_list(myArgs[i], myArgs1);
 
       if (myArgs1.count() == 2) {
-         myArg.name   = (myArgs1.at(0)).toUtf8();
-         myArg.defval = (myArgs1.at(1)).toUtf8();
+         myArg.name   = myArgs1.at(0);
+         myArg.defval = myArgs1.at(1);
 
          if (myArg.defval.isEmpty()) {
             myArg.defval = " ";
          }
 
-         myArglist += "?" + QByteArray(myArg.name) + "? ";
+         myArglist += "?" + myArg.name + "? ";
 
       } else {
-         myArg.name = (myArgs.at(i)).toUtf8();
+         myArg.name = (myArgs.at(i));
          myArglist += QString(myArg.name) + " ";
       }
 
@@ -3890,11 +3885,11 @@ static void tcl_command_ArgList(QString &arglist)
    }
 
    arglist = myArglist;
-   tcl.entry_current->args = arglist.toUtf8();
+   tcl.entry_current->args = arglist;
 }
 
 //! Create link.
-static void tcl_codify_link(QByteArray name)
+static void tcl_codify_link(const QString &name)
 {
    if (tcl.code == NULL || name.isEmpty()) {
       return;
@@ -3920,14 +3915,14 @@ static void tcl_codify_link(QByteArray name)
    }
 
    QSharedPointer<MemberDef> myDef;
-   QByteArray myName = name;
+   QString myName = name;
 
    if (name.mid(0, 2) == "::") { // fully qualified global command
       myName = myName.mid(2);
       myDef  = fn.value(myName);
 
    } else { // not qualified name
-      QByteArray myName1 = myName;
+      QString  myName1 = myName;
       myDef   =  QSharedPointer<MemberDef>();
       myName1 = tcl.scan.at(0)->ns;
 
@@ -3947,8 +3942,8 @@ static void tcl_codify_link(QByteArray name)
    }
 
    if (myDef) { // documented command
-      tcl.code->writeCodeLink(myDef->getReference().data(), myDef->getOutputFileBase().data(), myDef->anchor().data(),
-                              name, myDef->qualifiedName().data());
+      tcl.code->writeCodeLink(myDef->getReference(), myDef->getOutputFileBase(), myDef->anchor(),
+                              name, myDef->qualifiedName());
 
       if (tcl.memberdef) {
          myDef->addSourceReferencedBy(tcl.memberdef);
@@ -3969,7 +3964,7 @@ static void tcl_codify_link(QByteArray name)
 
          if (i < tcl.scan.count()) {
             // enclosing method found
-            QByteArray callerName = callerEntry->name;
+            QString callerName = callerEntry->name;
 
             if (callerName.mid(0, 2) == "::") { // fully qualified global command
                callerName = callerName.mid(2);
@@ -3998,7 +3993,7 @@ static void tcl_codify_link(QByteArray name)
 
 //! scan general argument for brackets
 //
-// parses (*tcl.list_commandwords.at(i)).toUtf8() and checks for brackets.
+// parses (*tcl.list_commandwords.at(i)) and checks for brackets.
 // Starts a new scan context if needed (*myScan==0 and brackets found).
 // Returns NULL or the created scan context.
 //
@@ -4014,10 +4009,10 @@ static tcl_scan *tcl_command_ARG(tcl_scan *myScan, unsigned int i, bool ignoreOu
 
    if (i % 2 != 0) {
       // handle white space
-      myScan = tcl_codify_token(myScan, "NULL", myName.toUtf8());
+      myScan = tcl_codify_token(myScan, "NULL", myName);
 
    } else {
-      QByteArray myStr = "";
+      QString myStr = "";
       unsigned int j;
 
       for (j = 0; j < myName.length(); j++) {
@@ -4085,7 +4080,7 @@ static void tcl_command_EVAL()
 {   
    tcl_codify_cmd("keyword", 0);
    tcl_scan *myScan = tcl.scan.at(0);
-   QByteArray myString = "";
+   QString myString = "";
 
    // we simply rescan the line without the eval
    // we include leading whitespace because tcl_scan_start will examine
@@ -4093,7 +4088,7 @@ static void tcl_command_EVAL()
    // Example: eval [list set] [list NotInvoked] [Invoked NotInvoked]
 
    for (unsigned int i = 1; i < tcl.list_commandwords.count(); i++) {
-      myString += tcl.list_commandwords.at(i).toUtf8();
+      myString += tcl.list_commandwords.at(i);
    }
 
    myScan = tcl_scan_start('?', myString, myScan->ns, myScan->entry_cl, myScan->entry_fn);
@@ -4109,13 +4104,13 @@ static void tcl_command_SWITCH()
    tcl_scan *myScan = NULL;
    unsigned int i;
  
-   QByteArray token;
+   QString token;
 
    // first: find the last option token
    unsigned int lastOptionIndex = 0;
 
    for (i = 2; i < tcl.list_commandwords.count(); i += 2) {
-      token = tcl.list_commandwords.at(i).toUtf8();
+      token = tcl.list_commandwords.at(i);
 
       if (token == "--") {
          lastOptionIndex = i;
@@ -4150,18 +4145,18 @@ static void tcl_command_SWITCH()
       const char *elem;
       const char *next;
 
-      token = tcl.list_commandwords.at(lastOptionIndex + 4).toUtf8();
+      token = tcl.list_commandwords.at(lastOptionIndex + 4);
 
       if (token[0] == '{') {
          inBraces = true;
          token    = token.mid(1, token.length() - 2);
-         myScan   = tcl_codify_token(myScan, "NULL", QByteArray("{"));
+         myScan   = tcl_codify_token(myScan, "NULL", QString("{"));
       }
 
       // ToDo: check if multibyte chars are handled correctly
       while (token.length() > 0) {
 
-         const char *tempToken = token.constData();
+         QString tempToken = token;
          TclFindElement(tempToken, token.length(), &elem, &next, &size, NULL);
 
          // handle leading whitespace/opening brace/double quotes
@@ -4188,7 +4183,7 @@ static void tcl_command_SWITCH()
       }
 
       if (inBraces) {
-         myScan = tcl_codify_token(myScan, "NULL", QByteArray("}"));
+         myScan = tcl_codify_token(myScan, "NULL", QString("}"));
       }
 
       if (! nextIsPattern) {
@@ -4206,7 +4201,7 @@ static void tcl_command_SWITCH()
          myScan = tcl_command_ARG(myScan, i + 1, false); // pattern
          myScan = tcl_command_ARG(myScan, i + 2, false); // whitespace
 
-         myScan = tcl_codify_token(myScan, "script", tcl.list_commandwords.at(i + 3).toUtf8()); // script
+         myScan = tcl_codify_token(myScan, "script", tcl.list_commandwords.at(i + 3)); // script
       }
 
    } else {
@@ -4330,7 +4325,7 @@ static void tcl_command_OTHER()
 //! Handle \c proc statements.
 static void tcl_command_PROC()
 {
-   QByteArray myNs, myName;
+   QString myNs, myName;
    QSharedPointer<Entry> myEntryNs;
    QSharedPointer<Entry> myEntry;
 
@@ -4342,7 +4337,7 @@ static void tcl_command_PROC()
    tcl_codify_cmd(NULL, 3);
    tcl_codify_cmd(NULL, 4);
    tcl_codify_cmd(NULL, 5);
-   tcl_name_SnippetAware(myScan->ns, tcl.list_commandwords.at(2).toUtf8(), myNs, myName);
+   tcl_name_SnippetAware(myScan->ns, tcl.list_commandwords.at(2), myNs, myName);
    if (myNs.length()) {
       myEntryNs = tcl_entry_namespace(myNs);
    } else {
@@ -4370,7 +4365,7 @@ static void tcl_command_PROC()
 //! Handle \c itcl::body statements and \c oo::define method and method inside \c itcl::class statements.
 static void tcl_command_Method()
 {   
-   QByteArray myNs, myName;
+   QString myNs, myName;
 
    QSharedPointer<Entry> myEntryCl;
    QSharedPointer<Entry> myEntry;
@@ -4383,7 +4378,7 @@ static void tcl_command_Method()
    tcl_codify_cmd(NULL, 3);
    tcl_codify_cmd(NULL, 4);
    tcl_codify_cmd(NULL, 5);
-   tcl_name(myScan->ns, tcl.list_commandwords.at(2).toUtf8(), myNs, myName);
+   tcl_name(myScan->ns, tcl.list_commandwords.at(2), myNs, myName);
 
    if (myNs.length()) {
       myEntryCl = tcl_entry_class(myNs);
@@ -4414,7 +4409,7 @@ static void tcl_command_Method()
 //! Handle \c constructor statements inside class definitions.
 static void tcl_command_Constructor()
 {   
-   QByteArray myNs, myName;
+   QString myNs, myName;
    QSharedPointer<Entry> myEntryCl;
    QSharedPointer<Entry> myEntry;
 
@@ -4424,7 +4419,7 @@ static void tcl_command_Constructor()
    tcl_codify_cmd(NULL, 1);
    tcl_codify_cmd(NULL, 2);
    tcl_codify_cmd(NULL, 3);
-   tcl_name(myScan->ns, tcl.list_commandwords.at(0).toUtf8(), myNs, myName);
+   tcl_name(myScan->ns, tcl.list_commandwords.at(0), myNs, myName);
 
    if (myNs.length()) {
       myEntryCl = tcl_entry_class(myNs);
@@ -4454,7 +4449,7 @@ static void tcl_command_Constructor()
 //! Handle \c destructor statements inside class definitions.
 static void tcl_command_DESTRUCTOR()
 {   
-   QByteArray myNs, myName;
+   QString myNs, myName;
    QSharedPointer<Entry> myEntryCl;
    QSharedPointer<Entry> myEntry;
 
@@ -4462,7 +4457,7 @@ static void tcl_command_DESTRUCTOR()
 
    tcl_codify_cmd("keyword", 0);
    tcl_codify_cmd(NULL, 1);
-   tcl_name(myScan->ns, tcl.list_commandwords.at(0).toUtf8(), myNs, myName);
+   tcl_name(myScan->ns, tcl.list_commandwords.at(0), myNs, myName);
  
   if (myNs.length()) {
       myEntryCl = tcl_entry_class(myNs);
@@ -4488,7 +4483,7 @@ static void tcl_command_DESTRUCTOR()
 //! Handle \c namespace statements.
 static void tcl_command_NAMESPACE()
 {   
-   QByteArray myNs, myName, myStr;
+   QString myNs, myName, myStr;
    
    tcl_scan *myScan = tcl.scan.at(0);
 
@@ -4498,7 +4493,7 @@ static void tcl_command_NAMESPACE()
    tcl_codify_cmd(NULL, 3);
    tcl_codify_cmd(NULL, 4);
    tcl_codify_cmd(NULL, 5);
-   tcl_name(myScan->ns, tcl.list_commandwords.at(4).toUtf8(), myNs, myName);
+   tcl_name(myScan->ns, tcl.list_commandwords.at(4), myNs, myName);
 
    if (myNs.length()) {
       myName = myNs + "::" + myName;
@@ -4513,11 +4508,11 @@ static void tcl_command_NAMESPACE()
    tcl.entry_main->addSubEntry(tcl.entry_current, tcl.entry_main);
    tcl.ns.insert(myName, tcl.entry_current);
 
-   myStr = tcl.list_commandwords.at(6).toUtf8();
+   myStr = tcl.list_commandwords.at(6);
 
    if (tcl.list_commandwords.count() > 7) {
       for (uint i = 7; i < tcl.list_commandwords.count(); i++) {
-         myStr.append(tcl.list_commandwords.at(i).toUtf8());
+         myStr.append(tcl.list_commandwords.at(i));
       }
 
       tcl.word_is = ' ';
@@ -4529,8 +4524,8 @@ static void tcl_command_NAMESPACE()
 //! Handle \c itcl::class statements.
 static void tcl_command_ITCL_CLASS()
 {   
-   QByteArray myNs;
-   QByteArray myName;
+   QString myNs;
+   QString myName;
 
    QSharedPointer<Entry> myEntryCl;
 
@@ -4541,7 +4536,7 @@ static void tcl_command_ITCL_CLASS()
    tcl_codify_cmd("NULL", 2);
    tcl_codify_cmd("NULL", 3);
 
-   tcl_name(myScan->ns, tcl.list_commandwords.at(2).toUtf8(), myNs, myName);
+   tcl_name(myScan->ns, tcl.list_commandwords.at(2), myNs, myName);
 
    if (myNs.length()) {
       myName = myNs + "::" + myName;
@@ -4564,8 +4559,8 @@ static void tcl_command_ITCL_CLASS()
 //! Handle \c oo::class statements.
 static void tcl_command_OO_CLASS()
 {
-   QByteArray myNs;
-   QByteArray myName;
+   QString myNs;
+   QString myName;
 
    QSharedPointer<Entry> myEntryCl;
    tcl_scan *myScan = tcl.scan.at(0);
@@ -4576,7 +4571,7 @@ static void tcl_command_OO_CLASS()
    tcl_codify_cmd("NULL", 3);
    tcl_codify_cmd("NULL", 4);
    tcl_codify_cmd("NULL", 5);
-   tcl_name(myScan->ns, tcl.list_commandwords.at(4).toUtf8(), myNs, myName);
+   tcl_name(myScan->ns, tcl.list_commandwords.at(4), myNs, myName);
 
    if (myNs.length()) {
       myName = myNs + "::" + myName;
@@ -4597,7 +4592,7 @@ static void tcl_command_OO_CLASS()
 //! Handle \c oo::define statements.
 static void tcl_command_OO_DEFINE()
 {
-   QByteArray myNs, myName, myStr;
+   QString myNs, myName, myStr;
    QSharedPointer<Entry> myEntryCl;
 
    tcl_scan *myScan = tcl.scan.at(0);
@@ -4607,13 +4602,13 @@ static void tcl_command_OO_DEFINE()
    tcl_codify_cmd("NULL", 2);
    tcl_codify_cmd("NULL", 3);
 
-   tcl_name(myScan->ns, tcl.list_commandwords.at(2).toUtf8(), myNs, myName);
+   tcl_name(myScan->ns, tcl.list_commandwords.at(2), myNs, myName);
    if (myNs.length()) {
       myName = myNs + "::" + myName;
    }
 
    myEntryCl = tcl_entry_class(myName);
-   myStr = tcl.list_commandwords.at(4).toUtf8();
+   myStr = tcl.list_commandwords.at(4);
    
    // special cases first
    // oo::define classname method methodname args script
@@ -4628,8 +4623,8 @@ static void tcl_command_OO_DEFINE()
       }
 
       QSharedPointer<Entry> myEntry;
-      QByteArray myMethod;
-      tcl_name(myScan->ns, tcl.list_commandwords.at(n == 11 ? 6 : 4).toUtf8(), myNs, myMethod);
+      QString myMethod;
+      tcl_name(myScan->ns, tcl.list_commandwords.at(n == 11 ? 6 : 4), myNs, myMethod);
       // code snippet taken from tcl_command_Method()/tcl_command_Constructor
       tcl.fn.remove(myMethod);
    
@@ -4664,7 +4659,7 @@ static void tcl_command_OO_DEFINE()
       if (tcl.list_commandwords.count() > 5) {
 
          for (uint i = 5; i < tcl.list_commandwords.count(); i++) {
-            myStr.append(tcl.list_commandwords.at(i).toUtf8());
+            myStr.append(tcl.list_commandwords.at(i));
          }
          tcl.word_is = ' ';
       }
@@ -4676,7 +4671,7 @@ static void tcl_command_OO_DEFINE()
 //! Handle \c variable statements.
 static void tcl_command_Variable(int inclass)
 {   
-   QByteArray myNs, myName;
+   QString myNs, myName;
    QSharedPointer<Entry> myEntry;
 
    tcl_scan *myScan = tcl.scan.at(0);
@@ -4686,7 +4681,7 @@ static void tcl_command_Variable(int inclass)
       tcl_codify_cmd(NULL, i);
    }
 
-   tcl_name(myScan->ns, tcl.list_commandwords.at(2).toUtf8(), myNs, myName);
+   tcl_name(myScan->ns, tcl.list_commandwords.at(2), myNs, myName);
 
    if (myNs.length()) {
       // qualified variables go into namespace
@@ -4750,7 +4745,7 @@ static void tcl_command(int what, const char *text)
       tcl_err("what %d\n", what);
       return;
    }
-   QByteArray myText = text;
+   QString myText = text;
    tcl_inf("->\n");
    if (tcl.command == 0) {
       return; //TODO check on inside comment
@@ -4763,7 +4758,7 @@ static void tcl_command(int what, const char *text)
    yy_pop_state();
 
    // check command
-   QByteArray myStr = tcl.list_commandwords.at(0).toUtf8();
+   QString myStr = tcl.list_commandwords.at(0);
    tcl_scan *myScanBackup = tcl.scan.at(0);
    int myLevel = 0;
    Protection myProt = tcl.protection;
@@ -4779,7 +4774,7 @@ static void tcl_command(int what, const char *text)
    }
 
    if (tcl.config_subst.contains(myStr)) {
-      myStr = tcl.config_subst[myStr].toUtf8();
+      myStr = tcl.config_subst[myStr];
    }
 
    if (myStr == "private") {
@@ -4809,7 +4804,7 @@ static void tcl_command(int what, const char *text)
          goto command_end;
       }
 
-      myStr  = tcl.list_commandwords.at(0).toUtf8();
+      myStr  = tcl.list_commandwords.at(0);
 
       // remove leading "::" and apply TCL_SUBST
       if (myStr.left(2) == "::") {
@@ -4817,7 +4812,7 @@ static void tcl_command(int what, const char *text)
       }
 
       if (tcl.config_subst.contains(myStr)) {
-         myStr = tcl.config_subst[myStr].toUtf8();
+         myStr = tcl.config_subst[myStr];
       }
    }
 
@@ -4870,7 +4865,7 @@ static void tcl_command(int what, const char *text)
    }
 
    if (myStr == "namespace") {
-      if (tcl.list_commandwords.at(2).toUtf8() == "eval") {
+      if (tcl.list_commandwords.at(2) == "eval") {
          if (tcl.list_commandwords.count() < 7) {
             myLine = __LINE__;
             goto command_warn;
@@ -4901,7 +4896,7 @@ static void tcl_command(int what, const char *text)
    }
 
    if (myStr == "oo::class") {
-      if (tcl.list_commandwords.at(2).toUtf8() == "create") {
+      if (tcl.list_commandwords.at(2) == "create") {
          if (tcl.list_commandwords.count() != 7) {
             myLine = __LINE__;
             goto command_warn;
@@ -4953,7 +4948,7 @@ static void tcl_command(int what, const char *text)
 
       if (tcl.scan.at(0)->entry_cl && tcl.scan.at(0)->entry_cl->name != "") {
          for (unsigned int i = 2; i < tcl.list_commandwords.count(); i = i + 2) {
-            tcl.scan.at(0)->entry_cl->extends.append(BaseInfo(tcl.list_commandwords.at(i).toUtf8(), Public, Normal));
+            tcl.scan.at(0)->entry_cl->extends.append(BaseInfo(tcl.list_commandwords.at(i), Public, Normal));
          }
       }
       goto command_end;
@@ -5014,7 +5009,7 @@ static void tcl_command(int what, const char *text)
       char myState = 'x'; // last word: e'x'pr 't'hen 'b'ody 'e'lse else'i'f..
 
       for (unsigned int i = 4; i < tcl.list_commandwords.count(); i = i + 2) {
-         QByteArray myStr = tcl.list_commandwords.at(i).toUtf8();
+         QString myStr = tcl.list_commandwords.at(i);
 
          if (myState == 'x') {
             if (myStr == "then") {
@@ -5102,12 +5097,12 @@ static void tcl_init()
 
    for (auto s : myStrList) {
   
-      QByteArray myStr = s.toUtf8();
+      QString myStr = s;
       int i = myStr.indexOf('=');
 
       if (i > 0) {
-         QByteArray myName  = myStr.left(i).trimmed();
-         QByteArray myValue = myStr.right(myStr.length() - i - 1).trimmed();
+         QString myName  = myStr.left(i).trimmed();
+         QString myValue = myStr.right(myStr.length() - i - 1).trimmed();
 
          if (! myName.isEmpty() && ! myValue.isEmpty()) {
             tcl_inf("TCL_SUBST: use '%s'\n", qPrintable(s));
@@ -5129,13 +5124,13 @@ static void tcl_init()
 
    }
 
-   tcl.code = NULL;
-   tcl.code_font = NULL;
+   tcl.code      = nullptr;
+   tcl.code_font = "";
    tcl.code_line = 1;
    tcl.code_linenumbers = 1;
    tcl.config_autobrief = Config::getBool("javadoc-auto-brief");
    tcl.input_position = 0;
-   tcl.file_name = NULL;
+   tcl.file_name   = "";
    tcl.this_parser = NULL;
    tcl.command = 0;
    tcl.comment = 0;
@@ -5166,7 +5161,7 @@ static void tcl_init()
 }
 
 //! Start parsing.
-static void tcl_parse(const QByteArray ns, const QByteArray cls)
+static void tcl_parse(const QString ns, const QString cls)
 {
    tcl_scan *myScan;
 
@@ -5211,33 +5206,31 @@ static void tcl_parse(const QByteArray ns, const QByteArray cls)
 }
 
 //! Parse text file and build up entry tree.
-void TclLanguageParser::parseInput(const char *fileName, const char *input, QSharedPointer<Entry> root,
+void TclLanguageParser::parseInput(const QString &fileName, const QString &input, QSharedPointer<Entry> root,
                  enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    QFile  myFile;
-   tcl_inf("%s\n", fileName);
+   tcl_inf("%s\n", qPrintable(fileName) );
 
    myFile.setFileName(fileName);
    if (! myFile.open(QIODevice::ReadOnly)) {
       return;
    }
 
-   if (strlen(input) < 1) {
+   if (input.isEmpty()) {
       return;
    }
 
    tcl.input_string = input;
-   if (tcl.input_string.length() < 1) {
-      return;
-   }
+ 
    printlex(tclscannerYY_flex_debug, TRUE, __FILE__, fileName);
 
-   msg("Parsing %s\n", fileName);
+   msg("Parsing %s\n", qPrintable(fileName));
    groupEnterFile(fileName, tclscannerYYlineno);
 
    tcl_init();
    tcl.code = NULL;
-   tcl.file_name = fileName;
+   tcl.file_name   = fileName;
    tcl.this_parser = this;
    tcl.entry_main          = root; /* toplevel entry */
    tcl_parse("", "");
@@ -5250,8 +5243,8 @@ void TclLanguageParser::parseInput(const char *fileName, const char *input, QSha
 }
 
 //! Parse file and codify.
-void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const char *scopeName, const QByteArray &input,
-                  SrcLangExt lang, bool isExampleBlock, const char *exampleName, QSharedPointer<FileDef> fileDef, int startLine,
+void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
+                  SrcLangExt lang, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef, int startLine,
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers, 
                   QSharedPointer<Definition> searchCtx, bool collectXRefs)
 {
@@ -5259,7 +5252,7 @@ void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const char *
       return;
    }
 
-   printlex(tclscannerYY_flex_debug, TRUE, __FILE__, fileDef ? fileDef->fileName().data() : NULL);
+   printlex(tclscannerYY_flex_debug, TRUE, __FILE__, fileDef ? qPrintable(fileDef->fileName()) : "" );
    tcl.input_string = input;
 
    QString myNs  = "";
@@ -5277,14 +5270,16 @@ void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const char *
 
    QString myStr = "Codifying..";
 
-   if (scopeName) {
+   if (! scopeName.isEmpty()) {
       myStr += " scope=";
       myStr += scopeName;
    }
-   if (exampleName) {
+
+   if (! exampleName.isEmpty()) {
       myStr += " example=";
       myStr += exampleName;
    }
+
    if (memberDef) {
       myStr += " member=";
       myStr += memberDef->memberTypeName();
@@ -5295,6 +5290,7 @@ void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const char *
       myStr += " file=";
       myStr += fileDef->fileName();
    }
+
    tcl_inf("%s (%d,%d) %d %d\n", qPrintable(myStr), startLine, endLine, isExampleBlock, inlineFragment);
 
    if (isExampleBlock) {
@@ -5324,7 +5320,7 @@ void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const char *
    tcl.this_parser = NULL;
 
    tcl.entry_main = tcl_entry_new();
-   tcl_parse(myNs.toUtf8(), myCls.toUtf8());
+   tcl_parse(myNs, myCls);
 
    tcl.code->endCodeLine();
    tcl.scan.clear();
@@ -5333,12 +5329,11 @@ void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const char *
    tcl.fn.clear();
    tcl.entry.clear();
 
-   printlex(tclscannerYY_flex_debug, FALSE, __FILE__, fileDef ? fileDef->fileName().data() : NULL);
+   printlex(tclscannerYY_flex_debug, FALSE, __FILE__, fileDef ? qPrintable(fileDef->fileName()) : "");
 }
 
-bool TclLanguageParser::needsPreprocessing(const QByteArray &extension)
+bool TclLanguageParser::needsPreprocessing(const QString &)
 {
-   (void)extension;
    return FALSE;
 }
 
@@ -5346,7 +5341,7 @@ void TclLanguageParser::resetCodeParserState()
 {
 }
 
-void TclLanguageParser::parsePrototype(const char *text)
+void TclLanguageParser::parsePrototype(const QString &text)
 {
    (void)text;
 }
@@ -5354,22 +5349,26 @@ void TclLanguageParser::parsePrototype(const char *text)
 static int yyread(char *buf, int max_size)
 {
    int c = 0;
-   *buf  = '\0';
 
-   int maxLen = tcl.input_string.length();
+   while (tcl.input_string[tcl.input_position] != 0) {
 
-/* BroomCS - deciper parser issue 
+      QString tmp1    = tcl.input_string.at(tcl.input_position);
+      QByteArray tmp2 = tmp1.toUtf8();
 
-   while (c < max_size && tcl.input_position < maxLen) {
-      *buf = tcl.input_string.at(tcl.input_position);
+      if (c + tmp2.length() >= max_size)  {
+         // buffer is full
+         break;
+      }
 
-      tcl.input_position++;
-      c++;
-      buf++;
+      c += tmp2.length();     
+   
+      for (auto letters : tmp2) {
+         *buf = letters;
+          buf++;
+      }
+
+      tcl.input_position++;     
    }
-
-   *buf = '\0';
-*/
 
    return c;
 }

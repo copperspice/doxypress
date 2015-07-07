@@ -36,7 +36,6 @@
 #include <entry.h>
 #include <example.h>
 #include <filename.h>
-#include <growbuf.h>
 #include <htmlentity.h>
 #include <htmlhelp.h>
 #include <image.h>
@@ -123,32 +122,24 @@ void TextGeneratorOLImpl::writeString(const QString &text, bool keepSpaces) cons
 {
    if (text.isEmpty()) {
       return;
-   }   
-
-// broom - fix me
-
-   QByteArray tmp = text.toUtf8();
-   const char *s  = tmp.constData();    
+   }       
 
    if (keepSpaces) {
-      const char *p = s;
+      const QChar *p  = text.constData(); 
+      QChar c;       
+  
+      while ((c = *p++) != 0) {
+         if (c == ' ') {
+            m_od.writeNonBreakableSpace(1);
 
-      if (p) {
-         char cs[2];
-         char c;
-         cs[1] = '\0';
-
-         while ((c = *p++)) {
-            if (c == ' ') {
-               m_od.writeNonBreakableSpace(1);
-            } else {
-               cs[0] = c, m_od.docify(cs);
-            }
+         } else {
+            m_od.docify(c);
          }
       }
+      
 
    } else {
-      m_od.docify(s);
+      m_od.docify(text);
 
    }
 }
@@ -1742,38 +1733,38 @@ QString removeRedundantWhiteSpace(const QString &str)
 
          vsp = 0;
 
-      } else if (! c.isSpace()) || 
+      } else if (! c.isSpace() || 
                  ( i > 0 && i < len - 1 &&   
-                   (isId(str.at(i - 1)) || s.at(i - 1) == ')' || str.at(i - 1) == ',' || str.at(i - 1) == '>' || str.at(i - 1) == ']') &&
+                   (isId(str.at(i - 1)) || str.at(i - 1) == ')' || str.at(i - 1) == ',' || str.at(i - 1) == '>' || str.at(i - 1) == ']') &&
                    (isId(str.at(i + 1)) ||
                     (i < len - 2 && str.at(i + 1) == '$' && isId(str.at(i + 2))) ||
-                    (i < len - 3 && str.at(i + 1) == '&' && str.at(i + 2) == '$' && isId(str.at(i + 3))) ) ) ) {
+                    (i < len - 3 && str.at(i + 1) == '&' && str.at(i + 2) == '$' && isId(str.at(i + 3))) ))) {
 
          if (c == '\t') {
             c = ' ';
          }
 
-         if (c == '*' || c == '&' || c == '@' || c == '$') {
-            //uint rl=result.length();
-            uint rl = growBuf.getPos();
+         if (c == '*' || c == '&' || c == '@' || c == '$') {           
+            uint rl = retval.length();
 
-            if ((rl > 0 && (isId(growBuf.at(rl - 1)) || growBuf.at(rl - 1) == '>')) &&
-                  ((c != '*' && c != '&') || !findOperator2(str, i)) ) {
+            if ((rl > 0 && (isId(retval.at(rl - 1)) || retval.at(rl - 1) == '>')) &&
+                  ((c != '*' && c != '&') || ! findOperator2(str, i)) ) {
 
                // avoid splitting operator* and operator->* and operator&
                retval += ' ';
             }
 
          } else if (c == '-') {
-            uint rl = growBuf.getPos();
+            uint rl = retval.length();
 
-            if (rl > 0 && growBuf.at(rl - 1) == ')' && i < len - 1 && s.trat(i + 1) == '>') { 
+            if (rl > 0 && retval.at(rl - 1) == ')' && i < len - 1 && str.at(i + 1) == '>') { 
                // trailing return type ')->' => ') ->'
                retval += ' ';
             }
          }
 
-         growBuf.addChar(c);
+         retval += c;
+
          if (cliSupport && (c == '^' || c == '%') && i > 1 && isId(str.at(i - 1)) && ! findOperator(str, i) ) {
             retval +=  ' ';          // C++/CLI: Type^ name and Type% name
          }
@@ -2213,20 +2204,22 @@ void setAnchors(QSharedPointer<MemberList> ml)
 
 /*! takes the \a buf of the given length \a len and converts CR LF (DOS)
  * or CR (MAC) line ending to LF (Unix).  Returns the length of the
- * converted content (i.e. the same as \a len (Unix, MAC) or
- * smaller (DOS).
+ * converted content (i.e. the same as \a len (Unix, MAC) or smaller (DOS).
  */
-int filterCRLF(char *buf, int len)
+int filterCRLF(QString &buf)
 {
-   int src = 0;    // source index
-   int dest = 0;   // destination index
-   char c;         // current character
+   int src  = 0;    // source index
+   int dest = 0;    // destination index
+   QChar c;         // current character
+
+   int len = buf.length();
 
    while (src < len) {
-      c = buf[src++];            // Remember the processed character.
+      c = buf[src++];             // Remember the processed character.
 
-      if (c == '\r') {           // CR to be solved (MAC, DOS)
+      if (c == '\r') {            // CR to be solved (MAC, DOS)
          c = '\n';                // each CR to LF
+
          if (src < len && buf[src] == '\n') {
             ++src;   // skip LF just after CR (DOS)
          }
@@ -2333,7 +2326,7 @@ QString transcodeToQString(const QByteArray &input)
  *  is true the file will be filtered by any user specified input filter.
  *  If \a name is "-" the string will be read from standard input.
  */
-QByteArray fileToString(const QString &name, bool filter, bool isSourceCode)
+QString fileToString(const QString &name, bool filter, bool isSourceCode)
 {
    if (name.isEmpty()) {
       return "";
@@ -2349,11 +2342,12 @@ QByteArray fileToString(const QString &name, bool filter, bool isSourceCode)
 
       if (fileOpened) {
         
-         QByteArray contents;         
-         contents = f.readAll();            
+         QByteArray data;         
+         data = f.readAll();  
 
-         int totalSize = filterCRLF(contents.data(), contents.size());
-         contents.resize(totalSize);         
+         QString contents = QString::fromUtf8(data);
+
+         int totalSize = filterCRLF(contents);              
          contents.append('\n');    // to help the scanner
 
          return contents;
@@ -2367,18 +2361,17 @@ QByteArray fileToString(const QString &name, bool filter, bool isSourceCode)
          return "";
       }
 
-      BufStr buf(fi.size());
+      QString buf;
       fileOpened = readInputFile(name, buf, filter, isSourceCode);
 
       if (fileOpened) {
          int s = buf.size();
 
-         if (s > 1 && buf.at(s - 2) != '\n') {
-            buf.at(s - 1) = '\n';
-            buf.addChar(0);
+         if (! buf.endsWith('\n')) {
+            buf += '\n';            
          }
 
-         return buf.data();
+         return buf;
       }
    }
 
@@ -2520,7 +2513,7 @@ static QString trimTemplateSpecifiers(const QString &namespaceName, const QStrin
       int cl = i + 1;
 
       while (i >= 0) {
-         char c = className.at(i);
+         QChar c = className.at(i);
 
          if (c == '>') {
             count++, i--;
@@ -2582,11 +2575,12 @@ static QString trimTemplateSpecifiers(const QString &namespaceName, const QStrin
  * @param len resulting pattern length
  * @returns position on which string is found, or -1 if not found
  */
-static int findScopePattern(const QByteArray &pattern, const QByteArray &s, int p, int *len)
+static int findScopePattern(const QString &pattern, const QString &s, int p, int *len)
 {
    int sl = s.length();
    int pl = pattern.length();
    int sp = 0;
+
    *len = 0;
 
    while (p < sl) {
@@ -2786,10 +2780,11 @@ static bool matchArgument(const Argument *srcA, const Argument *dstA, const QStr
    stripIrrelevantConstVolatile(dstAType);
 
    // strip typename keyword
-   if (qstrncmp(srcAType, "typename ", 9) == 0) {
+   if (srcAType.startsWith("typename ")) {
       srcAType = srcAType.right(srcAType.length() - 9);
    }
-   if (qstrncmp(dstAType, "typename ", 9) == 0) {
+
+   if (dstAType.startsWith("typename ")) {
       dstAType = dstAType.right(dstAType.length() - 9);
    }
 
@@ -2855,7 +2850,8 @@ static bool matchArgument(const Argument *srcA, const Argument *dstA, const QStr
          return true;
       }
 
-      uint srcPos = 0, dstPos = 0;
+      uint srcPos = 0;
+      uint dstPos = 0;
       bool equal = true;
 
       while (srcPos < srcAType.length() && dstPos < dstAType.length() && equal) {
@@ -2915,48 +2911,67 @@ static bool matchArgument(const Argument *srcA, const Argument *dstA, const QStr
                return false;
             }
          }
+
       } else if (dstPos < dstAType.length()) {
-         if (!isspace((uchar)dstAType.at(dstPos))) { // maybe the names differ
-            if (!dstAName.isEmpty()) { // dst has its name separated from its type
+         if (! dstAType.at(dstPos).isSpace()) { 
+            // maybe the names differ
+
+            if (! dstAName.isEmpty()) { 
+               // dst has its name separated from its type
                DOX_NOMATCH
                return false;
             }
+
             while (dstPos < dstAType.length() && isId(dstAType.at(dstPos))) {
                dstPos++;
             }
+
             if (dstPos != dstAType.length()) {
                DOX_NOMATCH
                return false; // more than a difference in name -> no match
             }
-         } else { // maybe dst has a name while src has not
+
+         } else { 
+            // maybe dst has a name while src has not
             dstPos++;
+
             while (dstPos < dstAType.length() && isId(dstAType.at(dstPos))) {
                dstPos++;
             }
+
             if (dstPos != dstAType.length() || !srcAName.isEmpty()) {
                DOX_NOMATCH
                return false; // nope not a name -> no match
             }
          }
+
       } else if (srcPos < srcAType.length()) {
-         if (!isspace((uchar)srcAType.at(srcPos))) { // maybe the names differ
-            if (!srcAName.isEmpty()) { // src has its name separated from its type
+         if (! srcAType.at(srcPos).isSpace() ) { 
+            // maybe the names differ
+
+            if (! srcAName.isEmpty()) { 
+               // src has its name separated from its type
                DOX_NOMATCH
                return false;
             }
+
             while (srcPos < srcAType.length() && isId(srcAType.at(srcPos))) {
                srcPos++;
             }
+
             if (srcPos != srcAType.length()) {
                DOX_NOMATCH
                return false; // more than a difference in name -> no match
             }
-         } else { // maybe src has a name while dst has not
+
+         } else { 
+            // maybe src has a name while dst has not
             srcPos++;
             while (srcPos < srcAType.length() && isId(srcAType.at(srcPos))) {
                srcPos++;
             }
-            if (srcPos != srcAType.length() || !dstAName.isEmpty()) {
+
+            if (srcPos != srcAType.length() || ! dstAName.isEmpty()) {
                DOX_NOMATCH
                return false; // nope not a name -> no match
             }
@@ -3195,10 +3210,10 @@ static QString extractCanonicalType(QSharedPointer<Definition> d, QSharedPointer
    return removeRedundantWhiteSpace(canType);
 }
 
-static QByteArray extractCanonicalArgType(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, const Argument *arg)
+static QString extractCanonicalArgType(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, const Argument *arg)
 {
-   QByteArray type = arg->type.trimmed();
-   QByteArray name = arg->name;
+   QString type = arg->type.trimmed();
+   QString name = arg->name;
  
    if ((type == "const" || type == "volatile") && ! name.isEmpty()) {
       // name is part of type => correct
@@ -3224,10 +3239,10 @@ static QByteArray extractCanonicalArgType(QSharedPointer<Definition> d, QSharedP
 static bool matchArgument2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef> srcFileScope, Argument *srcA, 
                            QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope, Argument *dstA)
 {
-   QByteArray sSrcName = " " + srcA->name;
-   QByteArray sDstName = " " + dstA->name;
-   QByteArray srcType  = srcA->type;
-   QByteArray dstType  = dstA->type;
+   QString sSrcName = " " + srcA->name;
+   QString sDstName = " " + dstA->name;
+   QString srcType  = srcA->type;
+   QString dstType  = dstA->type;
 
    stripIrrelevantConstVolatile(srcType);
    stripIrrelevantConstVolatile(dstType);
@@ -3257,9 +3272,7 @@ static bool matchArgument2(QSharedPointer<Definition> srcScope, QSharedPointer<F
       DOX_MATCH
       return true;
 
-   } else {
-      //printf("   Canonical types do not match [%s]<->[%s]\n",
-      //    srcA->canType.data(),dstA->canType.data());
+   } else {     
       DOX_NOMATCH
       return false;
    }
@@ -3444,8 +3457,8 @@ void mergeArguments(ArgumentList *srcAl, ArgumentList *dstAl, bool forceNameOver
    }
 }
 
-static void findMembersWithSpecificName(MemberName *mn, const QByteArray &args, bool checkStatics, QSharedPointer<FileDef> currentFile,
-                                        bool checkCV, const QByteArray &forceTagFile, QList<QSharedPointer<MemberDef>> &members)
+static void findMembersWithSpecificName(QSharedPointer<MemberName> mn, const QString &args, bool checkStatics, QSharedPointer<FileDef> currentFile,
+                                        bool checkCV, const QString &forceTagFile, QList<QSharedPointer<MemberDef>> &members)
 {
    for (auto md : *mn) {
       QSharedPointer<FileDef> fd  = md->getFileDef();
@@ -3903,12 +3916,12 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
          QList<QSharedPointer<MemberDef>> members;
 
          // search for matches with strict static checking
-         findMembersWithSpecificName(mn.data(), args, true, currentFile, checkCV, forceTagFile, members);
+         findMembersWithSpecificName(mn, args, true, currentFile, checkCV, forceTagFile, members);
 
          if (members.count() == 0) { 
             // nothing found
             // search again without strict static checking
-            findMembersWithSpecificName(mn.data(), args, false, currentFile, checkCV, forceTagFile, members);
+            findMembersWithSpecificName(mn, args, false, currentFile, checkCV, forceTagFile, members);
          }
  
          if (members.count() != 1 && ! args.isEmpty() && args != "()") {
@@ -3979,13 +3992,13 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
  *   - if `cd` is non zero, the scope was a class pointed to by cd.
  *   - if `nd` is non zero, the scope was a namespace pointed to by nd.
  */
-static bool getScopeDefs(const QByteArray &docScope, const QByteArray &scope, 
+static bool getScopeDefs(const QString &docScope, const QString &scope, 
                   QSharedPointer<ClassDef> &cd, QSharedPointer<NamespaceDef> &nd)
 {
    cd = QSharedPointer<ClassDef>();
    nd = QSharedPointer<NamespaceDef>();
 
-   QByteArray scopeName = scope;
+   QString scopeName = scope;
 
    if (scopeName.isEmpty()) {
       return false;
@@ -3998,12 +4011,12 @@ static bool getScopeDefs(const QByteArray &docScope, const QByteArray &scope,
       explicitGlobalScope = true;
    }
 
-   QByteArray docScopeName = docScope;
+   QString docScopeName = docScope;
    int scopeOffset = explicitGlobalScope ? 0 : docScopeName.length();
 
    do { 
       // for each possible docScope (from largest to and including empty)
-      QByteArray fullName = scopeName;
+      QString fullName = scopeName;
 
       if (scopeOffset > 0) {
          fullName.prepend(docScopeName.left(scopeOffset) + "::");
@@ -4029,11 +4042,11 @@ static bool getScopeDefs(const QByteArray &docScope, const QByteArray &scope,
    return false;
 }
 
-static bool isLowerCase(const QByteArray &str)    
+static bool isLowerCase(const QString &str)    
 {
    for (auto c : str) {
  
-      if (! islower( static_cast<unsigned char>(c) )) {
+      if (! c.isLower() ) {
          return false;
       }    
    }
@@ -4070,7 +4083,7 @@ bool resolveRef(const QString &scName, const QString &tsName, bool inSeeBlock, Q
       QSharedPointer<ClassDef> cd;
       QSharedPointer<NamespaceDef> nd;
  
-      if (! inSeeBlock && scopePos == -1 && isLowerCase(tsName)) {
+      if (! inSeeBlock && scopePos == -1 && isLowerCase(tsName) ) {
          // link to lower case only name, do not try to autolink
          return false;
       } 
@@ -4619,158 +4632,147 @@ bool hasVisibleRoot(SortedList<BaseClassDef *> *bcl)
    return false;
 }
 
-// note that this function is not reentrant due to the use of static growBuf!
-QByteArray escapeCharsInString(const QString &name, bool allowDots, bool allowUnderscore)
+QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnderscore)
 {
    static bool caseSenseNames    = Config::getBool("case-sensitive-fname");
    static bool allowUnicodeNames = Config::getBool("allow-unicode-names");
-   static GrowBuf growBuf;
 
-   growBuf.clear();
-   char c;
-
-   QByteArray tempName = name.toUtf8();
-   const char *p = tempName.constData();
+   QString retval;
+  
+   const QChar *p = name.constData();
+   QChar c;
 
    while ((c = *p++) != 0) {
-      switch (c) {
+
+      switch (c.unicode()) {
          case '_':
+
             if (allowUnderscore) {
-               growBuf.addChar('_');
+               retval += '_';
             } else {
-               growBuf.addStr("__");
+               retval += "__";
             }
             break;
+
          case '-':
-            growBuf.addChar('-');
+            retval += '-';
             break;
+
          case ':':
-            growBuf.addStr("_1");
+            retval += "_1";
             break;
+
          case '/':
-            growBuf.addStr("_2");
+            retval += "_2";
             break;
+
          case '<':
-            growBuf.addStr("_3");
+            retval += "_3";
             break;
+
          case '>':
-            growBuf.addStr("_4");
+            retval += "_4";
             break;
+
          case '*':
-            growBuf.addStr("_5");
+            retval += "_5";
             break;
+
          case '&':
-            growBuf.addStr("_6");
+            retval += "_6";
             break;
+
          case '|':
-            growBuf.addStr("_7");
+            retval += "_7";
             break;
+
          case '.':
             if (allowDots) {
-               growBuf.addChar('.');
+               retval += '.';
             } else {
-               growBuf.addStr("_8");
+               retval += "_8";
             }
             break;
+
          case '!':
-            growBuf.addStr("_9");
+            retval += "_9";
             break;
+
          case ',':
-            growBuf.addStr("_00");
+            retval += "_00";
             break;
+
          case ' ':
-            growBuf.addStr("_01");
+            retval += "_01";
             break;
+
          case '{':
-            growBuf.addStr("_02");
+            retval += "_02";
             break;
+
          case '}':
-            growBuf.addStr("_03");
+            retval += "_03";
             break;
+
          case '?':
-            growBuf.addStr("_04");
+            retval += "_04";
             break;
+
          case '^':
-            growBuf.addStr("_05");
+            retval += "_05";
             break;
+
          case '%':
-            growBuf.addStr("_06");
+            retval += "_06";
             break;
+
          case '(':
-            growBuf.addStr("_07");
+            retval += "_07";
             break;
+
          case ')':
-            growBuf.addStr("_08");
+            retval += "_08";
             break;
+
          case '+':
-            growBuf.addStr("_09");
+            retval += "_09";
             break;
+
          case '=':
-            growBuf.addStr("_0A");
+            retval += "_0A";
             break;
+
          case '$':
-            growBuf.addStr("_0B");
+            retval += "_0B";
             break;
+
          case '\\':
-            growBuf.addStr("_0C");
+            retval += "_0C";
             break;
 
          default:
-            if (c < 0) {
-               char ids[5];
-               const unsigned char uc = (unsigned char)c;
-               bool doEscape = true;
 
-               if (allowUnicodeNames && uc <= 0xf7) {
-                  const char *pt = p;
-                  ids[ 0 ] = c;
-                  int l    = 0;
+            if (c.unicode() > 127) {                           
+               if (allowUnicodeNames) {
+                  retval += c;
+                 
+               } else {                                
+                  QString tmp = QString("_x%1").arg(c.unicode(), 2, 16, QChar('0') ); 
+                  retval += tmp;
+               }
 
-                  if ((uc & 0xE0) == 0xC0) {
-                     l = 2; // 11xx.xxxx: >=2 byte character
-                  }
-                  if ((uc & 0xF0) == 0xE0) {
-                     l = 3; // 111x.xxxx: >=3 byte character
-                  }
-                  if ((uc & 0xF8) == 0xF0) {
-                     l = 4; // 1111.xxxx: >=4 byte character
-                  }
-                  doEscape = l == 0;
-                  for (int m = 1; m < l && !doEscape; ++m) {
-                     unsigned char ct = (unsigned char) * pt;
-                     if (ct == 0 || (ct & 0xC0) != 0x80) { // invalid unicode character
-                        doEscape = true;
-                     } else {
-                        ids[ m ] = *pt++;
-                     }
-                  }
-                  if ( !doEscape ) { // got a valid unicode character
-                     ids[ l ] = 0;
-                     growBuf.addStr( ids );
-                     p += l - 1;
-                  }
-               }
-               if (doEscape) { // not a valid unicode char or escaping needed
-                  static char map[] = "0123456789ABCDEF";
-                  unsigned char id = (unsigned char)c;
-                  ids[0] = '_';
-                  ids[1] = 'x';
-                  ids[2] = map[id >> 4];
-                  ids[3] = map[id & 0xF];
-                  ids[4] = 0;
-                  growBuf.addStr(ids);
-               }
-            } else if (caseSenseNames || !isupper(c)) {
-               growBuf.addChar(c);
+            } else if (caseSenseNames || ! c.isUpper()) {
+               retval += c;
+
             } else {
-               growBuf.addChar('_');
-               growBuf.addChar(tolower(c));
+               retval += '_';
+               retval += c.toLower();
             }
             break;
       }
    }
-   growBuf.addChar(0);
-   return growBuf.get();
+  
+   return retval;
 }
 
 /*! This function determines the file name on disk of an item
@@ -4860,8 +4862,8 @@ QString convertNameToFile(const QString &name, bool allowDots, bool allowUndersc
       QString sigStr;
       sigStr = QCryptographicHash::hash(result.toUtf8(), QCryptographicHash::Md5);  
 
-      l1Dir = sigStr[14] & 0xf;
-      l2Dir = sigStr[15];
+      l1Dir = sigStr[14].unicode() & 0xf;
+      l2Dir = sigStr[15].unicode() & 0xff;
 #endif
 
       result = QString("d%1/d%2/").arg(l1Dir, 0, 16).arg(l2Dir, 2, 16, QChar('0')) + result;
@@ -5004,9 +5006,9 @@ QString stripScope(const QString &name)
       p = l - 1; // start at the end of the string
 
       while (p >= 0 && count >= 0) {
-         char c = result.at(p);
+         QChar c = result.at(p);
 
-         switch (c) {
+         switch (c.unicode()) {
             case ':':
                // only exit in the case of ::
 
@@ -5030,10 +5032,10 @@ QString stripScope(const QString &name)
                   p--;
                   bool foundMatch = false;
 
-                  while (p >= 0 && !foundMatch) {
+                  while (p >= 0 && ! foundMatch) {
                      c = result.at(p--);
 
-                     switch (c) {
+                     switch (c.unicode()) {
                         case '>':
                            count++;
                            break;
@@ -5072,15 +5074,15 @@ QString stripScope(const QString &name)
 
 
 /*! Converts a string to an XML-encoded string */
-QString convertToXML(const QString &s)
+QString convertToXML(const QString &str)
 {
    QString retval;
    
-   if (s.isEmpty()) {
+   if (str.isEmpty()) {
       return retval;
    }
 
-   for (auto c : s) {
+   for (auto c : str) {
 
       switch (c.unicode()) {
          case '<':
@@ -5140,68 +5142,71 @@ QString convertToXML(const QString &s)
 }
 
 /*! Converts a string to a HTML-encoded string */
-QString convertToHtml(const QString &s, bool keepEntities)
-{
-   // BROOM - adjust like the one above
-
-   static GrowBuf growBuf;
-   growBuf.clear();
-
-   if (s.isEmpty()) {
+QString convertToHtml(const QString &str, bool keepEntities)
+{  
+   if (str.isEmpty()) {
       return "";
    }
+   
+   QString retval;
 
-   QByteArray temp = s.toUtf8();
-   const char *p = temp.constData();
-   char c;
+   const QChar *p = str.constData();
+   QChar c;
 
-   while ((c = *p++)) {
-      switch (c) {
+   while ((c = *p++) != 0) {
+
+      switch (c.unicode()) {
          case '<':
-            growBuf.addStr("&lt;");
+            retval =+ "&lt;";
             break;
 
          case '>':
-            growBuf.addStr("&gt;");
+            retval += "&gt;";
             break;
 
          case '&':
             if (keepEntities) {
-               const char *e = p;
-               char ce;
+               const QChar *e = p;
+               QChar ce;
 
-               while ((ce = *e++)) {
-                  if (ce == ';' || (!(isId(ce) || ce == '#'))) {
+               while ((ce = *e++) != 0) {
+                  if (ce == ';' || (! (isId(ce) || ce == '#'))) {
                      break;
                   }
                }
-               if (ce == ';') { // found end of an entity
-                  // copy entry verbatim
-                  growBuf.addChar(c);
+
+               if (ce == ';') {
+                  // found end of an entity, copy entry verbatim
+                  retval += c;
+
                   while (p < e) {
-                     growBuf.addChar(*p++);
+                     retval += *p++;
                   }
+
                } else {
-                  growBuf.addStr("&amp;");
+                  retval += "&amp;";
                }
+
             } else {
-               growBuf.addStr("&amp;");
+               retval += "&amp;";
             }
             break;
+
          case '\'':
-            growBuf.addStr("&#39;");
+            retval += "&#39;";
             break;
+
          case '"':
-            growBuf.addStr("&quot;");
+            retval += "&quot;";
             break;
+
          default:
-            growBuf.addChar(c);
+            retval += c;
             break;
       }
    }
-
-   growBuf.addChar(0);
-   return growBuf.get();
+  
+   return retval;
 }
 
 QString convertToJSString(const QString &s)
@@ -5218,54 +5223,45 @@ QString convertToJSString(const QString &s)
    return convertCharEntities(retval);
 }
 
-QString convertCharEntities(const QString &s)
-{
-   QString result;
-   static QRegExp entityPat("&[a-zA-Z]+[0-9]*;");
-
-   if (s.length() == 0) {
-      return result;
+QString convertCharEntities(const QString &str)
+{ 
+   QString retval;
+  
+   if (str.isEmpty()) {
+      return retval;
    }
 
-   static GrowBuf growBuf;
-   growBuf.clear();
-   int p, i = 0, l;
+   static QRegExp entityPat("&[a-zA-Z]+[0-9]*;");
+ 
+   int p;
+   int i = 0;
+   int l;
 
-   while ((p = entityPat.indexIn(s, i)) != -1) {
+   while ((p = entityPat.indexIn(str, i)) != -1) {
       l = entityPat.matchedLength();
 
       if (p > i) {
-         growBuf.addStr(s.mid(i, p - i));
+         retval += str.mid(i, p - i);
       }
 
-      QString entity = s.mid(p, l);
+      QString entity = str.mid(p, l);
       DocSymbol::SymType symType = HtmlEntityMapper::instance()->name2sym(entity);
+
       const char *code = 0;
 
       if (symType != DocSymbol::Sym_Unknown && (code = HtmlEntityMapper::instance()->utf8(symType))) {
-         growBuf.addStr(code);
+         retval += code;
+
       } else {
-         growBuf.addStr(s.mid(p, l));
+         retval += str.mid(p, l);
       }
 
       i = p + l;
    }
 
-   growBuf.addStr(s.mid(i, s.length() - i));
-   growBuf.addChar(0);
-   
-   return growBuf.get();
-}
-
-/*! Returns the standard string that is generated when the \\overload
- * command is used.
- */
-QByteArray getOverloadDocs()
-{
-   return theTranslator->trOverloadText();
-   //"This is an overloaded member function, "
-   //       "provided for convenience. It differs from the above "
-   //       "function only in what argument(s) it accepts.";
+   retval += str.mid(i, str.length() - i);
+    
+   return retval;
 }
 
 void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **ppMemberGroupSDict, QSharedPointer<Definition> context)
@@ -5465,7 +5461,7 @@ QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointe
       l = re.matchedLength();
 
       result += name.mid(p, i - p);
-      QByteArray n = name.mid(i, l);
+      QString n = name.mid(i, l);
       bool found = false;
 
       if (formalArgs) { 
@@ -5476,7 +5472,7 @@ QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointe
                break;
             }
 
-            found = formArg.name == n;
+            found = (formArg.name == n);
          }
       }
 
@@ -5650,7 +5646,7 @@ QString stripTemplateSpecifiersFromScope(const QString &fullName, bool parentOnl
       int count = 1;
 
       while (e < l && ! done) {
-         char c = fullName.at(e++);
+         QChar c = fullName.at(e++);
 
          if (c == '<') {
             count++;
@@ -5660,6 +5656,7 @@ QString stripTemplateSpecifiersFromScope(const QString &fullName, bool parentOnl
             done = count == 0;
          }
       }
+
       int si = fullName.indexOf("::", e);
 
       if (parentOnly && si == -1) {
@@ -5671,10 +5668,8 @@ QString stripTemplateSpecifiersFromScope(const QString &fullName, bool parentOnl
 
       if (getClass(result + fullName.mid(i, e - i)) != 0) { 
          result += fullName.mid(i, e - i);
-         //printf("  2:result+=%s\n",fullName.mid(i,e-i-1).data());
 
       } else if (pLastScopeStripped) {
-         //printf("  last stripped scope '%s'\n",fullName.mid(i,e-i).data());
          *pLastScopeStripped = fullName.mid(i, e - i);
       }
 
@@ -5738,9 +5733,9 @@ QString mergeScopes(const QString &leftScope, const QString &rightScope)
  *  @param l the resulting length of the fragment.
  *  @returns the location of the fragment, or -1 if non is found.
  */
-int getScopeFragment(const QString &s, int p, int *l)
+int getScopeFragment(const QString &str, int p, int *l)
 {
-   int sl = s.length();
+   int sl = str.length();
    int sp = p;
    int count = 0;
 
@@ -5751,10 +5746,11 @@ int getScopeFragment(const QString &s, int p, int *l)
    }
 
    while (sp < sl) {
-      char c = s.at(sp);
+      QChar c = str.at(sp);
 
       if (c == ':') {
-         sp++, p++;
+         sp++;
+         p++;
 
       } else {
          break;
@@ -5764,9 +5760,9 @@ int getScopeFragment(const QString &s, int p, int *l)
    bool goAway = false;
 
    while (sp < sl) {
-      char c = s.at(sp);
+      QChar c = str.at(sp);
 
-      switch (c) {
+      switch (c.unicode()) {
          case ':': 
             // found next part
             goAway = true;
@@ -5781,9 +5777,9 @@ int getScopeFragment(const QString &s, int p, int *l)
 
             while (sp < sl && !done) {
                // TODO: deal with << and >> operators!
-               char c = s.at(sp++);
+               QChar c = str.at(sp++);
 
-               switch (c) {
+               switch (c.unicode()) {
                   case '<':
                      count++;
                      break;
@@ -6258,26 +6254,31 @@ bool containsWord(const QString &s, const QString &word)
    return false;
 }
 
-bool findAndRemoveWord(QString &s, const QString &word)
+bool findAndRemoveWord(QString &str, const QString &word)
 {
    static QRegExp wordExp("[a-z_A-Z\\x80-\\xFF]+");
-   int p = 0, i, l;
+   int p = 0;
+   int i;
+   int l;
 
-   while ((i = wordExp.indexIn(s, p)) != -1) {
+   while ((i = wordExp.indexIn(str, p)) != -1) {
       l = wordExp.matchedLength();
 
-      if (s.mid(i, l) == word) {
-         if (i > 0 && isspace((uchar)s.at(i - 1))) {
-            i--, l++;
+      if (str.mid(i, l) == word) {
 
-         } else if (i + l < s.length() && isspace(s.at(i + l))) {
+         if (i > 0 && str.at(i - 1).isSpace() ) {
+            i--;
+            l++;
+
+         } else if (i + l < str.length() && str.at(i + l).isSpace() ) {
             l++;
 
          }
 
-         s = s.left(i) + s.mid(i + l); // remove word + spacing
+         str = str.left(i) + str.mid(i + l); // remove word + spacing
          return true;
       }
+
       p = i + l;
 
    }
@@ -6292,21 +6293,18 @@ bool findAndRemoveWord(QString &s, const QString &word)
  *         from the start.
  *  @returns The stripped string.
  */
-QString stripLeadingAndTrailingEmptyLines(const QString &s, int &docLine)
+QString stripLeadingAndTrailingEmptyLines(const QString &str, int &docLine)
 {  
-   if (s.isEmpty()) {
+   if (str.isEmpty()) {
       return "";
    }
 
-
-// broom fix me
-
-   const QChar *p = s.constData();
+   const QChar *p = str.constData();
 
    // search for leading empty lines
    int i  = 0;
    int li = -1;
-   int l  = s.length();
+   int l  = str.length();
 
    QChar c;
 
@@ -6330,7 +6328,7 @@ QString stripLeadingAndTrailingEmptyLines(const QString &s, int &docLine)
    int b  = l - 1;
    int bi = -1;
 
-   p = s.constData() + b;
+   p = str.constData() + b;
 
    while (b >= 0) {
       c = *p;
@@ -6350,7 +6348,7 @@ QString stripLeadingAndTrailingEmptyLines(const QString &s, int &docLine)
 
    // return whole string if no leading or trailing lines where found
    if (li == -1 && bi == -1) {
-      return s;
+      return str;
    }
 
    // return substring
@@ -6367,7 +6365,7 @@ QString stripLeadingAndTrailingEmptyLines(const QString &s, int &docLine)
       return "";  
    }
 
-   return s.mid(li, bi - li);
+   return str.mid(li, bi - li);
 }
 
 static struct Lang2ExtMap {
@@ -6518,10 +6516,10 @@ SrcLangExt getLanguageFromFileName(const QString &fileName)
    return SrcLangExt_Cpp; // not listed => assume C-ish language.
 }
 
-QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QByteArray &xName)
+QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QString &xName)
 {  
    QSharedPointer<MemberDef> bestMatch = QSharedPointer<MemberDef> (); 
-   QByteArray name = xName;         
+   QString name = xName;         
    
    if (name.isEmpty()) {    
       return bestMatch;
@@ -6539,7 +6537,7 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
       scope = Doxy_Globals::globalScope;
    }   
   
-   QByteArray explicitScopePart;
+   QString explicitScopePart;
    int qualifierIndex = computeQualifiedIndex(name);
 
    if (qualifierIndex != -1) {
@@ -6736,14 +6734,14 @@ struct Marker {
  *  - s=="a{2,3} b" returns 6
  *  = s=="#"        returns 0
  */
-static int findEndOfCommand(const QByteArray &str) 
+static int findEndOfCommand(const QString &str) 
 {
    int retval = 0;
 
-   const char *data = str.constData();
-   const char *ptr  = data;
+   const QChar *data = str.constData();
+   const QChar *ptr  = data;
 
-   char c = *ptr;
+   QChar c = *ptr;
 
    while (isId(c)) { 
       ptr++;
@@ -6753,7 +6751,7 @@ static int findEndOfCommand(const QByteArray &str)
    }
 
    if (c == '{') {
-      QByteArray args = extractAliasArgs(ptr, 0);
+      QString args = extractAliasArgs(str, ptr - data);
       retval += args.length();
    }
 
@@ -6772,11 +6770,11 @@ static QString replaceAliasArguments(const QString &aliasValue, const QString &a
    QList<QString> args;
    
    int i;
-   int l = (int)argList.length();
+   int l = argList.length();
    int s = 0;
 
    for (i = 0; i < l; i++) {
-      char c = argList.at(i);
+      QChar c = argList.at(i);
 
       if (c == ',' && (i == 0 || argList.at(i - 1) != '\\')) {
          args.append(argList.mid(s, i - s));
@@ -6784,7 +6782,7 @@ static QString replaceAliasArguments(const QString &aliasValue, const QString &a
 
       } else if (c == '@' || c == '\\') {
          // check if this is the start of another aliased command (see bug704172)
-         i += findEndOfCommand(argList.data() + i + 1);
+         i += findEndOfCommand(argList.mid(i + 1));
       }
    }
 
@@ -6812,7 +6810,7 @@ static QString replaceAliasArguments(const QString &aliasValue, const QString &a
             int markerLen = markerEnd - markerStart;
 
             // include backslash
-            markerList.append(Marker(markerStart - 1, atoi(aliasValue.mid(markerStart, markerLen)), markerLen + 1));            
+            markerList.append(Marker(markerStart - 1, aliasValue.mid(markerStart, markerLen).toInt(), markerLen + 1));            
          }
 
          markerStart = 0; // outside marker
@@ -6828,7 +6826,7 @@ static QString replaceAliasArguments(const QString &aliasValue, const QString &a
       int markerLen = markerEnd - markerStart;
 
       // include backslash
-      markerList.append(Marker(markerStart - 1, atoi(aliasValue.mid(markerStart, markerLen)), markerLen + 1));
+      markerList.append(Marker(markerStart - 1, aliasValue.mid(markerStart, markerLen).toInt(), markerLen + 1));
       
    }
 
@@ -6857,15 +6855,15 @@ static QString replaceAliasArguments(const QString &aliasValue, const QString &a
    return result;
 }
 
-static QByteArray escapeCommas(const QByteArray &s)
+static QString escapeCommas(const QString &s)
 {
-   QByteArray retval = s;
+   QString retval = s;
    retval.replace(",", "\\,");
     
    return retval;
 }
 
-static QString expandAliasRec(const QString s, bool allowRecursion)
+static QString expandAliasRec(const QString &s, bool allowRecursion)
 {
    QString result;
    static QRegExp cmdPat("[\\\\@][a-z_A-Z][a-z_A-Z0-9]*");
@@ -6944,20 +6942,20 @@ static QString expandAliasRec(const QString s, bool allowRecursion)
    return result;
 }
 
-int countAliasArguments(const QString argList)
+int countAliasArguments(const QString &argList)
 {
    int count = 1;
    int len   = argList.length();
    
    for (int k = 0; k < len; k++) {
-      char c = argList.at(k);
+      QChar c = argList.at(k);
 
       if (c == ',' && (k == 0 || argList.at(k - 1) != '\\')) {
          count++;
 
       } else if (c == '@' || c == '\\') {
          // check if this is the start of another aliased command (see bug704172)
-         k += findEndOfCommand(argList.data() + k + 1);
+         k += findEndOfCommand(argList.mid(k + 1));
       }
    }
    
@@ -6969,7 +6967,7 @@ QString extractAliasArgs(const QString &args, int pos)
    int i;
    int bc = 0;
 
-   char prevChar = 0;
+   QChar prevChar = 0;
 
    if (args.length() > pos && args.at(pos) == '{') { 
 
@@ -7081,25 +7079,23 @@ void stackTrace()
 }
 
 static int transcodeCharacterBuffer(const QString &fileName, BufStr &srcBuf, int size,
-                                    const char *inputEncoding, const char *outputEncoding)
+                                    const QString &inputEncoding, const QString &outputEncoding)
 {
-   // broom - fix me
-
-   if (inputEncoding == 0 || outputEncoding == 0) {
+   if (inputEncoding.isEmpty() || outputEncoding.isEmpty()) {
       return size;
    }
 
-   if (qstricmp(inputEncoding, outputEncoding) == 0) {
+   if ( inputEncoding.compare(outputEncoding, Qt::CaseInsensitive) == 0) {
       return size;
    }
 
-   QTextCodec *inCodec  = QTextCodec::codecForName(inputEncoding);
-   QTextCodec *outCodec = QTextCodec::codecForName(outputEncoding);
+   QTextCodec *inCodec  = QTextCodec::codecForName(inputEncoding.toUtf8());
+   QTextCodec *outCodec = QTextCodec::codecForName(outputEncoding.toUtf8());
   
    if (! inCodec || ! outCodec) {
       err("Unsupported character conversion: '%s'->'%s': %s\n"
           "Check the INPUT_ENCODING setting in the project file\n",
-          inputEncoding, outputEncoding, strerror(errno));
+          qPrintable(inputEncoding), qPrintable(outputEncoding), strerror(errno));
 
       exit(1);
    }
@@ -7116,7 +7112,7 @@ static int transcodeCharacterBuffer(const QString &fileName, BufStr &srcBuf, int
 }
 
 //! read a file name \a fileName and optionally filter and transcode it
-bool readInputFile(const QString &fileName, BufStr &inBuf, bool filter, bool isSourceCode)
+bool readInputFile(const QString &fileName, QString &inBuf, bool filter, bool isSourceCode)
 {
    // try to open file
    int size = 0;
@@ -7127,22 +7123,21 @@ bool readInputFile(const QString &fileName, BufStr &inBuf, bool filter, bool isS
    }
  
    QString filterName = getFileFilter(fileName, isSourceCode);
+   QByteArray buffer;
 
    if (filterName.isEmpty() || ! filter) {
       QFile f(fileName);
 
       if (! f.open(QIODevice::ReadOnly)) {
-         err("Unable to open file %s, error: %d\n", fileName.constData(), f.error());
+         err("Unable to open file %s, error: %d\n", qPrintable(fileName), f.error());
          return false;
       }
 
-      size = fi.size();
-
-      // read the file
-      inBuf.skip(size);
-
-      if (f.read(inBuf.data(), size) != size) {
-         err("Unable to read file %s, error: %d\n", fileName.constData(), f.error());
+      size = fi.size();     
+      buffer.resize(size);
+     
+      if (f.read(buffer.data(), size) != size) {
+         err("Unable to read file %s, error: %d\n", qPrintable(fileName), f.error());
          return false;
       }
 
@@ -7162,47 +7157,36 @@ bool readInputFile(const QString &fileName, BufStr &inBuf, bool filter, bool isS
       int numRead;
 
       while ((numRead = (int)fread(buf, 1, bufSize, f)) > 0) {         
-         inBuf.addArray(buf, numRead), size += numRead;
+         buffer.append(buf, numRead);
+         size += numRead;
       }
 
       pclose(f);
-
-      inBuf.at(inBuf.curPos()) = '\0';
+      
       Debug::print(Debug::FilterOutput, 0, "Filter output\n");
-      Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", inBuf.data());
+      Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", buffer.data() );
    }
+  
+   if (size >= 2 && ((buffer.at(0) == -1 && buffer.at(1) == -2) || (buffer.at(0) == -2 && buffer.at(1) == -1) )) { 
+      // UCS-2 encoded file   
+      inBuf  = QTextCodec::codecForMib(1015)->toUnicode(buffer);
 
-   int start = 0;
-   if (size >= 2 && ((inBuf.at(0) == -1 && inBuf.at(1) == -2) ||  (inBuf.at(0) == -2 && inBuf.at(1) == -1) )) { 
-      // UCS-2 encoded file
-      transcodeCharacterBuffer(fileName, inBuf, inBuf.curPos(), "UCS-2", "UTF-8");
+   } else if (size >= 3 && (uchar)buffer.at(0) == 0xEF && (uchar)buffer.at(1) == 0xBB && (uchar)buffer.at(2) == 0xBF) { 
 
-   } else if (size >= 3 && (uchar)inBuf.at(0) == 0xEF && (uchar)inBuf.at(1) == 0xBB &&
-              (uchar)inBuf.at(2) == 0xBF) { 
-
-      // UTF-8 encoded file
-      inBuf.dropFromStart(3); // remove UTF-8 BOM: no translation needed
-
+      // UTF-8 encoded file, remove UTF-8 BOM: no translation needed
+      buffer = buffer.mid(3); 
+      inBuf  = QString::fromUtf8(buffer);
+            
    } else { 
       // transcode according to the INPUT_ENCODING setting
       // do character transcoding if needed.
 
-      transcodeCharacterBuffer(fileName, inBuf, inBuf.curPos(), Config::getString("input-encoding"), "UTF-8");
-   }
-
-   //inBuf.addChar('\n'); /* to prevent problems under Windows ? */
-
-   // and translate CR's
-   size = inBuf.curPos() - start;
-   int newSize = filterCRLF(inBuf.data() + start, size);
+      inBuf = transcodeToQString(buffer);       
+   }   
   
-   if (newSize != size) { 
-      // we removed chars
-      inBuf.shrink(newSize); // resize the array      
-   }
-
-   inBuf.addChar(0);
-
+   // translate CR's   
+   filterCRLF(inBuf);
+    
    return true;
 }
 

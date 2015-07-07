@@ -626,6 +626,8 @@ static void codifyLines(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, con
 
    const QChar *p   = text.constData();
    const QChar *sp  = p;
+   const QChar *ptr = p;
+
    QChar c;
 
    bool done = false;
@@ -662,7 +664,7 @@ static void codifyLines(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, con
          }
 
       } else {
-         ol.codify(sp);
+         ol.codify(text.mid(sp - ptr) );
          done = true;
       }
    }
@@ -689,31 +691,30 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<FileD
       tooltip = d->briefDescriptionAsTooltip();
    }
 
-   bool done = false;
-   char *p = (char *)text;
+   QString tmp;
 
-   while (!done) {
-      char *sp = p;
-      char c;
-
-      while ((c = *p++) && c != '\n') {
-         column++;
-      }
+   for (auto c : text) { 
 
       if (c == '\n') {
-         line++;
-         *(p - 1) = '\0';
+         line++;         
 
-         ol.writeCodeLink(ref, file, anchor, sp, tooltip);
+         ol.writeCodeLink(ref, file, anchor, tmp, tooltip);
          ol.endCodeLine();
+
          ol.startCodeLine(true);
          writeLineNumber(ol, fd, line);
 
-      } else {
+         tmp = "";
 
-         ol.writeCodeLink(ref, file, anchor, sp, tooltip);
-         done = true;
+      } else {
+         column++;
+         tmp += c;
+                
       }
+   }
+
+   if (! tmp.isEmpty() )  {
+      ol.writeCodeLink(ref, file, anchor, tmp, tooltip); 
    }
 }
 

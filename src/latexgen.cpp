@@ -648,7 +648,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
             writeDefaultHeaderPart1(m_textStream);
 
          } else {
-            QByteArray header = fileToString(latexHeader);
+            QString header = fileToString(latexHeader);
             m_textStream << modifyKeywords(header);
          }
       
@@ -1111,7 +1111,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
             writeDefaultFooter(m_textStream);
 
          } else {
-            QByteArray footer = fileToString(latexFooter);            
+            QString footer = fileToString(latexFooter);            
             m_textStream << modifyKeywords(footer);
 
          }

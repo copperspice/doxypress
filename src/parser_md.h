@@ -22,8 +22,8 @@
 class Entry;
 
 /** processes string \a s and converts markdown into DoxyPress html commands. */
-QString processMarkdown(const QString &fileName, const int lineNr, Entry *e, const  QString &s);
- QString markdownFileNameToId(const QString &fileName);
+QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointer<Entry> e, const  QString &s);
+QString markdownFileNameToId(const QString &fileName);
 
 class MarkdownFileParser : public ParserInterface
 {

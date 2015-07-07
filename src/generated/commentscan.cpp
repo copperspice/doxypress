@@ -3224,9 +3224,9 @@ char *commentscanYYtext;
 #include <ctype.h>
 #include <unistd.h>
 
-#include "cite.h"
-#include "condparser.h"
-#include "config.h"
+#include <cite.h>
+#include <condparser.h>
+#include <config.h>
 #include <doxy_globals.h>
 #include <entry.h>
 #include <formula.h>
@@ -3245,77 +3245,77 @@ char *commentscanYYtext;
 #define YY_NO_INPUT 1
 
 // forward declarations
-static bool handleBrief(const QByteArray &);
-static bool handleFn(const QByteArray &);
-static bool handleDef(const QByteArray &);
-static bool handleOverload(const QByteArray &);
-static bool handleEnum(const QByteArray &);
-static bool handleDefGroup(const QByteArray &);
-static bool handleAddToGroup(const QByteArray &);
-static bool handleWeakGroup(const QByteArray &);
-static bool handleNamespace(const QByteArray &);
-static bool handlePackage(const QByteArray &);
-static bool handleClass(const QByteArray &);
-static bool handleHeaderFile(const QByteArray &);
-static bool handleProtocol(const QByteArray &);
-static bool handleCategory(const QByteArray &);
-static bool handleUnion(const QByteArray &);
-static bool handleStruct(const QByteArray &);
-static bool handleInterface(const QByteArray &);
-static bool handleIdlException(const QByteArray &);
-static bool handlePage(const QByteArray &);
-static bool handleMainpage(const QByteArray &);
-static bool handleFile(const QByteArray &);
-static bool handleDir(const QByteArray &);
-static bool handleExample(const QByteArray &);
-static bool handleDetails(const QByteArray &);
-static bool handleName(const QByteArray &);
-static bool handleTodo(const QByteArray &);
-static bool handleTest(const QByteArray &);
-static bool handleBug(const QByteArray &);
-static bool handleSubpage(const QByteArray &s);
-static bool handleDeprecated(const QByteArray &);
-static bool handleXRefItem(const QByteArray &);
-static bool handleRelated(const QByteArray &);
-static bool handleRelatedAlso(const QByteArray &);
-static bool handleMemberOf(const QByteArray &);
-static bool handleRefItem(const QByteArray &);
-static bool handleSection(const QByteArray &);
-static bool handleAnchor(const QByteArray &);
-static bool handleCite(const QByteArray &);
-static bool handleFormatBlock(const QByteArray &);
-static bool handleAddIndex(const QByteArray &);
-static bool handleIf(const QByteArray &);
-static bool handleIfNot(const QByteArray &);
-static bool handleElseIf(const QByteArray &);
-static bool handleElse(const QByteArray &);
-static bool handleEndIf(const QByteArray &);
-static bool handleIngroup(const QByteArray &);
-static bool handleNoSubGrouping(const QByteArray &);
-static bool handleShowInitializer(const QByteArray &);
-static bool handleHideInitializer(const QByteArray &);
-static bool handleCallgraph(const QByteArray &);
-static bool handleCallergraph(const QByteArray &);
-static bool handleInternal(const QByteArray &);
-static bool handleLineBr(const QByteArray &);
-static bool handleStatic(const QByteArray &);
-static bool handlePure(const QByteArray &);
-static bool handlePrivate(const QByteArray &);
-static bool handlePrivateSection(const QByteArray &);
-static bool handleProtected(const QByteArray &);
-static bool handleProtectedSection(const QByteArray &);
-static bool handlePublic(const QByteArray &s);
-static bool handlePublicSection(const QByteArray &s);
-static bool handleToc(const QByteArray &s);
-static bool handleInherit(const QByteArray &);
-static bool handleExtends(const QByteArray &);
-static bool handleCopyDoc(const QByteArray &);
-static bool handleCopyBrief(const QByteArray &);
-static bool handleCopyDetails(const QByteArray &);
-static bool handleParBlock(const QByteArray &);
-static bool handleEndParBlock(const QByteArray &);
+static bool handleBrief(const QString &);
+static bool handleFn(const QString &);
+static bool handleDef(const QString &);
+static bool handleOverload(const QString &);
+static bool handleEnum(const QString &);
+static bool handleDefGroup(const QString &);
+static bool handleAddToGroup(const QString &);
+static bool handleWeakGroup(const QString &);
+static bool handleNamespace(const QString &);
+static bool handlePackage(const QString &);
+static bool handleClass(const QString &);
+static bool handleHeaderFile(const QString &);
+static bool handleProtocol(const QString &);
+static bool handleCategory(const QString &);
+static bool handleUnion(const QString &);
+static bool handleStruct(const QString &);
+static bool handleInterface(const QString &);
+static bool handleIdlException(const QString &);
+static bool handlePage(const QString &);
+static bool handleMainpage(const QString &);
+static bool handleFile(const QString &);
+static bool handleDir(const QString &);
+static bool handleExample(const QString &);
+static bool handleDetails(const QString &);
+static bool handleName(const QString &);
+static bool handleTodo(const QString &);
+static bool handleTest(const QString &);
+static bool handleBug(const QString &);
+static bool handleSubpage(const QString &s);
+static bool handleDeprecated(const QString &);
+static bool handleXRefItem(const QString &);
+static bool handleRelated(const QString &);
+static bool handleRelatedAlso(const QString &);
+static bool handleMemberOf(const QString &);
+static bool handleRefItem(const QString &);
+static bool handleSection(const QString &);
+static bool handleAnchor(const QString &);
+static bool handleCite(const QString &);
+static bool handleFormatBlock(const QString &);
+static bool handleAddIndex(const QString &);
+static bool handleIf(const QString &);
+static bool handleIfNot(const QString &);
+static bool handleElseIf(const QString &);
+static bool handleElse(const QString &);
+static bool handleEndIf(const QString &);
+static bool handleIngroup(const QString &);
+static bool handleNoSubGrouping(const QString &);
+static bool handleShowInitializer(const QString &);
+static bool handleHideInitializer(const QString &);
+static bool handleCallgraph(const QString &);
+static bool handleCallergraph(const QString &);
+static bool handleInternal(const QString &);
+static bool handleLineBr(const QString &);
+static bool handleStatic(const QString &);
+static bool handlePure(const QString &);
+static bool handlePrivate(const QString &);
+static bool handlePrivateSection(const QString &);
+static bool handleProtected(const QString &);
+static bool handleProtectedSection(const QString &);
+static bool handlePublic(const QString &s);
+static bool handlePublicSection(const QString &s);
+static bool handleToc(const QString &s);
+static bool handleInherit(const QString &);
+static bool handleExtends(const QString &);
+static bool handleCopyDoc(const QString &);
+static bool handleCopyBrief(const QString &);
+static bool handleCopyDetails(const QString &);
+static bool handleParBlock(const QString &);
+static bool handleEndParBlock(const QString &);
 
-typedef bool (*DocCmdFunc)(const QByteArray &name);
+typedef bool (*DocCmdFunc)(const QString &name);
 
 struct DocCmdMap {
    const char *cmdName;
@@ -3469,7 +3469,7 @@ class DocCmdMapper
    };
 
    /** maps a command name to a handler function */
-   static Cmd *map(const char *name) {
+   static Cmd *map(const QString &name) {
       return instance()->find(name);
    }
 
@@ -3502,7 +3502,7 @@ class DocCmdMapper
       }
    }
 
-   Cmd *find(const char *name) {
+   Cmd *find(const QString &name) {
       return m_map.value(name);
    }
 
@@ -3555,30 +3555,30 @@ class GuardedSection
    bool m_parentVisible;
 };
 
-void openGroup(QSharedPointer<Entry> e, const char *file, int line);
-void closeGroup(QSharedPointer<Entry> e, const char *file, int line, bool foundInline = FALSE);
+void openGroup(QSharedPointer<Entry> e, const QString &file, int line);
+void closeGroup(QSharedPointer<Entry> e, const QString &file, int line, bool foundInline = FALSE);
 void initGroupInfo(QSharedPointer<Entry> e);
-static void groupAddDocs(QSharedPointer<Entry> e, const char *fileName);
+static void groupAddDocs(QSharedPointer<Entry> e, const QString &fileName);
 
 static ParserInterface *langParser;          // the language parser that is calling us
-static QByteArray       inputString;         // input string
+static QString          inputString;         // input string
 static int		         inputPosition;       // read pointer
-static QByteArray		   yyFileName;          // file name that is read from
+static QString     	   yyFileName;          // file name that is read from
 static int		         yyLineNr;            // line number in the input
 static bool             inBody;              // was the comment found inside the body of a function?
 static OutputContext    inContext;           // are we inside the brief, details or xref part
 static bool             briefEndsAtDot;      // does the brief description stop at a dot?
-static QByteArray       formulaText;         // Running text of a formula
-static QByteArray       formulaEnv;          // environment name
+static QString          formulaText;         // Running text of a formula
+static QString          formulaEnv;          // environment name
 static int              formulaNewLines;     // amount of new lines in the formula
-static QByteArray      *pOutputString;       // pointer to string to which the output is appended.
-static QByteArray       outputXRef;          // temp argument of todo/test/../xrefitem commands
-static QByteArray       blockName;           // preformatted block name (e.g. verbatim, latexonly,...)
+static QString         *pOutputString;       // pointer to string to which the output is appended.
+static QString          outputXRef;          // temp argument of todo/test/../xrefitem commands
+static QString          blockName;           // preformatted block name (e.g. verbatim, latexonly,...)
 static XRefKind         xrefKind;            // kind of cross-reference command
 static XRefKind         newXRefKind;         //
 static GuardType        guardType;           // kind of guard for conditional section
 static bool             enabledSectionFound;
-static QByteArray       functionProto;       // function prototype
+static QString          functionProto;       // function prototype
 
 static QStack<GuardedSection *> guards;      // tracks nested conditional sections (if,ifnot,..)
 
@@ -3586,13 +3586,13 @@ static QSharedPointer<Entry>	current;       // working entry
 
 static bool             needNewEntry;
 
-static QByteArray       g_sectionLabel;
-static QByteArray		   g_sectionTitle;
+static QString          g_sectionLabel;
+static QString		      g_sectionTitle;
 static int              g_sectionLevel;
-static QByteArray       xrefItemKey;
-static QByteArray       newXRefItemKey;
-static QByteArray       xrefItemTitle;
-static QByteArray       xrefListTitle;
+static QString          xrefItemKey;
+static QString          newXRefItemKey;
+static QString          xrefItemTitle;
+static QString          xrefListTitle;
 static Protection	      protection;
 
 static bool             xrefAppendFlag;
@@ -3603,23 +3603,21 @@ static bool             parseMore;
 static int              g_condCount;
 
 static int              g_commentCount;
-static QByteArray         g_spaceBeforeCmd;
-static QByteArray         g_spaceBeforeIf;
-static QByteArray         g_copyDocArg;
+static QString          g_spaceBeforeCmd;
+static QString          g_spaceBeforeIf;
+static QString          g_copyDocArg;
 
-static QByteArray         g_guardExpr;
+static QString          g_guardExpr;
 static int              g_roundCount;
 
 static bool             g_insideParBlock;
 
-//-----------------------------------------------------------------------------
-
 static QStack<Grouping *> g_autoGroupStack;
-static int              g_memberGroupId = DOX_NOGROUP;
-static QByteArray         g_memberGroupHeader;
-static QByteArray         g_memberGroupDocs;
-static QByteArray         g_memberGroupRelates;
-static QByteArray         g_compoundName;
+static int               g_memberGroupId = DOX_NOGROUP;
+static QString           g_memberGroupHeader;
+static QString           g_memberGroupDocs;
+static QString           g_memberGroupRelates;
+static QString           g_compoundName;
 
 static void initParser()
 {
@@ -3679,9 +3677,9 @@ static void lineCount()
    }
 }
 
-static QByteArray stripQuotes(const char *s)
+static QString stripQuotes(const QString &s)
 {
-   QByteArray name = s;
+   QString name = s;
 
    if (name.isEmpty()) {
       return name;
@@ -3694,11 +3692,11 @@ static QByteArray stripQuotes(const char *s)
    return name;
 }
 
-static void addXRefItem(const char *listName, const char *itemTitle, const char *listTitle, bool append)
+static void addXRefItem(const QString &listName, const QString &itemTitle, const QString &listTitle, bool append)
 {
    QSharedPointer<Entry> docEntry = current; // inBody && previous ? previous : current;
   
-   if (listName == 0) {
+   if (listName.isEmpty()) {
       return;
    }
  
@@ -3717,7 +3715,7 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
       for (auto &item : *docEntry->sli) {
          lii = &item;
 
-         if (qstrcmp(lii->type, listName) == 0) {           
+         if (lii->type == listName) {           
             break;
          }
       }
@@ -3732,7 +3730,7 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
       item->text += " <p>";
 
       if (Doxy_Globals::markdownSupport) {
-         item->text += processMarkdown(yyFileName, yyLineNr, current.data(), outputXRef);
+         item->text += processMarkdown(yyFileName, yyLineNr, current, outputXRef);
       } else {
          item->text += outputXRef;
       }
@@ -3745,14 +3743,13 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
       // if we have already an item from the same list type (e.g. a second @todo)
       // in the same Entry (i.e. lii!=0) then we reuse its link anchor.
 
-      char anchorLabel[1024];
-      sprintf(anchorLabel, "_%s%06d", listName, itemId);
+      QString anchorLabel = QString("_%1%2").arg(listName).arg(itemId, 6, 10, QChar('0'));
 
       RefItem *item = refList->getRefItem(itemId);
       assert(item != 0);
 
       if (Doxy_Globals::markdownSupport) {
-         item->text = processMarkdown(yyFileName, yyLineNr, current.data(), outputXRef);
+         item->text = processMarkdown(yyFileName, yyLineNr, current, outputXRef);
       } else {
          item->text = outputXRef;
       }
@@ -3760,8 +3757,7 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
       item->listAnchor = anchorLabel;
       docEntry->addSpecialListItem(listName, itemId);
 
-      QByteArray cmdString;
-      cmdString = QString("\\xrefitem %1 %2.").arg(listName).arg(itemId).toUtf8();
+      QString cmdString = QString("\\xrefitem %1 %2.").arg(listName).arg(itemId);
 
       if (inBody) {
          docEntry->inbodyDocs += cmdString;
@@ -3774,9 +3770,9 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
       if (si) {
          if (si->lineNr != -1) {
             warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)", 
-                                     anchorLabel, si->fileName.constData(), si->lineNr);
+                                     qPrintable(anchorLabel), qPrintable(si->fileName), si->lineNr);
          } else {
-            warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s)", anchorLabel, si->fileName.constData());
+            warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s)", qPrintable(anchorLabel), qPrintable(si->fileName));
          }
 
       } else {
@@ -3791,10 +3787,10 @@ static void addXRefItem(const char *listName, const char *itemTitle, const char 
 
 // Adds a formula text to the list/dictionary of formulas if it was
 // not already added. Returns the label of the formula.
-static QByteArray addFormula()
+static QString addFormula()
 {
-   QByteArray formLabel;
-   QByteArray fText = formulaText.simplified();
+   QString formLabel;
+   QString fText = formulaText.simplified();
    
    auto f = Doxy_Globals::formulaDict->find(fText);
 
@@ -3804,13 +3800,13 @@ static QByteArray addFormula()
       Doxy_Globals::formulaList->append(temp);
       Doxy_Globals::formulaDict->insert(fText, temp);
 
-      formLabel = QString("\\form#%1").arg(temp.getId()).toUtf8();
+      formLabel = QString("\\form#%1").arg(temp.getId());
 
       Doxy_Globals::formulaNameDict->insert(formLabel, temp);
       f = Doxy_Globals::formulaDict->find(fText);
 
    } else {
-      formLabel = QString("\\form#%1").arg(f->getId()).toUtf8();
+      formLabel = QString("\\form#%1").arg(f->getId());
 
    }
 
@@ -3869,19 +3865,20 @@ static void addCite()
 }
 
 // strip trailing whitespace (excluding newlines) from string s
-static void stripTrailingWhiteSpace(QByteArray &s)
+static void stripTrailingWhiteSpace(QString &s)
 {
    uint len = s.length();
 
    int i = len - 1;
-   char c;
+   QChar c;
 
    while (i >= 0 && ((c = s.at(i)) == ' ' || c == '\t' || c == '\r')) {
       i--;
    }
 
    if (i != len - 1) {
-      s.resize(i + 2); // string up to and including char at pos i and \0 terminator
+      // string up to and including char at pos i and \0 terminator
+      s.resize(i + 2); 
    }
 }
 
@@ -3891,7 +3888,7 @@ static inline void setOutput(OutputContext ctx)
    bool xrefAppendToPrev = xrefAppendFlag;
 
    // determine append flag for the next item (i.e. the end of this item)
-   xrefAppendFlag = !inBody &&
+   xrefAppendFlag = ! inBody &&
                     inContext == OutputXRef && ctx == OutputXRef && // two consecutive xref items
                     newXRefKind == xrefKind &&                  // of the same kind
                     (xrefKind != XRef_Item ||
@@ -3907,42 +3904,23 @@ static inline void setOutput(OutputContext ctx)
 
       switch (xrefKind) {
          case XRef_Todo:
-            addXRefItem("todo",
-                        theTranslator->trTodo(),
-                        theTranslator->trTodoList(),
-                        xrefAppendToPrev
-                       );
+            addXRefItem("todo", theTranslator->trTodo(), theTranslator->trTodoList(), xrefAppendToPrev);
             break;
 
          case XRef_Test:
-            addXRefItem("test",
-                        theTranslator->trTest(),
-                        theTranslator->trTestList(),
-                        xrefAppendToPrev
-                       );
+            addXRefItem("test", theTranslator->trTest(), theTranslator->trTestList(), xrefAppendToPrev);
             break;
 
          case XRef_Bug:
-            addXRefItem("bug",
-                        theTranslator->trBug(),
-                        theTranslator->trBugList(),
-                        xrefAppendToPrev
-                       );
+            addXRefItem("bug", theTranslator->trBug(), theTranslator->trBugList(), xrefAppendToPrev);
             break;
 
          case XRef_Deprecated:
-            addXRefItem("deprecated",
-                        theTranslator->trDeprecated(),
-                        theTranslator->trDeprecatedList(),
-                        xrefAppendToPrev
-                       );
+            addXRefItem("deprecated", theTranslator->trDeprecated(), theTranslator->trDeprecatedList(), xrefAppendToPrev);
             break;
+
          case XRef_Item:  // user defined list
-            addXRefItem(xrefItemKey,
-                        xrefItemTitle,
-                        xrefListTitle,
-                        xrefAppendToPrev
-                       );
+            addXRefItem(xrefItemKey, xrefItemTitle, xrefListTitle, xrefAppendToPrev);
             break;
 
          case XRef_None:
@@ -4006,39 +3984,32 @@ static inline void setOutput(OutputContext ctx)
 }
 
 // add a string to the output
-static inline void addOutput(const char *s)
+static inline void addOutput(const QString &s)
 {   
    *pOutputString += s;
 }
 
-// add a character to the output
-static inline void addOutput(char c)
-{
-   *pOutputString += c;
+static inline void addOutput(char s)
+{   
+   *pOutputString += s;
 }
 
-
-// add a character to the output
-static inline void addOutput(QByteArray c)
+static void endBrief(bool addToOutput = true)
 {
-   addOutput(c.constData());
-}
-
-
-static void endBrief(bool addToOutput = TRUE)
-{
-   if (!current->brief.trimmed().isEmpty()) {
+   if (! current->brief.trimmed().isEmpty()) {
       // only go to the detailed description if we have
       // found some brief description and not just whitespace
+
       briefEndsAtDot = FALSE;
       setOutput(OutputDoc);
+
       if (addToOutput) {
          addOutput(commentscanYYtext);
       }
    }
 }
 
-static void handleGuard(const QByteArray &expr);
+static void handleGuard(const QString &expr);
 
 #undef	YY_INPUT
 #define	YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
@@ -4050,11 +4021,24 @@ static int yyread(char *buf, int max_size)
    prevPosition = inputPosition;
    int c = 0;
 
-   while ( c < max_size && inputString[inputPosition] ) {
-      *buf = inputString[inputPosition++] ;
+   while (inputString[inputPosition] != 0) {
 
-      c++;
-      buf++;
+      QString tmp1    = inputString.at(inputPosition);
+      QByteArray tmp2 = tmp1.toUtf8();
+
+      if (c + tmp2.length() >= max_size)  {
+         // buffer is full
+         break;
+      }
+
+      c += tmp2.length();     
+   
+      for (auto letters : tmp2) {
+         *buf = letters;
+          buf++;
+      }
+
+      inputPosition++;     
    }
 
    return c;
@@ -4574,7 +4558,7 @@ YY_DECL {
                // potentially interesting command
                // the {B}* in the front was added for bug620924
 
-               QByteArray cmdName = QByteArray(commentscanYYtext).trimmed().data() + 1;
+               QString cmdName = QString(commentscanYYtext).trimmed().mid(1); 
                DocCmdMapper::Cmd *cmdPtr = DocCmdMapper::map(cmdName);
 
                if (cmdPtr) // special action is required
@@ -4584,13 +4568,13 @@ YY_DECL {
                      i++;
                   }
 
-                  g_spaceBeforeCmd = QByteArray(commentscanYYtext).left(i);
+                  g_spaceBeforeCmd = QString(commentscanYYtext).left(i);
                   if (cmdPtr->endsBrief && inContext != OutputXRef) {
                      briefEndsAtDot = FALSE;
                      // this command forces the end of brief description
                      setOutput(OutputDoc);
                   }
-                  //if (i>0) addOutput(QByteArray(commentscanYYtext).left(i)); // removed for bug 689341
+
                   if (cmdPtr->func && cmdPtr->func(cmdName)) {
                      // implicit split of the comment block into two
                      // entries. Restart the next block at the start
@@ -4631,7 +4615,7 @@ YY_DECL {
 
             {
                // language switch command
-               QByteArray langId = QString(commentscanYYtext).trimmed().toUtf8().mid(2);
+               QString langId = QString(commentscanYYtext).trimmed().mid(2);
 
                if (! langId.isEmpty() && Config::getEnum("output-language").compare(langId, Qt::CaseInsensitive) != 0)
                {
@@ -4646,7 +4630,7 @@ YY_DECL {
             {
                // start of a formula with custom environment
                formulaText = "\\begin";
-               formulaEnv = QString(commentscanYYtext).trimmed().toUtf8().mid(2);
+               formulaEnv = QString(commentscanYYtext).trimmed().mid(2);
 
                if (formulaEnv.at(formulaEnv.length() - 1) == '{')
                {
@@ -6037,7 +6021,7 @@ YY_DECL {
          case YY_STATE_EOF(FormatBlock):
 
          {
-            QByteArray endTag = "@end" + blockName;
+            QString endTag = "@end" + blockName;
             if (blockName == "startuml") {
                endTag = "enduml";
             }
@@ -6575,7 +6559,7 @@ YY_DECL {
                if (functionProto.trimmed().isEmpty())
                {
                   // plain overload command
-                  addOutput(getOverloadDocs());
+                  addOutput(theTranslator->trOverloadText());
                   addOutput('\n');
 
                } else // overload declaration
@@ -6680,7 +6664,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* language switch */
-               QByteArray langId = &commentscanYYtext[2];
+               QString langId = &commentscanYYtext[2];
 
                if (langId.isEmpty() || Config::getEnum("output-language").compare(langId, Qt::CaseInsensitive) == 0)
                {
@@ -7821,13 +7805,13 @@ void commentscanYYfree (void *ptr )
 #define YYTABLES_NAME "yytables"
 
 
-static bool handleBrief(const QByteArray &)
+static bool handleBrief(const QString &)
 {
    setOutput(OutputBrief);
    return FALSE;
 }
 
-static bool handleFn(const QByteArray &)
+static bool handleFn(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::MEMBERDOC_SEC);
    functionProto.resize(0);
@@ -7836,7 +7820,7 @@ static bool handleFn(const QByteArray &)
    return stop;
 }
 
-static bool handleDef(const QByteArray &)
+static bool handleDef(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::DEFINEDOC_SEC);
    functionProto.resize(0);
@@ -7844,21 +7828,21 @@ static bool handleDef(const QByteArray &)
    return stop;
 }
 
-static bool handleOverload(const QByteArray &)
+static bool handleOverload(const QString &)
 {
    functionProto.resize(0);
    BEGIN(OverloadParam);
    return FALSE;
 }
 
-static bool handleEnum(const QByteArray &)
+static bool handleEnum(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::ENUMDOC_SEC);
    BEGIN(EnumDocArg1);
    return stop;
 }
 
-static bool handleDefGroup(const QByteArray &)
+static bool handleDefGroup(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::GROUPDOC_SEC);
    current->groupDocType = Entry::GROUPDOC_NORMAL;
@@ -7866,7 +7850,7 @@ static bool handleDefGroup(const QByteArray &)
    return stop;
 }
 
-static bool handleAddToGroup(const QByteArray &)
+static bool handleAddToGroup(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::GROUPDOC_SEC);
    current->groupDocType = Entry::GROUPDOC_ADD;
@@ -7874,7 +7858,7 @@ static bool handleAddToGroup(const QByteArray &)
    return stop;
 }
 
-static bool handleWeakGroup(const QByteArray &)
+static bool handleWeakGroup(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::GROUPDOC_SEC);
    current->groupDocType = Entry::GROUPDOC_WEAK;
@@ -7882,34 +7866,34 @@ static bool handleWeakGroup(const QByteArray &)
    return stop;
 }
 
-static bool handleNamespace(const QByteArray &)
+static bool handleNamespace(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::NAMESPACEDOC_SEC);
    BEGIN( NameSpaceDocArg1 );
    return stop;
 }
 
-static bool handlePackage(const QByteArray &)
+static bool handlePackage(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::PACKAGEDOC_SEC);
    BEGIN( PackageDocArg1 );
    return stop;
 }
 
-static bool handleClass(const QByteArray &)
+static bool handleClass(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::CLASSDOC_SEC);
    BEGIN( ClassDocArg1 );
    return stop;
 }
 
-static bool handleHeaderFile(const QByteArray &)
+static bool handleHeaderFile(const QString &)
 {
    BEGIN( ClassDocArg2 );
    return FALSE;
 }
 
-static bool handleProtocol(const QByteArray &)
+static bool handleProtocol(const QString &)
 {
    // Obj-C protocol
    bool stop = makeStructuralIndicator(Entry::PROTOCOLDOC_SEC);
@@ -7917,7 +7901,7 @@ static bool handleProtocol(const QByteArray &)
    return stop;
 }
 
-static bool handleCategory(const QByteArray &)
+static bool handleCategory(const QString &)
 {
    // Obj-C category
    bool stop = makeStructuralIndicator(Entry::CATEGORYDOC_SEC);
@@ -7925,42 +7909,42 @@ static bool handleCategory(const QByteArray &)
    return stop;
 }
 
-static bool handleUnion(const QByteArray &)
+static bool handleUnion(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::UNIONDOC_SEC);
    BEGIN( ClassDocArg1 );
    return stop;
 }
 
-static bool handleStruct(const QByteArray &)
+static bool handleStruct(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::STRUCTDOC_SEC);
    BEGIN( ClassDocArg1 );
    return stop;
 }
 
-static bool handleInterface(const QByteArray &)
+static bool handleInterface(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::INTERFACEDOC_SEC);
    BEGIN( ClassDocArg1 );
    return stop;
 }
 
-static bool handleIdlException(const QByteArray &)
+static bool handleIdlException(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::EXCEPTIONDOC_SEC);
    BEGIN( ClassDocArg1 );
    return stop;
 }
 
-static bool handlePage(const QByteArray &)
+static bool handlePage(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::PAGEDOC_SEC);
    BEGIN( PageDocArg1 );
    return stop;
 }
 
-static bool handleMainpage(const QByteArray &)
+static bool handleMainpage(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::MAINPAGEDOC_SEC);
    if (!stop) {
@@ -7970,7 +7954,7 @@ static bool handleMainpage(const QByteArray &)
    return stop;
 }
 
-static bool handleFile(const QByteArray &)
+static bool handleFile(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::FILEDOC_SEC);
    if (!stop) {
@@ -7980,7 +7964,7 @@ static bool handleFile(const QByteArray &)
    return stop;
 }
 
-static bool handleDir(const QByteArray &)
+static bool handleDir(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::DIRDOC_SEC);
    if (!stop) {
@@ -7990,7 +7974,7 @@ static bool handleDir(const QByteArray &)
    return stop;
 }
 
-static bool handleExample(const QByteArray &)
+static bool handleExample(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::EXAMPLE_SEC);
    if (!stop) {
@@ -8000,7 +7984,7 @@ static bool handleExample(const QByteArray &)
    return stop;
 }
 
-static bool handleDetails(const QByteArray &)
+static bool handleDetails(const QString &)
 {
    if (inContext != OutputBrief) {
       addOutput("\n\n"); // treat @details outside brief description
@@ -8010,7 +7994,7 @@ static bool handleDetails(const QByteArray &)
    return FALSE;
 }
 
-static bool handleName(const QByteArray &)
+static bool handleName(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::MEMBERGRP_SEC);
    if (! stop) {
@@ -8023,7 +8007,7 @@ static bool handleName(const QByteArray &)
    return stop;
 }
 
-static bool handleTodo(const QByteArray &)
+static bool handleTodo(const QString &)
 {
    newXRefKind = XRef_Todo;
    setOutput(OutputXRef);
@@ -8031,7 +8015,7 @@ static bool handleTodo(const QByteArray &)
    return FALSE;
 }
 
-static bool handleTest(const QByteArray &)
+static bool handleTest(const QString &)
 {
    newXRefKind = XRef_Test;
    setOutput(OutputXRef);
@@ -8039,7 +8023,7 @@ static bool handleTest(const QByteArray &)
    return FALSE;
 }
 
-static bool handleBug(const QByteArray &)
+static bool handleBug(const QString &)
 {
    newXRefKind = XRef_Bug;
    setOutput(OutputXRef);
@@ -8047,7 +8031,7 @@ static bool handleBug(const QByteArray &)
    return FALSE;
 }
 
-static bool handleDeprecated(const QByteArray &)
+static bool handleDeprecated(const QString &)
 {
    // mark item for isDeprcated()
    current->m_specFlags.spec |= Entry::Deprecated;
@@ -8058,14 +8042,14 @@ static bool handleDeprecated(const QByteArray &)
    return FALSE;
 }
 
-static bool handleXRefItem(const QByteArray &)
+static bool handleXRefItem(const QString &)
 {
    newXRefKind = XRef_Item;
    BEGIN(XRefItemParam1);
    return FALSE;
 }
 
-static bool handleParBlock(const QByteArray &)
+static bool handleParBlock(const QString &)
 {
    if (g_insideParBlock) {
       warn(yyFileName, yyLineNr, "Found \\parblock command while already in a parblock");
@@ -8082,7 +8066,7 @@ static bool handleParBlock(const QByteArray &)
    return FALSE;
 }
 
-static bool handleEndParBlock(const QByteArray &)
+static bool handleEndParBlock(const QString &)
 {
    if (!g_insideParBlock) {
       warn(yyFileName, yyLineNr, "found \\endparblock command without matching \\parblock");
@@ -8095,34 +8079,34 @@ static bool handleEndParBlock(const QByteArray &)
    return FALSE;
 }
 
-static bool handleRelated(const QByteArray &)
+static bool handleRelated(const QString &)
 {
    BEGIN(RelatesParam1);
    return FALSE;
 }
 
-static bool handleRelatedAlso(const QByteArray &)
+static bool handleRelatedAlso(const QString &)
 {
    current->relatesType = Duplicate;
    BEGIN(RelatesParam1);
    return FALSE;
 }
 
-static bool handleMemberOf(const QByteArray &)
+static bool handleMemberOf(const QString &)
 {
    current->relatesType = MemberOf;
    BEGIN(RelatesParam1);
    return FALSE;
 }
 
-static bool handleRefItem(const QByteArray &)
+static bool handleRefItem(const QString &)
 {
    addOutput("@refitem ");
    BEGIN(LineParam);
    return FALSE;
 }
 
-static bool handleSection(const QByteArray &s)
+static bool handleSection(const QString &s)
 {
    setOutput(OutputDoc);
    addOutput("@" + s + " ");
@@ -8139,7 +8123,7 @@ static bool handleSection(const QByteArray &s)
    return FALSE;
 }
 
-static bool handleSubpage(const QByteArray &s)
+static bool handleSubpage(const QString &s)
 {
    if (current->section != Entry::EMPTY_SEC && current->section != Entry::PAGEDOC_SEC && 
          current->section != Entry::MAINPAGEDOC_SEC) {
@@ -8157,14 +8141,14 @@ static bool handleSubpage(const QByteArray &s)
    return FALSE;
 }
 
-static bool handleAnchor(const QByteArray &s)
+static bool handleAnchor(const QString &s)
 {
    addOutput("@" + s + " ");
    BEGIN(AnchorLabel);
    return FALSE;
 }
 
-static bool handleCite(const QByteArray &s)
+static bool handleCite(const QString &s)
 {
    if (!g_spaceBeforeCmd.isEmpty()) {
       addOutput(g_spaceBeforeCmd);
@@ -8175,7 +8159,7 @@ static bool handleCite(const QByteArray &s)
    return FALSE;
 }
 
-static bool handleFormatBlock(const QByteArray &s)
+static bool handleFormatBlock(const QString &s)
 {
    addOutput("@" + s + " ");  
    blockName = s;
@@ -8184,14 +8168,14 @@ static bool handleFormatBlock(const QByteArray &s)
    return FALSE;
 }
 
-static bool handleAddIndex(const QByteArray &)
+static bool handleAddIndex(const QString &)
 {
    addOutput("@addindex ");
    BEGIN(LineParam);
    return FALSE;
 }
 
-static bool handleIf(const QByteArray &)
+static bool handleIf(const QString &)
 {
    enabledSectionFound = FALSE;
    guardType = Guard_If;
@@ -8200,7 +8184,7 @@ static bool handleIf(const QByteArray &)
    return FALSE;
 }
 
-static bool handleIfNot(const QByteArray &)
+static bool handleIfNot(const QString &)
 {
    enabledSectionFound = FALSE;
    guardType = Guard_IfNot;
@@ -8209,7 +8193,7 @@ static bool handleIfNot(const QByteArray &)
    return FALSE;
 }
 
-static bool handleElseIf(const QByteArray &)
+static bool handleElseIf(const QString &)
 {
    if (guards.isEmpty()) {
       warn(yyFileName, yyLineNr, "Found \\else without matching start command");
@@ -8220,7 +8204,7 @@ static bool handleElseIf(const QByteArray &)
    return FALSE;
 }
 
-static bool handleElse(const QByteArray &)
+static bool handleElse(const QString &)
 {
    if (guards.isEmpty()) {
       warn(yyFileName, yyLineNr, "Found \\else without matching start command");
@@ -8230,7 +8214,7 @@ static bool handleElse(const QByteArray &)
    return FALSE;
 }
 
-static bool handleEndIf(const QByteArray &)
+static bool handleEndIf(const QString &)
 {
    if (guards.isEmpty()) {
       warn(yyFileName, yyLineNr, "Found \\endif without matching start command");
@@ -8248,44 +8232,44 @@ static bool handleEndIf(const QByteArray &)
    return FALSE;
 }
 
-static bool handleIngroup(const QByteArray &)
+static bool handleIngroup(const QString &)
 {
    inGroupParamFound = FALSE;
    BEGIN( InGroupParam );
    return FALSE;
 }
 
-static bool handleNoSubGrouping(const QByteArray &)
+static bool handleNoSubGrouping(const QString &)
 {
    current->subGrouping = FALSE;
    return FALSE;
 }
 
-static bool handleShowInitializer(const QByteArray &)
+static bool handleShowInitializer(const QString &)
 {
    current->initLines = 100000; // ON
    return FALSE;
 }
 
-static bool handleHideInitializer(const QByteArray &)
+static bool handleHideInitializer(const QString &)
 {
    current->initLines = 0; // OFF
    return FALSE;
 }
 
-static bool handleCallgraph(const QByteArray &)
+static bool handleCallgraph(const QString &)
 {
    current->callGraph = TRUE; // ON
    return FALSE;
 }
 
-static bool handleCallergraph(const QByteArray &)
+static bool handleCallergraph(const QString &)
 {
    current->callerGraph = TRUE; // ON
    return FALSE;
 }
 
-static bool handleInternal(const QByteArray &)
+static bool handleInternal(const QString &)
 {
    if (! Config::getBool("internal-docs")) {
       // make sure some whitespace before \internal command
@@ -8307,63 +8291,63 @@ static bool handleInternal(const QByteArray &)
    return FALSE;
 }
 
-static bool handleLineBr(const QByteArray &)
+static bool handleLineBr(const QString &)
 {
    addOutput('\n');
    return FALSE;
 }
 
-static bool handleStatic(const QByteArray &)
+static bool handleStatic(const QString &)
 {
    endBrief();
    current->stat = TRUE;
    return FALSE;
 }
 
-static bool handlePure(const QByteArray &)
+static bool handlePure(const QString &)
 {
    endBrief();
    current->virt = Pure;
    return FALSE;
 }
 
-static bool handlePrivate(const QByteArray &)
+static bool handlePrivate(const QString &)
 {
    current->protection = Private;
    return FALSE;
 }
 
-static bool handlePrivateSection(const QByteArray &)
+static bool handlePrivateSection(const QString &)
 {
    current->protection = protection = Private;
    return FALSE;
 }
 
-static bool handleProtected(const QByteArray &)
+static bool handleProtected(const QString &)
 {
    current->protection = Protected;
    return FALSE;
 }
 
-static bool handleProtectedSection(const QByteArray &)
+static bool handleProtectedSection(const QString &)
 {
    current->protection = protection = Protected ;
    return FALSE;
 }
 
-static bool handlePublic(const QByteArray &)
+static bool handlePublic(const QString &)
 {
    current->protection = Public;
    return FALSE;
 }
 
-static bool handlePublicSection(const QByteArray &)
+static bool handlePublicSection(const QString &)
 {
    current->protection = protection = Public;
    return FALSE;
 }
 
-static bool handleToc(const QByteArray &)
+static bool handleToc(const QString &)
 {
    if (current->section == Entry::PAGEDOC_SEC || current->section == Entry::MAINPAGEDOC_SEC) {
       current->stat = TRUE; // we 'abuse' stat to pass whether or the TOC is enabled
@@ -8371,19 +8355,19 @@ static bool handleToc(const QByteArray &)
    return FALSE;
 }
 
-static bool handleInherit(const QByteArray &)
+static bool handleInherit(const QString &)
 {
    BEGIN(InheritParam);
    return FALSE;
 }
 
-static bool handleExtends(const QByteArray &)
+static bool handleExtends(const QString &)
 {
    BEGIN(ExtendsParam);
    return FALSE;
 }
 
-static bool handleCopyBrief(const QByteArray &)
+static bool handleCopyBrief(const QString &)
 {
    if (current->brief.isEmpty() && current->doc.isEmpty()) {
       // if we don't have a brief or detailed description yet,
@@ -8399,7 +8383,7 @@ static bool handleCopyBrief(const QByteArray &)
    return FALSE;
 }
 
-static bool handleCopyDetails(const QByteArray &)
+static bool handleCopyDetails(const QString &)
 {
    setOutput(OutputDoc);
    if (!g_spaceBeforeCmd.isEmpty()) {
@@ -8410,7 +8394,7 @@ static bool handleCopyDetails(const QByteArray &)
    return FALSE;
 }
 
-static bool handleCopyDoc(const QByteArray &)
+static bool handleCopyDoc(const QString &)
 {
    setOutput(OutputBrief);
    if (!g_spaceBeforeCmd.isEmpty()) {
@@ -8430,8 +8414,8 @@ static void checkFormula()
    }
 }
 
-bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, const QByteArray &comment,
-                  const QByteArray &fileName, int  &lineNr, bool isBrief, bool isAutoBriefOn, bool isInbody,
+bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, const QString &comment,
+                  const QString &fileName, int &lineNr, bool isBrief, bool isAutoBriefOn, bool isInbody,
                   Protection &prot, int &position, bool &newEntryNeeded )
 {
    initParser();
@@ -8467,7 +8451,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    g_spaceBeforeCmd.resize(0);
    g_spaceBeforeIf.resize(0);
 
-   printlex(commentscanYY_flex_debug, TRUE, __FILE__, ! fileName.isEmpty() ? fileName.constData() : NULL);
+   printlex(commentscanYY_flex_debug, TRUE, __FILE__, ! fileName.isEmpty() ? qPrintable(fileName) : "");
 
    if (! current->inbodyDocs.isEmpty() && isInbody) { 
       // separate in body fragments
@@ -8475,7 +8459,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    }
 
    Debug::print(Debug::CommentScan, 0, "-----------\nCommentScanner: %s:%d\n"
-                "input=[\n%s]\n", fileName.data(), lineNr, comment.data() );
+                "input=[\n%s]\n", qPrintable(fileName), lineNr, qPrintable(comment) );
 
 
    commentscanYYrestart( commentscanYYin );
@@ -8486,7 +8470,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    if (YY_START == OverloadParam) { 
       // comment ended with \overload
-      addOutput(getOverloadDocs());
+      addOutput(theTranslator->trOverloadText());
    }
 
    if (!guards.isEmpty()) {
@@ -8504,22 +8488,20 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
       current->doc = "\n\n";
    }
 
-   if (current->section == Entry::MEMBERGRP_SEC &&
-         g_memberGroupId == DOX_NOGROUP) { // @name section but no group started yet
+   if (current->section == Entry::MEMBERGRP_SEC && g_memberGroupId == DOX_NOGROUP) { 
+      // @name section but no group started yet
       openGroup(current, yyFileName, yyLineNr);
    }
 
    if (Doxy_Globals::markdownSupport) {
-      current->brief      = processMarkdown(fileName, lineNr, current.data(), current->brief);
-      current->doc        = processMarkdown(fileName, lineNr, current.data(), current->doc);
-      current->inbodyDocs = processMarkdown(fileName, lineNr, current.data(), current->inbodyDocs);
+      current->brief      = processMarkdown(fileName, lineNr, current, current->brief);
+      current->doc        = processMarkdown(fileName, lineNr, current, current->doc);
+      current->inbodyDocs = processMarkdown(fileName, lineNr, current, current->inbodyDocs);
    }
 
-   Debug::print(Debug::CommentScan, 0,
-                "brief=[line=%d\n%s]\ndocs=[line=%d\n%s]\ninbody=[line=%d\n%s]\n===========\n",
-                current->briefLine, current->brief.data(),
-                current->docLine, current->doc.data(),
-                current->inbodyLine, current->inbodyDocs.data());
+   Debug::print(Debug::CommentScan, 0, "brief=[line=%d\n%s]\ndocs=[line=%d\n%s]\ninbody=[line=%d\n%s]\n===========\n",
+                current->briefLine, qPrintable(current->brief), current->docLine, qPrintable(current->doc), 
+                current->inbodyLine, qPrintable(current->inbodyDocs) );
 
    checkFormula();
    prot = protection;
@@ -8541,12 +8523,12 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    }
 
    lineNr = yyLineNr;
-   printlex(commentscanYY_flex_debug, FALSE, __FILE__, ! fileName.isEmpty() ? fileName.constData() : NULL);
+   printlex(commentscanYY_flex_debug, FALSE, __FILE__, ! fileName.isEmpty() ? qPrintable(fileName) : "");
 
    return parseMore;
 }
 
-void groupEnterFile(const char *fileName, int)
+void groupEnterFile(const QString &fileName, int)
 {
    g_autoGroupStack.clear();
    g_memberGroupId = DOX_NOGROUP;
@@ -8555,22 +8537,23 @@ void groupEnterFile(const char *fileName, int)
    g_compoundName = fileName;
 }
 
-void groupLeaveFile(const char *fileName, int line)
+void groupLeaveFile(const QString &fileName, int line)
 {  
    g_memberGroupId = DOX_NOGROUP;
    g_memberGroupRelates.resize(0);
    g_memberGroupDocs.resize(0);
 
-   if (!g_autoGroupStack.isEmpty()) {
+   if (! g_autoGroupStack.isEmpty()) {
       warn(fileName, line, "End of file while inside a group\n");
    }
 }
 
-void groupEnterCompound(const char *fileName, int line, const char *name)
+void groupEnterCompound(const QString &fileName, int line, const QString &name)
 {
    if (g_memberGroupId != DOX_NOGROUP) {
-      warn(fileName, line, "Try to put compound %s inside a member group\n", name);
+      warn(fileName, line, "Try to put compound %s inside a member group\n", qPrintable(name));
    }
+
    g_memberGroupId = DOX_NOGROUP;
    g_memberGroupRelates.resize(0);
    g_memberGroupDocs.resize(0);
@@ -8585,7 +8568,7 @@ void groupEnterCompound(const char *fileName, int line, const char *name)
    //printf("groupEnterCompound(%s)\n",name);
 }
 
-void groupLeaveCompound(const char *, int, const char * /*name*/)
+void groupLeaveCompound(const QString &, int, const QString &)
 {   
    g_memberGroupId = DOX_NOGROUP;
    g_memberGroupRelates.resize(0);
@@ -8599,11 +8582,9 @@ static int findExistingGroup(int &groupId, const MemberGroupInfo *info)
 
       auto mi = *di;
 
-      if (g_compoundName == mi->compoundName && // same file or scope
-            !mi->header.isEmpty() &&             // not a nameless group
-            qstricmp(mi->header, info->header) == 0 // same header name
-         ) {
-         //printf("Found it!\n");
+      if (g_compoundName == mi->compoundName && ! mi->header.isEmpty() && mi->header.compare(info->header, Qt::CaseInsensitive) == 0) {
+         // same file or scope, not a nameless group, same header name
+
          return (int)di.key(); // put the item in this group
       }
    }
@@ -8612,14 +8593,17 @@ static int findExistingGroup(int &groupId, const MemberGroupInfo *info)
    return groupId;
 }
 
-void openGroup(QSharedPointer<Entry> e, const char *, int)
+void openGroup(QSharedPointer<Entry> e, const QString &, int)
 {   
-   if (e->section == Entry::GROUPDOC_SEC) { // auto group
+   if (e->section == Entry::GROUPDOC_SEC) { 
+      // auto group
       g_autoGroupStack.push(new Grouping(e->name, e->groupingPri()));
 
-   } else { // start of a member group
-      //printf("    membergroup id=%d %s\n",g_memberGroupId,g_memberGroupHeader.data());
-      if (g_memberGroupId == DOX_NOGROUP) { // no group started yet
+   } else { 
+      // start of a member group
+      
+      if (g_memberGroupId == DOX_NOGROUP) { 
+         // no group started yet
          static int curGroupId = 0;
 
          QSharedPointer<MemberGroupInfo> info(new MemberGroupInfo);
@@ -8636,7 +8620,7 @@ void openGroup(QSharedPointer<Entry> e, const char *, int)
    }
 }
 
-void closeGroup(QSharedPointer<Entry> e, const char *fileName, int, bool foundInline)
+void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int, bool foundInline)
 {   
    if (g_memberGroupId != DOX_NOGROUP) { // end of member group
 
@@ -8680,12 +8664,12 @@ void initGroupInfo(QSharedPointer<Entry> e)
    }
 }
 
-static void groupAddDocs(QSharedPointer<Entry> e, const char *fileName)
+static void groupAddDocs(QSharedPointer<Entry> e, const QString &fileName)
 {
    if (e->section == Entry::MEMBERGRP_SEC) {
       g_memberGroupDocs = e->brief.trimmed();
       e->doc = stripLeadingAndTrailingEmptyLines(e->doc, e->docLine);
-      if (!g_memberGroupDocs.isEmpty() && !e->doc.isEmpty()) {
+      if (!g_memberGroupDocs.isEmpty() && ! e->doc.isEmpty()) {
          g_memberGroupDocs += "\n\n";
       }
       g_memberGroupDocs += e->doc;
@@ -8703,7 +8687,7 @@ static void groupAddDocs(QSharedPointer<Entry> e, const char *fileName)
    }
 }
 
-static void handleGuard(const QByteArray &expr)
+static void handleGuard(const QString &expr)
 {
    CondParser prs;
    bool sectionEnabled = prs.parse(yyFileName, yyLineNr, expr.trimmed());
@@ -8730,3 +8714,4 @@ static void handleGuard(const QByteArray &expr)
       BEGIN( SkipGuardedSection );
    }
 }
+ 

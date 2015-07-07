@@ -28,16 +28,15 @@
  *         !     NOT operator
  */
 
-#include <QByteArray>
+#include <QString>
 
 class CondParser
 {
-   // public functions
+ 
  public:
    CondParser() : m_e(0), m_tokenType(NOTHING) {}
-   bool parse(const char *fileName, int lineNr, const char *expr);
-
-   // enumerations
+   bool parse(const QString &fileName, int lineNr, const QString &expr);
+ 
  private:
    enum TOKENTYPE {
       NOTHING = -1,
@@ -45,25 +44,23 @@ class CondParser
       VARIABLE,
       UNKNOWN
    };
+
    enum OPERATOR_ID {
       UNKNOWN_OP = -1,
       AND = 1,
       OR,
       NOT
    };
-
-   // data
+ 
  private:
 
-   QByteArray m_err;                 //!< error state
-   QByteArray m_expr;                //!< holds the expression
-   const char *m_e;                //!< points to a character in expr
+   QString m_err;                 //!< error state
+   QString m_expr;                //!< holds the expression
+   const QChar *m_e;              //!< points to a character in expr
 
-   QByteArray m_token;               //!< holds the token
-   TOKENTYPE m_tokenType;          //!< type of the token
-
-   // private functions
- private:
+   QString m_token;               //!< holds the token
+   TOKENTYPE m_tokenType;         //!< type of the token
+  
    void getToken();
 
    bool parseLevel1();
@@ -72,8 +69,8 @@ class CondParser
    bool parseVar();
 
    bool evalOperator(const int opId, bool lhs, bool rhs);
-   bool evalVariable(const char *varName);
-   int getOperatorId(const QByteArray &opName);
+   bool evalVariable(const QString &varName);
+   int getOperatorId(const QString &opName);
 };
 
 #endif
