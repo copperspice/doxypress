@@ -389,8 +389,8 @@ int fortranscannerYYlineno = 1;
 extern char *fortranscannerYYtext;
 #define yytext_ptr fortranscannerYYtext
 
-static yy_state_type yy_get_previous_state (void );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  );
+static yy_state_type  yy_get_previous_state (void );
+static yy_state_type  yy_try_NUL_trans (yy_state_type current_state  );
 static int yy_get_next_buffer (void );
 static void yy_fatal_error (yyconst char msg[]  );
 
@@ -56452,11 +56452,11 @@ char *fortranscannerYYtext;
  * - Must track yyLineNr when using REJECT, unput() or similar commands.
  */
 
-#include <QVector>
-#include <QStack>
-#include <QRegExp>
 #include <QFile>
 #include <QMap>
+#include <QStack>
+#include <QRegExp>
+#include <QVector>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -56528,10 +56528,10 @@ struct SymbolModifiers {
 
 //ostream& operator<<(ostream& out, const SymbolModifiers& mdfs);
 
-static const char *directionStrs[] = {
+static const QString directionStrs[] = {
    "", "intent(in)", "intent(out)", "intent(inout)"
 };
-static const char *directionParam[] = {
+static const QString directionParam[] = {
    "", "[in]", "[out]", "[in,out]"
 };
 
@@ -56554,15 +56554,14 @@ struct CommentInPrepass {
 };
 static QList<CommentInPrepass *>  comments;
 
-YY_BUFFER_STATE *include_stack = NULL;
-int include_stack_ptr = 0;
-int include_stack_cnt = 0;
+QStack<YY_BUFFER_STATE> include_stack;
+QStack<QByteArray> buffer_stack;
 
 static QFile         inputFile;
 static QString  		yyFileName;
 
-static int		      yyLineNr = 1 ;
-static int		      yyColNr  = 0 ;
+static int		      yyLineNr = 1;
+static int		      yyColNr  = 0;
 
 static QSharedPointer<Entry>	current_root;
 static QSharedPointer<Entry>	global_root;
@@ -56625,7 +56624,7 @@ static void resolveModuleProcedures(QList<QSharedPointer<Entry>> &moduleProcedur
 static int getAmpersandAtTheStart(const  QString &buf, int length);
 static int getAmpOrExclAtTheEnd(const  QString &buf, int length);
 static void truncatePrepass(int index);
-static void pushBuffer(const QString &buffer);
+static void pushBuffer(QString &buffer);
 static void popBuffer();
 
 static QString extractFromParens(const QString &name);
@@ -56633,8 +56632,8 @@ static CommentInPrepass *locatePrepassComment(int from, int to);
 static void updateVariablePrepassComment(int from, int to);
 static void newLine();
 
-#undef	YY_INPUT
-#define	YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
+#undef  YY_INPUT
+#define YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
 #define YY_USER_ACTION yyColNr+=(int)fortranscannerYYleng;
 
 #define INITIAL 0
@@ -56993,7 +56992,7 @@ YY_DECL {
                DBG_CTX((stderr, "---%s", fortranscannerYYtext));
 
                int indexStart = getAmpersandAtTheStart(fortranscannerYYtext, (int)fortranscannerYYleng);
-               int indexEnd = getAmpOrExclAtTheEnd(fortranscannerYYtext, (int)fortranscannerYYleng);
+               int indexEnd   = getAmpOrExclAtTheEnd(fortranscannerYYtext, (int)fortranscannerYYleng);
                if (indexEnd >= 0 && fortranscannerYYtext[indexEnd] != '&') //we are only interested in amp
                {
                   indexEnd = -1;
@@ -57004,7 +57003,7 @@ YY_DECL {
                   if (YY_START == Prepass) { // last line in "continuation"
 
                      // Only take input after initial ampersand
-                     inputStringPrepass += (const char *)(fortranscannerYYtext + (indexStart + 1));
+                     inputStringPrepass += fortranscannerYYtext + (indexStart + 1);
                      
                      pushBuffer(inputStringPrepass);
                      yyColNr = 0;
@@ -57855,7 +57854,7 @@ YY_DECL {
                               lft = current_root->type.left(strt).trimmed();
                            }
 
-                           int lenFunc = QString("function").lenth();
+                           int lenFunc = QString("function").length();
 
                            if ((current_root->type.length() - strt - lenFunc) != 0) {
                               rght = current_root->type.right(current_root->type.length() - strt - lenFunc).trimmed();
@@ -58423,16 +58422,19 @@ YY_DECL {
             if (parsingPrototype) {
                yyterminate();
 
-            } else if ( include_stack_ptr <= 0 ) {
+            } else if ( include_stack.isEmpty() ) {
+
                if (YY_START != INITIAL && YY_START != Start) {
                   DBG_CTX((stderr, "==== Error: EOF reached in wrong state (end missing)"));
                   scanner_abort();
                }
                yyterminate();
+
             } else {
                popBuffer();
             }
          }
+
          YY_BREAK
          case 113:
             YY_RULE_SETUP
@@ -59185,7 +59187,6 @@ YY_BUFFER_STATE fortranscannerYY_scan_buffer  (char *base, yy_size_t  size )
  */
 YY_BUFFER_STATE fortranscannerYY_scan_string (yyconst char *yystr )
 {
-
    return fortranscannerYY_scan_bytes(yystr, strlen(yystr) );
 }
 
@@ -59275,7 +59276,7 @@ static int yy_top_state  (void)
 
 static void yy_fatal_error (yyconst char *msg )
 {
-   (void) fprintf( stderr, "%s\n", msg );
+   (void) fprintf( stderr, "%s\n", msg);
    exit( YY_EXIT_FAILURE );
 }
 
@@ -59526,10 +59527,10 @@ static void updateVariablePrepassComment(int from, int to)
    }
 }
 
-static int getAmpersandAtTheStart(const char *buf, int length)
+static int getAmpersandAtTheStart(const QString &buf, int length)
 {
    for (int i = 0; i < length; i++) {
-      switch (buf[i]) {
+      switch (buf[i].unicode()) {
          case ' ':
          case '\t':
             break;
@@ -59543,24 +59544,25 @@ static int getAmpersandAtTheStart(const char *buf, int length)
 }
 
 /* Returns ampersand index, comment start index or -1 if neither exist.*/
-static int getAmpOrExclAtTheEnd(const char *buf, int length)
+static int getAmpOrExclAtTheEnd(const QString &buf, int length)
 {
    // Avoid ampersands in string and comments
-   int parseState = Start;
-   char quoteSymbol = 0;
-   int ampIndex = -1;
-   int commentIndex = -1;
+   int parseState    = Start;   
+   int ampIndex      = -1;
+   int commentIndex  = -1;
+   
+   QChar quoteSymbol = 0;
 
    for (int i = 0; i < length && parseState != Comment; i++) {
-      // When in string, skip backslashes
-      // Legacy code, not sure whether this is correct?
+      // When in string, skip backslashes, legacy code
+
       if (parseState == String) {
          if (buf[i] == '\\') {
             i++;
          }
       }
 
-      switch (buf[i]) {
+      switch (buf[i].unicode()) {
          case '\'':
          case '"':
             // Close string, if quote symbol matches.
@@ -59576,6 +59578,7 @@ static int getAmpOrExclAtTheEnd(const char *buf, int length)
             }
             ampIndex = -1; // invalidate prev ampersand
             break;
+
          case '!':
             // When in string or comment, ignore exclamation mark
             if (parseState == Start) {
@@ -59583,6 +59586,7 @@ static int getAmpOrExclAtTheEnd(const char *buf, int length)
                commentIndex = i;
             }
             break;
+
          case ' ':  // ignore whitespace
          case '\t':
          case '\n': // this may be at the end of line
@@ -59677,121 +59681,113 @@ static bool recognizeFixedForm(const QString &contents, FortranFormat format)
 }
 
 /* This function assumes that contents has at least size=length+1 */
-static void insertCharacter(char *contents, int length, int pos, char c)
+static void insertCharacter(QString &contents, int length, int pos, QChar c)
 {
    // shift tail by one character
    for (int i = length; i > pos; i--) {
       contents[i] = contents[i - 1];
    }
+
    // set the character
    contents[pos] = c;
 }
 
 /* change comments and bring line continuation character to previous line */
-static const char *prepassFixedForm(const QString &contents)
+static QString prepassFixedForm(const QString &contents)
 {
    int column = 0;
    int prevLineLength = 0;
    int prevLineAmpOrExclIndex = -1;
-   bool emptyLabel = TRUE;
+   bool emptyLabel = TRUE;  
 
-   int newContentsSize = strlen(contents) + 3; // \000, \n (when necessary) and one spare character (to avoid reallocation)
-   char *newContents = (char *)malloc(newContentsSize);
+   QString newContents;
 
-   for (int i = 0, j = 0;; i++, j++) {
-      if (j >= newContentsSize - 1) { // check for one spare character, which may be eventually used below (by &)
-         newContents = (char *)realloc(newContents, newContentsSize + 1000);
-         newContentsSize = newContentsSize + 1000;
-      }
+   for (int i = 0, j = 0;  true; i++, j++) {    
 
       column++;
-      char c = contents[i];
-      switch (c) {
+      QChar c = contents[i];
+
+      switch (c.unicode()) {
          case '\n':
             prevLineLength = column;
-            prevLineAmpOrExclIndex = getAmpOrExclAtTheEnd(&contents[i - prevLineLength + 1], prevLineLength);
+            prevLineAmpOrExclIndex = getAmpOrExclAtTheEnd(contents.mid(i - prevLineLength + 1), prevLineLength);
             column = 0;
             emptyLabel = TRUE;
-            newContents[j] = c;
+            newContents += c;
             break;
+
          case ' ':
-            newContents[j] = c;
+            newContents += c;
             break;
-         case '\000':
-            newContents[j] = '\000';
-            newContentsSize = strlen(newContents);
-            if (newContents[newContentsSize - 1] != '\n') {
-               // to be on the safe side
-               newContents = (char *)realloc(newContents, newContentsSize + 2);
-               newContents[newContentsSize] = '\n';
-               newContents[newContentsSize + 1] = '\000';
-            }
+
+         case '\0':          
             return newContents;
+
          case 'C':
          case 'c':
          case '*':
             if (column != 6) {
                emptyLabel = FALSE;
+
                if (column == 1) {
-                  newContents[j] = '!';
+                  newContents += '!';
                } else {
-                  newContents[j] = c;
+                  newContents += c;
                }
                break;
             }
+
          default:
             if (column == 6 && emptyLabel) { // continuation
                if (c != '0') { // 0 not allowed as continuatioin character, see f95 standard paragraph 3.3.2.3
-                  newContents[j] = ' ';
+                  newContents += ' ';
 
-                  if (prevLineAmpOrExclIndex == -1) { // add & just before end of previous line
+                  if (prevLineAmpOrExclIndex == -1) { 
+                     // add & just before end of previous line
                      insertCharacter(newContents, j + 1, (j + 1) - 6 - 1, '&');
                      j++;
-                  } else { // add & just before end of previous line comment
+
+                  } else { 
+                     // add & just before end of previous line comment
                      insertCharacter(newContents, j + 1, (j + 1) - 6 - prevLineLength + prevLineAmpOrExclIndex, '&');
                      j++;
                   }
+
                } else {
-                  newContents[j] = c; // , just handle like space
+                  newContents += c; // just handle like space
                }
+
             } else {
-               newContents[j] = c;
+               newContents += c;
                emptyLabel = FALSE;
             }
             break;
       }
    }
 
-   newContentsSize = strlen(newContents);
-   if (newContents[newContentsSize - 1] != '\n') {
-      // to be on the safe side
-      newContents = (char *)realloc(newContents, newContentsSize + 2);
-      newContents[newContentsSize] = '\n';
-      newContents[newContentsSize + 1] = '\000';
-   }
    return newContents;
 }
 
 static void pushBuffer(QString &buffer)
 {
-   if (include_stack_cnt <= include_stack_ptr) {
-      include_stack_cnt++;
-      include_stack = (YY_BUFFER_STATE *)realloc(include_stack, include_stack_cnt * sizeof(YY_BUFFER_STATE));
-   }
-
-   include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
-   fortranscannerYY_switch_to_buffer(fortranscannerYY_scan_string(buffer));
-
    DBG_CTX((stderr, "--PUSH--%s", qPrintable(buffer)));
+
+   buffer_stack.push(buffer.toUtf8());
+
+   include_stack.push(YY_CURRENT_BUFFER);
+   fortranscannerYY_switch_to_buffer(fortranscannerYY_scan_string( buffer_stack.top().constData() ));   
+
    buffer = "";
 }
 
 static void popBuffer()
 {
    DBG_CTX((stderr, "--POP--"));
-   include_stack_ptr --;
-   fortranscannerYY_delete_buffer(YY_CURRENT_BUFFER );
-   fortranscannerYY_switch_to_buffer(include_stack[include_stack_ptr] );
+   
+   fortranscannerYY_switch_to_buffer(include_stack.pop());
+   fortranscannerYY_delete_buffer(YY_CURRENT_BUFFER);
+
+   buffer_stack.pop();
 }
 
 /** used to copy entry to an interface module procedure */
@@ -60303,7 +60299,7 @@ static int max(int a, int b)
    return a > b ? a : b;
 }
 
-static void addModule(const char *name, bool isModule)
+static void addModule(const QString &name, bool isModule)
 {
    DBG_CTX((stderr, "0=========> got module %s\n", name));
 
@@ -60324,7 +60320,7 @@ static void addModule(const char *name, bool isModule)
       current->name = fname;
    }
 
-   current->type = "program";
+   current->type      = "program";
    current->fileName  = yyFileName;
    current->bodyLine  = yyLineNr; // used for source reference
    current->protection = Public ;
@@ -60333,10 +60329,9 @@ static void addModule(const char *name, bool isModule)
    startScope(last_entry);
 }
 
-
-static void addSubprogram(const char *text)
+static void addSubprogram(const QString &text)
 {
-   DBG_CTX((stderr, "1=========> got subprog, type: %s\n", text));
+   DBG_CTX((stderr, "1=========> got subprog, type: %s\n", qPrintable(text)));
    subrCurrent.prepend(current);
    current->section = Entry::FUNCTION_SEC ;
 
@@ -60359,7 +60354,7 @@ static void addSubprogram(const char *text)
  * \note Code was brought to this procedure from the parser,
  * because there was/is idea to use it in several parts of the parser.
  */
-static void addInterface(QString name, InterfaceType type)
+static void addInterface(const QString &name, InterfaceType type)
 {
    if (YY_START == Start) {
       addModule(NULL);
@@ -60368,7 +60363,7 @@ static void addInterface(QString name, InterfaceType type)
 
    current->section = Entry::CLASS_SEC; // was Entry::INTERFACE_SEC;
    current->m_specFlags.spec = Entry::Interface;
-   current->name    = name;
+   current->name  = name;
 
    switch (type) {
       case IF_ABSTRACT:
@@ -60386,13 +60381,13 @@ static void addInterface(QString name, InterfaceType type)
    }
 
    /* if type is part of a module, mod name is necessary for output */
-   if ((current_root) && (current_root->section ==  Entry::CLASS_SEC ||
-          current_root->section ==  Entry::NAMESPACE_SEC)) {
+   if ((current_root) && (current_root->section ==  Entry::CLASS_SEC || current_root->section ==  Entry::NAMESPACE_SEC)) {
       current->name = current_root->name + "::" + current->name;
    }
 
    current->fileName = yyFileName;
    current->bodyLine  = yyLineNr;
+
    addCurrentEntry(1);
 }
 
@@ -60498,7 +60493,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
             (directionParam[dir1] == directionParam[SymbolModifiers::IN])) {
 
          // strip direction
-         loc_doc = loc_doc.right(loc_doc.length() - strlen(directionParam[SymbolModifiers::IN]));
+         loc_doc = loc_doc.right(loc_doc.length() - directionParam[SymbolModifiers::IN].length());
 
          // in case of emty documentation or (now) just name, consider it as no documemntation
          if (loc_doc.isEmpty() || (loc_doc.toLower() == argName.toLower())) {
@@ -60525,7 +60520,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
       if ((directionParam[dir1] == directionParam[SymbolModifiers::NONE_D]) ||
             (directionParam[dir1] == directionParam[SymbolModifiers::OUT])) {
 
-         loc_doc = loc_doc.right(loc_doc.length() - strlen(directionParam[SymbolModifiers::OUT]));
+         loc_doc = loc_doc.right(loc_doc.length() - directionParam[SymbolModifiers::OUT].length());
 
          if (loc_doc.isEmpty() || (loc_doc.toLower() == argName.toLower())) {
             current = tmp_entry;
@@ -60549,7 +60544,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
       if ((directionParam[dir1] == directionParam[SymbolModifiers::NONE_D]) ||
             (directionParam[dir1] == directionParam[SymbolModifiers::INOUT])) {
 
-         loc_doc = loc_doc.right(loc_doc.length() - strlen(directionParam[SymbolModifiers::INOUT]));
+         loc_doc = loc_doc.right(loc_doc.length() - directionParam[SymbolModifiers::INOUT].length() );
          if (loc_doc.isEmpty() || (loc_doc.toLower() == argName.toLower())) {
             current = tmp_entry;
             return;
@@ -60579,8 +60574,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
 }
 
 static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> &rt, FortranFormat format)
-{
-   char *tmpBuf = NULL;
+{  
    initParser();
 
    defaultProtection    = Public;
@@ -60589,7 +60583,6 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
    inputStringPrepass   = "";
    inputPositionPrepass = 0;
 
-   //anonCount     = 0;  // don't reset per file
    mtype         = Method;
    gstat         = FALSE;
    virt          = Normal;
@@ -60605,13 +60598,9 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
          msg("Prepassing fixed form of %s\n", qPrintable(fileName));        
          inputString = prepassFixedForm(fileBuf);
 
-      } else if (inputString[strlen(fileBuf) - 1] != '\n') {
-         tmpBuf = (char *)malloc(strlen(fileBuf) + 2);
-         strcpy(tmpBuf, fileBuf);
+      } else if (! inputString.endsWith('\n') ){         
+         inputString += '\n';
 
-         tmpBuf[strlen(fileBuf)]     = '\n';
-         tmpBuf[strlen(fileBuf) + 1] = '\000';
-         inputString = tmpBuf;
       }
 
       yyLineNr = 1 ;
@@ -60641,20 +60630,14 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       fortranscannerYYlex();
       groupLeaveFile(yyFileName, yyLineNr);
 
-      endScope(current_root, TRUE); // TRUE - global root
+      endScope(current_root, TRUE); //  global root
 
       rt->program.resize(0);     
       current = QSharedPointer<Entry>();      
 
       moduleProcedures.clear();
-
-      if (tmpBuf) {
-         free((char *)tmpBuf);
-         inputString = "";
-      }
-
-      if (isFixedForm) {
-         free((char *)inputString);
+ 
+      if (isFixedForm) {        
          inputString = "";
       }
 

@@ -175,24 +175,37 @@ uint portable_pid()
    static char **last_environ;
 #endif
 
-void portable_setenv(const char *name, const QString &valueX)
-{  
-   QByteArray value = valueX.toUtf8();
+void portable_setenv(const QString &name_T, const QString &value_T)
+{    
 
 #ifdef HAVE_WINDOWS_H
-   SetEnvironmentVariable(name, value.constData());
+
+   std::vector<wchar_t> name;
+   name.resize(name_T.length() + 1);
+   name_T.toWCharArray(&name[0]);
+   name[name_T.length()] = 0;
+
+   std::vector<wchar_t> value;
+   value.resize(value_T.length() + 1);
+   value_T.toWCharArray(&value[0]);
+   value[value_T.length()] = 0;
+
+   SetEnvironmentVariableW(&name[0], &value[0]);
 
 #else
+   QByteArray name  = name_T.utf8();
+   QByteArray value = value_T.utf8();
+
    char **ep = 0;
    size_t size;
-
-   const size_t namelen = qstrlen(name);
+ 
+   const size_t namelen = name.length();
    const size_t vallen  = value.size() + 1;
 
    size = 0;
    if (environ != 0) {
       for (ep = environ; *ep; ++ep) {
-         if (!qstrncmp (*ep, name, (uint)namelen) && (*ep)[namelen] == '=') {
+         if (! qstrncmp (*ep, name, (uint)namelen) && (*ep)[namelen] == '=') {
             break;
          } else {
             ++size;
@@ -256,32 +269,42 @@ void portable_setenv(const char *name, const QString &valueX)
 #endif
 }
 
-void portable_unsetenv(const char *variable)
+void portable_unsetenv(const QString &variable)
 {
 
 #ifdef HAVE_WINDOWS_H
-   SetEnvironmentVariable(variable, 0);
+
+   std::vector<wchar_t> tmp;
+   tmp.resize(variable.length() + 1);
+   variable.toWCharArray(&tmp[0]);
+   tmp[variable.length()] = 0;
+
+   SetEnvironmentVariableW(&tmp[0], 0);
 
 #else
-   /* Some systems do not have unsetenv(), so we do it ourselves */
-   size_t len;
-   char **ep;
-
-   if (variable == NULL || *variable == '\0' || strchr (variable, '=') != NULL) {
+  if (! variable.isEmpty() || ! variable.contains('=')) {
       return; // not properly formatted
    }
 
-   len = qstrlen(variable);
-   ep = environ;
+   /* Some systems do not have unsetenv(), so we do it ourselves */
+   QByteArray tmp = variable.utf8();
+
+   size_t len = tmp.length();
+
+   char **ep;  
+   ep  = environ;
 
    while (*ep != NULL) {
-      if (!qstrncmp(*ep, variable, (uint)len) && (*ep)[len] == '=') {
-         /* Found it.  Remove this pointer by moving later ones back.  */
+      if (! qstrncmp(*ep, tmp.constData(), len) && (*ep)[len] == '=') {
+         // found it, remove this pointer by moving later ones back. 
          char **dp = ep;
+
          do {
             dp[0] = dp[1];
          } while (*dp++);
+
          /* Continue the loop in case NAME appears again.  */
+
       } else {
          ++ep;
       }
@@ -289,9 +312,9 @@ void portable_unsetenv(const char *variable)
 #endif
 }
 
-const char *portable_getenv(const char *variable)
+QString portable_getenv(const QString &variable)
 {
-   return getenv(variable);
+   return getenv(variable.toUtf8());
 }
 
 portable_off_t portable_fseek(FILE *f, portable_off_t offset, int whence)
@@ -331,7 +354,7 @@ char portable_pathListSeparator()
 #endif
 }
 
-const char *portable_commandExtension()
+QString portable_commandExtension()
 {
 #ifdef Q_OS_WIN
    return ".exe";

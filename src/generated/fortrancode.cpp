@@ -25943,8 +25943,6 @@ int yy_end       = 1;
 #define YY_FTN_RESET   {yy_old_start = 0; yy_my_start = 0; yy_end = 1;}
 #define YY_FTN_REJECT  {yy_end = yy_my_start; yy_my_start = yy_old_start; REJECT;}
 
-//--------------------------------------------------------------------------------
-
 /**
   data of an use-statement
 */
@@ -25978,7 +25976,7 @@ class Scope
 };
 
 static QString     docBlock;                     //!< contents of all lines of a documentation block
-static QString     currentModule = 0;            //!< name of the current enclosing module
+static QString     currentModule;                //!< name of the current enclosing module
 static UseSDict    *useMembers = new UseSDict;   //!< info about used modules
 static UseEntry    *useEntry = 0;                //!< current use statement info
 static QList<Scope *> scopeStack;
@@ -26022,8 +26020,7 @@ static int 	     bracketCount = 0;
 static bool      g_endComment;
 
 // simplified way to know if this is fixed form
-// duplicate in fortranscanner.l
-static bool recognizeFixedForm(const char *contents, FortranFormat format)
+static bool recognizeFixedForm(const QString &contents, FortranFormat format)
 {
    int column = 0;
    bool skipLine = FALSE;
@@ -26031,13 +26028,15 @@ static bool recognizeFixedForm(const char *contents, FortranFormat format)
    if (format == FortranFormat_Fixed) {
       return TRUE;
    }
+
    if (format == FortranFormat_Free) {
       return FALSE;
    }
-   for (int i = 0;; i++) {
+
+   for (int i = 0; true; i++) {
       column++;
 
-      switch (contents[i]) {
+      switch (contents[i].unicode()) {
          case '\n':
             column = 0;
             skipLine = FALSE;
@@ -26075,6 +26074,7 @@ static bool recognizeFixedForm(const char *contents, FortranFormat format)
             return FALSE;
       }
    }
+
    return FALSE;
 }
 
@@ -26366,12 +26366,12 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
  gets the link to a generic procedure which depends not on the name, but on the parameter list
  @todo implementation
 */
-static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd, const char *memberText, CodeOutputInterface &ol)
+static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd, const QString &memberText, CodeOutputInterface &ol)
 { 
    return FALSE;
 }
 
-static bool getLink(UseSDict *usedict, const char *memberText, CodeOutputInterface &ol, const char *text)
+static bool getLink(UseSDict *usedict, const QString &memberText, CodeOutputInterface &ol, const QString &text)
 {
    QSharedPointer<MemberDef> md;
    QString memberName = removeRedundantWhiteSpace(memberText);
@@ -26396,8 +26396,8 @@ static bool getLink(UseSDict *usedict, const char *memberText, CodeOutputInterfa
             addDocCrossReference(g_currentMemberDef, md);
          }
 
-         writeMultiLineCodeLink(ol, md, text ? text : memberText);
-         addToSearchIndex(text ? text : memberText);
+         writeMultiLineCodeLink(ol, md, ! text.isEmpty() ? text : memberText);
+         addToSearchIndex(! text.isEmpty() ? text : memberText);
          return TRUE;
       }
    }
@@ -26405,7 +26405,7 @@ static bool getLink(UseSDict *usedict, const char *memberText, CodeOutputInterfa
 }
 
 
-static void generateLink(CodeOutputInterface &ol, QString &lname)
+static void generateLink(CodeOutputInterface &ol, const QString &lname)
 {
    QSharedPointer<ClassDef> cd;
 
@@ -26421,7 +26421,7 @@ static void generateLink(CodeOutputInterface &ol, QString &lname)
       } else {
          // write type or interface link
          writeMultiLineCodeLink(ol, cd, tmp);
-         addToSearchIndex(tmp.data());
+         addToSearchIndex(tmp);
       }
    }
 
@@ -26433,10 +26433,9 @@ static void generateLink(CodeOutputInterface &ol, QString &lname)
       // nothing found, just write out the word
 
       codifyLines(tmp);
-      addToSearchIndex(tmp.data());
+      addToSearchIndex(tmp);
    }
 }
-
 
 /*! counts the number of lines in the input */
 static int countLines()
@@ -26755,13 +26754,6 @@ YY_DECL {
    register yy_state_type yy_current_state;
    register char *yy_cp, *yy_bp;
    register int yy_act;
-
-
-
-   /*==================================================================*/
-
-   /*-------- ignore ------------------------------------------------------------*/
-
 
 
    if ( !(yy_init) )
@@ -27130,7 +27122,7 @@ YY_DECL {
 
             {
                // just reset currentModule, rest is done in following rule
-               currentModule = 0;
+               currentModule = "";
                YY_FTN_REJECT;
             }
             YY_BREAK
@@ -28471,7 +28463,7 @@ static int yy_top_state  (void)
 
 static void yy_fatal_error (yyconst char *msg )
 {
-   (void) fprintf( stderr, "%s\n", msg );
+   (void) fprintf( stderr, "%s\n", msg);
    exit( YY_EXIT_FAILURE );
 }
 
@@ -28690,8 +28682,8 @@ void fortrancodeYYfree (void *ptr )
 
 void resetFortranCodeParserState() {}
 
-void parseFortranCode(CodeOutputInterface &od, const char *className, const QString &s,
-                  bool exBlock, const char *exName, QSharedPointer<FileDef> fd, int startLine, 
+void parseFortranCode(CodeOutputInterface &od, const QString &className, const QString &s,
+                  bool exBlock, const QString &exName, QSharedPointer<FileDef> fd, int startLine, 
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool, 
                   QSharedPointer<Definition> searchCtx, bool collectXRefs, FortranFormat format)
 {
@@ -28699,13 +28691,14 @@ void parseFortranCode(CodeOutputInterface &od, const char *className, const QStr
       return;
    }
 
-   printlex(fortrancodeYY_flex_debug, TRUE, __FILE__, fd ? fd->fileName().data() : NULL);
+   printlex(fortrancodeYY_flex_debug, TRUE, __FILE__, fd ? qPrintable(fd->fileName()) : "");
+
    TooltipManager::instance()->clearTooltips();
    g_code = &od;
 
    g_inputString   = s;
    g_inputPosition = 0;
-   g_isFixedForm   = recognizeFixedForm((const char *)s, format);
+   g_isFixedForm   = recognizeFixedForm(s, format);
    g_currentFontClass = "";
    g_needsTermination = FALSE;
 
@@ -28767,11 +28760,12 @@ void parseFortranCode(CodeOutputInterface &od, const char *className, const QStr
       g_sourceFileDef = QSharedPointer<FileDef>();
    }
 
-   printlex(fortrancodeYY_flex_debug, FALSE, __FILE__, fd ? fd->fileName().data() : NULL);
+   printlex(fortrancodeYY_flex_debug, FALSE, __FILE__, fd ? qPrintable(fd->fileName()) : "");
+
    return;
 }
 
-#if !defined(YY_FLEX_SUBMINOR_VERSION)
+#if ! defined(YY_FLEX_SUBMINOR_VERSION)
 extern "C" { // some bogus code to keep the compiler happy
    void fortrancodeYYdummy()
    {

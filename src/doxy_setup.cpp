@@ -83,9 +83,9 @@ void initDoxyPress()
 {
    printf("Initialization\n"); 
 
-   const char *lang = portable_getenv("LC_ALL");
+   const QString lang = portable_getenv("LC_ALL");
 
-   if (lang) {
+   if (! lang.isEmpty()) {
       portable_setenv("LANG", lang);
    }
 
@@ -482,7 +482,7 @@ void readConfiguration(struct CommandLine cmdArgs)
        
    // Perlmod wants to know the path to the project file
    QFileInfo configFileInfo(cmdArgs.configName);
-   setPerlModDoxyfile(qPrintable(configFileInfo.absoluteFilePath()));  
+   setPerlModDoxyfile(configFileInfo.absoluteFilePath());  
 }
 
 QString Doxy_Setup::getValue(QStringList::iterator &iter, QStringList::iterator end)

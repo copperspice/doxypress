@@ -13354,6 +13354,11 @@ find_rule: /* we branch to this label when backing up */
 
 		YY_DO_BEFORE_ACTION;
 
+
+printf("\n  BROOM parseMain -  before the magical switch");
+
+
+
 do_action:	/* This label is used only to access EOF actions. */
 
 		switch ( yy_act )
@@ -24391,6 +24396,12 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
    inputFile.setFileName(fileName);
 
+
+
+printf("\n  BROOM parseMain  %s ", qPrintable( fileBuf.mid(1000, 200) )  );
+
+
+
    if (inputFile.open(QIODevice::ReadOnly)) {
       yyLineNr   = 1 ;
       yyFileName = fileName;
@@ -24444,7 +24455,6 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
       scannerYYlex();
       g_lexInit = TRUE;
-
 
       if (YY_START == Comment) {
          warn(yyFileName, yyLineNr, "File ended in the middle of a comment block, Check for a missing \\endcode");

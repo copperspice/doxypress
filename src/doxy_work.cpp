@@ -9241,7 +9241,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
       QString inBuf;
       msg("Processing %s\n", qPrintable(fileName));
 
-      readInputFile(fileName, inBuf);
+      readInputFile(fileName, inBuf); 
       preBuf = preprocessFile(fileName, inBuf);
 
    } else { 

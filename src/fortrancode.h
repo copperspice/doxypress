@@ -27,7 +27,7 @@ class FileDef;
 class MemberDef;
 class Definition;
 
-void parseFortranCode(CodeOutputInterface &, const char *, const QByteArray &, bool, const char *, 
+void parseFortranCode(CodeOutputInterface &, const QString &, const QString &, bool, const QString &, 
                   QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
                   QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
                   bool collectRefs, FortranFormat format);

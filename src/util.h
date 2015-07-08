@@ -155,12 +155,12 @@ int getPrefixIndex(const QString &name);
 bool generateLink(OutputDocInterface &od, const QString &clName, const QString &lr, bool inSeeBlock, const QString &lt);
 void generateFileRef(OutputDocInterface &od, const QString &name, const QString &text = QString() );
 
-QByteArray getLanguageSpecificSeparator(SrcLangExt lang, bool classScope = false);
+QString getLanguageSpecificSeparator(SrcLangExt lang, bool classScope = false);
 QByteArray getCanonicalTemplateSpec(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, const QByteArray &spec);
 
 QString fileToString(const QString &name, bool filter = false, bool isSourceCode = false);
 
-QByteArray langToString(SrcLangExt lang);
+QString langToString(SrcLangExt lang);
 
 void linkifyText(const TextGeneratorIntf &ol, QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
                  QSharedPointer<Definition> self, const QString &text, bool autoBreak = false, bool external = true,
@@ -310,7 +310,7 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<FileDef> fileScope, QS
 QString parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<MemberDef> member, 
                   const QString &doc, const QString &fileName, int lineNr);
 
-QString transcodeToQString(const QString &input);
+QString transcodeToQString(const QByteArray &input);
 QString extractAliasArgs(const QString &args, int pos);
 
 int countAliasArguments(const QString &argList);
@@ -334,7 +334,6 @@ QString externalLinkTarget();
 QString externalRef(const QString &relPath, const QString &ref, bool href);
 int nextUtf8CharPosition(const QByteArray &utf8Str, int len, int startPos);
 
-const char *writeUtf8Char(QTextStream &t, const QString &s);
 void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn);
 
 /** Data associated with a HSV colored image. */

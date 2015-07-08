@@ -11177,16 +11177,18 @@ static void addParmType()
       g_parmName.resize(0);
       return;
    }
+
    if (!g_parmType.isEmpty()) {
       g_parmType += ' ' ;
    }
+
    g_parmType += g_parmName ;
    g_parmName.resize(0) ;
 }
 
-static void addUsingDirective(const char *name)
+static void addUsingDirective(const QString &name)
 {
-   if (g_sourceFileDef && name) {
+   if (g_sourceFileDef && ! name.isEmpty()) {
       QSharedPointer<NamespaceDef> nd = Doxy_Globals::namespaceSDict->find(name);
 
       if (nd) {
@@ -11450,19 +11452,19 @@ static bool getLink(const QString &className, const QString &memberName, CodeOut
    return TRUE;
 }
 
-static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clName,
-                                      bool typeOnly = FALSE, bool varOnly = FALSE)
+static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &clName, bool typeOnly = FALSE, bool varOnly = FALSE)
 {
    int i = 0;
 
-   if (*clName == '~') { 
+   QString className = clName;
+
+   if (clName.startsWith('~')) { 
       // correct for matching negated values i.s.o. destructors.
 
       g_code->codify("~");
-      clName++;
+      className = className.mid(1);
    }
 
-   QString className = clName;
    if (className.isEmpty()) {
       return;
    }
@@ -11491,13 +11493,13 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
       
       cd = getResolvedClass(d, g_sourceFileDef, className, &md);
 
-      DBG_CTX((stderr, "non-local variable name=%s context=%d cd=%s md=%s!\n",
-               className.constData(), g_theVarContext.count(), cd ? cd->name().data() : "<none>",
-               md ? md->name().constData() : "<none>"));
+      DBG_CTX((stderr, "non-local variable name=%s context=%d cd=%s md=%s\n",
+               className.constData(), g_theVarContext.count(), cd ? qPrintable(cd->name()) : "<none>",
+               md ? qPrintable(md->name()) : "<none>"));
 
       if (cd == 0 && md == 0 && (i = className.indexOf('<')) != -1) {
          QString bareName = className.left(i); 
-         DBG_CTX((stderr, "bareName=%s\n", bareName.data()));
+         DBG_CTX((stderr, "bareName=%s\n", qPrintable(bareName)));
 
          if (bareName != className) {
             cd = getResolvedClass(d, g_sourceFileDef, bareName, &md); // try unspecialized version
@@ -11634,7 +11636,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const char *clNam
    }
 }
 
-static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<MemberDef> xmd, const char *memName)
+static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<MemberDef> xmd, const QString &memName)
 {
    // extract class definition of the return type in order to resolve
    // a->b()->c() like call chains
@@ -11690,7 +11692,7 @@ static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Memb
    return FALSE;
 }
 
-static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> def, const char *memName)
+static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> def, const QString &memName)
 {
    if (def && def->definitionType() == Definition::TypeClass) {
       QSharedPointer<ClassDef>  cd  = def.dynamicCast<ClassDef>();
@@ -11724,7 +11726,7 @@ static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Defi
    return FALSE;
 }
 
-static void generateMemberLink(CodeOutputInterface &ol, const QString &varName, QString &memName)
+static void generateMemberLink(CodeOutputInterface &ol, const QString &varName, const QString &memName)
 {
    if (varName.isEmpty()) {
       return;
@@ -11736,15 +11738,13 @@ static void generateMemberLink(CodeOutputInterface &ol, const QString &varName, 
    if (vcd) {
       if (vcd != VariableContext::dummyContext()) {
         
-         if (getLink(vcd->name(), memName, ol)) {
-            //printf("Found result!\n");
+         if (getLink(vcd->name(), memName, ol)) {           
             return;
          }
 
          if (vcd->baseClasses()) {          
             for (auto item : *vcd->baseClasses()) { 
                if (getLink(item->classDef->name(), memName, ol)) {
-                  //printf("Found result!\n");
                   return;
                }
             }
@@ -11810,9 +11810,10 @@ static void generateMemberLink(CodeOutputInterface &ol, const QString &varName, 
    return;
 }
 
-static void generatePHPVariableLink(CodeOutputInterface &ol, const char *varName)
+static void generatePHPVariableLink(CodeOutputInterface &ol, const QString &varName)
 {
-   QString name = varName + 7; // strip $this->
+   // strip $this->
+   QString name = varName + 7; 
    name.prepend("$");
    
    if (! getLink(g_classScope, name, ol, varName)) {
@@ -11820,7 +11821,7 @@ static void generatePHPVariableLink(CodeOutputInterface &ol, const char *varName
    }
 }
 
-static void generateFunctionLink(CodeOutputInterface &ol, const char *funcName)
+static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcName)
 {  
    QSharedPointer<ClassDef> ccd;
 
@@ -11831,7 +11832,7 @@ static void generateFunctionLink(CodeOutputInterface &ol, const char *funcName)
    QString funcWithFullScope = locFunc;
    QString fullScope = locScope;
 
-   DBG_CTX((stdout, "*** locScope=%s locFunc=%s\n", locScope.data(), locFunc.data()));
+   DBG_CTX((stdout, "*** locScope=%s locFunc=%s\n", qPrintable(locScope), qPrintable(locFunc)));
 
    int len = 2;
    int i = locFunc.lastIndexOf("::");
@@ -11968,13 +11969,13 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
    if (ctx == 0) {
       return;
    }
-
-   char c;
-   const char *p = ctx->format.constData();
+  
+   const QChar *p = ctx->format.constData();
+   QChar c;
 
    if (! ctx->methodName.isEmpty()) {
      
-      if (!ctx->objectTypeOrName.isEmpty() && ctx->objectTypeOrName.at(0) != '$') {
+      if (! ctx->objectTypeOrName.isEmpty() && ctx->objectTypeOrName.at(0) != '$') {
         
          QSharedPointer<ClassDef> cd = g_theVarContext.findVariable(ctx->objectTypeOrName);
 
@@ -12018,9 +12019,9 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
       }
    }
    
-   while ((c = *p++)) { // for each character in ctx->format
+   while ((c = *p++) != 0) { // for each character in ctx->format
       if (c == '$') {
-         char nc = *p++;
+         QChar nc = *p++;
 
          if (nc == '$') { // escaped $
             g_code->codify("$");
@@ -12030,7 +12031,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                nc = *p++;
                QString refIdStr;
 
-               while (nc != 0 && isdigit(nc)) {
+               while (nc != 0 && nc.isNumber() ) {
                   refIdStr += nc;
                   nc = *p++;
                }
@@ -12041,25 +12042,22 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
                if (pName) {
                   if (ctx->method && ctx->method->isLinkable()) {
-                     writeMultiLineCodeLink(*g_code, ctx->method, pName->data());
+                     writeMultiLineCodeLink(*g_code, ctx->method, *pName);
 
                      if (g_currentMemberDef && g_collectXRefs) {
                         addDocCrossReference(g_currentMemberDef, ctx->method);
                      }
 
                   } else {
-                     codifyLines(pName->data());
-                  }
-
-               } else {
-                  //printf("Invalid name: id=%d\n",refId);
+                     codifyLines(*pName);
+                  }              
                }
 
             } else if (nc == 'o') { // reference to potential object name
                nc = *p++;
                QString refIdStr;
 
-               while (nc != 0 && isdigit(nc)) {
+               while (nc != 0 && nc.isNumber()) {
                   refIdStr += nc;
                   nc = *p++;
                }
@@ -12084,7 +12082,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                      }
 
                      startFontClass("keyword");
-                     codifyLines(pObject->data());
+                     codifyLines(*pObject);
                      endFontClass();
 
                   } else if (*pObject == "super") {
@@ -12115,11 +12113,11 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                      }
 
                      startFontClass("keyword");
-                     codifyLines(pObject->data());
+                     codifyLines(*pObject);
                      endFontClass();
 
                   } else if (ctx->objectVar && ctx->objectVar->isLinkable()) { // object is class variable
-                     writeMultiLineCodeLink(*g_code, ctx->objectVar, pObject->data());
+                     writeMultiLineCodeLink(*g_code, ctx->objectVar, *pObject);
 
                      if (g_currentMemberDef && g_collectXRefs) {
                         addDocCrossReference(g_currentMemberDef, ctx->objectVar);
@@ -12130,7 +12128,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
                      // object is class name
                      QSharedPointer<ClassDef> cd = ctx->objectType;
-                     writeMultiLineCodeLink(*g_code, cd, pObject->data());
+                     writeMultiLineCodeLink(*g_code, cd, *pObject);
 
                   } else { // object still needs to be resolved
 
@@ -12140,20 +12138,18 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                         if (ctx->objectType == 0) {
                            ctx->objectType = cd;
                         }
-                        writeMultiLineCodeLink(*g_code, cd, pObject->data());
+                        writeMultiLineCodeLink(*g_code, cd, *pObject);
                      } else {
-                        codifyLines(pObject->data());
+                        codifyLines(*pObject);
                      }
-                  }
-               } else {
-                  //printf("Invalid object: id=%d\n",refId);
+                  }             
                }
 
             } else if (nc == 'c') { // reference to nested call
                nc = *p++;
                QString refIdStr;
 
-               while (nc != 0 && isdigit(nc)) {
+               while (nc != 0 && nc.isNumber()) {
                   refIdStr += nc;
                   nc = *p++;
                }
@@ -12198,7 +12194,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                nc = *p++;
                QString refIdStr;
 
-               while (nc != 0 && isdigit(nc)) {
+               while (nc != 0 && nc.isNumber()) {
                   refIdStr += nc;
                   nc = *p++;
                }
@@ -12208,7 +12204,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                QString *pWord = g_wordDict.value(refId);
 
                if (pWord) {
-                  codifyLines(pWord->data());
+                  codifyLines(*pWord);
                }
 
             } else { // illegal marker
@@ -12216,11 +12212,8 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
             }
          }
 
-      } else { // normal non-marker character
-         char s[2];
-         s[0] = c;
-         s[1] = 0;
-         codifyLines(s);
+      } else { // normal non-marker character       
+         codifyLines(c);
       }
    }
    
@@ -15830,9 +15823,9 @@ YY_BUFFER_STATE codeYY_scan_bytes  (yyconst char *yybytes, int  _yybytes_len )
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char *msg )
+static void yy_fatal_error (yyconst char *msg)
 {
-   (void) fprintf( stderr, "%s\n", msg );
+   (void) fprintf( stderr, "%s\n", msg); 
    exit( YY_EXIT_FAILURE );
 }
 
@@ -16098,7 +16091,7 @@ void parseCCode(CodeOutputInterface &od, const QString &className, const QString
       return;
    }
 
-   printlex(codeYY_flex_debug, TRUE, __FILE__, fd ? fd->fileName().data() : NULL);
+   printlex(codeYY_flex_debug, TRUE, __FILE__, fd ? qPrintable(fd->fileName()) : "");
 
    TooltipManager::instance()->clearTooltips();
 

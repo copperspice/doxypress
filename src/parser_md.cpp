@@ -1582,7 +1582,7 @@ static bool isFencedCodeBlock(const QString &data, int size, int refIndent, QStr
    return false;
 }
 
-static bool isCodeBlock(const QString &data, int offset, int size, int &indent)
+static bool isCodeBlock(const QString &data, int offset, int size, int &indent, const QString &priorLine)
 {   
    // determine the indent of this line
 
@@ -1632,10 +1632,11 @@ static bool isCodeBlock(const QString &data, int offset, int size, int &indent)
       // if the difference is > 4 spaces -> code block
       return indent0 >= indent + codeBlockIndent;
 
-   } else { // not enough lines to determine the relative indent, use global indent
-      // check that line -1 is empty
+   } else { 
+      // not enough lines to determine the relative indent, use global indent
+      // check that line - 1 is empty
 
-      if (nl == 1 && ! isEmptyLine(data - offset, offset - 1)) {
+      if (nl == 1 && ! isEmptyLine(priorLine, offset - 1)) {
          return false;
       }
 
@@ -2110,7 +2111,7 @@ static void findEndOfLine(QString &out, const QString &data, int size, int &pi, 
 
          // not escaped
          
-         QString endBlockName = isBlockCommand(data + end - 1, end - 1, size - (end - 1));
+         QString endBlockName = isBlockCommand(data.mid(end - 1), end - 1, size - (end - 1));
          end++;
 
          if (! endBlockName.isEmpty()) {
@@ -2155,8 +2156,8 @@ static void findEndOfLine(QString &out, const QString &data, int size, int &pi, 
             out += data.mid(i, end - 1 - i);
 
             // output part until </pre>
-            i = end - 1 + processHtmlTag(out, data + end - 1, end - 1, size - end + 1);
-            pi = -1;
+            i   = end - 1 + processHtmlTag(out, data.mid(end - 1), end - 1, size - end + 1);
+            pi  = -1;
             end = i + 1;
             break;
 
@@ -2382,7 +2383,7 @@ static QString processBlocks(const QString &str, int indent)
             end = i + 1;
             continue;
 
-         } else if (isCodeBlock(str.mid(data - ptr + i), i, end - i, blockIndent)) {
+         } else if (isCodeBlock(str.mid(data - ptr + i), i, end - i, blockIndent, str.mid(data - ptr, i) )) {
             // skip previous line (it is empty anyway)
 
             i   += writeCodeBlock(out, str.mid(data - ptr + i), size - i, blockIndent);

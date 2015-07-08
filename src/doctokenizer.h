@@ -118,7 +118,7 @@ extern int doctokenizerYYlineno;
 extern FILE *doctokenizerYYin;
 
 // helper functions
-const char *tokToString(int token);
+QString tokToString(int token);
 
 // operations on the scanner
 void doctokenizerYYFindSections(const QString &input, QSharedPointer<Definition> d, MemberGroup *mg, const QString &fileName);

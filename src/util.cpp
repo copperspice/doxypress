@@ -2273,7 +2273,7 @@ static QString getFilterFromList(const QString &name, const QStringList &filterL
  *  In case \a inSourceCode is true then first the source filter list is
  *  considered.
  */
-QString getFileFilter(const QByteArray &name, bool isSourceCode)
+QString getFileFilter(const QString &name, bool isSourceCode)
 {   
    if (name.isEmpty()) {
       return "";
@@ -6585,36 +6585,6 @@ bool checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fi
    }
 }
 
-const char *writeUtf8Char(QTextStream &t, const char *s)
-{
-   char c = *s++;
-   t << c;
-
-   if (c < 0) { // multibyte character
-      if (((uchar)c & 0xE0) == 0xC0) {
-         t << *s++; // 11xx.xxxx: >=2 byte character
-      }
-
-      if (((uchar)c & 0xF0) == 0xE0) {
-         t << *s++; // 111x.xxxx: >=3 byte character
-      }
-
-      if (((uchar)c & 0xF8) == 0xF0) {
-         t << *s++; // 1111.xxxx: >=4 byte character
-      }
-
-      if (((uchar)c & 0xFC) == 0xF8) {
-         t << *s++; // 1111.1xxx: >=5 byte character
-      }
-
-      if (((uchar)c & 0xFE) == 0xFC) {
-         t << *s++; // 1111.1xxx: 6 byte character
-      }
-   }
-
-   return s;
-}
-
 int nextUtf8CharPosition(const QByteArray &utf8Str, int len, int startPos)
 {
    int bytes = 1;
@@ -7420,9 +7390,10 @@ bool copyFile(const QString &src, const QString &dest)
 /** Returns the section of text, in between a pair of markers.
  *  Full lines are returned, excluding the lines on which the markers appear.
  */
-QByteArray extractBlock(const QByteArray &text, const QByteArray &marker)
+QString extractBlock(const QString &text, const QString &marker)
 {
-   QByteArray result;
+   QString result;
+
    int p = 0;
    int i;
    bool found = false;
@@ -7466,11 +7437,11 @@ QByteArray extractBlock(const QByteArray &text, const QByteArray &marker)
       l2 = lp;
    }
    
-   return l2 > l1 ? text.mid(l1, l2 - l1) : QByteArray();
+   return l2 > l1 ? text.mid(l1, l2 - l1) : QString();
 }
 
 /** Returns a string representation of \a lang. */
-QByteArray langToString(SrcLangExt lang)
+QString langToString(SrcLangExt lang)
 {
    switch (lang) {
       case SrcLangExt_Unknown:
@@ -7515,11 +7486,12 @@ QByteArray langToString(SrcLangExt lang)
       case SrcLangExt_Markdown:
          return "Markdown";
    }
+
    return "Unknown";
 }
 
 /** Returns the scope separator to use given the programming language \a lang */
-QByteArray getLanguageSpecificSeparator(SrcLangExt lang, bool classScope)
+QString getLanguageSpecificSeparator(SrcLangExt lang, bool classScope)
 {
    if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp || lang == SrcLangExt_Python) {
       return ".";

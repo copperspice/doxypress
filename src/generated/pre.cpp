@@ -2576,13 +2576,14 @@ struct CondCtx {
 
 struct FileState {
    FileState(int size) : lineNr(1), fileBuf(size),
-      oldFileBuf(0), oldFileBufPos(0), bufState(0) {}
-   int lineNr;
-   BufStr fileBuf;
-   BufStr *oldFileBuf;
-   int oldFileBufPos;
+      oldFileBuf(""), oldFileBufPos(0), bufState(0) {}
+
+   int        lineNr;
+   QString    fileBuf;
+   QString    oldFileBuf;
+   int        oldFileBufPos;   
+   QString   fileName;
    YY_BUFFER_STATE bufState;
-   QString fileName;
 };
 
 /** @brief Singleton that manages the defines available while
@@ -2882,7 +2883,7 @@ static bool               g_lexInit   = FALSE;
 static int                g_fenceSize = 0;
 static bool               g_ccomment;
 
-static void setFileName(const char *name)
+static void setFileName(const QString &name)
 {
    bool ambig;
    QFileInfo fi(name);
@@ -2990,11 +2991,13 @@ static FileState *checkAndOpenFile(const QString &fileName, bool &alreadyInclude
       
       fs = new FileState(fi.size() + 4096);
       alreadyIncluded = FALSE;
+
       if (!readInputFile(absName, fs->fileBuf)) {
          // error
-         //printf("  error reading\n");
+
          delete fs;
          fs = 0;
+
       } else {
          fs->oldFileBuf    = g_inputBuf;
          fs->oldFileBufPos = g_inputBufPos;
@@ -3066,27 +3069,35 @@ static QString extractTrailingComment(const QString &s)
       return "";
    }
 
-   int i = strlen(s) - 1;
+   int i = s.length() - 1;
+
    while (i >= 0) {
-      char c = s[i];
-      switch (c) {
+      QChar c = s[i];
+
+      switch (c.unicode()) {
          case '/': {
             i--;
             if (i >= 0 && s[i] == '*') { // end of a comment block
                i--;
+
                while (i > 0 && !(s[i - 1] == '/' && s[i] == '*')) {
                   i--;
                }
+
                if (i == 0) {
                   i++;
                }
-               // only /*!< or /**< are treated as a comment for the macro name,
+
+               // only /*!< or /**< are treated as a comment for the macro name     */
                // otherwise the comment is treated as part of the macro definition
-               return ((s[i + 1] == '*' || s[i + 1] == '!') && s[i + 2] == '<') ? &s[i - 1] : "";
+
+               return ((s[i + 1] == '*' || s[i + 1] == '!') && s[i + 2] == '<') ? s.mid(i - 1) : "";
+
             } else {
                return "";
             }
          }
+
          break;
 
          // whitespace or line-continuation
@@ -3096,6 +3107,7 @@ static QString extractTrailingComment(const QString &s)
          case '\n':
          case '\\':
             break;
+
          default:
             return "";
       }
@@ -3113,15 +3125,20 @@ static void expandExpression(QString &expr, QString *rest, int pos);
 static QString stringize(const QString &s)
 {
    QString result;
+
    uint i = 0;
    bool inString = FALSE;
    bool inChar   = FALSE;
-   char c, pc;
+
+   QChar c;
+   QChar pc;
 
    while (i < s.length()) {
-      if (!inString && !inChar) {
-         while (i < s.length() && !inString && !inChar) {
+
+      if (! inString && ! inChar) {
+         while (i < s.length() && ! inString && ! inChar) {
             c = s.at(i++);
+
             if (c == '"') {
                result += "\\\"";
                inString = TRUE;
@@ -3132,9 +3149,11 @@ static QString stringize(const QString &s)
                result += c;
             }
          }
+
       } else if (inChar) {
          while (i < s.length() && inChar) {
             c = s.at(i++);
+
             if (c == '\'') {
                result += '\'';
                inChar = FALSE;
@@ -3144,19 +3163,25 @@ static QString stringize(const QString &s)
                result += c;
             }
          }
+
       } else {
          pc = 0;
+
          while (i < s.length() && inString) {
-            char c = s.at(i++);
-            if (c == '"') {
+            QChar c2 = s.at(i++);
+
+            if (c2 == '"') {
                result += "\\\"";
                inString = pc == '\\';
-            } else if (c == '\\') {
+
+            } else if (c2 == '\\') {
                result += "\\\\";
+
             } else {
-               result += c;
+               result += c2;
             }
-            pc = c;
+
+            pc = c2;
          }
       }
    }
@@ -3234,19 +3259,21 @@ static inline void addTillEndOfString(const QString &expr, QString *rest, uint &
  */
 static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, int &len, const A_Define *def, QString &result)
 {
-   //printf("replaceFunctionMacro(expr=%s,rest=%s,pos=%d,def=%s) level=%d\n",expr.data(),rest ? rest->data() : 0,pos,def->name.data(),g_level);
    uint j = pos;
-   len = 0;
+   len    = 0;
    result.resize(0);
    int cc;
+
    while ((cc = getCurrentChar(expr, rest, j)) != EOF && isspace(cc)) {
       len++;
       getNextChar(expr, rest, j);
    }
+
    if (cc != '(') {
       unputChar(expr, rest, j, ' ');
       return FALSE;
    }
+
    getNextChar(expr, rest, j); // eat the `(' character
 
    QHash<QString, QString *> argTable;  // list of arguments
@@ -3386,19 +3413,22 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
                while (k < d.length() && d.at(k) >= '0' && d.at(k) <= '9') {
                   key += d.at(k++);
                }
+
                if (!hash) {
                   // search for ## forward
                   l = k;
-                  if (l < (int)d.length() && d.at(l) == '"') {
+                  if (l < d.length() && d.at(l) == '"') {
                      l++;
                   }
-                  while (l < (int)d.length() && d.at(l) == ' ') {
+                  while (l < d.length() && d.at(l) == ' ') {
                      l++;
                   }
-                  if (l < (int)d.length() - 1 && d.at(l) == '#' && d.at(l + 1) == '#') {
+
+                  if (l < d.length() - 1 && d.at(l) == '#' && d.at(l + 1) == '#') {
                      hash = TRUE;
                   }
                }
+
                //printf("request key %s result %s\n",key.data(),argTable[key]->data());
                if (key.length() > 1 && (subst = argTable[key])) {
                   QString substArg = *subst;
@@ -3451,25 +3481,33 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
 static int getNextId(const QString &expr, int p, int *l)
 {
    int n;
-   while (p < (int)expr.length()) {
-      char c = expr.at(p++);
-      if (isdigit(c)) { // skip number
-         while (p < (int)expr.length() && isId(expr.at(p))) {
+
+   while (p < expr.length()) {
+      QChar c = expr.at(p++);
+
+      if (c.isNumber()) { 
+         // skip number
+         while (p < expr.length() && isId(expr.at(p))) {
             p++;
          }
-      } else if (isalpha(c) || c == '_') { // read id
+
+      } else if (c.isLetter() || c == '_') { // read id
          n = p - 1;
-         while (p < (int)expr.length() && isId(expr.at(p))) {
+         while (p < expr.length() && isId(expr.at(p))) {
             p++;
          }
          *l = p - n;
          return n;
+
       } else if (c == '"') { // skip string
-         char ppc = 0, pc = c;
-         if (p < (int)expr.length()) {
+         QChar ppc = 0;
+         QChar pc = c;
+
+         if (p < expr.length()) {
             c = expr.at(p);
          }
-         while (p < (int)expr.length() && (c != '"' || (pc == '\\' && ppc != '\\')))
+
+         while (p < expr.length() && (c != '"' || (pc == '\\' && ppc != '\\')))
             // continue as long as no " is found, but ignoring \", but not \\"
          {
             ppc = pc;
@@ -3477,25 +3515,30 @@ static int getNextId(const QString &expr, int p, int *l)
             c = expr.at(p);
             p++;
          }
-         if (p < (int)expr.length()) {
+
+         if (p < expr.length()) {
             ++p;   // skip closing quote
          }
+
       } else if (c == '/') { // skip C Comment
-         //printf("Found C comment at p=%d\n",p);
-         char pc = c;
-         if (p < (int)expr.length()) {
+         QChar pc = c;
+
+         if (p < expr.length()) {
             c = expr.at(p);
+
             if (c == '*') { // Start of C comment
                p++;
-               while (p < (int)expr.length() && !(pc == '*' && c == '/')) {
+
+               while (p < expr.length() && !(pc == '*' && c == '/')) {
                   pc = c;
                   c = expr.at(p++);
                }
             }
          }
-         //printf("Found end of C comment at p=%d\n",p);
+
       }
    }
+
    return -1;
 }
 
@@ -3549,8 +3592,8 @@ static void expandExpression(QString &expr, QString *rest, int pos)
             } else if (def && def->nargs >= 0) { // function macro
                replaced = replaceFunctionMacro(expr, rest, p + l, len, def, expMacro);
                len += l;
+
             } else if (macroName == "defined") {
-               //printf("found defined inside macro definition '%s'\n",expr.right(expr.length()-p).data());
                definedTest = TRUE;
             }
 
@@ -3559,7 +3602,9 @@ static void expandExpression(QString &expr, QString *rest, int pos)
                //printf("replacing `%s'->`%s'\n",expr.mid(p,len).data(),expMacro.data());
                QString resultExpr = expMacro;
                QString restExpr = expr.right(expr.length() - len - p);
+
                processConcatOperators(resultExpr);
+
                if (def && !def->nonRecursive) {
                   g_expandedDict->insert(macroName, def);
                   expandExpression(resultExpr, &restExpr, 0);
@@ -3567,19 +3612,18 @@ static void expandExpression(QString &expr, QString *rest, int pos)
                }
                expr = expr.left(p) + resultExpr + restExpr;
                i = p;
-               //printf("new expression: %s\n",expr.data());
+
             } else { // move to the next macro name
-               //printf("moving to the next macro old=%d new=%d\n",i,p+l);
                i = p + l;
             }
+
          } else { // move to the next macro name
             expr = expr.left(p) + "@-" + expr.right(expr.length() - p);
-            //printf("macro already expanded, moving to the next macro expr=%s\n",expr.data());
             i = p + l + 2;
-            //i=p+l;
+
          }
+
       } else { // no re-scan marker found, skip the macro name
-         //printf("skipping marked macro\n");
          i = p + l;
       }
    }
@@ -3591,7 +3635,8 @@ static void expandExpression(QString &expr, QString *rest, int pos)
  */
 QString removeIdsAndMarkers(const QString &s)
 {
-   const QChar *p = s;
+   const QChar *p = s.constData();
+   const QChar *ptr = p;
    QChar c;
 
    bool inNum = FALSE;
@@ -3599,7 +3644,7 @@ QString removeIdsAndMarkers(const QString &s)
 
    if (p) {
 
-      while ((c = *p)) {
+      while ((c = *p) != 0) {
          if (c == '@') { // replace @@ with @ and remove @E
             if (*(p + 1) == '@') {
                result += c;
@@ -3607,44 +3652,58 @@ QString removeIdsAndMarkers(const QString &s)
                // skip
             }
             p += 2;
-         } else if (isdigit(c)) { // number
+
+         } else if (c.isNumber()) { // number
             result += c;
             p++;
             inNum = TRUE;
-         } else if (c == 'd' && !inNum) { // identifier starting with a `d'
-            if (qstrncmp(p, "defined ", 8) == 0 || qstrncmp(p, "defined(", 8) == 0)
+
+         } else if (c == 'd' && !inNum) { 
+            // identifier starting with a `d'
+            
+            if (s.mid(p - ptr, 8) == "defined " || s.mid(p - ptr, 8) == "defined(") { 
                // defined keyword
-            {
                p += 7; // skip defined
+
             } else {
                result += "0L";
                p++;
-               while ((c = *p) && isId(c)) {
+
+               while ((c = *p) != 0 && isId(c)) {
                   p++;
                }
             }
-         } else if ((isalpha(c) || c == '_') && !inNum) { // replace identifier with 0L
+
+         } else if ((c.isLetter() || c == '_') && ! inNum) { 
+            // replace identifier with 0L
             result += "0L";
             p++;
-            while ((c = *p) && isId(c)) {
+
+            while ((c = *p) != 0 && isId(c)) {
                p++;
             }
+
             if (*p == '(') { // undefined function macro
                p++;
                int count = 1;
-               while ((c = *p++)) {
+
+               while ((c = *p++) != 0 ) {
                   if (c == '(') {
                      count++;
+
                   } else if (c == ')') {
                      count--;
                      if (count == 0) {
                         break;
                      }
+
                   } else if (c == '/') {
-                     char pc = c;
+                     QChar pc = c;
                      c = *++p;
+
                      if (c == '*') { // start of C comment
-                        while (*p && !(pc == '*' && c == '/')) { // search end of comment
+                        while (*p != 0 && ! (pc == '*' && c == '/')) { 
+                           // search end of comment
                            pc = c;
                            c = *++p;
                         }
@@ -3653,33 +3712,37 @@ QString removeIdsAndMarkers(const QString &s)
                   }
                }
             }
+
          } else if (c == '/') { // skip C comments
-            char pc = c;
+            QChar pc = c;
             c = *++p;
+
             if (c == '*') { // start of C comment
-               while (*p && !(pc == '*' && c == '/')) { // search end of comment
+               while (*p != 0 && ! (pc == '*' && c == '/')) { // search end of comment
                   pc = c;
                   c = *++p;
                }
                p++;
-            } else { // oops, not comment but division
+
+            } else { // not comment but division
                result += pc;
                goto nextChar;
             }
+
          } else {
 
          nextChar:
             result += c;
-            char lc = tolower(c);
+            QChar lc = c.toLower();
 
-            if (!isId(lc) && lc != '.' /*&& lc!='-' && lc!='+'*/) {
+            if (! isId(lc) && lc != '.' /*&& lc!='-' && lc!='+'*/) {
                inNum = FALSE;
             }
             p++;
          }
       }
    }
-   //printf("removeIdsAndMarkers(%s)=%s\n",s,result.data());
+   
    return result;
 }
 
@@ -3689,75 +3752,92 @@ QString removeIdsAndMarkers(const QString &s)
  */
 QString removeMarkers(const QString &s)
 {
-   const char *p = s;
-   char c;
+   const QChar *p = s.constData();
+   QChar c;
+
    QString result;
 
-   if (p) {
-      while ((c = *p)) {
-         switch (c) {
-            case '@': { // replace @@ with @
-               if (*(p + 1) == '@') {
-                  result += c;
-               }
-               p += 2;
-            }
-            break;
-            case '/': { // skip C comments
+   while ((c = *p) != 0) {
+      switch (c.unicode()) {
+         case '@': { // replace @@ with @
+            if (*(p + 1) == '@') {
                result += c;
-               char pc = c;
-               c = *++p;
-               if (c == '*') { // start of C comment
-                  while (*p && !(pc == '*' && c == '/')) { // search end of comment
-                     if (*p == '@' && *(p + 1) == '@') {
-                        result += c, p++;
-                     } else {
-                        result += c;
-                     }
-                     pc = c;
-                     c = *++p;
+            }
+            p += 2;
+         }
+         break;
+
+         case '/': { // skip C comments
+            result  += c;
+            QChar pc = c;
+            c = *++p;
+
+            if (c == '*') { // start of C comment
+
+               while (*p != 0  && !(pc == '*' && c == '/')) { // search end of comment
+                  if (*p == '@' && *(p + 1) == '@') {
+                     result += c;
+                     p++;
+
+                  } else {
+                     result += c;
                   }
-                  if (*p) {
-                     result += c, p++;
-                  }
+
+                  pc = c;
+                  c  = *++p;
                }
-            }
-            break;
-            case '"': { // skip string literals
-               result += c;
-               char pc = c;
-               c = *++p;
-               while (*p && (c != '"' || pc == '\\')) { // no end quote
+
+               if (*p != 0) {
                   result += c;
-                  c = *++p;
-               }
-               if (*p) {
-                  result += c, p++;
+                  p++;
                }
             }
-            break;
-            case '\'': { // skip char literals
+         }
+         break;
+
+         case '"': { // skip string literals
+            result += c;
+            QChar pc = c;
+            c = *++p;
+
+            while (*p != 0 && (c != '"' || pc == '\\')) { // no end quote
                result += c;
-               char pc = c;
                c = *++p;
-               while (*p && (c != '\'' || pc == '\\')) { // no end quote
-                  result += c;
-                  c = *++p;
-               }
-               if (*p) {
-                  result += c, p++;
-               }
             }
-            break;
-            default: {
+            if (*p != 0) {
                result += c;
                p++;
             }
-            break;
          }
+         break;
+
+         case '\'': { // skip char literals
+            result += c;
+            QChar pc = c;
+            c = *++p;
+
+            while (*p != 0 && (c != '\'' || pc == '\\')) { 
+               // no end quote
+               result += c;
+               c = *++p;
+            }
+
+            if (*p != 0) {
+               result += c;
+               p++;
+            }
+         }
+         break;
+
+         default: {
+            result += c;
+            p++;
+         }
+         break;
       }
    }
-   //printf("RemoveMarkers(%s)=%s\n",s,result.data());
+
+  
    return result;
 }
 
@@ -3842,11 +3922,13 @@ void addDefine()
    } else if (l > 0) {
       // align the items on the first line with the items on the second line
       int k = l + 1;
-      const char *p = g_defLitText.data() + k;
-      char c;
-      while ((c = *p++) && (c == ' ' || c == '\t')) {
+      const QChar *p = g_defLitText.data() + k;
+      QChar c;
+
+      while ((c = *p++) != 0 && (c == ' ' || c == '\t')) {
          k++;
       }
+
       g_defLitText = g_defLitText.mid(l + 1, k - l - 1) + g_defLitText.trimmed();
    }
    md->setInitializer(g_defLitText.trimmed());
@@ -4008,12 +4090,11 @@ static void readIncludeFile(const QString &inc)
          // #include's within { .. } blocks
 
          QString lineStr = QString("# 1 \"%1\" 1\n").arg(QString(g_yyFileName));
+         outputArray(lineStr, lineStr.length());
 
-         outputArray(lineStr.data(), lineStr.length());
-
-         DBG_CTX((stderr, "Switching to include file %s\n", incFileName.data()));
+         DBG_CTX((stderr, "Switching to include file %s\n", qPrintable(incFileName)));
          g_expectGuard = TRUE;
-         g_inputBuf    = &fs->fileBuf;
+         g_inputBuf    = fs->fileBuf;
          g_inputBufPos = 0;
          preYY_switch_to_buffer(preYY_create_buffer(0, YY_BUF_SIZE));
 
@@ -4053,15 +4134,14 @@ static void readIncludeFile(const QString &inc)
    }
 }
 
-static void startCondSection(const char *sectId)
-{
-   //printf("startCondSection: skip=%d stack=%d\n",g_skip,g_condStack.count());
+static void startCondSection(const QString &sectId)
+{   
    CondParser prs;
 
    bool expResult = prs.parse(g_yyFileName, g_yyLineNr, sectId);
    g_condStack.push(new CondCtx(g_yyLineNr, sectId, g_skip));
 
-   if (!expResult) {
+   if (! expResult) {
       g_skip = TRUE;
    }
 
@@ -5534,7 +5614,8 @@ YY_DECL {
                {
                   // define may appear in the output
                   QString tmp = "#define " + g_defName;
-                  outputArray(tmp.data(), tmp.length());
+                  outputArray(tmp, tmp.length());
+
                   g_quoteArg = FALSE;
                   g_insideComment = FALSE;
                   g_lastGuardName.resize(0);
@@ -5569,7 +5650,8 @@ YY_DECL {
                if (g_curlyCount > 0 || g_defName != g_lastGuardName || ! g_expectGuard) {
                   // define may appear in the output
                   QString tmp = "#define " + g_defName;
-                  outputArray(tmp.data(), tmp.length());
+                  outputArray(tmp, tmp.length());
+
                   g_quoteArg = FALSE;
                   g_insideComment = FALSE;
                   if (g_insideCS) {
@@ -5602,7 +5684,7 @@ YY_DECL {
                g_defVarArgs = FALSE;
 
                QString tmp = "#define " + g_defName + g_defArgsStr;
-               outputArray(tmp.data(), tmp.length());      // broom 
+               outputArray(tmp, tmp.length());  
 
                g_quoteArg = FALSE;
                g_insideComment = FALSE;
@@ -5635,7 +5717,7 @@ YY_DECL {
                g_defArgsStr += preYYtext;
 
                QString tmp = "#define " + g_defName + g_defArgsStr + g_defExtraSpacing;
-               outputArray(tmp.data(), tmp.length()); 
+               outputArray(tmp, tmp.length()); 
 
                g_quoteArg = FALSE;
                g_insideComment = FALSE;
@@ -6486,14 +6568,13 @@ YY_DECL {
                   g_inputBufPos = fs->oldFileBufPos;
                   setFileName(fs->fileName);
 
-                  DBG_CTX((stderr, "######## FileName %s\n", g_yyFileName.data()));
+                  DBG_CTX((stderr, "######## FileName %s\n", qPrintable(g_yyFileName)));
    
                   // Deal with file changes due to
                   // #include's within { .. } blocks
    
-                  QString lineStr = QString("# %1 \"%2\" 2").arg(g_yyLineNr).arg(QString(g_yyFileName));
-   
-                  outputArray(lineStr.data(), lineStr.length());
+                  QString lineStr = QString("# %1 \"%2\" 2").arg(g_yyLineNr).arg(QString(g_yyFileName));   
+                  outputArray(lineStr, lineStr.length());
    
                   delete fs;
                   fs = 0;
@@ -7346,7 +7427,7 @@ YY_BUFFER_STATE preYY_scan_bytes  (yyconst char *yybytes, int  _yybytes_len )
 
 static void yy_fatal_error (yyconst char *msg )
 {
-   (void) fprintf( stderr, "%s\n", msg );
+   (void) fprintf( stderr, "%s\n", msg);
    exit( YY_EXIT_FAILURE );
 }
 
@@ -7523,8 +7604,9 @@ static void yy_flex_strncpy (char *s1, yyconst char *s2, int n )
 static int yy_flex_strlen (yyconst char *s )
 {
    register int n;
-   for ( n = 0; s[n]; ++n )
+   for ( n = 0; s[n]; ++n ) {
       ;
+   }
 
    return n;
 }
@@ -7556,58 +7638,53 @@ void preYYfree (void *ptr )
 
 
 static int getNextChar(const QString &expr, QString *rest, uint &pos)
-{
-   //printf("getNextChar(%s,%s,%d)\n",expr.data(),rest ? rest->data() : 0,pos);
-   if (pos < expr.length()) {
-      //printf("%c=expr()\n",expr.at(pos));
-      return expr.at(pos++);
-   } else if (rest && !rest->isEmpty()) {
-      int cc = rest->at(0);
-      *rest = rest->right(rest->length() - 1);
-      //printf("%c=rest\n",cc);
+{   
+   if (pos < expr.length()) {      
+      return expr.at(pos++).unicode();
+
+   } else if (rest && ! rest->isEmpty()) {
+      int cc  = rest->at(0).unicode();
+      *rest   = rest->right(rest->length() - 1);
       return cc;
+
    } else {
       int cc = yyinput();
-      //printf("%d=yyinput() %d\n",cc,EOF);
+
       return cc;
    }
 }
 
 static int getCurrentChar(const QString &expr, QString *rest, uint pos)
-{
-   //printf("getCurrentChar(%s,%s,%d)\n",expr.data(),rest ? rest->data() : 0,pos);
+{   
    if (pos < expr.length()) {
-      //printf("%c=expr()\n",expr.at(pos));
-      return expr.at(pos);
-   } else if (rest && !rest->isEmpty()) {
-      int cc = rest->at(0);
-      //printf("%c=rest\n",cc);
+      return expr.at(pos).unicode();
+
+   } else if (rest && ! rest->isEmpty()) {
+      int cc = rest->at(0).unicode();
       return cc;
+
    } else {
       int cc = yyinput();
       returnCharToStream(cc);
-      //unput((char)cc);
-      //printf("%c=yyinput()\n",cc);
       return cc;
    }
 }
 
 static void unputChar(const QString &expr, QString *rest, uint &pos, char c)
-{
-   //printf("unputChar(%s,%s,%d,%c)\n",expr.data(),rest ? rest->data() : 0,pos,c);
+{  
    if (pos < expr.length()) {
       pos++;
+
    } else if (rest) {
-      //printf("Prepending to rest!\n");
       char cs[2];
       cs[0] = c;
       cs[1] = '\0';
       rest->prepend(cs);
+
    } else {
-      //unput(c);
+
       returnCharToStream(c);
    }
-   //printf("result: unputChar(%s,%s,%d,%c)\n",expr.data(),rest ? rest->data() : 0,pos,c);
 }
 
 void addSearchDir(const QString &dir)
@@ -7640,9 +7717,7 @@ void removePreProcessor()
 
 QString preprocessFile(const QString &fileName, const QString &input)
 {  
-   printlex(preYY_flex_debug, TRUE, __FILE__, fileName);
-   
-   uint orgOffset = output.curPos();
+   printlex(preYY_flex_debug, TRUE, __FILE__, qPrintable(fileName) );     
    
    g_macroExpansion   = Config::getBool("macro-expansion");
    g_expandOnlyPredef = Config::getBool("expand-only-predefined");
@@ -7658,6 +7733,8 @@ QString preprocessFile(const QString &fileName, const QString &input)
    g_includeStack.clear();
    g_expandedDict->clear();
    g_condStack.clear();
+
+   uint orgOffset = 0;
 
    setFileName(fileName);
 
@@ -7816,15 +7893,17 @@ QString preprocessFile(const QString &fileName, const QString &input)
    forceEndCondSection();
   
    if (Debug::isFlagSet(Debug::Preprocessor)) {
-      char *orgPos = output.data() + orgOffset;
-      char *newPos = output.data() + output.curPos();
+      const QChar *orgPos = g_outputBuf.constData() + orgOffset;
+      const QChar *newPos = g_outputBuf.constData() + g_outputBuf.length();
 
       Debug::print(Debug::Preprocessor, 0, "Preprocessor output (size: %d bytes):\n", newPos - orgPos);
       int line = 1;
+
       Debug::print(Debug::Preprocessor, 0, "---------\n00001 ");
 
       while (orgPos < newPos) {
-         putchar(*orgPos);
+         putchar(orgPos->toLatin1());
+
          if (*orgPos == '\n') {
             Debug::print(Debug::Preprocessor, 0, "%05d ", ++line);
          }

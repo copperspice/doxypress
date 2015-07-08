@@ -36,13 +36,13 @@ typedef off_t portable_off_t;
 
 int            portable_system(const QString &command, const QString &args, bool commandHasConsole = true);
 uint           portable_pid();
-const char    *portable_getenv(const char *variable);
-void           portable_setenv(const char *variable, const QString &value);
-void           portable_unsetenv(const char *variable);
+QString        portable_getenv(const QString &variable);
+void           portable_setenv(const QString &variable, const QString &value);
+void           portable_unsetenv(const QString &variable);
 portable_off_t portable_fseek(FILE *f, portable_off_t offset, int whence);
 portable_off_t portable_ftell(FILE *f);
 char           portable_pathListSeparator();
-const char    *portable_commandExtension();
+QString        portable_commandExtension();
 
 Qt::CaseSensitivity  portable_fileSystemIsCaseSensitive();
 

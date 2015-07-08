@@ -113,15 +113,10 @@ inline void writeXMLString(QTextStream &t, const QString &text)
 }
 
 inline void writeXMLCodeString(QTextStream &t, const QString &text, int &col)
-{
-   QByteArray tmp = text.toUtf8();
-   const char *s  = tmp.constData();
+{  
+   for (auto c : text) { 
 
-   char c;
-
-   while (c = *s++) {
-
-      switch (c) {
+      switch (c.unicode()) {
          case '\t': {
             static int tabSize = Config::getInt("tab-size");
 
@@ -187,9 +182,11 @@ inline void writeXMLCodeString(QTextStream &t, const QString &text, int &col)
          case 30:
          case 31:
             break; // skip invalid XML characters (see http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char)
-         default:
-            s = writeUtf8Char(t, s - 1);
+
+         default:           
+            t << c;
             col++;
+
             break;
       }
    }

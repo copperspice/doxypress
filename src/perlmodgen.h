@@ -20,7 +20,7 @@
 
 class QByteArray;
 
-extern void setPerlModDoxyfile(const QByteArray &);
+extern void setPerlModDoxyfile(const QString &);
 extern void generatePerlMod();
 
 #endif

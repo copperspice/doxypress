@@ -860,7 +860,7 @@ static int handleStyleArgument(DocNode *parent, QList<DocNode *> &children, cons
 
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s while handling command %s",
-                              tokToString(tok), qPrintable(cmdName));
+                              qPrintable(tokToString(tok)), qPrintable(cmdName));
                break;
          }
          break;
@@ -1184,7 +1184,7 @@ static DocInternalRef *handleInternalRef(DocNode *parent)
 
    if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(tokenName));
+                     qPrintable(tokToString(tok)), qPrintable(tokenName));
       return 0;
    }
 
@@ -1211,7 +1211,7 @@ static DocAnchor *handleAnchor(DocNode *parent)
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(g_token->name));
+                     qPrintable(tokToString(tok)), qPrintable(g_token->name));
       return 0;
    }
 
@@ -1240,7 +1240,7 @@ static void handleAnchorName(DocNode *parent)
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(g_token->name));
+                     qPrintable(tokToString(tok)), qPrintable(g_token->name));
       return;
    }
 
@@ -1287,7 +1287,7 @@ static void handleAnchorName(DocNode *parent)
  */
 static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &children, bool handleWord)
 {
-   DBG(("token %s at %d", tokToString(tok), doctokenizerYYlineno));
+   DBG(("token %s at %d", qPrintable(tokToString(tok)), doctokenizerYYlineno));
 
    if (tok == TK_WORD || tok == TK_LNKWORD || tok == TK_SYMBOL || tok == TK_URL || tok == TK_COMMAND || tok == TK_HTMLTAG) {
       DBG((" name=%s", qPrintable(g_token->name)));
@@ -2198,13 +2198,14 @@ void DocSecRefItem::parse()
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a \\refitem",
                               qPrintable(g_token->name));
                break;
+
             case TK_SYMBOL:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
                               qPrintable(g_token->name));
                break;
+
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok));
+               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", qPrintable(tokToString(tok)) );
                break;
          }
       }
@@ -2265,7 +2266,7 @@ void DocSecRefList::parse()
                tok = doctokenizerYYlex();
                if (tok != TK_WORD && tok != TK_LNKWORD) {
                   warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of \\refitem",
-                                 tokToString(tok));
+                                 qPrintable(tokToString(tok)));
                   break;
                }
 
@@ -2282,12 +2283,13 @@ void DocSecRefList::parse()
                               qPrintable(g_token->name));
                goto endsecreflist;
          }
+
       } else if (tok == TK_WHITESPACE) {
          // ignore whitespace
 
       } else {
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s inside section reference list",
-                        tokToString(tok));
+                        qPrintable(tokToString(tok)));
          goto endsecreflist;
       }
 
@@ -2335,8 +2337,7 @@ void DocInternalRef::parse()
                               qPrintable(g_token->name));
                break;
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok));
+               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", qPrintable(tokToString(tok)));
                break;
          }
       }
@@ -2483,7 +2484,7 @@ void DocRef::parse()
                break;
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok));
+                              qPrintable(tokToString(tok)));
                break;
          }
       }
@@ -2629,7 +2630,7 @@ QString DocLink::parse(bool isJavaLink, bool isXmlLink)
                break;
 
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", tokToString(tok));
+               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", qPrintable(tokToString(tok)));
                break;
          }
       }
@@ -2683,7 +2684,7 @@ void DocDotFile::parse()
                break;
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok));
+                              qPrintable(tokToString(tok)));
                break;
          }
       }
@@ -2762,7 +2763,7 @@ void DocMscFile::parse()
                break;
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok));
+                              qPrintable(tokToString(tok)));
                break;
          }
       }
@@ -2839,7 +2840,7 @@ void DocDiaFile::parse()
                break;
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok));
+                              qPrintable(tokToString(tok)));
                break;
          }
       }
@@ -2926,7 +2927,7 @@ void DocImage::parse()
                break;
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok));
+                              qPrintable(tokToString(tok)));
                break;
          }
       }
@@ -3032,7 +3033,7 @@ int DocHtmlHeader::parse()
                break;
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok));
+                              qPrintable(tokToString(tok)));
                break;
          }
       }
@@ -3087,7 +3088,7 @@ int DocHRef::parse()
             break;
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok), doctokenizerYYlineno);
+                              qPrintable(tokToString(tok)), doctokenizerYYlineno);
                break;
          }
       }
@@ -3309,8 +3310,7 @@ int DocIndexEntry::parse()
             break;
 
          default:
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                           tokToString(tok));
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", qPrintable(tokToString(tok)));
             break;
       }
    }
@@ -3361,7 +3361,7 @@ int DocHtmlCaption::parse()
             break;
 
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", tokToString(tok));
+               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", qPrintable(tokToString(tok)));
                break;
          }
       }
@@ -3590,7 +3590,7 @@ int DocHtmlRow::parse()
       goto endrow;
 
    } else { // token other than html token
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <td> or <th> tag, found %s token instead ", tokToString(tok));
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <td> or <th> tag, found %s token instead ", qPrintable(tokToString(tok)));
       goto endrow;
 
    }
@@ -3666,7 +3666,7 @@ int DocHtmlRow::parseXml(bool isHeading)
 
    } else { // token other than html token
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <td> or <th> tag, found %s token instead",
-                     tokToString(tok));
+                     qPrintable(tokToString(tok)));
       goto endrow;
    }
 
@@ -3746,7 +3746,7 @@ getrow:
 
    } else { 
       // token other than html token
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <tr> tag, found %s token instead ", tokToString(tok));
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <tr> tag, found %s token instead ", qPrintable(tokToString(tok)));
    }
 
    // parse one or more rows
@@ -3942,7 +3942,7 @@ int DocHtmlDescTitle::parse()
 
                         if (tok != TK_WORD) {
                            warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                                          tokToString(tok), qPrintable(cmdName));
+                                          qPrintable(tokToString(tok)), qPrintable(cmdName));
 
                         } else {
                            // add the name
@@ -3971,7 +3971,7 @@ int DocHtmlDescTitle::parse()
 
                         if (tok != TK_WORD) {
                            warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                                          tokToString(tok), qPrintable(cmdName));
+                                          qPrintable(tokToString(tok)), qPrintable(cmdName));
 
                         } else {
                            doctokenizerYYsetStatePara();
@@ -4031,7 +4031,7 @@ int DocHtmlDescTitle::parse()
             break;
 
             default: 
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", tokToString(tok));
+               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", qPrintable(tokToString(tok)));
                break;
          }
       }
@@ -4130,11 +4130,10 @@ int DocHtmlDescList::parse()
       goto enddesclist;
 
    } else { // token other than html token
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <dt> tag, found %s token instead", tokToString(tok));
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <dt> tag, found %s token instead", qPrintable(tokToString(tok)));
       goto enddesclist;
 
    }
-
 
    {
       // first entry must be a <dt>
@@ -4325,7 +4324,7 @@ int DocHtmlList::parse()
       // add dummy item to obtain valid HTML
       m_children.append(new DocHtmlListItem(this, HtmlAttribList(), 1));
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <li> tag, found %s token instead",
-                     tokToString(tok));
+                     qPrintable(tokToString(tok)));
       goto endlist;
    }
 
@@ -4387,7 +4386,7 @@ int DocHtmlList::parseXml()
 
    } else { // token other than html token
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <item> tag, found %s token instead",
-                     tokToString(tok));
+                     qPrintable(tokToString(tok)));
       goto endlist;
    }
 
@@ -4650,7 +4649,7 @@ void DocTitle::parse()
                break;
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              tokToString(tok));
+                              qPrintable(tokToString(tok)));
                break;
          }
       }
@@ -5135,7 +5134,7 @@ void DocPara::handleCite()
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable("cite"));
+                     qPrintable(tokToString(tok)), qPrintable("cite"));
       return;
    }
 
@@ -5165,7 +5164,7 @@ void DocPara::handleSortId()
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable("sortid"));
+                     qPrintable(tokToString(tok)), qPrintable("sortid"));
       return;
    }
   
@@ -5218,7 +5217,7 @@ void DocPara::handleIncludeOperator(const QString &cmdName, DocIncOperator::Type
 
    } else if (tok != TK_WORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(cmdName));
+                     qPrintable(tokToString(tok)), qPrintable(cmdName));
       return;
    }
 
@@ -5266,7 +5265,7 @@ void DocPara::handleImage(const QString &cmdName)
 
    if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(cmdName));
+                     qPrintable(tokToString(tok)), qPrintable(cmdName));
       return;
    }
    tok = doctokenizerYYlex();
@@ -5298,7 +5297,7 @@ void DocPara::handleImage(const QString &cmdName)
 
    if (tok != TK_WORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(cmdName));
+                     qPrintable(tokToString(tok)), qPrintable(cmdName));
       return;
    }
 
@@ -5324,7 +5323,7 @@ void DocPara::handleDotFile(const QString &cmdName)
 
    if (tok != TK_WORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(cmdName));
+                     qPrintable(tokToString(tok)), qPrintable(cmdName));
       return;
    }
 
@@ -5350,7 +5349,7 @@ void DocPara::handleMscFile(const QString &cmdName)
 
    if (tok != TK_WORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(cmdName));
+                     qPrintable(tokToString(tok)), qPrintable(cmdName));
       return;
    }
 
@@ -5375,7 +5374,7 @@ void DocPara::handleDiaFile(const QString &cmdName)
  
   if (tok != TK_WORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(cmdName));
+                     qPrintable(tokToString(tok)), qPrintable(cmdName));
       return;
    }
  
@@ -5398,7 +5397,7 @@ void DocPara::handleLink(const QString &cmdName, bool isJavaLink)
 
    if (tok != TK_WORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "%s as the argument of %s",
-                     tokToString(tok), qPrintable(cmdName));
+                    qPrintable(tokToString(tok)), qPrintable(cmdName));
       return;
    }
    doctokenizerYYsetStatePara();
@@ -5427,7 +5426,7 @@ void DocPara::handleRef(const QString &cmdName)
 
    if (tok != TK_WORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(cmdName));
+                     qPrintable(tokToString(tok)), qPrintable(cmdName));
       goto endref;
    }
 
@@ -5461,7 +5460,7 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
 
    } else if (tok != TK_WORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(cmdName));
+                     qPrintable(tokToString(tok)), qPrintable(cmdName));
       return;
    }
 
@@ -5477,7 +5476,7 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
       doctokenizerYYsetStatePara();
       if (tok != TK_WORD) {
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected block identifier, found token %s instead while parsing the %s command",
-                        tokToString(tok), qPrintable(cmdName));
+                        qPrintable(tokToString(tok)), qPrintable(cmdName));
          return;
       }
       blockId = "[" + g_token->name + "]";
@@ -5507,7 +5506,7 @@ void DocPara::handleSection(const QString &cmdName)
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     tokToString(tok), qPrintable(cmdName));
+                     qPrintable(tokToString(tok)), qPrintable(cmdName));
       return;
    }
 
@@ -6688,7 +6687,7 @@ int DocPara::parse(bool skipParse, int token)
       }
      
    reparsetoken:
-      DBG(("token %s at %d", tokToString(tok), doctokenizerYYlineno));
+      DBG(("token %s at %d", qPrintable(tokToString(tok)), doctokenizerYYlineno));
 
       if (tok == TK_WORD || tok == TK_LNKWORD || tok == TK_SYMBOL || tok == TK_URL ||
             tok == TK_COMMAND || tok == TK_HTMLTAG) {
@@ -7219,7 +7218,7 @@ void DocText::parse()
             break;
 
          default:
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", tokToString(tok));
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", qPrintable(tokToString(tok)));
             break;
       }
    }

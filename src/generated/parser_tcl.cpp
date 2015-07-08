@@ -55,6 +55,9 @@
 #include <errno.h>
 #include <stdlib.h>
 
+// this must be further up in the file
+#include <QString>
+
 /* end standard C headers. */
 
 /* flex integer type definitions */
@@ -74,6 +77,7 @@
 #endif
 
 #include <inttypes.h>
+
 typedef int8_t flex_int8_t;
 typedef uint8_t flex_uint8_t;
 typedef int16_t flex_int16_t;
@@ -353,7 +357,7 @@ static void tclscannerYY_init_buffer (YY_BUFFER_STATE b, FILE *file  );
 #define YY_FLUSH_BUFFER tclscannerYY_flush_buffer(YY_CURRENT_BUFFER )
 
 YY_BUFFER_STATE tclscannerYY_scan_buffer (char *base, yy_size_t size  );
-YY_BUFFER_STATE tclscannerYY_scan_string (yyconst char *yy_str  );
+YY_BUFFER_STATE tclscannerYY_scan_string (const QString &yy_str  );
 YY_BUFFER_STATE tclscannerYY_scan_bytes (yyconst char *bytes, int len  );
 
 void *tclscannerYYalloc (yy_size_t  );
@@ -720,11 +724,9 @@ static int yy_more_len = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *tclscannerYYtext;
 
-
 #include <QFile>
 #include <QHash>
 #include <QRegExp>
-#include <QString>
 #include <QStringList>
 #include <QStack>
 #include <QVector>
@@ -788,78 +790,57 @@ char *tclscannerYYtext;
 #define ckalloc         malloc
 #define ckfree          free
 
-#define TclCopyAndCollapse(size,src,dest) memcpy(dest,src,size); *(dest+size)=0
-
-/*
-   // Points to the first byte of a string containing a Tcl list with
-   // zero or more elements (possibly in braces). 
-   const char *list,            
-
-   // Number of bytes in the list's string. 
-   int listLength,              
-
-   // Where to put address of first significant character in first element of list. 
-   const char **elementPtr,     
-
-   // Fill in with location of character just after all white space 
-   // following end of argument (next arg or end of list). 
-   const char **nextPtr,        
-
-   // If non-zero, fill in with size of element 
-   int *sizePtr,                
-
-   // If non-zero, fill in with non-zero/zero to indicate that arg was/wasn't in braces. 
-   int *bracePtr                
-*/
-
-int TclFindElement(const QString &list, int listLength, const char **elementPtr, const char **nextPtr, int *sizePtr, int *bracePtr) 
+int TclFindElement(const QString &list, int listLength, int &elementIndex, int &nextIndex, int *sizePtr, int *bracePtr) 
 {
-   const char *p = list;
-   const char *elemStart;        /* Points to first byte of first element. */
-   const char *limit;            /* Points just after list's last byte. */
+   const QChar *p = list.constData();
+   const QChar *ptr = p;
 
-   int openBraces = 0;           /* Brace nesting level during parse. */
-   int inQuotes = 0;
-   int size = 0;        
+   const QChar *elemStart;              /* Points to first byte of first element. */
+   const QChar *limit;                  /* Points just after list's last byte. */
+
+   int openBraces = 0;                  /* Brace nesting level during parse. */
+   int inQuotes   = 0;
+   int size       = 0;        
   
    /*
     * Skim off leading white space and check for an opening brace or quote.
-    * We treat embedded NULLs in the list as bytes belonging to a list
-    * element.
+    * We treat embedded NULLs in the list as bytes belonging to a list element.
     */
 
-   limit = (list + listLength);
-   while ((p < limit) && (isspace(UCHAR(*p)))) {
-      /* INTL: ISO space. */
+   limit = ptr + listLength;
+
+   while ((p < limit) && ( p->isSpace())) {
       p++;
    }
 
    if (p == limit) {
-      /* no element found */
+      // no element found 
       elemStart = limit;
       goto done;
    }
 
-   if (*p == '{') { /* } to keep vi happy */
+   if (*p == '{') {
       openBraces = 1;
       p++;
+
    } else if (*p == '"') {
       inQuotes = 1;
       p++;
+
    }
+
    elemStart = p;
+
    if (bracePtr != 0) {
       *bracePtr = openBraces;
    }
-
-   /*
-    * Find element's end (a space, close brace, or the end of the string).
-    */
-
+   
+   // Find element's end (a space, close brace, or the end of the string 
    while (p < limit) {
-      switch (*p) {
+
+      switch (p->unicode()) {
          /*
-          * Open brace: don't treat specially unless the element is in
+          * Open brace: do not treat specially unless the element is in
           * braces. In this case, keep a nesting count.
           */
 
@@ -877,34 +858,30 @@ int TclFindElement(const QString &list, int listLength, const char **elementPtr,
          case '}':
             if (openBraces > 1) {
                openBraces--;
+
             } else if (openBraces == 1) {
-               size = (int)(p - elemStart);
+               size = p - elemStart;
                p++;
-               if ((p >= limit) || isspace(UCHAR(*p))) {
-                  /* INTL: ISO space. */
+
+               if ((p >= limit) || p->isSpace()) {                  
                   goto done;
                }
-
-               /*
-                * Garbage after the closing brace; return an error.
-                */
-
+               
+               // Garbage after the closing brace; return an error.               
                return TCL_ERROR;
             }
             break;
 
-         /*
+          /*
           * Backslash: skip over everything up to the end of the backslash
           * sequence.
           */
 
-         case '\\':
-            //RZ        Tcl_UtfBackslash(p, &numChars, NULL);
-            //RZ        p += (numChars - 1);
+         case '\\':           
             p++; //RZ
             break;
 
-         /*
+          /*
           * Space: ignore if element is in braces or quotes; otherwise
           * terminate element.
           */
@@ -915,26 +892,26 @@ int TclFindElement(const QString &list, int listLength, const char **elementPtr,
          case '\r':
          case '\t':
          case '\v':
-            if ((openBraces == 0) && !inQuotes) {
-               size = (int)(p - elemStart);
+            if ((openBraces == 0) && ! inQuotes) {
+               size = p - elemStart;
                goto done;
             }
             break;
 
-         /*
+          /*
           * Double-quote: if element is in quotes then terminate it.
           */
 
          case '"':
             if (inQuotes) {
-               size = (int)(p - elemStart);
+               size = (p - elemStart);
                p++;
-               if ((p >= limit) || isspace(UCHAR(*p))) {
-                  /* INTL: ISO space */
+
+               if ((p >= limit) || p->isSpace()) {                
                   goto done;
                }
 
-               /*
+                /*
                 * Garbage after the closing quote; return an error.
                 */
                return TCL_ERROR;
@@ -943,153 +920,103 @@ int TclFindElement(const QString &list, int listLength, const char **elementPtr,
       }
       p++;
    }
-
-   /*
-    * End of list: terminate element.
-    */
-
+   
+   // End of list: terminate element    
    if (p == limit) {
       if (openBraces != 0) {
          return TCL_ERROR;
+
       } else if (inQuotes) {
          return TCL_ERROR;
+
       }
+
       size = (int)(p - elemStart);
    }
 
 done:
-   while ((p < limit) && (isspace(UCHAR(*p)))) {
-      /* INTL: ISO space. */
+   while ((p < limit) && p->isSpace()) {
       p++;
    }
-   *elementPtr = elemStart;
-   *nextPtr = p;
+
+   elementIndex = elemStart - ptr;
+   nextIndex    = p - ptr;
 
    if (sizePtr != 0) {
       *sizePtr = size;
    }
+
    return TCL_OK;
 }
 
-int Tcl_SplitList(
-   const char *list,           /* Pointer to string with list structure. */
-   int *argcPtr,               /* Pointer to location to fill in with the
-                                 * number of elements in the list. */
-   const char ***argvPtr)      /* Pointer to place to store pointer to array
-                                 * of pointers to list elements. */
-{
-   const char **argv, *l, *element;
-   char *p;
-   int length, size, i, result, elSize, brace;
 
-   /*
-    * Figure out how much space to allocate. There must be enough space for
-    * both the array of pointers and also for a copy of the list. To estimate
-    * the number of pointers needed, count the number of space characters in
-    * the list.
-    */
+/* Pointer to string with list structure. */
+/* Pointer to location to fill in with the number of elements in the list. */
+/* Pointer to place to store pointer to array of pointers to list elements. */
 
-   for (size = 2, l = list; *l != 0; l++) {
-      if (isspace(UCHAR(*l))) {
-         /* INTL: ISO space. */
-         size++;
+int tcl_split_internal(const QString &str, QStringList &list)           
+{ 
+   int result;
 
-         /*
-          * Consecutive space can only count as a single list delimiter.
-          */
+   int elementIdx;
+   int nextIdx;
+   int size;
+   int brace;
+    
+   int length;  
+   int elSize;
+     
+   QString data = str;
+   length = str.length();
+  
+   while (! data.isEmpty()) { 
 
-         while (1) {
-            char next = *(l + 1);
+      result  = TclFindElement(data, length, elementIdx, nextIdx, &elSize, &brace);
+      length -= nextIdx; 
 
-            if (next == '\0') {
-               break;
-            }
-            ++l;
-            if (isspace(UCHAR(next))) {
-               /* INTL: ISO space. */
-               continue;
-            }
-            break;
-         }
-      }
-   }
-
-   length = (int)(l - list);
-   argv = (const char **) ckalloc((unsigned)((size * sizeof(char *)) + length + 1));
-
-   for (i = 0, p = ((char *) argv) + size * sizeof(char *); *list != 0;  i++) {
-      const char *prevList = list;
-
-      result = TclFindElement(list, length, &element, &list, &elSize, &brace);
-      length -= (int)(list - prevList);
-
-      if (result != TCL_OK) {
-         ckfree((char *) argv);
+      if (result != TCL_OK) {         
          return result;
       }
 
-      if (*element == 0) {
+      if (elementIdx == length) {
          break;
-      }
+      }          
+     
+      list.append(data.mid(elementIdx, elSize));    
 
-      if (i >= size) {
-         ckfree((char *) argv);
-         return TCL_ERROR;
-      }
-
-      argv[i] = p;
-      if (brace) {
-         memcpy(p, element, (size_t) elSize);
-         p += elSize;
-         *p = 0;
-         p++;
-
-      } else {
-         TclCopyAndCollapse(elSize, element, p);
-         p += elSize + 1;
-      }
+      // remove used data
+      data.mid(nextIdx);
    }
-
-   argv[i] = NULL;
-   *argvPtr = argv;
-   *argcPtr = i;
 
    return TCL_OK;
 }
 
-void tcl_split_list(QString &str, QStringList &list)
+QStringList tcl_split_list(QString &str)
 {
-   int argc;
-   const char **argv;
-
-   list.clear();
-
+   QStringList retval;
+   
    if (str.left(1) == "{" && str.right(1) == "}") {
       str = str.mid(1, str.length() - 2);
 
    } else if (str.left(1) == "\"" && str.right(1) == "\"") {
       str = str.mid(1, str.length() - 2);
+
    }
 
-   if (Tcl_SplitList(str, &argc, &argv) != TCL_OK) {
-      list.append(str);
-
-   } else {
-      for (int i = 0; i < argc; i++) {
-         list.append(argv[i]);
-      }
-
-      ckfree((char *) argv);
+   if (tcl_split_internal(str, retval) != TCL_OK) {
+      retval.append(str); 
    }
+
+   return retval;
 }
 
 //! Structure containing information about current scan context.
 typedef struct {
    char type[2]; // type of scan context: "\"" "{" "[" "?" " "
-   int line0; // start line of scan context
-   int line1; // end line of scan context
+   int line0;    // start line of scan context
+   int line1;    // end line of scan context
    YY_BUFFER_STATE buffer_state; // value of scan context
-   QString ns; // current namespace
+   QString ns;   // current namespace
 
    QSharedPointer<Entry> entry_fn;      // if set contains the current proc/method/constructor/destructor
    QSharedPointer<Entry> entry_cl;      // if set contain the current class
@@ -1514,9 +1441,9 @@ void tclscannerYYset_out  (FILE *out_str  );
 
 int tclscannerYYget_leng (void );
 
-char *tclscannerYYget_text (void );
+char *tclscannerYYget_text (void);
 
-int tclscannerYYget_lineno (void );
+int tclscannerYYget_lineno (void);
 
 void tclscannerYYset_lineno (int line_number  );
 
@@ -1532,10 +1459,10 @@ extern int tclscannerYYwrap (void );
 #endif
 #endif
 
-static void yyunput (int c, char *buf_ptr  );
+static void yyunput (int c, char *buf_ptr);
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *, yyconst char *, int );
+static void yy_flex_strncpy (char *, yyconst char *, int);
 #endif
 
 #ifdef YY_NEED_STRLEN
@@ -2500,9 +2427,9 @@ static int yy_get_next_buffer (void)
                b->yy_buf_size *= 2;
             }
 
-            b->yy_ch_buf = (char *)
-                           /* Include room in for 2 EOB chars. */
-                           tclscannerYYrealloc((void *) b->yy_ch_buf, b->yy_buf_size + 2  );
+            /* Include room in for 2 EOB chars. */
+            b->yy_ch_buf = (char *)tclscannerYYrealloc((void *) b->yy_ch_buf, b->yy_buf_size + 2  );
+
          } else
             /* Can't grow it, we don't own it. */
          {
@@ -2510,13 +2437,11 @@ static int yy_get_next_buffer (void)
          }
 
          if ( ! b->yy_ch_buf )
-            YY_FATAL_ERROR(
-               "fatal error - scanner input buffer overflow" );
+            YY_FATAL_ERROR("fatal error - scanner input buffer overflow" );
 
          (yy_c_buf_p) = &b->yy_ch_buf[yy_c_buf_p_offset];
 
-         num_to_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
-                       number_to_move - 1;
+         num_to_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
       }
 
@@ -3030,19 +2955,17 @@ static void tclscannerYYensure_buffer_stack (void)
  *
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE tclscannerYY_scan_buffer  (char *base, yy_size_t  size )
+YY_BUFFER_STATE tclscannerYY_scan_buffer(char *base, yy_size_t  size )
 {
    YY_BUFFER_STATE b;
 
-   if ( size < 2 ||
-         base[size - 2] != YY_END_OF_BUFFER_CHAR ||
-         base[size - 1] != YY_END_OF_BUFFER_CHAR )
-      /* They forgot to leave room for the EOB's. */
-   {
+   if ( size < 2 || base[size - 2] != YY_END_OF_BUFFER_CHAR || base[size - 1] != YY_END_OF_BUFFER_CHAR ) {
+      /* They forgot to leave room for the EOB's. */   
       return 0;
    }
 
    b = (YY_BUFFER_STATE) tclscannerYYalloc(sizeof( struct yy_buffer_state )  );
+
    if ( ! b ) {
       YY_FATAL_ERROR( "out of dynamic memory in tclscannerYY_scan_buffer()" );
    }
@@ -3057,7 +2980,7 @@ YY_BUFFER_STATE tclscannerYY_scan_buffer  (char *base, yy_size_t  size )
    b->yy_fill_buffer = 0;
    b->yy_buffer_status = YY_BUFFER_NEW;
 
-   tclscannerYY_switch_to_buffer(b  );
+   tclscannerYY_switch_to_buffer(b);
 
    return b;
 }
@@ -3070,10 +2993,10 @@ YY_BUFFER_STATE tclscannerYY_scan_buffer  (char *base, yy_size_t  size )
  * @note If you want to scan bytes that may contain NUL values, then use
  *       tclscannerYY_scan_bytes() instead.
  */
-YY_BUFFER_STATE tclscannerYY_scan_string (yyconst char *yystr )
+YY_BUFFER_STATE tclscannerYY_scan_string (const QString &yystr )
 {
-
-   return tclscannerYY_scan_bytes(yystr, strlen(yystr) );
+   QByteArray tmp = yystr.toUtf8();
+   return tclscannerYY_scan_bytes(tmp, tmp.length() );
 }
 
 /** Setup the input buffer state to scan the given bytes. The next call to tclscannerYYlex() will
@@ -3083,7 +3006,7 @@ YY_BUFFER_STATE tclscannerYY_scan_string (yyconst char *yystr )
  *
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE tclscannerYY_scan_bytes  (yyconst char *yybytes, int  _yybytes_len )
+YY_BUFFER_STATE tclscannerYY_scan_bytes(yyconst char *yybytes, int  _yybytes_len )
 {
    YY_BUFFER_STATE b;
    char *buf;
@@ -3092,7 +3015,8 @@ YY_BUFFER_STATE tclscannerYY_scan_bytes  (yyconst char *yybytes, int  _yybytes_l
 
    /* Get memory for full buffer, including space for trailing EOB's. */
    n = _yybytes_len + 2;
-   buf = (char *) tclscannerYYalloc(n  );
+   buf = (char *) tclscannerYYalloc(n);
+
    if ( ! buf ) {
       YY_FATAL_ERROR( "out of dynamic memory in tclscannerYY_scan_bytes()" );
    }
@@ -3162,7 +3086,7 @@ static int yy_top_state  (void)
 
 static void yy_fatal_error (yyconst char *msg )
 {
-   (void) fprintf( stderr, "%s\n", msg );
+   (void) fprintf( stderr, "%s\n", msg);
    exit( YY_EXIT_FAILURE );
 }
 
@@ -3222,7 +3146,7 @@ int tclscannerYYget_leng  (void)
  *
  */
 
-char *tclscannerYYget_text  (void)
+char *tclscannerYYget_text(void)
 {
    return tclscannerYYtext;
 }
@@ -3355,14 +3279,7 @@ void *tclscannerYYalloc (yy_size_t  size )
 }
 
 void *tclscannerYYrealloc  (void *ptr, yy_size_t  size )
-{
-   /* The cast to (char *) in the following accommodates both
-    * implementations that use char* generic pointers, and those
-    * that use void* generic pointers.  It works with the latter
-    * because both ANSI C and C++ allow castless assignment from
-    * any pointer type to void*, and deal with argument conversions
-    * as though doing an assignment.
-    */
+{   
    return (void *) realloc( (char *) ptr, size );
 }
 
@@ -3479,208 +3396,259 @@ static void tcl_scan_end()
    }
 }
 
-//! Handling of word parsing.
-static void tcl_word(int what, const char *text)
+//! Handling of word parsing
+static void tcl_word(int what, const QString &text)
 {
-   static char myList[1024] = ""; // nesting level list
-   static int myLevel = 0; // number of current nesting level
-   static int myWhite = 0; // set true when next char should be whitespace
-   static char myWord;// internal state
+   static QStack<QChar> myList;       // nesting level list  
+   static int myWhite = 0;            // set true when next char should be whitespace
+
+   static QChar myWord;               // internal state
 
    switch (what) {
       case 0:// start
          yy_push_state(WORD);
-         switch (text[0]) {
+
+         switch (text[0].unicode() ) {
             case '{':
             case '[':
             case '"':
                myWord = text[0];
                break;
+
             default:
                myWord = '.';
          }
-         myList[0] = myWord;
-         myLevel = 1;
+
+         myList.clear();
+         myList.push(myWord); 
+
          myWhite = 0;
+
          break;
+
       case 1:// all other chars
-         if (myWhite) {
+         if (myWhite != 0) {
             // {x}y "x"y
             tcl_err("expected word separator: %s\n", qPrintable(text));
             return;
          }
-         if (myLevel == 0) {
+
+         if (myList.isEmpty()) {
             myWord = '.';
-            myList[0] = myWord;
-            myLevel = 1;
+
+            myList.push(myWord);           
          }
          break;
+
       case 2:// \\\n
-         if (myLevel == 0) {
+         if (myList.isEmpty()) {
             myWord = ' ';
+
             yy_pop_state();
             yyless(0);
             tcl_inf("(\\\n) ?%s?\n", qPrintable(tcl.string_last));
+
             return;
          }
-         switch (myList[myLevel - 1]) {
+
+         switch (myList.top().unicode()) {
             case '{':
             case '[':
             case '"':
                break;
+
             case '.':
-               if (myLevel == 1) {
+               if (myList.size() == 1) {
                   myWord = ' ';
+
                   yy_pop_state();
                   yyless(0);
                   tcl_inf("(\\\n) ?%s?\n", qPrintable(tcl.string_last));
+
                   return;
                }
                break;
          }
+
          myWhite = 0;
          break;
+
       case 3:// {
-         if (myWhite) {
+         if (myWhite != 0) {
             // {x}{ "x"{
-            tcl_err("expected word separator: %s\n", text);
+            tcl_err("expected word separator: %s\n", qPrintable(text));
             return;
          }
-         switch (myList[myLevel - 1]) {
+
+         switch (myList.top().unicode()) {
             case '{':
-            case '[':
-               myList[myLevel++] = '{';
+            case '[': 
+               myList.push('{');
                break;
+ 
             case '"':
             case '.':
                break;
          }
+
          myWhite = 0;
          break;
+
       case 4:// }
-         if (myWhite) {
+         if (myWhite != 0) {
             // {x}{ "x"{
-            tcl_err("expected word separator: %s\n", text);
+            tcl_err("expected word separator: %s\n", qPrintable(text));
             return;
          }
-         switch (myList[myLevel - 1]) {
+
+         switch (myList.top().unicode()) {
             case '{':// {{x}}
-               myLevel--;
-               if (myLevel == 0 && !tcl.code) {
+
+               myList.pop();
+
+               if (myList.isEmpty() && ! tcl.code) {
                   myWhite = 1;
                }
+
                break;
+
             case '[':
             case '"':
             case '.':
                break;
          }
+
          break;
       case 5:// [
-         if (myWhite) {
+         if (myWhite != 0) {
             // {x}[
-            tcl_err("expected word separator: %s\n", text);
+            tcl_err("expected word separator: %s\n", qPrintable(text));
             return;
          }
-         switch (myList[myLevel - 1]) {
+
+         switch (myList.top().unicode()) {
             case '{':
                break;
+
             case '[':
             case '"':
             case '.':
-               myList[myLevel++] = '[';
+               myList.push('[');
                break;
          }
+
          myWhite = 0;
          break;
+
       case 6:// ]
-         if (myWhite) {
+         if (myWhite != 0) {
             // {x}]
-            tcl_err("expected word separator: %s\n", text);
+            tcl_err("expected word separator: %s\n", qPrintable(text));
             return;
          }
-         switch (myList[myLevel - 1]) {
+
+         switch (myList.top().unicode()) {
             case '{':
                break;
+
             case '[':
-               myLevel--;
+               myList.pop();
                break;
+
             case '"':
             case '.':
                break;
          }
          myWhite = 0;
          break;
+
       case 7:// "
-         if (myWhite) {
+         if (myWhite != 0) {
             // {x}"
-            tcl_err("expected word separator: %s\n", text);
+            tcl_err("expected word separator: %s\n", qPrintable(text));
             return;
          }
-         switch (myList[myLevel - 1]) {
+         switch (myList.top().unicode()) {
             case '{':
                break;
+
             case '[':
-               myList[myLevel++] = '"';
+               myList.push('"');             
                break;
+
             case '"':
-               myLevel--;
+               myList.pop();
+               
             case '.':
                break;
          }
          break;
+
       case 8:// ' '
       case 9:// \t
       case 10:// ;
       case 11:// \n
-         if (myLevel == 0) {
+         if (myList.isEmpty()) {
             myWord = ' ';
+
             yy_pop_state();
             yyless(0);
             tcl_inf("(%d) ?%s?\n", what, qPrintable(tcl.string_last));
             return;
          }
-         switch (myList[myLevel - 1]) {
+
+         switch (myList.top().unicode()) {
             case '{':
             case '[':
             case '"':
                break;
+
             case '.':
-               if (myLevel == 1) {
+               if (myList.size() == 1) {
                   myWord = ' ';
+
                   yy_pop_state();
                   yyless(0);
                   tcl_inf("(.%d) ?%s?\n", what, qPrintable(tcl.string_last));
+
                   return;
+
                } else {
-                  myLevel--;
+                  myList.pop();
+                  
                }
                break;
          }
          myWhite = 0;
          break;
+
       case 12:// \x1A
-         if (myLevel == 0) {
+         if (myList.isEmpty()) {
             myWord = ' ';
+
             yy_pop_state();
             yyless(0);
             tcl_inf("(%d) ?%s?\n", what, qPrintable(tcl.string_last));
+
             return;
          }
-         if (myLevel != 1 || myList[0] != '.') {
-            tcl_war("level=%d expected=%c\n", myLevel, myList[myLevel - 1]);
+
+         if (myList.size() != 1 || myList[0] != '.') {
+            tcl_war("level=%d expected=%c\n", myList.size(), myList.top());
          }
+
          myWord = ' ';
          yy_pop_state();
          yyless(0);
          tcl_inf("(.%d) ?%s?\n", what, qPrintable(tcl.string_last));
-         return;
-         myWhite = 0;
-         break;
+
+         return;      
+
       default:
          tcl_err("wrong state: %d\n", what);
          return;
    }
+
    tcl.string_last += text;
 }
 
@@ -3859,12 +3827,12 @@ static void tcl_command_ArgList(QString &arglist)
    QStringList myArgs;
    QString myArglist = "";
 
-   tcl_split_list(arglist, myArgs);
+   myArgs = tcl_split_list(arglist);
 
    for (uint i = 0; i < myArgs.count(); i++) {
       QStringList myArgs1;
      
-      tcl_split_list(myArgs[i], myArgs1);
+      myArgs1 = tcl_split_list(myArgs[i]);
 
       if (myArgs1.count() == 2) {
          myArg.name   = myArgs1.at(0);
@@ -4139,11 +4107,7 @@ static void tcl_command_SWITCH()
       // this way we can preserve whitespace
 
       bool inBraces = false;
-      bool nextIsPattern = true;
-      int size;
-
-      const char *elem;
-      const char *next;
+      bool nextIsPattern = true;     
 
       token = tcl.list_commandwords.at(lastOptionIndex + 4);
 
@@ -4157,29 +4121,34 @@ static void tcl_command_SWITCH()
       while (token.length() > 0) {
 
          QString tempToken = token;
-         TclFindElement(tempToken, token.length(), &elem, &next, &size, NULL);
+
+         int elem;
+         int next;
+         int size;
+         
+         TclFindElement(tempToken, token.length(), elem, next, &size, nullptr);
 
          // handle leading whitespace/opening brace/double quotes
-         if (elem - tempToken > 0) {
-            myScan = tcl_codify_token(myScan, "NULL", token.left(elem - tempToken));
+         if (elem > 0) {
+            myScan = tcl_codify_token(myScan, "NULL", token.left(elem));
          }
 
          // handle actual element without braces/double quotes
          if (nextIsPattern) {
-            myScan = tcl_codify_token(myScan, "NULL", token.mid(elem - tempToken, size));
+            myScan = tcl_codify_token(myScan, "NULL", token.mid(elem, size));
 
          } else {
-            myScan = tcl_codify_token(myScan, "script", token.mid(elem - tempToken, size));
+            myScan = tcl_codify_token(myScan, "script", token.mid(elem, size));
 
          }
 
          // handle trailing whitespace/closing brace/double quotes
          if (next - elem - size > 0) {
-            myScan = tcl_codify_token(myScan, "NULL", token.mid(elem - tempToken + size, next - elem - size));
+            myScan = tcl_codify_token(myScan, "NULL", token.mid(elem + size, next - elem - size));
          }
 
          nextIsPattern = ! nextIsPattern;
-         token = token.mid(next - tempToken);
+         token = token.mid(next);
       }
 
       if (inBraces) {
@@ -4713,14 +4682,14 @@ static void tcl_command_Variable(int inclass)
 //! what=0  -> ...
 //! what=1  -> ...
 //! what=-1 -> ...
-static void tcl_command(int what, const char *text)
+static void tcl_command(int what, const QString &text)
 {
    int myLine = 0;
 
    if (what == 0) {
       tcl.scan.at(0)->line1 = tclscannerYYlineno; // current line in scan context
       tcl.line_body0 = tclscannerYYlineno;        // start line of command
-      tcl_inf("<- %s\n", text);
+      tcl_inf("<- %s\n", qPrintable(text));
       yy_push_state(COMMAND);
 
       tcl.list_commandwords.clear();
@@ -4735,7 +4704,7 @@ static void tcl_command(int what, const char *text)
          tcl.string_last = "";
       }
 
-      if (text) {
+      if (! text.isEmpty() ) {
          tcl.list_commandwords.append(text);
       }
       return;

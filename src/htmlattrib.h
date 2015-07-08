@@ -18,13 +18,13 @@
 #ifndef HTMLATTRIB_H
 #define HTMLATTRIB_H
 
-#include <QByteArray>
+#include <QString>
 #include <QList>
 
 /*! A Html option. A name, value pair */
 struct HtmlAttrib {
-   QByteArray name;
-   QByteArray value;
+   QString name;
+   QString value;
 };
 
 /*! @brief A list of Html attributes.
@@ -51,7 +51,7 @@ class HtmlAttribList : public QList<HtmlAttrib>
       return *this;
    }
 
-   QByteArray find(const QByteArray name) const {          
+   QString find(const QString &name) const {          
       for (auto item : *this) {
          if (item.name == name) {
             return item.value;
@@ -60,14 +60,15 @@ class HtmlAttribList : public QList<HtmlAttrib>
       return "";
    }
 
-   QByteArray toString() const {
-      QByteArray result;
+   QString toString() const {
+      QString result;
 
       for (auto item : *this) {
          result += " " + item.name + "=\"" + item.value + "\"";
       }
       return result;
    }
+
  private:
    HtmlAttrib *newValue( HtmlAttrib *v ) const {
       return new HtmlAttrib(*v);
