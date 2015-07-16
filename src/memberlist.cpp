@@ -165,7 +165,8 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
             //case MemberType_Prototype:   m_protoCnt++,m_numDecMembers++; break;
 
             case MemberType_Define:
-               if (Config::getBool("extract-all") || ! md->argsString().isEmpty() || ! md->initializer().isEmpty() || md->hasDocumentation()) {
+               if (Config::getBool("extract-all") || ! md->argsString().isEmpty() ||
+                      ! md->initializer().isEmpty() || md->hasDocumentation()) {
                   m_defCnt++, m_numDecMembers++;
                }
                break;
@@ -175,7 +176,7 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
                break;
 
             default:
-               err("Unknown member type found for member `%s'\n!", md->name().data());
+               err("Unknown member type found for member `%s'\n", qPrintable(md->name()));
          }
       }
    }

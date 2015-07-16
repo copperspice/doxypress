@@ -3304,7 +3304,7 @@ This operator is only available if Qt is configured with STL compatibility enabl
 
 
 /**
-\fn std::wstring QString::toStdWString () const
+\fn QStdWString QString::toStdWString () const
 
 Returns a std::wstring object with the data contained in this QString. The std::wstring is encoded in utf16 on platforms where wchar_t is 2 bytes
 wide (e.g. windows) and in ucs4 on platforms where wchar_t is 4 bytes wide (most Unix systems).
@@ -4107,8 +4107,6 @@ The QString::const_iterator typedef provides an STL-style const iterator for QSt
 
 The QString::const_reference typedef provides an STL-style const reference for QString.
 
-This typedef was introduced in Qt 4.8.
-
 
 */
 
@@ -4129,8 +4127,6 @@ The QString::iterator typedef provides an STL-style non-const iterator for QStri
 
 The QString::const_reference typedef provides an STL-style reference for QString.
 
-This typedef was introduced in Qt 4.8.
-
 
 */
 
@@ -4140,9 +4136,6 @@ This typedef was introduced in Qt 4.8.
 
 The QString::const_reference typedef provides an STL-style value type for QString.
 
-This typedef was introduced in Qt 4.8.
-
 
 */
-
 

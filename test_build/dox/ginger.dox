@@ -303,7 +303,7 @@ An enum list of different Shapes.
 /**
 \typedef Ginger::AmountType
 
-AmountType is a typedef for double. 
+AmountType is a typedef for double.
 
 */
 

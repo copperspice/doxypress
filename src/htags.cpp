@@ -157,7 +157,7 @@ bool Htags::loadFilemap(const QString &htmlDir)
          return true;
 
       } else {
-         err("file %s cannot be opened\n", fileMapName.data());
+         err("file %s can not be opened\n", qPrintable(fileMapName));
       }
    }
 

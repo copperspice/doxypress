@@ -500,7 +500,7 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
             removeMemberFromList(MemberListType_docFriendMembers, md);
             break;
          default:
-            err("GroupDef::removeMember(): unexpected member remove in file!\n");
+            err("GroupDef::removeMember(): unexpected member remove in file\n");
       }
    }
 }
@@ -1280,11 +1280,11 @@ void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGr
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
 
          if (gd == subGroup) {
-            warn(root->fileName, root->startLine, "Refusing to add group %s to itself", gd->name().constData());
+            warn(root->fileName, root->startLine, "Refusing to add group %s to itself", qPrintable(gd->name()));
 
          } else if (subGroup->findGroup(gd)) {
             warn(root->fileName, root->startLine, "Refusing to add group %s to group %s, since the latter is already a "
-                 "subgroup of the former\n", subGroup->name().data(), gd->name().data());
+                 "subgroup of the former\n", qPrintable(subGroup->name()), qPrintable(gd->name()));
 
          } else if (! gd->findGroup(subGroup)) {
             gd->addGroup(subGroup);

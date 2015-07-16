@@ -76,11 +76,14 @@ void DocbookDocVisitor::visit(DocSymbol *s)
    if (m_hide) {
       return;
    }
-   const char *res = HtmlEntityMapper::instance()->docbook(s->symbol());
-   if (res) {
+
+   QString res = HtmlEntityMapper::instance()->docbook(s->symbol());
+
+   if (! res.isEmpty()) {
       m_t << res;
+
    } else {
-      err("DocBook: non supported HTML-entity found: %s\n", HtmlEntityMapper::instance()->html(s->symbol(), true));
+      err("DocBook: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 }
 
@@ -235,7 +238,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".dot");
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s.msc for writing\n", baseName.data());
+            err("Could not open file %s.msc for writing\n", qPrintable(baseName));
          }
 
          file.write( stext.toUtf8() );
@@ -271,7 +274,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".msc");
 
          if (!file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s.msc for writing\n", baseName.data());
+            err("Could not open file %s.msc for writing\n", qPrintable(baseName));
          }
 
          QString text = "msc {";

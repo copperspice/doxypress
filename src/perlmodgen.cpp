@@ -639,17 +639,16 @@ void PerlModDocVisitor::visit(DocSymbol *sy)
                   break;
             }
             leaveText();
+
             if (accent) {
                openItem("accent");
-               m_output
-               .addFieldQuotedString("accent", accent)
-               .addFieldQuotedChar("letter", res->symb[0]);
+               m_output.addFieldQuotedString("accent", accent).addFieldQuotedChar("letter", res->symb[0]);
                closeItem();
             }
             break;
       }
    } else {
-      err("perl: non supported HTML-entity found: %s\n", HtmlEntityMapper::instance()->html(sy->symbol(), true));
+      err("Perl: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(sy->symbol(), true)) );
    }
 }
 

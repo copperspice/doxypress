@@ -78,13 +78,17 @@ void ManDocVisitor::visit(DocSymbol *s)
    if (m_hide) {
       return;
    }
-   const char *res = HtmlEntityMapper::instance()->man(s->symbol());
-   if (res) {
+
+   QString res = HtmlEntityMapper::instance()->man(s->symbol());
+
+   if (! res.isEmpty()) {
       m_t << res;
+
    } else {
       // no error or warning to be supplied
       // err("man: non supported HTML-entity found: &%s;\n",get_symbol_item(s->symbol()));
    }
+
    m_firstCol = false;
 }
 

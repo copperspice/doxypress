@@ -120,10 +120,18 @@ static QString addTemplateNames(const QString &s, const QString  &n, const QStri
 
 static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md)
 {
-   ArgumentList *defArgList = (md->isDocsForDefinition()) ? md->argumentList() : md->declArgumentList();
+   ArgumentList *defArgList;
+
+   if (md->isDocsForDefinition())  {
+      defArgList = md->argumentList();
+
+   } else {
+      defArgList = md->declArgumentList();
+   }
 
    if (defArgList == 0 || md->isProperty()) {
-      return false; // member has no function like argument list
+      // member has no function like argument list
+      return false; 
    }
 
    // simple argument list for tcl
@@ -134,13 +142,14 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
      
       ol.endMemberDocName();
       ol.startParameterList(false);
-      ol.startParameterType(true, 0);
+      ol.startParameterType(true, 0);     
       ol.endParameterType();
       ol.startParameterName(false);
       
       for (auto a: *defArgList) {
          if (a.defval.isEmpty()) {
             ol.docify(a.name + " ");
+
          } else {
             ol.docify("?" + a.name + "? ");
          }
@@ -221,7 +230,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       a = &(*ali);
 
       if (isDefine || first) {
-         ol.startParameterType(first, 0);
+         ol.startParameterType(first, "");
          paramTypeStarted = true;
 
          if (isDefine) {
@@ -239,7 +248,8 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       // use the following to put the function pointer type before the name
       bool hasFuncPtrType = false;
 
-      if (! a->attrib.isEmpty() && !md->isObjCMethod()) { // argument has an IDL attribute
+      if (! a->attrib.isEmpty() && ! md->isObjCMethod()) { 
+         // argument has an IDL attribute
          ol.docify(a->attrib + " ");
       }
 
@@ -272,12 +282,13 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          }
 
          if (a->type != "...") {
-            if (!cName.isEmpty()) {
+            if (! cName.isEmpty()) {
                n = addTemplateNames(n, scope->name(), cName);
             }
             linkifyText(TextGeneratorOLImpl(ol), scope, md->getBodyDef(), md, n);
          }
       }
+
       if (! isDefine) {
          if (paramTypeStarted) {
             ol.endParameterType();
@@ -290,8 +301,10 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          ol.docify(a->type.mid(wp, vp - wp));
       }
 
-      if (!a->name.isEmpty() || a->type == "...") { // argument has a name
-         //if (!hasFuncPtrType)
+      if (! a->name.isEmpty() || a->type == "...") { 
+         // argument has a name
+
+         //if (! hasFuncPtrType)
          //{
          //  ol.docify(" ");
          //}
@@ -342,6 +355,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       if (! a->defval.isEmpty()) { 
          // write the default value
          QString  n = a->defval;
+
          if (! cName.isEmpty()) {
             n = addTemplateNames(n, scope->name(), cName);
          }
@@ -365,16 +379,16 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          if (! isDefine) {
             QString key;
 
-            if (md->isObjCMethod() && a->attrib.length() >= 2) {
-               //printf("Found parameter keyword %s\n",a->attrib.data());
+            if (md->isObjCMethod() && a->attrib.length() >= 2) {               
                // strip [ and ]
+
                key = a->attrib.mid(1, a->attrib.length() - 2);
                if (key != ",") {
                   key += ":";   // for normal keywords add colon
                }
             }
 
-            ol.endParameterName(false, false, !md->isObjCMethod());
+            ol.endParameterName(false, false, ! md->isObjCMethod());
             if (paramTypeStarted) {
                ol.endParameterType();
             }
@@ -2937,7 +2951,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString
          }
 
          if (i > 0) {
-            // insert braches around the type
+            // insert braces around the type
             QString tmp("(" + ldef.left(i + 1) + ")" + ldef.mid(i + 1));
             ldef = tmp;
          }

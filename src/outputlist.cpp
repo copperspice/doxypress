@@ -154,7 +154,7 @@ bool OutputList::parseText(const QString &textStr)
    }
 
    if (count == 0) {
-       // no output formats enabled
+      // no output formats enabled
       return true;  
    }
 

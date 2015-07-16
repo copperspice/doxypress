@@ -11813,7 +11813,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QString &varName, 
 static void generatePHPVariableLink(CodeOutputInterface &ol, const QString &varName)
 {
    // strip $this->
-   QString name = varName + 7; 
+   QString name = varName.mid(7); 
    name.prepend("$");
    
    if (! getLink(g_classScope, name, ol, varName)) {
@@ -12626,17 +12626,20 @@ YY_DECL {
          case 2:
             YY_RULE_SETUP
             {
+               QString text = QString::fromUtf8(codeYYtext); 
                startFontClass("preprocessor");
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                BEGIN( ReadInclude );
             }
             YY_BREAK
          case 3:
             /* rule 3 can match eol */
-            YY_RULE_SETUP {
+            YY_RULE_SETUP 
+            {
+               QString text = QString::fromUtf8(codeYYtext); 
                g_insideObjC = TRUE;
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                if (!g_insideTemplate)
                {
@@ -12648,12 +12651,13 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext); 
                if (g_insideTemplate)
                {
                   REJECT;
                }
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                BEGIN( ClassName );
             }
@@ -12663,12 +12667,13 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext); 
                if (g_insideTemplate)
                {
                   REJECT;
                }
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
             }
             YY_BREAK
@@ -12676,8 +12681,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext); 
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                if (!g_insideTemplate)
                {
@@ -12685,13 +12691,15 @@ YY_DECL {
                }
             }
             YY_BREAK
+
          case 7:
             /* rule 7 can match eol */
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext); 
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                BEGIN( PackageName );
             }
@@ -12701,14 +12709,18 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (!g_insideObjC)
+               QString text = QString::fromUtf8(codeYYtext); 
+               if (! g_insideObjC)
                {
                   REJECT;
                }
-               codifyLines(codeYYtext);
+               codifyLines(text);
                BEGIN(Body);
             }
             YY_BREAK
+
+// broom               QString text = QString::fromUtf8(codeYYtext); 
+
          case 9:
             YY_RULE_SETUP
 

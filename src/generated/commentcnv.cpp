@@ -1150,33 +1150,33 @@ static void replaceCommentMarker(const QString &s, int len)
    g_outBuf += QString(p, len - (p - ptr) );
 }
 
-static inline int computeIndent(const char *s)
+static inline int computeIndent(const QString &str)
 {
    int col = 0;
    static int tabSize = Config::getInt("tab-size");
-   const char *p = s;
-   char c;
+ 
+   for (auto c : str) { 
 
-   while ((c = *p++)) {
       if (c == ' ') {
          col++;
+
       } else if (c == '\t') {
          col += tabSize - (col % tabSize);
+
       } else {
          break;
       }
    }
+
    return col;
 }
 
 static inline void copyToOutput(const QString &s, int len)
 {
-   int i;
-
    if (g_skip) { 
       // only add newlines
 
-      for (i = 0; i < len; i++) {
+      for (int i = 0; i < len; i++) {
          if (s[i] == '\n') {
             ADDCHAR('\n');
            
@@ -1189,16 +1189,17 @@ static inline void copyToOutput(const QString &s, int len)
 
       static int tabSize = Config::getInt("tab-size");
 
-      for (i = 0; i < len; i++) {
+      for (int i = 0; i < len; i++) {
          switch (s[i].unicode()) {
             case '\n':
                g_col = 0;
-               //fprintf(stderr,"---> copy %d\n",g_lineNr);
                g_lineNr++;
                break;
+
             case '\t':
                g_col += tabSize - (g_col % tabSize);
                break;
+
             default:
                g_col++;
                break;
@@ -1228,7 +1229,6 @@ static void endCondSection()
       CondCtx *ctx = g_condStack.pop();
       g_skip = ctx->skip;
    }
-   //printf("endCondSection: skip=%d stack=%d\n",g_skip,g_condStack.count());
 }
 
 /** copies string \a s with length \a len to the output, while
@@ -1584,29 +1584,37 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* eat anything that is not " / , or \n */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
+
          case 2:
             YY_RULE_SETUP
 
             { /* eat , so we have a nice separator in long initialization lines */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
+
          case 3:
             YY_RULE_SETUP
 
             { /* start of python long comment */
-               if (g_lang != SrcLangExt_Python)
-               {
+
+               if (g_lang != SrcLangExt_Python) {
                   REJECT;
-               } else
-               {
+               } else {
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
+
                   g_pythonDocString = TRUE;
                   g_nestingCount = 0;
                   g_commentStack.clear(); /*  to be on the save side */
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+                  
+                  copyToOutput(text, text.length());
+
                   BEGIN(CComment);
                   g_commentStack.push(new CommentCtx(g_lineNr));
                }
@@ -1620,12 +1628,12 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (g_lang != SrcLangExt_Fortran)
-               {
+               if (g_lang != SrcLangExt_Fortran) {
                   REJECT;
-               } else
-               {
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               } else {
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
+                  copyToOutput(text, text.length());
+
                   g_nestingCount = 0;
                   g_commentStack.clear(); /*  to be on the save side */
                   BEGIN(CComment);
@@ -1641,15 +1649,16 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (g_lang != SrcLangExt_Fortran)
-               {
+               if (g_lang != SrcLangExt_Fortran) {
                   REJECT;
                } else
                {
                   /* check for fixed format; we might have some conditional as part of multilene if like C<5 .and. & */
-                  if (isFixedForm && (g_col == 0))
-                  {
-                     copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+                  if (isFixedForm && (g_col == 0)) {
+       
+                     QString text = QString::fromUtf8(commentcnvYYtext); 
+                     copyToOutput(text, text.length());
+
                      g_nestingCount = 0;
                      g_commentStack.clear(); /*  to be on the save side */
                      BEGIN(CComment);
@@ -1671,7 +1680,8 @@ YY_DECL {
                   REJECT;
                } else
                {
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
+                  copyToOutput(text, text.length());
                }
             }
             YY_BREAK
@@ -1685,11 +1695,10 @@ YY_DECL {
                   REJECT;
                } else
                {
-                  if (g_col == 0)
-                  {
-                     copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
-                  } else
-                  {
+                  if (g_col == 0) {
+                     QString text = QString::fromUtf8(commentcnvYYtext); 
+                     copyToOutput(text, text.length());
+                  } else {
                      REJECT;
                   }
                }
@@ -1699,7 +1708,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* start of a string */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
+
                g_stringContext = YY_START;
                BEGIN(SkipString);
             }
@@ -1708,7 +1719,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
                g_charContext = YY_START;
                
                BEGIN(SkipChar);
@@ -1720,7 +1732,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* new line */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+                QString text = QString::fromUtf8(commentcnvYYtext); 
+                copyToOutput(text, text.length());
             }
             YY_BREAK
          case 11:
@@ -1740,18 +1753,19 @@ YY_DECL {
 
                } else {
                   int i = 3;
-                  if (commentcnvYYtext[2] == '/')
 
-                  {
-                     while (i < (int)commentcnvYYleng && commentcnvYYtext[i] == '/') {
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
+
+                  if (text[2] == '/') {
+                     while (i < text.length() && text[i] == '/') {
                         i++;
                      }
                   }
 
                   g_blockHeadCol = g_col;
-                  copyToOutput("/**", 3);
+                  copyToOutput("/**", 3);     // syntax highlight */
 
-                  replaceAliases(commentcnvYYtext + i);
+                  replaceAliases(text.mid(i));
                   g_inSpecialComment = TRUE;
                  
                   g_readLineCtx = SComment;
@@ -1767,19 +1781,24 @@ YY_DECL {
             YY_DO_BEFORE_ACTION; /* set up commentcnvYYtext again */
             YY_RULE_SETUP
 
-            { /* Start of Rational Rose ANSI C++ comment block */
-               if (g_mlBrief)
-               {
+            {  /* Start of Rational Rose ANSI C++ comment block */
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+
+               if (g_mlBrief) {
                   REJECT;
                }
-               int i = 17; //=strlen("//##Documentation");
+
+               int i = QString("//##Documentation").length();
+
                g_blockHeadCol = g_col;
-               copyToOutput("/**", 3);
-               replaceAliases(commentcnvYYtext + i);
+               copyToOutput("/**", 3);        // syntax highlight */  
+  
+               replaceAliases(text.mid(i));
                g_inRoseComment = TRUE;
                BEGIN(SComment);
             }
             YY_BREAK
+
          case 14:
             /* rule 14 can match eol */
             *yy_cp = (yy_hold_char); /* undo effects of setting up commentcnvYYtext */
@@ -1788,8 +1807,10 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* one line C++ comment */
-               g_inSpecialComment = commentcnvYYtext[2] == '/' || commentcnvYYtext[2] == '!';
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+
+               g_inSpecialComment = text[2] == '/' || text[2] == '!';                 
+               copyToOutput(text, text.length());
                g_readLineCtx = YY_START;
                BEGIN(ReadLine);
             }
@@ -1798,21 +1819,27 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* avoid matching next rule for empty C comment, see bug 711723 */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 16:
             YY_RULE_SETUP
 
             { /* start of a C comment */
-               g_specialComment = (int)commentcnvYYleng == 3;
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+
+               g_specialComment = (commentcnvYYleng == 3);
                g_nestingCount = 0;
                g_commentStack.clear(); /*  to be on the save side */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+                
+               copyToOutput(text, text.length());
+              
                BEGIN(CComment);
                g_commentStack.push(new CommentCtx(g_lineNr));
             }
             YY_BREAK
+
          case 17:
             YY_RULE_SETUP
 
@@ -1822,9 +1849,11 @@ YY_DECL {
                   REJECT;
                } else
                {
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
+
+                  copyToOutput(text, text.length());
                   g_nestingCount = 0;
-                  g_commentStack.clear(); /*  to be on the save side */
+                  g_commentStack.clear();    /* to be on the save side */
                   BEGIN(CComment);
                   g_commentStack.push(new CommentCtx(g_lineNr));
                }
@@ -1847,9 +1876,11 @@ YY_DECL {
                   REJECT;
                } else
                {
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
+                  copyToOutput(text, text.length());
+
                   g_nestingCount = 0;
-                  g_commentStack.clear(); /*  to be on the save side */
+                  g_commentStack.clear();    /* to be on the save side */
                   BEGIN(CComment);
                   g_commentStack.push(new CommentCtx(g_lineNr));
                }
@@ -1863,10 +1894,13 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+
                copyToOutput("@code", 5);
                g_lastCommentContext = YY_START;
                g_javaBlock = 1;
-               g_blockName = &commentcnvYYtext[1];
+
+               g_blockName = text.mid(1);
                BEGIN(VerbatimCode);
             }
             YY_BREAK
@@ -1878,15 +1912,16 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* start of a verbatim block */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
+
                g_lastCommentContext = YY_START;
                g_javaBlock = 0;
-               if (qstrcmp(&commentcnvYYtext[1], "startuml") == 0)
-               {
+
+               if ( text.mid(1) == "startuml") {
                   g_blockName = "uml";
-               } else
-               {
-                  g_blockName = &commentcnvYYtext[1];
+               } else {
+                  g_blockName = text.mid(1);
                }
                BEGIN(VerbatimCode);
             }
@@ -1895,8 +1930,10 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
-               g_blockName = &commentcnvYYtext[1];
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
+
+               g_blockName = text.mid(1);
 
                if (g_blockName.at(1) == '[') {
                   g_blockName[1] = ']';
@@ -1918,33 +1955,40 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* start of a verbatim block */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
-               g_blockName = &commentcnvYYtext[1];
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
+
+               g_blockName = text.mid(1);
                g_lastCommentContext = YY_START;
                BEGIN(Verbatim);
             }
             YY_BREAK
+
          case 24:
             YY_RULE_SETUP
 
             { /* any ather character */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 25:
             YY_RULE_SETUP
 
             { /* end of verbatim block */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
-               if (commentcnvYYtext[1] == 'f') // end of formula
-               {
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
+
+               if (text[1] == 'f') {
+                  // end of formula               
                   BEGIN(g_lastCommentContext);
-               } else if (&commentcnvYYtext[4] == g_blockName)
-               {
+
+               } else if (text.mid(4) == g_blockName) {
                   BEGIN(g_lastCommentContext);
                }
             }
             YY_BREAK
+
          case 26:
             YY_RULE_SETUP
 
@@ -1955,7 +1999,9 @@ YY_DECL {
                } else
                {
                   g_javaBlock++;
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+  
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
+                  copyToOutput(text, text.length());
                }
             }
             YY_BREAK
@@ -1963,19 +2009,20 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (g_javaBlock == 0)
-               {
-                  REJECT;
-               } else
-               {
+               if (g_javaBlock == 0) {
+                  REJECT; 
+
+               } else {
                   g_javaBlock--;
-                  if (g_javaBlock == 0)
-                  {
+
+                  if (g_javaBlock == 0) {
                      copyToOutput(" @endcode ", 10);
                      BEGIN(g_lastCommentContext);
-                  } else
-                  {
-                     copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+
+                  } else {
+                     QString text = QString::fromUtf8(commentcnvYYtext); 
+                     copyToOutput(text, text.length());
+
                   }
                }
             }
@@ -1984,51 +2031,62 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* end of verbatim block */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
-               if (&commentcnvYYtext[4] == g_blockName)
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
+
+               if (text.mid(4) == g_blockName)
                {
                   BEGIN(g_lastCommentContext);
                }
             }
             YY_BREAK
+
          case 29:
             YY_RULE_SETUP
 
             { /* skip leading comments */
-               if (!g_inSpecialComment)
-               {
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
-               } else
-               {
-                  int l = 0;
-                  while (commentcnvYYtext[l] == ' ' || commentcnvYYtext[l] == '\t')
-                  {
-                     l++;
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+
+               if (! g_inSpecialComment) {                    
+                  copyToOutput(text, text.length());
+
+               } else {
+                  int k = 0;
+
+                  while (k < text.length() && (text[k] == ' ' || text[k] == '\t')) {
+                     k++;
                   }
-                  copyToOutput(commentcnvYYtext, l);
-                  if (commentcnvYYleng - l == 3) // ends with //! or ///
-                  {
+
+                  copyToOutput(text, k);
+
+                  if (text.length() - k == 3) {
+                     // ends with //! or ///                  
                      copyToOutput(" * ", 3);
-                  } else // ends with //
-                  {
+
+                  } else {
+                     // ends with //                  
                      copyToOutput("//", 2);
                   }
                }
             }
             YY_BREAK
+
          case 30:
             YY_RULE_SETUP
 
             { /* any character not a backslash or new line or } */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
+
          case 31:
             /* rule 31 can match eol */
             YY_RULE_SETUP
 
             { /* new line in verbatim block */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 32:
@@ -2037,15 +2095,19 @@ YY_DECL {
                if (g_blockName == "dot" || g_blockName == "msc" || g_blockName == "uml" || g_blockName.startsWith('f') ) {               
                   // see bug 487871, strip /// from dot images and formulas
 
-                  int l = 0;
-                  while (commentcnvYYtext[l] == ' ' || commentcnvYYtext[l] == '\t') {
-                     l++;
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
+          
+                  int k = 0;
+
+                  while (k < text.length() && (text[k] == ' ' || text[k] == '\t')) {
+                     k++;
                   }
-                  copyToOutput(commentcnvYYtext, l);
+
+                  copyToOutput(text, k);
                   copyToOutput("   ", 3);
 
-               } else // even slashes are verbatim (e.g. \verbatim, \code)
-               {
+               } else  {
+                  // even slashes are verbatim (e.g. \verbatim, \code)               
                   REJECT;
                }
             }
@@ -2055,21 +2117,24 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* any other character */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 34:
             YY_RULE_SETUP
 
             { /* escaped character in string */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 35:
             YY_RULE_SETUP
 
             { /* end of string */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
                BEGIN(g_stringContext);
             }
             YY_BREAK
@@ -2077,7 +2142,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* any other string character */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 37:
@@ -2085,21 +2151,24 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* new line inside string (illegal for some compilers) */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 38:
             YY_RULE_SETUP
 
             { /* escaped character */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 39:
             YY_RULE_SETUP
 
             { /* end of character literal */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
                BEGIN(g_charContext);
             }
             YY_BREAK
@@ -2107,7 +2176,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* any other string character */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 41:
@@ -2115,34 +2185,38 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* new line character */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
-            }
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());            }
             YY_BREAK
          case 42:
             YY_RULE_SETUP
 
             { /* anything that is not a '*' or command */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 43:
             YY_RULE_SETUP
 
             { /* stars without slashes */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 44:
             YY_RULE_SETUP
 
             { /* end of Python docstring */
-               if (g_lang != SrcLangExt_Python)
-               {
+               if (g_lang != SrcLangExt_Python) {
                   REJECT;
-               } else
-               {
+
+               } else {
                   g_pythonDocString = FALSE;
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+                  
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
+                  copyToOutput(text, text.length());
+
                   BEGIN(Scan);
                }
             }
@@ -2151,11 +2225,12 @@ YY_DECL {
             /* rule 45 can match eol */
             YY_RULE_SETUP
 
-            { /* new line in comment */
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+            { /* new line in comment */              
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
+
                /* in case of Fortran always end of comment */
-               if (g_lang == SrcLangExt_Fortran)
-               {
+               if (g_lang == SrcLangExt_Fortran) {
                   BEGIN(Scan);
                }
             }
@@ -2164,26 +2239,29 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* nested C comment */
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+
                g_nestingCount++;
                g_commentStack.push(new CommentCtx(g_lineNr));
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               copyToOutput(text, text.length());
             }
             YY_BREAK
+
          case 47:
             YY_RULE_SETUP
 
             { /* end of C comment */
-               if (g_lang == SrcLangExt_Python)
-               {
+               if (g_lang == SrcLangExt_Python) {
                   REJECT;
-               } else
-               {
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
-                  if (g_nestingCount <= 0)
-                  {
+
+               } else {                  
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
+                  copyToOutput(text, text.length());
+
+                  if (g_nestingCount <= 0) {
                      BEGIN(Scan);
-                  } else
-                  {
+
+                  } else {
                      g_nestingCount--;
                      delete g_commentStack.pop();
                   }
@@ -2203,7 +2281,8 @@ YY_DECL {
                   REJECT;
                } else
                {
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
+                  copyToOutput(text, text.length());
                   BEGIN(Scan);
                }
             }
@@ -2218,9 +2297,8 @@ YY_DECL {
             {            
                   REJECT;               
             }
-
-
             YY_BREAK
+
          /* removed for bug 674842 (bug was introduced in rev 768)
          <CComment>"'"			   {
            			             g_charContext = YY_START;
@@ -2237,7 +2315,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 51:
@@ -2351,8 +2430,12 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* end of special comment */
+
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+
                copyToOutput(" */", 3);
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               copyToOutput(text, text.length());
+
                g_inSpecialComment = FALSE;
                g_inRoseComment = FALSE;
                BEGIN(Scan);
@@ -2366,7 +2449,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
                BEGIN(g_readLineCtx);
             }
             YY_BREAK
@@ -2375,7 +2459,8 @@ YY_DECL {
 
             {
                // escaped command
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
          case 66:
@@ -2419,11 +2504,12 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+
                bool oldSkip = g_skip;
-               startCondSection(commentcnvYYtext);
-               if ((g_condCtx == CComment || g_readLineCtx == SComment) &&
-               !oldSkip && g_skip)
-               {
+               startCondSection(text);
+
+               if ((g_condCtx == CComment || g_readLineCtx == SComment) && ! oldSkip && g_skip) {
                   if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Fortran) {
                      ADDCHAR('*');
                      ADDCHAR('/');
@@ -2455,6 +2541,8 @@ YY_DECL {
 
             {
                // forgot section id?
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+
                if (YY_START != CondLine)
                {
                   g_condCtx = YY_START;
@@ -2470,10 +2558,11 @@ YY_DECL {
                      ADDCHAR('/');
                   }
                }
-               if (*commentcnvYYtext == '\n')
+               if (text[0] == '\n')
                {
                   g_lineNr++;
                }
+
                if (g_readLineCtx == SComment)
                {
                   BEGIN(SComment);
@@ -2487,7 +2576,8 @@ YY_DECL {
             YY_RULE_SETUP
             {
                // expand alias without arguments
-               replaceAliases(commentcnvYYtext);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               replaceAliases(text);
             }
             YY_BREAK
          case 73:
@@ -2495,9 +2585,10 @@ YY_DECL {
 
             {
                // expand alias with arguments
+               QString text = QString::fromUtf8(commentcnvYYtext); 
                g_lastBlockContext = YY_START;
                g_blockCount = 1;
-               g_aliasString = commentcnvYYtext;
+               g_aliasString = text;
                g_lastEscaped = 0;
                BEGIN( ReadAliasArgs );
             }
@@ -2517,10 +2608,12 @@ YY_DECL {
                if (g_lang == SrcLangExt_Python)
                {
                   REJECT;
-               } else // abort the alias, restart scanning
-               {
+               } else {
+                  // abort the alias, restart scanning
+               
+                  QString text = QString::fromUtf8(commentcnvYYtext); 
                   copyToOutput(g_aliasString, g_aliasString.length());
-                  copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+                  copyToOutput(text, text.length());
                   BEGIN(Scan);
                }
             }
@@ -2529,7 +2622,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_aliasString += commentcnvYYtext;
+               g_aliasString += QString::fromUtf8(commentcnvYYtext); 
                g_lastEscaped = FALSE;
             }
             YY_BREAK
@@ -2540,8 +2633,10 @@ YY_DECL {
                if (g_lastEscaped)
                {
                   g_lastEscaped = FALSE;
-               } else{ g_lastEscaped = TRUE; }
-               g_aliasString += commentcnvYYtext;
+               } else{ 
+                  g_lastEscaped = TRUE; 
+               }
+               g_aliasString += QString::fromUtf8(commentcnvYYtext); 
             }
             YY_BREAK
          case 78:
@@ -2549,7 +2644,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_aliasString += commentcnvYYtext;
+               g_aliasString += QString::fromUtf8(commentcnvYYtext); 
                g_lineNr++;
                g_lastEscaped = FALSE;
             }
@@ -2558,19 +2653,21 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_aliasString += commentcnvYYtext;
-               if (!g_lastEscaped)
+               g_aliasString += QString::fromUtf8(commentcnvYYtext); 
+
+               if (! g_lastEscaped)
                {
                   g_blockCount++;
                }
                g_lastEscaped = FALSE;
             }
             YY_BREAK
+
          case 80:
             YY_RULE_SETUP
 
             {
-               g_aliasString += commentcnvYYtext;
+               g_aliasString += QString::fromUtf8(commentcnvYYtext); 
                if (!g_lastEscaped)
                {
                   g_blockCount--;
@@ -2587,7 +2684,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_aliasString += commentcnvYYtext;
+               g_aliasString += QString::fromUtf8(commentcnvYYtext); ;
                g_lastEscaped = FALSE;
             }
             YY_BREAK
@@ -2595,9 +2692,11 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+               QString text = QString::fromUtf8(commentcnvYYtext); 
+               copyToOutput(text, text.length());
             }
             YY_BREAK
+
          case 83:
             YY_RULE_SETUP
 
@@ -3603,25 +3702,28 @@ void commentcnvYYfree (void *ptr )
 
 #define YYTABLES_NAME "yytables"
 
-
-
-
-
 void replaceComment(int offset)
 {
+   QString text = QString::fromUtf8(commentcnvYYtext); 
+
    if (g_mlBrief || g_skip) {
-      copyToOutput(commentcnvYYtext, (int)commentcnvYYleng);
+      copyToOutput(text, text.length());
+
    } else {
-      //printf("replaceComment(%s)\n",commentcnvYYtext);
-      int i = computeIndent(&commentcnvYYtext[offset]);
+      int i = computeIndent(text.mid(offset));
+
       if (i == g_blockHeadCol) {
-         replaceCommentMarker(commentcnvYYtext, (int)commentcnvYYleng);
+         replaceCommentMarker(text, text.length());
+
       } else {
          copyToOutput(" */", 3);
          int i;
-         for (i = (int)commentcnvYYleng - 1; i >= 0; i--) {
-            unput(commentcnvYYtext[i]);
+
+         for (i = commentcnvYYleng - 1; i >= 0; i--) {
+            char tmp = commentcnvYYtext[i];
+            unput(tmp);
          }
+
          g_inSpecialComment = FALSE;
          BEGIN(Scan);
       }

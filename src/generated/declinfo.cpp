@@ -657,13 +657,13 @@ char *declinfoYYtext;
 
 static QString  inputString;
 static int	    inputPosition;
-static QString  scope;
 static QString  className;
 static QString  classTempList;
 static QString  funcTempList;
-static QString  type;
-static QString  name;
-static QString  args;
+static QString  s_scope;
+static QString  s_type;
+static QString  s_name;
+static QString  s_args;
 
 static int      sharpCount;
 static bool     classTempListFound;
@@ -673,41 +673,42 @@ static bool     insideObjC;
 
 static void addType()
 {
-   //printf("addType() type=`%s' scope=`%s' name=`%s'\n",
-   //       type.data(),scope.data(),name.data());
-   if (name.isEmpty() && scope.isEmpty()) {
+   if (s_name.isEmpty() && s_scope.isEmpty()) {
       return;
    }
-   if (!type.isEmpty()) {
-      type += " ";
+
+   if (! s_type.isEmpty()) {
+      s_type += " ";
    }
-   if (!scope.isEmpty()) {
-      type += scope + "::";
+
+   if (! s_scope.isEmpty()) {
+      s_type += s_scope + "::";
    }
-   type += name;
-   scope.resize(0);
-   name.resize(0);
+
+   s_type += s_name;
+   s_scope.resize(0);
+   s_name.resize(0);
 }
 
 static void addTypeName()
 {
-   //printf("addTypeName() type=`%s' scope=`%s' name=`%s'\n",
-   //       type.data(),scope.data(),name.data());
-   if (name.isEmpty() ||
-         name.at(name.length() - 1) == ':') { // end of Objective-C keyword => append to name not type
+   if (s_name.isEmpty() || s_name.at(s_name.length() - 1) == ':') { 
+      // end of Objective-C keyword => append to name not type
       return;
    }
-   if (!type.isEmpty()) {
-      type += ' ';
+
+   if (! s_type.isEmpty()) {
+      s_type += ' ';
    }
-   type += name;
-   name.resize(0);
+
+   s_type += s_name;
+   s_name.resize(0);
 }
 
 #define YY_NEVER_INTERACTIVE 1
 
 #undef	YY_INPUT
-#define	YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
+#define	YY_INPUT(buf, result, max_size) result=yyread(buf, max_size);
 
 static int yyread(char *buf, int max_size)
 {  
@@ -732,6 +733,8 @@ static int yyread(char *buf, int max_size)
 
       inputPosition++;     
    }
+
+   return c;
 }
 
 #define INITIAL 0
@@ -1041,7 +1044,7 @@ YY_DECL {
 
             {
                // operator rule must be before {ID} rule
-               name += declinfoYYtext;
+               s_name += QString::fromUtf8(declinfoYYtext);
                BEGIN(Operator);
             }
             YY_BREAK
@@ -1050,12 +1053,10 @@ YY_DECL {
 
             {
                // Objective-C class categories
-               if (!insideObjC)
-               {
-                  REJECT;
-               } else
-               {
-                  name += declinfoYYtext;
+               if (! insideObjC) {
+                  REJECT; 
+               } else {                  
+                  s_name += QString::fromUtf8(declinfoYYtext);
                }
             }
             YY_BREAK
@@ -1064,12 +1065,13 @@ YY_DECL {
 
             {
                // the []'s are for Java,
-               // the / was add to deal with multi-
-               // dimensional C++ arrays like A[][15]
+               // the / was add to deal with multi-dimensional C++ arrays like A[][15]
                // the leading ~ is for a destructor
                // the leading ! is for a C++/CLI finalizer (see bug 456475 and 635198)
+
+               QString text = QString::fromUtf8(declinfoYYtext);
                addTypeName();
-               name += declinfoYYtext;
+               s_name += text;
             }
             YY_BREAK
          case 4:
@@ -1077,14 +1079,13 @@ YY_DECL {
 
             {
                // found a scope specifier
-               if (!scope.isEmpty())
-               {
-                  scope += "::" + name; // add name to scope
-               } else
-               {
-                  scope = name; // scope becomes name
+               if (! s_scope.isEmpty()) {
+                  s_scope += "::" + s_name; // add name to scope
+
+               } else {
+                  s_scope = s_name; // scope becomes name
                }
-               name.resize(0);
+               s_name.resize(0);
             }
             YY_BREAK
          case 5:
@@ -1092,7 +1093,7 @@ YY_DECL {
 
             {
                // Objective-C argument separator
-               name += declinfoYYtext;
+               s_name += QString::fromUtf8(declinfoYYtext);
             }
             YY_BREAK
          case 6:
@@ -1100,7 +1101,7 @@ YY_DECL {
 
             {
                addType();
-               type += declinfoYYtext;
+               s_type += QString::fromUtf8(declinfoYYtext);
             }
             YY_BREAK
          case 7:
@@ -1115,15 +1116,14 @@ YY_DECL {
 
             {
                addType();
-               QString text = declinfoYYtext;
-               type += text.trimmed();
+               s_type += QString::fromUtf8(declinfoYYtext).trimmed();
             }
             YY_BREAK
          case 9:
             YY_RULE_SETUP
 
             {
-               type += ")";
+               s_type += ")";
             }
             YY_BREAK
          case 10:
@@ -1131,7 +1131,7 @@ YY_DECL {
 
             {
                // TODO: function pointers
-               args += "(";
+               s_args += "(";
                BEGIN(ReadArgs);
             }
             YY_BREAK
@@ -1139,7 +1139,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               args += "[";
+               s_args += "[";
                BEGIN(ReadArgs);
             }
             YY_BREAK
@@ -1147,7 +1147,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               name += "<";
+               s_name += "<";
                sharpCount = 0;
                BEGIN(Template);
             }
@@ -1155,18 +1155,20 @@ YY_DECL {
          case 13:
             YY_RULE_SETUP
 
-            { name += "<<"; }
+            { s_name += "<<"; }
             YY_BREAK
+
          case 14:
             YY_RULE_SETUP
 
-            { name += ">>"; }
+            { s_name += ">>"; }
             YY_BREAK
+
          case 15:
             YY_RULE_SETUP
 
             {
-               name += "<";
+               s_name += "<";
                sharpCount++;
             }
             YY_BREAK
@@ -1174,12 +1176,10 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               name += ">";
-               if (sharpCount)
-               {
+               s_name += ">";
+               if (sharpCount) {
                   --sharpCount;
-               } else
-               {
+               } else {
                   BEGIN(Start);
                }
             }
@@ -1188,9 +1188,11 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               name += *declinfoYYtext;
+               QString text = QString::fromUtf8(declinfoYYtext);
+               s_name += declinfoYYtext[0];
             }
             YY_BREAK
+
          case 18:
             *yy_cp = (yy_hold_char); /* undo effects of setting up declinfoYYtext */
             (yy_c_buf_p) = yy_cp -= 1;
@@ -1198,7 +1200,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               name += "() <>";
+               s_name += "() <>";
                BEGIN(ReadArgs);
             }
             YY_BREAK
@@ -1209,7 +1211,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               name += "()";
+               s_name += "()";
                BEGIN(ReadArgs);
             }
             YY_BREAK
@@ -1221,7 +1223,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               name += declinfoYYtext;
+               QString text = QString::fromUtf8(declinfoYYtext);
+               s_name += text;
                BEGIN(ReadArgs);
             }
             YY_BREAK
@@ -1237,14 +1240,16 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               args += *declinfoYYtext;
+               QString text = QString::fromUtf8(declinfoYYtext);
+               s_args += text[0];
             }
             YY_BREAK
          case 23:
             YY_RULE_SETUP
 
             {
-               exceptionString += *declinfoYYtext;
+               QString text = QString::fromUtf8(declinfoYYtext);
+               exceptionString += text[0];
             }
             YY_BREAK
          case 24:
@@ -2235,14 +2240,16 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
    inputPosition      = 0;
    classTempListFound = FALSE;
    funcTempListFound  = FALSE;
-   insideObjC = objC;
-   scope.resize(0);
+   insideObjC = objC;  
    className.resize(0);
    classTempList.resize(0);
    funcTempList.resize(0);
-   name.resize(0);
-   type.resize(0);
-   args.resize(0);
+
+   s_scope.resize(0);
+   s_name.resize(0);
+   s_type.resize(0);
+   s_args.resize(0);
+
    exceptionString.resize(0);
 
    // first we try to find the type, scope, name and arguments
@@ -2250,50 +2257,27 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
    BEGIN( Start );
    declinfoYYlex();
 
-   //printf("type=`%s' class=`%s' name=`%s' args=`%s'\n",
-   //        type.data(),scope.data(),name.data(),args.data());
+   int nb = s_name.lastIndexOf('[');
 
-   int nb = name.lastIndexOf('[');
-   if (nb != -1 && args.isEmpty()) { // correct for [] in name ambigity (due to Java return type allowing [])
-      args.prepend(name.right(name.length() - nb));
-      name = name.left(nb);
+   if (nb != -1 && s_args.isEmpty()) { 
+      // correct for [] in name ambigity (due to Java return type allowing [])
+      s_args.prepend(s_name.right(s_name.length() - nb));
+      s_name = s_name.left(nb);
    }
 
-#if 0
-   {
-      int l = scope.length();
-      int i = 0;
-      int skipCount = 0;
-      cl.resize(0);
-      ctl.resize(0);
-      for (i = 0; i < l; i++) {
-         char c = scope.at(i);
-         if (c == '<') {
-            skipCount++;
-         } else if (c == '>') {
-            skipCount--;
-         } else if (skipCount == 0) {
-            cl += c;
-         }
-      }
-   }
-   cl = stripTemplateSpecifiersFromScope(removeRedundantWhiteSpace(scope), FALSE);
-   ctl.resize(0);
-#endif
-
-   cl = scope;
-   n = removeRedundantWhiteSpace(name);
+   cl = s_scope;
+   n = removeRedundantWhiteSpace(s_name);
    int il, ir;
 
-   if ((il = n.indexOf('<')) != -1 && (ir = n.lastIndexOf('>')) != -1)
+   if ((il = n.indexOf('<')) != -1 && (ir = n.lastIndexOf('>')) != -1) {
       // TODO: handle cases like where n="operator<< <T>"
-   {
+   
       ftl = removeRedundantWhiteSpace(n.right(n.length() - il));
       n = n.left(il);
    }
  
-   t = removeRedundantWhiteSpace(type);
-   a = removeRedundantWhiteSpace(args);
+   t   = removeRedundantWhiteSpace(s_type);
+   a   = removeRedundantWhiteSpace(s_args);
    exc = removeRedundantWhiteSpace(exceptionString);
 
    if (!t.isEmpty() && t.at(t.length() - 1) == ')') { // for function pointers

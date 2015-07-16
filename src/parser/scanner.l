@@ -583,6 +583,8 @@ static int yyread(char *buf, int max_size)
 
       inputPosition++;     
    }
+
+   return c;
 }
 
 %}

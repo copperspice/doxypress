@@ -2274,8 +2274,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("keyword");
-               codify(pycodeYYtext);
+               codify(text);
                endFontClass();
                BEGIN( FunctionDec );
             }
@@ -2284,18 +2285,21 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("keyword");
-               codify(pycodeYYtext);
+               codify(text);
                endFontClass();
                BEGIN( ClassDec );
             }
             YY_BREAK
+
          case 3:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("keywordtype");
-               codify(pycodeYYtext);
+               codify(text);
                endFontClass();
             }
             YY_BREAK
@@ -2306,16 +2310,18 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(pycodeYYtext);
                codify("self.");
-               findMemberLink(*g_code, &pycodeYYtext[5]);
+               findMemberLink(*g_code, text.mid(5));
             }
             YY_BREAK
          case 5:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(pycodeYYtext);
                codify("self.");
-               findMemberLink(*g_code, &pycodeYYtext[5]);
+               findMemberLink(*g_code, text.mid(5));
             }
             YY_BREAK
 
@@ -2323,9 +2329,10 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               generateClassOrGlobalLink(*g_code, pycodeYYtext);
-               // codify(pycodeYYtext);
-               g_curClassName = pycodeYYtext;
+               QString text = QString::fromUtf8(pycodeYYtext);
+               generateClassOrGlobalLink(*g_code, text);
+
+               g_curClassName = text;
                g_curClassBases.clear();
                BEGIN( ClassInheritance );
             }
@@ -2335,9 +2342,11 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
+
          case 8:
             YY_RULE_SETUP
 
@@ -2347,10 +2356,10 @@ YY_DECL {
 
                // it should probably be more strict about what to accept.
 
-               g_curClassBases.append(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               g_curClassBases.append(text);
 
-               generateClassOrGlobalLink(*g_code, pycodeYYtext);
-               // codify(pycodeYYtext);
+               generateClassOrGlobalLink(*g_code, text);
             }
             YY_BREAK
 
@@ -2358,7 +2367,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
 
                // Assume this will be a one-line suite;
                // found counter-example in SuiteStart.
@@ -2400,14 +2410,16 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               generateFunctionLink(*g_code, pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               generateFunctionLink(*g_code, text);
             }
             YY_BREAK
          case 11:
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
                BEGIN( FunctionParams );
             }
             YY_BREAK
@@ -2418,28 +2430,32 @@ YY_DECL {
 
             {
                // Parses delimiters
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 13:
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 14:
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 15:
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
 
                // Assume this will
                // be a one-line suite;
@@ -2460,8 +2476,9 @@ YY_DECL {
                // Must come BEFORE identifier NONEMPTY-like rules
                //   to syntax highlight.
 
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("keyword");
-               codify(pycodeYYtext);
+               codify(text);
                endFontClass();
             }
             YY_BREAK
@@ -2469,8 +2486,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("keywordflow");
-               codify(pycodeYYtext);
+               codify(text);
                endFontClass();
             }
             YY_BREAK
@@ -2481,20 +2499,25 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               generateClassOrGlobalLink(*g_code, pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               generateClassOrGlobalLink(*g_code, text);
             }
             YY_BREAK
          case 19:
             YY_RULE_SETUP
 
             {
-               generateClassOrGlobalLink(*g_code, pycodeYYtext, TRUE);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               generateClassOrGlobalLink(*g_code, text, TRUE);
             }
             YY_BREAK
          case 20:
             YY_RULE_SETUP
 
-            { codify(pycodeYYtext); }
+            { 
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
+            }
             YY_BREAK
 
 
@@ -2502,15 +2525,17 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 22:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("keyword");
-               codifyLines(pycodeYYtext);
+               codifyLines(text);
                endFontClass();
                BEGIN(Body);
             }
@@ -2519,8 +2544,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("keyword");
-               codifyLines(pycodeYYtext);
+               codifyLines(text);
                endFontClass();
 
                // No indentation necessary
@@ -2531,8 +2557,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("keywordflow");
-               codifyLines(pycodeYYtext);
+               codifyLines(text);
                endFontClass();
 
                // No indentation necessary
@@ -2543,17 +2570,18 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 26:
             YY_RULE_SETUP
 
             {
-               // This eats EVERYTHING
-               // except the newline
+               // This eats EVERYTHING except the newline
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("comment");
-               codifyLines(pycodeYYtext);
+               codifyLines(text);
                endFontClass();
             }
             YY_BREAK
@@ -2562,7 +2590,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codifyLines(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);
                if ( g_noSuiteFound )
                {
                   // printf("New suite to capture [%d]\n", g_yyLineNr);
@@ -2578,7 +2607,8 @@ YY_DECL {
 
             {
                // Blankline - ignore, keep looking for indentation.
-               codifyLines(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 29:
@@ -2589,10 +2619,10 @@ YY_DECL {
                // to check the indentation
                // level that is about to be used.
 
-               codifyLines(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);
                g_indents.push(pycodeYYleng);
-
-               // printf("Captured indent of %d [line %d]\n", pycodeYYleng, g_yyLineNr);
+               
                BEGIN( Suite );
             }
             YY_BREAK
@@ -2606,8 +2636,10 @@ YY_DECL {
                // indendation-tracking;
                // should be improved.
                // (translate tabs to space, etc)
-               codifyLines(pycodeYYtext);
-               adjustScopesAndSuites((int)pycodeYYleng);
+
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);
+               adjustScopesAndSuites(pycodeYYleng);
             }
             YY_BREAK
          case 31:
@@ -2619,7 +2651,9 @@ YY_DECL {
                // it means that this is
                // a blank line, and
                // can be ignored.
-               codifyLines(pycodeYYtext);
+
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 32:
@@ -2639,7 +2673,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codifyLines(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);
                BEGIN( SuiteMaintain );
             }
             YY_BREAK
@@ -2647,7 +2682,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 35:
@@ -2655,7 +2691,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codifyLines(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          // Single quoted string like 'That\'s a """nice""" string!'
@@ -2665,7 +2702,8 @@ YY_DECL {
 
             {
                // line continuation
-               codifyLines(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 37:
@@ -2673,7 +2711,8 @@ YY_DECL {
 
             {
                // espaced char
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 38:
@@ -2681,7 +2720,8 @@ YY_DECL {
 
             {
                // tripple double quotes
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 39:
@@ -2689,7 +2729,8 @@ YY_DECL {
 
             {
                // end of the string
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
                endFontClass();
                BEGIN(g_stringContext);
             }
@@ -2699,7 +2740,8 @@ YY_DECL {
 
             {
                // normal chars
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 41:
@@ -2707,7 +2749,8 @@ YY_DECL {
 
             {
                // normal char
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
 
@@ -2718,7 +2761,8 @@ YY_DECL {
 
             {
                // line continuation
-               codifyLines(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 43:
@@ -2726,7 +2770,8 @@ YY_DECL {
 
             {
                // espaced char
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 44:
@@ -2734,7 +2779,8 @@ YY_DECL {
 
             {
                // tripple single quotes
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 45:
@@ -2742,7 +2788,8 @@ YY_DECL {
 
             {
                // end of the string
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
                endFontClass();
                BEGIN(g_stringContext);
             }
@@ -2752,7 +2799,8 @@ YY_DECL {
 
             {
                // normal chars
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
          case 47:
@@ -2760,7 +2808,8 @@ YY_DECL {
 
             {
                // normal char
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
 
@@ -2771,8 +2820,10 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
-               if (g_doubleQuote == (pycodeYYtext[0] == '"'))
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
+
+               if (g_doubleQuote == (text[0] == '"'))
                {
                   endFontClass();
                   BEGIN(g_stringContext);
@@ -2784,7 +2835,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codifyLines(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 51:
@@ -2792,26 +2844,26 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codifyLines(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 52:
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
             }
             YY_BREAK
 
          /*
-         <*>({NONEMPTY}|{EXPCHAR}|{BB})           { // This should go one character at a time.
-           		                 codify(pycodeYYtext);
-         				 // printf("[pycode] '%s' [ state %d ]  [line %d] no match\n",
-         				 //       pycodeYYtext, YY_START, g_yyLineNr);
-
-         				 //endFontClass();
-         				 BEGIN(Body);
-                                        }
+         <*>({NONEMPTY}|{EXPCHAR}|{BB})           
+                     { // This should go one character at a time.
+                     codify(pycodeYYtext);         				 
+                     //endFontClass();
+         				BEGIN(Body);
+                     }
             */
          case 53:
 
@@ -2819,10 +2871,11 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("stringliteral");
                g_stringContext = YY_START;
-               g_doubleQuote = pycodeYYtext[pycodeYYleng - 1] == '"';
-               codify(pycodeYYtext);
+               g_doubleQuote = text[text.length() - 1] == '"';
+               codify(text);
                BEGIN(TripleString);
             }
             YY_BREAK
@@ -2831,9 +2884,10 @@ YY_DECL {
 
             {
                // single quoted string
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("stringliteral");
                g_stringContext = YY_START;
-               codify(pycodeYYtext);
+               codify(text);
                BEGIN(SingleQuoteString);
             }
             YY_BREAK
@@ -2842,9 +2896,10 @@ YY_DECL {
 
             {
                // double quoted string
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("stringliteral");
                g_stringContext = YY_START;
-               codify(pycodeYYtext);
+               codify(text);
                BEGIN(DoubleQuoteString);
             }
             YY_BREAK
@@ -2859,10 +2914,10 @@ YY_DECL {
                {
                   REJECT;
                }
-               // This eats EVERYTHING
-               // except the newline
+               // This eats EVERYTHING except the newline
+               QString text = QString::fromUtf8(pycodeYYtext);
                startFontClass("comment");
-               codifyLines(pycodeYYtext);
+               codifyLines(text);
                endFontClass();
             }
             YY_BREAK
@@ -2871,11 +2926,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codifyLines(pycodeYYtext);
-               //printf("[pycode] %d NEWLINE [line %d] no match\n",
-               //       YY_START, g_yyLineNr);
-
-               //endFontClass();
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codifyLines(text);               
                BEGIN(Body);
             }
             YY_BREAK
@@ -2883,7 +2935,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
                BEGIN(Body);
             }
             YY_BREAK
@@ -2891,11 +2944,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codify(pycodeYYtext);
-               // printf("[pycode] '%s' [ state %d ]  [line %d] no match\n",
-               //        pycodeYYtext, YY_START, g_yyLineNr);
-
-               //endFontClass();
+               QString text = QString::fromUtf8(pycodeYYtext);
+               codify(text);
                BEGIN(Body);
             }
             YY_BREAK

@@ -31,14 +31,15 @@ class HtmlEntityMapper
  public:
    static HtmlEntityMapper *instance();
    static void deleteInstance();
+
    DocSymbol::SymType name2sym(const QString &symName) const;
-   const char *utf8(DocSymbol::SymType symb, bool useInPrintf = false) const;
-   const char *html(DocSymbol::SymType symb, bool useInPrintf = false) const;
-   const char *xml(DocSymbol::SymType symb) const;
-   const char *docbook(DocSymbol::SymType symb) const;
-   const char *latex(DocSymbol::SymType symb) const;
-   const char *man(DocSymbol::SymType symb) const;
-   const char *rtf(DocSymbol::SymType symb) const;
+   QString utf8(DocSymbol::SymType symb, bool useInPrintf = false) const;
+   QString html(DocSymbol::SymType symb, bool useInPrintf = false) const;
+   QString xml(DocSymbol::SymType symb) const;
+   QString docbook(DocSymbol::SymType symb) const;
+   QString latex(DocSymbol::SymType symb) const;
+   QString man(DocSymbol::SymType symb) const;
+   QString rtf(DocSymbol::SymType symb) const;
    const DocSymbol::PerlSymb *perl(DocSymbol::SymType symb) const;
    void  writeXMLSchema(QTextStream &t);
 
@@ -46,6 +47,7 @@ class HtmlEntityMapper
    void  validate();
    HtmlEntityMapper();
    ~HtmlEntityMapper();
+
    static HtmlEntityMapper *s_instance;
    QHash<QString, int> *m_name2sym;
 };

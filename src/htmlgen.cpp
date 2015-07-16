@@ -737,7 +737,7 @@ void HtmlGenerator::init()
 
       if (! resource.isEmpty()) {
          QTextStream t(&f);
-         t << resource.constData();
+         t << resource;
 
          if (Config::getBool("source-code") && Config::getBool("source-tooltips")) {
             t << endl <<
@@ -2458,7 +2458,7 @@ void HtmlGenerator::writeSearchPage()
       t_stream << ResourceMgr::instance().getAsString("html/extsearch.js");
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", scriptName.constData(), f.error());
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(scriptName), f.error());
    }
 }
 
@@ -2580,7 +2580,7 @@ void HtmlGenerator::writeExternalSearchPage()
       t_stream << "});" << endl;
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", scriptName.constData(), sf.error());
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(scriptName), sf.error());
    }
 }
 

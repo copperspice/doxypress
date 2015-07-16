@@ -144,47 +144,50 @@
     </message>
     <message>
         <source>Generated automatically by DoxyPress for %1 from the source code.</source>
-        <translation type="unfinished"></translation>
+        <translation>Automatisch erzeugt von DoxyPress für %1 aus dem Quellcode.</translation>
     </message>
     <message>
         <source>Generated automatically by DoxyPress from the source code.</source>
-        <translation type="unfinished"></translation>
+        <translation>Automatisch erzeugt von DoxyPress aus dem Quellcode.</translation>
     </message>
     <message>
         <source>Here is a list of all files with brief descriptions:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier folgt die Aufzählung aller Dateien mit einer Kurzbeschreibung:</translation>
     </message>
     <message>
         <source>Here is a list of all documented files with brief descriptions:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier folgt die Aufzählung aller dokumentierten Dateien mit einer Kurzbeschreibung:</translation>
     </message>
     <message>
         <source>Here is a list of all functions, variables, defines, enums, and typedefs with links to the files they belong to:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier folgt die Aufzählung aller Funktionen, Variablen, Makros, Aufzählungen und Typdefinitionen  mit Verweisen 
+               auf die Dokumentation zu jedem Element:</translation>
     </message>
     <message>
         <source>Here is a list of all documented file members with links to the files they belong to:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier folgt die Aufzählung aller dokumentierten Dateielemente  mit Verweisen auf die Dokumentation zu
+               jedem Element:</translation>
     </message>
     <message>
         <source>Here is a list of all functions, variables, defines, enums, and typedefs with links to the documentation:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier folgt die Aufzählung aller Funktionen, Variablen, Makros, Aufzählungen und Typdefinitionen  mit Verweisen
+               auf die zugehörigen Dateien:</translation>
     </message>
     <message>
         <source>Here is a list of all documented file members with links to the documentation:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier folgt die Aufzählung aller dokumentierten Dateielemente  mit Verweisen auf die zugehörigen Dateien:</translation>
     </message>
     <message>
         <source>Here is a list of all examples:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier folgt eine Liste mit allen Beispielen:</translation>
     </message>
     <message>
         <source>Here is a list of all related documentation pages:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier folgt eine Liste mit zusammengehörigen Themengebieten:</translation>
     </message>
     <message>
         <source>Here is a list of all modules:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier folgt die Aufzählung aller Module:</translation>
     </message>
     <message>
         <source>Documentation</source>
@@ -288,11 +291,11 @@
     </message>
     <message>
         <source>Inheritance diagram for %1:</source>
-        <translation type="unfinished"></translation>
+        <translation>Klassendiagramm für %1:</translation>
     </message>
     <message>
         <source>For internal use only.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nur für den internen Gebrauch.</translation>
     </message>
     <message>
         <source>Warning</source>
@@ -348,15 +351,15 @@
     </message>
     <message>
         <source>Friends</source>
-        <translation type="unfinished"></translation>
+        <translation>Freundbeziehungen</translation>
     </message>
     <message>
         <source>Friends And Related Function Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Freundbeziehungen und Funktionsdokumentation</translation>
     </message>
     <message>
         <source>%1 File Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1-Dateireferenz</translation>
     </message>
     <message>
         <source>%1 Namespace Reference</source>
@@ -564,15 +567,15 @@
     </message>
     <message>
         <source>legend</source>
-        <translation type="unfinished"></translation>
+        <translation>Legende</translation>
     </message>
     <message>
         <source>Test List</source>
-        <translation type="unfinished"></translation>
+        <translation>Test-Liste</translation>
     </message>
     <message>
         <source>Property Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentation der Propertys</translation>
     </message>
     <message>
         <source>Package List</source>
@@ -600,71 +603,71 @@
     </message>
     <message>
         <source>References</source>
-        <translation type="unfinished"></translation>
+        <translation>Benutzt</translation>
     </message>
     <message>
         <source>Table of Contents</source>
-        <translation type="unfinished"></translation>
+        <translation>Inhaltsverzeichnis</translation>
     </message>
     <message>
         <source>Deprecated List</source>
-        <translation type="unfinished"></translation>
+        <translation>Veraltete Elemente</translation>
     </message>
     <message>
         <source>Events</source>
-        <translation type="unfinished"></translation>
+        <translation>Ereignisse</translation>
     </message>
     <message>
         <source>Event Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Ereignisdokumentation</translation>
     </message>
     <message>
         <source>Package Types</source>
-        <translation type="unfinished"></translation>
+        <translation>Pakettypen</translation>
     </message>
     <message>
         <source>Package Functions</source>
-        <translation type="unfinished"></translation>
+        <translation>Paketfunktionen</translation>
     </message>
     <message>
         <source>Static Package Functions</source>
-        <translation type="unfinished"></translation>
+        <translation>Statische Paketfunktionen</translation>
     </message>
     <message>
         <source>Package Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Paketattribute</translation>
     </message>
     <message>
         <source>Static Package Attributes</source>
-        <translation type="unfinished"></translation>
+        <translation>Statische Paketattribute</translation>
     </message>
     <message>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle</translation>
     </message>
     <message>
         <source>Here is the call graph for this function:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist ein Graph, der zeigt, was diese Funktion aufruft:</translation>
     </message>
     <message>
         <source>Search Results</source>
-        <translation type="unfinished"></translation>
+        <translation>Suchergebnisse</translation>
     </message>
     <message>
         <source>Matches:</source>
-        <translation type="unfinished"></translation>
+        <translation>Treffer:</translation>
     </message>
     <message>
         <source>Directory Hierarchy</source>
-        <translation type="unfinished"></translation>
+        <translation>Verzeichnishierarchie</translation>
     </message>
     <message>
         <source>Directory Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Verzeichnisdokumentation</translation>
     </message>
     <message>
         <source>Directories</source>
-        <translation type="unfinished"></translation>
+        <translation>Verzeichnisse</translation>
     </message>
     <message>
         <source>Here is the caller graph for this function:</source>

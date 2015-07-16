@@ -252,7 +252,7 @@ QString mergeScopes(const QString &leftScope, const QString &rightScope);
 
 int getScopeFragment(const QString &s, int p, int *l);
 
-int filterCRLF(QString &buf);
+QString filterCRLF(const QString &buffer);
 
 void addRefItem(const QList<ListItemInfo> *sli, const QString &key, const QString &prefix, 
                   const QString &name, const QString &title, const QString &args, QSharedPointer<Definition> scope);
@@ -324,7 +324,8 @@ QString convertCharEntities(const QString &s);
 
 void stackTrace();
 
-bool readInputFile(const QString &fileName, QString &inBuf, bool filter = true, bool isSourceCode = false);
+QString readInputFile(const QString &fileName);
+bool readInputFile(const QString &fileName, QString &fileContents, bool filter = true, bool isSourceCode = false);
 
 QString filterTitle(const QString &title);
 
@@ -332,7 +333,6 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList);
 
 QString externalLinkTarget();
 QString externalRef(const QString &relPath, const QString &ref, bool href);
-int nextUtf8CharPosition(const QByteArray &utf8Str, int len, int startPos);
 
 void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn);
 

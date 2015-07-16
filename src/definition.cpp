@@ -829,7 +829,7 @@ bool readCodeFragment(const QString &fileName, int &startLine, int &endLine, QSt
       if (usePipe) {
          pclose(f);
          Debug::print(Debug::FilterOutput, 0, "Filter output\n");
-         Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", tempResult.constData());
+         Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", qPrintable(tempResult));
 
       } else {
          fclose(f);
@@ -1570,7 +1570,11 @@ QString Definition::symbolName() const
 
 QString Definition::documentation() const
 {
-   return m_private->details ? m_private->details->doc : "";
+   if (m_private->details) {
+      return m_private->details->doc;
+   }
+
+   return "";
 }
 
 int Definition::docLine() const

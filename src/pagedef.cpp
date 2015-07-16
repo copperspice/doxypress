@@ -77,8 +77,8 @@ void PageDef::setFileName(const QString &name, bool dontEscape)
 {
    static bool shortNames = Config::getBool("short-names");
 
-   if (shortNames && !dontEscape) {
-      m_fileName = convertNameToFile(name).toUtf8();
+   if (shortNames && ! dontEscape) {
+      m_fileName = convertNameToFile(name);
 
    } else {
       m_fileName = name;

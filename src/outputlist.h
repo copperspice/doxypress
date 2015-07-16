@@ -655,15 +655,19 @@ class OutputList : public OutputDocInterface
    void startParameterType(bool first, const QString &key) {
       forall(&OutputGenerator::startParameterType, first, key);
    }
+
    void endParameterType() {
       forall(&OutputGenerator::endParameterType);
    }
+
    void startParameterName(bool one) {
       forall(&OutputGenerator::startParameterName, one);
    }
+
    void endParameterName(bool last, bool one, bool bracket) {
       forall(&OutputGenerator::endParameterName, last, one, bracket);
    }
+
    void startParameterList(bool openBracket) {
       forall(&OutputGenerator::startParameterList, openBracket);
    }

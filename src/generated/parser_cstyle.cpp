@@ -12709,6 +12709,8 @@ static int yyread(char *buf, int max_size)
 
       inputPosition++;     
    }
+
+   return c;
 }
 
 /* start command character */
@@ -13354,12 +13356,8 @@ find_rule: /* we branch to this label when backing up */
 
 		YY_DO_BEFORE_ACTION;
 
-
-printf("\n  BROOM parseMain -  before the magical switch");
-
-
-
 do_action:	/* This label is used only to access EOF actions. */
+
 
 		switch ( yy_act )
 	{ /* beginning of action switch */
@@ -22374,8 +22372,14 @@ case 734:
 YY_RULE_SETUP
 #line 6614 "scanner.l"
 { // end of comment block
-                         handleCommentBlock(docBlock, FALSE);
-                 BEGIN(docBlockContext);
+
+
+
+             handleCommentBlock(docBlock, FALSE);
+             BEGIN(docBlockContext);
+
+
+
                   }
 	YY_BREAK
 case 735:
@@ -24199,12 +24203,10 @@ static void handleCommentBlock(const QString &doc,bool brief)
    docBlockInBody ? FALSE : brief,               // isBrief
    docBlockInBody ? FALSE : docBlockAutoBrief,   // isJavaDocStyle
    docBlockInBody,                               // isInBody
-   protection,
-        position,
-        needsEntry
-        )
-     )
+   protection, position, needsEntry))
+
   {
+
     if (needsEntry)
     {
       QString docFile = current->docFile;
@@ -24213,6 +24215,7 @@ static void handleCommentBlock(const QString &doc,bool brief)
       current->docLine = lineNr;
     }
   }
+
   if (needsEntry)
   {
     newEntry();
@@ -24396,12 +24399,6 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
    inputFile.setFileName(fileName);
 
-
-
-printf("\n  BROOM parseMain  %s ", qPrintable( fileBuf.mid(1000, 200) )  );
-
-
-
    if (inputFile.open(QIODevice::ReadOnly)) {
       yyLineNr   = 1 ;
       yyFileName = fileName;
@@ -24438,16 +24435,16 @@ printf("\n  BROOM parseMain  %s ", qPrintable( fileBuf.mid(1000, 200) )  );
          current->section = sec;
 
          current_root->addSubEntry(current, current_root);
-
          current = QMakeShared<Entry>();
       }
 
       current->reset();
-
       initEntry();
+
       scannerYYrestart( scannerYYin );
 
-      if ( insidePHP ) {
+
+      if (insidePHP) {
          BEGIN( FindMembersPHP );
       } else {
          BEGIN( FindMembers );
@@ -24547,8 +24544,9 @@ void CPPLanguageParser::finishTranslationUnit()
 
 void CPPLanguageParser::parseInput(const QString &fileName, const QString &fileBuf,
                   QSharedPointer<Entry> root, enum ParserMode mode,
-                  QStringList & filesInSameTranslationUnit, bool useClang)
+                  QStringList &filesInSameTranslationUnit, bool useClang)
 {
+
   g_thisParser = this;
 
   printlex(scannerYY_flex_debug, TRUE, __FILE__, fileName);

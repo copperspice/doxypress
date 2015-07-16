@@ -110,8 +110,8 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    portable_sysTimerStart();
 
    if ((exitCode = portable_system(pumlExe, pumlArgs, false)) != 0) {
-      err("Problem running PlantUML, verify the command 'java -jar \"%splantuml.jar\" -h' works from the command line. Exit code: %d\n",
-          plantumlJarPath.constData(), exitCode);
+      err("Problem running PlantUML, verify the command 'java -jar \"%splantuml.jar\" -h' works from "
+         "the command line. Exit code: %d\n", qPrintable(plantumlJarPath), exitCode);
 
    } else if (Config::getBool("dot-cleanup")) {
       QFile(baseName + ".pu").remove();

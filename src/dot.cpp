@@ -574,7 +574,7 @@ static bool readSVGSize(const QString &fileName, int *width, int *height)
    QByteArray buf;
    buf.resize(maxLineLen);
 
-   while (! f.atEnd() && !found) {
+   while (! f.atEnd() && ! found) {
       int numBytes = f.readLine(buf.data(), maxLineLen - 1); 
 
       if (numBytes > 0) {
@@ -845,7 +845,8 @@ bool DotRunner::run()
    return true;
 
 error:
-   err("Problem  running dot: exit code=%d, command='%s', arguments='%s'\n", exitCode, dotExe.data(), dotArgs.data());
+   err("Problem  running dot: exit code=%d, command='%s', arguments='%s'\n", exitCode, qPrintable(dotExe), 
+            qPrintable(dotArgs));
 
    return false;
 }
@@ -1535,25 +1536,21 @@ static QString convertLabel(const QString &label)
    QString bBefore("\\_/<({[: =-+@%#~?$"); // break before character set
    QString bAfter(">]),:;|");              // break after  character set
 
-   QByteArray tempLabel = label.toUtf8();
-   const char *p = tempLabel.constData();
+   const QChar *p = label.constData();
  
-   char c;
-   char pc = 0;
-   char cs[2];
-
-   cs[1] = 0;
-
-   int len = tempLabel.length();
+   QChar c;
+   QChar pc = 0;
+ 
+   int len = label.length();
 
    int charsLeft = len;
    int sinceLast = 0;
    int foldLen   = 17; // ideal text length
 
-   while ((c = *p++)) {
-      QByteArray replacement;
+   while ((c = *p++) != 0) {
+      QString replacement;
 
-      switch (c) {
+      switch (c.unicode()) {
          case '\\':
             replacement = "\\\\";
             break;
@@ -1579,8 +1576,7 @@ static QString convertLabel(const QString &label)
             replacement = "\\\"";
             break;
          default:
-            cs[0] = c;
-            replacement = cs;
+            replacement = c;
             break;
       }
 
@@ -1591,22 +1587,25 @@ static QString convertLabel(const QString &label)
          result += replacement;
          foldLen = (3 * foldLen + sinceLast + 2) / 4;
          sinceLast = 1;
+
       } else if ((pc != ':' || c != ':') && charsLeft > foldLen / 3 && sinceLast > foldLen && bBefore.contains(c)) {
          result += "\\l";
          result += replacement;
          foldLen = (foldLen + sinceLast + 1) / 2;
          sinceLast = 1;
-      } else if (charsLeft > 1 + foldLen / 4 && sinceLast > foldLen + foldLen / 3 &&
-                 !isupper(c) && isupper(*p)) {
+
+      } else if (charsLeft > 1 + foldLen / 4 && sinceLast > foldLen + foldLen / 3 && ! c.isUpper() && p->isUpper()) {
          result += replacement;
          result += "\\l";
          foldLen = (foldLen + sinceLast + 1) / 2;
          sinceLast = 0;
+
       } else if (charsLeft > foldLen / 3 && sinceLast > foldLen && bAfter.contains(c) && (c != ':' || *p != ':')) {
          result += replacement;
          result += "\\l";
          foldLen = (foldLen + sinceLast + 1) / 2;
          sinceLast = 0;
+
       } else {
          result += replacement;
          sinceLast++;
@@ -2950,7 +2949,6 @@ QString computeMd5Signature(DotNode *root, DotNode::GraphType gt, GraphOutputFor
    }
 
    root->clearWriteFlag();
-
    root->write(md5stream, gt, format, gt != DotNode::CallGraph && gt != DotNode::Dependency, true, backArrows, reNumber);
 
    if (renderParents && root->m_parents) {
@@ -4140,7 +4138,7 @@ void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QStri
    QDir d(outDir);
 
    if (! d.exists()) {
-      err("Output dir %s does not exist\n", outDir.data());
+      err("Output dir %s does not exist\n", qPrintable(outDir));
       exit(1);
    }
 

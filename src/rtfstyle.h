@@ -24,16 +24,16 @@
 // used for table column width calculation
 const int rtf_pageWidth = 8748;
 
-extern QByteArray rtf_title;
-extern QByteArray rtf_subject;
-extern QByteArray rtf_comments;
-extern QByteArray rtf_company;
-extern QByteArray rtf_logoFilename;
-extern QByteArray rtf_author;
-extern QByteArray rtf_manager;
-extern QByteArray rtf_documentType;
-extern QByteArray rtf_documentId;
-extern QByteArray rtf_keywords;
+extern QString rtf_title;
+extern QString rtf_subject;
+extern QString rtf_comments;
+extern QString rtf_company;
+extern QString rtf_logoFilename;
+extern QString rtf_author;
+extern QString rtf_manager;
+extern QString rtf_documentType;
+extern QString rtf_documentId;
+extern QString rtf_keywords;
 
 struct RTFListItemInfo {
    bool isEnum;
@@ -45,9 +45,9 @@ const int rtf_maxIndentLevels = 10;
 extern RTFListItemInfo rtf_listItemInfo[rtf_maxIndentLevels];
 
 struct Rtf_Style_Default {
-   const char *name;
-   const char *reference;
-   const char *definition;
+   QString name;
+   QString reference;
+   QString definition;
 };
 
 extern char rtf_Style_Reset[];
@@ -59,16 +59,16 @@ struct StyleData {
    // to define a tag in the header reference + definition is required
    // to use a tag in the body of the document only reference is required
 
-   unsigned index;   // index in style-sheet, i.e. number in s-clause
-   char *reference;  // everything required to apply the style
-   char *definition; // aditional tags like \snext and style name
+   unsigned index;         // index in style-sheet, i.e. number in s-clause
+   QString  reference;     // everything required to apply the style
+   QString  definition;    // aditional tags like \snext and style name
 
-   StyleData(const char *reference, const char *definition);
+   StyleData(const QString &reference, const QString &definition);
    StyleData();
 
    ~StyleData();
 
-   bool setStyle(const char *s, const char *styleName);
+   bool setStyle(const QString &s, const QString &styleName);
 
    static const QRegExp s_clause;
 };

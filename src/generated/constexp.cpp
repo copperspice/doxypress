@@ -593,6 +593,8 @@ static int yyread(char *buf, int max_size)
 
       g_inputPosition++;     
    }
+
+   return c;
 }
 
 #define INITIAL 0
@@ -987,7 +989,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_strToken = constexpYYtext;
+               g_strToken = QString::fromUtf8(constexpYYtext);
                return TOK_CHARACTER;
             }
             YY_BREAK
@@ -995,7 +997,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_strToken = constexpYYtext;
+               g_strToken = QString::fromUtf8(constexpYYtext);
                return TOK_OCTALINT;
             }
             YY_BREAK
@@ -1003,7 +1005,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_strToken = constexpYYtext;
+               g_strToken = QString::fromUtf8(constexpYYtext);
                return TOK_DECIMALINT;
             }
             YY_BREAK
@@ -1011,7 +1013,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_strToken = constexpYYtext + 2;
+               QString text = QString::fromUtf8(constexpYYtext);
+               g_strToken = text.mid(2);
+
                return TOK_HEXADECIMALINT;
             }
             YY_BREAK
@@ -1019,7 +1023,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_strToken = constexpYYtext;
+               g_strToken = QString::fromUtf8(constexpYYtext);
                return TOK_FLOAT;
             }
             YY_BREAK
@@ -1027,7 +1031,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_strToken = constexpYYtext;
+               g_strToken = QString::fromUtf8(constexpYYtext);
                return TOK_FLOAT;
             }
             YY_BREAK

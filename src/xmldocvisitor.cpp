@@ -133,11 +133,13 @@ void XmlDocVisitor::visit(DocSymbol *s)
    if (m_hide) {
       return;
    }
-   const char *res = HtmlEntityMapper::instance()->xml(s->symbol());
-   if (res) {
+   
+   QString res = HtmlEntityMapper::instance()->xml(s->symbol());
+
+   if (! res.isEmpty()) {
       m_t << res;
    } else {
-      err("XML: non supported HTML-entity found: %s\n", HtmlEntityMapper::instance()->html(s->symbol(), true));
+      err("XML: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 }
 

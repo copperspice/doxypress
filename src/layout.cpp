@@ -1039,7 +1039,8 @@ class LayoutParser : public QXmlDefaultHandler
             err("An entry tag within a navindex has no type attribute, verify your layout file\n");
 
          } else {
-            err("The type '%s' is not supported for the entry tag within a navindex,  verify your layout file\n", type.data());
+            err("The type '%s' is not supported for the entry tag within a navindex, verify your layout file\n", 
+                              qPrintable(type));
          }
 
          m_invalidEntry = true;
@@ -1200,7 +1201,8 @@ class LayoutParser : public QXmlDefaultHandler
          (*handler)(attrib);             
     
       } else {
-         err("XML tag: '%s' was found in scope: '%s', unable to process project layout file\n", qPrintable(name), m_scope.constData());
+         err("XML tag: '%s' was found in scope: '%s', unable to process project layout file\n", 
+                     qPrintable(name), qPrintable(m_scope));
 
       }
 

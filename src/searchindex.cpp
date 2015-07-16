@@ -29,7 +29,6 @@
 #include <doxy_build_info.h>
 #include <filename.h>
 #include <filedef.h>
-#include <growbuf.h>
 #include <groupdef.h>
 #include <language.h>
 #include <message.h>
@@ -433,8 +432,8 @@ struct SearchDocEntry {
    QString extId;
    QString url;
 
-   GrowBuf  importantText;
-   GrowBuf  normalText;
+   QString importantText;
+   QString normalText;
 };
 
 SearchIndexExternal::SearchIndexExternal() : SearchIndexIntf(External)
@@ -539,13 +538,13 @@ void SearchIndexExternal::addWord(const QString &word, bool hiPriority)
       return;
    }
 
-   GrowBuf *pText = hiPriority ? &m_current->importantText : &m_current->normalText;
+   QString *pText = hiPriority ? &m_current->importantText : &m_current->normalText;
 
-   if (pText->getPos() > 0) {
-      pText->addChar(' ');
+   if (! pText->isEmpty()) {   
+      *pText += ' ';
    }
 
-   pText->addStr(word); 
+   *pText += word; 
 }
 
 void SearchIndexExternal::write(const QString &fileName)
@@ -558,30 +557,29 @@ void SearchIndexExternal::write(const QString &fileName)
       t << "<add>" << endl;
       
       for (auto doc : m_docEntries) {
-         doc->normalText.addChar(0);    // make sure buffer ends with a 0 terminator
-         doc->importantText.addChar(0); // make sure buffer ends with a 0 terminator
 
          t << "  <doc>" << endl;
          t << "    <field name=\"type\">"     << doc->type << "</field>" << endl;
          t << "    <field name=\"name\">"     << convertToXML(doc->name) << "</field>" << endl;
-         if (!doc->args.isEmpty()) {
+
+         if (! doc->args.isEmpty()) {
             t << "    <field name=\"args\">"     << convertToXML(doc->args) << "</field>" << endl;
          }
          if (!doc->extId.isEmpty()) {
             t << "    <field name=\"tag\">"      << convertToXML(doc->extId)  << "</field>" << endl;
          }
          t << "    <field name=\"url\">"      << convertToXML(doc->url)  << "</field>" << endl;
-         t << "    <field name=\"keywords\">" << convertToXML(doc->importantText.get())  << "</field>" << endl;
-         t << "    <field name=\"text\">"     << convertToXML(doc->normalText.get())     << "</field>" << endl;
+         t << "    <field name=\"keywords\">" << convertToXML(doc->importantText)  << "</field>" << endl;
+         t << "    <field name=\"text\">"     << convertToXML(doc->normalText)     << "</field>" << endl;
          t << "  </doc>" << endl;
       }
       t << "</add>" << endl;
 
    } else {
-      err("Failed to open file %s for writing!\n", qPrintable(fileName));
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+     
    }
 }
-
 
 // the following part is for the javascript based search engine
 

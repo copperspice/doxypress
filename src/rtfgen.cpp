@@ -179,7 +179,7 @@ void RTFGenerator::init()
 
    while (def->reference != 0) {
       if (def->definition == 0) {
-         err("Internal: rtf_Style_Default[%s] has no definition.\n", def->name);
+         err("Internal: rtf_Style_Default[%s] has no definition.\n", qPrintable(def->name));
       }
 
       StyleData styleData = StyleData(def->reference, def->definition);
@@ -1839,13 +1839,13 @@ void RTFGenerator::endMemberList()
 //
 //void RTFGenerator::startDotFile(const char *name,bool)
 //{
-//  QByteArray baseName=name;
+//  QString baseName = name;
 //  int i;
 //  if ((i=baseName.lastIndexOf('/'))!=-1 || (i=baseName.lastIndexOf('\\'))!=-1)
 //  {
 //    baseName=baseName.right(baseName.length()-i-1);
 //  }
-//  QByteArray outDir = Config::getString("rtf-output");
+//  QString outDir = Config::getString("rtf-output");
 //  writeDotGraphFromFile(name,outDir,baseName,BITMAP);
 //  newParagraph();
 //  m_textStream << "{" << endl;
@@ -1911,7 +1911,7 @@ void RTFGenerator::incrementIndentLevel()
 {
    m_listLevel++;
    if (m_listLevel > rtf_maxIndentLevels - 1) {
-      err("Maximum indent level (%d) exceeded while generating RTF output!\n", rtf_maxIndentLevels);
+      err("Maximum indent level (%d) exceeded while generating RTF output\n", rtf_maxIndentLevels);
       m_listLevel = rtf_maxIndentLevels - 1;
    }
 }
@@ -2146,10 +2146,6 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
 
          DBG_RTF(t_stream << "{\\comment begin include " << fileName << "}" << endl)
 
-
-printf("\n BROOM - RECURSIVE, process file -->  %s \nBUFFER = %s ", qPrintable(fileName), lineBuf.constData()  );
-
-
          if (! preProcessFile_RTF(fileName, t_stream, false)) {
             return false;
          }
@@ -2294,11 +2290,7 @@ void RTFGenerator::endDirDepGraph(const DotDirDeps &g)
  */
 void testRTFOutput(const QString &name)
 {
-
-   printf("\n\n  BROOM  --  TEST the output" );
-
-
-   int bcount = 0;
+    int bcount = 0;
    int line   = 1;
    char c;
 

@@ -55,9 +55,9 @@ QHash<QString, Debug::DebugMask> debugMap()
    return tempMap;
 }
 
-int Debug::labelToEnum(const QString &data)
+int Debug::labelToEnum(const QString &text)
 {   
-   Debug::DebugMask type = m_map.value(data.toLower());
+   Debug::DebugMask type = m_map.value(text.toLower());
 
    if (type) {
       return type;
@@ -80,9 +80,9 @@ void Debug::clearFlag(const QString &label)
    curMask = curMask & ~labelToEnum(label);
 }
 
-void Debug::setPriority(int data)
+void Debug::setPriority(int text)
 {
-   curPriority = data;
+   curPriority = text;
 }
 
 bool Debug::isFlagSet(DebugMask mask)
@@ -165,10 +165,11 @@ static void format_warn(const QString &file, int line, const QString &text)
    msgText = substitute(msgText, "$version", versionSubst) + "\n";
    
    // print resulting message
-   fwrite(msgText.data(), 1, msgText.length(), warnFile);
+   fwrite(msgText.toUtf8().constData(), 1, msgText.length(), warnFile);
 }
 
-static void warn_internal(const QString &tag, const QString &file, int line, const QString &prefix, const QString &fmt, va_list args)
+static void warn_internal(const QString &tag, const QString &file, int line, const QString &prefix, 
+                  const QString &fmt, va_list args)
 {
    if (! Config::getBool(tag)) {
       // is this warning type disabled
@@ -177,19 +178,17 @@ static void warn_internal(const QString &tag, const QString &file, int line, con
 
    const int bufSize = 40960;
 
-   QByteArray text;
-   text.resize(bufSize);
-
+   QByteArray text;  
    int len = 0;
 
    if (! prefix.isEmpty()) {
-      qstrncpy(text.data(), prefix.toUtf8().constData(), bufSize);
-      len = prefix.length();
+      text = prefix.toUtf8();
+      len  = text.length();
    }
 
+   text.resize(bufSize);
    vsnprintf(text.data() + len, bufSize - len, fmt.toUtf8().constData(), args);
-
-   text.resize(bufSize - 1);
+  
    format_warn(file, line, text);
 }
 
@@ -302,18 +301,19 @@ void printlex(int dbg, bool enter, const QString &lexName, const QString &fileNa
    if (dbg) {
 
       if (! fileName.isEmpty()) {
-         fprintf(stderr, "--%s lexical analyzer: %s (for: %s)\n", qPrintable(enter_txt), lexName.toUtf8().constData(), 
-                  fileName.toUtf8().constData());
+         fprintf(stderr, "--%s lexical analyzer: %s (for: %s)\n", qPrintable(enter_txt), qPrintable(lexName), 
+                  qPrintable(fileName));
       } else {
-         fprintf(stderr, "--%s lexical analyzer: %s\n", qPrintable(enter_txt), lexName.toUtf8().constData());
+         fprintf(stderr, "--%s lexical analyzer: %s\n", qPrintable(enter_txt), qPrintable(lexName));
       }
 
    } else {
        if (! fileName.isEmpty()) {
          Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s (for: %s)\n", qPrintable(enter_txt_uc), 
-                  lexName.toUtf8().constData(), fileName.toUtf8().constData());
+                  qPrintable(lexName), qPrintable(fileName));
       } else {
-         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s\n", qPrintable(enter_txt_uc), lexName.toUtf8().constData());
+         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s\n", qPrintable(enter_txt_uc), 
+                  qPrintable(lexName));
       }
    }
 }

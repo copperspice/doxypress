@@ -911,7 +911,7 @@ static int              g_argSharpCount;
 static int              g_argCurlyCount;
 static int              g_readArgContext;
 static int              g_lastDocContext;
-static int              g_lastDocChar;
+static char             g_lastDocChar;
 static int              g_lastExtendsContext;
 static QString          g_delimiter;
 
@@ -1269,41 +1269,53 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(defargsYYtext); 
+
                if (g_curArgTypeName.trimmed().isEmpty())
-               {
-                  g_curArgAttrib = defargsYYtext; // for M$-IDL
+               {                  
+                  g_curArgAttrib = text;       // for M$-IDL
+
                } else // array type
                {
-                  g_curArgArray += defargsYYtext;
+                  g_curArgArray += text;
                }
             }
             YY_BREAK
          case 4:
             YY_RULE_SETUP
 
-            { g_curArgDefValue += defargsYYtext; }
+            { 
+               QString text = QString::fromUtf8(defargsYYtext); 
+               g_curArgDefValue += text; 
+            }
             YY_BREAK
          case 5:
             YY_RULE_SETUP
 
-            { g_curArgDefValue += defargsYYtext; }
+            { 
+               QString text = QString::fromUtf8(defargsYYtext); 
+               g_curArgDefValue += text;
+            }
             YY_BREAK
          case 6:
             YY_RULE_SETUP
 
-            { g_curArgDefValue += defargsYYtext; }
+            { 
+               QString text = QString::fromUtf8(defargsYYtext); 
+               g_curArgDefValue += text; 
+            }
             YY_BREAK
          case 7:
             /* rule 7 can match eol */
             YY_RULE_SETUP
 
             {
-               g_curArgDefValue += defargsYYtext;
-
-               QString text = defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext); 
+               g_curArgDefValue += text;
+             
                int i = text.indexOf('"');
 
-               g_delimiter = defargsYYtext + i + 1;
+               g_delimiter = text.mid(i + 1);
                g_delimiter = g_delimiter.left(g_delimiter.length() - 1);
                BEGIN( CopyRawString );
             }
@@ -1313,18 +1325,22 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_curArgDefValue += *defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext); 
+               g_curArgDefValue += text[0];
                BEGIN( CopyArgString );
             }
             YY_BREAK
+
          case 9:
             /* rule 9 can match eol */
             YY_RULE_SETUP
 
             {
                // function pointer as argument
-               g_curArgTypeName += defargsYYtext;
-               //g_curArgTypeName=g_curArgTypeName.simplified();
+
+               QString text = QString::fromUtf8(defargsYYtext); 
+               g_curArgTypeName += text;
+
                BEGIN( ReadFuncArgPtr );
             }
             YY_BREAK
@@ -1332,7 +1348,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_curArgName = defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext); 
+               g_curArgName = text;
             }
             YY_BREAK
          case 11:
@@ -1340,14 +1357,17 @@ YY_DECL {
 
             {
                // function pointer
-               g_curArgTypeName += defargsYYtext;
-               //g_curArgTypeName=g_curArgTypeName.simplified();
+
+               QString text = QString::fromUtf8(defargsYYtext); 
+               g_curArgTypeName += text;
+
                g_readArgContext = ReadFuncArgType;
-               g_copyArgValue = &g_curArgTypeName;
-               g_argRoundCount = 0;
+               g_copyArgValue   = &g_curArgTypeName;
+               g_argRoundCount  = 0;
                BEGIN( CopyArgRound2 );
             }
             YY_BREAK
+
          case 12:
             *yy_cp = (yy_hold_char); /* undo effects of setting up defargsYYtext */
             (yy_c_buf_p) = yy_cp = yy_bp + 1;
@@ -1356,9 +1376,11 @@ YY_DECL {
 
             {
                // pointer to fixed size array
-               g_curArgTypeName += defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext); 
+
+               g_curArgTypeName += text;
                g_curArgTypeName += g_curArgName;
-               //g_curArgTypeName=g_curArgTypeName.simplified();
+
                BEGIN( ReadFuncArgType );
             }
             YY_BREAK
@@ -1380,59 +1402,71 @@ YY_DECL {
 
             {
                // handle operators in defargs
-               g_curArgTypeName += defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext); 
+               g_curArgTypeName += text;
             }
             YY_BREAK
+
          case 15:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(defargsYYtext);
+
                if (YY_START == ReadFuncArgType)
                {
-                  g_curArgTypeName += *defargsYYtext;
+                  g_curArgTypeName += text[0];
                   g_copyArgValue = &g_curArgTypeName;
-               } else // YY_START==ReadFuncArgDef
+
+               } else 
                {
-                  g_curArgDefValue += *defargsYYtext;
+                  g_curArgDefValue += text[0];
                   g_copyArgValue = &g_curArgDefValue;
                }
+
                g_readArgContext = YY_START;
-               if (*defargsYYtext == '(')
-               {
+
+               if (text[0] == '(') {
                   g_argRoundCount = 0;
                   BEGIN( CopyArgRound );
-               } else if (*defargsYYtext == '{')
-               {
+
+               } else if (text[0] == '{') {
                   g_argCurlyCount = 0;
                   BEGIN( CopyArgCurly );
-               } else // defargsYYtext=='<'
-               {
+
+               } else  {
+                  // defargsYYtext == '<'
+               
                   g_argSharpCount = 0;
                   g_argRoundCount = 0;
                   BEGIN( CopyArgSharp );
                }
             }
             YY_BREAK
+
          case 16:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(defargsYYtext);
                g_argRoundCount++;
-               *g_copyArgValue += *defargsYYtext;
+               *g_copyArgValue += text[0];
             }
             YY_BREAK
+
          case 17:
             YY_RULE_SETUP
 
             {
-               *g_copyArgValue += defargsYYtext;
-               if (g_argRoundCount > 0)
-               {
+               QString text = QString::fromUtf8(defargsYYtext);
+               *g_copyArgValue += text;
+
+               if (g_argRoundCount > 0) {
                   g_argRoundCount--;
-               } else
-               {
-                  if (YY_START == CopyArgRound2)
-                  {
+
+               } else {
+
+                  if (YY_START == CopyArgRound2) {
                      *g_copyArgValue += " " + g_curArgName;
                   }
                   BEGIN( g_readArgContext );
@@ -1446,111 +1480,138 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               *g_copyArgValue += *defargsYYtext;
-               if (g_argRoundCount > 0)
-               {
+               QString text = QString::fromUtf8(defargsYYtext);
+               *g_copyArgValue += text[0];
+
+               if (g_argRoundCount > 0) {
                   g_argRoundCount--;
-               } else { BEGIN( g_readArgContext ); }
+               } else { 
+                  BEGIN( g_readArgContext ); 
+               }
             }
             YY_BREAK
+
          case 19:
             YY_RULE_SETUP
 
             {
                if (g_argRoundCount > 0)
                {
-                  *g_copyArgValue += defargsYYtext;
+                  QString text = QString::fromUtf8(defargsYYtext);
+                  *g_copyArgValue += text;
                } else
                {
                   REJECT;
                }
             }
             YY_BREAK
+
          case 20:
             YY_RULE_SETUP
 
             {
                if (g_argRoundCount > 0)
                {
-                  *g_copyArgValue += defargsYYtext;
-               } else
-               {
+                  QString text = QString::fromUtf8(defargsYYtext);
+                  *g_copyArgValue += text;
+
+               } else {
                   REJECT;
                }
             }
             YY_BREAK
+
          case 21:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(defargsYYtext);
                g_argSharpCount++;
-               *g_copyArgValue += *defargsYYtext;
+               *g_copyArgValue += text[0];
             }
             YY_BREAK
+
          case 22:
             YY_RULE_SETUP
 
             {
-               *g_copyArgValue += *defargsYYtext;
-               if (g_argSharpCount > 0)
-               {
+               QString text = QString::fromUtf8(defargsYYtext);
+               *g_copyArgValue += text[0];
+
+               if (g_argSharpCount > 0) {
                   g_argSharpCount--;
-               } else { BEGIN( g_readArgContext ); }
+               } else { 
+                  BEGIN( g_readArgContext ); 
+               }
             }
+
             YY_BREAK
          case 23:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(defargsYYtext);
                g_argRoundCount++;
-               *g_copyArgValue += *defargsYYtext;
+               *g_copyArgValue += text[0];
             }
             YY_BREAK
+
          case 24:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(defargsYYtext);
                g_argRoundCount--;
-               *g_copyArgValue += *defargsYYtext;
+               *g_copyArgValue += text[0];
             }
             YY_BREAK
+
          case 25:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(defargsYYtext);
                g_argCurlyCount++;
-               *g_copyArgValue += *defargsYYtext;
+               *g_copyArgValue += text[0];
             }
             YY_BREAK
+
          case 26:
             YY_RULE_SETUP
 
             {
-               *g_copyArgValue += *defargsYYtext;
-               if (g_argCurlyCount > 0)
-               {
+               QString text = QString::fromUtf8(defargsYYtext);
+               *g_copyArgValue += text[0];
+
+               if (g_argCurlyCount > 0) {
                   g_argCurlyCount--;
-               } else { BEGIN( g_readArgContext ); }
+               } else { 
+                  BEGIN( g_readArgContext );
+               }
             }
             YY_BREAK
+
          case 27:
             YY_RULE_SETUP
 
             {
-               g_curArgDefValue += defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_curArgDefValue += text;
             }
             YY_BREAK
+
          case 28:
             /* rule 28 can match eol */
             YY_RULE_SETUP
 
             {
-               g_curArgDefValue += defargsYYtext;
-               QString delimiter = defargsYYtext + 1;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_curArgDefValue += text;
+               QString delimiter = text.mid(1);
 
                delimiter = delimiter.left(delimiter.length() - 1);
-               if (delimiter == g_delimiter)
-               {
+
+               if (delimiter == g_delimiter) {
                   BEGIN( ReadFuncArgDef );
                }
             }
@@ -1559,10 +1620,13 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_curArgDefValue += *defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_curArgDefValue += text[0];
+
                BEGIN( ReadFuncArgDef );
             }
             YY_BREAK
+
          case 30:
             YY_RULE_SETUP
 
@@ -1570,28 +1634,30 @@ YY_DECL {
                BEGIN( ReadFuncArgDef );
             }
             YY_BREAK
+
          case 31:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(defargsYYtext);
                g_lastDocContext = YY_START;
-               g_lastDocChar = *defargsYYtext;
-               QString text = defargsYYtext;
+               g_lastDocChar    = defargsYYtext[0];   
 
-               if (text.indexOf("//") != -1)
-               {
+               if (text.indexOf("//") != -1) {
                  BEGIN( ReadDocLine );
                } else { BEGIN( ReadDocBlock ); }
             }
+
             YY_BREAK
 
          case 32:
             YY_RULE_SETUP
 
             {
-               if (*defargsYYtext == ')' && g_curArgTypeName.trimmed().isEmpty())
-               {
-                  g_curArgTypeName += *defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+
+               if (text[0] == ')' && g_curArgTypeName.trimmed().isEmpty()) {
+                  g_curArgTypeName += text[0];
                   BEGIN(FuncQual);
 
                } else {
@@ -1669,10 +1735,12 @@ YY_DECL {
                      //printf("array=%s\n",a->array.data());
                      int alen = a->array.length();
 
-                     if (alen > 2 && a->array.at(0) == '(' &&
-                           a->array.at(alen - 1) == ')') { // fix-up for int *(a[10])
+                     if (alen > 2 && a->array.at(0) == '(' && a->array.at(alen - 1) == ')') { 
+
+                        // fix-up for int *(a[10])
                         int i = a->array.indexOf('[') - 1;
                         a->array = a->array.mid(1, alen - 2);
+
                         if (i > 0 && a->name.isEmpty()) {
                            a->name  = a->array.left(i).trimmed();
                            a->array = a->array.mid(i);
@@ -1691,8 +1759,7 @@ YY_DECL {
                   g_curArgDocs.resize(0);
                   g_curTypeConstraint.resize(0);
 
-                  if (*defargsYYtext == ')')
-                  {
+                  if (text[0] == ')') {
                      BEGIN(FuncQual);
                   } else {
                      BEGIN( ReadFuncArgType );
@@ -1714,14 +1781,16 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QString name = defargsYYtext; //resolveDefines(defargsYYtext);
-               if (YY_START == ReadFuncArgType && g_curArgArray == "[]") // Java style array
-               {
+               QString text = QString::fromUtf8(defargsYYtext);
+
+               if (YY_START == ReadFuncArgType && g_curArgArray == "[]") {
+                  // Java style array
+               
                   g_curArgTypeName += " []";
                   g_curArgArray.resize(0);
                }
-               //printf("resolveName `%s'->`%s'\n",defargsYYtext,name.data());
-               g_curArgTypeName += name;
+
+               g_curArgTypeName += text;
             }
             YY_BREAK
 
@@ -1729,7 +1798,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_curArgTypeName += *defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_curArgTypeName += text[0];
             }
             YY_BREAK
 
@@ -1737,7 +1807,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_curArgDefValue += defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_curArgDefValue += text;
             }
             YY_BREAK
 
@@ -1745,7 +1816,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_curArgDefValue += *defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_curArgDefValue += text[0];
             }
             YY_BREAK
 
@@ -1753,8 +1825,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QString name = defargsYYtext; //resolveDefines(defargsYYtext);
-               *g_copyArgValue += name;
+               QString text = QString::fromUtf8(defargsYYtext);
+               *g_copyArgValue += text;
             }
             YY_BREAK
 
@@ -1762,14 +1834,15 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               *g_copyArgValue += *defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               *g_copyArgValue += text[0];
             }
             YY_BREAK
 
          case 40:
             YY_RULE_SETUP
             {
-               unput(*defargsYYtext);
+               unput(defargsYYtext[0]);
                BEGIN(g_lastExtendsContext);
             }
             YY_BREAK
@@ -1777,7 +1850,8 @@ YY_DECL {
          case 41:
             YY_RULE_SETUP
             {
-               g_curTypeConstraint += defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_curTypeConstraint += text;
             }
             YY_BREAK
 
@@ -1831,7 +1905,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               unput(*defargsYYtext);
+               unput(defargsYYtext[0]);
                BEGIN(FuncQual);
             }
             YY_BREAK
@@ -1839,7 +1913,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_argList->trailingReturnType += defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_argList->trailingReturnType += text;
             }
             YY_BREAK
          case 49:
@@ -1847,7 +1922,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_argList->trailingReturnType += defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_argList->trailingReturnType += text;
             }
             YY_BREAK
          case 50:
@@ -1857,43 +1933,50 @@ YY_DECL {
             {
                // for functions returning a pointer to an array,
                // i.e. ")[]" in "int (*f(int))[4]" with argsString="(int))[4]"
-               g_extraTypeChars = defargsYYtext;
+
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_extraTypeChars = text;
             }
             YY_BREAK
          case 51:
             YY_RULE_SETUP
 
             {
-               g_curArgDocs += defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_curArgDocs += text;
             }
             YY_BREAK
+
          case 52:
             YY_RULE_SETUP
 
             {
-               g_curArgDocs += defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_curArgDocs += text;
             }
             YY_BREAK
+
          case 53:
             YY_RULE_SETUP
 
             {
-               if (g_lastDocChar != 0)
-               {
-                  unput(g_lastDocChar);
+               if (g_lastDocChar != '\0') {
+                  unput(g_lastDocChar);    
                }
+
                BEGIN(g_lastDocContext);
             }
             YY_BREAK
+
          case 54:
             /* rule 50 can match eol */
             YY_RULE_SETUP
 
             {
-               if (g_lastDocChar != 0)
-               {
+               if (g_lastDocChar != '\0') {
                   unput(g_lastDocChar);
                }
+
                BEGIN(g_lastDocContext);
             }
             YY_BREAK
@@ -1902,27 +1985,31 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_curArgDocs += *defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_curArgDocs += text[0];
             }
             YY_BREAK
          case 56:
             YY_RULE_SETUP
 
             {
-               g_curArgDocs += *defargsYYtext;
+               QString text = QString::fromUtf8(defargsYYtext);
+               g_curArgDocs += text[0];
             }
             YY_BREAK
+
          case 57:
             YY_RULE_SETUP
 
             {
                g_lastDocContext = YY_START;
-               g_lastDocChar = 0;
-               if (defargsYYtext[1] == '/')
-               {
-                  BEGIN( ReadDocLine );
-               } else
-               { BEGIN( ReadDocBlock ); }
+               g_lastDocChar = '\0';
+
+               if (defargsYYtext[1] == '/') {
+                  BEGIN( ReadDocLine ); 
+               } else { 
+                  BEGIN( ReadDocBlock ); 
+               }
             }
             YY_BREAK
 
@@ -2953,7 +3040,7 @@ void stringToArgumentList(const QString &argsString, ArgumentList *al, QString *
       return;
    }
 
-   if (! argsString.isEmpty()) {
+   if (argsString.isEmpty()) {
       return;
    }
 
@@ -2969,7 +3056,7 @@ void stringToArgumentList(const QString &argsString, ArgumentList *al, QString *
    g_argRoundCount = 0;
    g_argSharpCount = 0;
    g_argCurlyCount = 0;
-   g_lastDocChar   = 0;
+   g_lastDocChar   = '\0';
    g_inputString   = argsString;
    g_inputPosition = 0;
 
@@ -2988,6 +3075,3 @@ void stringToArgumentList(const QString &argsString, ArgumentList *al, QString *
   
    printlex(defargsYY_flex_debug, FALSE, __FILE__, NULL);
 }
-
-
-

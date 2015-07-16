@@ -218,7 +218,6 @@ noinst_HEADERS = \
    src/fortrancode.h \
    src/ftvhelp.h \
    src/groupdef.h \
-   src/growbuf.h \
    src/htags.h \
    src/htmlattrib.h \
    src/htmldocvisitor.h \
@@ -312,7 +311,7 @@ TRANSLATIONS =  \
     resources/translation/doxy_ko_en.ts \
     resources/translation/doxy_lv.ts \
     resources/translation/doxy_lt.ts \
-    resources/translation/doxy_mt.ts \
+    resources/translation/doxy_mk.ts \
     resources/translation/doxy_nb.ts \
     resources/translation/doxy_pl.ts \
     resources/translation/doxy_pt.ts \

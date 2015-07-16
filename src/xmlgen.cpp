@@ -946,7 +946,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          writeMemberTemplateLists(md, t);
       }
 
-      QString typeStr = md->typeString(); //replaceAnonymousScopes(md->typeString());
+      QString typeStr = md->typeString();    //replaceAnonymousScopes(md->typeString());
       stripQualifiers(typeStr);
 
       t << "        <type>";
@@ -958,9 +958,6 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    }
 
    t << "        <name>" << convertToXML(md->name()) << "</name>" << endl;
-
-
-// broom -- on hold
 
    if (md->memberType() == MemberType_Property) {
       if (md->isReadable()) {
@@ -2033,7 +2030,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
                        pd->documentation() + "\n\\include " + pd->name());
 
    } else {
-      writeXMLDocBlock(t, pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(),pd->documentation());
+      writeXMLDocBlock(t, pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(), pd->documentation());
    }
    t << "    </detaileddescription>" << endl;
 
@@ -2068,34 +2065,32 @@ void generateXML()
    }
 
    // write compound.xsd, but replace special marker with the entities
-   QByteArray compound_xsd = ResourceMgr::instance().getAsString("xml/compound.xsd");
-   const char *startLine = compound_xsd.constData();
+   QByteArray tmp = ResourceMgr::instance().getAsString("xml/compound.xsd");
 
-// broom check
+   QString xmlData = QString::fromUtf8(tmp);
+   const QChar *startLine = xmlData.constData();
 
-   while (*startLine) {
+   while (*startLine != 0) {
       // find end of the line
-      const char *endLine = startLine + 1;
+      const QChar *endLine = startLine + 1;
 
-      while (*endLine && *(endLine - 1) != '\n') {
+      while (*endLine != 0 && *(endLine - 1) != '\n') {
          endLine++;   // skip to end of the line including \n
       }
 
       int len = endLine - startLine;
 
       if (len > 0) {
-         QByteArray s;
-         s.resize(len + 1);
+         QString s;
+         s = QString(startLine, len);              
 
-         qstrncpy(s.data(), startLine, len);
-         s[len] = '\0';
+         QTextStream t(&f);
 
-         if (s.indexOf("<!-- Automatically insert here the HTML entities -->") != -1) {
-            QTextStream t(&f);
+         if (s.indexOf("<!-- Automatically insert here the HTML entities -->") != -1) {           
             HtmlEntityMapper::instance()->writeXMLSchema(t);
 
          } else {
-            f.write(startLine, len);
+            t << s;
          }
       }
       startLine = endLine;
@@ -2118,41 +2113,40 @@ void generateXML()
    t << "<doxypressindex xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ";
    t << "xsi:noNamespaceSchemaLocation=\"index.xsd\" ";
    t << "version=\"" << versionString << "\">" << endl;
-
        
    for (auto cd : *Doxy_Globals::classSDict) {
        generateXMLForClass(cd, t);
    }
    
    for (auto nd : *Doxy_Globals::namespaceSDict) {
-      msg("Generating XML output for namespace %s\n", nd->name().data());
+      msg("Generating XML output for namespace %s\n", qPrintable(nd->name()));
       generateXMLForNamespace(nd, t);
    }
  
    for (auto fn : *Doxy_Globals::inputNameList) {     
       for (auto fd : *fn) {
-         msg("Generating XML output for file %s\n", fd->name().data());
+         msg("Generating XML output for file %s\n", qPrintable(fd->name()));
          generateXMLForFile(fd, t);
       }
    }
  
    for (auto gd : *Doxy_Globals::groupSDict) {
-      msg("Generating XML output for group %s\n", gd->name().data());
+      msg("Generating XML output for group %s\n", qPrintable(gd->name()));
       generateXMLForGroup(gd, t);
    } 
 
    for (auto pd : *Doxy_Globals::pageSDict) {
-      msg("Generating XML output for page %s\n", pd->name().data());
+      msg("Generating XML output for page %s\n", qPrintable(pd->name()));
       generateXMLForPage(pd, t, false);
    }
     
    for (auto dir : Doxy_Globals::directories) {
-      msg("Generate XML output for dir %s\n", dir->name().data());
+      msg("Generate XML output for dir %s\n", qPrintable(dir->name()));
       generateXMLForDir(dir, t);
    }
     
    for (auto pd : *Doxy_Globals::exampleSDict) {
-      msg("Generating XML output for example %s\n", pd->name().data());
+      msg("Generating XML output for example %s\n", qPrintable(pd->name()));
       generateXMLForPage(pd, t, true);
    }
    

@@ -146,15 +146,11 @@ void RTFDocVisitor::visit(DocSymbol *s)
    DBG_RTF("{\\comment RTFDocVisitor::visit(DocSymbol)}\n");
    const QString res = HtmlEntityMapper::instance()->rtf(s->symbol());
 
-
-// brooom check
-
-
    if (! res.isEmpty()) {
       m_t << res;
 
    } else {
-      err("RTF: non supported HTML-entity found: %s\n", HtmlEntityMapper::instance()->html(s->symbol(), true));
+      err("RTF: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 
    m_lastIsPara = false;
@@ -348,7 +344,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
 
          QFile file(fileName);
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s for writing\n", fileName.data());
+            err("Could not open file %s for writing\n", qPrintable(fileName));
          }
 
          file.write( s->text().toUtf8() );

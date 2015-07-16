@@ -27,16 +27,16 @@
 
 RTFListItemInfo rtf_listItemInfo[rtf_maxIndentLevels];
 
-QByteArray rtf_title;
-QByteArray rtf_subject;
-QByteArray rtf_comments;
-QByteArray rtf_company;
-QByteArray rtf_logoFilename;
-QByteArray rtf_author;
-QByteArray rtf_manager;
-QByteArray rtf_documentType;
-QByteArray rtf_documentId;
-QByteArray rtf_keywords;
+QString rtf_title;
+QString rtf_subject;
+QString rtf_comments;
+QString rtf_company;
+QString rtf_logoFilename;
+QString rtf_author;
+QString rtf_manager;
+QString rtf_documentType;
+QString rtf_documentId;
+QString rtf_keywords;
 
 char rtf_Style_Reset[] = "\\pard\\plain ";
 
@@ -408,28 +408,20 @@ Rtf_Style_Default rtf_Style_Default[] = {
    }
 };
 
-const QRegExp StyleData::s_clause("\\\\s[0-9]+\\s*");
+const QRegExp StyleData::s_clause("\\\\s([0-9]+)\\s*");
 
-StyleData::StyleData(const char *reference, const char *definition)
-{
-   //  QString temp = reference;
-
+StyleData::StyleData(const QString &reference, const QString &definition)
+{  
    int start = s_clause.indexIn(reference);
    assert(start >= 0);
 
-   reference += start;
-   index = (int)atol(reference + 2);
+   QString tmp = reference.mid(start);   
+   index = s_clause.cap(1).toLong();
 
    assert(index > 0);
-   assert(reference != 0);
 
-   size_t size = 1 + strlen(reference);
-   memcpy(this->reference = new char[size], reference, size);
-
-   assert(definition != 0);
-   size = 1 + strlen(definition);
-
-   memcpy(this->definition = new char[size], definition, size);
+   this->reference  = tmp;
+   this->definition = definition;
 }
 
 StyleData::StyleData()
@@ -438,14 +430,10 @@ StyleData::StyleData()
 } 
 
 StyleData::~StyleData()
-{
-   if (! Doxy_Globals::g_programExit)  {
-      delete[] reference;
-      delete[] definition;
-   }
+{  
 }
 
-bool StyleData::setStyle(const char *s, const char *styleName)
+bool StyleData::setStyle(const QString &str, const QString &styleName)
 {
    static const QRegExp subgroup("^\\{[^}]*\\}\\s*");
    static const QRegExp any_clause("^\\\\[a-z][a-z0-9-]*\\s*");
@@ -453,27 +441,30 @@ bool StyleData::setStyle(const char *s, const char *styleName)
    int len = 0;     // length of a particular RTF formatting control
    int ref_len = 0; // length of the whole formatting section of a style
 
+   QString s = str;
+
    int start = s_clause.indexIn(s);
    len = s_clause.matchedLength();   
- 
+
    if (start < 0) {
-      err("Style sheet '%s' contains no '\\s' clause.\n{%s}\n", styleName, s);
+      err("Style sheet '%s' contains no '\\s' clause.\n{%s}\n", qPrintable(styleName), qPrintable(s));
       return false;
    }
 
-   s += start;
-   index = (int)atol(s + 2);
+   s = s.mid(start);  
+   index = s.mid(2).toLong();
+
    assert(index > 0);
 
    // search for the end of pure formatting codes
-   const char *end = s + len;
+   QString end = s.mid(len);
    ref_len = len;
 
    bool haveNewDefinition = true;
 
    while (true) {
 
-      if (*end == '{') {
+      if (end.startsWith('{')) {
          // subgroups are used for \\additive
 
          int startX = subgroup.indexIn(end);
@@ -483,16 +474,16 @@ bool StyleData::setStyle(const char *s, const char *styleName)
             break;
 
          } else {
-            end += len;
+            end = end.mid(len);
             ref_len += len;
          }
 
-      } else if (*end == '\\') {
-         if (0 == qstrncmp(end, "\\snext", 6)) {
+      } else if (end.startsWith('\\')) {
+         if (end.startsWith("\\snext")) {
             break;
          }
 
-         if (0 == qstrncmp(end, "\\sbasedon", 9)) {
+         if (end.startsWith("\\sbasedon")) {
             break;
          }
 
@@ -503,10 +494,10 @@ bool StyleData::setStyle(const char *s, const char *styleName)
             break;
          }
 
-         end += len;
+         end = end.mid(len);
          ref_len += len;
 
-      } else if (*end == 0) {
+      } else if (end.isEmpty()) {
          // no style-definition part, keep default value
          haveNewDefinition = false;
          break;
@@ -516,20 +507,14 @@ bool StyleData::setStyle(const char *s, const char *styleName)
          break;
 
       }
-   }
-
-   delete[] reference;
-
-   reference = new char[ref_len + 1];
-   memcpy(reference, s, ref_len);
-   reference[ref_len] = 0;
+   } 
+   
+   reference = s.mid(ref_len);
 
    if (haveNewDefinition) {
-      delete[] definition;
-      size_t size = 1 + strlen(end);
-      definition = new char[size];
-      memcpy(definition, end, size);
+      definition = end;
    }
+
    return true;
 }
 
@@ -538,7 +523,7 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
    QFile file(name);
 
    if (! file.open(QIODevice::ReadOnly)) {
-      err("Can't open RTF style sheet file %s. Using defaults.\n", qPrintable(name));
+      err("Ca not open RTF style sheet file %s. Using defaults.\n", qPrintable(name));
       return;
    }
    msg("Loading RTF style sheet %s\n", qPrintable(name));
@@ -550,7 +535,7 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
    t.setCodec("UTF-8");
 
    while (! t.atEnd()) {
-      QByteArray s = t.readLine().trimmed().toUtf8();
+      QString s = t.readLine().trimmed();
 
       if (s.isEmpty() || s.at(0) == '#') {
          continue;   // skip blanks & comments
@@ -568,11 +553,11 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
          continue;
       }
 
-      QByteArray key = s.left(sepStart);
+      QString key = s.left(sepStart);
 
       if (! dict.contains(key)) { 
          // not a valid style sheet name
-         warn(qPrintable(name), lineNr, "Invalid style sheet name %s ignored.\n", key.constData());
+         warn(qPrintable(name), lineNr, "Invalid style sheet name %s ignored.\n", qPrintable(key));
          continue;
       }
 
@@ -580,7 +565,7 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
       StyleData &styleData = dict.find(key).value();
 
       s += " "; 
-      styleData.setStyle(s.constData() + sepStart + sepLength, key.constData());
+      styleData.setStyle(s.mid(sepStart + sepLength), key);
 
       lineNr++;
    }
@@ -607,8 +592,7 @@ void loadExtensions(const QString &name)
    while (! t.atEnd()) {
       // string buffer of max line length
 
-      QByteArray s;       
-      s = t.readLine().trimmed().toUtf8();
+      QString s = t.readLine().trimmed();
 
       if (s.length() == 0 || s.at(0) == '#') {
          continue;   // skip blanks & comments
@@ -623,39 +607,40 @@ void loadExtensions(const QString &name)
          continue;
       }
 
-      QByteArray key  = s.left(sepStart);
-      QByteArray data = s.data() + sepStart + sepLength;
+      QString key  = s.left(sepStart);
+      QString data = s.mid(sepStart + sepLength);
 
       if (key == "Title") {
-         rtf_title            = data.data();
+         rtf_title            = data;
       }
       if (key == "Subject") {
-         rtf_subject          = data.data();
+         rtf_subject          = data;
       }
       if (key == "Comments") {
-         rtf_comments         = data.data();
+         rtf_comments         = data;
       }
       if (key == "Company") {
-         rtf_company          = data.data();
+         rtf_company          = data;
       }
       if (key == "LogoFilename") {
-         rtf_logoFilename     = data.data();
+         rtf_logoFilename     = data;
       }
       if (key == "Author") {
-         rtf_author           = data.data();
+         rtf_author           = data;
       }
       if (key == "Manager") {
-         rtf_manager          = data.data();
+         rtf_manager          = data;
       }
       if (key == "DocumentType") {
-         rtf_documentType     = data.data();
+         rtf_documentType     = data;
       }
       if (key == "DocumentId") {
-         rtf_documentId       = data.data();
+         rtf_documentId       = data;
       }
       if (key == "Keywords") {
-         rtf_keywords         = data.data();
+         rtf_keywords         = data;
       }
+
       lineNr++;
    }
 }

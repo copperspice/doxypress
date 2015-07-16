@@ -2206,32 +2206,14 @@ void setAnchors(QSharedPointer<MemberList> ml)
  * or CR (MAC) line ending to LF (Unix).  Returns the length of the
  * converted content (i.e. the same as \a len (Unix, MAC) or smaller (DOS).
  */
-int filterCRLF(QString &buf)
-{
-   int src  = 0;    // source index
-   int dest = 0;    // destination index
-   QChar c;         // current character
+QString filterCRLF(const QString &buffer)
+{   
+   QString retval = buffer;   
+   
+   retval.replace("\r\n",   "\n");
+   retval.replace(QChar(0), " ");      
 
-   int len = buf.length();
-
-   while (src < len) {
-      c = buf[src++];             // Remember the processed character.
-
-      if (c == '\r') {            // CR to be solved (MAC, DOS)
-         c = '\n';                // each CR to LF
-
-         if (src < len && buf[src] == '\n') {
-            ++src;   // skip LF just after CR (DOS)
-         }
-
-      } else if ( c == '\0' && src < len - 1) { // filter out internal \0 characters, as it will confuse the parser
-         c = ' ';                 // turn into a space
-      }
-
-      buf[dest++] = c;           // copy the (modified) character to dest
-   }
-
-   return dest;                 // length of the valid part of the buf
+   return retval; 
 }
 
 static QString getFilterFromList(const QString &name, const QStringList &filterList, bool &found)
@@ -2334,21 +2316,21 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
 
    QFile f;
 
-   bool fileOpened = false;
+   bool isFileOpened = false;
 
    if (name == "-") { 
       // read from stdin
-      fileOpened = f.open(stdin, QIODevice::ReadOnly);
+      isFileOpened = f.open(stdin, QIODevice::ReadOnly);
 
-      if (fileOpened) {
+      if (isFileOpened) {
         
          QByteArray data;         
          data = f.readAll();  
 
          QString contents = QString::fromUtf8(data);
 
-         int totalSize = filterCRLF(contents);              
-         contents.append('\n');    // to help the scanner
+         contents = filterCRLF(contents);
+         contents.append('\n');             // to help the scanner
 
          return contents;
       }
@@ -2361,21 +2343,21 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
          return "";
       }
 
-      QString buf;
-      fileOpened = readInputFile(name, buf, filter, isSourceCode);
+      QString fileContents;
+      isFileOpened = readInputFile(name, fileContents, filter, isSourceCode);
 
-      if (fileOpened) {
-         int s = buf.size();
+      if (isFileOpened) {
+         int s = fileContents.size();
 
-         if (! buf.endsWith('\n')) {
-            buf += '\n';            
+         if (! fileContents.endsWith('\n')) {
+            fileContents += '\n';            
          }
 
-         return buf;
+         return fileContents;
       }
    }
 
-   if (! fileOpened) {
+   if (! isFileOpened) {
       err("Unable to open file `%s' for reading\n", qPrintable(name));
    }
 
@@ -5232,31 +5214,38 @@ QString convertCharEntities(const QString &str)
    }
 
    static QRegExp entityPat("&[a-zA-Z]+[0-9]*;");
- 
-   int p;
+   
    int i = 0;
-   int l;
+   int p;
+   int k;
 
    while ((p = entityPat.indexIn(str, i)) != -1) {
-      l = entityPat.matchedLength();
+      k = entityPat.matchedLength();
 
       if (p > i) {
          retval += str.mid(i, p - i);
       }
 
-      QString entity = str.mid(p, l);
+      QString entity = str.mid(p, k);
       DocSymbol::SymType symType = HtmlEntityMapper::instance()->name2sym(entity);
 
-      const char *code = 0;
+      QString code;
 
-      if (symType != DocSymbol::Sym_Unknown && (code = HtmlEntityMapper::instance()->utf8(symType))) {
-         retval += code;
+      if (symType == DocSymbol::Sym_Unknown) { 
+         retval += str.mid(p, k);
 
-      } else {
-         retval += str.mid(p, l);
+      } else {   
+         code = HtmlEntityMapper::instance()->utf8(symType);
+
+         if (! code.isEmpty()) {
+            retval += code;
+
+         } else {
+            retval += str.mid(p, k);
+         }              
       }
 
-      i = p + l;
+      i = p + k;
    }
 
    retval += str.mid(i, str.length() - i);
@@ -5976,6 +5965,8 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
       return;
    }
 
+// broom check (1a)
+
    QByteArray tmp = text.toUtf8(); 
    const char *p  = tmp.constData();   
   
@@ -6031,6 +6022,8 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                // migiht be a special symbol
 
                const char *ptr2;
+
+// broom check (1b)
 
                ptr2 = p;
                cnt  = 2;  
@@ -6154,37 +6147,27 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
 }
 
 QString rtfFormatBmkStr(const QString &key) 
-{
-   static QByteArray nextTag("AAAAAAAAAA");
-   static QHash<QString, QString> tagDict;
-  
+{     
    // To overcome the 40-character tag limitation, we substitute a short arbitrary string for the name
    // supplied, and keep track of the correspondence between names and strings.
-   
-   auto tag = tagDict.find(key);
 
-   if (tag == tagDict.end()) {
-      // this particular name has not yet been added to the list. Add it now
-      // associate it with the next tag value, and increment the next tag
+   static uint64_t nextTag = 0;
+   static QHash<QString, uint64_t> tagDict;
+   
+   auto item = tagDict.find(key);
+
+   if (item == tagDict.end()) {
+      // this particular name has not yet been added to the list. Add it now and 
+      // associate it with the next tag value. then increment next tag
     
       tagDict.insert(key, nextTag);
-      tag = tagDict.find(key);
+      item = tagDict.find(key);
 
-      // this is the increment part
-      char *tempTag = nextTag.data() + nextTag.length() - 1;
-
-      for ( unsigned int i = 0; i < nextTag.length(); ++i, --tempTag ) {
-         if ( ( ++(*tempTag) ) > 'Z' ) {
-            *tempTag = 'A';
-
-         } else {
-            // since there was no carry, we can stop now
-            break;
-         }
-      }
+      // increment part
+      nextTag++;
    }
 
-   return tag.value();
+   return QString::number(item.value(), 16);
 }
 
 QString stripExtension(QString fName)
@@ -6285,12 +6268,10 @@ bool findAndRemoveWord(QString &str, const QString &word)
    return false;
 }
 
-/** Special version of QByteArray::trimmed() that only strips
- *  completely blank lines.
+/** Special version of QByteArray::trimmed() that only strips completely blank lines.
  *  @param s the string to be stripped
- *  @param docLine the line number corresponding to the start of the
- *         string. This will be adjusted based on the number of lines stripped
- *         from the start.
+ *  @param docLine the line number corresponding to the start of the string
+ *         This will be adjusted based on the number of lines stripped from the start.
  *  @returns The stripped string.
  */
 QString stripLeadingAndTrailingEmptyLines(const QString &str, int &docLine)
@@ -6300,22 +6281,21 @@ QString stripLeadingAndTrailingEmptyLines(const QString &str, int &docLine)
    }
 
    const QChar *p = str.constData();
+   const QChar *ptr = p;
 
-   // search for leading empty lines
-   int i  = 0;
-   int li = -1;
-   int l  = str.length();
+   // search for leading empty lines 
+   int start = -1;
+   int len   = str.length();
 
    QChar c;
 
-   while ((c = *p++).unicode()) {
+   while ((c = *p++) != 0) {
 
       if (c == ' ' || c == '\t' || c == '\r') {
-         i++;
+         // do nothing
 
-      } else if (c == '\n') {
-         i++;
-         li = i;
+      } else if (c == '\n') {         
+         start = (p - ptr);
          docLine++;
 
       } else {
@@ -6324,48 +6304,46 @@ QString stripLeadingAndTrailingEmptyLines(const QString &str, int &docLine)
       }
    }
 
-   // search for trailing empty lines
-   int b  = l - 1;
-   int bi = -1;
+   // search for trailing empty lines   
+   int end = -1;
+   
+   p = ptr + len - 1;
 
-   p = str.constData() + b;
-
-   while (b >= 0) {
+   while (p >= ptr) {
       c = *p;
       p--;
 
       if (c == ' ' || c == '\t' || c == '\r') {
-         b--;
+         // do nothing
 
       } else if (c == '\n') {
-         bi = b;
-         b--;
-
+         end = (p - ptr);
+        
       } else {
          break;
       }
    }
 
    // return whole string if no leading or trailing lines where found
-   if (li == -1 && bi == -1) {
+   if (start == -1 && end == -1) {
       return str;
    }
 
    // return substring
-   if (bi == -1) {
-      bi = l;
+   if (end == -1) {
+      end = len;
    }
 
-   if (li == -1) {
-      li = 0;
+   if (start == -1) {
+      start = 0;
    }
 
-   if (bi <= li) {
+   if (end <= start) {
       // only empty lines
       return "";  
    }
 
-   return str.mid(li, bi - li);
+   return str.mid(start, end - start + 1);
 }
 
 static struct Lang2ExtMap {
@@ -6585,59 +6563,6 @@ bool checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fi
    }
 }
 
-int nextUtf8CharPosition(const QByteArray &utf8Str, int len, int startPos)
-{
-   int bytes = 1;
-   if (startPos >= len) {
-      return len;
-   }
-
-   char c = utf8Str[startPos];
-
-   if (c < 0) { // multibyte utf-8 character
-
-      if (((uchar)c & 0xE0) == 0xC0) {
-         bytes++; // 11xx.xxxx: >=2 byte character
-      }
-
-      if (((uchar)c & 0xF0) == 0xE0) {
-         bytes++; // 111x.xxxx: >=3 byte character
-      }
-
-      if (((uchar)c & 0xF8) == 0xF0) {
-         bytes++; // 1111.xxxx: >=4 byte character
-      }
-
-      if (((uchar)c & 0xFC) == 0xF8) {
-         bytes++; // 1111.1xxx: >=5 byte character
-      }
-
-      if (((uchar)c & 0xFE) == 0xFC) {
-         bytes++; // 1111.1xxx: 6 byte character
-      }
-
-   } else if (c == '&') { // skip over character entities
-      static QRegExp re1("&#[0-9]+;");     // numerical entity
-      static QRegExp re2("&[A-Z_a-z]+;");  // named entity
-
-      int l1, l2;
-
-      int i1 = re1.indexIn(utf8Str, startPos);
-      int i2 = re2.indexIn(utf8Str, startPos);
-
-      l1 = re1.matchedLength();
-      l2 = re2.matchedLength();
-
-      if (i1 != -1) {
-         bytes = l1;
-
-      } else if (i2 != -1) {
-         bytes = l2;
-      }
-   }
-   return startPos + bytes;
-}
-
 QString parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md,
                   const QString &doc, const QString &fileName, int lineNr)
 {
@@ -6660,7 +6585,7 @@ QString parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<Memb
 
    QString result = convertCharEntities(s);
   
-   int len = result.length();
+   int len   = result.length();
    int count = len;
 
    if (count >= 80) { 
@@ -7082,9 +7007,17 @@ static int transcodeCharacterBuffer(const QString &fileName, BufStr &srcBuf, int
 }
 
 //! read a file name \a fileName and optionally filter and transcode it
-bool readInputFile(const QString &fileName, QString &inBuf, bool filter, bool isSourceCode)
+QString readInputFile(const QString &fileName) 
 {
-   // try to open file
+   QString retval;
+   readInputFile(fileName, retval);
+
+   return retval;
+}
+
+//! read a file name \a fileName and optionally filter and transcode it
+bool readInputFile(const QString &fileName, QString &fileContents, bool filter, bool isSourceCode)
+{   
    int size = 0;
   
    QFileInfo fi(fileName);
@@ -7105,7 +7038,7 @@ bool readInputFile(const QString &fileName, QString &inBuf, bool filter, bool is
 
       size = fi.size();     
       buffer.resize(size);
-     
+  
       if (f.read(buffer.data(), size) != size) {
          err("Unable to read file %s, error: %d\n", qPrintable(fileName), f.error());
          return false;
@@ -7126,7 +7059,7 @@ bool readInputFile(const QString &fileName, QString &inBuf, bool filter, bool is
       char buf[bufSize];
       int numRead;
 
-      while ((numRead = (int)fread(buf, 1, bufSize, f)) > 0) {         
+      while ((numRead = fread(buf, 1, bufSize, f)) > 0) {         
          buffer.append(buf, numRead);
          size += numRead;
       }
@@ -7139,24 +7072,24 @@ bool readInputFile(const QString &fileName, QString &inBuf, bool filter, bool is
   
    if (size >= 2 && ((buffer.at(0) == -1 && buffer.at(1) == -2) || (buffer.at(0) == -2 && buffer.at(1) == -1) )) { 
       // UCS-2 encoded file   
-      inBuf  = QTextCodec::codecForMib(1015)->toUnicode(buffer);
+      fileContents = QTextCodec::codecForMib(1015)->toUnicode(buffer);
 
    } else if (size >= 3 && (uchar)buffer.at(0) == 0xEF && (uchar)buffer.at(1) == 0xBB && (uchar)buffer.at(2) == 0xBF) { 
 
       // UTF-8 encoded file, remove UTF-8 BOM: no translation needed
       buffer = buffer.mid(3); 
-      inBuf  = QString::fromUtf8(buffer);
+      fileContents  = QString::fromUtf8(buffer);
             
    } else { 
       // transcode according to the INPUT_ENCODING setting
       // do character transcoding if needed.
 
-      inBuf = transcodeToQString(buffer);       
-   }   
-  
+      fileContents = transcodeToQString(buffer);       
+   } 
+   
    // translate CR's   
-   filterCRLF(inBuf);
-    
+   fileContents = filterCRLF(fileContents);
+  
    return true;
 }
 

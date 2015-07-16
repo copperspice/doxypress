@@ -144,5 +144,5 @@ int compareListValues(const NavIndexEntry *item1, const NavIndexEntry *item2)
 
 int compareListValues(const FileList *item1, const FileList *item2) 
 {
-   return item1->path().compare(item2->path(), Qt::CaseInsensitive );   // BROOM CHECK
+   return item1->path().compare(item2->path(), Qt::CaseInsensitive );
 }

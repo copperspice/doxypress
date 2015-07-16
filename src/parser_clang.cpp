@@ -28,7 +28,6 @@
 #include <doxy_globals.h>
 #include <filedef.h>
 #include <filename.h>
-#include <growbuf.h>
 #include <message.h>
 #include <memberdef.h>
 #include <membername.h>

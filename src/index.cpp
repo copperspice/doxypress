@@ -1929,7 +1929,7 @@ static void writeAnnotatedIndex(OutputList &ol)
    ol.popGeneratorState();
 }
 
-static void writeClassLinkForMember(OutputList &ol, MemberDef *md, const char *separator, QString &prevClassName)
+static void writeClassLinkForMember(OutputList &ol, MemberDef *md, const QString &separator, QString &prevClassName)
 {
    QSharedPointer<ClassDef> cd = md->getClassDef();
 
@@ -1941,7 +1941,7 @@ static void writeClassLinkForMember(OutputList &ol, MemberDef *md, const char *s
    }
 }
 
-static void writeFileLinkForMember(OutputList &ol, MemberDef *md, const char *separator, QString &prevFileName)
+static void writeFileLinkForMember(OutputList &ol, MemberDef *md, const QString &separator, QString &prevFileName)
 {
    QSharedPointer<FileDef> fd = md->getFileDef();
 
@@ -1953,7 +1953,7 @@ static void writeFileLinkForMember(OutputList &ol, MemberDef *md, const char *se
    }
 }
 
-static void writeNamespaceLinkForMember(OutputList &ol, MemberDef *md, const char *separator, QString &prevNamespaceName)
+static void writeNamespaceLinkForMember(OutputList &ol, MemberDef *md, const QString &separator, QString &prevNamespaceName)
 {
    QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
 
@@ -1971,7 +1971,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
    int index = (int)type;
    assert(index < 3);
 
-   using writeLinkForMember_t = void (*)(OutputList & ol, MemberDef * md, const char *separator, QString &prevNamespaceName);
+   using writeLinkForMember_t = void (*)(OutputList & ol, MemberDef * md, const QString &separator, QString &prevNamespaceName);
 
    // each index tab has its own write function
    static writeLinkForMember_t   writeLinkForMemberMap[3] = {
@@ -1998,14 +1998,14 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
       }     
       
       for (auto md : *ml) {
-         const char *sep;
+         QString sep;
 
          bool isFunc = ! md->isObjCMethod() && (md->isFunction() || md->isSlot() || md->isSignal());
 
          QString name = md->name();
          int startIndex  = getPrefixIndex(name);
 
-         if ((name + startIndex) != prevName) { 
+         if (name.mid(startIndex) != prevName) { 
             // new entry
 
             if ((prevName.isEmpty() || name.at(startIndex).toLower() != prevName.at(0).toLower()) && useSections) { 
@@ -2058,7 +2058,8 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
             sep         = ": ";
             prevName    = name.mid(startIndex);
 
-         } else { // same entry
+         } else { 
+            // same entry
             sep = ", ";
             // link to class for other members with the same name
          }
@@ -2875,7 +2876,7 @@ static void countRelatedPages(int &docPages, int &indexPages)
 {
    docPages   = 0;
    indexPages = 0;
- 
+
    for (auto pd : *Doxy_Globals::pageSDict) {
 
       if ( pd->visibleInIndex()) {
@@ -2885,6 +2886,7 @@ static void countRelatedPages(int &docPages, int &indexPages)
       if ( pd->documentedPage()) {
          docPages++;
       }
+
    }
 }
 
@@ -3093,7 +3095,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
    
    if (level > 20) {
       warn(gd->getDefFileName(), gd->getDefLine(), "Maximum nesting level exceeded for group %s: check for possible "
-         "recursive group relation\n", gd->name().constData());
+         "recursive group relation\n", qPrintable(gd->name()) );
 
       return;
    }

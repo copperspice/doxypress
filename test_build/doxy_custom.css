@@ -81,6 +81,25 @@ div.fragment {
    margin-right: 18px;
 }
 
+div.md {      
+   margin-top: 40px;
+   margin-bottom: 15px;  
+   padding-top: 3px;   
+   padding-left: 12px;
+   padding-bottom: 3px;
+   padding-right: 12px;
+   display: inline-block;
+
+   background-color: #777777;
+   color: #FFFFFF;   
+}
+
+div.md p {
+   font-size: 125%;   
+   margin-top: 0px;
+   margin-bottom: 0px;
+}
+
 div.list_page
 {   
    margin-top: 35px;
@@ -131,6 +150,7 @@ div.list_page
    font-weight: bold;
    color: purple;
 }
+
 
 hr {
    height: 0px;

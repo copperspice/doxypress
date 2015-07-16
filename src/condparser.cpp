@@ -122,7 +122,8 @@ void CondParser::getToken()
    //printf("\tgetToken e:{%c}, ascii=%i, col=%i\n", *e, *e, e-expr);
 
    // skip over whitespaces
-   while (*m_e == ' ' || *m_e == '\t') {   // space or tab
+   while (*m_e == ' ' || *m_e == '\t') {   
+      // space or tab
       m_e++;
    }
 

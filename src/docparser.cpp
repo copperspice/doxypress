@@ -36,7 +36,6 @@
 #include <filedef.h>
 #include <formula.h>
 #include <groupdef.h>
-#include <growbuf.h>
 #include <htmlentity.h>
 #include <language.h>
 #include <memberdef.h>
@@ -1550,7 +1549,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
 
                case HTML_CODE:
                case XML_C:
-                  if (!g_token->endTag) {
+                  if (! g_token->endTag) {
                      handleStyleEnter(parent, children, DocStyleChange::Code, &g_token->attribs);
                   } else {
                      handleStyleLeave(parent, children, DocStyleChange::Code, tokenName);
@@ -1876,7 +1875,7 @@ void DocInclude::parse()
          if (! m_blockId.isEmpty() && (count = m_text.count(m_blockId)) != 2) {
 
             warn_doc_error(s_fileName, doctokenizerYYlineno, "block marked with %s for \\snippet should appear twice "
-                "in file %s, found it %d times\n", m_blockId.data(), m_file.data(), count);
+                "in file %s, found it %d times\n", qPrintable(m_blockId), qPrintable(m_file), count);
          }
          break;
    }
@@ -4276,6 +4275,7 @@ int DocHtmlList::parse()
 
    int retval = RetVal_OK;
    int num = 1;
+
    
    // get next token
    int tok = doctokenizerYYlex();
@@ -4289,21 +4289,21 @@ int DocHtmlList::parse()
    if (tok == TK_HTMLTAG) {
       int tagId = Mappers::htmlTagMapper->map(g_token->name);
 
-      if (tagId == HTML_LI && !g_token->endTag) { // found <li> tag
+      if (tagId == HTML_LI && ! g_token->endTag) { 
+         // found <li> tag
          // ok, we can go on.
 
-      } else if (((m_type == Unordered && tagId == HTML_UL) ||
-                  (m_type == Ordered   && tagId == HTML_OL)
-                 ) && g_token->endTag
-                ) { // found empty list
+      } else if (((m_type == Unordered && tagId == HTML_UL) || (m_type == Ordered && tagId == HTML_OL)) && g_token->endTag) { 
+         // found empty list
          // add dummy item to obtain valid HTML
 
          m_children.append(new DocHtmlListItem(this, HtmlAttribList(), 1));
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "empty list!");
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "empty list");
          retval = RetVal_EndList;
          goto endlist;
 
-      } else { // found some other tag
+      } else { 
+         // found some other tag
          // add dummy item to obtain valid HTML
          m_children.append(new DocHtmlListItem(this, HtmlAttribList(), 1));
 
@@ -4314,14 +4314,19 @@ int DocHtmlList::parse()
          goto endlist;
       }
 
-   } else if (tok == 0) { // premature end of comment
+   } else if (tok == 0) { 
+      // premature end of comment
       // add dummy item to obtain valid HTML
+
       m_children.append(new DocHtmlListItem(this, HtmlAttribList(), 1));
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while looking"
                      " for an html list item");
       goto endlist;
-   } else { // token other than html token
+
+   } else { 
+      // token other than html token
       // add dummy item to obtain valid HTML
+
       m_children.append(new DocHtmlListItem(this, HtmlAttribList(), 1));
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <li> tag, found %s token instead",
                      qPrintable(tokToString(tok)));
@@ -4897,7 +4902,9 @@ int DocParamList::parse(const QString &cmdName)
    doctokenizerYYsetStateParam();
    tok = doctokenizerYYlex();
 
-   while (tok == TK_WORD) { /* there is a parameter name */
+   while (tok == TK_WORD) { 
+      /* there is a parameter name */
+
       if (m_type == DocParamSect::Param) {
          int typeSeparator = g_token->name.indexOf('#'); // explicit type position
 
@@ -5031,9 +5038,11 @@ int DocParamSect::parse(const QString &cmdName, bool xmlContext, Direction d)
    }
 
    DocParamList *pl = new DocParamList(this, m_type, d);
+
    if (m_children.isEmpty()) {
       pl->markFirst();
       pl->markLast();
+
    } else {
       assert(m_children.last()->kind() == DocNode::Kind_ParamList);
       ((DocParamList *)m_children.last())->markLast(false);
@@ -5047,6 +5056,7 @@ int DocParamSect::parse(const QString &cmdName, bool xmlContext, Direction d)
    } else {
       retval = pl->parse(cmdName);
    }
+
    if (retval == RetVal_EndParBlock) {
       retval = RetVal_OK;
    }
@@ -5095,8 +5105,8 @@ int DocPara::handleParamSection(const QString &cmdName, DocParamSect::Type t, bo
 {
    DocParamSect *ps = 0;
 
-   if (!m_children.isEmpty() &&                        // previous element
-         m_children.last()->kind() == Kind_ParamSect &&  // was a param sect
+   if (! m_children.isEmpty() &&                           // previous element
+         m_children.last()->kind() == Kind_ParamSect &&    // was a param sect
          ((DocParamSect *)m_children.last())->type() == t) { 
 
       // of same type
@@ -5104,7 +5114,8 @@ int DocPara::handleParamSection(const QString &cmdName, DocParamSect::Type t, bo
 
       ps = (DocParamSect *)m_children.last();
 
-   } else { // start new section
+   } else { 
+      // start new section
       ps = new DocParamSect(this, t);
       m_children.append(ps);
    }
@@ -5603,7 +5614,7 @@ int DocPara::handleCommand(const QString &cmdName)
    DBG(("handleCommand(%s)\n", qPrintable(cmdName)));
 
    int retval = RetVal_OK;
-   int cmdId = Mappers::cmdMapper->map(cmdName);
+   int cmdId  = Mappers::cmdMapper->map(cmdName);
 
    switch (cmdId) {
       case CMD_UNKNOWN:
@@ -5885,21 +5896,27 @@ int DocPara::handleCommand(const QString &cmdName)
       case CMD_ENDUML:
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s", qPrintable(g_token->name));
          break;
+
       case CMD_PARAM:
          retval = handleParamSection(cmdName, DocParamSect::Param, false, g_token->paramDir);
          break;
+
       case CMD_TPARAM:
          retval = handleParamSection(cmdName, DocParamSect::TemplateParam, false, g_token->paramDir);
          break;
+
       case CMD_RETVAL:
          retval = handleParamSection(cmdName, DocParamSect::RetVal);
          break;
+
       case CMD_EXCEPTION:
          retval = handleParamSection(cmdName, DocParamSect::Exception);
          break;
+
       case CMD_XREFITEM:
          retval = handleXRefItem();
          break;
+
       case CMD_LINEBREAK: {
          DocLineBreak *lb = new DocLineBreak(this);
          m_children.append(lb);
@@ -6309,8 +6326,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
       case XML_PARAMREF:
       case XML_TYPEPARAMREF: {
          QString paramName;
-         if (findAttribute(tagHtmlAttribs, "name", &paramName)) {
-            //printf("paramName=%s\n",paramName.data());
+         if (findAttribute(tagHtmlAttribs, "name", &paramName)) {            
             m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Italic, true));
             m_children.append(new DocWord(this, paramName));
             m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Italic, false));
@@ -6678,7 +6694,7 @@ int DocPara::parse(bool skipParse, int token)
          skipParse = false;
 
       } else {
-          // get the next token
+         // get the next token
          tok = doctokenizerYYlex(); 
       }
 
@@ -6718,7 +6734,7 @@ int DocPara::parse(bool skipParse, int token)
                // all whitespace is relevant
 
                   (  // remove leading whitespace
-                     !m_children.isEmpty()  &&
+                     ! m_children.isEmpty()  &&
 
                      // and whitespace after certain constructs
                      (k = m_children.last()->kind()) != DocNode::Kind_HtmlDescList &&
@@ -6744,12 +6760,14 @@ int DocPara::parse(bool skipParse, int token)
             while (n && n->kind() != DocNode::Kind_AutoList) {
                n = n->parent();
             }
+
             if (n) { // we found an auto list up in the hierarchy
                DocAutoList *al = (DocAutoList *)n;
                DBG(("previous list item at %d\n", al->indent()));
-               if (al->indent() >= g_token->indent)
+
+               if (al->indent() >= g_token->indent) {
                   // new item at the same or lower indent level
-               {
+               
                   retval = TK_LISTITEM;
                   goto endparagraph;
                }
@@ -6807,7 +6825,8 @@ int DocPara::parse(bool skipParse, int token)
                   // end list
                   goto endparagraph;
 
-               } else { // continue with current paragraph
+               } else { 
+                  // continue with current paragraph
 
                }
 
@@ -6839,6 +6858,7 @@ int DocPara::parse(bool skipParse, int token)
             break;
 
          case TK_COMMAND: {
+
             // see if we have to start a simple section
             int cmd = Mappers::cmdMapper->map(g_token->name);
             DocNode *n = parent();
@@ -6848,9 +6868,11 @@ int DocPara::parse(bool skipParse, int token)
             }
 
             if (cmd & SIMPLESECT_BIT) {
+
                if (n) { 
                   // already in a simple section
                   // simple section cannot start in this paragraph, need to unwind the stack and remember the command.
+
                   g_token->simpleSectName = g_token->name;
                   retval = RetVal_SimpleSec;
                   goto endparagraph;
@@ -6862,6 +6884,7 @@ int DocPara::parse(bool skipParse, int token)
             while (n && n->kind() != DocNode::Kind_SimpleListItem) {
                n = n->parent();
             }
+
             if (n) {
                if (cmd == CMD_LI) {
                   retval = RetVal_ListItem;
@@ -6880,11 +6903,15 @@ int DocPara::parse(bool skipParse, int token)
                // This is the same as unputting the last read token and continuing.
 
                g_token->name = g_token->simpleSectName;
-               if (g_token->name.left(4) == "rcs:") { // RCS section
+
+               if (g_token->name.left(4) == "rcs:") { 
+                  // RCS section
                   g_token->name = g_token->name.mid(4);
                   g_token->text = g_token->simpleSectText;
                   tok = TK_RCSTAG;
-               } else { // other section
+
+               } else { 
+                  // other section
                   tok = TK_COMMAND;
                }
 
@@ -7150,7 +7177,6 @@ void DocText::parse()
 
       switch (tok) {
          case TK_WORD:
-
             m_children.append(new DocWord(this, g_token->name));
             break;
 
@@ -7697,7 +7723,7 @@ DocText *validatingParseText(const QString &input)
    s_includeFileText = "";
    s_includeFileOffset = 0;
    s_includeFileLength = 0;
-   s_isExample = false;
+   s_isExample   = false;
    s_exampleName = "";
    s_hasParamCommand = false;
    s_hasReturnCommand = false;
@@ -7724,6 +7750,7 @@ DocText *validatingParseText(const QString &input)
 
    // restore original parser state
    docParserPopContext();
+
    return txt;
 }
 

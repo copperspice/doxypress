@@ -434,7 +434,7 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
 
       if (incDepGraph.isTooBig()) {
          warn_uncond("Included by graph for '%s' not generated, too many nodes. "
-                     " Consider increasing 'DOT GRAPH MAX NODES'\n", name().constData());
+                     " Consider increasing 'DOT GRAPH MAX NODES'\n", qPrintable(name()));
 
       } else if (!incDepGraph.isTrivial()) {
          ol.startTextBlock();

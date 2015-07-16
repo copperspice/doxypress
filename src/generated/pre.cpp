@@ -2736,9 +2736,8 @@ class DefineManager
       dpf->addInclude(toFileName);
    }
 
-   /** Returns a Define object given its name or 0 if the Define does
-    *  not exist.
-    */
+   /** Returns a Define object given its name or 0 if the Define does not exist.
+   */
    A_Define *isDefined(const QString &name) const {
       A_Define *d = m_contextDefines.value(name);
 
@@ -2848,10 +2847,9 @@ static QString            g_defLitText;
 static QString            g_defArgsStr;
 static QString            g_defExtraSpacing;
 static bool               g_defVarArgs;
-static int                g_level;
 static int                g_lastCContext;
 static int                g_lastCPPContext;
-static QVector<int>       g_levelGuard;
+static QStack<int>        g_levelGuard;
 static QString            g_inputBuf;
 static int                g_inputBufPos;
 static QString            g_outputBuf;
@@ -2906,35 +2904,36 @@ static void setFileName(const QString &name)
 }
 
 static void incrLevel()
-{
-   g_level++;
-   g_levelGuard.resize(g_level);
-   g_levelGuard[g_level - 1] = 0;
+{   
+   g_levelGuard.push(0);
 }
 
 static void decrLevel()
 {   
-   if (g_level > 0) {
-      g_level--;
-      g_levelGuard.resize(g_level);
+   if (g_levelGuard.size() > 0) {
+      g_levelGuard.pop();
+
    } else {
       warn(g_yyFileName, g_yyLineNr, "More #endif's than #if's found\n");
+
    }
 }
 
 static bool otherCaseDone()
 {
-   if (g_level == 0) {
+   if (g_levelGuard.size() == 0) {
       warn(g_yyFileName, g_yyLineNr, "Found an #else without a preceding #if\n");
       return TRUE;
+
    } else {
-      return g_levelGuard[g_level - 1];
+      return g_levelGuard.top();
+
    }
 }
 
 static void setCaseDone(bool value)
 {
-   g_levelGuard[g_level - 1] = value;
+   g_levelGuard.top() = value;
 }
 
 static QSet<QString> g_allIncludes;
@@ -2992,7 +2991,7 @@ static FileState *checkAndOpenFile(const QString &fileName, bool &alreadyInclude
       fs = new FileState(fi.size() + 4096);
       alreadyIncluded = FALSE;
 
-      if (!readInputFile(absName, fs->fileBuf)) {
+      if (! readInputFile(absName, fs->fileBuf)) {
          // error
 
          delete fs;
@@ -3032,6 +3031,7 @@ static FileState *findFile(const QString &fileName, bool localInclude, bool &alr
             setFileName(absName);
             g_yyLineNr = 1;
             return fs;
+
          } else if (alreadyIncluded) {
             return 0;
          }
@@ -3050,7 +3050,7 @@ static FileState *findFile(const QString &fileName, bool localInclude, bool &alr
       if (fs) {
          setFileName(absName);
          g_yyLineNr = 1;
-         //printf("  -> found it\n");
+
          return fs;
 
       } else if (alreadyIncluded) {
@@ -3550,45 +3550,49 @@ static int getNextId(const QString &expr, int p, int *l)
  */
 static void expandExpression(QString &expr, QString *rest, int pos)
 {
-   //printf("expandExpression(%s,%s)\n",expr.data(),rest ? rest->data() : 0);
    QString macroName;
    QString expMacro;
+
    bool definedTest = FALSE;
    int i = pos, l, p, len;
 
    while ((p = getNextId(expr, i, &l)) != -1) { // search for an macro name
       bool replaced = FALSE;
       macroName = expr.mid(p, l);
-
-      //printf("macroName=%s\n",macroName.data());
-      if (p < 2 || !(expr.at(p - 2) == '@' && expr.at(p - 1) == '-')) { // no-rescan marker?
+      
+      if (p < 2 || ! (expr.at(p - 2) == '@' && expr.at(p - 1) == '-')) { // no-rescan marker?
 
          if (! g_expandedDict->contains(macroName)) {
 
             // expand macro
             A_Define *def = DefineManager::instance().isDefined(macroName);
 
-            if (definedTest) { // macro name was found after defined
+            if (definedTest) { 
+               // macro name was found after defined
+
                if (def) {
                   expMacro = " 1 ";
                } else {
                   expMacro = " 0 ";
                }
+
                replaced = TRUE;
                len = l;
                definedTest = FALSE;
-            } else if (def && def->nargs == -1) { // simple macro
+
+            } else if (def && def->nargs == -1) { 
+               // simple macro
                // substitute the definition of the macro
-               //printf("macro `%s'->`%s'\n",macroName.data(),def->definition.data());
+
                if (g_nospaces) {
                   expMacro = def->definition.trimmed();
                } else {
                   expMacro = " " + def->definition.trimmed() + " ";
                }
-               //expMacro=def->definition.trimmed();
+
                replaced = TRUE;
                len = l;
-               //printf("simple macro expansion=`%s'->`%s'\n",macroName.data(),expMacro.data());
+               
             } else if (def && def->nargs >= 0) { // function macro
                replaced = replaceFunctionMacro(expr, rest, p + l, len, def, expMacro);
                len += l;
@@ -3597,11 +3601,12 @@ static void expandExpression(QString &expr, QString *rest, int pos)
                definedTest = TRUE;
             }
 
-            if (replaced) { // expand the macro and rescan the expression
+            if (replaced) { 
+               // expand the macro and rescan the expression
 
                //printf("replacing `%s'->`%s'\n",expr.mid(p,len).data(),expMacro.data());
                QString resultExpr = expMacro;
-               QString restExpr = expr.right(expr.length() - len - p);
+               QString restExpr   = expr.right(expr.length() - len - p);
 
                processConcatOperators(resultExpr);
 
@@ -3848,13 +3853,14 @@ QString removeMarkers(const QString &s)
 bool computeExpression(const QString &expr)
 {
    QString e = expr;
+
    expandExpression(e, 0, 0);
-   //printf("after expansion `%s'\n",e.data());
    e = removeIdsAndMarkers(e);
+
    if (e.isEmpty()) {
-      return FALSE;
+      return false;
    }
-   //printf("parsing `%s'\n",e.data());
+
    return parseconstexp(g_yyFileName, g_yyLineNr, e);
 }
 
@@ -3865,9 +3871,10 @@ bool computeExpression(const QString &expr)
 QString expandMacro(const QString &name)
 {
    QString n = name;
+
    expandExpression(n, 0, 0);
    n = removeMarkers(n);
-   //printf("expandMacro `%s'->`%s'\n",name.data(),n.data());
+
    return n;
 }
 
@@ -4123,8 +4130,7 @@ static void readIncludeFile(const QString &inc)
                Debug::print(Debug::Preprocessor, 0, "#include %s: already included! skipping...\n", incFileName.data());
             } else {
                Debug::print(Debug::Preprocessor, 0, "#include %s: not found! skipping...\n", incFileName.data());
-            }
-            //printf("error: include file %s not found\n",preYYtext);
+            }           
          }
 
          if (g_curlyCount > 0 && !alreadyIncluded) { // failed to find #include inside { ... }
@@ -4214,7 +4220,7 @@ static char resolveTrigraph(char c)
 
 static int yyread(char *buf, int max_size)
 {
-  int c = 0;
+   int c = 0;
 
    while (g_inputBuf[g_inputBufPos] != 0) {
 
@@ -4608,7 +4614,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
                BEGIN(CopyLine);
             }
             YY_BREAK
@@ -4619,7 +4626,7 @@ YY_DECL {
             {
                // constructors?
                int i;
-               for (i = (int)preYYleng - 1; i >= 0; i--)
+               for (i = preYYleng - 1; i >= 0; i--)
                {
                   unput(preYYtext[i]);
                }
@@ -4637,29 +4644,22 @@ YY_DECL {
                // function like macro
                static bool skipFuncMacros = Config::getBool("skip-function-macros");
 
-               QString name(preYYtext);
+               QString name = QString::fromUtf8(preYYtext); 
                name = name.left(name.indexOf('(')).trimmed();
 
                A_Define *def = 0;
 
-               if (skipFuncMacros &&
-               name != "Q_PROPERTY" &&
-               !(
-                  (g_includeStack.isEmpty() || g_curlyCount > 0) &&
-                  g_macroExpansion &&
-                  (def = DefineManager::instance().isDefined(name)) &&
-                  /*macroIsAccessible(def) &&*/
-                  (!g_expandOnlyPredef || def->isPredefined)
-               )
-                  )
-               {
+               if (skipFuncMacros && name != "Q_PROPERTY" && ! ( (g_includeStack.isEmpty() || g_curlyCount > 0) && g_macroExpansion &&
+                        (def = DefineManager::instance().isDefined(name)) && (! g_expandOnlyPredef || def->isPredefined)) ) {
+
                   outputChar('\n');
                   g_yyLineNr++;
-               } else // don't skip
-               {
+
+               } else  {
+                  // do not skip 
+               
                   int i;
-                  for (i = (int)preYYleng - 1; i >= 0; i--)
-                  {
+                  for (i = (int)preYYleng - 1; i >= 0; i--) {
                      unput(preYYtext[i]);
                   }
                   BEGIN(CopyLine);
@@ -4671,9 +4671,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               QString text = preYYtext;
-               g_yyLineNr += text.count('\n');
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext); 
+               g_yyLineNr += text.count('\n');               
+               outputArray(text, text.length());
             }
             YY_BREAK
          case 11:
@@ -4704,21 +4704,24 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
          case 14:
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
          case 15:
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
          case 16:
@@ -4733,14 +4736,16 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
          case 18:
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
          case 19:
@@ -4756,29 +4761,30 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(preYYtext);
+
                g_expectGuard = FALSE;
                A_Define *def = 0;
             
                if ((g_includeStack.isEmpty() || g_curlyCount > 0) && g_macroExpansion &&
-               (def = DefineManager::instance().isDefined(preYYtext)) &&
-               /*(def->isPredefined || macroIsAccessible(def)) && */
-               (!g_expandOnlyPredef || def->isPredefined)
-                  )
-               {
-                  //printf("Found it! #args=%d\n",def->nargs);
-                  g_roundCount = 0;
-                  g_defArgsStr = preYYtext;
+                        (def = DefineManager::instance().isDefined(text)) && (! g_expandOnlyPredef || def->isPredefined)) {
 
-                  if (def->nargs == -1) { // no function macro
-                     QString result = def->isPredefined ? def->definition : expandMacro(g_defArgsStr);
+                  g_roundCount = 0;
+                  g_defArgsStr = text; 
+
+                  if (def->nargs == -1) { 
+                     // no function macro
+                     QString result = def->isPredefined ? def->definition : expandMacro(g_defArgsStr);                      
                      outputArray(result, result.length());
-                  } else { // zero or more arguments
+
+                  } else {
+                     // zero or more arguments
                      g_findDefArgContext = CopyLine;
                      BEGIN(FindDefineArgs);
                   }
-               } else
-               {
-                  outputArray(preYYtext, (int)preYYleng);
+
+               } else {
+                  outputArray(text, text.length());
                }
             }
             YY_BREAK
@@ -4786,22 +4792,22 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(preYYtext);
+
                A_Define *def = 0;
+
                if ((g_includeStack.isEmpty() || g_curlyCount > 0) && g_macroExpansion &&
-               (def = DefineManager::instance().isDefined(preYYtext)) &&
-               def->nargs == -1 &&
-               /*(def->isPredefined || macroIsAccessible(def)) &&*/
-               (!g_expandOnlyPredef || def->isPredefined)
-                  )
-               {
-                  QString result = def->isPredefined ? def->definition : expandMacro(preYYtext);
+                     (def = DefineManager::instance().isDefined(text)) && def->nargs == -1 && (! g_expandOnlyPredef || def->isPredefined)) {
+
+                  QString result = def->isPredefined ? def->definition : expandMacro(text);
                   outputArray(result, result.length());
-               } else
-               {
-                  outputArray(preYYtext, (int)preYYleng);
+
+               } else {                 
+                 outputArray(text, text.length());
                }
             }
             YY_BREAK
+
          case 22:
             /* rule 22 can match eol */
             *yy_cp = (yy_hold_char); /* undo effects of setting up preYYtext */
@@ -4845,14 +4851,15 @@ YY_DECL {
             {
                g_defArgsStr += ')';
                g_roundCount--;
-               if (g_roundCount == 0)
-               {
+
+               if (g_roundCount == 0) {
                   QString result = expandMacro(g_defArgsStr);
-                  //printf("g_defArgsStr=`%s'->`%s'\n",g_defArgsStr.data(),result.data());
+
                   if (g_findDefArgContext == CopyLine) {
                      outputArray(result, result.length());
                      BEGIN(g_findDefArgContext);
-                  } else { // g_findDefArgContext==IncludeID
+
+                  } else { 
                      readIncludeFile(result);
                      g_nospaces = FALSE;
                      BEGIN(Start);
@@ -4860,23 +4867,19 @@ YY_DECL {
                }
             }
             YY_BREAK
-         /*
-         <FindDefineArgs>")"{B}*"("		{
-           					  g_defArgsStr+=preYYtext;
-           					}
-           */
+
          case 27:
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += preYYtext;
+               g_defArgsStr += QString::fromUtf8(preYYtext); 
             }
             YY_BREAK
          case 28:
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += preYYtext;
+               g_defArgsStr += QString::fromUtf8(preYYtext); 
                BEGIN(ArgCopyCComment);
             }
             YY_BREAK
@@ -4884,7 +4887,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += *preYYtext;
+               QString text = QString::fromUtf8(preYYtext); 
+               g_defArgsStr += text[0];
                BEGIN(ReadString);
             }
             YY_BREAK
@@ -4909,21 +4913,22 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += *preYYtext;
+               QString text = QString::fromUtf8(preYYtext); 
+               g_defArgsStr += text[0];
             }
             YY_BREAK
          case 33:
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += preYYtext;
+               g_defArgsStr += QString::fromUtf8(preYYtext); 
             }
             YY_BREAK
          case 34:
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += preYYtext;
+               g_defArgsStr += QString::fromUtf8(preYYtext); 
                BEGIN(FindDefineArgs);
             }
             YY_BREAK
@@ -4941,14 +4946,15 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += preYYtext;
+               g_defArgsStr += QString::fromUtf8(preYYtext); 
             }
             YY_BREAK
          case 37:
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += *preYYtext;
+               QString text = QString::fromUtf8(preYYtext); 
+               g_defArgsStr += text[0];
                BEGIN(FindDefineArgs);
             }
             YY_BREAK
@@ -4956,28 +4962,31 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += preYYtext;
+               g_defArgsStr += QString::fromUtf8(preYYtext); 
             }
             YY_BREAK
          case 39:
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += preYYtext;
+               g_defArgsStr += QString::fromUtf8(preYYtext); 
             }
             YY_BREAK
          case 40:
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += *preYYtext;
+               QString text = QString::fromUtf8(preYYtext); 
+               g_defArgsStr += text[0];
             }
             YY_BREAK
          case 41:
             YY_RULE_SETUP
 
             {
-               g_isImported = preYYtext[1] == 'm';
+               QString text = QString::fromUtf8(preYYtext); 
+               g_isImported = text[1] == 'm';
+
                if (g_macroExpansion)
                {
                   BEGIN(IncludeID);
@@ -4988,23 +4997,22 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_isImported = preYYtext[1] == 'm';
-               char c[2];
-               c[0] = preYYtext[preYYleng - 1];
-               c[1] = '\0';
-               g_incName = c;
+               QString text = QString::fromUtf8(preYYtext); 
+               g_isImported = text[1] == 'm';
+          
+               g_incName = text[preYYleng - 1];
                BEGIN(Include);
             }
             YY_BREAK
          case 43:
             YY_RULE_SETUP
 
-            {
-               //printf("!!!DefName\n");
+            {               
                g_yyColNr += preYYleng;
                BEGIN(DefName);
             }
             YY_BREAK
+
          case 44:
             *yy_cp = (yy_hold_char); /* undo effects of setting up preYYtext */
             (yy_c_buf_p) = yy_cp = yy_bp + 5;
@@ -5012,23 +5020,29 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               // #ifdef(
+
                incrLevel();
                g_guardExpr.resize(0);
                BEGIN(DefinedExpr2);
             }
             YY_BREAK
+
          case 45:
             *yy_cp = (yy_hold_char); /* undo effects of setting up preYYtext */
             (yy_c_buf_p) = yy_cp = yy_bp + 5;
             YY_DO_BEFORE_ACTION; /* set up preYYtext again */
             YY_RULE_SETUP
 
-            {               
+            {  
+               // #ifdef
+             
                incrLevel();
                g_guardExpr.resize(0);
                BEGIN(DefinedExpr1);
             }
             YY_BREAK
+
          case 46:
             *yy_cp = (yy_hold_char); /* undo effects of setting up preYYtext */
             (yy_c_buf_p) = yy_cp = yy_bp + 6;
@@ -5036,6 +5050,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               // #ifndef(
+
                incrLevel();
                g_guardExpr = "! ";
                BEGIN(DefinedExpr2);
@@ -5048,6 +5064,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               // #ifndef
+
                incrLevel();
                g_guardExpr = "! ";
                BEGIN(DefinedExpr1);
@@ -5060,11 +5078,14 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               // #if
+
                incrLevel();
                g_guardExpr.resize(0);
                BEGIN(Guard);
             }
             YY_BREAK
+
          case 49:
             *yy_cp = (yy_hold_char); /* undo effects of setting up preYYtext */
             (yy_c_buf_p) = yy_cp -= 1;
@@ -5072,7 +5093,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (!otherCaseDone())
+               if (! otherCaseDone())
                {
                   g_guardExpr.resize(0);
                   BEGIN(Guard);
@@ -5090,8 +5111,7 @@ YY_DECL {
             YY_DO_BEFORE_ACTION; /* set up preYYtext again */
             YY_RULE_SETUP
 
-            {
-               //printf("else g_levelGuard[%d]=%d\n",g_level-1,g_levelGuard[g_level-1]);
+            {               
                if (otherCaseDone())
                {
                   g_ifcount = 0;
@@ -5099,7 +5119,6 @@ YY_DECL {
                } else
                {
                   setCaseDone(TRUE);
-                  //g_levelGuard[g_level-1]=TRUE;
                }
             }
             YY_BREAK
@@ -5117,13 +5136,14 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (!otherCaseDone())
+               if (! otherCaseDone())
                {
                   g_guardExpr.resize(0);
                   BEGIN(Guard);
                }
             }
             YY_BREAK
+
          case 53:
             /* rule 53 can match eol */
             *yy_cp = (yy_hold_char); /* undo effects of setting up preYYtext */
@@ -5132,10 +5152,11 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               //printf("Pre.l: #endif\n");
+               // #endif
                decrLevel();
             }
             YY_BREAK
+
          case 54:
             /* rule 54 can match eol */
             YY_RULE_SETUP
@@ -5184,18 +5205,17 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(preYYtext);
+
                A_Define *def;
-               if ((def = DefineManager::instance().isDefined(preYYtext))
-               /*&& !def->isPredefined*/
-               && !def->nonRecursive
-                  )
-               {
-                  //printf("undefining %s\n",preYYtext);
+
+               if ((def = DefineManager::instance().isDefined(text)) && !def->nonRecursive) {
                   def->undef = TRUE;
                }
                BEGIN(Start);
             }
             YY_BREAK
+
          case 61:
             /* rule 61 can match eol */
             YY_RULE_SETUP
@@ -5229,12 +5249,18 @@ YY_DECL {
          case 64:
             YY_RULE_SETUP
 
-            { g_guardExpr += preYYtext; }
+            { g_guardExpr += QString::fromUtf8(preYYtext); 
+            }
             YY_BREAK
+
          case 65:
             YY_RULE_SETUP
 
-            { g_guardExpr += *preYYtext; }
+            { 
+               QString text = QString::fromUtf8(preYYtext); 
+               g_guardExpr += text[0]; 
+            }   
+
             YY_BREAK
          case 66:
             /* rule 66 can match eol */
@@ -5242,13 +5268,11 @@ YY_DECL {
 
             {
                unput(*preYYtext);
-               //printf("Guard: `%s'\n",
-               //    g_guardExpr.data());
+              
                bool guard = computeExpression(g_guardExpr);
                setCaseDone(guard);
-               //printf("if g_levelGuard[%d]=%d\n",g_level-1,g_levelGuard[g_level-1]);
-               if (guard)
-               {
+
+               if (guard) {
                   BEGIN(Start);
                } else
                {
@@ -5261,18 +5285,22 @@ YY_DECL {
             /* rule 67 can match eol */
             YY_RULE_SETUP
 
-            { g_yyLineNr++; outputChar('\n'); }
+            { g_yyLineNr++; 
+              outputChar('\n'); 
+            }
             YY_BREAK
          case 68:
             YY_RULE_SETUP
 
             {
-               if (DefineManager::instance().isDefined(preYYtext) || g_guardName == preYYtext)
-               {
+               QString text = QString::fromUtf8(preYYtext); 
+
+               if (DefineManager::instance().isDefined(text) || g_guardName == text) {
                   g_guardExpr += " 1L ";
-               } else
-               { g_guardExpr += " 0L "; }
-               g_lastGuardName = preYYtext;
+               } else { 
+                  g_guardExpr += " 0L "; 
+               }
+               g_lastGuardName = text;
                BEGIN(Guard);
             }
             YY_BREAK
@@ -5280,20 +5308,24 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (DefineManager::instance().isDefined(preYYtext) || g_guardName == preYYtext)
-               {
+               QString text = QString::fromUtf8(preYYtext); 
+
+               if (DefineManager::instance().isDefined(text) || g_guardName == text) {
                   g_guardExpr += " 1L ";
-               } else
-               { g_guardExpr += " 0L "; }
-               g_lastGuardName = preYYtext;
+               } else { 
+                  g_guardExpr += " 0L ";  
+               }
+               g_lastGuardName = text;
             }
             YY_BREAK
+
          case 70:
             /* rule 70 can match eol */
             YY_RULE_SETUP
 
             {
                // should not happen, handle anyway
+
                g_yyLineNr++;
                g_ifcount = 0;
                BEGIN(SkipCPPBlock);
@@ -5329,7 +5361,10 @@ YY_DECL {
             /* rule 75 can match eol */
             YY_RULE_SETUP
 
-            { g_yyLineNr++; outputChar('\n'); }
+            { 
+              g_yyLineNr++;
+              outputChar('\n');
+            }
             YY_BREAK
          case 76:
             YY_RULE_SETUP
@@ -5344,8 +5379,7 @@ YY_DECL {
 
             {
                incrLevel();
-               g_ifcount++;
-               //printf("#if... depth=%d\n",g_ifcount);
+               g_ifcount++;              
             }
             YY_BREAK
          case 78:
@@ -5384,11 +5418,12 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               // #endif
+
                g_expectGuard = FALSE;
                decrLevel();
-               if (--g_ifcount < 0)
-               {
-                  //outputChar('\n');
+
+               if (--g_ifcount < 0) {
                   BEGIN(Start);
                }
             }
@@ -5514,19 +5549,22 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_nospaces = TRUE;
+               g_nospaces   = TRUE;
                g_roundCount = 0;
-               g_defArgsStr = preYYtext;
+               g_defArgsStr = QString::fromUtf8(preYYtext); 
                g_findDefArgContext = IncludeID;
                BEGIN(FindDefineArgs);
             }
             YY_BREAK
+
          case 98:
             YY_RULE_SETUP
 
             {
+
+               QString text = QString::fromUtf8(preYYtext);
                g_nospaces = TRUE;
-               readIncludeFile(expandMacro(preYYtext));
+               readIncludeFile(expandMacro(text));
                BEGIN(Start);
             }
             YY_BREAK
@@ -5534,7 +5572,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_incName += preYYtext;
+               g_incName += QString::fromUtf8(preYYtext); 
                readIncludeFile(g_incName);
                if (g_isImported)
                {
@@ -5577,7 +5615,7 @@ YY_DECL {
 
             {
                // define with argument
-               //printf("Define() `%s'\n",preYYtext);
+              
                delete g_argDict;
                g_argDict = new QHash<QString, int *>;
 
@@ -5585,7 +5623,8 @@ YY_DECL {
                g_defArgsStr.resize(0);
                g_defText.resize(0);
                g_defLitText.resize(0);
-               g_defName = preYYtext;
+
+               g_defName    = QString::fromUtf8(preYYtext); 
                g_defVarArgs = FALSE;
                g_defExtraSpacing.resize(0);
                BEGIN(DefineArg);
@@ -5600,17 +5639,17 @@ YY_DECL {
 
             {
                // special case: define with 1 -> can be "guard"
-               //printf("Define `%s'\n",preYYtext);
+              
                delete g_argDict;
                g_argDict = 0;
                g_defArgs = -1;
                g_defArgsStr.resize(0);
-               g_defName = preYYtext;
+
+               g_defName = QString::fromUtf8(preYYtext); 
                g_defName = g_defName.left(g_defName.length() - 1).trimmed();
                g_defVarArgs = FALSE;
                
-
-               if (g_curlyCount > 0 || g_defName != g_lastGuardName || !g_expectGuard)
+               if (g_curlyCount > 0 || g_defName != g_lastGuardName || ! g_expectGuard)
                {
                   // define may appear in the output
                   QString tmp = "#define " + g_defName;
@@ -5622,9 +5661,10 @@ YY_DECL {
                   g_defText = "1";
                   g_defLitText = "1";
                   BEGIN(DefineText);
+
                } else // define is a guard => hide
                {
-                  //printf("Found a guard %s\n",preYYtext);
+
                   g_defText.resize(0);
                   g_defLitText.resize(0);
                   BEGIN(Start);
@@ -5638,10 +5678,12 @@ YY_DECL {
 
             {
                // empty define
+               QString text = QString::fromUtf8(preYYtext); 
+
                delete g_argDict;
                g_argDict = 0;
                g_defArgs = -1;
-               g_defName = preYYtext;
+               g_defName = text;
                g_defArgsStr.resize(0);
                g_defText.resize(0);
                g_defLitText.resize(0);
@@ -5654,33 +5696,38 @@ YY_DECL {
 
                   g_quoteArg = FALSE;
                   g_insideComment = FALSE;
+
                   if (g_insideCS) {
                      g_defText = "1";   // for C#, use "1" as define text
                   }
+
                   BEGIN(DefineText);
-               } else // define is a guard => hide
-               {
-                  //printf("Found a guard %s\n",preYYtext);
-                  g_guardName = preYYtext;
+
+               } else {
+                  // define is a guard => hide
+               
+                  g_guardName = text;
                   g_lastGuardName.resize(0);
                   BEGIN(Start);
                }
                g_expectGuard = FALSE;
             }
             YY_BREAK
+
          case 106:
             YY_RULE_SETUP
 
             {
                // define with content
-               //printf("Define `%s'\n",preYYtext);
+               QString text = QString::fromUtf8(preYYtext); 
+
                delete g_argDict;
                g_argDict = 0;
                g_defArgs = -1;
                g_defArgsStr.resize(0);
                g_defText.resize(0);
                g_defLitText.resize(0);
-               g_defName = preYYtext;
+               g_defName = text;
                g_defVarArgs = FALSE;
 
                QString tmp = "#define " + g_defName + g_defArgsStr;
@@ -5703,18 +5750,22 @@ YY_DECL {
          case 108:
             YY_RULE_SETUP
 
-            { g_defArgsStr += preYYtext; }
+            { g_defArgsStr += QString::fromUtf8(preYYtext); 
+            }
             YY_BREAK
+
          case 109:
             YY_RULE_SETUP
 
-            { g_defArgsStr += preYYtext; }
+            { g_defArgsStr += QString::fromUtf8(preYYtext); 
+            }
             YY_BREAK
+
          case 110:
             YY_RULE_SETUP
 
             {
-               g_defArgsStr += preYYtext;
+               g_defArgsStr += QString::fromUtf8(preYYtext); 
 
                QString tmp = "#define " + g_defName + g_defArgsStr + g_defExtraSpacing;
                outputArray(tmp, tmp.length()); 
@@ -5724,13 +5775,14 @@ YY_DECL {
                BEGIN(DefineText);
             }
             YY_BREAK
+
          case 111:
             YY_RULE_SETUP
 
             {
                // Variadic macro
                g_defVarArgs = TRUE;
-               g_defArgsStr += preYYtext;
+               g_defArgsStr +=  QString::fromUtf8(preYYtext); 
                g_argDict->insert("__VA_ARGS__", new int(g_defArgs));
                g_defArgs++;
             }
@@ -5738,17 +5790,22 @@ YY_DECL {
          case 112:
             YY_RULE_SETUP
 
-            {
-               //printf("Define addArg(%s)\n",preYYtext);
-               QString argName = preYYtext;
-               g_defVarArgs = preYYtext[preYYleng - 1] == '.';
-               if (g_defVarArgs) // strip ellipsis
-               {
-                  argName = argName.left(argName.length() - 3);
+            {             
+               QString text = QString::fromUtf8(preYYtext); 
+
+               QString argName = text;
+               g_defVarArgs = text.endsWith("...");
+
+               if (g_defVarArgs) {
+                  // strip ellipsis               
+                  argName = text.left(text.length() - 3);
                }
-               argName = argName.trimmed();
-               g_defArgsStr += preYYtext;
+
+               g_defArgsStr += text;
+
+               argName = argName.trimmed();              
                g_argDict->insert(argName, new int(g_defArgs));
+
                g_defArgs++;
             }
             YY_BREAK
@@ -5768,8 +5825,10 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_defText += preYYtext;
-               g_defLitText += preYYtext;
+               QString text = QString::fromUtf8(preYYtext);
+
+               g_defText    += text;
+               g_defLitText += text;
                g_lastCContext = YY_START;
                g_commentCount = 1;
                BEGIN(CopyCComment);
@@ -5779,7 +5838,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
+
                g_lastCPPContext = YY_START;
                g_defLitText += ' ';
                BEGIN(SkipCPPComment);
@@ -5789,14 +5850,16 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (preYYtext[0] == '/')
-               {
+               QString text = QString::fromUtf8(preYYtext);
+
+               if (text[0] == '/') {
                   outputChar('/');
                }
+
                outputChar('*');
                outputChar('/');
-               if (--g_commentCount <= 0)
-               {
+
+               if (--g_commentCount <= 0) {
                   if (g_lastCContext == Start)
                      // small hack to make sure that ^... rule will
                      // match when going to Start... Example: "/*...*/ some stuff..."
@@ -5811,9 +5874,11 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
+
          case 117:
             YY_RULE_SETUP
 
@@ -5827,7 +5892,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
 
@@ -5841,7 +5907,8 @@ YY_DECL {
                   REJECT;
 
                } else {
-                  outputArray(preYYtext, (int)preYYleng);
+                  QString text = QString::fromUtf8(preYYtext);
+                  outputArray(text, text.length());
                   g_fenceSize = preYYleng;
                   BEGIN(SkipVerbatim);
                }
@@ -5855,9 +5922,11 @@ YY_DECL {
                static bool markdown = Config::getBool("markdown");
                if (! markdown) {
                   REJECT;
+
                } else {
-                  outputArray(preYYtext,(int)preYYleng);
-                  g_fenceSize=preYYleng;
+                  QString text = QString::fromUtf8(preYYtext);
+                  outputArray(text, text.length());
+                  g_fenceSize = preYYleng;
                   BEGIN(SkipVerbatim);
                }
             }
@@ -5868,8 +5937,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
-               g_yyLineNr += QString(preYYtext).count('\n');
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
+               g_yyLineNr += text.count('\n');
             }
             YY_BREAK
 
@@ -5878,16 +5948,17 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
-               g_yyLineNr += QString(preYYtext).count('\n');
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
+
+               g_yyLineNr += text.count('\n');
                g_fenceSize = 0;
 
-               if (preYYtext[1] == 'f')  {
+               if (text[1] == 'f')  {
                   g_blockName = "f"; 
 
                } else {
-                  QString bn = &preYYtext[1];
-
+                  QString bn = text.mid(1);
                   int i = bn.indexOf('{'); 
 
                   // for \code{.c}
@@ -5907,7 +5978,8 @@ YY_DECL {
 
             {
                // escaped @cond
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
 
@@ -5936,7 +6008,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               startCondSection(preYYtext);
+               QString text = QString::fromUtf8(preYYtext);
+               startCondSection(text);
+
                if (g_skip)
                {
                   if (YY_START == CondLineC) {
@@ -6005,7 +6079,9 @@ YY_DECL {
             /* rule 128 can match eol */
             YY_RULE_SETUP
 
-            { g_yyLineNr++; outputChar('\n'); }
+            { g_yyLineNr++; 
+              outputChar('\n'); 
+            }
             YY_BREAK
 
          case 130:
@@ -6042,9 +6118,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (! g_skip)
-               {
-                  outputArray(preYYtext, (int)preYYleng);
+               if (! g_skip) {
+                  QString text = QString::fromUtf8(preYYtext);
+                  outputArray(text, text.length());
                }
             }
             YY_BREAK
@@ -6089,14 +6165,14 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* end of verbatim block */
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
 
-               if (preYYtext[1] == 'f' && g_blockName == "f")
+               if (text[1] == 'f' && g_blockName == "f")
                {
                   BEGIN(SkipCComment);
 
-               } else if (&preYYtext[4] == g_blockName)
-               {
+               } else if (text.mid(4) == g_blockName) {
                   BEGIN(SkipCComment);
                }
             }
@@ -6106,9 +6182,10 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
-               if (g_fenceSize == preYYleng)
-               {
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
+
+               if (g_fenceSize == preYYleng) {
                   BEGIN(SkipCComment);
                }
             }
@@ -6118,9 +6195,10 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
-               if (g_fenceSize == preYYleng)
-               {
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
+
+               if (g_fenceSize == preYYleng) {
                   BEGIN(SkipCComment);
                }
             }
@@ -6130,7 +6208,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
 
@@ -6138,7 +6217,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
 
@@ -6163,8 +6243,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_defLitText += preYYtext;
-               g_defText += escapeAt(preYYtext);
+               QString text = QString::fromUtf8(preYYtext);
+               g_defLitText += text;
+               g_defText += escapeAt(text);
             }
             YY_BREAK
 
@@ -6172,8 +6253,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_defLitText += preYYtext;
-               g_defText += preYYtext;
+               QString text = QString::fromUtf8(preYYtext);
+               g_defLitText += text;
+               g_defText    += text;
                BEGIN(g_lastCContext);
             }
             YY_BREAK
@@ -6185,7 +6267,7 @@ YY_DECL {
             {
                g_yyLineNr++;
                outputChar('\n');
-               g_defLitText += preYYtext;
+               g_defLitText += QString::fromUtf8(preYYtext);
                g_defText += ' ';
             }
             YY_BREAK
@@ -6225,7 +6307,9 @@ YY_DECL {
             /* rule 152 can match eol */
             YY_RULE_SETUP
 
-            { g_yyLineNr++; outputChar('\n'); }
+            { g_yyLineNr++; 
+              outputChar('\n'); 
+            }
             YY_BREAK
 
          case 153:
@@ -6236,7 +6320,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
          case 155:
@@ -6268,7 +6353,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               outputArray(preYYtext, (int)preYYleng);
+               QString text = QString::fromUtf8(preYYtext);
+               outputArray(text, text.length());
             }
             YY_BREAK
          case 159:
@@ -6303,7 +6389,7 @@ YY_DECL {
 
             {
                g_quoteArg = TRUE;
-               g_defLitText += preYYtext;
+               g_defLitText +=  QString::fromUtf8(preYYtext);
             }
             YY_BREAK
 
@@ -6311,34 +6397,36 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_defLitText += preYYtext;
-               if (g_quoteArg)
-               {
+               QString text = QString::fromUtf8(preYYtext);
+
+               g_defLitText += text; 
+
+               if (g_quoteArg) {
                   g_defText += "\"";
                }
-               if (g_defArgs > 0)
-               {
+
+               if (g_defArgs > 0) {
                   int *n;
-                  if ((n = (*g_argDict)[preYYtext])) {
-                     //if (!g_quoteArg) g_defText+=' ';
+
+                  if ((n = (*g_argDict)[text])) {
+                   
                      g_defText += '@';
 
-                     QString numStr;
-                     numStr = QString("%1").arg(*n);
-
+                     QString numStr = QString("%1").arg(*n);
                      g_defText += numStr;
-                     //if (!g_quoteArg) g_defText+=' ';
+
                   } else {
-                     g_defText += preYYtext;
+                     g_defText += text;
                   }
-               } else
-               {
-                  g_defText += preYYtext;
+
+               } else {
+                  g_defText += text;
                }
-               if (g_quoteArg)
-               {
+
+               if (g_quoteArg) {
                   g_defText += "\"";
                }
+
                g_quoteArg = FALSE;
             }
             YY_BREAK
@@ -6346,42 +6434,50 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_defLitText += preYYtext;
-               g_defText += preYYtext;
+               QString text = QString::fromUtf8(preYYtext);
+               g_defLitText += text;
+               g_defText += text;
             }
             YY_BREAK
+
          case 167:
             /* rule 167 can match eol */
             YY_RULE_SETUP
 
             {
-               g_defLitText += preYYtext;
+               g_defLitText += QString::fromUtf8(preYYtext);
                outputChar('\n');
                g_defText += ' ';
                g_yyLineNr++;
                g_yyMLines++;
             }
             YY_BREAK
+
          case 168:
             /* rule 166 can match eol */
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(preYYtext);
+
                QString comment = extractTrailingComment(g_defLitText);
-               g_defLitText += preYYtext;
-               if (!comment.isEmpty())
-               {
+               g_defLitText += text;
+
+               if (! comment.isEmpty()) {
                   outputArray(comment, comment.length());
                   g_defLitText = g_defLitText.left(g_defLitText.length() - comment.length() - 1);
                }
+
                outputChar('\n');
+
                A_Define *def = 0;
-               //printf("Define name=`%s' text=`%s' litTexti=`%s'\n",g_defName.data(),g_defText.data(),g_defLitText.data());
-               if (g_includeStack.isEmpty() || g_curlyCount > 0)
-               {
+
+               if (g_includeStack.isEmpty() || g_curlyCount > 0) {
                   addDefine();
                }
+
                def = DefineManager::instance().isDefined(g_defName);
+
                if (def == 0) // new define
                {
                   //printf("new define '%s'!\n",g_defName.data());
@@ -6393,11 +6489,11 @@ YY_DECL {
                   //{
                   //  g_fileDefineDict->insert(g_defName,nd);
                   //}
+
                } else if (def /*&& macroIsAccessible(def)*/)
                   // name already exists
                {
-                  //printf("existing define!\n");
-                  //printf("define found\n");
+
                   if (def->undef) { // undefined name
                      def->undef = FALSE;
                      def->name = g_defName;
@@ -6405,9 +6501,7 @@ YY_DECL {
                      def->nargs = g_defArgs;
                      def->fileName = g_yyFileName;
                      def->lineNr = g_yyLineNr - g_yyMLines;
-                     def->columnNr = g_yyColNr;
-                  } else {
-                     //printf("error: define %s is defined more than once!\n",g_defName.data());
+                     def->columnNr = g_yyColNr;     
                   }
                }
 
@@ -6422,25 +6516,39 @@ YY_DECL {
          case 169:
             YY_RULE_SETUP
 
-            { g_defText += ' '; g_defLitText += preYYtext; }
+            { 
+               QString text = QString::fromUtf8(preYYtext);
+               g_defText += ' '; 
+               g_defLitText += text;
+            }
             YY_BREAK
          case 170:
             YY_RULE_SETUP
 
-            { g_defText += "##"; g_defLitText += preYYtext; }
+            {  
+               QString text = QString::fromUtf8(preYYtext);
+               g_defText += "##"; 
+               g_defLitText += text; 
+            }
             YY_BREAK
          case 171:
             YY_RULE_SETUP
 
-            { g_defText += "@@"; g_defLitText += preYYtext; }
+            { 
+              QString text = QString::fromUtf8(preYYtext);
+              g_defText += "@@"; 
+              g_defLitText += text;
+            }
             YY_BREAK
          case 172:
             YY_RULE_SETUP
 
             {
-               g_defText += *preYYtext;
-               g_defLitText += preYYtext;
-               if (!g_insideComment)
+               QString text = QString::fromUtf8(preYYtext);
+               g_defText += text[0];
+               g_defLitText += text;
+
+               if (! g_insideComment)
                {
                   BEGIN(SkipDoubleQuote);
                }
@@ -6450,9 +6558,11 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_defText += *preYYtext;
-               g_defLitText += preYYtext;
-               if (!g_insideComment)
+               QString text = QString::fromUtf8(preYYtext);
+               g_defText += text[0];
+               g_defLitText += text;
+
+               if (! g_insideComment)
                {
                   BEGIN(SkipSingleQuote);
                }
@@ -6461,19 +6571,28 @@ YY_DECL {
          case 174:
             YY_RULE_SETUP
 
-            { g_defText += preYYtext; g_defLitText += preYYtext; }
+            { 
+              QString text = QString::fromUtf8(preYYtext);               
+              g_defText += text;
+              g_defLitText += text; 
+            }
             YY_BREAK
          case 175:
             YY_RULE_SETUP
 
-            { g_defText += preYYtext; g_defLitText += preYYtext; }
+            { 
+              QString text = QString::fromUtf8(preYYtext);
+              g_defText += text;
+              g_defLitText += text; 
+            }
             YY_BREAK
          case 176:
             YY_RULE_SETUP
 
             {
-               g_defText += *preYYtext;
-               g_defLitText += preYYtext;
+               QString text = QString::fromUtf8(preYYtext);
+               g_defText += text[0];
+               g_defLitText += text;
                BEGIN(DefineText);
             }
             YY_BREAK
@@ -6481,35 +6600,50 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_defText += preYYtext;
-               g_defLitText += preYYtext;
+               QString text = QString::fromUtf8(preYYtext);
+               g_defText += text;
+               g_defLitText += text;
             }
             YY_BREAK
+
          case 178:
             YY_RULE_SETUP
 
             {
-               g_defText += *preYYtext;
-               g_defLitText += preYYtext;
+               QString text = QString::fromUtf8(preYYtext);
+               g_defText += text[0];
+               g_defLitText += text;
                BEGIN(DefineText);
             }
             YY_BREAK
          case 179:
             YY_RULE_SETUP
 
-            { g_defText += *preYYtext; g_defLitText += preYYtext; }
+            { 
+              QString text = QString::fromUtf8(preYYtext);
+              g_defText += text[0];
+              g_defLitText += text; 
+            }
             YY_BREAK
 
          case 180:
             YY_RULE_SETUP
 
-            { g_defText += *preYYtext; g_defLitText += preYYtext; }
+            { 
+               QString text = QString::fromUtf8(preYYtext);
+               g_defText += text[0];
+                g_defLitText += text;
+            }
             YY_BREAK
 
          case 181:
             YY_RULE_SETUP
 
-            { g_defText += *preYYtext; g_defLitText += preYYtext; }
+            { 
+               QString text = QString::fromUtf8(preYYtext);
+               g_defText += text[0];
+               g_defLitText += text; 
+            }
             YY_BREAK
 
          case YY_STATE_EOF(INITIAL):
@@ -6591,12 +6725,13 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (YY_START == SkipVerbatim || YY_START == SkipCond)
-               {
+               if (YY_START == SkipVerbatim || YY_START == SkipCond) {
                   REJECT;
-               } else
-               {
-                  outputArray(preYYtext, (int)preYYleng);
+
+               } else {
+                  QString text = QString::fromUtf8(preYYtext);
+                  outputArray(text, text.length());
+
                   g_lastCContext = YY_START;
                   g_commentCount = 1;
                   if (preYYleng == 3)
@@ -6612,12 +6747,13 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               if (YY_START == SkipVerbatim || YY_START == SkipCond)
-               {
+               if (YY_START == SkipVerbatim || YY_START == SkipCond) {
                   REJECT;
-               } else
-               {
-                  outputArray(preYYtext, (int)preYYleng);
+
+               } else {
+                  QString text = QString::fromUtf8(preYYtext);
+                  outputArray(text, text.length());
+
                   g_lastCPPContext = YY_START;
                   if (preYYleng == 3)
                   {
@@ -7862,9 +7998,10 @@ QString preprocessFile(const QString &fileName, const QString &input)
    }
 
    g_yyLineNr = 1;
-   g_yyColNr  = 1;
-   g_level    = 0;
+   g_yyColNr  = 1;  
    g_ifcount  = 0;
+
+   g_levelGuard.clear();
 
    BEGIN( Start );
 

@@ -15,7 +15,7 @@
 *************************************************************************/
 
 /*!
-\page main-changed Changes with DoxyPress
+\page main-changed DoxyPress Improvements 
 
 <ul>  
    <li>Default name for the <b>HTML Header</b> file was changed to doxy_header.html

@@ -41,32 +41,18 @@ static const char types[][NUM_HTML_LIST_TYPES] = {"1", "a", "i", "A"};
 static QString convertIndexWordToAnchor(const QString &word)
 {
    static char hex[] = "0123456789abcdef";
-
    QString result;
 
-   QByteArray tmp  = word.toUtf8();
-   const char *str = tmp.constData();
+   for (auto c : word) {
+    
+      if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'A') || (c >= '0' && c <= '9') || 
+            c == '-' || c == '.' || c == '_' || c == '~') { 
 
-   unsigned char c;
+         result += c;
 
-   if (str) {
-      while ((c = *str++)) {
-
-         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'A') || (c >= '0' && c <= '9') || 
-               c == '-' || c == '.' || c == '_' || c == '~') { 
-
-            result += c;
-
-         } else {
-            char enc[4];
-
-            enc[0] = '%';
-            enc[1] = hex[(c & 0xf0) >> 4];
-            enc[2] = hex[c & 0xf];
-            enc[3] = 0;
-
-            result += enc;
-         }
+      } else {
+         result += QString("%%1").arg(c.unicode(), 2, 16, QChar('0'));       
+         
       }
    }
 
@@ -202,11 +188,13 @@ void HtmlDocVisitor::visit(DocSymbol *s)
       return;
    }
 
-   const char *res = HtmlEntityMapper::instance()->html(s->symbol());
-   if (res) {
+   QString res = HtmlEntityMapper::instance()->html(s->symbol());
+
+   if (! res.isEmpty()) {
       m_t << res;
+
    } else {
-      err("HTML: non supported HTML-entity found: %s\n", HtmlEntityMapper::instance()->html(s->symbol(), true));
+      err("HTML: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 }
 
@@ -420,7 +408,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          QFile file(fileName);
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s for writing\n", fileName.data());
+            err("Could not open file %s for writing\n", qPrintable(fileName));
          }
 
          file.write(s->text().toUtf8());
@@ -451,7 +439,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".msc");
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s.msc for writing\n", baseName.data());
+            err("Could not open file %s.msc for writing\n", qPrintable(baseName));
          }
 
          QString text = "msc {";

@@ -180,17 +180,23 @@ void LatexDocVisitor::visit(DocSymbol *s)
    if (m_hide) {
       return;
    }
-   const char *res = HtmlEntityMapper::instance()->latex(s->symbol());
-   if (res) {
-      if (((s->symbol() == DocSymbol::Sym_lt) || (s->symbol() == DocSymbol::Sym_Less)) && (!m_insidePre)) {
+
+   QString res = HtmlEntityMapper::instance()->latex(s->symbol());
+
+   if (! res.isEmpty()) {
+
+      if (((s->symbol() == DocSymbol::Sym_lt) || (s->symbol() == DocSymbol::Sym_Less)) && (! m_insidePre)) {
          m_t << "$<$";
-      } else if (((s->symbol() == DocSymbol::Sym_gt) || (s->symbol() == DocSymbol::Sym_Greater)) && (!m_insidePre)) {
+
+      } else if (((s->symbol() == DocSymbol::Sym_gt) || (s->symbol() == DocSymbol::Sym_Greater)) && (! m_insidePre)) {
          m_t << "$>$";
+
       } else {
          m_t << res;
       }
+
    } else {
-      err("LaTeX: non supported HTML-entity found: %s\n", HtmlEntityMapper::instance()->html(s->symbol(), true));
+      err("LaTeX: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 }
 

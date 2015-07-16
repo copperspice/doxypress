@@ -25,25 +25,31 @@ static const int g_numberHtmlMappedCmds = 11;
 //! @details In case an entity does not exist a NULL is given for the entity. The first column contains the symbolic code
 //!          for the entity, see also doxparser.h The second column contains the name of the enitity (without the starting \& and
 //!          ending ;)
+
 struct htmlEntityInfo {
    DocSymbol::SymType symb;
-   const char *item;
-   const char *UTF8;
-   const char *html;
-   const char *xml;
-   const char *docbook;
-   const char *latex;
-   const char *man;
-   const char *rtf;
+
+   QString item;
+   QString utf8;
+   QString html;
+   QString xml;
+   QString docbook;
+   QString latex;
+   QString man;
+   QString rtf;
+
    DocSymbol::PerlSymb perl;
 };
 
+
+#undef SYM 
+#define SYM(s)    DocSymbol::Sym_##s,"&"#s";"
+
 static struct htmlEntityInfo g_htmlEntities[] = {
-#undef SYM
-   // helper macro to force consistent entries for the symbol and item columns
-#define SYM(s) DocSymbol::Sym_##s,"&"#s";"
+
    // HTML4 entities
    // symb+item     UTF-8           html          xml                     docbook          latex                     man       rtf            perl
+
    { SYM(nbsp),     "\xc2\xa0",     "&#160;",     "<nonbreakablespace/>", "&#160;",        "~",                      " ",      "\\~",         { " ",          DocSymbol::Perl_char    }},
    { SYM(iexcl),    "\xc2\xa1",     "&iexcl;",    "<iexcl/>",             "&#161;",        "!`",                     NULL,     "\\'A1",       { NULL,         DocSymbol::Perl_unknown }},
    { SYM(cent),     "\xc2\xa2",     "&cent;",     "<cent/>",              "&#162;",        "\\textcent{}",           NULL,     "\\'A2",       { NULL,         DocSymbol::Perl_unknown }},
@@ -314,6 +320,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
    { SYM(Pipe),     "|",            "|",          "|",                    "|",             "$|$",                    "|",      "|",           { "|",          DocSymbol::Perl_char    }},
    { SYM(Quot),     "\"",           "\"",         "\"",                   "&quot;",        "\"",                     "\"",     "\"",          { "\"",         DocSymbol::Perl_char    }},
    { SYM(Minus),    "-",            "-",          "-",                    "-",             "-\\/",                   "-",      "-",           { "-",          DocSymbol::Perl_char    }}
+
 };
 
 static const int g_numHtmlEntities = (int)(sizeof(g_htmlEntities) / sizeof(*g_htmlEntities));
@@ -342,6 +349,7 @@ HtmlEntityMapper *HtmlEntityMapper::instance()
    if (s_instance == 0) {
       s_instance = new HtmlEntityMapper;
    }
+
    return s_instance;
 }
 
@@ -361,12 +369,14 @@ void HtmlEntityMapper::deleteInstance()
  * @return the UTF8 code of the HTML entity,
  *         in case the UTF code is unknown \c NULL is returned.
  */
-const char *HtmlEntityMapper::utf8(DocSymbol::SymType symb, bool useInPrintf) const
+QString HtmlEntityMapper::utf8(DocSymbol::SymType symb, bool useInPrintf) const
 {
    if (useInPrintf && symb == DocSymbol::Sym_Percent) {
-      return "%%"; // escape for printf
+      // escape for printf
+      return "%%"; 
+
    } else {
-      return g_htmlEntities[symb].UTF8;
+      return g_htmlEntities[symb].utf8;
    }
 }
 
@@ -378,10 +388,12 @@ const char *HtmlEntityMapper::utf8(DocSymbol::SymType symb, bool useInPrintf) co
  * @return the html representation of the HTML entity,
  *         in case the html code is unknown \c NULL is returned.
  */
-const char *HtmlEntityMapper::html(DocSymbol::SymType symb, bool useInPrintf) const
+QString HtmlEntityMapper::html(DocSymbol::SymType symb, bool useInPrintf) const
 {
    if (useInPrintf && symb == DocSymbol::Sym_Percent) {
-      return "%%"; // escape for printf
+      // escape for printf
+      return "%%"; 
+
    } else {
       return g_htmlEntities[symb].html;
    }
@@ -393,7 +405,7 @@ const char *HtmlEntityMapper::html(DocSymbol::SymType symb, bool useInPrintf) co
  * @return the XML code of the HTML entity,
  *         in case the XML code is unknown \c NULL is returned.
  */
-const char *HtmlEntityMapper::xml(DocSymbol::SymType symb) const
+QString HtmlEntityMapper::xml(DocSymbol::SymType symb) const
 {
    return g_htmlEntities[symb].xml;
 }
@@ -404,7 +416,7 @@ const char *HtmlEntityMapper::xml(DocSymbol::SymType symb) const
  * @return the docbook code of the HTML entity,
  *         in case the docbook code is unknown \c NULL is returned.
  */
-const char *HtmlEntityMapper::docbook(DocSymbol::SymType symb) const
+QString HtmlEntityMapper::docbook(DocSymbol::SymType symb) const
 {
    return g_htmlEntities[symb].docbook;
 }
@@ -415,7 +427,7 @@ const char *HtmlEntityMapper::docbook(DocSymbol::SymType symb) const
  * @return the LaTeX code of the HTML entity,
  *         in case the LaTeX code is unknown \c NULL is returned.
  */
-const char *HtmlEntityMapper::latex(DocSymbol::SymType symb) const
+QString HtmlEntityMapper::latex(DocSymbol::SymType symb) const
 {
    return g_htmlEntities[symb].latex;
 }
@@ -426,7 +438,7 @@ const char *HtmlEntityMapper::latex(DocSymbol::SymType symb) const
  * @return the man of the HTML entity,
  *         in case the man code is unknown \c NULL is returned.
  */
-const char *HtmlEntityMapper::man(DocSymbol::SymType symb) const
+QString HtmlEntityMapper::man(DocSymbol::SymType symb) const
 {
    return g_htmlEntities[symb].man;
 }
@@ -437,7 +449,7 @@ const char *HtmlEntityMapper::man(DocSymbol::SymType symb) const
  * @return the RTF of the HTML entity,
  *         in case the RTF code is unknown \c NULL is returned.
  */
-const char *HtmlEntityMapper::rtf(DocSymbol::SymType symb) const
+QString HtmlEntityMapper::rtf(DocSymbol::SymType symb) const
 {
    return g_htmlEntities[symb].rtf;
 }
@@ -476,9 +488,9 @@ DocSymbol::SymType HtmlEntityMapper::name2sym(const QString &symName) const
 void HtmlEntityMapper::writeXMLSchema(QTextStream &t)
 {
    for (int i = 0; i < g_numHtmlEntities - g_numberHtmlMappedCmds; i++) {
-      QByteArray bareName = g_htmlEntities[i].xml;
+      QString  bareName = g_htmlEntities[i].xml;
 
-      if (!bareName.isEmpty() && bareName.at(0) == '<' && bareName.right(2) == "/>") {
+      if (! bareName.isEmpty() && bareName.at(0) == '<' && bareName.right(2) == "/>") {
          bareName = bareName.mid(1, bareName.length() - 3); // strip < and />
          t << "      <xsd:element name=\"" << bareName << "\" type=\"docEmptyType\" />\n";
       }
@@ -492,7 +504,7 @@ void HtmlEntityMapper::validate()
 {
    for (int i = 0; i < g_numHtmlEntities; i++) {
       if (i != g_htmlEntities[i].symb) {
-         warn_uncond("Internal inconsistency, htmlentries code %d (item=%s)\n", i, g_htmlEntities[i].item);
+         warn_uncond("Internal inconsistency, htmlentries code %d (item=%s)\n", i, qPrintable(g_htmlEntities[i].item) );
       }
    }
 }

@@ -778,6 +778,7 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
    static bool repeatBrief = Config::getBool("repeat-brief");
+   const QString docText = documentation();
 
    ol.startTextBlock();
 
@@ -786,11 +787,11 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
    }
 
    // repeat brief description
-   if (!briefDescription().isEmpty() && repeatBrief) {
+   if (! briefDescription().isEmpty() && repeatBrief) {
       ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
    }
 
-   if (! briefDescription().isEmpty() && repeatBrief && ! documentation().isEmpty()) {
+   if (! briefDescription().isEmpty() && repeatBrief && ! docText.isEmpty()) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
       ol.writeString("\n\n");
@@ -798,8 +799,8 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
    }
 
    // write documentation
-   if (! documentation().isEmpty()) {
-      ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation(), true, false);
+   if (! docText.isEmpty()) {
+      ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), docText, true, false);
    }
 
    // write type constraints
@@ -817,6 +818,7 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
       ol.endDescForItem();
       ol.endSimpleSect();
    }
+
    //ol.newParagraph();
    writeSourceDef(ol, name());
    ol.endTextBlock();
@@ -827,8 +829,7 @@ bool ClassDef::hasDetailedDescription() const
    static bool repeatBrief   = Config::getBool("repeat-brief");
    static bool sourceBrowser = Config::getBool("source-code");
 
-   return ((!briefDescription().isEmpty() && repeatBrief) ||
-           !documentation().isEmpty() ||
+   return ((! briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty() ||
            (sourceBrowser && getStartBodyLine() != -1 && getBodyDef()));
 }
 

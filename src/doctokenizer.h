@@ -68,8 +68,6 @@ enum Tokens {
 
 /** @brief Data associated with a token used by the comment block parser. */
 struct TokenInfo {
-   // unknown token
-   char unknownChar;
 
    // command token
    QString name;
