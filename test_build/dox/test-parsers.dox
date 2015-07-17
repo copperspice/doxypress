@@ -13,25 +13,22 @@
 *                                                                         
 *************************************************************************/
 
-/*!
-\page note-test  NoteTest
+/**
+\page parser-test  Parsers
 
-This information pertains to building Diamond to run on Windows.
-
-<h3>Test 1</h3>
-
-\note{ Now we have a comma, and yes there are more words after the comma }
+Test other parsers in DoxyPress.
 
 
-<h3>Test 2</h3>
+<h3>Python</h3>
 
-Some information goes here. 
 
-\note{ All of the Autotool commands are run from a Bash prompt. For information about installing a Bourne
-shell on Windows refer to require-win.}
+\include py_sample.py
 
-(1)&nbsp; Run Autoconf from your project directory with the syntax shown below. This step is run once or anytime
-configure.ac is modified. When this command runs successfully, there is no output displayed.
+
+<h3>TCL</h3>
+
+
+\include tcl_sample.tcl
 
 
 */

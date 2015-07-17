@@ -12381,15 +12381,9 @@ static void yy_flex_strncpy (char *, yyconst char *, int );
 static int yy_flex_strlen (yyconst char *);
 #endif
 
-#ifndef YY_NO_INPUT
+static int yyinput ( );
+static QChar yyinput_x ( );
 
-#ifdef __cplusplus
-static int yyinput (void );
-#else
-static int input (void );
-#endif
-
-#endif
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
@@ -12719,20 +12713,19 @@ YY_DECL {
             }
             YY_BREAK
 
-// broom               QString text = QString::fromUtf8(codeYYtext); 
-
          case 9:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext);
+
                if (! g_insideObjC || g_insideBody) {
-                  g_code->codify(codeYYtext);
+                  g_code->codify(text);
 
-               } else // Start of Objective-C method
-
-               {
-                  //printf("Method!\n");
-                  g_code->codify(codeYYtext);
+               } else  { 
+                  // Start of Objective-C method
+                                 
+                  g_code->codify(text);
                   BEGIN(ObjCMethod);
                }
             }
@@ -12741,7 +12734,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext); 
+               g_code->codify(text);
                BEGIN(ObjCParams);
             }
             YY_BREAK
@@ -12749,7 +12743,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext); 
+               g_code->codify(text);
                BEGIN(ObjCParamType);
             }
             YY_BREAK
@@ -12757,18 +12752,24 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_code->codify(codeYYtext);
-               if (*codeYYtext == '{')
-               {
+
+               QString text = QString::fromUtf8(codeYYtext); 
+               g_code->codify(text);
+
+               if (text[0] == '{')  {
                   g_curlyCount++;
+
                   if (g_searchingForBody) {
                      g_searchingForBody = FALSE;
                      g_insideBody = TRUE;
                   }
+
                   if (g_insideBody) {
                      g_bodyCurlyCount++;
                   }
-                  if (!g_curClassName.isEmpty()) { // valid class name
+
+                  if (! g_curClassName.isEmpty()) { 
+                     // valid class name
                      pushScope(g_curClassName);
 
                      DBG_CTX((stderr, "** scope stack push SCOPEBLOCK\n"));
@@ -12784,32 +12785,36 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext); 
+               g_code->codify(text);
             }
             YY_BREAK
          case 14:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext); 
                startFontClass("keywordtype");
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                endFontClass();
-               g_parmType = codeYYtext;
+               g_parmType = text;
             }
             YY_BREAK
          case 15:
             YY_RULE_SETUP
 
             {
-               generateClassOrGlobalLink(*g_code, codeYYtext);
-               g_parmType = codeYYtext;
+               QString text = QString::fromUtf8(codeYYtext);
+               generateClassOrGlobalLink(*g_code, text);
+               g_parmType = text;
             }
             YY_BREAK
          case 16:
             YY_RULE_SETUP
 
             {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                BEGIN(ObjCParams);
             }
             YY_BREAK
@@ -12817,8 +12822,9 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_code->codify(codeYYtext);
-               g_parmName = codeYYtext;
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
+               g_parmName = text;
                g_theVarContext.addVariable(g_parmType, g_parmName);
                g_parmType.resize(0);
                g_parmName.resize(0);
@@ -12828,14 +12834,16 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               generateClassOrGlobalLink(*g_code, codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               generateClassOrGlobalLink(*g_code, text);
             }
             YY_BREAK
          case 19:
             YY_RULE_SETUP
 
             {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 20:
@@ -12843,7 +12851,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codifyLines(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 21:
@@ -12853,12 +12862,14 @@ YY_DECL {
                bool ambig;
                bool found = FALSE;               
 
-               QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, codeYYtext, ambig);
+               QString text = QString::fromUtf8(codeYYtext);
+               QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, text, ambig);
                
                if (fd && fd->isLinkable())
                {
-                  if (ambig) { // multiple input files match the name
-                     QString name = QDir::cleanPath(codeYYtext);
+                  if (ambig) { 
+                     // multiple input files match the name
+                     QString name = QDir::cleanPath(text);
 
                      if (! name.isEmpty() && g_sourceFileDef) {
                         QSharedPointer<FileName> fn = Doxy_Globals::inputNameDict->find(name);
@@ -12879,21 +12890,25 @@ YY_DECL {
                   }
                }
                
-               if (found)
-               {
-                  writeMultiLineCodeLink(*g_code, fd, codeYYtext);
+               if (found) {
+                  writeMultiLineCodeLink(*g_code, fd, text);
                } else
                {
-                  g_code->codify(codeYYtext);
+                  g_code->codify(text);
                }
-               char c = yyinput();
-               QString text;
-               text += c;
-               g_code->codify(text);
+
+               QChar c = yyinput_x();
+               QString t = c;              
+               g_code->codify(t);
+
                endFontClass();
                BEGIN( Body );
             }
             YY_BREAK
+
+// BROOM          QString text = QString::fromUtf8(codeYYtext);
+
+
          case 22:
             YY_RULE_SETUP
 
@@ -15383,13 +15398,7 @@ static void yyunput (int c, register char *yy_bp )
    (yy_c_buf_p) = yy_cp;
 }
 
-#ifndef YY_NO_INPUT
-#ifdef __cplusplus
 static int yyinput (void)
-#else
-static int input  (void)
-#endif
-
 {
    int c;
 
@@ -15436,11 +15445,8 @@ static int input  (void)
                if ( ! (yy_did_buffer_switch_on_eof) ) {
                   YY_NEW_FILE;
                }
-#ifdef __cplusplus
+
                return yyinput();
-#else
-               return input();
-#endif
             }
 
             case EOB_ACT_CONTINUE_SCAN:
@@ -15458,7 +15464,46 @@ static int input  (void)
 
    return c;
 }
-#endif	/* ifndef YY_NO_INPUT */
+
+static QChar yyinput_x() 
+{
+   QChar retval;
+
+   unsigned char c1 = yyinput();   
+   int len = 0;
+
+   if ((c & 0xE0) == 0xC0) {
+      len = 1;
+
+   } else if ((c & 0xF0) == 0xE0)  {
+      len = 2; 
+
+   } else if ((c & 0xF8) == 0xF8)  {
+      len = 3; 
+
+   } else if ((c & 0xFC) == 0xF8)  {
+      len = 4; 
+
+   } else if ((c & 0xFE) == 0xFC)  {
+      len = 5; 
+
+   }   
+
+   QByteArray tmp;
+
+   tmp += c1;
+
+   for (int i = 0; i <= len; ++i)  {
+      tmp += yyinput();  
+   }
+
+   QString tmp2 = QString::fromUtf8(tmp);
+   assert (tmp2.length() == 1);
+
+   retval = tmp2[0];
+
+   return retval;
+}
 
 /** Immediately switch to a different input stream.
  * @param input_file A readable stream.
