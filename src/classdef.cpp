@@ -3428,7 +3428,7 @@ void ClassDef::addListReferences()
 
 QSharedPointer<MemberDef> ClassDef::getMemberByName(const QString &name) const
 {
-   QSharedPointer<ClassDef> self = sharedFrom(this);
+   QSharedPointer<const ClassDef> self = sharedFrom(this);
    QSharedPointer<MemberDef> xmd;
 
    if (m_allMemberNameInfoSDict) {

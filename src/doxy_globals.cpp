@@ -120,12 +120,6 @@ bool Doxy_Globals::g_programExit   = false;
 
 
 // part 3
-QMap<const EnableSharedFromThis *, QWeakPointer<EnableSharedFromThis>> &EnableSharedFromThis::m_selfMap()
-{
-   static QMap<const EnableSharedFromThis *, QWeakPointer<EnableSharedFromThis>> data;
-   return data;
-}
-
 QHash<QString, Definition *> &Doxy_Globals::symbolMap()
 {
    static QHash<QString, Definition *> data;

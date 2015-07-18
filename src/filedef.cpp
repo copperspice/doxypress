@@ -1601,7 +1601,7 @@ static void getAllIncludeFilesRecursively(QSet<QString> &filesVisited, QSharedPo
 
 void FileDef::getAllIncludeFilesRecursively(QStringList &incFiles) const
 {
-   QSharedPointer<FileDef> self = sharedFrom(this);
+   QSharedPointer<const FileDef> self = sharedFrom(this);
 
    QSet<QString> includes;
    ::getAllIncludeFilesRecursively(includes, self, incFiles);

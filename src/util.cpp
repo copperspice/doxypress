@@ -6563,7 +6563,7 @@ bool checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fi
    }
 }
 
-QString parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md,
+QString parseCommentAsText(QSharedPointer<const Definition> scope, QSharedPointer<const MemberDef> md,
                   const QString &doc, const QString &fileName, int lineNr)
 {
    QString s;
@@ -6573,8 +6573,14 @@ QString parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<Memb
    }
 
    {
+      // need to remove the const, this should be reworked      
+      QSharedPointer<Definition> scope_unconst = scope.constCast<Definition>();
+
+      // need to remove the const, this should be reworked      
+      QSharedPointer<MemberDef> md_unconst = md.constCast<MemberDef>();
+      
       QTextStream t_stream(&s);
-      DocNode *root = validatingParseDoc(fileName, lineNr, scope, md, doc, false, false);
+      DocNode *root = validatingParseDoc(fileName, lineNr, scope_unconst, md_unconst, doc, false, false);
    
       TextDocVisitor *visitor = new TextDocVisitor(t_stream);
       root->accept(visitor);

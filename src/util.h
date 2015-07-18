@@ -307,7 +307,7 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<FileDef> fileScope, QS
                   QSharedPointer<MemberDef> *pMemType = 0, QString *pTemplSpec = nullptr, QString *pResolvedType = nullptr, 
                   ArgumentList *actTemplParams = 0);
 
-QString parseCommentAsText(QSharedPointer<Definition> scope, QSharedPointer<MemberDef> member, 
+QString parseCommentAsText(QSharedPointer<const Definition> scope, QSharedPointer<const MemberDef> member, 
                   const QString &doc, const QString &fileName, int lineNr);
 
 QString transcodeToQString(const QByteArray &input);

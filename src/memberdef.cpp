@@ -846,7 +846,7 @@ MemberDef &MemberDef::operator=(const MemberDef &)
 QSharedPointer<MemberDef> MemberDef::deepCopy() const
 {   
    // make a copy of the object
-   QSharedPointer<MemberDef> result = QMakeShared<MemberDef>(*this);
+   QSharedPointer<MemberDef> result { new MemberDef(*this) };
   
    // clear pointers owned by object
    result->m_impl->redefinedBy       = 0;

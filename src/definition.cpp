@@ -1645,16 +1645,22 @@ QString Definition::briefDescription(bool abbr) const
 
 QString Definition::briefDescriptionAsTooltip() const
 {
-   QSharedPointer<Definition> self = sharedFrom(this);
+   QSharedPointer<const Definition> self = sharedFrom(this);
 
    if (m_private->brief) {
       if (m_private->brief->tooltip.isEmpty() && ! m_private->brief->doc.isEmpty()) {
          static bool reentering = false;
 
          if (! reentering) {
-            QSharedPointer<MemberDef> md = definitionType() == TypeMember ? self.dynamicCast<MemberDef>() : QSharedPointer<MemberDef>();
+            QSharedPointer<const MemberDef> md;
 
-            QSharedPointer<Definition> scope;
+            if (definitionType() == TypeMember) {
+               md = self.dynamicCast< const MemberDef>();
+            } else {
+               md = QSharedPointer<MemberDef>();
+            }
+
+            QSharedPointer<const Definition> scope;
 
             if (definitionType() == TypeMember) {
                scope = getOuterScope();

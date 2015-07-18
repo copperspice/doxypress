@@ -10766,7 +10766,6 @@ QSharedPointer<ClassDef> VariableContext::dummyContext()
 
 void VariableContext::addVariable(const QString &type, const QString &name)
 {
-   //printf("VariableContext::addVariable(%s,%s)\n",type.data(),name.data());
    QString ltype = type.simplified();
    QString lname = name.simplified();
 
@@ -10782,9 +10781,10 @@ void VariableContext::addVariable(const QString &type, const QString &name)
    }
 
    DBG_CTX((stderr, "** addVariable trying: type='%s' name='%s' g_currentDefinition=%s\n",
-            ltype.data(), lname.data(), g_currentDefinition ? g_currentDefinition->name().data() : "<none>"));
-   Scope *scope = m_scopes.count() == 0 ? &m_globalScope : m_scopes.last();
+            qPrintable(ltype), qPrintable(lname), 
+            g_currentDefinition ? qPrintable(g_currentDefinition->name()) : "<none>"));
 
+   Scope *scope = m_scopes.count() == 0 ? &m_globalScope : m_scopes.last();
 
    QSharedPointer<ClassDef> varType;
 
@@ -10795,7 +10795,7 @@ void VariableContext::addVariable(const QString &type, const QString &name)
 
        // look for global class definitions
       
-      DBG_CTX((stderr, "** addVariable type='%s' name='%s'\n", ltype.data(), lname.data()));
+      DBG_CTX((stderr, "** addVariable type='%s' name='%s'\n", qPrintable(ltype), qPrintable(lname)));
       scope->insert(lname, varType); // add it to a list
 
    } else if ((i = ltype.indexOf('<')) != -1) {
@@ -10817,7 +10817,9 @@ void VariableContext::addVariable(const QString &type, const QString &name)
       }
 
       if (newDef) {
-         DBG_CTX((stderr, "** addVariable type='%s' templ='%s' name='%s'\n", typeName.data(), templateArgs.data(), lname.data()));
+         DBG_CTX((stderr, "** addVariable type='%s' templ='%s' name='%s'\n", qPrintable(typeName), 
+                  qPrintable(templateArgs), qPrintable(lname)));
+
          scope->insert(lname, newDef);
 
       } else {
@@ -10830,7 +10832,7 @@ void VariableContext::addVariable(const QString &type, const QString &name)
          // is hidden to avoid false links to global variables with the same name
          // TODO: make this work for namespaces as well!
       {
-         DBG_CTX((stderr, "** addVariable: dummy context for '%s'\n", lname.data()));
+         DBG_CTX((stderr, "** addVariable: dummy context for '%s'\n", qPrintable(lname)));
          scope->insert(lname, VariableContext::dummyContext());
 
       } else {
@@ -10853,13 +10855,13 @@ void VariableContext::addVariable(const QString &type, const QString &name)
       result = scope->find(key);
 
       if (result) {
-         DBG_CTX((stderr, "** findVariable(%s)=%p\n", name.data(), result));
+         DBG_CTX((stderr, "** findVariable(%s)=%p\n", qPrintable(name), result));
          return result;
       }
    }
    // nothing found -> also try the global scope
    result = m_globalScope.find(name);
-   DBG_CTX((stderr, "** findVariable(%s)=%p\n", name.data(), result));
+   DBG_CTX((stderr, "** findVariable(%s)=%p\n", qPrintable(name), result));
 
    return result;
 }
@@ -10887,7 +10889,7 @@ class CallContext
       Ctx *ctx = m_defList.last();
 
       if (ctx) {
-         DBG_CTX((stderr, "** Set call context %s (%p)\n", d == 0 ? "<null>" : d->name().data(), d.data()));
+         DBG_CTX((stderr, "** Set call context %s (%p)\n", d == 0 ? "<null>" : qPrintable(d->name()), d.data()));
          ctx->d = d;
       }
    }
@@ -11031,7 +11033,7 @@ static void startCodeLine()
          g_args.resize(0);
          g_parmType.resize(0);
          g_parmName.resize(0);
-         //printf("Real scope: `%s'\n",g_realScope.data());
+
          g_bodyCurlyCount = 0;
 
          QString lineAnchor = QString("l%1").arg(g_yyLineNr, 5, 10, QChar('0'));
@@ -11284,7 +11286,6 @@ static QSharedPointer<MemberDef> setCallContextForVar(const QString &name)
             QSharedPointer<MemberDef> md = mnd->getMemberByName(locName);
 
             if (md) {
-               //printf("name=%s scope=%s\n",locName.data(),scope.data());
                g_theCallContext.setScope(stripClassName(md->typeString(), md->getOuterScope() ));
                return md;
             }
@@ -11299,24 +11300,24 @@ static QSharedPointer<MemberDef> setCallContextForVar(const QString &name)
       DBG_CTX((stderr, "local variable?\n"));
 
       if (mcd != VariableContext::dummyContext()) {
-         DBG_CTX((stderr, "local var `%s' mcd=%s\n", name.data(), mcd->name().data()));
+         DBG_CTX((stderr, "local var `%s' mcd=%s\n", qPrintable(name), qPrintable(mcd->name())));
          g_theCallContext.setScope(mcd);
       }
 
    } else {
-      DBG_CTX((stderr, "class member? scope=%s\n", g_classScope.data()));
+      DBG_CTX((stderr, "class member? scope=%s\n", qPrintable(g_classScope)));
       // look for a class member
       mcd = getClass(g_classScope);
 
       if (mcd) {
-         DBG_CTX((stderr, "Inside class %s\n", mcd->name().data()));
+         DBG_CTX((stderr, "Inside class %s\n", qPrintable(mcd->name())));
          QSharedPointer<MemberDef> md = mcd->getMemberByName(name);
 
          if (md) {
-            DBG_CTX((stderr, "Found member %s\n", md->name().data()));
+            DBG_CTX((stderr, "Found member %s\n", qPrintable(md->name())));
 
             if (g_scopeStack.isEmpty() || g_scopeStack.top() != CLASSBLOCK) {
-               DBG_CTX((stderr, "class member `%s' mcd=%s\n", name.data(), mcd->name().data()));
+               DBG_CTX((stderr, "class member `%s' mcd=%s\n", qPrintable(name), qPrintable(mcd->name())));
                g_theCallContext.setScope(stripClassName(md->typeString(), md->getOuterScope() ));
             }
 
@@ -11385,7 +11386,7 @@ static bool getLinkInScope(const QString &c, const QString &m, const QString  me
    QSharedPointer<NamespaceDef> nd;
    QSharedPointer<GroupDef>     gd;
 
-   DBG_CTX((stderr, "getLinkInScope: trying `%s'::`%s' varOnly=%d\n", c.data(), m.data(), varOnly));
+   DBG_CTX((stderr, "getLinkInScope: trying `%s'::`%s' varOnly=%d\n", qPrintable(c), qPrintable(m), varOnly));
 
    if (getDefs(c, m, "()", md, cd, fd, nd, gd, FALSE, g_sourceFileDef, FALSE, g_forceTagReference) &&
          md->isLinkable() && (!varOnly || md->isVariable())) {
@@ -11515,7 +11516,8 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
          return;
       }
      
-      DBG_CTX((stderr, "is found as a type cd=%s nd=%s\n", cd ? cd->name().data() : "<null>", nd ? nd->name().data() : "<null>"));
+      DBG_CTX((stderr, "is found as a type cd=%s nd=%s\n", cd ? qPrintable(cd->name()) : "<null>", 
+                  nd ? qPrintable(nd->name()) : "<null>"));
 
       if (cd == 0 && md == 0) { 
          // also see if it is variable or enum or enum value
@@ -11584,9 +11586,9 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
             
             if (md && g_currentDefinition) {
                DBG_CTX((stderr, "%s accessible from %s? %d md->getOuterScope=%s\n",
-                        md->name().data(), g_currentDefinition->name().data(),
+                        qPrintable(md->name()), qPrintable(g_currentDefinition->name()),
                         isAccessibleFrom(g_currentDefinition, g_sourceFileDef, md),
-                        md->getOuterScope()->name().data()));
+                        qPrintable(md->getOuterScope()->name())));
             }
 
             if (md && g_currentDefinition && isAccessibleFrom(g_currentDefinition, g_sourceFileDef, md) == -1) {
@@ -11596,7 +11598,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 
          if (md && (!varOnly || md->isVariable())) {
             DBG_CTX((stderr, "is a global md=%p g_currentDefinition=%s linkable=%d\n", md, 
-                     g_currentDefinition ? g_currentDefinition->name().data() : "<none>", md->isLinkable()));
+                     g_currentDefinition ? qPrintable(g_currentDefinition->name()) : "<none>", md->isLinkable()));
 
             if (md->isLinkable()) {
                QString text;
@@ -12168,12 +12170,8 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
                         QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict->find(ctx->methodName);
 
-                        //printf("mn->count=%d ictx->method=%s ctx->methodName=%s\n",
-                        //    mn==0?-1:(int)mn->count(),
-                        //    ictx->method->name().data(),
-                        //    ctx->methodName.data());
-
-                        if (mn && mn->count() == 1) { // member name unique
+                        if (mn && mn->count() == 1) { 
+                           // member name unique
                            ctx->method = mn->first();
                         }
 
@@ -12906,16 +12904,14 @@ YY_DECL {
             }
             YY_BREAK
 
-// BROOM          QString text = QString::fromUtf8(codeYYtext);
-
-
          case 22:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("preprocessor");
                g_lastSkipCppContext = YY_START;
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                BEGIN( SkipCPP ) ;
             }
             YY_BREAK
@@ -12923,14 +12919,16 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 24:
             YY_RULE_SETUP
 
             {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 25:
@@ -12938,20 +12936,23 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               codifyLines(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 26:
             YY_RULE_SETUP
 
             {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 27:
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext);
                g_theVarContext.pushScope();
 
                DBG_CTX((stderr, "** scope stack push INNERBLOCK\n"));
@@ -12962,7 +12963,7 @@ YY_DECL {
                   g_searchingForBody = FALSE;
                   g_insideBody = TRUE;
                }
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                g_curlyCount++;
                if (g_insideBody)
                {
@@ -12977,6 +12978,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext);
                g_theVarContext.popScope();
                g_type.resize(0);
                g_name.resize(0);
@@ -12993,7 +12995,7 @@ YY_DECL {
                   popScope();
                }
 
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
 
                DBG_CTX((stderr, "g_bodyCurlyCount=%d\n", g_bodyCurlyCount));
 
@@ -13014,6 +13016,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext);
+
                if (g_sourceFileDef) {
                   QSharedPointer<FileDef> fd = g_sourceFileDef;
                   g_insideObjC = fd->name().toLower().right(2) == ".m" ||
@@ -13042,7 +13046,7 @@ YY_DECL {
                }
 
                startFontClass("keyword");
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                endFontClass();
 
                g_currentMemberDef = QSharedPointer<MemberDef>();
@@ -13057,7 +13061,8 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                g_searchingForBody = FALSE;
                BEGIN( Body );
             }
@@ -13066,9 +13071,10 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext);
                g_type = g_curClassName;
                g_name.resize(0);
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                BEGIN( Body ); // variable of type struct *
             }
             YY_BREAK
@@ -13076,55 +13082,69 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                endFontClass();
             }
             YY_BREAK
          case 33:
-            YY_RULE_SETUP {
-               g_curClassName = codeYYtext;
+            YY_RULE_SETUP
+            {
+               QString text = QString::fromUtf8(codeYYtext);
+               g_curClassName = text;
                addType();
                if (g_curClassName == "alignas")
                {
                   startFontClass("keyword");
-                  g_code->codify(codeYYtext);
+                  g_code->codify(text);
                   endFontClass();
                   BEGIN( AlignAs );
                } else
                {
-                  generateClassOrGlobalLink(*g_code, codeYYtext);
+                  generateClassOrGlobalLink(*g_code, text);
                   BEGIN( ClassVar );
                }
             }
             YY_BREAK
          case 34:
-            YY_RULE_SETUP {
+            YY_RULE_SETUP 
+            {
+               QString text = QString::fromUtf8(codeYYtext);
                g_bracketCount = 1;
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                BEGIN( AlignAsEnd );
             }
             YY_BREAK
          case 35:
             /* rule 35 can match eol */
-            YY_RULE_SETUP {
+            YY_RULE_SETUP 
+            {
+               QString text = QString::fromUtf8(codeYYtext);
                g_yyLineNr++;
-               codifyLines(codeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 36:
             YY_RULE_SETUP
-            { g_code->codify(codeYYtext); }
+            { 
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
+            }
             YY_BREAK
          case 37:
-            YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+            YY_RULE_SETUP 
+            {
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                g_bracketCount++;
             }
             YY_BREAK
          case 38:
-            YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+            YY_RULE_SETUP 
+            {
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                if (--g_bracketCount <= 0)
                {
                   BEGIN(ClassName);
@@ -13133,59 +13153,70 @@ YY_DECL {
             YY_BREAK
          case 39:
             /* rule 39 can match eol */
-            YY_RULE_SETUP {
+            YY_RULE_SETUP 
+            {
+               QString text = QString::fromUtf8(codeYYtext);
                g_yyLineNr++;
-               codifyLines(codeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 40:
             YY_RULE_SETUP
-            { g_code->codify(codeYYtext); }
+            { 
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text); 
+            }
             YY_BREAK
          case 41:
-            YY_RULE_SETUP {
+            YY_RULE_SETUP 
+            {
                // PHP namespace
-               g_curClassName = substitute(codeYYtext, "\\", "::");
+               QString text = QString::fromUtf8(codeYYtext);
+               g_curClassName = substitute(text, "\\", "::");
 
                g_scopeStack.push(CLASSBLOCK);
 
                pushScope(g_curClassName);
                addType();
-               generateClassOrGlobalLink(*g_code, codeYYtext);
+               generateClassOrGlobalLink(*g_code, text);
                BEGIN( ClassVar );
             }
             YY_BREAK
          case 42:
             YY_RULE_SETUP {
                // Obj-C category
-               g_curClassName = removeRedundantWhiteSpace(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_curClassName = removeRedundantWhiteSpace(text);
                g_scopeStack.push(CLASSBLOCK);
 
                pushScope(g_curClassName);
                addType();
-               generateClassOrGlobalLink(*g_code, codeYYtext);
+               generateClassOrGlobalLink(*g_code, text);
                BEGIN( ClassVar );
             }
             YY_BREAK
          case 43:
             YY_RULE_SETUP {
-               g_curClassName = substitute(codeYYtext, ".", "::");
-               //printf("found package: %s\n",g_curClassName.data());
+               QString text = QString::fromUtf8(codeYYtext);
+               g_curClassName = substitute(text, ".", "::");
                addType();
-               codifyLines(codeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 44:
-            YY_RULE_SETUP {
+            YY_RULE_SETUP
+            {               
                unput(*codeYYtext);
                BEGIN( Body );
             }
             YY_BREAK
          case 45:
-            YY_RULE_SETUP {
+            YY_RULE_SETUP 
+            {
                // Java
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                g_curClassBases.clear();
                BEGIN( Bases );
@@ -13194,27 +13225,31 @@ YY_DECL {
          case 46:
             /* rule 46 can match eol */
             YY_RULE_SETUP {
-               DBG_CTX((stderr, "***** C++/CLI modifier %s on g_curClassName=%s\n", codeYYtext, g_curClassName.data()));
+               QString text = QString::fromUtf8(codeYYtext);
+               DBG_CTX((stderr, "***** C++/CLI modifier %s on g_curClassName=%s\n", qPrintable(text), qPrintable(g_curClassName)));
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                BEGIN( CppCliTypeModifierFollowup );
             }
             YY_BREAK
          case 47:
-            YY_RULE_SETUP {
+            YY_RULE_SETUP 
+            {
+               QString text = QString::fromUtf8(codeYYtext);
                g_type = g_curClassName;
-               g_name = codeYYtext;
+               g_name = text;
                if (g_insideBody)
                {
                   g_theVarContext.addVariable(g_type, g_name);
                }
-               generateClassOrGlobalLink(*g_code, codeYYtext);
+               generateClassOrGlobalLink(*g_code, text);
             }
             YY_BREAK
          case 48:
             YY_RULE_SETUP {
-               codifyLines(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               codifyLines(text);
                g_curClassBases.clear();
                BEGIN( Bases );
             }
@@ -13225,8 +13260,9 @@ YY_DECL {
 
          case 51:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                g_theVarContext.pushScope();
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                g_curlyCount++;
                if (YY_START == ClassVar && g_curClassName.isEmpty())
                {
@@ -13241,17 +13277,17 @@ YY_DECL {
                {
                   g_bodyCurlyCount++;
                }
-               if (!g_curClassName.isEmpty()) // valid class name
+               if (! g_curClassName.isEmpty()) // valid class name
                {
                   DBG_CTX((stderr, "** scope stack push CLASSBLOCK\n"));
                   g_scopeStack.push(CLASSBLOCK);
 
                   pushScope(g_curClassName);
-                  DBG_CTX((stderr, "***** g_curClassName=%s\n", g_curClassName.data()));
+                  DBG_CTX((stderr, "***** g_curClassName=%s\n", qPrintable(g_curClassName)));
 
                   if (getResolvedClass(g_currentDefinition, g_sourceFileDef, g_curClassName) == 0) {
 
-                     DBG_CTX((stderr, "Adding new class %s\n", g_curClassName.data()));
+                     DBG_CTX((stderr, "Adding new class %s\n", qPrintable(g_curClassName)));
 
                      QSharedPointer<ClassDef> ncd = QMakeShared<ClassDef>("<code>", 1, 1, g_curClassName, ClassDef::Class, 
                                     nullptr, "", FALSE); 
@@ -13287,23 +13323,27 @@ YY_DECL {
             YY_BREAK
          case 52:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                endFontClass();
             }
             YY_BREAK
+
          case 53:
             YY_RULE_SETUP {
-               DBG_CTX((stderr, "%s:addBase(%s)\n", g_curClassName.data(), codeYYtext));
-               g_curClassBases.append(codeYYtext);
-               generateClassOrGlobalLink(*g_code, codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);   
+               DBG_CTX((stderr, "%s:addBase(%s)\n", qPrintable(g_curClassName), qPrintable(text) ));
+               g_curClassBases.append(text);
+               generateClassOrGlobalLink(*g_code, text);
             }
             YY_BREAK
          case 54:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
-               if (!g_insideObjC)
-               {
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
+
+               if (! g_insideObjC) {
                   g_sharpCount = 1;
                   BEGIN ( SkipSharp );
                } else
@@ -13314,19 +13354,22 @@ YY_DECL {
             YY_BREAK
          case 55:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                g_insideProtocolList = FALSE;
             }
             YY_BREAK
          case 56:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                ++g_sharpCount;
             }
             YY_BREAK
          case 57:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                if (--g_sharpCount <= 0)
                {
                   BEGIN ( Bases );
@@ -13335,20 +13378,23 @@ YY_DECL {
             YY_BREAK
          case 58:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                g_sharpCount = 1;
                BEGIN ( SkipSharp );
             }
             YY_BREAK
          case 59:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                ++g_sharpCount;
             }
             YY_BREAK
          case 60:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                if (--g_sharpCount <= 0)
                {
                   BEGIN ( Bases );
@@ -13357,7 +13403,8 @@ YY_DECL {
             YY_BREAK
          case 61:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 62:
@@ -13365,12 +13412,14 @@ YY_DECL {
             *yy_cp = (yy_hold_char); /* undo effects of setting up codeYYtext */
             (yy_c_buf_p) = yy_cp -= 1;
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
+
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                addType();
-               generateFunctionLink(*g_code, codeYYtext);
+               generateFunctionLink(*g_code, text);
                g_bracketCount = 0;
                g_args.resize(0);
-               g_name += codeYYtext;
+               g_name += text;
                BEGIN( FuncCall );
             }
             YY_BREAK
@@ -13380,11 +13429,12 @@ YY_DECL {
             (yy_c_buf_p) = yy_cp -= 1;
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                addType();
-               generateFunctionLink(*g_code, codeYYtext);
+               generateFunctionLink(*g_code, text);
                g_bracketCount = 0;
                g_args.resize(0);
-               g_name += codeYYtext;
+               g_name += text;
                BEGIN( FuncCall );
             }
             YY_BREAK
@@ -13394,11 +13444,12 @@ YY_DECL {
             (yy_c_buf_p) = yy_cp -= 1;
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                addType();
-               generateFunctionLink(*g_code, codeYYtext);
+               generateFunctionLink(*g_code, text);
                g_bracketCount = 0;
                g_args.resize(0);
-               g_name += codeYYtext;
+               g_name += text;
                BEGIN( FuncCall );
             }
             YY_BREAK
@@ -13407,9 +13458,11 @@ YY_DECL {
             *yy_cp = (yy_hold_char); /* undo effects of setting up codeYYtext */
             (yy_c_buf_p) = yy_cp -= 1;
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
+
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                g_insideTemplate = TRUE;
                g_sharpCount = 0;
@@ -13418,64 +13471,81 @@ YY_DECL {
          case 66:
             /* rule 66 can match eol */
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                BEGIN(UsingName);
             }
             YY_BREAK
          case 67:
             YY_RULE_SETUP {
-               addUsingDirective(codeYYtext);
-               generateClassOrGlobalLink(*g_code, codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               addUsingDirective(text);
+               generateClassOrGlobalLink(*g_code, text);
                DBG_CTX((stderr, "** scope stack push CLASSBLOCK\n"));
                g_scopeStack.push(CLASSBLOCK);
-               pushScope(codeYYtext);
+               pushScope(text);
                BEGIN(Body);
             }
             YY_BREAK
          case 68:
             /* rule 68 can match eol */
             YY_RULE_SETUP
-            { codifyLines(codeYYtext); BEGIN(Body); }
+            { 
+              QString text = QString::fromUtf8(codeYYtext);
+              codifyLines(text); 
+              BEGIN(Body); 
+            }
             YY_BREAK
          case 69:
             YY_RULE_SETUP
-            { codifyLines(codeYYtext); BEGIN(Body); }
-            YY_BREAK
-         case 70:
-            YY_RULE_SETUP {
-               g_code->codify(codeYYtext); // this-> for C++, this. for C#
+            { 
+               QString text = QString::fromUtf8(codeYYtext);
+               codifyLines(codeYYtext); 
+               BEGIN(Body); 
             }
             YY_BREAK
+         case 70:
+            YY_RULE_SETUP 
+            {
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text); // this-> for C++, this. for C#
+            }
+            YY_BREAK
+
          case 71:
             /* rule 71 can match eol */
             *yy_cp = (yy_hold_char); /* undo effects of setting up codeYYtext */
             (yy_c_buf_p) = yy_cp -= 1;
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
+
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               codifyLines(codeYYtext);
-               if (QString(codeYYtext) == "typedef")
+               codifyLines(text);
+               if (QString(text) == "typedef")
                {
                   addType();
-                  g_name += codeYYtext;
+                  g_name += text;
                }
                endFontClass();
             }
             YY_BREAK
          case 72:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
             }
             YY_BREAK
          case 73:
             /* rule 73 can match eol */
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                g_name.resize(0);
                g_type.resize(0);
@@ -13486,13 +13556,15 @@ YY_DECL {
             *yy_cp = (yy_hold_char); /* undo effects of setting up codeYYtext */
             (yy_c_buf_p) = yy_cp = yy_bp + 2;
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
+
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                if (!g_inForEachExpression)
                {
                   REJECT;
                }
                startFontClass("keywordflow");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                // insert the variable in the parent scope, see bug 546158
                g_theVarContext.popScope();
@@ -13505,12 +13577,14 @@ YY_DECL {
          case 75:
             /* rule 75 can match eol */
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keywordflow");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                g_name.resize(0);
                g_type.resize(0);
-               g_inForEachExpression = (qstrcmp(codeYYtext, "for each") == 0 || qstrcmp(codeYYtext, "foreach") == 0);
+
+               g_inForEachExpression = (text == "for each") || (text == "foreach");
                BEGIN(FuncCall);
             }
             YY_BREAK
@@ -13519,27 +13593,32 @@ YY_DECL {
             *yy_cp = (yy_hold_char); /* undo effects of setting up codeYYtext */
             (yy_c_buf_p) = yy_cp -= 1;
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
+
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keywordflow");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
-               if (g_inFunctionTryBlock && (qstrcmp(codeYYtext, "catch") == 0 || qstrcmp(codeYYtext, "finally") == 0))
-               {
+
+               if (g_inFunctionTryBlock && ((text == "catch") || (text == "finally")) ) {
                   g_inFunctionTryBlock = FALSE;
                }
             }
             YY_BREAK
          case 77:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keywordflow");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
             }
             YY_BREAK
          case 78:
-            YY_RULE_SETUP {
+            YY_RULE_SETUP 
+            {
                // end of cast?
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                g_theCallContext.popScope();
                g_bracketCount--;
                g_parmType = g_name;
@@ -13547,12 +13626,14 @@ YY_DECL {
             }
             YY_BREAK
          case 79:
-            YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+            YY_RULE_SETUP 
+            {
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                g_name.resize(0);
                g_type.resize(0);
-               if (*codeYYtext == ')')
-               {
+
+               if (text[0] == ')') {
                   g_theCallContext.popScope();
                   g_bracketCount--;
                   BEGIN(FuncCall);
@@ -13561,20 +13642,23 @@ YY_DECL {
             YY_BREAK
          case 80:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keywordtype");
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                endFontClass();
                addType();
-               g_name += codeYYtext;
+               g_name += text;
             }
             YY_BREAK
          case 81:
             *yy_cp = (yy_hold_char); /* undo effects of setting up codeYYtext */
             (yy_c_buf_p) = yy_cp = yy_bp + 7;
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
+
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                endFontClass();
                g_sharpCount = 0;
                BEGIN(TemplDecl);
@@ -13584,10 +13668,12 @@ YY_DECL {
             *yy_cp = (yy_hold_char); /* undo effects of setting up codeYYtext */
             (yy_c_buf_p) = yy_cp = yy_bp + 8;
             YY_DO_BEFORE_ACTION; /* set up codeYYtext again */
+
             YY_RULE_SETUP {
                // template<...>
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                endFontClass();
                g_sharpCount = 0;
                BEGIN(TemplDecl);
@@ -13595,20 +13681,23 @@ YY_DECL {
             YY_BREAK
          case 83:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
             }
             YY_BREAK
          case 84:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                g_sharpCount++;
             }
             YY_BREAK
          case 85:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                g_sharpCount--;
                if (g_sharpCount <= 0)
                {
@@ -13618,34 +13707,40 @@ YY_DECL {
             YY_BREAK
          case 86:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                BEGIN( g_lastTemplCastContext );
             }
             YY_BREAK
          case 87:
-            YY_RULE_SETUP {
-               generateClassOrGlobalLink(*g_code, codeYYtext);
+            YY_RULE_SETUP 
+            {
+               QString text = QString::fromUtf8(codeYYtext);
+               generateClassOrGlobalLink(*g_code, text);
             }
             YY_BREAK
          case 88:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
             }
             YY_BREAK
          case 89:
             YY_RULE_SETUP {
-               codifyLines(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 90:
             YY_RULE_SETUP {
                // static_cast<T>(
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("keyword");
-               codifyLines(codeYYtext);
+               codifyLines(text);
                endFontClass();
                g_lastTemplCastContext = YY_START;
                BEGIN(TemplCast);
@@ -13655,43 +13750,51 @@ YY_DECL {
             /* rule 91 can match eol */
             YY_RULE_SETUP {
                // PHP member variable
+               QString text = QString::fromUtf8(codeYYtext);
                addType();
-               generatePHPVariableLink(*g_code, codeYYtext);
-               g_name += codeYYtext + 7;
+               generatePHPVariableLink(*g_code, text);
+               g_name += text.mid(7);
             }
             YY_BREAK
          case 92:
             /* rule 92 can match eol */
             YY_RULE_SETUP {
                // A<T> *pt;
-               int i = QString(codeYYtext).indexOf('<');
-               QString kw = QString(codeYYtext).left(i).trimmed();
+               QString text = QString::fromUtf8(codeYYtext);
+
+               int i = text.indexOf('<');
+               QString kw = text.left(i).trimmed();
+
                if (kw.right(5) == "_cast" && YY_START == Body)
                {
                   REJECT;
                }
                addType();
-               generateClassOrGlobalLink(*g_code, codeYYtext);
-               g_name += codeYYtext;
+               generateClassOrGlobalLink(*g_code, text);
+               g_name += text;
             }
             YY_BREAK
          case 93:
             /* rule 93 can match eol */
             YY_RULE_SETUP {
                // "int var;" or "var, var2" or "debug(f) macro"
+               QString text = QString::fromUtf8(codeYYtext);
                addType();
+
                // changed this to generateFunctionLink, see bug 624514
                //generateClassOrGlobalLink(*g_code,codeYYtext,FALSE,TRUE);
-               generateFunctionLink(*g_code, codeYYtext);
-               g_name += codeYYtext;
+
+               generateFunctionLink(*g_code, text);
+               g_name += text;
             }
             YY_BREAK
          case 94:
             /* rule 94 can match eol */
             YY_RULE_SETUP {              
+               QString text = QString::fromUtf8(codeYYtext);
                addType();
-               generateClassOrGlobalLink(*g_code, codeYYtext);
-               g_name += codeYYtext;
+               generateClassOrGlobalLink(*g_code, text);
+               g_name += text;
             }
             YY_BREAK
 
@@ -13699,53 +13802,63 @@ YY_DECL {
             /* rule 95 can match eol */
             YY_RULE_SETUP {
                // (*p)->func() but not "if (p) ..."
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                int s = 0;
-               while (s < (int)codeYYleng && !isId(codeYYtext[s]))
+
+               while (s < text.length() && ! isId(text[s]))
                {
                   s++;
                }
-               int e = (int)codeYYleng - 1;
-               while (e >= 0 && !isId(codeYYtext[e]))
+
+               int e = text.length() - 1;
+
+               while (e >= 0 && ! isId(text[e]))
                {
                   e--;
                }
-               QString varname = QString(codeYYtext).mid(s, e - s + 1);
+               QString varname = text.mid(s, e - s + 1);
                addType();
                g_name = varname;
             }
             YY_BREAK
+
          case 96:
             /* rule 96 can match eol */
             YY_RULE_SETUP {
                // a() or c::a() or t<A,B>::a() or A\B\foo()
+               QString text = QString::fromUtf8(codeYYtext);
                addType();
-               generateFunctionLink(*g_code, codeYYtext);
+               generateFunctionLink(*g_code, text);
                g_bracketCount = 0;
                g_args.resize(0);
                g_name += codeYYtext;
                BEGIN( FuncCall );
             }
             YY_BREAK
+             
+
          case 97:
             /* rule 97 can match eol */
             YY_RULE_SETUP {
-               QString text = codeYYtext;
+               QString text = QString::fromUtf8(codeYYtext);
+
                int i = text.indexOf('R');
                g_code->codify(text.left(i + 1));
                startFontClass("stringliteral");
-               g_code->codify(codeYYtext + i + 1);
+               g_code->codify(text.mid(i + 1));
                g_lastStringContext = YY_START;
                g_inForEachExpression = FALSE;
-               g_delimiter = codeYYtext + i + 2;
+               g_delimiter = text.mid(i + 2);
                g_delimiter = g_delimiter.left(g_delimiter.length() - 1);
                BEGIN( RawString );
             }
             YY_BREAK
          case 98:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("stringliteral");
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                g_lastStringContext = YY_START;
                g_inForEachExpression = FALSE;
                BEGIN( SkipString );
@@ -13753,8 +13866,9 @@ YY_DECL {
             YY_BREAK
          case 99:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("stringliteral");
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                g_lastStringContext = YY_START;
                g_inForEachExpression = FALSE;
                BEGIN( SkipStringS );
@@ -13762,44 +13876,53 @@ YY_DECL {
             YY_BREAK
          case 100:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 101:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 102:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 103:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                endFontClass();
                BEGIN( g_lastStringContext );
             }
             YY_BREAK
          case 104:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                endFontClass();
                BEGIN( g_lastStringContext );
             }
             YY_BREAK
          case 105:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 106:
             /* rule 106 can match eol */
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
-               QString delimiter = codeYYtext + 1;
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
+
+               QString delimiter = text.mid(1);
                delimiter = delimiter.left(delimiter.length() - 1);
+
                if (delimiter == g_delimiter)
                {
                   BEGIN( g_lastStringContext );
@@ -13808,92 +13931,116 @@ YY_DECL {
             YY_BREAK
          case 107:
             YY_RULE_SETUP
-            { g_code->codify(codeYYtext); }
+            { 
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
+            }
             YY_BREAK
          case 108:
             YY_RULE_SETUP
-            { g_code->codify(codeYYtext); }
+            { 
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(codeYYtext); 
+            }
             YY_BREAK
          case 109:
             /* rule 109 can match eol */
             YY_RULE_SETUP
-            { codifyLines(codeYYtext); }
+            { 
+               QString text = QString::fromUtf8(codeYYtext);
+               codifyLines(codeYYtext); 
+            }
             YY_BREAK
          case 110:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 111:
             YY_RULE_SETUP {
                // escaped quote
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 112:
             YY_RULE_SETUP {
                // end of string
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                endFontClass();
                BEGIN( g_lastVerbStringContext );
             }
             YY_BREAK
          case 113:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 114:
             /* rule 114 can match eol */
             YY_RULE_SETUP {
-               codifyLines(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               codifyLines(text);
             }
             YY_BREAK
          case 115:
             YY_RULE_SETUP {
-               g_code->codify(codeYYtext);
+               QString text = QString::fromUtf8(codeYYtext);
+               g_code->codify(text);
                g_name.resize(0);
                g_type.resize(0);
             }
             YY_BREAK
          case 116:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                if (g_insideTemplate)
                {
                   g_sharpCount++;
                }
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 117:
-            YY_RULE_SETUP {
-               if (g_insideTemplate)
-               {
+            YY_RULE_SETUP 
+            {
+               QString text = QString::fromUtf8(codeYYtext);
+
+               if (g_insideTemplate) {
                   if (--g_sharpCount <= 0) {
                      g_insideTemplate = FALSE;
                   }
                }
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
             }
             YY_BREAK
          case 118:
             YY_RULE_SETUP {
+               QString text = QString::fromUtf8(codeYYtext);
                startFontClass("charliteral");
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                endFontClass();
             }
             YY_BREAK
          case 119:
             YY_RULE_SETUP {
-               if (codeYYtext[0] == '-') // -> could be overloaded
-               {
+               QString text = QString::fromUtf8(codeYYtext);
+
+               if (text[0] == '-') {
+                  // -> could be overloaded               
                   updateCallContextForSmartPointer();
                }
-               g_code->codify(codeYYtext);
+               g_code->codify(text);
                g_memCallContext = YY_START;
                BEGIN( MemberCall );
             }
             YY_BREAK
+
+//  broom start               QString text = QString::fromUtf8(codeYYtext);
+
          case 120:
             /* rule 120 can match eol */
             YY_RULE_SETUP {
@@ -14012,7 +14159,6 @@ YY_DECL {
            					  g_name+=codeYYtext;
          					  if (g_theCallContext.getClass())
          					  {
-         					    //printf("Calling method %s\n",g_name.data());
          					    if (!generateClassMemberLink(*g_code,g_theCallContext.getClass(),g_name))
          					    {
            					      g_code->codify(codeYYtext);
@@ -14061,7 +14207,6 @@ YY_DECL {
                if (g_braceCount == 0)
                {
                   g_currentCtx->objectTypeOrName = codeYYtext;
-                  //printf("new type=%s\n",g_currentCtx->objectTypeOrName.data());
                   BEGIN(ObjCMName);
                }
             }
@@ -14303,7 +14448,6 @@ YY_DECL {
             YY_RULE_SETUP {
                if (codeYYtext[0] == ')') // no a pointer cast
                {
-                  //printf("addVariable(%s,%s)\n",g_parmType.data(),g_parmName.data());
                   g_theVarContext.addVariable(g_parmType, g_parmName);
                } else
                {
@@ -14342,7 +14486,7 @@ YY_DECL {
                }
                if (!g_type.isEmpty())
                {
-                  DBG_CTX((stderr, "add variable g_type=%s g_name=%s)\n", g_type.data(), g_name.data()));
+                  DBG_CTX((stderr, "add variable g_type=%s g_name=%s)\n", qPrintable(g_type), qPrintable(g_name)));
                   g_theVarContext.addVariable(g_type, g_name);
                }
 
@@ -14385,7 +14529,9 @@ YY_DECL {
                g_parmType.resize(0);
                g_parmName.resize(0);
                int index = g_name.lastIndexOf("::");
-               DBG_CTX((stderr, "g_name=%s\n", g_name.data()));
+
+               DBG_CTX((stderr, "g_name=%s\n", qPrintable(g_name)));
+
                if (index != -1)
                {
                   QString scope = g_name.left(index);
@@ -15469,7 +15615,7 @@ static QChar yyinput_x()
 {
    QChar retval;
 
-   unsigned char c1 = yyinput();   
+   unsigned char c = yyinput();   
    int len = 0;
 
    if ((c & 0xE0) == 0xC0) {
@@ -15491,13 +15637,18 @@ static QChar yyinput_x()
 
    QByteArray tmp;
 
-   tmp += c1;
+   tmp += c;
 
-   for (int i = 0; i <= len; ++i)  {
+   for (int i = 0; i < len; ++i)  {
       tmp += yyinput();  
    }
 
    QString tmp2 = QString::fromUtf8(tmp);
+
+if (tmp2.length() != 1 ) { 
+   printf("\n  broom %d   -->%s<--", tmp2.length(), qPrintable(tmp2) );
+}
+
    assert (tmp2.length() == 1);
 
    retval = tmp2[0];

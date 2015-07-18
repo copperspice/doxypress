@@ -14,21 +14,20 @@
 *************************************************************************/
 
 /**
-\page parser-test  Parsers
+\page parser-test  Parser Test
 
 Test other parsers in DoxyPress.
 
 
 <h3>Python</h3>
 
-
 \include py_sample.py
 
 
 <h3>TCL</h3>
 
-
 \include tcl_sample.tcl
+
 
 
 */

@@ -418,9 +418,6 @@ class MemberDef : public Definition
  private:
    MemberDef(const MemberDef &);  
 
-   template<class T, class ...Ts>
-   friend QSharedPointer<typename std::enable_if<std::is_base_of<EnableSharedFromThis, T>::value, T>::type> QMakeShared(Ts &&...vs);
-
    void lock() const;
    void unlock() const;
    void saveToDisk() const;
