@@ -8555,7 +8555,8 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    current    = curEntry;
 
    if (comment.isEmpty()) {
-      return FALSE;   // avoid empty strings
+      // avoid empty strings
+      return FALSE;   
    }
 
    inputString    = comment;
@@ -8581,7 +8582,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    g_spaceBeforeCmd.resize(0);
    g_spaceBeforeIf.resize(0);
 
-   printlex(commentscanYY_flex_debug, TRUE, __FILE__, ! fileName.isEmpty() ? qPrintable(fileName) : "");
+   printlex(commentscanYY_flex_debug, TRUE, __FILE__, qPrintable(fileName) );
 
    if (! current->inbodyDocs.isEmpty() && isInbody) { 
       // separate in body fragments
@@ -8594,6 +8595,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    commentscanYYrestart( commentscanYYin );
    BEGIN( Comment );
+
    commentscanYYlex();
 
    setOutput( OutputDoc );
@@ -8653,7 +8655,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    }
 
    lineNr = yyLineNr;
-   printlex(commentscanYY_flex_debug, FALSE, __FILE__, ! fileName.isEmpty() ? qPrintable(fileName) : "");
+   printlex(commentscanYY_flex_debug, FALSE, __FILE__, qPrintable(fileName));
 
    return parseMore;
 }

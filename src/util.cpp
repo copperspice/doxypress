@@ -4732,6 +4732,10 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
             retval += "_0C";
             break;
 
+         case '@': 
+            retval += "_0D";
+            break;
+
          default:
 
             if (c.unicode() > 127) {                           
@@ -5289,7 +5293,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
                      }
 
                      mg->insertMember(fmd); // insert in member group
-                     fmd->setMemberGroup(mg.data());
+                     fmd->setMemberGroup(mg);
                   }
                }
             }
@@ -5318,7 +5322,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
             mg->insertMember(md);       // insert in member group
             mg->setRefItems(info->m_sli);
 
-            md->setMemberGroup(mg.data());
+            md->setMemberGroup(mg);
 
             continue;
          }
@@ -6019,17 +6023,17 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                break;
 
             case '&':              
-               // migiht be a special symbol
-
-               const char *ptr2;
+               // might be a special symbol
 
 // broom check (1b)
+
+               const char *ptr2;
 
                ptr2 = p;
                cnt  = 2;  
 
                // we have to count & and ; as well
-               while (*ptr2 && *ptr2 != ';') {
+               while ((*ptr2 >= 'a' && *ptr2 <= 'z') || (*ptr2 >= 'A' && *ptr2 <= 'Z') || (*ptr2 >= '0' && *ptr2 <= '9')) {
                   cnt++;
                   ptr2++;
                }
@@ -6047,6 +6051,7 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
 
                   } else {
                      t << HtmlEntityMapper::instance()->latex(res);
+                     ptr2++;
                      p = ptr2;
                   }
 

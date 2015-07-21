@@ -291,7 +291,7 @@ class PrintDocVisitor : public DocVisitor
 
    void visit(DocFormula *f) {
       indent_leaf();
-      printf("<formula name=%s test=%s/>", qPrintable(f->name()), qPrintable(f->text()));
+      printf("<formula name=%s text=%s/>", qPrintable(f->name()), qPrintable(f->text()));
    }
 
    void visit(DocIndexEntry *i) {

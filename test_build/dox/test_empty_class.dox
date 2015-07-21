@@ -1,7 +1,7 @@
 /*************************************************************************
 *                                                                         
-* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim
-* Copyright (C) 2014 Digia Plc                   
+* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim              
+* Copyright (C) 2014 Digia Plc                                            
 * All rights reserved.                                                    
 *                                                                         
 *                                                                         
@@ -13,22 +13,8 @@
 *                                                                         
 *************************************************************************/
 
-/**
-\page parser-test  Parser Test
-
-Test other parsers in DoxyPress.
-
-
-<h3>Python</h3>
-
-\include sample_code.py
-
-
-<h3>TCL</h3>
-
-\include sample_code.tcl
-
+/*!
+\class QString::EmptyClass
 
 
 */
-

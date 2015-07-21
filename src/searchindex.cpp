@@ -40,19 +40,6 @@
 #include <searchindex.h>
 #include <util.h>
 
-// file format: (all multi-byte values are stored in big endian format)
-//   4 byte header
-//   256*256*4 byte index (4 bytes)
-//   for each index entry: a zero terminated list of words
-//   for each word: a \0 terminated string + 4 byte offset to the stats info
-//   padding bytes to align at 4 byte boundary
-//   for each word: the number of urls (4 bytes)
-//               + for each url containing the word 8 bytes statistics
-//                 (4 bytes index to url string + 4 bytes frequency counter)
-//   for each url: a \0 terminated string
-
-const int numIndexEntries = 256 * 256;
-
 IndexWord::IndexWord(const QString &word) : m_word(word)
 {  
 }
@@ -62,7 +49,7 @@ void IndexWord::addUrlIndex(int idx, bool hiPriority)
    QSharedPointer<URLInfo> ui = m_urls.value(idx);
 
    if (! ui) {     
-      ui =  QMakeShared<URLInfo>(idx, 0);
+      ui = QMakeShared<URLInfo>(idx, 0);
       m_urls.insert(idx, ui);
    }
 
@@ -74,19 +61,11 @@ void IndexWord::addUrlIndex(int idx, bool hiPriority)
 }
 
 SearchIndex::SearchIndex() : SearchIndexIntf(Internal), m_urlIndex(-1)
-{
-   int i;
-  
-   for (i = 0; i < numIndexEntries; i++) {
-      m_index.append(QList<IndexWord *>());
-   }
+{    
 }
 
 SearchIndex::~SearchIndex()
-{
-   for (auto item : m_words) {
-      delete item;
-   }
+{ 
 }
 
 void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const QString &anchor, bool isSourceFile)
@@ -218,7 +197,7 @@ void SearchIndex::addWord(const QString &word, bool hiPriority, bool recurse)
    static QRegExp nextPart("[_a-z:][A-Z]");
 
    QString wStr = word.toLower();   
-   IndexWord *w = m_words.value(wStr);
+   QSharedPointer<IndexWord> w = m_words.value(wStr);
 
    if (! w) {
       int idx = charsToIndex(wStr);
@@ -227,8 +206,7 @@ void SearchIndex::addWord(const QString &word, bool hiPriority, bool recurse)
          return;
       }
 
-      w = new IndexWord(wStr);         
-      m_index[idx].append(w);
+      w = QMakeShared<IndexWord>(wStr);     
       m_words.insert(wStr, w);
    }
 
@@ -276,88 +254,26 @@ static void writeString(QFile &file, const QString &str)
    file.putChar(0);
 }
 
+
+// file format: (all multi-byte values are stored in big endian format)
+//   4 byte header
+//   256*256*4 byte index (4 bytes)
+//   for each index entry: a zero terminated list of words
+//   for each word: a \0 terminated string + 4 byte offset to the stats info
+//   padding bytes to align at 4 byte boundary
+//   for each word: the number of urls (4 bytes)
+//               + for each url containing the word 8 bytes statistics
+//                 (4 bytes index to url string + 4 bytes frequency counter)
+//   for each url: a \0 terminated string
+
 void SearchIndex::write(const QString &fileName)
 {
-   int i;
-   int size = 4; 
-
-   // for the header
-   size += 4 * numIndexEntries; 
-
-   // for the index
-   int wordsOffset = size;
-
-   // pass 1: compute the size of the wordlist
-   for (i = 0; i < numIndexEntries; i++) {
-      QList<IndexWord *> &wlist = m_index[i];
-
-      if (! wlist.isEmpty()) {
- 
-         for (auto iw : wlist) {    
-            int ws = iw->word().length() + 1;
-
-            // word + url info list offset
-            size += ws + 4; 
-         }
-
-         // zero list terminator
-         size += 1; 
-      }
-   }
-
-   // pass 2: compute the offsets in the index
-   int indexOffsets[numIndexEntries];
-   int offset = wordsOffset;
-
-   for (i = 0; i < numIndexEntries; i++) {
-      QList<IndexWord *> &wlist = m_index[i];
-
-      if (! wlist.isEmpty()) {
-         indexOffsets[i] = offset;
-
-         for (auto iw : wlist) {  
-            offset += iw->word().length() + 1;
-
-            // word + offset to url info array
-            offset += 4; 
-         }
-
-         // zero list terminator
-         offset += 1; 
-
-      } else {
-         indexOffsets[i] = 0;
-      }
-   }
-
-   int padding = size;
-   size = (size + 3) & ~3; // round up to 4 byte boundary
-   padding = size - padding;
-
-   // 
-   int *wordStatOffsets = new int[m_words.count()];
-   int count = 0;
-
-   // third pass: compute offset to stats info for each word
-   for (i = 0; i < numIndexEntries; i++) {   
-      QList<IndexWord *> &wlist = m_index[i];
-
-      if (! wlist.isEmpty()) {
-        
-         for (auto iw : wlist) { 
-            wordStatOffsets[count++] = size;
-            size += 4 + iw->urls().count() * 8; 
-         }
-      }
-   }
-
-   int *urlOffsets = new int[m_urls.count()];   
-
-   for (auto iter = m_urls.begin(); iter != m_urls.end(); ++iter) {    
-      urlOffsets[iter.key()] = size;
-      size += iter.value()->name.length() + 1 + iter.value()->url.length() + 1;
-   }
-  
+   static const int numIndexEntries = 256 * 256;
+    
+   QMap<QString, int> wordStatOffsets;  
+   QMap<QString, int> urlOffsets;
+   QMap<int, int> wordOffsets;
+    
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
@@ -367,62 +283,62 @@ void SearchIndex::write(const QString &fileName)
       f.putChar('X');
       f.putChar('S');
 
-      // write index
-      for (i = 0; i < numIndexEntries; i++) {
-         writeInt(f, indexOffsets[i]);
-      }
+      f.seek((numIndexEntries * 4) + 4);
 
-      // write word lists
-      count = 0;
-
-      for (i = 0; i < numIndexEntries; i++) {
-         QList<IndexWord *> &wlist = m_index[i];
-
-         if (! wlist.isEmpty()) {           
-            for (auto item : wlist) {
-               writeString(f, item->word());
-               writeInt(f, wordStatOffsets[count++]);
-            }
-
-            f.putChar(0);
-         }
-      }
-
-      // write extra padding bytes
-      for (i = 0; i < padding; i++) {
-         f.putChar(0);
-      }
-
-      // write word statistics
-      for (i = 0; i < numIndexEntries; i++) {
-         QList<IndexWord *> &wlist = m_index[i];
-
-         if (! wlist.isEmpty()) {          
-
-            for (auto item1 : wlist) {            
-               int numUrls = item1->urls().count();
-               writeInt(f, numUrls);
-              
-               for (auto item2 : item1->urls() ) {
-                  writeInt(f, urlOffsets[item2->urlIdx]);
-                  writeInt(f, item2->freq);
-               }
-            }
-         }
-      }
-
-      // write urls
-     
+      // write urls     
       for (auto item : m_urls) {
+
+         // save the offset of this url
+         urlOffsets.insert(item->name, f.pos());
+
          writeString(f, item->name);
          writeString(f, item->url);
       }
+
+      // write word statistics                    
+      for (auto item1 : m_words) {            
+
+         // save the offset of this stats entry
+         wordStatOffsets.insert(item1->word(), f.pos() );
+
+         int numUrls = item1->urls().count();
+         writeInt(f, numUrls);
+        
+         for (auto item2 : item1->urls() ) {
+            writeInt(f, urlOffsets.value(m_urls.value(item2->urlIdx)->name));
+            writeInt(f, item2->freq);
+         }
+      }                                   
+
+      int lastIndex = -1;
+
+      for (auto item : m_words) {
+         int currentIndex = charsToIndex(item->word());
+         
+         if (lastIndex != currentIndex) {
+
+            if (lastIndex != -1) {
+               f.putChar(0); 
+            }
+
+            lastIndex = currentIndex;   
+            wordOffsets.insert(currentIndex, f.pos());
+         }
+
+         writeString(f, item->word());
+         writeInt(f, wordStatOffsets[item->word()]);        
+      }
+       
+      f.putChar(0);  
+     
+      // write index
+      f.seek(4);
+
+      for (int i = 0; i < numIndexEntries; i++) {
+         writeInt(f, wordOffsets.value(i));
+      }  
    }
-
-   delete[] urlOffsets;
-   delete[] wordStatOffsets;
 }
-
 
 // the following part is for writing an external search index
 struct SearchDocEntry {

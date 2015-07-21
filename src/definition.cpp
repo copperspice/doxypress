@@ -625,7 +625,7 @@ void Definition::setBriefDescription(const QString &b, const QString &briefFile,
 
 void Definition::_setInbodyDocumentation(const QString &doc, const QString &inbodyFile, int inbodyLine)
 {
-   if (m_private->inbodyDocs) {
+   if (m_private->inbodyDocs == nullptr) {
       m_private->inbodyDocs = new DocInfo;
    }
 
@@ -858,7 +858,9 @@ QString Definition::getSourceFileBase() const
 QString Definition::getSourceAnchor() const
 {
    const int maxAnchorStrLen = 20;
+
    char anchorStr[maxAnchorStrLen];
+   anchorStr[0] = '\0';
 
    if (m_private->body && m_private->body->startLine != -1) {
       if (Htags::useHtags) {

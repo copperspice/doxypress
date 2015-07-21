@@ -26,62 +26,62 @@
     <message>
         <location filename="../../src/translator_cs.h" line="55"/>
         <source>These are not member functions</source>
-        <translation type="unfinished"></translation>
+        <translation>(Observar que estas no son funciones miembro.)</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="60"/>
         <source>Detailed Description</source>
-        <translation type="unfinished"></translation>
+        <translation>Descripción detallada</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="65"/>
         <source>Member Typedef Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación de los 'Typedef' miembros de la clase</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="70"/>
         <source>Member Enumeration Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación de las enumeraciones miembro de la clase</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="75"/>
         <source>Member Function Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación de las funciones miembro</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="81"/>
         <source>Field Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación de los campos</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="83"/>
         <source>Member Data Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación de los datos miembro</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="89"/>
         <source>More...</source>
-        <translation type="unfinished"></translation>
+        <translation>Más...</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="94"/>
         <source>List of all members</source>
-        <translation type="unfinished"></translation>
+        <translation>Lista de todos los miembros</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="99"/>
         <source>Member List</source>
-        <translation type="unfinished"></translation>
+        <translation>Lista de los miembros</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="104"/>
         <source>This is the complete list of members for </source>
-        <translation type="unfinished"></translation>
+        <translation>Lista completa de los miembros de </translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="109"/>
         <source>, including all inherited members.</source>
-        <translation type="unfinished"></translation>
+        <translation>, incluyendo todos los heredados:</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="117"/>
@@ -96,29 +96,29 @@
     <message>
         <location filename="../../src/translator_cs.h" line="127"/>
         <source>enum name</source>
-        <translation type="unfinished"></translation>
+        <translation>nombre de la enumeración</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="132"/>
         <source>enum value</source>
-        <translation type="unfinished"></translation>
+        <translation>valor enumerado</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="137"/>
         <source>defined in</source>
-        <translation type="unfinished"></translation>
+        <translation>definido en</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="144"/>
         <location filename="../../src/translator_cs.h" line="1319"/>
         <location filename="../../src/translator_cs.h" line="1829"/>
         <source>Modules</source>
-        <translation type="unfinished"></translation>
+        <translation>Módulos</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="149"/>
         <source>Class Hierarchy</source>
-        <translation type="unfinished"></translation>
+        <translation>Jerarquía de la clase</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="155"/>
@@ -135,7 +135,7 @@
     <message>
         <location filename="../../src/translator_cs.h" line="163"/>
         <source>File List</source>
-        <translation type="unfinished"></translation>
+        <translation>Lista de archivos</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="169"/>
@@ -153,7 +153,7 @@
         <location filename="../../src/translator_cs.h" line="178"/>
         <location filename="../../src/translator_cs.h" line="1389"/>
         <source>Globals</source>
-        <translation type="unfinished"></translation>
+        <translation>Globales</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="180"/>
@@ -163,17 +163,17 @@
     <message>
         <location filename="../../src/translator_cs.h" line="186"/>
         <source>Related Pages</source>
-        <translation type="unfinished"></translation>
+        <translation>Páginas relacionadas</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="191"/>
         <source>Examples</source>
-        <translation type="unfinished"></translation>
+        <translation>Ejemplos</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="196"/>
         <source>Search</source>
-        <translation type="unfinished"></translation>
+        <translation>Buscar</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="201"/>
@@ -258,17 +258,17 @@
     <message>
         <location filename="../../src/translator_cs.h" line="308"/>
         <source>Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="315"/>
         <source>Module Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Indice de módulos</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="322"/>
         <source>Hierarchical Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Indice jerárquico</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="330"/>
@@ -303,22 +303,22 @@
     <message>
         <location filename="../../src/translator_cs.h" line="364"/>
         <source>File Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación de archivos</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="371"/>
         <source>Example Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación de ejemplos</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="378"/>
         <source>Page Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación de páginas</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="383"/>
         <source>Reference Manual</source>
-        <translation type="unfinished"></translation>
+        <translation>Manual de referencia</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="390"/>
@@ -353,17 +353,17 @@
     <message>
         <location filename="../../src/translator_cs.h" line="422"/>
         <source>Functions</source>
-        <translation type="unfinished"></translation>
+        <translation>Funciones</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="429"/>
         <source>Variables</source>
-        <translation type="unfinished"></translation>
+        <translation>Variables</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="436"/>
         <source>Enum Values</source>
-        <translation type="unfinished"></translation>
+        <translation>Valores de enumeraciones</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="443"/>
@@ -373,7 +373,7 @@
     <message>
         <location filename="../../src/translator_cs.h" line="450"/>
         <source>Typedef Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentación de los 'typedefs'</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="457"/>

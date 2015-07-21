@@ -1256,7 +1256,7 @@ static void processInline(QString &out, const QString &processText, int size)
    }
 }
 
-/** returns whether the line is a setext-style hdr underline */
+/** returns whether the line is a text-style hdr underline */
 static int isHeaderline(const QString &data, int size)
 {
    int i = 0;
@@ -1267,25 +1267,31 @@ static int isHeaderline(const QString &data, int size)
    }
 
    // test of level 1 header
-   if (data[i] == '=') {
+   if (i < size && data[i] == '=') {
       while (i < size && data[i] == '=') {
          i++, c++;
       }
+
       while (i < size && data[i] == ' ') {
          i++;
       }
+
       return (c > 1 && (i >= size || data[i] == '\n')) ? 1 : 0;
    }
+
    // test of level 2 header
-   if (data[i] == '-') {
+   if (i < size && data[i] == '-') {
       while (i < size && data[i] == '-') {
          i++, c++;
       }
+
       while (i < size && data[i] == ' ') {
          i++;
       }
+
       return (c > 1 && (i >= size || data[i] == '\n')) ? 2 : 0;
    }
+
    return 0;
 }
 
@@ -2061,11 +2067,11 @@ void writeOneLineHeaderOrRuler(QString &out, const QString &data, int size)
          if (si) {
             if (si->lineNr != -1) {
                warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)", 
-                    header.data(), si->fileName.data(), si->lineNr);
+                   qPrintable(header), qPrintable(si->fileName), si->lineNr);
 
             } else {
                warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s)", 
-                    header.data(), si->fileName.data());
+                    qPrintable(header), qPrintable(si->fileName));
             }
 
          } else {
@@ -2421,7 +2427,7 @@ static QString processBlocks(const QString &str, int indent)
 
       end++;
    }
-
+ 
    int priorLine2_Indent  = -1;   
    int priorLine1_Indent  = -1;  
    int currentLine_Indent = -1;
@@ -2519,7 +2525,6 @@ static QString processBlocks(const QString &str, int indent)
             continue;
 
          } else  {               
-
             bool isCB = isCodeBlock(str.mid(i), blockIndent, priorLine1_Indent, priorLine2_Indent);
 
             if (isCB) { 
@@ -2543,7 +2548,6 @@ static QString processBlocks(const QString &str, int indent)
             }
          }
       }
-
       pi = i;
       i = end;
    }
@@ -2700,6 +2704,10 @@ QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointe
 
    // replace tabs with spaces
    QString s = detab(input, refIndent);
+
+   if (s.trimmed().isEmpty()) {
+      return "";
+   }
 
    // process quotation blocks (as these may contain other blocks)
    s = processQuotations(s, refIndent);

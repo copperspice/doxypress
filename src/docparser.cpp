@@ -521,12 +521,8 @@ static void checkUndocumentedParams()
                }
             }
 
-            if (s_memberDef->inheritsDocsFrom()) {
-               warn_doc_error(s_memberDef->getDefFileName(), s_memberDef->getDefLine(), qPrintable(substitute(errMsg, "%", "%%")));
-
-            } else {
-               warn_doc_error(s_memberDef->docFile(), s_memberDef->docLine(), qPrintable(substitute(errMsg, "%", "%%")));
-            }
+            warn_doc_error(s_memberDef->getDefFileName(), s_memberDef->getDefLine(), qPrintable(substitute(errMsg, "%", "%%")));
+            
          }
       }
    }
@@ -3763,7 +3759,7 @@ getrow:
 
    DBG(("DocHtmlTable::parse() end\n"));
 
-   return retval == RetVal_EndTable ? RetVal_OK : retval;
+   return retval == RetVal_EndTable ? RetVal_OK : retval;  
 }
 
 int DocHtmlTable::parseXml()
@@ -3812,8 +3808,14 @@ int DocHtmlTable::parseXml()
    assert(n == this);
 
    DBG(("DocHtmlTable::parseXml() end\n"));
+  
+   tagId = Mappers::htmlTagMapper->map(g_token->name);
 
-   return retval == RetVal_EndTable ? RetVal_OK : retval;
+   if (tagId == XML_LIST && g_token->endTag)  {
+      retval = RetVal_OK;
+   }
+
+   return retval;
 }
 
 /** Helper class to compute the grid for an HTML style table */
@@ -6635,10 +6637,10 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
       case XML_SUMMARY:
       case XML_REMARKS:
       case XML_PARA:
-      case XML_VALUE:
-      case XML_LIST:
+      case XML_VALUE:      
       case XML_EXAMPLE:
       case XML_PARAM:
+      case XML_LIST:
       case XML_TYPEPARAM:
       case XML_RETURNS:
       case XML_SEE:

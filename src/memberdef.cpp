@@ -609,22 +609,21 @@ class MemberDefImpl
    // lists of template argument lists for template functions in nested template classes
    QList<ArgumentList> *defTmpArgLists; 
 
-   QSharedPointer<ClassDef> cachedAnonymousType; // if the member has an anonymous compound
-
-   // as its type then this is computed by
+   // if the member has an anonymous compound as its type then this is computed by
    // getClassDefOfAnonymousType() and cached here
+   QSharedPointer<ClassDef> cachedAnonymousType;    
+    
+   QMap<QSharedPointer<Definition>, QSharedPointer<MemberList>> classSectionSDict;
 
-   StringMap<QSharedPointer<MemberList>> *classSectionSDict; // not accessible
+   QSharedPointer<MemberDef> groupAlias;           // Member containing the definition
 
-   QSharedPointer<MemberDef> groupAlias;          // Member containing the definition
+   int grpId;                                      // group id
+   QSharedPointer<MemberGroup> memberGroup;        // group's member definition
+   QSharedPointer<GroupDef> group;                 // group in which this member is in
+   Grouping::GroupPri_t grouppri;                  // priority of this definition
 
-   int grpId;                      // group id
-   MemberGroup *memberGroup;       // group's member definition
-   QSharedPointer<GroupDef> group; // group in which this member is in
-   Grouping::GroupPri_t grouppri;  // priority of this definition
-
-   QString groupFileName;          // file where this grouping was defined
-   int groupStartLine;             // line  "      "      "     "     "
+   QString groupFileName;                          // file where this grouping was defined
+   int groupStartLine;                             // line where this grouping was defined
 
    QSharedPointer<MemberDef> groupMember;
 
@@ -640,8 +639,7 @@ class MemberDefImpl
    QString explicitOutputFileBase;
 
    // objective-c
-   bool implOnly; // function found in implementation but not
-   // in the interface
+   bool implOnly; // function found in implementation but not in the interface
    bool hasDocumentedParams;
    bool hasDocumentedReturnType;
    bool isDMember;
@@ -672,8 +670,7 @@ MemberDefImpl::MemberDefImpl() :
    declArgList(0),
    tArgList(0),
    typeConstraints(0),
-   defTmpArgLists(0),
-   classSectionSDict(0),
+   defTmpArgLists(0),   
    category(0),
    categoryRelation(0)
 {
@@ -686,8 +683,7 @@ MemberDefImpl::~MemberDefImpl()
    delete defArgList;
    delete tArgList;
    delete typeConstraints;
-   delete defTmpArgLists;
-   delete classSectionSDict;
+   delete defTmpArgLists;   
    delete declArgList;
 }
 
@@ -727,7 +723,7 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
       decl = type + " " + def->name() + args;
    }
 
-   memberGroup = 0;
+   memberGroup = QSharedPointer<MemberGroup>();
    virt        = v;
    prot        = p;
    related     = r;
@@ -780,7 +776,8 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
 
    templateMaster = QSharedPointer<MemberDef>();
 
-   classSectionSDict  = 0;
+   classSectionSDict.clear();
+
    docsForDefinition  = true;
    isTypedefValCached = false;
    cachedTypedefValue = QSharedPointer<ClassDef>();
@@ -858,7 +855,6 @@ QSharedPointer<MemberDef> MemberDef::deepCopy() const
    result->m_impl->tArgList          = 0;
    result->m_impl->typeConstraints   = 0;
    result->m_impl->defTmpArgLists    = 0;
-   result->m_impl->classSectionSDict = 0;
    result->m_impl->declArgList       = 0;
 
    // replace pointers owned by the object by deep copies
@@ -898,14 +894,9 @@ QSharedPointer<MemberDef> MemberDef::deepCopy() const
 
    result->setDefinitionTemplateParameterLists(m_impl->defTmpArgLists);
 
-   if (m_impl->classSectionSDict) {
-      result->m_impl->classSectionSDict = new StringMap<QSharedPointer<MemberList>>();
-      
-      for (auto iter = m_impl->classSectionSDict->begin(); iter != m_impl->classSectionSDict->end(); ++iter  ) { 
-         result->m_impl->classSectionSDict->insert(iter.key(), iter.value() );
-      }
-   }
-
+   //  
+   result->m_impl->classSectionSDict = m_impl->classSectionSDict;
+          
    return result;
 }
 
@@ -1824,7 +1815,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), getOuterScope() ? getOuterScope() : d, 
                   self, briefDescription(), true, false, "", true, false);
 
-      if (rootNode && !rootNode->isEmpty()) {
+      if (rootNode && ! rootNode->isEmpty()) {
          ol.startMemberDescription(anchor(), inheritId);
          ol.writeDoc(rootNode, getOuterScope() ? getOuterScope() : d, self);
 
@@ -1835,11 +1826,15 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
             //ol.endEmphasis();
 
             ol.docify(" ");
-            if (separateMemberPages || (m_impl->group != 0 && gd == 0)) { // forward link to the page or group
+
+            if (separateMemberPages || (m_impl->group != 0 && gd == 0) || (m_impl->nspace != 0 && nd == 0) ) { 
+               // forward link to the page, group, or namespace
                ol.startTextLink(getOutputFileBase(), anchor());
-            } else { // local link
+            } else { 
+               // local link
                ol.startTextLink(0, anchor());
             }
+
             ol.parseText(theTranslator->trMore());
             ol.endTextLink();
             //ol.startEmphasis();
@@ -2412,13 +2407,6 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
 void MemberDef::_writeCategoryRelation(OutputList &ol)
 {
    if (m_impl->classDef) { // this should be a member of a class/category
-      //printf("%s: category %s relation %s class=%s categoryOf=%s\n",
-      //    name().data(),
-      //    m_impl->category ? m_impl->category->name().data() : "<none>",
-      //    m_impl->categoryRelation ? m_impl->categoryRelation->name().data() : "<none>",
-      //    m_impl->classDef->name().data(),
-      //    m_impl->classDef->categoryOf() ? m_impl->classDef->categoryOf()->name().data() : "<none>"
-      //    );
 
       QString text;
       QString ref;
@@ -2619,7 +2607,7 @@ QString MemberDef::displayDefinition() const
       }
 
       l = ldef.length();
-      //printf("start >%s<\n",ldef.data());
+     
       i = l - 1;
       while (i >= 0 && (isId(ldef.at(i).unicode()) || ldef.at(i) == ':')) {
          i--;
@@ -2815,8 +2803,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString
 
       if (! found) { 
          // anonymous compound
-         // printf("Anonymous compound `%s'\n",cname.data());
-
+         
          ol.startDoxyAnchor(cfname, cname, memAnchor, doxyName, doxyArgs);
          ol.startMemberDoc(ciname, name(), memAnchor, name(), showInline);
 
@@ -3243,12 +3230,12 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString
          Config::getBool("warn-undoc-param") && ! Doxy_Globals::suppressDocWarnings) {
 
       if (! hasDocumentedParams()) {
-         warn_doc_error(docFile(), docLine(), "parameters of member %s are not (all) documented",
+         warn_doc_error(getDefFileName(),getDefLine(), "parameters of member %s are not (all) documented",
                         qPrintable(qualifiedName()));
       }
 
-      if (!hasDocumentedReturnType() && isFunction() && hasDocumentation()) {
-         warn_doc_error(docFile(), docLine(), "return type of member %s was not documented",
+      if (! hasDocumentedReturnType() && isFunction() && hasDocumentation()) {
+         warn_doc_error(getDefFileName(),getDefLine(), "return type of member %s was not documented",
                         qPrintable(qualifiedName()));
       }
    }
@@ -3276,11 +3263,12 @@ static QString simplifyTypeForTable(const QString &s)
    if (i != -1) {
       ts = ts.left(i);
    }
+
    i = ts.lastIndexOf('.');
    if (i != -1) {
       ts = ts.right(ts.length() - i - 1);
    }
-   //printf("simplifyTypeForTable(%s)->%s\n",s.data(),ts.data());
+  
    return ts;
 }
 
@@ -3311,12 +3299,13 @@ static Definition *getClassFromType(Definition *scope, const QString &type, SrcL
       if (cd) {
          start = i;
          length = l;
-         printf("getClassFromType: type=%s name=%s start=%d length=%d\n", type.data(), name.data(), start, length);
+         printf("getClassFromType: type=%s name=%s start=%d length=%d\n", qPrintable(type), qPrintable(name), start, length);
          return cd;
+
       } else if (md) {
          start = i;
          length = l;
-         printf("getClassFromType: type=%s name=%s start=%d length=%d\n", type.data(), name.data(), start, length);
+         printf("getClassFromType: type=%s name=%s start=%d length=%d\n", qPrintable(type), qPrintable(name), start, length);
          return md;
       }
       pos = i + l;
@@ -3495,7 +3484,7 @@ void MemberDef::warnIfUndocumented()
    if ((! hasUserDocumentation() && ! extractAll) && !isFriendClass() && name().indexOf('@') == -1 && d && d->name().indexOf('@') == -1 &&
          protectionLevelVisible(m_impl->prot) && ! isReference() && ! isDeleted() ) {
 
-      warn_undoc(getDefFileName(), getDefLine(), "Member %s%s (%s) of %s %s is not documented.",
+      warn_undoc(d->getDefFileName(),d->getDefLine(), "Member %s%s (%s) of %s %s is not documented.",
                  qPrintable(name()), qPrintable(argsString()), qPrintable(memberTypeName()), t, qPrintable(d->name()));
    }
 }
@@ -3542,14 +3531,14 @@ bool MemberDef::hasUserDocumentation() const
 #endif
 
 
-void MemberDef::setMemberGroup(MemberGroup *grp)
+void MemberDef::setMemberGroup(QSharedPointer<MemberGroup> grp)
 {
    m_impl->memberGroup = grp;
 }
 
 bool MemberDef::visibleMemberGroup(bool hideNoHeader)
 {
-   return m_impl->memberGroup != 0 && (!hideNoHeader || m_impl->memberGroup->header() != "[NOHEADER]");
+   return m_impl->memberGroup != 0 && (! hideNoHeader || m_impl->memberGroup->header() != "[NOHEADER]");
 }
 
 QString MemberDef::getScopeString() const
@@ -3759,7 +3748,7 @@ void MemberDef::addListReference(QSharedPointer<Definition> d)
    QString sep = getLanguageSpecificSeparator(lang, true);
    QString memArgs;
 
-   if (!isRelated() ) {
+   if (! isRelated() ) {
 
       if (isObjCMethod()) {
          memName = "[" + pd->name() + " " + name() + "]";
@@ -3784,28 +3773,12 @@ void MemberDef::addListReference(QSharedPointer<Definition> d)
 
 QSharedPointer<MemberList> MemberDef::getSectionList(QSharedPointer<Definition> d) const
 {
-   char key[20];
-   sprintf(key, "%p", d.data());
-
-   if (d != 0 && m_impl->classSectionSDict) {
-      return m_impl->classSectionSDict->find(key); 
-
-   } else  {
-      return QSharedPointer<MemberList>();
-
-   }
+   return m_impl->classSectionSDict.value(d);  
 }
 
 void MemberDef::setSectionList(QSharedPointer<Definition> d, QSharedPointer<MemberList> sl)
-{  
-   char key[20];
-   sprintf(key, "%p", d.data());
-
-   if (m_impl->classSectionSDict == 0) {
-      m_impl->classSectionSDict = new StringMap<QSharedPointer<MemberList>>();
-   }
-
-   m_impl->classSectionSDict->insert(key, sl);
+{   
+   m_impl->classSectionSDict.insert(d, sl);
 }
 
 Specifier MemberDef::virtualness(int count) const
@@ -4218,26 +4191,6 @@ void MemberDef::enableCallerGraph(bool e)
    }
 }
 
-#if 0
-bool MemberDef::protectionVisible() const
-{
-   return m_impl->prot == Public ||
-          (m_impl->prot == Private   && Config::getBool("extract-private"))   ||
-          (m_impl->prot == Protected && Config::getBool("extract-protected")) ||
-          (m_impl->prot == Package   && Config::getBool("extract-package"));
-}
-#endif
-
-#if 0
-void MemberDef::setInbodyDocumentation(const char *docs, const char *docFile, int docLine)
-{
-   m_impl->inbodyDocs = docs;
-   m_impl->inbodyDocs = m_impl->inbodyDocs.trimmed();
-   m_impl->inbodyLine = docLine;
-   m_impl->inbodyFile = docFile;
-}
-#endif
-
 bool MemberDef::isObjCMethod() const
 {
    if (m_impl->classDef && m_impl->classDef->isObjectiveC() && isFunction()) {
@@ -4281,8 +4234,7 @@ QString MemberDef::qualifiedName() const
 
 void MemberDef::setTagInfo(TagInfo *ti)
 {
-   if (ti) {
-      //printf("%s: Setting tag name=%s anchor=%s\n",name().data(),ti->tagName.data(),ti->anchor.data());
+   if (ti) {      
       m_impl->anc = ti->anchor;
       setReference(ti->tagName);
 
@@ -4876,7 +4828,7 @@ int MemberDef::getMemberGroupId() const
    return m_impl->grpId;
 }
 
-MemberGroup *MemberDef::getMemberGroup() const
+QSharedPointer<MemberGroup> MemberDef::getMemberGroup() const
 {
    return m_impl->memberGroup;
 }
@@ -5435,6 +5387,10 @@ bool MemberDef::isFunctionOrSignalSlot() const
 
 bool MemberDef::isRelatedOrFriend() const
 {
-   return isRelated() || isForeign() || (isFriend() && !isFriendToHide());
+   return isRelated() || isForeign() || (isFriend() && ! isFriendToHide());
 }
 
+bool MemberDef::isReference() const
+{
+  return Definition::isReference() || (m_impl->templateMaster && m_impl->templateMaster->isReference());
+}

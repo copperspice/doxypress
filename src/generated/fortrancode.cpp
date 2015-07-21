@@ -25897,13 +25897,15 @@ char *fortrancodeYYtext;
        - references to variables
 **/
 
-#include <QRegExp>
 #include <QDir>
+#include <QRegExp>
 #include <QStringList>
 
-#include <stdio.h>
+#include <set>
+
 #include <assert.h>
 #include <ctype.h>
+#include <stdio.h>
 
 #include "entry.h"
 #include <doxy_globals.h>
@@ -25950,7 +25952,7 @@ class UseEntry
 {
  public:
    QString module;          // just for debug
-   QStringList onlyNames;   /* entries of the ONLY-part */
+   QStringList onlyNames;   // entries of the ONLY-part
 };
 
 /**
@@ -25963,16 +25965,24 @@ class UseSDict : public StringMap<UseEntry *>
    UseSDict() {}
 };
 
+class Compare 
+{ 
+   public:      
+      bool operator()(const QString &a, const QString &b) const {
+         return a.compare(b, Qt::CaseInsensitive) < 0;        
+      }  
+};
+
 /**
   Contains names of used modules and names of local variables.
 */
 class Scope
 {
  public:
-   QStringList useNames;                        //!< contains names of used modules
-   QHash<QString, void *> localVars;            //!< contains names of local variables
+   QStringList useNames;                         //!< contains names of used modules
+   std::set<QString, Compare> localVars;         //!< contains names of local variables
 
-   Scope() {}      // broom -- on hold localVars should be case insensitive
+   Scope() {}      
 };
 
 static QString     docBlock;                     //!< contents of all lines of a documentation block
@@ -26301,8 +26311,8 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
 
    // look in local variables  
    for (auto scope : scopeStack) {
-      if (scope->localVars.contains(memberName)) {
-         return FALSE;
+      if (scope->localVars.count(memberName) != 0) {
+         return false;
       }
    }
 
@@ -26505,7 +26515,7 @@ static void addUse(const QString &moduleName)
 static void addLocalVar(const QString &varName)
 {
    if (! scopeStack.isEmpty()) {
-      scopeStack.last()->localVars.insert(varName, (void *)1);
+      scopeStack.last()->localVars.insert(varName);
    }
 }
 

@@ -101,11 +101,9 @@ class SearchIndex : public SearchIndexIntf
  private:
    void addWord(const QString &word, bool hiPrio, bool recurse);
 
-   QHash<QString, IndexWord *>  m_words;         // merge these two containers (broom -- on hold)
-   QVector<QList<IndexWord *>>  m_index;
+   QMap<QString, QSharedPointer<IndexWord>> m_words;
 
    QHash<QString,int> m_url2IdMap;
-
    QHash<long, QSharedPointer<URL>> m_urls;
 
    int m_urlIndex;
@@ -127,8 +125,6 @@ class SearchIndexExternal : public SearchIndexIntf
    QSharedPointer<SearchDocEntry> m_current;
 
 };
-
-//------- client side search index ----------------------
 
 void writeJavascriptSearchIndex();
 

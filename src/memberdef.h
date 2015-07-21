@@ -242,7 +242,7 @@ class MemberDef : public Definition
 
    // member group related members
    int getMemberGroupId() const;
-   MemberGroup *getMemberGroup() const;
+   QSharedPointer<MemberGroup> getMemberGroup() const;
 
    bool fromAnonymousScope() const;
    bool anonymousDeclShown() const;
@@ -281,6 +281,7 @@ class MemberDef : public Definition
    QString documentation() const;
    QString briefDescription(bool abbr = false) const;
    QString fieldType() const;
+   bool isReference() const;
 
    // set functions
    void setMemberType(MemberType t);
@@ -351,7 +352,7 @@ class MemberDef : public Definition
    void setNamespace(QSharedPointer<NamespaceDef> nd);
 
    // member group related members
-   void setMemberGroup(MemberGroup *grp);
+   void setMemberGroup(QSharedPointer<MemberGroup> grp);
    void setMemberGroupId(int id);
    void makeImplementationDetail();
 

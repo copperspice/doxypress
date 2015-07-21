@@ -586,17 +586,14 @@ void RTFDocVisitor::visit(DocCite *cite)
    }
 }
 
-
-//--------------------------------------
-// visitor functions for compound nodes
-//--------------------------------------
-
 void RTFDocVisitor::visitPre(DocAutoList *l)
 {
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocAutoList)}\n");
+
    m_t << "{" << endl;
    rtf_listItemInfo[m_indentLevel].isEnum = l->isEnumList();
    rtf_listItemInfo[m_indentLevel].number = 1;
@@ -608,6 +605,7 @@ void RTFDocVisitor::visitPost(DocAutoList *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocAutoList)}\n");
    m_t << "\\par";
    m_t << "}" << endl;
@@ -818,7 +816,9 @@ void RTFDocVisitor::visitPre(DocSimpleList *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocSimpleSect)}\n");
+
    m_t << "{" << endl;
    rtf_listItemInfo[m_indentLevel].isEnum = false;
    m_lastIsPara = false;
@@ -829,10 +829,13 @@ void RTFDocVisitor::visitPost(DocSimpleList *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocSimpleSect)}\n");
+
    if (!m_lastIsPara) {
       m_t << "\\par" << endl;
    }
+
    m_t << "}" << endl;
    m_lastIsPara = true;
 }
@@ -1608,6 +1611,7 @@ void RTFDocVisitor::visitPre(DocXRefItem *x)
    if (m_hide) {
       return;
    }
+
    if (x->title().isEmpty()) {
       return;
    }
@@ -1615,10 +1619,15 @@ void RTFDocVisitor::visitPre(DocXRefItem *x)
    bool anonymousEnum = x->file() == "@";
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocXRefItem)}\n");
 
+   if ( ! m_lastIsPara)   {
+      m_t << "\\par" << endl;
+      m_lastIsPara = true;
+   }
+
    m_t << "{"; 
 
    // start param list
-   //m_t << "{\\b "; // start bold
+   // m_t << "{\\b "; // start bold
 
    m_t << "{" << rtf_Style["Heading5"].reference << endl;
 
@@ -1628,10 +1637,11 @@ void RTFDocVisitor::visitPre(DocXRefItem *x)
       if (!x->file().isEmpty()) {
          refName += x->file();
       }
-      if (!x->file().isEmpty() && !x->anchor().isEmpty()) {
+
+      if (! x->file().isEmpty() && ! x->anchor().isEmpty()) {
          refName += "_";
       }
-      if (!x->anchor().isEmpty()) {
+      if (! x->anchor().isEmpty()) {
          refName += x->anchor();
       }
 

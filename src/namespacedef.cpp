@@ -53,25 +53,19 @@ NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &nam
 
    m_subGrouping = Config::getBool("allow-sub-grouping");
 
+   if (type == "module") {
+      m_type = MODULE;
 
-// broom check with orig
+   } else if (type == "constants") {
+      m_type = CONSTANT_GROUP;
 
-   if (type.isEmpty() ) {
+   } else if (type == "library") {
+      m_type = LIBRARY;
+
+   } else   {
       m_type = NAMESPACE;
 
-   } else  {
-
-      if (type != "module") {
-         m_type = MODULE;
-
-      } else if (type != "constants") {
-         m_type = CONSTANT_GROUP;
-
-      } else if (type != "library") {
-         m_type = LIBRARY;
-
-      }      
-   }
+   }  
 }
 
 NamespaceDef::~NamespaceDef()

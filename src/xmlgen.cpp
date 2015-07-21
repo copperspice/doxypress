@@ -1143,7 +1143,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    if (md->getDefLine() != -1) {
       t << "        <location file=\""
-        << md->getDefFileName() << "\" line=\""
+        << stripFromPath(md->getDefFileName()) << "\" line=\"" 
         << md->getDefLine() << "\"" << " column=\""
         << md->getDefColumn() << "\"" ;
 
@@ -1407,7 +1407,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
       return;   // skip artificially created classes
    }
 
-   msg("Generating XML output for class %s\n", cd->name().data());
+   msg("Generating XML output for class %s\n", qPrintable(cd->name()));
 
    ti << "  <compound refid=\"" << classOutputFileBase(cd)
       << "\" kind=\"" << cd->compoundTypeString()
@@ -1614,7 +1614,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
    }
 
    t << "    <location file=\""
-     << cd->getDefFileName() << "\" line=\""
+     << stripFromPath(cd->getDefFileName()) << "\" line=\""
      << cd->getDefLine() << "\"" << " column=\""
      << cd->getDefColumn() << "\"" ;
 
@@ -1700,7 +1700,7 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
   writeXMLDocBlock(t, nd->docFile(), nd->docLine(), nd, QSharedPointer<MemberDef>(), nd->documentation());
    t << "    </detaileddescription>" << endl;
    t << "    <location file=\""
-     << nd->getDefFileName() << "\" line=\""
+     << stripFromPath(nd->getDefFileName()) << "\" line=\""
      << nd->getDefLine() << "\"" << " column=\""
      << nd->getDefColumn() << "\"/>" << endl ;
    t << "  </compounddef>" << endl;
@@ -1833,7 +1833,7 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       writeXMLCodeBlock(t, fd);
       t << "    </programlisting>" << endl;
    }
-   t << "    <location file=\"" << fd->getDefFileName() << "\"/>" << endl;
+   t << "    <location file=\"" << stripFromPath(fd->getDefFileName()) << "\"/>" << endl;
    t << "  </compounddef>" << endl;
    t << "</doxypress>" << endl;
 
@@ -1949,7 +1949,7 @@ static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    t << "    <detaileddescription>" << endl;
    writeXMLDocBlock(t, dd->docFile(), dd->docLine(), dd, QSharedPointer<MemberDef>(), dd->documentation());
    t << "    </detaileddescription>" << endl;
-   t << "    <location file=\"" << dd->name() << "\"/>" << endl;
+   t << "    <location file=\"" << stripFromPath(dd->name()) << "\"/>" << endl;
    t << "  </compounddef>" << endl;
    t << "</doxypress>" << endl;
 

@@ -1291,8 +1291,7 @@ void XmlDocVisitor::filter(const QString &str)
 }
 
 void XmlDocVisitor::startLink(const QString &ref, const QString &file, const QString &anchor)
-{
-   //printf("XmlDocVisitor: file=%s anchor=%s\n",file.data(),anchor.data());
+{ 
    m_t << "<ref refid=\"" << file;
 
    if (!anchor.isEmpty()) {

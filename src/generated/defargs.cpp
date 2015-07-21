@@ -1714,8 +1714,8 @@ YY_DECL {
 
                         }
 
-                        if (a->type.mid(sv,6) == "struct" || a->type.mid(sv,5) == "union" ||
-                            a->type.mid(sv,5) == "class"  || a->type.mid(sv,8) == "typename" ||
+                        if (a->type.mid(sv) == "struct" || a->type.mid(sv) == "union"     ||
+      						    a->type.mid(sv) == "class"  || a->type.mid(sv) == "typename"  ||
                             a->type == "const" || a->type == "volatile") {
 
                            a->type = a->type + " " + a->name;

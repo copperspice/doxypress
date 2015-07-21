@@ -131,7 +131,6 @@ class RTFDocVisitor : public DocVisitor
    void visitPost(DocParBlock *);
 
  private:
-
    void filter(const QString &str, bool verbatim = false);
    void startLink(const QString &ref, const QString &file, const QString &anchor);
    void endLink(const QString &ref);

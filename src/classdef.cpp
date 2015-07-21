@@ -2439,7 +2439,7 @@ bool ClassDef::isLinkable() const
    if (m_templateMaster) {
       return m_templateMaster->isLinkable();
    } else {
-      return isLinkableInProject() || isReference();
+      return isReference() || isLinkableInProject();
    }
 }
 
