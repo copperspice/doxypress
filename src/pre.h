@@ -18,8 +18,6 @@
 #ifndef PRE_H
 #define PRE_H
 
-class BufStr;
-
 void initPreprocessor();
 void removePreProcessor();
 void addSearchDir(const QString &dir);

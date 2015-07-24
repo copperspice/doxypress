@@ -18,8 +18,6 @@
 #ifndef COMMENTCNV_H
 #define COMMENTCNV_H
 
-class BufStr;
-
 extern QString convertCppComments(const QString &inBuf, const QString &fileName);
 
 #endif

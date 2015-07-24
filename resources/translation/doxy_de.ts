@@ -335,19 +335,19 @@
     </message>
     <message>
         <source>Generated on %1 for %2 &amp;nbsp; by</source>
-        <translation type="unfinished"></translation>
+        <translation>Erzeugt am %1 für %2 &amp;nbsp; von</translation>
     </message>
     <message>
         <source>Generated on %1 &amp;nbsp; by</source>
-        <translation type="unfinished"></translation>
+        <translation>Erzeugt am %1 &amp;nbsp; von</translation>
     </message>
     <message>
         <source>Here is a list of all namespaces with brief descriptions:</source>
-        <translation type="unfinished"></translation>
+        <translation>Liste aller Namensbereiche mit Kurzbeschreibung:</translation>
     </message>
     <message>
         <source>Here is a list of all documented namespaces with brief descriptions:</source>
-        <translation type="unfinished"></translation>
+        <translation>Liste aller dokumentierten Namensbereiche mit Kurzbeschreibung:</translation>
     </message>
     <message>
         <source>Friends</source>
@@ -447,15 +447,15 @@
     </message>
     <message>
         <source>Constructor &amp; Destructor Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Destructor Documentation</translation>
     </message>
     <message>
         <source>Go to the source code of this file.</source>
-        <translation type="unfinished"></translation>
+        <translation>gehe zum Quellcode dieser Datei</translation>
     </message>
     <message>
         <source>Go to the documentation of this file.</source>
-        <translation type="unfinished"></translation>
+        <translation>gehe zur Dokumentation dieser Datei</translation>
     </message>
     <message>
         <source>Precondition</source>
@@ -555,7 +555,7 @@
     </message>
     <message>
         <source>This graph shows which files directly or indirectly include this file</source>
-        <translation type="unfinished"></translation>
+        <translation>Dieser Graph zeigt, welche Datei direkt oder indirekt diese Datei enthält:</translation>
     </message>
     <message>
         <source>Since</source>
@@ -671,75 +671,75 @@
     </message>
     <message>
         <source>Here is the caller graph for this function:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist ein Graph der zeigt, wo diese Funktion aufgerufen wird:</translation>
     </message>
     <message>
         <source>Enumerator Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Enumerator Documentation</translation>
     </message>
     <message>
         <source>Member Function/Subroutine Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Elementfunktionen/Unterroutinen-Dokumentation</translation>
     </message>
     <message>
         <source>Data Types List</source>
-        <translation type="unfinished"></translation>
+        <translation>Datentyp-Liste</translation>
     </message>
     <message>
         <source>Here are the data types with brief descriptions:</source>
-        <translation type="unfinished"></translation>
+        <translation>Datentyp-Index</translation>
     </message>
     <message>
         <source>Data Type Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Datentyp-Index</translation>
     </message>
     <message>
         <source>Data Type Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Datentyp-Dokumentation</translation>
     </message>
     <message>
         <source>Functions/Subroutines</source>
-        <translation type="unfinished"></translation>
+        <translation>Functions/Subroutines</translation>
     </message>
     <message>
         <source>Function/Subroutine Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Funktionen/Unterroutinen-Dokumentation</translation>
     </message>
     <message>
         <source>Modules List</source>
-        <translation type="unfinished"></translation>
+        <translation>Modulliste</translation>
     </message>
     <message>
         <source>Module Members</source>
-        <translation type="unfinished"></translation>
+        <translation>Module Members</translation>
     </message>
     <message>
         <source>Modules Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Modul-Verzeichnis</translation>
     </message>
     <message>
         <source>Type Constraints</source>
-        <translation type="unfinished"></translation>
+        <translation>Type Constraints</translation>
     </message>
     <message>
         <source>Loading...</source>
-        <translation type="unfinished"></translation>
+        <translation>Lade ...</translation>
     </message>
     <message>
         <source>Global Namespace</source>
-        <translation type="unfinished"></translation>
+        <translation>Globaler Namensbereich</translation>
     </message>
     <message>
         <source>Searching...</source>
-        <translation type="unfinished"></translation>
+        <translation>Suche ...</translation>
     </message>
     <message>
         <source>No Matches</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine Treffer</translation>
     </message>
     <message>
         <source>Bibliography</source>
-        <translation type="unfinished"></translation>
+        <translation>Literaturverzeichnis</translation>
     </message>
     <message>
         <source>Copyright</source>
@@ -747,11 +747,11 @@
     </message>
     <message>
         <source>detail level</source>
-        <translation type="unfinished"></translation>
+        <translation>Detailebene</translation>
     </message>
     <message>
         <source>Template Parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Template-Parameter</translation>
     </message>
     <message>
         <source>Additional Inherited Members</source>
@@ -775,590 +775,591 @@
     </message>
     <message>
         <source>Exported Interfaces</source>
-        <translation type="unfinished"></translation>
+        <translation>Exportierten Interfaces</translation>
     </message>
     <message>
         <source>Included Services</source>
-        <translation type="unfinished"></translation>
+        <translation>Inkludierte Leistungen</translation>
     </message>
     <message>
         <source>Constant Groups</source>
-        <translation type="unfinished"></translation>
+        <translation>Constant Groups</translation>
     </message>
     <message>
         <source>Here is a list of all namespace members with links to the namespace documentation for each member:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller Namespace Mitglieder mit Links zu den Namespace-Dokumentation für jedes Mitglied:</translation>
     </message>
     <message>
         <source>Here is a list of all documented namespace members with links to the namespaces they belong to:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller dokumentierten Namespace Mitglieder mit Links zu den Namespaces sie gehören:</translation>
     </message>
     <message>
         <source>Collaboration diagram for %1:</source>
-        <translation type="unfinished"></translation>
+        <translation>Kollaborationsdiagramm für% 1:</translation>
     </message>
     <message>
         <source>Include dependency graph for %1:</source>
-        <translation type="unfinished"></translation>
-    </message>
+        <translation>Include-Abhängigkeitsdiagramm für% 1:</translation>
+    </message>    
     <message>
         <source>Test</source>
-        <translation type="unfinished"></translation>
+        <translation>Test</translation>
     </message>
     <message>
         <source>Properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Propertys</translation>
     </message>
     <message>
         <source>Package %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Paket %1</translation>
     </message>
     <message>
         <source>Class</source>
-        <translation type="unfinished"></translation>
+        <translation>Klassen</translation>
     </message>
     <message>
         <source>class</source>
-        <translation type="unfinished"></translation>
+        <translation>klasse</translation>
     </message>
     <message>
         <source>classes</source>
-        <translation type="unfinished"></translation>
+        <translation>klassen</translation>
     </message>
     <message>
         <source>File</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei</translation>
     </message>
     <message>
         <source>Files</source>
-        <translation type="unfinished"></translation>
+        <translation>Dateien</translation>
     </message>
     <message>
         <source>file</source>
-        <translation type="unfinished"></translation>
+        <translation>dateien</translation>
     </message>
     <message>
         <source>files</source>
-        <translation type="unfinished"></translation>
+        <translation>dateien</translation>
     </message>
     <message>
         <source>Namespace</source>
-        <translation type="unfinished"></translation>
+        <translation>Namensbereich</translation>
     </message>
     <message>
         <source>namespace</source>
-        <translation type="unfinished"></translation>
+        <translation>namensbereich</translation>
     </message>
     <message>
         <source>namespaces</source>
-        <translation type="unfinished"></translation>
+        <translation>namensbereichn</translation>
     </message>
     <message>
         <source>Module</source>
-        <translation type="unfinished"></translation>
+        <translation>Gruppe</translation>
     </message>
     <message>
         <source>module</source>
-        <translation type="unfinished"></translation>
+        <translation>gruppe</translation>
     </message>
     <message>
         <source>modules</source>
-        <translation type="unfinished"></translation>
+        <translation>gruppe</translation>
     </message>
     <message>
         <source>Page</source>
-        <translation type="unfinished"></translation>
+        <translation>Seite</translation>
     </message>
     <message>
         <source>Pages</source>
-        <translation type="unfinished"></translation>
+        <translation>Seiten</translation>
     </message>
     <message>
         <source>page</source>
-        <translation type="unfinished"></translation>
+        <translation>seite</translation>
     </message>
     <message>
         <source>pages</source>
-        <translation type="unfinished"></translation>
+        <translation>seiten</translation>
     </message>
     <message>
         <source>Member</source>
-        <translation type="unfinished"></translation>
+        <translation>Element</translation>
     </message>
     <message>
         <source>Members</source>
-        <translation type="unfinished"></translation>
+        <translation>Elemente</translation>
     </message>
     <message>
         <source>member</source>
-        <translation type="unfinished"></translation>
+        <translation>element</translation>
     </message>
     <message>
         <source>members</source>
-        <translation type="unfinished"></translation>
+        <translation>elemente</translation>
     </message>
     <message>
         <source>Global</source>
-        <translation type="unfinished"></translation>
+        <translation>Global</translation>
     </message>
     <message>
         <source>global</source>
-        <translation type="unfinished"></translation>
+        <translation>global</translation>
     </message>
     <message>
         <source>globals</source>
-        <translation type="unfinished"></translation>
+        <translation>global</translation>
     </message>
     <message>
         <source>Author</source>
-        <translation type="unfinished"></translation>
+        <translation>Autor</translation>
     </message>
     <message>
         <source>Authors</source>
-        <translation type="unfinished"></translation>
+        <translation>Autoren</translation>
     </message>
     <message>
         <source>author</source>
-        <translation type="unfinished"></translation>
+        <translation>autor</translation>
     </message>
     <message>
         <source>Sorry, no documents matching your query.</source>
-        <translation type="unfinished"></translation>
+        <translation>Leider sind noch keine Dokumente gefunden, die Ihren Suchbegriffen.</translation>
     </message>
     <message>
         <source>Found &lt;b&gt;1&lt;/b&gt; document matching your query.</source>
-        <translation type="unfinished"></translation>
+        <translation>Gefunden &lt;b&gt;1&lt;/b&gt; Dokument für Ihre Abfrage.</translation>
     </message>
     <message>
         <source>Found &lt;b&gt;$num&lt;/b&gt; documents matching your query. Showing best matches first.</source>
-        <translation type="unfinished"></translation>
+        <translation>Gefunden &lt;b&gt;$num&lt;/b&gt; Dokumente, die Ihrer Suchanfrage. Es werden zunächst die besten Übereinstimmungen.</translation>
     </message>
     <message>
         <source>%1 Source File</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Source File</translation>
     </message>
     <message>
         <source>This directory hierarchy is sorted roughly, but not completely, alphabetically:</source>
-        <translation type="unfinished"></translation>
+        <translation>Diese Verzeichnishierarchie ist grob sortiert, aber nicht vollständig, alphabetischer Reihenfolge:</translation>
     </message>
     <message>
         <source>%1 Directory Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Verzeichnis Reference</translation>
     </message>
     <message>
         <source>Directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Verzeichnis</translation>
     </message>
     <message>
         <source>directory</source>
-        <translation type="unfinished"></translation>
+        <translation>verzeichnis</translation>
     </message>
     <message>
         <source>directories</source>
-        <translation type="unfinished"></translation>
+        <translation>verzeichnisse</translation>
     </message>
     <message>
         <source>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dies ist eine überladene Member-Funktion, für die Bequemlichkeit zur Verfügung gestellt. Es unterscheidet sich von der obigen Funktion nur in welchem ​​Argument(e) sie akzeptiert.</translation>
     </message>
     <message>
         <source>Data Types</source>
-        <translation type="unfinished"></translation>
-    </message>
+        <translation>Datentypen</translation>
+    </message>     
     <message>
         <source>%1 Module Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Modul-Referenz</translation>
     </message>
     <message>
         <source>%1 Relation</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Verhältnis</translation>
     </message>
     <message>
         <source>File in %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei in %1</translation>
     </message>
     <message>
         <source>Includes file in %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Inklusive Datei in %1</translation>
     </message>
     <message>
         <source>Directory dependency graph for %1:</source>
-        <translation type="unfinished"></translation>
+        <translation>Verzeichnis Abhängigkeitsdiagramm für %1:</translation>
     </message>
     <message>
         <source>and %1 more...</source>
-        <translation type="unfinished"></translation>
+        <translation>und %1 mehr ...</translation>
     </message>
     <message>
         <source>%1 Enum Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Enum Reference</translation>
     </message>
     <message>
         <source>Inherits %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Erbt %1.</translation>
     </message>
     <message>
         <source>%1 Class Template Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Klasse Template Reference</translation>
     </message>
     <message>
         <source>%1 Class Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Klassenreferenz</translation>
     </message>
     <message>
         <source>%1 Struct Template Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Struct Template Reference</translation>
     </message>
     <message>
         <source>%1 Struct Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Strukturreferenz</translation>
     </message>
     <message>
         <source>%1 Union Template Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Union Template Reference</translation>
     </message>
     <message>
         <source>%1 Union Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Union Reference</translation>
     </message>
     <message>
         <source>%1 Interface Template Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Schnittstelle Template Reference</translation>
     </message>
     <message>
         <source>%1 Interface Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Interface Reference</translation>
     </message>
     <message>
         <source>%1 Protocol Template Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Protocol Template Reference</translation>
     </message>
     <message>
         <source>%1 Protocol Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Protocol Reference</translation>
     </message>
     <message>
         <source>%1 Category Template Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Kategorie Template Reference</translation>
     </message>
     <message>
         <source>%1 Category Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Kategorie Reference</translation>
     </message>
     <message>
         <source>%1 Exception Template Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Exception Template Reference</translation>
     </message>
     <message>
         <source>%1 Exception Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Exception Reference</translation>
     </message>
     <message>
         <source>%1 Template Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Template Reference</translation>
     </message>
     <message>
         <source>%1 Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Bezugs</translation>
     </message>
     <message>
         <source>The documentation for this class  was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Klasse wurde erzeugt aufgrund der Datei:</translation>
     </message>
     <message>
         <source>The documentation for this class  was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Klasse wurde erzeugt aufgrund der Dateien:</translation>
     </message>
     <message>
         <source>The documentation for this struct  was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Struktur wurde erzeugt aufgrund der Datei:</translation>
     </message>
     <message>
         <source>The documentation for this struct  was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Struktur wurde erzeugt aufgrund der Dateien:</translation>
     </message>
     <message>
         <source>The documentation for this union  was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Vereinigung wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this union  was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Vereinigung wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this interface  was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Schnittstelle wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this interface  was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Schnittstelle wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this protocol  was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Protokoll wurde von der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this protocol  was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Protokoll wurde von den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this category  was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Klasse wurde erzeugt aufgrund der Datei generiert:</translation>
     </message>
     <message>
         <source>The documentation for this category  was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Klasse wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this exception was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Ausnahme wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this exception was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Ausnahme wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this  was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this  was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>Here is a list of all modules with brief descriptions:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller Module mit einer kurzen Beschreibung:</translation>
     </message>
     <message>
         <source>Here is a list of all documented modules with brief descriptions:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller dokumentierten Module mit Kurzbeschreibungen:</translation>
     </message>
     <message>
         <source>Here is a list of all module members with links to the module documentation for each member:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller Modulelemente mit Verweisen auf das Modul-Dokumentation für jedes Mitglied:</translation>
     </message>
     <message>
         <source>Here is a list of all documented module members with links to the modules they belong to:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller dokumentierten Modulelemente mit Links zu den sie gehören Module:</translation>
     </message>
     <message>
         <source>The documentation for this enum was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Enumeration wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this enum was generated  from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Enumeration wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>%1 inherited from %2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 von geerbt %2</translation>
     </message>
     <message>
         <source>click to enable panel synchronization</source>
-        <translation type="unfinished"></translation>
+        <translation>klicken Sie auf das Panel-Synchronisation aktivieren</translation>
     </message>
     <message>
         <source>click to disable panel synchronization</source>
-        <translation type="unfinished"></translation>
+        <translation>klicken Sie auf das Panel-Synchronisation zu deaktivieren</translation>
     </message>
     <message>
         <source>%1 Constant Group Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Constant Gruppe Referenz</translation>
     </message>
     <message>
         <source>%1 Service Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Service Reference</translation>
     </message>
     <message>
         <source>%1 Singleton Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Singleton Reference</translation>
     </message>
     <message>
         <source>The documentation for this service was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Dienstleistung wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this service was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Dienstleistung wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this singleton was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Singleton wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this singleton was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Singleton wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>Inherited by %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Von %1 geerbt.</translation>
     </message>
     <message>
         <source>Reimplemented from %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Von %1 neu implementiert.</translation>
     </message>
     <message>
         <source>Reimplemented in %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>In %1 neu implementiert.</translation>
     </message>
     <message>
         <source>Definition at line @0 of file @1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Definiert in Zeile @0 von Datei @1.</translation>
     </message>
     <message>
         <source>Definition in file @0.</source>
-        <translation type="unfinished"></translation>
+        <translation>Definition in der Datei @0.</translation>
     </message>
     <message>
         <source>Index</source>
-        <translation type="unfinished">Index</translation>
+        <translation>Index</translation>
     </message>
     <message>
         <source>Here is a list of all struct and union fields with links to the structures/unions they belong to:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller struct und union Felder mit Links zu den Strukturen / Vereinigungen, denen sie angehören:</translation>
     </message>
     <message>
         <source>Here is a list of all class members with links to the classes they belong to:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller Teilnehmer, mit Links zu den zugehörigen Klassen:</translation>
     </message>
     <message>
         <source>Here is a list of all documented struct and union fields with links to the struct/union documentation for each field:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller dokumentierten struct und union Felder mit Verbindungen zum struct / union Dokumentation für jedes Feld:</translation>
     </message>
     <message>
         <source>Here is a list of all documented class members with links to the class documentation for each member:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller dokumentierten die Schüler mit Links zu den Klassendokumentation für jedes Mitglied:</translation>
     </message>
     <message>
         <source>Implements %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Implementiert %1.</translation>
     </message>
     <message>
         <source>Implemented %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Implementiert %1.</translation>
     </message>
     <message>
         <source>Here is a list of all data types members with links to the data types they belong to:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller Datentypen Mitglieder mit Links zu den Datentypen, denen sie angehören:</translation>
     </message>
     <message>
         <source>Here is a list of all documented data types members with links to the data structure documentation for each member:</source>
-        <translation type="unfinished"></translation>
+        <translation>Hier ist eine Liste aller dokumentierten Datentypen Elemente mit Verweisen auf die Datenstruktur der Dokumentation für jedes Mitglied:</translation>
     </message>
     <message>
         <source>Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Art</translation>
     </message>
     <message>
         <source>Types</source>
-        <translation type="unfinished"></translation>
+        <translation>Typen</translation>
     </message>
     <message>
         <source>type</source>
-        <translation type="unfinished"></translation>
+        <translation>Art</translation>
     </message>
     <message>
         <source>types</source>
-        <translation type="unfinished"></translation>
+        <translation>Typen</translation>
     </message>
     <message>
         <source>Subprogram</source>
-        <translation type="unfinished"></translation>
+        <translation>Unterprogramm</translation>
     </message>
     <message>
         <source>Subprograms</source>
-        <translation type="unfinished"></translation>
+        <translation>Unterprogramme</translation>
     </message>
     <message>
         <source>subprogram</source>
-        <translation type="unfinished"></translation>
+        <translation>Unterprogramm</translation>
     </message>
     <message>
         <source>subprograms</source>
-        <translation type="unfinished"></translation>
+        <translation>Unterprogramme</translation>
     </message>
     <message>
         <source>Provided by category @1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nach Kategorie @1 zur Verfügung gestellt.</translation>
     </message>
     <message>
         <source>Extends class @1</source>
-        <translation type="unfinished"></translation>
+        <translation>Erstreckt Klasse @1</translation>
     </message>
     <message>
         <source>%1 Module Template Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Modul Template Reference</translation>
     </message>
     <message>
         <source>%1 Type Template Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Typ Template Reference</translation>
     </message>
     <message>
         <source>%1 Type Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Type Reference</translation>
     </message>
     <message>
         <source>%1  Protocol Reference</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Protocol Reference</translation>
     </message>
     <message>
         <source>The documentation for this module was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für dieses Modul wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this module was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für dieses Modul wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this type was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Art wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this type was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Art wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this union was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Vereinigung wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this union was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Vereinigung wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this interface was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Schnittstelle wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this interface was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Schnittstelle wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this protocol was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Protokoll wurde von der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this protocol was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Protokoll wurde von den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this category was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Klasse wurde erzeugt aufgrund der Datei generiert:</translation>
     </message>
     <message>
         <source>The documentation for this category was generated from the following files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese Klasse wurde aus den folgenden Dateien generiert:</translation>
     </message>
     <message>
         <source>The documentation for this was generated from the following file:</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Dokumentation für diese wurde aus der folgenden Datei:</translation>
     </message>
     <message>
         <source>The documentation for this was generated from the following files:</source>
-        <translation type="unfinished"></translation>
-    </message>
+        <translation>Die Dokumentation für diese wurde aus den folgenden Dateien generiert:</translation>
+    </message> 
     <message>
-        <source>This page explains how to interpret the graphs which are generated by DoxyPress.&lt;p&gt;
+        <source>
+This page explains how to interpret the graphs which are generated by DoxyPress.&lt;p&gt;
 Consider the following example:
 \code
 /*! Invisible class because of truncation */
@@ -1421,26 +1422,26 @@ The arrows have the following meaning:
     </message>
     <message>
         <source>, and </source>
-        <translation type="unfinished"></translation>
+         <translation>Und </translation>
     </message>
     <message>
         <source>Public Typedefs</source>
-        <translation type="unfinished"></translation>
+        <translation>Öffentliche Typedefs</translation>
     </message>
     <message>
         <source>Protected Typedefs</source>
-        <translation type="unfinished"></translation>
+        <translation>Geschützte Typedefs</translation>
     </message>
     <message>
         <source>Private Typedefs</source>
-        <translation type="unfinished"></translation>
+        <translation>Private Typedefs</translation>
     </message>
 </context>
 <context>
     <name>latexSupport</name>
     <message>
         <source>remove-value</source>
-        <translation></translation>
+        <translation>remove-Wert</translation>
     </message>
 </context>
 </TS>

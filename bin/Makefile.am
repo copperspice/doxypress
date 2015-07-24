@@ -174,7 +174,6 @@ doxypress_SOURCES = \
 noinst_HEADERS = \
    src/a_define.h \
    src/arguments.h \
-   src/bufstr.h \
    src/ce_parse.h \
    src/cite.h \
    src/classdef.h \

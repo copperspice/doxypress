@@ -1171,8 +1171,8 @@ YY_DECL {
          }
 
          default:
-            YY_FATAL_ERROR(
-               "fatal flex scanner internal error--no action found" );
+            YY_FATAL_ERROR("fatal flex scanner internal error--no action found" );
+
       } /* end of action switch */
    } /* end of scanning one token */
 } /* end of constexpYYlex */
@@ -1285,7 +1285,7 @@ static int yy_get_next_buffer (void)
    if ( (yy_n_chars) == 0 ) {
       if ( number_to_move == YY_MORE_ADJ ) {
          ret_val = EOB_ACT_END_OF_FILE;
-         constexpYYrestart(constexpYYin  );
+         constexpYYrestart(constexpYYin);
       }
 
       else {
@@ -1451,13 +1451,11 @@ static int input  (void)
  *
  * @note This function does not reset the start condition to @c INITIAL .
  */
-void constexpYYrestart  (FILE *input_file )
+void constexpYYrestart  (FILE *input_file)
 {
-
    if ( ! YY_CURRENT_BUFFER ) {
       constexpYYensure_buffer_stack ();
-      YY_CURRENT_BUFFER_LVALUE =
-         constexpYY_create_buffer(constexpYYin, YY_BUF_SIZE );
+      YY_CURRENT_BUFFER_LVALUE = constexpYY_create_buffer(constexpYYin, YY_BUF_SIZE );
    }
 
    constexpYY_init_buffer(YY_CURRENT_BUFFER, input_file );
@@ -2023,20 +2021,27 @@ void constexpYYfree (void *ptr )
 
 #define YYTABLES_NAME "yytables"
 
-bool parseconstexp(const QString &fileName, int lineNr, const QString &s)
+bool parseconstexp(const QString &fileName, int lineNr, const QString &data)
 {
-   printlex(constexpYY_flex_debug, TRUE, __FILE__, fileName);
-
    g_constExpFileName = fileName;
-   g_constExpLineNr = lineNr;
-   g_inputString    = s;
-   g_inputPosition  = 0;
+   g_constExpLineNr   = lineNr;
+   g_inputString      = data;
+   g_inputPosition    = 0;
+   
+   QString s = data.simplified();
 
-   constexpYYrestart( constexpYYin );
+   if (s == "0L"|| s == "! 1L") { 
+      return false;
+
+   } else if (s == "1L" || s == "! 0L") { 
+      return true;
+
+   }   
+
+   constexpYYrestart(constexpYYin);
    constexpYYparse();
-
-   printlex(constexpYY_flex_debug, FALSE, __FILE__, fileName);
-   return (long)g_resultValue != 0;
+ 
+   return ((long)g_resultValue != 0);
 }
 
 extern "C" {

@@ -56,6 +56,7 @@ class CPPValue
 
  private:
    Type type;
+
    union {
       double d;
       long l;

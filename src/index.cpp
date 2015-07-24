@@ -3067,11 +3067,15 @@ void writeGraphInfo(OutputList &ol)
    endTitle(ol, 0, 0);
    ol.startContents();
 
-   QString legendDocs = theTranslator->trLegendDocs();
+   //
+   static QString dotFormat = Config::getEnum("dot-image-format");
+
+   QString legendDocs = theTranslator->trLegendDocs(dotFormat);
+
    int s = legendDocs.indexOf("<center>");
    int e = legendDocs.indexOf("</center>");
 
-   if (Config::getEnum("dot-image-format") == "svg" && s != -1 && e != -1) {
+   if (dotFormat == "svg" && s != -1 && e != -1) {
       legendDocs = legendDocs.left(s + 8) + "[!-- SVG 0 --]\n" + legendDocs.mid(e);    
    }
 
@@ -3703,7 +3707,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
       if (! indexWritten.at(index)) {
          switch (kind) {
             case LayoutNavEntry::MainPage:
-               msg("Generating index page\n");
+               msg("Generating main page\n");
                writeIndex(ol);
                break;
 

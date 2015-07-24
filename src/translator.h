@@ -187,7 +187,7 @@ class Translator
    virtual QString trSince() = 0;
 
    virtual QString trLegendTitle() = 0;
-   virtual QString trLegendDocs() = 0;
+   virtual QString trLegendDocs(const QString &dotFormat) = 0;
    virtual QString trLegend() = 0;
 
    virtual QString trTest() = 0;

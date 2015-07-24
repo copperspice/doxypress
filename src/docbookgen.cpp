@@ -1142,7 +1142,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       return;   // skip generated template instances.
    }
 
-   msg("Generating Docbook output for class %s\n", cd->name().data());
+   msg("Generating Docbook output for class %s\n", qPrintable(cd->name()));
 
    QString fileDocbook = cd->getOutputFileBase() + ".xml";
 
@@ -1799,7 +1799,7 @@ void generateDocbook()
    }
 
    for (auto nd : *Doxy_Globals::namespaceSDict)  {
-      msg("Generating Docbook output for namespace %s\n", nd->name().data());
+      msg("Generating Docbook output for namespace %s\n", qPrintable(nd->name()));
       generateDocbookForNamespace(nd, t);
    }
 
@@ -1818,7 +1818,7 @@ void generateDocbook()
    // PAGE DOCUMENTATION
       
    for (auto pd : *Doxy_Globals::pageSDict) {
-      msg("Generating Docbook output for page %s\n", pd->name().data());
+      msg("Generating Docbook output for page %s\n", qPrintable(pd->name()));
       generateDocbookForPage(pd, t, false);      
    }
 
@@ -1832,7 +1832,7 @@ void generateDocbook()
    }
 
    for (auto gd : *Doxy_Globals::groupSDict) {
-      msg("Generating Docbook output for group %s\n", gd->name().data());
+      msg("Generating Docbook output for group %s\n", qPrintable(gd->name()));
       generateDocbookForGroup(gd, t);
    }
 
@@ -1873,7 +1873,7 @@ void generateDocbook()
     
       for (auto fn : *Doxy_Globals::inputNameList) {        
          for (auto fd : *fn) {
-            msg("Generating Docbook output for file %s\n", fd->name().data());
+            msg("Generating Docbook output for file %s\n", qPrintable(fd->name()));
             generateDocbookForFile(fd, t);
          }
       }
@@ -1894,7 +1894,7 @@ void generateDocbook()
       }
       
       for (auto dir : Doxy_Globals::directories) {
-         msg("Generate Docbook output for dir %s\n", dir->name().data());
+         msg("Generate Docbook output for dir %s\n", qPrintable(dir->name()));
          generateDocbookForDir(dir, t);
       }
 
@@ -1914,7 +1914,7 @@ void generateDocbook()
       }
     
       for (auto pd : *Doxy_Globals::exampleSDict) {
-         msg("Generating Docbook output for example %s\n", pd->name().data());
+         msg("Generating Docbook output for example %s\n", qPrintable(pd->name()));
          generateDocbookForPage(pd, t, true);
       }
 

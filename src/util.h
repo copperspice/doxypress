@@ -28,7 +28,6 @@
 #include <types.h>
 
 #include <arguments.h>
-#include <bufstr.h>
 #include <classdef.h>
 #include <docparser.h>
 #include <filedef.h>
@@ -374,7 +373,7 @@ bool mainPageHasTitle();
 QString stripPrefix(QString input, const QByteArray &prefix); 
 QByteArray stripPrefix(QByteArray input, const QByteArray &prefix);
 
-Protection getProtection(const QByteArray &data);
+Protection getProtection(const QString &data);
 
 #endif
 

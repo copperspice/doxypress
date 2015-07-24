@@ -738,7 +738,6 @@ char *tclscannerYYtext;
 #include <unistd.h>
 
 #include "arguments.h"
-#include "bufstr.h"
 #include "commentcnv.h"
 #include "commentscan.h"
 #include "config.h"

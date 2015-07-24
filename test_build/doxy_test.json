@@ -128,8 +128,8 @@
     "generate-chi": false,
     "generate-chm": false,
     "generate-deprecate-list": true,
-    "generate-docbook": false,
-    "generate-docset": true,
+    "generate-docbook": true,
+    "generate-docset": false,
     "generate-eclipse": true,
     "generate-html": true,
     "generate-latex": true,
@@ -328,7 +328,7 @@
     "strip-from-path": [
         ""
     ],
-    "tab-size": 1,
+    "tab-size": 4,
     "tag-files": [
         ""
     ],

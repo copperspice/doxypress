@@ -22,7 +22,6 @@
 
 #include <stdio.h>
 
-#include <bufstr.h>
 #include <config.h>
 #include <commentscan.h>
 #include <commentcnv.h>

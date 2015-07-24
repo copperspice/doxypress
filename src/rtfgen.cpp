@@ -299,8 +299,9 @@ void RTFGenerator::beginRTFDocument()
 
 void RTFGenerator::beginRTFChapter()
 {
-   m_textStream << "\n";
    DBG_RTF(m_textStream << "{\\comment BeginRTFChapter}\n")
+
+   m_textStream << "\n";   
    m_textStream << rtf_Style_Reset;
 
    // if we are compact, no extra page breaks
@@ -318,8 +319,9 @@ void RTFGenerator::beginRTFChapter()
 
 void RTFGenerator::beginRTFSection()
 {
-   m_textStream << "\n";
    DBG_RTF(m_textStream << "{\\comment BeginRTFSection}\n")
+
+   m_textStream << "\n";   
    m_textStream << rtf_Style_Reset;
 
    // if we are compact, no extra page breaks
@@ -352,8 +354,8 @@ void RTFGenerator::startFile(const QString &name, const QString &, const QString
 void RTFGenerator::endFile()
 {
    DBG_RTF(m_textStream << "{\\comment endFile}\n")
-   m_textStream << "}";
-
+  
+   m_textStream << "}";    
    endPlainFile();
 }
 
@@ -587,15 +589,16 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          {
             m_textStream << "}" << rtf_title;
          } else {
-            m_textStream << "}" << Config::getString("project-name").toUtf8();
+            m_textStream << "}" << Config::getString("project-name");
          }
          break;
 
       case isTitlePageAuthor: {
-         m_textStream << "Doxgyen. }\n";
+         m_textStream << "DoxyPress. }\n";
          m_textStream << "{\\creatim " << dateToRTFDateString() << "}\n}";
 
          DBG_RTF(m_textStream << "{\\comment end of infoblock}\n");
+
          // setup for this section
          m_textStream << rtf_Style_Reset << "\n";
          m_textStream << "\\sectd\\pgnlcrm\n";
@@ -853,8 +856,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
       }
       break;
 
-      case isExampleDocumentation: {
-         //t << "}\n";
+      case isExampleDocumentation: {        
          m_textStream  << "{\\tc \\v " << theTranslator->trExampleDocumentation() << "}" << endl;
       
          auto iter1 = Doxy_Globals::exampleSDict->begin();
@@ -902,6 +904,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          //}
       }
       break;
+
       case isPageDocumentation2: {
          m_textStream  << "}";
          m_textStream  << "\\par " << rtf_Style_Reset << endl;
@@ -1521,8 +1524,7 @@ void RTFGenerator::endMemberDescription()
    endEmphasis();
    newParagraph();
    decrementIndentLevel();
-
-   // m_textStream << "\\par";
+   
    m_textStream << "}" << endl;
 
    //m_omitParagraph = true;
@@ -2112,18 +2114,17 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
       }
 
       return false;
-   }
+   }  
 
-   const int maxLineLength = 10240;
-
-   static QByteArray lineBuf;
-   lineBuf.resize(maxLineLength);
+   QByteArray lineBuf;
 
    // scan until find end of header, this works becasue the first line of the rtf file 
    // before the body, ALWAYS contains "{\comment begin body}"
 
-   do {     
-      if (f.readLine(lineBuf.data(), maxLineLength) == -1) {
+   do {  
+      lineBuf = f.readLine();
+   
+      if (f.error() != QFile::NoError) {
          err("Read error in %s, error: %d\n", qPrintable(input_FName), f.error());
          return false;
       }
@@ -2134,11 +2135,17 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
 
    } while (lineBuf.indexOf("\\comment begin body") == -1);
 
+   while (true) {
+      lineBuf = f.readLine();
+   
+      if (f.error() != QFile::NoError) {
+         err("Read error in %s, error: %d\n", qPrintable(input_FName), f.error());
+         return false;     
+      }
 
-   while (f.readLine(lineBuf.data(), maxLineLength) != -1) {
-      int pos;
+      int pos = lineBuf.indexOf("INCLUDETEXT");
 
-      if ((pos = lineBuf.indexOf("INCLUDETEXT")) != -1) {
+      if (pos != -1) {
          int startNamePos = lineBuf.indexOf('"', pos) + 1;
 
          int endNamePos   = lineBuf.indexOf('"', startNamePos);
@@ -2153,27 +2160,32 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
          DBG_RTF(t_stream << "{\\comment end include " << fileName << "}" << endl)
 
       } else {
-         // no INCLUDETEXT on this line
-         // elaborate hoopla to skip  the final "}" if we did not include the headers
+         // no INCLUDETEXT on this line, 
+         // odd code to skip  the final "}" if we did not include the headers
 
          if (! f.atEnd() || bIncludeHeader) {
             encodeForOutput(t_stream, lineBuf);
 
          } else { 
-            // last line of included file
-            // null terminate at the last '}'
+            // last line of included file has a "}" which needs to be removed
 
-            int pos = lineBuf.lastIndexOf('}');
+            int bracePos = lineBuf.lastIndexOf('}');
 
-            if (pos != -1) {
-               lineBuf.resize(pos);
+            if (bracePos != -1) {
+               // truncate the last char, odd but it solves the problem
+               lineBuf.truncate(bracePos);
 
             } else {
-               err("Last char was not a '}'\n");
+               err("Last charactor of %s was not a '}' as expected.\n", qPrintable(input_FName) );
+
             }
 
             encodeForOutput(t_stream, lineBuf);
          }
+      }
+
+      if (f.atEnd()) {
+         break;
       }
    }
 
@@ -2290,7 +2302,7 @@ void RTFGenerator::endDirDepGraph(const DotDirDeps &g)
  */
 void testRTFOutput(const QString &name)
 {
-    int bcount = 0;
+   int bcount = 0;
    int line   = 1;
    char c;
 
@@ -2301,23 +2313,25 @@ void testRTFOutput(const QString &name)
       while (f.getChar(&c)) {
 
          if (c == '\\') { 
-            // escape char
+            // escape char found, skip the next char
             
-            if (f.getChar(&c)) {
+            if (! f.getChar(&c)) {
                break;
             }
 
-         } else if (c == '{') { // open bracket
+         } else if (c == '{') { 
+            // open bracket
             bcount++;
 
-         } else if (c == '}') { // close bracket
+         } else if (c == '}') { 
+            // close bracket
             bcount--;
 
             if (bcount < 0) {
                goto err;              
             }
 
-         } else if (c == '\n') { // newline
+         } else if (c == '\n') { 
             line++;
          }
       }

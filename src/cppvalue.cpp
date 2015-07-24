@@ -15,32 +15,74 @@
  *
 *************************************************************************/
 
+#include <QRegExp>
 #include <QString>
 
 #include <stdlib.h>
+
 #include <cppvalue.h>
 #include <constexp.h>
 
 CPPValue parseOctal()
 {
-   long val = g_strToken.toLong(nullptr, 8);  
+  long val = 0;
+
+   QString tmp = g_strToken;
+
+   QRegExp reg("[A-Za-z]");    
+   tmp.replace(reg, "");
+
+   val = g_strToken.toLong(nullptr, 8); 
+ 
    return CPPValue(val);
 }
 
 CPPValue parseDecimal()
 {
-   long val = g_strToken.toLong(nullptr, 10);
+   long val = 0;
+
+   QString tmp = g_strToken;
+
+   QRegExp reg("[A-Za-z]");    
+   tmp.replace(reg, "");
+
+   val = tmp.toLong(nullptr, 10);
+
    return CPPValue(val);
 }
 
 CPPValue parseHexadecimal()
 {
-   long val = g_strToken.toLong(nullptr, 16);   
+  long val = 0;
+
+   QString tmp = g_strToken;
+
+   QRegExp reg("[A-Za-z]");    
+   tmp.replace(reg, "");
+
+   val = g_strToken.toLong(nullptr, 16);   
+
    return CPPValue(val);
 }
 
-CPPValue parseCharacter() // does not work for '\n' and the alike
+CPPValue parseFloat()
 {
+   double val = 0;
+
+   QString tmp = g_strToken;
+
+   QRegExp reg("[A-Za-z]");    
+   tmp.replace(reg, "");
+
+   val = g_strToken.toDouble();
+
+   return CPPValue(val);
+}
+
+CPPValue parseCharacter()
+{
+   // does not work for '\n' and the alike
+
    if (g_strToken[1] == '\\') {
 
       switch (g_strToken[2].unicode()) {
@@ -90,8 +132,3 @@ CPPValue parseCharacter() // does not work for '\n' and the alike
    return CPPValue(static_cast<long>(g_strToken[1].unicode()));
 }
 
-CPPValue parseFloat()
-{
-   double val = g_strToken.toDouble();
-   return CPPValue(val);
-}

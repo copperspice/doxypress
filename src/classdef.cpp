@@ -1573,6 +1573,7 @@ void ClassDef::writeMoreLink(OutputList &ol, const QString &anchor)
 
    if (!anchor.isEmpty()) {
       ol.pushGeneratorState();
+
       // LaTeX + RTF
       ol.disable(OutputGenerator::Html);
       ol.disable(OutputGenerator::Man);
@@ -1586,6 +1587,7 @@ void ClassDef::writeMoreLink(OutputList &ol, const QString &anchor)
       ol.startTextLink(getOutputFileBase(), anchor);
       ol.parseText(theTranslator->trMore());
       ol.endTextLink();
+
       // RTF only
       ol.disable(OutputGenerator::Latex);
       ol.writeString("\\par");

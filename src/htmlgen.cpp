@@ -20,7 +20,6 @@
 
 #include <stdlib.h>
 
-#include <bufstr.h>
 #include <config.h>
 #include <dirdef.h>
 #include <docparser.h>

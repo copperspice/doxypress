@@ -1040,7 +1040,6 @@ char *commentcnvYYtext;
 #include <qglobal.h>
 
 #include <assert.h>
-#include <bufstr.h>
 #include <stdio.h>
 #include <stdlib.h>
 

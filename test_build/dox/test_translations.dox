@@ -1,0 +1,34 @@
+/*************************************************************************
+*                                                                         
+* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2014 Digia Plc                   
+* All rights reserved.                                                    
+*                                                                         
+*                                                                         
+* GNU Free Documentation License                                          
+* This file may be used under the terms of the GNU Free Documentation     
+* License version 1.3 as published by the Free Software Foundation        
+* and appearing in the file included in the packaging of this file.       
+*                                                                         
+*                                                                         
+*************************************************************************/
+
+/**
+\page translation-test  Translation Test
+This page contains samples of the DoxyPress translation phrases. Currently we have translations for English, French, German, Italian, and Spanish. To see the phrases in one of these languages 
+
+
+\todo BROOM - figure this out
+
+
+trPublicTypedefs()
+
+
+trProtectedTypedefs()
+
+
+trPrivateTypedefs()
+
+
+*/
+
