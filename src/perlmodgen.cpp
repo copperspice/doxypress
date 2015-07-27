@@ -53,16 +53,29 @@ class PerlModOutputStream
 
    PerlModOutputStream(QTextStream *t = 0) : m_t(t) { }
 
+   void add(char c);
    void add(QChar c);
    void add(const QString &s);   
    void add(int n);
    void add(unsigned int n);
 };
 
+
+void PerlModOutputStream::add(char c)
+{
+   if (m_t != 0) {
+      (*m_t) << c;
+
+   } else {
+      m_s += c;
+   }
+}
+
 void PerlModOutputStream::add(QChar c)
 {
    if (m_t != 0) {
       (*m_t) << c;
+
    } else {
       m_s += c;
    }
@@ -72,6 +85,7 @@ void PerlModOutputStream::add(const QString &s)
 {
    if (m_t != 0) {
       (*m_t) << s;
+
    } else {
       m_s += s;
    }
@@ -129,6 +143,11 @@ class PerlModOutput
          m_stream->add(',');
       }
       indent();
+      return *this;
+   }
+
+   inline PerlModOutput &add(char c) {
+      m_stream->add(c);
       return *this;
    }
 
@@ -1574,7 +1593,8 @@ static void addPerlModDocBlock(PerlModOutput &output, const QString &name, const
       output.addField(name).add("{}");
 
    } else {
-      DocNode *root = validatingParseDoc(fileName, lineNr, scope, md, stext, false, "");
+
+      DocNode *root = validatingParseDoc(fileName, lineNr, scope, md, stext, false, false);
       output.openHash(name);
 
       PerlModDocVisitor *visitor = new PerlModDocVisitor(output);
@@ -2331,13 +2351,14 @@ void PerlModGenerator::generatePerlModForPage(QSharedPointer<PageDef> pd)
    QSharedPointer<MemberDef> nullMem;
 
    addPerlModDocBlock(m_output, "detailed", pd->docFile(), pd->docLine(), nullDef, nullMem, pd->documentation());
+
    m_output.closeHash();
 }
 
 bool PerlModGenerator::generatePerlModOutput()
 {
    QFile outputFile;
-   if (!createOutputFile(outputFile, pathDoxyDocsPM)) {
+   if (! createOutputFile(outputFile, pathDoxyDocsPM)) {
       return false;
    }
 
@@ -2372,17 +2393,21 @@ bool PerlModGenerator::generatePerlModOutput()
    }
    m_output.closeList();
 
+
    m_output.openList("pages");  
    for (auto pd : *Doxy_Globals::pageSDict) {
       generatePerlModForPage(pd);
    }
+
 
    if (Doxy_Globals::mainPage) {
       generatePerlModForPage(Doxy_Globals::mainPage);
    }
    m_output.closeList();
 
+
    m_output.closeHash().add(";\n1;\n");
+
    return true;
 }
 
@@ -3105,26 +3130,24 @@ void PerlModGenerator::generate()
    bool perlmodLatex = Config::getBool("perl-latex");
 
    QString perlModAbsPath = perlModDir.absolutePath();
-   pathDoxyDocsPM      = perlModAbsPath + "/DoxyDocs.pm";
-   pathDoxyStructurePM = perlModAbsPath + "/DoxyStructure.pm";
-   pathMakefile        = perlModAbsPath + "/Makefile";
-   pathDoxyRules       = perlModAbsPath + "/doxyrules.make";
+
+   pathDoxyDocsPM         = perlModAbsPath + "/DoxyDocs.pm";
+   pathDoxyStructurePM    = perlModAbsPath + "/DoxyStructure.pm";
+   pathMakefile           = perlModAbsPath + "/Makefile";
+   pathDoxyRules          = perlModAbsPath + "/doxyrules.make";
 
    if (perlmodLatex) {
       pathDoxyStructureTex = perlModAbsPath + "/doxystructure.tex";
-      pathDoxyFormatTex = perlModAbsPath + "/doxyformat.tex";
-      pathDoxyLatexTex = perlModAbsPath + "/doxylatex.tex";
-      pathDoxyLatexDVI = perlModAbsPath + "/doxylatex.dvi";
-      pathDoxyLatexPDF = perlModAbsPath + "/doxylatex.pdf";
-      pathDoxyDocsTex = perlModAbsPath + "/doxydocs.tex";
-      pathDoxyLatexPL = perlModAbsPath + "/doxylatex.pl";
+      pathDoxyFormatTex = perlModAbsPath    + "/doxyformat.tex";
+      pathDoxyLatexTex  = perlModAbsPath    + "/doxylatex.tex";
+      pathDoxyLatexDVI  = perlModAbsPath    + "/doxylatex.dvi";
+      pathDoxyLatexPDF  = perlModAbsPath    + "/doxylatex.pdf";
+      pathDoxyDocsTex   = perlModAbsPath    + "/doxydocs.tex";
+      pathDoxyLatexPL   = perlModAbsPath    + "/doxylatex.pl";
       pathDoxyLatexStructurePL = perlModAbsPath + "/doxylatex-structure.pl";
    }
 
-   if (!(generatePerlModOutput()
-         && generateDoxyStructurePM()
-         && generateMakefile()
-         && generateDoxyRules())) {
+   if (! (generatePerlModOutput() && generateDoxyStructurePM() && generateMakefile() && generateDoxyRules())) { 
       return;
    }
 

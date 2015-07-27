@@ -256,7 +256,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
       }
       searchCssJs += "<script type=\"text/javascript\" src=\"$relpath^search/search.js\"></script>\n";
 
-      if (!serverBasedSearch) {
+      if (! serverBasedSearch) {
          searchCssJs += "<script type=\"text/javascript\">\n"
                         "  $(document).ready(function() { init_search(); });\n"
                         "</script>";
@@ -418,14 +418,14 @@ void HtmlCodeGenerator::codify(const QString &str)
             m_col++;
             break;
 
-         case '\'':
-            m_streamX << "&#39;";
-            m_col++; // &apos; is not valid XHTML
-            break;
-
          case '"':
             m_streamX << "&quot;";
             m_col++;
+            break;
+
+         case '\'':
+            m_streamX << "&#39;";
+            m_col++;                // &apos; is not valid XHTML
             break;
 
          case '\\':
@@ -456,9 +456,9 @@ void HtmlCodeGenerator::codify(const QString &str)
 }
 
 void HtmlCodeGenerator::docify(const QString &text)
-{      
-   bool isBackSlash = false;   
-
+{       
+   bool isBackSlash = false;  
+  
    for (auto c : text) {
 
       switch (c.unicode()) {
@@ -576,7 +576,7 @@ void HtmlCodeGenerator::writeTooltip(const QString &id, const DocLinkInfo &docIn
       m_streamX << externalRef(m_relPath, docInfo.ref, true);
       m_streamX << docInfo.url << Doxy_Globals::htmlFileExtension;
 
-      if (!docInfo.anchor.isEmpty()) {
+      if (! docInfo.anchor.isEmpty()) {
          m_streamX << "#" << docInfo.anchor;
       }
 

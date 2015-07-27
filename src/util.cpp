@@ -5148,7 +5148,7 @@ QString convertToHtml(const QString &str, bool keepEntities)
    if (str.isEmpty()) {
       return "";
    }
-   
+  
    QString retval;
 
    const QChar *p = str.constData();

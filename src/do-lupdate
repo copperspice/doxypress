@@ -1,7 +1,6 @@
 # to remove obsolete   -no-obsolete 
 
-../deploy/lupdate  translator_cs.h -ts \
- ../resources/translation/doxy_en.ts  \
+../deploy/lupdate  translator_cs.h -ts  -no-obsolete   ../resources/translation/doxy_en.ts  \
  ../resources/translation/doxy_af.ts  \
  ../resources/translation/doxy_ar.ts  \
  ../resources/translation/doxy_am.ts  \

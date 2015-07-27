@@ -323,8 +323,8 @@ void endFile(OutputList &ol, bool skipNavIndex, bool skipEndContents, const QStr
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   if (!skipNavIndex) {
-      if (!skipEndContents) {
+   if (! skipNavIndex) {
+      if (! skipEndContents) {
          ol.endContents();
       }
 

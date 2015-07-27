@@ -12633,8 +12633,8 @@ YY_DECL {
                startFontClass("keyword");
                codifyLines(text);
                endFontClass();
-               if (!g_insideTemplate)
-               {
+
+               if (! g_insideTemplate) {
                   BEGIN( ClassName );
                }
             }
@@ -12644,10 +12644,10 @@ YY_DECL {
 
             {
                QString text = QString::fromUtf8(codeYYtext); 
-               if (g_insideTemplate)
-               {
+               if (g_insideTemplate) {
                   REJECT;
                }
+
                startFontClass("keyword");
                codifyLines(text);
                endFontClass();
@@ -12750,7 +12750,6 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-
                QString text = QString::fromUtf8(codeYYtext); 
                g_code->codify(text);
 
@@ -12965,8 +12964,7 @@ YY_DECL {
                }
                g_code->codify(text);
                g_curlyCount++;
-               if (g_insideBody)
-               {
+               if (g_insideBody) {
                   g_bodyCurlyCount++;
                }
                g_type.resize(0);
@@ -14591,14 +14589,14 @@ YY_DECL {
                //g_theCallContext.popScope();
                g_parmType.resize(0);
                g_parmName.resize(0);
+
                int index = g_name.lastIndexOf("::");
 
                DBG_CTX((stderr, "g_name=%s\n", qPrintable(g_name)));
 
-               if (index != -1)
-               {
+               if (index != -1) {
                   QString scope = g_name.left(index);
-                  if (!g_classScope.isEmpty()) {
+                  if (! g_classScope.isEmpty()) {
                      scope.prepend(g_classScope + "::");
                   }
 
@@ -14614,32 +14612,34 @@ YY_DECL {
                      DBG_CTX((stderr, "** scope stack push INNERBLOCK\n"));
                   }
 
-               } else
-               {
+               } else {
                   DBG_CTX((stderr, "** scope stack push INNERBLOCK\n"));
                   g_scopeStack.push(INNERBLOCK);
-               }             
+               } 
 
-               if (! text.trimmed().isEmpty())
-               {
+               text.truncate(text.length() - 1);            
+
+               if (! text.trimmed().isEmpty()) {
                   startFontClass("keyword");
                   codifyLines(text);
                   endFontClass();
 
-               } else // just whitespace
-               {
+               } else {
+                  // just whitespace               
                   codifyLines(text);
                }
+
                g_code->codify("{");
-               if (g_searchingForBody)
-               {
+
+               if (g_searchingForBody) {
                   g_searchingForBody = FALSE;
                   g_insideBody = TRUE;
                }
-               if (g_insideBody)
-               {
+
+               if (g_insideBody) {
                   g_bodyCurlyCount++;
                }
+
                g_curlyCount++;
                g_type.resize(0);
                g_name.resize(0);

@@ -4,13 +4,13 @@
 <context>
     <name>doxy-rtf</name>
     <message>
-        <location filename="../../src/translator_cs.h" line="1226"/>
+        <location filename="../../src/translator_cs.h" line="1225"/>
         <source>1252</source>
         <comment>trRTFansicp</comment>
         <translation>1252</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="1233"/>
+        <location filename="../../src/translator_cs.h" line="1232"/>
         <source>0</source>
         <comment>trRTFCharSet</comment>
         <translation>0</translation>
@@ -110,8 +110,8 @@
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="144"/>
-        <location filename="../../src/translator_cs.h" line="1319"/>
-        <location filename="../../src/translator_cs.h" line="1829"/>
+        <location filename="../../src/translator_cs.h" line="1317"/>
+        <location filename="../../src/translator_cs.h" line="1826"/>
         <source>Modules</source>
         <translation>Modules</translation>
     </message>
@@ -123,7 +123,7 @@
     <message>
         <location filename="../../src/translator_cs.h" line="155"/>
         <location filename="../../src/translator_cs.h" line="479"/>
-        <location filename="../../src/translator_cs.h" line="1158"/>
+        <location filename="../../src/translator_cs.h" line="1157"/>
         <source>Data Structures</source>
         <translation>Structures de données</translation>
     </message>
@@ -140,7 +140,7 @@
     <message>
         <location filename="../../src/translator_cs.h" line="169"/>
         <location filename="../../src/translator_cs.h" line="992"/>
-        <location filename="../../src/translator_cs.h" line="1647"/>
+        <location filename="../../src/translator_cs.h" line="1644"/>
         <source>Data Fields</source>
         <translation>Champs de données</translation>
     </message>
@@ -151,7 +151,7 @@
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="178"/>
-        <location filename="../../src/translator_cs.h" line="1389"/>
+        <location filename="../../src/translator_cs.h" line="1386"/>
         <source>Globals</source>
         <translation>Globals</translation>
     </message>
@@ -392,8 +392,8 @@
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="481"/>
-        <location filename="../../src/translator_cs.h" line="1160"/>
-        <location filename="../../src/translator_cs.h" line="1250"/>
+        <location filename="../../src/translator_cs.h" line="1159"/>
+        <location filename="../../src/translator_cs.h" line="1249"/>
         <source>Classes</source>
         <translation>Classes</translation>
     </message>
@@ -410,7 +410,7 @@
     <message>
         <location filename="../../src/translator_cs.h" line="499"/>
         <source>Inheritance diagram for %1:</source>
-        <translation>Graphe d'héritage pour %1:</translation>
+        <translation>Graphe d&apos;héritage pour %1:</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="504"/>
@@ -504,31 +504,31 @@
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="601"/>
-        <location filename="../../src/translator_cs.h" line="1741"/>
+        <location filename="../../src/translator_cs.h" line="1738"/>
         <source>%1 Union Template Reference</source>
         <translation>%1 Union Modèle de référence</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="603"/>
-        <location filename="../../src/translator_cs.h" line="1743"/>
+        <location filename="../../src/translator_cs.h" line="1740"/>
         <source>%1 Union Reference</source>
         <translation>%1 référence de l&apos;Union</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="609"/>
-        <location filename="../../src/translator_cs.h" line="1749"/>
+        <location filename="../../src/translator_cs.h" line="1746"/>
         <source>%1 Interface Template Reference</source>
         <translation>%1 Interface Modèle de référence</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="611"/>
-        <location filename="../../src/translator_cs.h" line="1751"/>
+        <location filename="../../src/translator_cs.h" line="1748"/>
         <source>%1 Interface Reference</source>
         <translation>%1 Référence de l&apos;interface</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="617"/>
-        <location filename="../../src/translator_cs.h" line="1757"/>
+        <location filename="../../src/translator_cs.h" line="1754"/>
         <source>%1 Protocol Template Reference</source>
         <translation>%1 Protocole modèle de référence</translation>
     </message>
@@ -539,37 +539,37 @@
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="625"/>
-        <location filename="../../src/translator_cs.h" line="1765"/>
+        <location filename="../../src/translator_cs.h" line="1762"/>
         <source>%1 Category Template Reference</source>
         <translation>%1 Catégorie Modèle de référence</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="627"/>
-        <location filename="../../src/translator_cs.h" line="1767"/>
+        <location filename="../../src/translator_cs.h" line="1764"/>
         <source>%1 Category Reference</source>
         <translation>%1 Catégorie de référence</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="633"/>
-        <location filename="../../src/translator_cs.h" line="1773"/>
+        <location filename="../../src/translator_cs.h" line="1770"/>
         <source>%1 Exception Template Reference</source>
         <translation>%1 Exception Modèle de référence</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="635"/>
-        <location filename="../../src/translator_cs.h" line="1775"/>
+        <location filename="../../src/translator_cs.h" line="1772"/>
         <source>%1 Exception Reference</source>
         <translation>Référence %1 d&apos;exception</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="641"/>
-        <location filename="../../src/translator_cs.h" line="1781"/>
+        <location filename="../../src/translator_cs.h" line="1778"/>
         <source>%1 Template Reference</source>
         <translation>%1 Modèle de référence</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="643"/>
-        <location filename="../../src/translator_cs.h" line="1783"/>
+        <location filename="../../src/translator_cs.h" line="1780"/>
         <source>%1 Reference</source>
         <translation>%1 Référence</translation>
     </message>
@@ -695,7 +695,7 @@
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="791"/>
-        <location filename="../../src/translator_cs.h" line="1296"/>
+        <location filename="../../src/translator_cs.h" line="1295"/>
         <source>Namespaces</source>
         <translation>Espaces de noms</translation>
     </message>
@@ -761,13 +761,13 @@
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="865"/>
-        <location filename="../../src/translator_cs.h" line="1905"/>
+        <location filename="../../src/translator_cs.h" line="1902"/>
         <source>The documentation for this exception was generated from the following file:</source>
         <translation>La documentation de cette exception a été générée à partir du fichier suivant:</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="868"/>
-        <location filename="../../src/translator_cs.h" line="1908"/>
+        <location filename="../../src/translator_cs.h" line="1905"/>
         <source>The documentation for this exception was generated from the following files:</source>
         <translation>La documentation de cette exception a été générée à partir des fichiers suivants:</translation>
     </message>
@@ -972,8 +972,730 @@
         <translation>Graph Legend</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="1068"/>
-        <source>This page explains how to interpret the graphs which are generated by DoxyPress.&lt;p&gt;
+        <location filename="../../src/translator_cs.h" line="1131"/>
+        <source>legend</source>
+        <translation>légende</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1136"/>
+        <source>Test</source>
+        <translation>Test</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1141"/>
+        <source>Test List</source>
+        <translation>Liste d&apos;essai</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1146"/>
+        <source>Properties</source>
+        <translation>Propriétés</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1151"/>
+        <source>Property Documentation</source>
+        <translation>Documentation de propriété</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1165"/>
+        <source>Package %1</source>
+        <translation>Forfait %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1170"/>
+        <source>Package List</source>
+        <translation>Liste des paquets</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1175"/>
+        <source>Here are the packages with brief descriptions (if available):</source>
+        <translation>Voici les paquets avec de courtes descriptions (si disponible):</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1181"/>
+        <source>Packages</source>
+        <translation>Forfaits</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1186"/>
+        <source>Value:</source>
+        <translation>Valeur:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1191"/>
+        <source>Bug</source>
+        <translation>Bogue</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1196"/>
+        <source>Bug List</source>
+        <translation>Liste des bogues</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1237"/>
+        <source>Index</source>
+        <translation>Index</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1247"/>
+        <source>Class</source>
+        <translation>Classe</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1255"/>
+        <source>class</source>
+        <translation>classe</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1257"/>
+        <source>classes</source>
+        <translation>Classes</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1270"/>
+        <source>File</source>
+        <translation>Fichier</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1272"/>
+        <source>Files</source>
+        <translation>fichiers</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1278"/>
+        <source>file</source>
+        <translation>Fichier</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1280"/>
+        <source>files</source>
+        <translation>fichiers</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1293"/>
+        <source>Namespace</source>
+        <translation>Espace de noms</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1301"/>
+        <source>namespace</source>
+        <translation>namespace</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1303"/>
+        <source>namespaces</source>
+        <translation>namespaces</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1315"/>
+        <location filename="../../src/translator_cs.h" line="1824"/>
+        <source>Module</source>
+        <translation>Module</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1323"/>
+        <location filename="../../src/translator_cs.h" line="1832"/>
+        <source>module</source>
+        <translation>module</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1325"/>
+        <location filename="../../src/translator_cs.h" line="1834"/>
+        <source>modules</source>
+        <translation>modules</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1337"/>
+        <source>Page</source>
+        <translation>Page</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1339"/>
+        <source>Pages</source>
+        <translation>Pages</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1345"/>
+        <source>page</source>
+        <translation>page</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1347"/>
+        <source>pages</source>
+        <translation>pages</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1361"/>
+        <source>Member</source>
+        <translation>Membre</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1363"/>
+        <source>Members</source>
+        <translation>Membres</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1369"/>
+        <source>member</source>
+        <translation>membre</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1371"/>
+        <source>members</source>
+        <translation>membres</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1384"/>
+        <source>Global</source>
+        <translation>Mondial</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1392"/>
+        <source>global</source>
+        <translation>mondial</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1394"/>
+        <source>globals</source>
+        <translation>globals</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1405"/>
+        <source>Author</source>
+        <translation>Auteur</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1407"/>
+        <location filename="../../src/translator_cs.h" line="1415"/>
+        <source>Authors</source>
+        <translation>Auteurs</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1413"/>
+        <source>author</source>
+        <translation>auteur</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1423"/>
+        <source>References</source>
+        <translation>Références</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1430"/>
+        <source>Implements %1.</source>
+        <translation>Met en œuvre %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1437"/>
+        <source>Implemented %1.</source>
+        <translation>Mise en œuvre %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1445"/>
+        <source>Table of Contents</source>
+        <translation>table des matières</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1452"/>
+        <source>Deprecated List</source>
+        <translation>Liste obsolète</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1459"/>
+        <source>Events</source>
+        <translation>Événements</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1464"/>
+        <source>Event Documentation</source>
+        <translation>Documentation de l&apos;événement</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1470"/>
+        <source>Package Types</source>
+        <translation>Types de l&apos;emballage</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1477"/>
+        <source>Package Functions</source>
+        <translation>Fonctions de l&apos;emballage</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1484"/>
+        <source>Static Package Functions</source>
+        <translation>Fonctions de l&apos;emballage statiques</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1491"/>
+        <source>Package Attributes</source>
+        <translation>Attributs de l&apos;emballage</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1498"/>
+        <source>Static Package Attributes</source>
+        <translation>Attributs de l&apos;emballage statiques</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1505"/>
+        <source>All</source>
+        <translation>Tous</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1510"/>
+        <source>Here is the call graph for this function:</source>
+        <translation>Voici le graphe d&apos;appel pour cette fonction:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1517"/>
+        <source>Search Results</source>
+        <translation>Résultats De La Recherche</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1530"/>
+        <source>Sorry, no documents matching your query.</source>
+        <translation>Désolé, aucun document correspondant à votre requête.</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1533"/>
+        <source>Found &lt;b&gt;1&lt;/b&gt; document matching your query.</source>
+        <translation>Trouvé &lt;b&gt;1&lt;/b&gt; Document correspondant à votre requête.</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1536"/>
+        <source>Found &lt;b&gt;$num&lt;/b&gt; documents matching your query. Showing best matches first.</source>
+        <translation>Trouvé &lt;b&gt;$num&lt;/b&gt; documents correspondant à votre requête. Affichage meilleurs matchs du premier.</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1544"/>
+        <source>Matches:</source>
+        <translation>Matches:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1550"/>
+        <source>%1 Source File</source>
+        <translation>Fichier %1 de Source</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1557"/>
+        <source>Directory Hierarchy</source>
+        <translation>Annuaire Hiérarchie</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1564"/>
+        <source>Directory Documentation</source>
+        <translation>Répertoire Documentation</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1571"/>
+        <location filename="../../src/translator_cs.h" line="1598"/>
+        <source>Directories</source>
+        <translation>Répertoires</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1578"/>
+        <source>This directory hierarchy is sorted roughly, but not completely, alphabetically:</source>
+        <translation>Cette hiérarchie de répertoire est triée en gros, mais pas complètement, par ordre alphabétique:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1586"/>
+        <source>%1 Directory Reference</source>
+        <translation>%1 Répertoire de référence</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1596"/>
+        <source>Directory</source>
+        <translation>Annuaire</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1604"/>
+        <source>directory</source>
+        <translation>annuaire</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1606"/>
+        <source>directories</source>
+        <translation>répertoires</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1615"/>
+        <source>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</source>
+        <translation>Ceci est une fonction membre surchargée, prévu pour plus de commodité. Elle diffère de la fonction ci-dessus seulement dans quel argument (s), il accepte.</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1622"/>
+        <source>Here is the caller graph for this function:</source>
+        <translation>Voici le graphe d&apos;appel pour cette fonction:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1629"/>
+        <source>Enumerator Documentation</source>
+        <translation>Recenseur Documentation</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1634"/>
+        <source>Member Function/Subroutine Documentation</source>
+        <translation>Fonction de membres / Documentation Subroutine</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1639"/>
+        <source>Data Types List</source>
+        <translation>Liste des types de données</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1649"/>
+        <source>Here are the data types with brief descriptions:</source>
+        <translation>Voici les types de données avec une brève description:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1657"/>
+        <source>Here is a list of all data types members with links to the data types they belong to:</source>
+        <translation>Voici une liste de tous les types de données membres avec des liens vers les types de données auxquels ils appartiennent:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1660"/>
+        <source>Here is a list of all documented data types members with links to the data structure documentation for each member:</source>
+        <translation>Voici une liste de tous les types de données documentées membres avec des liens vers la documentation de structure de données pour chaque membre:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1670"/>
+        <source>Data Type Index</source>
+        <translation>Type de données Index</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1677"/>
+        <source>Data Type Documentation</source>
+        <translation>Type de données Documentation</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1684"/>
+        <source>Functions/Subroutines</source>
+        <translation>Fonctions / sous-programmes</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1691"/>
+        <source>Function/Subroutine Documentation</source>
+        <translation>Fonction / Subroutine Documentation</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1698"/>
+        <source>Data Types</source>
+        <translation>Types de données</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1703"/>
+        <source>Modules List</source>
+        <translation>Liste des Modules</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1709"/>
+        <source>Here is a list of all modules with brief descriptions:</source>
+        <translation>Voici une liste de tous les modules avec une brève description:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1711"/>
+        <source>Here is a list of all documented modules with brief descriptions:</source>
+        <translation>Voici une liste de tous les modules documentées avec une brève description:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1722"/>
+        <source>%1 Module Template Reference</source>
+        <translation>%1 Module Modèle de référence</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1724"/>
+        <location filename="../../src/translator_cs.h" line="1789"/>
+        <source>%1 Module Reference</source>
+        <translation>%1 Module Référence</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1730"/>
+        <source>%1 Type Template Reference</source>
+        <translation>%1 type de modèle de référence</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1732"/>
+        <source>%1 Type Reference</source>
+        <translation>%1 Type Référence</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1756"/>
+        <source>%1  Protocol Reference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1794"/>
+        <source>Module Members</source>
+        <translation>Membres du module</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1800"/>
+        <source>Here is a list of all module members with links to the module documentation for each member:</source>
+        <translation>Voici une liste de tous les membres de module avec des liens vers la documentation du module pour chaque membre:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1803"/>
+        <source>Here is a list of all documented module members with links to the modules they belong to:</source>
+        <translation>Voici une liste de tous les membres de module documentées avec des liens vers les modules auxquels ils appartiennent:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1812"/>
+        <source>Modules Index</source>
+        <translation>Indice de modules</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1848"/>
+        <source>The documentation for this module was generated from the following file:</source>
+        <translation>La documentation de ce module a été générée à partir du fichier suivant:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1851"/>
+        <source>The documentation for this module was generated from the following files:</source>
+        <translation>La documentation de ce module a été générée à partir des fichiers suivants:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1857"/>
+        <source>The documentation for this type was generated from the following file:</source>
+        <translation>La documentation de ce type a été générée à partir du fichier suivant:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1860"/>
+        <source>The documentation for this type was generated from the following files:</source>
+        <translation>La documentation de ce type a été générée à partir des fichiers suivants:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1866"/>
+        <source>The documentation for this union was generated from the following file:</source>
+        <translation>La documentation de cette union a été générée à partir du fichier suivant:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1869"/>
+        <source>The documentation for this union was generated from the following files:</source>
+        <translation>La documentation de cette union a été générée à partir des fichiers suivants:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1875"/>
+        <source>The documentation for this interface was generated from the following file:</source>
+        <translation>La documentation de cette interface a été générée à partir du fichier suivant:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1878"/>
+        <source>The documentation for this interface was generated from the following files:</source>
+        <translation>La documentation de cette interface a été générée à partir des fichiers suivants:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1884"/>
+        <source>The documentation for this protocol was generated from the following file:</source>
+        <translation>La documentation de ce protocole a été générée à partir du fichier suivant:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1887"/>
+        <source>The documentation for this protocol was generated from the following files:</source>
+        <translation>La documentation de ce protocole a été générée à partir des fichiers suivants:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1893"/>
+        <source>The documentation for this category was generated from the following file:</source>
+        <translation>La documentation de cette catégorie a été générée à partir du fichier suivant:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1896"/>
+        <source>The documentation for this category was generated from the following files:</source>
+        <translation>La documentation de cette catégorie a été générée à partir des fichiers suivants:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1911"/>
+        <source>The documentation for this was generated from the following file:</source>
+        <translation>La documentation de cette a été générée à partir du fichier suivant:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1914"/>
+        <source>The documentation for this was generated from the following files:</source>
+        <translation>La documentation de cette a été générée à partir des fichiers suivants:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1930"/>
+        <source>Type</source>
+        <translation>Type</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1932"/>
+        <source>Types</source>
+        <translation>Types</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1938"/>
+        <source>type</source>
+        <translation>type</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1940"/>
+        <source>types</source>
+        <translation>types</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1953"/>
+        <source>Subprogram</source>
+        <translation>Sous-programme</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1955"/>
+        <source>Subprograms</source>
+        <translation>Sous-programmes</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1961"/>
+        <source>subprogram</source>
+        <translation>sous-programme</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1963"/>
+        <source>subprograms</source>
+        <translation>sous-programmes</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1970"/>
+        <source>Type Constraints</source>
+        <translation>Type de Contraintes</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1975"/>
+        <source>%1 Relation</source>
+        <translation>%1 Relation</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1980"/>
+        <source>Loading...</source>
+        <translation>Chargement ...</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1985"/>
+        <source>Global Namespace</source>
+        <translation>Espace de noms global</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1990"/>
+        <source>Searching...</source>
+        <translation>Recherche ...</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1995"/>
+        <source>No Matches</source>
+        <translation>Pas De Correspondance</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2003"/>
+        <source>File in %1</source>
+        <translation>Fichier %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2011"/>
+        <source>Includes file in %1</source>
+        <translation>Inclut le fichier %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2016"/>
+        <source>Bibliography</source>
+        <translation>Bibliographie</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2021"/>
+        <source>Copyright</source>
+        <translation>Droit d&apos;auteur</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2026"/>
+        <source>Directory dependency graph for %1:</source>
+        <translation>Annuaire Graphe des dépendances %1:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2031"/>
+        <source>detail level</source>
+        <translation>niveau de détail</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2036"/>
+        <source>Template Parameters</source>
+        <translation>Les paramètres de modèle</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2041"/>
+        <source>and %1 more...</source>
+        <translation>et %1 plus ...</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2047"/>
+        <source>The documentation for this enum was generated from the following file:</source>
+        <translation>La documentation de cette énumération a été générée à partir du fichier suivant:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2050"/>
+        <source>The documentation for this enum was generated  from the following files:</source>
+        <translation>La documentation de cette énumération a été générée à partir des fichiers suivants:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2057"/>
+        <source>%1 Enum Reference</source>
+        <translation>%1 Enum Référence</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2062"/>
+        <source>%1 inherited from %2</source>
+        <translation>%1 %2 hérité de</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2089"/>
+        <source>Provided by category @1.</source>
+        <translation>Fourni par catégorie @1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2097"/>
+        <source>Extends class @1</source>
+        <translation>Étend la classe @1</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2144"/>
+        <source>%1 Constant Group Reference</source>
+        <translation>%1 Constant Groupe de référence</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2149"/>
+        <source>%1 Service Reference</source>
+        <translation>%1 Service de référence</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2154"/>
+        <source>%1 Singleton Reference</source>
+        <translation>%1 Singleton Référence</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2160"/>
+        <source>The documentation for this service was generated from the following file:</source>
+        <translation>La documentation de ce service a été générée à partir du fichier suivant:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2164"/>
+        <source>The documentation for this service was generated from the following files:</source>
+        <translation>La documentation de ce service a été générée à partir des fichiers suivants:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2172"/>
+        <source>The documentation for this singleton was generated from the following file:</source>
+        <translation>La documentation de cette singleton a été générée à partir du fichier suivant:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2176"/>
+        <source>The documentation for this singleton was generated from the following files:</source>
+        <translation>La documentation de cette singleton a été générée à partir des fichiers suivants:</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2069"/>
+        <source>Additional Inherited Members</source>
+        <translation>Les membres hérités supplémentaires</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="1067"/>
+        <source>This page explains how to interpret the graphs which are generated by DoxyPress.
+
 Consider the following example:
 \code
 /*! Invisible class because of truncation */
@@ -1011,19 +1733,21 @@ class Inherited : public PublicBase,
     Used *m_usedClass;
 };
 \endcode
-This will result in the following graph:&lt;p&gt;&lt;center&gt;&lt;img alt=&quot;&quot; src=&quot;graph_legend.%1&quot;&gt;&lt;/center&gt;&lt;/p&gt;
-&lt;p&gt;
+This will result in the following graph:
+
+&lt;center&gt;&lt;img alt=&quot;&quot; src=&quot;graph_legend.%1&quot;&gt;&lt;/center&gt;
+
 The boxes in the above graph have the following meaning:
-&lt;/p&gt;
+
 &lt;ul&gt;
 &lt;li&gt;%A filled gray box represents the struct or class for which the graph is generated.&lt;/li&gt;
 &lt;li&gt;%A box with a black border denotes a documented struct or class.&lt;/li&gt;
 &lt;li&gt;%A box with a grey border denotes an undocumented struct or class.&lt;/li&gt;
-&lt;li&gt;%A box with a red border denotes a documented struct or class forwhich not all inheritance/containment relations are shown. %A graph is truncated if it does not fit within the specified boundaries.&lt;/li&gt;
+&lt;li&gt;%A box with a red border denotes a documented struct or class for which not all inheritance/containment relations are shown. %A graph is truncated if it does not fit within the specified boundaries.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;
+
 The arrows have the following meaning:
-&lt;/p&gt;
+
 &lt;ul&gt;
 &lt;li&gt;%A dark blue arrow is used to visualize a public inheritance relation between two classes.&lt;/li&gt;
 &lt;li&gt;%A dark green arrow is used for protected inheritance.&lt;/li&gt;
@@ -1031,772 +1755,112 @@ The arrows have the following meaning:
 &lt;li&gt;%A purple dashed arrow is used if a class is contained or used by another class. The arrow is labeled with the variable(s) through which the pointed class or struct is accessible.&lt;/li&gt;
 &lt;li&gt;%A yellow dashed arrow denotes a relation between a template instance and the template class it was instantiated from. The arrow is labeled with the template parameters of the instance.&lt;/li&gt;
 &lt;/ul&gt;
-        </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1132"/>
-        <source>legend</source>
-        <translation>légende</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1137"/>
-        <source>Test</source>
-        <translation>Test</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1142"/>
-        <source>Test List</source>
-        <translation>Liste d&apos;essai</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1147"/>
-        <source>Properties</source>
-        <translation>Propriétés</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1152"/>
-        <source>Property Documentation</source>
-        <translation>Documentation de propriété</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1166"/>
-        <source>Package %1</source>
-        <translation>Forfait %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1171"/>
-        <source>Package List</source>
-        <translation>Liste des paquets</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1176"/>
-        <source>Here are the packages with brief descriptions (if available):</source>
-        <translation>Voici les paquets avec de courtes descriptions (si disponible):</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1182"/>
-        <source>Packages</source>
-        <translation>Forfaits</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1187"/>
-        <source>Value:</source>
-        <translation>Valeur:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1192"/>
-        <source>Bug</source>
-        <translation>Bogue</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1197"/>
-        <source>Bug List</source>
-        <translation>Liste des bogues</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1238"/>
-        <source>Index</source>
-        <translation>Index</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1248"/>
-        <source>Class</source>
-        <translation>Classe</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1256"/>
-        <source>class</source>
-        <translation>classe</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1258"/>
-        <source>classes</source>
-        <translation>Classes</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1271"/>
-        <source>File</source>
-        <translation>Fichier</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1273"/>
-        <source>Files</source>
-        <translation>fichiers</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1279"/>
-        <source>file</source>
-        <translation>Fichier</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1281"/>
-        <source>files</source>
-        <translation>fichiers</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1294"/>
-        <source>Namespace</source>
-        <translation>Espace de noms</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1302"/>
-        <source>namespace</source>
-        <translation>namespace</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1304"/>
-        <source>namespaces</source>
-        <translation>namespaces</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1317"/>
-        <location filename="../../src/translator_cs.h" line="1827"/>
-        <source>Module</source>
-        <translation>Module</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1325"/>
-        <location filename="../../src/translator_cs.h" line="1835"/>
-        <source>module</source>
-        <translation>module</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1327"/>
-        <location filename="../../src/translator_cs.h" line="1837"/>
-        <source>modules</source>
-        <translation>modules</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1340"/>
-        <source>Page</source>
-        <translation>Page</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1342"/>
-        <source>Pages</source>
-        <translation>Pages</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1348"/>
-        <source>page</source>
-        <translation>page</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1350"/>
-        <source>pages</source>
-        <translation>pages</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1364"/>
-        <source>Member</source>
-        <translation>Membre</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1366"/>
-        <source>Members</source>
-        <translation>Membres</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1372"/>
-        <source>member</source>
-        <translation>membre</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1374"/>
-        <source>members</source>
-        <translation>membres</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1387"/>
-        <source>Global</source>
-        <translation>Mondial</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1395"/>
-        <source>global</source>
-        <translation>mondial</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1397"/>
-        <source>globals</source>
-        <translation>globals</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1408"/>
-        <source>Author</source>
-        <translation>Auteur</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1410"/>
-        <location filename="../../src/translator_cs.h" line="1418"/>
-        <source>Authors</source>
-        <translation>Auteurs</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1416"/>
-        <source>author</source>
-        <translation>auteur</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1426"/>
-        <source>References</source>
-        <translation>Références</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1433"/>
-        <source>Implements %1.</source>
-        <translation>Met en œuvre %1.</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1440"/>
-        <source>Implemented %1.</source>
-        <translation>Mise en œuvre %1.</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1448"/>
-        <source>Table of Contents</source>
-        <translation>table des matières</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1455"/>
-        <source>Deprecated List</source>
-        <translation>Liste obsolète</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1462"/>
-        <source>Events</source>
-        <translation>Événements</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1467"/>
-        <source>Event Documentation</source>
-        <translation>Documentation de l&apos;événement</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1473"/>
-        <source>Package Types</source>
-        <translation>Types de l&apos;emballage</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1480"/>
-        <source>Package Functions</source>
-        <translation>Fonctions de l&apos;emballage</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1487"/>
-        <source>Static Package Functions</source>
-        <translation>Fonctions de l&apos;emballage statiques</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1494"/>
-        <source>Package Attributes</source>
-        <translation>Attributs de l&apos;emballage</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1501"/>
-        <source>Static Package Attributes</source>
-        <translation>Attributs de l&apos;emballage statiques</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1508"/>
-        <source>All</source>
-        <translation>Tous</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1513"/>
-        <source>Here is the call graph for this function:</source>
-        <translation>Voici le graphe d&apos;appel pour cette fonction:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1520"/>
-        <source>Search Results</source>
-        <translation>Résultats De La Recherche</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1533"/>
-        <source>Sorry, no documents matching your query.</source>
-        <translation>Désolé, aucun document correspondant à votre requête.</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1536"/>
-        <source>Found &lt;b&gt;1&lt;/b&gt; document matching your query.</source>
-        <translation>Trouvé &lt;b&gt; &lt;/ b&gt; Document 1 correspondant à votre requête.</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1539"/>
-        <source>Found &lt;b&gt;$num&lt;/b&gt; documents matching your query. Showing best matches first.</source>
-        <translation>Trouvé &lt;b&gt; $ num &lt;/ b&gt; documents correspondant à votre requête. Affichage meilleurs matchs du premier.</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1547"/>
-        <source>Matches:</source>
-        <translation>Matches:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1553"/>
-        <source>%1 Source File</source>
-        <translation>Fichier %1 de Source</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1560"/>
-        <source>Directory Hierarchy</source>
-        <translation>Annuaire Hiérarchie</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1567"/>
-        <source>Directory Documentation</source>
-        <translation>Répertoire Documentation</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1574"/>
-        <location filename="../../src/translator_cs.h" line="1601"/>
-        <source>Directories</source>
-        <translation>Répertoires</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1581"/>
-        <source>This directory hierarchy is sorted roughly, but not completely, alphabetically:</source>
-        <translation>Cette hiérarchie de répertoire est triée en gros, mais pas complètement, par ordre alphabétique:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1589"/>
-        <source>%1 Directory Reference</source>
-        <translation>%1 Répertoire de référence</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1599"/>
-        <source>Directory</source>
-        <translation>Annuaire</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1607"/>
-        <source>directory</source>
-        <translation>annuaire</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1609"/>
-        <source>directories</source>
-        <translation>répertoires</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1618"/>
-        <source>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</source>
-        <translation>Ceci est une fonction membre surchargée, prévu pour plus de commodité. Elle diffère de la fonction ci-dessus seulement dans quel argument (s), il accepte.</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1625"/>
-        <source>Here is the caller graph for this function:</source>
-        <translation>Voici le graphe d&apos;appel pour cette fonction:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1632"/>
-        <source>Enumerator Documentation</source>
-        <translation>Recenseur Documentation</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1637"/>
-        <source>Member Function/Subroutine Documentation</source>
-        <translation>Fonction de membres / Documentation Subroutine</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1642"/>
-        <source>Data Types List</source>
-        <translation>Liste des types de données</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1652"/>
-        <source>Here are the data types with brief descriptions:</source>
-        <translation>Voici les types de données avec une brève description:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1660"/>
-        <source>Here is a list of all data types members with links to the data types they belong to:</source>
-        <translation>Voici une liste de tous les types de données membres avec des liens vers les types de données auxquels ils appartiennent:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1663"/>
-        <source>Here is a list of all documented data types members with links to the data structure documentation for each member:</source>
-        <translation>Voici une liste de tous les types de données documentées membres avec des liens vers la documentation de structure de données pour chaque membre:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1673"/>
-        <source>Data Type Index</source>
-        <translation>Type de données Index</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1680"/>
-        <source>Data Type Documentation</source>
-        <translation>Type de données Documentation</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1687"/>
-        <source>Functions/Subroutines</source>
-        <translation>Fonctions / sous-programmes</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1694"/>
-        <source>Function/Subroutine Documentation</source>
-        <translation>Fonction / Subroutine Documentation</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1701"/>
-        <source>Data Types</source>
-        <translation>Types de données</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1706"/>
-        <source>Modules List</source>
-        <translation>Liste des Modules</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1712"/>
-        <source>Here is a list of all modules with brief descriptions:</source>
-        <translation>Voici une liste de tous les modules avec une brève description:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1714"/>
-        <source>Here is a list of all documented modules with brief descriptions:</source>
-        <translation>Voici une liste de tous les modules documentées avec une brève description:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1725"/>
-        <source>%1 Module Template Reference</source>
-        <translation>%1 Module Modèle de référence</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1727"/>
-        <location filename="../../src/translator_cs.h" line="1792"/>
-        <source>%1 Module Reference</source>
-        <translation>%1 Module Référence</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1733"/>
-        <source>%1 Type Template Reference</source>
-        <translation>%1 type de modèle de référence</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1735"/>
-        <source>%1 Type Reference</source>
-        <translation>%1 Type Référence</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1759"/>
-        <source>%1 Protocol Reference</source>
-        <translation>%1 Protocole Référence</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1797"/>
-        <source>Module Members</source>
-        <translation>Membres du module</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1803"/>
-        <source>Here is a list of all module members with links to the module documentation for each member:</source>
-        <translation>Voici une liste de tous les membres de module avec des liens vers la documentation du module pour chaque membre:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1806"/>
-        <source>Here is a list of all documented module members with links to the modules they belong to:</source>
-        <translation>Voici une liste de tous les membres de module documentées avec des liens vers les modules auxquels ils appartiennent:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1815"/>
-        <source>Modules Index</source>
-        <translation>Indice de modules</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1851"/>
-        <source>The documentation for this module was generated from the following file:</source>
-        <translation>La documentation de ce module a été générée à partir du fichier suivant:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1854"/>
-        <source>The documentation for this module was generated from the following files:</source>
-        <translation>La documentation de ce module a été générée à partir des fichiers suivants:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1860"/>
-        <source>The documentation for this type was generated from the following file:</source>
-        <translation>La documentation de ce type a été générée à partir du fichier suivant:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1863"/>
-        <source>The documentation for this type was generated from the following files:</source>
-        <translation>La documentation de ce type a été générée à partir des fichiers suivants:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1869"/>
-        <source>The documentation for this union was generated from the following file:</source>
-        <translation>La documentation de cette union a été générée à partir du fichier suivant:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1872"/>
-        <source>The documentation for this union was generated from the following files:</source>
-        <translation>La documentation de cette union a été générée à partir des fichiers suivants:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1878"/>
-        <source>The documentation for this interface was generated from the following file:</source>
-        <translation>La documentation de cette interface a été générée à partir du fichier suivant:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1881"/>
-        <source>The documentation for this interface was generated from the following files:</source>
-        <translation>La documentation de cette interface a été générée à partir des fichiers suivants:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1887"/>
-        <source>The documentation for this protocol was generated from the following file:</source>
-        <translation>La documentation de ce protocole a été générée à partir du fichier suivant:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1890"/>
-        <source>The documentation for this protocol was generated from the following files:</source>
-        <translation>La documentation de ce protocole a été générée à partir des fichiers suivants:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1896"/>
-        <source>The documentation for this category was generated from the following file:</source>
-        <translation>La documentation de cette catégorie a été générée à partir du fichier suivant:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1899"/>
-        <source>The documentation for this category was generated from the following files:</source>
-        <translation>La documentation de cette catégorie a été générée à partir des fichiers suivants:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1914"/>
-        <source>The documentation for this was generated from the following file:</source>
-        <translation>La documentation de cette a été générée à partir du fichier suivant:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1917"/>
-        <source>The documentation for this was generated from the following files:</source>
-        <translation>La documentation de cette a été générée à partir des fichiers suivants:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1933"/>
-        <source>Type</source>
-        <translation>Type</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1935"/>
-        <source>Types</source>
-        <translation>Types</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1941"/>
-        <source>type</source>
-        <translation>type</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1943"/>
-        <source>types</source>
-        <translation>types</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1956"/>
-        <source>Subprogram</source>
-        <translation>Sous-programme</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1958"/>
-        <source>Subprograms</source>
-        <translation>Sous-programmes</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1964"/>
-        <source>subprogram</source>
-        <translation>sous-programme</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1966"/>
-        <source>subprograms</source>
-        <translation>sous-programmes</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1973"/>
-        <source>Type Constraints</source>
-        <translation>Type de Contraintes</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1978"/>
-        <source>%1 Relation</source>
-        <translation>%1 Relation</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1983"/>
-        <source>Loading...</source>
-        <translation>Chargement ...</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1988"/>
-        <source>Global Namespace</source>
-        <translation>Espace de noms global</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1993"/>
-        <source>Searching...</source>
-        <translation>Recherche ...</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="1998"/>
-        <source>No Matches</source>
-        <translation>Pas De Correspondance</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2006"/>
-        <source>File in %1</source>
-        <translation>Fichier %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2014"/>
-        <source>Includes file in %1</source>
-        <translation>Inclut le fichier %1</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2019"/>
-        <source>Bibliography</source>
-        <translation>Bibliographie</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2024"/>
-        <source>Copyright</source>
-        <translation>Droit d&apos;auteur</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2029"/>
-        <source>Directory dependency graph for %1:</source>
-        <translation>Annuaire Graphe des dépendances %1:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2034"/>
-        <source>detail level</source>
-        <translation>niveau de détail</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2039"/>
-        <source>Template Parameters</source>
-        <translation>Les paramètres de modèle</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2044"/>
-        <source>and %1 more...</source>
-        <translation>et %1 plus ...</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2050"/>
-        <source>The documentation for this enum was generated from the following file:</source>
-        <translation>La documentation de cette énumération a été générée à partir du fichier suivant:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2053"/>
-        <source>The documentation for this enum was generated  from the following files:</source>
-        <translation>La documentation de cette énumération a été générée à partir des fichiers suivants:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2060"/>
-        <source>%1 Enum Reference</source>
-        <translation>%1 Enum Référence</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2065"/>
-        <source>%1 inherited from %2</source>
-        <translation>%1 %2 hérité de</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2092"/>
-        <source>Provided by category @1.</source>
-        <translation>Fourni par catégorie @1.</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2100"/>
-        <source>Extends class @1</source>
-        <translation>Étend la classe @1</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2147"/>
-        <source>%1 Constant Group Reference</source>
-        <translation>%1 Constant Groupe de référence</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2152"/>
-        <source>%1 Service Reference</source>
-        <translation>%1 Service de référence</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2157"/>
-        <source>%1 Singleton Reference</source>
-        <translation>%1 Singleton Référence</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2163"/>
-        <source>The documentation for this service was generated from the following file:</source>
-        <translation>La documentation de ce service a été générée à partir du fichier suivant:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2167"/>
-        <source>The documentation for this service was generated from the following files:</source>
-        <translation>La documentation de ce service a été générée à partir des fichiers suivants:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2175"/>
-        <source>The documentation for this singleton was generated from the following file:</source>
-        <translation>La documentation de cette singleton a été générée à partir du fichier suivant:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2179"/>
-        <source>The documentation for this singleton was generated from the following files:</source>
-        <translation>La documentation de cette singleton a été générée à partir des fichiers suivants:</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2072"/>
-        <source>Additional Inherited Members</source>
-        <translation>Les membres hérités supplémentaires</translation>
-    </message>
-    <message>
-        <location filename="../../src/translator_cs.h" line="2081"/>
+</source>
+        <translation>Cette page explique comment interpréter les graphiques qui sont générés par DoxyPress.
+
+Prenons l'exemple suivant:
+\code
+/*! Invisible classe en raison de la troncature */
+class Invisible { };
+
+/*! Classe tronqué, relation d'héritage est caché */
+class Truncated : public Invisible { };
+
+/* Classe non documentée avec DoxyPress commente */
+class Undocumented { };
+
+/*! Classe qui est dérivée par héritage publique */
+class PublicBase : public Truncated { };
+
+/*! Un modèle de classe * /
+template&lt;class T&gt; class Templ { };
+
+/*! Classe qui est héritée en utilisant l'héritage protégé */
+class ProtectedBase { };
+
+/*! Classe qui est dérivée par héritage privé */
+class PrivateBase { };
+
+/*! Classe qui est utilisée par la classe Hérité */
+class Used { };
+
+/*! Super classe qui hérite d'un certain nombre d'autres classes */
+class Inherited : public PublicBase,
+                  protected ProtectedBase,
+                  private PrivateBase,
+                  public Undocumented,
+                  public Templ&lt;int&gt;
+{
+  private:
+    Used *m_usedClass;
+};
+\endcode
+Cela se traduira dans le graphique suivant:
+
+&lt;center&gt;&lt;img alt=&quot;&quot; src=&quot;graph_legend.%1&quot;&gt;&lt;/center&gt;
+
+Les boîtes dans le graphique ci-dessus ont la signification suivante:
+
+&lt;ul&gt;
+&lt;li&gt;%Une boîte remplie de gris représente la structure ou classe pour laquelle le graphique est générée. &lt;/li&gt;
+&lt;li&gt;%Une boîte avec une bordure noire désigne une structure ou une classe documentée. &lt;/li&gt;
+&lt;li&gt;%Une boîte avec une bordure grise désigne une catégorie struct ou sans papiers. &lt;/li&gt;
+&lt;li&gt;%Une boîte avec une bordure rouge désigne une structure ou une classe documentés pour lesquels ne sont pas tous des relations héritage / confinement sont présentés. %Un graphe est tronquée si elle ne rentre pas dans les limites spécifiées. &lt;/li&gt;
+&lt;/ul&gt;
+
+Les flèches ont la signification suivante:
+
+&lt;ul&gt;
+&lt;li&gt;%Une flèche bleue foncée est utilisée pour visualiser une relation d'héritage public entre deux classes. &lt;/li&gt;
+&lt;li&gt;%Une flèche de couleur vert foncé est utilisé pour héritage protégé. &lt;/li&gt;
+&lt;li&gt;%Une flèche rouge foncé est utilisé pour l'héritage privé. &lt;/li&gt;
+&lt;li&gt;%Une flèche violette en pointillés est utilisé si une classe est contenue ou utilisée par une autre classe. La flèche est étiqueté avec la variable (s) à travers laquelle la classe pointue ou struct est accessible. &lt;/li&gt;
+&lt;li&gt;%Une flèche en pointillé jaune dénote une relation entre une instance de modèle et de la classe de modèle, il a été instancié à partir. La flèche est marquée avec les paramètres du modèle de l'instance. &lt;/li&gt;
+&lt;/ul&gt;
+</translation>
+    </message>
+    <message>
+        <location filename="../../src/translator_cs.h" line="2078"/>
         <source>click to enable panel synchronization</source>
         <translation>cliquez pour activer la synchronisation du panneau</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="2083"/>
+        <location filename="../../src/translator_cs.h" line="2080"/>
         <source>click to disable panel synchronization</source>
         <translation>cliquez pour désactiver la synchronisation du panneau</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="2107"/>
+        <location filename="../../src/translator_cs.h" line="2104"/>
         <source>Class Methods</source>
         <translation>Méthodes de classe</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="2114"/>
+        <location filename="../../src/translator_cs.h" line="2111"/>
         <source>Instance Methods</source>
         <translation>Méthodes d&apos;instance</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="2120"/>
+        <location filename="../../src/translator_cs.h" line="2117"/>
         <source>Method Documentation</source>
         <translation>Méthode Documentation</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="2127"/>
+        <location filename="../../src/translator_cs.h" line="2124"/>
         <source>Design Overview</source>
         <translation>Aperçu de la conception</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="2132"/>
+        <location filename="../../src/translator_cs.h" line="2129"/>
         <source>Exported Interfaces</source>
         <translation>Interfaces exportés</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="2137"/>
+        <location filename="../../src/translator_cs.h" line="2134"/>
         <source>Included Services</source>
         <translation>Services inclus</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="2142"/>
+        <location filename="../../src/translator_cs.h" line="2139"/>
         <source>Constant Groups</source>
         <translation>Groupes constants</translation>
     </message>

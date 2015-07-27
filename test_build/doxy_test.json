@@ -126,17 +126,17 @@
     "full-path-names": false,
     "generate-bug-list": true,
     "generate-chi": false,
-    "generate-chm": false,
+    "generate-chm": true,
     "generate-deprecate-list": true,
     "generate-docbook": true,
-    "generate-docset": false,
+    "generate-docset": true,
     "generate-eclipse": true,
     "generate-html": true,
     "generate-latex": true,
     "generate-legend": true,
     "generate-man": true,
-    "generate-perl": false,
-    "generate-qthelp": false,
+    "generate-perl": true,
+    "generate-qthelp": true,
     "generate-rtf": true,
     "generate-tagfile": "",
     "generate-test-list": true,
@@ -351,5 +351,5 @@
     "warn-undoc-param": false,
     "warnings": true,
     "xml-output": "xml",
-    "xml-program-listing": true
+    "xml-program-listing": false
 }

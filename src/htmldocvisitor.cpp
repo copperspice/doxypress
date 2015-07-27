@@ -2024,7 +2024,21 @@ void HtmlDocVisitor::filter(const QString &str)
       return;
    }
 
-   for (auto c : str) {
+   QString result = str;
+
+   if (result.contains("$tr") )  {
+      // used in the doxypress test build to show sample translations
+
+      result = result.replace("$trPublicTypedefs",           theTranslator->trPublicTypedefs()); 
+      result = result.replace("$trProtectedTypedefs",        theTranslator->trProtectedTypedefs() );
+      result = result.replace("$trPrivateTypedefs",          theTranslator->trPrivateTypedefs());
+      result = result.replace("$trConstructorDocumentation", theTranslator->trConstructorDocumentation());
+      result = result.replace("$trModulesDescription",       theTranslator->trModulesDescription());
+      result = result.replace("$trDeprecatedList",           theTranslator->trDeprecatedList());
+      result = result.replace("$trLegendDocs",               theTranslator->trLegendDocs("png"));
+   }
+   
+   for (auto c : result) {
 
       switch (c.unicode()) {
          case '<':

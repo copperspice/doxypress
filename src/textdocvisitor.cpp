@@ -46,21 +46,27 @@ void TextDocVisitor::filter(const QString &str)
          case '\n':
             m_t << " ";
             break;
-         case '"':
-            m_t << "&quot;";
-            break;
+
          case '\'':
             m_t << "&#39;";
             break;
+
+         case '"':
+            m_t << "&quot;";
+            break;
+
          case '<':
             m_t << "&lt;";
             break;
+
          case '>':
             m_t << "&gt;";
             break;
+
          case '&':
             m_t << "&amp;";
             break;
+
          default:
             m_t << c;
       }

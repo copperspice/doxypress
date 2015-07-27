@@ -1470,7 +1470,6 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
          if (bcd->classDef->isLinkable()) {
             t << "refid=\"" << classOutputFileBase(bcd->classDef) << "\" ";
          }
-
          t << "prot=\"";
 
          switch (bcd->prot) {
@@ -1488,6 +1487,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
                break;
          }
          t << "\" virt=\"";
+
          switch (bcd->virt) {
             case Normal:
                t << "non-virtual";
@@ -1500,11 +1500,10 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
                break;
          }
          t << "\">";
-         if (!bcd->templSpecifiers.isEmpty()) {
+
+         if (! bcd->templSpecifiers.isEmpty()) {
             t << convertToXML(
-                 insertTemplateSpecifierInScope(
-                    bcd->classDef->name(), bcd->templSpecifiers)
-              );
+                 insertTemplateSpecifierInScope(bcd->classDef->name(), bcd->templSpecifiers));
          } else {
             t << convertToXML(bcd->classDef->displayName());
          }
@@ -1512,9 +1511,11 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
       }
    }
 
+
    if (cd->subClasses()) {
    
-      for (auto bcd : *cd->baseClasses()) {
+      for (auto bcd : *cd->subClasses()) {
+
          t << "    <derivedcompoundref refid=\""
            << classOutputFileBase(bcd->classDef)
            << "\" prot=\"";
@@ -1534,6 +1535,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
                break;
          }
          t << "\" virt=\"";
+
          switch (bcd->virt) {
             case Normal:
                t << "non-virtual";
@@ -1575,7 +1577,6 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
    }
 
    writeInnerClasses(cd->getClassSDict(), t);
-
    writeTemplateList(cd, t);
 
    if (cd->getMemberGroupSDict()) {     

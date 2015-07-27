@@ -126,7 +126,7 @@ static int              lastCopyArgContext;
 static QString          *copyArgString;
 static QString          fullArgString;
 static ArgumentList     *currentArgumentList;
-static char             lastCopyArgChar;
+static QChar            lastCopyArgChar;
 
 static QString          *pCopyQuotedString;
 static QString          *pCopyRoundString;
@@ -170,6 +170,19 @@ static QString          g_delimiter;
 static int              g_column;
 static int              g_fencedSize = 0;
 static bool             g_nestedComment = 0;
+
+// double declared
+static void yyunput (int c, char *buf_ptr);
+
+static void yyunput (QChar c, char *yy_bp )
+{
+   QString tmp1    = c;
+   QByteArray tmp2 = tmp1.toUtf8();
+
+   for (int i = tmp2.length() - 1; i >= 0;  i--) {
+      unput(tmp2[i]);
+   }
+}
 
 static void initParser()
 {
@@ -633,7 +646,7 @@ LOGICOP      "=="|"!="|">"|"<"|">="|"<="|"&&"|"||"|"!"
 BITOP        "&"|"|"|"^"|"<<"|">>"|"~"
 OPERATOR     "operator"{B}*({ARITHOP}|{ASSIGNOP}|{LOGICOP}|{BITOP})
 
-CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"CS_ENUM"|"CS_FLAG"|"CS_INVOKABLE_CONSTRUCTOR_1"|"CS_INVOKABLE_CONSTRUCTOR_2"|("CS_DECLARE"[_A-Z0-9]+)|("Q_DECLARE"[_A-Z0-9]+)|"Q_DISABLE_COPY"|"Q_ENUM"|"Q_ENUMS"|"Q_INTERFACES"|"K_DECLARE_PRIVATE"|"K_D"|"PHONON_HEIR")
+CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_INTERNAL"|"CS_CLASSINFO"|"CS_INTERFACES"|"CS_ENUM"|"CS_FLAG"|"CS_INVOKABLE_CONSTRUCTOR_1"|"CS_INVOKABLE_CONSTRUCTOR_2"|("CS_DECLARE"[_A-Z0-9]+)|("Q_DECLARE"[_A-Z0-9]+)|"Q_DISABLE_COPY"|"Q_ENUM"|"Q_ENUMS"|"Q_INTERFACES"|"K_DECLARE_PRIVATE"|"K_D"|"PHONON_HEIR")
 
 %option noyywrap
 
@@ -2738,18 +2751,18 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <CsPropReadMethod>{ID}               {
-                 // cs property read method
-                 QString text = QString::fromUtf8(yytext);
-                 current->m_read = text;
-                 BEGIN(CsPropClose);
+      // cs property read method
+      QString text = QString::fromUtf8(yytext);
+      current->m_read = text;
+      BEGIN(CsPropClose);
    }
 
 <FindMembers>"CS_PROPERTY_WRITE"        {
-                 current->protection = Public;
-                 current->mtype = MethodTypes::Property;
-                 current->m_specFlags.m_isWritable = true;
-                 current->type.resize(0);
-                 BEGIN(CsPropWriteVar);
+      current->protection = Public;
+      current->mtype = MethodTypes::Property;
+      current->m_specFlags.m_isWritable = true;
+      current->type.resize(0);
+      BEGIN(CsPropWriteVar);
    }
 
 <CsPropWriteVar>"("                  {
@@ -4104,12 +4117,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 
   /* generic round bracket list copy rules for growable strings */
 <GCopyRound>\"             {
-
-                 QString text = QString::fromUtf8(yytext);        //  BROOM start here
-                 *pCopyRoundGString += text[0];
-                 pCopyQuotedGString =  pCopyRoundGString;
-                 lastStringContext  =  YY_START;
-                 BEGIN(CopyGString);
+      QString text = QString::fromUtf8(yytext);       
+      *pCopyRoundGString += text[0];
+      pCopyQuotedGString =  pCopyRoundGString;
+      lastStringContext  =  YY_START;
+      BEGIN(CopyGString);
    }
 
 <GCopyRound>"("            {
@@ -4119,58 +4131,63 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <GCopyRound>")"            {
-                    *pCopyRoundGString+=*yytext;
-                 if (--roundCount<0)
-                   BEGIN(lastRoundContext);
+      QString text = QString::fromUtf8(yytext);  
+      *pCopyRoundGString += text[0];
+      if (--roundCount<0)
+         BEGIN(lastRoundContext);
    }
 
 <GCopyRound>\n             {
-                                          lineCount();
-                    *pCopyRoundGString+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+      lineCount();
+      *pCopyRoundGString += text[0];
    }
 
 <GCopyRound>\'             {
+      QString text = QString::fromUtf8(yytext);  
                     if (insidePHP)
                  {
-                   current->initializer+=yytext;
+                   current->initializer += text;
                                             pCopyQuotedGString = pCopyRoundGString;
                                             lastStringContext=YY_START;
                    BEGIN(CopyPHPGString);
                  }
                  else
                  {
-                   *pCopyRoundGString+=yytext;
+                   *pCopyRoundGString += text;
                  }
    }
 
 <GCopyRound>{CHARLIT}              {
-                                          if (insidePHP)
-                 {
-                   REJECT;
-                 }
-                 else
-                 {
-                                            *pCopyRoundGString+=yytext;
-                 }
+      QString text = QString::fromUtf8(yytext);  
+      if (insidePHP) {
+         REJECT;
+      } else {
+         *pCopyRoundGString += text;
+      }
    }
 
 <GCopyRound>[^"'()\n/]+          {
-                    *pCopyRoundGString+=yytext;
+      QString text = QString::fromUtf8(yytext);  
+                    *pCopyRoundGString += text;
                   }
 <GCopyRound>.           {
-                    *pCopyRoundGString+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+                    *pCopyRoundGString += text[0];
    }
 
   /* generic curly bracket list copy rules */
 <CopyCurly>\"           {
-                 *pCopyCurlyString+=*yytext;
-                    pCopyQuotedString=pCopyCurlyString;
-                 lastStringContext=YY_START;
-                 BEGIN(CopyString);
+      QString text = QString::fromUtf8(yytext);  
+      *pCopyCurlyString += text[0];
+      pCopyQuotedString = pCopyCurlyString;
+      lastStringContext = YY_START;
+      BEGIN(CopyString);
    }
 
 <CopyCurly>\'           {
-                 *pCopyCurlyString+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+                 *pCopyCurlyString += text[0];
                     if (insidePHP)
                  {
                    pCopyQuotedString=pCopyCurlyString;
@@ -4180,38 +4197,45 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <CopyCurly>"{"             {
-                    *pCopyCurlyString+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+                    *pCopyCurlyString += text[0];
                  curlyCount++;
    }
 
 <CopyCurly>"}"             {
-                 *pCopyCurlyString+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+                 *pCopyCurlyString += text[0];
                  if (--curlyCount<0)
                    BEGIN(lastCurlyContext);
    }
 
 <CopyCurly>{CHARLIT}                    { 
+      QString text = QString::fromUtf8(yytext);  
       if (insidePHP) {
          REJECT;
       } else {
-         *pCopyCurlyString+=yytext;
+         *pCopyCurlyString += text;
       }
    }
 
 <CopyCurly>[^"'{}\/\n]+          {
-                    *pCopyCurlyString+=yytext;
+      QString text = QString::fromUtf8(yytext);  
+                    *pCopyCurlyString += text;
    }
 
 <CopyCurly>"/"             { 
-      *pCopyCurlyString+=yytext; 
+      QString text = QString::fromUtf8(yytext);  
+      *pCopyCurlyString += yytext; 
    }
 <CopyCurly>\n           {
+      QString text = QString::fromUtf8(yytext);  
       lineCount();
-      *pCopyCurlyString+=*yytext;
+      *pCopyCurlyString += text[0];
    }
 
 <CopyCurly>.            {
-      *pCopyCurlyString+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+      *pCopyCurlyString += text[0];
    }
 
   /* generic curly bracket list copy rules for growable strings */
@@ -4221,26 +4245,28 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 
 <GCopyCurly>^"#"{B}+[0-9]+{B}+"\""[^\"\n]+"\""{B}+"2"{B}*\n? { 
       // end of included file marker
-                 QString line = QString(yytext);
-                 int s = line.indexOf(' ');
-                 int e = line.indexOf('"',s);
-                 yyLineNr = line.mid(s,e-s).toInt();
-                 if (yytext[yyleng-1]=='\n')
-                 {
-                                            lineCount();
-                                            g_column=0;
-                 }
+      QString text = QString::fromUtf8(yytext);  
+      int s = text.indexOf(' ');
+      int e = text.indexOf('"',s);
+      yyLineNr = text.mid(s, e-s).toInt();
+      
+      if (text[text.length() - 1] == '\n') {
+         lineCount();
+         g_column=0;
+      }
    }
 
 <GCopyCurly>\"             {
-                 *pCopyCurlyGString+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+                 *pCopyCurlyGString += text[0];
                     pCopyQuotedGString=pCopyCurlyGString;
                  lastStringContext=YY_START;
                  BEGIN(CopyGString);
    }
 
 <GCopyCurly>\'             {
-                 *pCopyCurlyGString+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+                 *pCopyCurlyGString += text[0];
                     if (insidePHP)
                  {
                    pCopyQuotedGString=pCopyCurlyGString;
@@ -4250,48 +4276,56 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <GCopyCurly>"{"            {
-                    *pCopyCurlyGString+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+                    *pCopyCurlyGString += text[0];
                  curlyCount++;
    }
 
 <GCopyCurly>"}"            {
-                 *pCopyCurlyGString+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+                 *pCopyCurlyGString += text[0];
                  if (--curlyCount<0)
                    BEGIN(lastCurlyContext);
    }
 
 <GCopyCurly>{CHARLIT}                    { 
+      QString text = QString::fromUtf8(yytext);  
       if (insidePHP) {
                    REJECT;
                  }
                  else
                  {
-                   *pCopyCurlyGString+=yytext;
+                   *pCopyCurlyGString += text;
                  }
    }
 
 <GCopyCurly>[^"'{}\/\n,]+     {
-                    *pCopyCurlyGString+=yytext;
+      QString text = QString::fromUtf8(yytext);  
+      *pCopyCurlyGString += text;
    }
 
 <GCopyCurly>[,]+             {
-                    *pCopyCurlyGString+=yytext;
+      QString text = QString::fromUtf8(yytext);  
+      *pCopyCurlyGString +=text;
    }
 
-<GCopyCurly>"/"            { 
-      *pCopyCurlyGString+=yytext; 
+<GCopyCurly>"/"            {
+      QString text = QString::fromUtf8(yytext);   
+      *pCopyCurlyGString += text; 
    }
 <GCopyCurly>\n             {
+      QString text = QString::fromUtf8(yytext);  
       lineCount();
-      *pCopyCurlyGString+=*yytext;
+      *pCopyCurlyGString += text[0];
    }
 
 <GCopyCurly>.           {
-      *pCopyCurlyGString+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+      *pCopyCurlyGString += text[0];
    }
 
 <FindMembers>":"        {
-                 if (current->type.isEmpty() && current->name=="enum")  {
+                 if (current->type.isEmpty() && current->name == "enum")  {
                    // see bug 69041, C++11 style anon enum: 'enum : unsigned int {...}'
 
                    current->section=Entry::ENUM_SEC;
@@ -4313,11 +4347,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <BitFields>.            {
-                    current->bitfields+=*yytext;
+   QString text = QString::fromUtf8(yytext);  
+   current->bitfields += text[0];
    }
 
 <EnumBaseType>.            {
-                    current->args+=*yytext;
+      QString text = QString::fromUtf8(yytext);  
+      current->args += text[0];
    }
 
 <EnumBaseType>\n        {
@@ -4326,6 +4362,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <FindMembers>[;,]       {
+      QString text = QString::fromUtf8(yytext);  
                  QString oldType = current->type;
                  if (current->bodyLine==-1)
                  {
@@ -4356,7 +4393,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                    current_root->addSubEntry( current, current_root);
                    needNewCurrent=true;
                  }
-                 if ( *yytext == ',')
+                 if ( text[0] == ',')
                  {
                    bool stat = current->stat;
                    if (needNewCurrent) {
@@ -4392,6 +4429,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <FindMembers>"["        {
+      QString text = QString::fromUtf8(yytext);  
                  if (! insideCSharp && (current->name.isEmpty() ||  current->name == "typedef"))  {
                     // IDL function property
                    squareCount=1;
@@ -4418,7 +4456,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                      BEGIN( SkipSquare );
 
                  } else {
-                   current->args += yytext ;
+                   current->args += text ;
                    squareCount=1;
                    BEGIN( Array ) ;
                  }
@@ -4513,16 +4551,18 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <IDLPropName>{BN}*{ID}{BN}*      {
-                 // return type (probably HRESULT) - skip it
+      // return type (probably HRESULT) - skip it
+      QString text = QString::fromUtf8(yytext);  
 
-                 if (odlProp) {
-                   // property type
-					    idlProp = yytext;
-					  }
+      if (odlProp) {
+         // property type
+			idlProp = text;
+	   }
    }
 
 <IDLPropName>{ID}{BN}*"("     {
-                 current->name = yytext;
+      QString text = QString::fromUtf8(yytext);  
+                 current->name = text;
                  current->name = current->name.left(current->name.length()-1).trimmed();
                  current->startLine   = yyLineNr;
                  current->startColumn = yyColNr;
@@ -4530,14 +4570,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <IDLPropName>{BN}*"("{BN}*{ID}{BN}*")"{BN}*	{
+      QString text = QString::fromUtf8(yytext);  
 					   if (odlProp) {
-					     idlProp += yytext;
+					     idlProp += text;
 					   }
    }
 
 <IDLPropName>{ID}{BN}*/";"		{
+      QString text = QString::fromUtf8(yytext);  
 					   if (odlProp) {
-					     current->name = yytext;
+					     current->name = text;
 					     idlProp = idlProp.trimmed();
 					     odlProp = false;
 
@@ -4547,17 +4589,20 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 
 <IDLProp>{BN}*"["[^\]]*"]"{BN}*     {  
       // attribute of a parameter
-                  idlAttr = yytext;
-                  idlAttr=idlAttr.trimmed();
+      QString text = QString::fromUtf8(yytext);  
+      idlAttr = text;
+      idlAttr=idlAttr.trimmed();
    }
 
 <IDLProp>{ID}                       {  
       // property type
-                  idlProp = yytext;
+      QString text = QString::fromUtf8(yytext);  
+      idlProp = text;
    }
 
 <IDLProp>{BN}*{ID}{BN}*","          {  
       // Rare: Another parameter ([propput] HRESULT Item(int index, [in] Type theRealProperty);)
+      QString text = QString::fromUtf8(yytext);  
                  if (current->args.isEmpty())
                    current->args = "(";
                  else
@@ -4566,7 +4611,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                  current->args += " ";
                  current->args += idlProp;   // prop was actually type of extra parameter
                  current->args += " ";
-                 current->args += yytext;
+                 current->args += text;
                  current->args = current->args.left(current->args.length() - 1);    // strip comma
                  idlProp.resize(0);
                  idlAttr.resize(0);
@@ -4596,28 +4641,44 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 
 <IDLProp>.           { 
       // spaces, *, or other stuff
-      //idlProp+=yytext;
+      // QString text = QString::fromUtf8(yytext);  
+      // idlProp += text;
    }
 
-<Array>"]"                     { current->args += *yytext ;
-                 if (--squareCount<=0)
-                                        BEGIN( FindMembers ) ;
+<Array>"]"                     { 
+      QString text = QString::fromUtf8(yytext);  
+      current->args += text[0];
+      if (--squareCount <= 0) {
+         BEGIN( FindMembers );
+      }
    }
 
-<FuncFuncArray>"]"              { current->args += *yytext ;
-                 if (--squareCount<=0)
-                                        BEGIN( Function ) ;
+<FuncFuncArray>"]"              { 
+      QString text = QString::fromUtf8(yytext);  
+      current->args += text[0];
+      if (--squareCount <= 0)
+         BEGIN( Function ) ;
    }
 
-<Array,FuncFuncArray>"["      { current->args += *yytext ;
-                 squareCount++;
+<Array,FuncFuncArray>"["      { 
+      QString text = QString::fromUtf8(yytext);  
+      current->args += text[0];
+      squareCount++;
    }
 
-<Array,FuncFuncArray>.        { current->args += *yytext ; }
-<SkipSquare>"["            { squareCount++; }
+<Array,FuncFuncArray>.        { 
+      QString text = QString::fromUtf8(yytext);  
+      current->args += text[0]; 
+   }
+
+<SkipSquare>"["            { 
+      squareCount++; 
+   }
+
 <SkipSquare>"]"            {
-                 if (--squareCount<=0)
-                 BEGIN( lastSquareContext );
+      if (--squareCount <=0 )  {
+         BEGIN( lastSquareContext );
+      }
    }
 
 <SkipSquare>\"             {
@@ -4626,49 +4687,59 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <SkipSquare>[^\n\[\]\"]+
-<FindMembers>"<"        { addType( current ) ;
-                 current->type += yytext ;
-                 BEGIN( Sharp ) ;
+<FindMembers>"<"        { 
+      QString text = QString::fromUtf8(yytext);  
+      addType( current );
+      current->type += text;
+      BEGIN( Sharp );
    }
 
 <Sharp>">"                           { 
-                 current->type += *yytext ;
-                 if (--sharpCount<=0)
-                                        BEGIN( FindMembers ) ;
+   QString text = QString::fromUtf8(yytext);  
+   current->type += text[0];
+   if (--sharpCount <=0 )
+      BEGIN( FindMembers ) ;
    }
 
-<Sharp>"<"           { current->type += *yytext ;
-                 sharpCount++;
+<Sharp>"<"           { 
+      QString text = QString::fromUtf8(yytext);  
+      current->type += text[0];
+      sharpCount++;
    }
 
 <Sharp>{BN}+                        {
-                    current->type += ' ';
-                    lineCount();
+      current->type += ' ';
+      lineCount();
    }
 
-<Sharp>.             { current->type += *yytext ; }
+<Sharp>.             { 
+      QString text = QString::fromUtf8(yytext);  
+      current->type += text[0]; 
+   }
 <FindFields>{ID}                    {
-                   if (insideCpp || insideObjC)  {
-                      current->id = ClangParser::instance()->lookup(yyLineNr,yytext);
-                   }
-                   current->bodyLine = yyLineNr;
-                   current->name     = yytext;
+      QString text = QString::fromUtf8(yytext);  
+      if (insideCpp || insideObjC)  {
+         current->id = ClangParser::instance()->lookup(yyLineNr, text);
+      }
+      current->bodyLine = yyLineNr;
+      current->name     = text;
    }
 
 <FindFields>"("            {
-                    // Java enum initializer
-                    unput('(');
-                    lastInitializerContext = YY_START;
-                 initBracketCount=0;
-                                          current->initializer = "=";
-                    BEGIN(ReadInitializer);
+      // Java enum initializer
+      unput('(');
+      lastInitializerContext = YY_START;
+      initBracketCount = 0;
+      current->initializer = "=";
+      BEGIN(ReadInitializer);
    }
 
 <FindFields>"="            {
-                    lastInitializerContext = YY_START;
-                 initBracketCount=0;
-                                          current->initializer = yytext;
-                    BEGIN(ReadInitializer);
+      QString text = QString::fromUtf8(yytext);  
+      lastInitializerContext = YY_START;
+      initBracketCount=0;
+      current->initializer = text;
+      BEGIN(ReadInitializer);
    }
 
 <FindFields>";"                         {
@@ -4754,110 +4825,117 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
   */
 
 <ReadBody,ReadNSBody,ReadBodyIntf>[^\r\n\#{}"@'/<]*   { 
-      current->program += yytext; 
+      QString text = QString::fromUtf8(yytext);  
+      current->program += text; 
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"//".*     { 
-      current->program += yytext; 
+      QString text = QString::fromUtf8(yytext);  
+      current->program += text; 
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"#".*   { 
-   if (! insidePHP)
-                   REJECT;
-                 // append PHP comment.
-                 current->program += yytext ;
+      QString text = QString::fromUtf8(yytext);  
+      if (! insidePHP) {
+         REJECT;
+      }
+      // append PHP comment.
+      current->program += text ;
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>@\"  { 
-      current->program += yytext ;
+      QString text = QString::fromUtf8(yytext);  
+      current->program += text ;
                                           pSkipVerbString = &current->program;
                                           lastSkipVerbStringContext=YY_START;
                                           BEGIN( SkipVerbString );
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"<<<"   { 
-   if (insidePHP) {
-                                            current->program += yytext ;
-                                            pCopyHereDocGString = &current->program;
-                                            lastHereDocContext=YY_START;
-                                            BEGIN( CopyHereDoc );
-                                          }
-                                          else
-                                          {
-                                            REJECT;
-                                          }
+      QString text = QString::fromUtf8(yytext);  
+      if (insidePHP) {
+
+         current->program += text ;
+         pCopyHereDocGString = &current->program;
+         lastHereDocContext=YY_START;
+         BEGIN( CopyHereDoc );
+
+      } else {
+         REJECT;
+      }
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>\"   { 
-   current->program += yytext ;
-                                          pCopyQuotedGString = &current->program;
-                                          lastStringContext=YY_START;
-                                          BEGIN( CopyGString );
+      QString text = QString::fromUtf8(yytext);  
+      current->program += text ;
+      pCopyQuotedGString = &current->program;
+      lastStringContext = YY_START;
+      BEGIN( CopyGString );
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"/*"{B}*      { 
       // */ (editor syntax fix)
-      current->program += yytext;
+      QString text = QString::fromUtf8(yytext);  
+      current->program += text;
       lastContext = YY_START;
       BEGIN( Comment );
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"/*"{BL}      { 
       // */ (editor syntax fix)
-      current->program += yytext ;
-      ++yyLineNr ;
-      lastContext = YY_START ;
-      BEGIN( Comment ) ;
+      QString text = QString::fromUtf8(yytext);  
+      current->program += text;
+      ++yyLineNr;
+      lastContext = YY_START;
+      BEGIN( Comment );
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"'"  {
-                    if (!insidePHP)
-                 {
-                   current->program += yytext;
-                 }
-                 else
-                 { // begin of single quoted string
-                   current->program += yytext;
-                                            pCopyQuotedGString = &current->program;
-                                            lastStringContext=YY_START;
-                   BEGIN(CopyPHPGString);
-                 }
+      QString text = QString::fromUtf8(yytext);  
+      if (! insidePHP) {
+         current->program += text;
+      } else { 
+         // begin of single quoted string
+         current->program   += text;
+         pCopyQuotedGString = &current->program;
+         lastStringContext  = YY_START;
+         BEGIN(CopyPHPGString);
+      }
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>{CHARLIT} {
-                                              if (insidePHP)
-                     {
-                  REJECT; // for PHP code single quotes
-                               // are used for strings of arbitrary length
-                     }
-                     else
-                     {
-                                                current->program += yytext;
-                     }
+      QString text = QString::fromUtf8(yytext);  
+      if (insidePHP) {
+         REJECT; // for PHP code single quotes
+         // are used for strings of arbitrary length
+      } else {
+         current->program += text;
+      }
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"{"   { 
-      current->program += yytext ;
-                 ++curlyCount ;
+      QString text = QString::fromUtf8(yytext);  
+      current->program += text;
+      ++curlyCount;
    }
 
 <ReadBodyIntf>"}"          {
-                 current->program += yytext ;
-                 --curlyCount ;
+      QString text = QString::fromUtf8(yytext);  
+      current->program += text;
+      --curlyCount ;
    }
 
 <ReadBody,ReadNSBody>"}"      { 
       // err("ReadBody count=%d\n",curlyCount);
-                    if ( curlyCount>0 )
-                 {
-                   current->program += yytext ;
-                   --curlyCount ;
-                 }
-                 else
-                 {
-                   current->endBodyLine = yyLineNr;
-                   QString &cn = current->name;
-                   QString rn = current_root->name;
+      QString text = QString::fromUtf8(yytext);  
+      if ( curlyCount>0 )  {
+         current->program += text ;
+         --curlyCount ;
+
+      } else {
+         current->endBodyLine = yyLineNr;
+         QString &cn = current->name;
+         QString rn = current_root->name;
 
                    if (!cn.isEmpty() && !rn.isEmpty())
                    {
@@ -4922,14 +5000,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 
 <ReadBody>"}"{BN}+"typedef"{BN}+    { 
       // err("ReadBody count=%d\n",curlyCount);
-                 lineCount();
-                    if ( curlyCount>0 )
-                 {
-                   current->program += yytext ;
-                   --curlyCount ;
-                 }
-                 else
-                 {
+      QString text = QString::fromUtf8(yytext);  
+      lineCount();
+      if ( curlyCount >0 ) {
+         current->program += text;
+         --curlyCount;
+
+      } else {
                    isTypedef = true;
                    current->endBodyLine = yyLineNr;
                    QString &cn = current->name;
@@ -4944,29 +5021,31 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 
 <TypedefName>("const"|"volatile"){BN}  { 
       // late "const" or "volatile" keyword
+      QString text = QString::fromUtf8(yytext);
       lineCount();
-      current->type.prepend(yytext);
+      current->type.prepend(text);
    }
 
 <TypedefName>{ID}          {
-                 if ((current->section == Entry::ENUM_SEC) || (current->m_specFlags.spec & Entry::Enum))
-                 {
-                   current->program += ","; // add field terminator
-                 }
-                         current->name=yytext;
-                 prependScope();
-                    current->args = current->args.simplified();
-                    current->type = current->type.simplified();
-                 //printf("Adding compound %s %s %s\n",current->type.data(),current->name.data(),current->args.data());
-                 current_root->addSubEntry( current , current_root);
-                 if (!firstTypedefEntry)
-                 {
-                   firstTypedefEntry = current;
-                 }
-                 current = QMakeShared<Entry>();
-                 initEntry();
-                 isTypedef=true; // to undo reset by initEntry()
-                    BEGIN(MemberSpecSkip);
+      QString text = QString::fromUtf8(yytext); 
+      if ((current->section == Entry::ENUM_SEC) || (current->m_specFlags.spec & Entry::Enum)) {
+         current->program += ","; // add field terminator
+      }
+      current->name = text;
+      prependScope();
+      current->args = current->args.simplified();
+      current->type = current->type.simplified();
+
+      current_root->addSubEntry(current , current_root);
+
+      if (!firstTypedefEntry) {
+         firstTypedefEntry = current;
+      }
+
+      current = QMakeShared<Entry>();
+      initEntry();
+      isTypedef = true;          // to undo reset by initEntry()
+      BEGIN(MemberSpecSkip);
    }
 
 <TypedefName>";"        { 
@@ -4990,38 +5069,42 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 
 <MemberSpec>([*&]*{BN}*)*{ID}{BN}*("["[^\]\n]*"]")* { 
       // the [] part could be improved.
-                    lineCount();
-                    int i=0,l=(int)yyleng,j;
-                 while (i<l && (!isId(yytext[i]))) i++;
-                 msName = QString(yytext).right(l-i).trimmed();
-                 j=msName.indexOf("[");
-                 if (j!=-1)
-                 {
-                   msArgs=msName.right(msName.length()-j);
-                   msName=msName.left(j);
-                 }
-                 msType=QString(yytext).left(i);
+      QString text = QString::fromUtf8(yytext); 
 
-                 // handle *pName in: typedef { ... } name, *pName;
-                 if (firstTypedefEntry)
-                 {
-                   if (firstTypedefEntry->m_specFlags.spec & Entry::Struct)
-                   {
-                     msType.prepend("struct "+firstTypedefEntry->name);
-                   }
-                   else if (firstTypedefEntry->m_specFlags.spec & Entry::Union)
-                   {
-                     msType.prepend("union "+firstTypedefEntry->name);
-                   }
-                   else if (firstTypedefEntry->section==Entry::ENUM_SEC)
-                   {
-                     msType.prepend("enum "+firstTypedefEntry->name);
-                   }
-                   else
-                   {
-                     msType.prepend(firstTypedefEntry->name);
-                   }
-                 }
+      lineCount();
+      int i = 0;
+      int l = yyleng;
+      int j;
+
+      while (i < l && (! isId(text[i])) ) {
+        i++;
+      } 
+
+      msName = text.right(l-i).trimmed();
+      j = msName.indexOf("[");
+      
+      if (j != -1) {
+         msArgs=msName.right(msName.length()-j);
+         msName=msName.left(j);
+      }
+      
+      msType = text.left(i);
+      
+      // handle *pName in: typedef { ... } name, *pName;
+      if (firstTypedefEntry) {
+         if (firstTypedefEntry->m_specFlags.spec & Entry::Struct) {
+         msType.prepend("struct "+firstTypedefEntry->name);
+
+         } else if (firstTypedefEntry->m_specFlags.spec & Entry::Union) {
+         msType.prepend("union "+firstTypedefEntry->name);
+
+         }  else if (firstTypedefEntry->section==Entry::ENUM_SEC) {
+            msType.prepend("enum "+firstTypedefEntry->name);
+
+         } else {
+            msType.prepend(firstTypedefEntry->name);
+         }
+      }
    }
 
 <MemberSpec>"("            { 
@@ -5035,8 +5118,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <MemberSpec>[,;]        {
-                    if (msName.isEmpty() && !current->name.isEmpty())
-                 {
+      QString text = QString::fromUtf8(yytext); 
+
+      if (msName.isEmpty() && ! current->name.isEmpty()) {
                    // see if the compound does not have a name or is inside another
                    // anonymous compound. If so we insert a
                    // special `anonymous' variable.
@@ -5045,16 +5129,14 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 
                    QSharedPointer<Entry> p = current;
 
-                   while (p)
-                   {
+                   while (p) {
                      // only look for class scopes, not namespace scopes
-                     if ((p->section & Entry::COMPOUND_MASK) && !p->name.isEmpty())
-                     {
-                  //printf("Trying scope `%s'\n",p->name.data());
-                  int i=p->name.lastIndexOf("::");
-                  int pi = (i==-1) ? 0 : i+2;
-                  if (p->name.at(pi)=='@')
-                  {
+                     if ((p->section & Entry::COMPOUND_MASK) && !p->name.isEmpty()) {
+                        //printf("Trying scope `%s'\n",p->name.data());
+                        int i=p->name.lastIndexOf("::");
+                        int pi = (i==-1) ? 0 : i+2;
+
+                        if (p->name.at(pi)=='@') {
                     // anonymous compound inside -> insert dummy variable name
                     //printf("Adding anonymous variable for scope %s\n",p->name.data());
 
@@ -5129,19 +5211,22 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                      current_root->addSubEntry(varEntry, current_root);
                    }
                  }
-                 if (*yytext==';') // end of a struct/class ...
-                 {
-                   if (!isTypedef && msName.isEmpty() && memspecEntry && (current->section&Entry::COMPOUND_MASK))
-                   { // case where a class/struct has a doc block after it
-                     if (!current->doc.isEmpty())
-                     {
+
+                 if (text[0] == ';')  {
+                    // end of a struct/class ...
+                 
+                   if (! isTypedef && msName.isEmpty() && memspecEntry && (current->section&Entry::COMPOUND_MASK)) { 
+                     // case where a class/struct has a doc block after it
+
+                     if (! current->doc.isEmpty()) {
                        memspecEntry->doc += current->doc;
                      }
-                     if (!current->brief.isEmpty())
-                     {
+
+                     if (!current->brief.isEmpty()) {
                        memspecEntry->brief += current->brief;
                      }
-                      }
+                   }
+
                    msType.resize(0);
                    msName.resize(0);
                    msArgs.resize(0);
@@ -5159,15 +5244,14 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                    current->doc.resize(0);
                    current->brief.resize(0);
                  }
-
     }
 
 <MemberSpec>"="            {
-                    lastInitializerContext=YY_START;
-                 initBracketCount=0;
-                                          current->initializer = yytext;
-                    BEGIN(ReadInitializer);
-                    /* BEGIN(MemberSpecSkip); */
+      QString text = QString::fromUtf8(yytext);
+      lastInitializerContext = YY_START;
+      initBracketCount = 0;
+      current->initializer = text;
+      BEGIN(ReadInitializer);      
    }
 
   /*
@@ -5189,7 +5273,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>{BN}{1,80} { 
-      current->program += yytext ;
+      QString text = QString::fromUtf8(yytext); 
+      current->program += text;
       lineCount() ;
    }
 
@@ -5198,50 +5283,47 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
       current_root->addSubEntry( current, current_root);
       current = QMakeShared<Entry>();
       initEntry();
-      insideObjC=false;
+      insideObjC = false;
       BEGIN( FindMembers );
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>.    { 
-      current->program += yytext ; 
+      QString text = QString::fromUtf8(yytext); 
+      current->program += text; 
    }
 
 <FindMembers>"("/{BN}*"::"*{BN}*({TSCOPE}{BN}*"::")*{TSCOPE}{BN}*")"{BN}*"(" | /* typedef void (A<int>::func_t)(args...) */
 <FindMembers>("("({BN}*"::"*{BN}*{TSCOPE}{BN}*"::")*({BN}*[*&\^]{BN}*)+)+ {   
       /* typedef void (A::*ptr_t)(args...) or int (*func(int))[], the ^ is for Obj-C blocks */
-      if (insidePHP) // reference parameter
-                 {
-                   REJECT
-                 }
-                 else
-                 {
-                   current->bodyLine = yyLineNr;
-                   lineCount();
-                   addType(current);
-                   funcPtrType=yytext;
-                   roundCount=0;
-                   //current->type += yytext;
-                   BEGIN( FuncPtr );
-                 }
+      QString text = QString::fromUtf8(yytext); 
+      if (insidePHP)  {
+         // reference parameter
+         REJECT
+
+      } else {
+         current->bodyLine = yyLineNr;
+         lineCount();
+         addType(current);
+         funcPtrType = text;
+         roundCount  = 0;      
+         BEGIN( FuncPtr );
+      }
    }
 
 <FuncPtr>{SCOPENAME}          {
-                    current->name = yytext;
-                 if (nameIsOperator(current->name))
-                 {
-                   BEGIN( FuncPtrOperator );
-                 }
-                 else
-                 {
-                   if (current->name=="const" || current->name=="volatile")
-                   {
-                     funcPtrType += current->name;
-                   }
-                   else
-                   {
-                     BEGIN( EndFuncPtr );
-                   }
-                 }
+      QString text = QString::fromUtf8(yytext);     
+      current->name = text;
+      if (nameIsOperator(current->name)) {
+         BEGIN( FuncPtrOperator );
+
+         } else {
+
+         if (current->name=="const" || current->name == "volatile") {
+            funcPtrType += current->name;
+         } else {
+            BEGIN( EndFuncPtr );
+         }
+      }
    }
 
 <FuncPtr>.           {
@@ -5249,54 +5331,55 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <FuncPtrOperator>"("{BN}*")"{BN}*/"("  {
-                 current->name += yytext;
-                 current->name = current->name.simplified();
-                 lineCount();
+      QString text = QString::fromUtf8(yytext);    
+      current->name += text;
+      current->name = current->name.simplified();
+      lineCount();
    }
 
 <FuncPtrOperator>\n        {
-                    lineCount();
-                    current->name += *yytext;
+      QString text = QString::fromUtf8(yytext);
+      lineCount();
+      current->name += text[0];
    }
 
 <FuncPtrOperator>"("          {
-                 unput(*yytext);
-                 BEGIN( EndFuncPtr );
+      unput(*yytext);
+      BEGIN( EndFuncPtr );
    }
 
 <FuncPtrOperator>.         {
-                    current->name += *yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->name += text[0];
    }
 
 <EndFuncPtr>")"{BN}*/";"      { 
       // a variable with extra braces
-                 lineCount();
-                 current->type += funcPtrType.mid(1);
-                 BEGIN(FindMembers);
-                  }
+      lineCount();
+      current->type += funcPtrType.mid(1);
+      BEGIN(FindMembers);
+   }
+
 <EndFuncPtr>")"{BN}*/"("      { 
       // a function pointer
-                 lineCount();
-                 current->type += funcPtrType + ")";
-                 BEGIN(FindMembers);
+      lineCount();
+      current->type += funcPtrType + ")";
+      BEGIN(FindMembers);
    }
 
 <EndFuncPtr>")"{BN}*/"["      { 
       // an array of variables
-                    lineCount();
-                 current->type += funcPtrType;
-                 current->args += ")";
-                 BEGIN(FindMembers);
+      lineCount();
+      current->type += funcPtrType;
+      current->args += ")";
+      BEGIN(FindMembers);
    }
 
 <EndFuncPtr>"("            { 
       // a function returning a function or
       // a function returning a pointer to an array
-
-      current->args += *yytext ;
-
-      //roundCount=0;
-      //BEGIN( FuncFunc );
+      QString text = QString::fromUtf8(yytext);
+      current->args += text[0];
 
       current->bodyLine = yyLineNr;
       currentArgumentContext = FuncFuncEnd;
@@ -5306,7 +5389,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <EndFuncPtr>"["[^\n\]]*"]"       {
-                    funcPtrType+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      funcPtrType += text;
    }
 
 <EndFuncPtr>")"            {
@@ -5314,24 +5398,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <FuncFunc>"("           {
-                    current->args += *yytext ;
-                    ++roundCount;
+      QString text = QString::fromUtf8(yytext);   
+      current->args += text[0];
+      ++roundCount;
    }
 
 <FuncFunc>")"           {
-                    current->args += *yytext ;
-                    if ( roundCount )
-                   --roundCount;
-                 else
-                 {
-                   BEGIN(FuncFuncEnd);
-                 }
+      QString text = QString::fromUtf8(yytext);
+      current->args += text[0];
+
+      if ( roundCount ) {
+         --roundCount;
+      } else {
+         BEGIN(FuncFuncEnd);
+      }
    }
 
 <FuncFuncEnd>")"{BN}*"("      {
-                    lineCount();
-                 current->type += funcPtrType + ")(";
-                 BEGIN(FuncFuncType);
+      lineCount();
+      current->type += funcPtrType + ")(";
+      BEGIN(FuncFuncType);
    }
 
 <FuncFuncEnd>")"{BN}*/[;{]       {
@@ -5348,16 +5434,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <FuncFuncEnd>.             {
-                    current->args += *yytext;
+      QString text = QString::fromUtf8(yytext);     
+      current->args += text[0];
    }
 
 <FuncFuncType>"("          {
-                    current->type += *yytext;
-                 roundCount++;
+      QString text = QString::fromUtf8(yytext);
+      current->type += text[0];
+      roundCount++;
    }
 
 <FuncFuncType>")"          {
-                    current->type += *yytext;
+      QString text = QString::fromUtf8(yytext);
+                    current->type += text[0];
                     if (roundCount)
                    --roundCount;
                  else
@@ -5375,11 +5464,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <FuncFuncType>.            {
-      current->type += *yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->type += text[0];
    }
 
 <FindMembers>"("/{BN}*{ID}{BN}*"*"{BN}*{ID}*")(" { 
       // for catching typedef void (__stdcall *f)() like definitions
+      QString text = QString::fromUtf8(yytext);
 
       if (current->type.left(7) == "typedef" && current->bodyLine == -1) {
          // the bodyLine check is to prevent this guard to be true more than once
@@ -5390,7 +5481,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
        } else if (!current->name.isEmpty())  {
          // normal function
          
-         current->args = yytext;
+         current->args = text;
          current->bodyLine = yyLineNr;
          currentArgumentContext = FuncQual;
          fullArgString=current->args;
@@ -5400,27 +5491,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <GetCallType>{BN}*{ID}{BN}*"*"      {
+      QString text = QString::fromUtf8(yytext);
       lineCount();
       addType(current);
       funcPtrType="(";
-      funcPtrType+=yytext;
+      funcPtrType += text;
       roundCount=0;
       BEGIN( FuncPtr );
    }
 
 <FindMembers>"("        {
-                 if (! current->name.isEmpty())
-                 {
-                   current->args = yytext;
+      QString text = QString::fromUtf8(yytext);
+      if (! current->name.isEmpty()) {
+                   current->args = text;
                    current->bodyLine = yyLineNr;
                    currentArgumentContext = FuncQual;
                    fullArgString=current->args;
                    copyArgString=&current->args;
-                   BEGIN( ReadFuncArgType ) ;
-                   //printf(">>> Read function arguments current->argListcount()=%d\n",current->argListcount());
+                   BEGIN( ReadFuncArgType );
                  }
    }
-
 
   /*
 <FindMembers>"("{BN}*("void"{BN}*)?")"    {     
@@ -5433,18 +5523,21 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
   /* Function argument reading rules */
 
 <ReadFuncArgType>[^ \/\r\t\n\)\(\"\'#]+ {       
-      *copyArgString += yytext;
-      fullArgString  += yytext;
+      QString text = QString::fromUtf8(yytext);
+      *copyArgString += text;
+      fullArgString  += text;
    }
 
 <CopyArgString,CopyArgPHPString>[^\n\\\"\']+       { 
-      *copyArgString += yytext;
-      fullArgString  += yytext;
+      QString text = QString::fromUtf8(yytext);
+      *copyArgString += text;
+      fullArgString  += text;
    }
 
 <CopyArgRound>[^\/\n\)\(\"\']+      {
-      *copyArgString += yytext;
-      fullArgString  += yytext;
+      QString text = QString::fromUtf8(yytext);
+      *copyArgString += text;
+      fullArgString  += text;
    }
 
 <ReadFuncArgType,ReadTempArgs>{BN}*    {
@@ -5454,34 +5547,38 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <ReadFuncArgType,CopyArgRound,CopyArgSharp,ReadTempArgs>{RAWBEGIN}   {
-                 g_delimiter = yytext+2;
-                 g_delimiter=g_delimiter.left(g_delimiter.length()-1);
+      QString text = QString::fromUtf8(yytext);
+                 g_delimiter = text.mid(2);
+                 g_delimiter=g_delimiter.left(g_delimiter.length() - 1);
                  lastRawStringContext = YY_START;
                  pCopyRawString = copyArgString;
-                 *pCopyRawString+=yytext;
-                 fullArgString+=yytext;
+                 *pCopyRawString += text;
+                 fullArgString   += text;
                  BEGIN(RawString);
    }
 
 <ReadFuncArgType,CopyArgRound,CopyArgSharp,ReadTempArgs>\"  {
-                    *copyArgString+=*yytext;
-                    fullArgString+=*yytext;
-                 lastCopyArgStringContext = YY_START;
-                    BEGIN(CopyArgString);
+      QString text = QString::fromUtf8(yytext);
+      *copyArgString += text[0];
+      fullArgString  += text[0];
+      lastCopyArgStringContext = YY_START;
+      BEGIN(CopyArgString);
    }
 
 <ReadFuncArgType,ReadTempArgs>"("   {
-                    *copyArgString+=*yytext;
-                    fullArgString+=*yytext;
-                    argRoundCount=0;
-                 lastCopyArgContext = YY_START;
-                 BEGIN(CopyArgRound);
+      QString text = QString::fromUtf8(yytext);
+      *copyArgString += text[0];
+      fullArgString  += text[0];
+      argRoundCount=0;
+      lastCopyArgContext = YY_START;
+      BEGIN(CopyArgRound);
    }
 
 <ReadFuncArgType>")"          {
-                    *copyArgString+=*yytext;
-                    fullArgString+=*yytext;
-                 stringToArgumentList(fullArgString, &current->argList);
+      QString text = QString::fromUtf8(yytext);
+      *copyArgString += text[0];
+      fullArgString  += text[0];
+      stringToArgumentList(fullArgString, &current->argList);
 
                  if (insideJS) {
                    fixArgumentListForJavaScript(&current->argList);
@@ -5493,38 +5590,38 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                  docBackup   = current->doc;
                  briefBackup = current->brief;
 
-                 // go back to the saved state
+                 // go back to the saved state5691
                  BEGIN(currentArgumentContext);
     }
 
    /* a special comment */
 <ReadFuncArgType,ReadTempArgs>("/*"[*!]|"//"[/!])("<"?)  {
       // */ (editor syntax fix)
+      QString text = QString::fromUtf8(yytext);
 
-      if (currentArgumentContext==DefineEnd) {
+      if (currentArgumentContext == DefineEnd) {
                  
-                   // for defines we interpret a comment
-                   // as documentation for the define
-                   int i;for (i=(int)yyleng-1;i>=0;i--)
-                   {
-                     unput(yytext[i]);
-                   }
-                   stringToArgumentList(fullArgString, &current->argList);
-                                            handleParametersCommentBlocks(&current->argList);
-                   BEGIN(currentArgumentContext);
-                 }
-                 else // not a define
-                 {
-                   // for functions we interpret a comment
-                   // as documentation for the argument
-                   fullArgString+=yytext;
-                   lastCopyArgChar=0;
-                   lastCommentInArgContext=YY_START;
-                   if (yytext[1]=='/')
-                     BEGIN(CopyArgCommentLine);
-                   else
-                     BEGIN(CopyArgComment);
-                 }
+         // for defines we interpret a comment as documentation for the define
+         for (int i = yyleng - 1; i >= 0; i--) {
+            unput(yytext[i]);
+         }
+      
+         stringToArgumentList(fullArgString, &current->argList); 
+         handleParametersCommentBlocks(&current->argList);
+         BEGIN(currentArgumentContext);
+
+      } else {
+          // not a define      
+         // for functions we interpret a comment as documentation for the argument
+         fullArgString  += text;
+         lastCopyArgChar = QChar(0);
+         lastCommentInArgContext = YY_START;
+
+         if (text[1] == '/')
+            BEGIN(CopyArgCommentLine);
+         else
+            BEGIN(CopyArgComment);
+      }
    }
 
    /* a non-special comment */
@@ -5543,10 +5640,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 
   /*
 <ReadFuncArgType,ReadTempArgs>"'#"  { 
+      QString text = QString::fromUtf8(yytext); 
       if (insidePHP)
          REJECT;
-      *copyArgString  += yytext;
-      fullArgString   += yytext;
+      *copyArgString  += text;
+      fullArgString   += text;
    }
 
 <ReadFuncArgType,ReadTempArgs>"#"   {
@@ -5560,31 +5658,32 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    /* `)' followed by a special comment */
 <ReadFuncArgType>")"{BN}*("/*"[*!]|"//"[/!])"<"    {
       // */ (editor syntax fix)
+      QString text = QString::fromUtf8(yytext);
       lineCount();
-       if (currentArgumentContext==DefineEnd) {
+
+       if (currentArgumentContext == DefineEnd) {
                  
-                   // for defines we interpret a comment
-                   // as documentation for the define
-                   int i;for (i=(int)yyleng-1;i>0;i--)
-                   {
+                   // for defines we interpret a comment as documentation for the define
+                   for (int i = yyleng -1; i > 0; i--) {
                      unput(yytext[i]);
                    }
-                   *copyArgString+=*yytext;
-                   fullArgString+=*yytext;
+
+                   *copyArgString += text[0];
+                   fullArgString  += text[0];
                    stringToArgumentList(fullArgString, &current->argList);
-                                            handleParametersCommentBlocks(&current->argList);
+                   handleParametersCommentBlocks(&current->argList);
                    BEGIN( currentArgumentContext );
-                 }
-                 else
-                 {
-                   // for functions we interpret a comment
-                   // as documentation for the last argument
-                   lastCopyArgChar=*yytext;
-                   QString text=&yytext[1];
-                   text=text.trimmed();
-                   lastCommentInArgContext=YY_START;
-                   fullArgString+=text;
-                   if (text.indexOf("//")!=-1)
+
+                 } else {
+                   // for functions we interpret a comment as documentation for the last argument
+                   lastCopyArgChar = text[0];
+
+                   QString tmp = text.mid(1).trimmed();        
+
+                   lastCommentInArgContext = YY_START;
+                   fullArgString += tmp;
+
+                   if (tmp.indexOf("//") != -1)
                      BEGIN( CopyArgCommentLine );
                    else
                      BEGIN( CopyArgComment );
@@ -5593,201 +5692,227 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 
 <CopyArgComment>^{B}*"*"+/{BN}+
 <CopyArgComment>[^\n\\\@\*]+     { 
-      fullArgString+=yytext; 
+      QString text = QString::fromUtf8(yytext); 
+      fullArgString += text; 
    }
 
 <CopyArgComment>"*/"          { 
-      fullArgString+=yytext;
-      if (lastCopyArgChar != 0)
-         unput(lastCopyArgChar);
+      QString text = QString::fromUtf8(yytext); 
+      fullArgString += text;
+
+      if (lastCopyArgChar.unicode() != 0) {
+         unput(lastCopyArgChar); 
+      }
       BEGIN( lastCommentInArgContext );
    }
 
 <CopyArgCommentLine>\n        { 
-      fullArgString+=yytext;
+      QString text = QString::fromUtf8(yytext); 
+      fullArgString += text;
       lineCount();
-                    if (lastCopyArgChar!=0)
-                   unput(lastCopyArgChar);
-                 BEGIN( lastCommentInArgContext );
+
+      if (lastCopyArgChar.unicode() != 0) {
+         unput(lastCopyArgChar);
+      }
+
+      BEGIN( lastCommentInArgContext );
    }
 
 <CopyArgCommentLine>{CMD}("verbatim"|"latexonly"|"htmlonly"|"xmlonly"|"manonly"|"dot"|"code")/[^a-z_A-Z0-9]    { 
       // verbatim command (which could contain nested comments!)
-      docBlockName=&yytext[1];
-      fullArgString+=yytext;
+      QString text = QString::fromUtf8(yytext);   
+      docBlockName = text.mid(1);
+      fullArgString += text;
       BEGIN(CopyArgVerbatim);
    }
 
-<CopyArgCommentLine>{CMD}("f$"|"f["|"f{")            {
-                      docBlockName=&yytext[1];
-                 if (docBlockName.at(1)=='[')
-                 {
-                        docBlockName[1] ='}';
-                 }
-                 if (docBlockName.at(1)=='{')
-                 {
-                        docBlockName[1] ='}';
-                 }
-                    fullArgString+=yytext;
-                    BEGIN(CopyArgVerbatim);
+<CopyArgCommentLine>{CMD}("f$"|"f["|"f{")       {
+      QString text = QString::fromUtf8(yytext);   
+      docBlockName = text.mid(1);
+
+      if (docBlockName.at(1) == '[') {
+        docBlockName[1] ='}';
+      } 
+      
+      if (docBlockName.at(1) == '{') {
+        docBlockName[1] ='}';
+      }
+      
+      fullArgString += text;
+      BEGIN(CopyArgVerbatim);
    }
 
 <CopyArgVerbatim>[\\@]("endverbatim"|"endlatexonly"|"endhtmlonly"|"endxmlonly"|"enddocbookonly"|"endmanonly"|"enddot"|"endcode"|"f$"|"f]"|"f}")/[^a-z_A-Z0-9] { 
       // end of verbatim block
-      fullArgString+=yytext;
+      QString text = QString::fromUtf8(yytext); 
+      fullArgString += text;
 
-      if (yytext[1] == 'f') // end of formula
-                      {
-                        BEGIN(CopyArgCommentLine);
-                      }
-                 if (&yytext[4]==docBlockName)
-                 {
-                      BEGIN(CopyArgCommentLine);
-                 }
+      if (text[1] == 'f') { // end of formula
+         BEGIN(CopyArgCommentLine);
+      }
+
+      if (text.mid(4) == docBlockName) {
+         BEGIN(CopyArgCommentLine);
+      }
    }
 
 <CopyArgCommentLine>[^\\\@\n]+      { 
-      fullArgString+=yytext; 
+      QString text = QString::fromUtf8(yytext); 
+      fullArgString += text; 
    }
 
 <CopyArgCommentLine>.         { 
-      fullArgString += *yytext; 
+      QString text = QString::fromUtf8(yytext); 
+      fullArgString += text[0]; 
    }
 <CopyArgComment,CopyArgVerbatim>\n  { 
-      fullArgString+=*yytext; 
+      QString text = QString::fromUtf8(yytext); 
+      fullArgString += text[0]; 
       lineCount(); 
    }
 
 <CopyArgComment,CopyArgVerbatim>.   { 
-      fullArgString+=*yytext; 
+      QString text = QString::fromUtf8(yytext); 
+      fullArgString += text[0]; 
    }
 
 
 <CopyArgComment>{CMD}("brief"|"short"){B}+ {
-      warn(yyFileName,yyLineNr, "Ignoring %c brief command inside argument documentation",*yytext);
-      fullArgString+=' ';
+      QString text = QString::fromUtf8(yytext); 
+      warn(yyFileName,yyLineNr, "Ignoring %c brief command inside argument documentation", qPrintable(text[0]) );
+      fullArgString += ' ';
    }
 
 <ReadTempArgs>"<"          {
-                 *copyArgString+=*yytext;
-                 fullArgString+=*yytext;
-                 argSharpCount=1;
+      QString text = QString::fromUtf8(yytext); 
+                 *copyArgString += text[0];
+                 fullArgString  += text[0];
+                 argSharpCount  =  1;
                  BEGIN( CopyArgSharp );
    }
 
 <ReadTempArgs>">"          {
-                 *copyArgString+=*yytext;
-                 fullArgString+=*yytext;
+      QString text = QString::fromUtf8(yytext); 
+                 *copyArgString += text[0];
+                 fullArgString  += text[0];
                  //printf("end template list %s\n",copyArgString->data());
                  stringToArgumentList(fullArgString,currentArgumentList);
                  BEGIN( currentArgumentContext );
    }
 
 <CopyArgRound>"("          {
-                    argRoundCount++;
-                 *copyArgString+=*yytext;
-                 fullArgString+=*yytext;
+      QString text = QString::fromUtf8(yytext); 
+                 argRoundCount++;
+                 *copyArgString += text[0];
+                 fullArgString  += text[0];
    }
 
 <CopyArgRound>")"          {
-                 *copyArgString+=*yytext;
-                 fullArgString+=*yytext;
-                 if (argRoundCount>0)
+      QString text = QString::fromUtf8(yytext); 
+                 *copyArgString += text[0];
+                 fullArgString  += text[0];
+                 if (argRoundCount > 0)
                    argRoundCount--;
                  else
                    BEGIN( lastCopyArgContext );
    }
 
 <CopyArgSharp>"("                       {
-                    *copyArgString+=*yytext;
-                    fullArgString+=*yytext;
-                    argRoundCount=0;
+      QString text = QString::fromUtf8(yytext); 
+                    *copyArgString += text[0];
+                    fullArgString  += text[0];
+                    argRoundCount  = 0;
                  lastCopyArgContext = YY_START;
                  BEGIN( CopyArgRound );
    }
 
 <CopyArgSharp>"<"          {
-                    argSharpCount++;
-                 //printf("argSharpCount++=%d  copy\n",argSharpCount);
-                 *copyArgString+=*yytext;
-                 fullArgString+=*yytext;
+      QString text = QString::fromUtf8(yytext); 
+      argSharpCount++;
+      *copyArgString += text[0];
+      fullArgString  += text[0];
    }
 
 <CopyArgSharp>">"          {
-                    *copyArgString+=*yytext;
-                    fullArgString+=*yytext;
+      QString text = QString::fromUtf8(yytext); 
+                 *copyArgString += text[0];
+                 fullArgString  += text[0];
                  argSharpCount--;
-                 if (argSharpCount>0)
-                 {
+
+                 if (argSharpCount>0) {
                    //printf("argSharpCount--=%d copy\n",argSharpCount);
-                 }
-                 else
-                 {
+                 } else {
                    BEGIN( ReadTempArgs );
                    //printf("end of argSharpCount\n");
                  }
    }
 
 <CopyArgString,CopyArgPHPString>\\.    {
-                    *copyArgString+=yytext;
-                    fullArgString+=yytext;
+      QString text = QString::fromUtf8(yytext); 
+      *copyArgString += text;
+      fullArgString  += text;
    }
 
 <CopyArgString>\"          {
-                    *copyArgString+=*yytext;
-                    fullArgString+=*yytext;
-                 BEGIN( lastCopyArgStringContext );
+      QString text = QString::fromUtf8(yytext); 
+      *copyArgString += text[0];
+      fullArgString  += text[0];
+      BEGIN( lastCopyArgStringContext );
    }
 
 <CopyArgPHPString>\'          {
-                    *copyArgString+=*yytext;
-                    fullArgString+=*yytext;
-                 BEGIN( lastCopyArgStringContext );
+      QString text = QString::fromUtf8(yytext); 
+      *copyArgString += text[0];
+      fullArgString  += text[0];
+      BEGIN( lastCopyArgStringContext );
    }
 
 <ReadFuncArgType,ReadTempArgs,CopyArgRound,CopyArgSharp>{CHARLIT}     {
-                 if (insidePHP)
-                 {
+      QString text = QString::fromUtf8(yytext); 
+                 if (insidePHP) {
                    REJECT;
-                 }
-                 else
-                 {
-                      *copyArgString+=yytext;
-                      fullArgString+=yytext;
+                 } else {
+                      *copyArgString += text;
+                      fullArgString  += text;
                  }
    }
 
 <ReadFuncArgType,ReadTempArgs,CopyArgRound,CopyArgSharp>\'     {
-                    *copyArgString+=yytext;
-                    fullArgString+=yytext;
-                 if (insidePHP)
-                 {
-                   lastCopyArgStringContext=YY_START;
+      QString text = QString::fromUtf8(yytext); 
+                 *copyArgString += text;
+                 fullArgString  += text;
+                 if (insidePHP) {
+                   lastCopyArgStringContext = YY_START;
                    BEGIN(CopyArgPHPString);
                  }
    }
 
 <ReadFuncArgType,ReadTempArgs,CopyArgString,CopyArgPHPString,CopyArgRound,CopyArgSharp>\n  {
+      QString text = QString::fromUtf8(yytext); 
                  lineCount();
-                 *copyArgString+=*yytext;
-                 fullArgString+=*yytext;
+                 *copyArgString += text[0];
+                 fullArgString  += text[0];
    }
 
 <ReadFuncArgType,ReadTempArgs,CopyArgString,CopyArgPHPString,CopyArgRound,CopyArgSharp>.    {
-                    *copyArgString+=*yytext;
-                    fullArgString+=*yytext;
+      QString text = QString::fromUtf8(yytext); 
+      *copyArgString += text[0];
+      fullArgString  += text[0];
    }
 
-
-<FuncRound>"("             { current->args += *yytext ;
-                 ++roundCount ;
+<FuncRound>"("             { 
+      QString text = QString::fromUtf8(yytext); 
+      current->args += text[0];
+      ++roundCount ;
    }
 
-<FuncRound>")"                          { current->args += *yytext ;
-                 if ( roundCount )
-                   --roundCount ;
-                      else
-                   BEGIN( FuncQual ) ;
+<FuncRound>")"                          { 
+      QString text = QString::fromUtf8(yytext); 
+      current->args += text[0];
+      if ( roundCount )
+         --roundCount ;
+      else
+         BEGIN( FuncQual ) ;
    }
 
   /*
@@ -5798,36 +5923,33 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
       lastCPPContext = YY_START;
       BEGIN(SkipCPP);
    }
-
   */
 
-<FuncQual>[{:;,]                        {
-                      if ( qstrcmp(yytext,";") == 0 && insidePHP &&  ! containsWord(current->type,"function") )
-                        {
-                          current->reset();
-                          initEntry();
-                          BEGIN( FindMembers );
-                        }
-                        else
-                        {
-                          unput(*yytext);
-                          BEGIN( Function );
-                        }
+<FuncQual>[{:;,]    {
+      QString text = QString::fromUtf8(yytext);
+      if (text == ";" && insidePHP &&  ! containsWord(current->type,"function") ) {  
+         current->reset();
+         initEntry();
+         BEGIN( FindMembers );
+      } else {
+         unput(*yytext);
+         BEGIN( Function );
+      }
    }
 
 <FuncQual>{BN}*"abstract"{BN}*          { 
       // pure virtual member function
-                                          lineCount() ;
-                                          current->virt = Pure;
-                                          current->args += " override ";
+      lineCount() ;
+      current->virt = Pure;
+      current->args += " override ";
    }
 
 <FuncQual,TrailingReturn>{BN}*"override"{BN}*          { 
       // C++11 overridden virtual member function
-                                          lineCount() ;
-                                          current->m_specFlags.spec |= Entry::Override;
-                                          current->args += " override ";
-                                          BEGIN(FuncQual);
+      lineCount() ;
+      current->m_specFlags.spec |= Entry::Override;
+      current->args += " override ";
+      BEGIN(FuncQual);
    }
 
 <FuncQual,TrailingReturn>{BN}*"final"{BN}*             { 
@@ -5918,256 +6040,272 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <TrailingReturn>[{;]                    {
-                                          unput(*yytext);
-                                          BEGIN(FuncQual);
+      unput(*yytext);
+      BEGIN(FuncQual);
    }
 
 <TrailingReturn>.                       {
-                                          current->argList.trailingReturnType+=yytext;
-                                          current->args+=yytext;
+      QString text = QString::fromUtf8(yytext); 
+      current->argList.trailingReturnType += text;
+      current->args += text;
    }
 
 <TrailingReturn>\n                      {
-                                          lineCount();
-                                          current->argList.trailingReturnType+=yytext;
-                                          current->args+=' ';
+      QString text = QString::fromUtf8(yytext); 
+      lineCount();
+      current->argList.trailingReturnType += text;
+      current->args+=' ';
    }
 
 <FuncRound,FuncFunc>{BN}*","{BN}*   {
-                    lineCount() ;
-                 current->args += ", " ;
+      lineCount() ;
+      current->args += ", " ;
    }
 
 <FuncQual,FuncRound,FuncFunc>{BN}+     {
-                    lineCount() ;
-                 current->args += ' ' ;
+      lineCount() ;
+      current->args += ' ' ;
    }
 
-<Function,FuncQual,FuncRound,FuncFunc>"#" { if (insidePHP)
-                      REJECT;
-                    lastCPPContext = YY_START;
-                    BEGIN(SkipCPP);
+<Function,FuncQual,FuncRound,FuncFunc>"#" { 
+      if (insidePHP)
+         REJECT;
+      lastCPPContext = YY_START;
+      BEGIN(SkipCPP);
    }
 
 <FuncQual>"="           {
-                                          if (insideCli &&
-                     (current_root->section&Entry::COMPOUND_MASK)
-                    )
-                 {
-                   BEGIN(CliOverride);
-                 }
-                 else
-                 {
-                                            // typically an initialized function pointer
-                      lastInitializerContext=YY_START;
-                   initBracketCount=0;
-                                            current->initializer = yytext;
-                      BEGIN(ReadInitializer);
-                 }
+      QString text = QString::fromUtf8(yytext);
+      if (insideCli && (current_root->section&Entry::COMPOUND_MASK)) {
+         BEGIN(CliOverride);
+
+      } else {
+         // typically an initialized function pointer
+         lastInitializerContext = YY_START;
+         initBracketCount = 0;
+         current->initializer = text;
+         BEGIN(ReadInitializer);
+      }
    }
 
 <CliOverride>{ID}          {
    }
 
 <CliOverride>"{"        {
-                    unput(*yytext);
-                 BEGIN(FuncQual);
+      unput(*yytext);
+      BEGIN(FuncQual);
    }
 
 <CliOverride>\n            {
-                                          lineCount();
+      lineCount();
    }
 
 <CliOverride>.             {
    }
 
 <FuncPtrInit>[{;]          {
-                    unput(*yytext);
-                 BEGIN(FuncQual);
+      unput(*yytext);
+      BEGIN(FuncQual);
    }
 
 <FuncPtrInit>\"            {
-                                          current->args += *yytext;
-                    pCopyQuotedString=&current->args;
-                 lastStringContext=FuncPtrInit;
-                 BEGIN(CopyString);
+      QString text = QString::fromUtf8(yytext);
+      current->args += text[0];
+      pCopyQuotedString = &current->args;
+      lastStringContext = FuncPtrInit;
+      BEGIN(CopyString);
    }
 
 <FuncPtrInit>\'            {
-                                          current->args += *yytext;
-                 if (insidePHP)
-                 {
-                   pCopyQuotedString=&current->args;
-                   lastStringContext=FuncPtrInit;
-                   BEGIN(CopyPHPString);
-                 }
+      QString text = QString::fromUtf8(yytext);
+      current->args += text[0];
+      if (insidePHP)  {
+         pCopyQuotedString = &current->args;
+         lastStringContext = FuncPtrInit;
+         BEGIN(CopyPHPString);
+      }
    }
 
 <FuncPtrInit>{CHARLIT}        {
-                                          if (insidePHP)
-                 {
-                   REJECT;
-                 }
-                 else
-                 {
-                                            current->args += yytext;
-                 }
+      if (insidePHP) {
+         REJECT;
+      } else {
+         current->args += yytext;
+      }
    }
 
 <FuncPtrInit>{ID}          {
-                                          current->args += yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->args += text;
    }
 
 <FuncPtrInit>.             {
-                                          current->args += *yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->args += text[0];
    }
 
 <FuncPtrInit>\n            {
-                                          current->args += *yytext;
-                                          lineCount();
+      QString text = QString::fromUtf8(yytext);
+      current->args += text[0];
+      lineCount();
    }
 
 <FuncQual>{ID}             { 
       // typically a K&R style C function
-                 if (insideCSharp && qstrcmp(yytext,"where")==0)
-                 {
-                   // type contraint for a method
+      QString text = QString::fromUtf8(yytext);
+      if (insideCSharp && text == "where") {
+         // type contraint for a method
+      
+         current->typeConstr = ArgumentList();
+         current->typeConstr.append(Argument());
+         lastCSConstraint = YY_START;
+         BEGIN( CSConstraintName );
 
-                   current->typeConstr = ArgumentList();
-                   current->typeConstr.append(Argument());
-                   lastCSConstraint = YY_START;
-                   BEGIN( CSConstraintName );
-                 }
-                 else if (checkForKnRstyleC())
-                 {
-                                            current->args = yytext;
-                   oldStyleArgType.resize(0);
-                   BEGIN(OldStyleArgs);
-                 }
-                 else
-                 {
-                   current->args += yytext;
-                 }
+      } else if (checkForKnRstyleC()) {
+         current->args = text;
+         oldStyleArgType.resize(0);
+         BEGIN(OldStyleArgs);
+
+      } else {
+         current->args += text;
+      }
    }
 
 <OldStyleArgs>[,;]         {
-                    QString oldStyleArgPtr;
-                    QString oldStyleArgName;
-                 splitKnRArg(oldStyleArgPtr,oldStyleArgName);
-                 QString doc,brief;
-                 if (current->doc!=docBackup)
-                 {
-                                            doc=current->doc;
-                   current->doc=docBackup;
-                 }
-                 if (current->brief!=briefBackup)
-                 {
-                                            brief=current->brief;
-                   current->brief=briefBackup;
-                 }
-                 addKnRArgInfo(oldStyleArgType+oldStyleArgPtr,
-                               oldStyleArgName,brief,doc);
-                 current->args.resize(0);
-                 if (*yytext==';') oldStyleArgType.resize(0);
+      QString text = QString::fromUtf8(yytext);
+      QString oldStyleArgPtr;
+      QString oldStyleArgName;
+      splitKnRArg(oldStyleArgPtr,oldStyleArgName);
+      
+      QString doc;
+      QString brief;
+      if (current->doc != docBackup) {
+         doc=current->doc;
+         current->doc=docBackup;
+      }
+
+      if (current->brief!=briefBackup) {
+         brief=current->brief;
+         current->brief=briefBackup;
+      }
+
+      addKnRArgInfo(oldStyleArgType+oldStyleArgPtr,
+      oldStyleArgName,brief,doc);
+      current->args.resize(0);
+      
+      if (text[0] == ';') {
+        oldStyleArgType.resize(0);
+      }
    }
 
 <OldStyleArgs>{ID}         { 
-      current->args += yytext; 
+      QString text = QString::fromUtf8(yytext);
+      current->args += text; 
    }
 
 <OldStyleArgs>"{"          {
-                    current->args = argListToString(&current->argList);
-                    unput('{');
-                 BEGIN(FuncQual);
+      current->args = argListToString(&current->argList);
+      unput('{');
+      BEGIN(FuncQual);
    }
 
 <OldStyleArgs>.            { 
-      current->args += *yytext; 
+      QString text = QString::fromUtf8(yytext);      
+      current->args += text[0]; 
    }
 
 <FuncQual,FuncRound,FuncFunc>.      { 
-      current->args += *yytext; 
+      QString text = QString::fromUtf8(yytext);
+      current->args += text[0]; 
    }
 
 <FuncQual>{BN}*"try:"         |
 <FuncQual>{BN}*"try"{BN}+     { 
       /* try-function-block */
-                 insideTryBlock=true;
-                 lineCount();
-                    if (yytext[yyleng-1]==':')
-                 {
-                   unput(':');
-                   BEGIN( Function );
-                 }
+      QString text = QString::fromUtf8(yytext);
+      insideTryBlock = true;
+      lineCount();
+      if (text[text.length() - 1] == ':') {
+         unput(':');
+         BEGIN( Function );
+      }
    }
 
 <FuncQual>{BN}*"throw"{BN}*"("      { 
       // C++ style throw clause
-                    current->exception = " throw (" ;
-                 roundCount=0;
-                 lineCount() ;
-                 BEGIN( ExcpRound ) ;
+      current->exception = " throw (";
+      roundCount = 0;
+      lineCount();
+      BEGIN( ExcpRound );
    }
 
 <FuncQual>{BN}*"raises"{BN}*"("         {
-                    current->exception = " raises (" ;
-                 lineCount() ;
-                 roundCount=0;
-                 BEGIN( ExcpRound ) ;
+      current->exception = " raises (" ;
+      lineCount() ;
+      roundCount=0;
+      BEGIN( ExcpRound ) ;
    }
 
 <FuncQual>{BN}*"throws"{BN}+     { 
       // Java style throw clause
-                    current->exception = " throws " ;
-                 lineCount() ;
-                 BEGIN( ExcpList );
+      current->exception = " throws " ;
+      lineCount() ;
+      BEGIN( ExcpList );
    }
 
 <ExcpRound>"("             { 
-      current->exception += *yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->exception += text[0];
       ++roundCount;
    }
 
 <ExcpRound>")"                          { 
-      current->exception += *yytext ;
+      QString text = QString::fromUtf8(yytext);
+      current->exception += text[0];
       if ( roundCount )
-                   --roundCount ;
-                      else
-                   BEGIN( FuncQual ) ;
+         --roundCount ;
+      else
+         BEGIN( FuncQual ) ;
    }
 
 <ExcpRound>.            {
-                    current->exception += *yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->exception += text[0];
    }
 
 <ExcpList>"{"           {
-                    unput('{'); BEGIN( FuncQual );
+      unput('{'); 
+      BEGIN( FuncQual );
    }
 
 <ExcpList>";"           {
-                    unput(';'); BEGIN( FuncQual );
-                  }
+      unput(';'); 
+      BEGIN( FuncQual );
+   }
+
 <ExcpList>"\n"             {
-                    current->exception += ' ';
-                                          lineCount();
+      current->exception += ' ';
+      lineCount();
    }
 
 <ExcpList>.             {
-                    current->exception += *yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->exception += text[0];
    }
 
 <Function>"("           { 
-      current->type += current->name ;
-                 current->name  = current->args ;
-                 current->args  = yytext ;
-                 roundCount=0;
-                 BEGIN( FuncRound ) ;
+      QString text = QString::fromUtf8(yytext);
+      current->type += current->name;
+      current->name  = current->args;
+      current->args  = text;
+      roundCount=0;
+      BEGIN( FuncRound ) ;
    }
 
 <Function>":"              {
-                 if (! insidePHP) {
-                    BEGIN(SkipInits);
-                 } 
+      if (! insidePHP) {
+         BEGIN(SkipInits);
+      } 
    }
 
 <Function>[;{,]            {
@@ -6175,6 +6313,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    current->name = current->name.simplified();
    current->type = current->type.simplified();
    current->args = removeRedundantWhiteSpace(current->args);
+
    // was: current->args.simplified();
 
                  current->fileName    = yyFileName;
@@ -6222,7 +6361,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                  
                    if (! current->type.isEmpty() && (re.indexIn(current->type, 0) !=-1 || current->type.left(8) == "typedef ")) {
                    
-                     if (isTypedef && current->type.left(8)!="typedef ") {
+                     if (isTypedef && current->type.left(8) != "typedef ") {
                         current->type.prepend("typedef ");
                      }
                      
@@ -6323,117 +6462,112 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <SkipCurly>"{"                            {
-                 //addToBody(yytext);
-                 ++curlyCount ;
+      ++curlyCount ;
    }
 
 <SkipCurly>"}"/{BN}*("/*!"|"/**"|"//!"|"///")"<!--" | /* see bug710917 */
 <SkipCurly>"}"             {
-                         //addToBody(yytext);
-                    if( curlyCount )
-                 {
-                   --curlyCount ;
-                 }
-                 else
-                 {
-                   if (current->sli && previous) // copy special list items
-                  {
-                     for (auto lii : *current->sli) {
-                        previous->addSpecialListItem(lii.type, lii.itemId);
-                     }
-                     delete current->sli;
-                     current->sli = 0;
-                  }
-                   if (previous) previous->endBodyLine=yyLineNr;
-                   BEGIN( lastCurlyContext ) ;
-                 }
+      if (curlyCount)  {
+         --curlyCount;
+
+      } else {
+
+         if (current->sli && previous) {
+            // copy special list items
+         
+            for (auto lii : *current->sli) {
+               previous->addSpecialListItem(lii.type, lii.itemId);
+            }
+
+            delete current->sli;
+            current->sli = 0;
+         }
+
+         if (previous) {
+            previous->endBodyLine = yyLineNr;
+         }
+         BEGIN( lastCurlyContext ) ;
+         }
    }
 
 <SkipCurly>"}"{BN}*("/*!"|"/**"|"//!"|"///")"<" {
       // */ (editor syntax fix)
-
+      QString text = QString::fromUtf8(yytext);
       lineCount();
+
       if ( curlyCount ) {
-         //addToBody(yytext);
          --curlyCount ;
+      } else {
+         current->endBodyLine = yyLineNr;
+         
+         tempEntry = current;          // temporarily switch to the previous entry
+         current = previous;
+         previous = QSharedPointer<Entry>();
+         
+         docBlockContext   = SkipCurlyEndDoc;
+         docBlockInBody    = false;
+
+         docBlockAutoBrief = ( text[text.length() - 2] == '*' && Config::getBool("javadoc-auto-brief") ) || 
+               ( text[text.length() - 2] == '!' && Config::getBool("qt-auto-brief") );
+
+         docBlock.resize(0);
+         docBlockTerm = '}';
+
+         if (text[text.length() - 3] == '/') {
+            startCommentBlock(true);
+            BEGIN( DocLine );
+         } else {
+            startCommentBlock(false);
+            BEGIN( DocBlock );
+         }
       }
-                 else
-                 {
-                   current->endBodyLine=yyLineNr;
-
-                   tempEntry = current; // temporarily switch to the previous entry
-                   current = previous;
-                   previous = QSharedPointer<Entry>();
-
-                   docBlockContext   = SkipCurlyEndDoc;
-                   docBlockInBody    = false;
-                   docBlockAutoBrief = ( yytext[yyleng-2]=='*' && Config::getBool("javadoc-auto-brief") ) ||
-                                       ( yytext[yyleng-2]=='!' && Config::getBool("qt-auto-brief") );
-                   docBlock.resize(0);
-                   docBlockTerm = '}';
-                   if (yytext[yyleng-3]=='/')
-                   {
-                     startCommentBlock(true);
-                     BEGIN( DocLine );
-                   }
-                   else
-                   {
-                     startCommentBlock(false);
-                     BEGIN( DocBlock );
-                   }
-                 }
    }
 
 <SkipCurlyEndDoc>"}"{BN}*("/*!"|"/**"|"//!"|"///")"<" { 
 
       // */ (editor syntax fix)
       // desc is followed by another one
-
+      QString text = QString::fromUtf8(yytext); 
                  docBlockContext   = SkipCurlyEndDoc;
                  docBlockInBody    = false;
-                 docBlockAutoBrief = ( yytext[yyleng-2]=='*' && Config::getBool("javadoc-auto-brief") ) ||
-                                     ( yytext[yyleng-2]=='!' && Config::getBool("qt-auto-brief") );
+                 docBlockAutoBrief = ( text[text.length() - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
+                                     ( text[text.length() - 2] == '!' && Config::getBool("qt-auto-brief") );
                  docBlock.resize(0);
                  docBlockTerm = '}';
-                 if (yytext[yyleng-3]=='/')
-                 {
+                 if (text[text.length() - 3] == '/') {
                    startCommentBlock(true);
-                   BEGIN( DocLine );
-                 }
-                 else
-                 {
+                   BEGIN( DocLine ); 
+                 } else {
                    startCommentBlock(false);
                    BEGIN( DocBlock );
                  }
     }
 
 <SkipCurlyEndDoc>"}"          {
-                         //addToBody("}");
-                                          if (tempEntry) // we can only switch back to current if no new item was created
+      // addToBody("}");
+      if (tempEntry) // we can only switch back to current if no new item was created
                  {
-                   current = tempEntry;
+                    current = tempEntry;
                     tempEntry = QSharedPointer<Entry>();
                  }
                     BEGIN( lastCurlyContext );
    }
 
 <SkipCurly>\"                {
-                         //addToBody(yytext);
-                    lastStringContext=SkipCurly;
-                         BEGIN( SkipString );
+      lastStringContext=SkipCurly;
+      BEGIN( SkipString );
    }
 
 <SkipCurly>^{B}*"#"                           {
                     if (insidePHP) {
                            REJECT;
                     } 
-                    //addToBody(yytext);
+
                     BEGIN( SkipCurlyCpp );
    }
 
 <SkipCurly,SkipC11Inits,SkipInits>\n          {
-                    lineCount();
-                    //addToBody(yytext);
+      lineCount();
    }
 
 <SkipCurly,SkipCurlyCpp>"<<<"                 {
@@ -6443,61 +6577,58 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                  }
                  else
                  {
-                                            lastHereDocContext = YY_START;
+                   lastHereDocContext = YY_START;
                    BEGIN(HereDoc);
                  }
    }
 
 <SkipCurly,SkipCurlyCpp>[^\n#"'@\\/{}<]+ {
-                                          lineCount();  // for g_column updates
-                         //addToBody(yytext);
-                  }
+      lineCount();  // for g_column updates      
+   }
+
 <SkipCurlyCpp>\n        {
-                         //addToBody(yytext);
-                                          lineCount();
-                    lastCurlyContext = FindMembers;
-                    BEGIN( SkipCurly );
+      lineCount();
+      lastCurlyContext = FindMembers;
+      BEGIN( SkipCurly );
    }
 
 <SkipCurlyCpp>\\[\r]*"\n"[\r]*      {
-                    //addToBody(yytext);
-                                          lineCount();
+      lineCount();
    }
 
 <SkipInits,SkipC11Inits,SkipCurly,SkipCurlyCpp>"/*"    {
-                    //addToBody(yytext);
-                    lastCContext = YY_START;
-                    BEGIN(SkipComment);
+      // */ (editor syntax fix) 
+      lastCContext = YY_START;
+      BEGIN(SkipComment);
    }
 
 <SkipInits,SkipC11Inits,SkipCurly,SkipCurlyCpp>"//"  {
-                    //addToBody(yytext);
-                    lastCContext = YY_START;
-                    BEGIN(SkipCxxComment);
+      lastCContext = YY_START;
+      BEGIN(SkipCxxComment);
    }
 
 <SkipInits,SkipC11Inits>"("                          {
-                   roundCount=0;
-                   lastSkipRoundContext=YY_START;
-                   BEGIN(SkipRound);
+      roundCount=0;
+      lastSkipRoundContext=YY_START;
+      BEGIN(SkipRound);
     }
 
 <SkipInits,SkipC11Inits>\"           {
-                    lastStringContext=YY_START;
-                    BEGIN( SkipString );
-               }
-<SkipInits>;                          {
-                 warn(yyFileName, yyLineNr, "Found a ';' while parsing an initializer list. "
-                   "Some macros which are used without semicolons may not be parsed accurately.\n");
+      lastStringContext=YY_START;
+      BEGIN( SkipString );
+   }
 
-                 BEGIN( FindMembers );
+<SkipInits>;                          {
+      warn(yyFileName, yyLineNr, "Found a ';' while parsing an initializer list. "
+            "Some macros which are used without semicolons may not be parsed accurately.\n");
+
+      BEGIN( FindMembers );
    }
 
 <SkipInits,SkipCurly,SkipCurlyCpp>"#"   {
                  if (!insidePHP) {
                     REJECT;
                  }    
-                 //addToBody(yytext);
                  lastCContext = YY_START;
                  BEGIN(SkipCxxComment);
    }
@@ -6589,11 +6720,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
     }
 
 <CompoundName>{SCOPENAME}{BN}*/"<"  {
-                    sharpCount = 0;
-                    current->name = yytext ;
+      QString text = QString::fromUtf8(yytext); 
+      sharpCount = 0;
+      current->name = text;
                  if (current->m_specFlags.spec & Entry::Protocol)
                  {
-                   current->name+="-p";
+                   current->name += "-p";
                  }
                  lineCount();
                  lastClassTemplSpecContext = ClassVar;
@@ -6644,9 +6776,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <ClassTemplSpec>">"({BN}*"::"{BN}*{SCOPENAME})?    {
-                 current->name += yytext;
-                 lineCount();
-                    if (--sharpCount<=0)
+      QString text = QString::fromUtf8(yytext); 
+      current->name += text;
+      lineCount();
+      if (--sharpCount<=0)
                  {
                    current->name = removeRedundantWhiteSpace(current->name);
                    if (current->m_specFlags.spec & Entry::Protocol)
@@ -6662,34 +6795,36 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <ClassTemplSpec>"<"        {
-                    current->name += yytext;
-                    sharpCount++;
+      QString text = QString::fromUtf8(yytext); 
+      current->name += text;
+      sharpCount++;
    }
 
 <ClassTemplSpec>.          {
-                    current->name += yytext;
+      QString text = QString::fromUtf8(yytext); 
+      current->name += text;
    }
 
 <CompoundName>{SCOPENAME}{BN}*";"   { 
       // forward declaration
-                                          if (current->tArgLists && current->tArgLists->count()>0)
-                                          {
-                                            // found a forward template declaration, this has
-                                            // a purpose of its own
-                                            current->name = yytext;
-                                            current->name=current->name.left(current->name.length()-1).trimmed();
-                                            //printf("template class declaration for %s!\n",current->name.data());
-                   QString rn = current_root->name;
-                   //printf("cn=`%s' rn=`%s' isTypedef=%d\n",cn.data(),rn.data(),isTypedef);
-                   if (!current->name.isEmpty() && !rn.isEmpty())
-                   {
-                     prependScope();
-                   }
-                                            current->m_specFlags.spec |= Entry::ForwardDecl;
-                                            current_root->addSubEntry(current, current_root);
-                                             current = QMakeShared<Entry>();
-                                          }
-                 else if (insideIDL &&
+      QString text = QString::fromUtf8(yytext); 
+      if (current->tArgLists && current->tArgLists->count() > 0) {
+          // found a forward template declaration, this has
+          // a purpose of its own
+          current->name = text;
+          current->name=current->name.left(current->name.length()-1).trimmed();
+ 
+         QString rn = current_root->name;
+         
+         if (!current->name.isEmpty() && !rn.isEmpty()) {
+            prependScope();
+         }
+         
+         current->m_specFlags.spec |= Entry::ForwardDecl;
+         current_root->addSubEntry(current, current_root);
+         current = QMakeShared<Entry>();
+
+      } else if (insideIDL &&
                           (((current_root->m_specFlags.spec & (Entry::Interface | Entry::Service)) &&
                             (current->m_specFlags.spec & Entry::Interface)) ||
                            ((current_root->m_specFlags.spec & (Entry::Service | Entry::Singleton)) &&
@@ -6699,7 +6834,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
                    // service inside of UNO IDL service or singleton
                    // there may be documentation on the member,
                    // so do not throw it away...
-                   current->name = yytext;
+                   current->name = text;
                    current->name=current->name.left(current->name.length()-1).trimmed();
                    current->section = (current->m_specFlags.spec & Entry::Interface)
                        ? Entry::EXPORTED_INTERFACE_SEC
@@ -6724,8 +6859,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <CompoundName>{SCOPENAME}/{BN}*"("  {
-                 current->name = yytext ;
-                 lineCount();
+      QString text = QString::fromUtf8(yytext); 
+      current->name = text;
+      lineCount();
                                           if (insideCpp && current->name=="alignas") // C++11
                                           {
                                             lastAlignAsContext = YY_START;
@@ -6774,11 +6910,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <CompoundName>{SCOPENAME}     {
-                 current->name = yytext ;
-                                          if (insideCpp || insideObjC)
-                                          {
-                                            current->id = ClangParser::instance()->lookup(yyLineNr,yytext);
-                                          }
+      QString text = QString::fromUtf8(yytext); 
+      current->name = text;
+                 if (insideCpp || insideObjC) {
+                    current->id = ClangParser::instance()->lookup(yyLineNr, text);
+                 }
                  lineCount();
                  if (current->m_specFlags.spec & Entry::Protocol)
                  {
@@ -6793,25 +6929,27 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <CompoundName>{CSSCOPENAME}           { // C# style scope
-                 current->name = substitute(yytext,".","::");
+      QString text = QString::fromUtf8(yytext); 
+                 current->name = substitute(text, ".", "::");
                  lineCount();
                  BEGIN( ClassVar );
    }
 
 <ClassVar>{SCOPENAME}{BN}*/"("      {
-                    if (insideIDL && qstrncmp(yytext,"switch",6)==0 && !isId(yytext[6]))
-                 {
+      QString text = QString::fromUtf8(yytext);
+
+      if (insideIDL && text.startsWith("switch") == 0 && ! isId(text[6])) {
+                 
                    // Corba IDL style union
                    roundCount=0;
                    BEGIN(SkipUnionSwitch);
-                 }
-                 else
-                 {
-                      addType(current);
-                   current->name = yytext;
+
+                 }  else {
+                   addType(current);
+                   current->name = text;
                    current->name = current->name.trimmed();
                    lineCount();
-                      BEGIN( FindMembers );
+                   BEGIN( FindMembers );
                  }
    }
 
@@ -6830,93 +6968,88 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
    }
 
 <ClassVar>("sealed"|"abstract")/{BN}*(":"|"{") {
-                    if (insideCli)
-                 {
-                   if (yytext[0]=='s') // sealed
-                     current->m_specFlags.spec|= Entry::SealedClass;
-                   else // abstract
-                     current->m_specFlags.m_isAbstractClass = true;
-                   BEGIN( ClassVar );
-                 }
-                 else
-                 {
-                   REJECT;
-                 }
+         QString text = QString::fromUtf8(yytext); 
+         if (insideCli) {
+            if ( text[0] == 's')  // sealed
+               current->m_specFlags.spec|= Entry::SealedClass;
+            else // abstract
+               current->m_specFlags.m_isAbstractClass = true;
+            
+            BEGIN( ClassVar );
+
+         } else {
+            REJECT;
+         }
    }
 
 <ClassVar>{ID}             {
-                                          if (insideCpp || insideObjC)
-                                          {
-                                            current->id = ClangParser::instance()->lookup(yyLineNr,yytext);
-                                          }
-                    if (insideIDL && qstrcmp(yytext,"switch")==0)
-                 {
-                   // Corba IDL style union
-                   roundCount=0;
-                   BEGIN(SkipUnionSwitch);
-                 }
-                 else if ((insideJava || insidePHP || insideJS) && (qstrcmp(yytext,"implements")==0 || qstrcmp(yytext,"extends")==0))
-                 {
-                      current->type.resize(0);
-                   baseProt=Public;
-                                            baseVirt=Normal;
-                   baseName.resize(0);
-                   BEGIN( BasesProt ) ;
-                 }
-                 else if (insideCSharp && qstrcmp(yytext,"where")==0) // C# type contraint
-                 {
+      QString text = QString::fromUtf8(yytext); 
+      if (insideCpp || insideObjC) {
+         current->id = ClangParser::instance()->lookup(yyLineNr, text);
+      }
 
-                   current->typeConstr = ArgumentList();
-                   current->typeConstr.append(Argument());
+      if (insideIDL && text == "switch") {
+          // Corba IDL style union
+          roundCount=0;
+          BEGIN(SkipUnionSwitch);
 
-                   lastCSConstraint = YY_START;
-                   BEGIN( CSConstraintName );
-                 }
-                 else if (insideCli &&  qstrcmp(yytext,"abstract")==0)
-                 {
-                   current->m_specFlags.spec |= Entry::Abstract;
-                 }
-                 else if (insideCli && qstrcmp(yytext,"sealed")==0)
-                 {
-                   current->m_specFlags.spec |= Entry::Sealed;
-                 }
-                 else if (qstrcmp(yytext,"final")==0)
-                 {
-                     current->m_specFlags.m_isFinal = true;
-                 }
-                 else
-                 {
-                   if (current->section == Entry::ENUM_SEC)
-                   { // found "enum a b" -> variable
-                     current->section = Entry::VARIABLE_SEC ;
-                   }
-                   current->type += ' ' ;
-                   current->type += current->name ;
-                   current->name = yytext ;
+      } else if ((insideJava || insidePHP || insideJS) && (text == "implements" || text =="extends") ) {
+          current->type.resize(0);
+          baseProt=Public;
+          baseVirt=Normal;
+          baseName.resize(0);
+          BEGIN( BasesProt );
 
-                   if (nameIsOperator(current->name))
-                   {
-                          BEGIN( Operator );
-                   }
-                 }
+      } else if (insideCSharp && text == "where")  {
+         // C# type contraint
+                 
+         current->typeConstr = ArgumentList();
+         current->typeConstr.append(Argument());
+
+         lastCSConstraint = YY_START;
+         BEGIN( CSConstraintName );
+
+      } else if (insideCli &&  text == "abstract") {
+         current->m_specFlags.spec |= Entry::Abstract;
+
+      } else if (insideCli && text == "sealed") {
+         current->m_specFlags.spec |= Entry::Sealed;
+
+      } else if (text == "final") {
+         current->m_specFlags.m_isFinal = true;
+
+      } else {
+      
+         if (current->section == Entry::ENUM_SEC) { 
+            // found "enum a b" -> variable
+            current->section = Entry::VARIABLE_SEC ;
+         }
+   
+         current->type += ' ' ;
+         current->type += current->name ;
+         current->name = text ;
+         
+         if (nameIsOperator(current->name)) {
+            BEGIN( Operator );
+         }
+      }
    }
 
 <ClassVar>[(\[]            {
-                    if (insideObjC && *yytext=='(') // class category
-                 {
-                   current->name+='(';
-                                            //if (current->section!=Entry::OBJCIMPL_SEC)
-                                            //{
-                     current->m_specFlags.spec |= Entry::Category;
-                                            //}
-                   BEGIN( ClassCategory );
-                 }
-                 else
-                 {
-                                            // probably a function anyway
-                                            unput(*yytext);
-                   BEGIN( FindMembers );
-                 }
+      QString text = QString::fromUtf8(yytext);    // BROOM
+      if (insideObjC && *yytext=='(') {
+         // class category
+                 
+         current->name += '(';
+         current->m_specFlags.spec |= Entry::Category;
+                                            
+         BEGIN( ClassCategory );
+
+      } else {
+         // probably a function anyway
+         unput(*yytext);
+         BEGIN( FindMembers );
+      }
    }
 
 <CSConstraintType,CSConstraintName>"/**/" {
@@ -6926,9 +7059,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_GADGET"|"CS_CLASSINFO"|"CS_INTERFACES"|"C
 <CSConstraintType,CSConstraintName>("/*"[*!]|"//"[/!])("<"?)   {
       // */ (editor syntax fix)
       // special comment
-                                          fullArgString.resize(0);
-                 lastCopyArgChar='#'; // end marker
-                 lastCommentInArgContext=YY_START;
+      fullArgString.resize(0);
+      lastCopyArgChar = '#';       // end marker
+      lastCommentInArgContext = YY_START;
+
                  if (yytext[1]=='/')
                    BEGIN( CopyArgCommentLine );
                  else

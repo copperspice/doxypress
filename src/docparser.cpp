@@ -5180,9 +5180,11 @@ void DocPara::handleSortId()
                      qPrintable(tokToString(tok)), qPrintable("sortid"));
       return;
    }
-  
-   // save the sort id value       
-   s_scope->setSortId(g_token->name.toInt());
+
+   if (s_scope) {  
+      // save the sort id value       
+      s_scope->setSortId(g_token->name.toInt());
+   }
   
    doctokenizerYYsetStatePara();
 }
@@ -5742,12 +5744,14 @@ int DocPara::handleCommand(const QString &cmdName)
       case CMD_PAR:
          retval = handleSimpleSection(DocSimpleSect::User);
          break;
+
       case CMD_LI: {
          DocSimpleList *sl = new DocSimpleList(this);
          m_children.append(sl);
          retval = sl->parse();
       }
       break;
+
       case CMD_SECTION: {
          handleSection(cmdName);
          retval = RetVal_Section;
@@ -5777,7 +5781,9 @@ int DocPara::handleCommand(const QString &cmdName)
       case CMD_HTMLONLY: {
          doctokenizerYYsetStateHtmlOnly();
          retval = doctokenizerYYlex();
-         m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::HtmlOnly, s_isExample, s_exampleName, g_token->name == "block"));
+         m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::HtmlOnly, 
+                  s_isExample, s_exampleName, g_token->name == "block"));
+
          if (retval == 0) {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "htmlonly section ended without end marker");
          }
@@ -6703,12 +6709,13 @@ int DocPara::parse(bool skipParse, int token)
       if (tok == 0) {
          break;
       }
-     
+    
    reparsetoken:
       DBG(("token %s at %d", qPrintable(tokToString(tok)), doctokenizerYYlineno));
 
       if (tok == TK_WORD || tok == TK_LNKWORD || tok == TK_SYMBOL || tok == TK_URL ||
             tok == TK_COMMAND || tok == TK_HTMLTAG) {
+
          DBG((" name=%s", qPrintable(g_token->name)));
       }
 
@@ -7016,7 +7023,6 @@ int DocPara::parse(bool skipParse, int token)
    retval = 0;
 
 endparagraph:
-
    handlePendingStyleCommands(this, m_children);
 
    if (! s_nodeStack.isEmpty() ) {
