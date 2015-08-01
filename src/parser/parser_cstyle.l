@@ -5109,12 +5109,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <MemberSpec>"("            { 
       // function with struct return type
-                 addType(current);
-                 current->name = msName;
-                 current->m_specFlags = Entry::SpecifierFlags{};
-
-                 unput('(');
-                 BEGIN(FindMembers);
+      addType(current);
+      current->name = msName;
+      current->m_specFlags = Entry::SpecifierFlags{};
+      
+      unput('(');
+      BEGIN(FindMembers);
    }
 
 <MemberSpec>[,;]        {
@@ -5256,10 +5256,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
   /*
 <MemberSpecSkip>"{"        {
-                 curlyCount=0;
-                 lastCurlyContext = MemberSpecSkip;
-                 previous = current;
-                  BEGIN(SkipCurly);
+      curlyCount=0;
+      lastCurlyContext = MemberSpecSkip;
+      previous = current;
+      BEGIN(SkipCurly);
    }
   */
 
@@ -7036,8 +7036,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <ClassVar>[(\[]            {
-      QString text = QString::fromUtf8(yytext);    // BROOM
-      if (insideObjC && *yytext=='(') {
+      QString text = QString::fromUtf8(yytext);
+      if (insideObjC && text[0] == '(') {
          // class category
                  
          current->name += '(';
@@ -7059,11 +7059,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <CSConstraintType,CSConstraintName>("/*"[*!]|"//"[/!])("<"?)   {
       // */ (editor syntax fix)
       // special comment
+      QString text = QString::fromUtf8(yytext);
       fullArgString.resize(0);
       lastCopyArgChar = '#';       // end marker
       lastCommentInArgContext = YY_START;
 
-                 if (yytext[1]=='/')
+                 if (text[1] == '/')
                    BEGIN( CopyArgCommentLine );
                  else
                    BEGIN( CopyArgComment );
@@ -7093,44 +7094,49 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <CSConstraintName>{ID}                  {
-                                          // parameter name
-                                          current->typeConstr.last().name = yytext;
+      // parameter name
+      QString text = QString::fromUtf8(yytext);
+      current->typeConstr.last().name = text;
    }
 
 <CSConstraintType>"where"     { 
       // another constraint for a different param
-                 current->typeConstr.append(Argument());
-                                          BEGIN( CSConstraintName );
-                  }
+      current->typeConstr.append(Argument());
+      BEGIN( CSConstraintName );
+   }
+
 <CSConstraintType>({ID}".")*{ID}("<"{ID}">")?("()")?  {
-                                          if (current->typeConstr.last().type.isEmpty())
-                                              // first type constraint for this parameter
-                                          {
-                                            current->typeConstr.last().type=yytext;
-                                          }
-                                          else // new type constraint for same parameter
-                                          {
-                  QString name = current->typeConstr.last().name;
-                  current->typeConstr.append(Argument());
-                  current->typeConstr.last().name = name;
-                  current->typeConstr.last().type = yytext;
-                                          }
+      QString text = QString::fromUtf8(yytext);
+      if (current->typeConstr.last().type.isEmpty()) {
+         // first type constraint for this parameter
+                                          
+         current->typeConstr.last().type = text;
+
+      } else  {
+         // new type constraint for same parameter
+                                          
+         QString name = current->typeConstr.last().name;
+         current->typeConstr.append(Argument());
+         current->typeConstr.last().name = name;
+         current->typeConstr.last().type = text;
+      }
    }
 
 <CSConstraintName,CSConstraintType>\n  {
-                                          lineCount();
+      lineCount();
    }
 
 <CSConstraintName,CSConstraintType>.   {
    }
 
 <ClassCategory>{ID}        {
-                 current->name+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->name += text;
    }
 
 <ClassCategory>")"/{BN}*"{"      {
-                 current->name+=')';
-                 BEGIN( ClassVar );
+      current->name += ')';
+      BEGIN( ClassVar );
    }
 
 <ClassCategory>")"/{BN}*"<"      {
@@ -7191,30 +7197,29 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <ClassVar>[;=*&]        {
-                    unput(*yytext);
-                 if (isTypedef) // typedef of a class, put typedef keyword back
-                 {
-                   current->type.prepend("typedef");
-                 }
-                 if ((yytext[0]=='*' || yytext[0]=='&') &&
-                     current->section == Entry::ENUM_SEC)
-                 { // found "enum a *b" -> variable
-                   current->section = Entry::VARIABLE_SEC ;
-                 }
-                 BEGIN( FindMembers );
+      QString text = QString::fromUtf8(yytext);
+      unput(*yytext);
+      if (isTypedef) { 
+         // typedef of a class, put typedef keyword back                 
+         current->type.prepend("typedef");
+      }
+      
+      if ((text[0] == '*' || text[0] == '&') && current->section == Entry::ENUM_SEC) {
+         // found "enum a *b" -> variable
+         current->section = Entry::VARIABLE_SEC ;
+      }
+      BEGIN( FindMembers );
    }
 
 <Bases,ClassVar>"///"/[^/]              {
-                    if (!insideObjC)
-                 {
-                   REJECT;
-                 }
-                 else
-                 {
+      QString text = QString::fromUtf8(yytext);
+                 if (! insideObjC) {
+                   REJECT; 
+                 } else {
                    lineCount();
-                   current->program+=yytext;
-                                            current->fileName = yyFileName ;
-                   current->startLine = yyLineNr ;
+                   current->program += text;
+                   current->fileName    = yyFileName ;
+                   current->startLine   = yyLineNr ;
                    current->startColumn = yyColNr;
                    curlyCount=0;
                    BEGIN( ReadBodyIntf );
@@ -7226,20 +7231,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <Bases,ClassVar>"//!"                   |
 <Bases,ClassVar>[\-+]{BN}*       {
       // */ (editor syntax fix)
-
+      QString text = QString::fromUtf8(yytext);
       if (! insideObjC) {
-                   REJECT;
-                 }
-                 else
-                 {
-                   lineCount();
-                   current->program+=yytext;
-                                            current->fileName = yyFileName ;
-                   current->startLine = yyLineNr ;
-                   current->startColumn = yyColNr;
-                   curlyCount=0;
-                   BEGIN( ReadBodyIntf );
-                 }
+         REJECT;
+
+      } else {
+         lineCount();
+         current->program     += text;
+         current->fileName    = yyFileName ;
+         current->startLine   = yyLineNr ;
+         current->startColumn = yyColNr;
+         curlyCount = 0;
+         BEGIN( ReadBodyIntf );
+      }
    }
 
 <CompoundName,ClassVar>{B}*"{"{B}*  {
@@ -7322,47 +7326,46 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <Bases>("\\")?({ID}"\\")*{ID}       {      
       // PHP namespace token, not sure if interspacing is allowed but it gives problems (see bug 640847)
-                 if (! insidePHP)
-                 {
-                   REJECT;
-                 }
-                 else // PHP base class of the form \Ns\Cl or Ns\Cl
-                 {
-                   lineCount();
-                   QString bn=yytext;
-                   bn = substitute(bn,"\\","::");
-                   baseName += bn;
-                   current->args += ' ';
-                   current->args += yytext;
+      QString text = QString::fromUtf8(yytext);
+
+      if (! insidePHP) {
+         REJECT;
+      } else {  
+         // PHP base class of the form \Ns\Cl or Ns\Cl                 
+         lineCount();
+          
+         baseName += substitute(text,"\\","::");
+         current->args += ' ';      
+         current->args += text;
+      }
    }
-                                        }
+
 <Bases>("::")?{BN}*({ID}{BN}*"::"{BN}*)*{ID}    {     
+      QString text = QString::fromUtf8(yytext);
       lineCount();
-                  QString baseScope = yytext;
-                  if (insideCSharp && baseScope.trimmed()=="where")
-                 {
-                   // type contraint for a class
+     
+      if (insideCSharp && text.trimmed() == "where") {
+         // type contraint for a class
 
-                  current->typeConstr = ArgumentList();
-                  current->typeConstr.append(Argument());
+         current->typeConstr = ArgumentList();
+         current->typeConstr.append(Argument());
 
-                  lastCSConstraint = YY_START;
-                  BEGIN( CSConstraintName );
-                 }
-                 else
-                 {
-                      baseName+=yytext;
-                   current->args += ' ';
-                   current->args += yytext;
-                 }
+         lastCSConstraint = YY_START;
+         BEGIN( CSConstraintName );
+     } else {
+       baseName += text;
+       current->args += ' ';
+       current->args += text;
+     }
    }
 
 <Bases>{BN}*{ID}("."{ID})*       { 
       // Java style class
-                    QString name = substitute(yytext,".","::");
-                 baseName += name;
-                 current->args += ' ';
-                 current->args += name;
+      QString text = QString::fromUtf8(yytext);            
+      QString name = substitute(text,".","::");
+      baseName += name;
+      current->args += ' ';
+      current->args += name;
    }
 
 <ClassVar,Bases>\n/{BN}*[^{, \t\n]  {
@@ -7388,8 +7391,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <ClassVar>"<"                     {
-   current->name += *yytext;
-                    sharpCount=1;
+      QString text = QString::fromUtf8(yytext);   
+      current->name += text[0];
+                 sharpCount=1;
                  roundCount=0;
                  lastSkipSharpContext = YY_START;
                  specName = &current->name;
@@ -7397,10 +7401,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <Bases>{BN}*"<"                         {
-                                          lineCount();
-                    sharpCount=1;
-                 roundCount=0;
-                 lastSkipSharpContext = YY_START;
+      QString text = QString::fromUtf8(yytext);   
+      lineCount();
+      sharpCount=1;
+      roundCount=0;
+      lastSkipSharpContext = YY_START;
                  if (insideObjC) // start of protocol list
                  {
                    unput(',');
@@ -7411,23 +7416,27 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                    //{
                    //  baseName+="-g";
                    //}
-                                            templateStr = yytext;
+                   templateStr = text;
                    specName = &templateStr;
                    BEGIN ( Specialization );
                  }
    }
 
-<Specialization>"<"        { *specName += *yytext;
-                    if (roundCount==0) sharpCount++;
+<Specialization>"<"        { 
+      QString text = QString::fromUtf8(yytext);   
+      *specName += text[0];
+      if (roundCount == 0) {
+         sharpCount++;
+      }
    }
 
 <Specialization>">"        {
-                    *specName += *yytext;
-                    if (roundCount==0 && --sharpCount<=0)
-                 {
-                   baseName+=removeRedundantWhiteSpace(*specName);
-                   BEGIN(lastSkipSharpContext);
-                 }
+      QString text = QString::fromUtf8(yytext);   
+      *specName += text[0];
+      if (roundCount == 0 && --sharpCount <= 0) {
+         baseName += removeRedundantWhiteSpace(*specName);
+         BEGIN(lastSkipSharpContext);
+      }
    }
 
 <Specialization>{BN}+         { 
@@ -7436,7 +7445,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <Specialization>"<<"          { 
-      *specName += yytext; 
+      QString text = QString::fromUtf8(yytext);   
+      *specName += text; 
    }
 
 <Specialization>">>"/{B}*"::"       { 
@@ -7447,27 +7457,25 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <Specialization>">>"          {
-                                          if (insideCSharp) // for C# >> ends a nested template
-                 {
-                   REJECT;
-                 }
-                 else // for C++ >> is a bitshift
-                      // operator and > > would end
-                      // a nested template.
-                      // We require the bitshift to be enclosed in braces.
-                      // See http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2005/n1757.html
-                 {
-                   if (roundCount>0)
-                   {
-                                              *specName += yytext;
-                   }
-                   else
-                   {
-                        unput('>');
-                        unput(' ');
-                        unput('>');
-                   }
-                 }
+      QString text = QString::fromUtf8(yytext);   
+      if (insideCSharp) {
+         // for C# >> ends a nested template      
+         REJECT;
+
+      } else  {
+         // for C++ >> is a bitshift operator and > > would end a nested template.
+         // We require the bitshift to be enclosed in braces.
+         // See http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2005/n1757.html
+         
+         if (roundCount > 0) {
+            *specName += text;
+
+         } else {
+            unput('>');
+            unput(' ');
+            unput('>');
+         }
+      }
    }
 
 <Specialization>"typename"{BN}+     { 
@@ -7475,25 +7483,29 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <Specialization>"("        { 
-      *specName += *yytext; 
+      QString text = QString::fromUtf8(yytext);   
+      *specName += text[0]; 
       roundCount++; 
    }
 
 <Specialization>")"        { 
-      *specName += *yytext; 
+      QString text = QString::fromUtf8(yytext);   
+      *specName += text[0]; 
       roundCount--; 
    }
 
 <Specialization>.          {
-                    *specName += *yytext;
+      QString text = QString::fromUtf8(yytext);   
+      *specName += text[0];
    }
 
-<SkipRound>"("             { ++roundCount; 
+<SkipRound>"("             { 
+      ++roundCount; 
    }
 
 <SkipRound>")"             { 
       if (--roundCount < 0)
-                   BEGIN ( lastSkipRoundContext );
+         BEGIN ( lastSkipRoundContext );
    }
 
 <SkipRound>\"           {
@@ -7502,14 +7514,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <Bases>","|(">"({BN}*"{")?)|({BN}+"implements"{BN}*)  { 
-   lineCount();
-                                          if (insideProtocolList)
+      QString text = QString::fromUtf8(yytext);
+      lineCount();
+                 if (insideProtocolList)
                  {
                    baseName+="-p";
                  }
                  else
                  {
-                                            current->args += ',' ;
+                    current->args += ',' ;
                  }
                  current->name = removeRedundantWhiteSpace(current->name);
                     if (! baseName.isEmpty())
@@ -7527,25 +7540,22 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                  {
                    baseProt=Private;
                  }
+
                  baseVirt=Normal;
                  baseName.resize(0);
-                                          if (*yytext=='>')
-                 { // end of a ObjC protocol list
-                      insideProtocolList=false;
-                   if (yyleng==1)
-                   {
+                 if (text[0] == '>') {
+                    // end of a ObjC protocol list
+                    insideProtocolList=false;
+                    if (yyleng == 1) {
                      unput('{'); // dummy start body
-                   }
-                   else
-                   {
+                   } else {
                      yyless(1);
                    }
-                 }
-                 else
-                 {
-                   if (*yytext==',' && insideObjC) // Begin of protocol list
-                   {
-                        insideProtocolList=true;
+
+                 } else {
+                   if (text[0] == ',' && insideObjC) {
+                      // Begin of protocol list                   
+                      insideProtocolList=true;
                    }
                    BEGIN(BasesProt);
                  }
@@ -7572,14 +7582,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <SkipUnionSwitch>{B}*"("      {
-                    roundCount++;
+      roundCount++;
    }
 
 <SkipUnionSwitch>")"          {
-                    if (--roundCount==0)
-                 {
-                   BEGIN(ClassVar);
-                 }
+      if (--roundCount == 0 ) {
+         BEGIN(ClassVar);
+      }
    }
 
 <SkipUnionSwitch>\n        { 
@@ -7588,217 +7597,203 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <SkipUnionSwitch>.
 <Comment>{BN}+             { 
-      current->program += yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->program += text;
       lineCount() ;
    }
 
 <Comment>"/*"           { 
       // */ (editor syntax fix)
-      current->program += yytext; 
+      QString text = QString::fromUtf8(yytext);
+      current->program += text; 
    }
 
 <Comment>"//"           { 
-      current->program += yytext; 
+      QString text = QString::fromUtf8(yytext);
+      current->program += text; 
    }
 
 <Comment>{CMD}("code"|"verbatim")   {
+      QString text = QString::fromUtf8(yytext);
       insideCode=true;
-      current->program += yytext ;
+      current->program += text;
    }
 
 <Comment>{CMD}("endcode"|"endverbatim")   {
+      QString text = QString::fromUtf8(yytext);
       insideCode=false;
-      current->program += yytext ;
+      current->program += text;
    }
 
 <Comment>[^ \.\t\r\n\/\*]+       { 
-      current->program += yytext ; 
+      QString text = QString::fromUtf8(yytext);
+      current->program += text; 
    }
 
 <Comment>"*/"           { 
-      current->program += yytext ;
-      if (!insideCode) BEGIN( lastContext ) ;
+      QString text = QString::fromUtf8(yytext);
+      current->program += text;
+      if (!insideCode) BEGIN( lastContext );
    }
 
 <Comment>.           { 
-      current->program += *yytext ; 
+      QString text = QString::fromUtf8(yytext);
+      current->program += text[0]; 
    }
-
 
 <FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,SkipC11Inits,Bases,OldStyleArgs>("//"{B}*)?"/*!" {
       // */ (editor syntax fix)
-      //printf("Start doc block at %d\n",yyLineNr);
-                 removeSlashes=(yytext[1]=='/');
-                 tmpDocType=-1;
-                 if (!current->doc.isEmpty())
-                 {
-                   current->doc+="\n\n";
-                 }
-                 else
-                 {
-                   current->docLine = yyLineNr;
-                   current->docFile = yyFileName;
-                 }
+      QString text = QString::fromUtf8(yytext);
+      removeSlashes=(text[1] == '/');
+      tmpDocType=-1;
+      if (!current->doc.isEmpty()) {
+         current->doc+="\n\n";
+      } else {
+         current->docLine = yyLineNr;
+         current->docFile = yyFileName;
+      }
+      
+      lastDocContext = YY_START;
+      if (current_root->section & Entry::SCOPE_MASK) {
+         current->inside = current_root->name+"::";
+      }
 
-                 lastDocContext = YY_START;
-                 if (current_root->section & Entry::SCOPE_MASK)
-                                          {
-                   current->inside = current_root->name+"::";
-                                          }
-                 docBlockContext   = YY_START;
-                 docBlockInBody    = YY_START==SkipCurly;
-                 docBlockAutoBrief = Config::getBool("qt-auto-brief");
+      docBlockContext   = YY_START;
+      docBlockInBody    = YY_START == SkipCurly;
+      docBlockAutoBrief = Config::getBool("qt-auto-brief");
+      
+      text.fill(' ', computeIndent(text, g_column));
+      docBlock = text;
+      
+      if (docBlockAutoBrief) {
+         current->briefLine = yyLineNr;
+         current->briefFile = yyFileName;
+      }
 
-                                          QString indent;
-                                          indent.fill(' ',computeIndent(yytext,g_column));
-                                          docBlock=indent;
-
-                 if (docBlockAutoBrief)
-                 {
-                   current->briefLine = yyLineNr;
-                   current->briefFile = yyFileName;
-                 }
-                 startCommentBlock(false);
-                 BEGIN( DocBlock );
+      startCommentBlock(false);
+      BEGIN( DocBlock );
    }
 
 <FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,Bases,OldStyleArgs>("//"{B}*)?"/**"/[^/*] {
-                    removeSlashes=(yytext[1]=='/');
-                 lastDocContext = YY_START;
+      // */ (editor syntax fix)
+      QString text = QString::fromUtf8(yytext);
+      removeSlashes=(text[1] == '/');
+      lastDocContext = YY_START;
 
-                 //printf("Found comment block at %s:%d\n",yyFileName,yyLineNr);
-                 if (current_root->section & Entry::SCOPE_MASK)
-                                          {
-                   current->inside = current_root->name+"::";
-                                          }
-                 current->docLine = yyLineNr;
-                 current->docFile = yyFileName;
-                 docBlockContext = YY_START;
-                 docBlockInBody  = YY_START==SkipCurly;
-                                          static bool javadocAutoBrief = Config::getBool("javadoc-auto-brief");
-                 docBlockAutoBrief = javadocAutoBrief;
+      if (current_root->section & Entry::SCOPE_MASK) {
+         current->inside = current_root->name+"::";
+      }
 
-                                          QString indent;
-                                          indent.fill(' ',computeIndent(yytext,g_column));
-                                          docBlock=indent;
+      current->docLine = yyLineNr;
+      current->docFile = yyFileName;
+      docBlockContext = YY_START;
+      docBlockInBody  = YY_START==SkipCurly; 
 
-                 if (docBlockAutoBrief)
-                 {
-                   current->briefLine = yyLineNr;
-                   current->briefFile = yyFileName;
-                 }
-                 startCommentBlock(false);
-                 BEGIN( DocBlock );
+      static bool javadocAutoBrief = Config::getBool("javadoc-auto-brief");
+      docBlockAutoBrief = javadocAutoBrief;     
+
+      text.fill(' ', computeIndent(text, g_column));
+      docBlock = text;
+      
+      if (docBlockAutoBrief) {
+         current->briefLine = yyLineNr;
+         current->briefFile = yyFileName;
+      }
+      startCommentBlock(false);
+      BEGIN( DocBlock );
    }
 
 <FindMembers,FindFields,MemberSpec,SkipCurly,FuncQual,Operator,ClassVar,Bases,OldStyleArgs>"//!" {
-                 tmpDocType=-1;
-                 lastDocContext = YY_START;
-                 if (current_root->section & Entry::SCOPE_MASK)
-                                          {
-                   current->inside = current_root->name+"::";
-                                          }
-                 docBlockContext   = YY_START;
-                 docBlockInBody    = YY_START==SkipCurly;
-                 docBlockAutoBrief = false;
+      QString text = QString::fromUtf8(yytext);
+      tmpDocType=-1;
+      lastDocContext = YY_START;
+      if (current_root->section & Entry::SCOPE_MASK) {
+         current->inside = current_root->name+"::";
+      }
+      docBlockContext   = YY_START;
+      docBlockInBody    = YY_START == SkipCurly;
+      docBlockAutoBrief = false;     
 
-                                          QString indent;
-                                          indent.fill(' ',computeIndent(yytext,g_column));
-                                          docBlock=indent;
-
-                 startCommentBlock(current->brief.isEmpty());
-                 BEGIN( DocLine );
+      text.fill(' ', computeIndent(text,g_column));
+      docBlock = text;
+      
+      startCommentBlock(current->brief.isEmpty());
+      BEGIN( DocLine );
    }
 
 <FindMembers,FindFields,MemberSpec,SkipCurly,FuncQual,Operator,ClassVar,Bases,OldStyleArgs>"///"/[^/] {
-                 tmpDocType=-1;
-                 lastDocContext = YY_START;
-                 if (current_root->section & Entry::SCOPE_MASK)
-                                          {
-                   current->inside = current_root->name+"::";
-                                          }
-                 docBlockContext   = YY_START;
-                 docBlockInBody    = YY_START==SkipCurly;
-                 docBlockAutoBrief = false;
-                                          QString indent;
-                                          indent.fill(' ',computeIndent(yytext,g_column));
-                                          docBlock=indent;
-                 startCommentBlock(current->brief.isEmpty());
-                 BEGIN( DocLine );
+      QString text = QString::fromUtf8(yytext);
+      tmpDocType = -1;
+      lastDocContext = YY_START;
+      if (current_root->section & Entry::SCOPE_MASK) {
+         current->inside = current_root->name+"::";
+      }
+
+      docBlockContext   = YY_START;
+      docBlockInBody    = YY_START == SkipCurly;
+      docBlockAutoBrief = false;
+      
+      text.fill(' ',computeIndent(text, g_column));
+      docBlock = text;
+
+      startCommentBlock(current->brief.isEmpty());
+      BEGIN( DocLine );
    }
 
 <FindMembers>"extern"{BN}*"\"C"("++")?"\""{BN}*("{")?  {
-                 lineCount();
-                 externC=true;
+      lineCount();
+      externC = true;
    }
 
 <FindMembers>"{"        {
-                                          if (externC)
-                 {
-                   externC=false;
-                 }
-                                          else if (insideCSharp &&
-                     !current->name.isEmpty() &&
-                     !current->type.isEmpty())
-                 {
-                   if (containsWord(current->type,"event")) // event
-                   {
-                        current->mtype = mtype = MethodTypes::Event;
-                   }
-                   else // property
-                   {
-                        current->mtype = mtype = MethodTypes::Property;
-                   }
-                   current->bodyLine = yyLineNr;
-                   curlyCount=0;
-                   BEGIN( CSAccessorDecl );
-                 }
-                 else if (insideIDL && (current->m_specFlags.spec & Entry::Attribute))
-                 {
-                   // UNO IDL: attributes may have setter and getter
-                   // exception specifications
-                   current->exception = " {";
-                   BEGIN(UNOIDLAttributeBlock);
-                 }
-                 else
-                 {
-                   if ((insideJava || insideCSharp || insideD) &&
-                  current->name.isEmpty()
-                      )
-                   {
-                     // static Java initializer
-                     needsSemi = false;
-                     if (current->stat)
-                     {
-                  current->name="[static initializer]";
-                  current->type.resize(0);
-                     }
-                     else
-                     {
-                  current->name="[instance initializer]";
-                     }
-                                              unput(*yytext);
-                     BEGIN( Function );
-                   }
-                   else
-                   {
-                     // pre C++11 code -> ignore the initializer
-                                              //needsSemi = true;
-                     //current->type.resize(0);
-                     //current->name.resize(0);
-                     //current->args.resize(0);
-                     //current->argList.clear();
-                     //curlyCount=0;
-                     //BEGIN( SkipCurlyBlock );
+      QString text = QString::fromUtf8(yytext);
+      if (externC) {
+         externC = false;
 
-                                              // C++11 style initializer list
-                        current->bodyLine = yyLineNr;
-                                              current->initializer = yytext;
-                     lastInitializerContext = YY_START;
-                     initBracketCount=1;
-                     BEGIN(ReadInitializer);
-                   }
-                 }
+      } else if (insideCSharp && ! current->name.isEmpty() && ! current->type.isEmpty())  {
+         if (containsWord(current->type,"event")) {
+            // event      
+            current->mtype = mtype = MethodTypes::Event;
+         } else {
+            // property      
+            current->mtype = mtype = MethodTypes::Property;
+         }
+
+         current->bodyLine = yyLineNr;
+         curlyCount=0;
+
+         BEGIN( CSAccessorDecl );
+
+      }  else if (insideIDL && (current->m_specFlags.spec & Entry::Attribute)) {
+         // UNO IDL: attributes may have setter and getter
+         // exception specifications
+         current->exception = " {";
+         BEGIN(UNOIDLAttributeBlock);
+
+      } else {
+
+         if ((insideJava || insideCSharp || insideD) && current->name.isEmpty()) {
+            // static Java initializer
+            needsSemi = false;
+            if (current->stat) {
+               current->name="[static initializer]";
+               current->type.resize(0);
+            } else {
+               current->name="[instance initializer]";
+            }
+
+            unput(*yytext);
+            BEGIN( Function );
+
+      } else {        
+         // C++11 style initializer list
+         current->bodyLine      = yyLineNr;
+         current->initializer   = text;
+         lastInitializerContext = YY_START;
+         initBracketCount=1;
+         BEGIN(ReadInitializer);
+         }
+      }
    }
 
 <CSAccessorDecl>"{"        { 
@@ -7868,7 +7863,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
  /*  ---- Single line comments ------ */
 <DocLine>[^\n]*"\n"[ \t]*"//"[/!]       { 
       // continuation of multiline C++-style comment          
-      docBlock+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
       docBlock.resize(docBlock.length() - 3);
       lineCount();
 }
@@ -7881,7 +7877,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <DocLine>[^\n]*/"\n"          { 
       // whole line
-      docBlock+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
       handleCommentBlock(docBlock, current->brief.isEmpty());
       BEGIN( docBlockContext );
    }
@@ -7895,17 +7892,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <DocBlock>^{B}*"*"+/[^/]      {
-
-                                          QString indent;
-                                          indent.fill(' ',computeIndent(yytext,g_column));
-                                          docBlock+=indent;
+      QString text = QString::fromUtf8(yytext);
+      text.fill(' ',computeIndent(text, g_column));
+      docBlock += text;
    }
 
 <DocBlock>^{B}*("//")?{B}*"*"+/[^//a-z_A-Z0-9*]    {
       // start of a comment line
-                                          QString indent;
-                                          indent.fill(' ',computeIndent(yytext,g_column));
-                                          docBlock+=indent;
+      QString text = QString::fromUtf8(yytext);     
+      text.fill(' ',computeIndent(text,g_column));
+      docBlock += text;
    }
 
 <DocBlock>^{B}*("//"){B}*     { 
@@ -7914,215 +7910,214 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <DocBlock>"//"             { 
       // slashes in the middle of a comment block
-                    docBlock+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
    }
 
 <DocBlock>"/*"             { 
       // */ (editor syntax fix)
       // start of a new comment in the middle of a comment block
-      docBlock+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
    }
 
 <DocBlock>("@@"|"\\\\"){ID}/[^a-z_A-Z0-9] { 
       // */ (editor syntax fix)
       // escaped command
-      docBlock+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
    }
 
 <DocBlock>{CMD}("f$"|"f["|"f{")          {
       // */ (editor syntax fix)
-
-                  docBlock+=yytext;
-                  docBlockName=&yytext[1];
-
-                 if (docBlockName.at(1)=='{')
-                 {
-                    docBlockName[1]='}';
-                 }
-
-                 g_fencedSize=0;
-                 g_nestedComment=false;
-                 BEGIN(DocCopyBlock);
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
+      docBlockName= text.mid(1);
+      
+      if (docBlockName.at(1) == '{') {
+         docBlockName[1] = '}';
+      }
+      
+      g_fencedSize=0;
+      g_nestedComment = false;
+      BEGIN(DocCopyBlock);
    }
 
 <DocBlock>{B}*"<"{PRE}">"     {
-                    docBlock+=yytext;
-                    docBlockName="<pre>";
-                    g_fencedSize=0;
-                    g_nestedComment=false;
-                    BEGIN(DocCopyBlock);
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
+      docBlockName="<pre>";
+      g_fencedSize=0;
+      g_nestedComment = false;
+      BEGIN(DocCopyBlock);
    }
 
 <DocBlock>{CMD}("verbatim"|"latexonly"|"htmlonly"|"xmlonly"|"manonly"|"dot"|"code")/[^a-z_A-Z0-9]  { 
       // verbatim command (which could contain nested comments!)
-                    docBlock+=yytext;
-                    docBlockName=&yytext[1];
-                    g_fencedSize=0;
-                    g_nestedComment=false;
-                    BEGIN(DocCopyBlock);
+      QString text = QString::fromUtf8(yytext);
+      docBlock     += text;
+      docBlockName = text.mid(1);
+      g_fencedSize = 0;
+      g_nestedComment = false;
+      BEGIN(DocCopyBlock);
    }
 
-<DocBlock>^({B}*"*"+)?{B}{0,3}"~~~"[~]*            {
-                    docBlock+=yytext;
-                    docBlockName="~~~";
-                    g_fencedSize=yyleng;
-                    g_nestedComment=false;
-                    BEGIN(DocCopyBlock);
+<DocBlock>^({B}*"*"+)?{B}{0,3}"~~~"[~]*    {
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
+      docBlockName = "~~~";
+      g_fencedSize = yyleng;
+      g_nestedComment = false;
+      BEGIN(DocCopyBlock);
    }
 
-<DocBlock>^({B}*"*"+)?{B}{0,3}"```"[`]*            {
-                    docBlock += yytext;
-                    docBlockName    = "```";
-                    g_fencedSize    = yyleng;
-                    g_nestedComment = false;
-                    BEGIN(DocCopyBlock);
+<DocBlock>^({B}*"*"+)?{B}{0,3}"```"[`]*    {
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
+      docBlockName    = "```";
+      g_fencedSize    = yyleng;
+      g_nestedComment = false;
+      BEGIN(DocCopyBlock);
    }
 
 <DocBlock>{B}*"<code>"                  {
-                    if (insideCSharp)
-                 {
-                   docBlock+=yytext;
-                   docBlockName="<code>";
-                                            g_nestedComment=false;
-                   BEGIN(DocCopyBlock);
-                 }
-                 else
-                 {
-                   REJECT;
-                 }
+      QString text = QString::fromUtf8(yytext);
+      if (insideCSharp) {
+         docBlock += text;
+         docBlockName = "<code>";
+         g_nestedComment = false;
+         BEGIN(DocCopyBlock);
+      } else {
+         REJECT;
+      }
    }
 
 <DocBlock>[^@*~\/\\\n]+          { 
       // any character that isn't special
-      docBlock+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
    }
 
 <DocBlock>\n            { 
       // newline
+      QString text = QString::fromUtf8(yytext);
       lineCount();
-      docBlock+=*yytext;
+      docBlock += text[0];
    }
 
 <DocBlock>.             { 
       // command block
-      docBlock+=*yytext;
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text[0];
    }
 
  /* ---- Copy verbatim sections ------ */
 
 <DocCopyBlock>"</"{PRE}">"       { 
       // end of a <pre> block
-                    docBlock+=yytext;
-                 if (docBlockName=="<pre>")
-                 {
-                      BEGIN(DocBlock);
-                 }
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
+      if (docBlockName == "<pre>") {
+         BEGIN(DocBlock);
+      }
    }
 
 <DocCopyBlock>"</"{CODE}">"      { 
       // end of a <code> block
-                    docBlock+=yytext;
-                 if (docBlockName=="<code>")
-                 {
-                      BEGIN(DocBlock);
-                 }
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text; 
+      if (docBlockName == "<code>") {
+         BEGIN(DocBlock);
+      }
    }
 
 <DocCopyBlock>[\\@]("f$"|"f]"|"f}")     {
-      docBlock += yytext;
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
       BEGIN(DocBlock);
    }
 
 <DocCopyBlock>[\\@]("endverbatim"|"endlatexonly"|"endhtmlonly"|"endxmlonly"|"enddocbookonly"|"endmanonly"|"enddot"|"endcode")/[^a-z_A-Z0-9] { 
       // end of verbatim block
-                    docBlock+=yytext;
-                 if (&yytext[4]==docBlockName)
-                 {
-                      BEGIN(DocBlock);
-                 }
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
+      if (text.mid(4) == docBlockName) {
+         BEGIN(DocBlock);
+      }
    }
 
 <DocCopyBlock>^{B}*"*"+/{BN}+       { 
       // start of a comment line
-                    if (docBlockName=="verbatim")
-                 {
-                   REJECT;
-                 }
-                    else if (docBlockName=="code")
-                 {
-                   REJECT;
-                 }
-                                          else
-                                          {
-                                            QString indent;
-                                            indent.fill(' ',computeIndent(yytext,0));
-                                            docBlock+=indent;
-                                          }
+      QString text = QString::fromUtf8(yytext);
+      if (docBlockName == "verbatim") {
+         REJECT;
+      } else if (docBlockName == "code") {
+         REJECT;
+      } else {
+
+      text.fill(' ',computeIndent(text, 0));
+      docBlock += text;
+      }
    }
 
 <DocCopyBlock>^{B}*"*"+/{BN}+"*"{BN}*  { 
       // start of a comment line with two *'s
-                    if (docBlockName=="code")
-                                          {
-                                            QString indent;
-                                            indent.fill(' ',computeIndent(yytext,0));
-                                            docBlock+=indent;
-                                          }
-                                          else
-                 {
-                   REJECT;
-                 }
+      QString text = QString::fromUtf8(yytext);
+      if (docBlockName == "code") {
+         text.fill(' ',computeIndent(text,0));
+         docBlock += text;
+      } else {
+         REJECT;
+      }
    }
 
 <DocCopyBlock>^{B}*"*"+/({ID}|"(")  { 
       // Assume *var or *(... is part of source code (see bug723516)
-                 if (docBlockName=="code")
-                                          {
-                                            QString indent;
-                                            indent.fill(' ',computeIndent(yytext,-1));
-                                            docBlock+=indent+"*";
-                                          }
-                                          else
-                                          {
-                                            REJECT;
-                                          }
+      QString text = QString::fromUtf8(yytext);
+      if (docBlockName == "code") {
+         text.fill(' ',computeIndent(text,-1));
+         docBlock += text + "*";
+       } else {
+         REJECT;
+       }
    }
 
 <DocCopyBlock>^{B}*"*"+/{BN}*       { 
       // start of a comment line with one *
-                    if (docBlockName=="code")
-                                          {
-                                            QString indent;
-                                            if (g_nestedComment) // keep * it is part of the code
-                                            {
-                                              indent.fill(' ',computeIndent(yytext,-1));
-                                              docBlock+=indent+"*";
-                                            }
-                                            else // remove * it is part of the comment block
-                                            {
-                                              indent.fill(' ',computeIndent(yytext,0));
-                                              docBlock+=indent;
-                                            }
-                                          }
-                                          else
-                 {
-                   REJECT;
-                 }
+      QString text = QString::fromUtf8(yytext);
+      if (docBlockName == "code") {
+     
+         if (g_nestedComment) { 
+            // keep * it is part of the code
+         
+            text.fill(' ',computeIndent(text,-1));
+            docBlock += text + "*";
+   
+         } else {
+            // remove * it is part of the comment block
+         
+            text.fill(' ',computeIndent(text,0));
+            docBlock += text;
+         }
+      } else {
+         REJECT;
+      }
    }
 
 <DocCopyBlock>^({B}*"*"+)?{B}{0,3}"~~~"[~]*        {
-                         docBlock+=yytext;
-                         if (g_fencedSize==yyleng)
-                         {
-                           BEGIN(DocBlock);
-                         }
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
+      if (g_fencedSize==yyleng) {
+         BEGIN(DocBlock);
+      }
    }
 
 <DocCopyBlock>^({B}*"*"+)?{B}{0,3}"```"[`]*        {
-                          docBlock+=yytext;
-                          if (g_fencedSize==yyleng) {
-                              BEGIN(DocBlock);
-                          }
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text;
+      if (g_fencedSize == text.length()) {
+         BEGIN(DocBlock);
+      }
    }
 
 <DocCopyBlock>[^\<@/*\]~\$\\\n]+    { 
@@ -8132,26 +8127,28 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <DocCopyBlock>"/*"|"*/"|"//"     {
       // */ (editor syntax fix)
-                                          if (yytext[1]=='*')
-                                          {
-                                            g_nestedComment=true;
-                                          }
-                                          else if (yytext[0]=='*')
-                                          {
-                                            g_nestedComment=false;
-                                          }
-                    docBlock+=yytext;
+      QString text = QString::fromUtf8(yytext); 
+      if (text[1] == '*') {
+         g_nestedComment = true;
+
+      } else if (text[0] == '*') {
+         g_nestedComment = false;
+      }
+
+      docBlock += text;
    }
 
 <DocCopyBlock>\n        { 
-      // newline
-      docBlock+=*yytext;
+      // newline    
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text[0];
       lineCount();
    }
 
 <DocCopyBlock>.            { 
       // any other character
-      docBlock+=*yytext;
+      QString text = QString::fromUtf8(yytext);
+      docBlock += text[0];
    }
 
 <DocCopyBlock><<EOF>>         {
@@ -8164,29 +8161,34 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
     /* ------------- Prototype parser -------------- */
 
 <Prototype>"operator"{B}*"("{B}*")"    {
-                    current->name+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->name += text;
    }
 
 <Prototype>"("                 {
-                    current->args+=*yytext;
-                 currentArgumentContext = PrototypeQual;
-                 fullArgString = current->args;
-                 copyArgString = &current->args;
-                 BEGIN( ReadFuncArgType ) ;
+      QString text = QString::fromUtf8(yytext);
+      current->args += text[0];
+      currentArgumentContext = PrototypeQual;
+      fullArgString = current->args;
+      copyArgString = &current->args;
+      BEGIN( ReadFuncArgType ) ;
    }
 
 <Prototype>"("({ID}"::")*({B}*[&*])+   {
-                    current->type+=current->name + QString(yytext);
-                 current->name.resize(0);
-                    BEGIN( PrototypePtr );
+      QString text = QString::fromUtf8(yytext);
+      current->type += current->name + text;
+      current->name.resize(0);
+      BEGIN( PrototypePtr );
    }
 
 <PrototypePtr>{SCOPENAME}     {
-                    current->name+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->name += text;
    }
 
 <PrototypePtr>"("          {
-                    current->args+=*yytext;
+      QString text = QString::fromUtf8(yytext);
+                 current->args+=text[0];
                  currentArgumentContext = PrototypeQual;
                  fullArgString = current->args;
                  copyArgString = &current->args;
@@ -8199,7 +8201,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <PrototypePtr>.            {
-                    current->name+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->name += text;
    }
 
 <PrototypeQual>"{"         {
@@ -8223,28 +8226,31 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <PrototypeQual>"throw"{B}*"("            {
-                    current->exception = "throw(";
-                 BEGIN(PrototypeExc);
+      current->exception = "throw(";
+      BEGIN(PrototypeExc);
    }
 
-<PrototypeExc>")"          {
-                    current->exception += ')';
-                 BEGIN(PrototypeQual);
+<PrototypeExc>")"       {
+      current->exception += ')';
+      BEGIN(PrototypeQual);
    }
 
-<PrototypeExc>.                 {
-                    current->exception += *yytext;
+<PrototypeExc>.         {
+      QString text = QString::fromUtf8(yytext);
+      current->exception += text[0];
    }
 
 <PrototypeQual>.        {
-                    current->args += *yytext;
+      QString text = QString::fromUtf8(yytext);
+      current->args += text[0];
    }
 
-<Prototype>.                           {
-                    current->name += *yytext;
+<Prototype>.           {
+      QString text = QString::fromUtf8(yytext);
+      current->name += text[0];
    }
 
-<PrototypeSkipLine>.          {
+<PrototypeSkipLine>.   {
    }
 
 
@@ -8253,18 +8259,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <SkipCxxComment>.*"\\\n"      {  
       // line continuation
-      if (insideCSharp)
-                 {
-                   REJECT;
-                 }
-                 else
-                 {
-                   lineCount();
-                 }
+      if (insideCSharp) {
+         REJECT;
+      } else {
+         lineCount();
+      }
    }
 
 <SkipCxxComment>.*/\n         {
-                 BEGIN( lastCContext ) ;
+      BEGIN( lastCContext ) ;
    }
 
 <SkipComment>[^\*\n]+
@@ -8279,18 +8282,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <*>"#"                    {
-                    if (!insidePHP)
-                      REJECT;
-                    lastCContext = YY_START ;
-                 BEGIN( SkipCxxComment ) ;
+      if (!insidePHP)
+         REJECT;
+      lastCContext = YY_START ;
+         BEGIN( SkipCxxComment ) ;
    }
 
 <*>\'                {
-                    if (insidePHP)
-                 {
-                      lastStringContext=YY_START;
-                   BEGIN(SkipPHPString);
-                 }
+      if (insidePHP) {
+         lastStringContext=YY_START;
+         BEGIN(SkipPHPString);
+      }
    }
 
 <*>\"                {

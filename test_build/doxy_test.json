@@ -126,7 +126,7 @@
     "full-path-names": false,
     "generate-bug-list": true,
     "generate-chi": false,
-    "generate-chm": true,
+    "generate-chm": false,
     "generate-deprecate-list": true,
     "generate-docbook": true,
     "generate-docset": true,

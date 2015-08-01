@@ -8964,17 +8964,6 @@ void Doxy_Work::generatePageDocs()
       return;
    }  
 
-
-      //  BROOM - resolve this issue
-
-      QString temp = "Généré le %1 %2 pour &nbsp; par";
-      QString a = "Mon Jul 20";
-
-      qWarning("Warning: QString::arg() Missing place marker '%%n'\n"
-               "Format String: %s     Argument Value: %s\n", temp.toLocal8Bit().data(), a.toLocal8Bit().data());
-
-
-
    for (auto pd : *Doxy_Globals::pageSDict) {
 
       if (! pd->getGroupDef() && ! pd->isReference()) {

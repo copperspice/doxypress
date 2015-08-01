@@ -189,7 +189,6 @@ void shutDownDoxypress()
    
    removePreProcessor();
 
-   delete theTranslator;
    delete Doxy_Globals::g_outputList;
 
    Mappers::freeMappers();
