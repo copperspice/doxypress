@@ -409,7 +409,7 @@ QByteArray Image::convert(int mode)
 
    int numCols;
 
-   if (mode = 0) {
+   if (mode == 0) {
       numCols = 8; 
    } else {
       numCols = 16;

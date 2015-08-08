@@ -17,5 +17,6 @@ class Brief3
    public:
       Brief3();
 
-      void myMethod();
+      void myMethod1();
+      void myMethod2();
 };

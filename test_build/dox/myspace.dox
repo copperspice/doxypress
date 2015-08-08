@@ -72,7 +72,7 @@ This function is defined in the <tt>&lt;QTextDocument&gt;</tt> header file.
 
 
 
-/**
+/*!
 \typedef MySpace::Alignment
 
 Refer to Test::AlignmentFlag for documentation.
@@ -80,7 +80,7 @@ Refer to Test::AlignmentFlag for documentation.
 */
 
 
-/**
+/*!
 \enum  MySpace::AlignmentFlag
 
 This enum type is used to describe alignment. It contains horizontal and vertical flags that can be combined to produce the required effect.
@@ -90,7 +90,7 @@ The Test::TextElideMode enum can also be used in many situations to fine-tune th
 */
 
 
-/**
+/*!
 \enum  MySpace::ArrowType
 
 Arrow type:
@@ -116,7 +116,8 @@ Arrow type:
 
 */
 
-/**
+
+/*!
 \enum  MySpace::BGMode
 
 Background mode:

@@ -22,7 +22,7 @@ The QSsl namespace declares enums common to all SSL classes in %CsNetwork.
 */
 
 
-/**
+/*!
 \enum QSsl::KeyType
 
 Describes the two types of keys QSslKey supports.
@@ -59,7 +59,7 @@ Describes the different key algorithms supported by QSslKey.
 */
 
 
-/**
+/*!
 \fn QSsl::someFunction (QString data)
 
 This is a function inside a namespace.

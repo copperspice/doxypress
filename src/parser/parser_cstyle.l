@@ -2316,47 +2316,54 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <UsingAlias>";"                         {
-                 previous->section=Entry::VARIABLE_SEC;
-                 previous->type = "typedef "+previous->args;
-                 previous->type=previous->type.simplified();
-                 previous->args.resize(0);
-                 previous->name=previous->name.trimmed();
-                 previous->bodyLine = yyLineNr;
-                 previous->m_specFlags.spec |= Entry::Alias;
-                 BEGIN(FindMembers);
+      previous->section=Entry::VARIABLE_SEC;
+      previous->type = "typedef "+previous->args;
+      previous->type=previous->type.simplified();
+      previous->args.resize(0);
+      previous->name=previous->name.trimmed();
+      previous->bodyLine = yyLineNr;
+      previous->m_specFlags.spec |= Entry::Alias;
+      BEGIN(FindMembers);
    }
 
 <UsingAlias>";"{BN}*("/**"|"//!"|"/*!"|"///")"<" {
-                 QString text = QString::fromUtf8(yytext);
-                 docBlockContext   = UsingAliasEnd;
-                 docBlockInBody    = false;
-
-                 docBlockAutoBrief = ( text[yyleng-2]=='*' && Config::getBool("javadoc-auto-brief") ) ||
-                                     ( text[yyleng-2]=='!' && Config::getBool("qt-auto-brief") );
-                 QString indent;
-                 indent.fill(' ',computeIndent(text, g_column));
-                 docBlock=indent;
-                 lineCount();
-
-                 docBlockTerm = ';';
-                 if (text[yyleng-3]=='/') {
-                   startCommentBlock(true);
-                   BEGIN( DocLine );
-                 } else {
-                   startCommentBlock(false);
-                   BEGIN( DocBlock );
-                 }
+      // */ (editor syntax fix)
+      QString text = QString::fromUtf8(yytext);
+      docBlockContext = UsingAliasEnd;
+      docBlockInBody  = false;
+      
+      static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+      static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+      
+      QString tmpChar = text[text.length() - 2]; 
+      docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
+      
+      text.fill(' ', computeIndent(text, g_column));
+      docBlock = text;
+      
+      lineCount();
+      
+      docBlockTerm = ';';
+      
+      if (text.length() - 3] == '/') {
+       startCommentBlock(true);
+       BEGIN( DocLine );
+      
+      } else {
+       startCommentBlock(false);
+       BEGIN( DocBlock );
+      }
    }
 
 <UsingAlias>.                           {
-                                          QString text = QString::fromUtf8(yytext);
-                                          previous->args += text;
+      QString text = QString::fromUtf8(yytext);
+      previous->args += text;
    }
 
 <UsingAlias>\n                          {
-                                          QString text = QString::fromUtf8(yytext);
-                                          previous->args += text;
-                                          lineCount();
+      QString text = QString::fromUtf8(yytext);
+      previous->args += text;
+      lineCount();
    }
 
 <UsingAliasEnd>";"                      {
@@ -3535,58 +3542,60 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FindMembers>[\^%]         {  
-   // ^ and % are C++/CLI extensions
-                 QString text = QString::fromUtf8(yytext);
-                 if (insideCli) {
-                      addType( current );
-                      current->name = text ;
-                 }
-                 else
-                 {
-                   REJECT;
-                 }
+      // ^ and % are C++/CLI extensions
+      QString text = QString::fromUtf8(yytext);
+
+      if (insideCli) {
+          addType( current );
+          current->name = text ;
+      } else {
+         REJECT;
+      }
    }
 
 <FindMembers>[*&]+         {
-                    QString text = QString::fromUtf8(yytext);
-                    current->name += text;
-                    addType( current );
+      QString text = QString::fromUtf8(yytext);
+      current->name += text;
+      addType( current );
    }
 
 <FindMembers,MemberSpec,Function,NextSemi,EnumBaseType,BitFields,ReadInitializer,OldStyleArgs>";"{BN}*("/**"|"//!"|"/*!"|"///")"<" {    
-                 // */ (editor syntax fix)
-
-                 QString text = QString::fromUtf8(yytext);
-
-                 if (current->bodyLine == -1) {
-                   current->bodyLine = yyLineNr;
-                 }
-
-                 docBlockContext   = YY_START;
-                 docBlockInBody    = false;
-                 docBlockAutoBrief = ( text[text.length() - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
-                                     ( text[text.length() - 2] == '!' && Config::getBool("qt-auto-brief")  );
-
-                 QString indent;
-                 indent.fill(' ',computeIndent(text, g_column));
-                 docBlock = indent;
-
-                 lineCount();
-                 docBlockTerm = ';';
-                 if (YY_START == EnumBaseType && current->section == Entry::ENUM_SEC) {
-                    current->bitfields = ":" + current->args;
-                    current->args.resize(0);
-                    current->section = Entry::VARIABLE_SEC;
-                 }
-
-                 if (text[text.length() - 3] == '/')  {
-                   startCommentBlock(true);
-                   BEGIN( DocLine );
-                 }
-                 else   {
-                   startCommentBlock(false);
-                   BEGIN( DocBlock );
-                 }
+      // */ (editor syntax fix)
+      
+      QString text = QString::fromUtf8(yytext);
+      
+      static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+      static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+      
+      if (current->bodyLine == -1) {
+         current->bodyLine = yyLineNr;
+      }
+      
+      docBlockContext   = YY_START;
+      docBlockInBody    = false;
+      
+      QString tmpChar = text[text.length() - 2]; 
+      docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
+      
+      text.fill(' ',computeIndent(text, g_column));
+      docBlock = text;
+      
+      lineCount();
+      docBlockTerm = ';';
+      
+      if (YY_START == EnumBaseType && current->section == Entry::ENUM_SEC) {
+         current->bitfields = ":" + current->args;
+         current->args.resize(0);
+         current->section = Entry::VARIABLE_SEC;
+      }
+      
+      if (text[text.length() - 3] == '/')  {
+         startCommentBlock(true);
+         BEGIN( DocLine );
+      } else   {
+         startCommentBlock(false);
+         BEGIN( DocBlock );
+      }
    }
 
 <MemberSpec,FindFields,FindMembers,NextSemi,EnumBaseType,BitFields,ReadInitializer,OldStyleArgs>","{BN}*("/**"|"//!"|"/*!"|"///")"<" {
@@ -3596,29 +3605,30 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                  docBlockContext   = YY_START;
                  docBlockInBody    = false;
 
-                 docBlockAutoBrief = ( text[text.length() - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
-                                     ( text[text.length() - 2] == '!' && Config::getBool("qt-auto-brief")  );
+                 static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+                 static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
-                 QString indent;
-                 indent.fill(' ',computeIndent(text, g_column));
-                 docBlock=indent;
+                  QString tmpChar = text[text.length() - 2]; 
+                  docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
+
+                 
+                 text.fill(' ',computeIndent(text, g_column));
+                 docBlock = text;
+
                  lineCount();
-
                  docBlockTerm = ',';
-                 if (YY_START == EnumBaseType && current->section == Entry::ENUM_SEC)
-                 {
-                    current->bitfields = ":"+current->args;
+
+                 if (YY_START == EnumBaseType && current->section == Entry::ENUM_SEC) {
+                    current->bitfields = ":" + current->args;
                     current->args.resize(0);
-                    current->section=Entry::VARIABLE_SEC;
+                    current->section = Entry::VARIABLE_SEC;
                  }
                 
-                 if (text[text.length() - 3] == '/')
-                 {
+                 if (text[text.length() - 3] == '/') {
                    startCommentBlock(true);
                    BEGIN( DocLine );
-                 }
-                 else
-                 {
+
+                 } else {
                    startCommentBlock(false);
                    BEGIN( DocBlock );
                  }
@@ -3636,19 +3646,18 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                  docBlockInBody    = false;
                  docBlockAutoBrief = ( text[text.length() - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
                                      ( text[text.length() - 2] == '!' && Config::getBool("qt-auto-brief") );
-                 QString indent;
-                 indent.fill(' ', computeIndent(text, g_column));
+
+                 text.fill(' ',computeIndent(text, g_column));
+                 docBlock = text;
+
                  docBlock = indent;
                  lineCount();
 
                  docBlockTerm = 0;
-                 if (text[text.length() - 3] == '/')
-                 {
+                 if (text[text.length() - 3] == '/') {
                    startCommentBlock(true);
                    BEGIN( DocLine );
-                 }
-                 else
-                 {
+                 } else {
                    startCommentBlock(false);
                    BEGIN( DocBlock );
                  }
@@ -3666,7 +3675,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                    openGroup(current,yyFileName,yyLineNr);
                  }
 
-                 //current = tmp;
+                 // current = tmp;
                  initEntry();
 
                  if (text[1] == '/') {
@@ -3678,24 +3687,28 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                      docBlockTerm = 0;
                      startCommentBlock(true);
                      BEGIN(DocLine);
-                   }
-                   else
-                   {
+                   } else {
                      lastCContext = YY_START;
                      BEGIN(SkipCxxComment);
                    }
 
                  } else {
+
                    if (text[2] == '!' || text[2] == '*') {
                      docBlockContext   = YY_START;
                      docBlockInBody    = false;
                      docBlock.resize(0);
 
-                     docBlockAutoBrief = ( text[text.length() - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
-                                         ( text[text.length() - 2] == '!' && Config::getBool("qt-auto-brief") );
+                     static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+                     static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+      
+                     QString tmpChar = text[text.length() - 2]; 
+                     docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
+
                      docBlockTerm = 0;
                      startCommentBlock(false);
                      BEGIN(DocBlock);
+
                    } else {
                      lastCContext = YY_START;
                      BEGIN(SkipComment);
@@ -6497,6 +6510,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       if ( curlyCount ) {
          --curlyCount ;
+
       } else {
          current->endBodyLine = yyLineNr;
          
@@ -6507,8 +6521,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          docBlockContext   = SkipCurlyEndDoc;
          docBlockInBody    = false;
 
-         docBlockAutoBrief = ( text[text.length() - 2] == '*' && Config::getBool("javadoc-auto-brief") ) || 
-               ( text[text.length() - 2] == '!' && Config::getBool("qt-auto-brief") );
+         static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+         static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+
+         QString tmpChar = text[text.length() - 2]; 
+         docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
 
          docBlock.resize(0);
          docBlockTerm = '}';
@@ -6528,19 +6545,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // */ (editor syntax fix)
       // desc is followed by another one
       QString text = QString::fromUtf8(yytext); 
-                 docBlockContext   = SkipCurlyEndDoc;
-                 docBlockInBody    = false;
-                 docBlockAutoBrief = ( text[text.length() - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
-                                     ( text[text.length() - 2] == '!' && Config::getBool("qt-auto-brief") );
-                 docBlock.resize(0);
-                 docBlockTerm = '}';
-                 if (text[text.length() - 3] == '/') {
-                   startCommentBlock(true);
-                   BEGIN( DocLine ); 
-                 } else {
-                   startCommentBlock(false);
-                   BEGIN( DocBlock );
-                 }
+
+      static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+      static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+
+      docBlockContext   = SkipCurlyEndDoc;
+      docBlockInBody    = false;
+
+      QString tmpChar = text[text.length() - 2]; 
+      docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
+              
+      docBlock.resize(0);
+      docBlockTerm = '}';
+      
+      if (text[text.length() - 3] == '/') {
+         startCommentBlock(true);
+         BEGIN( DocLine ); 
+      } else {
+         startCommentBlock(false);
+         BEGIN( DocBlock );
+      }
     }
 
 <SkipCurlyEndDoc>"}"          {
@@ -7644,10 +7668,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,SkipC11Inits,Bases,OldStyleArgs>("//"{B}*)?"/*!" {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
-      removeSlashes=(text[1] == '/');
+
+      removeSlashes = (text[1] == '/');
       tmpDocType=-1;
-      if (!current->doc.isEmpty()) {
-         current->doc+="\n\n";
+
+      if (! current->doc.isEmpty()) {
+         current->doc += "\n\n";
       } else {
          current->docLine = yyLineNr;
          current->docFile = yyFileName;
@@ -7659,7 +7685,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       }
 
       docBlockContext   = YY_START;
-      docBlockInBody    = YY_START == SkipCurly;
+      docBlockInBody    = (YY_START == SkipCurly);
+
       docBlockAutoBrief = Config::getBool("qt-auto-brief");
       
       text.fill(' ', computeIndent(text, g_column));
@@ -7677,7 +7704,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,Bases,OldStyleArgs>("//"{B}*)?"/**"/[^/*] {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
-      removeSlashes=(text[1] == '/');
+      removeSlashes  = (text[1] == '/');
       lastDocContext = YY_START;
 
       if (current_root->section & Entry::SCOPE_MASK) {
@@ -7686,8 +7713,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       current->docLine = yyLineNr;
       current->docFile = yyFileName;
-      docBlockContext = YY_START;
-      docBlockInBody  = YY_START==SkipCurly; 
+      docBlockContext  = YY_START;
+      docBlockInBody   = YY_START==SkipCurly; 
 
       static bool javadocAutoBrief = Config::getBool("javadoc-auto-brief");
       docBlockAutoBrief = javadocAutoBrief;     
@@ -7707,9 +7734,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
       tmpDocType=-1;
       lastDocContext = YY_START;
+
       if (current_root->section & Entry::SCOPE_MASK) {
          current->inside = current_root->name+"::";
       }
+
       docBlockContext   = YY_START;
       docBlockInBody    = YY_START == SkipCurly;
       docBlockAutoBrief = false;     

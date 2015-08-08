@@ -22,7 +22,7 @@ There is an enum in this namespace with the same name as one found in the QSsl n
 */
 
 
-/**
+/*!
 \enum QSsl_DupEnum::KeyType
 
 Start of text for %KeyType in QSsl_DupEnum

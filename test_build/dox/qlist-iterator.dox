@@ -67,7 +67,7 @@ Multiple iterators can be used on the same list. However, be aware that any non-
 */
 
 
-/**
+/*!
 \fn QList::iterator::iterator ()
 
 Constructs an uninitialized iterator.
@@ -79,7 +79,7 @@ Functions like operator*() and operator++() should not be called on an uninitial
 */
 
 
-/**
+/*!
 \fn QList< T >::iterator::iterator ( const iterator & other )
 
 Constructs a copy of <i>other</i>.
@@ -87,7 +87,7 @@ Constructs a copy of <i>other</i>.
 */
 
 
-/**
+/*!
 \fn bool QList< T >::iterator::operator!= ( const iterator & other ) const
 
 Returns true if <i>other</i> points to a different item than this iterator; otherwise returns false.
@@ -98,7 +98,7 @@ Returns true if <i>other</i> points to a different item than this iterator; othe
 */
 
 
-/**
+/*!
 \fn bool QList::iterator::operator!= ( const const_iterator & other ) const
 
 Returns true if <i>other</i> points to a different item than this iterator; otherwise returns false.
@@ -108,7 +108,7 @@ Returns true if <i>other</i> points to a different item than this iterator; othe
 */
 
 
-/**
+/*!
 \fn T & QList::iterator::operator* () const
 
 Returns a modifiable reference to the current item.
@@ -127,7 +127,7 @@ You can change the value of an item by using operator*() on the left side of an 
 */
 
 
-/**
+/*!
 \fn iterator QList::iterator::operator+ ( int j ) const
 
 Returns an iterator to the item at <i>j</i> positions forward from this iterator. (If <i>j</i> is negative, the iterator goes backward.)
@@ -138,7 +138,7 @@ Returns an iterator to the item at <i>j</i> positions forward from this iterator
 */
 
 
-/**
+/*!
 \fn iterator & QList::iterator::operator++ ()
 
 The prefix ++ operator (<tt>++it</tt>) advances the iterator to the next item in the list and returns an iterator to the new current item.
@@ -150,7 +150,7 @@ Calling this function on QList::end() leads to undefined results.
 */
 
 
-/**
+/*!
 \fn iterator QList::iterator::operator++ ( int )
 
 This is an overloaded function.
@@ -161,7 +161,7 @@ The postfix ++ operator (<tt>it++</tt>) advances the iterator to the next item i
 */
 
 
-/**
+/*!
 \fn iterator & QList::iterator::operator+= ( int j )
 
 Advances the iterator by <i>j</i> items. (If <i>j</i> is negative, the iterator goes backward.)
@@ -172,7 +172,7 @@ Advances the iterator by <i>j</i> items. (If <i>j</i> is negative, the iterator 
 */
 
 
-/**
+/*!
 \fn iterator QList::iterator::operator- ( int j ) const
 
 Returns an iterator to the item at <i>j</i> positions backward from this iterator. (If <i>j</i> is negative, the iterator goes forward.)
@@ -182,7 +182,7 @@ Returns an iterator to the item at <i>j</i> positions backward from this iterato
 */
 
 
-/**
+/*!
 \fn int QList::iterator::operator- ( iterator other ) const
 
 Returns the number of items between the item pointed to by <i>other</i> and the item pointed to by this iterator.
@@ -190,7 +190,7 @@ Returns the number of items between the item pointed to by <i>other</i> and the 
 */
 
 
-/**
+/*!
 \fn iterator & QList::iterator::operator-- ()
 
 The prefix -- operator (<tt>--it</tt>) makes the preceding item current and returns an iterator to the new current item.
@@ -202,7 +202,7 @@ Calling this function on QList::begin() leads to undefined results.
 */
 
 
-/**
+/*!
 \fn iterator QList::iterator::operator-- ( int )
 
 This is an overloaded function.
@@ -212,7 +212,7 @@ The postfix -- operator (<tt>it--</tt>) makes the preceding item current and ret
 */
 
 
-/**
+/*!
 \fn iterator & QList::iterator::operator-= ( int j )
 
 Makes the iterator go back by <i>j</i> items. (If <i>j</i> is negative, the iterator goes forward.)
@@ -222,7 +222,7 @@ Makes the iterator go back by <i>j</i> items. (If <i>j</i> is negative, the iter
 */
 
 
-/**
+/*!
 \fn T * QList::iterator::operator-> () const
 
 Returns a pointer to the current item.
@@ -233,7 +233,7 @@ Returns a pointer to the current item.
 */
 
 
-/**
+/*!
 \fn bool QList::iterator::operator< ( const iterator & other ) const
 
 Returns true if the item pointed to by this iterator is less than the item pointed to by the <i>other</i> iterator.
@@ -241,7 +241,7 @@ Returns true if the item pointed to by this iterator is less than the item point
 */
 
 
-/**
+/*!
 \fn bool QList::iterator::operator< ( const const_iterator & other ) const
 
 Returns true if the item pointed to by this iterator is less than the item pointed to by the <i>other</i> iterator.
@@ -249,7 +249,7 @@ Returns true if the item pointed to by this iterator is less than the item point
 */
 
 
-/**
+/*!
 \fn bool QList::iterator::operator<= ( const iterator & other ) const
 
 Returns true if the item pointed to by this iterator is less than or equal to the item pointed to by the <i>other</i> iterator.
@@ -258,7 +258,7 @@ Returns true if the item pointed to by this iterator is less than or equal to th
 */
 
 
-/**
+/*!
 \fn bool QList::iterator::operator<= ( const const_iterator & other ) const
 
 Returns true if the item pointed to by this iterator is less than or equal to the item pointed to by the <i>other</i> iterator.
@@ -267,7 +267,7 @@ Returns true if the item pointed to by this iterator is less than or equal to th
 */
 
 
-/**
+/*!
 \fn bool QList::iterator::operator== ( const iterator & other ) const
 
 Returns true if <i>other</i> points to the same item as this iterator; otherwise returns false.
@@ -278,7 +278,7 @@ Returns true if <i>other</i> points to the same item as this iterator; otherwise
 */
 
 
-/**
+/*!
 \fn bool QList::iterator::operator== ( const const_iterator & other ) const
 
 Returns true if <i>other</i> points to the same item as this iterator; otherwise returns false.
@@ -289,7 +289,7 @@ Returns true if <i>other</i> points to the same item as this iterator; otherwise
 */
 
 
-/**
+/*!
 \fn bool QList::iterator::operator> ( const iterator & other ) const
 
 Returns true if the item pointed to by this iterator is greater than the item pointed to by the <i>other</i> iterator.
@@ -298,7 +298,7 @@ Returns true if the item pointed to by this iterator is greater than the item po
 */
 
 
-/**
+/*!
 \fn bool QList::iterator::operator> ( const const_iterator & other ) const
 
 Returns true if the item pointed to by this iterator is greater than the item pointed to by the <i>other</i> iterator.
@@ -307,7 +307,7 @@ Returns true if the item pointed to by this iterator is greater than the item po
 */
 
 
-/**
+/*!
 \fn bool QList::iterator::operator>= ( const iterator & other ) const
 
 Returns true if the item pointed to by this iterator is greater than or equal to the item pointed to by the <i>other</i> iterator.
@@ -316,7 +316,7 @@ Returns true if the item pointed to by this iterator is greater than or equal to
 */
 
 
-/**
+/*!
 \fn bool QList::iterator::operator>= ( const const_iterator & other ) const
 
 Returns true if the item pointed to by this iterator is greater than or equal to the item pointed to by the <i>other</i> iterator.
@@ -325,7 +325,7 @@ Returns true if the item pointed to by this iterator is greater than or equal to
 */
 
 
-/**
+/*!
 \fn T & QList::iterator::operator[] ( int j ) const
 
 Returns a modifiable reference to the item at position *this + <i>j</i>.
@@ -337,7 +337,7 @@ This function is provided to make QList iterators behave like C++ pointers.
 */
 
 
-/**
+/*!
 \typedef QList::iterator::iterator_category
 
 A synonym for <i>std::random_access_iterator_tag</i> indicating this iterator is a random access iterator.

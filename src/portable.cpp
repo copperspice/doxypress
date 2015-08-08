@@ -193,8 +193,8 @@ void portable_setenv(const QString &name_T, const QString &value_T)
    SetEnvironmentVariableW(&name[0], &value[0]);
 
 #else
-   QByteArray name  = name_T.utf8();
-   QByteArray value = value_T.utf8();
+   QByteArray name  = name_T.toUtf8();
+   QByteArray value = value_T.toUtf8();
 
    char **ep = 0;
    size_t size;
@@ -287,7 +287,7 @@ void portable_unsetenv(const QString &variable)
    }
 
    /* Some systems do not have unsetenv(), so we do it ourselves */
-   QByteArray tmp = variable.utf8();
+   QByteArray tmp = variable.toUtf8();
 
    size_t len = tmp.length();
 

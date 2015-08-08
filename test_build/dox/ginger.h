@@ -149,7 +149,6 @@ class Lemongrass : public CSObject
    public:
       int howMuch;
       QString otherNames;
-
 }
 
 #endif

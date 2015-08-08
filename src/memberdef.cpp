@@ -1152,8 +1152,7 @@ void MemberDef::_computeLinkableInProject()
       m_isLinkableCached = 1; // in file (and not in namespace) but file not linkable
       return;
    }
-   if (!protectionLevelVisible(m_impl->prot) && m_impl->mtype != MemberType_Friend) {
-      //printf("private and invisible!\n");
+   if (!protectionLevelVisible(m_impl->prot) && m_impl->mtype != MemberType_Friend) {     
       m_isLinkableCached = 1; // hidden due to protection
       return;
    }
@@ -1340,8 +1339,8 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
    return annoClassDef;
 }
 
-/*! This methods returns true if the brief section (also known as
- *  declaration section) is visible in the documentation.
+/*! This methods returns true if the brief section (also known as declaration section)
+ *  is visible in the documentation.
  */
 bool MemberDef::isBriefSectionVisible() const
 {
@@ -1350,31 +1349,33 @@ bool MemberDef::isBriefSectionVisible() const
    static bool briefMemberDesc     = Config::getBool("brief-member-desc");
    static bool repeatBrief         = Config::getBool("repeat-brief");
    static bool hideFriendCompounds = Config::getBool("hide-friend-compounds");
+   static bool alwaysDetailedSec   = Config::getBool("always-detailed-sec");
  
    QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict[m_impl->grpId];
 
    bool hasDocs = hasDocumentation() || (m_impl->grpId != -1 && !(info->doc.isEmpty() && info->header.isEmpty()));
 
-   // only include static members with file/namespace scope if
-   // explicitly enabled in the project file
+   // only include static members with file/namespace scope if enabled in the project file
    bool visibleIfStatic = ! (getClassDef() == 0 && isStatic() && ! extractStatic );
 
-   // only include members is the are documented or
-   // HIDE_UNDOC_MEMBERS is NO in the project file
-   bool visibleIfDocumented = (!hideUndocMembers || hasDocs || isDocumentedFriendClass() );
+   // only include members which are documented or HIDE_UNDOC_MEMBERS is NO in the project file
+   bool visibleIfDocumented = (! hideUndocMembers || hasDocs || isDocumentedFriendClass() );
 
-   // hide members with no detailed description and brief descriptions explicitly disabled.
-   bool visibleIfEnabled = !(hideUndocMembers && documentation().isEmpty() && !briefMemberDesc && !repeatBrief );
+   // hide members with no detailed description and brief description disabled
+   bool fnTest1 = (hideUndocMembers && documentation().isEmpty());
+   bool fnTest2 = (! briefMemberDesc && ! repeatBrief);
+   bool fnTest3 = ! (alwaysDetailedSec && ! briefDescription().isEmpty());
 
+   bool visibleIfEnabled = ! (fnTest1 && fnTest2 && fnTest3);
+   
    // Hide friend (class|struct|union) declarations if HIDE_FRIEND_COMPOUNDS is true
-   bool visibleIfFriendCompound = !(hideFriendCompounds && isFriend() && (m_impl->type == "friend class" ||
+   bool visibleIfFriendCompound = ! (hideFriendCompounds && isFriend() && (m_impl->type == "friend class" ||
                                      m_impl->type == "friend struct" || m_impl->type == "friend union" ) );
 
    // only include members that are non-private unless EXTRACT_PRIVATE is
    // set to YES or the member is part of a group
    bool visibleIfPrivate = (protectionLevelVisible(protection()) || m_impl->mtype == MemberType_Friend );
    
-
    // true if this member is a constructor or destructor
    bool cOrDTor = isConstructor() || isDestructor();
 
@@ -1631,7 +1632,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
       } else {
          // there is a brief member description and brief member
-         // descriptions are enabled or there is no detailed description.
+         // descriptions are enabled or there is no detailed description
       
          if (m_impl->annMemb) {
             m_impl->annMemb->setAnonymousUsed();

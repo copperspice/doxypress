@@ -141,7 +141,7 @@ instance is modified, it will be copied (copy-on-write), and that takes linear t
 */
 
 
-/**
+/*!
 \fn QList::QList ( std::initializer_list<T> args )
 
 Construct a list from the std::initializer_list specified by <i>args</i>.
@@ -152,7 +152,7 @@ This constructor is only enabled if the compiler supports C++0x
 */
 
 
-/**
+/*!
 \fn QList::~QList ()
 
 Destroys the list. References to the values in the list and all iterators of this list become invalid.
@@ -161,7 +161,7 @@ Destroys the list. References to the values in the list and all iterators of thi
 */
 
 
-/**
+/*!
 \fn void QList::append ( const T & value )
 
 Inserts <i>value</i> at the end of the list.
@@ -187,7 +187,7 @@ fast growth at both ends of the list.
 */
 
 
-/**
+/*!
 \fn void QList::append ( const QList<T> & value )
 
 This is an overloaded function.
@@ -200,7 +200,7 @@ Appends the items of the <i>value</i> list to this list.
 */
 
 
-/**
+/*!
 \fn const T & QList::at ( int i ) const
 
 Returns the item at index position <i>i</i> in the list. <i>i</i> must be a valid index position in the list (i.e., 0 &lt;= <i>i</i> &lt; size()).
@@ -213,7 +213,7 @@ This function is very fast (constant time).
 */
 
 
-/**
+/*!
 \fn T & QList::back ()
 
 This function is provided for STL compatibility. It is equivalent to last(). The list must not be empty. If the list can be empty, call isEmpty()
@@ -223,7 +223,7 @@ before calling this function.
 */
 
 
-/**
+/*!
 \fn const T & QList::back () const
 
 This is an overloaded function.
@@ -231,7 +231,7 @@ This is an overloaded function.
 */
 
 
-/**
+/*!
 \fn iterator QList::begin ()
 
 Returns an STL-style iterator pointing to the first item in the list.
@@ -242,7 +242,7 @@ Returns an STL-style iterator pointing to the first item in the list.
 */
 
 
-/**
+/*!
 \fn const_iterator QList::begin () const
 
 This is an overloaded function.
@@ -251,7 +251,7 @@ This is an overloaded function.
 */
 
 
-/**
+/*!
 \fn void QList::clear ()
 
 Removes all items from the list.
@@ -262,7 +262,7 @@ Removes all items from the list.
 */
 
 
-/**
+/*!
 \fn const_iterator QList::constBegin () const
 
 Returns a const STL-style iterator pointing to the first item in the list.
@@ -273,7 +273,7 @@ Returns a const STL-style iterator pointing to the first item in the list.
 */
 
 
-/**
+/*!
 \fn const_iterator QList::constEnd () const
 
 Returns a const STL-style iterator> pointing to the imaginary item after the last item in the list.
@@ -284,7 +284,7 @@ Returns a const STL-style iterator> pointing to the imaginary item after the las
 */
 
 
-/**
+/*!
 \fn QBool QList::contains ( const T & value ) const
 
 Returns true if the list contains an occurrence of <i>value</i>; otherwise returns false.
@@ -297,7 +297,7 @@ This function requires the value type to have an implementation of <tt>operator=
 */
 
 
-/**
+/*!
 \fn int QList::count ( const T & value ) const
 
 Returns the number of occurrences of <i>value</i> in the list.
@@ -310,7 +310,7 @@ This function requires the value type to have an implementation of <tt>operator=
 */
 
 
-/**
+/*!
 \fn int QList::count () const
 
 Returns the number of items in the list. This is effectively the same as size().
@@ -319,7 +319,7 @@ Returns the number of items in the list. This is effectively the same as size().
 */
 
 
-/**
+/*!
 \fn bool QList::empty () const
 
 This function is provided for STL compatibility. It is equivalent to isEmpty() and returns true if the list is empty.
@@ -328,7 +328,7 @@ This function is provided for STL compatibility. It is equivalent to isEmpty() a
 */
 
 
-/**
+/*!
 \fn iterator QList::end ()
 
 Returns an STL-style iterator pointing to the imaginary item after the last item in the list.
@@ -339,7 +339,7 @@ Returns an STL-style iterator pointing to the imaginary item after the last item
 */
 
 
-/**
+/*!
 \fn const_iterator QList::end () const
 
 This is an overloaded function.
@@ -348,7 +348,7 @@ This is an overloaded function.
 */
 
 
-/**
+/*!
 \fn bool QList::endsWith ( const T & value ) const
 
 Returns true if this list is not empty and its last item is equal to <i>value</i>; otherwise returns false.
@@ -361,7 +361,7 @@ Returns true if this list is not empty and its last item is equal to <i>value</i
 */
 
 
-/**
+/*!
 \fn QList<T>::iterator QList::erase ( iterator pos )
 
 Removes the item associated with the iterator <i>pos</i> from the list, and returns an iterator to the next item in the list (which may be end()).
@@ -372,7 +372,7 @@ Removes the item associated with the iterator <i>pos</i> from the list, and retu
 */
 
 
-/**
+/*!
 \fn QList<T>::iterator QList::erase ( iterator begin, iterator end )
 
 This is an overloaded function.
@@ -383,7 +383,7 @@ Removes all the items from <i>begin</i> up to (but not including) <i>end</i>. Re
 */
 
 
-/**
+/*!
 \fn T & QList::first ()
 
 Returns a reference to the first item in the list. The list must not be empty. If the list can be empty, call isEmpty() before calling this function.
@@ -394,7 +394,7 @@ Returns a reference to the first item in the list. The list must not be empty. I
 */
 
 
-/**
+/*!
 \fn const T & QList::first () const
 
 This is an overloaded function.
@@ -403,7 +403,7 @@ This is an overloaded function.
 */
 
 
-/**
+/*!
 \fn QList<T> QList::fromSet ( const QSet<T> & set ) [static]
 
 Returns a QList object with the data contained in <i>set</i>. The order of the elements in the QList is undefined.
@@ -424,7 +424,7 @@ Example:
 */
 
 
-/**
+/*!
 \fn QList<T> QList::fromStdList ( const std::list<T> & list ) [static]
 
 Returns a QList object with the data contained in <i>list</i>. The order of the elements in the QList is the same as in <i>list</i>.
@@ -446,7 +446,7 @@ Example:
 */
 
 
-/**
+/*!
 \fn QList<T> QList::fromVector ( const QVector<T> & vector ) [static]
 
 Returns a QList object with the data contained in <i>vector</i>.
@@ -467,7 +467,7 @@ Example:
 */
 
 
-/**
+/*!
 \fn T & QList::front ()
 
 This function is provided for STL compatibility. It is equivalent to first(). The list must not be empty. If the list can be empty, call isEmpty()
@@ -477,7 +477,7 @@ before calling this function.
 */
 
 
-/**
+/*!
 \fn const T & QList::front () const
 
 This is an overloaded function.
@@ -486,7 +486,7 @@ This is an overloaded function.
 */
 
 
-/**
+/*!
 \fn int QList::indexOf ( const T & value, int from = 0 ) const
 
 Returns the index position of the first occurrence of <i>value</i> in the list, searching forward from index position <i>from</i>. Returns -1 if no item matched.
@@ -512,7 +512,7 @@ Note that QList uses 0-based indexes, just like C++ arrays. Negative indexes are
 */
 
 
-/**
+/*!
 \fn void QList::insert ( int i, const T & value )
 
 Inserts <i>value</i> at index position <i>i</i> in the list. If <i>i</i> is 0, the value is prepended to the list. If <i>i</i> is size(), the
@@ -533,7 +533,7 @@ Example:
 */
 
 
-/**
+/*!
 \fn QList<T>::iterator QList::insert ( iterator before, const T & value )
 
 This is an overloaded function.
@@ -545,7 +545,7 @@ iterator passed to the function will be invalid after the call; the returned ite
 */
 
 
-/**
+/*!
 \fn bool QList::isEmpty () const
 
 Returns true if the list contains no items; otherwise returns false.
@@ -556,7 +556,7 @@ Returns true if the list contains no items; otherwise returns false.
 */
 
 
-/**
+/*!
 \fn T & QList::last ()
 
 Returns a reference to the last item in the list. The list must not be empty. If the list can be empty, call isEmpty() before calling this function.
@@ -567,7 +567,7 @@ Returns a reference to the last item in the list. The list must not be empty. If
 */
 
 
-/**
+/*!
 \fn const T & QList::last () const
 
 This is an overloaded function.
@@ -576,7 +576,7 @@ This is an overloaded function.
 */
 
 
-/**
+/*!
 \fn int QList::lastIndexOf ( const T & value, int from = -1 ) const
 
 Returns the index position of the last occurrence of <i>value</i> in the list, searching backward from index position <i>from</i>. If <i>from</i>
@@ -603,7 +603,7 @@ Note that QList uses 0-based indexes, just like C++ arrays. Negative indexes are
 */
 
 
-/**
+/*!
 \fn int QList::length () const
 
 This function is identical to count().
@@ -614,7 +614,7 @@ This function is identical to count().
 */
 
 
-/**
+/*!
 \fn QList<T> QList::mid ( int pos, int length = -1 ) const
 
 Returns a list whose elements are copied from this list, starting at position <i>pos</i>. If <i>length</i> is -1 (the default), all elements from
@@ -624,7 +624,7 @@ Returns a list whose elements are copied from this list, starting at position <i
 */
 
 
-/**
+/*!
 \fn void QList::move ( int from, int to )
 
 Moves the item at index position <i>from</i> to index position <i>to</i>.
@@ -646,7 +646,7 @@ This is the same as insert(<i>to</i>, takeAt(<i>from</i>)).This function assumes
 */
 
 
-/**
+/*!
 \fn void QList::pop_back ()
 
 This function is provided for STL compatibility. It is equivalent to removeLast(). The list must not be empty. If the list can be empty, call isEmpty() before calling this function.
@@ -655,7 +655,7 @@ This function is provided for STL compatibility. It is equivalent to removeLast(
 */
 
 
-/**
+/*!
 \fn void QList::pop_front ()
 
 This function is provided for STL compatibility. It is equivalent to removeFirst(). The list must not be empty. If the list can be empty, call isEmpty() before calling this function.
@@ -664,7 +664,7 @@ This function is provided for STL compatibility. It is equivalent to removeFirst
 */
 
 
-/**
+/*!
 \fn void QList::prepend ( const T & value )
 
 Inserts <i>value</i> at the beginning of the list.
@@ -689,7 +689,7 @@ This operation is usually very fast (constant time), because QList preallocates 
 */
 
 
-/**
+/*!
 \fn void QList::push_back ( const T & value )
 
 This function is provided for STL compatibility. It is equivalent to append(<i>value</i>).
@@ -698,7 +698,7 @@ This function is provided for STL compatibility. It is equivalent to append(<i>v
 */
 
 
-/**
+/*!
 \fn void QList::push_front ( const T & value )
 
 This function is provided for STL compatibility. It is equivalent to prepend(<i>value</i>).
@@ -707,7 +707,7 @@ This function is provided for STL compatibility. It is equivalent to prepend(<i>
 */
 
 
-/**
+/*!
 \fn int QList::removeAll ( const T & value )
 
 Removes all occurrences of <i>value</i> in the list and returns the number of entries removed.
@@ -729,7 +729,7 @@ This function requires the value type to have an implementation of <tt>operator=
 */
 
 
-/**
+/*!
 \fn void QList::removeAt ( int i )
 
 Removes the item at index position <i>i</i>. <i>i</i> must be a valid index position in the list (i.e., 0 &lt;= <i>i</i> &lt; size()).
@@ -740,7 +740,7 @@ Removes the item at index position <i>i</i>. <i>i</i> must be a valid index posi
 */
 
 
-/**
+/*!
 \fn void QList::removeFirst ()
 
 Removes the first item in the list. Calling this function is equivalent to calling removeAt(0). The list must not be empty. If the list can be empty, call isEmpty() before calling this function.
@@ -751,7 +751,7 @@ Removes the first item in the list. Calling this function is equivalent to calli
 */
 
 
-/**
+/*!
 \fn void QList::removeLast ()
 
 Removes the last item in the list. Calling this function is equivalent to calling removeAt(size() - 1). The list must not be empty. If the list can be empty, call isEmpty() before calling this function.
@@ -762,7 +762,7 @@ Removes the last item in the list. Calling this function is equivalent to callin
 */
 
 
-/**
+/*!
 \fn bool QList::removeOne ( const T & value )
 
 Removes the first occurrence of <i>value</i> in the list and returns true on success; otherwise returns false.
@@ -784,7 +784,7 @@ This function requires the value type to have an implementation of <tt>operator=
 */
 
 
-/**
+/*!
 \fn void QList::replace ( int i, const T & value )
 
 Replaces the item at index position <i>i</i> with <i>value</i>. <i>i</i> must be a valid index position in the list (i.e., 0 &lt;= <i>i</i> &lt; size()).
@@ -795,7 +795,7 @@ Replaces the item at index position <i>i</i> with <i>value</i>. <i>i</i> must be
 */
 
 
-/**
+/*!
 \fn void QList::reserve ( int alloc )
 
 Reserve space for <i>alloc</i> elements.
@@ -808,7 +808,7 @@ Use this function to avoid repetetive reallocation of QList's internal data if y
 */
 
 
-/**
+/*!
 \fn int QList::size () const
 
 Returns the number of items in the list.
@@ -819,7 +819,7 @@ Returns the number of items in the list.
 */
 
 
-/**
+/*!
 \fn bool QList::startsWith ( const T & value ) const
 
 Returns true if this list is not empty and its first item is equal to <i>value</i>; otherwise returns false.
@@ -830,7 +830,7 @@ Returns true if this list is not empty and its first item is equal to <i>value</
 */
 
 
-/**
+/*!
 \fn void QList::swap ( QList<T> & other )
 
 Swaps list <i>other</i> with this list. This operation is very fast and never fails.
@@ -838,7 +838,7 @@ Swaps list <i>other</i> with this list. This operation is very fast and never fa
 */
 
 
-/**
+/*!
 \fn void QList::swap ( int i, int j )
 
 Exchange the item at index position <i>i</i> with the item at index position <i>j</i>. This function assumes that both <i>i</i> and <i>j</i> are at
@@ -859,7 +859,7 @@ Example:
 */
 
 
-/**
+/*!
 \fn T QList::takeAt ( int i )
 
 Removes the item at index position <i>i</i> and returns it. <i>i</i> must be a valid index position in the list (i.e., 0 &lt;= <i>i</i> &lt; size()).
@@ -872,7 +872,7 @@ If you do not use the return value, removeAt() is more efficient.
 */
 
 
-/**
+/*!
 \fn T QList::takeFirst ()
 
 Removes the first item in the list and returns it. This is the same as takeAt(0). This function assumes the list is not empty. To avoid failure, call isEmpty() before calling this function.
@@ -887,7 +887,7 @@ If you do not use the return value, removeFirst() is more efficient.
 */
 
 
-/**
+/*!
 \fn T QList::takeLast ()
 
 Removes the last item in the list and returns it. This is the same as takeAt(size() - 1). This function assumes the list is not empty. To avoid failure, call
@@ -903,7 +903,7 @@ If you don't use the return value, removeLast() is more efficient.
 */
 
 
-/**
+/*!
 \fn QSet<T> QList::toSet () const
 
 Returns a QSet object with the data contained in this QList. Since QSet doesn't allow duplicates, the resulting QSet might be smaller than the original list was.
@@ -926,7 +926,7 @@ Example:
 */
 
 
-/**
+/*!
 \fn std::list<T> QList::toStdList () const
 
 Returns a std::list object with the data contained in this QList. Example:
@@ -944,7 +944,7 @@ Returns a std::list object with the data contained in this QList. Example:
 */
 
 
-/**
+/*!
 \fn QVector<T> QList::toVector () const
 
 Returns a QVector object with the data contained in this QList.
@@ -965,7 +965,7 @@ Example:
 */
 
 
-/**
+/*!
 \fn T QList::value ( int i ) const
 
 Returns the value at index position <i>i</i> in the list.
@@ -979,7 +979,7 @@ bounds, you can use at() instead, which is slightly faster.
 */
 
 
-/**
+/*!
 \fn T QList::value ( int i, const T & defaultValue ) const
 
 This is an overloaded function.
@@ -990,7 +990,7 @@ If the index <i>i</i> is out of bounds, the function returns <i>defaultValue</i>
 */
 
 
-/**
+/*!
 \fn bool QList::operator!= ( const QList<T> & other ) const
 
 Returns true if <i>other</i> is not equal to this list; otherwise returns false.
@@ -1005,7 +1005,7 @@ This function requires the value type to have an implementation of <tt>operator=
 */
 
 
-/**
+/*!
 \fn QList<T> QList::operator+ ( const QList<T> & other ) const
 
 Returns a list that contains all the items in this list followed by all the items in the <i>other</i> list.
@@ -1016,7 +1016,7 @@ Returns a list that contains all the items in this list followed by all the item
 */
 
 
-/**
+/*!
 \fn QList<T> & QList::operator+= ( const QList<T> & other )
 
 Appends the items of the <i>other</i> list to this list and returns a reference to this list.
@@ -1027,7 +1027,7 @@ Appends the items of the <i>other</i> list to this list and returns a reference 
 */
 
 
-/**
+/*!
 \fn QList<T> & QList::operator+= ( const T & value )
 
 This is an overloaded function.
@@ -1040,7 +1040,7 @@ Appends <i>value</i> to the list.
 */
 
 
-/**
+/*!
 \fn QList<T> & QList::operator<< ( const QList<T> & other )
 
 Appends the items of the <i>other</i> list to this list and returns a reference to this list.
@@ -1051,7 +1051,7 @@ Appends the items of the <i>other</i> list to this list and returns a reference 
 */
 
 
-/**
+/*!
 \fn QList<T> & QList::operator<< ( const T & value )
 
 This is an overloaded function.
@@ -1062,7 +1062,7 @@ Appends <i>value</i> to the list.
 */
 
 
-/**
+/*!
 \fn QList<T> & QList::operator= ( const QList<T> & other )
 
 Assigns <i>other</i> to this list and returns a reference to this list.
@@ -1071,7 +1071,7 @@ Assigns <i>other</i> to this list and returns a reference to this list.
 */
 
 
-/**
+/*!
 \fn bool QList::operator== ( const QList<T> & other ) const
 
 Returns true if <i>other</i> is equal to this list; otherwise returns false.
@@ -1086,7 +1086,7 @@ This function requires the value type to have an implementation of <tt>operator=
 */
 
 
-/**
+/*!
 \fn T & QList::operator[] ( int i )
 
 Returns the item at index position <i>i</i> as a modifiable reference. <i>i</i> must be a valid index position in the list (i.e., 0 &lt;= <i>i</i> &lt; size()).
@@ -1099,7 +1099,7 @@ This function is very fast (constant time).
 */
 
 
-/**
+/*!
 \fn const T & QList::operator[] ( int i ) const
 
 This is an overloaded function.
@@ -1110,7 +1110,7 @@ Same as at().
 */
 
 
-/**
+/*!
 \typedef QList::ConstIterator
 
 Synonym for QList::const_iterator.
@@ -1119,7 +1119,7 @@ Synonym for QList::const_iterator.
 */
 
 
-/**
+/*!
 \typedef QList::Iterator
 
 Synonym for QList::iterator.
@@ -1128,7 +1128,7 @@ Synonym for QList::iterator.
 */
 
 
-/**
+/*!
 \typedef QList::const_pointer
 
 Typedef for const T *. Provided for STL compatibility.
@@ -1137,7 +1137,7 @@ Typedef for const T *. Provided for STL compatibility.
 */
 
 
-/**
+/*!
 \typedef QList::const_reference
 
 Typedef for const T &. Provided for STL compatibility.
@@ -1146,7 +1146,7 @@ Typedef for const T &. Provided for STL compatibility.
 */
 
 
-/**
+/*!
 \typedef QList::difference_type
 
 Typedef for ptrdiff_t. Provided for STL compatibility.
@@ -1155,7 +1155,7 @@ Typedef for ptrdiff_t. Provided for STL compatibility.
 */
 
 
-/**
+/*!
 \typedef QList::pointer
 
 Typedef for T *. Provided for STL compatibility.
@@ -1164,7 +1164,7 @@ Typedef for T *. Provided for STL compatibility.
 */
 
 
-/**
+/*!
 \typedef QList::reference
 
 Typedef for T &. Provided for STL compatibility.
@@ -1173,7 +1173,7 @@ Typedef for T &. Provided for STL compatibility.
 */
 
 
-/**
+/*!
 \typedef QList::size_type
 
 Typedef for int. Provided for STL compatibility.
@@ -1182,7 +1182,7 @@ Typedef for int. Provided for STL compatibility.
 */
 
 
-/**
+/*!
 \typedef QList::value_type
 
 Typedef for T. Provided for STL compatibility.

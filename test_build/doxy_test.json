@@ -21,7 +21,7 @@
     "allow-sub-grouping": true,
     "allow-unicode-names": false,
     "alpha-index": true,
-    "always-detailed-sec": false,
+    "always-detailed-sec": true,
     "auto-link": true,
     "binary-toc": false,
     "brief-member-desc": false,

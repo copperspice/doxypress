@@ -3920,7 +3920,7 @@ int DocHtmlDescTitle::parse()
    int retval = 0;
    int tok;
 
-   while (tok = doctokenizerYYlex()) {
+   while ((tok = doctokenizerYYlex())) {
 
       if (! defaultHandleToken(this, tok, m_children)) {
 

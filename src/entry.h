@@ -212,6 +212,8 @@ class Entry
          this->m_isFinal      |= other.m_isFinal;
 
          this->m_isAssign     |= other.m_isAssign;
+
+         return *this;
       }
 
       QByteArray toQByteArray() const {

@@ -21,7 +21,7 @@ Ginger is a test class to review how documentation is generated in DoxyPress for
 */
 
 
-/**
+/*!
 \fn Ginger::Ginger ()
 
 Constructs an empty Ginger class.
@@ -29,7 +29,7 @@ Constructs an empty Ginger class.
 */
 
 
-/**
+/*!
 \fn Ginger::~Ginger ()
 
 Destructor for Ginger.
@@ -38,7 +38,7 @@ Destructor for Ginger.
 
 
 
-/**
+/*!
 \fn double Ginger::getAmount ()
 
 Returns the amount of ginger used in a recipe.
@@ -46,7 +46,7 @@ Returns the amount of ginger used in a recipe.
 */
 
 
-/**
+/*!
 \fn void Ginger::setAmount (double amt)
 
 Sets the amount of ginger to use in a recipe.
@@ -55,7 +55,7 @@ Sets the amount of ginger to use in a recipe.
 */
 
 
-/**
+/*!
 \fn bool Ginger::isChopped ()
 
 Indicates if the ginger should be chopped. This only pertains to fresh ginger.
@@ -63,7 +63,7 @@ Indicates if the ginger should be chopped. This only pertains to fresh ginger.
 */
 
 
-/**
+/*!
 \fn bool Ginger::isGrated ()
 
 Indicates if the ginger should be grated. This only pertains to fresh ginger.
@@ -94,7 +94,7 @@ Powdered ginger should only be used for making a marinade like a Turkey Jerky re
 
 
 
-/**
+/*!
 \fn QString Ginger::someProtected ()
 
 Documentation for a protected method.
@@ -103,7 +103,7 @@ Documentation for a protected method.
 */
 
 
-/**
+/*!
 \fn QString Ginger::somePrivate ()
 
 Documentation for a private method.
@@ -111,7 +111,7 @@ Documentation for a private method.
 */
 
 
-/**
+/*!
 \fn QList<int> Ginger::takesRValue(QString && dataA);
 
 Documenting a method with an rvalue reference parameter.
@@ -119,14 +119,15 @@ Documenting a method with an rvalue reference parameter.
 */
 
 
-/**
+/*!
 \fn QString Ginger::getTitle()
 
 This method is documentation for getTitle which is used in a property.
 
 */
 
-/**
+
+/*!
 \fn void Ginger::setTitle()
 
 This method is documentation for setTitle which is used in a property.
@@ -134,7 +135,7 @@ This method is documentation for setTitle which is used in a property.
 */
 
 
-/**
+/*!
 \fn void Ginger::resetTitle()
 
 This method is documentation for resetTitle which is used in a property.
@@ -142,14 +143,15 @@ This method is documentation for resetTitle which is used in a property.
 */
 
 
-/**
+/*!
 \fn Ginger::getFavorite ()
 
 The getFavorite documentation is used with with retrieving a value in a property.
 
 */
 
-/**
+
+/*!
 \fn void Ginger::setFavorite ()
 
 The settFavorite documentation is used with with setting a value in a property.
@@ -157,7 +159,7 @@ The settFavorite documentation is used with with setting a value in a property.
 
 */
 
-/**
+/*!
 \fn Ginger::isScriptTitle ()
 
 The isScriptTitle documentation is connected to a property.
@@ -165,7 +167,7 @@ The isScriptTitle documentation is connected to a property.
 */
 
 
-/**
+/*!
 \fn void Ginger::ready ()
 
 The ready method is a signal in Ginger. 
@@ -173,7 +175,7 @@ The ready method is a signal in Ginger.
 */
 
 
-/**
+/*!
 \fn void Ginger::titleChanged (QString title)
 
 The titleChanged method is a signal in Ginger. 
@@ -181,21 +183,23 @@ The titleChanged method is a signal in Ginger.
 */
 
 
-/**
+/*!
 \fn void Ginger::newTitle (QString)
 
 The titleChanged method is a public slot in Ginger. 
 
 */
 
-/**
+
+/*!
 \fn void Ginger::someProtectedSlot ()
 
 The someProtectedSlot method is a protected slot in Ginger. 
 
 */
 
-/**
+
+/*!
 \fn void Ginger::somePrivateSlot (int)
 
 The somePrivateSlot titleChanged method is a private slot in Ginger. 
@@ -203,7 +207,7 @@ The somePrivateSlot titleChanged method is a private slot in Ginger.
 */
 
 
-/**
+/*!
 \fn void Ginger::test_A( Ginger **var_r )
 
 This is a private signal in Ginger.
@@ -211,7 +215,7 @@ This is a private signal in Ginger.
 */
 
 
-/**
+/*!
 \fn void Ginger::test_B(int var_s[] )
 
 This is a protected signal in Ginger.
@@ -219,7 +223,7 @@ This is a protected signal in Ginger.
 */
 
 
-/**
+/*!
 \fn void Ginger::test_C(bool b)
 
 This is a private signal in Ginger.
@@ -227,7 +231,7 @@ This is a private signal in Ginger.
 */
 
 
-/** 
+/*! 
 \fn void Ginger::test_D(int data[][42], void (*ptr)(int,QString *))
 
 This is a protectred signal in Ginger.
@@ -235,14 +239,15 @@ This is a protectred signal in Ginger.
 */
 
 
-/**
+/*!
 \enum Ginger::Brands
 
 An enum listing the different varieties of Ginger.
 
 */
 
-/**
+
+/*!
 \var Ginger::Brands Ginger::Chinese
 
 Considered to be the true ginger.
@@ -250,7 +255,7 @@ Considered to be the true ginger.
 */
 
 
-/**
+/*!
 \var Ginger::Brands Ginger::Jamaican
 
 This is the standard type of ginger found in most grocery stores.
@@ -258,7 +263,7 @@ This is the standard type of ginger found in most grocery stores.
 */
 
 
-/**
+/*!
 \var Ginger::Brands Ginger::Thai
 
 This ginger is also referred to as galangal or blue ginger.
@@ -266,13 +271,12 @@ This ginger is also referred to as galangal or blue ginger.
 */
 
 
-/**
+/*!
 \var Ginger::Brands Ginger::Yellow
 
 This is another name for Jamaican ginger.
 
 */
-
 
 
 /*!
@@ -291,7 +295,7 @@ The possible values are:
 */
 
 
-/**
+/*!
 \enum Ginger::Shapes
 
 An enum list of different Shapes. 
@@ -300,7 +304,7 @@ An enum list of different Shapes.
 
 
 
-/**
+/*!
 \typedef Ginger::AmountType
 
 AmountType is a typedef for double.
@@ -308,7 +312,7 @@ AmountType is a typedef for double.
 */
 
 
-/**
+/*!
 \property QNoSuchType Ginger::title_Qt
 
 Property documentation for title.   ( Qt )
@@ -316,7 +320,7 @@ Property documentation for title.   ( Qt )
 */
 
 
-/**
+/*!
 \property QString Ginger::title
 
 Property documentation for title.
@@ -324,7 +328,7 @@ Property documentation for title.
 */
 
 
-/**
+/*!
 \property Spices Ginger::favorite
 
 Property documentation for favorite.
@@ -346,7 +350,7 @@ Does the link from the QSSsl namespace work correct?   QSsl::someFunction()
 */
 
 
-/** 
+/*! 
 \var Lemongrass::howMuch
 
 Documentation for a public variable.

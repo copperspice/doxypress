@@ -5500,7 +5500,9 @@ void Doxy_Work::findInheritedTemplateInstances()
 
       Debug::print(Debug::Classes, 0, "  Inheritance: Class %s : \n", bName.data());
 
-      if (cd = getClass(bName)) {
+      cd = getClass(bName);
+
+      if (cd) {
          rootNav->loadEntry(Doxy_Globals::g_storage);
          findBaseClassesForClass(rootNav, cd, cd, cd, TemplateInstances, false);
          rootNav->releaseEntry();
@@ -5521,7 +5523,9 @@ void Doxy_Work::findUsedTemplateInstances()
 
       Debug::print(Debug::Classes, 0, "  Usage: Class %s : \n", bName.data());
 
-      if (cd = getClass(bName)) {
+      cd = getClass(bName);
+
+      if (cd) {
          rootNav->loadEntry(Doxy_Globals::g_storage);
 
          findUsedClassesForClass(rootNav, cd, cd, cd, true);
@@ -5547,7 +5551,9 @@ void Doxy_Work::computeClassRelations()
       QString bName = extractClassName(rootNav);
       Debug::print(Debug::Classes, 0, "  Relations: Class %s : \n", bName.data());
 
-      if (cd = getClass(bName)) {
+      cd = getClass(bName);
+
+      if (cd) {
          findBaseClassesForClass(rootNav, cd, cd, cd, DocumentedOnly, false);
       }
 
