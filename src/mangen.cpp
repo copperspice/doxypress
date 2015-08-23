@@ -86,7 +86,7 @@ void ManGenerator::init()
    QDir d(manOutput);
 
    if (! d.exists() && ! QDir::current().mkpath(manOutput)) {
-      err("Could not create output directory %s\n", qPrintable(manOutput));
+      err("Unable to create output directory %s\n", qPrintable(manOutput));
       exit(1);
    }
 
@@ -94,7 +94,7 @@ void ManGenerator::init()
    d.setPath(manOutput + "/" + subdir);
  
    if (! d.exists() && ! QDir::current().mkpath(manOutput + "/" + subdir)) {
-      err("Could not create output directory %s/%s\n", qPrintable(manOutput), qPrintable(subdir));
+      err("Unable to create output directory %s/%s\n", qPrintable(manOutput), qPrintable(subdir));
       exit(1);
    }
 
@@ -313,6 +313,10 @@ void ManGenerator::docify(const QString &text)
    for (auto c : text) {
       
       switch (c.unicode()) {
+         case '-':  
+            m_textStream << "\\-"; 
+            break;
+
          case '.':
             m_textStream << "\\&.";
             break; 
@@ -328,7 +332,8 @@ void ManGenerator::docify(const QString &text)
             break;
 
          case '\"':
-            c = '\''; // no break is correct
+            c = '\''; 
+            // no break is correct
 
          default:
             m_textStream << c;

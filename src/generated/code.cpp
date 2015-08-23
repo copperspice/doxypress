@@ -10889,7 +10889,7 @@ class CallContext
       Ctx *ctx = m_defList.last();
 
       if (ctx) {
-         DBG_CTX((stderr, "** Set call context %s (%p)\n", d == 0 ? "<null>" : qPrintable(d->name()), d.data()));
+         DBG_CTX((stderr, "** Set call context %s (%p)\n", d == 0 ? "<null>" : csPrintable(d->name()), d.data()));
          ctx->d = d;
       }
    }

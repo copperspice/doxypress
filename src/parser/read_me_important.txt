@@ -1,5 +1,6 @@
 The following is the copyright and code which needs to be copied by hand to src/generated/parser_cstyle.cpp
 
+egrep -v '^#line.*$' parser_cstyle.cpp > x.cpp
 
 
 /*************************************************************************

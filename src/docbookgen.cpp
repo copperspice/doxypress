@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -101,7 +101,7 @@ inline void writeDocbookString(QTextStream &t, const QString &text)
 }
 
 inline void writeDocbookCodeString(QTextStream &t, const QString &s, int &col)
-{   
+{
    for (auto c : s) {
 
       switch (c.unicode()) {
@@ -200,11 +200,11 @@ class DocbookCodeGenerator : public CodeOutputInterface
 
    virtual ~DocbookCodeGenerator() {}
 
-   void codify(const QString &text)  override {      
+   void codify(const QString &text)  override {
       writeDocbookCodeString(m_t, text, m_col);
    }
 
-   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor, 
+   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
                   const QString &name, const QString &tooltip) override {
 
       writeDocbookLink(m_t, file, anchor, name);
@@ -216,7 +216,7 @@ class DocbookCodeGenerator : public CodeOutputInterface
    }
 
    void startCodeLine(bool) {
-      
+
       if (m_lineNumber != -1) {
          if (!m_refId.isEmpty()) {
             m_t << "<link linkend=\"" << m_refId << "\">";
@@ -238,7 +238,7 @@ class DocbookCodeGenerator : public CodeOutputInterface
       m_insideCodeLine = false;
    }
 
-   void startFontClass(const QString &colorClass)  override {      
+   void startFontClass(const QString &colorClass)  override {
       m_t << "<emphasis class=\"" << colorClass << "\">";
       m_insideSpecialHL = true;
    }
@@ -248,7 +248,7 @@ class DocbookCodeGenerator : public CodeOutputInterface
       m_insideSpecialHL = false;
    }
 
-   void writeCodeAnchor(const QString &) override {      
+   void writeCodeAnchor(const QString &) override {
    }
 
    void writeLineNumber(const QString &extRef, const QString &compId, const QString &anchorId, int l) override {
@@ -294,7 +294,7 @@ class DocbookCodeGenerator : public CodeOutputInterface
    bool m_insideSpecialHL;
 };
 
-static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, QSharedPointer<Definition> scope, 
+static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, QSharedPointer<Definition> scope,
                   QSharedPointer<FileDef> fileScope, int indent)
 {
    QString indentStr;
@@ -335,7 +335,7 @@ static void writeTemplateList(QSharedPointer<ClassDef> cd, QTextStream &t)
    writeTemplateArgumentList(cd->templateArguments(), t, cd, QSharedPointer<FileDef>(), 4);
 }
 
-static void writeDocbookDocBlock(QTextStream &t, const QString &fileName, int lineNr, QSharedPointer<Definition> scope, 
+static void writeDocbookDocBlock(QTextStream &t, const QString &fileName, int lineNr, QSharedPointer<Definition> scope,
                   QSharedPointer<MemberDef> md, const QString &text)
 {
    QString stext = text.trimmed();
@@ -411,6 +411,8 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
    if (md->isHidden()) {
       return;
    }
+
+   static bool repeatBrief = Config::getBool("repeat-brief");
 
    //if (md->name().at(0)=='@') return; // anonymous member
 
@@ -495,7 +497,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
          t << "_1" << md->anchor() << "\">" << convertToXML(md->name()) << "</link>";
 
          if (enumFields != 0) {
-           
+
             t << " {" << endl;
             int cnt = 0;
 
@@ -516,7 +518,14 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             }
 
             t << endl << "}";
-            t << "</literallayout>" << endl;
+         }
+
+         t << "</literallayout>" << endl;
+
+         if (! md->briefDescription().isEmpty()) {
+            t << "<para><emphasis>";
+            writeDocbookString(t, md->briefDescription());
+            t << "</emphasis></para>" << endl;
          }
 
       } else if (md->memberType() == MemberType_Define) {
@@ -565,6 +574,12 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             }
 
             t << "_1" << md->anchor() << "\">" << convertToXML(md->name()) << "</link>";
+
+            if (! md->briefDescription().isEmpty()) {
+               t << "<para><emphasis>";
+               writeDocbookString(t,md->briefDescription());
+               t << "</emphasis></para>" << endl;
+            }
          }
 
       } else if (md->memberType() == MemberType_Typedef) {
@@ -573,12 +588,20 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
          linkifyText(TextGeneratorDocbookImpl(t), def, md->getBodyDef(), md, md->typeString());
          t << " ";
          t << " <link linkend=\"";
+
          if (md->getGroupDef() && def->definitionType() == Definition::TypeGroup) {
             t << md->getGroupDef()->getOutputFileBase();
          } else {
             t << memberOutputFileBase(md);
          }
+
          t << "_1" << md->anchor() << "\">" << convertToXML(md->name()) << "</link>";
+
+         if (! md->briefDescription().isEmpty()) {
+            t << "<para><emphasis>";
+            writeDocbookString(t,md->briefDescription());
+            t << "</emphasis></para>" << endl;
+         }
 
       } else if (md->memberType() == MemberType_Function) {
          t << "                        <para>";
@@ -594,10 +617,10 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
          t << "_1" << md->anchor() << "\">" << convertToXML(md->name()) << "</link>";
          t << " (" << endl;
 
-         ArgumentList *declAl = md->declArgumentList();             
+         ArgumentList *declAl = md->declArgumentList();
 
          if (declAl && declAl->count() > 0) {
-            int cnt = 0;            
+            int cnt = 0;
 
             for (auto a : *declAl) {
                if (cnt != 0) {
@@ -620,9 +643,16 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
 
          t << ")";
 
+         if (! md->briefDescription().isEmpty()) {      
+           t << "<para><emphasis>";
+           writeDocbookString(t,md->briefDescription());
+           t << "</emphasis></para>" << endl;
+          }
+
       } else {
          closePara = false;
       }
+
       if (closePara) {
          t << "</para>" << endl;
       }
@@ -654,7 +684,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
          if (enumFields != 0) {
 
             t << "               <formalpara>" << endl;
-            t << "                    <title>Enumerator:</title>" << endl;
+            t << "                    <title>" << theTranslator->trEnumerationValues() << ":</title>" << endl;
             t << "                    <variablelist>" << endl;
 
             for (auto emd : *enumFields) {
@@ -662,15 +692,21 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
                t << "                        <varlistentry xml:id=\"";
                t << memberOutputFileBase(emd) << "_1" << emd->anchor() << "\">" << endl;
                t << "                            <term>";
+
                writeDocbookString(t, emd->name());
                t << "</term>" << endl;
                t << "                            <listitem>" << endl;
-               t << "                                <para>";
-               writeDocbookString(t, emd->briefDescription());
-               t << "</para>" << endl;
+
+               if (repeatBrief) {
+                  t << "                                <para>";
+                  writeDocbookString(t,emd->briefDescription());
+                  t << "</para>" << endl;
+               }
+
                t << "                            </listitem>" << endl;
                t << "                        </varlistentry>" << endl;
             }
+
             t << "                     </variablelist>" << endl;
             t << "                </formalpara>" << endl;
             t << "                <para>";
@@ -678,12 +714,10 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             t << "                    <computeroutput><literallayout>" << endl;
             t << "{" << endl;
 
-//          for (emli.toFirst(); (emd = emli.current()); ++emli) {
-
             for (auto emd : *enumFields) {
                writeDocbookString(t, emd->name());
 
-               if (!emd->initializer().isEmpty()) {
+               if (! emd->initializer().isEmpty()) {
                   writeDocbookString(t, emd->initializer());
                }
                t << ", " << endl;
@@ -706,10 +740,13 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
 
          t << "_1" << md->anchor() << "\">" << endl;
          t << "                <title>" << convertToXML(md->definition()) << "</title>";
-         t << " <emphasis>";
-         writeDocbookString(t, md->briefDescription());
 
-         t << "</emphasis>" << endl;
+         if (repeatBrief) {
+            t << " <emphasis>";
+            writeDocbookString(t,md->briefDescription());
+            t << "</emphasis>" << endl;
+         }
+
          t << "                ";
          writeDocbookDocBlock(t, md->docFile(), md->docLine(), md->getOuterScope(), md, md->documentation());
 
@@ -727,10 +764,13 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
 
          t << "_1" << md->anchor() << "\">" << endl;
          t << "                <title>" << convertToXML(md->definition()) << " " << convertToXML(md->argsString()) << "</title>";
-         t << " <emphasis>";
-         writeDocbookString(t, md->briefDescription());
 
-         t << "</emphasis>" << endl;
+         if (repeatBrief)   {
+            t << " <emphasis>";
+            writeDocbookString(t,md->briefDescription());
+            t << "</emphasis>" << endl;
+         }
+
          t << "                ";
          writeDocbookDocBlock(t, md->docFile(), md->docLine(), md->getOuterScope(), md, md->documentation());
 
@@ -756,7 +796,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             t << "                <para>Definition at line " << md->getDefLine() << " of file " << stripPath(md->getDefFileName()) << "</para>" << endl;
             t << "                <para>The Documentation for this define was generated from the following file: </para>" << endl;
 
-            t << "                <para><itemizedlist><listitem><para>" << stripPath(md->getDefFileName()) 
+            t << "                <para><itemizedlist><listitem><para>" << stripPath(md->getDefFileName())
               << "</para></listitem></itemizedlist></para>" << endl;
 
             t << "            </section>" << endl;
@@ -773,12 +813,12 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
 
                t << endl;
 
-               t << "                <para>Definition at line " << md->getDefLine() << " of file " 
+               t << "                <para>Definition at line " << md->getDefLine() << " of file "
                  << stripPath(md->getDefFileName()) << "</para>" << endl;
 
                t << "                <para>The Documentation for this struct was generated from the following file: </para>" << endl;
 
-               t << "                <para><itemizedlist><listitem><para>" << stripPath(md->getDefFileName()) 
+               t << "                <para><itemizedlist><listitem><para>" << stripPath(md->getDefFileName())
                  << "</para></listitem></itemizedlist></para>" << endl;
 
                t << "            </simplesect>" << endl;
@@ -794,9 +834,13 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             }
             t << "_1" << md->anchor() << "\">" << endl;
             t << "                <title>" << convertToXML(md->definition()) << "</title>";
-            t << " <emphasis>";
-            writeDocbookString(t, md->briefDescription());
-            t << "</emphasis>" << endl;
+
+            if (repeatBrief) {
+               t << " <emphasis>";
+               writeDocbookString(t,md->briefDescription());
+               t << "</emphasis>" << endl;
+            }
+
             t << "                ";
             writeDocbookDocBlock(t, md->docFile(), md->docLine(), md->getOuterScope(), md, md->documentation());
             t << endl;
@@ -813,12 +857,14 @@ static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t,
       return;
    }
 
+   static bool repeatBrief = Config::getBool("repeat-brief");
+
    int count     = 0;
    int doc_count = 0;
 
    QString title;
    QString desctitle;
- 
+
    for (auto md : *ml) {
       // namespace members are also inserted in the file scope
       // to prevent this duplication in the Docbook output, we filter those here
@@ -828,78 +874,83 @@ static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t,
       }
    }
 
+   if (count == 0) {
+      // empty list
+      return;
+   }
+
    switch (ml->listType()) {
+
       case MemberListType_decDefineMembers:
-         title = "Defines";
-         desctitle = "Define Documentation";
+         title     = theTranslator->trDefines();
+         desctitle = theTranslator->trDefineDocumentation();
          break;
+
       case MemberListType_decTypedefMembers:
-         title = "Typedefs";
-         desctitle = "Typedef Documentation";
+         title     = theTranslator->trTypedefs(); 
+         desctitle = theTranslator->trTypedefDocumentation();  
          break;
+
       case MemberListType_decEnumMembers:
-         title = "Enumerations";
-         desctitle = "Enumeration Type documentation";
+         title     = theTranslator->trEnumerations();
+         desctitle = theTranslator->trEnumerationTypeDocumentation();
          break;
+
       case MemberListType_decFuncMembers:
-         title = "Functions";
-         desctitle = "Function Documentation";
+         title     = theTranslator->trFunctions();
+         desctitle = theTranslator->trFunctionDocumentation();
          break;
+
       case MemberListType_decVarMembers:
-         title = "Variables";
-         desctitle = "Variable Documentation";
+         title     = theTranslator->trVariables(); 
+         desctitle = theTranslator->trVariableDocumentation();
          break;
+
       case MemberListType_pubAttribs:
-         title = "Public Attributes";
+         title     = theTranslator->trPublicAttribs();
          desctitle = "Member Documentation";
          break;
+
       case MemberListType_priAttribs:
-         title = "Private Attributes";
-         desctitle = "Member Documentation";
+         title     = theTranslator->trPrivateAttribs(); 
+         desctitle = theTranslator->trMemberDataDocumentation();
          break;
+
       case MemberListType_proAttribs:
-         title = "Protected Attributes";
-         desctitle = "Member Documentation";
+         title     = theTranslator->trProtectedAttribs();
+         desctitle = theTranslator->trMemberDataDocumentation(); 
          break;
+
       default:
-         title = "";
+         title     = "";
          desctitle = "";
          break;
    }
 
-   if (count == 0) {
-      return;   
-   }
-
-   for (auto md : *ml) {
-      if (! md->documentation().isEmpty()) {
-         doc_count++;
-      }
-   }
-
    if (detailed) {
 
-      if (! desctitle.isEmpty()) {
-         if (desctitle == "Member Documentation") {
-            if (doc_count > 0) {
-               t << "        <simplesect>" << endl;
-               t << "            <title>" << desctitle << "</title>" << endl;
-            }
+      for (auto md : *ml) {
 
-         } else if (desctitle == "Define Documentation") {
-            if (doc_count > 0) {
-               t << "        <section>" << endl;
-               t << "            <title>" << desctitle << "</title>" << endl;
-            }
-
-         } else {
-            t << "        <section>" << endl;
-            t << "            <title>" << desctitle << "</title>" << endl;
+         if (md->documentation().isEmpty() && ! repeatBrief) {
+            continue;
          }
+
+         doc_count = 1;
+         break;
+      }
+
+      if (doc_count == 0) {
+         return;
+      }
+
+      if (! desctitle.isEmpty()) {
+         t << "        <section>" << endl;
+         t << "            <title>" << desctitle << "</title>" << endl;
       }
 
    } else {
-      t << "        <simplesect>" << endl;
+
+      t << "        <section>" << endl;
 
       if (! header.isEmpty()) {
          t << "            <title>" << convertToXML(header) << "</title>" << endl;
@@ -913,12 +964,17 @@ static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t,
       writeDocbookDocBlock(t, d->docFile(), d->docLine(), d, QSharedPointer<MemberDef>(), documentation);
       t << "</description>" << endl;
    }
-  
+
    for (auto md : *ml) {
-      // namespace members are also inserted in the file scope, 
+      // namespace members are also inserted in the file scope,
       // to prevent this duplication in the Docbook output, we filter those here
 
       if (d->definitionType() != Definition::TypeFile || md->getNamespaceDef() == 0) {
+
+         if (detailed && md->documentation().isEmpty() && ! repeatBrief) {
+            continue;
+         }
+
          generateDocbookForMember(md, t, d, detailed);
       }
    }
@@ -926,74 +982,70 @@ static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t,
    if (detailed) {
 
       if (! desctitle.isEmpty()) {
-         if (desctitle == "Member Documentation") {
-            if (doc_count > 0) {
-               t << "        </simplesect>" << endl;
-            }
-
-         } else if (desctitle == "Define Documentation") {
-            if (doc_count > 0) {
-               t << "        </section>" << endl;
-            }
-         } else {
-            t << "        </section>" << endl;
-         }
+         t << "        </section>" << endl;
       }
 
    } else {
-      t << "        </simplesect>" << endl;
+      t << "        </section>" << endl;
    }
 }
 
 static void writeInnerClasses(const ClassSDict *cl, QTextStream &t)
 {
    if (cl) {
-      QString title = "Classes";
-   
-      if (! cl->isEmpty()) { 
-            t << "        <simplesect>" << endl;
+      QString title = theTranslator->trClasses();
+
+      if (! cl->isEmpty()) {
+            t << "        <section>" << endl;
             t << "            <title> " << title << " </title>" << endl;
       }
 
-      for (auto cd : *cl) {        
+      for (auto cd : *cl) {
          if (! cd->isHidden() && cd->name().indexOf('@') == -1) {
             t << "            <para>" << endl;
             t << "                <itemizedlist>" << endl;
             t << "                    <listitem>" << endl;
 
-            t << "                        <para>" << "struct <link linkend=\"" 
+            t << "                        <para>" << "struct <link linkend=\""
               << classOutputFileBase(cd) << "\">" << convertToXML(cd->name()) << "</link>";
 
             t << "</para>" << endl;
+
+            if (! cd->briefDescription().isEmpty()) {
+               t << "<para><emphasis>";
+               writeDocbookString(t, cd->briefDescription());
+               t << "</emphasis></para>" << endl;
+            }
+
             t << "                    </listitem>" << endl;
             t << "                </itemizedlist>" << endl;
             t << "            </para>" << endl;
          }
       }
 
-      if (! cl->isEmpty()) { 
-         t << "        </simplesect>" << endl;
+      if (! cl->isEmpty()) {
+         t << "        </section>" << endl;
       }
    }
 }
 
 static void writeInnerNamespaces(const NamespaceSDict *nl, QTextStream &t)
 {
-   if (nl) {     
-      QString title = "Namespaces";
+   if (nl) {
+      QString title = theTranslator->trNamespaces();
 
       if (! nl->isEmpty()) {
          t << "        <simplesect>" << endl;
          t << "            <title> " << title << " </title>" << endl;
       }
-      
-      for (auto nd : *nl) {     
+
+      for (auto nd : *nl) {
          if (! nd->isHidden() && nd->name().indexOf('@') == -1) { // skip anonymouse scopes
             t << "            <para>" << endl;
             t << "                <itemizedlist>" << endl;
             t << "                    <listitem>" << endl;
 
-            t << "                        <para>" << "struct <link linkend=\"" << nd->getOutputFileBase() 
+            t << "                        <para>" << "struct <link linkend=\"" << nd->getOutputFileBase()
               << "\">" << convertToXML(nd->name()) << "</link>";
 
             t << "</para>" << endl;
@@ -1012,14 +1064,14 @@ static void writeInnerNamespaces(const NamespaceSDict *nl, QTextStream &t)
 static void writeInnerFiles(const FileList *fl, QTextStream &t)
 {
    if (fl) {
-      QString title = "Files";
+      QString title = theTranslator->trFile(true, true);
 
       if (! fl->isEmpty()) {
          t << "        <simplesect>" << endl;
          t << "            <title> " << title << " </title>" << endl;
       }
 
-      for (auto fd : *fl) {   
+      for (auto fd : *fl) {
          t << "            <para>" << endl;
          t << "                <itemizedlist>" << endl;
          t << "                    <listitem>" << endl;
@@ -1052,13 +1104,13 @@ static void writeInnerGroups(const SortedList<QSharedPointer<GroupDef>> *gl, QTe
 
       if (! gl->isEmpty()) {
          t << "    <simplesect>" << endl;
-         t << "        <title>Modules</title>" << endl;
+         t << "        <title>" << theTranslator->trModules() << "</title>" << endl;
          t << "    </simplesect>" << endl;
          t << "    <para>" << endl;
          t << "        <itemizedlist>" << endl;
       }
 
-      for (auto sgd : *gl) {   
+      for (auto sgd : *gl) {
          t << "            <listitem><para><link linkend=\"" << sgd->getOutputFileBase() << "\">" << convertToXML(
               sgd->groupTitle()) << "</link></para></listitem>" << endl;
       }
@@ -1073,15 +1125,15 @@ static void writeInnerGroups(const SortedList<QSharedPointer<GroupDef>> *gl, QTe
 }
 
 static void writeInnerDirs(const SortedList<QSharedPointer<DirDef>> dl, QTextStream &t)
-{ 
-   QString title = "Directories";
+{
+   QString title = theTranslator->trDirectories();
 
    if (! dl.isEmpty()) {
       t << "        <simplesect>" << endl;
       t << "            <title> " << title << " </title>" << endl;
    }
-  
-   for (auto subdir : dl) {   
+
+   for (auto subdir : dl) {
       t << "            <para>" << endl;
       t << "                <itemizedlist>" << endl;
       t << "                    <listitem>" << endl;
@@ -1156,7 +1208,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 
@@ -1231,30 +1283,31 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       }
    }
 
-   if (! cd->briefDescription().isEmpty()) {
-      t << "    <simplesect>" << endl;
-      t << "        <title>Brief Description</title>" << endl;
+   if (Config::getBool("repeat-brief")) {
 
-      writeDocbookDocBlock(t, cd->briefFile(), cd->briefLine(), cd, QSharedPointer<MemberDef>(), cd->briefDescription());
+      if (! cd->briefDescription().isEmpty()) {
+         t << "    <simplesect>" << endl;
 
-      t << "    </simplesect>" << endl;
+         writeDocbookDocBlock(t, cd->briefFile(), cd->briefLine(), cd, QSharedPointer<MemberDef>(), cd->briefDescription());
+         t << "    </simplesect>" << endl;
+      }
    }
 
    if (! cd->documentation().isEmpty()) {
       t << "        <simplesect>" << endl;
-      t << "            <title>Detailed Description</title>" << endl;
+      t << "            <title>" << theTranslator->trDetailedDescription() << "</title>" << endl;
 
       writeDocbookDocBlock(t, cd->docFile(), cd->docLine(), cd, QSharedPointer<MemberDef>(), cd->documentation());
 
       t << "                <para>Definition at line " << cd->getDefLine() << " of file " << stripPath(cd->getDefFileName()) << "</para>" << endl;
       t << "                <para>The Documentation for this struct was generated from the following file: </para>" << endl;
 
-      t << "                <para><itemizedlist><listitem><para>" << stripPath(cd->getDefFileName()) 
+      t << "                <para><itemizedlist><listitem><para>" << stripPath(cd->getDefFileName())
         << "</para></listitem></itemizedlist></para>" << endl;
 
       t << "        </simplesect>" << endl;
    }
- 
+
    for (auto ml : cd->getMemberLists()) {
       if ((ml->listType()&MemberListType_detailedLists) == 0) {
          generateDocbookSection(cd, t, ml, g_docbookSectionMapper.value(ml->listType()), true);
@@ -1331,8 +1384,6 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
    }
 
    QTextStream t(&f);
-   //t.setEncoding(QTextStream::UnicodeUTF8);
-
    writeDocbookHeader_ID(t, nd->getOutputFileBase());
 
    t << "<title>";
@@ -1354,23 +1405,26 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
       }
    }
 
-   if (! nd->briefDescription().isEmpty()) {
-      t << "    <simplesect>" << endl;
-      t << "        <title>Brief Description</title>" << endl;
-      writeDocbookDocBlock(t, nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(), nd->briefDescription());
-      t << "    </simplesect>" << endl;
+   if (Config::getBool("repeat-brief")) {
+
+      if (! nd->briefDescription().isEmpty()) {
+         t << "    <simplesect>" << endl;
+
+         writeDocbookDocBlock(t, nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(), nd->briefDescription());
+         t << "    </simplesect>" << endl;
+      }
    }
 
    if (! nd->documentation().isEmpty()) {
       t << "        <simplesect>" << endl;
-      t << "            <title>Detailed Description</title>" << endl;
+      t << "            <title>" << theTranslator->trDetailedDescription() << "</title>" << endl;
 
       writeDocbookDocBlock(t, nd->docFile(), nd->docLine(), nd, QSharedPointer<MemberDef>(), nd->documentation());
 
       t << "                <para>Definition at line " << nd->getDefLine() << " of file " << stripPath(nd->getDefFileName()) << "</para>" << endl;
       t << "                <para>The Documentation for this struct was generated from the following file: </para>" << endl;
 
-      t << "                <para><itemizedlist><listitem><para>" << stripPath(nd->getDefFileName()) 
+      t << "                <para><itemizedlist><listitem><para>" << stripPath(nd->getDefFileName())
         << "</para></listitem></itemizedlist></para>" << endl;
 
       t << "        </simplesect>" << endl;
@@ -1399,7 +1453,7 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    }
 
    QString fileDocbook = fd->getOutputFileBase() + ".xml";
- 
+
   //Add the file Documentation info to index file
    ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
 
@@ -1415,16 +1469,14 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    }
 
    QTextStream t(&f);
-   //t.setEncoding(QTextStream::UnicodeUTF8);
-
    writeDocbookHeader_ID(t, fd->getOutputFileBase());
 
    t << "    <title>";
    writeDocbookString(t, fd->name());
    t << " File Reference";
-   t << "</title>" << endl;  
+   t << "</title>" << endl;
 
-   if (fd->includeFileList()) {   
+   if (fd->includeFileList()) {
       for (auto inc : *fd->includeFileList()) {
          t << "    <programlisting>#include ";
 
@@ -1474,14 +1526,14 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       }
    }
 
-   for (auto ml : fd->getMemberLists()) {   
+   for (auto ml : fd->getMemberLists()) {
       if ((ml->listType()&MemberListType_declarationLists) != 0) {
          generateDocbookSection(fd, t, ml, g_docbookSectionMapper.value(ml->listType()));
       }
    }
 
    t << "    <simplesect>" << endl;
-   t << "        <title>Detailed Description</title>" << endl;
+   t << "        <title>" << theTranslator->trDetailedDescription() << "</title>" << endl;
 
    writeDocbookDocBlock(t, fd->briefFile(), fd->briefLine(), fd, QSharedPointer<MemberDef>(), fd->briefDescription());
    writeDocbookDocBlock(t, fd->docFile(), fd->docLine(), fd,  QSharedPointer<MemberDef>(), fd->documentation());
@@ -1534,7 +1586,7 @@ static void generateDocbookForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 
@@ -1551,17 +1603,14 @@ static void generateDocbookForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti
    }
 
    if (! gd->briefDescription().isEmpty()) {
-      t << "    <simplesect>" << endl;
-      t << "        <title>Brief Description</title>" << endl;
       writeDocbookDocBlock(t, gd->briefFile(), gd->briefLine(), gd, QSharedPointer<MemberDef>(), gd->briefDescription());
-      t << "    </simplesect>" << endl;
    }
 
    if (! gd->documentation().isEmpty()) {
-      t << "        <simplesect>" << endl;
-      t << "            <title>Detailed Description</title>" << endl;
+      t << "        <section>" << endl;
+      t << "            <title>" << theTranslator->trDetailedDescription() << "</title>" << endl;
       writeDocbookDocBlock(t, gd->docFile(), gd->docLine(), gd, QSharedPointer<MemberDef>(), gd->documentation());
-      t << "        </simplesect>" << endl;
+      t << "        </section>" << endl;
    }
 
    writeInnerFiles(gd->getFiles(), t);
@@ -1575,12 +1624,12 @@ static void generateDocbookForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti
          generateDocbookSection(gd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
       }
    }
- 
+
    for (auto ml : gd->getMemberLists()) {
       if ((ml->listType()&MemberListType_declarationLists) != 0) {
          generateDocbookSection(gd, t, ml, g_docbookSectionMapper.value(ml->listType()));
       }
-   } 
+   }
 
    for (auto ml : gd->getMemberLists()) {
       if ((ml->listType()&MemberListType_declarationLists) != 0) {
@@ -1611,18 +1660,15 @@ static void generateDocbookForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    QString relPath = relativePathToRoot(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 
    QTextStream t(&f);
-   //t.setEncoding(QTextStream::UnicodeUTF8);
    writeDocbookHeader_ID(t, dd->getOutputFileBase());
 
    t << "    <title>";
-   writeDocbookString(t, dd->displayName().toUtf8());
-
-   t << " Directory Reference";
+   t << theTranslator->trDirReference(dd->displayName());
    t << "</title>" << endl;
 
    if (Config::getBool("directory-graph") && Config::getBool("have-dot")) {
@@ -1635,7 +1681,7 @@ static void generateDocbookForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    writeInnerFiles(dd->getFiles(), t);
 
    t << "    <simplesect>" << endl;
-   t << "        <title>Detailed Description</title>" << endl;
+   t << "        <title>" << theTranslator->trDetailedDescription() << "</title>" << endl;
 
    writeDocbookDocBlock(t, dd->briefFile(), dd->briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription());
    writeDocbookDocBlock(t, dd->docFile(), dd->docLine(), dd, QSharedPointer<MemberDef>(), dd->documentation());
@@ -1672,12 +1718,12 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 
    QTextStream t(&f);
-   
+
    QString pName = pageName;
 
    if (isExample) {
@@ -1693,7 +1739,14 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
       writeDocbookHeaderMainpage(t);
 
    } else {
-      QString pid = pName + "_1" + pName;
+      QString pid;
+
+      if(isExample)     {
+         pid = pageName;
+      } else {
+         pid = pageName+"_1" + pageName;
+      }
+
       writeDocbookHeader_ID(t, pid);
    }
 
@@ -1742,7 +1795,7 @@ void generateDocbook()
          dir.setPath(QDir::currentPath());
 
          if (! dir.mkdir(outputDirectory)) {
-            err("DOCBOOK Output directory `%s' does not exist and can not be created\n", qPrintable(outputDirectory));
+            err("DocBook Output directory `%s' does not exist and can not be created\n", qPrintable(outputDirectory));
             exit(1);
 
          } else {
@@ -1761,7 +1814,7 @@ void generateDocbook()
       dir.setPath(QDir::currentPath());
 
       if (! dir.mkdir(outputDirectory)) {
-         err("Can not create directory %s\n", qPrintable(outputDirectory));
+         err("Unable to create directory %s\n", qPrintable(outputDirectory));
          return;
       }
    }
@@ -1776,7 +1829,7 @@ void generateDocbook()
    f.setFileName(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());     
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 
@@ -1790,7 +1843,7 @@ void generateDocbook()
    t << "    <title>" << dbk_projectName << "</title>" << endl;
    t << "    </info>" << endl;
 
-   // NAMESPACE DOCUMENTATION 
+   // NAMESPACE DOCUMENTATION
    //Namespace Documentation index header
 
    if (! Doxy_Globals::namespaceSDict->isEmpty()) {
@@ -1816,19 +1869,19 @@ void generateDocbook()
    }
 
    // PAGE DOCUMENTATION
-      
+
    for (auto pd : *Doxy_Globals::pageSDict) {
       msg("Generating Docbook output for page %s\n", qPrintable(pd->name()));
-      generateDocbookForPage(pd, t, false);      
+      generateDocbookForPage(pd, t, false);
    }
 
-   // ** MODULE GROUP DOCUMENTATION 
+   // ** module group documentation
 
 
    // Module group Documentation index header
    if (! Doxy_Globals::groupSDict->isEmpty()) {
       t << "    <chapter>" << endl;
-      t << "        <title>Module Documentation</title>" << endl;
+      t << "        <title>" << theTranslator->trModuleDocumentation() << "</title>" << endl;
    }
 
    for (auto gd : *Doxy_Globals::groupSDict) {
@@ -1847,7 +1900,7 @@ void generateDocbook()
       // Class Documentation index header
       if (! Doxy_Globals::classSDict->isEmpty()) {
          t << "    <chapter>" << endl;
-         t << "        <title>Class Documentation</title>" << endl;
+         t << "        <title>" << theTranslator->trClassDocumentation() << "</title>" << endl;
       }
 
       for (auto cd : *Doxy_Globals::classSDict) {
@@ -1864,14 +1917,14 @@ void generateDocbook()
 
    static bool showFiles = Config::getBool("show-file-page");
    if (showFiles) {
-    
+
       //File Documentation index header
       if (! Doxy_Globals::inputNameList->isEmpty()) {
          t << "    <chapter>" << endl;
-         t << "        <title>File Documentation</title>" << endl;
+         t << "        <title>" << theTranslator->trFileDocumentation() << "</title>" << endl;
       }
-    
-      for (auto fn : *Doxy_Globals::inputNameList) {        
+
+      for (auto fn : *Doxy_Globals::inputNameList) {
          for (auto fd : *fn) {
             msg("Generating Docbook output for file %s\n", qPrintable(fd->name()));
             generateDocbookForFile(fd, t);
@@ -1890,9 +1943,9 @@ void generateDocbook()
       // Directory Documentation index header
       if (! Doxy_Globals::directories.isEmpty()) {
          t << "    <chapter>" << endl;
-         t << "        <title>Directory Documentation</title>" << endl;
+         t << "        <title>" << theTranslator->trDirDocumentation() << "</title>" << endl;
       }
-      
+
       for (auto dir : Doxy_Globals::directories) {
          msg("Generate Docbook output for dir %s\n", qPrintable(dir->name()));
          generateDocbookForDir(dir, t);
@@ -1906,13 +1959,13 @@ void generateDocbook()
 
    // EXAMPLE PAGE DOCUMENTATION
 
-   {      
+   {
       //Example Page Documentation index header
       if (! Doxy_Globals::exampleSDict->isEmpty()) {
          t << "    <chapter>" << endl;
-         t << "        <title>Example Documentation</title>" << endl;
+         t << "        <title>" << theTranslator->trExampleDocumentation() << "</title>" << endl;
       }
-    
+
       for (auto pd : *Doxy_Globals::exampleSDict) {
          msg("Generating Docbook output for example %s\n", qPrintable(pd->name()));
          generateDocbookForPage(pd, t, true);

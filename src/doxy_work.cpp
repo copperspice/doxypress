@@ -988,7 +988,7 @@ void generateOutput()
       Htags::useHtags = true;      
 
       if (! Htags::execute(htmlOutput)) {
-         err("USE HTAGS is set, however htags(1) failed\n");
+         err("'USE HTAGS' is set, however htags(1) failed\n");
       }
       if (! Htags::loadFilemap(htmlOutput)) {
          err("htags(1) ended normally but failed to load the file map\n");
@@ -1171,7 +1171,7 @@ void generateOutput()
    if (generateRtf) {
       Doxy_Globals::g_stats.begin("Combining RTF output\n");
       if (! RTFGenerator::preProcessFileInplace(Config::getString("rtf-output"), "refman.rtf")) {
-         err("An error occurred during post processing the RTF files\n");
+         err("Error occurred during post processing of RTF files\n");
       }
 
       Doxy_Globals::g_stats.end();
@@ -1192,7 +1192,7 @@ void generateOutput()
       portable_sysTimerStart();
 
       if (portable_system(Config::getString("hhc-location"), "index.hhp", false)) {
-         err("Failed to run HTML Help compiler on 'index.hhp'\n");
+         err("Unable to run HTML Help compiler on 'index.hhp'\n");
       }
 
       portable_sysTimerStop();
@@ -1214,7 +1214,7 @@ void generateOutput()
       portable_sysTimerStart();
 
       if (portable_system(Config::getString("qthhelp-gen-path"), args, false)) {
-         err("Failed to run qhelpgenerator on 'index.qhp'\n");
+         err("Unable to run qhelpgenerator on 'index.qhp'\n");
       }
 
       portable_sysTimerStop();
@@ -1727,9 +1727,10 @@ void Doxy_Work::buildFileList(QSharedPointer<EntryNav> rootNav)
 
             text += "matches the following input files:\n";
             text += showFileDefMatches(Doxy_Globals::inputNameDict, root->name);
-            text += "Please use a more specific name by including a (larger) part of the path!";
+            text += "Please use a more specific name or includ a larger part of the path";
 
-         } else { // name is not an input file
+         } else { 
+            // name is not an input file
             text += "is not an input file";
          }
 
@@ -2108,7 +2109,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
    QSharedPointer<ClassDef> cd = getClass(qualifiedName);
 
    Debug::print(Debug::Classes, 0, "  Found class with name %s (qualifiedName=%s -> cd=%p)\n",
-                cd ? qPrintable(cd->name()) : qPrintable(root->name), qPrintable(qualifiedName), cd.data() );
+                cd ? csPrintable(cd->name()) : csPrintable(root->name), csPrintable(qualifiedName), cd.data() );
 
    if (cd) {
       fullName = cd->name();
@@ -2176,7 +2177,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
                         fullName, sec, tagName, refFileName, true, root->m_specFlags.spec & Entry::Enum);
 
       Debug::print(Debug::Classes, 0, "  New class `%s' (sec=0x%08x)! #tArgLists=%d tagInfo=%p\n",
-                   fullName.data(), sec, root->tArgLists ? (int)root->tArgLists->count() : -1, tagInfo);
+                   csPrintable(fullName), sec, root->tArgLists ? (int)root->tArgLists->count() : -1, tagInfo);
 
       // copy docs to definition
       cd->setDocumentation(root->doc, root->docFile, root->docLine);
@@ -2801,7 +2802,7 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
          if (usingCd == 0) { 
             // definition not in the input => add an artificial class
             Debug::print(Debug::Classes, 0, "  New using class `%s' (sec=0x%08x)! #tArgLists=%d\n",
-                         name.data(), root->section, root->tArgLists ? (int)root->tArgLists->count() : -1);
+                         csPrintable(name), root->section, root->tArgLists ? root->tArgLists->count() : -1);
 
             usingCd = QMakeShared<ClassDef>("<using>", 1, 1,name, ClassDef::Class);
 
@@ -2812,7 +2813,7 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
 
          } else {
             Debug::print(Debug::Classes, 0, "  Found used class %s in scope=%s\n",
-                         usingCd->name().data(), nd ? nd->name().data() : fd->name().data());
+                         csPrintable(usingCd->name()), nd ? csPrintable(nd->name()) : csPrintable(fd->name()));
          }
 
          if (nd) {           
@@ -2953,8 +2954,8 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
 
    Debug::print(Debug::Variables, 0, "  class variable:\n" 
                 "    `%s' `%s'::`%s' `%s' prot=`%d ann=%d init=`%s'\n",
-                root->type.data(), qualScope.data(), name.data(), root->args.data(),
-                root->protection, fromAnnScope, root->initializer.data());
+                csPrintable(root->type), csPrintable(qualScope), csPrintable(name), csPrintable(root->args),
+                root->protection, fromAnnScope, csPrintable(root->initializer));
 
    QString def;
 
@@ -3222,7 +3223,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
                // not a php array
                // not a php array variable
             
-               Debug::print(Debug::Variables, 0, "    variable already found: scope=%s\n", md->getOuterScope()->name().data());
+               Debug::print(Debug::Variables, 0, "    variable already found: scope=%s\n", csPrintable(md->getOuterScope()->name()));
 
                addMemberDocs(rootNav, md, def, 0, false);
                md->setRefItems(root->sli);
@@ -3485,8 +3486,8 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
 
    Debug::print(Debug::Variables, 0, "VARIABLE_SEC: \n"
                 "  type=`%s' name=`%s' args=`%s' bodyLine=`%d' mGrpId=%d relates=%s\n",
-                root->type.data(), root->name.data(), root->args.data(), root->bodyLine,
-                root->mGrpId, root->relates.data() );
+                csPrintable(root->type), csPrintable(root->name), csPrintable(root->args), root->bodyLine,
+                root->mGrpId, csPrintable(root->relates) );
 
    if (root->type.isEmpty() && root->name.indexOf("operator") == -1 &&
          (root->name.indexOf('*') != -1 || root->name.indexOf('&') != -1)) {
@@ -3773,7 +3774,7 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<EntryNa
 
    Debug::print(Debug::Functions, 0, "  Interface Member:\n"
                 "    `%s' `%s' proto=%d\n"
-                "    def=`%s'\n", root->type.data(), rname.data(), root->proto, def.data());
+                "    def=`%s'\n", csPrintable(root->type), csPrintable(rname), root->proto, csPrintable(def));
 
    // add member to the global list of all members
    QSharedPointer<MemberName> mn;
@@ -3818,21 +3819,11 @@ void Doxy_Work::buildInterfaceAndServiceList(QSharedPointer<EntryNav> rootNav)
       Debug::print(Debug::Functions, 0,"EXPORTED_INTERFACE_SEC:\n"
                    "  `%s' `%s'::`%s' `%s' relates=`%s' relatesType=`%d' file=`%s' "
                    "line=`%d' bodyLine=`%d' #tArgLists=%d mGrpId=%d spec=%lld proto=%d docFile=%s\n",
-
-                   root->type.data(),
-                   rootNav->parent()->name().data(),
-                   root->name.data(),
-                   root->args.data(),
-                   root->relates.data(),
-                   root->relatesType,
-                   root->fileName.data(),
-                   root->startLine,
-                   root->bodyLine,
+                   csPrintable(root->type), csPrintable(rootNav->parent()->name()), csPrintable(root->name),
+                   csPrintable(root->args), csPrintable(root->relates), root->relatesType,
+                   csPrintable(root->fileName), root->startLine, root->bodyLine,
                    root->tArgLists ? (int)root->tArgLists->count() : -1,
-                   root->mGrpId,
-                   root->m_specFlags,
-                   root->proto,
-                   root->docFile.data() );
+                   root->mGrpId, root->m_specFlags, root->proto, csPrintable(root->docFile) );
 
       QString const rname = removeRedundantWhiteSpace(root->name);
 
@@ -4143,7 +4134,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
             QSharedPointer<MemberDef> md;
 
             if (mn) {
-               Debug::print(Debug::Functions, 0, "  --> function %s already found\n", rname.data());
+               Debug::print(Debug::Functions, 0, "  --> function %s already found\n", csPrintable(rname));
 
                for (auto item : *mn) {
 
@@ -4772,7 +4763,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                         if (arg.name == usedName) {
                            // type is a template argument
                            found = true;
-                           Debug::print(Debug::Classes, 0, "    New used class `%s'\n", usedName.data());
+                           Debug::print(Debug::Classes, 0, "    New used class `%s'\n", csPrintable(usedName));
 
                            QSharedPointer<ClassDef> usedCd = Doxy_Globals::hiddenClasses->find(usedName);
 
@@ -4791,7 +4782,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                               usedCd->setArtificial(true);
                            }
 
-                           Debug::print(Debug::Classes, 0, "      Adding used class `%s' (1)\n", usedCd->name().data());
+                           Debug::print(Debug::Classes, 0, "      Adding used class `%s' (1)\n", csPrintable(usedCd->name()));
                            instanceCd->addUsedClass(usedCd, md->name(), md->protection());
                            usedCd->addUsedByClass(instanceCd, md->name(), md->protection());
                         }
@@ -4804,7 +4795,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                      if (usedCd) {
                         found = true;
 
-                        Debug::print(Debug::Classes, 0, "    Adding used class `%s' (2)\n", usedCd->name().data());
+                        Debug::print(Debug::Classes, 0, "    Adding used class `%s' (2)\n", csPrintable(usedCd->name()));
 
                         instanceCd->addUsedClass(usedCd, md->name(), md->protection()); // class exists
                         usedCd->addUsedByClass(instanceCd, md->name(), md->protection());
@@ -4827,7 +4818,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                         type += md->argsString();
                      }
 
-                     Debug::print(Debug::Classes, 0, "  New undocumented used class `%s'\n", type.data());
+                     Debug::print(Debug::Classes, 0, "  New undocumented used class `%s'\n", csPrintable(type));
 
                      usedCd = QMakeShared<ClassDef>(masterCd->getDefFileName(), masterCd->getDefLine(),
                         masterCd->getDefColumn(), type, ClassDef::Class);
@@ -4842,7 +4833,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                         usedCd->setArtificial(true);
                      }
 
-                     Debug::print(Debug::Classes, 0, "    Adding used class `%s' (3)\n", usedCd->name().data());
+                     Debug::print(Debug::Classes, 0, "    Adding used class `%s' (3)\n", csPrintable(usedCd->name()));
                      instanceCd->addUsedClass(usedCd, md->name(), md->protection());
                      usedCd->addUsedByClass(instanceCd, md->name(), md->protection());
                   }
@@ -4909,7 +4900,7 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
                const QString &templSpec, QHash<QString, int> *templateNames, bool isArtificial)
 {
    Debug::print(Debug::Classes, 0, "    derived from template %s with parameters %s\n",
-                templateClass->name().data(), templSpec.data());
+                csPrintable(templateClass->name()), csPrintable(templSpec));
 
    bool existingClass = (templSpec == tempArgListToString(templateClass->templateArguments(), root->lang) );
 
@@ -4927,7 +4918,7 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
    instanceClass->setLanguage(root->lang);
 
    if (freshInstance) {
-      Debug::print(Debug::Classes, 0, "      found fresh instance '%s'\n", instanceClass->name().data());
+      Debug::print(Debug::Classes, 0, "      found fresh instance '%s'\n", csPrintable(instanceClass->name()));
       Doxy_Globals::classSDict->insert(instanceClass->name(), instanceClass);
 
       instanceClass->setTemplateBaseClassNames(templateNames);
@@ -4949,7 +4940,7 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
          }
 
          Debug::print(Debug::Classes, 0, "        template root found %s templSpec=%s\n",
-                      templateRoot->name.data(), templSpec.data());
+                      csPrintable(templateRoot->name), csPrintable(templSpec));
 
          ArgumentList *templArgs = new ArgumentList;
          stringToArgumentList(templSpec, templArgs);
@@ -4970,9 +4961,7 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
          Debug::print(Debug::Classes, 0, "        no template root entry found\n");
          // TODO: what happened if we get here?
       }
-
-      //Debug::print(Debug::Classes,0,"    Template instance %s : \n",instanceClass->name().data());
-
+     
    } else {
       Debug::print(Debug::Classes, 0, "      instance already exists\n");
    }
@@ -5144,7 +5133,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
                // (i.e. this is needed for addInterfaceOrServiceToServiceOrSingleton)
 
             Debug::print(Debug::Classes, 0, "    class relation %s inherited/used by %s found (%s and %s) templSpec='%s'\n",
-               qPrintable(baseClassName), rootNav->name().data(),
+               qPrintable(baseClassName), csPrintable(rootNav->name()),
                (bi->prot == Private) ? "private" : ((bi->prot == Protected) ? "protected" : "public"),
                (bi->virt == Normal) ? "normal" : "virtual", qPrintable(templSpec) );
 
@@ -5324,7 +5313,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
             } else if (mode == Undocumented && (scopeOffset == 0 || isATemplateArgument)) {
                Debug::print(Debug::Classes, 0,
                             "    New undocumented base class `%s' baseClassName=%s templSpec=%s isArtificial=%d\n",
-                            biName.data(), baseClassName.data(), templSpec.data(), isArtificial);
+                            csPrintable(biName), csPrintable(baseClassName), csPrintable(templSpec), isArtificial);
 
                baseClass = QSharedPointer<ClassDef>();
 
@@ -5394,7 +5383,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
                return true;
 
             } else {
-               Debug::print(Debug::Classes, 0, "    Base class `%s' not found\n", biName.data());
+               Debug::print(Debug::Classes, 0, "    Base class `%s' not found\n", csPrintable(biName));
             }
 
          } else {
@@ -5498,7 +5487,7 @@ void Doxy_Work::findInheritedTemplateInstances()
       QSharedPointer<ClassDef> cd;
       QString bName = extractClassName(rootNav);
 
-      Debug::print(Debug::Classes, 0, "  Inheritance: Class %s : \n", bName.data());
+      Debug::print(Debug::Classes, 0, "  Inheritance: Class %s : \n", csPrintable(bName));
 
       cd = getClass(bName);
 
@@ -5521,7 +5510,7 @@ void Doxy_Work::findUsedTemplateInstances()
 
       QString bName = extractClassName(rootNav);
 
-      Debug::print(Debug::Classes, 0, "  Usage: Class %s : \n", bName.data());
+      Debug::print(Debug::Classes, 0, "  Usage: Class %s : \n", csPrintable(bName));
 
       cd = getClass(bName);
 
@@ -5549,7 +5538,7 @@ void Doxy_Work::computeClassRelations()
       QSharedPointer<Entry> root = rootNav->entry();
 
       QString bName = extractClassName(rootNav);
-      Debug::print(Debug::Classes, 0, "  Relations: Class %s : \n", bName.data());
+      Debug::print(Debug::Classes, 0, "  Relations: Class %s : \n", csPrintable(bName));
 
       cd = getClass(bName);
 
@@ -5589,7 +5578,7 @@ void Doxy_Work::computeTemplateClassRelations()
       QHash<QString, QSharedPointer<ClassDef>> *templInstances;
 
       if (cd && (templInstances = cd->getTemplateInstances())) {
-         Debug::print(Debug::Classes, 0, "  Template class %s : \n", cd->name().data());
+         Debug::print(Debug::Classes, 0, "  Template class %s : \n", csPrintable(cd->name()));
 
          for (auto tcd = templInstances->begin(); tcd != templInstances->end(); ++tcd) {
             // for each template instance
@@ -6217,7 +6206,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
    Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [start] root= %p   funcDecl= %s   related= %s\n"
                 "  overload= %d   isFunc= %d   mGrpId= %d   tArgList= %p (# of tArgs= %d)  spec= %lld   lang= %x\n",
-                root.data(), qPrintable(funcDecl), qPrintable(root->relates), overloaded, isFunc, root->mGrpId,
+                root.data(), csPrintable(funcDecl), csPrintable(root->relates), overloaded, isFunc, root->mGrpId,
                 root->tArgLists, root->tArgLists ? root->tArgLists->count() : 0, root->m_specFlags, root->lang);
 
    QString scopeName;
@@ -6616,7 +6605,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                      } else if (matching && ! (md->isVariable() || md->isTypedef() || md->isEnumValue()) ) {
                         // compare the return types
 
-                        // value from the source
+                        // value from source code
                         QString memType = md->typeString();
 
                         if (memType == "virtual") { 
@@ -6626,6 +6615,12 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                         memType  = stripPrefix(memType, "static "); 
                         memType  = stripPrefix(memType, "virtual "); 
                        
+                        // remove myClass<T>, or myClass, etc
+                        if (memType.startsWith(className)) {   
+                           memType = stripTemplateSpecifiersFromScope(memType, true);
+                           memType = substitute(memType, className + "::", ""); 
+                        } 
+
                         // remove myClass<T>, or myClass, etc
                         if (funcType.startsWith(className)) {   
                            funcType = stripTemplateSpecifiersFromScope(funcType, true);
@@ -8023,7 +8018,7 @@ void Doxy_Work::addMembersToIndex()
       
       // for each member definition
       for (auto md : *mn) {
-         addClassMemberNameToIndex(md.data());
+         addClassMemberNameToIndex(md);
       }
    }
   
@@ -8033,9 +8028,9 @@ void Doxy_Work::addMembersToIndex()
       // for each member definition
       for (auto md : *mn) {
          if (md->getNamespaceDef()) {
-            addNamespaceMemberNameToIndex(md.data());
+            addNamespaceMemberNameToIndex(md);
          } else {
-            addFileMemberNameToIndex(md.data());
+            addFileMemberNameToIndex(md);
          }
       }
    }
@@ -9154,10 +9149,10 @@ void Doxy_Work::copyStyleSheet()
          QFileInfo fi(fileName);
 
          if (! fi.exists()) {
-            err("Style sheet '%s' specified in HTML STYLESHEETS does not exist\n", qPrintable(fileName));
+            err("Style sheet '%s' specified in 'HTML STYLESHEETS' does not exist\n", qPrintable(fileName));
 
          } else if (fi.fileName() == "doxypress.css" || fi.fileName() == "tabs.css" || fi.fileName() == "navtree.css") {
-            err("Style sheet %s specified by HTML STYLESHEETS is using built in stylesheet. Please use a "
+            err("Style sheet %s specified by 'HTML STYLESHEETS' is using built in stylesheet. Please use a "
                "different name\n", qPrintable(fileName));      
             
          } else {
@@ -9209,9 +9204,9 @@ void Doxy_Work::copyExtraFiles(const QString &kind)
          if (! fi.exists()) {
 
             if (kind == "html") {
-               err("Extra file '%s' specified in HTML EXTRA FILES does not exist\n", qPrintable(fileName));
+               err("Extra file '%s' specified in 'HTML EXTRA FILES' does not exist\n", qPrintable(fileName));
             } else {
-                err("Extra file '%s' specified in LATEX EXTRA FILES does not exist\n", qPrintable(fileName));
+                err("Extra file '%s' specified in 'LATEX EXTRA FILES' does not exist\n", qPrintable(fileName));
             }
 
          } else {

@@ -2343,11 +2343,12 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
          return contents;
       }
 
-   } else { // read from file
+   } else { 
+      // read from file
       QFileInfo fi(name);
 
       if (! fi.exists() || ! fi.isFile()) {
-         err("File `%s' not found\n", qPrintable(name));
+         err("Unable to find file `%s'\n", qPrintable(name));
          return "";
       }
 
@@ -4381,7 +4382,7 @@ bool generateLink(OutputDocInterface &od, const QString &clName, const QString &
          }
 
       } else {
-         err("%s:%d: Internal error: resolveLink() successful but no compound found", __FILE__, __LINE__);
+         err("%s:%d: resolveLink() successful but no compound was found", __FILE__, __LINE__);
       }
 
       return true;

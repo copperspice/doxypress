@@ -47,7 +47,6 @@ To insert a (key, value) pair into the map, you can use operator[]():
     map["seven"] = 7;
 \endcode
 
-
 */
 
 

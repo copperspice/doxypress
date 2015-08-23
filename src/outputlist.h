@@ -91,7 +91,7 @@ class OutputList : public OutputDocInterface
    }
 
    void startFile(const QString &name, const QString &manName, const QString &title) {
-      forall(&OutputGenerator::startFile, name.toUtf8(), manName.toUtf8(), title.toUtf8());
+      forall(&OutputGenerator::startFile, name, manName, title);
    }
 
    void writeSearchInfo() {

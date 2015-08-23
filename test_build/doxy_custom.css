@@ -110,6 +110,10 @@ div.list_page
    border: 3px blue solid;
 }
 
+div.one-line
+{
+   margin: 0px;     
+}
 
 /* cs classes */
 .cs_heading {

@@ -690,7 +690,7 @@ void HtmlGenerator::init()
    QDir d(dname);
 
    if (! d.exists() && ! d.mkdir(dname)) {
-      err("HTML Generator: Unable to create output directory %s\n", qPrintable(dname));      
+      err("HTML Generator, unable to create output directory %s\n", qPrintable(dname));      
       exit(1);
    }
    
@@ -749,7 +749,7 @@ void HtmlGenerator::init()
          }
 
       } else {
-         err("Resource file dynsections.js was not found");
+         err("Unable to find or load the resource file dynsections.js");
 
       }
 
@@ -890,7 +890,7 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
 
    startPlainFile(fileName);
   
-   m_codeGen = QMakeShared<HtmlCodeGenerator> (m_textStream, m_relativePath.toUtf8());
+   m_codeGen = QMakeShared<HtmlCodeGenerator> (m_textStream, m_relativePath);
   
    //
    Doxy_Globals::indexList->addIndexFile(fileName);
@@ -2341,7 +2341,7 @@ QString HtmlGenerator::writeSplitBarAsString(const QString &name, const QString 
                   "');});\n</script>\n<div id=\"doc-content\">\n";
    }
 
-   return result.toUtf8();
+   return result;
 }
 
 void HtmlGenerator::writeSplitBar(const QString &name)
@@ -2351,7 +2351,7 @@ void HtmlGenerator::writeSplitBar(const QString &name)
 
 void HtmlGenerator::writeNavigationPath(const QString &s)
 {
-   m_textStream << substitute(s, "$relpath^", m_relativePath.toUtf8());
+   m_textStream << substitute(s, "$relpath^", m_relativePath);
 }
 
 void HtmlGenerator::startContents()
@@ -2760,7 +2760,7 @@ void HtmlGenerator::writeInheritedSectionTitle(const QString &id, const QString 
       classLink += m_relativePath;
    }
 
-   classLink += file + Doxy_Globals::htmlFileExtension.toUtf8() + a;
+   classLink += file + Doxy_Globals::htmlFileExtension + a;
    classLink += "\">" + convertToHtml(name, false) + "</a>";
 
    m_textStream << "<tr class=\"inherit_header " << id << "\">"

@@ -710,10 +710,10 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
       t << "\"index" << Doxy_Globals::htmlFileExtension << "\", ";
 
       // add special entry for index page
-      navIndex.inSort(new NavIndexEntry("index" + Doxy_Globals::htmlFileExtension.toUtf8(), ""));
+      navIndex.inSort(new NavIndexEntry("index" + Doxy_Globals::htmlFileExtension, ""));
 
       // related page index, written as a child of index.html
-      navIndex.inSort(new NavIndexEntry("pages" + Doxy_Globals::htmlFileExtension.toUtf8(), ""));
+      navIndex.inSort(new NavIndexEntry("pages" + Doxy_Globals::htmlFileExtension, ""));
 
       // adjust for display output     
       reSortNodes(nodeList);

@@ -131,7 +131,7 @@ static void endIndexHierarchy(OutputList &ol, int level)
    ol.popGeneratorState();
 }
 
-class MemberIndexList : public QList<MemberDef *>
+class MemberIndexList : public QList<QSharedPointer<MemberDef>>
 {
  public: 
    MemberIndexList(uint letter) : m_letter(letter)
@@ -140,7 +140,7 @@ class MemberIndexList : public QList<MemberDef *>
    ~MemberIndexList()
     {}
 
-   int compareValues(const MemberDef *md1, const MemberDef *md2) const {
+   int compareValues(const QSharedPointer<MemberDef> md1, const QSharedPointer<MemberDef> md2) const {
       int result = md1->name().compare(md2->name(), Qt::CaseInsensitive);
 
       if (result == 0) {
@@ -150,7 +150,7 @@ class MemberIndexList : public QList<MemberDef *>
       return result;
    }
 
-   void insertDef(MemberDef *d) {
+   void insertDef(QSharedPointer<MemberDef> d) {
       append(d);
    }
 
@@ -578,7 +578,7 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
    if (level > 20) {
       warn(dd->getDefFileName(), dd->getDefLine(),
            "maximum nesting level exceeded for directory %s: "
-           "check for possible recursive directory relation!\n", dd->name().data()
+           "check for possible recursive directory relation\n", csPrintable(dd->name())
           );
       return;
    }
@@ -1361,7 +1361,7 @@ static void writeNamespaceIndex(OutputList &ol)
          }
          
          ol.startIndexKey();         
-         ol.writeObjectLink(0, nd->getOutputFileBase(), 0, nd->displayName().toUtf8());         
+         ol.writeObjectLink(0, nd->getOutputFileBase(), 0, nd->displayName());         
          ol.endIndexKey();
 
          bool hasBrief = ! nd->briefDescription().isEmpty();
@@ -1454,7 +1454,7 @@ static void writeAnnotatedClassList(OutputList &ol)
       if (cd->isLinkableInProject() && cd->templateMaster() == 0) {         
          ol.startIndexKey();
         
-         ol.writeObjectLink(0, cd->getOutputFileBase(), cd->anchor(), cd->displayName().toUtf8());
+         ol.writeObjectLink(0, cd->getOutputFileBase(), cd->anchor(), cd->displayName());
          ol.endIndexKey();
 
          bool hasBrief = ! cd->briefDescription().isEmpty();
@@ -1749,7 +1749,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
                                  "<tr>"
                                  "<td><div class=\"ah\">&#160;&#160;");
 
-                  ol.writeString(QString(QChar(cell->letter())).toUtf8());
+                  ol.writeString(QString(QChar(cell->letter())));
                   ol.writeString("&#160;&#160;</div>"
                                  "</td>"
                                  "</tr>"
@@ -1929,19 +1929,19 @@ static void writeAnnotatedIndex(OutputList &ol)
    ol.popGeneratorState();
 }
 
-static void writeClassLinkForMember(OutputList &ol, MemberDef *md, const QString &separator, QString &prevClassName)
+static void writeClassLinkForMember(OutputList &ol, QSharedPointer<MemberDef> md, const QString &separator, QString &prevClassName)
 {
    QSharedPointer<ClassDef> cd = md->getClassDef();
 
    if ( cd && prevClassName != cd->displayName()) {
       ol.docify(separator);
-      ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), cd->displayName().toUtf8());
+      ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), cd->displayName());
       ol.writeString("\n");
       prevClassName = cd->displayName();
    }
 }
 
-static void writeFileLinkForMember(OutputList &ol, MemberDef *md, const QString &separator, QString &prevFileName)
+static void writeFileLinkForMember(OutputList &ol, QSharedPointer<MemberDef> md, const QString &separator, QString &prevFileName)
 {
    QSharedPointer<FileDef> fd = md->getFileDef();
 
@@ -1953,7 +1953,7 @@ static void writeFileLinkForMember(OutputList &ol, MemberDef *md, const QString 
    }
 }
 
-static void writeNamespaceLinkForMember(OutputList &ol, MemberDef *md, const QString &separator, QString &prevNamespaceName)
+static void writeNamespaceLinkForMember(OutputList &ol, QSharedPointer<MemberDef> md, const QString &separator, QString &prevNamespaceName)
 {
    QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
 
@@ -1971,7 +1971,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
    int index = (int)type;
    assert(index < 3);
 
-   using writeLinkForMember_t = void (*)(OutputList & ol, MemberDef * md, const QString &separator, QString &prevNamespaceName);
+   using writeLinkForMember_t = void (*)(OutputList & ol, QSharedPointer<MemberDef> md, const QString &separator, QString &prevNamespaceName);
 
    // each index tab has its own write function
    static writeLinkForMember_t   writeLinkForMemberMap[3] = {
@@ -2091,7 +2091,7 @@ void initClassMemberIndices()
    }
 }
 
-void addClassMemberNameToIndex(MemberDef *md)
+void addClassMemberNameToIndex(QSharedPointer<MemberDef> md)
 {
    static bool hideFriendCompounds = Config::getBool("hide-friend-compounds");
    QSharedPointer<ClassDef> cd;
@@ -2158,7 +2158,7 @@ void initNamespaceMemberIndices()
    }
 }
 
-void addNamespaceMemberNameToIndex(MemberDef *md)
+void addNamespaceMemberNameToIndex(QSharedPointer<MemberDef> md)
 {
    QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
 
@@ -2207,7 +2207,7 @@ void initFileMemberIndices()
    }
 }
 
-void addFileMemberNameToIndex(MemberDef *md)
+void addFileMemberNameToIndex(QSharedPointer<MemberDef> md)
 {
    QSharedPointer<FileDef> fd = md->getFileDef();
 
@@ -2351,8 +2351,8 @@ static void writeClassMemberIndexFiltered(OutputList &ol, ClassMemberHighlight h
       QString fileName = getCmhlInfo(hl)->fname;
 
       if (multiPageIndex) {        
-         fileName += "_" + letterToLabel(page);         
-
+         fileName += "_" + letterToLabel(page);
+              
          QString cs = QChar(page);
          if (addToIndex) {
             Doxy_Globals::indexList->addContentsItem(false, cs, "", fileName, "", false, true);
@@ -2472,14 +2472,14 @@ static void writeClassMemberIndex(OutputList &ol)
          link += QString("_") + QChar(firstLetter);
          
          // save back
-         getCmhlInfo(k)->link = link.toUtf8();            
+         getCmhlInfo(k)->link = link;            
 
          // (part 2) create redirect page        
          ClassMemberRedirect(fName, link);
 
       }  else { 
          // save unchanged link
-         getCmhlInfo(k)->link = link.toUtf8();   
+         getCmhlInfo(k)->link = link;   
       }         
    }
 
@@ -3497,7 +3497,7 @@ static void writeIndex(OutputList &ol)
       }
 
       ol.startTextBlock();
-      ol.generateDoc(defFileName.toUtf8(), defLine, Doxy_Globals::mainPage, QSharedPointer<MemberDef>(),
+      ol.generateDoc(defFileName, defLine, Doxy_Globals::mainPage, QSharedPointer<MemberDef>(),
                      Doxy_Globals::mainPage->documentation(), true, false);
 
       ol.endTextBlock();
@@ -3529,8 +3529,8 @@ static void writeIndex(OutputList &ol)
 
    if (! projectVersion.isEmpty()) {
       ol.startProjectNumber();
-      ol.generateDoc(defFileName.toUtf8(), defLine, Doxy_Globals::mainPage, QSharedPointer<MemberDef>(), 
-                     projectVersion.toUtf8(), false, false);
+      ol.generateDoc(defFileName, defLine, Doxy_Globals::mainPage, QSharedPointer<MemberDef>(), 
+                     projectVersion, false, false);
 
       ol.endProjectNumber();
    }
@@ -3668,7 +3668,7 @@ static void writeIndex(OutputList &ol)
       ol.startContents();
       ol.startTextBlock();
 
-      ol.generateDoc(defFileName.toUtf8(), defLine, Doxy_Globals::mainPage, QSharedPointer<MemberDef>(),
+      ol.generateDoc(defFileName, defLine, Doxy_Globals::mainPage, QSharedPointer<MemberDef>(),
                      Doxy_Globals::mainPage->documentation(), false, false);
 
       ol.endTextBlock();

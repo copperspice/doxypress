@@ -194,7 +194,7 @@ void HtmlDocVisitor::visit(DocSymbol *s)
       m_t << res;
 
    } else {
-      err("HTML: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+      err("Unsupported HTML entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 }
 
@@ -408,7 +408,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          QFile file(fileName);
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s for writing\n", qPrintable(fileName));
+            err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), file.error());      
          }
 
          file.write(s->text().toUtf8());
@@ -417,7 +417,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          forceEndParagraph(s);
          m_t << "<div align=\"center\">" << endl;
 
-         writeDotFile(fileName.toUtf8(), s->relPath(), s->context());
+         writeDotFile(fileName, s->relPath(), s->context());
          m_t << "</div>" << endl;
 
          forceStartParagraph(s);
@@ -438,8 +438,8 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
 
          QFile file(baseName + ".msc");
 
-         if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s.msc for writing\n", qPrintable(baseName));
+         if (! file.open(QIODevice::WriteOnly)) {       
+            err("Unable to open file for writing %s.msc error: %d\n", qPrintable(baseName), file.error()); 
          }
 
          QString text = "msc {";

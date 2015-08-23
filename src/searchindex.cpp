@@ -77,7 +77,7 @@ void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const QString &a
    assert(! isSourceFile || ctx->definitionType() == Definition::TypeFile);
    
    QString url = isSourceFile ? ctx.dynamicCast<FileDef>()->getSourceFileBase() : ctx->getOutputFileBase();
-   url += Doxy_Globals::htmlFileExtension.toUtf8();
+   url += Doxy_Globals::htmlFileExtension;
 
    QString baseUrl = url;
 
@@ -217,7 +217,7 @@ void SearchIndex::addWord(const QString &word, bool hiPriority, bool recurse)
 
    if (! recurse) { 
       // the first time we check if we can strip the prefix
-      i = getPrefixIndex(word.toUtf8());
+      i = getPrefixIndex(word);
 
       if (i > 0) {
          addWord(word.mid(i), hiPriority, true);
@@ -420,7 +420,7 @@ void SearchIndexExternal::setCurrentDoc(QSharedPointer<Definition> ctx, const QS
    QString extId = stripPath(Config::getString("external-search-id"));
 
    QString baseName = isSourceFile ? ctx.dynamicCast<FileDef>()->getSourceFileBase() : ctx->getOutputFileBase();
-   QString url = baseName + Doxy_Globals::htmlFileExtension.toUtf8();
+   QString url = baseName + Doxy_Globals::htmlFileExtension;
 
    if (! anchor.isEmpty()) {
       url += "#" + anchor;
@@ -1179,7 +1179,7 @@ void writeJavascriptSearchIndex()
 
                for (auto sl : g_searchIndexSymbols[i]) {
                   // for each letter
-                  t << QString( QChar( sl->letter() ) ).toUtf8();
+                  t << QString( QChar( sl->letter() ) );
                }
                t << "\"";
                first = false;

@@ -270,7 +270,7 @@
     "project-brief": "Sample files to test the functionality of DoxyPress",
     "project-logo": "images/cslogo-32.png",
     "project-name": "DoxyPress Test Suite",
-    "project-version": "1.0.1",
+    "project-version": "1.2.0",
     "qch-file": "",
     "qhp-cust-attrib": [
         ""

@@ -126,7 +126,7 @@ void FormulaList::generateBitmaps(const QString &path)
       portable_sysTimerStart();
 
       if (portable_system(latexCmd, "_formulas.tex") != 0) {
-         err("Problem running latex, verify your installation, _formulas.tex, and _formulas.log\n");
+         err("Unable to run LaTeX, verify your installation, _formulas.tex, and _formulas.log\n");
          formulaError = true;         
       }
 
@@ -149,7 +149,7 @@ void FormulaList::generateBitmaps(const QString &path)
          portable_sysTimerStart();
 
          if (portable_system("dvips", dviArgs) != 0) {
-            err("Problem running dvips. Check your installation\n");
+            err("Unable to run dvips, check your installation\n");
             portable_sysTimerStop();
             return;
          }
@@ -166,7 +166,7 @@ void FormulaList::generateBitmaps(const QString &path)
                sscanf(eps.toUtf8().constData() + i, "%%%%BoundingBox:%d %d %d %d", &x1, &y1, &x2, &y2);
 
             } else {
-               err("Could not extract bounding box\n");
+               err("Unable to extract bounding box\n");
             }
          }
 
@@ -217,7 +217,7 @@ void FormulaList::generateBitmaps(const QString &path)
          QString gsExe = Config::getString("ghostscript");   
 
          if (portable_system(gsExe, gsArgs) != 0) {
-            err("Problem running ghostscript %s %s. Verify your installation\n", qPrintable(gsExe), gsArgs);
+            err("Unable to run GhostScript %s %s. Verify your installation\n", qPrintable(gsExe), gsArgs);
             portable_sysTimerStop();
 
             return;
@@ -238,7 +238,7 @@ void FormulaList::generateBitmaps(const QString &path)
             }
 
             if (s.length() < 2 || s.left(2) != "P6") {
-               err("GhostScript produced an illegal image format.");
+               err("GhostScript produced an illegal image format");
 
             } else {
                // assume the size is after the first line that does not start with

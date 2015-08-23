@@ -305,7 +305,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
                }
 
             } else {
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Could not write output image %s", qPrintable(outputFile));
+               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to write output image %s", qPrintable(outputFile));
             }
 
          } else {
@@ -314,7 +314,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
          }
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Could not open image %s", qPrintable(fileName));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to open image %s", qPrintable(fileName));
       }
 
       if (type == DocImage::Latex && Config::getBool("latex-pdf") && fd->name().right(4) == ".eps") {
@@ -2110,7 +2110,7 @@ bool DocXRefItem::parse()
                m_anchor = "@";
    
             } else {
-               m_file   = convertNameToFile(refList.listName(), false, true).toUtf8();
+               m_file   = convertNameToFile(refList.listName(), false, true);
                m_anchor = item->listAnchor;
             }
    
@@ -2141,12 +2141,13 @@ DocFormula::DocFormula(DocNode *parent, int id)
    auto formula = Doxy_Globals::formulaNameDict->find(formCmd);
 
    if (formula != Doxy_Globals::formulaNameDict->end()) {
-      m_id = formula->getId();   
-      m_name = QString("form_%1").arg(m_id).toUtf8();
+      m_id   = formula->getId();   
+      m_name = QString("form_%1").arg(m_id);
 
       m_text = formula->getFormulaText();
 
-   } else { // wrong \form#<n> command
+   } else { 
+      // wrong \form#<n> command
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Incorrect formula id %d", id);
       m_id = -1;
 
@@ -2519,7 +2520,7 @@ DocCite::DocCite(DocNode *parent, const QString &target, const QString &)
       m_text         = cite->text;
       m_ref          = cite->ref;
       m_anchor       = CiteConsts::anchorPrefix + cite->label;
-      m_file         = convertNameToFile(CiteConsts::fileName, false, true).toUtf8();
+      m_file         = convertNameToFile(CiteConsts::fileName, false, true);
      
       return;
    }
@@ -2722,7 +2723,7 @@ void DocDotFile::parse()
                     );
    } else {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included dot file %s is not found "
-                     "in any of the paths specified via DOTFILE_DIRS!", qPrintable(m_name));
+                     "in any of the paths specified via DOTFILE_DIRS", qPrintable(m_name));
    }
    
    DocNode *n = s_nodeStack.pop();
@@ -2799,7 +2800,7 @@ void DocMscFile::parse()
 
    } else {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included msc file %s is not found "
-                     "in any of the paths specified via MSCFILE_DIRS!", qPrintable(m_name));
+                     "in any of the paths specified via MSCFILE_DIRS", qPrintable(m_name));
    }
    
    DocNode *n = s_nodeStack.pop();
@@ -2877,7 +2878,7 @@ void DocDiaFile::parse()
 
    } else {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included dia file %s is not found "
-                     "in any of the paths specified via DIAFILE_DIRS!", qPrintable(m_name));
+                     "in any of the paths specified via DIAFILE_DIRS", qPrintable(m_name));
    }
    
    DocNode *n = s_nodeStack.pop();
@@ -7149,9 +7150,10 @@ int DocSection::parse()
               (m_level <= 2 + Doxy_Globals::subpageNestingLevel && retval == RetVal_Paragraph)
              ) {
       int level = (retval == RetVal_Subsubsection) ? 3 : 4;
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected %s "
-                     "command found inside %s!",
+
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected %s command found inside %s",
                      sectionLevelToName[level], sectionLevelToName[m_level]);
+
       retval = 0; // stop parsing
    } else {
    }

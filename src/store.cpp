@@ -80,7 +80,7 @@ int Store::open(QString name)
       return 0;   // already open
    }
 
-   m_file = fopen(name.toUtf8().constData(), "w+b");
+   m_file = fopen(name.toUtf8(), "w+b");
 
    if (m_file == 0) {
       return -1;

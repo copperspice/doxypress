@@ -482,7 +482,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                      break;
 
                   default:
-                     err("Unexpected member type %d found!\n", md->memberType());
+                     err("Unexpected member type %d found\n", md->memberType());
                }
             }
             break;
@@ -499,8 +499,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
    if (md->name() == "operator->") {
       m_arrowOperator = md;
    }
-
-   //::addClassMemberNameToIndex(md);
+   
    if (addToAllList && ! (Config::getBool("hide-friend-compounds") && md->isFriend() &&  (md->typeString() == "friend class" || 
             md->typeString() == "friend struct" || md->typeString() == "friend union"))) {
       
@@ -1055,7 +1054,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
             }
 
          } else {
-            err("invalid marker %d in inherits list!\n", entryIndex);
+            err("Invalid marker %d in inherits list\n", entryIndex);
          }
 
          index = newIndex + matchLen;
@@ -2490,8 +2489,7 @@ bool ClassDef::hasDocumentation() const
 bool ClassDef::isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, int level)
 {
    bool found = false;
-   //printf("isBaseClass(cd=%s) looking for %s\n",name().data(),bcd->name().data());
-
+  
    if (level > 256) {
       err("Possible recursive class relation while inside %s and looking for base class %s\n", qPrintable(name()), qPrintable(bcd->name()));
       return false;
@@ -2507,8 +2505,7 @@ bool ClassDef::isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, i
          if (! followInstances && ccd->templateMaster()) {
             ccd = ccd->templateMaster();
          }
-
-         //printf("isBaseClass() baseclass %s\n",ccd->name().data());
+         
          if (ccd == bcd) {
             found = true;
          } else {
@@ -3193,7 +3190,7 @@ QSharedPointer<ClassDef> ClassDef::insertTemplateInstance(const QString &fileNam
    auto templateClass = m_templateInstances->find(templSpec);
 
    if (templateClass == m_templateInstances->end()) {
-      Debug::print(Debug::Classes, 0, "      New template instance class `%s'`%s'\n", name().data(), templSpec.data());
+      Debug::print(Debug::Classes, 0, "      New template instance class `%s'`%s'\n", csPrintable(name()), csPrintable(templSpec));
       QString tcname = removeRedundantWhiteSpace(localName() + templSpec);
 
       QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>(fileName, startLine, startColumn, tcname, ClassDef::Class); 
@@ -3517,7 +3514,7 @@ void ClassDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md, 
 }
 
 int ClassDef::countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
-                                      int lt2, bool invert, bool showAlways, QHash<void *, void *> *visitedClasses)
+                                      int lt2, bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses)
 {
    int count = 0;
 
@@ -3556,7 +3553,7 @@ int ClassDef::countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef
 }
 
 int ClassDef::countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool invert, 
-                  bool showAlways, QHash<void *, void *> *visitedClasses)
+                  bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses)
 {
    int inhCount = 0;
    int count    = countMembersIncludingGrouped(lt, inheritedFrom, false);
@@ -3574,9 +3571,9 @@ int ClassDef::countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDe
             if (icd->isLinkable()) {
                convertProtectionLevel(lt, ibcd->prot, &lt1, &lt2);
                
-               if (! visitedClasses->contains(icd.data())) {
+               if (! visitedClasses->contains(icd)) {
                   // guard for multiple virtual inheritance
-                  visitedClasses->insert(icd.data(), icd.data()); 
+                  visitedClasses->insert(icd); 
 
                   if (lt1 != -1) {
                      inhCount += icd->countMemberDeclarations((MemberListType)lt1, inheritedFrom, lt2, false, true, visitedClasses);
@@ -3619,8 +3616,9 @@ int ClassDef::countAdditionalInheritedMembers()
       if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
 
-         if (lmd->type != MemberListType_friends) { // friendship is not inherited                       
-            QHash<void *, void *> visited;
+         if (lmd->type != MemberListType_friends) { 
+            // friendship is not inherited                       
+            QSet<QSharedPointer<ClassDef>> visited;
 
             totalCount += countInheritedDecMembers(lmd->type, self, true, false, &visited);            
          }
@@ -3640,7 +3638,7 @@ void ClassDef::writeAdditionalInheritedMembers(OutputList &ol)
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
 
          if (lmd->type != MemberListType_friends) {
-            QHash<void *, void *> visited;
+            QSet<QSharedPointer<ClassDef>> visited;
             writeInheritedMemberDeclarations(ol, lmd->type, -1, lmd->title(getLanguage()), self, true, false, &visited);
          }
       }
@@ -3673,7 +3671,7 @@ int ClassDef::countMembersIncludingGrouped(MemberListType lt, QSharedPointer<Cla
 
 void ClassDef::writeInheritedMemberDeclarations(OutputList &ol, MemberListType lt, int lt2, const QString &title,
                                                 QSharedPointer<ClassDef> inheritedFrom, bool invert, bool showAlways, 
-                                                QHash<void *, void *> *visitedClasses)
+                                                QSet<QSharedPointer<ClassDef>> *visitedClasses)
 {
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
@@ -3696,18 +3694,14 @@ void ClassDef::writeInheritedMemberDeclarations(OutputList &ol, MemberListType l
                   lt2 = lt3;
                }
                
-               if (! visitedClasses->contains(icd.data())) {
+               if (! visitedClasses->contains(icd)) {
                   // guard for multiple virtual inheritance
-                  visitedClasses->insert(icd.data(), icd.data()); 
+                  visitedClasses->insert(icd); 
 
                   if (lt1 != -1) {
                      icd->writeMemberDeclarations(ol, (MemberListType)lt1, title, QString(), false, 
                                                   inheritedFrom, lt2, false, true, visitedClasses);
-                  }
-
-               } else {
-                  //printf("%s: class already visited!\n",icd->name().data());
-
+                  }              
                }
             }
          }
@@ -3718,7 +3712,7 @@ void ClassDef::writeInheritedMemberDeclarations(OutputList &ol, MemberListType l
 
 void ClassDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title,
                                        const QString &subTitle, bool showInline, QSharedPointer<ClassDef> inheritedFrom, int lt2,
-                                       bool invert, bool showAlways, QHash<void *, void *> *visitedClasses)
+                                       bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
@@ -3744,10 +3738,19 @@ void ClassDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const 
 
    if (! inlineInheritedMembers) { 
       // show inherited members as separate lists
-      QHash<void *, void *> visited;
 
-      writeInheritedMemberDeclarations(ol, lt, lt2, title, inheritedFrom ? inheritedFrom : self,
-                                       invert, showAlways, visitedClasses == 0 ? &visited : visitedClasses);
+      if (visitedClasses == nullptr) { 
+         QSet<QSharedPointer<ClassDef>> visited;
+
+         writeInheritedMemberDeclarations(ol, lt, lt2, title, inheritedFrom ? inheritedFrom : self,
+                                       invert, showAlways, &visited);
+
+      } else {
+         writeInheritedMemberDeclarations(ol, lt, lt2, title, inheritedFrom ? inheritedFrom : self,
+                                       invert, showAlways, visitedClasses);
+
+      }
+
    } 
 }
 
@@ -3758,7 +3761,8 @@ void ClassDef::addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSh
 
    if (m_memberGroupSDict) {     
       for (auto mg : *m_memberGroupSDict) {
-         if (! mg->allMembersInSameSection() || ! m_subGrouping) { // group is in its own section
+         if (! mg->allMembersInSameSection() || ! m_subGrouping) { 
+            // group is in its own section
             mg->addGroupedInheritedMembers(ol, self, lt, inheritedFrom, inheritId);
          }
       }

@@ -2312,7 +2312,7 @@ void MemberDef::_writeReimplements(OutputList &ol)
             ol.parseText(reimplFromLine.right(reimplFromLine.length() - markerPos - 2)); // text right from marker
 
          } else {
-            err("Error: Translation has no marker in trReimplementsFromList()\n");
+            err("Translation has no marker in trReimplementsFromList()\n");
          }
 
          ol.endParagraph();

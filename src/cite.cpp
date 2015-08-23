@@ -218,7 +218,7 @@ void CiteDict::generatePage() const
    int exitCode = portable_system("perl", temp); 
 
    if (exitCode != 0) {
-      err("Problem running bibtex. Verify the command 'perl --version' works from the command line. Exit code: %d\n", exitCode);
+      err("Unable to run BibTeX. Verify the command 'perl --version' works from the command line. Exit code: %d\n", exitCode);
    }
    portable_sysTimerStop();
 
@@ -244,7 +244,6 @@ void CiteDict::generatePage() const
    int p = 0;
    int s;
 
-   // printf("input=[%s]\n",input.data());
 
    while ((s = input.indexOf('\n', p)) != -1) {
       QString line = input.mid(p, s - p);

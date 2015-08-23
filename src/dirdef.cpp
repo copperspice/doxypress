@@ -196,7 +196,7 @@ void DirDef::writeDirectoryGraph(OutputList &ol)
       DotDirDeps dirDep(self);
 
       if (! dirDep.isTrivial()) {
-         msg("Generating dependency graph for directory %s\n", displayName().data());
+         msg("Generating dependency graph for directory %s\n", csPrintable(displayName()));
          ol.disable(OutputGenerator::Man);
 
          //ol.startParagraph();
@@ -226,7 +226,7 @@ void DirDef::writeSubDirList(OutputList &ol)
          ol.startMemberItem(dd->getOutputFileBase(), 0);
          ol.parseText(theTranslator->trDir(false, true) + " ");
          ol.insertMemberAlign();
-         ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName().toUtf8());
+         ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName());
          ol.endMemberItem();
 
          if (!dd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
@@ -688,7 +688,7 @@ static void writePartialDirPath(OutputList &ol, QSharedPointer<const DirDef> roo
       ol.writeString("&#160;/&#160;");
    }
 
-   ol.writeObjectLink(target->getReference(), target->getOutputFileBase(), 0, target->shortName().toUtf8());
+   ol.writeObjectLink(target->getReference(), target->getOutputFileBase(), 0, target->shortName());
 }
 
 static void writePartialFilePath(OutputList &ol, QSharedPointer<const DirDef> root, QSharedPointer<const FileDef> fd)
@@ -848,9 +848,7 @@ static void computeCommonDirPrefix()
    
    for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {   
       QString diskName = dir->name().right(dir->name().length() - path.length());
-      dir->setDiskName(diskName);
-
-      //  printf("set disk name: %s -> %s\n",dir->name().data(),diskName.data());
+      dir->setDiskName(diskName);      
    }
 }
 
@@ -882,8 +880,6 @@ void buildDirectories()
    // compute relations between directories => introduce container dirs.
  
    for (auto dir : Doxy_Globals::directories) {  
-      // printf("New dir %s\n",dir->displayName().data());
-
       QString name = dir->name();
       int i = name.lastIndexOf('/', name.length() - 2);
 
@@ -907,8 +903,7 @@ void computeDirDependencies()
    }
 
    // compute uses dependencies between directories
-   for (auto dir : Doxy_Globals::directories) { 
-      //printf("computeDependencies for %s: #dirs=%d\n",dir->name().data(),Doxy_Globals::directories.count());
+   for (auto dir : Doxy_Globals::directories) {       
       dir->computeDependencies();
    }
 }

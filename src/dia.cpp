@@ -78,7 +78,7 @@ void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const Q
          portable_sysTimerStart();
 
          if (portable_system("epstopdf", epstopdfArgs) != 0) {
-            err("Problems running epstopdf. Check your TeX installation!\n");
+            err("Unable to run epstopdf. Check your TeX installation\n");
          }
          portable_sysTimerStop();
       }

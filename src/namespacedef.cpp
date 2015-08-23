@@ -463,7 +463,7 @@ void NamespaceDef::writeAuthorSection(OutputList &ol)
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name").toUtf8()));
+   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name")));
    ol.popGeneratorState();
 }
 
@@ -713,7 +713,7 @@ void NamespaceDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) c
                if (createSubDirs) {
                   ol.writeString("../../");
                }
-               ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8() + "#" + md->anchor());
+               ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension + "#" + md->anchor());
                ol.writeString("\">");
                ol.writeString(convertToHtml(md->localName()));
                ol.writeString("</a>");
@@ -760,10 +760,10 @@ void NamespaceDef::addUsingDeclaration(QSharedPointer<Definition> d)
 QString NamespaceDef::getOutputFileBase() const
 {
    if (isReference()) {
-      return fileName.toUtf8();
+      return fileName;
 
    } else {
-      return convertNameToFile(fileName.toUtf8()).toUtf8();
+      return convertNameToFile(fileName);
    }
 }
 
@@ -816,7 +816,7 @@ QString NamespaceDef::displayName(bool includeScope) const
    QString sep = getLanguageSpecificSeparator(lang);
 
    if (sep != "::") {
-      result = substitute(result.toUtf8(), "::", sep);
+      result = substitute(result, "::", sep);
    }
   
    return result;
@@ -950,7 +950,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
             name = nd->displayName();
          }
 
-         ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), 0, name.toUtf8());
+         ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), 0, name);
          ol.endMemberItem();
 
          if (! nd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {

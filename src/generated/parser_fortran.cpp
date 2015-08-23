@@ -57138,7 +57138,7 @@ YY_DECL {
 
             {
                yy_pop_state(); // comment ends with endline character
-               DBG_CTX((stderr, "end comment %d %s\n", yyLineNr, debugStr.data()));
+               DBG_CTX((stderr, "end comment %d %s\n", yyLineNr, csPrintable(debugStr)));
             } // comment line ends
             YY_BREAK
          case 9:
@@ -57146,7 +57146,7 @@ YY_DECL {
 
             { debugStr += fortranscannerYYtext; }
             YY_BREAK
-         /*------ use handling ------------------------------------------------------------*/
+
          case 10:
             YY_RULE_SETUP
 
@@ -60429,7 +60429,7 @@ static void handleCommentBlock(const QString &doc, bool brief)
       return;
    }
 
-   DBG_CTX((stderr, "call parseCommentBlock [%s]\n", doc.data()));
+   DBG_CTX((stderr, "call parseCommentBlock [%s]\n", csPrintable(doc)));
    int lineNr = brief ? current->briefLine : current->docLine;
 
    while (parseCommentBlock(
@@ -60445,14 +60445,14 @@ static void handleCommentBlock(const QString &doc, bool brief)
              position,
              needsEntry)) {
 
-      DBG_CTX((stderr, "parseCommentBlock position=%d [%s]  needsEntry=%d\n", position, doc.data() + position, needsEntry));
+      DBG_CTX((stderr, "parseCommentBlock position=%d [%s]  needsEntry=%d\n", position, csPrintable(doc) + position, needsEntry));
 
       if (needsEntry) {
          addCurrentEntry(0);
       }
    }
 
-   DBG_CTX((stderr, "parseCommentBlock position=%d [%s]  needsEntry=%d\n", position, doc.data() + position, needsEntry));
+   DBG_CTX((stderr, "parseCommentBlock position=%d [%s]  needsEntry=%d\n", position, csPrintable(doc) + position, needsEntry));
 
    if (needsEntry) {
       addCurrentEntry(0);
@@ -60690,7 +60690,7 @@ void FortranLanguageParser::parsePrototype(const QString &text)
 static void scanner_abort()
 {
    fprintf(stderr, "********************************************************************\n");
-   fprintf(stderr, "Error in file %s line: %d, state: %d\n", yyFileName.data(), yyLineNr, YY_START);
+   fprintf(stderr, "Error in file %s line: %d, state: %d\n", csPrintable(yyFileName), yyLineNr, YY_START);
    fprintf(stderr, "********************************************************************\n");
    
    bool start = FALSE; 

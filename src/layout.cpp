@@ -106,7 +106,7 @@ QString LayoutNavEntry::url() const
       if (resolveLink(0, url.mid(5).trimmed(), true, &d, anchor)) {
 
          if (d && d->isLinkable()) {
-            url = d->getOutputFileBase() + Doxy_Globals::htmlFileExtension.toUtf8();
+            url = d->getOutputFileBase() + Doxy_Globals::htmlFileExtension;
 
             if (! anchor.isEmpty()) {
                url += "#" + anchor;
@@ -952,8 +952,8 @@ class LayoutParser : public QXmlDefaultHandler
             LayoutNavEntry::ClassMembers,
             fortranOpt ? theTranslator->trCompoundMembersFortran() : theTranslator->trCompoundMembers(),
             "",
-            fortranOpt ? theTranslator->trCompoundMembersDescriptionFortran(extractAll) : theTranslator->trCompoundMembersDescription(extractAll),
-            "functions_all"
+            fortranOpt ? theTranslator->trCompoundMembersDescriptionFortran(extractAll) : 
+                  theTranslator->trCompoundMembersDescription(extractAll), "functions_all"
          },
          {
             "files",
@@ -1036,10 +1036,10 @@ class LayoutParser : public QXmlDefaultHandler
 
       if (mapping[i].typeStr == 0) {
          if (type.isEmpty()) {
-            err("An entry tag within a navindex has no type attribute, verify your layout file\n");
+            err("Entry tag within a navindex has no type attribute, verify the layout file\n");
 
          } else {
-            err("The type '%s' is not supported for the entry tag within a navindex, verify your layout file\n", 
+            err("Type '%s' is not supported for the entry tag within a navindex, verify your layout file\n", 
                               qPrintable(type));
          }
 
@@ -1048,7 +1048,7 @@ class LayoutParser : public QXmlDefaultHandler
       }
 
       QString baseFile = mapping[i].baseFile;
-      QString title = attrib.value("title").toUtf8();
+      QString title = attrib.value("title");
 
       bool isVisible = elemIsVisible(attrib);
 
@@ -1201,9 +1201,8 @@ class LayoutParser : public QXmlDefaultHandler
          (*handler)(attrib);             
     
       } else {
-         err("XML tag: '%s' was found in scope: '%s', unable to process project layout file\n", 
+         err("Unable to process layout file, XML tag '%s' was found in scope: '%s', \n", 
                      qPrintable(name), qPrintable(m_scope));
-
       }
 
       return true;
@@ -1212,13 +1211,13 @@ class LayoutParser : public QXmlDefaultHandler
    bool endElement( const QString &, const QString &, const QString &name ) {           
       EndElementHandler *handler;
 
-      if (! m_scope.isEmpty() && m_scope.right(name.length() + 1 ) == name.toUtf8() + "/") { 
+      if (! m_scope.isEmpty() && m_scope.right(name.length() + 1 ) == name + "/") { 
         // element ends current scope
         handler = m_eHandler[m_scope.left(m_scope.length()-1)];
 
       }  else  {
          // continue with current scope      
-        handler = m_eHandler[m_scope + name.toUtf8()];
+        handler = m_eHandler[m_scope + name];
       }
 
       if (handler) {
@@ -1267,7 +1266,7 @@ class LayoutErrorHandler : public QXmlErrorHandler
    }
 
    bool fatalError( const QXmlParseException &exception ) override {
-      err("fatal: at line %d column %d of %s: %s\n",
+      err("at line %d column %d of %s: %s\n",
           exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message()));
       return false;
    }
@@ -1380,7 +1379,7 @@ void writeDefaultLayoutFile(const QString &fileName)
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file %s for writing\n", qPrintable(fileName));
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
       return;
    }
 

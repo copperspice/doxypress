@@ -196,7 +196,7 @@ void LatexDocVisitor::visit(DocSymbol *s)
       }
 
    } else {
-      err("LaTeX: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+      err("LaTeX unsupported HTML entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 }
 
@@ -352,7 +352,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
          QFile file(fileName);
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s for writing\n", qPrintable(fileName));
+            err("Unable to open file %s for writing\n", qPrintable(fileName));
          }
 
          file.write( s->text().toUtf8() );
@@ -360,7 +360,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
 
          m_t << "\\begin{center}\n";
 
-         startDotFile(fileName.toUtf8(), "", "", false);
+         startDotFile(fileName, "", "", false);
          endDotFile(false);
 
          m_t << "\\end{center}\n";
@@ -379,7 +379,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
 
          QFile file(baseName + ".msc");
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s.msc for writing\n", qPrintable(baseName));
+            err("Unable to open file %s.msc for writing\n", qPrintable(baseName));
          }
 
          QString text = "msc {";
@@ -436,7 +436,7 @@ void LatexDocVisitor::visit(DocInclude *inc)
          m_t << "\n\\begin{DoxyCodeInclude}\n";
 
          QFileInfo cfi(inc->file());
-         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8(), cfi.fileName().toUtf8());
+         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
 
          Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd);
@@ -482,9 +482,7 @@ void LatexDocVisitor::visit(DocInclude *inc)
 }
 
 void LatexDocVisitor::visit(DocIncOperator *op)
-{
-   //printf("DocIncOperator: type=%d first=%d, last=%d text=`%s'\n",
-   //    op->type(),op->isFirst(),op->isLast(),op->text().data());
+{   
    if (op->isFirst()) {
       if (!m_hide) {
          m_t << "\n\\begin{DoxyCodeInclude}\n";
@@ -973,7 +971,8 @@ void LatexDocVisitor::visitPre(DocHtmlCaption *c)
    if (m_hide) {
       return;
    }
-   m_t << "\\end{" << getTableName(c->parent()) << "}\n\\centering\n\\caption{";
+
+   m_t << "\\end{" << getTableName(c->parent()->parent()) << "}\n\\centering\n\\caption{";
 }
 
 void LatexDocVisitor::visitPost(DocHtmlCaption *)

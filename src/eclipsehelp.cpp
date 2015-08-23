@@ -70,8 +70,8 @@ void EclipseHelp::initialize()
    QString name = Config::getString("html-output") + "/toc.xml";
    m_tocfile = new QFile(name);
 
-   if (!m_tocfile->open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", qPrintable(name));
+   if (! m_tocfile->open(QIODevice::WriteOnly)) {
+      err("Unable to open file %s for writing\n", qPrintable(name));
       exit(1);
    }
 

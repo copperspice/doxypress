@@ -83,7 +83,7 @@ void DocbookDocVisitor::visit(DocSymbol *s)
       m_t << res;
 
    } else {
-      err("DocBook: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+      err("DocBook unsupported HTML entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 }
 
@@ -238,7 +238,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".dot");
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s.msc for writing\n", qPrintable(baseName));
+            err("Unable to open file for writing %s.msc, error: %d\n", qPrintable(baseName), file.error());          
          }
 
          file.write( stext.toUtf8() );
@@ -274,7 +274,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".msc");
 
          if (!file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s.msc for writing\n", qPrintable(baseName));
+            err("Unable to open file for writing %s.msc, error: %d\n", qPrintable(baseName), file.error());             
          }
 
          QString text = "msc {";
@@ -344,7 +344,7 @@ void DocbookDocVisitor::visit(DocInclude *inc)
          m_t << "<literallayout><computeroutput>";
 
          QFileInfo cfi( inc->file() );
-         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path().toUtf8(), cfi.fileName().toUtf8());
+         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
 
          Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
                   inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd);
@@ -1160,8 +1160,11 @@ void DocbookDocVisitor::visitPre(DocParamSect *s)
       default:
          assert(0);
    }
+
    m_t << "                        </title>" << endl;
    m_t << "                        <tgroup cols=\"2\" align=\"left\" colsep=\"1\" rowsep=\"1\">" << endl;
+   m_t << "                        <colspec colwidth=\"1*\"/>" << endl;
+   m_t << "                        <colspec colwidth=\"4*\"/>" << endl;
    m_t << "                        <tbody>" << endl;
 }
 

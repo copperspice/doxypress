@@ -907,7 +907,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             }
 
             // write line link (HTML, LaTeX optionally)
-            ol.writeObjectLink(0, fn, anchorStr, lineStr.toUtf8());
+            ol.writeObjectLink(0, fn, anchorStr, lineStr);
             ol.enableAll();
             ol.disable(OutputGenerator::Html);
 
@@ -976,7 +976,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             }
             ol.disableAllBut(OutputGenerator::Html);
             // write line link (HTML only)
-            ol.writeObjectLink(0, fn, anchorStr, lineStr.toUtf8());
+            ol.writeObjectLink(0, fn, anchorStr, lineStr);
             ol.enableAll();
             ol.disable(OutputGenerator::Html);
 
@@ -994,7 +994,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
          ol.endParagraph();
 
       } else {
-         err("Error: Invalid translation markers in 'trDefinedAtLineInSourceFile'\n");
+         err("Invalid translation markers in 'trDefinedAtLineInSourceFile'\n");
       }
    }
    ol.popGeneratorState();
@@ -1131,8 +1131,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                const int maxLineNrStr = 10;
                char anchorStr[maxLineNrStr];
                qsnprintf(anchorStr, maxLineNrStr, "l%05d", md->getStartBodyLine());
-
-               //printf("Write object link to %s\n",md->getBodyDef()->getSourceFileBase().data());
+             
                ol.writeObjectLink(0, md->getBodyDef()->getSourceFileBase(), anchorStr, name);
                ol.popGeneratorState();
 
@@ -1477,7 +1476,7 @@ void Definition::writeNavigationPath(OutputList &ol) const
    ol.disableAllBut(OutputGenerator::Html);
 
    QString navPath;
-   navPath += "<div id=\"nav-path\" class=\"navpath\">\n"
+   navPath += "<div id=\"breadcrumb\" class=\"breadcrumb\">\n"
               "  <ul>\n";
    navPath += navigationPathAsString();
    navPath += "  </ul>\n"
@@ -1642,7 +1641,7 @@ QString abbreviate(const QString &s, const QString &name)
 
 QString Definition::briefDescription(bool abbr) const
 {
-   return m_private->brief ? (abbr ? abbreviate(m_private->brief->doc, displayName().toUtf8()) : m_private->brief->doc) : "";
+   return m_private->brief ? (abbr ? abbreviate(m_private->brief->doc, displayName()) : m_private->brief->doc) : "";
 }
 
 QString Definition::briefDescriptionAsTooltip() const
@@ -1812,7 +1811,7 @@ void Definition::setArtificial(bool b)
 
 void Definition::setLocalName(const QString &name)
 {
-   m_private->localName = name.toUtf8();
+   m_private->localName = name;
 }
 
 void Definition::setLanguage(SrcLangExt lang)

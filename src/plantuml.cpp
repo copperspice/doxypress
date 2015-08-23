@@ -48,10 +48,10 @@ QString writePlantUMLSource(const QString &outDir, const QString &fileName, cons
    QFile file(baseName + ".pu");
 
    if (! file.open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", qPrintable(baseName));
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(baseName), file.error());
    }
 
-   QString text = "@startuml\n";
+   QString text = "@startuml";
    text += content;
    text += "@enduml\n";
 
@@ -110,7 +110,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    portable_sysTimerStart();
 
    if ((exitCode = portable_system(pumlExe, pumlArgs, false)) != 0) {
-      err("Problem running PlantUML, verify the command 'java -jar \"%splantuml.jar\" -h' works from "
+      err("Unable to run PlantUML, verify the command 'java -jar \"%splantuml.jar\" -h' works from "
          "the command line. Exit code: %d\n", qPrintable(plantumlJarPath), exitCode);
 
    } else if (Config::getBool("dot-cleanup")) {
@@ -127,7 +127,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
       portable_sysTimerStart();
 
       if ((exitCode = portable_system("epstopdf", epstopdfArgs)) != 0) {
-         err("Problem running epstopdf, verify your TeX installation, exit code: %d\n", exitCode);
+         err("Unable to run epstopdf, verify your TeX installation, exit code: %d\n", exitCode);
       }
 
       portable_sysTimerStop();

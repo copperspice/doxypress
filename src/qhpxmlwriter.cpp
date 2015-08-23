@@ -40,12 +40,12 @@ void QhpXmlWriter::setCompressionEnabled(bool enabled)
 
 void QhpXmlWriter::insert(QhpXmlWriter const &source)
 {
-   m_out << source.m_backend.data();
+   m_out << source.m_backend;
 }
 
 void QhpXmlWriter::dumpTo(QFile &file)
 {
-   file.write(m_backend.data(), m_backend.length());
+   file.write(m_backend);
 }
 
 void QhpXmlWriter::open(const QString &elementName, const QMap<QString, QString> &attributes)

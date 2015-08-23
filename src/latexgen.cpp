@@ -68,7 +68,7 @@ static void writeLatexMakefile()
    QFile file(fileName);
 
    if (! file.open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", qPrintable(fileName));
+      err("Unable to open file %s for writing\n", qPrintable(fileName));
       exit(1);
    }
 
@@ -171,7 +171,7 @@ static void writeMakeBat()
    bool generateBib = !Doxy_Globals::citeDict->isEmpty();
 
    if (! file.open(QIODevice::WriteOnly)) {
-      err("Could not open file %s for writing\n", qPrintable(fileName));
+      err("Unable to open file %s for writing\n", qPrintable(fileName));
       exit(1);
    }
 
@@ -250,7 +250,7 @@ void LatexGenerator::init()
    QDir d(dir);
 
    if (! d.exists() && !d.mkdir(dir)) {
-      err("Could not create output directory %s\n", qPrintable(dir));
+      err("Unable to create output directory %s\n", qPrintable(dir));
       exit(1);
    }
 
@@ -550,23 +550,25 @@ static void writeDefaultFooter(QTextStream &t)
    Doxy_Globals::citeDict->writeLatexBibliography(t);
 
    // Index
+   t << "% Index\n";
+
    QString unit;
 
    if (Config::getBool("latex-compact")) {
       unit = "section";
+
    } else {
       unit = "chapter";
+      t << "\\backmatter\n";
    }
 
-   t << "% Index\n"
-     "\\backmatter\n"
-     "\\newpage\n"
-     "\\phantomsection\n"
-     "\\clearemptydoublepage\n"
-     "\\addcontentsline{toc}{" << unit << "}{" << theTranslator->trRTFGeneralIndex() << "}\n"
-     "\\printindex\n"
-     "\n"
-     "\\end{document}\n";
+   t << "\\newpage\n"
+        "\\phantomsection\n"
+        "\\clearemptydoublepage\n"
+        "\\addcontentsline{toc}{" << unit << "}{" << theTranslator->trRTFGeneralIndex() << "}\n"
+        "\\printindex\n"
+        "\n"
+        "\\end{document}\n";
 }
 
 void LatexGenerator::writeHeaderFile(QFile &f)
@@ -632,7 +634,7 @@ static QByteArray convertToLaTeX(const QString &s)
    QByteArray result;
 
    QTextStream t(&result);
-   filterLatexString(t, s.toUtf8(), false, false, false);
+   filterLatexString(t, s, false, false, false);
 
    return result;
 }

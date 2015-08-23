@@ -2065,19 +2065,19 @@ void writeOneLineHeaderOrRuler(QString &out, const QString &data, int size)
 
          if (si) {
             if (si->lineNr != -1) {
-               warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)", 
-                   qPrintable(header), qPrintable(si->fileName), si->lineNr);
+               warn(g_fileName, g_lineNr, "Multiple use of section label '%s', (first occurrence: %s, line %d)", 
+                   qPrintable(header), csPrintable(si->fileName), si->lineNr);
 
             } else {
-               warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s)", 
-                    qPrintable(header), qPrintable(si->fileName));
+               warn(g_fileName, g_lineNr, "Multiple use of section label '%s', (first occurrence: %s)", 
+                    qPrintable(header), csPrintable(si->fileName));
             }
 
          } else {
             si = QSharedPointer<SectionInfo> (new SectionInfo(g_fileName, g_lineNr, id, header, type, level));
 
             if (g_current) {
-               g_current->anchors->append(*(si.data()));
+               g_current->anchors->append(*si);
             }
 
             Doxy_Globals::sectionDict->insert(id, si);
@@ -2747,8 +2747,8 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    QString docs = fileBuf;
    QString id;
    QString title   = extractPageTitle(docs, id).trimmed();
-   QString titleFn = QFileInfo(fileName).baseName().toUtf8();
-   QString fn      = QFileInfo(fileName).fileName().toUtf8();
+   QString titleFn = QFileInfo(fileName).baseName();
+   QString fn      = QFileInfo(fileName).fileName();
 
    static QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
 

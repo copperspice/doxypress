@@ -3383,7 +3383,7 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
       // substitution of all formal arguments
       QString resExpr;
       const QString d = def->definition.trimmed();
-      //printf("Macro definition: %s\n",d.data());
+     
       bool inString = FALSE;
       while (k < d.length()) {
          if (d.at(k) == '@') { // maybe a marker, otherwise an escaped @
@@ -3428,8 +3428,7 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
                      hash = TRUE;
                   }
                }
-
-               //printf("request key %s result %s\n",key.data(),argTable[key]->data());
+              
                if (key.length() > 1 && (subst = argTable[key])) {
                   QString substArg = *subst;
                   //printf("substArg=`%s'\n",substArg.data());
@@ -4157,14 +4156,14 @@ static void readIncludeFile(const QString &inc)
 
          if (Debug::isFlagSet(Debug::Preprocessor)) {
             if (alreadyIncluded) {
-               Debug::print(Debug::Preprocessor, 0, "#include %s: already included! skipping...\n", incFileName.data());
+               Debug::print(Debug::Preprocessor, 0, "#include %s: already included! skipping...\n", csPrintable(incFileName));
             } else {
-               Debug::print(Debug::Preprocessor, 0, "#include %s: not found! skipping...\n", incFileName.data());
+               Debug::print(Debug::Preprocessor, 0, "#include %s: not found! skipping...\n", csPrintable(incFileName));
             }           
          }
 
          if (g_curlyCount > 0 && !alreadyIncluded) { // failed to find #include inside { ... }
-            warn(g_yyFileName, g_yyLineNr, "include file %s not found, perhaps you forgot to add its directory to INCLUDE_PATH?", incFileName.data());
+            warn(g_yyFileName, g_yyLineNr, "include file %s not found, perhaps you forgot to add its directory to INCLUDE_PATH?", csPrintable(incFileName));
          }
       }
    }
@@ -8068,7 +8067,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
       }
 
       warn(fileName, ctx->lineNr, "Conditional section%sdoes not have "
-           "a corresponding \\endcond command within this file.", sectionInfo.data());
+           "a corresponding \\endcond command within this file.", csPrintable(sectionInfo));
    }
 
    // make sure we don't extend a \cond with missing \endcond over multiple files (see bug 624829)

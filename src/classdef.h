@@ -402,12 +402,12 @@ class ClassDef : public Definition
 
    void writeInheritedMemberDeclarations(OutputList &ol, MemberListType lt, int lt2,
                   const QString &title, QSharedPointer<ClassDef> inheritedFrom,
-                  bool invert, bool showAlways, QHash<void *, void *> *visitedClasses);
+                  bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses);
 
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title,
                   const QString &subTitle = 0, bool showInline = false,
                   QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), int lt2 = -1, bool invert = false,
-                  bool showAlways = false, QHash<void *, void *> *visitedClasses = 0);
+                  bool showAlways = false, QSet<QSharedPointer<ClassDef>> *visitedClasses = 0);
 
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title, bool showInline = false);
    void writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt);
@@ -436,11 +436,12 @@ class ClassDef : public Definition
    int countAdditionalInheritedMembers();
    void writeAdditionalInheritedMembers(OutputList &ol);
    void addClassAttributes(OutputList &ol);
+
    int countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
-                               int lt2, bool invert, bool showAlways, QHash<void *, void *> *visitedClasses);
+                               int lt2, bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses);
 
    int countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool invert, bool showAlways,
-                                QHash<void *, void *> *visitedClasses);
+                                QSet<QSharedPointer<ClassDef>> *visitedClasses);
 
    void getTitleForMemberListType(MemberListType type, QString &title, QString &subtitle);
    QString includeStatement() const;

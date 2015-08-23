@@ -1732,8 +1732,9 @@ YY_DECL {
                         a->name = a->type;
                         a->type = "";
                      }
+
                      a->array  += removeRedundantWhiteSpace(g_curArgArray);
-                     //printf("array=%s\n",a->array.data());
+                     
                      int alen = a->array.length();
 
                      if (alen > 2 && a->array.at(0) == '(' && a->array.at(alen - 1) == ')') { 

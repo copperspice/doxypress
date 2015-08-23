@@ -150,7 +150,7 @@ void RTFDocVisitor::visit(DocSymbol *s)
       m_t << res;
 
    } else {
-      err("RTF: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+      err("RTF, Unsupported HTML entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 
    m_lastIsPara = false;
@@ -351,7 +351,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
 
          QFile file(fileName);
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Could not open file %s for writing\n", qPrintable(fileName));
+            err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), file.error());            
          }
 
          file.write( s->text().toUtf8() );
@@ -509,10 +509,8 @@ void RTFDocVisitor::visit(DocInclude *inc)
 
 void RTFDocVisitor::visit(DocIncOperator *op)
 {
-   //printf("DocIncOperator: type=%d first=%d, last=%d text=`%s'\n",
-   //    op->type(),op->isFirst(),op->isLast(),op->text().data());
-
    DBG_RTF("{\\comment RTFDocVisitor::visit(DocIncOperator)}\n");
+
    SrcLangExt langExt = getLanguageFromFileName(m_langExt);
    if (op->isFirst()) {
       if (!m_hide) {

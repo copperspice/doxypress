@@ -105,7 +105,7 @@ div.qindex, div.navtab{
    text-align: center;
 }
 
-div.qindex, div.navpath {
+div.qindex, div.navpath, div.breadcrumb {
    width: 100%;
    line-height: 140%;
 }
@@ -189,8 +189,7 @@ div.line {
    font-family: monospace, fixed;
    font-size: 13px;
    min-height: 13px;
-   line-height: 1.0;
-   text-wrap: unrestricted;
+   line-height: 1.0;   
    white-space: -moz-pre-wrap; /* Moz */
    white-space: -pre-wrap;     /* Opera 4-6 */
    white-space: -o-pre-wrap;   /* Opera 7 */
@@ -743,8 +742,7 @@ div.directory .levels span {
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    -ms-user-select: none;    
     cursor: pointer;
     font-size: 80%;
     display: inline-block;
@@ -760,7 +758,7 @@ div.directory .levels span {
     margin-right: 4px;
     display: inline-block;
     color: white;
-    text-align: top;
+    vertical-align: top;
     position: relative;
     top: -3px;
 }
@@ -846,8 +844,7 @@ div.dynheader {
    -webkit-user-select: none;
    -khtml-user-select: none;
    -moz-user-select: none;
-   -ms-user-select: none;
-   user-select: none;
+   -ms-user-select: none;   
 }
 
 address {
@@ -857,8 +854,8 @@ address {
 
 table.doxtable {
    border-collapse:collapse;
-        margin-top: 4px;
-        margin-bottom: 4px;
+   margin-top: 4px;
+   margin-bottom: 4px;
 }
 
 table.doxtable td, table.doxtable th {
@@ -947,7 +944,7 @@ table.fieldtable {
    font-size: 13px;
 }
 
-.navpath ul
+.navpath ul, .breadcrumb ul
 {
    font-size: 11px;
    background-image:url('tab_b.png');
@@ -962,7 +959,7 @@ table.fieldtable {
    padding:0px;
 }
 
-.navpath li
+.navpath li, .breadcrumb li
 {
    list-style-type:none;
    float:left;
@@ -974,7 +971,7 @@ table.fieldtable {
    color:##45;
 }
 
-.navpath li.navelem a
+.navpath li.navelem a, .breadcrumb li.navelem a
 {
    height:32px;
    display:block;
@@ -986,7 +983,7 @@ table.fieldtable {
    text-decoration: none;
 }
 
-.navpath li.navelem a:hover
+.navpath li.navelem a:hover, .breadcrumb li.navelem a:hover
 {
    color:##80;
 }
@@ -1273,7 +1270,6 @@ div.toc li.level4 {
    -khtml-user-select: none;
    -moz-user-select: none;
    -ms-user-select: none;
-   user-select: none;
 }
 
 .inherit_header td {
@@ -1468,7 +1464,8 @@ tr.heading h2 {
 @media print
 {
   #top { display: none; }
-  #side-nav { display: none; }
+  #breadcrumb { display: none; }
+  #side-nav { display: none; } 
   #nav-path { display: none; }
   body { overflow:visible; }
   h1, h2, h3, h4, h5, h6 { page-break-after: avoid; }

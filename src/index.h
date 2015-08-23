@@ -279,8 +279,8 @@ void endFileWithNavPath(QSharedPointer<Definition> d, OutputList &ol);
 void initClassMemberIndices();
 void initFileMemberIndices();
 void initNamespaceMemberIndices();
-void addClassMemberNameToIndex(MemberDef *md);
-void addFileMemberNameToIndex(MemberDef *md);
-void addNamespaceMemberNameToIndex(MemberDef *md);
+void addClassMemberNameToIndex(QSharedPointer<MemberDef> md);
+void addFileMemberNameToIndex(QSharedPointer<MemberDef> md);
+void addNamespaceMemberNameToIndex(QSharedPointer<MemberDef> md);
 
 #endif

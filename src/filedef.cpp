@@ -88,7 +88,7 @@ FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, const
    m_dir               = QSharedPointer<DirDef>();
 
    if (Config::getBool("full-path-names")) {
-      m_docname.prepend(stripFromPath(m_path).toUtf8());
+      m_docname.prepend(stripFromPath(m_path));
    }
 
    setLanguage(getLanguageFromFileName(name()));
@@ -411,9 +411,9 @@ void FileDef::writeIncludeGraph(OutputList &ol)
       DotInclDepGraph incDepGraph(self, false);
 
       if (incDepGraph.isTooBig()) {
-         warn_uncond("Include graph for '%s' not generated, too many nodes. Consider increasing DOT_GRAPH_MAX_NODES.\n", name().data());
+         warn_uncond("Include graph for '%s' not generated, too many nodes. Consider increasing DOT_GRAPH_MAX_NODES.\n", csPrintable(name()));
 
-      } else if (!incDepGraph.isTrivial()) {
+      } else if (! incDepGraph.isTrivial()) {
          ol.startTextBlock();
          ol.disable(OutputGenerator::Man);
          ol.startInclDepGraph();
@@ -536,7 +536,7 @@ void FileDef::writeAuthorSection(OutputList &ol)
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name").toUtf8()));
+   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name")));
    ol.popGeneratorState();
 }
 
@@ -1449,15 +1449,15 @@ void FileDef::acquireFileVersion()
    QString vercmd = Config::getString("file-version-filter");
 
    if (! vercmd.isEmpty() && !m_filePath.isEmpty() && m_filePath != "generated") {
-      msg("Version of %s : ", m_filePath.data());
+      msg("Version of %s : ", csPrintable(m_filePath));
 
       QString cmd = vercmd + " \"" + m_filePath + "\"";
-      Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", qPrintable(cmd));
+      Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", csPrintable(cmd));
 
-      FILE *f = popen(qPrintable(cmd), "r");
+      FILE *f = popen(csPrintable(cmd), "r");
 
       if (! f) {
-         err("could not execute %s\n", qPrintable(vercmd));
+         err("Unable to execute %s\n", qPrintable(vercmd));
          return;
       }
 
@@ -1466,7 +1466,7 @@ void FileDef::acquireFileVersion()
       QByteArray buf;
       buf.resize(bufSize);
 
-      int numRead = (int)fread(buf.data(), 1, bufSize - 1, f);
+      int numRead = fread(buf.data(), 1, bufSize - 1, f);
       pclose(f);
 
       if (numRead > 0 && numRead < bufSize) {
@@ -1489,7 +1489,7 @@ QString FileDef::getSourceFileBase() const
    if (Htags::useHtags) {
       return Htags::path2URL(m_filePath);
    } else {
-      return (convertNameToFile(m_diskName) + "_source").toUtf8();
+      return (convertNameToFile(m_diskName) + "_source");
    }
 }
 

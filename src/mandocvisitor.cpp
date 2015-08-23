@@ -85,8 +85,8 @@ void ManDocVisitor::visit(DocSymbol *s)
       m_t << res;
 
    } else {
-      // no error or warning to be supplied
-      // err("man: non supported HTML-entity found: &%s;\n",get_symbol_item(s->symbol()));
+      // no error or warning is supplied
+      // non supported HTML-entity found
    }
 
    m_firstCol = false;
@@ -281,7 +281,7 @@ void ManDocVisitor::visit(DocInclude *inc)
          m_t << ".nf" << endl;
 
          QFileInfo cfi( inc->file() );
-         QSharedPointer<FileDef> fd = QMakeShared<FileDef>( cfi.path().toUtf8(), cfi.fileName().toUtf8() );
+         QSharedPointer<FileDef> fd = QMakeShared<FileDef>( cfi.path(), cfi.fileName() );
 
          Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(), 
                                            langExt, inc->isExample(), inc->exampleFile(), fd);
@@ -361,9 +361,7 @@ void ManDocVisitor::visit(DocInclude *inc)
 
 void ManDocVisitor::visit(DocIncOperator *op)
 {
-   SrcLangExt langExt = getLanguageFromFileName(m_langExt);
-   //printf("DocIncOperator: type=%d first=%d, last=%d text=`%s'\n",
-   //    op->type(),op->isFirst(),op->isLast(),op->text().data());
+   SrcLangExt langExt = getLanguageFromFileName(m_langExt);   
 
    if (op->isFirst()) {
       if (!m_hide) {

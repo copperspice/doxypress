@@ -324,7 +324,7 @@ class TagFileParser : public QXmlDefaultHandler
    }
 
    void setFileName( const QString &fileName ) {
-      m_inputFileName = fileName.toUtf8();
+      m_inputFileName = fileName;
    }
 
    void warn(const char *fmt) {
@@ -525,9 +525,9 @@ class TagFileParser : public QXmlDefaultHandler
       if (m_state == InMember) {
          m_curString = "";
          m_curEnumValue = new TagEnumValueInfo;
-         m_curEnumValue->file = attrib.value("file").toUtf8();
-         m_curEnumValue->anchor = attrib.value("anchor").toUtf8();
-         m_curEnumValue->clangid = attrib.value("clangid").toUtf8();
+         m_curEnumValue->file    = attrib.value("file");
+         m_curEnumValue->anchor  = attrib.value("anchor");
+         m_curEnumValue->clangid = attrib.value("clangid");
 
          m_stateStack.push(m_state);
          m_state = InEnumValue;
@@ -661,8 +661,8 @@ class TagFileParser : public QXmlDefaultHandler
    }
 
    void startDocAnchor(const QXmlAttributes &attrib ) {
-      m_fileName = attrib.value("file").toUtf8();
-      m_title = attrib.value("title").toUtf8();
+      m_fileName = attrib.value("file");
+      m_title = attrib.value("title");
       m_curString = "";
    }
 
@@ -752,10 +752,10 @@ class TagFileParser : public QXmlDefaultHandler
       if (m_state == InFile && m_curFile) {
 
          m_curIncludes = new TagIncludeInfo;
-         m_curIncludes->id = attrib.value("id").toUtf8();
-         m_curIncludes->name = attrib.value("name").toUtf8();
-         m_curIncludes->isLocal = attrib.value("local").toUtf8() == "yes" ? true : false;
-         m_curIncludes->isImported = attrib.value("imported").toUtf8() == "yes" ? true : false;
+         m_curIncludes->id = attrib.value("id");
+         m_curIncludes->name = attrib.value("name");
+         m_curIncludes->isLocal = attrib.value("local") == "yes" ? true : false;
+         m_curIncludes->isImported = attrib.value("imported") == "yes" ? true : false;
 
          m_curFile->includes.append(* m_curIncludes);
 
@@ -955,7 +955,7 @@ class TagFileParser : public QXmlDefaultHandler
 
    bool startElement(const QString &, const QString &, const QString &name, const QXmlAttributes &attrib) {
 
-      auto iter = m_startElementHandlers.find(name.toUtf8());
+      auto iter = m_startElementHandlers.find(name);
 
       if (iter != m_startElementHandlers.end())  {
 
@@ -972,7 +972,7 @@ class TagFileParser : public QXmlDefaultHandler
 
    bool endElement( const QString &, const QString &, const QString &name ) {
  
-      auto iter = m_endElementHandlers.find(name.toUtf8());
+      auto iter = m_endElementHandlers.find(name);
 
       if (iter != m_endElementHandlers.end()) { 
 
@@ -988,7 +988,7 @@ class TagFileParser : public QXmlDefaultHandler
    }
 
    bool characters (const QString &ch) {
-      m_curString += ch.toUtf8();
+      m_curString += ch;
       return true;
    }
 
@@ -1052,9 +1052,8 @@ class TagFileErrorHandler : public QXmlErrorHandler
    }
 
    bool fatalError( const QXmlParseException &exception ) override {
-      err("Fatal error at line %d column %d: %s\n",
-          exception.lineNumber(), exception.columnNumber(),
-          exception.message().data());
+      err("Error at line %d column %d: %s\n",
+          exception.lineNumber(), exception.columnNumber(), csPrintable(exception.message()) );
       return false;
    }
 
@@ -1066,35 +1065,35 @@ class TagFileErrorHandler : public QXmlErrorHandler
    QString errorMsg;
 };
 
-/*! Dumps the internal structures. For debugging only! */
+/*! Dumps the internal structures. For debugging only */
 void TagFileParser::dump()
 {
    msg("Result:\n");  
 
-   //  CLASSES  
-   for (auto cd : m_tagFileClasses) {
-      msg("class `%s'\n",      cd.name.data());
-      msg("  filename `%s'\n", cd.filename.data());
+   //  classes
+   for (auto cd : m_tagFileClasses) { 
+      msg("class `%s'\n",      csPrintable(cd.name));
+      msg("  filename `%s'\n", csPrintable(cd.filename));
 
       if (cd.bases) {         
          for (auto bi : *cd.bases) {
-            msg( "  base: %s \n", bi.name.data() );
+            msg( "  base: %s \n", csPrintable(bi.name) );
          }
       }
      
       for (auto md : cd.members) {
          msg("  member:\n");
-         msg("    kind: `%s'\n",    md.kind.data());
-         msg("    name: `%s'\n",    md.name.data());
-         msg("    anchor: `%s'\n",  md.anchor.data());
-         msg("    arglist: `%s'\n", md.arglist.data());
+         msg("    kind: `%s'\n",    csPrintable(md.kind));
+         msg("    name: `%s'\n",    csPrintable(md.name));
+         msg("    anchor: `%s'\n",  csPrintable(md.anchor));
+         msg("    arglist: `%s'\n", csPrintable(md.arglist));
       }
    }
 
    //  NAMESPACES
    for (auto nd : m_tagFileNamespaces) {
-      msg("namespace `%s'\n",  nd.name.data());
-      msg("  filename `%s'\n", nd.filename.data());
+      msg("namespace `%s'\n",  csPrintable(nd.name));
+      msg("  filename `%s'\n", csPrintable(nd.filename));
 
       QStringList::Iterator it;
       for ( it = nd.classList.begin(); it != nd.classList.end(); ++it ) {
@@ -1103,17 +1102,17 @@ void TagFileParser::dump()
      
       for (auto md : nd.members) {
          msg("  member:\n");
-         msg("    kind: `%s'\n",    md.kind.data());
-         msg("    name: `%s'\n",    md.name.data());
-         msg("    anchor: `%s'\n",  md.anchor.data());
-         msg("    arglist: `%s'\n", md.arglist.data());
+         msg("    kind: `%s'\n",    csPrintable(md.kind));
+         msg("    name: `%s'\n",    csPrintable(md.name));
+         msg("    anchor: `%s'\n",  csPrintable(md.anchor));
+         msg("    arglist: `%s'\n", csPrintable(md.arglist));
       }
    }
 
    //  FILES  
    for (auto fd : m_tagFileFiles) {
-      msg("file `%s'\n",       fd.name.data());
-      msg("  filename `%s'\n", fd.filename.data());
+      msg("file `%s'\n",       csPrintable(fd.name));
+      msg("  filename `%s'\n", csPrintable(fd.filename));
 
       QStringList::Iterator it;
       for ( it = fd.namespaceList.begin(); it != fd.namespaceList.end(); ++it ) {
@@ -1126,21 +1125,21 @@ void TagFileParser::dump()
      
       for (auto md : fd.members) {
          msg("  member:\n");
-         msg("    kind: `%s'\n",    md.kind.data());
-         msg("    name: `%s'\n",    md.name.data());
-         msg("    anchor: `%s'\n",  md.anchor.data());
-         msg("    arglist: `%s'\n", md.arglist.data());
+         msg("    kind: `%s'\n",    csPrintable(md.kind));
+         msg("    name: `%s'\n",    csPrintable(md.name));
+         msg("    anchor: `%s'\n",  csPrintable( md.anchor));
+         msg("    arglist: `%s'\n", csPrintable(md.arglist));
       }  
 
       for (auto item : fd.includes) {
-         msg("  includes id: %s name: %s\n", item.id.data(), item.name.data());
+         msg("  includes id: %s name: %s\n", csPrintable(item.id), csPrintable(item.name));
       }
    }
 
    //  GROUPS 
    for (auto gd : m_tagFileGroups) {
-      msg("group `%s'\n",      gd.name.data());
-      msg("  filename `%s'\n", gd.filename.data());
+      msg("group `%s'\n",      csPrintable(gd.name));
+      msg("  filename `%s'\n", csPrintable(gd.filename));
 
       QStringList::Iterator it;
       for ( it = gd.namespaceList.begin(); it != gd.namespaceList.end(); ++it ) {
@@ -1164,24 +1163,24 @@ void TagFileParser::dump()
    
       for (auto md : gd.members) {
          msg("  member:\n");
-         msg("    kind: `%s'\n",    md.kind.data());
-         msg("    name: `%s'\n",    md.name.data());
-         msg("    anchor: `%s'\n",  md.anchor.data());
-         msg("    arglist: `%s'\n", md.arglist.data());
+         msg("    kind: `%s'\n",    csPrintable(md.kind));
+         msg("    name: `%s'\n",    csPrintable(md.name));
+         msg("    anchor: `%s'\n",  csPrintable(md.anchor));
+         msg("    arglist: `%s'\n", csPrintable(md.arglist));
       }
    }
 
    //  PAGES  
    for (auto pd : m_tagFilePages) {
-      msg("page `%s'\n",       pd.name.data());
-      msg("  title `%s'\n",    pd.title.data());
-      msg("  filename `%s'\n", pd.filename.data());
+      msg("page `%s'\n",       csPrintable(pd.name));
+      msg("  title `%s'\n",    csPrintable(pd.title));
+      msg("  filename `%s'\n", csPrintable(pd.filename));
    }
 
    //  DIRS
    for (auto dd : m_tagFileDirs) {
-      msg("dir `%s'\n",    dd.name.data());
-      msg("  path `%s'\n", dd.path.data());
+      msg("dir `%s'\n",    csPrintable(dd.name));
+      msg("  path `%s'\n", csPrintable(dd.path));
 
       QStringList::Iterator it;
       for ( it = dd.fileList.begin(); it != dd.fileList.end(); ++it ) {

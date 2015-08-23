@@ -523,7 +523,7 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
    QFile file(name);
 
    if (! file.open(QIODevice::ReadOnly)) {
-      err("Ca not open RTF style sheet file %s. Using defaults.\n", qPrintable(name));
+      err("Unable to open RTF style sheet file %s, using default file\n", qPrintable(name));
       return;
    }
    msg("Loading RTF style sheet %s\n", qPrintable(name));

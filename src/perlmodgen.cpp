@@ -667,7 +667,7 @@ void PerlModDocVisitor::visit(DocSymbol *sy)
             break;
       }
    } else {
-      err("Perl: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(sy->symbol(), true)) );
+      err("Perl, Unsupported HTML entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(sy->symbol(), true)) );
    }
 }
 
@@ -828,15 +828,15 @@ void PerlModDocVisitor::visit(DocInclude *inc)
 
 void PerlModDocVisitor::visit(DocIncOperator *)
 {
-#if 0
-   //printf("DocIncOperator: type=%d first=%d, last=%d text=`%s'\n",
-   //    op->type(),op->isFirst(),op->isLast(),op->text().data());
+#if 0  
    if (op->isFirst()) {
       m_output.add("<programlisting>");
    }
+
    if (op->type() != DocIncOperator::Skip) {
       parseCode(m_ci, op->context(), op->text(), false, 0);
    }
+
    if (op->isLast()) {
       m_output.add("</programlisting>");
    } else {
@@ -991,9 +991,10 @@ void PerlModDocVisitor::visitPre(DocSimpleSect *s)
          type = "rcs";
          break;
       case DocSimpleSect::Unknown:
-         err("unknown simple section found\n");
+         err("Unknown simple section found\n");
          break;
    }
+
    leaveText();
    m_output.openHash();
    openOther();
@@ -1425,7 +1426,7 @@ void PerlModDocVisitor::visitPre(DocParamSect *s)
          type = "templateparam";
          break;
       case DocParamSect::Unknown:
-         err("unknown parameter section found\n");
+         err("Unknown parameter section found\n");
          break;
    }
    openOther();
@@ -1641,7 +1642,7 @@ static QString pathDoxyExec;
 void setPerlModDoxyfile(const QString &qs)
 {
    pathDoxyfile = qs;
-   pathDoxyExec = QDir::currentPath().toUtf8();
+   pathDoxyExec = QDir::currentPath();
 }
 
 class PerlModGenerator
@@ -1987,7 +1988,7 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
    
       for (auto bcd : *cd->baseClasses()) {
          m_output.openHash()
-         .addFieldQuotedString("name", bcd->classDef->displayName().toUtf8())
+         .addFieldQuotedString("name", bcd->classDef->displayName())
          .addFieldQuotedString("virtualness", getVirtualnessName(bcd->virt))
          .addFieldQuotedString("protection",  getProtectionName(bcd->prot)).closeHash();
       }
@@ -2000,7 +2001,7 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
 
       for (auto bcd : *cd->subClasses()) {
          m_output.openHash()
-         .addFieldQuotedString("name", bcd->classDef->displayName().toUtf8())
+         .addFieldQuotedString("name", bcd->classDef->displayName())
          .addFieldQuotedString("virtualness", getVirtualnessName(bcd->virt))
          .addFieldQuotedString("protection",  getProtectionName(bcd->prot)).closeHash();
       }   
@@ -2433,14 +2434,14 @@ bool PerlModGenerator::createOutputDir(QDir &perlModDir)
       dir.setPath(QDir::currentPath());
 
       if (! dir.mkdir(outputDirectory)) {
-         err("Unable to create directory %s\n", outputDirectory.data());
+         err("Unable to create directory %s\n", csPrintable(outputDirectory));
          return false;
       }
    }
 
    perlModDir.setPath(outputDirectory + "/perlmod");
    if (! perlModDir.exists() && !perlModDir.mkdir(outputDirectory + "/perlmod")) {
-      err("Unable to create perlmod directory in %s\n", outputDirectory.data());
+      err("Unable to create perlmod directory in %s\n", csPrintable(outputDirectory));
       return false;
    }
    return true;

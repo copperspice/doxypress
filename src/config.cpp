@@ -152,7 +152,7 @@ bool Config::preVerify()
       QFileInfo fi(headerFile);
 
       if (! fi.exists()) {
-         err("HTML HEADER file `%s' does not exist\n", qPrintable(headerFile)); 
+         err("HTML Header file `%s' does not exist\n", qPrintable(headerFile)); 
          isError = true;
       }
    }
@@ -165,7 +165,7 @@ bool Config::preVerify()
       QFileInfo fi(footerFile);
 
       if (! fi.exists()) {
-         err("HTML FOOTER file `%s' does not exist\n", qPrintable(footerFile));
+         err("HTML Footer file `%s' does not exist\n", qPrintable(footerFile));
          isError = true;
       }
    }
@@ -178,7 +178,7 @@ bool Config::preVerify()
       QFileInfo fi(latexHeaderFile);
 
       if (! fi.exists()) {
-         err("LATEX HEADER file `%s' does not exist\n", qPrintable(latexHeaderFile));
+         err("LaTeX Header file `%s' does not exist\n", qPrintable(latexHeaderFile));
          isError = true;
       }
    }
@@ -191,7 +191,7 @@ bool Config::preVerify()
       QFileInfo fi(latexFooterFile);
 
       if (! fi.exists()) {
-         err("LATEX FOOTER file `%s' does not exist\n", qPrintable(latexFooterFile));
+         err("LaTeX Footer file `%s' does not exist\n", qPrintable(latexFooterFile));
          isError = true;
       }
    }
@@ -205,7 +205,7 @@ bool Config::preVerify()
          QFileInfo fi(mathJaxCodefile);
 
          if (! fi.exists()) {
-            err("MATHJAX CODEFILE file `%s' does not exist\n", qPrintable(mathJaxCodefile));
+            err("MathJax Codefile file `%s' does not exist\n", qPrintable(mathJaxCodefile));
             isError = true;
          }
       }
@@ -223,7 +223,7 @@ bool Config::verify()
    QString outputDirectory = iterString.value().value;
 
    if (outputDirectory.isEmpty()) {
-       outputDirectory = QDir::currentPath().toUtf8();
+       outputDirectory = QDir::currentPath();
    
    } else {
       QDir dir(outputDirectory);
@@ -232,18 +232,18 @@ bool Config::verify()
          dir.setPath(QDir::currentPath());
 
          if (! dir.mkdir(outputDirectory)) {
-            err("Output directory `%s' does not exist and can not be created\n", qPrintable(outputDirectory));            
+            err("Output directory `%s' does not exist and can not be created\n", csPrintable(outputDirectory));            
             isError = true;
 
          } else {
-            msg("Output directory `%s' was automatically created\n", qPrintable(outputDirectory));
+            msg("Output directory `%s' was automatically created\n", csPrintable(outputDirectory));
 
          }
 
          dir.cd(outputDirectory);
       }
 
-      outputDirectory = dir.absolutePath().toUtf8();
+      outputDirectory = dir.absolutePath();
    }
 
    iterString.value().value = outputDirectory;
@@ -326,7 +326,7 @@ bool Config::verify()
          QString language  = mapStr.mid(i + 1).trimmed().toLower();
 
          if (! updateLanguageMapping(extension, language)) {
-            err("Unable to map file extension '%s' to '%s', verify the EXTENSION MAPPING tag\n", 
+            err("Unable to map file extension '%s' to '%s', verify the Extension Mapping tag\n", 
                   qPrintable(extension), qPrintable(language));
 
          } else {
@@ -348,7 +348,7 @@ bool Config::verify()
       QFileInfo fi(layoutFileName);
 
       if (! fi.exists()) {
-         err("LAYOUT FILE file `%s' does not exist\n", qPrintable(layoutFileName));
+         err("Layout file `%s' does not exist\n", qPrintable(layoutFileName));
          isError = true;
       }
    }
@@ -451,7 +451,7 @@ bool Config::verify()
       dotImageFormat = "png";
 
    } else if (! s_dotImageFormat.contains(dotImageFormat)) {
-      err("Invalid value of %s for DOT IMAGE FORMAT, using the the default of png\n", qPrintable(dotImageFormat));
+      err("Invalid value of %s for Dot Image Format, using the the default of png\n", qPrintable(dotImageFormat));
 
       dotImageFormat = "png";
    }
@@ -467,7 +467,7 @@ bool Config::verify()
       QFileInfo dp(mscgenPath + "/mscgen" + portable_commandExtension());
 
       if (! dp.exists() || ! dp.isFile()) {
-         warnMsg("MSCGEN program could not be found at %s\n", mscgenPath.data());
+         warnMsg("Unable to find the MSCGEN program at %s\n", csPrintable(mscgenPath));
          mscgenPath = "";
 
       } else {
@@ -487,7 +487,7 @@ bool Config::verify()
       QFileInfo dp(diaPath + "/dia" + portable_commandExtension());
 
       if (! dp.exists() || ! dp.isFile()) {
-         warnMsg("DIA program could not be found at %s\n", qPrintable(diaPath));
+         warnMsg("Unable to find the DIA program at %s\n", qPrintable(diaPath));
          diaPath = "";
 
       } else {
@@ -508,13 +508,13 @@ bool Config::verify()
 
       if (fi.exists() && fi.isFile()) { 
          // user specified path + exec
-         dotPath = fi.absolutePath().toUtf8() + "/";
+         dotPath = fi.absolutePath() + "/";
 
       } else {
          QFileInfo dp(dotPath + "/dot" + portable_commandExtension());            
 
-         if (! dp.exists() || !dp.isFile()) {
-            err("Unable to locate DOT program at %s\n", qPrintable(dotPath));
+         if (! dp.exists() || ! dp.isFile()) {
+            err("Unable to locate Dot program at %s\n", qPrintable(dotPath));
             dotPath = "";
 
          } else {
@@ -546,8 +546,8 @@ bool Config::verify()
             plantumlJarPath = jar.absolutePath() + QDir::separator();
 
          } else {
-            err("PlantUml jar file 'plantuml.jar' was not found at the path specified by "
-                   "PLANTUML JAR PATH '%s'\n", qPrintable(plantumlJarPath));
+            err("PlantUml Jar File 'plantuml.jar' was not found at the path specified by "
+                   "PlantUml Jar Path '%s'\n", qPrintable(plantumlJarPath));
 
             iterString.value().value = QString();
          }
@@ -559,7 +559,7 @@ bool Config::verify()
          iterString.value().value = plantumlJarPath;
 
       } else {
-         err("PLANTUML JAR PATH does not exist and is not a directory: %s\n", qPrintable(plantumlJarPath));         
+         err("PlantUml Jar Path does not exist and is not a directory: %s\n", qPrintable(plantumlJarPath));         
          iterString.value().value = QString();
       }
    }
@@ -569,7 +569,7 @@ bool Config::verify()
    int depth = iterInt.value().value;
    
    if (depth == 0) {
-      err("DOT GRAPH MAX nodes was greater than maximum, setting to 1000");  
+      err("Dot Graph Max nodes was greater than maximum, setting to 1000");  
 
       iterInt.value().value = 1000;
    }
@@ -637,7 +637,7 @@ bool Config::verify()
    QString mathJaxFormat = iterEnum.value().value;
 
    if (! s_mathJaxFormat.contains(mathJaxFormat)) {
-      err("Invalid value of %s for MATHJAX FORMAT, using the the default of HTML-CSS", qPrintable(mathJaxFormat));
+      err("Invalid value of %s for MathJax Format, using the the default of HTML-CSS", qPrintable(mathJaxFormat));
   
       iterEnum.value().value = "HTML-CSS";
    }
@@ -712,7 +712,7 @@ bool Config::verify()
       paperType = "a4";
 
    } else if (! s_latexPaperType.contains(paperType)) {
-      err("Invalid value of %s for LATEX PAPER TYPE, using the the default of a4\n", qPrintable(paperType));
+      err("Invalid value of %s for LaTeX Paper Type, using the the default of a4\n", qPrintable(paperType));
 
       paperType = "a4";
    }
@@ -754,7 +754,7 @@ bool Config::verify()
       QString temp = iterString.value().value;
 
       if (temp.isEmpty()) {
-         err("When GENERATE Qt Help is set, QHP NAMESPACE can not be empty. Setting to the default value of 'org.doxypress.doc'\n");      
+         err("When Generate QtHelp is set, QHP Namespace can not be empty. Setting to the default value of 'org.doxypress.doc'\n");      
 
          iterString.value().value = "org.doxypress.doc";
       }
@@ -763,7 +763,7 @@ bool Config::verify()
       temp = iterString.value().value;
 
       if (temp.isEmpty()) {
-         err("When GENERATE Qt HELP is set, QHP VIRTUAL FOLDER can not be empty. Setting to the defualt of doc'\n");      
+         err("When Generate QtHelp is set, QHP Virtual Folder can not be empty. Setting to the defualt of doc'\n");      
          
          iterString.value().value = "doc";
       }
@@ -783,7 +783,7 @@ bool Config::verify()
 
    // **
    if (Config::getBool("html-search") && Config::getBool("generate-chm")) {
-      warnMsg("When enabling 'GENERATE CHM', HTML SEARCH' must be disabled\n");
+      warnMsg("When enabling 'Generate CHM', HTML Search' must be disabled\n");
 
       auto iterBool = m_cfgBool.find("html-search");
       bool data = iterBool.value().value;
@@ -793,7 +793,7 @@ bool Config::verify()
 
    // **
    if (Config::getBool("inline-grouped-classes") && Config::getBool("separate-member-pages")) {
-      err("Error: When enabling 'INLINE GROUPED CLASSES', 'SEPARATE MEMBER PAGES' taga must be disabled\n");
+      err("Error when enabling 'INLINE GROUPED CLASSES', 'SEPARATE MEMBER PAGES' tags must be disabled\n");
 
       auto iterBool = m_cfgBool.find("separate-member-pages");
       bool data = iterBool.value().value;
@@ -803,12 +803,12 @@ bool Config::verify()
 
    // ** 
    if (! Config::getBool("generate-html") && Config::getBool("generate-chm")) {
-      warnMsg("GENERATE CHM requires GENERATE HTML to be set\n");
+      warnMsg("GENERATE CHM requires Generate HTML to be set\n");
    }
   
    // **
    if (Config::getBool("optimize-java") && Config::getBool("inline-info")) {
-      warnMsg("Java does have an inline concept, setting INLINE INFO to false\n");
+      warnMsg("Java does have an inline concept, setting Inline Info to false\n");
      
       auto iterBool = m_cfgBool.find("inline-info");
       bool data = iterBool.value().value;

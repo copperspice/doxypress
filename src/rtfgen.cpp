@@ -53,7 +53,7 @@ static QString dateToRTFDateString()
 
    result = QString("\\yr%1\\mo%2\\dy%3\\hr%4\\min%5\\sec%6").
                   arg(d.date().year()).arg(d.date().month()).arg(d.date().day()).
-                  arg(d.time().hour()).arg(d.time().minute()).arg(d.time().second()).toUtf8();
+                  arg(d.time().hour()).arg(d.time().minute()).arg(d.time().second());
 
    return result;
 }
@@ -82,8 +82,6 @@ RTFGenerator::~RTFGenerator()
 //  //insideTabbing=insideTabbing || ((RTFGenerator *)g)->insideTabbing;
 //  m_listLevel=((RTFGenerator *)g)->m_listLevel;
 //  m_omitParagraph=((RTFGenerator *)g)->m_omitParagraph;
-//  //printf("RTFGenerator::append(%s) insideTabbing=%s\n", g->getContents().data(),
-//  //    insideTabbing ? "true" : "false" );
 //}
 
 //OutputGenerator *RTFGenerator::copy()
@@ -170,7 +168,7 @@ void RTFGenerator::init()
    QDir d(dir);
 
    if (! d.exists() && ! d.mkdir(dir)) {
-      err("Could not create output directory %s\n", qPrintable(dir));
+      err("Unable to create output directory %s\n", qPrintable(dir));
       exit(1);
    }
  
@@ -179,7 +177,7 @@ void RTFGenerator::init()
 
    while (def->reference != 0) {
       if (def->definition == 0) {
-         err("Internal: rtf_Style_Default[%s] has no definition.\n", qPrintable(def->name));
+         err("RTF Style Default [%s] has no definition\n", qPrintable(def->name));
       }
 
       StyleData styleData = StyleData(def->reference, def->definition);
@@ -637,7 +635,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
 
          m_textStream  << rtf_Style_Reset << rtf_Style["SubTitle"].reference << endl; // set to subtitle style
          m_textStream  << "{\\field\\fldedit {\\*\\fldinst AUTHOR \\\\*MERGEFORMAT}{\\fldrslt AUTHOR}}\\par" << endl;
-         m_textStream  << "Version " << Config::getString("project-version").toUtf8() << "\\par";
+         m_textStream  << "Version " << Config::getString("project-version") << "\\par";
 
          m_textStream  << "{\\field\\fldedit {\\*\\fldinst CREATEDATE \\\\*MERGEFORMAT}"
            "{\\fldrslt CREATEDATE}}\\par" << endl;
@@ -1922,7 +1920,7 @@ void RTFGenerator::decrementIndentLevel()
 {
    m_listLevel--;
    if (m_listLevel < 0) {
-      err("Negative indent level while generating RTF output!\n");
+      err("Negative indent level while generating RTF output\n");
       m_listLevel = 0;
    }
 }
@@ -2124,8 +2122,8 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
    do {  
       lineBuf = f.readLine();
    
-      if (f.error() != QFile::NoError) {
-         err("Read error in %s, error: %d\n", qPrintable(input_FName), f.error());
+      if (f.error() != QFile::NoError) {        
+         err("Unable to open file for reading %s, error: %d\n", qPrintable(input_FName), f.error());
          return false;
       }
 
@@ -2139,7 +2137,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
       lineBuf = f.readLine();
    
       if (f.error() != QFile::NoError) {
-         err("Read error in %s, error: %d\n", qPrintable(input_FName), f.error());
+         err("Unable to open file for reading %s, error: %d\n", qPrintable(input_FName), f.error());
          return false;     
       }
 
@@ -2356,7 +2354,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
    QDir d(path);
    
    if (! d.exists()) {      
-      err("RTF Generator: Output directory %s does not exist\n", qPrintable(path));
+      err("RTF, Output directory %s does not exist\n", qPrintable(path));
       return false;
    }
   
@@ -2381,7 +2379,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
    QFile outf(combinedName);
 
    if (! outf.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s (rtf, preProcessB), error: %d\n", qPrintable(combinedName), outf.error());
+      err("Unable to open file for writing %s (rtf preProcessB), error: %d\n", qPrintable(combinedName), outf.error());
 
       QDir::setCurrent(oldDir);
       return false;

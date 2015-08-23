@@ -377,17 +377,16 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                   ol.insertMemberAlign();
                   md->writeEnumDeclaration(ol, cd, nd, fd, gd);
 
-                  if (!detailsLinkable) {
+                  if (! detailsLinkable) {
                      ol.endDoxyAnchor(md->getOutputFileBase(), md->anchor());
                   }
-
-                  ol.endMemberItem();
+                 
                   if (! md->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
 
                      DocRoot *rootNode = validatingParseDoc(md->briefFile(), md->briefLine(),
                                             cd, md, md->briefDescription(), true, false, "", true, false);
 
-                     if (rootNode && !rootNode->isEmpty()) {
+                     if (rootNode && ! rootNode->isEmpty()) {
                         ol.startMemberDescription(md->anchor());
                         ol.writeDoc(rootNode, cd, md);
 
@@ -404,11 +403,15 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                      }
                      delete rootNode;
                   }
+
                   ol.endMemberDeclaration(md->anchor(), inheritId);
+                  ol.endMemberItem();
                }
+
                md->warnIfUndocumented();
                break;
             }
+
             case MemberType_Friend:
                if (inheritedFrom == 0) {
                   if (first) {

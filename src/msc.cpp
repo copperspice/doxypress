@@ -32,8 +32,9 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
 {
    QFile f(mapName);
 
-   if (! f.open(QIODevice::ReadOnly)) { err("Unable to open map file %s\n" 
-          "If Graphviz/dot was installed after a previous problem, delete the output directory " 
+   if (! f.open(QIODevice::ReadOnly)) { 
+      err("Unable to open map file %s\n" 
+         "If Graphviz/dot was installed after a previous problem, delete the output directory " 
           " and run DoxyPress again.\n", qPrintable(mapName) );
       return false;
    }
@@ -158,7 +159,7 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
 
       portable_sysTimerStart();
       if (portable_system("epstopdf", epstopdfArgs) != 0) {
-         err("Problem running epstopdf. Verify your TeX installation\n");
+         err("Unable to run epstopdf. Verify your TeX installation\n");
       }
 
       portable_sysTimerStop();

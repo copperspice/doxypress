@@ -41,7 +41,7 @@ void OutputGenerator::startPlainFile(const QString &name)
    m_filePtr  = new QFile(m_fileName);
 
    if (! m_filePtr) {
-      err("Unable to create file for %s\n", qPrintable(m_fileName));
+      err("Unable to create file %s\n", qPrintable(m_fileName));
       exit(1);
    }
 

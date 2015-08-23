@@ -747,7 +747,7 @@ void GroupDef::writeGroupGraph(OutputList &ol)
       DotGroupCollaboration graph(self);
 
       if (! graph.isTrivial()) {
-         msg("Generating dependency graph for group %s\n", qualifiedName().data());
+         msg("Generating dependency graph for group %s\n", csPrintable(qualifiedName()));
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          //ol.startParagraph();
@@ -859,7 +859,7 @@ void GroupDef::writeDirs(OutputList &ol, const QString &title)
          ol.parseText(theTranslator->trDir(false, true));
 
          ol.insertMemberAlign();
-         ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName().toUtf8());
+         ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName());
          ol.endMemberItem();
 
          if (!dd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
@@ -957,7 +957,7 @@ void GroupDef::writeAuthorSection(OutputList &ol)
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name").toUtf8()));
+   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name")));
    ol.popGeneratorState();
 }
 
@@ -1346,10 +1346,8 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
                   warn(md->getGroupFileName(), md->getGroupStartLine(),
                        "Member documentation for %s found several times in %s groups!\n"
                        "%s:%d: The member will remain in group %s, and won't be put into group %s",
-                       md->name().data(), Grouping::getGroupPriName( pri ),
-                       root->fileName.data(), root->startLine,
-                       mgd->name().data(),
-                       fgd->name().data()
+                       csPrintable(md->name()), Grouping::getGroupPriName( pri ),
+                       csPrintable(root->fileName), root->startLine, csPrintable(mgd->name()), csPrintable(fgd->name())
                       );
                }
             }
@@ -1391,10 +1389,10 @@ void addExampleToGroups(Entry *root, QSharedPointer<PageDef> eg)
 QString GroupDef::getOutputFileBase() const
 {
    if (isReference()) {
-      return fileName.toUtf8();
+      return fileName;
 
    } else {
-      return convertNameToFile(fileName.toUtf8()).toUtf8();
+      return convertNameToFile(fileName);
 
    }
 }

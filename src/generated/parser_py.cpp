@@ -1380,7 +1380,7 @@ static QString findPackageScope(const QString &fileName)
 
    QFileInfo fi(fileName);
 
-   return findPackageScopeFromPath(fi.absolutePath().toUtf8());
+   return findPackageScopeFromPath(fi.absolutePath());
 }
 
 static void lineCount()
@@ -4753,7 +4753,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       yyFileName = fileName;
 
       //setContext();
-      msg("Parsing file %s\n", yyFileName.data());
+      msg("Parsing file %s\n", csPrintable(yyFileName));
 
       QFileInfo fi(fileName);
       g_moduleScope = findPackageScope(fileName);

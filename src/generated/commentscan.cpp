@@ -3837,11 +3837,11 @@ static void addSection()
    if (si) {
       if (si->lineNr != -1) {
          warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding section, (first occurrence: %s, line %d)", 
-                  g_sectionLabel.data(), si->fileName.data(),si->lineNr);
+                  g_sectionLabel.data(), csPrintable(si->fileName), si->lineNr);
 
       } else {
          warn(yyFileName, yyLineNr, "multiple use of section label '%s' while adding section, (first occurrence: %s)", 
-                  g_sectionLabel.data(), si->fileName.data());
+                  g_sectionLabel.data(), csPrintable(si->fileName));
       }
 
    } else {
@@ -8708,7 +8708,7 @@ void groupLeaveCompound(const QString &, int, const QString &)
    g_compoundName.resize(0);
 }
 
-static int findExistingGroup(int &groupId, const MemberGroupInfo *info)
+static int findExistingGroup(int &groupId, const QSharedPointer<MemberGroupInfo> info)
 {
    for (auto di = Doxy_Globals::memGrpInfoDict.begin(); di != Doxy_Globals::memGrpInfoDict.end(); ++di) {
 
@@ -8742,7 +8742,7 @@ void openGroup(QSharedPointer<Entry> e, const QString &, int)
 
          info->header = g_memberGroupHeader.trimmed();
          info->compoundName = g_compoundName;
-         g_memberGroupId = findExistingGroup(curGroupId, info.data());
+         g_memberGroupId = findExistingGroup(curGroupId, info);
  
          Doxy_Globals::memGrpInfoDict.insert(g_memberGroupId, info);
 
