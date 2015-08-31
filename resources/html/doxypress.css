@@ -757,8 +757,7 @@ div.directory .levels span {
     margin-left: 4px;
     margin-right: 4px;
     display: inline-block;
-    color: white;
-    vertical-align: top;
+    color: white;   
     position: relative;
     top: -3px;
 }

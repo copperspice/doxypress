@@ -61,7 +61,7 @@ deploy : all
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
 
 	rsync -W -a --modify-window=2  $(patsubst %,$(gccpath)%.dll,$(gcclibs))  $(deploydir)
-	rsync -W -a --modify-window=2  $(clang_dll)  $(deploydir)
+	rsync -W -a --modify-window=2  $(clang_dll) $(deploydir)
 	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%1-0.dll,$(cslibs))  $(deploydir)
 endif
 
