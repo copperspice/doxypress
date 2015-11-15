@@ -1,355 +1,403 @@
 {
-    "abbreviate-brief": [
-        "The $name class",
-        "The $name widget",
-        "The $name file",
-        "is",
-        "provides",
-        "specifies",
-        "contains",
-        "represents",
-        "a",
-        "an",
-        "the"
-    ],
-    "aliases": [
-        "badref=<span class='badref'>Bad Ref</span>",
-        "note{1}=<div class='cs_note1'><span class='cs_note2'>Note:</span>\\1</div>",
-        "cs_docs_url{1}=<a class=\"docs-link\" href=\"http://www.copperspice.com/docs/cs_overview\\1\">"
-    ],
-    "all-externals": false,
-    "allow-sub-grouping": true,
-    "allow-unicode-names": false,
-    "alpha-index": true,
-    "always-detailed-sec": true,
-    "auto-link": true,
-    "binary-toc": false,
-    "brief-member-desc": false,
-    "built-in-stl-support": false,
-    "case-sensitive-fname": false,
-    "chm-file": "",
-    "chm-index-encoding": "",
-    "cite-bib-files": [
-        ""
-    ],
-    "clang-flags": [
-        ""
-    ],
-    "clang-parsing": false,
-    "class-diagrams": false,
-    "cols-in-index": 1,
-    "cpp-cli-support": false,
-    "create-subdirs": false,
-    "dia-file-dirs": [
-        ""
-    ],
-    "dia-path": "",
-    "directory-graph": true,
-    "disable-index": false,
-    "docbook-output": "docbook",
-    "docbook-program-listing": false,
-    "docset-bundle-id": "org.doxypress.Project",
-    "docset-feedname": "DoxyPress generated docs",
-    "docset-publisher-id": "org.doxypress.Publisher",
-    "docset-publisher-name": "Publisher",
-    "dot-call": false,
-    "dot-called-by": false,
-    "dot-class-graph": true,
-    "dot-cleanup": true,
-    "dot-collaboration": true,
-    "dot-file-dirs": [
-        ""
-    ],
-    "dot-font-name": "Helvetica",
-    "dot-font-path": "",
-    "dot-font-size": 4,
-    "dot-graph-max-depth": 0,
-    "dot-graph-max-nodes": 50,
-    "dot-hierarchy": true,
-    "dot-image-format": "png",
-    "dot-include": true,
-    "dot-included-by": true,
-    "dot-multiple-targets": false,
-    "dot-num-threads": 0,
-    "dot-path": "",
-    "dot-transparent": false,
-    "duplicate-docs": false,
-    "eclipse-doc-id": "org.doxypress.Project",
-    "enable-preprocessing": true,
-    "enabled-sections": [
-        ""
-    ],
-    "enum-values-per-line": 4,
-    "example-patterns": [
-        "*"
-    ],
-    "example-recursive": false,
-    "example-source": [
-        "dox"
-    ],
-    "exclude-files": [
-        ""
-    ],
-    "exclude-patterns": [
-        ""
-    ],
-    "exclude-symbols": [
-        ""
-    ],
-    "exclude-symlinks": false,
-    "expand-as-defined": [
-        ""
-    ],
-    "expand-only-predefined": true,
-    "external-groups": true,
-    "external-links-in-window": false,
-    "external-pages": true,
-    "extract-all": false,
-    "extract-anon-namespaces": false,
-    "extract-local-classes": true,
-    "extract-local-methods": false,
-    "extract-package": false,
-    "extract-private": true,
-    "extract-static": false,
-    "file-version-filter": "",
-    "filter-patterns": [
-        ""
-    ],
-    "filter-program": "",
-    "filter-source-files": false,
-    "filter-source-patterns": [
-        ""
-    ],
-    "force-local-includes": false,
-    "formula-fontsize": 8,
-    "formula-transparent": true,
-    "full-path-names": false,
-    "generate-bug-list": true,
-    "generate-chi": false,
-    "generate-chm": false,
-    "generate-deprecate-list": true,
-    "generate-docbook": true,
-    "generate-docset": true,
-    "generate-eclipse": true,
-    "generate-html": true,
-    "generate-latex": true,
-    "generate-legend": true,
-    "generate-man": true,
-    "generate-perl": true,
-    "generate-qthelp": true,
-    "generate-rtf": true,
-    "generate-tagfile": "",
-    "generate-test-list": true,
-    "generate-todo-list": true,
-    "generate-treeview": true,
-    "generate-xml": true,
-    "ghostscript": "",
-    "group-graphs": true,
-    "have-dot": false,
-    "hhc-location": "",
-    "hide-compound-ref": false,
-    "hide-friend-compounds": false,
-    "hide-in-body-docs": false,
-    "hide-scope-names": false,
-    "hide-undoc-classes": true,
-    "hide-undoc-members": true,
-    "hide-undoc-relations": true,
-    "html-colorstyle-gamma": 80,
-    "html-colorstyle-hue": 220,
-    "html-colorstyle-sat": 100,
-    "html-dynamic-sections": false,
-    "html-extra-files": [
-        ""
-    ],
-    "html-file-extension": ".html",
-    "html-footer": "doxy_footer.html",
-    "html-header": "",
-    "html-index-num-entries": 100,
-    "html-output": "html",
-    "html-search": true,
-    "html-stylesheets": [
-        "doxy_custom.css"
-    ],
-    "html-timestamp": true,
-    "idl-support": true,
-    "ignore-prefix": [
-        ""
-    ],
-    "image-path": [
-        ""
-    ],
-    "include-file-patterns": [
-        ""
-    ],
-    "include-path": [
-        ""
-    ],
-    "inherit-docs": true,
-    "inline-grouped-classes": false,
-    "inline-info": true,
-    "inline-inherited-member": false,
-    "inline-simple-struct": false,
-    "inline-source": false,
-    "input-encoding": "UTF-8",
-    "input-patterns": [
-        "*.dox",
-        "*.h"
-    ],
-    "input-source": [
-        "dox"
-    ],
-    "interactive-svg": false,
-    "internal-docs": false,
-    "javadoc-auto-brief": false,
-    "language-mapping": [
-        ""
-    ],
-    "latex-batch-mode": false,
-    "latex-bib-style": "plain",
-    "latex-cmd-name": "latex",
-    "latex-compact": false,
-    "latex-extra-files": [
-        ""
-    ],
-    "latex-extra-packages": [
-        ""
-    ],
-    "latex-footer": "",
-    "latex-header": "",
-    "latex-hide-indices": false,
-    "latex-hyper-pdf": true,
-    "latex-output": "latex",
-    "latex-paper-type": "a4",
-    "latex-pdf": true,
-    "latex-ps": true,
-    "latex-source-code": false,
-    "latex-timestamp": false,
-    "layout-file": "doxy_layout.xml",
-    "lookup-cache-size": 0,
-    "macro-expansion": true,
-    "make-index-cmd-name": "makeindex",
-    "man-extension": ".3",
-    "man-links": false,
-    "man-output": "man",
-    "man-subdir": "",
-    "markdown": true,
-    "mathjax-codefile": "",
-    "mathjax-extensions": [
-        ""
-    ],
-    "mathjax-format": "HTML-CSS",
-    "mathjax-relpath": "http://cdn.mathjax.org/mathjax/latest",
-    "max-init-lines": 1,
-    "mdfile-mainpage": "",
-    "msc-file-dirs": [
-        ""
-    ],
-    "mscgen-path": "",
-    "multiline-cpp-brief": false,
-    "optimize-c": false,
-    "optimize-cplus": true,
-    "optimize-fortran": false,
-    "optimize-java": false,
-    "output-dir": ".",
-    "output-language": "English",
-    "perl-latex": false,
-    "perl-path": "/usr/bin/perl",
-    "perl-prefix": "",
-    "perl-pretty": true,
-    "plantuml-inc-path": [
-        ""
-    ],
-    "plantuml-jar-path": "",
-    "predefined-macros": [
-        "Q_REQUIRED_RESULT=",
-        "Q_CORE_EXPORT=",
-        "Q_INLINE_TEMPLATE=",
-        "Q_OUTOFLINE_TEMPLATE=",
-        "CORE_CS_ENUM=CS_ENUM"
-    ],
-    "project-brief": "Sample files to test the functionality of DoxyPress",
-    "project-logo": "images/cslogo-32.png",
-    "project-name": "DoxyPress Test Suite",
-    "project-version": "1.2.0",
-    "qch-file": "",
-    "qhp-cust-attrib": [
-        ""
-    ],
-    "qhp-cust-filter-name": "",
-    "qhp-namespace": "org.doxypress.Project",
-    "qhp-sect-attrib": [
-        ""
-    ],
-    "qhp-virtual-folder": "doc",
-    "qt-auto-brief": true,
-    "qthelp-gen-path": "",
-    "quiet": false,
-    "ref-by-relation": false,
-    "ref-link-source": true,
-    "ref-relation": false,
-    "repeat-brief": false,
-    "rtf-compact": false,
-    "rtf-extension": "",
-    "rtf-hyperlinks": false,
-    "rtf-output": "rtf",
-    "rtf-stylesheet": "",
-    "search-data-file": "searchdata.xml",
-    "search-external": false,
-    "search-external-id": "",
-    "search-external-url": "",
-    "search-includes": true,
-    "search-mappings": [
-        ""
-    ],
-    "search-server-based": false,
-    "separate-member-pages": false,
-    "short-names": false,
-    "show-file-page": false,
-    "show-grouped-members-inc": false,
-    "show-include-files": false,
-    "show-namespace-page": true,
-    "show-used-files": false,
-    "sip-support": false,
-    "skip-function-macros": false,
-    "sort-brief-docs": true,
-    "sort-by-scope-name": false,
-    "sort-class-case-sensitive": false,
-    "sort-constructors-first": true,
-    "sort-group-names": true,
-    "sort-member-docs": true,
-    "source-code": false,
-    "source-recursive": true,
-    "source-tooltips": true,
-    "strict-sig-matching": false,
-    "strip-code-comments": true,
-    "strip-from-inc-path": [
-        ""
-    ],
-    "strip-from-path": [
-        ""
-    ],
-    "tab-size": 4,
-    "tag-files": [
-        ""
-    ],
-    "tcl-subst": [
-        ""
-    ],
-    "template-relations": false,
-    "toc-expanded": false,
-    "treeview-width": 250,
-    "uml-limit-num-fields": 0,
-    "uml-look": false,
-    "use-htags": false,
-    "use-mathjax": false,
-    "use-typedef-name": false,
-    "verbatim-headers": false,
-    "warn-doc-error": true,
-    "warn-format": "$file:$line: $text",
-    "warn-logfile": "doxy_error.log",
-    "warn-undoc": false,
-    "warn-undoc-param": false,
-    "warnings": true,
-    "xml-output": "xml",
-    "xml-program-listing": false
+    "bb": {
+        "bb-main-page": "",
+        "bb-skip-ns": [
+            ""
+        ],
+        "bb-style": false
+    },
+    "configuration": {
+        "allow-sub-grouping": true,
+        "allow-unicode-names": false,
+        "always-detailed-sec": true,
+        "auto-link": true,
+        "brief-member-desc": false,
+        "built-in-stl-support": false,
+        "case-sensitive-fname": false,
+        "cpp-cli-support": false,
+        "create-subdirs": false,
+        "duplicate-docs": false,
+        "enabled-sections": [
+            ""
+        ],
+        "extract-all": false,
+        "extract-anon-namespaces": false,
+        "extract-local-classes": true,
+        "extract-local-methods": false,
+        "extract-package": false,
+        "extract-private": true,
+        "extract-static": false,
+        "file-version-filter": "",
+        "force-local-includes": false,
+        "full-path-names": false,
+        "generate-bug-list": true,
+        "generate-deprecate-list": true,
+        "generate-test-list": true,
+        "generate-todo-list": true,
+        "hide-compound-ref": false,
+        "hide-friend-compounds": false,
+        "hide-in-body-docs": false,
+        "hide-navtree-members": true,
+        "hide-scope-names": false,
+        "hide-undoc-classes": true,
+        "hide-undoc-members": true,
+        "idl-support": true,
+        "inherit-docs": true,
+        "inline-grouped-classes": false,
+        "inline-info": true,
+        "inline-inherited-member": false,
+        "inline-simple-struct": false,
+        "internal-docs": false,
+        "javadoc-auto-brief": false,
+        "language-mapping": [
+            ""
+        ],
+        "layout-file": "doxy_layout.xml",
+        "markdown": true,
+        "max-init-lines": 1,
+        "multiline-cpp-brief": false,
+        "qt-auto-brief": true,
+        "repeat-brief": false,
+        "separate-member-pages": false,
+        "short-names": false,
+        "show-file-page": false,
+        "show-grouped-members-inc": false,
+        "show-include-files": false,
+        "show-namespace-page": true,
+        "show-used-files": false,
+        "sip-support": false,
+        "sort-brief-docs": true,
+        "sort-by-scope-name": false,
+        "sort-class-case-sensitive": false,
+        "sort-constructors-first": true,
+        "sort-group-names": true,
+        "sort-member-docs": true,
+        "strict-sig-matching": false,
+        "tcl-subst": [
+            ""
+        ],
+        "use-typedef-name": false
+    },
+    "dot": {
+        "class-diagrams": false,
+        "dia-file-dirs": [
+            ""
+        ],
+        "dia-path": "",
+        "directory-graph": true,
+        "dot-call": false,
+        "dot-called-by": false,
+        "dot-class-graph": true,
+        "dot-cleanup": true,
+        "dot-collaboration": true,
+        "dot-file-dirs": [
+            ""
+        ],
+        "dot-font-name": "Helvetica",
+        "dot-font-path": "",
+        "dot-font-size": 4,
+        "dot-graph-max-depth": 0,
+        "dot-graph-max-nodes": 50,
+        "dot-hierarchy": true,
+        "dot-image-format": "png",
+        "dot-include": true,
+        "dot-included-by": true,
+        "dot-multiple-targets": false,
+        "dot-num-threads": 0,
+        "dot-path": "",
+        "dot-transparent": false,
+        "generate-legend": true,
+        "group-graphs": true,
+        "have-dot": false,
+        "hide-undoc-relations": true,
+        "interactive-svg": false,
+        "msc-file-dirs": [
+            ""
+        ],
+        "mscgen-path": "",
+        "plantuml-inc-path": [
+            ""
+        ],
+        "plantuml-jar-path": "",
+        "template-relations": false,
+        "uml-limit-num-fields": 0,
+        "uml-look": false
+    },
+    "doxypress-format": 1,
+    "doxypress-updated": "2015-Oct-15",
+    "external": {
+        "all-externals": false,
+        "external-groups": true,
+        "external-pages": true,
+        "generate-tagfile": "",
+        "perl-path": "/usr/bin/perl",
+        "tag-files": [
+            ""
+        ]
+    },
+    "general": {
+        "abbreviate-brief": [
+            "The $name class",
+            "The $name widget",
+            "The $name file",
+            "is",
+            "provides",
+            "specifies",
+            "contains",
+            "represents",
+            "a",
+            "an",
+            "the"
+        ],
+        "aliases": [
+            "badref=<span class='badref'>Bad Ref</span>",
+            "note{1}=<div class='cs_note1'><span class='cs_note2'>Note:</span>\\1</div>",
+            "cs_docs_url{1}=<a class=\"docs-link\" href=\"http://www.copperspice.com/docs/cs_overview\\1\">"
+        ],
+        "lookup-cache-size": 0,
+        "optimize-c": false,
+        "optimize-cplus": true,
+        "optimize-fortran": false,
+        "optimize-java": false,
+        "output-dir": ".",
+        "output-language": "English",
+        "strip-from-inc-path": [
+            ""
+        ],
+        "strip-from-path": [
+            ""
+        ],
+        "tab-size": 4
+    },
+    "index": {
+        "alpha-index": true,
+        "cols-in-index": 1,
+        "ignore-prefix": [
+            ""
+        ]
+    },
+    "input": {
+        "example-patterns": [
+            "*"
+        ],
+        "example-recursive": false,
+        "example-source": [
+            "dox"
+        ],
+        "exclude-files": [
+            ""
+        ],
+        "exclude-patterns": [
+            ""
+        ],
+        "exclude-symbols": [
+            ""
+        ],
+        "exclude-symlinks": false,
+        "filter-patterns": [
+            ""
+        ],
+        "filter-program": "",
+        "filter-source-files": false,
+        "filter-source-patterns": [
+            ""
+        ],
+        "image-path": [
+            ""
+        ],
+        "input-encoding": "UTF-8",
+        "input-patterns": [
+            "*.dox",
+            "*.h"
+        ],
+        "input-source": [
+            "dox"
+        ],
+        "mdfile-mainpage": "",
+        "source-recursive": true
+    },
+    "messages": {
+        "quiet": false,
+        "warn-doc-error": true,
+        "warn-format": "$file:$line: $text",
+        "warn-logfile": "doxy_error.log",
+        "warn-undoc": false,
+        "warn-undoc-param": false,
+        "warnings": true
+    },
+    "output-chm": {
+        "binary-toc": false,
+        "chm-file": "",
+        "chm-index-encoding": "",
+        "generate-chi": false,
+        "generate-chm": false,
+        "hhc-location": "",
+        "toc-expanded": false
+    },
+    "output-docbook": {
+        "docbook-output": "docbook",
+        "docbook-program-listing": false,
+        "generate-docbook": true
+    },
+    "output-docset": {
+        "docset-bundle-id": "org.doxypress.Project",
+        "docset-feedname": "DoxyPress generated docs",
+        "docset-publisher-id": "org.doxypress.Publisher",
+        "docset-publisher-name": "Publisher",
+        "generate-docset": true
+    },
+    "output-eclipse": {
+        "eclipse-doc-id": "org.doxypress.Project",
+        "generate-eclipse": true
+    },
+    "output-html": {
+        "disable-index": false,
+        "enum-values-per-line": 4,
+        "external-links-in-window": false,
+        "formula-fontsize": 8,
+        "formula-transparent": true,
+        "generate-html": true,
+        "generate-treeview": true,
+        "ghostscript": "",
+        "html-colorstyle-gamma": 80,
+        "html-colorstyle-hue": 220,
+        "html-colorstyle-sat": 100,
+        "html-dynamic-sections": false,
+        "html-extra-files": [
+            ""
+        ],
+        "html-file-extension": ".html",
+        "html-footer": "doxy_footer.html",
+        "html-header": "",
+        "html-index-num-entries": 100,
+        "html-output": "html",
+        "html-search": true,
+        "html-stylesheets": [
+            "doxy_custom.css"
+        ],
+        "html-timestamp": true,
+        "mathjax-codefile": "",
+        "mathjax-extensions": [
+            ""
+        ],
+        "mathjax-format": "HTML-CSS",
+        "mathjax-relpath": "http://cdn.mathjax.org/mathjax/latest",
+        "search-data-file": "searchdata.xml",
+        "search-external": false,
+        "search-external-id": "",
+        "search-external-url": "",
+        "search-mappings": [
+            ""
+        ],
+        "search-server-based": false,
+        "treeview-width": 250,
+        "use-mathjax": false
+    },
+    "output-latex": {
+        "cite-bib-files": [
+            ""
+        ],
+        "generate-latex": true,
+        "latex-batch-mode": false,
+        "latex-bib-style": "plain",
+        "latex-cmd-name": "latex",
+        "latex-compact": false,
+        "latex-extra-files": [
+            ""
+        ],
+        "latex-extra-packages": [
+            ""
+        ],
+        "latex-footer": "",
+        "latex-header": "",
+        "latex-hide-indices": false,
+        "latex-hyper-pdf": true,
+        "latex-output": "latex",
+        "latex-paper-type": "a4",
+        "latex-pdf": true,
+        "latex-ps": true,
+        "latex-source-code": false,
+        "latex-timestamp": false,
+        "make-index-cmd-name": "makeindex"
+    },
+    "output-man": {
+        "generate-man": true,
+        "man-extension": ".3",
+        "man-links": false,
+        "man-output": "man",
+        "man-subdir": ""
+    },
+    "output-perl": {
+        "generate-perl": true,
+        "perl-latex": false,
+        "perl-prefix": "",
+        "perl-pretty": true
+    },
+    "output-qhelp": {
+        "generate-qthelp": true,
+        "qch-file": "",
+        "qhp-cust-attrib": [
+            ""
+        ],
+        "qhp-cust-filter-name": "",
+        "qhp-namespace": "org.doxypress.Project",
+        "qhp-sect-attrib": [
+            ""
+        ],
+        "qhp-virtual-folder": "doc",
+        "qthelp-gen-path": ""
+    },
+    "output-rtf": {
+        "generate-rtf": true,
+        "rtf-compact": false,
+        "rtf-extension": "",
+        "rtf-hyperlinks": false,
+        "rtf-output": "rtf",
+        "rtf-stylesheet": ""
+    },
+    "output-xml": {
+        "generate-xml": true,
+        "xml-output": "xml",
+        "xml-program-listing": false
+    },
+    "preprocessor": {
+        "enable-preprocessing": false,
+        "expand-as-defined": [
+            ""
+        ],
+        "expand-only-predefined": false,
+        "include-file-patterns": [
+            ""
+        ],
+        "include-path": [
+            ""
+        ],
+        "macro-expansion": false,
+        "predefined-macros": [
+            ""
+        ],
+        "search-includes": false,
+        "skip-function-macros": false
+    },
+    "project": {
+        "project-brief": "Sample files to test the functionality of DoxyPress",
+        "project-logo": "images/cslogo-32.png",
+        "project-name": "DoxyPress Test Suite",
+        "project-version": "1.2.0"
+    },
+    "source": {
+        "clang-flags": [
+            ""
+        ],
+        "clang-parsing": false,
+        "inline-source": false,
+        "ref-by-relation": false,
+        "ref-link-source": true,
+        "ref-relation": false,
+        "source-code": false,
+        "source-tooltips": true,
+        "strip-code-comments": true,
+        "use-htags": false,
+        "verbatim-headers": false
+    }
 }
