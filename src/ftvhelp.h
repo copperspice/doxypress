@@ -54,13 +54,12 @@ class FTVHelp : public IndexIntf
    void addIndexFile(const QString &) override {}
    void addImageFile(const QString &) override {}
    void addStyleSheetFile(const QString &) override {}
-
-   void generateTreeView();
+  
    void generateTreeViewInline(QTextStream &t);
    static void generateTreeViewImages();
    void generateTreeViewScripts();
 
- private:
+ private:   
    void generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index);
   
    QString generateIndentLabel(FTVNode *n, int level);
@@ -74,12 +73,12 @@ class FTVHelp : public IndexIntf
 };
 
 struct NavIndexEntry {
-   NavIndexEntry(const QString &u, const QString &p) 
-      : url(u), path(p)
+   NavIndexEntry(const QString &url, const QString &id) 
+      : m_url(url), m_indexId(id)
    {}
 
-   QString url;
-   QString path;
+   QString m_url;
+   QString m_indexId;
 };
 
 #endif

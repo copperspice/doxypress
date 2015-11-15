@@ -722,7 +722,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QString commandNam
    QSharedPointer<GroupDef>     gd;
    QSharedPointer<PageDef>      pd;
      
-   // `find('.') is a hack to detect files
+   // find('.') is a hack to detect files
    bool found = getDefs(s_context.indexOf('.') == -1 ? s_context : QString(), name, args.isEmpty() ? QString() : args, 
                         md, cd, fd, nd, gd, false, QSharedPointer<FileDef>(), true);
    

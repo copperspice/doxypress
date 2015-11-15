@@ -23,13 +23,13 @@
 #include <QTextStream>
 
 #include <definition.h>
+#include <filelist.h>
 #include <stringmap.h>
 
 class ClassDef;
 class ClassSDict;
 class DirDef;
 class Entry;
-class FileList;
 class FileDef;
 class FTVHelp;
 class MemberDef;

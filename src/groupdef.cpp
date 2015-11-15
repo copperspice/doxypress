@@ -913,7 +913,7 @@ void GroupDef::writeMemberGroups(OutputList &ol)
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
    if (memberGroupSDict) {      
-      /* write user defined member groups */
+      // write user defined member groups
       
       for (auto mg : *memberGroupSDict) {
          mg->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(), 

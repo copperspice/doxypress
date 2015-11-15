@@ -136,13 +136,5 @@ int compareListValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2
 // sort list based on url
 int compareListValues(const NavIndexEntry *item1, const NavIndexEntry *item2)
 {  
-   return item1->url.compare(item2->url);  
-}
-
-
-// OutputNameList -->  SortedList<FileList *>
-
-int compareListValues(const FileList *item1, const FileList *item2) 
-{
-   return item1->path().compare(item2->path(), Qt::CaseInsensitive );
+   return item1->m_url.compare(item2->m_url);  
 }

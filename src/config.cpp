@@ -134,13 +134,16 @@ bool Config::preVerify()
 { 
    bool isError = false;
 
+
+// BROOM CHECK 
+
+
    // **
    if (! (Config::getBool("generate-html") || Config::getBool("generate-latex") || Config::getBool("generate-man") ||
           Config::getBool("generate-perl") || Config::getBool("generate-rtf")   || Config::getBool("generate-xml") ||
-          Config::getBool("generate-autogen-def") || Config::getBool("generate-docbook")) && 
-          Config::getString("generate-tagfile").isEmpty() ) {
+          Config::getBool("generate-docbook")) && Config::getString("generate-tagfile").isEmpty() ) {
 
-      err("No output format was selected, at least one output format must be set\n");
+      err("No output format was indicated, at least one output format must be selected\n");
       isError = true;
    }
  
@@ -569,7 +572,7 @@ bool Config::verify()
    int depth = iterInt.value().value;
    
    if (depth == 0) {
-      err("Dot Graph Max nodes was greater than maximum, setting to 1000");  
+      err("Dot Graph Max nodes was greater than the maximum value, setting to 1000\n");  
 
       iterInt.value().value = 1000;
    }
@@ -637,7 +640,14 @@ bool Config::verify()
    QString mathJaxFormat = iterEnum.value().value;
 
    if (! s_mathJaxFormat.contains(mathJaxFormat)) {
-      err("Invalid value of %s for MathJax Format, using the the default of HTML-CSS", qPrintable(mathJaxFormat));
+
+      if (mathJaxFormat.isEmpty()) {
+         err("MathJax Format can not be empty, setting to the default value of HTML-CSS\n");
+
+      } else  {
+         err("Invalid value of %s for MathJax Format, setting to the default value of HTML-CSS\n", qPrintable(mathJaxFormat));
+
+      }
   
       iterEnum.value().value = "HTML-CSS";
    }
@@ -763,7 +773,7 @@ bool Config::verify()
       temp = iterString.value().value;
 
       if (temp.isEmpty()) {
-         err("When Generate QtHelp is set, QHP Virtual Folder can not be empty. Setting to the defualt of doc'\n");      
+         err("When Generate QtHelp is set, QHP Virtual Folder can not be empty. Setting to the defualt of 'doc'\n");      
          
          iterString.value().value = "doc";
       }

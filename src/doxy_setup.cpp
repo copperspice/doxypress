@@ -81,7 +81,7 @@ enum Options {
 
 void initDoxyPress()
 {
-   printf("Initialization\n"); 
+   printf("\nInitialization\n"); 
 
    const QString lang = portable_getenv("LC_ALL");
 
@@ -248,7 +248,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             exit(1);                  
        
          case BLANK_LAYOUT:
-            cmdArgs.genLayout = true;
+            cmdArgs.genLayout  = true;
             cmdArgs.layoutName = getValue(iter, argList.end());
            
             if (cmdArgs.layoutName.isEmpty()) {
@@ -437,7 +437,7 @@ void readConfiguration(struct CommandLine cmdArgs)
    printf("\nDoxyPress Version: %s\n\n", versionString);   
       
    if (cmdArgs.genLayout) {
-      writeDefaultLayoutFile(cmdArgs.layoutName);      
+      writeDefaultLayoutFile(cmdArgs.layoutName);            
    }
 
    if (! cmdArgs.generateDoxy) {            
@@ -473,7 +473,7 @@ void readConfiguration(struct CommandLine cmdArgs)
   
    // step 1 
    if (! Config::parseConfig(cmdArgs.configName) ) {
-      fprintf(stderr, "\n\nIssue parsing the project file.\nPlease submit a bug report to " 
+      fprintf(stderr, "\n\nA problem occured when parsing the project file.\nPlease submit a bug report to " 
                   "the developers at info@copperspice.com\n");
 
       exit(1);

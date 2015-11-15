@@ -18,32 +18,12 @@
 #ifndef FILELIST_H
 #define FILELIST_H
 
-#include <QByteArray>
-
 #include <sortedlist.h>
 
 class FileDef;
 
-/** Class representing a list of FileDef objects. */
-class FileList : public SortedList<QSharedPointer<FileDef>>
-{
- public:
-   FileList() : m_pathName("tmp")
-   {}
-
-   FileList(const QString &path) : m_pathName(path) 
-   {}
-
-   ~FileList() 
-   {}
-
-   QString path() const {
-      return m_pathName;
-   }
-
- private:  
-   QString m_pathName;
-};
+// stores a list of FileDef objects
+using  FileList = SortedList<QSharedPointer<FileDef>>;
 
 
 #endif

@@ -13147,6 +13147,11 @@ YY_DECL {
    register char *yy_cp, *yy_bp;
    register int yy_act;
 
+
+bool traceme = true;
+
+
+
    if ( !(yy_init) )
    {
       (yy_init) = 1;
@@ -13253,6 +13258,12 @@ YY_DECL {
       YY_DO_BEFORE_ACTION;
 
    do_action:	/* This label is used only to access EOF actions. */
+
+
+if (traceme)  {
+   printf("\n --> BROOM  (parser) %d \n", yy_act );
+}
+
 
       switch ( yy_act ) {
          /* beginning of action switch */
@@ -14438,7 +14449,7 @@ YY_DECL {
                   current->type += " volatile";
                }
 
-               current->type += " class" ;
+               current->type        += " class" ;
                current->fileName    = yyFileName;
                current->startLine   = yyLineNr;
                current->startColumn = yyColNr;
@@ -14573,7 +14584,7 @@ YY_DECL {
 
                // preserve UNO IDL
                // bug 582676: can be a struct nested in an interface so keep insideObjC state
-               //current->objc    = insideObjC = false;
+               // current->objc    = insideObjC = false;
 
                addType( current ) ;
                if (isConst)
@@ -14677,6 +14688,7 @@ YY_DECL {
 
                // bug 582676: can be a struct nested in an interface so keep insideObjC state
                // current->objc    = insideObjC = false;
+
                addType( current ) ;
                if (isConst)
                {
@@ -17997,8 +18009,14 @@ YY_DECL {
             YY_BREAK
          case 442:
             YY_RULE_SETUP {
+               // reads a comment 
+
                QString text = QString::fromUtf8(cstyleYYtext);
                current->program += text;
+
+printf("\n  Broom (parser)  %s", csPrintable(text) );
+
+
             }
             YY_BREAK
          case 443:
@@ -18953,6 +18971,7 @@ YY_DECL {
             }
            */
          /* `)' followed by a special comment */
+
          case 507:
             /* rule 507 can match eol */
             YY_RULE_SETUP {
@@ -20465,6 +20484,7 @@ YY_DECL {
             YY_RULE_SETUP {
                QString text = QString::fromUtf8(cstyleYYtext);
                current->name = text;
+
                if (insideCpp || insideObjC)
                {
                   current->id = ClangParser::instance()->lookup(yyLineNr, text);
@@ -20482,6 +20502,7 @@ YY_DECL {
                BEGIN( ClassVar );
             }
             YY_BREAK
+
          case 642:
             /* rule 642 can match eol */
             YY_RULE_SETUP {
@@ -20878,6 +20899,7 @@ YY_DECL {
                current->startLine = yyLineNr ;
                current->startColumn = yyColNr;
                current->name = removeRedundantWhiteSpace(current->name);
+
                if (current->name.isEmpty() && !isTypedef) // anonymous compound
                {
                   if (current->section == Entry::NAMESPACE_SEC) { // allow reopening of anonymous namespaces
@@ -20890,6 +20912,7 @@ YY_DECL {
                      current->name = QString("@%1").arg(anonCount++);
                   }
                }
+
                curlyCount = 0;
                if (current_root && // not a nested struct inside an @interface section
                      !(current_root->m_specFlags.spec & Entry::Interface) &&
@@ -23600,6 +23623,7 @@ static void  parseCompounds(QSharedPointer<Entry> rt)
    }
 }
 
+// main entry point
 static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> rt,
                       enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {

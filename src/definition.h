@@ -351,7 +351,7 @@ class Definition : public DefinitionIntf
    void writeDocAnchorsToTagFile(QTextStream &);
    void setLocalName(const QString &name);
 
-   void addSectionsToIndex();
+   void addSectionsToIndex(bool addToNavIndex);
    void writeToc(OutputList &ol);
 
  protected:

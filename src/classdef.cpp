@@ -189,7 +189,8 @@ void ClassDef::addMembersToMemberGroup()
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
    for (auto item : m_memberLists ) {
-      if ((item->listType()&MemberListType_detailedLists) == 0) {      
+
+      if ( (item->listType() & MemberListType_detailedLists) == 0) {
          ::addMembersToMemberGroup(item, &m_memberGroupSDict, self);
       }
    }
@@ -198,7 +199,7 @@ void ClassDef::addMembersToMemberGroup()
    if (m_memberGroupSDict) {
   
       for (auto item : *m_memberGroupSDict ) {
-         if (item->allMembersInSameSection() && m_subGrouping) {           
+         if (item->allMembersInSameSection() && m_subGrouping) {   
             item->addToDeclarationSection();
          }
       }

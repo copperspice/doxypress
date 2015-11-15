@@ -417,7 +417,7 @@ bool Definition::hasSections() const
    return false;
 }
 
-void Definition::addSectionsToIndex()
+void Definition::addSectionsToIndex(bool addToNavIndex)
 { 
    int level = 1;
 
@@ -447,7 +447,7 @@ void Definition::addSectionsToIndex()
             title = si->label;
          }
 
-         Doxy_Globals::indexList->addContentsItem(true, title, getReference(), getOutputFileBase(), si->label, false, true);
+         Doxy_Globals::indexList->addContentsItem(true, title, getReference(), getOutputFileBase(), si->label, false, addToNavIndex);
          level = nextLevel;
       }
    }
@@ -812,7 +812,7 @@ bool readCodeFragment(const QString &fileName, int &startLine, int &endLine, QSt
 
                lineNr++;
 
-            } while (lineNr <= endLine && !feof(f));
+            } while (lineNr <= endLine && ! feof(f));
 
             // strip stuff after closing bracket
             int newLineIndex = tempResult.lastIndexOf('\n');

@@ -1582,7 +1582,7 @@ YY_DECL {
          case 1:
             YY_RULE_SETUP
 
-            { /* eat anything that is not " / , or \n */
+            { /* consume anything that is not " / , or \n */
 
                QString text = QString::fromUtf8(commentcnvYYtext); 
                copyToOutput(text, text.length());
@@ -1592,7 +1592,7 @@ YY_DECL {
          case 2:
             YY_RULE_SETUP
 
-            { /* eat , so we have a nice separator in long initialization lines */
+            { /* consume so we have a nice separator in long initialization lines */
                QString text = QString::fromUtf8(commentcnvYYtext); 
                copyToOutput(text, text.length());
             }
@@ -1807,13 +1807,13 @@ YY_DECL {
 
             { /* one line C++ comment */
                QString text = QString::fromUtf8(commentcnvYYtext); 
-
                g_inSpecialComment = text[2] == '/' || text[2] == '!';                 
                copyToOutput(text, text.length());
                g_readLineCtx = YY_START;
                BEGIN(ReadLine);
             }
             YY_BREAK
+
          case 15:
             YY_RULE_SETUP
 
@@ -3776,13 +3776,14 @@ static bool recognizeFixedForm(const QString &contents)
    return FALSE;
 }
 
-
 /*! This function does three things:
  *  -# It converts multi-line C++ style comment blocks (that are aligned)
  *     to C style comment blocks (if MULTILINE_CPP_IS_BRIEF is set to NO).
  *  -# It replaces aliases with their definition (see ALIASES)
  *  -# It handles conditional sections (cond...endcond blocks)
  */
+
+// main entry point
 QString convertCppComments(const QString &inBuf, const QString &fileName)
 {  
    g_inBuf    = inBuf;

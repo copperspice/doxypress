@@ -1072,15 +1072,20 @@ QString MemberDef::getReference() const
 
    if (m_impl->templateMaster) {
       return m_impl->templateMaster->getReference();
+
    } else if (m_impl->group) {
       return m_impl->group->getReference();
+
    } else if (m_impl->classDef) {
       return m_impl->classDef->getReference();
+
    } else if (m_impl->nspace) {
       return m_impl->nspace->getReference();
+
    } else if (m_impl->fileDef) {
       return m_impl->fileDef->getReference();
    }
+
    return "";
 }
 
@@ -1141,23 +1146,23 @@ void MemberDef::_computeLinkableInProject()
       return;
    }
 
-   if (!m_impl->group && m_impl->classDef && !m_impl->classDef->isLinkableInProject()) {
+   if (! m_impl->group && m_impl->classDef && ! m_impl->classDef->isLinkableInProject()) {
       m_isLinkableCached = 1; // in class but class not linkable
       return;
    }
 
-   if (!m_impl->group && m_impl->nspace && !m_impl->related && !m_impl->nspace->isLinkableInProject()) {   
+   if (! m_impl->group && m_impl->nspace && ! m_impl->related && !m_impl->nspace->isLinkableInProject()) {   
       m_isLinkableCached = 1; // in namespace but namespace not linkable
       return;
    }
  
-  if (!m_impl->group && !m_impl->nspace && !m_impl->related && !m_impl->classDef &&
+  if (! m_impl->group && !m_impl->nspace && ! m_impl->related && !m_impl->classDef &&
          m_impl->fileDef && !m_impl->fileDef->isLinkableInProject()) {
 
       m_isLinkableCached = 1; // in file (and not in namespace) but file not linkable
       return;
    }
-   if (!protectionLevelVisible(m_impl->prot) && m_impl->mtype != MemberType_Friend) {     
+   if (! protectionLevelVisible(m_impl->prot) && m_impl->mtype != MemberType_Friend) {     
       m_isLinkableCached = 1; // hidden due to protection
       return;
    }
@@ -1607,15 +1612,13 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
       // hide anonymous stuff      
       if (! (name().isEmpty() || name().at(0) == '@') && (hasDocumentation() || isReference()) && 
-            !(m_impl->prot == Private && ! Config::getBool("extract-private") && m_impl->mtype != MemberType_Friend) && 
-            !(isStatic() && m_impl->classDef == 0 && ! Config::getBool("extract-static"))) {
+            ! (m_impl->prot == Private && ! Config::getBool("extract-private") && m_impl->mtype != MemberType_Friend) && 
+            ! (isStatic() && m_impl->classDef == 0 && ! Config::getBool("extract-static"))) {
 
          if (m_impl->annMemb) {
             
-            m_impl->annMemb->writeLink(ol, m_impl->annMemb->getClassDef(),
-                                       m_impl->annMemb->getNamespaceDef(),
-                                       m_impl->annMemb->getFileDef(),
-                                       m_impl->annMemb->getGroupDef() );
+            m_impl->annMemb->writeLink(ol, m_impl->annMemb->getClassDef(), m_impl->annMemb->getNamespaceDef(),
+                  m_impl->annMemb->getFileDef(), m_impl->annMemb->getGroupDef() );
 
             m_impl->annMemb->setAnonymousUsed();
             setAnonymousUsed();
@@ -1836,6 +1839,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
             if (separateMemberPages || (m_impl->group != 0 && gd == 0) || (m_impl->nspace != 0 && nd == 0) ) { 
                // forward link to the page, group, or namespace
                ol.startTextLink(getOutputFileBase(), anchor());
+
             } else { 
                // local link
                ol.startTextLink(0, anchor());
@@ -2729,13 +2733,13 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString
       ciname = container.dynamicCast<GroupDef>()->groupTitle();
 
    } else if (container->definitionType() == TypeFile && getNamespaceDef()) {
-      // member is in a namespace, but is written as part of the file documentation
-      // as well, so we need to make sure its label is unique.
+      // member is in a namespace, but is written as part of the file documentation as well
+      // make sure its label is unique
       memAnchor.prepend("file_");
    }
 
-   QString cname   = container->name();
-   QString cfname  = getOutputFileBase();
+   QString cname  = container->name();
+   QString cfname = getOutputFileBase();
  
    // get member name
    QString doxyName = name();
@@ -3656,6 +3660,7 @@ void MemberDef::setMemberClass(QSharedPointer<ClassDef> cd)
 void MemberDef::setNamespace(QSharedPointer<NamespaceDef> nd)
 {
    m_impl->nspace = nd;
+
    setOuterScope(nd);
 }
 

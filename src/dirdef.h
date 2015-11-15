@@ -23,6 +23,7 @@
 #include <QTextStream>
 
 #include <definition.h>
+#include <filelist.h>
 #include <stringmap.h>
 #include <sortedlist.h>
 

@@ -191,11 +191,13 @@ void DocSets::finalize()
    m_nts << "  </TOC>" << endl;
    m_nts << "</DocSetNodes>" << endl;
    m_nf->close();
+
    delete m_nf;
    m_nf = 0;
 
    m_tts << "</Tokens>" << endl;
    m_tf->close();
+
    delete m_tf;
    m_tf = 0;
 }

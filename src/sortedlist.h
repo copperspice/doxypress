@@ -26,7 +26,6 @@ class ClassDef;
 class DirDef;
 class DotNode;
 class FileDef;
-class FileList;
 class FileName;
 class GroupDef;
 class MemberDef;
@@ -77,7 +76,6 @@ void SortedList<T>::sort()
 int compareListValues(const BaseClassDef *item1,  const BaseClassDef *item2);
 int compareListValues(const ClassDef *item1,      const ClassDef *item2);
 int compareListValues(const DotNode *item1,       const DotNode *item2);
-int compareListValues(const FileList *item1,      const FileList *item2); 
 int compareListValues(const NavIndexEntry *item1, const NavIndexEntry *item2);
 
 int compareListValues(QSharedPointer<DirDef>    item1, QSharedPointer<DirDef>    item2); 

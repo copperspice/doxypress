@@ -70,7 +70,7 @@ class FileDef : public Definition
    friend class FileName;
 
  public:
-   //enum FileType { Source, Header, Unknown };
+   // enum FileType { Source, Header, Unknown };
 
    FileDef(const QString &p, const QString &n, const QString &ref = QString(), const QString &dn = QString());
    ~FileDef();

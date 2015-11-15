@@ -2873,13 +2873,15 @@ static bool               g_isImported;
 static QString            g_blockName;
 static int                g_condCtx;
 static bool               g_skip;
-static QStack<CondCtx *>  g_condStack;
+
 static bool               g_insideCS; // C# has simpler preprocessor
 static bool               g_isSource;
 
 static bool               g_lexInit   = FALSE;
 static int                g_fenceSize = 0;
 static bool               g_ccomment;
+
+static QStack<QSharedPointer<CondCtx>>  g_condStack;
 
 static void setFileName(const QString &name)
 {
@@ -4174,13 +4176,11 @@ static void startCondSection(const QString &sectId)
    CondParser prs;
 
    bool expResult = prs.parse(g_yyFileName, g_yyLineNr, sectId);
-   g_condStack.push(new CondCtx(g_yyLineNr, sectId, g_skip));
+   g_condStack.push( QMakeShared<CondCtx>(g_yyLineNr, sectId, g_skip) );
 
    if (! expResult) {
-      g_skip = TRUE;
+      g_skip = true;
    }
-
-   //printf("  expResult=%d skip=%d\n",expResult,g_skip);
 }
 
 static void endCondSection()
@@ -4189,18 +4189,18 @@ static void endCondSection()
       g_skip = FALSE;
 
    } else {
-      CondCtx *ctx = g_condStack.pop();
-      g_skip = ctx->skip;
+      QSharedPointer<CondCtx> ctx = g_condStack.pop();     
+      g_skip = ctx->skip;      
    }   
 }
 
 static void forceEndCondSection()
 {
-   while (!g_condStack.isEmpty()) {
+   while (! g_condStack.isEmpty()) {
       g_condStack.pop();
    }
 
-   g_skip = FALSE;
+   g_skip = false;
 }
 
 static QString escapeAt(const QString &text)
@@ -8059,14 +8059,14 @@ QString preprocessFile(const QString &fileName, const QString &input)
    g_lexInit = TRUE;
 
    while (! g_condStack.isEmpty()) {
-      CondCtx *ctx = g_condStack.pop();
+      QSharedPointer<CondCtx> ctx = g_condStack.pop();
       QString sectionInfo = " ";
 
       if (ctx->sectionId != " ") {
          sectionInfo = QString(" with label %1 ").arg(QString(ctx->sectionId));
       }
 
-      warn(fileName, ctx->lineNr, "Conditional section%sdoes not have "
+      warn(fileName, ctx->lineNr, "Conditional section %s does not have "
            "a corresponding \\endcond command within this file.", csPrintable(sectionInfo));
    }
 

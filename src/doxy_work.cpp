@@ -198,7 +198,7 @@ static STLInfo g_stlinfo[] = {
 namespace Doxy_Work{
 
    // broom (on hold, clang testing)
-   void do_fake_ginger(QSharedPointer<EntryNav> rootNav);
+   // void do_fake_ginger(QSharedPointer<EntryNav> rootNav);
 
    void addClassToContext(QSharedPointer<EntryNav> rootNav);
    void addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav);
@@ -2127,7 +2127,8 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
       }
 
       if (root->tArgLists != nullptr && 
-                  (cd->templateArguments() == 0 || (cd->isForwardDeclared() && (root->m_specFlags.spec & Entry::ForwardDecl) == 0)) ) {
+                  (cd->templateArguments() == 0 || (cd->isForwardDeclared() && 
+                  (root->m_specFlags.spec & Entry::ForwardDecl) == 0)) ) {
 
          // happens if a template class is declared before the actual definition or 
          // if a forward declaration has different template parameter names
@@ -2537,7 +2538,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
             }
 
             nd = QMakeShared<NamespaceDef>(root->fileName, root->startLine, root->startColumn,
-                                              fullName, tagName, tagFileName, root->type, root->m_specFlags.spec & Entry::Published);
+                  fullName, tagName, tagFileName, root->type, root->m_specFlags.spec & Entry::Published);
 
             nd->setDocumentation(root->doc, root->docFile, root->docLine); // copy docs to definition
             nd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
@@ -4107,7 +4108,8 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
          if (done) {
             // all done
 
-         } else if (!((rootNav->parent()->section() & Entry::COMPOUND_MASK) || rootNav->parent()->section() == Entry::OBJCIMPL_SEC) &&
+         } else if (!((rootNav->parent()->section() & Entry::COMPOUND_MASK) || 
+                    rootNav->parent()->section() == Entry::OBJCIMPL_SEC) &&
                     ! isMember && (root->relates.isEmpty() || root->relatesType == Duplicate) &&
                     root->type.left(7) != "extern " && root->type.left(8) != "typedef ") {
 
@@ -6259,11 +6261,11 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                     ":: ", "::"),
                  " ::", "::").trimmed();
    
-   if (isFriend && funcDecl.left(6) == "class ") {     
+   if (isFriend && funcDecl.startsWith("class ")) {     
       funcDecl = funcDecl.right(funcDecl.length() - 6);
       funcName = funcDecl;
 
-   } else if (isFriend && funcDecl.left(7) == "struct ") {
+   } else if (isFriend && funcDecl.startsWith("struct ")) {
       funcDecl = funcDecl.right(funcDecl.length() - 7);
       funcName = funcDecl;
 
@@ -6457,7 +6459,8 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
       if (! isRelated && mn) { 
          // function name already found
-         Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [2] member name exists (%d members with this name)\n", mn->count());
+         Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [2] member name exists "
+                  "(%d members with this name)\n", mn->count());
 
          if (! className.isEmpty()) { 
             // class name is valid
@@ -6628,7 +6631,9 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                         // Method with template return type does not match method without return type
                         // even if the parameters are the same. See also bug709052
 
-                        Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [7] comparing return types: template with non-template\n");
+                        Debug::print(Debug::FindMembers, 0, 
+                              "\nDebug: findMember() [7] comparing return types: template with non-template\n");
+
                         matching = false;
                      }                     
 
@@ -9238,7 +9243,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
 {   
    static bool clangParsing = Config::getBool("clang-parsing");
    auto srcLang = fd->getLanguage(); 
-       
+        
    QString extension;
    int ei = fileName.lastIndexOf('.');
 
@@ -10169,11 +10174,9 @@ void searchInputFiles()
    Doxy_Globals::g_stats.end();
 }
 
+/* cland testing
 void Doxy_Work::do_fake_ginger(QSharedPointer<EntryNav> parentNav)
-{
-   //  clang parsing
-   return; 
-
+{  
    QString className = "Ginger";
 
    if (((parentNav->section() & Entry::COMPOUND_MASK) || parentNav->section() == Entry::OBJCIMPL_SEC) && 
@@ -10276,4 +10279,6 @@ void Doxy_Work::do_fake_ginger(QSharedPointer<EntryNav> parentNav)
    rootNav->setEntry(root);
    parentNav->addChild(rootNav);
 }
+
+*/
 

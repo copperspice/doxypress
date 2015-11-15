@@ -133,13 +133,13 @@ void FTVHelp::initialize()
 {
 }
 
-/*! Finalizes the FTV help. This will finish and close the
- *  contents file (index.js).
+/*! Finalizes the FTV help. This will finish and close the contents file (index.js).
  *  \sa initialize()
  */
 void FTVHelp::finalize()
 {
-   generateTreeView();
+   generateTreeViewImages();
+   generateTreeViewScripts();
 }
 
 /*! Increase the level of the contents hierarchy.
@@ -154,8 +154,7 @@ void FTVHelp::incContentsDepth()
    assert(m_indent < MAX_INDENT);
 }
 
-/*! Decrease the level of the contents hierarchy.
- *  This will end the current sublist.
+/*! Decrease the level of the contents hierarchy. This will end the current sublist.
  *  \sa incContentsDepth()
  */
 void FTVHelp::decContentsDepth()
@@ -300,8 +299,8 @@ void FTVHelp::generateIndent(QTextStream &t, FTVNode *n, bool opened)
 
 void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
 {
-
-   if (n->file.isEmpty()) { // no link
+   if (n->file.isEmpty()) { 
+      // no link
       t << "<b>" << convertToHtml(n->name) << "</b>";
 
    } else { 
@@ -457,20 +456,26 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
    }
 }
 
-static QString pathToNode(FTVNode *leaf, FTVNode *n)
+static QString pathToNode(FTVNode *node)
 {
    QString result;
 
-   if (n->parent) {
-      result += pathToNode(leaf, n->parent);
+   bool isFirst = true;
+
+   while (node != nullptr) {
+
+      if (isFirst) {
+         result = QString::number(node->index);       
+         isFirst = false;
+
+      } else {
+         result = QString::number(node->index) + "," + result;  
+
+      }            
+
+      node = node->parent;
    }
-
-   result += QString::number(n->index);
-
-   if (leaf != n) {
-      result += ",";
-   }
-
+ 
    return result;
 }
 
@@ -479,9 +484,11 @@ static bool dupOfParent(const FTVNode *n)
    if (n->parent == 0) {
       return false;
    }
+
    if (n->file == n->parent->file) {
       return true;
    }
+
    return false;
 }
 
@@ -514,22 +521,24 @@ static QString convertFileId2Var(const QString  &fileId)
    return substitute(varId, "-", "_");
 }
 
-static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t, const QList<FTVNode *> &nl, int level, bool &first)
+static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t, const QList<FTVNode *> &nl, int level, bool &omitComma)
 {
    static QString htmlOutput = Config::getString("html-output");
+   static bool isBB          = Config::getBool("bb-style"); 
+   static QString bbIndex    = Config::getFullName(Config::getString("bb-main-page")); 
 
    QString indentStr;
    indentStr.fill(' ', level * 2);
 
    bool found = false;
 
-   for (auto n : nl)  {
+   for (auto node : nl)  {
       // terminate previous entry
 
-      if (! first) {
+      if (! omitComma) {
          t << "," << endl;
       }
-      first = false;
+      omitComma = false;
 
       // start entry
       if (! found) {
@@ -537,79 +546,105 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
       }
       found = true;
 
-      if (n->addToNavIndex) { 
+      if (node->addToNavIndex) { 
          // add entry to the navigation index
 
-         if (n->def && n->def->definitionType() == Definition::TypeFile) {
+         if (node->def && node->def->definitionType() == Definition::TypeFile) {            
+            QSharedPointer<FileDef> fd = node->def.dynamicCast<FileDef>();
+   
+            if (! bbIndex.isEmpty() && fd->getFilePath() == bbIndex) {       
+               // do not add this file to the navIndex
 
-            QSharedPointer<FileDef> fd = n->def.dynamicCast<FileDef>();
-
-            bool doc;
-            bool src;
-
-            doc = fileVisibleInIndex(fd, src);
-
-            if (doc) {
-               navIndex.inSort(new NavIndexEntry(node2URL(n, true, false), pathToNode(n, n)));
+            } else {  
+               bool doc;
+               bool src;
+   
+               doc = fileVisibleInIndex(fd, src);
+   
+               if (doc) {
+                  navIndex.inSort(new NavIndexEntry(node2URL(node, true, false), pathToNode(node)));
+               }
+   
+               if (src) {
+                  navIndex.inSort(new NavIndexEntry(node2URL(node, true, true), pathToNode(node)));
+               }
             }
 
-            if (src) {
-               navIndex.inSort(new NavIndexEntry(node2URL(n, true, true), pathToNode(n, n)));
+         } else {                 
+            if (isBB && node->def == Doxy_Globals::mainPage) { 
+               // do not add index.html to navIndex               
+            } else {
+               navIndex.inSort(new NavIndexEntry(node2URL(node), pathToNode(node)));
             }
-
-         } else {
-            navIndex.inSort(new NavIndexEntry(node2URL(n), pathToNode(n, n)));
          }
       }
 
-      if (n->separateIndex) { 
-         // store items in a separate file for dynamic loading
-         bool firstChild = true;
+      if (node->separateIndex) { 
+         // store some items in a separate file (annotated, modules, namespaces, files)
+         bool firstChild   = true;
+         bool showMainPage = true;
 
-         t << indentStr << "  [ ";
-         generateJSLink(t, n);
+         if (node->def && node->def->definitionType() == Definition::TypeFile) {            
+            QSharedPointer<FileDef> fd = node->def.dynamicCast<FileDef>();
 
-         if (n->children.count() > 0) { 
-            // write children to separate file for dynamic loading
-            QString fileId = n->file;
-
-            if (! n->anchor.isEmpty()) {
-               fileId += "_" + n->anchor;
+            if (! bbIndex.isEmpty() && fd->getFilePath() == bbIndex) {
+               showMainPage = false;
+               omitComma    = true;
             }
-
-            if (dupOfParent(n)) {
-               fileId += "_dup";
-            }
-
-            QFile f(htmlOutput + "/" + fileId + ".js");
-
-            if (f.open(QIODevice::WriteOnly)) {
-               QTextStream tt(&f);
-
-               tt << "var " << convertFileId2Var(fileId) << " =" << endl;
-               generateJSTree(navIndex, tt, n->children, 1, firstChild);
-               tt << endl << "];";
-            }
-
-            t << "\"" << fileId << "\" ]";
-
-         } else { // no children
-            t << "null ]";
          }
 
-      } else { 
-         // show items in this file
+         if (showMainPage) {         
+            t << indentStr << "  [ ";
+            generateJSLink(t, node);
+   
+            if (node->children.count() > 0) { 
+               // write children to separate file for dynamic loading
+               QString fileId = node->file;
+   
+               if (! node->anchor.isEmpty()) {
+                  fileId += "_" + node->anchor;
+               }
+   
+               if (dupOfParent(node)) {
+                  fileId += "_dup";
+               }
+   
+               QFile f(htmlOutput + "/" + fileId + ".js");
+   
+               if (f.open(QIODevice::WriteOnly)) {
+                  QTextStream tt(&f);
+   
+                  tt << "var " << convertFileId2Var(fileId) << " =" << endl;
+                  generateJSTree(navIndex, tt, node->children, 1, firstChild);
+                  tt << endl << "];";
+               }
+   
+               t << "\"" << fileId << "\" ]";            
+
+            } else { 
+               // no children
+               t << "null ]";
+            }
+         }
+
+      } else {
          bool firstChild = true;
 
-         t << indentStr << "  [ ";
-         generateJSLink(t, n);
+         if (isBB && node->file == "index") { 
+            // omit treeview entries for index page
+            omitComma = true;
 
-         bool emptySection = ! generateJSTree(navIndex, t, n->children, level + 1, firstChild);
-
-         if (emptySection) {
-            t << "null ]";
-         } else {
-            t << endl << indentStr << "  ] ]";
+         } else  {
+            t << indentStr << "  [ ";
+            generateJSLink(t, node);
+   
+            bool emptySection = ! generateJSTree(navIndex, t, node->children, level + 1, firstChild);
+   
+            if (emptySection) {
+               t << "null ]";
+            } else {
+               t << endl << indentStr << "  ] ]";
+            }
          }
       }
    }
@@ -620,6 +655,8 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
 // adjust for display
 static void reSortNodes(QList<FTVNode *> &nodeList)
 {   
+   static bool isBB = Config::getBool("bb-style"); 
+
    std::stable_sort(nodeList.begin(), nodeList.end(), [](FTVNode *a, FTVNode *b) {  
    
       if (a->def == nullptr || b->def == nullptr) {
@@ -647,29 +684,35 @@ static void reSortNodes(QList<FTVNode *> &nodeList)
    
    int counter = 0;
 
-   for (auto item : nodeList) {     
+   for (auto node : nodeList) {     
 
 
 /*  broom (on hold, sort test)
-if  (item->file.contains("getting-started")) {
-//    (item->file.contains("build-from-source") || item->file.contains("build-options") || item->file.contains("requirements-") ||
-//    item->file.contains("implicit") || item->file.contains("unicode") ||
-//    item->file.contains("main-dev") || item->file.contains("sample-project") || item->file.contains("faq") ) {
-     
-      printf("\n  file: %-20s   Name: %-20s   Alpha: %-3d", qPrintable(item->file), qPrintable(item->name), item->index );
+if  (node->file.contains("getting-started")) {
 
-      if (item->def) {         
-         printf("  Our OrderId: %-3d",  item->def->getInputOrderId() );  
-         printf("  New sortId: %-3d",   item->def->getSortId() );  
+//    (node->file.contains("build-from-source") || node->file.contains("build-options") || node->file.contains("requirements-") ||
+//       node->file.contains("implicit") || node->file.contains("unicode") ||
+//       node->file.contains("main-dev") || node->file.contains("sample-project") || item->file.contains("faq") ) {
+     
+      printf("\n  file: %-20s   Name: %-20s   Alpha: %-3d", qPrintable(item->file), qPrintable(node->name), node->index );
+
+      if (node->def) {         
+         printf("  Our OrderId: %-3d",  node->def->getInputOrderId() );  
+         printf("  New sortId: %-3d",   node->def->getSortId() );  
       }   
 }
 */
 
-      item->index = counter;
-      counter++;
+      node->index = counter;
 
-      if (item->children.count() != 0 ) {
-         QList<FTVNode *> &children = item->children;
+      if ( isBB && node->file == "index") {  
+         // do not count this page
+      } else {
+         counter++;
+      }
+
+      if (node->children.count() != 0 ) {
+         QList<FTVNode *> &children = node->children;
          reSortNodes(children);
       }
    }
@@ -679,6 +722,7 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
 {
    QString htmlOutput = Config::getString("html-output");
 
+   // new JS  
    QFile f(htmlOutput + "/navtreedata.js");
    SortedList<NavIndexEntry *> navIndex;
 
@@ -692,12 +736,12 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
       QString projName = Config::getString("project-name");
 
       if (projName.isEmpty()) {
-         if (Doxy_Globals::mainPage && !Doxy_Globals::mainPage->title().isEmpty()) { 
-            // Use title of main page as root
+         if (Doxy_Globals::mainPage && ! Doxy_Globals::mainPage->title().isEmpty()) { 
+            // use title of main page as root
             t << "\"" << convertToJSString(Doxy_Globals::mainPage->title()) << "\", ";
 
          } else { 
-            // Use default section title as root
+            // use default section title as root
             LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::MainPage);
             t << "\"" << convertToJSString(lne->title()) << "\", ";
          }
@@ -718,10 +762,10 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
       // adjust for display output     
       reSortNodes(nodeList);
 
-      bool first = true;
-      generateJSTree(navIndex, t, nodeList, 1, first);
+      bool omitComma = true;
+      generateJSTree(navIndex, t, nodeList, 1, omitComma);
 
-      if (first) {
+      if (omitComma) {
          t << "]" << endl;
       } else {
          t << endl << "  ] ]" << endl;
@@ -731,10 +775,9 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
  
       int subIndex  = 0;
       int elemCount = 0;
-
       const int maxElemCount = 250;
 
-      //
+      // new JS     
       QFile fsidx(htmlOutput + "/navtreeindex0.js");
 
       if (fsidx.open(QIODevice::WriteOnly)) {
@@ -747,29 +790,30 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
          tsidx << "var NAVTREEINDEX" << subIndex << " =" << endl;
          tsidx << "{" << endl;
 
-         bool first = true;     
+         omitComma = true;     
 
-         auto nextItem = navIndex.begin();
+         auto nextItem  = navIndex.begin();
 
          for (auto e : navIndex)  {
             // for each entry
             ++nextItem;
 
             if (elemCount == 0) {
-               if (! first) {
+               if (! omitComma) {
                   t << "," << endl;
 
                } else {
-                  first = false;
+                  omitComma = false;
                }
 
-               t << "\"" << e->url << "\"";
+               t << "\"" << e->m_url << "\"";
             }
 
-            tsidx << "\"" << e->url << "\":[" << e->path << "]";
+            tsidx << "\"" << e->m_url << "\":[" << e->m_indexId << "]";
             
             if (nextItem != navIndex.end() && elemCount < maxElemCount - 1) {
-               tsidx << ",";   // not last entry
+               // not the last entry
+               tsidx << ",";   
             }
 
             tsidx << endl;
@@ -808,7 +852,7 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
    ResourceMgr::instance().copyResourceAs("html/navtree.js", htmlOutput, "navtree.js");
 }
 
-// new style images
+// style images
 void FTVHelp::generateTreeViewImages()
 {
    QString htmlOutput = Config::getString("html-output");
@@ -823,12 +867,12 @@ void FTVHelp::generateTreeViewImages()
    rm.copyResourceAs("html/splitbar.lum",      htmlOutput, "splitbar.png");
 }
 
-// new style scripts
+// style scripts
 void FTVHelp::generateTreeViewScripts()
 {
    QString htmlOutput = Config::getString("html-output");
 
-   // generate navtree.js & navtreeindex.js
+   // generate navtree.js and navtreeindex.js
    generateJSNavTree(m_indentNodes[0]);
    
    ResourceMgr::instance().copyResourceAs("html/resize.js",   htmlOutput, "resize.js");
@@ -901,11 +945,3 @@ void FTVHelp::generateTreeViewInline(QTextStream &t)
    t << "</table>\n";
    t << "</div><!-- directory -->\n" << endl;
 }
-
-// write old style index.html and tree.html
-void FTVHelp::generateTreeView()
-{
-   generateTreeViewImages();
-   generateTreeViewScripts();
-}
-

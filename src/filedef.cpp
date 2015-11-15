@@ -82,10 +82,10 @@ FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, const
 
    setReference(lref);
       
-   m_package           = 0;
-   m_isSource          = guessSection(nm) == Entry::SOURCE_SEC;
-   m_docname           = nm;
-   m_dir               = QSharedPointer<DirDef>();
+   m_package   = 0;
+   m_isSource  = guessSection(nm) == Entry::SOURCE_SEC;
+   m_docname   = nm;
+   m_dir       = QSharedPointer<DirDef>();
 
    if (Config::getBool("full-path-names")) {
       m_docname.prepend(stripFromPath(m_path));

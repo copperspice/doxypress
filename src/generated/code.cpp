@@ -10559,10 +10559,10 @@ char *codeYYtext;
 #include <assert.h>
 #include <ctype.h>
 
-#include "entry.h"
+#include <entry.h>
 #include <doxy_globals.h>
-#include "message.h"
-#include "outputlist.h"
+#include <message.h>
+#include <outputlist.h>
 #include <stringmap.h>
 #include "util.h"
 #include "membername.h"
@@ -10576,8 +10576,7 @@ char *codeYYtext;
 #include "namespacedef.h"
 #include "tooltip.h"
 
-
-//  Toggle for some debugging info
+//  Toggle for debugging info
 //  #define DBG_CTX(x) fprintf x
 #define DBG_CTX(x) do { } while(0)
 
@@ -10830,7 +10829,7 @@ void VariableContext::addVariable(const QString &type, const QString &name)
    } else {
       if (m_scopes.count() > 0) // for local variables add a dummy entry so the name
          // is hidden to avoid false links to global variables with the same name
-         // TODO: make this work for namespaces as well!
+         // TODO: make this work for namespaces as well
       {
          DBG_CTX((stderr, "** addVariable: dummy context for '%s'\n", qPrintable(lname)));
          scope->insert(lname, VariableContext::dummyContext());
@@ -10938,7 +10937,7 @@ class CallContext
 
 static CallContext g_theCallContext;
 
-/*! add class/namespace name s to the scope */
+/*! add class/namespace name(s) to the scope */
 static void pushScope(const QString &s)
 {
    g_classScopeLengthStack.push(new int(g_classScope.length()));
@@ -11279,7 +11278,8 @@ static QSharedPointer<MemberDef> setCallContextForVar(const QString &name)
             return md;
          }
 
-      } else { // check namespace as well
+      } else { 
+         // check namespace as well
          QSharedPointer<NamespaceDef> mnd = getResolvedNamespace(scope);
 
          if (mnd && !locName.isEmpty()) {
@@ -11503,7 +11503,8 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
          DBG_CTX((stderr, "bareName=%s\n", qPrintable(bareName)));
 
          if (bareName != className) {
-            cd = getResolvedClass(d, g_sourceFileDef, bareName, &md); // try unspecialized version
+            // try unspecialized version
+            cd = getResolvedClass(d, g_sourceFileDef, bareName, &md); 
          }
       }
 
@@ -11713,6 +11714,7 @@ static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Defi
             return TRUE;
          }
       }
+
    } else if (def && def->definitionType() == Definition::TypeNamespace) {
       QSharedPointer<NamespaceDef> nd = def.dynamicCast<NamespaceDef>();    
       QSharedPointer<Definition> innerDef = nd->findInnerCompound(memName);
@@ -13262,19 +13264,23 @@ YY_DECL {
                g_theVarContext.pushScope();
                g_code->codify(text);
                g_curlyCount++;
+
                if (YY_START == ClassVar && g_curClassName.isEmpty())
                {
                   g_curClassName = g_name;
                }
+
                if (g_searchingForBody)
                {
                   g_searchingForBody = FALSE;
                   g_insideBody = TRUE;
                }
+
                if (g_insideBody)
                {
                   g_bodyCurlyCount++;
                }
+
                if (! g_curClassName.isEmpty()) // valid class name
                {
                   DBG_CTX((stderr, "** scope stack push CLASSBLOCK\n"));

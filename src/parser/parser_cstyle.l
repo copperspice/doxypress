@@ -1472,22 +1472,22 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <ObjCSkipStatement>";"        {
-                    BEGIN(FindMembers);
+      BEGIN(FindMembers);
    }
 
 <PackageName>{ID}(("."|"\\"){ID})*  {
-                 QString text = QString::fromUtf8(yytext); 
-                 isTypedef = false;
-                 current->name = text;
-                 current->name = substitute(current->name,".","::");
-                 current->name = substitute(current->name,"\\","::");
-                 current->section = Entry::NAMESPACE_SEC;
-                 current->type = "namespace" ;
-                 current->fileName  = yyFileName;
-                 current->startLine = yyLineNr;
-                 current->startColumn = yyColNr;
-                 current->bodyLine  = yyLineNr;
-                 lineCount();
+      QString text  = QString::fromUtf8(yytext); 
+      isTypedef     = false;
+      current->name = text;
+      current->name = substitute(current->name,".","::");
+      current->name = substitute(current->name,"\\","::");
+      current->section     = Entry::NAMESPACE_SEC;
+      current->type        = "namespace" ;
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
+      current->startColumn = yyColNr;
+      current->bodyLine    = yyLineNr;
+      lineCount();
    }
 
 <PackageName>";"        {
@@ -1496,7 +1496,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
                  current = QMakeShared<Entry>();
                  initEntry();
-                    BEGIN(FindMembers);
+                 BEGIN(FindMembers);
    }
 
 <PackageName>"{"        {
@@ -1606,20 +1606,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                  current->startColumn = yyColNr;
                  current->bodyLine  = yyLineNr;
                  lineCount();
-                 if (insidePHP)
-                 {
-                   BEGIN( PackageName );
-                 }
-                 else
-                 {
-                      BEGIN( CompoundName );
+
+                 if (insidePHP) {
+                    BEGIN( PackageName );
+                 } else {
+                    BEGIN( CompoundName );
                  }
    }
 
 <FindMembers>{B}*"module"{BN}+      {
                  lineCount();
-                                          if (insideIDL)
-                 {
+                 if (insideIDL) {
                    isTypedef=false;
                    current->section = Entry::NAMESPACE_SEC;
                    current->type = "module" ;
@@ -1836,44 +1833,44 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*{TYPEDEFPREFIX}"class{" |
 <FindMembers>{B}*{TYPEDEFPREFIX}"class"{BN}+   {
       QString text = QString::fromUtf8(yytext);
+   
+      isTypedef = text.indexOf("typedef") != -1;
+      
+      bool isConst     = text.indexOf("const")!=-1;
+      bool isVolatile  = text.indexOf("volatile")!=-1;
+      current->section = Entry::CLASS_SEC;
+      
+      addType(current);
+      if (isConst) {
+        current->type += " const";
+      } else if (isVolatile) {
+        current->type += " volatile";
+      }
+      
+      current->type        += " class" ;
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
+      current->startColumn = yyColNr;
+      current->bodyLine    = yyLineNr;
+      
+      if (text[0] == '@') {
+       language = current->lang = SrcLangExt_ObjC;
+       insideObjC = true;
+      }
+      
+      lineCount();
+      if (text[yyleng-1] == '{') {
+        unput('{');
+      } 
+      
+      if (insidePHP && current->m_specFlags.spec & Entry::Abstract) {
+       // convert Abstract to AbstractClass
+      
+       current->m_specFlags.m_isAbstractClass = true;
+       current->m_specFlags.spec = current->m_specFlags.spec & ~Entry::Abstract;
+      }
 
-                 isTypedef = text.indexOf("typedef")!=-1;
-
-                 bool isConst     = text.indexOf("const")!=-1;
-                 bool isVolatile  = text.indexOf("volatile")!=-1;
-                 current->section = Entry::CLASS_SEC;
-
-                 addType(current);
-                 if (isConst) {
-                    current->type += " const";
-                 } else if (isVolatile) {
-                    current->type += " volatile";
-                 }
-
-                 current->type += " class" ;
-                 current->fileName    = yyFileName;
-                 current->startLine   = yyLineNr;
-                 current->startColumn = yyColNr;
-                 current->bodyLine    = yyLineNr;
-
-                 if (text[0] == '@') {
-                   language = current->lang = SrcLangExt_ObjC;
-                   insideObjC = true;
-                 }
-
-                 lineCount();
-                 if (text[yyleng-1] == '{') {
-                    unput('{');
-                 } 
-
-                 if (insidePHP && current->m_specFlags.spec & Entry::Abstract)
-                 {
-                   // convert Abstract to AbstractClass
-
-                   current->m_specFlags.m_isAbstractClass = true;
-                   current->m_specFlags.spec = current->m_specFlags.spec & ~Entry::Abstract;
-                 }
-                 BEGIN( CompoundName ) ;
+      BEGIN( CompoundName ) ;
    }
 
 <FindMembers>{B}*"value class{" |         // C++/CLI extension
@@ -3089,29 +3086,29 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <CsSignalSlot2Name,CsSignalSlot2Extra>")"        { 
       // end of signal2 or slot2 or overload
-                 --roundCount;
-
-                 if (roundCount == 0)  {
-                    current = QMakeShared<Entry>();
-                    initEntry();
-                    BEGIN(FindMembers);
-                 }
+      --roundCount;
+         
+      if (roundCount == 0)  {
+         current = QMakeShared<Entry>();
+         initEntry();
+         BEGIN(FindMembers);
+      }
    }
 
 <FindMembers>"CS_SLOT_1"       {
-                  current->mtype = MethodTypes::Slot;
-                  current->type.resize(0);
-                  BEGIN(CsSlotProtection);
+      current->mtype = MethodTypes::Slot;
+      current->type.resize(0);
+      BEGIN(CsSlotProtection);
    }
 
 <CsSlotProtection>{ID}       {
-                  QString text = QString::fromUtf8(yytext);
-                  Protection visibility = getProtection(text);
-                  current->protection = visibility;
+      QString text = QString::fromUtf8(yytext);
+      Protection visibility = getProtection(text);
+      current->protection = visibility;
    }
 
 <CsSlotProtection>","           {
-                  BEGIN(CsSignalSlotMethod);
+      BEGIN(CsSignalSlotMethod);
    }
 
    /* end CopperSpice specific parsing */
@@ -3762,8 +3759,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                     BEGIN(GCopyCurly);
    }
 
-<ReadInitializer>[;,]         {
-                 // printf(">> initializer `%s' <<\n",current->initializer.data());
+<ReadInitializer>[;,]         {                 
                  QString text = QString::fromUtf8(yytext);
                  if (text[0] == ';' && (current_root->m_specFlags.spec & Entry::Enum)) {
                    current->fileName    = yyFileName;
@@ -6702,16 +6698,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <CompoundName>";"          {
-                 current->section = Entry::EMPTY_SEC ;
-                 current->type.resize(0) ;
-                 current->name.resize(0) ;
-                 current->args.resize(0) ;
-                 current->argList.clear();
-                 BEGIN( FindMembers ) ;
+      current->section = Entry::EMPTY_SEC ;
+      current->type.resize(0) ;
+      current->name.resize(0) ;
+      current->args.resize(0) ;
+      current->argList.clear();
+      BEGIN( FindMembers ) ;
    }
 
 <Bases>";"        {
-                 if (insideIDL && (current->m_specFlags.spec & (Entry::Singleton | Entry::Service)))
+      if (insideIDL && (current->m_specFlags.spec & (Entry::Singleton | Entry::Service)))
                  {
                    // in UNO IDL a service or singleton may be defined
                    // completely like this: "service Foo : XFoo;"
@@ -6742,29 +6738,34 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <CompoundName>{SCOPENAME}{BN}*/"<"  {
       QString text = QString::fromUtf8(yytext); 
-      sharpCount = 0;
+
+      sharpCount    = 0;
       current->name = text;
-                 if (current->m_specFlags.spec & Entry::Protocol)
-                 {
-                   current->name += "-p";
-                 }
-                 lineCount();
-                 lastClassTemplSpecContext = ClassVar;
-                 if (insideObjC) // protocol list
-                 {
-                   BEGIN( ObjCProtocolList );
-                 }
-                 else if (insideCSharp) // C# generic class
-                 {
-                                            //current->name+="-g";
-                   BEGIN( CSGeneric );
-                 }
-                 else // C++ template specialization
-                 {
-                   roundCount=0;
-                   BEGIN( ClassTemplSpec );
-                 }
-    }
+
+      if (current->m_specFlags.spec & Entry::Protocol) {
+         current->name += "-p";
+      }
+
+      lineCount();
+      lastClassTemplSpecContext = ClassVar;
+
+      if (insideObjC)  {
+         // protocol list      
+         BEGIN( ObjCProtocolList );
+
+      } else if (insideCSharp) {
+         // C# generic class 
+      
+         // current->name+="-g";
+         BEGIN( CSGeneric );
+
+      } else  {
+         // C++ template specialization
+      
+         roundCount=0;
+         BEGIN( ClassTemplSpec );
+      }
+   }
 
 <CSGeneric>"<"             {
                  if (current->tArgLists==0)
@@ -6829,15 +6830,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <CompoundName>{SCOPENAME}{BN}*";"   { 
       // forward declaration
       QString text = QString::fromUtf8(yytext); 
+
       if (current->tArgLists && current->tArgLists->count() > 0) {
-          // found a forward template declaration, this has
-          // a purpose of its own
+          // found a forward template declaration, this has a purpose of its own
           current->name = text;
-          current->name=current->name.left(current->name.length()-1).trimmed();
+          current->name = current->name.left(current->name.length()-1).trimmed();
  
          QString rn = current_root->name;
          
-         if (!current->name.isEmpty() && !rn.isEmpty()) {
+         if (! current->name.isEmpty() && ! rn.isEmpty()) {
             prependScope();
          }
          
@@ -6883,19 +6884,20 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext); 
       current->name = text;
       lineCount();
-                                          if (insideCpp && current->name=="alignas") // C++11
-                                          {
-                                            lastAlignAsContext = YY_START;
-                                            BEGIN( AlignAs );
-                                          }
-                                          else
-                                          {
-                                            if (current->m_specFlags.spec & Entry::Protocol)
-                                            {
-                                              current->name += "-p";
-                                            }
-                                            BEGIN( ClassVar );
-                                          }
+      
+      if (insideCpp && current->name == "alignas") { 
+         // C++11
+      
+         lastAlignAsContext = YY_START;
+         BEGIN( AlignAs );
+      
+      } else {
+         if (current->m_specFlags.spec & Entry::Protocol) {
+            current->name += "-p";
+         }
+      
+         BEGIN( ClassVar );
+      }
    }
 
 <AlignAs>"("      { 
@@ -6933,27 +6935,30 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <CompoundName>{SCOPENAME}     {
       QString text = QString::fromUtf8(yytext); 
       current->name = text;
-                 if (insideCpp || insideObjC) {
-                    current->id = ClangParser::instance()->lookup(yyLineNr, text);
-                 }
-                 lineCount();
-                 if (current->m_specFlags.spec & Entry::Protocol)
-                 {
-                   current->name += "-p";
-                 }
-                 if ((current->m_specFlags.spec & Entry::Protocol) ||
-                     current->section == Entry::OBJCIMPL_SEC)
-                 {
-                   unput('{'); // fake start of body
-                 }
-                 BEGIN( ClassVar );
+
+      if (insideCpp || insideObjC) {
+         current->id = ClangParser::instance()->lookup(yyLineNr, text);
+      }
+
+      lineCount();
+
+      if (current->m_specFlags.spec & Entry::Protocol) {
+         current->name += "-p";
+      }
+
+      if ((current->m_specFlags.spec & Entry::Protocol) || current->section == Entry::OBJCIMPL_SEC) {
+         unput('{');       // fake start of body
+      }
+
+      BEGIN( ClassVar );
    }
 
-<CompoundName>{CSSCOPENAME}           { // C# style scope
+<CompoundName>{CSSCOPENAME}           { 
+      // C# style scope
       QString text = QString::fromUtf8(yytext); 
-                 current->name = substitute(text, ".", "::");
-                 lineCount();
-                 BEGIN( ClassVar );
+      current->name = substitute(text, ".", "::");
+      lineCount();
+      BEGIN( ClassVar );
    }
 
 <ClassVar>{SCOPENAME}{BN}*/"("      {
@@ -7268,47 +7273,50 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <CompoundName,ClassVar>{B}*"{"{B}*  {
-      current->fileName = yyFileName ;
-      current->startLine = yyLineNr ;
+      current->fileName    = yyFileName ;
+      current->startLine   = yyLineNr ;
       current->startColumn = yyColNr;
+
       current->name = removeRedundantWhiteSpace(current->name);
-                 if (current->name.isEmpty() && !isTypedef) // anonymous compound
-                 {
-                   if (current->section==Entry::NAMESPACE_SEC) // allow reopening of anonymous namespaces
-                   {
-                     if (Config::getBool("extract-anon-namespaces")) // use visible name
-                     {
-                       current->name="anonymous_namespace{"+stripPath(current->fileName)+"}";
-                     }
-                     else // use invisible name
-                     {
-                        current->name = QString("@%1").arg(anonNSCount);
-                     }
-                   }
-                   else
-                   {
-                      current->name = QString("@%1").arg(anonCount++);
-                   }
-                 }
-                 curlyCount=0;
-                 if (current_root && // not a nested struct inside an @interface section
-                     !(current_root->m_specFlags.spec & Entry::Interface) &&
-                     ((current->m_specFlags.spec & (Entry::Interface | Entry::Protocol | Entry::Category) ||
-                       current->section==Entry::OBJCIMPL_SEC)
-                     ) &&
-                     insideObjC
-                    )
-                 { // ObjC body that ends with @end
-                   BEGIN( ReadBodyIntf );
-                 }
-                 else if (current->section==Entry::NAMESPACE_SEC)
-                 { // namespace body
-                   BEGIN( ReadNSBody );
-                 }
-                 else
-                 { // class body
-                   BEGIN( ReadBody ) ;
-                 }
+
+      if (current->name.isEmpty() && ! isTypedef)  {
+         // anonymous compound
+                 
+         if (current->section==Entry::NAMESPACE_SEC) {
+            // allow reopening of anonymous namespaces
+         
+            if (Config::getBool("extract-anon-namespaces")) { 
+               // use visible name            
+               current->name = "anonymous_namespace{"+stripPath(current->fileName)+"}";
+
+            } else {
+               // use invisible name            
+               current->name = QString("@%1").arg(anonNSCount);
+            }
+
+         } else {
+            current->name = QString("@%1").arg(anonCount++);
+         }
+      }
+
+      curlyCount = 0;
+
+      if (current_root && // not a nested struct inside an @interface section
+            !(current_root->m_specFlags.spec & Entry::Interface) &&
+            ((current->m_specFlags.spec & (Entry::Interface | Entry::Protocol | Entry::Category) ||
+            current->section==Entry::OBJCIMPL_SEC) ) && insideObjC) { 
+      
+         // ObjC body that ends with @end
+         BEGIN( ReadBodyIntf );
+      
+      } else if (current->section == Entry::NAMESPACE_SEC) { 
+         // namespace body
+         BEGIN( ReadNSBody );
+      
+      } else { 
+         // class body
+         BEGIN( ReadBody ) ;
+      }
    }
 
 <BasesProt>"virtual"{BN}+               { 

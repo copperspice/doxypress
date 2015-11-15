@@ -8544,6 +8544,7 @@ static void checkFormula()
    }
 }
 
+// main entry point
 bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, const QString &comment,
                   const QString &fileName, int &lineNr, bool isBrief, bool isAutoBriefOn, bool isInbody,
                   Protection &prot, int &position, bool &newEntryNeeded )

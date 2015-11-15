@@ -56,8 +56,7 @@ struct TagInfo {
    QString anchor;
 };
 
-/** Represents an unstructured piece of information, about an
- *  entity found in the sources.
+/** Represents some information, about an entity found in the source.
  *
  *  parseMain() in scanner.l will generate a tree of these entries.
  */
@@ -65,7 +64,7 @@ class Entry
 {
  public:
 
-   /*! Kind of entries that are supported */
+   /*! Kind of entries which are supported */
    enum Sections {
       CLASS_SEC        = 0x00000001,
       NAMESPACE_SEC    = 0x00000010,
@@ -186,7 +185,8 @@ class Entry
 
       SpecifierFlags() {
          // ensures this struc has no virtual methods
-         static_assert(std::is_standard_layout<SpecifierFlags>::value == true, "Struct SpecifierFlags can not have virutal methods");
+         static_assert(std::is_standard_layout<SpecifierFlags>::value == true, 
+                  "Struct SpecifierFlags can not have virutal methods");
 
          // set ever bit field to zero or false
          memset(this, 0, sizeof(SpecifierFlags));
@@ -330,11 +330,11 @@ class Entry
    int  startColumn;         //!< start column of entry in the source
 
    bool stat;                //!< static ?
-   bool explicitExternal;    //!< explicitly defined as external?
+   bool explicitExternal;    //!< explicitly defined as external ?
    bool proto;               //!< prototype ?
-   bool subGrouping;         //!< automatically group class members?
-   bool callGraph;           //!< do we need to draw the call graph?
-   bool callerGraph;         //!< do we need to draw the caller graph?
+   bool subGrouping;         //!< automatically group class members ?
+   bool callGraph;           //!< do we need to draw the call graph ?
+   bool callerGraph;         //!< do we need to draw the caller graph ?
   
    QList<ArgumentList> *tArgLists;    //!< template argument declarations
    QList<BaseInfo>      extends;      //!< list of base classes
