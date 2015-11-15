@@ -19,6 +19,7 @@
 #define CONFIG_H
 
 #include <QByteArray>
+#include <QDir>
 #include <QHash>
 #include <QString>
 #include <QStringList>
@@ -29,6 +30,8 @@ class Config
       Config() = delete;      
 
       static bool parseConfig(const QString &fName);
+      static QDir getConfigDir();
+      static QString getFullName(const QString &fName);
 
       static bool getBool(const QString &name);
       static QString getEnum(const QString &name);
@@ -74,6 +77,8 @@ class Config
       static QHash<QString, struc_CfgEnum>   m_cfgEnum;
       static QHash<QString, struc_CfgList>   m_cfgList; 
       static QHash<QString, struc_CfgString> m_cfgString;
+
+      static QDir m_configDir;
     
       static QByteArray json_ReadFile(const QString &fName);
 

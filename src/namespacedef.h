@@ -36,7 +36,7 @@ class NamespaceSDict;
 class NamespaceList;
 class OutputList;
 
-/** A sorted dictionary of NamespaceDef objects. */
+/** sorted dictionary of NamespaceDef objects. */
 class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
 {
  public:
@@ -52,7 +52,7 @@ class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
 };
 
 
-/** A model of a namespace symbol. */
+/** model of a namespace symbol */
 class NamespaceDef : public Definition
 {
  public:
@@ -193,33 +193,6 @@ class NamespaceDef : public Definition
    QList<QSharedPointer<MemberList>> m_memberLists;
  
    enum { NAMESPACE, MODULE, CONSTANT_GROUP, LIBRARY } m_type;   
-};
-
-/** A list of NamespaceDef objects. */
-class NamespaceList : public QList<NamespaceDef>
-{
- public:
-   ~NamespaceList() {}
-
-   int compareValues(const NamespaceDef *nd1, const NamespaceDef *nd2) const {  
-      return nd1->name().compare(nd2->name(), Qt::CaseInsensitive);
-   }
-};
-
-/** An iterator for NamespaceDef objects in a NamespaceList. */
-class NamespaceListIterator : public QListIterator<NamespaceDef>
-{
- public:
-   NamespaceListIterator(const NamespaceList &l) :
-      QListIterator<NamespaceDef>(l) {}
-};
-
-/** An unsorted dictionary of NamespaceDef objects. */
-class NamespaceDict : public QHash<QString,NamespaceDef>
-{
- public:
-   NamespaceDict() : QHash<QString, NamespaceDef>() {}
-   ~NamespaceDict() {}
 };
 
 #endif

@@ -31,6 +31,25 @@ QHash<QString, Config::struc_CfgEnum>   Config::m_cfgEnum;
 QHash<QString, Config::struc_CfgList>   Config::m_cfgList; 
 QHash<QString, Config::struc_CfgString> Config::m_cfgString;
 
+QDir Config::m_configDir;
+
+QDir Config::getConfigDir()
+{
+   return m_configDir;
+}
+
+QString Config::getFullName(const QString &fName)
+{
+   QString retval;
+   QFileInfo fi(m_configDir, fName);
+
+   if (fi.exists() ) {
+      retval = fi.absoluteFilePath();
+   } 
+
+   return retval;
+}
+
 QByteArray Config::json_ReadFile(const QString &fName)
 {        
    QByteArray data;
@@ -51,6 +70,8 @@ QByteArray Config::json_ReadFile(const QString &fName)
    QString workingDir = temp.absolutePath();
    QDir::setCurrent(workingDir);
   
+   // save currentDir
+   m_configDir = QDir{workingDir};
    return data;
 }
 
