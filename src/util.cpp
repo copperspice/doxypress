@@ -536,7 +536,10 @@ QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &name)
 
    QString subst = Doxy_Globals::namespaceAliasDict[name];
 
-   if (! subst.isEmpty()) {
+   if (subst.isEmpty()) {
+      return Doxy_Globals::namespaceSDict->find(name);
+
+   } else { 
       int count = 0; 
       
       // recursion detection guard
@@ -551,10 +554,7 @@ QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &name)
          warn_uncond("Possible recursive namespace alias detected for %s\n", qPrintable(name) );
       }
 
-      return Doxy_Globals::namespaceSDict->find(subst);
-
-   } else {
-      return Doxy_Globals::namespaceSDict->find(name);
+      return Doxy_Globals::namespaceSDict->find(subst);      
    }
 }
 
@@ -4415,7 +4415,6 @@ void generateFileRef(OutputDocInterface &od, const QString &name, const QString 
    }
 }
 
-/** Cache element for the file name to FileDef mapping cache */
 QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &name, bool &ambig)
 {
    ambig = false;
@@ -4434,76 +4433,68 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
       return cachedResult->fileDef;
    }
    
-   cachedResult = new FindFileCacheElem(QSharedPointer<FileDef>(), false);
-   
-   QString fName = QDir::cleanPath(name);
-   QString path;
+   cachedResult = new FindFileCacheElem(QSharedPointer<FileDef>(), false);  
 
-   do {
+   QFileInfo fi(name);
+
+   QString fName = fi.fileName();
+   QString path  = fi.canonicalPath();
      
-      if (fName.isEmpty()) {
-         break;
-      }
+   if (fName.isEmpty()) {
+      s_findFileDefCache.insert(key, cachedResult);  
+      return QSharedPointer<FileDef>();
+   }
+      
+   // returns a FileList data type
+   QSharedPointer<FileName> fn = (*fnDict)[fName];
    
-      int slashPos = qMax(fName.lastIndexOf('/'), fName.lastIndexOf('\\'));
+   if (fn) {  
+    
+      if (fn->count() == 1) {
+         QSharedPointer<FileDef> fd = fn->first();     
    
-      if (slashPos != -1) {
-         path  = fName.left(slashPos + 1);
-         fName = fName.right(fName.length() - slashPos - 1);      
-      }
-   
-      if (fName.isEmpty()) {
-         break;
-      }
-   
-      // returns a FileList data type
-      QSharedPointer<FileName> fn = (*fnDict)[fName];
-   
-      if (fn) {      
-         if (fn->count() == 1) {
-            QSharedPointer<FileDef> fd = fn->first();
+         QFileInfo fdFile(fd->getPath());
+         QString fdPath = fi.canonicalPath();    
 
 #if defined(_WIN32) || defined(__MACOSX__) 
-            // Windows or MacOSX
-            bool isSamePath = fd->getPath().right(path.length()).toLower() == path.toLower();
+         // Windows or MacOSX
+         bool isSamePath = fdPath.toLower() == path.toLower();
 #else 
-            // Unix
-            bool isSamePath = fd->getPath().right(path.length()) == path;
+         // Unix
+         bool isSamePath = fdPath == path;
 #endif
 
-            if (path.isEmpty() || isSamePath) {
-               cachedResult->fileDef = fd;
+         if (path.isEmpty() || isSamePath) {
+            cachedResult->fileDef = fd;
 
-               s_findFileDefCache.insert(key, cachedResult);              
-               return fd;
+            s_findFileDefCache.insert(key, cachedResult);              
+            return fd;
+         }
+     
+      } else {
+         // file name alone is ambiguous
+         int count = 0;
+             
+         QSharedPointer<FileDef> lastMatch;
+         QString pathStripped = stripFromIncludePath(path);
+               
+         for (auto fd : *fn) {
+            QString fdStripPath = stripFromIncludePath(fd->getPath());
+      
+            if (path.isEmpty() || fdStripPath.right(pathStripped.length()) == pathStripped) {
+               count++;
+               lastMatch = fd;
             }
-   
-         } else {
-            // file name alone is ambiguous
-            int count = 0;
-          
-            QSharedPointer<FileDef> lastMatch;
-            QString pathStripped = stripFromIncludePath(path);
-            
-            for (auto fd : *fn) {
-               QString fdStripPath = stripFromIncludePath(fd->getPath());
-   
-               if (path.isEmpty() || fdStripPath.right(pathStripped.length()) == pathStripped) {
-                  count++;
-                  lastMatch = fd;
-               }
-            }
-            
-            ambig = (count > 1);
-            cachedResult->isAmbig = ambig;
-            cachedResult->fileDef = lastMatch;
-   
-            s_findFileDefCache.insert(key, cachedResult);   
-            return lastMatch;
-         }   
-      }     
- 
-   } while (false);
+         }
+               
+         ambig = (count > 1);
+         cachedResult->isAmbig = ambig;
+         cachedResult->fileDef = lastMatch;
+      
+         s_findFileDefCache.insert(key, cachedResult);   
+         return lastMatch;
+      }   
+   }           
    
    s_findFileDefCache.insert(key, cachedResult);
   
@@ -5277,7 +5268,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
 {
    assert(context != 0);
    
-   if (ml == 0) {
+   if (ml == nullptr) {
       return;
    }
    
@@ -5289,7 +5280,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
          // insert enum value of this enum into groups
          QSharedPointer<MemberList> fmdl = md->enumFieldList();
 
-         if (fmdl != 0) {           
+         if (fmdl != nullptr) {           
             for (auto fmd : *fmdl) {
                int groupId = fmd->getMemberGroupId();
 
@@ -5297,18 +5288,18 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
                   QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict[groupId];
                  
                   if (info) {
-                     if (*ppMemberGroupSDict == 0) {
+                     if (*ppMemberGroupSDict == nullptr) {
                         *ppMemberGroupSDict = new MemberGroupSDict;                        
                      }
 
                      QSharedPointer<MemberGroup> mg = (*ppMemberGroupSDict)->find(groupId);
 
-                     if (mg == 0) {
+                     if (mg == nullptr) {
                         mg = QMakeShared<MemberGroup>(context, groupId, info->header, info->doc, info->docFile);
                         (*ppMemberGroupSDict)->insert(groupId, mg);
                      }
 
-                     mg->insertMember(fmd); // insert in member group
+                     mg->insertMember(fmd);          // insert in member group
                      fmd->setMemberGroup(mg);
                   }
                }
@@ -5323,21 +5314,20 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
 
          if (info) {
 
-            if (*ppMemberGroupSDict == 0) {
+            if (*ppMemberGroupSDict == nullptr) {
                *ppMemberGroupSDict = new MemberGroupSDict;               
             }
 
             QSharedPointer<MemberGroup> mg = (*ppMemberGroupSDict)->find(groupId);
 
-            if (mg) {
+            if (mg == nullptr) {
                mg = QSharedPointer<MemberGroup>(new MemberGroup( context, groupId, info->header, info->doc, info->docFile));
                (*ppMemberGroupSDict)->insert(groupId, mg);
             }
 
-            md = ml->takeAt(index);     // remove from member list
-            mg->insertMember(md);       // insert in member group
+            md = ml->takeAt(index);           // remove from member list
+            mg->insertMember(md);             // insert in member group
             mg->setRefItems(info->m_sli);
-
             md->setMemberGroup(mg);
 
             continue;
@@ -7819,7 +7809,7 @@ void convertProtectionLevel(MemberListType inListType, Protection inProt, int *o
 
 bool mainPageHasTitle()
 {
-   if (Doxy_Globals::mainPage == 0) {
+   if (Doxy_Globals::mainPage == nullptr) {
       return false;
    }
   
