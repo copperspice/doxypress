@@ -1379,15 +1379,18 @@ void writeDefaultLayoutFile(const QString &fileName)
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
    QString layoutData = getLayout_Default();
+   layoutData.replace("$doxypressversion", versionString);
+   layoutData.replace("$doxygenversion",   versionString);         // compatibility
 
    QTextStream t(&f);
-   t << substitute(layoutData, "$doxypressversion", versionString);
-   t << substitute(layoutData, "$doxygenversion",   versionString);         // ok
+   t << layoutData;
+
+   printf("DoxyPress layout file generated: %s", csPrintable( f.fileName() )); 
 }
 
 // Convert input to a title.
