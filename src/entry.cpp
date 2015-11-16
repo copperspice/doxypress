@@ -77,7 +77,7 @@ Entry::Entry(const Entry &e)
    argList     = e.argList; 
    tArgLists   = 0;     
    
-   program     = e.program;
+   m_program    = e.m_program;
    initializer = e.initializer;
    includeFile = e.includeFile;
    includeName = e.includeName;
@@ -191,7 +191,7 @@ void Entry::reset()
    args.resize(0);
    bitfields.resize(0);
    exception.resize(0);
-   program.resize(0);
+   m_program.resize(0);
    includeFile.resize(0);
    includeName.resize(0);
    doc.resize(0);

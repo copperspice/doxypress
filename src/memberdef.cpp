@@ -3412,8 +3412,8 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
 
    ol.startInlineMemberDoc();
 
-   QString brief           = briefDescription();
-   QString detailed        = documentation();
+   QString brief     = briefDescription();
+   QString detailed  = documentation();
 
    /* write brief description */
    if (!brief.isEmpty()) {
@@ -5268,7 +5268,7 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
          transferArgumentDocumentation(mdecAl, mdefAl);
 
          /* copy documentation between function definition and declaration */
-         if (!mdec->briefDescription().isEmpty()) {
+         if (! mdec->briefDescription().isEmpty()) {
             mdef->setBriefDescription(mdec->briefDescription(), mdec->briefFile(), mdec->briefLine());
 
          } else if (!mdef->briefDescription().isEmpty()) {

@@ -208,7 +208,7 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalArgumentList(s,  e->argList);
    marshalArgumentLists(s, e->tArgLists);
 
-   marshalQString(s, e->program);
+   marshalQString(s, e->m_program);
    marshalQString(s, e->initializer);
 
    marshalQString(s, e->includeFile);
@@ -517,7 +517,7 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->argList          = *unmarshalArgumentList(s);      // CopperSpice - check for memory leak
    e->tArgLists        = unmarshalArgumentLists(s);     
 
-   e->program          = unmarshalQString(s);
+   e->m_program        = unmarshalQString(s);
    e->initializer      = unmarshalQString(s);
 
    e->includeFile      = unmarshalQString(s);

@@ -3955,6 +3955,7 @@ static inline void setOutput(OutputContext ctx)
 
       case OutputBrief:
          if (oldContext != inContext) {
+
             if (current->briefFile.isEmpty()) {
                current->briefFile = yyFileName;
                current->briefLine = yyLineNr;
@@ -3962,9 +3963,7 @@ static inline void setOutput(OutputContext ctx)
          }
 
          if (current->brief.trimmed().isEmpty())  {
-            // we only want one brief
-            // description even if multiple are given
-         
+            // we only want one brief description even if multiple are given         
             pOutputString = &current->brief;
 
          } else {
@@ -3975,8 +3974,8 @@ static inline void setOutput(OutputContext ctx)
 
       case OutputXRef:
          pOutputString = &outputXRef;
-         // first item found, so can't append to previous
-         //xrefAppendFlag = FALSE;
+         // first item found, so ca not append to previous
+         // xrefAppendFlag = FALSE;
          break;
 
       case OutputInbody:
@@ -4429,7 +4428,7 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               // directory (or chain of commands!)
+               // directory (or chain of commands)
                QString text = QString::fromUtf8(commentscanYYtext); 
                addOutput(text);
             }
@@ -4559,7 +4558,7 @@ YY_DECL {
 
             {
                addOutput("\\endinternal ");
-               if (!inInternalDocs) {
+               if (! inInternalDocs) {
                   warn(yyFileName, yyLineNr, "found \\endinternal without matching \\internal");
                }
                inInternalDocs = FALSE;
@@ -4595,25 +4594,18 @@ YY_DECL {
                   }
 
                   if (cmdPtr->func && cmdPtr->func(cmdName)) {
-                     // implicit split of the comment block into two entries. Restart the next
-                     // block at the start of this command.
-                     parseMore = TRUE;
+                     // implicit split of the comment block into two entries. 
+                     // Restart the next block at the start of this command.
+                     parseMore = TRUE;               
 
-                     // this is probably not very portable across lex implementations,
-                     // but we need to know the position in the input buffer where this rule matched.
-                     // for flex 2.5.33+ we should use YY_CURRENT_BUFFER_LVALUE
-
-#if YY_FLEX_MINOR_VERSION >= 5 && YY_FLEX_SUBMINOR_VERSION >= 33
                      inputPosition = prevPosition + (int)(yy_bp - YY_CURRENT_BUFFER_LVALUE->yy_ch_buf);
-#else
-                     inputPosition = prevPosition + (int)(yy_bp - yy_current_buffer->yy_ch_buf);
-#endif
                      yyterminate();
 
                   } else if (cmdPtr->func == 0) {
                      // command without handler, to be processed later by parserdoc.cpp
                      addOutput(text);
                   }
+
                } else {
                   // command not relevant               
                   addOutput(text);
@@ -8498,7 +8490,7 @@ static bool handleExtends(const QString &)
 static bool handleCopyBrief(const QString &)
 {
    if (current->brief.isEmpty() && current->doc.isEmpty()) {
-      // if we don't have a brief or detailed description yet,
+      // if we do not have a brief or detailed description yet
       // then the @copybrief should end up in the brief description.
       // otherwise it will be copied inline (see bug691315 & bug700788)
       setOutput(OutputBrief);
@@ -8593,13 +8585,17 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    Debug::print(Debug::CommentScan, 0, "-----------\nCommentScanner: %s:%d\n"
                 "input=[\n%s]\n", qPrintable(fileName), lineNr, qPrintable(comment) );
 
-
    commentscanYYrestart( commentscanYYin );
-   BEGIN( Comment );
+   BEGIN(Comment);
 
    commentscanYYlex();
 
-   setOutput( OutputDoc );
+   setOutput(OutputDoc);
+
+
+printf("BROOM  (commentScan - result)  %s  name: %s\n", csPrintable(current->brief), csPrintable(current->name) );
+
+
 
    if (YY_START == OverloadParam) { 
       // comment ended with \overload
@@ -8607,7 +8603,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    }
 
    if (! guards.isEmpty()) {
-      warn(yyFileName, yyLineNr, "Documentation block ended in the middle of a conditional section!");
+      warn(yyFileName, yyLineNr, "Documentation block ended in the middle of a conditional section");
    }
 
    if (g_insideParBlock) {
@@ -8643,7 +8639,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    newEntryNeeded = needNewEntry;
 
-   // if we did not proceed during this call it does not make ense to continue since we get stuck. 
+   // if we did not proceed during this call it does not make ense to continue since we get stuck 
    // See bug 567346 for situations were this happens
    if (parseMore && position == inputPosition) {
       parseMore = FALSE;
@@ -8655,8 +8651,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
       position = 0;
    }
 
-   lineNr = yyLineNr;
-   printlex(commentscanYY_flex_debug, FALSE, __FILE__, qPrintable(fileName));
+   lineNr = yyLineNr;  
 
    return parseMore;
 }
@@ -8802,9 +8797,11 @@ static void groupAddDocs(QSharedPointer<Entry> e, const QString &fileName)
    if (e->section == Entry::MEMBERGRP_SEC) {
       g_memberGroupDocs = e->brief.trimmed();
       e->doc = stripLeadingAndTrailingEmptyLines(e->doc, e->docLine);
+
       if (!g_memberGroupDocs.isEmpty() && ! e->doc.isEmpty()) {
          g_memberGroupDocs += "\n\n";
       }
+
       g_memberGroupDocs += e->doc;
 
       QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict.value(g_memberGroupId);

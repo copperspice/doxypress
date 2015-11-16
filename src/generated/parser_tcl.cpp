@@ -5364,7 +5364,7 @@ void TclLanguageParser::parseInput(const QString &fileName, const QString &input
    tcl_parse("", "");
 
    groupLeaveFile(tcl.file_name, tclscannerYYlineno);
-   root->program.resize(0);
+   root->m_program.resize(0);
    myFile.close();
 
    printlex(tclscannerYY_flex_debug, FALSE, __FILE__, fileName);

@@ -60632,7 +60632,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
       endScope(current_root, TRUE); //  global root
 
-      rt->program.resize(0);     
+      rt->m_program.resize(0);     
       current = QSharedPointer<Entry>();      
 
       moduleProcedures.clear();

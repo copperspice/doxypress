@@ -346,7 +346,7 @@ class Entry
    QString	 name;        //!< member name
    QString   args;        //!< member argument string
    QString   bitfields;   //!< member's bit fields  
-   QString	 program;     //!< the program text
+   QString	 m_program;   //!< the program text
    QString   initializer; //!< initial value (for variables)
    QString   includeFile; //!< include file (2 arg of \\class, must be unique)
    QString   includeName; //!< include name (3 arg of \\class)

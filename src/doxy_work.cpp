@@ -2376,6 +2376,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
          imd->setMaxInitLines(md->initializerLines());
          imd->setBitfields(md->bitfieldString());
          imd->setLanguage(md->getLanguage());
+
          cd->insertMember(imd);
       }
    }
@@ -2703,7 +2704,7 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<EntryNav> rootNav)
 
             QSharedPointer<NamespaceDef> nd = QMakeShared<NamespaceDef>(root->fileName, root->startLine, root->startColumn, name);
 
-            nd->setDocumentation(root->doc, root->docFile, root->docLine); // copy docs to definition
+            nd->setDocumentation(root->doc, root->docFile, root->docLine);             // copy docs to definition
             nd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
             nd->addSectionsToDefinition(root->anchors);
 
@@ -2883,7 +2884,7 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<EntryNav> rootNav)
                            newMd->setMemberClass(cd);
                            cd->insertMember(newMd);
 
-                           if (!root->doc.isEmpty() || !root->brief.isEmpty()) {
+                           if (! root->doc.isEmpty() || ! root->brief.isEmpty()) {
                               newMd->setDocumentation(root->doc, root->docFile, root->docLine);
                               newMd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
                               newMd->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
@@ -3942,6 +3943,13 @@ if (name.contains("fake") || name.contains("isChopped")) {
                (root->stat && root->relatesType != MemberOf), 
                (root->relates.isEmpty() ? Member : root->relatesType == MemberOf ? Foreign : Related),
                mtype, root->tArgLists ? &root->tArgLists->last() : 0, &root->argList);
+
+
+printf("\n BROOM (dw 3960)  method: %s   ", csPrintable(root->name) );
+printf("\n BROOM (dw 3960)  brief:%s     ", csPrintable(root->brief) );
+printf("\n BROOM (dw 3961)  details:%s \n", csPrintable(root->doc));
+
+
 
    md->setTagInfo(rootNav->tagInfo());
    md->setMemberClass(cd);
@@ -5781,15 +5789,15 @@ void Doxy_Work::addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<M
 
    } else {     
       md->setDocumentation(root->doc, root->docFile, root->docLine);
-      md->setDocsForDefinition(!root->proto);
+      md->setDocsForDefinition(! root->proto);
+
+
+//  BROOM maybe
+
 
       md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
 
-      if (
-         (md->inbodyDocumentation().isEmpty() ||
-          !rootNav->parent()->name().isEmpty()
-         ) && !root->inbodyDocs.isEmpty()
-      ) {
+      if ((md->inbodyDocumentation().isEmpty() || ! rootNav->parent()->name().isEmpty() ) && !root->inbodyDocs.isEmpty()) {
          md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
       }
    }
