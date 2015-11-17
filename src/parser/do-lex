@@ -1,2 +1,5 @@
 flex -PcstyleYY -t -d  parser_cstyle.l  > parser_cstyle.cpp
 cp  parser_cstyle.cpp  ../generated/parser_cstyle.cpp
+
+flex -PcommentscanYY -t -d  commentscan.l  > commentscan.cpp
+# REM  cp  commentscan.cpp  ../generated/commentscan.cpp

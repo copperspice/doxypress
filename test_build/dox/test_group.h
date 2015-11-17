@@ -12,7 +12,10 @@
 *
 *************************************************************************/
 
-/** This class contains a group of constructors */
+/** This class contains a group of constructors. 
+  * The following notation will translate 'code' to behave like it says <code>true</code> 
+*/
+
 
 class groupTest
 {
@@ -24,17 +27,29 @@ class groupTest
 
 /** @{ */
 
-   /** constructor a - this works */
-   groupTest();
+   /** constructor a */
+   groupTest1();
 
-   groupTest(long);             /**< constructor b  */
+   groupTest2(long);             /**< constructor b  */
 
-   groupTest(QString);          /*!< constructor e  */
+   groupTest3(QString);          /*!< constructor e  */
 
-   groupTest(bool);             ///< constructor c
+   groupTest4(bool);             ///< constructor c  broom
 
-   groupTest(int);              //!< constructor d
+   groupTest5(int);              //!< constructor d
+
+   /// Normal documentation on line one.
+   /// Continued standard documentation on line two.
+   documentTest();
+
+   bbTest();
+      // bb documentation line one.
+      // continued bb documentation on line two.
+      // Return 'true' line three.
+
+   // INFO: bb comment which should not appear
+   someMethodwithNoDocs();
 
 /** @} */
-
+   
 };

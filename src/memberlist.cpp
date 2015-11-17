@@ -543,7 +543,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
          QString st = subtitle;
          st = st.trimmed();
 
-         if (!st.isEmpty()) {
+         if (! st.isEmpty()) {
             ol.startMemberSubtitle();
             ol.generateDoc("[generated]", -1, ctx, QSharedPointer<MemberDef>(), subtitle, false, false, 0, false, false);
             ol.endMemberSubtitle();
@@ -572,7 +572,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
                if (! mg.documentation().isEmpty()) {
                   ol.startMemberGroupDocs();
-                  ol.generateDoc("[generated]", -1, ctx, QSharedPointer<MemberDef>(), mg.documentation() + "\n", false, false);
+                  ol.generateDoc(mg.docFile(), mg.docLine(), ctx, QSharedPointer<MemberDef>(), mg.documentation() + "\n", false, false);
                   ol.endMemberGroupDocs();
                }
                ol.startMemberGroup();

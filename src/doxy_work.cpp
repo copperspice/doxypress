@@ -3945,9 +3945,9 @@ if (name.contains("fake") || name.contains("isChopped")) {
                mtype, root->tArgLists ? &root->tArgLists->last() : 0, &root->argList);
 
 
-printf("\n BROOM (dw 3960)  method: %s   ", csPrintable(root->name) );
-printf("\n BROOM (dw 3960)  brief:%s     ", csPrintable(root->brief) );
-printf("\n BROOM (dw 3961)  details:%s \n", csPrintable(root->doc));
+printf("\n BROOM (dw 3960)  method: %s ",   csPrintable(root->name) );
+printf("\n BROOM (dw 3960)  brief:%s   ",   csPrintable(root->brief) );
+printf("\n BROOM (dw 3961)  details:%s \n", csPrintable(root->doc.left(30)) );
 
 
 
@@ -5790,10 +5790,6 @@ void Doxy_Work::addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<M
    } else {     
       md->setDocumentation(root->doc, root->docFile, root->docLine);
       md->setDocsForDefinition(! root->proto);
-
-
-//  BROOM maybe
-
 
       md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
 

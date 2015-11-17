@@ -21,11 +21,11 @@
 #include <config.h>
 #include <commentscan.h>
 #include <code.h>
+#include <defargs.h>
 #include <doxy_globals.h>
 #include <entry.h>
-#include <message.h>
-#include <defargs.h>
 #include <language.h>
+#include <message.h>
 #include <parser_clang.h>
 #include <parser_cstyle.h>
 #include <util.h>
@@ -102,6 +102,7 @@ static QString          formulaText;
 static bool             useOverrideCommands = false;
 
 static SrcLangExt       language;
+
 static bool             insideIDL    = false;       //!< processing IDL code?
 static bool             insideJava   = false;       //!< processing Java code?
 static bool             insideCSharp = false;       //!< processing C# code?
@@ -208,7 +209,7 @@ static void initParser()
   insideCode     = false;
 
    insideCli = Config::getBool("cpp-cli-support");
-  
+
    firstTypedefEntry = QSharedPointer<Entry>();
    previous          = QSharedPointer<Entry>();
    tempEntry         = QSharedPointer<Entry>();
@@ -416,7 +417,7 @@ static void prependScope()
    }
 }
 
-/*! Returns true iff the current entry could be a K&R style C function */
+/*! Returns true if the current entry could be a K&R style C function */
 static bool checkForKnRstyleC()
 {
    if (yyFileName.right(2).toLower() != ".c") {
@@ -430,8 +431,9 @@ static bool checkForKnRstyleC()
    }
 
    for (auto a : current->argList) {
-      // K&R style arguments do not have a type, but DoxyPress expects a type
-      // so it will think the argument has no name
+      // K&R style arguments do not have a type 
+      // DoxyPress expects a type so it will think the argument has no name
+
       if (a.type.isEmpty() || ! a.name.isEmpty()) {
          return false;
       }
@@ -1336,37 +1338,37 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <ObjCParamType>[^()]*         {
-                       QString text = QString::fromUtf8(yytext); 
-                       current->argList.last().type += QString(text).trimmed();
+      QString text = QString::fromUtf8(yytext); 
+      current->argList.last().type += QString(text).trimmed();
    }
 
 <ObjCMethod,ObjCParams>";"       { 
       // end of method declaration
-                 if (! current->argList.isEmpty() && current->argList.last().type.isEmpty())
-                 {
-                   current->argList.last().type="id";
-                 }
-                    current->args = argListToString(&current->argList);
-                 //printf("argList=%s\n",current->args.data());
-                    unput(';');
-                    BEGIN( Function );
+      if (! current->argList.isEmpty() && current->argList.last().type.isEmpty()) {
+         current->argList.last().type = "id";
+      }
+
+      current->args = argListToString(&current->argList);
+
+      unput(';');
+      BEGIN( Function );
    }
 
 <ObjCMethod,ObjCParams>(";"{BN}+)?"{"  { 
       // start of a method body
       lineCount();
              
-                 if (! current->argList.isEmpty() && current->argList.last().type.isEmpty())
-                 {
-                   current->argList.last().type = "id";
-                 }
-                    current->args = argListToString(&current->argList);
-                 unput('{');
-                    BEGIN( Function );
+      if (! current->argList.isEmpty() && current->argList.last().type.isEmpty()) {
+         current->argList.last().type = "id";
+      }
+      
+      current->args = argListToString(&current->argList);
+      unput('{');
+      BEGIN( Function );
    }
 
 <FindMembers>{BN}{1,80}               {
-                    lineCount();
+      lineCount();
    }
 
 <FindMembers>"@"({ID}".")*{ID}{BN}*"("    {
@@ -3590,7 +3592,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          BEGIN(DocBlock);
       }
    }
-
+  
 <MemberSpec,FindFields,FindMembers,NextSemi,EnumBaseType,BitFields,ReadInitializer,OldStyleArgs>","{BN}*("/**"|"//!"|"/*!"|"///")"<" {
       // */ (editor syntax fix)
       
@@ -4836,7 +4838,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <ReadBody,ReadNSBody,ReadBodyIntf>"//".*     { 
       // read a comment 
 
-      QString text = QString::fromUtf8(yytext);   
+      QString text = QString::fromUtf8(yytext);     
       current->m_program += text; 
    }
 
@@ -7744,7 +7746,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->docLine = yyLineNr;
       current->docFile = yyFileName;
       s_docBlockContext  = YY_START;
-      s_docBlockInBody   = YY_START==SkipCurly; 
+      s_docBlockInBody   = YY_START == SkipCurly; 
 
       static bool javadocAutoBrief = Config::getBool("javadoc-auto-brief");
       s_docBlockAutoBrief = javadocAutoBrief;     
@@ -7944,10 +7946,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <DocLine>[^\n]*/"\n"          { 
       // whole line
       QString text = QString::fromUtf8(yytext);
+
       s_docBlock += text;
       handleCommentBlock(s_docBlock, current->brief.isEmpty());
       BEGIN( s_docBlockContext );
    }
+
 
  /* ---- Comments blocks ------ */
 <DocBlock>"*"*"*/"         { 
@@ -8475,11 +8479,16 @@ static void handleCommentBlock(const QString &doc, bool brief)
       docEntry->inbodyLine = lineNr;
    }
 
-   bool isBrief = s_docBlockInBody ? false : brief;
-   bool isJavaDocStyle = s_docBlockInBody ? false : s_docBlockAutoBrief;
+   bool isBrief = false;
+   bool isJavaDocStyle = false;
+
+   if (! s_docBlockInBody) {
+      isBrief = brief;
+      isJavaDocStyle = s_docBlockAutoBrief;
+   }
 
    while (parseCommentBlock(g_thisParser, docEntry, stripIndentation(doc), yyFileName,
-                            lineNr, isBrief,  isJavaDocStyle, s_docBlockInBody,               
+                            lineNr, isBrief, isJavaDocStyle, s_docBlockInBody,               
                             protection, position, needsEntry) ) {   // last 3 are passed by reference
 
       if (needsEntry) {

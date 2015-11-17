@@ -2728,6 +2728,7 @@ YY_DECL {
                g_defVal += text[0];
             }
             YY_BREAK
+
          case 75:
 
          case 76:
@@ -2736,16 +2737,16 @@ YY_DECL {
             {
                QString text = QString::fromUtf8(pyscannerYYtext);
 
-               if (g_braceCount == 0) // end of default argument
-               {
+               if (g_braceCount == 0) {
+                  // end of default argument
+               
                   if (! current->argList.isEmpty()) {
                      current->argList.last().defval = g_defVal.trimmed();
                   }
 
                   BEGIN(FunctionParams);
 
-               } else // continue
-               {
+               } else {
                   g_braceCount--;
                   g_defVal += text[0];
                }

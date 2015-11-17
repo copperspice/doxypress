@@ -1911,6 +1911,7 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
             out.writeString(splitText.left(i + offset), keepSpaces);
             out.writeBreak(indentLevel == 0 ? 0 : indentLevel + 1);
             out.writeString(splitText.right(splitLength - i - offset), keepSpaces);
+
             floatingIndex = splitLength - i - offset + matchLen;
 
          } else {
@@ -1919,6 +1920,7 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
 
       } else {         
          out.writeString(text.mid(skipIndex, newIndex - skipIndex), keepSpaces);
+
       }
 
       // get word from string
@@ -2004,7 +2006,7 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
       // set next start point in the string     
       skipIndex = index = newIndex + matchLen;
    }
-  
+
    out.writeString(text.right(text.length() - skipIndex), keepSpaces);
 }
 
@@ -5295,7 +5297,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
                      QSharedPointer<MemberGroup> mg = (*ppMemberGroupSDict)->find(groupId);
 
                      if (mg == nullptr) {
-                        mg = QMakeShared<MemberGroup>(context, groupId, info->header, info->doc, info->docFile);
+                        mg = QMakeShared<MemberGroup>(context, groupId, info->header, info->doc, info->docFile, info->docLine);
                         (*ppMemberGroupSDict)->insert(groupId, mg);
                      }
 
@@ -5321,7 +5323,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
             QSharedPointer<MemberGroup> mg = (*ppMemberGroupSDict)->find(groupId);
 
             if (mg == nullptr) {
-               mg = QSharedPointer<MemberGroup>(new MemberGroup( context, groupId, info->header, info->doc, info->docFile));
+               mg = QMakeShared<MemberGroup>(context, groupId, info->header, info->doc, info->docFile, info->docLine);
                (*ppMemberGroupSDict)->insert(groupId, mg);
             }
 

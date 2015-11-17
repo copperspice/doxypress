@@ -3315,7 +3315,7 @@ static bool handleCopyDetails(const QString &);
 static bool handleParBlock(const QString &);
 static bool handleEndParBlock(const QString &);
 
-typedef bool (*DocCmdFunc)(const QString &name);
+using DocCmdFunc = bool (*)(const QString &name);
 
 struct DocCmdMap {
    const char *cmdName;
@@ -3336,7 +3336,7 @@ static DocCmdMap docCmdMap[] = {
    { "overload",        &handleOverload,         FALSE },
    { "enum",            &handleEnum,             FALSE },
    { "defgroup",        &handleDefGroup,         FALSE },
-   { "group",           &handleDefGroup,         FALSE },
+   { "group",           &handleDefGroup,         FALSE },      
    { "addtogroup",      &handleAddToGroup,       FALSE },
    { "weakgroup",       &handleWeakGroup,        FALSE },
    { "namespace",       &handleNamespace,        FALSE },
@@ -3558,7 +3558,7 @@ class GuardedSection
 void openGroup(QSharedPointer<Entry> e, const QString &file, int line);
 void closeGroup(QSharedPointer<Entry> e, const QString &file, int line, bool foundInline = FALSE);
 void initGroupInfo(QSharedPointer<Entry> e);
-static void groupAddDocs(QSharedPointer<Entry> e, const QString &fileName);
+static void groupAddDocs(QSharedPointer<Entry> e);
 
 static ParserInterface *langParser;          // the language parser that is calling us
 static QString          inputString;         // input string
@@ -3566,7 +3566,7 @@ static int		         inputPosition;       // read pointer
 static QString     	   yyFileName;          // file name that is read from
 static int		         yyLineNr;            // line number in the input
 static bool             inBody;              // was the comment found inside the body of a function?
-static OutputContext    inContext;           // are we inside the brief, details or xref part
+static OutputContext    inContext;           // are we inside the brief, details, or xref part
 static bool             briefEndsAtDot;      // does the brief description stop at a dot?
 static QString          formulaText;         // Running text of a formula
 static QString          formulaEnv;          // environment name
@@ -3581,7 +3581,6 @@ static bool             enabledSectionFound;
 static QString          functionProto;       // function prototype
 
 static QStack<GuardedSection *> guards;      // tracks nested conditional sections (if,ifnot,..)
-
 static QSharedPointer<Entry>	current;       // working entry
 
 static bool             needNewEntry;
@@ -3741,7 +3740,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       int itemId  = refList->addRefItem();
      
       // if we have already an item from the same list type (e.g. a second @todo)
-      // in the same Entry (i.e. lii!=0) then we reuse its link anchor.
+      // in the same Entry then we reuse its link anchor.
 
       QString anchorLabel = QString("_%1%2").arg(listName).arg(itemId, 6, 10, QChar('0'));
 
@@ -3770,13 +3769,15 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       if (si) {
          if (si->lineNr != -1) {
             warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)", 
-                                     qPrintable(anchorLabel), qPrintable(si->fileName), si->lineNr);
+                     csPrintable(anchorLabel), csPrintable(si->fileName), si->lineNr);
+
          } else {
-            warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s)", qPrintable(anchorLabel), qPrintable(si->fileName));
+            warn(listName, yyLineNr, "multiple use of section label '%s', (first occurrence: %s)", 
+                     csPrintable(anchorLabel), csPrintable(si->fileName));
          }
 
       } else {
-         si = QSharedPointer<SectionInfo>(new SectionInfo(listName, yyLineNr, anchorLabel, g_sectionTitle, SectionInfo::Anchor, g_sectionLevel));
+         si = QMakeShared<SectionInfo>(listName, yyLineNr, anchorLabel, g_sectionTitle, SectionInfo::Anchor, g_sectionLevel);
          Doxy_Globals::sectionDict->insert(anchorLabel, si);
          docEntry->anchors->append(*si);
       }
@@ -3810,8 +3811,7 @@ static QString addFormula()
 
    }
 
-   int i;
-   for (i = 0; i < formulaNewLines; i++) {
+   for (int i = 0; i < formulaNewLines; i++) {
       formLabel += "@_fakenl";   // add fake newlines to
    }
 
@@ -3827,6 +3827,7 @@ static SectionInfo::SectionType sectionLevelToType(int level)
    if (level >= 0 && level < 5) {
       return (SectionInfo::SectionType)level;
    }
+
    return SectionInfo::Anchor;
 }
 
@@ -3968,7 +3969,7 @@ static inline void setOutput(OutputContext ctx)
 
          } else {
             pOutputString = &current->doc;
-            inContext = OutputDoc; // need to switch to detailed docs, see bug 631380
+            inContext = OutputDoc;             // need to switch to detailed docs, see bug 631380
          }
          break;
 
@@ -3982,7 +3983,6 @@ static inline void setOutput(OutputContext ctx)
          pOutputString = &current->inbodyDocs;
          break;
    }
-
 }
 
 // add a string to the output
@@ -4386,8 +4386,15 @@ YY_DECL {
 
    do_action:	/* This label is used only to access EOF actions. */
 
+
+if (inputString.contains("bb documentation") ) { 
+   printf("\n BROOM (switch) %d", yy_act);
+}
+
+
       switch ( yy_act ) {
          /* beginning of action switch */
+
          case 1:
             YY_RULE_SETUP
 
@@ -4593,7 +4600,7 @@ YY_DECL {
                      setOutput(OutputDoc);
                   }
 
-                  if (cmdPtr->func && cmdPtr->func(cmdName)) {
+                  if (cmdPtr->func != nullptr && cmdPtr->func(cmdName)) {
                      // implicit split of the comment block into two entries. 
                      // Restart the next block at the start of this command.
                      parseMore = TRUE;               
@@ -4601,7 +4608,7 @@ YY_DECL {
                      inputPosition = prevPosition + (int)(yy_bp - YY_CURRENT_BUFFER_LVALUE->yy_ch_buf);
                      yyterminate();
 
-                  } else if (cmdPtr->func == 0) {
+                  } else if (cmdPtr->func == nullptr) {
                      // command without handler, to be processed later by parserdoc.cpp
                      addOutput(text);
                   }
@@ -5912,8 +5919,7 @@ YY_DECL {
                QString text = QString::fromUtf8(commentscanYYtext); 
                warn(yyFileName, yyLineNr, "\\subpage command has no label");
 
-               if (text[0] == '\n')
-               {
+               if (text[0] == '\n') {
                   yyLineNr++;
                }
                addOutput('\n');
@@ -7933,6 +7939,10 @@ static bool handleBrief(const QString &)
 
 static bool handleFn(const QString &)
 {
+
+printf("\n PERTH do we get here?  MEMBERDOC_SEC");
+
+
    bool stop = makeStructuralIndicator(Entry::MEMBERDOC_SEC);
    functionProto.resize(0);
    braceCount = 0;
@@ -8002,6 +8012,10 @@ static bool handlePackage(const QString &)
 
 static bool handleClass(const QString &)
 {
+
+printf("\n  PERTH  do we get here?  CLASSDOC_SEC");
+
+
    bool stop = makeStructuralIndicator(Entry::CLASSDOC_SEC);
    BEGIN( ClassDocArg1 );
    return stop;
@@ -8107,8 +8121,9 @@ static bool handleExample(const QString &)
 static bool handleDetails(const QString &)
 {
    if (inContext != OutputBrief) {
-      addOutput("\n\n"); // treat @details outside brief description
-      // as a new paragraph
+      addOutput("\n\n"); 
+
+      // treat @details outside brief description as a new paragraph
    }
    setOutput(OutputDoc);
    return FALSE;
@@ -8567,7 +8582,15 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    inBody         = isInbody;
 
    outputXRef.resize(0);
-   setOutput( isBrief || isAutoBriefOn ? OutputBrief : OutputDoc );
+
+   if (isBrief || isAutoBriefOn) {
+      setOutput(OutputBrief);
+
+   } else {
+      setOutput(OutputDoc);
+   }
+
+
    briefEndsAtDot = isAutoBriefOn;
 
    g_condCount    = 0;
@@ -8588,14 +8611,13 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    commentscanYYrestart( commentscanYYin );
    BEGIN(Comment);
 
+
+printf("\n\n  * * BROOM (pre scan)  %s", csPrintable(comment) );
+
    commentscanYYlex();
 
+
    setOutput(OutputDoc);
-
-
-printf("BROOM  (commentScan - result)  %s  name: %s\n", csPrintable(current->brief), csPrintable(current->name) );
-
-
 
    if (YY_START == OverloadParam) { 
       // comment ended with \overload
@@ -8635,7 +8657,7 @@ printf("BROOM  (commentScan - result)  %s  name: %s\n", csPrintable(current->bri
    checkFormula();
    prot = protection;
 
-   groupAddDocs(curEntry, fileName);
+   groupAddDocs(curEntry);
 
    newEntryNeeded = needNewEntry;
 
@@ -8748,15 +8770,18 @@ void openGroup(QSharedPointer<Entry> e, const QString &, int)
    }
 }
 
-void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int, bool foundInline)
+void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool foundInline)
 {   
-   if (g_memberGroupId != DOX_NOGROUP) { // end of member group
+   if (g_memberGroupId != DOX_NOGROUP) { 
+      // end of member group
 
       QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict.value(g_memberGroupId);
 
-      if (info) { // known group
+      if (info) { 
+         // known group
          info->doc = g_memberGroupDocs;
          info->docFile = fileName;
+         info->docLine = line;
       }
 
       g_memberGroupId = DOX_NOGROUP;  
@@ -8766,10 +8791,11 @@ void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int, bool foun
       if (! foundInline) {
          e->mGrpId = DOX_NOGROUP;
       }
-      
-  
-   } else if (!g_autoGroupStack.isEmpty()) { // end of auto group
+        
+   } else if (! g_autoGroupStack.isEmpty()) { 
+      // end of auto group
       Grouping *grp = g_autoGroupStack.pop();
+
       // see bug577005: we should not remove the last group for e
       if (! foundInline) {
          e->groups->removeLast();
@@ -8792,7 +8818,7 @@ void initGroupInfo(QSharedPointer<Entry> e)
    }
 }
 
-static void groupAddDocs(QSharedPointer<Entry> e, const QString &fileName)
+static void groupAddDocs(QSharedPointer<Entry> e)
 {
    if (e->section == Entry::MEMBERGRP_SEC) {
       g_memberGroupDocs = e->brief.trimmed();
@@ -8808,7 +8834,8 @@ static void groupAddDocs(QSharedPointer<Entry> e, const QString &fileName)
 
       if (info) {
          info->doc = g_memberGroupDocs;
-         info->docFile = fileName;
+         info->docFile = e->docFile;
+         info->docLine = e->docLine;
          info->setRefItems(e->sli);
       }
 
@@ -8822,24 +8849,29 @@ static void handleGuard(const QString &expr)
    CondParser prs;
    bool sectionEnabled = prs.parse(yyFileName, yyLineNr, expr.trimmed());
    bool parentEnabled = TRUE;
-   if (!guards.isEmpty()) {
+
+   if (! guards.isEmpty()) {
       parentEnabled = guards.top()->isEnabled();
    }
+
    if (parentEnabled) {
-      if (
-         (sectionEnabled && guardType == Guard_If) ||
-         (!sectionEnabled && guardType == Guard_IfNot)
-      ) { // section is visible
+      if ( (sectionEnabled && guardType == Guard_If) || (!sectionEnabled && guardType == Guard_IfNot)) { 
+         // section is visible
          guards.push(new GuardedSection(TRUE, TRUE));
          enabledSectionFound = TRUE;
          BEGIN( GuardParamEnd );
-      } else { // section is invisible
+
+      } else { 
+         // section is invisible
          if (guardType != Guard_Skip) {
             guards.push(new GuardedSection(FALSE, TRUE));
          }
+
          BEGIN( SkipGuardedSection );
       }
-   } else { // invisible because of parent
+
+   } else { 
+      // invisible because of parent
       guards.push(new GuardedSection(FALSE, FALSE));
       BEGIN( SkipGuardedSection );
    }

@@ -35,7 +35,8 @@ MemberGroup::MemberGroup()
 {
 }
 
-MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const QString &hdr, const QString &d, const QString &docFile)
+MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const QString &hdr, const QString &d, 
+                  const QString &docFile, int docLine)
    : m_parent(parent)
 {   
    memberList      = QMakeShared<MemberList>(MemberListType_memberGroup);
@@ -48,6 +49,7 @@ MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const QStrin
    m_numDocMembers = -1;
    
    m_docFile       = docFile;
+   m_docLine       = docLine;
    m_xrefListItems = 0;   
 }
 
