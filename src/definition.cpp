@@ -517,7 +517,7 @@ void Definition::_setDocumentation(const QString &tDoc, const QString &docFile, 
 
    if (! _docsAlreadyAdded(doc, m_private->docSignatures)) {
      
-      if (m_private->details == 0) {
+      if (m_private->details == nullptr) {
          m_private->details = new DocInfo;
       }
 
@@ -1217,7 +1217,6 @@ bool Definition::hasUserDocumentation() const
 
    return hasDocs;
 }
-
 
 void Definition::addSourceReferencedBy(QSharedPointer<MemberDef> md)
 {

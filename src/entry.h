@@ -393,6 +393,7 @@ class Entry
             return "unknown group command";
       }
    }
+
    Grouping::GroupPri_t groupingPri() const {
       if ( section != GROUPDOC_SEC ) {
          return Grouping::GROUPING_LOWEST;

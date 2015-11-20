@@ -187,28 +187,28 @@ static void yyunput (QChar c, char *yy_bp )
 
 static void initParser()
 {
-  sectionLabel.resize(0);
-  sectionTitle.resize(0);
-  baseName.resize(0);
-  formulaText.resize(0);
+   sectionLabel.resize(0);
+   sectionTitle.resize(0);
+   baseName.resize(0);
+   formulaText.resize(0);
+   
+   protection = Public;
+   baseProt   = Public;
+   sharpCount = 0;
+   roundCount = 0;
+   curlyCount = 0;
+   mtype      = MethodTypes::Method;
+   gstat      = false;
+   virt       = Normal;
+   baseVirt   = Normal;
+   isTypedef  = false;
 
-  protection = Public;
-  baseProt   = Public;
-  sharpCount = 0;
-  roundCount = 0;
-  curlyCount = 0;
-  mtype      = MethodTypes::Method;
-  gstat      = false;
-  virt       = Normal;
-  baseVirt   = Normal;
-  isTypedef  = false;
+   autoGroupStack.clear();
+   insideTryBlock = false;
+   insideFormula  = false;
+   insideCode     = false;
 
-  autoGroupStack.clear();
-  insideTryBlock = false;
-  insideFormula  = false;
-  insideCode     = false;
-
-   insideCli = Config::getBool("cpp-cli-support");
+   insideCli      = Config::getBool("cpp-cli-support");
 
    firstTypedefEntry = QSharedPointer<Entry>();
    previous          = QSharedPointer<Entry>();
@@ -221,6 +221,7 @@ static void initEntry()
   if (insideJava)  {
     protection = (current_root->m_specFlags.spec & (Entry::Interface | Entry::Enum)) ? Public : Package;
   }
+
   current->protection = protection;
   current->mtype      = mtype;
   current->virt       = virt;
@@ -857,26 +858,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <SkipCurlyBlock>"{"   {
-                    ++curlyCount ;
+      ++curlyCount ;
    }
 
 <SkipCurlyBlock>"}"        {
-                 if( curlyCount ) {
-                   --curlyCount ;
-                 } else if (needsSemi) {
-                   BEGIN( NextSemi );
-                 }
-                 else
-                 {
-                   BEGIN( FindMembers );
-                 }
+      if( curlyCount ) {
+       --curlyCount ;
+      } else if (needsSemi) {
+       BEGIN( NextSemi );
+      }
+      else
+      {
+       BEGIN( FindMembers );
+      }
    }
 
 <NextSemi>\'     {
-                   if (insidePHP) {
-                    lastStringContext=NextSemi;
-                    BEGIN(SkipPHPString);
-                   }
+      if (insidePHP) {
+         lastStringContext=NextSemi;
+         BEGIN(SkipPHPString);
+      }
    }
 
 <NextSemi>{CHARLIT}        { 
@@ -886,23 +887,23 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <NextSemi>\"            {
-                    lastStringContext=NextSemi;
-                 BEGIN(SkipString);
+      lastStringContext=NextSemi;
+      BEGIN(SkipString);
    }
 
 <NextSemi>[;,]             {
-                    unput(*yytext);
-                    BEGIN( FindMembers );
+      unput(*yytext);
+      BEGIN( FindMembers );
                }
 <BitFields>[;,]            {
-                    unput(*yytext);
-                 BEGIN( FindMembers );
+      unput(*yytext);
+      BEGIN( FindMembers );
    }
 
 <EnumBaseType>[{;,]                     {
-                 current->args = current->args.simplified();
-                 unput(*yytext);
-                 BEGIN( ClassVar );
+      current->args = current->args.simplified();
+      unput(*yytext);
+      BEGIN( ClassVar );
    }                                        
 
 <FindMembers>"<?php"   { 
@@ -936,23 +937,23 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>"?>"|"</script>"           { 
       // PHP code end
-                 if (insidePHP)
-                   BEGIN( FindMembersPHP );
-                 else
-                   REJECT;
+      if (insidePHP)
+         BEGIN( FindMembersPHP );
+      else
+         REJECT;
    }
 
 <FindMembers>{PHPKW}          { 
       if (insidePHP)
-                   BEGIN( NextSemi );
-                 else
-                   REJECT;
+         BEGIN( NextSemi );
+      else
+         REJECT;
    }
 
 <FindMembers>"%{"[^\n]*          { 
       // Mozilla XPIDL lang-specific block
-                 if (!insideIDL)
-                   REJECT;
+      if (!insideIDL)
+         REJECT;
    }
 
 <FindMembers>"%}"          { 
@@ -964,161 +965,158 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>{B}*("properties"){BN}*":"{BN}*  { 
       // IDL or Borland C++ builder property
-                 current->mtype = mtype = MethodTypes::Property;
-                 current->protection = protection = Public ;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount() ;
+      current->mtype = mtype = MethodTypes::Property;
+      current->protection = protection = Public ;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount() ;
    }
 
 <FindMembers>{B}*"k_dcop"{BN}*":"{BN}*  {
-                 current->mtype = mtype = MethodTypes::DCOP;
-                 current->protection = protection = Public ;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount() ;
+      current->mtype = mtype = MethodTypes::DCOP;
+      current->protection = protection = Public ;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount() ;
    }
 
 <FindMembers>{B}*("signals"|"Q_SIGNALS"){BN}*":"{BN}* {
-                 current->mtype = mtype = MethodTypes::Signal;
-                 current->protection = protection = Public ;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount() ;
+      current->mtype = mtype = MethodTypes::Signal;
+      current->protection = protection = Public ;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount() ;
    }
 
 <FindMembers>{B}*"public"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
-                 current->mtype = mtype = MethodTypes::Slot;
-                 current->protection = protection = Public ;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount();
+      current->mtype = mtype = MethodTypes::Slot;
+      current->protection = protection = Public ;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount();
    }
 
 <FindMembers>{B}*"protected"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
-                 current->protection = protection = Protected ;
-                 current->mtype = mtype = MethodTypes::Slot;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount();
+      current->protection = protection = Protected ;
+      current->mtype = mtype = MethodTypes::Slot;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount();
    }
 
 <FindMembers>{B}*"private"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
-                 current->protection = protection = Private ;
-                 current->mtype = mtype = MethodTypes::Slot;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount();
+      current->protection = protection = Private ;
+      current->mtype = mtype = MethodTypes::Slot;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount();
    }
 
 <FindMembers>{B}*("public"|"methods"|"__published"){BN}*":"{BN}* {
-                 current->protection = protection = Public ;
-                 current->mtype = mtype = MethodTypes::Method;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount() ;
+      current->protection = protection = Public ;
+      current->mtype = mtype = MethodTypes::Method;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount() ;
    }
 
 <FindMembers>{B}*"internal"{BN}*":"{BN}* {  
       // for now treat C++/CLI's internal as package...
       if (insideCli) {
-                   current->protection = protection = Package ;
-                   current->mtype = mtype = MethodTypes::Method;
-                   current->type.resize(0);
-                   current->name.resize(0);
-                   current->args.resize(0);
-                   current->argList.clear();
-                   lineCount() ;
-                 }
-                 else
-                 {
-                   REJECT;
-                 }
+         current->protection = protection = Package ;
+         current->mtype = mtype = MethodTypes::Method;
+         current->type.resize(0);
+         current->name.resize(0);
+         current->args.resize(0);
+         current->argList.clear();
+         lineCount() ;
+
+      } else {
+         REJECT;
+      }
    }
 
 <FindMembers>{B}*"protected"{BN}*":"{BN}* {
-                    current->protection = protection = Protected ;
-                 current->mtype = mtype = MethodTypes::Method;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount() ;
+      current->protection = protection = Protected ;
+      current->mtype = mtype = MethodTypes::Method;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount() ;
    }
 
 <FindMembers>{B}*"private"{BN}*":"{BN}*   {
-                    current->protection = protection = Private ;
-                 current->mtype = mtype = MethodTypes::Method;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount() ;
+      current->protection = protection = Private ;
+      current->mtype = mtype = MethodTypes::Method;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount() ;
    }
 
 <FindMembers>{B}*"event"{BN}+           {
-                    if (insideCli)
-                 {
-                   // C++/CLI event
-                   lineCount() ;
-                      current->mtype = mtype = MethodTypes::Event;
-                   current->bodyLine = yyLineNr;
-                   curlyCount=0;
-                   BEGIN( CliPropertyType );
-                 }
-                 else if (insideCSharp)
-                 {
-                   lineCount() ;
-                      current->mtype = MethodTypes::Event;
-                   current->bodyLine = yyLineNr;
-                 }
-                 else
-                 {
-                   REJECT;
-                 }
+      if (insideCli) {
+         // C++/CLI event
+         lineCount() ;
+          current->mtype = mtype = MethodTypes::Event;
+         current->bodyLine = yyLineNr;
+         curlyCount=0;
+         BEGIN( CliPropertyType );
+         }
+         else if (insideCSharp)
+         {
+         lineCount() ;
+          current->mtype = MethodTypes::Event;
+         current->bodyLine = yyLineNr;
+         }
+         else
+         {
+         REJECT;
+      }
    }
 
 <FindMembers>{B}*"property"{BN}+    {
-                     if (insideCli)
-                  {
-                    // C++/CLI property
-                    lineCount() ;
-                       current->mtype = mtype = MethodTypes::Property;
-                    current->bodyLine = yyLineNr;
-                    curlyCount=0;
-                    BEGIN( CliPropertyType );
-                  }
-                  else
-                  {
-                    REJECT;
-                  }
+      if (insideCli) {
+         // C++/CLI property
+         lineCount() ;
+         current->mtype = mtype = MethodTypes::Property;
+         current->bodyLine = yyLineNr;
+         curlyCount=0;
+         BEGIN( CliPropertyType );
+         }
+         else
+         {
+         REJECT;
+      }
    }
 
 <CliPropertyType>{ID}         {
-                    QString text = QString::fromUtf8(yytext);
-                    addType( current );
-                    current->name = text;
+      QString text = QString::fromUtf8(yytext);
+      addType( current );
+      current->name = text;
    }
 
 <CliPropertyType>"["               { 
       // C++/CLI indexed property
-                 QString text = QString::fromUtf8(yytext);
-                 current->name += text;
-                 BEGIN( CliPropertyIndex );
+      QString text = QString::fromUtf8(yytext);
+      current->name += text;
+      BEGIN( CliPropertyIndex );
    }
 
 <CliPropertyType>"{"          {
@@ -1127,31 +1125,31 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <CliPropertyType>";"          {
-                    unput(*yytext);
-                 BEGIN( FindMembers );
+      unput(*yytext);
+      BEGIN( FindMembers );
    }
 
 <CliPropertyType>\n        {
-                                          lineCount();
+      lineCount();
    }
 
 <CliPropertyType>{B}*         {
    }
 
 <CliPropertyType>.         {
-                    QString text = QString::fromUtf8(yytext);
-                    addType( current );
-                    current->type += text;
+      QString text = QString::fromUtf8(yytext);
+      addType( current );
+      current->type += text;
    }
 
 <CliPropertyIndex>"]"         {
-                    QString text = QString::fromUtf8(yytext);
-                    BEGIN( CliPropertyType );
-                    current->name+=text;
+      QString text = QString::fromUtf8(yytext);
+      BEGIN( CliPropertyType );
+      current->name += text;
                   }
 <CliPropertyIndex>.        {
-                    QString text = QString::fromUtf8(yytext);
-                    current->name+=text;
+      QString text = QString::fromUtf8(yytext);
+      current->name += text;
    }
 
   /*
@@ -1166,62 +1164,62 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
   */
 
 <FindMembers>{B}*"@private"{BN}+    {
-                    current->protection = protection = Private ;
-                 current->mtype = mtype = MethodTypes::Method;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount() ;
+      current->protection = protection = Private ;
+      current->mtype = mtype = MethodTypes::Method;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount() ;
    }
 
 <FindMembers>{B}*"@protected"{BN}+  {
-                    current->protection = protection = Protected ;
-                 current->mtype = mtype = MethodTypes::Method;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount() ;
+      current->protection = protection = Protected ;
+      current->mtype = mtype = MethodTypes::Method;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount() ;
    }
 
 <FindMembers>{B}*"@public"{BN}+  {
-                 current->protection = protection = Public ;
-                 current->mtype = mtype = MethodTypes::Method;
-                 current->type.resize(0);
-                 current->name.resize(0);
-                 current->args.resize(0);
-                 current->argList.clear();
-                 lineCount() ;
+      current->protection = protection = Public ;
+      current->mtype = mtype = MethodTypes::Method;
+      current->type.resize(0);
+      current->name.resize(0);
+      current->args.resize(0);
+      current->argList.clear();
+      lineCount() ;
    }
 
 <FindMembers>[\-+]{BN}*          {
-                 QString text = QString::fromUtf8(yytext);
-
-                 if (! insideObjC) {
-                   REJECT; 
-
-                 } else {
-                   lineCount();
-                   current->fileName    = yyFileName;
-                   current->startLine   = yyLineNr;
-                   current->startColumn = yyColNr;
-                   current->bodyLine    = yyLineNr;
-                   current->section     = Entry::FUNCTION_SEC;
-                   current->protection  = protection = Public;
-
-                   language   = current->lang = SrcLangExt_ObjC;
-                   insideObjC = true;
-
-                   current->virt  = Virtual;
-                   current->stat  = (text[0]=='+');
-                   current->mtype = mtype = MethodTypes::Method;
-                   current->type.resize(0);
-                   current->name.resize(0);
-                   current->args.resize(0);
-                   current->argList.clear();
-                   BEGIN( ObjCMethod );
-                 }
+      QString text = QString::fromUtf8(yytext);
+      
+      if (! insideObjC) {
+       REJECT; 
+      
+      } else {
+       lineCount();
+       current->fileName    = yyFileName;
+       current->startLine   = yyLineNr;
+       current->startColumn = yyColNr;
+       current->bodyLine    = yyLineNr;
+       current->section     = Entry::FUNCTION_SEC;
+       current->protection  = protection = Public;
+      
+       language   = current->lang = SrcLangExt_ObjC;
+       insideObjC = true;
+      
+       current->virt  = Virtual;
+       current->stat  = (text[0]=='+');
+       current->mtype = mtype = MethodTypes::Method;
+       current->type.resize(0);
+       current->name.resize(0);
+       current->args.resize(0);
+       current->argList.clear();
+       BEGIN( ObjCMethod );
+      }
    }
 
 <ObjCMethod>"("            {
@@ -1233,25 +1231,25 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // found method name
       QString text = QString::fromUtf8(yytext);  
 
-                 if (current->type.isEmpty())
-                 {
-                   current->type = "id";
-                 }
-                 current->name = text;
-                                          if (insideCpp || insideObjC)
-                                          {
-                                            current->id = ClangParser::instance()->lookup(yyLineNr, text);
-                                          }
+      if (current->type.isEmpty())
+      {
+      current->type = "id";
+      }
+      current->name = text;
+      if (insideCpp || insideObjC)
+      {
+      current->id = ClangParser::instance()->lookup(yyLineNr, text);
+      }
    }
 
 <ObjCMethod>":"{B}*        { 
       // start of parameter list
-                    current->name += ':';
-
-                 Argument temp;
-                 current->argList.append(temp);
-
-                    BEGIN( ObjCParams );
+      current->name += ':';
+      
+      Argument temp;
+      current->argList.append(temp);
+      
+      BEGIN( ObjCParams );
    }
 
 <ObjCReturnType>[^)]*         { 
@@ -1266,44 +1264,44 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ObjCParams>({ID})?":"        { 
       // Keyword of parameter
-                 QString text = QString::fromUtf8(yytext); 
-
-                 text = text.left(text.length()-1); // strip :
-
-                 if (text.isEmpty())
-                 {
-                   current->name += " :";
-                 }
-                 else
-                 {
-                   current->name += text + ":";
-                 }
-                 if (current->argList.last().type.isEmpty())
-                 {
-                   current->argList.last().type="id";
-                 }
-
-                 Argument a;
-                 a.attrib=(QString)"["+text+"]";
-                 current->argList.append(a);
+      QString text = QString::fromUtf8(yytext); 
+      
+      text = text.left(text.length()-1); // strip :
+      
+      if (text.isEmpty())
+      {
+       current->name += " :";
+      }
+      else
+      {
+       current->name += text + ":";
+      }
+      if (current->argList.last().type.isEmpty())
+      {
+       current->argList.last().type="id";
+      }
+      
+      Argument a;
+      a.attrib=(QString)"["+text+"]";
+      current->argList.append(a);
    }
 
 <ObjCParams>{ID}{BN}*         { 
       // name of parameter
-                    QString text = QString::fromUtf8(yytext); 
-                    lineCount();
-                    current->argList.last().name = QString(text).trimmed();
+      QString text = QString::fromUtf8(yytext); 
+      lineCount();
+      current->argList.last().name = QString(text).trimmed();
    }
 
 <ObjCParams>","{BN}*"..."     { 
       // name of parameter
-                 lineCount();
-                 // do we want the comma as part of the name?
-                 //current->name += ",";
-                 Argument a;
-                 a.attrib="[,]";
-                 a.type="...";
-                 current->argList.append(a);
+      lineCount();
+      // do we want the comma as part of the name?
+      //current->name += ",";
+      Argument a;
+      a.attrib="[,]";
+      a.type="...";
+      current->argList.append(a);
    }
 
    /*
@@ -1313,28 +1311,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    */
 
 <ObjCParams>"("            {
-                 roundCount=0;
-                 current->argList.last().type.resize(0);
-                 BEGIN( ObjCParamType );
+      roundCount=0;
+      current->argList.last().type.resize(0);
+      BEGIN( ObjCParamType );
    }
 
 <ObjCParamType>"("                      {
-                    QString text = QString::fromUtf8(yytext); 
-                    roundCount++;
-                    current->argList.last().type+=text;
+      QString text = QString::fromUtf8(yytext); 
+      roundCount++;
+      current->argList.last().type+=text;
    }
 
 <ObjCParamType>")"/{B}*          {
-                    QString text = QString::fromUtf8(yytext); 
-                    if (roundCount<=0)
-                    {
-                       BEGIN( ObjCParams );
-                    }
-                       else
-                    {
-                       current->argList.last().type += text;
-                       roundCount--;
-                    }
+      QString text = QString::fromUtf8(yytext); 
+
+      if (roundCount <= 0) {
+         BEGIN( ObjCParams );
+      } else {
+         current->argList.last().type += text;
+         roundCount--;
+      }
    }
 
 <ObjCParamType>[^()]*         {
@@ -1372,43 +1368,43 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FindMembers>"@"({ID}".")*{ID}{BN}*"("    {
-                 QString text = QString::fromUtf8(yytext); 
-                 if (insideJava) // Java annotation
-                 {
-                   lineCount();
-                   lastSkipRoundContext = YY_START;
-                   roundCount=0;
-                   BEGIN( SkipRound );
-                 }
-                 else if (text.startsWith("@property")) // ObjC 2.0 property
-                 {
-                   current->mtype = mtype = MethodTypes::Property;
-                   current->m_specFlags.m_isReadable = true;
-                   current->m_specFlags.m_isWritable = true;
-                   current->m_specFlags.m_isAssign = true;
-
-                   current->protection = Public ;
-                   unput('(');
-                   BEGIN( ObjCPropAttr );
-                 }
-                 else
-                 {
-                   REJECT;
-                 }
+      QString text = QString::fromUtf8(yytext); 
+      if (insideJava) // Java annotation
+      {
+      lineCount();
+      lastSkipRoundContext = YY_START;
+      roundCount=0;
+      BEGIN( SkipRound );
+      }
+      else if (text.startsWith("@property")) // ObjC 2.0 property
+      {
+      current->mtype = mtype = MethodTypes::Property;
+      current->m_specFlags.m_isReadable = true;
+      current->m_specFlags.m_isWritable = true;
+      current->m_specFlags.m_isAssign = true;
+      
+      current->protection = Public ;
+      unput('(');
+      BEGIN( ObjCPropAttr );
+      }
+      else
+      {
+      REJECT;
+      }
    }
 
 <ObjCPropAttr>"getter="{ID}      {
-                     QString text = QString::fromUtf8(yytext); 
-                     current->m_read = text.mid(7);
+      QString text = QString::fromUtf8(yytext); 
+      current->m_read = text.mid(7);
    }
 
 <ObjCPropAttr>"setter="{ID}      {
-                     QString text = QString::fromUtf8(yytext);  
-                     current->m_write = text.mid(7);
+      QString text = QString::fromUtf8(yytext);  
+      current->m_write = text.mid(7);
    }
 
 <ObjCPropAttr>"readonly"      {
-                 current->m_specFlags.m_isWritable = false;
+      current->m_specFlags.m_isWritable = false;
    }
 
 <ObjCPropAttr>"readwrite"     { 
@@ -1420,31 +1416,31 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <ObjCPropAttr>"unsafe_unretained"       {
-                 current->m_specFlags.m_isAssign  = false;
-                 current->m_specFlags.spec |=Entry::Unretained;
+      current->m_specFlags.m_isAssign  = false;
+      current->m_specFlags.spec |=Entry::Unretained;
    }
 
 <ObjCPropAttr>"retain"        {
-                 current->m_specFlags.m_isAssign  = false;
-                 current->m_specFlags.spec |=Entry::Retain;
+      current->m_specFlags.m_isAssign  = false;
+      current->m_specFlags.spec |=Entry::Retain;
    }
 
 <ObjCPropAttr>"copy"          {
-                 current->m_specFlags.m_isAssign  = false;
-                 current->m_specFlags.spec |=Entry::Copy;
+      current->m_specFlags.m_isAssign  = false;
+      current->m_specFlags.spec |=Entry::Copy;
    }
 
 <ObjCPropAttr>"weak"                    {
-                 current->m_specFlags.m_isAssign  = false;
-                 current->m_specFlags.spec |=Entry::Weak;
+      current->m_specFlags.m_isAssign  = false;
+      current->m_specFlags.spec |=Entry::Weak;
                                         }
 <ObjCPropAttr>"strong"                  {
-                 current->m_specFlags.m_isAssign  = false;
-                 current->m_specFlags.spec |=Entry::Strong;
+      current->m_specFlags.m_isAssign  = false;
+      current->m_specFlags.spec |=Entry::Strong;
    }
 
 <ObjCPropAttr>"nonatomic"     {
-                 current->m_specFlags.spec |= Entry::NonAtomic;
+      current->m_specFlags.spec |= Entry::NonAtomic;
    }
 
 <ObjCPropAttr>")"          {
@@ -1452,25 +1448,24 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FindMembers>"@"{ID}          {
-                 QString text = QString::fromUtf8(yytext); 
-                 if (insideJava) // Java annotation
-                 {
-                   // skip annotation
-                 }  else if (text == "@property") // ObjC 2.0 property 
-                 {
-                   current->mtype = mtype = MethodTypes::Property;
-                   current->m_specFlags.m_isReadable = true;
-                   current->m_specFlags.m_isWritable = true;
-
-                   current->protection = Public ;
-                 }
-                 else if ( text == "@synthesize") {
-                   BEGIN( ObjCSkipStatement );
-                 } else if (text == "@dynamic") {
-                   BEGIN( ObjCSkipStatement ); 
-                 } else {
-                   REJECT;
-                 }
+      QString text = QString::fromUtf8(yytext); 
+      if (insideJava) // Java annotation
+      {
+      // skip annotation
+      }  else if (text == "@property") // ObjC 2.0 property 
+      {
+      current->mtype = mtype = MethodTypes::Property;
+      current->m_specFlags.m_isReadable = true;
+      current->m_specFlags.m_isWritable = true;
+                         current->protection = Public ;
+      }
+      else if ( text == "@synthesize") {
+      BEGIN( ObjCSkipStatement );
+      } else if (text == "@dynamic") {
+      BEGIN( ObjCSkipStatement ); 
+      } else {
+      REJECT;
+      }
    }
 
 <ObjCSkipStatement>";"        {
@@ -1493,71 +1488,69 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <PackageName>";"        {
-                 current_root->addSubEntry(current, current_root);
-                 current_root = current ;
-
-                 current = QMakeShared<Entry>();
-                 initEntry();
-                 BEGIN(FindMembers);
+      current_root->addSubEntry(current, current_root);
+      current_root = current ;
+      current = QMakeShared<Entry>();
+      initEntry();
+      BEGIN(FindMembers);
    }
 
 <PackageName>"{"        {
-                 curlyCount=0;
-                 BEGIN( ReadNSBody );
+      curlyCount=0;
+      BEGIN( ReadNSBody );
    }
 
 <FindMembers>{B}*"initonly"{BN}+    {
-                    current->type += " initonly ";
-                 if (insideCli) current->m_specFlags.spec |= Entry::Initonly;
-                 lineCount();
+      current->type += " initonly ";
+      if (insideCli) current->m_specFlags.spec |= Entry::Initonly;
+      lineCount();
    }
 
-<FindMembers>{B}*"static"{BN}+         { current->type += " static ";
-                    current->stat = true;
-                 lineCount();
+<FindMembers>{B}*"static"{BN}+         { 
+      current->type += " static ";
+      current->stat = true;
+      lineCount();
    }
 
 <FindMembers>{B}*"extern"{BN}+      {
-                    current->stat = false;
-                 current->explicitExternal = true;
-                 lineCount();
+      current->stat = false;
+      current->explicitExternal = true;
+      lineCount();
    }
 
-<FindMembers>{B}*"virtual"{BN}+        { current->type += " virtual ";
-                 current->virt = Virtual;
-                 lineCount();
+<FindMembers>{B}*"virtual"{BN}+        { 
+      current->type += " virtual ";
+      current->virt = Virtual;
+      lineCount();
    }
 
 <FindMembers>{B}*"published"{BN}+   { 
       // UNO IDL published keyword
-                 if (insideIDL)
-                 {
-                   lineCount();
-                   current->m_specFlags.spec |= Entry::Published;
-                 }
-                 else
-                 {
-                   REJECT;
-                 }
+      if (insideIDL)
+      {
+       lineCount();
+       current->m_specFlags.spec |= Entry::Published;
+      }
+      else
+      {
+       REJECT;
+      }
    }
 
 <FindMembers>{B}*"abstract"{BN}+       {
-      if (!insidePHP) {
-                   current->type += " abstract ";
-                   if (!insideJava)
-                   {
-                        current->virt = Pure;
-                   }
-                   else
-                   {
-                        current->m_specFlags.spec |= Entry::Abstract;
-                   }
-                 }
-                 else
-                 {
-                   current->m_specFlags.spec |= Entry::Abstract;
-                 }
-                 lineCount();
+      if (! insidePHP) {
+         current->type += " abstract ";
+
+         if (! insideJava) {
+            current->virt = Pure; 
+         } else {
+            current->m_specFlags.spec |= Entry::Abstract;
+         }
+
+      } else {
+         current->m_specFlags.spec |= Entry::Abstract;
+      }
+      lineCount();
    }
 
 <FindMembers>{B}*"inline"{BN}+      { 
@@ -1600,113 +1593,112 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FindMembers>{B}*"namespace"{BN}*/[^a-z_A-Z0-9]    {
-                 isTypedef=false;
-                 current->section = Entry::NAMESPACE_SEC;
-                 current->type = "namespace" ;
-                 current->fileName  = yyFileName;
-                 current->startLine = yyLineNr;
-                 current->startColumn = yyColNr;
-                 current->bodyLine  = yyLineNr;
-                 lineCount();
-
-                 if (insidePHP) {
-                    BEGIN( PackageName );
-                 } else {
-                    BEGIN( CompoundName );
-                 }
+      isTypedef = false;
+      current->section = Entry::NAMESPACE_SEC;
+      current->type = "namespace" ;
+      current->fileName  = yyFileName;
+      current->startLine = yyLineNr;
+      current->startColumn = yyColNr;
+      current->bodyLine  = yyLineNr;
+      lineCount();
+      
+      if (insidePHP) {
+      BEGIN( PackageName );
+      } else {
+      BEGIN( CompoundName );
+      }
    }
 
 <FindMembers>{B}*"module"{BN}+      {
-                 lineCount();
-                 if (insideIDL) {
-                   isTypedef=false;
-                   current->section = Entry::NAMESPACE_SEC;
-                   current->type = "module" ;
-                   current->fileName  = yyFileName;
-                   current->startLine = yyLineNr;
-                   current->startColumn = yyColNr;
-                   current->bodyLine  = yyLineNr;
-                   BEGIN( CompoundName );
-                 }
-                 else if (insideD)
-                 {
-                   lineCount();
-                   BEGIN(PackageName);
-                 }
-                 else
-                 {
-                   QString text = QString::fromUtf8(yytext); 
-                   addType( current ) ;
-                   current->name = text.trimmed();
-                 }
+      lineCount();
+      if (insideIDL) {
+      isTypedef = false;
+      current->section = Entry::NAMESPACE_SEC;
+      current->type = "module" ;
+      current->fileName  = yyFileName;
+      current->startLine = yyLineNr;
+      current->startColumn = yyColNr;
+      current->bodyLine  = yyLineNr;
+      BEGIN( CompoundName );
+      }
+      else if (insideD)
+      {
+      lineCount();
+      BEGIN(PackageName);
+      }
+      else
+      {
+      QString text = QString::fromUtf8(yytext); 
+      addType( current ) ;
+      current->name = text.trimmed();
+      }
    }
 
 <FindMembers>{B}*"library"{BN}+     {
-                 lineCount();
-                 if (insideIDL)
-                 {
-                      isTypedef=false;
-                   current->section = Entry::NAMESPACE_SEC;
-                   current->type = "library" ;
-                   current->fileName  = yyFileName;
-                   current->startLine = yyLineNr;
-                   current->startColumn = yyColNr;
-                   current->bodyLine  = yyLineNr;
-                      BEGIN( CompoundName );
-                 }
-                 else
-                 {
-
-                   QString text = QString::fromUtf8(yytext);
-                   addType( current ) ;
-                   current->name = text.trimmed();
-                 }
+      lineCount();
+      if (insideIDL) {
+      isTypedef = false;
+      current->section = Entry::NAMESPACE_SEC;
+      current->type = "library" ;
+      current->fileName  = yyFileName;
+      current->startLine = yyLineNr;
+      current->startColumn = yyColNr;
+      current->bodyLine  = yyLineNr;
+      BEGIN( CompoundName );
+      }
+      else
+      {
+      
+      QString text = QString::fromUtf8(yytext);
+      addType( current ) ;
+      current->name = text.trimmed();
+      }
    }
 
 <FindMembers>{B}*"constants"{BN}+   {  
       // UNO IDL constant group
       lineCount();
       if (insideIDL) {
-                   isTypedef=false;
-                   current->section = Entry::NAMESPACE_SEC;
-                   current->type = "constants";
-                   current->fileName  = yyFileName;
-                   current->startLine = yyLineNr;
-                   current->startColumn = yyColNr;
-                   current->bodyLine  = yyLineNr;
-                   BEGIN( CompoundName );
-                 }
-                 else
-                 {
-                   QString text = QString::fromUtf8(yytext);
-                   addType( current ) ;
-                   current->name = text.trimmed();
-                 }
+      isTypedef = false;
+      current->section = Entry::NAMESPACE_SEC;
+      current->type = "constants";
+      current->fileName  = yyFileName;
+      current->startLine = yyLineNr;
+      current->startColumn = yyColNr;
+      current->bodyLine  = yyLineNr;
+      BEGIN( CompoundName );
+      }
+      else
+      {
+      QString text = QString::fromUtf8(yytext);
+      addType( current ) ;
+      current->name = text.trimmed();
+      }
    }
 
 <FindMembers>{BN}*("service"){BN}+     { 
       // UNO IDL service
-                 lineCount();
-                 if (insideIDL)
-                 {
-                   isTypedef=false;
-                   current->section = Entry::CLASS_SEC;
-                   current->m_specFlags.spec = Entry::Service |
-                     // preserve UNO IDL [optional] or published
-                     (current->m_specFlags.spec & (Entry::Optional|Entry::Published));
-                   addType( current ) ;
-                   current->type += " service " ;
-                   current->fileName  = yyFileName;
-                   current->startLine = yyLineNr;
-                   current->bodyLine  = yyLineNr;
-                   BEGIN( CompoundName );
-                 }
-                 else // TODO is addType right? just copy/pasted
-                 {
-                   QString text = QString::fromUtf8(yytext);
-                   addType( current ) ;
-                   current->name = text.trimmed();
-                 }
+      lineCount();
+      if (insideIDL)
+      {
+      isTypedef = false;
+      current->section = Entry::CLASS_SEC;
+      current->m_specFlags.spec = Entry::Service |
+      // preserve UNO IDL [optional] or published
+      (current->m_specFlags.spec & (Entry::Optional|Entry::Published));
+      addType( current ) ;
+      current->type += " service " ;
+      current->fileName  = yyFileName;
+      current->startLine = yyLineNr;
+      current->bodyLine  = yyLineNr;
+      BEGIN( CompoundName );
+      }
+      else // TODO is addType right? just copy/pasted
+      {
+      QString text = QString::fromUtf8(yytext);
+      addType( current ) ;
+      current->name = text.trimmed();
+      }
    }
 
 <FindMembers>{BN}*("singleton"){BN}+   { 
@@ -1714,7 +1706,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                  lineCount();
                  if (insideIDL)
                  {
-                   isTypedef=false;
+                   isTypedef = false;
                    current->section = Entry::CLASS_SEC;
                    current->m_specFlags.spec = Entry::Singleton | (current->m_specFlags.spec & Entry::Published); // preserve
                    addType( current ) ;
@@ -1739,7 +1731,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       lineCount();
 
       if (insideIDL || insideJava || insideCSharp || insideD || insidePHP) {
-                   isTypedef=false;
+                   isTypedef = false;
                    current->section = Entry::CLASS_SEC;
 
                    current->m_specFlags.spec = Entry::Interface |
@@ -1764,7 +1756,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"@implementation"{BN}+   { 
       // Objective-C class implementation
                  lineCount();
-                    isTypedef=false;
+                    isTypedef = false;
                  current->section = Entry::OBJCIMPL_SEC;
                  language = current->lang = SrcLangExt_ObjC;
                  insideObjC = true;
@@ -1780,7 +1772,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"@interface"{BN}+  { 
       // Objective-C class interface, or Java attribute
                  lineCount();
-                    isTypedef=false;
+                    isTypedef = false;
                  current->section = Entry::CLASS_SEC;
                                           current->m_specFlags.spec = Entry::Interface;
                  if (!insideJava)
@@ -1801,7 +1793,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"@protocol"{BN}+   { 
    // Objective-C protocol definition
                  lineCount();
-                    isTypedef=false;
+                    isTypedef = false;
                  current->section = Entry::CLASS_SEC;
                  current->m_specFlags.spec = Entry::Protocol;
                  language = current->lang = SrcLangExt_ObjC;
@@ -1818,7 +1810,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>{B}*"exception"{BN}+   { 
       // Corba IDL exception
-                 isTypedef=false;
+                 isTypedef = false;
                  current->section = Entry::CLASS_SEC;
                  current->m_specFlags.spec = Entry::Exception | (current->m_specFlags.spec & Entry::Published); // preserve UNO IDL
                  addType( current ) ;
@@ -1882,7 +1874,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"value class{" |         // C++/CLI extension
 <FindMembers>{B}*"value class"{BN}+     {
                  QString text = QString::fromUtf8(yytext);
-                 isTypedef=false;
+                 isTypedef = false;
                  current->section = Entry::CLASS_SEC;
                  current->m_specFlags.spec = Entry::Value;
                  addType( current ) ;
@@ -1901,7 +1893,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"ref class{" |          // C++/CLI extension
 <FindMembers>{B}*"ref class"{BN}+       {
                  QString text = QString::fromUtf8(yytext); 
-                 isTypedef=false;
+                 isTypedef = false;
                  current->section = Entry::CLASS_SEC;
                  current->m_specFlags.spec = Entry::Ref;
                  addType( current ) ;
@@ -1939,7 +1931,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"coclass"{BN}+     {
                  QString text = QString::fromUtf8(yytext);
                  if (insideIDL) {
-                   isTypedef=false;
+                   isTypedef = false;
                    current->section = Entry::CLASS_SEC;
                    addType( current ) ;
                    current->type += " coclass" ;
@@ -1997,7 +1989,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"value struct{" |      // C++/CLI extension
 <FindMembers>{B}*"value struct"{BN}+     {
                  QString text = QString::fromUtf8(yytext);
-                 isTypedef=false;
+                 isTypedef = false;
                  current->section = Entry::CLASS_SEC;
                  current->m_specFlags.spec  = Entry::Struct | Entry::Value;
                  addType( current ) ;
@@ -2034,7 +2026,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"interface struct{" |     // C++/CLI extension
 <FindMembers>{B}*"interface struct"{BN}+ {
                  QString text = QString::fromUtf8(yytext);
-                 isTypedef=false;
+                 isTypedef = false;
                  current->section = Entry::CLASS_SEC;
                  current->m_specFlags.spec = Entry::Struct | Entry::Interface;
                  addType( current ) ;
@@ -3315,8 +3307,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FindMembers>"::"          {
-                 QString text = QString::fromUtf8(yytext);
-                 current->name += text;
+      QString text = QString::fromUtf8(yytext);
+      current->name += text;
    }
 
 <CppQuote>"("{B}*"\""         {
@@ -3339,9 +3331,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <TryFunctionBlock>"{"         {
-                 curlyCount=0;
-                 lastCurlyContext = TryFunctionBlockEnd ;
-                 BEGIN( SkipCurly );
+      curlyCount = 0;
+      lastCurlyContext = TryFunctionBlockEnd ;
+      BEGIN( SkipCurly );
    }
 
 <TryFunctionBlock>.
@@ -3357,13 +3349,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <TryFunctionBlockEnd>.        { 
-                    unput(*yytext);
-                    BEGIN( FindMembers );
+      unput(*yytext);
+      BEGIN( FindMembers );
    }
 
 <EndCppQuote>")"        {
-                    insideCppQuote=false;
-                 BEGIN(FindMembers);
+      insideCppQuote = false;
+      BEGIN(FindMembers);
    }
 
 <FindMembers,FindFields>{B}*"#"     { 
@@ -3375,12 +3367,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FindMembers,FindFields>{B}*"#"{B}*("cmake")?"define"    {
-                    if (insidePHP) {
-                       REJECT;
-                    }
-                    current->bodyLine = yyLineNr;
-                    lastDefineContext = YY_START;
-                    BEGIN( Define );
+      if (insidePHP) {
+         REJECT;
+      }
+
+      current->bodyLine = yyLineNr;
+      lastDefineContext = YY_START;
+      BEGIN( Define );
    }
 
 <FindMembers,ReadBody,ReadNSBody,ReadBodyIntf,SkipCurly,SkipCurlyCpp>{B}*"#"{B}+[0-9]+{B}+/"\""    {
@@ -3400,29 +3393,29 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <PreLineCtrl>"\""[^\n\"]*"\""       {
-                 QString text = QString::fromUtf8(yytext);
-                 yyFileName = stripQuotes(text);
+      QString text = QString::fromUtf8(yytext);
+      yyFileName = stripQuotes(text);
 
-                 if (lastPreLineCtrlContext==ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
-                   current->m_program += text;
-                 }
+      if (lastPreLineCtrlContext==ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
+         current->m_program += text;
+      }
    }
 
 <PreLineCtrl>.             {
-                 QString text = QString::fromUtf8(yytext);
-                 if (lastPreLineCtrlContext==ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
-                      current->m_program += text;
-                 }
+      QString text = QString::fromUtf8(yytext);
+      if (lastPreLineCtrlContext==ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
+         current->m_program += text;
+      }
    }
-
+      
 <PreLineCtrl>\n            {
-                 QString text = QString::fromUtf8(yytext);
-                 if (lastPreLineCtrlContext==ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
-                      current->m_program += text;
-                 }
-
-                 lineCount();
-                 BEGIN( lastPreLineCtrlContext );
+      QString text = QString::fromUtf8(yytext);
+      if (lastPreLineCtrlContext==ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
+         current->m_program += text;
+      }
+      
+      lineCount();
+      BEGIN( lastPreLineCtrlContext );
    }
 
 <SkipCPP>.
@@ -3436,15 +3429,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <Define>{ID}{B}*"("        {
-                 QString text = QString::fromUtf8(yytext);
-                 current->name = text;
-                 current->name = current->name.left(current->name.length() - 1).trimmed();
-                 current->args = "(";
-                 current->bodyLine = yyLineNr;
-                 currentArgumentContext = DefineEnd;
-                 fullArgString=current->args;
-                 copyArgString=&current->args;
-                 BEGIN( ReadFuncArgType ) ;
+      QString text = QString::fromUtf8(yytext);
+
+      current->name = text;
+      current->name = current->name.left(current->name.length() - 1).trimmed();
+      current->args = "(";
+      current->bodyLine = yyLineNr;
+      currentArgumentContext = DefineEnd;
+      fullArgString=current->args;
+      copyArgString=&current->args;
+
+      BEGIN( ReadFuncArgType ) ;
    }
 
  /*
@@ -3457,7 +3452,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
       current->args += text[0];
    }
-  */
+ */
 
 <Define>{ID}            {     
       QString text = QString::fromUtf8(yytext);
@@ -3592,7 +3587,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          BEGIN(DocBlock);
       }
    }
-  
+
 <MemberSpec,FindFields,FindMembers,NextSemi,EnumBaseType,BitFields,ReadInitializer,OldStyleArgs>","{BN}*("/**"|"//!"|"/*!"|"///")"<" {
       // */ (editor syntax fix)
       
@@ -3632,7 +3627,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       
       QString text = QString::fromUtf8(yytext);
       if (current->bodyLine == -1) {
-       current->bodyLine = yyLineNr;
+         current->bodyLine = yyLineNr;
       }
       
       s_docBlockContext   = YY_START;
@@ -3646,98 +3641,99 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       s_docBlockTerm = 0;
       
       if (text[text.length() - 3] == '/') {
-       startCommentBlock(true);
-       BEGIN( DocLine );
+        startCommentBlock(true);
+        BEGIN( DocLine );
       } else {
-       startCommentBlock(false);
-       BEGIN( DocBlock );
+        startCommentBlock(false);
+        BEGIN( DocBlock );
       }
    }
 
 <FindMembers,FindFields>("//"([!/]?){B}*{CMD}"{")|("/*"([!*]?){B}*{CMD}"{")   {
-                 // */ (editor syntax fix)
-              
-                 QString text = QString::fromUtf8(yytext);
-                 if (previous && previous->section == Entry::GROUPDOC_SEC) {
-                   // link open command to the group defined in the previous entry
-                   openGroup(previous, yyFileName, yyLineNr);
-                 } else {
-                   // link open command to the current entry
-                   openGroup(current,yyFileName,yyLineNr);
-                 }
+      // */ (editor syntax fix)      
+      QString text = QString::fromUtf8(yytext);
 
-                 // current = tmp;
-                 initEntry();
-
-                 if (text[1] == '/') {
-                   if (text[2] == '!' || text[2] == '/') {
-                     s_docBlockContext   = YY_START;
-                     s_docBlockInBody    = false;
-                     s_docBlockAutoBrief = false;
-                     s_docBlock.resize(0);
-                     s_docBlockTerm = 0;
-
-                     startCommentBlock(true);
-                     BEGIN(DocLine);
-
-                   } else {
-                     lastCContext = YY_START;
-                     BEGIN(SkipCxxComment);
-                   }
-
-                 } else {
-
-                   if (text[2] == '!' || text[2] == '*') {
-                     s_docBlockContext   = YY_START;
-                     s_docBlockInBody    = false;
-                     s_docBlock.resize(0);
-
-                     static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
-                     static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
-      
-                     QChar tmpChar = text[text.length() - 2]; 
-                     s_docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
-
-                     s_docBlockTerm = 0;
-
-                     startCommentBlock(false);
-                     BEGIN(DocBlock);
-
-                   } else {
-                     lastCContext = YY_START;
-                     BEGIN(SkipComment);
-                   }
-                 }
+      if (previous && previous->section == Entry::GROUPDOC_SEC) {
+         // link open command to the group defined in the previous entry
+         openGroup(previous, yyFileName, yyLineNr);
+      } else {
+         // link open command to the current entry
+         openGroup(current,yyFileName,yyLineNr);
+      }
+         
+      // current = tmp;
+      initEntry();
+         
+      if (text[1] == '/') {
+         if (text[2] == '!' || text[2] == '/') {
+            s_docBlockContext   = YY_START;
+            s_docBlockInBody    = false;
+            s_docBlockAutoBrief = false;
+            s_docBlock.resize(0);
+            s_docBlockTerm = 0;
+         
+            startCommentBlock(true);
+            BEGIN(DocLine);
+         
+         } else {
+            lastCContext = YY_START;
+            BEGIN(SkipCxxComment);
+         }
+         
+      } else {
+         
+         if (text[2] == '!' || text[2] == '*') {
+            s_docBlockContext   = YY_START;
+            s_docBlockInBody    = false;
+            s_docBlock.resize(0);
+         
+            static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+            static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+         
+            QChar tmpChar = text[text.length() - 2]; 
+            s_docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
+         
+            s_docBlockTerm = 0;
+         
+            startCommentBlock(false);
+            BEGIN(DocBlock);
+         
+         } else {
+            lastCContext = YY_START;
+            BEGIN(SkipComment);
+         }
+      }
    }
 
 <FindMembers,FindFields,ReadInitializer>"//"([!/]?){B}*{CMD}"}".*|"/*"([!*]?){B}*{CMD}"}"[^*]*"*/"    {
-                    closeGroup(current, yyFileName, yyLineNr);
-                    bool insideEnum = YY_START == FindFields || 
-                        (YY_START == ReadInitializer && lastInitializerContext == FindFields); 
+      closeGroup(current, yyFileName, yyLineNr);
 
- 					closeGroup(current, yyFileName, yyLineNr, insideEnum);
+      bool insideEnum = YY_START == FindFields || 
+            (YY_START == ReadInitializer && lastInitializerContext == FindFields); 
+
+      closeGroup(current, yyFileName, yyLineNr, insideEnum);
    }
 
 <FindMembers>"="                                { 
       // in PHP code this could also be due to "<?="
-                 QString text = QString::fromUtf8(yytext);
-                 current->bodyLine      = yyLineNr;
-                 current->initializer   = text;
-                 lastInitializerContext = YY_START;
-                 initBracketCount=0;
-                 BEGIN(ReadInitializer);
+      QString text = QString::fromUtf8(yytext);
+      current->bodyLine      = yyLineNr;
+      current->initializer   = text;
+      lastInitializerContext = YY_START;
+      initBracketCount=0;
+      BEGIN(ReadInitializer);
    }
 
 <UNOIDLAttributeBlock>{BN}*[gs]"et"{BN}+"raises"{BN}*"("{BN}*{SCOPENAME}{BN}*(","{BN}*{SCOPENAME}{BN}*)*")"{BN}*";"  {
-                 QString text = QString::fromUtf8(yytext);
-                 lineCount();
-                 current->exception += " ";
-                 current->exception += removeRedundantWhiteSpace(text);
+      QString text = QString::fromUtf8(yytext);
+      lineCount();
+      current->exception += " ";
+      current->exception += removeRedundantWhiteSpace(text);
    }
 
 <UNOIDLAttributeBlock>"}"     {
-                 current->exception += " }";
-                 BEGIN(FindMembers);
+      current->exception += " }";
+      BEGIN(FindMembers);
    }
 
   /* Read initializer rules */
@@ -4382,7 +4378,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                  {
                    current->type.prepend("typedef ");
                  }
-                 bool needNewCurrent=false;
+                 bool needNewCurrent = false;
                  if (! current->name.isEmpty() && current->section != Entry::ENUM_SEC)
                  {
                    current->type=current->type.simplified();
@@ -4837,8 +4833,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"//".*     { 
       // read a comment 
-
-      QString text = QString::fromUtf8(yytext);     
+      QString text = QString::fromUtf8(yytext);  
       current->m_program += text; 
    }
 
@@ -5249,7 +5244,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                    msType.resize(0);
                    msName.resize(0);
                    msArgs.resize(0);
-                   isTypedef=false;
+                   isTypedef = false;
 
                    firstTypedefEntry = QSharedPointer<Entry>();
                    memspecEntry = QSharedPointer<Entry>();
@@ -5294,7 +5289,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <ReadBody,ReadNSBody,ReadBodyIntf>{BN}{1,80} { 
       QString text = QString::fromUtf8(yytext); 
       current->m_program += text;
-      lineCount() ;
+      lineCount();
    }
 
 <ReadBodyIntf>"@end"/[^a-z_A-Z0-9]  { 
@@ -6341,9 +6336,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
    // was: current->args.simplified();
 
-                 current->fileName    = yyFileName;
-                 current->startLine   = yyBegLineNr;
-                 current->startColumn = yyBegColNr;
+   current->fileName    = yyFileName;
+   current->startLine   = yyBegLineNr;
+   current->startColumn = yyBegColNr;
 
                  static QRegExp re("\\([^)]*[*&][^)]*\\)");       // (...*...)     
 
@@ -6527,8 +6522,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->endBodyLine = yyLineNr;
          
          tempEntry = current;          // temporarily switch to the previous entry
-         current = previous;
-         previous = QSharedPointer<Entry>();
+         current   = previous;
+         previous  = QSharedPointer<Entry>();
          
          s_docBlockContext   = SkipCurlyEndDoc;
          s_docBlockInBody    = false;
@@ -6580,13 +6575,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
     }
 
 <SkipCurlyEndDoc>"}"          {
-      // addToBody("}");
-      if (tempEntry) // we can only switch back to current if no new item was created
-                 {
-                    current = tempEntry;
-                    tempEntry = QSharedPointer<Entry>();
-                 }
-                    BEGIN( lastCurlyContext );
+      // addToBody ("}");
+      if (tempEntry) {
+         // we can only switch back to current if no new item was created      
+         current   = tempEntry;
+         tempEntry = QSharedPointer<Entry>();
+      }
+      BEGIN( lastCurlyContext );
    }
 
 <SkipCurly>\"                {
@@ -6787,52 +6782,47 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <CSGeneric>"<"             {
-                 if (current->tArgLists==0)
-                 {
-                   current->tArgLists = new QList<ArgumentList>;
-                   // current->tArgLists->setAutoDelete(true);
-                 }
-
-                 // check bug 612858 before enabling the next line
-                 //current->spec |= Entry::Template;
-
-                 current->tArgLists->append(ArgumentList());
-                 ArgumentList *al = &current->tArgLists->last();
-
-                 currentArgumentList = al;
-
-                 templateStr="<";
-                 current->name += "<";
-                 fullArgString = templateStr;
-                 copyArgString = &current->name;
-
-                 //copyArgString = &templateStr;
-                 currentArgumentContext = ClassVar;
-                 BEGIN( ReadTempArgs );
+      if (current->tArgLists == 0) {
+         current->tArgLists = new QList<ArgumentList>;
+      }
+            
+      current->tArgLists->append(ArgumentList());
+      ArgumentList *al = &current->tArgLists->last();
+      
+      currentArgumentList = al;
+      
+      templateStr="<";
+      current->name += "<";
+      fullArgString = templateStr;
+      copyArgString = &current->name;
+            
+      currentArgumentContext = ClassVar;
+      BEGIN( ReadTempArgs );
    }
 
 <ObjCProtocolList>"<"         {
-                    insideProtocolList=true;
-                    BEGIN( Bases );
+      insideProtocolList=true;
+      BEGIN( Bases );
    }
 
 <ClassTemplSpec>">"({BN}*"::"{BN}*{SCOPENAME})?    {
-      QString text = QString::fromUtf8(yytext); 
+      QString text   = QString::fromUtf8(yytext); 
       current->name += text;
+
       lineCount();
-      if (--sharpCount<=0)
-                 {
-                   current->name = removeRedundantWhiteSpace(current->name);
-                   if (current->m_specFlags.spec & Entry::Protocol)
-                   { // Objective-C protocol
-                     unput('{'); // fake start of body
-                     BEGIN( ClassVar );
-                   }
-                   else
-                   {
-                     BEGIN( lastClassTemplSpecContext );
-                   }
-                 }
+
+      if (--sharpCount <= 0) {
+         current->name = removeRedundantWhiteSpace(current->name);
+         
+         if (current->m_specFlags.spec & Entry::Protocol) { 
+            // Objective-C protocol
+            unput('{'); // fake start of body
+            BEGIN( ClassVar );
+            
+         } else {
+            BEGIN( lastClassTemplSpecContext );
+         }
+       }
    }
 
 <ClassTemplSpec>"<"        {
@@ -7597,7 +7587,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                  baseName.resize(0);
                  if (text[0] == '>') {
                     // end of a ObjC protocol list
-                    insideProtocolList=false;
+                    insideProtocolList = false;
                     if (yyleng == 1) {
                      unput('{'); // dummy start body
                    } else {
@@ -7674,7 +7664,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <Comment>{CMD}("endcode"|"endverbatim")   {
       QString text = QString::fromUtf8(yytext);
-      insideCode=false;
+      insideCode = false;
       current->m_program += text;
    }
 
@@ -7860,25 +7850,22 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <CSAccessorDecl>"}"        {
-                                          if (curlyCount)
-                                          {
-                                            curlyCount--;
-                 }
-                 else
-                 {
-                      mtype = MethodTypes::Method;
-                                            virt = Normal;
-                                            unput(';');
-                   BEGIN(FindMembers);
-                 }
+      if (curlyCount) {
+         curlyCount--;
+      } else {
+         mtype = MethodTypes::Method;
+         virt = Normal;
+         unput(';');
+         BEGIN(FindMembers);
+      }
    }
 
 <CSAccessorDecl>"private "{BN}*"set"      { 
-      if (curlyCount==0) current->m_specFlags.spec |= Entry::PrivateSettable;   
+      if (curlyCount == 0) current->m_specFlags.spec |= Entry::PrivateSettable;   
    }
 
 <CSAccessorDecl>"protected "{BN}*"set"    { 
-      if (curlyCount==0) current->m_specFlags.spec |= Entry::ProtectedSettable; 
+      if (curlyCount == 0) current->m_specFlags.spec |= Entry::ProtectedSettable; 
    }
 
 <CSAccessorDecl>"private "{BN}*"get"      { 
@@ -7951,7 +7938,6 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       handleCommentBlock(s_docBlock, current->brief.isEmpty());
       BEGIN( s_docBlockContext );
    }
-
 
  /* ---- Comments blocks ------ */
 <DocBlock>"*"*"*/"         { 
@@ -8255,7 +8241,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <DocCopyBlock><<EOF>>         {
-      warn(yyFileName,yyLineNr, "reached end of file while inside a %s block\n"
+      warn(yyFileName,yyLineNr, "Reached end of file while inside a %s block\n"
          "The command which ends the block appears to be missing\n", qPrintable(s_docBlockName)); 
       yyterminate();
    }
@@ -8291,16 +8277,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <PrototypePtr>"("          {
       QString text = QString::fromUtf8(yytext);
-                 current->args+=text[0];
-                 currentArgumentContext = PrototypeQual;
-                 fullArgString = current->args;
-                 copyArgString = &current->args;
-                 BEGIN( ReadFuncArgType ) ;
+      current->args+=text[0];
+      currentArgumentContext = PrototypeQual;
+      fullArgString = current->args;
+      copyArgString = &current->args;
+      BEGIN( ReadFuncArgType ) ;
    }
 
 <PrototypePtr>")"          {
-                    current->type+=')';
-                    BEGIN( Prototype );
+      current->type+=')';
+      BEGIN( Prototype );
    }
 
 <PrototypePtr>.            {
@@ -8309,23 +8295,23 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <PrototypeQual>"{"         {
-                    BEGIN( PrototypeSkipLine);
+      BEGIN( PrototypeSkipLine);
    }
 
 <PrototypeQual>{B}*"const"{B}*      {
-                    current->args += " const ";
-                 current->argList.constSpecifier=true;
+      current->args += " const ";
+      current->argList.constSpecifier=true;
    }
 
 <PrototypeQual>{B}*"volatile"{B}*   {
-                    current->args += " volatile ";
-                 current->argList.volatileSpecifier=true;
+      current->args += " volatile ";
+      current->argList.volatileSpecifier=true;
    }
 
 <PrototypeQual>{B}*"="{B}*"0"{B}*   {
-                 current->args += " = 0";
-                 current->virt = Pure;
-                 current->argList.pureSpecifier=true;
+      current->args += " = 0";
+      current->virt = Pure;
+      current->argList.pureSpecifier=true;
    }
 
 <PrototypeQual>"throw"{B}*"("            {
@@ -8355,7 +8341,6 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <PrototypeSkipLine>.   {
    }
-
 
 
   /* ------------ Generic rules -------------- */
@@ -8407,19 +8392,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <*>.
 <SkipComment>"//"|"/*"
-<*>"/*"          { 
+<*>"/*"                { 
       // */ (editor syntax fix)
       lastCContext = YY_START ;
       BEGIN( SkipComment ) ;
    }
 
 <SkipComment>{B}*"*/"         { 
-      BEGIN( lastCContext ) ; 
+      BEGIN( lastCContext ); 
    }
 
 <*>"//"        {
       lastCContext = YY_START ;
-      BEGIN( SkipCxxComment ) ;
+      BEGIN( SkipCxxComment );
    }
 
 %%
@@ -8438,10 +8423,10 @@ static void startCommentBlock(bool brief)
 
 static void newEntry()
 {
-   if (tempEntry == 0) {
-      // if temp entry is not 0 it holds current and current is actually
-      // replaced by previous which was already added to current_root
-      // so we should not add it again  (see bug723314)
+   if (tempEntry == nullptr) {
+      // if temp entry is not 0 it holds current 
+      // current is replaced by previous which was already added to current_root
+      // do not add it again  (see bug723314)
 
       current_root->addSubEntry(current, current_root);
    }
@@ -8487,21 +8472,25 @@ static void handleCommentBlock(const QString &doc, bool brief)
       isJavaDocStyle = s_docBlockAutoBrief;
    }
 
-   while (parseCommentBlock(g_thisParser, docEntry, stripIndentation(doc), yyFileName,
-                            lineNr, isBrief, isJavaDocStyle, s_docBlockInBody,               
-                            protection, position, needsEntry) ) {   // last 3 are passed by reference
+   while (parseCommentBlock(g_thisParser, docEntry, stripIndentation(doc), yyFileName, lineNr, 
+                            isBrief, isJavaDocStyle, s_docBlockInBody,               
+                            protection, position, needsEntry) ) {         // last 3 are passed by reference
 
       if (needsEntry) {
          QString docFile = current->docFile;
 
          newEntry();
+
          current->docFile = docFile;
          current->docLine = lineNr;
+
+         //
+         docEntry = s_docBlockInBody && previous ? previous : current;
       }
    }
 
    if (needsEntry) {
-      newEntry();
+      newEntry();  
    }
 
    if (s_docBlockTerm) {
@@ -8527,11 +8516,8 @@ static void handleParametersCommentBlocks(ArgumentList *al)
          current->doc.resize(0);
          current->brief.resize(0);
 
-         while (parseCommentBlock(g_thisParser, current,
-                   a.docs,             // text
-                   yyFileName,         // file
-                   current->docLine,   // line of block start
-                   false, false, false, protection, position, needsEntry ) ) {
+         while (parseCommentBlock(g_thisParser, current, a.docs, yyFileName, current->docLine,   
+                   false, false, false, protection, position, needsEntry ) ) {   // last 3 are passed by reference
 
             if (needsEntry) {
                newEntry();

@@ -3141,7 +3141,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString
    }
 
    /* write detailed description */
-   if (!detailed.isEmpty() || ! inbodyDocumentation().isEmpty()) {           
+   if (! detailed.isEmpty() || ! inbodyDocumentation().isEmpty()) {           
       ol.generateDoc(docFile(), docLine(), getOuterScope() ? getOuterScope() : container, self, detailed + "\n", true, false);
       
 
@@ -5276,8 +5276,7 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
 
          }
 
-         if (!mdef->documentation().isEmpty()) {
-            //printf("transferring docs mdef->mdec (%s->%s)\n",mdef->argsString(),mdec->argsString());
+         if (! mdef->documentation().isEmpty()) {            
             mdec->setDocumentation(mdef->documentation(), mdef->docFile(), mdef->docLine());
             mdec->setDocsForDefinition(mdef->isDocsForDefinition());
 

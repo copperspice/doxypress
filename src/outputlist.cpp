@@ -120,7 +120,7 @@ bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPoin
    }
 
    if (count == 0) {
-      return true;   // no output formats enabled.
+      return true;   // no output formats enabled
    }
 
    DocRoot *root = 0;

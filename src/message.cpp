@@ -139,11 +139,15 @@ void initWarningFormat()
  
 static void format_warn(const QString &file, int line, const QString &text)
 {
-   QString fileSubst = file == 0 ? "<unknown>" : file;
+   QString fileSubst = file;
+
+   if (file.isEmpty() ) { 
+      fileSubst = "<unknown>";
+   }
+
    QString lineSubst;
-
    lineSubst.setNum(line);
-
+  
    QString textSubst = text;
    QString versionSubst;
 

@@ -174,14 +174,14 @@ Entry::~Entry()
    num--;
 }
 
-void Entry::addSubEntry(QSharedPointer<Entry> current, QSharedPointer<Entry> self)
+void Entry::addSubEntry(QSharedPointer<Entry> child, QSharedPointer<Entry> self)
 {
    if (self != this) {
       throw std::runtime_error("Internal Issue: passed parameter was not equal to the current object (Entry::addSubEntry)");
    }
 
-   current->m_parent = self; 
-   m_sublist.append(current);
+   child->m_parent = self; 
+   m_sublist.append(child);
 }
 
 void Entry::reset()

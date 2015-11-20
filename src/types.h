@@ -58,6 +58,7 @@ enum SrcLangExt {
 
 /** Grouping info */
 struct Grouping {
+
    /** Grouping priority */
    enum GroupPri_t {
       GROUPING_LOWEST,
@@ -86,7 +87,7 @@ struct Grouping {
    Grouping( const QString &gn, GroupPri_t p ) : groupname(gn), pri(p) {}
    Grouping( const Grouping &g ) : groupname(g.groupname), pri(g.pri) {}
 
-   QString groupname;   //!< name of the group
+   QString groupname;      //!< name of the group
    GroupPri_t pri;         //!< priority of this definition
 
 };

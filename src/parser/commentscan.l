@@ -16,7 +16,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-//   #include <unistd.h>           // broom check
 
 #include <cite.h>
 #include <condparser.h>
@@ -27,18 +26,17 @@
 #include <formula.h>
 #include <index.h>
 #include <language.h>
-//   #include <markdown.h>         // broom check
 #include <membergroup.h>
 #include <message.h>
 #include <outputlist.h>
 #include <parser_base.h>
 #include <parser_cstyle.h>
+#include <parser_md.h>
 #include <reflist.h>
 #include <util.h>
 
 #define YY_NO_INPUT 1
 #define YY_NEVER_INTERACTIVE 1
-//   #define YY_NO_UNISTD_H 1      // broom check
 
 // forward declarations
 static bool handleBrief(const QString &);
@@ -91,7 +89,9 @@ static bool handleNoSubGrouping(const QString &);
 static bool handleShowInitializer(const QString &);
 static bool handleHideInitializer(const QString &);
 static bool handleCallgraph(const QString &);
+static bool handleHideCallgraph(const QString &);
 static bool handleCallergraph(const QString &);
+static bool handleHideCallergraph(const QString &);
 static bool handleInternal(const QString &);
 static bool handleLineBr(const QString &);
 static bool handleStatic(const QString &);
@@ -111,7 +111,10 @@ static bool handleCopyDetails(const QString &);
 static bool handleParBlock(const QString &);
 static bool handleEndParBlock(const QString &);
 
-typedef bool (*DocCmdFunc)(const QString &name);
+static void handleGuard(const QString &expr);
+static void checkFormula();
+
+using DocCmdFunc = bool (*)(const QString &name);
 
 struct DocCmdMap
 {
@@ -289,12 +292,13 @@ class DocCmdMapper
 
    DocCmdMapper() {
       DocCmdMap *p = docCmdMap;
+
       while (p->cmdName) {
          if (m_map.contains(p->cmdName)) {
             err("DocCmdMapper: command %s already added\n", p->cmdName);
             exit(1);
          }
-         Cmd *cmd = new Cmd;
+         Cmd *cmd  = new Cmd;
          cmd->func = p->handler;
          cmd->endsBrief = p->endsBrief;
          m_map.insert(p->cmdName, cmd);
@@ -311,9 +315,7 @@ class DocCmdMapper
 };
 
 DocCmdMapper *DocCmdMapper::s_instance = 0;
-
-bool inInternalDocs = false;
-
+    
 #define YY_NEVER_INTERACTIVE 1
 
 enum XRefKind {
@@ -383,22 +385,23 @@ static QString          functionProto;       // function prototype
 static QStack<GuardedSection *> guards;      // tracks nested conditional sections (if,ifnot,..)
 static QSharedPointer<Entry>  current;       // working entry
 
-static bool             needNewEntry;
+static bool             s_needNewEntry;
+static int              s_resumeState; 
 
 static QString          g_sectionLabel;
-static QString             g_sectionTitle;
+static QString          g_sectionTitle;
 static int              g_sectionLevel;
 static QString          xrefItemKey;
 static QString          newXRefItemKey;
 static QString          xrefItemTitle;
 static QString          xrefListTitle;
-static Protection          protection;
+static Protection       protection;
 
 static bool             xrefAppendFlag;
 static bool             inGroupParamFound;
 static int              braceCount;
 static bool             insidePre;
-static bool             parseMore;
+static bool             s_parseMore;
 
 static int              g_condCount;
 static int              g_commentCount;
@@ -409,7 +412,7 @@ static QString          g_guardExpr;
 static int              g_roundCount;
 static bool             g_insideParBlock;
 
-static QStack<Grouping *> g_autoGroupStack;
+static QStack<QSharedPointer<Grouping>> g_autoGroupStack;
 
 static int              g_memberGroupId = DOX_NOGROUP;
 static QString          g_memberGroupHeader;
@@ -417,12 +420,23 @@ static QString          g_memberGroupDocs;
 static QString          g_memberGroupRelates;
 static QString          g_compoundName;
 
+static bool             internalDocs;   
+
+static bool             processInternalDocs = false;    
+static int              boldCount = 0;
+static int              emCount   = 0;
+static int              tickCount = 0;
+
+static int              prevPosition = 0;
+
 static void initParser()
 {
-  g_sectionLabel.resize(0);
-  g_sectionTitle.resize(0);
-  g_memberGroupHeader.resize(0);
-  g_insideParBlock = false;
+   g_sectionLabel.resize(0);
+   g_sectionTitle.resize(0);
+   g_memberGroupHeader.resize(0);
+   g_insideParBlock = false;
+
+   internalDocs = Config::getBool("internal-docs");   
 }
 
 static bool getDocSectionName(int s)
@@ -459,8 +473,8 @@ static bool makeStructuralIndicator(Entry::Sections s)
   if (getDocSectionName(current->section)) {
     return true;
 
-  }  else {
-    needNewEntry = true;
+  } else {
+    s_needNewEntry     = true;
     current->section   = s;
     current->fileName  = yyFileName;
     current->startLine = yyLineNr;
@@ -469,7 +483,7 @@ static bool makeStructuralIndicator(Entry::Sections s)
 }
 static void lineCount()
 {
-  for( const char *c = yytext ; *c ; ++c ) {
+  for (const char *c = yytext ; *c ; ++c) {
     yyLineNr += (*c == '\n') ;
   }
 }
@@ -575,9 +589,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
          }
 
       } else {
-         si = QSharedPointer<SectionInfo>(new SectionInfo(listName, yyLineNr, anchorLabel, g_sectionTitle,
-                  SectionInfo::Anchor, g_sectionLevel));
-
+         si = QMakeShared<SectionInfo>(listName, yyLineNr, anchorLabel, g_sectionTitle, SectionInfo::Anchor, g_sectionLevel);
          Doxy_Globals::sectionDict->insert(anchorLabel, si);
          docEntry->anchors->append(*si);
       }
@@ -650,8 +662,8 @@ static void addSection()
 
       g_sectionTitle += text.trimmed();
 
-      si = QSharedPointer<SectionInfo>(new SectionInfo(yyFileName, yyLineNr, g_sectionLabel,
-                           g_sectionTitle, sectionLevelToType(g_sectionLevel), g_sectionLevel));
+      si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, g_sectionLabel, g_sectionTitle, 
+                  sectionLevelToType(g_sectionLevel), g_sectionLevel);
 
       // add section to this entry
       current->anchors->append(*si);
@@ -774,7 +786,7 @@ static inline void setOutput(OutputContext ctx)
 
       case OutputXRef:
          pOutputString = &outputXRef;
-         // first item found, so ca not append to previous
+         // first item found, so can not append to previous
          // xrefAppendFlag = false;
          break;
 
@@ -799,13 +811,14 @@ static void addAnchor(const QString &anchorLabel)
       }
 
       } else {
-         si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, anchorLabel, 0, SectionInfo::Anchor, 0);
+         si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, anchorLabel, QString(""), SectionInfo::Anchor, 0);
          Doxy_Globals::sectionDict->insert(anchorLabel, si);
          current->anchors->append(*si);
+
    }
 }
 
-// add a string to the output
+// add a string in the output
 static inline void addOutput(const QString &s)
 {
    *pOutputString += s;
@@ -837,11 +850,9 @@ static void handleGuard(const QString &expr);
 #undef   YY_INPUT
 #define  YY_INPUT(buf,result,max_size) result = yyread(buf,max_size);
 
-static int prevPosition = 0;
-
 static int yyread(char *buf, int max_size)
 {
-    prevPosition = inputPosition;
+   prevPosition = inputPosition;
    int c = 0;
 
    while (inputString[inputPosition] != 0) {
@@ -1061,15 +1072,15 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <Comment>"<"{CAPTION}{ATTR}">"          {
       QString tag = QString::fromUtf8(yytext);
 
-      int s = tag.find("id=");
+      int s = tag.indexOf("id=");
 
       if (s != -1) {
          // command has id attribute
-         char c = tag[s+3];
+         QChar c = tag[s + 3];
 
          if (c == '\'' || c == '"') {
             // valid start
-            int e = tag.find(c,s + 4);
+            int e = tag.indexOf(c,s + 4);
 
             if (e != -1) {
                // found matching end
@@ -1080,8 +1091,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          }
       }
 
-      QString text = QString::fromUtf8(yytext);
-      addOutput(text);
+      addOutput(tag);
    }
 
 <Comment>"<"{PRE}{ATTR}">"    {
@@ -1109,15 +1119,15 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <Comment>{B}*{CMD}"endinternal"{B}*    {
       addOutput("\\endinternal ");
 
-      if (! inInternalDocs) {
+      if (! processInternalDocs) {
          warn(yyFileName, yyLineNr, "Found \\endinternal without matching \\internal");
       }
 
-      inInternalDocs = false;
+      processInternalDocs = false;
    }
 
 <Comment>{B}*{CMD}[a-z_A-Z]+{B}*    {
-      // potentially interesting command
+      // might be a valid command
       // the {B}* in the front was added for bug620924
 
       QString text = QString::fromUtf8(yytext);
@@ -1137,20 +1147,22 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
          if (cmdPtr->endsBrief && inContext != OutputXRef) {
             briefEndsAtDot = false;
+
             // this command forces the end of brief description
             setOutput(OutputDoc);
          }
 
          if (cmdPtr->func && cmdPtr->func(cmdName)) {
-            // implicit split of the comment block into two
-            // entries. Restart the next block at the start of this command.
-            parseMore = true;
+            // implicit split of the comment block into two entries. 
+            // Restart the next block at the start of this command.
+
+            s_parseMore = true;
 
             inputPosition = prevPosition + (int)(yy_bp - YY_CURRENT_BUFFER_LVALUE->yy_ch_buf);
             yyterminate();
 
-         } else if (cmdPtr->func == 0) {
-            // command without handler, to be processed later by parserdoc.cpp
+         } else if (cmdPtr->func == nullptr) {
+            // command without handler is processed later by parserdoc.cpp
             addOutput(text);
          }
 
@@ -1173,7 +1185,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString langId = text.trimmed().mid(2);
 
       if (! langId.isEmpty() && Config::getEnum("output-language").compare(langId, Qt::CaseInsensitive) != 0) {
-
          // enable language specific section
          BEGIN(SkipLang);
       }
@@ -1212,22 +1223,21 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <Comment>{B}*{CMD}"{"        {
       // begin of a group
-      //langParser->handleGroupStartCommand(g_memberGroupHeader);
+      // langParser->handleGroupStartCommand(g_memberGroupHeader);
       openGroup(current, yyFileName, yyLineNr);
    }
 
 <Comment>{B}*{CMD}"}"        {
       // end of a group
-      //langParser->handleGroupEndCommand();
-
-      closeGroup(current, yyFileName, yyLineNr, true);
-      g_memberGroupHeader.resize(0);
-      parseMore    = true;
-      needNewEntry = true;
-
       QString text = QString::fromUtf8(yytext);
 
-      inputPosition=prevPosition + (int)(yy_bp - YY_CURRENT_BUFFER_LVALUE->yy_ch_buf) + strlen(yytext);
+      closeGroup(current, yyFileName, yyLineNr, true);
+
+      g_memberGroupHeader.resize(0);
+      s_parseMore    = true;
+      s_needNewEntry = true;
+
+      inputPosition = prevPosition + (int)(yy_bp - YY_CURRENT_BUFFER_LVALUE->yy_ch_buf) + text.length();
       yyterminate();
    }
 
@@ -1237,7 +1247,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addOutput(text);
    }
 
-<Comment>[a-z_A-Z]+        {
+<Comment>[a-z_A-Z]*[a-zA-Z]       {
       // normal word
       QString text = QString::fromUtf8(yytext);
       addOutput(text);
@@ -1257,7 +1267,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       } else {
 
-         if (inContext! = OutputXRef) {
+         if (inContext != OutputXRef) {
             briefEndsAtDot = false;
             setOutput(OutputDoc);
          }
@@ -1322,8 +1332,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <Comment>".\\"[ \t]        {
       // . with escaped space.
-      addOutput(yytext[0]);
-      addOutput(yytext[2]);
+      QString text = QString::fromUtf8(yytext);
+
+      addOutput(text[0]);
+      addOutput(text[2]);
    }
 
 <Comment>".,"           {
@@ -1345,39 +1357,64 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <Comment>(\n|\\_linebr)({B}*(\n|\\_linebr))+    {
       // at least one blank line (or blank line command)
-      if (inContext==OutputXRef) {
-         // see bug 613024, we need to put the newlines after ending the XRef section.
-         if (!g_insideParBlock) setOutput(OutputDoc);
-            int i;
-            for (i=0;i<yyleng;)
-            {
-            if (yytext[i]=='\n') addOutput('\n'),i++;
-            else if (strcmp(yytext+i,"\\_linebr")==0) addOutput('\n'),i+=8;
-            else i++;
-            }
-            } else if (inContext!=OutputBrief) {
-            int i;
-            for (i=0;i<yyleng;)
-            {
-            if (yytext[i]=='\n') addOutput('\n'),i++;
-            else if (strcmp(yytext+i,"\\_linebr")==0) addOutput('\n'),i+=8;
-            else i++;
-            }
+
+      QString text = QString::fromUtf8(yytext);
+
+      if (inContext == OutputXRef) {
+         // see bug 613024, need to put the newlines after ending the XRef section.
+
+         if (! g_insideParBlock) {
             setOutput(OutputDoc);
+         }
 
-         } else {
-             // inContext==OutputBrief
-             // only go to the detailed description if we have
-             // found some brief description and not just whitespace
+         for (int i = 0; i < text.length();  ) {
+            if (text[i] == '\n') { 
+               addOutput('\n'); 
+               i++; 
 
-            endBrief(false);
+            } else if (text.mid(i) == "\\_linebr")  { 
+               addOutput('\n');
+               i += 8;
+
+            } else  {
+               i++;
+            }
+         } 
+
+      } else if (inContext != OutputBrief) {
+      
+         for (int i = 0; i< text.length(); ) {
+            if (text[i] == '\n') {
+               addOutput('\n');
+               i++;
+
+            } else if (text.mid(i) == "\\_linebr")  { 
+                addOutput('\n');
+                i += 8;
+
+            } else  {
+               i++;
+
+            }
+         }
+
+         setOutput(OutputDoc);
+
+      } else {
+          // inContext==OutputBrief
+          // only go to the detailed description if we have
+          // found some brief description and not just whitespace
+
+         endBrief(false);
       }
+
       lineCount();
    }
 
 <Comment>"."            {
       // potential end of a JavaDoc style comment
-      addOutput(*yytext);
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text[0]);
 
       if (briefEndsAtDot) {
          setOutput(OutputDoc);
@@ -1387,22 +1424,35 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <Comment>\n             {
       // newline
-      addOutput(*yytext);
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text[0]);
       yyLineNr++;
    }
 
 <Comment>.           {
       // catch-all for anything else
-      addOutput(*yytext);
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text[0]);
    }
+
+<Comment>[ \t\n(]['\*_!]/[^a-zA-Z0-9]   {     
+      QString text = QString::fromUtf8(yytext); 
+      addOutput(text);
+   }
+
 
  /* --------------   Rules for handling HTML comments ----------- */
 
 <HtmlComment>"--"[!]?">"{B}*     {
       BEGIN( Comment );
    }
+
 <HtmlComment>{DOCNL}          {
-      if (*yytext=='\n') yyLineNr++;
+      QString text = QString::fromUtf8(yytext);
+
+      if (text[0] == '\n') {
+         yyLineNr++;
+      }   
    }
 
 <HtmlComment>[^\\\n\-]+          {
@@ -1418,40 +1468,45 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <ReadFormulaShort>{CMD}"f$"      {
       // end of inline formula
-      formulaText+="$";
-      addOutput(" "+addFormula());
+      formulaText += "$";
+      addOutput(" " + addFormula());
       BEGIN(Comment);
    }
 
 <ReadFormulaLong>{CMD}"f]"       {
       // end of block formula
-      formulaText+="\\]";
-      addOutput(" "+addFormula());
+      formulaText += "\\]";
+      addOutput(" " + addFormula());
       BEGIN(Comment);
    }
 
 <ReadFormulaLong>{CMD}"f}"       {
       // end of custom env formula
-                 formulaText+="\\end";
-                 formulaText+=formulaEnv;
-                 addOutput(" "+addFormula());
-                 BEGIN(Comment);
+      formulaText += "\\end";
+      formulaText += formulaEnv;
+      addOutput(" " + addFormula());
+      BEGIN(Comment);
    }
 
 <ReadFormulaLong,ReadFormulaShort>[^\\@\n]+ {
       // any non-special character
-      formulaText+=yytext;
+      QString text = QString::fromUtf8(yytext); 
+      formulaText += text;
    }
 
 <ReadFormulaLong,ReadFormulaShort>\n   {
       // new line
+      QString text = QString::fromUtf8(yytext); 
+
       formulaNewLines++;
-      formulaText+=*yytext;
+      formulaText += text[0];
       yyLineNr++;
    }
+
 <ReadFormulaLong,ReadFormulaShort>.     {
       // any othe character
-      formulaText += *yytext;
+      QString text = QString::fromUtf8(yytext); 
+      formulaText += text[0]; 
    }
 
 
@@ -1459,14 +1514,15 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <EnumDocArg1>{SCOPEID}        {
       // handle argument
-      current->name = yytext;
+      QString text = QString::fromUtf8(yytext); 
+      current->name = text;
       BEGIN( Comment );
    }
 
 <EnumDocArg1>{LC}          {
       // line continuation
-                    yyLineNr++;
-                 addOutput('\n');
+      yyLineNr++;
+      addOutput('\n');
    }
 
 <EnumDocArg1>{DOCNL}          {
@@ -1492,7 +1548,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <NameSpaceDocArg1>{SCOPENAME}       {
       // handle argument
-      current->name = substitute(yytext,".","::");
+      QString text = QString::fromUtf8(yytext); 
+      current->name = substitute(text,".", "::");
       BEGIN( Comment );
    }
 
@@ -1523,19 +1580,20 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <PackageDocArg1>{ID}("."{ID})*      {
       // handle argument
-                    current->name = yytext;
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+      current->name = text;
+      BEGIN( Comment );
    }
 
 <PackageDocArg1>{LC}          {
       // line continuation
-                 yyLineNr++;
-                 addOutput('\n');
+      yyLineNr++;
+      addOutput('\n');
    }
 
 <PackageDocArg1>{DOCNL}          {
       // missing argument
-      QString text = QString::fromUtf8(commentscanYYtext);
+      QString text = QString::fromUtf8(yytext);
 
       warn(yyFileName, yyLineNr, "Missing argument after \\package");
       addOutput('\n');
@@ -1553,24 +1611,28 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
   /* ------ handle argument of class/struct/union command --------------- */
 
 <ClassDocArg1>{SCOPENAME}{TMPLSPEC}     {
-                    current->name = substitute(removeRedundantWhiteSpace(yytext),".","::");
-                 BEGIN( ClassDocArg2 );
+      QString text = QString::fromUtf8(yytext);
+      current->name = substitute(removeRedundantWhiteSpace(text),".","::");
+      BEGIN( ClassDocArg2 );
    }
 
 <ClassDocArg1>{SCOPENAME}     {
       // first argument
-                    current->name = substitute(yytext,".","::");
-                 if (current->section==Entry::PROTOCOLDOC_SEC)
-                 {
-                   current->name+="-p";
-                 }
-                 // prepend outer scope name
-                 BEGIN( ClassDocArg2 );
+      QString text = QString::fromUtf8(yytext);
+
+      current->name = substitute(text,".","::");
+      if (current->section==Entry::PROTOCOLDOC_SEC) {
+         current->name+="-p"; 
+      }
+
+      // prepend outer scope name
+      BEGIN( ClassDocArg2 );
    }
 
 <CategoryDocArg1>{SCOPENAME}{B}*"("[^\)]+")" {
-                    current->name = substitute(yytext,".","::");
-                 BEGIN( ClassDocArg2 );
+      QString text = QString::fromUtf8(yytext);
+      current->name = substitute(text,".","::");
+      BEGIN( ClassDocArg2 );
    }
 
 <ClassDocArg1,CategoryDocArg1>{LC}      {
@@ -1583,7 +1645,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // missing argument
       QString text = QString::fromUtf8(yytext);
 
-      warn(yyFileName, yyLineNr, "Missing argument after \\%s", YY_START == ClassDocArg1 ? "class" : "category" );
+      warn(yyFileName, yyLineNr, "Missing argument after \\%s", 
+            YY_START == ClassDocArg1 ? "class" : "category" );
 
       addOutput('\n');
 
@@ -1593,47 +1656,60 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN( Comment );
    }
 
-<ClassDocArg1,CategoryDocArg1>.     { // ignore other stuff
+<ClassDocArg1,CategoryDocArg1>.     {    
+      // ignore other stuff
    }
-
 
 <ClassDocArg2>{FILE}|"<>"     {
       // second argument; include file
-                 current->includeFile = yytext;
-                 BEGIN( ClassDocArg3 );
+      QString text = QString::fromUtf8(yytext);
+      current->includeFile = text;
+      BEGIN( ClassDocArg3 );
    }
 
 <ClassDocArg2>{LC}         {
       // line continuation
-                                          yyLineNr++;
-                 addOutput('\n');
+      yyLineNr++;
+      addOutput('\n');
    }
 
 <ClassDocArg2>{DOCNL}         {
-                 addOutput('\n');
-                    if (*yytext=='\n') yyLineNr++;
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+
+      addOutput('\n');
+
+      if (text[0] == '\n')  {
+         yyLineNr++;
+      }
+      BEGIN( Comment );
    }
 
-<ClassDocArg2>.            { // ignore other stuff
+<ClassDocArg2>.            { 
+      // ignore other stuff
    }
 
 
 <ClassDocArg3>[<"]?{FILE}?[">]?     {
       // third argument; include file name
-                 current->includeName = yytext;
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+      current->includeName = text;
+      BEGIN( Comment );
    }
 
 <ClassDocArg3>{LC}         {
       // line continuation
-                                          yyLineNr++;
-                 addOutput('\n');
+      yyLineNr++;
+      addOutput('\n');
    }
 
 <ClassDocArg3>{DOCNL}         {
-                    if (*yytext=='\n') yyLineNr++;
-                    BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+
+      if (text[0] =='\n') { 
+         yyLineNr++;
+      }
+
+      BEGIN( Comment );
    }
 
 <ClassDocArg3>.            {
@@ -1641,31 +1717,35 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 
-  /* --------- handle arguments of {def,add,weak}group commands --------- */
+  /* --------- handle arguments of {def,add,weak} group commands --------- */
 
 <GroupDocArg1>{LABELID}(".html"?)   {
       // group name
-                    current->name = yytext;
-                 //lastDefGroup.groupname = yytext;
-                 //lastDefGroup.pri = current->groupingPri();
-                    // the .html stuff is for Qt compatibility
-                 if (current->name.right(5)==".html")
-                 {
-                   current->name=current->name.left(current->name.length()-5);
-                 }
-                 current->type.resize(0);
-                 BEGIN(GroupDocArg2);
+      QString text  = QString::fromUtf8(yytext);
+      current->name = text;
+
+      // lastDefGroup.groupname = text;
+      // lastDefGroup.pri = current->groupingPri();
+      // the .html stuff is for Qt compatibility
+
+      if (current->name.endsWith(".html")) {
+         current->name = current->name.left(current->name.length()-5);
+      }
+
+      current->type.resize(0);
+      BEGIN(GroupDocArg2);
    }
 
 <GroupDocArg1>"\\"{B}*"\n"       {
       // line continuation
-                    yyLineNr++;
-                 addOutput('\n');
+      yyLineNr++;
+      addOutput('\n');
    }
 
 <GroupDocArg1>{DOCNL}         {
       // missing argument
       QString text = QString::fromUtf8(yytext);
+
       warn(yyFileName, yyLineNr, "Missing group name after %s", current->groupDocCmd() );
 
       addOutput('\n');
@@ -1683,17 +1763,20 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <GroupDocArg2>[^\n\\\*]+      {
       // title (stored in type)
-      current->type += yytext;
-      current->type = current->type.stripWhiteSpace();
+      QString text = QString::fromUtf8(yytext);
+      current->type += text.trimmed();
    }
 
 <GroupDocArg2>{DOCNL}         {
+      QString text = QString::fromUtf8(yytext);
+
       if ( current->groupDocType == Entry::GROUPDOC_NORMAL && current->type.isEmpty()) {
-         // defgroup requires second argument
-         warn(yyFileName, yyLineNr, "Missing title after \\defgroup %s", qPrintable(current->name) );
+            // defgroup requires second argument
+            warn(yyFileName, yyLineNr, "Missing title after \\defgroup %s",
+                  csPrintable(current->name) );
       }
 
-      if (*yytext == '\n') {
+      if (text[0] == '\n') {
          yyLineNr++;
       }
 
@@ -1706,24 +1789,27 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <PageDocArg1>{FILE}        {
       // first argument; page name
-                 current->name = stripQuotes(yytext);
-                 BEGIN( PageDocArg2 );
+      QString text  = QString::fromUtf8(yytext);
+      current->name = stripQuotes(text);
+      BEGIN( PageDocArg2 );
    }
 
-<PageDocArg1>{LC}          { yyLineNr++;
-                 addOutput('\n');
+<PageDocArg1>{LC}          { 
+      yyLineNr++;
+      addOutput('\n');
    }
 
 <PageDocArg1>{DOCNL}          {
       // missing arguement
-      QString text = QString::fromUtf8(commentscanYYtext);
+      QString text = QString::fromUtf8(yytext);
       warn(yyFileName, yyLineNr, "Missing argument after \\page");
 
       if (text[0] == '\n') {
          yyLineNr++;
       }
+
       addOutput('\n');
-      BEGIN( Comment ));
+      BEGIN( Comment );
    }
 
 <PageDocArg1>.             {
@@ -1732,10 +1818,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <PageDocArg2>.*"\n"        {
       // second argument; page title
-                         yyLineNr++;
-                 current->args = yytext;
-                 addOutput('\n');
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+
+      yyLineNr++;
+      current->args = text;
+
+      addOutput('\n');
+      BEGIN( Comment );
    }
 
 
@@ -1743,19 +1832,26 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <FileDocArg1>{DOCNL}          {
       // no file name specfied
-                    if (*yytext=='\n') yyLineNr++;
-                 addOutput('\n');
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+
+      if (text[0] == '\n') {
+         yyLineNr++;
+      }
+
+      addOutput('\n');
+      BEGIN( Comment );
    }
 
 <FileDocArg1>{FILE}        {
       // first argument; name
-                    current->name = stripQuotes(yytext);
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+      current->name = stripQuotes(text);
+      BEGIN( Comment );
    }
 
-<FileDocArg1>{LC}          { yyLineNr++;
-                 addOutput('\n');
+<FileDocArg1>{LC}          { 
+      yyLineNr++;
+      addOutput('\n');
    }
 
 <FileDocArg1>.             {
@@ -1767,20 +1863,23 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <XRefItemParam1>{LABELID}     {
       // first argument
-                    newXRefItemKey=yytext;
-                                          setOutput(OutputXRef);
-                 BEGIN(XRefItemParam2);
+      QString text = QString::fromUtf8(yytext);
+
+      newXRefItemKey = text;
+      setOutput(OutputXRef);
+
+      BEGIN(XRefItemParam2);
    }
 
 <XRefItemParam1>{LC}          {
       // line continuation
-                                          yyLineNr++;
-                 addOutput('\n');
+      yyLineNr++;
+      addOutput('\n');
    }
 
-<XRefItemParam1>{DOCNL}          {
+<XRefItemParam1>{DOCNL}       {
       // missing arguments
-      QString text = QString::fromUtf8(commentscanYYtext);
+      QString text = QString::fromUtf8(yytext);
       warn(yyFileName, yyLineNr, "Missing first argument of \\xrefitem");
 
       if (text[0] == '\n') {
@@ -1796,10 +1895,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // ignore other stuff
    }
 
-
 <XRefItemParam2>"\""[^\n\"]*"\""    {
       // second argument
-      xrefItemTitle = stripQuotes(yytext);
+      QString text = QString::fromUtf8(yytext);
+      xrefItemTitle = stripQuotes(text);
       BEGIN(XRefItemParam3);
    }
 
@@ -1811,7 +1910,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <XRefItemParam2>{DOCNL}          {
       // missing argument
-      QString text = QString::fromUtf8(commentscanYYtext);
+      QString text = QString::fromUtf8(yytext);
       warn(yyFileName, yyLineNr, "Missing second argument of \\xrefitem");
 
       if (text[0] == '\n') {
@@ -1827,18 +1926,20 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // ignore other stuff
    }
 
-
 <XRefItemParam3>"\""[^\n\"]*"\""    {
       // third argument
-      xrefListTitle = stripQuotes(yytext);
+      QString text = QString::fromUtf8(yytext);
+
+      xrefListTitle = stripQuotes(text);
       xrefKind = XRef_Item;
+
       BEGIN( Comment );
    }
 
 <XRefItemParam2,XRefItemParam3>{LC}    {
       // line continuation
-                                          yyLineNr++;
-                 addOutput('\n');
+      yyLineNr++;
+      addOutput('\n');
    }
 
 <XRefItemParam3>{DOCNL}          {
@@ -1863,12 +1964,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <RelatesParam1>({ID}("::"|"."))*{ID}   {
       // argument
-                    current->relates = yytext;
-                                          //if (current->mGrpId!=DOX_NOGROUP)
-                                          //{
-                                          //  memberGroupRelates = yytext;
-                                          //}
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+
+      current->relates = text;                                          
+      BEGIN( Comment );
    }
 
 <RelatesParam1>{LC}        {
@@ -1879,12 +1978,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <RelatesParam1>{DOCNL}        {
       // missing argument
-      QString text = QString::fromUtf8(commentscanYYtext);
+      QString text = QString::fromUtf8(yytext);
       warn(yyFileName, yyLineNr, "Missing argument of \\relates or \\memberof command");
 
       if (text[0] == '\n') {
          yyLineNr++;
       }
+
       addOutput('\n');
       BEGIN( Comment );
    }
@@ -1894,14 +1994,18 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 
-
   /* ----- handle arguments of the relates(also)/addindex commands ----- */
 
 <LineParam>{DOCNL}         {
       // end of argument
-                    if (*yytext=='\n') yyLineNr++;
-                 addOutput('\n');
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+
+      if (text[0] == '\n')  {
+         yyLineNr++;
+      }
+
+      addOutput('\n');
+      BEGIN( Comment );
    }
 
 <LineParam>{LC}            {
@@ -1912,7 +2016,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <LineParam>.            {
       // ignore other stuff
-                    addOutput(*yytext);
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text[0]);
    }
 
 
@@ -1920,9 +2025,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <SectionLabel>{LABELID}          {
       // first argyment
-      g_sectionLabel=yytext;
-      addOutput(yytext);
+      QString text = QString::fromUtf8(yytext);
+
+      g_sectionLabel = text;
+      addOutput(text);
       g_sectionTitle.resize(0);
+
       BEGIN(SectionTitle);
    }
 
@@ -1934,13 +2042,14 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       if (text[0] == '\n') {
          yyLineNr++;
       }
+
       addOutput('\n');
       BEGIN( Comment );
    }
 
 <SectionLabel>.            {
       // invalid character for section label
-      warn(yyFileName, yyLineNr, "Invalid or missing section label" );
+      warn(yyFileName, yyLineNr, "Invalid or missing section label");
       BEGIN(Comment);
    }
 
@@ -1975,31 +2084,40 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <SectionTitle>("\\\\"|"@@"){ID}     {
       // unescape escaped command
-                    g_sectionTitle+=&yytext[1];
-                 addOutput(yytext);
+      QString text = QString::fromUtf8(yytext);
+
+      g_sectionTitle += text.mid(1);               
+      addOutput(text);
    }
 
 <SectionTitle>{CMD}[$@\\&~<>#%]     {
       // unescape escaped character
-                    g_sectionTitle+=yytext[1];
-                    addOutput(yytext);
+      QString text = QString::fromUtf8(yytext);
+
+      g_sectionTitle += text[1];
+      addOutput(text);
    }
 
 <SectionTitle>.            { 
       // anything else
-                    g_sectionTitle+=yytext;
-                 addOutput(*yytext);
+      QString text = QString::fromUtf8(yytext);
+      
+      g_sectionTitle += text;
+      addOutput(text[0]);
    }
 
   /* ----- handle arguments of the subpage command ------- */
 
 <SubpageLabel>{LABELID}          {
       // first argument
-                                          addOutput(yytext);
-                 // we add subpage labels as a kind of "inheritance" relation to prevent
-                 // needing to add another list to the Entry class.
-                 current->extends->append(new BaseInfo(yytext,Public,Normal));
-                 BEGIN(SubpageTitle);
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text);
+      
+      // we add subpage labels as a kind of "inheritance" relation to prevent
+      // needing to add another list to the Entry class.
+
+      current->extends.append(BaseInfo(text, Public, Normal));
+      BEGIN(SubpageTitle);
    }
 
 <SubpageLabel>{DOCNL}         {
@@ -2010,25 +2128,28 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       if (text[0] == '\n') {
          yyLineNr++;
       }
+
       addOutput('\n');
       BEGIN( Comment );
    }
 
 <SubpageTitle>{DOCNL}         {
       // no title, end command
-      addOutput(yytext);
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text);
       BEGIN( Comment );
    }
 
 <SubpageTitle>[ \t]*"\""[^\"\n]*"\""   {
       // add title, end of command
-      addOutput(yytext);
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text);
       BEGIN( Comment );
    }
 
 <SubpageTitle>.            {
       // no title, end of command
-      unput(*yytext);
+      unput(yytext[0]);     
       BEGIN( Comment );
    }
 
@@ -2037,13 +2158,17 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <AnchorLabel>{LABELID}        {
       // found argument
-      addAnchor(yytext);
-      addOutput(yytext);
+      QString text = QString::fromUtf8(yytext);
+
+      addAnchor(text);
+      addOutput(text);
+
       BEGIN( Comment );
    }
 
 <AnchorLabel>{DOCNL}          {
       // missing argument
+      QString text = QString::fromUtf8(yytext);
       warn(yyFileName, yyLineNr, "\\anchor command has no label");
 
       if (text[0] == '\n') {
@@ -2065,22 +2190,25 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <FormatBlock>{CMD}("endverbatim"|"endlatexonly"|"endhtmlonly"|"endxmlonly"|"enddocbookonly"|"endrtfonly"|"endmanonly"|"enddot"|"endcode"|"endmsc"|"endvhdlflow")/{NW} {
       // possible ends
-      addOutput(yytext);
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text);
 
-      if (&yytext[4] == blockName)  {
+      if (text.mid(4) == blockName)  {
          // found end of the block
          BEGIN(Comment);
       }
    }
 
 <FormatBlock>{CMD}"enduml"              {
-                    addOutput(yytext);
-                 if (blockName=="startuml") // found end of the block
-                 {
-                      BEGIN(Comment);
-   }
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text);
 
-                                        }
+      if (blockName == "startuml")   {
+         // found end of the block
+         BEGIN(Comment);
+      }
+   }
+                                        
 <FormatBlock>[^ \@\*\/\\\n]*     { 
       // some word
       QString text = QString::fromUtf8(yytext);
@@ -2090,7 +2218,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <FormatBlock>{DOCNL}          { 
       // new line
       QString text = QString::fromUtf8(yytext);
-      if (*yytext == '\n') {
+
+      if (text[0] == '\n') {
          yyLineNr++;
       }
 
@@ -2098,16 +2227,19 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <FormatBlock>"/*"          {
+      // */ (editor syntax fix)
       // start of a C-comment
+      QString text = QString::fromUtf8(yytext);
+
       g_commentCount++;
-      addOutput(yytext);
+      addOutput(text);
    }
 
 <FormatBlock>"*/"          {
       // end of a C-comment
-
       QString text = QString::fromUtf8(yytext);
       addOutput(text);
+
       g_commentCount--;
 
       if (g_commentCount < 0 && blockName != "verbatim") {
@@ -2124,12 +2256,14 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <FormatBlock><<EOF>>          {
       QString endTag = "@end" + blockName;
+
       if (blockName == "startuml") {
          endTag = "enduml";
       }
 
       warn(yyFileName, yyLineNr, "Reached end of comment while inside a @%s block, check for missing @%s tag",
-           csPrintable(blockName), csPrintable(endTag) );
+                 csPrintable(blockName), csPrintable(endTag) );
+
       yyterminate();
    }
 
@@ -2137,22 +2271,26 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
   /* ----- handle arguments of if/ifnot commands ------- */
 
 <GuardParam>{B}*"("                     {
-      g_guardExpr=yytext;
-      g_roundCount=1;
+      QString text = QString::fromUtf8(yytext);
+      g_guardExpr  = text;
+      g_roundCount = 1;
       BEGIN(GuardExpr);
    }
 
 <GuardExpr>[^()]*                       {
-      g_guardExpr+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      g_guardExpr += text;
    }
 
 <GuardExpr>"("                          {
-      g_guardExpr+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      g_guardExpr += text;
       g_roundCount++;
    }
 
 <GuardExpr>")"                          {
-      g_guardExpr+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      g_guardExpr += text;
       g_roundCount--;
 
       if (g_roundCount == 0) {
@@ -2160,25 +2298,29 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       }
    }
 
-<GuardExpr>\n                           {
-      warn(yyFileName, yyLineNr, "invalid expression '%s' for guard", qPrintable(g_guardExpr));
-      unput(commentscanYYtext[0]);
+<GuardExpr>\n                           {      
+      warn(yyFileName, yyLineNr, "Invalid expression '%s' for guard", csPrintable(g_guardExpr));
+      unput(yytext[0]);
       BEGIN(GuardParam);
    }
 
 <GuardParam>{B}*[a-z_A-Z0-9.\-]+            {
       // parameter of if/ifnot guard
-      handleGuard(yytext);
+      QString text = QString::fromUtf8(yytext);
+      handleGuard(text);
    }
 
 <GuardParam>{DOCNL}        {
       // end of argument
-      if (*yytext=='\n') {
+      QString text = QString::fromUtf8(yytext);
+
+      if (text[0] == '\n') {
          yyLineNr++;
       }
 
-      //next line is commented out due to bug620924
-      //addOutput('\n');
+      // next line is commented out due to bug620924
+      // addOutput('\n');
+
       BEGIN( Comment );
    }
 
@@ -2190,7 +2332,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <GuardParam>.           {
       // ignore other stuff
-      addOutput(*yytext);
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text[0]);
    }
 
 <GuardParamEnd>{B}*{DOCNL}       {
@@ -2210,7 +2353,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <GuardParamEnd>.        {
-      unput(*yytext);
+      unput(yytext[0]);
       BEGIN(Comment);
    }
 
@@ -2231,7 +2374,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          warn(yyFileName,yyLineNr, "Found @endif without matching start command");
 
        } else {
-         GuardedSection *s = guards.pop();
+         GuardedSection *s  = guards.pop();
          bool parentVisible = s->parentVisible();
          delete s;
 
@@ -2243,34 +2386,32 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <SkipGuardedSection>{CMD}"else"/{NW}   {
-      if (guards.isEmpty())
-         {
-         warn(yyFileName,yyLineNr, "Found @else without matching start command");
-         }
-         else
-         {
-         if (! enabledSectionFound && guards.top()->parentVisible())
-         {
-         delete guards.pop();
-         guards.push(new GuardedSection(true,true));
-         enabledSectionFound=true;
-         BEGIN( GuardParamEnd );
+      if (guards.isEmpty()) {
+         warn(yyFileName, yyLineNr, "Found @else without matching start command");
+
+      } else {
+
+         if (! enabledSectionFound && guards.top()->parentVisible()) {
+            delete guards.pop();
+            guards.push(new GuardedSection(true,true));
+            enabledSectionFound = true;
+
+            BEGIN( GuardParamEnd );
          }
       }
    }
 
 <SkipGuardedSection>{CMD}"elseif"/{NW}  {
-      if (guards.isEmpty())
-         {
+      if (guards.isEmpty()) {
          warn(yyFileName,yyLineNr, "Found @elseif without matching start command");
-         }
-         else
-         {
-         if (!enabledSectionFound && guards.top()->parentVisible())
-         {
-         guardType=Guard_If;
-         delete guards.pop();
-         BEGIN( GuardParam );
+
+       } else {
+
+         if (! enabledSectionFound && guards.top()->parentVisible()) {
+            guardType = Guard_If;
+            delete guards.pop();
+
+            BEGIN( GuardParam );
          }
       }
    }
@@ -2299,62 +2440,65 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <SkipInternal>{DOCNL}         { 
       // skip line
-      if (*yytext=='\n') yyLineNr++;
+      QString text = QString::fromUtf8(yytext);
+
+      if (text[0] == '\n')  { 
+         yyLineNr++;
+      }
+
       addOutput('\n');
    }
 
 <SkipInternal>[@\\]"if"/[ \t]       {
-                                          g_condCount++;
+      g_condCount++;
    }
 
 <SkipInternal>[@\\]"ifnot"/[ \t]    {
-                                          g_condCount++;
+      g_condCount++;
    }
 
 <SkipInternal>[@\\]/"endif"      {
-                                          g_condCount--;
-                 if (g_condCount<0) // handle conditional section around of \internal, see bug607743
-                 {
-                   unput('\\');
-                   BEGIN(Comment);
-                 }
+      g_condCount--;
+   
+      if (g_condCount < 0 )   {
+         // handle conditional section around of \internal, see bug607743
+      
+         unput('\\');
+         BEGIN(Comment);
+      }
    }
 
 <SkipInternal>[@\\]/"section"[ \t]  {
-                    if (g_sectionLevel>0)
-                 {
-                   unput('\\');
-                   BEGIN(Comment);
-                 }
+      if (g_sectionLevel > 0 ) {
+         unput('\\');
+         BEGIN(Comment);
+      }
    }
 
 <SkipInternal>[@\\]/"subsection"[ \t]  {
-                    if (g_sectionLevel>1)
-                 {
-                   unput('\\');
-                   BEGIN(Comment);
-                 }
+      if (g_sectionLevel > 1)  {                 
+         unput('\\');
+         BEGIN(Comment);
+      }
    }
 
 <SkipInternal>[@\\]/"subsubsection"[ \t]  {
-                    if (g_sectionLevel>2)
-                 {
-                   unput('\\');
-                   BEGIN(Comment);
-                 }
+      if (g_sectionLevel > 2) {      
+         unput('\\');
+         BEGIN(Comment);
+      }
    }
 
 <SkipInternal>[@\\]/"paragraph"[ \t]   {
-                    if (g_sectionLevel>3)
-                 {
-                   unput('\\');
-                   BEGIN(Comment);
-                 }
+      if (g_sectionLevel > 3) {      
+         unput('\\');
+         BEGIN(Comment);
+      }
    }
 
 <SkipInternal>[@\\]"endinternal"[ \t]*  {
-                                          addOutput("\\endinternal ");
-                 BEGIN(Comment);
+      addOutput("\\endinternal ");
+      BEGIN(Comment);
    }
 
 <SkipInternal>[^ \\@\n]+      { 
@@ -2365,27 +2509,32 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // any other character
    }
 
-
-
   /* ----- handle argument of name command ------- */
 
 <NameParam>{DOCNL}         { 
       // end of argument
-                    if (*yytext=='\n') yyLineNr++;
-                 addOutput('\n');
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+
+      if (text[0] == '\n') {
+         yyLineNr++;
+      }
+
+      addOutput('\n');
+      BEGIN( Comment );
    }
 
 <NameParam>{LC}            { 
       // line continuation
-                                          yyLineNr++;
-                 addOutput('\n');
-                 g_memberGroupHeader+=' ';
+      yyLineNr++;
+      addOutput('\n');
+      g_memberGroupHeader+=' ';
    }
 
-<NameParam>.            { // ignore other stuff
-                 g_memberGroupHeader+=*yytext;
-                 current->name+=*yytext;
+<NameParam>.            { 
+      // ignore other stuff
+      QString text = QString::fromUtf8(yytext);
+      g_memberGroupHeader += text[0];
+      current->name       += text[0];
    }
 
 
@@ -2393,33 +2542,38 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <InGroupParam>{LABELID}          { 
       // group id
-                    current->groups->append(
-                   new Grouping(yytext, Grouping::GROUPING_INGROUP)
-                 );
-                 inGroupParamFound=true;
+      QString text = QString::fromUtf8(yytext);
+
+      current->groups->append(Grouping(text, Grouping::GROUPING_INGROUP) ); 
+      inGroupParamFound = true;
    }
 
 <InGroupParam>{DOCNL}         { 
       // missing argument
-      if (!inGroupParamFound)
-      {
-      warn(yyFileName,yyLineNr, "Missing group name for \\ingroup command"
-      );
+      QString text = QString::fromUtf8(yytext);
+
+      if (! inGroupParamFound) {
+         warn(yyFileName,yyLineNr, "Missing group name for \\ingroup command");
       }
-      if (*yytext=='\n') yyLineNr++;
+
+      if (text[0] == '\n')   {
+         yyLineNr++; 
+      }
+
       addOutput('\n');
       BEGIN( Comment );
    }
 
 <InGroupParam>{LC}         { 
       // line continuation
-                                          yyLineNr++;
-                 addOutput('\n');
+      yyLineNr++;
+      addOutput('\n');
    }
 
 <InGroupParam>.            { 
       // ignore other stuff
-                    addOutput(*yytext);
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text[0]);
    }
 
 
@@ -2427,69 +2581,82 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <FnParam>{DOCNL}        { 
       // end of argument
-                    if (braceCount==0)
-                 {
-                   if (*yytext=='\n') yyLineNr++;
-                   addOutput('\n');
-                   langParser->parsePrototype(functionProto);
-                   BEGIN( Comment );
-                 }
+      QString text = QString::fromUtf8(yytext);
+
+      if (braceCount == 0) {
+         if (text[0] == '\n')   {
+            yyLineNr++; 
+         }
+         
+         addOutput('\n');        
+         langParser->parsePrototype(functionProto);
+         BEGIN( Comment );
+      }
    }
 
 <FnParam>{LC}           { 
       // line continuation
-                                          yyLineNr++;
-                 functionProto+=' ';
+      yyLineNr++;
+      functionProto += ' ';
    }
 
-<FnParam>[^@\\\n()]+          { // non-special characters
-                                          functionProto+=yytext;
+<FnParam>[^@\\\n()]+          { 
+      // non-special characters
+      QString text = QString::fromUtf8(yytext);
+      functionProto += text;
    }
 
 <FnParam>"("            {
-      functionProto+=yytext;
+      QString text = QString::fromUtf8(yytext);
+      functionProto += text;
       braceCount++;
    }
 
 <FnParam>")"            {
-                                          functionProto+=yytext;
-                 braceCount--;
+      QString text = QString::fromUtf8(yytext);
+      functionProto += text;
+      braceCount--;
    }
 
 <FnParam>.           { 
       // add other stuff
-      functionProto+=*yytext;
+      QString text = QString::fromUtf8(yytext);
+      functionProto += text[0];
    }
 
 
   /* ----- handle argument of overload command ------- */
-
-
 <OverloadParam>{DOCNL}        { 
       // end of argument
-                    if (*yytext=='\n') yyLineNr++;
-                 if (functionProto.stripWhiteSpace().isEmpty())
-                 { // plain overload command
-                   addOutput(getOverloadDocs());
-                   addOutput('\n');
-                 }
-                 else // overload declaration
-                 {
-                                            makeStructuralIndicator(Entry::OVERLOADDOC_SEC);
-                   langParser->parsePrototype(functionProto);
-                 }
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+      if (text[0] == '\n')  {
+         yyLineNr++;
+      }   
+
+      if (functionProto.trimmed().isEmpty()) { 
+         // plain overload command
+         addOutput(theTranslator->trOverloadText());
+         addOutput('\n');
+
+      }  else   {
+         // overload declaration      
+         makeStructuralIndicator(Entry::OVERLOADDOC_SEC);
+         langParser->parsePrototype(functionProto);
+      }
+
+      BEGIN( Comment );
    }
 
 <OverloadParam>{LC}        { 
       // line continuation
       yyLineNr++;
-      functionProto+=' ';
+      functionProto += ' ';
    }
 
 <OverloadParam>.        { 
       // add other stuff
-      functionProto+=*yytext;
+      QString text = QString::fromUtf8(yytext);
+      functionProto += text[0];
    }
 
 
@@ -2497,28 +2664,30 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <InheritParam>({ID}("::"|"."))*{ID}    { 
       // found argument
-                 current->extends->append(
-                   new BaseInfo(removeRedundantWhiteSpace(yytext),Public,Normal)
-                 );
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+
+      current->extends.append(BaseInfo(removeRedundantWhiteSpace(text), Public, Normal));
+      BEGIN( Comment );
    }
 
 <InheritParam>{DOCNL}         { 
       // missing argument
-                    warn(yyFileName,yyLineNr,
-                     "\\inherit command has no argument"
-                     );
-                    if (*yytext=='\n') yyLineNr++;
-                 addOutput('\n');
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+
+      warn(yyFileName, yyLineNr, "\\inherit command has no argument");
+
+      if (text[0] == '\n')  {
+         yyLineNr++;
+      }
+
+      addOutput('\n');
+      BEGIN( Comment );
    }
 
 <InheritParam>.            { 
       // invalid character for anchor label
-                    warn(yyFileName,yyLineNr,
-                     "Invalid or missing name for \\inherit command"
-                     );
-                 BEGIN(Comment);
+      warn(yyFileName, yyLineNr, "Invalid or missing name for \\inherit command");
+      BEGIN(Comment);
    }
 
 
@@ -2526,20 +2695,22 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <ExtendsParam>({ID}("::"|"."))*{ID}    { 
       // found argument
-                 current->extends->append(
-                   new BaseInfo(removeRedundantWhiteSpace(yytext),Public,Normal)
-                 );
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+      current->extends.append(BaseInfo(removeRedundantWhiteSpace(text),Public,Normal));
+      BEGIN( Comment );
    }
 
 <ExtendsParam>{DOCNL}         { 
       // missing argument
-                    warn(yyFileName,yyLineNr,
-                     "\\extends or \\implements command has no argument"
-                     );
-                    if (*yytext=='\n') yyLineNr++;
-                 addOutput('\n');
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+      warn(yyFileName,yyLineNr, "\\extends or \\implements command has no argument");
+
+      if (text[0] == '\n')   {
+         yyLineNr++;
+      }
+
+      addOutput('\n');
+      BEGIN( Comment );
    }
 
 <ExtendsParam>.            { 
@@ -2550,8 +2721,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <SkipLang>[\\@]"~"[a-zA-Z-]*        {
       /* language switch */
-
-      QString text = QString::fromUtf8(commentscanYYtext);
+      QString text = QString::fromUtf8(yytext);
       QString langId = text.mid(2);
 
       if (langId.isEmpty() || Config::getEnum("output-language").compare(langId, Qt::CaseInsensitive) == 0) {
@@ -2566,7 +2736,11 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <SkipLang>{DOCNL}          { 
       /* new line in verbatim block */
-                              if (*yytext=='\n') yyLineNr++;
+      QString text = QString::fromUtf8(yytext);
+
+      if (text[0] == '\n') {
+         yyLineNr++;
+      }
    }
 
 <SkipLang>.             { 
@@ -2578,26 +2752,30 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <CiteLabel>{CITEID}        { 
       // found argyment
-                    addCite();
-                                          addOutput(yytext);
-                 BEGIN(Comment);
+      QString text = QString::fromUtf8(yytext);
+
+      addCite();
+      addOutput(text);
+      BEGIN(Comment);
    }
 
 <CiteLabel>{DOCNL}         { 
       // missing argument
-                    warn(yyFileName,yyLineNr,
-                     "\\cite command has no label"
-                     );
-                    if (*yytext=='\n') yyLineNr++;
-                 addOutput('\n');
-                 BEGIN( Comment );
+      QString text = QString::fromUtf8(yytext);
+      warn(yyFileName, yyLineNr, "\\cite command has no label" );
+
+      if (text[0] == '\n')   {
+         yyLineNr++;
+      }
+
+      addOutput('\n');
+      BEGIN( Comment );
    }
 
-<CiteLabel>.            { // invalid character for cite label
-                    warn(yyFileName,yyLineNr,
-                     "Invalid or missing cite label"
-                     );
-                 BEGIN(Comment);
+<CiteLabel>.            { 
+      // invalid character for cite label
+      warn(yyFileName,yyLineNr, "Invalid or missing cite label");
+      BEGIN(Comment);
    }
 
 
@@ -2605,49 +2783,58 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <CopyDoc><<EOF>>        |
 <CopyDoc>{DOCNL}        {
-                    if (*yytext=='\n') yyLineNr++;
-                 addOutput('\n');
-                 setOutput(OutputDoc);
-                                          addOutput("\\copydetails ");
-                 addOutput(g_copyDocArg);
-                 addOutput("\n");
-                 BEGIN(Comment);
+      QString text = QString::fromUtf8(yytext);
+      if (text[0] == '\n')   {
+         yyLineNr++; 
+      }
+      
+      addOutput('\n');
+
+      setOutput(OutputDoc);
+      addOutput("\\copydetails ");
+      addOutput(g_copyDocArg);
+
+      addOutput("\n");
+
+      BEGIN(Comment);
    }
 
 <CopyDoc>[^\n\\]+          {
-      g_copyDocArg+=yytext;
-      addOutput(yytext);
+      QString text = QString::fromUtf8(yytext);
+      g_copyDocArg += text;
+      addOutput(text);
    }
 
 <CopyDoc>.           {
-      g_copyDocArg+=yytext;
-      addOutput(yytext);
+      QString text = QString::fromUtf8(yytext);
+      g_copyDocArg += text;
+      addOutput(text);
    }
 
 %%
 
 static bool handleBrief(const QString &)
 {
-  setOutput(OutputBrief);
-  return false;
+   setOutput(OutputBrief);
+   return false;
 }
 
 static bool handleFn(const QString &)
 {
-  bool stop = makeStructuralIndicator(Entry::MEMBERDOC_SEC);
-  functionProto.resize(0);
-  braceCount = 0;
-  BEGIN(FnParam);
+   bool stop = makeStructuralIndicator(Entry::MEMBERDOC_SEC);
+   functionProto.resize(0);
+   braceCount = 0;
+   BEGIN(FnParam);
 
-  return stop;
+   return stop;
 }
 
 static bool handleDef(const QString &)
 {
-   bool stop = makeStructuralIndicator(Entry::DEFINEDOC_SEC)
-  functionProto.resize(0);
-  BEGIN(FnParam);
-  return stop;
+   bool stop = makeStructuralIndicator(Entry::DEFINEDOC_SEC);
+   functionProto.resize(0);
+   BEGIN(FnParam);
+   return stop;
 }
 
 static bool handleOverload(const QString &)
@@ -2669,6 +2856,7 @@ static bool handleDefGroup(const QString &)
    bool stop = makeStructuralIndicator(Entry::GROUPDOC_SEC);
    current->groupDocType = Entry::GROUPDOC_NORMAL;
    BEGIN( GroupDocArg1 );
+
    return stop;
 }
 
@@ -2677,6 +2865,7 @@ static bool handleAddToGroup(const QString &)
    bool stop = makeStructuralIndicator(Entry::GROUPDOC_SEC);
    current->groupDocType = Entry::GROUPDOC_ADD;
    BEGIN( GroupDocArg1 );
+
    return stop;
 }
 
@@ -2733,9 +2922,9 @@ static bool handleCategory(const QString &)
 
 static bool handleUnion(const QString &)
 {
-  bool stop=makeStructuralIndicator(Entry::UNIONDOC_SEC);
-  BEGIN( ClassDocArg1 );
-  return stop;
+   bool stop = makeStructuralIndicator(Entry::UNIONDOC_SEC);
+   BEGIN( ClassDocArg1 );
+   return stop;
 }
 
 static bool handleStruct(const QString &)
@@ -2747,386 +2936,402 @@ static bool handleStruct(const QString &)
 
 static bool handleInterface(const QString &)
 {
-  bool stop=makeStructuralIndicator(Entry::INTERFACEDOC_SEC);
+  bool stop = makeStructuralIndicator(Entry::INTERFACEDOC_SEC);
   BEGIN( ClassDocArg1 );
   return stop;
 }
 
 static bool handleIdlException(const QString &)
 {
-  bool stop=makeStructuralIndicator(Entry::EXCEPTIONDOC_SEC);
+  bool stop = makeStructuralIndicator(Entry::EXCEPTIONDOC_SEC);
   BEGIN( ClassDocArg1 );
   return stop;
 }
 
 static bool handlePage(const QString &)
 {
-  bool stop=makeStructuralIndicator(Entry::PAGEDOC_SEC);
-  BEGIN( PageDocArg1 );
-  return stop;
+   bool stop = makeStructuralIndicator(Entry::PAGEDOC_SEC);
+   BEGIN( PageDocArg1 );
+   return stop;
 }
 
 static bool handleMainpage(const QString &)
 {
-  bool stop=makeStructuralIndicator(Entry::MAINPAGEDOC_SEC);
-  if (!stop)
-  {
-    current->name = "mainpage";
-  }
-  BEGIN( PageDocArg2 );
-  return stop;
+   bool stop = makeStructuralIndicator(Entry::MAINPAGEDOC_SEC);
+   
+   if (! stop) {
+      current->name = "mainpage";
+   }
+   
+   BEGIN( PageDocArg2 );
+   return stop;
 }
 
 static bool handleFile(const QString &)
 {
-  bool stop=makeStructuralIndicator(Entry::FILEDOC_SEC);
-  if (!stop)
-  {
-    current->name = yyFileName;
-  }
-  BEGIN( FileDocArg1 );
-  return stop;
+   bool stop = makeStructuralIndicator(Entry::FILEDOC_SEC);
+
+   if (! stop) {
+      current->name = yyFileName;
+   }
+
+   BEGIN( FileDocArg1 );
+   return stop;
 }
 
 static bool handleDir(const QString &)
 {
-  bool stop=makeStructuralIndicator(Entry::DIRDOC_SEC);
-  if (!stop) current->name = yyFileName;
-  BEGIN( FileDocArg1 );
-  return stop;
+   bool stop = makeStructuralIndicator(Entry::DIRDOC_SEC);
+
+   if (! stop) {
+      current->name = yyFileName;
+   }
+
+   BEGIN( FileDocArg1 );
+   return stop;
 }
 
 static bool handleExample(const QString &)
 {
-  bool stop=makeStructuralIndicator(Entry::EXAMPLE_SEC);
-  if (!stop) current->name = yyFileName;
-  BEGIN( FileDocArg1 );
-  return stop;
+   bool stop = makeStructuralIndicator(Entry::EXAMPLE_SEC);
+
+   if (! stop) {
+      current->name = yyFileName;
+   }
+
+   BEGIN( FileDocArg1 );
+   return stop;
 }
 
 static bool handleDetails(const QString &)
 {
-  if (inContext!=OutputBrief)
-  {
-    addOutput("\n\n"); // treat @details outside brief description
-                       // as a new paragraph
-  }
-  setOutput(OutputDoc);
-  return false;
+   if (inContext != OutputBrief) {
+      // treat @details outside brief description as a new paragraph
+      addOutput("\n\n"); 
+   }
+
+   setOutput(OutputDoc);
+   return false;
 }
 
 static bool handleName(const QString &)
 {
-  bool stop=makeStructuralIndicator(Entry::MEMBERGRP_SEC);
-  if (!stop)
-  {
-    g_memberGroupHeader.resize(0);
-    BEGIN( NameParam );
-    if (g_memberGroupId!=DOX_NOGROUP) // end of previous member group
-    {
-      closeGroup(current,yyFileName,yyLineNr,true);
-    }
+   bool stop = makeStructuralIndicator(Entry::MEMBERGRP_SEC);
+
+   if (! stop) {  
+      g_memberGroupHeader.resize(0);
+      BEGIN( NameParam );
+
+      if (g_memberGroupId != DOX_NOGROUP) {
+         // end of previous member group
+    
+         closeGroup(current,yyFileName,yyLineNr,true);
+       }
   }
+
   return stop;
 }
 
 static bool handleTodo(const QString &)
 {
-  newXRefKind = XRef_Todo;
-  setOutput(OutputXRef);
-  xrefKind = XRef_Todo;
-  return false;
+   newXRefKind = XRef_Todo;
+   setOutput(OutputXRef);
+   xrefKind = XRef_Todo;
+   return false;
 }
 
 static bool handleTest(const QString &)
 {
-  newXRefKind = XRef_Test;
-  setOutput(OutputXRef);
-  xrefKind = XRef_Test;
-  return false;
+   newXRefKind = XRef_Test;
+   setOutput(OutputXRef);
+   xrefKind = XRef_Test;
+   return false;
 }
 
 static bool handleBug(const QString &)
 {
-  newXRefKind = XRef_Bug;
-  setOutput(OutputXRef);
-  xrefKind = XRef_Bug;
-  return false;
+   newXRefKind = XRef_Bug;
+   setOutput(OutputXRef);
+   xrefKind = XRef_Bug;
+   return false;
 }
 
 static bool handleDeprecated(const QString &)
 {
-  newXRefKind = XRef_Deprecated;
-  setOutput(OutputXRef);
-  xrefKind = XRef_Deprecated;
-  return false;
+   newXRefKind = XRef_Deprecated;
+   setOutput(OutputXRef);
+   xrefKind = XRef_Deprecated;
+   return false;
 }
 
 static bool handleXRefItem(const QString &)
 {
-  newXRefKind = XRef_Item;
-  BEGIN(XRefItemParam1);
-  return false;
+   newXRefKind = XRef_Item;
+   BEGIN(XRefItemParam1);
+   return false;
 }
 
 static bool handleParBlock(const QString &)
 {
-  if (g_insideParBlock)
-  {
-    warn(yyFileName,yyLineNr,
-   "found \\parblock command while already in a parblock!");
-  }
-  if (!g_spaceBeforeCmd.isEmpty())
-  {
-    addOutput(g_spaceBeforeCmd);
-    g_spaceBeforeCmd.resize(0);
-  }
-  addOutput("@parblock ");
-  g_insideParBlock = true;
-  return false;
+   if (g_insideParBlock)   {
+      warn(yyFileName,yyLineNr, "Found \\parblock command while already in a parblock");
+   }
+   
+   if (! g_spaceBeforeCmd.isEmpty()) {
+      addOutput(g_spaceBeforeCmd);
+      g_spaceBeforeCmd.resize(0);
+   }
+   
+   addOutput("@parblock ");
+   g_insideParBlock = true;
+
+   return false;
 }
 
 static bool handleEndParBlock(const QString &)
 {
-  if (!g_insideParBlock)
-  {
-    warn(yyFileName,yyLineNr,
-   "found \\endparblock command without matching \\parblock!");
-  }
-  addOutput("@endparblock");
-  setOutput(OutputDoc); // to end a parblock inside a xrefitem like context
-  g_insideParBlock = false;
-  return false;
+   if (! g_insideParBlock) {
+     warn(yyFileName,yyLineNr, "Found \\endparblock command without matching \\parblock");
+   }
+
+   addOutput("@endparblock");
+   setOutput(OutputDoc); // to end a parblock inside a xrefitem like context
+   g_insideParBlock = false;
+
+   return false;
 }
 
 static bool handleRelated(const QString &)
 {
-  BEGIN(RelatesParam1);
-  return false;
+   BEGIN(RelatesParam1);
+   return false;
 }
 
 static bool handleRelatedAlso(const QString &)
 {
-  current->relatesType = Duplicate;
-  BEGIN(RelatesParam1);
-  return false;
+   current->relatesType = Duplicate;
+   BEGIN(RelatesParam1);
+   return false;
 }
 
 static bool handleMemberOf(const QString &)
 {
-  current->relatesType = MemberOf;
-  BEGIN(RelatesParam1);
-  return false;
+   current->relatesType = MemberOf;
+   BEGIN(RelatesParam1);
+   return false;
 }
 
 static bool handleRefItem(const QString &)
 {
-  addOutput("@refitem ");
-  BEGIN(LineParam);
-  return false;
+   addOutput("@refitem ");
+   BEGIN(LineParam);
+   return false;
 }
 
 static bool handleSection(const QString &s)
 {
-  setOutput(OutputDoc);
-  addOutput("@"+s+" ");
-  BEGIN(SectionLabel);
-  if      (s=="section")       g_sectionLevel=1;
-  else if (s=="subsection")    g_sectionLevel=2;
-  else if (s=="subsubsection") g_sectionLevel=3;
-  else if (s=="paragraph")     g_sectionLevel=4;
-  return false;
+   setOutput(OutputDoc);
+   addOutput("@"+s+" ");
+   BEGIN(SectionLabel);
+
+   if (s == "section") {
+      g_sectionLevel = 1;
+
+   } else if (s == "subsection") {
+      g_sectionLevel = 2;
+
+   } else if (s == "subsubsection") {
+      g_sectionLevel = 3;
+
+   } else if (s == "paragraph") {
+      g_sectionLevel = 4;
+
+   }
+
+   return false;
 }
 
 static bool handleSubpage(const QString &s)
 {
-  if (current->section!=Entry::EMPTY_SEC &&
-      current->section!=Entry::PAGEDOC_SEC &&
-      current->section!=Entry::MAINPAGEDOC_SEC
-     )
-  {
-    warn(yyFileName,yyLineNr,
-   "found \\subpage command in a comment block that is not marked as a page!");
+   if (current->section != Entry::EMPTY_SEC && current->section != Entry::PAGEDOC_SEC && 
+         current->section != Entry::MAINPAGEDOC_SEC) {
+
+      warn(yyFileName,yyLineNr, "Found \\subpage command in a comment block that is not marked as a page");
   }
-  if (!g_spaceBeforeCmd.isEmpty())
-  {
-    addOutput(g_spaceBeforeCmd);
-    g_spaceBeforeCmd.resize(0);
+
+  if (! g_spaceBeforeCmd.isEmpty()) {
+     addOutput(g_spaceBeforeCmd);
+      g_spaceBeforeCmd.resize(0);
   }
-  addOutput("@"+s+" ");
-  BEGIN(SubpageLabel);
-  return false;
+
+   addOutput("@"+s+" ");
+   BEGIN(SubpageLabel);
+
+   return false;
 }
 
 static bool handleAnchor(const QString &s)
 {
-  addOutput("@"+s+" ");
-  BEGIN(AnchorLabel);
-  return false;
+   addOutput("@"+s+" ");
+   BEGIN(AnchorLabel);
+   return false;
 }
 
 static bool handleCite(const QString &s)
 {
-  if (!g_spaceBeforeCmd.isEmpty())
-  {
-    addOutput(g_spaceBeforeCmd);
-    g_spaceBeforeCmd.resize(0);
-  }
-  addOutput("@"+s+" ");
-  BEGIN(CiteLabel);
-  return false;
+   if (! g_spaceBeforeCmd.isEmpty()) {
+     addOutput(g_spaceBeforeCmd);
+     g_spaceBeforeCmd.resize(0);
+   }
+
+   addOutput("@"+s+" ");
+   BEGIN(CiteLabel);
+   return false;
 }
 
 static bool handleFormatBlock(const QString &s)
 {
-  addOutput("@"+s+" ");
-  blockName=s;
-  g_commentCount=0;
-  BEGIN(FormatBlock);
-  return false;
+   addOutput("@"+s+" ");
+   blockName=s;
+   g_commentCount=0;
+   BEGIN(FormatBlock);
+
+   return false;
 }
 
 static bool handleAddIndex(const QString &)
 {
-  addOutput("@addindex ");
-  BEGIN(LineParam);
-  return false;
+   addOutput("@addindex ");
+   BEGIN(LineParam);
+   return false;
 }
 
 static bool handleIf(const QString &)
 {
-  enabledSectionFound=false;
-  guardType = Guard_If;
-  g_spaceBeforeIf = g_spaceBeforeCmd;
-  BEGIN(GuardParam);
-  return false;
+   enabledSectionFound = false;
+   guardType = Guard_If;
+   g_spaceBeforeIf = g_spaceBeforeCmd;
+   BEGIN(GuardParam);
+   return false;
 }
 
 static bool handleIfNot(const QString &)
 {
-  enabledSectionFound=false;
-  guardType = Guard_IfNot;
-  g_spaceBeforeIf = g_spaceBeforeCmd;
-  BEGIN(GuardParam);
-  return false;
+   enabledSectionFound = false;
+   guardType = Guard_IfNot;
+   g_spaceBeforeIf = g_spaceBeforeCmd;
+   BEGIN(GuardParam);
+   return false;
 }
 
 static bool handleElseIf(const QString &)
 {
-  if (guards.isEmpty())
-  {
-    warn(yyFileName,yyLineNr,
-   "found \\else without matching start command");
-  }
-  else
-  {
-    guardType = enabledSectionFound ? Guard_Skip : Guard_If;
-    BEGIN(GuardParam);
-  }
-  return false;
+   if (guards.isEmpty()) {
+      warn(yyFileName,yyLineNr, "Found \\else without matching start command");
+   } else {
+      guardType = enabledSectionFound ? Guard_Skip : Guard_If;
+      BEGIN(GuardParam);
+   }
+   
+   return false;
 }
 
 static bool handleElse(const QString &)
 {
-  if (guards.isEmpty())
-  {
-    warn(yyFileName,yyLineNr,
-   "found \\else without matching start command");
-  }
-  else
-  {
-    BEGIN( SkipGuardedSection );
-  }
-  return false;
+   if (guards.isEmpty()) {
+      warn(yyFileName,yyLineNr, "Found \\else without matching start command");
+   } else {
+      BEGIN( SkipGuardedSection );
+   }
+
+   return false;
 }
 
 static bool handleEndIf(const QString &)
 {
-  if (guards.isEmpty())
-  {
-    warn(yyFileName,yyLineNr,
-   "found \\endif without matching start command");
-  }
-  else
-  {
-    delete guards.pop();
-  }
-  enabledSectionFound=false;
-  if (!g_spaceBeforeCmd.isEmpty())
-  {
-    addOutput(g_spaceBeforeCmd);
-    g_spaceBeforeCmd.resize(0);
-  }
-  BEGIN( GuardParamEnd );
-  return false;
+   if (guards.isEmpty())   {
+      warn(yyFileName,yyLineNr, "Found \\endif without matching start command");
+   
+   } else {
+      delete guards.pop();
+   }
+   
+   enabledSectionFound = false;
+   if (! g_spaceBeforeCmd.isEmpty()) {
+      addOutput(g_spaceBeforeCmd);
+      g_spaceBeforeCmd.resize(0);
+   }
+
+   BEGIN( GuardParamEnd );
+   return false;
 }
 
 static bool handleIngroup(const QString &)
 {
-  inGroupParamFound=false;
-  BEGIN( InGroupParam );
-  return false;
+   inGroupParamFound = false;
+   BEGIN( InGroupParam );
+   return false;
 }
 
 static bool handleNoSubGrouping(const QString &)
 {
-  current->subGrouping = false;
-  return false;
+   current->subGrouping = false;
+   return false;
 }
 
 static bool handleShowInitializer(const QString &)
 {
-  current->initLines = 100000; // ON
-  return false;
+   current->initLines = 100000;  // ON
+   return false;
 }
 
 static bool handleHideInitializer(const QString &)
 {
-  current->initLines = 0; // OFF
-  return false;
+   current->initLines = 0;       // OFF
+   return false;
 }
 
 static bool handleCallgraph(const QString &)
 {
-  current->callGraph = true; // ON
-  return false;
+   current->callGraph = true; 
+   return false;
 }
 
 static bool handleHideCallgraph(const QString &)
 {
-  current->callGraph = false; // OFF
-  return false;
+   current->callGraph = false; 
+   return false;
 }
 
 static bool handleCallergraph(const QString &)
 {
-  current->callerGraph = true; // ON
-  return false;
+   current->callerGraph = true; 
+   return false;
 }
 
 static bool handleHideCallergraph(const QString &)
 {
-  current->callerGraph = false; // OFF
-  return false;
+   current->callerGraph = false; 
+   return false;
 }
 
 static bool handleInternal(const QString &)
 {
-   if (! Config::getBool("internal-docs")) {
+   if (! internalDocs) {
       // make sure some whitespace before a \internal command
       // is not treated as "documentation"
 
-      if (current->doc.stripWhiteSpace().isEmpty()) {
+      if (current->doc.trimmed().isEmpty()) {
          current->doc.resize(0);
       }
 
-      g_condCount=0;
+      g_condCount = 0;
       BEGIN( SkipInternal );
 
    } else   {
       // re-enabled for bug640828
       addOutput("\\internal ");
-      inInternalDocs = true;
+      processInternalDocs = true;
   }
 
   return false;
@@ -3134,22 +3339,22 @@ static bool handleInternal(const QString &)
 
 static bool handleLineBr(const QString &)
 {
-  addOutput('\n');
-  return false;
+   addOutput('\n');
+   return false;
 }
 
 static bool handleStatic(const QString &)
 {
-  endBrief();
-  current->stat = true;
-  return false;
+   endBrief();
+   current->stat = true;
+   return false;
 }
 
 static bool handlePure(const QString &)
 {
-  endBrief();
-  current->virt = Pure;
-  return false;
+   endBrief();
+   current->virt = Pure;
+   return false;
 }
 
 static bool handlePrivate(const QString &)
@@ -3160,20 +3365,20 @@ static bool handlePrivate(const QString &)
 
 static bool handlePrivateSection(const QString &)
 {
-  current->protection = protection = Private;
-  return false;
+   current->protection = protection = Private;
+   return false;
 }
 
 static bool handleProtected(const QString &)
 {
-  current->protection = Protected;
-  return false;
+   current->protection = Protected;
+   return false;
 }
 
 static bool handleProtectedSection(const QString &)
 {
-  current->protection = protection = Protected ;
-  return false;
+   current->protection = protection = Protected ;
+   return false;
 }
 
 static bool handlePublic(const QString &)
@@ -3265,7 +3470,7 @@ static void checkFormula()
 // main entry point
 bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, const QString &comment,
                   const QString &fileName, int &lineNr, bool isBrief, bool isAutoBriefOn, bool isInbody,
-                  Protection &prot, int &position, bool &newEntryNeeded )
+                  Protection &r_protection, int &r_position, bool &r_newEntryNeeded )
 {
    initParser();
 
@@ -3281,15 +3486,15 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    inputString    = comment;
    inputString.append(" ");
 
-   inputPosition  = position;
-   yyLineNr       = lineNr;
+   inputPosition  = r_position;
    yyFileName     = fileName;
-   protection     = prot;
-   needNewEntry   = false;
+   yyLineNr       = lineNr;
+   protection     = r_protection;
+   s_needNewEntry = false;
    xrefKind       = XRef_None;
    xrefAppendFlag = false;
    insidePre      = false;
-   parseMore      = false;
+   s_parseMore    = false;
    inBody         = isInbody;
 
    outputXRef.resize(0);
@@ -3301,7 +3506,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    g_spaceBeforeCmd.resize(0);
    g_spaceBeforeIf.resize(0);
 
-   printlex(yy_flex_debug, true, __FILE__, fileName ? csPrintable(fileName));
+   printlex(yy_flex_debug, true, __FILE__, fileName);
 
    if (! current->inbodyDocs.isEmpty() && isInbody) {
       // separate in body fragments
@@ -3310,17 +3515,20 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    Debug::print(Debug::CommentScan, 0, "-----------\nCommentScanner: %s:%d\n"
                 "input=[\n%s]\n", qPrintable(fileName), lineNr, qPrintable(comment) );
-              );
+              
+   yyrestart(yyin);   
 
-   commentscanYYrestart(commentscanYYin);
-   BEGIN( Comment );
+   if (s_resumeState == 0) {
+      BEGIN( Comment );
 
-printf("\n BROOM (about to run commentScan)  %s  %s\n", csPrintable(current->brief), csPrintable(current->doc.left(30)) );
+   } else {
+      BEGIN(s_resumeState);
+   }
 
+   s_resumeState = Comment;
 
-   commentscanYYlex();
+   yylex();
    setOutput(OutputDoc);
-
 
    if (YY_START == OverloadParam) {
       // comment ended with \overload
@@ -3338,7 +3546,7 @@ printf("\n BROOM (about to run commentScan)  %s  %s\n", csPrintable(current->bri
    current->doc = stripLeadingAndTrailingEmptyLines(current->doc, current->docLine);
 
    if (current->section == Entry::FILEDOC_SEC && current->doc.isEmpty()) {
-      // to allow a comment block with just a @file command.
+      // to allow a comment block with just a @file command
       current->doc = "\n\n";
    }
 
@@ -3354,31 +3562,31 @@ printf("\n BROOM (about to run commentScan)  %s  %s\n", csPrintable(current->bri
    }
 
    Debug::print(Debug::CommentScan, 0, "brief=[line=%d\n%s]\ndocs=[line=%d\n%s]\ninbody=[line=%d\n%s]\n===========\n",
-                current->briefLine, qPrintable(current->brief), current->docLine, qPrintable(current->doc),
+                current->briefLine,  qPrintable(current->brief), current->docLine, qPrintable(current->doc),
                 current->inbodyLine, qPrintable(current->inbodyDocs) );
+
    checkFormula();
-   prot = protection;
+   r_protection = protection;
 
    groupAddDocs(curEntry);
-
-   // if we did not proceed during this call it does not make ense to continue since we get stuck
-   // See bug 567346 for situations were this happens
-
-   if (parseMore && position == inputPosition) {
-      parseMore = FALSE;
+   r_newEntryNeeded = s_needNewEntry;
+    
+   if (s_parseMore && r_position == inputPosition) {
+      // did not proceed during this call, do not continue or there will be an infinate loop
+      s_parseMore = false;
    }
 
-   if (parseMore) {
-      position = inputPosition;
+   if (s_parseMore) {
+      r_position = inputPosition;
    } else {
-      position = 0;
+      r_position = 0;
    }
 
    lineNr = yyLineNr;
 
-   printlex(yy_flex_debug, false, __FILE__, qPrintable(fileName) );
+   printlex(yy_flex_debug, false, __FILE__, fileName);
 
-   return parseMore;
+   return s_parseMore;
 }
 
 void groupEnterFile(const QString &fileName, int)
@@ -3415,7 +3623,8 @@ void groupEnterCompound(const QString &fileName, int line, const QString &name)
    int i = g_compoundName.indexOf('(');
 
    if (i != -1) {
-      g_compoundName=g_compoundName.left(i); // strip category (Obj-C)
+      // strip category (Obj-C)
+      g_compoundName=g_compoundName.left(i);
    }
 
    if (g_compoundName.isEmpty()) {
@@ -3437,10 +3646,12 @@ static int findExistingGroup(int &groupId, const QSharedPointer<MemberGroupInfo>
 
       auto mi = *di;
 
-      if (g_compoundName == mi->compoundName && ! mi->header.isEmpty() && mi->header.compare(info->header, Qt::CaseInsensitive) == 0) {
+      if (g_compoundName == mi->compoundName && ! mi->header.isEmpty() && 
+               mi->header.compare(info->header, Qt::CaseInsensitive) == 0) {
+
          // same file or scope, not a nameless group, same header name
 
-         return (int)di.key(); // put the item in this group
+         return (int)di.key();    // put the item in this group
       }
    }
 
@@ -3452,7 +3663,7 @@ void openGroup(QSharedPointer<Entry> e, const QString &, int)
 {
    if (e->section == Entry::GROUPDOC_SEC) {
       // auto group
-      g_autoGroupStack.push(new Grouping(e->name, e->groupingPri()));
+      g_autoGroupStack.push( QMakeShared<Grouping>(e->name, e->groupingPri()) ); 
 
    } else {
       // start of a member group
@@ -3461,7 +3672,7 @@ void openGroup(QSharedPointer<Entry> e, const QString &, int)
          // no group started yet
          static int curGroupId = 0;
 
-         QSharedPointer<MemberGroupInfo> info(new MemberGroupInfo);
+         QSharedPointer<MemberGroupInfo> info = QMakeShared<MemberGroupInfo>();
 
          info->header = g_memberGroupHeader.trimmed();
          info->compoundName = g_compoundName;
@@ -3499,15 +3710,14 @@ void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool
 
    } else if (! g_autoGroupStack.isEmpty()) {
       // end of auto group
-      Grouping *grp = g_autoGroupStack.pop();
+      QSharedPointer<Grouping> grp = g_autoGroupStack.pop();
 
       // see bug577005: we should not remove the last group for e
       if (! foundInline) {
          e->groups->removeLast();
       }
-
-      delete grp;
-      if (!foundInline) {
+     
+      if (! foundInline) {
          initGroupInfo(e);
       }
    }
@@ -3552,7 +3762,7 @@ static void handleGuard(const QString &expr)
 {
    CondParser prs;
    bool sectionEnabled = prs.parse(yyFileName, yyLineNr, expr.trimmed());
-   bool parentEnabled = true;
+   bool parentEnabled  = true;
 
    if (! guards.isEmpty()) {
       parentEnabled = guards.top()->isEnabled();

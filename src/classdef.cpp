@@ -819,7 +819,7 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
       ol.endSimpleSect();
    }
 
-   //ol.newParagraph();
+   // ol.newParagraph();
    writeSourceDef(ol, name());
    ol.endTextBlock();
 }

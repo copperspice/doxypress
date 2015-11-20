@@ -418,7 +418,7 @@ static void checkArgumentName(const QString &name, bool isParam)
          }
       }
 
-      if (!found && isParam) {         
+      if (! found && isParam) {         
          QString scope = s_memberDef->getScopeString();
 
          if (!scope.isEmpty()) {
@@ -430,14 +430,14 @@ static void checkArgumentName(const QString &name, bool isParam)
          QString inheritedFrom = "";
 
          QString docFile = s_memberDef->docFile();
-         int docLine = s_memberDef->docLine();
+         int docLine     = s_memberDef->docLine();
 
          QSharedPointer<MemberDef> inheritedMd = s_memberDef->inheritsDocsFrom();
 
          if (inheritedMd) { 
             // documentation was inherited
 
-            inheritedFrom = QString(" inherited from member %1 at line %2 in file %3").arg(QString(inheritedMd->name())).
+            inheritedFrom = QString(" Inherited from member %1 at line %2 in file %3").arg(QString(inheritedMd->name())).
                                   arg(inheritedMd->docLine()).arg(QString(inheritedMd->docFile()));
   
             docFile = s_memberDef->getDefFileName();
@@ -1038,13 +1038,12 @@ static void handleUnclosedStyleCommands()
 {
    if (! s_initialStyleStack.isEmpty()) {
       DocStyleChange sc = s_initialStyleStack.top();
-
       s_initialStyleStack.pop();
 
       handleUnclosedStyleCommands();
 
       warn_doc_error(s_fileName, doctokenizerYYlineno, "End of comment block while expecting "
-                     "command </%s>", qPrintable(sc.styleString()));
+                     "command </%s>", csPrintable(sc.styleString()));
    }
 }
 
@@ -5487,6 +5486,7 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
       if (fileName == "this") {
          fileName = s_fileName;
       }
+
       doctokenizerYYsetStateSnippet();
       tok = doctokenizerYYlex();
       doctokenizerYYsetStatePara();
@@ -7535,6 +7535,7 @@ static QString processCopyDoc(const QString &data, uint &len)
    return retval;
 }
 
+// main entry point
 DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md, 
                             const QString &input, bool indexWords, bool isExample, const QString &exampleName, 
                             bool singleLine, bool linkFromIndex)

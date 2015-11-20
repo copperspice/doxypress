@@ -3904,7 +3904,6 @@ if (name.contains("fake") || name.contains("isChopped")) {
    printf("\n AddMethodToClass --> %s  <--", qPrintable(name) );  
    printf("\n      Type: %s",    qPrintable(root->type) );
    printf("\n      Args: %s",    qPrintable(root->args) );  
-
    printf("\n      Brief: %s",   qPrintable(root->brief) );   
    printf("\n      Doc: %s",     qPrintable(root->doc)   );   
    printf("\n      In Body: %s", qPrintable(root->inbodyDocs) );   
@@ -3945,16 +3944,16 @@ if (name.contains("fake") || name.contains("isChopped")) {
                mtype, root->tArgLists ? &root->tArgLists->last() : 0, &root->argList);
 
 
-printf("\n BROOM (dw 3960)  method: %s ",   csPrintable(root->name) );
-printf("\n BROOM (dw 3960)  brief:%s   ",   csPrintable(root->brief) );
-printf("\n BROOM (dw 3961)  details:%s \n", csPrintable(root->doc.left(30)) );
+//   printf("\n BROOM (dw 3960)  method: %s ",   csPrintable(root->name) );
+//   printf("\n BROOM (dw 3960)  brief:%s   ",   csPrintable(root->brief) );
+//   printf("\n BROOM (dw 3961)  details:%s \n", csPrintable(root->doc.left(30)) );
 
 
 
    md->setTagInfo(rootNav->tagInfo());
    md->setMemberClass(cd);
    md->setDocumentation(root->doc, root->docFile, root->docLine);
-   md->setDocsForDefinition(!root->proto);
+   md->setDocsForDefinition(! root->proto);
    md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
    md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
    md->setBodySegment(root->bodyLine, root->endBodyLine);
@@ -9048,7 +9047,6 @@ void Doxy_Work::generateExampleDocs()
 void Doxy_Work::generateGroupDocs()
 { 
    for (auto gd : *Doxy_Globals::groupSDict) {
-
       if (! gd->isReference()) {
          msg("Generating docs for group %s\n", qPrintable(gd->name()) );
          gd->writeDocumentation(*Doxy_Globals::g_outputList);
