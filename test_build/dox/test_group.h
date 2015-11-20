@@ -44,8 +44,11 @@ class groupTest
 
    bbTest();
       // bb documentation line one.
-      // continued bb documentation on line two.
-      // Return 'true' line three.
+      // continue with *italic* or _italic_
+      // Return 'tiny font' line three.
+      // See {Valid Date Values and Their Representations} for details
+      // show me a !bold!   
+
 
    // INFO: bb comment which should not appear
    someMethodwithNoDocs();
@@ -53,3 +56,20 @@ class groupTest
 /** @} */
    
 };
+
+
+class Fruit 
+{
+   public:
+      virtual void chew(void);      ///< describe how to chew a fruit
+};
+
+class Apple : public Fruit
+{
+   public:
+      void chew();                 
+
+};
+
+
+
