@@ -1801,7 +1801,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
          m_anchor = id;
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid cite anchor id `%s'", qPrintable(id));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid cite anchor id '%s'", qPrintable(id));
          m_file   = "invalid";
          m_anchor = "invalid";
          
@@ -1821,7 +1821,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
          }
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid anchor id `%s'", qPrintable(id));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid anchor id '%s'", qPrintable(id));
          m_file   = "invalid";
          m_anchor = "invalid";
 
@@ -2429,7 +2429,7 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
       }
    }
    m_text = target;
-   warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to resolve reference to `%s' for \\ref command", 
+   warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to resolve reference to '%s' for \\ref command", 
                   qPrintable(target));
 }
 
@@ -2525,7 +2525,7 @@ DocCite::DocCite(DocNode *parent, const QString &target, const QString &)
    }
 
    m_text = target;
-   warn_doc_error(s_fileName, doctokenizerYYlineno, "unable to resolve reference to `%s' for \\cite command", qPrintable(target));
+   warn_doc_error(s_fileName, doctokenizerYYlineno, "unable to resolve reference to '%s' for \\cite command", qPrintable(target));
 }
 
 DocLink::DocLink(DocNode *parent, const QString &target)
@@ -2561,7 +2561,7 @@ DocLink::DocLink(DocNode *parent, const QString &target)
    }
 
    // bogus link target
-   warn_doc_error(s_fileName, doctokenizerYYlineno, "unable to resolve link to `%s' for \\link command", qPrintable(target));
+   warn_doc_error(s_fileName, doctokenizerYYlineno, "unable to resolve link to '%s' for \\link command", qPrintable(target));
 }
 
 
@@ -5623,7 +5623,7 @@ int DocPara::handleCommand(const QString &cmdName)
 
    switch (cmdId) {
       case CMD_UNKNOWN:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Found unknown command `\\%s'", qPrintable(cmdName));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Found unknown command '\\%s'", csPrintable(cmdName));
          break;
 
       case CMD_EMPHASIS:
@@ -7248,7 +7248,7 @@ void DocText::parse()
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Quot));
                   break;
                default:
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command `%s' found", qPrintable(g_token->name));
+                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command '%s' found", qPrintable(g_token->name));
                   break;
             }
             break;
@@ -7368,7 +7368,7 @@ void DocRoot::parse()
          retval = s->parse();
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid section id `%s'; ignoring section", qPrintable(g_token->sectionId));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid section id '%s'; ignoring section", qPrintable(g_token->sectionId));
          retval = 0;
       }
    }

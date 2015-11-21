@@ -2361,12 +2361,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <UsingAliasEnd>";"                      {
-                                          previous->doc   = current->doc;
-                                          previous->brief = current->brief;
-                                          current->doc.resize(0);
-                                          current->brief.resize(0);
-                                          unput(';');
-                                          BEGIN(UsingAlias);
+      previous->doc   = current->doc;
+      previous->brief = current->brief;
+      current->doc.resize(0);
+      current->brief.resize(0);
+      unput(';');
+      BEGIN(UsingAlias);
    }
 
 <UsingDirective>{SCOPENAME}      { 

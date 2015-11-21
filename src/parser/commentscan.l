@@ -422,7 +422,7 @@ static QString          g_compoundName;
 
 static bool             internalDocs;   
 
-static bool             processInternalDocs = false;    
+static bool             processInternalDocs = false;  
 static int              boldCount = 0;
 static int              emCount   = 0;
 static int              tickCount = 0;
@@ -1423,9 +1423,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <Comment>\n             {
-      // newline
-      QString text = QString::fromUtf8(yytext);
-      addOutput(text[0]);
+      // newline      
+      addOutput('\n');
       yyLineNr++;
    }
 
@@ -1439,7 +1438,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext); 
       addOutput(text);
    }
-
 
  /* --------------   Rules for handling HTML comments ----------- */
 
@@ -3517,15 +3515,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
                 "input=[\n%s]\n", qPrintable(fileName), lineNr, qPrintable(comment) );
               
    yyrestart(yyin);   
-
-   if (s_resumeState == 0) {
-      BEGIN( Comment );
-
-   } else {
-      BEGIN(s_resumeState);
-   }
-
-   s_resumeState = Comment;
+   BEGIN( Comment );
 
    yylex();
    setOutput(OutputDoc);
