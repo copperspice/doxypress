@@ -12,8 +12,8 @@
 *
 *************************************************************************/
 
-/** This class contains a group of constructors. 
-  * The following notation will translate 'code' to behave like it says <code>true</code> 
+/** This class contains a group of constructors.
+  * The following notation will translate 'code' to behave like it says <code>true</code>
 */
 
 
@@ -27,38 +27,43 @@ class groupTest
 
 /** @{ */
 
-   /** constructor a */
+   /** constructor with no parameters */
    groupTest1();
 
-   groupTest2(long);             /**< constructor b  */
+   groupTest2(long);             /**< constructor comment with two stars  */
 
-   groupTest3(QString);          /*!< constructor e  */
+   groupTest3(QString);          /*!< constructor comment with one star and one exclamation  */
 
-   groupTest4(bool);             ///< constructor c  broom
+   groupTest4(bool);             ///< constructor comment with three slashes
 
-   groupTest5(int);              //!< constructor d
+   groupTest5(int);              //!< constructor comment two slashes and one exclamation 
 
    /// Normal documentation on line one.
    /// Continued standard documentation on line two.
    documentTest();
 
-   bbTest();
-      // bb documentation line one.
-      // continue with *italic* or _italic_
-      // Return 'tiny font' line three.
-      // See {Valid Date Values and Their Representations} for details
-      // show me a !bold!   
+   bbTest1();
+      // Documentation on line one.
+      // Continue with some *italic* using a star and then _italic_ with an underscore.
+      // This is a link {Valid Date Values and Their Representations}.
+      // Show text in !bold-good! and now fail a !bold-bad1(! and then fail again !bold-bad2 ! end test.
 
+   bbTest2();
+      // Return 'tiny font' text.
+      // Sample text: (1) 'Date's   'Date'd   'Date'ed   'Date'th    'Date'ing
+      // The next link is split on two lines. See {Valid Date Values and
+      // Their Representations} for details.
 
-   // INFO: bb comment which should not appear
+   // INFO: this comment which should not appear
    someMethodwithNoDocs();
 
 /** @} */
-   
+
 };
 
 
-class Fruit 
+
+class Fruit
 {
    public:
       virtual void chew(void);      ///< describe how to chew a fruit
@@ -67,9 +72,8 @@ class Fruit
 class Apple : public Fruit
 {
    public:
-      void chew();                 
+      void chew();
 
 };
-
 
 

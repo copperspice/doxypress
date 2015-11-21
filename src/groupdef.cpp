@@ -1402,7 +1402,18 @@ void GroupDef::addListReferences()
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
    QList<ListItemInfo> *xrefItems = xrefListItems();
-   addRefItem(xrefItems, getOutputFileBase(), theTranslator->trGroup(true, true), getOutputFileBase(), 
+
+   QString title;
+
+   if (Config::getBool("bb-style"))  {
+      // maybe allow a user defined value   11/20/2015
+      title = "Component";
+
+   } else {
+      title = theTranslator->trGroup(true, true);
+   }
+
+   addRefItem(xrefItems, getOutputFileBase(), title, getOutputFileBase(), 
               name(), 0, QSharedPointer<Definition>() );
     
    for (auto mg : *memberGroupSDict) {

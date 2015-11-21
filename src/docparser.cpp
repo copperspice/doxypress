@@ -7619,16 +7619,20 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
             name.prepend(cd->compoundTypeString() + " ");
          }
          break;
+
          case Definition::TypeNamespace: {
             if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
                name = theTranslator->trPackage(name);
+
             } else if (lang == SrcLangExt_Fortran) {
                name.prepend(theTranslator->trModule(true, true) + " ");
+
             } else {
                name.prepend(theTranslator->trNamespace(true, true) + " ");
             }
          }
          break;
+
          case Definition::TypeGroup: {
             QSharedPointer<GroupDef> gd = ctx.dynamicCast<GroupDef>();
 

@@ -283,8 +283,8 @@ void MemberGroup::addListReferences(QSharedPointer<Definition> def)
    memberList->addListReferences(def);
 
    if (m_xrefListItems && def) {
-      QString name = def->getOutputFileBase() + "#" + anchor();
-      addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, 0, def);
+      QString name = def->getOutputFileBase() + "#" + anchor();      
+      addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, 0, def);      
    }
 }
 

@@ -1813,8 +1813,7 @@ class Translator_Cs : public Translator
    }
 
    /*! This is used for translation of the word that will possibly
-    *  be followed by a single name or by a list of names
-    *  of the category.
+    *  be followed by a single name or by a list of names of the category.
     */
    virtual QString trModule(bool first_capital, bool singular) {        
 
