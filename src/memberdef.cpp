@@ -180,7 +180,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       }
 
       ol.endMemberDocName();
-      ol.startParameterList(!md->isObjCMethod());
+      ol.startParameterList(! md->isObjCMethod());
    }
 
    ol.enableAll();
@@ -189,7 +189,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
    {
       // other formats
-      if (!md->isObjCMethod()) {
+      if (! md->isObjCMethod()) {
          ol.docify("(");   // start argument list
       }
       ol.endMemberDocName();
@@ -250,6 +250,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
       if (! a->attrib.isEmpty() && ! md->isObjCMethod()) { 
          // argument has an IDL attribute
+
          ol.docify(a->attrib + " ");
       }
 
@@ -408,16 +409,20 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Html);
    ol.disable(OutputGenerator::Latex);
-   if (!md->isObjCMethod()) {
+
+   if (! md->isObjCMethod()) {
       ol.docify(")");   // end argument list
    }
+
    ol.enableAll();
    if (htmlOn) {
       ol.enable(OutputGenerator::Html);
    }
+
    if (latexOn) {
       ol.enable(OutputGenerator::Latex);
    }
+
    if (first) {
       ol.startParameterName(defArgList->count() < 2);
    }
@@ -552,7 +557,7 @@ class MemberDefImpl
    bool livesInsideEnum;
    QSharedPointer<MemberList> enumFields;    // enumeration fields
 
-   QSharedPointer<MemberDef> redefines;      // the members that this member redefines
+   QSharedPointer<MemberDef> redefines;      // the parent member 
    MemberList   *redefinedBy;                // the list of members that redefine this one
 
    QSharedPointer<MemberDef>  memDef;        // member definition for this declaration
@@ -2537,7 +2542,7 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
 
 QString MemberDef::displayDefinition() const
 {
-   QString ldef = definition();
+   QString ldef  = definition();
    QString title = name();
 
    if (isEnumerate()) {
@@ -2683,8 +2688,7 @@ void MemberDef::_writeGroupInclude(OutputList &ol, bool inGroup)
    }
 }
 
-/*! Writes the "detailed documentation" section of this member to
- *  all active output formats.
+/*! Writes the "detailed documentation" section of this member to all active output formats.
  */
 void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString &scName, QSharedPointer<Definition> container,
                                    bool inGroup, bool showEnumValues, bool showInline)
@@ -2742,8 +2746,8 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString
    }
 
    QString doxyArgs = argsString();
-   QString ldef     = definition();     
-   QString title    = name();
+   QString ldef     = definition();        // used in the member docs   
+   QString title    = name();              // used in the list of methods
  
    if (isEnumerate() && ! title.isEmpty() ) {
      
@@ -2764,7 +2768,6 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString
          ldef = ldef.mid(2);
       }
    }
-
    
    int i = 0;
    int l;
@@ -2829,14 +2832,18 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString
 
          // last ei characters of ldef contain pointer/reference specifiers
          int ni = ldef.indexOf("::", si);
+
          if (ni >= ei) {
             ei = ni + 2;
          }
+
          linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), self, ldef.right(ldef.length() - ei));
       }
 
    } else { 
       // not an enum value or anonymous compound
+      // write member name and documentation
+ 
       ol.startDoxyAnchor(cfname, cname, memAnchor, doxyName, doxyArgs);
       ol.startMemberDoc(ciname, name(), memAnchor, title, showInline);
 
@@ -2950,7 +2957,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString
             ldef.prepend("- ");
          }
       }
-   
+
       linkifyText(TextGeneratorOLImpl(ol), container, getBodyDef(), self, substitute(ldef, "::", sep));
 
       QSharedPointer<Definition> scope = cd;
@@ -2958,6 +2965,7 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString
          scope = nd;
       }
 
+      // writes ( argList ) for member 
       hasParameterList = writeDefArgumentList(ol, scope, self);
      
       if (hasOneLineInitializer()) { 
@@ -4257,7 +4265,8 @@ QString MemberDef::objCMethodName(bool localLink, bool showStatic) const
 
    qm += name();
 
-   if (!localLink) { // link to method of same class
+   if (!localLink) { 
+      // link to method of same class
       qm += " (";
       qm += m_impl->classDef->name();
       qm += ")";
@@ -5136,37 +5145,36 @@ void MemberDef::cacheTypedefVal(QSharedPointer<ClassDef> val, const QString &tem
 }
 
 void MemberDef::copyArgumentNames(QSharedPointer<MemberDef> bmd)
-{
-   {
-      ArgumentList *arguments = bmd->argumentList();
+{   
+   // part 1
+   ArgumentList *arguments = bmd->argumentList();
 
-      if (m_impl->defArgList && arguments) {                        
-         auto iter = m_impl->defArgList->begin();
+   if (m_impl->defArgList && arguments) {                        
+      auto iter = m_impl->defArgList->begin();
 
-         for (auto argSrc : *arguments) {            
-            iter->name = argSrc.name;
-            ++iter;
-
-            if (iter == m_impl->defArgList->end()) {
-               break;
-            }
+      for (auto argSrc : *arguments) {            
+         if (iter == m_impl->defArgList->end()) {
+            break;
          }
+
+         iter->name = argSrc.name;
+         ++iter;
       }
    }
+   
+   // part 2
+   arguments = bmd->declArgumentList();
 
-   {
-      ArgumentList *arguments = bmd->declArgumentList();
-      if (m_impl->declArgList && arguments) {       
-         auto iter = m_impl->declArgList->begin();
+   if (m_impl->declArgList && arguments) {     
+      auto iter = m_impl->declArgList->begin();
 
-         for (auto argSrc : *arguments) { 
-            iter->name = argSrc.name;
-            ++iter;
-
-           if (iter == m_impl->declArgList->end()) {
-               break;
-            }
+      for (auto argSrc : *arguments) { 
+         if (iter == m_impl->declArgList->end()) {
+            break;
          }
+
+         iter->name = argSrc.name;
+         ++iter;        
       }
    }
 }
