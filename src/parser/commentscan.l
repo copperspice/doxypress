@@ -388,9 +388,9 @@ static QSharedPointer<Entry>  current;       // working entry
 static bool             s_needNewEntry;
 static int              s_resumeState; 
 
-static QString          g_sectionLabel;
-static QString          g_sectionTitle;
-static int              g_sectionLevel;
+static QString          s_sectionLabel;
+static QString          s_sectionTitle;
+static int              s_sectionLevel;
 static QString          xrefItemKey;
 static QString          newXRefItemKey;
 static QString          xrefItemTitle;
@@ -403,38 +403,34 @@ static int              braceCount;
 static bool             insidePre;
 static bool             s_parseMore;
 
-static int              g_condCount;
-static int              g_commentCount;
-static QString          g_spaceBeforeCmd;
-static QString          g_spaceBeforeIf;
-static QString          g_copyDocArg;
-static QString          g_guardExpr;
-static int              g_roundCount;
-static bool             g_insideParBlock;
+static int              s_condCount;
+static int              s_commentCount;
+static QString          s_spaceBeforeCmd;
+static QString          s_spaceBeforeIf;
+static QString          s_copyDocArg;
+static QString          s_guardExpr;
+static int              s_roundCount;
+static bool             s_insideParBlock;
 
-static QStack<QSharedPointer<Grouping>> g_autoGroupStack;
+static QStack<QSharedPointer<Grouping>> s_autoGroupStack;
 
-static int              g_memberGroupId = DOX_NOGROUP;
-static QString          g_memberGroupHeader;
-static QString          g_memberGroupDocs;
-static QString          g_memberGroupRelates;
-static QString          g_compoundName;
+static int              s_memberGroupId = DOX_NOGROUP;
+static QString          s_memberGroupHeader;
+static QString          s_memberGroupDocs;
+static QString          s_memberGroupRelates;
+static QString          s_compoundName;
 
 static bool             internalDocs;   
-
 static bool             processInternalDocs = false;  
-static int              boldCount = 0;
-static int              emCount   = 0;
-static int              tickCount = 0;
 
 static int              prevPosition = 0;
 
 static void initParser()
 {
-   g_sectionLabel.resize(0);
-   g_sectionTitle.resize(0);
-   g_memberGroupHeader.resize(0);
-   g_insideParBlock = false;
+   s_sectionLabel.resize(0);
+   s_sectionTitle.resize(0);
+   s_memberGroupHeader.resize(0);
+   s_insideParBlock = false;
 
    internalDocs = Config::getBool("internal-docs");   
 }
@@ -589,7 +585,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
          }
 
       } else {
-         si = QMakeShared<SectionInfo>(listName, yyLineNr, anchorLabel, g_sectionTitle, SectionInfo::Anchor, g_sectionLevel);
+         si = QMakeShared<SectionInfo>(listName, yyLineNr, anchorLabel, s_sectionTitle, SectionInfo::Anchor, s_sectionLevel);
          Doxy_Globals::sectionDict->insert(anchorLabel, si);
          docEntry->anchors->append(*si);
       }
@@ -644,32 +640,32 @@ static SectionInfo::SectionType sectionLevelToType(int level)
 
 static void addSection()
 {
-   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(g_sectionLabel);
+   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(s_sectionLabel);
 
    if (si) {
       if (si->lineNr != -1) {
          warn(yyFileName, yyLineNr, "Multiple use of section label '%s' while adding section, (first occurrence: %s, line %d)",
-                  csPrintable(g_sectionLabel), csPrintable(si->fileName), si->lineNr);
+                  csPrintable(s_sectionLabel), csPrintable(si->fileName), si->lineNr);
 
       } else {
          warn(yyFileName, yyLineNr, "Multiple use of section label '%s' while adding section, (first occurrence: %s)",
-                  csPrintable(g_sectionLabel), csPrintable(si->fileName));
+                  csPrintable(s_sectionLabel), csPrintable(si->fileName));
       }
 
    } else {
       // create a new section element
       QString text = QString::fromUtf8(yytext);
 
-      g_sectionTitle += text.trimmed();
+      s_sectionTitle += text.trimmed();
 
-      si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, g_sectionLabel, g_sectionTitle, 
-                  sectionLevelToType(g_sectionLevel), g_sectionLevel);
+      si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, s_sectionLabel, s_sectionTitle, 
+                  sectionLevelToType(s_sectionLevel), s_sectionLevel);
 
       // add section to this entry
       current->anchors->append(*si);
 
       // add section to the global dictionary
-      Doxy_Globals::sectionDict->insert(g_sectionLabel, si);
+      Doxy_Globals::sectionDict->insert(s_sectionLabel, si);
    }
 }
 
@@ -1143,7 +1139,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
             i++;
          }
 
-         g_spaceBeforeCmd = QString(text).left(i);
+         s_spaceBeforeCmd = QString(text).left(i);
 
          if (cmdPtr->endsBrief && inContext != OutputXRef) {
             briefEndsAtDot = false;
@@ -1223,7 +1219,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <Comment>{B}*{CMD}"{"        {
       // begin of a group
-      // langParser->handleGroupStartCommand(g_memberGroupHeader);
+      // langParser->handleGroupStartCommand(s_memberGroupHeader);
       openGroup(current, yyFileName, yyLineNr);
    }
 
@@ -1233,7 +1229,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       closeGroup(current, yyFileName, yyLineNr, true);
 
-      g_memberGroupHeader.resize(0);
+      s_memberGroupHeader.resize(0);
       s_parseMore    = true;
       s_needNewEntry = true;
 
@@ -1331,7 +1327,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <Comment>".\\"[ \t]        {
-      // . with escaped space.
+      // . with escaped space
       QString text = QString::fromUtf8(yytext);
 
       addOutput(text[0]);
@@ -1345,7 +1341,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <Comment>"...\\"[ \t]         {
-      // ellipsis with escaped space.
+      // ellipsis with escaped space
       addOutput("... ");
    }
 
@@ -1363,7 +1359,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       if (inContext == OutputXRef) {
          // see bug 613024, need to put the newlines after ending the XRef section.
 
-         if (! g_insideParBlock) {
+         if (! s_insideParBlock) {
             setOutput(OutputDoc);
          }
 
@@ -2025,9 +2021,9 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // first argyment
       QString text = QString::fromUtf8(yytext);
 
-      g_sectionLabel = text;
+      s_sectionLabel = text;
       addOutput(text);
-      g_sectionTitle.resize(0);
+      s_sectionTitle.resize(0);
 
       BEGIN(SectionTitle);
    }
@@ -2076,7 +2072,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <SectionTitle>[^\n@\\]*          {
       // any character without special meaning
       QString text = QString::fromUtf8(yytext);
-      g_sectionTitle += text;
+      s_sectionTitle += text;
       addOutput(text);
    }
 
@@ -2084,7 +2080,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // unescape escaped command
       QString text = QString::fromUtf8(yytext);
 
-      g_sectionTitle += text.mid(1);               
+      s_sectionTitle += text.mid(1);               
       addOutput(text);
    }
 
@@ -2092,7 +2088,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // unescape escaped character
       QString text = QString::fromUtf8(yytext);
 
-      g_sectionTitle += text[1];
+      s_sectionTitle += text[1];
       addOutput(text);
    }
 
@@ -2100,7 +2096,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // anything else
       QString text = QString::fromUtf8(yytext);
       
-      g_sectionTitle += text;
+      s_sectionTitle += text;
       addOutput(text[0]);
    }
 
@@ -2229,7 +2225,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // start of a C-comment
       QString text = QString::fromUtf8(yytext);
 
-      g_commentCount++;
+      s_commentCount++;
       addOutput(text);
    }
 
@@ -2238,9 +2234,9 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
       addOutput(text);
 
-      g_commentCount--;
+      s_commentCount--;
 
-      if (g_commentCount < 0 && blockName != "verbatim") {
+      if (s_commentCount < 0 && blockName != "verbatim") {
          warn(yyFileName, yyLineNr, "Found */ without matching /* while inside a \\%s block. "
             "Perhaps there is a missing \\end%s?\n", csPrintable(blockName), csPrintable(blockName));
       }
@@ -2270,34 +2266,34 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <GuardParam>{B}*"("                     {
       QString text = QString::fromUtf8(yytext);
-      g_guardExpr  = text;
-      g_roundCount = 1;
+      s_guardExpr  = text;
+      s_roundCount = 1;
       BEGIN(GuardExpr);
    }
 
 <GuardExpr>[^()]*                       {
       QString text = QString::fromUtf8(yytext);
-      g_guardExpr += text;
+      s_guardExpr += text;
    }
 
 <GuardExpr>"("                          {
       QString text = QString::fromUtf8(yytext);
-      g_guardExpr += text;
-      g_roundCount++;
+      s_guardExpr += text;
+      s_roundCount++;
    }
 
 <GuardExpr>")"                          {
       QString text = QString::fromUtf8(yytext);
-      g_guardExpr += text;
-      g_roundCount--;
+      s_guardExpr += text;
+      s_roundCount--;
 
-      if (g_roundCount == 0) {
-         handleGuard(g_guardExpr);
+      if (s_roundCount == 0) {
+         handleGuard(s_guardExpr);
       }
    }
 
 <GuardExpr>\n                           {      
-      warn(yyFileName, yyLineNr, "Invalid expression '%s' for guard", csPrintable(g_guardExpr));
+      warn(yyFileName, yyLineNr, "Invalid expression '%s' for guard", csPrintable(s_guardExpr));
       unput(yytext[0]);
       BEGIN(GuardParam);
    }
@@ -2335,18 +2331,18 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <GuardParamEnd>{B}*{DOCNL}       {
-      g_spaceBeforeIf.resize(0);
+      s_spaceBeforeIf.resize(0);
       BEGIN(Comment);
    }
 
 <GuardParamEnd>{B}*        {  
-      if (! g_spaceBeforeIf.isEmpty()) {
+      if (! s_spaceBeforeIf.isEmpty()) {
          // needed for 665313 in combation with bug620924
    
-         addOutput(g_spaceBeforeIf);
+         addOutput(s_spaceBeforeIf);
       }
 
-      g_spaceBeforeIf.resize(0);
+      s_spaceBeforeIf.resize(0);
       BEGIN(Comment);
    }
 
@@ -2448,18 +2444,18 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <SkipInternal>[@\\]"if"/[ \t]       {
-      g_condCount++;
+      s_condCount++;
    }
 
 <SkipInternal>[@\\]"ifnot"/[ \t]    {
-      g_condCount++;
+      s_condCount++;
    }
 
 <SkipInternal>[@\\]/"endif"      {
-      g_condCount--;
+      s_condCount--;
    
-      if (g_condCount < 0 )   {
-         // handle conditional section around of \internal, see bug607743
+      if (s_condCount < 0 )   {
+         // handle conditional section around \internal, see bug607743
       
          unput('\\');
          BEGIN(Comment);
@@ -2467,28 +2463,28 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <SkipInternal>[@\\]/"section"[ \t]  {
-      if (g_sectionLevel > 0 ) {
+      if (s_sectionLevel > 0 ) {
          unput('\\');
          BEGIN(Comment);
       }
    }
 
 <SkipInternal>[@\\]/"subsection"[ \t]  {
-      if (g_sectionLevel > 1)  {                 
+      if (s_sectionLevel > 1)  {                 
          unput('\\');
          BEGIN(Comment);
       }
    }
 
 <SkipInternal>[@\\]/"subsubsection"[ \t]  {
-      if (g_sectionLevel > 2) {      
+      if (s_sectionLevel > 2) {      
          unput('\\');
          BEGIN(Comment);
       }
    }
 
 <SkipInternal>[@\\]/"paragraph"[ \t]   {
-      if (g_sectionLevel > 3) {      
+      if (s_sectionLevel > 3) {      
          unput('\\');
          BEGIN(Comment);
       }
@@ -2525,13 +2521,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // line continuation
       yyLineNr++;
       addOutput('\n');
-      g_memberGroupHeader+=' ';
+      s_memberGroupHeader+=' ';
    }
 
 <NameParam>.            { 
       // ignore other stuff
       QString text = QString::fromUtf8(yytext);
-      g_memberGroupHeader += text[0];
+      s_memberGroupHeader += text[0];
       current->name       += text[0];
    }
 
@@ -2790,7 +2786,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       setOutput(OutputDoc);
       addOutput("\\copydetails ");
-      addOutput(g_copyDocArg);
+      addOutput(s_copyDocArg);
 
       addOutput("\n");
 
@@ -2799,13 +2795,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <CopyDoc>[^\n\\]+          {
       QString text = QString::fromUtf8(yytext);
-      g_copyDocArg += text;
+      s_copyDocArg += text;
       addOutput(text);
    }
 
 <CopyDoc>.           {
       QString text = QString::fromUtf8(yytext);
-      g_copyDocArg += text;
+      s_copyDocArg += text;
       addOutput(text);
    }
 
@@ -3017,10 +3013,10 @@ static bool handleName(const QString &)
    bool stop = makeStructuralIndicator(Entry::MEMBERGRP_SEC);
 
    if (! stop) {  
-      g_memberGroupHeader.resize(0);
+      s_memberGroupHeader.resize(0);
       BEGIN( NameParam );
 
-      if (g_memberGroupId != DOX_NOGROUP) {
+      if (s_memberGroupId != DOX_NOGROUP) {
          // end of previous member group
     
          closeGroup(current,yyFileName,yyLineNr,true);
@@ -3071,30 +3067,30 @@ static bool handleXRefItem(const QString &)
 
 static bool handleParBlock(const QString &)
 {
-   if (g_insideParBlock)   {
+   if (s_insideParBlock)   {
       warn(yyFileName,yyLineNr, "Found \\parblock command while already in a parblock");
    }
    
-   if (! g_spaceBeforeCmd.isEmpty()) {
-      addOutput(g_spaceBeforeCmd);
-      g_spaceBeforeCmd.resize(0);
+   if (! s_spaceBeforeCmd.isEmpty()) {
+      addOutput(s_spaceBeforeCmd);
+      s_spaceBeforeCmd.resize(0);
    }
    
    addOutput("@parblock ");
-   g_insideParBlock = true;
+   s_insideParBlock = true;
 
    return false;
 }
 
 static bool handleEndParBlock(const QString &)
 {
-   if (! g_insideParBlock) {
+   if (! s_insideParBlock) {
      warn(yyFileName,yyLineNr, "Found \\endparblock command without matching \\parblock");
    }
 
    addOutput("@endparblock");
    setOutput(OutputDoc); // to end a parblock inside a xrefitem like context
-   g_insideParBlock = false;
+   s_insideParBlock = false;
 
    return false;
 }
@@ -3133,16 +3129,16 @@ static bool handleSection(const QString &s)
    BEGIN(SectionLabel);
 
    if (s == "section") {
-      g_sectionLevel = 1;
+      s_sectionLevel = 1;
 
    } else if (s == "subsection") {
-      g_sectionLevel = 2;
+      s_sectionLevel = 2;
 
    } else if (s == "subsubsection") {
-      g_sectionLevel = 3;
+      s_sectionLevel = 3;
 
    } else if (s == "paragraph") {
-      g_sectionLevel = 4;
+      s_sectionLevel = 4;
 
    }
 
@@ -3157,9 +3153,9 @@ static bool handleSubpage(const QString &s)
       warn(yyFileName,yyLineNr, "Found \\subpage command in a comment block that is not marked as a page");
   }
 
-  if (! g_spaceBeforeCmd.isEmpty()) {
-     addOutput(g_spaceBeforeCmd);
-      g_spaceBeforeCmd.resize(0);
+  if (! s_spaceBeforeCmd.isEmpty()) {
+     addOutput(s_spaceBeforeCmd);
+      s_spaceBeforeCmd.resize(0);
   }
 
    addOutput("@"+s+" ");
@@ -3177,9 +3173,9 @@ static bool handleAnchor(const QString &s)
 
 static bool handleCite(const QString &s)
 {
-   if (! g_spaceBeforeCmd.isEmpty()) {
-     addOutput(g_spaceBeforeCmd);
-     g_spaceBeforeCmd.resize(0);
+   if (! s_spaceBeforeCmd.isEmpty()) {
+     addOutput(s_spaceBeforeCmd);
+     s_spaceBeforeCmd.resize(0);
    }
 
    addOutput("@"+s+" ");
@@ -3191,7 +3187,7 @@ static bool handleFormatBlock(const QString &s)
 {
    addOutput("@"+s+" ");
    blockName=s;
-   g_commentCount=0;
+   s_commentCount=0;
    BEGIN(FormatBlock);
 
    return false;
@@ -3208,7 +3204,7 @@ static bool handleIf(const QString &)
 {
    enabledSectionFound = false;
    guardType = Guard_If;
-   g_spaceBeforeIf = g_spaceBeforeCmd;
+   s_spaceBeforeIf = s_spaceBeforeCmd;
    BEGIN(GuardParam);
    return false;
 }
@@ -3217,7 +3213,7 @@ static bool handleIfNot(const QString &)
 {
    enabledSectionFound = false;
    guardType = Guard_IfNot;
-   g_spaceBeforeIf = g_spaceBeforeCmd;
+   s_spaceBeforeIf = s_spaceBeforeCmd;
    BEGIN(GuardParam);
    return false;
 }
@@ -3255,9 +3251,9 @@ static bool handleEndIf(const QString &)
    }
    
    enabledSectionFound = false;
-   if (! g_spaceBeforeCmd.isEmpty()) {
-      addOutput(g_spaceBeforeCmd);
-      g_spaceBeforeCmd.resize(0);
+   if (! s_spaceBeforeCmd.isEmpty()) {
+      addOutput(s_spaceBeforeCmd);
+      s_spaceBeforeCmd.resize(0);
    }
 
    BEGIN( GuardParamEnd );
@@ -3315,21 +3311,21 @@ static bool handleHideCallergraph(const QString &)
 
 static bool handleInternal(const QString &)
 {
-   if (! internalDocs) {
-      // make sure some whitespace before a \internal command
+   if (internalDocs) {
+      // re-enabled for bug640828
+      addOutput("\\internal ");
+      processInternalDocs = true;
+
+   } else {
+      // make sure some whitespace before an \internal command
       // is not treated as "documentation"
 
       if (current->doc.trimmed().isEmpty()) {
          current->doc.resize(0);
       }
 
-      g_condCount = 0;
-      BEGIN( SkipInternal );
-
-   } else   {
-      // re-enabled for bug640828
-      addOutput("\\internal ");
-      processInternalDocs = true;
+      s_condCount = 0;
+      BEGIN( SkipInternal );  
   }
 
   return false;
@@ -3422,9 +3418,9 @@ static bool handleCopyBrief(const QString &)
       setOutput(OutputBrief);
    }
 
-   if (! g_spaceBeforeCmd.isEmpty()) {
-      addOutput(g_spaceBeforeCmd);
-      g_spaceBeforeCmd.resize(0);
+   if (! s_spaceBeforeCmd.isEmpty()) {
+      addOutput(s_spaceBeforeCmd);
+      s_spaceBeforeCmd.resize(0);
    }
 
    addOutput("\\copybrief ");
@@ -3434,9 +3430,9 @@ static bool handleCopyBrief(const QString &)
 static bool handleCopyDetails(const QString &)
 {
    setOutput(OutputDoc);
-   if (! g_spaceBeforeCmd.isEmpty()) {
-     addOutput(g_spaceBeforeCmd);
-     g_spaceBeforeCmd.resize(0);
+   if (! s_spaceBeforeCmd.isEmpty()) {
+     addOutput(s_spaceBeforeCmd);
+     s_spaceBeforeCmd.resize(0);
    }
 
    addOutput("\\copydetails ");
@@ -3446,13 +3442,13 @@ static bool handleCopyDetails(const QString &)
 static bool handleCopyDoc(const QString &)
 {
    setOutput(OutputBrief);
-   if (! g_spaceBeforeCmd.isEmpty()) {
-     addOutput(g_spaceBeforeCmd);
-     g_spaceBeforeCmd.resize(0);
+   if (! s_spaceBeforeCmd.isEmpty()) {
+     addOutput(s_spaceBeforeCmd);
+     s_spaceBeforeCmd.resize(0);
    }
 
    addOutput("\\copybrief ");
-   g_copyDocArg.resize(0);
+   s_copyDocArg.resize(0);
    BEGIN(CopyDoc);
 
    return false;
@@ -3499,10 +3495,10 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    setOutput( isBrief || isAutoBriefOn ? OutputBrief : OutputDoc );
    briefEndsAtDot = isAutoBriefOn;
 
-   g_condCount    = 0;
-   g_sectionLevel = 0;
-   g_spaceBeforeCmd.resize(0);
-   g_spaceBeforeIf.resize(0);
+   s_condCount    = 0;
+   s_sectionLevel = 0;
+   s_spaceBeforeCmd.resize(0);
+   s_spaceBeforeIf.resize(0);
 
    printlex(yy_flex_debug, true, __FILE__, fileName);
 
@@ -3529,7 +3525,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
       warn(yyFileName, yyLineNr, "Documentation block ended in the middle of a conditional section");
    }
 
-   if (g_insideParBlock) {
+   if (s_insideParBlock) {
       warn(yyFileName, yyLineNr, "Documentation block ended while inside a \\parblock. Missing \\endparblock");
    }
 
@@ -3540,7 +3536,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
       current->doc = "\n\n";
    }
 
-   if (current->section == Entry::MEMBERGRP_SEC && g_memberGroupId == DOX_NOGROUP) {
+   if (current->section == Entry::MEMBERGRP_SEC && s_memberGroupId == DOX_NOGROUP) {
       // @name section but no group started yet
       openGroup(current, yyFileName, yyLineNr);
    }
@@ -3581,53 +3577,53 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
 void groupEnterFile(const QString &fileName, int)
 {
-   g_autoGroupStack.clear();
-   g_memberGroupId = DOX_NOGROUP;
-   g_memberGroupDocs.resize(0);
-   g_memberGroupRelates.resize(0);
-   g_compoundName = fileName;
+   s_autoGroupStack.clear();
+   s_memberGroupId = DOX_NOGROUP;
+   s_memberGroupDocs.resize(0);
+   s_memberGroupRelates.resize(0);
+   s_compoundName = fileName;
 }
 
 void groupLeaveFile(const QString &fileName, int line)
 {
-   g_memberGroupId = DOX_NOGROUP;
-   g_memberGroupRelates.resize(0);
-   g_memberGroupDocs.resize(0);
+   s_memberGroupId = DOX_NOGROUP;
+   s_memberGroupRelates.resize(0);
+   s_memberGroupDocs.resize(0);
 
-   if (! g_autoGroupStack.isEmpty()) {
+   if (! s_autoGroupStack.isEmpty()) {
       warn(fileName, line, "End of file while inside a group\n");
    }
 }
 
 void groupEnterCompound(const QString &fileName, int line, const QString &name)
 {
-   if (g_memberGroupId != DOX_NOGROUP) {
+   if (s_memberGroupId != DOX_NOGROUP) {
       warn(fileName, line, "Try to put compound %s inside a member group\n", qPrintable(name));
    }
 
-   g_memberGroupId = DOX_NOGROUP;
-   g_memberGroupRelates.resize(0);
-   g_memberGroupDocs.resize(0);
-   g_compoundName = name;
+   s_memberGroupId = DOX_NOGROUP;
+   s_memberGroupRelates.resize(0);
+   s_memberGroupDocs.resize(0);
+   s_compoundName = name;
 
-   int i = g_compoundName.indexOf('(');
+   int i = s_compoundName.indexOf('(');
 
    if (i != -1) {
       // strip category (Obj-C)
-      g_compoundName=g_compoundName.left(i);
+      s_compoundName=s_compoundName.left(i);
    }
 
-   if (g_compoundName.isEmpty()) {
-      g_compoundName=fileName;
+   if (s_compoundName.isEmpty()) {
+      s_compoundName=fileName;
    }
 }
 
 void groupLeaveCompound(const QString &, int, const QString &)
 {
-   g_memberGroupId = DOX_NOGROUP;
-   g_memberGroupRelates.resize(0);
-   g_memberGroupDocs.resize(0);
-   g_compoundName.resize(0);
+   s_memberGroupId = DOX_NOGROUP;
+   s_memberGroupRelates.resize(0);
+   s_memberGroupDocs.resize(0);
+   s_compoundName.resize(0);
 }
 
 static int findExistingGroup(int &groupId, const QSharedPointer<MemberGroupInfo> info)
@@ -3636,7 +3632,7 @@ static int findExistingGroup(int &groupId, const QSharedPointer<MemberGroupInfo>
 
       auto mi = *di;
 
-      if (g_compoundName == mi->compoundName && ! mi->header.isEmpty() && 
+      if (s_compoundName == mi->compoundName && ! mi->header.isEmpty() && 
                mi->header.compare(info->header, Qt::CaseInsensitive) == 0) {
 
          // same file or scope, not a nameless group, same header name
@@ -3653,54 +3649,54 @@ void openGroup(QSharedPointer<Entry> e, const QString &, int)
 {
    if (e->section == Entry::GROUPDOC_SEC) {
       // auto group
-      g_autoGroupStack.push( QMakeShared<Grouping>(e->name, e->groupingPri()) ); 
+      s_autoGroupStack.push( QMakeShared<Grouping>(e->name, e->groupingPri()) ); 
 
    } else {
       // start of a member group
 
-      if (g_memberGroupId == DOX_NOGROUP) {
+      if (s_memberGroupId == DOX_NOGROUP) {
          // no group started yet
          static int curGroupId = 0;
 
          QSharedPointer<MemberGroupInfo> info = QMakeShared<MemberGroupInfo>();
 
-         info->header = g_memberGroupHeader.trimmed();
-         info->compoundName = g_compoundName;
-         g_memberGroupId = findExistingGroup(curGroupId, info);
+         info->header = s_memberGroupHeader.trimmed();
+         info->compoundName = s_compoundName;
+         s_memberGroupId = findExistingGroup(curGroupId, info);
 
-         Doxy_Globals::memGrpInfoDict.insert(g_memberGroupId, info);
+         Doxy_Globals::memGrpInfoDict.insert(s_memberGroupId, info);
 
-         g_memberGroupRelates = e->relates;
-         e->mGrpId = g_memberGroupId;
+         s_memberGroupRelates = e->relates;
+         e->mGrpId = s_memberGroupId;
       }
    }
 }
 
 void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool foundInline)
 {
-   if (g_memberGroupId != DOX_NOGROUP) {
+   if (s_memberGroupId != DOX_NOGROUP) {
       // end of member group
 
-      QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict.value(g_memberGroupId);
+      QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict.value(s_memberGroupId);
 
       if (info) {
          // known group
-         info->doc = g_memberGroupDocs;
+         info->doc = s_memberGroupDocs;
          info->docFile = fileName;
          info->docLine = line;
       }
 
-      g_memberGroupId = DOX_NOGROUP;
-      g_memberGroupRelates.resize(0);
-      g_memberGroupDocs.resize(0);
+      s_memberGroupId = DOX_NOGROUP;
+      s_memberGroupRelates.resize(0);
+      s_memberGroupDocs.resize(0);
 
       if (! foundInline) {
          e->mGrpId = DOX_NOGROUP;
       }
 
-   } else if (! g_autoGroupStack.isEmpty()) {
+   } else if (! s_autoGroupStack.isEmpty()) {
       // end of auto group
-      QSharedPointer<Grouping> grp = g_autoGroupStack.pop();
+      QSharedPointer<Grouping> grp = s_autoGroupStack.pop();
 
       // see bug577005: we should not remove the last group for e
       if (! foundInline) {
@@ -3715,29 +3711,29 @@ void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool
 
 void initGroupInfo(QSharedPointer<Entry> e)
 {
-   e->mGrpId  = g_memberGroupId;
-   e->relates = g_memberGroupRelates;
+   e->mGrpId  = s_memberGroupId;
+   e->relates = s_memberGroupRelates;
 
-   if (! g_autoGroupStack.isEmpty()) {
-      e->groups->append(*g_autoGroupStack.top());
+   if (! s_autoGroupStack.isEmpty()) {
+      e->groups->append(*s_autoGroupStack.top());
    }
 }
 
 static void groupAddDocs(QSharedPointer<Entry> e)
 {
    if (e->section == Entry::MEMBERGRP_SEC) {
-      g_memberGroupDocs = e->brief.trimmed();
+      s_memberGroupDocs = e->brief.trimmed();
       e->doc = stripLeadingAndTrailingEmptyLines(e->doc, e->docLine);
 
-      if (! g_memberGroupDocs.isEmpty() && ! e->doc.isEmpty()) {
-         g_memberGroupDocs+="\n\n";
+      if (! s_memberGroupDocs.isEmpty() && ! e->doc.isEmpty()) {
+         s_memberGroupDocs+="\n\n";
       }
 
-      g_memberGroupDocs += e->doc;
-      QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict.value(g_memberGroupId);
+      s_memberGroupDocs += e->doc;
+      QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict.value(s_memberGroupId);
 
       if (info) {
-         info->doc = g_memberGroupDocs;
+         info->doc = s_memberGroupDocs;
          info->docFile = e->docFile;
          info->docLine = e->docLine;
          info->setRefItems(e->sli);

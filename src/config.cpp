@@ -25,17 +25,6 @@
 #include <pre.h>
 #include <util.h>
 
-static void cleanUpPaths(QStringList &str);
-
-static QString getAbbreviateBrief();
-static QStringList getDotImageFormat();
-static QStringList getMathJaxFormat();
-static QStringList getLatexPaperType();
-
-const static QStringList s_dotImageFormat = getDotImageFormat();
-const static QStringList s_mathJaxFormat  = getMathJaxFormat();
-const static QStringList s_latexPaperType = getLatexPaperType();
-
 bool Config::getBool(const QString &name)
 {
    bool retval   = false;  
@@ -219,6 +208,11 @@ bool Config::preVerify()
 
 bool Config::verify()
 {
+
+   const static QStringList s_dotImageFormat = getDotImageFormat();
+   const static QStringList s_mathJaxFormat  = getMathJaxFormat();
+   const static QStringList s_latexPaperType = getLatexPaperType();
+
    bool isError = false;
  
    // ** project
@@ -831,10 +825,9 @@ bool Config::verify()
    // ********** Save data to structers and variables   
   
    Doxy_Globals::parseSourcesNeeded = Config::getBool("dot-call") ||  Config::getBool("dot-called-by") ||
-                                 Config::getBool("ref-relation") || Config::getBool("ref-by-relation");
+                  Config::getBool("ref-relation") || Config::getBool("ref-by-relation");
    
-   Doxy_Globals::markdownSupport    = Config::getBool("markdown");
-
+   Doxy_Globals::markdownSupport = Config::getBool("markdown");
 
    // ** 
    const QStringList expandAsDefinedList = Config::getList("expand-as-defined");
@@ -854,7 +847,7 @@ bool Config::verify()
    return isError;
 }
 
-static void cleanUpPaths(QStringList &str)
+void Config::cleanUpPaths(QStringList &str)
 {
    for (auto &item : str) {  
 
@@ -875,7 +868,7 @@ static void cleanUpPaths(QStringList &str)
    }
 }
 
-static QStringList getDotImageFormat()
+QStringList Config::getDotImageFormat()
 {
    QStringList list;
 
@@ -887,7 +880,7 @@ static QStringList getDotImageFormat()
    return list;
 }
 
-static QStringList getMathJaxFormat()
+QStringList Config::getMathJaxFormat()
 {
    QStringList list;
 
@@ -898,7 +891,7 @@ static QStringList getMathJaxFormat()
    return list;
 }
 
-static QStringList getLatexPaperType()
+QStringList Config::getLatexPaperType()
 {
    QStringList list;
 
@@ -987,4 +980,71 @@ Qt::CaseSensitivity Config::getCase(const QString &name)
    }
 
    return isCase;
+}
+
+void Config::readAliases()
+{
+   // add aliases to a dictionary
+   const QStringList aliasList = Config::getList("aliases");
+
+   for (auto alias : aliasList) {
+
+      if (! Doxy_Globals::aliasDict.contains(alias)) {
+         int i = alias.indexOf('=');
+
+         if (i > 0) {
+            QString name  = alias.left(i).trimmed();
+            QString value = alias.right(alias.length() - i - 1);
+
+            if (! name.isEmpty()) {
+               // insert or update with the new alias
+               Doxy_Globals::aliasDict[name] = value;
+            }
+         }
+      }
+   }
+
+   expandAliases();
+   escapeAliases();
+}
+
+void Config::expandAliases()
+{
+   for (auto iter = Doxy_Globals::aliasDict.begin(); iter != Doxy_Globals::aliasDict.end(); ++iter) {
+      *iter = expandAlias(iter.key(), *iter);
+   }
+}
+
+void Config::escapeAliases()
+{
+   for (auto &s : Doxy_Globals::aliasDict) {
+      QString value = s;
+      QString newValue;
+
+      int in;
+      int p = 0;
+
+      // for each \n in the alias command value
+      while ((in = value.indexOf("\\n", p)) != -1) {
+         newValue += value.mid(p, in - p);
+
+         // expand \n's except if \n is part of a built-in command
+
+
+         if (value.mid(in, 5) != "\\note" && value.mid(in, 5) != "\\name" && 
+               value.mid(in, 10) != "\\namespace" && value.mid(in, 14) != "\\nosubgrouping") {
+
+            newValue += "\\_linebr ";
+
+         } else {
+            newValue += "\\n";
+
+         }
+
+         p = in + 2;
+      }
+
+      newValue += value.mid(p, value.length() - p);
+      s = newValue;
+   }
 }

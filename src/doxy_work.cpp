@@ -273,8 +273,6 @@ namespace Doxy_Work{
    void dumpSymbol(QTextStream &t, QSharedPointer<Definition> d);
    void dumpSymbolMap();
 
-   void escapeAliases();
-   void expandAliases();
    QString extractClassName(QSharedPointer<EntryNav> rootNav);
    
    void filterMemberDocumentation(QSharedPointer<EntryNav> rootNav);
@@ -4717,8 +4715,8 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                while (! found && extractClassNameFromType(type, pos, usedClassName, templSpec, rootNav->lang()) != -1) {
 
                   // find the type (if any) that matches usedClassName
-                  QSharedPointer<ClassDef> typeCd = getResolvedClass(masterCd, masterCd->getFileDef(), usedClassName,
-                                                      0, 0, false, true);
+                  QSharedPointer<ClassDef> typeCd = getResolvedClass(masterCd, 
+                        masterCd->getFileDef(), usedClassName, 0, 0, false, true);
 
                   if (typeCd) {
                      usedClassName = typeCd->name();
@@ -9749,73 +9747,6 @@ void readFormulaRepository()
          }
       }
    }
-}
-
-void Doxy_Work::expandAliases()
-{
-   for (auto iter = Doxy_Globals::aliasDict.begin(); iter != Doxy_Globals::aliasDict.end(); ++iter) {
-      *iter = expandAlias(iter.key(), *iter);
-   }
-}
-
-void Doxy_Work::escapeAliases()
-{
-   for (auto &s : Doxy_Globals::aliasDict) {
-      QString value = s;
-      QString newValue;
-
-      int in;
-      int p = 0;
-
-      // for each \n in the alias command value
-      while ((in = value.indexOf("\\n", p)) != -1) {
-         newValue += value.mid(p, in - p);
-
-         // expand \n's except if \n is part of a built-in command
-
-
-         if (value.mid(in, 5) != "\\note" && value.mid(in, 5) != "\\name" && 
-               value.mid(in, 10) != "\\namespace" && value.mid(in, 14) != "\\nosubgrouping") {
-
-            newValue += "\\_linebr ";
-
-         } else {
-            newValue += "\\n";
-
-         }
-
-         p = in + 2;
-      }
-
-      newValue += value.mid(p, value.length() - p);
-      s = newValue;
-   }
-}
-
-void readAliases()
-{
-   // add aliases to a dictionary
-   const QStringList aliasList = Config::getList("aliases");
-
-   for (auto alias : aliasList) {
-
-      if (! Doxy_Globals::aliasDict.contains(alias)) {
-         int i = alias.indexOf('=');
-
-         if (i > 0) {
-            QString name  = alias.left(i).trimmed();
-            QString value = alias.right(alias.length() - i - 1);
-
-            if (! name.isEmpty()) {
-               // insert or update with the new alias
-               Doxy_Globals::aliasDict[name] = value;
-            }
-         }
-      }
-   }
-
-   expandAliases();
-   escapeAliases();
 }
 
 void Doxy_Work::dumpSymbol(QTextStream &t, QSharedPointer<Definition> d)

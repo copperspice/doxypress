@@ -88,7 +88,16 @@ class Config
       static bool verify();
 
       static QStringList getAbbreviateBrief();
-      static QStringList getFilePatterns();
+      static QStringList getFilePatterns();    
+      static QStringList getDotImageFormat();
+      static QStringList getMathJaxFormat();
+      static QStringList getLatexPaperType();
+
+      static void cleanUpPaths(QStringList &str);
+
+      static void readAliases();
+      static void escapeAliases();
+      static void expandAliases();
 };
 
 #endif

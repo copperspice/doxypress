@@ -3146,6 +3146,7 @@ int DocInternal::parse(int level)
             retval != RetVal_Paragraph &&
             retval != RetVal_EndInternal
            );
+
    if (lastPar) {
       lastPar->markLast();
    }

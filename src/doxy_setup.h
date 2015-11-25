@@ -58,7 +58,6 @@ void searchInputFiles();
 void processFiles();
 void generateOutput();
 
-void readAliases();
 void readFormulaRepository();
 void shutDownDoxypress();
 

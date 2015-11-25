@@ -563,6 +563,7 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
       if (! m_hide) {
          m_t << PREFRAG_START;
       }
+
       pushEnabled();
       m_hide = true;
    }
@@ -572,7 +573,7 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
 
-      if (!m_hide) {
+      if (! m_hide) {
          Doxy_Globals::parserManager->getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
             langExt, op->isExample(), op->exampleFile(),
             QSharedPointer<FileDef>(), -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
@@ -581,13 +582,15 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
       pushEnabled();
       m_hide = true;
    }
+
    if (op->isLast()) {
       popEnabled();
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << PREFRAG_END;
       }
+
    } else {
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << endl;
       }
    }
@@ -1466,8 +1469,7 @@ void HtmlDocVisitor::visitPre(DocInternal *)
 {
    if (m_hide) {
       return;
-   }
- 
+   } 
 }
 
 void HtmlDocVisitor::visitPost(DocInternal *)
