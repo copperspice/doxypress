@@ -144,10 +144,8 @@ class ParserManager
    }
 
    /** Registers an additional parser.
-    *  @param[in] name      A symbolic name of the parser, i.e. "c",
-    *                       "python", "fortran" 
-    *  @param[in] parser    The parser that is to be used for the
-    *                       given name.
+    *  @param[in] name      A symbolic name of the parser, i.e. "c", "python", "fortran" 
+    *  @param[in] parser    The parser that is to be used for the given name.
     */
    void registerParser(const QString &name, ParserInterface *parser) {
       m_parsers.insert(name, parser);
@@ -158,13 +156,13 @@ class ParserManager
     */
    bool registerExtension(const QString &extension, const QString &parserName) {
 
-      if (parserName.isEmpty() || extension.isEmpty()) {
+      if (extension.isEmpty() || parserName.isEmpty()) {
          return false;
       }
 
       ParserInterface *intf = m_parsers.value(parserName);
 
-      if (intf == 0) {
+      if (intf == nullptr) {
          return false;
       }
 
@@ -173,7 +171,8 @@ class ParserManager
          m_extensions.remove(extension);
       }
 
-      m_extensions.insert(extension, intf); // add new mapping
+      // add new mapping
+      m_extensions.insert(extension, intf);
 
       return true;
    }

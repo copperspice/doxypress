@@ -61,4 +61,9 @@ void generateOutput();
 void readFormulaRepository();
 void shutDownDoxypress();
 
+void initDefaultLangMapping();
+void initUserLangMapping();
+
+bool updateLanguageMapping(const QString &extension, const QString &parser, bool userParser = false);
+
 #endif

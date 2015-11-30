@@ -129,28 +129,30 @@ QString ClassDef::displayName(bool includeScope) const
    // static bool optimizeOutputForJava = Config::getBool("optimize-java");
    SrcLangExt lang = getLanguage();
 
-   QString n;
+   QString retval;
 
    if (includeScope) {
-      n = qualifiedNameWithTemplateParameters();
+      retval = qualifiedNameWithTemplateParameters();
    } else {
-      n = className();
+      retval = className();
    }
 
    QString sep = getLanguageSpecificSeparator(lang);
 
    if (sep != "::") {
-      n = substitute(n, "::", sep);
+      retval = substitute(retval, "::", sep);
    }
 
-   if (m_compType == ClassDef::Protocol && n.right(2) == "-p") {
-      n = "<" + n.left(n.length() - 2) + ">";
+   if (m_compType == ClassDef::Protocol && retval.right(2) == "-p") {
+      retval = "<" + retval.left(retval.length() - 2) + ">";
    }
+   
+   retval = renameNS_Aliases(retval);
 
-   if (n.indexOf('@') != -1) {
-      return removeAnonymousScopes(n);
+   if (retval.indexOf('@') != -1) {
+      return removeAnonymousScopes(retval);
    } else {
-      return n;
+      return retval;
    }
 }
 
@@ -1044,8 +1046,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
          if (ok && bcd) {
             QSharedPointer<ClassDef> cd = bcd->classDef;
 
-            // use the class name but with the template arguments as given
-            // in the inheritance relation
+            // use the class name but with the template arguments as given in the inheritance relation
             QString displayName = insertTemplateSpecifierInScope(cd->displayName(), bcd->templSpecifiers);
 
             if (cd->isLinkable()) {
@@ -3776,7 +3777,7 @@ void ClassDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, qPrintable(displayName()), self, title, false, showInline); 
+      ml->writeDocumentation(ol, csPrintable(displayName()), self, title, false, showInline); 
    }
 }
 

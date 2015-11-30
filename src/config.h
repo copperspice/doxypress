@@ -95,9 +95,11 @@ class Config
 
       static void cleanUpPaths(QStringList &str);
 
-      static void readAliases();
+      static void loadCmd_Aliases();
       static void escapeAliases();
       static void expandAliases();
+
+      static void loadRenameNS_Aliases();
 };
 
 #endif

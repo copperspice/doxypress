@@ -274,6 +274,7 @@ QString linkToText(SrcLangExt lang, const QString &link, bool isFileName);
 
 QString stripExtension(QString fName);
 
+QString renameNS_Aliases(const QString &scope, QString xx = "");      // broom - testing only
 void replaceNamespaceAliases(QString &scope, int i);
 
 int isAccessibleFrom(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item);
@@ -294,10 +295,6 @@ bool containsWord(const QString &s, const QString &word);
 bool findAndRemoveWord(QString &s, const QString &word);
 
 QString stripLeadingAndTrailingEmptyLines(const QString &s, int &docLine);
-
-bool updateLanguageMapping(const QString &extension, const QString &parser);
-SrcLangExt getLanguageFromFileName(const QString &fileName);
-void initDefaultExtensionMapping();
 
 QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QByteArray &name);
 bool checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,const QString &name);
@@ -374,6 +371,9 @@ QString stripPrefix(QString input, const QByteArray &prefix);
 QByteArray stripPrefix(QByteArray input, const QByteArray &prefix);
 
 Protection getProtection(const QString &data);
+
+// method located in doxy_setup.cpp
+SrcLangExt getLanguageFromFileName(const QString &fileName);
 
 #endif
 

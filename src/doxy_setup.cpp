@@ -79,6 +79,9 @@ enum Options {
      DOXY_VERSION,      
 };
 
+static QHash<QString, int>     s_extLookup;
+static QHash<QString, QString> s_langMapping;
+
 void initDoxyPress()
 {
    printf("\nInitialization\n"); 
@@ -111,8 +114,11 @@ void initDoxyPress()
    Doxy_Globals::parserManager->registerParser("md",           new MarkdownFileParser);
    Doxy_Globals::parserManager->registerParser("make",         new MakeFileParser);
  
-   // register any additional parsers here
-   initDefaultExtensionMapping();
+   // register additional parsers here
+   initDefaultLangMapping();
+
+   // register user language mappings
+   initUserLangMapping();
 
    initClassMemberIndices();
    initNamespaceMemberIndices();
@@ -535,6 +541,171 @@ bool Doxy_Setup::openOutputFile(const QString &outFile, QFile &f)
    }
 
    return fileOpened;
+}
+
+static struct Lang2ExtMap {
+   const char *langName;
+   const char *parserName;
+   SrcLangExt parserId;
+}
+
+s_lang2extMap[] = {
+   //  language       parser           parser option
+   { "idl",          "c",             SrcLangExt_IDL      },
+   { "java",         "c",             SrcLangExt_Java     },
+   { "csharp",       "c",             SrcLangExt_CSharp   },
+   { "d",            "c",             SrcLangExt_D        },
+   { "php",          "c",             SrcLangExt_PHP      },
+   { "objective-c",  "c",             SrcLangExt_ObjC     },
+   { "c",            "c",             SrcLangExt_Cpp      },
+   { "c++",          "c",             SrcLangExt_Cpp      },  
+   { "fortran",      "fortran",       SrcLangExt_Fortran  },
+   { "fortranfree",  "fortranfree",   SrcLangExt_Fortran  },
+   { "fortranfixed", "fortranfixed",  SrcLangExt_Fortran  },
+   { "javascript",   "c",             SrcLangExt_JS       },
+   { "python",       "python",        SrcLangExt_Python   },    
+   { "md",           "md",            SrcLangExt_Markdown },
+   { "make",         "make",          SrcLangExt_Make     },
+   { "tcl",          "tcl",           SrcLangExt_Tcl      },   
+   { 0,              0,               (SrcLangExt)0       }
+};
+
+bool updateLanguageMapping(const QString &extension, const QString &language, bool userParser)
+{
+   if (extension.isEmpty()) {
+      return false;
+   }
+
+   // part 1
+   const Lang2ExtMap *p = s_lang2extMap;
+   QString searchName = language.toLower();
+
+   while (p->langName) {
+      if (searchName == p->langName) {
+         break;
+      }
+
+      p++;
+   }
+
+   if (! p->langName) {
+      return false;
+   }
+
+   // found the language
+   SrcLangExt parserId = p->parserId;
+
+   // part 2
+   QString searchExt = extension.toLower();
+
+   if (searchExt.at(0) != '.') {
+      searchExt.prepend(".");
+   }
+    
+   // update or adds the new values 
+   s_extLookup.insert(searchExt, parserId);
+
+   if (userParser) {   
+      // user parsers will be registered later
+      s_langMapping.insert(searchExt, p->parserName); 
+
+   } else {
+
+      if (! Doxy_Globals::parserManager->registerExtension(searchExt, p->parserName)) {   
+         msg("Unable to assign extension %-4s (%-7s), currently unsupported\n",
+             csPrintable(searchExt), csPrintable(p->parserName));
+      }
+   }
+   
+   return true;
+}
+
+void initUserLangMapping() 
+{
+   for (auto item = s_langMapping.begin(); item != s_langMapping.end(); item++)  {
+
+      QString extension  = item.key();
+      QString parserName = item.value();
+
+      if (! Doxy_Globals::parserManager->registerExtension(extension, parserName)) {
+   
+         msg("Unable to assign extension %-4s (%-7s), currently unsupported\n",
+             csPrintable(extension), csPrintable(parserName));
+      }
+   }
+}
+
+void initDefaultLangMapping()
+{
+   //                   extension      parser id
+   updateLanguageMapping(".dox",      "c");
+   updateLanguageMapping(".txt",      "c");
+   updateLanguageMapping(".doc",      "c");
+   updateLanguageMapping(".c",        "c");
+   updateLanguageMapping(".C",        "c");
+   updateLanguageMapping(".cc",       "c");
+   updateLanguageMapping(".CC",       "c");
+   updateLanguageMapping(".cxx",      "c");
+   updateLanguageMapping(".cpp",      "c");
+   updateLanguageMapping(".c++",      "c");
+   updateLanguageMapping(".ii",       "c");
+   updateLanguageMapping(".ixx",      "c");
+   updateLanguageMapping(".ipp",      "c");
+   updateLanguageMapping(".i++",      "c");
+   updateLanguageMapping(".inl",      "c");
+   updateLanguageMapping(".h",        "c");
+   updateLanguageMapping(".H",        "c");
+   updateLanguageMapping(".hh",       "c");
+   updateLanguageMapping(".HH",       "c");
+   updateLanguageMapping(".hxx",      "c");
+   updateLanguageMapping(".hpp",      "c");
+   updateLanguageMapping(".h++",      "c");
+   updateLanguageMapping(".idl",      "idl");
+   updateLanguageMapping(".ddl",      "idl");
+   updateLanguageMapping(".odl",      "idl");
+   updateLanguageMapping(".java",     "java");
+   updateLanguageMapping(".as",       "javascript"); 
+   updateLanguageMapping(".js",       "javascript");
+   updateLanguageMapping(".cs",       "csharp");
+   updateLanguageMapping(".d",        "d");
+   updateLanguageMapping(".php",      "php");
+   updateLanguageMapping(".php4",     "php");
+   updateLanguageMapping(".php5",     "php");
+   updateLanguageMapping(".inc",      "php");
+   updateLanguageMapping(".phtml",    "php");
+   updateLanguageMapping(".m",        "objective-c");
+   updateLanguageMapping(".M",        "objective-c");
+   updateLanguageMapping(".mm",       "objective-c");
+   updateLanguageMapping(".py",       "python");
+   updateLanguageMapping(".f",        "fortran");
+   updateLanguageMapping(".for",      "fortran");
+   updateLanguageMapping(".f90",      "fortran");  
+   updateLanguageMapping(".tcl",      "tcl");  
+   updateLanguageMapping(".md",       "md");
+   updateLanguageMapping(".markdown", "md");
+   updateLanguageMapping(".mk",       "make");
+}
+
+SrcLangExt getLanguageFromFileName(const QString &fileName)
+{
+   int i = fileName.lastIndexOf('.');
+
+   if (i != -1) { 
+      // name has an extension
+      QString extStr = fileName.right(fileName.length() - i).toLower();
+
+      if (! extStr.isEmpty()) { 
+         // non-empty extension
+         auto pVal = s_extLookup.find(extStr);
+
+         if (pVal != s_extLookup.end() ) { 
+            // listed extension           
+            return (SrcLangExt) * pVal;
+         }
+      }
+   }
+   
+   return SrcLangExt_Cpp; // not listed => assume C language
 }
 
 void Doxy_Setup::usage()

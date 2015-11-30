@@ -110,8 +110,8 @@ static bool handleCopyBrief(const QString &);
 static bool handleCopyDetails(const QString &);
 static bool handleParBlock(const QString &);
 static bool handleEndParBlock(const QString &);
-
 static void handleGuard(const QString &expr);
+
 static void checkFormula();
 
 using DocCmdFunc = bool (*)(const QString &name);
@@ -254,7 +254,7 @@ static DocCmdMap docCmdMap[] =
   { "until",           0,                       true  },
   { "verbinclude",     0,                       false },
   { "version",         0,                       true  },
-  { "warning",         0,                       true  },
+  { "warning",         0,                       true  },  
   { 0, 0, false }
 };
 
@@ -386,7 +386,7 @@ static QStack<GuardedSection *> guards;      // tracks nested conditional sectio
 static QSharedPointer<Entry>  current;       // working entry
 
 static bool             s_needNewEntry;
-static int              s_resumeState; 
+static int              s_docBlockContext; 
 
 static QString          s_sectionLabel;
 static QString          s_sectionTitle;
@@ -928,7 +928,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 %option noyywrap
 
-/* comment parsing states. */
+/* comment parsing states */
 %x Comment
 %x PageDocArg1
 %x PageDocArg2

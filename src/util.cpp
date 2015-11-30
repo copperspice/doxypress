@@ -74,7 +74,6 @@ const int MAX_STACK_SIZE = 1000;
 
 static QHash<QString, QSharedPointer<MemberDef>>   s_resolvedTypedefs;
 static QHash<QString, QSharedPointer<Definition>>  s_visitedNamespaces;
-static QHash<QString, int>                         s_extLookup;
 
 static QSet<QString> s_aliasesProcessed;
 
@@ -82,13 +81,13 @@ static QCache<QPair<const FileNameDict *, QString>, FindFileCacheElem> s_findFil
 
 // forward declaration
 static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-                  const QString &n, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType );
+                  const QString &n, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType);
 
 int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-               QSharedPointer<Definition> item, const QString &explicitScopePart);
+                  QSharedPointer<Definition> item, const QString &explicitScopePart);
 
-// ** selects one of the name to sub-dir mapping algorithms that is used
-// to select a sub directory when CREATE_SUBDIRS is set to YES.
+// selects one of the name to sub-dir mapping algorithms that is used
+// to select a sub directory when CREATE_SUBDIRS is set to YES
 
 #define ALGO_COUNT 1
 #define ALGO_CRC16 2
@@ -99,8 +98,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointe
 // #define MAP_ALGO   ALGO_COUNT
 // #define MAP_ALGO   ALGO_CRC16
 
-
-// ** debug support for matchArguments
+// debug support for matchArguments
 #define DOX_MATCH
 #define DOX_NOMATCH
 
@@ -700,7 +698,7 @@ done:
 /*! Substitutes a simple unqualified \a name within \a scope. Returns the
  *  value of the typedef or \a name if no typedef was found.
  */
-static QString substTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QString &symbolName, 
+static QString substTypedef(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, const QString &symbolName, 
                                QSharedPointer<MemberDef> *pTypeDef = nullptr)
 {
    QString result = symbolName;
@@ -717,7 +715,7 @@ static QString substTypedef(QSharedPointer<Definition> scope, QSharedPointer<Fil
       return "";   
    }
 
-   int minDistance = 10000; // init at "infinite"
+   int minDistance = 10000;    // init at "infinite"
 
    QSharedPointer<MemberDef> bestMatch;
 
@@ -733,7 +731,7 @@ static QString substTypedef(QSharedPointer<Definition> scope, QSharedPointer<Fil
          if (md->isTypedef()) { 
             // d is a typedef, test accessibility of typedef within scope
 
-            int distance = isAccessibleFromWithExpScope(scope, fileScope, self, "");
+            int distance = isAccessibleFromWithExpScope(scopeDef, fileScope, self, "");
 
             if (distance != -1 && distance < minDistance) {
                // definition is accessible and a better match
@@ -909,8 +907,7 @@ static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer
    return false;
 }
 
-/** Helper class representing the stack of items considered while resolving
- *  the scope.
+/** Helper class representing the stack of items considered while resolving the scope.
  */
 class AccessStack
 {
@@ -918,62 +915,65 @@ class AccessStack
    AccessStack() : m_index(0)
    {}
 
-   void push(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item) {
+   void push(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item) {
       if (m_index < MAX_STACK_SIZE) {
-         m_elements[m_index].scope     = scope;
+         m_elements[m_index].scopeDef  = scopeDef;
          m_elements[m_index].fileScope = fileScope;
          m_elements[m_index].item      = item;
          m_index++;
       }
    }
 
-   void push(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item, 
+   void push(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item, 
             const QString &expScope) {
 
       if (m_index < MAX_STACK_SIZE) {
-         m_elements[m_index].scope     = scope;
+         m_elements[m_index].scopeDef  = scopeDef;
          m_elements[m_index].fileScope = fileScope;
          m_elements[m_index].item      = item;
          m_elements[m_index].expScope  = expScope;
          m_index++;
       }
    }
+
    void pop() {
       if (m_index > 0) {
          m_index--;
       }
    }
 
-   bool find(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item) {
-      int i = 0;
+   bool find(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item) {
 
-      for (i = 0; i < m_index; i++) {
+      for (int i = 0; i < m_index; i++) {
          AccessElem *e = &m_elements[i];
-         if (e->scope == scope && e->fileScope == fileScope && e->item == item) {
+
+         if (e->scopeDef == scopeDef && e->fileScope == fileScope && e->item == item) {
             return true;
          }
       }
+
       return false;
    }
 
-   bool find(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item, 
+   bool find(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item, 
              const QString &expScope) {
 
-      int i = 0;
-
-      for (i = 0; i < m_index; i++) {
+      for (int i = 0; i < m_index; i++) {
          AccessElem *e = &m_elements[i];
-         if (e->scope == scope && e->fileScope == fileScope && e->item == item && e->expScope == expScope) {
+
+         if (e->scopeDef == scopeDef && e->fileScope == fileScope && e->item == item && e->expScope == expScope) {
             return true;
          }
       }
+
       return false;
    }
 
  private:
-   /** Element in the stack. */
+
+   /** Element in the stack */
    struct AccessElem {
-      QSharedPointer<Definition>  scope;
+      QSharedPointer<Definition>  scopeDef;
       QSharedPointer<FileDef>     fileScope;
       QSharedPointer<Definition>  item;
 
@@ -987,34 +987,34 @@ class AccessStack
 /* Returns the "distance" (=number of levels up) from item to scope, or -1
  * if item in not inside scope.
  */
-int isAccessibleFrom(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item)
+int isAccessibleFrom(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item)
 { 
    static AccessStack accessStack;
-   if (accessStack.find(scope, fileScope, item)) {
+
+   if (accessStack.find(scopeDef, fileScope, item)) {
       return -1;
    }
-   accessStack.push(scope, fileScope, item);
+   accessStack.push(scopeDef, fileScope, item);
 
    // assume we found it
    int result = 0; 
    int i;
 
-   QSharedPointer<Definition> itemScope = item->getOuterScope();
+   QSharedPointer<Definition> itemScope     = item->getOuterScope();
 
-   QSharedPointer<ClassDef> tempPtr = scope.dynamicCast<ClassDef>();
-
-   QSharedPointer<MemberDef> tempItem     = item.dynamicCast<MemberDef>();
-   QSharedPointer<ClassDef> tempItemScope = item.dynamicCast<ClassDef>();
+   QSharedPointer<ClassDef>   tempPtr       = scopeDef.dynamicCast<ClassDef>();
+   QSharedPointer<MemberDef>  tempItem      = item.dynamicCast<MemberDef>();
+   QSharedPointer<ClassDef>   tempItemScope = item.dynamicCast<ClassDef>();
 
    bool memberAccessibleFromScope = (item->definitionType() == Definition::TypeMember &&                
        itemScope && itemScope->definitionType() == Definition::TypeClass  && 
-       scope->definitionType() == Definition::TypeClass && tempPtr->isAccessibleMember(tempItem));
+       scopeDef->definitionType() == Definition::TypeClass && tempPtr->isAccessibleMember(tempItem));
 
    bool nestedClassInsideBaseClass = (item->definitionType() == Definition::TypeClass &&                 
        itemScope && itemScope->definitionType() == Definition::TypeClass && 
-       scope->definitionType() == Definition::TypeClass && tempPtr->isBaseClass(tempItemScope, true));
+       scopeDef->definitionType() == Definition::TypeClass && tempPtr->isBaseClass(tempItemScope, true));
 
-   if (itemScope == scope || memberAccessibleFromScope || nestedClassInsideBaseClass) {
+   if (itemScope == scopeDef || memberAccessibleFromScope || nestedClassInsideBaseClass) {
     
       if (nestedClassInsideBaseClass) {
          // penalty for base class to prevent
@@ -1023,20 +1023,20 @@ int isAccessibleFrom(QSharedPointer<Definition> scope, QSharedPointer<FileDef> f
 
       // this is preferred over nested class in this class
   
-   } else if (scope == Doxy_Globals::globalScope) {
+   } else if (scopeDef == Doxy_Globals::globalScope) {
 
       if (fileScope) {
          StringMap<QSharedPointer<Definition>> *cl = fileScope->getUsedClasses();
 
          if (accessibleViaUsingClass(cl, fileScope, item)) {
-            //printf("> found via used class\n");
+            // found via used class
             goto done;
          }
 
          NamespaceSDict *nl = fileScope->getUsedNamespaces();
 
          if (accessibleViaUsingNamespace(nl, fileScope, item)) {
-            //printf("> found via used namespace\n");
+            // found via used namespace
             goto done;
          }
       }
@@ -1046,8 +1046,8 @@ int isAccessibleFrom(QSharedPointer<Definition> scope, QSharedPointer<FileDef> f
    } else { 
       // keep searching, check if scope is a namespace, which is using other classes and namespaces
 
-      if (scope->definitionType() == Definition::TypeNamespace) {
-         QSharedPointer<NamespaceDef> nscope = scope.dynamicCast<NamespaceDef>();
+      if (scopeDef->definitionType() == Definition::TypeNamespace) {
+         QSharedPointer<NamespaceDef> nscope = scopeDef.dynamicCast<NamespaceDef>();
          
          StringMap<QSharedPointer<Definition>> cl = nscope->getUsedClasses();
 
@@ -1063,7 +1063,7 @@ int isAccessibleFrom(QSharedPointer<Definition> scope, QSharedPointer<FileDef> f
       }
 
       // repeat for the parent scope
-      i = isAccessibleFrom(scope->getOuterScope(), fileScope, item);     
+      i = isAccessibleFrom(scopeDef->getOuterScope(), fileScope, item);     
       result = (i == -1) ? -1 : i + 2;
    }
 
@@ -1089,24 +1089,25 @@ done:
  *   not found and then A::I is searched in the global scope, which matches and
  *   thus the result is 1.
  */
-int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
+int isAccessibleFromWithExpScope(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope,
                                  QSharedPointer<Definition> item, const QString &explicitScopePart)
 {
    if (explicitScopePart.isEmpty()) {
       // handle degenerate case where there is no explicit scope
-      return isAccessibleFrom(scope, fileScope, item);
+      return isAccessibleFrom(scopeDef, fileScope, item);
    }
 
    static AccessStack accessStack;
-   if (accessStack.find(scope, fileScope, item, explicitScopePart)) {
+   if (accessStack.find(scopeDef, fileScope, item, explicitScopePart)) {
       return -1;
    }
-   accessStack.push(scope, fileScope, item, explicitScopePart);
+
+   accessStack.push(scopeDef, fileScope, item, explicitScopePart);
 
    // assume we found it
    int result = 0; 
 
-   QSharedPointer<Definition> newScope = followPath(scope, fileScope, explicitScopePart);
+   QSharedPointer<Definition> newScope = followPath(scopeDef, fileScope, explicitScopePart);
 
    if (newScope) { 
       // explicitScope is inside scope => newScope is the result
@@ -1152,7 +1153,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointe
           
             for (auto nd : nl) {
                if (! s_visitedNamespaces.contains(nd->name())) {                    
-                  i = isAccessibleFromWithExpScope(scope, fileScope, item, nd->name());
+                  i = isAccessibleFromWithExpScope(scopeDef, fileScope, item, nd->name());
                   if (i != -1) {                        
                      goto done;
                   }
@@ -1162,8 +1163,8 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointe
          }
 
          // repeat for the parent scope
-         if (scope != Doxy_Globals::globalScope) {
-            i = isAccessibleFromWithExpScope(scope->getOuterScope(), fileScope, item, explicitScopePart);
+         if (scopeDef != Doxy_Globals::globalScope) {
+            i = isAccessibleFromWithExpScope(scopeDef->getOuterScope(), fileScope, item, explicitScopePart);
          }
          
          result = (i == -1) ? -1 : i + 2;
@@ -1172,30 +1173,34 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointe
    } else { 
       // failed to resolve explicitScope
       
-      if (scope->definitionType() == Definition::TypeNamespace) {
-         QSharedPointer<NamespaceDef> nscope = scope.dynamicCast<NamespaceDef>();
+      if (scopeDef->definitionType() == Definition::TypeNamespace) {
+         QSharedPointer<NamespaceDef> nscope = scopeDef.dynamicCast<NamespaceDef>();
          NamespaceSDict nl = nscope->getUsedNamespaces();
 
          if (accessibleViaUsingNamespace(&nl, fileScope, item, explicitScopePart)) {
-            //printf("> found in used namespace\n");
+            // found in used namespace
             goto done;
          }
       }
 
-      if (scope == Doxy_Globals::globalScope) {
+      if (scopeDef == Doxy_Globals::globalScope) {
+
          if (fileScope) {
             NamespaceSDict *nl = fileScope->getUsedNamespaces();
+
             if (accessibleViaUsingNamespace(nl, fileScope, item, explicitScopePart)) {
-               //printf("> found in used namespace\n");
+               // found in used namespace
                goto done;
             }
          }
-         //printf("> not found\n");
+         
+         // not found
          result = -1;
-      } else { // continue by looking into the parent scope
-         int i = isAccessibleFromWithExpScope(scope->getOuterScope(), fileScope,
-                                              item, explicitScopePart);
-         //printf("> result=%d\n",i);
+
+      } else { 
+         // continue by looking into the parent scope
+         int i = isAccessibleFromWithExpScope(scopeDef->getOuterScope(), fileScope, item, explicitScopePart);
+         
          result = (i == -1) ? -1 : i + 2;
       }
    }
@@ -1355,8 +1360,7 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
 /* Find the fully qualified class name referred to by the input class
  * or typedef name against the input scope.
  * Loops through scope and each of its parent scopes looking for a
- * match against the input name. Can recursively call itself when
- * resolving typedefs.
+ * match against the input name. Can recursively call itself when resolving typedefs.
  */
 static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
                   const QString &nType, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType )
@@ -1451,7 +1455,7 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
       return pval->classDef;
 
    } else {
-      // not found, we already add a 0 to avoid the possibility of endless recursion.   
+      // not found, we already add a 0 to avoid the possibility of endless recursion   
       Doxy_Globals::lookupCache->insert(key, new LookupInfo);
    }
 
@@ -1863,6 +1867,12 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
    int newIndex;
    int skipIndex = 0;
    int floatingIndex = 0;
+
+
+if (self->name() == "Date") {
+   printf("\n  BROOM  scope --> %s", csPrintable(scope->name()) );
+}
+
  
    // read a word from the text string
    while ((newIndex = regExp.indexIn(text, index)) != -1 && (newIndex == 0 ||
@@ -1879,13 +1889,14 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
 
       for (i = index; i < newIndex; i++) {
          if (text.at(i) == '"') {
-            insideString = !insideString;
+            insideString = ! insideString;
          }
       }
       
       if (strLen > 35 && floatingIndex > 30 && autoBreak) { 
          // try to insert a split point
          QString splitText = text.mid(skipIndex, newIndex - skipIndex);
+
          int splitLength = splitText.length();
          int offset = 1;
 
@@ -1936,6 +1947,21 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
          QSharedPointer<NamespaceDef> nd;
          QSharedPointer<GroupDef>     gd;        
          QSharedPointer<MemberDef>    typeDef;
+
+
+if (self->name() == "Date") {  
+   printf("\n  BROOM  matchWord --> %s \n", csPrintable(matchWord) );
+}
+
+     //    QString temp = scope->name();
+     //    temp = renameNS_Aliases(temp, "MD_3"); 
+     //    scope->setName(temp);
+
+
+if (self->name() == "Date") {  
+   printf("\n  BROOM  newScope --> %s \n", csPrintable() );
+}
+
 
          cd = getResolvedClass(scope, fileScope, matchWord, &typeDef);
 
@@ -6197,6 +6223,15 @@ QString stripExtension(QString fName)
    return result;
 }
 
+QString renameNS_Aliases(const QString &scope, QString xx)
+{
+   if ( Doxy_Globals::renameNSDict.isEmpty() )  { 
+      return scope;          
+   } 
+
+   QString retval = scope;  
+   return retval;
+}
 
 void replaceNamespaceAliases(QString &scope, int i)
 {
@@ -6360,154 +6395,6 @@ QString stripLeadingAndTrailingEmptyLines(const QString &str, int &docLine)
    }
 
    return str.mid(start, end - start + 1);
-}
-
-static struct Lang2ExtMap {
-   const char *langName;
-   const char *parserName;
-   SrcLangExt parserId;
-}
-
-g_lang2extMap[] = {
-   //  language       parser           parser option
-   { "idl",          "c",             SrcLangExt_IDL      },
-   { "java",         "c",             SrcLangExt_Java     },
-   { "csharp",       "c",             SrcLangExt_CSharp   },
-   { "d",            "c",             SrcLangExt_D        },
-   { "php",          "c",             SrcLangExt_PHP      },
-   { "objective-c",  "c",             SrcLangExt_ObjC     },
-   { "c",            "c",             SrcLangExt_Cpp      },
-   { "c++",          "c",             SrcLangExt_Cpp      },  
-   { "fortran",      "fortran",       SrcLangExt_Fortran  },
-   { "fortranfree",  "fortranfree",   SrcLangExt_Fortran  },
-   { "fortranfixed", "fortranfixed",  SrcLangExt_Fortran  },
-   { "javascript",   "c",             SrcLangExt_JS       },
-   { "python",       "python",        SrcLangExt_Python   },    
-   { "md",           "md",            SrcLangExt_Markdown },
-   { "make",         "make",          SrcLangExt_Make     },
-   { "tcl",          "tcl",           SrcLangExt_Tcl      },
-   { "dbusxml",      "dbusxml",       SrcLangExt_XML      },
-   { 0,              0,               (SrcLangExt)0       }
-};
-
-bool updateLanguageMapping(const QString &extension, const QString &language)
-{
-   const Lang2ExtMap *p = g_lang2extMap;
-   QString langName = language.toLower();
-
-   while (p->langName) {
-      if (langName == p->langName) {
-         break;
-      }
-
-      p++;
-   }
-
-   if (! p->langName) {
-      return false;
-   }
-
-   // found the language
-   SrcLangExt parserId = p->parserId;
-   QString extName = extension.toLower();
-
-   if (extName.isEmpty()) {
-      return false;
-   }
-
-   if (extName.at(0) != '.') {
-      extName.prepend(".");
-   }
-
-   if (s_extLookup.contains(extension)) { 
-      // language was already register for this ext
-      s_extLookup.remove(extension);
-   }
-   
-   s_extLookup.insert(extName, parserId);
-
-   if (! Doxy_Globals::parserManager->registerExtension(extName, p->parserName)) {
-
-      msg("Unable to assign extension %-4s (%-7s) for %-7s language, currently unsupported\n",
-          qPrintable(extName), p->parserName, qPrintable(language));
-   }
-
-   return true;
-}
-
-void initDefaultExtensionMapping()
-{
-    //                  extension      parser id
-   updateLanguageMapping(".dox",      "c");
-   updateLanguageMapping(".txt",      "c");
-   updateLanguageMapping(".doc",      "c");
-   updateLanguageMapping(".c",        "c");
-   updateLanguageMapping(".C",        "c");
-   updateLanguageMapping(".cc",       "c");
-   updateLanguageMapping(".CC",       "c");
-   updateLanguageMapping(".cxx",      "c");
-   updateLanguageMapping(".cpp",      "c");
-   updateLanguageMapping(".c++",      "c");
-   updateLanguageMapping(".ii",       "c");
-   updateLanguageMapping(".ixx",      "c");
-   updateLanguageMapping(".ipp",      "c");
-   updateLanguageMapping(".i++",      "c");
-   updateLanguageMapping(".inl",      "c");
-   updateLanguageMapping(".h",        "c");
-   updateLanguageMapping(".H",        "c");
-   updateLanguageMapping(".hh",       "c");
-   updateLanguageMapping(".HH",       "c");
-   updateLanguageMapping(".hxx",      "c");
-   updateLanguageMapping(".hpp",      "c");
-   updateLanguageMapping(".h++",      "c");
-   updateLanguageMapping(".idl",      "idl");
-   updateLanguageMapping(".ddl",      "idl");
-   updateLanguageMapping(".odl",      "idl");
-   updateLanguageMapping(".java",     "java");
-   updateLanguageMapping(".as",       "javascript"); 
-   updateLanguageMapping(".js",       "javascript");
-   updateLanguageMapping(".cs",       "csharp");
-   updateLanguageMapping(".d",        "d");
-   updateLanguageMapping(".php",      "php");
-   updateLanguageMapping(".php4",     "php");
-   updateLanguageMapping(".php5",     "php");
-   updateLanguageMapping(".inc",      "php");
-   updateLanguageMapping(".phtml",    "php");
-   updateLanguageMapping(".m",        "objective-c");
-   updateLanguageMapping(".M",        "objective-c");
-   updateLanguageMapping(".mm",       "objective-c");
-   updateLanguageMapping(".py",       "python");
-   updateLanguageMapping(".f",        "fortran");
-   updateLanguageMapping(".for",      "fortran");
-   updateLanguageMapping(".f90",      "fortran");  
-   updateLanguageMapping(".tcl",      "tcl");  
-   updateLanguageMapping(".md",       "md");
-   updateLanguageMapping(".markdown", "md");
-   updateLanguageMapping(".mk",       "make");
-  
-   // updateLanguageMapping(".xml",   "dbusxml");
-}
-
-SrcLangExt getLanguageFromFileName(const QString &fileName)
-{
-   int i = fileName.lastIndexOf('.');
-
-   if (i != -1) { 
-      // name has an extension
-      QString extStr = fileName.right(fileName.length() - i).toLower();
-
-      if (! extStr.isEmpty()) { 
-         // non-empty extension
-         auto pVal = s_extLookup.find(extStr);
-
-         if (pVal != s_extLookup.end() ) { 
-            // listed extension           
-            return (SrcLangExt) * pVal;
-         }
-      }
-   }
-   
-   return SrcLangExt_Cpp; // not listed => assume C-ish language.
 }
 
 QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QString &xName)
@@ -6811,13 +6698,13 @@ static QString expandAliasRec(const QString &s, bool allowRecursion)
          cmd = cmd + QString("{%1}").arg(numArgs);    // alias name + {n}
       }
 
-      QString aliasText = Doxy_Globals::aliasDict.value(cmd);
+      QString aliasText = Doxy_Globals::cmdAliasDict.value(cmd);
 
       if (numArgs > 1 &&  aliasText.isEmpty()) {
          // in case there is no command with numArgs parameters, but there is a command with 1 parameter
          // we also accept all text as the argument of that command (so you do not have to escape commas)
 
-         aliasText = Doxy_Globals::aliasDict.value(cmdNoArgs + "{1}");
+         aliasText = Doxy_Globals::cmdAliasDict.value(cmdNoArgs + "{1}");
 
          if (! aliasText.isEmpty()) {
             cmd  = cmdNoArgs + "{1}";

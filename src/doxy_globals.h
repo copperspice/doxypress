@@ -166,7 +166,8 @@ class Doxy_Globals
    
       static StringDict                namespaceAliasDict;
       static StringDict                tagDestinationDict;
-      static StringDict                aliasDict;    
+      static StringDict                cmdAliasDict;    
+      static StringDict                renameNSDict;  
    
       //
       static FormulaList              *formulaList; 

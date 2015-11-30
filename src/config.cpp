@@ -123,10 +123,6 @@ bool Config::preVerify()
 { 
    bool isError = false;
 
-
-// BROOM CHECK 
-
-
    // **
    if (! (Config::getBool("generate-html") || Config::getBool("generate-latex") || Config::getBool("generate-man") ||
           Config::getBool("generate-perl") || Config::getBool("generate-rtf")   || Config::getBool("generate-xml") ||
@@ -311,7 +307,6 @@ bool Config::verify()
       }      
    }
 
-
    // ** 
    const QStringList extMaps = Config::getList("language-mapping");
   
@@ -322,7 +317,7 @@ bool Config::verify()
          QString extension = mapStr.left(i).trimmed().toLower();
          QString language  = mapStr.mid(i + 1).trimmed().toLower();
 
-         if (! updateLanguageMapping(extension, language)) {
+         if (! updateLanguageMapping(extension, language, true)) {
             err("Unable to map file extension '%s' to '%s', verify the Extension Mapping tag\n", 
                   qPrintable(extension), qPrintable(language));
 
@@ -332,7 +327,6 @@ bool Config::verify()
          }
       }
    }
- 
 
    // **  build                                                 
    iterString = m_cfgString.find("layout-file");
@@ -822,7 +816,7 @@ bool Config::verify()
 
   
 
-   // ********** Save data to structers and variables   
+   // ********** save data to structers and variables   
   
    Doxy_Globals::parseSourcesNeeded = Config::getBool("dot-call") ||  Config::getBool("dot-called-by") ||
                   Config::getBool("ref-relation") || Config::getBool("ref-by-relation");
@@ -841,8 +835,11 @@ bool Config::verify()
 
    }  
    
-   // read aliases and store them in a dictionary
-   readAliases();
+   // read command aliases, store in a dictionary
+   loadCmd_Aliases();
+
+   // read namespace aliases, store in a dictionary
+   loadRenameNS_Aliases();
 
    return isError;
 }
@@ -982,23 +979,23 @@ Qt::CaseSensitivity Config::getCase(const QString &name)
    return isCase;
 }
 
-void Config::readAliases()
+void Config::loadCmd_Aliases()
 {
    // add aliases to a dictionary
-   const QStringList aliasList = Config::getList("aliases");
+   const QStringList list = Config::getList("aliases");
 
-   for (auto alias : aliasList) {
+   for (auto item : list) {
 
-      if (! Doxy_Globals::aliasDict.contains(alias)) {
-         int i = alias.indexOf('=');
+      if (! Doxy_Globals::cmdAliasDict.contains(item)) {
+         int i = item.indexOf('=');
 
          if (i > 0) {
-            QString name  = alias.left(i).trimmed();
-            QString value = alias.right(alias.length() - i - 1);
+            QString name  = item.left(i).trimmed();
+            QString value = item.right(item.length() - i - 1);
 
             if (! name.isEmpty()) {
                // insert or update with the new alias
-               Doxy_Globals::aliasDict[name] = value;
+               Doxy_Globals::cmdAliasDict[name] = value;
             }
          }
       }
@@ -1010,14 +1007,14 @@ void Config::readAliases()
 
 void Config::expandAliases()
 {
-   for (auto iter = Doxy_Globals::aliasDict.begin(); iter != Doxy_Globals::aliasDict.end(); ++iter) {
+   for (auto iter = Doxy_Globals::cmdAliasDict.begin(); iter != Doxy_Globals::cmdAliasDict.end(); ++iter) {
       *iter = expandAlias(iter.key(), *iter);
    }
 }
 
 void Config::escapeAliases()
 {
-   for (auto &s : Doxy_Globals::aliasDict) {
+   for (auto &s : Doxy_Globals::cmdAliasDict) {
       QString value = s;
       QString newValue;
 
@@ -1046,5 +1043,28 @@ void Config::escapeAliases()
 
       newValue += value.mid(p, value.length() - p);
       s = newValue;
+   }
+}
+
+void Config::loadRenameNS_Aliases()
+{
+   // add aliases to a dictionary
+   const QStringList list = Config::getList("bb-skip-ns");
+
+   for (auto item : list) {
+
+      if (! Doxy_Globals::renameNSDict.contains(item)) {
+         int i = item.indexOf('=');
+
+         if (i > 0) {
+            QString name  = item.left(i).trimmed();
+            QString value = item.right(item.length() - i - 1);
+
+            if (! name.isEmpty()) {
+               // insert or update with the new alias
+               Doxy_Globals::renameNSDict[name] = value;
+            }
+         }
+      }
    }
 }

@@ -810,16 +810,18 @@ void NamespaceDef::addListReferences()
 
 QString NamespaceDef::displayName(bool includeScope) const
 {
-   QString result = includeScope ? name() : localName();
+   QString retval = includeScope ? name() : localName();
 
    SrcLangExt lang = getLanguage();
    QString sep = getLanguageSpecificSeparator(lang);
 
    if (sep != "::") {
-      result = substitute(result, "::", sep);
+      retval = substitute(retval, "::", sep);
    }
+
+   retval = renameNS_Aliases(retval);
   
-   return result;
+   return retval;
 }
 
 QString NamespaceDef::localName() const

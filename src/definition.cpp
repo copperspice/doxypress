@@ -1183,6 +1183,11 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
 void Definition::writeSourceReffedBy(OutputList &ol, const QString &scopeName)
 {
    if (Config::getBool("ref-by-relation")) {
+
+
+printf("\n BROOM what is the scope: %s \n", csPrintable(scopeName));
+
+
       _writeSourceRefList(ol, scopeName, theTranslator->trReferencedBy(), m_private->sourceRefByDict, false);
    }
 }

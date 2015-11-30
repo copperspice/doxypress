@@ -48,7 +48,12 @@ FormulaDict     *Doxy_Globals::formulaNameDict = 0;     // the label name of all
 
 SectionDict     *Doxy_Globals::sectionDict = 0;         // all page sections
 CiteDict        *Doxy_Globals::citeDict = 0;            // database of bibliographic references
-StringDict       Doxy_Globals::aliasDict;               // aliases
+
+StringDict       Doxy_Globals::namespaceAliasDict;      // all namespace aliases
+StringDict       Doxy_Globals::tagDestinationDict;      // all tag locations
+StringDict       Doxy_Globals::cmdAliasDict;            // cmd aliases
+StringDict       Doxy_Globals::renameNSDict;            // rename namespaces
+
 DirSDict         Doxy_Globals::directories;
 GenericsSDict   *Doxy_Globals::genericsDict;
 
@@ -59,9 +64,6 @@ FileNameDict    *Doxy_Globals::imageNameDict = 0;       // images
 FileNameDict    *Doxy_Globals::dotFileNameDict = 0;     // dot files
 FileNameDict    *Doxy_Globals::mscFileNameDict = 0;     // msc files
 FileNameDict    *Doxy_Globals::diaFileNameDict = 0;     // dia files
-
-StringDict       Doxy_Globals::namespaceAliasDict;      // all namespace aliases
-StringDict       Doxy_Globals::tagDestinationDict;      // all tag locations
 
 SortedList<QSharedPointer<FileName>> *Doxy_Globals::inputNameList; // all input files
 
