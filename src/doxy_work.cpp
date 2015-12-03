@@ -622,7 +622,6 @@ void processFiles()
    Doxy_Globals::g_storage->close();
    Doxy_Globals::g_stats.end();
 
-
    // done with input scanning, free up the buffers used by lex (can be around 4MB)
    preFreeScanner();
    CPPScanFreeParser();
@@ -2236,7 +2235,6 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
 // and all classes that have a documentation block before their definition
 void Doxy_Work::buildClassList(QSharedPointer<EntryNav> rootNav)
 {
-
    if (((rootNav->section() & Entry::COMPOUND_MASK) || rootNav->section() == Entry::OBJCIMPL_SEC) && ! rootNav->name().isEmpty()) {
       addClassToContext(rootNav);
    }

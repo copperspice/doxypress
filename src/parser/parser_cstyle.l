@@ -864,11 +864,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <SkipCurlyBlock>"}"        {
       if( curlyCount ) {
        --curlyCount ;
+
       } else if (needsSemi) {
        BEGIN( NextSemi );
-      }
-      else
-      {
+
+      } else {
        BEGIN( FindMembers );
       }
    }
@@ -952,7 +952,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>"%{"[^\n]*          { 
       // Mozilla XPIDL lang-specific block
-      if (!insideIDL)
+      if (! insideIDL)
          REJECT;
    }
 
@@ -1593,43 +1593,41 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>{B}*"namespace"{BN}*/[^a-z_A-Z0-9]    {
       isTypedef = false;
-      current->section = Entry::NAMESPACE_SEC;
-      current->type = "namespace" ;
-      current->fileName  = yyFileName;
-      current->startLine = yyLineNr;
+      current->section     = Entry::NAMESPACE_SEC;
+      current->type        = "namespace" ;
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
-      current->bodyLine  = yyLineNr;
+      current->bodyLine    = yyLineNr;
       lineCount();
       
       if (insidePHP) {
-      BEGIN( PackageName );
+         BEGIN( PackageName );
       } else {
-      BEGIN( CompoundName );
+         BEGIN( CompoundName );
       }
    }
 
 <FindMembers>{B}*"module"{BN}+      {
       lineCount();
       if (insideIDL) {
-      isTypedef = false;
-      current->section = Entry::NAMESPACE_SEC;
-      current->type = "module" ;
-      current->fileName  = yyFileName;
-      current->startLine = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine  = yyLineNr;
-      BEGIN( CompoundName );
-      }
-      else if (insideD)
-      {
-      lineCount();
-      BEGIN(PackageName);
-      }
-      else
-      {
-      QString text = QString::fromUtf8(yytext); 
-      addType( current ) ;
-      current->name = text.trimmed();
+         isTypedef = false;
+         current->section = Entry::NAMESPACE_SEC;
+         current->type = "module" ;
+         current->fileName  = yyFileName;
+         current->startLine = yyLineNr;
+         current->startColumn = yyColNr;
+         current->bodyLine  = yyLineNr;
+         BEGIN( CompoundName );
+
+      } else if (insideD) {
+         lineCount();
+         BEGIN(PackageName);
+
+      } else {
+         QString text = QString::fromUtf8(yytext); 
+         addType( current ) ;
+         current->name = text.trimmed();
       }
    }
 
@@ -1809,26 +1807,25 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>{B}*"exception"{BN}+   { 
       // Corba IDL exception
-                 isTypedef = false;
-                 current->section = Entry::CLASS_SEC;
-                 current->m_specFlags.spec = Entry::Exception | (current->m_specFlags.spec & Entry::Published); // preserve UNO IDL
-                 addType( current ) ;
-                 current->type += " exception" ;
-                 current->fileName  = yyFileName;
-                 current->startLine = yyLineNr;
-                 current->startColumn = yyColNr;
-                 current->bodyLine  = yyLineNr;
-                 lineCount();
-                 BEGIN( CompoundName );
+      isTypedef = false;
+      current->section = Entry::CLASS_SEC;
+      current->m_specFlags.spec = Entry::Exception | (current->m_specFlags.spec & Entry::Published); // preserve UNO IDL
+      addType( current ) ;
+      current->type += " exception" ;
+      current->fileName  = yyFileName;
+      current->startLine = yyLineNr;
+      current->startColumn = yyColNr;
+      current->bodyLine  = yyLineNr;
+      lineCount();
+      BEGIN( CompoundName );
    }
 
 <FindMembers>"@class" | // for Objective C class declarations
 <FindMembers>{B}*{TYPEDEFPREFIX}"class{" |
 <FindMembers>{B}*{TYPEDEFPREFIX}"class"{BN}+   {
       // add a new class
-
       QString text = QString::fromUtf8(yytext);
-   
+ 
       isTypedef = text.indexOf("typedef") != -1;
       
       bool isConst     = text.indexOf("const")!=-1;
@@ -3299,14 +3296,14 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <DeclType>.      {
-         unput(*yytext);
-         BEGIN(FindMembers);
+      unput(*yytext);
+      BEGIN(FindMembers);
    }
 
 <CSIndexer>"["[^\n\]]*"]"     {
-                    QString text = QString::fromUtf8(yytext);
-                    current->name += removeRedundantWhiteSpace(text);
-                    BEGIN(FindMembers);
+      QString text = QString::fromUtf8(yytext);
+      current->name += removeRedundantWhiteSpace(text);
+      BEGIN(FindMembers);
    }
 
 <FindMembers>[0-9]{ID}        { 
@@ -3426,7 +3423,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       
 <PreLineCtrl>\n            {
       QString text = QString::fromUtf8(yytext);
-      if (lastPreLineCtrlContext==ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
+      if (lastPreLineCtrlContext == ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
          current->m_program += text;
       }
       
@@ -4858,8 +4855,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"//".*     { 
       // read a comment 
-      QString text = QString::fromUtf8(yytext);  
-      current->m_program += text;     
+      QString text = QString::fromUtf8(yytext); 
+      current->m_program += text; 
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"#".*   { 
@@ -4878,7 +4875,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       
       current->m_program += text ;
       pSkipVerbString = &current->m_program;
-      lastSkipVerbStringContext=YY_START;
+      lastSkipVerbStringContext = YY_START;
       BEGIN( SkipVerbString );
    }
 
@@ -4962,18 +4959,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       --curlyCount ;
    }
 
-<ReadBody,ReadNSBody>"}"      { 
-      // err("ReadBody count=%d\n",curlyCount);
+<ReadBody,ReadNSBody>"}"      {     
       QString text = QString::fromUtf8(yytext);
   
-      if ( curlyCount>0 )  {
+      if ( curlyCount > 0 )  {
          current->m_program += text ;
          --curlyCount;
 
       } else {
          current->endBodyLine = yyLineNr;
          QString &cn = current->name;
-         QString rn = current_root->name;
+         QString rn  = current_root->name;
    
          if (! cn.isEmpty() && ! rn.isEmpty()) {
             prependScope();
@@ -5002,7 +4998,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                BEGIN( ReadBodyIntf );
    
             } else {
-               current_root->addSubEntry( current , current_root);
+               current_root->addSubEntry(current , current_root);
                memspecEntry = current;
                current = QMakeShared<Entry>(*current);
    
@@ -5035,25 +5031,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       }
    }
 
-<ReadBody>"}"{BN}+"typedef"{BN}+    { 
-      // err("ReadBody count=%d\n",curlyCount);
+<ReadBody>"}"{BN}+"typedef"{BN}+    {       
       QString text = QString::fromUtf8(yytext);  
+
       lineCount();
       if ( curlyCount >0 ) {
          current->m_program += text;
          --curlyCount;
 
       } else {
-                   isTypedef = true;
-                   current->endBodyLine = yyLineNr;
-                   QString &cn = current->name;
-                   QString rn = current_root->name;
-                   if (!cn.isEmpty() && !rn.isEmpty())
-                   {
-                     prependScope();
-                   }
-                   BEGIN( TypedefName );
-                 }
+         isTypedef = true;
+         current->endBodyLine = yyLineNr;
+         QString &cn = current->name;
+         QString rn = current_root->name;
+
+         if (!cn.isEmpty() && !rn.isEmpty()) {
+            prependScope();
+         }
+
+         BEGIN( TypedefName );
+      }
    }
 
 <TypedefName>("const"|"volatile"){BN}  { 
@@ -5161,8 +5158,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       if (msName.isEmpty() && ! current->name.isEmpty()) {
                    // see if the compound does not have a name or is inside another
-                   // anonymous compound. If so we insert a
-                   // special `anonymous' variable.
+                   // anonymous compound. If so we insert a special `anonymous' variable.
                    // Entry *p=current_root;
                    // Entry *p=current;
 
@@ -5314,7 +5310,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <ReadBody,ReadNSBody,ReadBodyIntf>{BN}{1,80} { 
       QString text = QString::fromUtf8(yytext); 
       current->m_program += text;
-      lineCount();     
+      lineCount();  
    }
 
 <ReadBodyIntf>"@end"/[^a-z_A-Z0-9]  { 
@@ -6972,10 +6968,6 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext); 
       current->name = text;
 
-
- printf("\n --> (7088) current name  %s", csPrintable(current->name) );
-
-
       if (insideCpp || insideObjC) {
          current->id = ClangParser::instance()->lookup(yyLineNr, text);
       }
@@ -7016,20 +7008,18 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                    current->name = current->name.trimmed();
                    lineCount();
                    BEGIN( FindMembers );
-                 }
+      }
    }
 
 <ClassVar>","           {
-                 if (isTypedef)
-                 {
+                 if (isTypedef) {
                    // multiple types in one typedef
                    unput(',');
                    current->type.prepend("typedef ");
                    BEGIN(FindMembers);
-                 }
-                 else
-                 {
-                      // Multiple class forward declaration
+
+                 } else {
+                    // Multiple class forward declaration
                  }
    }
 
@@ -7103,6 +7093,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ClassVar>[(\[]            {
       QString text = QString::fromUtf8(yytext);
+
       if (insideObjC && text[0] == '(') {
          // class category
                  
@@ -7138,7 +7129,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <CSConstraintType,CSConstraintName>"#"    { 
       // artificially inserted token to signal end of comment block
-                                          current->typeConstr.last().docs = fullArgString;
+      current->typeConstr.last().docs = fullArgString;
    }
 
 <CSConstraintType>"{"         { 
@@ -7316,8 +7307,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <CompoundName,ClassVar>{B}*"{"{B}*  {
-      current->fileName    = yyFileName ;
-      current->startLine   = yyLineNr ;
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
 
       current->name = removeRedundantWhiteSpace(current->name);
@@ -7341,7 +7332,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             current->name = QString("@%1").arg(anonCount++);
          }
       }
-
+ 
       curlyCount = 0;
 
       if (current_root && // not a nested struct inside an @interface section
@@ -7357,7 +7348,6 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          BEGIN( ReadNSBody );
       
       } else { 
-         // class body        
          BEGIN( ReadBody );         
       }
    }
@@ -7576,13 +7566,14 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <SkipRound>")"             { 
-      if (--roundCount < 0)
-         BEGIN ( lastSkipRoundContext );
+      if (--roundCount < 0) {
+         BEGIN ( lastSkipRoundContext );   
+      }
    }
 
 <SkipRound>\"           {
-                    lastStringContext=SkipRound;
-                 BEGIN(SkipString);
+      lastStringContext=SkipRound;
+      BEGIN(SkipString);
    }
 
 <Bases>","|(">"({BN}*"{")?)|({BN}+"implements"{BN}*)  { 
