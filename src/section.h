@@ -24,6 +24,7 @@ class Definition;
 
 /** Class representing a section in a page */
 struct SectionInfo {
+
    enum SectionType { Page          = 0,
                       Section       = 1,
                       Subsection    = 2,
@@ -32,36 +33,25 @@ struct SectionInfo {
                       Anchor        = 5
                     };
 
-   SectionInfo(const QString &f, const int lin, const  QString &l, const  QString &t, SectionType st, int lev, const QString &r = QString()) 
-      : label(l), title(t), type(st), ref(r), fileName(f), lineNr(lin), generated(false), level(lev) 
-   { }
-
-   SectionInfo(const SectionInfo &s) {
-      label = s.label;
-      title = s.title;
-      type  = s.type;
-      ref   = s.ref;
-
-      definition = s.definition;
-      fileName   = s.fileName;
-      lineNr     = s.lineNr;
-      generated  = s.generated;
-      level      = s.level;
-   }
-
-   ~SectionInfo() {}
+   SectionInfo(const QString &f, const int lin, const  QString &l, const QString &t, SectionType st, int lev, const QString &r = QString()) 
+      : label(l), title(t), type(st), ref(r), fileName(f), lineNr(lin), generated(false), level(lev), dupAnchor_cnt(0) 
+   { }  
 
    QString label;
-   QString title;
-   SectionType type;
+   QString title;   
    QString ref;
+   QString fileName;
+      
+   int lineNr;   
+   int level;
 
+   bool generated;
+
+   SectionType type;
    QSharedPointer<Definition> definition;
 
-   QString fileName;
-   int lineNr;
-   bool generated;
-   int level;
+   int dupAnchor_cnt;
+   QString dupAnchor_fName;
 };
 
 using SectionDict = StringMap<QSharedPointer<SectionInfo>>;

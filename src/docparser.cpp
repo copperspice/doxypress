@@ -2285,6 +2285,7 @@ void DocSecRefList::parse()
       } else {
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s inside section reference list",
                         qPrintable(tokToString(tok)));
+
          goto endsecreflist;
       }
 
@@ -2361,12 +2362,20 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
 
    QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict->find(target);
 
-   if (sec == 0 && lang == SrcLangExt_Markdown) { // lookup as markdown file
+   if (sec == nullptr && lang == SrcLangExt_Markdown) { 
+      // lookup as markdown file
       sec = Doxy_Globals::sectionDict->find(markdownFileNameToId(target));
    }
 
    if (sec) { 
       // ref to section or anchor      
+
+      if (sec->dupAnchor_cnt > 0)  {
+         warn(s_fileName, doctokenizerYYlineno, "Link to ambiguous anchor '%s', "
+            "using first anchor declared in %s, line %d", csPrintable(target), 
+            csPrintable(sec->dupAnchor_fName), sec->lineNr);
+      }
+
       QSharedPointer<PageDef> pd;
 
       if (sec->type == SectionInfo::Page) {
@@ -2428,6 +2437,7 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
          return;
       }
    }
+
    m_text = target;
    warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to resolve reference to '%s' for \\ref command", 
                   qPrintable(target));

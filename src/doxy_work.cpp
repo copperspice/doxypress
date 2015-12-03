@@ -2154,7 +2154,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
          refFileName = tagInfo->fileName;
 
          if (fullName.indexOf("::") != -1) {
-            // symbols imported via tag files may come without the parent scope,
+            // symbols imported via tag files may come without the parent scope
             // so we artificially create it here
 
             buildScopeFromQualifiedName(fullName, fullName.count("::"), root->lang, tagInfo);
@@ -2213,7 +2213,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
    }
 
    cd->addSectionsToDefinition(root->anchors);
-   if (!root->subGrouping) {
+   if (! root->subGrouping) {
       cd->setSubGrouping(false);
    }
 
@@ -3940,13 +3940,6 @@ if (name.contains("fake") || name.contains("isChopped")) {
                (root->stat && root->relatesType != MemberOf), 
                (root->relates.isEmpty() ? Member : root->relatesType == MemberOf ? Foreign : Related),
                mtype, root->tArgLists ? &root->tArgLists->last() : 0, &root->argList);
-
-
-//   printf("\n BROOM (dw 3960)  method: %s ",   csPrintable(root->name) );
-//   printf("\n BROOM (dw 3960)  brief:%s   ",   csPrintable(root->brief) );
-//   printf("\n BROOM (dw 3961)  details:%s \n", csPrintable(root->doc.left(30)) );
-
-
 
    md->setTagInfo(rootNav->tagInfo());
    md->setMemberClass(cd);

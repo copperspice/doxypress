@@ -171,12 +171,12 @@ void FTVHelp::decContentsDepth()
       
       } else {   
          FTVNode *parent = nl.last();
-   
+  
          if (parent) {
-            QList<FTVNode *> &children = m_indentNodes[m_indent + 1];
+            QList<FTVNode *> &kids = m_indentNodes[m_indent + 1];
    
-            while (! children.isEmpty()) {
-               parent->children.append(children.takeAt(0));
+            while (! kids.isEmpty()) {
+               parent->children.append(kids.takeAt(0));
             }
          }
       }
@@ -712,8 +712,7 @@ if  (node->file.contains("getting-started")) {
       }
 
       if (node->children.count() != 0 ) {
-         QList<FTVNode *> &children = node->children;
-         reSortNodes(children);
+         reSortNodes(node->children);
       }
    }
 }

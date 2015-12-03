@@ -2107,7 +2107,8 @@ void HtmlDocVisitor::filterQuotedCdataAttr(const QString &str)
 void HtmlDocVisitor::startLink(const QString &ref, const QString &file, const QString &relPath, 
                   const QString &anchor, const QString &tooltip)
 {
-   if (!ref.isEmpty()) { // link to entity imported via tag file
+   if (!ref.isEmpty()) { 
+      // link to entity imported via tag file
       m_t << "<a class=\"elRef\" ";
       m_t << externalLinkTarget() << externalRef(relPath, ref, false);
 
@@ -2117,14 +2118,18 @@ void HtmlDocVisitor::startLink(const QString &ref, const QString &file, const QS
 
    m_t << "href=\"";
    m_t << externalRef(relPath, ref, true);
+
    if (!file.isEmpty()) {
       m_t << file << Doxy_Globals::htmlFileExtension;
    }
+
    if (!anchor.isEmpty()) {
       m_t << "#" << anchor;
    }
+
    m_t << "\"";
-   if (!tooltip.isEmpty()) {
+
+   if (! tooltip.isEmpty()) {
       m_t << " title=\"" << substitute(tooltip, "\"", "&quot;") << "\"";
    }
    m_t << ">";

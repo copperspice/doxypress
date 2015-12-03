@@ -2288,6 +2288,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
                  QString text = QString::fromUtf8(yytext);
                  lineCount();
+
                  current->name = text;
                  current->fileName = yyFileName;
                  current->section=Entry::USINGDECL_SEC;
@@ -3753,53 +3754,55 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
   /* Read initializer rules */
 <ReadInitializer>"("          {
-                    QString text = QString::fromUtf8(yytext);
-                    lastRoundContext  = YY_START;
-                    pCopyRoundGString = &current->initializer;
-                    roundCount = 0;
-                    current->initializer += text[0];
-                    BEGIN(GCopyRound);
+      QString text = QString::fromUtf8(yytext);
+      lastRoundContext  = YY_START;
+      pCopyRoundGString = &current->initializer;
+      roundCount = 0;
+      current->initializer += text[0];
+      BEGIN(GCopyRound);
    }
 
 <ReadInitializer>"{"          {
-                    QString text = QString::fromUtf8(yytext);
-                    lastCurlyContext  = YY_START;
-                    pCopyCurlyGString = &current->initializer;
-                    curlyCount = 0;
-                    current->initializer += text[0];
-                    BEGIN(GCopyCurly);
+      QString text = QString::fromUtf8(yytext);
+      lastCurlyContext  = YY_START;
+      pCopyCurlyGString = &current->initializer;
+      curlyCount = 0;
+      current->initializer += text[0];
+      BEGIN(GCopyCurly);
    }
 
 <ReadInitializer>[;,]         {                 
-                 QString text = QString::fromUtf8(yytext);
-                 if (text[0] == ';' && (current_root->m_specFlags.spec & Entry::Enum)) {
-                   current->fileName    = yyFileName;
-                   current->startLine   = yyLineNr;
-                   current->startColumn = yyColNr;
-                   current->args        = current->args.simplified();
-                   current->name        = current->name.trimmed();
-                   current->section     = Entry::VARIABLE_SEC;
-                   current_root->addSubEntry(current, current_root);
+      QString text = QString::fromUtf8(yytext);
+      
+      if (text[0] == ';' && (current_root->m_specFlags.spec & Entry::Enum)) {
+         current->fileName    = yyFileName;
+         current->startLine   = yyLineNr;
+         current->startColumn = yyColNr;
+         current->args        = current->args.simplified();
+         current->name        = current->name.trimmed();
+         current->section     = Entry::VARIABLE_SEC;
+         current_root->addSubEntry(current, current_root);
+         
+         current = QMakeShared<Entry>();
+         initEntry();
+         BEGIN(FindMembers);
+         
+         } else if (text[0] == ';' || (lastInitializerContext == FindFields && initBracketCount==0))  {
+            // initBracketCount == 0 was added for bug 665778
+         
+            unput(*yytext);
+            BEGIN(lastInitializerContext);
+         
+         } else if (text[0] == ',' && initBracketCount == 0) { 
+            // for "int a=0,b=0"
+         
+            unput(*yytext);
+            BEGIN(lastInitializerContext);
+         
+      } else  {
+         current->initializer += text[0];
 
-                   current = QMakeShared<Entry>();
-                   initEntry();
-                   BEGIN(FindMembers);
-                 }
-                 else if (text[0] == ';' || (lastInitializerContext == FindFields && initBracketCount==0)) 
-                    // initBracketCount == 0 was added for bug 665778
-                 {
-                      unput(*yytext);
-                      BEGIN(lastInitializerContext);
-                 }
-                 else if (text[0] == ',' && initBracketCount == 0) // for "int a=0,b=0"
-                 {
-                      unput(*yytext);
-                      BEGIN(lastInitializerContext);
-                 }
-                 else
-                 {
-                      current->initializer += text[0];
-                 }
+      }
    }
 
 <ReadInitializer>{RAWBEGIN}             { 
@@ -4381,28 +4384,31 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>[;,]       {
       QString text = QString::fromUtf8(yytext);  
                  QString oldType = current->type;
-                 if (current->bodyLine==-1)
-                 {
+
+                 if (current->bodyLine == -1) {
                    current->bodyLine = yyLineNr;
                  }
-                 if ( insidePHP && current->type.left(3) == "var" )
-                 {
+
+                 if ( insidePHP && current->type.left(3) == "var" ) {
                     current->type = current->type.mid(3);
                  }
-                 if (isTypedef && current->type.left(8)!="typedef ")
-                 {
+
+                 if (isTypedef && current->type.left(8)!="typedef ") {
                    current->type.prepend("typedef ");
                  }
+
                  bool needNewCurrent = false;
-                 if (! current->name.isEmpty() && current->section != Entry::ENUM_SEC)
-                 {
+
+                 if (! current->name.isEmpty() && current->section != Entry::ENUM_SEC) {
                    current->type=current->type.simplified();
                    current->args=removeRedundantWhiteSpace(current->args);
                    current->name=current->name.trimmed();
+
                    if (current->section==Entry::CLASS_SEC) // remove spec for "struct Bla bla;"
                    {
                      current->m_specFlags = Entry::SpecifierFlags{};
                    }
+
                    current->section = Entry::VARIABLE_SEC;
                    current->fileName = yyFileName;
                    current->startLine = yyBegLineNr;
@@ -4410,13 +4416,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                    current_root->addSubEntry( current, current_root);
                    needNewCurrent=true;
                  }
-                 if ( text[0] == ',')
-                 {
+
+                 if ( text[0] == ',') {
                    bool stat = current->stat;
+
                    if (needNewCurrent) {
                      current = QMakeShared<Entry>(*current);
                      initEntry();
                    }
+
                    current->stat = stat; // the static attribute holds for all variables
                    current->name.resize(0);
                    current->args.resize(0);
@@ -4642,12 +4650,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <IDLProp>";"            {
                  current->fileName   = yyFileName;
                  current->type       = idlProp;
-                    current->args       = current->args.simplified();
+                 current->args       = current->args.simplified();
 
-                    if (! current->args.isEmpty())
-                      current->args += ")";
+                 if (! current->args.isEmpty())
+                    current->args += ")";
 
-                    current->name       = current->name.trimmed();
+                 current->name       = current->name.trimmed();
                  current->section    = Entry::VARIABLE_SEC;
                  current_root->addSubEntry(current, current_root);
 
@@ -4733,6 +4741,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);  
       current->type += text[0]; 
    }
+
 <FindFields>{ID}                    {
       QString text = QString::fromUtf8(yytext);  
       if (insideCpp || insideObjC)  {
@@ -5313,7 +5322,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current_root->addSubEntry( current, current_root);
       current = QMakeShared<Entry>();
       initEntry();
+
       insideObjC = false;
+
       BEGIN( FindMembers );
    }
 
@@ -6961,6 +6972,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext); 
       current->name = text;
 
+
+ printf("\n --> (7088) current name  %s", csPrintable(current->name) );
+
+
       if (insideCpp || insideObjC) {
          current->id = ClangParser::instance()->lookup(yyLineNr, text);
       }
@@ -7115,10 +7130,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       lastCopyArgChar = '#';       // end marker
       lastCommentInArgContext = YY_START;
 
-                 if (text[1] == '/')
-                   BEGIN( CopyArgCommentLine );
-                 else
-                   BEGIN( CopyArgComment );
+      if (text[1] == '/')
+       BEGIN( CopyArgCommentLine );
+      else
+       BEGIN( CopyArgComment );
    }
 
 <CSConstraintType,CSConstraintName>"#"    { 
@@ -7285,6 +7300,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <Bases,ClassVar>[\-+]{BN}*       {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
+
       if (! insideObjC) {
          REJECT;
 
@@ -8793,7 +8809,7 @@ static void parsePrototype(const QString &text)
    yy_switch_to_buffer(orgState);
    yy_delete_buffer(tmpState);
    
-   inputString = orgInputString;
+   inputString   = orgInputString;
    inputPosition = orgInputPosition;
 }
 

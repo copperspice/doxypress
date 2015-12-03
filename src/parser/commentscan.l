@@ -365,6 +365,9 @@ static void groupAddDocs(QSharedPointer<Entry> e);
 static ParserInterface *langParser;          // the language parser that is calling us
 static QString          inputString;         // input string
 static int              inputPosition;       // read pointer
+static int              prevPosition;
+static char *           s_bufferPosition;
+
 static QString          yyFileName;          // file name that is read from
 static int              yyLineNr;            // line number in the input
 static bool             inBody;              // was the comment found inside the body of a function?
@@ -792,25 +795,20 @@ static inline void setOutput(OutputContext ctx)
    }
 }
 
-static void addAnchor(const QString &anchorLabel)
+static void addAnchor(const QString &anchorName)
 {
-   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(anchorLabel);
+   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(anchorName);
 
    if (si) {
-      if (si->lineNr != -1) {
-         warn(yyFileName,yyLineNr,"Multiple use of section label '%s' while adding anchor, "
-               "(first occurrence: %s, line %d)", csPrintable(anchorLabel), csPrintable(si->fileName), si->lineNr);
+      // anchor name already exists         
+      si->dupAnchor_cnt++;                 
 
-      } else  {
-         warn(yyFileName,yyLineNr,"Multiple use of section label '%s' while adding anchor, "
-               "(first occurrence: %s)", csPrintable(anchorLabel), csPrintable(si->fileName));
-      }
+   } else {
+      si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, anchorName, QString(""), SectionInfo::Anchor, 0);
+      si->dupAnchor_fName = yyFileName; 
 
-      } else {
-         si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, anchorLabel, QString(""), SectionInfo::Anchor, 0);
-         Doxy_Globals::sectionDict->insert(anchorLabel, si);
-         current->anchors->append(*si);
-
+      Doxy_Globals::sectionDict->insert(anchorName, si);          
+      current->anchors->append(*si);
    }
 }
 
@@ -848,6 +846,8 @@ static void handleGuard(const QString &expr);
 
 static int yyread(char *buf, int max_size)
 {
+   s_bufferPosition = buf;
+
    prevPosition = inputPosition;
    int c = 0;
 
@@ -1149,12 +1149,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          }
 
          if (cmdPtr->func && cmdPtr->func(cmdName)) {
-            // implicit split of the comment block into two entries. 
-            // Restart the next block at the start of this command.
+            // implicit split of the comment block into two entries 
+            // restart the next block at the start of this command
 
             s_parseMore = true;
 
-            inputPosition = prevPosition + (int)(yy_bp - YY_CURRENT_BUFFER_LVALUE->yy_ch_buf);
+            inputPosition = prevPosition + (yy_bp - s_bufferPosition);     
             yyterminate();
 
          } else if (cmdPtr->func == nullptr) {
@@ -1233,7 +1233,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       s_parseMore    = true;
       s_needNewEntry = true;
 
-      inputPosition = prevPosition + (int)(yy_bp - YY_CURRENT_BUFFER_LVALUE->yy_ch_buf) + text.length();
+      inputPosition = prevPosition + (yy_bp - s_bufferPosition) + text.length();           
       yyterminate();
    }
 

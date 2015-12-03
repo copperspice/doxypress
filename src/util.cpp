@@ -1867,12 +1867,6 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
    int newIndex;
    int skipIndex = 0;
    int floatingIndex = 0;
-
-
-if (self->name() == "Date") {
-   printf("\n  BROOM  scope --> %s", csPrintable(scope->name()) );
-}
-
  
    // read a word from the text string
    while ((newIndex = regExp.indexIn(text, index)) != -1 && (newIndex == 0 ||
@@ -1949,8 +1943,13 @@ if (self->name() == "Date") {
          QSharedPointer<MemberDef>    typeDef;
 
 
+if (self->name() == "Date") {
+   printf("\n  BROOM (linky) scope --> %s", csPrintable(scope->name()) );
+}
+
+
 if (self->name() == "Date") {  
-   printf("\n  BROOM  matchWord --> %s \n", csPrintable(matchWord) );
+   printf("\n  BROOM (linky) matchWord --> %s", csPrintable(matchWord) );
 }
 
      //    QString temp = scope->name();
@@ -1959,7 +1958,7 @@ if (self->name() == "Date") {
 
 
 if (self->name() == "Date") {  
-   printf("\n  BROOM  newScope --> %s \n", csPrintable() );
+// printf("\n  BROOM  (linky) newScope --> %s \n", csPrintable() );
 }
 
 
@@ -7411,10 +7410,11 @@ QString stripIndentation(const QString &s)
 bool fileVisibleInIndex(QSharedPointer<FileDef> fd, bool &genSourceFile)
 {
    static bool allExternals = Config::getBool("all-externals");
-   bool isDocFile = fd->isDocumentationFile();
-   genSourceFile = !isDocFile && fd->generateSourceFile();
 
-   return ( ((allExternals && fd->isLinkable()) || fd->isLinkableInProject()) && !isDocFile);
+   bool isDocFile = fd->isDocumentationFile();
+   genSourceFile  = ! isDocFile && fd->generateSourceFile();
+
+   return ( ((allExternals && fd->isLinkable()) || fd->isLinkableInProject()) && ! isDocFile);
 }
 
 void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDef> dst)
@@ -7574,8 +7574,10 @@ void convertProtectionLevel(MemberListType inListType, Protection inProt, int *o
          default:
             break;
       }
+
    } else if (inProt == Protected) { // Protected inheritance
-      switch (inListType) // in the protected section of the derived class,
+      switch (inListType) 
+         // in the protected section of the derived class,
          // both the public and protected members are shown as protected
       {
          case MemberListType_pubMethods:
@@ -7615,6 +7617,7 @@ void convertProtectionLevel(MemberListType inListType, Protection inProt, int *o
          default:
             break;
       }
+
    } else if (inProt == Private) {
       switch (inListType) // in the private section of the derived class,
          // both the public and protected members are shown

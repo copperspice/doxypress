@@ -139,14 +139,20 @@ void NamespaceDef::addInnerCompound(QSharedPointer<Definition> d)
 
 void NamespaceDef::insertClass(QSharedPointer<ClassDef> cd)
 {
-   if (classSDict->find(cd->name()) == 0) {      
+   if (classSDict->find(cd->name()) == nullptr) {      
+
+      // added 12/2015
+      if (cd->isHidden()) {
+         return;
+      }
+
       classSDict->insert(cd->name(), cd);
    }
 }
 
 void NamespaceDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
 {
-   if (namespaceSDict->find(nd->name()) == 0) {     
+   if (namespaceSDict->find(nd->name()) == nullptr) {     
       namespaceSDict->insert(nd->name(), nd);
    }
 }
@@ -451,7 +457,6 @@ void NamespaceDef::writeMemberGroups(OutputList &ol)
             mg->writeDeclarations(ol, QSharedPointer<ClassDef>(), self, QSharedPointer<FileDef>(), QSharedPointer<GroupDef>());
          }
       }
-
    }
 }
 
@@ -498,7 +503,7 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
       }
    }
 
-   if (!first) {
+   if (! first) {
       ol.writeString("  </div>\n");
    }
    ol.popGeneratorState();
@@ -1062,7 +1067,7 @@ bool NamespaceDef::isLinkableInProject() const
    }
 
    return ! name().isEmpty() && name().at(i) != '@' &&  (hasDocumentation() || getLanguage() == SrcLangExt_CSharp) && 
-          ! isReference() && !isHidden() && ! isArtificial();      
+          ! isReference() && ! isHidden() && ! isArtificial();      
 }
 
 bool NamespaceDef::isLinkable() const
@@ -1084,8 +1089,8 @@ QSharedPointer<MemberDef> NamespaceDef::getMemberByName(const QString &n) const
 QString NamespaceDef::title() const
 {
    SrcLangExt lang = getLanguage();
-   QString pageTitle;
 
+   QString pageTitle;
    QString tempDisplay = displayName();
 
    if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
