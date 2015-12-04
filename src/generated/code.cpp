@@ -11009,8 +11009,8 @@ static void setClassScope(const QString &name)
    pushScope(n);  
 }
 
-/*! start a new line of code, inserting a line number if g_sourceFileDef
- * is TRUE. If a definition starts at the current line, then the line
+/*! start a new line of code, inserting a line number if g_sourceFileDef is TRUE
+ * If a definition starts at the current line, then the line
  * number is linked to the documentation of that definition.
  */
 static void startCodeLine()

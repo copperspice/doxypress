@@ -1745,8 +1745,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
    QString temp1 = root->doc.trimmed();
    QString temp2 = root->brief.trimmed();
 
-   if ( (! temp1.isEmpty() || ! temp2.isEmpty() || Config::getBool("extract-all")) && root->protection != Private)  {
-    
+   if ( (! temp1.isEmpty() || ! temp2.isEmpty() || Config::getBool("extract-all")) && root->protection != Private)  {    
       bool local = Config::getBool("force-local-includes");
 
       QString includeFile = root->includeFile;
@@ -1794,7 +1793,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
       // if a file is found, we mark it as a source file
       if (fd) {
 
-         QString iName = !root->includeName.isEmpty() ? root->includeName : includeFile;
+         QString iName = ! root->includeName.isEmpty() ? root->includeName : includeFile;
 
          if (! iName.isEmpty()) { 
             // user specified include file
@@ -1820,14 +1819,22 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
          } else {
             // use name of the file containing the class definition
             iName = fd->name();
+
+printf("\n Broom fName (A) include file= %s", csPrintable(iName) );
+
          }
 
-         if (fd->generateSourceFile()) { // generate code for header
+         if (fd->generateSourceFile()) { 
+            // generate code for header
             cd->setIncludeFile(fd, qPrintable(iName), local, ! root->includeName.isEmpty());
+
+printf("\n Broom fName (B) include file= %s", csPrintable(iName) );
+
 
          } else { 
             // put #include in the class documentation without link
-            cd->setIncludeFile(QSharedPointer<FileDef>(), qPrintable(iName), local, true);
+            cd->setIncludeFile(QSharedPointer<FileDef>(), csPrintable(iName), local, true);
+
          }
       }
    }
@@ -8145,8 +8152,8 @@ void Doxy_Work::generateFileSources()
                      fd->writeSource(*Doxy_Globals::g_outputList, false, includeFiles);
 
                   } else if (! fd->isReference() && Doxy_Globals::parseSourcesNeeded) {
-                     // we needed to parse the sources even if we do not show them
-                  
+                     // we needed to parse the sources even if we do not show them                 
+
                      msg("Parsing code for file %s\n", qPrintable(fd->docName()));
                      fd->parseSource(false, includeFiles);
                   }
@@ -8168,8 +8175,8 @@ void Doxy_Work::generateFileSources()
                               ifd->writeSource(*Doxy_Globals::g_outputList, true, moreFiles);
 
                            } else if (Doxy_Globals::parseSourcesNeeded)  {
-                              // need to parse the sources even if we do not show it
-                           
+                              // need to parse the sources even if we do not show it                           
+
                               msg("Parsing code for file %s\n", qPrintable(ifd->docName()));
                               ifd->parseSource(true, moreFiles);
                            }
@@ -8224,12 +8231,17 @@ void Doxy_Work::generateFileSources()
                if (fd->generateSourceFile()) {
                   // source needs to be shown in the output
 
+printf("\n Broom A GEN code");
+
                   msg("Generating code for file %s\n",  qPrintable(fd->docName()));
                   fd->writeSource(*Doxy_Globals::g_outputList, false, includeFiles);
 
                } else if (! fd->isReference() && Doxy_Globals::parseSourcesNeeded) {
                   // parse the sources even if we do not show it
                
+printf("\n Broom A PARSE code");
+
+
                   msg("Parsing code for file %s\n",  qPrintable(fd->docName()));
                   fd->parseSource(false, includeFiles);
                }

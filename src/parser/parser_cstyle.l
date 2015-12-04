@@ -5099,6 +5099,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       memspecEntry = current;
       current = QMakeShared<Entry>(*current);
       initEntry();
+
       unput(';');
       BEGIN( MemberSpec ) ;
    }
@@ -5157,128 +5158,132 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext); 
 
       if (msName.isEmpty() && ! current->name.isEmpty()) {
-                   // see if the compound does not have a name or is inside another
-                   // anonymous compound. If so we insert a special `anonymous' variable.
-                   // Entry *p=current_root;
-                   // Entry *p=current;
+         // see if the compound does not have a name or is inside another
+         // anonymous compound. If so we insert a special `anonymous' variable.
+         // Entry *p=current_root;
+         // Entry *p=current;
+         
+         QSharedPointer<Entry> p = current;
+      
+         while (p) {
+            // only look for class scopes, not namespace scopes
+            if ((p->section & Entry::COMPOUND_MASK) && !p->name.isEmpty()) {
+               //printf("Trying scope `%s'\n",p->name.data());
+               int i = p->name.lastIndexOf("::");
+               int pi = (i==-1) ? 0 : i+2;
+            
+               if (p->name.at(pi)=='@') {
+                  // anonymous compound inside -> insert dummy variable name         
+            
+                  msName = QString("@%1").arg(anonCount++);
+                  break;
+               }
+            }
 
-                   QSharedPointer<Entry> p = current;
+            if (p == current) p=current_root; else p=p->parent();
+         }
+      }
+     
+      if (! msName.isEmpty() ) {
+         //  && msName != current->name ) 
+         // skip typedef T {} T;, removed due to bug608493
+      
+         static bool typedefHidesStruct =  Config::getBool("use-typedef-name");
+      
+         // case 1: typedef struct _S { ... } S_t;
+         // -> omit typedef and use S_t as the struct name
+      
+         if (typedefHidesStruct &&  isTypedef && 
+               ((current->m_specFlags.spec & (Entry::Struct|Entry::Union)) ||
+               current->section == Entry::ENUM_SEC ) && msType.trimmed().isEmpty() && memspecEntry) {
 
-                   while (p) {
-                     // only look for class scopes, not namespace scopes
-                     if ((p->section & Entry::COMPOUND_MASK) && !p->name.isEmpty()) {
-                        //printf("Trying scope `%s'\n",p->name.data());
-                        int i=p->name.lastIndexOf("::");
-                        int pi = (i==-1) ? 0 : i+2;
+            memspecEntry->name=msName;
 
-                        if (p->name.at(pi)=='@') {
-                    // anonymous compound inside -> insert dummy variable name
-                    //printf("Adding anonymous variable for scope %s\n",p->name.data());
+         }  else  {
+            // case 2: create a typedef field
+      
+            QSharedPointer<Entry> varEntry = QMakeShared<Entry>();
+            varEntry->lang = language;
+            varEntry->protection = current->protection ;
+            varEntry->mtype = current->mtype;
+            varEntry->virt = current->virt;
+            varEntry->stat = current->stat;
+            varEntry->section = Entry::VARIABLE_SEC;
+            varEntry->name = msName.trimmed();
+            varEntry->type = current->type.simplified()+" ";
+            varEntry->args = msArgs;
 
-                    msName = QString("@%1").arg(anonCount++);
-                    break;
-                  }
-                     }
-                     //p=p->parent;
-                     if (p==current) p=current_root; else p=p->parent();
-                   }
-                 }
-                 //printf("msName=%s current->name=%s\n",msName.data(),current->name.data());
-                 if (!msName.isEmpty()
-                     /*&& msName!=current->name*/) // skip typedef T {} T;, removed due to bug608493
-                 {
-                   static bool typedefHidesStruct =  Config::getBool("use-typedef-name");
+            if (isTypedef) {
+               varEntry->type.prepend("typedef ");
+            }
 
-                   // case 1: typedef struct _S { ... } S_t;
-                   // -> omit typedef and use S_t as the struct name
+            if (typedefHidesStruct && isTypedef && (current->m_specFlags.spec & (Entry::Struct|Entry::Union)) && memspecEntry) {
+               // case 1: use S_t as type for pS_t in "typedef struct _S {} S_t, *pS_t;"
+      
+               varEntry->type+=memspecEntry->name + msType;
 
-                   if (typedefHidesStruct &&  isTypedef &&
-                     ((current->m_specFlags.spec & (Entry::Struct|Entry::Union)) ||
-                      current->section == Entry::ENUM_SEC ) && msType.trimmed().isEmpty() && memspecEntry)
-                   {
-                     memspecEntry->name=msName;
-                   }
-                   else // case 2: create a typedef field
-                   {
-                     QSharedPointer<Entry> varEntry = QMakeShared<Entry>();
-                     varEntry->lang = language;
-                     varEntry->protection = current->protection ;
-                     varEntry->mtype = current->mtype;
-                     varEntry->virt = current->virt;
-                     varEntry->stat = current->stat;
-                     varEntry->section = Entry::VARIABLE_SEC;
-                     varEntry->name = msName.trimmed();
-                     varEntry->type = current->type.simplified()+" ";
-                     varEntry->args = msArgs;
-                     if (isTypedef)
-                     {
-                  varEntry->type.prepend("typedef ");
-                  //  //printf("current->name = %s %s\n",current->name.data(),msName.data());
-                     }
-                     if (typedefHidesStruct && isTypedef && (current->m_specFlags.spec & (Entry::Struct|Entry::Union)) && memspecEntry)
-                     // case 1: use S_t as type for pS_t in "typedef struct _S {} S_t, *pS_t;"
-                     {
-                        varEntry->type+=memspecEntry->name+msType;
-                     }
-                     else // case 2: use _S as type for for pS_t
-                     {
-                  varEntry->type+=current->name+msType;
-                     }
-                     varEntry->fileName = yyFileName;
-                     varEntry->startLine = yyLineNr;
-                     varEntry->startColumn = yyColNr;
-                     varEntry->doc = current->doc;
-                     varEntry->brief = current->brief;
-                     varEntry->mGrpId = current->mGrpId;
-                     varEntry->initializer = current->initializer;
+            } else  {
+               // case 2: use _S as type for for pS_t
+      
+               varEntry->type+=current->name+msType;
+            }
 
-                     // deep copy group list
-                     for (auto g : *current->groups) {
-                        varEntry->groups->append(g);
-                     }
+            varEntry->fileName = yyFileName;
+            varEntry->startLine = yyLineNr;
+            varEntry->startColumn = yyColNr;
+            varEntry->doc = current->doc;
+            varEntry->brief = current->brief;
+            varEntry->mGrpId = current->mGrpId;
+            varEntry->initializer = current->initializer;
+            
+            // deep copy group list
+            for (auto g : *current->groups) {
+               varEntry->groups->append(g);
+            }
+      
+            if (current->sli) { 
+               // copy special list items
 
-                     if (current->sli) { // copy special list items
-                        for (auto lii : *current->sli) {
-                           varEntry->addSpecialListItem(lii.type, lii.itemId);
-                        }
-                     }
+               for (auto lii : *current->sli) {
+                  varEntry->addSpecialListItem(lii.type, lii.itemId);
+               }
+            }
+      
+            current_root->addSubEntry(varEntry, current_root);
+         }
+      }
+      
+      if (text[0] == ';')  {
+         // end of a struct/class ...
+         
+         if (! isTypedef && msName.isEmpty() && memspecEntry && (current->section&Entry::COMPOUND_MASK)) { 
+            // case where a class/struct has a doc block after it
+         
+            if (! current->doc.isEmpty()) {
+               memspecEntry->doc += current->doc;
+            }
+         
+            if (!current->brief.isEmpty()) {
+               memspecEntry->brief += current->brief;
+            }
+         }
+         
+         msType.resize(0);
+         msName.resize(0);
+         msArgs.resize(0);
+         isTypedef = false;
+            
+         firstTypedefEntry = QSharedPointer<Entry>();
+         memspecEntry = QSharedPointer<Entry>();
+         
+         current->reset();
+         initEntry();
+         BEGIN( FindMembers );
 
-                     current_root->addSubEntry(varEntry, current_root);
-                   }
-                 }
-
-                 if (text[0] == ';')  {
-                    // end of a struct/class ...
-                 
-                   if (! isTypedef && msName.isEmpty() && memspecEntry && (current->section&Entry::COMPOUND_MASK)) { 
-                     // case where a class/struct has a doc block after it
-
-                     if (! current->doc.isEmpty()) {
-                       memspecEntry->doc += current->doc;
-                     }
-
-                     if (!current->brief.isEmpty()) {
-                       memspecEntry->brief += current->brief;
-                     }
-                   }
-
-                   msType.resize(0);
-                   msName.resize(0);
-                   msArgs.resize(0);
-                   isTypedef = false;
-
-                   firstTypedefEntry = QSharedPointer<Entry>();
-                   memspecEntry = QSharedPointer<Entry>();
-
-                   current->reset();
-                   initEntry();
-                   BEGIN( FindMembers );
-                 }
-                 else
-                 {
-                   current->doc.resize(0);
-                   current->brief.resize(0);
-                 }
+      } else {
+         current->doc.resize(0);
+         current->brief.resize(0);
+      }
     }
 
 <MemberSpec>"="            {
@@ -5431,7 +5436,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <EndFuncPtr>")"            {
-                    BEGIN(FindMembers);
+      BEGIN(FindMembers);
    }
 
 <FuncFunc>"("           {
@@ -5458,16 +5463,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FuncFuncEnd>")"{BN}*/[;{]       {
-                    lineCount();
-                 current->type += funcPtrType.mid(1);
-                    BEGIN(Function);
+      lineCount();
+      current->type += funcPtrType.mid(1);
+      BEGIN(Function);
    }
 
 <FuncFuncEnd>")"{BN}*/"["     { // function returning a pointer to an array
-                 lineCount();
-                 current->type+=funcPtrType;
-                 current->args+=")";
-                 BEGIN(FuncFuncArray);
+      lineCount();
+      current->type += funcPtrType;
+      current->args += ")";
+      BEGIN(FuncFuncArray);
    }
 
 <FuncFuncEnd>.             {
@@ -5483,11 +5488,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FuncFuncType>")"          {
       QString text = QString::fromUtf8(yytext);
-                    current->type += text[0];
-                    if (roundCount)
-                   --roundCount;
-                 else
-                   BEGIN(Function);
+      current->type += text[0];
+
+      if (roundCount) {
+         --roundCount;
+      } else {
+         BEGIN(Function);
+      }
    }
 
 <FuncFuncType>{BN}*","{BN}*      { 
@@ -5540,13 +5547,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>"("        {
       QString text = QString::fromUtf8(yytext);
       if (! current->name.isEmpty()) {
-                   current->args = text;
-                   current->bodyLine = yyLineNr;
-                   currentArgumentContext = FuncQual;
-                   fullArgString=current->args;
-                   copyArgString=&current->args;
-                   BEGIN( ReadFuncArgType );
-                 }
+         current->args = text;
+         current->bodyLine = yyLineNr;
+         currentArgumentContext = FuncQual;
+         fullArgString=current->args;
+         copyArgString=&current->args;
+         BEGIN( ReadFuncArgType );
+      }
    }
 
   /*
@@ -5578,20 +5585,20 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <ReadFuncArgType,ReadTempArgs>{BN}*    {
-                    *copyArgString+=" ";
-                    fullArgString+=" ";
-                    lineCount();
+      *copyArgString+=" ";
+      fullArgString+=" ";
+      lineCount();
    }
 
 <ReadFuncArgType,CopyArgRound,CopyArgSharp,ReadTempArgs>{RAWBEGIN}   {
       QString text = QString::fromUtf8(yytext);
-                 s_delimiter = text.mid(2);
-                 s_delimiter=s_delimiter.left(s_delimiter.length() - 1);
-                 lastRawStringContext = YY_START;
-                 pCopyRawString = copyArgString;
-                 *pCopyRawString += text;
-                 fullArgString   += text;
-                 BEGIN(RawString);
+      s_delimiter = text.mid(2);
+      s_delimiter=s_delimiter.left(s_delimiter.length() - 1);
+      lastRawStringContext = YY_START;
+      pCopyRawString = copyArgString;
+      *pCopyRawString += text;
+      fullArgString   += text;
+      BEGIN(RawString);
    }
 
 <ReadFuncArgType,CopyArgRound,CopyArgSharp,ReadTempArgs>\"  {
@@ -5616,19 +5623,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       *copyArgString += text[0];
       fullArgString  += text[0];
       stringToArgumentList(fullArgString, &current->argList);
-
-                 if (insideJS) {
-                   fixArgumentListForJavaScript(&current->argList);
-                 }
-
-                 handleParametersCommentBlocks(&current->argList);
-
-                 // save the current documentation block
-                 docBackup   = current->doc;
-                 briefBackup = current->brief;
-
-                 // go back to the saved state5691
-                 BEGIN(currentArgumentContext);
+      
+      if (insideJS) {
+         fixArgumentListForJavaScript(&current->argList);
+      }
+      
+      handleParametersCommentBlocks(&current->argList);
+      
+      // save the current documentation block
+      docBackup   = current->doc;
+      briefBackup = current->brief;
+      
+      // go back to the saved state5691
+      BEGIN(currentArgumentContext);
     }
 
    /* a special comment */
@@ -5702,31 +5709,31 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       if (currentArgumentContext == DefineEnd) {
                  
-                   // for defines we interpret a comment as documentation for the define
-                   for (int i = yyleng -1; i > 0; i--) {
-                     unput(yytext[i]);
-                   }
-
-                   *copyArgString += text[0];
-                   fullArgString  += text[0];
-                   stringToArgumentList(fullArgString, &current->argList);
-                   handleParametersCommentBlocks(&current->argList);
-                   BEGIN( currentArgumentContext );
-
-                 } else {
-                   // for functions we interpret a comment as documentation for the last argument
-                   lastCopyArgChar = text[0];
-
-                   QString tmp = text.mid(1).trimmed();        
-
-                   lastCommentInArgContext = YY_START;
-                   fullArgString += tmp;
-
-                   if (tmp.indexOf("//") != -1)
-                     BEGIN( CopyArgCommentLine );
-                   else
-                     BEGIN( CopyArgComment );
-                 }
+         // for defines we interpret a comment as documentation for the define
+         for (int i = yyleng -1; i > 0; i--) {
+         unput(yytext[i]);
+         }
+         
+         *copyArgString += text[0];
+         fullArgString  += text[0];
+         stringToArgumentList(fullArgString, &current->argList);
+         handleParametersCommentBlocks(&current->argList);
+         BEGIN( currentArgumentContext );
+         
+         } else {
+         // for functions we interpret a comment as documentation for the last argument
+         lastCopyArgChar = text[0];
+         
+         QString tmp = text.mid(1).trimmed();        
+         
+         lastCommentInArgContext = YY_START;
+         fullArgString += tmp;
+         
+         if (tmp.indexOf("//") != -1)
+         BEGIN( CopyArgCommentLine );
+         else
+         BEGIN( CopyArgComment );
+      }
    }
 
 <CopyArgComment>^{B}*"*"+/{BN}+
@@ -5828,45 +5835,45 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadTempArgs>"<"          {
       QString text = QString::fromUtf8(yytext); 
-                 *copyArgString += text[0];
-                 fullArgString  += text[0];
-                 argSharpCount  =  1;
-                 BEGIN( CopyArgSharp );
+      *copyArgString += text[0];
+      fullArgString  += text[0];
+      argSharpCount  =  1;
+      BEGIN( CopyArgSharp );
    }
 
 <ReadTempArgs>">"          {
       QString text = QString::fromUtf8(yytext); 
-                 *copyArgString += text[0];
-                 fullArgString  += text[0];
-                 //printf("end template list %s\n",copyArgString->data());
-                 stringToArgumentList(fullArgString,currentArgumentList);
-                 BEGIN( currentArgumentContext );
+      *copyArgString += text[0];
+      fullArgString  += text[0];
+      //printf("end template list %s\n",copyArgString->data());
+      stringToArgumentList(fullArgString,currentArgumentList);
+      BEGIN( currentArgumentContext );
    }
 
 <CopyArgRound>"("          {
       QString text = QString::fromUtf8(yytext); 
-                 argRoundCount++;
-                 *copyArgString += text[0];
-                 fullArgString  += text[0];
+      argRoundCount++;
+      *copyArgString += text[0];
+      fullArgString  += text[0];
    }
 
 <CopyArgRound>")"          {
       QString text = QString::fromUtf8(yytext); 
-                 *copyArgString += text[0];
-                 fullArgString  += text[0];
-                 if (argRoundCount > 0)
-                   argRoundCount--;
-                 else
-                   BEGIN( lastCopyArgContext );
+      *copyArgString += text[0];
+      fullArgString  += text[0];
+      if (argRoundCount > 0)
+         argRoundCount--;
+      else
+         BEGIN( lastCopyArgContext );
    }
 
 <CopyArgSharp>"("                       {
       QString text = QString::fromUtf8(yytext); 
-                    *copyArgString += text[0];
-                    fullArgString  += text[0];
-                    argRoundCount  = 0;
-                 lastCopyArgContext = YY_START;
-                 BEGIN( CopyArgRound );
+      *copyArgString += text[0];
+      fullArgString  += text[0];
+      argRoundCount  = 0;
+      lastCopyArgContext = YY_START;
+      BEGIN( CopyArgRound );
    }
 
 <CopyArgSharp>"<"          {
@@ -5878,16 +5885,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <CopyArgSharp>">"          {
       QString text = QString::fromUtf8(yytext); 
-                 *copyArgString += text[0];
-                 fullArgString  += text[0];
-                 argSharpCount--;
+      *copyArgString += text[0];
+      fullArgString  += text[0];
+      argSharpCount--;
+      
+      if (argSharpCount>0) {
+         // 
 
-                 if (argSharpCount>0) {
-                   //printf("argSharpCount--=%d copy\n",argSharpCount);
-                 } else {
-                   BEGIN( ReadTempArgs );
-                   //printf("end of argSharpCount\n");
-                 }
+      } else {
+         BEGIN( ReadTempArgs );
+       
+      }
    }
 
 <CopyArgString,CopyArgPHPString>\\.    {
@@ -5912,29 +5920,30 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadFuncArgType,ReadTempArgs,CopyArgRound,CopyArgSharp>{CHARLIT}     {
       QString text = QString::fromUtf8(yytext); 
-                 if (insidePHP) {
-                   REJECT;
-                 } else {
-                      *copyArgString += text;
-                      fullArgString  += text;
-                 }
+      if (insidePHP) {
+         REJECT;
+      } else {
+         *copyArgString += text;
+         fullArgString  += text;
+      }
    }
 
 <ReadFuncArgType,ReadTempArgs,CopyArgRound,CopyArgSharp>\'     {
       QString text = QString::fromUtf8(yytext); 
-                 *copyArgString += text;
-                 fullArgString  += text;
-                 if (insidePHP) {
-                   lastCopyArgStringContext = YY_START;
-                   BEGIN(CopyArgPHPString);
-                 }
+      *copyArgString += text;
+      fullArgString  += text;
+
+      if (insidePHP) {
+         lastCopyArgStringContext = YY_START;
+         BEGIN(CopyArgPHPString);
+      }
    }
 
 <ReadFuncArgType,ReadTempArgs,CopyArgString,CopyArgPHPString,CopyArgRound,CopyArgSharp>\n  {
       QString text = QString::fromUtf8(yytext); 
-                 lineCount();
-                 *copyArgString += text[0];
-                 fullArgString  += text[0];
+      lineCount();
+      *copyArgString += text[0];
+      fullArgString  += text[0];
    }
 
 <ReadFuncArgType,ReadTempArgs,CopyArgString,CopyArgPHPString,CopyArgRound,CopyArgSharp>.    {
@@ -8426,7 +8435,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <*>"//"                          {
-      lastCContext = YY_START ;
+      lastCContext = YY_START;
       BEGIN( SkipCxxComment );
    }
 %%

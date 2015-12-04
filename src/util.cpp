@@ -6318,13 +6318,13 @@ bool findAndRemoveWord(QString &str, const QString &word)
    return false;
 }
 
-/** Special version of QByteArray::trimmed() that only strips completely blank lines.
- *  @param s the string to be stripped
+/** strips blank lines from the start and end of a string
+ *  @param str the string to be stripped
  *  @param docLine the line number corresponding to the start of the string
  *         This will be adjusted based on the number of lines stripped from the start.
  *  @returns The stripped string.
  */
-QString stripLeadingAndTrailingEmptyLines(const QString &str, int &docLine)
+QString trimEmptyLines(const QString &str, int &docLine)
 {  
    if (str.isEmpty()) {
       return "";

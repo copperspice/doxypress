@@ -376,7 +376,7 @@ static bool             briefEndsAtDot;      // does the brief description stop 
 static QString          formulaText;         // Running text of a formula
 static QString          formulaEnv;          // environment name
 static int              formulaNewLines;     // amount of new lines in the formula
-static QString         *pOutputString;       // pointer to string to which the output is appended.
+static QString         *pOutputString;       // pointer to string to which the output is appended
 static QString          outputXRef;          // temp argument of todo/test/../xrefitem commands
 static QString          blockName;           // preformatted block name (e.g. verbatim, latexonly,...)
 static XRefKind         xrefKind;            // kind of cross-reference command
@@ -1397,7 +1397,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          setOutput(OutputDoc);
 
       } else {
-          // inContext==OutputBrief
+          // inContext == OutputBrief
           // only go to the detailed description if we have
           // found some brief description and not just whitespace
 
@@ -3502,6 +3502,11 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    printlex(yy_flex_debug, true, __FILE__, fileName);
 
+   if (! current->doc.isEmpty()) {
+      // separate detailed doc fragments
+      current->doc += "\n\n";
+   }
+
    if (! current->inbodyDocs.isEmpty() && isInbody) {
       // separate in body fragments
       current->inbodyDocs += "\n\n";
@@ -3529,7 +3534,8 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
       warn(yyFileName, yyLineNr, "Documentation block ended while inside a \\parblock. Missing \\endparblock");
    }
 
-   current->doc = stripLeadingAndTrailingEmptyLines(current->doc, current->docLine);
+   // removes blank lines from the detailed docs
+   current->doc = trimEmptyLines(current->doc, current->docLine);
 
    if (current->section == Entry::FILEDOC_SEC && current->doc.isEmpty()) {
       // to allow a comment block with just a @file command
@@ -3723,7 +3729,7 @@ static void groupAddDocs(QSharedPointer<Entry> e)
 {
    if (e->section == Entry::MEMBERGRP_SEC) {
       s_memberGroupDocs = e->brief.trimmed();
-      e->doc = stripLeadingAndTrailingEmptyLines(e->doc, e->docLine);
+      e->doc = trimEmptyLines(e->doc, e->docLine);
 
       if (! s_memberGroupDocs.isEmpty() && ! e->doc.isEmpty()) {
          s_memberGroupDocs+="\n\n";

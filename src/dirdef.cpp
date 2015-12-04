@@ -859,7 +859,7 @@ void buildDirectories()
     
       for (auto fd : *fn) {  
          
-         if (fd->getReference().isEmpty() && !fd->isDocumentationFile()) {
+         if (fd->getReference().isEmpty() && ! fd->isDocumentationFile()) {
             QSharedPointer<DirDef> dir;
 
             if ((dir = Doxy_Globals::directories.find(fd->getPath())) == 0) { 

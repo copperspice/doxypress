@@ -512,7 +512,7 @@ void Definition::_setDocumentation(const QString &tDoc, const QString &docFile, 
    }
 
    if (stripWhiteSpace) {
-      doc = stripLeadingAndTrailingEmptyLines(doc, docLine);
+      doc = trimEmptyLines(doc, docLine);
    }
 
    if (! _docsAlreadyAdded(doc, m_private->docSignatures)) {

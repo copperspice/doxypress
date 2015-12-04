@@ -1755,8 +1755,8 @@ static void readTextFileByName(const QString &file, QString &text)
                      "Possible candidates:\n%s", qPrintable(file), qPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, file)));
 
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "included file %s is not found. "
-                     "Check your EXAMPLE PATH", qPrintable(file));
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included file %s was not found. "
+                     "Check the EXAMPLE PATH in your project file.", qPrintable(file));
    }
 }
 
@@ -5501,9 +5501,12 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
       doctokenizerYYsetStateSnippet();
       tok = doctokenizerYYlex();
       doctokenizerYYsetStatePara();
+
       if (tok != TK_WORD) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected block identifier, found token %s instead while parsing the %s command",
-                        qPrintable(tokToString(tok)), qPrintable(cmdName));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected block identifier, " 
+               "found token %s instead while parsing the %s command", 
+               qPrintable(tokToString(tok)), qPrintable(cmdName));
+
          return;
       }
       blockId = "[" + g_token->name + "]";

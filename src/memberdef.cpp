@@ -3110,9 +3110,15 @@ void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString
       }
 
       ol.endBold();
+    
       ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
+
       ol.startCodeFragment();
+
+      if (m_impl->initializer.startsWith("=")) {
+         m_impl->initializer = m_impl->initializer.mid(1).trimmed();
+      }
 
       pIntf->parseCode(ol, qPrintable(scopeName), m_impl->initializer, lang, false, 0, getFileDef(),
                        -1, -1, true, self, false, self);

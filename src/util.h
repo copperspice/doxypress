@@ -294,7 +294,7 @@ QString stripPath(const QString &s);
 bool containsWord(const QString &s, const QString &word);
 bool findAndRemoveWord(QString &s, const QString &word);
 
-QString stripLeadingAndTrailingEmptyLines(const QString &s, int &docLine);
+QString trimEmptyLines(const QString &s, int &docLine);
 
 QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QByteArray &name);
 bool checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,const QString &name);

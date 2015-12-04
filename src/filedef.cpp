@@ -144,7 +144,7 @@ bool FileDef::hasDetailedDescription() const
    // avail empty section
 
    return ((! briefDescription().isEmpty() && repeatBrief) ||
-            !documentation().trimmed().isEmpty() ||  (sourceBrowser && getStartBodyLine() != -1 && getBodyDef()) );
+            ! documentation().trimmed().isEmpty() || (sourceBrowser && getStartBodyLine() != -1 && getBodyDef()) );
 }
 
 void FileDef::writeTagFile(QTextStream &tagFile)
@@ -254,7 +254,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
 
       ol.startTextBlock();
 
-      if (!briefDescription().isEmpty() && Config::getBool("repeat-brief")) {
+      if (! briefDescription().isEmpty() && Config::getBool("repeat-brief")) {
          ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
 
@@ -375,8 +375,7 @@ void FileDef::writeIncludeFiles(OutputList &ol)
             // then we should have used fd->docName() instead of ii->includeName
             if (fd && fd->isLinkable()) {
                ol.writeObjectLink(fd->getReference(),  
-                                  fd->generateSourceFile() ? fd->includeName() : fd->getOutputFileBase(),
-                                  0, ii.includeName);
+                  fd->generateSourceFile() ? fd->includeName() : fd->getOutputFileBase(), 0, ii.includeName);
 
             } else {
                ol.docify(ii.includeName);
@@ -436,7 +435,7 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
          warn_uncond("Included by graph for '%s' not generated, too many nodes. "
                      " Consider increasing 'DOT GRAPH MAX NODES'\n", qPrintable(name()));
 
-      } else if (!incDepGraph.isTrivial()) {
+      } else if (! incDepGraph.isTrivial()) {
          ol.startTextBlock();
          ol.disable(OutputGenerator::Man);
          ol.startInclDepGraph();
@@ -451,6 +450,9 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
 
 void FileDef::writeSourceLink(OutputList &ol)
 {   
+
+printf("   --> BROOM  (file list) writeSourceLink? %s\n",  csPrintable(this->getOutputFileBase()) );
+
    if (generateSourceFile()) {
       ol.disableAllBut(OutputGenerator::Html);
       ol.startParagraph();
@@ -615,7 +617,7 @@ void FileDef::writeDocumentation(OutputList &ol)
    } else {
       startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_FileVisible, !generateTreeView);
 
-      if (!generateTreeView) {
+      if (! generateTreeView) {
          ol.endQuickIndices();
       }
 
@@ -741,8 +743,7 @@ void FileDef::writeDocumentation(OutputList &ol)
             break;
       }
    }
-
-   //---------------------------------------- end flexible part -------------------------------
+  
    ol.endContents();
   
    endFileWithNavPath(self, ol);
@@ -824,7 +825,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    DevNullCodeDocInterface devNullIntf;
    QString title = m_docname;
 
-   if (!m_fileVersion.isEmpty()) {
+   if (! m_fileVersion.isEmpty()) {
       title += (" (" + m_fileVersion + ")");
    }
 
@@ -837,7 +838,11 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    }
 
    bool isDocFile = isDocumentationFile();
-   bool genSourceFile = !isDocFile && generateSourceFile();
+   bool genSourceFile = ! isDocFile && generateSourceFile();
+
+
+printf("   --> Broom (src file) write source  %s  %s\n",  csPrintable(this->getOutputFileBase()), csPrintable(getSourceFileBase()) );
+
 
    if (getDirDef()) {
 
@@ -848,6 +853,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
          getDirDef()->writeNavigationPath(ol);
          ol.endQuickIndices();
       }
+
       startTitle(ol, getSourceFileBase());
       ol.parseText(name());
       endTitle(ol, getSourceFileBase(), title);
@@ -870,6 +876,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       ol.startTextLink(getOutputFileBase(), 0);
       ol.parseText(theTranslator->trGotoDocumentation());
       ol.endTextLink();
+
       if (latexSourceCode) {
          ol.enable(OutputGenerator::Latex);
       }
@@ -912,13 +919,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       }
 
       pIntf->parseCode(ol, 0, fileToString(getFilePath(), filterSourceFiles, true),
-                       srcLang,            // lang
-                       false,              // isExampleBlock
-                       0,                  // exampleName
-                       self,               // fileDef
-                       -1,                 // startLine
-                       -1,                 // endLine
-                       false,              // inlineFragment
+                       srcLang, false, 0, self, -1, -1, false,
                        QSharedPointer<MemberDef>(), true, QSharedPointer<Definition>(), ! needs2PassParsing);
                       
       ol.endCodeFragment();
@@ -1234,11 +1235,20 @@ bool FileDef::generateSourceFile() const
 {
    static bool sourceBrowser   = Config::getBool("source-code");
    static bool verbatimHeaders = Config::getBool("verbatim-headers");
+   
+   QString name4 = name().right(4);
 
-   QString extension = name().right(4);
+   bool retval = ! isReference();
 
-   return ! isReference() && (sourceBrowser || (verbatimHeaders && guessSection(name()) == Entry::HEADER_SEC) ) &&
-          extension != ".doc" && extension != ".txt" && extension != ".dox" && extension != ".md" && name().right(9) != ".markdown";
+   if (retval) {
+      retval = (sourceBrowser || (verbatimHeaders && guessSection(name()) == Entry::HEADER_SEC));
+   }
+
+   if (retval) {    
+      retval = name4 != ".doc" && name4 != ".dox" && name4 != ".txt" && name().right(3) != ".md" && name().right(9) != ".markdown";      
+   }     
+
+   return retval;
 }
 
 
@@ -1441,7 +1451,7 @@ bool FileDef::isDocumentationFile() const
           name().right(4) == ".txt" ||
           name().right(4) == ".dox" ||
           name().right(3) == ".md"  ||
-          name().right(9) == ".markdown";
+          name().right(9) == ".markdown";   
 }
 
 void FileDef::acquireFileVersion()
@@ -1457,7 +1467,7 @@ void FileDef::acquireFileVersion()
       FILE *f = popen(csPrintable(cmd), "r");
 
       if (! f) {
-         err("Unable to execute %s\n", qPrintable(vercmd));
+         err("Unable to execute %s\n", csPrintable(vercmd));
          return;
       }
 
@@ -1493,7 +1503,7 @@ QString FileDef::getSourceFileBase() const
    }
 }
 
-/*! Returns the name of the verbatim copy of this file (if any). */
+/*! Returns the name of the verbatim copy of this file (if any) */
 QString FileDef::includeName() const
 {
    return getSourceFileBase();
