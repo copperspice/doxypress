@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <set>
 
 #include <arguments.h>
 #include <cite.h>
@@ -381,17 +382,17 @@ namespace Doxy_Work{
 struct ReadDirArgs {
    bool recursive = false;
    bool errorIfNotExist = true; 
+
+   QStringList includePatternList; 
+   QStringList excludePatternList; 
+
+   QSet<QString> excludeSet;
    
    bool isFnList = false;
    SortedList<QSharedPointer<FileName>> fnList;
 
    bool isFnDict = false;
-   FileNameDict fnDict;    
-
-   QSet<QString> excludeSet;
-   
-   QStringList patternList; 
-   QStringList excludePatternList; 
+   FileNameDict fnDict;     
 
    bool isResultList = false;
    QStringList resultList;
@@ -410,10 +411,12 @@ struct ReadDirArgs {
    void readDir(const QFileInfo &fileInfo, ReadDirArgs &data);  
            
    void resolveClassNestingRelations();
+   void resolveHiddenNamespace();
    QString resolveSymlink(QString path);
    void resolveUserReferences();
-   void readTagFile(QSharedPointer<Entry> root, const char *tl);
 
+   void readTagFile(QSharedPointer<Entry> root, const char *tl);
+   
    bool scopeIsTemplate(QSharedPointer<Definition> d);
    void substituteTemplatesInArgList(const QList<ArgumentList> &srcTempArgLists, const QList<ArgumentList> &dstTempArgLists,
                ArgumentList *src, ArgumentList *dst, ArgumentList *funcTempArgs = 0);
@@ -712,6 +715,11 @@ void processFiles()
    buildVarList(rootNav);
    Doxy_Globals::g_stats.end();
 
+   // added 12/2015
+   Doxy_Globals::g_stats.begin("Resolve empty Namespaces\n");
+   resolveHiddenNamespace();
+   Doxy_Globals::g_stats.end();
+  
    // UNO IDL
    Doxy_Globals::g_stats.begin("Building interface member list\n");
    buildInterfaceAndServiceList(rootNav);                  
@@ -1717,7 +1725,7 @@ void Doxy_Work::buildFileList(QSharedPointer<EntryNav> rootNav)
          const QString fn = root->fileName;
 
          QString text;
-         text = QString("the name `%1' supplied as the second argument in the \\file statement ").arg(QString(root->name));
+         text = QString("Name `%1' supplied as the second argument in the \\file statement ").arg(QString(root->name));
 
          if (ambig) {
             // name is ambiguous
@@ -1785,12 +1793,11 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
 
          warn(root->fileName, root->startLine, qPrintable(text) );
 
-      } else if (includeFile.isEmpty() && ifd && guessSection(ifd->name()) == Entry::HEADER_SEC) {
-         // see if the file extension makes sense, implicit assumption
+      } else if (includeFile.isEmpty() && ifd && determineSection(ifd->name()) == Entry::HEADER_SEC) {        
          fd = ifd;
       }
 
-      // if a file is found, we mark it as a source file
+      // if a file is found, mark it as a source file
       if (fd) {
 
          QString iName = ! root->includeName.isEmpty() ? root->includeName : includeFile;
@@ -1819,17 +1826,11 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
          } else {
             // use name of the file containing the class definition
             iName = fd->name();
-
-printf("\n Broom fName (A) include file= %s", csPrintable(iName) );
-
          }
 
          if (fd->generateSourceFile()) { 
             // generate code for header
             cd->setIncludeFile(fd, qPrintable(iName), local, ! root->includeName.isEmpty());
-
-printf("\n Broom fName (B) include file= %s", csPrintable(iName) );
-
 
          } else { 
             // put #include in the class documentation without link
@@ -2364,9 +2365,9 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
 
       for (auto md : *ml) {
         
-         QSharedPointer<MemberDef> imd = QMakeShared<MemberDef>(md->getDefFileName(), md->getDefLine(), md->getDefColumn(),
-                          md->typeString(), md->name(), md->argsString(), md->excpString(),
-                          md->protection(), md->virtualness(), md->isStatic(), Member, md->memberType(), nullptr, nullptr);
+         QSharedPointer<MemberDef> imd = QMakeShared<MemberDef>(md->getDefFileName(), md->getDefLine(),
+                   md->getDefColumn(), md->typeString(), md->name(), md->argsString(), md->excpString(),
+                   md->protection(), md->virtualness(), md->isStatic(), Member, md->memberType(), nullptr, nullptr);
 
          imd->setMemberClass(cd);
 
@@ -3747,6 +3748,36 @@ void Doxy_Work::buildVarList(QSharedPointer<EntryNav> rootNav)
       if (e->section() != Entry::ENUM_SEC) {
          buildVarList(e);
       }
+   }
+}
+
+void Doxy_Work::resolveHiddenNamespace()
+{ 
+   std::set<QString> visibleSet;
+   std::map<QString, QSharedPointer<NamespaceDef>> hiddenMap;
+
+   // are there any classes in this namespace
+   for (auto nd : *Doxy_Globals::namespaceSDict) { 
+      ClassSDict *cd  = nd->getClassSDict();
+
+      if (cd == nullptr || cd->isEmpty()) {              
+         hiddenMap.insert( std::make_pair(nd->name(), nd) );         
+       
+      } else  {         
+         visibleSet.insert(nd->name());
+
+      }    
+   }
+
+   // verify if the hidden ns should be visible
+   for (auto item : hiddenMap) {
+
+      auto begin = visibleSet.lower_bound(item.first + "::");
+      auto end   = visibleSet.lower_bound(item.first + ":;");      // colon -- semicolon is correct
+
+      if (begin == end) {         
+          item.second->setHidden(true);            
+      }      
    }
 }
 
@@ -5515,6 +5546,9 @@ void Doxy_Work::findUsedTemplateInstances()
 
 void Doxy_Work::computeClassRelations()
 {
+   static bool extractLocalClass = Config::getBool("extract-local-classes");
+   static bool hideUndocClasses  = Config::getBool("hide-undoc-classes");
+
    for (auto item : *Doxy_Globals::classSDict) {
       item->visited = false;
    }
@@ -5538,10 +5572,9 @@ void Doxy_Work::computeClassRelations()
 
       if ((cd == 0 || (!cd->hasDocumentation() && !cd->isReference())) && numMembers > 0 && bName.right(2) != "::") {
 
-         if (! root->name.isEmpty() && root->name.indexOf('@') == -1 && // normal name
-               (guessSection(root->fileName) == Entry::HEADER_SEC ||
-                   Config::getBool("extract-local-classes")) && protectionLevelVisible(root->protection) &&
-                   ! Config::getBool("hide-undoc-classes") )
+         if (! root->name.isEmpty() && root->name.indexOf('@') == -1 && 
+               (determineSection(root->fileName) == Entry::HEADER_SEC || extractLocalClass) && 
+                protectionLevelVisible(root->protection) && ! hideUndocClasses )
 
             warn_undoc(root->fileName, root->startLine, "Compound %s was not documented", qPrintable(root->name));
       }
@@ -8231,17 +8264,12 @@ void Doxy_Work::generateFileSources()
                if (fd->generateSourceFile()) {
                   // source needs to be shown in the output
 
-printf("\n Broom A GEN code");
-
                   msg("Generating code for file %s\n",  qPrintable(fd->docName()));
                   fd->writeSource(*Doxy_Globals::g_outputList, false, includeFiles);
 
                } else if (! fd->isReference() && Doxy_Globals::parseSourcesNeeded) {
                   // parse the sources even if we do not show it
-               
-printf("\n Broom A PARSE code");
-
-
+            
                   msg("Parsing code for file %s\n",  qPrintable(fd->docName()));
                   fd->parseSource(false, includeFiles);
                }
@@ -9084,7 +9112,7 @@ void Doxy_Work::generateNamespaceDocs()
       // for each class in the namespace   
       for (auto cd : *nd->getClassSDict()) {
 
-         if ( ( cd->isLinkableInProject() && cd->templateMaster() == 0)   && !cd->isHidden() && !cd->isEmbeddedInOuterScope() ) {
+         if ( ( cd->isLinkableInProject() && cd->templateMaster() == 0)   && ! cd->isHidden() && !cd->isEmbeddedInOuterScope() ) {
               // skip external references, anonymous compounds and
               // template instances and nested classes             
          
@@ -9584,7 +9612,7 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
 
             if (cfi.isFile()) {
 
-               bool testA = (data.patternList.isEmpty() || patternMatch(cfi, data.patternList));                
+               bool testA = (data.includePatternList.isEmpty() || patternMatch(cfi, data.includePatternList));                
                bool testB = (! patternMatch(cfi, data.excludePatternList));
                
                if (testA && testB && ! data.killDict.contains(filePath) ) {
@@ -9922,29 +9950,31 @@ QString Doxy_Work::getQchFileName()
 
 void searchInputFiles()
 {     
-   // ** gather names for all files in the include path
+   // gather names for all files in the include and example path
+   QSet<QString> excludeSet;
+
+   // source   
    Doxy_Globals::g_stats.begin("Searching for include files\n");
 
-   QSet<QString> local_excludeSet;
+   const QStringList inputPatterns   = Config::getList("input-patterns");
+   const bool inputRecursive         = Config::getBool("input-recursive");
 
-   bool sourceRecursive = Config::getBool("source-recursive");
-   const QStringList includePathList = Config::getList("include-path");
    const QStringList excludePatterns = Config::getList("exclude-patterns");
 
-   //
-   QStringList includePatterns = Config::getList("include-file-patterns"); 
-
+   const QStringList includePath     = Config::getList("include-path");
+   QStringList includePatterns       = Config::getList("include-patterns");  
+       
    if (includePatterns.isEmpty()) {
-      includePatterns = Config::getList("input-patterns");
+      includePatterns = inputPatterns;
    }
 
-   for (auto s : includePathList) {    
+   for (auto s : includePath) {    
       ReadDirArgs data;
 
-      data.recursive          = sourceRecursive;         
+      data.recursive          = inputRecursive;         
       data.isFnDict           = true;
       data.fnDict             = *Doxy_Globals::includeNameDict;
-      data.patternList        = includePatterns;
+      data.includePatternList = includePatterns;
       data.excludePatternList = excludePatterns;
 
       readFileOrDirectory(s, data);
@@ -9953,21 +9983,20 @@ void searchInputFiles()
    }
    Doxy_Globals::g_stats.end();
 
-
-   // **
+   // examples
    Doxy_Globals::g_stats.begin("Searching for example files\n");
-   const QStringList examplePathList = Config::getList("example-source");
 
-   const QStringList tempList = Config::getList("example-patterns");
-   bool exampleRecursive      = Config::getBool("example-recursive");
+   const QStringList examplePath     = Config::getList("example-source");
+   const QStringList examplePatterns = Config::getList("example-patterns");
+   const bool exampleRecursive       = Config::getBool("example-recursive");
 
-   for (auto s : examplePathList) {     
+   for (auto s : examplePath) {     
       ReadDirArgs data;
 
-      data.recursive   = (sourceRecursive || exampleRecursive);
-      data.isFnDict    = true;
-      data.fnDict      = *Doxy_Globals::exampleNameDict;
-      data.patternList = tempList;
+      data.recursive          = exampleRecursive;
+      data.isFnDict           = true;
+      data.fnDict             = *Doxy_Globals::exampleNameDict;
+      data.includePatternList = examplePatterns;
  
       readFileOrDirectory(s, data);
 
@@ -9976,16 +10005,16 @@ void searchInputFiles()
    Doxy_Globals::g_stats.end();
 
 
-   // **
+   // images
    Doxy_Globals::g_stats.begin("Searching for images\n");
-   const QStringList imagePathList = Config::getList("image-path");
+   const QStringList imagePath = Config::getList("image-path");
 
-   for (auto s : imagePathList) {
+   for (auto s : imagePath) {
       ReadDirArgs data;
 
-      data.recursive   = sourceRecursive;
-      data.isFnDict    = true;
-      data.fnDict      = *Doxy_Globals::imageNameDict;
+      data.recursive = inputRecursive;
+      data.isFnDict  = true;
+      data.fnDict    = *Doxy_Globals::imageNameDict;
 
       readFileOrDirectory(s, data);
 
@@ -9993,16 +10022,17 @@ void searchInputFiles()
    }
    Doxy_Globals::g_stats.end();
 
-   // **
-   Doxy_Globals::g_stats.begin("Searching for dot files\n");
-   const QStringList dotFileList = Config::getList("dot-file-dirs");
 
-   for (auto s : dotFileList) {
+   // dot files
+   Doxy_Globals::g_stats.begin("Searching for dot files\n");
+   const QStringList dotFiles = Config::getList("dot-file-dirs");
+
+   for (auto s : dotFiles) {
       ReadDirArgs data;
 
-      data.recursive   = sourceRecursive;
-      data.isFnDict    = true;
-      data.fnDict      = *Doxy_Globals::dotFileNameDict;
+      data.recursive  = inputRecursive;
+      data.isFnDict   = true;
+      data.fnDict     = *Doxy_Globals::dotFileNameDict;
 
       readFileOrDirectory(s, data);
 
@@ -10010,16 +10040,17 @@ void searchInputFiles()
    }
    Doxy_Globals::g_stats.end();
 
-   //
-   Doxy_Globals::g_stats.begin("Searching for msc files\n");
-   const QStringList mscFileList = Config::getList("msc-file-dirs");
 
-   for (auto s : mscFileList) {
+   // msc
+   Doxy_Globals::g_stats.begin("Searching for msc files\n");
+   const QStringList mscFiles = Config::getList("msc-file-dirs");
+
+   for (auto s : mscFiles) {
       ReadDirArgs data;
 
-      data.recursive   = sourceRecursive;
-      data.isFnDict    = true;
-      data.fnDict      = *Doxy_Globals::mscFileNameDict;
+      data.recursive  = inputRecursive;
+      data.isFnDict   = true;
+      data.fnDict     = *Doxy_Globals::mscFileNameDict;
 
       readFileOrDirectory(s, data);
 
@@ -10027,14 +10058,15 @@ void searchInputFiles()
    }
    Doxy_Globals::g_stats.end();
 
-   //
-   Doxy_Globals::g_stats.begin("Searching for dia files\n");
-   const QStringList diaFileList = Config::getList("dia-file-dirs");
 
-   for (auto s : diaFileList) {
+   // dia
+   Doxy_Globals::g_stats.begin("Searching for dia files\n");
+   const QStringList diaFiles = Config::getList("dia-file-dirs");
+
+   for (auto s : diaFiles) {
       ReadDirArgs data;
 
-      data.recursive   = sourceRecursive;
+      data.recursive   = inputRecursive;
       data.isFnDict    = true;
       data.fnDict      = *Doxy_Globals::diaFileNameDict;
     
@@ -10043,34 +10075,33 @@ void searchInputFiles()
    }
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Searching for files to exclude\n");
-   const QStringList excludeList  = Config::getList("exclude-files");
-   const QStringList filePatterns = Config::getList("input-patterns");
 
-   for (auto s : excludeList) {   
+   Doxy_Globals::g_stats.begin("Searching for files to exclude\n");
+   const QStringList excludeFiles  = Config::getList("exclude-files");   
+
+   for (auto s : excludeFiles) {   
       ReadDirArgs data;
 
-      data.recursive       = sourceRecursive;
-      data.errorIfNotExist = false;
-      data.patternList     = filePatterns;
-      data.isPrepExclude   = true;
-      data.prepExcludeSet  = local_excludeSet;
+      data.recursive          = inputRecursive;
+      data.errorIfNotExist    = false;
+      data.includePatternList = inputPatterns;
+      data.isPrepExclude      = true;
+      data.prepExcludeSet     = excludeSet;
             
       readFileOrDirectory(s, data);  
 
-      local_excludeSet = data.prepExcludeSet;  
+      excludeSet = data.prepExcludeSet;  
    }
    Doxy_Globals::g_stats.end();
 
 
-   // ** Determine Input Files
+   // find input files
    Doxy_Globals::g_stats.begin("Searching for files to process\n");
 
    QSet<QString> killDict;
+   QStringList inputSource = Config::getList("input-source");
 
-   QStringList inputList = Config::getList("input-source");
-
-   for (auto s : inputList) {
+   for (auto s : inputSource) {
       QString path = s;
       uint len = path.length();
 
@@ -10082,14 +10113,14 @@ void searchInputFiles()
 
          ReadDirArgs data;       
 
-         data.recursive          = true;         
+         data.recursive          = inputRecursive;         
          data.isFnList           = true;
          data.fnList             = *Doxy_Globals::inputNameList;
          data.isFnDict           = true;
-         data.fnDict             = *Doxy_Globals::inputNameDict;
-         data.excludeSet         = local_excludeSet;
-         data.patternList        = filePatterns;
+         data.fnDict             = *Doxy_Globals::inputNameDict;   
+         data.includePatternList = inputPatterns;
          data.excludePatternList = excludePatterns;
+         data.excludeSet         = excludeSet;
          data.isResultList       = true;
          data.resultList         = Doxy_Globals::g_inputFiles;       
          data.isKillDict         = true;
@@ -10217,4 +10248,3 @@ void Doxy_Work::do_fake_ginger(QSharedPointer<EntryNav> parentNav)
 }
 
 */
-

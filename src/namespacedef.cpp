@@ -428,7 +428,7 @@ void NamespaceDef::writeClassDeclarations(OutputList &ol, const QString &title)
    if (classSDict) {
       classSDict->writeDeclaration(ol, 0, title, true);
    }
-}
+}   
 
 void NamespaceDef::writeInlineClasses(OutputList &ol)
 {

@@ -207,7 +207,7 @@ void Config::load_Defaults()
    // tab 2 - experimental
    m_cfgBool.insert("bb-style",                  struc_CfgBool   { false,           DEFAULT } );
    m_cfgString.insert("bb-main-page",            struc_CfgString { "",              DEFAULT } );   
-   m_cfgList.insert("bb-skip-ns",                struc_CfgList   { QStringList(),   DEFAULT } );
+   m_cfgList.insert("bb-ns-alias",               struc_CfgList   { QStringList(),   DEFAULT } );
 
    // tab 2 -programming
    m_cfgList.insert("tcl-subst",                 struc_CfgList   { QStringList(),  DEFAULT } );
@@ -233,7 +233,7 @@ void Config::load_Defaults()
    m_cfgList.insert("input-patterns",            struc_CfgList   { tempList2,       DEFAULT } );   
 
    m_cfgString.insert("input-encoding",          struc_CfgString { "UTF-8",         DEFAULT } );
-   m_cfgBool.insert("source-recursive",          struc_CfgBool   { false,           DEFAULT } );
+   m_cfgBool.insert("input-recursive",           struc_CfgBool   { false,           DEFAULT } );
 
    m_cfgList.insert("exclude-files",             struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgBool.insert("exclude-symlinks",          struc_CfgBool   { false,           DEFAULT } );
@@ -266,13 +266,22 @@ void Config::load_Defaults()
    // tab 2 - source code
    m_cfgBool.insert("source-code",               struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("inline-source",             struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("verbatim-headers",          struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("strip-code-comments",       struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("ref-by-relation",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("ref-relation",              struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("ref-link-source",           struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("source-tooltips",           struc_CfgBool   { true,           DEFAULT } );
-   m_cfgBool.insert("use-htags",                 struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("verbatim-headers",          struc_CfgBool   { true,           DEFAULT } );
+   m_cfgBool.insert("use-htags",                 struc_CfgBool   { false,          DEFAULT } );  
+
+   QStringList tempList3 = Config::getSuffixSource();
+   m_cfgList.insert("suffix-source-navtree",     struc_CfgList   { tempList3,      DEFAULT } );
+
+   QStringList tempList4 = Config::getSuffixHeader();
+   m_cfgList.insert("suffix-header-navtree",     struc_CfgList   { tempList4,      DEFAULT } );
+
+   QStringList tempList5 = Config::getSuffixExclude();
+   m_cfgList.insert("suffix-exclude-navtree",    struc_CfgList   { tempList5,      DEFAULT } );
 
    m_cfgBool.insert("clang-parsing",             struc_CfgBool   { false,          DEFAULT } );
    m_cfgList.insert("clang-flags",               struc_CfgList   { QStringList(),  DEFAULT } );
@@ -282,7 +291,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("search-includes",           struc_CfgBool   { true,           DEFAULT } );
 
    m_cfgList.insert("include-path",              struc_CfgList   { QStringList(),  DEFAULT } );
-   m_cfgList.insert("include-file-patterns",     struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("include-patterns",          struc_CfgList   { QStringList(),  DEFAULT } );
 
    m_cfgBool.insert("macro-expansion",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("expand-only-predefined",    struc_CfgBool   { false,          DEFAULT } );
@@ -528,8 +537,8 @@ bool Config::read_ProjectFile(const QString &fName)
                hashIter.value() = { tempObj.toString(), PROJECT };            
    
             }  else {
-               fprintf(stderr, "Error: %s is an unknown enum configuration parameter and not recognized by DoxyPress\n", qPrintable(key) );
-               isError = true;
+               fprintf(stderr, "Error: %s is an unknown enum configuration parameter and not " 
+                     "recognized by DoxyPress\n", qPrintable(key) );               
    
             } 
    
@@ -543,8 +552,8 @@ bool Config::read_ProjectFile(const QString &fName)
                hashIter.value() = { tempObj.toBool(), PROJECT };            
    
             }  else {
-               fprintf(stderr, "Error: %s is an unknown boolean configuration parameter and not recognized by DoxyPress\n", qPrintable(key) );
-               isError = true;
+               fprintf(stderr, "Error: %s is an unknown boolean configuration parameter and not " 
+                     "recognized by DoxyPress\n", qPrintable(key) );               
    
             }
          } 
@@ -556,8 +565,8 @@ bool Config::read_ProjectFile(const QString &fName)
                hashIter.value() = { tempObj.toInt(), PROJECT };            
    
             }  else {
-               fprintf(stderr, "Error: %s is an unknown integer configuration parameter and not recognized by DoxyPress\n", qPrintable(key) );
-               isError = true;
+               fprintf(stderr, "Error: %s is an unknown integer configuration parameter and not "
+                     "recognized by DoxyPress\n", qPrintable(key) );               
    
             }
          }
@@ -581,8 +590,8 @@ bool Config::read_ProjectFile(const QString &fName)
                hashIter.value() = { listData, PROJECT };
    
             }  else {
-               fprintf(stderr, "Error: %s is an unknown array configuration parameter and not recognized by DoxyPress\n", qPrintable(key) );
-               isError = true;
+               fprintf(stderr, "Error: %s is an unknown array configuration parameter and not "
+                  "recognized by DoxyPress\n", qPrintable(key) );               
    
             }
          }        
@@ -594,9 +603,9 @@ bool Config::read_ProjectFile(const QString &fName)
                hashIter.value() = { tempObj.toString(), PROJECT };            
    
             }  else {
-               fprintf(stderr, "Error: %s is an unknown string configuration parameter and not recognized by DoxyPress\n", qPrintable(key) );
-               isError = true;
-   
+               fprintf(stderr, "Error: %s is an unknown string configuration parameter and not "
+                  "recognized by DoxyPress\n", qPrintable(key) );
+                  
             }
          } 
       }

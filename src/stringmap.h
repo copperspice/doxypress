@@ -15,8 +15,8 @@
  *
 *************************************************************************/
 
-#ifndef MAP_H
-#define MAP_H
+#ifndef STRINGMAP_H
+#define STRINGMAP_H
 
 #include <QList>
 #include <QHash>
@@ -24,6 +24,10 @@
 #include <typeinfo>
 #include <algorithm>
 #include <stdexcept>
+
+class FilePair;
+class NamespaceDef;
+class OutputList;
 
 /** Ordered dictionary of elements of type T Internally uses a QMap<T>.
  */
@@ -98,7 +102,7 @@ class StringMap
    const_iterator end() const {     
       return m_dict.end();  
    }  
-
+  
    T find(const char *key) {
       auto item = m_dict.find(key);
 
@@ -409,6 +413,32 @@ class LongMap
       typename  QList<T>::iterator m_li;
    };
 
+};
+
+/** A sorted dictionary of FilePair objects. */
+class FilePairDict : public StringMap<QSharedPointer<FilePair>>
+{
+ public:
+   // CopperSpice - can add isCase 
+   FilePairDict() : StringMap<QSharedPointer<FilePair>>() {}
+
+ private:
+   int compareMapValues(const QSharedPointer<FilePair> &item1, const QSharedPointer<FilePair> &item2) const override;
+};
+
+/** sorted dictionary of NamespaceDef objects. */
+class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
+{   
+   public:
+      // CopperSpice - can add isCase
+      NamespaceSDict() : StringMap<QSharedPointer<NamespaceDef>>() {}
+      ~NamespaceSDict() {}
+      
+      void writeDeclaration(OutputList &ol, const QString &title, bool isConstantGroup = false, bool localName = false);
+      bool declVisible() const;
+      
+   private:
+      int compareMapValues(const QSharedPointer<NamespaceDef> &item1, const QSharedPointer<NamespaceDef> &item2) const override;       
 };
 
 #endif

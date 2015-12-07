@@ -1199,9 +1199,9 @@ bool Definition::hasDocumentation() const
    static bool extractAll = Config::getBool("extract-all");
    // static bool sourceBrowser = Config::getBool("source-code");
 
-   bool hasDocs = (m_private->details    && !m_private->details->doc.isEmpty())    || 
-                  (m_private->brief      && !m_private->brief->doc.isEmpty())      ||
-                  (m_private->inbodyDocs && !m_private->inbodyDocs->doc.isEmpty()) ||  extractAll; 
+   bool hasDocs = (m_private->details    && ! m_private->details->doc.isEmpty())    || 
+                  (m_private->brief      && ! m_private->brief->doc.isEmpty())      ||
+                  (m_private->inbodyDocs && ! m_private->inbodyDocs->doc.isEmpty()) || extractAll; 
 
       //  ||   // extract everything
       //       (sourceBrowser && m_private->body && m_private->body->startLine!=-1 && m_private->body->fileDef)
@@ -1799,7 +1799,7 @@ SrcLangExt Definition::getLanguage() const
 }
 
 void Definition::setHidden(bool b)
-{
+{  
    m_private->hidden = m_private->hidden || b;
 }
 

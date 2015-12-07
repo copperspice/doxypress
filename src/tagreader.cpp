@@ -1435,7 +1435,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
    // build file list   
    for (auto tfi : m_tagFileFiles) {
       QSharedPointer<Entry> fe = QMakeShared<Entry>();
-      fe->section = guessSection(tfi.name);
+      fe->section = determineSection(tfi.name);
       fe->name    = tfi.name;
 
       addDocAnchors(fe, tfi.docAnchors);

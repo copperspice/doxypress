@@ -83,7 +83,7 @@ FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, const
    setReference(lref);
       
    m_package   = 0;
-   m_isSource  = guessSection(nm) == Entry::SOURCE_SEC;
+   m_isSource  = determineSection(nm) == Entry::SOURCE_SEC;
    m_docname   = nm;
    m_dir       = QSharedPointer<DirDef>();
 
@@ -450,9 +450,6 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
 
 void FileDef::writeSourceLink(OutputList &ol)
 {   
-
-printf("   --> BROOM  (file list) writeSourceLink? %s\n",  csPrintable(this->getOutputFileBase()) );
-
    if (generateSourceFile()) {
       ol.disableAllBut(OutputGenerator::Html);
       ol.startParagraph();
@@ -838,16 +835,12 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    }
 
    bool isDocFile = isDocumentationFile();
-   bool genSourceFile = ! isDocFile && generateSourceFile();
-
-
-printf("   --> Broom (src file) write source  %s  %s\n",  csPrintable(this->getOutputFileBase()), csPrintable(getSourceFileBase()) );
-
+   bool genSourceFile = isDocFile && generateSourceFile();
 
    if (getDirDef()) {
 
-      startFile(ol, getSourceFileBase(), QString(), pageTitle, HLI_FileVisible,
-                ! generateTreeView, !isDocFile && genSourceFile ? QString() : getOutputFileBase());
+      startFile(ol, getSourceFileBase(), QString(), pageTitle, HLI_FileVisible, ! generateTreeView, 
+                  isDocFile && genSourceFile ? QString() : getOutputFileBase());
 
       if (! generateTreeView) {
          getDirDef()->writeNavigationPath(ol);
@@ -860,7 +853,7 @@ printf("   --> Broom (src file) write source  %s  %s\n",  csPrintable(this->getO
 
    } else {
       startFile(ol, getSourceFileBase(), QString(), pageTitle, HLI_FileVisible, false,
-                ! isDocFile && genSourceFile ? QString() : getOutputFileBase());
+                isDocFile && genSourceFile ? QString() : getOutputFileBase());
 
       startTitle(ol, getSourceFileBase());
       ol.parseText(title);
@@ -1234,23 +1227,37 @@ bool FileDef::isIncluded(const QString &name) const
 bool FileDef::generateSourceFile() const
 {
    static bool sourceBrowser   = Config::getBool("source-code");
-   static bool verbatimHeaders = Config::getBool("verbatim-headers");
-   
-   QString name4 = name().right(4);
-
+   static bool verbatimHeaders = Config::getBool("verbatim-headers");   
+      
    bool retval = ! isReference();
 
    if (retval) {
-      retval = (sourceBrowser || (verbatimHeaders && guessSection(name()) == Entry::HEADER_SEC));
+      retval = (sourceBrowser || (verbatimHeaders && determineSection(name()) == Entry::HEADER_SEC));     
    }
 
-   if (retval) {    
-      retval = name4 != ".doc" && name4 != ".dox" && name4 != ".txt" && name().right(3) != ".md" && name().right(9) != ".markdown";      
+   if (retval) {      
+      retval = isDocumentationFile();      
    }     
 
    return retval;
 }
 
+bool FileDef::isDocumentationFile() const
+{
+   const QStringList suffixExclude = Config::getList("suffix-exclude-navtree");
+
+   QFileInfo fi(name());
+   QString suffix = fi.suffix();
+
+   bool retval = true;
+
+   if (suffixExclude.contains(suffix))  {
+      // exclude file extension
+      retval = false;
+   }
+
+   return retval;
+}
 
 void FileDef::addListReferences()
 {   
@@ -1443,15 +1450,6 @@ void FileDef::combineUsingRelations()
          addUsingDeclaration(ucd);
       }            
    }
-}
-
-bool FileDef::isDocumentationFile() const
-{
-   return name().right(4) == ".doc" ||
-          name().right(4) == ".txt" ||
-          name().right(4) == ".dox" ||
-          name().right(3) == ".md"  ||
-          name().right(9) == ".markdown";   
 }
 
 void FileDef::acquireFileVersion()

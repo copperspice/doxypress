@@ -354,46 +354,24 @@ QString stripFromIncludePath(const QString &path)
    return stripFromPath(path, Config::getList("strip-from-inc-path"));
 }
 
-/*! try to determine if \a name is a source or a header file name by looking
- * at the extension. A number of variations are allowed in both upper and lower case 
+/*! check if \a fname is a source or a header file name by looking at the extension
  */
-int guessSection(const QString &name)
-{
-   QString n = name.toLower();
+int determineSection(const QString &fname)
+{   
+   const QStringList suffixSource = Config::getList("suffix-source-navtree");
+   const QStringList suffixHeader = Config::getList("suffix-header-navtree");
 
-   // source
-   if (n.right(2) == ".c"    || 
-       n.right(3) == ".cc"   ||
-       n.right(4) == ".cxx"  ||
-       n.right(4) == ".cpp"  ||
-       n.right(4) == ".c++"  ||
-       n.right(5) == ".java" ||
-       n.right(2) == ".m"    ||
-       n.right(2) == ".M"    ||
-       n.right(3) == ".mm"   ||
-       n.right(3) == ".ii"   || // inline
-       n.right(4) == ".ixx"  ||
-       n.right(4) == ".ipp"  ||
-       n.right(4) == ".i++"  ||
-       n.right(4) == ".inl"  ||
-       n.right(4) == ".xml") 
-   {
+   QFileInfo fi(fname);
+   QString suffix = fi.suffix().toLower();
+ 
+   if (suffixSource.contains(suffix) ) {
       return Entry::SOURCE_SEC;
    }
-
-   // header
-   if (n.right(2) == ".h"   || 
-       n.right(3) == ".hh"  ||
-       n.right(4) == ".hxx" ||
-       n.right(4) == ".hpp" ||
-       n.right(4) == ".h++" ||
-       n.right(4) == ".idl" ||
-       n.right(4) == ".ddl" ||
-       n.right(5) == ".pidl") 
-   {
+ 
+   if (suffixHeader.contains(suffix) ) {
       return Entry::HEADER_SEC;
    }
-
+ 
    return 0;
 }
 
@@ -7407,14 +7385,18 @@ QString stripIndentation(const QString &s)
    return result;
 }
 
-bool fileVisibleInIndex(QSharedPointer<FileDef> fd, bool &genSourceFile)
+bool docFileVisibleInIndex(QSharedPointer<FileDef> fd)
+{
+   return fd->isDocumentationFile() && fd->generateSourceFile();
+}
+
+bool srcFileVisibleInIndex(QSharedPointer<FileDef> fd)
 {
    static bool allExternals = Config::getBool("all-externals");
+ 
+   bool retval = ( (allExternals && fd->isLinkable()) || fd->isLinkableInProject() ) && fd->isDocumentationFile();
 
-   bool isDocFile = fd->isDocumentationFile();
-   genSourceFile  = ! isDocFile && fd->generateSourceFile();
-
-   return ( ((allExternals && fd->isLinkable()) || fd->isLinkableInProject()) && ! isDocFile);
+   return retval;
 }
 
 void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDef> dst)

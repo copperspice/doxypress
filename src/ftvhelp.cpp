@@ -556,16 +556,12 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
                // do not add this file to the navIndex
 
             } else {  
-               bool doc;
-               bool src;
-   
-               doc = fileVisibleInIndex(fd, src);
-   
-               if (doc) {
+                                   
+               if (docFileVisibleInIndex(fd)) {
                   navIndex.inSort(new NavIndexEntry(node2URL(node, true, false), pathToNode(node)));
                }
    
-               if (src) {
+               if (srcFileVisibleInIndex(fd)) {
                   navIndex.inSort(new NavIndexEntry(node2URL(node, true, true), pathToNode(node)));
                }
             }

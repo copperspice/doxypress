@@ -91,7 +91,7 @@ ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const
    // can not use getLanguage at this point, setLanguage() has not been called
    SrcLangExt lang = getLanguageFromFileName(defFileName);
 
-   if ((lang == SrcLangExt_Cpp || lang == SrcLangExt_ObjC) && guessSection(defFileName) == Entry::SOURCE_SEC) {
+   if ((lang == SrcLangExt_Cpp || lang == SrcLangExt_ObjC) && determineSection(defFileName) == Entry::SOURCE_SEC) {
       m_isLocal = true;
    } else {
       m_isLocal = false;
@@ -1605,7 +1605,7 @@ bool ClassDef::visibleInParentsDeclList() const
    bool linkable = isLinkable();
    return (!isAnonymous() && !isExtension() &&
            (protection() !=::Private || extractPrivate) &&
-           (linkable || (!hideUndocClasses && (!isLocal() || extractLocalClasses)))
+           (linkable || (! hideUndocClasses && (!isLocal() || extractLocalClasses)))
           );
 }
 
@@ -2433,7 +2433,7 @@ bool ClassDef::isLinkableInProject() const
 
    } else {
       return ! name().isEmpty() && ! isArtificial() && !isHidden() && ! isAnonymous() && protectionLevelVisible(m_prot) &&
-             (! m_isLocal || extractLocal)  && (hasDocumentation() || !hideUndoc) && (! m_isStatic || extractStatic) && !isReference(); 
+             (! m_isLocal || extractLocal)  && (hasDocumentation() || ! hideUndoc) && (! m_isStatic || extractStatic) && !isReference(); 
    }
 }
 

@@ -2902,7 +2902,7 @@ static void setFileName(const QString &name)
    }
 
    g_insideCS = getLanguageFromFileName(g_yyFileName) == SrcLangExt_CSharp;
-   g_isSource = guessSection(g_yyFileName);
+   g_isSource = determineSection(g_yyFileName);
 }
 
 static void incrLevel()
@@ -6521,9 +6521,9 @@ YY_DECL {
 
                def = DefineManager::instance().isDefined(g_defName);
 
-               if (def == 0) // new define
-               {
-                  //printf("new define '%s'!\n",g_defName.data());
+               if (def == 0)  {
+                  // new define               
+                  
                   A_Define *nd = newDefine();
                   DefineManager::instance().addDefine(g_yyFileName, nd);
 
@@ -6533,9 +6533,8 @@ YY_DECL {
                   //  g_fileDefineDict->insert(g_defName,nd);
                   //}
 
-               } else if (def /*&& macroIsAccessible(def)*/)
-                  // name already exists
-               {
+               } else if (def /*&& macroIsAccessible(def)*/) {
+                  // name already exists               
 
                   if (def->undef) { // undefined name
                      def->undef = FALSE;
@@ -6556,6 +6555,7 @@ YY_DECL {
                BEGIN(Start);
             }
             YY_BREAK
+
          case 169:
             YY_RULE_SETUP
 
@@ -8049,7 +8049,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
 
    BEGIN( Start );
 
-   g_expectGuard = guessSection(fileName) == Entry::HEADER_SEC;
+   g_expectGuard = determineSection(fileName) == Entry::HEADER_SEC;
    g_guardName.resize(0);
    g_lastGuardName.resize(0);
    g_guardExpr = "";

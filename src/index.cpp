@@ -562,12 +562,12 @@ static bool dirHasVisibleChildren(QSharedPointer<DirDef> dd)
    }
 
    for (auto fd : *dd->getFiles() ) {
-      bool genSourceFile;
-
-      if (fileVisibleInIndex(fd, genSourceFile)) {
+      
+      if (docFileVisibleInIndex(fd)) {
          return true;
       }
-      if (genSourceFile) {
+
+      if (srcFileVisibleInIndex(fd)) {
          return true;
       }
    }
@@ -637,11 +637,11 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
    if (fileList && fileList->count() > 0) {
       
       for (auto fd : *fileList) {
-         bool genSourceFile;
 
-         if (fileVisibleInIndex(fd, genSourceFile)) {
+         if (docFileVisibleInIndex(fd)) {
             fileCount++;
-         } else if (genSourceFile) {
+
+          } else if (srcFileVisibleInIndex(fd)) {
             fileCount++;
          }
       }
@@ -650,10 +650,8 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
          startIndexHierarchy(ol, level + 1);
          
          for (auto fd : *fileList) {
-            bool doc;
-            bool src;
-
-            doc = fileVisibleInIndex(fd, src);  
+            bool doc = docFileVisibleInIndex(fd);
+            bool src = srcFileVisibleInIndex(fd);
 
             QString reference;
             QString outputBase;
@@ -685,15 +683,11 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
       if (fileCount > 0) {        
 
          for (auto fd : *fileList) {
-            bool doc;
-            bool src;
-           
-            doc = fileVisibleInIndex(fd, src);
 
-            if (doc) {
+            if (docFileVisibleInIndex(fd)) {
                addMembersToIndex(fd, LayoutDocManager::File, fd->displayName(), QString(), true, true);
 
-            } else if (src) {
+             } else if (srcFileVisibleInIndex(fd)) {
                Doxy_Globals::indexList->addContentsItem(false, convertToHtml(fd->name(), true), "", 
                      fd->getSourceFileBase(), "", false, true, fd);
             }
@@ -743,10 +737,9 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
        
             if (! fullPathNames || fd->getDirDef() == 0) { 
                // top level file
-               bool doc;
-               bool src;
-
-               doc = fileVisibleInIndex(fd, src);
+               bool doc = docFileVisibleInIndex(fd);
+               bool src = srcFileVisibleInIndex(fd);
+              
                QString reference;
                QString outputBase;
 
@@ -1031,8 +1024,8 @@ static void countFiles(int &htmlFiles, int &files)
    for (auto fn : *Doxy_Globals::inputNameList) {
      
       for (auto fd : *fn) {
-         bool doc, src;
-         doc = fileVisibleInIndex(fd, src);
+         bool doc = docFileVisibleInIndex(fd);
+         bool src = srcFileVisibleInIndex(fd);
 
          if (doc || src) {
             htmlFiles++;
@@ -1047,11 +1040,12 @@ static void countFiles(int &htmlFiles, int &files)
 
 static void writeSingleFileIndex(OutputList &ol, QSharedPointer<FileDef> fd)
 {  
-   bool doc    = fd->isLinkableInProject();
-   bool src    = fd->generateSourceFile();
-   bool nameOk = ! fd->isDocumentationFile();
-
-   if (nameOk && (doc || src) && ! fd->isReference()) {
+   bool doc     = fd->isLinkableInProject();
+   bool src     = fd->generateSourceFile();
+   bool addFile = fd->isDocumentationFile();
+  
+   if (addFile && (doc || src) && ! fd->isReference()) {
+      // add the file entry to the navtree and file list 
       QString path;
 
       if (Config::getBool("full-path-names")) {
@@ -1059,6 +1053,7 @@ static void writeSingleFileIndex(OutputList &ol, QSharedPointer<FileDef> fd)
       }
 
       QString fullName = fd->name();
+
       if (! path.isEmpty()) {
          if (path.at(path.length() - 1) != '/') {
             fullName.prepend("/");
@@ -3878,7 +3873,8 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                break;
          }
 
-         if (kind != LayoutNavEntry::User && kind != LayoutNavEntry::UserGroup) { // User entry may appear multiple times
+         if (kind != LayoutNavEntry::User && kind != LayoutNavEntry::UserGroup) {
+            // User entry may appear multiple times
             indexWritten[index] = true;
          }
       }

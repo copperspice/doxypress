@@ -164,17 +164,6 @@ class FilePair
    QSharedPointer<FileDef> m_dst;
 };
 
-/** A sorted dictionary of FilePair objects. */
-class FilePairDict : public StringMap<QSharedPointer<FilePair>>
-{
- public:
-   // CopperSpice - can add isCase 
-   FilePairDict() : StringMap<QSharedPointer<FilePair>>() {}
-
- private:
-   int compareMapValues(const QSharedPointer<FilePair> &item1, const QSharedPointer<FilePair> &item2) const override;
-};
-
 /** Usage information of a directory. */
 class UsedDir
 {

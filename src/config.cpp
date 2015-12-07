@@ -389,10 +389,9 @@ bool Config::verify()
          }         
       }
    }
-
    iterList.value().value = inputSource;
 
-
+   // **   
    iterList = m_cfgList.find("example-patterns");
    QStringList examplePatterns = iterList.value().value;
 
@@ -413,6 +412,68 @@ bool Config::verify()
    }
 
 
+   // ** source code
+   iterList = m_cfgList.find("suffix-source-navtree");
+   QStringList suffixSource = iterList.value().value;
+
+   if (suffixSource.isEmpty()) {
+      suffixSource = getSuffixSource();
+      iterList.value().value = suffixSource;   
+
+   } else  {
+
+      for (auto &item: suffixSource) {      
+          item = item.trimmed();
+
+          if (item.startsWith('.')) {
+            item = item.mid(1);
+          }
+      }
+
+      iterList.value().value = suffixSource;  
+   }
+
+   iterList = m_cfgList.find("suffix-header-navtree");
+   QStringList suffixHeader = iterList.value().value;
+
+   if (suffixHeader.isEmpty()) {
+      suffixHeader = getSuffixHeader();
+      iterList.value().value = suffixHeader;   
+
+   } else  {
+
+      for (auto &item: suffixHeader) {      
+          item = item.trimmed();
+
+          if (item.startsWith('.')) {
+            item = item.mid(1);
+          }
+      }
+
+      iterList.value().value = suffixHeader;  
+   }
+
+   iterList = m_cfgList.find("suffix-exclude-navtree");
+   QStringList suffixExclude = iterList.value().value;
+
+   if (suffixExclude.isEmpty()) {
+      suffixExclude = getSuffixExclude();
+      iterList.value().value = suffixExclude;   
+
+   } else  {
+
+      for (auto &item: suffixExclude) {      
+          item = item.trimmed();
+
+          if (item.startsWith('.')) {
+            item = item.mid(1);
+          }
+      }
+
+      iterList.value().value = suffixExclude;  
+   }
+
+
    // ** preprocessing
    iterList = m_cfgList.find("include-path");
    QStringList includePath = iterList.value().value;
@@ -428,7 +489,6 @@ bool Config::verify()
 
       }          
    }
-
    iterList.value().value = includePath;
 
 
@@ -727,7 +787,7 @@ bool Config::verify()
 
    } else {
 
-      if (manExtension.at(0) == '.') {
+      if (manExtension.startsWith('.')) {
          if (manExtension.length() == 1) {
             manExtension = "3";
    
@@ -847,13 +907,13 @@ bool Config::verify()
 void Config::cleanUpPaths(QStringList &str)
 {
    for (auto &item : str) {  
+      item = item.trimmed();
 
       if (item.isEmpty()) {
          continue;
       }
 
       item.replace("\\", "/");         
-      item = item.trimmed();
 
       if ((item.at(0) != '/' && (item.length() <= 2 || item.at(1) != ':')) || item.at(item.length() - 1) != '/' ) {
          QFileInfo fi(item);
@@ -968,6 +1028,57 @@ QStringList Config::getFilePatterns()
    return list;
 }
 
+QStringList Config::getSuffixSource()
+{
+   QStringList list;
+
+   list.append("c");   
+   list.append("cc");
+   list.append("cxx");
+   list.append("cpp");
+   list.append("c++");   
+   list.append("ii");
+   list.append("ixx");
+   list.append("ipp");
+   list.append("i++");
+   list.append("inl");
+   list.append("java"); 
+   list.append("m");
+   list.append("mm");
+   list.append("xml");
+
+   return list;
+}
+
+QStringList Config::getSuffixHeader()
+{
+   QStringList list;
+
+   list.append("h");   
+   list.append("hh");
+   list.append("hxx");
+   list.append("hpp");
+   list.append("h++");
+   list.append("idl");
+   list.append("ddl");
+   list.append("pidl");
+
+   return list;
+}
+
+QStringList Config::getSuffixExclude()
+{
+   QStringList list;
+
+   list.append("doc");   
+   list.append("dox");
+   list.append("md");
+   list.append("markdown");
+   list.append("txt");
+
+   return list;
+}
+
 Qt::CaseSensitivity Config::getCase(const QString &name)
 {
    Qt::CaseSensitivity isCase = Qt::CaseInsensitive;
@@ -1049,7 +1160,7 @@ void Config::escapeAliases()
 void Config::loadRenameNS_Aliases()
 {
    // add aliases to a dictionary
-   const QStringList list = Config::getList("bb-skip-ns");
+   const QStringList list = Config::getList("bb-ns-alias");
 
    for (auto item : list) {
 

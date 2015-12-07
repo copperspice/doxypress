@@ -8722,7 +8722,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       groupEnterFile(yyFileName, yyLineNr);
 
       current = QMakeShared<Entry>();     
-      int sec = guessSection(yyFileName);
+      int sec = determineSection(yyFileName);
 
       if (sec) {
          current->name    = yyFileName;

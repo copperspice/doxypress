@@ -423,8 +423,8 @@ static QString          s_memberGroupDocs;
 static QString          s_memberGroupRelates;
 static QString          s_compoundName;
 
-static bool             internalDocs;   
-static bool             processInternalDocs = false;  
+static bool             s_internalDocs;   
+static bool             s_processInternalDocs = false;  
 
 static int              prevPosition = 0;
 
@@ -435,7 +435,7 @@ static void initParser()
    s_memberGroupHeader.resize(0);
    s_insideParBlock = false;
 
-   internalDocs = Config::getBool("internal-docs");   
+   internalDocs = Config::getBool("internal-docs"); 
 }
 
 static bool getDocSectionName(int s)
@@ -1115,11 +1115,11 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <Comment>{B}*{CMD}"endinternal"{B}*    {
       addOutput("\\endinternal ");
 
-      if (! processInternalDocs) {
+      if (! s_processInternalDocs) {
          warn(yyFileName, yyLineNr, "Found \\endinternal without matching \\internal");
       }
 
-      processInternalDocs = false;
+      s_processInternalDocs = false;
    }
 
 <Comment>{B}*{CMD}[a-z_A-Z]+{B}*    {
@@ -1429,6 +1429,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
       addOutput(text[0]);
    }
+
 
 <Comment>[ \t\n(]['\*_!]/[^a-zA-Z0-9]   {     
       QString text = QString::fromUtf8(yytext); 
@@ -3311,10 +3312,10 @@ static bool handleHideCallergraph(const QString &)
 
 static bool handleInternal(const QString &)
 {
-   if (internalDocs) {
+   if (s_internalDocs) {
       // re-enabled for bug640828
       addOutput("\\internal ");
-      processInternalDocs = true;
+      s_processInternalDocs = true;
 
    } else {
       // make sure some whitespace before an \internal command
@@ -3494,7 +3495,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    outputXRef.resize(0);
    setOutput( isBrief || isAutoBriefOn ? OutputBrief : OutputDoc );
    briefEndsAtDot = isAutoBriefOn;
-
+  
    s_condCount    = 0;
    s_sectionLevel = 0;
    s_spaceBeforeCmd.resize(0);

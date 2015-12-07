@@ -88,7 +88,10 @@ class Config
       static bool verify();
 
       static QStringList getAbbreviateBrief();
-      static QStringList getFilePatterns();    
+      static QStringList getFilePatterns();  
+      static QStringList getSuffixSource();
+      static QStringList getSuffixHeader();
+      static QStringList getSuffixExclude();
       static QStringList getDotImageFormat();
       static QStringList getMathJaxFormat();
       static QStringList getLatexPaperType();

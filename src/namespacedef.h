@@ -32,25 +32,8 @@ class ClassSDict;
 class MemberList;
 class MemberDef;
 class MemberGroupSDict;
-class NamespaceSDict;
 class NamespaceList;
 class OutputList;
-
-/** sorted dictionary of NamespaceDef objects. */
-class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
-{
- public:
-   // CopperSpice - can add isCase
-   NamespaceSDict() : StringMap<QSharedPointer<NamespaceDef>>() {}
-   ~NamespaceSDict() {}
-
-   void writeDeclaration(OutputList &ol, const QString &title, bool isConstantGroup = false, bool localName = false);
-   bool declVisible() const;
-
- private:
-   int compareMapValues(const QSharedPointer<NamespaceDef> &item1, const QSharedPointer<NamespaceDef> &item2) const override;       
-};
-
 
 /** model of a namespace symbol */
 class NamespaceDef : public Definition
@@ -118,7 +101,6 @@ class NamespaceDef : public Definition
    void findSectionsInDocumentation();
  
    virtual QSharedPointer<Definition> findInnerCompound(const QString &name) override;
-
    virtual void addInnerCompound(QSharedPointer<Definition> d) override;
 
    void addListReferences();

@@ -182,7 +182,7 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
 
 QString showFileDefMatches(const FileNameDict *fnDict, const QString &xName);
 
-int guessSection(const QString &name);
+int determineSection(const QString &name);
 
 QString argListToString(ArgumentList *al, bool useCanonicalType = false, bool showDefVals = true);
 QString tempArgListToString(const ArgumentList *al, SrcLangExt lang);
@@ -353,7 +353,8 @@ bool protectionLevelVisible(Protection prot);
 
 QString stripIndentation(const QString &s);
 
-bool fileVisibleInIndex(QSharedPointer<FileDef> fd, bool &genSourceFile);
+bool docFileVisibleInIndex(QSharedPointer<FileDef> fd);
+bool srcFileVisibleInIndex(QSharedPointer<FileDef> fd);
 
 void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDef> dst);
 
