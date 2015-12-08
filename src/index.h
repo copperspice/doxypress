@@ -36,11 +36,11 @@ class IndexIntf
    virtual void finalize() = 0;
    virtual void incContentsDepth() = 0;
    virtual void decContentsDepth() = 0;
-   virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString  &anchor, 
-                                bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) = 0;
+   virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, 
+            const QString  &anchor, bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) = 0;
 
-   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
-                             const QString &title) = 0;
+   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, 
+            const QString &sectionAnchor, const QString &title) = 0;
 
    virtual void addIndexFile(const QString &name) = 0;
    virtual void addImageFile(const QString &name) = 0;
@@ -282,5 +282,7 @@ void initNamespaceMemberIndices();
 void addClassMemberNameToIndex(QSharedPointer<MemberDef> md);
 void addFileMemberNameToIndex(QSharedPointer<MemberDef> md);
 void addNamespaceMemberNameToIndex(QSharedPointer<MemberDef> md);
+
+QString fixSpaces(const QString &s);
 
 #endif

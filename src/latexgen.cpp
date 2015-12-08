@@ -423,7 +423,14 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
       t_stream << "% Packages requested by user\n";     
    
       for (auto pkgName : extraPackages) {         
-         t_stream << "\\usepackage{" << pkgName << "}\n";        
+ 
+         if (pkgName.startsWith('[') || pkgName.startsWith('{')) {
+            t_stream << "\\usepackage" << pkgName << "\n";
+
+         } else {
+            t_stream << "\\usepackage{" << pkgName << "}\n";
+         }
+
       }
    
       t_stream << "\n";      
@@ -1580,7 +1587,7 @@ void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
 
 void LatexGenerator::writeAnchor(const QString &fName, const QString &name)
 {   
-   m_textStream << "\\label{" << name << "}" << endl;
+   m_textStream << "\\label{" << stripPath(name) << "}" << endl;
 
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
    static bool usePDFLatex   = Config::getBool("latex-pdf");
@@ -1588,9 +1595,10 @@ void LatexGenerator::writeAnchor(const QString &fName, const QString &name)
    if (usePDFLatex && pdfHyperlinks) {
 
       if (! fName.isEmpty()) {
-         m_textStream << "\\hypertarget{" << stripPath(fName) << "_" << name << "}{}" << endl;
+         m_textStream  << "\\hypertarget{" << stripPath(fName) << "_" << stripPath(name) << "}{}" << endl;
+      
       } else {
-         m_textStream << "\\hypertarget{" << name << "}{}" << endl;
+         m_textStream  << "\\hypertarget{" << stripPath(name) << "}{}" << endl;
       }
    }
 }

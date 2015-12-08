@@ -267,8 +267,6 @@ static void endQuickIndexItem(OutputList &ol)
    }
 }
 
-// don't make this static as it is called from a template function and some
-// old compilers don't support calls to static functions from a template.
 QString fixSpaces(const QString &s)
 {
    return substitute(s, " ", "&#160;");
@@ -2918,11 +2916,12 @@ static void writePages(QSharedPointer<PageDef> pd, FTVHelp *ftv)
       }
 
       if (ftv) {
-         ftv->addContentsItem(hasSubPages, pageTitle, pd->getReference(), pd->getOutputFileBase(), "", hasSubPages, true, pd);
+         ftv->addContentsItem(hasSubPages || hasSections, pageTitle, pd->getReference(), pd->getOutputFileBase(), 
+                  "", hasSubPages, true, pd);
       }
 
       if (addToIndex && pd != Doxy_Globals::mainPage) {
-         Doxy_Globals::indexList->addContentsItem(hasSubPages, pageTitle, pd->getReference(), 
+         Doxy_Globals::indexList->addContentsItem(hasSubPages || hasSections, pageTitle, pd->getReference(), 
                   pd->getOutputFileBase(), "", hasSubPages, true, pd);
       }
    }

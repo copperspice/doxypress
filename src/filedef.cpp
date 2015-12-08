@@ -1456,7 +1456,9 @@ void FileDef::acquireFileVersion()
 {
    QString vercmd = Config::getString("file-version-filter");
 
-   if (! vercmd.isEmpty() && !m_filePath.isEmpty() && m_filePath != "generated") {
+   if (! vercmd.isEmpty() && ! m_filePath.isEmpty() && 
+               m_filePath != "generated" && m_filePath != "graph_legend") {
+
       msg("Version of %s : ", csPrintable(m_filePath));
 
       QString cmd = vercmd + " \"" + m_filePath + "\"";

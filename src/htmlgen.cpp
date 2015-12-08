@@ -598,14 +598,18 @@ void HtmlCodeGenerator::writeTooltip(const QString &id, const DocLinkInfo &docIn
    }
 
    if (! desc.isEmpty()) {
-      m_streamX << "<div class=\"ttdoc\">";
-      m_streamX << desc; // desc is already HTML escaped
+      m_streamX << "<div class=\"ttdoc\">";   
+
+      // desc is already HTML escaped but there are still < and > signs
+      docify(desc); 
+
       m_streamX << "</div>";
    }
 
    if (! defInfo.file.isEmpty()) {
       m_streamX << "<div class=\"ttdef\"><b>Definition:</b> ";
-      if (!defInfo.url.isEmpty()) {
+
+      if (! defInfo.url.isEmpty()) {
          m_streamX << "<a href=\"";
          m_streamX << externalRef(m_relPath, defInfo.ref, true);
          m_streamX << defInfo.url << Doxy_Globals::htmlFileExtension;
@@ -2046,11 +2050,6 @@ static void endQuickIndexItem(QTextStream &t_stream, const QString &l)
    }
 
    t_stream << "</li>\n";
-}
-
-static QString fixSpaces(const QString &s)
-{
-   return substitute(s, " ", "&#160;");
 }
 
 static bool quickLinkVisible(LayoutNavEntry::Kind kind)

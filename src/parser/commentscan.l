@@ -1141,7 +1141,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
          s_spaceBeforeCmd = QString(text).left(i);
 
-         if (cmdPtr->endsBrief && inContext != OutputXRef) {
+         if (cmdPtr->endsBrief && (inContext != OutputXRef && cmdName=="parblock")) {
             briefEndsAtDot = false;
 
             // this command forces the end of brief description

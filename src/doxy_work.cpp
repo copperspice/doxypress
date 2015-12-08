@@ -1162,7 +1162,7 @@ void generateOutput()
             searchDataFile = "searchdata.xml";
          }
 
-         if (! QDir::isAbsolutePath(searchDataFile)) {        
+         if (! QDir::isAbsolutePath(searchDataFile)) {                       
             QString outputDirectory = Config::getString("output-dir");
             searchDataFile.prepend(outputDirectory + "/");
          }
@@ -2182,7 +2182,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
 
       }
 
-      cd = QMakeShared<ClassDef>(root->fileName, root->startLine, root->startColumn,
+      cd = QMakeShared<ClassDef>(tagInfo ? tagName : root->fileName, root->startLine, root->startColumn,
                         fullName, sec, tagName, refFileName, true, root->m_specFlags.spec & Entry::Enum);
 
       Debug::print(Debug::Classes, 0, "  New class `%s' (sec=0x%08x)! #tArgLists=%d tagInfo=%p\n",
@@ -2542,7 +2542,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
                tagFileName = tagInfo->fileName;
             }
 
-            nd = QMakeShared<NamespaceDef>(root->fileName, root->startLine, root->startColumn,
+            nd = QMakeShared<NamespaceDef>(tagInfo ? tagName : root->fileName, root->startLine, root->startColumn,
                   fullName, tagName, tagFileName, root->type, root->m_specFlags.spec & Entry::Published);
 
             nd->setDocumentation(root->doc, root->docFile, root->docLine); // copy docs to definition
@@ -2877,10 +2877,16 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<EntryNav> rootNav)
                            QSharedPointer<MemberDef> newMd;
 
                            {
+                              QString fileName = root->fileName;
+
+                              if (fileName.isEmpty() && rootNav->tagInfo()) {
+                                 fileName = rootNav->tagInfo()->tagName;
+                              }
+
                               ArgumentList *templAl = md->templateArguments();
                               ArgumentList *al = md->templateArguments();
 
-                              newMd = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, md->typeString(),
+                              newMd = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn, md->typeString(),
                                  memName, md->argsString(), md->excpString(), root->protection, root->virt, md->isStatic(),
                                  Member, md->memberType(),  templAl, al);
                            }
@@ -3042,8 +3048,14 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
       }
    }
 
+   QString fileName = root->fileName;
+
+   if (fileName.isEmpty() && rootNav->tagInfo()) {
+      fileName = rootNav->tagInfo()->tagName;
+   }
+
    // new member variable, typedef, enum value, or property
-   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, 
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn, 
             root->type, name, root->args, root->exception, prot, Normal, root->stat, 
             related, mtype, root->tArgLists ? &(root->tArgLists->last()) : 0, nullptr);
 
@@ -3246,8 +3258,14 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
       }
    }
 
+   QString fileName = root->fileName;
+
+   if (fileName.isEmpty() && rootNav->tagInfo()) {
+      fileName = rootNav->tagInfo()->tagName;
+   }
+
    // new global variable, enum value, or typedef
-   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, root->type, name,
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn, root->type, name,
                                               root->args, nullptr, Public, Normal, root->stat, Member, mtype,
                                               root->tArgLists ? &(root->tArgLists->last()) : nullptr, nullptr);
   
@@ -3791,7 +3809,13 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<EntryNa
    enum MemberType const type = (rootNav->section() == Entry::EXPORTED_INTERFACE_SEC)
                                 ? MemberType_Interface : MemberType_Service;
 
-   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, root->type, rname,
+   QString fileName = root->fileName;
+
+   if (fileName.isEmpty() && rootNav->tagInfo()) {
+      fileName = rootNav->tagInfo()->tagName;
+   }
+
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn, root->type, rname,
          "", "", root->protection, root->virt, root->stat, Member, type, nullptr, &root->argList);
 
    md->setTagInfo(rootNav->tagInfo());
@@ -3970,8 +3994,14 @@ if (name.contains("fake") || name.contains("isChopped")) {
       name = name.left(i);
    }
 
+   QString fileName = root->fileName;
+
+   if (fileName.isEmpty() && rootNav->tagInfo()) {
+      fileName = rootNav->tagInfo()->tagName;
+   }
+
    // adding class member
-   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn,
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
                root->type, name, root->args, root->exception, root->protection, root->virt,
                (root->stat && root->relatesType != MemberOf), 
                (root->relates.isEmpty() ? Member : root->relatesType == MemberOf ? Foreign : Related),
@@ -7736,7 +7766,13 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                            // enum value scope matches that of the enum
                            // be less strict for tag files as members can have incomplete scope
 
-                           QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(root->fileName, root->startLine, 
+                           QString fileName = root->fileName;
+
+                           if (fileName.isEmpty() && rootNav->tagInfo()) {
+                              fileName = rootNav->tagInfo()->tagName;
+                           }
+
+                           QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(fileName, root->startLine, 
                               root->startColumn, root->type, root->name, root->args, nullptr, Public, Normal, 
                               root->stat, Member, MemberType_EnumValue, nullptr, nullptr);
 
@@ -8604,10 +8640,10 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
       rootNav->loadEntry(Doxy_Globals::g_storage);
       QSharedPointer<Entry> root = rootNav->entry();
 
-      if (rootNav->tagInfo() && !root->name.isEmpty()) { 
+      if (rootNav->tagInfo() && ! root->name.isEmpty()) { 
 
          // define read from a tag file
-         QSharedPointer<MemberDef> md = QMakeShared<MemberDef>("<tagfile>", 1, 1, "#define", root->name, root->args, nullptr,
+         QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(rootNav->tagInfo()->tagName, 1, 1, "#define", root->name, root->args, nullptr,
                                        Public, Normal, false, Member, MemberType_Define, nullptr, nullptr);
 
          md->setTagInfo(rootNav->tagInfo());

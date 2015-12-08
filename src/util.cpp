@@ -4259,6 +4259,8 @@ QString linkToText(SrcLangExt lang, const QString &link, bool isFileName)
 bool resolveLink(const QString &scName, const QString &linkRef, bool xx, QSharedPointer<Definition> *resContext, QString &resAnchor)
 {
    *resContext = QSharedPointer<Definition>();
+
+   QString linkRefWithoutTemplates = stripTemplateSpecifiersFromScope(linkRef, false);
     
    QSharedPointer<FileDef>  fd;
    QSharedPointer<GroupDef> gd;
@@ -4323,6 +4325,13 @@ bool resolveLink(const QString &scName, const QString &linkRef, bool xx, QShared
       resAnchor = cd->anchor();
       return true;
 
+   } else if ((cd = getClass(linkRefWithoutTemplates))) {
+      // C#/Java generic class link
+  
+      *resContext = cd;
+      resAnchor = cd->anchor();
+      return true;
+  
    } else if (cd = getClass(linkRef + "-p")) { 
       // Obj-C protocol link
 

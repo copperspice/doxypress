@@ -220,6 +220,28 @@ static void docParserPopContext(bool keepParamInfo = false)
    doctokenizerYYpopContext();   
 }
 
+// replaces { with < and } with > inside string s
+static void unescapeCRef(QString &value)
+{
+   QString tmp;
+
+   for (auto c :  value) { 
+
+      if (c == '{') {
+         tmp += '<'; 
+
+      } else if ( c== '}') {
+         tmp += '>';
+
+      } else {
+         tmp += c;
+      } 
+   }
+
+   value = substitute(tmp,   "&lt;", "<");
+   value = substitute(value, "&gt;", ">");   
+}
+
 /*! search for an image in the imageNameDict and if found
  * copies the image to the output directory (which depends on the \a type
  * parameter).
@@ -1731,14 +1753,24 @@ static int internalValidatingParseDoc(DocNode *parent, QList<DocNode *> &childre
 static void readTextFileByName(const QString &file, QString &text)
 {
    const QStringList examplePathList = Config::getList("example-source");
+   const bool filterSourceFiles      = Config::getBool("filter-source-files");
    
+   if (! QDir::isAbsolutePath(file)) {
+      QFileInfo fi(file);
+
+      if (fi.exists()) {
+         text = fileToString(file, filterSourceFiles);
+         return;
+      }
+   }
+
    for (auto s : examplePathList) {
       QString absFileName = s +  QDir::separator() + file;
 
       QFileInfo fi(absFileName);
 
       if (fi.exists()) {
-         text = fileToString(absFileName, Config::getBool("filter-source-files"));
+         text = fileToString(absFileName, filterSourceFiles);
          return;
       }  
    }
@@ -1748,15 +1780,16 @@ static void readTextFileByName(const QString &file, QString &text)
    QSharedPointer<FileDef> fd;
 
    if ((fd = findFileDef(Doxy_Globals::exampleNameDict, file, ambig))) {
-      text = fileToString(fd->getFilePath(), Config::getBool("filter-source-files"));
+      text = fileToString(fd->getFilePath(), filterSourceFiles);
 
    } else if (ambig) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "included file name %s is ambiguous"
-                     "Possible candidates:\n%s", qPrintable(file), qPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, file)));
+                  "Possible candidates:\n%s", csPrintable(file),
+                  csPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, file)));
 
    } else {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Included file %s was not found. "
-                     "Check the EXAMPLE PATH in your project file.", qPrintable(file));
+                     "Check the EXAMPLE PATH in your project file.", csPrintable(file));
    }
 }
 
@@ -6301,6 +6334,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          handleImg(this, m_children, tagHtmlAttribs);
       }
       break;
+
       case HTML_BLOCKQUOTE: {
          DocHtmlBlockQuote *block = new DocHtmlBlockQuote(this, tagHtmlAttribs);
          m_children.append(block);
@@ -6310,6 +6344,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
 
       case XML_SUMMARY:
       case XML_REMARKS:
+      case XML_EXAMPLE:
          s_xmlComment = true;
       // fall through
       case XML_VALUE:
@@ -6318,18 +6353,22 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
             retval = TK_NEWPARA;
          }
          break;
-      case XML_EXAMPLE:
+     
       case XML_DESCRIPTION:
          if (insideTable(this)) {
             retval = RetVal_TableCell;
          }
          break;
+
       case XML_C:
          handleStyleEnter(this, m_children, DocStyleChange::Code, &g_token->attribs);
          break;
+
       case XML_PARAM:
       case XML_TYPEPARAM: {
          QString paramName;
+
+         s_xmlComment = true;
 
          if (findAttribute(tagHtmlAttribs, "name", &paramName)) {
 
@@ -6346,31 +6385,43 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          }
       }
       break;
+
       case XML_PARAMREF:
       case XML_TYPEPARAMREF: {
          QString paramName;
+
          if (findAttribute(tagHtmlAttribs, "name", &paramName)) {            
             m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Italic, true));
             m_children.append(new DocWord(this, paramName));
             m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Italic, false));
+
             if (retval != TK_WORD) {
                m_children.append(new DocWhiteSpace(this, " "));
             }
+
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'name' attribute from <param%sref> tag.", tagId == XML_PARAMREF ? "" : "type");
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'name' attribute from <param%sref> tag.", 
+                  tagId == XML_PARAMREF ? "" : "type");
          }
       }
       break;
+
       case XML_EXCEPTION: {
          QString exceptName;
+
+         s_xmlComment = true;
+
          if (findAttribute(tagHtmlAttribs, "cref", &exceptName)) {
+            unescapeCRef(exceptName);
             retval = handleParamSection(exceptName, DocParamSect::Exception, true);
+
          } else {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'name' attribute from <exception> tag.");
          }
       }
 
       break;
+
       case XML_ITEM:
       case XML_LISTHEADER:
          if (insideTable(this)) {
@@ -6383,6 +6434,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          break;
 
       case XML_RETURNS:
+         s_xmlComment = true;
          retval = handleSimpleSection(DocSimpleSect::Return, true);
          s_hasReturnCommand = true;
          break;
@@ -6398,9 +6450,11 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          // not sure if <see> is the same as <seealso> or if it should you link a member
          // without producing a section. The C# specification is extremely vague
       {
-         QString cref;
+         QString cref;       
          
          if (findAttribute(tagHtmlAttribs, "cref", &cref)) {
+            unescapeCRef(cref);
+
             if (g_token->emptyTag) { 
                // <see cref="..."/> style
 
@@ -6432,8 +6486,13 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
 
       case XML_SEEALSO: {
          QString cref;
+
+         s_xmlComment = true;
+
          if (findAttribute(tagHtmlAttribs, "cref", &cref)) {
             // Look for an existing "see" section
+            unescapeCRef(cref);
+
             DocSimpleSect *ss = 0;
            
             for (auto n : m_children) {
@@ -6454,6 +6513,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          }
       }
       break;
+
       case XML_LIST: {
          QString type;
          findAttribute(tagHtmlAttribs, "type", &type);
@@ -6473,14 +6533,18 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          }
       }
       break;
+
       case XML_INCLUDE:
       case XML_PERMISSION:
          // These tags are defined in .Net but are currently unsupported
+         s_xmlComment = true;
          break;
+
       case HTML_UNKNOWN:
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported xml/html tag <%s> found", qPrintable(tagName));
          m_children.append(new DocWord(this, "<" + tagName + tagHtmlAttribs.toString() + ">"));
          break;
+
       case XML_INHERITDOC:
          handleInheritDoc();
          break;

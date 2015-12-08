@@ -791,10 +791,11 @@ void DotRunner::addPostProcessing(const char *cmd, const char *args)
 }
 
 bool DotRunner::run()
-{
+{   
+   static const QString dotExe    = Config::getString("dot-path") + "dot";
+   static const bool multiTargets = Config::getBool("dot-multiple-targets");
+
    int exitCode      = 0;
-   QString dotExe    = Config::getString("dot-path") + "dot";
-   bool multiTargets = Config::getBool("dot-multiple-targets");
  
    QString dotArgs;
      

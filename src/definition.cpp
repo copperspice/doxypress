@@ -421,6 +421,8 @@ void Definition::addSectionsToIndex(bool addToNavIndex)
 { 
    int level = 1;
 
+   auto nextItem = m_private->sectionList.begin();
+
    // by definition order  
    for (auto si : m_private->sectionList) {   
 
@@ -447,7 +449,17 @@ void Definition::addSectionsToIndex(bool addToNavIndex)
             title = si->label;
          }
 
-         Doxy_Globals::indexList->addContentsItem(true, title, getReference(), getOutputFileBase(), si->label, false, addToNavIndex);
+         // determine if there is a next level inside this item
+         ++nextItem;
+         bool isDir = false;
+
+         if (nextItem != m_private->sectionList.end())  {
+            isDir = (*nextItem)->type > nextLevel;
+         }
+      
+         Doxy_Globals::indexList->addContentsItem(isDir, title, getReference(), getOutputFileBase(), 
+               si->label, false, addToNavIndex);
+
          level = nextLevel;
       }
    }
