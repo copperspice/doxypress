@@ -21,10 +21,11 @@
 #include <stdio.h>
 
 #include <htags.h>
-#include <util.h>
-#include <message.h>
+
 #include <config.h>
+#include <message.h>
 #include <portable.h>
+#include <util.h>
 
 bool Htags::useHtags = false;
 

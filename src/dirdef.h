@@ -24,11 +24,10 @@
 
 #include <definition.h>
 #include <filelist.h>
-#include <stringmap.h>
 #include <sortedlist.h>
+#include <stringmap.h>
 
 class ClassSDict;
-class FileDef;
 class OutputList;
 class UsedDir;
 
@@ -217,19 +216,6 @@ class DirRelation
    QString m_name;
    QSharedPointer<DirDef> m_src;
    UsedDir *m_dst;
-};
-
-
-/** A sorted dictionary of DirDef objects. */
-class DirSDict : public StringMap<QSharedPointer<DirDef>>
-{
- public:
-   // CopperSpice - can add isCase
-   DirSDict() : StringMap<QSharedPointer<DirDef>>() {}
-
-   int compareMapValues(const QSharedPointer<DirDef> &item1, const QSharedPointer<DirDef> &item2) const override {
-      return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
-   }
 };
 
 void buildDirectories();

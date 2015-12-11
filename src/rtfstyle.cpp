@@ -21,9 +21,10 @@
 #include <cassert>
 #include <stdlib.h>
 
+#include <rtfstyle.h>
+
 #include <doxy_globals.h>
 #include <message.h>
-#include <rtfstyle.h>
 
 RTFListItemInfo rtf_listItemInfo[rtf_maxIndentLevels];
 

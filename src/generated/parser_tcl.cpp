@@ -737,25 +737,20 @@ char *tclscannerYYtext;
 #include <ctype.h>
 #include <unistd.h>
 
-#include "arguments.h"
-#include "commentcnv.h"
-#include "commentscan.h"
-#include "config.h"
-#include "doxy_globals.h"
-#include "defargs.h"
-#include "entry.h"
-#include "filedef.h"
-#include "language.h"
-#include "message.h"
-#include "membername.h"
-#include "namespacedef.h"
-#include "outputlist.h"
-#include "parser_tcl.h"
-#include "pre.h"
-#include "searchindex.h"
-#include "portable.h"
-
-#include "util.h"
+#include <arguments.h>
+#include <commentcnv.h>
+#include <commentscan.h>
+#include <config.h>
+#include <doxy_globals.h>
+#include <defargs.h>
+#include <entry.h>
+#include <filedef.h>
+#include <language.h>
+#include <message.h>
+#include <outputlist.h>
+#include <parser_tcl.h>
+#include <pre.h>
+#include <util.h>
 
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1

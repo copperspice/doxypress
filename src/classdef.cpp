@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 #include <classdef.h>
-#include <classlist.h>
+
 #include <config.h>
 #include <dot.h>
 #include <defargs.h>
@@ -29,11 +29,9 @@
 #include <doxy_globals.h>
 #include <diagram.h>
 #include <entry.h>
-#include <htmlhelp.h>
 #include <language.h>
 #include <layout.h>
 #include <message.h>
-#include <searchindex.h>
 #include <util.h>
 
 // constructs a new class definition

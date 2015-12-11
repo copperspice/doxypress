@@ -18,9 +18,10 @@
 #include <QDir>
 
 #include <textdocvisitor.h>
+
+#include <htmlentity.h>
 #include <message.h>
 #include <util.h>
-#include <htmlentity.h>
 
 void TextDocVisitor::visit(DocSymbol *s)
 {

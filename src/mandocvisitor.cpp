@@ -17,6 +17,8 @@
 
 #include <QFileInfo>
 
+#include <mandocvisitor.h>
+
 #include <code.h>
 #include <docparser.h>
 #include <dot.h>
@@ -24,7 +26,6 @@
 #include <filedef.h>
 #include <htmlentity.h>
 #include <language.h>
-#include <mandocvisitor.h>
 #include <message.h>
 #include <outputgen.h>
 #include <parser_base.h>

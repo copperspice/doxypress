@@ -17,6 +17,8 @@
 
 #include <QCryptographicHash>
 
+#include <membergroup.h>
+
 #include <classdef.h>
 #include <doxy_globals.h>
 #include <docparser.h>
@@ -25,7 +27,6 @@
 #include <groupdef.h>
 #include <language.h>
 #include <marshal.h>
-#include <membergroup.h>
 #include <memberlist.h>
 #include <namespacedef.h>
 #include <outputlist.h>

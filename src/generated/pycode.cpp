@@ -1154,19 +1154,13 @@ char *pycodeYYtext;
 
 #include <stdio.h>
 
-#include <classlist.h>
 #include <config.h>
 #include <doxy_globals.h>
 #include <entry.h>
-#include <filedef.h>
-#include <groupdef.h>
-#include <membername.h>
 #include <message.h>
-#include <namespacedef.h>
 #include <outputlist.h>
 #include <parser_cstyle.h>
 #include <parser_py.h>
-#include <searchindex.h>
 #include <tooltip.h>
 #include <util.h>
 
@@ -1231,13 +1225,7 @@ class PyVariableContext
 {
  public:
    static QSharedPointer<ClassDef> dummyContext();
-
-   class Scope : public StringMap<QSharedPointer<ClassDef>>
-   {
-    public:
-      Scope()  {}
-   };
-
+ 
    PyVariableContext() {
    }
 
@@ -1245,7 +1233,7 @@ class PyVariableContext
    }
 
    void pushScope() {
-      m_scopes.append(new Scope);     
+      m_scopes.append(new StringMap<QSharedPointer<ClassDef>>);     
    }
 
    void popScope() {
@@ -1267,8 +1255,8 @@ class PyVariableContext
    QSharedPointer<ClassDef> findVariable(const QString &name);
 
  private:
-   Scope          m_globalScope;
-   QList<Scope *> m_scopes;
+   StringMap<QSharedPointer<ClassDef>>          m_globalScope;
+   QList<StringMap<QSharedPointer<ClassDef>> *> m_scopes;
 };
 
 QSharedPointer<ClassDef> PyVariableContext::dummyContext()
@@ -1282,7 +1270,7 @@ void PyVariableContext::addVariable(const QString &type, const QString &name)
    QString ltype = type.simplified();
    QString lname = name.simplified();
 
-   Scope *scope; 
+   StringMap<QSharedPointer<ClassDef>> *scope; 
 
    if (m_scopes.count() == 0 ) {
       scope = &m_globalScope;
@@ -1849,7 +1837,7 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
 
    if (i > 0) {
       locScope = locFunc.left(i);
-      locFunc = locFunc.right(locFunc.length() - i - 2).trimmed();
+      locFunc  = locFunc.right(locFunc.length() - i - 2).trimmed();
    }
 
    if (! locScope.isEmpty() && (ccd = g_codeClassSDict[locScope])) {

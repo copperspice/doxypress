@@ -17,8 +17,9 @@
 
 #include <stdio.h>
 
-#include <definition.h>
 #include <reflist.h>
+
+#include <definition.h>
 #include <util.h>
 
 /*! Create a list of items that are cross referenced with documentation blocks

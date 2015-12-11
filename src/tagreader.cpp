@@ -32,16 +32,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include <tagreader.h>
+
 #include <arguments.h>
-#include <classdef.h>
 #include <defargs.h>
 #include <doxy_globals.h>
 #include <entry.h>
-#include <filedef.h>
-#include <filename.h>
 #include <message.h>
-#include <section.h>
-#include <tagreader.h>
 #include <util.h>
 
 /** Information about an linkable anchor */

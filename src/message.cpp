@@ -20,11 +20,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include <message.h>
+
 #include <config.h>
 #include <doxy_globals.h>
 #include <filedef.h>
-#include <message.h>
-#include <portable.h>
 #include <util.h>
 
 int Debug::curMask     = 0;

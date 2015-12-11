@@ -16,6 +16,7 @@
 *************************************************************************/
 
 #include <condparser.h>
+
 #include <config.h>
 #include <message.h>
 

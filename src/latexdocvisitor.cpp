@@ -17,6 +17,8 @@
 
 #include <QFileInfo>
 
+#include <latexdocvisitor.h>
+
 #include <cite.h>
 #include <config.h>
 #include <dia.h>
@@ -26,7 +28,6 @@
 #include <filedef.h>
 #include <htmlattrib.h>
 #include <htmlentity.h>
-#include <latexdocvisitor.h>
 #include <language.h>
 #include <message.h>
 #include <msc.h>

@@ -15,9 +15,10 @@
  *
 *************************************************************************/
 
+#include <docsets.h>
+
 #include <classdef.h>
 #include <config.h>
-#include <docsets.h>
 #include <doxy_globals.h>
 #include <groupdef.h>
 #include <filedef.h>

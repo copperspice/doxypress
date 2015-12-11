@@ -19,12 +19,13 @@
 #include <QFile>
 
 #include <cite.h>
-#include <portable.h>
+
 #include <config.h>
-#include <message.h>
-#include <util.h>
 #include <language.h>
+#include <message.h>
+#include <portable.h>
 #include <resourcemgr.h>
+#include <util.h>
 
 const QString CiteConsts::fileName("citelist");
 const QString CiteConsts::anchorPrefix("CITEREF_");

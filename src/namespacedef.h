@@ -25,7 +25,6 @@
 
 #include <definition.h>
 #include <filelist.h>
-#include <stringmap.h>
 
 class ClassDef;
 class ClassSDict;
@@ -33,7 +32,11 @@ class MemberList;
 class MemberDef;
 class MemberGroupSDict;
 class NamespaceList;
+class NamespaceSDict;
 class OutputList;
+
+template<typename T>
+class StringMap;
 
 /** model of a namespace symbol */
 class NamespaceDef : public Definition
@@ -73,9 +76,7 @@ class NamespaceDef : public Definition
 
    const NamespaceSDict &getUsedNamespaces() const;
 
-   StringMap<QSharedPointer<Definition>> &getUsedClasses() {
-      return m_usingDeclMap;
-   }
+   StringMap<QSharedPointer<Definition>> &getUsedClasses();
 
    void combineUsingRelations();
    QString displayName(bool = true) const override;
@@ -163,10 +164,10 @@ class NamespaceDef : public Definition
    QString  fileName;
    FileList files;
   
-   StringMap<QSharedPointer<Definition>>   m_usingDeclMap;
+   StringMap<QSharedPointer<Definition>>  *m_usingDeclMap;
    StringMap<QSharedPointer<Definition>>  *m_innerCompounds;
 
-   NamespaceSDict    m_usingDirMap;
+   NamespaceSDict    *m_usingDirMap;
    NamespaceSDict    *namespaceSDict;
    MemberSDict       *m_allMembersDict;
    MemberGroupSDict  *memberGroupSDict;

@@ -23,8 +23,6 @@
 
 #include <objcache.h>
 
-//----------------------------------------------------------------------
-
 ObjCache::ObjCache(unsigned int logSize)
    : m_head(-1), m_tail(-1), //m_numEntries(0),
      m_size(1 << logSize), m_count(0), m_freeHashNodes(0), m_freeCacheNodes(0),

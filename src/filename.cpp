@@ -15,8 +15,9 @@
  *
 *************************************************************************/
 
-#include <config.h>
 #include <filename.h>
+
+#include <config.h>
 #include <util.h>
 
 FileName::FileName(const QString &fn, const QString &n) : FileList()

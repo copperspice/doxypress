@@ -16,7 +16,6 @@
 *************************************************************************/
 
 #include <lodepng.h>
-#include <portable.h>
 
 #define USE_BRUTE_FORCE_ENCODING 1
 

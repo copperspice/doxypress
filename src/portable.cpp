@@ -15,10 +15,10 @@
  *
 *************************************************************************/
 
-#include <qglobal.h>
 #include <QDateTime>
 #include <QDir>
 #include <QFSFileEngine>
+#include <qglobal.h>
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -41,8 +41,8 @@ extern char **environ;
 
 #endif
 
-#include <message.h>
 #include <portable.h>
+#include <message.h>
 
 static double g_sysElapsedTime;
 static QTime  g_time;

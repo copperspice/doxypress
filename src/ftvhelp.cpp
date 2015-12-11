@@ -22,17 +22,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <config.h>
-#include <doxy_globals.h>
 #include <ftvhelp.h>
-#include <message.h>
-#include <language.h>
-#include <htmlgen.h>
-#include <layout.h>
-#include <pagedef.h>
-#include <docparser.h>
-#include <htmldocvisitor.h>
+
+#include <config.h>
 #include <filedef.h>
+#include <doxy_globals.h>
+#include <docparser.h>
+#include <htmlgen.h>
+#include <htmldocvisitor.h>
+#include <language.h>
+#include <layout.h>
+#include <message.h>
+#include <pagedef.h>
 #include <resourcemgr.h>
 #include <util.h>
 

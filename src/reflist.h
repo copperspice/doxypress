@@ -21,7 +21,6 @@
 #include <QHash>
 #include <QList>
 
-#include <stringmap.h>
 #include <sortedlist.h>
 
 class Definition;

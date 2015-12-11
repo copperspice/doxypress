@@ -145,6 +145,7 @@ doxypress_SOURCES = \
    src/sortedlist.cpp \
    src/searchindex.cpp \
    src/store.cpp \
+   src/stringmap.cpp \
    src/tagreader.cpp \
    src/textdocvisitor.cpp \
    src/tooltip.cpp \

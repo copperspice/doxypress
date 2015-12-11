@@ -22,27 +22,21 @@
 
 #include <stdlib.h>
 
-#include <message.h>
 #include <index.h>
-#include <doxy_globals.h>
+
 #include <config.h>
-#include <filedef.h>
-#include <outputlist.h>
-#include <util.h>
-#include <groupdef.h>
-#include <language.h>
-#include <htmlgen.h>
-#include <htmlhelp.h>
-#include <ftvhelp.h>
-#include <dot.h>
-#include <pagedef.h>
 #include <dirdef.h>
+#include <dot.h>
+#include <doxy_globals.h>
+#include <ftvhelp.h>
+#include <groupdef.h>
+#include <htmlgen.h>
+#include <language.h>
 #include <layout.h>
-#include <memberlist.h>
-#include <classlist.h>
-#include <namespacedef.h>
-#include <filename.h>
+#include <message.h>
+#include <outputlist.h>
 #include <sortedlist.h>
+#include <util.h>
 
 #define MAX_ITEMS_BEFORE_MULTIPAGE_INDEX 200
 #define MAX_ITEMS_BEFORE_QUICK_INDEX 30
@@ -3754,7 +3748,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
 
             case LayoutNavEntry::Classes:
                if (annotatedClasses > 0 && addToIndex) {
-                  Doxy_Globals::indexList->addContentsItem(true, lne->title(), "", "", "");
+                  Doxy_Globals::indexList->addContentsItem(true, lne->title(), 0, "annotated", 0);
                   Doxy_Globals::indexList->incContentsDepth();
                   needsClosing = true;
                }

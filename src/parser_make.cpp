@@ -15,9 +15,10 @@
  *
 *************************************************************************/
 
+#include <parser_make.h>
+
 #include <doxy_globals.h>
 #include <outputgen.h>
-#include <parser_make.h>
 
 static CodeOutputInterface     *g_code;
 static QString                 g_currentFontClass;

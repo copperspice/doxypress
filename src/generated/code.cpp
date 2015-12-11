@@ -10559,22 +10559,15 @@ char *codeYYtext;
 #include <assert.h>
 #include <ctype.h>
 
-#include <entry.h>
+#include <arguments.h>
+#include <config.h>
 #include <doxy_globals.h>
+#include <entry.h>
 #include <message.h>
 #include <outputlist.h>
 #include <stringmap.h>
-#include "util.h"
-#include "membername.h"
-#include "searchindex.h"
-#include "arguments.h"
-#include "config.h"
-#include "groupdef.h"
-#include "classlist.h"
-#include "filedef.h"
-#include "filename.h"
-#include "namespacedef.h"
-#include "tooltip.h"
+#include <tooltip.h>
+#include <util.h>
 
 //  Toggle for debugging info
 //  #define DBG_CTX(x) fprintf x
@@ -10705,15 +10698,6 @@ class VariableContext
  public:
    static QSharedPointer<ClassDef> dummyContext();
 
-   class Scope : public StringMap<QSharedPointer<ClassDef>>
-   {
-    public:
-      Scope()
-      {
-      }
-
-   };
-
    VariableContext() {
    }
 
@@ -10721,7 +10705,7 @@ class VariableContext
    }
 
    void pushScope() {
-      m_scopes.append(new Scope);
+      m_scopes.append(new StringMap<QSharedPointer<ClassDef>>);
       DBG_CTX((stderr, "** Push var context %d\n", m_scopes.count()));
    }
 
@@ -10753,8 +10737,8 @@ class VariableContext
    }
 
  private:
-   Scope        m_globalScope;
-   QList<Scope *> m_scopes;
+   StringMap<QSharedPointer<ClassDef>>          m_globalScope;
+   QList<StringMap<QSharedPointer<ClassDef>> *> m_scopes;
 };
 
 QSharedPointer<ClassDef> VariableContext::dummyContext()
@@ -10783,7 +10767,7 @@ void VariableContext::addVariable(const QString &type, const QString &name)
             qPrintable(ltype), qPrintable(lname), 
             g_currentDefinition ? qPrintable(g_currentDefinition->name()) : "<none>"));
 
-   Scope *scope = m_scopes.count() == 0 ? &m_globalScope : m_scopes.last();
+   StringMap<QSharedPointer<ClassDef>> *scope = m_scopes.count() == 0 ? &m_globalScope : m_scopes.last();
 
    QSharedPointer<ClassDef> varType;
 
@@ -11389,10 +11373,9 @@ static bool getLinkInScope(const QString &c, const QString &m, const QString  me
    DBG_CTX((stderr, "getLinkInScope: trying `%s'::`%s' varOnly=%d\n", qPrintable(c), qPrintable(m), varOnly));
 
    if (getDefs(c, m, "()", md, cd, fd, nd, gd, FALSE, g_sourceFileDef, FALSE, g_forceTagReference) &&
-         md->isLinkable() && (!varOnly || md->isVariable())) {
+         md->isLinkable() && (! varOnly || md->isVariable())) {
      
       if (g_exampleBlock) {
-
          QString anchor = QString("a%1").arg(g_anchorCount);
         
          if (md->addExample(anchor, g_exampleName, g_exampleFile)) {

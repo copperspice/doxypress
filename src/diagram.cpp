@@ -22,15 +22,16 @@
 #include <stdlib.h>
 
 #include <diagram.h>
-#include <doxy_globals.h>
-#include <image.h>
+
+#include <classlist.h>
 #include <classdef.h>
 #include <config.h>
-#include <message.h>
-#include <util.h>
-#include <portable.h>
+#include <doxy_globals.h>
 #include <index.h>
-#include <classlist.h>
+#include <image.h>
+#include <message.h>
+#include <portable.h>
+#include <util.h>
 
 #define IMAGE_EXT ".png"
 

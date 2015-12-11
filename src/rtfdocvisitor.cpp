@@ -17,6 +17,8 @@
 
 #include <QFileInfo>
 
+#include <rtfdocvisitor.h>
+
 #include <config.h>
 #include <dia.h>
 #include <docparser.h>
@@ -32,7 +34,6 @@
 #include <parser_base.h>
 #include <plantuml.h>
 #include <rtfstyle.h>
-#include <rtfdocvisitor.h>
 #include <util.h>
 
 // #define DBG_RTF(x) m_t << x

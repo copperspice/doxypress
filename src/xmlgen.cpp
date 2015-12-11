@@ -22,32 +22,23 @@
 
 #include <stdlib.h>
 
+#include <xmlgen.h>
+
 #include <arguments.h>
 #include <config.h>
-#include <classlist.h>
-#include <dirdef.h>
 #include <docparser.h>
 #include <doxy_build_info.h>
 #include <doxy_globals.h>
 #include <dot.h>
 #include <defargs.h>
-#include <groupdef.h>
 #include <htmlentity.h>
-#include <filename.h>
 #include <language.h>
 #include <message.h>
-#include <memberdef.h>
-#include <memberlist.h>
-#include <membername.h>
 #include <membergroup.h>
-#include <namespacedef.h>
 #include <outputgen.h>
-#include <pagedef.h>
 #include <parser_base.h>
 #include <resourcemgr.h>
-#include <section.h>
 #include <util.h>
-#include <xmlgen.h>
 #include <xmldocvisitor.h>
 
 // no debug info

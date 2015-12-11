@@ -21,7 +21,6 @@
 #include <QList>
 #include <QTextStream>
 
-#include <stringmap.h>
 #include <types.h>
 
 class ClassDef;
@@ -138,19 +137,6 @@ class MemberGroup
    int  m_numDocMembers; 
 
    QList<ListItemInfo> *m_xrefListItems;
-};
-
-/** A sorted dictionary of MemberGroup objects. */
-class MemberGroupSDict : public LongMap<QSharedPointer<MemberGroup>>
-{
- public:
-   MemberGroupSDict() : LongMap<QSharedPointer<MemberGroup>>() {}
-   ~MemberGroupSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<MemberGroup> &item1, const QSharedPointer<MemberGroup> &item2) const override {
-      return item1->groupId() - item2->groupId();
-   }
 };
 
 /** Data collected for a member group */

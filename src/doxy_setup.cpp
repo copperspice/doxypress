@@ -24,26 +24,22 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+#include <doxy_setup.h>
+
 #include <cite.h>
-#include <classlist.h>
 #include <cmdmapper.h>
 #include <code.h>
 #include <config.h>
 #include <doxy_globals.h>
-#include <doxy_setup.h>
 #include <doxy_build_info.h>
 #include <entry.h>
-#include <filename.h>
 #include <filestorage.h>
 #include <formula.h>
-#include <groupdef.h>
 #include <htmlgen.h>
 #include <index.h>
 #include <language.h>
 #include <latexgen.h>
 #include <layout.h>
-#include <membername.h>
-#include <namespacedef.h>
 #include <outputlist.h>
 #include <parser_cstyle.h>
 #include <parser_file.h>
@@ -52,11 +48,9 @@
 #include <parser_md.h>
 #include <parser_py.h>
 #include <parser_tcl.h>
-#include <pagedef.h>
 #include <perlmodgen.h>
 #include <portable.h>
 #include <pre.h>
-#include <reflist.h>
 #include <rtfgen.h>
 #include <util.h>
 

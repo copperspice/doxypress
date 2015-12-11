@@ -22,7 +22,6 @@
 
 #include <outputgen.h>
 #include <message.h>
-#include <portable.h>
 
 OutputGenerator::OutputGenerator()
 {

@@ -16,6 +16,7 @@
 *************************************************************************/
 
 #include <parser_file.h>
+
 #include <outputgen.h>
 
 void FileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &, const QString &input,

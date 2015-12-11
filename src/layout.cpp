@@ -26,10 +26,11 @@
 
 #include <assert.h>
 
+#include <layout.h>
+
 #include <config.h>
 #include <doxy_build_info.h>
 #include <doxy_globals.h>
-#include <layout.h>
 #include <language.h>
 #include <message.h>
 #include <util.h>

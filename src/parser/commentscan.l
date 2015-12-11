@@ -32,7 +32,6 @@
 #include <parser_base.h>
 #include <parser_cstyle.h>
 #include <parser_md.h>
-#include <reflist.h>
 #include <util.h>
 
 #define YY_NO_INPUT 1

@@ -2554,7 +2554,6 @@ char *preYYtext;
 #include "message.h"
 #include "memberdef.h"
 #include "membername.h"
-#include "portable.h"
 #include "pre.h"
 #include "util.h"
 

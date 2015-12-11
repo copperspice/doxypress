@@ -20,10 +20,11 @@
 #include <QRegExp>
 #include <QTextStream>
 
+#include <resourcemgr.h>
+
 #include <config.h>
 #include <doxy_build_info.h>
 #include <message.h>
-#include <resourcemgr.h>
 #include <util.h>
 
 ResourceMgr &ResourceMgr::instance()

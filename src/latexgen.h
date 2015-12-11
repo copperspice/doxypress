@@ -18,6 +18,7 @@
 #ifndef LATEXGEN_H
 #define LATEXGEN_H
 
+#include <language.h>
 #include <outputgen.h>
 
 class QFile;

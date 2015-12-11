@@ -20,8 +20,9 @@
 #include <math.h>
 
 #include <image.h>
-#include <lodepng.h>
+
 #include <config.h>
+#include <lodepng.h>
 
 typedef unsigned char  Byte;
 

@@ -22,14 +22,14 @@
 
 #include <stdio.h>
 
+#include <parser_md.h>
+
 #include <config.h>
 #include <commentscan.h>
 #include <commentcnv.h>
 #include <doxy_globals.h>
 #include <entry.h>
 #include <message.h>
-#include <parser_md.h>
-#include <section.h>
 #include <util.h>
 
 struct LinkRef {

@@ -15,8 +15,9 @@
  *
 *************************************************************************/
 
-#include <arguments.h>
 #include <classlist.h>
+
+#include <arguments.h>
 #include <config.h>
 #include <defargs.h>
 #include <groupdef.h>

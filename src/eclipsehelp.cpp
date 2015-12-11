@@ -15,8 +15,9 @@
  *
 *************************************************************************/
 
-#include <config.h>
 #include <eclipsehelp.h>
+
+#include <config.h>
 #include <doxy_globals.h>
 #include <message.h>
 #include <util.h>

@@ -19,10 +19,11 @@
 
 #include <cassert>
 
+#include <marshal.h>
+
 #include <arguments.h>
 #include <entry.h>
 #include <groupdef.h>
-#include <marshal.h>
 
 #define HEADER ('D'<<24)+('O'<<16)+('X'<<8)+'!'
 

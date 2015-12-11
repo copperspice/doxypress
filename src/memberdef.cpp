@@ -16,36 +16,31 @@
 *************************************************************************/
 
 #include <qglobal.h>
-
 #include <QRegExp>
 
 #include <stdio.h>
 #include <assert.h>
 
+#include <memberdef.h>
+
+#include <arguments.h>
 #include <code.h>
 #include <config.h>
 #include <defargs.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
+#include <example.h>
+#include <filedef.h>
+#include <groupdef.h>
 #include <htmlhelp.h>
 #include <language.h>
-#include <memberdef.h>
-#include <membername.h>
+#include <membergroup.h>
 #include <message.h>
 #include <outputlist.h>
-#include <example.h>
-#include <membergroup.h>
-#include <groupdef.h>
-#include <searchindex.h>
 #include <parser_base.h>
-
 #include <marshal.h>
 #include <objcache.h>
-#include <arguments.h>
-#include <memberlist.h>
-#include <namespacedef.h>
-#include <filedef.h>
 #include <util.h>
 
 int MemberDef::s_indentLevel = 0;

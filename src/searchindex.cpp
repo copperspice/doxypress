@@ -22,22 +22,18 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include <searchindex.h>
+
 #include <classlist.h>
-#include <classdef.h>
 #include <config.h>
 #include <doxy_globals.h>
 #include <doxy_build_info.h>
-#include <filename.h>
 #include <filedef.h>
 #include <groupdef.h>
 #include <language.h>
 #include <message.h>
-#include <memberdef.h>
-#include <membername.h>
 #include <namespacedef.h>
-#include <pagedef.h>
 #include <resourcemgr.h>
-#include <searchindex.h>
 #include <util.h>
 
 IndexWord::IndexWord(const QString &word) : m_word(word)
@@ -70,7 +66,7 @@ SearchIndex::~SearchIndex()
 
 void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const QString &anchor, bool isSourceFile)
 {
-   if (ctx == 0) {
+   if (ctx == nullptr) {
       return;
    }
 
@@ -515,58 +511,6 @@ void SearchIndexExternal::write(const QString &fileName)
 #define SEARCH_INDEX_GROUPS     13
 #define SEARCH_INDEX_PAGES      14
 #define NUM_SEARCH_INDICES      15
-
-class SearchDefinitionList : public QList<QSharedPointer<Definition>>
-{
- public:
-   SearchDefinitionList(uint letter) : m_letter(letter) 
-   {}
-
-   uint letter() const {
-      return m_letter;
-   }
-
- private:
-   uint m_letter;
-};
-
-class SearchIndexMap : public StringMap<QSharedPointer<SearchDefinitionList>>
-{
- public:   
-   SearchIndexMap(uint letter) 
-      : StringMap<QSharedPointer<SearchDefinitionList>>(Qt::CaseInsensitive), m_letter(letter)
-   { }
-
-   ~SearchIndexMap()
-   { }
-
-   void insertDef(QSharedPointer<Definition> d) {
-
-      QSharedPointer<SearchDefinitionList> lx = this->find(d->name());
-
-      if (! lx) {
-         lx = QSharedPointer<SearchDefinitionList>(new SearchDefinitionList(m_letter));
-         StringMap<QSharedPointer<SearchDefinitionList>>::insert(d->name(), lx);
-      }
-
-      lx->append(d);
-   }
-
-   uint letter() const {
-      return m_letter;
-   }
-
- private:
-   int compareMapValues(const QSharedPointer<SearchDefinitionList> &md1, 
-                                    const QSharedPointer<SearchDefinitionList> &md2) const override{
-      QString n1 = md1->first()->localName();
-      QString n2 = md2->first()->localName();
-
-      return n1.compare(n2, Qt::CaseInsensitive);
-   }
-
-   uint m_letter;
-};
 
 static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_SEARCH_INDICES],
                                    int symbolCount[NUM_SEARCH_INDICES], QSharedPointer<MemberDef> md)

@@ -25,9 +25,26 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include <classdef.h>
+#include <config.h>
+
+class ClassDef;
+class DirDef;
+class Example;
+class FileName;
 class FilePair;
+class GroupDef;
+class IndexField;
+class MemberDef;
+class MemberGroup;
+class MemberName;
+class MemberNameInfo;
 class NamespaceDef;
 class OutputList;
+class PageDef;
+class SearchDefinitionList;
+class SectionInfo;
+class UseEntry;
 
 /** Ordered dictionary of elements of type T Internally uses a QMap<T>.
  */
@@ -415,15 +432,126 @@ class LongMap
 
 };
 
+
+// ------------------------------------------------------------------------
+
+// CopperSpice - we can add isCase to the constructor
+
+/** A sorted dictionary of ClassDef objects. */
+class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
+{
+ public:
+   ClassSDict(Qt::CaseSensitivity isCase = Qt::CaseSensitive) 
+      : StringMap<QSharedPointer<ClassDef>>(isCase)
+   {}
+
+   ~ClassSDict() {}
+
+   void writeDeclaration(OutputList &ol, const ClassDef::CompoundType *filter = 0,
+                         const QString &header = 0, bool localNames = false);
+
+   void writeDocumentation(OutputList &ol, Definition *container = 0);
+   bool declVisible(const ClassDef::CompoundType *filter = 0) const;
+
+ private:
+   int compareMapValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const override;
+};
+
+/** A sorted dictionary of DirDef objects. */
+class DirSDict : public StringMap<QSharedPointer<DirDef>>
+{
+   public:      
+      DirSDict() : StringMap<QSharedPointer<DirDef>>() {}
+   
+      int compareMapValues(const QSharedPointer<DirDef> &item1, const QSharedPointer<DirDef> &item2) const override; 
+};
+
+/** A sorted dictionary of Example objects. */
+class ExampleSDict : public StringMap<QSharedPointer<Example>>
+{
+   public:      
+      ExampleSDict() : StringMap<QSharedPointer<Example>>() {}
+      ~ExampleSDict() {}
+   
+   private:
+      int compareMapValues(const QSharedPointer<Example> &item1, const QSharedPointer<Example> &item2) const override;      
+};
+
+/** map of FileName objects. */
+class FileNameDict : public StringMap<QSharedPointer<FileName>>
+{   
+   public:
+      FileNameDict() : StringMap<QSharedPointer<FileName>>(Config::getCase("case-sensitive-fname"))
+      { }
+   
+      ~FileNameDict() {}
+};
+
 /** A sorted dictionary of FilePair objects. */
 class FilePairDict : public StringMap<QSharedPointer<FilePair>>
 {
- public:
-   // CopperSpice - can add isCase 
-   FilePairDict() : StringMap<QSharedPointer<FilePair>>() {}
+   public:      
+      FilePairDict() : StringMap<QSharedPointer<FilePair>>() {}
+   
+   private:
+      int compareMapValues(const QSharedPointer<FilePair> &item1, const QSharedPointer<FilePair> &item2) const override;
+};
 
- private:
-   int compareMapValues(const QSharedPointer<FilePair> &item1, const QSharedPointer<FilePair> &item2) const override;
+/** A sorted dictionary of GroupDef objects. */
+class GroupSDict : public StringMap<QSharedPointer<GroupDef>>
+{
+   public:     
+      GroupSDict() : StringMap<QSharedPointer<GroupDef>>() {}
+      virtual ~GroupSDict() {}
+   
+   private:
+      int compareMapValues(const QSharedPointer<GroupDef> &item1, const QSharedPointer<GroupDef> &item2) const override; 
+};
+
+
+/** Sorted dictionary of IndexField objects. */
+class IndexFieldSDict : public StringMap<QSharedPointer<IndexField>>
+{
+   public:     
+      IndexFieldSDict() : StringMap<QSharedPointer<IndexField>>() {}
+      ~IndexFieldSDict() {}
+   
+   private:
+     int compareMapValues(const QSharedPointer<IndexField> &item1, const QSharedPointer<IndexField> &item2) const override;     
+};
+
+/** A sorted dictionary of MemberDef objects. */
+class MemberSDict : public StringMap<QSharedPointer<MemberDef>>
+{
+   public:
+      MemberSDict() : StringMap<QSharedPointer<MemberDef>>() {}
+      virtual ~MemberSDict() {}
+   
+   private:
+      int compareMapValues(const QSharedPointer<MemberDef> &item1, const QSharedPointer<MemberDef> &item2) const override;
+};
+
+/** Sorted dictionary of MemberName objects */
+class MemberNameSDict : public StringMap<QSharedPointer<MemberName>>
+{
+   public:    
+      MemberNameSDict() : StringMap<QSharedPointer<MemberName>>() {}
+      ~MemberNameSDict() {}
+   
+   private:
+      int compareMapValues(const QSharedPointer<MemberName> &item1, const QSharedPointer<MemberName> &item2) const override;
+};
+
+/** Sorted dictionary of MemberNameInfo objects. */
+class MemberNameInfoSDict : public StringMap<QSharedPointer<MemberNameInfo>>
+{
+   public: 
+      MemberNameInfoSDict() : StringMap<QSharedPointer<MemberNameInfo>>() {}
+      ~MemberNameInfoSDict() {}
+   
+   private:
+      int compareMapValues(const QSharedPointer<MemberNameInfo> &item1, const QSharedPointer<MemberNameInfo> &item2) 
+             const override; 
 };
 
 /** sorted dictionary of NamespaceDef objects. */
@@ -438,7 +566,59 @@ class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
       bool declVisible() const;
       
    private:
-      int compareMapValues(const QSharedPointer<NamespaceDef> &item1, const QSharedPointer<NamespaceDef> &item2) const override;       
+      int compareMapValues(const QSharedPointer<NamespaceDef> &item1, const QSharedPointer<NamespaceDef> &item2) 
+            const override;       
 };
+
+class PageSDict : public StringMap<QSharedPointer<PageDef>>
+{
+   public:
+      // CopperSpice - can add isCase
+      PageSDict() : StringMap<QSharedPointer<PageDef>>() {}
+      virtual ~PageSDict() {}
+   
+   private:
+      int compareMapValues(const QSharedPointer<PageDef> &i1, const QSharedPointer<PageDef> &i2) const override;
+};
+
+
+class SearchIndexMap : public StringMap<QSharedPointer<SearchDefinitionList>>
+{
+ public:   
+   SearchIndexMap(uint letter) : 
+                  StringMap<QSharedPointer<SearchDefinitionList>>(Qt::CaseInsensitive), m_letter(letter)
+   { }
+
+   ~SearchIndexMap()
+   { }
+
+   void insertDef(QSharedPointer<Definition> d);
+   uint letter() const; 
+
+ private:
+   int compareMapValues(const QSharedPointer<SearchDefinitionList> &md1, 
+                  const QSharedPointer<SearchDefinitionList> &md2) const; 
+
+   uint m_letter;
+};
+
+
+// ------------------------------------------------------------------------
+
+/** A sorted dictionary of MemberGroup objects. */
+class MemberGroupSDict : public LongMap<QSharedPointer<MemberGroup>>
+{
+ public:
+   MemberGroupSDict() : LongMap<QSharedPointer<MemberGroup>>() {}
+   ~MemberGroupSDict() {}
+
+ private:
+   int compareMapValues(const QSharedPointer<MemberGroup> &item1, const QSharedPointer<MemberGroup> &item2) const override {
+      return item1->groupId() - item2->groupId();
+   }
+};
+
+using SectionDict = StringMap<QSharedPointer<SectionInfo>>;
+using UseSDict    = StringMap<UseEntry *>;
 
 #endif

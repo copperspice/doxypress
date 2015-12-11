@@ -17,15 +17,14 @@
 
 #include <QRegExp>
 
+#include <pagedef.h>
+
 #include <config.h>
 #include <docparser.h>
 #include <doxy_globals.h>
 #include <groupdef.h>
 #include <language.h>
-#include <namespacedef.h>
 #include <outputlist.h>
-#include <pagedef.h>
-#include <reflist.h>
 #include <util.h>
 
 PageDef::PageDef(const QString &f, int l, const QString &n, const QString &d, const QString &t)

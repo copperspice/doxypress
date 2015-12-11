@@ -21,22 +21,17 @@
 
 #include <stdlib.h>
 
-#include <classlist.h>
+#include <dot.h>
+
 #include <config.h>
 #include <defargs.h>
 #include <dirdef.h>
 #include <docparser.h>
-#include <dot.h>
 #include <doxy_globals.h>
-#include <filename.h>
 #include <groupdef.h>
 #include <language.h>
 #include <message.h>
-#include <memberdef.h>
-#include <memberlist.h>
 #include <membergroup.h>
-#include <namespacedef.h>
-#include <pagedef.h>
 #include <portable.h>
 #include <sortedlist.h>
 #include <util.h>

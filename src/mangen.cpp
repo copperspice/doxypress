@@ -15,8 +15,8 @@
  *
 *************************************************************************/
 
-/* http://www.cubic.org/source/archive/fileform/txt/man/ has some
-   introductions to groff and man pages. */
+/* http://www.cubic.org/source/archive/fileform/txt/man/ 
+*/
 
 #include <QDir>
 #include <QTextStream>
@@ -24,14 +24,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <message.h>
 #include <mangen.h>
+
 #include <config.h>
-#include <util.h>
 #include <docparser.h>
 #include <doxy_globals.h>
-#include <mandocvisitor.h>
 #include <language.h>
+#include <mandocvisitor.h>
+#include <message.h>
+#include <util.h>
 
 static QString getSubdir()
 {

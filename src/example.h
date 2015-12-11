@@ -20,30 +20,11 @@
 
 #include <QByteArray>
 
-#include <stringmap.h>
-
-class ClassDef;
-class MemberName;
-
 /** Data associated with an example. */
 struct Example {
    QString anchor;
    QString name;
    QString file;
-};
-
-/** A sorted dictionary of Example objects. */
-class ExampleSDict : public StringMap<QSharedPointer<Example>>
-{
- public:
-   // CopperSpice - can add isCase
-   ExampleSDict() : StringMap<QSharedPointer<Example>>() {}
-   ~ExampleSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<Example> &item1, const QSharedPointer<Example> &item2) const override {
-      return item1->name.compare(item2->name, Qt::CaseInsensitive);
-   }
 };
 
 #endif

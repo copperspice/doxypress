@@ -48,6 +48,20 @@ struct URLInfo {
    int freq;
 };
 
+class SearchDefinitionList : public QList<QSharedPointer<Definition>>
+{
+   public:
+      SearchDefinitionList(uint letter) : m_letter(letter) 
+      {}
+   
+      uint letter() const {
+         return m_letter;
+      }
+   
+   private:
+      uint m_letter;
+};
+
 class IndexWord
 {
  public:

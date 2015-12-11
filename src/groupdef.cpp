@@ -22,24 +22,17 @@
 #include <arguments.h>
 #include <config.h>
 #include <classdef.h>
-#include <classlist.h>
-#include <dirdef.h>
 #include <doxy_globals.h>
 #include <dot.h>
 #include <docparser.h>
 #include <entry.h>
-#include <filedef.h>
 #include <groupdef.h>
 #include <language.h>
 #include <layout.h>
 #include <membername.h>
-#include <memberlist.h>
 #include <message.h>
 #include <membergroup.h>
-#include <namespacedef.h>
 #include <outputlist.h>
-#include <pagedef.h>
-#include <searchindex.h>
 #include <util.h>
 
 GroupDef::GroupDef(const QString &df, int dl, const QString &na, const QString &t, QString refFileName) 

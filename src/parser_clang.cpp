@@ -23,16 +23,12 @@
 #include <stdlib.h>
 
 #include <clang-c/Index.h>
+#include <parser_clang.h>
 
 #include <config.h>
 #include <doxy_globals.h>
-#include <filedef.h>
-#include <filename.h>
 #include <message.h>
-#include <memberdef.h>
-#include <membername.h>
 #include <outputgen.h>
-#include <parser_clang.h>
 #include <qfileinfo.h>
 #include <stringmap.h>
 #include <tooltip.h>

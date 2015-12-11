@@ -24,7 +24,6 @@
 
 #include <definition.h>
 #include <filelist.h>
-#include <stringmap.h>
 
 class ClassDef;
 class ClassSDict;
@@ -211,20 +210,6 @@ class GroupDef : public Definition
    MemberGroupSDict  *memberGroupSDict;
 
    bool m_subGrouping;
-};
-
-/** A sorted dictionary of GroupDef objects. */
-class GroupSDict : public StringMap<QSharedPointer<GroupDef>>
-{
- public:
-   // CopperSpice - can add isCase
-   GroupSDict() : StringMap<QSharedPointer<GroupDef>>() {}
-   virtual ~GroupSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<GroupDef> &item1, const QSharedPointer<GroupDef> &item2) const override {
-      return item1->groupTitle().compare(item2->groupTitle());
-   }
 };
 
 void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd);

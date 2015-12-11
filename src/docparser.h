@@ -25,9 +25,7 @@
 #include <definition.h>
 #include <docvisitor.h>
 #include <htmlattrib.h>
-#include <memberdef.h>
 #include <membergroup.h>
-#include <section.h>
 
 /*! Main entry point for the documentation parser.
  *  @param fileName  File in which the documentation block is found (or the

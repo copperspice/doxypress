@@ -22,30 +22,22 @@
 
 #include <stdlib.h>
 
+#include <docbookgen.h>
+
 #include <arguments.h>
 #include <config.h>
-#include <classlist.h>
 #include <defargs.h>
-#include <dirdef.h>
-#include <docbookgen.h>
 #include <docbookvisitor.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
 #include <doxy_build_info.h>
-#include <filename.h>
 #include <groupdef.h>
 #include <language.h>
-#include <memberlist.h>
 #include <message.h>
-#include <memberdef.h>
-#include <namespacedef.h>
-#include <membername.h>
 #include <membergroup.h>
 #include <outputgen.h>
-#include <pagedef.h>
 #include <parser_base.h>
-#include <section.h>
 #include <util.h>
 
 class DocbookSectionMapper : public QHash<long, QString>

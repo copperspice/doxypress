@@ -18,6 +18,7 @@
 #include <QDir>
 
 #include <config.h>
+
 #include <doxy_setup.h>
 #include <doxy_globals.h>
 #include <language.h>

@@ -18,8 +18,6 @@
 #ifndef SECTION_H
 #define SECTION_H
 
-#include <stringmap.h>
-
 class Definition;
 
 /** Class representing a section in a page */
@@ -33,7 +31,8 @@ struct SectionInfo {
                       Anchor        = 5
                     };
 
-   SectionInfo(const QString &f, const int lin, const  QString &l, const QString &t, SectionType st, int lev, const QString &r = QString()) 
+   SectionInfo(const QString &f, const int lin, const  QString &l, const QString &t, SectionType st, 
+      int lev, const QString &r = QString()) 
       : label(l), title(t), type(st), ref(r), fileName(f), lineNr(lin), generated(false), level(lev), dupAnchor_cnt(0) 
    { }  
 
@@ -53,7 +52,5 @@ struct SectionInfo {
    int dupAnchor_cnt;
    QString dupAnchor_fName;
 };
-
-using SectionDict = StringMap<QSharedPointer<SectionInfo>>;
 
 #endif

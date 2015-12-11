@@ -14,18 +14,18 @@
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
+
 #include <QFileInfo>
+
+#include <docbookvisitor.h>
 
 #include <config.h>
 #include <dia.h>
-#include <docbookvisitor.h>
 #include <docparser.h>
 #include <outputgen.h>
 #include <docbookgen.h>
 #include <doxy_globals.h>
 #include <dot.h>
-#include <filename.h>
-#include <filedef.h>
 #include <htmlentity.h>
 #include <language.h>
 #include <message.h>

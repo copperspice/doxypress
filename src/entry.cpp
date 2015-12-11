@@ -19,9 +19,10 @@
 
 #include <stdlib.h>
 
+#include <entry.h>
+
 #include <arguments.h>
 #include <doxy_globals.h>
-#include <entry.h>
 #include <filestorage.h>
 #include <marshal.h>
 #include <section.h>

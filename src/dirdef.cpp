@@ -17,12 +17,12 @@
 
 #include <QCryptographicHash>
 
+#include <dirdef.h>
+
 #include <config.h>
 #include <docparser.h>
-#include <dirdef.h>
 #include <dot.h>
 #include <doxy_globals.h>
-#include <filename.h>
 #include <layout.h>
 #include <language.h>
 #include <message.h>

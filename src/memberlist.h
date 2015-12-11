@@ -24,7 +24,6 @@
 #include <cassert>
 
 #include <memberdef.h>
-#include <stringmap.h>
 #include <sortedlist.h>
 #include <types.h>
 
@@ -166,18 +165,6 @@ class MemberDict : public QHash<QString, MemberDef>
    {}
 
    virtual ~MemberDict() {}
-};
-
-/** A sorted dictionary of MemberDef objects. */
-class MemberSDict : public StringMap<QSharedPointer<MemberDef>>
-{
- public:
-   // CopperSpice - can add isCase
-   MemberSDict() : StringMap<QSharedPointer<MemberDef>>() {}
-   virtual ~MemberSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<MemberDef> &item1, const QSharedPointer<MemberDef> &item2) const override;
 };
 
 

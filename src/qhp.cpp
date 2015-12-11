@@ -21,14 +21,15 @@
 
 #include <string.h>
 
+#include <qhp.h>
+
 #include <config.h>
 #include <doxy_globals.h>
-#include <qhp.h>
-#include <qhpxmlwriter.h>
+#include <filedef.h>
+#include <groupdef.h>
 #include <message.h>
 #include <memberdef.h>
-#include <groupdef.h>
-#include <filedef.h>
+#include <qhpxmlwriter.h>
 
 static QString makeFileName(const QString &withoutExtension)
 {

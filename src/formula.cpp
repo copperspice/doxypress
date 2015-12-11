@@ -22,9 +22,10 @@
 
 #include <stdlib.h>
 
+#include <formula.h>
+
 #include <config.h>
 #include <doxy_globals.h>
-#include <formula.h>
 #include <image.h>
 #include <index.h>
 #include <message.h>

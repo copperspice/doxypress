@@ -18,8 +18,9 @@
 #include <QDir>
 
 #include <plantuml.h>
-#include <portable.h>
+
 #include <config.h>
+#include <portable.h>
 #include <message.h>
 
 static const int maxCmdLine = 40960;

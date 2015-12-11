@@ -17,11 +17,12 @@
 
 #include <QFileInfo>
 
+#include <xmldocvisitor.h>
+
 #include <config.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
-#include <filename.h>
 #include <htmlentity.h>
 #include <language.h>
 #include <message.h>
@@ -29,7 +30,6 @@
 #include <parser_base.h>
 #include <util.h>
 #include <xmlgen.h>
-#include <xmldocvisitor.h>
 
 static void visitCaption(XmlDocVisitor *parent, QList<DocNode *> children)
 {   

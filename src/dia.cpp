@@ -18,9 +18,10 @@
 #include <QDir>
 
 #include <dia.h>
-#include <portable.h>
+
 #include <config.h>
 #include <message.h>
+#include <portable.h>
 #include <util.h>
 
 static const int maxCmdLine = 40960;

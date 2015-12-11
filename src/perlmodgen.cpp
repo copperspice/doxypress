@@ -23,24 +23,16 @@
 
 #include <stdlib.h>
 
+#include <perlmodgen.h>
+
 #include <arguments.h>
-#include <classdef.h>
-#include <classlist.h>
 #include <config.h>
 #include <docparser.h>
-#include <message.h>
 #include <doxy_globals.h>
-#include <pagedef.h>
-#include <perlmodgen.h>
-#include <memberlist.h>
-#include <groupdef.h>
-#include <filename.h>
-#include <membername.h>
-#include <namespacedef.h>
-#include <membergroup.h>
-#include <section.h>
-#include <util.h>
 #include <htmlentity.h>
+#include <message.h>
+#include <membergroup.h>
+#include <util.h>
 
 #define PERLOUTPUT_MAX_INDENTATION 40
 

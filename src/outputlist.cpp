@@ -16,11 +16,13 @@
 *************************************************************************/
 
 #include <outputlist.h>
-#include <outputgen.h>
+
 #include <config.h>
-#include <message.h>
 #include <definition.h>
 #include <docparser.h>
+#include <message.h>
+#include <outputgen.h>
+
 
 /*! \file
  *  This class represents a list of output generators that work in "parallel".

@@ -21,44 +21,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <htmlhelp.h>
+
 #include <config.h>
 #include <doxy_globals.h>
 #include <filedef.h>
 #include <groupdef.h>
-#include <htmlhelp.h>
 #include <language.h>
 #include <message.h>
 #include <memberdef.h>
 #include <qtextcodec.h>
-#include <stringmap.h>
 #include <util.h>
 
-/** Class representing a field in the HTML help index. */
-struct IndexField {
-   QString name;
-   QString url;
-   QString anchor;
-
-   bool link;
-   bool reversed;
-};
-
-/** Sorted dictionary of IndexField objects. */
-class IndexFieldSDict : public StringMap<QSharedPointer<IndexField>>
-{
- public:
-   // CopperSpice - can add isCase
-   IndexFieldSDict() : StringMap<QSharedPointer<IndexField>>() {}
-   ~IndexFieldSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<IndexField> &item1, const QSharedPointer<IndexField> &item2) const override {
-      return item1->name.compare(item2->name, Qt::CaseInsensitive);
-   }
-};
-
-/** A helper class for HtmlHelp that manages a two level index in
- *  alphabetical order.
+/** A helper class for HtmlHelp that manages a two level index in alphabetical order.
  */
 class HtmlHelpIndex
 {
