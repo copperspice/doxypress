@@ -26,6 +26,7 @@
 #include <QSharedPointer>
 #include <QTime>
 
+#include <classlist.h>
 #include <cite.h>
 #include <dirdef.h>
 #include <entry.h>
@@ -40,6 +41,7 @@
 #include <pagedef.h>
 #include <reflist.h>
 #include <searchindex.h>
+#include <stringmap.h>
 
 class ParserManager;
 
@@ -195,6 +197,7 @@ class Doxy_Globals
       static int subpageNestingLevel;
    
       static QString htmlFileExtension;
+      static QString latexStyleExtension;
    
       static QString tempA_FName;
       static QString tempB_FName;

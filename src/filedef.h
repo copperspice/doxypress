@@ -22,15 +22,11 @@
 #include <QHash>
 #include <QTextStream>
 
-#include <classlist.h>
 #include <definition.h>
 #include <filelist.h>
 #include <index.h>
-#include <memberlist.h>
-#include <membergroup.h>
-#include <namespacedef.h>
-#include <stringmap.h>
 #include <sortedlist.h>
+#include <stringmap.h>
 
 class ClassDef;
 class DirDef;
@@ -44,6 +40,7 @@ class PackageDef;
 struct IncludeInfo {
    IncludeInfo() {      
       local    = false;
+      imported = false;
       indirect = false;
    }
 

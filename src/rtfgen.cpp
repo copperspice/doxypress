@@ -23,22 +23,18 @@
 
 #include <stdlib.h>
 
+#include <rtfgen.h>
+
 #include <config.h>
-#include <classlist.h>
 #include <diagram.h>
 #include <doxy_globals.h>
 #include <dirdef.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_build_info.h>
-#include <filename.h>
 #include <groupdef.h>
 #include <language.h>
 #include <message.h>
-#include <namespacedef.h>
-#include <pagedef.h>
-#include <portable.h>
-#include <rtfgen.h>
 #include <rtfstyle.h>
 #include <rtfdocvisitor.h>
 #include <util.h>
@@ -60,14 +56,14 @@ static QString dateToRTFDateString()
 
 RTFGenerator::RTFGenerator() : OutputGenerator()
 {
-   m_dir = Config::getString("rtf-output");
+   m_dir        = Config::getString("rtf-output");
+   m_prettyCode = Config::getBool("rtf-source-code");
 
-   col = 0;
-
-   m_numCols = 0;
+   col         = 0;
+   m_numCols   = 0;
    m_listLevel = 0;
 
-   m_bstartedBody = false;
+   m_bstartedBody  = false;
    m_omitParagraph = false; 
 }
 
@@ -577,18 +573,20 @@ void RTFGenerator::startIndexSection(IndexSections is)
 
 void RTFGenerator::endIndexSection(IndexSections indexSec)
 {
-   bool fortranOpt = Config::getBool("optimize-fortran");
- 
+   static const bool fortranOpt     = Config::getBool("optimize-fortran");
+   static const bool sourceCode     = Config::getBool("source-code");
+   static const QString projectName = Config::getString("project-name"); 
+
    switch (indexSec) {
       case isTitlePageStart:
 
-         if (! rtf_title.isEmpty())
-            // User has overridden document title in extensions file
-         {
+         if (! rtf_title.isEmpty()) {
+            // User has overridden document title in extensions file         
             m_textStream << "}" << rtf_title;
          } else {
-            m_textStream << "}" << Config::getString("project-name");
+            m_textStream << "}" << projectName;
          }
+
          break;
 
       case isTitlePageAuthor: {
@@ -635,7 +633,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
 
          m_textStream  << rtf_Style_Reset << rtf_Style["SubTitle"].reference << endl; // set to subtitle style
          m_textStream  << "{\\field\\fldedit {\\*\\fldinst AUTHOR \\\\*MERGEFORMAT}{\\fldrslt AUTHOR}}\\par" << endl;
-         m_textStream  << "Version " << Config::getString("project-version") << "\\par";
+         m_textStream  << "Version " << projectName << "\\par";
 
          m_textStream  << "{\\field\\fldedit {\\*\\fldinst CREATEDATE \\\\*MERGEFORMAT}"
            "{\\fldrslt CREATEDATE}}\\par" << endl;
@@ -833,12 +831,20 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
        
          for (auto fn :*Doxy_Globals::inputNameList) {  
             for (auto fd :*fn) {  
+
                if (fd->isLinkableInProject()) {
                   if (isFirst) {
                      m_textStream  << "\\par " << rtf_Style_Reset << endl;
                      m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"";
                      m_textStream  << fd->getOutputFileBase();
                      m_textStream  << ".rtf\" \\\\*MERGEFORMAT}{\\fldrslt includedstuff}}\n";
+
+                     if (sourceCode && m_prettyCode && fd->generateSourceFile() ) {
+                        m_textStream << "\\par " << rtf_Style_Reset << endl;
+                        m_textStream << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"" << fd->getSourceFileBase() 
+                           << ".rtf\" \\\\*MERGEFORMAT}{\\fldrslt includedstuff}}\n";
+                     }  
+
                      isFirst = false;
 
                   } else {
@@ -847,8 +853,15 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
                      m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"";
                      m_textStream  << fd->getOutputFileBase();
                      m_textStream  << ".rtf\" \\\\*MERGEFORMAT}{\\fldrslt includedstuff}}\n";
+
+                     if (sourceCode && m_prettyCode && fd->generateSourceFile()) {
+                        m_textStream << "\\par " << rtf_Style_Reset << endl;
+                        m_textStream << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"" << fd->getSourceFileBase() 
+                           << ".rtf\" \\\\*MERGEFORMAT}{\\fldrslt includedstuff}}\n";
+                     }
                   }
                }
+
             }
          }
       }
@@ -2481,6 +2494,8 @@ void RTFGenerator::startSimpleSect(SectionTypes, const QString &file, const QStr
 void RTFGenerator::endSimpleSect()
 {
    DBG_RTF(m_textStream << "{\\comment (endSimpleSect)}"    << endl)
+
+   m_omitParagraph = false;
    newParagraph();
    decrementIndentLevel();
    m_omitParagraph = true;

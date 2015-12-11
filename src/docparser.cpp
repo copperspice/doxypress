@@ -25,29 +25,21 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include <docparser.h>
+
 #include <arguments.h>
-#include <classlist.h>
 #include <cite.h>
 #include <config.h>
 #include <cmdmapper.h>
-#include <docparser.h>
 #include <doctokenizer.h>
 #include <doxy_globals.h>
-#include <filedef.h>
 #include <formula.h>
-#include <groupdef.h>
 #include <htmlentity.h>
 #include <language.h>
-#include <memberdef.h>
 #include <message.h>
-#include <namespacedef.h>
-#include <pagedef.h>
 #include <parser_md.h>
 #include <portable.h>
 #include <printdocvisitor.h>
-#include <reflist.h>
-#include <section.h>
-#include <searchindex.h>
 #include <util.h>
 
 // debug off
@@ -5607,10 +5599,14 @@ int DocPara::handleStartCode()
       lang = "." + lang;
    }
 
+   if (s_xmlComment) {
+      g_token->verb = substitute(substitute(g_token->verb,"&lt;","<"), "&gt;",">");
+   }
+
    // search for the first non-whitespace line, index is stored in li
-   int i = 0;
+   int i  = 0;
    int li = 0;
-   int l = g_token->verb.length();
+   int l  = g_token->verb.length();
 
    while (i < l && (g_token->verb.at(i) == ' ' || g_token->verb.at(i) == '\n')) {
       if (g_token->verb.at(i) == '\n') {

@@ -27,29 +27,18 @@
 #include <errno.h>
 #include <math.h>
 
-#include <classlist.h>
+#include <util.h>
+
 #include <config.h>
 #include <defargs.h>
-#include <dirdef.h>
 #include <doxy_globals.h>
 #include <doxy_build_info.h>
 #include <entry.h>
-#include <example.h>
-#include <filename.h>
 #include <htmlentity.h>
-#include <htmlhelp.h>
 #include <image.h>
 #include <language.h>
 #include <message.h>
-#include <memberlist.h>
-#include <namespacedef.h>
-#include <membername.h>
-#include <portable.h>
-#include <parser_base.h>
-#include <reflist.h>
-#include <searchindex.h>
 #include <textdocvisitor.h>
-#include <util.h>
 
 struct FindFileCacheElem {
    FindFileCacheElem(QSharedPointer<FileDef> fd, bool ambig) 
@@ -6198,15 +6187,26 @@ QString rtfFormatBmkStr(const QString &key)
    return QString::number(item.value(), 16);
 }
 
-QString stripExtension(QString fName)
+
+bool checkExtension(const QString &fName, const QString &ext)
+{
+   return (fName.endsWith(ext));
+}
+
+QString stripExtensionGeneral(const QString &fName, const QString &ext)
 {
    QString result = fName;
 
-   if (result.right(Doxy_Globals::htmlFileExtension.length()) == Doxy_Globals::htmlFileExtension) {
-      result = result.left(result.length() - Doxy_Globals::htmlFileExtension.length());
+   if (result.endsWith(ext)) {
+      result = result.left(result.length() - ext.length());
    }
 
    return result;
+ }
+
+QString stripExtension(const QString &fName)
+{
+   return stripExtensionGeneral(fName, Doxy_Globals::htmlFileExtension);
 }
 
 QString renameNS_Aliases(const QString &scope, QString xx)

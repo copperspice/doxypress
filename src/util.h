@@ -34,19 +34,15 @@
 #include <groupdef.h>
 #include <membergroup.h>
 #include <pagedef.h>
-#include <stringmap.h>
 #include <outputlist.h>
+#include <stringmap.h>
 
 class BaseClassDef;
-class ClassSDict;
 class Definition;
-class ExampleSDict;
 class FileNameDict;
 class MemberList;
 class MemberDef;
-class MemberNameInfoSDict;
 class NamespaceDef;
-class NamespaceSDict;
 class OutputDocInterface;
 
 struct ListItemInfo;
@@ -272,7 +268,9 @@ QString rtfFormatBmkStr(const QString &name);
 
 QString linkToText(SrcLangExt lang, const QString &link, bool isFileName);
 
-QString stripExtension(QString fName);
+bool checkExtension(const QString &fName, const QString &ext);
+QString stripExtensionGeneral(const QString &fName, const QString &ext);
+QString stripExtension(const QString &fName);
 
 QString renameNS_Aliases(const QString &scope, QString xx = "");      // broom - testing only
 void replaceNamespaceAliases(QString &scope, int i);

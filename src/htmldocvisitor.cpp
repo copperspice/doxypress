@@ -17,23 +17,24 @@
 
 #include <QDir>
 
-#include <doxy_globals.h>
 #include <htmldocvisitor.h>
-#include <docparser.h>
-#include <language.h>
-#include <outputgen.h>
-#include <dot.h>
-#include <message.h>
+
 #include <config.h>
-#include <htmlgen.h>
-#include <msc.h>
+#include <docparser.h>
 #include <dia.h>
-#include <util.h>
+#include <doxy_globals.h>
+#include <dot.h>
 #include <filedef.h>
-#include <memberdef.h>
+#include <htmlgen.h>
 #include <htmlentity.h>
+#include <language.h>
+#include <message.h>
+#include <memberdef.h>
+#include <msc.h>
+#include <outputgen.h>
 #include <parser_base.h>
 #include <plantuml.h>
+#include <util.h>
 
 static const int NUM_HTML_LIST_TYPES = 4;
 static const char types[][NUM_HTML_LIST_TYPES] = {"1", "a", "i", "A"};
@@ -2080,24 +2081,14 @@ void HtmlDocVisitor::filterQuotedCdataAttr(const QString &str)
             m_t << "&quot;";
             break;
 
-         // For SGML compliance, and given the SGML declaration for HTML syntax,
-         // it's enough to replace these two, provided that the declaration
-         // for the HTML version we generate (and as supported by the browser)
-         // specifies that all the other symbols used in rawVal are
-         // within the right character class (i.e., they're not
-         // some multinational weird characters not in the BASESET).
-         // We assume that 1) the browser will support whatever is remaining
-         // in the formula and 2) the TeX formulae are generally governed
-         // by even stricter character restrictions so it should be enough.
-         //
-         // On some incompliant browsers, additional translation of
-         // '>' and '<' into "&gt;" and "&lt;", respectively, might be needed;
-         // but I'm unaware of particular modern (last 4 years) versions
-         // with such problems, so let's not do it for performance.
-         // Also, some brousers will (wrongly) not process the entity references
-         // inside the attribute value and show the &...; form instead,
-         // so we won't create entites unless necessary to minimize clutter there.
-       
+         case '<':  
+            m_t << "&lt;"; 
+            break;
+
+         case '>':  
+            m_t << "&gt;"; 
+            break;
+            
          default:
             m_t << c;
       }

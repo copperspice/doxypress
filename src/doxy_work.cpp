@@ -24,7 +24,6 @@
 
 #include <arguments.h>
 #include <cite.h>
-#include <classlist.h>
 #include <cmdmapper.h>
 #include <code.h>
 #include <config.h>
@@ -41,7 +40,6 @@
 #include <doxy_globals.h>
 #include <eclipsehelp.h>
 #include <entry.h>
-#include <filename.h>
 #include <filestorage.h>
 #include <formula.h>
 #include <ftvhelp.h>
@@ -55,12 +53,9 @@
 #include <layout.h>
 #include <logos.h>
 #include <mangen.h>
-#include <membername.h>
 #include <msc.h>
-#include <namespacedef.h>
 #include <objcache.h>
 #include <outputlist.h>
-#include <pagedef.h>
 #include <parser_base.h>
 #include <parser_cstyle.h>
 #include <parser_file.h>
@@ -73,9 +68,7 @@
 #include <portable.h>
 #include <pre.h>
 #include <qhp.h>
-#include <reflist.h>
 #include <rtfgen.h>
-#include <searchindex.h>
 #include <store.h>
 #include <tagreader.h>
 #include <util.h>
@@ -265,6 +258,7 @@ namespace Doxy_Work{
    void copyExtraFiles(const QString &kind);
    void copyLogo();
    void copyStyleSheet();
+   void copyLatexStyleSheet();
 
    QString createOutputDirectory(const QString &baseDirName, const QString &formatDirOption, const QString &defaultDirName);
    void createTemplateInstanceMembers();
@@ -974,6 +968,8 @@ void generateOutput()
    if (generateLatex) {
       Doxy_Globals::g_outputList->add(new LatexGenerator);
       LatexGenerator::init();
+
+      copyLatexStyleSheet();
 
       // copy static stuff
       copyExtraFiles("latex");
@@ -8643,8 +8639,9 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
       if (rootNav->tagInfo() && ! root->name.isEmpty()) { 
 
          // define read from a tag file
-         QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(rootNav->tagInfo()->tagName, 1, 1, "#define", root->name, root->args, nullptr,
-                                       Public, Normal, false, Member, MemberType_Define, nullptr, nullptr);
+         QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(rootNav->tagInfo()->tagName, 
+                  1, 1, "#define", root->name, root->args, nullptr,
+                  Public, Normal, false, Member, MemberType_Define, nullptr, nullptr);
 
          md->setTagInfo(rootNav->tagInfo());
          md->setLanguage(root->lang);         
@@ -9188,11 +9185,9 @@ static QString fixSlashes(QString &s)
 
 void Doxy_Work::copyStyleSheet()
 {
-   const QDir configDir    = Config::getConfigDir();
-
-   //   
-   const QString outputDir = Config::getString("html-output") + "/";
-   const QString cssFile   = ":/resources/html/doxypress.css";
+   static const QDir configDir    = Config::getConfigDir();
+   static const QString outputDir = Config::getString("html-output") + "/";
+   static const QString cssFile   = ":/resources/html/doxypress.css";
 
    QFileInfo fi(cssFile);
 
@@ -9205,7 +9200,7 @@ void Doxy_Work::copyStyleSheet()
    }
  
    //
-   const QStringList htmlStyleSheet = Config::getList("html-stylesheets");
+   static const QStringList htmlStyleSheet = Config::getList("html-stylesheets");
 
    for (auto fileName : htmlStyleSheet) {             
       
@@ -9213,11 +9208,11 @@ void Doxy_Work::copyStyleSheet()
          QFileInfo fi(configDir, fileName);
 
          if (! fi.exists()) {
-            err("Style sheet '%s' specified in 'HTML STYLESHEETS' does not exist\n", qPrintable(fileName));
+            err("Stylesheet '%s' specified in 'HTML STYLESHEETS' does not exist\n", csPrintable(fileName));
 
          } else if (fi.fileName() == "doxypress.css" || fi.fileName() == "tabs.css" || fi.fileName() == "navtree.css") {
             err("Style sheet %s specified by 'HTML STYLESHEETS' is using the built in stylesheet name. Please use a "
-               "different file name\n", qPrintable(fileName));      
+               "different file name\n", csPrintable(fileName));      
             
          } else {
             QString destFileName = outputDir + fi.fileName();
@@ -9227,10 +9222,37 @@ void Doxy_Work::copyStyleSheet()
    }
 }
 
+void Doxy_Work::copyLatexStyleSheet()
+{  
+   static const QDir configDir              = Config::getConfigDir();
+   static const QString outputDir           = Config::getString("latex-output") + "/";
+   static const QStringList latexStyleSheet = Config::getList("latex-stylesheets");
+  
+   for (auto fileName : latexStyleSheet) {
+
+      if (! fileName.isEmpty()) {
+         QFileInfo fi(configDir, fileName);
+
+         if (! fi.exists()) {
+            err("Stylesheet '%s' specified in 'LATEX STYLESHEETS' does not exist\n", csPrintable(fileName));
+
+         } else {           
+            QString destFileName = outputDir + fi.fileName();
+
+            if (! checkExtension(fi.fileName(), Doxy_Globals::latexStyleExtension)) {
+               destFileName += Doxy_Globals::latexStyleExtension;
+            }
+           
+            copyFile(fi.absoluteFilePath(), destFileName);
+         }
+      }
+   }
+}
+
 void Doxy_Work::copyLogo()
 {
-   const QDir configDir = Config::getConfigDir();
-   const QString projectLogo = Config::getString("project-logo");
+   static const QDir configDir = Config::getConfigDir();
+   static const QString projectLogo = Config::getString("project-logo");
 
    if (! projectLogo.isEmpty()) {
       QFileInfo fi(configDir, projectLogo);

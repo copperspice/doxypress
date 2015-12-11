@@ -15,22 +15,10 @@
  *
 *************************************************************************/
 
-#include <cite.h>
-#include <classlist.h>
-#include <dirdef.h>
 #include <doxy_globals.h>
-#include <filename.h>
-#include <formula.h>
-#include <groupdef.h>
-#include <index.h>
-#include <membergroup.h>
-#include <membername.h>
-#include <namespacedef.h>
-#include <parser_base.h>
-#include <pagedef.h>
-#include <section.h>
-#include <searchindex.h>
-#include <reflist.h>
+
+class GenericsSDict;
+class IndexList;
 
 // part 1
 ClassSDict      *Doxy_Globals::classSDict = 0;
@@ -99,6 +87,8 @@ bool             Doxy_Globals::markdownSupport = true;
 int              Doxy_Globals::subpageNestingLevel = 0;
 
 QString          Doxy_Globals::htmlFileExtension;
+QString          Doxy_Globals::latexStyleExtension = ".sty";
+
 QString          Doxy_Globals::tempA_FName;
 QString          Doxy_Globals::tempB_FName;
 QTime            Doxy_Globals::runningTime;

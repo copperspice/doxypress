@@ -15,30 +15,21 @@
  *
 *************************************************************************/
 
+#include <filedef.h>
+
 #include <config.h>
-#include <classlist.h>
-#include <classdef.h>
-#include <dirdef.h>
 #include <docparser.h>
 #include <doxy_globals.h>
 #include <dot.h>
 #include <entry.h>
-#include <filename.h>
-#include <filedef.h>
 #include <groupdef.h>
 #include <htags.h>
 #include <layout.h>
 #include <language.h>
-#include <memberdef.h>
 #include <message.h>
-#include <membergroup.h>
-#include <memberlist.h>
-#include <namespacedef.h>
 #include <outputlist.h>
 #include <parser_base.h>
 #include <parser_clang.h>
-#include <portable.h>
-#include <searchindex.h>
 #include <util.h>
 
 /** Class implementing CodeOutputInterface by throwing away everything. */
@@ -239,6 +230,11 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
+   static const bool sourceCode      = Config::getBool("source-code");
+   static const bool repeatBrief     = Config::getBool("repeat-brief"); 
+   static const bool latexSourceCode = Config::getBool("latex-source-code");
+   static const bool rtfSourceCode   = Config::getBool("rtf-source-code");
+
    if (hasDetailedDescription()) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
@@ -254,11 +250,11 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
 
       ol.startTextBlock();
 
-      if (! briefDescription().isEmpty() && Config::getBool("repeat-brief")) {
+      if (! briefDescription().isEmpty() && repeatBrief ) {
          ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
 
-      if (!briefDescription().isEmpty() && Config::getBool("repeat-brief") && ! documentation().isEmpty()) {
+      if (! briefDescription().isEmpty() && repeatBrief  && ! documentation().isEmpty()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::RTF);
@@ -270,16 +266,20 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
          ol.popGeneratorState();
       }
 
-      if (!documentation().isEmpty()) {
+      if (! documentation().isEmpty()) {
          ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
       }
       
-      if (Config::getBool("source-code")) {
+      if (sourceCode) {
          //if Latex enabled and LATEX_SOURCE_CODE is not -> skip, bug_738548
 
          ol.pushGeneratorState();
-         if (ol.isEnabled(OutputGenerator::Latex) && ! Config::getBool("latex-source-code")) {
+         if (ol.isEnabled(OutputGenerator::Latex) && ! latexSourceCode) {
             ol.disable(OutputGenerator::Latex);
+         }
+
+         if (ol.isEnabled(OutputGenerator::RTF) && ! rtfSourceCode) {
+            ol.disable(OutputGenerator::RTF);
          }
 
          ol.startParagraph();
@@ -296,6 +296,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
          //Restore settings, bug_738548
          ol.popGeneratorState();
       }
+
       ol.endTextBlock();
    }
 }
@@ -312,6 +313,7 @@ void FileDef::writeBriefDescription(OutputList &ol)
          ol.startParagraph();
          ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
          ol.pushGeneratorState();
+
          ol.disable(OutputGenerator::RTF);
          ol.writeString(" \n");
          ol.enable(OutputGenerator::RTF);
@@ -815,9 +817,10 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   static bool generateTreeView  = Config::getBool("generate-treeview");
-   static bool filterSourceFiles = Config::getBool("filter-source-files");
-   static bool latexSourceCode   = Config::getBool("latex-source-code");
+   static const bool generateTreeView  = Config::getBool("generate-treeview");
+   static const bool filterSourceFiles = Config::getBool("filter-source-files");
+   static const bool latexSourceCode   = Config::getBool("latex-source-code");
+   static const bool rtfSourceCode     = Config::getBool("rtf-source-code");
 
    DevNullCodeDocInterface devNullIntf;
    QString title = m_docname;
@@ -828,10 +831,13 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
 
    QString pageTitle = theTranslator->trSourceFile(title);
    ol.disable(OutputGenerator::Man);
-   ol.disable(OutputGenerator::RTF);
 
    if (! latexSourceCode) {
       ol.disable(OutputGenerator::Latex);
+   }
+
+   if (! rtfSourceCode) {
+      ol.disable(OutputGenerator::RTF);
    }
 
    bool isDocFile = isDocumentationFile();
@@ -866,12 +872,21 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       if (latexSourceCode) {
          ol.disable(OutputGenerator::Latex);
       }
+
+      if (rtfSourceCode) {
+         ol.disable(OutputGenerator::RTF);
+      }
+
       ol.startTextLink(getOutputFileBase(), 0);
       ol.parseText(theTranslator->trGotoDocumentation());
       ol.endTextLink();
 
       if (latexSourceCode) {
          ol.enable(OutputGenerator::Latex);
+      }
+
+      if (rtfSourceCode) {
+         ol.enable(OutputGenerator::RTF);
       }
    }
 

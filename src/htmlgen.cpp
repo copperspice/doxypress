@@ -20,24 +20,23 @@
 
 #include <stdlib.h>
 
+#include <htmlgen.h>
+
 #include <config.h>
 #include <dirdef.h>
 #include <docparser.h>
-#include <doxy_build_info.h>
-#include <doxy_globals.h>
-#include <logos.h>
 #include <diagram.h>
 #include <dot.h>
-#include <htmlgen.h>
+#include <doxy_build_info.h>
+#include <doxy_globals.h>
+#include <ftvhelp.h>
+#include <htmldocvisitor.h>
 #include <htmlhelp.h>
+#include <image.h>
+#include <layout.h>
+#include <logos.h>
 #include <language.h>
 #include <message.h>
-#include <htmldocvisitor.h>
-#include <searchindex.h>
-#include <pagedef.h>
-#include <layout.h>
-#include <image.h>
-#include <ftvhelp.h>
 #include <resourcemgr.h>
 #include <util.h>
 
@@ -217,7 +216,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
    QString cssFile = "doxypress.css"; 
 
    QString extraCssText = "";
-   const QStringList extraCssFile = Config::getList("html-stylesheets");
+   static const QStringList extraCssFile = Config::getList("html-stylesheets");
 
    for (auto fileName : extraCssFile) {          
 
@@ -225,7 +224,8 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
          QFileInfo fi(fileName);
 
          if (fi.exists()) {
-            extraCssText += "<link href=\"$relpath^" + stripPath(qPrintable(fileName)) + "\" rel=\"stylesheet\" type=\"text/css\"/>\n";
+            extraCssText += "<link href=\"$relpath^" + stripPath(qPrintable(fileName)) + 
+                  "\" rel=\"stylesheet\" type=\"text/css\"/>\n";
          }
       }
    }

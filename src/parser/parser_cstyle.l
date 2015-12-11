@@ -8573,6 +8573,8 @@ static void handleParametersCommentBlocks(ArgumentList *al)
 
 static void parseCompounds(QSharedPointer<Entry> rt)
 {
+  static const bool groupNested = Config::getBool("group-nested-compounds");
+
    for (auto ce : rt->children() ) {
 
       if (! ce->m_program.isEmpty()) {
@@ -8600,10 +8602,10 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
          current = QMakeShared<Entry>();
          gstat = false;
-         initEntry();
+         initEntry();       
 
          // deep copy group list from parent (see bug 727732)
-         if (rt->groups) {
+         if (groupNested && rt->groups && ce->section != Entry::ENUM_SEC && ! (ce->m_specFlags.spec & Entry::Enum)) {
             for (auto g : *rt->groups) {
                ce->groups->append(g);
             }

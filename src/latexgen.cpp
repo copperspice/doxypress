@@ -19,38 +19,32 @@
 
 #include <stdlib.h>
 
+#include <latexgen.h>
+
 #include <cite.h>
-#include <classlist.h>
 #include <config.h>
 #include <diagram.h>
-#include <dirdef.h>
 #include <docparser.h>
-
 #include <dot.h>
 #include <doxy_build_info.h>
 #include <doxy_globals.h>
-#include <filename.h>
-#include <groupdef.h>
 #include <language.h>
 #include <latexdocvisitor.h>
-#include <latexgen.h>
 #include <message.h>
-#include <namespacedef.h>
 #include <resourcemgr.h>
-#include <pagedef.h>
 #include <util.h>
 
 LatexGenerator::LatexGenerator() : OutputGenerator()
 {
-   m_dir = Config::getString("latex-output");
+   m_dir        = Config::getString("latex-output");
    m_prettyCode = Config::getBool("latex-source-code");
 
    col = 0;
    m_indent = 0;
 
-   insideTabbing = false;
-   firstDescItem = true;
-   disableLinks = false;
+   insideTabbing      = false;
+   firstDescItem      = true;
+   disableLinks       = false;
    templateMemberItem = false;
 }
 
@@ -262,6 +256,8 @@ void LatexGenerator::init()
 
 static void writeDefaultHeaderPart1(QTextStream &t_stream)
 {
+   static const QStringList extraLatexStyle = Config::getList("latex-stylesheets");
+
    // part 1
 
    // Handle batch mode
@@ -283,19 +279,38 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
 
    // Load required packages
    t_stream << "% Packages required by DoxyPress\n"
-     "\\usepackage{fixltx2e}\n" // for \textsubscript
-     "\\usepackage{calc}\n"
-     "\\usepackage{doxypress}\n"
-     "\\usepackage{graphicx}\n"
-     "\\usepackage[utf8]{inputenc}\n"
-     "\\usepackage{makeidx}\n"
-     "\\usepackage{multicol}\n"
-     "\\usepackage{multirow}\n"
-     "\\PassOptionsToPackage{warn}{textcomp}\n"
-     "\\usepackage{textcomp}\n"
-     "\\usepackage[nointegrals]{wasysym}\n"
-     "\\usepackage[table]{xcolor}\n"
-     "\n";
+      "\\usepackage{fixltx2e}\n" // for \textsubscript
+      "\\usepackage{calc}\n"
+      "\\usepackage{doxypress}\n";
+    
+   for (auto fileName : extraLatexStyle) {   
+
+      if (! fileName.isEmpty()) {
+         QFileInfo fi(fileName);
+
+         if (fi.exists()) {
+            if (checkExtension(fi.fileName(), Doxy_Globals::latexStyleExtension)) {
+               // strip the extension, it will be added by the usepackage in the tex conversion process
+               t_stream << "\\usepackage{" << stripExtensionGeneral(fi.fileName(), 
+                     Doxy_Globals::latexStyleExtension) << "}\n";
+
+            } else {
+               t_stream << "\\usepackage{" << fi.fileName() << "}\n";
+            }
+         }
+      }
+   }
+
+   t_stream << "\\usepackage{graphicx}\n"
+                "\\usepackage[utf8]{inputenc}\n"
+                "\\usepackage{makeidx}\n"
+                "\\usepackage{multicol}\n"
+                "\\usepackage{multirow}\n"
+                "\\PassOptionsToPackage{warn}{textcomp}\n"
+                "\\usepackage{textcomp}\n"
+                "\\usepackage[nointegrals]{wasysym}\n"
+                "\\usepackage[table]{xcolor}\n"
+                "\n";
 
    // Language support
    QString languageSupport = theTranslator->latexLanguageSupportCommand();

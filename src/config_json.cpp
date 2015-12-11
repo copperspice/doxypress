@@ -197,6 +197,8 @@ void Config::load_Defaults()
    m_cfgBool.insert("separate-member-pages",     struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("allow-sub-grouping",        struc_CfgBool   { true,           DEFAULT } );   
    m_cfgBool.insert("duplicate-docs",            struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("group-nested-compounds",    struc_CfgBool   { false,          DEFAULT } );
+
   
    // tab 2 -output
    m_cfgList.insert("enabled-sections",          struc_CfgList   { QStringList(),  DEFAULT } ); 
@@ -428,6 +430,7 @@ void Config::load_Defaults()
    m_cfgList.insert("latex-extra-packages",      struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgString.insert("latex-header",            struc_CfgString { QString(),      DEFAULT } ); 
    m_cfgString.insert("latex-footer",            struc_CfgString { QString(),      DEFAULT } ); 
+   m_cfgList.insert("latex-stylesheets",         struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("latex-extra-files",         struc_CfgList   { QStringList(),  DEFAULT } );
 
    m_cfgBool.insert("latex-timestamp",           struc_CfgBool   { true,           DEFAULT } );
@@ -470,6 +473,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("rtf-hyperlinks",            struc_CfgBool   { false,          DEFAULT } );
    m_cfgString.insert("rtf-stylesheet",          struc_CfgString { QString(),      DEFAULT } );
    m_cfgString.insert("rtf-extension",           struc_CfgString { QString(),      DEFAULT } );
+   m_cfgBool.insert("rtf-source-code",           struc_CfgBool   { false,          DEFAULT } );
 
    // tab 3 - xml
    m_cfgString.insert("xml-output",              struc_CfgString { "xml",          DEFAULT } );

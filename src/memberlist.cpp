@@ -17,13 +17,14 @@
 
 #include <QRegExp>
 
+#include <memberlist.h>
+
 #include <classdef.h>
 #include <config.h>
 #include <docparser.h>
 #include <filedef.h>
 #include <groupdef.h>
 #include <language.h>
-#include <memberlist.h>
 #include <membergroup.h>
 #include <message.h>
 #include <namespacedef.h>
@@ -872,7 +873,14 @@ QString MemberList::listTypeAsString(MemberListType type)
 void MemberList::writeTagFile(QTextStream &tagFile)
 { 
    for (auto md : *this) {     
-      md->writeTagFile(tagFile);    
+      md->writeTagFile(tagFile);  
+
+      if (md->memberType() == MemberType_Enumeration && md->enumFieldList() && ! md->isStrong()) {
+
+         for (auto vmd : *md->enumFieldList()) {
+            vmd->writeTagFile(tagFile);
+         }
+      }  
    }
 
    if (memberGroupList) { 
