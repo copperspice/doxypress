@@ -154,12 +154,12 @@ class LatexDocVisitor : public DocVisitor
 
    void startMscFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endMscFile(bool hasCaption);
-   void writeMscFile(const QString &fileName);
+   void writeMscFile(const QString &fileName, DocVerbatim *s);
 
    void startDiaFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endDiaFile(bool hasCaption);
-   void writeDiaFile(const QString &fileName);
-   void writePlantUMLFile(const QString &fileName);
+   void writeDiaFile(const QString &fileName, DocVerbatim *s);
+   void writePlantUMLFile(const QString &fileName, DocVerbatim *s);
 
    void pushEnabled();
    void popEnabled();

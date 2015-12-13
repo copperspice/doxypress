@@ -508,8 +508,12 @@ bool Config::verify()
       dotImageFormat = "png";
    }
 
-   iterEnum.value().value = dotImageFormat;
+   // BROOM - may want to split this into two config entries ( 12/2015)
+   if (dotImageFormat.contains(":"))  {
+      dotImageFormat = dotImageFormat.replace( QRegExp(":.*"), "");
+   }
 
+   iterEnum.value().value = dotImageFormat;   
 
    // 
    iterString = m_cfgString.find("mscgen-path");

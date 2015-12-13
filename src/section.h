@@ -28,7 +28,8 @@ struct SectionInfo {
                       Subsection    = 2,
                       Subsubsection = 3,
                       Paragraph     = 4,
-                      Anchor        = 5
+                      Anchor        = 5,
+                      Table         = 6
                     };
 
    SectionInfo(const QString &f, const int lin, const  QString &l, const QString &t, SectionType st, 

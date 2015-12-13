@@ -1,3 +1,4 @@
+
 flex -PcstyleYY -t -d  parser_cstyle.l  > parser_cstyle.cpp
 cp  parser_cstyle.cpp  ../generated/parser_cstyle.cpp
 rm  parser_cstyle.cpp
@@ -6,3 +7,8 @@ rm  parser_cstyle.cpp
 flex -PcommentscanYY -t -d  commentscan.l  > commentscan.cpp
 cp  commentscan.cpp  ../generated/commentscan.cpp
 rm  commentscan.cpp
+
+
+flex -PdoctokenizerYY -t -d  doctokenizer.l  > doctokenizer.cpp
+cp  doctokenizer.cpp  ../generated/doctokenizer.cpp
+rm  doctokenizer.cpp

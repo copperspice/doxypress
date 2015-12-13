@@ -147,10 +147,10 @@ class DocbookDocVisitor : public DocVisitor
    void startDotFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endDotFile(bool hasCaption);
 
-   void writeDotFile(const QString &fileName);
-   void writeMscFile(const QString &fileName);
-   void writeDiaFile(const QString &fileName);
-   void writePlantUMLFile(const QString &fileName);
+   void writeDotFile(const QString &fileName, DocVerbatim *s);
+   void writeMscFile(const QString &fileName, DocVerbatim *s);
+   void writeDiaFile(const QString &fileName, DocVerbatim *s);
+   void writePlantUMLFile(const QString &fileName, DocVerbatim *s);
 
    QTextStream &m_t;
    CodeOutputInterface &m_ci;

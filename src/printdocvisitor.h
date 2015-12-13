@@ -596,12 +596,15 @@ class PrintDocVisitor : public DocVisitor
             printf("docbook");
             break;
       }
+
       printf("\" width=%s height=%s>\n", qPrintable(img->width()), qPrintable(img->height()));
    }
+
    void visitPost(DocImage *) {
       indent_post();
       printf("</image>\n");
    }
+
    void visitPre(DocDotFile *df) {
       indent_pre();
       printf("<dotfile src=\"%s\">\n", qPrintable(df->name()));

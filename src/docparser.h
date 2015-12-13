@@ -616,15 +616,54 @@ class DocVerbatim : public DocNode
       return m_isBlock;
    }
 
+   bool hasCaption() const { 
+      return ! m_children.isEmpty(); 
+   }
+
+   QString width() const { 
+      return m_width; 
+   }
+
+   QString height() const      { 
+      return m_height; 
+   }
+
+   const QList<DocNode *> &children() const { 
+      return m_children; 
+   }
+
+   QList<DocNode *> &children() { 
+      return m_children; 
+   }
+
+   void setText(const QString &t)   { 
+      m_text = t;   
+   }
+
+   void setWidth(const QString &w)  { 
+      m_width = w;  
+   }
+
+   void setHeight(const QString &h) { 
+      m_height = h; 
+   }
+    
  private:
    QString  m_context;
    QString  m_text;
+
    Type     m_type;
    bool     m_isExample;
+
    QString  m_exampleFile;
    QString  m_relPath;
    QString  m_lang;
+
    bool     m_isBlock;
+
+   QString m_width;
+   QString m_height;
+   QList<DocNode *> m_children;    
 };
 
 
@@ -633,6 +672,7 @@ class DocInclude : public DocNode
 {
  public:
    enum Type { Include, DontInclude, VerbInclude, HtmlInclude, LatexInclude, IncWithLines, Snippet };
+
    DocInclude(DocNode *parent, const QString &file, const QString context, Type t,
               bool isExample, const QString exampleFile, const QString blockId) 
       : m_file(file), m_context(context), m_type(t), m_isExample(isExample), m_exampleFile(exampleFile), m_blockId(blockId) { 
@@ -972,7 +1012,7 @@ class DocXRefItem : public CompAccept<DocXRefItem>, public DocNode
 class DocImage : public CompAccept<DocImage>, public DocNode
 {
  public:
-   enum Type { Html, Latex, Rtf, DocBook };
+   enum Type { None, Html, Latex, Rtf, DocBook };
 
    DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString &name, Type t, const QString &url = QString());
    Kind kind() const           {
@@ -1675,9 +1715,10 @@ class DocPara : public CompAccept<DocPara>, public DocNode
    int handleParamSection(const QString &cmdName, DocParamSect::Type t, bool xmlContext, int direction);
    void handleIncludeOperator(const QString &cmdName, DocIncOperator::Type t);
    void handleImage(const QString &cmdName);
-   void handleDotFile(const QString &cmdName);
-   void handleMscFile(const QString &cmdName);
-   void handleDiaFile(const QString &cmdName);
+
+   template<class T>
+   void handleFile(const QString &cmdName);
+
    void handleInclude(const QString &cmdName, DocInclude::Type t);
    void handleLink(const QString &cmdName, bool isJavaLink);
    void handleCite();

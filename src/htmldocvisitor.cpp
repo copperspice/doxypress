@@ -342,6 +342,28 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
    }
 }
 
+
+static void visitPreCaption(QTextStream &t, DocVerbatim *s)
+{
+   if (s->hasCaption()) { 
+      t << "<div class=\"caption\">" << endl;
+   }
+}
+
+static void visitPostCaption(QTextStream &t, DocVerbatim *s)
+{
+   if (s->hasCaption()) {
+      t << "</div>" << endl;
+   }
+}
+
+static void visitCaption(HtmlDocVisitor *parent, QList<DocNode *> children)
+{
+   for (auto n : children) {
+      n->accept(parent);
+   }
+}
+
 void HtmlDocVisitor::visit(DocVerbatim *s)
 {
    if (m_hide) {
@@ -403,29 +425,38 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Dot: {
          static int dotindex = 1;
 
+         forceEndParagraph(s);
+
          QString fileName;
          fileName = QString("%1%2.dot").arg(Config::getString("html-output") + "/inline_dotgraph_").arg(dotindex++);
 
          QFile file(fileName);
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), file.error());      
+            err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), file.error());      
+
+         } else {
+
+            file.write(s->text().toUtf8());
+            file.close();
+               
+            m_t << "<div align=\"center\">" << endl;
+   
+            writeDotFile(fileName, s->relPath(), s->context());
+
+            visitPreCaption(m_t, s);
+            visitCaption(this, s->children());
+            visitPostCaption(m_t, s);
+
+            m_t << "</div>" << endl;            
+   
+            if (Config::getBool("dot-cleanup")) {
+               file.remove();
+            }            
          }
-
-         file.write(s->text().toUtf8());
-         file.close();
-
-         forceEndParagraph(s);
-         m_t << "<div align=\"center\">" << endl;
-
-         writeDotFile(fileName, s->relPath(), s->context());
-         m_t << "</div>" << endl;
 
          forceStartParagraph(s);
 
-         if (Config::getBool("dot-cleanup")) {
-            file.remove();
-         }
       }
       break;
 
@@ -440,27 +471,32 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".msc");
 
          if (! file.open(QIODevice::WriteOnly)) {       
-            err("Unable to open file for writing %s.msc error: %d\n", qPrintable(baseName), file.error()); 
+            err("Unable to open file for writing %s.msc error: %d\n", csPrintable(baseName), file.error()); 
+
+         } else {
+            QString text = "msc {";
+            text += s->text();
+            text += "}";
+   
+            file.write( text.toUtf8() );
+            file.close();
+   
+            m_t << "<div align=\"center\">" << endl;   
+            writeMscFile(baseName + ".msc", s->relPath(), s->context());
+
+            visitPreCaption(m_t, s);
+            visitCaption(this, s->children());
+            visitPostCaption(m_t, s);
+
+            m_t << "</div>" << endl;
+
+            if (Config::getBool("dot-cleanup")) {
+               file.remove();
+            }                      
          }
 
-         QString text = "msc {";
-         text += s->text();
-         text += "}";
-
-         file.write( text.toUtf8() );
-         file.close();
-
-         m_t << "<div align=\"center\">" << endl;
-
-         writeMscFile(baseName + ".msc", s->relPath(), s->context());
-         if (Config::getBool("dot-cleanup")) {
-            file.remove();
-         }
-
-         m_t << "</div>" << endl;
          forceStartParagraph(s);
       }
-
       break;
 
       case DocVerbatim::PlantUML: {
@@ -471,6 +507,11 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
 
          m_t << "<div align=\"center\">" << endl;
          writePlantUMLFile(baseName, s->relPath(), s->context());
+
+         visitPreCaption(m_t, s);
+         visitCaption(this, s->children());
+         visitPostCaption(m_t, s);
+
          m_t << "</div>" << endl;
          forceStartParagraph(s);
       }

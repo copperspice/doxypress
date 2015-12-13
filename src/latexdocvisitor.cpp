@@ -70,7 +70,8 @@ static QString escapeLabelName(const QString &str)
 }
 
 const int maxLevels = 5;
-static const char *secLabels[maxLevels] = { "section", "subsection", "subsubsection", "paragraph", "subparagraph" };
+static const char *secLabels[maxLevels] = { 
+      "section", "subsection", "subsubsection", "paragraph", "subparagraph" };
 
 static const char *getSectionName(int level)
 {
@@ -87,6 +88,70 @@ static const char *getSectionName(int level)
    }
 
    return secLabels[qMin(maxLevels - 1, l)];
+}
+
+static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &name, 
+         const QString &width, const QString &height)
+{
+    if (hasCaption) {
+      t << "\n\\begin{DoxyImage}\n";
+
+    } else {
+      t << "\n\\begin{DoxyImageNoCaption}\n"
+             "  \\mbox{";
+    }
+
+    t << "\\includegraphics";
+
+    if (! width.isEmpty() || ! height.isEmpty()) {
+      t << "[";
+    } 
+
+    if (! width.isEmpty()) {
+      t << "width=" << width;
+    }
+
+    if (! width.isEmpty() && !height.isEmpty()) {
+      t << ",";
+    }
+
+    if (! height.isEmpty()) {
+      t << "height=" << height;
+    }
+
+    if (width.isEmpty() && height.isEmpty()) {
+      /* default setting */
+      t << "[width=\\textwidth,height=\\textheight/2,keepaspectratio=true]";
+
+    } else {
+      t << "]";
+    }
+
+    t << "{" << name << "}";
+
+    if (hasCaption) {
+      t << "\n\\caption{";
+    }
+}
+
+static void visitPostEnd(QTextStream &t, const bool hasCaption)
+{
+   // end mbox or caption
+   t << "}\n"; 
+
+   if (hasCaption) {
+      t << "\\end{DoxyImage}\n";
+
+   } else{
+      t << "\\end{DoxyImageNoCaption}\n";
+   }
+}
+
+static void visitCaption(LatexDocVisitor *parent, QList<DocNode *> children)
+{
+   for (auto n : children) {
+      n->accept(parent);
+   }
 }
 
 QString LatexDocVisitor::escapeMakeIndexChars(const QString &str)
@@ -312,11 +377,13 @@ void LatexDocVisitor::visit(DocVerbatim *s)
    }
 
    QString lang = m_langExt;
-   if (! s->language().isEmpty()) { // explicit language setting
+   if (! s->language().isEmpty()) { 
+      // explicit language setting
       lang = s->language();
    }
 
    SrcLangExt langExt = getLanguageFromFileName(lang);
+
    switch (s->type()) {
       case DocVerbatim::Code: {
          m_t << "\n\\begin{DoxyCode}\n";
@@ -326,6 +393,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
          m_t << "\\end{DoxyCode}\n";
       }
       break;
+
       case DocVerbatim::Verbatim:
          m_t << "\\begin{DoxyVerb}";
          m_t << s->text();
@@ -353,22 +421,21 @@ void LatexDocVisitor::visit(DocVerbatim *s)
          QFile file(fileName);
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file %s for writing\n", qPrintable(fileName));
-         }
+            err("Unable to open file %s for writing, error: %d\n", csPrintable(fileName), file.error()); 
+ 
+         } else {
 
-         file.write( s->text().toUtf8() );
-         file.close();
+            file.write( s->text().toUtf8() );
+            file.close();
+       
+            startDotFile(fileName, s->width(), s->height(), s->hasCaption());
+            visitCaption(this, s->children());
+            endDotFile(s->hasCaption());
 
-         m_t << "\\begin{center}\n";
-
-         startDotFile(fileName, "", "", false);
-         endDotFile(false);
-
-         m_t << "\\end{center}\n";
-
-         if (Config::getBool("dot-cleanup")) {
-            file.remove();
-         }
+            if (Config::getBool("dot-cleanup")) {
+               file.remove();
+            }
+         } 
       }
       break;
 
@@ -379,34 +446,33 @@ void LatexDocVisitor::visit(DocVerbatim *s)
          QString baseName = QString("%1%2").arg(latexOutput).arg(mscindex++);
 
          QFile file(baseName + ".msc");
+
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file %s.msc for writing\n", qPrintable(baseName));
-         }
+            err("Unable to open file %s.msc for writing, error: %d\n", qPrintable(baseName), file.error()); 
 
-         QString text = "msc {";
-         text += s->text();
-         text += "}";
+         } else {
 
-         file.write( text.toUtf8() );
-         file.close();
-
-         m_t << "\\begin{center}\n";
-         writeMscFile(baseName);
-         m_t << "\\end{center}\n";
-
-         if (Config::getBool("dot-cleanup")) {
-            file.remove();
+            QString text = "msc {";
+            text += s->text();
+            text += "}";
+   
+            file.write( text.toUtf8() );
+            file.close();
+   
+            writeMscFile(baseName, s);
+   
+            if (Config::getBool("dot-cleanup")) {
+               file.remove();
+            }
          }
       }
       break;
 
       case DocVerbatim::PlantUML: {
          QString latexOutput = Config::getString("latex-output");
-         QString baseName = writePlantUMLSource(latexOutput, s->exampleFile(), s->text());
+         QString baseName    = writePlantUMLSource(latexOutput, s->exampleFile(), s->text());
 
-         m_t << "\\begin{center}\n";
-         writePlantUMLFile(baseName);
-         m_t << "\\end{center}\n";
+         writePlantUMLFile(baseName, s);
       }
       break;
    }
@@ -562,6 +628,7 @@ void LatexDocVisitor::visitPre(DocAutoList *l)
    if (m_hide) {
       return;
    }
+
    if (l->isEnumList()) {
       m_t << "\n\\begin{DoxyEnumerate}";
    } else {
@@ -574,6 +641,7 @@ void LatexDocVisitor::visitPost(DocAutoList *l)
    if (m_hide) {
       return;
    }
+
    if (l->isEnumList()) {
       m_t << "\n\\end{DoxyEnumerate}";
    } else {
@@ -602,7 +670,8 @@ void LatexDocVisitor::visitPost(DocPara *p)
    if (m_hide) {
       return;
    }
-   if (!p->isLast() &&            // omit <p> for last paragraph
+
+   if (! p->isLast() &&            // omit <p> for last paragraph
          !(p->parent() &&           // and for parameter sections
            p->parent()->kind() == DocNode::Kind_ParamSect
           )
@@ -932,10 +1001,12 @@ void LatexDocVisitor::visitPost(DocHtmlDescData *)
 static const char *getTableName(const DocNode *n)
 {
    bool isNested = false;
+
    while (n && !isNested) {
-      isNested = n->kind() == DocNode::Kind_HtmlTable;
+      isNested = n->kind() == DocNode::Kind_HtmlTable || n->kind() == DocNode::Kind_ParamSect;
       n  = n->parent();
    }
+
    return isNested ? "TabularNC" : "TabularC";
 }
 
@@ -943,12 +1014,15 @@ void LatexDocVisitor::visitPre(DocHtmlTable *t)
 {
    m_rowSpans.clear();
    m_insideTable = true;
+
    if (m_hide) {
       return;
    }
+
    if (t->hasCaption()) {
       m_t << "\\begin{table}[h]";
    }
+
    m_t << "\\begin{" << getTableName(t->parent()) << "}{" << t->numColumns() << "}\n";
    m_numCols = t->numColumns();
    m_t << "\\hline\n";
@@ -1232,32 +1306,17 @@ void LatexDocVisitor::visitPre(DocImage *img)
       if (m_hide) {
          return;
       }
-
-      if (img->hasCaption()) {
-         m_t << "\n\\begin{DoxyImage}\n";
-      } else {
-         m_t << "\n\\begin{DoxyImageNoCaption}\n"
-             "  \\mbox{";
-      }
-
+   
       QString gfxName = img->name();
-      if (gfxName.right(4) == ".eps" || gfxName.right(4) == ".pdf") {
+
+      if (gfxName.endsWith(".eps") || gfxName.endsWith(".pdf")) {
          gfxName = gfxName.left(gfxName.length() - 4);
       }
 
-      m_t << "\\includegraphics";
-      if (!img->width().isEmpty()) {
-         m_t << "[width=" << img->width() << "]";
-      } else if (!img->height().isEmpty()) {
-         m_t << "[height=" << img->height() << "]";
-      }
+      visitPreStart(m_t, img->hasCaption(), gfxName, img->width(), img->height());
 
-      m_t << "{" << gfxName << "}";
-      if (img->hasCaption()) {
-         m_t << "\n\\caption{";
-      }
-
-   } else { // other format -> skip
+   } else { 
+      // other format -> skip
       pushEnabled();
       m_hide = true;
    }
@@ -1270,14 +1329,10 @@ void LatexDocVisitor::visitPost(DocImage *img)
          return;
       }
 
-      m_t << "}\n"; // end mbox or caption
-      if (img->hasCaption()) {
-         m_t << "\\end{DoxyImage}\n";
-      } else {
-         m_t << "\\end{DoxyImageNoCaption}\n";
-      }
+      visitPostEnd(m_t, img->hasCaption());
 
-   } else { // other format
+   } else { 
+      // other format
       popEnabled();
    }
 }
@@ -1791,37 +1846,9 @@ void LatexDocVisitor::startDotFile(const QString &fileName, const QString &width
    baseName.prepend("dot_");
    QString outDir = Config::getString("latex-output");
    QString name = fileName;
+
    writeDotGraphFromFile(name, outDir, baseName, GOF_EPS);
-
-   if (hasCaption) {
-      m_t << "\n\\begin{DoxyImage}\n";
-   } else {
-      m_t << "\n\\begin{DoxyImageNoCaption}\n"
-          "  \\mbox{";
-   }
-
-   m_t << "\\includegraphics";
-   if (!width.isEmpty()) {
-      m_t << "[width=" << width << "]";
-   } else if (!height.isEmpty()) {
-      m_t << "[height=" << height << "]";
-   } else {
-      m_t << "[width=\\textwidth,height=\\textheight/2,keepaspectratio=true]";
-   }
-   m_t << "{" << baseName;
-   //if (Config::getBool("latex-pdf"))
-   //{
-   //  m_t << ".pdf";
-   //}
-   //else
-   //{
-   //  m_t << ".eps";
-   //}
-   m_t << "}";
-
-   if (hasCaption) {
-      m_t << "\n\\caption{";
-   }
+   visitPreStart(m_t, hasCaption, baseName, width, height);    
 }
 
 void LatexDocVisitor::endDotFile(bool hasCaption)
@@ -1829,12 +1856,8 @@ void LatexDocVisitor::endDotFile(bool hasCaption)
    if (m_hide) {
       return;
    }
-   m_t << "}\n"; // end caption or mbox
-   if (hasCaption) {
-      m_t << "\\end{DoxyImage}\n";
-   } else {
-      m_t << "\\end{DoxyImageNoCaption}\n";
-   }
+
+   visitPostEnd(m_t, hasCaption);
 }
 
 void LatexDocVisitor::startMscFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
@@ -1851,39 +1874,9 @@ void LatexDocVisitor::startMscFile(const QString &fileName, const QString &width
    baseName.prepend("msc_");
 
    QString outDir = Config::getString("latex-output");
+
    writeMscGraphFromFile(fileName, outDir, baseName, MSC_EPS);
-
-   if (hasCaption) {
-      m_t << "\n\\begin{DoxyImage}\n";
-   } else {
-      m_t << "\n\\begin{DoxyImageNoCaption}\n"
-          "  \\mbox{";
-   }
-
-   m_t << "\\includegraphics";
-
-   if (!width.isEmpty()) {
-      m_t << "[width=" << width << "]";
-   } else if (!height.isEmpty()) {
-      m_t << "[height=" << height << "]";
-   } else {
-      m_t << "[width=\\textwidth,height=\\textheight/2,keepaspectratio=true]";
-   }
-   m_t << "{" << baseName;
-
-   //if (Config::getBool("latex-pdf"))
-   //{
-   //  m_t << ".pdf";
-   //}
-   //else
-   //{
-   //  m_t << ".eps";
-   //}
-   m_t << "}";
-
-   if (hasCaption) {
-      m_t << "\n\\caption{";
-   }
+   visitPreStart(m_t,hasCaption, baseName, width, height);
 }
 
 void LatexDocVisitor::endMscFile(bool hasCaption)
@@ -1891,15 +1884,11 @@ void LatexDocVisitor::endMscFile(bool hasCaption)
    if (m_hide) {
       return;
    }
-   m_t << "}\n"; // end caption or mbox
-   if (hasCaption) {
-      m_t << "\\end{DoxyImage}\n";
-   } else {
-      m_t << "\\end{DoxyImageNoCaption}\n";
-   }
+
+   visitPostEnd(m_t, hasCaption);
 }
 
-void LatexDocVisitor::writeMscFile(const QString &baseName)
+void LatexDocVisitor::writeMscFile(const QString &baseName, DocVerbatim *s)
 {
    QString shortName = baseName;
    int i;
@@ -1909,13 +1898,12 @@ void LatexDocVisitor::writeMscFile(const QString &baseName)
    }
 
    QString outDir = Config::getString("latex-output");
-   writeMscGraphFromFile(baseName + ".msc", outDir, shortName, MSC_EPS);
 
-   m_t << "\n\\begin{DoxyImageNoCaption}"
-       "  \\mbox{\\includegraphics";
-   m_t << "{" << shortName << "}";
-   m_t << "}\n"; // end mbox
-   m_t << "\\end{DoxyImageNoCaption}\n";
+   writeMscGraphFromFile(baseName + ".msc", outDir, shortName, MSC_EPS);
+ 
+   visitPreStart(m_t, s->hasCaption(), shortName, s->width(),s->height());
+   visitCaption(this, s->children());
+   visitPostEnd(m_t,  s->hasCaption());  
 }
 
 void LatexDocVisitor::startDiaFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
@@ -1932,40 +1920,9 @@ void LatexDocVisitor::startDiaFile(const QString &fileName, const QString &width
    baseName.prepend("dia_");
 
    QString outDir = Config::getString("latex-output");
+
    writeDiaGraphFromFile(fileName, outDir, baseName, DIA_EPS);
-
-   if (hasCaption) {
-      m_t << "\n\\begin{DoxyImage}\n";
-
-   } else {
-      m_t << "\n\\begin{DoxyImageNoCaption}\n"
-          "  \\mbox{";
-   }
-   m_t << "\\includegraphics";
-
-   if (!width.isEmpty()) {
-      m_t << "[width=" << width << "]";
-   } else if (!height.isEmpty()) {
-      m_t << "[height=" << height << "]";
-   } else {
-      m_t << "[width=\\textwidth,height=\\textheight/2,keepaspectratio=true]";
-   }
-
-   m_t << "{" << baseName;
-
-   //if (Config::getBool("latex-pdf"))
-   //{
-   //  m_t << ".pdf";
-   //}
-   //else
-   //{
-   //  m_t << ".eps";
-   //}
-   m_t << "}";
-
-   if (hasCaption) {
-      m_t << "\n\\caption{";
-   }
+   visitPreStart(m_t,hasCaption, baseName, width, height); 
 }
 
 void LatexDocVisitor::endDiaFile(bool hasCaption)
@@ -1973,16 +1930,11 @@ void LatexDocVisitor::endDiaFile(bool hasCaption)
    if (m_hide) {
       return;
    }
-   m_t << "}\n"; // end caption or mbox
-   if (hasCaption) {
-      m_t << "\\end{DoxyImage}\n";
-   } else {
-      m_t << "\\end{DoxyImageNoCaption}\n";
-   }
+   
+   visitPostEnd(m_t, hasCaption);
 }
 
-
-void LatexDocVisitor::writeDiaFile(const QString &baseName)
+void LatexDocVisitor::writeDiaFile(const QString &baseName, DocVerbatim *s)
 {
    QString shortName = baseName;
    int i;
@@ -1994,14 +1946,12 @@ void LatexDocVisitor::writeDiaFile(const QString &baseName)
    QString outDir = Config::getString("latex-output");
    writeDiaGraphFromFile(baseName + ".dia", outDir, shortName, DIA_EPS);
 
-   m_t << "\n\\begin{DoxyImageNoCaption}"
-       "  \\mbox{\\includegraphics";
-   m_t << "{" << shortName << "}";
-   m_t << "}\n"; // end mbox
-   m_t << "\\end{DoxyImageNoCaption}\n";
+   visitPreStart(m_t, s->hasCaption(), shortName, s->width(), s->height());
+   visitCaption(this, s->children());
+   visitPostEnd(m_t, s->hasCaption());  
 }
 
-void LatexDocVisitor::writePlantUMLFile(const QString &baseName)
+void LatexDocVisitor::writePlantUMLFile(const QString &baseName, DocVerbatim *s)
 {
    QString shortName = baseName;            
    int i;
@@ -2013,10 +1963,8 @@ void LatexDocVisitor::writePlantUMLFile(const QString &baseName)
    QString outDir = Config::getString("latex-output");
    generatePlantUMLOutput(baseName, outDir, PUML_EPS);
 
-   m_t << "\n\\begin{DoxyImageNoCaption}"
-       "  \\mbox{\\includegraphics";
-   m_t << "{" << shortName << "}";
-   m_t << "}\n"; // end mbox
-   m_t << "\\end{DoxyImageNoCaption}\n";
+   visitPreStart(m_t, s->hasCaption(), shortName, s->width(), s->height());
+   visitCaption(this, s->children());
+   visitPostEnd(m_t, s->hasCaption());
 }
 

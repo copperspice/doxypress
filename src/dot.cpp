@@ -377,11 +377,11 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
       QByteArray buf;
       buf.resize(maxLineLen);
 
-      int numBytes = f.readLine(buf.data(), maxLineLen);
-      buf[numBytes - 1] = '\0';
+      int numBytes = f.readLine(buf.data(), maxLineLen);      
+      buf.resize(numBytes);
 
-      if (buf.left(5) == "<area") {
-         t << replaceRef(buf, relPath, urlOnly, context);
+      if (buf.startsWith("<area")) {
+         t << replaceRef(buf, relPath, urlOnly, context);         
       }
    }
 
@@ -987,6 +987,8 @@ bool DotFilePatcher::run()
          break;
       }
       
+      line.resize(numBytes);
+
       int i;
       assert(numBytes < maxLineLen);
 
@@ -2268,12 +2270,12 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
    int count = 0;
 
    for (auto n : *m_rootSubgraphs) {      
-      QString imgExt = Config::getEnum("dot-image-format");
+      QString imgExt   = Config::getEnum("dot-image-format");
 
       QString baseName = QString("inherit_graph_%1").arg(count++);
      
-      QString imgName = baseName + "." + imgExt;
-      QString mapName = baseName + ".map";
+      QString imgName  = baseName + "." + imgExt;
+      QString mapName  = baseName + ".map";
 
       QString absImgName  = d.absolutePath() + "/" + imgName;
       QString absMapName  = d.absolutePath() + "/" + mapName;

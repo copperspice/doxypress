@@ -281,7 +281,8 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    t_stream << "% Packages required by DoxyPress\n"
       "\\usepackage{fixltx2e}\n" // for \textsubscript
       "\\usepackage{calc}\n"
-      "\\usepackage{doxypress}\n";
+      "\\usepackage{doxypress}\n"
+      "\\usepackage[export]{adjustbox} % also loads graphicx\n";
     
    for (auto fileName : extraLatexStyle) {   
 

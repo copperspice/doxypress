@@ -246,6 +246,23 @@ int Mapper::map(const QString &n)
    return retval;
 }
 
+QString Mapper::map(const int n)
+{
+   QString retval;
+
+// broom check 12/11       should this be find()  ? 
+
+   for (auto item = m_map.begin(); item != m_map.end(); ++item) {
+      int value = item.value(); 
+
+      if (value == n || (value == (n | SIMPLESECT_BIT))) {
+         return item.key();
+      }
+   }
+
+   return retval;
+}
+
 void Mappers::freeMappers()
 {
    delete cmdMapper;

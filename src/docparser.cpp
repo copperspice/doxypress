@@ -153,9 +153,9 @@ static void docParserPushContext(bool saveParamInfo = true)
    ctx.relPath            = s_relPath;
 
    if (saveParamInfo) {
-      ctx.hasParamCommand    = s_hasParamCommand;
-      ctx.hasReturnCommand   = s_hasReturnCommand;
-      ctx.paramsFound        = s_paramsFound;
+      ctx.hasParamCommand   = s_hasParamCommand;
+      ctx.hasReturnCommand  = s_hasReturnCommand;
+      ctx.paramsFound       = s_paramsFound;
    }
 
    ctx.memberDef          = s_memberDef;
@@ -190,7 +190,7 @@ static void docParserPopContext(bool keepParamInfo = false)
    s_fileName            = ctx.fileName;
    s_relPath             = ctx.relPath;
 
-   if (!keepParamInfo) {
+   if (! keepParamInfo) {
       s_hasParamCommand     = ctx.hasParamCommand;
       s_hasReturnCommand    = ctx.hasReturnCommand;
       s_paramsFound         = ctx.paramsFound;
@@ -251,6 +251,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
 
       if (inImage.open(QIODevice::ReadOnly)) {
          result = fileName;
+
          int i;
 
          if ((i = result.lastIndexOf('/')) != -1 || (i = result.lastIndexOf('\\')) != -1) {
@@ -291,44 +292,33 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
          }
 
          QString outputFile = outputDir + "/" + result;
-         QFileInfo outfi(outputFile);
-
-         if (outfi.isSymLink()) {
-            QFile::remove(outputFile);
-
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Destination of image %s is a symlink, replacing with image", 
-                  qPrintable(outputFile));
-         }
-
+                  
          if (outputFile != inputFile) { 
             // prevent copying to ourself
-            QFile outImage(outputFile);
 
-            if (outImage.open(QIODevice::WriteOnly)) { 
+            QFile::remove(outputFile);
+            bool copyOk = inImage.copy(outputFile);
+        
+            if (copyOk) { 
                // copy the image
-               char *buffer = new char[inImage.size()];
-               inImage.read(buffer, inImage.size());
-
-               outImage.write(buffer, inImage.size());
-               outImage.flush();
-
-               delete[] buffer;
 
                if (type == DocImage::Html) {
                   Doxy_Globals::indexList->addImageFile(result);
                }
 
             } else {
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to write output image %s", qPrintable(outputFile));
+               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to open image file for writing %s, error: %d\n", 
+                        csPrintable(outputFile), inImage.error());
             }
 
          } else {
-            printf("Source and Destination directories are the same\n");
+            printf("Source and Destination directories are the same name\n");
 
          }
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to open image %s", qPrintable(fileName));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to open image file for reading %s, error: %d", 
+                        csPrintable(fileName), inImage.error() );       
       }
 
       if (type == DocImage::Latex && Config::getBool("latex-pdf") && fd->name().right(4) == ".eps") {
@@ -1281,6 +1271,85 @@ static void handleAnchorName(DocNode *parent)
 
    doctokenizerYYsetStatePara();
 }
+
+
+/* Helper function that deals with the title, width, and height arguments of various commands.
+ * @param[in] cmd        Command id for which to extract caption and size info.
+ * @param[in] parent     Parent node, owner of the children list passed as
+ *                       the third argument.
+ * @param[in] children   The list of child nodes to which the node representing
+ *                       the token can be added.
+ * @param[out] width     the extracted width specifier
+ * @param[out] height    the extracted height specifier  
+ */
+static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocNode *> &children, 
+                  QString &width, QString &height)
+{
+   s_nodeStack.push(parent);
+   
+   // parse title
+   doctokenizerYYsetStateTitle();
+   int tok;
+
+   while ((tok = doctokenizerYYlex())) {    
+
+      if (tok == TK_WORD && g_token->name == "width=" || g_token->name == "height=") {
+         // special case: no title, but we do have a size indicator
+         doctokenizerYYsetStateTitleAttrValue();
+
+         // strip =
+         g_token->name = g_token->name.left(g_token->name.length()-1);
+         break;
+       } 
+
+      if (! defaultHandleToken(parent,tok,children))    {
+      
+         switch (tok) {
+            case TK_COMMAND: 
+               warn_doc_error(s_fileName, doctokenizerYYlineno," Illegal command %s as part of a \\%s",
+               csPrintable(g_token->name), csPrintable(Mappers::cmdMapper->map(cmd)) );
+               break;
+            
+            case TK_SYMBOL: 
+               warn_doc_error(s_fileName, doctokenizerYYlineno," Unsupported symbol %s found", csPrintable(g_token->name));
+               break;
+            
+            default:
+               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", csPrintable(tokToString(tok)));
+               break;
+         }
+      }
+   }
+
+   // parse size attributes
+   if (tok == 0) {
+     tok = doctokenizerYYlex();
+   }
+
+   while (tok == TK_WORD)  { 
+      // there are values following the title
+  
+      if (g_token->name == "width")  {
+         width = g_token->chars;
+
+      } else if (g_token->name == "height")  {
+         height = g_token->chars;
+
+      } else {
+         warn_doc_error(s_fileName,doctokenizerYYlineno,"Unknown option %s after \\%s command, expected 'width' or 'height'",
+                  csPrintable(g_token->name), csPrintable(Mappers::cmdMapper->map(cmd)));
+      }
+
+      tok = doctokenizerYYlex();     
+   }
+
+   doctokenizerYYsetStatePara();
+
+   handlePendingStyleCommands(parent,children);
+   DocNode *n = s_nodeStack.pop();
+   assert(n == parent);
+}
+
 
 /* Helper function that deals with the most common tokens allowed in
  * title like sections.
@@ -2539,10 +2608,9 @@ void DocRef::parse()
 
 DocCite::DocCite(DocNode *parent, const QString &target, const QString &) 
 {
-   static uint numBibFiles = Config::getList("cite-bib-files").count();
+   static const int numBibFiles = Config::getList("cite-bib-files").count();
 
    m_parent = parent;
-
    assert(! target.isEmpty());
 
    m_relPath = s_relPath;
@@ -2551,16 +2619,27 @@ DocCite::DocCite(DocNode *parent, const QString &target, const QString &)
    if (numBibFiles > 0 && cite && !cite->text.isEmpty()) {
       // ref to citation
 
-      m_text         = cite->text;
-      m_ref          = cite->ref;
-      m_anchor       = CiteConsts::anchorPrefix + cite->label;
-      m_file         = convertNameToFile(CiteConsts::fileName, false, true);
+      m_text   = cite->text;
+      m_ref    = cite->ref;
+      m_anchor = CiteConsts::anchorPrefix + cite->label;
+      m_file   = convertNameToFile(CiteConsts::fileName, false, true);
      
       return;
    }
 
    m_text = target;
-   warn_doc_error(s_fileName, doctokenizerYYlineno, "unable to resolve reference to '%s' for \\cite command", qPrintable(target));
+
+   if (numBibFiles == 0) {
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "No bib files for the \\cite command were specified in 'CITE BIB FILES'");
+
+   } else if (cite == 0) {
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to resolve reference to '%s' for \\cite command", 
+                  csPrintable(target));
+
+   } else {
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "No value was specified for the \\cite command to '%s'",
+                  csPrintable(target));
+   }   
 }
 
 DocLink::DocLink(DocNode *parent, const QString &target)
@@ -2694,56 +2773,14 @@ DocDotFile::DocDotFile(DocNode *parent, const QString &name, const QString &cont
 }
 
 void DocDotFile::parse()
-{
-   DBG(("DocDotFile::parse() start\n"));
-   s_nodeStack.push(this);
- 
-   doctokenizerYYsetStateTitle();
-   int tok;
-
-   while ((tok = doctokenizerYYlex())) {
-      if (!defaultHandleToken(this, tok, m_children)) {
-         switch (tok) {
-            case TK_COMMAND:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a \\dotfile",
-                              qPrintable(g_token->name));
-               break;
-            case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
-                              qPrintable(g_token->name));
-               break;
-            default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              qPrintable(tokToString(tok)));
-               break;
-         }
-      }
-   }
-
-   tok = doctokenizerYYlex();
-
-   while (tok == TK_WORD) { // there are values following the title
-      if (g_token->name == "width") {
-         m_width = g_token->chars;
-
-      } else if (g_token->name == "height") {
-         m_height = g_token->chars;
-
-      } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unknown option %s after image title",
-                        qPrintable(g_token->name));
-      }
-      tok = doctokenizerYYlex();
-   }
-   assert(tok == 0);
-
-   doctokenizerYYsetStatePara();
-   handlePendingStyleCommands(this, m_children);
+{  
+   defaultHandleTitleAndSize(CMD_DOTFILE, this, m_children, m_width, m_height);
 
    bool ambig;
    QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::dotFileNameDict, m_name, ambig);
 
-   if (fd == 0 && m_name.right(4) != ".dot") { // try with .dot extension as well
+   if (fd == 0 && m_name.right(4) != ".dot") { 	
+      // try with .dot extension as well
       fd = findFileDef(Doxy_Globals::dotFileNameDict, m_name + ".dot", ambig);
    }
 
@@ -2751,19 +2788,13 @@ void DocDotFile::parse()
       m_file = fd->getFilePath();
 
    } else if (ambig) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "included dot file name %s is ambiguous.\n"
-                     "Possible candidates:\n%s", qPrintable(m_name),
-                     qPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name))
-                    );
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included dot file name %s is ambiguous.\n"
+                  "Possible candidates:\n%s", csPrintable(m_name),
+                  csPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name)));
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "included dot file %s is not found "
-                     "in any of the paths specified via DOTFILE_DIRS", qPrintable(m_name));
-   }
-   
-   DocNode *n = s_nodeStack.pop();
-   assert(n == this);
-
-   DBG(("DocDotFile::parse() end\n"));
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included dot file %s was not found "
+                  "in any of the paths specified via DOTFILE_DIRS", csPrintable(m_name));
+   }   
 }
 
 DocMscFile::DocMscFile(DocNode *parent, const QString &name, const QString &context) :
@@ -2774,53 +2805,13 @@ DocMscFile::DocMscFile(DocNode *parent, const QString &name, const QString &cont
 
 void DocMscFile::parse()
 {
-   DBG(("DocMscFile::parse() start\n"));
-   s_nodeStack.push(this);
- 
-   doctokenizerYYsetStateTitle();
-   int tok;
-
-   while ((tok = doctokenizerYYlex())) {
-      if (!defaultHandleToken(this, tok, m_children)) {
-         switch (tok) {
-            case TK_COMMAND:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a \\mscfile",
-                              qPrintable(g_token->name));
-               break;
-            case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
-                              qPrintable(g_token->name));
-               break;
-            default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              qPrintable(tokToString(tok)));
-               break;
-         }
-      }
-   }
-
-   tok = doctokenizerYYlex();
-
-   while (tok == TK_WORD) { // there are values following the title
-      if (g_token->name == "width") {
-         m_width = g_token->chars;
-      } else if (g_token->name == "height") {
-         m_height = g_token->chars;
-      } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unknown option %s after image title",
-                        qPrintable(g_token->name));
-      }
-      tok = doctokenizerYYlex();
-   }
-
-   assert(tok == 0);
-   doctokenizerYYsetStatePara();
-   handlePendingStyleCommands(this, m_children);
-
+   defaultHandleTitleAndSize(CMD_MSCFILE, this, m_children, m_width, m_height);
+  
    bool ambig;
    QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::mscFileNameDict, m_name, ambig);
 
-   if (fd == 0 && m_name.right(4) != ".msc") { // try with .msc extension as well
+   if (fd == 0 && m_name.right(4) != ".msc") { 
+      // try with .msc extension as well
       fd = findFileDef(Doxy_Globals::mscFileNameDict, m_name + ".msc", ambig);
    }
 
@@ -2828,19 +2819,14 @@ void DocMscFile::parse()
       m_file = fd->getFilePath();
 
    } else if (ambig) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "included msc file name %s is ambiguous.\n"
-                     "Possible candidates:\n%s", qPrintable(m_name),
-                     qPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name)));
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included msc file name %s is ambiguous.\n"
+                  "Possible candidates:\n%s", csPrintable(m_name),
+                  csPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name)));
 
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "included msc file %s is not found "
-                     "in any of the paths specified via MSCFILE_DIRS", qPrintable(m_name));
-   }
-   
-   DocNode *n = s_nodeStack.pop();
-   assert(n == this);
-
-   DBG(("DocMscFile::parse() end\n"));
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included msc file %s was not found "
+                  "in any of the paths specified via MSCFILE DIRS", csPrintable(m_name));
+   }    
 }
 
 DocDiaFile::DocDiaFile(DocNode *parent, const QString &name, const QString &context) :
@@ -2851,54 +2837,13 @@ DocDiaFile::DocDiaFile(DocNode *parent, const QString &name, const QString &cont
 
 void DocDiaFile::parse()
 {
-  DBG(("DocDiaFile::parse() start\n")); 
-  s_nodeStack.push(this);
- 
-   doctokenizerYYsetStateTitle();
-   int tok;
-
-   while ((tok = doctokenizerYYlex())) {
-      if (!defaultHandleToken(this, tok, m_children)) {
-         switch (tok) {
-            case TK_COMMAND:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a \\diafile",
-                              qPrintable(g_token->name));
-               break;
-            case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
-                              qPrintable(g_token->name));
-               break;
-            default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              qPrintable(tokToString(tok)));
-               break;
-         }
-      }
-   }
-
-   tok = doctokenizerYYlex();
-
-   while (tok == TK_WORD) { // there are values following the title
-      if (g_token->name == "width") {
-         m_width = g_token->chars;
-
-      } else if (g_token->name == "height") {
-         m_height = g_token->chars;
-      } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unknown option %s after image title",
-                        qPrintable(g_token->name));
-      }
-      tok = doctokenizerYYlex();
-   }
-
-   assert(tok == 0);
-   doctokenizerYYsetStatePara();
-   handlePendingStyleCommands(this, m_children);
+   defaultHandleTitleAndSize(CMD_DIAFILE, this, m_children, m_width, m_height);
 
    bool ambig;
    QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::diaFileNameDict, m_name, ambig);
 
-   if (fd == 0 && m_name.right(4) != ".dia") { // try with .dia extension as well
+   if (fd == 0 && m_name.right(4) != ".dia") { 
+      // try with .dia extension as well
       fd = findFileDef(Doxy_Globals::diaFileNameDict, m_name + ".dia", ambig);
    }
 
@@ -2906,19 +2851,14 @@ void DocDiaFile::parse()
       m_file = fd->getFilePath();
 
    } else if (ambig) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "included dia file name %s is ambiguous.\n"
-                     "Possible candidates:\n%s", qPrintable(m_name),
-                     qPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name)));
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included dia file name %s is ambiguous.\n"
+                  "Possible candidates:\n%s", qPrintable(m_name),
+                  csPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name)));
 
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "included dia file %s is not found "
-                     "in any of the paths specified via DIAFILE_DIRS", qPrintable(m_name));
-   }
-   
-   DocNode *n = s_nodeStack.pop();
-   assert(n == this);
-
-   DBG(("DocDiaFile::parse() end\n"));
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included dia file %s was not found "
+                  "in any of the paths specified via DIAFILE DIRS", csPrintable(m_name));
+   }     
 }
 
 DocImage::DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString &name, Type t, const QString &url) 
@@ -2929,64 +2869,7 @@ DocImage::DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString
 
 void DocImage::parse()
 {
-   DBG(("DocImage::parse() start\n"));
-   s_nodeStack.push(this);
-
-   // parse title
-   doctokenizerYYsetStateTitle();
-   int tok;
-
-   while ((tok = doctokenizerYYlex())) {
-      if (tok == TK_WORD && (g_token->name == "width=" || g_token->name == "height=")) {
-         // special case: no title, but we do have a size indicator
-         doctokenizerYYsetStateTitleAttrValue();
-         
-         g_token->name = g_token->name.left(g_token->name.length() - 1);
-         break;
-      }
-
-      if (!defaultHandleToken(this, tok, m_children)) {
-         switch (tok) {
-            case TK_COMMAND:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a \\image",
-                              qPrintable(g_token->name));
-               break;
-            case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
-                              qPrintable(g_token->name));
-               break;
-            default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              qPrintable(tokToString(tok)));
-               break;
-         }
-      }
-   }
-
-   // parse size attributes
-   tok = doctokenizerYYlex();
-
-   while (tok == TK_WORD) { // there are values following the title
-      if (g_token->name == "width") {
-         m_width = g_token->chars;
-
-      } else if (g_token->name == "height") {
-         m_height = g_token->chars;
-
-      } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unknown option %s after image title",
-                        qPrintable(g_token->name));
-      }
-      tok = doctokenizerYYlex();
-   }
-
-   doctokenizerYYsetStatePara();
-   handlePendingStyleCommands(this, m_children);
-   
-   DocNode *n = s_nodeStack.pop();
-   assert(n == this);
-
-   DBG(("DocImage::parse() end\n"));
+   defaultHandleTitleAndSize(CMD_IMAGE, this, m_children, m_width, m_height);   
 }
 
 int DocHtmlHeader::parse()
@@ -3002,46 +2885,47 @@ int DocHtmlHeader::parse()
          switch (tok) {
             case TK_COMMAND:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a <h%d> tag",
-                              qPrintable(g_token->name), m_level);
+                              csPrintable(g_token->name), m_level);
                break;
+
             case TK_HTMLTAG: {
                int tagId = Mappers::htmlTagMapper->map(g_token->name);
                if (tagId == HTML_H1 && g_token->endTag) {        // found </h1> tag
                   if (m_level != 1) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h1>",
-                                    m_level);
+                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h1>", m_level);
                   }
                   goto endheader;
+
                } else if (tagId == HTML_H2 && g_token->endTag) { // found </h2> tag
                   if (m_level != 2) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h2>",
-                                    m_level);
+                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h2>", m_level);
                   }
                   goto endheader;
+
                } else if (tagId == HTML_H3 && g_token->endTag) { // found </h3> tag
                   if (m_level != 3) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h3>",
-                                    m_level);
+                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h3>", m_level);
                   }
                   goto endheader;
+
                } else if (tagId == HTML_H4 && g_token->endTag) { // found </h4> tag
                   if (m_level != 4) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h4>",
-                                    m_level);
+                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h4>", m_level);
                   }
                   goto endheader;
+
                } else if (tagId == HTML_H5 && g_token->endTag) { // found </h5> tag
                   if (m_level != 5) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h5>",
-                                    m_level);
+                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h5>", m_level);
                   }
                   goto endheader;
+
                } else if (tagId == HTML_H6 && g_token->endTag) { // found </h6> tag
                   if (m_level != 6) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h6>",
-                                    m_level);
+                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h6>", m_level);
                   }
                   goto endheader;
+
                } else if (tagId == HTML_A) {
                   if (!g_token->endTag) {
                      handleAHref(this, m_children, g_token->attribs);
@@ -3052,18 +2936,20 @@ int DocHtmlHeader::parse()
 
                } else {
                   warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected html tag <%s%s> found within <h%d> context",
-                                 g_token->endTag ? "/" : "", qPrintable(g_token->name), m_level);
+                                 g_token->endTag ? "/" : "", csPrintable(g_token->name), m_level);
                }
 
             }
             break;
+
             case TK_SYMBOL:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
-                              qPrintable(g_token->name));
+                              csPrintable(g_token->name));
                break;
+
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              qPrintable(tokToString(tok)));
+                              csPrintable(tokToString(tok)));
                break;
          }
       }
@@ -5358,13 +5244,14 @@ void DocPara::handleImage(const QString &cmdName)
    img->parse();
 }
 
-void DocPara::handleDotFile(const QString &cmdName)
+template<class T>
+void DocPara::handleFile(const QString &cmdName)
 {
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after %s command",
-                     qPrintable(cmdName));
+                     csPrintable(cmdName));
       return;
    }
 
@@ -5374,63 +5261,13 @@ void DocPara::handleDotFile(const QString &cmdName)
 
    if (tok != TK_WORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     qPrintable(tokToString(tok)), qPrintable(cmdName));
+                     csPrintable(tokToString(tok)), csPrintable(cmdName));
       return;
    }
 
    QString name = g_token->name;
-   DocDotFile *df = new DocDotFile(this, name, s_context);
-   m_children.append(df);
-   df->parse();
-}
 
-void DocPara::handleMscFile(const QString &cmdName)
-{
-   int tok = doctokenizerYYlex();
-
-   if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after %s command",
-                     qPrintable(cmdName));
-      return;
-   }
-
-   doctokenizerYYsetStateFile();
-   tok = doctokenizerYYlex();
-   doctokenizerYYsetStatePara();
-
-   if (tok != TK_WORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     qPrintable(tokToString(tok)), qPrintable(cmdName));
-      return;
-   }
-
-   QString name = g_token->name;
-   DocMscFile *df = new DocMscFile(this, name, s_context);
-   m_children.append(df);
-   df->parse();
-}
-
-void DocPara::handleDiaFile(const QString &cmdName)
-{
-   int tok = doctokenizerYYlex();
-
-   if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after %s command",
-                     qPrintable(cmdName));
-      return;
-   }
-   doctokenizerYYsetStateFile();
-   tok = doctokenizerYYlex();
-   doctokenizerYYsetStatePara();
- 
-  if (tok != TK_WORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     qPrintable(tokToString(tok)), qPrintable(cmdName));
-      return;
-   }
- 
-   QString name = g_token->name;
-   DocDiaFile *df = new DocDiaFile(this, name, s_context);
+   T *df = new T(this, name, s_context);
    m_children.append(df);
    df->parse();
 }
@@ -5695,96 +5532,125 @@ int DocPara::handleCommand(const QString &cmdName)
             m_children.append(new DocWhiteSpace(this, " "));
          }
          break;
+
       case CMD_BSLASH:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_BSlash));
          break;
+
       case CMD_AT:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_At));
          break;
+
       case CMD_LESS:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Less));
          break;
+
       case CMD_GREATER:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Greater));
          break;
+
       case CMD_AMP:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Amp));
          break;
+
       case CMD_DOLLAR:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Dollar));
          break;
+
       case CMD_HASH:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Hash));
          break;
+
       case CMD_PIPE:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Pipe));
          break;
+
       case CMD_DCOLON:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_DoubleColon));
          break;
+
       case CMD_PERCENT:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Percent));
          break;
+
       case CMD_NDASH:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
          break;
+
       case CMD_MDASH:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
          break;
+
       case CMD_QUOTE:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Quot));
          break;
+
       case CMD_SA:
          s_inSeeBlock = true;
          retval = handleSimpleSection(DocSimpleSect::See);
          s_inSeeBlock = false;
          break;
+
       case CMD_RETURN:
          retval = handleSimpleSection(DocSimpleSect::Return);
          s_hasReturnCommand = true;
          break;
+
       case CMD_AUTHOR:
          retval = handleSimpleSection(DocSimpleSect::Author);
          break;
+
       case CMD_AUTHORS:
          retval = handleSimpleSection(DocSimpleSect::Authors);
          break;
+
       case CMD_VERSION:
          retval = handleSimpleSection(DocSimpleSect::Version);
          break;
+
       case CMD_SINCE:
          retval = handleSimpleSection(DocSimpleSect::Since);
          break;
+
       case CMD_DATE:
          retval = handleSimpleSection(DocSimpleSect::Date);
          break;
+
       case CMD_NOTE:
          retval = handleSimpleSection(DocSimpleSect::Note);
          break;
+
       case CMD_WARNING:
          retval = handleSimpleSection(DocSimpleSect::Warning);
          break;
+
       case CMD_PRE:
          retval = handleSimpleSection(DocSimpleSect::Pre);
          break;
+
       case CMD_POST:
          retval = handleSimpleSection(DocSimpleSect::Post);
          break;
+
       case CMD_COPYRIGHT:
          retval = handleSimpleSection(DocSimpleSect::Copyright);
          break;
+
       case CMD_INVARIANT:
          retval = handleSimpleSection(DocSimpleSect::Invar);
          break;
+
       case CMD_REMARK:
          retval = handleSimpleSection(DocSimpleSect::Remark);
          break;
+
       case CMD_ATTENTION:
          retval = handleSimpleSection(DocSimpleSect::Attention);
          break;
+
       case CMD_PAR:
          retval = handleSimpleSection(DocSimpleSect::User);
          break;
@@ -5801,16 +5667,19 @@ int DocPara::handleCommand(const QString &cmdName)
          retval = RetVal_Section;
       }
       break;
+
       case CMD_SUBSECTION: {
          handleSection(cmdName);
          retval = RetVal_Subsection;
       }
       break;
+
       case CMD_SUBSUBSECTION: {
          handleSection(cmdName);
          retval = RetVal_Subsubsection;
       }
       break;
+
       case CMD_PARAGRAPH: {
          handleSection(cmdName);
          retval = RetVal_Paragraph;
@@ -5822,6 +5691,7 @@ int DocPara::handleCommand(const QString &cmdName)
          retval = handleStartCode();
       }
       break;
+
       case CMD_HTMLONLY: {
          doctokenizerYYsetStateHtmlOnly();
          retval = doctokenizerYYlex();
@@ -5834,6 +5704,7 @@ int DocPara::handleCommand(const QString &cmdName)
          doctokenizerYYsetStatePara();
       }
       break;
+
       case CMD_MANONLY: {
          doctokenizerYYsetStateManOnly();
          retval = doctokenizerYYlex();
@@ -5844,6 +5715,7 @@ int DocPara::handleCommand(const QString &cmdName)
          doctokenizerYYsetStatePara();
       }
       break;
+
       case CMD_RTFONLY: {
          doctokenizerYYsetStateRtfOnly();
          retval = doctokenizerYYlex();
@@ -5854,6 +5726,7 @@ int DocPara::handleCommand(const QString &cmdName)
          doctokenizerYYsetStatePara();
       }
       break;
+
       case CMD_LATEXONLY: {
          doctokenizerYYsetStateLatexOnly();
          retval = doctokenizerYYlex();
@@ -5864,6 +5737,7 @@ int DocPara::handleCommand(const QString &cmdName)
          doctokenizerYYsetStatePara();
       }
       break;
+
       case CMD_XMLONLY: {
          doctokenizerYYsetStateXmlOnly();
          retval = doctokenizerYYlex();
@@ -5874,62 +5748,121 @@ int DocPara::handleCommand(const QString &cmdName)
          doctokenizerYYsetStatePara();
       }
       break;
+
       case CMD_DBONLY: {
          doctokenizerYYsetStateDbOnly();
          retval = doctokenizerYYlex();
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::DocbookOnly, s_isExample, s_exampleName));
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "docbookonly section ended without end marker", doctokenizerYYlineno);
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Docbookonly section ended without end marker", doctokenizerYYlineno);
          }
          doctokenizerYYsetStatePara();
       }
       break;
+
       case CMD_VERBATIM: {
          doctokenizerYYsetStateVerbatim();
          retval = doctokenizerYYlex();
+
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::Verbatim, s_isExample, s_exampleName));
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "verbatim section ended without end marker");
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Verbatim section ended without an end marker");
          }
          doctokenizerYYsetStatePara();
       }
       break;
-      case CMD_DOT: {
+
+      case CMD_DOT: {                        
+         DocVerbatim *dv = new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::Dot, s_isExample, s_exampleName);
+         doctokenizerYYsetStatePara();
+
+         QString width;
+         QString height;
+
+         defaultHandleTitleAndSize(CMD_DOT, dv, dv->children(),  width, height);         
          doctokenizerYYsetStateDot();
+
          retval = doctokenizerYYlex();
-         m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::Dot, s_isExample, s_exampleName));
+
+         dv->setText(g_token->verb);
+         dv->setWidth(width);
+         dv->setHeight(height);
+
+         m_children.append(dv);
+
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "dot section ended without end marker");
-         }
+            warn_doc_error(s_fileName, doctokenizerYYlineno,"Dot section ended without an end marker");
+         }  
+ 
          doctokenizerYYsetStatePara();
       }
       break;
-      case CMD_MSC: {
+
+      case CMD_MSC: {        
+         DocVerbatim *dv = new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::Msc, s_isExample, s_exampleName);
+         doctokenizerYYsetStatePara();
+
+         QString width;
+         QString height;
+
+         defaultHandleTitleAndSize(CMD_MSC, dv, dv->children(), width, height);        
          doctokenizerYYsetStateMsc();
+
          retval = doctokenizerYYlex();
-         m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::Msc, s_isExample, s_exampleName));
+        
+         dv->setText(g_token->verb);
+         dv->setWidth(width);
+         dv->setHeight(height);
+      
+         m_children.append(dv);
+
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "msc section ended without end marker");
-         }
-         doctokenizerYYsetStatePara();
+            warn_doc_error(s_fileName, doctokenizerYYlineno,"Msc section ended without an end marker");
+         }  
+ 
+         doctokenizerYYsetStatePara();       
       }
       break;
+
       case CMD_STARTUML: {
-         static QString jarPath = Config::getString("plantuml-jar-path");
+         static const QString jarPath = Config::getString("plantuml-jar-path");
+
+         doctokenizerYYsetStatePlantUMLOpt();
+         retval = doctokenizerYYlex();
+
+         QString plantFile(g_token->sectionId);
+
+         DocVerbatim *dv = new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::PlantUML, false, s_exampleName);
+         doctokenizerYYsetStatePara();
+
+         QString width;
+         QString height;
+
+         defaultHandleTitleAndSize(CMD_STARTUML, dv, dv->children(), width, height);
 
          doctokenizerYYsetStatePlantUML();
          retval = doctokenizerYYlex();
+
+         dv->setText(g_token->verb);
+         dv->setWidth(width);
+         dv->setHeight(height);
+      
          if (jarPath.isEmpty()) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "ignoring startuml command because PLANTUML JAR PATH is not set");
-         } else {
-            m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::PlantUML, false, g_token->sectionId));
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Ignoring \\startuml command since 'PLANTUML JAR PATH' was not set");
+            delete dv;
+
+         } else { 
+            m_children.append(dv);
          }
+
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "startuml section ended without end marker");
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "startuml section ended without an end marker");
          }
+
          doctokenizerYYsetStatePara();
       }
       break;
+
       case CMD_ENDPARBLOCK:
          retval = RetVal_EndParBlock;
          break;
@@ -6062,15 +5995,15 @@ int DocPara::handleCommand(const QString &cmdName)
          break;
 
       case CMD_DOTFILE:
-         handleDotFile(cmdName);
+         handleFile<DocDotFile>(cmdName);
          break;
     
       case CMD_MSCFILE:
-         handleMscFile(cmdName);
+         handleFile<DocMscFile>(cmdName);
          break;
 
       case CMD_DIAFILE:
-         handleDiaFile(cmdName);
+         handleFile<DocDiaFile>(cmdName);
          break;
 
       case CMD_LINK:

@@ -9648,8 +9648,7 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
 
    const QFileInfoList list = dir.entryInfoList();
 
-   for (auto &item : list) {
-      QFileInfo &cfi   = const_cast<QFileInfo &>(item);
+   for (auto &cfi : list) {
       QString filePath = cfi.absoluteFilePath();
 
       if (! data.excludeSet.contains(filePath)) {
@@ -9720,8 +9719,8 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
                   continue;
                }   
 
-               cfi.setFile(filePath);
-               readDir(cfi, data);               
+               QFile tmp(filePath);
+               readDir(tmp, data);               
             }
          }
       }

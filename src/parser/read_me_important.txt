@@ -21,6 +21,9 @@ egrep -v '^#line.*$' parser_cstyle.cpp > x.cpp
 *************************************************************************/
 
 
+// parser_cstyle.cpp
+// commentscan.cpp 
+//  Doctokeizer.cpp
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
