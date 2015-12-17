@@ -114,6 +114,9 @@ CommandMap cmdMap[] = {
    { "#",             CMD_HASH },
    { "%",             CMD_PERCENT },
    { "|",             CMD_PIPE },
+   { ".",             CMD_PUNT },
+   { "+",             CMD_PLUS },
+   { "-",             CMD_MINUS },
    { "::",            CMD_DCOLON },
    { "\"",            CMD_QUOTE },
    { "_internalref",  CMD_INTERNALREF },
@@ -249,8 +252,6 @@ int Mapper::map(const QString &n)
 QString Mapper::map(const int n)
 {
    QString retval;
-
-// broom check 12/11       should this be find()  ? 
 
    for (auto item = m_map.begin(); item != m_map.end(); ++item) {
       int value = item.value(); 

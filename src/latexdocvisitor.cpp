@@ -25,7 +25,6 @@
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
-#include <filedef.h>
 #include <htmlattrib.h>
 #include <htmlentity.h>
 #include <language.h>

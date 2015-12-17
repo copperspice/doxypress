@@ -24,15 +24,11 @@
 
 #include <searchindex.h>
 
-#include <classlist.h>
 #include <config.h>
 #include <doxy_globals.h>
 #include <doxy_build_info.h>
-#include <filedef.h>
-#include <groupdef.h>
 #include <language.h>
 #include <message.h>
-#include <namespacedef.h>
 #include <resourcemgr.h>
 #include <util.h>
 

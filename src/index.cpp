@@ -1247,8 +1247,9 @@ void writeClassTree(ClassSDict *clDict, FTVHelp *ftv, bool addToIndex, bool glob
                                     cd->getOutputFileBase(), cd->anchor(), false, true, cd);
 
                if (addToIndex && (cd->getOuterScope() == 0 || cd->getOuterScope()->definitionType() != Definition::TypeClass)) {
-                  addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), 
-                                       true, cd->partOfGroups() == 0 && ! cd->isSimple() );
+
+                  bool tmp_addToIndex = cd->partOfGroups() == 0 && ! cd->isSimple();
+                  addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), false, tmp_addToIndex );
                }
 
                if (count > 0) {
@@ -2149,12 +2150,13 @@ void addNamespaceMemberNameToIndex(QSharedPointer<MemberDef> md)
    QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
 
    if (nd && nd->isLinkableInProject() && md->isLinkableInProject()) {
-      QString n = md->name();
+
+      QString n   = md->name();
       int index   = getPrefixIndex(n);
       uint letter = getUtf8CodeToLower(n, index);
 
       if (! n.isEmpty()) {
-         if (! md->isEnumValue() || (md->getEnumScope() && !md->getEnumScope()->isStrong())) {
+         if (! md->isEnumValue() || (md->getEnumScope() && ! md->getEnumScope()->isStrong())) {
             g_namespaceIndexLetterUsed[NMHL_All].insertElement(letter, md);
             documentedNamespaceMembers[NMHL_All]++;
          }
@@ -2687,7 +2689,7 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
 
    if (addToIndex) {
       Doxy_Globals::indexList->addContentsItem(multiPageIndex, getNmhlInfo(hl)->title, "",
-                                          getNmhlInfo(hl)->fname, "", multiPageIndex, true);
+                  getNmhlInfo(hl)->fname, "", multiPageIndex, true);
 
       if (multiPageIndex) {
          Doxy_Globals::indexList->incContentsDepth();

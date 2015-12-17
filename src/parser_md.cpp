@@ -790,8 +790,11 @@ static int processLink(QString &out, const QString &data, int, int size)
    while (i < size && data[i] == ' ') {
       i++;
    }
-   if (i < size && data[i] == '\n') { // one newline allowed here
+
+   if (i < size && data[i] == '\n') { 
+      // one newline allowed here
       i++;
+
       // skip more whitespace
       while (i < size && data[i] == ' ') {
          i++;
@@ -799,8 +802,10 @@ static int processLink(QString &out, const QString &data, int, int size)
    }
 
    bool explicitTitle = false;
-   if (i < size && data[i] == '(') { // inline link
+   if (i < size && data[i] == '(') { 
+      // inline link
       i++;
+
       while (i < size && data[i] == ' ') {
          i++;
       }
@@ -811,15 +816,28 @@ static int processLink(QString &out, const QString &data, int, int size)
 
       linkStart = i;
       nl = 0;
+      int braceCount = 1;
 
-      while (i < size && data[i] != '\'' && data[i] != '"' && data[i] != ')') {
+      while (i < size && data[i] != '\'' && data[i] != '"' && braceCount > 0) {
          if (data[i] == '\n') {
+            // unexpected EOL
             nl++;
+
             if (nl > 1) {
                return 0;
             }
+
+         } else if (data[i] == '(') {
+            braceCount++;
+
+         } else if (data[i] == ')') {
+            braceCount--;
+
          }
-         i++;
+
+         if (braceCount > 0) {
+           i++;
+         }        
       }
 
       if (i >= size || data[i] == '\n') {
@@ -1136,8 +1154,8 @@ static int processSpecialCommand(QString &out, const QString &data, int offset, 
    if (size > 1 && data[0] == '\\') {
       QChar c = data[1];
 
-      if (c == '[' || c == ']' || c == '*' || c == '+' || c == '-' ||
-            c == '!' || c == '(' || c == ')' || c == '.' || c == '`' || c == '_') {
+      if (c == '[' || c == ']' || c == '*' ||
+            c == '!' || c == '(' || c == ')' || c == '`' || c == '_') {
 
          if (c == '-' && size > 3 && data[2] == '-' && data[3] == '-') { 
             // \---
@@ -1145,12 +1163,17 @@ static int processSpecialCommand(QString &out, const QString &data, int offset, 
             return 4;
 
          } else if (c == '-' && size > 2 && data[2] == '-') { 
-             // \--
+            // \--
             out += data.mid(1, 2);
             return 3;
+
+         } else if (c =='-') {
+            // \- 
+            out += c;
+
          }
 
-         out += data.mid(1, 1);
+         out += c;
          return 2;
       }
    }
@@ -2754,23 +2777,28 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
 
    if (id.isEmpty()) {
       id = markdownFileNameToId(fileName);
-   }
+   }   
 
-   if (title.isEmpty()) {
-      title = titleFn;
-   }
-
-   if (!mdfileAsMainPage.isEmpty() && (fn == mdfileAsMainPage || 
+   if (! mdfileAsMainPage.isEmpty() && (fn == mdfileAsMainPage || 
           QFileInfo(fileName).absoluteFilePath() == QFileInfo(mdfileAsMainPage).absoluteFilePath()) ) {
 
-      // name reference
-      // file reference with path
-      docs.prepend("@mainpage\n");
-
-   } else if (id == "mainpage" || id == "index") {
+      // name reference, // file reference with path
       docs.prepend("@mainpage " + title + "\n");
 
-   } else {
+   } else if (id == "mainpage" || id == "index") {
+      
+      if (title.isEmpty()) {
+         title = titleFn;
+      }
+
+      docs.prepend("@mainpage " + title + "\n");
+
+   } else {     
+
+      if (title.isEmpty()) {
+         title = titleFn;
+      }
+
       docs.prepend("@page " + id + " " + title + "\n");
 
    }

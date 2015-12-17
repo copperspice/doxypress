@@ -27,10 +27,7 @@
 
 #include <code.h>
 #include <config.h>
-#include <dirdef.h>
 #include <doxy_globals.h>
-#include <filedef.h>
-#include <groupdef.h>
 #include <htags.h>
 #include <language.h>
 #include <message.h>
@@ -1293,9 +1290,9 @@ bool Definition::hasDocumentation() const
 
 bool Definition::hasUserDocumentation() const
 {
-   bool hasDocs = (m_private->details    && !m_private->details->doc.isEmpty()) ||
-                  (m_private->brief      && !m_private->brief->doc.isEmpty())   ||
-                  (m_private->inbodyDocs && !m_private->inbodyDocs->doc.isEmpty());
+   bool hasDocs = (m_private->details    && ! m_private->details->doc.isEmpty()) ||
+                  (m_private->brief      && ! m_private->brief->doc.isEmpty())   ||
+                  (m_private->inbodyDocs && ! m_private->inbodyDocs->doc.isEmpty());
 
    return hasDocs;
 }
@@ -1807,12 +1804,12 @@ bool Definition::isHidden() const
 
 bool Definition::isVisibleInProject() const
 {
-   return isLinkableInProject() && !m_private->hidden;
+   return isLinkableInProject() && ! m_private->hidden;
 }
 
 bool Definition::isVisible() const
 {
-   return isLinkable() && !m_private->hidden;
+   return isLinkable() && ! m_private->hidden;
 }
 
 bool Definition::isArtificial() const

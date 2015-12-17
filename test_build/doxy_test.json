@@ -1,7 +1,7 @@
 {
     "bb": {
         "bb-main-page": "",
-        "bb-skip-ns": [
+        "bb-ns-alias": [
             ""
         ],
         "bb-style": false
@@ -34,10 +34,11 @@
         "generate-deprecate-list": true,
         "generate-test-list": true,
         "generate-todo-list": true,
+        "group-nested-compounds": false,
         "hide-compound-ref": false,
         "hide-friend-compounds": false,
         "hide-in-body-docs": false,
-        "hide-navtree-members": true,
+        "hide-navtree-members": false,
         "hide-scope-names": false,
         "hide-undoc-classes": true,
         "hide-undoc-members": true,
@@ -210,11 +211,11 @@
             "*.dox",
             "*.h"
         ],
+        "input-recursive": false,
         "input-source": [
             "dox"
         ],
-        "mdfile-mainpage": "",
-        "source-recursive": true
+        "mdfile-mainpage": ""
     },
     "messages": {
         "quiet": false,
@@ -317,6 +318,9 @@
         "latex-pdf": true,
         "latex-ps": true,
         "latex-source-code": false,
+        "latex-stylesheets": [
+            ""
+        ],
         "latex-timestamp": false,
         "make-index-cmd-name": "makeindex"
     },
@@ -353,12 +357,13 @@
         "rtf-extension": "",
         "rtf-hyperlinks": false,
         "rtf-output": "rtf",
+        "rtf-source-code": false,
         "rtf-stylesheet": ""
     },
     "output-xml": {
         "generate-xml": true,
         "xml-output": "xml",
-        "xml-program-listing": false
+        "xml-program-listing": true
     },
     "preprocessor": {
         "enable-preprocessing": false,
@@ -366,10 +371,10 @@
             ""
         ],
         "expand-only-predefined": false,
-        "include-file-patterns": [
+        "include-path": [
             ""
         ],
-        "include-path": [
+        "include-patterns": [
             ""
         ],
         "macro-expansion": false,
@@ -397,6 +402,15 @@
         "source-code": false,
         "source-tooltips": true,
         "strip-code-comments": true,
+        "suffix-exclude-navtree": [
+            ""
+        ],
+        "suffix-header-navtree": [
+            ""
+        ],
+        "suffix-source-navtree": [
+            ""
+        ],
         "use-htags": false,
         "verbatim-headers": false
     }

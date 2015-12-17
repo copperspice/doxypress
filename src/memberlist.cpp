@@ -19,11 +19,8 @@
 
 #include <memberlist.h>
 
-#include <classdef.h>
 #include <config.h>
 #include <docparser.h>
-#include <filedef.h>
-#include <groupdef.h>
 #include <language.h>
 #include <membergroup.h>
 #include <message.h>

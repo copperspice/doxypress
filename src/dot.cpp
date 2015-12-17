@@ -25,7 +25,6 @@
 
 #include <config.h>
 #include <defargs.h>
-#include <dirdef.h>
 #include <docparser.h>
 #include <doxy_globals.h>
 #include <groupdef.h>

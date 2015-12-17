@@ -34,6 +34,7 @@
 #include <doxy_globals.h>
 #include <doxy_build_info.h>
 #include <entry.h>
+#include <example.h>
 #include <htmlentity.h>
 #include <image.h>
 #include <language.h>
@@ -93,9 +94,6 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointe
 
 // #define DOX_MATCH     printf("Match at line %d\n",__LINE__);
 // #define DOX_NOMATCH   printf("Nomatch at line %d\n",__LINE__);
-
-// ** 
-#define REL_PATH_TO_ROOT "../../"
 
 #define HEXTONUM(x) (((x)>='0' && (x)<='9') ? ((x)-'0') :       \
                      ((x)>='a' && (x)<='f') ? ((x)-'a'+10) :    \
@@ -1892,7 +1890,6 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
 
       } else {         
          out.writeString(text.mid(skipIndex, newIndex - skipIndex), keepSpaces);
-
       }
 
       // get word from string
@@ -1910,24 +1907,20 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
          QSharedPointer<MemberDef>    typeDef;
 
 
-if (self->name() == "Date") {
-   printf("\n  BROOM (linky) scope --> %s", csPrintable(scope->name()) );
+if (self != nullptr) {
+   if (self->name() == "Date") {
+      printf("\n  BROOM (linky) scope --> %s", csPrintable(scope->name()) ); 
+      printf("\n  BROOM (linky) matchWord --> %s", csPrintable(matchWord) );
+   }
+   
+   //    QString temp = scope->name();
+   //    temp = renameNS_Aliases(temp, "MD_3"); 
+   //    scope->setName(temp);
+      
+   if (self->name() == "Date") {  
+      // printf("\n  BROOM  (linky) newScope --> %s \n", csPrintable() );
+   }
 }
-
-
-if (self->name() == "Date") {  
-   printf("\n  BROOM (linky) matchWord --> %s", csPrintable(matchWord) );
-}
-
-     //    QString temp = scope->name();
-     //    temp = renameNS_Aliases(temp, "MD_3"); 
-     //    scope->setName(temp);
-
-
-if (self->name() == "Date") {  
-// printf("\n  BROOM  (linky) newScope --> %s \n", csPrintable() );
-}
-
 
          cd = getResolvedClass(scope, fileScope, matchWord, &typeDef);
 
@@ -1935,10 +1928,12 @@ if (self->name() == "Date") {
             // First look at typedef then class, see bug 584184.
            
             if (external ? typeDef->isLinkable() : typeDef->isLinkableInProject()) {
-               if (typeDef->getOuterScope() != self) { out.writeLink(typeDef->getReference(),
-                                typeDef->getOutputFileBase(), typeDef->anchor(), word);
+
+               if (typeDef->getOuterScope() != self) { 
+                  out.writeLink(typeDef->getReference(), typeDef->getOutputFileBase(), typeDef->anchor(), word);
                   found = true;
                }
+
             }
          }
 
@@ -4871,22 +4866,14 @@ QString convertNameToFile(const QString &name, bool allowDots, bool allowUndersc
 
 QByteArray relativePathToRoot(const QString &name)
 {
-   QByteArray result;
-
    if (Config::getBool("create-subdirs")) {
-      if (name.isEmpty()) {
-         return REL_PATH_TO_ROOT;
 
-      } else {         
-         int i = name.lastIndexOf('/');
-
-         if (i != -1) {
-            result = REL_PATH_TO_ROOT;
-         }
+      if (name.isEmpty() || name.contains("/") ) {
+         return "../../";
       }
    }
 
-   return result;
+   return QByteArray();
 }
 
 void createSubDirs(QDir &d)

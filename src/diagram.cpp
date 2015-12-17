@@ -23,7 +23,6 @@
 
 #include <diagram.h>
 
-#include <classlist.h>
 #include <classdef.h>
 #include <config.h>
 #include <doxy_globals.h>

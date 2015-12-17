@@ -24,8 +24,6 @@
 #include <types.h>
 
 #include <definition.h>
-#include <filedef.h>
-#include <memberdef.h>
 #include <outputgen.h>
 #include <parser_base.h>
 

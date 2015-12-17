@@ -29,6 +29,7 @@
 #include <doxy_globals.h>
 #include <diagram.h>
 #include <entry.h>
+#include <example.h>
 #include <language.h>
 #include <layout.h>
 #include <message.h>
@@ -2431,7 +2432,8 @@ bool ClassDef::isLinkableInProject() const
 
    } else {
       return ! name().isEmpty() && ! isArtificial() && !isHidden() && ! isAnonymous() && protectionLevelVisible(m_prot) &&
-             (! m_isLocal || extractLocal)  && (hasDocumentation() || ! hideUndoc) && (! m_isStatic || extractStatic) && !isReference(); 
+             (! m_isLocal || extractLocal)  && (hasDocumentation() || ! hideUndoc) && 
+             (! m_isStatic || extractStatic) && ! isReference(); 
    }
 }
 

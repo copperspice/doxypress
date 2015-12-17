@@ -19,16 +19,12 @@
 
 #include <membergroup.h>
 
-#include <classdef.h>
 #include <doxy_globals.h>
 #include <docparser.h>
 #include <entry.h>
-#include <filedef.h>
 #include <groupdef.h>
 #include <language.h>
 #include <marshal.h>
-#include <memberlist.h>
-#include <namespacedef.h>
 #include <outputlist.h>
 #include <util.h>
 

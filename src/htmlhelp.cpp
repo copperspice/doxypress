@@ -25,11 +25,8 @@
 
 #include <config.h>
 #include <doxy_globals.h>
-#include <filedef.h>
-#include <groupdef.h>
 #include <language.h>
 #include <message.h>
-#include <memberdef.h>
 #include <qtextcodec.h>
 #include <util.h>
 

@@ -25,10 +25,7 @@
 
 #include <config.h>
 #include <doxy_globals.h>
-#include <filedef.h>
-#include <groupdef.h>
 #include <message.h>
-#include <memberdef.h>
 #include <qhpxmlwriter.h>
 
 static QString makeFileName(const QString &withoutExtension)

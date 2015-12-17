@@ -295,7 +295,7 @@ static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, QSharedP
    if (al) {
       t << indentStr << "<templateparamlist>" << endl;
 
-      for (auto item : *al) {
+      for (auto &item : *al) {
          t << indentStr << "  <param>" << endl;
 
          if (! item.type.isEmpty()) {
@@ -1147,7 +1147,8 @@ static void writeInnerGroupFiles(const SortedList<QSharedPointer<GroupDef>> *gl,
 {
    if (gl) {
       for (auto sgd : *gl) {
-         t << "<xi:include href=\"" << sgd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>"  << endl;
+         t << "<xi:include href=\"" << sgd->getOutputFileBase() 
+           << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>"  << endl;
       }
    }
 }
@@ -1186,27 +1187,28 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       return;   // skip generated template instances.
    }
 
-   msg("Generating Docbook output for class %s\n", qPrintable(cd->name()));
+   static const QString docbookOutDir = Config::getString("docbook-output");
+ 
+   msg("Generating Docbook output for class %s\n", csPrintable(cd->name()));
 
+
+   // Add the file Documentation info to index file
    QString fileDocbook = cd->getOutputFileBase() + ".xml";
-
-   //Add the file Documentation info to index file
    ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+      
+   //  
+   QString fileName  = docbookOutDir + "/" + classOutputFileBase(cd) + ".xml";
+   QString relPath   = relativePathToRoot(fileName);
+ 
+   QFile fi(fileName);
 
-   QString outputDirectory = Config::getString("docbook-output");
-   QString fileName = outputDirectory + "/" + classOutputFileBase(cd) + ".xml";
-   QString relPath  = relativePathToRoot(fileName);
-
-   QFile f(fileName);
-
-   if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+   if (! fi.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), fi.error());
       return;
    }
 
-   QTextStream t(&f);
-   //t.setEncoding(QTextStream::UnicodeUTF8);
-
+   QTextStream t(&fi);
+ 
    writeDocbookHeader_ID(t, classOutputFileBase(cd));
    t << "<title>";
 
@@ -1226,20 +1228,26 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       if (!nm.isEmpty()) {
          t << "<para>" << endl;
          t << "    <programlisting>#include ";
-         if (ii->fileDef && !ii->fileDef->isReference()) { // TODO: support external references
+
+         if (ii->fileDef && !ii->fileDef->isReference()) {
+            // TODO: support external references
             t << "<link linkend=\"" << ii->fileDef->getOutputFileBase() << "\">";
          }
+
          if (ii->local) {
             t << "&quot;";
          } else {
             t << "&lt;";
          }
+
          t << convertToXML(nm);
+
          if (ii->local) {
             t << "&quot;";
          } else {
             t << "&gt;";
          }
+
          if (ii->fileDef && !ii->fileDef->isReference()) {
             t << "</link>";
          }
@@ -1251,18 +1259,18 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
    if (Config::getBool("have-dot") && (Config::getBool("class-diagrams") || Config::getBool("dot-class-graph"))) {
       t << "<para>Inheritance diagram for " << convertToXML(cd->name()) << "</para>" << endl;
       DotClassGraph inheritanceGraph(cd, DotNode::Inheritance);
-      inheritanceGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config::getString("docbook-output"), fileName, relPath, true, false);
+      inheritanceGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, docbookOutDir, fileName, relPath, true, false);
    }
 
    if (Config::getBool("have-dot") && Config::getBool("dot-collaboration")) {
       t << "<para>Collaboration diagram for " << convertToXML(cd->name()) << "</para>" << endl;
       DotClassGraph collaborationGraph(cd, DotNode::Collaboration);
-      collaborationGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config::getString("docbook-output"), fileName, relPath, true, false);
+      collaborationGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, docbookOutDir, fileName, relPath, true, false);
    }
 
    writeInnerClasses(cd->getClassSDict(), t);
-
    writeTemplateList(cd, t);
+
    if (cd->getMemberGroupSDict()) {
       for (auto mg : *cd->getMemberGroupSDict()) {
          generateDocbookSection(cd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
@@ -1291,7 +1299,9 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
 
       writeDocbookDocBlock(t, cd->docFile(), cd->docLine(), cd, QSharedPointer<MemberDef>(), cd->documentation());
 
-      t << "                <para>Definition at line " << cd->getDefLine() << " of file " << stripPath(cd->getDefFileName()) << "</para>" << endl;
+      t << "                <para>Definition at line " << cd->getDefLine() << " of file " 
+        << stripPath(cd->getDefFileName()) << "</para>" << endl;
+
       t << "                <para>The Documentation for this struct was generated from the following file: </para>" << endl;
 
       t << "                <para><itemizedlist><listitem><para>" << stripPath(cd->getDefFileName())

@@ -2542,20 +2542,19 @@ char *preYYtext;
 #include <ctype.h>
 #include <errno.h>
 
-#include "a_define.h"
-#include "arguments.h"
-#include "constexp.h"
-#include "config.h"
-#include "condparser.h"
-#include "doxy_globals.h"
-#include "defargs.h"
-#include "entry.h"
-#include "filedef.h"
-#include "message.h"
-#include "memberdef.h"
-#include "membername.h"
-#include "pre.h"
-#include "util.h"
+#include <pre.h>
+
+#include <a_define.h>
+#include <arguments.h>
+#include <constexp.h>
+#include <config.h>
+#include <condparser.h>
+#include <doxy_globals.h>
+#include <defargs.h>
+#include <entry.h>
+#include <message.h>
+#include <membername.h>
+#include <util.h>
 
 #define YY_NO_UNISTD_H 1
 

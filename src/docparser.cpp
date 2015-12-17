@@ -1383,30 +1383,39 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                case CMD_BSLASH:
                   children.append(new DocSymbol(parent, DocSymbol::Sym_BSlash));
                   break;
+
                case CMD_AT:
                   children.append(new DocSymbol(parent, DocSymbol::Sym_At));
                   break;
+
                case CMD_LESS:
                   children.append(new DocSymbol(parent, DocSymbol::Sym_Less));
                   break;
+
                case CMD_GREATER:
                   children.append(new DocSymbol(parent, DocSymbol::Sym_Greater));
                   break;
+
                case CMD_AMP:
                   children.append(new DocSymbol(parent, DocSymbol::Sym_Amp));
                   break;
+
                case CMD_DOLLAR:
                   children.append(new DocSymbol(parent, DocSymbol::Sym_Dollar));
                   break;
+
                case CMD_HASH:
                   children.append(new DocSymbol(parent, DocSymbol::Sym_Hash));
-                  break;
+                  break;             
+
                case CMD_DCOLON:
                   children.append(new DocSymbol(parent, DocSymbol::Sym_DoubleColon));
                   break;
+
                case CMD_PERCENT:
                   children.append(new DocSymbol(parent, DocSymbol::Sym_Percent));
                   break;
+
                case CMD_NDASH:
                   children.append(new DocSymbol(parent, DocSymbol::Sym_Minus));
                   children.append(new DocSymbol(parent, DocSymbol::Sym_Minus));
@@ -1420,6 +1429,18 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
 
                case CMD_QUOTE:
                   children.append(new DocSymbol(parent, DocSymbol::Sym_Quot));
+                  break;
+
+               case CMD_PUNT:
+                  children.append(new DocSymbol(parent, DocSymbol::Sym_Dot));
+                  break;
+
+               case CMD_PLUS:
+                  children.append(new DocSymbol(parent, DocSymbol::Sym_Plus));
+                  break;
+
+               case CMD_MINUS:
+                  children.append(new DocSymbol(parent, DocSymbol::Sym_Minus));
                   break;
 
                case CMD_EMPHASIS: {
@@ -3216,18 +3237,32 @@ int DocIndexEntry::parse()
                case CMD_MDASH:
                   m_entry += "---";
                   break;
+
                case CMD_QUOTE:
                   m_entry += '"';
                   break;
+
+               case CMD_PUNT:
+                  m_entry += '.';  
+                  break;
+
+               case CMD_PLUS:    
+                  m_entry += '+';
+                  break;
+
+               case CMD_MINUS:   
+                  m_entry += '-';  
+                  break;
+
                default:
                   warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s found as argument of \\addindex",
-                                 qPrintable(g_token->name));
+                        csPrintable(g_token->name));
                   break;
             }
             break;
 
          default:
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", qPrintable(tokToString(tok)));
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", csPrintable(tokToString(tok)));
             break;
       }
    }
@@ -5588,6 +5623,18 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Quot));
          break;
 
+      case CMD_PUNT:
+         m_children.append(new DocSymbol(this,DocSymbol::Sym_Dot));
+         break;
+
+      case CMD_PLUS:
+         m_children.append(new DocSymbol(this,DocSymbol::Sym_Plus));
+         break;
+
+      case CMD_MINUS:
+         m_children.append(new DocSymbol(this,DocSymbol::Sym_Minus));
+         break;
+
       case CMD_SA:
          s_inSeeBlock = true;
          retval = handleSimpleSection(DocSimpleSect::See);
@@ -6303,14 +6350,19 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
 
             if (paramName.isEmpty()) {
                if (Config::getBool("warn-undoc-param")) {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "empty 'name' attribute for <param> tag.");
+                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Empty 'name' attribute for <param%s> tag.",
+                        tagId == XML_PARAM ? "" : "type");
+
                }
+
             } else {
                retval = handleParamSection(paramName,
-                                           tagId == XML_PARAM ? DocParamSect::Param : DocParamSect::TemplateParam,true);
+                        tagId == XML_PARAM ? DocParamSect::Param : DocParamSect::TemplateParam,true);
             }
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'name' attribute from <param> tag.");
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'name' attribute from <param%s> tag.",
+                        tagId == XML_PARAM ? "" : "type");
+
          }
       }
       break;
@@ -6345,7 +6397,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
             retval = handleParamSection(exceptName, DocParamSect::Exception, true);
 
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'name' attribute from <exception> tag.");
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'cref' attribute from <exception> tag.");
          }
       }
 
@@ -7227,35 +7279,56 @@ void DocText::parse()
                case CMD_GREATER:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Greater));
                   break;
+
                case CMD_AMP:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Amp));
                   break;
+
                case CMD_DOLLAR:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Dollar));
                   break;
+
                case CMD_HASH:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Hash));
                   break;
+
                case CMD_DCOLON:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_DoubleColon));
                   break;
+
                case CMD_PERCENT:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Percent));
                   break;
+
                case CMD_NDASH:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
                   break;
+
                case CMD_MDASH:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
                   break;
+
                case CMD_QUOTE:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Quot));
                   break;
+
+               case CMD_PUNT:
+                  m_children.append(new DocSymbol(this,DocSymbol::Sym_Dot));
+                  break;
+
+               case CMD_PLUS:
+                  m_children.append(new DocSymbol(this,DocSymbol::Sym_Plus));
+                  break;
+
+               case CMD_MINUS:
+                  m_children.append(new DocSymbol(this,DocSymbol::Sym_Minus));
+                  break;
+
                default:
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command '%s' found", qPrintable(g_token->name));
+                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command '%s' found", csPrintable(g_token->name));
                   break;
             }
             break;

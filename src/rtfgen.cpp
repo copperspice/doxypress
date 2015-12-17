@@ -28,7 +28,6 @@
 #include <config.h>
 #include <diagram.h>
 #include <doxy_globals.h>
-#include <dirdef.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_build_info.h>
@@ -576,6 +575,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
    static const bool fortranOpt     = Config::getBool("optimize-fortran");
    static const bool sourceCode     = Config::getBool("source-code");
    static const QString projectName = Config::getString("project-name"); 
+   static const QString projectNum  = Config::getString("project-number");
 
    switch (indexSec) {
       case isTitlePageStart:
@@ -616,7 +616,18 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          }
 
          m_textStream  << rtf_Style_Reset << rtf_Style["Title"].reference << endl; // set to title style
-         m_textStream  << "{\\field\\fldedit {\\*\\fldinst TITLE \\\\*MERGEFORMAT}{\\fldrslt TITLE}}\\par" << endl;
+        
+         if (! rtf_title.isEmpty()) {
+            // User has overridden document title in extensions file
+            m_textStream << "{\\field\\fldedit {\\*\\fldinst " << rtf_title << " \\\\*MERGEFORMAT}{\\fldrslt " << rtf_title << "}}\\par" << endl;
+
+         } else {
+            DocText *root = validatingParseText(projectName);
+            m_textStream << "{\\field\\fldedit {\\*\\fldinst TITLE \\\\*MERGEFORMAT}{\\fldrslt ";
+
+            writeDoc(root, QSharedPointer<Definition>(), QSharedPointer<MemberDef>());
+            m_textStream << "}}\\par" << endl;
+         }
 
          m_textStream  << rtf_Style_Reset << rtf_Style["SubTitle"].reference << endl; // set to title style
          m_textStream  << "\\par\n";
@@ -632,11 +643,17 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          m_textStream  << "\\par\\par\\par\\par\\par\\par\\par\\par\\par\\par\\par\\par\n";
 
          m_textStream  << rtf_Style_Reset << rtf_Style["SubTitle"].reference << endl; // set to subtitle style
-         m_textStream  << "{\\field\\fldedit {\\*\\fldinst AUTHOR \\\\*MERGEFORMAT}{\\fldrslt AUTHOR}}\\par" << endl;
-         m_textStream  << "Version " << projectName << "\\par";
+
+         if (! rtf_author.isEmpty())  {
+           m_textStream << "{\\field\\fldedit {\\*\\fldinst AUTHOR \\\\*MERGEFORMAT}{\\fldrslt "<< rtf_author << " }}\\par" << endl;
+         } else  {
+           m_textStream << "{\\field\\fldedit {\\*\\fldinst AUTHOR \\\\*MERGEFORMAT}{\\fldrslt AUTHOR}}\\par" << endl;
+         }
+        
+         m_textStream << theTranslator->trVersion() << " " << projectNum << "\\par";
 
          m_textStream  << "{\\field\\fldedit {\\*\\fldinst CREATEDATE \\\\*MERGEFORMAT}"
-           "{\\fldrslt CREATEDATE}}\\par" << endl;
+                  "{\\fldrslt "<< dateToString(false) << " }}\\par"<<endl;
          m_textStream  << "\\page\\page";
 
          DBG_RTF(m_textStream  << "{\\comment End title page}" << endl)
@@ -2132,7 +2149,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
    // scan until find end of header, this works becasue the first line of the rtf file 
    // before the body, ALWAYS contains "{\comment begin body}"
 
-   do {  
+   while (true) {  
       lineBuf = f.readLine();
    
       if (f.error() != QFile::NoError) {        
@@ -2140,11 +2157,14 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
          return false;
       }
 
+      if (lineBuf.contains("\\comment begin body")) {
+         break;
+      }
+
       if (bIncludeHeader) {
          encodeForOutput(t_stream, lineBuf.constData());
       }
-
-   } while (lineBuf.indexOf("\\comment begin body") == -1);
+   }
 
    while (true) {
       lineBuf = f.readLine();

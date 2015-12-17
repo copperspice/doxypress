@@ -2623,7 +2623,7 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<EntryNav> rootNav)
          name = name.left(name.length() - 2);
       }
 
-      if (!name.isEmpty()) {
+      if (! name.isEmpty()) {
          QSharedPointer<NamespaceDef> usingNd;
          QSharedPointer<NamespaceDef> nd;
          QSharedPointer<FileDef> fd = rootNav->fileDef();
@@ -3770,11 +3770,21 @@ void Doxy_Work::resolveHiddenNamespace()
    std::set<QString> visibleSet;
    std::map<QString, QSharedPointer<NamespaceDef>> hiddenMap;
 
-   // are there any classes in this namespace
+   // are there any classes or members in this namespace
    for (auto nd : *Doxy_Globals::namespaceSDict) { 
-      ClassSDict *cd  = nd->getClassSDict();
+      ClassSDict *cd  = nd->getClassSDict();          
 
-      if (cd == nullptr || cd->isEmpty()) {              
+      const QList<QSharedPointer<MemberList>> &list = nd->getMemberLists();
+      bool hasMembers = false;      
+
+      for (auto item : list)  { 
+         if (item != nullptr && ! item->isEmpty())  {            
+            hasMembers = true;
+            break;
+         }
+      }
+
+      if ( (cd == nullptr || cd->isEmpty()) && ! hasMembers ) {              
          hiddenMap.insert( std::make_pair(nd->name(), nd) );         
        
       } else  {         
@@ -3790,7 +3800,7 @@ void Doxy_Work::resolveHiddenNamespace()
       auto end   = visibleSet.lower_bound(item.first + ":;");      // colon -- semicolon is correct
 
       if (begin == end) {         
-          item.second->setHidden(true);            
+         item.second->setHidden(true);            
       }      
    }
 }

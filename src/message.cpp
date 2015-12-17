@@ -24,7 +24,6 @@
 
 #include <config.h>
 #include <doxy_globals.h>
-#include <filedef.h>
 #include <util.h>
 
 int Debug::curMask     = 0;

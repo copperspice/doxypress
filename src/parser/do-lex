@@ -9,6 +9,6 @@ cp  commentscan.cpp  ../generated/commentscan.cpp
 rm  commentscan.cpp
 
 
-flex -PdoctokenizerYY -t -d  doctokenizer.l  > doctokenizer.cpp
+flex -PdoctokenizerYY -t    doctokenizer.l  > doctokenizer.cpp
 cp  doctokenizer.cpp  ../generated/doctokenizer.cpp
 rm  doctokenizer.cpp

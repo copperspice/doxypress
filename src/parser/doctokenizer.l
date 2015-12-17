@@ -1355,6 +1355,7 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 <St_Ref>\n	       { 
       // new line
       unput(yytext[0]);
+      return 0;
    }
 
 <St_Ref>.	       { 

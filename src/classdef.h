@@ -26,13 +26,10 @@
 #include <arguments.h>
 #include <definition.h>
 #include <entry.h>
-#include <example.h>
 #include <groupdef.h>
-#include <memberdef.h>
 #include <memberlist.h>
 #include <membergroup.h>
 #include <membername.h>
-#include <namespacedef.h>
 #include <outputlist.h>
 
 class ConstraintClassDef;

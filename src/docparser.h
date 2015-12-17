@@ -510,7 +510,7 @@ class DocSymbol : public DocNode
                   /* DoxyPresscommands mapped */
                   Sym_BSlash, Sym_At, Sym_Less, Sym_Greater, Sym_Amp,
                   Sym_Dollar, Sym_Hash, Sym_DoubleColon, Sym_Percent, Sym_Pipe,
-                  Sym_Quot, Sym_Minus
+                  Sym_Quot, Sym_Minus, Sym_Plus, Sym_Dot
                 };
 
    enum PerlType { Perl_unknown = 0, Perl_string, Perl_char, Perl_symbol, Perl_umlaut,

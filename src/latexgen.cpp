@@ -528,13 +528,18 @@ static void writeDefaultHeaderPart2(QTextStream &t_stream)
 static void writeDefaultHeaderPart3(QTextStream &t_stream)
 {
    // part 3
-   // Finalize project number
+   static bool timeStamp = Config::getBool("latex-timestamp");
 
-   t_stream << " DoxyPress " << versionString << "}\\\\\n"
-     "\\vspace*{0.5cm}\n"
-     "{\\small " << dateToString(true) << "}\\\\\n"
-     "\\end{center}\n"
-     "\\end{titlepage}\n";
+   // Finalize project number
+   t_stream << " DoxyPress " << versionString << "}\\\\\n";
+
+   if (timeStamp) {
+     t_stream << "\\vspace*{0.5cm}\n"
+                 "{\\small " << dateToString(true) << "}\\\\\n";
+   }
+
+   t_stream << "\\end{center}\n"
+               "\\end{titlepage}\n";
 
    bool compactLatex = Config::getBool("latex-compact");
    if (!compactLatex) {

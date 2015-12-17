@@ -22,7 +22,6 @@
 #include <config.h>
 #include <definition.h>
 #include <doxy_globals.h>
-#include <filedef.h>
 #include <outputgen.h>
 #include <util.h>
 

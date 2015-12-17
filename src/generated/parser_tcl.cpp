@@ -744,7 +744,6 @@ char *tclscannerYYtext;
 #include <doxy_globals.h>
 #include <defargs.h>
 #include <entry.h>
-#include <filedef.h>
 #include <language.h>
 #include <message.h>
 #include <outputlist.h>

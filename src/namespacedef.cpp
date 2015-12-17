@@ -1054,7 +1054,7 @@ void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, c
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, qPrintable(displayName()), self, title);
+      ml->writeDocumentation(ol, csPrintable(displayName()), self, title);
    }
 }
 
@@ -1074,7 +1074,7 @@ bool NamespaceDef::isLinkableInProject() const
       return true;
    }
 
-   return ! name().isEmpty() && name().at(i) != '@' &&  (hasDocumentation() || getLanguage() == SrcLangExt_CSharp) && 
+   return ! name().isEmpty() && name().at(i) != '@' && (hasDocumentation() || getLanguage() == SrcLangExt_CSharp) && 
           ! isReference() && ! isHidden() && ! isArtificial();      
 }
 

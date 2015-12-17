@@ -17,14 +17,9 @@
 
 #include <docsets.h>
 
-#include <classdef.h>
 #include <config.h>
 #include <doxy_globals.h>
-#include <groupdef.h>
-#include <filedef.h>
 #include <message.h>
-#include <memberdef.h>
-#include <namespacedef.h>
 #include <util.h>
 
 DocSets::DocSets()

@@ -31,15 +31,12 @@
 #include <dot.h>
 #include <doxy_globals.h>
 #include <example.h>
-#include <filedef.h>
-#include <groupdef.h>
-#include <htmlhelp.h>
 #include <language.h>
+#include <marshal.h>
 #include <membergroup.h>
 #include <message.h>
 #include <outputlist.h>
 #include <parser_base.h>
-#include <marshal.h>
 #include <objcache.h>
 #include <util.h>
 
@@ -1198,7 +1195,9 @@ bool MemberDef::isLinkableInProject() const
       MemberDef *that = (MemberDef *)this;
       that->_computeLinkableInProject();
    }
+
    assert(m_isLinkableCached > 0);
+
    return m_isLinkableCached == 2;
 }
 

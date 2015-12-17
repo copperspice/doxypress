@@ -17,8 +17,6 @@
 
 #include <membername.h>
 
-#include <classdef.h>
-#include <filedef.h>
 #include <util.h>
 
 MemberName::MemberName(const QString &n) : QList<QSharedPointer<MemberDef>>()

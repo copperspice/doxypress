@@ -23,7 +23,6 @@
 #include <htmlgen.h>
 
 #include <config.h>
-#include <dirdef.h>
 #include <docparser.h>
 #include <diagram.h>
 #include <dot.h>
@@ -2060,24 +2059,34 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
    switch (kind) {
       case LayoutNavEntry::MainPage:
          return true;
+
       case LayoutNavEntry::User:
          return true;
+
       case LayoutNavEntry::UserGroup:
          return true;
+
       case LayoutNavEntry::Pages:
          return indexedPages > 0;
+
       case LayoutNavEntry::Modules:
          return documentedGroups > 0;
+
       case LayoutNavEntry::Namespaces:
          return documentedNamespaces > 0 && showNamespaces;
+
       case LayoutNavEntry::NamespaceList:
          return documentedNamespaces > 0 && showNamespaces;
+
       case LayoutNavEntry::NamespaceMembers:
          return documentedNamespaceMembers[NMHL_All] > 0;
+
       case LayoutNavEntry::Classes:
          return annotatedClasses > 0;
+
       case LayoutNavEntry::ClassList:
          return annotatedClasses > 0;
+
       case LayoutNavEntry::ClassIndex:
          return annotatedClasses > 0;
       case LayoutNavEntry::ClassHierarchy:

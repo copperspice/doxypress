@@ -25,7 +25,6 @@
 #include <ftvhelp.h>
 
 #include <config.h>
-#include <filedef.h>
 #include <doxy_globals.h>
 #include <docparser.h>
 #include <htmlgen.h>
@@ -33,7 +32,6 @@
 #include <language.h>
 #include <layout.h>
 #include <message.h>
-#include <pagedef.h>
 #include <resourcemgr.h>
 #include <util.h>
 
@@ -606,10 +604,10 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
                   fileId += "_dup";
                }
    
-               QFile f(htmlOutput + "/" + fileId + ".js");
+               QFile fi(htmlOutput + "/" + fileId + ".js");
    
-               if (f.open(QIODevice::WriteOnly)) {
-                  QTextStream tt(&f);
+               if (fi.open(QIODevice::WriteOnly)) {
+                  QTextStream tt(&fi);
    
                   tt << "var " << convertFileId2Var(fileId) << " =" << endl;
                   generateJSTree(navIndex, tt, node->children, 1, firstChild);

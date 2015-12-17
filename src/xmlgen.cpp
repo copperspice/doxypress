@@ -1398,23 +1398,23 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
       return;   // skip artificially created classes
    }
 
-   msg("Generating XML output for class %s\n", qPrintable(cd->name()));
+   msg("Generating XML output for class %s\n", csPrintable(cd->name()));
 
    ti << "  <compound refid=\"" << classOutputFileBase(cd)
       << "\" kind=\"" << cd->compoundTypeString()
       << "\"><name>" << convertToXML(cd->name()) << "</name>" << endl;
 
-   QString outputDirectory = Config::getString("xml-output");
-   QString fileName = outputDirectory + "/" + classOutputFileBase(cd) + ".xml";
+   static const QString xmlOutDir = Config::getString("xml-output");
+   QString fileName  = xmlOutDir + "/" + classOutputFileBase(cd) + ".xml";
 
-   QFile f(fileName);
+   QFile fi(fileName);
 
-   if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+   if (! fi.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), fi.error());
       return;
    }
 
-   QTextStream t(&f);
+   QTextStream t(&fi);
  
    writeXMLHeader(t);
    t << "  <compounddef id=\""

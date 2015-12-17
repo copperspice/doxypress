@@ -1318,7 +1318,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <ObjCParamType>"("                      {
       QString text = QString::fromUtf8(yytext); 
       roundCount++;
-      current->argList.last().type+=text;
+      current->argList.last().type += text;
    }
 
 <ObjCParamType>")"/{B}*          {
@@ -8383,9 +8383,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       BEGIN( lastCContext ) ;
    }
 
-<SkipComment>[^\*\n]+
+<SkipComment>[^\*\n]+    {     
+   }
 
-<*>\n                { 
+<*>\n                    { 
       lineCount(); 
    }
 
@@ -8427,7 +8428,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <*>"/*"                          { 
       // */ (editor syntax fix)
       lastCContext = YY_START ;
-      BEGIN( SkipComment ) ;
+      BEGIN( SkipComment );
    }
 
 <SkipComment>{B}*"*/"            { 

@@ -1715,20 +1715,21 @@ YY_DECL {
 
                         }
 
-                        if (a->type.mid(sv) == "struct" || a->type.mid(sv) == "union"     ||
-      						    a->type.mid(sv) == "class"  || a->type.mid(sv) == "typename"  ||
+                        if (a->type.mid(sv, 6) == "struct" || a->type.mid(sv, 5) == "union"     ||
+      						    a->type.mid(sv, 5) == "class"  || a->type.mid(sv, 8) == "typename"  ||
                             a->type == "const" || a->type == "volatile") {
 
                            a->type = a->type + " " + a->name;
                            a->name.resize(0);
                         }
 
-
-                     } else { // assume only the type was specified, try to determine name later
+                     } else { 
+                        // assume only the type was specified, try to determine name later
                         a->type = removeRedundantWhiteSpace(g_curArgTypeName);
                      }
 
-                     if (!a->type.isEmpty() && a->type.at(0) == '$') { // typeless PHP name?
+                     if (! a->type.isEmpty() && a->type.at(0) == '$') { 
+                        // typeless PHP name?
                         a->name = a->type;
                         a->type = "";
                      }

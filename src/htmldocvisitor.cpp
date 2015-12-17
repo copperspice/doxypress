@@ -24,12 +24,10 @@
 #include <dia.h>
 #include <doxy_globals.h>
 #include <dot.h>
-#include <filedef.h>
 #include <htmlgen.h>
 #include <htmlentity.h>
 #include <language.h>
 #include <message.h>
-#include <memberdef.h>
 #include <msc.h>
 #include <outputgen.h>
 #include <parser_base.h>
