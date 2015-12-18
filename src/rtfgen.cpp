@@ -572,10 +572,10 @@ void RTFGenerator::startIndexSection(IndexSections is)
 
 void RTFGenerator::endIndexSection(IndexSections indexSec)
 {
-   static const bool fortranOpt     = Config::getBool("optimize-fortran");
-   static const bool sourceCode     = Config::getBool("source-code");
-   static const QString projectName = Config::getString("project-name"); 
-   static const QString projectNum  = Config::getString("project-number");
+   static const bool fortranOpt        = Config::getBool("optimize-fortran");
+   static const bool sourceCode        = Config::getBool("source-code");
+   static const QString projectName    = Config::getString("project-name"); 
+   static const QString projectVersion = Config::getString("project-version");
 
    switch (indexSec) {
       case isTitlePageStart:
@@ -650,7 +650,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
            m_textStream << "{\\field\\fldedit {\\*\\fldinst AUTHOR \\\\*MERGEFORMAT}{\\fldrslt AUTHOR}}\\par" << endl;
          }
         
-         m_textStream << theTranslator->trVersion() << " " << projectNum << "\\par";
+         m_textStream << theTranslator->trVersion() << " " << projectVersion << "\\par";
 
          m_textStream  << "{\\field\\fldedit {\\*\\fldinst CREATEDATE \\\\*MERGEFORMAT}"
                   "{\\fldrslt "<< dateToString(false) << " }}\\par"<<endl;

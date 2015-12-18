@@ -656,9 +656,7 @@ static void addSection()
 
    } else {
       // create a new section element
-      QString text = QString::fromUtf8(yytext);
-
-      s_sectionTitle += text.trimmed();
+      s_sectionTitle += QString::fromUtf8(yytext).trimmed();
 
       si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, s_sectionLabel, s_sectionTitle, 
                   sectionLevelToType(s_sectionLevel), s_sectionLevel);
@@ -668,6 +666,13 @@ static void addSection()
 
       // add section to the global dictionary
       Doxy_Globals::sectionDict->insert(s_sectionLabel, si);
+
+
+if (s_sectionLabel.contains("cppblock"))  {
+   printf("\n Broom  (commentScan)  section= %s    fileName= %s \n\n", csPrintable(s_sectionLabel), csPrintable(yyFileName) );
+}
+
+
    }
 }
 
@@ -803,6 +808,7 @@ static void addAnchor(const QString &anchorName)
       si->dupAnchor_cnt++;                 
 
    } else {
+      // title is empty, level is zero
       si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, anchorName, QString(""), SectionInfo::Anchor, 0);
       si->dupAnchor_fName = yyFileName; 
 

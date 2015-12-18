@@ -1191,8 +1191,11 @@ void generateOutput()
       QDir::setCurrent(htmlOutput);
 
       portable_sysTimerStart();
+    
+      // this was false, now it is testing the extcmd flag
+      bool isDebug = Debug::isFlagSet(Debug::ExtCmd);
 
-      if (portable_system(Config::getString("hhc-location"), "index.hhp", false)) {
+      if (portable_system(Config::getString("hhc-location"), "index.hhp", isDebug)) {
          err("Unable to run HTML Help compiler on 'index.hhp'\n");
       }
 
@@ -9006,7 +9009,7 @@ void Doxy_Work::resolveUserReferences()
 
          if (si->definition) {
             // TODO: there should be one function in Definition that returns
-            // the file to link to, so we can avoid the following tests.
+            // the file to link to, so we can avoid the following tests
             QSharedPointer<GroupDef> gd;
 
             if (si->definition->definitionType() == Definition::TypeMember) {
@@ -9940,29 +9943,39 @@ void Doxy_Work::writeTagFile()
 
    // for each file
    for (auto fn : *Doxy_Globals::inputNameList) {
-      for (auto fd : *fn) {
-         fd->writeTagFile(tagFile);
+      for (auto fd : *fn) {       
+         if (fd->isLinkableInProject()) {
+            fd->writeTagFile(tagFile);
+         }  
       }
    }
 
    // for each class
-   for (auto cd : *Doxy_Globals::classSDict) {
-      cd->writeTagFile(tagFile);
+   for (auto cd : *Doxy_Globals::classSDict) { 
+      if (cd->isLinkableInProject()) {
+         cd->writeTagFile(tagFile);
+      }
    }
 
    // for each namespace
    for (auto nd : *Doxy_Globals::namespaceSDict) {
-      nd->writeTagFile(tagFile);
+      if (nd->isLinkableInProject()) {
+         nd->writeTagFile(tagFile);
+      }
    }
 
    // for each group
    for (auto gd : *Doxy_Globals::groupSDict) {
-      gd->writeTagFile(tagFile);
+      if (gd->isLinkableInProject()) {
+         gd->writeTagFile(tagFile);
+      }
    }
 
    // for each page
    for (auto pd : *Doxy_Globals::pageSDict) {
-      pd->writeTagFile(tagFile);
+      if (pd->isLinkableInProject()) {
+         pd->writeTagFile(tagFile);
+      }
    }
 
    if (Doxy_Globals::mainPage) {

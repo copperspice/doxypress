@@ -708,12 +708,15 @@ void HtmlDocVisitor::visit(DocCite *cite)
    if (m_hide) {
       return;
    }
-   if (!cite->file().isEmpty()) {
+
+   if (! cite->file().isEmpty()) {
       startLink(cite->ref(), cite->file(), cite->relPath(), cite->anchor());
    } else {
       m_t << "<b>[";
    }
+
    filter(cite->text());
+
    if (!cite->file().isEmpty()) {
       endLink();
    } else {
@@ -1680,8 +1683,10 @@ void HtmlDocVisitor::visitPre(DocDiaFile *df)
    if (m_hide) {
       return;
    }
+
    m_t << "<div class=\"diagraph\">" << endl;
    writeDiaFile(df->file(), df->relPath(), df->context());
+
    if (df->hasCaption()) {
       m_t << "<div class=\"caption\">" << endl;
    }
@@ -1702,6 +1707,7 @@ void HtmlDocVisitor::visitPre(DocLink *lnk)
    if (m_hide) {
       return;
    }
+
    startLink(lnk->ref(), lnk->file(), lnk->relPath(), lnk->anchor());
 }
 
@@ -1719,9 +1725,15 @@ void HtmlDocVisitor::visitPre(DocRef *ref)
       return;
    }
 
+
+if (ref->file().contains("test_doc_ref"))  {
+   printf("\n Broom  (visitPre)  %s", csPrintable( ref->file())  );
+}
+
+
    if (! ref->file().isEmpty()) {
-      // when ref->isSubPage() == true we use ref->file() for HTML and
-      // ref->anchor() for LaTeX/RTF
+      // if ref->isSubPage(), HTML use ref->file(), Latex and RTF use ref->anchor()
+
       startLink(ref->ref(), ref->file(), ref->relPath(), ref->isSubPage() ? QString() : ref->anchor());
    }
 
@@ -1935,11 +1947,11 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
 }
 
 void HtmlDocVisitor::visitPost(DocParamList *)
-{
-   //printf("DocParamList::visitPost\n");
+{   
    if (m_hide) {
       return;
    }
+
    m_t << "</td></tr>" << endl;
 }
 
@@ -1991,6 +2003,7 @@ void HtmlDocVisitor::visitPre(DocInternalRef *ref)
    if (m_hide) {
       return;
    }
+
    startLink(0, ref->file(), ref->relPath(), ref->anchor());
 }
 
@@ -2137,23 +2150,30 @@ void HtmlDocVisitor::filterQuotedCdataAttr(const QString &str)
 void HtmlDocVisitor::startLink(const QString &ref, const QString &file, const QString &relPath, 
                   const QString &anchor, const QString &tooltip)
 {
-   if (!ref.isEmpty()) { 
+   if (! ref.isEmpty()) { 
       // link to entity imported via tag file
       m_t << "<a class=\"elRef\" ";
       m_t << externalLinkTarget() << externalRef(relPath, ref, false);
 
-   } else { // local link
+   } else { 
+      // local link
       m_t << "<a class=\"el\" ";
    }
 
    m_t << "href=\"";
    m_t << externalRef(relPath, ref, true);
 
-   if (!file.isEmpty()) {
+
+   if (! file.isEmpty()) {
+
+if (file.contains("test_doc"))  {
+   printf("\n Broom  (startlink)  %s \n\n", csPrintable( file  ) );
+}
+
       m_t << file << Doxy_Globals::htmlFileExtension;
    }
 
-   if (!anchor.isEmpty()) {
+   if (! anchor.isEmpty()) {
       m_t << "#" << anchor;
    }
 

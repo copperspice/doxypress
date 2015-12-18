@@ -2744,6 +2744,10 @@ YY_DECL {
                      current->argList.last().defval = g_defVal.trimmed();
                   }
 
+                  if (text[0] == ')') {
+                     current->args = argListToString(&current->argList);
+                  }
+
                   BEGIN(FunctionParams);
 
                } else {

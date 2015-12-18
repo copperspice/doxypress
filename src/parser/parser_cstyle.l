@@ -8549,8 +8549,10 @@ static void handleParametersCommentBlocks(ArgumentList *al)
          current->doc.resize(0);
          current->brief.resize(0);
 
-         while (parseCommentBlock(s_thisParser, current, a.docs, yyFileName, current->docLine,   
-                   false, false, false, protection, position, needsEntry ) ) {   // last 3 are passed by reference
+         while (parseCommentBlock(s_thisParser, current, a.docs, yyFileName, 
+                   current->docLine,                        // passed by reference
+                   false, false, false, 
+                   protection, position, needsEntry ) ) {   // last 3 are passed by reference
 
             if (needsEntry) {
                newEntry();

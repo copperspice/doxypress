@@ -261,7 +261,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    // part 1
 
    // Handle batch mode
-   if (Config::getBool("latex-batchmode")) {
+   if (Config::getBool("latex-batch-mode")) {
       t_stream << "\\batchmode\n";
    }
 
@@ -433,7 +433,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\n";
 
    // User-specified packages
-   const QStringList extraPackages = Config::getList("extra-packages");
+   const QStringList extraPackages = Config::getList("latex-extra-packages");
   
    if (! extraPackages.isEmpty()) {     
       t_stream << "% Packages requested by user\n";     

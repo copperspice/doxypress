@@ -2912,7 +2912,7 @@ static void writePages(QSharedPointer<PageDef> pd, FTVHelp *ftv)
       }
 
       if (ftv) {
-         ftv->addContentsItem(hasSubPages || hasSections, pageTitle, pd->getReference(), pd->getOutputFileBase(), 
+         ftv->addContentsItem(hasSubPages, pageTitle, pd->getReference(), pd->getOutputFileBase(), 
                   "", hasSubPages, true, pd);
       }
 

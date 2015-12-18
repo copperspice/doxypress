@@ -160,9 +160,10 @@ class DocNode
    bool m_insidePre;
 };
 
-/** Default accept implementation for compound nodes in the abstract syntax tree.
+/** Default accept implementation for compound nodes in the abstract syntax tree
  */
-template<class T> class CompAccept
+template<class T>
+class CompAccept
 {
  public:
    CompAccept() {  }
@@ -1274,11 +1275,11 @@ class DocRef : public CompAccept<DocRef>, public DocNode
    bool m_refToAnchor;
    bool m_isSubPage;
 
-   QString   m_file;
-   QString   m_relPath;
-   QString   m_ref;
-   QString   m_anchor;
-   QString   m_text;
+   QString m_file;
+   QString m_relPath;
+   QString m_ref;
+   QString m_anchor;
+   QString m_text;
 };
 
 /** Node representing an internal reference to some item */
@@ -1817,13 +1818,16 @@ class DocSimpleListItem : public DocNode
       m_paragraph = new DocPara(this);
       m_parent = parent;
    }
+
    int parse();
    virtual ~DocSimpleListItem() {
       delete m_paragraph;
    }
+
    Kind kind() const            {
       return Kind_SimpleListItem;
    }
+
    void accept(DocVisitor *v) {
       v->visitPre(this);
       m_paragraph->accept(v);

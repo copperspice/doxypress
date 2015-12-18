@@ -7028,10 +7028,10 @@ QString externalRef(const QString &relPath, const QString &ref, bool href)
       QString dest = Doxy_Globals::tagDestinationDict[ref];
 
       if (! dest.isEmpty()) {
-         result = dest;
-         int l  = result.length();
+         result  = dest;
+         int len = result.length();
 
-         if (! relPath.isEmpty() && l > 0 && result.at(0) == '.') {
+         if (! relPath.isEmpty() && len > 0 && result.at(0) == '.') {
             // relative path -> prepend relPath.
             result.prepend(relPath);
          }
@@ -7040,7 +7040,7 @@ QString externalRef(const QString &relPath, const QString &ref, bool href)
             result.prepend("doxypress=\"" + ref + ":");
          }
 
-         if (l > 0 && result.at(l - 1) != '/') {
+         if (len > 0 && result.at(len - 1) != '/') {
             result += '/';
          }
 
@@ -7048,6 +7048,7 @@ QString externalRef(const QString &relPath, const QString &ref, bool href)
             result.append("\" ");
          }
       }
+
 
    } else {
       result = relPath;

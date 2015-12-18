@@ -311,17 +311,17 @@ QString Qhp::getQhpFileName()
 
 QString Qhp::getFullProjectName()
 {
-   QString projectName = Config::getString("project-name");
-   QString versionText = Config::getString("project-version");
+   QString projectName    = Config::getString("project-name");
+   QString projectVersion = Config::getString("project-version");
 
    if (projectName.isEmpty()) {
       projectName = "Root";
    }
 
-   if (versionText.isEmpty()) { 
+   if (projectVersion.isEmpty()) { 
       return projectName; 
    } else {
-     return projectName + " " + versionText;
+     return projectName + " " + projectVersion;
    } 
 }
 

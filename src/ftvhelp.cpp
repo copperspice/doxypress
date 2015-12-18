@@ -304,7 +304,9 @@ void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
 
    } else { 
       // link into other frame
-      if (!n->ref.isEmpty()) { // link to entity imported via tag file
+
+      if (!n->ref.isEmpty()) { 
+         // link to entity imported via tag file
          t << "<a class=\"elRef\" ";
          t << externalLinkTarget() << externalRef("", n->ref, false);
 

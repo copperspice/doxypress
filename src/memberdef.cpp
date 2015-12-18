@@ -1466,25 +1466,30 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
    // If there is no detailed description we need to write the anchor here
    bool detailsVisible = isDetailedSectionLinkable();
+  
+   // only write anchors for member which have no details and are
+   // rendered inside the group page or are not grouped at all
 
-   if (! detailsVisible) {
+   bool writeAnchor = (inGroup || m_impl->group == 0) && ! detailsVisible && !m_impl->annMemb; 
+   
+   if (writeAnchor) {
       QString doxyArgs = argsString();
-
-      if (! m_impl->annMemb) {
-         QString doxyName = name();
-
-         if (! cname.isEmpty()) {
-            doxyName.prepend( (cdname + getLanguageSpecificSeparator(getLanguage())) );
-         }
-         ol.startDoxyAnchor(cfname, cname, anchor(), doxyName, doxyArgs);
+      QString doxyName = name();
+   
+      if (! cname.isEmpty()) {
+         doxyName.prepend( (cdname + getLanguageSpecificSeparator(getLanguage())) );
       }
 
+      ol.startDoxyAnchor(cfname, cname, anchor(), doxyName, doxyArgs);
+   }
+
+   if (! detailsVisible) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Man);
       ol.disable(OutputGenerator::Latex);
       ol.docify("\n");
       ol.popGeneratorState();
-   }
+   }  
 
    if (annoClassDef || m_impl->annMemb) {     
       for (int j = 0; j < s_indentLevel; j++) {
@@ -1802,7 +1807,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
       ol.endTypewriter();
    }
 
-   if (!detailsVisible && !m_impl->annMemb) {
+   if (writeAnchor) {
       ol.endDoxyAnchor(cfname, anchor());
    }
   
@@ -3487,13 +3492,27 @@ void MemberDef::warnIfUndocumented()
    const char *t = 0;
 
    if (cd) {
-      t = "class", d = cd;
-   } else if (nd) {
-      t = "namespace", d = nd;
+      t = "class";
+      d = cd;
+
+   } else if (nd) {          
+
+      if (nd->getLanguage() == SrcLangExt_Fortran) {
+         t = "module";
+      } else {
+         t = "namespace";
+      }
+
+      d = nd;      
+
    } else if (gd) {
-      t = "group", d = gd;
+      t = "group";
+      d = gd;
+
    } else {
-      t = "file", d = fd;
+      t = "file";
+      d = fd;
+
    }
 
    static bool extractAll = Config::getBool("extract-all");

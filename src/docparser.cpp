@@ -1944,7 +1944,6 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
    }
 }
 
-
 DocVerbatim::DocVerbatim(DocNode *parent, const QString &context, const QString &text, Type t, bool isExample,
                          const QString &exampleFile, bool isBlock, const QString &lang) 
    : m_context(context), m_text(text), m_type(t), m_isExample(isExample), m_exampleFile(exampleFile),
@@ -1984,7 +1983,7 @@ void DocInclude::parse()
 
          if (! m_blockId.isEmpty() && (count = m_text.count(m_blockId)) != 2) {
 
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "block marked with %s for \\snippet should appear twice "
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Block marked with %s for \\snippet should appear twice "
                 "in file %s, found it %d times\n", qPrintable(m_blockId), qPrintable(m_file), count);
          }
          break;
@@ -2326,7 +2325,7 @@ void DocSecRefItem::parse()
 
    QSharedPointer<SectionInfo> sec;
 
-   if (!m_target.isEmpty()) {
+   if (! m_target.isEmpty()) {
       sec = Doxy_Globals::sectionDict->find(m_target);
 
       if (sec) {
@@ -2484,6 +2483,11 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
 
    if (sec) { 
       // ref to section or anchor      
+
+
+if (sec->fileName.contains("test_doc_ref"))  {   
+   printf("\n Broom  (docparser.cpp) target %s  file %s   ", csPrintable(target), csPrintable(sec->fileName) );
+}
 
       if (sec->dupAnchor_cnt > 0)  {
          warn(s_fileName, doctokenizerYYlineno, "Link to ambiguous anchor '%s', "

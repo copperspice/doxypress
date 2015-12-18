@@ -45,8 +45,8 @@ bool Htags::execute(const QString &htmldir)
 
    static QByteArray htagsOptions  = "";       // Config::getString("htags-options");
 
-   static QString projectName   = Config::getString("project-name");
-   static QString projectNumber = Config::getString("project-version");
+   static QString projectName    = Config::getString("project-name");
+   static QString projectVersion = Config::getString("project-version");
 
    QByteArray cwd = QDir::currentPath().toUtf8();
 
@@ -81,13 +81,13 @@ bool Htags::execute(const QString &htmldir)
       commandLine += htagsOptions;
    }
 
-   if (!projectName.isEmpty()) {
+   if (! projectName.isEmpty()) {
       commandLine += "-t \"";
       commandLine += projectName;
 
-      if (!projectNumber.isEmpty()) {
+      if (! projectVersion.isEmpty()) {
          commandLine += '-';
-         commandLine += projectNumber;
+         commandLine += projectVersion;
       }
       commandLine += "\" ";
    }

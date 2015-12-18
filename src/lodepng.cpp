@@ -2870,10 +2870,14 @@ unsigned LodePNG_convert(unsigned char *out, const unsigned char *in, LodePNG_In
                break;
          }
       }
-   } else if (LodePNG_InfoColor_isGreyscaleType(infoOut) && infoOut->bitDepth == 8) { /*conversion from greyscale to greyscale*/
-      if (!LodePNG_InfoColor_isGreyscaleType(infoIn)) {
+
+   } else if (LodePNG_InfoColor_isGreyscaleType(infoOut) && infoOut->bitDepth == 8) { 
+      // conversion from grayscale to grayscale
+
+      if (! LodePNG_InfoColor_isGreyscaleType(infoIn)) {
          return 62;
       }
+
       if (infoIn->bitDepth == 8) {
          switch (infoIn->colorType) {
             case 0: /*greyscale color*/
@@ -2924,7 +2928,7 @@ unsigned LodePNG_convert(unsigned char *out, const unsigned char *in, LodePNG_In
          }
       } else { /*infoIn->bitDepth is less than 8 bit per channel*/
          if (infoIn->colorType != 0) {
-            return 31;   /*colorType 0 is the only greyscale type with < 8 bits per channel*/
+            return 31;   /*colorType 0 is the only grayscale type with < 8 bits per channel*/
          }
          for (i = 0; i < numpixels; i++) {
             unsigned value = readBitsFromReversedStream(&bp, in, infoIn->bitDepth);
@@ -3387,7 +3391,7 @@ static void decodeGeneric(LodePNG_Decoder *decoder, unsigned char **out, size_t 
             }
          } else if (decoder->infoPng.color.colorType == 0) {
             if (chunkLength != 2) {
-               decoder->error = 40;   /*error: this chunk must be 2 bytes for greyscale image*/
+               decoder->error = 40;   /*error: this chunk must be 2 bytes for grayscale image*/
                break;
             }
             decoder->infoPng.color.key_defined = 1;
@@ -3418,14 +3422,14 @@ static void decodeGeneric(LodePNG_Decoder *decoder, unsigned char **out, size_t 
             decoder->infoPng.background_r = decoder->infoPng.background_g = decoder->infoPng.background_g = data[0];
          } else if (decoder->infoPng.color.colorType == 0 || decoder->infoPng.color.colorType == 4) {
             if (chunkLength != 2) {
-               decoder->error = 44;   /*error: this chunk must be 2 bytes for greyscale image*/
+               decoder->error = 44;   /*error: this chunk must be 2 bytes for grayscale image*/
                break;
             }
             decoder->infoPng.background_defined = 1;
             decoder->infoPng.background_r = decoder->infoPng.background_g = decoder->infoPng.background_b = 256 * data[0] + data[1];
          } else if (decoder->infoPng.color.colorType == 2 || decoder->infoPng.color.colorType == 6) {
             if (chunkLength != 6) {
-               decoder->error = 45;   /*error: this chunk must be 6 bytes for greyscale image*/
+               decoder->error = 45;   /*error: this chunk must be 6 bytes for grayscale image*/
                break;
             }
             decoder->infoPng.background_defined = 1;
@@ -3749,7 +3753,9 @@ void LodePNG_decode(LodePNG_Decoder *decoder, unsigned char **out, size_t *outsi
       /*color conversion needed; sort of copy of the data*/
       unsigned char *data = *out;
 
-      /*TODO: check if this works according to the statement in the documentation: "The converter can convert from greyscale input color type, to 8-bit greyscale or greyscale with alpha"*/
+      // TODO: check if this works according to the statement in the documentation:
+      // "The converter can convert from grayscale input color type, to 8-bit grayscale or grayscale with alpha"
+
       if (!(decoder->infoRaw.color.colorType == 2 || decoder->infoRaw.color.colorType == 6) && !(decoder->infoRaw.color.bitDepth == 8)) {
          decoder->error = 56;
          return;
