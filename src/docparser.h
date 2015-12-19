@@ -57,7 +57,8 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
 DocText *validatingParseText(const QString &input);
 
 /*! Searches for section and anchor commands in the input */
-void docFindSections(const QString &input, QSharedPointer<Definition> d, MemberGroup *m, const QString &fileName);
+void docFindSections(const QString &input, QSharedPointer<Definition> def, 
+                  QSharedPointer<MemberGroup> mg, const QString &fileName);
 
 /** Abstract node interface with type information. */
 class DocNode

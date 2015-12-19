@@ -1731,7 +1731,7 @@ void Doxy_Work::buildFileList(QSharedPointer<EntryNav> rootNav)
 
             text += "matches the following input files:\n";
             text += showFileDefMatches(Doxy_Globals::inputNameDict, root->name);
-            text += "Please use a more specific name or includ a larger part of the path";
+            text += "Use a more specific name or include a larger part of the path";
 
          } else { 
             // name is not an input file
@@ -1783,7 +1783,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
 
             text += "matches the following input files:\n";
             text += showFileDefMatches(Doxy_Globals::inputNameDict, root->includeFile);
-            text += "Use a more specific name by including a (larger) part of the path\n";
+            text += "Use a more specific name by including a larger part of the path\n";
 
          } else { 
             // name is not an input file
@@ -9449,23 +9449,23 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
       }
 
       // process remaining files
-      for (auto s : Doxy_Globals::g_inputFiles) { 
+      for (auto fName : Doxy_Globals::g_inputFiles) { 
 
-         if (! processedFiles.contains(s)) { 
+         if (! processedFiles.contains(fName)) { 
             // not yet processed
             bool ambig;
             QStringList includedFiles;
 
-            QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s, ambig);
+            QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, fName, ambig);
             assert(fd != 0);
 
-            ParserInterface *parser = getParserForFile(s);
-            parser->startTranslationUnit(s);
+            ParserInterface *parser = getParserForFile(fName);
+            parser->startTranslationUnit(fName);
 
-            parseFile(parser, root, rootNav, fd, s, ParserMode::SOURCE_FILE, includedFiles);
+            parseFile(parser, root, rootNav, fd, fName, ParserMode::SOURCE_FILE, includedFiles);
             parser->finishTranslationUnit();
 
-            processedFiles.insert(s);
+            processedFiles.insert(fName);
          }
       }
 
@@ -9744,19 +9744,19 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
 // input string. The names of the files are appended to the `fiList' list.
 
 void Doxy_Work::readFileOrDirectory(const QString &fn, ReadDirArgs &data)
-{
-   // strip trailing slashes
+{   
    if (fn.isEmpty()) {
       return;
    } 
 
+   // strip trailing slashes
    QString fileName = fn;
   
    if (fileName.endsWith('/') || fileName.endsWith('\\')) {
       fileName = fileName.left(fileName.length() - 1);
    }
 
-   QFileInfo fi(fileName);
+   QFileInfo fi(fileName);                  
  
    QString name     = fi.fileName();
    QString dirPath  = fi.absolutePath();
@@ -9776,20 +9776,21 @@ void Doxy_Work::readFileOrDirectory(const QString &fn, ReadDirArgs &data)
             if (! data.killDict.contains(filePath)) {
                             
                if (data.isFnDict) {
-                  QSharedPointer<FileDef> fd = QMakeShared<FileDef>(qPrintable(dirPath + "/"), qPrintable(name));
+                  QSharedPointer<FileDef> fd = QMakeShared<FileDef>(dirPath + "/", name);
                   QSharedPointer<FileName> fn;
 
                   if (! name.isEmpty() && (fn = data.fnDict[name])) {
                      fn->append(fd);
 
                   } else {
-                     fn = QMakeShared<FileName>(qPrintable(filePath), qPrintable(name));
+                     fn = QMakeShared<FileName>(filePath, name);
                      fn->append(fd);
 
                      if (data.isFnList) {
                         data.fnList.inSort(fn);
                      }
 
+                     // can be Doxy_Globals::inputNameDict->insert(), Doxy_Globals::exampleNameDict, etc
                      data.fnDict.insert(name, fn);
                   }
                }
@@ -10048,7 +10049,7 @@ void searchInputFiles()
       includePatterns = inputPatterns;
    }
 
-   for (auto s : includePath) {    
+   for (auto fName : includePath) {    
       ReadDirArgs data;
 
       data.recursive          = inputRecursive;         
@@ -10057,7 +10058,7 @@ void searchInputFiles()
       data.includePatternList = includePatterns;
       data.excludePatternList = excludePatterns;
 
-      readFileOrDirectory(s, data);
+      readFileOrDirectory(fName, data);
 
       *Doxy_Globals::includeNameDict = data.fnDict;
    }
@@ -10211,7 +10212,7 @@ void searchInputFiles()
          readFileOrDirectory(path, data);              
 
          *Doxy_Globals::inputNameList  = data.fnList;
-         *Doxy_Globals::inputNameDict  = data.fnDict;
+         *Doxy_Globals::inputNameDict  = data.fnDict; 
          Doxy_Globals::g_inputFiles    = data.resultList;          
          killDict                      = data.killDict;
          Doxy_Globals::inputPaths      = data.pathSet;   
@@ -10221,7 +10222,7 @@ void searchInputFiles()
    Doxy_Globals::g_stats.end();
 }
 
-/* cland testing
+/* clang testing
 void Doxy_Work::do_fake_ginger(QSharedPointer<EntryNav> parentNav)
 {  
    QString className = "Ginger";

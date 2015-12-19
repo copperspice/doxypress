@@ -39,7 +39,6 @@ static QString      s_inputString;
 static QString      s_fileName;
 static bool         s_insidePre;
 
-static MemberGroup *s_memberGroup;
 static QString      s_secLabel;
 static QString      s_secTitle;
 
@@ -50,6 +49,7 @@ static int          s_sharpCount = 0;
 static SectionInfo::SectionType    s_secType;
 
 // context for section finding phase
+static QSharedPointer<MemberGroup> s_memberGroup;
 static QSharedPointer<Definition>  s_definition;
 
 struct DocLexerContext {
@@ -176,6 +176,7 @@ static void processSection()
 
    } else {
       warn(s_fileName, yylineno, "Found section/anchor %s without context\n", csPrintable(s_secLabel));
+
    }
 
    QSharedPointer<SectionInfo> si;
@@ -1546,7 +1547,6 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 
 <St_Sections>[^\n@\\<]+   {
       // nothing
-
    }
 
 <St_Sections>"@@"|"\\\\"|"@<"|"\\<"  {
@@ -1571,7 +1571,7 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
                // found matching end
             
                s_secType  = SectionInfo::Table;
-               s_secLabel = tag.mid(s + 4, e - s - 4); // extract id
+               s_secLabel = tag.mid(s + 4, e - s - 4);   // extract id
                processSection();
             }
          }
@@ -1634,22 +1634,22 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
    }
 
 <St_Sections>{CMD}"xmlonly"/[^a-z_A-Z0-9] {
-      s_endMarker="endxmlonly";
+      s_endMarker = "endxmlonly";
 		BEGIN(St_SecSkip);
    }
 
 <St_Sections>{CMD}"docbookonly"/[^a-z_A-Z0-9] {
-      s_endMarker="enddocbookonly";
+      s_endMarker = "enddocbookonly";
 		BEGIN(St_SecSkip);
    }
 
 <St_Sections>{CMD}"code"/[^a-z_A-Z0-9] {
-      s_endMarker="endcode";
+      s_endMarker = "endcode";
 		BEGIN(St_SecSkip);
    }
 
 <St_Sections>"<!--"                 {
-      s_endMarker="-->";
+      s_endMarker = "-->";
 		BEGIN(St_SecSkip);
    }
 
@@ -1703,13 +1703,14 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 
 <St_SecTitle>[^\n]+    |
 <St_SecTitle>[^\n]*\n        {
-      s_secLabel = QString::fromUtf8(yytext).trimmed();
+      s_secTitle = QString::fromUtf8(yytext).trimmed();
       processSection();
       BEGIN(St_Sections);
    }
 
 <St_SecTitle,St_SecLabel1,St_SecLabel2>. {
-      warn(s_fileName, yylineno, "Unexpected character `%s' while looking for section label or title", yytext); 
+      QString text = QString::fromUtf8(yytext);
+      warn(s_fileName, yylineno, "Unexpected character `%s' while looking for section label or title", csPrintable(text)); 
    }
 
 <St_Snippet>[^\n]+     |
@@ -1733,7 +1734,8 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
    }
 
 <*>.       { 
-      warn(s_fileName, yylineno,"Unexpected character `%s'", yytext);      
+      QString text = QString::fromUtf8(yytext); 
+      warn(s_fileName, yylineno,"Unexpected character `%s'", csPrintable(text));      
    }
 %%
 
@@ -1748,7 +1750,8 @@ static void yyunput(QChar c, char *yy_bp)
    }
 }
 
-void doctokenizerYYFindSections(const QString &input, QSharedPointer<Definition> d, MemberGroup *mg, const QString &fileName)
+void doctokenizerYYFindSections(const QString &input, QSharedPointer<Definition> def, 
+               QSharedPointer<MemberGroup> mg, const QString &fileName)
 {
    if (input.isEmpty()) {
       return;
@@ -1758,13 +1761,14 @@ void doctokenizerYYFindSections(const QString &input, QSharedPointer<Definition>
 
    s_inputString = input;   
    s_inputPos    = 0;
-   s_definition  = d;
+   s_definition  = def;
    s_memberGroup = mg;
    s_fileName    = fileName;
 
    BEGIN(St_Sections);
    doctokenizerYYlineno = 1;
    doctokenizerYYlex();
+
    printlex(yy_flex_debug, false, __FILE__, fileName);
 }
 

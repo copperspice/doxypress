@@ -4209,8 +4209,7 @@ QSharedPointer<ClassDef> MemberDef::accessorClass() const
 void MemberDef::findSectionsInDocumentation()
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
-
-   docFindSections(documentation(), self, 0, docFile());
+   docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
 }
 
 void MemberDef::enableCallGraph(bool e)

@@ -667,12 +667,8 @@ static void addSection()
       // add section to the global dictionary
       Doxy_Globals::sectionDict->insert(s_sectionLabel, si);
 
-
-if (s_sectionLabel.contains("cppblock"))  {
-   printf("\n Broom  (commentScan)  section= %s    fileName= %s \n\n", csPrintable(s_sectionLabel), csPrintable(yyFileName) );
-}
-
-
+      // for a section the si->fileName is the physical file name. this will be replaced with the section name
+      // in doctokenizer processSection()
    }
 }
 
@@ -1646,7 +1642,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       warn(yyFileName, yyLineNr, "Missing argument after \\%s", 
-            YY_START == ClassDocArg1 ? "class" : "category" );
+                  YY_START == ClassDocArg1 ? "class" : "category" );
 
       addOutput('\n');
 

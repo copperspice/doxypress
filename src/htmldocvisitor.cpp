@@ -1725,12 +1725,6 @@ void HtmlDocVisitor::visitPre(DocRef *ref)
       return;
    }
 
-
-if (ref->file().contains("test_doc_ref"))  {
-   printf("\n Broom  (visitPre)  %s", csPrintable( ref->file())  );
-}
-
-
    if (! ref->file().isEmpty()) {
       // if ref->isSubPage(), HTML use ref->file(), Latex and RTF use ref->anchor()
 
@@ -2165,11 +2159,6 @@ void HtmlDocVisitor::startLink(const QString &ref, const QString &file, const QS
 
 
    if (! file.isEmpty()) {
-
-if (file.contains("test_doc"))  {
-   printf("\n Broom  (startlink)  %s \n\n", csPrintable( file  ) );
-}
-
       m_t << file << Doxy_Globals::htmlFileExtension;
    }
 

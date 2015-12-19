@@ -61,7 +61,7 @@ struct BodyInfo {
 };
 
 /** Abstract interface for a Definition or DefinitionList */
-class DefinitionIntf : public EnableSharedFromThis
+class DefinitionIntf : public EnableSharedFromThis 
 {
  public:
    DefinitionIntf() { }

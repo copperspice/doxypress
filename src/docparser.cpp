@@ -2484,11 +2484,6 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
    if (sec) { 
       // ref to section or anchor      
 
-
-if (sec->fileName.contains("test_doc_ref"))  {   
-   printf("\n Broom  (docparser.cpp) target %s  file %s   ", csPrintable(target), csPrintable(sec->fileName) );
-}
-
       if (sec->dupAnchor_cnt > 0)  {
          warn(s_fileName, doctokenizerYYlineno, "Link to ambiguous anchor '%s', "
             "using first anchor declared in %s, line %d", csPrintable(target), 
@@ -7853,7 +7848,8 @@ DocText *validatingParseText(const QString &input)
    return txt;
 }
 
-void docFindSections(const QString &input, QSharedPointer<Definition> d, MemberGroup *mg, const QString &fileName)
+void docFindSections(const QString &input, QSharedPointer<Definition> def, 
+                  QSharedPointer<MemberGroup> mg, const QString &fileName)
 {
-   doctokenizerYYFindSections(input, d, mg, fileName);
+   doctokenizerYYFindSections(input, def, mg, fileName);
 }

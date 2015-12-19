@@ -103,8 +103,7 @@ void GroupDef::distributeMemberGroupDocumentation()
 void GroupDef::findSectionsInDocumentation()
 {
    QSharedPointer<GroupDef> self = sharedFrom(this);
-
-   docFindSections(documentation(), self, 0, docFile());
+   docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
   
    for (auto mg : *memberGroupSDict) {
       mg->findSectionsInDocumentation();

@@ -45,7 +45,7 @@ PageDef::~PageDef()
 void PageDef::findSectionsInDocumentation()
 {
    QSharedPointer<PageDef> self = sharedFrom(this);
-   docFindSections(documentation(), self, 0, docFile());
+   docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
 }
 
 QSharedPointer<GroupDef> PageDef::getGroupDef() const

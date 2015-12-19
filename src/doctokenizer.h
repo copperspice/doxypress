@@ -119,7 +119,9 @@ extern FILE *doctokenizerYYin;
 QString tokToString(int token);
 
 // operations on the scanner
-void doctokenizerYYFindSections(const QString &input, QSharedPointer<Definition> d, MemberGroup *mg, const QString &fileName);
+void doctokenizerYYFindSections(const QString &input, QSharedPointer<Definition> def, 
+                  QSharedPointer<MemberGroup> mg, const QString &fileName);
+
 void doctokenizerYYinit(const QString &input, const QString &fileName);
 void doctokenizerYYcleanup();
 void doctokenizerYYpushContext();

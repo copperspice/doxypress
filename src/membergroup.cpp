@@ -287,7 +287,9 @@ void MemberGroup::addListReferences(QSharedPointer<Definition> def)
 
 void MemberGroup::findSectionsInDocumentation()
 {
-   docFindSections(doc, QSharedPointer<Definition>(), this, m_docFile);
+   QSharedPointer<MemberGroup> self = sharedFrom(this);
+   docFindSections(doc, QSharedPointer<Definition>(), self, m_docFile);
+
    memberList->findSectionsInDocumentation();
 }
 

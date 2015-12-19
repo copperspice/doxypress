@@ -557,7 +557,7 @@ void ClassDef::distributeMemberGroupDocumentation()
 void ClassDef::findSectionsInDocumentation()
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
-   docFindSections(documentation(), self, 0, docFile());
+   docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
 
    if (m_memberGroupSDict) {    
       for (auto item : *m_memberGroupSDict) {
@@ -576,7 +576,7 @@ void ClassDef::findSectionsInDocumentation()
 // add a file name to the used files set
 void ClassDef::insertUsedFile(QSharedPointer<FileDef> fd)
 {
-   if (fd == 0) {
+   if (fd == nullptr) {
       return;
    }
 

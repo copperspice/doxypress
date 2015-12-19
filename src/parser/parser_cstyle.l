@@ -5829,7 +5829,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <CopyArgComment>{CMD}("brief"|"short"){B}+ {
       QString text = QString::fromUtf8(yytext); 
-      warn(yyFileName,yyLineNr, "Ignoring %c brief command inside argument documentation", qPrintable(text[0]) );
+      warn(yyFileName,yyLineNr, "Ignoring %c brief command inside argument documentation", csPrintable(text[0]) );
       fullArgString += ' ';
    }
 
@@ -8267,7 +8267,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <DocCopyBlock><<EOF>>         {
       warn(yyFileName,yyLineNr, "Reached end of file while inside a %s block\n"
-         "The command which ends the block appears to be missing\n", qPrintable(s_docBlockName)); 
+         "The command which ends the block appears to be missing\n", csPrintable(s_docBlockName)); 
       yyterminate();
    }
 

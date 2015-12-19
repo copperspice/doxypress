@@ -30,8 +30,7 @@
 
 NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &name, 
       const QString &lref, QString fName, const QString &type, bool isPublished) 
-   : Definition(df, dl, dc, name), m_isPublished(isPublished),
-     m_subGrouping(Config::getBool("allow-sub-grouping"))
+   : Definition(df, dl, dc, name), m_isPublished(isPublished), m_subGrouping(Config::getBool("allow-sub-grouping"))
 {
    if (! fName.isEmpty()) {
       fileName = stripExtension(fName);
@@ -95,8 +94,7 @@ StringMap<QSharedPointer<Definition>> &NamespaceDef::getUsedClasses()
 void NamespaceDef::findSectionsInDocumentation()
 {
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
-
-   docFindSections(documentation(), self, 0, docFile());
+   docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
    
    for (auto mg : *memberGroupSDict) {
       mg->findSectionsInDocumentation();

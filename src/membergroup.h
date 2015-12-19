@@ -23,6 +23,8 @@
 
 #include <types.h>
 
+#include <doxy_shared.h>
+
 class ClassDef;
 class Definition;
 class FileDef;
@@ -38,9 +40,9 @@ struct ListItemInfo;
 #define DOX_NOGROUP -1
 
 /** A class representing a group of members. */
-class MemberGroup
+class MemberGroup : public EnableSharedFromThis
 {
- public:
+  public:
    MemberGroup();
    MemberGroup(QSharedPointer<Definition> parent, int id, const QString &header, const QString &docs,    
          const QString &docFile, int docLine);
@@ -63,12 +65,14 @@ class MemberGroup
    void writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool showInline = false);
 
-   void writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container, bool showEnumValues, bool showInline);
+   void writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container, 
+                  bool showEnumValues, bool showInline);
+
    void writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container);
    void writeTagFile(QTextStream &);
 
    void addGroupedInheritedMembers(OutputList &ol, QSharedPointer<ClassDef> cd, MemberListType lt,
-                                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
+                  QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
    QString documentation() const {
       return doc;

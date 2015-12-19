@@ -16458,9 +16458,10 @@ void parseCCode(CodeOutputInterface &od, const QString &className, const QString
 
    if (fd == 0) {
       // create a dummy filedef for the example
-      g_sourceFileDef  = QMakeShared<FileDef>("", (! exName.isEmpty() ? qPrintable(exName) : "generated"));
+      g_sourceFileDef  = QMakeShared<FileDef>("", (! exName.isEmpty() ? exName : "generated"));
       cleanupSourceDef = TRUE;
    }
+
    g_insideObjC = lang == SrcLangExt_ObjC;
    g_insideJava = lang == SrcLangExt_Java;
    g_insideCS   = lang == SrcLangExt_CSharp;
