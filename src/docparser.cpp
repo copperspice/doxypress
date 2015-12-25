@@ -57,7 +57,7 @@
 
 static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &children, bool handleWord = true);
 
-static const char *sectionLevelToName[] = {
+static const QString sectionLevelToName[] = {
    "page",
    "section",
    "subsection",
@@ -425,7 +425,7 @@ static void checkArgumentName(const QString &name, bool isParam)
       if (! found && isParam) {         
          QString scope = s_memberDef->getScopeString();
 
-         if (!scope.isEmpty()) {
+         if (! scope.isEmpty()) {
             scope += "::";
          } else {
             scope = "";
@@ -1001,7 +1001,7 @@ static int handleAHref(DocNode *parent, QList<DocNode *> &children, const HtmlAt
    return retval;
 }
 
-const char *DocStyleChange::styleString() const
+QString DocStyleChange::styleString() const
 {
    switch (m_style) {
       case DocStyleChange::Bold:
@@ -2215,7 +2215,7 @@ bool DocXRefItem::parse()
 
          // either not a built-in list or the list is enabled
          RefItem *item = refList.getRefItem(m_id);
-         assert(item != 0);
+         assert(item != nullptr);
 
          if (item) {
             if (s_memberDef && ! s_memberDef->name().isEmpty() && s_memberDef->name().at(0) == '@') {
@@ -6133,7 +6133,7 @@ int DocPara::handleCommand(const QString &cmdName)
    return retval;
 }
 
-static bool findAttribute(const HtmlAttribList &tagHtmlAttribs, const char *attrName, QString *result)
+static bool findAttribute(const HtmlAttribList &tagHtmlAttribs, const QString &attrName, QString *result)
 {
    for (auto opt : tagHtmlAttribs) { 
       if (opt.name == attrName) {
@@ -7210,7 +7210,7 @@ int DocSection::parse()
       int level = (retval == RetVal_Subsubsection) ? 3 : 4;
 
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected %s command found inside %s",
-                     sectionLevelToName[level], sectionLevelToName[m_level]);
+                     csPrintable(sectionLevelToName[level]), csPrintable(sectionLevelToName[m_level]) );
 
       retval = 0; // stop parsing
    } else {
@@ -7659,78 +7659,8 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
          Doxy_Globals::searchIndex->setCurrentDoc(ctx, ctx->anchor(), false);
 
       }
-   }
 
-
-#if 0
-   if (indexWords && md && Doxy_Globals::searchIndex) {
-      s_searchUrl = md->getOutputFileBase();
-      Doxy_Globals::searchIndex->setCurrentDoc(
-         (md->getLanguage() == SrcLangExt_Fortran ?
-          theTranslator->trSubprogram(true, true) :
-          theTranslator->trMember(true, true)) + " " + md->qualifiedName(),
-         s_searchUrl,
-         md->anchor());
-
-   } else if (indexWords && ctx && Doxy_Globals::searchIndex) {
-      s_searchUrl = ctx->getOutputFileBase();
-      QString name = ctx->qualifiedName();
-
-      SrcLangExt lang = ctx->getLanguage();
-      QString sep = getLanguageSpecificSeparator(lang);
-
-      if (sep != "::") {
-         name = substitute(name, "::", sep);
-      }
-
-      switch (ctx->definitionType()) {
-         case Definition::TypePage: {
-            PageDef *pd = (PageDef *)ctx;
-            if (!pd->title().isEmpty()) {
-               name = theTranslator->trPage(true, true) + " " + pd->title();
-            } else {
-               name = theTranslator->trPage(true, true) + " " + pd->name();
-            }
-         }
-         break;
-         case Definition::TypeClass: {
-            ClassDef *cd = (ClassDef *)ctx;
-            name.prepend(cd->compoundTypeString() + " ");
-         }
-         break;
-
-         case Definition::TypeNamespace: {
-            if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
-               name = theTranslator->trPackage(name);
-
-            } else if (lang == SrcLangExt_Fortran) {
-               name.prepend(theTranslator->trModule(true, true) + " ");
-
-            } else {
-               name.prepend(theTranslator->trNamespace(true, true) + " ");
-            }
-         }
-         break;
-
-         case Definition::TypeGroup: {
-            QSharedPointer<GroupDef> gd = ctx.dynamicCast<GroupDef>();
-
-            if (gd->groupTitle()) {
-               name = theTranslator->trGroup(true, true) + " " + gd->groupTitle();
-            } else {
-               name.prepend(theTranslator->trGroup(true, true) + " ");
-            }
-         }
-         break;
-
-         default:
-            break;
-      }
-      Doxy_Globals::searchIndex->setCurrentDoc(name, s_searchUrl);
-   }
-#endif
-
-   else {
+   } else {
       s_searchUrl = "";
    }
 

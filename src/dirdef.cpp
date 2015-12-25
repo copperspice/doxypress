@@ -39,7 +39,7 @@ DirDef::DirDef(const QString &path) : Definition(path, 1, 1, path), visited(fals
    // get short name (last part of path)
 
    m_shortName = path;
-   m_diskName = path;
+   m_diskName  = path;
 
    if (m_shortName.at(m_shortName.length() - 1) == '/') {
       // strip trailing /

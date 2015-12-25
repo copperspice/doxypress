@@ -27,8 +27,8 @@
 #include <outputlist.h>
 #include <util.h>
 
-PageDef::PageDef(const QString &f, int l, const QString &n, const QString &d, const QString &t)
-   : Definition(f, l, 1, n), m_title(t)
+PageDef::PageDef(const QString &f, int l, const QString &name, const QString &d, const QString &t)
+   : Definition(f, l, 1, name), m_title(t)
 {
    setDocumentation(d, f, l);
 
@@ -110,6 +110,12 @@ void PageDef::addInnerCompound(QSharedPointer<Definition> d)
 bool PageDef::hasParentPage() const
 {
    return getOuterScope() && getOuterScope()->definitionType() == Definition::TypePage;
+}
+
+
+QString PageDef::pathFragment_Internal() const
+{
+   return title();
 }
 
 void PageDef::writeTagFile(QTextStream &tagFile)
@@ -212,7 +218,7 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    if (! title().isEmpty() && !name().isEmpty() && si != 0) {
 
-      startTitle(ol, getOutputFileBase(), this);
+      startTitle(ol, getOutputFileBase(), self);
       ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, 0, true, false);
       
       endTitle(ol, getOutputFileBase(), name());
@@ -221,6 +227,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.startContents();
    ol.popGeneratorState();
    //2.}
+
 
    if (m_showToc && hasSections()) {
       writeToc(ol);

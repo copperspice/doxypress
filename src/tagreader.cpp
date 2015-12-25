@@ -1447,13 +1447,13 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       
       QSharedPointer<FileDef> fd = QMakeShared<FileDef>(m_tagName + ":" + tfi.path, tfi.name, m_tagName, tfi.filename);
      
-      QSharedPointer<FileName> mn (Doxy_Globals::inputNameDict->find(tfi.name));
+      QSharedPointer<FileNameList> mn (Doxy_Globals::inputNameDict->find(tfi.name));
 
       if (mn) {
          mn->append(fd);
 
       } else {       
-         mn = QSharedPointer<FileName> (new FileName(fullName, tfi.name));
+         mn = QMakeShared<FileNameList>(fullName, tfi.name); 
          mn->append(fd);
 
          Doxy_Globals::inputNameList->inSort(mn);
@@ -1544,7 +1544,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
 void TagFileParser::addIncludes()
 { 
    for (auto tfi : m_tagFileFiles) {      
-      QSharedPointer<FileName> fn (Doxy_Globals::inputNameDict->find(tfi.name));
+      QSharedPointer<FileNameList> fn (Doxy_Globals::inputNameDict->find(tfi.name));
 
       if (fn) {
                  
@@ -1553,7 +1553,7 @@ void TagFileParser::addIncludes()
                             
                for (auto item : tfi.includes) {
                
-                  QSharedPointer<FileName> ifn (Doxy_Globals::inputNameDict->find(item.name));
+                  QSharedPointer<FileNameList> ifn (Doxy_Globals::inputNameDict->find(item.name));
                   assert(ifn != 0);
 
                   if (ifn) {                   

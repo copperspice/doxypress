@@ -72,11 +72,6 @@ int MemberNameInfo::compareValues(QSharedPointer<const MemberInfo> m1, QSharedPo
    }
 }
 
-MemberNameIterator::MemberNameIterator(const MemberName &mnlist) 
-   : QListIterator<QSharedPointer<MemberDef>>(mnlist)
-{
-}
-
 int MemberNameSDict::compareMapValues(const QSharedPointer<MemberName> &n1, const QSharedPointer<MemberName> &n2) const
 { 
    QString name1 = n1->memberName();

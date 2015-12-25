@@ -21,16 +21,6 @@
 #include <QByteArray>
 #include <QString>
 
-/** @brief Compiled resource */
-struct Resource {
-   enum Type { Verbatim, Luminance, LumAlpha, CSS };
-
-   const char *category;
-   const char *name;
-   const char *data;
-   int size;  
-};
-
 /** @brief Singleton for managing resources compiled into an executable */
 class ResourceMgr
 {
@@ -47,6 +37,8 @@ class ResourceMgr
  private:
    ResourceMgr();
    ~ResourceMgr();
+
+   enum Type { Verbatim, Luminance, LumAlpha, CSS };
 };
 
 #endif

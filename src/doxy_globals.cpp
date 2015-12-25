@@ -16,6 +16,7 @@
 *************************************************************************/
 
 #include <doxy_globals.h>
+#include <filedef.h>
 
 class GenericsSDict;
 class IndexList;
@@ -43,7 +44,8 @@ StringDict       Doxy_Globals::cmdAliasDict;            // cmd aliases
 StringDict       Doxy_Globals::renameNSDict;            // rename namespaces
 
 DirSDict         Doxy_Globals::directories;
-GenericsSDict   *Doxy_Globals::genericsDict;
+
+QSharedPointer<GenericsSDict> Doxy_Globals::genericsDict;
 
 FileNameDict    *Doxy_Globals::inputNameDict = 0;
 FileNameDict    *Doxy_Globals::includeNameDict = 0;     // include names
@@ -53,7 +55,7 @@ FileNameDict    *Doxy_Globals::dotFileNameDict = 0;     // dot files
 FileNameDict    *Doxy_Globals::mscFileNameDict = 0;     // msc files
 FileNameDict    *Doxy_Globals::diaFileNameDict = 0;     // dia files
 
-SortedList<QSharedPointer<FileName>> *Doxy_Globals::inputNameList; // all input files
+SortedList<QSharedPointer<FileNameList>> *Doxy_Globals::inputNameList; // all input files
 
 QCache<QString, LookupInfo>  *Doxy_Globals::lookupCache;
 
@@ -109,7 +111,6 @@ Statistics Doxy_Globals::g_stats;
 
 bool Doxy_Globals::g_dumpSymbolMap = false;
 bool Doxy_Globals::g_programExit   = false;
-
 
 // part 3
 QHash<QString, Definition *> &Doxy_Globals::symbolMap()

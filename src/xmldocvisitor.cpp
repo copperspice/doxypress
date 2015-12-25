@@ -38,7 +38,7 @@ static void visitCaption(XmlDocVisitor *parent, QList<DocNode *> children)
    } 
 }
 
-static void visitPreStart(QTextStream &t, const char *cmd, const bool doCaption, XmlDocVisitor *parent,
+static void visitPreStart(QTextStream &t, const QString &cmd, const bool doCaption, XmlDocVisitor *parent,
                   QList<DocNode *> children, const QString &name, bool writeType, DocImage::Type type, 
                   const QString &width, const QString &height)
 {

@@ -470,27 +470,6 @@ BriefInfo *unmarshalBriefInfo(StorageIntf *s)
    return result;
 }
 
-SortedList<GroupDef *> *unmarshalGroupList(StorageIntf *s)
-{
-   uint i;
-   uint count = unmarshalUInt(s);
-
-   if (count == NULL_LIST) {
-      return 0;   
-   }
-
-   assert(count < 1000000);
-
-   SortedList<GroupDef *> *result = new SortedList<GroupDef *>;
-
-   for (i = 0; i < count; i++) {
-      GroupDef *gd = (GroupDef *)unmarshalObjPointer(s);
-      result->append(gd);
-   }
-
-   return result;
-}
-
 QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
 {
    QSharedPointer<Entry> e = QMakeShared<Entry>();

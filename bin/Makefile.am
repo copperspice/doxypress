@@ -101,7 +101,7 @@ doxypress_SOURCES = \
    src/eclipsehelp.cpp \
    src/entry.cpp \
    src/filedef.cpp \
-   src/filename.cpp \
+   src/filenamelist.cpp \
    src/formula.cpp \
    src/ftvhelp.cpp \
    src/groupdef.cpp \
@@ -208,8 +208,7 @@ noinst_HEADERS = \
    src/entry.h \
    src/example.h \
    src/filedef.h \
-   src/filelist.h \
-   src/filename.h \
+   src/filenamelist.h \
    src/filestorage.h \
    src/formula.h \
    src/fortrancode.h \
@@ -267,6 +266,7 @@ noinst_HEADERS = \
    src/searchindex.h \
    src/section.h \
    src/sortedlist.h \
+   src/sortedlist_fwd.h \
    src/store.h \
    src/stringmap.h \
    src/tagreader.h \

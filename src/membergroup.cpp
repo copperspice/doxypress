@@ -134,8 +134,7 @@ void MemberGroup::addGroupedInheritedMembers(OutputList &ol, QSharedPointer<Clas
 }
 
 int MemberGroup::countGroupedInheritedMembers(MemberListType lt)
-{
-   //printf("** countGroupedInheritedMembers()\n");
+{  
    int count = 0;  
 
    for (auto md : *memberList) {  
@@ -155,7 +154,8 @@ int MemberGroup::countGroupedInheritedMembers(MemberListType lt)
 void MemberGroup::addToDeclarationSection()
 {
    if (inDeclSection) {    
-      inDeclSection->addMemberGroup(this);
+      QSharedPointer<MemberGroup> self = sharedFrom(this);
+      inDeclSection->addMemberGroup(self);
    }
 }
 

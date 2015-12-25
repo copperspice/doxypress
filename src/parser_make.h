@@ -56,9 +56,4 @@ class MakeFileParser : public ParserInterface
         void startFontClass(const QString &s);
 };
 
-extern void parseMakeCode(CodeOutputInterface &, const QString &, const QString &,
-                          bool, const QString &, FileDef *fd, int startLine, int endLine, bool inlineFragment,
-                          MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx, bool collectXRefs);
-
-
 #endif

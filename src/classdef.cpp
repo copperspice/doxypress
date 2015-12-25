@@ -38,7 +38,7 @@
 // constructs a new class definition
 ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const QString &x_name, CompoundType ct,
                    const QString &lref, const QString &fName, bool isSymbol, bool isJavaEnum)
-   : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(x_name), 0, 0, isSymbol)
+   : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(x_name), "", "", isSymbol)
 {
    visited = false;
    setReference(lref);
@@ -516,7 +516,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
          mni->append(mi);
 
       } else {
-         mni = QSharedPointer<MemberNameInfo> (new MemberNameInfo(md->name()));
+         mni = QMakeShared<MemberNameInfo>(md->name());
          mni->append(mi);
 
          m_allMemberNameInfoSDict->insert(mni->memberName(), mni);
@@ -556,6 +556,7 @@ void ClassDef::distributeMemberGroupDocumentation()
 
 void ClassDef::findSectionsInDocumentation()
 {
+
    QSharedPointer<ClassDef> self = sharedFrom(this);
    docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
 
@@ -566,7 +567,8 @@ void ClassDef::findSectionsInDocumentation()
    }
  
    for (auto item : m_memberLists) {
-      if ((item->listType()&MemberListType_detailedLists) == 0) {
+
+      if ((item->listType() & MemberListType_detailedLists) == 0) {
          item->findSectionsInDocumentation();
       }
    }
@@ -628,20 +630,20 @@ static void writeInheritanceSpecifier(OutputList &ol, BaseClassDef *bcd)
    }
 }
 
-void ClassDef::setIncludeFile(QSharedPointer<FileDef> fd, const char *includeName, bool local, bool force)
+void ClassDef::setIncludeFile(QSharedPointer<FileDef> fd, const QString &includeName, bool local, bool force)
 {   
-   if (!m_incInfo) {
+   if (! m_incInfo) {
       m_incInfo = new IncludeInfo;
    }
 
-   if ((includeName && m_incInfo->includeName.isEmpty()) || (fd != 0 && m_incInfo->fileDef == 0) ) {
+   if ((! includeName.isEmpty() && m_incInfo->includeName.isEmpty()) || (fd != nullptr && m_incInfo->fileDef == 0) ) {
 
       m_incInfo->fileDef     = fd;
       m_incInfo->includeName = includeName;
       m_incInfo->local       = local;
    }
 
-   if (force && includeName) {
+   if (force && ! includeName.isEmpty()) {
       m_incInfo->includeName = includeName;
       m_incInfo->local       = local;
    }
@@ -1238,7 +1240,8 @@ void ClassDef::writeNestedClasses(OutputList &ol, const QString &title)
 void ClassDef::writeInlineClasses(OutputList &ol)
 {
    if (m_innerClasses) {
-      m_innerClasses->writeDocumentation(ol, this);
+      QSharedPointer<ClassDef> self = sharedFrom(this);
+      m_innerClasses->writeDocumentation(ol, self);
    }
 }
 
@@ -1901,7 +1904,7 @@ void ClassDef::writeDocumentation(OutputList &ol)
       ol.endQuickIndices();
    }
 
-   startTitle(ol, getOutputFileBase(), this);
+   startTitle(ol, getOutputFileBase(), self);
    ol.parseText(pageTitle);
 
    addClassAttributes(ol);
@@ -1935,7 +1938,7 @@ void ClassDef::writeMemberPages(OutputList &ol)
    ol.popGeneratorState();
 }
 
-void ClassDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
+void ClassDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const
 {
    static bool createSubDirs = Config::getBool("create-subdirs");
 
@@ -1946,10 +1949,10 @@ void ClassDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
     
       for (auto mni : *m_allMemberNameInfoSDict) {
 
-         for (auto mi : *mni) {
+         for (auto &mi : *mni) {
             QSharedPointer<MemberDef> md = mi.memberDef;
 
-            if (md->getClassDef() == this && md->isLinkable() && !md->isEnumValue()) {
+            if (md->getClassDef() == this && md->isLinkable() && ! md->isEnumValue()) {
                ol.writeString("          <tr><td class=\"navtab\">");
 
                if (md->isLinkableInProject()) {
@@ -2042,7 +2045,7 @@ void ClassDef::writeMemberList(OutputList &ol)
   
    for (auto mni : *m_allMemberNameInfoSDict) {
 
-      for (auto mi : *mni) {
+      for (auto &mi : *mni) {
          QSharedPointer<MemberDef> md = mi.memberDef;
          QSharedPointer<ClassDef>  cd = md->getClassDef();
 
@@ -2597,9 +2600,8 @@ void ClassDef::mergeMembers()
                   // the member may hide or reimplement the one in the sub class
                   // or there may be another path to the base class that is already
                   // visited via another branch in the class hierarchy
-
                                 
-                  for (auto srcMi : *srcMni) {
+                  for (auto &srcMi : *srcMni) {
                      QSharedPointer<MemberDef> srcMd = srcMi.memberDef;
 
                      bool found   = false;
@@ -2608,7 +2610,7 @@ void ClassDef::mergeMembers()
                     
                      QSharedPointer<ClassDef> srcCd = srcMd->getClassDef();
                    
-                     for (auto dstMi : *dstMni) {
+                     for (auto &dstMi : *dstMni) {
 
                         if (found) {
                            break;
@@ -2729,7 +2731,7 @@ void ClassDef::mergeMembers()
 
                   // copy the member(s) from the base to the sub class
                
-                  for (auto mi : *srcMni )   {
+                  for (auto &mi : *srcMni )   {
                      if (! mi.memberDef->isFriend()) { 
                         // do not inherit friends
                         Protection prot = mi.prot;
@@ -2829,7 +2831,7 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
 
    if (srcMnd && dstMnd) {     
 
-      for (auto &srcMni : *srcMnd )   {
+      for (auto srcMni : *srcMnd )   {
          QSharedPointer<MemberNameInfo> dstMni = dstMnd->find(srcMni->memberName());
 
          if (dstMni) { 
@@ -2852,7 +2854,7 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
             // create a deep copy of the list
 
             QSharedPointer<ClassDef> self = sharedFrom(this);
-            QSharedPointer<MemberNameInfo> newMni (new MemberNameInfo(srcMni->memberName()));
+            QSharedPointer<MemberNameInfo> newMni = QMakeShared<MemberNameInfo>(srcMni->memberName());
 
             // copy the member(s) from the category to this class
                          
@@ -2881,7 +2883,7 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
                      mn->append(newMd);
 
                   } else {
-                     mn = QSharedPointer<MemberName> (new MemberName(newMd->name()));
+                     mn = QMakeShared<MemberName>(newMd->name());
                      mn->append(newMd);
 
                      Doxy_Globals::memberNameSDict->insert(name, mn);
@@ -2916,7 +2918,7 @@ void ClassDef::addUsedClass(QSharedPointer<ClassDef> cd, const QString &accessNa
    }
    
    if (m_usesImplClassDict == 0) {
-      m_usesImplClassDict = new UsesClassDict();      
+      m_usesImplClassDict = new QHash<QString, UsesClassDef>();      
    }
 
    auto ucd = m_usesImplClassDict->find(cd->name());
@@ -2962,7 +2964,7 @@ void ClassDef::addUsedByClass(QSharedPointer<ClassDef> cd, const QString &access
    }
    
    if (m_usedByImplClassDict == 0) {
-      m_usedByImplClassDict = new UsesClassDict();      
+      m_usedByImplClassDict = new QHash<QString, UsesClassDef>();      
    }
 
 
@@ -3136,8 +3138,9 @@ void ClassDef::setGroupDefForAllMembers(QSharedPointer<GroupDef> gd, Grouping::G
   
    for (auto mni : *m_allMemberNameInfoSDict) {    
 
-      for (auto mi : *mni) {
+      for (auto &mi : *mni) {
          QSharedPointer<MemberDef> md = mi.memberDef;
+
          md->setGroupDef(gd, pri, fileName, startLine, hasDocs);
          gd->insertMember(md, true);
 
@@ -3269,7 +3272,7 @@ void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const Q
   
    for (auto mni : *cd->memberNameInfoSDict()) {
 
-      for (auto mi : *mni) {
+      for (auto &mi : *mni) {
          ArgumentList *actualArguments = new ArgumentList;
          stringToArgumentList(templSpec, actualArguments);
 
@@ -3290,7 +3293,7 @@ void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const Q
          QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict->find(imd->name());
 
          if (! mn) {
-            mn = QSharedPointer<MemberName> (new MemberName(imd->name()));
+            mn = QMakeShared<MemberName>(imd->name());
             Doxy_Globals::memberNameSDict->insert(imd->name(), mn);
          }
 
@@ -3439,7 +3442,7 @@ QSharedPointer<MemberDef> ClassDef::getMemberByName(const QString &name) const
          const int maxInheritanceDepth = 100000;
          int mdist = maxInheritanceDepth;
         
-         for (auto mi : *mni) {  
+         for (auto &mi : *mni) {  
             QSharedPointer<ClassDef> mcd = mi.memberDef->getClassDef();
 
             int m = minClassDistance(self, mcd);
@@ -3469,7 +3472,7 @@ QSharedPointer<MemberList> ClassDef::createMemberList(MemberListType lt)
    }
 
    // no memberList was found, create a new memberList
-   QSharedPointer<MemberList> ml (new MemberList(lt));
+   QSharedPointer<MemberList> ml = QMakeShared<MemberList>(lt);
    m_memberLists.append(ml);
 
    return ml;
@@ -3659,7 +3662,7 @@ int ClassDef::countMembersIncludingGrouped(MemberListType lt, QSharedPointer<Cla
    if (m_memberGroupSDict) {
       
       for (auto mg : *m_memberGroupSDict) { 
-         bool hasOwnSection = ! mg->allMembersInSameSection() || !m_subGrouping; 
+         bool hasOwnSection = ! mg->allMembersInSameSection() || ! m_subGrouping; 
 
          // group is in its own section
          if ((additional && hasOwnSection) || (!additional && !hasOwnSection)) {
@@ -3888,17 +3891,17 @@ IncludeInfo *ClassDef::includeInfo() const
    return m_incInfo;
 }
 
-UsesClassDict *ClassDef::usedImplementationClasses() const
+QHash<QString, UsesClassDef> *ClassDef::usedImplementationClasses() const
 {
    return m_usesImplClassDict;
 }
 
-UsesClassDict *ClassDef::usedByImplementationClasses() const
+QHash<QString, UsesClassDef> *ClassDef::usedByImplementationClasses() const
 {
    return m_usedByImplClassDict;
 }
 
-UsesClassDict *ClassDef::usedInterfaceClasses() const
+QHash<QString, UsesClassDef> *ClassDef::usedInterfaceClasses() const
 {
    return m_usesIntfClassDict;
 }

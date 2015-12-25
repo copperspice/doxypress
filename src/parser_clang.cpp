@@ -721,7 +721,7 @@ void ClangParser::linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> f
    QSharedPointer<FileDef> ifd;
 
    if (! incName.isEmpty()) {     
-      QSharedPointer<FileName> fn = Doxy_Globals::inputNameDict->find(incName);
+      QSharedPointer<FileNameList> fn = Doxy_Globals::inputNameDict->find(incName);
 
       if (fn) {
          bool found = false;

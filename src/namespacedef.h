@@ -24,7 +24,7 @@
 #include <QTextStream>
 
 #include <definition.h>
-#include <filelist.h>
+#include <filenamelist.h>
 
 class ClassDef;
 class ClassSDict;
@@ -61,7 +61,7 @@ class NamespaceDef : public Definition
 
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
-   void writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const;
+   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const;
    void writeTagFile(QTextStream &);
 
    void insertClass(QSharedPointer<ClassDef> cd);

@@ -336,11 +336,11 @@ class Entry
    bool callGraph;           //!< do we need to draw the call graph ?
    bool callerGraph;         //!< do we need to draw the caller graph ?
   
-   QList<ArgumentList> *tArgLists;    //!< template argument declarations
-   QList<BaseInfo>      extends;      //!< list of base classes
-   QList<Grouping>     *groups;       //!< list of groups this entry belongs to
-   QList<SectionInfo>  *anchors;      //!< list of anchors defined in this entry
-   QList<ListItemInfo> *sli;          //!< special lists (test/todo/bug/deprecated/..) this entry is in
+   QList<ArgumentList>   *tArgLists;    //!< template argument declarations
+   QList<BaseInfo>        extends;      //!< list of base classes
+   QList<Grouping>       *groups;       //!< list of groups this entry belongs to
+   QList<SectionInfo>    *anchors;      //!< list of anchors defined in this entry
+   QList<ListItemInfo>   *sli;          //!< special lists (test/todo/bug/deprecated/..) 
 
    QString	 type;        //!< member type
    QString	 name;        //!< member name
@@ -381,14 +381,18 @@ class Entry
    static int  num;        //!< counts the total number of entries
 
    /// return the command name used to define GROUPDOC_SEC
-   const char *groupDocCmd() const {
+   QString groupDocCmd() const {
+
       switch ( groupDocType ) {
          case GROUPDOC_NORMAL:
             return "\\defgroup";
+
          case GROUPDOC_ADD:
             return "\\addgroup";
+
          case GROUPDOC_WEAK:
             return "\\weakgroup";
+
          default:
             return "unknown group command";
       }

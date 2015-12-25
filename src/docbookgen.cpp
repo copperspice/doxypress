@@ -1188,9 +1188,9 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
    }
 
    static const QString docbookOutDir = Config::getString("docbook-output");
+   static const bool    haveDot       = Config::getBool("have-dot"); 
  
    msg("Generating Docbook output for class %s\n", csPrintable(cd->name()));
-
 
    // Add the file Documentation info to index file
    QString fileDocbook = cd->getOutputFileBase() + ".xml";
@@ -1256,13 +1256,13 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       }
    }
 
-   if (Config::getBool("have-dot") && (Config::getBool("class-diagrams") || Config::getBool("dot-class-graph"))) {
+   if (haveDot && (Config::getBool("class-diagrams") || Config::getBool("dot-class-graph"))) {
       t << "<para>Inheritance diagram for " << convertToXML(cd->name()) << "</para>" << endl;
       DotClassGraph inheritanceGraph(cd, DotNode::Inheritance);
       inheritanceGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, docbookOutDir, fileName, relPath, true, false);
    }
 
-   if (Config::getBool("have-dot") && Config::getBool("dot-collaboration")) {
+   if (haveDot && Config::getBool("dot-collaboration")) {
       t << "<para>Collaboration diagram for " << convertToXML(cd->name()) << "</para>" << endl;
       DotClassGraph collaborationGraph(cd, DotNode::Collaboration);
       collaborationGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, docbookOutDir, fileName, relPath, true, false);
@@ -1316,44 +1316,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       }
    }
 
-/*
-   // TODO: Handling of Inheritance and Colloboration graph for Docbook to be implemented
-
-   DotClassGraph inheritanceGraph(cd,DotNode::Inheritance);
-
-   if (!inheritanceGraph.isTrivial()) {
-     t << "    <inheritancegraph>" << endl;
-     inheritanceGraph.writeDocbook(t);
-     t << "    </inheritancegraph>" << endl;
-   }
-
-   DotClassGraph collaborationGraph(cd,DotNode::Collaboration);
-   if (! collaborationGraph.isTrivial()) {
-     t << "    <collaborationgraph>" << endl;
-     collaborationGraph.writeDocbook(t);
-     t << "    </collaborationgraph>" << endl;
-   }
-
-   t << "    <location file=\"" << cd->getDefFileName() << "\" line=\"" << cd->getDefLine() << "\"";
-
-   if (cd->getStartBodyLine() != -1) {
-     FileDef *bodyDef = cd->getBodyDef();
-
-     if (bodyDef) {
-        t << " bodyfile=\"" << bodyDef->absoluteFilePath() << "\"";
-     }
-
-     t << " bodystart=\"" << cd->getStartBodyLine() << "\" bodyend=\""
-       << cd->getEndBodyLine() << "\"";
-   }
-
-   t << "/>" << endl;
-   writeListOfAllMembers(cd,t);
-
-*/
-
    t << "</section>" << endl;
-
 }
 
 static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream &ti)

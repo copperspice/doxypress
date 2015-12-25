@@ -1214,8 +1214,9 @@ static void startCondSection(const QString &sectId)
 
    g_condStack.push(new CondCtx(g_lineNr, sectId, g_skip));
 
-   if (! expResult) { // not enabled
-      g_skip = TRUE;
+   if (! expResult) { 
+      // not enabled
+      g_skip = true;
    }
 }
 
@@ -1223,7 +1224,8 @@ static void endCondSection()
 {
    if (g_condStack.isEmpty()) {
       warn(g_fileName, g_lineNr, "Found \\endcond command without matching \\cond");
-      g_skip = FALSE;
+      g_skip = false;
+
    } else {
       CondCtx *ctx = g_condStack.pop();
       g_skip = ctx->skip;

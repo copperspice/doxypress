@@ -380,15 +380,19 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
    switch (s->type()) {
 
       case DocVerbatim::Code:
+
          forceEndParagraph(s);
          m_t << PREFRAG_START;
 
-         Doxy_Globals::parserManager->getParser(lang)->parseCode(m_ci, s->context(), s->text(),
-                     langExt, s->isExample(), s->exampleFile(), QSharedPointer<FileDef>(), 
-                     -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
+         {
+            auto tmp = Doxy_Globals::parserManager->getParser(lang);
+
+            tmp->parseCode(m_ci, s->context(), s->text(), langExt, 
+                  s->isExample(), s->exampleFile(), QSharedPointer<FileDef>(), -1, -1, false, 
+                  QSharedPointer<MemberDef>(), true, m_ctx);
+         }  
 
          m_t << PREFRAG_END;
-
          forceStartParagraph(s);
 
          break;
@@ -2181,13 +2185,12 @@ void HtmlDocVisitor::endLink()
 
 void HtmlDocVisitor::pushEnabled()
 {
-   m_enabled.push(new bool(m_hide));
+   m_enabled.push(m_hide);
 }
 
 void HtmlDocVisitor::popEnabled()
 {
-   bool v = m_enabled.pop();
-   m_hide = v;   
+   m_hide = m_enabled.pop();   
 }
 
 void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, const QString &context)
@@ -2199,7 +2202,8 @@ void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, con
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   if ((i = baseName.indexOf('.')) != -1) { // strip extension
+   if ((i = baseName.indexOf('.')) != -1) { 
+      // strip extension
       baseName = baseName.left(i);
    }
 

@@ -31,7 +31,7 @@ A_Define::A_Define()
 }
 
 A_Define::A_Define(const A_Define &d)
-   : name(d.name), definition(d.definition), fileName(d.fileName)
+   : m_name(d.m_name), m_definition(d.m_definition), m_fileName(d.m_fileName)
 {   
    lineNr   = d.lineNr;
    columnNr = d.columnNr;
@@ -49,7 +49,7 @@ A_Define::~A_Define()
 
 bool A_Define::hasDocumentation()
 {
-   if (! definition.isEmpty() && (! doc.isEmpty() || Config::getBool("extract-all") )) { 
+   if (! m_definition.isEmpty() && (! doc.isEmpty() || Config::getBool("extract-all") )) { 
       return true;
    }
 

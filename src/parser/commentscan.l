@@ -1742,7 +1742,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // missing argument
       QString text = QString::fromUtf8(yytext);
 
-      warn(yyFileName, yyLineNr, "Missing group name after %s", current->groupDocCmd() );
+      warn(yyFileName, yyLineNr, "Missing group name after %s", csPrintable(current->groupDocCmd()) );
 
       addOutput('\n');
       if (text[0] == '\n') {

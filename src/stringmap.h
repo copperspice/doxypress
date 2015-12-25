@@ -31,7 +31,7 @@
 class ClassDef;
 class DirDef;
 class Example;
-class FileName;
+class FileNameList;
 class FilePair;
 class GroupDef;
 class IndexField;
@@ -450,7 +450,7 @@ class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
    void writeDeclaration(OutputList &ol, const ClassDef::CompoundType *filter = 0,
                          const QString &header = 0, bool localNames = false);
 
-   void writeDocumentation(OutputList &ol, Definition *container = 0);
+   void writeDocumentation(OutputList &ol, QSharedPointer<Definition> container = QSharedPointer<Definition>());
    bool declVisible(const ClassDef::CompoundType *filter = 0) const;
 
  private:
@@ -477,11 +477,11 @@ class ExampleSDict : public StringMap<QSharedPointer<Example>>
       int compareMapValues(const QSharedPointer<Example> &item1, const QSharedPointer<Example> &item2) const override;      
 };
 
-/** map of FileName objects. */
-class FileNameDict : public StringMap<QSharedPointer<FileName>>
+/** map of FileNameList objects. */
+class FileNameDict : public StringMap<QSharedPointer<FileNameList>>
 {   
    public:
-      FileNameDict() : StringMap<QSharedPointer<FileName>>(Config::getCase("case-sensitive-fname"))
+      FileNameDict() : StringMap<QSharedPointer<FileNameList>>(Config::getCase("case-sensitive-fname"))
       { }
    
       ~FileNameDict() {}

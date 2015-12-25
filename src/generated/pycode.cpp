@@ -1889,10 +1889,10 @@ static void findMemberLink(CodeOutputInterface &ol, const QString &symName)
    if (g_currentDefinition) { 
       auto di = Doxy_Globals::symbolMap().find(symName);
 
-      while (di != Doxy_Globals::symbolMap().end() && di.key() == symName) {      
-         QSharedPointer<Definition> self = sharedFrom(di.value());          
-          
-         if (findMemberLink(ol, self, symName)) {
+      while (di != Doxy_Globals::symbolMap().end() && di.key() == symName) {               
+         QSharedPointer<Definition> sharedPtr = sharedFrom(di.value());
+
+         if (findMemberLink(ol, sharedPtr, symName)) {
             return;            
          }   
 

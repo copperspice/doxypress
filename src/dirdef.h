@@ -23,7 +23,7 @@
 #include <QTextStream>
 
 #include <definition.h>
-#include <filelist.h>
+#include <filenamelist.h>
 #include <sortedlist.h>
 #include <stringmap.h>
 
@@ -221,6 +221,5 @@ class DirRelation
 void buildDirectories();
 void generateDirDocs(OutputList &ol);
 void computeDirDependencies();
-void writeDirDependencyGraph(const char *file);
 
 #endif

@@ -50,7 +50,7 @@ class DevNullCodeDocInterface : public CodeOutputInterface
    virtual void startFontClass(const QString &) override {}
    virtual void endFontClass() {}
    virtual void writeCodeAnchor(const QString &) override {}
-   virtual void linkableSymbol(int, QString &, Definition *, Definition *) {}
+   virtual void linkableSymbol(int, QString &, QSharedPointer<Definition>(), QSharedPointer<Definition>()) {}
    virtual void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
    virtual void addWord(const QString &, bool) override {}
 };
@@ -73,7 +73,7 @@ FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, const
 
    setReference(lref);
       
-   m_package   = 0;
+   m_package   = QSharedPointer<PackageDef>();
    m_isSource  = determineSection(nm) == Entry::SOURCE_SEC;
    m_docname   = nm;
    m_dir       = QSharedPointer<DirDef>();
@@ -479,10 +479,12 @@ void FileDef::writeInlineClasses(OutputList &ol)
    // temporarily undo the disbling could be done by startMemberDocumentation()
    // as a result of setting SEPARATE MEMBER PAGES to YES; see bug730512
 
+   QSharedPointer<FileDef> self = sharedFrom(this);
+
    bool isEnabled = ol.isEnabled(OutputGenerator::Html);
    ol.enable(OutputGenerator::Html);
    
-   m_classSDict.writeDocumentation(ol, this);
+   m_classSDict.writeDocumentation(ol, self);
    
    // restore the initial state if needed
    if (! isEnabled) {
@@ -601,7 +603,7 @@ void FileDef::writeDocumentation(OutputList &ol)
       }
 
       QString pageTitleShort = theTranslator->trFileReference(name());
-      startTitle(ol, getOutputFileBase(), this);
+      startTitle(ol, getOutputFileBase(), self);
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
       ol.parseText(pageTitleShort); // Html only
@@ -619,7 +621,7 @@ void FileDef::writeDocumentation(OutputList &ol)
          ol.endQuickIndices();
       }
 
-      startTitle(ol, getOutputFileBase(), this);
+      startTitle(ol, getOutputFileBase(), self);
       ol.parseText(pageTitle);
       addGroupListToTitle(ol, self);
       endTitle(ol, getOutputFileBase(), title);
@@ -772,7 +774,7 @@ void FileDef::writeMemberPages(OutputList &ol)
    ol.popGeneratorState();
 }
 
-void FileDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
+void FileDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const
 {
    static bool createSubDirs = Config::getBool("create-subdirs");
 
@@ -1010,7 +1012,7 @@ void FileDef::insertMember(QSharedPointer<MemberDef> md)
    }
 
    if (allMemberList == nullptr) {   
-      m_memberLists.append(QSharedPointer<MemberList>(new MemberList(MemberListType_allMembersList)));
+      m_memberLists.append(QMakeShared<MemberList>(MemberListType_allMembersList));
       allMemberList = m_memberLists.last();
    }
 
@@ -1279,7 +1281,7 @@ void FileDef::addListReferences()
 
    QList<ListItemInfo> *xrefItems = xrefListItems();
    addRefItem(xrefItems, getOutputFileBase(), theTranslator->trFile(true, true), getOutputFileBase(), name(), 
-              0, QSharedPointer<Definition>());
+              "", QSharedPointer<Definition>());
       
    for (auto mg : m_memberGroupSDict) {
       mg->addListReferences(self);
@@ -1318,12 +1320,12 @@ static int findMatchingPart(const QString &path, const QString dir)
    return 0;
 }
 
-static Directory *findDirNode(Directory *root, const QString &name)
+static QSharedPointer<DirEntryTree> findDirNode(QSharedPointer<DirEntryTree> root, const QString &name)
 {  
    for (auto de : root->children()) {
 
       if (de->kind() == DirEntry::Dir) {
-         Directory *dir = (Directory *)de;
+         QSharedPointer<DirEntryTree> dir = de.dynamicCast<DirEntryTree>();
 
          QString dirName = dir->name();
          int sp = findMatchingPart(name, dirName);
@@ -1331,8 +1333,8 @@ static Directory *findDirNode(Directory *root, const QString &name)
          if (sp > 0) { 
             // match found
 
-            if ((uint)sp == dirName.length()) { // whole directory matches
-               // recurse into the directory
+            if (sp == dirName.length()) { 
+               // whole directory matches, recurse into the directory
                return findDirNode(dir, name.mid(dirName.length() + 1));
 
             } else { // partial match => we need to split the path into three parts
@@ -1342,12 +1344,13 @@ static Directory *findDirNode(Directory *root, const QString &name)
 
                // strip file name from path
                int newIndex = newBranchName.lastIndexOf('/');
+
                if (newIndex > 0) {
                   newBranchName = newBranchName.left(newIndex);
                }
               
-               Directory *base = new Directory(root, baseName);
-               Directory *newBranch = new Directory(base, newBranchName);
+               QSharedPointer<DirEntryTree> base      = QMakeShared<DirEntryTree>(root, baseName);
+               QSharedPointer<DirEntryTree> newBranch = QMakeShared<DirEntryTree>(base, newBranchName);
 
                dir->reParent(base);
                dir->rename(oldBranchName);
@@ -1359,7 +1362,7 @@ static Directory *findDirNode(Directory *root, const QString &name)
                root->children().removeOne(dir);
               
                // add new branch to the root
-               if (!root->children().isEmpty()) {
+               if (! root->children().isEmpty()) {
                   root->children().last()->setLast(false);
                }
 
@@ -1371,14 +1374,17 @@ static Directory *findDirNode(Directory *root, const QString &name)
    }
 
    int si = name.lastIndexOf('/');
-   if (si == -1) { // no subdir
-      return root; // put the file under the root node.
 
-   } else { // need to create a subdir
+   if (si == -1) { 
+      // no subdir, put the file under the root node.
+      return root; 
+
+   } else { 
+      // need to create a subdir
       QString baseName = name.left(si);
 
-      Directory *newBranch = new Directory(root, baseName);
-      if (!root->children().isEmpty()) {
+      QSharedPointer<DirEntryTree> newBranch = QMakeShared<DirEntryTree>(root, baseName);
+      if (! root->children().isEmpty()) {
          root->children().last()->setLast(false);
       }
 
@@ -1387,21 +1393,21 @@ static Directory *findDirNode(Directory *root, const QString &name)
    }
 }
 
-static void mergeFileDef(Directory *root, QSharedPointer<FileDef> fd)
+static void mergeFileDef(QSharedPointer<DirEntryTree> root, QSharedPointer<FileDef> fd)
 {  
    QString filePath = fd->getFilePath();
  
-   Directory *dirNode = findDirNode(root, filePath);
+   QSharedPointer<DirEntryTree> dirNode = findDirNode(root, filePath);
 
    if (! dirNode->children().isEmpty()) {
       dirNode->children().last()->setLast(false);
    }
 
-   DirEntry *e = new DirEntry(dirNode, fd);
+   QSharedPointer<DirEntry> e = QMakeShared<DirEntry>(dirNode, fd);
    dirNode->addChild(e);
 }
 
-static void addDirsAsGroups(Directory *root, QSharedPointer<GroupDef> parent, int level)
+static void addDirsAsGroups(QSharedPointer<DirEntryTree> root, QSharedPointer<GroupDef> parent, int level)
 {
    QSharedPointer<GroupDef> gd;
 
@@ -1419,26 +1425,29 @@ static void addDirsAsGroups(Directory *root, QSharedPointer<GroupDef> parent, in
   
    for (auto de : root->children()) {
       if (de->kind() == DirEntry::Dir) {
-         addDirsAsGroups((Directory *)de, gd, level + 1);
+         QSharedPointer<DirEntryTree> dir = de.dynamicCast<DirEntryTree>();
+         addDirsAsGroups(dir, gd, level + 1);
       }
    }
 }
 
-void generateFileTree()
-{
-   Directory *root = new Directory(0, "root");
-   root->setLast(true);
-  
-   for (auto fn : *Doxy_Globals::inputNameList ) {    
-      for (auto fd :*fn) { 
-         mergeFileDef(root, fd);
+#if 0
+   void generateFileTree()
+   {
+      QSharedPointer<DirEntryTree> root = QMakeShared<DirEntryTree>(0, "root");
+      root->setLast(true);
+     
+      for (auto fn : *Doxy_Globals::inputNameList ) {    
+         for (auto fd :*fn) { 
+            mergeFileDef(root, fd);
+         }
       }
+    
+      addDirsAsGroups(root, QSharedPointer<GroupDef>(), 0);
+   
+      delete root;
    }
- 
-   addDirsAsGroups(root, QSharedPointer<GroupDef>(), 0);
-
-   delete root;
-}
+#endif
 
 void FileDef::combineUsingRelations()
 {
@@ -1532,15 +1541,14 @@ QSharedPointer<MemberList> FileDef::createMemberList(MemberListType lt)
    }
 
    // not found, create a new member list   
-   m_memberLists.append(QSharedPointer<MemberList>(new MemberList(lt)));
+   m_memberLists.append(QMakeShared<MemberList>(lt));
    
    return m_memberLists.last();
 }
 
 void FileDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 {
-   QSharedPointer<FileDef> self = sharedFrom(this);
-
+   QSharedPointer<FileDef> self  = sharedFrom(this);
    QSharedPointer<MemberList> ml = createMemberList(lt);  
 
    static bool sortBriefDocs  = Config::getBool("sort-brief-docs");
@@ -1593,7 +1601,7 @@ void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const Q
 
 void FileDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title)
 {
-   QSharedPointer<FileDef> self = sharedFrom(this);
+   QSharedPointer<FileDef> self  = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {

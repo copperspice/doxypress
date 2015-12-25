@@ -345,7 +345,7 @@ class Definition : public DefinitionIntf
    {}
 
    QString pathFragment() const;
-
+   
    /*! Writes the documentation anchors of the definition to yhe Doxy_Globals::tagFile stream.
     */
    void writeDocAnchorsToTagFile(QTextStream &);
@@ -356,6 +356,7 @@ class Definition : public DefinitionIntf
 
  protected:
    Definition(const Definition &d);
+   virtual QString pathFragment_Internal() const;
 
  private:
    void addToMap(const QString &name);
@@ -382,39 +383,5 @@ class Definition : public DefinitionIntf
    int m_inputOrderId;
    int m_sortId;
 };
-
-/** A list of Definition objects. */
-class DefinitionList : public QList<QSharedPointer<Definition>>, public DefinitionIntf
-{
- public:
-   ~DefinitionList() {}
-
-   DefType definitionType() const {
-      return TypeSymbolList;
-   }
-
-   int compareValues(const QSharedPointer<Definition> &item1, const QSharedPointer<Definition> &item2) const {
-      return item1->name().compare(item2->name(), Qt::CaseInsensitive);
-   }
-
-};
-
-/** An iterator for Definition objects in a DefinitionList. */
-class DefinitionListIterator : public QListIterator<QSharedPointer<Definition>>
-{
- public:
-   DefinitionListIterator(const DefinitionList &list)
-      : QListIterator<QSharedPointer<Definition>>(list)
-   {}
-
-   ~DefinitionListIterator() {}
-};
-
-/** Reads a fragment from file \a fileName starting with line \a startLine
- *  and ending with line \a endLine. The result is returned as a string
- *  via \a result. The function returns true if successful and false
- *  in case of an error.
- */
-bool readCodeFragment(const QString &fileName, int &startLine, int &endLine, QString &result);
 
 #endif

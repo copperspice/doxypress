@@ -1872,7 +1872,7 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
       m_output.openHash("reimplements").addFieldQuotedString("name", rmd->name()).closeHash();
    }
 
-   MemberList *rbml = md->reimplementedBy();
+   QSharedPointer<MemberList> rbml = md->reimplementedBy();
 
    if (rbml) {    
       m_output.openList("reimplemented_by");

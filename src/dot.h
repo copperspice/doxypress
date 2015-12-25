@@ -72,7 +72,7 @@ class DotNode
    ~DotNode();
 
    void addChild(DotNode *n, int edgeColor = EdgeInfo::Purple, int edgeStyle = EdgeInfo::Solid,
-                 const QString &edgeLab = QString(), const char *edgeURL = 0, int edgeLabCol = -1);
+                 const QString &edgeLab = QString(), const QString &edgeURL = QString(), int edgeLabCol = -1);
 
    void addParent(DotNode *n);
    void deleteNode(SortedList<DotNode *> &deletedList, StringMap<QSharedPointer<DotNode>> *skipNodes = 0);
@@ -377,7 +377,7 @@ class DotRunner
     *  Performing multiple jobs one file can be faster.
     */
    void addJob(const QString &format, const QString &output);
-   void addPostProcessing(const char *cmd, const char *args);
+   void addPostProcessing(const QString &cmd, const QString &args);
 
    void preventCleanUp() {
       m_cleanUp = false;

@@ -39,9 +39,9 @@ class QhpXmlWriter{
    void openClose(const QString &elementName, const QMap<QString, QString> &attributes = (QMap<QString, QString>()));
    void openCloseContent(const QString &elementName, const QString &content);
    void close(const QString &elementName);
-   void declaration(const char *version, const char *encoding);
+   void declaration(const QString &version, const QString &encoding);
 
-   static char *dupEscaped(const char *source);
+   static QString dupEscaped(const QString &source);
 
  private:
    void indent();

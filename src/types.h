@@ -70,14 +70,17 @@ struct Grouping {
       GROUPING_HIGHEST = GROUPING_INGROUP
    };
 
-   static const char *getGroupPriName( GroupPri_t priority ) {
+   static QString getGroupPriName( GroupPri_t priority ) {
       switch ( priority ) {
          case GROUPING_AUTO_WEAK:
             return "@weakgroup";
+
          case GROUPING_AUTO_ADD:
             return "@addtogroup";
+
          case GROUPING_AUTO_DEF:
             return "@defgroup";
+
          case GROUPING_INGROUP:
             return "@ingroup";
       }

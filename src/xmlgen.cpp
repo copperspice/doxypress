@@ -46,56 +46,56 @@
 
 // debug to stdout
 //#define XML_DB(x) printf x
+
 // debug inside output
 //#define XML_DB(x) QByteArray __t;__t.sprintf x;m_t << __t
 
 /** Helper class mapping MemberList::ListType to a string representing */
-class XmlSectionMapper : public QHash<long, const char *>
+class XmlSectionMapper : public QHash<long, QString>
 {
  public:
-   XmlSectionMapper() : QHash<long, const char *>() {
-      insert(MemberListType_pubTypes, "public-type");
-      insert(MemberListType_pubMethods, "public-func");
-      insert(MemberListType_pubAttribs, "public-attrib");
-      insert(MemberListType_pubSlots, "public-slot");
-      insert(MemberListType_pubSignals, "public-signal");
-      insert(MemberListType_dcopMethods, "dcop-func");
-      insert(MemberListType_properties, "property");
-      insert(MemberListType_events, "event");
-      insert(MemberListType_interfaces, "interfaces");
-      insert(MemberListType_services, "services");
-      insert(MemberListType_pubStaticMethods, "public-static-func");
-      insert(MemberListType_pubStaticAttribs, "public-static-attrib");
-      insert(MemberListType_proTypes, "protected-type");
-      insert(MemberListType_proMethods, "protected-func");
-      insert(MemberListType_proAttribs, "protected-attrib");
-      insert(MemberListType_proSlots, "protected-slot");
-      insert(MemberListType_proSignals, "protected-signal");
-      insert(MemberListType_proStaticMethods, "protected-static-func");
-      insert(MemberListType_proStaticAttribs, "protected-static-attrib");
-      insert(MemberListType_pacTypes, "package-type");
-      insert(MemberListType_pacMethods, "package-func");
-      insert(MemberListType_pacAttribs, "package-attrib");
-      insert(MemberListType_pacStaticMethods, "package-static-func");
-      insert(MemberListType_pacStaticAttribs, "package-static-attrib");
-      insert(MemberListType_priTypes, "private-type");
-      insert(MemberListType_priMethods, "private-func");
-      insert(MemberListType_priAttribs, "private-attrib");
-      insert(MemberListType_priSlots, "private-slot");
-      insert(MemberListType_priSignals, "private-signal");
-      insert(MemberListType_priStaticMethods, "private-static-func");
-      insert(MemberListType_priStaticAttribs, "private-static-attrib");
-      insert(MemberListType_friends, "friend");
-      insert(MemberListType_related, "related");
-      insert(MemberListType_decDefineMembers, "define");
-      insert(MemberListType_decProtoMembers, "prototype");
+   XmlSectionMapper() : QHash<long, QString>() {
+      insert(MemberListType_pubTypes,          "public-type");
+      insert(MemberListType_pubMethods,        "public-func");
+      insert(MemberListType_pubAttribs,        "public-attrib");
+      insert(MemberListType_pubSlots,          "public-slot");
+      insert(MemberListType_pubSignals,        "public-signal");
+      insert(MemberListType_dcopMethods,       "dcop-func");
+      insert(MemberListType_properties,        "property");
+      insert(MemberListType_events,            "event");
+      insert(MemberListType_interfaces,        "interfaces");
+      insert(MemberListType_services,          "services");
+      insert(MemberListType_pubStaticMethods,  "public-static-func");
+      insert(MemberListType_pubStaticAttribs,  "public-static-attrib");
+      insert(MemberListType_proTypes,          "protected-type");
+      insert(MemberListType_proMethods,        "protected-func");
+      insert(MemberListType_proAttribs,        "protected-attrib");
+      insert(MemberListType_proSlots,          "protected-slot");
+      insert(MemberListType_proSignals,        "protected-signal");
+      insert(MemberListType_proStaticMethods,  "protected-static-func");
+      insert(MemberListType_proStaticAttribs,  "protected-static-attrib");
+      insert(MemberListType_pacTypes,          "package-type");
+      insert(MemberListType_pacMethods,        "package-func");
+      insert(MemberListType_pacAttribs,        "package-attrib");
+      insert(MemberListType_pacStaticMethods,  "package-static-func");
+      insert(MemberListType_pacStaticAttribs,  "package-static-attrib");
+      insert(MemberListType_priTypes,          "private-type");
+      insert(MemberListType_priMethods,        "private-func");
+      insert(MemberListType_priAttribs,        "private-attrib");
+      insert(MemberListType_priSlots,          "private-slot");
+      insert(MemberListType_priSignals,        "private-signal");
+      insert(MemberListType_priStaticMethods,  "private-static-func");
+      insert(MemberListType_priStaticAttribs,  "private-static-attrib");
+      insert(MemberListType_friends,           "friend");
+      insert(MemberListType_related,           "related");
+      insert(MemberListType_decDefineMembers,  "define");
+      insert(MemberListType_decProtoMembers,   "prototype");
       insert(MemberListType_decTypedefMembers, "typedef");
-      insert(MemberListType_decEnumMembers, "enum");
-      insert(MemberListType_decFuncMembers, "func");
-      insert(MemberListType_decVarMembers, "var");
+      insert(MemberListType_decEnumMembers,    "enum");
+      insert(MemberListType_decFuncMembers,    "func");
+      insert(MemberListType_decVarMembers,     "var");
    }
 };
-
 static XmlSectionMapper g_xmlSectionMapper;
 
 inline void writeXMLString(QTextStream &t, const QString &text)
@@ -976,7 +976,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
         << convertToXML(rmd->name()) << "</reimplements>" << endl;
    }
 
-   MemberList *rbml = md->reimplementedBy();
+   QSharedPointer<MemberList> rbml = md->reimplementedBy();
 
    if (rbml) {     
       for (auto rmd : *rbml) {
@@ -1172,7 +1172,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QTextStream &t, QSharedPointer<MemberList> ml, 
                                const QString &kind, const QString &header = QString(), const QString &documentation = QString() )
 {
-   if (ml == 0) {
+   if (ml == nullptr) {
       return;
    }
 

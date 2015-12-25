@@ -25,6 +25,7 @@
 
 #include <config.h>
 #include <doxy_globals.h>
+#include <filedef.h>
 #include <message.h>
 #include <qhpxmlwriter.h>
 

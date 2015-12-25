@@ -31,7 +31,7 @@ class StringMap;
 /** @brief A model of a page symbol. */
 class PageDef : public Definition
 {
- public:
+  public:
    PageDef(const QString &f, int l, const QString &n, const QString &d, const QString &t);
    ~PageDef();
 
@@ -96,7 +96,10 @@ class PageDef : public Definition
    void writeDocumentation(OutputList &ol);
    void writeTagFile(QTextStream &);
 
- private:
+  protected:
+   QString pathFragment_Internal() const override;
+
+  private:
    void setNestingLevel(int l);
    void writePageDocumentation(OutputList &ol);
 

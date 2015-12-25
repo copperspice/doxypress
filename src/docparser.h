@@ -425,7 +425,7 @@ class DocStyleChange : public DocNode
       return m_style;
    }
 
-   const char *styleString() const;
+   QString styleString() const;
 
    bool enable() const {
       return m_enable;

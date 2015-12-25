@@ -32,7 +32,7 @@ class MemberGroup;
 class StorageIntf;
 
 /** A list of MemberDef objects. */
-class MemberList : public SortedList<QSharedPointer<MemberDef>>
+class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSharedFromThis
 {
  public:
    MemberList();
@@ -120,7 +120,7 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>
 
    void writeTagFile(QTextStream &);
    bool declVisible() const;
-   void addMemberGroup(MemberGroup *mg);
+   void addMemberGroup(QSharedPointer<MemberGroup> mg);
 
    void setInGroup(bool inGroup) {
       m_inGroup = inGroup;

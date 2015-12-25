@@ -1101,35 +1101,6 @@ void LatexGenerator::endIndexSection(IndexSections is)
 
       case isPageDocumentation: {
          m_textStream << "}\n";
-
-
-#if 0
-         PageSDict::Iterator pdi(*Doxy_Globals::pageSDict);
-         PageDef *pd = pdi.toFirst();
-         bool first = true;
-
-         for (pdi.toFirst(); (pd = pdi.current()); ++pdi) {
-
-            if (!pd->getGroupDef() && !pd->isReference()) {
-               if (compactLatex) {
-                  m_textStream << "\\section";
-               } else {
-                  m_textStream << "\\chapter";
-               }
-               m_textStream << "{" << pd->title();
-               m_textStream << "}\n";
-
-               if (compactLatex || first) {
-                  m_textStream << "\\input" ;
-               } else {
-                  m_textStream << "\\include";
-               }
-               m_textStream << "{" << pd->getOutputFileBase() << "}\n";
-               first = false;
-            }
-         }
-#endif
-
       }
       break;
 

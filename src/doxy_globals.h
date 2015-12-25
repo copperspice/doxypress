@@ -30,7 +30,7 @@
 #include <cite.h>
 #include <dirdef.h>
 #include <entry.h>
-#include <filename.h>
+#include <filenamelist.h>
 #include <filestorage.h>
 #include <formula.h>
 #include <groupdef.h>
@@ -81,7 +81,7 @@ class Statistics
    {
    }
 
-   void begin(const char *name) {
+   void begin(const QString &name) {
       msg(name);
 
       stat *entry = new stat(name, 0);
@@ -104,7 +104,7 @@ class Statistics
       msg("----------------------\n");
 
       for (auto item : stats) {
-         msg("Spent %.3f seconds in %s", item->elapsed, item->name);
+         msg("Spent %.3f seconds in %s", item->elapsed, csPrintable(item->name));
       }
 
       if (restore) {
@@ -114,10 +114,14 @@ class Statistics
 
  private:
    struct stat {
-      const char *name;
+      QString name;
       double elapsed;
-      stat() : name(NULL), elapsed(0) {}
-      stat(const char *n, double el) : name(n), elapsed(el) {}
+
+      stat() : elapsed(0)
+      {}
+
+      stat(const QString &n, double el) : name(n), elapsed(el)
+      {}
    };
 
    QList<stat *> stats;
@@ -145,14 +149,15 @@ class Doxy_Globals
       static FormulaDict              *formulaDict;
       static FormulaDict              *formulaNameDict;
        
-      static GenericsSDict            *genericsDict;     
+      static QSharedPointer<GenericsSDict> genericsDict;     
+
       static GroupSDict               *groupSDict;
      
       static FileNameDict             *includeNameDict;
       static FileNameDict             *exampleNameDict;   
       static FileNameDict             *inputNameDict;
    
-      static SortedList<QSharedPointer<FileName>> *inputNameList;
+      static SortedList<QSharedPointer<FileNameList>> *inputNameList;
    
       static FileNameDict             *imageNameDict;
       static FileNameDict             *dotFileNameDict;
@@ -209,12 +214,10 @@ class Doxy_Globals
       static bool  insideMainPage;
       static bool  parseSourcesNeeded;
       static bool  generatingXmlOutput;
-      static bool  markdownSupport;
-     
-      //
+      static bool  markdownSupport;     
+      
       static QHash<QString, Definition *> &symbolMap();
-
-      static QHash<QString, QSharedPointer<EntryNav>>  g_classEntries;
+      static QHash<QString, QSharedPointer<EntryNav>>    g_classEntries;
 
       static QStringList               g_inputFiles;
       static QSet<QString>             g_compoundKeywordDict;   // keywords recognised as compounds

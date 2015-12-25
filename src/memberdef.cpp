@@ -539,28 +539,28 @@ class MemberDefImpl
    void init(Definition *def, const QString &t, const QString &a, const QString &e, Protection p, 
               Specifier v, bool s, Relationship r, MemberType mt, const ArgumentList *tal, const ArgumentList *al);
 
-   QSharedPointer<ClassDef>     classDef;     // member of or related to
-   QSharedPointer<FileDef>      fileDef;      // member of file definition
-   QSharedPointer<NamespaceDef> nspace;       // the namespace this member is in.
-   QSharedPointer<MemberDef>    enumScope;    // the enclosing scope, if this is an enum field
-   QSharedPointer<MemberDef>    annEnumType;  // the anonymous enum that is the type of this member
+   QSharedPointer<ClassDef>     classDef;         // member of or related to
+   QSharedPointer<FileDef>      fileDef;          // member of file definition
+   QSharedPointer<NamespaceDef> nspace;           // the namespace this member is in.
+   QSharedPointer<MemberDef>    enumScope;        // the enclosing scope, if this is an enum field
+   QSharedPointer<MemberDef>    annEnumType;      // the anonymous enum that is the type of this member
 
    bool livesInsideEnum;
-   QSharedPointer<MemberList> enumFields;     // enumeration fields
+   QSharedPointer<MemberList>   enumFields;       // enumeration fields
 
-   QSharedPointer<MemberDef> redefines;       // the parent member 
-   MemberList   *redefinedBy;                 // the list of members that redefine this one
+   QSharedPointer<MemberDef>    redefines;        // the parent member 
+   QSharedPointer<MemberList>   redefinedBy;      // the list of members that redefine this one
 
-   QSharedPointer<MemberDef>  memDef;         // member definition for this declaration
-   QSharedPointer<MemberDef>  memDec;         // member declaration for this definition
-   QSharedPointer<ClassDef>   relatedAlso;    // points to class marked by relatedAlso
+   QSharedPointer<MemberDef>     memDef;          // member definition for this declaration
+   QSharedPointer<MemberDef>     memDec;          // member declaration for this definition
+   QSharedPointer<ClassDef>      relatedAlso;     // points to class marked by relatedAlso
 
-   ExampleSDict *exampleSDict;  // a dictionary of all examples for quick access
+   ExampleSDict *exampleSDict;                    // a dictionary of all examples for quick access
 
    QString type;             // return actual type
    QString accessorType;     // return type that tell how to get to this member
 
-   QSharedPointer<ClassDef> accessorClass;     // class that this member accesses (for anonymous types)
+   QSharedPointer<ClassDef> accessorClass;        // class that this member accesses (for anonymous types)
 
    QString args;            // function arguments/variable array specifiers
    QString def;             // member definition in code (fully qualified name)
@@ -659,22 +659,13 @@ class MemberDefImpl
 };
 
 MemberDefImpl::MemberDefImpl() :
-   enumFields(0),
-   redefinedBy(0),
-   exampleSDict(0),
-   defArgList(0),
-   declArgList(0),
-   tArgList(0),
-   typeConstraints(0),
-   defTmpArgLists(0),   
-   category(0),
-   categoryRelation(0)
+   enumFields(0), redefinedBy(0), exampleSDict(0), defArgList(0), declArgList(0), tArgList(0),
+   typeConstraints(0), defTmpArgLists(0), category(0), categoryRelation(0)
 {
 }
 
 MemberDefImpl::~MemberDefImpl()
-{
-   delete redefinedBy;
+{  
    delete exampleSDict;   
    delete defArgList;
    delete tArgList;
@@ -688,7 +679,7 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
 {    
    redefines     = QSharedPointer<MemberDef>();
    relatedAlso   = QSharedPointer<ClassDef>();
-   redefinedBy   = 0;
+   redefinedBy   = QSharedPointer<MemberList>();
    accessorClass = QSharedPointer<ClassDef>();   
 
    memDef = QSharedPointer<MemberDef>();
@@ -839,10 +830,10 @@ MemberDef &MemberDef::operator=(const MemberDef &)
 QSharedPointer<MemberDef> MemberDef::deepCopy() const
 {   
    // make a copy of the object
-   QSharedPointer<MemberDef> result { new MemberDef(*this) };
+   QSharedPointer<MemberDef> result  = QSharedPointer<MemberDef>(new MemberDef(*this));
   
    // clear pointers owned by object
-   result->m_impl->redefinedBy       = 0;
+   result->m_impl->redefinedBy       = QSharedPointer<MemberList>();
    result->m_impl->exampleSDict      = 0;
 
    result->m_impl->enumFields.clear();
@@ -932,7 +923,7 @@ void MemberDef::insertReimplementedBy(QSharedPointer<MemberDef> md)
    }
 
    if (m_impl->redefinedBy == 0) {
-      m_impl->redefinedBy = new MemberList(MemberListType_redefinedBy);
+      m_impl->redefinedBy = QMakeShared<MemberList>(MemberListType_redefinedBy);
    }
 
    if (m_impl->redefinedBy->lastIndexOf(md) == -1) {
@@ -945,7 +936,7 @@ QSharedPointer<MemberDef> MemberDef::reimplements() const
    return m_impl->redefines;
 }
 
-MemberList *MemberDef::reimplementedBy() const
+QSharedPointer<MemberList> MemberDef::reimplementedBy() const
 {
    return m_impl->redefinedBy;
 }
@@ -1106,7 +1097,7 @@ QString MemberDef::anchor() const
    return result;
 }
 
-void MemberDef::_computeLinkableInProject()
+void MemberDef::computeLinkableInProject() const
 {
    static bool extractStatic  = Config::getBool("extract-static");
 
@@ -1191,11 +1182,9 @@ void MemberDef::setHidden(bool b)
 
 bool MemberDef::isLinkableInProject() const
 {
-   if (m_isLinkableCached == 0) {
-      MemberDef *that = (MemberDef *)this;
-      that->_computeLinkableInProject();
+   if (m_isLinkableCached == 0) {      
+      computeLinkableInProject();
    }
-
    assert(m_isLinkableCached > 0);
 
    return m_isLinkableCached == 2;
@@ -2331,7 +2320,7 @@ void MemberDef::_writeReimplements(OutputList &ol)
 
 void MemberDef::_writeReimplementedBy(OutputList &ol)
 {
-   MemberList *bml = reimplementedBy();
+   QSharedPointer<MemberList> bml = reimplementedBy();
 
    if (bml) {
       
@@ -2694,8 +2683,8 @@ void MemberDef::_writeGroupInclude(OutputList &ol, bool inGroup)
 
 /*! Writes the "detailed documentation" section of this member to all active output formats
  */
-void MemberDef::writeDocumentation(MemberList *ml, OutputList &ol, const QString &scName, QSharedPointer<Definition> container,
-                                   bool inGroup, bool showEnumValues, bool showInline)
+void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol, const QString &scName, 
+                  QSharedPointer<Definition> container, bool inGroup, bool showEnumValues, bool showInline)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
@@ -3299,7 +3288,7 @@ static QString simplifyTypeForTable(const QString &s)
  *  @param[out] start The string position where the class definition name was found.
  *  @param[out] length The length of the class definition's name.
  */
-static Definition *getClassFromType(QSharedPointer<Definition> scope, const QString &type, SrcLangExt lang, int &start, int &length)
+static QSharedPointer<Definition> getClassFromType(QSharedPointer<Definition> scope, const QString &type, SrcLangExt lang, int &start, int &length)
 {
    int pos = 0;
    int i;
@@ -3805,7 +3794,8 @@ void MemberDef::addListReference(QSharedPointer<Definition> d)
    if (xrefItems) {
       // argsString is needed for overloaded functions (see bug 609624)
 
-      addRefItem(xrefItems, qualifiedName() + argsString(), memLabel, getOutputFileBase() + "#" + anchor(), memName, memArgs, pd);
+      addRefItem(xrefItems, qualifiedName() + argsString(), memLabel, getOutputFileBase() + "#" + anchor(), 
+                  memName, memArgs, pd);
    }
 }
 
@@ -3951,20 +3941,24 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
    tagFile << "    </member>" << endl;
 }
 
-void MemberDef::_computeIsConstructor()
+void MemberDef::computeIsConstructor() const
 {
-   m_isConstructorCached = 1; // false
+   m_isConstructorCached = 1; 
+
    if (m_impl->classDef) {
       if (m_impl->isDMember) { // for D
          m_isConstructorCached = name() == "this" ? 2 : 1;
          return;
+
       } else if (getLanguage() == SrcLangExt_PHP) { // for PHP
          m_isConstructorCached = name() == "__construct" ? 2 : 1;
          return;
+
       } else if (name() == "__init__" &&
                  getLanguage() == SrcLangExt_Python) { // for Python
          m_isConstructorCached = 2; // true
          return;
+
       } else if (getLanguage() == SrcLangExt_Tcl) { // for Tcl
          m_isConstructorCached = name() == "constructor" ? 2 : 1;
          return;
@@ -3972,11 +3966,13 @@ void MemberDef::_computeIsConstructor()
       } else { // for other languages
          QString locName = m_impl->classDef->localName();
          int i = locName.indexOf('<');
+
          if (i == -1) { // not a template class
             m_isConstructorCached = name() == locName ? 2 : 1;
          } else {
             m_isConstructorCached = name() == locName.left(i) ? 2 : 1;
          }
+
          return;
       }
    }
@@ -3984,16 +3980,15 @@ void MemberDef::_computeIsConstructor()
 
 bool MemberDef::isConstructor() const
 {
-   if (m_isConstructorCached == 0) {
-      MemberDef *that = (MemberDef *)this;
-      that->_computeIsConstructor();
+   if (m_isConstructorCached == 0) {      
+      computeIsConstructor();
    }
    assert(m_isConstructorCached > 0);
-   return m_isConstructorCached == 2;
 
+   return m_isConstructorCached == 2;
 }
 
-void MemberDef::_computeIsDestructor()
+void MemberDef::computeIsDestructor() const
 {
    bool isDestructor;
 
@@ -4021,10 +4016,11 @@ void MemberDef::_computeIsDestructor()
 bool MemberDef::isDestructor() const
 {
    if (m_isDestructorCached == 0) {
-      MemberDef *that = (MemberDef *)this;
-      that->_computeIsDestructor();
+      computeIsDestructor();
    }
+
    assert(m_isDestructorCached > 0);
+
    return m_isDestructorCached == 2;
 }
 
@@ -4190,7 +4186,7 @@ void MemberDef::setTypeConstraints(ArgumentList *al)
    }
 }
 
-void MemberDef::setType(const char *t)
+void MemberDef::setType(const QString &t)
 {
    m_impl->type = t;
 }
@@ -4198,7 +4194,7 @@ void MemberDef::setType(const char *t)
 void MemberDef::setAccessorType(QSharedPointer<ClassDef> cd, const QString &t)
 {
    m_impl->accessorClass = cd;
-   m_impl->accessorType = t;
+   m_impl->accessorType  = t;
 }
 
 QSharedPointer<ClassDef> MemberDef::accessorClass() const
@@ -4215,6 +4211,7 @@ void MemberDef::findSectionsInDocumentation()
 void MemberDef::enableCallGraph(bool e)
 {
    m_impl->hasCallGraph = e;
+
    if (e) {
       Doxy_Globals::parseSourcesNeeded = true;
    }

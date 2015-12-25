@@ -23,13 +23,14 @@
 #include <QTextStream>
 
 #include <definition.h>
-#include <filelist.h>
+#include <filenamelist.h>
 #include <index.h>
 #include <sortedlist.h>
 #include <stringmap.h>
 
 class ClassDef;
 class DirDef;
+class DirEntryTree;
 class FileDef;
 class MemberDef;
 class MemberList;
@@ -64,7 +65,7 @@ struct IncludeInfo {
  */
 class FileDef : public Definition
 {
-   friend class FileName;
+   friend class FileNameList;
 
  public:
    // enum FileType { Source, Header, Unknown };
@@ -142,7 +143,7 @@ class FileDef : public Definition
 
    bool isIncluded(const QString &name) const;
 
-   PackageDef *packageDef() const {
+   QSharedPointer<PackageDef> packageDef() const {
       return m_package;
    }
 
@@ -209,7 +210,7 @@ class FileDef : public Definition
 
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
-   void writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const;
+   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const;
    void writeSummaryLinks(OutputList &ol);
    void writeTagFile(QTextStream &t);
 
@@ -224,7 +225,7 @@ class FileDef : public Definition
    void insertNamespace(QSharedPointer<NamespaceDef> nd);
    void computeAnchors();
 
-   void setPackageDef(PackageDef *pd) {
+   void setPackageDef(QSharedPointer<PackageDef> pd) {
       m_package = pd;
    }
 
@@ -297,7 +298,8 @@ class FileDef : public Definition
 
    bool               m_isSource;
    QString            m_fileVersion;
-   PackageDef        *m_package;
+
+   QSharedPointer<PackageDef> m_package;
 
    QSharedPointer<DirDef> m_dir;
    QList<QSharedPointer<MemberList>> m_memberLists;
@@ -309,19 +311,17 @@ class FileDef : public Definition
    bool               m_subGrouping;
 };
 
-class Directory;
-
 /** Class representing an entry (file or sub directory) in a directory */
 class DirEntry
 {
  public:
    enum EntryKind { Dir, File };
 
-   DirEntry(DirEntry *parent, QSharedPointer<FileDef> fd)
-      : m_parent(parent), m_name(fd->name()), m_kind(File), m_fd(fd),m_isLast(false) 
+   DirEntry(QSharedPointer<DirEntry> parent, QSharedPointer<FileDef> fd)
+      : m_parent(parent), m_name(fd->name()), m_kind(File), m_fd(fd), m_isLast(false) 
    { }
 
-   DirEntry(DirEntry *parent, QString name)
+   DirEntry(QSharedPointer<DirEntry> parent, QString name)
       : m_parent(parent), m_name(name), m_kind(Dir), m_fd(0), m_isLast(false) { }
 
    virtual ~DirEntry() { }
@@ -342,7 +342,7 @@ class DirEntry
       m_isLast = b;
    }
 
-   DirEntry *parent() const {
+   QSharedPointer<DirEntry> parent() const {
       return m_parent;
    }
 
@@ -355,7 +355,7 @@ class DirEntry
    }
 
  protected:
-   DirEntry *m_parent;
+   QSharedPointer<DirEntry> m_parent;
    QString m_name;
 
  private:
@@ -365,22 +365,22 @@ class DirEntry
 };
 
 /** Class representing a directory tree of DirEntry objects. */
-class Directory : public DirEntry
+class DirEntryTree : public DirEntry
 {
  public:
-   Directory(Directory *parent, const QString &name)
+   DirEntryTree(QSharedPointer<DirEntryTree> parent, const QString &name)
       : DirEntry(parent, name)
    {      
    }
 
-   virtual ~Directory() {}
+   virtual ~DirEntryTree() {}
 
-   void addChild(DirEntry *d) {
+   void addChild(QSharedPointer<DirEntry> d) {
       m_children.append(d);
       d->setLast(true);
    }
 
-   QList<DirEntry *> &children() {
+   QList<QSharedPointer<DirEntry>> &children() {
       return m_children;
    }
 
@@ -388,15 +388,13 @@ class Directory : public DirEntry
       m_name = name;
    }
 
-   void reParent(Directory *parent)  {
+   void reParent(QSharedPointer<DirEntryTree> parent)  {
       m_parent = parent;
    }
 
  private:
-   QList<DirEntry *> m_children;
+   QList<QSharedPointer<DirEntry>> m_children;
 };
-
-void generateFileTree();
 
 #endif
 

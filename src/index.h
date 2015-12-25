@@ -266,13 +266,13 @@ extern int documentedDirs;
 extern int documentedHtmlFiles;
 extern int documentedPages;
 
-void startTitle(OutputList &ol, const QString &fileName, Definition *def = 0);
+void startTitle(OutputList &ol, const QString &fileName, QSharedPointer<Definition> def = QSharedPointer<Definition>() );
 void endTitle(OutputList &ol, const QString &fileName, const QString &name);
 
 void startFile(OutputList &ol, const QString &name, const QString &manName, const QString &title, 
                   HighlightedItem hli = HLI_None, bool additionalIndices = false, const QString &altSidebarName = QString() );
 
-void endFile(OutputList &ol, bool skipNavIndex = false, bool skipEndContents = false, const QString &navPath = QString());
+void endFile(OutputList &ol, bool skipNavIndex = false, bool skipEndContents = false, const QString &navPath = QString() );
 
 void endFileWithNavPath(QSharedPointer<Definition> d, OutputList &ol);
 

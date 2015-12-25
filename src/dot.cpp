@@ -778,7 +778,7 @@ void DotRunner::addJob(const QString &format, const QString &output)
    m_jobs.append(args);
 }
 
-void DotRunner::addPostProcessing(const char *cmd, const char *args)
+void DotRunner::addPostProcessing(const  QString &cmd, const  QString &args)
 {
    m_postCmd  = cmd;
    m_postArgs = args;
@@ -1440,7 +1440,8 @@ DotNode::~DotNode()
    delete m_edgeInfo;
 }
 
-void DotNode::addChild(DotNode *n, int edgeColor, int edgeStyle, const QString &edgeLab, const char *edgeURL, int edgeLabCol )
+void DotNode::addChild(DotNode *n, int edgeColor, int edgeStyle, const QString &edgeLab, 
+                  const QString &edgeURL, int edgeLabCol )
 {
    if (m_children == 0) {
       m_children = new QList<DotNode *>;
@@ -2742,9 +2743,15 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
    }
 
    if (m_graphType == DotNode::Collaboration) {
-      // ---- Add usage relations
+      // Add usage relations
 
-      UsesClassDict *dict = base ? cd->usedImplementationClasses() : cd->usedByImplementationClasses();
+      QHash<QString, UsesClassDef> *dict;
+
+      if (base) { 
+         dict = cd->usedImplementationClasses(); 
+      } else {
+         dict = cd->usedByImplementationClasses();
+      }
 
       if (dict) {
         
@@ -4744,9 +4751,9 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
             QString relationName;
             relationName = QString("dir_%1_%2").arg(dir->dirCount(), 6, 10, QChar('0')).arg(usedDir->dirCount(), 6, 10, QChar('0'));
 
-            if (Doxy_Globals::dirRelations.find(relationName) == 0) {
+            if (Doxy_Globals::dirRelations.find(relationName) == nullptr) {
                // new relation
-               Doxy_Globals::dirRelations.insert(relationName, QSharedPointer<DirRelation>(new DirRelation(relationName, dir, udir)));
+               Doxy_Globals::dirRelations.insert(relationName, QMakeShared<DirRelation>(relationName, dir, udir));
             }
 
             int nrefs = udir->filePairs().count();

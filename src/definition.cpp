@@ -200,7 +200,7 @@ static bool matchExcludedSymbols(const QString &name)
 }
 
 void Definition::addToMap(const QString &name)
-{   
+{    
    QString symbolName = name;
    int index = computeQualifiedIndex(symbolName);
 
@@ -208,13 +208,15 @@ void Definition::addToMap(const QString &name)
       symbolName = symbolName.mid(index + 2);
    }
 
-   if (! symbolName.isEmpty()) {                       
+   if (! symbolName.isEmpty()) { 
+      // must add a raw pointer since this method is called from a constructor                     
       Doxy_Globals::symbolMap().insertMulti(symbolName, this);         
       this->setSymbolName(symbolName);
    }
 }
 
-Definition::Definition(const QString &df, int dl, int dc, const QString &name, const QString &b, const QString &d, bool isSymbol)
+Definition::Definition(const QString &df, int dl, int dc, const QString &name, const QString &briefDoc, 
+                  const QString &fullDoc, bool isSymbol)
 {
    m_name      = name;
    m_defLine   = dl;
@@ -233,8 +235,8 @@ Definition::Definition(const QString &df, int dl, int dc, const QString &name, c
    m_inputOrderId = -1;
    m_sortId = -1;
 
-   _setBriefDescription(b, df, dl);
-   _setDocumentation(d, df, dl, true, false);
+   _setBriefDescription(briefDoc, df, dl);
+   _setDocumentation(fullDoc, df, dl, true, false);
 
    if (matchExcludedSymbols(name)) {
       m_private->hidden = true;
@@ -657,6 +659,7 @@ void Definition::setInbodyDocumentation(const QString &d, const QString &inbodyF
    _setInbodyDocumentation(d, inbodyFile, inbodyLine);
 }
 
+
 /*! Reads a fragment of code from file \a fileName starting at
  * line \a startLine and ending at line \a endLine (inclusive). The fragment is
  * stored in \a result. If false is returned the code fragment could not be found
@@ -666,7 +669,7 @@ void Definition::setInbodyDocumentation(const QString &d, const QString &inbodyF
  * The file is scanned for a closing bracket ('}') from \a endLine backward.
  * The line actually containing the bracket is returned via endLine.
  */
-bool readCodeFragment(const QString &fileName, int &startLine, int &endLine, QString &result)
+static bool readCodeFragment(const QString &fileName, int &startLine, int &endLine, QString &result)
 {
    static bool filterSourceFiles = Config::getBool("filter-source-files");
    static int tabSize = Config::getInt("tab-size");
@@ -1471,15 +1474,7 @@ QString Definition::pathFragment() const
          result += "/";
       }
 
-      if (definitionType() == Definition::TypeGroup && ! ((const GroupDef *)this)->groupTitle().isEmpty()) {
-         result += ((const GroupDef *)this)->groupTitle();
-
-      } else if (definitionType() == Definition::TypePage && ! ((const PageDef *)this)->title().isEmpty()) {
-         result += ((const PageDef *)this)->title();
-
-      } else {
-         result += m_private->localName;
-      }
+      result += pathFragment_Internal();
 
    } else {
       result += m_private->localName;
@@ -1488,6 +1483,10 @@ QString Definition::pathFragment() const
    return result;
 }
 
+QString Definition::pathFragment_Internal() const
+{
+   return m_private->localName;
+}
 
 // TODO: move to htmlgen
 /*! Returns the string used in the footer for $navpath when

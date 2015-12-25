@@ -118,7 +118,7 @@ void initDoxyPress()
    initNamespaceMemberIndices();
    initFileMemberIndices();
  
-   Doxy_Globals::inputNameList     = new SortedList<QSharedPointer<FileName>>;
+   Doxy_Globals::inputNameList     = new SortedList<QSharedPointer<FileNameList>>;
 
    Doxy_Globals::memberNameSDict   = new MemberNameSDict();
    Doxy_Globals::functionNameSDict = new MemberNameSDict();
@@ -141,7 +141,7 @@ void initDoxyPress()
    Doxy_Globals::mscFileNameDict   = new FileNameDict();
    Doxy_Globals::diaFileNameDict   = new FileNameDict();
    Doxy_Globals::citeDict          = new CiteDict();
-   Doxy_Globals::genericsDict      = new GenericsSDict;
+   Doxy_Globals::genericsDict      = QMakeShared<GenericsSDict>();
    Doxy_Globals::indexList         = new IndexList;
    Doxy_Globals::formulaList       = new FormulaList;
    Doxy_Globals::formulaDict       = new FormulaDict();
@@ -173,8 +173,7 @@ void shutDownDoxypress()
    delete Doxy_Globals::formulaNameDict;
    delete Doxy_Globals::formulaDict;
    delete Doxy_Globals::formulaList;
-   delete Doxy_Globals::indexList;
-   delete Doxy_Globals::genericsDict;
+   delete Doxy_Globals::indexList;   
    delete Doxy_Globals::inputNameDict;
    delete Doxy_Globals::includeNameDict;
    delete Doxy_Globals::exampleNameDict;

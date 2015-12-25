@@ -266,12 +266,14 @@ QString fixSpaces(const QString &s)
    return substitute(s, " ", "&#160;");
 }
 
-void startTitle(OutputList &ol, const QString &fileName, Definition *def)
+void startTitle(OutputList &ol, const QString &fileName, QSharedPointer<Definition> def)
 {
    ol.startHeaderSection();
+
    if (def) {
       def->writeSummaryLinks(ol);
    }
+
    ol.startTitleHead(fileName);
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Man);

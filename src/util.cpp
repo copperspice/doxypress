@@ -73,7 +73,7 @@ static QCache<QPair<const FileNameDict *, QString>, FindFileCacheElem> s_findFil
 static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
                   const QString &n, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType);
 
-int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
+static int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
                   QSharedPointer<Definition> item, const QString &explicitScopePart);
 
 // selects one of the name to sub-dir mapping algorithms that is used
@@ -664,7 +664,7 @@ done:
  *  value of the typedef or \a name if no typedef was found.
  */
 static QString substTypedef(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, const QString &symbolName, 
-                               QSharedPointer<MemberDef> *pTypeDef = nullptr)
+                  QSharedPointer<MemberDef> *pTypeDef = nullptr)
 {
    QString result = symbolName;
 
@@ -687,16 +687,14 @@ static QString substTypedef(QSharedPointer<Definition> scopeDef, QSharedPointer<
    while (di != Doxy_Globals::symbolMap().end() && di.key() == symbolName)  {      
       // search for the best match, only look at members 
 
-      QSharedPointer<Definition> self = sharedFrom(di.value());
-
-      if (self->definitionType() == Definition::TypeMember) {
+      if (di.value()->definitionType() == Definition::TypeMember) {
          // which are also typedefs
-         QSharedPointer<MemberDef> md = self.dynamicCast<MemberDef>(); 
+         QSharedPointer<Definition> sharedPtr = sharedFrom(di.value());
+         QSharedPointer<MemberDef> md = sharedPtr.dynamicCast<MemberDef>();
 
          if (md->isTypedef()) { 
             // d is a typedef, test accessibility of typedef within scope
-
-            int distance = isAccessibleFromWithExpScope(scopeDef, fileScope, self, "");
+            int distance = isAccessibleFromWithExpScope(scopeDef, fileScope, sharedPtr, "");
 
             if (distance != -1 && distance < minDistance) {
                // definition is accessible and a better match
@@ -1186,30 +1184,34 @@ int computeQualifiedIndex(const QString &name)
    return name.lastIndexOf("::", i);
 }
 
-static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> d, 
-                              const QString &explicitScopePart, ArgumentList *actTemplParams, int &minDistance, 
-                              QSharedPointer<ClassDef> &bestMatch, QSharedPointer<MemberDef> &bestTypedef,
-                              QString &bestTemplSpec, QString &bestResolvedType)
+static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> def, 
+                  const QString &explicitScopePart, ArgumentList *actTemplParams, int &minDistance, 
+                  QSharedPointer<ClassDef> &bestMatch, QSharedPointer<MemberDef> &bestTypedef,
+                  QString &bestTemplSpec, QString &bestResolvedType)
 {
    // only look at classes and members which are enums or typedefs
 
-   bool isClass  = (d->definitionType() == Definition::TypeClass); 
-   bool isMember = (d->definitionType() == Definition::TypeMember);
+   bool isClass  = (def->definitionType() == Definition::TypeClass); 
+   bool isMember = (def->definitionType() == Definition::TypeMember);
 
-   if (isClass || (isMember && 
-      ( d.dynamicCast<MemberDef>()->isTypedef() || d.dynamicCast<MemberDef>()->isEnumerate()) ))  {
+   QSharedPointer<MemberDef> md;
+   if (isMember) {
+      md = def.dynamicCast<MemberDef>();
+   }
+
+   if (isClass || (isMember && (md->isTypedef() || md->isEnumerate())) )  {
 
       s_visitedNamespaces.clear();
 
       // test accessibility of definition within scope.
-      int distance = isAccessibleFromWithExpScope(scope, fileScope, d, explicitScopePart);
+      int distance = isAccessibleFromWithExpScope(scope, fileScope, def, explicitScopePart);
      
       if (distance != -1) { 
          // definition is accessible, see if we are dealing with a class or a typedef
 
-         if (d->definitionType() == Definition::TypeClass) { 
-            // d is a class
-            QSharedPointer<ClassDef> cd = d.dynamicCast<ClassDef>();
+         if (def->definitionType() == Definition::TypeClass) { 
+            // def is a class
+            QSharedPointer<ClassDef> cd = def.dynamicCast<ClassDef>();
             
             if (! cd->isTemplateArgument()) {
                // skip classes whice are only there to  represent a template argument
@@ -1224,7 +1226,7 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
                   bestResolvedType = cd->qualifiedName();
 
                } else if (distance == minDistance && fileScope && bestMatch && fileScope->getUsedNamespaces() && 
-                          d->getOuterScope()->definitionType() == Definition::TypeNamespace &&
+                          def->getOuterScope()->definitionType() == Definition::TypeNamespace &&
                           bestMatch->getOuterScope() == Doxy_Globals::globalScope) {
 
                   // in case the distance is equal it could be that a class X
@@ -1246,11 +1248,10 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
                
             }
 
-         } else if (d->definitionType() == Definition::TypeMember) {
-            QSharedPointer<MemberDef> md = d.dynamicCast<MemberDef>();
-            
+         } else if (def->definitionType() == Definition::TypeMember) {
+                        
             if (md->isTypedef()) { 
-               // d is a typedef
+               // def is a typedef
                QString args = md->argsString();
 
                if (args.isEmpty()) {
@@ -1268,40 +1269,45 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
                      minDistance = distance;
 
                      QSharedPointer<MemberDef> enumType;
-                     QSharedPointer<ClassDef>cd = newResolveTypedef(fileScope, md, &enumType, &spec, &type, actTemplParams);
+                     QSharedPointer<ClassDef> cd = newResolveTypedef(fileScope, md, &enumType, &spec, &type, actTemplParams);
 
                      if (cd) { 
                         // type resolves to a class
                        
-                        bestMatch = cd;
-                        bestTypedef = md;
+                        bestMatch     = cd;
+                        bestTypedef   = md;
                         bestTemplSpec = spec;
                         bestResolvedType = type;
 
-                     } else if (enumType) { // type resolves to a enum
-                        //printf("      is enum\n");
-                        bestMatch   = QSharedPointer<ClassDef>();
-                        bestTypedef = enumType;
+                     } else if (enumType) { 
+                        // type resolves to a enum
+                        
+                        bestMatch     = QSharedPointer<ClassDef>();
+                        bestTypedef   = enumType;
                         bestTemplSpec = "";
                         bestResolvedType = enumType->qualifiedName();
 
-                     } else if (md->isReference()) { // external reference
-                        bestMatch   = QSharedPointer<ClassDef>();
-                        bestTypedef = md;
+                     } else if (md->isReference()) { 
+                        // external reference
+
+                        bestMatch     = QSharedPointer<ClassDef>();
+                        bestTypedef   = md;
                         bestTemplSpec = spec;
                         bestResolvedType = type;
 
                      } else {
+                        // no match
+
                         bestMatch = QSharedPointer<ClassDef>();
                         bestTypedef = md;
                         bestTemplSpec.resize(0);
                         bestResolvedType.resize(0);
-                        //printf("      no match\n");
+
                      }                 
                   }
 
                } else {
-                  //printf("     not a simple typedef\n")
+                  // not a simple typedef
                }
 
             } else if (md->isEnumerate()) {
@@ -1315,17 +1321,16 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
             }
          }
 
-      }  else {
-         //  printf("  Not accessible!\n");
+      } else {
+         //  mot accessible
 
       }
    }   
 }
 
-/* Find the fully qualified class name referred to by the input class
- * or typedef name against the input scope.
- * Loops through scope and each of its parent scopes looking for a
- * match against the input name. Can recursively call itself when resolving typedefs.
+/* Find the fully qualified class name referred to by the input class or typedef name in the input scope
+ * Loops through scope and each of its parent scopes looking for a match with the input name
+ * Can recursively call itself when resolving typedefs
  */
 static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
                   const QString &nType, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType )
@@ -1367,8 +1372,9 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
       }
    }
 
-   bool hasUsingStatements = (fileScope && ((fileScope->getUsedNamespaces() && fileScope->getUsedNamespaces()->count() > 0) ||
-                     (fileScope->getUsedClasses() && fileScope->getUsedClasses()->count() > 0)) );
+   bool hasUsingStatements = (fileScope && ((fileScope->getUsedNamespaces() && 
+                  fileScope->getUsedNamespaces()->count() > 0) ||
+                  (fileScope->getUsedClasses() && fileScope->getUsedClasses()->count() > 0)) );
 
    // Since it is often the case that the same name is searched in the same
    // scope over an over again (especially for the linked source code generation)
@@ -1436,16 +1442,16 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
    int count = 0;
    auto di   = Doxy_Globals::symbolMap().find(name);
            
-   while (di != Doxy_Globals::symbolMap().end() && di.key() == name)  { 
-
-      QSharedPointer<Definition> self = sharedFrom(di.value());
-           
-      getResolvedSymbol(scope, fileScope, self, explicitScopePart, &actTemplParams,
+   while (di != Doxy_Globals::symbolMap().end() && di.key() == name)  {
+      QSharedPointer<Definition> sharedPtr = sharedFrom(di.value());
+        
+      getResolvedSymbol(scope, fileScope, sharedPtr, explicitScopePart, &actTemplParams,
                         minDistance, bestMatch, bestTypedef, bestTemplSpec, bestResolvedType);
 
       ++count;
       ++di;
    }
+
  
    if (pTypeDef) {
       *pTypeDef = bestTypedef;
@@ -1907,6 +1913,8 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
          QSharedPointer<MemberDef>    typeDef;
 
 
+/* 
+
 if (self != nullptr) {
    if (self->name() == "Date") {
       printf("\n  BROOM (linky) scope --> %s", csPrintable(scope->name()) ); 
@@ -1921,6 +1929,8 @@ if (self != nullptr) {
       // printf("\n  BROOM  (linky) newScope --> %s \n", csPrintable() );
    }
 }
+*/
+
 
          cd = getResolvedClass(scope, fileScope, matchWord, &typeDef);
 
@@ -3018,13 +3028,14 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
    QString result;
    QString templSpec;
    QString tmpName;
- 
-   if (tSpec && !tSpec->isEmpty()) {
+
+   if (tSpec && ! tSpec->isEmpty()) {
       templSpec = stripDeclKeywords(getCanonicalTemplateSpec(d, fs, *tSpec));
    }
 
    if (word.lastIndexOf("::") != -1 && ! (tmpName = stripScope(word)).isEmpty()) {
-      symName = tmpName; // name without scope
+      // name without scope
+      symName = tmpName; 
    } else {
       symName = word;
    }
@@ -3040,13 +3051,15 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
 
    bool isTemplInst = (cd && ! templSpec.isEmpty());
 
+
    if (! cd && ! templSpec.isEmpty()) {
       // class template specialization not known, look up class template
       cd = getResolvedClass(d, fs, word, &mType, &ts, true, true, &resolvedType);
    }
 
    if (cd && cd->isUsedOnly()) {
-      cd = QSharedPointer<ClassDef>();   // ignore types introduced by usage relations
+      // ignore types introduced by usage relations
+      cd = QSharedPointer<ClassDef>();  
    }
  
    if (cd) { 
@@ -3075,10 +3088,13 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
 
          result = removeRedundantWhiteSpace(cd->qualifiedName() + templSpec);
 
-         if (cd->isTemplate() && tSpec) { //
-            if (!templSpec.isEmpty()) { // specific instance
+         if (cd->isTemplate() && tSpec) { 
+            if (! templSpec.isEmpty()) { 
+               // specific instance
                result = cd->name() + templSpec;
-            } else { // use template type
+
+            } else { 
+               // use template type
                result = cd->qualifiedNameWithTemplateParameters();
             }
 
@@ -3092,20 +3108,25 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
          }
       }
 
-   } else if (mType && mType->isEnumerate()) { // an enum
+   } else if (mType && mType->isEnumerate()) { 
+      // an enum
       result = mType->qualifiedName();
 
-   } else if (mType && mType->isTypedef()) { // a typedef     
+   } else if (mType && mType->isTypedef()) { 
+      // a typedef     
+
       if (word != mType->typeString()) {
          result = getCanonicalTypeForIdentifier(d, fs, mType->typeString(), tSpec, count + 1);
       } else {
          result = mType->typeString();
       }
 
-   } else { // fallback
+   } else { 
+      // fallback
       resolvedType = resolveTypeDef(d, word);
      
-      if (resolvedType.isEmpty()) { // not known as a typedef either
+      if (resolvedType.isEmpty()) { 
+         // not known as a typedef either
          result = word;
       } else {
          result = resolvedType;
@@ -3115,7 +3136,7 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
    return result;
 }
 
-static QString extractCanonicalType(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, QString type)
+static QString extractCanonicalType(QSharedPointer<Definition> def, QSharedPointer<FileDef> fs, QString type)
 {
    type = type.trimmed();
 
@@ -3130,14 +3151,13 @@ static QString extractCanonicalType(QSharedPointer<Definition> d, QSharedPointer
    type = stripPrefix(type, "typename ");
 
    type = removeRedundantWhiteSpace(type);
-
   
    QString canType;
    QString templSpec;
    QString word;
 
    int i;
-   int p = 0;
+   int p  = 0;
    int pp = 0;
 
    while ((i = extractClassNameFromType(type, p, word, templSpec)) != -1) {
@@ -3147,7 +3167,7 @@ static QString extractCanonicalType(QSharedPointer<Definition> d, QSharedPointer
          canType += type.mid(pp, i - pp);
       }
 
-      QString ct = getCanonicalTypeForIdentifier(d, fs, word, &templSpec);
+      QString ct = getCanonicalTypeForIdentifier(def, fs, word, &templSpec);
 
       // in case the ct is empty it means that "word" represents scope "d"
       // and this does not need to be added to the canonical
@@ -3155,24 +3175,26 @@ static QString extractCanonicalType(QSharedPointer<Definition> d, QSharedPointer
 
       if (ct.isEmpty() && type.mid(p, 2) == "::") {
          p += 2;
+
       } else {
          canType += ct;
       }
-      
+ 
       if (!templSpec.isEmpty())  {
-         // if we didn't use up the templSpec already
-         // (i.e. type is not a template specialization)
-         // then resolve any identifiers inside.
+         // if we did not use up the templSpec already (i.e. type is not a template specialization)
+         // then resolve any identifiers inside
       
          static QRegExp re("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
-         int tp = 0, tl, ti;
+         int tp = 0;
+         int tl;
+         int ti;
 
          // for each identifier template specifier
          while ((ti = re.indexIn(templSpec, tp)) != -1) {
             tl = re.matchedLength();
 
             canType += templSpec.mid(tp, ti - tp);
-            canType += getCanonicalTypeForIdentifier(d, fs, templSpec.mid(ti, tl), 0);
+            canType += getCanonicalTypeForIdentifier(def, fs, templSpec.mid(ti, tl), 0);
             tp = ti + tl; 
          }
 
@@ -3203,6 +3225,7 @@ static QString extractCanonicalArgType(QSharedPointer<Definition> d, QSharedPoin
       if (! type.isEmpty()) {
          type += " ";
       }
+
       type += name;
    }
 
@@ -3241,6 +3264,7 @@ static bool matchArgument2(QSharedPointer<Definition> srcScope, QSharedPointer<F
       srcA->canType = extractCanonicalArgType(srcScope, srcFileScope, srcA);
    }
 
+
    if (dstA->canType.isEmpty()) {
       dstA->canType = extractCanonicalArgType(dstScope, dstFileScope, dstA);
    }
@@ -3254,7 +3278,6 @@ static bool matchArgument2(QSharedPointer<Definition> srcScope, QSharedPointer<F
       return false;
    }
 }
-
 
 // algorithm for argument matching
 bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef> srcFileScope, ArgumentList *srcAl,
@@ -3321,14 +3344,17 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
 
    for (auto &srcA : *srcAl ) {
 
-      if (! matchArgument2(srcScope, srcFileScope, &srcA,  dstScope, dstFileScope, &(*item))) {
+      if (item == dstAl->end()) {
+         return false;
+      }
+
+      if (! matchArgument2(srcScope, srcFileScope, &srcA, dstScope, dstFileScope, &(*item))) {
          DOX_NOMATCH
          return false;
       }
 
       ++item;
    }
-
 
    DOX_MATCH
    return true; // all arguments match
@@ -4443,7 +4469,7 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
    }
       
    // returns a FileName which inherits from FileList
-   QSharedPointer<FileName> fn = (*fnDict)[fName];
+   QSharedPointer<FileNameList> fn = (*fnDict)[fName];
    
    if (fn) {  
     
@@ -4512,7 +4538,7 @@ QString showFileDefMatches(const FileNameDict *fnDict, const QString &xName)
       name = name.right(name.length() - slashPos - 1);
    }
 
-   QSharedPointer<FileName> fn;
+   QSharedPointer<FileNameList> fn;
    fn = (*fnDict)[name];  
 
    if (fn) { 
@@ -6385,7 +6411,7 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
       return bestMatch;
    }
 
-   if (scope == 0 || (scope->definitionType() != Definition::TypeClass && 
+   if (scope == nullptr || (scope->definitionType() != Definition::TypeClass && 
           scope->definitionType() != Definition::TypeNamespace) ) {
 
       scope = Doxy_Globals::globalScope;
@@ -6406,17 +6432,17 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
    while (di != Doxy_Globals::symbolMap().end() && di.key() == name)  {      
       // search for the best match, only look at members 
 
-      QSharedPointer<Definition> self = sharedFrom(di.value());
-
-      if (self->definitionType() == Definition::TypeMember) {
+      if (di.value()->definitionType() == Definition::TypeMember) {
          s_visitedNamespaces.clear();
 
-         int distance = isAccessibleFromWithExpScope(scope, fileScope, self, explicitScopePart);
+         QSharedPointer<Definition> sharedPtr = sharedFrom(di.value());
+         int distance = isAccessibleFromWithExpScope(scope, fileScope, sharedPtr, explicitScopePart);
 
          if (distance != -1 && distance < minDistance) {
             minDistance = distance;
 
-            QSharedPointer<MemberDef> md = self.dynamicCast<MemberDef>();  
+            QSharedPointer<Definition> sharedPtr = sharedFrom(di.value());
+            QSharedPointer<MemberDef> md = sharedPtr.dynamicCast<MemberDef>();            
             bestMatch = md;            
          }
       }

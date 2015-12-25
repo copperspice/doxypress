@@ -38,13 +38,6 @@ class MemberName : public QList<QSharedPointer<MemberDef>>
    QString name;
 };
 
-/** Iterator for MemberDef objects in a MemberName list */
-class MemberNameIterator : public QListIterator<QSharedPointer<MemberDef>>
-{
- public:
-   MemberNameIterator( const MemberName &list);
-};
-
 /** Data associated with a MemberDef in an inheritance relation. */
 struct MemberInfo {
    MemberInfo(QSharedPointer<MemberDef> md, Protection p, Specifier v, bool inh)
@@ -78,14 +71,6 @@ class MemberNameInfo : public QList<MemberInfo>
  private:
    int compareValues(QSharedPointer<const MemberInfo> item1, QSharedPointer<const MemberInfo> item2) const;
    QString name;
-};
-
-/** Iterator for MemberInfo objects in a MemberNameInfo list. */
-class MemberNameInfoIterator : public QListIterator<MemberInfo>
-{
- public:
-   MemberNameInfoIterator(const MemberNameInfo &mnii)
-      : QListIterator<MemberInfo>(mnii) {}
 };
 
 #endif

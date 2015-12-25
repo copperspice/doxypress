@@ -18,6 +18,8 @@
 #ifndef DOXY_SHARED_H
 #define DOXY_SHARED_H
 
+#include <cassert>
+
 #include <QMap>
 #include <QSharedPointer>
 
@@ -25,7 +27,9 @@
 class EnableSharedFromThis : public QEnableSharedFromThis<EnableSharedFromThis>
 {
    public:
-      virtual ~EnableSharedFromThis() {};
+      virtual ~EnableSharedFromThis() 
+      {    
+      };
 };
 
 template<class T>

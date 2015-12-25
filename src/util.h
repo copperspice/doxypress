@@ -36,6 +36,7 @@
 #include <pagedef.h>
 #include <outputlist.h>
 #include <stringmap.h>
+#include <sortedlist_fwd.h>
 
 class BaseClassDef;
 class Definition;
@@ -48,10 +49,6 @@ class OutputDocInterface;
 struct ListItemInfo;
 struct SectionInfo;
 struct TagInfo;
-
-template <class T>
-class SortedList;
-
 
 /*! \file
  *  \brief A bunch of utility functions.
@@ -276,9 +273,6 @@ QString renameNS_Aliases(const QString &scope, QString xx = "");      // broom -
 void replaceNamespaceAliases(QString &scope, int i);
 
 int isAccessibleFrom(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item);
-
-int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-                  QSharedPointer<Definition> item, const QString &explicitScopePart);
 
 int computeQualifiedIndex(const QString &name);
 

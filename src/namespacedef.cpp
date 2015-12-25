@@ -439,7 +439,8 @@ void NamespaceDef::writeClassDeclarations(OutputList &ol, const QString &title)
 void NamespaceDef::writeInlineClasses(OutputList &ol)
 {
    if (classSDict) {
-      classSDict->writeDocumentation(ol, this);
+      QSharedPointer<NamespaceDef> self = sharedFrom(this);
+      classSDict->writeDocumentation(ol, self);
    }
 }
 
@@ -546,7 +547,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
       ol.endQuickIndices();
    }
 
-   startTitle(ol, getOutputFileBase(), this);
+   startTitle(ol, getOutputFileBase(), self);
    ol.parseText(pageTitle);
    addGroupListToTitle(ol, self);
    addNamespaceAttributes(ol);
@@ -697,7 +698,7 @@ void NamespaceDef::writeMemberPages(OutputList &ol)
    ol.popGeneratorState();
 }
 
-void NamespaceDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
+void NamespaceDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const
 {
    static bool createSubDirs = Config::getBool("create-subdirs");
 
@@ -800,13 +801,18 @@ QSharedPointer<Definition> NamespaceDef::findInnerCompound(const QString &n)
 void NamespaceDef::addListReferences()
 {
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
-
    // bool fortranOpt = Config::getBool("optimize-fortran");
    
    QList<ListItemInfo> *xrefItems = xrefListItems();
-   addRefItem(xrefItems, qualifiedName(), 
-                 getLanguage() == SrcLangExt_Fortran ? theTranslator->trModule(true, true) : theTranslator->trNamespace(true, true),
-                 getOutputFileBase(), qPrintable(displayName()), 0, self);
+
+   QString prefix; 
+   if (getLanguage() == SrcLangExt_Fortran) {
+      prefix = theTranslator->trModule(true, true); 
+   } else {
+      prefix = theTranslator->trNamespace(true, true);
+   }
+
+   addRefItem(xrefItems, qualifiedName(), prefix, getOutputFileBase(), displayName(), "", self);
      
    for (auto mg : *memberGroupSDict) {
       mg->addListReferences(self);
@@ -988,7 +994,7 @@ QSharedPointer<MemberList> NamespaceDef::createMemberList(MemberListType lt)
    }
 
    // not found, create a new member list
-   QSharedPointer<MemberList> ml (new MemberList(lt));
+   QSharedPointer<MemberList> ml = QMakeShared<MemberList>(lt);
    m_memberLists.append(ml);
  
    return ml;

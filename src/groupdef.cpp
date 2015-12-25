@@ -92,6 +92,10 @@ void GroupDef::setGroupTitle(const QString &t)
    }
 }
 
+QString GroupDef::pathFragment_Internal() const
+{
+   return groupTitle();
+}
 
 void GroupDef::distributeMemberGroupDocumentation()
 {
@@ -269,7 +273,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
       mni->append(MemberInfo(md, md->protection(), md->virtualness(), false));
 
    } else {
-      QSharedPointer<MemberNameInfo> mni (new MemberNameInfo(md->name()));
+      QSharedPointer<MemberNameInfo> mni = QMakeShared<MemberNameInfo>(md->name());
       mni->append(MemberInfo(md, md->protection(), md->virtualness(), false));
 
       allMemberNameInfoSDict->insert(mni->memberName(), mni);
@@ -1188,7 +1192,7 @@ void GroupDef::writeMemberPages(OutputList &ol)
    ol.popGeneratorState();
 }
 
-void GroupDef::writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const
+void GroupDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const
 {
    static bool createSubDirs = Config::getBool("create-subdirs");
 
@@ -1302,7 +1306,8 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
          if (fgd && gd != fgd && g.pri == pri) {
             warn(root->fileName, root->startLine, "Member %s found in multiple %s groups. "
                  "The member will be put in group %s, and not in group %s", 
-                 qPrintable(md->name()), Grouping::getGroupPriName(pri), qPrintable(gd->name()), qPrintable(fgd->name()) );
+                 csPrintable(md->name()), csPrintable(Grouping::getGroupPriName(pri)), 
+                 csPrintable(gd->name()), csPrintable(fgd->name()) );
          }
 
          fgd = gd;
@@ -1334,13 +1339,14 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
             if (md->getGroupPri() == pri) {
                if (!root->doc.isEmpty() && !md->getGroupHasDocs()) {
                   moveit = true;
-               } else if (!root->doc.isEmpty() && md->getGroupHasDocs()) {
+
+               } else if (! root->doc.isEmpty() && md->getGroupHasDocs()) {
+
                   warn(md->getGroupFileName(), md->getGroupStartLine(),
-                       "Member documentation for %s found several times in %s groups!\n"
-                       "%s:%d: The member will remain in group %s, and won't be put into group %s",
-                       csPrintable(md->name()), Grouping::getGroupPriName( pri ),
-                       csPrintable(root->fileName), root->startLine, csPrintable(mgd->name()), csPrintable(fgd->name())
-                      );
+                       "Member documentation for %s found several times in %s groups\n"
+                       "%s:%d: The member will remain in group %s, and will not be put into group %s",
+                       csPrintable(md->name()), csPrintable(Grouping::getGroupPriName(pri)),
+                       csPrintable(root->fileName), root->startLine, csPrintable(mgd->name()), csPrintable(fgd->name()) );
                }
             }
          }

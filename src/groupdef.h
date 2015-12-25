@@ -23,7 +23,7 @@
 #include <QTextStream>
 
 #include <definition.h>
-#include <filelist.h>
+#include <filenamelist.h>
 
 class ClassDef;
 class ClassSDict;
@@ -86,7 +86,7 @@ class GroupDef : public Definition
 
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
-   void writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const;
+   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const;
    void writeTagFile(QTextStream &);
    int  countMembers() const;
    bool isLinkableInProject() const;
@@ -159,6 +159,7 @@ class GroupDef : public Definition
   
  protected:
    void addMemberListToGroup(QSharedPointer<MemberList>, bool (MemberDef::*)() const);
+   QString pathFragment_Internal() const override;
 
  private:
    QSharedPointer<MemberList> createMemberList(MemberListType lt);
