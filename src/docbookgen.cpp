@@ -614,7 +614,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
          if (declAl && declAl->count() > 0) {
             int cnt = 0;
 
-            for (auto a : *declAl) {
+            for (auto &a : *declAl) {
                if (cnt != 0) {
                   t << ", ";
                }
@@ -1442,7 +1442,7 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    t << "</title>" << endl;
 
    if (fd->includeFileList()) {
-      for (auto inc : *fd->includeFileList()) {
+      for (auto &inc : *fd->includeFileList()) {
          t << "    <programlisting>#include ";
 
          if (inc.local) {
@@ -1452,11 +1452,13 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
          }
 
          t << convertToXML(inc.includeName);
+
          if (inc.local) {
             t << "&quot;";
          } else {
             t << "&gt;";
          }
+
          t << "</programlisting>" << endl;
       }
    }
@@ -1826,22 +1828,19 @@ void generateDocbook()
       t << "    </chapter>" << endl;
    }
 
-   /** MAINPAGE DOCUMENTATION **/
-
+   // mainpage documentation
    if (Doxy_Globals::mainPage) {
       msg("Generating Docbook output for the main page\n");
       generateDocbookForPage(Doxy_Globals::mainPage, t, false);
    }
 
-   // PAGE DOCUMENTATION
-
+   // page documentation
    for (auto pd : *Doxy_Globals::pageSDict) {
       msg("Generating Docbook output for page %s\n", qPrintable(pd->name()));
       generateDocbookForPage(pd, t, false);
    }
 
    // ** module group documentation
-
 
    // Module group Documentation index header
    if (! Doxy_Globals::groupSDict->isEmpty()) {
@@ -1878,8 +1877,7 @@ void generateDocbook()
       }
    }
 
-   // ** FILE DOCUMENTATION
-
+   // file documentation
    static bool showFiles = Config::getBool("show-file-page");
    if (showFiles) {
 
@@ -1896,8 +1894,8 @@ void generateDocbook()
          }
       }
 
-      //File Documentation index footer
-       if (! Doxy_Globals::inputNameList->isEmpty()) {
+      // File Documentation index footer
+      if (! Doxy_Globals::inputNameList->isEmpty()) {
          t << "    </chapter>" << endl;
       }
    }
@@ -1936,8 +1934,8 @@ void generateDocbook()
          generateDocbookForPage(pd, t, true);
       }
 
-      //Example Page Documentation index footer
-       if (! Doxy_Globals::exampleSDict->isEmpty()) {
+      // Example Page Documentation index footer
+      if (! Doxy_Globals::exampleSDict->isEmpty()) {
          t << "    </chapter>" << endl;
       }
    }

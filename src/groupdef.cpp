@@ -236,11 +236,11 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
    if ((mni = (*allMemberNameInfoSDict)[md->name()])) {
       // member with this name already found
   
-      for (auto srcMi : *mni) {
+      for (auto &srcMi : *mni) {
          QSharedPointer<MemberDef> srcMd = srcMi.memberDef;
 
          if (srcMd == md) {
-            return false;   // already added before!
+            return false;   // already added before
          }
 
          bool sameScope = srcMd->getOuterScope() == md->getOuterScope() || // same class or namespace
@@ -1232,7 +1232,7 @@ void GroupDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> c
 
 void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd)
 {
-    for (auto g : *root->groups) {
+    for (auto &g : *root->groups) {
       QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
@@ -1245,7 +1245,7 @@ void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd)
 
 void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDef> nd)
 { 
-   for (auto g : *root->groups) {
+   for (auto &g : *root->groups) {
       QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
@@ -1258,7 +1258,7 @@ void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDe
 
 void addDirToGroups(QSharedPointer<Entry> root, QSharedPointer<DirDef> dd)
 {
-   for (auto g : *root->groups) {
+   for (auto &g : *root->groups) {
        QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
@@ -1270,7 +1270,7 @@ void addDirToGroups(QSharedPointer<Entry> root, QSharedPointer<DirDef> dd)
 
 void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGroup)
 { 
-   for (auto g : *root->groups) {
+   for (auto &g : *root->groups) {
       QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
@@ -1298,7 +1298,7 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
    Grouping::GroupPri_t pri = Grouping::GROUPING_LOWEST;
    QSharedPointer<GroupDef> fgd;
   
-   for (auto g : *root->groups) {
+   for (auto &g : *root->groups) {
       QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname)) && g.pri >= pri) {
@@ -1374,7 +1374,7 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
 
 void addExampleToGroups(Entry *root, QSharedPointer<PageDef> eg)
 {
-   for (auto g : *root->groups) {
+   for (auto &g : *root->groups) {
       QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {

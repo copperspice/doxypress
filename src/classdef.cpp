@@ -1706,7 +1706,7 @@ void ClassDef::addClassAttributes(OutputList &ol)
 
       for (auto s : sl) {         
          ++nextItem;                   
-         ol.writeLabel(qPrintable(s), nextItem != sl.end());         
+         ol.writeLabel(s, nextItem != sl.end());         
       }
 
       ol.endLabels();

@@ -3518,7 +3518,7 @@ static void findMembersWithSpecificName(QSharedPointer<MemberName> mn, const QSt
 bool getDefs(const QString &scName, const QString &mbName, const QString &args, QSharedPointer<MemberDef> &md,
              QSharedPointer<ClassDef> &cd, QSharedPointer<FileDef> &fd, QSharedPointer<NamespaceDef> &nd, 
              QSharedPointer<GroupDef> &gd, bool forceEmptyScope, QSharedPointer<FileDef> currentFile, 
-             bool checkCV, const QString &forceTagFile )
+             bool checkCV, const QString &forceTagFile)
 {
    fd = QSharedPointer<FileDef>();
    md = QSharedPointer<MemberDef>();
@@ -3585,8 +3585,14 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
          QSharedPointer<MemberDef> tmd;
          QSharedPointer<ClassDef> fcd = getResolvedClass(Doxy_Globals::globalScope, QSharedPointer<FileDef>(), className, &tmd);
         
+         if (fcd == nullptr && className.contains('<'))  {
+            // try without template specifiers as well
+            QString nameWithoutTemplates = stripTemplateSpecifiersFromScope(className, false);
+            fcd = getResolvedClass(Doxy_Globals::globalScope, QSharedPointer<FileDef>(), nameWithoutTemplates, &tmd);
+         }
+
          // todo: fill in correct fileScope
-         if (fcd &&  fcd->isLinkable() ) {
+         if (fcd && fcd->isLinkable() ) {
             // is it a documented class
           
             int mdist = maxInheritanceDepth;

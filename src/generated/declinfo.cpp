@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -2289,14 +2289,3 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
 
    return;
 }
-
-#if !defined(YY_FLEX_SUBMINOR_VERSION)
-extern "C" { // some bogus code to keep the compiler happy
-   void declinfoYYdummy()
-   {
-      yy_flex_realloc(0, 0);
-   }
-}
-#endif
-
-

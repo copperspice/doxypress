@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -8112,21 +8112,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
 
 void preFreeScanner()
 {
-#if defined(YY_FLEX_SUBMINOR_VERSION)
    if (g_lexInit) {
       preYYlex_destroy();
    }
-#endif
 }
-
-#if !defined(YY_FLEX_SUBMINOR_VERSION)
-extern "C" { // some bogus code to keep the compiler happy
-   //  int  preYYwrap() { return 1 ; }
-   void preYYdummy()
-   {
-      yy_flex_realloc(0, 0);
-   }
-}
-#endif
-
-

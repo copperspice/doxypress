@@ -20,12 +20,11 @@
 #include <arguments.h>
 #include <marshal.h>
 
-/*! the argument list is documented if one of its
- *  arguments is documented
+/*! the argument list is documented if one of its arguments is documented
  */
 bool ArgumentList::hasDocumentation() const
 {
-   for (auto item : *this)  {
+   for (auto &item : *this)  {
 
       if (item.hasDocumentation()) {
          return true;
@@ -72,34 +71,25 @@ ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
    return result;
 }
 
-void ArgumentList::marshal(StorageIntf *s, ArgumentList *argList)
-{
-   if (argList == 0) {
-      marshalUInt(s, NULL_LIST); 
-
-   } else {
-      marshalUInt(s, argList->count());
-
-      if (argList->count() > 0) {
-
-         for (auto item : *argList)  {
-
-            marshalQString(s, item.attrib);
-            marshalQString(s, item.type);
-            marshalQString(s, item.canType);
-            marshalQString(s, item.name);
-            marshalQString(s, item.array);
-            marshalQString(s, item.defval);
-            marshalQString(s, item.docs);
-            marshalQString(s, item.typeConstraint);
-         }
-      }
-
-      marshalBool(s, argList->constSpecifier);
-      marshalBool(s, argList->volatileSpecifier);
-      marshalBool(s, argList->pureSpecifier);
-      marshalQString(s, argList->trailingReturnType);
-      marshalBool(s,argList->isDeleted);
+void ArgumentList::marshal(StorageIntf *s, const ArgumentList &argList)
+{     
+   marshalUInt(s, argList.count());    
+   
+   for (auto &item : argList)  {
+      marshalQString(s, item.attrib);
+      marshalQString(s, item.type);
+      marshalQString(s, item.canType);
+      marshalQString(s, item.name);
+      marshalQString(s, item.array);
+      marshalQString(s, item.defval);
+      marshalQString(s, item.docs);
+      marshalQString(s, item.typeConstraint);
    }
+      
+   marshalBool(s, argList.constSpecifier);
+   marshalBool(s, argList.volatileSpecifier);
+   marshalBool(s, argList.pureSpecifier);
+   marshalQString(s, argList.trailingReturnType);
+   marshalBool(s, argList.isDeleted);   
 }
 

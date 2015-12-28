@@ -138,7 +138,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       ol.endParameterType();
       ol.startParameterName(false);
       
-      for (auto a: *defArgList) {
+      for (auto &a: *defArgList) {
          if (a.defval.isEmpty()) {
             ol.docify(a.name + " ");
 
@@ -511,7 +511,7 @@ static void writeTemplatePrefix(OutputList &ol, ArgumentList *al)
 
    auto nextItem = al->begin();
 
-   for (auto a : *al) {
+   for (auto &a : *al) {
       ol.docify(a.type);
       ol.docify(" ");
       ol.docify(a.name);
@@ -1782,8 +1782,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
       auto nextItem = sl.begin();
 
-      for (auto s : sl) { 
-      
+      for (auto s : sl) {       
          ol.docify(s);
          ++nextItem;          
 
@@ -2850,7 +2849,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
          if (m_impl->defTmpArgLists && lang == SrcLangExt_Cpp) {  
 
             // definition has explicit template parameter declarations          
-            for (auto tal : *m_impl->defTmpArgLists) {
+            for (auto &tal : *m_impl->defTmpArgLists) {
                if (tal.count() > 0) {
                   if (! first) {
                      ol.docify(" ");
@@ -2870,7 +2869,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
                QList<ArgumentList> tempParamLists;
                cd->getTemplateParameterLists(tempParamLists);                          
 
-               for (auto tal : tempParamLists) {
+               for (auto &tal : tempParamLists) {
                   if (tal.count() > 0) {
 
                      if (!first) {
@@ -2994,7 +2993,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
       for (auto s : sl) {   
          ++nextItem;          
-         ol.writeLabel(qPrintable(s), nextItem != sl.end());        
+         ol.writeLabel(s, nextItem != sl.end());        
       }
 
       ol.endLabels(); 
@@ -3068,7 +3067,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
             showProperties.append(temp);
            
          } else {
-            ol.writeLabel(qPrintable(s), nextItem != sl.end());                    
+            ol.writeLabel(s, nextItem != sl.end());                    
 
          }       
       }
@@ -3157,7 +3156,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       QString paramDocs;
      
       // convert the parameter documentation into a list of @param commands      
-      for (auto a : *docArgList) {
+      for (auto &a : *docArgList) {
          if (a.hasDocumentation()) {
             QString direction = extractDirection(a.docs);
             paramDocs += "@param" + direction + " " + a.name + " " + a.docs;
@@ -3686,7 +3685,7 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(ArgumentList *
 
       // replace formal arguments with actuals
       
-      for (auto arg : *actualArgList) {
+      for (auto &arg : *actualArgList) {
          arg.type = substituteTemplateArgumentsInString(arg.type, formalArgs, actualArgs);
       }
 
@@ -3694,7 +3693,7 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(ArgumentList *
    }
 
    QString methodName = name();
-   if (methodName.left(9) == "operator ") { 
+   if (methodName.startsWith("operator ")) { 
       // conversion operator
       methodName = substituteTemplateArgumentsInString(methodName, formalArgs, actualArgs);
    }
@@ -3923,12 +3922,12 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
 
       if (fmdl) {
          for (auto fmd : *fmdl) {
-            if (!fmd->isReference()) {
+            if (! fmd->isReference()) {
                tagFile << "      <enumvalue file=\"" << convertToXML(getOutputFileBase() + Doxy_Globals::htmlFileExtension);
                tagFile << "\" anchor=\"" << convertToXML(fmd->anchor());
 
                QString idStr = fmd->id();
-               if (!idStr.isEmpty()) {
+               if (! idStr.isEmpty()) {
                   tagFile << "\" clangid=\"" << convertToXML(idStr);
                }
 
@@ -4181,7 +4180,7 @@ void MemberDef::setTypeConstraints(ArgumentList *al)
 
    m_impl->typeConstraints = new ArgumentList;
 
-   for (auto a : * al) {
+   for (auto a : *al) {
       m_impl->typeConstraints->append(a);
    }
 }
@@ -5177,7 +5176,7 @@ void MemberDef::copyArgumentNames(QSharedPointer<MemberDef> bmd)
    if (m_impl->defArgList && arguments) {                        
       auto iter = m_impl->defArgList->begin();
 
-      for (auto argSrc : *arguments) {            
+      for (auto &argSrc : *arguments) {            
          if (iter == m_impl->defArgList->end()) {
             break;
          }
@@ -5193,7 +5192,7 @@ void MemberDef::copyArgumentNames(QSharedPointer<MemberDef> bmd)
    if (m_impl->declArgList && arguments) {     
       auto iter = m_impl->declArgList->begin();
 
-      for (auto argSrc : *arguments) { 
+      for (auto &argSrc : *arguments) { 
          if (iter == m_impl->declArgList->end()) {
             break;
          }
@@ -5207,7 +5206,7 @@ void MemberDef::copyArgumentNames(QSharedPointer<MemberDef> bmd)
 static void invalidateCachedTypesInArgumentList(ArgumentList *al)
 {
    if (al) {    
-      for (auto a : *al) { 
+      for (auto &a : *al) { 
          a.canType.resize(0);
       }
    }
@@ -5253,7 +5252,7 @@ static void transferArgumentDocumentation(ArgumentList *decAl, ArgumentList *def
    if (decAl && defAl) {      
       auto iter = defAl->begin();
 
-      for (auto decA : *decAl) {  
+      for (auto &decA : *decAl) {  
 
          if (decA.docs.isEmpty() && ! iter->docs.isEmpty()) {
             decA.docs = iter->docs;

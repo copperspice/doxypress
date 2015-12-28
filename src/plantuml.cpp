@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -103,7 +103,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    pumlArgs += " \"";
    pumlArgs += baseName;
    pumlArgs += ".pu\" ";
-   pumlArgs += "-charset " + Config::getString("input-encoding") + " ";
+   pumlArgs += "-charset UTF-8 ";
 
    int exitCode;
    

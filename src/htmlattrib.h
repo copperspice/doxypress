@@ -52,7 +52,7 @@ class HtmlAttribList : public QList<HtmlAttrib>
    }
 
    QString find(const QString &name) const {          
-      for (auto item : *this) {
+      for (auto &item : *this) {
          if (item.name == name) {
             return item.value;
          }
@@ -63,7 +63,7 @@ class HtmlAttribList : public QList<HtmlAttrib>
    QString toString() const {
       QString result;
 
-      for (auto item : *this) {
+      for (auto &item : *this) {
          result += " " + item.name + "=\"" + item.value + "\"";
       }
       return result;

@@ -50,7 +50,7 @@ template <class T, bool flag>
 template <class U>
 bool SortedList<T, flag>::contains(const U &data)
 {
-   for (auto item : *this) {
+   for (auto &item : *this) {
       if (item == data) {
          return true;
       }      

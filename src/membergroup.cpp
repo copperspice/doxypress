@@ -138,7 +138,6 @@ int MemberGroup::countGroupedInheritedMembers(MemberListType lt)
    int count = 0;  
 
    for (auto md : *memberList) {  
-      //printf("matching %d == %d\n",lt,md->getSectionList(m_parent)->listType());
 
       if (lt == md->getSectionList(m_parent)->listType()) {
          count++;
@@ -302,7 +301,7 @@ void MemberGroup::setRefItems(const QList<ListItemInfo> *sli)
       }    
 
       for (auto item : *sli ) {
-         m_xrefListItems->append(ListItemInfo(item));
+         m_xrefListItems->append(item);
       }
    }
 }
@@ -323,6 +322,6 @@ void MemberGroupInfo::setRefItems(const QList<ListItemInfo> *sli)
    }
 
    for (auto item : *sli ) {
-      m_sli->append(ListItemInfo(item));
+      m_sli->append(item);
    }
 }

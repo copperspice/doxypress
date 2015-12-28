@@ -109,7 +109,7 @@ class ArgumentList : public QList<Argument>
    bool isDeleted;
    
    static ArgumentList *unmarshal(StorageIntf *s);
-   static void marshal(StorageIntf *s, ArgumentList *argList);
+   static void marshal(StorageIntf *s, const ArgumentList &argList);
 };
 
 using ArgumentListIterator = QListIterator<Argument>;

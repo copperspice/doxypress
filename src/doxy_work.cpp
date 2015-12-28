@@ -1521,7 +1521,7 @@ void Doxy_Work::addRelatedPage(QSharedPointer<EntryNav> rootNav)
    QSharedPointer<Entry> root = rootNav->entry();
    QSharedPointer<GroupDef> gd;
 
-   for (auto g : *root->groups) {
+   for (auto &g : *root->groups) {
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
          break;
       }
@@ -1710,7 +1710,7 @@ void Doxy_Work::buildFileList(QSharedPointer<EntryNav> rootNav)
             fd->addSectionsToDefinition(root->anchors);
             fd->setRefItems(root->sli);
 
-            for (auto g : *root->groups) {
+            for (auto &g : *root->groups) {
                QSharedPointer<GroupDef> gd;
 
                if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
@@ -1974,6 +1974,7 @@ QSharedPointer<Definition> Doxy_Work::findScopeFromQualifiedName(QSharedPointer<
                if (rightScopeMatch(resultScope->name(), scope.left(i2 + l2))) {
                   break;
                }
+
                goto nextFragment;
             }
          }
@@ -2349,7 +2350,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
 
    SortedList<QSharedPointer<GroupDef>> *groups = rootCd->partOfGroups();
 
-   if ( groups != 0 ) {
+   if (groups != 0) {
       for (auto item : *groups) {
          cd->makePartOfGroup(item);
          item->addClass(cd);
@@ -2605,7 +2606,7 @@ QSharedPointer<NamespaceDef> Doxy_Work::findUsedNamespace(NamespaceSDict *unl, c
    QSharedPointer<NamespaceDef> usingNd;
 
    if (unl) {
-      for (auto und : *unl ) {
+      for (auto und : *unl) {
          QString uScope = und->name() + "::";
          usingNd = getResolvedNamespace(uScope + name);
       }
@@ -2716,7 +2717,7 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<EntryNav> rootNav)
             nd->setLanguage(root->lang);
             nd->setId(root->id);
 
-            for (auto g : *root->groups) {
+            for (auto &g : *root->groups) {
                QSharedPointer<GroupDef> gd;
 
                if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict->find(g.groupname))) {
@@ -2865,7 +2866,7 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<EntryNav> rootNav)
 
                   if (mni) {
 
-                     for (auto mi : *mni) {
+                     for (auto &mi : *mni) {
                         QSharedPointer<MemberDef> md = mi.memberDef;
 
                         if (md && md->protection() != Private) {
@@ -3423,7 +3424,7 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<EntryNav> rootNav)
             break;
          }
 
-         for (auto a : *al) {
+         for (auto &a : *al) {
             if (! a.name.isEmpty() || ! a.defval.isEmpty()) {
 
                if (initChars.indexIn(a.name) == 0) {
@@ -3713,13 +3714,13 @@ nextMember:
 void Doxy_Work::buildTypedefList(QSharedPointer<EntryNav> rootNav)
 {
    if (! rootNav->name().isEmpty() && rootNav->section() == Entry::VARIABLE_SEC &&
-         rootNav->type().indexOf("typedef ") != -1) {
+                  rootNav->type().indexOf("typedef ") != -1) {
 
       // it is a typedef
       addVariable(rootNav);
    }
 
-   for (auto &e : rootNav->children() ) {
+   for (auto e : rootNav->children() ) {
       if (e->section() != Entry::ENUM_SEC) {
          buildTypedefList(e);
       }
@@ -3761,7 +3762,7 @@ void Doxy_Work::buildVarList(QSharedPointer<EntryNav> rootNav)
       addVariable(rootNav, isFuncPtr);
    }
    
-   for (auto &e : rootNav->children() ) {
+   for (auto e : rootNav->children() ) {
       if (e->section() != Entry::ENUM_SEC) {
          buildVarList(e);
       }
@@ -4687,7 +4688,7 @@ QHash<QString, int> *Doxy_Work::getTemplateArgumentsInName(ArgumentList *templat
    if (templateArguments) {
       int count = 0;
 
-      for (auto item : *templateArguments) {
+      for (auto &item : *templateArguments) {
 
          int i;
          int len;
@@ -4758,7 +4759,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
 
       for (auto mni : *masterCd->memberNameInfoSDict()) {
 
-         for (auto mi : *mni) {
+         for (auto &mi : *mni) {
             QSharedPointer<MemberDef> md = mi.memberDef;
 
             if (md->isVariable() || md->isObjCProperty()) {
@@ -4819,7 +4820,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                   if (masterCd->templateArguments()) {
                      int count = 0;
 
-                     for (auto arg : *masterCd->templateArguments()) {
+                     for (auto &arg : *masterCd->templateArguments()) {
                         if (arg.name == usedName) {
                            // type is a template argument
                            found = true;
@@ -5668,19 +5669,18 @@ void Doxy_Work::computeTemplateClassRelations()
 
                   QHash<QString, int> *actualTemplateNames = new QHash<QString, int>();
 
-                  for (auto item : *templateNames) {
-                     int templIndex = item;
+                  for (int index : *templateNames) {
 
                      Argument *actArg = 0;
 
-                     if (templIndex < templArgs->count()) {
-                        actArg = &(*templArgs)[templIndex];
+                     if (index < templArgs->count()) {
+                        actArg = &(*templArgs)[index];
                      }
 
                      if (actArg != 0 && baseClassNames != 0 && baseClassNames->contains(actArg->type)
                             && ! actualTemplateNames->contains(actArg->type)) {
 
-                        actualTemplateNames->insert(actArg->type, templIndex);
+                        actualTemplateNames->insert(actArg->type, index);
                      }
                   }
 
@@ -5769,11 +5769,9 @@ void Doxy_Work::addListReferences()
       if (pd->getGroupDef()) {
          name = pd->getGroupDef()->getOutputFileBase();
       }
-
-      {
-         QList<ListItemInfo> *xrefItems = pd->xrefListItems();
-         addRefItem(xrefItems, name, theTranslator->trPage(true, true), name, pd->title(), "", QSharedPointer<Definition>());
-      }
+      
+      QList<ListItemInfo> *xrefItems = pd->xrefListItems();
+      addRefItem(xrefItems, name, theTranslator->trPage(true, true), name, pd->title(), "", QSharedPointer<Definition>());      
    }
 
    for (auto dd : Doxy_Globals::directories) {
@@ -6107,7 +6105,7 @@ QString Doxy_Work::substituteTemplatesInString(const QList<ArgumentList> &srcTem
       QString name = src.mid(i, l);
 
       bool found = false;
-      auto dest = dstTempArgLists.begin();
+      auto dest  = dstTempArgLists.begin();
 
       for (auto &source : srcTempArgLists) {
 
@@ -6125,7 +6123,7 @@ QString Doxy_Work::substituteTemplatesInString(const QList<ArgumentList> &srcTem
          
          auto tempDest = dest->begin();   
          
-         for (auto tsa : source) {
+         for (auto &tsa : source) {
 
             if (found) {
                break;
@@ -6212,7 +6210,7 @@ void Doxy_Work::substituteTemplatesInArgList(const QList<ArgumentList> &srcTempA
    
    auto destIter = dst->begin();
 
-   for (auto sa : *src) {
+   for (auto &sa : *src) {
       // for each member argument
 
       QString dstType  = substituteTemplatesInString(srcTempArgLists, dstTempArgLists, funcTempArgs, sa.type);
@@ -6650,6 +6648,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
                         // see bug700693 & bug732594
                         funcType = substitute(stripTemplateSpecifiersFromScope(funcType, true), className + "::", ""); 
+                        memType  = substitute(stripTemplateSpecifiersFromScope(memType, true), className+"::",""); 
 
                         Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [6] comparing return types %s with %s"
                                      "#args %d with %d\n", csPrintable(md->typeString()), csPrintable(funcType),
@@ -7435,10 +7434,10 @@ void Doxy_Work::findMemberDocumentation(QSharedPointer<EntryNav> rootNav)
 
 void Doxy_Work::findObjCMethodDefinitions(QSharedPointer<EntryNav> rootNav)
 {  
-   for (auto &objCImplNav : rootNav->children() ) {
+   for (auto objCImplNav : rootNav->children() ) {
       if (objCImplNav->section() == Entry::OBJCIMPL_SEC) {
 
-         for (auto &objCMethodNav : objCImplNav->children() ) {
+         for (auto objCMethodNav : objCImplNav->children() ) {
 
             if (objCMethodNav->section() == Entry::FUNCTION_SEC) {
 
@@ -7753,7 +7752,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 
                if (md->isEnumerate()) {
                   
-                  for (auto &e : rootNav->children() ) {                     
+                  for (auto e : rootNav->children() ) {                     
                      SrcLangExt sle;
 
                      if ( (sle = rootNav->lang()) == SrcLangExt_CSharp || sle == SrcLangExt_Java ||
@@ -8374,7 +8373,7 @@ void Doxy_Work::addSourceReferences()
    // add source references for member names
    for (auto mn: *Doxy_Globals::memberNameSDict) {
 
-      for (auto md: *mn) {
+      for (auto md : *mn) {
          QSharedPointer<FileDef> fd = md->getBodyDef();
 
          if (fd && md->getStartBodyLine() != -1 && md->isLinkableInProject() &&
@@ -9162,7 +9161,7 @@ void Doxy_Work::generateNamespaceDocs()
       // for each class in the namespace   
       for (auto cd : *nd->getClassSDict()) {
 
-         if ( ( cd->isLinkableInProject() && cd->templateMaster() == 0)   && ! cd->isHidden() && !cd->isEmbeddedInOuterScope() ) {
+         if ( ( cd->isLinkableInProject() && cd->templateMaster() == 0) && ! cd->isHidden() && !cd->isEmbeddedInOuterScope() ) {
               // skip external references, anonymous compounds and
               // template instances and nested classes             
          

@@ -376,8 +376,7 @@ void Definition::addSectionsToDefinition(QList<SectionInfo> *anchorList)
       return;
    }
 
-   for (auto si : *anchorList) {   
-    
+   for (auto &si : *anchorList) {       
       QSharedPointer<SectionInfo> gsi (Doxy_Globals::sectionDict->find(si.label));
       
       if (! gsi) {
@@ -1403,14 +1402,14 @@ void Definition::makePartOfGroup(QSharedPointer<GroupDef> gd)
 
 void Definition::setRefItems(const QList<ListItemInfo> *sli)
 {
-      if (sli) {
+   if (sli) {
       // deep copy the list
       if (m_private->xrefListItems == 0) {
          m_private->xrefListItems = new QList<ListItemInfo>;        
       }
    
-      for (auto lii : *sli) {
-         m_private->xrefListItems->append(lii);
+      for (auto item : *sli) {
+         m_private->xrefListItems->append(item);
       }
    }
 }
@@ -1425,9 +1424,9 @@ void Definition::mergeRefItems(QSharedPointer<Definition> d)
          m_private->xrefListItems = new QList<ListItemInfo>;         
       }
     
-      for (auto lii : *xrefList) {  
-         if (_getXRefListId(lii.type) == -1) {
-            m_private->xrefListItems->append(lii);
+      for (auto item : *xrefList) {  
+         if (_getXRefListId(item.type) == -1) {
+            m_private->xrefListItems->append(item);
          }
       }
    }
@@ -1436,12 +1435,13 @@ void Definition::mergeRefItems(QSharedPointer<Definition> d)
 int Definition::_getXRefListId(const QString &listName) const
 {
    if (m_private->xrefListItems) {     
-      for (auto lii : *m_private->xrefListItems) {  
-         if (lii.type == listName) {
-            return lii.itemId;
+      for (auto &item : *m_private->xrefListItems) {  
+         if (item.type == listName) {
+            return item.itemId;
          }
       }
    }
+
    return -1;
 }
 

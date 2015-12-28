@@ -387,7 +387,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
                // do not add members to the navtree
 
             } else if (ml) {              
-               for (auto md : *ml ) {
+               for (auto md : *ml) {
                   QSharedPointer<MemberList> enumList = md->enumFieldList();
 
                   bool isDir = (enumList != 0 && md->isEnumerate());
@@ -878,7 +878,6 @@ static int countClassesInTreeList(const ClassSDict &cl)
                count++;
             }
          }
-
       }
    }
 
@@ -1168,7 +1167,7 @@ static void writeFileIndex(OutputList &ol)
 
    if (Config::getBool("full-path-names")) {
    
-      for (auto fl : outputNameMap ) {         
+      for (auto fl : outputNameMap) {         
          for (auto fd : *fl) {
             writeSingleFileIndex(ol, fd);
          }

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -4856,11 +4856,9 @@ static void parsePrototype(const QString &text)
 
 void pyScanFreeParser()
 {
-#if defined(YY_FLEX_SUBMINOR_VERSION)
    if (g_lexInit) {
       pyscannerYYlex_destroy();
    }
-#endif
 }
 
 void PythonLanguageParser::parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,

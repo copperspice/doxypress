@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -1687,9 +1687,10 @@ YY_DECL {
                         int bi = g_curArgTypeName.indexOf('(');
                         int fi = bi - 1;
                         
-                        while (fi >= 0 && isId(g_curArgTypeName.at(fi))) {
+                        while (fi >= 0 && (isId(g_curArgTypeName.at(fi)) || g_curArgTypeName.at(fi)==':')) {
                            fi--;
                         }
+
                         if (fi >= 0) {
                            a->type  = g_curArgTypeName.left(fi + 1);
                            a->name  = g_curArgTypeName.mid(fi + 1, bi - fi - 1).trimmed();
@@ -1697,6 +1698,7 @@ YY_DECL {
                         } else {
                            a->type = g_curArgTypeName;
                         }
+
                      } else if (i >= 0 && g_curArgTypeName.at(i) != ':') {
                         // type contains a name
                         a->type = removeRedundantWhiteSpace(g_curArgTypeName.left(i + 1)).trimmed();

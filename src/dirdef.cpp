@@ -115,7 +115,7 @@ void DirDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
    QSharedPointer<DirDef> self = sharedFrom(this);
 
-   if ((!briefDescription().isEmpty() && Config::getBool("repeat-brief")) || ! documentation().isEmpty()) {
+   if ((! briefDescription().isEmpty() && Config::getBool("repeat-brief")) || ! documentation().isEmpty()) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
       ol.writeRuler();
@@ -377,7 +377,7 @@ void DirDef::writeDocumentation(OutputList &ol)
    QString title = theTranslator->trDirReference(qPrintable(m_dispName));
    startFile(ol, getOutputFileBase(), name(), title, HLI_None, !generateTreeView);
 
-   if (!generateTreeView) {
+   if (! generateTreeView) {
       // write navigation path
       writeNavigationPath(ol);
       ol.endQuickIndices();
@@ -470,7 +470,6 @@ void DirDef::writeDocumentation(OutputList &ol)
    //---------------------------------------- end flexible part -------------------------------
 
    ol.endContents();
-
    endFileWithNavPath(self, ol);
 
    ol.popGeneratorState();
@@ -509,7 +508,7 @@ void DirDef::addUsesDependency(QSharedPointer<DirDef> dir, QSharedPointer<FileDe
       // dir dependency already present
       QSharedPointer<FilePair> usedPair = usedDir->findFilePair(srcFd->getOutputFileBase() + dstFd->getOutputFileBase());
 
-      if (usedPair) {         
+      if (usedPair == nullptr) {         
          usedDir->addFileDep(srcFd, dstFd);
          added = true;
 
@@ -555,7 +554,7 @@ void DirDef::computeDependencies()
          if (ifl) {           
             // for each include file
 
-            for (auto item : *ifl) {                  
+            for (auto &item : *ifl) {                  
 
                if (item.fileDef && item.fileDef->isLinkable()) { 
                   // linkable file
@@ -574,10 +573,12 @@ void DirDef::computeDependencies()
 
 bool DirDef::isParentOf(QSharedPointer<DirDef> dir) const
 {
-   if (dir->parent() == this) { // this is a parent of dir
+   if (dir->parent() == this) { 
+      // this is a parent of dir
       return true;
 
-   } else if (dir->parent()) { // repeat for the parent of dir
+   } else if (dir->parent()) { 
+      // repeat for the parent of dir
       return isParentOf(dir->parent());
 
    } else {
@@ -629,7 +630,7 @@ QSharedPointer<DirDef> DirDef::createNewDir(const QString &path)
 
    QSharedPointer<DirDef> dir = Doxy_Globals::directories.find(path);
 
-   if (dir) { 
+   if (dir == nullptr) { 
       // new dir
     
       dir = QMakeShared<DirDef>(path);
@@ -652,7 +653,7 @@ bool DirDef::matchPath(const QString &path, const QStringList &list)
    return false;
 }
 
-/*! strip part of \a path if it matches  one of the paths in the list
+/*! strip part of \a path if it matches one of the paths in the list
  */
 QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QString &path)
 {   
@@ -759,7 +760,6 @@ void DirRelation::writeDocumentation(OutputList &ol)
    }
 
    ol.writeString("</table>");
-
    ol.endContents();
 
    endFileWithNavPath(m_src, ol);
@@ -767,96 +767,73 @@ void DirRelation::writeDocumentation(OutputList &ol)
    ol.popGeneratorState();
 }
 
-/** In order to create stable, but unique directory names,
- *  we compute the common part of the path shared by all directories.
+static int misMatch(const QString &path, const QString &dirName)
+{
+   int retval = 0;
+
+   const QChar *data1 = path.constData();
+   const QChar *data2 = dirName.constData();
+
+   while (*data1 == *data2 && *data1 != 0)  {
+      ++data1;
+      ++data2;
+
+      ++retval;
+   }
+
+   return retval;
+}  
+
+/** In order to create stable, but unique directory names
+ *  compute the common part of the path shared by all directories.
  */
 static void computeCommonDirPrefix()
 {
-   QString path;
-   QSharedPointer<DirDef> dir;
+   if (Doxy_Globals::directories.count() == 0) { 
+      return;
+   }
 
-   DirSDict::Iterator sdi(Doxy_Globals::directories);
+   // Map<QString, QSharedPointer<DirDef>>
 
-   if (Doxy_Globals::directories.count() > 0) { 
-      // we have at least one dir, start will full path of first dir
-      sdi.toFirst();
+   QString path; 
+   bool isFirstLoop = true;
+  
+   for (auto dir : Doxy_Globals::directories) {
 
-      dir   = sdi.current();
-      path  = dir->name();
+      if (isFirstLoop) {
+         isFirstLoop = false;
+         path = dir->name();
+         continue;
+      }
 
-      int i = path.lastIndexOf('/', path.length() - 2);
+      int index = misMatch(path, dir->name());  
 
-      path = path.left(i + 1);
-      bool done = false;
+      if (index < path.length()) {
+         // trim what did not match
+         path = path.left(index);
 
-      if (i == -1) {
-         path = "";
-
-      } else {
-         while (! done) {
-            int l = path.length();
-            int count = 0;
-
-            for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {
-               QString dirName = dir->name();
-
-               if (dirName.length() > path.length()) {
-
-                  if (! dirName.startsWith(path)) { 
-
-                     // dirName does not start with path
-                     int i = path.lastIndexOf('/', l - 2);
-
-                     if (i == -1) { 
-                        // no unique prefix -> stop
-                        path = "";
-                        done = true;
-
-                     } else { 
-                        // restart with shorter path
-                        path = path.left(i + 1);
-                        break;
-                     }
-                  }
-
-               } else { 
-                  // dir is shorter than path -> take path of dir as new start
-                  path = dir->name();
-                  int i = path.lastIndexOf('/', l - 2);
-
-                  if (i == -1) { 
-                     // no unique prefix -> stop
-                     path = "";
-                     done = true;
-
-                  } else { // restart with shorter path
-                     path = path.left(i + 1);
-                  }
-
-                  break;
-               }
-               count++;
-            }
-
-            if (count == Doxy_Globals::directories.count()) {
-               // path matches for all directories -> found the common prefix            
-               done = true;
-            }
+         if (path.isEmpty()) {
+            break;
          }
       }
-   }
+   }     
+
+   if (! path.isEmpty()) {
+      // strip off the common prefix from each directory
+     
+      int prefixLength = path.lastIndexOf('/') + 1;
    
-   for (sdi.toFirst(); (dir = sdi.current()); ++sdi) {   
-      QString diskName = dir->name().right(dir->name().length() - path.length());
-      dir->setDiskName(diskName);      
+      for (auto dir : Doxy_Globals::directories) {   
+         QString diskName = dir->name().mid(prefixLength);
+         dir->setDiskName(diskName);      
+      }   
    }
 }
 
 void buildDirectories()
 {
    // for each input file  
-   for (auto fn : *Doxy_Globals::inputNameList) {   
-    
+   for (auto fn : *Doxy_Globals::inputNameList) {       
       for (auto fd : *fn) {  
          
          if (fd->getReference().isEmpty() && fd->isDocumentationFile()) {
@@ -872,14 +849,13 @@ void buildDirectories()
             }
 
          } else {
-            // do something for file imported via tag files.
+            // do something for file imported via tag files
          }
       }
    }
    
-   // compute relations between directories => introduce container dirs.
- 
-   for (auto dir : Doxy_Globals::directories) {  
+   // compute relations between directories, introduce container dirs 
+   for (auto dir : Doxy_Globals::directories) { 
       QString name = dir->name();
       int i = name.lastIndexOf('/', name.length() - 2);
 

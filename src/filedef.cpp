@@ -146,24 +146,24 @@ void FileDef::writeTagFile(QTextStream &tagFile)
 
    if (m_includeList.count() > 0) {
       
-      for (auto ii : m_includeList) {
-         if (! ii.indirect) {
-            QSharedPointer<FileDef> fd = ii.fileDef;
+      for (auto item : m_includeList) {
+         if (! item.indirect) {
+            QSharedPointer<FileDef> fd = item.fileDef;
 
             if (fd && fd->isLinkable() && !fd->isReference()) {
                bool isIDLorJava = false;
                SrcLangExt lang = fd->getLanguage();
 
                isIDLorJava = lang == SrcLangExt_IDL || lang == SrcLangExt_Java;
-               const char *locStr = (ii.local    || isIDLorJava) ? "yes" : "no";
-               const char *impStr = (ii.imported || isIDLorJava) ? "yes" : "no";
+               const char *locStr = (item.local    || isIDLorJava) ? "yes" : "no";
+               const char *impStr = (item.imported || isIDLorJava) ? "yes" : "no";
 
                tagFile << "    <includes id=\""
                        << convertToXML(fd->getOutputFileBase()) << "\" "
                        << "name=\"" << convertToXML(fd->name()) << "\" "
                        << "local=\"" << locStr << "\" "
                        << "imported=\"" << impStr << "\">"
-                       << convertToXML(ii.includeName)
+                       << convertToXML(item.includeName)
                        << "</includes>"
                        << endl;
             }
@@ -338,9 +338,9 @@ void FileDef::writeIncludeFiles(OutputList &ol)
    if (m_includeList.count() > 0) {
       ol.startTextBlock(true);
      
-      for (auto ii : m_includeList) {
-         if (! ii.indirect) {
-            QSharedPointer<FileDef> fd = ii.fileDef;
+      for (auto item : m_includeList) {
+         if (! item.indirect) {
+            QSharedPointer<FileDef> fd = item.fileDef;
             bool isIDLorJava = false;
 
             if (fd) {
@@ -350,40 +350,43 @@ void FileDef::writeIncludeFiles(OutputList &ol)
 
             ol.startTypewriter();
 
-            if (isIDLorJava) { // IDL/Java include
+            if (isIDLorJava) { 
+               // IDL/Java include
                ol.docify("import ");
 
-            } else if (ii.imported) { // Objective-C include
+            } else if (item.imported) { 
+               // Objective-C include
                ol.docify("#import ");
 
             } else { // C/C++ include
                ol.docify("#include ");
             }
 
-            if (ii.local || isIDLorJava) {
+            if (item.local || isIDLorJava) {
                ol.docify("\"");
             } else {
                ol.docify("<");
             }
 
             ol.disable(OutputGenerator::Html);
-            ol.docify(ii.includeName);
+            ol.docify(item.includeName);
             ol.enableAll();
             ol.disableAllBut(OutputGenerator::Html);
 
             // use the include file name as it appears in the file
             // we could also we the name as it is used within doxypress
             // then we should have used fd->docName() instead of ii->includeName
+
             if (fd && fd->isLinkable()) {
                ol.writeObjectLink(fd->getReference(),  
-                  fd->generateSourceFile() ? fd->includeName() : fd->getOutputFileBase(), 0, ii.includeName);
+                  fd->generateSourceFile() ? fd->includeName() : fd->getOutputFileBase(), 0, item.includeName);
 
             } else {
-               ol.docify(ii.includeName);
+               ol.docify(item.includeName);
             }
 
             ol.enableAll();
-            if (ii.local || isIDLorJava) {
+            if (item.local || isIDLorJava) {
                ol.docify("\"");
 
             } else {
@@ -1287,7 +1290,7 @@ void FileDef::addListReferences()
       mg->addListReferences(self);
    }
    
-   for (auto &ml : m_memberLists) {
+   for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_documentationLists) {
          ml->addListReferences(self);
       }
@@ -1579,7 +1582,7 @@ void FileDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 
 QSharedPointer<MemberList> FileDef::getMemberList(MemberListType lt) const
 {
-   for (auto &ml : m_memberLists) {
+   for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
          return ml;
       }
@@ -1619,7 +1622,7 @@ static void getAllIncludeFilesRecursively(QSet<QString> &filesVisited, QSharedPo
 {
    if (fd->includeFileList()) {
 
-      for (auto item : *fd->includeFileList() ) {   
+      for (auto &item : *fd->includeFileList() ) {   
          if (item.fileDef && ! item.fileDef->isReference() && ! filesVisited.contains(item.fileDef->getFilePath())) {
 
             incFiles.append(item.fileDef->getFilePath());

@@ -157,7 +157,7 @@ void RefList::generatePage()
       doc += item.listAnchor;
       doc += "\n";
 
-      if (item.scope) {
+      if (item.scope && item.scope->name() != "<globalScope>") {
          doc += "\\_setscope ";
          doc += item.scope->name();
          doc += " ";

@@ -560,7 +560,6 @@ void TreeDiagram::computeLayout()
       bool first = true;
    
       for (auto item : *row) {
-
          DiagramItem *pi = item->parentItem();
 
          if (pi == opi && ! first) {
