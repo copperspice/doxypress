@@ -211,7 +211,7 @@
             "*.dox",
             "*.h"
         ],
-        "input-recursive": false,
+        "input-recursive": true,
         "input-source": [
             "dox",
             "dox2"
@@ -239,14 +239,14 @@
     "output-docbook": {
         "docbook-output": "docbook",
         "docbook-program-listing": false,
-        "generate-docbook": false
+        "generate-docbook": true
     },
     "output-docset": {
         "docset-bundle-id": "org.doxypress.Project",
         "docset-feedname": "DoxyPress generated docs",
         "docset-publisher-id": "org.doxypress.Publisher",
         "docset-publisher-name": "Publisher",
-        "generate-docset": false
+        "generate-docset": true
     },
     "output-eclipse": {
         "eclipse-doc-id": "org.doxypress.Project",
@@ -299,7 +299,7 @@
         "cite-bib-files": [
             ""
         ],
-        "generate-latex": false,
+        "generate-latex": true,
         "latex-batch-mode": false,
         "latex-bib-style": "plain",
         "latex-cmd-name": "latex",
@@ -326,7 +326,7 @@
         "make-index-cmd-name": "makeindex"
     },
     "output-man": {
-        "generate-man": false,
+        "generate-man": true,
         "man-extension": ".3",
         "man-links": false,
         "man-output": "man",
@@ -353,7 +353,7 @@
         "qthelp-gen-path": ""
     },
     "output-rtf": {
-        "generate-rtf": false,
+        "generate-rtf": true,
         "rtf-compact": false,
         "rtf-extension": "",
         "rtf-hyperlinks": false,
@@ -362,27 +362,31 @@
         "rtf-stylesheet": ""
     },
     "output-xml": {
-        "generate-xml": false,
+        "generate-xml": true,
         "xml-output": "xml",
-        "xml-program-listing": true
+        "xml-program-listing": false
     },
     "preprocessor": {
-        "enable-preprocessing": false,
+        "enable-preprocessing": true,
         "expand-as-defined": [
             ""
         ],
-        "expand-only-predefined": false,
+        "expand-only-predefined": true,
         "include-path": [
             ""
         ],
         "include-patterns": [
             ""
         ],
-        "macro-expansion": false,
+        "macro-expansion": true,
         "predefined-macros": [
-            ""
+            "Q_REQUIRED_RESULT=",
+            "Q_CORE_EXPORT=",
+            "Q_INLINE_TEMPLATE=",
+            "Q_OUTOFLINE_TEMPLATE=",
+            "CORE_CS_ENUM=CS_ENUM"
         ],
-        "search-includes": false,
+        "search-includes": true,
         "skip-function-macros": false
     },
     "project": {

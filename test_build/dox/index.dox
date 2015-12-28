@@ -12,22 +12,16 @@
 *
 *************************************************************************/
 
-/**
-\page parser-test  Parser Test
+/*!
+\mainpage DoxyPress Test Build
 
-Test other parsers in DoxyPress.
+The pages in the test suite are designed to test various new features of DoxyPress, 
+how to use some of the enhancements, corrected issues, and overall testing. If there
+are items which should be added to this test feel free to email the development team 
+for consideration. 
 
-
-<h3>Python</h3>
-
-\include sample_code.py
-
-
-<h3>TCL</h3>
-
-\include sample_code.tcl
+info@copperspice.com 
 
 
 
 */
-

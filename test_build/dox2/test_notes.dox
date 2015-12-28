@@ -1,6 +1,7 @@
 /*************************************************************************
 *                                                                         
-* Copyright (C) 2012-2016 Barbara Geller & Ansel Sermersheim                                                         
+* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2014 Digia Plc                   
 * All rights reserved.                                                    
 *                                                                         
 *                                                                         
@@ -12,11 +13,10 @@
 *                                                                         
 *************************************************************************/
 
-class Brief3
-{
-   public:
-      Brief3();
+/*!
+\page note-test-two  Note - Test Two
 
-      void myMethod1();
-      void myMethod2();
-};
+\note  This text is from a file in another directory which has the same name as a file in the standard input folder. 
+
+*/
+
