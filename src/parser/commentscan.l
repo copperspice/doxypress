@@ -3283,7 +3283,7 @@ static bool handleShowInitializer(const QString &)
 
 static bool handleHideInitializer(const QString &)
 {
-   current->initLines = 0;       // OFF
+   current->initLines = 0;       
    return false;
 }
 
@@ -3515,7 +3515,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    }
 
    Debug::print(Debug::CommentScan, 0, "-----------\nCommentScanner: %s:%d\n"
-                "input=[\n%s]\n", qPrintable(fileName), lineNr, qPrintable(comment) );
+                "input=[\n%s]\n", csPrintable(fileName), lineNr, csPrintable(comment) );
               
    yyrestart(yyin);   
    BEGIN( Comment );

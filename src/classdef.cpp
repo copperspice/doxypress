@@ -1618,7 +1618,7 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &
    // static bool fortranOpt = Config::getBool("optimize-fortran");
    SrcLangExt lang = getLanguage();
 
-   if (visibleInParentsDeclList()) {
+   if (visibleInParentsDeclList() && hasDocumentation()) {
 
       if (! found) { 
          // first class
@@ -3196,6 +3196,7 @@ QSharedPointer<ClassDef> ClassDef::insertTemplateInstance(const QString &fileNam
 
    if (templateClass == m_templateInstances->end()) {
       Debug::print(Debug::Classes, 0, "      New template instance class `%s'`%s'\n", csPrintable(name()), csPrintable(templSpec));
+
       QString tcname = removeRedundantWhiteSpace(localName() + templSpec);
 
       QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>(fileName, startLine, startColumn, tcname, ClassDef::Class); 

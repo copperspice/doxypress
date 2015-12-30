@@ -38,19 +38,18 @@ static const int NUM_HTML_LIST_TYPES = 4;
 static const char types[][NUM_HTML_LIST_TYPES] = {"1", "a", "i", "A"};
 
 static QString convertIndexWordToAnchor(const QString &word)
-{
-   static char hex[] = "0123456789abcdef";
-   QString result;
+{  
+   QString result = "a";
 
    for (auto c : word) {
     
       if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'A') || (c >= '0' && c <= '9') || 
-            c == '-' || c == '.' || c == '_' || c == '~') { 
+            c == '-' || c == '.' || c == '_') { 
 
          result += c;
 
       } else {
-         result += QString("%%1").arg(c.unicode(), 2, 16, QChar('0'));       
+         result += QString(":%1").arg(c.unicode(), 2, 16, QChar('0'));       
          
       }
    }
@@ -2283,9 +2282,11 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
    if (imgExt == "svg") {
       generatePlantUMLOutput(fileName, outDir, PUML_SVG);
 
-      //m_t << "<iframe scrolling=\"no\" frameborder=\"0\" src=\"" << relPath << baseName << ".svg" << "\" />" << endl;
-      //m_t << "<p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p>";
-      //m_t << "</iframe>" << endl;
+      // m_t << "<iframe scrolling=\"no\" frameborder=\"0\" src=\"" << relPath << baseName 
+      //     << ".svg" << "\" />" << endl;
+      // m_t << "<p><b>Yourbrowser is unable to show SVG: try Firefox, Chrome, Safari, or Opera instead</b></p>";
+      // m_t << "</iframe>" << endl;
+
       m_t << "<object type=\"image/svg+xml\" data=\"" << relPath << baseName << ".svg\"></object>" << endl;
 
    } else {
@@ -2294,6 +2295,40 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
    }
 }
 
+/** Returns TRUE if the child nodes in paragraph \a para until \a nodeIndex
+    contain a style change node that is still active and that style change is one that
+    must be located outside of a paragraph, i.e. it is a center, div, or pre tag.    
+ */
+static bool insideStyleChange_OutsidePara(DocPara *para,int nodeIndex)
+{
+   int styleMask = 0;
+   bool styleOutsideParagraph = false;
+
+   while (nodeIndex >= 0 && ! styleOutsideParagraph) {
+      DocNode *n = para->children().at(nodeIndex);
+
+      if (n->kind() == DocNode::Kind_StyleChange) {
+         DocStyleChange *sc = dynamic_cast<DocStyleChange*>(n);
+
+         if (! sc->enable()) {
+            // remember styles which have been closed already      
+            styleMask |= sc->style();
+         }
+
+         bool paraStyle = (sc->style() == DocStyleChange::Center ||
+                  sc->style() == DocStyleChange::Div || sc->style() == DocStyleChange::Preformatted);
+
+         if (sc->enable() && (styleMask&(int)sc->style()) == 0 && paraStyle) {
+            // style change that is still active          
+            styleOutsideParagraph = true;
+         }
+      }
+
+      nodeIndex--;
+   }
+
+   return styleOutsideParagraph;
+}
 
 /** Used for items found inside a paragraph, which due to XHTML restrictions
  *  have to be outside of the paragraph. This method will force the end of 
@@ -2324,12 +2359,19 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
          }
       }
 
+      nodeIndex--;
+      bool styleOutsideParagraph = insideStyleChange_OutsidePara(para, nodeIndex);
+
       bool isFirst;
       bool isLast;
 
       getParagraphContext(para, isFirst, isLast);
       
       if (isFirst && isLast) {
+         return;
+      }
+
+      if (styleOutsideParagraph) {
          return;
       }
 
@@ -2349,10 +2391,17 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
       DocPara *para = (DocPara *)n->parent();
       int nodeIndex = para->children().indexOf(n);
       int numNodes  = para->children().count();
+
+      bool styleOutsideParagraph = insideStyleChange_OutsidePara(para,nodeIndex);
+      if (styleOutsideParagraph) {
+         return;
+      }
+
       nodeIndex++;
 
       if (nodeIndex == numNodes) {
-         return;   // last node
+         // last node
+         return;   
       }
 
       while (nodeIndex < numNodes && para->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace) {
@@ -2367,7 +2416,9 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
          }
 
       } else {
-         return; // only whitespace at the end!
+         // only whitespace at the end
+         return; 
+
       }
 
       bool isFirst;

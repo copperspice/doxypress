@@ -1305,9 +1305,11 @@ static void newVariable()
    if (!current->name.isEmpty() && current->name.at(0) == '_') { // mark as private
       current->protection = Private;
    }
+
    if (current_root->section & Entry::COMPOUND_MASK) { // mark as class variable
       current->stat = TRUE;
    }
+
    newEntry();
 }
 
@@ -1547,8 +1549,8 @@ static void searchFoundDef()
    current->fileName  = yyFileName;
    current->startLine = yyLineNr;
    current->bodyLine  = yyLineNr;
-   current->section = Entry::FUNCTION_SEC;
-   current->protection = protection = Public;
+   current->section   = Entry::FUNCTION_SEC;
+  
    current->lang = SrcLangExt_Python;
    current->virt = Normal;
    current->stat = gstat;
@@ -2282,7 +2284,7 @@ YY_DECL {
                QString text = QString::fromUtf8(pyscannerYYtext);
                current->name = removeRedundantWhiteSpace(substitute(text, ".", "::"));
                current->fileName = yyFileName;
-               current->section = Entry::USINGDECL_SEC;
+               current->section  = Entry::USINGDECL_SEC;
                current_root->addSubEntry(current, current_root);
 
                current = QMakeShared<Entry>();
@@ -2290,6 +2292,7 @@ YY_DECL {
                BEGIN(Search);
             }
             YY_BREAK
+
          case 36:
             /* rule 36 can match eol */
             YY_RULE_SETUP
@@ -2299,12 +2302,14 @@ YY_DECL {
                BEGIN(Search);
             }
             YY_BREAK
+
          case 37:
             YY_RULE_SETUP
 
             {
             }
             YY_BREAK
+
          case 38:
             YY_RULE_SETUP
 
@@ -2329,16 +2334,15 @@ YY_DECL {
                current->bodyLine  = yyLineNr;
                current->type.resize(0);
 
-               if (current->name.at(0) == '_') // mark as private
-               {
-                  current->protection = Private;
-               } else
-               {
-                  current->protection = Public;
+               if (current->name.at(0) == '_')  {
+                  // mark as private               
+                  current->protection = Private;             
                }
+
                newEntry();
             }
             YY_BREAK
+
          case 40:
             YY_RULE_SETUP
 
@@ -2348,6 +2352,7 @@ YY_DECL {
                BEGIN(TripleComment);
             }
             YY_BREAK
+
          case 41:
             YY_RULE_SETUP
 
@@ -2751,9 +2756,14 @@ YY_DECL {
                   BEGIN(FunctionParams);
 
                } else {
-                  g_braceCount--;
+
+                  if (text[0] == ')') {
+                     g_braceCount--;
+                  }
+
                   g_defVal += text[0];
                }
+
             }
             YY_BREAK
 

@@ -2477,6 +2477,7 @@ YY_DECL {
                BEGIN(CondLine);
             }
             YY_BREAK
+
          case 67:
             /* rule 67 can match eol */
             *yy_cp = (yy_hold_char); /* undo effects of setting up commentcnvYYtext */
@@ -2488,10 +2489,10 @@ YY_DECL {
                // end of conditional section
                bool oldSkip = g_skip;
                endCondSection();
-               if (YY_START == CComment && oldSkip && !g_skip)
-               {
-                  //printf("** Adding start of comment!\n");
-                  if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Fortran) {
+
+               if (YY_START == CComment && oldSkip && ! g_skip) {
+
+                  if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Markdown && g_lang != SrcLangExt_Fortran) {
                      ADDCHAR('/');
                      ADDCHAR('*');
                      if (g_specialComment) {
@@ -2501,6 +2502,7 @@ YY_DECL {
                }
             }
             YY_BREAK
+
          case 68:
             YY_RULE_SETUP
 
@@ -2511,19 +2513,19 @@ YY_DECL {
                startCondSection(text);
 
                if ((g_condCtx == CComment || g_readLineCtx == SComment) && ! oldSkip && g_skip) {
-                  if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Fortran) {
+                  if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Markdown && g_lang != SrcLangExt_Fortran) {
                      ADDCHAR('*');
                      ADDCHAR('/');
                   }
                }
-               if (g_readLineCtx == SComment)
-               {
+
+               if (g_readLineCtx == SComment) {
                   BEGIN(SComment);
-               } else
-               {
+               } else {
                   BEGIN(g_condCtx);
                }
             }
+
             YY_BREAK
          case 69:
             YY_RULE_SETUP

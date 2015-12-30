@@ -4,6 +4,12 @@ body, table, div, p, dl {
    font: 400 14px/22px Roboto,sans-serif;
 }
 
+body {
+   background-color: white;
+   color: black;
+   margin: 0;
+}
+
 .title {
    font: 400 14px/28px Roboto,sans-serif;
    font-size: 150%;
@@ -17,12 +23,6 @@ caption {
 
 .caption {
    font-weight: bold;
-}
-
-body {
-   background-color: white;
-   color: black;
-   margin: 0;
 }
 
 h1.groupheader {
@@ -211,6 +211,11 @@ div.line {
    transition-duration: 0.5s;
 }
 
+div.line:after {
+   content:"\000A";
+   white-space: pre;
+}
+
 div.line.glow {
    background-color: cyan;
    box-shadow: 0 0 10px cyan;
@@ -226,7 +231,7 @@ span.lineno {
    text-align: right;
    border-right: 2px solid #0F0;
    background-color: #E8E8E8;
-        white-space: pre;
+   white-space: pre;
 }
 span.lineno a {
    background-color: #D8D8D8;
@@ -234,6 +239,15 @@ span.lineno a {
 
 span.lineno a:hover {
    background-color: #C8C8C8;
+}
+
+div.classindex ul {
+   list-style: none;
+   padding-left: 0;
+}
+
+div.classindex span.ai {
+   display: inline-block;
 }
 
 div.ah, span.ah {
@@ -851,6 +865,10 @@ address {
    color: ##33;
 }
 
+table.doxtable caption {
+   caption-side: top;
+}
+
 table.doxtable {
    border-collapse:collapse;
    margin-top: 4px;
@@ -931,7 +949,6 @@ table.fieldtable {
    border-top-right-radius: 4px;
    border-bottom: 1px solid ##B4;
 }
-
 
 .tabsearch {
    top: 0px;
@@ -1201,9 +1218,9 @@ dl.citelist {
 
 dl.citelist dt {
    color:##40;
-   float:left;
-   font-weight:bold;
-   margin-right:10px;
+   float: left;
+   font-weight: bold;
+   margin-right: 10px;
    padding:5px;
 }
 
@@ -1431,12 +1448,14 @@ tr.heading h2 {
 #powerTip.e:after, #powerTip.e:before {
    left: 100%;
 }
+
 #powerTip.e:after {
    border-left-color: #ffffff;
    border-width: 10px;
    top: 50%;
    margin-top: -10px;
 }
+
 #powerTip.e:before {
    border-left-color: #808080;
    border-width: 11px;

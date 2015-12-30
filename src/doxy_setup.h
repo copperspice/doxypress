@@ -18,6 +18,7 @@
 #ifndef DOXY_SETUP_H
 #define DOXY_SETUP_H
 
+#include <QFile>
 #include <QString>
 #include <QStringList>
 
@@ -64,6 +65,7 @@ void shutDownDoxypress();
 void initDefaultLangMapping();
 void initUserLangMapping();
 
+bool openOutputFile(const QString &outFile, QFile &f);
 bool updateLanguageMapping(const QString &extension, const QString &parser, bool userParser = false);
 
 #endif

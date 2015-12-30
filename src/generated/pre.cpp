@@ -4159,9 +4159,9 @@ static void readIncludeFile(const QString &inc)
 
          if (Debug::isFlagSet(Debug::Preprocessor)) {
             if (alreadyIncluded) {
-               Debug::print(Debug::Preprocessor, 0, "#include %s: already included! skipping...\n", csPrintable(incFileName));
+               Debug::print(Debug::Preprocessor, 0, "#include %s: already included, skipping...\n", csPrintable(incFileName));
             } else {
-               Debug::print(Debug::Preprocessor, 0, "#include %s: not found! skipping...\n", csPrintable(incFileName));
+               Debug::print(Debug::Preprocessor, 0, "#include %s: not found, skipping...\n", csPrintable(incFileName));
             }           
          }
 

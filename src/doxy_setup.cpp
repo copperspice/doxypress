@@ -55,8 +55,7 @@
 #include <util.h>
 
 namespace Doxy_Setup {
-   QString getValue(QStringList::iterator &iter, QStringList::iterator end);   
-   bool openOutputFile(const QString &outFile, QFile &f);   
+   QString getValue(QStringList::iterator &iter, QStringList::iterator end);    
    void usage();
 }
 
@@ -501,7 +500,7 @@ QString Doxy_Setup::getValue(QStringList::iterator &iter, QStringList::iterator 
    return retval;
 }
 
-bool Doxy_Setup::openOutputFile(const QString &outFile, QFile &f)
+bool openOutputFile(const QString &outFile, QFile &f)
 {
    bool fileOpened = false;
    bool writeToStdout = (outFile[0] == '-' && outFile[1] == '\0');
@@ -529,7 +528,6 @@ bool Doxy_Setup::openOutputFile(const QString &outFile, QFile &f)
       }
 
       f.setFileName(outFile);
-
       fileOpened = f.open(QIODevice::WriteOnly | QIODevice::Text);
    }
 
@@ -670,6 +668,7 @@ void initDefaultLangMapping()
    updateLanguageMapping(".M",        "objective-c");
    updateLanguageMapping(".mm",       "objective-c");
    updateLanguageMapping(".py",       "python");
+   updateLanguageMapping(".pyw",      "python");
    updateLanguageMapping(".f",        "fortran");
    updateLanguageMapping(".for",      "fortran");
    updateLanguageMapping(".f90",      "fortran");  

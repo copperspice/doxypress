@@ -187,6 +187,9 @@ void Entry::addSubEntry(QSharedPointer<Entry> child, QSharedPointer<Entry> self)
 
 void Entry::reset()
 {
+   static bool dotCallGraph = Config::getBool("dot-call");
+   static bool dotCalledBy  = Config::getBool("dot-called-by");
+   
    name.resize(0);
    type.resize(0);
    args.resize(0);
@@ -217,8 +220,8 @@ void Entry::reset()
    endBodyLine = -1;
    mGrpId = -1;
 
-   callGraph   = false;
-   callerGraph = false;
+   callGraph   = dotCallGraph;
+   callerGraph = dotCalledBy;
 
    section = Entry::EMPTY_SEC;
    mtype   = Method;
@@ -229,7 +232,7 @@ void Entry::reset()
   
    m_specFlags = Entry::SpecifierFlags{};
 
-   lang = SrcLangExt_Unknown;
+   lang         = SrcLangExt_Unknown;
    hidden       = false;
    artificial   = false;
    subGrouping  = true;

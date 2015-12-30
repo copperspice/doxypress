@@ -567,7 +567,7 @@ static void detectNoDocumentedParams()
                }
             }
 
-            if (!allDoc && declAl != 0) { 
+            if (! allDoc && declAl != 0) { 
                // try declaration arguments as well
                allDoc = true;
               
@@ -593,13 +593,22 @@ static void detectNoDocumentedParams()
          // docs not yet found
          s_memberDef->setHasDocumentedReturnType(true);
 
-      } else if ( // see if return needs to documented 
-         s_memberDef->hasDocumentedReturnType() || returnType.isEmpty() || returnType.indexOf("void") != -1 || 
-               returnType.indexOf("subroutine") != -1 || s_memberDef->isConstructor() ||  s_memberDef->isDestructor() ) {
+      } else if ( s_memberDef->hasDocumentedReturnType() || returnType.isEmpty() || 
+               returnType.indexOf("void") != -1 || returnType.indexOf("subroutine") != -1 ||
+               s_memberDef->isConstructor() || s_memberDef->isDestructor() ) {
 
+         // see if return needs to documented 
          s_memberDef->setHasDocumentedReturnType(true);
       }
 
+
+      if ( s_memberDef->hasDocumentedReturnType() &&          
+               (returnType.isEmpty() || returnType.indexOf("void") != -1 || returnType.indexOf("subroutine") != -1 ||
+                s_memberDef->isConstructor() || s_memberDef->isDestructor() ))  {
+
+         // see if return type is documented in a function w/o return type
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Documented empty return type");
+      }
    }
 }
 

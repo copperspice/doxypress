@@ -766,6 +766,11 @@ void GroupDef::writeFiles(OutputList &ol, const QString &title)
       ol.startMemberList();   
 
       for (auto item : *fileList) {
+
+         if (! item->hasDocumentation()) {
+            continue;
+         }
+
          ol.startMemberDeclaration();
          ol.startMemberItem(item->getOutputFileBase(), 0);
          ol.docify(theTranslator->trFile(false, true) + " ");
@@ -819,6 +824,11 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
 
       for (auto gd : *groupList) {
          if (gd->isVisible()) {
+
+            if (! gd->hasDocumentation()) {
+               continue;
+            }
+
             ol.startMemberDeclaration();
             ol.startMemberItem(gd->getOutputFileBase(), 0);
      
@@ -850,6 +860,11 @@ void GroupDef::writeDirs(OutputList &ol, const QString &title)
       ol.startMemberList();
       
       for (auto dd : *dirList ) { 
+
+         if (! dd->hasDocumentation()) {
+            continue;
+         }
+
          ol.startMemberDeclaration();
          ol.startMemberItem(dd->getOutputFileBase(), 0);
          ol.parseText(theTranslator->trDir(false, true));

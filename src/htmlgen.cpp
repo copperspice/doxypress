@@ -658,7 +658,7 @@ void HtmlCodeGenerator::startCodeLine(bool hasLineNumbers)
 
 void HtmlCodeGenerator::endCodeLine()
 {
-   m_streamX << "</div>\n";  
+   m_streamX << "</div>";  
 }
 
 void HtmlCodeGenerator::startFontClass(const QString &s)
@@ -2594,7 +2594,8 @@ void HtmlGenerator::writeExternalSearchPage()
 void HtmlGenerator::startConstraintList(const QString &header)
 {
    m_textStream << "<div class=\"typeconstraint\">" << endl;
-   m_textStream << "<dl><dt><b>" << header << "</b></dt><dd>" << endl;
+   m_textStream << "<dl><dt><b>" << header << "</b></dt>" << endl;
+   m_textStream << "<dd>" << endl;
    m_textStream << "<table border=\"0\" cellspacing=\"2\" cellpadding=\"0\">" << endl;
 }
 
@@ -2631,6 +2632,7 @@ void HtmlGenerator::endConstraintDocs()
 void HtmlGenerator::endConstraintList()
 {
    m_textStream << "</table>" << endl;
+   m_textStream << "</dd>" << endl;
    m_textStream << "</dl>" << endl;
    m_textStream << "</div>" << endl;
 }

@@ -362,7 +362,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\\hbadness=750\n"
      "\\setlength{\\emergencystretch}{15pt}\n"
      "\\setlength{\\parindent}{0cm}\n"
-     "\\setlength{\\parskip}{0.2cm}\n";
+     "\\setlength{\\parskip}{3ex plus 2ex minus 2ex}\n";
 
    // Redefine paragraph/subparagraph environments, using sectsty fonts
    t_stream << "\\makeatletter\n"
@@ -1543,7 +1543,12 @@ void LatexGenerator::endMemberDoc(bool)
    m_textStream << "}";
 }
 
-void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, const QString &anchor, const QString &, const QString &)
+void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, const QString &anchor, 
+                  const QString &, const QString &)
+{
+}
+
+void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
 {
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
    static bool usePDFLatex   = Config::getBool("latex-pdf");
@@ -1561,10 +1566,7 @@ void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, cons
 
       m_textStream << "}{}";
    }
-}
 
-void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
-{
    m_textStream << "\\label{";
 
    if (! fName.isEmpty()) {
@@ -1574,6 +1576,7 @@ void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
    if (! anchor.isEmpty()) {
       m_textStream << "_" << anchor;
    }
+
    m_textStream << "}" << endl;
 }
 

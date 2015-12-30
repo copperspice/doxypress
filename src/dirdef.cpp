@@ -222,6 +222,11 @@ void DirDef::writeSubDirList(OutputList &ol)
       ol.startMemberList();
       
       for (auto dd : m_subdirs) {
+
+         if (! dd->hasDocumentation()) {
+            continue;
+         }
+
          ol.startMemberDeclaration();
          ol.startMemberItem(dd->getOutputFileBase(), 0);
          ol.parseText(theTranslator->trDir(false, true) + " ");
@@ -259,6 +264,11 @@ void DirDef::writeFileList(OutputList &ol)
       ol.startMemberList();
     
       for (auto fd : *m_fileList) {
+
+         if (! fd->hasDocumentation()) {
+            continue;
+         }
+
          ol.startMemberDeclaration();
          ol.startMemberItem(fd->getOutputFileBase(), 0);
          ol.docify(theTranslator->trFile(false, true) + " ");

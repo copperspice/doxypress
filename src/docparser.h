@@ -399,9 +399,19 @@ class DocCite : public DocNode
 /** Node representing a style change */
 class DocStyleChange : public DocNode
 {
- public:
-   enum Style { Bold, Italic, Code, Center, Small, Subscript, Superscript,
-                Preformatted, Span, Div };
+  public:
+  
+   enum Style { Bold          = 0x0001,
+                Italic        = 0x0002,
+                Code          = 0x0004,
+                Center        = 0x0008,
+                Small         = 0x0010,
+                Subscript     = 0x0020,
+                Superscript   = 0x0040,
+                Preformatted  = 0x0080,
+                Span          = 0x0100,
+                Div           = 0x0200,
+   };
 
    DocStyleChange(DocNode *parent, uint position, Style s, bool enable, const HtmlAttribList *attribs = 0)    
       : m_position(position), m_style(s), m_enable(enable) 
@@ -2011,19 +2021,30 @@ class DocHtmlRow : public CompAccept<DocHtmlRow>, public DocNode
    int parseXml(bool header);
 
    bool isHeading() const     {
+      // a row is a table heading if all cells are marked as such
 
-      if ( m_children.isEmpty() ) {
+      if (m_children.isEmpty()) {
          return false;
       }
 
-      DocNode * obj1 = m_children.first();
-      DocHtmlCell *obj2 = dynamic_cast<DocHtmlCell *>(obj1);
+      for (auto obj1 : m_children)  {
+            
+         if (obj1->kind() != Kind_HtmlCell) {
+            continue;
+         }
 
-      if (! obj2) {
-         return false;
+         DocHtmlCell *obj2 = dynamic_cast<DocHtmlCell *>(obj1);
+   
+         if (! obj2) {
+            return false;
+         }
+
+         if (! obj2->isHeading() ) {
+            return false;
+         }
       }
 
-      return obj2->isHeading();
+      return true;
    }
 
    void setVisibleCells(int n) {
@@ -2042,6 +2063,7 @@ class DocHtmlRow : public CompAccept<DocHtmlRow>, public DocNode
    void setRowIndex(int idx)    {
       m_rowIdx = idx;
    }
+
    HtmlAttribList m_attribs;
    int m_visibleCells;
    int m_rowIdx;
@@ -2056,27 +2078,49 @@ class DocHtmlTable : public CompAccept<DocHtmlTable>, public DocNode
       m_caption = 0;
       m_parent = parent;
    }
+
    ~DocHtmlTable()         {
       delete m_caption;
    }
+
    Kind kind() const       {
       return Kind_HtmlTable;
    }
+
    uint numRows() const    {
       return m_children.count();
    }
+
    bool hasCaption()       {
       return m_caption != 0;
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
+
    int parse();
    int parseXml();
+
    uint numColumns() const {
       return m_numCols;
    }
+
    void accept(DocVisitor *v);
+
+   DocHtmlRow *firstRow() {
+      if (m_children.isEmpty()) {
+         return nullptr;
+      }
+
+      DocNode *n = m_children.first();
+
+      if (n && n->kind() == Kind_HtmlRow) {
+         return dynamic_cast<DocHtmlRow *>(n);
+      }
+
+      return nullptr;
+   }
 
  private:
    void computeTableGrid();
@@ -2093,13 +2137,16 @@ class DocHtmlBlockQuote : public CompAccept<DocHtmlBlockQuote>, public DocNode
       : m_attribs(attribs) {
       m_parent = parent;
    }
+
    Kind kind() const       {
       return Kind_HtmlBlockQuote;
    }
+
    int parse();
    void accept(DocVisitor *v) {
       CompAccept<DocHtmlBlockQuote>::accept(this, v);
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }

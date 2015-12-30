@@ -309,7 +309,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
  
    for (auto md : *this) {
 
-      if ((inheritedFrom == 0 || !md->isReimplementedBy(inheritedFrom)) && md->isBriefSectionVisible()) {
+      if ((inheritedFrom == 0 || ! md->isReimplementedBy(inheritedFrom)) && md->isBriefSectionVisible()) {
          
          switch (md->memberType()) {
             case MemberType_Define:    // fall through
@@ -355,9 +355,10 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                }
 
                // if this is an anonymous enum and there are variables of this
-               // enum type (i.e. enumVars>0), then we do not show the enum here.
-               if (enumVars == 0) { // show enum here
-                  //printf("Enum!!\n");
+               // enum type (i.e. enumVars>0), then do not show the enum here
+
+               if (enumVars == 0 && md->hasDocumentation()) { 
+                  // show enum here
 
                   if (first) {
                      ol.startMemberList();

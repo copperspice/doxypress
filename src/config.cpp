@@ -1026,6 +1026,7 @@ QStringList Config::getFilePatterns()
    list.append("*.php5");
    list.append("*.phtml");
    list.append("*.py");
+   list.append("*.pyw");
    list.append("*.qsf");
    list.append("*.tcl");
    list.append("*.ucf");

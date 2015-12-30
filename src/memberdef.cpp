@@ -1422,6 +1422,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    QSharedPointer<Definition> d;
 
    assert (cd != 0 || nd != 0 || fd != 0 || gd != 0); // member should belong to something
+
    if (cd) {
       d = cd;
 
@@ -1434,6 +1435,10 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    } else {
       d = gd;
 
+   }
+
+   if (! hasDocumentation()) {
+     return;
    }
 
    //_writeTagData(compoundType);
@@ -2213,8 +2218,7 @@ void MemberDef::_writeCallGraph(OutputList &ol)
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
    // write call graph
-   if ((m_impl->hasCallGraph || Config::getBool("dot-call"))
-         && (isFunction() || isSlot() || isSignal()) && Config::getBool("have-dot")) {
+   if (m_impl->hasCallGraph && (isFunction() || isSlot() || isSignal()) && Config::getBool("have-dot")) {
 
       DotCallGraph callGraph(self, false);
 
@@ -2240,16 +2244,15 @@ void MemberDef::_writeCallerGraph(OutputList &ol)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
-   if ((m_impl->hasCallerGraph || Config::getBool("dot-called-by"))
-         && (isFunction() || isSlot() || isSignal()) && Config::getBool("have-dot")) {
+   if (m_impl->hasCallerGraph && (isFunction() || isSlot() || isSignal()) && Config::getBool("have-dot")) {
 
       DotCallGraph callerGraph(self, true);
 
       if (callerGraph.isTooBig()) {
-         warn_uncond("Caller graph for '%s' not generated, too many nodes. " 
+         warn_uncond("Caller graph for '%s' was not generated, too many nodes. " 
                      "Consider increasing DOT_GRAPH_MAX_NODES.\n", qPrintable(qualifiedName()));
 
-      } else if (!callerGraph.isTrivial() && !callerGraph.isTooBig()) {
+      } else if (! callerGraph.isTrivial() && !callerGraph.isTooBig()) {
          msg("Generating caller graph for function %s\n", qPrintable(qualifiedName()));
 
          ol.disable(OutputGenerator::Man);

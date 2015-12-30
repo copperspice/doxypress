@@ -190,6 +190,7 @@ static void processSection()
 static void handleHtmlTag()         
 {
    QString tagText = QString::fromUtf8(yytext);
+   int len = tagText.length();
  
    g_token->attribs.clear();
    g_token->endTag   = false;
@@ -198,7 +199,7 @@ static void handleHtmlTag()
    // Check for end tag
    int startNamePos = 1;
 
-   if (yyleng > 0 && tagText.at(1) == '/') {
+   if (len > 1 && tagText.at(1) == '/') {
       g_token->endTag = true;
       startNamePos++;
    }
@@ -206,8 +207,8 @@ static void handleHtmlTag()
    // parse the name portion
    int i = startNamePos;
   
-   for (i = startNamePos; i < yyleng; i++) {
-      // check for valid HTML/XML name chars (including namespaces)
+   for (i = startNamePos; i < len; i++) {
+     // check for valid HTML/XML name chars (including namespaces)
      QChar c = tagText.at(i);
 
       if (! ( c.isLetterOrNumber() || c == '-' || c == '_' || c == ':')) {
@@ -217,7 +218,6 @@ static void handleHtmlTag()
 
    g_token->name = tagText.mid(startNamePos, i - startNamePos);
 
-
    // Parse the attributes. Each attribute is a name, value pair
    // The result is stored in g_token->attribs
 
@@ -226,14 +226,14 @@ static void handleHtmlTag()
    int startAttrib;
    int endAttrib;
 
-   while (i < yyleng) {     
+   while (i < len) {     
       // skip spaces
       QChar c = tagText.at(i);
 
-      while (i < yyleng && c.isSpace()) {
+      while (i < len && c.isSpace()) {
          ++i;
 
-         if (i >= yyleng) {
+         if (i >= len) {
             break;
          }
 
@@ -254,10 +254,10 @@ static void handleHtmlTag()
       startName = i;
 
       // search for end of name
-      while (i < yyleng && ! c.isSpace() && c != '=') {
+      while (i < len && ! c.isSpace() && c != '=') {
          ++i;
 
-         if (i >= yyleng) {
+         if (i >= len) {
             break;
          }
 
@@ -270,10 +270,10 @@ static void handleHtmlTag()
       opt.name = tagText.mid(startName, endName - startName).toLower();
 
       // skip spaces
-      while (i < yyleng && c.isSpace()) {
+      while (i < len && c.isSpace()) {
          ++i;
 
-         if (i >= yyleng) {
+         if (i >= len) {
             break;
          }
 
@@ -281,31 +281,31 @@ static void handleHtmlTag()
       }
 
 
-      if (i < yyleng && tagText.at(i) == '=') { 
+      if (i < len && tagText.at(i) == '=') { 
          // option has value
          c = tagText.at(++i);
 
          // skip spaces
-         while (i < yyleng && c.isSpace()) {
+         while (i < len && c.isSpace()) {
             ++i;
 
-            if (i >= yyleng) {
+            if (i >= len) {
                break;
             }
 
             c = tagText.at(i);            
          }
 
-         if (i < yyleng && tagText.at(i) == '\'') { 
+         if (i < len && tagText.at(i) == '\'') { 
             // option '...'
             c = tagText.at(++i);
             startAttrib = i;
 
             // search for matching quote
-            while (i < yyleng && c != '\'') {
+            while (i < len && c != '\'') {
                ++i;
 
-               if (i >= yyleng) {
+               if (i >= len) {
                   break;
                }
 
@@ -313,19 +313,20 @@ static void handleHtmlTag()
             }
 
             endAttrib = i;
-            if (i < yyleng) {
+            if (i < len) {
                c = tagText.at(++i);
             }
 
-         } else if (tagText.at(i) == '"') { // option "..."
+         } else if (tagText.at(i) == '"') { 
+            // option "..."
             c = tagText.at(++i);
             startAttrib = i;
 
             // search for matching quote
-            while (i < yyleng && c != '"') {
+            while (i < len && c != '"') {
                ++i;
 
-               if (i >= yyleng) {
+               if (i >= len) {
                   break;
                }
 
@@ -333,7 +334,7 @@ static void handleHtmlTag()
             }
 
             endAttrib = i;
-            if (i < yyleng) {
+            if (i < len) {
                c = tagText.at(++i);
             }
 
@@ -342,10 +343,10 @@ static void handleHtmlTag()
             startAttrib = i;
 
             // search for separator or end symbol
-            while (i < yyleng && ! c.isSpace() && c != '>') {
+            while (i < len && ! c.isSpace() && c != '>') {
                ++i;
 
-               if (i >= yyleng) {
+               if (i >= len) {
                   break;
                }
 
@@ -353,7 +354,7 @@ static void handleHtmlTag()
             }
 
             endAttrib = i;
-            if (i < yyleng) {
+            if (i < len) {
                c = tagText.at(++i);
             }
          }

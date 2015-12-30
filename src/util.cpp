@@ -6167,10 +6167,9 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                t << "\\textquotesingle{}";
                break;
 
-            default:               
-
+            default:        
                if (! insideTabbing) {
-                  if ( (c >= 'A' && c <= 'Z' && pc != ' ' && pc != '\0') || (c == ':' && pc != ':') || (pc == '.' && isId(c)) ) {                   
+                  if ( (c >= 'A' && c <= 'Z' && pc != ' ' && pc != '\0' && *p != 0) || (c == ':' && pc != ':') || (pc == '.' && isId(c)) ) {                   
                      t << "\\+";
                   }
                }
@@ -6927,12 +6926,12 @@ bool readInputFile(const QString &fileName, QString &fileContents, bool filter, 
 
    } else {
       QString cmd = filterName + " \"" + fileName + "\"";
-      Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", qPrintable(cmd));
+      Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", csPrintable(cmd));
 
       FILE *f = popen(qPrintable(cmd), "r");
 
       if (! f) {
-         err("Unable to execute filer %s, error: %d\n", qPrintable(filterName));         
+         err("Unable to execute filer %s, error: %d\n", csPrintable(filterName));         
          return false;
       }
 
@@ -7431,15 +7430,13 @@ bool srcFileVisibleInIndex(QSharedPointer<FileDef> fd)
 void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDef> dst)
 {
    static bool referencedByRelation = Config::getBool("ref-by-relation");
-   static bool referencesRelation   = Config::getBool("ref-relation");
-   static bool callerGraph          = Config::getBool("dot-called-by");
-   static bool callGraph            = Config::getBool("dot-call");
+   static bool referencesRelation   = Config::getBool("ref-relation");   
    
    if (dst->isTypedef() || dst->isEnumerate()) {
-      return;   // don't add types
+      return;   // do not add types
    }
 
-   if ((referencedByRelation || callerGraph || dst->hasCallerGraph()) && src->showInCallGraph() ) {
+   if ((referencedByRelation || dst->hasCallerGraph()) && src->showInCallGraph() ) {
       dst->addSourceReferencedBy(src);
       QSharedPointer<MemberDef> mdDef = dst->memberDefinition();
 
@@ -7453,7 +7450,7 @@ void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDe
       }
    }
 
-   if ((referencesRelation || callGraph || src->hasCallGraph()) && src->showInCallGraph()) {
+   if ((referencesRelation || src->hasCallGraph()) && src->showInCallGraph()) {
       src->addSourceReferences(dst);
       QSharedPointer<MemberDef> mdDef = src->memberDefinition();
 

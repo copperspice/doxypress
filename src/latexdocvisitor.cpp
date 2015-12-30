@@ -202,8 +202,9 @@ QString LatexDocVisitor::escapeMakeIndexChars(const QString &str)
 }
 
 LatexDocVisitor::LatexDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt, bool insideTabbing)
-   : DocVisitor(DocVisitor_Latex), m_t(t), m_ci(ci), m_insidePre(false), m_insideItem(false), m_hide(false), m_insideTabbing(insideTabbing),
-     m_insideTable(false), m_langExt(langExt), m_currentColumn(0), m_inRowspan(false), m_inColspan(false)
+   : DocVisitor(DocVisitor_Latex), m_t(t), m_ci(ci), m_insidePre(false), m_insideItem(false), 
+     m_hide(false), m_insideTabbing(insideTabbing), m_insideTable(false), m_langExt(langExt), 
+     m_currentColumn(0), m_inRowspan(false), m_inColspan(false), m_firstRow(false)
 {
 }
 
@@ -1025,14 +1026,28 @@ void LatexDocVisitor::visitPre(DocHtmlTable *t)
    m_t << "\\begin{" << getTableName(t->parent()) << "}{" << t->numColumns() << "}\n";
    m_numCols = t->numColumns();
    m_t << "\\hline\n";
+
+   // check if first row is a heading and then render the row already here
+   // and end it with \endfirsthead (triggered via m_firstRow == TRUE)
+   // then repeat the row as normal and end it with \endhead (m_firstRow == FALSE)
+
+   DocHtmlRow *firstRow = t->firstRow();
+
+   if (firstRow && firstRow->isHeading()) {
+      m_firstRow = true;
+      firstRow->accept(this);
+      m_firstRow = false;
+   }
 }
 
 void LatexDocVisitor::visitPost(DocHtmlTable *t)
 {
    m_insideTable = false;
+
    if (m_hide) {
       return;
    }
+
    if (t->hasCaption()) {
       m_t << "\\end{table}\n";
    } else {
@@ -1054,14 +1069,16 @@ void LatexDocVisitor::visitPost(DocHtmlCaption *)
    if (m_hide) {
       return;
    }
+
    m_t << "}\n";
 }
 
 void LatexDocVisitor::visitPre(DocHtmlRow *r)
 {
    m_currentColumn = 0;
+
    if (r->isHeading()) {
-      m_t << "\\rowcolor{lightgray}";
+      m_t << "\\rowcolor{\\tableheadbgcolor}";
    }
 }
 
@@ -1134,6 +1151,16 @@ void LatexDocVisitor::visitPost(DocHtmlRow *row)
    }
 
    m_t << "\n";
+
+   if (row->isHeading() && row->rowIndex() == 1) {
+      if (m_firstRow) {
+         m_t << "\\endfirsthead" << endl;
+         m_t << "\\hline" << endl;
+
+      } else {
+         m_t << "\\endhead" << endl;
+      }
+   }
 }
 
 void LatexDocVisitor::visitPre(DocHtmlCell *c)
@@ -1196,7 +1223,7 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
           << cs << "/" << m_numCols << "}|}{";
 
       if (c->isHeading()) {
-         m_t << "\\cellcolor{lightgray}";
+         m_t << "\\cellcolor{\\tableheadbgcolor}";
       }
    }
 

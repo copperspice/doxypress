@@ -31,6 +31,7 @@
 #include <config.h>
 #include <doxy_build_info.h>
 #include <doxy_globals.h>
+#include <doxy_setup.h>
 #include <language.h>
 #include <message.h>
 #include <util.h>
@@ -1377,9 +1378,10 @@ void LayoutDocManager::parse(QTextStream &t, const QString &fileName)
 
 void writeDefaultLayoutFile(const QString &fileName)
 {
-   QFile f(fileName);
+   QFile f;
+   bool ok = openOutputFile(fileName, f);
 
-   if (! f.open(QIODevice::WriteOnly)) {
+   if (! ok) {
       err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }

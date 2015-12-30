@@ -897,7 +897,8 @@ bool NamespaceSDict::declVisible() const
 void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool const isConstantGroup, bool localName)
 {
    if (count() == 0) {
-      return;   // no namespaces in the list
+      // no namespaces in the list
+      return;  
    }
   
    bool found = false;
@@ -917,7 +918,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
                break;
             }
 
-         } else if (!isConstantGroup) { 
+         } else if (! isConstantGroup) { 
             // ensure we only get extra section in IDL
 
             if (nd->isConstantGroup()) {
@@ -930,7 +931,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
       }
    }
 
-   if (!found) {
+   if (! found) {
       return;   // no linkable namespaces in the list
    }
 
@@ -946,7 +947,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
     
    for (auto nd : *this) {
 
-      if (nd->isLinkable()) {
+      if (nd->isLinkable() && nd->hasDocumentation()) {
 
          SrcLangExt lang = nd->getLanguage();
 
