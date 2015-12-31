@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -6119,7 +6119,7 @@ int DocPara::handleCommand(const QString &cmdName)
          handleInheritDoc();
          break;
 
-      // added 03/30/2015
+      // added 03/2015
       case CMD_SORTID: 
          handleSortId();       
          break;

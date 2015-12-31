@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
@@ -508,7 +508,7 @@ bool Config::verify()
       dotImageFormat = "png";
    }
 
-   // BROOM - may want to split this into two config entries ( 12/2015)
+   // BROOM - may want to split this into two config entries (12/2015)
    if (dotImageFormat.contains(":"))  {
       dotImageFormat = dotImageFormat.replace( QRegExp(":.*"), "");
    }

@@ -1,7 +1,7 @@
 /*************************************************************************
  *
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its

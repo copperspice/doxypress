@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -1419,7 +1419,7 @@ void GroupDef::addListReferences()
    QString title;
 
    if (Config::getBool("bb-style"))  {
-      // maybe allow a user defined value   11/20/2015
+      // maybe allow a user defined value  12/2015
       title = "Component";
 
    } else {
