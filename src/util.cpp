@@ -4438,14 +4438,14 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
    QFileInfo fi(name);
 
    QString fName = fi.fileName();
-   QString path  = fi.canonicalPath();
+   QString path  = fi.absolutePath() + "/";
      
    if (fName.isEmpty()) {
       s_findFileDefCache.insert(key, cachedResult);  
       return QSharedPointer<FileDef>();
    }
       
-   // returns a FileList data type
+   // returns a FileName which inherits from FileList
    QSharedPointer<FileName> fn = (*fnDict)[fName];
    
    if (fn) {  
@@ -4454,7 +4454,7 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
          QSharedPointer<FileDef> fd = fn->first();     
    
          QFileInfo fdFile(fd->getPath());
-         QString fdPath = fi.canonicalPath();    
+         QString fdPath = fi.absolutePath() + "/";    
 
 #if defined(_WIN32) || defined(__MACOSX__) 
          // Windows or MacOSX
@@ -4480,7 +4480,7 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
                
          for (auto fd : *fn) {
             QString fdStripPath = stripFromIncludePath(fd->getPath());
-      
+     
             if (path.isEmpty() || fdStripPath.right(pathStripped.length()) == pathStripped) {
                count++;
                lastMatch = fd;
@@ -4488,6 +4488,7 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
          }
                
          ambig = (count > 1);
+
          cachedResult->isAmbig = ambig;
          cachedResult->fileDef = lastMatch;
       
@@ -4495,7 +4496,7 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
          return lastMatch;
       }   
    }           
-   
+
    s_findFileDefCache.insert(key, cachedResult);
   
    return QSharedPointer<FileDef>();
