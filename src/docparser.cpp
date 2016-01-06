@@ -1082,12 +1082,28 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
  
    QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s_fileName, ambig);
 
-   if (! s_insideHtmlLink && (resolveRef(s_context, g_token->name, s_inSeeBlock, &compound, &member, true, fd, true) ||
-             (! s_context.isEmpty() && 
-                resolveRef("", g_token->name, s_inSeeBlock, &compound, &member, false, QSharedPointer<FileDef>(), true)) )) {
+   bool partA = false;
 
-      // tried once with s_context and again with "" looking for a global scope
+   if (! s_insideHtmlLink) { 
+      QString tName = g_token->name;
 
+      // added 01/2016
+      tName = renameNS_Aliases(tName, false);
+
+      if (resolveRef(s_context, tName, s_inSeeBlock, &compound, &member, true, fd, true)) {
+         partA = true;
+
+      } else if ( ! s_context.isEmpty() )  {
+         // tried once with s_context now try again with "" looking for a global scope
+
+         if (resolveRef("", tName, s_inSeeBlock, &compound, &member, false, QSharedPointer<FileDef>(), true))  {
+            partA = true;
+         } 
+      }
+   }
+
+   if (partA) {
+     
       if (member && member->isLinkable()) { 
 
          if (member->isObjCMethod()) {
@@ -1148,7 +1164,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
       // normal non-linkable word
 
       if (g_token->name.left(1) == "#" || g_token->name.left(2) == "::") {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Explicit link request to '%s' could not be resolved", qPrintable(name));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Explicit link request to '%s' could not be resolved", csPrintable(name));
          children.append(new DocWord(parent, g_token->name));
 
       } else {
@@ -4641,24 +4657,24 @@ void DocTitle::parseFromString(const QString &text)
    m_children.append(new DocWord(this, text));
 }
 
-DocSimpleSect::DocSimpleSect(DocNode *parent, Type t) :
-   m_type(t)
+DocSimpleSect::DocSimpleSect(DocNode *parent, Type t) 
+   : m_type(t)
 {
    m_parent = parent;
-   m_title = 0;
 }
 
 DocSimpleSect::~DocSimpleSect()
 {
-   delete m_title;
 }
 
 void DocSimpleSect::accept(DocVisitor *v)
 {
+   // generates the <dl> See Also: href, title>Text</a> </dl>
+
    v->visitPre(this);
 
-   if (m_title) {
-      m_title->accept(v);
+   if (m_docTitle) {
+      m_docTitle->accept(v);
    }
  
    for (auto n : m_children) {
@@ -4675,11 +4691,11 @@ int DocSimpleSect::parse(bool userTitle, bool needsSeparator)
 
    // handle case for user defined title
    if (userTitle) {
-      m_title = new DocTitle(this);
-      m_title->parse();
+      m_docTitle = QMakeShared<DocTitle>(this);
+      m_docTitle->parse();
    }
 
-   // add new paragraph as child
+   // add new paragraph as a child
    DocPara *par = new DocPara(this);
 
    if (m_children.isEmpty()) {
@@ -4719,8 +4735,8 @@ int DocSimpleSect::parseRcs()
    DBG(("DocSimpleSect::parseRcs() start\n"));
    s_nodeStack.push(this);
 
-   m_title = new DocTitle(this);
-   m_title->parseFromString(g_token->name);
+   m_docTitle = QMakeShared<DocTitle>(this);
+   m_docTitle->parseFromString(g_token->name);
 
    QString text = g_token->text;
    docParserPushContext(); // this will create a new g_token
@@ -4762,8 +4778,7 @@ int DocSimpleSect::parseXml()
          m_children.append(par);
 
       } else {
-         delete par;
-         
+         delete par;         
       }     
 
       if (retval == 0) {
@@ -4810,37 +4825,53 @@ QString DocSimpleSect::typeString() const
    switch (m_type) {
       case Unknown:
          break;
+
       case See:
          return "see";
+
       case Return:
          return "return";
-      case Author:     // fall through
+
+      case Author:    
       case Authors:
          return "author";
+
       case Version:
          return "version";
+
       case Since:
          return "since";
+
       case Date:
          return "date";
+
       case Note:
          return "note";
+
       case Warning:
          return "warning";
+
       case Pre:
          return "pre";
+
       case Post:
          return "post";
+
       case Copyright:
          return "copyright";
+
       case Invar:
          return "invariant";
+
       case Remark:
          return "remark";
+
       case Attention:
          return "attention";
+
       case User:
          return "user";
+
       case Rcs:
          return "rcs";
    }
@@ -5038,10 +5069,10 @@ int DocParamSect::parse(const QString &cmdName, bool xmlContext, Direction d)
 
 int DocPara::handleSimpleSection(DocSimpleSect::Type t, bool xmlContext)
 {
-   DocSimpleSect *ss = 0;
+   DocSimpleSect *ss   = 0;
    bool needsSeparator = false;
 
-   if (!m_children.isEmpty() &&                                 // previous element
+   if (! m_children.isEmpty() &&                                // previous element
          m_children.last()->kind() == Kind_SimpleSect &&        // was a simple sect
          ((DocSimpleSect *)m_children.last())->type() == t &&   // of same type
          t != DocSimpleSect::User) {                            // but not user defined
@@ -5050,7 +5081,8 @@ int DocPara::handleSimpleSection(DocSimpleSect::Type t, bool xmlContext)
       ss = (DocSimpleSect *)m_children.last();
       needsSeparator = true;
 
-   } else { // start new section
+   } else { 
+      // start new section
       ss = new DocSimpleSect(this, t);
       m_children.append(ss);
    }
@@ -7752,8 +7784,8 @@ DocText *validatingParseText(const QString &input)
 
    s_inSeeBlock = false;
    s_xmlComment = false;
-   s_insideHtmlLink = false;
-   s_includeFileText = "";
+   s_insideHtmlLink    = false;
+   s_includeFileText   = "";
    s_includeFileOffset = 0;
    s_includeFileLength = 0;
    s_isExample   = false;

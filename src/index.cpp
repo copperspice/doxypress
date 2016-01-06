@@ -701,7 +701,7 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
 static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
 {
    static bool fullPathNames = Config::getBool("full-path-names");   
-   static QString bb_index   = Config::getFullName(Config::getString("bb-main-page")); 
+   static QString mainPage   = Config::getFullName(Config::getString("main-page")); 
 
    if (ftv) {
       ol.pushGeneratorState();
@@ -724,7 +724,7 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
 
          for (auto fd : *fn) {  
             
-            if (! bb_index.isEmpty() && fd->getFilePath() == bb_index) {       
+            if (! mainPage.isEmpty() && fd->getFilePath() == mainPage) {       
                // do not include this file
                continue;               
             } 
@@ -1283,6 +1283,7 @@ static void writeNamespaceTree(NamespaceSDict *nsDict, FTVHelp *ftv, bool rootOn
             }
 
             if ((isLinkable && ! showClasses) || hasChildren) {
+
                ftv->addContentsItem(hasChildren, nd->localName(), ref, file, "", false, true, nd);
 
                if (addToIndex) {
@@ -1442,7 +1443,7 @@ static void writeAnnotatedClassList(OutputList &ol)
       if (cd->isLinkableInProject() && cd->templateMaster() == 0) {         
          ol.startIndexKey();
         
-         ol.writeObjectLink(0, cd->getOutputFileBase(), cd->anchor(), cd->displayName());
+         ol.writeObjectLink("", cd->getOutputFileBase(), cd->anchor(), cd->displayName());
          ol.endIndexKey();
 
          bool hasBrief = ! cd->briefDescription().isEmpty();
@@ -1765,6 +1766,9 @@ static void writeAlphabeticalClassList(OutputList &ol)
 
                   }
 
+                  // added 01/2016
+                  nsDispName = renameNS_Aliases(nsDispName);
+
                   ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), cname);
 
                   if (! namesp.isEmpty()) {
@@ -1917,56 +1921,77 @@ static void writeAnnotatedIndex(OutputList &ol)
    ol.popGeneratorState();
 }
 
-static void writeClassLinkForMember(OutputList &ol, QSharedPointer<MemberDef> md, const QString &separator, QString &prevClassName)
+static QString writeClassLink(OutputList &ol, QSharedPointer<MemberDef> md, const QString &separator, const QString &prevName)
 {
+   QString retval = prevName;     
    QSharedPointer<ClassDef> cd = md->getClassDef();
 
-   if ( cd && prevClassName != cd->displayName()) {
-      ol.docify(separator);
-      ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), cd->displayName());
-      ol.writeString("\n");
-      prevClassName = cd->displayName();
+   if (cd) {
+      QString tName = cd->displayName();
+
+      if (prevName != tName) {
+         retval = tName;  
+
+         ol.docify(separator);
+         ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), tName);
+         ol.writeString("\n");
+      }
    }
+
+   return retval;
 }
 
-static void writeFileLinkForMember(OutputList &ol, QSharedPointer<MemberDef> md, const QString &separator, QString &prevFileName)
+static QString writeFileLink(OutputList &ol, QSharedPointer<MemberDef> md, const QString &separator, const QString &prevName)
 {
+   QString retval = prevName;
    QSharedPointer<FileDef> fd = md->getFileDef();
 
-   if (fd && prevFileName != fd->name()) {
-      ol.docify(separator);
-      ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), fd->name());
-      ol.writeString("\n");
-      prevFileName = fd->name();
+   if (fd) {  
+      QString tName = fd->name();
+
+      if (prevName != tName) { 
+         retval = tName;   
+
+         // added 01/2016
+         tName = renameNS_Aliases(tName);
+
+         ol.docify(separator);
+         ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), tName);
+         ol.writeString("\n");         
+      }
    }
+
+   return retval;
 }
 
-static void writeNamespaceLinkForMember(OutputList &ol, QSharedPointer<MemberDef> md, const QString &separator, QString &prevNamespaceName)
+static QString writeNamespaceLink(OutputList &ol, QSharedPointer<MemberDef> md, const QString &separator, const QString &prevName)
 {
+   QString retval = prevName;
    QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
 
-   if (nd && prevNamespaceName != nd->name()) {
-      ol.docify(separator);
-      ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), nd->name());
-      ol.writeString("\n");
-      prevNamespaceName = nd->name();
+   if (nd) { 
+      QString tName = nd->name();
+
+      if (prevName != tName) { 
+         retval = tName;   
+
+         // added 01/2016
+         tName = renameNS_Aliases(tName);   
+           
+         ol.docify(separator);
+         ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), tName);
+         ol.writeString("\n");
+      }
    }
+
+   return retval;
 }
 
 static void writeMemberList(OutputList &ol, bool useSections, int page, 
-                            const LetterToIndexMap<MemberIndexList> &memberLists, DefinitionIntf::DefType type)
+                  const LetterToIndexMap<MemberIndexList> &memberLists, DefinitionIntf::DefType type)
 {
    int index = (int)type;
    assert(index < 3);
-
-   using writeLinkForMember_t = void (*)(OutputList & ol, QSharedPointer<MemberDef> md, const QString &separator, QString &prevNamespaceName);
-
-   // each index tab has its own write function
-   static writeLinkForMember_t   writeLinkForMemberMap[3] = {
-      &writeClassLinkForMember,
-      &writeFileLinkForMember,
-      &writeNamespaceLinkForMember
-   };
 
    QString prevName;
    QString prevDefName;
@@ -1981,7 +2006,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
          ml = memberLists[page];
       }
 
-      if (ml == 0 || ml->count() == 0) {
+      if (ml == nullptr || ml->count() == 0) {
          continue;
       }     
       
@@ -1990,8 +2015,8 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
 
          bool isFunc = ! md->isObjCMethod() && (md->isFunction() || md->isSlot() || md->isSignal());
 
-         QString name = md->name();
-         int startIndex  = getPrefixIndex(name);
+         QString name   = md->name();
+         int startIndex = getPrefixIndex(name);
 
          if (name.mid(startIndex) != prevName) { 
             // new entry
@@ -2016,6 +2041,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
                ol.startSection(anchor, title, SectionInfo::Subsection);
                ol.docify(title);
                ol.endSection(anchor, SectionInfo::Subsection);
+
                ol.startItemList();
 
                firstSection = false;
@@ -2033,6 +2059,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
 
             ol.startItemListItem();
             firstItem = false;
+
             ol.docify(name);
 
             if (isFunc) {
@@ -2047,15 +2074,25 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
             prevName    = name.mid(startIndex);
 
          } else { 
-            // same entry
+            // same entry, link to class for other members with the same name
             sep = ", ";
-            // link to class for other members with the same name
+            
          }
+         
+         // write the link for the specific list type         
+         switch (index)  {
+            case 0:
+               prevDefName = writeClassLink(ol, md, sep, prevDefName);
+               break;
 
-         if (index < 3) {
-            // write the link for the specific list type
-            writeLinkForMemberMap[index](ol, md, sep, prevDefName);
-         }
+            case 1:
+               prevDefName = writeFileLink(ol, md, sep, prevDefName);
+               break;
+
+            case 2:
+               prevDefName = writeNamespaceLink(ol, md, sep, prevDefName);
+               break;
+         }         
       }
 
       if (page != -1) {
@@ -2392,7 +2429,7 @@ static void writeClassMemberIndexFiltered(OutputList &ol, ClassMemberHighlight h
          ol.endTextBlock();
 
       } else {
-         // hack to work around a mozilla bug, which refuses to switch to normal lists otherwise
+         // work around mozilla problem, refuses to switch to normal lists otherwise
          ol.writeString("&#160;");
       }
 
@@ -2601,8 +2638,7 @@ static void writeFileMemberIndexFiltered(OutputList &ol, FileMemberHighlight hl)
          ol.endTextBlock();
 
       } else {
-         // hack to work around a mozilla bug, which refuses to switch to
-         // normal lists otherwise
+         // work around mozilla problem, refuses to switch to normal lists otherwise
          ol.writeString("&#160;");
       }
 
@@ -2685,7 +2721,7 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
    QString extension = Doxy_Globals::htmlFileExtension;
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::NamespaceMembers);
 
-   QString title = lne ? lne->title() : theTranslator->trNamespaceMembers();
+   QString title   = lne ? lne->title() : theTranslator->trNamespaceMembers();
    bool addToIndex = lne == 0 || lne->visible();
 
    if (addToIndex) {
@@ -2724,9 +2760,8 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
          ol.writeString(fixSpaces(getNmhlInfo(0)->title));
          endQuickIndexItem(ol);
 
-         int i;
          // index items per category member lists
-         for (i = 1; i < NMHL_Total; i++) {
+         for (int i = 1; i < NMHL_Total; i++) {
             if (documentedNamespaceMembers[i] > 0) {
                startQuickIndexItem(ol, getNmhlInfo(i)->fname + Doxy_Globals::htmlFileExtension, hl == i, true);
                ol.writeString(fixSpaces(getNmhlInfo(i)->title));
@@ -2739,7 +2774,6 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
          if (quickIndex) {
             writeQuickMemberIndex(ol, g_namespaceIndexLetterUsed[hl], page, getNmhlInfo(hl)->fname, multiPageIndex);
          }
-
       }
       ol.endQuickIndices();
       ol.writeSplitBar(fileName);
@@ -2753,8 +2787,7 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
          ol.endTextBlock();
 
       } else {
-         // hack to work around a mozilla bug, which refuses to switch to
-         // normal lists otherwise
+         // work around mozilla problem, refuses to switch to normal lists otherwise
          ol.writeString("&#160;");
       }
 

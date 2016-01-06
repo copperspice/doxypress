@@ -146,6 +146,7 @@ QString ClassDef::displayName(bool includeScope) const
       retval = "<" + retval.left(retval.length() - 2) + ">";
    }
    
+   // added 01/2016
    retval = renameNS_Aliases(retval);
 
    if (retval.indexOf('@') != -1) {
@@ -668,7 +669,7 @@ void ClassDef::setIncludeFile(QSharedPointer<FileDef> fd, const QString &include
 //}
 
 static void searchTemplateSpecs(QSharedPointer<Definition> d, QList<ArgumentList> &result,
-                                QString &name, SrcLangExt lang)
+                  QString &name, SrcLangExt lang)
 {
    if (d->definitionType() == Definition::TypeClass) {
 
@@ -1393,8 +1394,10 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
               
                for (auto innerCd : *m_innerClasses) {
 
-                  if (innerCd->isLinkableInProject() && innerCd->templateMaster() == 0 && protectionLevelVisible(innerCd->protection()) &&
+                  if (innerCd->isLinkableInProject() && 
+                          innerCd->templateMaster() == 0 && protectionLevelVisible(innerCd->protection()) &&
                         ! innerCd->isEmbeddedInOuterScope() ) {
+
                      tagFile << "    <class kind=\"" << innerCd->compoundTypeString() << "\">" 
                              << convertToXML(innerCd->name()) << "</class>" << endl;
                   }

@@ -1913,23 +1913,18 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
          QSharedPointer<MemberDef>    typeDef;
 
 
-/* 
+// BROOM 
 
-if (self != nullptr) {
-   if (self->name() == "Date") {
-      printf("\n  BROOM (linky) scope --> %s", csPrintable(scope->name()) ); 
-      printf("\n  BROOM (linky) matchWord --> %s", csPrintable(matchWord) );
+/*
+   if (matchWord.contains("Ginger")) {
+      printf("\n  BROOM (linky) scope --> %s",        csPrintable(scope->name()) ); 
+      printf("\n  BROOM (linky) matchWord --> %s \n", csPrintable(matchWord) );
    }
-   
-   //    QString temp = scope->name();
-   //    temp = renameNS_Aliases(temp, "MD_3"); 
-   //    scope->setName(temp);
-      
-   if (self->name() == "Date") {  
-      // printf("\n  BROOM  (linky) newScope --> %s \n", csPrintable() );
-   }
-}
 */
+
+// BROOM
+
+
 
 
          cd = getResolvedClass(scope, fileScope, matchWord, &typeDef);
@@ -6227,13 +6222,88 @@ QString stripExtension(const QString &fName)
    return stripExtensionGeneral(fName, Doxy_Globals::htmlFileExtension);
 }
 
-QString renameNS_Aliases(const QString &scope, QString xx)
+QString renameNS_Aliases(const QString &scope, bool fromTo)
 {
-   if ( Doxy_Globals::renameNSDict.isEmpty() )  { 
+   if (scope.isEmpty() || Doxy_Globals::renameNSDict.isEmpty() )  { 
       return scope;          
    } 
 
-   QString retval = scope;  
+   QString retval = scope;
+
+   for (auto item = Doxy_Globals::renameNSDict.begin(); item != Doxy_Globals::renameNSDict.end(); item++) { 
+
+      QString from = item.key();
+      QString to   = item.value();
+
+      if (fromTo) {
+
+         if (to.isEmpty()) {
+            // do the same for now - this may be incorrect
+            
+            QStringList list = retval.split(" ");
+            retval = "";
+
+            for (auto str : list) {               
+               if (str.startsWith(from + "::") || str == from) { 
+                  str.replace(0, from.length(), to);                 
+               }
+
+               if (retval.isEmpty()) { 
+                  retval = str;
+
+               } else {
+                  retval = retval + " " + str;     
+
+               }
+            }
+
+         } else {                     
+            QStringList list = retval.split(" ");
+            retval = "";
+            
+            for (auto str : list) {               
+               if (str.startsWith(from + "::") || str == from) { 
+                  str.replace(0, from.length(), to);                 
+               }
+
+               if (retval.isEmpty()) { 
+                  retval = str;
+
+               } else {
+                  retval = retval + " " + str;     
+
+               }
+            }
+         }         
+
+      } else { 
+         // reverse used in docparser
+
+         if (to.isEmpty()) {
+            // hold on this for now
+          
+           
+         } else {
+            QStringList list = retval.split(" ");
+            retval = "";
+                  
+            for (auto str : list) {               
+               if (str.startsWith(to + "::") || str == to) { 
+                  str.replace(0, to.length(), from);                 
+               }
+
+               if (retval.isEmpty()) { 
+                  retval = str;
+
+               } else {
+                  retval = retval + " " + str;     
+
+               }              
+            }                     
+         }
+      }                        
+   }   
+
    return retval;
 }
 

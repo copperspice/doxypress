@@ -1497,7 +1497,7 @@ QString Definition::navigationPathAsString() const
    QString result;
    QSharedPointer<Definition> outerScope = getOuterScope();
 
-   QString locName = localName();
+   QString tName = localName();
 
    if (outerScope && outerScope != Doxy_Globals::globalScope) {
       result += outerScope->navigationPathAsString();
@@ -1510,19 +1510,25 @@ QString Definition::navigationPathAsString() const
    result += "<li class=\"navelem\">";
 
    if (isLinkable()) {
-      if (definitionType() == Definition::TypeGroup && ! ((const GroupDef *)this)->groupTitle().isEmpty()) {
-         result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension + "\">" +
-                   convertToHtml(((const GroupDef*)this)->groupTitle()) + "</a>";
 
-      } else if (definitionType() == Definition::TypePage && ! ((const PageDef *)this)->title().isEmpty()) {
+      auto gd = dynamic_cast<const GroupDef *>(this);
+      auto pd = dynamic_cast<const PageDef *>(this);
+
+      if (definitionType() == Definition::TypeGroup && ! gd->groupTitle().isEmpty() ) {
+    
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension + "\">" +
-                   convertToHtml(((const PageDef*)this)->title()) + "</a>";
+                   convertToHtml(gd->groupTitle()) + "</a>";
+
+      } else if (definitionType() == Definition::TypePage && ! pd->title().isEmpty() ) {
+
+         result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension + "\">" +
+                   convertToHtml(pd->title()) + "</a>";
 
       } else if (definitionType() == Definition::TypeClass) {
-         QString name = locName;
-
-         if (name.right(2) == "-p" /*|| name.right(2)=="-g"*/) {
-            name = name.left(name.length() - 2);
+         // class         
+    
+         if (tName.right(2) == "-p") {
+            tName = tName.left(tName.length() - 2);
          }
 
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension;
@@ -1530,15 +1536,21 @@ QString Definition::navigationPathAsString() const
             result += "#" + anchor();
          }
 
-         result+="\">" + convertToHtml(name) + "</a>";
+         result+="\">" + convertToHtml(tName) + "</a>";
 
       } else {
+         // namespace or something else
+
+         // added 01/2016
+         tName = renameNS_Aliases(tName);
+
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension + "\">" +
-                   convertToHtml(locName) + "</a>";
+                   convertToHtml(tName) + "</a>";
       }
 
    } else {
-      result+="<b>" + convertToHtml(locName) + "</b>";
+      result+="<b>" + convertToHtml(tName) + "</b>";
+
    }
 
    result += "</li>";
@@ -1555,9 +1567,11 @@ void Definition::writeNavigationPath(OutputList &ol) const
    QString navPath;
    navPath += "<div id=\"breadcrumb\" class=\"breadcrumb\">\n"
               "  <ul>\n";
+
    navPath += navigationPathAsString();
    navPath += "  </ul>\n"
               "</div>\n";
+
    ol.writeNavigationPath(navPath);
 
    ol.popGeneratorState();

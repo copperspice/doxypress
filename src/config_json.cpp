@@ -198,19 +198,17 @@ void Config::load_Defaults()
    m_cfgBool.insert("allow-sub-grouping",        struc_CfgBool   { true,           DEFAULT } );   
    m_cfgBool.insert("duplicate-docs",            struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("group-nested-compounds",    struc_CfgBool   { false,          DEFAULT } );
-
   
    // tab 2 -output
    m_cfgList.insert("enabled-sections",          struc_CfgList   { QStringList(),  DEFAULT } ); 
    m_cfgInt.insert("max-init-lines",             struc_CfgInt    { 30,             DEFAULT } );  
    m_cfgString.insert("file-version-filter",     struc_CfgString { QString(),      DEFAULT } );
-   m_cfgString.insert("layout-file",             struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("main-page",               struc_CfgString { "",             DEFAULT } );   
+   m_cfgString.insert("layout-file",             struc_CfgString { QString(),      DEFAULT } );     
+   m_cfgList.insert("ns-omit",                   struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgList.insert("ns-alias",                  struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgBool.insert("bb-style",                  struc_CfgBool   { false,          DEFAULT } );
    
-   // tab 2 - experimental
-   m_cfgBool.insert("bb-style",                  struc_CfgBool   { false,           DEFAULT } );
-   m_cfgString.insert("bb-main-page",            struc_CfgString { "",              DEFAULT } );   
-   m_cfgList.insert("bb-ns-alias",               struc_CfgList   { QStringList(),   DEFAULT } );
-
    // tab 2 -programming
    m_cfgList.insert("tcl-subst",                 struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("language-mapping",          struc_CfgList   { QStringList(),  DEFAULT } );

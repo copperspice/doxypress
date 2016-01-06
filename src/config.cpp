@@ -1166,7 +1166,7 @@ void Config::escapeAliases()
 void Config::loadRenameNS_Aliases()
 {
    // add aliases to a dictionary
-   const QStringList list = Config::getList("bb-ns-alias");
+   const QStringList list = Config::getList("ns-alias");
 
    for (auto item : list) {
 

@@ -339,7 +339,6 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
    }
 }
 
-
 static void visitPreCaption(QTextStream &t, DocVerbatim *s)
 {
    if (s->hasCaption()) { 
@@ -1062,7 +1061,9 @@ void HtmlDocVisitor::visitPre(DocPara *p)
 void HtmlDocVisitor::visitPost(DocPara *p)
 {
    bool needsTag = false;
+
    if (p && p->parent()) {
+
       switch (p->parent()->kind()) {
          case DocNode::Kind_Section:
          case DocNode::Kind_Internal:
@@ -1078,9 +1079,11 @@ void HtmlDocVisitor::visitPost(DocPara *p)
          case DocNode::Kind_ParBlock:
             needsTag = true;
             break;
+
          case DocNode::Kind_Root:
             needsTag = !((DocRoot *)p->parent())->singleLine();
             break;
+
          default:
             needsTag = false;
       }
@@ -1106,18 +1109,16 @@ void HtmlDocVisitor::visitPost(DocPara *p)
 
    bool isFirst;
    bool isLast;
+
    getParagraphContext(p, isFirst, isLast);
-   //printf("endPara first=%d last=%d\n",isFirst,isLast);
+
    if (isFirst && isLast) {
       needsTag = false;
    }
 
-   //printf("DocPara::visitPost needsTag=%d\n",needsTag);
-
    if (needsTag) {
       m_t << "</p>\n";
    }
-
 }
 
 void HtmlDocVisitor::visitPre(DocRoot *)
@@ -2174,6 +2175,7 @@ void HtmlDocVisitor::startLink(const QString &ref, const QString &file, const QS
    if (! tooltip.isEmpty()) {
       m_t << " title=\"" << substitute(tooltip, "\"", "&quot;") << "\"";
    }
+
    m_t << ">";
 }
 

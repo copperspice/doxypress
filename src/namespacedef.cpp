@@ -836,6 +836,7 @@ QString NamespaceDef::displayName(bool includeScope) const
       retval = substitute(retval, "::", sep);
    }
 
+   // added 01/2016
    retval = renameNS_Aliases(retval);
   
    return retval;
@@ -843,13 +844,17 @@ QString NamespaceDef::displayName(bool includeScope) const
 
 QString NamespaceDef::localName() const
 {
-   QString result = name();
-   int i = result.lastIndexOf("::");
+   QString retval = name();
+   int i = retval.lastIndexOf("::");
 
    if (i != -1) {
-      result = result.mid(i + 2);
+      retval = retval.mid(i + 2);
    }
-   return result;
+
+   // added 01/2016
+   retval = renameNS_Aliases(retval);
+
+   return retval;
 }
 
 void NamespaceDef::combineUsingRelations()

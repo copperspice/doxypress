@@ -525,8 +525,9 @@ static QString convertFileId2Var(const QString  &fileId)
 static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t, const QList<FTVNode *> &nl, int level, bool &omitComma)
 {
    static QString htmlOutput = Config::getString("html-output");
-   static bool isBB          = Config::getBool("bb-style"); 
-   static QString bbIndex    = Config::getFullName(Config::getString("bb-main-page")); 
+
+   static bool isBB        = Config::getBool("bb-style"); 
+   static QString mainPage = Config::getFullName(Config::getString("main-page")); 
 
    QString indentStr;
    indentStr.fill(' ', level * 2);
@@ -553,7 +554,7 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
          if (node->def && node->def->definitionType() == Definition::TypeFile) {            
             QSharedPointer<FileDef> fd = node->def.dynamicCast<FileDef>();
    
-            if (! bbIndex.isEmpty() && fd->getFilePath() == bbIndex) {       
+            if (! mainPage.isEmpty() && fd->getFilePath() == mainPage) {       
                // do not add this file to the navIndex
 
             } else {  
@@ -584,7 +585,7 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
          if (node->def && node->def->definitionType() == Definition::TypeFile) {            
             QSharedPointer<FileDef> fd = node->def.dynamicCast<FileDef>();
 
-            if (! bbIndex.isEmpty() && fd->getFilePath() == bbIndex) {
+            if (! mainPage.isEmpty() && fd->getFilePath() == mainPage) {
                showMainPage = false;
                omitComma    = true;
             }

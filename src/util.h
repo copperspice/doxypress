@@ -269,7 +269,7 @@ bool checkExtension(const QString &fName, const QString &ext);
 QString stripExtensionGeneral(const QString &fName, const QString &ext);
 QString stripExtension(const QString &fName);
 
-QString renameNS_Aliases(const QString &scope, QString xx = "");      // broom - testing only
+QString renameNS_Aliases(const QString &scope, bool fromTo = true);
 void replaceNamespaceAliases(QString &scope, int i);
 
 int isAccessibleFrom(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item);

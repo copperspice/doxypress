@@ -247,40 +247,42 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
       if (hasFuncPtrType) { 
          // argument type is a function pointer        
-         QString n = a->type.left(vp);
+         QString argType = a->type.left(vp);
          
-         n = a->type.left(wp);         
+         argType = a->type.left(wp);         
 
          if (md->isObjCMethod()) {
-            n.prepend("(");
-            n.append(")");
+            argType.prepend("(");
+            argType.append(")");
          }
 
          if (! cName.isEmpty()) {
-            n = addTemplateNames(n, scopeDef->name(), cName);
+            argType = addTemplateNames(argType, scopeDef->name(), cName);
          }
 
-         n = renameNS_Aliases(n);
+         // added 01/2016
+         argType = renameNS_Aliases(argType); 
 
-         linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, n);
+         linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, argType);
 
       } else { 
          // non-function pointer type
-         QString n = a->type;
+         QString argType = a->type;
 
          if (md->isObjCMethod()) {
-            n.prepend("(");
-            n.append(")");
+            argType.prepend("(");
+            argType.append(")");
          }
 
          if (a->type != "...") {
             if (! cName.isEmpty()) {
-               n = addTemplateNames(n, scopeDef->name(), cName);
+               argType = addTemplateNames(argType, scopeDef->name(), cName);
             }
 
-            n = renameNS_Aliases(n, "MD_2"); 
+            // added 01/2016
+            argType = renameNS_Aliases(argType); 
 
-            linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, n);
+            linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, argType);
          }
 
       }
@@ -2762,7 +2764,8 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       }
    }
 
-   ldef = renameNS_Aliases(ldef, "MD_1");
+   // added 01/2016
+   ldef = renameNS_Aliases(ldef);
    
    int i = 0;
    int l;
@@ -5221,7 +5224,7 @@ void MemberDef::invalidateCachedArgumentTypes()
    invalidateCachedTypesInArgumentList(m_impl->declArgList);
 }
 
-QString MemberDef::displayName(bool) const
+QString MemberDef::displayName(bool unused) const
 {
    QString retval = Definition::name();
    return retval;

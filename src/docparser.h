@@ -448,6 +448,7 @@ class DocStyleChange : public DocNode
    void accept(DocVisitor *v) {
       v->visit(this);
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
@@ -961,8 +962,6 @@ class DocAutoListItem : public CompAccept<DocAutoListItem>, public DocNode
    int m_itemNum;
 };
 
-
-
 /** Node representing a simple section title */
 class DocTitle : public CompAccept<DocTitle>, public DocNode
 {
@@ -970,16 +969,17 @@ class DocTitle : public CompAccept<DocTitle>, public DocNode
    DocTitle(DocNode *parent) {
       m_parent = parent;
    }
+
    void parse();
    void parseFromString(const QString &title);
+
    Kind kind() const          {
       return Kind_Title;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocTitle>::accept(this, v);
-   }
-
- private:
+   } 
 };
 
 /** Node representing an item of a cross-referenced list */
@@ -991,24 +991,31 @@ class DocXRefItem : public CompAccept<DocXRefItem>, public DocNode
    Kind kind() const          {
       return Kind_XRefItem;
    }
+
    QString file() const       {
       return m_file;
    }
+
    QString anchor() const     {
       return m_anchor;
    }
+
    QString title() const      {
       return m_title;
    }
+
    QString relPath() const    {
       return m_relPath;
    }
+
    QString key() const        {
       return m_key;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocXRefItem>::accept(this, v);
    }
+
    bool parse();
 
  private:
@@ -1434,18 +1441,23 @@ class DocSection : public CompAccept<DocSection>, public DocNode
       : m_level(level), m_id(id) {
       m_parent = parent;
    }
+
    Kind kind() const          {
       return Kind_Section;
    }
+
    int level() const          {
       return m_level;
    }
+
    QString title() const      {
       return m_title;
    }
+
    QString anchor() const     {
       return m_anchor;
    }
+
    QString id() const         {
       return m_id;
    }
@@ -1594,7 +1606,7 @@ class DocHtmlList : public CompAccept<DocHtmlList>, public DocNode
    int parseXml();
 
  private:
-   Type          m_type;
+   Type           m_type;
    HtmlAttribList m_attribs;
 };
 
@@ -1606,14 +1618,18 @@ class DocSimpleSect : public CompAccept<DocSimpleSect>, public DocNode
       Unknown, See, Return, Author, Authors, Version, Since, Date,
       Note, Warning, Copyright, Pre, Post, Invar, Remark, Attention, User, Rcs
    };
+
    DocSimpleSect(DocNode *parent, Type t);
    virtual ~DocSimpleSect();
+
    Kind kind() const       {
       return Kind_SimpleSect;
    }
+
    Type type() const       {
       return m_type;
    }
+
    QString typeString() const;
    void accept(DocVisitor *v);
    int parse(bool userTitle, bool needsSeparator);
@@ -1622,12 +1638,11 @@ class DocSimpleSect : public CompAccept<DocSimpleSect>, public DocNode
    void appendLinkWord(const QString &word);
 
  private:
-   Type            m_type;
-   DocTitle       *m_title;
+   Type m_type;
+   QSharedPointer<DocTitle> m_docTitle;
 };
 
-/** Node representing a separator between two simple sections of the
- *  same type.
+/** Node representing a separator between two simple sections of the same type.
  */
 class DocSimpleSectSep : public DocNode
 {
@@ -1635,9 +1650,11 @@ class DocSimpleSectSep : public DocNode
    DocSimpleSectSep(DocNode *parent) {
       m_parent = parent;
    }
+
    Kind kind() const {
       return Kind_SimpleSectSep;
    }
+
    void accept(DocVisitor *v) {
       v->visit(this);
    }
