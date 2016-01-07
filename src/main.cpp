@@ -23,11 +23,6 @@
 #include <language.h>
 #include <message.h>
 
-/*! \file
- *  \brief Main entry point for DoxyPress
- *
- *  This file contains main()
- */
 int main(int argc, char **argv)
 {      
    // passed parameters

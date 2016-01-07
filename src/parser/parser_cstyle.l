@@ -5066,7 +5066,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          QString &cn = current->name;
          QString rn = current_root->name;
 
-         if (!cn.isEmpty() && !rn.isEmpty()) {
+         if (! cn.isEmpty() && !rn.isEmpty()) {
             prependScope();
          }
 
@@ -6832,6 +6832,7 @@ SkipC11Attribute>"]]"                 {
 
       } else  {
          // C++ template specialization       
+
          roundCount = 0;
          BEGIN( ClassTemplSpec );
       }

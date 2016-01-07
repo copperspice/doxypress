@@ -41,6 +41,11 @@ class FTVHelp : public IndexIntf
    FTVHelp(bool lti);
    ~FTVHelp();
 
+   enum PageType{ 
+      Default,
+      Modules
+   };
+
    void initialize();
    void finalize();
    void incContentsDepth();
@@ -55,12 +60,12 @@ class FTVHelp : public IndexIntf
    void addImageFile(const QString &) override {}
    void addStyleSheetFile(const QString &) override {}
   
-   void generateTreeViewInline(QTextStream &t);
+   void generateTreeViewInline(QTextStream &t, enum PageType outputType = Default);
    static void generateTreeViewImages();
    void generateTreeViewScripts();
 
  private:   
-   void generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index);
+   void generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index, enum PageType outputType = Default);
   
    QString generateIndentLabel(FTVNode *n, int level);
    void generateIndent(QTextStream &t, FTVNode *n, bool opened);

@@ -144,11 +144,4 @@ Q_DECLARE_TYPEINFO(QString, Q_MOVABLE_TYPE)
 Q_DECLARE_SHARED(QString)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QString::SectionFlags)
 
-class Lemongrass : public CSObject
-{
-   public:
-      int howMuch;
-      QString otherNames;
-}
-
 #endif

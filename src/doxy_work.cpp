@@ -1556,7 +1556,7 @@ void Doxy_Work::buildGroupListFiltered(QSharedPointer<EntryNav> rootNav, bool ad
       QSharedPointer<Entry> root = rootNav->entry();
 
       if ((root->groupDocType == Entry::GROUPDOC_NORMAL && ! additional) ||
-            (root->groupDocType != Entry::GROUPDOC_NORMAL &&  additional)) {
+            (root->groupDocType != Entry::GROUPDOC_NORMAL && additional)) {
 
          QSharedPointer<GroupDef> gd = Doxy_Globals::groupSDict->find(root->name);
      

@@ -106,7 +106,7 @@ class GroupDef : public Definition
 
    bool visited;    // number of times accessed for output - KPW
 
-   //friend void writeGroupTreeNode(OutputList&, GroupDef*, int, FTVHelp*);
+   // friend void writeGroupTreeNode(OutputList&, GroupDef*, int, FTVHelp*);
    // make accessible for writing tree view of group in index.cpp - KPW
 
    void setGroupScope(QSharedPointer<Definition> d) {
@@ -156,6 +156,14 @@ class GroupDef : public Definition
    }
     
    bool hasDetailedDescription() const;   
+
+   QString getHint()  override {
+      return m_hint;
+   }
+
+   void setHint(QString data) {
+      m_hint = data;
+   }
   
  protected:
    void addMemberListToGroup(QSharedPointer<MemberList>, bool (MemberDef::*)() const);
@@ -211,6 +219,7 @@ class GroupDef : public Definition
    MemberGroupSDict  *memberGroupSDict;
 
    bool m_subGrouping;
+   QString m_hint;
 };
 
 void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd);

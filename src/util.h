@@ -50,10 +50,6 @@ struct ListItemInfo;
 struct SectionInfo;
 struct TagInfo;
 
-/*! \file
- *  \brief A bunch of utility functions.
- */
-
 /** Abstract interface for a hyperlinked text fragment. */
 class TextGeneratorIntf
 {

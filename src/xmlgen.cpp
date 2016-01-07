@@ -2133,7 +2133,7 @@ void generateXML()
    }
     
    for (auto dir : Doxy_Globals::directories) {
-      msg("Generate XML output for dir %s\n", qPrintable(dir->name()));
+      msg("Generating XML output for dir %s\n", qPrintable(dir->name()));
       generateXMLForDir(dir, t);
    }
     

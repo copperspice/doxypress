@@ -354,6 +354,10 @@ class Definition : public DefinitionIntf
    void addSectionsToIndex(bool addToNavIndex);
    void writeToc(OutputList &ol);
 
+   virtual QString getHint() {
+      return "";
+   }
+
  protected:
    Definition(const Definition &d);
    virtual QString pathFragment_Internal() const;

@@ -703,6 +703,7 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
    static bool fullPathNames = Config::getBool("full-path-names");   
    static QString mainPage   = Config::getFullName(Config::getString("main-page")); 
 
+
    if (ftv) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
@@ -725,7 +726,7 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
          for (auto fd : *fn) {  
             
             if (! mainPage.isEmpty() && fd->getFilePath() == mainPage) {       
-               // do not include this file
+               // do not include the mainPage in the File List
                continue;               
             } 
        
@@ -2966,9 +2967,9 @@ static void writePages(QSharedPointer<PageDef> pd, FTVHelp *ftv)
    }
 
    if (hasSections) {
-      static bool isBB = Config::getBool("bb-style");
+      static bool isStyleBB = Config::getBool("bb-style");
       
-      if (isBB && pd == Doxy_Globals::mainPage) { 
+      if (isStyleBB && pd == Doxy_Globals::mainPage) {          // Broom - revisist soon
          // do not add sections from mainpage to treeview
          pd->addSectionsToIndex(false); 
 
@@ -3326,6 +3327,8 @@ static void writeGroupHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
 
 static void writeGroupIndex(OutputList &ol)
 {
+   // modules.html
+
    if (documentedGroups == 0) {
       return;
    }
@@ -3340,13 +3343,25 @@ static void writeGroupIndex(OutputList &ol)
    bool addToIndex = lne == 0 || lne->visible();
 
    startFile(ol, "modules", QString(), title, HLI_Modules);
-   startTitle(ol, 0);
 
+   startTitle(ol, 0);
    ol.parseText(title);
    endTitle(ol, 0, 0);
+
    ol.startContents();
+
    ol.startTextBlock();
-   ol.parseText(lne ? lne->intro() : theTranslator->trModulesDescription());
+
+   if (Config::getBool("bb-style")) {      
+      ol.parseText("Here is a list of all components:");
+
+   } else if (lne) {
+      ol.parseText(lne->intro());
+
+   } else {
+      ol.parseText(theTranslator->trModulesDescription());
+   }
+
    ol.endTextBlock();
   
    // Normal group index for Latex/RTF  
@@ -3375,7 +3390,7 @@ static void writeGroupIndex(OutputList &ol)
       QString outStr;
 
       QTextStream t(&outStr);
-      ftv->generateTreeViewInline(t);
+      ftv->generateTreeViewInline(t, FTVHelp::Modules);
       ol.disableAllBut(OutputGenerator::Html);
       ol.writeString(outStr);
 
@@ -3385,6 +3400,7 @@ static void writeGroupIndex(OutputList &ol)
          Doxy_Globals::indexList->decContentsDepth();
       }
    }
+
    ol.popGeneratorState();
 
    endFile(ol);

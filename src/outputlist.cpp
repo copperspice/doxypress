@@ -23,14 +23,6 @@
 #include <message.h>
 #include <outputgen.h>
 
-
-/*! \file
- *  This class represents a list of output generators that work in "parallel".
- *  The class only knows about the abstract base class OutputGenerators.
- *  All output is produced by calling a method of this class, which forwards
- *  the call to all output generators.
- */
-
 OutputList::OutputList(bool)
 {
 }

@@ -1,9 +1,5 @@
 {
     "bb": {
-        "bb-main-page": "",
-        "bb-ns-alias": [
-            ""
-        ],
         "bb-style": false
     },
     "configuration": {
@@ -54,9 +50,16 @@
             ""
         ],
         "layout-file": "doxy_layout.xml",
+        "main-page": "",
         "markdown": true,
         "max-init-lines": 1,
         "multiline-cpp-brief": false,
+        "ns-alias": [
+            ""
+        ],
+        "ns-omit": [
+            ""
+        ],
         "qt-auto-brief": true,
         "repeat-brief": false,
         "separate-member-pages": false,
@@ -392,7 +395,7 @@
     "project": {
         "project-brief": "Sample files to test the functionality of DoxyPress",
         "project-logo": "images/cslogo-32.png",
-        "project-name": "DoxyPress Test Suite",
+        "project-name": "DoxyPress Test",
         "project-version": "1.2.0"
     },
     "source": {

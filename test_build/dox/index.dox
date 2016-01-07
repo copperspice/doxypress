@@ -14,6 +14,8 @@
 
 /*!
 \mainpage DoxyPress Test Build
+\sortid 1
+
 
 The pages in the test suite are designed to test various new features of DoxyPress, 
 how to use some of the enhancements, corrected issues, and overall testing. If there

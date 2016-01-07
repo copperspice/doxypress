@@ -328,7 +328,7 @@ void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
       t << convertToHtml(n->name);
       t << "</a>";
 
-      if (!n->ref.isEmpty()) {
+      if (! n->ref.isEmpty()) {
          t << "&#160;[external]";
       }
    }
@@ -337,10 +337,28 @@ void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
 static void generateBriefDoc(QTextStream &t, QSharedPointer<Definition> def)
 {
    QString brief = def->briefDescription(true);
-  
+
+/* ( save for testing )
+
+   if (brief.isEmpty()) {
+      SortedList<QSharedPointer<GroupDef>> *groups = def->partOfGroups();
+
+      if (groups) { 
+         for (auto gd : *groups) {
+            brief = gd->briefDescription(true);
+
+            if (! brief.isEmpty()) {
+               break;
+            }
+         }
+      }
+   }
+*/
+ 
    if (! brief.isEmpty()) {
+
       DocNode *root = validatingParseDoc(def->briefFile(), def->briefLine(),
-                                         def, QSharedPointer<MemberDef>(), brief, false, false, "", true, true);
+                  def, QSharedPointer<MemberDef>(), brief, false, false, "", true, true);
 
       QString relPath = relativePathToRoot(def->getOutputFileBase());
 
@@ -353,8 +371,10 @@ static void generateBriefDoc(QTextStream &t, QSharedPointer<Definition> def)
    }
 }
 
-void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index)
+void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index, enum PageType outputType)
 {
+   static bool isBBStyle = Config::getBool("bb-style"); 
+
    for (auto n : nl) {
       t << "<tr id=\"row_" << generateIndentLabel(n, 0) << "\"";
 
@@ -400,16 +420,30 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
          }
 
          generateLink(t, n);
-         t << "</td><td class=\"desc\">";
+         t << "</td>";
+
+         if (isBBStyle && outputType == FTVHelp::Modules) {
+            // modules.html only
+
+            QString text = n->def->getDefFileName();
+            text = text.mid( text.lastIndexOf('/')+1 ); 
+
+            t << "<td class=\"hint\">";
+            t << text;
+            t << "</td>";
+         }
+
+         // brief description   
+         t << "<td class=\"desc\">";
 
          if (n->def) {
             generateBriefDoc(t, n->def);
-         }
-
+         } 
+         
          t << "</td></tr>" << endl;
-         folderId++;
 
-         generateTree(t, n->children, level + 1, maxLevel, index);
+         folderId++;
+         generateTree(t, n->children, level + 1, maxLevel, index, outputType);
 
       } else {   
          // leaf node
@@ -446,7 +480,21 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
          }
 
          generateLink(t, n);
-         t << "</td><td class=\"desc\">";
+         t << "</td>";
+
+         if (isBBStyle && outputType == FTVHelp::Modules) {
+            // modules.html only
+
+            QString text = n->def->getDefFileName();
+            text = text.mid( text.lastIndexOf('/')+1 ); 
+
+            t << "<td class=\"hint\">";
+            t << text;
+            t << "</td>";
+         }
+
+         // brief description 
+         t << "<td class=\"desc\">";
 
          if (n->def) {
             generateBriefDoc(t, n->def);
@@ -524,10 +572,8 @@ static QString convertFileId2Var(const QString  &fileId)
 
 static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t, const QList<FTVNode *> &nl, int level, bool &omitComma)
 {
-   static QString htmlOutput = Config::getString("html-output");
-
-   static bool isBB        = Config::getBool("bb-style"); 
-   static QString mainPage = Config::getFullName(Config::getString("main-page")); 
+   static QString htmlOutput = Config::getString("html-output"); 
+   static QString mainPage   = Config::getFullName(Config::getString("main-page")); 
 
    QString indentStr;
    indentStr.fill(' ', level * 2);
@@ -568,9 +614,11 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
                }
             }
 
-         } else {                 
-            if (isBB && node->def == Doxy_Globals::mainPage) { 
+         } else { 
+                
+            if (node->def == Doxy_Globals::mainPage) { 
                // do not add index.html to navIndex               
+
             } else {
                navIndex.inSort(new NavIndexEntry(node2URL(node), pathToNode(node)));
             }
@@ -628,7 +676,7 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
       } else {
          bool firstChild = true;
 
-         if (isBB && node->file == "index") { 
+         if (node->file == "index") { 
             // omit treeview entries for index page
             omitComma = true;
 
@@ -652,9 +700,7 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
 
 // adjust for display
 static void reSortNodes(QList<FTVNode *> &nodeList)
-{   
-   static bool isBB = Config::getBool("bb-style"); 
-
+{      
    std::stable_sort(nodeList.begin(), nodeList.end(), [](FTVNode *a, FTVNode *b) {  
    
       if (a->def == nullptr || b->def == nullptr) {
@@ -703,7 +749,7 @@ if  (node->file.contains("getting-started")) {
 
       node->index = counter;
 
-      if ( isBB && node->file == "index") {  
+      if (node->file == "index") {  
          // do not count this page
       } else {
          counter++;
@@ -877,7 +923,7 @@ void FTVHelp::generateTreeViewScripts()
 }
 
 // write tree inside page
-void FTVHelp::generateTreeViewInline(QTextStream &t)
+void FTVHelp::generateTreeViewInline(QTextStream &t, enum PageType outputType)
 {
    int preferredNumEntries = Config::getInt("html-index-num-entries");
 
@@ -937,7 +983,7 @@ void FTVHelp::generateTreeViewInline(QTextStream &t)
    t << "<table class=\"directory\">\n";
 
    int index = 0;
-   generateTree(t, m_indentNodes[0], 0, preferredDepth, index);
+   generateTree(t, m_indentNodes[0], 0, preferredDepth, index, outputType);
 
    t << "</table>\n";
    t << "</div><!-- directory -->\n" << endl;
