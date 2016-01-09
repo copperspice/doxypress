@@ -144,4 +144,17 @@ Q_DECLARE_TYPEINFO(QString, Q_MOVABLE_TYPE)
 Q_DECLARE_SHARED(QString)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QString::SectionFlags)
 
+class Lemongrass : public CSObject
+{
+   public:
+      int howMuch;
+      QString otherNames;
+
+      /** This is the addHoliday. A bit more information about the method.  */
+      void addHoliday(int dayNum, QString monthName, int year);
+
+      /// This is the monthName method. 
+      void monthName(int value);   
+}
+
 #endif

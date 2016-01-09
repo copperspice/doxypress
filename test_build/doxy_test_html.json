@@ -243,18 +243,18 @@
     "output-docbook": {
         "docbook-output": "docbook",
         "docbook-program-listing": false,
-        "generate-docbook": true
+        "generate-docbook": false
     },
     "output-docset": {
         "docset-bundle-id": "org.doxypress.Project",
         "docset-feedname": "DoxyPress generated docs",
         "docset-publisher-id": "org.doxypress.Publisher",
         "docset-publisher-name": "Publisher",
-        "generate-docset": true
+        "generate-docset": false
     },
     "output-eclipse": {
         "eclipse-doc-id": "org.doxypress.Project",
-        "generate-eclipse": true
+        "generate-eclipse": false
     },
     "output-html": {
         "disable-index": false,
@@ -303,7 +303,7 @@
         "cite-bib-files": [
             ""
         ],
-        "generate-latex": true,
+        "generate-latex": false,
         "latex-batch-mode": false,
         "latex-bib-style": "plain",
         "latex-cmd-name": "latex",
@@ -330,20 +330,20 @@
         "make-index-cmd-name": "makeindex"
     },
     "output-man": {
-        "generate-man": true,
+        "generate-man": false,
         "man-extension": ".3",
         "man-links": false,
         "man-output": "man",
         "man-subdir": ""
     },
     "output-perl": {
-        "generate-perl": true,
+        "generate-perl": false,
         "perl-latex": false,
         "perl-prefix": "",
         "perl-pretty": true
     },
     "output-qhelp": {
-        "generate-qthelp": true,
+        "generate-qthelp": false,
         "qch-file": "",
         "qhp-cust-attrib": [
             ""
@@ -357,7 +357,7 @@
         "qthelp-gen-path": ""
     },
     "output-rtf": {
-        "generate-rtf": true,
+        "generate-rtf": false,
         "rtf-compact": false,
         "rtf-extension": "",
         "rtf-hyperlinks": false,
@@ -366,7 +366,7 @@
         "rtf-stylesheet": ""
     },
     "output-xml": {
-        "generate-xml": true,
+        "generate-xml": false,
         "xml-output": "xml",
         "xml-program-listing": false
     },

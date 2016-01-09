@@ -16,7 +16,12 @@
 \class Ginger
 \brief Test class to review how to document
 
-Ginger is a test class to review how documentation is generated in DoxyPress for CopperSpice specific syntax.
+Ginger is a test class to review how documentation is generated in DoxyPress for CopperSpice specific syntax. 
+
+The following should be valid links: Lemongrass::monthName and Lemongrass::monthName()
+
+These should not auto link: monthName, monthName()
+
 
 */
 
@@ -332,28 +337,6 @@ Property documentation for title.
 \property Spices Ginger::favorite
 
 Property documentation for favorite.
-
-
-*/
-
-
-/*!
-\class Lemongrass
-\brief Test class
-
-Lemongrass is a test class to ensure two classes in one file can be documented. This class appears after several macros.
-
-
-Does the link from the QSSsl namespace work correct?   QSsl::someFunction()
-
-
-*/
-
-
-/*! 
-\var Lemongrass::howMuch
-
-Documentation for a public variable.
 
 */
 

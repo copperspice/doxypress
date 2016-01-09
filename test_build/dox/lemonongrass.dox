@@ -12,20 +12,26 @@
 *                                                                         
 *************************************************************************/
 
-#ifndef LEMONGRASS_H
-#define LEMONGRASS_H
+/*!
+\class Lemongrass
+\brief Test class
 
-class Lemongrass : public CSObject
-{
-   public:
-      int howMuch;
-      QString otherNames;
+Lemongrass is a test class to ensure two classes in one file can be documented. The following text to addHoliday() 
+and monthName() test auto linking methods. 
 
-      /** This is the addHoliday. A bit more information about the method.  */
-      void addHoliday(int dayNum, int monthName, int year);
+These two auto link: monthName(int value),  monthName(int)
 
-      /// This is the monthName method. 
-      void monthName();   
-}
+This does not link, which is correct: monthName
 
-#endif
+Does the link from the QSSsl namespace work correct?   QSsl::someFunction()
+
+*/
+
+
+/*! 
+\var Lemongrass::howMuch
+
+Documentation for a public variable.
+
+*/
+
