@@ -373,7 +373,7 @@ static void generateBriefDoc(QTextStream &t, QSharedPointer<Definition> def)
 
 void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index, enum PageType outputType)
 {
-   static bool isBBStyle = Config::getBool("bb-style"); 
+   static bool isStyleBB = Config::getBool("bb-style"); 
 
    for (auto n : nl) {
       t << "<tr id=\"row_" << generateIndentLabel(n, 0) << "\"";
@@ -422,7 +422,7 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
          generateLink(t, n);
          t << "</td>";
 
-         if (isBBStyle && outputType == FTVHelp::Modules) {
+         if (isStyleBB && outputType == FTVHelp::Modules) {
             // modules.html only
 
             QString text = n->def->getDefFileName();
@@ -482,7 +482,7 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
          generateLink(t, n);
          t << "</td>";
 
-         if (isBBStyle && outputType == FTVHelp::Modules) {
+         if (isStyleBB && outputType == FTVHelp::Modules) {
             // modules.html only
 
             QString text = n->def->getDefFileName();
@@ -572,8 +572,9 @@ static QString convertFileId2Var(const QString  &fileId)
 
 static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t, const QList<FTVNode *> &nl, int level, bool &omitComma)
 {
-   static QString htmlOutput = Config::getString("html-output"); 
-   static QString mainPage   = Config::getFullName(Config::getString("main-page")); 
+   static QString htmlOutput   = Config::getString("html-output");   
+   static QString mainPageName = Config::getFullName(Config::getString("main-page-name")); 
+   static bool mainPageOmit    = Config::getBool("main-page-omit"); 
 
    QString indentStr;
    indentStr.fill(' ', level * 2);
@@ -599,9 +600,9 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
 
          if (node->def && node->def->definitionType() == Definition::TypeFile) {            
             QSharedPointer<FileDef> fd = node->def.dynamicCast<FileDef>();
-   
-            if (! mainPage.isEmpty() && fd->getFilePath() == mainPage) {       
-               // do not add this file to the navIndex
+  
+            if (! mainPageName.isEmpty() && fd->getFilePath() == mainPageName) {       
+               // do not add this file to the navIndex, for \files
 
             } else {  
                                    
@@ -616,9 +617,9 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
 
          } else { 
                 
-            if (node->def == Doxy_Globals::mainPage) { 
-               // do not add index.html to navIndex               
-
+            if (mainPageOmit && node->def == Doxy_Globals::mainPage) { 
+               // do not add this file to the navIndex 
+             
             } else {
                navIndex.inSort(new NavIndexEntry(node2URL(node), pathToNode(node)));
             }
@@ -633,7 +634,18 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
          if (node->def && node->def->definitionType() == Definition::TypeFile) {            
             QSharedPointer<FileDef> fd = node->def.dynamicCast<FileDef>();
 
-            if (! mainPage.isEmpty() && fd->getFilePath() == mainPage) {
+            if (! mainPageName.isEmpty() && fd->getFilePath() == mainPageName) {   
+               // do not add this file to the navIndex, for \files
+
+               showMainPage = false;
+               omitComma    = true;
+            }
+
+         } else { 
+                
+            if (mainPageOmit && node->def == Doxy_Globals::mainPage) { 
+               // do not add this file to the navIndex 
+
                showMainPage = false;
                omitComma    = true;
             }
@@ -676,7 +688,7 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
       } else {
          bool firstChild = true;
 
-         if (node->file == "index") { 
+         if (mainPageOmit && node->def == Doxy_Globals::mainPage) { 
             // omit treeview entries for index page
             omitComma = true;
 

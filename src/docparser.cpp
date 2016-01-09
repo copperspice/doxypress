@@ -1126,7 +1126,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
 
          }
 
-         if ( s_context == g_token->name ) { 
+         if (s_context == g_token->name) { 
             // do not add a link to myself
             children.append(new DocWord(parent, name));
       
@@ -1139,12 +1139,11 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
 
          // undocumented file that has source code we can link to
          children.append(new DocLinkedWord(parent, g_token->name, compound->getReference(), compound->getSourceFileBase(),
-                         "", compound->briefDescriptionAsTooltip() ) );
+                  "", compound->briefDescriptionAsTooltip() ) );
 
       } else { 
          // not linkable
          children.append(new DocWord(parent, name));
-
       }
 
    } else if (! s_insideHtmlLink && len > 1 && g_token->name.at(len - 1) == ':') {
@@ -1158,13 +1157,14 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
       // special case: the token name is not a class, but could be a Obj-C protocol
 
       children.append(new DocLinkedWord(parent, name, cd->getReference(), cd->getOutputFileBase(), 
-                                    cd->anchor(), cd->briefDescriptionAsTooltip()));
+                  cd->anchor(), cd->briefDescriptionAsTooltip()));
 
    } else {
       // normal non-linkable word
 
       if (g_token->name.left(1) == "#" || g_token->name.left(2) == "::") {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Explicit link request to '%s' could not be resolved", csPrintable(name));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Explicit link request to '%s' could not be resolved",
+                  csPrintable(name));
          children.append(new DocWord(parent, g_token->name));
 
       } else {

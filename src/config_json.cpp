@@ -41,11 +41,14 @@ QDir Config::getConfigDir()
 QString Config::getFullName(const QString &fName)
 {
    QString retval;
-   QFileInfo fi(m_configDir, fName);
 
-   if (fi.exists() ) {
-      retval = fi.absoluteFilePath();
-   } 
+   if (! fName.isEmpty()) {        
+      QFileInfo fi(m_configDir, fName);
+   
+      if (fi.exists() ) {
+         retval = fi.absoluteFilePath();
+      } 
+   }
 
    return retval;
 }
@@ -203,7 +206,8 @@ void Config::load_Defaults()
    m_cfgList.insert("enabled-sections",          struc_CfgList   { QStringList(),  DEFAULT } ); 
    m_cfgInt.insert("max-init-lines",             struc_CfgInt    { 30,             DEFAULT } );  
    m_cfgString.insert("file-version-filter",     struc_CfgString { QString(),      DEFAULT } );
-   m_cfgString.insert("main-page",               struc_CfgString { "",             DEFAULT } );   
+   m_cfgString.insert("main-page-name",          struc_CfgString { "",             DEFAULT } );   
+   m_cfgBool.insert("main-page-omit",            struc_CfgBool   { false,          DEFAULT } );  
    m_cfgString.insert("layout-file",             struc_CfgString { QString(),      DEFAULT } );     
    m_cfgList.insert("ns-omit",                   struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("ns-alias",                  struc_CfgList   { QStringList(),  DEFAULT } );

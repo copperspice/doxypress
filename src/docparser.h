@@ -240,15 +240,19 @@ class DocLinkedWord : public DocNode
    QString file() const       {
       return m_file;
    }
+
    QString relPath() const    {
       return m_relPath;
    }
+
    QString ref() const        {
       return m_ref;
    }
+
    QString anchor() const     {
       return m_anchor;
    }
+
    QString tooltip() const    {
       return m_tooltip;
    }

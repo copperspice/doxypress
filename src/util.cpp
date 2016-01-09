@@ -1821,7 +1821,7 @@ bool leftScopeMatch(const QString &scope, const QString &name)
 }
 
 void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-                  QSharedPointer<Definition> self, const QString &text, bool autoBreak, bool external, 
+                  QSharedPointer<Definition> def, const QString &text, bool autoBreak, bool external, 
                   bool keepSpaces, int indentLevel)
 {  
    int strLen = text.length();
@@ -1912,80 +1912,88 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
          QSharedPointer<GroupDef>     gd;        
          QSharedPointer<MemberDef>    typeDef;
 
-
-// BROOM 
-
-/*
-   if (matchWord.contains("Ginger")) {
-      printf("\n  BROOM (linky) scope --> %s",        csPrintable(scope->name()) ); 
-      printf("\n  BROOM (linky) matchWord --> %s \n", csPrintable(matchWord) );
-   }
+/* BROOM 
+if (matchWord.contains("monthName")) {
+   printf("\n  BROOM (linky) scope --> %s",     csPrintable(scope->name()) ); 
+   printf("\n  BROOM (linky) text  --> %s",     csPrintable(text) ); 
+   printf("\n  BROOM (linky) word  --> %s",     csPrintable(word) );
+   printf("\n  BROOM (linky) matchWord --> %s", csPrintable(matchWord) );  
+}
 */
-
-// BROOM
-
-
-
 
          cd = getResolvedClass(scope, fileScope, matchWord, &typeDef);
 
          if (typeDef) { 
-            // First look at typedef then class, see bug 584184.
+            // first look at typedef then class
            
             if (external ? typeDef->isLinkable() : typeDef->isLinkableInProject()) {
 
-               if (typeDef->getOuterScope() != self) { 
+               if (typeDef->getOuterScope() != def) { 
                   out.writeLink(typeDef->getReference(), typeDef->getOutputFileBase(), typeDef->anchor(), word);
                   found = true;
                }
-
             }
          }
 
          if (! found && (cd || (cd = getClass(matchWord)))) {            
-            // add link to the result
-
+            
             if (external ? cd->isLinkable() : cd->isLinkableInProject()) {
-               if (cd != self) {
+                                
+               if (cd == def || (scope && cd->name() == scope->name()) ) {
+                  // do not link to the current scope (added 01/2016)                
+
+               } else { 
+                  // add link to the result
                   out.writeLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), word);
                   found = true;
                }
             }
 
          } else if ((cd = getClass(matchWord + "-p"))) { 
-            // search for Obj-C protocols as well
+            // search for Obj-C protocols
             // add link to the result
 
             if (external ? cd->isLinkable() : cd->isLinkableInProject()) {
-               if (cd != self) {
+               if (cd != def) {
                   out.writeLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), word);
                   found = true;
                }
-            }
-           
+            }           
          }
 
          int m = matchWord.lastIndexOf("::");
          QString scopeName;
 
          if (scope && (scope->definitionType() == Definition::TypeClass ||
-             scope->definitionType() == Definition::TypeNamespace) ) {
+                  scope->definitionType() == Definition::TypeNamespace) ) {
 
             scopeName = scope->name();
 
          } else if (m != -1) {
             scopeName = matchWord.left(m);
             matchWord = matchWord.mid(m + 2);
-         }
-         
-         if (! found && getDefs(scopeName, matchWord, 0, md, cd, fd, nd, gd) && 
-               (external ? md->isLinkable() : md->isLinkableInProject()) ) {
-        
-            if (md != self && (self == 0 || md->name() != self->name())) {
-               // name check is needed for overloaded members, where getDefs just returns one
-            
-               out.writeLink(md->getReference(), md->getOutputFileBase(), md->anchor(), word);              
-               found = true;
+         }         
+             
+         if (! found && getDefs(scopeName, matchWord, "", md, cd, fd, nd, gd)) {
+            bool ok;
+
+            if (external) { 
+               ok = md->isLinkable(); 
+            } else {
+               ok = md->isLinkableInProject(); 
+            }
+
+            if (ok) {        
+               if (md != def && (def == nullptr || md->name() != def->name()) ) {
+                  // name check is needed for overloaded members, where getDefs returns one
+                   
+                  if (word.contains("(")) {    
+                     // ensure word refers to a method name, (added 01/2016)   
+                         
+                     out.writeLink(md->getReference(), md->getOutputFileBase(), md->anchor(), word);              
+                     found = true;
+                  }
+               }
             }
          }
       }
@@ -3502,13 +3510,13 @@ static void findMembersWithSpecificName(QSharedPointer<MemberName> mn, const QSt
  * Passing "()" means any argument list will do, but "()" is preferred.
  *
  * The function returns true if the member is known and documented or false if it is not.
- * If true is returned parameter `md' contains a pointer to the member
- * definition. Furthermore exactly one of the parameter `cd', `nd', or `fd'
+ * If true is returned parameter `md' contains a pointer to the member definition. 
+ *
+ * Furthermore exactly one of the parameter `cd', `nd', or `fd'
  * will be non-zero:
- *   - if `cd' is non zero, the member was found in a class pointed to by cd.
- *   - if `nd' is non zero, the member was found in a namespace pointed to by nd.
- *   - if `fd' is non zero, the member was found in the global namespace of
- *     file fd.
+ *   - if `cd' is non zero, the member was found in a class pointed to by cd
+ *   - if `nd' is non zero, the member was found in a namespace pointed to by nd
+ *   - if `fd' is non zero, the member was found in the global namespace of file fd.
  */
 bool getDefs(const QString &scName, const QString &mbName, const QString &args, QSharedPointer<MemberDef> &md,
              QSharedPointer<ClassDef> &cd, QSharedPointer<FileDef> &fd, QSharedPointer<NamespaceDef> &nd, 
@@ -4059,7 +4067,7 @@ static bool isLowerCase(const QString &str)
 }
 
 /*! Returns an object given its name and context
- *  @post return value true implies *resContext!=0 or *resMember!=0
+ *  @post return value true implies *resContext != 0 or *resMember != 0
  */
 bool resolveRef(const QString &scName, const QString &tsName, bool inSeeBlock, QSharedPointer<Definition> *resContext,
                 QSharedPointer<MemberDef> *resMember, bool lookForSpecialization, QSharedPointer<FileDef> currentFile,
@@ -4103,7 +4111,7 @@ bool resolveRef(const QString &scName, const QString &tsName, bool inSeeBlock, Q
          return false;
       } 
  
-      // check if this is a class or namespace reference
+      // check if fullName is a class or namespace reference
       if (scName != fullName && getScopeDefs(scName, fullName, cd, nd)) {
 
          if (cd) { 

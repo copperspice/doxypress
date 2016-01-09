@@ -700,9 +700,8 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
 
 static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
 {
-   static bool fullPathNames = Config::getBool("full-path-names");   
-   static QString mainPage   = Config::getFullName(Config::getString("main-page")); 
-
+   static bool fullPathNames    = Config::getBool("full-path-names");   
+   static QString mainPageName  = Config::getFullName(Config::getString("main-page-name"));    
 
    if (ftv) {
       ol.pushGeneratorState();
@@ -725,7 +724,7 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
 
          for (auto fd : *fn) {  
             
-            if (! mainPage.isEmpty() && fd->getFilePath() == mainPage) {       
+            if (! mainPageName.isEmpty() && fd->getFilePath() == mainPageName) {       
                // do not include the mainPage in the File List
                continue;               
             } 
