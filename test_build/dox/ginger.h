@@ -1,6 +1,6 @@
 /*************************************************************************
 *                                                                         
-* Copyright (C) 2012-2015 Barbara Geller & Ansel Sermersheim                                                         
+* Copyright (C) 2012-2016 Barbara Geller & Ansel Sermersheim                                                         
 * All rights reserved.                                                    
 *                                                                         
 *                                                                         
@@ -149,6 +149,12 @@ class Lemongrass : public CSObject
    public:
       int howMuch;
       QString otherNames;
+
+      /** This is the addHoliday. A bit more information about the method.  */
+      void addHoliday(int dayNum, QString monthName, int year);
+
+      /// This is the monthName method. 
+      void monthName(int value);   
 }
 
 #endif

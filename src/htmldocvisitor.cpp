@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -17,41 +17,39 @@
 
 #include <QDir>
 
-#include <doxy_globals.h>
 #include <htmldocvisitor.h>
-#include <docparser.h>
-#include <language.h>
-#include <outputgen.h>
-#include <dot.h>
-#include <message.h>
+
 #include <config.h>
-#include <htmlgen.h>
-#include <msc.h>
+#include <docparser.h>
 #include <dia.h>
-#include <util.h>
-#include <filedef.h>
-#include <memberdef.h>
+#include <doxy_globals.h>
+#include <dot.h>
+#include <htmlgen.h>
 #include <htmlentity.h>
+#include <language.h>
+#include <message.h>
+#include <msc.h>
+#include <outputgen.h>
 #include <parser_base.h>
 #include <plantuml.h>
+#include <util.h>
 
 static const int NUM_HTML_LIST_TYPES = 4;
 static const char types[][NUM_HTML_LIST_TYPES] = {"1", "a", "i", "A"};
 
 static QString convertIndexWordToAnchor(const QString &word)
-{
-   static char hex[] = "0123456789abcdef";
-   QString result;
+{  
+   QString result = "a";
 
    for (auto c : word) {
     
       if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'A') || (c >= '0' && c <= '9') || 
-            c == '-' || c == '.' || c == '_' || c == '~') { 
+            c == '-' || c == '.' || c == '_') { 
 
          result += c;
 
       } else {
-         result += QString("%%1").arg(c.unicode(), 2, 16, QChar('0'));       
+         result += QString(":%1").arg(c.unicode(), 2, 16, QChar('0'));       
          
       }
    }
@@ -341,6 +339,27 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
    }
 }
 
+static void visitPreCaption(QTextStream &t, DocVerbatim *s)
+{
+   if (s->hasCaption()) { 
+      t << "<div class=\"caption\">" << endl;
+   }
+}
+
+static void visitPostCaption(QTextStream &t, DocVerbatim *s)
+{
+   if (s->hasCaption()) {
+      t << "</div>" << endl;
+   }
+}
+
+static void visitCaption(HtmlDocVisitor *parent, QList<DocNode *> children)
+{
+   for (auto n : children) {
+      n->accept(parent);
+   }
+}
+
 void HtmlDocVisitor::visit(DocVerbatim *s)
 {
    if (m_hide) {
@@ -359,15 +378,19 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
    switch (s->type()) {
 
       case DocVerbatim::Code:
+
          forceEndParagraph(s);
          m_t << PREFRAG_START;
 
-         Doxy_Globals::parserManager->getParser(lang)->parseCode(m_ci, s->context(), s->text(),
-                     langExt, s->isExample(), s->exampleFile(), QSharedPointer<FileDef>(), 
-                     -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
+         {
+            auto tmp = Doxy_Globals::parserManager->getParser(lang);
+
+            tmp->parseCode(m_ci, s->context(), s->text(), langExt, 
+                  s->isExample(), s->exampleFile(), QSharedPointer<FileDef>(), -1, -1, false, 
+                  QSharedPointer<MemberDef>(), true, m_ctx);
+         }  
 
          m_t << PREFRAG_END;
-
          forceStartParagraph(s);
 
          break;
@@ -402,29 +425,38 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Dot: {
          static int dotindex = 1;
 
+         forceEndParagraph(s);
+
          QString fileName;
          fileName = QString("%1%2.dot").arg(Config::getString("html-output") + "/inline_dotgraph_").arg(dotindex++);
 
          QFile file(fileName);
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), file.error());      
+            err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), file.error());      
+
+         } else {
+
+            file.write(s->text().toUtf8());
+            file.close();
+               
+            m_t << "<div align=\"center\">" << endl;
+   
+            writeDotFile(fileName, s->relPath(), s->context());
+
+            visitPreCaption(m_t, s);
+            visitCaption(this, s->children());
+            visitPostCaption(m_t, s);
+
+            m_t << "</div>" << endl;            
+   
+            if (Config::getBool("dot-cleanup")) {
+               file.remove();
+            }            
          }
-
-         file.write(s->text().toUtf8());
-         file.close();
-
-         forceEndParagraph(s);
-         m_t << "<div align=\"center\">" << endl;
-
-         writeDotFile(fileName, s->relPath(), s->context());
-         m_t << "</div>" << endl;
 
          forceStartParagraph(s);
 
-         if (Config::getBool("dot-cleanup")) {
-            file.remove();
-         }
       }
       break;
 
@@ -439,27 +471,32 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".msc");
 
          if (! file.open(QIODevice::WriteOnly)) {       
-            err("Unable to open file for writing %s.msc error: %d\n", qPrintable(baseName), file.error()); 
+            err("Unable to open file for writing %s.msc error: %d\n", csPrintable(baseName), file.error()); 
+
+         } else {
+            QString text = "msc {";
+            text += s->text();
+            text += "}";
+   
+            file.write( text.toUtf8() );
+            file.close();
+   
+            m_t << "<div align=\"center\">" << endl;   
+            writeMscFile(baseName + ".msc", s->relPath(), s->context());
+
+            visitPreCaption(m_t, s);
+            visitCaption(this, s->children());
+            visitPostCaption(m_t, s);
+
+            m_t << "</div>" << endl;
+
+            if (Config::getBool("dot-cleanup")) {
+               file.remove();
+            }                      
          }
 
-         QString text = "msc {";
-         text += s->text();
-         text += "}";
-
-         file.write( text.toUtf8() );
-         file.close();
-
-         m_t << "<div align=\"center\">" << endl;
-
-         writeMscFile(baseName + ".msc", s->relPath(), s->context());
-         if (Config::getBool("dot-cleanup")) {
-            file.remove();
-         }
-
-         m_t << "</div>" << endl;
          forceStartParagraph(s);
       }
-
       break;
 
       case DocVerbatim::PlantUML: {
@@ -470,6 +507,11 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
 
          m_t << "<div align=\"center\">" << endl;
          writePlantUMLFile(baseName, s->relPath(), s->context());
+
+         visitPreCaption(m_t, s);
+         visitCaption(this, s->children());
+         visitPostCaption(m_t, s);
+
          m_t << "</div>" << endl;
          forceStartParagraph(s);
       }
@@ -563,6 +605,7 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
       if (! m_hide) {
          m_t << PREFRAG_START;
       }
+
       pushEnabled();
       m_hide = true;
    }
@@ -572,7 +615,7 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
 
-      if (!m_hide) {
+      if (! m_hide) {
          Doxy_Globals::parserManager->getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
             langExt, op->isExample(), op->exampleFile(),
             QSharedPointer<FileDef>(), -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
@@ -581,13 +624,15 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
       pushEnabled();
       m_hide = true;
    }
+
    if (op->isLast()) {
       popEnabled();
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << PREFRAG_END;
       }
+
    } else {
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << endl;
       }
    }
@@ -665,12 +710,15 @@ void HtmlDocVisitor::visit(DocCite *cite)
    if (m_hide) {
       return;
    }
-   if (!cite->file().isEmpty()) {
+
+   if (! cite->file().isEmpty()) {
       startLink(cite->ref(), cite->file(), cite->relPath(), cite->anchor());
    } else {
       m_t << "<b>[";
    }
+
    filter(cite->text());
+
    if (!cite->file().isEmpty()) {
       endLink();
    } else {
@@ -1013,7 +1061,9 @@ void HtmlDocVisitor::visitPre(DocPara *p)
 void HtmlDocVisitor::visitPost(DocPara *p)
 {
    bool needsTag = false;
+
    if (p && p->parent()) {
+
       switch (p->parent()->kind()) {
          case DocNode::Kind_Section:
          case DocNode::Kind_Internal:
@@ -1029,9 +1079,11 @@ void HtmlDocVisitor::visitPost(DocPara *p)
          case DocNode::Kind_ParBlock:
             needsTag = true;
             break;
+
          case DocNode::Kind_Root:
             needsTag = !((DocRoot *)p->parent())->singleLine();
             break;
+
          default:
             needsTag = false;
       }
@@ -1057,18 +1109,16 @@ void HtmlDocVisitor::visitPost(DocPara *p)
 
    bool isFirst;
    bool isLast;
+
    getParagraphContext(p, isFirst, isLast);
-   //printf("endPara first=%d last=%d\n",isFirst,isLast);
+
    if (isFirst && isLast) {
       needsTag = false;
    }
 
-   //printf("DocPara::visitPost needsTag=%d\n",needsTag);
-
    if (needsTag) {
       m_t << "</p>\n";
    }
-
 }
 
 void HtmlDocVisitor::visitPre(DocRoot *)
@@ -1466,8 +1516,7 @@ void HtmlDocVisitor::visitPre(DocInternal *)
 {
    if (m_hide) {
       return;
-   }
- 
+   } 
 }
 
 void HtmlDocVisitor::visitPost(DocInternal *)
@@ -1638,8 +1687,10 @@ void HtmlDocVisitor::visitPre(DocDiaFile *df)
    if (m_hide) {
       return;
    }
+
    m_t << "<div class=\"diagraph\">" << endl;
    writeDiaFile(df->file(), df->relPath(), df->context());
+
    if (df->hasCaption()) {
       m_t << "<div class=\"caption\">" << endl;
    }
@@ -1660,6 +1711,7 @@ void HtmlDocVisitor::visitPre(DocLink *lnk)
    if (m_hide) {
       return;
    }
+
    startLink(lnk->ref(), lnk->file(), lnk->relPath(), lnk->anchor());
 }
 
@@ -1678,8 +1730,8 @@ void HtmlDocVisitor::visitPre(DocRef *ref)
    }
 
    if (! ref->file().isEmpty()) {
-      // when ref->isSubPage() == true we use ref->file() for HTML and
-      // ref->anchor() for LaTeX/RTF
+      // if ref->isSubPage(), HTML use ref->file(), Latex and RTF use ref->anchor()
+
       startLink(ref->ref(), ref->file(), ref->relPath(), ref->isSubPage() ? QString() : ref->anchor());
    }
 
@@ -1893,11 +1945,11 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
 }
 
 void HtmlDocVisitor::visitPost(DocParamList *)
-{
-   //printf("DocParamList::visitPost\n");
+{   
    if (m_hide) {
       return;
    }
+
    m_t << "</td></tr>" << endl;
 }
 
@@ -1949,6 +2001,7 @@ void HtmlDocVisitor::visitPre(DocInternalRef *ref)
    if (m_hide) {
       return;
    }
+
    startLink(0, ref->file(), ref->relPath(), ref->anchor());
 }
 
@@ -2078,24 +2131,14 @@ void HtmlDocVisitor::filterQuotedCdataAttr(const QString &str)
             m_t << "&quot;";
             break;
 
-         // For SGML compliance, and given the SGML declaration for HTML syntax,
-         // it's enough to replace these two, provided that the declaration
-         // for the HTML version we generate (and as supported by the browser)
-         // specifies that all the other symbols used in rawVal are
-         // within the right character class (i.e., they're not
-         // some multinational weird characters not in the BASESET).
-         // We assume that 1) the browser will support whatever is remaining
-         // in the formula and 2) the TeX formulae are generally governed
-         // by even stricter character restrictions so it should be enough.
-         //
-         // On some incompliant browsers, additional translation of
-         // '>' and '<' into "&gt;" and "&lt;", respectively, might be needed;
-         // but I'm unaware of particular modern (last 4 years) versions
-         // with such problems, so let's not do it for performance.
-         // Also, some brousers will (wrongly) not process the entity references
-         // inside the attribute value and show the &...; form instead,
-         // so we won't create entites unless necessary to minimize clutter there.
-       
+         case '<':  
+            m_t << "&lt;"; 
+            break;
+
+         case '>':  
+            m_t << "&gt;"; 
+            break;
+            
          default:
             m_t << c;
       }
@@ -2105,26 +2148,34 @@ void HtmlDocVisitor::filterQuotedCdataAttr(const QString &str)
 void HtmlDocVisitor::startLink(const QString &ref, const QString &file, const QString &relPath, 
                   const QString &anchor, const QString &tooltip)
 {
-   if (!ref.isEmpty()) { // link to entity imported via tag file
+   if (! ref.isEmpty()) { 
+      // link to entity imported via tag file
       m_t << "<a class=\"elRef\" ";
       m_t << externalLinkTarget() << externalRef(relPath, ref, false);
 
-   } else { // local link
+   } else { 
+      // local link
       m_t << "<a class=\"el\" ";
    }
 
    m_t << "href=\"";
    m_t << externalRef(relPath, ref, true);
-   if (!file.isEmpty()) {
+
+
+   if (! file.isEmpty()) {
       m_t << file << Doxy_Globals::htmlFileExtension;
    }
-   if (!anchor.isEmpty()) {
+
+   if (! anchor.isEmpty()) {
       m_t << "#" << anchor;
    }
+
    m_t << "\"";
-   if (!tooltip.isEmpty()) {
+
+   if (! tooltip.isEmpty()) {
       m_t << " title=\"" << substitute(tooltip, "\"", "&quot;") << "\"";
    }
+
    m_t << ">";
 }
 
@@ -2135,13 +2186,12 @@ void HtmlDocVisitor::endLink()
 
 void HtmlDocVisitor::pushEnabled()
 {
-   m_enabled.push(new bool(m_hide));
+   m_enabled.push(m_hide);
 }
 
 void HtmlDocVisitor::popEnabled()
 {
-   bool v = m_enabled.pop();
-   m_hide = v;   
+   m_hide = m_enabled.pop();   
 }
 
 void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, const QString &context)
@@ -2153,7 +2203,8 @@ void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, con
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   if ((i = baseName.indexOf('.')) != -1) { // strip extension
+   if ((i = baseName.indexOf('.')) != -1) { 
+      // strip extension
       baseName = baseName.left(i);
    }
 
@@ -2233,9 +2284,11 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
    if (imgExt == "svg") {
       generatePlantUMLOutput(fileName, outDir, PUML_SVG);
 
-      //m_t << "<iframe scrolling=\"no\" frameborder=\"0\" src=\"" << relPath << baseName << ".svg" << "\" />" << endl;
-      //m_t << "<p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p>";
-      //m_t << "</iframe>" << endl;
+      // m_t << "<iframe scrolling=\"no\" frameborder=\"0\" src=\"" << relPath << baseName 
+      //     << ".svg" << "\" />" << endl;
+      // m_t << "<p><b>Yourbrowser is unable to show SVG: try Firefox, Chrome, Safari, or Opera instead</b></p>";
+      // m_t << "</iframe>" << endl;
+
       m_t << "<object type=\"image/svg+xml\" data=\"" << relPath << baseName << ".svg\"></object>" << endl;
 
    } else {
@@ -2244,6 +2297,40 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
    }
 }
 
+/** Returns TRUE if the child nodes in paragraph \a para until \a nodeIndex
+    contain a style change node that is still active and that style change is one that
+    must be located outside of a paragraph, i.e. it is a center, div, or pre tag.    
+ */
+static bool insideStyleChange_OutsidePara(DocPara *para,int nodeIndex)
+{
+   int styleMask = 0;
+   bool styleOutsideParagraph = false;
+
+   while (nodeIndex >= 0 && ! styleOutsideParagraph) {
+      DocNode *n = para->children().at(nodeIndex);
+
+      if (n->kind() == DocNode::Kind_StyleChange) {
+         DocStyleChange *sc = dynamic_cast<DocStyleChange*>(n);
+
+         if (! sc->enable()) {
+            // remember styles which have been closed already      
+            styleMask |= sc->style();
+         }
+
+         bool paraStyle = (sc->style() == DocStyleChange::Center ||
+                  sc->style() == DocStyleChange::Div || sc->style() == DocStyleChange::Preformatted);
+
+         if (sc->enable() && (styleMask&(int)sc->style()) == 0 && paraStyle) {
+            // style change that is still active          
+            styleOutsideParagraph = true;
+         }
+      }
+
+      nodeIndex--;
+   }
+
+   return styleOutsideParagraph;
+}
 
 /** Used for items found inside a paragraph, which due to XHTML restrictions
  *  have to be outside of the paragraph. This method will force the end of 
@@ -2274,12 +2361,19 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
          }
       }
 
+      nodeIndex--;
+      bool styleOutsideParagraph = insideStyleChange_OutsidePara(para, nodeIndex);
+
       bool isFirst;
       bool isLast;
 
       getParagraphContext(para, isFirst, isLast);
       
       if (isFirst && isLast) {
+         return;
+      }
+
+      if (styleOutsideParagraph) {
          return;
       }
 
@@ -2299,10 +2393,17 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
       DocPara *para = (DocPara *)n->parent();
       int nodeIndex = para->children().indexOf(n);
       int numNodes  = para->children().count();
+
+      bool styleOutsideParagraph = insideStyleChange_OutsidePara(para,nodeIndex);
+      if (styleOutsideParagraph) {
+         return;
+      }
+
       nodeIndex++;
 
       if (nodeIndex == numNodes) {
-         return;   // last node
+         // last node
+         return;   
       }
 
       while (nodeIndex < numNodes && para->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace) {
@@ -2317,7 +2418,9 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
          }
 
       } else {
-         return; // only whitespace at the end!
+         // only whitespace at the end
+         return; 
+
       }
 
       bool isFirst;

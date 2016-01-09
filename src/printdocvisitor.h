@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -596,12 +596,15 @@ class PrintDocVisitor : public DocVisitor
             printf("docbook");
             break;
       }
+
       printf("\" width=%s height=%s>\n", qPrintable(img->width()), qPrintable(img->height()));
    }
+
    void visitPost(DocImage *) {
       indent_post();
       printf("</image>\n");
    }
+
    void visitPre(DocDotFile *df) {
       indent_pre();
       printf("<dotfile src=\"%s\">\n", qPrintable(df->name()));

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -21,22 +21,16 @@
 
 #include <stdlib.h>
 
-#include <classlist.h>
+#include <dot.h>
+
 #include <config.h>
 #include <defargs.h>
-#include <dirdef.h>
 #include <docparser.h>
-#include <dot.h>
 #include <doxy_globals.h>
-#include <filename.h>
 #include <groupdef.h>
 #include <language.h>
 #include <message.h>
-#include <memberdef.h>
-#include <memberlist.h>
 #include <membergroup.h>
-#include <namespacedef.h>
-#include <pagedef.h>
 #include <portable.h>
 #include <sortedlist.h>
 #include <util.h>
@@ -382,11 +376,11 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
       QByteArray buf;
       buf.resize(maxLineLen);
 
-      int numBytes = f.readLine(buf.data(), maxLineLen);
-      buf[numBytes - 1] = '\0';
+      int numBytes = f.readLine(buf.data(), maxLineLen);      
+      buf.resize(numBytes);
 
-      if (buf.left(5) == "<area") {
-         t << replaceRef(buf, relPath, urlOnly, context);
+      if (buf.startsWith("<area")) {
+         t << replaceRef(buf, relPath, urlOnly, context);         
       }
    }
 
@@ -784,17 +778,18 @@ void DotRunner::addJob(const QString &format, const QString &output)
    m_jobs.append(args);
 }
 
-void DotRunner::addPostProcessing(const char *cmd, const char *args)
+void DotRunner::addPostProcessing(const  QString &cmd, const  QString &args)
 {
    m_postCmd  = cmd;
    m_postArgs = args;
 }
 
 bool DotRunner::run()
-{
+{   
+   static const QString dotExe    = Config::getString("dot-path") + "dot";
+   static const bool multiTargets = Config::getBool("dot-multiple-targets");
+
    int exitCode      = 0;
-   QString dotExe    = Config::getString("dot-path") + "dot";
-   bool multiTargets = Config::getBool("dot-multiple-targets");
  
    QString dotArgs;
      
@@ -991,6 +986,8 @@ bool DotFilePatcher::run()
          break;
       }
       
+      line.resize(numBytes);
+
       int i;
       assert(numBytes < maxLineLen);
 
@@ -1443,7 +1440,8 @@ DotNode::~DotNode()
    delete m_edgeInfo;
 }
 
-void DotNode::addChild(DotNode *n, int edgeColor, int edgeStyle, const QString &edgeLab, const char *edgeURL, int edgeLabCol )
+void DotNode::addChild(DotNode *n, int edgeColor, int edgeStyle, const QString &edgeLab, 
+                  const QString &edgeURL, int edgeLabCol )
 {
    if (m_children == 0) {
       m_children = new QList<DotNode *>;
@@ -1676,7 +1674,7 @@ static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberL
       QList<MemberGroup> *mgl = ml->getMemberGroupList();
 
       if (mgl) {       
-         for (auto mg : *mgl) {
+         for (auto &mg : *mgl) {
             if (mg.members()) {
                writeBoxMemberList(t, prot, mg.members(), scope, isStatic, skipNames);
             }
@@ -1712,7 +1710,8 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
          // for each edge
          
          for (auto ei : *m_edgeInfo) {  
-            if (! ei->m_label.isEmpty()) { // labels joined by \n
+            if (! ei->m_label.isEmpty()) { 
+               // labels joined by \n
                int li = ei->m_label.indexOf('\n');
                int p = 0;
 
@@ -2189,6 +2188,7 @@ void DotNode::clearWriteFlag()
          }
       }
    }
+
    if (m_children != 0) {
      for (auto cn : *m_children) {
          if (cn->m_written) {
@@ -2202,7 +2202,8 @@ void DotNode::colorConnectedNodes(int curColor)
 {
    if (m_children) {  
       for (auto cn : *m_children) {
-         if (cn->m_subgraphId == -1) { // uncolored child node
+         if (cn->m_subgraphId == -1) { 
+            // uncolored child node
             cn->m_subgraphId = curColor;
             cn->markAsVisible();
             cn->colorConnectedNodes(curColor);            
@@ -2212,7 +2213,8 @@ void DotNode::colorConnectedNodes(int curColor)
 
    if (m_parents) {
       for (auto pn : *m_parents) {
-         if (pn->m_subgraphId == -1) { // uncolored parent node
+         if (pn->m_subgraphId == -1) { 
+            // uncolored parent node
             pn->m_subgraphId = curColor;
             pn->markAsVisible();
             pn->colorConnectedNodes(curColor);            
@@ -2223,15 +2225,16 @@ void DotNode::colorConnectedNodes(int curColor)
 
 const DotNode *DotNode::findDocNode() const
 {
-   if (!m_url.isEmpty()) {
+   if (! m_url.isEmpty()) {
       return this;
    }
 
    if (m_parents) {
       for (auto pn : *m_parents) {
-         if (!pn->m_hasDoc) {
+         if (! pn->m_hasDoc) {
             pn->m_hasDoc = true;
             const DotNode *dn = pn->findDocNode();
+
             if (dn) {
                return dn;
             }
@@ -2272,12 +2275,12 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
    int count = 0;
 
    for (auto n : *m_rootSubgraphs) {      
-      QString imgExt = Config::getEnum("dot-image-format");
+      QString imgExt   = Config::getEnum("dot-image-format");
 
       QString baseName = QString("inherit_graph_%1").arg(count++);
      
-      QString imgName = baseName + "." + imgExt;
-      QString mapName = baseName + ".map";
+      QString imgName  = baseName + "." + imgExt;
+      QString mapName  = baseName + ".map";
 
       QString absImgName  = d.absolutePath() + "/" + imgName;
       QString absMapName  = d.absolutePath() + "/" + mapName;
@@ -2594,7 +2597,7 @@ void DotClassGraph::determineTruncatedNodes(QList<DotNode *> &queue, bool includ
 
          if (n->m_children) {       
             for (auto dn : *n->m_children) {
-               if (!dn->isVisible()) {
+               if (! dn->isVisible()) {
                   truncated = true;
                } else {
                   queue.append(dn);
@@ -2669,7 +2672,8 @@ bool DotClassGraph::determineVisibleNodes(DotNode *rootNode, int maxNodes, bool 
       if (includeParents && parentQueue.count() > 0) {
          DotNode *n = parentQueue.takeAt(0);
 
-         if ((!n->isVisible() || firstNode) && n->distance() <= maxDistance) { // not yet processed
+         if ((!n->isVisible() || firstNode) && n->distance() <= maxDistance) { 
+            // not yet processed
             firstNode = false;
             int distance = n->distance();
 
@@ -2745,20 +2749,26 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
    }
 
    if (m_graphType == DotNode::Collaboration) {
-      // ---- Add usage relations
+      // Add usage relations
 
-      UsesClassDict *dict = base ? cd->usedImplementationClasses() : cd->usedByImplementationClasses();
+      QHash<QString, UsesClassDef> *dict;
+
+      if (base) { 
+         dict = cd->usedImplementationClasses(); 
+      } else {
+         dict = cd->usedByImplementationClasses();
+      }
 
       if (dict) {
         
-         for (auto ucd : *dict) {
+         for (auto &ucd : *dict) {
             QString label;
                      
             bool first    = true;
             int count     = 0;
             int maxLabels = 10;
            
-            for (auto s : ucd.m_accessors ) {
+            for (auto &s : ucd.m_accessors ) {
 
                if (count >= maxLabels) {
                   break;
@@ -3245,15 +3255,15 @@ void DotInclDepGraph::buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int dis
 
    if (includeFiles) {
     
-      for (auto ii : *includeFiles) {
-         QSharedPointer<FileDef> bfd = ii.fileDef;
-         QString in  = ii.includeName;
+      for (auto &item : *includeFiles) {
+         QSharedPointer<FileDef> bfd = item.fileDef;
+         QString in  = item.includeName;
  
          bool doc = true, src = false;
 
          if (bfd) {
             in  = bfd->getFilePath();
-            doc = bfd->isLinkable() && !bfd->isHidden();
+            doc = bfd->isLinkable() && ! bfd->isHidden();
             src = bfd->generateSourceFile();
          }
 
@@ -3264,13 +3274,14 @@ void DotInclDepGraph::buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int dis
                url = bfd->getOutputFileBase();
             }
 
-            if (!doc && src) {
+            if (! doc && src) {
                url = bfd->getSourceFileBase();
             }
 
             DotNode *bn  = m_usedNodes->value(in);
 
-            if (bn) { // file is already a node in the graph
+            if (bn) { 
+               // file is already a node in the graph
                n->addChild(bn, 0, 0, 0);
                bn->addParent(n);
                bn->setDistance(distance);
@@ -3283,7 +3294,7 @@ void DotInclDepGraph::buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int dis
                   tmp_url = doc || src ? bfd->getReference() + "$" + url : QString();
                   tooltip = bfd->briefDescriptionAsTooltip();
                }
-               bn = new DotNode(m_curNodeNumber++, ii.includeName, tooltip, tmp_url, false, QSharedPointer<ClassDef>());
+               bn = new DotNode(m_curNodeNumber++, item.includeName, tooltip, tmp_url, false, QSharedPointer<ClassDef>());
 
                n->addChild(bn, 0, 0, 0);
                bn->addParent(n);
@@ -3330,7 +3341,7 @@ void DotInclDepGraph::determineTruncatedNodes(QList<DotNode *> &queue)
 
          if (n->m_children) {           
             for (auto dn : *n->m_children) {
-               if (!dn->isVisible()) {
+               if (! dn->isVisible()) {
                   truncated = true;
 
                } else {
@@ -3561,7 +3572,8 @@ void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int dist
             uniqueId = rmd->getReference() + "$" + rmd->getOutputFileBase() + "#" + rmd->anchor();
             DotNode *bn  = m_usedNodes->value(uniqueId);
 
-            if (bn) { // file is already a node in the graph
+            if (bn) { 
+               // file is already a node in the graph
                n->addChild(bn, 0, 0, 0);
                bn->addParent(n);
                bn->setDistance(distance);
@@ -3576,6 +3588,7 @@ void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int dist
                }
 
                QString tooltip = rmd->briefDescriptionAsTooltip();
+
                bn = new DotNode(m_curNodeNumber++, linkToText(rmd->getLanguage(), name, false), tooltip, uniqueId, false);
                n->addChild(bn, 0, 0, 0);
                bn->addParent(n);
@@ -3595,7 +3608,7 @@ void DotCallGraph::determineVisibleNodes(QList<DotNode *> &queue, int &maxNodes)
       static int maxDistance = Config::getInt("dot-graph-max-depth");
       DotNode *n = queue.takeAt(0);
 
-      if (!n->isVisible() && n->distance() <= maxDistance) { // not yet processed
+      if (! n->isVisible() && n->distance() <= maxDistance) { // not yet processed
          n->markAsVisible();
          maxNodes--;
 
@@ -3619,7 +3632,7 @@ void DotCallGraph::determineTruncatedNodes(QList<DotNode *> &queue)
 
          if (n->m_children) {          
             for (auto dn : *n->m_children) {
-               if (!dn->isVisible()) {
+               if (! dn->isVisible()) {
                   truncated = true;
                } else {
                   queue.append(dn);
@@ -4202,7 +4215,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    // Write parents
    SortedList<QSharedPointer<GroupDef>> *groups = gd->partOfGroups();
 
-   if ( groups ) {      
+   if (groups) {      
       for (auto d : *groups) {
          DotNode *nnode = m_usedNodes->value(d->name());
 
@@ -4263,7 +4276,8 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    }
 
    // Add namespaces
-   if ( gd->getNamespaces() && gd->getNamespaces()->count() ) {     
+   if ( gd->getNamespaces() && gd->getNamespaces()->count() ) { 
+    
       for (auto def : *gd->getNamespaces()) {
          tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tnamespace );
@@ -4272,6 +4286,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
 
    // Add files
    if ( gd->getFiles() && gd->getFiles()->count() ) {     
+
       for (auto def : *gd->getFiles()) {
          tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tfile );
@@ -4280,7 +4295,6 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
 
    // Add pages
    if ( gd->getPages() && gd->getPages()->count() ) {
-
 
       for (auto def : *gd->getPages()) {
          tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
@@ -4319,7 +4333,7 @@ DotGroupCollaboration::Edge *DotGroupCollaboration::addEdge(DotNode *x_pNStart, 
 
    // search a existing link 
    for (auto item : m_edges) {
-      if ( item->pNStart == x_pNStart && newEdge->pNEnd == x_pNEnd && item->eType == x_eType) {
+      if (item->pNStart == x_pNStart && newEdge->pNEnd == x_pNEnd && item->eType == x_eType) {
          // edge already found
          newEdge = item;
          break;
@@ -4747,9 +4761,9 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
             QString relationName;
             relationName = QString("dir_%1_%2").arg(dir->dirCount(), 6, 10, QChar('0')).arg(usedDir->dirCount(), 6, 10, QChar('0'));
 
-            if (Doxy_Globals::dirRelations.find(relationName) == 0) {
+            if (Doxy_Globals::dirRelations.find(relationName) == nullptr) {
                // new relation
-               Doxy_Globals::dirRelations.insert(relationName, QSharedPointer<DirRelation>(new DirRelation(relationName, dir, udir)));
+               Doxy_Globals::dirRelations.insert(relationName, QMakeShared<DirRelation>(relationName, dir, udir));
             }
 
             int nrefs = udir->filePairs().count();

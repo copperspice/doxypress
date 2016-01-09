@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -24,8 +24,6 @@
 #include <types.h>
 
 #include <definition.h>
-#include <filedef.h>
-#include <memberdef.h>
 #include <outputgen.h>
 #include <parser_base.h>
 

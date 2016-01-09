@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -17,12 +17,13 @@
 
 #include <QFileInfo>
 
+#include <rtfdocvisitor.h>
+
 #include <config.h>
 #include <dia.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
-#include <filedef.h>
 #include <htmlentity.h>
 #include <language.h>
 #include <msc.h>
@@ -32,7 +33,6 @@
 #include <parser_base.h>
 #include <plantuml.h>
 #include <rtfstyle.h>
-#include <rtfdocvisitor.h>
 #include <util.h>
 
 // #define DBG_RTF(x) m_t << x
@@ -1065,7 +1065,9 @@ void RTFDocVisitor::visitPre(DocHtmlRow *r)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlRow)}\n");
+
    uint i, columnWidth = r->numCells() > 0 ? rtf_pageWidth / r->numCells() : 10;
    m_t << "\\trowd \\trgaph108\\trleft-108"
        "\\trbrdrt\\brdrs\\brdrw10 "
@@ -1074,9 +1076,10 @@ void RTFDocVisitor::visitPre(DocHtmlRow *r)
        "\\trbrdrr\\brdrs\\brdrw10 "
        "\\trbrdrh\\brdrs\\brdrw10 "
        "\\trbrdrv\\brdrs\\brdrw10 " << endl;
+
    for (i = 0; i < r->numCells(); i++) {
       if (r->isHeading()) {
-         m_t << "\\clcbpat16"; // set cell shading to light grey (color 16 in the clut)
+         m_t << "\\clcbpat16"; // set cell shading to light gray (color 16 in the clut)
       }
       m_t << "\\clvertalt\\clbrdrt\\brdrs\\brdrw10 "
           "\\clbrdrl\\brdrs\\brdrw10 "

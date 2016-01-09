@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -1104,7 +1104,7 @@ class Translator_Cs : public Translator
          "<li>%A filled gray box represents the struct or class for which the "
          "graph is generated.</li>\n"
          "<li>%A box with a black border denotes a documented struct or class.</li>\n"
-         "<li>%A box with a grey border denotes an undocumented struct or class.</li>\n"
+         "<li>%A box with a gray border denotes an undocumented struct or class.</li>\n"
          "<li>%A box with a red border denotes a documented struct or class for "
          "which not all inheritance/containment relations are shown. %A graph is "
          "truncated if it does not fit within the specified boundaries.</li>\n"
@@ -1813,8 +1813,7 @@ class Translator_Cs : public Translator
    }
 
    /*! This is used for translation of the word that will possibly
-    *  be followed by a single name or by a list of names
-    *  of the category.
+    *  be followed by a single name or by a list of names of the category.
     */
    virtual QString trModule(bool first_capital, bool singular) {        
 

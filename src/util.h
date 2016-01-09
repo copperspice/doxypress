@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -34,32 +34,21 @@
 #include <groupdef.h>
 #include <membergroup.h>
 #include <pagedef.h>
-#include <stringmap.h>
 #include <outputlist.h>
+#include <stringmap.h>
+#include <sortedlist_fwd.h>
 
 class BaseClassDef;
-class ClassSDict;
 class Definition;
-class ExampleSDict;
 class FileNameDict;
 class MemberList;
 class MemberDef;
-class MemberNameInfoSDict;
 class NamespaceDef;
-class NamespaceSDict;
 class OutputDocInterface;
 
 struct ListItemInfo;
 struct SectionInfo;
 struct TagInfo;
-
-template <class T>
-class SortedList;
-
-
-/*! \file
- *  \brief A bunch of utility functions.
- */
 
 /** Abstract interface for a hyperlinked text fragment. */
 class TextGeneratorIntf
@@ -182,7 +171,7 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
 
 QString showFileDefMatches(const FileNameDict *fnDict, const QString &xName);
 
-int guessSection(const QString &name);
+int determineSection(const QString &name);
 
 QString argListToString(ArgumentList *al, bool useCanonicalType = false, bool showDefVals = true);
 QString tempArgListToString(const ArgumentList *al, SrcLangExt lang);
@@ -272,14 +261,14 @@ QString rtfFormatBmkStr(const QString &name);
 
 QString linkToText(SrcLangExt lang, const QString &link, bool isFileName);
 
-QString stripExtension(QString fName);
+bool checkExtension(const QString &fName, const QString &ext);
+QString stripExtensionGeneral(const QString &fName, const QString &ext);
+QString stripExtension(const QString &fName);
 
+QString renameNS_Aliases(const QString &scope, bool fromTo = true);
 void replaceNamespaceAliases(QString &scope, int i);
 
 int isAccessibleFrom(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item);
-
-int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-                  QSharedPointer<Definition> item, const QString &explicitScopePart);
 
 int computeQualifiedIndex(const QString &name);
 
@@ -293,11 +282,7 @@ QString stripPath(const QString &s);
 bool containsWord(const QString &s, const QString &word);
 bool findAndRemoveWord(QString &s, const QString &word);
 
-QString stripLeadingAndTrailingEmptyLines(const QString &s, int &docLine);
-
-bool updateLanguageMapping(const QString &extension, const QString &parser);
-SrcLangExt getLanguageFromFileName(const QString &fileName);
-void initDefaultExtensionMapping();
+QString trimEmptyLines(const QString &s, int &docLine);
 
 QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QByteArray &name);
 bool checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,const QString &name);
@@ -356,7 +341,8 @@ bool protectionLevelVisible(Protection prot);
 
 QString stripIndentation(const QString &s);
 
-bool fileVisibleInIndex(QSharedPointer<FileDef> fd, bool &genSourceFile);
+bool docFileVisibleInIndex(QSharedPointer<FileDef> fd);
+bool srcFileVisibleInIndex(QSharedPointer<FileDef> fd);
 
 void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDef> dst);
 
@@ -374,6 +360,9 @@ QString stripPrefix(QString input, const QByteArray &prefix);
 QByteArray stripPrefix(QByteArray input, const QByteArray &prefix);
 
 Protection getProtection(const QString &data);
+
+// method located in doxy_setup.cpp
+SrcLangExt getLanguageFromFileName(const QString &fileName);
 
 #endif
 

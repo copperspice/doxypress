@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -23,16 +23,12 @@
 #include <stdlib.h>
 
 #include <clang-c/Index.h>
+#include <parser_clang.h>
 
 #include <config.h>
 #include <doxy_globals.h>
-#include <filedef.h>
-#include <filename.h>
 #include <message.h>
-#include <memberdef.h>
-#include <membername.h>
 #include <outputgen.h>
-#include <parser_clang.h>
 #include <qfileinfo.h>
 #include <stringmap.h>
 #include <tooltip.h>
@@ -725,7 +721,7 @@ void ClangParser::linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> f
    QSharedPointer<FileDef> ifd;
 
    if (! incName.isEmpty()) {     
-      QSharedPointer<FileName> fn = Doxy_Globals::inputNameDict->find(incName);
+      QSharedPointer<FileNameList> fn = Doxy_Globals::inputNameDict->find(incName);
 
       if (fn) {
          bool found = false;

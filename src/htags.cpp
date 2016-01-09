@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -21,10 +21,11 @@
 #include <stdio.h>
 
 #include <htags.h>
-#include <util.h>
-#include <message.h>
+
 #include <config.h>
+#include <message.h>
 #include <portable.h>
+#include <util.h>
 
 bool Htags::useHtags = false;
 
@@ -44,8 +45,8 @@ bool Htags::execute(const QString &htmldir)
 
    static QByteArray htagsOptions  = "";       // Config::getString("htags-options");
 
-   static QString projectName   = Config::getString("project-name");
-   static QString projectNumber = Config::getString("project-version");
+   static QString projectName    = Config::getString("project-name");
+   static QString projectVersion = Config::getString("project-version");
 
    QByteArray cwd = QDir::currentPath().toUtf8();
 
@@ -80,13 +81,13 @@ bool Htags::execute(const QString &htmldir)
       commandLine += htagsOptions;
    }
 
-   if (!projectName.isEmpty()) {
+   if (! projectName.isEmpty()) {
       commandLine += "-t \"";
       commandLine += projectName;
 
-      if (!projectNumber.isEmpty()) {
+      if (! projectVersion.isEmpty()) {
          commandLine += '-';
-         commandLine += projectNumber;
+         commandLine += projectVersion;
       }
       commandLine += "\" ";
    }

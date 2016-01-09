@@ -1,0 +1,37 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2016 Barbara Geller & Ansel Sermersheim
+* All rights reserved.
+*
+*
+* GNU Free Documentation License
+* This file may be used under the terms of the GNU Free Documentation
+* License version 1.3 as published by the Free Software Foundation
+* and appearing in the file included in the packaging of this file.
+*
+*
+*************************************************************************/
+
+/*!
+\page note-test-one  Note - Test One
+
+This information pertains to building Diamond to run on Windows.
+
+<h3>Test 1</h3>
+
+\note{ Now we have a comma, and yes there are more words after the comma }
+
+
+<h3>Test 2</h3>
+
+Some information goes here. 
+
+\note{ All of the Autotool commands are run from a Bash prompt. For information about installing a Bourne
+shell on Windows refer to require-win.}
+
+(1)&nbsp; Run Autoconf from your project directory with the syntax shown below. This step is run once or anytime
+configure.ac is modified. When this command runs successfully, there is no output displayed.
+
+
+*/
+

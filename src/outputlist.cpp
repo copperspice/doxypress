@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -16,18 +16,12 @@
 *************************************************************************/
 
 #include <outputlist.h>
-#include <outputgen.h>
+
 #include <config.h>
-#include <message.h>
 #include <definition.h>
 #include <docparser.h>
-
-/*! \file
- *  This class represents a list of output generators that work in "parallel".
- *  The class only knows about the abstract base class OutputGenerators.
- *  All output is produced by calling a method of this class, which forwards
- *  the call to all output generators.
- */
+#include <message.h>
+#include <outputgen.h>
 
 OutputList::OutputList(bool)
 {
@@ -120,12 +114,13 @@ bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPoin
    }
 
    if (count == 0) {
-      return true;   // no output formats enabled.
+      return true;   // no output formats enabled
    }
 
    DocRoot *root = 0;
    root = validatingParseDoc(fileName, startLine, ctx, md, docStr, indexWords, isExample, 
-                             exampleName, singleLine, linkFromIndex);
+                  exampleName, singleLine, linkFromIndex);
+
    writeDoc(root, ctx, md);
 
    bool isEmpty = root->isEmpty();
@@ -137,6 +132,7 @@ bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPoin
 void OutputList::writeDoc(DocRoot *root, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
    for (auto item : m_outputs) {
+
       if (item->isEnabled()) {
          item->writeDoc(root, ctx, md);
       }

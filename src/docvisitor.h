@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -98,9 +98,8 @@ class DocVisitor
       return m_id;
    }
 
-   /*! @name Visitor functions for leaf nodes
-    *  @{
-    */
+   // @name Visitor functions for leaf nodes
+   
    virtual void visit(DocWord *) = 0;
    virtual void visit(DocWhiteSpace *) = 0;
    virtual void visit(DocSymbol *) = 0;
@@ -117,11 +116,9 @@ class DocVisitor
    virtual void visit(DocIndexEntry *) = 0;
    virtual void visit(DocSimpleSectSep *) = 0;
    virtual void visit(DocCite *) = 0;
-   /*! @} */
 
-   /*! @name Visitor functions for internal nodes
-    *  @{
-    */
+
+   //  @name Visitor functions for internal nodes   
    virtual void visitPre(DocAutoList *) = 0;
    virtual void visitPost(DocAutoList *) = 0;
    virtual void visitPre(DocAutoListItem *) = 0;
@@ -195,8 +192,7 @@ class DocVisitor
    virtual void visitPre(DocHtmlBlockQuote *) = 0;
    virtual void visitPost(DocHtmlBlockQuote *) = 0;   
    virtual void visitPre(DocParBlock *) = 0;
-   virtual void visitPost(DocParBlock *) = 0;
-   /*! @} */
+   virtual void visitPost(DocParBlock *) = 0;   
 };
 
 #endif

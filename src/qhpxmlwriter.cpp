@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 2008 by Sebastian Pipping. 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
@@ -80,7 +80,7 @@ void QhpXmlWriter::close(const QString &elementName)
    newLine();
 }
 
-void QhpXmlWriter::declaration(char const *version, char const *encoding)
+void QhpXmlWriter::declaration(const QString &version, const QString &encoding)
 {
    m_out << "<?xml version=\"" << version << "\" encoding=\"" << encoding << "\"?>";
    newLine();
@@ -91,9 +91,11 @@ void QhpXmlWriter::indent()
    if (m_curLineIndented) {
       return;
    }
+
    for (int i = 0; i < m_indentLevel; i++) {
       m_out << "  ";
    }
+
    m_curLineIndented = true;
 }
 

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -55,10 +55,5 @@ class MakeFileParser : public ParserInterface
         void endFontClass();
         void startFontClass(const QString &s);
 };
-
-extern void parseMakeCode(CodeOutputInterface &, const QString &, const QString &,
-                          bool, const QString &, FileDef *fd, int startLine, int endLine, bool inlineFragment,
-                          MemberDef *memberDef, bool showLineNumbers, Definition *searchCtx, bool collectXRefs);
-
 
 #endif

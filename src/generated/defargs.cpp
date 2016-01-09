@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -1687,9 +1687,10 @@ YY_DECL {
                         int bi = g_curArgTypeName.indexOf('(');
                         int fi = bi - 1;
                         
-                        while (fi >= 0 && isId(g_curArgTypeName.at(fi))) {
+                        while (fi >= 0 && (isId(g_curArgTypeName.at(fi)) || g_curArgTypeName.at(fi)==':')) {
                            fi--;
                         }
+
                         if (fi >= 0) {
                            a->type  = g_curArgTypeName.left(fi + 1);
                            a->name  = g_curArgTypeName.mid(fi + 1, bi - fi - 1).trimmed();
@@ -1697,6 +1698,7 @@ YY_DECL {
                         } else {
                            a->type = g_curArgTypeName;
                         }
+
                      } else if (i >= 0 && g_curArgTypeName.at(i) != ':') {
                         // type contains a name
                         a->type = removeRedundantWhiteSpace(g_curArgTypeName.left(i + 1)).trimmed();
@@ -1715,20 +1717,21 @@ YY_DECL {
 
                         }
 
-                        if (a->type.mid(sv) == "struct" || a->type.mid(sv) == "union"     ||
-      						    a->type.mid(sv) == "class"  || a->type.mid(sv) == "typename"  ||
+                        if (a->type.mid(sv, 6) == "struct" || a->type.mid(sv, 5) == "union"     ||
+      						    a->type.mid(sv, 5) == "class"  || a->type.mid(sv, 8) == "typename"  ||
                             a->type == "const" || a->type == "volatile") {
 
                            a->type = a->type + " " + a->name;
                            a->name.resize(0);
                         }
 
-
-                     } else { // assume only the type was specified, try to determine name later
+                     } else { 
+                        // assume only the type was specified, try to determine name later
                         a->type = removeRedundantWhiteSpace(g_curArgTypeName);
                      }
 
-                     if (!a->type.isEmpty() && a->type.at(0) == '$') { // typeless PHP name?
+                     if (! a->type.isEmpty() && a->type.at(0) == '$') { 
+                        // typeless PHP name?
                         a->name = a->type;
                         a->type = "";
                      }

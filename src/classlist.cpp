@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -15,8 +15,9 @@
  *
 *************************************************************************/
 
-#include <arguments.h>
 #include <classlist.h>
+
+#include <arguments.h>
 #include <config.h>
 #include <defargs.h>
 #include <groupdef.h>
@@ -90,7 +91,7 @@ void ClassSDict::writeDeclaration(OutputList &ol, const ClassDef::CompoundType *
    }
 }
 
-void ClassSDict::writeDocumentation(OutputList &ol, Definition *container)
+void ClassSDict::writeDocumentation(OutputList &ol, QSharedPointer<Definition> container)
 {
    static bool fortranOpt = Config::getBool("optimize-fortran");
 
@@ -143,8 +144,7 @@ void GenericsSDict::insert(const QString &key, QSharedPointer<ClassDef> cd)
 
    if (collection == 0) {
       // new hash
-
-      collection = QSharedPointer<QHash<long, QSharedPointer<ClassDef>>> (new QHash<long, QSharedPointer<ClassDef>>());       
+      collection = QMakeShared<QHash<long, QSharedPointer<ClassDef>>>();       
 
       // add new hash to m_dict
       m_dict.insert(key.left(i), collection);

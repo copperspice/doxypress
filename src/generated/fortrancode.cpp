@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -25907,21 +25907,14 @@ char *fortrancodeYYtext;
 #include <ctype.h>
 #include <stdio.h>
 
-#include "entry.h"
+#include <config.h>
+#include <defargs.h>
 #include <doxy_globals.h>
-#include "message.h"
-#include "outputlist.h"
-#include "membername.h"
-#include "searchindex.h"
-#include "defargs.h"
-#include "memberlist.h"
-#include "config.h"
-#include "groupdef.h"
-#include "classlist.h"
-#include "filedef.h"
-#include "namespacedef.h"
-#include "tooltip.h"
-#include "util.h"
+#include <entry.h>
+#include <message.h>
+#include <outputlist.h>
+#include <tooltip.h>
+#include <util.h>
 
 // Toggle for some debugging info
 //#define DBG_CTX(x) fprintf x
@@ -25955,16 +25948,6 @@ class UseEntry
    QStringList onlyNames;   // entries of the ONLY-part
 };
 
-/**
-  module name -> list of ONLY/remote entries
-  (module name = name of the module, which can be accessed via use-directive)
-*/
-class UseSDict : public StringMap<UseEntry *>
-{
- public:
-   UseSDict() {}
-};
-
 class Compare 
 { 
    public:      
@@ -25979,10 +25962,11 @@ class Compare
 class Scope
 {
  public:
+   Scope() {}  
+ 
    QStringList useNames;                         //!< contains names of used modules
    std::set<QString, Compare> localVars;         //!< contains names of local variables
-
-   Scope() {}      
+      
 };
 
 static QString     docBlock;                     //!< contents of all lines of a documentation block
@@ -28774,19 +28758,3 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
 
    return;
 }
-
-#if ! defined(YY_FLEX_SUBMINOR_VERSION)
-extern "C" { // some bogus code to keep the compiler happy
-   void fortrancodeYYdummy()
-   {
-      yy_flex_realloc(0, 0);
-   }
-}
-#else
-extern "C" { // some bogus code to keep the compiler happy
-   void fortrancodeYYdummy()
-   {
-      yy_top_state();
-   }
-}
-#endif

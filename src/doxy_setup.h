@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch. 
  * All rights reserved.    
  *
@@ -18,6 +18,7 @@
 #ifndef DOXY_SETUP_H
 #define DOXY_SETUP_H
 
+#include <QFile>
 #include <QString>
 #include <QStringList>
 
@@ -58,8 +59,13 @@ void searchInputFiles();
 void processFiles();
 void generateOutput();
 
-void readAliases();
 void readFormulaRepository();
 void shutDownDoxypress();
+
+void initDefaultLangMapping();
+void initUserLangMapping();
+
+bool openOutputFile(const QString &outFile, QFile &f);
+bool updateLanguageMapping(const QString &extension, const QString &parser, bool userParser = false);
 
 #endif

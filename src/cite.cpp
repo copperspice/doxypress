@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -19,12 +19,13 @@
 #include <QFile>
 
 #include <cite.h>
-#include <portable.h>
+
 #include <config.h>
-#include <message.h>
-#include <util.h>
 #include <language.h>
+#include <message.h>
+#include <portable.h>
 #include <resourcemgr.h>
+#include <util.h>
 
 const QString CiteConsts::fileName("citelist");
 const QString CiteConsts::anchorPrefix("CITEREF_");
@@ -146,7 +147,7 @@ void CiteDict::generatePage() const
    f.setFileName(citeListFile);
 
    if ( ! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(citeListFile), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(citeListFile), f.error());
    }
 
    QTextStream t(&f);
@@ -263,12 +264,12 @@ void CiteDict::generatePage() const
       int i;
 
       // determine text to use at the location of the @cite command
-      if (insideBib && (i = line.indexOf("<a name=\"CITEREF_")) != -1) {
+      if (insideBib && (i = line.indexOf("name=\"CITEREF_")) != -1) {
          int j = line.indexOf("\">[");
          int k = line.indexOf("]</a>");
 
          if (j != -1 && k != -1) {
-            QString label  = line.mid(i + 17, j - i - 17);
+            QString label  = line.mid(i + 14, j - i - 14);
             QString number = line.mid(j + 2, k - j - 1);
 
             CiteInfo *ci = this->find(label);

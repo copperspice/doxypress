@@ -1,0 +1,100 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2016 Barbara Geller & Ansel Sermersheim
+* All rights reserved.
+*
+*
+* GNU Free Documentation License
+* This file may be used under the terms of the GNU Free Documentation
+* License version 1.3 as published by the Free Software Foundation
+* and appearing in the file included in the packaging of this file.
+*
+*
+*************************************************************************/
+
+/**
+\page table-test  Table Test (blank rows) 
+
+The following table has blank rows in the source. This caused layout issues and has been resolved and works properly in DoxyPress. The blank rows are not visible
+in the table outoput as shown below.
+
+<br>
+ 
+<table class="generic"> 
+   <tr><th width="225">System</th><th>Information</th></tr>
+ 
+   <tr>
+      <td>\subpage metaobjects-c  "Meta Object System"</td>
+      <td>Overview of the Meta Object System and introspection</td>
+   </tr> 
+
+   <tr>
+      <td>\subpage object-model-c "Object Model"</td>
+      <td>Overview of the Object Model System</td>
+   </tr> 
+
+   <tr>
+      <td>\subpage object-trees-c</td>
+      <td>Overview about the parent-child relationship and object ownership</td>
+
+   </tr>  
+   <tr>
+      <td>\subpage  properties-c</td>
+      <td>Overview of the Property System</td>
+   </tr> 
+
+   <tr>
+      <td>\subpage signals-slots-c</td>
+      <td>Overview of Signals and Slots</td>
+   </tr>
+</table>
+
+*/
+
+
+/**  
+\page metaobjects-c Meta Object System
+
+Meta object system documentation goes here <b>. . .</b> 
+
+*/
+
+
+/**  
+\page object-model-c  Object Model
+
+Object model documentation goes here <b>. . .</b> 
+
+
+*/
+
+
+/**  
+\page object-trees-c Object Trees
+
+Documentation goes here <b>. . .</b>  
+
+
+*/
+
+
+/**  
+\page properties-c Property System
+
+Documentation goes here <b>. . .</b>  
+
+
+*/
+
+
+/**  
+\page signals-slots-c Signals & Slots
+ 
+Signals & Slots documentation goes here<b>. . .</b> 
+
+
+*/
+
+
+
+

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -56,8 +56,7 @@ struct TagInfo {
    QString anchor;
 };
 
-/** Represents an unstructured piece of information, about an
- *  entity found in the sources.
+/** Represents some information, about an entity found in the source.
  *
  *  parseMain() in scanner.l will generate a tree of these entries.
  */
@@ -65,7 +64,7 @@ class Entry
 {
  public:
 
-   /*! Kind of entries that are supported */
+   /*! Kind of entries which are supported */
    enum Sections {
       CLASS_SEC        = 0x00000001,
       NAMESPACE_SEC    = 0x00000010,
@@ -186,7 +185,8 @@ class Entry
 
       SpecifierFlags() {
          // ensures this struc has no virtual methods
-         static_assert(std::is_standard_layout<SpecifierFlags>::value == true, "Struct SpecifierFlags can not have virutal methods");
+         static_assert(std::is_standard_layout<SpecifierFlags>::value == true, 
+                  "Struct SpecifierFlags can not have virutal methods");
 
          // set ever bit field to zero or false
          memset(this, 0, sizeof(SpecifierFlags));
@@ -330,23 +330,23 @@ class Entry
    int  startColumn;         //!< start column of entry in the source
 
    bool stat;                //!< static ?
-   bool explicitExternal;    //!< explicitly defined as external?
+   bool explicitExternal;    //!< explicitly defined as external ?
    bool proto;               //!< prototype ?
-   bool subGrouping;         //!< automatically group class members?
-   bool callGraph;           //!< do we need to draw the call graph?
-   bool callerGraph;         //!< do we need to draw the caller graph?
+   bool subGrouping;         //!< automatically group class members ?
+   bool callGraph;           //!< do we need to draw the call graph ?
+   bool callerGraph;         //!< do we need to draw the caller graph ?
   
-   QList<ArgumentList> *tArgLists;    //!< template argument declarations
-   QList<BaseInfo>      extends;      //!< list of base classes
-   QList<Grouping>     *groups;       //!< list of groups this entry belongs to
-   QList<SectionInfo>  *anchors;      //!< list of anchors defined in this entry
-   QList<ListItemInfo> *sli;          //!< special lists (test/todo/bug/deprecated/..) this entry is in
+   QList<ArgumentList>   *tArgLists;    //!< template argument declarations
+   QList<BaseInfo>        extends;      //!< list of base classes
+   QList<Grouping>       *groups;       //!< list of groups this entry belongs to
+   QList<SectionInfo>    *anchors;      //!< list of anchors defined in this entry
+   QList<ListItemInfo>   *sli;          //!< special lists (test/todo/bug/deprecated/..) 
 
    QString	 type;        //!< member type
    QString	 name;        //!< member name
    QString   args;        //!< member argument string
    QString   bitfields;   //!< member's bit fields  
-   QString	 program;     //!< the program text
+   QString	 m_program;   //!< the program text
    QString   initializer; //!< initial value (for variables)
    QString   includeFile; //!< include file (2 arg of \\class, must be unique)
    QString   includeName; //!< include name (3 arg of \\class)
@@ -381,18 +381,23 @@ class Entry
    static int  num;        //!< counts the total number of entries
 
    /// return the command name used to define GROUPDOC_SEC
-   const char *groupDocCmd() const {
+   QString groupDocCmd() const {
+
       switch ( groupDocType ) {
          case GROUPDOC_NORMAL:
             return "\\defgroup";
+
          case GROUPDOC_ADD:
             return "\\addgroup";
+
          case GROUPDOC_WEAK:
             return "\\weakgroup";
+
          default:
             return "unknown group command";
       }
    }
+
    Grouping::GroupPri_t groupingPri() const {
       if ( section != GROUPDOC_SEC ) {
          return Grouping::GROUPING_LOWEST;

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -19,9 +19,10 @@
 
 #include <stdlib.h>
 
+#include <entry.h>
+
 #include <arguments.h>
 #include <doxy_globals.h>
-#include <entry.h>
 #include <filestorage.h>
 #include <marshal.h>
 #include <section.h>
@@ -77,7 +78,7 @@ Entry::Entry(const Entry &e)
    argList     = e.argList; 
    tArgLists   = 0;     
    
-   program     = e.program;
+   m_program    = e.m_program;
    initializer = e.initializer;
    includeFile = e.includeFile;
    includeName = e.includeName;
@@ -174,24 +175,27 @@ Entry::~Entry()
    num--;
 }
 
-void Entry::addSubEntry(QSharedPointer<Entry> current, QSharedPointer<Entry> self)
+void Entry::addSubEntry(QSharedPointer<Entry> child, QSharedPointer<Entry> self)
 {
    if (self != this) {
       throw std::runtime_error("Internal Issue: passed parameter was not equal to the current object (Entry::addSubEntry)");
    }
 
-   current->m_parent = self; 
-   m_sublist.append(current);
+   child->m_parent = self; 
+   m_sublist.append(child);
 }
 
 void Entry::reset()
 {
+   static bool dotCallGraph = Config::getBool("dot-call");
+   static bool dotCalledBy  = Config::getBool("dot-called-by");
+   
    name.resize(0);
    type.resize(0);
    args.resize(0);
    bitfields.resize(0);
    exception.resize(0);
-   program.resize(0);
+   m_program.resize(0);
    includeFile.resize(0);
    includeName.resize(0);
    doc.resize(0);
@@ -216,8 +220,8 @@ void Entry::reset()
    endBodyLine = -1;
    mGrpId = -1;
 
-   callGraph   = false;
-   callerGraph = false;
+   callGraph   = dotCallGraph;
+   callerGraph = dotCalledBy;
 
    section = Entry::EMPTY_SEC;
    mtype   = Method;
@@ -228,7 +232,7 @@ void Entry::reset()
   
    m_specFlags = Entry::SpecifierFlags{};
 
-   lang = SrcLangExt_Unknown;
+   lang         = SrcLangExt_Unknown;
    hidden       = false;
    artificial   = false;
    subGrouping  = true;

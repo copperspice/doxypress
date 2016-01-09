@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -129,7 +129,10 @@ enum CommandType {
    CMD_ENDUML       = 102,
    CMD_SETSCOPE     = 103,
    CMD_ANCHORNAME   = 104,
-   CMD_SORTID       = 105
+   CMD_SORTID       = 105,
+   CMD_PUNT         = 106,
+   CMD_PLUS         = 107,
+   CMD_MINUS        = 108
 };
 
 enum HtmlTagType {
@@ -202,6 +205,7 @@ class Mapper
    Mapper(const CommandMap *cm, bool caseSensitive);
 
    int map(const QString &n);
+   QString map(const int n);
 
  private:
    QHash<QString, int> m_map;

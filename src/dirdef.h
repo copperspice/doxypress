@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -23,11 +23,11 @@
 #include <QTextStream>
 
 #include <definition.h>
-#include <stringmap.h>
+#include <filenamelist.h>
 #include <sortedlist.h>
+#include <stringmap.h>
 
 class ClassSDict;
-class FileDef;
 class OutputList;
 class UsedDir;
 
@@ -163,17 +163,6 @@ class FilePair
    QSharedPointer<FileDef> m_dst;
 };
 
-/** A sorted dictionary of FilePair objects. */
-class FilePairDict : public StringMap<QSharedPointer<FilePair>>
-{
- public:
-   // CopperSpice - can add isCase 
-   FilePairDict() : StringMap<QSharedPointer<FilePair>>() {}
-
- private:
-   int compareMapValues(const QSharedPointer<FilePair> &item1, const QSharedPointer<FilePair> &item2) const override;
-};
-
 /** Usage information of a directory. */
 class UsedDir
 {
@@ -229,22 +218,8 @@ class DirRelation
    UsedDir *m_dst;
 };
 
-
-/** A sorted dictionary of DirDef objects. */
-class DirSDict : public StringMap<QSharedPointer<DirDef>>
-{
- public:
-   // CopperSpice - can add isCase
-   DirSDict() : StringMap<QSharedPointer<DirDef>>() {}
-
-   int compareMapValues(const QSharedPointer<DirDef> &item1, const QSharedPointer<DirDef> &item2) const override {
-      return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
-   }
-};
-
 void buildDirectories();
 void generateDirDocs(OutputList &ol);
 void computeDirDependencies();
-void writeDirDependencyGraph(const char *file);
 
 #endif

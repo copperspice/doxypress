@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -154,12 +154,12 @@ class LatexDocVisitor : public DocVisitor
 
    void startMscFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endMscFile(bool hasCaption);
-   void writeMscFile(const QString &fileName);
+   void writeMscFile(const QString &fileName, DocVerbatim *s);
 
    void startDiaFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endDiaFile(bool hasCaption);
-   void writeDiaFile(const QString &fileName);
-   void writePlantUMLFile(const QString &fileName);
+   void writeDiaFile(const QString &fileName, DocVerbatim *s);
+   void writePlantUMLFile(const QString &fileName, DocVerbatim *s);
 
    void pushEnabled();
    void popEnabled();
@@ -180,6 +180,7 @@ class LatexDocVisitor : public DocVisitor
    int m_currentColumn;
    bool m_inRowspan;
    bool m_inColspan;
+   bool m_firstRow;
 };
 
 #endif

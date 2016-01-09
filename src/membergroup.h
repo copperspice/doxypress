@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -21,8 +21,9 @@
 #include <QList>
 #include <QTextStream>
 
-#include <stringmap.h>
 #include <types.h>
+
+#include <doxy_shared.h>
 
 class ClassDef;
 class Definition;
@@ -39,11 +40,12 @@ struct ListItemInfo;
 #define DOX_NOGROUP -1
 
 /** A class representing a group of members. */
-class MemberGroup
+class MemberGroup : public EnableSharedFromThis
 {
- public:
+  public:
    MemberGroup();
-   MemberGroup(QSharedPointer<Definition> parent, int id, const QString &header, const QString &docs, const QString &docFile);
+   MemberGroup(QSharedPointer<Definition> parent, int id, const QString &header, const QString &docs,    
+         const QString &docFile, int docLine);
 
    ~MemberGroup();
 
@@ -63,12 +65,14 @@ class MemberGroup
    void writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool showInline = false);
 
-   void writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container, bool showEnumValues, bool showInline);
+   void writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container, 
+                  bool showEnumValues, bool showInline);
+
    void writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container);
    void writeTagFile(QTextStream &);
 
    void addGroupedInheritedMembers(OutputList &ol, QSharedPointer<ClassDef> cd, MemberListType lt,
-                                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
+                  QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
    QString documentation() const {
       return doc;
@@ -109,6 +113,14 @@ class MemberGroup
 
    QString anchor() const;
 
+   QString docFile() const {  
+      return m_docFile;
+   }  
+   
+   int docLine() const { 
+      return m_docLine;
+   }
+ 
  private:
    QSharedPointer<MemberList> memberList;      // list of all members in the group
    QSharedPointer<MemberList> inDeclSection;
@@ -117,7 +129,9 @@ class MemberGroup
    QString grpHeader;
    QString fileName;           // base name of the generated file
    QString doc;
+
    QString m_docFile;
+   int m_docLine;
 
    QSharedPointer<Definition> scope;
    QSharedPointer<Definition> m_parent;
@@ -125,31 +139,18 @@ class MemberGroup
    bool inSameSection;
    int  m_numDecMembers;
    int  m_numDocMembers; 
-   
+
    QList<ListItemInfo> *m_xrefListItems;
-};
-
-/** A sorted dictionary of MemberGroup objects. */
-class MemberGroupSDict : public LongMap<QSharedPointer<MemberGroup>>
-{
- public:
-   MemberGroupSDict() : LongMap<QSharedPointer<MemberGroup>>() {}
-   ~MemberGroupSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<MemberGroup> &item1, const QSharedPointer<MemberGroup> &item2) const override {
-      return item1->groupId() - item2->groupId();
-   }
 };
 
 /** Data collected for a member group */
 struct MemberGroupInfo {
-   MemberGroupInfo() : m_sli(0)
+   MemberGroupInfo() : m_sli(0), docLine(-1)
    {}
 
    ~MemberGroupInfo() {
       delete m_sli;
-      m_sli = 0;
+      m_sli = 0;    
    }
 
    void setRefItems(const QList<ListItemInfo> *sli);
@@ -157,6 +158,7 @@ struct MemberGroupInfo {
    QString header;
    QString doc;
    QString docFile;
+   int docLine;
    QString compoundName;
 
    QList<ListItemInfo> *m_sli;

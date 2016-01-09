@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -52,7 +52,7 @@ class HtmlAttribList : public QList<HtmlAttrib>
    }
 
    QString find(const QString &name) const {          
-      for (auto item : *this) {
+      for (auto &item : *this) {
          if (item.name == name) {
             return item.value;
          }
@@ -63,7 +63,7 @@ class HtmlAttribList : public QList<HtmlAttrib>
    QString toString() const {
       QString result;
 
-      for (auto item : *this) {
+      for (auto &item : *this) {
          result += " " + item.name + "=\"" + item.value + "\"";
       }
       return result;

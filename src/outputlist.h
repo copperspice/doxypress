@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -303,18 +303,23 @@ class OutputList : public OutputDocInterface
    void startAnonTypeScope(int i1) {
       forall(&OutputGenerator::startAnonTypeScope, i1);
    }
+
    void endAnonTypeScope(int i1) {
       forall(&OutputGenerator::endAnonTypeScope, i1);
    }
-   void startMemberItem(const QString &anchor, int i1, const QString &id = 0) {
+
+   void startMemberItem(const QString &anchor, int i1, const QString &id = QString() ) {
       forall(&OutputGenerator::startMemberItem, anchor, i1, id);
    }
+
    void endMemberItem() {
       forall(&OutputGenerator::endMemberItem);
    }
+
    void startMemberTemplateParams() {
       forall(&OutputGenerator::startMemberTemplateParams);
    }
+
    void endMemberTemplateParams(const QString &anchor, const QString &inheritId) {
       forall(&OutputGenerator::endMemberTemplateParams, anchor, inheritId);
    }

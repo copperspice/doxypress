@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -20,10 +20,11 @@
 #include <QRegExp>
 #include <QTextStream>
 
+#include <resourcemgr.h>
+
 #include <config.h>
 #include <doxy_build_info.h>
 #include <message.h>
-#include <resourcemgr.h>
 #include <util.h>
 
 ResourceMgr &ResourceMgr::instance()
@@ -47,22 +48,22 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
    QByteArray resData = getAsString(fName);     
    
    if (! resData.isEmpty()) {
-      Resource::Type type =  Resource::Verbatim;
+      ResourceMgr::Type type =  ResourceMgr::Verbatim;
 
       if (fName.endsWith(".lum")) {
-         type =  Resource::Luminance;
+         type =  ResourceMgr::Luminance;
 
       } else if (fName.endsWith(".luma")) {
-         type =  Resource::LumAlpha;
+         type =  ResourceMgr::LumAlpha;
 
       } else if (fName.endsWith(".css")) {
-         type =  Resource::CSS;
+         type =  ResourceMgr::CSS;
 
       }
 
       switch (type) {
 
-         case Resource::Verbatim: {
+         case ResourceMgr::Verbatim: {
             QFile f(outputName);
 
             if (f.open(QIODevice::WriteOnly))  {
@@ -75,7 +76,7 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
 
          break;
 
-         case Resource::Luminance: {
+         case ResourceMgr::Luminance: {
             // replace .lum with .png
 
             // convert file, throw out any line starting with #            
@@ -114,7 +115,7 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
          }
          break;
 
-         case Resource::LumAlpha: {
+         case ResourceMgr::LumAlpha: {
             // replace .luma with .png
 
             // convert file, throw out any line starting with #            
@@ -153,7 +154,7 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
          }
          break;
 
-         case Resource::CSS: {
+         case ResourceMgr::CSS: {
             QFile f(outputName);
 
             if (f.open(QIODevice::WriteOnly)) {

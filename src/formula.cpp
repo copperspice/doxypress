@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -22,9 +22,10 @@
 
 #include <stdlib.h>
 
+#include <formula.h>
+
 #include <config.h>
 #include <doxy_globals.h>
-#include <formula.h>
 #include <image.h>
 #include <index.h>
 #include <message.h>
@@ -93,9 +94,8 @@ void FormulaList::generateBitmaps(const QString &path)
 
       int page = 0;
      
-      for (auto formula : *this) {
-         QString resultName;
-         resultName = QString("form_%1.png").arg(formula.getId());
+      for (auto &formula : *this) {
+         QString resultName = QString("form_%1.png").arg(formula.getId());
 
          // only formulas for which no image exists are generated
          QFileInfo fi(resultName);
@@ -373,7 +373,7 @@ void FormulaList::generateBitmaps(const QString &path)
    if (f.open(QIODevice::WriteOnly)) {
       QTextStream t(&f);
 
-      for (auto formula : *this) {      
+      for (auto &formula : *this) {      
          t << "\\form#" << formula.getId() << ":" << formula.getFormulaText() << endl;
       }
       f.close();

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -57271,8 +57271,11 @@ YY_DECL {
 
             {
                // end scope only if GENERIC interface
-               if (ifType == IF_GENERIC && !endScope(current_root))
-               {
+               if (ifType == IF_GENERIC)  {
+                  last_entry->parent()->endBodyLine = yyLineNr - 1;
+               }
+
+               if (ifType == IF_GENERIC && ! endScope(current_root)) {
                   yyterminate();
                }
 
@@ -57280,6 +57283,7 @@ YY_DECL {
                yy_pop_state();
             }
             YY_BREAK
+
          case 22:
             YY_RULE_SETUP
 
@@ -57288,6 +57292,7 @@ YY_DECL {
                BEGIN(ModuleProcedure);
             }
             YY_BREAK
+
          case 23:
             YY_RULE_SETUP
 
@@ -60632,7 +60637,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
       endScope(current_root, TRUE); //  global root
 
-      rt->program.resize(0);     
+      rt->m_program.resize(0);     
       current = QSharedPointer<Entry>();      
 
       moduleProcedures.clear();

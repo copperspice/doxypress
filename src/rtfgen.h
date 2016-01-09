@@ -1,7 +1,7 @@
 /*************************************************************************
  *
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * All rights reserved.    
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -170,7 +170,7 @@ class RTFGenerator : public OutputGenerator
    void startCodeFragment();
    void endCodeFragment();
    void writeLineNumber(const QString &, const QString &, const QString &, int l) override {
-      m_textStream << l << " ";
+      m_textStream << QString("%1").arg(l, 5) << " ";
    }
    void startCodeLine(bool) {
       col = 0;
@@ -348,7 +348,9 @@ class RTFGenerator : public OutputGenerator
    QString rtf_Code_DepthStyle();
    void incrementIndentLevel();
    void decrementIndentLevel();
+
    int  col;
+   bool m_prettyCode;
 
    bool m_bstartedBody;     // has startbody been called yet?
    int  m_listLevel;        // RTF does not really have a addative indent...manually set list level.

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -26,26 +26,21 @@
 #include <arguments.h>
 #include <definition.h>
 #include <entry.h>
-#include <example.h>
+#include <filenamelist.h>
 #include <groupdef.h>
-#include <memberdef.h>
 #include <memberlist.h>
 #include <membergroup.h>
 #include <membername.h>
-#include <namespacedef.h>
 #include <outputlist.h>
+#include <sortedlist_fwd.h>
 
 class ConstraintClassDef;
 class ClassDict;
 class FileDef;
-class PackageDef;
 class StringDict;
-class UsesClassDict;
+class UsesClassDef;
 
 struct IncludeInfo;
-
-template <class T>
-class SortedList;
 
 /** A class representing a compound symbol
  *
@@ -219,9 +214,9 @@ class ClassDef : public Definition
 
    IncludeInfo *includeInfo() const;
 
-   UsesClassDict *usedImplementationClasses() const;
-   UsesClassDict *usedByImplementationClasses() const;
-   UsesClassDict *usedInterfaceClasses() const;
+   QHash<QString, UsesClassDef> *usedImplementationClasses() const;
+   QHash<QString, UsesClassDef> *usedByImplementationClasses() const;
+   QHash<QString, UsesClassDef> *usedInterfaceClasses() const;
 
    QHash<QString, QSharedPointer<ConstraintClassDef>> templateTypeConstraints() const;
 
@@ -321,7 +316,7 @@ class ClassDef : public Definition
 
    void insertBaseClass(QSharedPointer<ClassDef> cd, const QString &name, Protection p, Specifier s, const QString &t = QString() );
    void insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifier s, const QString &t = QString() );
-   void setIncludeFile(QSharedPointer<FileDef> fd, const char *incName, bool local, bool force);
+   void setIncludeFile(QSharedPointer<FileDef> fd, const QString &incName, bool local, bool force);
    void insertMember(QSharedPointer<MemberDef> );
    void insertUsedFile(QSharedPointer<FileDef> fd);
    bool addExample(const QString &anchor, const QString &name, const QString &file);
@@ -375,7 +370,7 @@ class ClassDef : public Definition
    void writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bool inGroup, 
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
-   void writeQuickMemberLinks(OutputList &ol, MemberDef *md) const;
+   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> md) const;
    void writeSummaryLinks(OutputList &ol);
    void reclassifyMember(QSharedPointer<MemberDef> md, MemberType t);
    void writeInlineDocumentation(OutputList &ol);
@@ -389,7 +384,7 @@ class ClassDef : public Definition
    bool visited;
 
  protected:
-   void addUsedInterfaceClasses(QSharedPointer<MemberDef> md, const char *typeStr);
+   void addUsedInterfaceClasses(QSharedPointer<MemberDef> md, const QString &typeStr);
    bool hasNonReferenceSuperClass();
    void showUsedFiles(OutputList &ol);
 
@@ -505,9 +500,9 @@ class ClassDef : public Definition
    ClassSDict *m_innerClasses;
 
    /* classes for the collaboration diagram */
-   UsesClassDict *m_usesImplClassDict;
-   UsesClassDict *m_usedByImplClassDict;
-   UsesClassDict *m_usesIntfClassDict;
+   QHash<QString, UsesClassDef> *m_usesImplClassDict;
+   QHash<QString, UsesClassDef> *m_usedByImplClassDict;
+   QHash<QString, UsesClassDef> *m_usesIntfClassDict;
 
    QHash<QString, QSharedPointer<ConstraintClassDef>> m_constraintClassDict;
 
@@ -611,29 +606,6 @@ class UsesClassDef
    QByteArray m_templSpecifiers;
 
    bool m_containment;
-};
-
-/** Dictionary of usage relations.
- */
-class UsesClassDict : public QHash<QString, UsesClassDef>
-{
- public:
-   UsesClassDict() : QHash<QString, UsesClassDef>()
-   { }
-
-   ~UsesClassDict()
-   {}
-};
-
-/** Iterator class to iterate over a dictionary of usage relations.
- */
-class UsesClassDictIterator : public QHashIterator<QString, UsesClassDef>
-{
- public:
-   UsesClassDictIterator(const QHash<QString, UsesClassDef> &d)
-      : QHashIterator<QString, UsesClassDef>(d) {}
-
-   ~UsesClassDictIterator() {}
 };
 
 /** Class that contains information about an inheritance relation

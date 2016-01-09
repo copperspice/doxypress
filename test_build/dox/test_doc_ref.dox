@@ -1,0 +1,43 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2016 Barbara Geller & Ansel Sermersheim
+* All rights reserved.
+*
+*
+* GNU Free Documentation License
+* This file may be used under the terms of the GNU Free Documentation
+* License version 1.3 as published by the Free Software Foundation
+* and appearing in the file included in the packaging of this file.
+*
+*
+*************************************************************************/
+
+/*!
+\page topic-source Documenting - Test Ref
+
+The following is a test of the \\ref command when the physical page name is not the same as the \\page name.
+<br>
+
+<h3>Test One</h3>
+
+<dl class="project">
+
+   <dt>\ref cppblock</dt>
+      <dd>Various styles of comment blocks supported by DoxyPress for C</dd>
+  
+</dl>
+
+<h3>Test Two</h3>
+
+This test is using an href wtih hard coded HTML. &nbsp;&nbsp; <a class="el" href="topic-source.html#cppblock">Comments in C</a>
+
+
+
+\section cppblock Comments in C
+
+For each entity (class, method, function, etc) in the code there are two categories of documentation, 
+brief documentation and detailed documentation. If both are supplied the brief will come first. 
+You can specify either of these or both as needed. 
+
+
+*/

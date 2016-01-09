@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -1214,8 +1214,9 @@ static void startCondSection(const QString &sectId)
 
    g_condStack.push(new CondCtx(g_lineNr, sectId, g_skip));
 
-   if (! expResult) { // not enabled
-      g_skip = TRUE;
+   if (! expResult) { 
+      // not enabled
+      g_skip = true;
    }
 }
 
@@ -1223,7 +1224,8 @@ static void endCondSection()
 {
    if (g_condStack.isEmpty()) {
       warn(g_fileName, g_lineNr, "Found \\endcond command without matching \\cond");
-      g_skip = FALSE;
+      g_skip = false;
+
    } else {
       CondCtx *ctx = g_condStack.pop();
       g_skip = ctx->skip;
@@ -1582,7 +1584,7 @@ YY_DECL {
          case 1:
             YY_RULE_SETUP
 
-            { /* eat anything that is not " / , or \n */
+            { /* consume anything that is not " / , or \n */
 
                QString text = QString::fromUtf8(commentcnvYYtext); 
                copyToOutput(text, text.length());
@@ -1592,7 +1594,7 @@ YY_DECL {
          case 2:
             YY_RULE_SETUP
 
-            { /* eat , so we have a nice separator in long initialization lines */
+            { /* consume so we have a nice separator in long initialization lines */
                QString text = QString::fromUtf8(commentcnvYYtext); 
                copyToOutput(text, text.length());
             }
@@ -1807,13 +1809,13 @@ YY_DECL {
 
             { /* one line C++ comment */
                QString text = QString::fromUtf8(commentcnvYYtext); 
-
                g_inSpecialComment = text[2] == '/' || text[2] == '!';                 
                copyToOutput(text, text.length());
                g_readLineCtx = YY_START;
                BEGIN(ReadLine);
             }
             YY_BREAK
+
          case 15:
             YY_RULE_SETUP
 
@@ -2475,6 +2477,7 @@ YY_DECL {
                BEGIN(CondLine);
             }
             YY_BREAK
+
          case 67:
             /* rule 67 can match eol */
             *yy_cp = (yy_hold_char); /* undo effects of setting up commentcnvYYtext */
@@ -2486,10 +2489,10 @@ YY_DECL {
                // end of conditional section
                bool oldSkip = g_skip;
                endCondSection();
-               if (YY_START == CComment && oldSkip && !g_skip)
-               {
-                  //printf("** Adding start of comment!\n");
-                  if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Fortran) {
+
+               if (YY_START == CComment && oldSkip && ! g_skip) {
+
+                  if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Markdown && g_lang != SrcLangExt_Fortran) {
                      ADDCHAR('/');
                      ADDCHAR('*');
                      if (g_specialComment) {
@@ -2499,6 +2502,7 @@ YY_DECL {
                }
             }
             YY_BREAK
+
          case 68:
             YY_RULE_SETUP
 
@@ -2509,19 +2513,19 @@ YY_DECL {
                startCondSection(text);
 
                if ((g_condCtx == CComment || g_readLineCtx == SComment) && ! oldSkip && g_skip) {
-                  if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Fortran) {
+                  if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Markdown && g_lang != SrcLangExt_Fortran) {
                      ADDCHAR('*');
                      ADDCHAR('/');
                   }
                }
-               if (g_readLineCtx == SComment)
-               {
+
+               if (g_readLineCtx == SComment) {
                   BEGIN(SComment);
-               } else
-               {
+               } else {
                   BEGIN(g_condCtx);
                }
             }
+
             YY_BREAK
          case 69:
             YY_RULE_SETUP
@@ -3776,13 +3780,14 @@ static bool recognizeFixedForm(const QString &contents)
    return FALSE;
 }
 
-
 /*! This function does three things:
  *  -# It converts multi-line C++ style comment blocks (that are aligned)
  *     to C style comment blocks (if MULTILINE_CPP_IS_BRIEF is set to NO).
  *  -# It replaces aliases with their definition (see ALIASES)
  *  -# It handles conditional sections (cond...endcond blocks)
  */
+
+// main entry point
 QString convertCppComments(const QString &inBuf, const QString &fileName)
 {  
    g_inBuf    = inBuf;
@@ -3864,15 +3869,4 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
 
    return g_outBuf;
 }
-
-
-#if !defined(YY_FLEX_SUBMINOR_VERSION)
-extern "C" { // some bogus code to keep the compiler happy
-   void commentcnvYYdummy()
-   {
-      yy_flex_realloc(0, 0);
-   }
-}
-#endif
-
 

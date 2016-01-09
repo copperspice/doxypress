@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -32,16 +32,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include <tagreader.h>
+
 #include <arguments.h>
-#include <classdef.h>
 #include <defargs.h>
 #include <doxy_globals.h>
 #include <entry.h>
-#include <filedef.h>
-#include <filename.h>
 #include <message.h>
-#include <section.h>
-#include <tagreader.h>
 #include <util.h>
 
 /** Information about an linkable anchor */
@@ -1435,7 +1432,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
    // build file list   
    for (auto tfi : m_tagFileFiles) {
       QSharedPointer<Entry> fe = QMakeShared<Entry>();
-      fe->section = guessSection(tfi.name);
+      fe->section = determineSection(tfi.name);
       fe->name    = tfi.name;
 
       addDocAnchors(fe, tfi.docAnchors);
@@ -1450,13 +1447,13 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       
       QSharedPointer<FileDef> fd = QMakeShared<FileDef>(m_tagName + ":" + tfi.path, tfi.name, m_tagName, tfi.filename);
      
-      QSharedPointer<FileName> mn (Doxy_Globals::inputNameDict->find(tfi.name));
+      QSharedPointer<FileNameList> mn (Doxy_Globals::inputNameDict->find(tfi.name));
 
       if (mn) {
          mn->append(fd);
 
       } else {       
-         mn = QSharedPointer<FileName> (new FileName(fullName, tfi.name));
+         mn = QMakeShared<FileNameList>(fullName, tfi.name); 
          mn->append(fd);
 
          Doxy_Globals::inputNameList->inSort(mn);
@@ -1547,7 +1544,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
 void TagFileParser::addIncludes()
 { 
    for (auto tfi : m_tagFileFiles) {      
-      QSharedPointer<FileName> fn (Doxy_Globals::inputNameDict->find(tfi.name));
+      QSharedPointer<FileNameList> fn (Doxy_Globals::inputNameDict->find(tfi.name));
 
       if (fn) {
                  
@@ -1556,7 +1553,7 @@ void TagFileParser::addIncludes()
                             
                for (auto item : tfi.includes) {
                
-                  QSharedPointer<FileName> ifn (Doxy_Globals::inputNameDict->find(item.name));
+                  QSharedPointer<FileNameList> ifn (Doxy_Globals::inputNameDict->find(item.name));
                   assert(ifn != 0);
 
                   if (ifn) {                   

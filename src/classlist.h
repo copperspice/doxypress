@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -31,26 +31,6 @@ class ClassDict : public QHash<QString, ClassDef>
  public:
    ClassDict() : QHash<QString, ClassDef>() {}
    ~ClassDict() {}
-};
-
-/** A sorted dictionary of ClassDef objects. */
-class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
-{
- public:
-   ClassSDict(Qt::CaseSensitivity isCase = Qt::CaseSensitive) 
-      : StringMap<QSharedPointer<ClassDef>>(isCase)
-   {}
-
-   ~ClassSDict() {}
-
-   void writeDeclaration(OutputList &ol, const ClassDef::CompoundType *filter = 0,
-                         const QString &header = 0, bool localNames = false);
-
-   void writeDocumentation(OutputList &ol, Definition *container = 0);
-   bool declVisible(const ClassDef::CompoundType *filter = 0) const;
-
- private:
-   int compareMapValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const override;
 };
 
 class GenericsSDict

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -46,6 +46,20 @@ struct URLInfo {
    URLInfo(int idx, int f) : urlIdx(idx), freq(f) {}
    int urlIdx;
    int freq;
+};
+
+class SearchDefinitionList : public QList<QSharedPointer<Definition>>
+{
+   public:
+      SearchDefinitionList(uint letter) : m_letter(letter) 
+      {}
+   
+      uint letter() const {
+         return m_letter;
+      }
+   
+   private:
+      uint m_letter;
 };
 
 class IndexWord

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -737,25 +737,19 @@ char *tclscannerYYtext;
 #include <ctype.h>
 #include <unistd.h>
 
-#include "arguments.h"
-#include "commentcnv.h"
-#include "commentscan.h"
-#include "config.h"
-#include "doxy_globals.h"
-#include "defargs.h"
-#include "entry.h"
-#include "filedef.h"
-#include "language.h"
-#include "message.h"
-#include "membername.h"
-#include "namespacedef.h"
-#include "outputlist.h"
-#include "parser_tcl.h"
-#include "pre.h"
-#include "searchindex.h"
-#include "portable.h"
-
-#include "util.h"
+#include <arguments.h>
+#include <commentcnv.h>
+#include <commentscan.h>
+#include <config.h>
+#include <doxy_globals.h>
+#include <defargs.h>
+#include <entry.h>
+#include <language.h>
+#include <message.h>
+#include <outputlist.h>
+#include <parser_tcl.h>
+#include <pre.h>
+#include <util.h>
 
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
@@ -5364,7 +5358,7 @@ void TclLanguageParser::parseInput(const QString &fileName, const QString &input
    tcl_parse("", "");
 
    groupLeaveFile(tcl.file_name, tclscannerYYlineno);
-   root->program.resize(0);
+   root->m_program.resize(0);
    myFile.close();
 
    printlex(tclscannerYY_flex_debug, FALSE, __FILE__, fileName);

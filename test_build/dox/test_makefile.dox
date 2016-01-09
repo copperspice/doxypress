@@ -1,0 +1,81 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2016 Barbara Geller & Ansel Sermersheim
+* All rights reserved.
+*
+*
+* GNU Free Documentation License
+* This file may be used under the terms of the GNU Free Documentation
+* License version 1.3 as published by the Free Software Foundation
+* and appearing in the file included in the packaging of this file.
+*
+*
+*************************************************************************/
+
+/**
+\page makefile-test Makefile Test
+
+The following test shows a new option in DoxPress for displaying a Makefile in a code block. The \\code command is followed by a new parameter to 
+indicate the source is a Makefile. There is currently no syntax highlighting since Makefiles seldom require this. 
+
+The source code is placed inside a block structured like the following:
+
+<pre>
+   \\code {.mk}
+
+      ... source goes here
+
+   \\endcode
+</pre>
+
+
+<br>
+
+\code {.mk}
+AUTOMAKE_OPTIONS=subdir-objects
+
+# location where CopperSpice libraries are installed
+CS_HOME:=$(shell cd $(CS_HOME); pwd)
+
+# location of includes, libs, defines for compiling
+AM_CXXFLAGS=$(AM_CFLAGS) -I$(CS_HOME)/include $(patsubst %,-I$(CS_HOME)/include/Qt%,$(cslibs))
+
+# location of CopperSpice libraries for linking
+AM_LDFLAGS=-L$(CS_HOME)/lib
+
+# location of CopperSpice programs
+LRELEASE=$(CS_HOME)/bin/lrelease
+RCC=$(CS_HOME)/bin/rcc
+UIC=$(CS_HOME)/bin/uic
+
+# 'deploy' is the folder for "make deploy"
+deploydir=$(abs_top_builddir)/deploy
+
+BUILT_SOURCES=$(patsubst forms/%.ui, ui_%.h,$(FORMS))
+EXTRA_DIST=$(FORMS)
+
+BUILT_SOURCES+=$(patsubst %.qrc,qrc_%.cpp,$(RESOURCES))
+EXTRA_DIST+=$(RESOURCES)
+
+BUILT_SOURCES+=$(patsubst %.ts,%.qm,$(TRANSLATIONS))
+EXTRA_DIST+=$(TRANSLATIONS)
+
+%.qm: %.ts
+	$(LRELEASE) $< $@
+
+qrc_%.cpp: %.qrc
+	$(RCC) $< -o $@ -name $(notdir $(basename $<))
+
+ui_%.h: forms/%.ui
+	$(UIC) $< -o $@
+
+clean-local:
+	-rm qrc_*.cpp
+	-rm ui_*.h
+
+\endcode
+
+<br>
+
+*/
+

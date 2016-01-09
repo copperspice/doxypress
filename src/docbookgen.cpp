@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
@@ -22,30 +22,22 @@
 
 #include <stdlib.h>
 
+#include <docbookgen.h>
+
 #include <arguments.h>
 #include <config.h>
-#include <classlist.h>
 #include <defargs.h>
-#include <dirdef.h>
-#include <docbookgen.h>
 #include <docbookvisitor.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
 #include <doxy_build_info.h>
-#include <filename.h>
 #include <groupdef.h>
 #include <language.h>
-#include <memberlist.h>
 #include <message.h>
-#include <memberdef.h>
-#include <namespacedef.h>
-#include <membername.h>
 #include <membergroup.h>
 #include <outputgen.h>
-#include <pagedef.h>
 #include <parser_base.h>
-#include <section.h>
 #include <util.h>
 
 class DocbookSectionMapper : public QHash<long, QString>
@@ -303,7 +295,7 @@ static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, QSharedP
    if (al) {
       t << indentStr << "<templateparamlist>" << endl;
 
-      for (auto item : *al) {
+      for (auto &item : *al) {
          t << indentStr << "  <param>" << endl;
 
          if (! item.type.isEmpty()) {
@@ -622,7 +614,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
          if (declAl && declAl->count() > 0) {
             int cnt = 0;
 
-            for (auto a : *declAl) {
+            for (auto &a : *declAl) {
                if (cnt != 0) {
                   t << ", ";
                }
@@ -1155,7 +1147,8 @@ static void writeInnerGroupFiles(const SortedList<QSharedPointer<GroupDef>> *gl,
 {
    if (gl) {
       for (auto sgd : *gl) {
-         t << "<xi:include href=\"" << sgd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>"  << endl;
+         t << "<xi:include href=\"" << sgd->getOutputFileBase() 
+           << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>"  << endl;
       }
    }
 }
@@ -1194,27 +1187,28 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       return;   // skip generated template instances.
    }
 
-   msg("Generating Docbook output for class %s\n", qPrintable(cd->name()));
+   static const QString docbookOutDir = Config::getString("docbook-output");
+   static const bool    haveDot       = Config::getBool("have-dot"); 
+ 
+   msg("Generating Docbook output for class %s\n", csPrintable(cd->name()));
 
+   // Add the file Documentation info to index file
    QString fileDocbook = cd->getOutputFileBase() + ".xml";
-
-   //Add the file Documentation info to index file
    ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+      
+   //  
+   QString fileName  = docbookOutDir + "/" + classOutputFileBase(cd) + ".xml";
+   QString relPath   = relativePathToRoot(fileName);
+ 
+   QFile fi(fileName);
 
-   QString outputDirectory = Config::getString("docbook-output");
-   QString fileName = outputDirectory + "/" + classOutputFileBase(cd) + ".xml";
-   QString relPath  = relativePathToRoot(fileName);
-
-   QFile f(fileName);
-
-   if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+   if (! fi.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), fi.error());
       return;
    }
 
-   QTextStream t(&f);
-   //t.setEncoding(QTextStream::UnicodeUTF8);
-
+   QTextStream t(&fi);
+ 
    writeDocbookHeader_ID(t, classOutputFileBase(cd));
    t << "<title>";
 
@@ -1234,20 +1228,26 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       if (!nm.isEmpty()) {
          t << "<para>" << endl;
          t << "    <programlisting>#include ";
-         if (ii->fileDef && !ii->fileDef->isReference()) { // TODO: support external references
+
+         if (ii->fileDef && !ii->fileDef->isReference()) {
+            // TODO: support external references
             t << "<link linkend=\"" << ii->fileDef->getOutputFileBase() << "\">";
          }
+
          if (ii->local) {
             t << "&quot;";
          } else {
             t << "&lt;";
          }
+
          t << convertToXML(nm);
+
          if (ii->local) {
             t << "&quot;";
          } else {
             t << "&gt;";
          }
+
          if (ii->fileDef && !ii->fileDef->isReference()) {
             t << "</link>";
          }
@@ -1256,21 +1256,21 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       }
    }
 
-   if (Config::getBool("have-dot") && (Config::getBool("class-diagrams") || Config::getBool("dot-class-graph"))) {
+   if (haveDot && (Config::getBool("class-diagrams") || Config::getBool("dot-class-graph"))) {
       t << "<para>Inheritance diagram for " << convertToXML(cd->name()) << "</para>" << endl;
       DotClassGraph inheritanceGraph(cd, DotNode::Inheritance);
-      inheritanceGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config::getString("docbook-output"), fileName, relPath, true, false);
+      inheritanceGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, docbookOutDir, fileName, relPath, true, false);
    }
 
-   if (Config::getBool("have-dot") && Config::getBool("dot-collaboration")) {
+   if (haveDot && Config::getBool("dot-collaboration")) {
       t << "<para>Collaboration diagram for " << convertToXML(cd->name()) << "</para>" << endl;
       DotClassGraph collaborationGraph(cd, DotNode::Collaboration);
-      collaborationGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config::getString("docbook-output"), fileName, relPath, true, false);
+      collaborationGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, docbookOutDir, fileName, relPath, true, false);
    }
 
    writeInnerClasses(cd->getClassSDict(), t);
-
    writeTemplateList(cd, t);
+
    if (cd->getMemberGroupSDict()) {
       for (auto mg : *cd->getMemberGroupSDict()) {
          generateDocbookSection(cd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
@@ -1299,7 +1299,9 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
 
       writeDocbookDocBlock(t, cd->docFile(), cd->docLine(), cd, QSharedPointer<MemberDef>(), cd->documentation());
 
-      t << "                <para>Definition at line " << cd->getDefLine() << " of file " << stripPath(cd->getDefFileName()) << "</para>" << endl;
+      t << "                <para>Definition at line " << cd->getDefLine() << " of file " 
+        << stripPath(cd->getDefFileName()) << "</para>" << endl;
+
       t << "                <para>The Documentation for this struct was generated from the following file: </para>" << endl;
 
       t << "                <para><itemizedlist><listitem><para>" << stripPath(cd->getDefFileName())
@@ -1314,44 +1316,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       }
    }
 
-/*
-   // TODO: Handling of Inheritance and Colloboration graph for Docbook to be implemented
-
-   DotClassGraph inheritanceGraph(cd,DotNode::Inheritance);
-
-   if (!inheritanceGraph.isTrivial()) {
-     t << "    <inheritancegraph>" << endl;
-     inheritanceGraph.writeDocbook(t);
-     t << "    </inheritancegraph>" << endl;
-   }
-
-   DotClassGraph collaborationGraph(cd,DotNode::Collaboration);
-   if (! collaborationGraph.isTrivial()) {
-     t << "    <collaborationgraph>" << endl;
-     collaborationGraph.writeDocbook(t);
-     t << "    </collaborationgraph>" << endl;
-   }
-
-   t << "    <location file=\"" << cd->getDefFileName() << "\" line=\"" << cd->getDefLine() << "\"";
-
-   if (cd->getStartBodyLine() != -1) {
-     FileDef *bodyDef = cd->getBodyDef();
-
-     if (bodyDef) {
-        t << " bodyfile=\"" << bodyDef->absoluteFilePath() << "\"";
-     }
-
-     t << " bodystart=\"" << cd->getStartBodyLine() << "\" bodyend=\""
-       << cd->getEndBodyLine() << "\"";
-   }
-
-   t << "/>" << endl;
-   writeListOfAllMembers(cd,t);
-
-*/
-
    t << "</section>" << endl;
-
 }
 
 static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream &ti)
@@ -1477,7 +1442,7 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    t << "</title>" << endl;
 
    if (fd->includeFileList()) {
-      for (auto inc : *fd->includeFileList()) {
+      for (auto &inc : *fd->includeFileList()) {
          t << "    <programlisting>#include ";
 
          if (inc.local) {
@@ -1487,11 +1452,13 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
          }
 
          t << convertToXML(inc.includeName);
+
          if (inc.local) {
             t << "&quot;";
          } else {
             t << "&gt;";
          }
+
          t << "</programlisting>" << endl;
       }
    }
@@ -1861,22 +1828,19 @@ void generateDocbook()
       t << "    </chapter>" << endl;
    }
 
-   /** MAINPAGE DOCUMENTATION **/
-
+   // mainpage documentation
    if (Doxy_Globals::mainPage) {
       msg("Generating Docbook output for the main page\n");
       generateDocbookForPage(Doxy_Globals::mainPage, t, false);
    }
 
-   // PAGE DOCUMENTATION
-
+   // page documentation
    for (auto pd : *Doxy_Globals::pageSDict) {
       msg("Generating Docbook output for page %s\n", qPrintable(pd->name()));
       generateDocbookForPage(pd, t, false);
    }
 
    // ** module group documentation
-
 
    // Module group Documentation index header
    if (! Doxy_Globals::groupSDict->isEmpty()) {
@@ -1913,8 +1877,7 @@ void generateDocbook()
       }
    }
 
-   // ** FILE DOCUMENTATION
-
+   // file documentation
    static bool showFiles = Config::getBool("show-file-page");
    if (showFiles) {
 
@@ -1931,8 +1894,8 @@ void generateDocbook()
          }
       }
 
-      //File Documentation index footer
-       if (! Doxy_Globals::inputNameList->isEmpty()) {
+      // File Documentation index footer
+      if (! Doxy_Globals::inputNameList->isEmpty()) {
          t << "    </chapter>" << endl;
       }
    }
@@ -1971,8 +1934,8 @@ void generateDocbook()
          generateDocbookForPage(pd, t, true);
       }
 
-      //Example Page Documentation index footer
-       if (! Doxy_Globals::exampleSDict->isEmpty()) {
+      // Example Page Documentation index footer
+      if (! Doxy_Globals::exampleSDict->isEmpty()) {
          t << "    </chapter>" << endl;
       }
    }

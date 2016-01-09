@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -22,15 +22,15 @@
 #include <stdlib.h>
 
 #include <diagram.h>
-#include <doxy_globals.h>
-#include <image.h>
+
 #include <classdef.h>
 #include <config.h>
-#include <message.h>
-#include <util.h>
-#include <portable.h>
+#include <doxy_globals.h>
 #include <index.h>
-#include <classlist.h>
+#include <image.h>
+#include <message.h>
+#include <portable.h>
+#include <util.h>
 
 #define IMAGE_EXT ".png"
 
@@ -560,7 +560,6 @@ void TreeDiagram::computeLayout()
       bool first = true;
    
       for (auto item : *row) {
-
          DiagramItem *pi = item->parentItem();
 
          if (pi == opi && ! first) {

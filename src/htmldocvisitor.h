@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -153,10 +153,12 @@ class HtmlDocVisitor : public DocVisitor
    QTextStream &m_t;
    CodeOutputInterface &m_ci;
    bool m_insidePre;
+
    bool m_hide;
    QStack<bool> m_enabled;
 
    QSharedPointer<Definition> m_ctx;
+
    QString m_langExt;
 };
 

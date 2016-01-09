@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
@@ -14,6 +14,13 @@
  * input used in their production; they are not affected by this license.
  *
 *************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <cppvalue.h>
+#include <constexp.h>
+#include <message.h>
 
 /* A Bison parser, made by GNU Bison 2.4.2.  */
 
@@ -47,14 +54,7 @@
 #define yydebug         constexpYYdebug
 #define yynerrs         constexpYYnerrs
 
-#include "cppvalue.h"
-#include "constexp.h"
-#include "message.h"
-
 #define YYSTYPE CPPValue
-
-#include <stdio.h>
-#include <stdlib.h>
 
 int constexpYYerror(const char *s)
 {

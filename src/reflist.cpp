@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -17,8 +17,9 @@
 
 #include <stdio.h>
 
-#include <definition.h>
 #include <reflist.h>
+
+#include <definition.h>
 #include <util.h>
 
 /*! Create a list of items that are cross referenced with documentation blocks
@@ -156,7 +157,7 @@ void RefList::generatePage()
       doc += item.listAnchor;
       doc += "\n";
 
-      if (item.scope) {
+      if (item.scope && item.scope->name() != "<globalScope>") {
          doc += "\\_setscope ";
          doc += item.scope->name();
          doc += " ";

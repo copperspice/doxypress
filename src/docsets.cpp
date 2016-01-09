@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -15,15 +15,11 @@
  *
 *************************************************************************/
 
-#include <classdef.h>
-#include <config.h>
 #include <docsets.h>
+
+#include <config.h>
 #include <doxy_globals.h>
-#include <groupdef.h>
-#include <filedef.h>
 #include <message.h>
-#include <memberdef.h>
-#include <namespacedef.h>
 #include <util.h>
 
 DocSets::DocSets()
@@ -191,11 +187,13 @@ void DocSets::finalize()
    m_nts << "  </TOC>" << endl;
    m_nts << "</DocSetNodes>" << endl;
    m_nf->close();
+
    delete m_nf;
    m_nf = 0;
 
    m_tts << "</Tokens>" << endl;
    m_tf->close();
+
    delete m_tf;
    m_tf = 0;
 }
@@ -232,7 +230,7 @@ void DocSets::decContentsDepth()
 }
 
 void DocSets::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
-                              bool , bool, QSharedPointer<Definition>)
+                              bool, bool, QSharedPointer<Definition>)
 {    
    if (! ref.isEmpty()) {
 

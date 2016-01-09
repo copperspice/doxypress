@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -88,7 +88,21 @@ class Config
       static bool verify();
 
       static QStringList getAbbreviateBrief();
-      static QStringList getFilePatterns();
+      static QStringList getFilePatterns();  
+      static QStringList getSuffixSource();
+      static QStringList getSuffixHeader();
+      static QStringList getSuffixExclude();
+      static QStringList getDotImageFormat();
+      static QStringList getMathJaxFormat();
+      static QStringList getLatexPaperType();
+
+      static void cleanUpPaths(QStringList &str);
+
+      static void loadCmd_Aliases();
+      static void escapeAliases();
+      static void expandAliases();
+
+      static void loadRenameNS_Aliases();
 };
 
 #endif

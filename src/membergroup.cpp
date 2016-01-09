@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -17,17 +17,14 @@
 
 #include <QCryptographicHash>
 
-#include <classdef.h>
+#include <membergroup.h>
+
 #include <doxy_globals.h>
 #include <docparser.h>
 #include <entry.h>
-#include <filedef.h>
 #include <groupdef.h>
 #include <language.h>
 #include <marshal.h>
-#include <membergroup.h>
-#include <memberlist.h>
-#include <namespacedef.h>
 #include <outputlist.h>
 #include <util.h>
 
@@ -35,7 +32,8 @@ MemberGroup::MemberGroup()
 {
 }
 
-MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const QString &hdr, const QString &d, const QString &docFile)
+MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const QString &hdr, const QString &d, 
+                  const QString &docFile, int docLine)
    : m_parent(parent)
 {   
    memberList      = QMakeShared<MemberList>(MemberListType_memberGroup);
@@ -48,6 +46,7 @@ MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const QStrin
    m_numDocMembers = -1;
    
    m_docFile       = docFile;
+   m_docLine       = docLine;
    m_xrefListItems = 0;   
 }
 
@@ -135,12 +134,10 @@ void MemberGroup::addGroupedInheritedMembers(OutputList &ol, QSharedPointer<Clas
 }
 
 int MemberGroup::countGroupedInheritedMembers(MemberListType lt)
-{
-   //printf("** countGroupedInheritedMembers()\n");
+{  
    int count = 0;  
 
    for (auto md : *memberList) {  
-      //printf("matching %d == %d\n",lt,md->getSectionList(m_parent)->listType());
 
       if (lt == md->getSectionList(m_parent)->listType()) {
          count++;
@@ -156,7 +153,8 @@ int MemberGroup::countGroupedInheritedMembers(MemberListType lt)
 void MemberGroup::addToDeclarationSection()
 {
    if (inDeclSection) {    
-      inDeclSection->addMemberGroup(this);
+      QSharedPointer<MemberGroup> self = sharedFrom(this);
+      inDeclSection->addMemberGroup(self);
    }
 }
 
@@ -281,14 +279,16 @@ void MemberGroup::addListReferences(QSharedPointer<Definition> def)
    memberList->addListReferences(def);
 
    if (m_xrefListItems && def) {
-      QString name = def->getOutputFileBase() + "#" + anchor();
-      addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, 0, def);
+      QString name = def->getOutputFileBase() + "#" + anchor();      
+      addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, 0, def);      
    }
 }
 
 void MemberGroup::findSectionsInDocumentation()
 {
-   docFindSections(doc, QSharedPointer<Definition>(), this, m_docFile);
+   QSharedPointer<MemberGroup> self = sharedFrom(this);
+   docFindSections(doc, QSharedPointer<Definition>(), self, m_docFile);
+
    memberList->findSectionsInDocumentation();
 }
 
@@ -301,7 +301,7 @@ void MemberGroup::setRefItems(const QList<ListItemInfo> *sli)
       }    
 
       for (auto item : *sli ) {
-         m_xrefListItems->append(ListItemInfo(item));
+         m_xrefListItems->append(item);
       }
    }
 }
@@ -322,6 +322,6 @@ void MemberGroupInfo::setRefItems(const QList<ListItemInfo> *sli)
    }
 
    for (auto item : *sli ) {
-      m_sli->append(ListItemInfo(item));
+      m_sli->append(item);
    }
 }

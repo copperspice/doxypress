@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -20,24 +20,22 @@
 
 #include <stdlib.h>
 
+#include <htmlgen.h>
+
 #include <config.h>
-#include <dirdef.h>
 #include <docparser.h>
-#include <doxy_build_info.h>
-#include <doxy_globals.h>
-#include <logos.h>
 #include <diagram.h>
 #include <dot.h>
-#include <htmlgen.h>
+#include <doxy_build_info.h>
+#include <doxy_globals.h>
+#include <ftvhelp.h>
+#include <htmldocvisitor.h>
 #include <htmlhelp.h>
+#include <image.h>
+#include <layout.h>
+#include <logos.h>
 #include <language.h>
 #include <message.h>
-#include <htmldocvisitor.h>
-#include <searchindex.h>
-#include <pagedef.h>
-#include <layout.h>
-#include <image.h>
-#include <ftvhelp.h>
 #include <resourcemgr.h>
 #include <util.h>
 
@@ -217,7 +215,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
    QString cssFile = "doxypress.css"; 
 
    QString extraCssText = "";
-   const QStringList extraCssFile = Config::getList("html-stylesheets");
+   static const QStringList extraCssFile = Config::getList("html-stylesheets");
 
    for (auto fileName : extraCssFile) {          
 
@@ -225,7 +223,8 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
          QFileInfo fi(fileName);
 
          if (fi.exists()) {
-            extraCssText += "<link href=\"$relpath^" + stripPath(qPrintable(fileName)) + "\" rel=\"stylesheet\" type=\"text/css\"/>\n";
+            extraCssText += "<link href=\"$relpath^" + stripPath(qPrintable(fileName)) + 
+                  "\" rel=\"stylesheet\" type=\"text/css\"/>\n";
          }
       }
    }
@@ -598,14 +597,18 @@ void HtmlCodeGenerator::writeTooltip(const QString &id, const DocLinkInfo &docIn
    }
 
    if (! desc.isEmpty()) {
-      m_streamX << "<div class=\"ttdoc\">";
-      m_streamX << desc; // desc is already HTML escaped
+      m_streamX << "<div class=\"ttdoc\">";   
+
+      // desc is already HTML escaped but there are still < and > signs
+      docify(desc); 
+
       m_streamX << "</div>";
    }
 
    if (! defInfo.file.isEmpty()) {
       m_streamX << "<div class=\"ttdef\"><b>Definition:</b> ";
-      if (!defInfo.url.isEmpty()) {
+
+      if (! defInfo.url.isEmpty()) {
          m_streamX << "<a href=\"";
          m_streamX << externalRef(m_relPath, defInfo.ref, true);
          m_streamX << defInfo.url << Doxy_Globals::htmlFileExtension;
@@ -655,7 +658,7 @@ void HtmlCodeGenerator::startCodeLine(bool hasLineNumbers)
 
 void HtmlCodeGenerator::endCodeLine()
 {
-   m_streamX << "</div>\n";  
+   m_streamX << "</div>";  
 }
 
 void HtmlCodeGenerator::startFontClass(const QString &s)
@@ -2048,11 +2051,6 @@ static void endQuickIndexItem(QTextStream &t_stream, const QString &l)
    t_stream << "</li>\n";
 }
 
-static QString fixSpaces(const QString &s)
-{
-   return substitute(s, " ", "&#160;");
-}
-
 static bool quickLinkVisible(LayoutNavEntry::Kind kind)
 {
    static bool showFiles      = Config::getBool("show-file-page");
@@ -2061,24 +2059,34 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
    switch (kind) {
       case LayoutNavEntry::MainPage:
          return true;
+
       case LayoutNavEntry::User:
          return true;
+
       case LayoutNavEntry::UserGroup:
          return true;
+
       case LayoutNavEntry::Pages:
          return indexedPages > 0;
+
       case LayoutNavEntry::Modules:
          return documentedGroups > 0;
+
       case LayoutNavEntry::Namespaces:
          return documentedNamespaces > 0 && showNamespaces;
+
       case LayoutNavEntry::NamespaceList:
          return documentedNamespaces > 0 && showNamespaces;
+
       case LayoutNavEntry::NamespaceMembers:
          return documentedNamespaceMembers[NMHL_All] > 0;
+
       case LayoutNavEntry::Classes:
          return annotatedClasses > 0;
+
       case LayoutNavEntry::ClassList:
          return annotatedClasses > 0;
+
       case LayoutNavEntry::ClassIndex:
          return annotatedClasses > 0;
       case LayoutNavEntry::ClassHierarchy:
@@ -2586,7 +2594,8 @@ void HtmlGenerator::writeExternalSearchPage()
 void HtmlGenerator::startConstraintList(const QString &header)
 {
    m_textStream << "<div class=\"typeconstraint\">" << endl;
-   m_textStream << "<dl><dt><b>" << header << "</b></dt><dd>" << endl;
+   m_textStream << "<dl><dt><b>" << header << "</b></dt>" << endl;
+   m_textStream << "<dd>" << endl;
    m_textStream << "<table border=\"0\" cellspacing=\"2\" cellpadding=\"0\">" << endl;
 }
 
@@ -2623,6 +2632,7 @@ void HtmlGenerator::endConstraintDocs()
 void HtmlGenerator::endConstraintList()
 {
    m_textStream << "</table>" << endl;
+   m_textStream << "</dd>" << endl;
    m_textStream << "</dl>" << endl;
    m_textStream << "</div>" << endl;
 }

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -23,13 +23,12 @@
 #include <QTextStream>
 
 #include <definition.h>
-#include <stringmap.h>
+#include <filenamelist.h>
 
 class ClassDef;
 class ClassSDict;
 class DirDef;
 class Entry;
-class FileList;
 class FileDef;
 class FTVHelp;
 class MemberDef;
@@ -87,7 +86,7 @@ class GroupDef : public Definition
 
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
-   void writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const;
+   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const;
    void writeTagFile(QTextStream &);
    int  countMembers() const;
    bool isLinkableInProject() const;
@@ -107,7 +106,7 @@ class GroupDef : public Definition
 
    bool visited;    // number of times accessed for output - KPW
 
-   //friend void writeGroupTreeNode(OutputList&, GroupDef*, int, FTVHelp*);
+   // friend void writeGroupTreeNode(OutputList&, GroupDef*, int, FTVHelp*);
    // make accessible for writing tree view of group in index.cpp - KPW
 
    void setGroupScope(QSharedPointer<Definition> d) {
@@ -157,9 +156,18 @@ class GroupDef : public Definition
    }
     
    bool hasDetailedDescription() const;   
+
+   QString getHint()  override {
+      return m_hint;
+   }
+
+   void setHint(QString data) {
+      m_hint = data;
+   }
   
  protected:
    void addMemberListToGroup(QSharedPointer<MemberList>, bool (MemberDef::*)() const);
+   QString pathFragment_Internal() const override;
 
  private:
    QSharedPointer<MemberList> createMemberList(MemberListType lt);
@@ -211,20 +219,7 @@ class GroupDef : public Definition
    MemberGroupSDict  *memberGroupSDict;
 
    bool m_subGrouping;
-};
-
-/** A sorted dictionary of GroupDef objects. */
-class GroupSDict : public StringMap<QSharedPointer<GroupDef>>
-{
- public:
-   // CopperSpice - can add isCase
-   GroupSDict() : StringMap<QSharedPointer<GroupDef>>() {}
-   virtual ~GroupSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<GroupDef> &item1, const QSharedPointer<GroupDef> &item2) const override {
-      return item1->groupTitle().compare(item2->groupTitle());
-   }
+   QString m_hint;
 };
 
 void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd);

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
@@ -18,23 +18,13 @@
 #include <QDir>
 
 #include <config.h>
+
 #include <doxy_setup.h>
 #include <doxy_globals.h>
 #include <language.h>
 #include <message.h>
 #include <pre.h>
 #include <util.h>
-
-static void cleanUpPaths(QStringList &str);
-
-static QString getAbbreviateBrief();
-static QStringList getDotImageFormat();
-static QStringList getMathJaxFormat();
-static QStringList getLatexPaperType();
-
-const static QStringList s_dotImageFormat = getDotImageFormat();
-const static QStringList s_mathJaxFormat  = getMathJaxFormat();
-const static QStringList s_latexPaperType = getLatexPaperType();
 
 bool Config::getBool(const QString &name)
 {
@@ -137,10 +127,9 @@ bool Config::preVerify()
    // **
    if (! (Config::getBool("generate-html") || Config::getBool("generate-latex") || Config::getBool("generate-man") ||
           Config::getBool("generate-perl") || Config::getBool("generate-rtf")   || Config::getBool("generate-xml") ||
-          Config::getBool("generate-autogen-def") || Config::getBool("generate-docbook")) && 
-          Config::getString("generate-tagfile").isEmpty() ) {
+          Config::getBool("generate-docbook")) && Config::getString("generate-tagfile").isEmpty() ) {
 
-      err("No output format was selected, at least one output format must be set\n");
+      err("No output format was indicated, at least one output format must be selected\n");
       isError = true;
    }
  
@@ -216,6 +205,11 @@ bool Config::preVerify()
 
 bool Config::verify()
 {
+
+   const static QStringList s_dotImageFormat = getDotImageFormat();
+   const static QStringList s_mathJaxFormat  = getMathJaxFormat();
+   const static QStringList s_latexPaperType = getLatexPaperType();
+
    bool isError = false;
  
    // ** project
@@ -314,7 +308,6 @@ bool Config::verify()
       }      
    }
 
-
    // ** 
    const QStringList extMaps = Config::getList("language-mapping");
   
@@ -325,7 +318,7 @@ bool Config::verify()
          QString extension = mapStr.left(i).trimmed().toLower();
          QString language  = mapStr.mid(i + 1).trimmed().toLower();
 
-         if (! updateLanguageMapping(extension, language)) {
+         if (! updateLanguageMapping(extension, language, true)) {
             err("Unable to map file extension '%s' to '%s', verify the Extension Mapping tag\n", 
                   qPrintable(extension), qPrintable(language));
 
@@ -335,7 +328,6 @@ bool Config::verify()
          }
       }
    }
- 
 
    // **  build                                                 
    iterString = m_cfgString.find("layout-file");
@@ -398,10 +390,9 @@ bool Config::verify()
          }         
       }
    }
-
    iterList.value().value = inputSource;
 
-
+   // **   
    iterList = m_cfgList.find("example-patterns");
    QStringList examplePatterns = iterList.value().value;
 
@@ -422,6 +413,68 @@ bool Config::verify()
    }
 
 
+   // ** source code
+   iterList = m_cfgList.find("suffix-source-navtree");
+   QStringList suffixSource = iterList.value().value;
+
+   if (suffixSource.isEmpty()) {
+      suffixSource = getSuffixSource();
+      iterList.value().value = suffixSource;   
+
+   } else  {
+
+      for (auto &item: suffixSource) {      
+          item = item.trimmed();
+
+          if (item.startsWith('.')) {
+            item = item.mid(1);
+          }
+      }
+
+      iterList.value().value = suffixSource;  
+   }
+
+   iterList = m_cfgList.find("suffix-header-navtree");
+   QStringList suffixHeader = iterList.value().value;
+
+   if (suffixHeader.isEmpty()) {
+      suffixHeader = getSuffixHeader();
+      iterList.value().value = suffixHeader;   
+
+   } else  {
+
+      for (auto &item: suffixHeader) {      
+          item = item.trimmed();
+
+          if (item.startsWith('.')) {
+            item = item.mid(1);
+          }
+      }
+
+      iterList.value().value = suffixHeader;  
+   }
+
+   iterList = m_cfgList.find("suffix-exclude-navtree");
+   QStringList suffixExclude = iterList.value().value;
+
+   if (suffixExclude.isEmpty()) {
+      suffixExclude = getSuffixExclude();
+      iterList.value().value = suffixExclude;   
+
+   } else  {
+
+      for (auto &item: suffixExclude) {      
+          item = item.trimmed();
+
+          if (item.startsWith('.')) {
+            item = item.mid(1);
+          }
+      }
+
+      iterList.value().value = suffixExclude;  
+   }
+
+
    // ** preprocessing
    iterList = m_cfgList.find("include-path");
    QStringList includePath = iterList.value().value;
@@ -437,7 +490,6 @@ bool Config::verify()
 
       }          
    }
-
    iterList.value().value = includePath;
 
 
@@ -456,8 +508,12 @@ bool Config::verify()
       dotImageFormat = "png";
    }
 
-   iterEnum.value().value = dotImageFormat;
+   // BROOM - may want to split this into two config entries (12/2015)
+   if (dotImageFormat.contains(":"))  {
+      dotImageFormat = dotImageFormat.replace( QRegExp(":.*"), "");
+   }
 
+   iterEnum.value().value = dotImageFormat;   
 
    // 
    iterString = m_cfgString.find("mscgen-path");
@@ -569,7 +625,7 @@ bool Config::verify()
    int depth = iterInt.value().value;
    
    if (depth == 0) {
-      err("Dot Graph Max nodes was greater than maximum, setting to 1000");  
+      err("Dot Graph Max nodes was greater than the maximum value, setting to 1000\n");  
 
       iterInt.value().value = 1000;
    }
@@ -637,7 +693,14 @@ bool Config::verify()
    QString mathJaxFormat = iterEnum.value().value;
 
    if (! s_mathJaxFormat.contains(mathJaxFormat)) {
-      err("Invalid value of %s for MathJax Format, using the the default of HTML-CSS", qPrintable(mathJaxFormat));
+
+      if (mathJaxFormat.isEmpty()) {
+         err("MathJax Format can not be empty, setting to the default value of HTML-CSS\n");
+
+      } else  {
+         err("Invalid value of %s for MathJax Format, setting to the default value of HTML-CSS\n", qPrintable(mathJaxFormat));
+
+      }
   
       iterEnum.value().value = "HTML-CSS";
    }
@@ -729,7 +792,7 @@ bool Config::verify()
 
    } else {
 
-      if (manExtension.at(0) == '.') {
+      if (manExtension.startsWith('.')) {
          if (manExtension.length() == 1) {
             manExtension = "3";
    
@@ -763,7 +826,7 @@ bool Config::verify()
       temp = iterString.value().value;
 
       if (temp.isEmpty()) {
-         err("When Generate QtHelp is set, QHP Virtual Folder can not be empty. Setting to the defualt of doc'\n");      
+         err("When Generate QtHelp is set, QHP Virtual Folder can not be empty. Setting to the defualt of 'doc'\n");      
          
          iterString.value().value = "doc";
       }
@@ -818,13 +881,12 @@ bool Config::verify()
 
   
 
-   // ********** Save data to structers and variables   
+   // ********** save data to structers and variables   
   
    Doxy_Globals::parseSourcesNeeded = Config::getBool("dot-call") ||  Config::getBool("dot-called-by") ||
-                                 Config::getBool("ref-relation") || Config::getBool("ref-by-relation");
+                  Config::getBool("ref-relation") || Config::getBool("ref-by-relation");
    
-   Doxy_Globals::markdownSupport    = Config::getBool("markdown");
-
+   Doxy_Globals::markdownSupport = Config::getBool("markdown");
 
    // ** 
    const QStringList expandAsDefinedList = Config::getList("expand-as-defined");
@@ -838,22 +900,25 @@ bool Config::verify()
 
    }  
    
-   // read aliases and store them in a dictionary
-   readAliases();
+   // read command aliases, store in a dictionary
+   loadCmd_Aliases();
+
+   // read namespace aliases, store in a dictionary
+   loadRenameNS_Aliases();
 
    return isError;
 }
 
-static void cleanUpPaths(QStringList &str)
+void Config::cleanUpPaths(QStringList &str)
 {
    for (auto &item : str) {  
+      item = item.trimmed();
 
       if (item.isEmpty()) {
          continue;
       }
 
       item.replace("\\", "/");         
-      item = item.trimmed();
 
       if ((item.at(0) != '/' && (item.length() <= 2 || item.at(1) != ':')) || item.at(item.length() - 1) != '/' ) {
          QFileInfo fi(item);
@@ -865,7 +930,7 @@ static void cleanUpPaths(QStringList &str)
    }
 }
 
-static QStringList getDotImageFormat()
+QStringList Config::getDotImageFormat()
 {
    QStringList list;
 
@@ -877,7 +942,7 @@ static QStringList getDotImageFormat()
    return list;
 }
 
-static QStringList getMathJaxFormat()
+QStringList Config::getMathJaxFormat()
 {
    QStringList list;
 
@@ -888,7 +953,7 @@ static QStringList getMathJaxFormat()
    return list;
 }
 
-static QStringList getLatexPaperType()
+QStringList Config::getLatexPaperType()
 {
    QStringList list;
 
@@ -961,9 +1026,61 @@ QStringList Config::getFilePatterns()
    list.append("*.php5");
    list.append("*.phtml");
    list.append("*.py");
+   list.append("*.pyw");
    list.append("*.qsf");
    list.append("*.tcl");
    list.append("*.ucf");
+
+   return list;
+}
+
+QStringList Config::getSuffixSource()
+{
+   QStringList list;
+
+   list.append("c");   
+   list.append("cc");
+   list.append("cxx");
+   list.append("cpp");
+   list.append("c++");   
+   list.append("ii");
+   list.append("ixx");
+   list.append("ipp");
+   list.append("i++");
+   list.append("inl");
+   list.append("java"); 
+   list.append("m");
+   list.append("mm");
+   list.append("xml");
+
+   return list;
+}
+
+QStringList Config::getSuffixHeader()
+{
+   QStringList list;
+
+   list.append("h");   
+   list.append("hh");
+   list.append("hxx");
+   list.append("hpp");
+   list.append("h++");
+   list.append("idl");
+   list.append("ddl");
+   list.append("pidl");
+
+   return list;
+}
+
+QStringList Config::getSuffixExclude()
+{
+   QStringList list;
+
+   list.append("doc");   
+   list.append("dox");
+   list.append("md");
+   list.append("markdown");
+   list.append("txt");
 
    return list;
 }
@@ -977,4 +1094,94 @@ Qt::CaseSensitivity Config::getCase(const QString &name)
    }
 
    return isCase;
+}
+
+void Config::loadCmd_Aliases()
+{
+   // add aliases to a dictionary
+   const QStringList list = Config::getList("aliases");
+
+   for (auto item : list) {
+
+      if (! Doxy_Globals::cmdAliasDict.contains(item)) {
+         int i = item.indexOf('=');
+
+         if (i > 0) {
+            QString name  = item.left(i).trimmed();
+            QString value = item.right(item.length() - i - 1);
+
+            if (! name.isEmpty()) {
+               // insert or update with the new alias
+               Doxy_Globals::cmdAliasDict[name] = value;
+            }
+         }
+      }
+   }
+
+   expandAliases();
+   escapeAliases();
+}
+
+void Config::expandAliases()
+{
+   for (auto iter = Doxy_Globals::cmdAliasDict.begin(); iter != Doxy_Globals::cmdAliasDict.end(); ++iter) {
+      *iter = expandAlias(iter.key(), *iter);
+   }
+}
+
+void Config::escapeAliases()
+{
+   for (auto &s : Doxy_Globals::cmdAliasDict) {
+      QString value = s;
+      QString newValue;
+
+      int in;
+      int p = 0;
+
+      // for each \n in the alias command value
+      while ((in = value.indexOf("\\n", p)) != -1) {
+         newValue += value.mid(p, in - p);
+
+         // expand \n's except if \n is part of a built-in command
+
+
+         if (value.mid(in, 5) != "\\note" && value.mid(in, 5) != "\\name" && 
+               value.mid(in, 10) != "\\namespace" && value.mid(in, 14) != "\\nosubgrouping") {
+
+            newValue += "\\_linebr ";
+
+         } else {
+            newValue += "\\n";
+
+         }
+
+         p = in + 2;
+      }
+
+      newValue += value.mid(p, value.length() - p);
+      s = newValue;
+   }
+}
+
+void Config::loadRenameNS_Aliases()
+{
+   // add aliases to a dictionary
+   const QStringList list = Config::getList("ns-alias");
+
+   for (auto item : list) {
+
+      if (! Doxy_Globals::renameNSDict.contains(item)) {
+         int i = item.indexOf('=');
+
+         if (i > 0) {
+            QString name  = item.left(i).trimmed();
+            QString value = item.right(item.length() - i - 1);
+
+            if (! name.isEmpty()) {
+               // insert or update with the new alias
+               Doxy_Globals::renameNSDict[name] = value;
+            }
+         }
+      }
+   }
 }

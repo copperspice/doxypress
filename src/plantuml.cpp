@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -18,8 +18,9 @@
 #include <QDir>
 
 #include <plantuml.h>
-#include <portable.h>
+
 #include <config.h>
+#include <portable.h>
 #include <message.h>
 
 static const int maxCmdLine = 40960;
@@ -102,14 +103,14 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    pumlArgs += " \"";
    pumlArgs += baseName;
    pumlArgs += ".pu\" ";
-   pumlArgs += "-charset " + Config::getString("input-encoding") + " ";
+   pumlArgs += "-charset UTF-8 ";
 
    int exitCode;
    
    msg("Running PlantUML on generated file %s.pu\n", qPrintable(baseName));
    portable_sysTimerStart();
 
-   if ((exitCode = portable_system(pumlExe, pumlArgs, false)) != 0) {
+   if ((exitCode = portable_system(pumlExe, pumlArgs, true)) != 0) {
       err("Unable to run PlantUML, verify the command 'java -jar \"%splantuml.jar\" -h' works from "
          "the command line. Exit code: %d\n", qPrintable(plantumlJarPath), exitCode);
 

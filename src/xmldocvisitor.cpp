@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -17,11 +17,12 @@
 
 #include <QFileInfo>
 
+#include <xmldocvisitor.h>
+
 #include <config.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
-#include <filename.h>
 #include <htmlentity.h>
 #include <language.h>
 #include <message.h>
@@ -29,16 +30,15 @@
 #include <parser_base.h>
 #include <util.h>
 #include <xmlgen.h>
-#include <xmldocvisitor.h>
 
 static void visitCaption(XmlDocVisitor *parent, QList<DocNode *> children)
 {   
-   for (auto &n : children) {
+   for (auto n : children) {
       n->accept(parent);
    } 
 }
 
-static void visitPreStart(QTextStream &t, const char *cmd, const bool doCaption, XmlDocVisitor *parent,
+static void visitPreStart(QTextStream &t, const QString &cmd, const bool doCaption, XmlDocVisitor *parent,
                   QList<DocNode *> children, const QString &name, bool writeType, DocImage::Type type, 
                   const QString &width, const QString &height)
 {
@@ -66,14 +66,14 @@ static void visitPreStart(QTextStream &t, const char *cmd, const bool doCaption,
    }
 
    if (! name.isEmpty()) {
-    t << " name=\"" << name << "\"";
+      t << " name=\"" << name << "\"";
    }
 
    if (! width.isEmpty()) {
-    t << " width=\"" << convertToXML(width) << "\"";
+      t << " width=\"" << convertToXML(width) << "\"";
 
    } else if (!height.isEmpty()) {
-    t << " height=\"" << convertToXML(height) << "\"";
+      t << " height=\"" << convertToXML(height) << "\"";
 
    }
 
@@ -86,7 +86,7 @@ static void visitPreStart(QTextStream &t, const char *cmd, const bool doCaption,
    t << ">";
 }
 
-static void visitPostEnd(QTextStream &t, const char *cmd)
+static void visitPostEnd(QTextStream &t, const QString &cmd)
 {
    t << "</" << cmd << ">" << endl;
 }
@@ -255,67 +255,59 @@ void XmlDocVisitor::visit(DocVerbatim *s)
    }
 
    QString lang = m_langExt;
-   if (! s->language().isEmpty()) { // explicit language setting
+   if (! s->language().isEmpty()) { 
+      // explicit language setting
       lang = s->language();
    }
 
    SrcLangExt langExt = getLanguageFromFileName(lang);
 
    switch (s->type()) {
-      case DocVerbatim::Code: // fall though
+      case DocVerbatim::Code: 
          m_t << "<programlisting>";
-         Doxy_Globals::parserManager->getParser(lang)
-         ->parseCode(m_ci, s->context(), s->text(), langExt,
-                     s->isExample(), s->exampleFile());
+         Doxy_Globals::parserManager->getParser(lang)->parseCode(m_ci, s->context(), s->text(),
+                   langExt, s->isExample(), s->exampleFile());
+
          m_t << "</programlisting>";
          break;
+
       case DocVerbatim::Verbatim:
          m_t << "<verbatim>";
          filter(s->text());
          m_t << "</verbatim>";
          break;
+    
       case DocVerbatim::HtmlOnly:
-         m_t << "<htmlonly>";
-         filter(s->text());
-         m_t << "</htmlonly>";
-         break;
       case DocVerbatim::RtfOnly:
-         m_t << "<rtfonly>";
-         filter(s->text());
-         m_t << "</rtfonly>";
-         break;
       case DocVerbatim::ManOnly:
-         m_t << "<manonly>";
-         filter(s->text());
-         m_t << "</manonly>";
-         break;
       case DocVerbatim::LatexOnly:
-         m_t << "<latexonly>";
-         filter(s->text());
-         m_t << "</latexonly>";
+      case DocVerbatim::DocbookOnly:
+         // do nothing
          break;
+
       case DocVerbatim::XmlOnly:
          m_t << s->text();
          break;
-      case DocVerbatim::DocbookOnly:
-         m_t << "<docbookonly>";
-         filter(s->text());
-         m_t << "</docbookonly>";
-         break;
+
       case DocVerbatim::Dot:
-         m_t << "<dot>";
+         visitPreStart(m_t, "dot", s->hasCaption(), this, s->children(), QString(""), false, 
+                     DocImage::Html, s->width(), s->height());
          filter(s->text());
-         m_t << "</dot>";
+         visitPostEnd(m_t, "dot");
          break;
+
       case DocVerbatim::Msc:
-         m_t << "<msc>";
+         visitPreStart(m_t, "msc", s->hasCaption(), this, s->children(),  QString(""), false, 
+                     DocImage::Html, s->width(), s->height());
          filter(s->text());
-         m_t << "</msc>";
+         visitPostEnd(m_t, "msc");        
          break;
+
       case DocVerbatim::PlantUML:
-         m_t << "<plantuml>";
+         visitPreStart(m_t, "plantuml", s->hasCaption(), this, s->children(),  QString(""), false, 
+                     DocImage::Html, s->width(), s->height());
          filter(s->text());
-         m_t << "</plantuml>";
+         visitPostEnd(m_t, "plantuml");
          break;
    }
 }
@@ -891,23 +883,7 @@ void XmlDocVisitor::visitPre(DocImage *img)
       return;
    }
 
-   m_t << "<image type=\"";
-
-   switch (img->type()) {
-      case DocImage::Html:
-         m_t << "html";
-         break;
-      case DocImage::Latex:
-         m_t << "latex";
-         break;
-      case DocImage::Rtf:
-         m_t << "rtf";
-         break;
-      case DocImage::DocBook:
-         m_t << "docbook";
-         break;
-   }
-   m_t << "\"";
+   static const QString xmlOutDir = Config::getString("xml-output"); 
 
    QString baseName = img->name();
 
@@ -916,32 +892,23 @@ void XmlDocVisitor::visitPre(DocImage *img)
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   m_t << " name=\"" << baseName << "\"";
-   if (!img->width().isEmpty()) {
-      m_t << " width=\"";
-      filter(img->width());
-      m_t << "\"";
-   } else if (!img->height().isEmpty()) {
-      m_t << " height=\"";
-      filter(img->height());
-      m_t << "\"";
-   }
-   m_t << ">";
+   visitPreStart(m_t, "image", false, this, img->children(), baseName, true, img->type(), img->width(), img->height());
 
    // copy the image to the output dir
    QFile inImage(img->name());
-   QFile outImage(Config::getString("xml-output") + "/" + baseName);
+   QString outputFile = xmlOutDir + "/" + baseName;
 
    if (inImage.open(QIODevice::ReadOnly)) {
 
-      if (outImage.open(QIODevice::WriteOnly)) {
-         char *buffer = new char[inImage.size()];
-         inImage.read(buffer, inImage.size());
-         outImage.write(buffer, inImage.size());
-         outImage.flush();
+      QFile::remove(outputFile);
+      bool copyOk = inImage.copy(outputFile);
 
-         delete[] buffer;
-      }
+      if (! copyOk) { 
+         err("Unable to open image file for writing %s, error: %d\n", csPrintable(outputFile), inImage.error());
+      }        
+
+   } else {
+      err("Unable to open image file for reading %s, error: %d\n", csPrintable( img->name() ), inImage.error());                
    }
 }
 
@@ -950,7 +917,8 @@ void XmlDocVisitor::visitPost(DocImage *)
    if (m_hide) {
       return;
    }
-   m_t << "</image>" << endl;
+   
+   visitPostEnd(m_t, "image");
 }
 
 void XmlDocVisitor::visitPre(DocDotFile *df)
@@ -958,7 +926,8 @@ void XmlDocVisitor::visitPre(DocDotFile *df)
    if (m_hide) {
       return;
    }
-   m_t << "<dotfile name=\"" << df->file() << "\">";
+
+   visitPreStart(m_t, "dotfile", false, this, df->children(), df->file(), false, DocImage::Html, df->width(), df->height());
 }
 
 void XmlDocVisitor::visitPost(DocDotFile *)
@@ -966,7 +935,8 @@ void XmlDocVisitor::visitPost(DocDotFile *)
    if (m_hide) {
       return;
    }
-   m_t << "</dotfile>" << endl;
+
+   visitPostEnd(m_t, "dotfile");
 }
 
 void XmlDocVisitor::visitPre(DocMscFile *df)
@@ -974,7 +944,8 @@ void XmlDocVisitor::visitPre(DocMscFile *df)
    if (m_hide) {
       return;
    }
-   m_t << "<mscfile name=\"" << df->file() << "\">";
+
+   visitPreStart(m_t, "mscfile", false, this, df->children(), df->file(), false, DocImage::Html, df->width(), df->height());
 }
 
 void XmlDocVisitor::visitPost(DocMscFile *)
@@ -982,7 +953,7 @@ void XmlDocVisitor::visitPost(DocMscFile *)
    if (m_hide) {
       return;
    }
-   m_t << "</mscfile>" << endl;
+   visitPostEnd(m_t, "mscfile");
 }
 
 void XmlDocVisitor::visitPre(DocDiaFile *df)
@@ -990,7 +961,8 @@ void XmlDocVisitor::visitPre(DocDiaFile *df)
    if (m_hide) {
       return;
    }
-   m_t << "<diafile name=\"" << df->file() << "\">";
+
+   visitPreStart(m_t, "diafile", false, this, df->children(), df->file(), false, DocImage::Html, df->width(), df->height());
 }
 
 void XmlDocVisitor::visitPost(DocDiaFile *)
@@ -998,7 +970,8 @@ void XmlDocVisitor::visitPost(DocDiaFile *)
    if (m_hide) {
       return;
    }
-   m_t << "</diafile>" << endl;
+
+   visitPostEnd(m_t, "diafile");
 }
 
 void XmlDocVisitor::visitPre(DocLink *lnk)

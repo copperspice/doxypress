@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -22,32 +22,23 @@
 
 #include <stdlib.h>
 
+#include <xmlgen.h>
+
 #include <arguments.h>
 #include <config.h>
-#include <classlist.h>
-#include <dirdef.h>
 #include <docparser.h>
 #include <doxy_build_info.h>
 #include <doxy_globals.h>
 #include <dot.h>
 #include <defargs.h>
-#include <groupdef.h>
 #include <htmlentity.h>
-#include <filename.h>
 #include <language.h>
 #include <message.h>
-#include <memberdef.h>
-#include <memberlist.h>
-#include <membername.h>
 #include <membergroup.h>
-#include <namespacedef.h>
 #include <outputgen.h>
-#include <pagedef.h>
 #include <parser_base.h>
 #include <resourcemgr.h>
-#include <section.h>
 #include <util.h>
-#include <xmlgen.h>
 #include <xmldocvisitor.h>
 
 // no debug info
@@ -55,56 +46,56 @@
 
 // debug to stdout
 //#define XML_DB(x) printf x
+
 // debug inside output
 //#define XML_DB(x) QByteArray __t;__t.sprintf x;m_t << __t
 
 /** Helper class mapping MemberList::ListType to a string representing */
-class XmlSectionMapper : public QHash<long, const char *>
+class XmlSectionMapper : public QHash<long, QString>
 {
  public:
-   XmlSectionMapper() : QHash<long, const char *>() {
-      insert(MemberListType_pubTypes, "public-type");
-      insert(MemberListType_pubMethods, "public-func");
-      insert(MemberListType_pubAttribs, "public-attrib");
-      insert(MemberListType_pubSlots, "public-slot");
-      insert(MemberListType_pubSignals, "public-signal");
-      insert(MemberListType_dcopMethods, "dcop-func");
-      insert(MemberListType_properties, "property");
-      insert(MemberListType_events, "event");
-      insert(MemberListType_interfaces, "interfaces");
-      insert(MemberListType_services, "services");
-      insert(MemberListType_pubStaticMethods, "public-static-func");
-      insert(MemberListType_pubStaticAttribs, "public-static-attrib");
-      insert(MemberListType_proTypes, "protected-type");
-      insert(MemberListType_proMethods, "protected-func");
-      insert(MemberListType_proAttribs, "protected-attrib");
-      insert(MemberListType_proSlots, "protected-slot");
-      insert(MemberListType_proSignals, "protected-signal");
-      insert(MemberListType_proStaticMethods, "protected-static-func");
-      insert(MemberListType_proStaticAttribs, "protected-static-attrib");
-      insert(MemberListType_pacTypes, "package-type");
-      insert(MemberListType_pacMethods, "package-func");
-      insert(MemberListType_pacAttribs, "package-attrib");
-      insert(MemberListType_pacStaticMethods, "package-static-func");
-      insert(MemberListType_pacStaticAttribs, "package-static-attrib");
-      insert(MemberListType_priTypes, "private-type");
-      insert(MemberListType_priMethods, "private-func");
-      insert(MemberListType_priAttribs, "private-attrib");
-      insert(MemberListType_priSlots, "private-slot");
-      insert(MemberListType_priSignals, "private-signal");
-      insert(MemberListType_priStaticMethods, "private-static-func");
-      insert(MemberListType_priStaticAttribs, "private-static-attrib");
-      insert(MemberListType_friends, "friend");
-      insert(MemberListType_related, "related");
-      insert(MemberListType_decDefineMembers, "define");
-      insert(MemberListType_decProtoMembers, "prototype");
+   XmlSectionMapper() : QHash<long, QString>() {
+      insert(MemberListType_pubTypes,          "public-type");
+      insert(MemberListType_pubMethods,        "public-func");
+      insert(MemberListType_pubAttribs,        "public-attrib");
+      insert(MemberListType_pubSlots,          "public-slot");
+      insert(MemberListType_pubSignals,        "public-signal");
+      insert(MemberListType_dcopMethods,       "dcop-func");
+      insert(MemberListType_properties,        "property");
+      insert(MemberListType_events,            "event");
+      insert(MemberListType_interfaces,        "interfaces");
+      insert(MemberListType_services,          "services");
+      insert(MemberListType_pubStaticMethods,  "public-static-func");
+      insert(MemberListType_pubStaticAttribs,  "public-static-attrib");
+      insert(MemberListType_proTypes,          "protected-type");
+      insert(MemberListType_proMethods,        "protected-func");
+      insert(MemberListType_proAttribs,        "protected-attrib");
+      insert(MemberListType_proSlots,          "protected-slot");
+      insert(MemberListType_proSignals,        "protected-signal");
+      insert(MemberListType_proStaticMethods,  "protected-static-func");
+      insert(MemberListType_proStaticAttribs,  "protected-static-attrib");
+      insert(MemberListType_pacTypes,          "package-type");
+      insert(MemberListType_pacMethods,        "package-func");
+      insert(MemberListType_pacAttribs,        "package-attrib");
+      insert(MemberListType_pacStaticMethods,  "package-static-func");
+      insert(MemberListType_pacStaticAttribs,  "package-static-attrib");
+      insert(MemberListType_priTypes,          "private-type");
+      insert(MemberListType_priMethods,        "private-func");
+      insert(MemberListType_priAttribs,        "private-attrib");
+      insert(MemberListType_priSlots,          "private-slot");
+      insert(MemberListType_priSignals,        "private-signal");
+      insert(MemberListType_priStaticMethods,  "private-static-func");
+      insert(MemberListType_priStaticAttribs,  "private-static-attrib");
+      insert(MemberListType_friends,           "friend");
+      insert(MemberListType_related,           "related");
+      insert(MemberListType_decDefineMembers,  "define");
+      insert(MemberListType_decProtoMembers,   "prototype");
       insert(MemberListType_decTypedefMembers, "typedef");
-      insert(MemberListType_decEnumMembers, "enum");
-      insert(MemberListType_decFuncMembers, "func");
-      insert(MemberListType_decVarMembers, "var");
+      insert(MemberListType_decEnumMembers,    "enum");
+      insert(MemberListType_decFuncMembers,    "func");
+      insert(MemberListType_decVarMembers,     "var");
    }
 };
-
 static XmlSectionMapper g_xmlSectionMapper;
 
 inline void writeXMLString(QTextStream &t, const QString &text)
@@ -985,7 +976,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
         << convertToXML(rmd->name()) << "</reimplements>" << endl;
    }
 
-   MemberList *rbml = md->reimplementedBy();
+   QSharedPointer<MemberList> rbml = md->reimplementedBy();
 
    if (rbml) {     
       for (auto rmd : *rbml) {
@@ -1181,7 +1172,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QTextStream &t, QSharedPointer<MemberList> ml, 
                                const QString &kind, const QString &header = QString(), const QString &documentation = QString() )
 {
-   if (ml == 0) {
+   if (ml == nullptr) {
       return;
    }
 
@@ -1407,23 +1398,23 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
       return;   // skip artificially created classes
    }
 
-   msg("Generating XML output for class %s\n", qPrintable(cd->name()));
+   msg("Generating XML output for class %s\n", csPrintable(cd->name()));
 
    ti << "  <compound refid=\"" << classOutputFileBase(cd)
       << "\" kind=\"" << cd->compoundTypeString()
       << "\"><name>" << convertToXML(cd->name()) << "</name>" << endl;
 
-   QString outputDirectory = Config::getString("xml-output");
-   QString fileName = outputDirectory + "/" + classOutputFileBase(cd) + ".xml";
+   static const QString xmlOutDir = Config::getString("xml-output");
+   QString fileName  = xmlOutDir + "/" + classOutputFileBase(cd) + ".xml";
 
-   QFile f(fileName);
+   QFile fi(fileName);
 
-   if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+   if (! fi.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), fi.error());
       return;
    }
 
-   QTextStream t(&f);
+   QTextStream t(&fi);
  
    writeXMLHeader(t);
    t << "  <compounddef id=\""
@@ -2142,7 +2133,7 @@ void generateXML()
    }
     
    for (auto dir : Doxy_Globals::directories) {
-      msg("Generate XML output for dir %s\n", qPrintable(dir->name()));
+      msg("Generating XML output for dir %s\n", qPrintable(dir->name()));
       generateXMLForDir(dir, t);
    }
     

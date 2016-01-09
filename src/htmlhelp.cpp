@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -21,44 +21,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <htmlhelp.h>
+
 #include <config.h>
 #include <doxy_globals.h>
-#include <filedef.h>
-#include <groupdef.h>
-#include <htmlhelp.h>
 #include <language.h>
 #include <message.h>
-#include <memberdef.h>
 #include <qtextcodec.h>
-#include <stringmap.h>
 #include <util.h>
 
-/** Class representing a field in the HTML help index. */
-struct IndexField {
-   QString name;
-   QString url;
-   QString anchor;
-
-   bool link;
-   bool reversed;
-};
-
-/** Sorted dictionary of IndexField objects. */
-class IndexFieldSDict : public StringMap<QSharedPointer<IndexField>>
-{
- public:
-   // CopperSpice - can add isCase
-   IndexFieldSDict() : StringMap<QSharedPointer<IndexField>>() {}
-   ~IndexFieldSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<IndexField> &item1, const QSharedPointer<IndexField> &item2) const override {
-      return item1->name.compare(item2->name, Qt::CaseInsensitive);
-   }
-};
-
-/** A helper class for HtmlHelp that manages a two level index in
- *  alphabetical order.
+/** A helper class for HtmlHelp that manages a two level index in alphabetical order.
  */
 class HtmlHelpIndex
 {
@@ -578,8 +550,8 @@ QString HtmlHelp::recode(const QString &s)
 void HtmlHelp::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
             bool seperateIndex, bool addToNavIndex, QSharedPointer<Definition> def)
 {
-   // If we're using a binary toc then folders cannot have links.
-   // Tried this and I didn't see any problems, when not using
+   // If we are using a binary toc then folders cannot have links.
+   // Tried this and I did not see any problems, when not using
    // the resetting of file and anchor the TOC works better
    // (prev / next button)
   

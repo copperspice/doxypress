@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -17,19 +17,16 @@
 
 #include <sortedlist.h>
 
-#include <classdef.h>
 #include <config.h>
 #include <dirdef.h>
 #include <dot.h>
 #include <filedef.h>
-#include <filename.h>
+#include <filenamelist.h>
 #include <ftvhelp.h>
 #include <groupdef.h>
 
 // BaseClassList --> SortedList<BaseClassDef *>
-// BaseClassListIterator --> QListIterator<BaseClassDef *>
-
-int compareListValues(const BaseClassDef *item1, const BaseClassDef *item2) 
+int compareListValues(const BaseClassDef *item1, const BaseClassDef *item2, bool flag) 
 {
    QSharedPointer<const ClassDef> c1 = item1->classDef;
    QSharedPointer<const ClassDef> c2 = item2->classDef;
@@ -44,8 +41,7 @@ int compareListValues(const BaseClassDef *item1, const BaseClassDef *item2)
 
 
 // ClassList --> SortedList<ClassDef *>
-// ClassListIterator --> QListIterator<ClassDef *>
-int compareListValues(const ClassDef *item1, const ClassDef *item2)
+int compareListValues(const QSharedPointer<ClassDef> item1, const QSharedPointer<ClassDef> item2, bool flag)
 {
    static bool b = Config::getBool("sort-by-scope-name");
 
@@ -58,29 +54,35 @@ int compareListValues(const ClassDef *item1, const ClassDef *item2)
    }
 }
 
+
 // DirList ->  SortedList<DirDef *>
-int compareListValues(QSharedPointer<DirDef> item1, QSharedPointer<DirDef> item2)
+int compareListValues(const QSharedPointer<DirDef> &item1, const QSharedPointer<DirDef> &item2, bool flag)
 {
     return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
 }
 
 
 // DotNodeList --> SortedList<DotNode *>
-int compareListValues(const DotNode *item1, const DotNode *item2) 
+int compareListValues(const DotNode *item1, const DotNode *item2, bool flag) 
 {
    return item1->label().compare(item2->label(), Qt::CaseInsensitive);
 }
 
 
-// FileList 
-int compareListValues(QSharedPointer<FileDef> item1, QSharedPointer<FileDef> item2) 
+// FileNameList --> SortedList<FileDef *>   true
+// FileList     --> SortedList<FileDef *>   false
+int compareListValues(const QSharedPointer<FileDef> &item1, const QSharedPointer<FileDef> &item2, bool flag) 
 {
-   return item1->name().compare(item2->name(), Qt::CaseInsensitive);
+   if (flag) {
+      return item1->fileName().compare(item2->fileName(), Qt::CaseInsensitive);
+   } else {
+      return item1->name().compare(item2->name(), Qt::CaseInsensitive);
+   }
 }
 
-// FileNameList --> SortedList<FileName *>
-// FileNameListIterator -->  QListIterator<FileName *>
-int compareListValues(QSharedPointer<FileName> item1, QSharedPointer<FileName> item2) 
+
+// Doxy_Globals::inputNameList --> SortedList<FileNameList *>
+int compareListValues(const QSharedPointer<FileNameList> &item1, const QSharedPointer<FileNameList> &item2, bool flag) 
 {
    int retval;
 
@@ -96,18 +98,15 @@ int compareListValues(QSharedPointer<FileName> item1, QSharedPointer<FileName> i
 }
 
 
-//   GroupList --> SortedList<GroupDef *>
-//   GroupListIterator --> QListIterator<GroupDef *>
-
-int compareListValues(QSharedPointer<GroupDef> item1, QSharedPointer<GroupDef> item2) 
+// GroupList --> SortedList<GroupDef *>
+int compareListValues(const QSharedPointer<GroupDef> &item1, const QSharedPointer<GroupDef> &item2, bool flag) 
 {
    return item1->groupTitle().compare(item2->groupTitle());
 }
 
 
-// MemberList
-
-int compareListValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2)
+// MemberList --> SortedList<MemberDef *>
+int compareListValues(const QSharedPointer<MemberDef> &c1, const QSharedPointer<MemberDef> &c2, bool flag)
 {
    static bool sortConstructorsFirst = Config::getBool("sort-constructors-first");
 
@@ -131,18 +130,8 @@ int compareListValues(QSharedPointer<MemberDef> c1, QSharedPointer<MemberDef> c2
 
 
 // NavIndexEntryList --> SortedList<NavIndexEntry *>
-
- 
-// sort list based on url
-int compareListValues(const NavIndexEntry *item1, const NavIndexEntry *item2)
+int compareListValues(const NavIndexEntry *item1, const NavIndexEntry *item2, bool flag)
 {  
-   return item1->url.compare(item2->url);  
-}
-
-
-// OutputNameList -->  SortedList<FileList *>
-
-int compareListValues(const FileList *item1, const FileList *item2) 
-{
-   return item1->path().compare(item2->path(), Qt::CaseInsensitive );
+   // sort list based on url
+   return item1->m_url.compare(item2->m_url);  
 }

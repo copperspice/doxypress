@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
@@ -19,38 +19,32 @@
 
 #include <stdlib.h>
 
+#include <latexgen.h>
+
 #include <cite.h>
-#include <classlist.h>
 #include <config.h>
 #include <diagram.h>
-#include <dirdef.h>
 #include <docparser.h>
-
 #include <dot.h>
 #include <doxy_build_info.h>
 #include <doxy_globals.h>
-#include <filename.h>
-#include <groupdef.h>
 #include <language.h>
 #include <latexdocvisitor.h>
-#include <latexgen.h>
 #include <message.h>
-#include <namespacedef.h>
 #include <resourcemgr.h>
-#include <pagedef.h>
 #include <util.h>
 
 LatexGenerator::LatexGenerator() : OutputGenerator()
 {
-   m_dir = Config::getString("latex-output");
+   m_dir        = Config::getString("latex-output");
    m_prettyCode = Config::getBool("latex-source-code");
 
    col = 0;
    m_indent = 0;
 
-   insideTabbing = false;
-   firstDescItem = true;
-   disableLinks = false;
+   insideTabbing      = false;
+   firstDescItem      = true;
+   disableLinks       = false;
    templateMemberItem = false;
 }
 
@@ -262,10 +256,12 @@ void LatexGenerator::init()
 
 static void writeDefaultHeaderPart1(QTextStream &t_stream)
 {
+   static const QStringList extraLatexStyle = Config::getList("latex-stylesheets");
+
    // part 1
 
    // Handle batch mode
-   if (Config::getBool("latex-batchmode")) {
+   if (Config::getBool("latex-batch-mode")) {
       t_stream << "\\batchmode\n";
    }
 
@@ -283,19 +279,39 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
 
    // Load required packages
    t_stream << "% Packages required by DoxyPress\n"
-     "\\usepackage{fixltx2e}\n" // for \textsubscript
-     "\\usepackage{calc}\n"
-     "\\usepackage{doxypress}\n"
-     "\\usepackage{graphicx}\n"
-     "\\usepackage[utf8]{inputenc}\n"
-     "\\usepackage{makeidx}\n"
-     "\\usepackage{multicol}\n"
-     "\\usepackage{multirow}\n"
-     "\\PassOptionsToPackage{warn}{textcomp}\n"
-     "\\usepackage{textcomp}\n"
-     "\\usepackage[nointegrals]{wasysym}\n"
-     "\\usepackage[table]{xcolor}\n"
-     "\n";
+      "\\usepackage{fixltx2e}\n" // for \textsubscript
+      "\\usepackage{calc}\n"
+      "\\usepackage{doxypress}\n"
+      "\\usepackage[export]{adjustbox} % also loads graphicx\n";
+    
+   for (auto fileName : extraLatexStyle) {   
+
+      if (! fileName.isEmpty()) {
+         QFileInfo fi(fileName);
+
+         if (fi.exists()) {
+            if (checkExtension(fi.fileName(), Doxy_Globals::latexStyleExtension)) {
+               // strip the extension, it will be added by the usepackage in the tex conversion process
+               t_stream << "\\usepackage{" << stripExtensionGeneral(fi.fileName(), 
+                     Doxy_Globals::latexStyleExtension) << "}\n";
+
+            } else {
+               t_stream << "\\usepackage{" << fi.fileName() << "}\n";
+            }
+         }
+      }
+   }
+
+   t_stream << "\\usepackage{graphicx}\n"
+                "\\usepackage[utf8]{inputenc}\n"
+                "\\usepackage{makeidx}\n"
+                "\\usepackage{multicol}\n"
+                "\\usepackage{multirow}\n"
+                "\\PassOptionsToPackage{warn}{textcomp}\n"
+                "\\usepackage{textcomp}\n"
+                "\\usepackage[nointegrals]{wasysym}\n"
+                "\\usepackage[table]{xcolor}\n"
+                "\n";
 
    // Language support
    QString languageSupport = theTranslator->latexLanguageSupportCommand();
@@ -346,7 +362,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\\hbadness=750\n"
      "\\setlength{\\emergencystretch}{15pt}\n"
      "\\setlength{\\parindent}{0cm}\n"
-     "\\setlength{\\parskip}{0.2cm}\n";
+     "\\setlength{\\parskip}{3ex plus 2ex minus 2ex}\n";
 
    // Redefine paragraph/subparagraph environments, using sectsty fonts
    t_stream << "\\makeatletter\n"
@@ -417,13 +433,20 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\n";
 
    // User-specified packages
-   const QStringList extraPackages = Config::getList("extra-packages");
+   const QStringList extraPackages = Config::getList("latex-extra-packages");
   
    if (! extraPackages.isEmpty()) {     
       t_stream << "% Packages requested by user\n";     
    
       for (auto pkgName : extraPackages) {         
-         t_stream << "\\usepackage{" << pkgName << "}\n";        
+ 
+         if (pkgName.startsWith('[') || pkgName.startsWith('{')) {
+            t_stream << "\\usepackage" << pkgName << "\n";
+
+         } else {
+            t_stream << "\\usepackage{" << pkgName << "}\n";
+         }
+
       }
    
       t_stream << "\n";      
@@ -505,13 +528,18 @@ static void writeDefaultHeaderPart2(QTextStream &t_stream)
 static void writeDefaultHeaderPart3(QTextStream &t_stream)
 {
    // part 3
-   // Finalize project number
+   static bool timeStamp = Config::getBool("latex-timestamp");
 
-   t_stream << " DoxyPress " << versionString << "}\\\\\n"
-     "\\vspace*{0.5cm}\n"
-     "{\\small " << dateToString(true) << "}\\\\\n"
-     "\\end{center}\n"
-     "\\end{titlepage}\n";
+   // Finalize project number
+   t_stream << " DoxyPress " << versionString << "}\\\\\n";
+
+   if (timeStamp) {
+     t_stream << "\\vspace*{0.5cm}\n"
+                 "{\\small " << dateToString(true) << "}\\\\\n";
+   }
+
+   t_stream << "\\end{center}\n"
+               "\\end{titlepage}\n";
 
    bool compactLatex = Config::getBool("latex-compact");
    if (!compactLatex) {
@@ -1073,35 +1101,6 @@ void LatexGenerator::endIndexSection(IndexSections is)
 
       case isPageDocumentation: {
          m_textStream << "}\n";
-
-
-#if 0
-         PageSDict::Iterator pdi(*Doxy_Globals::pageSDict);
-         PageDef *pd = pdi.toFirst();
-         bool first = true;
-
-         for (pdi.toFirst(); (pd = pdi.current()); ++pdi) {
-
-            if (!pd->getGroupDef() && !pd->isReference()) {
-               if (compactLatex) {
-                  m_textStream << "\\section";
-               } else {
-                  m_textStream << "\\chapter";
-               }
-               m_textStream << "{" << pd->title();
-               m_textStream << "}\n";
-
-               if (compactLatex || first) {
-                  m_textStream << "\\input" ;
-               } else {
-                  m_textStream << "\\include";
-               }
-               m_textStream << "{" << pd->getOutputFileBase() << "}\n";
-               first = false;
-            }
-         }
-#endif
-
       }
       break;
 
@@ -1544,7 +1543,12 @@ void LatexGenerator::endMemberDoc(bool)
    m_textStream << "}";
 }
 
-void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, const QString &anchor, const QString &, const QString &)
+void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, const QString &anchor, 
+                  const QString &, const QString &)
+{
+}
+
+void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
 {
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
    static bool usePDFLatex   = Config::getBool("latex-pdf");
@@ -1562,10 +1566,7 @@ void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, cons
 
       m_textStream << "}{}";
    }
-}
 
-void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
-{
    m_textStream << "\\label{";
 
    if (! fName.isEmpty()) {
@@ -1575,12 +1576,13 @@ void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
    if (! anchor.isEmpty()) {
       m_textStream << "_" << anchor;
    }
+
    m_textStream << "}" << endl;
 }
 
 void LatexGenerator::writeAnchor(const QString &fName, const QString &name)
 {   
-   m_textStream << "\\label{" << name << "}" << endl;
+   m_textStream << "\\label{" << stripPath(name) << "}" << endl;
 
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
    static bool usePDFLatex   = Config::getBool("latex-pdf");
@@ -1588,9 +1590,10 @@ void LatexGenerator::writeAnchor(const QString &fName, const QString &name)
    if (usePDFLatex && pdfHyperlinks) {
 
       if (! fName.isEmpty()) {
-         m_textStream << "\\hypertarget{" << stripPath(fName) << "_" << name << "}{}" << endl;
+         m_textStream  << "\\hypertarget{" << stripPath(fName) << "_" << stripPath(name) << "}{}" << endl;
+      
       } else {
-         m_textStream << "\\hypertarget{" << name << "}{}" << endl;
+         m_textStream  << "\\hypertarget{" << stripPath(name) << "}{}" << endl;
       }
    }
 }

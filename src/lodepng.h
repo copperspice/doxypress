@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -152,7 +152,7 @@ unsigned LodePNG_InfoColor_addPalette(LodePNG_InfoColor *info, unsigned char r, 
 /*additional color info*/
 unsigned LodePNG_InfoColor_getBpp(const LodePNG_InfoColor *info);           /*bits per pixel*/
 unsigned LodePNG_InfoColor_getChannels(const LodePNG_InfoColor *info);      /*amount of channels*/
-unsigned LodePNG_InfoColor_isGreyscaleType(const LodePNG_InfoColor *info);  /*is it a greyscale type? (colorType 0 or 4)*/
+unsigned LodePNG_InfoColor_isGreyscaleType(const LodePNG_InfoColor *info);  /*is it a grayscale type?  (colorType 0 or 4)*/
 unsigned LodePNG_InfoColor_isAlphaType(const LodePNG_InfoColor *info);      /*has it an alpha channel? (colorType 2 or 6)*/
 
 #ifdef LODEPNG_COMPILE_ANCILLARY_CHUNKS

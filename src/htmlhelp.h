@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -24,11 +24,22 @@
 #include <QStringList>
 #include <QTextCodec>
 #include <QTextStream>
+#include <QSet>
 
 #include <index.h>
 
 class Definition;
 class HtmlHelpIndex;
+
+/** Class representing a field in the HTML help index. */
+struct IndexField {
+   QString name;
+   QString url;
+   QString anchor;
+
+   bool link;
+   bool reversed;
+};
 
 /** A class that generated the HTML Help specific files.
  *

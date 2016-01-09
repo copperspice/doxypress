@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
@@ -109,7 +109,7 @@ class ArgumentList : public QList<Argument>
    bool isDeleted;
    
    static ArgumentList *unmarshal(StorageIntf *s);
-   static void marshal(StorageIntf *s, ArgumentList *argList);
+   static void marshal(StorageIntf *s, const ArgumentList &argList);
 };
 
 using ArgumentListIterator = QListIterator<Argument>;

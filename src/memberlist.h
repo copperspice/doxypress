@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -24,7 +24,6 @@
 #include <cassert>
 
 #include <memberdef.h>
-#include <stringmap.h>
 #include <sortedlist.h>
 #include <types.h>
 
@@ -33,7 +32,7 @@ class MemberGroup;
 class StorageIntf;
 
 /** A list of MemberDef objects. */
-class MemberList : public SortedList<QSharedPointer<MemberDef>>
+class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSharedFromThis
 {
  public:
    MemberList();
@@ -121,7 +120,7 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>
 
    void writeTagFile(QTextStream &);
    bool declVisible() const;
-   void addMemberGroup(MemberGroup *mg);
+   void addMemberGroup(QSharedPointer<MemberGroup> mg);
 
    void setInGroup(bool inGroup) {
       m_inGroup = inGroup;
@@ -166,18 +165,6 @@ class MemberDict : public QHash<QString, MemberDef>
    {}
 
    virtual ~MemberDict() {}
-};
-
-/** A sorted dictionary of MemberDef objects. */
-class MemberSDict : public StringMap<QSharedPointer<MemberDef>>
-{
- public:
-   // CopperSpice - can add isCase
-   MemberSDict() : StringMap<QSharedPointer<MemberDef>>() {}
-   virtual ~MemberSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<MemberDef> &item1, const QSharedPointer<MemberDef> &item2) const override;
 };
 
 

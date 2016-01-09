@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 2008 by Sebastian Pipping.
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
@@ -21,14 +21,13 @@
 
 #include <string.h>
 
+#include <qhp.h>
+
 #include <config.h>
 #include <doxy_globals.h>
-#include <qhp.h>
-#include <qhpxmlwriter.h>
-#include <message.h>
-#include <memberdef.h>
-#include <groupdef.h>
 #include <filedef.h>
+#include <message.h>
+#include <qhpxmlwriter.h>
 
 static QString makeFileName(const QString &withoutExtension)
 {
@@ -313,17 +312,17 @@ QString Qhp::getQhpFileName()
 
 QString Qhp::getFullProjectName()
 {
-   QString projectName = Config::getString("project-name");
-   QString versionText = Config::getString("project-version");
+   QString projectName    = Config::getString("project-name");
+   QString projectVersion = Config::getString("project-version");
 
    if (projectName.isEmpty()) {
       projectName = "Root";
    }
 
-   if (versionText.isEmpty()) { 
+   if (projectVersion.isEmpty()) { 
       return projectName; 
    } else {
-     return projectName + " " + versionText;
+     return projectName + " " + projectVersion;
    } 
 }
 

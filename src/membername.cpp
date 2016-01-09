@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -16,9 +16,8 @@
 *************************************************************************/
 
 #include <membername.h>
-#include <classdef.h>
+
 #include <util.h>
-#include <filedef.h>
 
 MemberName::MemberName(const QString &n) : QList<QSharedPointer<MemberDef>>()
 {
@@ -71,11 +70,6 @@ int MemberNameInfo::compareValues(QSharedPointer<const MemberInfo> m1, QSharedPo
       return 0;
 
    }
-}
-
-MemberNameIterator::MemberNameIterator(const MemberName &mnlist) 
-   : QListIterator<QSharedPointer<MemberDef>>(mnlist)
-{
 }
 
 int MemberNameSDict::compareMapValues(const QSharedPointer<MemberName> &n1, const QSharedPointer<MemberName> &n2) const

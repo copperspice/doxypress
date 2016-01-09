@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 2008 by Sebastian Pipping.
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
@@ -39,9 +39,9 @@ class QhpXmlWriter{
    void openClose(const QString &elementName, const QMap<QString, QString> &attributes = (QMap<QString, QString>()));
    void openCloseContent(const QString &elementName, const QString &content);
    void close(const QString &elementName);
-   void declaration(const char *version, const char *encoding);
+   void declaration(const QString &version, const QString &encoding);
 
-   static char *dupEscaped(const char *source);
+   static QString dupEscaped(const QString &source);
 
  private:
    void indent();

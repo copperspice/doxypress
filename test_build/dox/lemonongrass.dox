@@ -1,0 +1,37 @@
+/*************************************************************************
+*                                                                         
+* Copyright (C) 2012-2016 Barbara Geller & Ansel Sermersheim                                                         
+* All rights reserved.                                                    
+*                                                                         
+*                                                                         
+* GNU Free Documentation License                                          
+* This file may be used under the terms of the GNU Free Documentation     
+* License version 1.3 as published by the Free Software Foundation        
+* and appearing in the file included in the packaging of this file.       
+*                                                                         
+*                                                                         
+*************************************************************************/
+
+/*!
+\class Lemongrass
+\brief Test class
+
+Lemongrass is a test class to ensure two classes in one file can be documented. The following text to addHoliday() 
+and monthName() test auto linking methods. 
+
+These two auto link: monthName(int value),  monthName(int)
+
+This does not link, which is correct: monthName
+
+Does the link from the QSSsl namespace work correct?   QSsl::someFunction()
+
+*/
+
+
+/*! 
+\var Lemongrass::howMuch
+
+Documentation for a public variable.
+
+*/
+

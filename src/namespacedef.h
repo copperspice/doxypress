@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -24,33 +24,19 @@
 #include <QTextStream>
 
 #include <definition.h>
-#include <filelist.h>
-#include <stringmap.h>
+#include <filenamelist.h>
 
 class ClassDef;
 class ClassSDict;
 class MemberList;
 class MemberDef;
 class MemberGroupSDict;
-class NamespaceSDict;
 class NamespaceList;
+class NamespaceSDict;
 class OutputList;
 
-/** sorted dictionary of NamespaceDef objects. */
-class NamespaceSDict : public StringMap<QSharedPointer<NamespaceDef>>
-{
- public:
-   // CopperSpice - can add isCase
-   NamespaceSDict() : StringMap<QSharedPointer<NamespaceDef>>() {}
-   ~NamespaceSDict() {}
-
-   void writeDeclaration(OutputList &ol, const QString &title, bool isConstantGroup = false, bool localName = false);
-   bool declVisible() const;
-
- private:
-   int compareMapValues(const QSharedPointer<NamespaceDef> &item1, const QSharedPointer<NamespaceDef> &item2) const override;       
-};
-
+template<typename T>
+class StringMap;
 
 /** model of a namespace symbol */
 class NamespaceDef : public Definition
@@ -75,7 +61,7 @@ class NamespaceDef : public Definition
 
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
-   void writeQuickMemberLinks(OutputList &ol, MemberDef *currentMd) const;
+   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const;
    void writeTagFile(QTextStream &);
 
    void insertClass(QSharedPointer<ClassDef> cd);
@@ -90,9 +76,7 @@ class NamespaceDef : public Definition
 
    const NamespaceSDict &getUsedNamespaces() const;
 
-   StringMap<QSharedPointer<Definition>> &getUsedClasses() {
-      return m_usingDeclMap;
-   }
+   StringMap<QSharedPointer<Definition>> &getUsedClasses();
 
    void combineUsingRelations();
    QString displayName(bool = true) const override;
@@ -118,7 +102,6 @@ class NamespaceDef : public Definition
    void findSectionsInDocumentation();
  
    virtual QSharedPointer<Definition> findInnerCompound(const QString &name) override;
-
    virtual void addInnerCompound(QSharedPointer<Definition> d) override;
 
    void addListReferences();
@@ -181,10 +164,10 @@ class NamespaceDef : public Definition
    QString  fileName;
    FileList files;
   
-   StringMap<QSharedPointer<Definition>>   m_usingDeclMap;
+   StringMap<QSharedPointer<Definition>>  *m_usingDeclMap;
    StringMap<QSharedPointer<Definition>>  *m_innerCompounds;
 
-   NamespaceSDict    m_usingDirMap;
+   NamespaceSDict    *m_usingDirMap;
    NamespaceSDict    *namespaceSDict;
    MemberSDict       *m_allMembersDict;
    MemberGroupSDict  *memberGroupSDict;

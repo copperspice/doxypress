@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim documentation().
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim documentation().
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -215,8 +215,8 @@ class MemberDef : public Definition
    bool isFriendClass() const;
    bool isDocumentedFriendClass() const;
 
-   QSharedPointer<MemberDef> reimplements() const;
-   MemberList *reimplementedBy() const;
+   QSharedPointer<MemberDef>  reimplements() const;
+   QSharedPointer<MemberList> reimplementedBy() const;
    bool isReimplementedBy(QSharedPointer<ClassDef> cd) const;
  
    QSharedPointer<ClassDef> relatedAlso() const;
@@ -345,7 +345,7 @@ class MemberDef : public Definition
    void setDeclArgumentList(ArgumentList *al);
    void setDefinitionTemplateParameterLists(QList<ArgumentList> *lists);
    void setTypeConstraints(ArgumentList *al);
-   void setType(const char *t);
+   void setType(const QString &t);
    void setAccessorType(QSharedPointer<ClassDef> cd, const QString &t);
 
    // namespace related members
@@ -395,7 +395,7 @@ class MemberDef : public Definition
                  bool inGroup, QSharedPointer<ClassDef> inheritFrom = QSharedPointer<ClassDef>(), 
                  const QString &inheritId = 0);
 
-   void writeDocumentation(MemberList *ml, OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container,
+   void writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container,
                  bool inGroup, bool showEnumValues = false, bool showInline = false);
 
    void writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> container);
@@ -423,9 +423,11 @@ class MemberDef : public Definition
    void unlock() const;
    void saveToDisk() const;
    void makeResident() const;
-   void _computeLinkableInProject();
-   void _computeIsConstructor();
-   void _computeIsDestructor();
+
+   void computeLinkableInProject() const;
+   void computeIsConstructor() const;
+   void computeIsDestructor() const;
+
    void _writeGroupInclude(OutputList &ol, bool inGroup);
    void _writeCallGraph(OutputList &ol);
    void _writeCallerGraph(OutputList &ol);
@@ -435,7 +437,7 @@ class MemberDef : public Definition
    void _writeTypeConstraints(OutputList &ol);
 
    void _writeEnumValues(OutputList &ol, QSharedPointer<Definition> container,
-                         const QString &cfname, const QString &ciname, const QString &cname);
+                  const QString &cfname, const QString &ciname, const QString &cname);
 
    void _writeCategoryRelation(OutputList &ol);
    void _writeTagData(const DefType);
@@ -451,9 +453,9 @@ class MemberDef : public Definition
 
    QScopedPointer<MemberDefImpl> m_impl;
 
-   uchar m_isLinkableCached;    // 0 = not cached, 1=false, 2=true
-   uchar m_isConstructorCached; // 0 = not cached, 1=false, 2=true
-   uchar m_isDestructorCached;  // 0 = not cached, 1=false, 2=true
+   mutable uchar m_isLinkableCached;       // 0 = not cached, 1 = false, 2 = true
+   mutable uchar m_isConstructorCached;    // 0 = not cached, 1 = false, 2 = true
+   mutable uchar m_isDestructorCached;     // 0 = not cached, 1 = false, 2 = true
 };
 
 void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPointer<MemberDef> mdef);

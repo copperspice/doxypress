@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -15,22 +15,11 @@
  *
 *************************************************************************/
 
-#include <cite.h>
-#include <classlist.h>
-#include <dirdef.h>
 #include <doxy_globals.h>
-#include <filename.h>
-#include <formula.h>
-#include <groupdef.h>
-#include <index.h>
-#include <membergroup.h>
-#include <membername.h>
-#include <namespacedef.h>
-#include <parser_base.h>
-#include <pagedef.h>
-#include <section.h>
-#include <searchindex.h>
-#include <reflist.h>
+#include <filedef.h>
+
+class GenericsSDict;
+class IndexList;
 
 // part 1
 ClassSDict      *Doxy_Globals::classSDict = 0;
@@ -48,9 +37,15 @@ FormulaDict     *Doxy_Globals::formulaNameDict = 0;     // the label name of all
 
 SectionDict     *Doxy_Globals::sectionDict = 0;         // all page sections
 CiteDict        *Doxy_Globals::citeDict = 0;            // database of bibliographic references
-StringDict       Doxy_Globals::aliasDict;               // aliases
+
+StringDict       Doxy_Globals::namespaceAliasDict;      // all namespace aliases
+StringDict       Doxy_Globals::tagDestinationDict;      // all tag locations
+StringDict       Doxy_Globals::cmdAliasDict;            // cmd aliases
+StringDict       Doxy_Globals::renameNSDict;            // rename namespaces
+
 DirSDict         Doxy_Globals::directories;
-GenericsSDict   *Doxy_Globals::genericsDict;
+
+QSharedPointer<GenericsSDict> Doxy_Globals::genericsDict;
 
 FileNameDict    *Doxy_Globals::inputNameDict = 0;
 FileNameDict    *Doxy_Globals::includeNameDict = 0;     // include names
@@ -60,10 +55,7 @@ FileNameDict    *Doxy_Globals::dotFileNameDict = 0;     // dot files
 FileNameDict    *Doxy_Globals::mscFileNameDict = 0;     // msc files
 FileNameDict    *Doxy_Globals::diaFileNameDict = 0;     // dia files
 
-StringDict       Doxy_Globals::namespaceAliasDict;      // all namespace aliases
-StringDict       Doxy_Globals::tagDestinationDict;      // all tag locations
-
-SortedList<QSharedPointer<FileName>> *Doxy_Globals::inputNameList; // all input files
+SortedList<QSharedPointer<FileNameList>> *Doxy_Globals::inputNameList; // all input files
 
 QCache<QString, LookupInfo>  *Doxy_Globals::lookupCache;
 
@@ -97,6 +89,8 @@ bool             Doxy_Globals::markdownSupport = true;
 int              Doxy_Globals::subpageNestingLevel = 0;
 
 QString          Doxy_Globals::htmlFileExtension;
+QString          Doxy_Globals::latexStyleExtension = ".sty";
+
 QString          Doxy_Globals::tempA_FName;
 QString          Doxy_Globals::tempB_FName;
 QTime            Doxy_Globals::runningTime;
@@ -117,7 +111,6 @@ Statistics Doxy_Globals::g_stats;
 
 bool Doxy_Globals::g_dumpSymbolMap = false;
 bool Doxy_Globals::g_programExit   = false;
-
 
 // part 3
 QHash<QString, Definition *> &Doxy_Globals::symbolMap()

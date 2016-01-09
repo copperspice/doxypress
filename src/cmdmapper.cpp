@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -114,6 +114,9 @@ CommandMap cmdMap[] = {
    { "#",             CMD_HASH },
    { "%",             CMD_PERCENT },
    { "|",             CMD_PIPE },
+   { ".",             CMD_PUNT },
+   { "+",             CMD_PLUS },
+   { "-",             CMD_MINUS },
    { "::",            CMD_DCOLON },
    { "\"",            CMD_QUOTE },
    { "_internalref",  CMD_INTERNALREF },
@@ -241,6 +244,21 @@ int Mapper::map(const QString &n)
       if (result != m_map.end()) {
          retval = result.value();
       }  
+   }
+
+   return retval;
+}
+
+QString Mapper::map(const int n)
+{
+   QString retval;
+
+   for (auto item = m_map.begin(); item != m_map.end(); ++item) {
+      int value = item.value(); 
+
+      if (value == n || (value == (n | SIMPLESECT_BIT))) {
+         return item.key();
+      }
    }
 
    return retval;

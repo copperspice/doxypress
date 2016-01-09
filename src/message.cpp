@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -20,11 +20,10 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include <message.h>
+
 #include <config.h>
 #include <doxy_globals.h>
-#include <filedef.h>
-#include <message.h>
-#include <portable.h>
 #include <util.h>
 
 int Debug::curMask     = 0;
@@ -139,11 +138,15 @@ void initWarningFormat()
  
 static void format_warn(const QString &file, int line, const QString &text)
 {
-   QString fileSubst = file == 0 ? "<unknown>" : file;
+   QString fileSubst = file;
+
+   if (file.isEmpty() ) { 
+      fileSubst = "<unknown>";
+   }
+
    QString lineSubst;
-
    lineSubst.setNum(line);
-
+  
    QString textSubst = text;
    QString versionSubst;
 

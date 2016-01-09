@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -58,6 +58,7 @@ enum SrcLangExt {
 
 /** Grouping info */
 struct Grouping {
+
    /** Grouping priority */
    enum GroupPri_t {
       GROUPING_LOWEST,
@@ -69,14 +70,17 @@ struct Grouping {
       GROUPING_HIGHEST = GROUPING_INGROUP
    };
 
-   static const char *getGroupPriName( GroupPri_t priority ) {
+   static QString getGroupPriName( GroupPri_t priority ) {
       switch ( priority ) {
          case GROUPING_AUTO_WEAK:
             return "@weakgroup";
+
          case GROUPING_AUTO_ADD:
             return "@addtogroup";
+
          case GROUPING_AUTO_DEF:
             return "@defgroup";
+
          case GROUPING_INGROUP:
             return "@ingroup";
       }
@@ -86,7 +90,7 @@ struct Grouping {
    Grouping( const QString &gn, GroupPri_t p ) : groupname(gn), pri(p) {}
    Grouping( const Grouping &g ) : groupname(g.groupname), pri(g.pri) {}
 
-   QString groupname;   //!< name of the group
+   QString groupname;      //!< name of the group
    GroupPri_t pri;         //!< priority of this definition
 
 };

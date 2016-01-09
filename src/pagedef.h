@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -21,15 +21,17 @@
 #include <QTextStream>
 
 #include <definition.h>
-#include <stringmap.h>
 
 class PageSDict;
 class OutputList;
 
+template <typename T>
+class StringMap;
+
 /** @brief A model of a page symbol. */
 class PageDef : public Definition
 {
- public:
+  public:
    PageDef(const QString &f, int l, const QString &n, const QString &d, const QString &t);
    ~PageDef();
 
@@ -94,7 +96,10 @@ class PageDef : public Definition
    void writeDocumentation(OutputList &ol);
    void writeTagFile(QTextStream &);
 
- private:
+  protected:
+   QString pathFragment_Internal() const override;
+
+  private:
    void setNestingLevel(int l);
    void writePageDocumentation(OutputList &ol);
 
@@ -105,20 +110,6 @@ class PageDef : public Definition
    QSharedPointer<Definition> m_pageScope;
    int m_nestingLevel;
    bool m_showToc;
-};
-
-
-class PageSDict : public StringMap<QSharedPointer<PageDef>>
-{
- public:
-   // CopperSpice - can add isCase
-   PageSDict() : StringMap<QSharedPointer<PageDef>>() {}
-   virtual ~PageSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<PageDef> &i1, const QSharedPointer<PageDef> &i2) const override {
-      return i1->name().compare(i2->name(), Qt::CaseInsensitive);
-   }
 };
 
 #endif

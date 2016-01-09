@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -18,52 +18,40 @@
 #ifndef SECTION_H
 #define SECTION_H
 
-#include <stringmap.h>
-
 class Definition;
 
 /** Class representing a section in a page */
 struct SectionInfo {
+
    enum SectionType { Page          = 0,
                       Section       = 1,
                       Subsection    = 2,
                       Subsubsection = 3,
                       Paragraph     = 4,
-                      Anchor        = 5
+                      Anchor        = 5,
+                      Table         = 6
                     };
 
-   SectionInfo(const QString &f, const int lin, const  QString &l, const  QString &t, SectionType st, int lev, const  QString &r = QString()) 
-      : label(l), title(t), type(st), ref(r), fileName(f), lineNr(lin), generated(false), level(lev) 
-   { }
-
-   SectionInfo(const SectionInfo &s) {
-      label = s.label;
-      title = s.title;
-      type  = s.type;
-      ref   = s.ref;
-
-      definition = s.definition;
-      fileName   = s.fileName;
-      lineNr     = s.lineNr;
-      generated  = s.generated;
-      level      = s.level;
-   }
-
-   ~SectionInfo() {}
+   SectionInfo(const QString &f, const int line, const QString &anchor, const QString &t, SectionType secT, 
+      int lev, const QString &r = QString()) 
+      : label(anchor), title(t), type(secT), ref(r), fileName(f), lineNr(line), generated(false), level(lev), dupAnchor_cnt(0) 
+   { }  
 
    QString label;
-   QString title;
-   SectionType type;
+   QString title;   
    QString ref;
+   QString fileName;
+      
+   int lineNr;   
+   int level;
 
+   bool generated;
+
+   SectionType type;
    QSharedPointer<Definition> definition;
 
-   QString fileName;
-   int lineNr;
-   bool generated;
-   int level;
+   int dupAnchor_cnt;
+   QString dupAnchor_fName;
 };
-
-using SectionDict = StringMap<QSharedPointer<SectionInfo>>;
 
 #endif

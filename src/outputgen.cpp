@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -22,7 +22,6 @@
 
 #include <outputgen.h>
 #include <message.h>
-#include <portable.h>
 
 OutputGenerator::OutputGenerator()
 {

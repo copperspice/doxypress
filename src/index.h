@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -36,11 +36,11 @@ class IndexIntf
    virtual void finalize() = 0;
    virtual void incContentsDepth() = 0;
    virtual void decContentsDepth() = 0;
-   virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString  &anchor, 
-                                bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) = 0;
+   virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, 
+            const QString  &anchor, bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) = 0;
 
-   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
-                             const QString &title) = 0;
+   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, 
+            const QString &sectionAnchor, const QString &title) = 0;
 
    virtual void addIndexFile(const QString &name) = 0;
    virtual void addImageFile(const QString &name) = 0;
@@ -266,13 +266,13 @@ extern int documentedDirs;
 extern int documentedHtmlFiles;
 extern int documentedPages;
 
-void startTitle(OutputList &ol, const QString &fileName, Definition *def = 0);
+void startTitle(OutputList &ol, const QString &fileName, QSharedPointer<Definition> def = QSharedPointer<Definition>() );
 void endTitle(OutputList &ol, const QString &fileName, const QString &name);
 
 void startFile(OutputList &ol, const QString &name, const QString &manName, const QString &title, 
                   HighlightedItem hli = HLI_None, bool additionalIndices = false, const QString &altSidebarName = QString() );
 
-void endFile(OutputList &ol, bool skipNavIndex = false, bool skipEndContents = false, const QString &navPath = QString());
+void endFile(OutputList &ol, bool skipNavIndex = false, bool skipEndContents = false, const QString &navPath = QString() );
 
 void endFileWithNavPath(QSharedPointer<Definition> d, OutputList &ol);
 
@@ -282,5 +282,7 @@ void initNamespaceMemberIndices();
 void addClassMemberNameToIndex(QSharedPointer<MemberDef> md);
 void addFileMemberNameToIndex(QSharedPointer<MemberDef> md);
 void addNamespaceMemberNameToIndex(QSharedPointer<MemberDef> md);
+
+QString fixSpaces(const QString &s);
 
 #endif

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -17,19 +17,18 @@
 
 #include <QRegExp>
 
+#include <pagedef.h>
+
 #include <config.h>
 #include <docparser.h>
 #include <doxy_globals.h>
 #include <groupdef.h>
 #include <language.h>
-#include <namespacedef.h>
 #include <outputlist.h>
-#include <pagedef.h>
-#include <reflist.h>
 #include <util.h>
 
-PageDef::PageDef(const QString &f, int l, const QString &n, const QString &d, const QString &t)
-   : Definition(f, l, 1, n), m_title(t)
+PageDef::PageDef(const QString &f, int l, const QString &name, const QString &d, const QString &t)
+   : Definition(f, l, 1, name), m_title(t)
 {
    setDocumentation(d, f, l);
 
@@ -46,7 +45,7 @@ PageDef::~PageDef()
 void PageDef::findSectionsInDocumentation()
 {
    QSharedPointer<PageDef> self = sharedFrom(this);
-   docFindSections(documentation(), self, 0, docFile());
+   docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
 }
 
 QSharedPointer<GroupDef> PageDef::getGroupDef() const
@@ -111,6 +110,12 @@ void PageDef::addInnerCompound(QSharedPointer<Definition> d)
 bool PageDef::hasParentPage() const
 {
    return getOuterScope() && getOuterScope()->definitionType() == Definition::TypePage;
+}
+
+
+QString PageDef::pathFragment_Internal() const
+{
+   return title();
 }
 
 void PageDef::writeTagFile(QTextStream &tagFile)
@@ -213,7 +218,7 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    if (! title().isEmpty() && !name().isEmpty() && si != 0) {
 
-      startTitle(ol, getOutputFileBase(), this);
+      startTitle(ol, getOutputFileBase(), self);
       ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, 0, true, false);
       
       endTitle(ol, getOutputFileBase(), name());
@@ -222,6 +227,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.startContents();
    ol.popGeneratorState();
    //2.}
+
 
    if (m_showToc && hasSections()) {
       writeToc(ol);

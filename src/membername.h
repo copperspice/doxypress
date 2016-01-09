@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -21,7 +21,6 @@
 #include <QList>
 
 #include <memberdef.h>
-#include <stringmap.h>
 
 /** Class representing all MemberDef objects with the same name */
 class MemberName : public QList<QSharedPointer<MemberDef>>
@@ -37,25 +36,6 @@ class MemberName : public QList<QSharedPointer<MemberDef>>
  private:
    int compareValues(QSharedPointer<const MemberDef> item1, QSharedPointer<const MemberDef> item2) const;
    QString name;
-};
-
-/** Iterator for MemberDef objects in a MemberName list */
-class MemberNameIterator : public QListIterator<QSharedPointer<MemberDef>>
-{
- public:
-   MemberNameIterator( const MemberName &list);
-};
-
-/** Sorted dictionary of MemberName objects */
-class MemberNameSDict : public StringMap<QSharedPointer<MemberName>>
-{
- public:
-   // CopperSpice - can add isCase   
-   MemberNameSDict() : StringMap<QSharedPointer<MemberName>>() {}
-   ~MemberNameSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<MemberName> &item1, const QSharedPointer<MemberName> &item2) const override;
 };
 
 /** Data associated with a MemberDef in an inheritance relation. */
@@ -91,28 +71,6 @@ class MemberNameInfo : public QList<MemberInfo>
  private:
    int compareValues(QSharedPointer<const MemberInfo> item1, QSharedPointer<const MemberInfo> item2) const;
    QString name;
-};
-
-/** Iterator for MemberInfo objects in a MemberNameInfo list. */
-class MemberNameInfoIterator : public QListIterator<MemberInfo>
-{
- public:
-   MemberNameInfoIterator(const MemberNameInfo &mnii)
-      : QListIterator<MemberInfo>(mnii) {}
-};
-
-/** Sorted dictionary of MemberNameInfo objects. */
-class MemberNameInfoSDict : public StringMap<QSharedPointer<MemberNameInfo>>
-{
- public:
-   // CopperSpice - can add isCase
-   MemberNameInfoSDict() : StringMap<QSharedPointer<MemberNameInfo>>() {}
-   ~MemberNameInfoSDict() {}
-
- private:
-   int compareMapValues(const QSharedPointer<MemberNameInfo> &item1, const QSharedPointer<MemberNameInfo> &item2) const override {
-      return item1->memberName().compare(item2->memberName(), Qt::CaseInsensitive );
-   }
 };
 
 #endif

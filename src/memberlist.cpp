@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -17,13 +17,11 @@
 
 #include <QRegExp>
 
-#include <classdef.h>
+#include <memberlist.h>
+
 #include <config.h>
 #include <docparser.h>
-#include <filedef.h>
-#include <groupdef.h>
 #include <language.h>
-#include <memberlist.h>
 #include <membergroup.h>
 #include <message.h>
 #include <namespacedef.h>
@@ -104,9 +102,8 @@ int MemberList::countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) 
       }
    }
 
-   if (memberGroupList) {
-   
-      for (auto mg : *memberGroupList) {
+   if (memberGroupList) {   
+      for (auto &mg : *memberGroupList) {
          count += mg.countInheritableMembers(inheritedFrom);
       }
    }
@@ -153,6 +150,7 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
             case MemberType_Enumeration:
                m_enumCnt++, m_numDecMembers++;
                break;
+
             case MemberType_EnumValue:
                if (countEnumValues) {
                   m_enumValCnt++, m_numDecMembers++;
@@ -182,16 +180,17 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
    }
    if (memberGroupList) {
      
-      for (auto mg : *memberGroupList) {
+      for (auto &mg : *memberGroupList) {
          mg.countDecMembers(gd);
-         m_varCnt += mg.varCount();
-         m_funcCnt += mg.funcCount();
-         m_enumCnt += mg.enumCount();
-         m_enumValCnt += mg.enumValueCount();
-         m_typeCnt += mg.typedefCount();
-         m_protoCnt += mg.protoCount();
-         m_defCnt += mg.defineCount();
-         m_friendCnt += mg.friendCount();
+
+         m_varCnt        += mg.varCount();
+         m_funcCnt       += mg.funcCount();
+         m_enumCnt       += mg.enumCount();
+         m_enumValCnt    += mg.enumValueCount();
+         m_typeCnt       += mg.typedefCount();
+         m_protoCnt      += mg.protoCount();
+         m_defCnt        += mg.defineCount();
+         m_friendCnt     += mg.friendCount();
          m_numDecMembers += mg.numDecMembers();
       }
    }
@@ -218,7 +217,7 @@ void MemberList::countDocMembers(bool countEnumValues)
    }
 
    if (memberGroupList) {     
-      for (auto mg : *memberGroupList) {
+      for (auto &mg : *memberGroupList) {
          mg.countDocMembers();
          m_numDocMembers += mg.numDocMembers();
       }
@@ -310,7 +309,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
  
    for (auto md : *this) {
 
-      if ((inheritedFrom == 0 || !md->isReimplementedBy(inheritedFrom)) && md->isBriefSectionVisible()) {
+      if ((inheritedFrom == 0 || ! md->isReimplementedBy(inheritedFrom)) && md->isBriefSectionVisible()) {
          
          switch (md->memberType()) {
             case MemberType_Define:    // fall through
@@ -356,9 +355,10 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                }
 
                // if this is an anonymous enum and there are variables of this
-               // enum type (i.e. enumVars>0), then we do not show the enum here.
-               if (enumVars == 0) { // show enum here
-                  //printf("Enum!!\n");
+               // enum type (i.e. enumVars>0), then do not show the enum here
+
+               if (enumVars == 0 && md->hasDocumentation()) { 
+                  // show enum here
 
                   if (first) {
                      ol.startMemberList();
@@ -441,7 +441,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
    if (cd) {
      
       for (auto md : *this) {    
-         if (md->fromAnonymousScope() && !md->anonymousDeclShown()) {
+         if (md->fromAnonymousScope() && ! md->anonymousDeclShown()) {
             md->setFromAnonymousScope(false);
 
             //printf("anonymous compound members\n");
@@ -543,7 +543,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
          QString st = subtitle;
          st = st.trimmed();
 
-         if (!st.isEmpty()) {
+         if (! st.isEmpty()) {
             ol.startMemberSubtitle();
             ol.generateDoc("[generated]", -1, ctx, QSharedPointer<MemberDef>(), subtitle, false, false, 0, false, false);
             ol.endMemberSubtitle();
@@ -556,8 +556,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
      
       if (memberGroupList) {
 
-         for (auto mg : *memberGroupList) {   
- 
+         for (auto &mg : *memberGroupList) {    
             bool hasHeader = ! mg.header().isEmpty() && mg.header() != "[NOHEADER]";
 
             if (inheritId.isEmpty()) {
@@ -572,7 +571,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
                if (! mg.documentation().isEmpty()) {
                   ol.startMemberGroupDocs();
-                  ol.generateDoc("[generated]", -1, ctx, QSharedPointer<MemberDef>(), mg.documentation() + "\n", false, false);
+                  ol.generateDoc(mg.docFile(), mg.docLine(), ctx, QSharedPointer<MemberDef>(), mg.documentation() + "\n", false, false);
                   ol.endMemberGroupDocs();
                }
                ol.startMemberGroup();
@@ -590,13 +589,14 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
       // also add members that of this list type, that are grouped together
       // in a separate list in class 'inheritedFrom'
       cd->addGroupedInheritedMembers(ol, m_listType, inheritedFrom, inheritId);
-   }
-   
+   }   
 }
 
 void MemberList::writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container,
-                                    const QString &title, bool showEnumValues, bool showInline)
+                  const QString &title, bool showEnumValues, bool showInline)
 {
+   QSharedPointer<MemberList> self = sharedFrom(this);
+
    countDocMembers(showEnumValues); 
 
    if (numDocMembers() == 0) {
@@ -616,11 +616,11 @@ void MemberList::writeDocumentation(OutputList &ol, const QString &scopeName, QS
    ol.startMemberDocList();
   
    for (auto md : *this) {    
-      md->writeDocumentation(this, ol, scopeName, container, m_inGroup, showEnumValues, showInline);
+      md->writeDocumentation(self, ol, scopeName, container, m_inGroup, showEnumValues, showInline);
    }
 
    if (memberGroupList) {     
-      for (auto mg : *memberGroupList) {    
+      for (auto &mg : *memberGroupList) {    
          mg.writeDocumentation(ol, scopeName, container, showEnumValues, showInline);
       }
    }
@@ -648,6 +648,7 @@ void MemberList::writeSimpleDocumentation(OutputList &ol, QSharedPointer<Definit
 // separate member pages
 void MemberList::writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container)
 {
+   QSharedPointer<MemberList> self = sharedFrom(this);
    static bool generateTreeView = Config::getBool("generate-treeview");
   
    for (auto md : *this) {    
@@ -655,7 +656,7 @@ void MemberList::writeDocumentationPage(OutputList &ol, const QString &scopeName
          QString diskName = md->getOutputFileBase();
          QString title = md->qualifiedName();
 
-         startFile(ol, diskName, md->name(), title, HLI_None, !generateTreeView, diskName);
+         startFile(ol, diskName, md->name(), title, HLI_None, ! generateTreeView, diskName);
          if (!generateTreeView) {
             container->writeNavigationPath(ol);
             ol.endQuickIndices();
@@ -663,7 +664,7 @@ void MemberList::writeDocumentationPage(OutputList &ol, const QString &scopeName
          ol.startContents();
 
          if (generateTreeView) {
-            md->writeDocumentation(this, ol, scopeName, container, m_inGroup);
+            md->writeDocumentation(self, ol, scopeName, container, m_inGroup);
             ol.endContents();
             endFileWithNavPath(container, ol);
 
@@ -677,7 +678,7 @@ void MemberList::writeDocumentationPage(OutputList &ol, const QString &scopeName
             ol.writeString("   </td>\n");
             ol.writeString("   <td valign=\"top\" class=\"mempage\">\n");
 
-            md->writeDocumentation(this, ol, scopeName, container, m_inGroup);
+            md->writeDocumentation(self, ol, scopeName, container, m_inGroup);
 
             ol.writeString("    </td>\n");
             ol.writeString("  </tr>\n");
@@ -687,17 +688,15 @@ void MemberList::writeDocumentationPage(OutputList &ol, const QString &scopeName
          }
       }
 
-      if (memberGroupList) {
-         //printf("MemberList::writeDocumentation()  --  member groups\n");
-       
-         for (auto mg : *memberGroupList) {    
+      if (memberGroupList) {             
+         for (auto &mg : *memberGroupList) {    
             mg.writeDocumentationPage(ol, scopeName, container);
          }
       }
    }
 }
 
-void MemberList::addMemberGroup(MemberGroup *mg)
+void MemberList::addMemberGroup(QSharedPointer<MemberGroup> mg)
 {
    if (memberGroupList == 0) {
       memberGroupList = new QList<MemberGroup>;
@@ -723,7 +722,7 @@ void MemberList::addListReferences(QSharedPointer<Definition> def)
    }
 
    if (memberGroupList) {      
-       for (auto mg : *memberGroupList) {    
+       for (auto &mg : *memberGroupList) {    
          mg.addListReferences(def);
       }
    }
@@ -736,7 +735,7 @@ void MemberList::findSectionsInDocumentation()
    }
 
    if (memberGroupList) {
-      for (auto mg : *memberGroupList) {   
+      for (auto &mg : *memberGroupList) {   
          mg.findSectionsInDocumentation();
       }
    }
@@ -872,11 +871,18 @@ QString MemberList::listTypeAsString(MemberListType type)
 void MemberList::writeTagFile(QTextStream &tagFile)
 { 
    for (auto md : *this) {     
-      md->writeTagFile(tagFile);    
+      md->writeTagFile(tagFile);  
+
+      if (md->memberType() == MemberType_Enumeration && md->enumFieldList() && ! md->isStrong()) {
+
+         for (auto vmd : *md->enumFieldList()) {
+            vmd->writeTagFile(tagFile);
+         }
+      }  
    }
 
    if (memberGroupList) { 
-      for (auto mg : *memberGroupList) {   
+      for (auto &mg : *memberGroupList) {   
          mg.writeTagFile(tagFile);
       }
    }

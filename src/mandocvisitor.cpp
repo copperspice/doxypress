@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -17,14 +17,14 @@
 
 #include <QFileInfo>
 
+#include <mandocvisitor.h>
+
 #include <code.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
-#include <filedef.h>
 #include <htmlentity.h>
 #include <language.h>
-#include <mandocvisitor.h>
 #include <message.h>
 #include <outputgen.h>
 #include <parser_base.h>

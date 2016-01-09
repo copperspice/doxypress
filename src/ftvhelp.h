@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2015 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -41,6 +41,11 @@ class FTVHelp : public IndexIntf
    FTVHelp(bool lti);
    ~FTVHelp();
 
+   enum PageType{ 
+      Default,
+      Modules
+   };
+
    void initialize();
    void finalize();
    void incContentsDepth();
@@ -54,14 +59,13 @@ class FTVHelp : public IndexIntf
    void addIndexFile(const QString &) override {}
    void addImageFile(const QString &) override {}
    void addStyleSheetFile(const QString &) override {}
-
-   void generateTreeView();
-   void generateTreeViewInline(QTextStream &t);
+  
+   void generateTreeViewInline(QTextStream &t, enum PageType outputType = Default);
    static void generateTreeViewImages();
    void generateTreeViewScripts();
 
- private:
-   void generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index);
+ private:   
+   void generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index, enum PageType outputType = Default);
   
    QString generateIndentLabel(FTVNode *n, int level);
    void generateIndent(QTextStream &t, FTVNode *n, bool opened);
@@ -74,12 +78,12 @@ class FTVHelp : public IndexIntf
 };
 
 struct NavIndexEntry {
-   NavIndexEntry(const QString &u, const QString &p) 
-      : url(u), path(p)
+   NavIndexEntry(const QString &url, const QString &id) 
+      : m_url(url), m_indexId(id)
    {}
 
-   QString url;
-   QString path;
+   QString m_url;
+   QString m_indexId;
 };
 
 #endif
