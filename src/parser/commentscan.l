@@ -425,16 +425,14 @@ static QString          s_compoundName;
 static bool             s_internalDocs;   
 static bool             s_processInternalDocs = false;  
 
-static int              prevPosition = 0;
-
 static void initParser()
 {
    s_sectionLabel.resize(0);
    s_sectionTitle.resize(0);
    s_memberGroupHeader.resize(0);
-   s_insideParBlock = false;
 
-   internalDocs = Config::getBool("internal-docs"); 
+   s_insideParBlock = false;
+   s_internalDocs   = Config::getBool("internal-docs"); 
 }
 
 static bool getDocSectionName(int s)
