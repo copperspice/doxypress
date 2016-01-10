@@ -3132,7 +3132,7 @@ char *commentscanYYtext;
 
 #include <QFile>
 #include <QStack>
-#include <QRegexp>
+#include <QRegExp>
 #include <QVector>
 
 #include <stdio.h>
