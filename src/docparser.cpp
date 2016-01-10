@@ -525,7 +525,8 @@ static void checkUndocumentedParams()
                }
             }
 
-            warn_doc_error(s_memberDef->getDefFileName(), s_memberDef->getDefLine(), qPrintable(substitute(errMsg, "%", "%%")));
+            warn_doc_error(s_memberDef->getDefFileName(), s_memberDef->getDefLine(), 
+                     csPrintable(substitute(errMsg, "%", "%%")));
             
          }
       }

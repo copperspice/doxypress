@@ -296,6 +296,8 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, QSharedPointer<ClassDef> inheritedFrom, 
                   const QString &inheritId )
 {
+   static const bool hideUndocMembers = Config::getBool("hide-undoc-members");
+
    countDecMembers();
 
    if (numDecMembers() == 0) {
@@ -357,7 +359,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                // if this is an anonymous enum and there are variables of this
                // enum type (i.e. enumVars>0), then do not show the enum here
 
-               if (enumVars == 0 && md->hasDocumentation()) { 
+               if (enumVars == 0 && ! hideUndocMembers) { 
                   // show enum here
 
                   if (first) {

@@ -60,9 +60,9 @@ void MemberGroup::insertMember(QSharedPointer<MemberDef> md)
 
    if ( ! memberList->isEmpty() )  {
       firstMd = memberList->first();
-   } 
+   }  
 
-   if (inSameSection && memberList->count() > 0 && firstMd->getSectionList(m_parent) != md->getSectionList(m_parent)) {
+   if (inSameSection && firstMd && firstMd->getSectionList(m_parent) != md->getSectionList(m_parent)) {
       inSameSection = false;
 
    } else if (inDeclSection == 0) {

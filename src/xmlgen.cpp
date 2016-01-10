@@ -420,7 +420,7 @@ class XMLCodeGenerator : public CodeOutputInterface
 };
 
 static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, QSharedPointer<Definition> scope, 
-                                      QSharedPointer<FileDef> fileScope, int indent)
+                  QSharedPointer<FileDef> fileScope, int indent)
 {
    QString indentStr;
    indentStr.fill(' ', indent);

@@ -1698,8 +1698,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
       }
    }
 
-   ol.writeString("<table style=\"margin: 10px; white-space: nowrap;\" align=\"center\" "
-                  "width=\"95%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n");
+   ol.writeString("<table class=\"classindex\">\n");
 
    // generate table
    for (i = 0; i <= maxRows; i++) { 
@@ -3466,7 +3465,11 @@ static void writeIndex(OutputList &ol)
    QString title;
 
    if (mainPageHasTitle()) {
-      title = filterTitle(Doxy_Globals::mainPage->title());
+
+      if (Doxy_Globals::mainPage) {
+         title = filterTitle(Doxy_Globals::mainPage->title());
+      }
+
    } else {
       title = theTranslator->trMainPage();        
    }
@@ -3744,7 +3747,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
          }
       }
       
-      bool addToIndex   = (lne == 0 || lne->visible());
+      bool addToIndex   = (lne != nullptr && lne->visible());
       bool needsClosing = false;
 
       if (! indexWritten.at(index)) {

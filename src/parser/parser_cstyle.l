@@ -5345,6 +5345,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current = QMakeShared<Entry>();
       initEntry();
 
+      language = current->lang = SrcLangExt_Cpp;
       insideObjC = false;
 
       BEGIN( FindMembers );
@@ -6915,37 +6916,50 @@ SkipC11Attribute>"]]"                 {
          current = QMakeShared<Entry>();
 
       } else if (insideIDL &&
-                          (((current_root->m_specFlags.spec & (Entry::Interface | Entry::Service)) &&
-                            (current->m_specFlags.spec & Entry::Interface)) ||
-                           ((current_root->m_specFlags.spec & (Entry::Service | Entry::Singleton)) &&
-                            (current->m_specFlags.spec & Entry::Service))))
-                 {
-                   // interface inside of UNO IDL service or interface
-                   // service inside of UNO IDL service or singleton
-                   // there may be documentation on the member,
-                   // so do not throw it away...
-                   current->name = text;
-                   current->name=current->name.left(current->name.length()-1).trimmed();
-                   current->section = (current->m_specFlags.spec & Entry::Interface)
-                       ? Entry::EXPORTED_INTERFACE_SEC
-                       : Entry::INCLUDED_SERVICE_SEC;
-//                 current->section = Entry::MEMBERDOC_SEC;
-                   current->m_specFlags.spec &= ~(Entry::Interface|Entry::Service);
+               (((current_root->m_specFlags.spec & (Entry::Interface | Entry::Service)) &&
+                (current->m_specFlags.spec & Entry::Interface)) ||
+               ((current_root->m_specFlags.spec & (Entry::Service | Entry::Singleton)) &&
+                (current->m_specFlags.spec & Entry::Service))))  {
+                 
+         // interface inside of UNO IDL service or interface
+         // service inside of UNO IDL service or singleton
+         // there may be documentation on the member, so do not throw it away
 
-// FIXME: horrible: Interface == Gettable, so need to clear it - actually we are mixing values from different enums in
-// this case... granted only Optional and Interface are actually valid in this context but urgh...
-                   current_root->addSubEntry(current, current_root);
-                   current = QMakeShared<Entry>();
-                 }
+         current->name = text;
+         current->name = current->name.left(current->name.length() - 1).trimmed();
 
-                 unput(';');
-                 current->reset();
-                 initEntry();
-                 if (isTypedef) // typedef of a class, put typedef keyword back
-                 {
-                   current->type.prepend("typedef");
-                 }
-                 BEGIN( FindMembers );
+         if (current->m_specFlags.spec & Entry::Interface)  {
+            current->section = Entry::EXPORTED_INTERFACE_SEC;
+         } else {
+            current->section = Entry::INCLUDED_SERVICE_SEC;
+         }
+
+//       current->section = Entry::MEMBERDOC_SEC;
+         current->m_specFlags.spec &= ~(Entry::Interface|Entry::Service);
+
+// FIXME: not a good solution
+// Interface == Gettable, need to clear it - actually we are mixing values from different enums
+// in this case, granted only Optional and Interface are actually valid in this context
+
+            current_root->addSubEntry(current, current_root);
+            current = QMakeShared<Entry>();
+         }
+
+         unput(';');
+         current->reset();
+         initEntry();
+         
+         if (insideObjC) {                                          
+            language = current->lang = SrcLangExt_Cpp;
+            insideObjC = false;
+         }
+         
+         if (isTypedef) {
+            // typedef of a class, put typedef keyword back                 
+            current->type.prepend("typedef");
+         }
+         
+         BEGIN( FindMembers );
    }
 
 <CompoundName>{SCOPENAME}/{BN}*"("  {

@@ -846,7 +846,7 @@ class LayoutParser : public QXmlDefaultHandler
       if (m_rootNav && ! m_rootNav->find(LayoutNavEntry::MainPage)) {
 
          // no MainPage node... add one as the first item of the root node...
-         new LayoutNavEntry(m_rootNav, LayoutNavEntry::MainPage, true, "index", theTranslator->trMainPage(), "");
+         new LayoutNavEntry(m_rootNav, LayoutNavEntry::MainPage, true, "index", theTranslator->trMainPage(), "", true);
       }
    }
 

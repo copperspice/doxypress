@@ -39,11 +39,6 @@ void OutputGenerator::startPlainFile(const QString &name)
    m_fileName = m_dir + "/" + name;
    m_filePtr  = new QFile(m_fileName);
 
-   if (! m_filePtr) {
-      err("Unable to create file %s\n", qPrintable(m_fileName));
-      exit(1);
-   }
-
    if (! m_filePtr->open(QIODevice::WriteOnly)) {   
       err("Unable to open file for writing %s, error: %d\n", qPrintable(m_fileName), m_filePtr->error());
       exit(1);

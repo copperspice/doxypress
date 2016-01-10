@@ -7746,7 +7746,7 @@ void convertProtectionLevel(MemberListType inListType, Protection inProt, int *o
          case MemberListType_priSlots:
             if (extractPrivate) {
                *outListType1 = MemberListType_pubSlots;
-               *outListType1 = MemberListType_proSlots;
+               *outListType2 = MemberListType_proSlots;
             } else {
                *outListType1 = -1;
                *outListType2 = -1;

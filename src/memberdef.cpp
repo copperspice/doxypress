@@ -1439,10 +1439,6 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
    }
 
-   if (! hasDocumentation()) {
-     return;
-   }
-
    //_writeTagData(compoundType);
    _addToSearchIndex();
 
@@ -3481,41 +3477,43 @@ void MemberDef::warnIfUndocumented()
    QSharedPointer<FileDef>      fd = getFileDef();
    QSharedPointer<GroupDef>     gd = getGroupDef();
 
-   QSharedPointer<Definition> d;
+   QSharedPointer<Definition> def;
 
-   const char *t = 0;
+   QString type;
 
    if (cd) {
-      t = "class";
-      d = cd;
+      type = "class";
+      def  = cd;
 
    } else if (nd) {          
 
       if (nd->getLanguage() == SrcLangExt_Fortran) {
-         t = "module";
+         type = "module";
       } else {
-         t = "namespace";
+         type = "namespace";
       }
 
-      d = nd;      
+      def = nd;      
 
    } else if (gd) {
-      t = "group";
-      d = gd;
+      type = "group";
+      def  = gd;
 
    } else {
-      t = "file";
-      d = fd;
+      type = "file";
+      def  = fd;
 
    }
 
    static bool extractAll = Config::getBool("extract-all");
  
-   if ((! hasUserDocumentation() && ! extractAll) && !isFriendClass() && name().indexOf('@') == -1 && d && d->name().indexOf('@') == -1 &&
+   if ((! hasUserDocumentation() && ! extractAll) && !isFriendClass() && name().indexOf('@') == -1 && 
+         def && def->name().indexOf('@') == -1 &&
          protectionLevelVisible(m_impl->prot) && ! isReference() && ! isDeleted() ) {
 
-      warn_undoc(d->getDefFileName(),d->getDefLine(), "Member %s%s (%s) of %s %s is not documented.",
-                 qPrintable(name()), qPrintable(argsString()), qPrintable(memberTypeName()), t, qPrintable(d->name()));
+      warn_undoc(getDefFileName(),getDefLine(), "Member %s%s (%s) of %s %s is not documented.",
+                 csPrintable(name()), csPrintable(argsString()), csPrintable(memberTypeName()), 
+                 csPrintable(type), csPrintable(def->name()));
    }
 }
 

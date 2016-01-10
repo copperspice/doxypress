@@ -666,7 +666,7 @@ void initDefaultLangMapping()
    updateLanguageMapping(".phtml",    "php");
    updateLanguageMapping(".m",        "objective-c");
    updateLanguageMapping(".M",        "objective-c");
-   updateLanguageMapping(".mm",       "objective-c");
+   updateLanguageMapping(".mm",       "c");
    updateLanguageMapping(".py",       "python");
    updateLanguageMapping(".pyw",      "python");
    updateLanguageMapping(".f",        "fortran");

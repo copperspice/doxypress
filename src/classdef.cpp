@@ -1621,7 +1621,7 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &
    // static bool fortranOpt = Config::getBool("optimize-fortran");
    SrcLangExt lang = getLanguage();
 
-   if (visibleInParentsDeclList() && hasDocumentation()) {
+   if (visibleInParentsDeclList()) {
 
       if (! found) { 
          // first class

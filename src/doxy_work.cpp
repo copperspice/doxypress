@@ -2800,8 +2800,7 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
          // Assume the using statement was used to import a class.
          // Find the scope in which the `using' namespace is defined by prepending
          // the possible scopes in which the using statement was found, starting
-         // with the most inner scope and going to the most outer scope (i.e.
-         // file scope).
+         // with the most inner scope and going to the most outer scope (i.e. file scope).
 
          QString name = substitute(root->name, ".", "::"); //Java/C# scope->internal
          usingCd = getClass(name);
@@ -2824,7 +2823,8 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
 
          } else {
             Debug::print(Debug::Classes, 0, "  Found used class %s in scope=%s\n",
-                         csPrintable(usingCd->name()), nd ? csPrintable(nd->name()) : csPrintable(fd->name()));
+                         csPrintable(usingCd->name()), nd ? csPrintable(nd->name()) : 
+                         fd ? csPrintable(fd->name()) : "<unknown>");
          }
 
          if (nd) {           
@@ -5922,7 +5922,8 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString
    QSharedPointer<Entry> root = rootNav->entry();
 
    Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() namespace= %s   type= %s   name= %s   tempArg= %s   decl= %s\n",
-                csPrintable(namespaceName), csPrintable(type), csPrintable(name), csPrintable(tempArg), csPrintable(decl) );
+                csPrintable(namespaceName), csPrintable(type), csPrintable(name), 
+                csPrintable(tempArg), csPrintable(decl) );
 
    QString n = name;
 
@@ -6564,7 +6565,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
                   QSharedPointer<ClassDef> tcd = findClassDefinition(fd, nd, scopeName);
 
-                  if (tcd == 0 && stripAnonymousNamespaceScope(cd->name()) == scopeName) {
+                  if (tcd == nullptr && cd && stripAnonymousNamespaceScope(cd->name()) == scopeName) {
                      // do not be fooled by anonymous scopes
                      tcd = cd;
                   }
