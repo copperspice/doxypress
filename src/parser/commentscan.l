@@ -1429,10 +1429,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addOutput(text[0]);
    }
 
-<Comment>[ \t\n(]['\*_!]/[^a-zA-Z0-9]   {     
-      QString text = QString::fromUtf8(yytext); 
-      addOutput(text);
-   }
 
  /* --------------   Rules for handling HTML comments ----------- */
 
