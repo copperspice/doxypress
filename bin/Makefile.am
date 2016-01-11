@@ -368,6 +368,6 @@ dist-test-project:
 	cd ..  ; \
 \
 	rm  -f   DoxyPress-Test-Project-$(VERSION).zip         ; \
-	zip -r   DoxyPress-Test-Project-$(VERSION).zip test_build/{dox,images,*.css,*.html,*.json,*.xml}
+	zip -r   DoxyPress-Test-Project-$(VERSION).zip test_build/{dox,dox2,images,*.css,*.html,*.json,*.xml}
 
 
