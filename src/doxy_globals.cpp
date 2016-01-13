@@ -95,6 +95,7 @@ QString          Doxy_Globals::tempA_FName;
 QString          Doxy_Globals::tempB_FName;
 QTime            Doxy_Globals::runningTime;
 
+QDateTime        Doxy_Globals::dateTime;
 
 // part 2
 QHash<QString, QSharedPointer<EntryNav>> Doxy_Globals::g_classEntries;

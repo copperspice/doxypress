@@ -93,10 +93,19 @@ void Debug::printFlags()
 { 
    QList<QString> list = m_map.keys();
    std::sort(list.begin(), list.end());
+   int cnt = 1;
 
    for (auto item : list)  {      
-      printf("\t%s\n", qPrintable(item));      
-   }   
+      if (cnt == 5 || cnt == 10 || cnt == 15) {
+         printf("\t%-15s\n", csPrintable(item));  
+      } else  {
+         printf("\t%-15s", csPrintable(item));       
+      }
+
+      cnt++;
+   } 
+
+   printf("\n");  
 }
   
 void Debug::print(DebugMask mask, int data, const QString &fmt, ...)

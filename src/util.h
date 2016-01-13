@@ -126,8 +126,8 @@ inline bool isId(QChar c)
 
 bool classVisibleInIndex(QSharedPointer<ClassDef> cd);
 bool classHasVisibleChildren(QSharedPointer<ClassDef> cd);
-
-QString dateToString(bool);
+ 
+QString dateToString(bool includeTime);
 QString dateTimeHHMM();
 QString yearToString();
 

@@ -2377,23 +2377,21 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
 
 QString dateTimeHHMM()
 {   
-   QDateTime current = QDateTime::currentDateTime();
-
    const QString format = "ddd MMM d yyyy hh:mm";
-   return current.toString(format);   
+   static const QString retval = Doxy_Globals::dateTime.toString(format);
+  
+   return retval;  
 }
 
 QString dateToString(bool includeTime)
 {
-   QDateTime current = QDateTime::currentDateTime();
-
    if (includeTime) {
       const QString format = "ddd MMM d yyyy hh:mm:ss";
-      return current.toString(format); 
+      return Doxy_Globals::dateTime.toString(format); 
 
    } else {
       const QString format = "ddd MMM d yyyy";
-      return current.toString(format); 
+      return Doxy_Globals::dateTime.toString(format); 
 
    } 
 }

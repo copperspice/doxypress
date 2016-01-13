@@ -1,0 +1,3 @@
+#  gdb -ex=r --args /z/doxypress/deploy/doxypress.exe      /z/doxypress/test_build/doxy_test.json
+
+gdb --args /z/doxypress/deploy/doxypress.exe      /z/doxypress/test_build/doxy_test.json

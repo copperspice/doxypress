@@ -215,7 +215,9 @@ class Doxy_Globals
       static bool  parseSourcesNeeded;
       static bool  generatingXmlOutput;
       static bool  markdownSupport;     
-      
+
+      static QDateTime dateTime;
+            
       static QHash<QString, Definition *> &symbolMap();
       static QHash<QString, QSharedPointer<EntryNav>>    g_classEntries;
 

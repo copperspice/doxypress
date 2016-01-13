@@ -62,14 +62,15 @@ namespace Doxy_Setup {
 using namespace Doxy_Setup;
 
 enum Options {
-     INVALID, 
+     INVALID,      
      BLANK_LAYOUT,
      BLANK_STYLE,
      DEBUG_DUMP, 
      DEBUG_SYMBOLS,
+     DATETIME, 
      HELP, 
-     OUTPUT_APP,                 
-     DOXY_VERSION,      
+     OUTPUT_APP,                      
+     DVERSION,      
 };
 
 static QHash<QString, int>     s_extLookup;
@@ -209,16 +210,16 @@ struct CommandLine parseCommandLine(QStringList argList)
    CommandLine cmdArgs;
 
    QMap<QString, Options> argMap;
-   argMap.insert( "--b", OUTPUT_APP      );
-   argMap.insert( "--d", DEBUG_DUMP      );   
-   argMap.insert( "--h", HELP            );  
-   argMap.insert( "--l", BLANK_LAYOUT    );
-   argMap.insert( "--m", DEBUG_SYMBOLS   );
-   argMap.insert( "--w", BLANK_STYLE     );
-   argMap.insert( "--v", DOXY_VERSION    );
-
-   argMap.insert( "--help",    HELP         );
-   argMap.insert( "--version", DOXY_VERSION );
+   argMap.insert( "--b",       OUTPUT_APP      );
+   argMap.insert( "--d",       DEBUG_DUMP      );   
+   argMap.insert( "--h",       HELP            );  
+   argMap.insert( "--l",       BLANK_LAYOUT    );
+   argMap.insert( "--m",       DEBUG_SYMBOLS   );
+   argMap.insert( "--w",       BLANK_STYLE     );
+   argMap.insert( "--v",       DVERSION        );
+   argMap.insert( "--dt",      DATETIME        );
+   argMap.insert( "--help",    HELP            );
+   argMap.insert( "--version", DVERSION        );
 
    QStringList dashList;
 
@@ -237,7 +238,7 @@ struct CommandLine parseCommandLine(QStringList argList)
       if (argMap.contains(item)) {
          value = argMap.value(item);
          ++iter;
-      }
+      }  
                 
       switch (value) {
 
@@ -246,7 +247,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             exit(1);                  
        
          case BLANK_LAYOUT:
-            cmdArgs.genLayout  = true;
+            cmdArgs.generateLayout = true;
             cmdArgs.layoutName = getValue(iter, argList.end());
            
             if (cmdArgs.layoutName.isEmpty()) {
@@ -395,7 +396,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             }
            
             if (! Debug::setFlag(cmdArgs.debugLabel)) {
-               err("Option \"-d\" has an unknown debug specifier: \"%s\".\n", qPrintable(cmdArgs.debugLabel));
+               err("Option \"-d\" has an unknown debug specifier: \"%s\".\n", csPrintable(cmdArgs.debugLabel));
                exit(1);
             }
 
@@ -403,12 +404,7 @@ struct CommandLine parseCommandLine(QStringList argList)
 
          case DEBUG_SYMBOLS:
             Doxy_Globals::g_dumpSymbolMap = true;
-            break;
-          
-         case DOXY_VERSION:
-            printf("\nDoxyPress Version: %s\n", versionString);   
-            printf("email: info@copperspice.com\n");         
-            exit(0);
+            break;              
                   
          case OUTPUT_APP:
             setvbuf(stdout, NULL, _IONBF, 0);
@@ -417,9 +413,18 @@ struct CommandLine parseCommandLine(QStringList argList)
             Doxy_Globals::outputToApp = true;
             break;
 
+         case DATETIME:  
+            cmdArgs.dateTimeStr = getValue(iter, argList.end());
+            break;
+
          case HELP:       
             usage();
             exit(0);                    
+
+         case DVERSION:
+            printf("\nDoxyPress Version: %s\n", versionString);   
+            printf("email: info@copperspice.com\n");         
+            exit(0);
       }      
    }
 
@@ -434,7 +439,7 @@ void readConfiguration(struct CommandLine cmdArgs)
    // parse project file
    printf("\nDoxyPress Version: %s\n\n", versionString);   
       
-   if (cmdArgs.genLayout) {
+   if (cmdArgs.generateLayout) {
       writeDefaultLayoutFile(cmdArgs.layoutName);            
    }
 
@@ -476,8 +481,18 @@ void readConfiguration(struct CommandLine cmdArgs)
 
       exit(1);
    }
-       
-   // Perlmod wants to know the path to the project file
+
+   // set for internal usage
+   const QString dateTimeFormat = "yyyy/MM/dd HH:mm:ss";
+
+   if (cmdArgs.dateTimeStr.isEmpty()) {    
+      QDateTime dt = QDateTime::currentDateTime();
+      cmdArgs.dateTimeStr = dt.toString();      
+   } 
+
+   Doxy_Globals::dateTime = QDateTime::fromString(cmdArgs.dateTimeStr, dateTimeFormat);   
+        
+   // Perlmod path to the project file
    QFileInfo configFileInfo(cmdArgs.configName);
    setPerlModDoxyfile(configFileInfo.absoluteFilePath());  
 }
@@ -728,6 +743,10 @@ void Doxy_Setup::usage()
    printf("   LaTeX:  --w  latex-foot  [footer file name]       Default is 'doxy_footer.latex'\n");
    printf("   LaTeX:  --w  latex-style [styleSheet file name]   Default is 'doxypress.sty'\n");
    
+   printf("\n\n");
+   printf("Use the passed date/time value in the documentation:\n");
+   printf("   --dt  [date_time]   Default is current date and time\n");
+
    printf("\n");
    printf("Other Options:\n");
    printf("   --h  display usage\n");
@@ -736,7 +755,7 @@ void Doxy_Setup::usage()
    printf("\n");
    printf("   --b  output for DoxyPressApp\n"); 
    printf("   --m  dump symbol map\n");  
-   printf("   --d  <level> enable one or more debug levels\n");
+   printf("   --d  <level> enable one or more of the following debug levels\n");
 
    Debug::printFlags();  
 }

@@ -41,16 +41,16 @@
 #define DBG_RTF(x)
 
 static QString dateToRTFDateString()
-{
-   const QDateTime &d = QDateTime::currentDateTime();
+{  
+   static const QDateTime dt = Doxy_Globals::dateTime;
 
-   QString result;
+   QString retval;
 
-   result = QString("\\yr%1\\mo%2\\dy%3\\hr%4\\min%5\\sec%6").
-                  arg(d.date().year()).arg(d.date().month()).arg(d.date().day()).
-                  arg(d.time().hour()).arg(d.time().minute()).arg(d.time().second());
+   retval = QString("\\yr%1\\mo%2\\dy%3\\hr%4\\min%5\\sec%6").
+                  arg(dt.date().year()).arg(dt.date().month()).arg(dt.date().day()).
+                  arg(dt.time().hour()).arg(dt.time().minute()).arg(dt.time().second());
 
-   return result;
+   return retval;
 }
 
 RTFGenerator::RTFGenerator() : OutputGenerator()

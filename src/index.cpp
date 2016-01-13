@@ -2967,7 +2967,7 @@ static void writePages(QSharedPointer<PageDef> pd, FTVHelp *ftv)
    if (hasSections) {
       static bool isStyleBB = Config::getBool("bb-style");
       
-      if (isStyleBB && pd == Doxy_Globals::mainPage) {          // Broom - revisist soon
+      if (isStyleBB && pd == Doxy_Globals::mainPage) {
          // do not add sections from mainpage to treeview
          pd->addSectionsToIndex(false); 
 

@@ -23,6 +23,8 @@
 #include <QStringList>
 
 struct CommandLine {
+  
+   QString dateTimeStr;
 
    QString configName;
    QString layoutName;
@@ -39,11 +41,9 @@ struct CommandLine {
    QString latexHead;
    QString latexFoot;
    QString latexStyle;
-
-   bool genConfig = false;  
-   bool genLayout = false;   
-
-   bool generateDoxy = true;
+  
+   bool generateLayout = false;   
+   bool generateDoxy   = true;
 };
 
 void initDoxyPress();
