@@ -265,8 +265,8 @@ namespace Doxy_Work{
    QSharedPointer<ClassDef> createTagLessInstance(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> templ, const QString &fieldName);
 
    void distributeMemberGroupDocumentation();
-   void dumpSymbol(QTextStream &t, QSharedPointer<Definition> d);
-   void dumpSymbolMap();
+   void dumpPhrase(QTextStream &t, QSharedPointer<Definition> d);
+   void dumpGlossary();
 
    QString extractClassName(QSharedPointer<EntryNav> rootNav);
    
@@ -613,7 +613,8 @@ void processFiles()
       addSTLClasses(rootNav);
    }
 
-   Doxy_Globals::g_stats.begin("\n**  Parsing files\n");
+   msg("\n**  ");
+   Doxy_Globals::g_stats.begin("Parsing files\n");
    parseFiles(root, rootNav);
 
    Doxy_Globals::g_storage->close();
@@ -901,10 +902,9 @@ void generateOutput()
 {
    // Initialize output generators  
    printf("\n**  Generate Documentation Output\n");   
-
-   // dump all symbols
-   if (Doxy_Globals::g_dumpSymbolMap) {
-      dumpSymbolMap();
+  
+   if (Doxy_Globals::g_dumpGlossary) {
+      dumpGlossary();
       exit(0);
    }
 
@@ -1229,9 +1229,6 @@ void generateOutput()
    msg("Lookup cache used %d/%d \n", Doxy_Globals::lookupCache->count(), Doxy_Globals::lookupCache->size());
 
    if (Debug::isFlagSet(Debug::Time)) {
-      msg("Total elapsed time: %.3f seconds\n(of which %.3f seconds waiting for external tools to finish)\n",
-          ((double)Doxy_Globals::runningTime.elapsed()) / 1000.0, portable_getSysElapsedTime());
-
       Doxy_Globals::g_stats.print();
 
    } else {
@@ -2500,7 +2497,14 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
       }
 
       fullName = stripAnonymousNamespaceScope(fullName);
-
+         
+      // change the namespace to be match the ns alias
+      auto iter = Doxy_Globals::nsRenameAlias.find(fullName);
+            
+      if (iter != Doxy_Globals::nsRenameAlias.end()) {
+         fullName = iter.value();         
+      }  
+      
       if (! fullName.isEmpty()) {
          QSharedPointer<NamespaceDef> nd;
 
@@ -9855,7 +9859,7 @@ void readFormulaRepository()
    }
 }
 
-void Doxy_Work::dumpSymbol(QTextStream &t, QSharedPointer<Definition> def)
+void Doxy_Work::dumpPhrase(QTextStream &t, QSharedPointer<Definition> def)
 {
    QString anchor;
 
@@ -9879,18 +9883,18 @@ void Doxy_Work::dumpSymbol(QTextStream &t, QSharedPointer<Definition> def)
      << "');" << endl;
 }
 
-void Doxy_Work::dumpSymbolMap()
+void Doxy_Work::dumpGlossary()
 {
    QFile f("symbols.sql");
 
    if (f.open(QIODevice::WriteOnly)) {
       QTextStream t(&f);
 
-      for (auto item : Doxy_Globals::symbolMap()) {
-         // list of symbols 
+      for (auto item : Doxy_Globals::glossary()) {
+         // list of phrases
 
-         QSharedPointer<Definition> sharedPtr = sharedFrom(item);
-         dumpSymbol(t, sharedPtr);         
+         QSharedPointer<Definition> def = sharedFrom(item);
+         dumpPhrase(t, def);         
       }
    }
 }

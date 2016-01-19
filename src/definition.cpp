@@ -201,22 +201,22 @@ static bool matchExcludedSymbols(const QString &name)
 
 void Definition::addToMap(const QString &name)
 {    
-   QString symbolName = name;
-   int index = computeQualifiedIndex(symbolName);
+   QString phrase = name;
+   int index = computeQualifiedIndex(phrase);
 
    if (index != -1) {
-      symbolName = symbolName.mid(index + 2);
+      phrase = phrase.mid(index + 2);
    }
 
-   if (! symbolName.isEmpty()) { 
-      // must add a raw pointer since this method is called from a constructor                     
-      Doxy_Globals::symbolMap().insertMulti(symbolName, this);         
-      this->setSymbolName(symbolName);
+   if (! phrase.isEmpty()) { 
+      // must use a raw pointer since this method is called from a constructor                     
+      Doxy_Globals::glossary().insertMulti(phrase, this);         
+      this->setPhraseName(phrase);
    }
 }
 
 Definition::Definition(const QString &df, int dl, int dc, const QString &name, const QString &briefDoc, 
-                  const QString &fullDoc, bool isSymbol)
+                  const QString &fullDoc, bool isPhrase)
 {
    m_name      = name;
    m_defLine   = dl;
@@ -225,13 +225,13 @@ Definition::Definition(const QString &df, int dl, int dc, const QString &name, c
    m_private = new Definition_Private;
    m_private->init(df, name);
 
-   m_isSymbol = isSymbol;
+   m_isPhrase = isPhrase;
 
-   if (isSymbol) {
+   if (isPhrase) {
       addToMap(name);
    }
 
-   // id's used in ftvhelp
+   // these ids are used in ftvhelp
    m_inputOrderId = -1;
    m_sortId = -1;
 
@@ -313,8 +313,8 @@ Definition::Definition(const Definition &d)
       m_private->inbodyDocs = new DocInfo(*d.m_private->inbodyDocs);
    }
 
-   m_isSymbol = d.m_isSymbol;
-   if (m_isSymbol) {
+   m_isPhrase = d.m_isPhrase;
+   if (m_isPhrase) {
       addToMap(m_name);
    }
 }
@@ -327,15 +327,15 @@ Definition::~Definition()
    }
 
    if (! Doxy_Globals::g_programExit)  {
-      auto di = Doxy_Globals::symbolMap().find(m_symbolName);
+      auto iter = Doxy_Globals::glossary().find(m_phraseName);
    
-      while (di != Doxy_Globals::symbolMap().end() && di.key() == m_symbolName)  {      
+      while (iter != Doxy_Globals::glossary().end() && iter.key() == m_phraseName)  {      
    
-         if (di.value() == this) {
-            di = Doxy_Globals::symbolMap().erase(di);
+         if (iter.value() == this) {
+            iter = Doxy_Globals::glossary().erase(iter);
    
          }  else {
-            ++di;
+            ++iter;
    
          }      
       }
@@ -1655,9 +1655,9 @@ void Definition::writeToc(OutputList &ol)
    ol.popGeneratorState();
 }
 
-QString Definition::symbolName() const
+QString Definition::phraseName() const
 {
-   return m_symbolName;
+   return m_phraseName;
 }
 
 QString Definition::documentation() const
@@ -1910,9 +1910,9 @@ void Definition::setLanguage(SrcLangExt lang)
    m_private->lang = lang;
 }
 
-void Definition::setSymbolName(const QString &name)
+void Definition::setPhraseName(const QString &phrase)
 {
-   m_symbolName = name;
+   m_phraseName = phrase;
 }
 
 bool Definition::hasBriefDescription() const

@@ -35,11 +35,10 @@
 #include <message.h>
 #include <util.h>
 
-// constructs a new class definition
 ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const QString &x_name, CompoundType ct,
                    const QString &lref, const QString &fName, bool isSymbol, bool isJavaEnum)
    : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(x_name), "", "", isSymbol)
-{
+{  
    visited = false;
    setReference(lref);
    

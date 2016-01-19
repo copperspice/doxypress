@@ -339,7 +339,6 @@ static void generateBriefDoc(QTextStream &t, QSharedPointer<Definition> def)
    QString brief = def->briefDescription(true);
 
 /* ( save for testing )
-
    if (brief.isEmpty()) {
       SortedList<QSharedPointer<GroupDef>> *groups = def->partOfGroups();
 
@@ -424,14 +423,18 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
 
          if (isStyleBB && outputType == FTVHelp::Modules) {
             // modules.html only
-
-            QString text = n->def->getDefFileName();
-            text = text.mid( text.lastIndexOf('/')+1 ); 
-
+           
+            QString moduleDesc;   
+            auto iter = Doxy_Globals::g_moduleHint.find(n->def->getDefFileName());
+            
+            if (iter != Doxy_Globals::g_moduleHint.end()) {
+               moduleDesc = iter.value();
+            }
+           
             t << "<td class=\"hint\">";
-            t << text;
-            t << "</td>";
-         }
+            t << moduleDesc;
+            t << "</td>";   
+         }   
 
          // brief description   
          t << "<td class=\"desc\">";
@@ -485,11 +488,15 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
          if (isStyleBB && outputType == FTVHelp::Modules) {
             // modules.html only
 
-            QString text = n->def->getDefFileName();
-            text = text.mid( text.lastIndexOf('/')+1 ); 
-
+            QString moduleDesc;   
+            auto iter = Doxy_Globals::g_moduleHint.find(n->def->getDefFileName());
+            
+            if (iter != Doxy_Globals::g_moduleHint.end()) {
+               moduleDesc = iter.value();
+            }
+           
             t << "<td class=\"hint\">";
-            t << text;
+            t << moduleDesc;
             t << "</td>";
          }
 

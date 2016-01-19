@@ -276,7 +276,6 @@ bool Config::verify()
    } else {
       // expand the relative stripFromPath values
       cleanUpPaths(stripFromPath);
-
    }
 
    iterList.value().value = stripFromPath;
@@ -564,27 +563,28 @@ bool Config::verify()
 
       if (fi.exists() && fi.isFile()) { 
          // user specified path + exec
-         dotPath = fi.absolutePath() + "/";
+         dotPath = fi.absoluteFilePath();
 
       } else {
          QFileInfo dp(dotPath + "/dot" + portable_commandExtension());            
 
          if (! dp.exists() || ! dp.isFile()) {
-            err("Unable to locate Dot program at %s\n", qPrintable(dotPath));
+            warnMsg("Unable to locate the dot program in %s\n", csPrintable(dotPath));
             dotPath = "";
 
          } else {
-            dotPath = dp.absolutePath() + "/";
+            dotPath = dp.absoluteFilePath();
          }
       }
 
-   } else {      
-      dotPath = "";
-
+   } else {
+      // changed to store the dot program
+      dotPath = "dot" + portable_commandExtension();  
+   
    }
 
    iterString.value().value = dotPath;
-   
+         
 
    // ** dot
    iterString = m_cfgString.find("plantuml-jar-path");
@@ -1169,18 +1169,19 @@ void Config::loadRenameNS_Aliases()
    const QStringList list = Config::getList("ns-alias");
 
    for (auto item : list) {
+     
+      int i = item.indexOf('=');
 
-      if (! Doxy_Globals::renameNSDict.contains(item)) {
-         int i = item.indexOf('=');
+      if (i > 0) {
+         QString name  = item.left(i).trimmed();
+         QString alias = item.right(item.length() - i - 1);
 
-         if (i > 0) {
-            QString name  = item.left(i).trimmed();
-            QString value = item.right(item.length() - i - 1);
+         if (! name.isEmpty() && ! alias.isEmpty()) {
+            // insert or update with the alias
+            Doxy_Globals::nsRenameOrig[name]   = alias;
 
-            if (! name.isEmpty()) {
-               // insert or update with the new alias
-               Doxy_Globals::renameNSDict[name] = value;
-            }
+            // insert or update with the name
+            Doxy_Globals::nsRenameAlias[alias] = name;
          }
       }
    }

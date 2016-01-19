@@ -92,7 +92,6 @@ void initDoxyPress()
 
    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
-   Doxy_Globals::runningTime.start();
    initPreprocessor();
 
    Doxy_Globals::parserManager = new ParserManager;
@@ -403,7 +402,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             break;
 
          case DEBUG_SYMBOLS:
-            Doxy_Globals::g_dumpSymbolMap = true;
+            Doxy_Globals::g_dumpGlossary = true;
             break;              
                   
          case OUTPUT_APP:
@@ -476,8 +475,8 @@ void readConfiguration(struct CommandLine cmdArgs)
   
    // step 1 
    if (! Config::parseConfig(cmdArgs.configName) ) {
-      fprintf(stderr, "\n\nA problem occured when parsing the project file.\nPlease submit a bug report to " 
-                  "the developers at info@copperspice.com\n");
+      fprintf(stderr, "\n\nA problem occured when parsing the project file.\n"
+                  "If this is a DoxyPress issue please submit a report to the developers at info@copperspice.com\n");
 
       exit(1);
    }
@@ -487,7 +486,7 @@ void readConfiguration(struct CommandLine cmdArgs)
 
    if (cmdArgs.dateTimeStr.isEmpty()) {    
       QDateTime dt = QDateTime::currentDateTime();
-      cmdArgs.dateTimeStr = dt.toString();      
+      cmdArgs.dateTimeStr = dt.toString(dateTimeFormat);
    } 
 
    Doxy_Globals::dateTime = QDateTime::fromString(cmdArgs.dateTimeStr, dateTimeFormat);   

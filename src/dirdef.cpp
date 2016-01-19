@@ -31,7 +31,8 @@
 
 static int g_dirCount = 0;
 
-DirDef::DirDef(const QString &path) : Definition(path, 1, 1, path), visited(false)
+DirDef::DirDef(const QString &path) 
+   : Definition(path, 1, 1, path), visited(false)
 {
    bool fullPathNames = Config::getBool("full-path-names");
 

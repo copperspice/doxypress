@@ -78,67 +78,50 @@ class Statistics
 {
  public:
    Statistics()
-   {
-   }
+   {}
 
    void begin(const QString &name) {
       msg(name);
 
-      stat *entry = new stat(name, 0);
-      stats.append(entry);
+      StatData entry(name);
+      statList.append(std::move(entry));
+
       time.restart();
    }
 
    void end() {
-      stats.last()->elapsed = ((double)time.elapsed()) / 1000.0;
+      statList.last().elapsed = ((double)time.elapsed()) / 1000.00;
    }
 
-   void print() {
-      bool restore = false;
-
-      if (Debug::isFlagSet(Debug::Time)) {
-         Debug::clearFlag("time");
-         restore = true;
-      }
-
+   void print() {               
+      msg("\n");
       msg("----------------------\n");
 
-      for (auto item : stats) {
-         msg("Spent %.3f seconds in %s", item->elapsed, csPrintable(item->name));
-      }
-
-      if (restore) {
-         Debug::setFlag("time");
-      }
+      for (const auto &item : statList) {
+         msg("%.3f seconds %s", item.elapsed, csPrintable(item.name));
+      }                 
    }
 
  private:
-   struct stat {
+   struct StatData {         
+      StatData(const QString &n) : name(n), elapsed(0)
+      {}
+
       QString name;
       double elapsed;
-
-      stat() : elapsed(0)
-      {}
-
-      stat(const QString &n, double el) : name(n), elapsed(el)
-      {}
    };
 
-   QList<stat *> stats;
+   QList<StatData> statList;
    QTime time;
-
 }; 
 
 /*! \brief This class serves as a namespace for global variables used by DoxyPress
  *
- *  All fields in this class are public and static so they can be used directly.
+ *  All fields in this class are public and static
  */
 class Doxy_Globals 
 {
-   public:
-      static QSharedPointer<PageDef>       mainPage;
-      static QSharedPointer<NamespaceDef>  globalScope;
-    
+   public:         
       static CiteDict                 *citeDict;
    
       static ClassSDict               *classSDict;
@@ -147,94 +130,98 @@ class Doxy_Globals
       static DirSDict                 directories;
     
       static FormulaDict              *formulaDict;
-      static FormulaDict              *formulaNameDict;
-       
-      static QSharedPointer<GenericsSDict> genericsDict;     
+      static FormulaDict              *formulaNameDict;     
+
+      static QSharedPointer<GenericsSDict> genericsDict; 
 
       static GroupSDict               *groupSDict;
-     
-      static FileNameDict             *includeNameDict;
-      static FileNameDict             *exampleNameDict;   
-      static FileNameDict             *inputNameDict;
-   
-      static SortedList<QSharedPointer<FileNameList>> *inputNameList;
-   
-      static FileNameDict             *imageNameDict;
+
+      static FileNameDict             *diaFileNameDict;  
       static FileNameDict             *dotFileNameDict;
+      static FileNameDict             *exampleNameDict;     
+      static FileNameDict             *includeNameDict;   
+      static FileNameDict             *inputNameDict;        
+      static FileNameDict             *imageNameDict;      
       static FileNameDict             *mscFileNameDict;
-      static FileNameDict             *diaFileNameDict;   
-   
+ 
       static MemberNameSDict          *memberNameSDict;
       static MemberNameSDict          *functionNameSDict;
+
       static NamespaceSDict           *namespaceSDict;
+
       static PageSDict                *exampleSDict;
       static PageSDict                *pageSDict;
+
       static SectionDict              *sectionDict;
-   
+
+      static StringDict                cmdAliasDict;     
       static StringDict                namespaceAliasDict;
-      static StringDict                tagDestinationDict;
-      static StringDict                cmdAliasDict;    
-      static StringDict                renameNSDict;  
-   
-      //
+      static StringDict                tagDestinationDict;  
+
+      static QHash<QString, QString>       nsRenameOrig;
+      static QHash<QString, QString>       nsRenameAlias;
+      
+      static QSharedPointer<PageDef>       mainPage;
+      static QSharedPointer<NamespaceDef>  globalScope;  
+
       static FormulaList              *formulaList; 
+      static IndexList                *indexList;
       static ParserManager            *parserManager;  
       static SearchIndexIntf          *searchIndex; 
-      static Store                    *symbolStorage;  
-      static IndexList                *indexList;
-   
-      //
+      static Store                    *symbolStorage;        
+  
+      static OutputList               *g_outputList;                 
+      static FileStorage              *g_storage;
+      static Statistics                g_stats;                    
+     
+      static SortedList<QSharedPointer<FileNameList>> *inputNameList;
+      
       static QList<QByteArray>        tagfileList;   
    
       static QSet<QString>            inputPaths;   
-      static QSet<QString>            expandAsDefinedDict;   
-      static QHash<QString, RefList>  *xrefLists;           // array of xref lists: todo, test, bug, deprecated ...
+      static QSet<QString>            expandAsDefinedDict; 
+  
       static QHash<QString, int>      *htmlDirMap;
-     
-      static QHash<QString, QSharedPointer<Definition>> clangUsrMap;
-   
+      static QHash<QString, RefList>  *xrefLists;           
+          
+      static QHash<QString, QSharedPointer<Definition>>   clangUsrMap;   
       static QHash<long, QSharedPointer<MemberGroupInfo>> memGrpInfoDict;
-      static StringMap<QSharedPointer<DirRelation>> dirRelations; 
+
+      static StringMap<QSharedPointer<DirRelation>>       dirRelations; 
         
       static QCache<QString, LookupInfo> *lookupCache;
-         
-      static QTime runningTime;   
+
       static int subpageNestingLevel;
-   
+             
       static QString htmlFileExtension;
       static QString latexStyleExtension;
    
       static QString tempA_FName;
       static QString tempB_FName;
       
-      static bool  suppressDocWarnings;
-      static bool  outputToApp;
-      static bool  gatherDefines;
-      static bool  userComments;   
-      static bool  insideMainPage;
-      static bool  parseSourcesNeeded;
-      static bool  generatingXmlOutput;
-      static bool  markdownSupport;     
+      static bool gatherDefines;      
+      static bool outputToApp;      
+      static bool userComments;   
+      static bool insideMainPage;
+      static bool parseSourcesNeeded;
+      static bool generatingXmlOutput;
+      static bool markdownSupport;     
+      static bool suppressDocWarnings;
 
-      static QDateTime dateTime;
-            
-      static QHash<QString, Definition *> &symbolMap();
-      static QHash<QString, QSharedPointer<EntryNav>>    g_classEntries;
+      static bool g_dumpGlossary;    
+      static bool g_programExit;      
+
+      static QDateTime dateTime;           
+      
+      static QHash<QString, QSharedPointer<EntryNav>>   g_classEntries;
 
       static QStringList               g_inputFiles;
-      static QSet<QString>             g_compoundKeywordDict;   // keywords recognised as compounds
-      static QHash<QString, FileDef>   g_usingDeclarations;     // used classes
-      static QSet<QString>             g_pathsVisited;
-   
-      static OutputList               *g_outputList;            // list of output generating objects     
-      static FileStorage              *g_storage;
-      
-      static Statistics g_stats; 
-         
-      static bool g_dumpSymbolMap;
-      static bool g_useOutputTemplate;
+      static QSet<QString>             g_compoundKeywordDict;           
+      static QSet<QString>             g_pathsVisited; 
+      static QMap<QString,  QString>   g_moduleHint;            
+      static QHash<QString, FileDef>   g_usingDeclarations;  
 
-      static bool g_programExit;
+      static QHash<QString, Definition *> &glossary();
 };
 
 #endif

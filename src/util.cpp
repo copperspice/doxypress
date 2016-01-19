@@ -660,23 +660,22 @@ done:
    return result;
 }
 
-/*! Substitutes a simple unqualified \a name within \a scope. Returns the
- *  value of the typedef or \a name if no typedef was found.
+/*! Substitutes a simple unqualified name within a scope. Returns the
+ *  value of the typedef or name if no typedef was found.
  */
-static QString substTypedef(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, const QString &symbolName, 
-                  QSharedPointer<MemberDef> *pTypeDef = nullptr)
+static QString substTypedef(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, 
+                  const QString &phraseName, QSharedPointer<MemberDef> *pTypeDef = nullptr)
 {
-   QString result = symbolName;
+   QString result = phraseName;
 
-   if (symbolName.isEmpty()) {
+   if (phraseName.isEmpty()) {
       return result;
    }
+  
+   auto iter = Doxy_Globals::glossary().find(phraseName);
 
-   // lookup scope fragment in the symbol map
-   auto di = Doxy_Globals::symbolMap().find(symbolName);
-
-   if (di == Doxy_Globals::symbolMap().end()) {
-      // could not find any matching symbols
+   if (iter == Doxy_Globals::glossary().end()) {
+      // could not find a matching def
       return "";   
    }
 
@@ -684,16 +683,16 @@ static QString substTypedef(QSharedPointer<Definition> scopeDef, QSharedPointer<
 
    QSharedPointer<MemberDef> bestMatch;
 
-   while (di != Doxy_Globals::symbolMap().end() && di.key() == symbolName)  {      
+   while (iter != Doxy_Globals::glossary().end() && iter.key() == phraseName)  {      
       // search for the best match, only look at members 
 
-      if (di.value()->definitionType() == Definition::TypeMember) {
+      if (iter.value()->definitionType() == Definition::TypeMember) {
          // which are also typedefs
-         QSharedPointer<Definition> sharedPtr = sharedFrom(di.value());
+         QSharedPointer<Definition> sharedPtr = sharedFrom(iter.value());
          QSharedPointer<MemberDef> md = sharedPtr.dynamicCast<MemberDef>();
 
          if (md->isTypedef()) { 
-            // d is a typedef, test accessibility of typedef within scope
+            // md is a typedef, test accessibility of typedef within scope
             int distance = isAccessibleFromWithExpScope(scopeDef, fileScope, sharedPtr, "");
 
             if (distance != -1 && distance < minDistance) {
@@ -705,7 +704,7 @@ static QString substTypedef(QSharedPointer<Definition> scopeDef, QSharedPointer<
          }
       }
      
-      ++di;            
+      ++iter;            
    }
 
    if (bestMatch) {
@@ -1257,10 +1256,9 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
                if (args.isEmpty()) {
                   // do not expand "typedef t a[4];"                  
 
-                  // we found a symbol at this distance, but if it didn't
-                  // resolve to a class, we still have to make sure that
-                  // something at a greater distance does not match, since
-                  // that symbol is hidden by this one.
+                  // we found a phrase at this distance, but if it did not resolve to a class, 
+                  // we still have to make sure that something at a greater distance does not
+                  // match, since that phrase is hidden by this one.
 
                   if (distance < minDistance) {
                      QString spec;
@@ -1333,13 +1331,13 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
  * Can recursively call itself when resolving typedefs
  */
 static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-                  const QString &nType, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType )
+                  const QString &nameType, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType )
 {
    QString name;
    QString explicitScopePart;
    QString strippedTemplateParams;
 
-   name = stripTemplateSpecifiersFromScope(removeRedundantWhiteSpace(nType), true, &strippedTemplateParams);
+   name = stripTemplateSpecifiersFromScope(removeRedundantWhiteSpace(nameType), true, &strippedTemplateParams);
 
    ArgumentList actTemplParams;
 
@@ -1363,13 +1361,13 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
       return QSharedPointer<ClassDef>(); 
    }
 
-   // the -g (for C# generics) and -p (for ObjC protocols) 
-
-   if (! Doxy_Globals::symbolMap().contains(name)) {    
+   if (! Doxy_Globals::glossary().contains(name)) {    
+      // -p (for ObjC protocols) 
    
-      if (! Doxy_Globals::symbolMap().contains(name + "-p")) {    
+      if (! Doxy_Globals::glossary().contains(name + "-p")) {    
          return QSharedPointer<ClassDef>();           
       }
+
    }
 
    bool hasUsingStatements = (fileScope && ((fileScope->getUsedNamespaces() && 
@@ -1436,22 +1434,19 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
    QString bestTemplSpec;
    QString bestResolvedType;
 
-   int minDistance = 10000; // init at "infinite"
-  
-   // not a unique name         
-   int count = 0;
-   auto di   = Doxy_Globals::symbolMap().find(name);
+   // init at "infinite"
+   int minDistance = 10000; 
+          
+   auto iter = Doxy_Globals::glossary().find(name);
            
-   while (di != Doxy_Globals::symbolMap().end() && di.key() == name)  {
-      QSharedPointer<Definition> sharedPtr = sharedFrom(di.value());
+   while (iter != Doxy_Globals::glossary().end() && iter.key() == name)  {
+      QSharedPointer<Definition> def = sharedFrom(iter.value());
         
-      getResolvedSymbol(scope, fileScope, sharedPtr, explicitScopePart, &actTemplParams,
+      getResolvedSymbol(scope, fileScope, def, explicitScopePart, &actTemplParams,
                         minDistance, bestMatch, bestTypedef, bestTemplSpec, bestResolvedType);
 
-      ++count;
-      ++di;
+      ++iter;
    }
-
  
    if (pTypeDef) {
       *pTypeDef = bestTypedef;
@@ -6230,13 +6225,13 @@ QString stripExtension(const QString &fName)
 
 QString renameNS_Aliases(const QString &scope, bool fromTo)
 {
-   if (scope.isEmpty() || Doxy_Globals::renameNSDict.isEmpty() )  { 
+   if (scope.isEmpty() || Doxy_Globals::nsRenameOrig.isEmpty() )  { 
       return scope;          
    } 
 
    QString retval = scope;
 
-   for (auto item = Doxy_Globals::renameNSDict.begin(); item != Doxy_Globals::renameNSDict.end(); item++) { 
+   for (auto item = Doxy_Globals::nsRenameOrig.begin(); item != Doxy_Globals::nsRenameOrig.end(); item++) { 
 
       QString from = item.key();
       QString to   = item.value();
@@ -6287,8 +6282,7 @@ QString renameNS_Aliases(const QString &scope, bool fromTo)
 
          if (to.isEmpty()) {
             // hold on this for now
-          
-           
+                     
          } else {
             QStringList list = retval.split(" ");
             retval = "";
@@ -6486,9 +6480,9 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
       return bestMatch;
    }
   
-   auto di = Doxy_Globals::symbolMap().find(name);
+   auto iter = Doxy_Globals::glossary().find(name);
 
-   if (di == Doxy_Globals::symbolMap().end()) {
+   if (iter == Doxy_Globals::glossary().end()) {
       return bestMatch;
    }
 
@@ -6510,25 +6504,25 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
    int minDistance = 10000;  
    
    // find the closest matching definition   
-   while (di != Doxy_Globals::symbolMap().end() && di.key() == name)  {      
+   while (iter != Doxy_Globals::glossary().end() && iter.key() == name)  {      
       // search for the best match, only look at members 
 
-      if (di.value()->definitionType() == Definition::TypeMember) {
+      if (iter.value()->definitionType() == Definition::TypeMember) {
          s_visitedNamespaces.clear();
 
-         QSharedPointer<Definition> sharedPtr = sharedFrom(di.value());
-         int distance = isAccessibleFromWithExpScope(scope, fileScope, sharedPtr, explicitScopePart);
+         QSharedPointer<Definition> def = sharedFrom(iter.value());
+         int distance = isAccessibleFromWithExpScope(scope, fileScope, def, explicitScopePart);
 
          if (distance != -1 && distance < minDistance) {
             minDistance = distance;
 
-            QSharedPointer<Definition> sharedPtr = sharedFrom(di.value());
-            QSharedPointer<MemberDef> md = sharedPtr.dynamicCast<MemberDef>();            
+            QSharedPointer<Definition> def = sharedFrom(iter.value());
+            QSharedPointer<MemberDef> md   = def.dynamicCast<MemberDef>();            
             bestMatch = md;            
          }
       }
 
-      ++di;
+      ++iter;
    }
 
    return bestMatch;
@@ -6540,7 +6534,7 @@ bool checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fi
    QSharedPointer<MemberDef> bestMatch = getMemberFromSymbol(scope, fileScope, name);
 
    if (bestMatch && bestMatch->isTypedef()) {
-      return true;   // closest matching symbol is a typedef
+      return true;   // closest matching definition is a typedef
    } else {
       return false;
    }

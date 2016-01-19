@@ -1857,17 +1857,17 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
    return;
 }
 
-static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> sym, const QString &symName)
+static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> def, const QString &name)
 {
-   if (sym->getOuterScope() && sym->getOuterScope()->definitionType() == Definition::TypeClass &&
+   if (def->getOuterScope() && def->getOuterScope()->definitionType() == Definition::TypeClass &&
          g_currentDefinition->definitionType() == Definition::TypeClass) {
 
-      QSharedPointer<ClassDef> cd     = sym->getOuterScope().dynamicCast<ClassDef>();
+      QSharedPointer<ClassDef> cd     = def->getOuterScope().dynamicCast<ClassDef>();
       QSharedPointer<ClassDef> thisCd = g_currentDefinition.dynamicCast<ClassDef>();
 
-      if (sym->definitionType() == Definition::TypeMember) {
+      if (def->definitionType() == Definition::TypeMember) {
          if (g_currentMemberDef && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, sym.dynamicCast<MemberDef>());
+            addDocCrossReference(g_currentMemberDef, def.dynamicCast<MemberDef>());
          }
       }
 
@@ -1875,32 +1875,32 @@ static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> s
 
       // TODO: find the nearest base class in case cd is a base class of thisCd
 
-      if (cd == thisCd || (thisCd && thisCd->isBaseClass(cd, TRUE))) {
-         writeMultiLineCodeLink(ol, sym, symName);
-         return TRUE;
+      if (cd == thisCd || (thisCd && thisCd->isBaseClass(cd, true))) {
+         writeMultiLineCodeLink(ol, def, name);
+         return true;
       }
    }
 
-   return FALSE;
+   return false;
 }
 
-static void findMemberLink(CodeOutputInterface &ol, const QString &symName)
+static void findMemberLink(CodeOutputInterface &ol, const QString &phrase)
 {   
    if (g_currentDefinition) { 
-      auto di = Doxy_Globals::symbolMap().find(symName);
+      auto iter = Doxy_Globals::glossary().find(phrase);
 
-      while (di != Doxy_Globals::symbolMap().end() && di.key() == symName) {               
-         QSharedPointer<Definition> sharedPtr = sharedFrom(di.value());
+      while (iter != Doxy_Globals::glossary().end() && iter.key() == phrase) {               
+         QSharedPointer<Definition> def = sharedFrom(iter.value());
 
-         if (findMemberLink(ol, sharedPtr, symName)) {
+         if (findMemberLink(ol, def, phrase)) {
             return;            
          }   
 
-         ++di;      
+         ++iter;      
       }
    }
    
-   codify(symName);
+   codify(phrase);
 }
 
 static void startFontClass(const QString &s)

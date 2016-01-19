@@ -90,7 +90,7 @@ class DiagramItem
    }
 
    QSharedPointer<ClassDef> getClassDef() const {
-      return classDef;
+      return classDef;      
    }
 
  private:
@@ -128,14 +128,6 @@ class DiagramRow : public QList<DiagramItem *>
  private:
    TreeDiagram *diagram;
    uint level;
-};
-
-/** Class representing iterator for the rows in the built-in class diagram. */
-class DiagramRowIterator : public QListIterator<DiagramRow>
-{
- public:
-   DiagramRowIterator(const QList<DiagramRow> &d)
-      : QListIterator<DiagramRow>(d) {}
 };
 
 /** Class represeting the tree layout for the built-in class diagram. */
@@ -692,36 +684,45 @@ void TreeDiagram::computeExtremes(uint *maxLabelLen, uint *maxXPos)
 
 void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap, uint baseRows, uint superRows,
                             uint cellWidth, uint cellHeight, QString relPath, bool generateMap) 
-{  
-   int skip = 0;
+{      
+   bool skipFirst  = false;
+   bool done       = false;
+   bool firstRow   = doBase;  
 
    if (! doBase) {
-      skip = 1;
+      skipFirst= true;
    }
- 
-   bool done = false;
-   bool firstRow = doBase;
-   
-   for (auto iter = this->begin() + skip; iter != this->end(); ++iter) { 
+  
+   for (auto iter = this->begin(); iter != this->end(); ++iter) { 
+
+      if (skipFirst) {
+         skipFirst = false;
+         continue;
+      }
 
       if (done) {
          break;
-      }    
+      }         
 
-      auto dr = *iter;   
-
-      int x = 0;
-      int y = 0;
+      int x    = 0;
+      int y    = 0;
       float xf = 0.0f;
       float yf = 0.0f;
+
+      auto dr = *iter;  
+ 
+      if (dr->isEmpty()) {
+         // not very likely 
+         continue;   
+      }
 
       QList<DiagramItem *>::iterator rit = dr->begin();
       DiagramItem *di = *rit;
 
       if (di->isInList()) {    
          // put boxes in a list
+         DiagramItem *opi = nullptr;
 
-         DiagramItem *opi = 0;
          if (doBase) {
             rit = dr->end() - 1;
 
@@ -729,17 +730,18 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
             rit = dr->begin();
          }
 
-         while (rit != dr->end()) {
-   
+         while (true) {  
             di = *rit;
 
             if (di->parentItem() == opi) {
+
                if (bitmap) {
                   if (doBase) {
                      y -= cellHeight + labelVertSpacing;
                   } else {
                      y += cellHeight + labelVertSpacing;
                   }
+
                } else {
                   if (doBase) {
                      yf += 1.0f;
@@ -749,6 +751,7 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
                }
 
             } else {
+
                if (bitmap) {
                   x = di->xPos() * (cellWidth + labelHorSpacing) / gridWidth;
                   if (doBase) {
@@ -772,7 +775,8 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
             opi = di->parentItem();
 
             if (bitmap) {
-               bool hasDocs = di->getClassDef()->isLinkable();
+              
+               bool hasDocs = di->getClassDef()->isLinkable();          
                writeBitmapBox(di, image, x, y, cellWidth, cellHeight, firstRow, hasDocs, di->getChildren().count() > 0);
 
                if (! firstRow && generateMap) {
@@ -781,15 +785,29 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
 
             } else {
                writeVectorBox(t, di, xf, yf, di->getChildren().count() > 0);
+
             }
 
             if (doBase) {
+
+               if (rit == dr->begin()) {
+                  break;
+               }
+
                --rit;
+
             } else {
                ++rit;
+
+               if (rit == dr->end()) {
+                  break;   
+               }
+
             }
          }
+
          done = true;
+
 
       } else { 
          // draw a tree of boxes

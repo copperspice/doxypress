@@ -214,7 +214,7 @@ static EdgeProperties umlEdgeProps = {
 
 static QString getDotFontName()
 {
-   static QString dotFontName = Config::getString("dot-fontname");
+   static QString dotFontName = Config::getString("dot-font-name");
 
    if (dotFontName.isEmpty()) {
       dotFontName = "Helvetica";
@@ -225,7 +225,7 @@ static QString getDotFontName()
 
 static int getDotFontSize()
 {
-   static int dotFontSize = Config::getInt("dot-fontsize");
+   static int dotFontSize = Config::getInt("dot-font-size");
 
    if (dotFontSize < 4) {
       dotFontSize = 4;
@@ -786,11 +786,9 @@ void DotRunner::addPostProcessing(const  QString &cmd, const  QString &args)
 
 bool DotRunner::run()
 {   
-   static const QString dotExe    = Config::getString("dot-path") + "dot";
+   static const QString dotExe    = Config::getString("dot-path");
    static const bool multiTargets = Config::getBool("dot-multiple-targets");
-
-   int exitCode      = 0;
- 
+    
    QString dotArgs;
      
    QString file      = m_file;
@@ -799,8 +797,9 @@ bool DotRunner::run()
    QString postCmd   = m_postCmd;
    QString postArgs  = m_postArgs;
 
-   bool checkResult   = m_checkResult;
-   bool cleanUp       = m_cleanUp;
+   int exitCode      = 0;
+   bool checkResult  = m_checkResult;
+   bool cleanUp      = m_cleanUp;
 
    if (multiTargets) {
       dotArgs = "\"" + file + "\"";

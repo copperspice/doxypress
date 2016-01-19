@@ -95,7 +95,7 @@ class Definition : public DefinitionIntf
  public:
   
    Definition(const QString &defFileName, int defLine, int defColumn, const QString &name, 
-      const QString &b = QString(), const QString &d = QString(), bool isSymbol = true);
+      const QString &b = QString(), const QString &d = QString(), bool isPhrase = true);
  
    virtual ~Definition();
 
@@ -114,9 +114,9 @@ class Definition : public DefinitionIntf
     */
    virtual QString qualifiedName() const;
 
-   /*! Returns the name of this definition as it appears in the symbol map.
+   /*! Returns the name of this definition as it appears in the glossary map
     */
-   QString symbolName() const;
+   QString phraseName() const;
 
    /*! Returns the base file name (without extension) of this definition.
     *  as it is referenced to/written to disk.
@@ -276,7 +276,7 @@ class Definition : public DefinitionIntf
    /*! Sets a new \a name for the definition */
    virtual void setName(const QString &name);
 
-   /*! Sets a unique id for the symbol. Used for libclang integration. */
+   /*! Sets a unique id for the definition. Used for libclang integration. */
    void setId(const QString &name);
 
    /*! Sets the documentation of this definition to \a d. */
@@ -365,7 +365,7 @@ class Definition : public DefinitionIntf
  private:
    void addToMap(const QString &name);
  
-   void setSymbolName(const QString &name);
+   void setPhraseName(const QString &phrase);
 
    int  _getXRefListId(const QString &listName) const;
    void _writeSourceRefList(OutputList &ol, const QString &scopeName,const QString &text, MemberSDict *members, bool);
@@ -378,9 +378,9 @@ class Definition : public DefinitionIntf
    Definition_Private *m_private; 
    QString m_name;
 
-   bool m_isSymbol;
+   bool m_isPhrase;
 
-   QString m_symbolName;
+   QString m_phraseName;
    int m_defLine;
    int m_defColumn;
 
