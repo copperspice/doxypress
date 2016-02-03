@@ -182,7 +182,7 @@ bool rightScopeMatch(const QString &scope, const QString &name);
 bool leftScopeMatch(const QString &scope, const QString &name);
 
 bool resolveRef(const QString &scName, const QString &tsname, bool inSeeBlock, QSharedPointer<Definition> *resContext, 
-                  QSharedPointer<MemberDef> *resMember, bool lookForSpecializations = true, 
+                  QSharedPointer<MemberDef> *resMember, bool useBaseTemplateOnly = false, 
                   QSharedPointer<FileDef> currentFile = QSharedPointer<FileDef>(), bool checkScope = false);
 
 bool resolveLink(const QString &scName, const QString &linkRef, bool inSeeBlock, QSharedPointer<Definition> *resContext, QString &resAnchor);

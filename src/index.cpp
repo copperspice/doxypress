@@ -1242,6 +1242,9 @@ void writeClassTree(ClassSDict *clDict, FTVHelp *ftv, bool addToIndex, bool glob
                }
             }
 
+            // Broom - passing cd->displayName(false) will strip the template parameters on at least annotated.html
+            // modify to show based on a new project tag (2/2/2016)
+
             if (classVisibleInIndex(cd) && cd->templateMaster() == 0) { 
 
                ftv->addContentsItem(count > 0, cd->displayName(false), cd->getReference(),

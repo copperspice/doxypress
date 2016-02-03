@@ -1091,13 +1091,13 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
       // added 01/2016
       tName = renameNS_Aliases(tName, false);
 
-      if (resolveRef(s_context, tName, s_inSeeBlock, &compound, &member, true, fd, true)) {
+      if (resolveRef(s_context, tName, s_inSeeBlock, &compound, &member, false, fd, true)) {
          partA = true;
 
       } else if ( ! s_context.isEmpty() )  {
          // tried once with s_context now try again with "" looking for a global scope
 
-         if (resolveRef("", tName, s_inSeeBlock, &compound, &member, false, QSharedPointer<FileDef>(), true))  {
+         if (resolveRef("", tName, s_inSeeBlock, &compound, &member, true, QSharedPointer<FileDef>(), true))  {
             partA = true;
          } 
       }

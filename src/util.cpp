@@ -4062,11 +4062,11 @@ static bool isLowerCase(const QString &str)
 /*! Returns an object given its name and context
  *  @post return value true implies *resContext != 0 or *resMember != 0
  */
-bool resolveRef(const QString &scName, const QString &tsName, bool inSeeBlock, QSharedPointer<Definition> *resContext,
-                QSharedPointer<MemberDef> *resMember, bool lookForSpecialization, QSharedPointer<FileDef> currentFile,
+bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QSharedPointer<Definition> *resContext,
+                QSharedPointer<MemberDef> *resMember, bool useBaseTemplateOnly, QSharedPointer<FileDef> currentFile,
                 bool checkScope)
 {  
-   QString fullName = substitute(tsName, "#", "::");
+   QString fullName = substitute(tName, "#", "::");
 
    if (fullName.indexOf("anonymous_namespace{") == -1) {
       fullName = removeRedundantWhiteSpace(substitute(fullName, ".", "::"));
@@ -4085,10 +4085,9 @@ bool resolveRef(const QString &scName, const QString &tsName, bool inSeeBlock, Q
    } else   {
       endNamePos = fullName.length();
       scopePos = fullName.lastIndexOf("::", fullName.length() - 1);
-
    }
 
-   bool explicitScope = fullName.left(2) == "::" && (scopePos > 2 || tsName.left(2) == "::" || scName.isEmpty());
+   bool explicitScope = fullName.left(2) == "::" && (scopePos > 2 || tName.left(2) == "::" || scName.isEmpty());
 
    // default result values
    *resContext = QSharedPointer<Definition>();
@@ -4099,7 +4098,7 @@ bool resolveRef(const QString &scName, const QString &tsName, bool inSeeBlock, Q
       QSharedPointer<ClassDef> cd;
       QSharedPointer<NamespaceDef> nd;
  
-      if (! inSeeBlock && scopePos == -1 && isLowerCase(tsName) ) {
+      if (! inSeeBlock && scopePos == -1 && isLowerCase(tName) ) {
          // link to lower case only name, do not try to autolink
          return false;
       } 
@@ -4137,23 +4136,6 @@ bool resolveRef(const QString &scName, const QString &tsName, bool inSeeBlock, Q
    QString argsStr;
    if (bracePos != -1) {
       argsStr = fullName.right(fullName.length() - bracePos);
-   }
-
-   // strip template specifier
-   // TODO: match against the correct partial template instantiation
-   int templPos = nameStr.indexOf('<');
-   bool tryUnspecializedVersion = false;
-
-   if (templPos != -1 && nameStr.indexOf("operator") == -1) {
-      int endTemplPos = nameStr.lastIndexOf('>');
-
-      if (endTemplPos != -1) {
-         if (! lookForSpecialization) {
-            nameStr = nameStr.left(templPos) + nameStr.right(nameStr.length() - endTemplPos - 1);
-         } else {
-            tryUnspecializedVersion = true;
-         }
-      }
    }
 
    QString scopeStr = scName;
@@ -4210,11 +4192,11 @@ bool resolveRef(const QString &scName, const QString &tsName, bool inSeeBlock, Q
       *resContext = gd;
       return true;
 
-   } else if (tsName.indexOf('.') != -1) { 
+   } else if (tName.indexOf('.') != -1) { 
       // maybe a link to a file
 
       bool ambig;
-      fd = findFileDef(Doxy_Globals::inputNameDict, tsName, ambig);
+      fd = findFileDef(Doxy_Globals::inputNameDict, tName, ambig);
 
       if (fd && !ambig) {
          *resContext = fd;
@@ -4222,12 +4204,29 @@ bool resolveRef(const QString &scName, const QString &tsName, bool inSeeBlock, Q
       }
    }
 
-   if (tryUnspecializedVersion) {
-      return resolveRef(scName, tsName, inSeeBlock, resContext, resMember, false, QSharedPointer<FileDef>(), checkScope);
-   }
+   // strip template specifier, try again
+   // broom - use libClang to match the correct template
+   int posBegin = nameStr.indexOf('<');
+   bool tryBaseTemplate = false;
+
+   if (posBegin != -1 && nameStr.indexOf("operator") == -1) {
+      int posEnd = nameStr.lastIndexOf('>');
+
+      if (posEnd != -1) {
+
+         if (useBaseTemplateOnly) {
+            // do nothing         
+
+         } else {
+            nameStr = nameStr.left(posBegin) + nameStr.right(nameStr.length() - posEnd - 1);
+            return resolveRef(scName, nameStr, inSeeBlock, resContext, resMember, true, QSharedPointer<FileDef>(), checkScope);
+
+         }
+      }
+   }  
 
    if (bracePos != -1) { 
-      // Try without parameters as well, could be a contructor invocation
+      // try without parameters as well, could be a contructor invocation
       *resContext = getClass(fullName.left(bracePos));
 
       if (*resContext) {
@@ -5157,8 +5156,8 @@ QString convertToHtml(const QString &str, bool keepEntities)
 {  
    if (str.isEmpty()) {
       return "";
-   }
-  
+   }  
+
    QString retval;
 
    const QChar *p = str.constData();
@@ -5168,7 +5167,7 @@ QString convertToHtml(const QString &str, bool keepEntities)
 
       switch (c.unicode()) {
          case '<':
-            retval =+ "&lt;";
+            retval += "&lt;";
             break;
 
          case '>':

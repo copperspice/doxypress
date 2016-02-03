@@ -208,8 +208,7 @@ void Config::load_Defaults()
    m_cfgString.insert("file-version-filter",     struc_CfgString { QString(),      DEFAULT } );
    m_cfgString.insert("main-page-name",          struc_CfgString { "",             DEFAULT } );   
    m_cfgBool.insert("main-page-omit",            struc_CfgBool   { false,          DEFAULT } );  
-   m_cfgString.insert("layout-file",             struc_CfgString { QString(),      DEFAULT } );     
-   m_cfgList.insert("ns-omit",                   struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgString.insert("layout-file",             struc_CfgString { QString(),      DEFAULT } );       
    m_cfgList.insert("ns-alias",                  struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgBool.insert("bb-style",                  struc_CfgBool   { false,          DEFAULT } );
    
