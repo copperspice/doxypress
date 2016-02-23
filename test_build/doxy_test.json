@@ -58,9 +58,6 @@
         "ns-alias": [
             ""
         ],
-        "ns-omit": [
-            ""
-        ],
         "qt-auto-brief": true,
         "repeat-brief": false,
         "separate-member-pages": false,
@@ -84,7 +81,7 @@
         "use-typedef-name": false
     },
     "dot": {
-        "class-diagrams": false,
+        "class-diagrams": true,
         "dia-file-dirs": [
             ""
         ],
@@ -113,7 +110,7 @@
         "dot-transparent": false,
         "generate-legend": true,
         "group-graphs": true,
-        "have-dot": false,
+        "have-dot": true,
         "hide-undoc-relations": true,
         "interactive-svg": false,
         "msc-file-dirs": [

@@ -15,8 +15,8 @@
 #ifndef GINGER_H
 #define GINGER_H
 
-#include "QList.h"
-#include "QString.h"
+#include <QList>
+#include <QString>
 
 class Ginger : public CSObject
 {
