@@ -284,7 +284,7 @@ void HtmlHelp::initialize()
 
    if (m_toNewCodec == nullptr) {
       err("Unsupported character conversion for 'CHM INDEX ENCODING' '%s'\n", qPrintable(str));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    /* open the contents file */
@@ -293,7 +293,7 @@ void HtmlHelp::initialize()
 
    if (! cf->open(QIODevice::WriteOnly)) {
       err("Unable to open file for writing %s, error: %d\n", qPrintable(fName), cf->error());
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    /* Write the header of the contents file */
@@ -312,7 +312,7 @@ void HtmlHelp::initialize()
 
    if (! kf->open(QIODevice::WriteOnly)) {
       err("Unable to open file for writing %s, error: %d\n", qPrintable(fName), kf->error());
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    /* Write the header of the contents file */
@@ -543,21 +543,17 @@ QString HtmlHelp::recode(const QString &s)
  *  \param ref  the URL of to the item.
  *  \param file the file in which the item is defined.
  *  \param anchor the anchor of the item.
- *  \param separateIndex not used.
- *  \param addToNavIndex not used.
  *  \param def not used.
  */
 void HtmlHelp::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
-            bool seperateIndex, bool addToNavIndex, QSharedPointer<Definition> def)
+                  bool unused, QSharedPointer<Definition> def)
 {
    // If we are using a binary toc then folders cannot have links.
-   // Tried this and I did not see any problems, when not using
-   // the resetting of file and anchor the TOC works better
-   // (prev / next button)
-  
-   int i;
+   // Tried this and I did not see any problems, when not using the 
+   // resetting of file and anchor the TOC works better // (prev / next button)
 
-   for (i = 0; i < dc; i++) {
+
+   for (int i = 0; i < dc; i++) {
       cts << "  ";
    }
 

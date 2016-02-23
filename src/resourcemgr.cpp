@@ -15,7 +15,6 @@
  *
 *************************************************************************/
 
-#include <qglobal.h>
 #include <QFile>
 #include <QRegExp>
 #include <QTextStream>

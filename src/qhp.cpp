@@ -167,7 +167,7 @@ void Qhp::finalize()
 
    if (! file.open(QIODevice::WriteOnly)) {
       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), file.error());
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    m_doc.dumpTo(file);
@@ -189,7 +189,7 @@ void Qhp::decContentsDepth()
 }
 
 void Qhp::addContentsItem(bool, const QString &name, const QString &, const QString &file,
-                          const QString &anchor, bool, bool, QSharedPointer<Definition>)
+                          const QString &anchor, bool unused, QSharedPointer<Definition>)
 {
    // Backup difference before modification
    QString f = file;
@@ -203,7 +203,7 @@ void Qhp::addContentsItem(bool, const QString &name, const QString &, const QStr
    handlePrevSection();
    setPrevSection(name, f, anchor, m_sectionLevel);
 
-   // Close sections as needed  
+   // close sections as needed  
    for (; diff > 0; diff--) {
       m_toc.close("section");
    }

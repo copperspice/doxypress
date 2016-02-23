@@ -63,7 +63,7 @@ static void writeLatexMakefile()
 
    if (! file.open(QIODevice::WriteOnly)) {
       err("Unable to open file %s for writing\n", qPrintable(fileName));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    // inserted by KONNO Akihisa <konno@researchers.jp> 2002-03-05
@@ -157,6 +157,7 @@ static void writeMakeBat()
 #if defined(_MSC_VER)
    QString dir = Config::getString("latex-output");
    QString fileName = dir + "/make.bat";
+
    QString latex_command = Config::getString("latex-cmd-name");
    QString mkidx_command = Config::getString("make_index_cmd_name");
 
@@ -166,7 +167,7 @@ static void writeMakeBat()
 
    if (! file.open(QIODevice::WriteOnly)) {
       err("Unable to open file %s for writing\n", qPrintable(fileName));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    QTextStream t(&file);
@@ -180,17 +181,22 @@ static void writeMakeBat()
       t << latex_command << " refman.tex\n";
       t << "echo ----\n";
       t << mkidx_command << " refman.idx\n";
+
       if (generateBib) {
          t << "bibtex refman\n";
          t << "echo ----\n";
          t << latex_command << " refman.tex\n";
       }
+
       t << "setlocal enabledelayedexpansion\n";
       t << "set count=8\n";
       t << ":repeat\n";
       t << "set content=X\n";
       t << "for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun LaTeX\" refman.log' ) do set content=\"%%~T\"\n";
-      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' ) do set content=\"%%~T\"\n";
+
+      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' ) 
+                  do set content=\"%%~T\"\n";
+
       t << "if !content! == X goto :skip\n";
       t << "set /a count-=1\n";
       t << "if !count! EQU 0 goto :skip\n\n";
@@ -209,10 +215,12 @@ static void writeMakeBat()
       t << "pdflatex refman\n";
       t << "echo ----\n";
       t << mkidx_command << " refman.idx\n";
+
       if (generateBib) {
          t << "bibtex refman" << endl;
          t << "pdflatex refman" << endl;
       }
+
       t << "echo ----\n";
       t << "pdflatex refman\n\n";
       t << "setlocal enabledelayedexpansion\n";
@@ -220,7 +228,10 @@ static void writeMakeBat()
       t << ":repeat\n";
       t << "set content=X\n";
       t << "for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun LaTeX\" refman.log' ) do set content=\"%%~T\"\n";
-      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' ) do set content=\"%%~T\"\n";
+
+      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' ) 
+               do set content=\"%%~T\"\n";
+
       t << "if !content! == X goto :skip\n";
       t << "set /a count-=1\n";
       t << "if !count! EQU 0 goto :skip\n\n";
@@ -245,7 +256,7 @@ void LatexGenerator::init()
 
    if (! d.exists() && !d.mkdir(dir)) {
       err("Unable to create output directory %s\n", qPrintable(dir));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    writeLatexMakefile();

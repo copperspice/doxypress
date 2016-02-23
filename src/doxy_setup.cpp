@@ -157,13 +157,14 @@ void initDoxyPress()
    Doxy_Globals::g_compoundKeywordDict.insert("exception");
 }
 
-void shutDownDoxypress()
+void shutDownDoxyPress()
 {
    finializeSearchIndexer();
+
+   //
    Doxy_Globals::symbolStorage->close();
 
    QDir thisDir; 
-
    if (! Doxy_Globals::tempA_FName.isEmpty()) {
       thisDir.remove(Doxy_Globals::tempA_FName);
    }
@@ -243,7 +244,7 @@ struct CommandLine parseCommandLine(QStringList argList)
 
          case INVALID:           
             err("Option %s is invalid\n", qPrintable(item));             
-            exit(1);                  
+            Doxy_Work::stopDoxyPress();                  
        
          case BLANK_LAYOUT:
             cmdArgs.generateLayout = true;
@@ -261,7 +262,7 @@ struct CommandLine parseCommandLine(QStringList argList)
 
             if (cmdArgs.formatName.isEmpty()) {
                err("Option \"-w\" is missing format specifier rtf, html or latex\n");               
-               exit(1);
+               Doxy_Work::stopDoxyPress();
             }
 
             cmdArgs.formatName = cmdArgs.formatName.toLower();
@@ -379,7 +380,7 @@ struct CommandLine parseCommandLine(QStringList argList)
 
             } else  {
                err("Option \"-w %s\" is invalid\n", qPrintable(cmdArgs.formatName));               
-               exit(1);
+               Doxy_Work::stopDoxyPress();
 
             }
 
@@ -391,12 +392,12 @@ struct CommandLine parseCommandLine(QStringList argList)
 
             if (cmdArgs.debugLabel.isEmpty() ) {
                err("Option \"-d\" is missing a debug specifier\n");                       
-               exit(1);
+               Doxy_Work::stopDoxyPress();
             }
            
             if (! Debug::setFlag(cmdArgs.debugLabel)) {
                err("Option \"-d\" has an unknown debug specifier: \"%s\".\n", csPrintable(cmdArgs.debugLabel));
-               exit(1);
+               Doxy_Work::stopDoxyPress();
             }
 
             break;
@@ -462,7 +463,7 @@ void readConfiguration(struct CommandLine cmdArgs)
          printf("doxypress --help for more information\n\n");
 
          fprintf(stderr, "No project file was specified, default file 'doxypress.json' was not found\n");          
-         exit(1);
+         Doxy_Work::stopDoxyPress();
       }        
    }  
 
@@ -470,7 +471,7 @@ void readConfiguration(struct CommandLine cmdArgs)
 
    if (! fi.exists()) {  
       err("Project file %s was not found\n", qPrintable(cmdArgs.configName));      
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
   
    // step 1 
@@ -478,7 +479,7 @@ void readConfiguration(struct CommandLine cmdArgs)
       fprintf(stderr, "\n\nA problem occured when parsing the project file.\n"
                   "If this is a DoxyPress issue please submit a report to the developers at info@copperspice.com\n");
 
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    // set for internal usage

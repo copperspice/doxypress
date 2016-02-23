@@ -694,7 +694,7 @@ void HtmlGenerator::init()
 
    if (! d.exists() && ! d.mkdir(dname)) {
       err("HTML Generator, unable to create output directory %s\n", qPrintable(dname));      
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
    
    QString htmlHeader = Config::getString("html-header");

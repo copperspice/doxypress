@@ -246,18 +246,21 @@ static void writeGraphHeader(QTextStream &t, const QString &title = QString())
    }
 
    t << endl << "{" << endl;
-   if (interactiveSVG) // insert a comment to force regeneration when this
-      // option is toggled
-   {
+
+   if (interactiveSVG)  {
+      // insert a comment to force regeneration when this option is toggled   
       t << " // INTERACTIVE_SVG=YES\n";
    }
+
    if (Config::getBool("dot-transparent")) {
       t << "  bgcolor=\"transparent\";" << endl;
    }
+
    t << "  edge [fontname=\"" << FONTNAME << "\","
      "fontsize=\"" << FONTSIZE << "\","
      "labelfontname=\"" << FONTNAME << "\","
      "labelfontsize=\"" << FONTSIZE << "\"];\n";
+
    t << "  node [fontname=\"" << FONTNAME << "\","
      "fontsize=\"" << FONTSIZE << "\",shape=record];\n";
 }
@@ -287,12 +290,15 @@ static QString replaceRef(const QString &buf, const QString relPath, bool urlOnl
       QString link = buf.mid(indexS + len, indexE - indexS - len);
       QString result;
 
-      if (urlOnly) { // for user defined dot graphs
-         if (link.left(5) == "\\ref " || link.left(5) == "@ref ") { // \ref url
+      if (urlOnly) { 
+         // for user defined dot graphs
+
+         if (link.left(5) == "\\ref " || link.left(5) == "@ref ") { 
+            // \ref url
             result = href + "=\"";
 
             // fake ref node to resolve the url
-            DocRef *df = new DocRef( (DocNode *) 0, link.mid(5), context );
+            DocRef *df = new DocRef(nullptr, link.mid(5), context);
             result += externalRef(relPath, df->ref(), true);
 
             if (! df->file().isEmpty()) {
@@ -311,7 +317,8 @@ static QString replaceRef(const QString &buf, const QString relPath, bool urlOnl
             result = href + "=\"" + link + "\"";
          }
 
-      } else { // ref$url (external ref via tag file), or $url (local ref)
+      } else { 
+         // ref$url (external ref via tag file), or $url (local ref)
          int marker = link.indexOf('$');
 
          if (marker != -1) {
@@ -1417,8 +1424,7 @@ bool DotManager::run()
  *  one of the graph's nodes
  */
 static void deleteNodes(DotNode *node, StringMap<QSharedPointer<DotNode>> *skipNodes = 0)
-{
-   //printf("deleteNodes skipNodes=%p\n",skipNodes);
+{   
    static SortedList<DotNode *> deletedNodes;
    
    node->deleteNode(deletedNodes, skipNodes); // collect nodes to be deleted.
@@ -1466,7 +1472,7 @@ void DotNode::addChild(DotNode *n, int edgeColor, int edgeStyle, const QString &
 
 void DotNode::addParent(DotNode *n)
 {
-   if (m_parents == 0) {
+   if (m_parents == nullptr) {
       m_parents = new QList<DotNode *>;
    }
    m_parents->append(n);
@@ -1710,9 +1716,10 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
          
          for (auto ei : *m_edgeInfo) {  
             if (! ei->m_label.isEmpty()) { 
+
                // labels joined by \n
                int li = ei->m_label.indexOf('\n');
-               int p = 0;
+               int p  = 0;
 
                QString label;
 
@@ -1773,7 +1780,8 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
       }
       t << "}";
 
-   } else { // standard look
+   } else { 
+      // standard look
       t << convertLabel(m_label);
    }
 
@@ -1781,13 +1789,15 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
 
    if (m_isRoot) {
       t << ",color=\"black\", fillcolor=\"grey75\", style=\"filled\", fontcolor=\"black\"";
+
    } else {
       static bool dotTransparent = Config::getBool("dot-transparent");
 
-      if (!dotTransparent) {
+      if (! dotTransparent) {
          t << ",color=\"" << labCol << "\", fillcolor=\"";
          t << "white";
          t << "\", style=\"filled\"";
+
       } else {
          t << ",color=\"" << labCol << "\"";
       }
@@ -1803,10 +1813,12 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
               << m_url.right(m_url.length() - anchorPos) << "\"";
          }
       }
+
       if (!m_tooltip.isEmpty()) {
          t << ",tooltip=\"" << escapeTooltip(m_tooltip) << "\"";
       }
    }
+
    t << "];" << endl;
 }
 
@@ -1819,6 +1831,7 @@ void DotNode::writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat format,
    } else {
       t << reNumberNode(m_number, reNumber);
    }
+
    t << " -> Node";
    if (topDown) {
       t << reNumberNode(m_number, reNumber);
@@ -1836,20 +1849,23 @@ void DotNode::writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat format,
    if (pointBack && !umlUseArrow) {
       t << "dir=\"back\",";
    }
+
    t << "color=\"" << eProps->edgeColorMap[ei->m_color]
      << "\",fontsize=\"" << FONTSIZE << "\",";
    t << "style=\"" << eProps->edgeStyleMap[ei->m_style] << "\"";
+
    if (!ei->m_label.isEmpty()) {
       t << ",label=\" " << convertLabel(ei->m_label) << "\" ";
    }
-   if (umlLook &&
-         eProps->arrowStyleMap[ei->m_color] &&
-         (gt == Inheritance || gt == Collaboration)
-      ) {
+
+   if (umlLook && eProps->arrowStyleMap[ei->m_color] &&
+                  (gt == Inheritance || gt == Collaboration) ) {
+
       bool rev = pointBack;
       if (umlUseArrow) {
          rev = !rev;   // UML use relates has arrow on the start side
       }
+
       if (rev) {
          t << ",arrowtail=\"" << eProps->arrowStyleMap[ei->m_color] << "\"";
       } else {
@@ -1860,6 +1876,7 @@ void DotNode::writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat format,
    if (format == GOF_BITMAP) {
       t << ",fontname=\"" << FONTNAME << "\"";
    }
+
    t << "];" << endl;
 }
 
@@ -1877,19 +1894,27 @@ void DotNode::write(QTextStream &t, GraphType gt, GraphOutputFormat format, bool
    writeBox(t, gt, format, m_truncated == Truncated, reNumber);
    m_written = true;
 
-   QList<DotNode *> *nl = toChildren ? m_children : m_parents;
+   QList<DotNode *> *nl;
+
+   if (toChildren) {
+      nl = m_children;
+
+   } else {
+      nl = m_parents;
+
+   }
 
    if (nl) {
       if (toChildren) {       
-          auto iter = m_edgeInfo->begin();
+         auto iter = m_edgeInfo->begin();
 
-         for (auto cn : *nl) {  
+         for (auto childNode : *nl) {  
             
-            if (cn->isVisible()) {               
-               writeArrow(t, gt, format, cn, *iter, topDown, backArrows, reNumber);
+            if (childNode->isVisible()) {               
+               writeArrow(t, gt, format, childNode, *iter, topDown, backArrows, reNumber);
             }
 
-            cn->write(t, gt, format, topDown, toChildren, backArrows, reNumber);
+            childNode->write(t, gt, format, topDown, toChildren, backArrows, reNumber);
             ++iter;
          }
 
@@ -2265,7 +2290,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
    // store the original directory
    if (! d.exists()) {
       err("Output dir %s does not exist\n", qPrintable(path));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    // put each connected subgraph of the hierarchy in a row of the HTML output
@@ -2635,13 +2660,14 @@ bool DotClassGraph::determineVisibleNodes(DotNode *rootNode, int maxNodes, bool 
 
    // despite being marked visible in the child loop
    while ((childQueue.count() > 0 || parentQueue.count() > 0) && maxNodes > 0) {
-      static int maxDistance = Config::getInt("dot-graph-max-depth");
+      static int maxDepth = Config::getInt("dot-graph-max-depth");
 
       if (childQueue.count() > 0) {
          DotNode *n = childQueue.takeAt(0);
          int distance = n->distance();
 
-         if (!n->isVisible() && distance <= maxDistance) { // not yet processed
+         if (! n->isVisible() && distance <= maxDepth) {
+            // not yet processed
             if (distance > 0) {
                int oldSize = childTreeWidth.size();
 
@@ -2671,7 +2697,7 @@ bool DotClassGraph::determineVisibleNodes(DotNode *rootNode, int maxNodes, bool 
       if (includeParents && parentQueue.count() > 0) {
          DotNode *n = parentQueue.takeAt(0);
 
-         if ((!n->isVisible() || firstNode) && n->distance() <= maxDistance) { 
+         if ((! n->isVisible() || firstNode) && n->distance() <= maxDepth) { 
             // not yet processed
             firstNode = false;
             int distance = n->distance();
@@ -3037,7 +3063,7 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
    // store the original directory
    if (! d.exists()) {
       err("Output dir %s does not exist\n", qPrintable(path));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    static bool usePDFLatex = Config::getBool("latex-pdf");
@@ -3312,10 +3338,11 @@ void DotInclDepGraph::buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int dis
 void DotInclDepGraph::determineVisibleNodes(QList<DotNode *> &queue, int &maxNodes)
 {
    while (queue.count() > 0 && maxNodes > 0) {
-      static int maxDistance = Config::getInt("dot-graph-max-depth");
+      static int maxDepth = Config::getInt("dot-graph-max-depth");
       DotNode *n = queue.takeAt(0);
 
-      if (! n->isVisible() && n->distance() <= maxDistance) { // not yet processed
+      if (! n->isVisible() && n->distance() <= maxDepth) { 
+         // not yet processed
          n->markAsVisible();
          maxNodes--;
 
@@ -3413,7 +3440,7 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
    // store the original directory
    if (! d.exists()) {
       err("Output dir %s does not exist\n", qPrintable(path));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
    static bool usePDFLatex = Config::getBool("latex-pdf");
 
@@ -3541,6 +3568,7 @@ bool DotInclDepGraph::isTooBig() const
 {
    static int maxNodes = Config::getInt("dot-graph-max-nodes");
    int numNodes = m_startNode->m_children ? m_startNode->m_children->count() : 0;
+
    return numNodes >= maxNodes;
 }
 
@@ -3604,10 +3632,11 @@ void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int dist
 void DotCallGraph::determineVisibleNodes(QList<DotNode *> &queue, int &maxNodes)
 {
    while (queue.count() > 0 && maxNodes > 0) {
-      static int maxDistance = Config::getInt("dot-graph-max-depth");
+      static int maxDepth = Config::getInt("dot-graph-max-depth");
       DotNode *n = queue.takeAt(0);
 
-      if (! n->isVisible() && n->distance() <= maxDistance) { // not yet processed
+      if (! n->isVisible() && n->distance() <= maxDepth) { 
+         // not yet processed
          n->markAsVisible();
          maxNodes--;
 
@@ -3694,7 +3723,7 @@ QString DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat
    // store the original directory
    if (! d.exists()) {
       err("Output dir %s does not exist\n", qPrintable(path));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    static bool usePDFLatex = Config::getBool("latex-pdf");
@@ -3836,7 +3865,7 @@ QString DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, 
    // store the original directory
    if (! d.exists()) {
       err("Output dir %s does not exist\n", qPrintable(path));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    static bool usePDFLatex = Config::getBool("latex-pdf");
@@ -4008,7 +4037,7 @@ void generateGraphLegend(const QString &path)
    // store the original directory
    if (! d.exists()) {
       err("Output dir %s does not exist\n", qPrintable(path));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    QString theGraph;
@@ -4093,7 +4122,7 @@ void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const Q
 
    if (! d.exists()) {
       err("Output directory %s does not exist\n", qPrintable(outDir));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    QString imgExt     = Config::getEnum("dot-image-format");;
@@ -4148,7 +4177,7 @@ void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QStri
 
    if (! d.exists()) {
       err("Output dir %s does not exist\n", qPrintable(outDir));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    QString mapName    = baseName + ".map";
@@ -4392,7 +4421,7 @@ QString DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat gra
    // store the original directory
    if (! d.exists()) {
       err("Output directory %s does not exist\n", qPrintable(path));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    static bool usePDFLatex = Config::getBool("latex-pdf");

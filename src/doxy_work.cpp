@@ -22,6 +22,10 @@
 #include <sys/stat.h>
 #include <set>
 
+// broom
+#include <parser_clang.h>
+
+
 #include <arguments.h>
 #include <cite.h>
 #include <cmdmapper.h>
@@ -82,7 +86,7 @@
    } while(0)
 
 
-#if !defined(_WIN32) || defined(__CYGWIN__)
+#if ! defined(_WIN32) || defined(__CYGWIN__)
 #include <signal.h>
 #define HAS_SIGNALS
 #endif
@@ -345,11 +349,7 @@ namespace Doxy_Work{
    void generateNamespaceDocs();
    void generatePageDocs();
    void generateXRefPages();
-
-#ifdef HAS_SIGNALS
-   void stopDoxyPress(int);
-#endif
-
+  
    QString getQchFileName();
    QHash<QString, int> *getTemplateArgumentsInName(ArgumentList *templateArguments, const QString &name);
 
@@ -433,10 +433,10 @@ void processFiles()
 {
    printf("Parse input files\n");   
 
-   // Make sure the output directory exists
+   // make sure the output directory exists
    QString outputDirectory = Config::getString("output-dir");
   
-   // Initialize global lists and dictionaries
+   // initialize global lists and dictionaries
    Doxy_Globals::symbolStorage = new Store;
    
    int cacheSize = Config::getInt("lookup-cache-size");
@@ -467,7 +467,7 @@ void processFiles()
 
    if (Doxy_Globals::symbolStorage->open(Doxy_Globals::tempA_FName) == -1) {
       err("Unable to open temporary file %s\n", csPrintable(Doxy_Globals::tempA_FName));
-      exit(1);
+      stopDoxyPress();
    }
 
    // Check/create output directorties
@@ -592,7 +592,7 @@ void processFiles()
 
    if (! Doxy_Globals::g_storage->open(QIODevice::WriteOnly)) {
       err("Unable to create temporary file %s\n", csPrintable(Doxy_Globals::tempB_FName));
-      exit(1);
+      stopDoxyPress();
    }
 
    QSharedPointer<Entry> root = QMakeShared<Entry>();
@@ -626,8 +626,8 @@ void processFiles()
    pyScanFreeParser();
 
    if (! Doxy_Globals::g_storage->open(QIODevice::ReadOnly)) {
-      err("Unable to open  temporary file %s\n", csPrintable(Doxy_Globals::tempB_FName));
-      exit(1);
+      err("Unable to open temporary file %s\n", csPrintable(Doxy_Globals::tempB_FName));
+      stopDoxyPress();
    }
 
    // gather information
@@ -656,7 +656,7 @@ void processFiles()
    buildClassList(rootNav);
    Doxy_Globals::g_stats.end();
 
-   // \ (on hold, clang testing)
+   // broom (on hold, clang testing)
    // do_fake_ginger(rootNav);
 
    Doxy_Globals::g_stats.begin("Associating documentation with classes\n");
@@ -708,11 +708,6 @@ void processFiles()
 
    Doxy_Globals::g_stats.begin("Searching for documented variables\n");
    buildVarList(rootNav);
-   Doxy_Globals::g_stats.end();
-
-   // added 12/2015
-   Doxy_Globals::g_stats.begin("Resolve empty Namespaces\n");
-   resolveHiddenNamespace();
    Doxy_Globals::g_stats.end();
   
    // UNO IDL
@@ -774,6 +769,11 @@ void processFiles()
 
    transferRelatedFunctionDocumentation();
    transferFunctionDocumentation();
+   Doxy_Globals::g_stats.end();
+
+   // added 12/2015
+   Doxy_Globals::g_stats.begin("Resolve empty Namespaces\n");
+   resolveHiddenNamespace();
    Doxy_Globals::g_stats.end();
 
    Doxy_Globals::g_stats.begin("Building page list\n");
@@ -1031,7 +1031,7 @@ void generateOutput()
 
       if (! searchDir.exists() && ! QDir::current().mkpath(searchDirName)) {
          err("Unable to create search directory '%s'\n", csPrintable(searchDirName));   
-         exit(1);
+         stopDoxyPress();
       }
 
       HtmlGenerator::writeSearchData(searchDirName);
@@ -1237,7 +1237,7 @@ void generateOutput()
    }
 
    // all done, cleaning up and exit  
-   shutDownDoxypress();
+   shutDownDoxyPress();
    Doxy_Globals::g_programExit = true;
 }
 
@@ -8976,7 +8976,7 @@ void Doxy_Work::checkPageRelations()
                 "of itself Remove this cyclic dependency.\n", pd->docLine(), 
                 csPrintable(pd->docFile()), csPrintable(pd->name())); 
 
-            exit(1);
+            stopDoxyPress();
          }
 
          ppd = ppd->getOuterScope();
@@ -9417,15 +9417,14 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
          filesToProcess.insert(s);
       }
 
-      // process source files (and their include dependencies)     
+      // process source files and their include dependencies     
       for (auto s : Doxy_Globals::g_inputFiles) { 
          bool ambig;
 
          QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s, ambig);
          assert(fd != 0);
 
-         if (fd->isSource() && ! fd->isReference()) { 
-            // this is a source file
+         if (fd->isSource() && ! fd->isReference()) {             
             QStringList includedFiles;
 
             ParserInterface *parser = getParserForFile(s);
@@ -9456,7 +9455,7 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
          }
       }
 
-      // process remaining files
+      // process remaining files, treat as source files even if they are header files
       for (auto fName : Doxy_Globals::g_inputFiles) { 
 
          if (! processedFiles.contains(fName)) { 
@@ -9630,7 +9629,7 @@ QString Doxy_Work::createOutputDirectory(const QString &baseDirName, const QStri
 
    if (! formatDir.exists() && ! formatDir.mkdir(formatDirName)) {  
       err("Unable to create output directory %s", csPrintable(formatDirName));  
-      exit(1);
+      stopDoxyPress();
    }
 
    return formatDirName;
@@ -9913,24 +9912,28 @@ int Doxy_Work::computeIdealCacheParam(uint v)
    return qMax(0, qMin(r - 16, 9));
 }
 
-#ifdef HAS_SIGNALS
-void Doxy_Work::stopDoxyPress(int)
+void Doxy_Work::stopDoxyPress(int unused)
 {
-   QDir thisDir;
    msg("Cleaning up\n");
 
+   QDir thisDir;
    if (! Doxy_Globals::tempA_FName.isEmpty()) {
+      Doxy_Globals::symbolStorage->close();
       thisDir.remove(Doxy_Globals::tempA_FName);
    }
 
    if (! Doxy_Globals::tempB_FName.isEmpty()) {
+      Doxy_Globals::g_storage->close();
       thisDir.remove(Doxy_Globals::tempB_FName);
    }
 
+#ifdef HAS_SIGNALS
    killpg(0, SIGINT);
+#endif
+
+   msg("DoxyPress aborted\n");
    exit(1);
 }
-#endif
 
 void Doxy_Work::writeTagFile()
 {

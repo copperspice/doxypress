@@ -54,8 +54,8 @@ void DocSets::initialize()
       QFile makefile(mfName);
 
       if (! makefile.open(QIODevice::WriteOnly)) {
-         err("Unable to open file for writing %s, error: %d\n", qPrintable(mfName), makefile.error());
-         exit(1);
+         err("Unable to open file for writing %s, error: %d\n", csPrintable(mfName), makefile.error());
+         Doxy_Work::stopDoxyPress();
       }
 
       QTextStream ts(&makefile);
@@ -106,8 +106,8 @@ void DocSets::initialize()
       QFile plist(plName);
 
       if (! plist.open(QIODevice::WriteOnly)) {
-         err("Unable to open file for writing %s, error: %d\n", qPrintable(plName), plist.error());
-         exit(1);
+         err("Unable to open file for writing %s, error: %d\n", csPrintable(plName), plist.error());
+         Doxy_Work::stopDoxyPress();
       }
       QTextStream ts(&plist);
 
@@ -142,8 +142,8 @@ void DocSets::initialize()
    m_nf = new QFile(notes);
 
    if (! m_nf->open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(notes), m_nf->error());
-      exit(1);
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(notes), m_nf->error());
+      Doxy_Work::stopDoxyPress();
    }
 
    // QString indexName = Config::getBool("generate-treeview") ? "main" : "index";
@@ -166,8 +166,8 @@ void DocSets::initialize()
    m_tf = new QFile(tokens);
   
    if (! m_tf->open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(tokens), m_tf->error());
-      exit(1);
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(tokens), m_tf->error());
+      Doxy_Work::stopDoxyPress();
    }
 
    m_tts.setDevice(m_tf);
@@ -230,7 +230,7 @@ void DocSets::decContentsDepth()
 }
 
 void DocSets::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
-                              bool, bool, QSharedPointer<Definition>)
+                              bool unused, QSharedPointer<Definition>)
 {    
    if (! ref.isEmpty()) {
 

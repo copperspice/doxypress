@@ -15,8 +15,6 @@
  *
 *************************************************************************/
 
-#include <qglobal.h>
-
 #include <stdio.h>
 #include <assert.h>
 #include <stdint.h>
@@ -31,6 +29,7 @@ ObjCache::ObjCache(unsigned int logSize)
    int i;
    m_cache = new CacheNode[m_size];
    m_hash  = new HashNode[m_size];
+
    // add all items to list of free buckets
    for (i = 0; i < m_size - 1; i++) {
       m_hash[i].nextHash = i + 1;
@@ -51,17 +50,20 @@ int ObjCache::add(void *obj, void **victim)
    *victim = 0;
 
    HashNode *hnode = hashFind(obj);
-   //printf("hnode=%p\n",hnode);
-   if (hnode) // move object to the front of the LRU list, since it is used
-      // most recently
-   {
-      //printf("moveToFront=%d\n",hnode->index);
+
+   if (hnode)  {
+      // move object to the front of the LRU list, since it is used most recently
       moveToFront(hnode->index);
       m_hits++;
-   } else { // object not in the cache.
+
+   } else { 
+      // object not in the cache
       void *lruObj = 0;
-      if (m_freeCacheNodes != -1) { // cache not full -> add element to the cache
+
+      if (m_freeCacheNodes != -1) { 
+         // cache not full -> add element to the cache
          // remove element from free list
+
          int index = m_freeCacheNodes;
          m_freeCacheNodes = m_cache[index].next;
 
@@ -69,6 +71,7 @@ int ObjCache::add(void *obj, void **victim)
          if (m_tail == -1) {
             m_tail = index;
          }
+
          m_cache[index].prev = -1;
          m_cache[index].next = m_head;
          if (m_head != -1) {
@@ -76,19 +79,23 @@ int ObjCache::add(void *obj, void **victim)
          }
          m_head = index;
          m_count++;
-      } else { // cache full -> replace element in the cache
-         //printf("Cache full!\n");
+
+      } else { 
+         // cache full -> replace element in the cache
+        
          lruObj = m_cache[m_tail].obj;
          hashRemove(lruObj);
          moveToFront(m_tail); // m_tail indexes the emptied element, which becomes m_head
       }
-      //printf("numEntries=%d size=%d\n",m_numEntries,m_size);
+
+      
       m_cache[m_head].obj = obj;
       hnode = hashInsert(obj);
       hnode->index = m_head;
       *victim = lruObj;
       m_misses++;
    }
+
    return m_head;
 }
 
@@ -99,11 +106,13 @@ void ObjCache::del(int index)
    hashRemove(m_cache[index].obj);
    moveToFront(index);
    m_head = m_cache[index].next;
+
    if (m_head == -1) {
       m_tail = -1;
    } else {
       m_cache[m_head].prev = -1;
    }
+
    m_cache[index].obj = 0;
    m_cache[index].prev = -1;
    m_cache[index].next = m_freeCacheNodes;
@@ -137,7 +146,7 @@ void ObjCache::printLRU()
 #define cache_stats_printf printf
 void ObjCache::printStats()
 {
-   cache_stats_printf("ObjCache: hits=%d misses=%d hit ratio=%f\n", m_hits, m_misses, m_hits * 100.0 / (m_hits + m_misses));
+   cache_stats_printf("ObjCache: hits = %d, misses = %d,  hit ratio=%f\n", m_hits, m_misses, m_hits * 100.0 / (m_hits + m_misses));
 }
 #endif
 
@@ -167,6 +176,7 @@ void ObjCache::moveToFront(int index)
 unsigned int ObjCache::hash(void *addr)
 {
    static bool isPtr64 = sizeof(addr) == 8;
+
    if (isPtr64) {
       uint64_t key = (uint64_t)addr;
       // Thomas Wang's 64 bit Mix Function
@@ -179,6 +189,7 @@ unsigned int ObjCache::hash(void *addr)
       key += ~(key << 27);
       key ^=  (key >> 31);
       return (unsigned int)(key & (m_size - 1));
+
    } else {
       // Thomas Wang's 32 bit Mix Function
       uintptr_t key = (uintptr_t)addr;
@@ -196,39 +207,45 @@ ObjCache::HashNode *ObjCache::hashFind(void *obj)
 {
    HashNode *node = 0;
    int index = m_hash[hash(obj)].head;
-   //printf("hashFind: obj=%p index=%d\n",obj,index);
+
    while (index != -1 &&
           m_hash[index].obj != obj
          ) { // search for right object in the list
       index = m_hash[index].nextHash;
    }
+
    // found the obj at index, so it is in the cache!
    if (index != -1) {
       node = &m_hash[index];
    }
+
    return node;
 }
 
 ObjCache::HashNode *ObjCache::hashInsert(void *obj)
 {
-   int index = hash(obj);
-   //printf("Inserting %p index=%d\n",obj,index);
+   int index = hash(obj);   
 
    // remove element from empty list
    int newElement = m_freeHashNodes;
    assert(newElement != -1);
+
    m_freeHashNodes = m_hash[m_freeHashNodes].nextHash;
 
-   if (m_hash[index].head != -1) { // hash collision -> goto end of the list
+   if (m_hash[index].head != -1) { 
+      // hash collision -> goto end of the list
       index = m_hash[index].head;
       while (m_hash[index].nextHash != -1) {
          index = m_hash[index].nextHash;
       }
+
       // add to end of the list
       m_hash[index].nextHash = newElement;
+
    } else { // first element in the hash list
       m_hash[index].head = newElement;
    }
+
    // add to the end of the list
    m_hash[newElement].nextHash = -1;
    m_hash[newElement].obj = obj;
@@ -242,6 +259,7 @@ void ObjCache::hashRemove(void *obj)
    // find element
    int curIndex = m_hash[index].head;
    int prevIndex = -1;
+
    while (m_hash[curIndex].obj != obj) {
       prevIndex = curIndex;
       curIndex = m_hash[curIndex].nextHash;

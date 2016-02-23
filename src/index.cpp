@@ -359,7 +359,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
    bool hasMembers = def->getMemberLists().count() > 0 || def->getMemberGroupSDict() != 0;
 
    Doxy_Globals::indexList->addContentsItem(hasMembers, name, def->getReference(), def->getOutputFileBase(), anchor,
-                  hasMembers && ! preventSeparateIndex, addToIndex, def);
+                  addToIndex, def);
 
    int numClasses = 0;
 
@@ -400,12 +400,12 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
 
                      if (md->getOuterScope() == def || md->getOuterScope() == Doxy_Globals::globalScope) {
                         Doxy_Globals::indexList->addContentsItem(isDir, md->name(), md->getReference(), 
-                                 md->getOutputFileBase(), md->anchor(), false, addToIndex, md);
+                                 md->getOutputFileBase(), md->anchor(), addToIndex, md);
 
                      } else {
                         // inherited member
                         Doxy_Globals::indexList->addContentsItem(isDir, md->name(), def->getReference(), 
-                                 def->getOutputFileBase(), md->anchor(), false, addToIndex, md);
+                                 def->getOutputFileBase(), md->anchor(), addToIndex, md);
                      }
                   }
 
@@ -419,12 +419,12 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
                         if (! hideUndocMembers || emd->hasDocumentation()) {
                            if (emd->getOuterScope() == def || emd->getOuterScope() == Doxy_Globals::globalScope) {
                               Doxy_Globals::indexList->addContentsItem(false, emd->name(), emd->getReference(), 
-                                    emd->getOutputFileBase(), emd->anchor(), false, addToIndex, emd);
+                                    emd->getOutputFileBase(), emd->anchor(), addToIndex, emd);
 
                            } else { 
                               // inherited member
                               Doxy_Globals::indexList->addContentsItem(false, emd->name(), def->getReference(), 
-                                    def->getOutputFileBase(), emd->anchor(), false, addToIndex, emd);
+                                    def->getOutputFileBase(), emd->anchor(), addToIndex, emd);
                            }
                         }
                      }
@@ -505,12 +505,12 @@ static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl
 
             if (addToIndex) {
                Doxy_Globals::indexList->addContentsItem(hasChildren, cd->displayName(), cd->getReference(), 
-                        cd->getOutputFileBase(), cd->anchor(), false, false, cd);
+                        cd->getOutputFileBase(), cd->anchor(), false, cd);
             }
 
             if (ftv) {              
                ftv->addContentsItem(hasChildren, cd->displayName(), cd->getReference(), cd->getOutputFileBase(), 
-                        cd->anchor(), false, false, cd);               
+                        cd->anchor(), false, cd);               
             }
 
          } else {
@@ -519,11 +519,11 @@ static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl
             ol.endIndexItem(0, 0);
 
             if (addToIndex) {
-               Doxy_Globals::indexList->addContentsItem(hasChildren, cd->displayName(), "", "", "", false, false, cd);
+               Doxy_Globals::indexList->addContentsItem(hasChildren, cd->displayName(), "", "", "", false, cd);
             }
 
             if (ftv) {
-               ftv->addContentsItem(hasChildren, cd->displayName(), "", "", "", false, false, cd);
+               ftv->addContentsItem(hasChildren, cd->displayName(), "", "", "", false, cd);
             }
          }
 
@@ -591,16 +591,14 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
    static bool tocExpand = true;    // Config::getBool("toc-expand");
 
    bool isDir = dd->subDirs().count() > 0 || (tocExpand && dd->getFiles() && dd->getFiles()->count() > 0);
-
-   // there are files            
-
+          
    if (addToIndex) {
-      Doxy_Globals::indexList->addContentsItem(isDir, dd->shortName(), dd->getReference(), dd->getOutputFileBase(), "", true, true, dd);
+      Doxy_Globals::indexList->addContentsItem(isDir, dd->shortName(), dd->getReference(), dd->getOutputFileBase(), "", true, dd);
       Doxy_Globals::indexList->incContentsDepth();
    }
 
    if (ftv) {
-      ftv->addContentsItem(isDir, dd->shortName(), dd->getReference(), dd->getOutputFileBase(), "", false, true, dd);
+      ftv->addContentsItem(isDir, dd->shortName(), dd->getReference(), dd->getOutputFileBase(), "", true, dd);
       ftv->incContentsDepth();
    }
 
@@ -663,7 +661,7 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
                ol.endIndexListItem();
 
                if (ftv && (src || doc)) {
-                  ftv->addContentsItem(false, fd->displayName(), reference, outputBase, "", false, false, fd);
+                  ftv->addContentsItem(false, fd->displayName(), reference, outputBase, "", false, fd);
                }
             }
          }
@@ -683,7 +681,7 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
 
              } else if (srcFileVisibleInIndex(fd)) {
                Doxy_Globals::indexList->addContentsItem(false, convertToHtml(fd->name(), true), "", 
-                     fd->getSourceFileBase(), "", false, true, fd);
+                     fd->getSourceFileBase(), "", true, fd);
             }
          }
       }
@@ -743,7 +741,7 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
                }
 
                if (doc || src) {
-                  ftv->addContentsItem(false, fd->displayName(), reference, outputBase, "", false, false, fd);
+                  ftv->addContentsItem(false, fd->displayName(), reference, outputBase, "", false, fd);
                }
 
                if (addToIndex) {
@@ -752,7 +750,7 @@ static void writeDirHierarchy(OutputList &ol, FTVHelp *ftv, bool addToIndex)
 
                   } else if (src) {
                      Doxy_Globals::indexList->addContentsItem(false, convertToHtml(fd->name(), true), "",
-                        fd->getSourceFileBase(), "", false, true, fd);
+                        fd->getSourceFileBase(), "", true, fd);
                   }
                }
             }
@@ -774,11 +772,14 @@ static void writeClassTreeForList(OutputList &ol, ClassSDict *cl, bool &started,
       bool b = ! hasVisibleRoot(cd->baseClasses());     
 
       if (b) { 
-         //filter on root classes
+         // filter on root classes
 
-         if (cd->isVisibleInHierarchy()) { // should it be visible
+         if (cd->isVisibleInHierarchy()) { 
+            // should it be visible
+
             if (!started) {
                startIndexHierarchy(ol, 0);
+
                if (addToIndex) {
                   Doxy_Globals::indexList->incContentsDepth();
                }
@@ -803,25 +804,26 @@ static void writeClassTreeForList(OutputList &ol, ClassSDict *cl, bool &started,
                if (addToIndex) {                  
                   // prevents double insertion in Design Unit List
                   Doxy_Globals::indexList->addContentsItem(hasChildren, cd->displayName(), cd->getReference(), 
-                                                         cd->getOutputFileBase(), cd->anchor(), false, false, cd);                  
+                                       cd->getOutputFileBase(), cd->anchor(), false, cd);                  
                }
 
                if (ftv) {
                   ftv->addContentsItem(hasChildren, cd->displayName(), cd->getReference(), cd->getOutputFileBase(), 
-                                       cd->anchor(), false, false, cd);
+                                       cd->anchor(), false, cd);
                }
 
             } else {
+               // no link, use the name instead of the displayName, this will show the namespace::class
                ol.startIndexItem(0, 0);
-               ol.parseText(cd->displayName());
+               ol.parseText(cd->name());
                ol.endIndexItem(0, 0);
 
                if (addToIndex) {
-                  Doxy_Globals::indexList->addContentsItem(hasChildren, cd->displayName(), "", "", "", false, false, cd);
+                  Doxy_Globals::indexList->addContentsItem(hasChildren, cd->name(), "", "", "", false, cd);
                }
 
                if (ftv) {
-                  ftv->addContentsItem(hasChildren, cd->displayName(), "", "", "", false, false, cd);
+                  ftv->addContentsItem(hasChildren, cd->name(), "", "", "", false, cd);
                }
             }
             
@@ -903,8 +905,7 @@ static void writeHierarchicalIndex(OutputList &ol)
       return;
    }
 
-   ol.pushGeneratorState();
-   //1.{
+   ol.pushGeneratorState();   
    ol.disable(OutputGenerator::Man);
 
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::ClassHierarchy);
@@ -916,6 +917,7 @@ static void writeHierarchicalIndex(OutputList &ol)
    startTitle(ol, 0);
    ol.parseText(title);
    endTitle(ol, 0, 0);
+
    ol.startContents();
    ol.startTextBlock();
 
@@ -954,7 +956,7 @@ static void writeHierarchicalIndex(OutputList &ol)
 
    {
       if (addToIndex) {
-         Doxy_Globals::indexList->addContentsItem(true, title, "", "hierarchy", "", true, true);
+         Doxy_Globals::indexList->addContentsItem(true, title, "", "hierarchy", "", true);
       }
 
       FTVHelp *ftv = new FTVHelp(false);
@@ -1123,7 +1125,7 @@ static void writeFileIndex(OutputList &ol)
    ol.startTextBlock();
 
    if (addToIndex) {
-      Doxy_Globals::indexList->addContentsItem(true, title, "", "files", "", true, true);  
+      Doxy_Globals::indexList->addContentsItem(true, title, "", "files", "", true);  
       Doxy_Globals::indexList->incContentsDepth();
    }
 
@@ -1248,7 +1250,7 @@ void writeClassTree(ClassSDict *clDict, FTVHelp *ftv, bool addToIndex, bool glob
             if (classVisibleInIndex(cd) && cd->templateMaster() == 0) { 
 
                ftv->addContentsItem(count > 0, cd->displayName(false), cd->getReference(),
-                                    cd->getOutputFileBase(), cd->anchor(), false, true, cd);
+                                    cd->getOutputFileBase(), cd->anchor(), true, cd);
 
                if (addToIndex && (cd->getOuterScope() == 0 || cd->getOuterScope()->definitionType() != Definition::TypeClass)) {
 
@@ -1287,11 +1289,10 @@ static void writeNamespaceTree(NamespaceSDict *nsDict, FTVHelp *ftv, bool rootOn
 
             if ((isLinkable && ! showClasses) || hasChildren) {
 
-               ftv->addContentsItem(hasChildren, nd->localName(), ref, file, "", false, true, nd);
+               ftv->addContentsItem(hasChildren, nd->localName(), ref, file, "", true, nd);
 
                if (addToIndex) {
-                  Doxy_Globals::indexList->addContentsItem(hasChildren, nd->localName(), ref, file, QString(),
-                                                      hasChildren && ! file.isEmpty(), addToIndex, nd);
+                  Doxy_Globals::indexList->addContentsItem(hasChildren, nd->localName(), ref, file, QString(), addToIndex, nd);
                }
 
                if (hasChildren) {
@@ -1387,7 +1388,7 @@ static void writeNamespaceIndex(OutputList &ol)
 
    {
       if (addToIndex) {
-         Doxy_Globals::indexList->addContentsItem(true, title, "", "namespaces", "", true, true);
+         Doxy_Globals::indexList->addContentsItem(true, title, "", "namespaces", "", true);
          Doxy_Globals::indexList->incContentsDepth();
       }
 
@@ -1833,7 +1834,7 @@ static void writeAlphabeticalIndex(OutputList &ol)
    endTitle(ol, 0, 0);
 
    if (addToIndex) {
-      Doxy_Globals::indexList->addContentsItem(false, title, "", "classes", "", false, true);
+      Doxy_Globals::indexList->addContentsItem(false, title, "", "classes", "", true);
    }
 
    ol.startContents();
@@ -1895,7 +1896,7 @@ static void writeAnnotatedIndex(OutputList &ol)
 
    {
       if (addToIndex) {
-         Doxy_Globals::indexList->addContentsItem(true, title, "", "annotated", "", true, true);
+         Doxy_Globals::indexList->addContentsItem(true, title, "", "annotated", "", true);
          Doxy_Globals::indexList->incContentsDepth();
       }
 
@@ -2368,7 +2369,8 @@ static void writeClassMemberIndexFiltered(OutputList &ol, ClassMemberHighlight h
 
    if (addToIndex) {
       Doxy_Globals::indexList->addContentsItem(multiPageIndex, getCmhlInfo(hl)->title, "",
-                                          getCmhlInfo(hl)->link, "", multiPageIndex, true);
+                  getCmhlInfo(hl)->link, "", true);
+
       if (multiPageIndex) {
          Doxy_Globals::indexList->incContentsDepth();
       }
@@ -2383,7 +2385,7 @@ static void writeClassMemberIndexFiltered(OutputList &ol, ClassMemberHighlight h
               
          QString cs = QChar(page);
          if (addToIndex) {
-            Doxy_Globals::indexList->addContentsItem(false, cs, "", fileName, "", false, true);
+            Doxy_Globals::indexList->addContentsItem(false, cs, "", fileName, "", true);
          }
       }
 
@@ -2457,7 +2459,7 @@ static void ClassMemberRedirect(QString fName, QString link)
 
    if (! fout.open(QIODevice::WriteOnly)) {
       err("Unable to open file for writing %s, error: %d\n", qPrintable(fName), fout.error());
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    // Write the header 
@@ -2575,8 +2577,7 @@ static void writeFileMemberIndexFiltered(OutputList &ol, FileMemberHighlight hl)
    bool addToIndex = lne == 0 || lne->visible();
 
    if (addToIndex) {
-      Doxy_Globals::indexList->addContentsItem(multiPageIndex, getFmhlInfo(hl)->title, "",
-                                          getFmhlInfo(hl)->fname, "", multiPageIndex, true);
+      Doxy_Globals::indexList->addContentsItem(multiPageIndex, getFmhlInfo(hl)->title, "", getFmhlInfo(hl)->fname, "", true);
 
       if (multiPageIndex) {
          Doxy_Globals::indexList->incContentsDepth();
@@ -2592,7 +2593,7 @@ static void writeFileMemberIndexFiltered(OutputList &ol, FileMemberHighlight hl)
          
          const QString cs = QChar(page);
          if (addToIndex) {
-            Doxy_Globals::indexList->addContentsItem(false, cs, "", fileName, "", false, true);
+            Doxy_Globals::indexList->addContentsItem(false, cs, "", fileName, "", true);
          }
       }
 
@@ -2728,7 +2729,7 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
 
    if (addToIndex) {
       Doxy_Globals::indexList->addContentsItem(multiPageIndex, getNmhlInfo(hl)->title, "",
-                  getNmhlInfo(hl)->fname, "", multiPageIndex, true);
+                  getNmhlInfo(hl)->fname, "", true);
 
       if (multiPageIndex) {
          Doxy_Globals::indexList->incContentsDepth();
@@ -2745,7 +2746,7 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
 
          const QString cs = QChar(page);
          if (addToIndex) {
-            Doxy_Globals::indexList->addContentsItem(false, cs, "", fileName, "", false, true);
+            Doxy_Globals::indexList->addContentsItem(false, cs, "", fileName, "", true);
          }
       }
       bool quickIndex = documentedNamespaceMembers[hl] > maxItemsBeforeQuickIndex;
@@ -2853,7 +2854,7 @@ static void writeExampleIndex(OutputList &ol)
    ol.startContents();
 
    if (addToIndex) {
-      Doxy_Globals::indexList->addContentsItem(true, title, "", "examples", "", true, true);
+      Doxy_Globals::indexList->addContentsItem(true, title, "", "examples", "", true);
       Doxy_Globals::indexList->incContentsDepth();
    }
 
@@ -2871,13 +2872,13 @@ static void writeExampleIndex(OutputList &ol)
          ol.writeObjectLink(0, n, 0, pd->title());
 
          if (addToIndex) {
-            Doxy_Globals::indexList->addContentsItem(false, filterTitle(pd->title()), pd->getReference(), n, "", false, true, pd);
+            Doxy_Globals::indexList->addContentsItem(false, filterTitle(pd->title()), pd->getReference(), n, "", true, pd);
          }
 
       } else {
          ol.writeObjectLink(0, n, 0, pd->name());
          if (addToIndex) {
-            Doxy_Globals::indexList->addContentsItem(false, pd->name(), pd->getReference(), n, "", false, true, pd);
+            Doxy_Globals::indexList->addContentsItem(false, pd->name(), pd->getReference(), n, "", true, pd);
          }
       }
 
@@ -2949,12 +2950,12 @@ static void writePages(QSharedPointer<PageDef> pd, FTVHelp *ftv)
 
       if (ftv) {
          ftv->addContentsItem(hasSubPages, pageTitle, pd->getReference(), pd->getOutputFileBase(), 
-                  "", hasSubPages, true, pd);
+                  "", true, pd);
       }
 
       if (addToIndex && pd != Doxy_Globals::mainPage) {
          Doxy_Globals::indexList->addContentsItem(hasSubPages || hasSections, pageTitle, pd->getReference(), 
-                  pd->getOutputFileBase(), "", hasSubPages, true, pd);
+                  pd->getOutputFileBase(), "", true, pd);
       }
    }
 
@@ -3159,13 +3160,13 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
      
       if (addToIndex) {
          Doxy_Globals::indexList->addContentsItem(isDir, gd->groupTitle(), gd->getReference(), gd->getOutputFileBase(), 
-                  "", isDir, true, gd);
+                  "", true, gd);
 
          Doxy_Globals::indexList->incContentsDepth();
       }
 
       if (ftv) {
-         ftv->addContentsItem(hasSubGroups, gd->groupTitle(), gd->getReference(), gd->getOutputFileBase(), "", false, false, gd);
+         ftv->addContentsItem(hasSubGroups, gd->groupTitle(), gd->getReference(), gd->getOutputFileBase(), "", false, gd);
          ftv->incContentsDepth();
       }
   
@@ -3194,7 +3195,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
 
                   if (md->isVisible() && md->name().indexOf('@') == -1) {
                      Doxy_Globals::indexList->addContentsItem(isDir, md->name(), md->getReference(), md->getOutputFileBase(), 
-                           md->anchor(), false, addToIndex, md);
+                           md->anchor(), addToIndex, md);
                   }
 
                   if (isDir) {
@@ -3203,7 +3204,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
                      for (auto emd : *enumList) {
                         if (emd->isVisible()) {
                            Doxy_Globals::indexList->addContentsItem(false, emd->name(), emd->getReference(), emd->getOutputFileBase(),
-                                 emd->anchor(), false, addToIndex, emd);
+                                 emd->anchor(), addToIndex, emd);
                         }
                      }
 
@@ -3226,7 +3227,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
             for (auto nd : *gd->getNamespaces()) {
                if (nd->isVisible()) {
                   Doxy_Globals::indexList->addContentsItem(false, nd->localName(), nd->getReference(),
-                        nd->getOutputFileBase(), "", false, false, nd);
+                        nd->getOutputFileBase(), "", false, nd);
                }
             }
 
@@ -3235,7 +3236,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
             for (auto fd : *gd->getFiles()) {
                if (fd->isVisible()) {
                   Doxy_Globals::indexList->addContentsItem(false, fd->displayName(), fd->getReference(),
-                        fd->getOutputFileBase(), "", false, false, fd);
+                        fd->getOutputFileBase(), "", false, fd);
                }
             }
 
@@ -3245,7 +3246,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
             for (auto dd : *gd->getDirs()) {
                if (dd->isVisible()) {
                   Doxy_Globals::indexList->addContentsItem(false, dd->shortName(), dd->getReference(), 
-                        dd->getOutputFileBase(), "", false, false, dd);
+                        dd->getOutputFileBase(), "", false, dd);
                }
             }
 
@@ -3262,7 +3263,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
                bool hasSections = pd->hasSections();
 
                Doxy_Globals::indexList->addContentsItem( hasSubPages || hasSections, convertToHtml(pd->title(), true), 
-                     gd->getReference(), gd->getOutputFileBase(), si ? si->label : "", hasSubPages || hasSections, true); 
+                     gd->getReference(), gd->getOutputFileBase(), si ? si->label : "", true); 
       
                // addToNavIndex
                if (hasSections || hasSubPages) {
@@ -3381,7 +3382,7 @@ static void writeGroupIndex(OutputList &ol)
 
    {
       if (addToIndex) {
-         Doxy_Globals::indexList->addContentsItem(true, title, "", "modules", "", true, true);
+         Doxy_Globals::indexList->addContentsItem(true, title, "", "modules", "", true);
          Doxy_Globals::indexList->incContentsDepth();
       }
 
@@ -3484,7 +3485,7 @@ static void writeIndex(OutputList &ol)
       if ( (! projectName.isEmpty() && mainPageHasTitle() && title.compare(projectName, Qt::CaseInsensitive) != 0)) { 
 
          Doxy_Globals::indexList->addContentsItem(Doxy_Globals::mainPage->hasSubPages(), title, "", indexName, "", 
-                  Doxy_Globals::mainPage->hasSubPages(), true, Doxy_Globals::mainPage);
+                  true, Doxy_Globals::mainPage);
       }
 
       // to avoid duplicate entries in the treeview
@@ -3805,7 +3806,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
 
             case LayoutNavEntry::Classes:
                if (annotatedClasses > 0 && addToIndex) {
-                  Doxy_Globals::indexList->addContentsItem(true, lne->title(), 0, "annotated", 0);
+                  Doxy_Globals::indexList->addContentsItem(true, lne->title(), "", "annotated", "");
                   Doxy_Globals::indexList->incContentsDepth();
                   needsClosing = true;
                }
@@ -3893,7 +3894,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                }
 
                bool isRef = lne->baseFile().left(4) == "@ref" || lne->baseFile().left(4) == "\\ref";
-               Doxy_Globals::indexList->addContentsItem(true, lne->title(), "", url, "", false, isRef || isRelative);
+               Doxy_Globals::indexList->addContentsItem(true, lne->title(), "", url, "", isRef || isRelative);
             }
 
             break;
@@ -3904,17 +3905,17 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
 
                   if (! url.isEmpty()) {
                      if (url == "![none]") {
-                        Doxy_Globals::indexList->addContentsItem(true, lne->title(), "", "", "", false, false);
+                        Doxy_Globals::indexList->addContentsItem(true, lne->title(), "", "", "", false);
                      } else {
                         bool isRelative = url.at(0) == '!';
                         if (!isRelative) { // absolute URL
                            url.prepend("^"); // prepend ^ to absolute URL
                         }
                         bool isRef = lne->baseFile().left(4) == "@ref" || lne->baseFile().left(4) == "\\ref";
-                        Doxy_Globals::indexList->addContentsItem(true, lne->title(), "", url, "", false, isRef || isRelative);
+                        Doxy_Globals::indexList->addContentsItem(true, lne->title(), "", url, "", isRef || isRelative);
                      }
                   } else {
-                     Doxy_Globals::indexList->addContentsItem(true, lne->title(), "", lne->baseFile(), "", true, true);
+                     Doxy_Globals::indexList->addContentsItem(true, lne->title(), "", lne->baseFile(), "", true);
                   }
                   Doxy_Globals::indexList->incContentsDepth();
                   needsClosing = true;

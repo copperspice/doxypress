@@ -73,7 +73,7 @@ void EclipseHelp::initialize()
 
    if (! m_tocfile->open(QIODevice::WriteOnly)) {
       err("Unable to open file %s for writing\n", qPrintable(name));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    // -- initialize its text stream
@@ -168,7 +168,7 @@ void EclipseHelp::decContentsDepth()
  * @param def not used.
  */
 void EclipseHelp::addContentsItem(bool, const QString &name, const QString &, const QString &file, const QString &anchor,
-                  bool, bool, QSharedPointer<Definition>)
+                  bool unused, QSharedPointer<Definition>)
 {
    // -- write the topic tag
    closedTag();

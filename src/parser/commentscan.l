@@ -295,8 +295,9 @@ class DocCmdMapper
       while (p->cmdName) {
          if (m_map.contains(p->cmdName)) {
             err("DocCmdMapper: command %s already added\n", p->cmdName);
-            exit(1);
+            Doxy_Work::stopDoxyPress();
          }
+
          Cmd *cmd  = new Cmd;
          cmd->func = p->handler;
          cmd->endsBrief = p->endsBrief;

@@ -57,7 +57,7 @@ void FormulaList::generateBitmaps(const QString &path)
  
    if (! d.exists()) {
       err("Output dir %s does not exist\n", qPrintable(path));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    QString oldDir = QDir::currentPath();

@@ -53,7 +53,7 @@ GroupDef::GroupDef(const QString &df, int dl, const QString &na, const QString &
       fileName = stripExtension(refFileName);
 
    } else {
-      fileName = "group-" + QString(na);
+      fileName = "group_" + QString(na);
    }
 
    setGroupTitle(t);

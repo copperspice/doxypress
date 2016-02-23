@@ -164,7 +164,7 @@ void RTFGenerator::init()
 
    if (! d.exists() && ! d.mkdir(dir)) {
       err("Unable to create output directory %s\n", qPrintable(dir));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
  
    // first duplicate strings of rtf_Style_Default
@@ -2095,7 +2095,7 @@ static void encodeForOutput(QTextStream &t_stream, const QString &text)
   
    if (! outCodec) {
       err("Unsupported character conversion: '%s': %s\n", qPrintable(outputEncoding), strerror(errno));
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    QString temp = text;

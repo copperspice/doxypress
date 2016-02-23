@@ -1034,10 +1034,9 @@ char *commentcnvYYtext;
 
 #define YY_NEVER_INTERACTIVE 1
 
-#include <qstack.h>
-#include <qregexp.h>
-#include <qtextstream.h>
-#include <qglobal.h>
+#include <QStack>
+#include <QRegExp>
+#include <QTextStream>
 
 #include <assert.h>
 #include <stdio.h>

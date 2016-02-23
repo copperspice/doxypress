@@ -15,7 +15,6 @@
  *
 *************************************************************************/
 
-#include <qglobal.h>
 #include <QRegExp>
 #include <QFileInfo>
 #include <QHash>

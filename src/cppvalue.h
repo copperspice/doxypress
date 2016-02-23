@@ -18,8 +18,6 @@
 #ifndef CPPVALUE_H
 #define CPPVALUE_H
 
-#include <qglobal.h>
-
 #include <stdio.h>
 
 /** A class representing a C-preprocessor value. */

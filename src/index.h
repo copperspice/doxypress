@@ -37,7 +37,7 @@ class IndexIntf
    virtual void incContentsDepth() = 0;
    virtual void decContentsDepth() = 0;
    virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, 
-            const QString  &anchor, bool separateIndex, bool addToNavIndex, QSharedPointer<Definition> def) = 0;
+            const QString &anchor, bool addToNavIndex, QSharedPointer<Definition> def) = 0;
 
    virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, 
             const QString &sectionAnchor, const QString &title) = 0;
@@ -115,12 +115,11 @@ class IndexList : public IndexIntf
    }
 
    void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
-                        bool separateIndex = false, bool addToNavIndex = false, 
-                        QSharedPointer<Definition> def = QSharedPointer<Definition>()) override {
+                        bool addToNavIndex = false, QSharedPointer<Definition> def = QSharedPointer<Definition>()) override {
 
       if (m_enabled)  {
          for (auto item : m_intfs) {
-            item->addContentsItem(isDir, name, ref, file, anchor, separateIndex, addToNavIndex, def);
+            item->addContentsItem(isDir, name, ref, file, anchor, addToNavIndex, def);
          }
       }
    }

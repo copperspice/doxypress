@@ -18,8 +18,6 @@
 #ifndef PRINTDOCVISITOR_H
 #define PRINTDOCVISITOR_H
 
-#include <qglobal.h>
-
 #include <docvisitor.h>
 #include <htmlentity.h>
 

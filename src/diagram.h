@@ -18,7 +18,7 @@
 #ifndef DIAGRAM_H
 #define DIAGRAM_H
 
-#include <qglobal.h>
+#include <QString>
 #include <QTextStream>
 
 class ClassDef;

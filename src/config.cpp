@@ -621,12 +621,10 @@ bool Config::verify()
    }
 
    // **
-   auto iterInt = m_cfgInt.find("dot-graph-max-nodes");
+   auto iterInt = m_cfgInt.find("dot-graph-max-depth");
    int depth = iterInt.value().value;
    
-   if (depth == 0) {
-      err("Dot Graph Max nodes was greater than the maximum value, setting to 1000\n");  
-
+   if (depth == 0 || depth > 1000) {    
       iterInt.value().value = 1000;
    }
    
@@ -639,7 +637,7 @@ bool Config::verify()
       htmlFileExtension = ".html";
    }
 
-   iterString.value().value   = htmlFileExtension;
+   iterString.value().value = htmlFileExtension;
    Doxy_Globals::htmlFileExtension = htmlFileExtension;
 
 

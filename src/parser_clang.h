@@ -20,61 +20,54 @@
 
 #include <QStringList>
 
+#include <clang-c/Index.h>
+
 class CodeOutputInterface;
 class FileDef;
 
-/** @brief Wrapper for to let libclang assisted parsing. */
 class ClangParser
 {
- public:
-   /** Returns the one and only instance of the class */
+ public:  
    static ClangParser *instance();
 
-   /** Start parsing a file.
-    *  @param[in] fileName The name of the file to parse.
-    *  @param[in,out] filesInTranslationUnit Other files that are
-    *                 part of the input and included by the file.
-    *                 The function will return a subset of the files,
-    *                 only including the onces that were actually found
-    *                 during parsing.
-    */
-   void start(const QString &fileName, QStringList &filesInTranslationUnit);
+   // Start parsing a file, returns a subset of the files only including the
+   // ones which were actually found during parsing
 
-   /** Switches to another file within the translation unit started
-    *  with start().
-    *  @param[in] fileName The name of the file to switch to.
-    */
+   // fileName- name of the file to parse
+   // filesInTranslationUnit- other files which are included by this file
+   void start(const QString &fileName, QStringList &includeFiles);
+
+   // Switch to another file within the translation unit
+   // fileName - name of the file to switch to   
    void switchToFile(const QString &fileName);
 
-   /** Finishes parsing a translation unit. Free any resources that
-    *  were needed for parsing.
-    */
+   // clean up, free resources used in parsing   
    void finish();
 
-   /** Looks for \a symbol which should be found at \a line and
-    *  returns a clang unique reference to the symbol.
-    */
+   // looks for a symbol which should be found at line, returns a clang unique ref to the symbol    
    QString lookup(uint line, const QString &symbol);
 
-   /** writes the syntax highlighted source code for a file
-    *  @param[out] ol The output generator list to write to.
-    *  @param[in]  fd The file to write sources for.
-    */
+   // writes the syntax highlighted source code for a file
+   // ol- output generator list to write to, fd- file to write sources for    
    void writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> fd);
 
- private:
-   void linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const QString &text, int tokenIndex);
-   void linkMacro(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const QString &text);
-   void linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const QString &text);
-   void determineInputFiles(QStringList &includeFiles);
-
-   class Private;
-   Private *p;
-
+  private:
    ClangParser();
    virtual ~ClangParser();
 
-   static ClangParser *s_instance;
+   class Private;
+   Private *p; 
+
+   void linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, 
+                  uint &column, const QString &text, int tokenIndex);
+
+   void linkMacro(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, 
+                  uint &column, const QString &text);
+
+   void linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, 
+                  uint &column, const QString &text);
+
+   void determineInputFiles(QStringList &includeFiles);  
 };
 
 #endif

@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <cassert>
 
+#include <doxy_globals.h>
 #include <outputgen.h>
 #include <message.h>
 
@@ -41,7 +42,7 @@ void OutputGenerator::startPlainFile(const QString &name)
 
    if (! m_filePtr->open(QIODevice::WriteOnly)) {   
       err("Unable to open file for writing %s, error: %d\n", qPrintable(m_fileName), m_filePtr->error());
-      exit(1);
+      Doxy_Work::stopDoxyPress();
    }
 
    m_textStream.setDevice(m_filePtr);

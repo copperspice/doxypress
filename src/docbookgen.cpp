@@ -1763,7 +1763,7 @@ void generateDocbook()
 
          if (! dir.mkdir(outputDirectory)) {
             err("DocBook Output directory `%s' does not exist and can not be created\n", qPrintable(outputDirectory));
-            exit(1);
+            Doxy_Work::stopDoxyPress();
 
          } else {
             msg("DOCBOOK Output directory `%s' created\n", qPrintable(outputDirectory));

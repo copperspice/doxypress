@@ -115,7 +115,11 @@ class Statistics
    QTime time;
 }; 
 
-/*! \brief This class serves as a namespace for global variables used by DoxyPress
+namespace Doxy_Work{
+   void stopDoxyPress(int unused = 0);
+}
+
+/*! \brief This class is for global variables used by DoxyPress
  *
  *  All fields in this class are public and static
  */

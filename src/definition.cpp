@@ -453,9 +453,7 @@ void Definition::addSectionsToIndex(bool addToNavIndex)
             isDir = (*nextItem)->type > nextLevel;
          }
       
-         Doxy_Globals::indexList->addContentsItem(isDir, title, getReference(), getOutputFileBase(), 
-               si->label, false, addToNavIndex);
-
+         Doxy_Globals::indexList->addContentsItem(isDir, title, getReference(), getOutputFileBase(), si->label, addToNavIndex);
          level = nextLevel;
       }
    }
