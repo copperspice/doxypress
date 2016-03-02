@@ -194,8 +194,8 @@ static void writeMakeBat()
       t << "set content=X\n";
       t << "for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun LaTeX\" refman.log' ) do set content=\"%%~T\"\n";
 
-      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' ) 
-                  do set content=\"%%~T\"\n";
+      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' )" 
+                  " do set content=\"%%~T\"\n";
 
       t << "if !content! == X goto :skip\n";
       t << "set /a count-=1\n";
@@ -229,8 +229,8 @@ static void writeMakeBat()
       t << "set content=X\n";
       t << "for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun LaTeX\" refman.log' ) do set content=\"%%~T\"\n";
 
-      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' ) 
-               do set content=\"%%~T\"\n";
+      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' )" 
+               " do set content=\"%%~T\"\n";
 
       t << "if !content! == X goto :skip\n";
       t << "set /a count-=1\n";

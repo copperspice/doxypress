@@ -2314,7 +2314,7 @@ static void writeQuickMemberIndex(OutputList &ol, const LetterToIndexMap<MemberI
 /** Helper class representing a class member in the navigation menu. */
 struct CmhlInfo {
    CmhlInfo(const QString &fn, const QString &t) 
-      : fname(fn), title(t), link(t) { }
+      : fname(fn), title(t), link(fn) { }
 
    QString fname;         
    QString title;
@@ -2530,13 +2530,15 @@ static void writeClassMemberIndex(OutputList &ol)
 
 /** Helper class representing a file member in the navigation menu. */
 struct FmhlInfo {
-   FmhlInfo(const QString &fn, const QString &t) : fname(fn), title(t) {}
+   FmhlInfo(const QString &fn, const QString &t) 
+      : fname(fn), title(t), link(fn) {}
 
    QString fname;      
    QString title;
+   QString link;
 };
 
-static const FmhlInfo *getFmhlInfo(int hl)
+static FmhlInfo *getFmhlInfo(int hl)
 {
    static bool fortranOpt = Config::getBool("optimize-fortran");
   
@@ -2667,6 +2669,34 @@ static void writeFileMemberIndex(OutputList &ol)
       Doxy_Globals::indexList->incContentsDepth();
    }
 
+ // figure out the correct names for the links
+   for (int k = 0; k < FMHL_Total; k++) {
+
+      QString fName = getFmhlInfo(k)->fname;
+      QString link  = fName;
+
+      if (documentedFileMembers[k] > MAX_ITEMS_BEFORE_MULTIPAGE_INDEX) {   
+               
+         // (part 1) what is is the first letter of the list
+         const LetterToIndexMap<MemberIndexList> &charUsed = g_fileIndexLetterUsed[k];
+                    
+         auto value = *(charUsed.begin());
+         uint firstLetter = value->letter();
+   
+         link += QString("_") + QChar(firstLetter);
+         
+         // save back
+         getFmhlInfo(k)->link = link;            
+
+         // (part 2) create redirect page        
+         ClassMemberRedirect(fName, link);
+
+      }  else { 
+         // save unchanged link
+         getFmhlInfo(k)->link = link;   
+      }         
+   }
+
    writeFileMemberIndexFiltered(ol, FMHL_All);
    writeFileMemberIndexFiltered(ol, FMHL_Functions);
    writeFileMemberIndexFiltered(ol, FMHL_Variables);
@@ -2678,7 +2708,6 @@ static void writeFileMemberIndex(OutputList &ol)
    if (documentedFileMembers[FMHL_All] > 0 && addToIndex) {
       Doxy_Globals::indexList->decContentsDepth();
    }
-
 }
 
 /** Helper class representing a namespace member in the navigation menu. */
