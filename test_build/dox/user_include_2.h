@@ -12,11 +12,11 @@
 *                                                                         
 *************************************************************************/
 
-class testBrief
-{
-   public:
-      testBrief();
+#ifndef USER_INCLUDE_2_H
+#define USER_INCLUDE_2_H
 
-      void myMethod1();
-      void myMethod2();
-};
+template <class T>
+class testInclude;
+
+
+#endif

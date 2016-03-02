@@ -12,12 +12,14 @@
 *
 *************************************************************************/
 
+#ifndef USER_GROUP_H
+#define USER_GROUP_H
+
 /** This class contains a group of constructors.
   * The following notation will translate 'code' to behave like it says <code>true</code>
 */
 
-
-class groupTest
+class groupTest1
 {
    public:
 
@@ -30,50 +32,31 @@ class groupTest
    /** constructor with no parameters */
    groupTest1();
 
-   groupTest2(long);             /**< constructor comment with two stars  */
+   groupTest1(long);             /**< constructor comment with two stars  */
 
-   groupTest3(QString);          /*!< constructor comment with one star and one exclamation  */
+   groupTest1(QString);          /*!< constructor comment with one star and one exclamation  */
 
-   groupTest4(bool);             ///< constructor comment with three slashes
+   groupTest1(bool);             ///< constructor comment with three slashes
 
-   groupTest5(int);              //!< constructor comment two slashes and one exclamation 
+   groupTest1(int);              //!< constructor comment two slashes and one exclamation 
 
-   /// Normal documentation on line one.
-   /// Continued standard documentation on line two.
-   documentTest();
-
-   bbTest1();
-      // Documentation on line one.
-      // Continue with some *italic* using a star and then _italic_ with an underscore.
-      // This is a link {Valid Date Values and Their Representations}.
-      // Show text in !bold-good! and now fail a !bold-bad1(! and then fail again !bold-bad2 ! end test.
-
-   bbTest2();
-      // Return 'tiny font' text.
-      // Sample text: (1) 'Date's   'Date'd   'Date'ed   'Date'th    'Date'ing
-      // The next link is split on two lines. See {Valid Date Values and
-      // Their Representations} for details.
-
-   // INFO: this comment which should not appear
-   someMethodwithNoDocs();
-
-/** @} */
+/** @} */ 
 
 };
 
-
-
-class Fruit
+/** Test a single comment for a group, project setting 'duplicate group documentation' must be enabled */
+class groupTest2
 {
    public:
-      virtual void chew(void);      ///< describe how to chew a fruit
-};
+   //! This is a comment applied to each member of the group
+   //@{
+   int groupA()
+      { return 35; }
 
-class Apple : public Fruit
-{
-   public:
-      void chew();
+   int groupB()
+      { return 42; }
+   //@}
 
-};
+}
 
-
+#endif

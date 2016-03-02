@@ -12,7 +12,7 @@
         "case-sensitive-fname": false,
         "cpp-cli-support": false,
         "create-subdirs": false,
-        "duplicate-docs": false,
+        "duplicate-docs": true,
         "enabled-sections": [
             ""
         ],
@@ -64,9 +64,9 @@
         "short-names": false,
         "show-file-page": false,
         "show-grouped-members-inc": false,
-        "show-include-files": false,
+        "show-include-files": true,
         "show-namespace-page": true,
-        "show-used-files": false,
+        "show-used-files": true,
         "sip-support": false,
         "sort-brief-docs": true,
         "sort-by-scope-name": false,
@@ -110,7 +110,7 @@
         "dot-transparent": false,
         "generate-legend": true,
         "group-graphs": true,
-        "have-dot": true,
+        "have-dot": false,
         "hide-undoc-relations": true,
         "interactive-svg": false,
         "msc-file-dirs": [
@@ -209,8 +209,10 @@
         ],
         "input-encoding": "UTF-8",
         "input-patterns": [
+            "*.cpp",
+            "*.h",
             "*.dox",
-            "*.h"
+            "*.dll"
         ],
         "input-recursive": true,
         "input-source": [

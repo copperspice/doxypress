@@ -15,12 +15,12 @@
 #ifndef USER_TESTS_H
 #define USER_TESTS_H
 
-
-class TestTabs
+/// docs for testTabs
+class testTabs
 {
    public:
       /**
-      * 	Retrieves a list of integers  ( has a tab, causes a problem ? #1 )
+      * 	Retrieves a list of integers.  ( tab parsing test, No issue found. )
       * 	caller is responsible for deleting them
       *
       * @param myvar	some purpose or other
@@ -30,20 +30,38 @@ class TestTabs
 
 };
 
-class TestFriend
+/// docs for testFriend
+class testFriend
 {
    public:
-      // my cause a warning about return types not argreeing #2
+      /// does this cause a warning about return types? No issue found.
       friend class myFriend;
 
 };
 
-class TestTypeDef
+/// docs for testTypeDef
+class testTypeDef
 {
    public:
-      typedef int myTypeDef;
+      typedef int myTypeDef;      
       myTypeDef someMethod(); 
 };
 
 
-#endif      // some comment after the end of the header file (does this cause a problem?  #4)
+/// base class, test graphViz
+class dotFruit
+{
+   public:
+      virtual void chew(void);      ///< describe how to chew a fruit
+};
+
+/// child class, test graphViz
+class dotApple : public dotFruit
+{
+   public:
+      void chew();
+
+};
+
+
+#endif      // comment after the end of the header file (does this cause a problem? No isssue found.)

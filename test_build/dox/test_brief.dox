@@ -34,7 +34,7 @@ This same behavior will happen for a documented entity such as "\\class" or "\\f
 
 
 /*!
-\class Brief3 
+\class testBrief 
 
 There is a test class to show how what happens with the brief description and the detailed section text. For this example the tag for "QT-AUTO-BRIEF" is <b>on</b>. 
 
@@ -45,7 +45,7 @@ For myMethod1() there is only one line of text and it will be treated as the bri
 
 
 /*!
-\fn Brief3::Brief3 ()
+\fn testBrief::testBrief ()
 \brief  This is an explict brief notation.
 
 Constructs an empty class. 
@@ -54,7 +54,7 @@ Constructs an empty class.
 
 
 /*!
-\fn void Brief3::myMethod1 ()
+\fn void testBrief::myMethod1 ()
 
 Simple text for a method. 
 
@@ -62,7 +62,7 @@ Simple text for a method.
 
 
 /*!
-\fn void Brief3::myMethod2 ()
+\fn void testBrief::myMethod2 ()
 
 Line one of text, the brief. 
 Line two of text.

@@ -13,7 +13,7 @@
 *************************************************************************/
 
 /*!
-\page topic-source Documenting - Test Ref
+\page ref-test Command Ref Test
 
 The following is a test of the \\ref command when the physical page name is not the same as the \\page name.
 <br>

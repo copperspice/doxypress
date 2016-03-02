@@ -14,39 +14,30 @@
 
 /*!
 \page dash-test Dash Test
-This information pertains to building Diamond for OS X.
+Test the appearance of a dash in the in the documentation output.
 
 
-<h3>Compiler & Autotools</h3>
+<h3>Begin Test</h3>
+  
+The first test is using an ampersand and ndash which looks like this: &ndash;&ndash;prefix
 
-Xcode does not install Autotools, which is required to build the Diamond Editor. Use MacPorts or the equivalent
-to install Autotools. 
-
-The Diamond Editor requires Apple Clang version 4.2 or newer.&nbsp;&nbsp;
-
-MacPorts can be downloaded and installed from
-<a class="www-link" href="http://www.macports.org">MacPorts</a>
-
-The following is a straight forward guide for installing MacPorts
-<a class="www-link" href="http://guide.macports.org">MacPorts Guide</a>
-
-Using MacPorts, install the ports listed below. MacPorts will automatically adjust your PATH for Automake and Autoconf.
-
-  \li sudo port install automake
-  \li sudo port install autoconf   
-
-Compiling with Clang will require the following environment variables.
-
-  \li CC=clang
-  \li CXX=clang++
-  \li OBJCXX=clang++
-
-Alternatively, &ndash;&ndash; &ndash;&ndash;&ndash;  Are there dashes or ndash?
-
+The following is the ampersand and ndash text in a code block.
 
 \code
-CC=clang   CXX=clang++   OBJCXX=clang++   --prefix $HOME/cs_lib
+&ndash;&ndash;prefix $HOME/cs_lib
 \endcode
+
+<br>
+
+This example is two plain dashs like this: --prefix
+
+The following is what two plain dashs will look like in a code block.
+
+\code
+--prefix $HOME/cs_lib
+\endcode
+
+
 
 <br>
 

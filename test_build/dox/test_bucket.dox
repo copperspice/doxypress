@@ -13,18 +13,18 @@
 *************************************************************************/
 
 /*!
-\class MySpace
+\class Bucket
 
-\brief This namespace contains miscellaneous identifiers used throughout the library. 
+\brief This class contains miscellaneous identifiers.
 
-MySpace is a namespace which contains miscellaneous identifiers used throughout other libraries.
+This class contains miscellaneous identifiers which is a way to organize related entities.
 
 */
 
 
 
 /*!
-\fn QString MySpace::convertFromPlainText ( const QString & plain, WhiteSpaceMode mode = WhiteSpacePre )
+\fn QString Bucket::convertFromPlainText ( const QString & plain, WhiteSpaceMode mode = WhiteSpacePre )
 
 Converts the plain text string <i>plain</i> to an HTML-formatted paragraph while preserving most of its look.
 
@@ -38,7 +38,7 @@ This function is defined in the <tt>&lt;QTextDocument&gt;</tt> header file.
 
 
 /*!
-\fn QString MySpace::escape ( const QString & plain )
+\fn QString Bucket::escape ( const QString & plain )
 
 Converts the plain text string <i>plain</i> to a HTML string with HTML metacharacters <tt>&lt;</tt>, <tt>&gt;</tt>, <tt>&amp;</tt>,
 and <tt>&quot;</tt> replaced by HTML entities.
@@ -59,7 +59,7 @@ This function is defined in the <tt>&lt;QTextDocument&gt;</tt> header file.
 
 
 /*!
-\fn bool MySpace::mightBeRichText ( const QString & text )
+\fn bool Bucket::mightBeRichText ( const QString & text )
 
 Returns true if the string <i>text</i> is likely to be rich text; otherwise returns false.
 
@@ -73,7 +73,7 @@ This function is defined in the <tt>&lt;QTextDocument&gt;</tt> header file.
 
 
 /*!
-\typedef MySpace::Alignment
+\typedef Bucket::Alignment
 
 Refer to Test::AlignmentFlag for documentation.
 
@@ -81,7 +81,7 @@ Refer to Test::AlignmentFlag for documentation.
 
 
 /*!
-\enum  MySpace::AlignmentFlag
+\enum Bucket::AlignmentFlag
 
 This enum type is used to describe alignment. It contains horizontal and vertical flags that can be combined to produce the required effect.
 
@@ -91,7 +91,7 @@ The Test::TextElideMode enum can also be used in many situations to fine-tune th
 
 
 /*!
-\enum  MySpace::ArrowType
+\enum Bucket::ArrowType
 
 Arrow type:
 
@@ -118,7 +118,7 @@ Arrow type:
 
 
 /*!
-\enum  MySpace::BGMode
+\enum Bucket::BGMode
 
 Background mode:
 
@@ -136,7 +136,7 @@ Background mode:
 
 
 /*!
-\typedef MySpace::HANDLE
+\typedef Bucket::HANDLE
 
 Platform-specific handle type for system objects. This is equivalent to <tt>void *</tt> on Mac OS X and embedded Linux, and to
 <tt>unsigned long</tt> on X11. On Windows it is the DWORD returned by the Win32 function getCurrentThreadId().

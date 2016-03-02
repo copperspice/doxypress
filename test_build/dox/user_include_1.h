@@ -12,11 +12,16 @@
 *                                                                         
 *************************************************************************/
 
-class testBrief
-{
-   public:
-      testBrief();
+#ifndef USER_INCLUDE_1_H
+#define USER_INCLUDE_1_H
 
-      void myMethod1();
-      void myMethod2();
+/// This documentation is for someTestClass
+template <class T>
+class testInclude
+{        
+   /// docs for a member variable
+   bool isOk;
+   
 };
+
+#endif
