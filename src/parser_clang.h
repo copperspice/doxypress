@@ -21,6 +21,7 @@
 #include <QStringList>
 
 #include <clang-c/Index.h>
+#include <clang-c/Documentation.h>
 
 class CodeOutputInterface;
 class FileDef;
