@@ -2023,7 +2023,7 @@ void ClassDef::writeMemberList(OutputList &ol)
    startFile(ol, memListFile, memListFile, theTranslator->trMemberList(),
              HLI_ClassVisible, !generateTreeView, getOutputFileBase());
 
-   if (!generateTreeView) {
+   if (! generateTreeView) {
       if (getOuterScope() != Doxy_Globals::globalScope) {
          writeNavigationPath(ol);
       }

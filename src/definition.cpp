@@ -1738,6 +1738,7 @@ QString Definition::briefDescriptionAsTooltip() const
    QSharedPointer<const Definition> self = sharedFrom(this);
 
    if (m_private->brief) {
+
       if (m_private->brief->tooltip.isEmpty() && ! m_private->brief->doc.isEmpty()) {
          static bool reentering = false;
 
@@ -1763,10 +1764,13 @@ QString Definition::briefDescriptionAsTooltip() const
             // prevent requests for tooltips while parsing a tooltip
             reentering = true; 
 
-            m_private->brief->tooltip = parseCommentAsText(scope, md, m_private->brief->doc, m_private->brief->file, m_private->brief->line);
+            m_private->brief->tooltip = parseCommentAsText(scope, md, m_private->brief->doc, 
+                  m_private->brief->file, m_private->brief->line);
+
             reentering = false;
          }
       }
+
       return m_private->brief->tooltip;
    }
 

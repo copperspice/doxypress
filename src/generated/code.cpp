@@ -11106,12 +11106,13 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Defin
 
    TooltipManager::instance()->addTooltip(d);
 
-   QString ref  = d->getReference();
-   QString file = d->getOutputFileBase();
+   QString ref    = d->getReference();
+   QString file   = d->getOutputFileBase();
    QString anchor = d->anchor();
    QString tooltip;
 
-   if (! sourceTooltips) { // fall back to simple "title" tooltips
+   if (! sourceTooltips) { 
+      // fall back to simple "title" tooltips
       tooltip = d->briefDescriptionAsTooltip();
    }
 
@@ -11399,15 +11400,21 @@ static bool getLinkInScope(const QString &c, const QString &m, const QString  me
          d = md->getGroupDef();
       }
 
-      if (d && d->isLinkable()) {
+      if (d != nullptr && d->isLinkable()) {
          g_theCallContext.setScope(stripClassName(md->typeString(), md->getOuterScope()));
          
          if (g_currentDefinition && g_currentMemberDef && md != g_currentMemberDef && g_insideBody && g_collectXRefs) {
             addDocCrossReference(g_currentMemberDef, md);
          }
 
-         writeMultiLineCodeLink(ol, md, ! text.isEmpty() ? text : memberText);
-         addToSearchIndex(! text.isEmpty() ? text : memberText);
+         QString temp = text;
+
+         if (text.isEmpty()) {
+            temp = memberText;         
+         }
+
+         writeMultiLineCodeLink(ol, md, temp);
+         addToSearchIndex(temp);
 
          return true;
       }
@@ -11417,14 +11424,15 @@ static bool getLinkInScope(const QString &c, const QString &m, const QString  me
 }
 
 static bool getLink(const QString &className, const QString &memberName, CodeOutputInterface &ol, 
-                    const QString &text = QString(), bool varOnly = false)
+                  const QString &text = QString(), bool varOnly = false)
 {  
    QString m = removeRedundantWhiteSpace(memberName);
    QString c = className;
 
    if (! getLinkInScope(c, m, memberName, ol, text, varOnly)) {
+
       if (! g_curClassName.isEmpty()) {
-         if (!c.isEmpty()) {
+         if (! c.isEmpty()) {
             c.prepend("::");
          }
 
@@ -11434,10 +11442,12 @@ static bool getLink(const QString &className, const QString &memberName, CodeOut
 
       return false;
    }
+
    return true;
 }
 
-static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &clName, bool typeOnly = false, bool varOnly = false)
+static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &clName, 
+                  bool typeOnly = false, bool varOnly = false)
 {
    int i = 0;
 
@@ -11819,7 +11829,7 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
    QString funcWithFullScope = locFunc;
    QString fullScope = locScope;
 
-   DBG_CTX((stdout, "*** locScope=%s locFunc=%s\n", qPrintable(locScope), qPrintable(locFunc)));
+   DBG_CTX((stdout, "*** locScope=%s locFunc=%s\n", csPrintable(locScope), csPrintable(locFunc)));
 
    int len = 2;
    int i = locFunc.lastIndexOf("::");
@@ -11847,29 +11857,29 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
    if (i > 0) {
       funcScope = locFunc.left(i);
       locFunc = locFunc.right(locFunc.length() - i - len).trimmed();
-      int ts = locScope.indexOf('<'); // start of template
-      int te = locScope.lastIndexOf('>'); // end of template
+      int ts = locScope.indexOf('<');           // start of template
+      int te = locScope.lastIndexOf('>');       // end of template
     
       if (ts != -1 && te != -1 && te > ts) {
          // remove template from scope
          locScope = locScope.left(ts) + locScope.right(locScope.length() - te - 1);
       }
 
-      ts = funcScope.indexOf('<'); // start of template
-      te = funcScope.lastIndexOf('>'); // end of template
+      ts = funcScope.indexOf('<');              // start of template
+      te = funcScope.lastIndexOf('>');          // end of template
       
       if (ts != -1 && te != -1 && te > ts) {
          // remove template from scope
          funcScope = funcScope.left(ts) + funcScope.right(funcScope.length() - te - 1);
       }
 
-      if (!funcScope.isEmpty()) {
+      if (! funcScope.isEmpty()) {
          funcWithScope = funcScope + "::" + locFunc;
          if (!locScope.isEmpty()) {
             fullScope = locScope + "::" + funcScope;
          }
       }
-      if (!locScope.isEmpty()) {
+      if (! locScope.isEmpty()) {
          funcWithFullScope = locScope + "::" + funcWithScope;
       }
    }
@@ -11884,7 +11894,8 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
          }
       }
    }
-   if (!locScope.isEmpty() && fullScope != locScope && (ccd = g_codeClassSDict->find(locScope))) {
+
+   if (! locScope.isEmpty() && fullScope != locScope && (ccd = g_codeClassSDict->find(locScope))) {
       
       if (ccd->baseClasses()) {
 
@@ -11896,7 +11907,7 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
       }
    }
 
-   if (!getLink(locScope, funcWithScope, ol, funcName)) {
+   if (! getLink(locScope, funcWithScope, ol, funcName)) {
       generateClassOrGlobalLink(ol, funcName);
    }
 
@@ -12592,7 +12603,6 @@ YY_DECL {
       YY_DO_BEFORE_ACTION;
 
    do_action:	/* This label is used only to access EOF actions. */
-
 
       switch ( yy_act ) {
         
@@ -13817,11 +13827,14 @@ YY_DECL {
             YY_RULE_SETUP {
                // a() or c::a() or t<A,B>::a() or A\B\foo()
                QString text = QString::fromUtf8(codeYYtext);
+
                addType();
                generateFunctionLink(*g_code, text);
+
                g_bracketCount = 0;
                g_args.resize(0);
                g_name += codeYYtext;
+
                BEGIN( FuncCall );
             }
             YY_BREAK
@@ -16501,8 +16514,8 @@ void parseCCode(CodeOutputInterface &od, const QString &className, const QString
    BEGIN( Body );
 
    codeYYlex();
-
    g_lexInit = true;
+
    if (g_needsTermination) {
       endFontClass();
       DBG_CTX((stderr, "endCodeLine(%d)\n", g_yyLineNr));

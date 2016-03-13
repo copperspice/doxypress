@@ -374,27 +374,34 @@ static QString stripEmptyLines(const QString &s)
 {
    if (s.isEmpty()) {
       return QString();
-   }
+   } 
 
-   int end = s.length();
-   int start = 0, p = 0;
+   int end   = s.length();
+   int start = 0;
+   int p     = 0;
 
    // skip leading empty lines
-   for (;;) {
-      QChar c;
+   while (true) {
+  
+      while (p < end) {         
+         QChar c = s[p]; 
 
-      while ((c = s[p]) != 0 && (c == ' ' || c == '\t')) {
+         if (c != ' ' && c != '\t')  {
+            break;
+         }        
+
          p++;
       }
 
-      if (s[p] == '\n') {
+      if (p < end && s[p] == '\n') {
          start = ++p;
 
       } else {
          break;
+
       }
    }
-
+  
    // skip trailing empty lines
    p = end - 1;
    if (p >= start && s.at(p) == '\n') {
@@ -407,11 +414,13 @@ static QString stripEmptyLines(const QString &s)
       while ((c = s[p]) != 0  && (c == ' ' || c == '\t')) {
          p--;
       }
+
       if (s[p] == '\n') {
          end = p;
       } else {
          break;
       }
+
       p--;
    }
   

@@ -5849,6 +5849,7 @@ int DocPara::handleCommand(const QString &cmdName)
       break;
 
       case CMD_VERBATIM: {
+
          doctokenizerYYsetStateVerbatim();
          retval = doctokenizerYYlex();
 
@@ -6812,7 +6813,7 @@ int DocPara::parse(bool skipParse, int token)
       }
     
    reparsetoken:
-      DBG(("token %s at %d", qPrintable(tokToString(tok)), doctokenizerYYlineno));
+      DBG(("token %s at %d", csPrintable(tokToString(tok)), doctokenizerYYlineno));
 
       if (tok == TK_WORD || tok == TK_LNKWORD || tok == TK_SYMBOL || tok == TK_URL ||
             tok == TK_COMMAND || tok == TK_HTMLTAG) {
@@ -7004,6 +7005,7 @@ int DocPara::parse(bool skipParse, int token)
 
             // handle the command
             retval = handleCommand(g_token->name);
+
             DBG(("handleCommand returns %x\n", retval));
 
             // check the return value
@@ -7014,7 +7016,7 @@ int DocPara::parse(bool skipParse, int token)
 
                g_token->name = g_token->simpleSectName;
 
-               if (g_token->name.left(4) == "rcs:") { 
+               if (g_token->name.startsWith("rcs:")) { 
                   // RCS section
                   g_token->name = g_token->name.mid(4);
                   g_token->text = g_token->simpleSectText;
@@ -7433,8 +7435,8 @@ void DocRoot::parse()
             isFirst = false;
          }
 
-         retval = par->parse(true, tok);         
-
+         retval = par->parse(true, tok);   
+   
          // new code to test for a <div>
          if (! par->isEmpty()) {
        
@@ -7442,9 +7444,9 @@ void DocRoot::parse()
             lastPar = par;
 
             if (retval == RetVal_EndDiv ) {
-               // time to add the closeing div
-               DocStyleChange *sc = new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Div, false);
+               // time to add the closing div
 
+               DocStyleChange *sc = new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Div, false);
                m_children.append(sc); 
             }   
                  
@@ -7666,6 +7668,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    // bool fortranOpt = Config::getBool("optimize-fortran");
    docParserPushContext();
 
+
    if (ctx && ctx != Doxy_Globals::globalScope && (ctx->definitionType() == Definition::TypeClass ||
           ctx->definitionType() == Definition::TypeNamespace)) {
 
@@ -7743,7 +7746,6 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
 
    // build abstract syntax tree
    DocRoot *root = new DocRoot(md != 0, singleLine);
-
    root->parse();
 
    if (Debug::isFlagSet(Debug::PrintTree)) {

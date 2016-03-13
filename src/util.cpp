@@ -6552,6 +6552,7 @@ QString parseCommentAsText(QSharedPointer<const Definition> scope, QSharedPointe
       // need to remove the const, this should be reworked      
       QSharedPointer<Definition> scope_unconst = scope.constCast<Definition>();
 
+
       // need to remove the const, this should be reworked      
       QSharedPointer<MemberDef> md_unconst = md.constCast<MemberDef>();
       
@@ -7445,7 +7446,7 @@ QString stripIndentation(const QString &s)
       }
    }
 
-   // no indent to remove -> we're done
+   // no indent to remove -> we are done
    if (minIndent == 0) {
       return s;
    }
