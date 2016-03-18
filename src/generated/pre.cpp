@@ -2835,10 +2835,12 @@ static QString                  g_yyFileName;
 static QSharedPointer<FileDef>  g_yyFileDef;
 static QSharedPointer<FileDef>  g_inputFileDef;
 static int                      g_ifcount   = 0;
-static QStringList             *g_pathList  = 0;
+static int                      g_defArgs   = -1;
+
+static QStringList              g_pathList;
 static QStack<FileState *>      g_includeStack;
 static QHash<QString, int *>   *g_argDict;
-static int                      g_defArgs   = -1;
+
 
 static QString            g_defName;
 static QString            g_defText;
@@ -3019,7 +3021,7 @@ static FileState *findFile(const QString &fileName, bool localInclude, bool &alr
          return fs;
 
       } else if (alreadyIncluded) {
-         return 0;
+         return nullptr;
       }
    }
 
@@ -3036,16 +3038,16 @@ static FileState *findFile(const QString &fileName, bool localInclude, bool &alr
             return fs;
 
          } else if (alreadyIncluded) {
-            return 0;
+            return nullptr;
          }
       }
    }
 
-   if (g_pathList == 0) {
-      return 0;
+   if (g_pathList.isEmpty()) {
+      return nullptr;
    }
 
-   for (auto s : *g_pathList) {
+   for (auto &s : g_pathList) {
       QString absName = s + "/" + fileName;
      
       FileState *fs = checkAndOpenFile(absName, alreadyIncluded);
@@ -3057,13 +3059,13 @@ static FileState *findFile(const QString &fileName, bool localInclude, bool &alr
          return fs;
 
       } else if (alreadyIncluded) {
-         return 0;
+         return nullptr;
       }
 
      
    }
 
-   return 0;
+   return nullptr;
 }
 
 static QString extractTrailingComment(const QString &s)
@@ -7868,24 +7870,20 @@ void addSearchDir(const QString &dir)
    QFileInfo fi(dir);
 
    if (fi.isDir()) {
-      g_pathList->append(fi.absoluteFilePath());
+      g_pathList.append(fi.absoluteFilePath());
    }
 }
 
 void initPreprocessor()
-{
-   g_pathList = new QStringList;
+{   
    addSearchDir(".");
-
    g_expandedDict = QMakeShared<DefineDict>();
 }
 
 void removePreProcessor()
 {
-   g_expandedDict = QSharedPointer<DefineDict>();
-
-   delete g_pathList;
-   g_pathList = 0;
+   g_expandedDict = QSharedPointer<DefineDict>();  
+   g_pathList.clear();
 
    DefineManager::deleteInstance();
 }
