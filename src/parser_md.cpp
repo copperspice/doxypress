@@ -1326,19 +1326,22 @@ static bool isBlockQuote(const QString &data, int size, int indent)
    if (i < indent + codeBlockIndent) { // could be a quotation
       // count >'s and skip spaces
       int level = 0;
+
       while (i < size && (data[i] == '>' || data[i] == ' ')) {
          if (data[i] == '>') {
             level++;
          }
          i++;
       }
+
       // last characters should be a space or newline,
       // so a line starting with >= does not match
       return level > 0 && i < size && ((data[i - 1] == ' ') || data[i] == '\n');
-   } else { // too much indentation -> code block
+
+   } else { 
+      // too much indentation -> code block
       return false;
    }
-   //return i<size && data[i]=='>' && i<indent+codeBlockIndent;
 }
 
 /** returns end of the link ref if this is indeed a link reference. */
@@ -1755,13 +1758,14 @@ static bool isCodeBlock(const QString &data, int &indent, int priorLine1_Indent,
 {   
    // determine the indent for the current line
    int count = 0;
-   int size = data.length();
+   int size  = data.length();
   
    while (count < size && data[count] == ' ') {
       count++;      
    }
 
-   if (count < codeBlockIndent) {      
+   if (count < codeBlockIndent) {  
+      // line is not indented enough    
       return false;
    }
 
@@ -1779,10 +1783,10 @@ static bool isCodeBlock(const QString &data, int &indent, int priorLine1_Indent,
       return count >= indent + codeBlockIndent;
      
    } else if (priorLine1_Indent == -1 && priorLine2_Indent == -1)  {
-      // priorLine1 is empty and priorLine2 are empty
+      // priorLine1 is empty and priorLine2 is empty
 
-      // if the difference is > 4 spaces then this is a code block
-      return count >= codeBlockIndent;
+      // if the difference is > 4 spaces then this is the start of a code block
+      return count >= indent + codeBlockIndent;
 
    } else {     
       // priorLine1 is not empty, not a code block
@@ -2206,16 +2210,21 @@ static int writeCodeBlock(QString &out, const QString &data, int size, int refIn
       int indent = 0;
 
       while (j < end && data[j] == ' ') {
-         j++, indent++;
+         j++;
+         indent++;
       }
 
-      if (j == end - 1) { // empty line
+      if (j == end - 1) { 
+         // found an empty line
+
          emptyLines++;
          i = end;
 
-      } else if (indent >= refIndent + codeBlockIndent) { // enough indent to contine the code block
-         while (emptyLines > 0) { // write skipped empty lines
-            // add empty line
+      } else if (indent >= refIndent + codeBlockIndent) { 
+         // there is enough indent to contine the code block
+
+         while (emptyLines > 0) { 
+            // write skipped empty lines, add empty line
             out += "\n";
             emptyLines--;
          }
@@ -2224,15 +2233,16 @@ static int writeCodeBlock(QString &out, const QString &data, int size, int refIn
          out += data.mid(i + refIndent + codeBlockIndent, end - i - refIndent - codeBlockIndent);
          i = end;
 
-      } else { // end of code block
+      } else { 
+         // end of code block
          break;
       }
    }
 
    out += "@endverbatim\n";
 
-   while (emptyLines > 0) { // write skipped empty lines
-      // add empty line
+   while (emptyLines > 0) { 
+      // write skipped empty lines, add empty line
       out += "\n";
       emptyLines--;
    }
@@ -2667,7 +2677,9 @@ static QString detab(const QString &s, int &refIndent)
       QChar c = data[i++];
 
       switch (c.unicode()) {
-         case '\t': { // expand tab
+         case '\t': { 
+            // expand tab
+
             int stop = tabSize - (col % tabSize);
             col += stop;
 
@@ -2677,17 +2689,22 @@ static QString detab(const QString &s, int &refIndent)
          }
          break;
 
-         case '\n': // reset colomn counter
+         case '\n': 
+            // reset colomn counter
+
             out += c;
             col = 0;
             break;
 
-         case ' ': // increment column counter
+         case ' ': 
+            // increment column counter
+
             out += c;
             col++;
             break;
 
-         default: // non-whitespace => update minIndent
+         default: 
+            // non-whitespace => update minIndent
             out += c;        
 
             if (col < minIndent) {
@@ -2704,7 +2721,7 @@ static QString detab(const QString &s, int &refIndent)
       refIndent = 0;
 
    }
-   
+
    return out;
 }
 

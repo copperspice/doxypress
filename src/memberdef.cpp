@@ -1814,6 +1814,8 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
       if (rootNode && ! rootNode->isEmpty()) {
          ol.startMemberDescription(anchor(), inheritId);
+
+         // write the brief description
          ol.writeDoc(rootNode, getOuterScope() ? getOuterScope() : d, self);
 
          if (detailsVisible) {
