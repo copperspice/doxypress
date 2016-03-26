@@ -546,7 +546,7 @@ QString HtmlHelp::recode(const QString &s)
  *  \param def not used.
  */
 void HtmlHelp::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
-                  bool unused, QSharedPointer<Definition> def)
+                  bool unused, QSharedPointer<Definition> def, DirType category)
 {
    // If we are using a binary toc then folders cannot have links.
    // Tried this and I did not see any problems, when not using the 

@@ -43,7 +43,7 @@ class DocSets  : public IndexIntf
    void incContentsDepth();
    void decContentsDepth();
    void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
-                        bool unused, QSharedPointer<Definition> def) override;
+                        bool unused, QSharedPointer<Definition> def, DirType category) override;
 
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
                      const QString &title);

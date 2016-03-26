@@ -23,6 +23,12 @@
 #include <QString>
 #include <QSharedPointer>
 
+enum class DirType {
+   None,
+   File,
+   FileSource,   
+};
+
 class Definition;
 class MemberDef;
 class OutputList;
@@ -36,8 +42,9 @@ class IndexIntf
    virtual void finalize() = 0;
    virtual void incContentsDepth() = 0;
    virtual void decContentsDepth() = 0;
+
    virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, 
-            const QString &anchor, bool addToNavIndex, QSharedPointer<Definition> def) = 0;
+            const QString &anchor, bool addToNavIndex, QSharedPointer<Definition> def, DirType category) = 0;
 
    virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, 
             const QString &sectionAnchor, const QString &title) = 0;
@@ -115,11 +122,12 @@ class IndexList : public IndexIntf
    }
 
    void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
-                        bool addToNavIndex = false, QSharedPointer<Definition> def = QSharedPointer<Definition>()) override {
+                        bool addToNavIndex = false, QSharedPointer<Definition> def = QSharedPointer<Definition>(), 
+                        DirType category = DirType::None) override {
 
       if (m_enabled)  {
          for (auto item : m_intfs) {
-            item->addContentsItem(isDir, name, ref, file, anchor, addToNavIndex, def);
+            item->addContentsItem(isDir, name, ref, file, anchor, addToNavIndex, def, category);
          }
       }
    }
@@ -182,7 +190,7 @@ enum HighlightedItem {
    HLI_None = 0,
    HLI_Main,
    HLI_Modules,
-   //HLI_Directories,
+   // HLI_Directories,
    HLI_Namespaces,
    HLI_Hierarchy,
    HLI_Classes,
@@ -192,6 +200,7 @@ enum HighlightedItem {
    HLI_Functions,
    HLI_Globals,
    HLI_Pages,
+   HLI_FileSource,
    HLI_Examples,
    HLI_Search,
    HLI_UserGroup,
@@ -254,16 +263,12 @@ void countDataStructures();
 
 extern int annotatedClasses;
 extern int hierarchyClasses;
-extern int documentedFiles;
 extern int documentedGroups;
 extern int documentedNamespaces;
-extern int indexedPages;
 extern int documentedClassMembers[CMHL_Total];
 extern int documentedFileMembers[FMHL_Total];
 extern int documentedNamespaceMembers[NMHL_Total];
 extern int documentedDirs;
-extern int documentedHtmlFiles;
-extern int documentedPages;
 
 void startTitle(OutputList &ol, const QString &fileName, QSharedPointer<Definition> def = QSharedPointer<Definition>() );
 void endTitle(OutputList &ol, const QString &fileName, const QString &name);

@@ -403,7 +403,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             break;
 
          case DEBUG_SYMBOLS:
-            Doxy_Globals::g_dumpGlossary = true;
+            Doxy_Globals::dumpGlossary = true;
             break;              
                   
          case OUTPUT_APP:

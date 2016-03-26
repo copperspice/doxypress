@@ -87,13 +87,13 @@ StringMap<QSharedPointer<DirRelation>>       Doxy_Globals::dirRelations;
 
 QCache<QString, LookupInfo>  *Doxy_Globals::lookupCache;
 
-int              Doxy_Globals::subpageNestingLevel = 0;
+int     Doxy_Globals::subpageNestingLevel = 0;
 
-QString          Doxy_Globals::htmlFileExtension;
-QString          Doxy_Globals::latexStyleExtension = ".sty";
+QString Doxy_Globals::htmlFileExtension;
+QString Doxy_Globals::latexStyleExtension = ".sty";
 
-QString          Doxy_Globals::tempA_FName;
-QString          Doxy_Globals::tempB_FName;
+QString Doxy_Globals::tempA_FName;
+QString Doxy_Globals::tempB_FName;
 
 bool Doxy_Globals::gatherDefines       = true;
 bool Doxy_Globals::insideMainPage      = false;                     // indicates if doc are generatedd for the main page
@@ -104,8 +104,13 @@ bool Doxy_Globals::generatingXmlOutput = false;
 bool Doxy_Globals::markdownSupport     = true;
 bool Doxy_Globals::suppressDocWarnings = false;
 
-bool Doxy_Globals::g_dumpGlossary      = false;
-bool Doxy_Globals::g_programExit       = false;
+bool Doxy_Globals::dumpGlossary        = false;
+bool Doxy_Globals::programExit         = false;
+
+int Doxy_Globals::documentedFiles;
+int Doxy_Globals::documentedHtmlFiles;
+int Doxy_Globals::documentedPages;
+int Doxy_Globals::indexedPages;
 
 QDateTime Doxy_Globals::dateTime;
 

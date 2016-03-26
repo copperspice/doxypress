@@ -189,7 +189,7 @@ void Qhp::decContentsDepth()
 }
 
 void Qhp::addContentsItem(bool, const QString &name, const QString &, const QString &file,
-                          const QString &anchor, bool unused, QSharedPointer<Definition>)
+                          const QString &anchor, bool unused, QSharedPointer<Definition>, DirType category)
 {
    // Backup difference before modification
    QString f = file;

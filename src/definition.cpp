@@ -326,7 +326,7 @@ Definition::~Definition()
       m_private = 0;
    }
 
-   if (! Doxy_Globals::g_programExit)  {
+   if (! Doxy_Globals::programExit)  {
       auto iter = Doxy_Globals::glossary().find(m_phraseName);
    
       while (iter != Doxy_Globals::glossary().end() && iter.key() == m_phraseName)  {      

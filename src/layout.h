@@ -145,10 +145,11 @@ struct LayoutNavEntry {
       Files,
       FileList,
       FileGlobals,
-      //Dirs,
+      FileSource,      
       Examples,
       User,
-      UserGroup
+      UserGroup,
+      LastValue = UserGroup
    };
 
    LayoutNavEntry(LayoutNavEntry *parent, Kind k, bool vs, const QString &bf,

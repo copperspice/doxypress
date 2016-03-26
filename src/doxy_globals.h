@@ -212,8 +212,13 @@ class Doxy_Globals
       static bool markdownSupport;     
       static bool suppressDocWarnings;
 
-      static bool g_dumpGlossary;    
-      static bool g_programExit;      
+      static bool dumpGlossary;    
+      static bool programExit;      
+
+      static int documentedFiles;
+      static int documentedHtmlFiles;
+      static int documentedPages;
+      static int indexedPages;
 
       static QDateTime dateTime;           
       

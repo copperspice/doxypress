@@ -1907,15 +1907,6 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
          QSharedPointer<GroupDef>     gd;        
          QSharedPointer<MemberDef>    typeDef;
 
-/* BROOM 
-if (matchWord.contains("monthName")) {
-   printf("\n  BROOM (linky) scope --> %s",     csPrintable(scope->name()) ); 
-   printf("\n  BROOM (linky) text  --> %s",     csPrintable(text) ); 
-   printf("\n  BROOM (linky) word  --> %s",     csPrintable(word) );
-   printf("\n  BROOM (linky) matchWord --> %s", csPrintable(matchWord) );  
-}
-*/
-
          cd = getResolvedClass(scope, fileScope, matchWord, &typeDef);
 
          if (typeDef) { 
@@ -7483,12 +7474,12 @@ QString stripIndentation(const QString &s)
    return result;
 }
 
-bool docFileVisibleInIndex(QSharedPointer<FileDef> fd)
+bool srcFileVisibleInIndex(QSharedPointer<FileDef> fd)
 {
    return fd->isDocumentationFile() && fd->generateSourceFile();
 }
 
-bool srcFileVisibleInIndex(QSharedPointer<FileDef> fd)
+bool docFileVisibleInIndex(QSharedPointer<FileDef> fd)
 {
    static bool allExternals = Config::getBool("all-externals");
  

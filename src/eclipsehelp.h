@@ -50,10 +50,10 @@ class EclipseHelp : public IndexIntf
    virtual void incContentsDepth();
    virtual void decContentsDepth();
    virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, 
-                                const QString &anchor, bool unused, QSharedPointer<Definition> def) override;
+                  const QString &anchor, bool unused, QSharedPointer<Definition> def, DirType category) override;
   
    virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
-                     const QString &title) override;
+                  const QString &title) override;
 
    virtual void addIndexFile(const QString &name) override;
    virtual void addImageFile(const QString &name) override;

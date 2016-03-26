@@ -186,6 +186,11 @@ class Translator_Cs : public Translator
       return QCoreApplication::translate("doxy-text", "Related Pages");
    }
 
+   /*! This is put above each page as a link to file source. */
+   virtual QString trFileSource() {
+      return QCoreApplication::translate("doxy-text", "File Source");
+   }
+
    /*! This is put above each page as a link to all examples. */
    virtual QString trExamples() {
       return QCoreApplication::translate("doxy-text", "Examples");
@@ -284,6 +289,11 @@ class Translator_Cs : public Translator
       }     
    
       return result;
+   }
+
+   /*! This is an introduction to the page with the list of all file source */
+   virtual QString trFileSourceDescription() {
+      return QCoreApplication::translate("doxy-text", "Here is a list of all source code files with brief descriptions:");
    }
 
    /*! This is an introduction to the page with the list of all examples */

@@ -2067,7 +2067,7 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
          return true;
 
       case LayoutNavEntry::Pages:
-         return indexedPages > 0;
+         return Doxy_Globals::indexedPages > 0;
 
       case LayoutNavEntry::Modules:
          return documentedGroups > 0;
@@ -2089,17 +2089,22 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
 
       case LayoutNavEntry::ClassIndex:
          return annotatedClasses > 0;
+
       case LayoutNavEntry::ClassHierarchy:
          return hierarchyClasses > 0;
+
       case LayoutNavEntry::ClassMembers:
          return documentedClassMembers[CMHL_All] > 0;
+
       case LayoutNavEntry::Files:
-         return documentedHtmlFiles > 0 && showFiles;
+         return Doxy_Globals::documentedHtmlFiles > 0 && showFiles;
+
       case LayoutNavEntry::FileList:
-         return documentedHtmlFiles > 0 && showFiles;
+         return Doxy_Globals::documentedHtmlFiles > 0 && showFiles;
+
       case LayoutNavEntry::FileGlobals:
          return documentedFileMembers[FMHL_All] > 0;
-      //case LayoutNavEntry::Dirs:             return documentedDirs>0;
+
       case LayoutNavEntry::Examples:
          return Doxy_Globals::exampleSDict->count() > 0;
    }
@@ -2230,33 +2235,46 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
       case HLI_Hierarchy:
          kind = LayoutNavEntry::ClassHierarchy;
          break;
+
       case HLI_Classes:
          kind = LayoutNavEntry::ClassIndex;
          altKind = LayoutNavEntry::Classes;
          break;
+
       case HLI_Annotated:
          kind = LayoutNavEntry::ClassList;
          altKind = LayoutNavEntry::Classes;
          break;
+
       case HLI_Files:
          kind = LayoutNavEntry::FileList;
          altKind = LayoutNavEntry::Files;
          break;
+
       case HLI_NamespaceMembers:
          kind = LayoutNavEntry::NamespaceMembers;
          break;
+
       case HLI_Functions:
          kind = LayoutNavEntry::ClassMembers;
          break;
+
       case HLI_Globals:
          kind = LayoutNavEntry::FileGlobals;
          break;
+
       case HLI_Pages:
          kind = LayoutNavEntry::Pages;
          break;
+
+      case HLI_FileSource:
+         kind = LayoutNavEntry::FileSource;
+         break;
+
       case HLI_Examples:
          kind = LayoutNavEntry::Examples;
          break;
+
       case HLI_UserGroup:
          kind = LayoutNavEntry::UserGroup;
          break;

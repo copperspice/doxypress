@@ -168,7 +168,7 @@ void EclipseHelp::decContentsDepth()
  * @param def not used.
  */
 void EclipseHelp::addContentsItem(bool, const QString &name, const QString &, const QString &file, const QString &anchor,
-                  bool unused, QSharedPointer<Definition>)
+                  bool unused, QSharedPointer<Definition>, DirType category)
 {
    // -- write the topic tag
    closedTag();

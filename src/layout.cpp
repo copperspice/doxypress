@@ -955,8 +955,10 @@ class LayoutParser : public QXmlDefaultHandler
             fortranOpt ? theTranslator->trCompoundMembersFortran() : theTranslator->trCompoundMembers(),
             "",
             fortranOpt ? theTranslator->trCompoundMembersDescriptionFortran(extractAll) : 
-                  theTranslator->trCompoundMembersDescription(extractAll), "functions_all"
+                  theTranslator->trCompoundMembersDescription(extractAll), 
+            "functions_all"
          },
+
          {
             "files",
             LayoutNavEntry::Files,
@@ -981,13 +983,16 @@ class LayoutParser : public QXmlDefaultHandler
             theTranslator->trFileMembersDescription(extractAll),
             "globals"
          },
-         //{ "dirs",
-         //  LayoutNavEntry::Dirs,
-         //  theTranslator->trDirectories(),
-         //  QByteArray(),
-         //  theTranslator->trDirDescription(),
-         //  "dirs"
-         //},
+
+         {
+            "filesource",
+            LayoutNavEntry::FileSource,
+            theTranslator->trFileSource(),
+            "",
+            theTranslator->trFileSourceDescription(),
+            "filesource"
+         },        
+        
          {
             "examples",
             LayoutNavEntry::Examples,
@@ -996,6 +1001,7 @@ class LayoutParser : public QXmlDefaultHandler
             theTranslator->trExamplesDescription(),
             "examples"
          },
+
          {
             "user",
             LayoutNavEntry::User,

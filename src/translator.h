@@ -59,6 +59,7 @@ class Translator
    virtual QString trCompoundMembers() = 0;
    virtual QString trFileMembers() = 0;
    virtual QString trRelatedPages() = 0;
+   virtual QString trFileSource() = 0;
    virtual QString trExamples() = 0;
    virtual QString trSearch() = 0;
    virtual QString trClassHierarchyDescription() = 0;
@@ -66,6 +67,7 @@ class Translator
    virtual QString trCompoundListDescription() = 0;
    virtual QString trCompoundMembersDescription(bool extractAll) = 0;
    virtual QString trFileMembersDescription(bool extractAll) = 0;   
+   virtual QString trFileSourceDescription() = 0;
    virtual QString trExamplesDescription() = 0;
    virtual QString trRelatedPagesDescription() = 0;
    virtual QString trModulesDescription() = 0;
